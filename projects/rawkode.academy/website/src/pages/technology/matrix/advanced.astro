@@ -110,7 +110,7 @@ const media = academyMedia();
 		position: relative;
 		padding: clamp(2rem, 4vw, 3.5rem) 0 clamp(1.5rem, 3vw, 2.5rem);
 		overflow: hidden;
-		border-bottom: 1px solid var(--editorial-hairline);
+		border-bottom: 1px solid var(--colors-academy-border);
 	}
 
 	.hero-background {
@@ -124,8 +124,8 @@ const media = academyMedia();
 		inset: 0;
 		background: linear-gradient(
 			135deg,
-			color-mix(in oklab, var(--editorial-paper-deep) 74%, transparent),
-			color-mix(in oklab, var(--editorial-paper) 92%, transparent)
+			color-mix(in oklab, var(--colors-academy-ground) 74%, transparent),
+			color-mix(in oklab, var(--colors-academy-canvas) 92%, transparent)
 		);
 	}
 
@@ -133,8 +133,8 @@ const media = academyMedia();
 		position: absolute;
 		inset: 0;
 		background-image:
-			linear-gradient(var(--surface-border) 1px, transparent 1px),
-			linear-gradient(90deg, var(--surface-border) 1px, transparent 1px);
+			linear-gradient(var(--colors-academy-border) 1px, transparent 1px),
+			linear-gradient(90deg, var(--colors-academy-border) 1px, transparent 1px);
 		background-size: 60px 60px;
 		opacity: 0.55;
 	}
@@ -148,13 +148,13 @@ const media = academyMedia();
 	.back-link {
 		display: inline-flex;
 		margin-bottom: 1rem;
-		font-family: var(--font-jetbrains-mono), monospace;
+		font-family: var(--fonts-academy-mono), monospace;
 		font-size: 0.72rem;
 		font-weight: 700;
 		letter-spacing: 0.12em;
 		text-transform: uppercase;
 		text-decoration: none;
-		color: var(--editorial-spruce);
+		color: var(--colors-academy-status-spruce);
 	}
 
 	.hero-badge {
@@ -167,20 +167,20 @@ const media = academyMedia();
 	.badge-dot {
 		width: 6px;
 		height: 6px;
-		background: rgb(var(--brand-primary));
+		background: var(--colors-academy-accent);
 		border-radius: 50%;
 	}
 
 	.hero-title {
 		max-width: 58rem;
-		font-family: var(--font-instrument-serif), serif;
+		font-family: var(--fonts-academy-display), serif;
 		font-size: clamp(2.75rem, 7vw, 6rem);
 		font-style: italic;
 		font-weight: 500;
 		letter-spacing: 0;
 		line-height: 0.95;
 		margin: 0 0 0.75rem;
-		color: var(--editorial-ink);
+		color: var(--colors-academy-text);
 	}
 
 	.hero-subtitle {

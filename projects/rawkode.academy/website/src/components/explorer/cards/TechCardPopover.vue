@@ -162,17 +162,17 @@ const formatDate = (dateStr: string | null): string => {
  ================================= */
 .tech-card-popover {
  /* Stage colors derive from the editorial palette, mirroring the matrix page */
- --stage-skip: var(--editorial-rust);
- --stage-watch: var(--editorial-amber-text);
+ --stage-skip: var(--colors-academy-status-rust);
+ --stage-watch: var(--colors-academy-status-amber);
  --stage-explore: color-mix(
  in oklab,
- var(--editorial-amber-text) 45%,
- var(--editorial-spruce) 55%
+ var(--colors-academy-status-amber) 45%,
+ var(--colors-academy-status-spruce) 55%
  );
- --stage-learn: var(--editorial-violet);
- --stage-adopt: var(--editorial-spruce);
- --stage-advocate: var(--editorial-ink);
- --stage-graveyard: var(--editorial-ink-mute);
+ --stage-learn: var(--colors-academy-status-violet);
+ --stage-adopt: var(--colors-academy-status-spruce);
+ --stage-advocate: var(--colors-academy-text);
+ --stage-graveyard: var(--colors-academy-text-muted);
 
  width: 480px;
  max-width: calc(100vw - 3rem);
@@ -184,7 +184,7 @@ const formatDate = (dateStr: string | null): string => {
 }
 
 :global(html.dark) .tech-card-popover {
- --stage-learn: color-mix(in oklab, var(--editorial-violet) 60%, white 40%);
+ --stage-learn: color-mix(in oklab, var(--colors-academy-status-violet) 60%, white 40%);
 }
 
 .tech-card-backdrop {
@@ -233,25 +233,25 @@ const formatDate = (dateStr: string | null): string => {
  display: flex;
  align-items: center;
  justify-content: center;
- background: var(--surface-card);
- border: 1px solid var(--surface-border);
+ background: var(--colors-academy-panel);
+ border: 1px solid var(--colors-academy-border);
  border-radius: 50%;
- color: var(--text-muted);
+ color: var(--colors-academy-text-muted);
  cursor: pointer;
  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .close-btn:hover {
- background: var(--surface-card-muted);
- color: var(--text-primary-content);
+ background: var(--colors-academy-ground);
+ color: var(--colors-academy-text);
 }
 
 /* =================================
  Card Frame
  ================================= */
 .card-frame {
- background: var(--surface-card);
- border: 1px solid var(--editorial-hairline-strong);
+ background: var(--colors-academy-panel);
+ border: 1px solid var(--colors-academy-input-border);
  border-radius: var(--radius-4xl);
  overflow: hidden;
  max-height: calc(100vh - 4rem);
@@ -266,8 +266,8 @@ const formatDate = (dateStr: string | null): string => {
  align-items: center;
  gap: 1.25rem;
  padding: 1.75rem;
- background: var(--surface-card-muted);
- border-bottom: 4px solid var(--text-muted);
+ background: var(--colors-academy-ground);
+ border-bottom: 4px solid var(--colors-academy-text-muted);
 }
 
 .card-header.status-skip { border-bottom-color: var(--stage-skip); }
@@ -287,9 +287,9 @@ const formatDate = (dateStr: string | null): string => {
  height: 80px;
  object-fit: contain;
  border-radius: var(--radius-4xl);
- background: var(--surface-card);
+ background: var(--colors-academy-panel);
  padding: 0.875rem;
- border: 1px solid var(--surface-border);
+ border: 1px solid var(--colors-academy-border);
 }
 
 .card-icon-placeholder {
@@ -298,12 +298,12 @@ const formatDate = (dateStr: string | null): string => {
  display: flex;
  align-items: center;
  justify-content: center;
- background: var(--surface-card);
+ background: var(--colors-academy-panel);
  border-radius: var(--radius-4xl);
- border: 1px solid var(--surface-border);
+ border: 1px solid var(--colors-academy-border);
  font-size: 2rem;
  font-weight: 700;
- color: var(--text-primary-content);
+ color: var(--colors-academy-text);
 }
 
 .card-titles {
@@ -314,7 +314,7 @@ const formatDate = (dateStr: string | null): string => {
 .card-name {
  font-size: 1.75rem;
  font-weight: 700;
- color: var(--text-primary-content);
+ color: var(--colors-academy-text);
  margin: 0 0 0.625rem;
  line-height: 1.2;
 }
@@ -333,8 +333,8 @@ const formatDate = (dateStr: string | null): string => {
  letter-spacing: 0.04em;
  padding: 0.375rem 0.75rem;
  border-radius: var(--radius-md);
- color: var(--surface-base);
- background: var(--text-muted);
+ color: var(--colors-academy-canvas);
+ background: var(--colors-academy-text-muted);
 }
 
 .card-status-badge.status-skip { background: var(--stage-skip); }
@@ -347,7 +347,7 @@ const formatDate = (dateStr: string | null): string => {
 
 .card-category {
  font-size: 0.875rem;
- color: var(--text-secondary-content);
+ color: var(--colors-academy-text-soft);
 }
 
 /* =================================
@@ -372,13 +372,13 @@ const formatDate = (dateStr: string | null): string => {
  font-weight: 700;
  text-transform: uppercase;
  letter-spacing: 0.08em;
- color: var(--text-muted);
+ color: var(--colors-academy-text-muted);
 }
 
 .section-text {
  font-size: 0.9375rem;
  line-height: 1.6;
- color: var(--text-secondary-content);
+ color: var(--colors-academy-text-soft);
  margin: 0;
 }
 
@@ -395,14 +395,14 @@ const formatDate = (dateStr: string | null): string => {
  align-items: center;
  gap: 0.25rem;
  padding: 0.875rem 0.5rem;
- background: var(--surface-card-muted);
+ background: var(--colors-academy-ground);
  border-radius: var(--radius-3xl);
 }
 
 .stat-value {
  font-size: 1rem;
  font-weight: 700;
- color: var(--text-primary-content);
+ color: var(--colors-academy-text);
 }
 
 .stat-label {
@@ -410,7 +410,7 @@ const formatDate = (dateStr: string | null): string => {
  font-weight: 600;
  text-transform: uppercase;
  letter-spacing: 0.04em;
- color: var(--text-muted);
+ color: var(--colors-academy-text-muted);
  text-align: center;
 }
 
@@ -420,8 +420,8 @@ const formatDate = (dateStr: string | null): string => {
  align-items: flex-start;
  gap: 0.75rem;
  padding: 1rem;
- background: color-mix(in oklab, var(--editorial-rust) 8%, transparent);
- border: 1px solid color-mix(in oklab, var(--editorial-rust) 18%, transparent);
+ background: color-mix(in oklab, var(--colors-academy-status-rust) 8%, transparent);
+ border: 1px solid color-mix(in oklab, var(--colors-academy-status-rust) 18%, transparent);
  border-radius: var(--radius-3xl);
 }
 
@@ -434,7 +434,7 @@ const formatDate = (dateStr: string | null): string => {
 .spicy-text {
  font-size: 0.875rem;
  font-style: italic;
- color: var(--editorial-rust);
+ color: var(--colors-academy-status-rust);
  line-height: 1.5;
 }
 
@@ -452,9 +452,9 @@ const formatDate = (dateStr: string | null): string => {
  gap: 0.625rem;
  width: 100%;
  padding: 1rem 1.5rem;
- background: var(--editorial-ink);
- color: var(--editorial-paper);
- border: 1px solid var(--editorial-ink);
+ background: var(--colors-academy-text);
+ color: var(--colors-academy-canvas);
+ border: 1px solid var(--colors-academy-text);
  border-radius: var(--radius-md);
  font-size: 0.875rem;
  font-weight: 700;
@@ -465,8 +465,8 @@ const formatDate = (dateStr: string | null): string => {
 }
 
 .card-cta:hover {
- background: var(--editorial-spruce);
- border-color: var(--editorial-spruce);
+ background: var(--colors-academy-status-spruce);
+ border-color: var(--colors-academy-status-spruce);
 }
 
 .card-cta svg {

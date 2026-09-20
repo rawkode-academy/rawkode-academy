@@ -137,7 +137,7 @@
 <script setup lang="ts">
 import { academyCourse } from "@rawkodeacademy/design-system";
 const s = academyCourse();
-import { ref, computed, onMounted, onUnmounted, watch, nextTick } from "vue";
+import { ref, shallowRef, computed, onMounted, onUnmounted, watch, nextTick } from "vue";
 import { WebContainer } from "@webcontainer/api";
 
 interface Props {
@@ -149,7 +149,7 @@ interface Props {
 const props = defineProps<Props>();
 
 // State
-const webcontainerInstance = ref<WebContainer | null>(null);
+const webcontainerInstance = shallowRef<WebContainer | null>(null);
 const status = ref<"idle" | "booting" | "installing" | "ready" | "error">(
 	"idle",
 );
@@ -192,95 +192,54 @@ const formatTerminalLine = (line: string) => {
 	return line.replace(/\[(\w+)\]\s/, "");
 };
 
-const mountFiles = async () => {
-	if (!webcontainerInstance.value) return;
+let generation = 0;
+let disposed = false;
+let stopServerListener: (() => void) | undefined;
+const isCurrent = (run: number) => !disposed && run === generation;
 
-	// Create all necessary directories first
+const mountFiles = async (instance: WebContainer, files: Record<string, string>) => {
 	const directories = new Set<string>();
-	for (const path of Object.keys(props.files)) {
+	for (const path of Object.keys(files)) {
 		const parts = path.split("/");
-		for (let i = 1; i < parts.length; i++) {
-			directories.add(parts.slice(0, i).join("/"));
-		}
+		for (let i = 1; i < parts.length; i++) directories.add(parts.slice(0, i).join("/"));
 	}
-
-	// Create directories
-	for (const dir of directories) {
-		try {
-			await webcontainerInstance.value.fs.mkdir(dir, { recursive: true });
-		} catch (e) {
-			// Directory might already exist
-		}
-	}
-
-	// Write files
-	for (const [path, content] of Object.entries(props.files)) {
-		await webcontainerInstance.value.fs.writeFile(path, content);
-	}
+	for (const dir of directories) await instance.fs.mkdir(dir, { recursive: true });
+	for (const [path, content] of Object.entries(files)) await instance.fs.writeFile(path, content);
 };
 
-const installDependencies = async () => {
-	if (!webcontainerInstance.value) return;
-
-	status.value = "installing";
-	writeTerminal("Installing dependencies with npm...", "info");
-
-	const installProcess = await webcontainerInstance.value.spawn("npm", [
-		"install",
-	]);
-
-	installProcess.output.pipeTo(
-		new WritableStream({
-			write(data) {
-				writeTerminal(data, "info");
-			},
-		}),
-	);
-
-	const installExitCode = await installProcess.exit;
-
-	if (installExitCode !== 0) {
-		throw new Error("Failed to install dependencies");
-	}
-
-	writeTerminal("Dependencies installed successfully!", "success");
+const pipeOutput = (output: ReadableStream<string>, run: number) => {
+	void output.pipeTo(new WritableStream({
+		write(data) { if (isCurrent(run)) writeTerminal(data); },
+	})).catch(error => {
+		if (isCurrent(run)) writeTerminal(`Terminal output unavailable: ${error}`, "error");
+	});
 };
 
-const startDevServer = async () => {
-	if (!webcontainerInstance.value) return;
-
-	const command = props.startCommand || "npm run dev";
-	const [cmd = "npm", ...args] = command.trim().split(/\s+/);
-
-	writeTerminal(`Starting dev server: ${command}`, "info");
-
-	try {
-		const serverProcess = await webcontainerInstance.value.spawn(cmd, args);
-
-		serverProcess.output.pipeTo(
-			new WritableStream({
-				write(data) {
-					writeTerminal(data, "info");
-				},
-			}),
-		);
-
-		// Wait for server to be ready
-		webcontainerInstance.value.on("server-ready", (_port, url) => {
-			previewUrl.value = url;
-			status.value = "ready";
-			writeTerminal(`Server ready at ${url}`, "success");
-		});
-
-		// Check exit code
-		serverProcess.exit.then((exitCode) => {
-			if (exitCode !== 0) {
-				writeTerminal(`Server process exited with code ${exitCode}`, "error");
-			}
-		});
-	} catch (error) {
-		writeTerminal(`Failed to start server: ${error}`, "error");
-	}
+const startDevServer = async (instance: WebContainer, run: number) => {
+	const command = props.startCommand?.trim() || "npm run dev";
+	const [cmd = "npm", ...args] = command.split(/\s+/);
+	writeTerminal(`Starting dev server: ${command}`);
+	// Subscribe before spawning: a fast server can become ready during spawn.
+	stopServerListener = instance.on("server-ready", (_port, url) => {
+		if (!isCurrent(run)) return;
+		previewUrl.value = url;
+		status.value = "ready";
+		writeTerminal(`Server ready at ${url}`, "success");
+	});
+	const server = await instance.spawn(cmd, args);
+	if (!isCurrent(run)) return;
+	pipeOutput(server.output, run);
+	void server.exit.then(code => {
+		if (!isCurrent(run)) return;
+		previewUrl.value = "";
+		status.value = "error";
+		writeTerminal(`Server stopped with code ${code}. Restart to try again.`, "error");
+	}).catch(error => {
+		if (!isCurrent(run)) return;
+		status.value = "error";
+		previewUrl.value = "";
+		writeTerminal(`Server failed: ${error}`, "error");
+	});
 };
 
 const onFileChange = async () => {
@@ -296,72 +255,63 @@ const onFileChange = async () => {
 	}
 };
 
-const restart = async () => {
-
-	writeTerminal("Restarting container...", "info");
-	previewUrl.value = "";
-	status.value = "booting";
-
-	// Kill existing processes
-	await webcontainerInstance.value?.teardown();
+const stopContainer = () => {
+	generation++;
+	stopServerListener?.();
+	stopServerListener = undefined;
+	webcontainerInstance.value?.teardown();
 	webcontainerInstance.value = null;
-
-	// Reinitialize
-	await initWebContainer();
+	previewUrl.value = "";
 };
 
 const initWebContainer = async () => {
+	const run = ++generation;
 	try {
 		status.value = "booting";
-		writeTerminal("Booting WebContainer...", "info");
-
-		webcontainerInstance.value = await WebContainer.boot();
-		writeTerminal("WebContainer booted successfully!", "success");
-
-		await mountFiles();
-		writeTerminal("Files mounted successfully!", "success");
-
-		// Only install if package.json exists
-		if (props.files["package.json"]) {
-			await installDependencies();
+		writeTerminal("Booting WebContainer...");
+		const instance = await WebContainer.boot();
+		if (!isCurrent(run)) { instance.teardown(); return; }
+		webcontainerInstance.value = instance;
+		await mountFiles(instance, { ...fileContents.value });
+		if (!isCurrent(run)) return;
+		if (fileContents.value["package.json"]) {
+			status.value = "installing";
+			writeTerminal("Installing dependencies with npm...");
+			const install = await instance.spawn("npm", ["install"]);
+			if (!isCurrent(run)) return;
+			pipeOutput(install.output, run);
+			const code = await install.exit;
+			if (!isCurrent(run)) return;
+			if (code !== 0) throw new Error("Failed to install dependencies");
 		}
-
-		await startDevServer();
+		await startDevServer(instance, run);
 	} catch (error) {
+		if (!isCurrent(run)) return;
 		status.value = "error";
 		writeTerminal(`Error: ${error}`, "error");
 	}
 };
 
-// Lifecycle
-onMounted(async () => {
-	// Initialize file contents
-	fileContents.value = { ...props.files };
-	const files = Object.keys(props.files);
-	selectedFile.value = files[0] || "";
-
+const restart = async () => {
+	stopContainer();
 	await initWebContainer();
-});
+};
 
-onUnmounted(async () => {
-	if (webcontainerInstance.value) {
-		try {
-			await webcontainerInstance.value.teardown();
-		} catch (error) {
-			writeTerminal(`Error during teardown: ${error}`, "error");
-		}
+onMounted(() => {
+	fileContents.value = { ...props.files };
+	selectedFile.value = Object.keys(props.files)[0] || "";
+	void initWebContainer();
+});
+onUnmounted(() => { disposed = true; stopContainer(); });
+
+watch(() => props.files, newFiles => {
+	fileContents.value = { ...newFiles };
+	if (!(selectedFile.value in newFiles)) selectedFile.value = Object.keys(newFiles)[0] || "";
+	const instance = webcontainerInstance.value;
+	if (instance && status.value === "ready") {
+		void mountFiles(instance, { ...newFiles }).catch(error => {
+			if (!disposed) writeTerminal(`Failed to update files: ${error}`, "error");
+		});
 	}
-});
-
-// Watch for external file changes
-watch(
-	() => props.files,
-	(newFiles) => {
-		fileContents.value = { ...newFiles };
-		if (webcontainerInstance.value && status.value === "ready") {
-			mountFiles();
-		}
-	},
-	{ deep: true },
-);
+}, { deep: true });
 </script>

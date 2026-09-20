@@ -1,5 +1,5 @@
 <template>
- <Dialog.Root :open="isOpen" @open-change="isOpen = $event.open">
+ <Dialog.Root :lazy-mount="true" :unmount-on-exit="true" :open="isOpen" @open-change="isOpen = $event.open">
  <Teleport to="body">
  <Dialog.Backdrop :class="modal.backdrop" />
  <Dialog.Positioner :class="modal.positioner">
@@ -32,7 +32,7 @@
 
  <!-- WebContainer -->
  <WebContainerEmbed
- v-if="resource.embedConfig.container === 'webcontainer'"
+ v-if="isOpen && resource.embedConfig.container === 'webcontainer'"
  :title="resource.title"
  :files="resource.embedConfig.files || {}"
  :start-command="resource.embedConfig.startCommand"
@@ -41,7 +41,7 @@
 
  <!-- Generic iframe -->
  <iframe
- v-else
+ v-else-if="isOpen"
  :src="resource.embedConfig.src"
  :title="resource.title"
  :style="{ width: '100%', height: '100%' }"

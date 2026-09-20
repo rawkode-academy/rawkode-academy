@@ -106,8 +106,8 @@ const availablePresets = computed(() => {
  justify-content: space-between;
  gap: 1rem;
  padding: 1rem;
- background: var(--surface-card);
- border: 1px solid var(--surface-border);
+ background: var(--colors-academy-panel);
+ border: 1px solid var(--colors-academy-border);
  border-radius: 8px;
  margin-bottom: 1.5rem;
  flex-wrap: wrap;
@@ -126,7 +126,7 @@ const availablePresets = computed(() => {
  display: flex;
  gap: 0.25rem;
  padding: 0.25rem;
- background: var(--surface-card-muted);
+ background: var(--colors-academy-ground);
  border-radius: 8px;
 }
 
@@ -140,19 +140,19 @@ const availablePresets = computed(() => {
  border-radius: 6px;
  font-size: 0.8rem;
  font-weight: 600;
- color: var(--text-secondary-content);
+ color: var(--colors-academy-text-soft);
  cursor: pointer;
  transition: all 0.15s ease;
 }
 
 .view-btn:hover {
- background: var(--surface-card);
- color: var(--text-primary-content);
+ background: var(--colors-academy-panel);
+ color: var(--colors-academy-text);
 }
 
 .view-btn.active {
- background: var(--editorial-ink);
- color: var(--editorial-paper);
+ background: var(--colors-academy-text);
+ color: var(--colors-academy-canvas);
 }
 
 .view-icon {
@@ -171,25 +171,25 @@ const availablePresets = computed(() => {
  align-items: center;
  gap: 0.375rem;
  padding: 0.5rem 0.875rem;
- background: var(--surface-card-muted);
+ background: var(--colors-academy-ground);
  border: 1px solid transparent;
  border-radius: 6px;
  font-size: 0.75rem;
  font-weight: 600;
- color: var(--text-secondary-content);
+ color: var(--colors-academy-text-soft);
  cursor: pointer;
  transition: all 0.15s ease;
 }
 
 .preset-btn:hover {
- border-color: var(--surface-border);
- color: var(--text-primary-content);
+ border-color: var(--colors-academy-border);
+ color: var(--colors-academy-text);
 }
 
 .preset-btn.active {
- background: var(--editorial-paper-deep);
- border-color: var(--editorial-hairline-strong);
- color: var(--editorial-ink);
+ background: var(--colors-academy-ground);
+ border-color: var(--colors-academy-input-border);
+ color: var(--colors-academy-text);
 }
 
 /* Controls toggle */
@@ -198,23 +198,23 @@ const availablePresets = computed(() => {
  align-items: center;
  gap: 0.5rem;
  padding: 0.5rem 0.875rem;
- background: var(--surface-card-muted);
- border: 1px solid var(--surface-border);
+ background: var(--colors-academy-ground);
+ border: 1px solid var(--colors-academy-border);
  border-radius: 6px;
  font-size: 0.8rem;
  font-weight: 600;
- color: var(--text-secondary-content);
+ color: var(--colors-academy-text-soft);
  cursor: pointer;
  transition: all 0.15s ease;
 }
 
 .controls-toggle:hover {
- background: var(--surface-card);
- color: var(--text-primary-content);
+ background: var(--colors-academy-panel);
+ color: var(--colors-academy-text);
 }
 
 .controls-toggle.has-filters {
- border-color: var(--editorial-spruce);
+ border-color: var(--colors-academy-status-spruce);
 }
 
 .toggle-icon {
@@ -229,8 +229,8 @@ const availablePresets = computed(() => {
  min-width: 20px;
  height: 20px;
  padding: 0 0.375rem;
- background: var(--editorial-spruce);
- color: var(--editorial-paper);
+ background: var(--colors-academy-status-spruce);
+ color: var(--colors-academy-canvas);
  font-size: 0.7rem;
  font-weight: 700;
  border-radius: 9999px;
@@ -242,18 +242,18 @@ const availablePresets = computed(() => {
  align-items: center;
  gap: 0.5rem;
  padding: 0.5rem 0.875rem;
- background: var(--editorial-ink);
+ background: var(--colors-academy-text);
  border: none;
  border-radius: 6px;
  font-size: 0.8rem;
  font-weight: 600;
- color: var(--editorial-paper);
+ color: var(--colors-academy-canvas);
  cursor: pointer;
  transition: all 0.15s ease;
 }
 
 .share-btn:hover {
- background: var(--editorial-spruce);
+ background: var(--colors-academy-status-spruce);
  box-shadow: none;
 }
 

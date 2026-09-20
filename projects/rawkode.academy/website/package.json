@@ -9,7 +9,7 @@
 		"dev": "astro dev",
 		"format": "biome format --write",
 		"preview": "astro preview",
-		"check:academy-interactions": "vitest run src/tests/command-palette.test.ts src/tests/theme.test.ts src/lib/games/guess-the-logo.test.ts src/lib/games/guess-the-logo-achievements.test.ts",
+		"check:academy-interactions": "vitest run src/tests/webcontainer.test.ts src/tests/command-palette.test.ts src/tests/theme.test.ts src/lib/games/guess-the-logo.test.ts src/lib/games/guess-the-logo-achievements.test.ts",
 		"check:academy-shell": "node --test scripts/academy-source.test.mjs && node scripts/check-academy-shell.mjs",
 		"start": "astro dev",
 		"storybook": "storybook dev -p 6006",

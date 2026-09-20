@@ -142,8 +142,8 @@ const catalog = academyCatalog();
 
 <style>
 	.technology-page {
-		background: var(--editorial-paper);
-		color: var(--editorial-ink);
+		background: var(--colors-academy-canvas);
+		color: var(--colors-academy-text);
 	}
 
 	.technology-page__tools {
@@ -152,26 +152,26 @@ const catalog = academyCatalog();
 		align-items: center;
 		gap: 0.875rem 1rem;
 		padding: 1rem var(--space-section-pad-x);
-		border-bottom: 1px solid var(--editorial-hairline);
+		border-bottom: 1px solid var(--colors-academy-border);
 	}
 
 	.technology-page__label,
 	.technology-page__count {
-		font-family: var(--font-jetbrains-mono), monospace;
+		font-family: var(--fonts-academy-mono), monospace;
 		font-size: 0.6875rem;
 		font-weight: 600;
 		letter-spacing: 0.08em;
 		text-transform: uppercase;
-		color: var(--editorial-ink-mute);
+		color: var(--colors-academy-text-muted);
 	}
 
 	.technology-page__search-input {
 		width: 100%;
 		min-height: 2.75rem;
-		border: 1px solid var(--editorial-hairline-strong);
-		background: var(--editorial-paper-deep);
-		color: var(--editorial-ink);
-		font-family: var(--font-inter-tight), sans-serif;
+		border: 1px solid var(--colors-academy-input-border);
+		background: var(--colors-academy-ground);
+		color: var(--colors-academy-text);
+		font-family: var(--fonts-academy-text), sans-serif;
 		font-size: 1rem;
 		padding: 0.625rem 0.75rem;
 		border-radius: 0;
@@ -179,12 +179,12 @@ const catalog = academyCatalog();
 	}
 
 	.technology-page__search-input:focus {
-		border-color: var(--editorial-ink);
-		box-shadow: 0 0 0 2px var(--editorial-paper), 0 0 0 3px var(--editorial-ink);
+		border-color: var(--colors-academy-text);
+		box-shadow: 0 0 0 2px var(--colors-academy-canvas), 0 0 0 3px var(--colors-academy-text);
 	}
 
 	.technology-page__search-input::placeholder {
-		color: var(--editorial-ink-mute);
+		color: var(--colors-academy-text-muted);
 	}
 
 	.technology-page__count {
@@ -193,7 +193,7 @@ const catalog = academyCatalog();
 	}
 
 	.technology-page__count span {
-		color: var(--editorial-ink);
+		color: var(--colors-academy-text);
 	}
 
 	.technology-page__grid-section {
@@ -212,8 +212,8 @@ const catalog = academyCatalog();
 		align-items: center;
 		gap: 0.875rem;
 		min-width: 0;
-		border: 1px solid var(--editorial-hairline);
-		background: var(--editorial-paper-deep);
+		border: 1px solid var(--colors-academy-border);
+		background: var(--colors-academy-ground);
 		color: inherit;
 		text-decoration: none;
 		padding: 0.875rem;
@@ -221,7 +221,7 @@ const catalog = academyCatalog();
 	}
 
 	.tech-card-link:hover {
-		border-color: var(--editorial-ink);
+		border-color: var(--colors-academy-text);
 	}
 
 	.tech-card-link__logo-wrap {
@@ -229,8 +229,8 @@ const catalog = academyCatalog();
 		place-items: center;
 		width: 3.25rem;
 		height: 3.25rem;
-		background: var(--editorial-paper);
-		border: 1px solid var(--editorial-hairline);
+		background: var(--colors-academy-canvas);
+		border: 1px solid var(--colors-academy-border);
 	}
 
 	.tech-card-link__logo {
@@ -244,16 +244,16 @@ const catalog = academyCatalog();
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
-		font-family: var(--font-inter-tight), sans-serif;
+		font-family: var(--fonts-academy-text), sans-serif;
 		font-size: 0.975rem;
 		font-weight: 700;
 		line-height: 1.25;
-		color: var(--editorial-ink);
+		color: var(--colors-academy-text);
 	}
 
 	.technology-page__empty {
-		border: 1px solid var(--editorial-hairline);
-		background: var(--editorial-paper-deep);
+		border: 1px solid var(--colors-academy-border);
+		background: var(--colors-academy-ground);
 		padding: 2rem;
 		max-width: 28rem;
 		margin: 0 auto;
@@ -261,17 +261,17 @@ const catalog = academyCatalog();
 	}
 
 	.technology-page__empty h2 {
-		font-family: var(--font-inter-tight), sans-serif;
+		font-family: var(--fonts-academy-text), sans-serif;
 		font-size: 1.25rem;
 		font-weight: 700;
 		letter-spacing: 0;
-		color: var(--editorial-ink);
+		color: var(--colors-academy-text);
 		margin: 0;
 	}
 
 	.technology-page__empty p {
-		font-family: var(--font-inter-tight), sans-serif;
-		color: var(--editorial-ink-soft);
+		font-family: var(--fonts-academy-text), sans-serif;
+		color: var(--colors-academy-text-soft);
 		margin: 0.5rem 0 0;
 	}
 

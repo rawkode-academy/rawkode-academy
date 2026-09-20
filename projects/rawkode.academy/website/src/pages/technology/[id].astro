@@ -385,7 +385,7 @@ const cncfStatusColors: Record<string, string> = {
 	graduated:
 		"bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border-green-200 dark:border-green-800",
 	archived:
-		"bg-[var(--surface-card-muted)] text-secondary-content border-surface",
+		"bg-[var(--colors-academy-ground)] text-secondary-content border-surface",
 };
 
 // Check if we have community links to display
@@ -602,9 +602,9 @@ const hasCommunityLinks =
 								</p>
 							)}
 							{technology.matrix.spicyTake && (
-								<div class="flex items-start gap-2 p-3 bg-[color-mix(in_oklab,var(--editorial-rust)_8%,transparent)] border border-[color-mix(in_oklab,var(--editorial-rust)_18%,transparent)] rounded-sm">
+								<div class="flex items-start gap-2 p-3 bg-[color-mix(in_oklab,var(--colors-academy-status-rust)_8%,transparent)] border border-[color-mix(in_oklab,var(--colors-academy-status-rust)_18%,transparent)] rounded-sm">
 									<span class="text-base flex-shrink-0">🌶️</span>
-									<p class="text-sm italic text-[var(--editorial-rust)]">
+									<p class="text-sm italic text-[var(--colors-academy-status-rust)]">
 										{technology.matrix.spicyTake}
 									</p>
 								</div>
@@ -691,7 +691,7 @@ const hasCommunityLinks =
 								)}
 								{technology.cncf.archived && (
 									<div class="flex items-center gap-3">
-										<div class="w-2 h-2 rounded-full bg-[var(--editorial-ink-mute)]"></div>
+										<div class="w-2 h-2 rounded-full bg-[var(--colors-academy-text-muted)]"></div>
 										<span class="text-sm text-muted">
 											Archived: <span class="font-medium">{technology.cncf.archived}</span>
 										</span>
@@ -884,21 +884,21 @@ const hasCommunityLinks =
 	/* Adoption-stage tokens derive from the editorial palette so both
 	   color schemes resolve automatically; no hand-flipped dark overrides. */
 	.matrix-badge {
-		--stage-skip: var(--editorial-rust);
-		--stage-watch: var(--editorial-amber-text);
+		--stage-skip: var(--colors-academy-status-rust);
+		--stage-watch: var(--colors-academy-status-amber);
 		--stage-explore: color-mix(
 			in oklab,
-			var(--editorial-amber-text) 45%,
-			var(--editorial-spruce) 55%
+			var(--colors-academy-status-amber) 45%,
+			var(--colors-academy-status-spruce) 55%
 		);
-		--stage-learn: var(--editorial-violet);
-		--stage-adopt: var(--editorial-spruce);
-		--stage-advocate: var(--editorial-ink);
-		--stage-graveyard: var(--editorial-ink-mute);
+		--stage-learn: var(--colors-academy-status-violet);
+		--stage-adopt: var(--colors-academy-status-spruce);
+		--stage-advocate: var(--colors-academy-text);
+		--stage-graveyard: var(--colors-academy-text-muted);
 		--stage-guilty-pleasure: color-mix(
 			in oklab,
-			var(--editorial-rust) 50%,
-			var(--editorial-violet) 50%
+			var(--colors-academy-status-rust) 50%,
+			var(--colors-academy-status-violet) 50%
 		);
 		display: inline-flex;
 		align-items: center;
@@ -913,11 +913,11 @@ const hasCommunityLinks =
 	/* Violet is not re-pointed by html.dark; lift the violet-derived
 	   stages locally for contrast on dark surfaces. */
 	:global(html.dark) .matrix-badge {
-		--stage-learn: color-mix(in oklab, var(--editorial-violet) 60%, white 40%);
+		--stage-learn: color-mix(in oklab, var(--colors-academy-status-violet) 60%, white 40%);
 		--stage-guilty-pleasure: color-mix(
 			in oklab,
-			var(--editorial-violet) 35%,
-			var(--editorial-rust) 65%
+			var(--colors-academy-status-violet) 35%,
+			var(--colors-academy-status-rust) 65%
 		);
 	}
 
@@ -1031,7 +1031,7 @@ const hasCommunityLinks =
 	}
 
 	.btn-outline {
-		color: var(--text-primary-content);
+		color: var(--colors-academy-text);
 		background: transparent;
 		border: 1px solid rgba(148, 163, 184, 0.45);
 		transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
@@ -1039,8 +1039,8 @@ const hasCommunityLinks =
 
 	.btn-outline:hover {
 		transform: translateY(-1px);
-		border-color: var(--brand-primary);
-		background: rgb(var(--brand-primary) / 0.04);
+		border-color: var(--colors-academy-accent);
+		background: color-mix(in srgb, var(--colors-academy-accent) 4%, transparent);
 	}
 
 	:global(.dark) .btn-outline {
@@ -1048,27 +1048,27 @@ const hasCommunityLinks =
 	}
 
 	.text-link {
-		color: var(--text-secondary-content);
+		color: var(--colors-academy-text-soft);
 		font-weight: 500;
 		text-decoration: none;
 		transition: color 180ms ease;
 	}
 
 	.text-link:hover {
-		color: var(--brand-primary);
+		color: var(--colors-academy-accent);
 		text-decoration: underline;
 		text-underline-offset: 3px;
 	}
 
 	.technology-primary-link,
 	.technology-primary-link:visited {
-		background: var(--editorial-ink) !important;
-		border-color: var(--editorial-ink) !important;
-		color: var(--editorial-paper) !important;
+		background: var(--colors-academy-text) !important;
+		border-color: var(--colors-academy-text) !important;
+		color: var(--colors-academy-canvas) !important;
 	}
 
 	.technology-primary-link:hover {
-		color: var(--editorial-paper) !important;
+		color: var(--colors-academy-canvas) !important;
 	}
 
 	.technology-kicker {
@@ -1088,7 +1088,7 @@ const hasCommunityLinks =
 		border-radius: 9999px;
 		font-size: 0.72rem;
 		font-weight: 600;
-		color: var(--text-secondary-content);
+		color: var(--colors-academy-text-soft);
 		background: rgba(148, 163, 184, 0.12);
 		border: 1px solid rgba(148, 163, 184, 0.22);
 	}
@@ -1099,7 +1099,7 @@ const hasCommunityLinks =
 		line-height: 1.04;
 		font-weight: 800;
 		letter-spacing: -0.04em;
-		color: var(--text-primary-content);
+		color: var(--colors-academy-text);
 		text-wrap: balance;
 	}
 

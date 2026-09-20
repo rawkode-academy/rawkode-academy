@@ -122,24 +122,24 @@ const clearSelection = () => {
  width: 100%;
  gap: 0.5rem;
  padding: 0.5rem 0.75rem;
- background: var(--surface-card-muted);
- border: 1px solid var(--surface-border);
+ background: var(--colors-academy-ground);
+ border: 1px solid var(--colors-academy-border);
  border-radius: 8px;
  font-size: 0.8rem;
  font-weight: 600;
- color: var(--text-secondary-content);
+ color: var(--colors-academy-text-soft);
  cursor: pointer;
  transition: all 0.15s ease;
 }
 
 .filter-toggle:hover {
- border-color: rgb(var(--brand-primary) / 0.5);
- color: var(--text-primary-content);
+ border-color: color-mix(in srgb, var(--colors-academy-accent) 50%, transparent);
+ color: var(--colors-academy-text);
 }
 
 .filter-toggle.has-selection {
- border-color: rgb(var(--brand-primary));
- background: rgb(var(--brand-primary) / 0.1);
+ border-color: var(--colors-academy-accent);
+ background: color-mix(in srgb, var(--colors-academy-accent) 10%, transparent);
 }
 
 .filter-label {
@@ -154,7 +154,7 @@ const clearSelection = () => {
  min-width: 20px;
  height: 20px;
  padding: 0 0.375rem;
- background: rgb(var(--brand-primary));
+ background: var(--colors-academy-accent);
  color: white;
  font-size: 0.65rem;
  font-weight: 700;
@@ -177,8 +177,8 @@ const clearSelection = () => {
 .filter-dropdown {
  width: var(--reference-width);
  max-height: min(400px, var(--available-height));
- background: var(--surface-card);
- border: 1px solid var(--surface-border);
+ background: var(--colors-academy-panel);
+ border: 1px solid var(--colors-academy-border);
  border-radius: 10px;
  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
  display: flex;
@@ -192,25 +192,25 @@ const clearSelection = () => {
  display: flex;
  gap: 0.5rem;
  padding: 0.5rem;
- border-bottom: 1px solid var(--surface-border);
+ border-bottom: 1px solid var(--colors-academy-border);
 }
 
 .filter-dropdown .action-btn {
  flex: 1;
  padding: 0.375rem 0.5rem;
- background: var(--surface-card-muted);
+ background: var(--colors-academy-ground);
  border: none;
  border-radius: 6px;
  font-size: 0.7rem;
  font-weight: 600;
- color: var(--text-secondary-content);
+ color: var(--colors-academy-text-soft);
  cursor: pointer;
  transition: all 0.15s ease;
 }
 
 .filter-dropdown .action-btn:hover:not(:disabled) {
- background: var(--surface-border);
- color: var(--text-primary-content);
+ background: var(--colors-academy-border);
+ color: var(--colors-academy-text);
 }
 
 .filter-dropdown .action-btn:disabled {
@@ -236,13 +236,13 @@ const clearSelection = () => {
 }
 
 .filter-dropdown .option-item:hover {
- background: var(--surface-card-muted);
+ background: var(--colors-academy-ground);
 }
 
 .filter-dropdown .option-checkbox {
  width: 18px;
  height: 18px;
- accent-color: rgb(var(--brand-primary));
+ accent-color: var(--colors-academy-accent);
  cursor: pointer;
 }
 
@@ -255,7 +255,7 @@ const clearSelection = () => {
 
 .filter-dropdown .option-label {
  font-size: 0.875rem;
- color: var(--text-primary-content);
+ color: var(--colors-academy-text);
 }
 
 /* Transition */

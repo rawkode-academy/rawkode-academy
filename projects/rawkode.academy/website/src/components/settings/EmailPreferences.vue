@@ -137,6 +137,7 @@ const unsubscribeFromAll = async () => {
 
 const formatTechName = (id: string) => {
 	return id
+		.replace(/\/index$/, "")
 		.split("/")
 		.pop()
 		?.split("-")
@@ -331,6 +332,7 @@ const formatTechName = (id: string) => {
 						<Dialog.Content :class="modal.content">
 							<div :class="modal.body">
 							<Dialog.Title :class="account.title">Unsubscribe from all emails?</Dialog.Title>
+							<p v-if="error" role="alert" :class="account.error">{{ error }}</p>
 							<Dialog.Description :class="modal.description">
 								You will stop receiving all newsletters and notifications from Rawkode Academy.
 							</Dialog.Description>

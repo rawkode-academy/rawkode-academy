@@ -361,8 +361,8 @@ function handleKeydown(event: KeyboardEvent) {
  flex-direction: column;
  gap: 1.5rem;
  padding: 1rem;
- background: var(--surface-card);
- border: 1px solid var(--surface-border);
+ background: var(--colors-academy-panel);
+ border: 1px solid var(--colors-academy-border);
  border-radius: 8px;
  position: sticky;
  top: 1rem;
@@ -384,7 +384,7 @@ function handleKeydown(event: KeyboardEvent) {
  font-weight: 700;
  text-transform: uppercase;
  letter-spacing: 0.05em;
- color: var(--text-muted);
+ color: var(--colors-academy-text-muted);
  margin: 0;
 }
 
@@ -408,8 +408,8 @@ function handleKeydown(event: KeyboardEvent) {
  justify-content: center;
  min-height: 400px;
  padding: 3rem;
- background: var(--surface-card);
- border: 2px dashed var(--surface-border);
+ background: var(--colors-academy-panel);
+ border: 2px dashed var(--colors-academy-border);
  border-radius: 8px;
  text-align: center;
 }
@@ -424,12 +424,12 @@ function handleKeydown(event: KeyboardEvent) {
  font-size: 1.5rem;
  font-weight: 700;
  margin: 0 0 0.5rem;
- color: var(--text-primary-content);
+ color: var(--colors-academy-text);
 }
 
 .coming-soon p {
  font-size: 1rem;
- color: var(--text-muted);
+ color: var(--colors-academy-text-muted);
  margin: 0;
 }
 
@@ -443,8 +443,8 @@ function handleKeydown(event: KeyboardEvent) {
  align-items: center;
  gap: 0.5rem;
  padding: 0.75rem 1.25rem;
- background: var(--editorial-ink);
- color: var(--editorial-paper);
+ background: var(--colors-academy-text);
+ color: var(--colors-academy-canvas);
  border-radius: 6px;
  font-size: 0.875rem;
  font-weight: 600;
@@ -479,7 +479,7 @@ function handleKeydown(event: KeyboardEvent) {
  inset: 0;
  z-index: 49;
  display: block;
- background: color-mix(in oklab, var(--editorial-ink) 42%, transparent);
+ background: color-mix(in oklab, var(--colors-academy-text) 42%, transparent);
  border: 0;
  cursor: pointer;
  }
@@ -517,8 +517,8 @@ function handleKeydown(event: KeyboardEvent) {
  gap: 1rem;
  margin: 0 -1rem;
  padding: 0.875rem 1rem;
- background: var(--surface-card);
- border-bottom: 1px solid var(--surface-border);
+ background: var(--colors-academy-panel);
+ border-bottom: 1px solid var(--colors-academy-border);
  }
 
  .controls-drawer-header h2 {
@@ -527,7 +527,7 @@ function handleKeydown(event: KeyboardEvent) {
  font-weight: 800;
  letter-spacing: 0.08em;
  text-transform: uppercase;
- color: var(--text-primary-content);
+ color: var(--colors-academy-text);
  }
 
  .controls-close {
@@ -536,10 +536,10 @@ function handleKeydown(event: KeyboardEvent) {
  justify-content: center;
  width: 2.5rem;
  height: 2.5rem;
- background: var(--surface-card-muted);
- border: 1px solid var(--surface-border);
+ background: var(--colors-academy-ground);
+ border: 1px solid var(--colors-academy-border);
  border-radius: 6px;
- color: var(--text-primary-content);
+ color: var(--colors-academy-text);
  cursor: pointer;
  }
 
@@ -564,23 +564,23 @@ function handleKeydown(event: KeyboardEvent) {
  min-width: 0;
  min-height: 44px;
  padding: 0.5rem 0.875rem;
- background: var(--surface-card);
- border: 1px solid var(--surface-border);
+ background: var(--colors-academy-panel);
+ border: 1px solid var(--colors-academy-border);
  border-radius: 6px;
  font-size: 1rem;
- color: var(--text-primary-content);
+ color: var(--colors-academy-text);
  }
 
  .mobile-search-input:focus-visible {
- outline: 2px solid rgb(var(--brand-primary));
+ outline: 2px solid var(--colors-academy-accent);
  outline-offset: 1px;
  }
 
  .mobile-search-count {
- font-family: var(--font-jetbrains-mono), monospace;
+ font-family: var(--fonts-academy-mono), monospace;
  font-size: 0.72rem;
  font-weight: 700;
- color: var(--text-muted);
+ color: var(--colors-academy-text-muted);
  white-space: nowrap;
  }
 
@@ -594,11 +594,11 @@ function handleKeydown(event: KeyboardEvent) {
  gap: 0.5rem;
  min-height: 48px;
  padding: 0.75rem 1.125rem;
- background: var(--editorial-ink);
- color: var(--editorial-paper);
- border: 1px solid var(--editorial-ink);
+ background: var(--colors-academy-text);
+ color: var(--colors-academy-canvas);
+ border: 1px solid var(--colors-academy-text);
  border-radius: 9999px;
- font-family: var(--font-jetbrains-mono), monospace;
+ font-family: var(--fonts-academy-mono), monospace;
  font-size: 0.72rem;
  font-weight: 700;
  letter-spacing: 0.1em;
@@ -619,7 +619,7 @@ function handleKeydown(event: KeyboardEvent) {
  min-width: 1.25rem;
  height: 1.25rem;
  padding: 0 0.3rem;
- background: rgb(var(--brand-primary));
+ background: var(--colors-academy-accent);
  color: white;
  border-radius: 9999px;
  font-size: 0.65rem;
@@ -634,7 +634,7 @@ function handleKeydown(event: KeyboardEvent) {
  width: 2.5rem;
  height: 0.25rem;
  border-radius: 9999px;
- background: var(--surface-border-strong, var(--surface-border));
+ background: var(--surface-border-strong, var(--colors-academy-border));
  }
 }
 </style>
