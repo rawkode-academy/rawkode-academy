@@ -206,7 +206,7 @@ function getResourceHref(
 													href={href}
 													target={resource.type === "url" ? "_blank" : undefined}
 													rel={resource.type === "url" ? "noopener noreferrer" : undefined}
-													class={s.link}
+												class:list={[s.link, s.referenceLink]}
 												>{resource.title}</a>
 											) : <h3 class={s.lessonTitle}>{resource.title}</h3>}
 											{resource.description && <p class={s.lessonDescription}>{resource.description}</p>}

@@ -6,7 +6,6 @@ import faroUploader from "@grafana/faro-rollup-plugin";
 import d2 from "astro-d2";
 import expressiveCode from "astro-expressive-code";
 import { defineConfig, envField, fontProviders } from "astro/config";
-import { execSync } from "node:child_process";
 import { statSync, readFileSync } from "node:fs";
 import { dirname, join, parse } from "node:path";
 import { createRequire } from "node:module";
@@ -69,15 +68,6 @@ type AstroVitePlugins = NonNullable<
 const asAstroVitePlugins = (plugins: unknown[]): AstroVitePlugins =>
 	plugins as unknown as AstroVitePlugins;
 
-// Check if D2 is available (used for diagram rendering)
-let d2Available = false;
-try {
-	execSync("d2 --version", { stdio: "ignore" });
-	d2Available = true;
-} catch {
-	console.warn("D2 not available, skipping diagram support");
-}
-
 const getSiteUrl = () => {
 	if (import.meta.env.DEV === true) {
 		return "http://localhost:4321";
@@ -135,7 +125,9 @@ export default defineConfig({
 		// its output path relative to file.cwd — that traversal escapes both
 		// public/ and the URL base, leaving the <img src> pointing at a path
 		// that never ships in dist. Inlining avoids the broken file reference.
-		...(d2Available ? [d2({ inline: true })] : []),
+		// The integration checks D2 for build/dev, but not preview. Missing D2
+		// must fail a build rather than publish raw diagram source as prose.
+		d2({ inline: true }),
 		expressiveCode({
 			// Code blocks are "screen within the page" surfaces: like the
 			// --terminal-* tokens they stay dark in both colour schemes, so
@@ -183,6 +175,11 @@ export default defineConfig({
 		}),
 	],
 	vite: {
+		// One literal shared by prerendering and every deployed worker isolate.
+		// Scheduled News requires a new build because its detail pages are static.
+		define: {
+			__NEWS_DEPLOYMENT_CUTOFF_MS__: JSON.stringify(Date.now()),
+		},
 		plugins: asAstroVitePlugins([
 			webcontainerDemosPlugin(),
 			vidstackPlugin({ include: /components\/video\// }),

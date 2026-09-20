@@ -145,26 +145,66 @@
     },
     {
       "path": "/courses",
-      "status": "composition-rework",
+      "status": "visual-pass",
       "viewports": [
-        "1440x1000",
-        "390x844"
+        "1440x1000 light",
+        "390x844 light"
       ],
       "findings": [
-        "F08"
+        "F08 resolved",
+        "F53"
       ],
-      "coverage": "Hero and catalog artwork reviewed; final unboxed feature layout pending."
+      "environment": "Compiled local preview :4322, 19:20 light and 20:32 dark build",
+      "coverage": "Entire page inspected at both sizes through copyright in light and dark: featured Teleport and all three other course cards, availability states, artwork, descriptions and actions. GraphQL explicitly announced with no lessons, Rust one and Zitadel nine; mobile width 390/390. Featured image navigates to actual overview. Corrected More courses heading verified at both sizes; empty secondary collection suppression has source coverage.",
+      "justification": "Featured course provides an immediate lesson entry and overview via its cover. Three alternate courses expose distinct subjects, difficulty and actual availability; artwork identifies each series. No filters/pagination needed for four courses. Heading and shared navigation orient the visitor.",
+      "limitations": "No course playback or subscription from this catalogue; no-course branch has source coverage rather than a Browser fixture."
     },
     {
       "path": "/courses/teleport-for-kubernetes",
-      "status": "composition-rework",
+      "status": "visual-pass",
       "viewports": [
-        "390x844"
+        "1440x1000 light",
+        "390x844 light"
       ],
       "findings": [
-        "F11"
+        "F11 resolved",
+        "F54",
+        "CS07"
       ],
-      "coverage": "Observed excessive stacked metadata before curriculum. Rewritten layout pending Browser review."
+      "environment": "Compiled local preview :4322, 19:20 whole-page, 20:02 and 20:32 corrected builds",
+      "coverage": "Whole page inspected with overlapping captures through copyright at both sizes: cover, author, six lessons in three curriculum groups, five outcomes, authored overview, signup and two references. Desktop keyboard View curriculum anchor reaches its heading. Mobile width 390/390. Full-column cover, 44px references and narrowed local-Kind walkthrough promise verified in 20:02 build. In 20:32 build both dark compact consent labels measure 68.25px tall and show complete keyboard focus; optional Teleport offers/product-update sharing is explicit.",
+      "justification": "Cover identifies the series; author, availability and level establish scope. Six native lesson links provide immediate access, with curriculum groups explaining progression. Objectives and authored overview describe the course; references provide actual upstream resources. Optional signup explains sponsor consent separately.",
+      "limitations": "No playback or subscription; technical and licensing claims retained rather than independently revalidated."
+    },
+    {
+      "path": "/technology/acorn",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 light", "390x844 light"],
+      "environment": "Deployed preview d3ab9ff5 whole-page; compiled local :4322 20:32 corrected related links",
+      "findings": ["F55"],
+      "coverage": "Whole page inspected with overlapping captures through copyright at both sizes on deployed 5e1d65cd. Historical status, metadata, project links, three authored paragraphs, one recording, six related projects and hydrated signup inspected. Mobile document width 390/390. All six corrected related links verified locally at both sizes: consistent 40px marks and AP/BU fallbacks, one shared category, complete desktop keyboard focus outline.",
+      "justification": "Historical status and personal rating distinguish maintenance from opinion. Metadata qualifies the project, project links provide evidence, and description supplies context. Dated recording preserves learning history. Related projects offer onward exploration; signup explicitly concerns Academy coverage, not project updates.",
+      "limitations": "No playback, external destination verification or subscription. Authored factual statements preserved, not independently researched."
+    },
+    {
+      "path": "/read/our-architecture",
+      "status": "verification-pending",
+      "viewports": ["1440x1000 dark and light", "390x844 dark"],
+      "environment": "Compiled local preview :4322, 20:32 / 20:46 whole-section and 20:54 final diagram builds",
+      "findings": ["F57 resolved", "F58 resolved"],
+      "coverage": "Header, introduction, Cloud Native section, actual compiled diagram and CQRS boundary inspected. In 20:46, named diagram, written description, 44px native toggle, Space activation, Tab to scroll region, arrow-key and pointer panning, return to fitted view verified. Expanded mobile region is 350px wide over 1280px content, bounded to 591px height; document remains 390px. Desktop document remains 1440px and arrow navigation pans the enlarged region. Final 20:54 fitted mobile diagram and description rechecked; shared overflow correction verified on the GraphQL article.",
+      "justification": "Diagram communicates one gateway feeding five domain services and databases, with a separate write gateway. A description makes those relationships available without reading tiny labels. Enlargement and local scrolling provide detail without modal navigation or duplicate graphics.",
+      "limitations": "Full article body and related content remain pending; no infrastructure commands, external links or subscriptions exercised. Historical technical narrative is not independently revalidated."
+    },
+    {
+      "path": "/read/federated-graphql-microservices",
+      "status": "verification-pending",
+      "viewports": ["1440x1000 light", "390x844 light"],
+      "environment": "Compiled local preview :4322, 20:46 / 20:52 / 20:54 diagram builds",
+      "findings": ["F57 resolved", "F58 resolved"],
+      "coverage": "Our Federated GraphQL Stack anchor and whole compiled SVG inspected in overlapping desktop/mobile captures, with caption and written description. Corrected fitted graphic measures 397.8x700 desktop and is bounded to 591px mobile; expanded region contains 1280px content without document overflow. Space, Tab and arrow panning verified at both sizes. Final 20:54 mobile default overflow is visible and pointer scrolling over the graphic advances the page 422px; enlarged overflow is auto with keyboard panning. Document 390/390.",
+      "justification": "Diagram distinguishes shared gateway from two independent service/server/ORM/database chains. The new written description and optional enlarged region preserve both overview and label access.",
+      "limitations": "Not a whole-page sign-off. Article code, copy, related content, external destinations and live API remain pending."
     },
     {
       "path": "/read",
@@ -269,13 +309,29 @@
     {
       "path": "/courses/teleport-for-kubernetes/01-introduction",
       "viewports": [
-        "390x844"
+        "1440x1000 light",
+        "390x844 light"
       ],
       "findings": [
-        "F20"
+        "F20 resolved",
+        "F56",
+        "CS07"
       ],
-      "coverage": "Hero/player/resources inspected. Removed filler and reordered resources. Player loaded controls but poster image failed locally; HTTP asset check returned 200. Needs compiled retry.",
-      "status": "composition-rework"
+      "environment": "Compiled local preview :4322, 19:20 whole-page and 20:02 corrected build; shared consent label delta in 20:32",
+      "coverage": "Entire page inspected with overlapping viewport captures through copyright at both sizes. Hero, 12:43 player, all five authored sections, three-service ordered list, two resources, next-lesson link and signup reviewed. Desktop width 1440/1440. Corrected next copy and one-surface signup inspected desktop light and mobile light/dark in 20:02. Playback advanced to 0:16 with visible captions; Space paused; Escape from focused settings menu item closed and restored Settings focus. Final shared label correction verified at both sizes on lesson two and the overview, not replayed here.",
+      "justification": "Breadcrumb and lesson position orient the learner. Video is the primary lesson; authored sections provide readable context. Real upstream resources remain accessible beside desktop reading content and after mobile content. Native next-lesson navigation advances the sequence. Optional updates form should retain one clear purpose and separate sponsor consent.",
+      "limitations": "Only 16 seconds of playback, not the complete video; no fullscreen, casting, PiP or subscription. No independent technical fact-check. Intermediate clipped desktop captures were discarded and retaken in the correctly sized Browser tab.",
+      "status": "visual-pass"
+    },
+    {
+      "path": "/courses/teleport-for-kubernetes/02-deploying-teleport-cluster",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 dark", "390x844 light"],
+      "environment": "Compiled local preview :4322, 20:02 whole-page and 20:32 consent correction builds",
+      "findings": ["CS07 resolved", "F56 resolved"],
+      "coverage": "Whole page read with overlapping captures through copyright at both sizes. Loaded video poster and 10:39 controls, all four authored sections, five deployment steps, three upstream resources, previous/next navigation and simplified signup inspected. Mobile width 390/390. Overview lesson link entered by keyboard; no unsupported script download promise remains. In 20:32 build actual clickable consent label measures 261x68.25px mobile and 479.95x45.5px desktop, with full keyboard focus; label click toggled on then off without submission.",
+      "justification": "Prerequisites establish readiness, five ordered steps outline the recording, and production comparison provides context. Actual upstream resources support further study. Breadcrumb, ordinal and bidirectional lesson links locate the learner in the sequence. Optional signup remains separate from primary learning content.",
+      "limitations": "No infrastructure commands or form submission. Playback was exercised on lesson one, not this recording."
     },
     {
       "path": "/news/kubernetes-1-36-service-externalips-deprecation",
@@ -331,7 +387,7 @@
     },
     {
       "path": "/maintainers/share-your-project",
-      "status": "verification-pending",
+      "status": "visual-pass",
       "viewports": [
         "1440x1000 dark",
         "390x844 dark; light hero and focus"
@@ -339,8 +395,8 @@
       "findings": [
         "F30"
       ],
-      "environment": "Compiled local preview :4322, 19:20 build",
-      "coverage": "Entire page through copyright inspected at desktop and mobile dark; mobile light hero and full keyboard action outline also checked. Four process steps, fit criteria, prep link and visible contact remain. All four main links measure at least 44px tall; mobile document 390/390. Browser accessibility snapshot exposes the ordered list without individual list-item roles; semantic and remaining scoped-style recipe migration follow-up pending.",
+      "environment": "Compiled local preview :4322, 19:20 whole-page and 20:32 corrected build",
+      "coverage": "Entire page through copyright inspected at desktop and mobile dark; mobile light hero and full keyboard action outline also checked. Corrected Panda recipe rechecked in 20:32 at both sizes in light: all four process steps, fit criteria, prep link and contact. Four main links measure 50/50/44/44px; mobile document 390/390. Raw Browser accessibility tree confirms four ordered process listitems, each containing its heading and body; the flattened text snapshot was not evidence of missing roles.",
       "justification": "Hero states audience, format, duration and cost. Four steps explain the real participation sequence. Fit and exclusions distinguish editorial sessions from commercial work. Prep notes and three requested context items make the email actionable; visible address provides a fallback to the mailto action.",
       "limitations": "No email sent or session scheduled; external prep document and video playback not inspected."
     },

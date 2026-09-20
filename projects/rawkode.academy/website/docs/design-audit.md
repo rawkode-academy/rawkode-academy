@@ -77,8 +77,62 @@ duplicate navigation. Preserve useful content and functional behavior.
 | F50 | Learning-path hero and newsletter ignore reading grid; catalogue has meaningless ordinals; TOC loses keyboard outline and skips chapters during fast scroll; prerequisites expose literal Markdown | Aligned hero, contained newsletter, removed status dot/ordinals, padded focus boundary, RAF-batched reading-position calculation, plain-text prerequisites; six scroll tests, independent review and compiled desktop/mobile verification pass | Learning-path routes, `AcademyPage`, `ArticleTOC`, document/page recipes |
 | F51 | Page-wide navigation crossfade overlays old and new text; claimed thumbnail morph has no paired participant | Removed decorative navigation animation and unused naming helper; retained component reduced-motion rules. Rebuilt Browser check pending | `global.css`, watch page, obsolete helper and sidebar declaration |
 | F52 | About repeats a final principle divider before the next section; format copy claims courses/articles in current video-only paths | Remove final list divider and unnecessary end padding; describe selected lessons without unsupported format promises. Rebuilt delta pending | `academyAbout.ts`, About page |
+| F53 | Course catalogue repeats a visible three-item count and promises unsupported future subjects in its empty-library branch | Removed duplicate count, omitted empty secondary section and used neutral no-course state. Whole dark catalogue and corrected heading verified at both sizes | `courses/index.astro` |
+| F54 | Mobile course cover stops short of its column; standalone references have small hit areas | Full-column cover and shared 44px reference-link recipe, verified in compiled Browser at both sizes | `academyCourse.ts`, `courses/[...slug].astro` |
+| F55 | Related technology names shift when logos are missing; identical category repeated in every row | Consistent 40px marks, matching initials and one shared category; all six Acorn links and desktop focus verified at both sizes | `academyTechnology.ts`, `technology/[id].astro` |
+| F56 | Lesson signup nests cards and repeats its purpose three times; overview sponsor copy understates offers/product-update scope | One surface, one heading and explanation; explicit optional sponsor-sharing language in both forms. Final actual labels exceed 44px at both sizes; pointer toggle and keyboard focus verified without submission | Course signup components, `academyForms.ts` |
+| F57 | Optional D2 integration allows a successful build to publish raw diagram source when the compiler check fails | Always register the integration: build/dev preflight requires the declared compiler while preview still works without it. Compiled SVG rendering verified; dense mobile diagram readability tracked separately in F58 | `astro.config.mts`, document contract test |
+| F58 | Dense architecture diagram is unreadable on mobile; narrow GraphQL diagram expands to an excessive desktop height | Shared static figure with native enlargement toggle, keyboard-scrollable region, accessible name and written relationship description. Fitted/expanded views verified at both sizes. Normal scrolling over fitted graphics preserved; containment applies only when enlarged | `academyDiagram.ts`, `articles/Diagram.astro`, both published D2 articles |
 
 ## Verification log
+
+- Final 20:54 integration build passed: 44 templates, four bracket pages, 31
+  recipes, 440 Astro files / zero errors / zero warnings / nine hints, and all
+  111 SSR/hydration tests. Strict design-system check passed. Final Browser delta
+  proves fitted GraphQL graphic is 397.8x700 desktop and bounded to 591px mobile;
+  enlarged mobile region is 350x591 with 1280px scroll content. Arrow key pans
+  40px. Normal pointer scrolling over the fitted graphic advances the document
+  by 422px instead of trapping the gesture. Mobile width remains 390/390.
+- Final architecture mobile fitted view rechecked with readable textual
+  relationship description. Both articles remain verification-pending for their
+  full bodies and related sections, separate from the resolved diagram defect.
+- Course catalogue, Teleport overview and first two lessons, Acorn profile and
+  maintainer page now have explicit whole-page plus corrected-delta visual passes.
+  These six additions do not sign off other routes using their templates. Acorn
+  whole-page evidence is deployed 5e1d65cd; its corrected links are local 20:32.
+- 20:46 build with mandatory D2 and diagram controls passed: 440 Astro files,
+  zero errors/warnings, nine hints; 13 parser, 122 interaction and 111 SSR/hydration
+  tests. Full Vitest 572/572. Browser verified architecture enlargement, native
+  keyboard toggling, focus and panning, pointer panning, return to fitted view,
+  and 390/390 mobile plus 1440/1440 desktop document width. Both article diagrams
+  exist as compiled SVGs. Article bodies are not yet whole-page visual passes.
+- Strict design-system check caught raw size literals in the new diagram recipe.
+  Replaced them with the existing 7xl size and a named viewport-size token;
+  strict check then passed (74 files, missing 0, stale 0). Final rebuild and
+  bounded overview verification follow. Main implemented/reviewed this diagram
+  fix; an independent final reviewer was unavailable after delegated usage ended.
+- The newly published cuenv schema v0.55.1 is now installed through `cue mod get`.
+  Matched CLI/schema `sync -A` and `sync ci --check` both passed, with no version
+  mismatch warning. Generated workflows, locks and env configuration remained
+  byte-identical; independent review parsed all 44 workflows and confirmed the
+  existing 39 generated CLI pins. System Nix binary remains unchanged.
+- 20:02 BST integration build passed with D2: 44 route templates, four bracket
+  pages, 30 recipes, Astro check 439 files / zero errors / zero warnings / nine
+  hints. Full Vitest 570/570 and strict design-system check passed. Later narrow
+  initials and clickable-label corrections require the next build.
+- Independent News deployment-cutoff review found no blocker; 92 focused tests
+  passed. Google News's inherited prerendered XML only ages on rebuild; the
+  48-hour helper uses evaluation time, not an independently verified live request
+  clock. Test wording narrowed accordingly.
+
+- Checkpoint `5e1d65cd` pushed normally to PR #1355. Website CI 35529167454
+  and design-system CI 35529167321 succeeded using cuenv 0.55.1. Website
+  `deploy.preview` passed and produced worker d3ab9ff5-9ae4-4a19-b528-35b73a5c4fcf:
+  https://d3ab9ff5-rawkode-academy-website.rawkodeacademy.workers.dev.
+  Browser inspected the deployed Technology directory at desktop/dark and
+  mobile/light, filtered Acorn to 1 of 354 with visible focus, and confirmed
+  390px document width. Acorn detail received whole-page desktop/mobile review;
+  related-project alignment needs F55. Later local edits are not in this deploy.
 
 - User-requested cuenv upgrade: verified official 0.55.1 darwin-arm64 SHA-256
   bd8745d5513fc8fb92ea386cfe494c11ffeff56642d55d5fd707f8fc946e1479.

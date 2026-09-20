@@ -20,6 +20,7 @@ export const academyForms = sva({
 		"textarea",
 		"button",
 		"consent",
+		"courseConsent",
 		"checkbox",
 		"notice",
 		"error",
@@ -176,6 +177,17 @@ export const academyForms = sva({
 				outline: "focus",
 				outlineColor: "academy.accent",
 				outlineOffset: "focus",
+			},
+		},
+		courseConsent: {
+			display: "flex",
+			alignItems: "start",
+			gap: "3",
+			"& > label": {
+				minHeight: "11",
+				minWidth: "0",
+				flex: "1",
+				cursor: "pointer",
 			},
 		},
 		consent: {

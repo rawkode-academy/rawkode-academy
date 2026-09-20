@@ -20,6 +20,7 @@ import {
 import { resolveContentDirSync } from "@rawkodeacademy/content/utils";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { getVideosForTechnology } from "@/utils/get-videos-for-technology";
+import { isNewsPublished } from "@/lib/news-publication";
 import { academyTechnology } from "@rawkodeacademy/design-system";
 import "@rawkodeacademy/design-system/styles.css";
 
@@ -275,6 +276,17 @@ const relatedTechnologies = relatedTechSeed
 		subcategory: entry.data.subcategory,
 		status: entry.data.status,
 	}));
+const firstRelatedSubcategory = relatedTechnologies[0]?.subcategory?.trim();
+const sharedRelatedSubcategory = firstRelatedSubcategory &&
+	relatedTechnologies.every((related) => related.subcategory?.trim() === firstRelatedSubcategory)
+		? firstRelatedSubcategory : undefined;
+const relatedInitials = (name: string) => {
+	const words = name.trim().split(/[\s-]+/u);
+	return (words.length > 1
+		? words.slice(0, 2).map((word) => Array.from(word)[0]).join("")
+		: Array.from(name).slice(0, 2).join("")
+	).toUpperCase();
+};
 
 const seoTitle =
 	technology.seo?.title ??
@@ -433,7 +445,7 @@ const [articles, news, learningPaths] = await Promise.all([
 const now = new Date();
 const hasTopicContent =
 	articles.some(({ data }) => !data.draft && data.publishedAt <= now && matchesTechnology(data.technologies)) ||
-	news.some(({ data }) => data.publishedAt <= now && matchesTechnology(data.technologies)) ||
+	news.some(({ data }) => isNewsPublished(data.publishedAt, now) && matchesTechnology(data.technologies)) ||
 	learningPaths.some(({ data }) => data.publishedAt <= now && matchesTechnology(data.technologies));
 const hasAside = videoCount > 0 || hasMatrixDetails ||
 	Boolean(technology.cncf?.status) || cncfDates.length > 0 || cncfLinks.length > 0 || communityLinks.length > 0;
@@ -634,14 +646,18 @@ const hasAside = videoCount > 0 || hasMatrixDetails ||
 		{relatedTechnologies.length > 0 && (
 			<section class={styles.ruledSection} aria-labelledby="related-heading">
 				<h2 id="related-heading" class={styles.heading}>Related technologies</h2>
+				{sharedRelatedSubcategory && <p class={styles.relatedContext}>{sharedRelatedSubcategory}</p>}
 				<ul class={styles.relatedGrid}>
 					{relatedTechnologies.map((related) => (
 						<li>
 							<a href={"/technology/" + related.id.replace(/\/index$/, "")} class={styles.related}>
-								{related.logoUrl && <img src={related.logoUrl} alt="" width="40" height="40" loading="lazy" onerror="this.hidden=true;" />}
-								<span>
+								<span class={styles.relatedMark} aria-hidden="true">
+									{related.logoUrl && <img class={styles.relatedImage} src={related.logoUrl} alt="" width="40" height="40" loading="lazy" onerror="this.hidden=true; this.nextElementSibling.hidden=false;" />}
+									<span class={styles.relatedInitials} hidden={Boolean(related.logoUrl)}>{relatedInitials(related.name)}</span>
+								</span>
+								<span class={styles.relatedBody}>
 									<span class={styles.relatedName}>{related.name}</span>
-									{related.subcategory && <span class={styles.copy}>{related.subcategory}</span>}
+									{!sharedRelatedSubcategory && related.subcategory && <span class={styles.copy}>{related.subcategory}</span>}
 									{historicalStatuses.has(related.status) && <span class={styles.copy}>Project status: {related.status}</span>}
 								</span>
 							</a>

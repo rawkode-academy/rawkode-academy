@@ -4,6 +4,19 @@ Status: **approved exact set removed; verification complete with unrelated guard
 
 Snapshot: 2026-09-20, working tree based on `e5280286`. Other agents are editing active UI concurrently. This inventory describes the inspected working tree, not an immutable build artifact.
 
+## Subsequent exact removals
+
+The original table below is historical. Later reference audits supersede four
+of its retained dispositions: `news/CVEAlert.astro` was removed in checkpoint
+`5e1d65cd`; `navigation/PublicationNav.astro` and `sidebar/Sidebar.astro` are
+removed in the current integration. `technology/RelatedTechnologies.astro` is
+also removed after a final exact-reference check found only historical audit
+records: its former profile caller now renders the recipe-backed related section
+inline. The shared `/apple-touch-icon.png` asset is preserved. None has a surviving production import,
+export, story or event caller. Negative test assertions forbidding the legacy
+shell remain intact. Current `AcademyTopbar`, footer, auth/admin sidebar and
+shared tokens are preserved. All four files remain recoverable from Git.
+
 ## Scope and decision
 
 Removed **31 obsolete route-specific UI components and one orphan story (32 files)** after main approved the exact set and the concurrent-reference recheck passed. The original inventory retained 143 components with a discovered route/content path and 40 components without one. Main continues to change consumers; those original witnesses are historical inventory evidence, not a claim that every retained component still has the same callers. A missing production path is a screening signal, not a deletion criterion.

@@ -110,6 +110,7 @@ function harness({
 	};
 	const context = vm.createContext({
 		console,
+		__NEWS_DEPLOYMENT_CUTOFF_MS__: now,
 		URL,
 		Date: FixedDate,
 		Response,

@@ -28,6 +28,9 @@ const declarationNames = new Set([
 	"siblingMatches",
 	"relatedTechSeed",
 	"relatedTechnologies",
+	"firstRelatedSubcategory",
+	"sharedRelatedSubcategory",
+	"relatedInitials",
 	"projectLinks",
 	"officialLinks",
 	"description",
@@ -54,14 +57,18 @@ const code = ts.transpileModule(
 	statements.map((s) => s.getText(frontmatter)).join("\n"),
 	{ compilerOptions: { target: ts.ScriptTarget.ES2022 } },
 ).outputText;
-function contracts(technology, items = []) {
+function contracts(
+	technology,
+	items = [],
+	resolveTechnologyIconUrl = () => undefined,
+) {
 	return vm.runInNewContext(
-		`${code}\n({ relatedTechnologies, officialLinks, description, hasMatrixDetails, historicalStatuses, videoDateFormatter });`,
+		`${code}\n({ relatedTechnologies, sharedRelatedSubcategory, relatedInitials, officialLinks, description, hasMatrixDetails, historicalStatuses, videoDateFormatter });`,
 		{
 			technology,
 			id: technology.id,
 			items,
-			resolveTechnologyIconUrl: () => undefined,
+			resolveTechnologyIconUrl,
 		},
 	);
 }
@@ -81,6 +88,173 @@ const entry = (id, data = {}) => ({
 		status: "stable",
 		...data,
 	},
+});
+
+// Compile the production related-section markup and execute its real declarations.
+// Shared page/services are outside this fragment; no network or Browser is used.
+async function renderRelated(items, resolveLogo, profile = technology) {
+	const props = contracts(profile, items, resolveLogo);
+	const start = page.indexOf("\n\t\t{relatedTechnologies.length > 0 && (");
+	const end = page.indexOf("\n\t\t<div class={styles.newsletter}>", start);
+	assert(start > 0 && end > start);
+	const markup = page.slice(start, end);
+	const compiled = await transform(
+		`---\nconst { relatedTechnologies, sharedRelatedSubcategory, relatedInitials, historicalStatuses } = Astro.props;\nconst styles = new Proxy({}, { get: (_, slot) => 'tech-' + String(slot) });\n---\n${markup}`,
+		{ filename: "related.astro" },
+	);
+	assert.deepEqual(compiled.diagnostics, []);
+	const context = vm.createContext({ console });
+	const module = new vm.SourceTextModule(
+		ts.transpileModule(compiled.code, {
+			compilerOptions: {
+				module: ts.ModuleKind.ESNext,
+				target: ts.ScriptTarget.ES2022,
+			},
+		}).outputText,
+		{ context },
+	);
+	await module.link((specifier) => {
+		assert.equal(specifier, "astro/runtime/server/index.js");
+		const exports = { ...runtime, createMetadata: () => ({}) };
+		return new vm.SyntheticModule(
+			Object.keys(exports),
+			function () {
+				for (const [key, value] of Object.entries(exports))
+					this.setExport(key, value);
+			},
+			{ context },
+		);
+	});
+	await module.evaluate();
+	const container = await AstroContainer.create();
+	return parse(
+		await container.renderToString(module.namespace.default, { props }),
+	);
+}
+
+test("related initials match directory conventions for single, multiple and hyphenated names", async () => {
+	const names = ["Acorn", "BuildKit", "Cloud Native", "cert-manager", "Éclair", "𐐀bc"];
+	const dom = await renderRelated(names.map((name, index) => entry(`mark-${index}`, { name })));
+	assert.deepEqual(dom.querySelectorAll(".tech-relatedInitials").map((mark) => mark.text), ["AC", "BU", "CN", "CM", "ÉC", "𐐀B"]);
+});
+
+test("related rows always reserve a decorative mark, using genuine logos or name initials", async () => {
+	const dom = await renderRelated(
+		[
+			entry("logo/index", { name: "Logo Project" }),
+			entry("missing", { name: "Éclair Cloud", status: "abandoned" }),
+		],
+		(id) => (id === "logo/index" ? "/real-logo.svg" : undefined),
+	);
+	const links = dom.querySelectorAll("a");
+	assert.deepEqual(
+		links.map((a) => a.getAttribute("href")),
+		["/technology/logo", "/technology/missing"],
+	);
+	assert.equal(dom.querySelectorAll(".tech-relatedMark").length, 2);
+	for (const mark of dom.querySelectorAll(".tech-relatedMark"))
+		assert.equal(mark.getAttribute("aria-hidden"), "true");
+	const image = links[0].querySelector("img");
+	assert.equal(image.getAttribute("src"), "/real-logo.svg");
+	assert.equal(image.getAttribute("alt"), "");
+	assert.equal(image.getAttribute("width"), "40");
+	assert.equal(image.getAttribute("height"), "40");
+	assert(
+		links[0].querySelector(".tech-relatedInitials").hasAttribute("hidden"),
+	);
+	assert.equal(links[1].querySelector("img"), null);
+	assert.equal(links[1].querySelector(".tech-relatedInitials").text, "ÉC");
+	assert(
+		!links[1].querySelector(".tech-relatedInitials").hasAttribute("hidden"),
+	);
+	assert(links[1].text.includes("Project status: abandoned"));
+	const fallback = { hidden: true };
+	const failedImage = { hidden: false, nextElementSibling: fallback };
+	vm.runInNewContext(
+		`(function () { ${image.getAttribute("onerror")} }).call(image)`,
+		{ image: failedImage },
+	);
+	assert.equal(failedImage.hidden, true);
+	assert.equal(fallback.hidden, false);
+});
+
+test("one common nonempty subcategory appears once as section context", async () => {
+	const dom = await renderRelated([
+		entry("one"),
+		entry("two", { status: "superseded" }),
+	]);
+	assert.equal(dom.querySelector(".tech-relatedContext").text, "Tools");
+	assert.equal(dom.text.split("Tools").length - 1, 1);
+	assert(!dom.querySelector("ul").text.includes("Tools"));
+	assert(dom.text.includes("Project status: superseded"));
+});
+
+for (const subcategory of ["Other", "", undefined, "   "]) {
+	test(`mixed or missing subcategory (${JSON.stringify(subcategory)}) retains per-row distinctions`, async () => {
+		const dom = await renderRelated(
+			[entry("one"), entry("two", { subcategory })],
+			undefined,
+			{ ...technology, relatedTechnologies: ["one", "two"] },
+		);
+		assert.equal(dom.querySelector(".tech-relatedContext"), null);
+		const rows = dom.querySelectorAll("li");
+		assert.equal(rows.length, 2);
+		assert.equal(rows[0].querySelector(".tech-copy").text, "Tools");
+		assert.equal(
+			rows[1].querySelector(".tech-copy")?.text,
+			subcategory || undefined,
+		);
+	});
+}
+
+test("empty related content emits no section; names remain escaped", async () => {
+	assert.equal((await renderRelated([])).querySelector("section"), null);
+	const name = '<img src=x onerror="bad()"> & Tools';
+	const dom = await renderRelated([entry("safe", { name })]);
+	assert.equal(dom.querySelector(".tech-relatedName").text, name);
+	assert.equal(dom.querySelectorAll("img, script").length, 0);
+});
+
+test("related mark recipe fixes both states at 40px and honors hidden after image failure", async () => {
+	const source = readFileSync(
+		new URL(
+			"../../../../../packages/design-system/src/recipes/academyTechnology.ts",
+			import.meta.url,
+		),
+		"utf8",
+	);
+	const context = vm.createContext({});
+	const module = new vm.SourceTextModule(
+		ts.transpileModule(source, {
+			compilerOptions: {
+				module: ts.ModuleKind.ESNext,
+				target: ts.ScriptTarget.ES2022,
+			},
+		}).outputText,
+		{ context },
+	);
+	await module.link(
+		() =>
+			new vm.SyntheticModule(
+				["sva"],
+				function () {
+					this.setExport("sva", (config) => config);
+				},
+				{ context },
+			),
+	);
+	await module.evaluate();
+	const s = module.namespace.academyTechnology.base;
+	assert.equal(s.relatedMark.width, "10");
+	assert.equal(s.relatedMark.height, "10");
+	assert.equal(s.relatedMark.flexShrink, "0");
+	for (const key of ["relatedImage", "relatedInitials"]) {
+		assert.equal(s[key].width, "full");
+		assert.equal(s[key].height, "full");
+		assert.equal(s[key]["&[hidden]"].display, "none");
+	}
+	assert.equal(s.relatedImage.objectFit, "contain");
+	assert.equal(s.related["& > span"], undefined);
 });
 
 test("detail template compiles with every new branch and date slot", async () => {
@@ -143,7 +317,10 @@ test("exact project URLs combine labels without dropping a distinct README fragm
 });
 
 test("only editorial SEO description is promoted, while personal opinions are retained without invented details", () => {
-	assert(!page.includes(".useCase"), "Raw imported useCase is not promoted into visible or SEO prose");
+	assert(
+		!page.includes(".useCase"),
+		"Raw imported useCase is not promoted into visible or SEO prose",
+	);
 	assert.equal(
 		contracts({ ...technology, cncf: { useCase: "raw\\_import,tag" } })
 			.description,
@@ -280,7 +457,13 @@ test("newsletter server preference failures are unknown; supplied page path surv
 			.replace("import.meta.env.PROD", "isProduction"),
 		{ compilerOptions: { target: ts.ScriptTarget.ES2022 } },
 	).outputText;
-	for (const mode of ["empty", "subscribed", "error", "cookie", "development"]) {
+	for (const mode of [
+		"empty",
+		"subscribed",
+		"error",
+		"cookie",
+		"development",
+	]) {
 		const result = await vm.runInNewContext(
 			`(async () => { ${js}; return { preferencesUnavailable, isSubscribed, pagePath, signInUrl, shouldHide }; })()`,
 			{
@@ -306,7 +489,10 @@ test("newsletter server preference failures are unknown; supplied page path surv
 				},
 			},
 		);
-		assert.equal(result.preferencesUnavailable, mode === "error" || mode === "development");
+		assert.equal(
+			result.preferencesUnavailable,
+			mode === "error" || mode === "development",
+		);
 		assert.equal(result.isSubscribed, mode === "subscribed");
 		assert.equal(result.shouldHide, mode === "cookie");
 		assert.equal(result.pagePath, "/technology/acorn");

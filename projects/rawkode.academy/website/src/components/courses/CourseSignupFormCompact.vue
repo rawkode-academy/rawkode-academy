@@ -20,9 +20,9 @@
 					<input v-model="email" :id="emailId" type="email" name="email" autocomplete="email" placeholder="Enter your email" required :class="s.input" :disabled="loading" :readonly="submitted" />
 				</div>
 				<p v-if="courseSaved" :class="s.copy">Course updates are saved. Sponsor contact is optional; select the checkbox and submit only if you want to request it.</p>
-				<div v-if="canOfferSponsor" :class="s.consent">
+				<div v-if="canOfferSponsor" :class="s.courseConsent">
 					<input v-model="sponsorConsent" :id="consentId" type="checkbox" name="allowSponsorContact" :class="s.checkbox" :disabled="loading" />
-					<label :for="consentId" :class="s.copy">I agree to share my email with {{ signupConfig.sponsor }} for course-related updates</label>
+					<label :for="consentId" :class="s.copy">Optional: share my email with {{ signupConfig.sponsor }} so they can contact me with relevant offers and product updates.</label>
 				</div>
 				<button type="submit" :disabled="loading || (courseSaved && !sponsorConsent)" :class="s.button">{{ loading ? 'Submitting...' : courseSaved ? (sponsorStatus === 'unconfirmed' ? 'Retry sponsor signup' : 'Request sponsor contact') : 'Sign Up for Updates' }}</button>
 			</fieldset>

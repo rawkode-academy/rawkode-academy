@@ -72,8 +72,16 @@ export const academyCourse = sva({
 		"lessonMeta",
 		"unpublished",
 		"emptyCurriculum",
+		"referenceLink",
 	],
 	base: {
+		referenceLink: {
+			display: "inline-flex",
+			alignItems: "center",
+			width: "fit-content",
+			minHeight: "11",
+			paddingBlock: "2",
+		},
 		detailHero: {
 			paddingBlock: "6",
 			paddingInline: "academy-gutter",
@@ -125,13 +133,12 @@ export const academyCourse = sva({
 		heroCover: {
 			display: "block",
 			width: "full",
-			maxWidth: "80",
+			maxWidth: "full",
 			height: "auto",
 			aspectRatio: "academy-video",
 			objectFit: "contain",
 			borderRadius: "academy-m",
 			background: "academy.ground",
-			_sm: { maxWidth: "full" },
 		},
 		kicker: {
 			margin: "0",

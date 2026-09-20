@@ -1,0 +1,33 @@
+---
+import { academyDiagram } from "@rawkodeacademy/design-system";
+
+interface Props {
+	id: string;
+	title: string;
+	description: string;
+}
+
+const { id, title, description } = Astro.props;
+const styles = academyDiagram();
+---
+
+<figure class={styles.root} aria-labelledby={`${id}-caption`}>
+	<figcaption class={styles.caption} id={`${id}-caption`}>{title}</figcaption>
+	<label class={styles.toggle}>
+		<input type="checkbox" aria-controls={`${id}-viewport`} />
+		Enlarge diagram
+	</label>
+	<div
+		id={`${id}-viewport`}
+		class={styles.viewport}
+		data-diagram-viewport
+		role="region"
+		aria-label={`${title} — scroll to explore when enlarged`}
+		tabindex="0"
+	>
+		<div class={styles.image} data-diagram-image role="img" aria-label={title} aria-describedby={`${id}-description`}>
+			<slot />
+		</div>
+	</div>
+	<div class={styles.description} id={`${id}-description`}>{description}</div>
+</figure>

@@ -2,11 +2,10 @@
 	<section :class="[s.root, s.section]" :aria-labelledby="titleId">
 		<div :class="s.split">
 			<div :class="s.stack">
-				<p :class="s.kicker">Course Updates</p>
-				<h2 :id="titleId" :class="s.title">Stay updated as this course grows</h2>
-				<p :class="s.copy">Sign up once and we’ll send new modules, course notes, and supporting material as they ship.</p>
+				<h2 :id="titleId" :class="s.heading">Course updates</h2>
+				<p :class="s.copy">Get email updates when new course content is available.</p>
 			</div>
-			<div :class="s.panel">
+			<div :class="s.stack">
 				<p role="status" aria-live="polite" aria-atomic="true" :class="ready ? s.hidden : s.copy">{{ statusMessage }}</p>
 				<p :id="errorId" role="alert" aria-atomic="true" :class="error ? s.error : s.hidden">{{ error }}</p>
 				<div v-if="checkingSubscription" :class="s.status">
@@ -22,16 +21,14 @@
 				</div>
 				<form v-if="!checkingSubscription && (!courseSaved || canOfferSponsor)" method="POST" @submit.prevent="submitForm" :class="s.form" :aria-busy="!ready || submitting" :aria-describedby="error ? errorId : undefined">
 					<fieldset :class="[s.form, 'form-controls']" :disabled="!ready || submitting" aria-label="Course update signup">
-						<p v-if="!courseSaved" :class="s.copy">Sign up to receive notifications when new content is available for this course.</p>
 						<div v-if="!userEmail" :class="s.field">
 							<label :for="emailId" :class="s.label">Email address</label>
 							<input v-model="email" :id="emailId" type="email" name="email" autocomplete="email" required placeholder="your@email.com" :class="s.input" :disabled="submitting" :readonly="submitted" />
 						</div>
-						<p v-if="disclaimer && !courseSaved" :class="s.notice">{{ disclaimer }}</p>
 						<p v-if="courseSaved" :class="s.copy">Course updates are saved. Sponsor contact is optional; select the checkbox and submit only if you want to request it.</p>
-						<div v-if="canOfferSponsor" :class="s.consent">
+						<div v-if="canOfferSponsor" :class="s.courseConsent">
 							<input v-model="sponsorContact" :id="consentId" type="checkbox" name="allowSponsorContact" value="true" :class="s.checkbox" :disabled="submitting" />
-							<label :for="consentId" :class="s.copy">I agree to allow {{ sponsor }} to contact me with relevant offers and product updates.</label>
+							<label :for="consentId" :class="s.copy">Optional: share my email with {{ sponsor }} so they can contact me with relevant offers and product updates.</label>
 						</div>
 						<button type="submit" :disabled="submitting || (courseSaved && !sponsorContact)" :class="s.button">{{ submitting ? 'Submitting...' : courseSaved ? (sponsorStatus === 'unconfirmed' ? 'Retry sponsor signup' : 'Request sponsor contact') : 'Sign Up for Updates' }}</button>
 					</fieldset>
@@ -97,10 +94,6 @@ const statusMessage = computed(() => {
 	if (isAlreadySubscribed.value) return "You're subscribed to course updates.";
 	return "";
 });
-
-const disclaimer = props.sponsor
-	? "By signing up, you agree to receive course updates and notifications."
-	: null;
 
 // Optionally check subscription status on mount if deferred
 onMounted(async () => {

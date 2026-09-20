@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import ArticleCard from "@/components/articles/ArticleCard.astro";
 import { academyRelatedContent } from "@rawkodeacademy/design-system";
+import { isNewsPublished } from "@/lib/news-publication";
 
 export interface Props {
 	technologyId: string;
@@ -56,7 +57,7 @@ const articles = allArticles.sort(
 // Get news matching this technology
 const allNews = showNews
 	? (await getCollection("news"))
-			.filter((story) => story.data.publishedAt <= now && matchesTechnology(story.data.technologies))
+			.filter((story) => isNewsPublished(story.data.publishedAt, now) && matchesTechnology(story.data.technologies))
 			.sort(
 				(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
 			)

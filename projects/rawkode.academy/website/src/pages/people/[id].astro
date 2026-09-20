@@ -13,6 +13,7 @@ import type { ShowSummary } from "@/types/show";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { getPersonIdentityUrls } from "@/lib/person-identity-links";
+import { isNewsPublished } from "@/lib/news-publication";
 
 export async function getStaticPaths() {
 	const people = await getCollection("people");
@@ -28,7 +29,7 @@ const now = new Date();
 const videos = await getCollection("videos", ({ data }) => data.publishedAt <= now);
 const shows = await getCollection("shows", ({ data }) => data.publish);
 const technologies = await getCollection("technologies");
-const news = await getCollection("news", ({ data }) => data.publishedAt <= now);
+const news = await getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now));
 const articles = await getCollection("articles", ({ data }) => !data.draft && data.publishedAt <= now);
 const techNameById = new Map(
 	technologies.map((t) => [t.id.replace(/\/index$/, ""), t.data.name] as const),

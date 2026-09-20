@@ -27,16 +27,29 @@ const documentComponents = [
 	"courses/CourseModules.astro",
 	"articles/Resources.astro",
 	"articles/Updates.astro",
+	"articles/Diagram.astro",
 	"articles/series/SeriesArticles.astro",
 	"show/SubscribeLinks.astro",
 	"series/SeriesLink.astro",
 ];
 
 describe("Academy document migration", () => {
+	it("requires inline diagram rendering instead of silently omitting the integration", () => {
+		const config = readFileSync("astro.config.mts", "utf8");
+		expect(config).toContain("d2({ inline: true })");
+		expect(config).not.toContain("d2Available");
+		expect(config).not.toContain("skipping diagram support");
+		expect(readFileSync("devenv.nix", "utf8")).toMatch(/\n\s+d2\n/);
+	});
+
 	it("navigates without a decorative cross-document text crossfade", () => {
 		expect(source("styles/global.css")).not.toContain("@view-transition");
-		expect(source("pages/watch/[...slug].astro")).not.toContain("videoTransitionName");
-		expect(source("styles/global.css")).toContain("prefers-reduced-motion: reduce");
+		expect(source("pages/watch/[...slug].astro")).not.toContain(
+			"videoTransitionName",
+		);
+		expect(source("styles/global.css")).toContain(
+			"prefers-reduced-motion: reduce",
+		);
 	});
 
 	it.each(

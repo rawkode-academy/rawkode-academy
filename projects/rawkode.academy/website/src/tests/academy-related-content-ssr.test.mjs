@@ -15,7 +15,14 @@ const runtimeSource = readFileSync(
 	new URL("../lib/video-runtime.ts", import.meta.url),
 	"utf8",
 );
-const context = vm.createContext({ console, URL });
+const context = vm.createContext({ console, URL, __NEWS_DEPLOYMENT_CUTOFF_MS__: Date.parse("2100-01-01") });
+const publicationModule = new vm.SourceTextModule(
+	ts.transpileModule(readFileSync(new URL("../lib/news-publication.ts", import.meta.url), "utf8"), {
+		compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
+	}).outputText, { context },
+);
+await publicationModule.link(() => { throw new Error("Unexpected publication helper import"); });
+await publicationModule.evaluate();
 const runtimeModule = new vm.SourceTextModule(
 	ts.transpileModule(runtimeSource, {
 		compilerOptions: {
@@ -70,6 +77,7 @@ async function render(file, props, collections = {}) {
 		{ context },
 	);
 	await module.link((specifier) => {
+		if (specifier === "@/lib/news-publication") return publicationModule;
 		if (specifier === "@/lib/video-runtime") return runtimeModule;
 		const exports = mocks[specifier];
 		assert(exports, `Unexpected import: ${specifier}`);
@@ -190,6 +198,7 @@ const guardCode = ts.transpileModule(
 ).outputText;
 function pageHasTopicContent(collections, technologyId = "kubernetes/index") {
 	return vm.runInNewContext(`${guardCode}\nhasTopicContent;`, {
+		isNewsPublished: publicationModule.namespace.isNewsPublished,
 		technology: { id: technologyId },
 		articles: [],
 		news: [],

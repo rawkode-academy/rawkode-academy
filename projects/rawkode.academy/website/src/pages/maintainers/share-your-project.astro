@@ -1,6 +1,9 @@
 ---
 import EditorialShell from "@/components/ui/EditorialShell.astro";
 import Page from "@/wrappers/page.astro";
+import { academyMaintainers } from "@rawkodeacademy/design-system";
+
+const styles = academyMaintainers();
 
 export const prerender = true;
 
@@ -32,9 +35,9 @@ const expectations = [
 				<h2 id="session-process" class="editorial-section__title">From idea to live demo.</h2>
 				<p class="editorial-section__lede">A useful walkthrough your community can keep coming back to.</p>
 			</div>
-			<ol class="session-steps">
+			<ol class={styles.steps} role="list">
 				{processSteps.map((step) => (
-					<li><h3>{step.title}</h3><p>{step.body}</p></li>
+					<li class={styles.step} role="listitem"><h3 class={styles.stepTitle}>{step.title}</h3><p class={styles.stepBody}>{step.body}</p></li>
 				))}
 			</ol>
 		</section>
@@ -43,9 +46,9 @@ const expectations = [
 			<div class="editorial-section__header">
 				<h2 id="session-fit" class="editorial-section__title">Is your project a fit?</h2>
 			</div>
-			<div class="session-copy">
+			<div class={styles.copy}>
 				<ul class="editorial-list">{expectations.map((expectation) => <li>{expectation}</li>)}</ul>
-				<a href="https://rawkode.link/live-prep">Read the session prep notes ↗</a>
+				<a class={styles.link} href="https://rawkode.link/live-prep">Read the session prep notes ↗</a>
 			</div>
 		</section>
 
@@ -54,27 +57,14 @@ const expectations = [
 				<h2 id="session-contact" class="editorial-section__title">What would you like to show?</h2>
 				<p class="editorial-section__lede">Send a short email. We’ll reply if it is a fit and arrange a time together.</p>
 			</div>
-			<div class="session-copy">
+			<div class={styles.copy}>
 				<ul class="editorial-list">
 					<li>Project name, URL, and maintainer contacts</li>
 					<li>The problem it solves and the demo you have in mind</li>
 					<li>Any timing constraints around a release or community event</li>
 				</ul>
-				<a href={application}>david@rawkode.academy</a>
+				<a class={styles.link} href={application}>david@rawkode.academy</a>
 			</div>
 		</section>
 	</EditorialShell>
 </Page>
-
-<style>
-	.session-steps { counter-reset: step; display: grid; margin: 0; padding: 0; list-style: none; }
-	.session-steps li { counter-increment: step; display: grid; grid-template-columns: 2rem minmax(0, 1fr); column-gap: 1rem; padding-block: 1.25rem; border-bottom: 1px solid var(--colors-academy-border); }
-	.session-steps li:first-child { padding-top: 0; }
-	.session-steps li:last-child { border: 0; padding-bottom: 0; }
-	.session-steps li::before { content: counter(step, decimal-leading-zero); grid-row: span 2; padding-top: 0.2rem; color: var(--colors-academy-accent); font-family: var(--fonts-academy-mono); font-size: 0.8rem; }
-	.session-steps h3 { font-family: var(--fonts-academy-display); font-size: 1.25rem; font-weight: 700; line-height: 1.3; }
-	.session-steps p { margin-top: 0.5rem; color: var(--colors-academy-text-soft); line-height: 1.65; }
-	.session-copy { display: grid; align-content: start; gap: 1.5rem; }
-	.session-copy a { width: fit-content; min-height: 2.75rem; display: inline-flex; align-items: center; color: var(--colors-academy-accent); text-underline-offset: 0.2em; }
-	.session-copy a:focus-visible { outline: 2px solid var(--colors-academy-accent); outline-offset: 4px; }
-</style>

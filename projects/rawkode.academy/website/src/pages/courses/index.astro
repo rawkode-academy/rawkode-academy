@@ -115,28 +115,23 @@ const catalog = academyCatalog();
 					</a>}
 				</article>
 			) : (
-				<div class={styles.empty}>Courses are on the way. Practical, engineering-first courses are being built now.</div>
+				<div class={styles.empty}>No courses are published yet.</div>
 			)}
 			</div>
 		</section>
 
-		<section id="all-courses" class={styles.section}>
+		{libraryCourses.length > 0 && <section id="all-courses" class={styles.section}>
 			<div class={styles.container}>
 			<header class={styles.sectionHeader}>
 				<h2 class={styles.sectionTitle}>More courses</h2>
-				<span class={styles.meta}>{libraryCourses.length} more course{libraryCourses.length === 1 ? "" : "s"}</span>
 			</header>
 
-			{libraryCourses.length > 0 ? (
 				<div class={styles.grid}>
 					{libraryCourses.map((course) => (
 						<AcademyCatalogCard href={`/courses/${course.id}`} title={course.data.title} description={course.data.description} meta={[course.data.difficulty, availabilityLabel(course.id)]} image={courseImages.get(course.id)} imageAlt={course.data.cover?.alt ?? ""} />
 					))}
 				</div>
-			) : (
-				<div class={styles.empty}>More courses launching soon. Kubernetes, platform engineering, and identity courses are next.</div>
-			)}
 			</div>
-		</section>
+		</section>}
 	</div>
 </Page>

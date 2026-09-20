@@ -91,6 +91,7 @@ export default defineConfig({
 					"academy-toc": { value: "calc(100dvh - 4rem)" },
 					"academy-command": { value: "85dvh" },
 					"academy-command-list": { value: "50dvh" },
+					"academy-diagram-viewport": { value: "70svh" },
 					"academy-copy": { value: "680px" },
 					"academy-transcript": { value: "600px" },
 					"academy-card": { value: "400px" },

@@ -1,5 +1,6 @@
 import { getCollection } from "astro:content";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import { isNewsPublished } from "@/lib/news-publication";
 
 export type AcademyContentKind =
 	| "Video"
@@ -92,7 +93,7 @@ export async function getLatestContent(
 			"articles",
 			({ data }) => !data.draft && data.publishedAt <= now,
 		),
-		getCollection("news", ({ data }) => data.publishedAt <= now),
+		getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
 		getCollection("courses", ({ data }) => data.publishedAt <= now),
 		getCollection("learningPaths", ({ data }) => data.publishedAt <= now),
 	]);

@@ -22,7 +22,7 @@ const story = (id, data = {}) => ({ id, data: {
 } });
 
 async function render(path, props, collections = {}) {
-	const context = vm.createContext({ console, URL });
+	const context = vm.createContext({ console, URL, __NEWS_DEPLOYMENT_CUTOFF_MS__: Date.parse("2100-01-01") });
 	const pageProps = [], showProps = [], jsonLdProps = [];
 	const empty = runtime.createComponent(() => runtime.render``);
 	const styles = () => new Proxy({}, { get: (_, slot) => `academy-${String(slot)}` });

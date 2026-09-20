@@ -55,7 +55,7 @@ const collections = {
 };
 
 async function renderArchive(search = "", data = collections) {
-	const context = vm.createContext({ console, URL, URLSearchParams });
+	const context = vm.createContext({ console, URL, URLSearchParams, __NEWS_DEPLOYMENT_CUTOFF_MS__: Date.parse("2100-01-01") });
 	const pageProps = [];
 	const mocks = {
 		"astro/runtime/server/index.js": { ...runtime, createMetadata: () => ({}) },
@@ -115,7 +115,7 @@ async function renderArchive(search = "", data = collections) {
 		await module.evaluate();
 		return module;
 	}
-	for (const name of ["watch-archive", "content", "video-itemlist-jsonld"]) {
+	for (const name of ["news-publication", "watch-archive", "content", "video-itemlist-jsonld"]) {
 		modules.set(
 			`@/lib/${name}`,
 			await compile(name, readSource(`lib/${name}.ts`)),

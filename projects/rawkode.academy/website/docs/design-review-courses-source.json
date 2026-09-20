@@ -258,7 +258,20 @@
       "source_check": "All six lesson bodies/frontmatters and course resources were read. Resources link to upstream documentation/GitHub, not the demonstrated scripts. No Teleport examples directory is present.",
       "impact": "The page does not provide the promised follow-along artifacts; prose checklists alone do not supply the referenced values/manifests.",
       "recommendation": "Link the actual public demo repository/files, or narrow the promise to video walkthroughs. Do not label upstream product source as the lesson demo.",
-      "verification_boundary": "Page/source artifact availability only; scripts may be mentioned inside video content, which was not viewed."
+      "verification_boundary": "Page/source artifact availability only; scripts may be mentioned inside video content, which was not viewed.",
+      "resolution": {
+        "status": "source-fixed",
+        "correction": "Narrowed the overview to video walkthroughs, removed the introduction's promise of supplied runnable scripts, and described the deployment lesson as deployment steps. No demo repository or artifact links were invented.",
+        "files": [
+          "content/courses/teleport-for-kubernetes.mdx",
+          "content/courses/teleport-for-kubernetes/01-introduction.mdx",
+          "content/courses/teleport-for-kubernetes/02-deploying-teleport-cluster.mdx"
+        ],
+        "preserved": "All six lessons' media IDs, thumbnails, publication metadata and resource destinations; overview artwork and signup configuration; technical instructions and existing edition/licensing wording. The licensing claim was not validated.",
+        "test": "projects/rawkode.academy/website/src/tests/teleport-content-contract.test.ts",
+        "verification": "Focused Vitest run at 19:33:28 BST: 10 Teleport contract tests and 29 existing course-content contract tests passed (39 total).",
+        "boundary": "Source and contract-test evidence only. No Browser review, full build, video review, live artifact verification, or external requests were performed for this correction. Original finding evidence above records the pre-correction source."
+      }
     },
     {
       "id": "CS08",
