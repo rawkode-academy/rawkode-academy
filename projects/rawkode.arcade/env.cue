@@ -48,7 +48,7 @@ tasks: {
 		hermetic: false
 		command: "bun"
 		args: ["run", "check"]
-		inputs: ["src/**", "tsconfig.json", "package.json", "../../bun.lock"]
+		inputs: ["src/**", "tsconfig.json", "package.json", "devenv.nix", "../../bun.lock"]
 	}
 	test: schema.#Task & {
 		hermetic: false

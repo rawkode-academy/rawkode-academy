@@ -13,6 +13,8 @@ on:
     - cue.mod/**
     - projects/rawkode.arcade/astro.config.mts
     - projects/rawkode.arcade/astro.config.mts/**
+    - projects/rawkode.arcade/devenv.nix
+    - projects/rawkode.arcade/devenv.nix/**
     - projects/rawkode.arcade/dist/**
     - projects/rawkode.arcade/e2e/**
     - projects/rawkode.arcade/env.cue
