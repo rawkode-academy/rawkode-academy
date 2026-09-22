@@ -26,8 +26,9 @@ controls, and duplicate recommendations.
   (`#c2185b`). Dark mode uses navy canvas, light text, and brighter pink.
   Use semantic tokens rather than copying these values into components.
 - Ink surfaces (`academy.ink*` tokens) carry the navy as a committed colour in
-  light mode: the homepage hero, every collection masthead, and the site
-  footer open and close every page in ink. In dark mode the same tokens
+  light mode: the homepage hero, every collection masthead, Search, the
+  not-found page, the video stage on a watch page, and the site footer open
+  and close every page in ink. In dark mode the same tokens
   resolve to a raised, bordered panel so the rhythm survives without a second
   dark canvas.
 - The system grid is the one decorative motif: a 4rem measurement grid drawn
@@ -59,8 +60,10 @@ controls, and duplicate recommendations.
   without scroll timelines render the rows static), and interaction feedback
   elsewhere (title colour, arrow travel, a slow thumbnail scale, the body of
   a row easing right, the navigation rule drawing in from the left, the
-  drawer slide). Every animation has a `prefers-reduced-motion` alternative
-  that removes it. Text selection carries the accent.
+  drawer slide). Articles carry a fixed reading rule that tracks the document
+  scroll (`animation-timeline: scroll(root)`). Every animation has a
+  `prefers-reduced-motion` alternative that removes it. Text selection
+  carries the accent.
 
 ## Composition
 
@@ -99,9 +102,15 @@ Use available content artwork and genuine photography. Preserve logos' aspect
 ratios. Missing people or project artwork uses honest initials, not the Academy
 logo presented as someone else's identity.
 
-News has generic section artwork; do not imply it depicts the particular story.
-No artificial first-letter image tiles, empty media placeholders, or stock
-imagery added merely to fill space.
+News has no story artwork and does not pretend to: the lead story is a
+typographic ink panel with the publication day as its numeral, and ledger rows
+are text-led. No artificial first-letter image tiles, empty media
+placeholders, repeated section art, or stock imagery added merely to fill
+space.
+
+Call things what they are. Page titles are the noun for the collection
+(Videos, Articles, Learning paths, News, Courses, Technologies, People, Shows,
+Series) and mastheads carry no decorative kicker or sub-brand.
 
 ## Interaction and access
 

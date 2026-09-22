@@ -134,7 +134,6 @@ export async function getLatestContent(
 			description: compactCopy(item.data.description),
 			publishedAt: item.data.publishedAt.toISOString(),
 			meta: ["News", formatDate(item.data.publishedAt)],
-			mediaSrc: "/images/news/news-generic.svg",
 		})),
 		...courses.map((course) => ({
 			kind: "Course" as const,

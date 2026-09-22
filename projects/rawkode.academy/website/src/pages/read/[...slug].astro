@@ -186,6 +186,7 @@ const subtitle = article.data.openGraph?.subtitle || article.data.subtitle;
 	<link slot="extra-head" rel="alternate" type="application/feed+json" title="Rawkode Academy - Articles (JSON Feed)" href="/api/feeds/articles.json" />
 
 	<div class={doc.root}>
+		<div class={doc.progressRule} aria-hidden="true"></div>
 		<ArticleHeader
 			breadcrumbs={breadcrumbs}
 			kicker={badgeConfig.label}

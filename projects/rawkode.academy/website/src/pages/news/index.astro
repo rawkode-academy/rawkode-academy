@@ -3,7 +3,7 @@ import { getCollection } from "astro:content";
 import { isNewsPublished } from "@/lib/news-publication";
 import NewsItemListJsonLd from "@/components/html/news-itemlist-jsonld.astro";
 import Page from "@/wrappers/page.astro";
-import WireSubscribeCard from "@/components/news/WireSubscribeCard.astro";
+import NewsSubscribeCard from "@/components/news/NewsSubscribeCard.astro";
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
 import NewsStoryRow from "@/components/news/NewsStoryRow.astro";
 import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
@@ -17,9 +17,13 @@ const allNews = (
 	)
 ).sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
 const [leadStory, ...archive] = allNews;
-const editorialImage = "/images/news/news-generic.svg";
-const dateFormatter = new Intl.DateTimeFormat("en-GB", {
-	day: "numeric",
+// The lead story shows its publication day as a numeral with the month and
+// year beneath it. Dates are calendar days in UTC.
+const dayFormatter = new Intl.DateTimeFormat("en-GB", {
+	day: "2-digit",
+	timeZone: "UTC",
+});
+const monthFormatter = new Intl.DateTimeFormat("en-GB", {
 	month: "short",
 	year: "numeric",
 	timeZone: "UTC",
@@ -36,19 +40,17 @@ const catalog = academyCatalog();
 		<link rel="alternate" type="application/feed+json" title="Rawkode Academy - News (JSON Feed)" href="/api/feeds/news.json" />
 	</Fragment>
 	<div class={styles.root}>
-		<AcademyCatalogMasthead kicker="The wire" title="News" description="Releases, security updates, and changes worth understanding." figure={allNews.length} figureLabel={allNews.length === 1 ? "story" : "stories"}>
+		<AcademyCatalogMasthead title="News" description="Releases, security updates, and changes worth understanding." figure={allNews.length} figureLabel={allNews.length === 1 ? "story" : "stories"}>
 			<a slot="actions" class={catalog.feedLink} href="/api/feeds/news.xml">Follow the RSS feed ↗</a>
 		</AcademyCatalogMasthead>
 
 		{leadStory && <section class={styles.section} aria-label="Latest story">
-			<article class={catalog.featured}>
-				<a class={catalog.featuredMedia} href={`/news/${leadStory.id}`} aria-label={`Read ${leadStory.data.title}`}>
-					<img class={catalog.featuredImage} src={editorialImage} alt="" width="1200" height="675" fetchpriority="high" />
-				</a>
-				<div class={catalog.featuredBody}>
-					<p class={catalog.featuredKicker}>Latest · <time datetime={leadStory.data.publishedAt.toISOString()}>{dateFormatter.format(leadStory.data.publishedAt)}</time></p>
-					<h2 class={catalog.featuredTitle}>{leadStory.data.title}</h2>
-					<p class={catalog.featuredDescription}>{leadStory.data.description}</p>
+			<article class={catalog.lead}>
+				<p class={catalog.leadDate}><time datetime={leadStory.data.publishedAt.toISOString()}><strong>{dayFormatter.format(leadStory.data.publishedAt)}</strong>{monthFormatter.format(leadStory.data.publishedAt)}</time></p>
+				<div class={catalog.leadBody}>
+					<p class={catalog.leadKicker}>Latest story</p>
+					<h2 class={catalog.leadTitle}>{leadStory.data.title}</h2>
+					<p class={catalog.leadDescription}>{leadStory.data.description}</p>
 					<a class={styles.button} href={`/news/${leadStory.id}`}>Read the story →</a>
 				</div>
 			</article>
@@ -65,7 +67,7 @@ const catalog = academyCatalog();
 		</section>
 
 		<section class={styles.section} aria-label="Newsletter">
-			<WireSubscribeCard />
+			<NewsSubscribeCard />
 		</section>
 	</div>
 </Page>

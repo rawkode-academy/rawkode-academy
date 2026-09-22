@@ -223,7 +223,7 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 			...card,
 			href: `/news/item-${index}`,
 			title: `Item ${index}`,
-			mediaSrc: index === 1 ? undefined : "/images/news/news-generic.svg",
+			mediaSrc: index === 1 ? undefined : "/images/example-still.webp",
 			publishedAt: "2026-09-20T12:00:00.000Z",
 			meta: ["News", "20 September 2026"],
 		}));

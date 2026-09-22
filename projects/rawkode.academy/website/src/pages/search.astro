@@ -120,8 +120,8 @@ const s = academySearch();
 ---
 
 <Page title={searchQuery ? `Search results for "${searchQuery}"` : "Search"} description="Find videos, articles, news, courses, learning paths, shows, and technologies from Rawkode Academy." pageType="SearchResultsPage" noindex>
-	<div class={s.root}>
-		<header class={s.header}>
+	<header class={s.header}>
+		<div class={s.headerInner}>
 			<h1 class={s.title}>{searchQuery ? `Results for “${searchQuery}”` : "Find your next lesson."}</h1>
 			<p class={s.lede}>{searchQuery ? `${ranked.length} ${ranked.length === 1 ? "result" : "results"}${activeType ? ` in ${SEARCH_TYPE_LABELS[activeType].toLowerCase()}` : " across the Academy"}.` : "Search videos, articles, courses, and the technologies behind them."}</p>
 			<form class={s.form} method="get" action="/search" role="search">
@@ -133,7 +133,9 @@ const s = academySearch();
 			</form>
 			{!searchQuery && <nav aria-label="Suggested searches"><ul class={s.filters}>{suggestions.map((suggestion) => <li><a class={s.filter} href={suggestion.href}>{suggestion.label}</a></li>)}</ul></nav>}
 			{searchQuery && allRanked.length > 0 && <nav aria-label="Filter results by type"><ul class={s.filters}>{typeFilters.map((filter) => <li><a class={s.filter} href={filter.href} aria-current={filter.active ? "page" : undefined}>{filter.label} · {filter.count}</a></li>)}</ul></nav>}
-		</header>
+		</div>
+	</header>
+	<div class={s.root}>
 		{searchQuery && ranked.length === 0 && <section class={s.empty}>
 			<h2>No results found.</h2>
 			<p>{activeType ? <>Try <a href={searchHref()}>all content types</a> or a different keyword.</> : <>Try a broader keyword, or browse <a href="/watch">the video library</a>.</>}</p>

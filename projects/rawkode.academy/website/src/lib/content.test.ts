@@ -21,8 +21,9 @@ async function excerpt(description: string | undefined) {
 		title: story.data.title,
 		kind: "News",
 		publishedAt: publishedAt.toISOString(),
-		mediaSrc: "/images/news/news-generic.svg",
 	});
+	// News has no story-specific artwork, so the ledger row is text-led.
+	expect(items[0]).not.toHaveProperty("mediaSrc");
 	expect(story.data.description).toBe(description);
 	return items[0]?.description;
 }

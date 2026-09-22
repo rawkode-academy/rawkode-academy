@@ -148,12 +148,11 @@ test("News rows retain real story identity and date, escape content, and use sha
 		dom.querySelector("time").getAttribute("datetime"),
 		"2025-01-01T00:00:00.000Z",
 	);
-	assert.equal(
-		dom.querySelector("img").getAttribute("src"),
-		"/images/news/news-generic.svg",
-	);
-	assert.equal(dom.querySelector("img").getAttribute("alt"), "");
-	assert.equal(dom.querySelector("img").getAttribute("loading"), "lazy");
+	// News has no story-specific artwork, so the row is text-led: no
+	// placeholder image, and the ledger lays it out without a media column.
+	assert.equal(dom.querySelector("img"), null);
+	assert.equal(dom.querySelector("a").getAttribute("data-media"), "false");
+	assert.equal(dom.querySelector("time strong").text, "01");
 	assert.equal(dom.querySelectorAll("script").length, 0);
 });
 

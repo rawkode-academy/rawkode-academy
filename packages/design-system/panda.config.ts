@@ -175,6 +175,9 @@ export default defineConfig({
 					// rise as they enter the viewport. Browsers without scroll
 					// timelines never apply it (see the @supports guards).
 					"academy-reveal": { value: "academy-reveal linear both" },
+					// Scroll-driven: paired with animation-timeline: scroll(root) so
+					// the reading rule tracks the document.
+					"academy-progress": { value: "academy-progress linear both" },
 				},
 				zIndex: {
 					overlay: { value: 1000 },
@@ -207,6 +210,10 @@ export default defineConfig({
 				"academy-reveal": {
 					from: { opacity: "0", transform: "translateY(1.5rem)" },
 					to: { opacity: "1", transform: "translateY(0)" },
+				},
+				"academy-progress": {
+					from: { transform: "scaleX(0)" },
+					to: { transform: "scaleX(1)" },
 				},
 			},
 			semanticTokens: {

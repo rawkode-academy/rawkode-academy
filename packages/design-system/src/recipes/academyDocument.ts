@@ -6,6 +6,7 @@ import { sva } from "../../styled-system/css";
 export const academyDocument = sva({
 	slots: [
 		"root",
+		"progressRule",
 		"hero",
 		"container",
 		"reading",
@@ -124,6 +125,25 @@ export const academyDocument = sva({
 			background: "academy.canvas",
 			color: "academy.text",
 			minWidth: "0",
+		},
+		// A reading rule: a fixed accent line that tracks the document scroll
+		// position. Browsers without scroll timelines never show it.
+		progressRule: {
+			position: "fixed",
+			insetBlockStart: "0",
+			insetInlineStart: "0",
+			zIndex: "overlay",
+			width: "full",
+			height: "[3px]",
+			backgroundColor: "academy.accent",
+			transformOrigin: "left",
+			transform: "scaleX(0)",
+			pointerEvents: "none",
+			"@supports (animation-timeline: scroll())": {
+				animation: "academy-progress",
+				animationTimeline: "scroll(root)",
+			},
+			_motionReduce: { display: "none" },
 		},
 		hero: {
 			background: "academy.ground",

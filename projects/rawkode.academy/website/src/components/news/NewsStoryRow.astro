@@ -21,9 +21,8 @@ const month = new Intl.DateTimeFormat("en-GB", {
 });
 ---
 
-<a class={styles.editorialRow} href={`/news/${story.id}`} data-media="true">
+<a class={styles.editorialRow} href={`/news/${story.id}`} data-media="false">
 	<time class={styles.editorialDate} datetime={story.data.publishedAt.toISOString()}><strong>{day.format(story.data.publishedAt)}</strong><span>{month.format(story.data.publishedAt)}</span></time>
-	<span class={styles.editorialMedia}><img class={styles.editorialImage} src="/images/news/news-generic.svg" alt="" width="1200" height="675" loading="lazy" /></span>
 	<div class={styles.editorialBody} data-body>
 		<h3 class={styles.editorialTitle}>{story.data.title}</h3>
 		<p class={styles.editorialDescription}>{story.data.description}</p>

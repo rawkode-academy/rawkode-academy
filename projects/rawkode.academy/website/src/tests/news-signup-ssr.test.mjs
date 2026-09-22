@@ -9,7 +9,7 @@ import { parse } from "node-html-parser";
 
 const compiled = await transform(
 	readFileSync(
-		new URL("../components/news/WireSubscribeCard.astro", import.meta.url),
+		new URL("../components/news/NewsSubscribeCard.astro", import.meta.url),
 		"utf8",
 	),
 );

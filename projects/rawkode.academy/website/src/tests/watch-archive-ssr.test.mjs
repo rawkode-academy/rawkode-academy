@@ -153,19 +153,19 @@ async function renderArchive(search = "", data = collections) {
 
 test("Watch is a static server-rendered archive with labeled GET search, existing SEO title and feeds", async () => {
 	const { dom, html, pageProps } = await renderArchive();
-	assert.equal(dom.querySelector("h1").text, "Watch");
+	assert.equal(dom.querySelector("h1").text, "Videos");
 	assert.equal(dom.querySelectorAll(".archive-feedGrid > a").length, 23);
 	assert.equal(dom.querySelectorAll('a[href="/watch/session-0"]').length, 1);
 	assert.equal(
 		dom.querySelectorAll('[aria-label="Featured session"]').length,
 		1,
 	);
-	assert.match(dom.text, /Showing 1–24 of 329 sessions/);
+	assert.match(dom.text, /Showing 1–24 of 329 videos/);
 	assert.equal(
 		dom.querySelector('nav[aria-label="Video library pages"] p').text,
 		"Page 1 of 14",
 	);
-	assert.equal((dom.text.match(/329 sessions/g) ?? []).length, 1);
+	assert.equal((dom.text.match(/329 videos/g) ?? []).length, 1);
 	assert(!dom.text.includes("per page"));
 	assert.deepEqual(
 		dom.querySelectorAll(".archive-cardMeta").map((meta) => meta.text),
@@ -299,14 +299,14 @@ test("server search reaches full description, subtitle, technology name, guest a
 			dom.querySelector("#video-search").getAttribute("value"),
 			query,
 		);
-		assert.match(dom.text, /Showing 1–1 of 1 session/);
+		assert.match(dom.text, /Showing 1–1 of 1 video/);
 		assert.equal(jsonLd.numberOfItems, 1);
 	}
 });
 
 test("page bounds, clear search, escaped no-results copy, and empty archive are honest", async () => {
 	const last = await renderArchive("?page=999");
-	assert.match(last.dom.text, /Showing 313–329 of 329 sessions/);
+	assert.match(last.dom.text, /Showing 313–329 of 329 videos/);
 	assert.equal(
 		last.dom.querySelectorAll('[aria-label="Featured session"]').length,
 		0,
@@ -324,16 +324,16 @@ test("page bounds, clear search, escaped no-results copy, and empty archive are 
 		emptySearch.dom.querySelector("#video-search").getAttribute("value"),
 		query,
 	);
-	assert(!emptySearch.dom.text.includes("0 sessions matching"));
+	assert(!emptySearch.dom.text.includes("0 videos matching"));
 	assert(!emptySearch.dom.text.includes("Showing"));
-	assert.match(emptySearch.dom.text, /No sessions match/);
+	assert.match(emptySearch.dom.text, /No videos match/);
 	assert.equal(
 		emptySearch.dom.querySelector('a[href="/watch"]').text,
 		"Clear search",
 	);
 	assert.equal(emptySearch.jsonLd.numberOfItems, 0);
 	const empty = await renderArchive("", { ...collections, videos: [upcoming] });
-	assert.match(empty.dom.text, /No published sessions are available yet/);
+	assert.match(empty.dom.text, /No published videos are available yet/);
 	assert.equal(empty.dom.querySelectorAll(".archive-watchFeature").length, 0);
 	assert.equal(empty.jsonLd.numberOfItems, 0);
 });
