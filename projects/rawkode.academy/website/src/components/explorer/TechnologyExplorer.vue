@@ -52,7 +52,10 @@
  </div>
  </aside>
 
+ <!-- Body teleports must not hydrate: Vue reconciles them against the
+ document body and strips the server-rendered page on mismatch. -->
  <Dialog.Root
+ v-if="mounted"
  :open="isMobile && showControls"
  :modal="true"
  :trap-focus="true"
@@ -204,7 +207,15 @@
 
 <script setup lang="ts">
 import { Dialog } from "@ark-ui/vue/dialog";
-import { ref, computed, nextTick, onBeforeUnmount, onMounted, provide, useId } from "vue";
+import {
+	ref,
+	computed,
+	nextTick,
+	onBeforeUnmount,
+	onMounted,
+	provide,
+	useId,
+} from "vue";
 import type { NormalizedTechnology } from "@/lib/explorer/data-layer";
 import { useExplorerState } from "@/composables/useExplorerState";
 import { useUrlState } from "@/composables/useUrlState";
@@ -253,23 +264,27 @@ const {
 const explorerElement = ref<HTMLElement | null>(null);
 const controlsId = useId();
 const isMobile = ref(false);
+const mounted = ref(false);
 let viewport: MediaQueryList | undefined;
 let desktopControlsOpen = showControls.value;
 let returnFocus: HTMLElement | null = null;
 
 const getHeaderToggle = () =>
-	explorerElement.value?.querySelector<HTMLButtonElement>(".controls-toggle") ?? null;
+	explorerElement.value?.querySelector<HTMLButtonElement>(".controls-toggle") ??
+	null;
 
 const getReturnFocus = () =>
-	returnFocus?.isConnected && (isMobile.value || !returnFocus.classList.contains("filters-fab"))
+	returnFocus?.isConnected &&
+	(isMobile.value || !returnFocus.classList.contains("filters-fab"))
 		? returnFocus
 		: getHeaderToggle();
 
 function toggleControls(event?: MouseEvent) {
 	if (!showControls.value) {
-		returnFocus = event?.currentTarget instanceof HTMLElement
-			? event.currentTarget
-			: getHeaderToggle();
+		returnFocus =
+			event?.currentTarget instanceof HTMLElement
+				? event.currentTarget
+				: getHeaderToggle();
 	}
 	explorer.toggleControls();
 }
@@ -293,8 +308,13 @@ function onDialogOpenChange(details: { open: boolean }) {
 async function updateViewport() {
 	const mobile = viewport?.matches ?? false;
 	if (mobile === isMobile.value) return;
-	const restoreFocus = (isMobile.value && showControls.value) ||
-		Boolean(explorerElement.value?.querySelector(".explorer-controls")?.contains(document.activeElement));
+	const restoreFocus =
+		(isMobile.value && showControls.value) ||
+		Boolean(
+			explorerElement.value
+				?.querySelector(".explorer-controls")
+				?.contains(document.activeElement),
+		);
 	if (mobile) desktopControlsOpen = showControls.value;
 	// Closing the dialog releases Ark's modal effects, including its scroll lock.
 	// Keep filter state untouched and never turn a desktop sidebar into an open modal.
@@ -382,6 +402,7 @@ provide("explorer", explorer);
 
 // Initialize from URL on mount
 onMounted(() => {
+	mounted.value = true;
 	urlState.initFromUrl();
 	viewport = window.matchMedia("(max-width: 768px)");
 	updateViewport();
@@ -444,7 +465,6 @@ onBeforeUnmount(() => {
 .control-label {
  font-size: 0.7rem;
  font-weight: 700;
- text-transform: uppercase;
  letter-spacing: 0.05em;
  color: var(--colors-academy-text-muted);
  margin: 0;
@@ -592,7 +612,6 @@ onBeforeUnmount(() => {
  font-size: 0.82rem;
  font-weight: 800;
  letter-spacing: 0.08em;
- text-transform: uppercase;
  color: var(--colors-academy-text);
  }
 
@@ -668,7 +687,6 @@ onBeforeUnmount(() => {
  font-size: 0.72rem;
  font-weight: 700;
  letter-spacing: 0.1em;
- text-transform: uppercase;
  cursor: pointer;
  box-shadow: 0 4px 16px rgb(0 0 0 / 0.2);
  }

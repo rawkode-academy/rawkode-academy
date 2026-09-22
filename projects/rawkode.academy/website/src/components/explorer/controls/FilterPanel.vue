@@ -130,7 +130,6 @@ const handleSearchInput = (event: Event) => {
 .filter-title {
  font-size: 0.7rem;
  font-weight: 700;
- text-transform: uppercase;
  letter-spacing: 0.05em;
  color: var(--colors-academy-text-muted);
  margin: 0;

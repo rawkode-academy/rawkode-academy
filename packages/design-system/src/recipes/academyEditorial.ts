@@ -183,7 +183,7 @@ export const academyEditorial = sva({
 			},
 			"& .editorial-stat": {
 				padding: "5",
-				borderInlineStart: "focus",
+				borderTop: "focus",
 				borderColor: "academy.accent",
 				background: "academy.panel",
 			},

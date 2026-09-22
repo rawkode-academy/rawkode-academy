@@ -426,7 +426,6 @@ html.dark {
 		font-family: var(--font-red-hat-mono), monospace;
 		font-size: 0.6875rem;
 		font-weight: 500;
-		text-transform: uppercase;
 		letter-spacing: 0.14em;
 		background: var(--surface-card);
 		border: 1px solid var(--surface-border);
@@ -467,7 +466,6 @@ html.dark {
 		font-family: var(--font-red-hat-mono), monospace;
 		font-size: 0.6875rem;
 		font-weight: 500;
-		text-transform: uppercase;
 		letter-spacing: 0.14em;
 		color: var(--editorial-spruce);
 	}
@@ -532,7 +530,6 @@ html.dark {
 		gap: 0.625rem;
 		font-family: var(--font-red-hat-mono), monospace;
 		font-weight: 600;
-		text-transform: uppercase;
 		letter-spacing: 0.14em;
 		line-height: 1;
 		border-radius: var(--radius-sm);
@@ -621,7 +618,6 @@ html.dark {
 		font-family: var(--font-red-hat-mono), monospace;
 		font-size: 0.65rem;
 		font-weight: 500;
-		text-transform: uppercase;
 		letter-spacing: 0.14em;
 		color: inherit;
 	}
@@ -849,9 +845,9 @@ html.dark {
 	.prose blockquote {
 		margin: 2rem 0;
 		padding: 0.25rem 0 0.25rem 1.5rem;
-		border-left: 2px solid var(--editorial-ink);
-		font-family: var(--font-red-hat-display), serif;
-		font-style: italic;
+		border-left: 1px solid var(--editorial-hairline-strong);
+		font-family: var(--font-red-hat-display), sans-serif;
+		font-weight: 500;
 		font-size: 1.25rem;
 		line-height: 1.4;
 		color: var(--text-primary-content);
@@ -959,9 +955,8 @@ html.dark {
 	}
 
 	.prose hr.dots::before {
-		content: "§ § §";
-		font-family: var(--font-red-hat-display), serif;
-		font-style: italic;
+		content: "· · ·";
+		font-family: var(--font-red-hat-mono), monospace;
 		color: var(--editorial-ink-mute);
 		letter-spacing: 0.8em;
 		font-size: 1rem;
@@ -985,7 +980,6 @@ html.dark {
 		font-weight: 600;
 		font-family: var(--font-red-hat-mono), monospace;
 		font-size: 0.75em;
-		text-transform: uppercase;
 		letter-spacing: 0.12em;
 		color: var(--text-primary-content);
 		padding: 0.875rem 1rem;
@@ -1011,8 +1005,9 @@ html.dark {
 
 	/* Pull quote — serif italic display centered. */
 	.prose .pull-quote {
-		font-family: var(--font-red-hat-display), serif;
-		font-style: italic;
+		font-family: var(--font-red-hat-display), sans-serif;
+		font-weight: 700;
+		letter-spacing: -0.02em;
 		font-size: 2rem;
 		font-weight: 400;
 		line-height: 1.15;
@@ -1460,7 +1455,6 @@ html.dark {
 	[class~="font-semibold"] { font-weight: 600; }
 	[class~="font-bold"] { font-weight: 700; }
 	[class~="font-extrabold"] { font-weight: 800; }
-	[class~="uppercase"] { text-transform: uppercase; }
 	[class~="italic"] { font-style: italic; }
 	[class~="leading-none"] { line-height: 1; }
 	[class~="leading-tight"] { line-height: 1.25; }

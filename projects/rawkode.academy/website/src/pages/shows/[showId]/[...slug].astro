@@ -6,6 +6,7 @@ import { getCollection } from "astro:content";
 import ShowLayout from "@/layouts/ShowLayout.astro";
 import { getShowExtension, getShowNav } from "@/lib/shows/registry";
 import type { ShowEnv } from "@/lib/shows/types";
+import { academyLayout } from "@rawkodeacademy/design-system";
 
 const { showId, slug } = Astro.params;
 
@@ -19,28 +20,39 @@ const ext = getShowExtension(showId);
 const page = ext?.pages.find((p) => p.slug === (slug ?? ""));
 if (!ext || !page) return new Response(null, { status: 404 });
 
-const data = page.load
-	? await page.load({
-			showId,
-			slug: page.slug,
-			params: Astro.params,
-			request: Astro.request,
-			url: Astro.url,
-			env: env as unknown as ShowEnv,
-			locals: Astro.locals,
-		})
-	: {};
+// A read-model outage must not take the whole show page down: render the
+// shell with an honest notice instead of a bare 500.
+let data: Record<string, unknown> = {};
+let loadError: string | undefined;
+try {
+	data = page.load
+		? await page.load({
+				showId,
+				slug: page.slug,
+				params: Astro.params,
+				request: Astro.request,
+				url: Astro.url,
+				env: env as unknown as ShowEnv,
+				locals: Astro.locals,
+			})
+		: {};
+} catch (error) {
+	loadError = error instanceof Error ? error.message : String(error);
+	Astro.response.status = 503;
+	Astro.response.headers.set("Cache-Control", "no-store");
+}
 
-const meta = page.meta?.(data) ?? {
+const meta = (!loadError && page.meta?.(data)) || {
 	title: `${show.data.name} — ${page.label}`,
 };
 
-if (page.cache) {
+if (page.cache && !loadError) {
 	Astro.response.headers.set("Cache-Control", page.cache);
 }
 
 const nav = getShowNav(showId);
 const Component = page.Component;
+const layout = academyLayout();
 ---
 
 <ShowLayout
@@ -50,5 +62,12 @@ const Component = page.Component;
 	title={meta.title}
 	description={meta.description}
 >
-	<Component {...data} />
+	{loadError ? (
+		<p class={layout.notice} role="status">
+			{page.label} for {show.data.name} is temporarily unavailable. The data
+			service did not respond; try again in a few minutes.
+		</p>
+	) : (
+		<Component {...data} />
+	)}
 </ShowLayout>

@@ -2,7 +2,11 @@
 import { ref, computed, onMounted } from "vue";
 import { actions } from "astro:actions";
 import { Accordion } from "@ark-ui/vue/accordion";
-import { academyReference, academyLayout, academyAccount } from "@rawkodeacademy/design-system";
+import {
+	academyReference,
+	academyLayout,
+	academyAccount,
+} from "@rawkodeacademy/design-system";
 const s = academyReference();
 const layout = academyLayout();
 const account = academyAccount();
@@ -30,7 +34,6 @@ const isLoading = ref(false);
 const isSuccess = ref(false);
 const error = ref<string | null>(null);
 const hasCookieSubscription = ref(props.isSubscribed);
-
 
 interface Feature {
 	id: string;
@@ -217,22 +220,21 @@ const subscribeAsLearner = async () => {
 
 <template>
 	<section :class="s.panel" aria-label="Kubernetes 1.35 cheat sheet">
-		<div :class="layout.split">
+		<div :class="account.stack">
 			<div>
 				<p :class="layout.kicker">Release: December 17, 2025</p>
 				<h2 :class="s.heading">Kubernetes 1.35 Cheat Sheet</h2>
 				<p :class="s.text">Your guide to mandatory cgroup v2, AI/ML scheduler primitives, and structured authentication. Everything you need in one place.</p>
-				<Accordion.Root :multiple="true" :class="s.list">
-					<Accordion.Item v-for="feature in features" :key="feature.id" :value="feature.id" :class="s.notice">
+				<Accordion.Root :multiple="true" :class="s.accordion">
+					<Accordion.Item v-for="feature in features" :key="feature.id" :value="feature.id" :class="s.accordionItem">
 						<h3>
-							<Accordion.ItemTrigger :class="layout.buttonSecondary">
-								<span :class="s.tag">{{ categoryConfig[feature.category].label }}</span>
-								{{ feature.title }}
-								<Accordion.ItemIndicator aria-hidden="true">+</Accordion.ItemIndicator>
+							<Accordion.ItemTrigger :class="s.accordionTrigger">
+								<span :class="s.accordionTag">{{ categoryConfig[feature.category].label }}</span>
+								<span>{{ feature.title }}<span :class="s.muted"> · {{ feature.subtitle }}</span></span>
+								<Accordion.ItemIndicator :class="s.accordionIndicator" aria-hidden="true">+</Accordion.ItemIndicator>
 							</Accordion.ItemTrigger>
 						</h3>
-						<p :class="s.muted">{{ feature.subtitle }}</p>
-						<Accordion.ItemContent :class="s.text">{{ feature.detail }}</Accordion.ItemContent>
+						<Accordion.ItemContent :class="s.accordionContent"><p>{{ feature.detail }}</p></Accordion.ItemContent>
 					</Accordion.Item>
 				</Accordion.Root>
 			</div>

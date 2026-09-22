@@ -227,7 +227,7 @@ async function finishGame(finalAnswers: (string | null)[], finalTimes: number[])
 
 		<!-- Intro -->
 		<div v-else-if="state === 'intro'" class="gtl-intro gtl-center">
-			<p class="gtl-intro-eyebrow">Weekly Challenge</p>
+			<p class="gtl-intro-eyebrow">Weekly challenge</p>
 			<h1 class="gtl-intro-title">CNIcon</h1>
 			<p class="gtl-intro-week">{{ weekLabel }}</p>
 			<p class="gtl-intro-desc">
@@ -315,63 +315,55 @@ async function finishGame(finalAnswers: (string | null)[], finalTimes: number[])
 .gtl-loading-text {
 	font-family: var(--fonts-academy-mono);
 	font-size: 0.8rem;
-	letter-spacing: 0.1em;
-	text-transform: uppercase;
 	color: var(--colors-academy-text-muted);
 }
 
 /* Intro */
 .gtl-intro-eyebrow {
 	font-family: var(--fonts-academy-mono);
-	font-size: 0.7rem;
-	font-weight: 600;
-	letter-spacing: 0.2em;
-	text-transform: uppercase;
+	font-size: 0.8rem;
+	font-weight: 500;
 	color: var(--colors-academy-accent);
 	margin: 0;
 }
 
 .gtl-intro-title {
 	font-family: var(--fonts-academy-display);
-	font-style: italic;
-	font-size: 3rem;
-	font-weight: 400;
-	letter-spacing: -0.03em;
-	color: var(--colors-academy-text);
+	font-size: clamp(3rem, 8vw, 4.5rem);
+	font-weight: 800;
+	letter-spacing: -0.035em;
+	line-height: 1;
+	color: var(--colors-academy-ink-text);
 	margin: 0;
-	background: linear-gradient(135deg, var(--colors-academy-status-violet), var(--colors-academy-accent));
-	-webkit-background-clip: text;
-	background-clip: text;
-	-webkit-text-fill-color: transparent;
 }
 
 .gtl-intro-week {
-	font-family: var(--fonts-academy-text);
-	font-size: 0.9rem;
-	color: var(--colors-academy-text-soft);
+	font-family: var(--fonts-academy-mono);
+	font-size: 0.85rem;
+	color: var(--colors-academy-ink-text-muted);
 	margin: 0;
 }
 
 .gtl-intro-desc {
-	font-size: 0.95rem;
+	font-size: 1rem;
 	line-height: 1.6;
-	color: var(--colors-academy-text-soft);
+	color: var(--colors-academy-ink-text-soft);
 	max-width: 30rem;
 	margin: 0;
 }
 
 .gtl-start-btn {
-	padding: 0.875rem 3rem;
-	border-radius: 0.5rem;
-	border: none;
-	background: linear-gradient(135deg, var(--colors-academy-status-violet), var(--colors-academy-accent));
+	min-height: 3rem;
+	padding: 0.75rem 2.5rem;
+	border-radius: 3px;
+	border: 1px solid transparent;
+	background: var(--colors-academy-accent);
 	color: var(--colors-academy-accent-foreground);
 	font-family: var(--fonts-academy-text);
-	font-size: 1rem;
-	font-weight: 600;
+	font-size: 0.95rem;
+	font-weight: 700;
 	cursor: pointer;
 	transition: opacity 150ms ease, transform 150ms ease;
-	box-shadow: 0 4px 16px color-mix(in srgb, var(--colors-academy-status-violet) 30%, transparent);
 }
 
 .gtl-start-btn:hover {

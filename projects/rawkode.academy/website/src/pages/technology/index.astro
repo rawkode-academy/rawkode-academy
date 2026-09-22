@@ -43,6 +43,20 @@ try {
 } catch (error) {
 	logger.error("Failed to load technologies from content collection", error);
 }
+// Group by first letter so a 300-entry reference reads as an A–Z index
+// instead of an endless grid. Digits and symbols share one leading group.
+const letterOf = (name: string) => {
+	const first = Array.from(name.trim())[0]?.toUpperCase() ?? "#";
+	return /[A-Z]/.test(first) ? first : "#";
+};
+const groups = new Map<string, Technology[]>();
+for (const tech of technologies) {
+	const letter = letterOf(tech.name);
+	groups.set(letter, [...(groups.get(letter) ?? []), tech]);
+}
+const indexGroups = [...groups.entries()].sort(([a], [b]) =>
+	a === "#" ? -1 : b === "#" ? 1 : a.localeCompare(b),
+);
 const styles = academyLayout({ width: "wide" });
 const catalog = academyCatalog();
 ---
@@ -73,47 +87,48 @@ const catalog = academyCatalog();
 					</p>
 				</div>
 
-				<div id="technologies" class={catalog.identityGrid}>
+				<div id="technologies">
 					{
-						technologies.map((tech) => {
-							const searchKeywords = [
-								tech.name, tech.category, tech.subcategory, tech.description, ...tech.terms,
-							].filter(Boolean).join(" ").toLowerCase();
-							const words = tech.name.trim().split(/[\s-]+/u);
-							const initials = (words.length > 1
-								? words.slice(0, 2).map((word) => Array.from(word)[0]).join("")
-								: Array.from(tech.name).slice(0, 2).join("")
-							).toUpperCase();
-							const category = [tech.category, tech.subcategory].filter(Boolean).join(" / ");
-
-							return (
-								<a
-									href={`/technology/${tech.id}`}
-									class={catalog.identity}
-									data-keywords={searchKeywords}
-									aria-labelledby={`technology-${tech.id}`}
-								>
-									<span class={catalog.identityMark} aria-hidden="true">
-										<span class={catalog.identityInitials} hidden={Boolean(tech.logo)}>{initials}</span>
-										{tech.logo && <img
-											src={tech.logo}
-											alt=""
-											width="32"
-											height="32"
-											class={catalog.identityLogo}
-											loading="lazy"
-											onerror="this.previousElementSibling.hidden=false; this.remove();"
-										/>}
-									</span>
-									<span class={catalog.identityBody}>
-										<span id={`technology-${tech.id}`} class={catalog.identityTitle}>{tech.name}</span>
-										{category && <span class={catalog.identityMeta}>{category}</span>}
-										{tech.description && <span class={catalog.identityDescription}>{tech.description}</span>}
-									</span>
-									<span class={catalog.identityArrow} aria-hidden="true">→</span>
-								</a>
-							);
-						})
+						indexGroups.map(([letter, items]) => (
+							<section class={catalog.indexGroup} data-index-group aria-labelledby={`technology-letter-${letter === "#" ? "other" : letter}`}>
+								<h2 id={`technology-letter-${letter === "#" ? "other" : letter}`} class={catalog.indexLetter}>{letter}</h2>
+								<ul class={catalog.indexList}>
+									{items.map((tech) => {
+										const searchKeywords = [
+											tech.name, tech.category, tech.subcategory, tech.description, ...tech.terms,
+										].filter(Boolean).join(" ").toLowerCase();
+										const words = tech.name.trim().split(/[\s-]+/u);
+										const initials = (words.length > 1
+											? words.slice(0, 2).map((word) => Array.from(word)[0]).join("")
+											: Array.from(tech.name).slice(0, 2).join("")
+										).toUpperCase();
+										const category = tech.subcategory ?? tech.category;
+										return (
+											<li>
+												<a href={`/technology/${tech.id}`} class={catalog.indexItem} data-keywords={searchKeywords}>
+													<span class={catalog.indexMark} aria-hidden="true">
+														<span class={catalog.indexInitials} hidden={Boolean(tech.logo)}>{initials}</span>
+														{tech.logo && <img
+															src={tech.logo}
+															alt=""
+															width="20"
+															height="20"
+															class={catalog.indexLogo}
+															loading="lazy"
+															onerror="this.previousElementSibling.hidden=false; this.remove();"
+														/>}
+													</span>
+													<span>
+														<span class={catalog.indexName} data-name>{tech.name}</span>
+														{category && <span class={catalog.indexMeta}>{category}</span>}
+													</span>
+												</a>
+											</li>
+										);
+									})}
+								</ul>
+							</section>
+						))
 					}
 				</div>
 
@@ -132,6 +147,9 @@ const catalog = academyCatalog();
 				);
 				const emptyState = document.getElementById("technology-empty-state");
 				const count = document.getElementById("technology-count");
+				const groups = Array.from(
+					document.querySelectorAll<HTMLElement>("#technologies [data-index-group]"),
+				);
 
 				const applySearch = () => {
 					const query = (searchInput?.value ?? "").trim().toLowerCase();
@@ -145,6 +163,9 @@ const catalog = academyCatalog();
 						if (matchesSearch) {
 							visible += 1;
 						}
+					});
+					groups.forEach((group) => {
+						group.hidden = !group.querySelector("[data-keywords]:not([hidden])");
 					});
 
 					if (count) {

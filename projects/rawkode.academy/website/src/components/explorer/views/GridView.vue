@@ -254,7 +254,6 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
 .header-label {
  font-size: 0.75rem;
  font-weight: 700;
- text-transform: uppercase;
  letter-spacing: 0.08em;
 }
 
@@ -300,7 +299,6 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
 .tab-title {
  font-size: 0.75rem;
  font-weight: 700;
- text-transform: uppercase;
  letter-spacing: 0.08em;
  color: var(--colors-academy-text);
 }
@@ -525,7 +523,6 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  font-size: 0.72rem;
  font-weight: 700;
  letter-spacing: 0.1em;
- text-transform: uppercase;
  cursor: pointer;
  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
@@ -590,7 +587,6 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  content: attr(data-column);
  font-size: 0.65rem;
  font-weight: 600;
- text-transform: uppercase;
  letter-spacing: 0.05em;
  color: var(--cell-color);
  }

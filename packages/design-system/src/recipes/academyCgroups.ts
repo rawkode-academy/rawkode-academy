@@ -337,8 +337,11 @@ export const academyCgroups = sva({
 		notice: {
 			padding: "4",
 			backgroundColor: "academy.ground",
-			borderInlineStart: "focus",
-			borderColor: "academy.inputBorder",
+			border: "hairline",
+			borderColor: "academy.border",
+			borderTop: "focus",
+			borderTopColor: "academy.inputBorder",
+			borderRadius: "academy-s",
 			color: "academy.textSoft",
 			fontSize: "sm",
 			lineHeight: "relaxed",

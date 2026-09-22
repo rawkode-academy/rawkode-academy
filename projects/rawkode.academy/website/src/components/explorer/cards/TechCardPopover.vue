@@ -329,7 +329,6 @@ const formatDate = (dateStr: string | null): string => {
 .card-status-badge {
  font-size: 0.75rem;
  font-weight: 700;
- text-transform: uppercase;
  letter-spacing: 0.04em;
  padding: 0.375rem 0.75rem;
  border-radius: var(--radius-md);
@@ -370,7 +369,6 @@ const formatDate = (dateStr: string | null): string => {
 .section-label {
  font-size: 0.6875rem;
  font-weight: 700;
- text-transform: uppercase;
  letter-spacing: 0.08em;
  color: var(--colors-academy-text-muted);
 }
@@ -408,7 +406,6 @@ const formatDate = (dateStr: string | null): string => {
 .stat-label {
  font-size: 0.625rem;
  font-weight: 600;
- text-transform: uppercase;
  letter-spacing: 0.04em;
  color: var(--colors-academy-text-muted);
  text-align: center;
@@ -458,7 +455,6 @@ const formatDate = (dateStr: string | null): string => {
  border-radius: var(--radius-md);
  font-size: 0.875rem;
  font-weight: 700;
- text-transform: uppercase;
  letter-spacing: 0.04em;
  text-decoration: none;
  transition: background-color 0.2s ease, border-color 0.2s ease;

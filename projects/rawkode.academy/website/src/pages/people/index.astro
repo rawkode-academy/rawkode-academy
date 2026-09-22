@@ -20,7 +20,7 @@ const peopleJsonLd = sortedPeople.map((person) => ({
 	sameAs: getPersonIdentityUrls(person.data),
 }));
 const styles = academyLayout({ width: "wide" });
-const catalog = academyCatalog();
+const catalog = academyCatalog({ identityLayout: "tile" });
 ---
 
 <Page

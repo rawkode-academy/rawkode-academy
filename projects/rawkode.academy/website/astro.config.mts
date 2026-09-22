@@ -321,7 +321,9 @@ export default defineConfig({
 			name: "Red Hat Text",
 			cssVariable: "--font-red-hat-text",
 			weights: ["400", "500", "600", "700"],
-			styles: ["normal"],
+			// Prose emphasis needs a true italic; the display and mono faces
+			// never render italic, so they stay upright-only.
+			styles: ["normal", "italic"],
 			display: "swap",
 		},
 		{
