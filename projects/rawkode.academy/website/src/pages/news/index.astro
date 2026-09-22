@@ -36,7 +36,7 @@ const catalog = academyCatalog();
 		<link rel="alternate" type="application/feed+json" title="Rawkode Academy - News (JSON Feed)" href="/api/feeds/news.json" />
 	</Fragment>
 	<div class={styles.root}>
-		<AcademyCatalogMasthead kicker="The wire" title="News" description="Releases, security updates, and changes worth understanding.">
+		<AcademyCatalogMasthead kicker="The wire" title="News" description="Releases, security updates, and changes worth understanding." figure={allNews.length} figureLabel={allNews.length === 1 ? "story" : "stories"}>
 			<a slot="actions" class={catalog.feedLink} href="/api/feeds/news.xml">Follow the RSS feed ↗</a>
 		</AcademyCatalogMasthead>
 

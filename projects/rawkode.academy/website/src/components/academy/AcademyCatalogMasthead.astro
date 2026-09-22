@@ -6,21 +6,32 @@ interface Props {
 	title: string;
 	description?: string;
 	width?: "wide" | "reading";
+	/** The collection's real size, shown as a numeral beside the title. */
+	figure?: number | string;
+	figureLabel?: string;
 }
 
-const { kicker, title, description, width = "wide" } = Astro.props as Props;
+const {
+	kicker,
+	title,
+	description,
+	width = "wide",
+	figure,
+	figureLabel,
+} = Astro.props as Props;
 const styles = academyLayout({ width });
 ---
 
-<header class={styles.hero}>
+<header class={styles.masthead}>
 	<div class={styles.container}>
-		<div class={styles.heroInner}>
-			<div class={styles.heroCopy}>
-				{kicker && <p class={styles.kicker}>{kicker}</p>}
-				<h1 class={styles.title}>{title}</h1>
+		<div class={styles.mastheadInner}>
+			<div class={styles.mastheadCopy}>
+				{kicker && <p class={styles.mastheadKicker}>{kicker}</p>}
+				<h1 class={styles.mastheadTitle}>{title}</h1>
 			</div>
-			<div class={styles.heroAside}>
-				{description && <p class={styles.description}>{description}</p>}
+			<div class={styles.mastheadAside}>
+				{description && <p class={styles.mastheadDescription}>{description}</p>}
+				{figure !== undefined && <p class={styles.mastheadFigure}><strong>{figure}</strong>{figureLabel && <span>{figureLabel}</span>}</p>}
 				<slot name="actions" />
 			</div>
 		</div>

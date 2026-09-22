@@ -18,6 +18,13 @@
 		box-sizing: border-box;
 	}
 
+	/* Selection carries the accent so even a highlighted paragraph reads as
+	   the Academy. */
+	::selection {
+		background: var(--colors-academy-accent);
+		color: var(--colors-academy-accent-foreground);
+	}
+
 	html,
 	body {
 		margin: 0;

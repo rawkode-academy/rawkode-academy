@@ -163,6 +163,9 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
 	day: "2-digit",
 	year: "numeric",
 });
+// Ledger dates: the day is the numeral, month and year sit beneath it.
+const dayFormatter = new Intl.DateTimeFormat("en-GB", { day: "2-digit", timeZone: "UTC" });
+const monthFormatter = new Intl.DateTimeFormat("en-GB", { month: "short", year: "numeric", timeZone: "UTC" });
 
 const compactCopy = (text: string, maxLength: number) => {
 	const normalized = text.replace(/\s+/g, " ").trim();
@@ -226,7 +229,7 @@ const catalog = academyCatalog();
 	</Fragment>
 
 	<div class={styles.root}>
-		<AcademyCatalogMasthead kicker="Articles" title="Read" description="Articles and tutorials for engineers building and running production systems." />
+		<AcademyCatalogMasthead kicker="Articles" title="Read" description="Articles and tutorials for engineers building and running production systems." figure={allArticles.length} figureLabel={allArticles.length === 1 ? "article" : "articles"} />
 
 		{featured && (
 			<section class={styles.section}><div class={styles.container}>
@@ -264,9 +267,9 @@ const catalog = academyCatalog();
 			{isFiltered && <p class={styles.notice}>{visibleArticles.length} {visibleArticles.length === 1 ? "article" : "articles"}{activeFilterSummary ? ` · ${activeFilterSummary}` : ""} · <a href="/read">Clear filters</a></p>}
 			{visibleArticles.length === 0 ? <div class={styles.empty}>No articles match these filters. <a href="/read">Browse all articles →</a></div> : <div class={catalog.editorialList}>{restWithMeta.map(({ article, author, readingTime, cover }) => (
 				<a class={catalog.editorialRow} href={`/read/${article.id}`} data-media={Boolean(cover)}>
-					<time class={catalog.editorialDate} datetime={article.data.publishedAt.toISOString()}>{dateFormatter.format(article.data.publishedAt)}</time>
+					<time class={catalog.editorialDate} datetime={article.data.publishedAt.toISOString()}><strong>{dayFormatter.format(article.data.publishedAt)}</strong><span>{monthFormatter.format(article.data.publishedAt)}</span></time>
 					{cover && <span class={catalog.editorialMedia}><img class={catalog.editorialImage} src={cover.src} alt="" width={cover.attributes.width} height={cover.attributes.height} loading="lazy" /></span>}
-					<div class={catalog.editorialBody}>
+					<div class={catalog.editorialBody} data-body>
 						<p class={catalog.editorialKind}><span>{getTypeBadgeConfig(article.data.type || "tutorial").label}</span><span>·</span><span>{author ?? "Rawkode Academy"}</span><span>·</span><span>{readingTime}</span></p>
 						<h3 class={catalog.editorialTitle}>{article.data.title}</h3>
 						<p class={catalog.editorialDescription}>{compactCopy(article.data.openGraph?.subtitle || article.data.subtitle || article.data.description, 160)}</p>

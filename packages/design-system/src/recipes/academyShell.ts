@@ -30,6 +30,7 @@ export const academyShell = sva({
 		"skip",
 		"footer",
 		"footerInner",
+		"footerStatement",
 		"footerLead",
 		"footerTagline",
 		"footerGroups",
@@ -113,14 +114,27 @@ export const academyShell = sva({
 			paddingBlock: "3",
 			transitionProperty: "colors",
 			transitionDuration: "fast",
-			_hover: { color: "academy.text" },
+			// The accent rule draws in from the left on hover and stays put on
+			// the current page.
+			_after: {
+				content: '""',
+				position: "absolute",
+				insetInline: "0",
+				insetBlockEnd: "1",
+				height: "0.5",
+				backgroundColor: "academy.accent",
+				transform: "scaleX(0)",
+				transformOrigin: "left",
+				transitionProperty: "[transform]",
+				transitionDuration: "slow",
+				transitionTimingFunction: "academy-out",
+			},
+			_hover: { color: "academy.text", _after: { transform: "scaleX(1)" } },
 			"&[aria-current=page]": {
 				color: "academy.text",
-				textDecoration: "underline",
-				textDecorationThickness: "2px",
-				textDecorationColor: "academy.accent",
-				textUnderlineOffset: "0.45em",
+				_after: { transform: "scaleX(1)" },
 			},
+			_motionReduce: { _after: { transitionDuration: "none" } },
 			_focusVisible: {
 				outline: "focus",
 				outlineColor: "academy.accent",
@@ -303,6 +317,8 @@ export const academyShell = sva({
 			},
 		},
 		footer: {
+			position: "relative",
+			overflow: "hidden",
 			borderTop: "hairline",
 			borderColor: "academy.inkBorder",
 			backgroundColor: "academy.ink",
@@ -310,13 +326,46 @@ export const academyShell = sva({
 			paddingInline: "academy-gutter",
 			paddingBlock: "14",
 			_lg: { paddingBlock: "20" },
+			// The same system grid as the hero, rising from the bottom edge so
+			// every page opens and closes on the motif.
+			"--academy-grid-line":
+				"color-mix(in srgb, var(--colors-academy-ink-border) 70%, transparent)",
+			_before: {
+				content: '""',
+				position: "absolute",
+				inset: "0",
+				pointerEvents: "none",
+				backgroundImage:
+					"[linear-gradient(var(--academy-grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--academy-grid-line) 1px, transparent 1px)]",
+				backgroundSize: "[4rem 4rem]",
+				backgroundPosition: "[center bottom]",
+				maskImage:
+					"[radial-gradient(120% 100% at 50% 100%, black 20%, transparent 100%)]",
+			},
 		},
 		footerInner: {
+			position: "relative",
 			maxWidth: "academy-content",
 			marginInline: "auto",
 			display: "grid",
 			gap: "12",
 			_lg: { gridTemplateColumns: "minmax(0, 1fr) minmax(0, 2fr)", gap: "16" },
+		},
+		footerStatement: {
+			margin: "0",
+			paddingBlockEnd: "10",
+			borderBottom: "hairline",
+			borderColor: "academy.inkBorder",
+			color: "academy.inkText",
+			fontFamily: "academy-display",
+			fontSize: "academy-statement",
+			fontWeight: "extrabold",
+			letterSpacing: "academy-poster",
+			lineHeight: "academy-poster",
+			// Each sentence is one unit, so the statement only wraps between them.
+			"& span": { display: "inline-block" },
+			"& [data-accent]": { color: "academy.inkAccent" },
+			_lg: { gridColumn: "1 / -1", paddingBlockEnd: "14" },
 		},
 		footerLead: {
 			display: "grid",
@@ -369,7 +418,7 @@ export const academyShell = sva({
 			margin: "0",
 			paddingTop: "8",
 			borderTop: "hairline",
-			borderColor: "academy.inkBorder",
+			borderTopColor: "academy.inkBorder",
 			color: "academy.inkTextMuted",
 			fontFamily: "academy-mono",
 			fontSize: "xs",

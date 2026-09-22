@@ -86,7 +86,10 @@ const pageDescription =
 			<div class={styles.container}>
 				<div class={styles.pageHeroGrid}>
 					<h1 id="watch-title" class={styles.pageTitle}>Watch</h1>
-					<p class={styles.lede}>Live builds, deep dives, and honest conversations with the people behind the tools. Every session is recorded and searchable.</p>
+					<div class={styles.pageHeroAside}>
+						<p class={styles.pageLede}>Live builds, deep dives, and honest conversations with the people behind the tools. Every session is recorded and searchable.</p>
+						<p class={styles.heroFigure}><strong>{publishedVideos.length}</strong><span>{publishedVideos.length === 1 ? "session" : "sessions"} in the library</span></p>
+					</div>
 				</div>
 			</div>
 		</section>

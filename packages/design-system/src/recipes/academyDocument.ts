@@ -279,11 +279,11 @@ export const academyDocument = sva({
 			fontSize: "4xl",
 			fontWeight: "extrabold",
 			color: "academy.text",
-			lineHeight: "tight",
-			letterSpacing: "tight",
+			lineHeight: "academy-title",
+			letterSpacing: "academy-display",
 			textWrap: "balance",
 			_lg: {
-				fontSize: "5xl",
+				fontSize: "academy-title",
 			},
 		},
 		sectionTitle: {

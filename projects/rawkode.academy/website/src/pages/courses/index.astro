@@ -98,7 +98,7 @@ const catalog = academyCatalog();
 		listName="Cloud Native Courses"
 	/>
 	<div class={styles.root}>
-		<AcademyCatalogMasthead kicker="Learn by building" title="Courses" description="Structured courses and labs." />
+		<AcademyCatalogMasthead kicker="Learn by building" title="Courses" description="Structured courses and labs." figure={allCourses.length} figureLabel={allCourses.length === 1 ? "course" : "courses"} />
 		<section class={styles.section}>
 			<div class={styles.container}>
 			{featuredCourse ? (

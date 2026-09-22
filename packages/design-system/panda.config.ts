@@ -102,23 +102,33 @@ export default defineConfig({
 					"academy-play": { value: "72px" },
 					"academy-hero-copy": { value: "36rem" },
 					"academy-ledger-date": { value: "6.5rem" },
+					"academy-path-index": { value: "8rem" },
 				},
 				aspectRatios: {
 					"academy-video": { value: "16 / 9" },
 				},
 				fontSizes: {
 					"academy-display": { value: "clamp(3rem, 6.4vw, 5.5rem)" },
+					// Poster scale: the homepage statement and collection mastheads.
+					// The type is the composition, so it runs to the shell edge.
+					"academy-poster": { value: "clamp(3.5rem, 11.5vw, 10rem)" },
+					"academy-masthead": { value: "clamp(2.75rem, 9vw, 7.5rem)" },
+					"academy-numeral": { value: "clamp(2.25rem, 4.5vw, 3.75rem)" },
+					"academy-statement": { value: "clamp(2rem, 5.5vw, 4.5rem)" },
+					"academy-ledger-day": { value: "clamp(1.75rem, 2.4vw, 2.25rem)" },
 					"academy-lede": { value: "clamp(1.125rem, 1.4vw, 1.375rem)" },
 					"academy-title": { value: "clamp(2.4rem, 5vw, 4rem)" },
-					"academy-section": { value: "clamp(1.75rem, 3vw, 2.5rem)" },
+					"academy-section": { value: "clamp(2.25rem, 4vw, 3.5rem)" },
 					"academy-caption": { value: "0.6875rem" },
 				},
 				letterSpacings: {
 					"academy-display": { value: "-0.035em" },
+					"academy-poster": { value: "-0.05em" },
 					"academy-tight": { value: "-0.02em" },
 				},
 				lineHeights: {
 					"academy-display": { value: "1.04" },
+					"academy-poster": { value: "0.9" },
 					"academy-title": { value: "1.15" },
 					"academy-card": { value: "1.3" },
 					"academy-reading": { value: "1.65" },
@@ -161,6 +171,10 @@ export default defineConfig({
 					"academy-slide-in": {
 						value: "academy-slide-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both",
 					},
+					// Scroll-driven: paired with animation-timeline: view() so rows
+					// rise as they enter the viewport. Browsers without scroll
+					// timelines never apply it (see the @supports guards).
+					"academy-reveal": { value: "academy-reveal linear both" },
 				},
 				zIndex: {
 					overlay: { value: 1000 },
@@ -189,6 +203,10 @@ export default defineConfig({
 				"academy-slide-in": {
 					from: { transform: "translateX(2rem)", opacity: "0" },
 					to: { transform: "translateX(0)", opacity: "1" },
+				},
+				"academy-reveal": {
+					from: { opacity: "0", transform: "translateY(1.5rem)" },
+					to: { opacity: "1", transform: "translateY(0)" },
 				},
 			},
 			semanticTokens: {

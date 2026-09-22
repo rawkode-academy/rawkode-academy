@@ -43,6 +43,23 @@ const levelOf = (label: string) => {
 	return 0;
 };
 const pad = (index: number) => String(index + 1).padStart(2, "0");
+
+// Ledger dates are calendar days in UTC. The day is the numeral; the month
+// and year sit beneath it.
+const dayOf = new Intl.DateTimeFormat("en-GB", {
+	day: "2-digit",
+	timeZone: "UTC",
+});
+const monthOf = new Intl.DateTimeFormat("en-GB", {
+	month: "short",
+	year: "numeric",
+	timeZone: "UTC",
+});
+const dateParts = (iso: string) => {
+	const date = new Date(iso);
+	if (Number.isNaN(date.getTime())) return undefined;
+	return { day: dayOf.format(date), month: monthOf.format(date) };
+};
 </script>
 
 <template>
@@ -50,10 +67,10 @@ const pad = (index: number) => String(index + 1).padStart(2, "0");
 		<template v-if="props.page === 'home'">
 			<section :class="styles.hero" aria-labelledby="home-title">
 				<div :class="styles.container">
+					<h1 id="home-title" :class="styles.title"><span :class="styles.titleLine">Understand</span><span :class="[styles.titleLine, styles.titleAccent]">the system.</span></h1>
 					<div :class="styles.heroGrid">
 						<div :class="styles.heroCopy">
-							<h1 id="home-title" :class="styles.title"><span :class="styles.titleLine">Understand</span><span :class="[styles.titleLine, styles.titleAccent]">the system.</span></h1>
-							<p :class="styles.heroLede">Build it. Break it. Find out why. Cloud native, taught by the engineers doing the work, with every decision on screen.</p>
+							<p :class="styles.heroLede">Cloud native, taught by the engineers doing the work, with every decision on screen.</p>
 							<div :class="styles.actions">
 								<a :href="props.featured.href" :class="styles.buttonPrimary">Watch the latest session <span aria-hidden="true">→</span></a>
 								<a href="/watch" :class="styles.buttonGhost">Browse the library</a>
@@ -72,7 +89,7 @@ const pad = (index: number) => String(index + 1).padStart(2, "0");
 						</a>
 					</div>
 					<nav :class="styles.archive" aria-label="Academy archive">
-						<a v-for="link in props.archive" :key="link.href" :href="link.href" :class="styles.archiveLink"><strong>{{ link.value }}</strong> {{ link.label }}</a>
+						<a v-for="link in props.archive" :key="link.href" :href="link.href" :class="styles.archiveLink"><strong>{{ link.value }}</strong><span>{{ link.label }}</span></a>
 						<span :class="styles.archiveNote">Open to everyone.</span>
 					</nav>
 				</div>
@@ -84,9 +101,9 @@ const pad = (index: number) => String(index + 1).padStart(2, "0");
 				</div>
 				<div :class="styles.ledger">
 					<a v-for="item in props.latest.slice(0, 6)" :key="item.href" :href="item.href" :class="styles.ledgerRow" :data-media="Boolean(item.mediaSrc)">
-						<time v-if="item.publishedAt" :datetime="item.publishedAt" :class="styles.ledgerDate">{{ item.meta[1] }}</time>
+						<time v-if="item.publishedAt" :datetime="item.publishedAt" :class="styles.ledgerDate"><template v-if="dateParts(item.publishedAt)"><strong>{{ dateParts(item.publishedAt)?.day }}</strong><span>{{ dateParts(item.publishedAt)?.month }}</span></template><template v-else>{{ item.meta[1] }}</template></time>
 						<span v-if="item.mediaSrc" :class="styles.ledgerMedia"><img :src="item.mediaSrc" alt="" :class="styles.ledgerImage" width="640" height="360" loading="lazy" /></span>
-						<span :class="styles.ledgerBody">
+						<span :class="styles.ledgerBody" data-body>
 							<span :class="styles.ledgerKind" :data-kind="item.kind || item.meta[0]">{{ item.kind || item.meta[0] }}<template v-if="item.meta[2]"> · {{ item.meta[2] }}</template></span>
 							<h3 :class="styles.ledgerTitle">{{ item.title }}</h3>
 							<span :class="styles.ledgerDescription">{{ item.description }}</span>
@@ -96,7 +113,15 @@ const pad = (index: number) => String(index + 1).padStart(2, "0");
 			</section>
 		</template>
 		<section v-else :class="styles.pageHero">
-			<div :class="styles.container"><div :class="styles.pageHeroGrid"><h1 :class="styles.pageTitle">Learning paths</h1><p :class="styles.lede">A sequence of related lessons, articles, and working sessions. Start at the top and follow the order.</p></div></div>
+			<div :class="styles.container">
+				<div :class="styles.pageHeroGrid">
+					<h1 :class="styles.pageTitle">Learning paths</h1>
+					<div :class="styles.pageHeroAside">
+						<p :class="styles.pageLede">A sequence of related lessons, articles, and working sessions. Start at the top and follow the order.</p>
+						<p :class="styles.heroFigure"><strong>{{ props.learningPaths.length }}</strong><span>{{ props.learningPaths.length === 1 ? "learning path" : "learning paths" }}</span></p>
+					</div>
+				</div>
+			</div>
 		</section>
 		<section v-if="props.learningPaths.length" :class="styles.section" :aria-labelledby="props.page === 'home' ? 'paths-title' : undefined" :aria-label="props.page === 'learn' ? 'Available learning paths' : undefined">
 			<div v-if="props.page === 'home'" :class="styles.sectionHead">
@@ -105,7 +130,7 @@ const pad = (index: number) => String(index + 1).padStart(2, "0");
 			</div>
 			<div :class="styles.pathList">
 				<a v-for="(path, index) in (props.page === 'home' ? props.learningPaths.slice(0, 3) : props.learningPaths)" :key="path.href" :href="path.href" :class="styles.pathCard">
-					<span :class="styles.pathIndex" aria-hidden="true">{{ pad(index) }}</span>
+					<span :class="styles.pathIndex" data-index aria-hidden="true">{{ pad(index) }}</span>
 					<span :class="styles.pathBody">
 						<component :is="props.page === 'home' ? 'h3' : 'h2'" :class="styles.pathTitle">{{ path.title }}</component>
 						<span :class="styles.cardDescription">{{ path.description }}</span>
