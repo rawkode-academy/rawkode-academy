@@ -86,7 +86,9 @@ export const academyShell = sva({
 			// Inherits so the same mark reads navy in the header and paper on
 			// the ink footer.
 			color: "inherit",
-			flexShrink: "0",
+			// Shrinks on the narrowest phones so the account control still fits.
+			flexShrink: "1",
+			minWidth: "0",
 			minHeight: "11",
 			_focusVisible: {
 				outline: "focus",
@@ -97,6 +99,7 @@ export const academyShell = sva({
 		brandArt: {
 			display: "block",
 			width: "36",
+			maxWidth: "full",
 			_lg: { width: "48" },
 			"& svg": { display: "block", width: "full", height: "auto" },
 			"& path": { fill: "currentColor" },
@@ -151,31 +154,25 @@ export const academyShell = sva({
 			marginInlineStart: "auto",
 		},
 		search: {
-			// Icon-only below lg, so search never hides behind the drawer.
-			display: "inline-flex",
+			// Below lg the header keeps its width for the account control;
+			// search leads the drawer's Explore group instead.
+			display: "none",
 			alignItems: "center",
-			justifyContent: "center",
 			gap: "2",
 			minWidth: "11",
 			minHeight: "11",
 			paddingInline: "3",
 			border: "hairline",
-			borderColor: "transparent",
+			borderColor: "academy.border",
 			borderRadius: "academy-s",
-			backgroundColor: "transparent",
-			color: "academy.text",
+			backgroundColor: "academy.panel",
+			color: "academy.textSoft",
 			fontSize: "sm",
 			textDecoration: "none",
 			transitionProperty: "colors",
 			transitionDuration: "fast",
-			_hover: { backgroundColor: "academy.panel" },
-			_lg: {
-				marginInlineEnd: "2",
-				borderColor: "academy.border",
-				backgroundColor: "academy.panel",
-				color: "academy.textSoft",
-				_hover: { borderColor: "academy.inputBorder", color: "academy.text" },
-			},
+			_lg: { display: "inline-flex", marginInlineEnd: "2" },
+			_hover: { borderColor: "academy.inputBorder", color: "academy.text" },
 			_focusVisible: {
 				outline: "focus",
 				outlineColor: "academy.accent",
@@ -196,13 +193,15 @@ export const academyShell = sva({
 			lineHeight: "none",
 			_lg: { display: "inline-block" },
 		},
-		account: { display: "none", _lg: { display: "block" } },
+		// Sign in (or the profile menu) stays in the header at every width.
+		account: { display: "block", flexShrink: "0" },
 		authButton: {
 			display: "inline-flex",
 			alignItems: "center",
 			justifyContent: "center",
 			minHeight: "9",
-			paddingInline: "4",
+			paddingInline: "3",
+			_lg: { paddingInline: "4" },
 			paddingBlock: "2",
 			border: "academy-button",
 			borderRadius: "academy-s",

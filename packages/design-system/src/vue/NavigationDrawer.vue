@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Dialog } from "@ark-ui/vue/dialog";
-import { onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import { academyShell } from "../recipes/academyShell";
 
 interface NavigationItem {
@@ -21,6 +21,13 @@ const props = withDefaults(defineProps<{
 	id?: string;
 }>(), { primary: () => [], currentPath: "/", id: "academy-navigation" });
 const styles = academyShell();
+// Primary destinations are not repeated in the index below them.
+const indexGroups = computed(() => {
+	const primary = new Set(props.primary.map((item) => item.href));
+	return props.groups
+		.map((group) => ({ ...group, items: group.items.filter((item) => !primary.has(item.href)) }))
+		.filter((group) => group.items.length > 0);
+});
 const open = ref(false);
 const mounted = ref(false);
 let desktop: MediaQueryList | undefined;
@@ -69,7 +76,7 @@ onUnmounted(() => desktop?.removeEventListener("change", closeOnDesktop));
 								</li>
 							</ul>
 							<div :class="styles.menuGroups">
-								<section v-for="(group, index) in props.groups" :key="group.label" :aria-labelledby="`${props.id}-group-${index}`">
+								<section v-for="(group, index) in indexGroups" :key="group.label" :aria-labelledby="`${props.id}-group-${index}`">
 									<h2 :id="`${props.id}-group-${index}`" :class="styles.menuHeading">{{ group.label }}</h2>
 									<ul :class="styles.menuGroup">
 										<li v-for="item in group.items" :key="item.href">
