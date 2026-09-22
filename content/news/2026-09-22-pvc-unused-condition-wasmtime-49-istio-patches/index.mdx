@@ -14,7 +14,7 @@ Three primary releases landed on 21 September: a Kubernetes storage feature reac
 
 ## Kubernetes v1.37 promotes PersistentVolumeClaim unused tracking to beta
 
-Kubernetes v1.37 [graduates the `PersistentVolumeClaimUnusedSinceTime` feature gate to beta](https://kubernetes.io/blog/2026/09/21/kubernetes-v1-37-pvc-last-used-time/), enabled by default. The PVC protection controller now sets an `Unused` condition on each PersistentVolumeClaim, indicating whether any running pod references it, and the condition's transition time records when the claim stopped being referenced.
+Kubernetes v1.37 [graduates the `PersistentVolumeClaimUnusedSinceTime` feature gate to beta](https://kubernetes.io/blog/2026/09/21/kubernetes-v1-37-pvc-last-used-time/), enabled by default. The PVC protection controller now sets an `Unused` condition on each PersistentVolumeClaim, indicating whether it is still referenced by a non-terminated pod, and the condition's transition time records when the claim stopped being referenced. A pod that is scheduled but still `Pending` keeps the claim in use, so `Unused` only flips to true once no non-terminal pod references it.
 
 Before this, determining whether a PVC was still in use meant correlating pod-to-PVC references with custom tooling. Reading the state from the claim's own status lets cleanup workflows and controllers identify reclaim candidates directly. In large clusters, orphaned PVCs are a recurring source of unaccounted storage cost, and the condition gives operators a native signal to act on.
 
