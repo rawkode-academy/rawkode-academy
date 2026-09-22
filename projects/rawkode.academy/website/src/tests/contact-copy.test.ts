@@ -1,16 +1,10 @@
 import { readFileSync } from "node:fs";
-import ts from "typescript";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { readComponentScript } from "./helpers/component-script";
 
-const source = readFileSync(
-	"src/components/organizations/ContactFallback.astro",
-	"utf8",
-);
-const script = source.match(/<script>([\s\S]*?)<\/script>/)?.[1];
-if (!script) throw new Error("Contact copy script missing");
-const code = ts.transpileModule(script, {
-	compilerOptions: { target: ts.ScriptTarget.ES2022 },
-}).outputText;
+const componentPath = "src/components/organizations/ContactFallback.astro";
+const source = readFileSync(componentPath, "utf8");
+const code = await readComponentScript(componentPath);
 
 const copy = vi.fn();
 const legacyCopy = vi.fn();

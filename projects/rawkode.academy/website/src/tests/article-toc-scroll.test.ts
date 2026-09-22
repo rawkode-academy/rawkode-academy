@@ -1,13 +1,7 @@
-import { readFileSync } from "node:fs";
-import ts from "typescript";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { readComponentScript } from "./helpers/component-script";
 
-const source = readFileSync("src/components/read/ArticleTOC.astro", "utf8");
-const script = source.match(/<script>([\s\S]*?)<\/script>/)?.[1];
-if (!script) throw new Error("ArticleTOC script missing");
-const code = ts.transpileModule(script, {
-	compilerOptions: { target: ts.ScriptTarget.ES2022 },
-}).outputText;
+const code = await readComponentScript("src/components/read/ArticleTOC.astro");
 
 let scrollTop = 0;
 let viewportHeight = 1000;
@@ -19,8 +13,11 @@ const slugs = ["objectives", "chapter-1", "chapter-2", "chapter-3", "next"];
 function setup() {
 	// Execute the real component script with only geometry and window events stubbed.
 	new Function("document", "window", code)(document, {
-		get innerHeight() { return viewportHeight; },
-		requestAnimationFrame: (callback: FrameRequestCallback) => frames.push(callback),
+		get innerHeight() {
+			return viewportHeight;
+		},
+		requestAnimationFrame: (callback: FrameRequestCallback) =>
+			frames.push(callback),
 		addEventListener: addListener,
 	});
 }
@@ -36,8 +33,9 @@ function flushFrame() {
 }
 
 function current() {
-	return [...document.querySelectorAll<HTMLAnchorElement>("[aria-current]")]
-		.map((link) => link.dataset.tocSlug);
+	return [
+		...document.querySelectorAll<HTMLAnchorElement>("[aria-current]"),
+	].map((link) => link.dataset.tocSlug);
 }
 
 beforeEach(() => {
@@ -45,13 +43,22 @@ beforeEach(() => {
 	viewportHeight = 1000;
 	frames = [];
 	listeners = new Map();
-	addListener = vi.fn((name: string, listener: EventListener) => listeners.set(name, listener));
-	const links = slugs.map((slug) => `<a href="#${slug}" data-toc-slug="${slug}">${slug}</a>`).join("");
-	document.body.innerHTML = `<nav>${links}</nav><nav>${links}</nav>` +
+	addListener = vi.fn((name: string, listener: EventListener) =>
+		listeners.set(name, listener),
+	);
+	const links = slugs
+		.map((slug) => `<a href="#${slug}" data-toc-slug="${slug}">${slug}</a>`)
+		.join("");
+	document.body.innerHTML =
+		`<nav>${links}</nav><nav>${links}</nav>` +
 		slugs.map((slug) => `<h2 id="${slug}">${slug}</h2>`).join("");
 	for (const [index, slug] of slugs.entries()) {
-		vi.spyOn(document.getElementById(slug)!, "getBoundingClientRect")
-			.mockImplementation(() => ({ top: 500 + index * 1000 - scrollTop }) as DOMRect);
+		vi.spyOn(
+			document.getElementById(slug)!,
+			"getBoundingClientRect",
+		).mockImplementation(
+			() => ({ top: 500 + index * 1000 - scrollTop }) as DOMRect,
+		);
 	}
 });
 
@@ -74,7 +81,11 @@ describe("ArticleTOC reading position", () => {
 
 	it("tracks jumps past several headings, reverse scrolling and the end", () => {
 		setup();
-		for (const [position, slug] of [[3500, "chapter-3"], [1400, "chapter-1"], [6000, "next"]] as const) {
+		for (const [position, slug] of [
+			[3500, "chapter-3"],
+			[1400, "chapter-1"],
+			[6000, "next"],
+		] as const) {
 			scrollTop = position;
 			dispatch("scroll");
 			flushFrame();
@@ -92,7 +103,9 @@ describe("ArticleTOC reading position", () => {
 		dispatch("scroll");
 		dispatch("resize");
 		expect(frames).toHaveLength(1);
-		expect(addListener).toHaveBeenCalledWith("scroll", expect.any(Function), { passive: true });
+		expect(addListener).toHaveBeenCalledWith("scroll", expect.any(Function), {
+			passive: true,
+		});
 	});
 
 	it("recalculates the reading line after resize and late page layout", () => {

@@ -1,13 +1,7 @@
-import { readFileSync } from "node:fs";
-import ts from "typescript";
 import { afterEach, expect, it, vi } from "vitest";
+import { readComponentScript } from "./helpers/component-script";
 
-const source = readFileSync("src/components/articles/Diagram.astro", "utf8");
-const script = source.match(/<script>([\s\S]*?)<\/script>/)?.[1];
-if (!script) throw new Error("Diagram enhancement missing");
-const code = ts.transpileModule(script, {
-	compilerOptions: { target: ts.ScriptTarget.ES2022 },
-}).outputText;
+const code = await readComponentScript("src/components/articles/Diagram.astro");
 
 afterEach(() => {
 	document.body.innerHTML = "";
