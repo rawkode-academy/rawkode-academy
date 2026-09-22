@@ -1,4 +1,7 @@
 ---
+import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
+const doc = academyDocument();
+const styles = academyLayout({ width: "reading" });
 import {
 	type CollectionEntry,
 	getCollection,
@@ -7,10 +10,7 @@ import {
 } from "astro:content";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 import Page from "@/wrappers/page.astro";
-import ArticleHeader from "@/components/read/ArticleHeader.astro";
-import ArticleByline from "@/components/read/ArticleByline.astro";
-import EditorialButton from "@/components/ui/EditorialButton.vue";
-import MLabel from "@/components/ui/MLabel.vue";
+import ArticleTOC from "@/components/read/ArticleTOC.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import LearningPathJsonLd from "@/components/html/learning-path-jsonld.astro";
 import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
@@ -56,9 +56,6 @@ const technologyTags = (learningPath.data.technologies ?? []).map(
 );
 
 function formatDuration(minutes: number): string {
-	if (!minutes) {
-		return "Self-paced";
-	}
 	const hours = Math.floor(minutes / 60);
 	const mins = minutes % 60;
 	if (!hours) return `${mins}m`;
@@ -66,18 +63,14 @@ function formatDuration(minutes: number): string {
 	return `${hours}h ${mins}m`;
 }
 
-const durationLabel = formatDuration(learningPath.data.estimatedDuration);
-const outline = headings.filter((heading) => heading.depth === 2);
-const prerequisites = learningPath.data.prerequisites ?? [];
-
-// Dispatch number — position in chronological corpus of paths.
-const corpus = (await getCollection("learningPaths")).sort(
-	(a, b) => a.data.publishedAt.valueOf() - b.data.publishedAt.valueOf(),
+const durationLabel = learningPath.data.estimatedDuration > 0
+	? formatDuration(learningPath.data.estimatedDuration)
+	: undefined;
+// The content owns the resource sequence; use its rendered slug, not a second index.
+const firstResource = headings.find(
+	(heading) => heading.depth === 3 && /^\d+\.\s/.test(heading.text),
 );
-const dispatchIndex = corpus.findIndex((p) => p.id === learningPath.id);
-const dispatchNum = String(
-	dispatchIndex >= 0 ? dispatchIndex + 1 : corpus.length,
-).padStart(3, "0");
+const prerequisites = learningPath.data.prerequisites ?? [];
 
 const difficultyLabel =
 	learningPath.data.difficulty.charAt(0).toUpperCase() +
@@ -114,344 +107,79 @@ const pageDescription = learningPath.data.description;
 		]}
 	/>
 
-	<div class="path-detail">
-		<ArticleHeader
-			breadcrumbs={[
-				{ label: "Learning Paths", href: "/learning-paths" },
-				{ label: difficultyLabel },
-				{ label: learningPath.data.title, current: true },
-			]}
-			dispatchNum={dispatchNum}
-			kicker="Learning path"
-			categoryTrail={difficultyLabel}
-			title={learningPath.data.title}
-			dek={learningPath.data.description}
-			readingTime={durationLabel}
-		>
-			<ArticleByline
-				authors={authors}
-				date={publishDate}
-				readingTime={durationLabel}
-				tags={technologyTags.map((t) => ({
-					label: t.label,
-					href: `/technology/${t.id}`,
-				}))}
-			/>
-		</ArticleHeader>
-
-		<section class="path-detail__stat-row">
-			<div class="path-detail__stat">
-				<MLabel>Difficulty</MLabel>
-				<span class="path-detail__stat-value">{difficultyLabel}</span>
+	<div class={doc.root}>
+		<header class={doc.pathHero}>
+			<div class={doc.body}>
+			<div class={[doc.main, styles.container, styles.heroCopy].join(" ")}>
+				<a class={doc.link} href="/learning-paths">Learning paths</a>
+				<h1 class={doc.title}>{learningPath.data.title}</h1>
+				<div class={styles.meta}>
+					<span>{difficultyLabel}</span>
+					{durationLabel && <span>{durationLabel} core video</span>}
+					<time datetime={learningPath.data.publishedAt.toISOString()}>{publishDate}</time>
+				</div>
+				{durationLabel && <p class={doc.meta}>Exercises and bonus material take extra time.</p>}
+				<div class={doc.actions}>
+					{authors.map((author) => (
+						<a class={doc.author} href={`/people/${author.data.id}`}>
+							{author.data.avatarUrl && <img class={doc.avatar} src={author.data.avatarUrl} alt="" width="44" height="44" loading="lazy" />}
+							<span class={doc.authorMeta}>{author.data.name}</span>
+						</a>
+					))}
+				</div>
+				<div class={doc.actions}>
+					<a class={doc.button} href={firstResource ? `#${firstResource.slug}` : "#path-content"}>
+						Start learning
+					</a>
+				</div>
 			</div>
-			<div class="path-detail__stat">
-				<MLabel>Estimated time</MLabel>
-				<span class="path-detail__stat-value">{durationLabel}</span>
 			</div>
-			<div class="path-detail__stat">
-				<MLabel>Modules</MLabel>
-				<span class="path-detail__stat-value">
-					{outline.length || "—"}
-				</span>
-			</div>
-			<div class="path-detail__stat">
-				<MLabel>Pace</MLabel>
-				<span class="path-detail__stat-value">Self-paced</span>
-			</div>
-		</section>
+		</header>
 
-		<section class="path-detail__body">
-			<article class="prose">
-				<Content />
-			</article>
-
-			<aside class="path-detail__aside">
-				{outline.length > 0 && (
-					<div class="path-detail__panel">
-						<MLabel tone="spruce">Curriculum</MLabel>
-						<ol class="path-detail__outline">
-							{outline.map((heading, index) => (
-								<li class="path-detail__outline-row">
-									<MLabel tone="muted">
-										§{String(index + 1).padStart(2, "0")}
-									</MLabel>
-									<a
-										class="path-detail__outline-link"
-										href={`#${heading.slug}`}
-									>
-										{heading.text}
-									</a>
-								</li>
-							))}
-						</ol>
-					</div>
-				)}
-
+		<div class={doc.body}>
+			<div class={[doc.main, styles.container, doc.stack].join(" ")}>
 				{prerequisites.length > 0 && (
-					<div class="path-detail__panel">
-						<MLabel tone="spruce">Prerequisites</MLabel>
-						<ul class="path-detail__prereqs">
-							{prerequisites.map((item) => (
-								<li class="path-detail__prereq">
-									<span aria-hidden="true">▸</span>
-									<span>{item}</span>
-								</li>
-							))}
-						</ul>
-					</div>
+					<details>
+						<summary class={doc.tocSummary}>Before you start</summary>
+						<div class={styles.prose}>
+							<ul>
+								{prerequisites.map((item) => <li>{item}</li>)}
+							</ul>
+						</div>
+					</details>
 				)}
+
+				{/* The content supplies the introduction, objectives, and ordered resources once. */}
+				<article id="path-content" class={[styles.prose, doc.pathProse].join(" ")}>
+					<Content />
+				</article>
 
 				{technologyTags.length > 0 && (
-					<div class="path-detail__panel">
-						<MLabel tone="spruce">Technologies covered</MLabel>
-						<div class="path-detail__chips">
-							{technologyTags.map((technology) => (
-								<a
-									class="path-detail__chip"
-									href={`/technology/${technology.id}`}
-									rel="tag"
-								>
-									#{technology.label}
-								</a>
-							))}
-						</div>
-					</div>
+					<p class={doc.copy}>
+						Technologies: {technologyTags.map((technology, index) => (
+							<Fragment>
+								{index > 0 && ", "}
+								<a class={doc.link} href={`/technology/${technology.id}`} rel="tag">{technology.label}</a>
+							</Fragment>
+						))}
+					</p>
 				)}
-			</aside>
-		</section>
+
+				<nav class={doc.end} aria-label="More learning resources">
+					<a class={doc.link} href="/learning-paths">Browse learning paths</a>
+					<a class={doc.link} href="/watch">Watch the archive</a>
+				</nav>
+			</div>
+
+			<ArticleTOC headings={headings} maxDepth={3} />
+		</div>
 
 		<NewsletterCTA
-			class="not-prose"
+			class={doc.section ?? ""}
 			audience="learning-paths"
-			badge="New paths weekly"
+			badge="Learning path updates"
 			headline="Get notified when we ship new learning paths"
 			subtitle="Structured roadmaps for cloud native, AI infra, and platform engineering, delivered when they're ready."
 		/>
-
-		<footer class="path-detail__footer">
-			<div class="path-detail__footer-text">
-				<MLabel tone="spruce">Keep going</MLabel>
-				<h2 class="path-detail__footer-title">Pick another path.</h2>
-				<p class="path-detail__footer-body">
-					Browse the rest of the curriculum, or jump back into the video archive.
-				</p>
-			</div>
-			<div class="path-detail__footer-actions">
-				<EditorialButton variant="solid" size="md" href="/learning-paths" arrow>
-					Browse paths
-				</EditorialButton>
-				<EditorialButton variant="outline" size="md" href="/watch">
-					Watch the archive
-				</EditorialButton>
-			</div>
-		</footer>
 	</div>
 </Page>
-
-<style>
-	.path-detail {
-		background: var(--editorial-paper);
-		color: var(--editorial-ink);
-	}
-
-	.path-detail__stat-row {
-		display: grid;
-		grid-template-columns: repeat(4, 1fr);
-		gap: var(--space-block-gap);
-		padding: var(--space-section-pad-y) var(--space-section-pad-x);
-		border-bottom: 1px solid var(--editorial-hairline);
-		background: var(--editorial-paper-deep);
-	}
-
-	.path-detail__stat {
-		display: flex;
-		flex-direction: column;
-		gap: 0.4rem;
-		padding-right: 1.5rem;
-		border-right: 1px solid var(--editorial-hairline);
-	}
-	.path-detail__stat:last-child {
-		border-right: none;
-	}
-
-	.path-detail__stat-value {
-		font-family: var(--font-instrument-serif), serif;
-		font-style: italic;
-		font-size: 1.875rem;
-		line-height: 1;
-		color: var(--editorial-ink);
-	}
-
-	.path-detail__body {
-		display: grid;
-		grid-template-columns: minmax(0, 3fr) minmax(0, 1.1fr);
-		gap: var(--space-section-gap-lg);
-		padding: var(--space-section-pad-y) var(--space-section-pad-x) var(--space-page-pad-bottom);
-		max-width: 90rem;
-		margin: 0 auto;
-		align-items: start;
-	}
-
-	.path-detail__body :global(.prose) {
-		max-width: none;
-	}
-
-	.path-detail__aside {
-		display: flex;
-		flex-direction: column;
-		gap: 1.5rem;
-		position: sticky;
-		top: 6rem;
-	}
-
-	.path-detail__panel {
-		background: var(--editorial-paper-deep);
-		border: 1px solid var(--editorial-hairline);
-		padding: 1.25rem 1.25rem 1.4rem;
-		display: flex;
-		flex-direction: column;
-		gap: 0.875rem;
-	}
-
-	.path-detail__outline {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		display: flex;
-		flex-direction: column;
-	}
-
-	.path-detail__outline-row {
-		display: grid;
-		grid-template-columns: 2.5rem 1fr;
-		gap: 0.5rem;
-		padding: 0.55rem 0;
-		border-top: 1px solid var(--editorial-hairline);
-		align-items: baseline;
-	}
-	.path-detail__outline-row:first-child {
-		border-top: none;
-	}
-
-	.path-detail__outline-link {
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 0.875rem;
-		line-height: 1.35;
-		color: var(--editorial-ink);
-		text-decoration: none;
-		transition: color var(--duration-base) var(--ease-standard);
-	}
-	.path-detail__outline-link:hover {
-		color: var(--editorial-spruce);
-	}
-
-	.path-detail__prereqs {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	.path-detail__prereq {
-		display: grid;
-		grid-template-columns: 1rem 1fr;
-		gap: 0.5rem;
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 0.85rem;
-		line-height: 1.45;
-		color: var(--editorial-ink-soft);
-	}
-	.path-detail__prereq > span:first-child {
-		color: var(--editorial-spruce);
-	}
-
-	.path-detail__chips {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.4rem;
-	}
-
-	.path-detail__chip {
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.6875rem;
-		font-weight: 500;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
-		padding: 0.25rem 0.5rem;
-		color: var(--editorial-ink-soft);
-		border: 1px solid var(--editorial-hairline-strong);
-		border-radius: 2px;
-		text-decoration: none;
-		transition: color var(--duration-base) var(--ease-standard),
-			border-color var(--duration-base) var(--ease-standard);
-	}
-	.path-detail__chip:hover {
-		color: var(--editorial-ink);
-		border-color: var(--editorial-ink);
-	}
-
-	.path-detail__footer {
-		display: grid;
-		grid-template-columns: minmax(0, 1.4fr) auto;
-		gap: 2rem;
-		align-items: end;
-		padding: 2.5rem 2.5rem 3rem;
-		border-top: 1px solid var(--editorial-ink);
-		background: var(--editorial-paper-deep);
-	}
-
-	.path-detail__footer-text {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	.path-detail__footer-title {
-		font-family: var(--font-instrument-serif), serif;
-		font-style: italic;
-		font-weight: 400;
-		font-size: clamp(1.75rem, 3vw, 2.5rem);
-		line-height: 1;
-		letter-spacing: -0.02em;
-		color: var(--editorial-ink);
-		margin: 0;
-	}
-
-	.path-detail__footer-body {
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 1rem;
-		line-height: 1.45;
-		color: var(--editorial-ink-soft);
-		margin: 0;
-		max-width: 36rem;
-	}
-
-	.path-detail__footer-actions {
-		display: flex;
-		gap: 0.75rem;
-		flex-wrap: wrap;
-	}
-
-	@media (max-width: 880px) {
-		.path-detail__stat-row {
-			grid-template-columns: repeat(2, 1fr);
-			padding: 1.25rem 1.25rem;
-		}
-		.path-detail__stat {
-			border-right: none;
-			padding-right: 0;
-		}
-		.path-detail__body {
-			grid-template-columns: 1fr;
-			padding: 2rem 1.25rem;
-			gap: 2rem;
-		}
-		.path-detail__aside { position: static; }
-		.path-detail__footer {
-			grid-template-columns: 1fr;
-			padding: 2rem 1.25rem;
-		}
-	}
-</style>

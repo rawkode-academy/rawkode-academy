@@ -1,4 +1,5 @@
 import { env } from "cloudflare:workers";
+import { getCollection } from "astro:content";
 import type { APIRoute } from "astro";
 import { getShowExtension } from "@/lib/shows/registry";
 import type { ShowEnv } from "@/lib/shows/types";
@@ -12,6 +13,10 @@ export const ALL: APIRoute = async ({ locals, params, request, url }) => {
 	const ext = getShowExtension(showId);
 	const endpoint = ext?.endpoints?.find((e) => e.slug === (slug ?? ""));
 	if (!ext || !endpoint) return new Response(null, { status: 404 });
+	const shows = await getCollection("shows");
+	if (!shows.some((show) => show.data.id === showId && show.data.publish)) {
+		return new Response(null, { status: 404 });
+	}
 
 	return endpoint.handler({
 		showId,

@@ -1,5 +1,9 @@
 import { expect, vi } from "vitest";
 
+// Tests bypass Astro's Vite config; provide an explicit deployment artifact.
+// Clock-advance regressions override this before loading a fresh module graph.
+vi.stubGlobal("__NEWS_DEPLOYMENT_CUTOFF_MS__", Date.parse("2100-01-01T00:00:00Z"));
+
 // Mock Astro imports
 vi.mock("astro:content", () => ({
 	getCollection: vi.fn(),

@@ -7,6 +7,7 @@ import {
 } from "@/lib/studio-live";
 import CloudflareWhepPlayer from "./CloudflareWhepPlayer.vue";
 import VideoPlayer from "./player.vue";
+import { academyWatch } from "@rawkodeacademy/design-system";
 
 const props = defineProps<{
 	fallbackInitialPosition?: number;
@@ -18,6 +19,7 @@ const props = defineProps<{
 	videoSlug: string;
 	youtubeId?: string | undefined;
 }>();
+const watch = academyWatch();
 
 const liveState = ref<StudioLiveState>(
 	props.initialState
@@ -74,7 +76,8 @@ async function refreshLiveState(): Promise<void> {
 	/>
 	<img
 		v-else
-		class="watch-detail__upcoming-thumbnail"
+		:class="watch.upcomingThumbnail"
+		data-watch-upcoming-thumbnail
 		:src="thumbnailUrl"
 		:alt="title"
 		loading="eager"

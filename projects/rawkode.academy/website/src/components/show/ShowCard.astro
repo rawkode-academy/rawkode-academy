@@ -2,15 +2,17 @@
 import type { ShowSummary } from "@/types/show";
 import { Image } from "astro:assets";
 import MLabel from "@/components/ui/MLabel.vue";
+import { academyDocument } from "@rawkodeacademy/design-system";
 
 interface Props {
 	show: ShowSummary;
 }
 
 const { show } = Astro.props as Props;
+const doc = academyDocument();
 
 const hostNames = (show.hosts ?? [])
-	.map((host) => [host.forename, host.surname].filter(Boolean).join(" "))
+	.map((host) => [host.forename, host.surname].filter(Boolean).join(" ").trim())
 	.filter(Boolean);
 
 const episodes = (show.episodes ?? []).filter(
@@ -36,14 +38,15 @@ const latestEpisodeDate = latestEpisodePublishedAt
 ---
 
 <a href={`/shows/${show.id}`} class="show-card">
-	<div class="show-card__frame">
+	{(show.cover || thumbnailUrl) && <div class="show-card__frame">
 		{show.cover ? (
 			<Image
 				src={show.cover.image}
 				alt={show.cover.alt}
 				class="show-card__img"
+				loading="lazy"
 			/>
-		) : thumbnailUrl ? (
+		) : (
 			<img
 				src={thumbnailUrl}
 				alt={`Latest episode from ${show.name}`}
@@ -53,37 +56,23 @@ const latestEpisodeDate = latestEpisodePublishedAt
 				loading="lazy"
 				decoding="async"
 			/>
-		) : (
-			<div class="show-card__placeholder" aria-hidden="true">
-				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="1.5"
-						d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z"
-					/>
-				</svg>
-			</div>
 		)}
 		{episodes.length > 0 && (
 			<span class="show-card__count">
 				{episodes.length} {episodes.length === 1 ? "episode" : "episodes"}
 			</span>
 		)}
-	</div>
+	</div>}
 
 	<div class="show-card__body">
-		<h3 class="show-card__title">{show.name}</h3>
-		<p class="show-card__hosts">
-			{hostNames.length > 0 ? (
-				<>
+		<h3 class:list={[doc.cardTitle, "show-card__title"]}>{show.name}</h3>
+		{!show.cover && !thumbnailUrl && episodes.length > 0 && <span class="show-card__count">
+			{episodes.length} {episodes.length === 1 ? "episode" : "episodes"}
+		</span>}
+		{hostNames.length > 0 && <p class="show-card__hosts">
 					<MLabel>Hosted by</MLabel>
 					<span class="show-card__host-list">{hostNames.join(", ")}</span>
-				</>
-			) : (
-				<MLabel>Hosts to be announced</MLabel>
-			)}
-		</p>
+		</p>}
 		{latestEpisodeTitle && (
 			<p class="show-card__latest">
 				<MLabel tone="muted">Latest</MLabel>
@@ -103,23 +92,32 @@ const latestEpisodeDate = latestEpisodePublishedAt
 	.show-card {
 		display: flex;
 		flex-direction: column;
-		background: var(--editorial-paper-deep);
-		border: 1px solid var(--editorial-hairline);
+		min-width: 0;
+		font-family: var(--fonts-academy-text), sans-serif;
+		background: var(--colors-academy-panel);
+		border: 1px solid var(--colors-academy-border);
+		border-radius: var(--radii-academy-m);
 		text-decoration: none;
-		color: inherit;
+		color: var(--colors-academy-text);
 		transition: border-color var(--duration-base) var(--ease-standard);
 	}
 
 	.show-card:hover {
-		border-color: var(--editorial-ink);
+		border-color: var(--colors-academy-accent);
+	}
+
+	.show-card:focus-visible {
+		outline: 2px solid var(--colors-academy-accent);
+		outline-offset: 3px;
 	}
 
 	.show-card__frame {
 		position: relative;
 		aspect-ratio: 16 / 9;
-		background: var(--editorial-ink);
+		background: var(--colors-academy-ground);
 		overflow: hidden;
-		border-bottom: 1px solid var(--editorial-hairline);
+		border-radius: var(--radii-academy-m) var(--radii-academy-m) 0 0;
+		border-bottom: 1px solid var(--colors-academy-border);
 	}
 
 	.show-card__img {
@@ -127,37 +125,24 @@ const latestEpisodeDate = latestEpisodePublishedAt
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
-		transition: transform var(--duration-slow) var(--ease-standard);
-	}
-
-	.show-card:hover .show-card__img {
-		transform: scale(1.02);
-	}
-
-	.show-card__placeholder {
-		width: 100%;
-		height: 100%;
-		display: grid;
-		place-items: center;
-		color: var(--editorial-paper);
-		opacity: 0.25;
-	}
-	.show-card__placeholder svg {
-		width: 56px;
-		height: 56px;
 	}
 
 	.show-card__count {
-		position: absolute;
-		bottom: 10px;
-		right: 10px;
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.66rem;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
-		color: var(--editorial-paper);
-		background: oklch(0 0 0 / 0.65);
+		align-self: flex-start;
+		font-family: var(--fonts-academy-mono), monospace;
+		font-size: 0.75rem;
+		line-height: 1.5;
+		color: var(--colors-academy-canvas);
+		background: var(--colors-academy-text);
 		padding: 0.2rem 0.5rem;
+		border-radius: var(--radii-academy-s);
+	}
+
+	.show-card__frame .show-card__count {
+		position: absolute;
+		bottom: 0.5rem;
+		right: 0.5rem;
+		max-width: calc(100% - 1rem);
 	}
 
 	.show-card__body {
@@ -169,23 +154,13 @@ const latestEpisodeDate = latestEpisodePublishedAt
 	}
 
 	.show-card__title {
-		font-family: var(--font-instrument-serif), serif;
-		font-style: italic;
-		font-weight: 400;
-		font-size: 1.5rem;
-		line-height: 1.05;
-		letter-spacing: -0.02em;
-		color: var(--editorial-ink);
-		margin: 0;
-		text-wrap: balance;
-		display: -webkit-box;
-		-webkit-line-clamp: 2;
-		-webkit-box-orient: vertical;
-		overflow: hidden;
+		font-size: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+		line-height: 1.3;
+		overflow-wrap: anywhere;
 	}
 
 	.show-card:hover .show-card__title {
-		color: var(--editorial-spruce);
+		color: var(--colors-academy-accent);
 	}
 
 	.show-card__hosts {
@@ -197,9 +172,10 @@ const latestEpisodeDate = latestEpisodePublishedAt
 	}
 
 	.show-card__host-list {
-		font-family: var(--font-inter-tight), sans-serif;
 		font-size: 0.875rem;
-		color: var(--editorial-ink);
+		line-height: 1.5;
+		overflow-wrap: anywhere;
+		color: var(--colors-academy-text);
 	}
 
 	.show-card__latest {
@@ -208,14 +184,14 @@ const latestEpisodeDate = latestEpisodePublishedAt
 		gap: 0.25rem;
 		margin: 0;
 		padding-top: 0.75rem;
-		border-top: 1px solid var(--editorial-hairline);
+		border-top: 1px solid var(--colors-academy-border);
 	}
 
 	.show-card__latest-title {
-		font-family: var(--font-inter-tight), sans-serif;
 		font-size: 0.875rem;
-		line-height: 1.4;
-		color: var(--editorial-ink-soft);
+		line-height: 1.5;
+		overflow-wrap: anywhere;
+		color: var(--colors-academy-text-soft);
 		display: -webkit-box;
 		-webkit-line-clamp: 2;
 		-webkit-box-orient: vertical;
@@ -225,5 +201,9 @@ const latestEpisodeDate = latestEpisodePublishedAt
 	.show-card__cta {
 		margin-top: auto;
 		padding-top: 0.5rem;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.show-card { transition: none; }
 	}
 </style>

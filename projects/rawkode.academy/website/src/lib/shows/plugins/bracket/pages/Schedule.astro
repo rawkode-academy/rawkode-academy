@@ -6,28 +6,55 @@ interface Props {
 }
 
 const { matches } = Astro.props;
+const now = Date.now();
+const timestamp = (match: BracketMatch): number =>
+	Date.parse(match.scheduledAt ?? "");
+const isPast = (match: BracketMatch): boolean =>
+	match.status !== "live" && (match.status === "completed" || timestamp(match) < now);
+
+function byDate(a: BracketMatch, b: BracketMatch, direction = 1): number {
+	const at = timestamp(a);
+	const bt = timestamp(b);
+	if (!Number.isFinite(at)) return Number.isFinite(bt) ? 1 : 0;
+	if (!Number.isFinite(bt)) return -1;
+	return direction * (at - bt);
+}
 
 const scheduled = matches
 	.filter((m) => m.status !== "cancelled")
-	.sort((a, b) => {
-		const at = a.scheduledAt
-			? Date.parse(a.scheduledAt)
-			: Number.MAX_SAFE_INTEGER;
-		const bt = b.scheduledAt
-			? Date.parse(b.scheduledAt)
-			: Number.MAX_SAFE_INTEGER;
-		return at - bt;
-	});
+	.sort((a, b) => byDate(a, b));
 
-function fmt(iso?: string | null): string {
-	if (!iso) return "TBD";
-	return new Date(iso).toLocaleString("en-GB", {
-		weekday: "short",
-		day: "numeric",
-		month: "short",
-		hour: "2-digit",
-		minute: "2-digit",
-	});
+const groups = [
+	{
+		title: "Live and upcoming matches",
+		matches: scheduled.filter((m) => !isPast(m) && (m.status === "live" || Number.isFinite(timestamp(m)))),
+	},
+	{
+		title: "Times to be announced",
+		matches: scheduled.filter((m) => !isPast(m) && m.status !== "live" && !Number.isFinite(timestamp(m))),
+	},
+	{
+		title: "Past matches",
+		matches: scheduled.filter(isPast).sort((a, b) => byDate(a, b, -1)),
+	},
+].filter((group) => group.matches.length > 0);
+
+function fmt(iso?: string | null): { iso: string; label: string } | null {
+	const date = new Date(iso ?? "");
+	if (!Number.isFinite(date.getTime())) return null;
+	return {
+		iso: date.toISOString(),
+		label: date.toLocaleString("en-GB", {
+			weekday: "short",
+			day: "numeric",
+			month: "short",
+			year: "numeric",
+			hour: "2-digit",
+			minute: "2-digit",
+			timeZone: "UTC",
+			timeZoneName: "short",
+		}),
+	};
 }
 ---
 
@@ -42,29 +69,34 @@ function fmt(iso?: string | null): string {
 			</p>
 		</div>
 	) : (
-		<ul class="flex flex-col gap-3" role="list">
-			{scheduled.map((m) => (
-				<li class="flex flex-wrap items-center justify-between gap-3 rounded-sm paper-card p-4">
-					<div class="flex items-center gap-3">
-						<span class="font-medium text-primary-content">
-							{m.sideA?.displayName ?? "TBD"}
-						</span>
-						<span class="text-xs text-muted">vs</span>
-						<span class="font-medium text-primary-content">
-							{m.sideB?.displayName ?? "TBD"}
-						</span>
-					</div>
-					<div class="flex items-center gap-3 text-sm text-muted">
-						<span>{fmt(m.scheduledAt)}</span>
-						{m.status === "live" && (
-							<span class="font-semibold text-secondary">● LIVE</span>
-						)}
-						{m.status === "completed" && (
-							<span class="text-xs">{m.winner?.displayName} won</span>
-						)}
-					</div>
-				</li>
+		<div class="flex flex-col gap-5">
+			{groups.map((group) => (
+				<section>
+					<h2 class="mb-3 text-xl font-semibold text-primary-content">{group.title}</h2>
+					<ul class="flex flex-col gap-3" role="list">
+						{group.matches.map((m) => {
+							const date = fmt(m.scheduledAt);
+							return (
+								<li class="flex flex-wrap items-center justify-between gap-3 rounded-sm paper-card p-4">
+									<div class="flex items-center gap-3">
+										<span class="font-medium text-primary-content">{m.sideA?.displayName ?? "TBD"}</span>
+										<span class="text-xs text-muted">vs</span>
+										<span class="font-medium text-primary-content">{m.sideB?.displayName ?? "TBD"}</span>
+									</div>
+									<div class="flex items-center gap-3 text-sm text-muted">
+										{date ? <time datetime={date.iso}>{date.label}</time> : <span>{m.status === "completed" ? "Time unavailable" : "Time to be announced"}</span>}
+										{m.status === "live" && <span class="font-semibold text-secondary">● LIVE</span>}
+										{m.status === "completed" && (
+											<span class="text-xs">{m.winner?.displayName ? `${m.winner.displayName} won` : "Completed"}</span>
+										)}
+										{m.status !== "live" && m.status !== "completed" && <span class="text-xs">{m.status}</span>}
+									</div>
+								</li>
+							);
+						})}
+					</ul>
+				</section>
 			))}
-		</ul>
+		</div>
 	)
 }

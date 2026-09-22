@@ -4,6 +4,7 @@ export const prerender = false;
 import { env } from "cloudflare:workers";
 import NewsletterWidget from "./NewsletterWidget.vue";
 import { createLearnerId } from "@/actions/newsletter";
+import { academyMarketing } from "@rawkodeacademy/design-system";
 
 interface Props {
 	class?: string;
@@ -11,20 +12,23 @@ interface Props {
 	headline?: string;
 	subtitle?: string;
 	audience?: string;
+	pagePath?: string;
 	variant?: "card" | "section";
 }
 
 const {
 	class: className,
-	badge = "Weekly Cloud Native insights",
-	headline = "Stay ahead in cloud native",
-	subtitle = "Tutorials, deep dives, and curated events. No fluff.",
+	badge = "Rawkode Academy newsletter",
+	headline = "Academy publications by email",
+	subtitle = "Get an email when Rawkode Academy publishes new tutorials, articles, and videos.",
 	audience = "academy",
+	pagePath = Astro.url.pathname,
 	variant = "card",
 } = Astro.props;
 
 const user = Astro.locals.user;
 let isSubscribed = false;
+let preferencesUnavailable = Boolean(user);
 
 if (user && import.meta.env.PROD) {
 	try {
@@ -35,12 +39,13 @@ if (user && import.meta.env.PROD) {
 			audience,
 		);
 		isSubscribed = prefs.length > 0;
+		preferencesUnavailable = false;
 	} catch (e) {
+		preferencesUnavailable = true;
 		console.error("Failed to fetch preferences", e);
 	}
 }
 
-const pagePath = Astro.url.pathname;
 const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(pagePath)}`;
 
 // Check for the newsletter subscription cookie (server-side)
@@ -49,42 +54,41 @@ const hasNewsletterCookie =
 
 // For anonymous users with the cookie, hide the CTA entirely
 const shouldHide = !user && hasNewsletterCookie;
-const isSection = variant === "section";
+const marketing = academyMarketing({ newsletterVariant: variant });
 ---
 
 {!shouldHide && (
-	<section class:list={[isSection ? "relative z-10 w-full overflow-hidden py-8 sm:py-10" : "relative z-10 w-full py-12", className]}>
+	<section class:list={[marketing.newsletter, className]}>
 		<div
-			class:list={[
-				isSection
-					? "paper-panel relative mx-auto max-w-7xl overflow-hidden rounded-4xl px-6 py-7 sm:px-8 sm:py-8 lg:px-10 lg:py-10"
-					: "section-shell-muted overflow-hidden rounded-3xl px-6 py-6 sm:px-8 sm:py-8",
-			]}
+			class={marketing.newsletterSection}
 		>
 
-			<div class:list={[isSection ? "grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-center lg:gap-10" : "grid gap-5 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-center lg:gap-8"]}>
-				<div class:list={[isSection ? "min-w-0 space-y-3" : "min-w-0 space-y-2"]}>
-					<div class="flex items-center gap-2">
-						<span class="h-2 w-2 rounded-full bg-primary"></span>
-						<span class="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{badge}</span>
+			<div class={marketing.newsletterGrid}>
+				<div class={marketing.newsletterCopy}>
+					<div class={marketing.newsletterBadge}>
+						<span>{badge}</span>
 					</div>
-					<h2 class:list={[isSection ? "max-w-[18ch] text-balance text-2xl font-display font-semibold tracking-tight text-primary-content sm:max-w-none sm:text-3xl" : "text-xl font-display font-semibold tracking-tight text-primary-content sm:text-2xl"]}>
+					<h2 class={marketing.newsletterTitle}>
 						{headline}
 					</h2>
-					<p class:list={[isSection ? "max-w-[48ch] text-base leading-8 text-secondary-content sm:text-lg" : "max-w-[52ch] text-sm leading-7 text-secondary-content sm:text-base"]}>
+					<p class={marketing.newsletterLead}>
 						{subtitle}
 					</p>
 				</div>
 
-				<div class:list={[isSection ? "w-full max-w-md lg:justify-self-end" : "w-full max-w-sm lg:justify-self-end"]}>
+				<div class={marketing.newsletterWidget}>
 					<NewsletterWidget
 						client:visible
 						isSignedIn={!!user}
 						isSubscribed={isSubscribed}
+						preferencesUnavailable={preferencesUnavailable}
 						signInUrl={signInUrl}
 						pagePath={pagePath}
 						audience={audience}
 					/>
+					<noscript>
+						<p>Email signup requires JavaScript. You can <a href="/settings">manage email preferences in account settings</a>.</p>
+					</noscript>
 				</div>
 			</div>
 		</div>

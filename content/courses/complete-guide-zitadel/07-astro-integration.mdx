@@ -54,10 +54,11 @@ Before starting, make sure you have:
 
 ## Setting Up Dependencies
 
-The only dependency we need is Arctic, a fantastic OAuth library that simplifies integration:
+Install Arctic for OAuth helpers, the JWT decoder used below, and the ID-token claim types:
 
 ```bash
-bun add arctic
+bun add arctic @oslojs/jwt
+bun add -d oidc-client-ts
 ```
 
 Arctic handles all the heavy lifting for OAuth and OIDC flows, making our integration straightforward.
@@ -120,7 +121,7 @@ export class Zitadel {
   constructor() {
     this.authorizationEndpoint = `${ZITADEL_URL}/oauth/v2/authorize`;
     this.tokenEndpoint = `${ZITADEL_URL}/oauth/v2/token`;
-    this.redirectURI = 'http://localhost:4321/auth/callback';
+    this.redirectURI = 'http://localhost:4321/api/auth/callback';
   }
 
   async createAuthorizationURL(state: string, codeChallenge: string, scopes: string[]): Promise<URL> {
@@ -270,9 +271,7 @@ export const GET: APIRoute = async ({ url, cookies, redirect }) => {
 Update your login button to trigger the authentication flow:
 
 ```astro
-<a href="/api/auth/signin">
-  <button>Login with Zitadel</button>
-</a>
+<a href="/api/auth/signin">Login with Zitadel</a>
 ```
 
 ## Testing the Integration

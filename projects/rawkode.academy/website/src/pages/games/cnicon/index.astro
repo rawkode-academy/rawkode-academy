@@ -4,10 +4,14 @@ import { DISABLE_GAME_AUTH } from "astro:env/server";
 import { getCollection } from "astro:content";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { weekKey, buildWeeklyRounds, type CncfStatus } from "@/lib/games/guess-the-logo";
+import { academyLayout, academyMedia } from "@rawkodeacademy/design-system";
+import "@rawkodeacademy/design-system/styles.css";
 
 const disableAuth = DISABLE_GAME_AUTH === "true";
 const user = Astro.locals.user;
 const canPlay = Boolean(user) || disableAuth;
+const layout = academyLayout({ width: "wide" });
+const media = academyMedia();
 
 // Only build the puzzle for requests that can actually play — a signed-out
 // visitor just gets the sign-in CTA, so skip the content load + round generation.
@@ -44,8 +48,9 @@ if (canPlay) {
 	useImageDirectly={true}
 	image={{ image: new URL("/games/cnicon-og.png", Astro.site) }}
 >
+	<div class:list={[layout.root, media.root, "game-route"]}>
 	{!canPlay ? (
-		<div class="sign-in-cta">
+		<div class:list={[layout.section, "sign-in-cta"]}>
 			<div class="sign-in-card">
 				<h1>CNIcon</h1>
 				<p>Sign in to play this week's CNIcon and compete on the leaderboard.</p>
@@ -55,7 +60,7 @@ if (canPlay) {
 			</div>
 		</div>
 	) : (
-		<div class="game-wrapper bg-[var(--surface-base)]">
+		<div class:list={[media.frame, media.canvas, "game-wrapper"]}>
 			<div
 				id="gtl-root"
 				data-disable-auth={disableAuth ? "true" : "false"}
@@ -66,6 +71,7 @@ if (canPlay) {
 			<script type="application/json" id="gtl-rounds" set:html={roundsJson} />
 		</div>
 	)}
+	</div>
 </PageWrapper>
 
 <script>
@@ -120,7 +126,6 @@ if (canPlay) {
 		color: var(--editorial-paper);
 		font-family: var(--font-jetbrains-mono);
 		font-size: 0.875rem;
-		text-transform: uppercase;
 		letter-spacing: 0.08em;
 		text-decoration: none;
 		border-radius: var(--radius-sm);
@@ -133,14 +138,14 @@ if (canPlay) {
 
 	.game-wrapper {
 		width: 100%;
-		min-height: calc(100vh - 200px);
-		border-radius: 12px;
+		min-height: min(60vh, 30rem);
+		border-radius: 4px;
 		overflow: hidden;
 	}
 
 	#gtl-root {
 		width: 100%;
 		height: 100%;
-		min-height: calc(100vh - 200px);
+		min-height: min(60vh, 30rem);
 	}
 </style>

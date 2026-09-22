@@ -61,8 +61,9 @@ ${body}
 }
 
 export const GET: APIRoute = async ({ site }) => {
+	const now = new Date();
 	const allNews = await getCollection("news");
-	const fresh = selectFreshNewsItems(allNews);
+	const fresh = selectFreshNewsItems(allNews, now);
 	const xml = renderGoogleNewsSitemap(site, fresh);
 
 	return new Response(xml, {

@@ -21,9 +21,21 @@ export const robotsMiddleware: MiddlewareHandler = async (context, next) => {
 		NOINDEX_PREFIXES.some((prefix) => pathname.startsWith(prefix)) ||
 		NOINDEX_EXACT_PATHS.has(pathname);
 
-	if (shouldNoindex && !response.headers.has("X-Robots-Tag")) {
-		response.headers.set("X-Robots-Tag", "noindex, nofollow");
+	if (!shouldNoindex || response.headers.has("X-Robots-Tag")) {
+		return response;
 	}
 
-	return response;
+	try {
+		response.headers.set("X-Robots-Tag", "noindex, nofollow");
+		return response;
+	} catch {
+		// Prerendered and static responses arrive with immutable headers.
+		const headers = new Headers(response.headers);
+		headers.set("X-Robots-Tag", "noindex, nofollow");
+		return new Response(response.body, {
+			status: response.status,
+			statusText: response.statusText,
+			headers,
+		});
+	}
 };

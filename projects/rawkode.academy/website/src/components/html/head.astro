@@ -34,15 +34,14 @@ const normalizedTitle =
 
 <style is:global>
 	/* Body font + mono fallbacks. Heading font + body backdrop are owned
-	 by global.css (@layer base + body{}). UnoCSS handles class-level
-	 `font-display`/`font-body`/`font-mono` via theme. */
+	 by global.css (@layer base + body{}). */
 	pre,
 	code,
 	kbd,
 	samp,
 	tt {
 		font-family:
-			var(--font-jetbrains-mono),
+			var(--font-red-hat-mono),
 			ui-monospace,
 			SFMono-Regular,
 			Menlo,
@@ -54,9 +53,9 @@ const normalizedTitle =
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<meta name="color-scheme" content="light dark" />
-	<Font cssVariable="--font-instrument-serif" preload />
-	<Font cssVariable="--font-inter-tight" preload />
-	<Font cssVariable="--font-jetbrains-mono" />
+	<Font cssVariable="--font-red-hat-display" preload />
+	<Font cssVariable="--font-red-hat-text" preload />
+	<Font cssVariable="--font-red-hat-mono" />
 
 	{/*
 		Editorial favicons — light scheme shows ink on paper (icon-dark.svg),
@@ -71,14 +70,14 @@ const normalizedTitle =
 	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
 	<link rel="manifest" href="/site.webmanifest" />
 	<link rel="mask-icon" href="/icon-dark.svg" color="#23282d" />
-	<meta name="msapplication-TileColor" content="#f8f5ef" />
+	<meta name="msapplication-TileColor" content="#f4f7fb" />
 	{/* ThemeScript keeps browser chrome aligned with the applied preference,
 	    including when it overrides the operating-system scheme. */}
 	<meta
 		name="theme-color"
-		content="#f8f5ef"
-		data-light-color="#f8f5ef"
-		data-dark-color="#1b1b23"
+		content="#f4f7fb"
+		data-light-color="#f4f7fb"
+		data-dark-color="#0a1220"
 	/>
 	<meta
 		name="description"

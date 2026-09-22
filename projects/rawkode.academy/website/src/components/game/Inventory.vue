@@ -1,5 +1,5 @@
 <template>
-	<div class="inventory-container">
+	<div :class="gameTheme.root" class="inventory-container">
 		<div class="grid-bg"></div>
 
 		<div class="content">
@@ -77,6 +77,8 @@
 </template>
 
 <script setup lang="ts">
+import { academyGame } from "@rawkodeacademy/design-system";
+const gameTheme = academyGame();
 import { ref } from "vue";
 import type { Insult, Comeback, InsultLayer } from "@/game/data/types";
 
@@ -92,17 +94,17 @@ defineEmits<{
 const activeTab = ref<"insults" | "comebacks">("insults");
 
 const layerColors: Record<InsultLayer, string> = {
-	External: "#04b59c",
-	App: "#3498db",
-	ServiceMesh: "#9b59b6",
-	KubeSystem: "#e67e22",
-	ApiServer: "#e74c3c",
-	Host: "#c0392b",
-	Generic: "#6b7280",
+	External: "var(--colors-academy-status-spruce)",
+	App: "var(--colors-academy-status-sky)",
+	ServiceMesh: "var(--colors-academy-status-violet)",
+	KubeSystem: "var(--colors-academy-status-amber)",
+	ApiServer: "var(--colors-academy-status-rust)",
+	Host: "var(--colors-academy-status-rust)",
+	Generic: "var(--colors-academy-text-muted)",
 };
 
 function getLayerColor(layer: InsultLayer): string {
-	return layerColors[layer] || "#6b7280";
+	return layerColors[layer] || "var(--colors-academy-text-muted)";
 }
 </script>
 
@@ -122,8 +124,8 @@ function getLayerColor(layer: InsultLayer): string {
 	position: absolute;
 	inset: 0;
 	background-image:
-		linear-gradient(rgb(var(--brand-primary) / 0.1) 1px, transparent 1px),
-		linear-gradient(90deg, rgb(var(--brand-primary) / 0.1) 1px, transparent 1px);
+		linear-gradient(color-mix(in srgb, var(--colors-academy-accent) 10.0%, transparent) 1px, transparent 1px),
+		linear-gradient(90deg, color-mix(in srgb, var(--colors-academy-accent) 10.0%, transparent) 1px, transparent 1px);
 	background-size: 40px 40px;
 }
 
@@ -137,20 +139,20 @@ function getLayerColor(layer: InsultLayer): string {
 .title {
 	font-size: 2.5rem;
 	font-weight: 700;
-	color: rgb(var(--brand-primary));
-	text-shadow: 0 0 20px rgb(var(--brand-primary) / 0.5);
+	color: var(--colors-academy-accent);
+	text-shadow: 0 0 20px color-mix(in srgb, var(--colors-academy-accent) 50.0%, transparent);
 	letter-spacing: 0.1em;
 	margin-bottom: 0.5rem;
 }
 
 .subtitle {
-	color: rgb(107 114 128);
+	color: var(--colors-academy-text-muted);
 	font-size: 1rem;
 	margin-bottom: 1.5rem;
 }
 
 :root.dark .subtitle {
-	color: rgb(156 163 175);
+	color: var(--colors-academy-text-muted);
 }
 
 .tabs {
@@ -161,9 +163,9 @@ function getLayerColor(layer: InsultLayer): string {
 }
 
 .tab {
-	background: rgb(255 255 255 / 0.8);
-	border: 1px solid rgb(0 0 0 / 0.1);
-	color: rgb(107 114 128);
+	background: var(--colors-academy-panel);
+	border: 1px solid var(--colors-academy-border);
+	color: var(--colors-academy-text-muted);
 	padding: 0.75rem 1.5rem;
 	font-family: inherit;
 	font-size: 0.9rem;
@@ -174,25 +176,25 @@ function getLayerColor(layer: InsultLayer): string {
 }
 
 :root.dark .tab {
-	background: rgb(0 0 0 / 0.6);
-	border-color: rgb(255 255 255 / 0.2);
-	color: rgb(156 163 175);
+	background: var(--colors-academy-panel);
+	border-color: var(--colors-academy-border);
+	color: var(--colors-academy-text-muted);
 }
 
 .tab:hover {
-	border-color: rgb(var(--brand-primary));
-	color: rgb(var(--brand-primary));
+	border-color: var(--colors-academy-accent);
+	color: var(--colors-academy-accent);
 }
 
 .tab.active {
-	border-color: rgb(var(--brand-primary));
-	color: rgb(var(--brand-primary));
-	background: rgb(var(--brand-primary) / 0.1);
+	border-color: var(--colors-academy-accent);
+	color: var(--colors-academy-accent);
+	background: color-mix(in srgb, var(--colors-academy-accent) 10.0%, transparent);
 }
 
 .items-container {
-	background: rgb(255 255 255 / 0.8);
-	border: 1px solid rgb(var(--brand-primary) / 0.3);
+	background: var(--colors-academy-panel);
+	border: 1px solid color-mix(in srgb, var(--colors-academy-accent) 30.0%, transparent);
 	border-radius: 12px;
 	padding: 1rem;
 	margin-bottom: 1.5rem;
@@ -202,7 +204,7 @@ function getLayerColor(layer: InsultLayer): string {
 }
 
 :root.dark .items-container {
-	background: rgb(0 0 0 / 0.6);
+	background: var(--colors-academy-panel);
 }
 
 .items-list {
@@ -212,53 +214,53 @@ function getLayerColor(layer: InsultLayer): string {
 }
 
 .empty-state {
-	color: rgb(107 114 128);
+	color: var(--colors-academy-text-muted);
 	font-style: italic;
 	padding: 2rem;
 }
 
 :root.dark .empty-state {
-	color: rgb(156 163 175);
+	color: var(--colors-academy-text-muted);
 }
 
 .item-card {
 	text-align: left;
 	padding: 1rem;
-	background: rgb(0 0 0 / 0.03);
+	background: var(--colors-academy-border);
 	border-radius: 8px;
 	border-left: 3px solid transparent;
 	transition: all 0.2s ease;
 }
 
 :root.dark .item-card {
-	background: rgb(255 255 255 / 0.05);
+	background: var(--colors-academy-border);
 }
 
 .item-card:hover {
-	background: rgb(0 0 0 / 0.06);
+	background: var(--colors-academy-border);
 }
 
 :root.dark .item-card:hover {
-	background: rgb(255 255 255 / 0.08);
+	background: var(--colors-academy-border);
 }
 
 .item-card.insult {
-	border-left-color: #e67e22;
+	border-left-color: var(--colors-academy-status-amber);
 }
 
 .item-card.comeback {
-	border-left-color: rgb(var(--brand-primary));
+	border-left-color: var(--colors-academy-accent);
 }
 
 .item-text {
-	color: rgb(55 65 81);
+	color: var(--colors-academy-text);
 	font-size: 0.95rem;
 	line-height: 1.5;
 	margin-bottom: 0.5rem;
 }
 
 :root.dark .item-text {
-	color: rgb(204 204 204);
+	color: var(--colors-academy-text-muted);
 }
 
 .item-meta {
@@ -274,17 +276,17 @@ function getLayerColor(layer: InsultLayer): string {
 }
 
 .item-effective {
-	color: rgb(107 114 128);
+	color: var(--colors-academy-text-muted);
 }
 
 :root.dark .item-effective {
-	color: rgb(156 163 175);
+	color: var(--colors-academy-text-muted);
 }
 
 .back-btn {
 	background: transparent;
-	border: 2px solid rgb(var(--brand-primary));
-	color: rgb(var(--brand-primary));
+	border: 2px solid var(--colors-academy-accent);
+	color: var(--colors-academy-accent);
 	padding: 1rem 2rem;
 	font-family: inherit;
 	font-size: 1rem;
@@ -293,12 +295,12 @@ function getLayerColor(layer: InsultLayer): string {
 }
 
 .back-btn:hover {
-	background: rgb(var(--brand-primary));
+	background: var(--colors-academy-accent);
 	color: white;
 }
 
 :root.dark .back-btn:hover {
-	color: rgb(17 24 39);
+	color: var(--colors-academy-text);
 }
 
 .btn-text {

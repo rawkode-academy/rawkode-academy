@@ -29,7 +29,7 @@ export const Variants: Story = {
 		template: `
 			<div style="display:flex;flex-direction:column;gap:1rem;align-items:flex-start">
 				<EditorialButton variant="solid" :arrow="true">Start watching</EditorialButton>
-				<EditorialButton variant="outline">Weekly field notes</EditorialButton>
+				<EditorialButton variant="outline">Newsletter</EditorialButton>
 				<EditorialButton variant="ghost">Cancel</EditorialButton>
 			</div>
 		`,

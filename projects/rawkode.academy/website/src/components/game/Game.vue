@@ -1,5 +1,5 @@
 <template>
-	<div class="game-container">
+	<div :class="gameTheme.root" class="game-container">
 		<!-- Loading state -->
 		<div v-if="isLoading" class="loading-screen">
 			<div class="loading-content">
@@ -92,6 +92,8 @@
 </template>
 
 <script setup lang="ts">
+import { academyGame } from "@rawkodeacademy/design-system";
+const gameTheme = academyGame();
 import { ref, onMounted } from "vue";
 import type { EnemyData, Insult, Comeback } from "@/game/data/types";
 import {
@@ -441,7 +443,7 @@ function returnFromOverlay() {
 .game-container {
 	width: 100%;
 	min-height: calc(100vh - 200px);
-	font-family: "JetBrains Mono", "Fira Code", monospace;
+	font-family: var(--fonts-academy-mono);
 }
 
 .fade-enter-active,
@@ -470,8 +472,8 @@ function returnFromOverlay() {
 .loading-spinner {
 	width: 60px;
 	height: 60px;
-	border: 3px solid rgb(var(--brand-primary) / 0.2);
-	border-top-color: rgb(var(--brand-primary));
+	border: 3px solid color-mix(in srgb, var(--colors-academy-accent) 20.0%, transparent);
+	border-top-color: var(--colors-academy-accent);
 	border-radius: 50%;
 	animation: spin 1s linear infinite;
 	margin: 0 auto 1.5rem;
@@ -484,7 +486,7 @@ function returnFromOverlay() {
 }
 
 .loading-text {
-	color: rgb(var(--brand-primary));
+	color: var(--colors-academy-accent);
 	font-size: 1.1rem;
 	letter-spacing: 0.1em;
 	animation: pulse 1.5s ease-in-out infinite;
@@ -514,8 +516,8 @@ function returnFromOverlay() {
 	position: absolute;
 	inset: 0;
 	background-image:
-		linear-gradient(rgb(var(--brand-primary) / 0.1) 1px, transparent 1px),
-		linear-gradient(90deg, rgb(var(--brand-primary) / 0.1) 1px, transparent 1px);
+		linear-gradient(color-mix(in srgb, var(--colors-academy-accent) 10.0%, transparent) 1px, transparent 1px),
+		linear-gradient(90deg, color-mix(in srgb, var(--colors-academy-accent) 10.0%, transparent) 1px, transparent 1px);
 	background-size: 40px 40px;
 }
 
@@ -523,45 +525,45 @@ function returnFromOverlay() {
 	text-align: center;
 	z-index: 1;
 	padding: 3rem;
-	background: rgb(255 255 255 / 0.8);
-	border: 1px solid rgb(var(--brand-primary) / 0.3);
+	background: var(--colors-academy-panel);
+	border: 1px solid color-mix(in srgb, var(--colors-academy-accent) 30.0%, transparent);
 	border-radius: 12px;
 	backdrop-filter: blur(12px);
 }
 
 :root.dark .auth-content {
-	background: rgb(0 0 0 / 0.6);
+	background: var(--colors-academy-panel);
 }
 
 .auth-title {
 	font-size: 2rem;
 	font-weight: 700;
-	color: #d97706;
-	text-shadow: 0 0 20px rgb(217 119 6 / 0.5);
+	color: var(--colors-academy-status-amber);
+	text-shadow: 0 0 20px color-mix(in srgb, var(--colors-academy-status-amber) 50.0%, transparent);
 	letter-spacing: 0.1em;
 	margin-bottom: 1rem;
 }
 
 :root.dark .auth-title {
-	color: #f1c40f;
-	text-shadow: 0 0 20px rgba(241, 196, 15, 0.5);
+	color: var(--colors-academy-status-amber);
+	text-shadow: 0 0 20px color-mix(in srgb, var(--colors-academy-status-amber) 50.0%, transparent);
 }
 
 .auth-text {
-	color: rgb(107 114 128);
+	color: var(--colors-academy-text-muted);
 	font-size: 1.1rem;
 	margin-bottom: 2rem;
 }
 
 :root.dark .auth-text {
-	color: rgb(156 163 175);
+	color: var(--colors-academy-text-muted);
 }
 
 .auth-btn {
 	display: inline-block;
 	background: transparent;
-	border: 2px solid rgb(var(--brand-primary));
-	color: rgb(var(--brand-primary));
+	border: 2px solid var(--colors-academy-accent);
+	color: var(--colors-academy-accent);
 	padding: 1rem 2.5rem;
 	font-family: inherit;
 	font-size: 1.2rem;
@@ -571,12 +573,12 @@ function returnFromOverlay() {
 }
 
 .auth-btn:hover {
-	background: rgb(var(--brand-primary));
+	background: var(--colors-academy-accent);
 	color: white;
 }
 
 :root.dark .auth-btn:hover {
-	color: rgb(17 24 39);
+	color: var(--colors-academy-text);
 }
 
 .btn-text {

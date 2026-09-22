@@ -1,0 +1,724 @@
+{
+  "status": "in-progress",
+  "inventory": "design-inventory.json",
+  "rule": "Every path in the inventory is pending until an explicit review entry exists here. Source reviews and template samples are not visual sign-off.",
+  "reviews": [
+    {
+      "path": "/watch/introduction-to-the-kubernetes-seccomp-operator-rtfm-with-rawkode",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 light", "390x844 dark"],
+      "environment": "Compiled local :4322, 22:28 build; desktop dark transcript/chapter states on hosted c04b61c3 / ecec099d; desktop footer dark",
+      "findings": ["F67 resolved"],
+      "coverage": "Whole collapsed-transcript page inspected through copyright at both sizes: loaded player/poster, long title and metadata, three outcomes and description, three technology links, all three cast members, four resources, both tab panels, six recommendations, hydrated signup and footer. All ten expanded chapters inspected desktop and mobile. Resource tabs initially show Resources; ArrowLeft/Right switch panels with complete focus outlines at both sizes. Transcript AppArmor query shows three highlighted matches in one paragraph; no-match state stays beside input. Keyboard clear restores all 129 rows in nine sections. Hosted desktop timestamp Enter seeks to 4836 seconds and starts playback; navigation stops playback. Widths 390/390 and 1440/1440.",
+      "justification": "Player is the primary task; date/runtime and share action orient the viewer. Outcomes and description establish scope. Chapters and searchable captions support precise navigation without an always-expanded 129-paragraph wall. Technology/cast links provide context, actual documentation and code resources enable follow-through, and two visible tabs separate references from discussion. Removed redundant outer resource panel and permanently hidden dropdown; bounded recommendations and optional signup follow learning content.",
+      "limitations": "Expanded transcript reviewed at its opening and filtered match/empty/recovery states, not every one of 129 paragraphs or caption accuracy. No full playback, fullscreen, casting, PiP, live stream, external resource visits, authentication, reactions, comments or subscriptions. Main-agent review only. Final external-link glyph repair still requires deployed delta verification."
+    },
+    {
+      "path": "/watch",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 light", "390x844 dark"],
+      "environment": "Compiled local :4322, 22:11 build; earlier full desktop dark on hosted 75375748",
+      "findings": ["F63 resolved"],
+      "coverage": "Whole first page inspected in overlapping captures through copyright at both sizes: feature, search, every one of 23 grid cards and pagination. DOM confirms 24 unique session links including feature and desktop width 1440/1440. Mobile Next by Enter reaches page 2 with range 25-48; submitting kueue resets pagination and returns one session without the feature. No-match message and Clear search recovery verified. These state checks do not sign off the whole of page 2 or later pages.",
+      "justification": "One featured latest session supplies a clear starting point. Title, distinct artwork and runtime help compare sessions; search narrows the large catalogue and native pagination bounds its length. Duplicate featured grid tile removed without dropping any session. Shared navigation and footer provide routes to other learning formats.",
+      "limitations": "First-page visual review only. Pagination of a 329-record fixture is covered by an actual Astro SSR test, not by a visual review of every real archive page or video detail. Search state checks are mobile; no subscriptions or authentication."
+    },
+    {
+      "path": "/news/2026-09-18-gloo-interrupted-validation",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 light", "390x844 dark"],
+      "environment": "Compiled local :4322, 21:50 build / d5b4e864",
+      "findings": [],
+      "coverage": "Whole page inspected in overlapping captures through copyright at both sizes: headline/deck/byline and two technology links, all five paragraphs, four release-source links, long metric identifiers, three complete related stories, hydrated signup and footer. Mobile document is 390px wide and identifiers wrap without clipping. Related Gloo row from the ExternalDNS story opens by Enter.",
+      "justification": "Headline and summary identify the failure, provenance links identify releases, and the body distinguishes interrupted validation from actual rejection, fixed branches, observability and operator action. A short report needs no contents sidebar or decorative hero. Three related stories use shared generic artwork, dates and descriptions; optional newsletter follows content.",
+      "limitations": "Local visual evidence only. No gateway changes, operational commands, source-fact revalidation or subscription. Signup expansion covered separately on the preceding ExternalDNS detail; no claim of reviewing other News routes."
+    },
+    {
+      "path": "/news/2026-09-19-externaldns-023-dry-run-crd-registry",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 light", "390x844 dark"],
+      "environment": "Compiled local :4322, 21:50 build / d5b4e864",
+      "findings": [],
+      "coverage": "Whole page inspected in overlapping captures through copyright at both sizes: long headline/deck, author/date/read-time/technology, all four paragraphs and linked sources, three complete related rows with generic News artwork, hydrated newsletter and footer. Mobile newsletter expanded and input automatically receives a complete visible focus outline. Widths 390/390 and 1440/1440; long option names wrap within the text measure. Archive Read the story link reached this page by Enter.",
+      "justification": "Headline/deck communicate the release and upgrade consequence; byline/date and source links establish provenance. Four concise paragraphs distinguish provider fixes from the registry change. No unnecessary contents navigation or decorative hero image for this short report. Bounded related stories support continuation; optional email signup follows the article.",
+      "limitations": "Local visual evidence. No DNS commands, provider changes, source-fact revalidation, external navigation or subscription submission. Other News detail pages remain individually pending."
+    },
+    {
+      "path": "/learning-paths/klustered-advanced-cluster-triage",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 dark", "390x844 light"],
+      "environment": "Compiled local preview :4322, 18:30 whole-page and 19:00 correction builds",
+      "findings": ["F45", "F50"],
+      "coverage": "Whole page read with overlapping captures at both sizes, including expanded prerequisites, five sessions, four bonus links, after-action steps, newsletter and copyright. Long participant names and inline commands wrap without document overflow (390/390). Corrected aligned hero, plain-text prerequisites and contained newsletter rechecked in the 19:00 build at both sizes. Shared TOC keyboard and fast/reverse-scroll behavior verified on the security and developer-platform paths.",
+      "justification": "Five sequenced real sessions demonstrate distinct triage failures. Readiness criteria and objectives establish difficulty; drills and follow-ups turn viewing into practice. Bonus links extend the subject without inflating core-video runtime. Author/date and contents aid orientation; related technology and archive links support onward navigation.",
+      "limitations": "No command execution, cluster changes, video playback or subscription. Technical guidance preserved, not independently revalidated."
+    },
+    {
+      "path": "/learning-paths/mastering-kubernetes-security-posture-and-policy",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 dark", "390x844 light"],
+      "environment": "Compiled local preview :4322, 18:30 whole-page and 19:00 correction builds",
+      "findings": ["F45", "F50"],
+      "coverage": "Entire page inspected with overlapping captures at both sizes: expanded prerequisites, all seven lessons, two bonus links, three follow-ups, newsletter and copyright. All eleven mobile contents links inspected in expanded disclosure. Title, long linked headings, lists and commands fit; mobile width 390/390. In the 19:00 build, hero/body alignment, full TOC keyboard focus outline, Enter anchor, fast/reverse/end scroll current-section tracking and contained newsletter verified. Mobile dark newsletter expanded without submission; input 300x56 and document 390px wide.",
+      "justification": "Sequence distinguishes posture scanning, policy enforcement/reporting, OPA, runtime security and JavaScript policies. Prerequisites/objectives qualify the path, drills make it actionable, and optional bonus/follow-up work is separated from core recording time. Author/date, chapter navigation and related resources orient the reader.",
+      "limitations": "No security commands, external signups, video playback or independent factual validation of authored instructions."
+    },
+    {
+      "path": "/learning-paths",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 light", "390x844 light"],
+      "environment": "Compiled local preview :4322, 18:30 whole-page and 19:00 correction builds",
+      "findings": ["F45", "F50"],
+      "coverage": "Entire index including all four paths and footer inspected at both sizes. Each path has its own H2 and an honest core-video estimate. All four rebuilt rows inspected at both sizes in the 19:00 build: meaningless catalogue ordinals removed, full keyboard focus ring and Enter navigation to Klustered verified.",
+      "justification": "Title and brief description identify the collection. Four native linked rows expose title, distinguishing summary, difficulty and recording runtime. Shared navigation supports discovery; no filters or pagination for a four-item collection.",
+      "limitations": "Local visual evidence only; no playback or learner-completion estimate."
+    },
+    {
+      "path": "/learning-paths/build-your-first-kubernetes-developer-platform",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 light", "390x844 light"],
+      "environment": "Compiled local preview :4322, 18:30 whole-page and 19:00 correction builds",
+      "findings": ["F45", "F50"],
+      "coverage": "Whole page read with overlapping captures at both sizes, all six chapters, prerequisites, end links, newsletter and copyright. Mobile contents and prerequisites disclosures opened. Desktop chapter anchor used by keyboard; newsletter expanded without submission. In the 19:00 build, aligned hero, Start learning anchor, fast-scroll tracking to Crossplane in Action, end tracking to Where to Go Next and contained newsletter verified. Mobile hero and newsletter rechecked; document width 390/390. Shared full TOC focus outline verified on the security path.",
+      "justification": "Hero identifies the sequence, author, difficulty, date and core recording time. Prerequisites and objectives establish readiness and outcomes. Ordered linked chapters explain selection, learning and takeaways. TOC provides direct access through the long document. Technology links, next actions and optional learning-path email signup support further study.",
+      "limitations": "No email/auth request or video playback; desktop dark pending."
+    },
+    {
+      "path": "/learning-paths/gitops-landscape",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 dark", "390x844 light"],
+      "environment": "Compiled local preview :4322, 18:30 whole-page and 19:00 correction builds",
+      "findings": ["F45", "F50"],
+      "coverage": "Entire page read with overlapping captures at both sizes: five core chapters, drills, two bonus resources, three follow-ups, end navigation, newsletter and copyright. Prerequisites opened. Mobile width 390/390. In the 19:00 build, mobile hero and clean plain-text prerequisite rechecked; desktop aligned hero, Start learning anchor and current Timoni item, end current Fleet Follow-ups and contained newsletter verified.",
+      "justification": "Prerequisites qualify this advanced path. Objectives and sequenced chapters distinguish packaging, promotion, reconciliation, developer workflow and fleet operations. Drills apply each lesson; bonus links and follow-ups extend practice without inflating core-video time. Author/date and navigational elements provide context and recovery.",
+      "limitations": "No video playback or subscription; substantive technical instructions preserved, not independently revalidated."
+    },
+    {
+      "path": "/privacy",
+      "status": "visual-pass",
+      "viewports": [
+        "1440x1000 dark",
+        "390x844 light"
+      ],
+      "environment": "Compiled local preview :4322, 17:14 BST build",
+      "findings": [],
+      "coverage": "Entire page inspected with overlapping viewport captures from header through copyright at both sizes. No overflow, unreadable text or unnecessary controls observed.",
+      "justification": "Heading and date orient the reader; summary gives a quick overview; policy sections and contact address explain data handling and provide an action; shared navigation enables discovery.",
+      "limitations": "Visual and content-structure review only; no legal accuracy assessment, mail submission or deployed proof."
+    },
+    {
+      "path": "/changelog",
+      "status": "visual-pass",
+      "viewports": [
+        "1440x1000 dark",
+        "390x844 light"
+      ],
+      "findings": [
+        "F37 resolved",
+        "F47 resolved"
+      ],
+      "environment": "Compiled local preview :4322, 17:49 whole-page and 18:30 correction builds",
+      "coverage": "All sixteen entries and footer inspected at both sizes. Revised hero and first entries rechecked in the 18:30 build at both sizes; no empty paragraphs, sixteen entries, mobile width 390/390. Future optional PR-link branch has source accessibility coverage, not a current rendered fixture.",
+      "justification": "Dated entries and named authors explain the site's evolution; summaries and bullets distinguish each change; optional code-history links provide evidence. Historical descriptions are retained as history, not current feature promises."
+    },
+    {
+      "path": "/feeds",
+      "status": "visual-pass",
+      "viewports": [
+        "390x844 light",
+        "1440x1000 dark"
+      ],
+      "environment": "Compiled local preview :4322, 17:49 BST build",
+      "findings": [
+        "F38 resolved"
+      ],
+      "coverage": "Entire page inspected with overlapping viewport screenshots from header to copyright in both sizes. Format disclosure opened by pointer and closed with Enter. All sixteen feed links measured 44px tall; mobile document width 390px with no overflow.",
+      "justification": "Title and short introduction orient the reader. One OPML action imports the collection. Four topic groups and four published podcast rows expose individual subscription choices; descriptions distinguish them, contextual format links identify the destination. Optional native disclosure explains formats without competing with the choices. Shared footer enables discovery.",
+      "limitations": "Independent 17/17 local GET endpoint responses parsed with expected types; no production feed-reader import or subscription."
+    },
+    {
+      "path": "/",
+      "status": "visual-pass",
+      "viewports": [
+        "1440x1000 dark",
+        "390x844 light"
+      ],
+      "findings": [
+        "F02",
+        "F03",
+        "F04",
+        "F05",
+        "F07",
+        "F43"
+      ],
+      "environment": "Compiled local preview :4322, 17:49 whole-page dark/light and 19:00 corrected content light at both sizes",
+      "coverage": "Entire page inspected through copyright at both sizes in 17:49 build. Corrected 19:00 hero, all six chronological rows, all three paths and newsletter rechecked desktop/mobile. Hero thumbnail loads; generic News artwork retains aspect ratio; excerpts end at word boundaries; no meaningless path ordinals. Static AcademyPage island removed. No live subscription.",
+      "justification": "Hero establishes practical education and gives an immediate real lesson. Catalogue totals indicate available depth; three format links support different learning modes. Six chronological items expose new work without an oversized cover grid. Three distinct paths provide structured entry points with honest recording time. Optional email signup and shared footer offer return/discovery routes.",
+      "limitations": "No video playback or live email delivery; this is local compiled visual proof, not a final deployed sign-off."
+    },
+    {
+      "path": "/technology",
+      "status": "composition-rework",
+      "viewports": [
+        "390x844"
+      ],
+      "findings": [
+        "F06"
+      ],
+      "coverage": "Initial compact identity cards reviewed; full directory and filters pending. Deployed commit272b68bc mobile390 verified:354total, Kubernetes20, nonsense0,clear354,nohorizontaloverflow; full354directorystillpending."
+    },
+    {
+      "path": "/about",
+      "status": "visual-pass",
+      "viewports": [
+        "1440x1000 dark",
+        "390x844 light"
+      ],
+      "findings": [
+        "F14 resolved",
+        "F52 resolved"
+      ],
+      "environment": "Compiled local preview :4322, 19:00 whole-page and 19:20 correction builds",
+      "coverage": "Entire page inspected with overlapping captures at both sizes through copyright: photograph, three principles, three timeline milestones, two archive references and three format links. Full keyboard focus ring verified on format link; mobile width 390/390. Corrected single section divider and accurate learning-path description rechecked in 19:20 build at both sizes.",
+      "justification": "Introduction and real speaker photograph establish the academy and person behind it. Principles explain the teaching approach; dated history provides context; two archive links supply concrete examples. Three format links connect the story to actual learning options. No invented biography or decorative metrics.",
+      "limitations": "Historical claims retained, not independently researched. No external video playback."
+    },
+    {
+      "path": "/courses",
+      "status": "visual-pass",
+      "viewports": [
+        "1440x1000 light",
+        "390x844 light"
+      ],
+      "findings": [
+        "F08 resolved",
+        "F53"
+      ],
+      "environment": "Compiled local preview :4322, 19:20 light and 20:32 dark build",
+      "coverage": "Entire page inspected at both sizes through copyright in light and dark: featured Teleport and all three other course cards, availability states, artwork, descriptions and actions. GraphQL explicitly announced with no lessons, Rust one and Zitadel nine; mobile width 390/390. Featured image navigates to actual overview. Corrected More courses heading verified at both sizes; empty secondary collection suppression has source coverage.",
+      "justification": "Featured course provides an immediate lesson entry and overview via its cover. Three alternate courses expose distinct subjects, difficulty and actual availability; artwork identifies each series. No filters/pagination needed for four courses. Heading and shared navigation orient the visitor.",
+      "limitations": "No course playback or subscription from this catalogue; no-course branch has source coverage rather than a Browser fixture."
+    },
+    {
+      "path": "/courses/teleport-for-kubernetes",
+      "status": "visual-pass",
+      "viewports": [
+        "1440x1000 light",
+        "390x844 light"
+      ],
+      "findings": [
+        "F11 resolved",
+        "F54",
+        "CS07"
+      ],
+      "environment": "Compiled local preview :4322, 19:20 whole-page, 20:02 and 20:32 corrected builds",
+      "coverage": "Whole page inspected with overlapping captures through copyright at both sizes: cover, author, six lessons in three curriculum groups, five outcomes, authored overview, signup and two references. Desktop keyboard View curriculum anchor reaches its heading. Mobile width 390/390. Full-column cover, 44px references and narrowed local-Kind walkthrough promise verified in 20:02 build. In 20:32 build both dark compact consent labels measure 68.25px tall and show complete keyboard focus; optional Teleport offers/product-update sharing is explicit.",
+      "justification": "Cover identifies the series; author, availability and level establish scope. Six native lesson links provide immediate access, with curriculum groups explaining progression. Objectives and authored overview describe the course; references provide actual upstream resources. Optional signup explains sponsor consent separately.",
+      "limitations": "No playback or subscription; technical and licensing claims retained rather than independently revalidated."
+    },
+    {
+      "path": "/technology/acorn",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 light", "390x844 light"],
+      "environment": "Deployed preview d3ab9ff5 whole-page; compiled local :4322 20:32 and deployed f4762c10 corrected related links",
+      "findings": ["F55"],
+      "coverage": "Whole page inspected with overlapping captures through copyright at both sizes on deployed 5e1d65cd. Historical status, metadata, project links, three authored paragraphs, one recording, six related projects and hydrated signup inspected. Mobile document width 390/390. All six corrected related links verified locally at both sizes: consistent 40px marks and AP/BU fallbacks, one shared category, complete desktop keyboard focus outline.",
+      "justification": "Historical status and personal rating distinguish maintenance from opinion. Metadata qualifies the project, project links provide evidence, and description supplies context. Dated recording preserves learning history. Related projects offer onward exploration; signup explicitly concerns Academy coverage, not project updates.",
+      "limitations": "Corrected related links subsequently verified on deployed f4762c10 at both sizes in dark mode. No playback, external destination verification or subscription. Authored factual statements preserved, not independently researched."
+    },
+    {
+      "path": "/read/our-architecture",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 dark and light", "390x844 dark"],
+      "environment": "Deployed f4762c10 whole-page; F59/F60 deltas verified deployed 447c1270 / fbd52a50",
+      "findings": ["F57 resolved", "F58 resolved", "F59 resolved", "F60 resolved"],
+      "coverage": "Header, introduction, Cloud Native section, actual compiled diagram and CQRS boundary inspected. In 20:46, named diagram, written description, 44px native toggle, Space activation, Tab to scroll region, arrow-key and pointer panning, return to fitted view verified. Expanded mobile region is 350px wide over 1280px content, bounded to 591px height; document remains 390px. Desktop document remains 1440px and arrow navigation pans the enlarged region. Final 20:54 fitted mobile diagram and description rechecked; shared overflow correction verified on the GraphQL article.",
+      "justification": "Title, author/date and technology links establish topic and provenance. Four authored sections explain architecture decisions; the one gateway/five-service diagram, written description and optional local enlargement make relationships readable. The command example is contained code rather than executable UI. TOC aids navigation; bounded article/video recommendations support continuation; optional signup follows content. Coverless recommendations retain useful title, summary and author without invented imagery.",
+      "limitations": "Whole body, recommendations, hydrated signup and copyright inspected on deployed f4762c10 at 1440x1000 light and 390x844 dark. Mobile code overflow stays within its own block; desktop document is 1440px. F59 final compact card verified on 447c1270 at both sizes with full keyboard outline; F60 root-centred architecture zoom and fitted reset verified hosted mobile, plus previous local desktop. No infrastructure commands, external links or subscriptions exercised; historical technical narrative not independently revalidated."
+    },
+    {
+      "path": "/read/federated-graphql-microservices",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 light", "390x844 dark"],
+      "environment": "Whole page deployed 447c1270 / fbd52a50; final copy controls verified hosted 75375748 / d5b4e864 at both sizes",
+      "findings": ["F57 resolved", "F58 resolved", "F60 resolved", "F62 resolved"],
+      "coverage": "Entire article inspected in overlapping captures through copyright at both sizes: hero/byline/tags, introduction and info callout, seven sections, six code blocks, diagram, all lists, publication/discussion footer, three related articles, three videos, hydrated newsletter and footer. Mobile contents opened and all seven links inspected; desktop current-section state tracks reading. Widths 390/390 and 1440/1440; code overflow stays within blocks. Hosted mobile enlargement opens on API Client and returns to fitted graph. Final local copy controls all measure 44x44 at both sizes, with centred 20px icons and complete keyboard focus. Enter shows Copied feedback. All six mobile code regions are focusable; ArrowRight pans the first 40px without moving the document.",
+      "justification": "Title and byline identify topic and historical provenance. Benefits, incremental schema example, tools, publishing steps and limitations explain the approach. Six code blocks serve distinct examples, with native copy access. Diagram distinguishes shared gateway from two independent server/ORM/database chains; its description and optional enlargement provide overview and label access. Contents supports a long article, and bounded recommendations and optional signup support continuation without interrupting reading.",
+      "limitations": "F62 deployed and Browser-verified at both sizes on 75375748. No code execution, live API requests, external destination review, subscription or playback. Technical and historical claims preserved, not independently revalidated. Copy feedback is visually verified locally, not tested with a screen reader."
+    },
+    {
+      "path": "/read",
+      "status": "composition-rework",
+      "viewports": [
+        "390x844"
+      ],
+      "findings": [
+        "F08"
+      ],
+      "coverage": "Feature, filters, and initial cards inspected. Artwork and native filter form need final review."
+    },
+    {
+      "path": "/read/cgroups-from-chaos-to-control",
+      "status": "composition-rework",
+      "viewports": [
+        "390x844",
+        "1440x1000"
+      ],
+      "findings": [
+        "F12",
+        "F13"
+      ],
+      "coverage": "Header and first technical sections/code inspected. Entire long document, interactive diagrams, and contents states pending."
+    },
+    {
+      "path": "/news",
+      "status": "visual-pass",
+      "viewports": [
+        "390x844 dark",
+        "1440x1000 light"
+      ],
+      "findings": [
+        "F09 resolved",
+        "F10 resolved",
+        "F36 resolved",
+        "F61 resolved"
+      ],
+      "environment": "Whole archive deployed f4762c10 / 3541053b; corrected signup compiled local :4322 21:47 build",
+      "coverage": "Whole archive inspected in overlapping captures through copyright at both sizes: lead story, all 36 earlier rows from September through March, signup and footer. DOM confirms 37 unique story URLs and all 37 images using /images/news/news-generic.svg. Mobile width 390/390; desktop 1440/1440. Long titles and technical identifiers wrap. Corrected two-column signup and keyboard input/button focus verified desktop/dark; stacked mobile/dark has complete input focus ring, 300x50 input and 300x47 button with 390px document.",
+      "justification": "Lead story identifies the latest publication; chronological rows retain date, complete title and description for choosing what to read. Generic decorative artwork identifies the News format without implying article-specific illustrations. RSS provides real syndication. Optional email signup uses one heading, no repetitive paragraph, native labelled controls and the shared compact composition.",
+      "limitations": "F61 deployed and Browser-verified desktop/mobile on 75375748. No story-detail sign-off from this archive review, subscription submission, live feed-reader import or independent fact-check. Native form endpoint, method and required email semantics retained and covered by actual Astro SSR regression."
+    },
+    {
+      "path": "/technology/kubernetes",
+      "status": "composition-rework",
+      "viewports": [
+        "390x844",
+        "1440x1000"
+      ],
+      "findings": [
+        "F18"
+      ],
+      "coverage": "Original hero, article start, related video panel inspected; rewrite pending."
+    },
+    {
+      "path": "/organizations/partnerships",
+      "status": "visual-pass",
+      "viewports": [
+        "390x844 light",
+        "1440x1000 light and earlier dark"
+      ],
+      "findings": [
+        "F15 resolved",
+        "F48 resolved"
+      ],
+      "environment": "Compiled local preview :4322, 19:00 build; earlier 17:49 desktop dark",
+      "coverage": "Entire revised page inspected through copyright at both sizes, including both offers, process, scope boundaries, all three expanded FAQs and every application field. Mobile document 390/390; all inputs/selects 350px wide and approximately 50px tall, textarea 122px tall. Keyboard fit-review action reaches application with correct selected route. No live submission.",
+      "justification": "Hero identifies the offer. Two unboxed choices expose distinct fees, cadence and deliverables; scope exclusions and three nonduplicated answers set expectations. Ordered steps explain the process. Application fields identify the contact, company, preferred route, audience and adoption challenge; optional buyer, proof link, budget/timing and broader references provide qualification context. Shared navigation supports discovery.",
+      "limitations": "Commercial terms retained, not independently assessed. Live application success/error and delivery are not verified; SSR/hydration behavior has isolated tests."
+    },
+    {
+      "path": "/people/rawkode",
+      "status": "composition-rework",
+      "viewports": [
+        "390x844",
+        "1440x1000"
+      ],
+      "findings": [
+        "Oversized boxed identity; decorative section icons; repeated SEO copy"
+      ],
+      "coverage": "Profile and show cards inspected. Rewritten profile and full contribution archive pending."
+    },
+    {
+      "path": "/shows/klustered",
+      "status": "composition-rework",
+      "viewports": [
+        "390x844",
+        "1440x1000"
+      ],
+      "findings": [
+        "Newsletter precedes episodes; generic Show label; legacy secondary navigation"
+      ],
+      "coverage": "Header and episode grid inspected. Newsletter moved; final whole-page review pending."
+    },
+    {
+      "path": "/watch/hands-on-introduction-to-kueue",
+      "viewports": ["1440x1000 light", "390x844 dark"],
+      "findings": ["F19 resolved for this recorded page", "F64 resolved", "F65 resolved", "F66 resolved"],
+      "environment": "Compiled local :4322, 22:11 build; earlier full hosted desktop dark 75375748 exposed defects",
+      "coverage": "Whole corrected page inspected in overlapping captures through copyright at both sizes: loaded player/poster, title/deck/date/runtime/share, reactions, three learning outcomes, complete ten-point description, both technology links, both cast members, immediately visible empty comments, all six related sessions, hydrated signup and footer. Desktop description is 680px wide; reaction buttons 60x44 and plus 44x44. Document widths 1440/1440 and 390/390. Mobile playback advanced through the opening slate; Space paused at 35.6 seconds. Copy link Enter gives visible feedback and full focus outline. Emoji picker Enter/Escape restores trigger focus without sending a reaction.",
+      "status": "visual-pass",
+      "justification": "Player is primary; title and metadata identify the session. Outcomes and readable description explain relevance and substance. Reactions preserve feedback without an empty enclosing panel. Technology and cast links support subject/speaker discovery. Comments communicate their real empty state and the Discord destination without a one-option tab. Six related recordings and optional newsletter follow the lesson. Removed unlinked Learn more list, duplicate subscription prose and nonfunctional hashtags.",
+      "limitations": "Local corrected evidence only. No full-session playback, caption accuracy, casting, picture-in-picture, fullscreen, live-stream state, account state, reaction/comment writes or newsletter submission. This recording has no chapter, transcript or resource data; those distinct states remain pending Browser review. Resources SSR/hydration tested separately with fixtures. Main-agent review only; independent reviewer unavailable."
+    },
+    {
+      "path": "/courses/teleport-for-kubernetes/01-introduction",
+      "viewports": [
+        "1440x1000 light",
+        "390x844 light"
+      ],
+      "findings": [
+        "F20 resolved",
+        "F56",
+        "CS07"
+      ],
+      "environment": "Compiled local preview :4322, 19:20 whole-page and 20:02 corrected build; shared consent label delta in 20:32",
+      "coverage": "Entire page inspected with overlapping viewport captures through copyright at both sizes. Hero, 12:43 player, all five authored sections, three-service ordered list, two resources, next-lesson link and signup reviewed. Desktop width 1440/1440. Corrected next copy and one-surface signup inspected desktop light and mobile light/dark in 20:02. Playback advanced to 0:16 with visible captions; Space paused; Escape from focused settings menu item closed and restored Settings focus. Final shared label correction verified at both sizes on lesson two and the overview, not replayed here.",
+      "justification": "Breadcrumb and lesson position orient the learner. Video is the primary lesson; authored sections provide readable context. Real upstream resources remain accessible beside desktop reading content and after mobile content. Native next-lesson navigation advances the sequence. Optional updates form should retain one clear purpose and separate sponsor consent.",
+      "limitations": "Only 16 seconds of playback, not the complete video; no fullscreen, casting, PiP or subscription. No independent technical fact-check. Intermediate clipped desktop captures were discarded and retaken in the correctly sized Browser tab.",
+      "status": "visual-pass"
+    },
+    {
+      "path": "/courses/teleport-for-kubernetes/02-deploying-teleport-cluster",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 dark", "390x844 light"],
+      "environment": "Compiled local preview :4322, 20:02 whole-page and 20:32 consent correction builds",
+      "findings": ["CS07 resolved", "F56 resolved"],
+      "coverage": "Whole page read with overlapping captures through copyright at both sizes. Loaded video poster and 10:39 controls, all four authored sections, five deployment steps, three upstream resources, previous/next navigation and simplified signup inspected. Mobile width 390/390. Overview lesson link entered by keyboard; no unsupported script download promise remains. In 20:32 build actual clickable consent label measures 261x68.25px mobile and 479.95x45.5px desktop, with full keyboard focus; label click toggled on then off without submission.",
+      "justification": "Prerequisites establish readiness, five ordered steps outline the recording, and production comparison provides context. Actual upstream resources support further study. Breadcrumb, ordinal and bidirectional lesson links locate the learner in the sequence. Optional signup remains separate from primary learning content.",
+      "limitations": "No infrastructure commands or form submission. Playback was exercised on lesson one, not this recording."
+    },
+    {
+      "path": "/courses/teleport-for-kubernetes/03-identity-based-access-rbac",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 light", "390x844 dark"],
+      "environment": "Compiled local preview :4322, 20:54 build / pushed commit 3541053b",
+      "findings": [],
+      "coverage": "Whole page inspected with overlapping captures through copyright at both sizes. Loaded poster and 6:14 controls, all four authored sections, four-step authentication flow, three GitOps bullets, wrapped inline CLI command, three upstream resources, previous/next links and signup reviewed. Mobile document 390/390. Next-lesson full keyboard outline and Enter navigation to lesson four verified.",
+      "justification": "Title, lesson ordinal and breadcrumb locate the lesson. The recording is primary; the written flow explains identity-to-certificate progression, GitOps configuration and CLI access. Documentation and source links support application. Bidirectional navigation advances the sequence; optional signup is separate from learning content.",
+      "limitations": "No playback on this recording, command execution, authentication, external resource visit or form submission. Technical claims preserved, not independently validated."
+    },
+    {
+      "path": "/courses/teleport-for-kubernetes/04-two-layer-rbac-boundaries",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 dark", "390x844 dark"],
+      "environment": "Compiled local preview :4322, 20:54 build / pushed commit 3541053b",
+      "findings": [],
+      "coverage": "Whole page inspected in overlapping captures through copyright at both sizes: loaded 14:27 poster/controls, all five authored sections, two-layer ordered list, two namespace examples, deny-rule and defense-in-depth prose, three resources, bidirectional navigation and optional signup. Entered through lesson-three keyboard navigation. Mobile width 390/390. This route was inspected in dark; the shared light composition was checked on lesson three.",
+      "justification": "Least-privilege context establishes the problem. The ordered two-layer model and distinct namespace examples explain responsibility and boundaries; deny rules and defense-in-depth text describe how layers interact. Resources supply upstream reference material, while sequence navigation and optional updates serve learner continuation.",
+      "limitations": "No video playback, infrastructure commands, external resource visit or subscription. Security behavior described by the author is not independently validated."
+    },
+    {
+      "path": "/courses/teleport-for-kubernetes/05-just-in-time-access",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 light", "390x844 dark"],
+      "environment": "Deployed preview f4762c10 / commit 3541053b",
+      "findings": [],
+      "coverage": "Whole page inspected with overlapping captures through copyright at both sizes: loaded 9:34 poster and controls, all three authored sections, six implementation steps, wrapped inline commands, three resources, previous/next navigation and hydrated signup. Mobile document 390/390; keyboard Enter on Next reaches lesson six.",
+      "justification": "Standing-privilege context motivates the lesson. The recording and six-step request/approval/drop sequence teach the workflow; TTL guidance explains its boundary. Upstream resources support further learning. Breadcrumb and sequence navigation orient; optional signup stays after the lesson.",
+      "limitations": "No playback, command execution, external resource visits or form submission. Compliance and technical claims preserved, not independently revalidated."
+    },
+    {
+      "path": "/courses/teleport-for-kubernetes/06-auditing-and-session-recording",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 dark", "390x844 dark"],
+      "environment": "Deployed preview f4762c10 / commit 3541053b",
+      "findings": [],
+      "coverage": "Whole page inspected with overlapping captures through copyright at both sizes: loaded 9:33 poster and controls, five authored sections, four audit-event bullets, two joining modes, five-item course recap, three resources, Previous-only final-lesson navigation and hydrated signup. Entered through lesson-five keyboard navigation. Mobile document 390/390. Shared light composition inspected on lesson five.",
+      "justification": "Audit events, session playback and distinct joining modes explain the final topic; the course recap closes the six-part sequence. Resources provide next steps, Previous returns to the preceding lesson, and breadcrumb retains course access without a fictional seventh lesson. Optional updates remain separate.",
+      "limitations": "No playback, live session joining, infrastructure commands, resource visits or subscription. Technical and licensing narrative preserved, not independently researched."
+    },
+    {
+      "path": "/series",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 dark", "390x844 dark"],
+      "environment": "Deployed preview f4762c10 / commit 3541053b",
+      "findings": [],
+      "coverage": "Whole page inspected through copyright at both sizes: masthead, honest zero-published-series message, recovery link and complete footer. Keyboard Enter on all articles reaches /read. No empty series is presented as published.",
+      "justification": "Existing route explains why there is no series content and directs readers to the available article archive. Masthead establishes the content format; the normal footer provides other destinations without invented examples or a future-release promise.",
+      "limitations": "Current empty state only. No generated published series detail exists; populated list and detail are not covered by this Browser pass."
+    },
+    {
+      "path": "/news/kubernetes-1-36-service-externalips-deprecation",
+      "viewports": [
+        "390x844"
+      ],
+      "findings": [
+        "F21"
+      ],
+      "coverage": "Header and body inspected; revised recommendations/footer and dark mode pending.",
+      "status": "composition-rework"
+    },
+    {
+      "path": "/search",
+      "viewports": [
+        "390x844"
+      ],
+      "findings": [
+        "F22",
+        "F29"
+      ],
+      "coverage": "Compiled mobile results, 194-video count, page 1→2 link verified. Unlayered font reset and native search-button border exposed (F29); fix requires rebuilt review. Whole result pages pending.",
+      "status": "composition-rework"
+    },
+    {
+      "path": "/adrs",
+      "status": "visual-pass",
+      "viewports": [
+        "390x844 light",
+        "1440x1000 light"
+      ],
+      "environment": "Compiled local preview :4322, 17:49/18:30 whole-page and 19:00 correction builds",
+      "findings": [
+        "F44 resolved"
+      ],
+      "coverage": "Whole index and footer inspected at both sizes. In the 19:00 build, hero and both rows rechecked desktop/mobile: explicit By author prefix distinguishes metadata and wraps cleanly; no decorative Reference kicker or leading separator.",
+      "justification": "Title/lede explain decision archive; numberedlinks order decisions, dates/authors establish ownership and timing. No cards/artwork needed."
+    },
+    {
+      "path": "/organizations/branding",
+      "viewports": [
+        "1440x1000 dark",
+        "390x844 light"
+      ],
+      "findings": [
+        "F25",
+        "F46"
+      ],
+      "environment": "Compiled local preview :4322, 17:49 BST build",
+      "coverage": "Entire page through copyright inspected at both sizes. Logo exports and mono sample need corrected build; mobile CSS sample creates 22px page overflow, fixed in source. Actual downloads and keyboard states pending.",
+      "justification": "Three lockups and two download colors support real partner usage. Palette swatches pair exact values with roles; specimens identify typography; usage rules and CSS explain faithful reproduction. Jump links give quick access to assets and rules.",
+      "status": "verification-pending"
+    },
+    {
+      "path": "/maintainers/share-your-project",
+      "status": "visual-pass",
+      "viewports": [
+        "1440x1000 dark",
+        "390x844 dark; light hero and focus"
+      ],
+      "findings": [
+        "F30"
+      ],
+      "environment": "Compiled local preview :4322, 19:20 whole-page and 20:32 corrected build",
+      "coverage": "Entire page through copyright inspected at desktop and mobile dark; mobile light hero and full keyboard action outline also checked. Corrected Panda recipe rechecked in 20:32 at both sizes in light: all four process steps, fit criteria, prep link and contact. Four main links measure 50/50/44/44px; mobile document 390/390. Raw Browser accessibility tree confirms four ordered process listitems, each containing its heading and body; the flattened text snapshot was not evidence of missing roles.",
+      "justification": "Hero states audience, format, duration and cost. Four steps explain the real participation sequence. Fit and exclusions distinguish editorial sessions from commercial work. Prep notes and three requested context items make the email actionable; visible address provides a fallback to the mailto action.",
+      "limitations": "No email sent or session scheduled; external prep document and video playback not inspected."
+    },
+    {
+      "path": "/organizations",
+      "status": "visual-pass",
+      "viewports": [
+        "1440x1000 dark",
+        "390x844 light"
+      ],
+      "findings": [
+        "F31 resolved"
+      ],
+      "environment": "Compiled local preview :4322, 17:49 BST build",
+      "coverage": "Entire page through copyright inspected at both sizes. All four main actions measure at least 44px; visible keyboard focus and Enter navigation to programme verified. No desktop overflow observed.",
+      "justification": "Hero identifies service and application routes. Three scope definitions establish responsibility. Two offers expose actual prices, cadence and deliverables; exclusions prevent misleading expectations. The shared footer supports discovery.",
+      "limitations": "No application, email, purchase or independent legal/commercial assessment."
+    },
+    {
+      "path": "/organizations/lets-chat",
+      "status": "visual-pass",
+      "viewports": [
+        "1440x1000 dark",
+        "390x844 light"
+      ],
+      "findings": [
+        "F31 resolved",
+        "F49 resolved"
+      ],
+      "environment": "Compiled local preview :4322, 17:49 whole-page, 18:30 mobile and 19:00 desktop correction builds",
+      "coverage": "Entire page through copyright inspected at both sizes, no mobile page overflow. Copy template and email values verified exactly, including after navigating away and back. Corrected keyboard copy rechecked on mobile and desktop: 128x44px button retained during Copied feedback, exact address on clipboard, visible focus and persistent polite contextual status. No email sent.",
+      "justification": "Introduction explains the fit check; email and programme actions give next steps. Visible address and copyable brief work without a mail client. Expected reply explains what happens next. No duplicate application form.",
+      "limitations": "No email sent; clipboard failure is covered by isolated script tests, not an actual denied-permission Browser state."
+    },
+    {
+      "path": "/404",
+      "status": "visual-pass",
+      "viewports": [
+        "1440x1000 light",
+        "390x844 light",
+        "390x844 dark"
+      ],
+      "environment": "Deployed preview 3ff27879, commit 272b68bc",
+      "findings": [],
+      "coverage": "Entire page inspected with overlapping captures through copyright. Native GET search for cgroups reached the matching article result. Theme control worked after hydration.",
+      "justification": "Error label and plain heading explain the failure. Search, home link and issue-report link offer recovery. Shared navigation/footer expose other destinations. No decorative illustration or duplicate recommended-content panel.",
+      "limitations": "No GitHub issue or authentication submitted; search result destination inspected, article not reviewed in this pass."
+    },
+    {
+      "path": "/adrs/0001-adopt-adrs",
+      "status": "visual-pass",
+      "viewports": [
+        "390x844 light",
+        "1440x1000 dark"
+      ],
+      "environment": "Compiled local preview :4322, 17:49 whole-page and 18:30 corrected-link builds",
+      "findings": [
+        "F44 source-link resolved"
+      ],
+      "coverage": "Whole page with overlapping viewport captures through footer at both sizes. Readable prose/code wrapping; no observed overflow. Corrected GitHub source destination verified in 18:30 compiled DOM against the previously API-verified main/content/adrs target.",
+      "justification": "Breadcrumbreturnsarchive; decisionnumber/title identifyrecord; authorlinks/date provideprovenance. Background,goals/nongoals,designandconclusionretainhistoricalreasoning; bodyreferencesallowinspection. Sharedfooter providesdiscovery.",
+      "limitations": "Historicaldecisionclaimsnotre-researched; externalMediumreference notfetched."
+    },
+    {
+      "path": "/adrs/0002-adopt-bun",
+      "status": "visual-pass",
+      "viewports": [
+        "390x844 light",
+        "1440x1000 dark"
+      ],
+      "environment": "Compiled localpreview :4322 17:49BSTbuild",
+      "findings": [],
+      "coverage": "Entirepage reviewed in overlappingviewportcaptures throughcopyright atbothsizes, includinglonglists. SingleH1,nohorizontaloverflow. Breadcrumb/author/Rustlinkdestinationsinspected.",
+      "justification": "Decisionnumber/title/date/authoridentifyhistoricalrecord. Context,goals/nongoals,decision,positive/negativeconsequences,andconsideredalternatives eachdocumentadoptionreasoning. Preserveauthoredrecordratherthanremovingrepetitionthatdocumentsdistinctdecisionfacets.",
+      "limitations": "Visual/structuralreview only; historicalvendorclaimsnotre-researched, destinationsnotallopened."
+    }
+  ],
+  "componentStates": [
+    {
+      "component": "Technology directory filter",
+      "path": "/technology",
+      "viewport": "390x844",
+      "theme": "light",
+      "environment": "compiled local preview :4322, 16:33 BST checkpoint",
+      "states": [
+        "default 354",
+        "kubernetes:20matches",
+        "no-such-technology-1355:0matches",
+        "visible focus"
+      ],
+      "result": "observed-correct",
+      "limitations": "No entire-directory or detail-page sign-off."
+    },
+    {
+      "component": "HierarchyExplorer",
+      "environment": "Local Storybook after fresh Panda build",
+      "viewports": [
+        "390x844 light",
+        "1440x1000 dark"
+      ],
+      "states": [
+        "v1 three controller trees",
+        "CPU docker collapse",
+        "v2 unified hierarchy"
+      ],
+      "result": "observed-correct",
+      "limitations": "No entire cgroups article sign-off."
+    },
+    {
+      "component": "CgroupTimeline",
+      "environment": "Local Storybook after fresh Panda build",
+      "viewports": [
+        "1440x1000 dark",
+        "390x844 dark"
+      ],
+      "states": [
+        "expanded 2016 March",
+        "ArrowRight focus",
+        "Enter expands May",
+        "Escape closes"
+      ],
+      "result": "observed-correct-with-follow-up",
+      "limitations": "Literal backticks in description reported for repair. Resize can leave the selected milestone offscreen; keyboard navigation brings it back."
+    },
+    {
+      "component": "PodCgroupMapper",
+      "environment": "Local Storybook after fresh Panda build",
+      "viewports": [
+        "390x844 dark"
+      ],
+      "states": [
+        "Burstable specification, mapping and explanation",
+        "BestEffort selection and mapping"
+      ],
+      "result": "observed-correct",
+      "limitations": "Code scrolls horizontally within its own panel. Guaranteed and desktop final review pending."
+    },
+    {
+      "component": "ResourceList",
+      "environment": "Local Storybook after fresh Panda build",
+      "viewports": [
+        "390x844 light"
+      ],
+      "states": [
+        "valid links, file, webcontainer, iframe types",
+        "unknown category becomes Other",
+        "invalid resources omitted"
+      ],
+      "result": "observed-correct",
+      "limitations": "Fixture deliberately blocks activation; no modal, iframe, WebContainer, or external destination proof."
+    },
+    {
+      "component": "CourseDetailHero",
+      "environment": "Local Storybook after fresh Panda build",
+      "viewports": [
+        "390x844 light"
+      ],
+      "states": [
+        "six published lessons, author, cover"
+      ],
+      "result": "observed-correct",
+      "limitations": "Cover arrived after initial screenshot; settled rendered layout inspected. Whole production course page pending."
+    },
+    {
+      "component": "Academy forms, progress and badges",
+      "environment": "Local Storybook after fresh Panda build",
+      "viewports": [
+        "390x844 light",
+        "390x844 dark"
+      ],
+      "states": [
+        "visible field error in light",
+        "disabled form in dark",
+        "progress 0 in light",
+        "progress 100 in dark",
+        "all badge variants in dark"
+      ],
+      "result": "observed-correct",
+      "limitations": "Safe fixtures only; no real subscription or account mutation."
+    },
+    {
+      "component": "BracketBoard",
+      "environment": "Local Storybook after fresh Panda build",
+      "viewports": [
+        "390x844 light",
+        "390x844 dark",
+        "1440x1000 dark"
+      ],
+      "states": [
+        "two rounds with live match and winner",
+        "keyboard horizontal scroll",
+        "long names wrap without truncation",
+        "empty bracket",
+        "matches not announced"
+      ],
+      "result": "observed-correct",
+      "limitations": "Fixture evidence, not authenticated live bracket service."
+    },
+    {
+      "component": "VideoTranscript",
+      "environment": "Compiled local preview :4322, 16:58 BST checkpoint",
+      "viewports": [
+        "390x844 light"
+      ],
+      "states": [
+        "single-copy SSR disclosure",
+        "Docker search: 30 matches"
+      ],
+      "result": "observed-correct-after-repair",
+      "limitations": "Original auto-scroll defect repaired. Rechecked in 17:29 build: Docker produced 30 highlighted matches with input visible, no-match query hid unmatched paragraphs/empty sections, and clearing restored all 113 paragraphs. Whole Watch page review remains pending."
+    },
+    {
+      "component": "Unsubscribe form and mobile navigation",
+      "environment": "Compiled local preview :4322, 17:14 BST build",
+      "viewports": [
+        "390x844 light",
+        "390x844 dark",
+        "1440x1000 light",
+        "1440x1000 dark"
+      ],
+      "states": [
+        "forged success=true displays normal form",
+        "mobile footer through copyright",
+        "modal menu Shift-Tab wraps to Your account",
+        "Escape closes and returns focus to Open navigation"
+      ],
+      "result": "observed-correct-with-follow-up",
+      "limitations": "Rechecked in 17:29 build: pristine input has neutral border; revised two-column menu fits at390px and wraps without overflow at320px. No unsubscribe request sent. Signed-in/error/success route behavior only covered by mocked tests."
+    }
+  ]
+}

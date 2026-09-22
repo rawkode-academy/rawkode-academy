@@ -1,0 +1,120 @@
+---
+import { academyWatch } from "@rawkodeacademy/design-system";
+import {
+	type InitialTranscriptCue,
+	type TranscriptChapter,
+	formatTranscriptTimestamp,
+	normalizeTranscriptCues,
+	transcriptSections,
+} from "./transcript-content";
+
+interface Props {
+	cues: readonly InitialTranscriptCue[];
+	chapters?: readonly TranscriptChapter[];
+}
+
+const { cues, chapters = [] } = Astro.props;
+const sections = transcriptSections(normalizeTranscriptCues(cues), chapters);
+const styles = academyWatch();
+const searchId = `transcript-search-${crypto.randomUUID()}`;
+---
+
+<academy-transcript class={styles.comments} data-highlight-class={styles.transcriptHighlight}>
+	{sections.length > 0 ? (
+		<>
+			<div data-transcript-controls hidden>
+				<label for={searchId} class={styles.noticeCopy}>Search transcript</label>
+				<div class={styles.search}>
+					<input id={searchId} type="search" placeholder="Search transcript..." class={styles.searchInput} />
+					<svg class={styles.searchIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+					</svg>
+				</div>
+				<p class={styles.searchSummary} role="status" aria-atomic="true" />
+			</div>
+			<div class={styles.transcriptBody}>
+				{sections.map((section) => (
+					<section data-transcript-section aria-label={section.chapter?.title}>
+						{section.chapter && (
+							<h3 class={styles.transcriptChapter}>
+								<a href={`?t=${section.chapter.startTime}`} data-chapter-link={section.chapter.startTime} class={styles.transcriptChapterLink}>
+									<span class={styles.transcriptTimestamp}>{formatTranscriptTimestamp(section.chapter.startTime)}</span>
+									{section.chapter.title}
+								</a>
+							</h3>
+						)}
+						{section.cues.map((cue) => (
+							<p data-transcript-row class={styles.transcriptParagraph}>
+								<a href={`?t=${cue.startSeconds}`} data-chapter-link={cue.startSeconds} aria-label={`Jump to ${formatTranscriptTimestamp(cue.startSeconds)}`} class={styles.transcriptTimestampLink}>
+									<span class={styles.transcriptTimestamp}>{formatTranscriptTimestamp(cue.startSeconds)}</span>
+								</a>
+								<span data-transcript-text>{cue.text}</span>
+							</p>
+						))}
+					</section>
+				))}
+			</div>
+		</>
+	) : <p class={styles.noticeCopy}>No transcript is available for this video.</p>}
+</academy-transcript>
+
+<script>
+	import { transcriptTextParts } from "./transcript-content";
+
+	class AcademyTranscript extends HTMLElement {
+		private controller?: AbortController;
+
+		connectedCallback() {
+			// Also support fragment insertion after this element has been registered.
+			queueMicrotask(() => {
+				if (this.isConnected) this.initializeSearch();
+			});
+		}
+
+		private initializeSearch() {
+			this.controller?.abort();
+			const controls = this.querySelector<HTMLElement>("[data-transcript-controls]");
+			const input = controls?.querySelector<HTMLInputElement>('input[type="search"]');
+			const status = controls?.querySelector<HTMLElement>('[role="status"]');
+			if (!controls || !input || !status) return;
+			this.controller = new AbortController();
+			input.addEventListener("input", () => {
+				let count = 0;
+				const filtering = input.value.length >= 2;
+				for (const paragraph of this.querySelectorAll<HTMLElement>("[data-transcript-text]")) {
+					// The existing SSR text is the only data source, even after highlighting.
+					const parts = transcriptTextParts(paragraph.textContent ?? "", input.value);
+					const row = paragraph.closest<HTMLElement>("[data-transcript-row]");
+					if (row) row.hidden = filtering && !parts.some((part) => part.match);
+					const fragment = document.createDocumentFragment();
+					for (const part of parts) {
+						const text = document.createTextNode(part.text);
+						if (part.match) {
+							const mark = document.createElement("mark");
+							mark.className = this.dataset.highlightClass ?? "";
+							mark.appendChild(text);
+							fragment.append(mark);
+							count++;
+						} else fragment.append(text);
+					}
+					paragraph.replaceChildren(fragment);
+				}
+				for (const section of this.querySelectorAll<HTMLElement>("[data-transcript-section]")) {
+					section.hidden = filtering && !section.querySelector("[data-transcript-row]:not([hidden])");
+				}
+				status.textContent = !filtering ? "" : count === 0
+					? "No matches found. Clear search to show all transcript paragraphs."
+					: `${count} ${count === 1 ? "match" : "matches"} found`;
+			}, { signal: this.controller.signal });
+			controls.hidden = false;
+		}
+
+		disconnectedCallback() {
+			this.controller?.abort();
+		}
+	}
+
+	if (!customElements.get("academy-transcript")) {
+		customElements.define("academy-transcript", AcademyTranscript);
+	}
+</script>

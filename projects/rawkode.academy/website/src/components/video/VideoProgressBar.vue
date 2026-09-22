@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { academyWatch } from "@rawkodeacademy/design-system";
 
 interface Props {
 	progress: number;
@@ -16,67 +17,45 @@ const props = withDefaults(defineProps<Props>(), {
 	overlay: false,
 });
 
-const containerClass = computed(() =>
-	props.overlay
-		? "absolute bottom-0 left-0 right-0 overflow-hidden rounded-b-lg"
-		: "w-full overflow-hidden",
-);
-
 const clampedProgress = computed(() =>
-	Math.max(0, Math.min(100, props.progress)),
+	Number.isFinite(props.progress) ? Math.max(0, Math.min(100, props.progress)) : 0,
 );
 
+const complete = computed(() => clampedProgress.value === 100);
+const styles = computed(() => academyWatch({
+	progressVariant: props.variant,
+	progressHeight: props.height,
+	progressOverlay: props.overlay,
+	progressComplete: complete.value,
+}));
 const widthStyle = computed(() => ({ width: `${clampedProgress.value}%` }));
-
-const heightClass = computed(() => {
-	const heights: Record<string, string> = {
-		sm: "h-1",
-		md: "h-1.5",
-		lg: "h-2",
-	};
-	return heights[props.height] || "h-1";
-});
-
-const colorClass = computed(() => {
-	const colors: Record<string, string> = {
-		default: "bg-[rgb(var(--brand-primary))]",
-		subtle: "bg-[var(--editorial-ink-mute)]",
-		accent: "bg-[rgb(var(--brand-secondary))]",
-	};
-	return colors[props.variant] || "bg-[rgb(var(--brand-primary))]";
-});
-
-const ariaLabel = computed(
-	() => `Video progress: ${Math.round(clampedProgress.value)}%`,
+const progressText = computed(
+	() => complete.value ? "Completed" : `${Math.round(clampedProgress.value)}% watched`,
 );
 </script>
 
 <template>
 	<div
-		:class="containerClass"
+		:class="styles.progress"
 		role="progressbar"
 		:aria-valuenow="clampedProgress"
 		aria-valuemin="0"
 		aria-valuemax="100"
-		:aria-label="ariaLabel"
+		aria-label="Video progress"
+		:aria-valuetext="progressText"
 	>
-		<div
-			:class="['w-full bg-black/40 dark:bg-black/60', heightClass]"
-		>
+		<div :class="styles.progressTrack">
 			<div
-				:class="[
-					'transition-[width] duration-300 ease-out',
-					heightClass,
-					colorClass,
-				]"
+				:class="styles.progressFill"
 				:style="widthStyle"
 			/>
 		</div>
 		<span
-			v-if="showLabel && clampedProgress > 5"
-			class="absolute right-1 top-1/2 -translate-y-1/2 text-xs text-white drop-shadow-md"
+			v-if="showLabel"
+			:class="styles.progressLabel"
+			aria-hidden="true"
 		>
-			{{ Math.round(clampedProgress) }}%
+			{{ progressText }}
 		</span>
 	</div>
 </template>

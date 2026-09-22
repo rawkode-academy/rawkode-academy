@@ -43,7 +43,6 @@ withDefaults(
 	font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
 	font-size: 0.6875rem;
 	letter-spacing: 0.14em;
-	text-transform: uppercase;
 	color: var(--editorial-ink-mute);
 }
 
