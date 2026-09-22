@@ -26,6 +26,15 @@ describe("legacy route resolver", () => {
 		});
 		expect(
 			resolveLegacyRoute(
+				new URL("https://rawkode.academy/series/talos-on-hetzner"),
+			),
+		).toEqual({
+			kind: "redirect",
+			status: 301,
+			location: "https://rawkode.academy/series",
+		});
+		expect(
+			resolveLegacyRoute(
 				new URL("https://rawkode.academy/organizations/consulting"),
 			),
 		).toEqual({
