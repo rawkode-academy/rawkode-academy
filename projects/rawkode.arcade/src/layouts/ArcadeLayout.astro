@@ -1,26 +1,76 @@
 ---
-import "@/styles/global.css";
+import { Font } from "astro:assets";
+import { css } from "@/../styled-system/css";
 import ArcadeHeader from "@/components/ArcadeHeader.astro";
-import { arcadeShell } from "@/styles/arcade";
-const { title = "Rawkode Arcade", active = "" } = Astro.props;
+import { hairline, slug } from "@/styles/arcade";
+import "@/styles/global.css";
+
+interface Props {
+	title?: string;
+	description?: string;
+	active?: string;
+}
+
+const {
+	title = "Rawkode Arcade",
+	description = "Live technical game shows for cloud-native engineers.",
+	active = "",
+} = Astro.props;
+
+const main = css({ minHeight: "route", pb: "section" });
+
+const footer = css({
+	maxW: "content",
+	mx: "auto",
+	px: "pageSm",
+	py: "5",
+	mt: "section",
+	display: "flex",
+	flexWrap: "wrap",
+	gap: "3",
+	justifyContent: "space-between",
+});
+
+const skipLink = css({
+	position: "absolute",
+	left: "3",
+	top: "3",
+	zIndex: "toast",
+	transform: "translateY(-200%)",
+	bg: "live",
+	color: "ground",
+	textStyle: "label",
+	px: "3",
+	py: "2",
+	borderRadius: "xs",
+	_focusVisible: { transform: "translateY(0)" },
+});
 ---
+
 <!doctype html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<meta name="theme-color" content="#080d1d" />
-		<meta name="description" content="Live technical game shows for developers." />
+		<meta name="theme-color" content="#08090d" />
+		<meta name="description" content={description} />
+		<link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
 		<title>{title}</title>
+		{/* Self-hosted and subsetted at build time: no third-party request. */}
+		<Font cssVariable="--font-instrument-serif" preload />
+		<Font cssVariable="--font-inter-tight" preload />
+		<Font cssVariable="--font-jetbrains-mono" preload />
 	</head>
 	<body>
+		<a class={skipLink} href="#main">Skip to content</a>
 		<ArcadeHeader active={active} />
-		<main class={arcadeShell}><slot /></main>
-		<footer>RAWKODE ARCADE <span>•</span> Built for the live stream <span>•</span> © {new Date().getFullYear()}</footer>
+		<main class={main} id="main">
+			<slot />
+		</main>
+		<footer class={`${hairline} ${footer}`}>
+			<span class={slug()}>Rawkode Arcade</span>
+			<span class={slug()}>A Rawkode Academy production</span>
+			<span class={slug()}>&copy; {new Date().getFullYear()}</span>
+		</footer>
 	</body>
 </html>
-<style is:global>
-	main { min-height: calc(100vh - 136px); }
-	footer { border-top: 1px solid var(--line); color: var(--mist); font-family: "IBM Plex Mono", monospace; font-size: .68rem; letter-spacing: .08em; margin: 4rem auto 0; max-width: 1440px; padding: 1.5rem 2rem; text-align: center; }
-	footer span { color: var(--cyan); padding: 0 .45rem; }
-</style>

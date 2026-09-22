@@ -1,6 +1,43 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
+import { css } from "@/../styled-system/css";
 import { games, type GameId } from "@/lib/game-catalogue";
+import {
+	control,
+	field,
+	fieldLabel,
+	notice,
+	row,
+	runningOrder,
+	sectionRule,
+	shellWide,
+	slug as slugStyle,
+	stack,
+	stage,
+	text,
+} from "@/styles/arcade";
+
+const studio = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", lg: "minmax(0, token(sizes.railNarrow)) minmax(0, 1fr)" },
+	gap: "stack",
+	alignItems: "start",
+	pb: "section",
+});
+const deckHeader = css({
+	display: "flex",
+	flexWrap: "wrap",
+	alignItems: "center",
+	justifyContent: "space-between",
+	gap: "4",
+	py: "stackSm",
+});
+const editorGrid = css({ display: "grid", gap: "4" });
+const group = css({ border: "none", padding: "0", margin: "0", display: "grid", gap: "4" });
+const guard = css({ display: "grid", gap: "4", justifyItems: "start", py: "section", maxW: "measure" });
+const area = css({ minHeight: "6", py: "3", resize: "vertical" });
+const order = runningOrder();
+const orderSelected = runningOrder({ state: "selected" });
 
 type Pack = {
 	id: string;
@@ -315,29 +352,151 @@ resetRevisionDraft(gameKey.value);
 onMounted(load);
 </script>
 <template>
-	<div class="admin-shell">
-		<header>
-			<div><span>Content studio</span><h1>Build the next <em>great round.</em></h1></div>
-			<button class="publish" :disabled="pending || forbidden" @click="publishRevision">Publish revision <span>↗</span></button>
+	<div :class="shellWide">
+		<header :class="deckHeader">
+			<div :class="stack({ gap: 'tight' })">
+				<span :class="slugStyle({ tone: 'live' })">Content studio</span>
+				<h1 :class="text({ style: 'headline' })">Question packs</h1>
+			</div>
+			<button
+				:class="control({ tone: 'live' })"
+				type="button"
+				data-control
+				:disabled="pending || forbidden"
+				@click="publishRevision"
+			>
+				Publish revision
+			</button>
 		</header>
-		<p class="status" :class="{ error: forbidden }" aria-live="polite">{{ status }}</p>
-		<section v-if="!forbidden" class="studio">
-			<aside class="content-list" aria-label="Content packs">
-				<button v-for="pack in packs" :key="pack.id" class="pack" :class="{ active: selectedId === pack.id }" @click="edit(pack)"><b>{{ pack.game_key }}</b><span>{{ pack.title }}</span><small>{{ pack.status }}</small></button>
-				<p v-if="!packs.length">No packs yet.</p>
+
+		<p
+			:class="notice({ tone: forbidden ? 'error' : 'info' })"
+			aria-live="polite"
+		>{{ status }}</p>
+
+		<section v-if="!forbidden" :class="[studio, css({ mt: '5' })]">
+			<aside aria-label="Content packs">
+				<div :class="sectionRule">
+					<span :class="slugStyle()">{{ packs.length }} packs</span>
+				</div>
+				<div :class="order.root">
+					<button
+						v-for="pack in packs"
+						:key="pack.id"
+						type="button"
+						:class="selectedId === pack.id ? orderSelected.item : order.item"
+						:aria-current="selectedId === pack.id ? 'true' : undefined"
+						@click="edit(pack)"
+					>
+						<span :class="order.index">{{ pack.game_key }}</span>
+						<span :class="order.title">{{ pack.title }}</span>
+						<span :class="order.action">{{ pack.status }}</span>
+					</button>
+				</div>
+				<p v-if="!packs.length" :class="[text({ style: 'bodySm', tone: 'mute' }), css({ mt: '4' })]">
+					No packs yet. Fill in the form to create the first one.
+				</p>
 			</aside>
-			<form class="editor" @submit.prevent="savePack">
-				<label>Show format<select v-model="gameKey" :disabled="Boolean(selected)"><option v-for="game in games" :key="game.id" :value="game.id">{{ game.title }}</option></select></label>
-				<label>Slug<input v-model="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" :disabled="Boolean(selected)" /></label>
-				<label>Pack title<input v-model="title" required maxlength="160" /></label>
-				<label>Description<textarea v-model="description" rows="2" /></label>
-				<div class="editor-footer"><button class="save" type="submit" :disabled="pending">{{ selected ? 'Save pack' : 'Create pack' }}</button><button v-if="selected" class="archive" type="button" :disabled="pending" @click="archivePack">Archive</button></div>
-				<fieldset><legend>Publish a validated {{ games.find((game) => game.id === gameKey)?.title }} revision</legend><p class="revision-guide">{{ revisionGuide }}</p><label>{{ gameKey === 'spinlock' ? 'Category' : 'Prompt' }}<textarea v-model="question" required rows="3" /></label><label v-if="!answerListGame">{{ gameKey === 'spinlock' ? 'Phrase' : 'Correct answer' }}<input v-model="answer" required autocomplete="off" /></label><label v-if="gameKey === 'principal-engineer'">Four choices (one per line)<textarea v-model="options" required rows="4" /></label><label v-if="answerListGame">{{ gameKey === 'ten-nines' ? 'Ten answers (one per line)' : 'Answers (one per line)' }}<textarea v-model="answers" required rows="6" /></label><small>Answers are sent only to the authenticated content API. Each show is published as its own reducer-valid game manifest and is never passed to public live-room props.</small></fieldset>
+
+			<form :class="[stage({ pad: 'comfortable' }), editorGrid]" data-stage @submit.prevent="savePack">
+				<div>
+					<label :class="fieldLabel" for="pack-format">Show format</label>
+					<select
+						id="pack-format"
+						v-model="gameKey"
+						:class="field()"
+						data-field
+						:disabled="Boolean(selected)"
+					>
+						<option v-for="game in games" :key="game.id" :value="game.id">{{ game.title }}</option>
+					</select>
+				</div>
+
+				<div>
+					<label :class="fieldLabel" for="pack-slug">Slug</label>
+					<input
+						id="pack-slug"
+						v-model="slug"
+						:class="field()"
+						data-field
+						required
+						pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
+						:disabled="Boolean(selected)"
+					/>
+				</div>
+
+				<div>
+					<label :class="fieldLabel" for="pack-title">Pack title</label>
+					<input id="pack-title" v-model="title" :class="field()" data-field required maxlength="160" />
+				</div>
+
+				<div>
+					<label :class="fieldLabel" for="pack-description">Description</label>
+					<textarea id="pack-description" v-model="description" :class="[field(), area]" data-field rows="2" />
+				</div>
+
+				<div :class="row({ gap: 'base', wrap: true })">
+					<button :class="control({ tone: 'action', size: 'sm' })" type="submit" data-control :disabled="pending">
+						{{ selected ? "Save pack" : "Create pack" }}
+					</button>
+					<button
+						v-if="selected"
+						:class="control({ tone: 'danger', size: 'sm' })"
+						type="button"
+						data-control
+						:disabled="pending"
+						@click="archivePack"
+					>Archive</button>
+				</div>
+
+				<fieldset :class="group">
+					<legend :class="[fieldLabel, css({ padding: '0' })]">
+						Publish a validated revision
+					</legend>
+					<p :class="text({ style: 'bodySm', tone: 'soft' })">{{ revisionGuide }}</p>
+
+					<div>
+						<label :class="fieldLabel" for="revision-question">
+							{{ gameKey === "spinlock" ? "Category" : "Prompt" }}
+						</label>
+						<textarea id="revision-question" v-model="question" :class="[field(), area]" data-field required rows="3" />
+					</div>
+
+					<div v-if="!answerListGame">
+						<label :class="fieldLabel" for="revision-answer">
+							{{ gameKey === "spinlock" ? "Phrase" : "Correct answer" }}
+						</label>
+						<input id="revision-answer" v-model="answer" :class="field()" data-field required autocomplete="off" />
+					</div>
+
+					<div v-if="gameKey === 'principal-engineer'">
+						<label :class="fieldLabel" for="revision-options">Four choices, one per line</label>
+						<textarea id="revision-options" v-model="options" :class="[field(), area]" data-field required rows="4" />
+					</div>
+
+					<div v-if="answerListGame">
+						<label :class="fieldLabel" for="revision-answers">
+							{{ gameKey === "ten-nines" ? "Ten answers, one per line" : "Answers, one per line" }}
+						</label>
+						<textarea id="revision-answers" v-model="answers" :class="[field(), area]" data-field required rows="6" />
+					</div>
+
+					<p :class="text({ style: 'bodySm', tone: 'mute' })">
+						Answers go only to the authenticated content API. Each show publishes
+						as its own reducer-valid manifest and is never passed to public
+						live-room props.
+					</p>
+				</fieldset>
 			</form>
 		</section>
-		<section v-else class="auth-guard"><h2>Producer access required</h2><p>Sign in with a host or producer session, then reload the content studio.</p></section>
+
+		<section v-else :class="guard">
+			<span :class="slugStyle({ tone: 'closed' })">Access required</span>
+			<h2 :class="text({ style: 'headline' })">Producer sign-in needed.</h2>
+			<p :class="text({ style: 'body', tone: 'soft' })">
+				Sign in with a host or producer session through Cloudflare Access, then
+				reload the content studio.
+			</p>
+		</section>
 	</div>
 </template>
-<style scoped>
-.admin-shell { margin: auto; max-width: 1100px; padding: 2rem; }header { align-items: end; display: flex; justify-content: space-between; gap: 1rem; }header span { color: var(--cyan); font-family: "IBM Plex Mono", monospace; font-size: .64rem; letter-spacing: .1em; text-transform: uppercase; }h1 { font-family: "Space Grotesk", sans-serif; font-size: clamp(1.8rem, 4vw, 3rem); letter-spacing: -.07em; margin: .35rem 0 0; }h1 em { color: var(--cyan); font-style: normal; }.publish, .save { background: var(--cyan); border: 0; border-radius: 8px; color: var(--ink); font-weight: 800; padding: .7rem .85rem; }.status { color: var(--lime); font-size: .8rem; }.status.error { color: var(--coral); }.studio { display: grid; gap: 1rem; grid-template-columns: 280px 1fr; }.content-list, .editor, .auth-guard { background: rgb(16 26 53 / 70%); border: 1px solid var(--line); border-radius: 13px; padding: 1rem; }.pack { background: transparent; border: 1px solid transparent; border-radius: 8px; color: var(--cloud); display: grid; gap: .2rem; margin-bottom: .35rem; padding: .65rem; text-align: left; width: 100%; }.pack.active { background: rgb(77 232 255 / 8%); border-color: rgb(77 232 255 / 24%); }.pack b, .pack small, fieldset small { color: var(--mist); font-family: "IBM Plex Mono", monospace; font-size: .62rem; }.editor { display: grid; gap: .8rem; }.editor label { color: var(--mist); display: grid; font-family: "IBM Plex Mono", monospace; font-size: .64rem; gap: .35rem; letter-spacing: .05em; text-transform: uppercase; }input, select, textarea { background: rgb(8 13 29 / 58%); border: 1px solid var(--line); border-radius: 7px; color: var(--cloud); font: inherit; padding: .65rem; text-transform: none; width: 100%; }.editor-footer { display: flex; gap: .6rem; }.archive { background: transparent; border: 1px solid var(--coral); border-radius: 8px; color: var(--coral); padding: .65rem .8rem; }fieldset { border: 1px solid var(--line); border-radius: 9px; display: grid; gap: .7rem; padding: .8rem; }legend { color: var(--cyan); font-family: "IBM Plex Mono", monospace; font-size: .62rem; letter-spacing: .07em; text-transform: uppercase; }.auth-guard { margin-top: 1rem; }@media (max-width: 700px) { .admin-shell { padding: 1rem; } header { align-items: start; flex-direction: column; }.studio { grid-template-columns: 1fr; } }
-</style>

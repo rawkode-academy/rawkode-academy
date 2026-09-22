@@ -1,5 +1,23 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+import { css } from "@/../styled-system/css";
+import {
+	control,
+	hairline,
+	notice,
+	scoreboard,
+	sectionRule,
+	shell,
+	slug,
+	text,
+} from "@/styles/arcade";
+
+const board = css({ py: "sectionTight" });
+const empty = css({ display: "grid", gap: "4", justifyItems: "start", py: "section" });
+
+function slots(index: number) {
+	return scoreboard({ position: index === 0 ? "leading" : "default" });
+}
 
 type ProjectedEntry = {
 	principalId: string;
@@ -34,25 +52,39 @@ onMounted(async () => {
 	}
 });
 </script>
+
 <template>
-	<section class="board" aria-live="polite">
-		<p>LIVE LEADERBOARDS</p>
-		<h1>Ship. Score. <em>Repeat.</em></h1>
-		<p v-if="error" class="message">{{ error }}</p>
-		<ol v-else class="rows" aria-label="Final room leaderboard">
+	<div :class="[shell, board]" aria-live="polite">
+		<div :class="sectionRule">
+			<span :class="slug()">Verified result</span>
+			<span v-if="roomId" :class="slug({ tone: 'live' })">Room {{ roomId }}</span>
+		</div>
+
+		<h1 :class="text({ style: 'headline' })">Final standings</h1>
+
+		<div v-if="error" :class="empty">
+			<p :class="[notice({ tone: 'info' }), text({ style: 'body' })]">{{ error }}</p>
+			<a :class="control({ tone: 'quiet' })" href="/">Back to formats</a>
+		</div>
+
+		<ol
+			v-else
+			:class="[slots(1).root, hairline, css({ mt: '5' })]"
+			aria-label="Final room leaderboard"
+		>
 			<li
-				v-for="entry in entries"
+				v-for="(entry, index) in entries"
 				:key="`${entry.principalId}-${entry.teamId}`"
+				:class="slots(index).row"
 				:data-testid="`leaderboard-row-${roomId}-${entry.teamId ?? entry.principalId}`"
 			>
-				<span>#{{ entry.rank }}</span>
-				<strong>{{ entry.teamId ?? entry.principalId }}</strong>
-				<small>{{ roomId }}</small>
-				<b>{{ entry.score.toLocaleString() }}</b>
+				<span :class="slots(index).rank">{{ entry.rank }}</span>
+				<span :class="slots(index).identity">
+					<span :class="slots(index).name">{{ entry.teamId ?? entry.principalId }}</span>
+					<span v-if="index === 0" :class="slots(index).flag">Winner</span>
+				</span>
+				<span :class="slots(index).score">{{ entry.score.toLocaleString("en-GB") }}</span>
 			</li>
 		</ol>
-	</section>
+	</div>
 </template>
-<style scoped>
-.board { margin: auto; max-width: 900px; padding: 4rem 2rem; }.board > p:first-child { color: var(--cyan); font-family: "IBM Plex Mono", monospace; font-size: .65rem; letter-spacing: .1em; }.board h1 { font-family: "Space Grotesk", sans-serif; font-size: clamp(3rem, 7vw, 5rem); letter-spacing: -.08em; line-height: .85; }.board em { color: var(--cyan); font-style: normal; }.message { color: var(--mist); }.rows { display: grid; gap: .75rem; list-style: none; padding: 0; }.rows li { align-items: center; background: rgb(16 26 53 / 70%); border: 1px solid var(--line); border-radius: 12px; display: grid; gap: 1rem; grid-template-columns: auto 1fr auto auto; padding: 1rem; }.rows span, .rows small { color: var(--mist); font-family: "IBM Plex Mono", monospace; font-size: .7rem; }.rows b { color: var(--lime); font-family: "Space Grotesk", sans-serif; font-size: 1.25rem; }
-</style>

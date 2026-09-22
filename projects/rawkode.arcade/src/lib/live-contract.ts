@@ -12,7 +12,6 @@ export type PublicPrompt = {
 export type TeamScore = {
 	id: string;
 	name: string;
-	colour: string;
 	score: number;
 	streak?: number;
 };

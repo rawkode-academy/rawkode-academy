@@ -3,16 +3,18 @@
 	"private": true,
 	"version": "0.1.0",
 	"type": "module",
-	"engines": { "bun": ">=1.2.0" },
+	"engines": {
+		"bun": ">=1.2.0"
+	},
 	"scripts": {
 		"dev": "wrangler dev",
 		"panda": "panda codegen && panda cssgen",
-		"check": "bun run panda && astro check && tsc --noEmit",
+		"check": "bun run panda && bun run design && astro check && tsc --noEmit",
 		"test": "bun run test:unit && bun run test:integration",
-		"test:unit": "bun run scripts/require-no-skips.ts -- bun test src/games tests/content-and-results.test.ts tests/access-auth.test.ts",
+		"test:unit": "bun run scripts/require-no-skips.ts -- bun test src/games src/tests tests/content-and-results.test.ts tests/access-auth.test.ts",
 		"test:integration": "bun run scripts/require-no-skips.ts -- vitest run --config vitest.config.ts",
 		"test:e2e": "bun run scripts/require-no-skips.ts -- playwright test --config e2e/playwright.config.ts",
-		"build": "bun run panda && astro check && astro build && tsc --noEmit",
+		"build": "bun run panda && bun run design && astro check && astro build && tsc --noEmit",
 		"deploy:dry-run": "bun run build && bun run scripts/cloudflare-config.ts production --dry-run && wrangler deploy --config .wrangler/deploy-production.json --dry-run",
 		"deploy:preview": "bun run build && bun run scripts/cloudflare-config.ts preview --dry-run && wrangler deploy --config .wrangler/deploy-preview.json --dry-run",
 		"deploy": "bun run build && bun run scripts/deploy-cloudflare.ts production",
@@ -23,7 +25,8 @@
 		"ops:admission:disable": "wrangler secret put ADMISSION_ENABLED",
 		"ops:admission:restore": "wrangler secret put ADMISSION_ENABLED",
 		"ops:rotate-ticket-secret": "wrangler secret put TICKET_SECRET",
-		"ops:rotate-session-secret": "wrangler secret put SESSION_SECRET"
+		"ops:rotate-session-secret": "wrangler secret put SESSION_SECRET",
+		"design": "bun run scripts/require-no-skips.ts -- bun test src/tests/design-tokens.test.ts"
 	},
 	"dependencies": {
 		"@ark-ui/vue": "5.39.2",

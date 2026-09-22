@@ -1,28 +1,98 @@
 ---
+import { css } from "@/../styled-system/css";
+import { control, row, slug } from "@/styles/arcade";
+
 const { active = "" } = Astro.props;
+
 const links = [
-	{ href: "/", label: "Arcade", key: "arcade" },
-	{ href: "/leaderboard", label: "Leaderboard", key: "leaderboard" },
-	{ href: "/join", label: "Join live", key: "join" },
+	{ href: "/", label: "Formats", key: "arcade" },
+	{ href: "/leaderboards", label: "Results", key: "leaderboard" },
+	{ href: "/join", label: "Join", key: "join" },
 ];
+
+const masthead = css({
+	display: "flex",
+	alignItems: "center",
+	gap: "4",
+	justifyContent: "space-between",
+	maxW: "content",
+	mx: "auto",
+	px: "pageSm",
+	minH: "control",
+	py: "3",
+});
+
+const mastheadOuter = css({
+	borderBottomWidth: "hairline",
+	borderBottomStyle: "solid",
+	borderBottomColor: "rule",
+	position: "sticky",
+	top: "0",
+	zIndex: "sticky",
+	bg: "ground",
+});
+
+const brand = css({
+	display: "inline-flex",
+	alignItems: "baseline",
+	gap: "2",
+	fontFamily: "display",
+	fontSize: "title",
+	color: "ink",
+	whiteSpace: "nowrap",
+});
+
+const brandLive = css({ color: "live", fontStyle: "italic" });
+
+const nav = css({
+	display: "flex",
+	gap: "1",
+	marginRight: "auto",
+	hideBelow: "sm",
+});
+
+const navLink = css({
+	textStyle: "label",
+	color: "inkSoft",
+	px: "2",
+	py: "2",
+	borderRadius: "xs",
+	borderBottomWidth: "rule",
+	borderBottomStyle: "solid",
+	borderBottomColor: "transparent",
+	transitionProperty: "colors",
+	transitionDuration: "fast",
+	transitionTimingFunction: "standard",
+	_hover: { color: "ink" },
+	"&[aria-current='page']": { color: "ink", borderBottomColor: "live" },
+});
 ---
 
-<header class="header">
-	<a class="brand" href="/" aria-label="Rawkode Arcade home"><span class="brand-mark" aria-hidden="true">&gt;_</span><span>RAWKODE <b>ARCADE</b></span></a>
-	<nav aria-label="Primary navigation">
-		{links.map((link) => <a class:list={["nav-link", { active: active === link.key }]} href={link.href}>{link.label}</a>)}
-	</nav>
-	<a class="header-action" href="/host">Launch a room <span aria-hidden="true">↗</span></a>
-</header>
-
-<style>
-	.header { align-items: center; border-bottom: 1px solid var(--line); display: flex; gap: 2rem; justify-content: space-between; margin: auto; max-width: 1440px; min-height: 74px; padding: 0 2rem; }
-	.brand { align-items: center; display: flex; font-family: "Space Grotesk", sans-serif; font-size: .88rem; font-weight: 700; gap: .7rem; letter-spacing: .08em; white-space: nowrap; }
-	.brand b { color: var(--cyan); font-weight: 700; }
-	.brand-mark { align-items: center; background: var(--cyan); border-radius: 7px; color: var(--ink); display: inline-flex; font-family: "IBM Plex Mono", monospace; height: 30px; justify-content: center; letter-spacing: -.1em; width: 33px; }
-	nav { display: flex; gap: .4rem; margin-right: auto; }
-	.nav-link { border-radius: 8px; color: var(--mist); font-size: .9rem; font-weight: 600; padding: .55rem .75rem; }
-	.nav-link:hover, .nav-link.active { background: rgb(77 232 255 / 10%); color: var(--cloud); }
-	.header-action { align-items: center; background: var(--cloud); border-radius: 9px; color: var(--ink); display: flex; font-size: .84rem; font-weight: 800; gap: .4rem; padding: .65rem .85rem; }
-	@media (max-width: 680px) { .header { gap: .8rem; min-height: 64px; padding: 0 1rem; } nav { display: none; } .header-action { font-size: .72rem; padding: .5rem .6rem; } .brand { font-size: .72rem; } .brand-mark { height: 26px; width: 28px; } }
-</style>
+<div class={mastheadOuter}>
+	<div class={masthead}>
+		<a class={brand} href="/" aria-label="Rawkode Arcade home">
+			Rawkode <span class={brandLive}>Arcade</span>
+		</a>
+		<nav class={nav} aria-label="Primary">
+			{
+				links.map((link) => (
+					<a
+						class={navLink}
+						href={link.href}
+						aria-current={active === link.key ? "page" : undefined}
+					>
+						{link.label}
+					</a>
+				))
+			}
+		</nav>
+		<div class={row({ gap: "base" })}>
+			<span class={`${slug({ tone: "default" })} ${css({ hideBelow: "md" })}`}>
+				play.rawkode.academy
+			</span>
+			<a class={control({ tone: "quiet", size: "sm" })} href="/host">
+				Open a room
+			</a>
+		</div>
+	</div>
+</div>

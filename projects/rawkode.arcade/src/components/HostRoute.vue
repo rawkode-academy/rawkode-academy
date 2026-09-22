@@ -9,6 +9,18 @@ import {
 	requestJoin,
 	type RoomBootstrap,
 } from "@/lib/room-bootstrap";
+import { css } from "@/../styled-system/css";
+import { control, shell, slug, text } from "@/styles/arcade";
+
+const joining = css({
+	display: "grid",
+	justifyItems: "center",
+	alignContent: "center",
+	gap: "4",
+	minHeight: "route",
+	textAlign: "center",
+	py: "section",
+});
 
 const props = withDefaults(
 	defineProps<{ roomId: string; game?: GameId; code?: string }>(),
@@ -54,6 +66,7 @@ async function connectHost() {
 }
 onMounted(connectHost);
 </script>
+
 <template>
 	<HostControlDeck
 		v-if="bootstrap"
@@ -63,11 +76,13 @@ onMounted(connectHost);
 		:ticket="bootstrap.wsTicket"
 		:socket-url="bootstrap.socketUrl"
 	/>
-	<section v-else class="joining" :aria-busy="!error" aria-live="polite">
-		<h1>{{ error || "Opening producer controls…" }}</h1>
-		<p v-if="error"><a href="/">Return to the lobby</a> to create or open a room.</p>
+	<section v-else :class="[shell, joining]" :aria-busy="!error" aria-live="polite">
+		<span :class="slug({ tone: error ? 'closed' : 'live' })">
+			{{ error ? "Not authorised" : "Opening" }}
+		</span>
+		<h1 :class="text({ style: 'headline' })">
+			{{ error || "Opening producer controls" }}
+		</h1>
+		<a v-if="error" :class="control({ tone: 'quiet' })" href="/">Back to formats</a>
 	</section>
 </template>
-<style scoped>
-.joining { align-items: center; display: grid; justify-content: center; min-height: 70vh; padding: 2rem; text-align: center; }.joining h1 { font-family: "Space Grotesk", sans-serif; font-size: clamp(1.8rem, 5vw, 3rem); letter-spacing: -.06em; }.joining p { color: var(--mist); }.joining a { color: var(--cyan); text-decoration: underline; }
-</style>

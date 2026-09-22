@@ -1,12 +1,52 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import { css } from "@/../styled-system/css";
 import { joinBootstrapKey, requestJoin } from "@/lib/room-bootstrap";
+import {
+	choice,
+	control,
+	field,
+	fieldLabel,
+	notice,
+	slug,
+	stage,
+	text,
+} from "@/styles/arcade";
+
 const name = ref("");
 const roomCode = ref("");
 const teamId = ref("team-red");
 const role = ref<"contestant" | "audience">("contestant");
 const error = ref("");
 const pending = ref(false);
+
+const teams = [
+	{ id: "team-red", label: "The Merge Queue" },
+	{ id: "team-blue", label: "Cache Invalidators" },
+];
+
+const roles = [
+	{ id: "contestant", label: "Contestant", hint: "You are on camera." },
+	{ id: "audience", label: "Audience", hint: "You play from the crowd." },
+] as const;
+
+const form = css({ display: "grid", gap: "4" });
+const group = css({ border: "none", padding: "0", margin: "0", display: "grid", gap: "2" });
+const legend = css({ padding: "0" });
+const options = css({ display: "grid", gap: "2" });
+const optionBody = css({ display: "grid", gap: "1", minWidth: "0" });
+const radio = css({ accentColor: "action", flexShrink: "0" });
+const header = css({
+	display: "flex",
+	justifyContent: "space-between",
+	gap: "3",
+	pb: "3",
+	mb: "4",
+	borderBottomWidth: "hairline",
+	borderBottomStyle: "solid",
+	borderBottomColor: "rule",
+});
+
 async function join() {
 	if (!name.value.trim() || !roomCode.value.trim()) {
 		error.value = "Enter a display name and room code.";
@@ -41,15 +81,91 @@ async function join() {
 	}
 }
 </script>
+
 <template>
-	<form class="join-form" @submit.prevent="join">
-		<label>Display name<input v-model="name" data-testid="display-name" autocomplete="nickname" maxlength="30" aria-describedby="join-error" /></label>
-		<label>Room code<input v-model="roomCode" data-testid="room-code-input" autocomplete="off" maxlength="80" /></label>
-		<fieldset><legend>Join a team</legend><label v-for="team in [{ id: 'team-red', label: 'The Merge Queue' }, { id: 'team-blue', label: 'Cache Invalidators' }]" :key="team.id" class="team-choice" :data-testid="`team-choice-${team.id}`"><input v-model="teamId" type="radio" name="team" :value="team.id" /><span>{{ team.label }}</span></label></fieldset>
-		<fieldset><legend>How are you playing?</legend><label class="team-choice"><input v-model="role" type="radio" name="role" value="contestant" /><span>Contestant</span></label><label class="team-choice"><input v-model="role" type="radio" name="role" value="audience" /><span>Audience</span></label></fieldset>
-		<p id="join-error" class="error" aria-live="polite">{{ error }}</p><button type="submit" data-testid="join-room" :disabled="pending">{{ pending ? 'Joining…' : 'Join live room' }} <span>→</span></button>
-	</form>
+	<div :class="stage({ tone: 'raised', pad: 'comfortable' })" data-stage>
+		<div :class="header">
+			<span :class="slug({ tone: 'live' })">Live participant</span>
+			<span :class="slug()">No account needed</span>
+		</div>
+
+		<form :class="form" @submit.prevent="join">
+			<div>
+				<label :class="fieldLabel" for="join-code">Room code</label>
+				<input
+					id="join-code"
+					v-model="roomCode"
+					:class="field({ variant: 'code' })"
+					data-testid="room-code-input"
+					data-field
+					autocomplete="off"
+					autocapitalize="characters"
+					spellcheck="false"
+					maxlength="80"
+					aria-describedby="join-error"
+				/>
+			</div>
+
+			<div>
+				<label :class="fieldLabel" for="join-name">Display name</label>
+				<input
+					id="join-name"
+					v-model="name"
+					:class="field()"
+					data-testid="display-name"
+					data-field
+					autocomplete="nickname"
+					maxlength="30"
+					aria-describedby="join-error"
+				/>
+			</div>
+
+			<fieldset :class="group">
+				<legend :class="[fieldLabel, legend]">Team</legend>
+				<div :class="options">
+					<label
+						v-for="team in teams"
+						:key="team.id"
+						:class="choice({ state: teamId === team.id ? 'selected' : 'idle' })"
+						:data-testid="`team-choice-${team.id}`"
+					>
+						<input v-model="teamId" :class="radio" type="radio" name="team" :value="team.id" />
+						<span :class="text({ style: 'bodySm' })">{{ team.label }}</span>
+					</label>
+				</div>
+			</fieldset>
+
+			<fieldset :class="group">
+				<legend :class="[fieldLabel, legend]">How are you playing?</legend>
+				<div :class="options">
+					<label
+						v-for="option in roles"
+						:key="option.id"
+						:class="choice({ state: role === option.id ? 'selected' : 'idle' })"
+					>
+						<input v-model="role" :class="radio" type="radio" name="role" :value="option.id" />
+						<span :class="optionBody">
+							<span :class="text({ style: 'bodySm' })">{{ option.label }}</span>
+							<span :class="text({ style: 'bodySm', tone: 'soft' })">{{ option.hint }}</span>
+						</span>
+					</label>
+				</div>
+			</fieldset>
+
+			<p v-if="error" id="join-error" :class="notice({ tone: 'error' })" aria-live="polite">
+				{{ error }}
+			</p>
+			<p v-else id="join-error" hidden></p>
+
+			<button
+				:class="control({ tone: 'live', size: 'block' })"
+				type="submit"
+				data-testid="join-room"
+				data-control
+				:disabled="pending"
+			>
+				{{ pending ? "Joining room…" : "Join live room" }}
+			</button>
+		</form>
+	</div>
 </template>
-<style scoped>
-.join-form { display: grid; gap: .8rem; }.join-form > label, fieldset { color: var(--mist); display: grid; font-family: "IBM Plex Mono", monospace; font-size: .62rem; gap: .4rem; letter-spacing: .07em; text-transform: uppercase; }.join-form input:not([type='radio']) { background: rgb(8 13 29 / 62%); border: 1px solid var(--line); border-radius: 8px; color: var(--cloud); font-family: Inter, sans-serif; font-size: .9rem; padding: .72rem; }.join-form fieldset { border: 0; margin: 0; padding: 0; }.team-choice { align-items: center; background: rgb(8 13 29 / 38%); border: 1px solid var(--line); border-radius: 8px; color: var(--cloud); display: flex; font-family: Inter, sans-serif; font-size: .8rem; gap: .5rem; letter-spacing: 0; margin-top: .4rem; padding: .62rem; text-transform: none; }.team-choice:has(input:checked) { border-color: var(--cyan); }.team-choice input { accent-color: var(--cyan); }.error { color: var(--coral); font-size: .68rem; margin: 0; min-height: 1em; }.join-form button { background: var(--cyan); border: 0; border-radius: 8px; color: var(--ink); font-size: .84rem; font-weight: 800; padding: .8rem; }
-</style>

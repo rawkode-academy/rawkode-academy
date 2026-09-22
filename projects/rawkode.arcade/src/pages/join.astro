@@ -1,12 +1,100 @@
 ---
-import ArcadeLayout from "@/layouts/ArcadeLayout.astro";
+import { css } from "@/../styled-system/css";
 import JoinRoomForm from "@/components/JoinRoomForm.vue";
+import ArcadeLayout from "@/layouts/ArcadeLayout.astro";
 import { games } from "@/lib/game-catalogue";
+import { runningOrder, sectionRule, shell, slug, text } from "@/styles/arcade";
+
+const join = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", lg: "1fr minmax(0, token(sizes.formColumn))" },
+	gap: { base: "stack", lg: "section" },
+	alignItems: "start",
+	py: "sectionTight",
+});
+
+/** A genuine ordered sequence, so the numbers carry information. */
+const steps = css({
+	display: "grid",
+	gap: "3",
+	listStyle: "none",
+	marginBlock: "0",
+	marginInline: "0",
+	paddingInline: "0",
+	paddingBlockEnd: "0",
+	paddingBlockStart: "4",
+	borderTopWidth: "hairline",
+	borderTopStyle: "solid",
+	borderTopColor: "rule",
+});
+
+const step = css({
+	display: "grid",
+	gridTemplateColumns: "auto 1fr",
+	gap: "3",
+	alignItems: "baseline",
+});
+
+const order = runningOrder();
 ---
-<ArcadeLayout title="Join a room — Rawkode Arcade" active="join">
-	<section class="join-shell"><div class="join-intro"><p class="eyebrow"><i></i> Audience access</p><h1>Get in the <em>room.</em></h1><p>Bring a team, a second screen, or that one very specific opinion about database indexes.</p><ul><li><span>01</span> Enter the six-character live room code</li><li><span>02</span> Pick a name the presenter can read on air</li><li><span>03</span> Play in sync with the stream</li></ul></div><div class="join-card"><div class="form-top"><span>Live participant</span><b>Secure room</b></div><JoinRoomForm client:load /><p class="privacy">No account required for audience play. We only keep what is needed to run the room.</p></div></section>
-	<section class="tonight"><div><p class="eyebrow">Tonight's formats</p><h2>Find a game worth <em>arguing about.</em></h2></div><div class="format-list">{games.slice(0, 3).map((game) => <a href={`/games/${game.id}`}><span>{game.kicker}</span><b>{game.title}</b><i>→</i></a>)}</div></section>
+
+<ArcadeLayout
+	title="Join a live room: Rawkode Arcade"
+	description="Enter a room code to play along with a live Rawkode Arcade show."
+	active="join"
+>
+	<div class={shell}>
+		<section class={join}>
+			<div>
+				<h1 class={text({ style: "display" })}>Bring a code.</h1>
+				<p
+					class={`${text({ style: "body", tone: "soft", measure: "narrow" })} ${css({ mt: "4" })}`}
+				>
+					Audience play needs no account. The host reads a six-character code on
+					air; enter it here and your phone becomes the second screen.
+				</p>
+				<ol class={`${steps} ${css({ marginBlockStart: "5" })}`}>
+					<li class={step}>
+						<span class={slug({ wrap: "never" })}>01</span>
+						<span class={text({ style: "bodySm", tone: "soft" })}>
+							Enter the room code exactly as the host reads it.
+						</span>
+					</li>
+					<li class={step}>
+						<span class={slug({ wrap: "never" })}>02</span>
+						<span class={text({ style: "bodySm", tone: "soft" })}>
+							Pick a name the presenter can say out loud.
+						</span>
+					</li>
+					<li class={step}>
+						<span class={slug({ wrap: "never" })}>03</span>
+						<span class={text({ style: "bodySm", tone: "soft" })}>
+							Answer inside the window. Late answers do not score.
+						</span>
+					</li>
+				</ol>
+			</div>
+
+			<JoinRoomForm client:load />
+		</section>
+
+		<section class={css({ pb: "section" })}>
+			<div class={sectionRule}>
+				<span class={slug({ wrap: "never" })}>Formats in rotation</span>
+			</div>
+			<div class={order.root}>
+				{
+					games.slice(0, 3).map((game, index) => (
+						<a class={order.item} href={`/games/${game.id}`}>
+							<span class={order.index}>
+								FMT-{String(index + 1).padStart(2, "0")}
+							</span>
+							<span class={order.title}>{game.title}</span>
+							<span class={order.action}>{game.players}</span>
+						</a>
+					))
+				}
+			</div>
+		</section>
+	</div>
 </ArcadeLayout>
-<style>
-.join-shell { align-items: center; display: grid; gap: clamp(2rem, 8vw, 8rem); grid-template-columns: 1fr minmax(320px, 430px); margin: auto; max-width: 1050px; min-height: calc(100vh - 180px); padding: 3rem 2rem; }.eyebrow { align-items: center; color: var(--cyan); display: flex; font-family: "IBM Plex Mono", monospace; font-size: .66rem; gap: .45rem; letter-spacing: .1em; text-transform: uppercase; }.eyebrow i { background: var(--coral); border-radius: 50%; height: 8px; width: 8px; }.join-intro h1, .tonight h2 { font-family: "Space Grotesk", sans-serif; font-size: clamp(3rem, 6vw, 5rem); letter-spacing: -.09em; line-height: .87; margin: .9rem 0 1.2rem; max-width: 8ch; }.join-intro h1 em, .tonight em { color: var(--cyan); font-style: normal; }.join-intro > p:not(.eyebrow) { color: var(--mist); line-height: 1.65; max-width: 36ch; }.join-intro ul { border-top: 1px solid var(--line); list-style: none; margin: 2rem 0 0; padding: 1rem 0 0; }.join-intro li { align-items: center; color: var(--mist); display: flex; font-size: .82rem; gap: .7rem; margin: .7rem 0; }.join-intro li span { color: var(--cyan); font-family: "IBM Plex Mono", monospace; font-size: .6rem; }.join-card { background: linear-gradient(145deg, rgb(24 38 74 / 96%), rgb(16 26 53 / 96%)); border: 1px solid rgb(77 232 255 / 35%); border-radius: 17px; box-shadow: var(--shadow); padding: 1.2rem; }.form-top { border-bottom: 1px solid var(--line); color: var(--cyan); display: flex; font-family: "IBM Plex Mono", monospace; font-size: .64rem; justify-content: space-between; letter-spacing: .08em; padding-bottom: .8rem; text-transform: uppercase; }.form-top b { color: var(--lime); font-size: .58rem; font-weight: 500; }.join-card > label { color: var(--mist); display: grid; font-family: "IBM Plex Mono", monospace; font-size: .62rem; gap: .45rem; letter-spacing: .08em; margin-top: 1rem; text-transform: uppercase; }.join-card input[type='text'], .join-card input:not([type]) { background: rgb(8 13 29 / 62%); border: 1px solid var(--line); border-radius: 8px; color: var(--cloud); font-family: Inter, sans-serif; font-size: .9rem; letter-spacing: 0; padding: .75rem; text-transform: none; }.join-card label:first-of-type input { font-family: "IBM Plex Mono", monospace; font-size: 1.35rem; font-weight: 600; letter-spacing: .15em; text-transform: uppercase; }fieldset { border: 0; margin: 1.15rem 0 0; padding: 0; }legend { color: var(--mist); font-family: "IBM Plex Mono", monospace; font-size: .62rem; letter-spacing: .08em; margin-bottom: .55rem; text-transform: uppercase; }.role { align-items: center; background: rgb(8 13 29 / 38%); border: 1px solid var(--line); border-radius: 8px; display: flex; gap: .6rem; margin-top: .45rem; padding: .65rem; }.role:has(input:checked) { background: rgb(77 232 255 / 10%); border-color: var(--cyan); }.role input { accent-color: var(--cyan); }.role span { display: grid; gap: .1rem; }.role b { font-size: .8rem; }.role small { color: var(--mist); font-size: .67rem; }.join-card button { background: var(--cyan); border: 0; border-radius: 8px; color: var(--ink); font-size: .84rem; font-weight: 800; margin-top: 1rem; padding: .8rem; width: 100%; }.privacy { color: var(--mist); font-size: .64rem; line-height: 1.45; margin: .8rem 0 0; text-align: center; }.tonight { align-items: start; border-top: 1px solid var(--line); display: grid; gap: 2rem; grid-template-columns: 1fr 1fr; margin: auto; max-width: 1280px; padding: 4rem 2rem; }.tonight h2 { font-size: 2.4rem; }.format-list { border-top: 1px solid var(--line); }.format-list a { align-items: center; border-bottom: 1px solid var(--line); display: grid; gap: .55rem; grid-template-columns: 95px 1fr auto; padding: 1rem 0; }.format-list a:hover b { color: var(--cyan); }.format-list span { color: var(--mist); font-family: "IBM Plex Mono", monospace; font-size: .58rem; letter-spacing: .06em; text-transform: uppercase; }.format-list b { font-family: "Space Grotesk", sans-serif; font-size: 1rem; letter-spacing: -.04em; }.format-list i { color: var(--cyan); font-style: normal; }@media (max-width: 720px) { .join-shell, .tonight { grid-template-columns: 1fr; }.join-shell { min-height: auto; padding: 3rem 1rem; }.tonight { padding: 3rem 1rem; }.join-intro h1 { font-size: 3.6rem; } }
-</style>

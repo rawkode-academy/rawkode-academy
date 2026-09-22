@@ -2,7 +2,56 @@
 import { RadioGroup } from "@ark-ui/vue/radio-group";
 import { computed, ref, watch } from "vue";
 import type { PublicPrompt } from "@/lib/live-contract";
-import { arcadeCard, arcadeControl } from "@/styles/arcade";
+import { css } from "@/../styled-system/css";
+import {
+	choice,
+	choiceKey,
+	control,
+	field,
+	fieldLabel,
+	slug,
+	stage,
+	text,
+} from "@/styles/arcade";
+
+const header = css({
+	display: "flex",
+	justifyContent: "space-between",
+	gap: "3",
+	pb: "3",
+	mb: "4",
+	borderBottomWidth: "hairline",
+	borderBottomStyle: "solid",
+	borderBottomColor: "rule",
+});
+const question = css({ mb: "4" });
+const options = css({ display: "grid", gap: "2" });
+const freeAnswer = css({ mt: "4" });
+const submitButton = css({ mt: "4" });
+const reactionRow = css({
+	display: "flex",
+	alignItems: "center",
+	gap: "2",
+	mt: "4",
+	pt: "3",
+	borderTopWidth: "hairline",
+	borderTopStyle: "solid",
+	borderTopColor: "rule",
+});
+const reactionButton = css({
+	minWidth: "touch",
+	minHeight: "touch",
+	borderRadius: "sm",
+	borderWidth: "hairline",
+	borderStyle: "solid",
+	borderColor: "rule",
+	bg: "transparent",
+	fontSize: "body",
+	transitionProperty: "colors",
+	transitionDuration: "fast",
+	transitionTimingFunction: "standard",
+	_hover: { borderColor: "live", bg: "amberDim" },
+});
 
 const props = defineProps<{
 	prompt?: PublicPrompt;
@@ -21,6 +70,13 @@ const selected = ref("");
 const answerText = ref("");
 const choices = computed(() => props.prompt?.choices ?? []);
 const reactions = ["🔥", "🧠", "⚡", "🙌"] as const;
+/** Emoji need a text label; a screen reader cannot announce a pictograph usefully. */
+const reactionLabels: Record<(typeof reactions)[number], string> = {
+	"🔥": "fire",
+	"🧠": "big brain",
+	"⚡": "fast",
+	"🙌": "applause",
+};
 const submitted = computed(
 	() =>
 		!props.allowMultiple &&
@@ -54,21 +110,72 @@ function submit() {
 }
 </script>
 <template>
-	<section :class="[arcadeCard({ tone: 'live', padding: 'compact' }), 'audience-controls']" aria-label="Audience controls">
-		<div class="eyebrow"><span>Audience play</span><b>One vote · live</b></div>
-		<p v-if="prompt" class="question">{{ prompt.text }}</p>
-		<RadioGroup.Root v-model="selected" :disabled="formDisabled" class="choices" aria-label="Select an answer">
-			<RadioGroup.Item v-for="choice in choices" :key="choice.id" :value="choice.id" class="choice" :data-testid="`answer-option-${choice.id}`">
-				<RadioGroup.ItemControl class="choice-control"><RadioGroup.ItemIndicator>✓</RadioGroup.ItemIndicator></RadioGroup.ItemControl>
-				<RadioGroup.ItemText>{{ choice.label }}</RadioGroup.ItemText>
+	<section :class="stage({ tone: 'live', pad: 'base' })" data-stage aria-label="Audience controls">
+		<div :class="header">
+			<span :class="slug({ tone: 'live' })">Your ballot</span>
+			<span :class="slug()">{{ allowMultiple ? "Multiple answers" : "One answer" }}</span>
+		</div>
+
+		<p v-if="prompt" :class="[text({ style: 'body' }), question]">{{ prompt.text }}</p>
+
+		<RadioGroup.Root
+			v-model="selected"
+			:disabled="formDisabled"
+			:class="options"
+			aria-label="Select an answer"
+		>
+			<RadioGroup.Item
+				v-for="(item, index) in choices"
+				:key="item.id"
+				:value="item.id"
+				:class="choice({ state: selected === item.id ? 'selected' : 'idle' })"
+				:data-testid="`answer-option-${item.id}`"
+			>
+				<RadioGroup.ItemControl :class="choiceKey">
+					{{ String.fromCharCode(65 + index) }}
+				</RadioGroup.ItemControl>
+				<RadioGroup.ItemText>{{ item.label }}</RadioGroup.ItemText>
 				<RadioGroup.ItemHiddenInput />
 			</RadioGroup.Item>
 		</RadioGroup.Root>
-		<label class="free-answer" for="answer-input">Or enter an answer<input id="answer-input" v-model="answerText" data-testid="answer-input" :disabled="formDisabled" autocomplete="off" maxlength="100" /></label>
-		<button :class="[arcadeControl({ tone: 'accent' }), 'submit']" data-testid="submit-answer" :disabled="(!selected && !answerText.trim()) || formDisabled" @click="submit">{{ submitted ? 'Answer locked in' : submitting ? 'Sending answer…' : 'Lock in answer' }} <span aria-hidden="true">↗</span></button>
-		<div class="reactions" aria-label="Send a live reaction"><span>React</span><button v-for="emoji in reactions" :key="emoji" :aria-label="`Send ${emoji} reaction`" @click="emit('reaction', emoji)">{{ emoji }}</button></div>
+
+		<div :class="freeAnswer">
+			<label :class="fieldLabel" for="answer-input">Or type an answer</label>
+			<input
+				id="answer-input"
+				v-model="answerText"
+				:class="field()"
+				data-testid="answer-input"
+				data-field
+				:disabled="formDisabled"
+				autocomplete="off"
+				maxlength="100"
+			/>
+		</div>
+
+		<button
+			:class="[control({ tone: 'live', size: 'block' }), submitButton]"
+			type="button"
+			data-testid="submit-answer"
+			data-control
+			:disabled="(!selected && !answerText.trim()) || formDisabled"
+			@click="submit"
+		>
+			{{ submitted ? "Answer locked in" : submitting ? "Sending answer…" : "Lock in answer" }}
+		</button>
+
+		<div :class="reactionRow" aria-label="Send a live reaction">
+			<span :class="slug()">React</span>
+			<button
+				v-for="emoji in reactions"
+				:key="emoji"
+				type="button"
+				:class="reactionButton"
+				:aria-label="`Send ${reactionLabels[emoji]} reaction`"
+				@click="emit('reaction', emoji)"
+			>
+				{{ emoji }}
+			</button>
+		</div>
 	</section>
 </template>
-<style scoped>
-.audience-controls { background: linear-gradient(145deg, rgb(24 38 74 / 88%), rgb(16 26 53 / 88%)); border: 1px solid rgb(77 232 255 / 28%); border-radius: 16px; box-shadow: var(--shadow); padding: 1rem; }.eyebrow { align-items: center; color: var(--cyan); display: flex; font-family: "IBM Plex Mono", monospace; font-size: .66rem; justify-content: space-between; letter-spacing: .08em; text-transform: uppercase; }.eyebrow b { color: var(--mist); font-size: .57rem; font-weight: 500; }.question { font-family: "Space Grotesk", sans-serif; font-size: 1.05rem; font-weight: 600; letter-spacing: -.03em; line-height: 1.25; margin: .75rem 0 1rem; }.choices { display: grid; gap: .55rem; }.choice { align-items: center; background: rgb(8 13 29 / 42%); border: 1px solid var(--line); border-radius: 10px; display: grid; font-size: .83rem; gap: .65rem; grid-template-columns: 1rem 1fr; padding: .7rem; transition: background .14s ease, border-color .14s ease; }.choice[data-state='checked'] { background: rgb(77 232 255 / 11%); border-color: var(--cyan); }.choice-control { align-items: center; border: 1px solid var(--mist); border-radius: 50%; color: var(--ink); display: flex; font-size: .66rem; height: 16px; justify-content: center; width: 16px; }.choice[data-state='checked'] .choice-control { background: var(--cyan); border-color: var(--cyan); }.free-answer { color: var(--mist); display: grid; font-family: "IBM Plex Mono", monospace; font-size: .58rem; gap: .35rem; letter-spacing: .05em; margin-top: .8rem; text-transform: uppercase; }.free-answer input { background: rgb(8 13 29 / 42%); border: 1px solid var(--line); border-radius: 8px; color: var(--cloud); padding: .55rem; }.submit { background: var(--cyan); border: 0; border-radius: 9px; color: var(--ink); font-size: .83rem; font-weight: 800; margin-top: .8rem; padding: .75rem; width: 100%; }.submit:disabled { background: rgb(174 187 217 / 18%); color: var(--mist); cursor: not-allowed; }.reactions { align-items: center; border-top: 1px solid var(--line); display: flex; gap: .4rem; margin-top: .9rem; padding-top: .75rem; }.reactions span { color: var(--mist); font-family: "IBM Plex Mono", monospace; font-size: .58rem; letter-spacing: .07em; margin-right: auto; text-transform: uppercase; }.reactions button { background: rgb(174 187 217 / 8%); border: 1px solid var(--line); border-radius: 7px; font-size: .88rem; padding: .24rem .38rem; }
-</style>

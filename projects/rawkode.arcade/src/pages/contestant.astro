@@ -1,5 +1,27 @@
 ---
-import LiveGameRoom from "@/components/LiveGameRoom.vue";
+import { css } from "@/../styled-system/css";
 import ArcadeLayout from "@/layouts/ArcadeLayout.astro";
+import { control, shell, slug, text } from "@/styles/arcade";
+
+const empty = css({
+	display: "grid",
+	gap: "4",
+	justifyItems: "start",
+	maxW: "measure",
+	py: "section",
+});
 ---
-<ArcadeLayout title="Contestant console — Rawkode Arcade"><LiveGameRoom client:load role="contestant" game="race-condition" /></ArcadeLayout>
+
+<ArcadeLayout title="Contestant console: Rawkode Arcade">
+	<div class={shell}>
+		<div class={empty}>
+			<span class={slug({ tone: "live" })}>Contestant</span>
+			<h1 class={text({ style: "headline" })}>Contestants join with a code.</h1>
+			<p class={text({ style: "body", tone: "soft" })}>
+				The producer issues a contestant invite from the room controls.
+				Enter that code to open your console and buzzer.
+			</p>
+			<a class={control({ tone: "live" })} href="/join">Enter a room code</a>
+		</div>
+	</div>
+</ArcadeLayout>

@@ -1,15 +1,187 @@
 ---
+import { css } from "@/../styled-system/css";
 import GamePicker from "@/components/GamePicker.vue";
 import ArcadeLayout from "@/layouts/ArcadeLayout.astro";
+import { games } from "@/lib/game-catalogue";
+import {
+	control,
+	hairline,
+	sectionRule,
+	shell,
+	slug,
+	stack,
+	text,
+} from "@/styles/arcade";
+
+/**
+ * The landing page carries the one display moment on the site (Display
+ * Scarcity Rule) and the one piece of imagery: a real broadcast frame built
+ * from the same tokens the display route uses, not a decorative mockup.
+ */
+
+const hero = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", lg: "1.15fr 1fr" },
+	gap: { base: "stack", lg: "section" },
+	alignItems: "end",
+	pt: { base: "sectionTight", lg: "section" },
+	pb: "sectionTight",
+});
+
+const heroActions = css({
+	display: "flex",
+	flexWrap: "wrap",
+	gap: "3",
+	mt: "5",
+});
+
+/* The frame. A real lower third at the real proportions, so the landing page
+   shows what the product actually looks like on a stream. */
+const frame = css({
+	aspectRatio: { base: "auto", md: "16 / 9" },
+	bg: "surface",
+	borderWidth: "hairline",
+	borderStyle: "solid",
+	borderColor: "rule",
+	borderRadius: "lg",
+	display: "grid",
+	gridTemplateRows: "auto 1fr auto",
+	p: "4",
+	gap: "4",
+	overflow: "hidden",
+});
+
+const frameBar = css({
+	display: "flex",
+	flexWrap: "wrap",
+	alignItems: "center",
+	justifyContent: "space-between",
+	columnGap: "4",
+	rowGap: "2",
+});
+
+const frameScores = css({
+	display: "grid",
+	gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+	columnGap: "3",
+	rowGap: "2",
+	alignItems: "end",
+	borderTopWidth: "rule",
+	borderTopStyle: "solid",
+	borderTopColor: "ruleStrong",
+	pt: "3",
+});
+
+const frameScoreValue = css({
+	fontFamily: "mono",
+	fontSize: "title",
+	fontWeight: "semibold",
+	fontVariantNumeric: "tabular-nums",
+	lineHeight: "flat",
+});
+
+const heroFigure = css({ display: "grid", gap: "2" });
+
+const truncate = css({ overflow: "hidden", textOverflow: "ellipsis" });
+const leadScore = css({ color: "live" });
+const inkScore = css({ color: "ink" });
+
+const closing = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", md: "1fr auto" },
+	gap: "5",
+	alignItems: "center",
+	py: "section",
+});
+
+const standings = [
+	{ team: "The Merge Queue", score: 4820, lead: true },
+	{ team: "Cache Invalidators", score: 4110, lead: false },
+	{ team: "Rollback Party", score: 3675, lead: false },
+];
 ---
-<ArcadeLayout title="Rawkode Arcade — live games for developers" active="arcade">
-	<section class="hero">
-		<div class="hero-copy"><p class="eyebrow"><i></i> The developer game show network</p><h1>Put your tech brain <em>on air.</em></h1><p class="lede">Competitive, live, and deeply nerdy game shows built for teams, streams, and wildly opinionated audiences.</p><div class="hero-actions"><a class="primary" href="/join">Join a live room <span>→</span></a><a class="secondary" href="#formats">Explore formats</a></div><dl><div><dt>06</dt><dd>Original formats</dd></div><div><dt>Web</dt><dd>Low-latency audience play</dd></div><div><dt>Live</dt><dd>Authoritative Cloudflare rooms</dd></div></dl></div>
-		<aside class="on-air"><div class="on-air-bar"><span><i></i> Broadcast-ready</span><span>REAL-TIME STAGE</span></div><div class="on-air-screen"><div class="screen-noise"></div><div class="screen-content"><span>LIVE FORMAT</span><h2>Merge<br /><em>Conflict</em></h2><p>Open a room to see authoritative teams, prompts, and scores.</p></div></div><a href="/join" class="on-air-footer"><span>Bring your invite code</span><b>Enter room →</b></a></aside>
-	</section>
-	<section id="formats" class="formats"><div class="section-heading"><div><span class="eyebrow">Choose your format</span><h2>Every game has a <em>different kind of tension.</em></h2></div><p>Run a rapid contest from your browser, then give every viewer a reason to play along.</p></div><GamePicker client:load /></section>
-	<section class="community"><div class="community-copy"><span class="eyebrow">The afterparty has rankings</span><h2>Every answer counts. <em>Even the weird ones.</em></h2><p>Every completed room projects its own verified result. Open the result link from a live show to inspect the final standings.</p><a href="/leaderboards" class="secondary">Open a room result <span>→</span></a></div></section>
+
+<ArcadeLayout
+	title="Rawkode Arcade: live technical game shows"
+	description="Six live game shows for cloud-native engineers. Authoritative rooms, audience play, verifiable results."
+	active="arcade"
+>
+	<div class={shell}>
+		<section class={hero}>
+			<div>
+				<h1 class={text({ style: "display" })}>
+					Six game shows for people who read the changelog.
+				</h1>
+				<p class={`${text({ style: "body", tone: "soft", measure: "narrow" })} ${css({ mt: "4" })}`}>
+					Rawkode Arcade runs live competitive formats on real engineering
+					material. Contestants play on stream, the audience plays along from a
+					phone, and every room publishes a result you can check afterwards.
+				</p>
+				<div class={heroActions}>
+					<a class={control({ tone: "live" })} href="/join">Join a live room</a>
+					<a class={control({ tone: "quiet" })} href="#formats">See the formats</a>
+				</div>
+			</div>
+
+			<figure class={heroFigure}>
+				<div class={frame}>
+					<div class={frameBar}>
+						<span class={slug({ tone: "live", wrap: "never" })}>On air</span>
+						<span class={slug({ wrap: "never" })}>FMT-01</span>
+						<span class={slug({ wrap: "never" })}>R2 · Q4</span>
+					</div>
+					<div class={css({ display: "grid", alignContent: "center", gap: "3" })}>
+						<span class={slug()}>Name a reason the deploy was rolled back</span>
+						<p class={text({ style: "headline" })}>
+							Top answer: the migration was not reversible.
+						</p>
+					</div>
+					<div class={frameScores}>
+						{
+							standings.map((entry) => (
+								<div class={css({ display: "grid", gap: "1", minWidth: "0" })}>
+									<span
+										class={`${slug({ tone: entry.lead ? "live" : "default" })} ${truncate}`}
+									>
+										{entry.team}
+									</span>
+									<span
+										class={`${frameScoreValue} ${entry.lead ? leadScore : inkScore}`}
+									>
+										{entry.score.toLocaleString("en-GB")}
+									</span>
+								</div>
+							))
+						}
+					</div>
+				</div>
+				<figcaption class={slug()}>
+					The broadcast display, as composited into the stream
+				</figcaption>
+			</figure>
+		</section>
+
+		<section id="formats" class={css({ pt: "sectionTight" })}>
+			<div class={sectionRule}>
+				<span class={slug({ wrap: "never" })}>
+					{String(games.length).padStart(2, "0")} formats
+				</span>
+			</div>
+			<GamePicker client:load />
+		</section>
+
+		<section class={`${hairline} ${closing}`}>
+			<div class={stack({ gap: "base" })}>
+				<h2 class={text({ style: "headline" })}>
+					Every finished room publishes its own result.
+				</h2>
+				<p class={text({ style: "body", tone: "soft", measure: "narrow" })}>
+					Scores are settled by the room itself, not by the host's memory. Open
+					the result link from any completed show to see the final standings and
+					how they were reached.
+				</p>
+			</div>
+			<a class={control({ tone: "quiet" })} href="/leaderboards">Open a result</a>
+		</section>
+	</div>
 </ArcadeLayout>
-<style>
-.hero { display: grid; gap: 3rem; grid-template-columns: minmax(0, 1fr) minmax(330px, 480px); margin: auto; max-width: 1280px; padding: clamp(3rem, 8vw, 7rem) 2rem; }.eyebrow { align-items: center; color: var(--cyan); display: flex; font-family: "IBM Plex Mono", monospace; font-size: .68rem; gap: .5rem; letter-spacing: .13em; text-transform: uppercase; }.eyebrow i { animation: blink 1.3s infinite; background: var(--coral); border-radius: 50%; height: 8px; width: 8px; }.hero h1, .section-heading h2, .community h2 { font-family: "Space Grotesk", sans-serif; font-size: clamp(3rem, 7vw, 6.2rem); letter-spacing: -.09em; line-height: .86; margin: 1rem 0 1.35rem; max-width: 8ch; }.hero h1 em, .section-heading em, .community em { color: var(--cyan); font-style: normal; }.lede { color: var(--mist); font-size: 1.05rem; line-height: 1.65; max-width: 49ch; }.hero-actions { display: flex; flex-wrap: wrap; gap: .8rem; margin: 2rem 0 2.6rem; }.primary, .secondary { align-items: center; border-radius: 9px; display: inline-flex; font-size: .86rem; font-weight: 800; gap: .55rem; justify-content: center; padding: .8rem 1rem; }.primary { background: var(--cyan); color: var(--ink); }.primary span { font-size: 1.2rem; }.secondary { border: 1px solid var(--line); color: var(--cloud); }.secondary:hover { border-color: var(--cyan); }.hero dl { border-top: 1px solid var(--line); display: grid; gap: 1rem; grid-template-columns: repeat(3, 1fr); margin: 0; padding-top: 1.15rem; }.hero dt { font-family: "Space Grotesk", sans-serif; font-size: 1.35rem; font-weight: 700; letter-spacing: -.06em; }.hero dd { color: var(--mist); font-family: "IBM Plex Mono", monospace; font-size: .57rem; letter-spacing: .04em; line-height: 1.4; margin: .2rem 0; text-transform: uppercase; }.on-air { background: linear-gradient(145deg, #15234a, #0b1229); border: 1px solid rgb(77 232 255 / 35%); border-radius: 20px; box-shadow: var(--shadow); overflow: hidden; transform: rotate(2deg); }.on-air-bar, .on-air-footer { align-items: center; display: flex; font-family: "IBM Plex Mono", monospace; font-size: .62rem; justify-content: space-between; letter-spacing: .07em; padding: .85rem 1rem; text-transform: uppercase; }.on-air-bar { border-bottom: 1px solid var(--line); color: var(--mist); }.on-air-bar span:first-child { color: var(--coral); }.on-air-bar i { background: var(--coral); border-radius: 50%; display: inline-block; height: 7px; margin-right: .35rem; width: 7px; }.on-air-screen { aspect-ratio: 1.18; background: radial-gradient(circle at 50% 10%, rgb(77 232 255 / 18%), transparent 34%), #0a122a; overflow: hidden; position: relative; }.screen-noise { background-image: linear-gradient(rgb(174 187 217 / 5%) 1px, transparent 1px), linear-gradient(90deg, rgb(174 187 217 / 5%) 1px, transparent 1px); background-size: 22px 22px; inset: 0; position: absolute; }.screen-content { left: 10%; position: absolute; top: 17%; }.screen-content > span { color: var(--cyan); font-family: "IBM Plex Mono", monospace; font-size: .62rem; letter-spacing: .11em; }.screen-content h2 { font-family: "Space Grotesk", sans-serif; font-size: clamp(3rem, 6vw, 5.8rem); letter-spacing: -.1em; line-height: .75; margin: 1rem 0; }.screen-content h2 em { color: var(--cyan); font-style: normal; }.screen-content p { color: var(--mist); font-size: .75rem; }.team-chip { align-items: center; backdrop-filter: blur(8px); border: 1px solid var(--line); border-radius: 8px; display: flex; font-size: .65rem; font-weight: 700; gap: .6rem; justify-content: space-between; padding: .55rem; position: absolute; width: 56%; }.team-chip b { font-family: "Space Grotesk", sans-serif; font-size: 1rem; }.team-chip.cyan { background: rgb(77 232 255 / 12%); bottom: 17%; right: 7%; }.team-chip.amber { background: rgb(255 200 87 / 11%); bottom: 5%; left: 7%; }.on-air-footer { color: var(--mist); }.on-air-footer b { color: var(--cyan); font-family: Inter, sans-serif; font-size: .72rem; }.formats, .community { margin: auto; max-width: 1280px; padding: 4rem 2rem; }.section-heading { align-items: end; display: flex; gap: 3rem; justify-content: space-between; margin-bottom: 2rem; }.section-heading h2, .community h2 { font-size: clamp(2.1rem, 4vw, 3.6rem); margin-bottom: 0; max-width: 12ch; }.section-heading p { color: var(--mist); font-size: .9rem; line-height: 1.6; max-width: 34ch; }.game-grid { display: grid; gap: 1rem; grid-template-columns: repeat(3, 1fr); }.community { align-items: center; display: grid; gap: 4rem; grid-template-columns: 1fr 420px; padding-bottom: 5rem; }.community h2 { margin-top: .8rem; }.community p { color: var(--mist); line-height: 1.65; max-width: 39ch; }.community .secondary { margin-top: 1rem; }@keyframes blink { 50% { opacity: .3; } }@media (max-width: 900px) { .hero, .community { grid-template-columns: 1fr; }.hero { padding-top: 4rem; }.on-air { margin: auto; max-width: 520px; width: 100%; }.section-heading { align-items: start; flex-direction: column; gap: 1rem; }.game-grid { grid-template-columns: repeat(2, 1fr); }.community { max-width: 720px; }.community > :last-child { max-width: 440px; width: 100%; } }@media (max-width: 560px) { .hero, .formats, .community { padding-left: 1rem; padding-right: 1rem; }.hero h1 { font-size: 3.3rem; }.game-grid { grid-template-columns: 1fr; }.hero dl { gap: .4rem; }.hero dt { font-size: 1.1rem; }.hero dd { font-size: .5rem; }.on-air { transform: none; } }
-</style>

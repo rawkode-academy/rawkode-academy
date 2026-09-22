@@ -1,6 +1,23 @@
 ---
+import { Font } from "astro:assets";
 import LiveRoute from "@/components/LiveRoute.vue";
 import "@/styles/global.css";
-const code = Astro.params.code ?? "SHIPIT";
+
+const code = Astro.params.code;
 ---
-<!doctype html><html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>Broadcast display — Rawkode Arcade</title></head><body><LiveRoute client:load code={code} game="merge-conflict" role="display" /></body></html>
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="robots" content="noindex" />
+		<title>Broadcast display: Rawkode Arcade</title>
+		<Font cssVariable="--font-instrument-serif" preload />
+		<Font cssVariable="--font-inter-tight" preload />
+		<Font cssVariable="--font-jetbrains-mono" preload />
+	</head>
+	<body>
+		<LiveRoute client:load code={code ?? ""} game="merge-conflict" role="display" />
+	</body>
+</html>

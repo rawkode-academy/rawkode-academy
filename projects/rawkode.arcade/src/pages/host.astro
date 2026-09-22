@@ -1,5 +1,31 @@
 ---
-import HostControlDeck from "@/components/HostControlDeck.vue";
+import { css } from "@/../styled-system/css";
 import ArcadeLayout from "@/layouts/ArcadeLayout.astro";
+import { control, shell, slug, text } from "@/styles/arcade";
+
+/**
+ * Producer controls are bound to a room. Rooms are created from the format
+ * list, so this route points there rather than mounting a deck with no room.
+ */
+const empty = css({
+	display: "grid",
+	gap: "4",
+	justifyItems: "start",
+	maxW: "measure",
+	py: "section",
+});
 ---
-<ArcadeLayout title="Host control — Rawkode Arcade"><HostControlDeck client:load /></ArcadeLayout>
+
+<ArcadeLayout title="Producer controls: Rawkode Arcade">
+	<div class={shell}>
+		<div class={empty}>
+			<span class={slug({ tone: "live" })}>Producer</span>
+			<h1 class={text({ style: "headline" })}>Pick a format to open a room.</h1>
+			<p class={text({ style: "body", tone: "soft" })}>
+				Creating a room issues its producer, contestant, audience and display
+				codes. Operator access is granted through Cloudflare Access.
+			</p>
+			<a class={control({ tone: "live" })} href="/#formats">Choose a format</a>
+		</div>
+	</div>
+</ArcadeLayout>

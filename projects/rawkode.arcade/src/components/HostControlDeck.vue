@@ -4,7 +4,85 @@ import ConnectionPill from "@/components/ConnectionPill.vue";
 import TeamRail from "@/components/TeamRail.vue";
 import { useRoomSocket } from "@/composables/use-room-socket";
 import type { GameId } from "@/lib/game-catalogue";
-import { arcadeCard, arcadeControl } from "@/styles/arcade";
+import { css } from "@/../styled-system/css";
+import {
+	control,
+	field,
+	fieldLabel,
+	notice,
+	row,
+	slug,
+	stack,
+	shellWide,
+	stage,
+	statusDot,
+	text,
+} from "@/styles/arcade";
+
+const deck = css({ display: "grid", gap: "stackSm", py: "stackSm" });
+const deckHeader = css({
+	display: "flex",
+	flexWrap: "wrap",
+	alignItems: "center",
+	justifyContent: "space-between",
+	gap: "3",
+	pb: "3",
+	borderBottomWidth: "rule",
+	borderBottomStyle: "solid",
+	borderBottomColor: "ruleStrong",
+});
+const roomTitle = css({
+	fontFamily: "mono",
+	fontSize: "tally",
+	fontWeight: "semibold",
+	letterSpacing: "code",
+	color: "ink",
+	fontVariantNumeric: "tabular-nums",
+});
+const grid = css({
+	display: "grid",
+	gridTemplateColumns: {
+		base: "1fr",
+		md: "repeat(2, minmax(0, 1fr))",
+		xl: "repeat(3, minmax(0, 1fr))",
+	},
+	gap: "4",
+	alignItems: "start",
+});
+const span2 = css({ gridColumn: { base: "auto", md: "span 2" } });
+const actions = css({ display: "flex", flexWrap: "wrap", gap: "2" });
+const panelHead = css({
+	display: "block",
+	pb: "3",
+	mb: "3",
+	borderBottomWidth: "hairline",
+	borderBottomStyle: "solid",
+	borderBottomColor: "rule",
+});
+const inviteRow = css({
+	display: "grid",
+	gridTemplateColumns: "1fr auto auto",
+	alignItems: "center",
+	gap: "2",
+	py: "2",
+	borderBottomWidth: "hairline",
+	borderBottomStyle: "solid",
+	borderBottomColor: "rule",
+});
+const inviteCode = css({
+	fontFamily: "mono",
+	fontSize: "bodySm",
+	letterSpacing: "label",
+	color: "live",
+});
+const bigNumber = css({
+	fontFamily: "mono",
+	fontSize: "tally",
+	fontWeight: "semibold",
+	color: "crowd",
+	fontVariantNumeric: "tabular-nums",
+	lineHeight: "flat",
+});
 const props = withDefaults(
 	defineProps<{
 		game?: GameId;
@@ -99,21 +177,263 @@ function moveChaser() {
 		send("race.chaser-answer", { answer: chaserAnswer.value.trim() });
 }
 </script>
+
 <template>
-	<div class="host-deck">
-		<header><div><span>Producer control</span><h1><b data-testid="room-code">{{ room.roomCode }}</b> <b>/ {{ room.game }}</b></h1><output v-if="hostPrivateMarker" class="private-marker" data-testid="host-private-answer">{{ hostPrivateMarker }}</output></div><ConnectionPill :state="connection" /></header>
-		<div class="deck-grid">
-			<section :class="[arcadeCard({ tone: 'raised' }), 'program', 'card']"><span class="eyebrow">On program</span><h2 tabindex="-1">{{ room.prompt?.text }}</h2><div class="program-status"><i></i> <span data-testid="room-phase" aria-live="polite">{{ room.phase }}</span><b>{{ room.audienceCount.toLocaleString() }} audience</b></div><p v-if="room.phase === 'complete'" data-testid="game-complete" aria-live="polite">Game complete · results projected.</p></section>
-			<section :class="[arcadeCard({ tone: 'default' }), 'controls', 'card']"><span class="eyebrow">Round controls</span><div class="actions"><button :class="[arcadeControl({ tone: 'quiet', size: 'sm' }), 'secondary']" @click="pause">{{ paused ? 'Resume' : 'Pause clock' }}</button><button :class="[arcadeControl({ tone: 'outline', size: 'sm' }), 'outline']" data-testid="reveal-answer" :disabled="!canReveal" @click="send('prompt.reveal')">Reveal results</button><button :class="[arcadeControl({ tone: 'outline', size: 'sm' }), 'outline']" data-testid="freeze-distribution" :disabled="!canFreeze" @click="send('audience.freeze')">Freeze audience</button><button :class="[arcadeControl({ tone: 'outline', size: 'sm' }), 'outline']" data-testid="host-correct" @click="send('score.correct')">Correct score</button><button :class="[arcadeControl({ tone: 'outline', size: 'sm' }), 'outline']" data-testid="complete-game" @click="send('room.complete')">Complete game</button><button v-if="room.phase === 'lobby'" :class="[arcadeControl({ tone: 'accent' }), 'primary']" data-testid="start-game" @click="send('room.start')">Start game <span>→</span></button><button v-else :class="[arcadeControl({ tone: 'accent' }), 'primary']" data-testid="advance-phase" @click="send('phase.advance')">Next prompt <span>→</span></button></div><p>Controls dispatch canonical server-authorized envelopes only. Scores and answers remain private to the game room.</p></section>
-			<section :class="[arcadeCard({ tone: 'default' }), 'card', 'assembly']"><span class="eyebrow">Room assembly</span><label>Team ID<input v-model="activeTeamId" data-testid="host-team-id" autocomplete="off" /></label><label>Team name<input v-model="teamName" data-testid="host-team-name" maxlength="80" /></label><button :class="arcadeControl({ tone: 'outline', size: 'sm' })" data-testid="add-team" @click="addTeam">Add team</button><div class="invites"><span>Invite codes</span><div v-for="role in inviteRoles" :key="role"><button :data-testid="`mint-${role}-invite`" @click="mintInvite(role)">Create {{ role }}</button><code v-if="inviteCodes[role]" :data-testid="`${role}-invite-code`">{{ inviteCodes[role] }}</code><button v-if="inviteCodes[role]" :data-testid="`copy-${role}-invite`" @click="copyInvite(role)">Copy</button></div></div><p class="invite-status" aria-live="polite">{{ inviteStatus }}</p></section>
-			<section v-if="room.game === 'spinlock'" :class="[arcadeCard({ tone: 'default' }), 'card', 'game-controls']"><span class="eyebrow">Spinlock console</span><button :class="arcadeControl({ tone: 'accent', size: 'sm' })" data-testid="spin-wheel" @click="spin">Spin wheel</button><label>Letter<input v-model="letter" data-testid="spin-letter" maxlength="1" autocomplete="off" /></label><button :class="arcadeControl({ tone: 'outline', size: 'sm' })" data-testid="guess-letter" @click="guessLetter">Guess letter</button></section>
-			<section v-if="room.game === 'principal-engineer'" :class="[arcadeCard({ tone: 'default' }), 'card', 'game-controls']"><span class="eyebrow">Principal lifelines</span><button :class="arcadeControl({ tone: 'outline', size: 'sm' })" data-testid="lifeline-fifty-fifty" :disabled="room.principalEngineer?.fiftyFiftyUsed" @click="lifeline('fifty-fifty')">50:50</button><button :class="arcadeControl({ tone: 'outline', size: 'sm' })" data-testid="lifeline-ask-audience" :disabled="room.principalEngineer?.askAudienceUsed" @click="lifeline('ask-audience')">Ask audience</button></section>
-			<section v-if="room.game === 'race-condition'" :class="[arcadeCard({ tone: 'default' }), 'card', 'game-controls']"><span class="eyebrow">Chaser console</span><label>Chaser answer<input v-model="chaserAnswer" data-testid="chaser-answer" autocomplete="off" /></label><button :class="arcadeControl({ tone: 'accent', size: 'sm' })" data-testid="submit-chaser-answer" @click="moveChaser">Move chaser</button></section>
-			<section :class="[arcadeCard({ tone: 'default' }), 'card', 'teams']"><span class="eyebrow">Live teams</span><TeamRail :teams="room.teams" /></section>
-			<section :class="[arcadeCard({ tone: 'default' }), 'card', 'activity']"><span class="eyebrow">Audience activity</span><div class="activity-number">{{ room.audienceCount.toLocaleString() }}</div><p data-testid="audience-aggregate">{{ room.audienceResponseCount }} authoritative responses aggregated</p></section>
+	<div :class="[shellWide, deck]">
+		<header :class="deckHeader">
+			<div :class="stack({ gap: 'tight' })">
+				<span :class="slug({ tone: 'live' })">
+					<i :class="statusDot({ pulse: true })" aria-hidden="true" />
+					Producer control
+				</span>
+				<span :class="roomTitle" data-testid="room-code">{{ room.roomCode }}</span>
+				<span :class="slug()">{{ room.game }}</span>
+			</div>
+			<div :class="row({ gap: 'base' })">
+				<output
+					v-if="hostPrivateMarker"
+					:class="notice({ tone: 'live' })"
+					data-testid="host-private-answer"
+				>{{ hostPrivateMarker }}</output>
+				<ConnectionPill :state="connection" />
+			</div>
+		</header>
+
+		<div :class="grid">
+			<section :class="[stage({ tone: 'raised', pad: 'base' }), span2]" data-stage>
+				<span :class="[slug({ tone: 'live' }), panelHead]">On programme</span>
+				<h2 :class="text({ style: 'title' })" tabindex="-1">{{ room.prompt?.text }}</h2>
+				<div :class="[row({ gap: 'base', wrap: true }), css({ mt: '3' })]">
+					<span :class="slug()" data-testid="room-phase" aria-live="polite">{{ room.phase }}</span>
+					<span :class="slug({ tone: 'crowd' })">
+						{{ room.audienceCount.toLocaleString("en-GB") }} audience
+					</span>
+				</div>
+				<p
+					v-if="room.phase === 'complete'"
+					:class="[notice({ tone: 'live' }), css({ mt: '3' })]"
+					data-testid="game-complete"
+					aria-live="polite"
+				>
+					Game complete. Results projected.
+				</p>
+			</section>
+
+			<section :class="stage({ pad: 'base' })" data-stage>
+				<span :class="[slug(), panelHead]">Round controls</span>
+				<div :class="actions">
+					<button
+						v-if="room.phase === 'lobby'"
+						:class="control({ tone: 'live', size: 'sm' })"
+						type="button"
+						data-control
+						data-testid="start-game"
+						@click="send('room.start')"
+					>Start game</button>
+					<button
+						v-else
+						:class="control({ tone: 'live', size: 'sm' })"
+						type="button"
+						data-control
+						data-testid="advance-phase"
+						@click="send('phase.advance')"
+					>Next prompt</button>
+					<button
+						:class="control({ tone: 'quiet', size: 'sm' })"
+						type="button"
+						data-control
+						data-testid="reveal-answer"
+						:disabled="!canReveal"
+						@click="send('prompt.reveal')"
+					>Reveal results</button>
+					<button
+						:class="control({ tone: 'quiet', size: 'sm' })"
+						type="button"
+						data-control
+						data-testid="freeze-distribution"
+						:disabled="!canFreeze"
+						@click="send('audience.freeze')"
+					>Freeze audience</button>
+					<button
+						:class="control({ tone: 'quiet', size: 'sm' })"
+						type="button"
+						data-control
+						data-testid="host-correct"
+						@click="send('score.correct')"
+					>Correct score</button>
+					<button
+						:class="control({ tone: 'quiet', size: 'sm' })"
+						type="button"
+						data-control
+						@click="pause"
+					>{{ paused ? "Resume clock" : "Pause clock" }}</button>
+					<button
+						:class="control({ tone: 'danger', size: 'sm' })"
+						type="button"
+						data-control
+						data-testid="complete-game"
+						@click="send('room.complete')"
+					>Complete game</button>
+				</div>
+				<p :class="[text({ style: 'bodySm', tone: 'mute' }), css({ mt: '3' })]">
+					Controls dispatch server-authorised envelopes only. Scores and answers
+					stay private to the room.
+				</p>
+			</section>
+
+			<section :class="stage({ pad: 'base' })" data-stage>
+				<span :class="[slug(), panelHead]">Room assembly</span>
+				<div :class="stack({ gap: 'snug' })">
+					<div>
+						<label :class="fieldLabel" for="host-team-id">Team ID</label>
+						<input
+							id="host-team-id"
+							v-model="activeTeamId"
+							:class="field()"
+							data-field
+							data-testid="host-team-id"
+							autocomplete="off"
+						/>
+					</div>
+					<div>
+						<label :class="fieldLabel" for="host-team-name">Team name</label>
+						<input
+							id="host-team-name"
+							v-model="teamName"
+							:class="field()"
+							data-field
+							data-testid="host-team-name"
+							maxlength="80"
+						/>
+					</div>
+					<button
+						:class="control({ tone: 'quiet', size: 'sm' })"
+						type="button"
+						data-control
+						data-testid="add-team"
+						@click="addTeam"
+					>Add team</button>
+				</div>
+			</section>
+
+			<section :class="stage({ pad: 'base' })" data-stage>
+				<span :class="[slug(), panelHead]">Invite codes</span>
+				<div v-for="inviteRole in inviteRoles" :key="inviteRole" :class="inviteRow">
+					<span :class="text({ style: 'bodySm' })">{{ inviteRole }}</span>
+					<code v-if="inviteCodes[inviteRole]" :class="inviteCode" :data-testid="`${inviteRole}-invite-code`">
+						{{ inviteCodes[inviteRole] }}
+					</code>
+					<span v-else :class="slug()">none</span>
+					<button
+						v-if="inviteCodes[inviteRole]"
+						:class="control({ tone: 'quiet', size: 'sm' })"
+						type="button"
+						data-control
+						:data-testid="`copy-${inviteRole}-invite`"
+						@click="copyInvite(inviteRole)"
+					>Copy</button>
+					<button
+						v-else
+						:class="control({ tone: 'quiet', size: 'sm' })"
+						type="button"
+						data-control
+						:data-testid="`mint-${inviteRole}-invite`"
+						@click="mintInvite(inviteRole)"
+					>Create</button>
+				</div>
+				<p :class="[slug(), css({ mt: '3' })]" aria-live="polite">{{ inviteStatus }}</p>
+			</section>
+
+			<section v-if="room.game === 'spinlock'" :class="stage({ pad: 'base' })" data-stage>
+				<span :class="[slug(), panelHead]">Spinlock console</span>
+				<div :class="stack({ gap: 'snug' })">
+					<button
+						:class="control({ tone: 'live', size: 'sm' })"
+						type="button"
+						data-control
+						data-testid="spin-wheel"
+						@click="spin"
+					>Spin wheel</button>
+					<div>
+						<label :class="fieldLabel" for="spin-letter">Letter</label>
+						<input
+							id="spin-letter"
+							v-model="letter"
+							:class="field()"
+							data-field
+							data-testid="spin-letter"
+							maxlength="1"
+							autocomplete="off"
+						/>
+					</div>
+					<button
+						:class="control({ tone: 'quiet', size: 'sm' })"
+						type="button"
+						data-control
+						data-testid="guess-letter"
+						@click="guessLetter"
+					>Guess letter</button>
+				</div>
+			</section>
+
+			<section v-if="room.game === 'principal-engineer'" :class="stage({ pad: 'base' })" data-stage>
+				<span :class="[slug(), panelHead]">Lifelines</span>
+				<div :class="actions">
+					<button
+						:class="control({ tone: 'quiet', size: 'sm' })"
+						type="button"
+						data-control
+						data-testid="lifeline-fifty-fifty"
+						:disabled="room.principalEngineer?.fiftyFiftyUsed"
+						@click="lifeline('fifty-fifty')"
+					>50:50</button>
+					<button
+						:class="control({ tone: 'quiet', size: 'sm' })"
+						type="button"
+						data-control
+						data-testid="lifeline-ask-audience"
+						:disabled="room.principalEngineer?.askAudienceUsed"
+						@click="lifeline('ask-audience')"
+					>Ask audience</button>
+				</div>
+			</section>
+
+			<section v-if="room.game === 'race-condition'" :class="stage({ pad: 'base' })" data-stage>
+				<span :class="[slug(), panelHead]">Chaser console</span>
+				<div :class="stack({ gap: 'snug' })">
+					<div>
+						<label :class="fieldLabel" for="chaser-answer">Chaser answer</label>
+						<input
+							id="chaser-answer"
+							v-model="chaserAnswer"
+							:class="field()"
+							data-field
+							data-testid="chaser-answer"
+							autocomplete="off"
+						/>
+					</div>
+					<button
+						:class="control({ tone: 'live', size: 'sm' })"
+						type="button"
+						data-control
+						data-testid="submit-chaser-answer"
+						@click="moveChaser"
+					>Move chaser</button>
+				</div>
+			</section>
+
+			<section :class="stage({ pad: 'base' })" data-stage>
+				<span :class="[slug(), panelHead]">Live teams</span>
+				<TeamRail :teams="room.teams" compact />
+			</section>
+
+			<section :class="stage({ pad: 'base' })" data-stage>
+				<span :class="[slug({ tone: 'crowd' }), panelHead]">Audience activity</span>
+				<div :class="bigNumber">{{ room.audienceCount.toLocaleString("en-GB") }}</div>
+				<p :class="text({ style: 'bodySm', tone: 'soft' })" data-testid="audience-aggregate">
+					{{ room.audienceResponseCount }} authoritative responses aggregated
+				</p>
+			</section>
 		</div>
 	</div>
 </template>
-<style scoped>
-.host-deck { margin: auto; max-width: 1180px; padding: 2rem; }header { align-items: center; display: flex; justify-content: space-between; margin-bottom: 1.4rem; }header span, .eyebrow { color: var(--cyan); font-family: "IBM Plex Mono", monospace; font-size: .64rem; letter-spacing: .1em; text-transform: uppercase; }h1 { font-family: "Space Grotesk", sans-serif; font-size: 1.5rem; letter-spacing: -.05em; margin: .3rem 0 0; }h1 b { color: var(--mist); font-size: .8rem; font-weight: 500; }.deck-grid { display: grid; gap: 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }.card { background: rgb(16 26 53 / 70%); border: 1px solid var(--line); border-radius: 14px; padding: 1.1rem; }.program { grid-column: span 2; }.program h2 { font-family: "Space Grotesk", sans-serif; font-size: clamp(1.3rem, 3vw, 2rem); letter-spacing: -.05em; line-height: 1.1; margin: .7rem 0 1.2rem; max-width: 38ch; }.program-status { align-items: center; color: var(--mist); display: flex; font-family: "IBM Plex Mono", monospace; font-size: .65rem; gap: .45rem; letter-spacing: .06em; text-transform: uppercase; }.program-status i { background: var(--lime); border-radius: 50%; height: 8px; width: 8px; }.program-status b { color: var(--cloud); margin-left: auto; }.actions { display: grid; gap: .55rem; grid-template-columns: 1fr 1fr; margin-top: .8rem; }.actions button { border-radius: 8px; font-size: .78rem; font-weight: 800; min-height: 43px; }.primary { background: var(--cyan); border: 1px solid var(--cyan); color: var(--ink); grid-column: span 2; }.outline { background: transparent; border: 1px solid var(--cyan); color: var(--cyan); }.secondary { background: rgb(174 187 217 / 10%); border: 1px solid var(--line); color: var(--cloud); }.actions button:disabled { cursor: not-allowed; opacity: .4; }.controls p, .activity p { color: var(--mist); font-size: .72rem; line-height: 1.45; margin: .8rem 0 0; }.activity-number { color: var(--lime); font-family: "Space Grotesk", sans-serif; font-size: 3.3rem; font-weight: 700; letter-spacing: -.09em; line-height: 1; margin-top: 1rem; }.assembly, .game-controls { display: grid; gap: .6rem; align-content: start; }.assembly label, .game-controls label { color: var(--mist); display: grid; font-family: "IBM Plex Mono", monospace; font-size: .62rem; gap: .3rem; letter-spacing: .06em; text-transform: uppercase; }.assembly input, .game-controls input { background: rgb(8 13 29 / 60%); border: 1px solid var(--line); border-radius: 7px; color: var(--cloud); padding: .55rem; }.assembly > button, .game-controls > button { justify-content: center; }.invites { border-top: 1px solid var(--line); display: grid; gap: .45rem; margin-top: .3rem; padding-top: .7rem; }.invites > span { color: var(--mist); font-family: "IBM Plex Mono", monospace; font-size: .6rem; letter-spacing: .07em; text-transform: uppercase; }.invites > div { align-items: center; display: grid; gap: .35rem; grid-template-columns: auto 1fr auto; }.invites button { background: transparent; border: 1px solid var(--line); border-radius: 6px; color: var(--cloud); font-size: .68rem; padding: .35rem .45rem; }.invites code { color: var(--lime); font-size: .65rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }.invite-status { color: var(--mist); font-size: .68rem; margin: 0; min-height: 1em; }@media (max-width: 660px) { .host-deck { padding: 1rem; }.deck-grid { grid-template-columns: 1fr; }.program { grid-column: auto; }.activity { display: none; } }
-</style>

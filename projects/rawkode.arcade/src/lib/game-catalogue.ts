@@ -12,7 +12,6 @@ export type GameDefinition = {
 	kicker: string;
 	description: string;
 	mechanic: string;
-	accent: "cyan" | "violet" | "lime" | "amber" | "coral" | "pink";
 	mode: "survey" | "puzzle" | "ladder" | "chase" | "list" | "rare";
 	players: string;
 };
@@ -24,7 +23,6 @@ export const games: readonly GameDefinition[] = [
 		kicker: "Survey showdown",
 		description: "Teams merge the answers developers gave most often.",
 		mechanic: "Ranked answers · audience poll",
-		accent: "cyan",
 		mode: "survey",
 		players: "2–6 teams",
 	},
@@ -34,7 +32,6 @@ export const games: readonly GameDefinition[] = [
 		kicker: "Phrase puzzle",
 		description: "Solve technical phrases before the build turns red.",
 		mechanic: "Wheel · letters · lightning solve",
-		accent: "violet",
 		mode: "puzzle",
 		players: "2–4 teams",
 	},
@@ -44,7 +41,6 @@ export const games: readonly GameDefinition[] = [
 		kicker: "The career ladder",
 		description: "Climb from intern to principal under the studio lights.",
 		mechanic: "15 questions · lifelines",
-		accent: "amber",
 		mode: "ladder",
 		players: "Solo or teams",
 	},
@@ -54,7 +50,6 @@ export const games: readonly GameDefinition[] = [
 		kicker: "Beat the expert",
 		description: "Outrun the Chaser across a perilous engineering board.",
 		mechanic: "Buzzers · head-to-head",
-		accent: "coral",
 		mode: "chase",
 		players: "1–5 contestants",
 	},
@@ -64,7 +59,6 @@ export const games: readonly GameDefinition[] = [
 		kicker: "Complete the list",
 		description: "Name ten things every excellent engineer should know.",
 		mechanic: "Lists · team relay",
-		accent: "lime",
 		mode: "list",
 		players: "2–6 teams",
 	},
@@ -74,7 +68,6 @@ export const games: readonly GameDefinition[] = [
 		kicker: "Rare is rewarded",
 		description: "Find the right answers no one else thought of.",
 		mechanic: "Audience distribution · reverse scoring",
-		accent: "pink",
 		mode: "rare",
 		players: "Any audience",
 	},

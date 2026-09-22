@@ -1,76 +1,10 @@
-@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap");
+/* Panda owns every style in this project.
+ *
+ * The palette used to be declared here a second time as `:root` custom
+ * properties, which is how 229 raw `var(--…)` references ended up in scoped
+ * <style> blocks Panda could not see. There is now exactly one source of
+ * truth: panda.config.ts. Reset, global rules, @property registration and the
+ * prefers-contrast / prefers-reduced-motion blocks all live in its
+ * `globalCss` / `globalVars`, and land in the import below.
+ */
 @import "../../styled-system/styles.css";
-@layer reset, base, tokens, recipes, utilities;
-
-:root {
-	color-scheme: dark;
-	--ink: #080d1d;
-	--panel: #101a35;
-	--panel-raised: #18264a;
-	--cyan: #4de8ff;
-	--violet: #9577ff;
-	--lime: #c9ff63;
-	--amber: #ffc857;
-	--coral: #ff6b7a;
-	--cloud: #e9eeff;
-	--mist: #aebbd9;
-	--line: rgb(174 187 217 / 20%);
-	--shadow: 0 22px 80px rgb(0 0 0 / 35%);
-	font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-	background: var(--ink);
-	color: var(--cloud);
-}
-
-* {
-	box-sizing: border-box;
-}
-html {
-	min-width: 320px;
-	background: var(--ink);
-}
-body {
-	min-width: 320px;
-	margin: 0;
-	min-height: 100vh;
-	background: var(--ink);
-}
-button,
-input,
-select {
-	font: inherit;
-}
-button {
-	cursor: pointer;
-}
-a {
-	color: inherit;
-	text-decoration: none;
-}
-
-:focus-visible {
-	outline: 3px solid var(--cyan);
-	outline-offset: 3px;
-}
-
-@media (prefers-contrast: more) {
-	:root {
-		--line: rgb(233 238 255 / 80%);
-		--mist: #e9eeff;
-	}
-	.card,
-	.control,
-	.choice {
-		border-width: 2px !important;
-	}
-}
-
-@media (prefers-reduced-motion: reduce) {
-	*,
-	*::before,
-	*::after {
-		animation-duration: 1ms !important;
-		animation-iteration-count: 1 !important;
-		scroll-behavior: auto !important;
-		transition-duration: 1ms !important;
-	}
-}

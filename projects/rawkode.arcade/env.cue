@@ -48,13 +48,16 @@ tasks: {
 		hermetic: false
 		command: "bun"
 		args: ["run", "check"]
-		inputs: ["src/**", "tsconfig.json", "package.json", "devenv.nix", "../../bun.lock"]
+		// panda.config.ts and astro.config.mts are load-bearing for `check`:
+		// it runs panda codegen and the design-token guard, which reads the
+		// token values straight out of the config.
+		inputs: ["src/**", "tsconfig.json", "panda.config.ts", "astro.config.mts", "package.json", "devenv.nix", "../../bun.lock"]
 	}
 	test: schema.#Task & {
 		hermetic: false
 		command: "bun"
 		args: ["run", "test"]
-		inputs: ["src/**", "tests/**", "package.json", "../../bun.lock"]
+		inputs: ["src/**", "tests/**", "panda.config.ts", "package.json", "../../bun.lock"]
 	}
 	e2e: schema.#Task & {
 		hermetic: false

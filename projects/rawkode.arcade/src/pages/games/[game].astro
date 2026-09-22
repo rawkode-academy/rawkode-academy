@@ -4,6 +4,6 @@ import ArcadeLayout from "@/layouts/ArcadeLayout.astro";
 import { gameById } from "@/lib/game-catalogue";
 const game = gameById(Astro.params.game);
 ---
-<ArcadeLayout title={`${game.title} — Rawkode Arcade`} active="arcade">
+<ArcadeLayout title={`${game.title}: Rawkode Arcade`} active="arcade">
 	<LiveGameRoom client:load game={game.id} role="audience" />
 </ArcadeLayout>

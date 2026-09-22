@@ -14,8 +14,6 @@ import type {
 	ServerEnvelope,
 } from "@/lib/live-contract";
 
-const colours = ["#4de8ff", "#ffc857", "#9577ff"];
-
 /** A safe loading projection. Authoritative snapshots always replace this value. */
 const initialRoom = (
 	game: GameId,
@@ -126,7 +124,6 @@ function toPublicState(
 			return {
 				id,
 				name: typeof team.name === "string" ? team.name : id,
-				colour: colours[index % colours.length]!,
 				score: typeof team.score === "number" ? team.score : 0,
 			};
 		},

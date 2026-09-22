@@ -4,4 +4,4 @@ import ArcadeLayout from "@/layouts/ArcadeLayout.astro";
 const roomId = Astro.params.roomId ?? "room";
 const code = Astro.url.searchParams.get("code") ?? undefined;
 ---
-<ArcadeLayout title="Host — Rawkode Arcade"><HostRoute client:load roomId={roomId} code={code} /></ArcadeLayout>
+<ArcadeLayout title="Producer controls: Rawkode Arcade"><HostRoute client:load roomId={roomId} code={code} /></ArcadeLayout>
