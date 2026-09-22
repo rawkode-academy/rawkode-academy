@@ -6,6 +6,8 @@ import UserHeader from "@/components/auth/user-header.astro";
 import ThemeToggle from "@/components/ui/ThemeToggle.vue";
 import { isCurrentRoute, navigationGroups, primaryNavigation } from "@/lib/navigation";
 const styles = academyShell();
+// The drawer sets the Learn group in display type above the index.
+const [learnGroup, ...drawerGroups] = navigationGroups;
 ---
 
 <header class={styles.header}>
@@ -28,7 +30,7 @@ const styles = academyShell();
 					<a href="/settings" slot="fallback" class={styles.link}>Account</a>
 				</UserHeader>
 			</div>
-			<NavigationDrawer client:load groups={navigationGroups} currentPath={Astro.url.pathname} />
+			<NavigationDrawer client:load primary={learnGroup?.items} groups={drawerGroups} currentPath={Astro.url.pathname} />
 		</div>
 	</div>
 </header>
