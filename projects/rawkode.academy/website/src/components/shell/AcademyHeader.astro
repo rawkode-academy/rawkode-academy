@@ -1,7 +1,7 @@
 ---
 import { academyShell } from "@rawkodeacademy/design-system";
-import { NavigationDrawer } from "@rawkodeacademy/design-system/vue";
 import AcademyBrand from "@/components/branding/AcademyBrand.astro";
+import MobileNavigation from "@/components/shell/MobileNavigation.vue";
 import UserHeader from "@/components/auth/user-header.astro";
 import ThemeToggle from "@/components/ui/ThemeToggle.vue";
 import { isCurrentRoute, navigationGroups, primaryNavigation } from "@/lib/navigation";
@@ -28,7 +28,7 @@ const styles = academyShell();
 					<a href="/settings" slot="fallback" class={styles.link}>Account</a>
 				</UserHeader>
 			</div>
-			<NavigationDrawer client:load primary={primaryNavigation} groups={navigationGroups} currentPath={Astro.url.pathname} />
+			<MobileNavigation client:load primary={primaryNavigation} groups={navigationGroups} currentPath={Astro.url.pathname} />
 		</div>
 	</div>
 </header>
