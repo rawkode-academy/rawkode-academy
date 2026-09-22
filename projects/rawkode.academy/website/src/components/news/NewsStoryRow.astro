@@ -8,7 +8,14 @@ interface Props {
 
 const { story } = Astro.props;
 const styles = academyCatalog();
-const date = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" });
+// News dates are calendar days in UTC; pin the display so the day never
+// shifts for visitors west of UTC.
+const date = new Intl.DateTimeFormat("en-GB", {
+	day: "numeric",
+	month: "short",
+	year: "numeric",
+	timeZone: "UTC",
+});
 ---
 
 <a class={styles.editorialRow} href={`/news/${story.id}`} data-media="true">

@@ -11,13 +11,18 @@ import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 export const prerender = true;
 
 const now = new Date();
-const allNews = (await getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now))).sort(
-	(a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf(),
-);
+const allNews = (
+	await getCollection("news", ({ data }) =>
+		isNewsPublished(data.publishedAt, now),
+	)
+).sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
 const [leadStory, ...archive] = allNews;
 const editorialImage = "/images/news/news-generic.svg";
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
-	day: "numeric", month: "short", year: "numeric",
+	day: "numeric",
+	month: "short",
+	year: "numeric",
+	timeZone: "UTC",
 });
 const styles = academyLayout({ width: "wide" });
 const catalog = academyCatalog();

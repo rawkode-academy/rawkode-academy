@@ -28,7 +28,9 @@ type Props = {
 export const getStaticPaths: GetStaticPaths =
 	async (): Promise<GetStaticPathsResult> => {
 		const now = new Date();
-		const articles = await getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now));
+		const articles = await getCollection("news", ({ data }) =>
+			isNewsPublished(data.publishedAt, now),
+		);
 		return articles.map((article: CollectionEntry<"news">) => ({
 			params: { slug: article.id },
 			props: { article },
@@ -70,13 +72,12 @@ const publishDate = new Intl.DateTimeFormat("en-US", {
 	month: "short",
 	day: "numeric",
 	year: "numeric",
+	timeZone: "UTC",
 }).format(article.data.publishedAt);
 
 const readingTime = calculateReadingTime(article.body || "");
 
-const breadcrumbItems = [
-	{ label: "News", href: "/news" },
-];
+const breadcrumbItems = [{ label: "News", href: "/news" }];
 ---
 
 <Page
