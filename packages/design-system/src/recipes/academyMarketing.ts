@@ -65,7 +65,6 @@ export const academyMarketing = sva({
 			fontSize: "xs",
 			fontWeight: "bold",
 			letterSpacing: "wide",
-			textTransform: "uppercase",
 		},
 		lead: {
 			margin: "0",
@@ -98,7 +97,7 @@ export const academyMarketing = sva({
 		},
 		stat: {
 			padding: "5",
-			borderInlineStart: "focus",
+			borderTop: "focus",
 			borderColor: "academy.accent",
 			backgroundColor: "academy.panel",
 		},
@@ -219,7 +218,6 @@ export const academyMarketing = sva({
 			fontSize: "xs",
 			fontWeight: "semibold",
 			letterSpacing: "wide",
-			textTransform: "uppercase",
 		},
 		newsletterTitle: {
 			maxWidth: "academy-copy",

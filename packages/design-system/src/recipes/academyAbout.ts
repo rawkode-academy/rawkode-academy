@@ -56,7 +56,6 @@ export const academyAbout = sva({
 			fontSize: "xs",
 			fontWeight: "medium",
 			letterSpacing: "wide",
-			textTransform: "uppercase",
 		},
 		title: {
 			margin: "0",
@@ -205,7 +204,6 @@ export const academyAbout = sva({
 			fontSize: "xs",
 			fontWeight: "medium",
 			letterSpacing: "wide",
-			textTransform: "uppercase",
 		},
 		archiveLinks: {
 			display: "grid",

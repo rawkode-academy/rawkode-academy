@@ -76,7 +76,6 @@ export const academyEditorial = sva({
 				fontFamily: "academy-mono",
 				fontSize: "xs",
 				letterSpacing: "wide",
-				textTransform: "uppercase",
 			},
 			"& .editorial-kicker": { color: "academy.accent", margin: "0" },
 			"& .editorial-actions, & .editorial-button-row, & .editorial-pill-row": {

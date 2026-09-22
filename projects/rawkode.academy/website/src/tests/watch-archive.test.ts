@@ -198,14 +198,14 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 			href: `/learning-paths/path-${i}`,
 			title: `Path ${i}`,
 		})),
-		stats: [{ value: "329", label: "Lessons" }],
+		archive: [{ href: "/watch", value: "329", label: "sessions" }],
 	};
 	it("keeps Home's feature, feed, first three paths and newsletter", async () => {
 		const html = await renderToString(
 			createSSRApp(AcademyPage, { ...props, page: "home" }),
 		);
 		expect(html).toContain("Understand");
-		expect(html).toContain("Recently published.");
+		expect(html).toContain("Recently published");
 		expect(html).toContain('href="/learning-paths/path-2"');
 		expect(html).not.toContain('href="/learning-paths/path-3"');
 		expect(html).toContain('action="https://email.rawkode.academy/subscribe"');
@@ -262,14 +262,14 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 		app.config.warnHandler = (message) => warnings.push(message);
 		const html = await renderToString(app);
 		expect(warnings).toEqual([]);
-		expect(html).toContain("Learning paths.");
+		expect(html).toContain("Learning paths");
 		expect(html).toContain('href="/learning-paths/path-4"');
 		expect(html).not.toContain("video-search");
 		expect(html).not.toContain("Show more sessions");
 		expect(html).not.toContain('videos="');
 		expect(html).not.toContain('featured="');
 		expect(html).not.toContain('latest="');
-		expect(html).not.toContain('stats="');
+		expect(html).not.toContain('archive="');
 	});
 	it("passes only Learn's discriminator and path data from the Astro route", () => {
 		const source = readFileSync("src/pages/learning-paths/index.astro", "utf8");
@@ -277,7 +277,7 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 		expect(component).toBeDefined();
 		expect(component).toMatch(/page="learn"/);
 		expect(component).toMatch(/learningPaths=\{paths\}/);
-		expect(component).not.toMatch(/\b(featured|latest|stats)=/);
+		expect(component).not.toMatch(/\b(featured|latest|archive|stats)=/);
 		expect(source).not.toContain("const featured =");
 	});
 });

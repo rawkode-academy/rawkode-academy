@@ -12,9 +12,8 @@ export const academyLabel = sva({
 			fontFamily: "academy-mono",
 			fontSize: "xs",
 			fontWeight: "semibold",
-			letterSpacing: "wider",
+			letterSpacing: "wide",
 			lineHeight: "none",
-			textTransform: "uppercase",
 		},
 		liveDot: {
 			display: "inline-block",

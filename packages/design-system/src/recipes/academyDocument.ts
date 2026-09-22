@@ -339,8 +339,7 @@ export const academyDocument = sva({
 			fontFamily: "academy-mono",
 			fontSize: "xs",
 			fontWeight: "semibold",
-			letterSpacing: "wider",
-			textTransform: "uppercase",
+			letterSpacing: "wide",
 		},
 		link: {
 			color: "academy.accent",

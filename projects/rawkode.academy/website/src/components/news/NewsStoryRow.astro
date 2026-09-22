@@ -11,11 +11,11 @@ const styles = academyCatalog();
 const date = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" });
 ---
 
-<a class={styles.editorialRow} href={`/news/${story.id}`}>
-	<img class={styles.editorialImage} src="/images/news/news-generic.svg" alt="" width="1200" height="675" loading="lazy" />
+<a class={styles.editorialRow} href={`/news/${story.id}`} data-media="true">
+	<time class={styles.editorialDate} datetime={story.data.publishedAt.toISOString()}>{date.format(story.data.publishedAt)}</time>
+	<span class={styles.editorialMedia}><img class={styles.editorialImage} src="/images/news/news-generic.svg" alt="" width="1200" height="675" loading="lazy" /></span>
 	<div class={styles.editorialBody}>
-		<time class={styles.rowMeta} datetime={story.data.publishedAt.toISOString()}>{date.format(story.data.publishedAt)}</time>
 		<h3 class={styles.editorialTitle}>{story.data.title}</h3>
-		<p class={styles.rowDescription}>{story.data.description}</p>
+		<p class={styles.editorialDescription}>{story.data.description}</p>
 	</div>
 </a>

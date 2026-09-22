@@ -155,7 +155,6 @@ export const academyWatch = sva({
 			fontFamily: "academy-mono",
 			fontSize: "xs",
 			letterSpacing: "wide",
-			textTransform: "uppercase",
 		},
 		crumb: {
 			display: "inline-flex",
@@ -230,7 +229,6 @@ export const academyWatch = sva({
 			fontWeight: "semibold",
 			letterSpacing: "wide",
 			lineHeight: "body",
-			textTransform: "uppercase",
 		},
 		factValue: {
 			minWidth: "0",
@@ -264,7 +262,6 @@ export const academyWatch = sva({
 			fontSize: "xs",
 			fontWeight: "semibold",
 			letterSpacing: "wide",
-			textTransform: "uppercase",
 			cursor: "pointer",
 			_hover: { borderColor: "academy.accent", color: "academy.accent" },
 			_focusVisible: {
@@ -390,7 +387,6 @@ export const academyWatch = sva({
 			fontSize: "xs",
 			fontWeight: "semibold",
 			letterSpacing: "wide",
-			textTransform: "uppercase",
 		},
 		learnList: {
 			display: "grid",
@@ -458,7 +454,6 @@ export const academyWatch = sva({
 			fontSize: "xs",
 			fontWeight: "semibold",
 			letterSpacing: "wide",
-			textTransform: "uppercase",
 			cursor: "pointer",
 			_focusVisible: {
 				outline: "focus",
@@ -669,7 +664,6 @@ export const academyWatch = sva({
 			fontSize: "xs",
 			fontWeight: "semibold",
 			letterSpacing: "wide",
-			textTransform: "uppercase",
 		},
 		resourceList: { display: "grid", gap: "2" },
 		resourceLink: {

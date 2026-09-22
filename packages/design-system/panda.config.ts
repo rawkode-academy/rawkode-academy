@@ -82,6 +82,8 @@ export default defineConfig({
 					"academy-section": { value: "64px" },
 					"academy-section-wide": { value: "88px" },
 					"academy-join": { value: "72px" },
+					"academy-hero": { value: "clamp(3rem, 7vw, 6rem)" },
+					"academy-hero-tight": { value: "clamp(2rem, 4vw, 3.5rem)" },
 				},
 				sizes: {
 					"academy-lede": { value: "42ch" },
@@ -98,18 +100,22 @@ export default defineConfig({
 					"academy-card-mobile": { value: "74vw" },
 					"academy-feature": { value: "42%" },
 					"academy-play": { value: "72px" },
+					"academy-hero-copy": { value: "36rem" },
+					"academy-ledger-date": { value: "6.5rem" },
 				},
 				aspectRatios: {
 					"academy-video": { value: "16 / 9" },
 				},
 				fontSizes: {
-					"academy-display": { value: "clamp(2.75rem, 5.4vw, 5rem)" },
+					"academy-display": { value: "clamp(3rem, 6.4vw, 5.5rem)" },
+					"academy-lede": { value: "clamp(1.125rem, 1.4vw, 1.375rem)" },
 					"academy-title": { value: "clamp(2.4rem, 5vw, 4rem)" },
 					"academy-section": { value: "clamp(1.75rem, 3vw, 2.5rem)" },
 					"academy-caption": { value: "0.6875rem" },
 				},
 				letterSpacings: {
-					"academy-display": { value: "-0.04em" },
+					"academy-display": { value: "-0.035em" },
+					"academy-tight": { value: "-0.02em" },
 				},
 				lineHeights: {
 					"academy-display": { value: "1.04" },
@@ -125,6 +131,17 @@ export default defineConfig({
 				durations: {
 					none: { value: "0s" },
 					fast: { value: "120ms" },
+					base: { value: "200ms" },
+					slow: { value: "320ms" },
+					reveal: { value: "720ms" },
+					"stagger-1": { value: "60ms" },
+					"stagger-2": { value: "140ms" },
+					"stagger-3": { value: "220ms" },
+					"stagger-4": { value: "320ms" },
+				},
+				easings: {
+					"academy-out": { value: "cubic-bezier(0.22, 1, 0.36, 1)" },
+					"academy-standard": { value: "cubic-bezier(0.4, 0, 0.2, 1)" },
 				},
 				animations: {
 					none: { value: "none" },
@@ -135,6 +152,15 @@ export default defineConfig({
 						value: "academy-live-pulse 1.8s ease-in-out infinite",
 					},
 					"academy-spinner": { value: "academy-spinner 1s linear infinite" },
+					"academy-rise": {
+						value: "academy-rise 720ms cubic-bezier(0.22, 1, 0.36, 1) both",
+					},
+					"academy-fade": {
+						value: "academy-fade 900ms cubic-bezier(0.22, 1, 0.36, 1) both",
+					},
+					"academy-slide-in": {
+						value: "academy-slide-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both",
+					},
 				},
 				zIndex: {
 					overlay: { value: 1000 },
@@ -151,6 +177,18 @@ export default defineConfig({
 				},
 				"academy-spinner": {
 					to: { transform: "rotate(360deg)" },
+				},
+				"academy-rise": {
+					from: { opacity: "0", transform: "translateY(0.75rem)" },
+					to: { opacity: "1", transform: "translateY(0)" },
+				},
+				"academy-fade": {
+					from: { opacity: "0" },
+					to: { opacity: "1" },
+				},
+				"academy-slide-in": {
+					from: { transform: "translateX(2rem)", opacity: "0" },
+					to: { transform: "translateX(0)", opacity: "1" },
 				},
 			},
 			semanticTokens: {
@@ -252,6 +290,57 @@ export default defineConfig({
 							value: {
 								base: "#c3d0e2",
 								_dark: "{colors.academyBase.segment-off}",
+							},
+						},
+						// Ink surfaces: the navy that carries the homepage hero and
+						// the footer in light mode. In dark mode the canvas is already
+						// navy, so ink becomes a raised, bordered panel instead.
+						ink: {
+							value: {
+								base: "#0c1626",
+								_dark: "{colors.academyBase.ground-raised}",
+							},
+						},
+						inkRaised: {
+							value: {
+								base: "#152238",
+								_dark: "{colors.academyBase.panel}",
+							},
+						},
+						inkBorder: {
+							value: {
+								base: "oklch(1 0 0 / 0.14)",
+								_dark: "{colors.academyBase.border}",
+							},
+						},
+						inkText: {
+							value: {
+								base: "#f4f7fb",
+								_dark: "{colors.academyBase.text}",
+							},
+						},
+						inkTextSoft: {
+							value: {
+								base: "#c5d0e0",
+								_dark: "{colors.academyBase.text-soft}",
+							},
+						},
+						inkTextMuted: {
+							value: {
+								base: "#8fa0b8",
+								_dark: "{colors.academyBase.text-muted}",
+							},
+						},
+						inkAccent: {
+							value: {
+								base: "{colors.academyBase.accent}",
+								_dark: "{colors.academyBase.accent}",
+							},
+						},
+						inkAccentForeground: {
+							value: {
+								base: "{colors.academyBase.accent-foreground}",
+								_dark: "{colors.academyBase.accent-foreground}",
 							},
 						},
 					},

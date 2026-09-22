@@ -116,7 +116,6 @@ export const academyForms = sva({
 			fontSize: "xs",
 			fontWeight: "semibold",
 			letterSpacing: "wide",
-			textTransform: "uppercase",
 		},
 		label: {
 			color: "academy.textSoft",

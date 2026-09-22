@@ -82,7 +82,6 @@ export const academyLayout = sva({
 			fontFamily: "academy-mono",
 			fontSize: "xs",
 			letterSpacing: "wide",
-			textTransform: "uppercase",
 		},
 		title: {
 			maxWidth: "academy-copy",
@@ -250,7 +249,6 @@ export const academyLayout = sva({
 				fontSize: "xs",
 				fontWeight: "semibold",
 				letterSpacing: "wide",
-				textTransform: "uppercase",
 			},
 			"& > p": {
 				justifySelf: "start",
@@ -259,7 +257,6 @@ export const academyLayout = sva({
 				fontFamily: "academy-mono",
 				fontSize: "xs",
 				letterSpacing: "wide",
-				textTransform: "uppercase",
 			},
 			_sm: { gridTemplateColumns: "1fr minmax(16rem, 24rem)" },
 			_lg: {

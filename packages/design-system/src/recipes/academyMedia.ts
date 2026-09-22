@@ -55,7 +55,6 @@ export const academyMedia = sva({
 			fontFamily: "academy-mono",
 			fontSize: "xs",
 			letterSpacing: "wide",
-			textTransform: "uppercase",
 			color: "academy.textMuted",
 		},
 		body: {

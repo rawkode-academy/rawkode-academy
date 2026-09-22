@@ -84,10 +84,9 @@ const pageDescription =
 	<div class={styles.root}>
 		<section class={styles.pageHero} aria-labelledby="watch-title">
 			<div class={styles.container}>
-				<p class={styles.kicker}>Learn from the work</p>
 				<div class={styles.pageHeroGrid}>
 					<h1 id="watch-title" class={styles.pageTitle}>Watch</h1>
-					<p class={styles.lede}>Live builds, deep dives, and honest conversations with the people behind the tools.</p>
+					<p class={styles.lede}>Live builds, deep dives, and honest conversations with the people behind the tools. Every session is recorded and searchable.</p>
 				</div>
 			</div>
 		</section>
@@ -96,7 +95,7 @@ const pageDescription =
 				<a href={featured.href} class={styles.watchFeature}>
 					<div class={styles.featureArt}>
 						<img src={featured.mediaSrc} alt="" class={styles.featureImage} width="1280" height="720" fetchpriority="high" />
-						<span class={styles.play} aria-hidden="true">▶</span>
+						<span class={styles.play} data-play aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12-7.5z" /></svg></span>
 					</div>
 					<div class={styles.featureCopy}>
 						<p class={styles.kicker}>Latest session{featured.duration && ` · ${featured.duration}`}</p>

@@ -9,12 +9,17 @@ import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 // /read remain focused, but Latest is one chronological stream of everything
 // the Academy publishes.
 const now = new Date();
-const [latest, publishedVideos, learningPaths, courses] = await Promise.all([
-	getLatestContent(12, now),
-	getPublishedVideos(),
-	getCollection("learningPaths", ({ data }) => data.publishedAt <= now),
-	getCollection("courses", ({ data }) => data.publishedAt <= now),
-]);
+const [latest, publishedVideos, learningPaths, courses, articles] =
+	await Promise.all([
+		getLatestContent(12, now),
+		getPublishedVideos(),
+		getCollection("learningPaths", ({ data }) => data.publishedAt <= now),
+		getCollection("courses", ({ data }) => data.publishedAt <= now),
+		getCollection(
+			"articles",
+			({ data }) => !data.draft && data.publishedAt <= now,
+		),
+	]);
 
 learningPaths.sort(
 	(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
@@ -78,14 +83,32 @@ const featured = videos[0] ?? {
 };
 const featuredMedia = "mediaSrc" in featured ? featured.mediaSrc : undefined;
 
-const totalHours = Math.floor(
-	publishedVideos.reduce(
-		(total, video) =>
-			total +
-			(typeof video.data.duration === "number" ? video.data.duration : 0),
-		0,
-	) / 3600,
-);
+// The archive strip links to each collection with its real count. It is a
+// navigation aid, not a proof panel, so the numbers stay inline and small.
+const plural = (count: number, singular: string, pluralForm = `${singular}s`) =>
+	count === 1 ? singular : pluralForm;
+const archive = [
+	{
+		href: "/watch",
+		value: `${publishedVideos.length}`,
+		label: plural(publishedVideos.length, "session"),
+	},
+	{
+		href: "/read",
+		value: `${articles.length}`,
+		label: plural(articles.length, "article"),
+	},
+	{
+		href: "/learning-paths",
+		value: `${learningPaths.length}`,
+		label: plural(learningPaths.length, "learning path"),
+	},
+	{
+		href: "/courses",
+		value: `${courses.length}`,
+		label: plural(courses.length, "course"),
+	},
+].filter((link) => link.value !== "0");
 
 const pageTitle = "Cloud Native & Kubernetes Education";
 const pageDescription =
@@ -115,10 +138,6 @@ Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 			featured={featured}
 			latest={latest}
 			learningPaths={paths}
-			stats={[
-				{ value: `${publishedVideos.length}`, label: "Lessons" },
-				{ value: `${totalHours}+`, label: "Hours" },
-				{ value: `${courses.length}`, label: "Courses" },
-			]}
+			archive={archive}
 		/>
 </Page>

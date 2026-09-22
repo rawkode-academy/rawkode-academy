@@ -25,10 +25,22 @@ controls, and duplicate recommendations.
 - Cool light canvas (`#f4f7fb`), navy text (`#0c1626`), pink action accent
   (`#c2185b`). Dark mode uses navy canvas, light text, and brighter pink.
   Use semantic tokens rather than copying these values into components.
+- Ink surfaces (`academy.ink*` tokens) carry the navy as a committed colour in
+  light mode: the homepage hero and the site footer open and close every page
+  in ink. In dark mode the same tokens resolve to a raised, bordered panel so
+  the rhythm survives without a second dark canvas.
 - Status colors communicate actual status. A topic or decorative eyebrow is
   not a success, warning, or live state.
+- No uppercase tracked eyebrows. Metadata is sentence-case Red Hat Mono at
+  small sizes and appears only where it carries information (a date, a
+  runtime, a content kind, a difficulty). A kind indicator pairs a coloured
+  dot with its label so colour is never the only signal.
 - Borders include their semantic color. Hairlines must not default to text color.
 - Flat surfaces and modest 3–6px radii. Reserve shadows for floating layers.
+- Motion is one entrance sequence on the homepage hero (staggered rise, 720ms,
+  ease-out) and interaction feedback elsewhere (title colour, arrow travel,
+  a slow thumbnail scale, the drawer slide). Every animation has a
+  `prefers-reduced-motion` alternative that removes it.
 
 ## Composition
 
@@ -43,6 +55,13 @@ in a card or put cards inside redundant cards.
 Directory pages explain the collection and show real choices. Filters have
 labels, real results, and an empty state. A decorative tab or fake pagination
 label is not acceptable. Keep critical content server-rendered.
+
+Chronological collections (the homepage stream, Read, News) share one ledger
+row: a mono date column, an optional 16:9 still, then kind, title, and a
+one-sentence description, separated by hairlines. Learning paths use the
+same rule with a two-digit index and a three-bar difficulty meter. Video
+libraries use a 16:9 grid because the still is the primary way to recognise
+a session.
 
 Detail pages prioritize the lesson, article, profile, or project. A course
 exposes its curriculum promptly; a long article provides mobile contents

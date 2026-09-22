@@ -28,7 +28,6 @@ export const academyCallout = sva({
 			fontSize: "xs",
 			fontWeight: "semibold",
 			letterSpacing: "wide",
-			textTransform: "uppercase",
 		},
 		body: {
 			minWidth: "0",

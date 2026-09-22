@@ -147,7 +147,6 @@ export const academyCourse = sva({
 			fontSize: "xs",
 			fontWeight: "semibold",
 			letterSpacing: "wide",
-			textTransform: "uppercase",
 		},
 		metadata: {
 			display: "flex",
@@ -376,7 +375,6 @@ export const academyCourse = sva({
 			fontFamily: "academy-mono",
 			fontWeight: "semibold",
 			color: "academy.accent",
-			textTransform: "uppercase",
 			letterSpacing: "wide",
 		},
 		group: {

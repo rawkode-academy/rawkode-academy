@@ -14,7 +14,7 @@ export const academyAccount = sva({
 		title: { fontSize: "lg", fontWeight: "semibold", color: "academy.text", fontFamily: "academy-display" },
 		label: { fontSize: "md", fontWeight: "medium", color: "academy.text" },
 		description: { fontSize: "sm", color: "academy.textMuted", marginTop: "1", overflowWrap: "anywhere" },
-		heading: { fontSize: "sm", fontWeight: "semibold", color: "academy.textSoft", textTransform: "uppercase", letterSpacing: "wide", marginBottom: "3" },
+		heading: { fontSize: "sm", fontWeight: "semibold", color: "academy.textSoft", letterSpacing: "wide", marginBottom: "3" },
 		avatar: { width: "16", height: "16", borderRadius: "full", flexShrink: "0", objectFit: "cover" },
 		identity: { minWidth: "0", overflowWrap: "anywhere" },
 		success: { display: "flex", alignItems: "center", gap: "2", padding: "3", borderRadius: "academy-s", color: "academy.statusSpruce", background: "academy.ground", fontSize: "sm" },
