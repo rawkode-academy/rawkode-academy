@@ -1,0 +1,47 @@
+---
+title: "Kubernetes tracks unused PVCs, Wasmtime 49 lands, and Istio patches the 1.31 line"
+description: "Kubernetes v1.37 promotes PVC unused-tracking to beta, Wasmtime 49 enables wide-arithmetic by default, and Istio ships its first 1.31 patch with ambient and istiod fixes."
+publishedAt: '2026-09-22'
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+  - webassembly
+  - istio
+---
+
+Three primary releases landed on 21 September: a Kubernetes storage feature reaching beta, a new major Wasmtime, and Istio's first patch for its 1.31 line.
+
+## Kubernetes v1.37 promotes PersistentVolumeClaim unused tracking to beta
+
+Kubernetes v1.37 [graduates the `PersistentVolumeClaimUnusedSinceTime` feature gate to beta](https://kubernetes.io/blog/2026/09/21/kubernetes-v1-37-pvc-last-used-time/), enabled by default. The PVC protection controller now sets an `Unused` condition on each PersistentVolumeClaim, indicating whether any running pod references it, and the condition's transition time records when the claim stopped being referenced.
+
+Before this, determining whether a PVC was still in use meant correlating pod-to-PVC references with custom tooling. Reading the state from the claim's own status lets cleanup workflows and controllers identify reclaim candidates directly. In large clusters, orphaned PVCs are a recurring source of unaccounted storage cost, and the condition gives operators a native signal to act on.
+
+**Source:** [Kubernetes blog](https://kubernetes.io/blog/2026/09/21/kubernetes-v1-37-pvc-last-used-time/) - 21 September 2026
+
+---
+
+## Wasmtime 49 enables the wide-arithmetic proposal by default and adds Winch exception handling
+
+The Bytecode Alliance released [Wasmtime v49.0.0](https://github.com/bytecodealliance/wasmtime/releases/tag/v49.0.0) on 21 September. The release enables the WebAssembly wide-arithmetic proposal by default and adds initial, experimental support for the exception-handling proposal to Winch, Wasmtime's baseline compiler.
+
+The release also raises the minimum supported Rust version to 1.96.0 and, per the release notes, improves Cranelift alias-analysis compile times. Further changes touch WASIp2, including mapping broken-pipe errors to `StreamError::Closed` and avoiding stdin over-reads, alongside component-model API additions such as `Component::same`.
+
+For embedders, wide-arithmetic moving to on-by-default and exception handling reaching the baseline compiler both reduce the configuration needed to run guests that depend on those proposals.
+
+**Source:** [Wasmtime v49.0.0 release](https://github.com/bytecodealliance/wasmtime/releases/tag/v49.0.0) - 21 September 2026
+
+---
+
+## Istio ships 1.31.1, 1.30.5, and 1.29.8 with ambient and istiod fixes
+
+Istio published [1.31.1](https://github.com/istio/istio/releases/tag/1.31.1), 1.30.5, and 1.29.8 on 21 September, the first patch release for the 1.31 line. The [1.31.1 release notes](https://istio.io/latest/news/releases/1.31.x/announcing-1.31.1/) list fixes concentrated in ambient mode and istiod: corrected iptables backend auto-detection in the ambient CNI node agent, a memory leak in istiod's ambient multi-cluster mode, rising istiod CPU usage as `AuthorizationPolicies` grow, and JWKS resolver public-key fetches being forced onto HTTP/1.1.
+
+Several security-hardening fixes also land, including an SSRF gap in `RequestAuthentication` `jwksUri` fetching, kubeconfig sanitization in `istioctl analyze`, and Gateway API cross-namespace TLS reference authorization. The release notes also carry the prior BackendTLSPolicy fail-open advisory (GHSA-qm8v-g4f9-qhjx), first published on 27 August; the fresh content here is the operational and hardening fixes, not that CVE.
+
+Operators running the 1.31 line get the first consolidated round of ambient-mode and control-plane fixes; those on 1.30 and 1.29 receive the equivalent backports.
+
+**Source:** [Istio 1.31.1 release notes](https://istio.io/latest/news/releases/1.31.x/announcing-1.31.1/) - 21 September 2026
+
+---
