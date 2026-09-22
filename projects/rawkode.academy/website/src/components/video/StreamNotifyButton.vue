@@ -6,12 +6,14 @@ import {
 	ExclamationTriangleIcon,
 } from "@heroicons/vue/24/outline";
 import { computed, onMounted, ref } from "vue";
+import { academyDocument } from "@rawkodeacademy/design-system";
 import { getNotificationServiceWorkerRegistration } from "@/lib/notification-service-worker";
 
 const props = defineProps<{
 	videoSlug: string;
 	publicKey: string;
 }>();
+const doc = academyDocument();
 
 type NotifyState =
 	| "checking"
@@ -212,81 +214,24 @@ onMounted(() => {
 </script>
 
 <template>
-	<div class="stream-notify">
+	<div :class="doc.stackSmall">
 		<button
 			type="button"
-			class="stream-notify__button"
+			:class="doc.button"
 			:disabled="isDisabled"
 			@click="enableNotifications"
 		>
-			<CheckCircleIcon v-if="state === 'enabled'" class="stream-notify__icon" aria-hidden="true" />
+			<CheckCircleIcon v-if="state === 'enabled'" :class="doc.iconSmall" aria-hidden="true" />
 			<ExclamationTriangleIcon
 				v-else-if="state === 'unsupported' || state === 'denied' || state === 'error'"
-				class="stream-notify__icon"
+				:class="doc.iconSmall"
 				aria-hidden="true"
 			/>
-			<BellIcon v-else class="stream-notify__icon" aria-hidden="true" />
+			<BellIcon v-else :class="doc.iconSmall" aria-hidden="true" />
 			<span>{{ buttonLabel }}</span>
 		</button>
-		<p v-if="message" class="stream-notify__message" role="status">
+		<p v-if="message" :class="doc.copy" role="status">
 			{{ message }}
 		</p>
 	</div>
 </template>
-
-<style scoped>
-	.stream-notify {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 0.75rem;
-		margin-top: 1rem;
-	}
-
-	.stream-notify__button {
-		min-height: 2.5rem;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.5rem;
-		padding: 0.625rem 0.875rem;
-		border: 1px solid var(--editorial-ink);
-		border-radius: var(--radius-sm);
-		background: var(--editorial-ink);
-		color: var(--editorial-paper);
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 0.875rem;
-		font-weight: 700;
-		line-height: 1;
-		letter-spacing: 0;
-		transition:
-			background var(--duration-base) var(--ease-standard),
-			color var(--duration-base) var(--ease-standard),
-			border-color var(--duration-base) var(--ease-standard);
-	}
-
-	.stream-notify__button:not(:disabled):hover {
-		background: var(--editorial-spruce);
-		border-color: var(--editorial-spruce);
-	}
-
-	.stream-notify__button:disabled {
-		cursor: not-allowed;
-		opacity: 0.72;
-	}
-
-	.stream-notify__icon {
-		width: 1rem;
-		height: 1rem;
-		flex: 0 0 auto;
-	}
-
-	.stream-notify__message {
-		margin: 0;
-		max-width: 30rem;
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 0.8125rem;
-		line-height: 1.4;
-		color: var(--editorial-ink-soft);
-	}
-</style>

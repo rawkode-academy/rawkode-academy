@@ -1,9 +1,15 @@
 ---
+import { academyDocument } from "@rawkodeacademy/design-system";
+const doc = academyDocument();
 import type { CollectionEntry } from "astro:content";
 
-type Resource = NonNullable<
+type ArticleResource = NonNullable<
 	CollectionEntry<"articles">["data"]["resources"]
 >[number];
+type VideoResource = NonNullable<
+	CollectionEntry<"videos">["data"]["resources"]
+>[number];
+type Resource = ArticleResource | VideoResource;
 
 interface Props {
 	resources?: Resource[] | undefined;
@@ -56,64 +62,31 @@ const getCategoryLabel = (category: string) => {
 
 {
 	resources && resources.length > 0 && (
-		<div class="mt-12 pt-8 border-t border-surface">
-			<h2 class="text-xl font-bold text-primary-content mb-6">Resources & References</h2>
+		<div class={doc.rule}>
+			<h2 class={doc.cardTitle}>Resources & References</h2>
 			
-			<style>
-				@keyframes highlight-pulse {
-					0% {
-						background-color: rgb(99 102 241 / 0.2);
-						transform: scale(1);
-					}
-					30% {
-						background-color: rgb(99 102 241 / 0.3);
-						transform: scale(1.005);
-					}
-					70% {
-						background-color: rgb(99 102 241 / 0.2);
-						transform: scale(1.002);
-					}
-					100% {
-						background-color: rgb(99 102 241 / 0);
-						transform: scale(1);
-					}
-				}
-				
-				.resource-link {
-					text-decoration: none !important;
-				}
-				
-				.resource-wrapper:target .resource-link {
-					animation: highlight-pulse 3s ease-out;
-				}
-				
-				.resource-wrapper {
-					scroll-margin-top: 6rem;
-				}
-			</style>
-			
-			<div class="space-y-6">
+			<div class={doc.stack}>
 				{Object.entries(groupResourcesByCategory(resources)).map(([category, categoryResources]) => (
 					<div>
-						<h3 class="text-sm font-semibold text-muted uppercase tracking-wider mb-3">
+						<h3 class={doc.kicker}>
 							{getCategoryLabel(category)}
 						</h3>
-						<div class="grid gap-3">
+						<div class={doc.stackSmall}>
 							{categoryResources.map(resource => {
 								// Find the original index of this resource in the flat array
 								const resourceIndex = resources.findIndex(r => r === resource) + 1;
 								// Use explicit ID if available, otherwise use index
 								const resourceId = resource.id || `${resourceIndex}`;
 								return (
-									<div id={`resource-${resourceId}`} class="resource-wrapper">
+									<div id={`resource-${resourceId}`} class={doc.resourceTarget}>
 										<a
 											href={resource.url || resource.filePath || "#"}
 											target={resource.type === "url" ? "_blank" : undefined}
 											rel={resource.type === "url" ? "noopener noreferrer" : undefined}
-											class="resource-link flex items-start gap-3 p-3 rounded-sm bg-[var(--surface-card-muted)] hover:bg-[var(--surface-card)] transition-smooth group"
+											class={[doc.panel, doc.row, doc.link].join(" ")}
 										>
 									<svg
-										class="w-5 h-5 mt-0.5 text-muted group-hover:text-primary flex-shrink-0"
+										class={doc.icon}
 										fill="none"
 										stroke="currentColor"
 										viewBox="0 0 24 24"
@@ -125,19 +98,19 @@ const getCategoryLabel = (category: string) => {
 											d={getCategoryIcon(category)}
 										/>
 									</svg>
-									<div class="flex-1 min-w-0">
-										<div class="font-medium text-primary-content group-hover:text-primary">
+									<div class={doc.spacer}>
+										<div class={doc.copy}>
 											{resource.title}
 										</div>
 										{resource.description && (
-											<div class="text-sm text-muted mt-0.5">
+											<div class={doc.meta}>
 												{resource.description}
 											</div>
 										)}
 									</div>
 									{resource.type === "url" && (
 										<svg
-											class="w-4 h-4 mt-1 text-muted group-hover:text-primary flex-shrink-0"
+											class={doc.iconSmall}
 											fill="none"
 											stroke="currentColor"
 											viewBox="0 0 24 24"

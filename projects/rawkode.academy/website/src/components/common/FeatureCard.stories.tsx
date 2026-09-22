@@ -96,7 +96,7 @@ export const WithFooter: Story = {
 		props: {
 			title: "Get Started",
 			description:
-				"Ready to begin your learning journey? Start with our beginner-friendly courses.",
+				"Start with courses for beginners.",
 		},
 	},
 	render: (args) => (

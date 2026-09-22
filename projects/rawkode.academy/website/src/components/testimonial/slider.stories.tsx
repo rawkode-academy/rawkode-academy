@@ -22,7 +22,7 @@ type Story = StoryObj<typeof meta>;
 const sampleTestimonials = [
 	{
 		quote:
-			"The cloud native courses at Rawkode Academy transformed my career. The hands-on approach and expert guidance made complex concepts easy to understand.",
+			"Example feedback: I followed the Kubernetes exercises and tried the commands in my own cluster.",
 		author: {
 			name: "Sarah Johnson",
 			title: "Senior DevOps Engineer",
@@ -33,7 +33,7 @@ const sampleTestimonials = [
 	},
 	{
 		quote:
-			"I've been following Rawkode for years. The quality of content and community support is unmatched. Highly recommend for anyone serious about cloud technologies.",
+			"Example feedback: I use the articles and videos when learning a new cloud native tool.",
 		author: {
 			name: "Michael Chen",
 			title: "Platform Architect",
@@ -43,7 +43,7 @@ const sampleTestimonials = [
 	},
 	{
 		quote:
-			"From beginner to advanced topics, Rawkode Academy covers it all. The real-world examples and practical exercises helped me implement solutions at scale.",
+			"Example feedback: The code examples helped me test the approach in my own project.",
 		author: {
 			name: "Emily Rodriguez",
 			title: "Cloud Solutions Architect",
@@ -79,7 +79,7 @@ export const WithoutLinks: Story = {
 			testimonials: [
 				{
 					quote:
-						"An amazing learning experience that helped me master Kubernetes and cloud native practices.",
+						"Example feedback: I learned how to configure and troubleshoot Kubernetes workloads.",
 					author: {
 						name: "Alex Thompson",
 						title: "Infrastructure Engineer",
@@ -89,7 +89,7 @@ export const WithoutLinks: Story = {
 				},
 				{
 					quote:
-						"The community is incredibly supportive and the content is always cutting-edge.",
+						"Example feedback: I asked a question in the community and got help with my configuration.",
 					author: {
 						name: "Jessica Martinez",
 						title: "SRE Manager",

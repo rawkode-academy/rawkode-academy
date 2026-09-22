@@ -63,8 +63,14 @@ function resolvePreference(pref: ColorSchemePreference): ColorScheme {
  */
 export function getColorSchemePreference(): ColorSchemePreference {
 	if (typeof window === "undefined") return DEFAULT_PREFERENCE;
-	const stored = localStorage.getItem(PREF_STORAGE_KEY);
-	return isValidPreference(stored) ? stored : DEFAULT_PREFERENCE;
+	try {
+		const stored = localStorage.getItem(PREF_STORAGE_KEY);
+		if (isValidPreference(stored)) return stored;
+	} catch {
+		// Use the in-document preference if browser storage is unavailable.
+	}
+	const applied = document.documentElement.getAttribute?.("data-color-preference") ?? null;
+	return isValidPreference(applied) ? applied : DEFAULT_PREFERENCE;
 }
 
 /**
@@ -98,7 +104,12 @@ function applyColorScheme(scheme: ColorScheme): void {
  */
 export function setColorScheme(pref: ColorSchemePreference): void {
 	if (typeof window === "undefined") return;
-	localStorage.setItem(PREF_STORAGE_KEY, pref);
+	try {
+		localStorage.setItem(PREF_STORAGE_KEY, pref);
+	} catch {
+		// Private browsing/storage policies must not disable the theme control.
+	}
+	document.documentElement.setAttribute("data-color-preference", pref);
 	const resolved = resolvePreference(pref);
 	applyColorScheme(resolved);
 	window.dispatchEvent(

@@ -26,7 +26,7 @@ transparent to the public, hence we're establishing the format of ADRs.
   [Google Design Docs](https://medium.com/@alessandro.traversi/mastering-google-design-docs-a-comprehensive-guide-with-readme-md-template-a2706b57f64d)
   as a loose template.
 - ADRs live inside
-  [content/adrs](https://github.com/RawkodeAcademy/RawkodeAcademy/tree/main/projects/rawkode.academy/website/content/adrs/)
+  [content/adrs](https://github.com/rawkode-academy/rawkode-academy/tree/main/content/adrs/)
 - ADRs are named `<zero-lead-four-digit-prefix>-<some-nice-file-name>.<md|mdx>`
 - As long as an ADR only contains a `createdAt` date it's in the state of
   `Proposed`, as soon as the ADR contains a `adoptedAt` date it transitions in

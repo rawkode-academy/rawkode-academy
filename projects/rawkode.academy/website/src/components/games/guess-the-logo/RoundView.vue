@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { academyGame } from "@rawkodeacademy/design-system";
+const gameTheme = academyGame();
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import type { Round } from "@/lib/games/guess-the-logo";
 import { TIMER_SECONDS } from "@/lib/games/guess-the-logo";
@@ -70,9 +72,9 @@ function optionClass(option: string): string {
 const timerPercent = computed(() => (timeLeft.value / TIMER_SECONDS) * 100);
 
 const timerColor = computed(() => {
-	if (timeLeft.value > TIMER_SECONDS * 0.5) return "#00ceff";
-	if (timeLeft.value > TIMER_SECONDS * 0.25) return "#f59e0b";
-	return "#ef4444";
+	if (timeLeft.value > TIMER_SECONDS * 0.5) return "var(--colors-academy-accent)";
+	if (timeLeft.value > TIMER_SECONDS * 0.25) return "var(--colors-academy-status-amber)";
+	return "var(--colors-academy-status-rust)";
 });
 
 onMounted(() => {
@@ -86,7 +88,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-	<div class="gtl-round">
+	<div :class="gameTheme.root" class="gtl-round">
 		<!-- Round counter -->
 		<div class="gtl-round-header">
 			<span class="gtl-round-label">Logo {{ index + 1 }} of {{ total }}</span>
@@ -152,16 +154,16 @@ onUnmounted(() => {
 }
 
 .gtl-round-label {
-	font-family: var(--font-jetbrains-mono, monospace);
+	font-family: var(--fonts-academy-mono);
 	font-size: 0.75rem;
 	font-weight: 600;
 	letter-spacing: 0.12em;
 	text-transform: uppercase;
-	color: var(--editorial-ink-mute, oklch(0.58 0.012 60));
+	color: var(--colors-academy-text-muted);
 }
 
 .gtl-timer-label {
-	font-family: var(--font-jetbrains-mono, monospace);
+	font-family: var(--fonts-academy-mono);
 	font-size: 0.875rem;
 	font-weight: 700;
 	letter-spacing: 0.06em;
@@ -171,7 +173,7 @@ onUnmounted(() => {
 .gtl-timer-track {
 	width: 100%;
 	height: 4px;
-	background: var(--editorial-hairline, oklch(0.18 0.02 60 / 0.12));
+	background: var(--colors-academy-border);
 	border-radius: 2px;
 	overflow: hidden;
 }
@@ -203,10 +205,10 @@ onUnmounted(() => {
 .gtl-option {
 	padding: 0.75rem 1rem;
 	border-radius: 0.5rem;
-	border: 1px solid var(--editorial-hairline, oklch(0.18 0.02 60 / 0.12));
-	background: var(--surface-card, oklch(0.97 0.008 85));
-	color: var(--editorial-ink, oklch(0.18 0.02 60));
-	font-family: var(--font-inter-tight, system-ui, sans-serif);
+	border: 1px solid var(--colors-academy-border);
+	background: var(--colors-academy-panel);
+	color: var(--colors-academy-text);
+	font-family: var(--fonts-academy-text);
 	font-size: 0.9rem;
 	font-weight: 500;
 	cursor: pointer;
@@ -216,8 +218,8 @@ onUnmounted(() => {
 }
 
 .gtl-option:hover:not(:disabled) {
-	border-color: #00ceff;
-	background: color-mix(in srgb, #00ceff 8%, var(--surface-card, oklch(0.97 0.008 85)));
+	border-color: var(--colors-academy-accent);
+	background: color-mix(in srgb, var(--colors-academy-accent) 8%, var(--colors-academy-panel));
 }
 
 .gtl-option:disabled {
@@ -225,15 +227,15 @@ onUnmounted(() => {
 }
 
 .gtl-option--correct {
-	border-color: #22c55e;
-	background: color-mix(in srgb, #22c55e 12%, var(--surface-card, oklch(0.97 0.008 85)));
-	color: #16a34a;
+	border-color: var(--colors-academy-status-spruce);
+	background: color-mix(in srgb, var(--colors-academy-status-spruce) 12%, var(--colors-academy-panel));
+	color: var(--colors-academy-status-spruce);
 }
 
 .gtl-option--wrong {
-	border-color: #ef4444;
-	background: color-mix(in srgb, #ef4444 12%, var(--surface-card, oklch(0.97 0.008 85)));
-	color: #dc2626;
+	border-color: var(--colors-academy-status-rust);
+	background: color-mix(in srgb, var(--colors-academy-status-rust) 12%, var(--colors-academy-panel));
+	color: var(--colors-academy-status-rust);
 }
 
 .gtl-option--neutral {
@@ -247,15 +249,15 @@ onUnmounted(() => {
 }
 
 .gtl-reveal-correct {
-	color: #16a34a;
+	color: var(--colors-academy-status-spruce);
 	font-weight: 600;
 }
 
 .gtl-reveal-wrong {
-	color: var(--editorial-ink-soft, oklch(0.36 0.015 60));
+	color: var(--colors-academy-text-soft);
 }
 
 .gtl-reveal-timeout {
-	color: var(--editorial-ink-soft, oklch(0.36 0.015 60));
+	color: var(--colors-academy-text-soft);
 }
 </style>

@@ -226,10 +226,14 @@ async function generateNavigationItems(
 	});
 
 	try {
+		const publishedArticles = await getCollection(
+			"articles",
+			({ data }) => !data.draft,
+		);
+
 		// Add articles only if requested
 		if (includeArticles) {
-			const articles = await getCollection("articles");
-			articles.forEach((article) => {
+			publishedArticles.forEach((article) => {
 				navigationItems.push({
 					id: `/read/${article.id}`,
 					title: article.data.title,
@@ -243,7 +247,12 @@ async function generateNavigationItems(
 
 		// Add series
 		const series = await getCollection("series");
-		series.forEach((s) => {
+		const publishedSeriesIds = new Set(
+			publishedArticles
+				.map((article) => article.data.series?.id)
+				.filter((id): id is string => Boolean(id)),
+		);
+		series.filter((s) => publishedSeriesIds.has(s.id)).forEach((s) => {
 			navigationItems.push({
 				id: `/series/${s.id}`,
 				title: s.data.title,

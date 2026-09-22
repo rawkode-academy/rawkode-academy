@@ -2,6 +2,7 @@ import { getCollection, getEntries } from "astro:content";
 import type { APIContext } from "astro";
 import { renderAndSanitizeArticles } from "../../../lib/feed-utils";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import { isNewsPublished } from "@/lib/news-publication";
 
 interface AtomEntry {
 	title: string;
@@ -18,18 +19,22 @@ interface AtomEntry {
 }
 
 export async function GET(context: APIContext) {
+	const now = new Date();
 	const [articles, videos, technologies, news] = await Promise.all([
 		getCollection("articles", ({ data }) => !data.draft),
 		getCollection("videos"),
 		getCollection("technologies"),
-		getCollection("news"),
+		getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
 	]);
 
 	const techName = new Map(
 		technologies.map((t) => [t.id, t.data.name] as const),
 	);
 
-	const site = context.site?.toString() || "https://rawkode.academy";
+	const site = (context.site?.toString() || "https://rawkode.academy").replace(
+		/\/$/,
+		"",
+	);
 	const feedUrl = `${site}/api/feeds/all.atom`;
 
 	// Render all articles in parallel for better performance

@@ -1,5 +1,5 @@
 <template>
-	<div class="cluster-map">
+	<div :class="gameTheme.root" class="cluster-map">
 		<header class="map-header">
 			<h2>CLUSTER MAP</h2>
 			<div class="header-right">
@@ -62,6 +62,8 @@
 </template>
 
 <script setup lang="ts">
+import { academyGame } from "@rawkodeacademy/design-system";
+const gameTheme = academyGame();
 import { computed } from "vue";
 import type { EnemyData, ClusterLayer } from "@/game/data/types";
 import { enemies } from "@/game/data/enemies";
@@ -79,12 +81,12 @@ const emit = defineEmits<{
 }>();
 
 const layers: { id: ClusterLayer; name: string; color: string }[] = [
-	{ id: "External", name: "EXTERNAL", color: "#04b59c" },
-	{ id: "App", name: "APP", color: "#3498db" },
-	{ id: "ServiceMesh", name: "SERVICE MESH", color: "#9b59b6" },
-	{ id: "KubeSystem", name: "KUBE-SYSTEM", color: "#e67e22" },
-	{ id: "ApiServer", name: "API SERVER", color: "#e74c3c" },
-	{ id: "Host", name: "HOST", color: "#c0392b" },
+	{ id: "External", name: "EXTERNAL", color: "var(--colors-academy-status-spruce)" },
+	{ id: "App", name: "APP", color: "var(--colors-academy-status-sky)" },
+	{ id: "ServiceMesh", name: "SERVICE MESH", color: "var(--colors-academy-status-violet)" },
+	{ id: "KubeSystem", name: "KUBE-SYSTEM", color: "var(--colors-academy-status-amber)" },
+	{ id: "ApiServer", name: "API SERVER", color: "var(--colors-academy-status-rust)" },
+	{ id: "Host", name: "HOST", color: "var(--colors-academy-status-rust)" },
 ];
 
 const totalEnemies = computed(() => enemies.length);
@@ -136,17 +138,17 @@ function selectEnemy(enemy: EnemyData) {
 	align-items: center;
 	margin-bottom: 2rem;
 	padding-bottom: 1rem;
-	border-bottom: 1px solid rgb(0 0 0 / 0.1);
+	border-bottom: 1px solid var(--colors-academy-border);
 	flex-wrap: wrap;
 	gap: 1rem;
 }
 
 :root.dark .map-header {
-	border-bottom-color: rgb(255 255 255 / 0.1);
+	border-bottom-color: var(--colors-academy-border);
 }
 
 .map-header h2 {
-	color: rgb(var(--brand-primary));
+	color: var(--colors-academy-accent);
 	font-size: 1.5rem;
 	letter-spacing: 0.2em;
 }
@@ -159,12 +161,12 @@ function selectEnemy(enemy: EnemyData) {
 }
 
 .progress {
-	color: rgb(107 114 128);
+	color: var(--colors-academy-text-muted);
 	font-size: 0.9rem;
 }
 
 :root.dark .progress {
-	color: rgb(156 163 175);
+	color: var(--colors-academy-text-muted);
 }
 
 .map-nav {
@@ -174,8 +176,8 @@ function selectEnemy(enemy: EnemyData) {
 
 .nav-btn {
 	background: transparent;
-	border: 1px solid rgb(var(--brand-primary) / 0.4);
-	color: rgb(var(--brand-primary) / 0.8);
+	border: 1px solid color-mix(in srgb, var(--colors-academy-accent) 40.0%, transparent);
+	color: color-mix(in srgb, var(--colors-academy-accent) 80.0%, transparent);
 	padding: 0.4rem 0.75rem;
 	font-family: inherit;
 	font-size: 0.75rem;
@@ -185,9 +187,9 @@ function selectEnemy(enemy: EnemyData) {
 }
 
 .nav-btn:hover {
-	border-color: rgb(var(--brand-primary));
-	color: rgb(var(--brand-primary));
-	background: rgb(var(--brand-primary) / 0.1);
+	border-color: var(--colors-academy-accent);
+	color: var(--colors-academy-accent);
+	background: color-mix(in srgb, var(--colors-academy-accent) 10.0%, transparent);
 }
 
 .layers-container {
@@ -197,7 +199,7 @@ function selectEnemy(enemy: EnemyData) {
 }
 
 .layer {
-	background: rgb(0 0 0 / 0.03);
+	background: var(--colors-academy-border);
 	border: 1px solid var(--layer-color);
 	border-left: 4px solid var(--layer-color);
 	border-radius: 8px;
@@ -206,15 +208,15 @@ function selectEnemy(enemy: EnemyData) {
 }
 
 :root.dark .layer {
-	background: rgb(255 255 255 / 0.03);
+	background: var(--colors-academy-border);
 }
 
 .layer:hover {
-	background: rgb(0 0 0 / 0.05);
+	background: var(--colors-academy-border);
 }
 
 :root.dark .layer:hover {
-	background: rgb(255 255 255 / 0.05);
+	background: var(--colors-academy-border);
 }
 
 .layer-header {
@@ -232,12 +234,12 @@ function selectEnemy(enemy: EnemyData) {
 }
 
 .layer-status {
-	color: rgb(107 114 128);
+	color: var(--colors-academy-text-muted);
 	font-size: 0.8rem;
 }
 
 :root.dark .layer-status {
-	color: rgb(156 163 175);
+	color: var(--colors-academy-text-muted);
 }
 
 .layer-enemies {
@@ -247,8 +249,8 @@ function selectEnemy(enemy: EnemyData) {
 }
 
 .enemy-node {
-	background: rgb(255 255 255 / 0.5);
-	border: 1px solid rgb(0 0 0 / 0.1);
+	background: var(--colors-academy-panel);
+	border: 1px solid var(--colors-academy-border);
 	border-radius: 8px;
 	padding: 1rem 1.5rem;
 	min-width: 160px;
@@ -260,24 +262,24 @@ function selectEnemy(enemy: EnemyData) {
 }
 
 :root.dark .enemy-node {
-	background: rgb(0 0 0 / 0.3);
-	border-color: rgb(255 255 255 / 0.1);
+	background: var(--colors-academy-border);
+	border-color: var(--colors-academy-border);
 }
 
 .enemy-node:not(:disabled):hover {
 	border-color: var(--layer-color);
-	background: rgb(255 255 255 / 0.7);
+	background: var(--colors-academy-panel);
 	transform: translateY(-2px);
 }
 
 :root.dark .enemy-node:not(:disabled):hover {
-	background: rgb(255 255 255 / 0.05);
+	background: var(--colors-academy-border);
 }
 
 .enemy-node.defeated {
 	opacity: 0.5;
-	border-color: rgb(var(--brand-primary));
-	background: rgb(var(--brand-primary) / 0.1);
+	border-color: var(--colors-academy-accent);
+	background: color-mix(in srgb, var(--colors-academy-accent) 10.0%, transparent);
 }
 
 .enemy-node.locked {
@@ -306,7 +308,7 @@ function selectEnemy(enemy: EnemyData) {
 }
 
 .enemy-name {
-	color: rgb(17 24 39);
+	color: var(--colors-academy-text);
 	font-size: 0.9rem;
 	margin-bottom: 0.25rem;
 }
@@ -316,13 +318,13 @@ function selectEnemy(enemy: EnemyData) {
 }
 
 .enemy-difficulty {
-	color: #d97706;
+	color: var(--colors-academy-status-amber);
 	font-size: 0.7rem;
 	letter-spacing: 2px;
 }
 
 :root.dark .enemy-difficulty {
-	color: #f1c40f;
+	color: var(--colors-academy-status-amber);
 }
 
 @media (max-width: 768px) {

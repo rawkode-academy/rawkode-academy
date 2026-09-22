@@ -2,6 +2,7 @@ import { getCollection } from "astro:content";
 import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
 import { withRssMimeType } from "../../../../lib/feed-utils";
+import { isNewsPublished } from "@/lib/news-publication";
 
 import type { RSSFeedItem } from "@astrojs/rss";
 
@@ -27,6 +28,7 @@ export async function getStaticPaths() {
 }
 
 export async function GET(context: APIContext) {
+	const now = new Date();
 	const { technologyName, technologyRawId, technologyIndexedId } =
 		context.props as Props;
 
@@ -45,7 +47,7 @@ export async function GET(context: APIContext) {
 
 	const [articles, news, videos] = await Promise.all([
 		getCollection("articles", ({ data }) => !data.draft),
-		getCollection("news"),
+		getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
 		getCollection("videos"),
 	]);
 

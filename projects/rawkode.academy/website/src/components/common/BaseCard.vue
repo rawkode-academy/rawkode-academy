@@ -1,7 +1,7 @@
 <template>
-	<a :href="href" :class="['group base-card', className]">
+	<a :href="href" :class="['group base-card', { 'base-card--text': !showCover }, className]">
 		<article class="base-card__article">
-			<div v-if="$slots.cover" class="base-card__cover">
+			<div v-if="showCover && $slots.cover" class="base-card__cover">
 				<slot name="cover" />
 				<slot v-if="$slots.overlay" name="overlay" />
 				<div v-if="$slots.badge" class="base-card__badge">
@@ -10,7 +10,7 @@
 			</div>
 			<div class="base-card__body">
 				<slot name="content" />
-				<div v-if="$slots.footer" class="base-card__footer">
+				<div v-if="showFooter && $slots.footer" class="base-card__footer">
 					<slot name="footer" />
 				</div>
 			</div>
@@ -22,10 +22,14 @@
 interface Props {
 	href: string;
 	class?: string;
+	showCover?: boolean;
+	showFooter?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
 	class: "",
+	showCover: true,
+	showFooter: true,
 });
 
 const className = props.class;
@@ -102,5 +106,18 @@ const className = props.class;
 	margin-top: auto;
 	padding-top: 1rem;
 	border-top: 1px solid var(--editorial-hairline);
+}
+
+.base-card--text,
+.base-card--text .base-card__article {
+	height: auto;
+}
+
+.base-card--text .base-card__body {
+	padding-top: 0;
+}
+
+.base-card--text {
+	align-self: start;
 }
 </style>

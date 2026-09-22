@@ -1,5 +1,6 @@
 ---
 import type { BracketSeason } from "../queries";
+import { isRegistrationOpen } from "../presentation";
 
 interface Props {
 	showId: string;
@@ -7,6 +8,7 @@ interface Props {
 }
 
 const { showId, seasons } = Astro.props;
+const now = Date.now();
 
 function fmt(iso?: string | null): string {
 	if (!iso) return "TBD";
@@ -15,6 +17,7 @@ function fmt(iso?: string | null): string {
 		day: "numeric",
 		month: "short",
 		year: "numeric",
+		timeZone: "UTC",
 	});
 }
 
@@ -34,7 +37,7 @@ function fmtRange(season: BracketSeason): string {
 		<div class="mx-auto max-w-2xl rounded-sm paper-card p-12 text-center">
 			<p class="text-lg font-medium text-secondary-content">No seasons yet</p>
 			<p class="mt-2 text-sm text-muted">
-				Seasons appear here once Klustered is ready for signups.
+				No seasons are available for this show.
 			</p>
 		</div>
 	) : (
@@ -60,7 +63,9 @@ function fmtRange(season: BracketSeason): string {
 						<div class="mt-5 grid gap-3 md:grid-cols-2">
 							{season.brackets.map((bracket) => (
 								<a
-									href={`/shows/${showId}/apply`}
+									href={isRegistrationOpen(bracket, now)
+										? `/shows/${showId}/apply`
+										: `/shows/${showId}/brackets`}
 									class="focus-ring rounded-sm border p-4 transition-colors hover:border-primary"
 									style="border-color: var(--surface-border)"
 								>
@@ -80,10 +85,10 @@ function fmtRange(season: BracketSeason): string {
 										</span>
 									</div>
 									<p class="mt-3 text-sm text-muted">
-										Starts {fmt(bracket.startsAt)}
+										Start: {fmt(bracket.startsAt)}
 									</p>
 									<p class="mt-3 text-sm font-medium text-primary-content">
-										Apply or manage entry
+										{isRegistrationOpen(bracket, now) ? "Apply or manage entry" : "View bracket"}
 									</p>
 								</a>
 							))}

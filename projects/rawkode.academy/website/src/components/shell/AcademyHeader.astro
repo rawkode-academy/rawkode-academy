@@ -1,0 +1,67 @@
+---
+import { academyShell } from "@rawkodeacademy/design-system";
+import { NavigationDrawer } from "@rawkodeacademy/design-system/vue";
+import AcademyBrand from "@/components/branding/AcademyBrand.astro";
+import UserHeader from "@/components/auth/user-header.astro";
+import ThemeToggle from "@/components/ui/ThemeToggle.vue";
+import { isCurrentRoute, navigationGroups, primaryNavigation } from "@/lib/navigation";
+const styles = academyShell();
+---
+
+<header class={styles.header}>
+	<div class={styles.nav}>
+		<AcademyBrand />
+		<nav class={styles.links} aria-label="Primary navigation">
+			{primaryNavigation.map((item) => (
+				<a href={item.href} class={styles.link} aria-current={isCurrentRoute(Astro.url.pathname, item.href) ? "page" : undefined}>{item.label}</a>
+			))}
+		</nav>
+		<div class={styles.actions}>
+			<a href="/search" id="topbar-search-trigger" class={styles.search} aria-label="Search the Academy">
+				<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-4.35-4.35" /></svg>
+				<span class={styles.searchLabel} aria-hidden="true">Search</span>
+				<kbd class={styles.searchKey} aria-hidden="true">⌘K</kbd>
+			</a>
+			<ThemeToggle client:load variant="icon" size="md" />
+			<div class={styles.account}>
+				<UserHeader server:defer>
+					<a href="/settings" slot="fallback" class={styles.link}>Account</a>
+				</UserHeader>
+			</div>
+			<NavigationDrawer client:load groups={navigationGroups} currentPath={Astro.url.pathname} />
+		</div>
+	</div>
+</header>
+
+<script>
+	// Preserve real search links and load the command palette only on demand.
+	let paletteRequested = false;
+	function preMountKeydown(event: KeyboardEvent) {
+		if ((event.metaKey || event.ctrlKey) && (event.key === "k" || event.key === "/")) {
+			event.preventDefault();
+			loadPalette();
+		}
+	}
+	function loadPalette() {
+		if (paletteRequested) {
+			document.dispatchEvent(new CustomEvent("open-command-palette"));
+			return;
+		}
+		paletteRequested = true;
+		document.removeEventListener("keydown", preMountKeydown);
+		import("@/components/command-palette/mount")
+			.then((module) => module.mountCommandPalette())
+			.catch(() => window.location.assign("/search"));
+	}
+	document.addEventListener("keydown", preMountKeydown);
+	document.addEventListener("open-command-palette", () => {
+		if (!paletteRequested) loadPalette();
+	});
+	const trigger = document.getElementById("topbar-search-trigger");
+	trigger?.setAttribute("aria-haspopup", "dialog");
+	trigger?.addEventListener("click", (event) => {
+		if (event instanceof MouseEvent && (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)) return;
+		event.preventDefault();
+		loadPalette();
+	});
+</script>

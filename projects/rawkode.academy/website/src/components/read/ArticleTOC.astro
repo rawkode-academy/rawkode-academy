@@ -1,56 +1,44 @@
 ---
+import { academyDocument } from "@rawkodeacademy/design-system";
+const doc = academyDocument();
 import type { MarkdownHeading } from "astro";
 import MLabel from "@/components/ui/MLabel.vue";
 
 interface Props {
 	headings: MarkdownHeading[];
-	tools?: string[];
+	maxDepth?: 2 | 3;
 }
 
-const { headings, tools = [] } = Astro.props as Props;
+const { headings, maxDepth = 2 } = Astro.props as Props;
 
 const sections = headings
-	.filter((h) => h.depth === 2)
+	.filter((h) => h.depth >= 2 && h.depth <= maxDepth)
 	.map((h) => ({
 		slug: h.slug,
 		text: h.text,
+		depth: h.depth,
 	}));
 ---
 
-<aside class="article-toc">
-	<div class="article-toc__inner">
-		<MLabel>Contents</MLabel>
-		<nav class="article-toc__nav">
-			{sections.map((s, i) => (
-				<a
-					class={`article-toc__link ${i === 0 ? "article-toc__link--first" : ""}`}
-					href={`#${s.slug}`}
-					data-toc-slug={s.slug}
-				>
-					<span class="article-toc__text">{s.text}</span>
-				</a>
-			))}
+{sections.length > 0 && <aside class={doc.toc}>
+	<details class={doc.tocMobile}>
+		<summary class={doc.tocSummary}>On this page · {sections.length} sections</summary>
+		<nav aria-label="On this page">
+			{sections.map((section) => <a class={doc.tocLink} href={`#${section.slug}`} data-depth={section.depth} data-toc-slug={section.slug}>{section.text}</a>)}
 		</nav>
-
-		{tools.length > 0 && (
-			<div class="article-toc__tools">
-				<MLabel>Tools used</MLabel>
-				<ul class="article-toc__tools-list">
-					{tools.map((t) => (
-						<li>
-							<MLabel>{t}</MLabel>
-						</li>
-					))}
-				</ul>
-			</div>
-		)}
+	</details>
+	<div class={doc.tocDesktop}>
+		<MLabel>On this page</MLabel>
+		<nav aria-label="On this page">
+			{sections.map((section) => <a class={doc.tocLink} href={`#${section.slug}`} data-depth={section.depth} data-toc-slug={section.slug}>{section.text}</a>)}
+		</nav>
 	</div>
-</aside>
+</aside>}
 
 <script>
-	// Highlight the active section as the user scrolls.
+	// Recompute reading position even when a fast scroll skips a whole heading.
 	const links = document.querySelectorAll<HTMLAnchorElement>(
-		".article-toc__link",
+		"[data-toc-slug]",
 	);
 	const headingsBySlug = new Map<string, HTMLElement>();
 	for (const link of links) {
@@ -60,97 +48,35 @@ const sections = headings
 		if (el) headingsBySlug.set(slug, el);
 	}
 
-	if (headingsBySlug.size > 0 && "IntersectionObserver" in window) {
-		const observer = new IntersectionObserver(
-			(entries) => {
-				for (const entry of entries) {
-					if (entry.isIntersecting) {
-						const slug = entry.target.id;
-						for (const link of links) {
-							link.classList.toggle(
-								"article-toc__link--active",
-								link.dataset.tocSlug === slug,
-							);
-						}
-					}
+	if (headingsBySlug.size > 0) {
+		let framePending = false;
+		let activeSlug: string | undefined;
+		const update = () => {
+			framePending = false;
+			const readingLine = Math.min(160, window.innerHeight * 0.3);
+			let current: string | undefined;
+			for (const [slug, heading] of headingsBySlug) {
+				if (heading.getBoundingClientRect().top <= readingLine) current = slug;
+				else break;
+			}
+			if (current === activeSlug) return;
+			activeSlug = current;
+			for (const link of links) {
+				if (link.dataset.tocSlug === current) {
+					link.setAttribute("aria-current", "location");
+				} else {
+					link.removeAttribute("aria-current");
 				}
-			},
-			{ rootMargin: "0px 0px -70% 0px", threshold: 0 },
-		);
-
-		for (const el of headingsBySlug.values()) observer.observe(el);
+			}
+		};
+		const scheduleUpdate = () => {
+			if (framePending) return;
+			framePending = true;
+			window.requestAnimationFrame(update);
+		};
+		window.addEventListener("scroll", scheduleUpdate, { passive: true });
+		window.addEventListener("resize", scheduleUpdate);
+		window.addEventListener("load", scheduleUpdate, { once: true });
+		update();
 	}
 </script>
-
-<style>
-	.article-toc {
-		position: sticky;
-		top: 5rem;
-		align-self: start;
-	}
-
-	.article-toc__inner {
-		display: flex;
-		flex-direction: column;
-		gap: 0.875rem;
-	}
-
-	.article-toc__nav {
-		display: flex;
-		flex-direction: column;
-	}
-
-	.article-toc__link {
-		display: flex;
-		gap: 0.625rem;
-		align-items: baseline;
-		padding: 0.625rem 0;
-		text-decoration: none;
-		border-top: 1px solid var(--editorial-hairline-strong);
-		transition: color var(--duration-base) var(--ease-standard);
-		color: inherit;
-	}
-
-	.article-toc__link--first {
-		border-top-color: var(--editorial-ink);
-	}
-
-	.article-toc__text {
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 0.875rem;
-		font-weight: 400;
-		line-height: 1.35;
-		color: var(--editorial-ink-soft);
-	}
-
-	.article-toc__link:hover .article-toc__text,
-	.article-toc__link--active .article-toc__text {
-		color: var(--editorial-ink);
-		font-weight: 500;
-	}
-
-	.article-toc__tools {
-		margin-top: 1rem;
-		padding-top: 0.875rem;
-		border-top: 1px solid var(--editorial-hairline-strong);
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	.article-toc__tools-list {
-		list-style: none;
-		padding: 0;
-		margin: 0;
-		display: flex;
-		flex-direction: column;
-		gap: 0.3rem;
-	}
-
-	@media (max-width: 960px) {
-		.article-toc {
-			position: static;
-			margin-bottom: 1.5rem;
-		}
-	}
-</style>

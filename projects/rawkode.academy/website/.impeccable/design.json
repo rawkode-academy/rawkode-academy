@@ -167,7 +167,7 @@
       }
     ],
     "dos": [
-      "Do use src/styles/global.css and uno.config.ts tokens before adding new one-off values.",
+      "Do use src/styles/global.css and the design-system package tokens before adding new one-off values.",
       "Do keep body and lede text at strong contrast against Paper and Dark Base.",
       "Do write commercial copy as bounded adoption help with clear exclusions."
     ],

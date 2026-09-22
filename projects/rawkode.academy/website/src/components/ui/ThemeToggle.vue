@@ -1,7 +1,7 @@
 <template>
 	<button
 		@click="handleToggle"
-		:class="buttonClasses"
+		:class="props.variant === 'button' || props.showLabel ? layoutStyles.buttonSecondary : shellStyles.menuTrigger"
 		:aria-label="ariaLabel"
 		:title="ariaLabel"
 		type="button"
@@ -11,7 +11,8 @@
 			<svg
 				v-if="preference === 'system'"
 				key="system"
-				class="w-5 h-5"
+				width="20"
+				height="20"
 				fill="none"
 				stroke="currentColor"
 				stroke-width="2"
@@ -32,7 +33,8 @@
 			<svg
 				v-else-if="preference === 'dark'"
 				key="sun"
-				class="w-5 h-5"
+				width="20"
+				height="20"
 				fill="none"
 				stroke="currentColor"
 				stroke-width="2"
@@ -52,7 +54,8 @@
 			<svg
 				v-else
 				key="moon"
-				class="w-5 h-5"
+				width="20"
+				height="20"
 				fill="none"
 				stroke="currentColor"
 				stroke-width="2"
@@ -66,7 +69,7 @@
 			</svg>
 		</transition>
 
-		<span v-if="showLabel" class="ml-2 text-sm font-medium">
+		<span v-if="showLabel">
 			{{ label }}
 		</span>
 	</button>
@@ -74,6 +77,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from "vue";
+import { academyLayout, academyShell } from "@rawkodeacademy/design-system";
 import {
 	type ColorScheme,
 	type ColorSchemePreference,
@@ -104,6 +108,8 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const preference = ref<ColorSchemePreference>("system");
+const shellStyles = academyShell();
+const layoutStyles = academyLayout();
 
 const NEXT_DESCRIPTION: Record<ColorSchemePreference, string> = {
 	light: "Switch to dark mode",
@@ -151,29 +157,6 @@ const handleToggle = () => {
 	});
 };
 
-const buttonClasses = computed(() => {
-	const baseClasses =
-		"inline-flex items-center justify-center transition-smooth focus-ring";
-
-	const variantClasses = {
-		icon: "rounded-full hover:bg-[var(--surface-card-muted)]",
-		button:
-			"rounded-lg border border-[var(--surface-border)] hover:bg-[var(--surface-card-muted)]",
-	};
-
-	const sizeClasses = {
-		sm: props.variant === "button" ? "px-3 py-2" : "p-2",
-		// p-3 + 20px icon = 44px hit area for the default icon toggle.
-		md: props.variant === "button" ? "px-4 py-2.5 min-h-11" : "p-3",
-		lg: props.variant === "button" ? "px-5 py-3" : "p-3",
-	};
-
-	return [
-		baseClasses,
-		variantClasses[props.variant],
-		sizeClasses[props.size],
-	].join(" ");
-});
 </script>
 
 <style scoped>

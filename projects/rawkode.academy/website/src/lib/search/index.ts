@@ -1,4 +1,5 @@
 import { getCollection } from "astro:content";
+import { isNewsPublished } from "@/lib/news-publication";
 
 /**
  * Unified search index across every public content type on the site.
@@ -94,11 +95,12 @@ const compactKeywords = (
 };
 
 export async function buildSearchIndex(): Promise<SearchEntry[]> {
+	const now = new Date();
 	const [videos, articles, news, courses, learningPaths, shows, technologies] =
 		await Promise.all([
 			getCollection("videos"),
 			getCollection("articles", ({ data }) => !data.draft),
-			getCollection("news"),
+			getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
 			getCollection("courses"),
 			getCollection("learningPaths"),
 			getCollection("shows", ({ data }) => data.publish),

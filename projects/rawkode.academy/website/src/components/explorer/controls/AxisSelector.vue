@@ -1,8 +1,10 @@
 <template>
  <div class="axis-selector">
- <label class="axis-label">{{ label }}</label>
+ <label :for="selectId" class="axis-label">{{ label }}</label>
  <div class="select-wrapper">
  <select
+ :id="selectId"
+ :aria-describedby="`${selectId}-description`"
  :value="value"
  class="axis-select"
  @change="handleChange"
@@ -15,24 +17,27 @@
  {{ option.label }}
  </option>
  </select>
- <svg class="select-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <svg class="select-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
  </svg>
  </div>
- <p class="axis-description">{{ currentDescription }}</p>
+ <p :id="`${selectId}-description`" class="axis-description">{{ currentDescription }}</p>
  </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, useId } from "vue";
 import { getAxisOptions, type DimensionKey } from "@/lib/explorer/dimensions";
 
 interface Props {
+	id?: string;
 	label: string;
 	value: DimensionKey;
 }
 
 const props = defineProps<Props>();
+const generatedId = useId();
+const selectId = computed(() => props.id ?? generatedId);
 
 const emit = defineEmits<{
 	"update:value": [value: DimensionKey];
@@ -61,7 +66,7 @@ const handleChange = (event: Event) => {
 .axis-label {
  font-size: 0.7rem;
  font-weight: 600;
- color: var(--text-secondary-content);
+ color: var(--colors-academy-text-soft);
 }
 
 .select-wrapper {
@@ -71,25 +76,25 @@ const handleChange = (event: Event) => {
 .axis-select {
  width: 100%;
  padding: 0.625rem 2rem 0.625rem 0.75rem;
- background: var(--surface-card-muted);
- border: 1px solid var(--surface-border);
+ background: var(--colors-academy-ground);
+ border: 1px solid var(--colors-academy-border);
  border-radius: 8px;
  font-size: 0.85rem;
  font-weight: 600;
- color: var(--text-primary-content);
+ color: var(--colors-academy-text);
  cursor: pointer;
  appearance: none;
  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .axis-select:hover {
- border-color: rgb(var(--brand-primary) / 0.5);
+ border-color: color-mix(in srgb, var(--colors-academy-accent) 50%, transparent);
 }
 
 .axis-select:focus {
  outline: none;
- border-color: rgb(var(--brand-primary));
- box-shadow: 0 0 0 3px rgb(var(--brand-primary) / 0.15);
+ border-color: var(--colors-academy-accent);
+ box-shadow: 0 0 0 3px color-mix(in srgb, var(--colors-academy-accent) 15%, transparent);
 }
 
 .select-icon {
@@ -99,13 +104,13 @@ const handleChange = (event: Event) => {
  transform: translateY(-50%);
  width: 16px;
  height: 16px;
- color: var(--text-muted);
+ color: var(--colors-academy-text-muted);
  pointer-events: none;
 }
 
 .axis-description {
  font-size: 0.65rem;
- color: var(--text-muted);
+ color: var(--colors-academy-text-muted);
  margin: 0;
 }
 </style>

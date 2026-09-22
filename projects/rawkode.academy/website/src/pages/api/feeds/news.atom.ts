@@ -1,5 +1,6 @@
 import { getCollection, getEntries } from "astro:content";
 import type { APIContext } from "astro";
+import { isNewsPublished } from "@/lib/news-publication";
 
 function escapeXml(value: string): string {
 	return value.replace(/[<>&'"]/g, (char) => {
@@ -21,7 +22,10 @@ function escapeXml(value: string): string {
 }
 
 export async function GET(context: APIContext) {
-	const news = await getCollection("news");
+	const now = new Date();
+	const news = await getCollection("news", ({ data }) =>
+		isNewsPublished(data.publishedAt, now),
+	);
 
 	const sortedNews = [...news].sort(
 		(a, b) =>
@@ -29,13 +33,16 @@ export async function GET(context: APIContext) {
 			new Date(a.data.publishedAt).getTime(),
 	);
 
-	const site = context.site?.toString() || "https://rawkode.academy";
+	const site = (context.site?.toString() || "https://rawkode.academy").replace(
+		/\/$/,
+		"",
+	);
 	const feedUrl = `${site}/api/feeds/news.atom`;
 
 	const lastUpdated =
 		sortedNews[0]?.data.publishedAt instanceof Date
 			? sortedNews[0].data.publishedAt.toISOString()
-			: new Date().toISOString();
+			: now.toISOString();
 
 	const entries = await Promise.all(
 		sortedNews.map(async (story) => {

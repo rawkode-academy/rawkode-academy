@@ -1,13 +1,10 @@
 <template>
-	<div :class="className" role="status" :aria-label="ariaLabel">
+	<div :class="[skeleton.text, className]" role="status" :aria-label="ariaLabel">
 		<span class="sr-only">{{ ariaLabel }}</span>
 		<div
 			v-for="(line, index) in lines"
 			:key="index"
-			:class="[
-				'animate-pulse bg-[var(--surface-skeleton)]',
-				index < lines.length - 1 ? 'mb-2' : '',
-			]"
+			:class="skeleton.line"
 			:style="{
 				height: lineHeight,
 				width: getLineWidth(index),
@@ -18,6 +15,8 @@
 </template>
 
 <script setup lang="ts">
+import { academySkeleton } from "@rawkodeacademy/design-system";
+
 interface Props {
 	lines?: number;
 	lineHeight?: string;
@@ -33,6 +32,7 @@ const props = withDefaults(defineProps<Props>(), {
 	className: "",
 	ariaLabel: "Loading text content...",
 });
+const skeleton = academySkeleton();
 
 const getLineWidth = (index: number): string => {
 	if (index === props.lines - 1) {

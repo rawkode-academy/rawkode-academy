@@ -1,10 +1,13 @@
 <template>
- <div ref="triggerRef" class="multi-select-filter">
- <button
- type="button"
+ <Popover.Root
+ :open="isOpen"
+ :lazy-mount="true"
+ :unmount-on-exit="true"
+ @open-change="isOpen = $event.open"
+ >
+ <Popover.Trigger
  class="filter-toggle"
  :class="{ 'has-selection': selected.length > 0 }"
- @click="toggleDropdown"
  >
  <span class="filter-label">{{ label }}</span>
  <span v-if="selected.length > 0" class="selection-badge">
@@ -19,17 +22,10 @@
  >
  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
  </svg>
- </button>
+ </Popover.Trigger>
 
- <Teleport to="body">
- <Transition name="dropdown">
- <div
- v-if="isOpen"
- ref="dropdownRef"
- class="filter-dropdown"
- :style="dropdownStyle"
- @click.stop
- >
+ <Popover.Positioner class="filter-positioner">
+ <Popover.Content class="filter-dropdown">
  <!-- Select all / clear -->
  <div class="dropdown-actions">
  <button type="button" class="action-btn" @click="selectAll">
@@ -65,14 +61,14 @@
  <span class="option-label">{{ getValueLabel(value) }}</span>
  </label>
  </div>
- </div>
- </Transition>
- </Teleport>
- </div>
+ </Popover.Content>
+ </Popover.Positioner>
+</Popover.Root>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, nextTick } from "vue";
+import { Popover } from "@ark-ui/vue/popover";
+import { ref } from "vue";
 import {
 	getDimensionLabel,
 	getDimensionColor,
@@ -93,62 +89,6 @@ const emit = defineEmits<{
 }>();
 
 const isOpen = ref(false);
-const triggerRef = ref<HTMLElement | null>(null);
-const dropdownRef = ref<HTMLElement | null>(null);
-const dropdownPosition = ref({
-	top: 0,
-	bottom: 0,
-	left: 0,
-	width: 0,
-	maxHeight: 400,
-	openUpward: false,
-});
-
-const dropdownStyle = computed(() => ({
-	position: "fixed" as const,
-	top: dropdownPosition.value.openUpward
-		? "auto"
-		: `${dropdownPosition.value.top}px`,
-	bottom: dropdownPosition.value.openUpward
-		? `${dropdownPosition.value.bottom}px`
-		: "auto",
-	left: `${dropdownPosition.value.left}px`,
-	width: `${dropdownPosition.value.width}px`,
-	maxHeight: `${dropdownPosition.value.maxHeight}px`,
-}));
-
-const updateDropdownPosition = () => {
-	if (!triggerRef.value) return;
-	const rect = triggerRef.value.getBoundingClientRect();
-	const viewportHeight = window.innerHeight;
-	const spaceBelow = viewportHeight - rect.bottom - 16;
-	const spaceAbove = rect.top - 16;
-	const minDropdownHeight = 200;
-
-	// Prefer opening downward if there's enough space
-	const openUpward = spaceBelow < minDropdownHeight && spaceAbove > spaceBelow;
-	const maxHeight = openUpward
-		? Math.min(spaceAbove, 400)
-		: Math.min(spaceBelow, 400);
-
-	dropdownPosition.value = {
-		top: rect.bottom + 8,
-		bottom: viewportHeight - rect.top + 8,
-		left: rect.left,
-		width: rect.width,
-		maxHeight,
-		openUpward,
-	};
-};
-
-const toggleDropdown = () => {
-	isOpen.value = !isOpen.value;
-	if (isOpen.value) {
-		nextTick(() => {
-			updateDropdownPosition();
-		});
-	}
-};
 
 const getValueLabel = (value: string): string => {
 	return getDimensionLabel(props.dimension, value);
@@ -172,38 +112,6 @@ const selectAll = () => {
 const clearSelection = () => {
 	emit("update:selected", []);
 };
-
-// Close on click outside
-const handleClickOutside = (event: MouseEvent) => {
-	const target = event.target as HTMLElement;
-	if (
-		triggerRef.value &&
-		!triggerRef.value.contains(target) &&
-		dropdownRef.value &&
-		!dropdownRef.value.contains(target)
-	) {
-		isOpen.value = false;
-	}
-};
-
-// Update position on scroll/resize
-const handleScrollResize = () => {
-	if (isOpen.value) {
-		updateDropdownPosition();
-	}
-};
-
-onMounted(() => {
-	document.addEventListener("click", handleClickOutside);
-	window.addEventListener("scroll", handleScrollResize, true);
-	window.addEventListener("resize", handleScrollResize);
-});
-
-onUnmounted(() => {
-	document.removeEventListener("click", handleClickOutside);
-	window.removeEventListener("scroll", handleScrollResize, true);
-	window.removeEventListener("resize", handleScrollResize);
-});
 </script>
 
 <style scoped>
@@ -217,24 +125,24 @@ onUnmounted(() => {
  width: 100%;
  gap: 0.5rem;
  padding: 0.5rem 0.75rem;
- background: var(--surface-card-muted);
- border: 1px solid var(--surface-border);
+ background: var(--colors-academy-ground);
+ border: 1px solid var(--colors-academy-border);
  border-radius: 8px;
  font-size: 0.8rem;
  font-weight: 600;
- color: var(--text-secondary-content);
+ color: var(--colors-academy-text-soft);
  cursor: pointer;
  transition: all 0.15s ease;
 }
 
 .filter-toggle:hover {
- border-color: rgb(var(--brand-primary) / 0.5);
- color: var(--text-primary-content);
+ border-color: color-mix(in srgb, var(--colors-academy-accent) 50%, transparent);
+ color: var(--colors-academy-text);
 }
 
 .filter-toggle.has-selection {
- border-color: rgb(var(--brand-primary));
- background: rgb(var(--brand-primary) / 0.1);
+ border-color: var(--colors-academy-accent);
+ background: color-mix(in srgb, var(--colors-academy-accent) 10%, transparent);
 }
 
 .filter-label {
@@ -249,8 +157,8 @@ onUnmounted(() => {
  min-width: 20px;
  height: 20px;
  padding: 0 0.375rem;
- background: rgb(var(--brand-primary));
- color: white;
+ background: var(--colors-academy-accent);
+ color: var(--colors-academy-accent-foreground);
  font-size: 0.65rem;
  font-weight: 700;
  border-radius: 9999px;
@@ -270,9 +178,10 @@ onUnmounted(() => {
 <style>
 /* Dropdown styles - global because teleported to body */
 .filter-dropdown {
- z-index: 9999;
- background: var(--surface-card);
- border: 1px solid var(--surface-border);
+ width: var(--reference-width);
+ max-height: min(400px, var(--available-height));
+ background: var(--colors-academy-panel);
+ border: 1px solid var(--colors-academy-border);
  border-radius: 10px;
  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
  display: flex;
@@ -280,29 +189,31 @@ onUnmounted(() => {
  overflow: hidden;
 }
 
+.filter-positioner { z-index: 9999; }
+
 .filter-dropdown .dropdown-actions {
  display: flex;
  gap: 0.5rem;
  padding: 0.5rem;
- border-bottom: 1px solid var(--surface-border);
+ border-bottom: 1px solid var(--colors-academy-border);
 }
 
 .filter-dropdown .action-btn {
  flex: 1;
  padding: 0.375rem 0.5rem;
- background: var(--surface-card-muted);
+ background: var(--colors-academy-ground);
  border: none;
  border-radius: 6px;
  font-size: 0.7rem;
  font-weight: 600;
- color: var(--text-secondary-content);
+ color: var(--colors-academy-text-soft);
  cursor: pointer;
  transition: all 0.15s ease;
 }
 
 .filter-dropdown .action-btn:hover:not(:disabled) {
- background: var(--surface-border);
- color: var(--text-primary-content);
+ background: var(--colors-academy-border);
+ color: var(--colors-academy-text);
 }
 
 .filter-dropdown .action-btn:disabled {
@@ -328,13 +239,13 @@ onUnmounted(() => {
 }
 
 .filter-dropdown .option-item:hover {
- background: var(--surface-card-muted);
+ background: var(--colors-academy-ground);
 }
 
 .filter-dropdown .option-checkbox {
  width: 18px;
  height: 18px;
- accent-color: rgb(var(--brand-primary));
+ accent-color: var(--colors-academy-accent);
  cursor: pointer;
 }
 
@@ -347,7 +258,7 @@ onUnmounted(() => {
 
 .filter-dropdown .option-label {
  font-size: 0.875rem;
- color: var(--text-primary-content);
+ color: var(--colors-academy-text);
 }
 
 /* Transition */

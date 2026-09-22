@@ -59,6 +59,11 @@ let _NamespaceNix = schema.#Contributor & {
 
 schema.#Base
 
+config: ci: cuenv: {
+	source:  "release"
+	version: "0.55.1"
+}
+
 runtime: schema.#DevenvRuntime
 
 hooks: onEnter: devenv: schema.#Devenv

@@ -1,5 +1,5 @@
 <template>
-	<div class="victory-screen">
+	<div :class="gameTheme.root" class="victory-screen">
 		<div class="grid-bg"></div>
 
 		<div class="content">
@@ -65,6 +65,8 @@
 </template>
 
 <script setup lang="ts">
+import { academyGame } from "@rawkodeacademy/design-system";
+const gameTheme = academyGame();
 import { ref } from "vue";
 import {
 	generateShareCard as apiGenerateShareCard,
@@ -170,8 +172,8 @@ async function copyShareLink() {
 	position: absolute;
 	inset: 0;
 	background-image:
-		linear-gradient(rgb(var(--brand-secondary) / 0.1) 1px, transparent 1px),
-		linear-gradient(90deg, rgb(var(--brand-secondary) / 0.1) 1px, transparent 1px);
+		linear-gradient(color-mix(in srgb, var(--colors-academy-status-violet) 10.0%, transparent) 1px, transparent 1px),
+		linear-gradient(90deg, color-mix(in srgb, var(--colors-academy-status-violet) 10.0%, transparent) 1px, transparent 1px);
 	background-size: 40px 40px;
 	animation: grid-pulse 2s ease-in-out infinite;
 }
@@ -195,10 +197,10 @@ async function copyShareLink() {
 .title {
 	font-size: 3rem;
 	font-weight: 700;
-	color: rgb(var(--brand-secondary));
+	color: var(--colors-academy-status-violet);
 	text-shadow:
-		0 0 20px rgb(var(--brand-secondary) / 0.5),
-		0 0 40px rgb(var(--brand-secondary) / 0.3);
+		0 0 20px color-mix(in srgb, var(--colors-academy-status-violet) 50.0%, transparent),
+		0 0 40px color-mix(in srgb, var(--colors-academy-status-violet) 30.0%, transparent);
 	letter-spacing: 0.1em;
 	margin-bottom: 0.5rem;
 	animation: victory-glow 2s ease-in-out infinite;
@@ -207,24 +209,24 @@ async function copyShareLink() {
 @keyframes victory-glow {
 	0%, 100% {
 		text-shadow:
-			0 0 20px rgb(var(--brand-secondary) / 0.5),
-			0 0 40px rgb(var(--brand-secondary) / 0.3);
+			0 0 20px color-mix(in srgb, var(--colors-academy-status-violet) 50.0%, transparent),
+			0 0 40px color-mix(in srgb, var(--colors-academy-status-violet) 30.0%, transparent);
 	}
 	50% {
 		text-shadow:
-			0 0 30px rgb(var(--brand-secondary) / 0.8),
-			0 0 60px rgb(var(--brand-secondary) / 0.5);
+			0 0 30px color-mix(in srgb, var(--colors-academy-status-violet) 80.0%, transparent),
+			0 0 60px color-mix(in srgb, var(--colors-academy-status-violet) 50.0%, transparent);
 	}
 }
 
 .subtitle {
-	color: rgb(107 114 128);
+	color: var(--colors-academy-text-muted);
 	font-size: 1.2rem;
 	margin-bottom: 2rem;
 }
 
 :root.dark .subtitle {
-	color: rgb(204 204 204);
+	color: var(--colors-academy-text-muted);
 }
 
 .stats {
@@ -235,8 +237,8 @@ async function copyShareLink() {
 }
 
 .stat {
-	background: rgb(255 255 255 / 0.8);
-	border: 1px solid rgb(var(--brand-secondary) / 0.3);
+	background: var(--colors-academy-panel);
+	border: 1px solid color-mix(in srgb, var(--colors-academy-status-violet) 30.0%, transparent);
 	border-radius: 8px;
 	padding: 1rem 1.5rem;
 	text-align: center;
@@ -244,14 +246,14 @@ async function copyShareLink() {
 }
 
 :root.dark .stat {
-	background: rgb(0 0 0 / 0.6);
+	background: var(--colors-academy-panel);
 }
 
 .stat-value {
 	display: block;
 	font-size: 1.5rem;
 	font-weight: 700;
-	color: rgb(var(--brand-secondary));
+	color: var(--colors-academy-status-violet);
 }
 
 .stat-value.rank {
@@ -261,18 +263,18 @@ async function copyShareLink() {
 .stat-label {
 	display: block;
 	font-size: 0.75rem;
-	color: rgb(107 114 128);
+	color: var(--colors-academy-text-muted);
 	letter-spacing: 0.1em;
 	margin-top: 0.25rem;
 }
 
 :root.dark .stat-label {
-	color: rgb(156 163 175);
+	color: var(--colors-academy-text-muted);
 }
 
 .share-section {
-	background: rgb(255 255 255 / 0.8);
-	border: 1px solid rgb(var(--brand-primary) / 0.3);
+	background: var(--colors-academy-panel);
+	border: 1px solid color-mix(in srgb, var(--colors-academy-accent) 30.0%, transparent);
 	border-radius: 12px;
 	padding: 1.5rem;
 	margin-bottom: 2rem;
@@ -280,11 +282,11 @@ async function copyShareLink() {
 }
 
 :root.dark .share-section {
-	background: rgb(0 0 0 / 0.6);
+	background: var(--colors-academy-panel);
 }
 
 .share-title {
-	color: rgb(var(--brand-primary));
+	color: var(--colors-academy-accent);
 	font-size: 0.9rem;
 	letter-spacing: 0.2em;
 	margin-bottom: 1rem;
@@ -292,18 +294,18 @@ async function copyShareLink() {
 
 .generating {
 	padding: 1rem;
-	color: rgb(107 114 128);
+	color: var(--colors-academy-text-muted);
 }
 
 :root.dark .generating {
-	color: rgb(156 163 175);
+	color: var(--colors-academy-text-muted);
 }
 
 .loading-spinner {
 	width: 30px;
 	height: 30px;
-	border: 2px solid rgb(var(--brand-primary) / 0.2);
-	border-top-color: rgb(var(--brand-primary));
+	border: 2px solid color-mix(in srgb, var(--colors-academy-accent) 20.0%, transparent);
+	border-top-color: var(--colors-academy-accent);
 	border-radius: 50%;
 	animation: spin 1s linear infinite;
 	margin: 0 auto 0.5rem;
@@ -326,11 +328,11 @@ async function copyShareLink() {
 	max-width: 100%;
 	height: auto;
 	border-radius: 8px;
-	border: 1px solid rgb(0 0 0 / 0.1);
+	border: 1px solid var(--colors-academy-border);
 }
 
 :root.dark .share-card-preview {
-	border-color: rgb(255 255 255 / 0.2);
+	border-color: var(--colors-academy-border);
 }
 
 .share-buttons {
@@ -348,29 +350,29 @@ async function copyShareLink() {
 }
 
 .share-btn.twitter {
-	background: #1da1f2;
+	background: var(--colors-academy-status-sky);
 	border: none;
 	color: white;
 }
 
 .share-btn.twitter:hover {
-	background: #1a91da;
+	background: var(--colors-academy-status-sky);
 }
 
 .share-btn.copy {
 	background: transparent;
-	border: 1px solid rgb(var(--brand-primary));
-	color: rgb(var(--brand-primary));
+	border: 1px solid var(--colors-academy-accent);
+	color: var(--colors-academy-accent);
 }
 
 .share-btn.copy:hover {
-	background: rgb(var(--brand-primary) / 0.1);
+	background: color-mix(in srgb, var(--colors-academy-accent) 10.0%, transparent);
 }
 
 .generate-btn {
 	background: transparent;
-	border: 1px solid rgb(var(--brand-primary));
-	color: rgb(var(--brand-primary));
+	border: 1px solid var(--colors-academy-accent);
+	color: var(--colors-academy-accent);
 	padding: 0.75rem 1.5rem;
 	font-family: inherit;
 	font-size: 0.9rem;
@@ -379,11 +381,11 @@ async function copyShareLink() {
 }
 
 .generate-btn:hover {
-	background: rgb(var(--brand-primary) / 0.1);
+	background: color-mix(in srgb, var(--colors-academy-accent) 10.0%, transparent);
 }
 
 .share-error {
-	color: #e74c3c;
+	color: var(--colors-academy-status-rust);
 	font-size: 0.9rem;
 	margin-top: 0.5rem;
 }
@@ -404,26 +406,26 @@ async function copyShareLink() {
 }
 
 .action-btn.primary {
-	border: 2px solid rgb(var(--brand-secondary));
-	color: rgb(var(--brand-secondary));
+	border: 2px solid var(--colors-academy-status-violet);
+	color: var(--colors-academy-status-violet);
 }
 
 .action-btn.primary:hover {
-	background: rgb(var(--brand-secondary));
+	background: var(--colors-academy-status-violet);
 	color: white;
 }
 
 :root.dark .action-btn.primary:hover {
-	color: rgb(17 24 39);
+	color: var(--colors-academy-text);
 }
 
 .action-btn.secondary {
-	border: 1px solid rgb(var(--brand-primary));
-	color: rgb(var(--brand-primary));
+	border: 1px solid var(--colors-academy-accent);
+	color: var(--colors-academy-accent);
 }
 
 .action-btn.secondary:hover {
-	background: rgb(var(--brand-primary) / 0.1);
+	background: color-mix(in srgb, var(--colors-academy-accent) 10.0%, transparent);
 }
 
 .btn-text {

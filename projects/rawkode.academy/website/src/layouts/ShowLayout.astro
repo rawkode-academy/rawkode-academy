@@ -4,6 +4,7 @@ import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import ShowNav from "@/components/show/ShowNav.astro";
 import type { ShowNavItem } from "@/lib/shows/types";
 import Page from "@/wrappers/page.astro";
+import { showLayoutStyles } from "./showStyles";
 
 interface Props {
 	show: CollectionEntry<"shows">;
@@ -15,6 +16,7 @@ interface Props {
 
 const { show, nav, active = null, title, description } = Astro.props;
 const activeTab = nav.find((n) => n.slug === active);
+const layout = showLayoutStyles;
 
 const breadcrumbElements = [
 	{ title: "Home", link: "/" },
@@ -32,20 +34,11 @@ const breadcrumbElements = [
 ---
 
 <Page title={title} description={description ?? show.data.description ?? title}>
-	<section
-		class="relative overflow-hidden"
-		style="border-bottom: 1px solid var(--surface-border)"
-	>
-		<div
-			class="absolute inset-0 bg-[var(--surface-card-muted)]"
-			aria-hidden="true"
-		>
-		</div>
-		<div class="relative mx-auto max-w-7xl content-px pb-6 pt-8">
+	<div class={layout.root}>
+	<section class={layout.hero}>
+		<div class={layout.container}>
 			<Breadcrumb elements={breadcrumbElements} />
-			<h1
-				class="mt-6 text-3xl font-extrabold tracking-tight text-primary-content sm:text-4xl"
-			>
+			<h1 class={layout.title}>
 				{show.data.name}
 			</h1>
 		</div>
@@ -53,9 +46,10 @@ const breadcrumbElements = [
 
 	<ShowNav showId={show.data.id} nav={nav} active={active} />
 
-	<section class="section-py" style="background: var(--surface-base)">
-		<div class="mx-auto max-w-7xl content-px">
+	<section class={layout.section}>
+		<div class={layout.container}>
 			<slot />
 		</div>
 	</section>
+	</div>
 </Page>

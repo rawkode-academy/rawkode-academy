@@ -19,6 +19,8 @@ technologies:
   - kubernetes
 ---
 
+import Diagram from "@/components/articles/Diagram.astro";
+
 Welcome to the Rawkode Academy! We're thrilled to start talking about our new platform, designed to provide developers with an immersive and engaging learning experience.
 
 In this article, we'll take you behind the scenes, exploring the innovative patterns and techniques we've employed to build a robust, scalable, and cloud-native platform. From CQRS and GraphQL Federation to Restate and our unique approach to service-oriented architecture, we'll delve into the key components that power our platform.
@@ -57,6 +59,8 @@ Depending on what part of the platform you interact with; you'll be hitting eith
 I've taken a few liberties with the arrows on the diagram below (on the write path) in-order to have the diagram be more readable.
 
 All write requests, and some read (such as people) go through Zitadel for AuthN.
+
+<Diagram id="academy-architecture" title="Academy read and write services" description="The website queries the Cosmo GraphQL gateway, which routes to five read services and their databases. Each database also connects to a corresponding write service behind the Restate RPC gateway.">
 
 ```d2 sketch
 # System architecture in D2
@@ -120,6 +124,8 @@ TechnologiesDB <-> TechnologiesRestate
 # Cosmo.style.fill: lightgreen
 # Restate.style.fill: lightyellow
 ```
+
+</Diagram>
 
 ## Command Query Responsibility Segregation (CQRS)
 

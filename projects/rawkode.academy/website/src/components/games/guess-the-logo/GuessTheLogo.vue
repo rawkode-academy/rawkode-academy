@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { academyGame } from "@rawkodeacademy/design-system";
+const gameTheme = academyGame();
 import { ref, computed, onMounted } from "vue";
 import type { Round } from "@/lib/games/guess-the-logo";
 import { scoreGame, computeScore, TIMER_SECONDS } from "@/lib/games/guess-the-logo";
@@ -216,7 +218,7 @@ async function finishGame(finalAnswers: (string | null)[], finalTimes: number[])
 </script>
 
 <template>
-	<div class="gtl-root">
+	<div :class="gameTheme.root" class="gtl-root">
 		<!-- Loading -->
 		<div v-if="state === 'loading'" class="gtl-center" aria-live="polite" aria-label="Loading">
 			<div class="gtl-spinner" aria-hidden="true"></div>
@@ -225,7 +227,7 @@ async function finishGame(finalAnswers: (string | null)[], finalTimes: number[])
 
 		<!-- Intro -->
 		<div v-else-if="state === 'intro'" class="gtl-intro gtl-center">
-			<p class="gtl-intro-eyebrow">Weekly Challenge</p>
+			<p class="gtl-intro-eyebrow">Weekly challenge</p>
 			<h1 class="gtl-intro-title">CNIcon</h1>
 			<p class="gtl-intro-week">{{ weekLabel }}</p>
 			<p class="gtl-intro-desc">
@@ -293,8 +295,8 @@ async function finishGame(finalAnswers: (string | null)[], finalTimes: number[])
 .gtl-spinner {
 	width: 2.5rem;
 	height: 2.5rem;
-	border: 2px solid color-mix(in srgb, #00ceff 20%, transparent);
-	border-top-color: #00ceff;
+	border: 2px solid color-mix(in srgb, var(--colors-academy-accent) 20%, transparent);
+	border-top-color: var(--colors-academy-accent);
 	border-radius: 50%;
 	animation: gtl-spin 0.8s linear infinite;
 }
@@ -306,70 +308,62 @@ async function finishGame(finalAnswers: (string | null)[], finalTimes: number[])
 @media (prefers-reduced-motion: reduce) {
 	.gtl-spinner {
 		animation: none;
-		border-color: #00ceff;
+		border-color: var(--colors-academy-accent);
 	}
 }
 
 .gtl-loading-text {
-	font-family: var(--font-jetbrains-mono, monospace);
+	font-family: var(--fonts-academy-mono);
 	font-size: 0.8rem;
-	letter-spacing: 0.1em;
-	text-transform: uppercase;
-	color: var(--editorial-ink-mute, oklch(0.58 0.012 60));
+	color: var(--colors-academy-text-muted);
 }
 
 /* Intro */
 .gtl-intro-eyebrow {
-	font-family: var(--font-jetbrains-mono, monospace);
-	font-size: 0.7rem;
-	font-weight: 600;
-	letter-spacing: 0.2em;
-	text-transform: uppercase;
-	color: #00ceff;
+	font-family: var(--fonts-academy-mono);
+	font-size: 0.8rem;
+	font-weight: 500;
+	color: var(--colors-academy-accent);
 	margin: 0;
 }
 
 .gtl-intro-title {
-	font-family: var(--font-instrument-serif, serif);
-	font-style: italic;
-	font-size: 3rem;
-	font-weight: 400;
-	letter-spacing: -0.03em;
-	color: var(--editorial-ink, oklch(0.18 0.02 60));
+	font-family: var(--fonts-academy-display);
+	font-size: clamp(3rem, 8vw, 4.5rem);
+	font-weight: 800;
+	letter-spacing: -0.035em;
+	line-height: 1;
+	color: var(--colors-academy-ink-text);
 	margin: 0;
-	background: linear-gradient(135deg, #5f5ed7, #00ceff);
-	-webkit-background-clip: text;
-	background-clip: text;
-	-webkit-text-fill-color: transparent;
 }
 
 .gtl-intro-week {
-	font-family: var(--font-inter-tight, system-ui, sans-serif);
-	font-size: 0.9rem;
-	color: var(--editorial-ink-soft, oklch(0.36 0.015 60));
+	font-family: var(--fonts-academy-mono);
+	font-size: 0.85rem;
+	color: var(--colors-academy-ink-text-muted);
 	margin: 0;
 }
 
 .gtl-intro-desc {
-	font-size: 0.95rem;
+	font-size: 1rem;
 	line-height: 1.6;
-	color: var(--editorial-ink-soft, oklch(0.36 0.015 60));
+	color: var(--colors-academy-ink-text-soft);
 	max-width: 30rem;
 	margin: 0;
 }
 
 .gtl-start-btn {
-	padding: 0.875rem 3rem;
-	border-radius: 0.5rem;
-	border: none;
-	background: linear-gradient(135deg, #5f5ed7, #00ceff);
-	color: #fff;
-	font-family: var(--font-inter-tight, system-ui, sans-serif);
-	font-size: 1rem;
-	font-weight: 600;
+	min-height: 3rem;
+	padding: 0.75rem 2.5rem;
+	border-radius: 3px;
+	border: 1px solid transparent;
+	background: var(--colors-academy-accent);
+	color: var(--colors-academy-accent-foreground);
+	font-family: var(--fonts-academy-text);
+	font-size: 0.95rem;
+	font-weight: 700;
 	cursor: pointer;
 	transition: opacity 150ms ease, transform 150ms ease;
-	box-shadow: 0 4px 16px color-mix(in srgb, #5f5ed7 30%, transparent);
 }
 
 .gtl-start-btn:hover {

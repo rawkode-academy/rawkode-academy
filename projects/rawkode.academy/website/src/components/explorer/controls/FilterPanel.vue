@@ -130,9 +130,8 @@ const handleSearchInput = (event: Event) => {
 .filter-title {
  font-size: 0.7rem;
  font-weight: 700;
- text-transform: uppercase;
  letter-spacing: 0.05em;
- color: var(--text-muted);
+ color: var(--colors-academy-text-muted);
  margin: 0;
 }
 
@@ -163,28 +162,28 @@ const handleSearchInput = (event: Event) => {
  transform: translateY(-50%);
  width: 16px;
  height: 16px;
- color: var(--text-muted);
+ color: var(--colors-academy-text-muted);
 }
 
 .search-input {
  width: 100%;
  padding: 0.625rem 0.75rem 0.625rem 2.25rem;
- background: var(--surface-card-muted);
- border: 1px solid var(--surface-border);
+ background: var(--colors-academy-ground);
+ border: 1px solid var(--colors-academy-border);
  border-radius: 8px;
  font-size: 0.85rem;
- color: var(--text-primary-content);
+ color: var(--colors-academy-text);
  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .search-input::placeholder {
- color: var(--text-muted);
+ color: var(--colors-academy-text-muted);
 }
 
 .search-input:focus {
  outline: none;
- border-color: rgb(var(--brand-primary));
- box-shadow: 0 0 0 3px rgb(var(--brand-primary) / 0.15);
+ border-color: var(--colors-academy-accent);
+ box-shadow: 0 0 0 3px color-mix(in srgb, var(--colors-academy-accent) 15%, transparent);
 }
 
 /* Filter sections */

@@ -82,10 +82,6 @@ export function buildNewsArticleJsonLd(
 			},
 		},
 		articleSection: "News",
-		speakable: {
-			"@type": "SpeakableSpecification",
-			cssSelector: [".article-header h1"],
-		},
 	};
 
 	if (keywords.length > 0) {

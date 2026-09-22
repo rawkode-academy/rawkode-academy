@@ -1,0 +1,39 @@
+---
+import { academyLayout } from "@rawkodeacademy/design-system";
+
+interface Props {
+	kicker?: string;
+	title: string;
+	description?: string;
+	width?: "wide" | "reading";
+	/** The collection's real size, shown as a numeral beside the title. */
+	figure?: number | string;
+	figureLabel?: string;
+}
+
+const {
+	kicker,
+	title,
+	description,
+	width = "wide",
+	figure,
+	figureLabel,
+} = Astro.props as Props;
+const styles = academyLayout({ width });
+---
+
+<header class={styles.masthead}>
+	<div class={styles.container}>
+		<div class={styles.mastheadInner}>
+			<div class={styles.mastheadCopy}>
+				{kicker && <p class={styles.mastheadKicker}>{kicker}</p>}
+				<h1 class={styles.mastheadTitle}>{title}</h1>
+			</div>
+			<div class={styles.mastheadAside}>
+				{description && <p class={styles.mastheadDescription}>{description}</p>}
+				{figure !== undefined && <p class={styles.mastheadFigure}><strong>{figure}</strong>{figureLabel && <span>{figureLabel}</span>}</p>}
+				<slot name="actions" />
+			</div>
+		</div>
+	</div>
+</header>

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { academyGame } from "@rawkodeacademy/design-system";
+const gameTheme = academyGame();
 import { ref, onMounted, computed } from "vue";
 import { actions } from "astro:actions";
 import type { LeaderboardEntry } from "@/lib/games/guess-the-logo-api";
@@ -270,7 +272,7 @@ function achievementsForGroup(groupIds: Set<string>): AchievementDef[] {
 </script>
 
 <template>
-	<div class="gtl-results">
+	<div :class="gameTheme.root" class="gtl-results">
 		<!-- Header -->
 		<div class="gtl-results-header">
 			<p class="gtl-results-week">{{ weekLabel }}</p>
@@ -450,28 +452,28 @@ function achievementsForGroup(groupIds: Set<string>): AchievementDef[] {
 }
 
 .gtl-results-week {
-	font-family: var(--font-jetbrains-mono, monospace);
+	font-family: var(--fonts-academy-mono);
 	font-size: 0.75rem;
 	font-weight: 600;
 	letter-spacing: 0.14em;
 	text-transform: uppercase;
-	color: var(--editorial-ink-mute, oklch(0.58 0.012 60));
+	color: var(--colors-academy-text-muted);
 	margin-bottom: 0.5rem;
 }
 
 .gtl-results-title {
-	font-family: var(--font-instrument-serif, serif);
+	font-family: var(--fonts-academy-display);
 	font-style: italic;
 	font-size: 2rem;
 	font-weight: 400;
-	color: var(--editorial-ink, oklch(0.18 0.02 60));
+	color: var(--colors-academy-text);
 	margin: 0;
 }
 
 .gtl-already-played-note {
 	margin-top: 0.5rem;
 	font-size: 0.85rem;
-	color: var(--editorial-ink-mute, oklch(0.58 0.012 60));
+	color: var(--colors-academy-text-muted);
 }
 
 /* Score block */
@@ -483,19 +485,19 @@ function achievementsForGroup(groupIds: Set<string>): AchievementDef[] {
 }
 
 .gtl-score-points {
-	font-family: var(--font-instrument-serif, serif);
+	font-family: var(--fonts-academy-display);
 	font-size: 4rem;
 	font-weight: 400;
-	color: #00ceff;
+	color: var(--colors-academy-accent);
 	line-height: 1;
 }
 
 .gtl-score-pts-label {
-	font-family: var(--font-jetbrains-mono, monospace);
+	font-family: var(--fonts-academy-mono);
 	font-size: 1.25rem;
 	font-weight: 600;
 	letter-spacing: 0.1em;
-	color: color-mix(in srgb, #00ceff 60%, transparent);
+	color: color-mix(in srgb, var(--colors-academy-accent) 60%, transparent);
 	vertical-align: baseline;
 }
 
@@ -506,39 +508,39 @@ function achievementsForGroup(groupIds: Set<string>): AchievementDef[] {
 }
 
 .gtl-score-num {
-	font-family: var(--font-instrument-serif, serif);
+	font-family: var(--fonts-academy-display);
 	font-size: 2rem;
 	font-weight: 400;
-	color: var(--editorial-ink-soft, oklch(0.36 0.015 60));
+	color: var(--colors-academy-text-soft);
 }
 
 .gtl-score-sep {
 	font-size: 1.5rem;
-	color: var(--editorial-ink-mute, oklch(0.58 0.012 60));
+	color: var(--colors-academy-text-muted);
 }
 
 .gtl-score-denom {
-	font-family: var(--font-instrument-serif, serif);
+	font-family: var(--fonts-academy-display);
 	font-size: 2rem;
 	font-weight: 400;
-	color: var(--editorial-ink-soft, oklch(0.36 0.015 60));
+	color: var(--colors-academy-text-soft);
 }
 
 .gtl-score-correct-label {
 	margin-left: 0.4rem;
 	align-self: center;
-	font-family: var(--font-jetbrains-mono, monospace);
+	font-family: var(--fonts-academy-mono);
 	font-size: 0.7rem;
 	font-weight: 600;
 	letter-spacing: 0.1em;
 	text-transform: uppercase;
-	color: var(--editorial-ink-mute, oklch(0.58 0.012 60));
+	color: var(--colors-academy-text-muted);
 }
 
 .gtl-rank-line {
 	text-align: center;
 	font-size: 0.95rem;
-	color: var(--editorial-ink-soft, oklch(0.36 0.015 60));
+	color: var(--colors-academy-text-soft);
 }
 
 .gtl-share-btn {
@@ -546,10 +548,10 @@ function achievementsForGroup(groupIds: Set<string>): AchievementDef[] {
 	margin: 0 auto;
 	padding: 0.75rem 2rem;
 	border-radius: 0.5rem;
-	border: 1px solid var(--editorial-hairline, oklch(0.18 0.02 60 / 0.12));
-	background: linear-gradient(135deg, #5f5ed7, #00ceff);
-	color: #fff;
-	font-family: var(--font-inter-tight, system-ui, sans-serif);
+	border: 1px solid var(--colors-academy-border);
+	background: linear-gradient(135deg, var(--colors-academy-status-violet), var(--colors-academy-accent));
+	color: var(--colors-academy-accent-foreground);
+	font-family: var(--fonts-academy-text);
 	font-size: 0.95rem;
 	font-weight: 600;
 	cursor: pointer;
@@ -568,10 +570,10 @@ function achievementsForGroup(groupIds: Set<string>): AchievementDef[] {
 	gap: 0.5rem;
 	padding: 0.875rem 1.25rem;
 	border-radius: 0.5rem;
-	border: 1px solid var(--editorial-hairline, oklch(0.18 0.02 60 / 0.12));
-	background: var(--surface-card, oklch(0.97 0.008 85));
+	border: 1px solid var(--colors-academy-border);
+	background: var(--colors-academy-panel);
 	font-size: 0.9rem;
-	color: var(--editorial-ink-soft, oklch(0.36 0.015 60));
+	color: var(--colors-academy-text-soft);
 	text-align: center;
 }
 
@@ -587,8 +589,8 @@ function achievementsForGroup(groupIds: Set<string>): AchievementDef[] {
 	gap: 0.75rem 1.25rem;
 	padding: 1rem 1.25rem;
 	border-radius: 0.5rem;
-	border: 1px solid color-mix(in srgb, #5f5ed7 35%, transparent);
-	background: color-mix(in srgb, #5f5ed7 6%, var(--surface-card, oklch(0.97 0.008 85)));
+	border: 1px solid color-mix(in srgb, var(--colors-academy-status-violet) 35%, transparent);
+	background: color-mix(in srgb, var(--colors-academy-status-violet) 6%, var(--colors-academy-panel));
 }
 
 .gtl-newsletter-copy {
@@ -602,12 +604,12 @@ function achievementsForGroup(groupIds: Set<string>): AchievementDef[] {
 .gtl-newsletter-title {
 	font-size: 0.95rem;
 	font-weight: 600;
-	color: var(--editorial-ink, oklch(0.18 0.02 60));
+	color: var(--colors-academy-text);
 }
 
 .gtl-newsletter-sub {
 	font-size: 0.825rem;
-	color: var(--editorial-ink-mute, oklch(0.58 0.012 60));
+	color: var(--colors-academy-text-muted);
 }
 
 .gtl-newsletter-action {
@@ -621,9 +623,9 @@ function achievementsForGroup(groupIds: Set<string>): AchievementDef[] {
 	padding: 0.5rem 1.25rem;
 	border-radius: 0.5rem;
 	border: none;
-	background: linear-gradient(135deg, #5f5ed7, #00ceff);
-	color: #fff;
-	font-family: var(--font-inter-tight, system-ui, sans-serif);
+	background: linear-gradient(135deg, var(--colors-academy-status-violet), var(--colors-academy-accent));
+	color: var(--colors-academy-accent-foreground);
+	font-family: var(--fonts-academy-text);
 	font-size: 0.875rem;
 	font-weight: 600;
 	cursor: pointer;
@@ -641,7 +643,7 @@ function achievementsForGroup(groupIds: Set<string>): AchievementDef[] {
 
 .gtl-newsletter-error {
 	font-size: 0.75rem;
-	color: #dc2626;
+	color: var(--colors-academy-status-rust);
 }
 
 .gtl-newsletter-icon {
@@ -651,7 +653,7 @@ function achievementsForGroup(groupIds: Set<string>): AchievementDef[] {
 .gtl-newsletter-text {
 	margin: 0;
 	font-size: 0.9rem;
-	color: var(--editorial-ink-soft, oklch(0.36 0.015 60));
+	color: var(--colors-academy-text-soft);
 }
 
 .gtl-section {
@@ -661,12 +663,12 @@ function achievementsForGroup(groupIds: Set<string>): AchievementDef[] {
 }
 
 .gtl-section-title {
-	font-family: var(--font-inter-tight, system-ui, sans-serif);
+	font-family: var(--fonts-academy-text);
 	font-size: 0.75rem;
 	font-weight: 600;
 	letter-spacing: 0.14em;
 	text-transform: uppercase;
-	color: var(--editorial-ink-mute, oklch(0.58 0.012 60));
+	color: var(--colors-academy-text-muted);
 	margin: 0;
 }
 
@@ -677,8 +679,8 @@ function achievementsForGroup(groupIds: Set<string>): AchievementDef[] {
 	gap: 0.6rem;
 	padding: 0.75rem 1rem;
 	border-radius: 0.5rem;
-	border: 1px solid color-mix(in srgb, #5f5ed7 40%, transparent);
-	background: color-mix(in srgb, #5f5ed7 8%, var(--surface-card, oklch(0.97 0.008 85)));
+	border: 1px solid color-mix(in srgb, var(--colors-academy-status-violet) 40%, transparent);
+	background: color-mix(in srgb, var(--colors-academy-status-violet) 8%, var(--colors-academy-panel));
 }
 
 .gtl-achievements-unlocked-icon {
@@ -689,17 +691,17 @@ function achievementsForGroup(groupIds: Set<string>): AchievementDef[] {
 .gtl-achievements-unlocked-text {
 	font-size: 0.875rem;
 	font-weight: 500;
-	color: var(--editorial-ink, oklch(0.18 0.02 60));
+	color: var(--colors-academy-text);
 }
 
 /* Group label */
 .gtl-achievement-group-label {
-	font-family: var(--font-jetbrains-mono, monospace);
+	font-family: var(--fonts-academy-mono);
 	font-size: 0.68rem;
 	font-weight: 600;
 	letter-spacing: 0.12em;
 	text-transform: uppercase;
-	color: var(--editorial-ink-mute, oklch(0.58 0.012 60));
+	color: var(--colors-academy-text-muted);
 	margin: 0.5rem 0 0;
 }
 
@@ -714,20 +716,20 @@ function achievementsForGroup(groupIds: Set<string>): AchievementDef[] {
 	gap: 0.75rem;
 	padding: 0.875rem 1rem;
 	border-radius: 0.5rem;
-	border: 1px solid var(--editorial-hairline, oklch(0.18 0.02 60 / 0.12));
-	background: var(--surface-card, oklch(0.97 0.008 85));
+	border: 1px solid var(--colors-academy-border);
+	background: var(--colors-academy-panel);
 	align-items: flex-start;
 }
 
 .gtl-achievement-card--earned {
-	border-color: color-mix(in srgb, #5f5ed7 40%, transparent);
-	background: color-mix(in srgb, #5f5ed7 6%, var(--surface-card, oklch(0.97 0.008 85)));
+	border-color: color-mix(in srgb, var(--colors-academy-status-violet) 40%, transparent);
+	background: color-mix(in srgb, var(--colors-academy-status-violet) 6%, var(--colors-academy-panel));
 }
 
 /* Newly-unlocked card gets a cyan accent to distinguish from previously earned */
 .gtl-achievement-card--new {
-	border-color: color-mix(in srgb, #00ceff 55%, transparent);
-	background: color-mix(in srgb, #00ceff 8%, var(--surface-card, oklch(0.97 0.008 85)));
+	border-color: color-mix(in srgb, var(--colors-academy-accent) 55%, transparent);
+	background: color-mix(in srgb, var(--colors-academy-accent) 8%, var(--colors-academy-panel));
 }
 
 .gtl-achievement-card--locked {
@@ -757,7 +759,7 @@ function achievementsForGroup(groupIds: Set<string>): AchievementDef[] {
 .gtl-achievement-name {
 	font-size: 0.875rem;
 	font-weight: 600;
-	color: var(--editorial-ink, oklch(0.18 0.02 60));
+	color: var(--colors-academy-text);
 	line-height: 1.2;
 }
 
@@ -765,9 +767,9 @@ function achievementsForGroup(groupIds: Set<string>): AchievementDef[] {
 	display: inline-block;
 	padding: 0.1rem 0.4rem;
 	border-radius: 0.25rem;
-	background: linear-gradient(135deg, #5f5ed7, #00ceff);
-	color: #fff;
-	font-family: var(--font-jetbrains-mono, monospace);
+	background: linear-gradient(135deg, var(--colors-academy-status-violet), var(--colors-academy-accent));
+	color: var(--colors-academy-accent-foreground);
+	font-family: var(--fonts-academy-mono);
 	font-size: 0.65rem;
 	font-weight: 700;
 	letter-spacing: 0.1em;
@@ -776,18 +778,18 @@ function achievementsForGroup(groupIds: Set<string>): AchievementDef[] {
 
 .gtl-achievement-desc {
 	font-size: 0.8rem;
-	color: var(--editorial-ink-mute, oklch(0.58 0.012 60));
+	color: var(--colors-academy-text-muted);
 	line-height: 1.4;
 	margin: 0;
 }
 
 /* Progress hint shown under the description on locked cards */
 .gtl-achievement-progress {
-	font-family: var(--font-jetbrains-mono, monospace);
+	font-family: var(--fonts-academy-mono);
 	font-size: 0.7rem;
 	font-weight: 500;
 	letter-spacing: 0.04em;
-	color: color-mix(in srgb, #5f5ed7 70%, var(--editorial-ink-mute, oklch(0.58 0.012 60)));
+	color: color-mix(in srgb, var(--colors-academy-status-violet) 70%, var(--colors-academy-text-muted));
 }
 
 .gtl-leaderboard {
@@ -805,29 +807,29 @@ function achievementsForGroup(groupIds: Set<string>): AchievementDef[] {
 	gap: 0.75rem;
 	padding: 0.625rem 0.875rem;
 	border-radius: 0.375rem;
-	border: 1px solid var(--editorial-hairline, oklch(0.18 0.02 60 / 0.12));
-	background: var(--surface-card, oklch(0.97 0.008 85));
+	border: 1px solid var(--colors-academy-border);
+	background: var(--colors-academy-panel);
 }
 
 .gtl-leaderboard-gap {
 	list-style: none;
 	text-align: center;
-	font-family: var(--font-jetbrains-mono, monospace);
+	font-family: var(--fonts-academy-mono);
 	font-size: 0.85rem;
-	color: var(--editorial-ink-mute, oklch(0.58 0.012 60));
+	color: var(--colors-academy-text-muted);
 	padding: 0.25rem 0;
 }
 
 .gtl-leaderboard-entry--self {
-	border-color: color-mix(in srgb, #00ceff 50%, transparent);
-	background: color-mix(in srgb, #00ceff 8%, var(--surface-card, oklch(0.97 0.008 85)));
+	border-color: color-mix(in srgb, var(--colors-academy-accent) 50%, transparent);
+	background: color-mix(in srgb, var(--colors-academy-accent) 8%, var(--colors-academy-panel));
 }
 
 .gtl-lb-rank {
-	font-family: var(--font-jetbrains-mono, monospace);
+	font-family: var(--fonts-academy-mono);
 	font-size: 0.75rem;
 	font-weight: 700;
-	color: var(--editorial-ink-mute, oklch(0.58 0.012 60));
+	color: var(--colors-academy-text-muted);
 	width: 1.5rem;
 	text-align: right;
 	flex-shrink: 0;
@@ -837,23 +839,23 @@ function achievementsForGroup(groupIds: Set<string>): AchievementDef[] {
 	flex: 1;
 	font-size: 0.9rem;
 	font-weight: 500;
-	color: var(--editorial-ink, oklch(0.18 0.02 60));
+	color: var(--colors-academy-text);
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 
 .gtl-lb-score {
-	font-family: var(--font-jetbrains-mono, monospace);
+	font-family: var(--fonts-academy-mono);
 	font-size: 0.875rem;
 	font-weight: 700;
-	color: #5f5ed7;
+	color: var(--colors-academy-status-violet);
 	flex-shrink: 0;
 }
 
 .gtl-lb-time {
 	font-size: 0.75rem;
-	color: var(--editorial-ink-mute, oklch(0.58 0.012 60));
+	color: var(--colors-academy-text-muted);
 	flex-shrink: 0;
 }
 </style>

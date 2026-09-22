@@ -1,105 +1,51 @@
 <template>
- <div class="space-y-4">
- <!-- Checking Subscription -->
- <div v-if="checkingSubscription" class="py-2 text-center">
- <div class="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
- <svg class="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
- <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
- <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
- </svg>
- </div>
- <p class="text-sm text-secondary-content">Checking subscription...</p>
- </div>
-
- <!-- Already Subscribed -->
- <div v-else-if="isAlreadySubscribed" class="py-2 text-center">
- <div class="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-green-500/20">
- <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
- </svg>
- </div>
- <h4 class="mb-2 text-lg font-semibold text-primary-content">You're subscribed</h4>
- <p class="text-sm text-secondary-content">
- We'll notify you when new content is available.
- </p>
- </div>
-
- <!-- Success -->
- <div v-else-if="submitted" class="py-2 text-center">
- <div class="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-green-500/20">
- <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
- </svg>
- </div>
- <h4 class="mb-2 text-lg font-semibold text-primary-content">Thanks for signing up</h4>
- <p class="text-sm text-secondary-content">
- {{ successMessage || 'Check your email to confirm your subscription.' }}
- </p>
- </div>
-
- <!-- Form -->
- <form v-else @submit.prevent="submitForm" class="space-y-4">
- <div v-if="error" class="rounded-sm border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300">
- {{ error }}
- </div>
-
- <div v-if="!userEmail">
- <input
- v-model="email"
- type="email"
- id="email"
- placeholder="Enter your email"
- required
- class="w-full rounded-sm border border-white/60 bg-[var(--surface-card)] px-4 py-3 text-primary-content placeholder:text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-white/10"
- :disabled="loading"
- />
- </div>
-
- <div
- v-if="signupConfig.sponsor && signupConfig.allowSponsorContact"
- class="rounded-sm border border-white/40 bg-[var(--surface-card-muted)] px-4 py-3 dark:border-white/8"
- >
- <div class="flex items-start gap-3">
- <input
- v-model="sponsorConsent"
- type="checkbox"
- id="sponsor-consent"
- class="mt-1 h-4 w-4 rounded border-[var(--surface-border-strong)] text-primary focus:ring-primary"
- :disabled="loading"
- />
- <label for="sponsor-consent" class="text-sm leading-6 text-secondary-content">
- I agree to share my email with {{ signupConfig.sponsor }} for course-related updates
- </label>
- </div>
- </div>
-
- <button
- type="submit"
- :disabled="loading"
- class="ed-btn ed-btn--solid ed-btn--md w-full disabled:opacity-60 disabled:cursor-not-allowed"
- >
- <span v-if="loading" class="flex items-center">
- <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
- <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
- <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
- </svg>
- Subscribing...
- </span>
- <span v-else>
- {{ userEmail ? 'Subscribe to Updates' : 'Get Course Updates' }}
- </span>
- </button>
- </form>
- </div>
+	<div :class="[s.root, s.stack]">
+		<p role="status" aria-live="polite" aria-atomic="true" :class="ready ? s.hidden : s.copy">{{ statusMessage }}</p>
+		<p :id="errorId" role="alert" aria-atomic="true" :class="error ? s.error : s.hidden">{{ error }}</p>
+		<div v-if="checkingSubscription" :class="s.status">
+			<p :class="s.copy">Checking subscription...</p>
+		</div>
+		<div v-else-if="isAlreadySubscribed && !submitted" :class="s.status">
+			<h4 :class="s.heading">You're subscribed</h4>
+			<p :class="s.copy">We'll notify you when new content is available.</p>
+		</div>
+		<div v-else-if="submitted" :class="s.status">
+			<h4 :class="s.heading">Thanks for signing up</h4>
+			<p :class="s.copy">{{ successMessage || 'Course updates are saved.' }}</p>
+		</div>
+		<form v-if="!checkingSubscription && (!courseSaved || canOfferSponsor)" method="POST" @submit.prevent="submitForm" :class="s.form" :aria-busy="!ready || loading" :aria-describedby="error ? errorId : undefined">
+			<fieldset :class="[s.form, 'form-controls']" :disabled="!ready || loading" aria-label="Course update signup">
+				<div v-if="!userEmail" :class="s.field">
+					<label :for="emailId" :class="s.label">Email address</label>
+					<input v-model="email" :id="emailId" type="email" name="email" autocomplete="email" placeholder="Enter your email" required :class="s.input" :disabled="loading" :readonly="submitted" />
+				</div>
+				<p v-if="courseSaved" :class="s.copy">Course updates are saved. Sponsor contact is optional; select the checkbox and submit only if you want to request it.</p>
+				<div v-if="canOfferSponsor" :class="s.courseConsent">
+					<input v-model="sponsorConsent" :id="consentId" type="checkbox" name="allowSponsorContact" :class="s.checkbox" :disabled="loading" />
+					<label :for="consentId" :class="s.copy">Optional: share my email with {{ signupConfig.sponsor }} so they can contact me with relevant offers and product updates.</label>
+				</div>
+				<button type="submit" :disabled="loading || (courseSaved && !sponsorConsent)" :class="s.button">{{ loading ? 'Submitting...' : courseSaved ? (sponsorStatus === 'unconfirmed' ? 'Retry sponsor signup' : 'Request sponsor contact') : 'Sign Up for Updates' }}</button>
+			</fieldset>
+			<noscript :class="s.copy">JavaScript is required to sign up for course updates. Course content remains available without signing up.</noscript>
+		</form>
+	</div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { computed, ref, onMounted, useId } from "vue";
+import { academyForms } from "@rawkodeacademy/design-system";
+
 import { actions } from "astro:actions";
 import {
 	getSessionCampaignAttribution,
 	serializeCampaignAttribution,
 } from "@/lib/analytics/attribution";
+
+const s = academyForms();
+const id = useId();
+const emailId = `${id}-email`;
+const consentId = `${id}-consent`;
+const errorId = `${id}-error`;
 
 interface Props {
 	courseId: string;
@@ -120,15 +66,31 @@ const props = defineProps<Props>();
 
 const email = ref(props.userEmail || "");
 const sponsorConsent = ref(false);
+const ready = ref(false);
 const loading = ref(false);
 const submitted = ref(false);
 const error = ref("");
 const successMessage = ref("");
 const isAlreadySubscribed = ref(props.isAlreadySubscribed ?? false);
 const checkingSubscription = ref(false);
+const sponsorStatus = ref<"not_requested" | "subscribed" | "unconfirmed">("not_requested");
+const courseSaved = computed(() => isAlreadySubscribed.value || submitted.value);
+const canOfferSponsor = computed(() => Boolean(
+	props.signupConfig.allowSponsorContact && props.signupConfig.sponsor && props.signupConfig.sponsorAudienceId &&
+	sponsorStatus.value !== "subscribed",
+));
+const statusMessage = computed(() => {
+	if (!ready.value && !isAlreadySubscribed.value) return "Loading signup form...";
+	if (checkingSubscription.value) return "Checking subscription status...";
+	if (loading.value) return "Submitting your subscription...";
+	if (submitted.value) return successMessage.value || "Course updates are saved.";
+	if (isAlreadySubscribed.value) return "You're subscribed to course updates.";
+	return "";
+});
 
 // Optionally check subscription status on mount if deferred
 onMounted(async () => {
+	ready.value = true;
 	if (props.deferSubscriptionCheck && props.isAlreadySubscribed === undefined) {
 		checkingSubscription.value = true;
 		try {
@@ -136,8 +98,13 @@ onMounted(async () => {
 				`/api/subscriptions/check?audienceId=${encodeURIComponent(props.signupConfig.audienceId)}`,
 			);
 			if (response.ok) {
-				const data = await response.json();
-				isAlreadySubscribed.value = data.isSubscribed;
+				const data: unknown = await response.json();
+				if (
+					typeof data === "object" && data !== null &&
+					"isSubscribed" in data && typeof data.isSubscribed === "boolean"
+				) {
+					isAlreadySubscribed.value = data.isSubscribed;
+				}
 			}
 		} catch (err) {
 			// Silently fail - user can still subscribe if check fails
@@ -157,6 +124,8 @@ function createAttributionPayload(): string | undefined {
 }
 
 async function submitForm() {
+	if (!ready.value || loading.value) return;
+	if (courseSaved.value && (!canOfferSponsor.value || !sponsorConsent.value)) return;
 	error.value = "";
 	loading.value = true;
 
@@ -182,9 +151,13 @@ async function submitForm() {
 
 		if (result.error) {
 			error.value = result.error.message || "An error occurred";
-		} else if (result.data) {
+		} else if (result.data?.success) {
 			submitted.value = true;
 			successMessage.value = result.data.message;
+			sponsorStatus.value = result.data.sponsorStatus ?? "not_requested";
+			sponsorConsent.value = false;
+		} else {
+			error.value = "Subscription could not be confirmed. Please try again.";
 		}
 	} catch (err: any) {
 		error.value = err.message || "An error occurred. Please try again.";
@@ -193,3 +166,12 @@ async function submitForm() {
 	}
 }
 </script>
+
+<style scoped>
+.form-controls {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	min-inline-size: 0;
+}
+</style>

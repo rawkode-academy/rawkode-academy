@@ -1,17 +1,19 @@
 ---
 import type { BracketMatch } from "./queries";
+import { academyLayout } from "@rawkodeacademy/design-system";
 
 interface Props {
 	match: BracketMatch | null;
 }
 
 const { match } = Astro.props;
+const layout = academyLayout({ width: "wide" });
 ---
 
 {
 	match && (
-		<div class="bg-primary">
-			<div class="mx-auto flex max-w-7xl items-center gap-3 content-px py-2 text-sm text-white">
+		<div class:list={[layout.notice, "bg-primary"]}>
+			<div class:list={[layout.container, "mx-auto flex max-w-7xl items-center gap-3 content-px py-2 text-sm text-white"]}>
 				<span class="font-semibold uppercase tracking-wide">● Live now</span>
 				<span class="truncate">
 					{match.sideA?.displayName ?? "TBD"} vs{" "}

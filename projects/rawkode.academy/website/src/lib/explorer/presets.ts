@@ -51,7 +51,7 @@ export const EXPLORER_PRESETS: ExplorerPreset[] = [
 	{
 		id: "pipeline",
 		name: "Pipeline",
-		description: "Rawkode's adoption journey by category",
+		description: "Rawkode's technology adoption status by category",
 		icon: "🚀",
 		viewMode: "grid",
 		xAxis: "matrix.status",
@@ -96,7 +96,7 @@ export const EXPLORER_PRESETS: ExplorerPreset[] = [
 	},
 	{
 		id: "my-journey",
-		name: "My Journey",
+		name: "My Adoption Timeline",
 		description: "When I started using each technology",
 		icon: "🛤️",
 		viewMode: "timeline",

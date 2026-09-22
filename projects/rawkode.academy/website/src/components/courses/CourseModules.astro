@@ -1,192 +1,87 @@
 ---
-import type { CollectionEntry } from "astro:content";
-import { getCollection } from "astro:content";
-import Badge from "@/components/common/Badge.vue";
+import { academyCourse } from "@rawkodeacademy/design-system";
+import { type CollectionEntry, getCollection } from "astro:content";
 import { getCourseModuleSlug } from "@/utils/course-path";
 
 type Props = {
 	course: CollectionEntry<"courses">;
+	modules?: CollectionEntry<"courseModules">[];
 };
 
-const { course } = Astro.props;
+const { course, modules } = Astro.props;
+const s = academyCourse();
 
-const courseModules = (await getCollection("courseModules"))
+const courseModules = (modules ?? (await getCollection("courseModules")))
 	.filter((module) => module.data.course.id === course.id)
 	.sort((a, b) => a.data.order - b.data.order);
 
-const groupedModules = courseModules.reduce(
-	(acc, module) => {
-		const section = module.data.section || "Course Content";
-		if (!acc[section]) {
-			acc[section] = [];
-		}
-		acc[section].push(module);
-		return acc;
-	},
-	{} as Record<string, typeof courseModules>,
-);
+const groupedModules = new Map<string, typeof courseModules>();
+for (const module of courseModules) {
+	const section = module.data.section ?? "Lessons";
+	const group = groupedModules.get(section) ?? [];
+	group.push(module);
+	groupedModules.set(section, group);
+}
 
-const sectionEntries = Object.entries(groupedModules).sort(
-	([, leftModules], [, rightModules]) =>
-		(leftModules[0]?.data.order || 0) - (rightModules[0]?.data.order || 0),
-);
-
-const displayOrderById = new Map(
-	courseModules.map((module, index) => [module.id, index + 1]),
-);
-
-const totalModules = courseModules.length;
-const availableModules = courseModules.filter((module) => !module.data.draft);
-const comingSoonCount = totalModules - availableModules.length;
-const totalDuration = availableModules.reduce(
-	(acc, module) => acc + (module.data.duration || 0),
-	0,
+const publishedOrderById = new Map(
+	courseModules
+		.filter((module) => !module.data.draft)
+		.map((module, index) => [module.id, index + 1]),
 );
 
 function formatDuration(minutes: number): string {
-	if (minutes === 0) return "Self-paced";
-
 	const hours = Math.floor(minutes / 60);
 	const mins = minutes % 60;
-
 	if (hours > 0 && mins > 0) return `${hours}h ${mins}m`;
 	if (hours > 0) return `${hours}h`;
 	return `${mins}m`;
 }
 ---
 
-{
-	totalModules === 0 ? (
-		<div class="border-t border-black/10 py-6 text-center dark:border-white/10">
-			<p class="text-lg font-semibold text-primary-content">No curriculum is published yet.</p>
-			<p class="mt-2 text-sm text-secondary-content">
-				Check back soon for new modules and release updates.
-			</p>
-		</div>
-	) : (
-		<div class="space-y-6">
-			<div class="grid gap-6 border-t border-black/10 pt-6 dark:border-white/10 sm:grid-cols-3">
-				<div class="space-y-2">
-						<div class="eyebrow-label tracking-[0.18em]">Curriculum</div>
-						<div>
-							<div class="text-3xl font-bold text-primary-content">{totalModules}</div>
-							<p class="mt-1 text-sm text-secondary-content">Modules planned across the course.</p>
-						</div>
-				</div>
-				<div class="space-y-2">
-						<div class="eyebrow-label tracking-[0.18em]">Available</div>
-						<div>
-							<div class="text-3xl font-bold text-primary-content">{availableModules.length}</div>
-							<p class="mt-1 text-sm text-secondary-content">
-								{comingSoonCount > 0
-									? `${comingSoonCount} more marked as coming soon.`
-									: "Everything in the outline is live."}
-							</p>
-						</div>
-				</div>
-				<div class="space-y-2">
-						<div class="eyebrow-label tracking-[0.18em]">Runtime</div>
-						<div>
-							<div class="text-3xl font-bold text-primary-content">{formatDuration(totalDuration)}</div>
-							<p class="mt-1 text-sm text-secondary-content">Published lessons ready to watch now.</p>
-						</div>
-				</div>
-			</div>
+{courseModules.length === 0 ? (
+	<p class={s.emptyCurriculum}>No lessons have been added yet.</p>
+) : (
+	<div class={s.lessonGroups}>
+		{Array.from(groupedModules, ([sectionName, sectionModules]) => (
+			<section class={s.lessonGroup}>
+				<header class={s.lessonHeader}>
+					<h3 class={s.lessonTitle}>{sectionName}</h3>
+					<span class={s.status}>
+						{sectionModules.filter((module) => !module.data.draft).length} of {sectionModules.length} available
+					</span>
+				</header>
+				<ol class={s.lessonList} role="list">
+					{sectionModules.map((module) => {
+						const isDraft = module.data.draft;
+						const displayOrder = publishedOrderById.get(module.id);
+						const moduleSlug = getCourseModuleSlug(course.id, module.id);
+						const Element = isDraft ? "div" : "a";
+						const elementProps = isDraft
+							? { class: [s.lessonRow, s.unpublished].join(" ") }
+							: {
+								href: `/courses/${course.id}/${moduleSlug}`,
+								class: [s.lessonRow, s.lessonLink].join(" "),
+							};
 
-			{sectionEntries.map(([sectionName, modules]) => {
-				const availableCount = modules.filter((module) => !module.data.draft).length;
-				const sectionDuration = modules
-					.filter((module) => !module.data.draft)
-					.reduce((acc, module) => acc + (module.data.duration || 0), 0);
-
-				return (
-					<section class="border-t border-black/10 pt-5 dark:border-white/10">
-						<header class="pb-5">
-							<div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-								<div class="space-y-2">
-									<div class="eyebrow-label">{sectionName}</div>
-									<p class="text-sm leading-7 text-secondary-content">
-										{availableCount > 0
-											? `${availableCount} lesson${availableCount === 1 ? "" : "s"} ready right now.`
-											: "This section is planned and will unlock as modules publish."}
-									</p>
-								</div>
-								<div class="flex flex-wrap items-center gap-2">
-									{sectionDuration > 0 && (
-										<Badge variant="default" size="sm" class="bg-transparent">
-											{formatDuration(sectionDuration)}
-										</Badge>
+						return (
+							<li value={displayOrder}>
+								<Element {...elementProps}>
+									<span class={s.lessonIndex} aria-hidden="true">{displayOrder === undefined ? "—" : String(displayOrder).padStart(2, "0")}</span>
+									<div class={s.lessonCopy}>
+										<span class={s.lessonTitle}>{module.data.title}</span>
+										<p class={s.lessonDescription}>{module.data.description}</p>
+									</div>
+									{(isDraft || (module.data.duration != null && module.data.duration > 0)) && (
+										<span class={s.lessonMeta}>
+											{isDraft ? "Not published" : formatDuration(module.data.duration!)}
+										</span>
 									)}
-									<Badge variant="default" size="sm" class="bg-transparent">
-										{modules.length} module{modules.length === 1 ? "" : "s"}
-									</Badge>
-								</div>
-							</div>
-						</header>
-
-						<div class="divide-y surface-divider border-y">
-							{modules.map((module) => {
-								const isDraft = module.data.draft;
-								const displayOrder = displayOrderById.get(module.id);
-								const moduleSlug = getCourseModuleSlug(course.id, module.id);
-								const Element = isDraft ? "div" : "a";
-								const elementProps = isDraft
-									? {
-											class:
-												"block px-1 py-5 sm:px-2",
-										}
-									: {
-											href: `/courses/${course.id}/${moduleSlug}`,
-											class:
-												"group block px-1 py-5 transition-colors-smooth hover:bg-black/[0.02] dark:hover:bg-white/[0.02] sm:px-2",
-										};
-
-								return (
-									<Element {...elementProps}>
-										<div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-											<div class="flex gap-4">
-												<div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary-content dark:bg-primary/18">
-													{displayOrder}
-												</div>
-												<div class="min-w-0">
-													<h3
-														class:list={[
-															"text-lg font-semibold tracking-tight text-primary-content transition-colors",
-															!isDraft && "group-hover:text-primary",
-														]}
-													>
-														{module.data.title}
-													</h3>
-													<p class="mt-2 max-w-[62ch] text-sm leading-7 text-secondary-content">
-														{module.data.description}
-													</p>
-												</div>
-											</div>
-
-											<div class="flex shrink-0 items-center gap-3 pl-[3.75rem] md:pl-0">
-												{module.data.duration && !isDraft && (
-													<span class="text-sm font-medium text-muted">
-														{formatDuration(module.data.duration)}
-													</span>
-												)}
-												{isDraft ? (
-													<Badge variant="warning" size="sm">
-														Coming soon
-													</Badge>
-												) : (
-													<span class="text-lg text-primary group-hover:translate-x-0.5">
-														→
-													</span>
-												)}
-											</div>
-										</div>
-									</Element>
-								);
-							})}
-						</div>
-					</section>
-				);
-			})}
-		</div>
-	)
-}
+								</Element>
+							</li>
+						);
+					})}
+				</ol>
+			</section>
+		))}
+	</div>
+)}

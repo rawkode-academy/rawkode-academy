@@ -245,7 +245,6 @@ const actionsClasses = computed(() => {
 	font-size: 0.6875rem;
 	font-weight: 500;
 	letter-spacing: 0.14em;
-	text-transform: uppercase;
 	color: var(--editorial-spruce);
 }
 </style>

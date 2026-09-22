@@ -13,19 +13,16 @@ export async function isSubscribedToAudience(
 	userEmail?: string,
 	session?: AstroGlobal["session"],
 ): Promise<boolean> {
-	// Check session for anonymous users who have already signed up
-	if (session) {
+	// The session is an email hint, not proof of a current subscription:
+	// the reader may have unsubscribed since the flag was recorded.
+	let email = userEmail;
+	if (!email && session) {
 		const signedUpCourses = (await session.get("signedUpCourses")) || {};
-		const sessionEmail = signedUpCourses[audienceId];
-
-		if (sessionEmail && !userEmail) {
-			// Anonymous user who already signed up in this session
-			return true;
-		}
+		email = signedUpCourses[audienceId];
 	}
 
 	// Check if authenticated user is already subscribed via Resend API
-	if (userEmail) {
+	if (email) {
 		try {
 			const { getSecret } = await import("astro:env/server");
 			const { Resend } = await import("resend");
@@ -36,10 +33,10 @@ export async function isSubscribedToAudience(
 				const resend = new Resend(resendApiKey);
 				try {
 					const contact = await resend.contacts.get({
-						email: userEmail,
+						email,
 						audienceId: audienceId,
 					});
-					return contact.data !== null;
+					return !contact.error && contact.data?.unsubscribed === false;
 				} catch (error) {
 					// Contact not found or other error - they're not subscribed
 					return false;

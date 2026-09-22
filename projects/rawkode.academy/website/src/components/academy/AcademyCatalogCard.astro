@@ -1,0 +1,29 @@
+---
+import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
+
+interface Props {
+	href: string;
+	title: string;
+	description?: string | undefined;
+	meta?: string[] | undefined;
+	image?: string | undefined;
+	imageAlt?: string | undefined;
+}
+
+const { href, title, description, meta = [], image, imageAlt = "" } = Astro.props as Props;
+const layout = academyLayout({ width: "wide" });
+const catalog = academyCatalog();
+---
+
+<a class={layout.card} href={href}>
+	{image && (
+		<span class={catalog.featuredMedia}>
+			<img class={catalog.featuredImage} src={image} alt={imageAlt} loading="lazy" />
+		</span>
+	)}
+	<div class={layout.cardBody}>
+		{meta.length > 0 && <span class={catalog.rowMeta}>{meta.join(" · ")}</span>}
+		<h3 class={layout.cardTitle}>{title}</h3>
+		{description && <span class={catalog.rowDescription}>{description}</span>}
+	</div>
+</a>

@@ -1,0 +1,13 @@
+---
+import { academyShell } from "@rawkodeacademy/design-system";
+import wordmark from "./logos/wordmark.svg?raw";
+
+const styles = academyShell();
+// These trusted, versioned brand assets are the single source of artwork.
+// Remove document declarations when embedding an SVG into an HTML document.
+const artwork = wordmark.replace(/<\?xml[^>]*\?>/g, "").replace(/<!DOCTYPE[^>]*>/g, "");
+---
+
+<a href="/" class={styles.brand} aria-label="Rawkode Academy home">
+	<span class={styles.brandArt} aria-hidden="true" set:html={artwork} />
+</a>

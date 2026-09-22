@@ -25,13 +25,13 @@ const getAudience = (type: string | undefined) => {
 const getEyebrow = (type: string | undefined) => {
 	switch (type) {
 		case "maintainer":
-			return "Builder Feedback";
+			return "Maintainer Feedback";
 		case "partner":
-			return "Partner Perspective";
+			return "Partner Feedback";
 		case "viewer":
-			return "Community Signal";
+			return "Viewer Feedback";
 		default:
-			return "Community Signal";
+			return "Community Feedback";
 	}
 };
 

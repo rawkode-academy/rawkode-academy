@@ -1,24 +1,18 @@
 <template>
 	<div
-		:class="[
-			'flex flex-col items-center justify-center p-8',
-			centered ? 'min-h-[400px]' : '',
-		]"
+		:class="doc.empty"
+		:style="centered ? { minHeight: '25rem' } : undefined"
 	>
 		<div
-			:class="[
-				'rounded-sm p-6 w-full',
-				variant === 'error'
-					? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
-					: 'bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800',
-				maxWidth,
-			]"
+			:class="doc.notice"
+			:style="{ width: '100%', maxWidth }"
+			role="alert"
 		>
 			<!-- Icon -->
-			<div v-if="showIcon" class="flex justify-center mb-4">
+			<div v-if="showIcon">
 				<svg
 					v-if="variant === 'error'"
-					class="w-12 h-12 text-red-500 dark:text-red-400"
+					:class="doc.iconLarge"
 					fill="none"
 					stroke="currentColor"
 					viewBox="0 0 24 24"
@@ -32,7 +26,7 @@
 				</svg>
 				<svg
 					v-else
-					class="w-12 h-12 text-yellow-500 dark:text-yellow-400"
+					:class="doc.iconLarge"
 					fill="none"
 					stroke="currentColor"
 					viewBox="0 0 24 24"
@@ -48,43 +42,28 @@
 
 			<!-- Title -->
 			<h3
-				:class="[
-					'text-lg font-semibold mb-2 text-center',
-					variant === 'error'
-						? 'text-red-800 dark:text-red-200'
-						: 'text-yellow-800 dark:text-yellow-200',
-				]"
+				:class="doc.cardTitle"
 			>
 				{{ title }}
 			</h3>
 
 			<!-- Message -->
 			<p
-				:class="[
-					'text-sm mb-4 text-center',
-					variant === 'error'
-						? 'text-red-700 dark:text-red-300'
-						: 'text-yellow-700 dark:text-yellow-300',
-				]"
+				:class="doc.copy"
 			>
 				{{ message }}
 			</p>
 
 			<!-- Actions -->
-			<div v-if="$slots.actions" class="flex justify-center gap-3">
+			<div v-if="$slots.actions" :class="doc.actions">
 				<slot name="actions" />
 			</div>
 
 			<!-- Default retry button -->
-			<div v-else-if="onRetry" class="flex justify-center">
+			<div v-else-if="onRetry" :class="doc.actions">
 				<button
 					@click="onRetry"
-					:class="[
-						'px-4 py-2 rounded-md text-sm font-medium transition-colors',
-						variant === 'error'
-							? 'bg-red-600 hover:bg-red-700 text-white'
-							: 'bg-yellow-600 hover:bg-yellow-700 text-white',
-					]"
+					:class="doc.button"
 				>
 					{{ retryText }}
 				</button>
@@ -94,6 +73,8 @@
 </template>
 
 <script setup lang="ts">
+import { academyDocument } from "@rawkodeacademy/design-system";
+
 interface Props {
 	variant?: "error" | "warning";
 	title?: string;
@@ -111,7 +92,8 @@ withDefaults(defineProps<Props>(), {
 	message: "An unexpected error occurred. Please try again.",
 	showIcon: true,
 	centered: true,
-	maxWidth: "max-w-md",
+	maxWidth: "28rem",
 	retryText: "Try again",
 });
+const doc = academyDocument();
 </script>

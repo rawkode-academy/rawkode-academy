@@ -1,6 +1,7 @@
 import { getCollection } from "astro:content";
 import type { APIRoute } from "astro";
 import { buildOpmlDocument, type OpmlFeed, type OpmlOutline } from "@/lib/opml";
+import { isNewsPublished } from "@/lib/news-publication";
 
 const SITE_FALLBACK = "https://rawkode.academy";
 
@@ -52,13 +53,14 @@ const personHasContribution = (
 };
 
 export const GET: APIRoute = async ({ site }) => {
+	const now = new Date();
 	const baseUrl = (site?.toString() ?? SITE_FALLBACK).replace(/\/$/, "");
 	const u = (path: string) => `${baseUrl}${path}`;
 
 	const [articles, news, videos, technologies, people, shows] =
 		await Promise.all([
 			getCollection("articles"),
-			getCollection("news"),
+			getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
 			getCollection("videos"),
 			getCollection("technologies"),
 			getCollection("people"),

@@ -1,13 +1,13 @@
 <template>
 	<div
-		class="flex gap-3 p-4 border-b border-surface"
+		:class="skeleton.row"
 		role="status"
 		:aria-label="ariaLabel"
 	>
 		<span class="sr-only">{{ ariaLabel }}</span>
 		<!-- Avatar skeleton -->
 		<div
-			class="animate-pulse bg-[var(--surface-skeleton)] rounded-full shrink-0"
+			:class="skeleton.avatar"
 			:style="{
 				width: '2.5rem',
 				height: '2.5rem',
@@ -15,15 +15,15 @@
 		/>
 
 		<!-- Comment content -->
-		<div class="flex-1">
+		<div :class="skeleton.content">
 			<!-- Header with author and timestamp -->
-			<div class="flex items-center gap-2 mb-2">
+			<div :class="skeleton.meta">
 				<div
-					class="animate-pulse bg-[var(--surface-skeleton)] rounded h-4"
+					:class="skeleton.lineMedium"
 					style="width: 120px"
 				/>
 				<div
-					class="animate-pulse bg-[var(--surface-skeleton)] rounded h-3"
+					:class="skeleton.lineSmall"
 					style="width: 80px"
 				/>
 			</div>
@@ -39,6 +39,7 @@
 </template>
 
 <script setup lang="ts">
+import { academySkeleton } from "@rawkodeacademy/design-system";
 import SkeletonText from "./SkeletonText.vue";
 
 interface Props {
@@ -52,4 +53,5 @@ withDefaults(defineProps<Props>(), {
 	lastLineWidth: "70%",
 	ariaLabel: "Loading comment...",
 });
+const skeleton = academySkeleton();
 </script>

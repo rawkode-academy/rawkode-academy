@@ -7,7 +7,6 @@ export interface LearningPathSource {
 	title: string;
 	description: string;
 	difficulty: "beginner" | "intermediate" | "advanced";
-	estimatedDuration: number; // minutes
 	prerequisites?: ReadonlyArray<string>;
 	technologyLabels: ReadonlyArray<string>;
 	publishedAt: Date;
@@ -37,28 +36,6 @@ function joinUrl(base: string, path: string): string {
 }
 
 /**
- * Format an integer number of minutes as an ISO 8601 duration.
- * 90 -> "PT1H30M", 30 -> "PT30M", 120 -> "PT2H", 0/undefined -> undefined.
- */
-export function minutesToIsoDuration(
-	minutes: number | undefined,
-): string | undefined {
-	if (
-		typeof minutes !== "number" ||
-		!Number.isFinite(minutes) ||
-		minutes <= 0
-	) {
-		return undefined;
-	}
-	const total = Math.floor(minutes);
-	const hours = Math.floor(total / 60);
-	const mins = total % 60;
-	if (hours === 0) return `PT${mins}M`;
-	if (mins === 0) return `PT${hours}H`;
-	return `PT${hours}H${mins}M`;
-}
-
-/**
  * Build a schema.org/Course JSON-LD payload for a learning path detail page.
  * Course is Google's tracked rich-result type for educational content; the
  * payload also carries `learningResourceType: "LearningPath"` so consumers
@@ -69,7 +46,6 @@ export function buildLearningPathJsonLd(
 	input: BuildLearningPathJsonLdInput,
 ): Record<string, unknown> {
 	const { siteUrl, pathUrl, source, authors } = input;
-	const timeRequired = minutesToIsoDuration(source.estimatedDuration);
 
 	const jsonLd: Record<string, unknown> = {
 		"@context": "https://schema.org",
@@ -103,14 +79,12 @@ export function buildLearningPathJsonLd(
 				"@type": "CourseInstance",
 				name: source.title,
 				courseMode: "online",
-				...(timeRequired ? { courseWorkload: timeRequired } : {}),
 			},
 		],
 	};
 
-	if (timeRequired) {
-		jsonLd.timeRequired = timeRequired;
-	}
+	// Recording runtime is not a measured workload for the exercises and reading.
+	// Keep the visible core-video estimate out of completion-time metadata.
 
 	if (source.technologyLabels.length > 0) {
 		jsonLd.teaches = [...source.technologyLabels];

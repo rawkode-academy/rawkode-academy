@@ -20,6 +20,7 @@ technologies:
 ---
 
 import Aside from "@/components/Aside.astro";
+import Diagram from "@/components/articles/Diagram.astro";
 
 In this article, we'll explore the design and implementation of our federated GraphQL API. This API serves as a single, unified interface to our microservice architecture, allowing clients to query and retrieve data from multiple services in a single request. If you're unfamiliar with GraphQL federation, it's an architectural pattern that combines multiple GraphQL schemas into a unified graph, enabling seamless data access across service boundaries.
 
@@ -90,6 +91,8 @@ This approach allows you to be more agile, take risks, and be experimental witho
 
 Our federated GraphQL API is built using Apollo Federation's specification, but we've chosen to implement it using a fully open-source stack.
 
+<Diagram id="federated-graphql-stack" title="Federated GraphQL service stack" description="An API client sends requests through WunderGraph Cosmo to two services. Each service uses GraphQL Yoga, Drizzle ORM, and its own libSQL or Turso database.">
+
 ```d2 sketch
 API Client -> WunderGraph Cosmo
 
@@ -104,6 +107,8 @@ GraphQL Yoga B -> Drizzle ORM B
 Drizzle ORM B -> libSQL / Turso B
 
 ```
+
+</Diagram>
 
 ### GraphQL Yoga
 

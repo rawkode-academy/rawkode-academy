@@ -1,3 +1,5 @@
+import { isNewsPublished } from "./news-publication";
+
 export interface NewsListEntry {
 	id: string;
 	data: {
@@ -29,9 +31,11 @@ function joinUrl(base: string, path: string): string {
  */
 export function buildNewsItemListJsonLd(
 	input: BuildNewsItemListJsonLdInput,
+	now = new Date(),
 ): Record<string, unknown> {
 	const { siteUrl, listUrl, stories, limit = DEFAULT_LIMIT } = input;
 	const ordered = [...stories]
+		.filter((story) => isNewsPublished(story.data.publishedAt, now))
 		.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
 		.slice(0, Math.max(0, limit));
 

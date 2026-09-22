@@ -1,8 +1,5 @@
 ---
 import { env } from "cloudflare:workers";
-import MLabel from "@/components/ui/MLabel.vue";
-import EditorialButton from "@/components/ui/EditorialButton.vue";
-import EmptyState from "@/components/ui/EmptyState.vue";
 import Page from "@/wrappers/page.astro";
 import { captureServerEvent, getDistinctId } from "@/server/analytics";
 import { shouldCaptureSearchAnalytics } from "@/lib/search-analytics";
@@ -15,6 +12,8 @@ import {
 	type SearchResult,
 	type SearchType,
 } from "@/lib/search";
+import { academySearch } from "@rawkodeacademy/design-system";
+import "@rawkodeacademy/design-system/styles.css";
 
 const searchQuery = (Astro.url.searchParams.get("q") || "").trim();
 const typeParam = (Astro.url.searchParams.get("type") || "").trim();
@@ -46,7 +45,11 @@ if (shouldCaptureSearchAnalytics(searchQuery)) {
 
 // Group ranked results by content type, preserving rank order: groups are
 // ordered by their best-ranked result, items stay ranked within each group.
-const GROUP_LIMIT = activeType ? 48 : 12;
+const GROUP_LIMIT = activeType ? 24 : 12;
+const pageCount = Math.max(1, Math.ceil(ranked.length / GROUP_LIMIT));
+const requestedPage = Number.parseInt(Astro.url.searchParams.get("page") ?? "1", 10);
+const page = activeType && Number.isFinite(requestedPage) ? Math.min(pageCount, Math.max(1, requestedPage)) : 1;
+const offset = (page - 1) * GROUP_LIMIT;
 
 const groups: { type: SearchType; results: SearchResult[]; total: number }[] =
 	[];
@@ -59,7 +62,7 @@ for (const result of ranked) {
 		groups.push(group);
 	}
 	group.total += 1;
-	if (group.results.length < GROUP_LIMIT) {
+	if (group.total > offset && group.results.length < GROUP_LIMIT) {
 		group.results.push(result);
 	}
 }
@@ -69,9 +72,10 @@ for (const result of allRanked) {
 	countsByType.set(result.type, (countsByType.get(result.type) ?? 0) + 1);
 }
 
-const searchHref = (type?: SearchType): string => {
+const searchHref = (type?: SearchType, pageNumber = 1): string => {
 	const params = new URLSearchParams({ q: searchQuery });
 	if (type) params.set("type", type);
+	if (pageNumber > 1) params.set("page", String(pageNumber));
 	return `/search?${params.toString()}`;
 };
 
@@ -110,367 +114,47 @@ const suggestions = [
 	{ label: "GitOps", href: "/search?q=gitops" },
 	{ label: "eBPF", href: "/search?q=ebpf" },
 	{ label: "Talos", href: "/search?q=talos" },
-	{ label: "Open Telemetry", href: "/search?q=opentelemetry" },
+	{ label: "OpenTelemetry", href: "/search?q=opentelemetry" },
 ];
+const s = academySearch();
 ---
 
-<Page
-	title={searchQuery ? `Search results for "${searchQuery}"` : "Search"}
-	description={searchQuery
-		? `Search results for "${searchQuery}" on Rawkode Academy.`
-		: "Search Rawkode Academy's videos, articles, news, courses, learning paths, shows, and technologies."}
-	pageType="SearchResultsPage"
-	noindex
->
-	<div class="search-page">
-		<header class="search-page__header">
-			<MLabel tone="spruce">Search the archive</MLabel>
-			<h1 class="search-page__title">
-				{searchQuery ? `Results for ` : "Search everything"}
-				{searchQuery && <em class="search-page__query">"{searchQuery}"</em>}
-			</h1>
-			<p class="search-page__lede">
-				{searchQuery
-					? `Matched ${ranked.length} ${ranked.length === 1 ? "entry" : "entries"}${activeType ? ` in ${SEARCH_TYPE_LABELS[activeType].toLowerCase()}` : " across the archive"}.`
-					: "Searches videos, articles, news, courses, learning paths, shows, and technologies. Or press ⌘K anywhere on the site to open the command palette."}
-			</p>
-			<form class="search-page__form" method="get" action="/search">
-				<input
-					class="search-page__input"
-					type="search"
-					name="q"
-					value={searchQuery}
-					placeholder="kubernetes networking, eBPF, GitOps..."
-					autocomplete="off"
-					autofocus
-				/>
+<Page title={searchQuery ? `Search results for "${searchQuery}"` : "Search"} description="Find videos, articles, news, courses, learning paths, shows, and technologies from Rawkode Academy." pageType="SearchResultsPage" noindex>
+	<header class={s.header}>
+		<div class={s.headerInner}>
+			<h1 class={s.title}>{searchQuery ? `Results for “${searchQuery}”` : "Find your next lesson."}</h1>
+			<p class={s.lede}>{searchQuery ? `${ranked.length} ${ranked.length === 1 ? "result" : "results"}${activeType ? ` in ${SEARCH_TYPE_LABELS[activeType].toLowerCase()}` : " across the Academy"}.` : "Search videos, articles, courses, and the technologies behind them."}</p>
+			<form class={s.form} method="get" action="/search" role="search">
+				<label class={s.field} for="academy-search-query">Search the Academy
+					<input id="academy-search-query" class={s.input} type="search" name="q" value={searchQuery} placeholder="Kubernetes, eBPF, GitOps…" autocomplete="off" />
+				</label>
 				{activeType && <input type="hidden" name="type" value={activeType} />}
-				<EditorialButton variant="solid" size="md" arrow>Search</EditorialButton>
+				<button class={s.button} type="submit">Search</button>
 			</form>
-
-			{!searchQuery && (
-				<div class="search-page__suggest">
-					<MLabel tone="muted">Try one of</MLabel>
-					<ul class="search-page__chips">
-						{suggestions.map((s) => (
-							<li>
-								<a class="search-page__chip" href={s.href}>#{s.label}</a>
-							</li>
-						))}
-					</ul>
-				</div>
-			)}
-
-			{searchQuery && allRanked.length > 0 && (
-				<nav class="search-page__filters" aria-label="Filter results by type">
-					<MLabel tone="muted">Filter</MLabel>
-					<ul class="search-page__chips">
-						{typeFilters.map((filter) => (
-							<li>
-								<a
-									class:list={[
-										"search-page__chip",
-										{ "search-page__chip--active": filter.active },
-									]}
-									href={filter.href}
-									aria-current={filter.active ? "page" : undefined}
-								>
-									{filter.label} · {filter.count}
-								</a>
-							</li>
-						))}
-					</ul>
-				</nav>
-			)}
-		</header>
-
-		<section class="search-page__results">
-			{searchQuery.length === 0 ? (
-				<div class="search-page__empty">
-					<MLabel>Type a query to begin.</MLabel>
-				</div>
-			) : ranked.length === 0 ? (
-				<div class="search-page__empty">
-					<EmptyState title={`Nothing matched "${searchQuery}".`}>
-						{activeType ? (
-							<>
-								No {SEARCH_TYPE_LABELS[activeType].toLowerCase()} matched. Try{" "}
-								<a href={searchHref()}>searching all content types</a>.
-							</>
-						) : (
-							<>
-								Try a broader keyword, or browse{" "}
-								<a href="/watch">the full video library</a>.
-							</>
-						)}
-					</EmptyState>
-				</div>
-			) : (
-				<div class="search-page__groups">
-					{groups.map((group) => (
-						<section class="search-group" aria-label={SEARCH_TYPE_LABELS[group.type]}>
-							<header class="search-group__header">
-								<MLabel tone="rust">{SEARCH_TYPE_LABELS[group.type]}</MLabel>
-								<MLabel tone="muted">
-									{group.total} {group.total === 1 ? "match" : "matches"}
-								</MLabel>
-							</header>
-							<ul class="search-group__list">
-								{group.results.map((result) => (
-									<li class="search-result">
-										<a class="search-result__link focus-ring" href={result.href}>
-											<span class="search-result__meta">
-												<span class="search-result__type">
-													{SEARCH_TYPE_LABELS[group.type]}
-												</span>
-												{result.date && (
-													<>
-														<span aria-hidden="true">·</span>
-														<time datetime={result.date}>
-															{dateFormatter.format(new Date(result.date))}
-														</time>
-													</>
-												)}
-											</span>
-											<span class="search-result__title">{result.title}</span>
-											{result.description && (
-												<span class="search-result__description">
-													{truncate(result.description, 180)}
-												</span>
-											)}
-										</a>
-									</li>
-								))}
-							</ul>
-							{group.total > group.results.length && !activeType && (
-								<a class="search-group__more" href={searchHref(group.type)}>
-									All {group.total} {SEARCH_TYPE_LABELS[group.type].toLowerCase()} →
-								</a>
-							)}
-						</section>
-					))}
-				</div>
-			)}
-		</section>
+			{!searchQuery && <nav aria-label="Suggested searches"><ul class={s.filters}>{suggestions.map((suggestion) => <li><a class={s.filter} href={suggestion.href}>{suggestion.label}</a></li>)}</ul></nav>}
+			{searchQuery && allRanked.length > 0 && <nav aria-label="Filter results by type"><ul class={s.filters}>{typeFilters.map((filter) => <li><a class={s.filter} href={filter.href} aria-current={filter.active ? "page" : undefined}>{filter.label} · {filter.count}</a></li>)}</ul></nav>}
+		</div>
+	</header>
+	<div class={s.root}>
+		{searchQuery && ranked.length === 0 && <section class={s.empty}>
+			<h2>No results found.</h2>
+			<p>{activeType ? <>Try <a href={searchHref()}>all content types</a> or a different keyword.</> : <>Try a broader keyword, or browse <a href="/watch">the video library</a>.</>}</p>
+		</section>}
+		{groups.length > 0 && <div class={s.groups}>{groups.map((group) => <section aria-label={SEARCH_TYPE_LABELS[group.type]}>
+			<header class={s.groupHeader}><h2>{SEARCH_TYPE_LABELS[group.type]}</h2><span class={s.count}>{group.total} {group.total === 1 ? "match" : "matches"}</span></header>
+			<ul class={s.list}>{group.results.map((result) => <li>
+				<a class={s.result} href={result.href}>
+					<h3 class={s.resultTitle}>{result.title}</h3>
+					{result.description && <p class={s.description}>{truncate(result.description, 180)}</p>}
+					{result.date && <time class={s.date} datetime={result.date}>{dateFormatter.format(new Date(result.date))}</time>}
+				</a>
+			</li>)}</ul>
+			{!activeType && group.total > group.results.length && <a class={s.more} href={searchHref(group.type)}>All {group.total} {SEARCH_TYPE_LABELS[group.type].toLowerCase()} →</a>}
+		</section>)}</div>}
+		{activeType && pageCount > 1 && <nav class={s.pager} aria-label="Search result pages">
+			{page > 1 ? <a class={s.more} href={searchHref(activeType, page - 1)}>← Previous</a> : <span />}
+			<span class={s.count}>Page {page} of {pageCount}</span>
+			{page < pageCount ? <a class={s.more} href={searchHref(activeType, page + 1)}>Next →</a> : <span />}
+		</nav>}
 	</div>
 </Page>
-
-<style>
-	.search-page {
-		background: var(--editorial-paper);
-		color: var(--editorial-ink);
-	}
-
-	.search-page__header {
-		max-width: 60rem;
-		margin: 0 auto;
-		padding: 3rem 2.5rem 2rem;
-		display: flex;
-		flex-direction: column;
-		gap: 0.875rem;
-		border-bottom: 1px solid var(--editorial-hairline);
-	}
-
-	.search-page__title {
-		font-family: var(--font-instrument-serif), serif;
-		font-style: italic;
-		font-weight: 400;
-		font-size: clamp(2.5rem, 5vw, 4rem);
-		line-height: 0.98;
-		letter-spacing: -0.025em;
-		color: var(--editorial-ink);
-		margin: 0;
-		text-wrap: balance;
-	}
-
-	.search-page__query {
-		font-style: italic;
-		color: var(--editorial-spruce);
-	}
-
-	.search-page__lede {
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 1.0625rem;
-		line-height: 1.5;
-		color: var(--editorial-ink-soft);
-		margin: 0;
-		max-width: 40rem;
-	}
-
-	.search-page__form {
-		display: flex;
-		gap: 0.5rem;
-		margin-top: 0.75rem;
-		max-width: 36rem;
-	}
-
-	.search-page__input {
-		flex: 1;
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.875rem;
-		padding: 0.75rem 0.875rem;
-		background: var(--editorial-paper-deep);
-		border: 1px solid var(--editorial-hairline-strong);
-		border-radius: var(--radius-sm);
-		color: var(--editorial-ink);
-	}
-	.search-page__input:focus-visible {
-		outline: 2px solid var(--editorial-ink);
-		outline-offset: 2px;
-	}
-
-	.search-page__suggest,
-	.search-page__filters {
-		display: flex;
-		align-items: center;
-		gap: 0.875rem;
-		flex-wrap: wrap;
-		margin-top: 0.75rem;
-	}
-
-	.search-page__chips {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-		list-style: none;
-		margin: 0;
-		padding: 0;
-	}
-
-	.search-page__chip {
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.6875rem;
-		font-weight: 500;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
-		padding: 0.25rem 0.5rem;
-		color: var(--editorial-ink-soft);
-		border: 1px solid var(--editorial-hairline-strong);
-		border-radius: 2px;
-		text-decoration: none;
-		transition: color var(--duration-base) var(--ease-standard),
-			border-color var(--duration-base) var(--ease-standard);
-	}
-	.search-page__chip:hover {
-		color: var(--editorial-ink);
-		border-color: var(--editorial-ink);
-	}
-	.search-page__chip--active {
-		color: var(--editorial-paper);
-		background: var(--editorial-ink);
-		border-color: var(--editorial-ink);
-	}
-	.search-page__chip--active:hover {
-		color: var(--editorial-paper);
-	}
-
-	.search-page__results {
-		max-width: 60rem;
-		margin: 0 auto;
-		padding: 0 2.5rem 4rem;
-	}
-
-	.search-page__groups {
-		display: flex;
-		flex-direction: column;
-		gap: 2.5rem;
-		padding-top: 2rem;
-	}
-
-	.search-group__header {
-		display: flex;
-		align-items: baseline;
-		justify-content: space-between;
-		gap: 1rem;
-		padding-bottom: 0.625rem;
-		border-bottom: 2px solid var(--editorial-ink);
-	}
-
-	.search-group__list {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-	}
-
-	.search-result {
-		border-bottom: 1px solid var(--editorial-hairline);
-	}
-
-	.search-result__link {
-		display: flex;
-		flex-direction: column;
-		gap: 0.375rem;
-		padding: 1rem 0;
-		text-decoration: none;
-		color: inherit;
-	}
-
-	.search-result__meta {
-		display: flex;
-		align-items: baseline;
-		gap: 0.5rem;
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.6875rem;
-		font-weight: 500;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
-		color: var(--editorial-ink-mute);
-	}
-
-	.search-result__type {
-		color: var(--editorial-spruce);
-	}
-
-	.search-result__title {
-		font-family: var(--font-instrument-serif), serif;
-		font-style: italic;
-		font-weight: 400;
-		font-size: 1.5rem;
-		line-height: 1.15;
-		letter-spacing: -0.015em;
-		color: var(--editorial-ink);
-		transition: color var(--duration-base) var(--ease-standard);
-	}
-	.search-result__link:hover .search-result__title {
-		color: var(--editorial-spruce);
-	}
-
-	.search-result__description {
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 0.9375rem;
-		line-height: 1.5;
-		color: var(--editorial-ink-soft);
-		max-width: 44rem;
-	}
-
-	.search-group__more {
-		display: inline-block;
-		margin-top: 0.875rem;
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.6875rem;
-		font-weight: 500;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
-		color: var(--editorial-spruce);
-		text-decoration: none;
-	}
-	.search-group__more:hover {
-		text-decoration: underline;
-		text-underline-offset: 2px;
-	}
-
-	.search-page__empty {
-		padding: var(--space-section-pad-y) 0;
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	@media (max-width: 720px) {
-		.search-page__header { padding: 2rem 1.25rem 1.5rem; }
-		.search-page__results { padding: 0 1.25rem 3rem; }
-		.search-page__form { flex-direction: column; }
-		.search-page__input { width: 100%; }
-		.search-result__title { font-size: 1.25rem; }
-	}
-</style>

@@ -1,97 +1,33 @@
 ---
 import ContactFallback from "@/components/organizations/ContactFallback.astro";
 import EditorialShell from "@/components/ui/EditorialShell.astro";
-import {
-	decisionBriefSubject,
-	decisionBriefTemplate,
-} from "@/lib/partnerships";
+import { decisionBriefMailto, decisionBriefSubject, decisionBriefTemplate } from "@/lib/partnerships";
 import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
-
-const requiredContext = [
-	"Company or product category",
-	"Preferred route: Adoption Advisory, Fit & Proof Review, or not sure yet",
-	"Target technical evaluator",
-	"Team stakeholders",
-	"The adoption risk or decision to review",
-	"Working demo, docs, or repository",
-	"Budget and preferred quarter",
-	"Deadline or launch window",
-];
-
-const optionalContext = [
-	"Helm charts, CRDs, RBAC/IAM notes, Terraform, architecture notes, telemetry, tenancy, runbooks, demo environment, or docs paths",
-	"Current blockers from sales, product, marketing, DevRel, sales engineering, platform, or security",
-	"What happens next if the partnership is useful",
-];
 ---
 
-<Page
-title="Partner application"
-description="Apply for the Rawkode Academy partner programme or a Fit & Proof Review."
->
-	<EditorialShell
-		eyebrow="Rawkode Partner Programme"
-		title="Start with the real adoption problem"
-		lede="Send rough context on the product, the practitioner you need to reach, the proof gap, and the quarter you want to work in. David will reply with the next useful step."
-	>
+<Page title="Partner application" description="Apply for the Rawkode Academy partner programme or a Fit & Proof Review.">
+	<EditorialShell compact eyebrow="Work with Rawkode Academy" title="Let’s find the right fit."
+		lede="Tell David about your product, the people you need to reach, and the technical problem standing in their way. A short email is enough to start.">
 		<div class="editorial-actions" slot="actions">
-			<a class="editorial-button" href="#email">Email application</a>
+			<a class="editorial-button" href={decisionBriefMailto}>Start an email</a>
 			<a class="editorial-button editorial-button--secondary" href="/organizations/partnerships">Review the programme</a>
 		</div>
 
-		<section class="editorial-section editorial-section--split">
+		<section class="editorial-section" aria-labelledby="application-context">
 			<div class="editorial-section__header">
-				<p class="editorial-kicker">What to send</p>
-				<h2 class="editorial-section__title">Rough context is enough.</h2>
-				<p class="editorial-section__lede">
-					This is not a procurement form. The first email should make the adoption problem, technical proof, and desired quarter clear enough to judge fit.
-				</p>
+				<h2 id="application-context" class="editorial-section__title">Give us the useful context.</h2>
+				<p class="editorial-section__lede">The template below covers the essentials. Add links to your demo, documentation, or repository, the stakeholders involved, and any deadline or launch window. You don’t need to know which programme is right for you yet.</p>
 			</div>
-			<div class="fit-check-grid">
-				<article class="editorial-card">
-					<h3 class="editorial-card__title">Useful first email</h3>
-					<ul class="editorial-list">
-						{requiredContext.map((item) => <li>{item}</li>)}
-					</ul>
-				</article>
-				<article class="editorial-card editorial-card--paper">
-					<h3 class="editorial-card__title">Optional links</h3>
-					<ul class="editorial-list">
-						{optionalContext.map((item) => <li>{item}</li>)}
-					</ul>
-				</article>
-			</div>
+			<ContactFallback subject={decisionBriefSubject} template={decisionBriefTemplate} />
 		</section>
 
-		<section id="email" class="editorial-section editorial-section--split">
+		<section class="editorial-section" aria-labelledby="application-next">
 			<div class="editorial-section__header">
-				<p class="editorial-kicker">What happens next</p>
-				<h2 class="editorial-section__title">The reply should make the next move obvious.</h2>
+				<h2 id="application-next" class="editorial-section__title">What happens next?</h2>
+				<p class="editorial-section__lede">David will reply with a recommendation: Adoption Advisory, a Fit & Proof Review, or neither. If a conversation would help, we’ll arrange a call from there.</p>
 			</div>
-			<div class="editorial-card editorial-card--paper">
-				<p class="editorial-card__body">
-					David will tell you whether Adoption Advisory, Fit & Proof Review, or neither is the right next step. If a call is useful, it can be arranged from there.
-				</p>
-			</div>
-			<ContactFallback
-				subject={decisionBriefSubject}
-				template={decisionBriefTemplate}
-			/>
 		</section>
 	</EditorialShell>
 </Page>
-
-<style>
-	.fit-check-grid {
-		display: grid;
-		gap: 1rem;
-	}
-
-	@media (min-width: 760px) {
-		.fit-check-grid {
-			grid-template-columns: repeat(2, minmax(0, 1fr));
-		}
-	}
-</style>

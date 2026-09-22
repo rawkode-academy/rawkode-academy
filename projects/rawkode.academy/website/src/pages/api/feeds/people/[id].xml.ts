@@ -2,13 +2,11 @@ import { getCollection } from "astro:content";
 import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
 import { withRssMimeType } from "../../../../lib/feed-utils";
+import { isNewsPublished } from "@/lib/news-publication";
 
 import type { RSSFeedItem } from "@astrojs/rss";
 
-interface Props {
-	personId: string;
-	personName: string;
-}
+export const prerender = false;
 
 const matchRef = (
 	ref: { collection?: string; id?: string } | string | undefined,
@@ -19,56 +17,20 @@ const matchRef = (
 	return ref.id === id;
 };
 
-const hasContribution = async (personId: string): Promise<boolean> => {
-	const [articles, news, videos] = await Promise.all([
-		getCollection("articles", ({ data }) => !data.draft),
-		getCollection("news"),
-		getCollection("videos"),
-	]);
-
-	const inArticles = articles.some((article) =>
-		article.data.authors.some((author) => matchRef(author, personId)),
-	);
-	if (inArticles) return true;
-
-	const inNews = news.some((story) =>
-		story.data.authors.some((author) => matchRef(author, personId)),
-	);
-	if (inNews) return true;
-
-	const inVideos = videos.some((video) =>
-		video.data.guests.some((guest) => matchRef(guest, personId)),
-	);
-	return inVideos;
-};
-
-export async function getStaticPaths() {
-	const people = await getCollection("people");
-	const results = await Promise.all(
-		people.map(async (person) => {
-			const has = await hasContribution(person.data.id);
-			if (!has) return null;
-			return {
-				params: { id: person.data.id },
-				props: {
-					personId: person.data.id,
-					personName: person.data.name,
-				} satisfies Props,
-			};
-		}),
-	);
-	return results.filter(
-		(entry): entry is NonNullable<typeof entry> => entry !== null,
-	);
-}
-
 export async function GET(context: APIContext) {
-	const { personId, personName } = context.props as Props;
+	const person = (await getCollection("people")).find(
+		(entry) => entry.data.id === context.params.id,
+	);
+	if (!person) return new Response("Person not found", { status: 404 });
+	const { id: personId, name: personName } = person.data;
+	const now = new Date();
 
+	// Every known profile has a valid feed, including an honestly empty feed
+	// for host-only profiles. Hosting does not manufacture guest appearances.
 	const [articles, news, videos] = await Promise.all([
-		getCollection("articles", ({ data }) => !data.draft),
-		getCollection("news"),
-		getCollection("videos"),
+		getCollection("articles", ({ data }) => !data.draft && data.publishedAt <= now),
+		getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
+		getCollection("videos", ({ data }) => data.publishedAt <= now),
 	]);
 
 	const items: RSSFeedItem[] = [];

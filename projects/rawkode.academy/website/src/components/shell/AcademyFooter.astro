@@ -1,0 +1,25 @@
+---
+import { academyShell } from "@rawkodeacademy/design-system";
+import AcademyBrand from "@/components/branding/AcademyBrand.astro";
+import { navigationGroups } from "@/lib/navigation";
+const styles = academyShell();
+---
+
+<footer class={styles.footer}>
+	<div class={styles.footerInner}>
+		<p class={styles.footerStatement}><span>Build it.</span> <span>Break it.</span> <span data-accent>Find out why.</span></p>
+		<div class={styles.footerLead}>
+			<AcademyBrand />
+			<p class={styles.footerTagline}>Practical cloud native education from the people who run production systems.</p>
+		</div>
+		<nav id="academy-footer-navigation" class={styles.footerGroups} aria-label="Footer navigation" tabindex="-1">
+			{navigationGroups.map((group) => (
+				<div class={styles.footerGroup}>
+					<h2 class={styles.footerTitle}>{group.label}</h2>
+					{group.items.map((item) => <a class={styles.footerLink} href={item.href}>{item.label}</a>)}
+				</div>
+			))}
+		</nav>
+		<p class={styles.copyright}>© {new Date().getFullYear()} Rawkode Academy</p>
+	</div>
+</footer>

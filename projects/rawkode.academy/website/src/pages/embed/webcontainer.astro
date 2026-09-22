@@ -1,6 +1,8 @@
 ---
 import MinimalLayout from "@/layouts/minimal.astro";
 import WebContainerEmbed from "@/components/courses/WebContainerEmbed.vue";
+import { academyMedia } from "@rawkodeacademy/design-system";
+import "@rawkodeacademy/design-system/styles.css";
 // @ts-expect-error Virtual module provided by Vite plugin
 import { loadDemoFiles } from "virtual:webcontainer-demos";
 
@@ -13,6 +15,7 @@ let title = "WebContainer Demo";
 let files = {};
 let startCommand = "npm run dev";
 let error = null;
+const media = academyMedia();
 
 if (!courseId || !demoId) {
 	error = "Missing course or demo parameter";
@@ -60,14 +63,14 @@ export const prerender = false;
  </style>
  
  {error ? (
- <div class="error">
+ <div class:list={[media.root, media.canvas, "error"]}>
  <div>
  <p>{error}</p>
  <p><a href="javascript:history.back()">Go back</a></p>
  </div>
  </div>
  ) : (
- <div id="app">
+ <div id="app" class:list={[media.root, media.canvas]}>
  <WebContainerEmbed
  client:only="vue"
  title={title}

@@ -1,24 +1,24 @@
 <template>
 	<div
-		class="transcript-skeleton"
+		:class="skeleton.stack"
 		role="status"
 		aria-label="Loading transcript..."
 	>
 		<span class="sr-only">Loading transcript...</span>
 		<!-- Search bar skeleton -->
-		<div class="mb-4">
+		<div>
 			<div
-				class="animate-pulse bg-[var(--surface-skeleton)] rounded-sm"
+				:class="skeleton.line"
 				style="height: 42px"
 			/>
 		</div>
 
 		<!-- Transcript paragraphs skeleton -->
-		<div class="space-y-6">
-			<div v-for="i in 4" :key="i" class="transcript-paragraph-skeleton">
+		<div :class="skeleton.stack">
+			<div v-for="i in 4" :key="i" :class="skeleton.stack">
 				<!-- Timestamp -->
 				<div
-					class="animate-pulse bg-primary/20 dark:bg-primary/20 rounded mb-2"
+					:class="skeleton.line"
 					:style="{
 						height: '1rem',
 						width: getTimestampWidth(i),
@@ -36,7 +36,10 @@
 </template>
 
 <script setup lang="ts">
+import { academySkeleton } from "@rawkodeacademy/design-system";
 import SkeletonText from "./SkeletonText.vue";
+
+const skeleton = academySkeleton();
 
 const getTimestampWidth = (index: number): string => {
 	const widths = ["80px", "85px", "75px", "82px"];

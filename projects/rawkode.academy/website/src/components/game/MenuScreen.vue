@@ -1,5 +1,5 @@
 <template>
-	<div class="menu-screen">
+	<div :class="gameTheme.root" class="menu-screen">
 		<div class="grid-bg"></div>
 
 		<div class="content">
@@ -33,6 +33,8 @@
 </template>
 
 <script setup lang="ts">
+import { academyGame } from "@rawkodeacademy/design-system";
+const gameTheme = academyGame();
 defineEmits<{
 	start: [];
 	viewAchievements: [];
@@ -56,8 +58,8 @@ defineEmits<{
 	position: absolute;
 	inset: 0;
 	background-image:
-		linear-gradient(rgb(var(--brand-primary) / 0.1) 1px, transparent 1px),
-		linear-gradient(90deg, rgb(var(--brand-primary) / 0.1) 1px, transparent 1px);
+		linear-gradient(color-mix(in srgb, var(--colors-academy-accent) 10.0%, transparent) 1px, transparent 1px),
+		linear-gradient(90deg, color-mix(in srgb, var(--colors-academy-accent) 10.0%, transparent) 1px, transparent 1px);
 	background-size: 40px 40px;
 	animation: grid-move 20s linear infinite;
 }
@@ -84,10 +86,10 @@ defineEmits<{
 	display: block;
 	font-size: 4rem;
 	font-weight: 700;
-	color: rgb(var(--brand-primary));
+	color: var(--colors-academy-accent);
 	text-shadow:
-		0 0 20px rgb(var(--brand-primary) / 0.5),
-		0 0 40px rgb(var(--brand-primary) / 0.3);
+		0 0 20px color-mix(in srgb, var(--colors-academy-accent) 50.0%, transparent),
+		0 0 40px color-mix(in srgb, var(--colors-academy-accent) 30.0%, transparent);
 	letter-spacing: 0.1em;
 }
 
@@ -95,25 +97,25 @@ defineEmits<{
 	display: block;
 	font-size: 2.5rem;
 	font-weight: 300;
-	color: rgb(var(--brand-secondary));
+	color: var(--colors-academy-status-violet);
 	letter-spacing: 0.3em;
 	margin-top: 0.5rem;
 }
 
 .tagline {
-	color: rgb(107 114 128);
+	color: var(--colors-academy-text-muted);
 	font-size: 1.1rem;
 	margin-bottom: 3rem;
 }
 
 :root.dark .tagline {
-	color: rgb(156 163 175);
+	color: var(--colors-academy-text-muted);
 }
 
 .start-btn {
 	background: transparent;
-	border: 2px solid rgb(var(--brand-primary));
-	color: rgb(var(--brand-primary));
+	border: 2px solid var(--colors-academy-accent);
+	color: var(--colors-academy-accent);
 	padding: 1rem 2.5rem;
 	font-family: inherit;
 	font-size: 1.2rem;
@@ -127,7 +129,7 @@ defineEmits<{
 	content: "";
 	position: absolute;
 	inset: 0;
-	background: rgb(var(--brand-primary));
+	background: var(--colors-academy-accent);
 	transform: translateX(-100%);
 	transition: transform 0.3s ease;
 	z-index: -1;
@@ -138,7 +140,7 @@ defineEmits<{
 }
 
 :root.dark .start-btn:hover {
-	color: rgb(17 24 39);
+	color: var(--colors-academy-text);
 }
 
 .start-btn:hover::before {
@@ -168,8 +170,8 @@ defineEmits<{
 
 .nav-btn {
 	background: transparent;
-	border: 1px solid rgb(var(--brand-primary) / 0.5);
-	color: rgb(var(--brand-primary) / 0.8);
+	border: 1px solid color-mix(in srgb, var(--colors-academy-accent) 50.0%, transparent);
+	color: color-mix(in srgb, var(--colors-academy-accent) 80.0%, transparent);
 	padding: 0.75rem 1.5rem;
 	font-family: inherit;
 	font-size: 0.9rem;
@@ -178,20 +180,20 @@ defineEmits<{
 }
 
 .nav-btn:hover {
-	border-color: rgb(var(--brand-primary));
-	color: rgb(var(--brand-primary));
-	background: rgb(var(--brand-primary) / 0.1);
+	border-color: var(--colors-academy-accent);
+	color: var(--colors-academy-accent);
+	background: color-mix(in srgb, var(--colors-academy-accent) 10.0%, transparent);
 }
 
 .instructions {
 	margin-top: 3rem;
-	color: rgb(107 114 128);
+	color: var(--colors-academy-text-muted);
 	font-size: 0.9rem;
 	line-height: 1.8;
 }
 
 :root.dark .instructions {
-	color: rgb(107 114 128);
+	color: var(--colors-academy-text-muted);
 }
 
 @media (max-width: 768px) {

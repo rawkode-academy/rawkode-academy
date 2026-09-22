@@ -7,6 +7,7 @@ export const partial = true;
 type Props = {
 	courseId: string;
 	courseTitle: string;
+	pagePath?: string;
 	signupConfig: {
 		audienceId: string;
 		sponsor?: string | undefined;
@@ -21,6 +22,7 @@ type Props = {
 const {
 	courseId,
 	courseTitle,
+	pagePath = Astro.url.pathname,
 	signupConfig,
 	userEmail,
 	isAlreadySubscribed: propsIsAlreadySubscribed,
@@ -30,7 +32,6 @@ const user = Astro.locals?.user;
 
 const { audienceId, sponsor, sponsorAudienceId, allowSponsorContact } =
 	signupConfig;
-const pagePath = Astro.url.pathname;
 
 // If deferred, don't check on server - let client handle it
 // Short-circuit: if parent already determined user is subscribed, skip expensive checks

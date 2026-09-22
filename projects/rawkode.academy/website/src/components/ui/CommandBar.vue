@@ -118,7 +118,6 @@ const handleSearchClick = () => {
 	font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
 	font-size: 12px;
 	font-weight: 600;
-	text-transform: uppercase;
 	letter-spacing: 0.3em;
 	color: var(--editorial-ink);
 }
@@ -162,7 +161,6 @@ const handleSearchClick = () => {
 	font-size: 0.76rem;
 	font-weight: 650;
 	letter-spacing: 0.08em;
-	text-transform: uppercase;
 	text-align: left;
 	color: var(--editorial-ink);
 	white-space: nowrap;
@@ -201,7 +199,6 @@ const handleSearchClick = () => {
 	font-family: var(--font-jetbrains-mono), monospace;
 	font-size: 11.5px;
 	letter-spacing: 0.14em;
-	text-transform: uppercase;
 	font-weight: 500;
 	color: var(--editorial-ink-soft);
 	text-decoration: none;
@@ -213,7 +210,6 @@ const handleSearchClick = () => {
 	font-family: var(--font-jetbrains-mono), monospace;
 	font-size: 11.5px;
 	letter-spacing: 0.14em;
-	text-transform: uppercase;
 	font-weight: 600;
 	padding: 0.625rem 1.125rem;
 	background: var(--editorial-ink);

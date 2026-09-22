@@ -1,16 +1,22 @@
 ---
 import PageWrapper from "@/wrappers/page.astro";
 import { DISABLE_GAME_AUTH } from "astro:env/server";
+import { academyLayout, academyMedia } from "@rawkodeacademy/design-system";
+import "@rawkodeacademy/design-system/styles.css";
 
 const disableAuth = DISABLE_GAME_AUTH === "true";
+const layout = academyLayout({ width: "wide" });
+const media = academyMedia();
 ---
 
 <PageWrapper
 	title="Secret of Kubernetes Island"
 	description="A verbal combat game where you breach Kubernetes clusters one insult at a time"
 >
-	<div class="game-wrapper bg-[var(--surface-base)]">
+	<div class:list={[layout.root, media.root, "game-route"]}>
+	<div class:list={[layout.section, media.frame, media.canvas, "game-wrapper"]}>
 		<div id="game-root" data-disable-auth={disableAuth ? "true" : "false"}></div>
+	</div>
 	</div>
 </PageWrapper>
 

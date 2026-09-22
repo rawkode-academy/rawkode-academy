@@ -7,12 +7,14 @@ import {
 } from "../../../lib/feed-utils";
 import { createLogger } from "@/lib/logger";
 import { getVideoThumbnailJpegUrl } from "@/lib/video-thumbnail";
+import { isNewsPublished } from "@/lib/news-publication";
 
 import type { RSSFeedItem } from "@astrojs/rss";
 
 const logger = createLogger("feeds");
 
 export async function GET(context: APIContext) {
+	const now = new Date();
 	const site = (context.site?.toString() || "https://rawkode.academy").replace(
 		/\/$/,
 		"",
@@ -22,7 +24,7 @@ export async function GET(context: APIContext) {
 		getCollection("articles", ({ data }) => !data.draft),
 		getCollection("videos"),
 		getCollection("technologies"),
-		getCollection("news"),
+		getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
 	]);
 
 	const techName = new Map(

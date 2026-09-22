@@ -1,5 +1,5 @@
 <template>
-	<div class="combat-screen">
+	<div :class="gameTheme.root" class="combat-screen">
 		<div class="combat-header">
 			<div class="player-status">
 				<span class="status-label">{{ playerName }}</span>
@@ -92,6 +92,8 @@
 </template>
 
 <script setup lang="ts">
+import { academyGame } from "@rawkodeacademy/design-system";
+const gameTheme = academyGame();
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import type {
 	EnemyData,
@@ -570,11 +572,11 @@ function learnComeback(comeback: Comeback) {
 }
 
 .player-status .status-label {
-	color: rgb(var(--brand-primary));
+	color: var(--colors-academy-accent);
 }
 
 .enemy-status .status-label {
-	color: #e74c3c;
+	color: var(--colors-academy-status-rust);
 }
 
 .health-bar {
@@ -583,13 +585,13 @@ function learnComeback(comeback: Comeback) {
 }
 
 .vs {
-	color: rgb(107 114 128);
+	color: var(--colors-academy-text-muted);
 	font-size: 1.5rem;
 	font-weight: bold;
 }
 
 :root.dark .vs {
-	color: rgb(156 163 175);
+	color: var(--colors-academy-text-muted);
 }
 
 .combat-arena {
@@ -612,14 +614,14 @@ function learnComeback(comeback: Comeback) {
 	content: "";
 	position: absolute;
 	inset: 0;
-	background: rgba(255, 255, 255, 0.15);
+	background: var(--colors-academy-border);
 	border-radius: 12px;
 	pointer-events: none;
 	z-index: 1;
 }
 
 :root.dark .combat-arena::before {
-	background: rgba(0, 0, 0, 0.15);
+	background: var(--colors-academy-border);
 }
 
 .combatant {
@@ -681,7 +683,7 @@ function learnComeback(comeback: Comeback) {
 	width: 200px;
 	height: 200px;
 	object-fit: contain;
-	filter: drop-shadow(0 0 20px rgba(0, 0, 0, 0.5));
+	filter: drop-shadow(0 0 20px var(--colors-academy-panel));
 }
 
 .result-display {
@@ -692,11 +694,11 @@ function learnComeback(comeback: Comeback) {
 }
 
 .result-display.success {
-	color: rgb(var(--brand-secondary));
+	color: var(--colors-academy-status-violet);
 }
 
 .result-display.failure {
-	color: #e74c3c;
+	color: var(--colors-academy-status-rust);
 }
 
 .result-enter-active {
@@ -719,8 +721,8 @@ function learnComeback(comeback: Comeback) {
 }
 
 .dialogue-box {
-	background: rgb(255 255 255 / 0.9);
-	border: 2px solid rgb(var(--brand-primary));
+	background: var(--colors-academy-panel);
+	border: 2px solid var(--colors-academy-accent);
 	border-radius: 12px;
 	padding: 1.5rem 2rem;
 	min-height: 250px;
@@ -728,7 +730,7 @@ function learnComeback(comeback: Comeback) {
 }
 
 :root.dark .dialogue-box {
-	background: rgb(0 0 0 / 0.8);
+	background: var(--colors-academy-panel);
 }
 
 .turn-indicator {
@@ -740,11 +742,11 @@ function learnComeback(comeback: Comeback) {
 }
 
 .your-turn {
-	color: rgb(var(--brand-primary));
+	color: var(--colors-academy-accent);
 }
 
 .enemy-turn {
-	color: #e74c3c;
+	color: var(--colors-academy-status-rust);
 }
 
 .phrase-text {
@@ -755,15 +757,15 @@ function learnComeback(comeback: Comeback) {
 }
 
 .player-phrase {
-	color: rgb(var(--brand-primary));
+	color: var(--colors-academy-accent);
 }
 
 .enemy-phrase {
-	color: #d97706;
+	color: var(--colors-academy-status-amber);
 }
 
 :root.dark .enemy-phrase {
-	color: #f1c40f;
+	color: var(--colors-academy-status-amber);
 }
 
 .choices {
@@ -773,12 +775,12 @@ function learnComeback(comeback: Comeback) {
 }
 
 .choice-btn {
-	background: rgb(0 0 0 / 0.05);
-	border: 1px solid rgb(0 0 0 / 0.1);
+	background: var(--colors-academy-border);
+	border: 1px solid var(--colors-academy-border);
 	border-radius: 8px;
 	padding: 1rem 1.5rem;
 	text-align: left;
-	color: rgb(75 85 99);
+	color: var(--colors-academy-text-muted);
 	font-family: inherit;
 	font-size: 1rem;
 	cursor: pointer;
@@ -786,15 +788,15 @@ function learnComeback(comeback: Comeback) {
 }
 
 :root.dark .choice-btn {
-	background: rgb(255 255 255 / 0.05);
-	border-color: rgb(255 255 255 / 0.1);
-	color: rgb(170 170 170);
+	background: var(--colors-academy-border);
+	border-color: var(--colors-academy-border);
+	color: var(--colors-academy-text-muted);
 }
 
 .choice-btn:hover {
-	background: rgb(var(--brand-primary) / 0.2);
-	border-color: rgb(var(--brand-primary));
-	color: rgb(17 24 39);
+	background: color-mix(in srgb, var(--colors-academy-accent) 20.0%, transparent);
+	border-color: var(--colors-academy-accent);
+	color: var(--colors-academy-text);
 	transform: translateX(8px);
 }
 
@@ -803,12 +805,12 @@ function learnComeback(comeback: Comeback) {
 }
 
 .choice-number {
-	color: rgb(var(--brand-primary));
+	color: var(--colors-academy-accent);
 	margin-right: 0.5rem;
 }
 
 .response-text {
-	color: rgb(17 24 39);
+	color: var(--colors-academy-text);
 	font-size: 1.1rem;
 	text-align: center;
 }
@@ -823,24 +825,24 @@ function learnComeback(comeback: Comeback) {
 }
 
 .flee-choice:hover {
-	border-color: #e74c3c;
-	color: #e74c3c;
-	background: rgb(231 76 60 / 0.1);
+	border-color: var(--colors-academy-status-rust);
+	color: var(--colors-academy-status-rust);
+	background: color-mix(in srgb, var(--colors-academy-status-rust) 10.0%, transparent);
 	opacity: 1;
 }
 
 .flee-key {
 	font-size: 0.7rem;
-	background: rgb(0 0 0 / 0.15);
+	background: var(--colors-academy-border);
 	padding: 0.15rem 0.4rem;
 	border-radius: 3px;
 	margin-right: 0.5rem;
-	color: rgb(107 114 128);
+	color: var(--colors-academy-text-muted);
 }
 
 :root.dark .flee-key {
-	background: rgb(255 255 255 / 0.15);
-	color: rgb(156 163 175);
+	background: var(--colors-academy-border);
+	color: var(--colors-academy-text-muted);
 }
 
 @media (max-width: 768px) {

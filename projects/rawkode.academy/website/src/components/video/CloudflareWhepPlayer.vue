@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch } from "vue";
+import { academyWatch } from "@rawkodeacademy/design-system";
 
 const props = defineProps<{
 	playbackUrl: string;
 	title: string;
 }>();
+const styles = academyWatch();
 
 const videoElement = ref<HTMLVideoElement | null>(null);
 const status = ref<"connecting" | "failed" | "idle" | "live">("idle");
@@ -239,46 +241,18 @@ async function waitForIceGathering(
 </script>
 
 <template>
-	<div class="live-player">
+	<div :class="styles.livePlayer">
 		<video
 			ref="videoElement"
 			autoplay
-			class="live-player__video"
+			:class="styles.livePlayerVideo"
 			controls
 			muted
 			playsinline
 			:title="title"
 		/>
-		<div v-if="status !== 'live'" class="live-player__status">
+		<div v-if="status !== 'live'" :class="styles.livePlayerStatus">
 			{{ status === "failed" ? errorMessage : "Connecting live stream" }}
 		</div>
 	</div>
 </template>
-
-<style scoped>
-.live-player {
-	position: relative;
-	width: 100%;
-	height: 100%;
-	background: #05080a;
-}
-
-.live-player__video {
-	display: block;
-	width: 100%;
-	height: 100%;
-	object-fit: contain;
-	background: #05080a;
-}
-
-.live-player__status {
-	position: absolute;
-	inset: auto 16px 16px 16px;
-	padding: 10px 12px;
-	border-radius: 6px;
-	background: rgba(5, 8, 10, 0.78);
-	color: #fff;
-	font-size: 14px;
-	font-weight: 700;
-}
-</style>
