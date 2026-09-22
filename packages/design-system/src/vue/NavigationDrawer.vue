@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Dialog } from "@ark-ui/vue/dialog";
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { academyShell } from "../recipes/academyShell";
 
 interface NavigationItem {
@@ -20,6 +20,7 @@ const props = withDefaults(defineProps<{
 	currentPath?: string;
 	id?: string;
 }>(), { primary: () => [], currentPath: "/", id: "academy-navigation" });
+const emit = defineEmits<{ "open-change": [open: boolean] }>();
 const styles = academyShell();
 // Primary destinations are not repeated in the index below them.
 const indexGroups = computed(() => {
@@ -29,6 +30,7 @@ const indexGroups = computed(() => {
 		.filter((group) => group.items.length > 0);
 });
 const open = ref(false);
+watch(open, (value) => emit("open-change", value));
 const mounted = ref(false);
 let desktop: MediaQueryList | undefined;
 const closeOnDesktop = () => {
@@ -66,6 +68,8 @@ onUnmounted(() => desktop?.removeEventListener("change", closeOnDesktop));
 								<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6" /></svg>
 							</Dialog.CloseTrigger>
 						</div>
+						<!-- Account state is app-owned; see the open-change event. -->
+						<slot name="account" />
 						<nav aria-label="Mobile navigation">
 							<ul v-if="props.primary.length" :class="styles.menuPrimary">
 								<li v-for="item in props.primary" :key="item.href">
