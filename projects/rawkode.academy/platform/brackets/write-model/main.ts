@@ -68,6 +68,9 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 
 	private async getOpenBracket(bracketId: string) {
 		const bracket = await this.getBracket(bracketId);
+		if (bracket.status !== "active") {
+			throw new Error("bracket registration is not active");
+		}
 		if (
 			bracket.registrationClosesAt &&
 			bracket.registrationClosesAt.getTime() <= Date.now()
