@@ -113,9 +113,27 @@ export const createAuth = async (env: AuthEnv) => {
 			github: {
 				clientId: githubClientId,
 				clientSecret: githubClientSecret,
-				mapProfileToUser: (profile) => ({
-					username: profile.login,
-				}),
+				mapProfileToUser: async (profile) => {
+					const username = profile.login;
+					if (username) {
+						const linkedAccount = await db.query.account.findFirst({
+							where: and(
+								eq(schema.account.providerId, "github"),
+								eq(schema.account.accountId, String(profile.id)),
+							),
+						});
+						const usernameOwner = await db.query.user.findFirst({
+							where: eq(schema.user.username, username),
+						});
+						if (usernameOwner && usernameOwner.id !== linkedAccount?.userId) {
+							await db
+								.update(schema.user)
+								.set({ username: null })
+								.where(eq(schema.user.id, usernameOwner.id));
+						}
+					}
+					return { username };
+				},
 			},
 		},
 
@@ -163,12 +181,13 @@ export const createAuth = async (env: AuthEnv) => {
 							where: eq(schema.user.id, user.id),
 						}),
 					]);
-					const requiresGitHubUsername =
-						client.clientId === "rawkode-academy-website" ||
-						client.clientId === "klustered-dev";
-					const username = requiresGitHubUsername
-						? await refreshGitHubUsername(user.id)
-						: userRecord?.username ?? (user as { username?: string }).username;
+					const storedUsername =
+						userRecord?.username ?? (user as { username?: string }).username;
+					const username =
+						client.clientId === "klustered-dev" ||
+						(client.clientId === "rawkode-academy-website" && !storedUsername)
+							? await refreshGitHubUsername(user.id)
+							: storedUsername;
 					return {
 						...accessClaims,
 						...(username
@@ -372,22 +391,6 @@ export const createAuth = async (env: AuthEnv) => {
 							},
 							env.ANALYTICS,
 						);
-
-						try {
-							await refreshGitHubUsername(session.userId);
-						} catch (error) {
-							await captureAuthEvent(
-								{
-									event: "auth.username_refresh_failed",
-									distinctId: session.userId,
-									properties: {
-										error:
-											error instanceof Error ? error.message : "Unknown error",
-									},
-								},
-								env.ANALYTICS,
-							);
-						}
 
 					},
 				},
