@@ -5,19 +5,26 @@
 export const SHOW_ID = "klustered";
 
 export interface BracketsWrite {
+	syncCompetitorUsername(input: {
+		userId: string;
+		username: string;
+	}): Promise<{ updated: number }>;
 	selfRegisterCompetitor(input: {
 		bracketId: string;
 		userId: string;
+		username: string;
 		displayName: string;
 	}): Promise<{ competitorId: string; seasonId: string; bracketKind: string }>;
 	formTeam(input: {
 		bracketId: string;
 		name: string;
 		userId: string;
+		username: string;
 	}): Promise<{ teamId: string; token: string }>;
 	joinTeamViaInvite(input: {
 		token: string;
 		userId: string;
+		username: string;
 		displayName: string;
 	}): Promise<{ teamId: string; seasonId: string }>;
 	renameTeam(input: {

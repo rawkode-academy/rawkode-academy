@@ -21,7 +21,18 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
 				if (!bracketId || !name) {
 					return new Response("bracketId and name required", { status: 400 });
 				}
-				await write.formTeam({ bracketId, name, userId: user.id });
+				if (!user.username) {
+					return new Response(
+						"GitHub username unavailable. Please sign in again.",
+						{ status: 401 },
+					);
+				}
+				await write.formTeam({
+					bracketId,
+					name,
+					userId: user.id,
+					username: user.username,
+				});
 				break;
 			}
 			case "rename": {
