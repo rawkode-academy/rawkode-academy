@@ -10,6 +10,7 @@ interface BracketsWriteBinding {
 		bracketId: string;
 		displayName: string;
 		userId: string;
+		username: string;
 	}): Promise<{ competitorId: string; seasonId: string; bracketKind: string }>;
 }
 
@@ -54,6 +55,13 @@ export function bracketEndpoints(showId: string): ShowEndpointModule[] {
 				const displayName =
 					user.name?.trim() || user.email?.split("@")[0]?.trim() || user.id;
 
+				if (!user.username) {
+					return new Response(
+						"GitHub username unavailable. Please sign in again.",
+						{ status: 401 },
+					);
+				}
+
 				if (!bracketId) {
 					return new Response("bracketId required", {
 						status: 400,
@@ -65,6 +73,7 @@ export function bracketEndpoints(showId: string): ShowEndpointModule[] {
 						bracketId,
 						displayName,
 						userId: user.id,
+						username: user.username,
 					});
 				} catch {
 					return new Response("could not submit application", { status: 400 });

@@ -17,6 +17,13 @@ import {
 	identifyServerUser,
 } from "@/server/analytics";
 
+interface BracketsWriteBinding {
+	syncCompetitorUsername(input: {
+		userId: string;
+		username: string;
+	}): Promise<{ updated: number }>;
+}
+
 export const GET: APIRoute = async (context) => {
 	const code = context.url.searchParams.get("code");
 	const state = context.url.searchParams.get("state");
@@ -90,7 +97,7 @@ export const GET: APIRoute = async (context) => {
 
 	// Get user info
 	const userInfo = await getUserInfo(tokens.access_token);
-	if (!userInfo) {
+	if (!userInfo?.sub) {
 		console.error("[callback] User info fetch failed");
 		await captureServerEvent(
 			{
@@ -103,6 +110,42 @@ export const GET: APIRoute = async (context) => {
 		return context.redirect("/?error=userinfo_failed", 302);
 	}
 
+	const username = userInfo.username ?? userInfo.preferred_username;
+	if (!username) {
+		return new Response("GitHub username is missing from your profile", {
+			status: 502,
+		});
+	}
+
+	try {
+		const bracketsWrite = env.BRACKETS_WRITE as
+			| BracketsWriteBinding
+			| undefined;
+		if (!bracketsWrite) throw new Error("BRACKETS_WRITE binding unavailable");
+		await bracketsWrite.syncCompetitorUsername({
+			userId: userInfo.sub,
+			username,
+		});
+	} catch (error) {
+		console.error("[callback] Competitor username sync failed:", error);
+		await captureServerEvent(
+			{
+				event: "sign_in_failed",
+				properties: { reason: "competitor_username_sync_failed" },
+				distinctId: userInfo.sub,
+			},
+			analytics,
+		);
+		const hasConflict =
+			error instanceof Error && error.message.includes("already assigned");
+		return new Response(
+			hasConflict
+				? "This GitHub username is already assigned to another competitor in that season. Please contact a Klustered admin."
+				: "Could not synchronize your competitor profile. Please try again.",
+			{ status: hasConflict ? 409 : 502 },
+		);
+	}
+
 	// Create local session
 	const sessionId = crypto.randomUUID();
 	const session: StoredSession = {
@@ -112,7 +155,7 @@ export const GET: APIRoute = async (context) => {
 			email: userInfo.email || "",
 			name: userInfo.name || "",
 			image: userInfo.picture || null,
-			username: userInfo.username ?? userInfo.preferred_username ?? null,
+			username,
 		},
 		expiresAt: Date.now() + SESSION_DURATION_SECONDS * 1000,
 	};

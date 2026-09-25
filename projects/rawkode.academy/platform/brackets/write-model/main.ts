@@ -17,7 +17,9 @@ import {
 	SelfRegisterCompetitor,
 	SetMatchLiveState,
 	SubmitRegistration,
+	SyncCompetitorUsername,
 } from "../data-model/integrations/zod";
+import { planCompetitorUsernameSync } from "./competitor-username";
 import { planSummerToWinterTransfer } from "./season-transfer";
 
 export { GenerateBracketWorkflow } from "./generateBracket";
@@ -81,28 +83,6 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 		return bracket;
 	}
 
-	private async uniqueCompetitorSlug(
-		seasonId: string,
-		displayName: string,
-	): Promise<string> {
-		const base = slugify(displayName) || "competitor";
-		for (let attempt = 0; attempt < 100; attempt++) {
-			const slug = attempt === 0 ? base : `${base}-${attempt + 1}`;
-			const existing = await this.db
-				.select({ id: s.competitors.id })
-				.from(s.competitors)
-				.where(
-					and(
-						eq(s.competitors.seasonId, seasonId),
-						eq(s.competitors.personSlug, slug),
-					),
-				)
-				.get();
-			if (!existing) return slug;
-		}
-		return `${base}-${createId()}`;
-	}
-
 	private async uniqueTeamSlug(
 		bracketId: string,
 		name: string,
@@ -121,11 +101,68 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 		return `${base}-${createId()}`;
 	}
 
+	private async syncCompetitorUsernameForUser(input: {
+		userId: string;
+		username: string;
+	}): Promise<{ updated: number }> {
+		const linkedCompetitors = await this.db
+			.select({
+				id: s.competitors.id,
+				seasonId: s.competitors.seasonId,
+				personSlug: s.competitors.personSlug,
+			})
+			.from(s.competitors)
+			.where(eq(s.competitors.userId, input.userId))
+			.all();
+		if (linkedCompetitors.length === 0) return { updated: 0 };
+
+		const seasonIds = [...new Set(linkedCompetitors.map((row) => row.seasonId))];
+		const usernameOwners = await this.db
+			.select({
+				id: s.competitors.id,
+				seasonId: s.competitors.seasonId,
+				personSlug: s.competitors.personSlug,
+			})
+			.from(s.competitors)
+			.where(
+				and(
+					inArray(s.competitors.seasonId, seasonIds),
+					eq(s.competitors.personSlug, input.username),
+				),
+			)
+			.all();
+		const updates = planCompetitorUsernameSync({
+			competitors: linkedCompetitors,
+			username: input.username,
+			usernameOwners,
+		});
+		if (updates.length === 0) return { updated: 0 };
+
+		await this.env.DB.batch(
+			updates.map(({ id }) =>
+				this.env.DB.prepare(
+					"UPDATE competitors SET person_slug = ?, updated_at = ? WHERE id = ? AND user_id = ?",
+				).bind(input.username, Date.now(), id, input.userId),
+			),
+		);
+		return { updated: updates.length };
+	}
+
+	async syncCompetitorUsername(input: unknown): Promise<{ updated: number }> {
+		const data = SyncCompetitorUsername.parse(input);
+		return this.syncCompetitorUsernameForUser(data);
+	}
+
 	private async getOrCreateCompetitor(input: {
 		seasonId: string;
 		userId: string;
+		username: string;
 		displayName: string;
 	}) {
+		await this.syncCompetitorUsernameForUser({
+			userId: input.userId,
+			username: input.username,
+		});
 		const existing = await this.db
 			.select()
 			.from(s.competitors)
@@ -138,11 +175,24 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 			.get();
 		if (existing) return existing;
 
+		const usernameOwner = await this.db
+			.select({ id: s.competitors.id })
+			.from(s.competitors)
+			.where(
+				and(
+					eq(s.competitors.seasonId, input.seasonId),
+					eq(s.competitors.personSlug, input.username),
+				),
+			)
+			.get();
+		if (usernameOwner) {
+			throw new Error(
+				"GitHub username is already assigned to another competitor in this season",
+			);
+		}
+
 		const id = `cmp-${crypto.randomUUID()}`;
-		const personSlug = await this.uniqueCompetitorSlug(
-			input.seasonId,
-			input.displayName,
-		);
+		const personSlug = input.username;
 		try {
 			await this.db.insert(s.competitors).values({
 				id,
@@ -163,6 +213,21 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 				)
 				.get();
 			if (concurrent) return concurrent;
+			const usernameOwner = await this.db
+				.select({ id: s.competitors.id })
+				.from(s.competitors)
+				.where(
+					and(
+						eq(s.competitors.seasonId, input.seasonId),
+						eq(s.competitors.personSlug, input.username),
+					),
+				)
+				.get();
+			if (usernameOwner) {
+				throw new Error(
+					"GitHub username is already assigned to another competitor in this season",
+				);
+			}
 			throw new Error("could not create competitor");
 		}
 
@@ -385,6 +450,7 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 		const competitor = await this.getOrCreateCompetitor({
 			seasonId: bracket.seasonId,
 			userId: data.userId,
+			username: data.username,
 			displayName: data.displayName,
 		});
 		await this.ensureBracketApplication(bracket.id, competitor.id);
@@ -400,6 +466,10 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 		const bracket = await this.getOpenBracket(data.bracketId);
 		if (bracket.kind !== "team") throw new Error("team bracket required");
 
+		await this.syncCompetitorUsernameForUser({
+			userId: data.userId,
+			username: data.username,
+		});
 		const competitor = await this.db
 			.select()
 			.from(s.competitors)
@@ -466,6 +536,7 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 		const competitor = await this.getOrCreateCompetitor({
 			seasonId: team.seasonId,
 			userId: data.userId,
+			username: data.username,
 			displayName: data.displayName,
 		});
 
