@@ -1,0 +1,50 @@
+---
+title: "Dockerfile Tip 1: Define a Base Layer"
+description: "With the advent of the Multi Stage Dockerfile, it's very common for people to ver..."
+type: tutorial
+publishedAt: 2019-05-03
+authors:
+  - rawkode
+technologies:
+  - docker
+---
+
+With the advent of the Multi Stage Dockerfile, it's very common for people to very specific layers that do a single task; which often utilise the same 
+"primary" base layer.
+
+**Example:**
+
+```Dockerfile
+FROM elixir:1.8 AS deps
+
+RUN mix deps.get
+
+FROM elixir:1.8 AS compile
+
+COPY --from=deps ...
+
+RUN mix compile
+```
+
+This allows lengthy tasks to utilise the build cache and pass artefacts between layers, without rerunning the lengthy task. However, I often see this "primary" layer duplicated 4/6/10 times in a single Dockerfile; making maintenance cumbersome.
+
+## The Tip
+
+Create an empty layer with your primary image:
+
+```Dockerfile
+FROM elixir:1.8 AS base
+
+FROM base AS deps
+
+# ...
+
+FROM base AS compile
+
+# ...
+```
+
+This reduces duplication and makes maintenance, and pull-requests, easier to review/manage/change.
+
+Until next time
+:metal:

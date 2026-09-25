@@ -1,0 +1,501 @@
+---
+title: "Contributing to nixpkgs"
+description: "I've been using NixOS, on and off, for around 2 years now. It's got its challenges, which usually mea..."
+type: tutorial
+publishedAt: 2020-07-15
+authors:
+  - rawkode
+technologies:
+  - nix
+  - nixos
+  - nixpkgs
+---
+
+I've been using [NixOS](https://nixos.org/), on and off, for around 2 years now. It's got its challenges, which
+usually means I switch back to Arch after a few weeks; but not this time ... I'm not switching back.
+
+As I stumble my way through the trials and tribulations of Nix, NixOS, and nixpkgs; I'll document
+my path so that others can learn from my misery. Starting right now ...
+
+## What is Nix / NixOS?
+
+This is from the NixOS website:
+
+> Nix is a powerful package manager for Linux and other Unix systems that makes package management reliable and reproducible. Share
+> your development and build environments across different machines.
+>
+> NixOS is a Linux distribution with a unique approach to package and configuration management. Built on top of the Nix package
+> manager, it is completely declarative, makes upgrading systems reliable, and has many other advantages.
+
+## Contributing a GNOME Extension to nixpkgs
+
+In this article, I am going to walk you through the steps I've taken to contribute a GNOME Extension
+to the nixpkgs repository. The extension is one that I just CAN'T live without, the
+[emoji selector](https://github.com/maoschanz/emoji-selector-for-gnome) 😹🌟🥰
+
+This wasn't my first contribution to [nixpkgs](https://github.com/NixOS/nixpkgs/pulls?q=is%3Apr+author%3Arawkode+is%3Aclosed), I've
+sent 16 pull requests to nixpkgs since August 2018 ... and I still have no idea what I'm doing 😂
+
+OK. That's a lie, I know enough to be dangerous, but not enough to be smart.
+
+Lets try this, one step at a time.
+
+### Step 1. Clone the Repository
+
+Not much needs said about this, right?
+
+```console
+git clone https://github.com/NixOS/nixpkgs
+```
+
+### Step 2. Find Something Similiar
+
+I'm not a huge fan of reinventing the wheel. I'm certainly not going to type a bunch of Nix code
+that shares about 95% of it's logic with many other packages already contributed to the nixpkgs repository.
+
+Fortunately for us, this repository is segmented really well.
+
+First, all packages live under `./pkgs`.
+
+```console
+drwxr-xr-x - rawkode 11 Jul 13:34 -- applications
+drwxr-xr-x - rawkode 11 Jul 13:34 -- build-support
+drwxr-xr-x - rawkode 11 Jul 13:34 -- common-updater
+drwxr-xr-x - rawkode 11 Jul 13:34 -- data
+drwxr-xr-x - rawkode 11 Jul 13:34 -- desktops
+drwxr-xr-x - rawkode 11 Jul 13:34 -- development
+drwxr-xr-x - rawkode 11 Jul 13:34 -- games
+drwxr-xr-x - rawkode 11 Jul 13:34 -- misc
+drwxr-xr-x - rawkode 11 Jul 13:34 -- os-specific
+drwxr-xr-x - rawkode 11 Jul 13:34 -- servers
+drwxr-xr-x - rawkode 11 Jul 13:34 -- shells
+drwxr-xr-x - rawkode 11 Jul 13:34 -- stdenv
+drwxr-xr-x - rawkode 11 Jul 13:34 -- test
+drwxr-xr-x - rawkode 11 Jul 13:34 -- tools
+drwxr-xr-x - rawkode 14 Jul 23:40 -- top-level
+```
+
+As you can see, there's directories for desktop applications, development stuff, games, and a few other categories.
+
+Inside of `desktops`, we can see:
+
+```console
+drwxr-xr-x - rawkode 11 Jul 13:34 -- cdesktopenv
+drwxr-xr-x - rawkode 11 Jul 13:34 -- cinnamon
+drwxr-xr-x - rawkode 11 Jul 13:34 -- deepin
+drwxr-xr-x - rawkode 11 Jul 13:34 -- enlightenment
+drwxr-xr-x - rawkode 11 Jul 13:34 -- gnome-2
+drwxr-xr-x - rawkode 11 Jul 13:34 -- gnome-3
+drwxr-xr-x - rawkode 11 Jul 13:34 -- gnustep
+drwxr-xr-x - rawkode 11 Jul 13:34 -- lumina
+drwxr-xr-x - rawkode 11 Jul 13:34 -- lxde
+drwxr-xr-x - rawkode 11 Jul 13:34 -- lxqt
+drwxr-xr-x - rawkode 11 Jul 13:34 -- mate
+drwxr-xr-x - rawkode 11 Jul 13:34 -- pantheon
+drwxr-xr-x - rawkode 11 Jul 13:34 -- plasma-5
+drwxr-xr-x - rawkode 11 Jul 13:34 -- rox
+drwxr-xr-x - rawkode 11 Jul 13:34 -- surf-display
+drwxr-xr-x - rawkode 11 Jul 13:34 -- xfce
+```
+
+Pretty much every desktop environment there is ... and if you're shouting in your head
+"WHAT ABOUT MY SHITTY ESOTERIC TILING WINDOW MANAGER?" ... then I've got you; it's under
+`./applications/window-managers`. I love i3, but it's also quite nice being able to change
+the volume or pair bluetooth headphones without having to put my beer down and grep some shell
+history.
+
+Notice how I delicately said "shell history" and not `zsh`, `bash`, `fish`, or `nu` ... I can't be
+bothered getting into another shell debate; 2020's been shit enough.
+
+Sorry, I've digressed.
+
+Lets move forward. I've found some similiar packages. I've redacted some of the extensions below
+... mostly at random; but you can see that we're in the `./pkgs/desktops/gnome-3/extensions` directory
+and we have a fair number of example packages to use as a base for our new one.
+
+Perfect.
+
+```console
+pwd
+
+/home/rawkode/Code/src/github.com/NixOS/nixpkgs/pkgs/desktops/gnome-3/extensions
+```
+
+```console
+ll
+
+drwxr-xr-x - rawkode 11 Jul 13:34 -- appindicator
+drwxr-xr-x - rawkode 11 Jul 13:34 -- arc-menu
+drwxr-xr-x - rawkode 11 Jul 13:34 -- caffeine
+drwxr-xr-x - rawkode 11 Jul 13:34 -- dash-to-dock
+drwxr-xr-x - rawkode 11 Jul 21:39 -- dash-to-panel
+drwxr-xr-x - rawkode 11 Jul 13:34 -- paperwm
+drwxr-xr-x - rawkode 11 Jul 13:34 -- sound-output-device-chooser
+drwxr-xr-x - rawkode 11 Jul 13:34 -- topicons-plus
+```
+
+### Step 3. Creating Our Package
+
+I need to create a new directory with a `default.nix` and copy over my
+example Nix from the sample extension. I started with `dash-to-panel`,
+as I like that extension. The code for that looks like so:
+
+```nix
+{ stdenv, fetchFromGitHub, glib, gettext }:
+
+stdenv.mkDerivation rec {
+  pname = "gnome-shell-dash-to-panel";
+  version = "31";
+
+  src = fetchFromGitHub {
+    owner = "home-sweet-gnome";
+    repo = "dash-to-panel";
+    rev = "v${version}";
+    sha256 = "0vh36mdncjvfp1jbinifznj5dw3ahsswwm3m9sjw5gydsbx6vh83";
+  };
+
+  buildInputs = [
+    glib gettext
+  ];
+
+  makeFlags = [ "INSTALLBASE=$(out)/share/gnome-shell/extensions" ];
+
+  uuid = "dash-to-panel@jderose9.github.com";
+
+  meta = with stdenv.lib; {
+    description = "An icon taskbar for Gnome Shell";
+    license = licenses.gpl2;
+    maintainers = with maintainers; [ mounium ];
+    homepage = "https://github.com/jderose9/dash-to-panel";
+  };
+}
+```
+
+Unfortunately, there was a problem. This extension uses a `Makefile` to document its
+build steps (which I recommend for ALL repositories), but unfortunately; emoji-selector
+doesn't ship with a `Makefile` 😢
+
+So I'm going to copy the "core" sections and make up the rest from another example shortly.
+
+What I copied looked like so:
+
+```nix
+{ stdenv, fetchFromGitHub, glib, gettext }:
+
+stdenv.mkDerivation rec {
+  pname = "gnome-shell-emoji-selector";
+  version = "19";
+
+  src = fetchFromGitHub {
+    owner = "maoschanz";
+    repo = "emoji-selector-for-gnome";
+    rev = "${version}";
+    sha256 = "0x60pg5nl5d73av494dg29hyfml7fbf2d03wm053vx1q8a3pxbyb";
+  };
+
+  buildInputs = [ glib ];
+
+  meta = with stdenv.lib; {
+    description =
+      "This GNOME shell extension provides a searchable popup menu displaying most emojis";
+    license = licenses.gpl3;
+    maintainers = with maintainers; [ rawkode ];
+    homepage = "https://github.com/maoschanz/emoji-selector-for-gnome";
+  };
+}
+```
+
+Lets break this down.
+
+```nix
+{ stdenv, fetchFromGitHub, glib, gettext }:
+```
+
+This first line of Nix is in almost every Nix file you'll work with. It's the
+imports / dependencies that our Nix script needs from the environment / runtime.
+
+I like to think of it as similiar to JavaScript's destructing syntax; selecting
+only the values we need from the global list. If that's a terrible way to think
+about it, I'm sure someone from HackerNews will be along shortly.
+
+```nix
+stdenv.mkDerivation rec {
+  ...
+}
+```
+
+Next up, we need to create a derivation. That's fancy functional talk for a set of values
+that allow for some output to be derived.
+
+The set that we need to build our GNOME Extension contain some obvious facts:
+
+- GitHub Repository
+- Version / Branch
+- Dependencies (Inputs)
+- Meta Description
+
+```nix
+  pname = "gnome-shell-emoji-selector";
+  version = "19";
+```
+
+We define the package name and the version. The version is a tag / branch name that you can
+get from the Git repository or the GitHub UI.
+
+```nix
+  src = fetchFromGitHub {
+    owner = "maoschanz";
+    repo = "emoji-selector-for-gnome";
+    rev = "${version}";
+    sha256 = "0x60pg5nl5d73av494dg29hyfml7fbf2d03wm053vx1q8a3pxbyb";
+  };
+```
+
+`fetchFromGitHub` is a function that grabs some source code from GitHub. The
+owner, repo, and rev are hopefully self-explanitory. However, we also have `sha256`.
+
+Nix requires builds to be idempotent. That means it uses the sha to verify that
+the downloaded and extracted code is what we expected. If it's different, it'll let
+us know and we can decide what we want to do.
+
+#### Warning
+
+Word of warning ... if the sha that you use already exists in the Nix store (meaning you copied
+it from another example that you had installed), then Nix bypasses the download step and reuses
+the local files. This means that I ... you, will install some random extension instead of getting
+the actual download you expected.
+
+#### How Do We Get the Sha?
+
+The simplest way is to use lots of 0's. When you try to build
+this derivation, Nix will complain that your sha256 doesn't match the repositories download. You can
+then copy the sha and update in your derivation.
+
+Another approach is to calculate the actual sha yourself, using `nix-prefetch-url`.
+
+Go to GitHub and grab the URL for the `tar.gz` artefact on the releases page for the revision
+or version that you want to add to the repository. Now you can run:
+
+```console
+nix-prefetch-url --unpack https://github.com/maoschanz/emoji-selector-for-gnome/archive/19.tar.gz
+
+unpacking...
+[1.0 MiB DL]
+path is '/nix/store/694kcbsz38rni0lykffv89ndivgcccks-19.tar.gz'
+0x60pg5nl5d73av494dg29hyfml7fbf2d03wm053vx1q8a3pxbyb
+```
+
+#### Meta
+
+This is mostly self-explanitory. Just remember to check the license of the package you're adding and
+update `license =`. I use the [source code](https://github.com/NixOS/nixpkgs/blob/master/lib/licenses.nix) to
+check the correct way to reference the licenses.
+
+```nix
+  meta = with stdenv.lib; {
+    description =
+      "This GNOME shell extension provides a searchable popup menu displaying most emojis";
+    license = licenses.gpl3Plus;
+    maintainers = with maintainers; [ rawkode ];
+    homepage = "https://github.com/maoschanz/emoji-selector-for-gnome";
+  };
+```
+
+#### Dependencies
+
+Understanding the dependencies you need to build a new Nix package can be a little intimidating.
+
+Fortunately for GNOME Extensions, these don't vary too much and our example actually had this listed.
+
+```nix
+buildInputs = [ glib ];
+```
+
+If you need to work this out for another package and you don't know where to start? Follow these steps:
+
+- Clone Code
+- Enter directory
+- Create a Nix Shell (nix-shell -p depenendency1 depenendency2 ...)
+- Run Build Command
+
+Repeat this, adding whatever you need to `nix-shell -p` until the build step works.
+
+If you don't know what your dependency you need is called, search on the [Nix Package](https://nixos.org/nixos/packages.html?channel=nixpkgs-unstable) page.
+
+Example, if I need to build some code that needs Rust, Make, and bash - I'd run: `nix-shell -p bash cargo gnumake rustc`
+
+To use our repository as an example, if I ran `nix-shell` with no dependencies and then ran `./install.sh` - then
+our install would have failed with `glib-compile-schemas` command not found; which is provided by `glib`.
+
+#### Skipped Makefile
+
+So I said that we had a problem, the problem was that our example extension used `make` and our
+current extension doesn't. We know this because our example Nix contained:
+
+```nix
+makeFlags = [ "INSTALLBASE=$(out)/share/gnome-shell/extensions" ];
+```
+
+and our extension repository doesn't have a `Makefile`, it only has `./install.sh`.
+
+Drats.
+
+Fortunately, I looked at another example (caffeine) and came across the following code.
+It turns out that we can manually configure the build steps ourself. Sweet! 🥞
+
+```nix
+  uuid = "caffeine@patapon.info";
+
+  nativeBuildInputs = [
+    glib gettext
+  ];
+
+  buildPhase = ''
+    ${bash}/bin/bash ./update-locale.sh
+    glib-compile-schemas --strict --targetdir=caffeine@patapon.info/schemas/ caffeine@patapon.info/schemas
+  '';
+
+  installPhase = ''
+    mkdir -p $out/share/gnome-shell/extensions
+    cp -r ${uuid} $out/share/gnome-shell/extensions
+  '';
+```
+
+##### Customizing the Build
+
+In the code above, we've removed the `makeFlags` configuration that we found in the `dash-to-panel` Nix package,
+because `emoji-selector` doesn't have a `Makefile`. We've instead provided `buildPhase` and `installPhase` configuration. These
+two different "examples" also used slightly different inputs: `buildInputs` and `nativeBuildInputs`
+
+Argh. What?
+
+First, `buildInputs` vs `nativeBuildInputs`. This was tricky to track down, it's not that well documented. However,
+I did [find the following](https://nixos.org/nixpkgs/manual/#ssec-stdenv-dependencies):
+
+> nativeBuildInputs
+> A list of dependencies whose host platform is the new derivation's build platform, and target platform is the new derivation's
+> host platform. This means a -1 host offset and 0 target offset from the new derivation's platforms. These are programs and libraries
+> used at build-time that, if they are a compiler or similar tool, produce code to run at run-time—i.e. tools used to build the new
+> derivation. If the dependency doesn't care about the target platform (i.e. isn't a compiler or similar tool), put it here, rather
+> than in depsBuildBuild or depsBuildTarget. This could be called depsBuildHost but nativeBuildInputs is used for historical continuity.
+
+That's a mouthful. As I understand it, we use `nativeBuildInputs` when we expect the inputs to be build for the platform on our local machine;
+and can use `buildInputs` for when we don't have such a constraint. I definitely need to understand this more and I'll write more on this
+parameter soon; once I've done some more digging 😃
+
+Next, those phases!
+
+From the [documentation](https://nixos.org/nixpkgs/manual/#ssec-stdenv-attributes); we can see that there's many phases in a build:
+
+> $prePhases unpackPhase patchPhase $preConfigurePhases configurePhase $preBuildPhases buildPhase checkPhase $preInstallPhases
+> installPhase fixupPhase installCheckPhase $preDistPhases distPhase $postPhases.
+
+Each of these are called in this order, unless specifically overridden by the Nix package by providing `phases = []`.
+
+We need to override the `buildPhase` because [by default](https://nixos.org/nixpkgs/manual/#build-phase) it runs `make`.
+
+> The default buildPhase simply calls make if a file named Makefile, makefile or GNUmakefile exists in the current directory (or the makefile is explicitly set); otherwise it does nothing.
+
+This is also true for `installPhase`, only it tries to run the [install target](https://nixos.org/nixpkgs/manual/#ssec-install-phase).
+
+> The default installPhase creates the directory \$out and calls make install.
+
+It's a little less magic when you break it down; right? 🧙
+
+### Testing Our Package
+
+Using the commands inside of `./install.sh`, I was able to piece together the config
+we needed for our extension to be successfully build and installed by `nix`.
+
+The only "gotcha" here is that Nix provides `$out` variable that provides the directory
+our package should install things into.
+
+```nix
+{ stdenv, fetchFromGitHub, glib, gettext }:
+
+stdenv.mkDerivation rec {
+  pname = "gnome-shell-emoji-selector";
+  version = "19";
+
+  src = fetchFromGitHub {
+    owner = "maoschanz";
+    repo = "emoji-selector-for-gnome";
+    rev = "${version}";
+    sha256 = "0x60pg5nl5d73av494dg29hyfml7fbf2d03wm053vx1q8a3pxbyb";
+  };
+
+  uuid = "emoji-selector@maestroschan.fr";
+
+  nativeBuildInputs = [ glib ];
+
+  buildPhase = ''
+    runHooks preBuild
+    glib-compile-schemas ./${uuid}/schemas
+    runHooks postBuild
+  '';
+
+  installPhase = ''
+    runHook preInstall
+    mkdir -p $out/share/gnome-shell/extensions
+    cp -r ${uuid} $out/share/gnome-shell/extensions
+    runHook postInstall
+  '';
+
+  meta = with stdenv.lib; {
+    description =
+      "This GNOME shell extension provides a searchable popup menu displaying most emojis";
+    license = licenses.gpl3Plus;
+    maintainers = with maintainers; [ rawkode ];
+    homepage = "https://github.com/maoschanz/emoji-selector-for-gnome";
+  };
+}
+```
+
+So how do we test this to make sure it works?
+
+We can install it 😁
+
+To do that, we need to `cd` into the `nixpkgs` directory; then
+install our package using `nix-env` and the package name we declared above.
+
+```console
+cd ~/Code/src/github.com/NixOS/nixpkgs
+nix-env -f $(pwd) -i gnome-shell-emoji-selector
+```
+
+Assuming all goes to plan, you'll see something like:
+
+```console
+installing 'gnome-shell-emoji-selector-19'
+nix-env -f $(pwd) -i gnome-shell-emoji-selector  5.30s user 0.43s system 97% cpu 5.873 total
+```
+
+🎉🎉🎉 We did it! 🎉🎉🎉
+
+Our package installed. Well done. Fire open GitHub and submit a PR.
+
+## What's Next?
+
+There's still a fair amount to cover. When you submit a PR, you'll be presented with this checklist:
+
+```
+- [ ] Tested using sandboxing ([nix.useSandbox](https://nixos.org/nixos/manual/options.html#opt-nix.useSandbox) on NixOS, or option `sandbox` in [`nix.conf`](https://nixos.org/nix/manual/#sec-conf-file) on non-NixOS linux)
+- Built on platform(s)
+   - [x] NixOS
+   - [ ] macOS
+   - [ ] other Linux distributions
+- [ ] Tested via one or more NixOS test(s) if existing and applicable for the change (look inside [nixos/tests](https://github.com/NixOS/nixpkgs/blob/master/nixos/tests))
+- [ ] Tested compilation of all pkgs that depend on this change using `nix-shell -p nixpkgs-review --run "nixpkgs-review wip"`
+- [x] Tested execution of all binary files (usually in `./result/bin/`)
+- [ ] Determined the impact on package closure size (by running `nix path-info -S` before and after)
+- [ ] Ensured that relevant documentation is up to date
+- [ ] Fits [CONTRIBUTING.md](https://github.com/NixOS/nixpkgs/blob/master/.github/CONTRIBUTING.md).
+```
+
+We've only covered 2 measely steps. In the coming articles, we'll look at:
+
+- Sandbox
+- macOS Builds
+- Nixpkgs on Arch Linux
+
+Until next time

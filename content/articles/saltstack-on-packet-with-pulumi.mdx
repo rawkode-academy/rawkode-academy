@@ -1,0 +1,329 @@
+---
+title: "SaltStack on Packet with Pulumi"
+description: "WIP: You probably don't want to read this yet 😂 I joined Packet on July 27th (4 days ago, at the tim..."
+type: tutorial
+publishedAt: 2020-07-30
+authors:
+  - rawkode
+technologies:
+  - salt
+  - equinix-metal
+  - pulumi
+---
+
+**WIP: You probably don't want to read this yet 😂**
+
+I joined [Packet](https://packet.com) on July 27th (4 days ago, at the time of writing) as a Senior Tech Evangelist. This is exciting! I get to work for a Cloud company that specialises in bare metal compute. So what should I do first?
+
+I'm going to launch my favourite configuration management software with my favourite infrastructure as code software on my new favourite cloud provider. Sweet, right? 🍭🍬
+
+If you don't want to read the walk through, the [code is available here](https://gitlab.com/rawkode/packet-examples/-/tree/master/pulumi-saltstack).
+
+## Why SaltStack?
+
+Reasons
+
+## Why Pulumi?
+
+Reasons
+
+## Step 1. Pulumi
+
+[Pulumi](https://pulumi.com) is a Infrastructure as Code (IaaC) tool that allows you to describe your infrastructure, much like [Terraform](https://terraform.io). Unlike Terraform, Pulumi doesn't impose a specific DSL, HCL, on you; and instead, you can use your programmaing language of choice ... provided it's supported.
+
+At the time of writing, Pulumi supports:
+
+- C#
+- F#
+- Go
+- JavaScript
+- Python
+- TypeScript
+- VisualBasic
+
+I know, I know. I'm disappinted [Rust](https://www.rust-lang.org/) isn't there either. [Maybe one day](https://github.com/pulumi/pulumi/issues/3622).
+
+### Creating the Stack
+
+So to create our stack, we need to generate a new Pulumi project. For this example, we'll use the Pulumi "local" login, which stores the statefile on our local disk. The statefile is very similar to Terraform state. It is needed to build an execution plan for our `apply` commands. Using local will suffice today, but you should investigate using [alternative options](https://www.pulumi.com/docs/intro/concepts/state/) for production deployments.
+
+```
+pulumi login --local
+
+```
+
+We're going to use the TypeScript template to get started. Unfortunately, there isn't a template for all supported languages, but templates do exist for the following.
+
+```
+packet-go # A minimal Packet.net Go Pulumi program
+packet-javascript # A minimal Packet.net JavaScript Pulumi program
+packet-python # A minimal Packet.net Python Pulumi program
+packet-typescript # A minimal Packet.net TypeScript Pulumi program
+
+```
+
+If you want to use one of the dotNet languages, you can use a generic template; then add the Packet provider manually. Generic templates for dotNet are called.
+
+```
+csharp # A minimal C# Pulumi program
+fsharp # A minimal F# Pulumi program
+visualbasic # A minimal VB.NET Pulumi program
+
+```
+
+To create our project from the TypeScript template, let's run:
+
+```
+pulumi new packet-typescript
+
+```
+
+You'll be walked through a couple of questions to create your stack, after which you'll have a directory that looks like:
+
+```
+drwxr-xr-x - rawkode 30 Jul 18:07 node_modules
+.rw------- 286 rawkode 30 Jul 18:06 index.ts
+.rw-r--r-- 28k rawkode 30 Jul 18:07 package-lock.json
+.rw------- 201 rawkode 30 Jul 18:06 package.json
+.rw-r--r-- 85 rawkode 30 Jul 18:07 Pulumi.dev.yaml
+.rw------- 100 rawkode 30 Jul 18:06 Pulumi.yaml
+.rw------- 438 rawkode 30 Jul 18:06 tsconfig.json
+
+```
+
+If we take a look inside of `index.ts`, we'll see:
+
+```
+import * as pulumi from "@pulumi/pulumi";
+import * as packet from "@pulumi/packet";
+
+// Create a Packet resource (Project)
+const project = new packet.Project("my-test-project", {
+  name: "My Test Project",
+});
+
+// Export the name of the project
+export const projectName = project.name;
+
+```
+
+This TypeScript uses the Pulumi SDKs to provide a nice wrapper around the Packet API. Hopefully it's pretty self-explanitory; you can see that it creates a new project and exports it by name.
+
+Exports are similar to Terraform outputs. We use an export when we want to make some attribute from our stack available outside of Pulumi. Pulumi provides the `pulumi stack output` command, which displays these exports.
+
+We'll use these later.
+
+### Cleaning Up the Stack
+
+This step is completely subjective, but I don't like my code just chilling in the top level directory with all the other stuff. What is this, Go? 😏
+
+Fortunately, we can append `main: src/index.ts` to the `Pulumi.yaml` file, which tells Pulumi our entyrypoint for this stack lives somewhere else. I'm going to use a `src` directory.
+
+```
+mkdir src
+mv index.ts src/
+echo "main: src/index.ts" >> Pulumi.yaml
+
+```
+
+### Creating a "Platform"
+
+I like to create a `Platform` object / type / class that can be used to pass around the Pulumi configuration and some other common types that my Pulumi projects often need. This saves my function signatures getting too gnarly as we add new components to our stacks.
+
+The `Platform` object I'm using for this is pretty trivial. It loads the Pulumi configuration and stores our Packet Project, which means we can pass around `Platform` to other functions and it's a single argument, rather than many.
+
+```
+// ./src/platform.ts
+import { Config } from "@pulumi/pulumi";
+import { Project } from "@pulumi/packet";
+
+export type Platform = {
+  project: Project;
+  config: Config;
+};
+
+export const getPlatform = (project: Project): Platform => {
+  return {
+    project,
+    config: new Config(),
+  };
+};
+
+```
+
+Now we can update our `./src/index.ts` to look like so:
+
+```
+import * as packet from "@pulumi/packet";
+import { getPlatform } from "./platform";
+
+const project = new packet.Project("pulumi-saltstack-example", {
+  name: "pulumi-saltstack-example",
+});
+
+const platform = getPlatform(project);
+
+export const projectName = platform.project.name;
+
+```
+
+### Creating the SaltMaster
+
+Now we want to create the Salt Master server. For this, I create a new directory with an `index.ts` that exports a function called `createSaltMaster`; which I can consume in our `./src/index.ts`, much like we did with our `Platform`.
+
+Here's the complete file, but I'll run through each part seperately too; don't worry! I'm not going to explain the imports, I'll do that as we go.
+
+```
+// ./src/salt-master/index.ts
+import {
+  Device,
+  IpAddressTypes,
+  OperatingSystems,
+  Plans,
+  Facilities,
+  BillingCycles,
+} from "@pulumi/packet";
+import { Platform } from "../platform";
+import * as fs from "fs";
+import * as path from "path";
+import * as mustache from "mustache";
+
+export type SaltMaster = {
+  device: Device;
+};
+
+export const createSaltMaster = (
+  platform: Platform,
+  name: string
+): SaltMaster => {
+  // While we're not interpolating anything in this script atm,
+  // might as well leave this code in for the time being; as
+  // we probably will shortly.
+  const bootstrapString = fs
+    .readFileSync(path.join(__dirname, "./user-data.sh"))
+    .toString();
+
+  const bootstrapScript = mustache.render(bootstrapString, {});
+
+  const saltMaster = new Device(`master-${name}`, {
+    hostname: name,
+    plan: Plans.C1LargeARM,
+    facilities: [Facilities.AMS1],
+    operatingSystem: OperatingSystems.Debian9,
+    billingCycle: BillingCycles.Hourly,
+    ipAddresses: [
+      { type: IpAddressTypes.PrivateIPv4, cidr: 31 },
+      {
+        type: IpAddressTypes.PublicIPv4,
+      },
+    ],
+    projectId: platform.project.id,
+    userData: bootstrapScript,
+  });
+
+  return {
+    device: saltMaster,
+  };
+};
+
+```
+
+#### SaltMaster Return Type
+
+```
+export type SaltMaster = {
+  device: Device;
+};
+
+```
+
+Because this is TypeScript, we want to be very explicit about the return types within our code. This allows us to catch errors before we ever run our Pulumi stack. As we're using `createSaltMaster` function to create our SaltMaster, we want that function to return a type with the resources we create.
+
+While our function only returns a `Device`, it's still nice to encapsulate that in a named type that allows for our function to evolve over time.
+
+```
+import { Platform } from "../platform";
+
+export const createSaltMaster = (
+  platform: Platform,
+  name: string
+): SaltMaster =>
+
+```
+
+This is the function signature for `createSaltMaster`. You can see our return type is the type we just created, `SaltMaster`.
+
+Our function also takes a couple of parameters, namely `platform` and `name`. The platform is our `Platform` object with our Pulumi configuration and the Packet Project, so we also need to import it. The `name` allows us to give our SaltMaster a name when we create the device on Packet. We could hardcode this inside the function as `salt-master`, but then we can't use `createSaltMaster` more than once for a highly available set up in a later tutorial.
+
+```
+import * as fs from "fs";
+import * as path from "path";
+import * as mustache from "mustache";
+
+const bootstrapString = fs
+  .readFileSync(path.join(__dirname, "./user-data.sh"))
+  .toString();
+
+const bootstrapScript = mustache.render(bootstrapString, {});
+
+```
+
+I know what you're thinking ... but trust me. As Pulumi allows us to use a programming language to describe our infrastructure, we also have access to that programming languages entire eco-system of libraries. As such, if I want to template some user data for a server ... say, to provision and install SaltStack ... I can use a popular templating tool, such as mustache, from npm 😉
+
+My user data for the Salt Master looks like so:
+
+```
+# ./src/salt-master/user-data.sh
+#!/usr/bin/env sh
+apt update
+DEBIAN_FRONTEND=noninteractive apt install -y python-zmq python-systemd python-tornado salt-common salt-master
+
+LOCAL_IPv4=$(ip addr | grep -E -o '10\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}')
+
+cat <<EOF >/etc/salt/master.d/listen-interface.conf
+interface: ${LOCAL_IPv4}
+EOF
+
+systemctl restart salt-master
+
+```
+
+Lastly, we need to create the device with the Packet API. We use the Pulumi SDK to do so. I'm explictly importing the required types that I need to use as much of the type system as I can.
+
+```
+import {
+  Device,
+  IpAddressTypes,
+  OperatingSystems,
+  Plans,
+  Facilities,
+  BillingCycles,
+} from "@pulumi/packet";
+
+const saltMaster = new Device(`master-${name}`, {
+  hostname: name,
+  plan: Plans.C1LargeARM,
+  facilities: [Facilities.AMS1],
+  operatingSystem: OperatingSystems.Debian9,
+  billingCycle: BillingCycles.Hourly,
+  ipAddresses: [
+    { type: IpAddressTypes.PrivateIPv4, cidr: 31 },
+    {
+      type: IpAddressTypes.PublicIPv4,
+    },
+  ],
+  projectId: platform.project.id,
+  userData: bootstrapScript,
+});
+
+```
+
+Next up, we can call our `createSaltMaster` function from `./src/index.ts` and we'll have a server with the correct user data for running our `salt-master`.
+
+```
+const saltMaster = createSaltMaster(platform, "master-1");
+export const saltMasterPublicIp = saltMaster.device.accessPublicIpv4;
+
+```
+
+We're going to export it's public IPv4 address; so that we can access it easily later and SSH into the machine later.
