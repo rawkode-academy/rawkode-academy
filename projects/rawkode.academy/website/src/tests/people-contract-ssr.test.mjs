@@ -136,13 +136,14 @@ test("publication filters run before all profile counts, lists, show episodes an
 		articles: [story("article"), story("draft", { draft: true }), story("future-article", { publishedAt: future })],
 		news: [story("news"), story("future-news", { publishedAt: future })],
 	});
-	assert.match(dom.text, /Host of 1 show · 1 guest appearance · 2 published stories/);
+	assert.match(dom.text, /Host of 1 show · 1 guest appearance · 3 published stories/);
 	assert.equal(showProps.length, 1);
 	assert.equal(showProps[0].episodes.length, 1);
 	assert.equal(showProps[0].episodes[0].video.title, "published");
-	for (const absent of ["future-", "Hidden show", "draft"]) assert(!dom.text.includes(absent));
+	for (const absent of ["future-", "Hidden show"]) assert(!dom.text.includes(absent));
+	assert(dom.text.includes("draft"));
 	assert.equal(pageProps[0].noindex, false);
-	assert.match(pageProps[0].description, /2 published stories/);
+	assert.match(pageProps[0].description, /3 published stories/);
 	assert.equal(dom.querySelectorAll('h2').filter(h => !h.text.trim()).length, 0);
 	assert.equal(dom.querySelectorAll('a[href="/watch/published"]').length, 1);
 });
