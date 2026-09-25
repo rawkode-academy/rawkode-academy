@@ -322,7 +322,7 @@ const createBuilder = (env: { DB: D1Database }) => {
 		const rows = await showBrackets(showId);
 		return rows.filter(
 			(b) =>
-				b.status !== "finished" &&
+				b.status === "active" &&
 				(!b.registrationClosesAt || b.registrationClosesAt.getTime() > now),
 		);
 	};
