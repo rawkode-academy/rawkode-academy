@@ -125,7 +125,7 @@ const layout = academyLayout({ width: "reading" });
 				</div>
 					<div class={account.body}>
 						{preferencesUnavailable ? (<p class={account.error} role="alert">Your preferences could not be loaded. Reload this page before making changes.</p>) : (<EmailPreferences
-							client:load
+							client:only="vue"
 							academyNewsletter={academyNewsletter}
 							matrixNewsletter={matrixNewsletter}
 							kubernetesReleaseUpdates={kubernetesReleaseUpdates}
