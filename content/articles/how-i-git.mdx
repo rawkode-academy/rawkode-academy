@@ -1,0 +1,181 @@
+---
+title: "How I Git"
+description: "I've been slinging code for nearly 20 years now. I've navigated the murky waters of version control,..."
+type: article
+publishedAt: 2019-09-23
+updatedAt: 2019-09-23
+authors:
+  - rawkode
+technologies:
+  - git
+---
+
+I've been slinging code for nearly 20 years now. I've navigated the murky waters of version control, starting with CVS, Subversion, Perforce, and Git; with the latter being my de-facto since around 2010.
+
+### Mild Rant About Git
+
+Git isn't the version control system I want, but it is the version control system I have. I won't complain too much, but why does Git require an email address to identify authors and why can't a commit have multiple authors? Pfft.
+
+I firmly believe that we're stuck with Git. The only company that can change that is GitHub; providing a newer better VCS that would allow interoperability with Git while we all migrate over.
+
+Will that ever happen? Doubtful :disappointed:
+
+### Cloning Repositories
+
+First, we'll start with the simplest of concerns ...
+
+#### Clone to Where?
+
+I clone all my repositories to `~/Code/src`. This is also my `GOPATH`. For Go developers, this is likely unsurprising.
+
+I used to keep my Go projects and other code in separate directories, but eventually this become quite natural to adopt the "Go way".
+
+Inside of `~/Code/src` is a directory for every host that I clone repositories from. Inside their, orgs/usernames. Inside them, individual repositories.
+
+It looks like this:
+
+```
+~/Code/src:
+
+├── aur.archlinux.org
+│  ├── fluxlang
+│  ├── pulumi-bin
+│  └── yay
+├── github.com
+│  ├── chaoss
+│  │  └── augur
+│  ├── influxdata
+│  │  ├── flux
+│  │  ├── influxdb
+│  │  ├── telegraf
+│  ├── pulumi
+│  │  └── pulumi
+│  ├── rawkode
+│  │  ├── dotfiles
+│  │  ├── influxdb-examples
+│  │  ├── kubernetes-workshop
+│  │  ├── modern-life
+│  │  ├── php-stat-influxdb
+│  │  └── saltstack-dotfiles
+└── golang.org
+   └── x
+      ├── lint
+      └── tools
+```
+
+#### The Actual Cloning
+
+There are two rules when cloning repositories:
+
+1. Clone Over HTTPs
+2. Never clone a fork directly
+
+#### Clone Over HTTPS
+
+I'm a rather cautious person. I've got into the habit of only cloning public repositories over HTTPs so that I never accidentally push to master. Even if I don't own the repository, i've made this my default and it keeps me sane.
+
+NB: This is a "whenever possible" rule. For private repositories, you will need to use ssh cloning; so always adopt the rule below too.
+
+#### Never Clone a Fork Directly
+
+If you fork a repository, always clone the origin first.
+
+As an example. I have a fork of my companies primary product, InfluxDB.
+
+I clone this with `git clone https://github.com/influxdb/influxdb`
+
+I then add my fork as a remote with `git remote add rawkode git@github.com:rawkode/influxdb`
+
+Now, when you've made your awesome changes to some OSS project; you push with `git push rawkode`. Simples! :tada:
+
+##### Tip
+
+GitHub has a cool CLI command called `hub` that allows you perform the above with `hub fork`
+
+### Working with Git
+
+Now that I've got lots of code available to work on, how do I work with it?
+
+#### GPG Signing
+
+I always ensure that I sign my commits with my GPG key. If you aren't comfortable provisioning your own GPG key, checkout [Keybase](https://keybase.io).
+
+Very little is required to configure GPG signing. Some people specify their key in the config, but as I only have one secret key available locally, as you probably will too, it's not required.
+
+```
+[gpg]
+  program = gpg
+[commit]
+  gpgsign = true
+```
+
+#### Commit Template
+
+My Git commits are terrible. I've been using a template lately to remind myself when the commit screen pops up that I should do better.
+
+```
+[commit]
+  template = ~/.git/templates/commit
+```
+
+I've got an old [template](https://github.com/rawkode/saltstack-dotfiles/blob/master/states/development/git/files/templates/commit.txt) that I've used for years, but more recently I've been trying to adopt [Semantic Commits](https://seesparkbox.com/foundry/semantic_commit_messages), such as:
+
+```
+feat: add hat wobble
+^--^  ^------------^
+|     |
+|     +-> Summary in present tense.
+|
++-------> Type: chore, docs, feat, fix, refactor, style, or test.
+```
+
+#### Default Editor
+
+I use VSCode for all my editing now, even Git commits :smile:
+
+```
+[core]
+  editor = code --wait
+```
+
+#### Aliases
+
+Here are some of my favourite aliases.
+
+##### Pull
+
+I really like dislike merge commits. So much so, I always do a pull with a rebase to neatly, and cleanly, merge in missing changes; keeping my commits at the top.
+
+```
+[alias]
+  pl = pull --rebase
+```
+
+##### Cane
+
+Ever committed something and forgot to add a file? Ever committed a fix that wasn't actually the fix and then had to add a new commit with the actual fix? Yep. You need `git cane`.
+
+This will add / stage changes and add them to your previous commit.
+
+```
+[alias]
+  cane = commit --amend --no-edit
+```
+
+##### The Rest
+
+These are all rather simple short cuts.
+
+```
+[alias]
+  cm = commit -v
+  co = checkout
+  ps = push
+  st = status
+```
+
+---
+
+That's it! That's "How I Git" :smile: If you found this useful, let me know on [Twitter](https://twitter.com/rawkode) and I'll follow up some with new Git tips.
+
+Thanks for reading :wave:

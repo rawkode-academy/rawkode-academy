@@ -1,0 +1,381 @@
+---
+title: "Packet Metadata for SaltStack"
+description: "In my last article, we spun up some bare metal compute on Packet with Pulumi and installed SaltStack...."
+type: tutorial
+publishedAt: 2020-08-03
+authors:
+  - rawkode
+technologies:
+  - salt
+  - equinix-metal
+---
+
+In my last [article](/read/saltstack-on-packet-with-pulumi), we spun up some bare metal compute on [Packet](https://www.packet.com) with [Pulumi](https://www.pulumi.com) and installed [SaltStack](https://www.saltstack.com).
+
+In order to use SaltStack to provision our workloads on our servers, we need a way to identify which machines should be provisioned with what workload. SaltStack uses [Grains](https://docs.saltstack.com/en/latest/topics/grains/) to do this ... and there's a metadata grain that can read metadata from cloud providers; unfortunately, it doesn't support Packet.
+
+Drats ☹️
+
+Happy news though, SaltStack is rather extensible; as long as you don't mind getting your hands a little dirty with Python.
+
+## Writing a Custom Grain
+
+Writing a SaltStack grain module is SUPER easy. Lets take a look at the simplest implementation I can put together.
+
+```
+def test():
+    return dict(test={
+        "name": "David",
+        "age": "18",
+    })
+
+```
+
+Yeah, yeah. I know I'm not 18 anymore. Shush.
+
+Grain modules are Python functions that return key value pairs. This code above returns a grain named "test" with the key/value pairs `name = David` and `age = 18`. This means we can run `salt minion-1 grains.item test` and we'll see:
+
+```
+minion-1:
+    ----------
+    test:
+        ----------
+        name:
+            David
+        age:
+            18
+
+```
+
+Of course, we don't want to return hared coded key values! We want to return information about our servers from Packet's [metadata API](https://www.packet.com/developers/docs/servers/key-features/metadata/).
+
+The code to handle this isn't particularly complicated. In-fact, performing a HTTP request in Python is really simple 😀
+
+Lets take a look.
+
+```
+import json
+import logging
+import salt.utils.http as http
+
+# Setup logging
+log = logging.getLogger( __name__ )
+
+# metadata server information
+HOST = "https://metadata.packet.net/metadata"
+
+def packet_metadata():
+    response = http.query(HOST)
+    metadata = json.loads(response["body"])
+
+    log.error(metadata)
+
+    grains = {}
+    grains["id"] = metadata["id"]
+    grains["iqn"] = metadata["iqn"]
+    grains["plan"] = metadata["plan"]
+    grains["class"] = metadata["class"]
+    grains["facility"] = metadata["facility"]
+
+    grains["tags"] = metadata["tags"]
+
+    return dict(packet_metadata=grains)
+
+```
+
+The important lines here are these three:
+
+```
+HOST = "https://metadata.packet.net/metadata"
+
+response = http.query(HOST)
+metadata = json.loads(response["body"])
+
+```
+
+We first query the metadata API endpoint, defined by the variable `HOST`. We then decode the body of the response into a Python dict, using `json.loads`.
+
+This gives us access to every bit of metadata returned by the Packet metadata API. That looks like:
+
+```
+{
+  "id": "c5ce85c5-1eef-4581-90b6-88a91e47e207",
+  "hostname": "master-1",
+  "iqn": "iqn.2020-08.net.packet:device.c5ce85c5",
+  "operating_system": {
+    "slug": "debian_9",
+    "distro": "debian",
+    "version": "9",
+    "license_activation": {
+      "state": "unlicensed"
+    },
+    "image_tag": "b32a1f31b127ef631d6ae31af9c6d8b69dcaa9e9"
+  },
+  "plan": "c2.medium.x86",
+  "class": "c2.medium.x86",
+  "facility": "ams1",
+  "private_subnets": ["10.0.0.0/8"],
+  "tags": ["role/salt-master"],
+  "ssh_keys": [
+    "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBGf0w9b+lPcZhsNHU8Sw5hJPBhpNICTNkjlBz9jxtLbWNGvHTE1lBeXU5VA2/7cuYw48apHmMURHFtK5AZx3srg="
+  ],
+  "storage": {
+    "disks": [
+      {
+        "device": "/dev/sdd",
+        "wipeTable": true,
+        "partitions": [
+          {
+            "label": "BIOS",
+            "number": 1,
+            "size": "512M"
+          },
+          {
+            "label": "SWAP",
+            "number": 2,
+            "size": "3993600"
+          },
+          {
+            "label": "ROOT",
+            "number": 3,
+            "size": 0
+          }
+        ]
+      }
+    ],
+    "filesystems": [
+      {
+        "mount": {
+          "device": "/dev/sdd1",
+          "format": "vfat",
+          "point": "/boot/efi",
+          "create": {
+            "options": ["32", "-n", "EFI"]
+          }
+        }
+      },
+      {
+        "mount": {
+          "device": "/dev/sdd3",
+          "format": "ext4",
+          "point": "/",
+          "create": {
+            "options": ["-L", "ROOT"]
+          }
+        }
+      },
+      {
+        "mount": {
+          "device": "/dev/sdd2",
+          "format": "swap",
+          "point": "none",
+          "create": {
+            "options": ["-L", "SWAP"]
+          }
+        }
+      }
+    ]
+  },
+  "network": {
+    "bonding": {
+      "mode": 4,
+      "link_aggregation": "bonded",
+      "mac": "50:6b:4b:b4:a9:3a"
+    },
+    "interfaces": [
+      {
+        "name": "eth0",
+        "mac": "50:6b:4b:b4:a9:3a",
+        "bond": "bond0"
+      },
+      {
+        "name": "eth1",
+        "mac": "50:6b:4b:b4:a9:3b",
+        "bond": "bond0"
+      }
+    ],
+    "addresses": [
+      {
+        "id": "5d28837b-29c5-4505-bb05-930fd3760bac",
+        "address_family": 4,
+        "netmask": "255.255.255.252",
+        "created_at": "2020-08-03T14:07:50Z",
+        "public": true,
+        "cidr": 30,
+        "management": true,
+        "enabled": true,
+        "network": "147.75.84.128",
+        "address": "147.75.84.130",
+        "gateway": "147.75.84.129",
+        "parent_block": {
+          "network": "147.75.84.128",
+          "netmask": "255.255.255.252",
+          "cidr": 30,
+          "href": "/ips/7a30c2bf-f0e5-402c-b0c0-b8ab03359e63"
+        }
+      },
+      {
+        "id": "937552c6-cf1a-474d-9866-9fb1e0525503",
+        "address_family": 4,
+        "netmask": "255.255.255.254",
+        "created_at": "2020-08-03T14:07:49Z",
+        "public": false,
+        "cidr": 31,
+        "management": true,
+        "enabled": true,
+        "network": "10.80.76.4",
+        "address": "10.80.76.5",
+        "gateway": "10.80.76.4",
+        "parent_block": {
+          "network": "10.80.76.0",
+          "netmask": "255.255.255.128",
+          "cidr": 25,
+          "href": "/ips/8f8cd919-165a-4e62-b461-af7c15a25ec4"
+        }
+      }
+    ]
+  },
+  "customdata": {},
+  "specs": {
+    "cpus": [
+      {
+        "count": 1,
+        "type": "AMD EPYC 7401P 24-Core Processor @ 2.0GHz"
+      }
+    ],
+    "memory": {
+      "total": "64GB"
+    },
+    "drives": [
+      {
+        "count": 2,
+        "size": "120GB",
+        "type": "SSD",
+        "category": "boot"
+      },
+      {
+        "count": 2,
+        "size": "480GB",
+        "type": "SSD",
+        "category": "storage"
+      }
+    ],
+    "nics": [
+      {
+        "count": 2,
+        "type": "10Gbps"
+      }
+    ],
+    "features": {}
+  },
+  "switch_short_id": "f8dd5e3f",
+  "volumes": [],
+  "api_url": "https://metadata.packet.net",
+  "phone_home_url": "http://tinkerbell.ams1.packet.net/phone-home",
+  "user_state_url": "http://tinkerbell.ams1.packet.net/events"
+}
+
+```
+
+I decided not to make all of this available within the grains system, as only a few data points make sense for scheduling workloads. Hence, I cherry pick out the attributes I want for the next demo. You can pick and choose whatever you want too.
+
+```
+grains = {}
+grains["id"] = metadata["id"]
+grains["iqn"] = metadata["iqn"]
+grains["plan"] = metadata["plan"]
+grains["class"] = metadata["class"]
+grains["facility"] = metadata["facility"]
+
+grains["tags"] = metadata["tags"]
+
+return dict(packet_metadata=grains)
+
+```
+
+## Provisioning the Custom Grain
+
+Now that we have a custom grain, we need to update our Pulumi code to install this on our Salt master.
+
+**NB** : We **only** need to make this grain available on our Salt master, as the Salt master takes responsibility for syncing custom grains to the minions.
+
+I've updated our [user-data.sh](https://gitlab.com/rawkode/packet-examples/-/blob/master/pulumi-saltstack/src/salt-master/user-data.sh) to create the directory we need and added the mustache template syntax that allows us to inject the Python script. We use `&` before the variable name to request that mustache doesn't escape our quotes to HTML entities ... I only learnt that today 😂
+
+```
+mkdir -p /srv/salt/_grains
+
+cat <<EOF >/srv/salt/_grains/packet_metadata.py
+{{ &PACKET_METADATA_PY }}
+EOF
+
+```
+
+Next up, we provide the Python script at render time and provide some tags for our servers when we create them.
+
+```
+const pythonPacketMetadataGrain = fs
+  .readFileSync(path.join(__dirname, "..", "salt", "packet_metadata.py"))
+  .toString();
+
+const saltMaster = new Device(`master-${name}`, {
+  // ... code omitted for brevity
+  userData: mustache.render(bootstrapString, {
+    PACKET_METADATA_PY: pythonPacketMetadataGrain,
+  }),
+  // Add tags to this server
+  tags: ["role/salt-master"],
+});
+
+```
+
+### Syncing Custom Grains
+
+Finally, we need to tell our Salt master to sync the grains to our minions.
+
+```
+salt "*" saltutil.grains_sync
+
+```
+
+You can now confirm the custom grain is working with:
+
+```
+root@master-1:~# salt "*" grains.item packet_metadata
+minion-1:
+    ----------
+    packet_metadata:
+        ----------
+        class:
+            c2.medium.x86
+        facility:
+            ams1
+        id:
+            ab0bc2ba-557b-4d99-a1eb-0beec02adff2
+        iqn:
+            iqn.2020-08.net.packet:device.ab0bc2ba
+        plan:
+            c2.medium.x86
+        tags:
+            - role/salt-minion
+master-1:
+    ----------
+    packet_metadata:
+        ----------
+        class:
+            c2.medium.x86
+        facility:
+            ams1
+        id:
+            97ce9196-077d-4ce9-82a5-d58bf59d0dbc
+        iqn:
+            iqn.2020-08.net.packet:device.97ce9196
+        plan:
+            c2.medium.x86
+        tags:
+            - role/salt-master
+
+```
+
+That's it! Next time we'll take a look at using our tags to provision and schedule our workloads.
+
+See you then.
