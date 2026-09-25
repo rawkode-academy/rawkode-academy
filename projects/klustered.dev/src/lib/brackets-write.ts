@@ -87,6 +87,16 @@ export interface BracketsWrite {
 		startDate?: number | null;
 		endDate?: number | null;
 	}): Promise<{ ok: true }>;
+	transferSummerApplicationsToWinter(input: {
+		sourceSeasonId: string;
+		targetSeasonId: string;
+		seasonStartDate: number;
+		bracketStartsAt: number;
+	}): Promise<{
+		applicationsMoved: number;
+		competitorsMoved: number;
+		bracketsActivated: number;
+	}>;
 	deleteSeason(input: { id: string }): Promise<{ ok: true }>;
 	createBracket(input: {
 		seasonId: string;
