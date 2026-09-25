@@ -16,6 +16,7 @@ const props = defineProps<{
 	marketingEmails: boolean;
 	serviceEmails: boolean;
 	technologySubscriptions: string[];
+	klusteredSubscriptions: string[];
 }>();
 
 const preferences = ref({
@@ -27,6 +28,7 @@ const preferences = ref({
 });
 
 const techSubs = ref<string[]>([...props.technologySubscriptions]);
+const klusteredSubs = ref<string[]>([...props.klusteredSubscriptions]);
 const isLoading = ref<string | null>(null);
 const error = ref<string | null>(null);
 const showSuccess = ref(false);
@@ -40,7 +42,8 @@ const hasAnySubscription = computed(() => {
 		preferences.value.kubernetesReleaseUpdates ||
 		preferences.value.marketingEmails ||
 		preferences.value.serviceEmails ||
-		techSubs.value.length > 0
+		techSubs.value.length > 0 ||
+		klusteredSubs.value.length > 0
 	);
 });
 
@@ -103,6 +106,37 @@ const unsubscribeTechnology = async (techId: string) => {
 	}
 };
 
+const klusteredLabels: Record<string, string> = {
+	"klustered-watch": "Watch Klustered",
+	"klustered-solo": "Compete solo",
+	"klustered-team": "Compete as a team",
+	"klustered-compete": "Compete on Klustered",
+	"show:klustered": "Klustered show updates",
+};
+
+const unsubscribeKlustered = async (audience: string) => {
+	if (isLoading.value || isUnsubscribingAll.value) return;
+
+	isLoading.value = audience;
+	error.value = null;
+	try {
+		const { error: actionError } = await actions.newsletter.setPreference({
+			channel: "newsletter",
+			audience,
+			subscribed: false,
+			source: "settings-page",
+		});
+		if (actionError) throw new Error(actionError.message);
+		klusteredSubs.value = klusteredSubs.value.filter((item) => item !== audience);
+		showSuccess.value = true;
+		setTimeout(() => { showSuccess.value = false; }, 3000);
+	} catch (err: unknown) {
+		error.value = err instanceof Error ? err.message : "Failed to unsubscribe";
+	} finally {
+		isLoading.value = null;
+	}
+};
+
 const unsubscribeFromAll = async () => {
 	if (isUnsubscribingAll.value || isLoading.value) return;
 
@@ -123,6 +157,7 @@ const unsubscribeFromAll = async () => {
 			serviceEmails: false,
 		};
 		techSubs.value = [];
+		klusteredSubs.value = [];
 		showUnsubscribeConfirm.value = false;
 		showSuccess.value = true;
 		setTimeout(() => {
@@ -229,6 +264,19 @@ const formatTechName = (id: string) => {
 						:class="account.danger"
 					>
 						{{ isLoading === `tech-${techId}` ? "..." : "Unsubscribe" }}
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Klustered subscriptions use distinct audiences for each kind of update. -->
+		<div v-if="klusteredSubs.length > 0">
+			<h3 :class="account.heading">Klustered Updates</h3>
+			<div :class="account.list">
+				<div v-for="audience in klusteredSubs" :key="audience" :class="account.preference">
+					<span :class="account.label">{{ klusteredLabels[audience] ?? audience }}</span>
+					<button type="button" :disabled="Boolean(isLoading) || isUnsubscribingAll" @click="unsubscribeKlustered(audience)" :class="account.danger">
+						{{ isLoading === audience ? "..." : "Unsubscribe" }}
 					</button>
 				</div>
 			</div>
