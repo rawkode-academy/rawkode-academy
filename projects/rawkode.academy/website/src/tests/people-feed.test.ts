@@ -55,18 +55,18 @@ describe("person RSS request-time contracts", () => {
 		expect(xml).not.toContain("<item>");
 	});
 
-	it("filters future recorded/live videos, future stories, drafts and unrelated people", async () => {
+	it("filters future content while including legacy-flagged articles and excluding unrelated people", async () => {
 		const future = new Date("2026-09-20T12:00:00.001Z");
-		collections.articles = [entry("article"), entry("draft", { draft: true }), entry("future-article", { publishedAt: future })];
+		collections.articles = [entry("article"), entry("formerly-hidden", { draft: true }), entry("future-article", { publishedAt: future })];
 		collections.news = [entry("news", { authors: [{ id: "person" }] }), entry("future-news", { publishedAt: future })];
 		collections.videos = [entry("video", { guests: [{ id: "person" }], publishedAt: new Date() }),
 			entry("future-recorded", { publishedAt: future, type: "recorded" }),
 			entry("future-live", { publishedAt: future, type: "live" }),
 			entry("unrelated", { guests: ["someone-else"] })];
 		const xml = await (await GET(context("person"))).text();
-		expect(xml.match(/<item>/g)).toHaveLength(3);
-		for (const word of ["draft", "future-", "unrelated"]) expect(xml).not.toContain(word);
-		for (const url of ["/read/article/", "/news/news/", "/watch/video/"]) expect(xml).toContain(url);
+		expect(xml.match(/<item>/g)).toHaveLength(4);
+		for (const word of ["future-", "unrelated"]) expect(xml).not.toContain(word);
+		for (const url of ["/read/article/", "/read/formerly-hidden/", "/news/news/", "/watch/video/"]) expect(xml).toContain(url);
 		expect(xml.indexOf("/watch/video/")).toBeLessThan(xml.indexOf("/read/article/"));
 	});
 
