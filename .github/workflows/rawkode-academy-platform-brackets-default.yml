@@ -88,7 +88,7 @@ jobs:
     # task directly avoids cuenv's affected-task false negatives after merges.
     - name: Deploy brackets services
       working-directory: projects/rawkode.academy/platform/brackets
-      run: cuenv exec -- cuenv task ciDeploy
+      run: cuenv -e production exec -- cuenv -e production task ciDeploy
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_ACTOR: ${{ github.actor }}
