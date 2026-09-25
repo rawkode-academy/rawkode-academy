@@ -444,7 +444,7 @@ const [articles, news, learningPaths] = await Promise.all([
 ]);
 const now = new Date();
 const hasTopicContent =
-	articles.some(({ data }) => !data.draft && data.publishedAt <= now && matchesTechnology(data.technologies)) ||
+	articles.some(({ data }) => data.publishedAt <= now && matchesTechnology(data.technologies)) ||
 	news.some(({ data }) => isNewsPublished(data.publishedAt, now) && matchesTechnology(data.technologies)) ||
 	learningPaths.some(({ data }) => data.publishedAt <= now && matchesTechnology(data.technologies));
 const hasAside = videoCount > 0 || hasMatrixDetails ||
