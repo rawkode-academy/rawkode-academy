@@ -13,6 +13,8 @@ const logger = createLogger("unsubscribe");
 const user = Astro.locals.user;
 const pagePath = Astro.url.pathname;
 let email = Astro.url.searchParams.get("email") ?? "";
+const KLUSTERED_AUDIENCES = ["klustered-watch", "klustered-solo", "klustered-team", "klustered-compete", "show:klustered"] as const;
+let audience: "academy" | "klustered" = Astro.url.searchParams.get("audience") === "klustered" ? "klustered" : "academy";
 let scope: "account" | "email" =
 	!user || Astro.url.searchParams.has("email") || Astro.url.searchParams.get("scope") === "email"
 		? "email"
@@ -32,10 +34,14 @@ if (Astro.request.method === "POST") {
 
 	if (formData) {
 		const submittedScope = formData.get("scope");
+		const submittedAudience = formData.get("audience");
 		const submittedEmail = formData.get("email");
 		email = typeof submittedEmail === "string" ? submittedEmail.toLowerCase().trim() : "";
 		if (formData.getAll("scope").length !== 1 || (submittedScope !== "email" && submittedScope !== "account")) {
 			errorMessage = "Choose an account or email subscription to unsubscribe.";
+			Astro.response.status = 400;
+		} else if (formData.getAll("audience").length > 1 || (submittedAudience !== null && submittedAudience !== "academy" && submittedAudience !== "klustered")) {
+			errorMessage = "Choose an email update to unsubscribe from.";
 			Astro.response.status = 400;
 		} else if (submittedScope === "account" && !user) {
 			scope = "email";
@@ -43,6 +49,7 @@ if (Astro.request.method === "POST") {
 			Astro.response.status = 401;
 		} else {
 			scope = submittedScope;
+			audience = submittedAudience === "klustered" ? "klustered" : "academy";
 			if (scope === "email" && (formData.getAll("email").length !== 1 || !z.email("Please enter a valid email address").safeParse(email).success)) {
 				emailError = true;
 				errorMessage = "Please enter a valid email address.";
@@ -50,19 +57,25 @@ if (Astro.request.method === "POST") {
 			} else {
 				try {
 					const identity = scope === "email" ? createEmailId(email) : createLearnerId(user!.id);
-					const result = await env.EMAIL_PREFERENCES.setPreference(identity, {
-						audience: "academy",
-						channel: "newsletter",
-						status: "unsubscribed",
-						source: `website:newsletter:${pagePath}`,
-					});
-					if (!result.success) throw new Error("Unsubscribe was not confirmed");
-					if (scope === "email") {
-						Astro.cookies.delete("newsletter:academy:updates", { path: "/" });
+					const audiences = audience === "klustered" ? KLUSTERED_AUDIENCES : ["academy"];
+					for (const audienceId of audiences) {
+						const result = await env.EMAIL_PREFERENCES.setPreference(identity, {
+							audience: audienceId,
+							channel: "newsletter",
+							status: "unsubscribed",
+							source: `website:newsletter:${pagePath}`,
+						});
+						if (!result.success) throw new Error("Unsubscribe was not confirmed");
 					}
+					if (scope === "email") {
+						for (const audienceId of audiences) {
+							Astro.cookies.delete(`newsletter:${audienceId}:updates`, { path: "/" });
+						}
+					}
+					const label = audience === "klustered" ? "Klustered updates" : "Rawkode Academy newsletter";
 					successMessage = scope === "email"
-						? `The email subscription for ${email} has been unsubscribed from the Rawkode Academy newsletter. Your account subscription, if any, is unchanged.`
-						: "Your signed-in account has been unsubscribed from the Rawkode Academy newsletter. Any separate email-address subscription is unchanged.";
+						? `The email subscription for ${email} has been unsubscribed from ${label}. Your account subscription, if any, is unchanged.`
+						: `Your signed-in account has been unsubscribed from ${label}. Any separate email-address subscription is unchanged.`;
 				} catch (error) {
 					logger.error("Failed to unsubscribe", error);
 					errorMessage = "Failed to process your unsubscribe request. Please try again.";
@@ -76,7 +89,7 @@ const form = academyForms();
 const doc = academyDocument();
 ---
 
-<Page title="Unsubscribe" description="Unsubscribe from the Rawkode Academy newsletter." noindex>
+<Page title="Unsubscribe" description="Manage Rawkode Academy and Klustered email updates." noindex>
 	<section class={doc.reading}>
 		<div class={doc.stack}>
 			{successMessage ? <>
@@ -86,11 +99,18 @@ const doc = academyDocument();
 			</> : <>
 				<h1 class={doc.title}>{scope === "account" ? "Unsubscribe your account" : "Unsubscribe an email address"}</h1>
 				<p class={doc.lede}>{scope === "account"
-					? "Stop the newsletter subscription attached to your signed-in account. Separate email-address subscriptions will not change."
-					: "Enter the email address you used to subscribe. This will not change an account subscription."}</p>
+					? "Stop the selected updates attached to your signed-in account. Separate email-address subscriptions will not change."
+					: "Enter the email address you used to subscribe and choose the updates to stop. This will not change an account subscription."}</p>
 				{errorMessage && <p id="unsubscribe-error" class={form.error} role="alert">{errorMessage}</p>}
 				<form method="POST" action="/unsubscribe" class={form.form}>
 					<input type="hidden" name="scope" value={scope} />
+					<label class={form.field} for="unsubscribe-audience">
+						<span class={form.label}>Email updates</span>
+						<select id="unsubscribe-audience" name="audience" class={form.input}>
+							<option value="academy" selected={audience === "academy"}>Academy newsletter</option>
+							<option value="klustered" selected={audience === "klustered"}>All Klustered updates</option>
+						</select>
+					</label>
 					{scope === "email" && <label class={form.field} for="unsubscribe-email">
 						<span class={form.label}>Subscription email address</span>
 						<input id="unsubscribe-email" type="email" name="email" value={email} autocomplete="email" required class={form.input} aria-describedby={errorMessage ? "unsubscribe-error" : undefined} aria-invalid={emailError ? "true" : undefined} />
@@ -98,8 +118,8 @@ const doc = academyDocument();
 					<button type="submit" class={form.button}>{scope === "account" ? "Unsubscribe my account" : "Unsubscribe this email address"}</button>
 				</form>
 				{scope === "account"
-					? <a class={doc.link} href="/unsubscribe?scope=email">Unsubscribe a separate email address</a>
-					: user && <a class={doc.link} href="/unsubscribe">Manage my account subscription instead</a>}
+					? <a class={doc.link} href={`/unsubscribe?scope=email&audience=${audience}`}>Unsubscribe a separate email address</a>
+					: user && <a class={doc.link} href={`/unsubscribe?audience=${audience}`}>Manage my account subscription instead</a>}
 				<a class={doc.link} href="/">Go back home</a>
 			</>}
 		</div>

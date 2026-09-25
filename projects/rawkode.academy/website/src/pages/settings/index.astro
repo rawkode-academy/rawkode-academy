@@ -36,6 +36,7 @@ let kubernetesReleaseUpdates = false;
 let marketingEmails = false;
 let serviceEmails = false;
 let technologySubscriptions: string[] = [];
+let klusteredSubscriptions: string[] = [];
 
 try {
 	const allPrefs: EmailPreference[] =
@@ -60,6 +61,11 @@ try {
 			pref.audience.startsWith("technology:")
 		) {
 			technologySubscriptions.push(pref.audience.replace("technology:", ""));
+		} else if (
+			pref.channel === "newsletter" &&
+			(pref.audience.startsWith("klustered-") || pref.audience === "show:klustered")
+		) {
+			klusteredSubscriptions.push(pref.audience);
 		}
 	}
 } catch (e) {
@@ -132,6 +138,7 @@ const layout = academyLayout({ width: "reading" });
 							marketingEmails={marketingEmails}
 							serviceEmails={serviceEmails}
 							technologySubscriptions={technologySubscriptions}
+							klusteredSubscriptions={klusteredSubscriptions}
 						/>)}
 					</div>
 				</section>
