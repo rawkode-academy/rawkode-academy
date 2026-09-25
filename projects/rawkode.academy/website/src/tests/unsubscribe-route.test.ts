@@ -356,7 +356,7 @@ describe("Unsubscribe route: explicit identity and confirmed POST results", () =
 		[["audience", "unknown"]],
 		[["audience", "academy"], ["audience", "klustered"]],
 	] satisfies Array<Array<[string, string]>>)("rejects invalid or duplicate audience fields", async (audienceFields) => {
-		const { status } = await request({ fields: [["scope", "email"], ["email", "reader@example.com"], ...audienceFields] });
+		const { status } = await request({ fields: [["scope", "email"], ["email", "reader@example.com"], ...(audienceFields as Array<[string, string]>)] });
 		expect(status).toBe(400);
 		expect(setPreference).not.toHaveBeenCalled();
 	});
