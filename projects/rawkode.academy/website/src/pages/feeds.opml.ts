@@ -23,7 +23,6 @@ const personHasContribution = (
 	if (
 		articles.some(
 			(article) =>
-				!article.data.draft &&
 				Array.isArray(article.data.authors) &&
 				article.data.authors.some((author) =>
 					matchRef(author as { id?: string } | string, personId),
