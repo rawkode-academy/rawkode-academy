@@ -181,8 +181,9 @@ export const createAuth = async (env: AuthEnv) => {
 							where: eq(schema.user.id, user.id),
 						}),
 					]);
-					const storedUsername =
-						userRecord?.username ?? (user as { username?: string }).username;
+					const storedUsername = userRecord
+						? userRecord.username
+						: (user as { username?: string }).username;
 					const username =
 						client.clientId === "klustered-dev" ||
 						(client.clientId === "rawkode-academy-website" && !storedUsername)

@@ -7,6 +7,33 @@ const handler: APIRoute = async (context) => {
 	const url = new URL(context.request.url);
 	const pathname = url.pathname;
 
+	if (
+		context.request.method === "GET" &&
+		pathname === "/auth/oauth2/authorize" &&
+		["rawkode-academy-website", "klustered-dev"].includes(
+			url.searchParams.get("client_id") ?? "",
+		)
+	) {
+		const session = await auth.api.getSession({
+			headers: context.request.headers,
+		});
+		if (session) {
+			const identityUser = await env.DB.prepare(
+				"SELECT username FROM user WHERE id = ?",
+			)
+				.bind(session.user.id)
+				.first<{ username: string | null }>();
+			if (!identityUser?.username) {
+				const signInUrl = new URL("/auth/sign-in/social", url.origin);
+				signInUrl.searchParams.set(
+					"callbackURL",
+					`${url.pathname}${url.search}`,
+				);
+				return Response.redirect(signInUrl, 302);
+			}
+		}
+	}
+
 	if (context.request.method === "GET" && pathname === "/auth/sign-in/social") {
 		const provider = "github";
 
