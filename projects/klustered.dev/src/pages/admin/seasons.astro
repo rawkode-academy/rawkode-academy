@@ -14,6 +14,10 @@ const seasons = await db
 	.where(eq(schema.seasons.showId, SHOW_ID))
 	.orderBy(desc(schema.seasons.createdAt))
 	.all();
+const winterSeason = seasons.find((season) => season.slug === "w26");
+const movedApplications = Astro.url.searchParams.get("applicationsMoved");
+const movedCompetitors = Astro.url.searchParams.get("competitorsMoved");
+const activatedBrackets = Astro.url.searchParams.get("bracketsActivated");
 
 function formatDate(value: Date | null): string {
 	if (!value) return "—";
@@ -22,6 +26,13 @@ function formatDate(value: Date | null): string {
 ---
 
 <PortalLayout title="Seasons" section="admin" nav={[...ADMIN_NAV]}>
+	{movedApplications !== null && (
+		<p class="rounded-xl border border-emerald-800 bg-emerald-950/50 p-4 text-sm text-emerald-200">
+			Moved {movedApplications} applications and {movedCompetitors} competitor
+			profiles to Winter 2026; activated {activatedBrackets} brackets and deleted
+			Summer 2026.
+		</p>
+	)}
 	<section class="rounded-2xl border border-slate-800 bg-slate-900/60 p-6">
 		<h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400">
 			New season
@@ -130,11 +141,54 @@ function formatDate(value: Date | null): string {
 								</td>
 								<td class="px-6 py-3 text-slate-400">{formatDate(s.createdAt)}</td>
 								<td class="px-6 py-3 text-right">
-									<form method="POST" action={`/api/admin/seasons/${s.id}/delete`} onsubmit="return confirm('Delete this season?')">
-										<button class="text-xs text-rose-400 underline-offset-4 hover:underline">
-											Delete
-										</button>
-									</form>
+									{s.slug === "s26" && winterSeason ? (
+										<div class="ml-auto max-w-80 text-left">
+											<p class="mb-2 text-xs text-amber-200">
+												This creates active Winter brackets, moves every application
+												and competitor profile, then deletes Summer. No registration
+												close date is set, so applications stay open until an admin
+												finishes the brackets.
+											</p>
+											<form
+												method="POST"
+												action="/api/admin/seasons/transfer-summer-to-winter"
+												onsubmit="return confirm('Move Summer 2026 data to Winter 2026, activate the brackets, and delete Summer?')"
+												class="flex flex-wrap items-end justify-end gap-2"
+											>
+												<input type="hidden" name="sourceSeasonId" value={s.id} />
+												<input type="hidden" name="targetSeasonId" value={winterSeason.id} />
+												<label class="text-left text-xs text-slate-400">
+													Winter start date (UTC)
+												<input
+													type="date"
+													name="startDate"
+													required
+													value="2026-10-30"
+													class="mt-1 block rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-100"
+												/>
+												</label>
+												<label class="text-left text-xs text-slate-400">
+													Bracket start time (UTC)
+												<input
+													type="time"
+													name="startsAtTime"
+													required
+													value="19:00"
+													class="mt-1 block rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-100"
+												/>
+												</label>
+												<button class="rounded-lg bg-rose-700 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-rose-600">
+													Move applications and delete Summer
+												</button>
+											</form>
+										</div>
+									) : (
+										<form method="POST" action={`/api/admin/seasons/${s.id}/delete`} onsubmit="return confirm('Delete this season?')">
+											<button class="text-xs text-rose-400 underline-offset-4 hover:underline">
+												Delete
+											</button>
+										</form>
+									)}
 								</td>
 							</tr>
 						))

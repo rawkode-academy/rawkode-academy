@@ -13,14 +13,19 @@ Status checked 25 September 2026.
 
 Use **30 October 2026** as the target season start date. This is a planning date based on “the end of October”; confirm the actual day and match start time with the organizers before announcing it. Leave the season end date unset until the Winter format and cadence are agreed.
 
-Bracket start and registration closing times are entered in UTC. Set the individual and team bracket dates once the event schedule is agreed. This change does not publish registration dates, fixtures, or participant data.
+Bracket start and registration closing times are entered in UTC. The Summer-to-Winter action defaults to 19:00 UTC on 30 October, matching the existing bracket convention; change the date or time if the organizers choose another schedule. The action leaves the registration close unset, so applications stay open until an admin finishes each bracket.
+
+## Carrying Summer applications forward
+
+The current Summer 2026 season has four pending applications across Solo and Team, three competitor profiles, and no teams, entries, matches, or legacy registrations. Use the **Move applications and delete Summer** action on the Summer row in `klustered.dev/admin/seasons` after confirming the Winter date and time.
+
+The action creates and activates the matching Winter brackets, reassigns the existing application and competitor records while preserving their IDs and review state, activates Winter, and deletes Summer in one D1 batch. It refuses to run if Winter already has brackets, applications, or competitor data, or if Summer has other linked competition data that would be deleted.
 
 ## Launch steps
 
-1. In `klustered.dev/admin/seasons`, find the existing Winter 2026 season and set its start date to the agreed date. Set status to `active` when the season is ready to be announced.
-2. In `klustered.dev/admin/brackets`, create the individual and team brackets with agreed start times and registration closing times. New brackets stay in `draft`.
-3. Keep each bracket in `draft` while applications should remain closed. Set it to `active` when applications are meant to open. Active status opens applications immediately; this portal does not schedule a future opening time.
-4. Verify `/shows/klustered/apply` while signed out, then verify sign-in and self-application. Confirm the close time before opening if you do not want applications left open until the bracket is finished.
-5. Review applications, confirm competitors/teams, then generate round one and publish match dates.
+1. Confirm the 30 October date and bracket start time with the organizers.
+2. On the Summer row in `klustered.dev/admin/seasons`, run **Move applications and delete Summer**. This opens the matching Winter Solo and Team brackets immediately.
+3. Verify `/shows/klustered/apply` while signed out, then verify sign-in and self-application.
+4. Review the transferred and new applications, confirm competitors/teams, then generate round one and publish match dates.
 
 Draft and finished brackets cannot accept new applications after this change. An active bracket with no registration closing time remains open until an admin finishes it.
