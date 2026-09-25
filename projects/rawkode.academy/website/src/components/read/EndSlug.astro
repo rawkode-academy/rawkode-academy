@@ -1,22 +1,14 @@
----
 import { academyDocument } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
 import MLabel from "@/components/ui/MLabel.vue";
 
 interface Props {
 	date: string;
-	discussHref?: string;
 }
 
-const {
-	date,
-	discussHref = "https://discord.gg/rawkode",
-} = Astro.props as Props;
+const { date } = Astro.props as Props;
 ---
 
 <div class={doc.end}>
 	<MLabel>Published {date}</MLabel>
-	<a class={doc.link} href={discussHref} target="_blank" rel="noopener noreferrer">
-		<MLabel tone="ink">Discuss in the Discord →</MLabel>
-	</a>
 </div>
