@@ -28,6 +28,7 @@ const deleteCookie = vi.fn();
 const logError = vi.fn();
 
 interface RouteState {
+	audience: "academy" | "klustered";
 	scope: "email" | "account";
 	email: string;
 	emailError: boolean;
@@ -90,7 +91,7 @@ beforeAll(async () => {
 		"createLogger",
 		"academyForms",
 		"academyDocument",
-		`${outputText}\nreturn { scope, email, emailError, errorMessage, successMessage };`,
+		`${outputText}\nreturn { audience, scope, email, emailError, errorMessage, successMessage };`,
 	);
 	runHandler = (Astro) =>
 		execute(
@@ -317,11 +318,55 @@ describe("Unsubscribe route: explicit identity and confirmed POST results", () =
 		expect(deleteCookie).not.toHaveBeenCalled();
 	});
 
+	it("lists Klustered on GET and removes every Klustered audience for the signed-in account", async () => {
+		const get = await request({ signedIn: true, query: "?audience=klustered" });
+		expect(get.state.audience).toBe("klustered");
+		expect(setPreference).not.toHaveBeenCalled();
+
+		const { state, status } = await request({
+			signedIn: true,
+			fields: [["scope", "account"], ["audience", "klustered"]],
+		});
+		expect(status).toBe(200);
+		expect(state.successMessage).toContain("Klustered updates");
+		expect(setPreference).toHaveBeenCalledTimes(5);
+		expect(setPreference.mock.calls.map((call) => call[1].audience)).toEqual([
+			"klustered-watch", "klustered-solo", "klustered-team", "klustered-compete", "show:klustered",
+		]);
+		for (const [identity, payload] of setPreference.mock.calls) {
+			expect(identity).toBe("learner:learner-123");
+			expect(payload).toMatchObject({ channel: "newsletter", status: "unsubscribed" });
+		}
+		expect(deleteCookie).not.toHaveBeenCalled();
+	});
+
+	it("removes all Klustered email subscriptions without touching an account", async () => {
+		const { state, status } = await request({
+			signedIn: true,
+			fields: [["scope", "email"], ["audience", "klustered"], ["email", " Reader@Example.com "]],
+		});
+		expect(status).toBe(200);
+		expect(state.successMessage).toContain("Klustered updates");
+		expect(setPreference).toHaveBeenCalledTimes(4);
+		for (const [identity] of setPreference.mock.calls) expect(identity).toBe("email:reader@example.com");
+		expect(deleteCookie).toHaveBeenCalledTimes(5);
+	});
+
+	it.each([
+		[["audience", "unknown"]],
+		[["audience", "academy"], ["audience", "klustered"]],
+	] satisfies Array<Array<[string, string]>>)("rejects invalid or duplicate audience fields", async (audienceFields) => {
+		const { status } = await request({ fields: [["scope", "email"], ["email", "reader@example.com"], ...audienceFields] });
+		expect(status).toBe(400);
+		expect(setPreference).not.toHaveBeenCalled();
+	});
+
 	it("binds the UI to the selected scope, retained email and actual result", () => {
 		expect(source).toContain('name="scope" value={scope}');
 		expect(source).toContain('scope === "email" && <label');
 		expect(source).toContain('name="email" value={email}');
-		expect(source).toContain('href="/unsubscribe?scope=email"');
+		expect(source).toContain('name="audience"');
+		expect(source).toContain('href={`/unsubscribe?scope=email&audience=${audience}`}');
 		expect(source).toContain("Unsubscribe my account");
 		expect(source).toContain("{successMessage ?");
 		expect(source).not.toContain('searchParams.get("success")');
