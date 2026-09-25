@@ -477,20 +477,36 @@ test("hidden/missing shows reject every extension before read/write dispatch", a
 	}
 });
 
-test("finished/expired brackets link to results, open brackets preserve apply, without service calls", async () => {
+test("Klustered exposes only the apply page and endpoint until the relaunch is ready", async () => {
+	const h = harness();
+	const { klusteredExtension } = await h.module("shows/klustered/index.ts");
+	assert.equal(
+		klusteredExtension.pages.map((page) => page.slug).join(","),
+		"apply",
+	);
+	assert.equal(
+		klusteredExtension.endpoints?.map((endpoint) => endpoint.slug).join(","),
+		"apply",
+	);
+});
+
+test("only active, unexpired brackets link to applications, without service calls", async () => {
 	const fixtures = [
 		bracket({ id: "finished", name: "Finished", status: "finished" }),
 		bracket({
 			id: "expired",
 			name: "Expired",
+			status: "active",
 			registrationClosesAt: new Date(now).toISOString(),
 		}),
 		bracket({
 			id: "open",
 			name: "Open",
+			status: "active",
 			registrationClosesAt: new Date(now + 1).toISOString(),
 		}),
-		bracket({ id: "no-deadline" }),
+		bracket({ id: "no-deadline", status: "active" }),
+		bracket({ id: "draft", name: "Draft" }),
 	];
 	const h = harness();
 	const { dom } = await h.render(`${plugin}pages/Seasons.astro`, {
@@ -506,6 +522,7 @@ test("finished/expired brackets link to results, open brackets preserve apply, w
 			"/shows/klustered/brackets",
 			"/shows/klustered/apply",
 			"/shows/klustered/apply",
+			"/shows/klustered/brackets",
 		],
 	);
 	assert(

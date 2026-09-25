@@ -4,4 +4,6 @@ import type { ShowExtension } from "@/lib/shows/types";
 // Klustered is the first consumer of the reusable Bracket plugin.
 export const klusteredExtension: ShowExtension = bracketPlugin({
 	showId: "klustered",
+	enabledPages: ["apply"],
+	enabledEndpoints: ["apply"],
 });

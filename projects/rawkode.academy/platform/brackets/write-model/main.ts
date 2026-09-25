@@ -68,6 +68,9 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 
 	private async getOpenBracket(bracketId: string) {
 		const bracket = await this.getBracket(bracketId);
+		if (bracket.status !== "active") {
+			throw new Error("bracket registration is not active");
+		}
 		if (
 			bracket.registrationClosesAt &&
 			bracket.registrationClosesAt.getTime() <= Date.now()
@@ -579,12 +582,19 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 				seasonId: s.brackets.seasonId,
 				kind: s.brackets.kind,
 				status: s.brackets.status,
+				registrationClosesAt: s.brackets.registrationClosesAt,
 			})
 			.from(s.brackets)
 			.where(eq(s.brackets.id, data.bracketId))
 			.get();
-		if (!bracket || bracket.status === "finished") {
-			throw new Error("bracket not open");
+		if (!bracket || bracket.status !== "active") {
+			throw new Error("bracket registration is not active");
+		}
+		if (
+			bracket.registrationClosesAt &&
+			bracket.registrationClosesAt.getTime() <= Date.now()
+		) {
+			throw new Error("registration closed");
 		}
 		if (bracket.kind === "team" && !data.teamName) {
 			throw new Error("teamName required for team bracket entries");

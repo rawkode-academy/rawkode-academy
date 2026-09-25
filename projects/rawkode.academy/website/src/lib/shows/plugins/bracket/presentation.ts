@@ -7,7 +7,7 @@ export function isRegistrationOpen(
 	now = Date.now(),
 ): boolean {
 	return (
-		bracket.status !== "finished" &&
+		bracket.status === "active" &&
 		(!bracket.registrationClosesAt ||
 			Date.parse(bracket.registrationClosesAt) > now)
 	);
