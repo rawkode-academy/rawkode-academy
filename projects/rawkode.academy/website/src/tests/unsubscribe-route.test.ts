@@ -347,19 +347,21 @@ describe("Unsubscribe route: explicit identity and confirmed POST results", () =
 		});
 		expect(status).toBe(200);
 		expect(state.successMessage).toContain("Klustered updates");
-		expect(setPreference).toHaveBeenCalledTimes(4);
+		expect(setPreference).toHaveBeenCalledTimes(5);
 		for (const [identity] of setPreference.mock.calls) expect(identity).toBe("email:reader@example.com");
 		expect(deleteCookie).toHaveBeenCalledTimes(5);
 	});
 
-	it.each([
-		[["audience", "unknown"]],
-		[["audience", "academy"], ["audience", "klustered"]],
-	] satisfies Array<Array<[string, string]>>)("rejects invalid or duplicate audience fields", async (audienceFields) => {
-		const { status } = await request({ fields: [["scope", "email"], ["email", "reader@example.com"], ...(audienceFields as Array<[string, string]>)] });
-		expect(status).toBe(400);
-		expect(setPreference).not.toHaveBeenCalled();
-	});
+	for (const [caseName, audienceFields] of [
+		["invalid", [["audience", "unknown"]]],
+		["duplicate", [["audience", "academy"], ["audience", "klustered"]]],
+	] satisfies Array<[string, Array<[string, string]>]>) {
+		it(`rejects ${caseName} audience fields`, async () => {
+			const { status } = await request({ fields: [["scope", "email"], ["email", "reader@example.com"], ...audienceFields] });
+			expect(status).toBe(400);
+			expect(setPreference).not.toHaveBeenCalled();
+		});
+	}
 
 	it("binds the UI to the selected scope, retained email and actual result", () => {
 		expect(source).toContain('name="scope" value={scope}');
