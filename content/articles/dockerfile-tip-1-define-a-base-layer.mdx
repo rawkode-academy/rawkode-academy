@@ -14,7 +14,7 @@ With the advent of the Multi Stage Dockerfile, it's very common for people to ve
 
 **Example:**
 
-```Dockerfile
+```dockerfile
 FROM elixir:1.8 AS deps
 
 RUN mix deps.get
@@ -32,7 +32,7 @@ This allows lengthy tasks to utilise the build cache and pass artefacts between 
 
 Create an empty layer with your primary image:
 
-```Dockerfile
+```dockerfile
 FROM elixir:1.8 AS base
 
 FROM base AS deps
