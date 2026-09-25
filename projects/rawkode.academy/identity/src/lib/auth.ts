@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { jwt, oidcProvider, organization } from "better-auth/plugins";
-import { eq, and } from "drizzle-orm";
+import { eq, and, ne } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import * as schema from "../db/schema";
 import {
@@ -40,6 +40,59 @@ const resolveBaseUrl = (siteUrl?: string) => {
 export const createAuth = async (env: AuthEnv) => {
 	const db = drizzle(env.DB, { schema });
 	const baseURL = resolveBaseUrl(env.SITE_URL);
+
+	const refreshGitHubUsername = async (userId: string): Promise<string> => {
+		const accountRecord = await db.query.account.findFirst({
+			where: and(
+				eq(schema.account.userId, userId),
+				eq(schema.account.providerId, "github"),
+			),
+		});
+		if (!accountRecord?.accessToken) {
+			throw new Error("GitHub access token unavailable; cannot verify username");
+		}
+
+		const response = await fetch("https://api.github.com/user", {
+			headers: {
+				Authorization: `Bearer ${accountRecord.accessToken}`,
+				Accept: "application/vnd.github+json",
+				"User-Agent": "rawkode-academy-identity",
+			},
+		});
+		if (!response.ok) {
+			throw new Error(`GitHub profile lookup failed: ${response.status}`);
+		}
+
+		const profile = (await response.json()) as { login?: unknown };
+		if (
+			typeof profile.login !== "string" ||
+			!profile.login ||
+			profile.login.length > 39 ||
+			!/^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$/.test(profile.login)
+		) {
+			throw new Error("GitHub profile is missing a valid username");
+		}
+
+		// GitHub can reuse a renamed account's old handle. Clear that stale
+		// identity mapping before assigning the confirmed current login.
+		await db.batch([
+			db
+				.update(schema.user)
+				.set({ username: null })
+				.where(
+					and(
+						eq(schema.user.username, profile.login),
+						ne(schema.user.id, userId),
+					),
+				),
+			db
+				.update(schema.user)
+				.set({ username: profile.login })
+				.where(eq(schema.user.id, userId)),
+		]);
+
+		return profile.login;
+	};
 
 	const [authSecret, githubClientId, githubClientSecret] = await Promise.all([
 		env.AUTH_SECRET.get(),
@@ -110,7 +163,12 @@ export const createAuth = async (env: AuthEnv) => {
 							where: eq(schema.user.id, user.id),
 						}),
 					]);
-					const username = userRecord?.username ?? (user as { username?: string }).username;
+					const requiresGitHubUsername =
+						client.clientId === "rawkode-academy-website" ||
+						client.clientId === "klustered-dev";
+					const username = requiresGitHubUsername
+						? await refreshGitHubUsername(user.id)
+						: userRecord?.username ?? (user as { username?: string }).username;
 					return {
 						...accessClaims,
 						...(username
@@ -315,52 +373,22 @@ export const createAuth = async (env: AuthEnv) => {
 							env.ANALYTICS,
 						);
 
-						// Backfill username for existing users who don't have one
-						const userRecord = await db.query.user.findFirst({
-							where: eq(schema.user.id, session.userId),
-						});
-
-						if (!userRecord?.username) {
-							const accountRecord = await db.query.account.findFirst({
-								where: and(
-									eq(schema.account.userId, session.userId),
-									eq(schema.account.providerId, "github"),
-								),
-							});
-
-							if (accountRecord?.accessToken) {
-								try {
-									const response = await fetch("https://api.github.com/user", {
-										headers: {
-											Authorization: `Bearer ${accountRecord.accessToken}`,
-											Accept: "application/vnd.github+json",
-											"User-Agent": "rawkode-academy-identity",
-										},
-									});
-
-									if (response.ok) {
-										const profile = (await response.json()) as { login?: string };
-										if (profile.login) {
-											await db
-												.update(schema.user)
-												.set({ username: profile.login })
-												.where(eq(schema.user.id, session.userId));
-										}
-									}
-								} catch (error) {
-									await captureAuthEvent(
-										{
-											event: "auth.username_backfill_failed",
-											distinctId: session.userId,
-											properties: {
-												error: error instanceof Error ? error.message : "Unknown error",
-											},
-										},
-										env.ANALYTICS,
-									);
-								}
-							}
+						try {
+							await refreshGitHubUsername(session.userId);
+						} catch (error) {
+							await captureAuthEvent(
+								{
+									event: "auth.username_refresh_failed",
+									distinctId: session.userId,
+									properties: {
+										error:
+											error instanceof Error ? error.message : "Unknown error",
+									},
+								},
+								env.ANALYTICS,
+							);
 						}
+
 					},
 				},
 			},
