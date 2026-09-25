@@ -8,7 +8,7 @@ afterEach(() => {
 	vi.mocked(fetch).mockReset();
 });
 
-it("shows a compact empty discussion with a contextual H2 and one onward link", async () => {
+it("shows compact empty comments without a Discord discussion link", async () => {
 	vi.mocked(fetch).mockResolvedValue(
 		new Response(
 			JSON.stringify({
@@ -28,10 +28,7 @@ it("shows a compact empty discussion with a contextual H2 and one onward link", 
 	expect(wrapper.findAll("p").map((p) => p.text())).toEqual([
 		"No comments yet. Be the first to start the discussion.",
 	]);
-	expect(wrapper.findAll("a")).toHaveLength(1);
-	expect(wrapper.get("a").attributes("href")).toBe(
-		"https://discord.gg/example",
-	);
+	expect(wrapper.findAll("a")).toHaveLength(0);
 	expect(fetch).toHaveBeenCalledExactlyOnceWith("/api/comments/fixture");
 });
 

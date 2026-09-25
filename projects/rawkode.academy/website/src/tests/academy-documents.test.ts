@@ -71,6 +71,12 @@ describe("Academy document migration", () => {
 		);
 	});
 
+	it("does not render a Discord discussion link at the end of read articles", () => {
+		const endSlug = source("components/read/EndSlug.astro");
+		expect(endSlug).not.toContain("Discuss in the Discord");
+		expect(endSlug).not.toContain("discord.gg/rawkode");
+	});
+
 	it("keeps accessible active-location state independent of generated class names", () => {
 		const toc = source("components/read/ArticleTOC.astro");
 		expect(toc).toContain('aria-label="On this page"');
