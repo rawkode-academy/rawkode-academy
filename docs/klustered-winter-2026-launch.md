@@ -1,6 +1,6 @@
 # Klustered Winter 2026 launch
 
-Status checked 23 September 2026.
+Status checked 25 September 2026.
 
 ## What exists
 
