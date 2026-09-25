@@ -1,0 +1,243 @@
+---
+title: "Automate Google Calendar Invitations with Slack and Pipedream"
+description: "When I was working at InfluxData, I put together a programme that aimed to solve a common business ch..."
+type: tutorial
+publishedAt: 2020-07-15
+updatedAt: 2020-07-15
+authors:
+  - rawkode
+technologies:
+  - node
+  - javascript
+  - pipedream
+  - slack
+---
+
+When I was working at InfluxData, I put together a programme that aimed to solve a common business challenge.
+
+**How do we encourage and enable cross-functional collaboration within a fast moving organisation?**
+
+Having spent many years working and contributing to open source communities, I've seen many governance and collaboration models used across various successful open source projects; but the one that continues to impress me to this day is the Special Interest Groups (SIGs) model used by Kubernetes.
+
+I was curious what would happen if we adopted SIGs internally to provide guidance around our organisations involvement, support, and enable of our technology within external communities. That is to say that InfluxData had people across multiple disciplines that wished to collaborate on the use of our product within OpenTracing, Kubernetes, Machine Learning, and many other communities and ecosystems; but until then had no structured way to drive that collaboration forward.
+
+I'm not writing this article to talk about the progress of that programme, perhaps I'll do that later. What I wanted to write about was one of the challenges we had and how we solved it with a fantastic piece of open source software: [Pipedream](https://www.pipedream.com).
+
+## The Problem
+
+When I put this programme together, one of my goals was for each SIG to be inclusive. This meant that I was keen to avoid any one person controlling the calendar invitations, deciding whom they seen fit to join each SIG. Instead, I wanted each SIG to have a doors open policy that invited anyone and everyone to join their initiatives.
+
+Google Calendar provides "Team Calendars" to help achieve this. The concept is simple, but sadly the implementation is painful. While I was able to successfully create the shared calendar and pass around a link, the link didn't seem to work for everyone and was cumbersome, at best, to consume.
+
+More importantly, **there's no discovery of these events, you need to be told to look for them**.
+
+This led to the first few meetings having next to no participation, other than the core people that expressed an interest in the groups upfront.
+
+## The Solution
+
+So I got my thinking hat on. One of the mandates of the SIG programme was that every SIG **MUST** have a Slack channel, where the chair will share updates after each meeting.
+
+What if we could consider "membership" of the Slack channel as an indicator that they probably want to be aware of the events; hell, even auto-invite them? I kept my thinking hat on 🎩
+
+The goal is now this:
+
+Whenever anyone joins one of our `#sig-channels` on Slack, we automatically update the Google Calendar event (which still lives in the team calendar) with their email address.
+
+Lets do this!
+
+## The Implementation
+
+I like to avoid writing code or deploying anything as much as possible. NoCode and LowCode solutions are very exciting to me; because they're enablers for everyone, no matter what your constraints are. My biggest constraint is time, not technical knowledge; but NoCode and LowCode are great enablers, or gateways, for non-technical folk. I love these solutions.
+
+So I decided to utilise one of these solutions to provide the "plumbing" of this auto-inviter, hopefully allowing me to deliver a solution to my problem without writing or deploying any code or containers.
+
+### Pipedream
+
+You can read more about Pipedream at their [website](https://www.pipedream.com), but I'll share the first paragraph from their docs:
+
+> Pipedream is an integration platform for developers to build and run workflows that integrate apps, data, and APIs — no servers or infrastructure to manage!
+>
+> - Develop any workflow, based on any trigger.
+> - Workflows are code, which you can run for free.
+> - No server or cloud resources to manage.
+
+It ticked all the boxes I had:
+
+- Support Slack and Google Calendar as sources / sinks
+- OpenSource
+- NoCode / LowCode
+- SaaS (I didn't want to deploy anything)
+
+**It took me 30 minutes to implement this, let me show you how.**
+
+### Step 1. Connect Your Accounts
+
+I'm not going to cover this really, but Pipedream makes it very easy to connect your Pipedream account with your other services.
+
+For this tutorial, you need to connect Twitter and Slack using the built-in OAuth prompts.
+
+### Step 2. Prepare the Webhook
+
+I decided that I wanted to use Slack's webhooks / events API to consume events from Slack. It's the easiest way to get started and it works really well in a consume and emit / event driven workflow.
+
+Pipedream provides HTTP endpoints that can receive arbitrary payloads and you can build your workflow around these with ease.
+
+So I created a webhook using the Pipedream UI and I got a URL like `https://randomID.m.pipedream.net`.
+
+You can [see how to do this yourself, on their docs](https://docs.pipedream.com/workflows/steps/triggers/#webhook).
+
+#### Pro Tip
+
+Pipedream allows you to see the payloads that have hit your endpoint. I suggest hooking up your source ASAP and building up a history of payloads to see what you need to handle.
+
+Pipedream also provides autocomplete based on previous payloads when working with future steps in the workflow.
+
+Ridiculous, right?
+
+🥰🥰🥰
+
+### Step 3. Slack Challenge
+
+When you add a new receiver for Slack events, it first sends a challenge. You need to be able to respond to this correctly with their challenge string.
+
+Pipedream allows us to add arbitrary JavaScript to handle payloads through a "NodeJS Step". The code I used was really simple.
+
+```javascript
+if (event.body && event.body.challenge) {
+  $respond({
+    status: 200,
+    body: event.body.challenge,
+  });
+}
+```
+
+We check if the payload contains a `challenge` parameter and we respond with it.
+
+Next!
+
+### Step 4. Slack Channel Lookup
+
+I configured the Slack events integration to only send the join channel events. Part of this payload is a channel identifier, but not the channel name. So we need to query the Slack API to get the actual name of the channel.
+
+We use the NodeJS Step again to build up a config object to send to Slack with [axios](https://github.com/axios/axios).
+
+Pipedream provides the authentication we need through the `auths` object that is available after we complete the OAuth connection from Step 1.
+
+We need to configure a `param` for this step, which we can do through the GUI. You add a param called `channel` which using the shiny autocomplete dropdown we can set to `event.body.event.channel`.
+
+`event.body` is the payload we receive from Slack, which contains `event.channel`.
+
+```javascript
+// See the API docs here: https://api.slack.com/methods/channels.info
+var include_locale = params.include_locale || false;
+const config = {
+  url: `https://slack.com/api/conversations.info?channel=${params.channel}&include_locale=${include_locale}`,
+  headers: {
+    Authorization: `Bearer ${auths.slack.oauth_access_token}`,
+    "Content-Type": "application/x-www-form-urlencoded",
+  },
+};
+const channel = await require("@pipedreamhq/platform").axios(this, config);
+
+if (channel.ok != true) {
+  $end("Couldn't fetch Channel information");
+}
+
+this.channelName = channel.channel.name;
+
+return;
+```
+
+### Step 4. User Lookup
+
+Much like the channel lookup, we also need to lookup the user information. We can't add the Slack ID to a Google Calendar invite, we need their email address.
+
+This time we configure a param called `user`, which comes from `event.body.event.user`.
+
+```javascript
+//See the API docs here: https://api.slack.com/methods/users.info
+const data = {
+  user: params.user,
+  include_locale: params.include_locale || false,
+};
+const config = {
+  url: `https://slack.com/api/users.info`,
+  headers: {
+    Authorization: `Bearer ${auths.slack.oauth_access_token}`,
+    "Content-Type": "application/x-www-form-urlencoded",
+  },
+  params: data,
+};
+const user = await require("@pipedreamhq/platform").axios(this, config);
+
+if (user.ok !== true) {
+  $end("Failed to get user information");
+}
+
+this.userName = user.user.real_name;
+this.userEmail = user.user.profile.email;
+
+return;
+```
+
+### Step 5. Add to Google Calendar Event
+
+Finally, we want to add them to the invite! Unfortunately you need to hardcode some values here, one identifier for each event. I'm sure there's a way to do this programmatically with the Google Calendar API, but I've not worked that out yet.
+
+If the channel isn't one of the expected channels we have an event for; we exit early with `$end()`.
+
+For channels we do understand, we add the email address to the event. This is idempotent, so we don't need to check if the user already exists on the invite.
+
+Pipedream allows us to fetch variables from the previous steps, which we use to get the users name and email address. Neat, huh?
+
+This looks like `steps.slack_get_user_info.userEmail`, where `slack_get_user_info` is the name of the previous step, and `userEmail` is the variable I "exposed" with the `this.userEmail =` syntax.
+
+```javascript
+const axios = require("axios");
+
+switch (steps.slack_get_channel_info.channelName) {
+  case "sig-kubernetes":
+    eventId = "EventID from Google Calendar";
+    break;
+
+  case "sig-opentelemetry":
+    eventId = "EventID from Google Calendar";
+    break;
+
+  case "sig-ml":
+    eventId = "EventID from Google Calendar";
+    break;
+
+  default:
+    $end("Not a SIG channel.");
+    return;
+}
+
+calendarId = params.calendarId;
+
+event = await require("@pipedreamhq/platform").axios(this, {
+  url: `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events/${eventId}`,
+  headers: {
+    Authorization: `Bearer ${auths.google_calendar.oauth_access_token}`,
+  },
+  method: "GET",
+});
+
+newAttendee = {
+  email: steps.slack_get_user_info.userEmail,
+  name: steps.slack_get_user_info.userName,
+};
+
+if (event.attendees) event.attendees.push(newAttendee);
+else event.attendees = [newAttendee];
+data = event;
+
+return await require("@pipedreamhq/platform").axios(this, {
+  url: `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events/${eventId}`,
+  headers: {
+    Authorization: `Bearer ${auths.google_calendar.oauth_access_token}`,
+  },
+  method: "PUT",
+  data: data,
+});
+```

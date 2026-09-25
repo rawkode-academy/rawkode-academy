@@ -1,0 +1,292 @@
+---
+title: "QuestDB on Kubernetes"
+description: "I was first introduced to QuestDB by my former colleague, David Simmons, who now runs their Developer..."
+type: tutorial
+publishedAt: 2020-08-24
+authors:
+  - rawkode
+technologies:
+  - questdb
+  - kubernetes
+---
+
+I was first introduced to QuestDB by my former colleague, [David Simmons](https://twitter.com/davidgsiot), who now runs their Developer Relations team. As I'm a rather curious individual that is interested in databases, especially time-series, I wanted to have a play with it.
+
+I don't, unless absolutely need to, have a JVM installed on my laptop. QuestDB is written in Java ... so I had two options: Docker or Kubernetes.
+
+I opted for Kubernetes, as there was no Helm chart currently available; this would give me a great opportunity to contribute to QuestDB.
+
+If you'd prefer to watch a video than read this blog, fear not! You can watch David and I run through this process in the following video, which also includes configuring Telegraf to write data to QuestDB.
+
+<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/EFpZzgj8EfE" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe>
+
+## Installing QuestDB on Kubernetes with Helm
+
+In order to install QuestDB to Kubernetes, we need to clone the Helm chart locally. This step is currently required because a Helm chart repository isn't currently being published by QuestDB yet, though this is something I expect to assist them with over the coming weeks with some further contributions.
+
+```
+git clone https://github.com/questdb/questdb-kubernetes
+
+```
+
+The chart ships with a `values.yaml` that should be familiar to anyone that's deployed a Kubernetes resource before. I cover each block in a little detail in the next section, should you be interested in that kinda thing.
+
+For those of you that don't care, lets get to the fun bit. The following command assumes we've run the `git clone` above in the current working directory. If not, update the path at the end to wherever you cloned.
+
+```
+helm upgrade --install questdb ./questdb-kubernetes/charts/questdb
+
+```
+
+This command takes only a second, or two, and will print something like so to the terminal.
+
+```
+Release "questdb" does not exist. Installing it now.
+NAME: questdb
+LAST DEPLOYED: Mon Aug 24 11:15:15 2020
+NAMESPACE: default
+STATUS: deployed
+REVISION: 1
+NOTES:
+1. Get the application URL by running these commands:
+  export POD_NAME=$(kubectl get pods --namespace default -l "app.kubernetes.io/name=questdb,app.kubernetes.io/instance=questdb" -o jsonpath="{.items[0].metadata.name}")
+  echo "Visit http://127.0.0.1:9000 to use your application"
+  kubectl --namespace default port-forward $POD_NAME 9000:9000
+
+```
+
+### Confirming the Install
+
+The first thing we'll want to do is ensure that the pods are scheduled and running. You may see the `STATUS` as `ContainerCreating` for a few moments, this means that the container image is still being pulled into your cluster.
+
+```
+$ kubectl get pods
+
+NAME READY STATUS RESTARTS AGE
+questdb-0 1/1 Running 0 3s
+
+```
+
+💥 Perfect.
+
+Now that QuestDB is running, we'll want to port-forward to the service in-order to checkout the web UI.
+
+```
+kubectl port-forward svc/questdb 8080:80
+
+```
+
+This setups a port-forward from our local machine into the Kubernetes cluster. We're specifying that the local port `8080` should be forwarded to port `80` our QuestDB service, `svc/questdb`, inside the Kubernetes cluster.
+
+As if by magic, you'll now be able to browse to `http://localhost:8080` and see the QuestDB UI.
+
+Don't believe me? Try it 🤪
+
+### Writing Data
+
+One of the really cool features of QuestDB, besides its ridiculous performance with large data sets, is the support for InfluxDB line protocol. That means we can use Telegraf to write data to QuestDB within a matter of minutes.
+
+Assuming we have this `telegraf.conf`, which is configured with input plugins to gather metrics from our host; notable the `cpu`, `disk`, and `mem` plugins.
+
+```
+[agent]
+  interval = "5s"
+
+[[inputs.cpu]]
+[[inputs.disk]]
+[[inputs.mem]]
+
+```
+
+We can add Telegraf's generic `socket_writer` output plugin to write our data.
+
+```
+[[outputs.socket_writer]]
+  address = "tcp://questdb:9009"
+  data_format = "influx"
+
+```
+
+This output configuration specifies that we want Telegraf to use the line protocol data format and we want to write to a TCP socket on port `9009`. This does require enabling one parameter within the `values.yaml` file.
+
+First, lets take a look at our QuestDB service.
+
+```
+$ kubectl get svc
+NAME TYPE CLUSTER-IP EXTERNAL-IP PORT(S) AGE
+kubernetes ClusterIP 10.96.0.1 <none> 443/TCP 9d
+questdb ClusterIP 10.105.188.157 <none> 80/TCP 52m
+
+```
+
+You can see that under `PORT(S)` that it only lists port `80`, which is the web UI. So we need to upgrade our QuestDB deployment with a change that enables the InfluxDB line protocol support.
+
+```
+cat <<EOF >> values.yaml
+service:
+  type: ClusterIP
+  port: 80
+  expose:
+    influx:
+      enabled: true
+      port: 9009
+EOF
+
+helm upgrade -f values.yaml questdb ./questdb-kubernetes/charts/questdb
+
+```
+
+We've used `-f` to specify our own values file, which is augmented / merged with the default one provided by the chart. Our `values.yaml` adds the configuration we need to enable the InfluxDB support; which exposes our port on the QuestDB service. Cool, huh? Now if we check out the service again ...
+
+```
+$ kubectl get svc
+NAME TYPE CLUSTER-IP EXTERNAL-IP PORT(S) AGE
+kubernetes ClusterIP 10.96.0.1 <none> 443/TCP 9d
+questdb ClusterIP 10.105.188.157 <none> 80/TCP,9009/TCP 56m
+
+```
+
+We have port `9009` 😀
+
+I'm not going to cover running Telegraf inside our Kubernetes cluster, at-least not in this article. I also maintain the chart that makes that easy-easy too; which you can find [here](https://github.com/influxdata/helm-charts).
+
+### Easy Peasy
+
+That is all it takes to get QuestDB running on a Kubernetes cluster using the official Helm chart and write some data to it with Telegraf.
+
+Of course, there's a variety of things to consider when making the leap to production; and I'll explore that more as I continue my journey with QuestDB. Until then, go check it out for yourself.
+
+Below is the deeper dive into the configuration available, if you're really keen.
+
+Have a great day!
+
+## Helm Chart Values Explanations
+
+Firstly, we have the option to override which image and tag to use for our QuestDB deployment. By default, it's configured to use `questdb/questdb`, which is officially maintained by the QuestDB team. I would always recommend using officially maintained images, but if you're in an air gapped environment or have compliance teams to appease, you can override as needed. This may require using `imagePullSecrets` to handle authentication for your private registry, which can also be provided. At the time of writing, the most recent version of QuestDB is `5.0.1`.
+
+```
+image:
+  repository: questdb/questdb
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  #tag: "5.0.1"
+imagePullSecrets: []
+
+```
+
+Next, we have `nameOverride` and `fullnameOverride`. Pretty much every chart offers these and they're strictly superficial. They allow configuring the name of your resources that are created as a result of the deployment. We're not going to use them today.
+
+```
+nameOverride: ""
+fullnameOverride: ""
+
+```
+
+Now we get a little more interesting. `podAnnotations` allow you to inject arbitrary annotations onto the pods. This can be useful for gathering metrics from your QuestDB deployment, primarily with Prometheus; which can use annotations for endpoint discovery.
+
+```
+podAnnotations: {}
+
+```
+
+Now for some meaty security stuff. We can configure the user that our process within the containers run as, as well as the group ownership of the filesystems we need for storing our data. We also have the ability to be rather explicit about the capabilities our containers have at the kernel level. This is a **HUGE** topic that needs to be handled gracefully, like a swan. **HONK**. There was a great [TGIK](https://www.youtube.com/watch?v=ibrDDaLD6Ks) with [Duffie Cooley](https://twitter.com/mauilion) and [Ian Coldwater](https://twitter.com/IanColdwater) recently that's worth watching, if Kubernetes security is something that tickles your fancy.
+
+```
+podSecurityContext: {}
+# fsGroup: 2000
+securityContext: {}
+# capabilities:
+# drop:
+# - ALL
+# readOnlyRootFilesystem: true
+# runAsNonRoot: true
+# runAsUser: 1000
+
+```
+
+OK. Now we get to configuring QuestDB itself. I'll be honest, I don't know much about this, yet. However, it is [documented](https://questdb.io/docs/reference/configuration/server).
+
+```
+questdb:
+  config: #{}
+    enabled: true
+    options:
+      shared.worker.count: 2
+
+```
+
+Running QuestDB on Kubernetes is great ... but we also want to be able to consume it. We can use the `service` block to enable other pods within our cluster to access QuestDB. QuestDB runs a web server, to provide its API and UI, on port `9000`. However, it's quite common to expose that on the HTTP native port, `80`, within Kubernetes. This means we can, from within the cluster, run `curl http://questdb` and get what we expect.
+
+QuestDB also offers a few other ports, which allow for support of InfluxDB line protocol and PostgreSQL; on ports `9009` and `8812` respectfully. I actually forgot to add this to the Helm chart and it was contributed by [Niclas Mietz](https://github.com/solidnerd); so thank you! 😃
+
+```
+service:
+  type: ClusterIP
+  port: 80
+  expose:
+    postgresql:
+      enabled: false
+      port: 8812
+    influx:
+      enabled: false
+      port: 9009
+
+```
+
+You know what's more fun than accessing QuestDB internally within your cluster? Making it public ... ooooooh yeah.
+
+<iframe src="https://giphy.com/embed/aTx5OMKR7FCGQ" width="480" height="270" frameborder="0" allowfullscreen=""></iframe>
+
+The Helm chart allows you to leverage Kubernetes Ingress controllers to expose your services to the big bad world. In fact, QuestDB being rather bold ... actually runs their [own public QuestDB](https://questdb.io/blog/2020/07/01/we-put-a-sql-database-on-the-internet) that allows you to query 2.6 billion records ... that's wild. I don't think anyone's broken it ... yet 😂
+
+```
+ingress:
+enabled: false
+annotations: {}
+# kubernetes.io/ingress.class: nginx # kubernetes.io/tls-acme: "true"
+# hosts:
+# - host: chart-example.local
+# paths: []
+# tls: []
+# # - secretName: chart-example-tls
+# # hosts:
+# # - chart-example.local
+
+```
+
+You know what good a database is without state / persistence? [NOTHING](https://www.youtube.com/watch?v=e0r2Apn7OKA).
+
+We can configure our QuestDB deployment to use persistence through Kubernetes primitives, PVC/PV's. Resizing these isn't as easy as one might hope, but it does continually get easier (especially since Kubernetes 1.17). So think carefully about how much space to provision.
+
+```
+persistence:
+  enabled: true
+  #storageClass: "-"
+  accessMode: ReadWriteOnce
+  size: 50Gi
+
+```
+
+QuestDB does some magic stuff with the JVM to disable GC, which means that it can run on limited resources. You can use the `resources` block to limit this explicitly. There's no guessing these numbers, I'm afraid. You'll need to run without these constraints and profile / monitor your pods to see what "normal" usage patterns look like. Then add a safety ceiling of (10|20|30)% and go with that. Best of luck ... resource constraints are tricky business.
+
+```
+resources: {}
+# limits:
+# cpu: 100m
+# memory: 128Mi
+# requests:
+# cpu: 100m
+# memory: 128Mi
+
+```
+
+Finally, the last block. Like every Helm chart before it and every Helm chart that will come after it, we provide the ability to encourage the scheduling of your QuestDB pods to the nodes that you wish, whether it be for storage class support or locality to your other producing or consuming pods; you can do whatever you need with the following three keys.
+
+```
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+```
+
+[Read more here](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/).
