@@ -10,6 +10,7 @@ interface Entry {
 		series?: { id: string };
 		publishedAt?: Date;
 		updatedAt?: Date;
+		[key: string]: unknown;
 	};
 }
 type CollectionReader = (
@@ -128,7 +129,7 @@ describe("Published route and sitemap contracts", () => {
 			],
 			[
 				{ id: "orphan", data: {} },
-				{ id: "draft-only", data: {} },
+				{ id: "formerly-hidden", data: { updatedAt } },
 				{ id: "eligible", data: { updatedAt } },
 			],
 		);
@@ -136,6 +137,12 @@ describe("Published route and sitemap contracts", () => {
 		expect(entries).toEqual([
 			{
 				path: "/series/eligible",
+				lastmod: updatedAt,
+				changefreq: "weekly",
+				priority: 0.5,
+			},
+			{
+				path: "/series/formerly-hidden",
 				lastmod: updatedAt,
 				changefreq: "weekly",
 				priority: 0.5,
