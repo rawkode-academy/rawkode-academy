@@ -7,7 +7,7 @@ import {
 } from "../../../lib/feed-utils";
 
 export async function GET(context: APIContext) {
-	const articles = await getCollection("articles", ({ data }) => !data.draft);
+	const articles = await getCollection("articles");
 
 	// Sort by publishedAt desc
 	const sortedArticles = articles.sort(

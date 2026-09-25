@@ -24,7 +24,7 @@ Astro.response.headers.set("Cache-Tag", "articles-page, articles-list");
 // ─── Data ──────────────────────────────────────────────────────
 
 const allArticles = (
-	await getCollection("articles", ({ data }) => !data.draft)
+	await getCollection("articles")
 ).sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
 
 // ─── Filters (?type=…&topic=…) ─────────────────────────────────

@@ -15,10 +15,7 @@ const [latest, publishedVideos, learningPaths, courses, articles] =
 		getPublishedVideos(),
 		getCollection("learningPaths", ({ data }) => data.publishedAt <= now),
 		getCollection("courses", ({ data }) => data.publishedAt <= now),
-		getCollection(
-			"articles",
-			({ data }) => !data.draft && data.publishedAt <= now,
-		),
+		getCollection("articles", ({ data }) => data.publishedAt <= now),
 	]);
 
 learningPaths.sort(

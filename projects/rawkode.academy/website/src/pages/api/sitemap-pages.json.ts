@@ -226,10 +226,7 @@ async function generateNavigationItems(
 	});
 
 	try {
-		const publishedArticles = await getCollection(
-			"articles",
-			({ data }) => !data.draft,
-		);
+		const publishedArticles = await getCollection("articles");
 
 		// Add articles only if requested
 		if (includeArticles) {

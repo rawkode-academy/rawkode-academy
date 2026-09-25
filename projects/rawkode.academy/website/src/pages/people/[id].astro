@@ -30,7 +30,7 @@ const videos = await getCollection("videos", ({ data }) => data.publishedAt <= n
 const shows = await getCollection("shows", ({ data }) => data.publish);
 const technologies = await getCollection("technologies");
 const news = await getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now));
-const articles = await getCollection("articles", ({ data }) => !data.draft && data.publishedAt <= now);
+const articles = await getCollection("articles", ({ data }) => data.publishedAt <= now);
 const techNameById = new Map(
 	technologies.map((t) => [t.id.replace(/\/index$/, ""), t.data.name] as const),
 );

@@ -233,7 +233,7 @@ test("technology page guard admits object-reference-only articles and agrees wit
 	}
 });
 
-test("technology page guard retains draft exclusions and news/path matches without false positives", () => {
+test("technology page ignores legacy article draft flags and retains news/path matches", () => {
 	for (const collection of ["articles", "news", "learningPaths"]) {
 		for (const reference of ["kubernetes", { id: "kubernetes/index" }]) {
 			assert.equal(
@@ -260,13 +260,13 @@ test("technology page guard retains draft exclusions and news/path matches witho
 	assert.equal(
 		pageHasTopicContent({
 			articles: [
-				entry("draft", {
+				entry("legacy-flagged", {
 					draft: true,
 					technologies: [{ id: "kubernetes/index" }],
 				}),
 			],
 		}),
-		false,
+		true,
 	);
 	assert.equal(pageHasTopicContent({}), false);
 });
@@ -429,7 +429,7 @@ test("TopicHub preserves real path/article/video identities; titles are visible 
 		dom.querySelector("[data-article-id]").getAttribute("data-article-id"),
 		"public",
 	);
-	assert.equal(dom.querySelectorAll("[data-article-id]").length, 1);
+	assert.equal(dom.querySelectorAll("[data-article-id]").length, 2);
 	assert.equal(
 		dom.querySelector('a[href="/watch/real-video"] .related-body h3').text,
 		videos[0].title,

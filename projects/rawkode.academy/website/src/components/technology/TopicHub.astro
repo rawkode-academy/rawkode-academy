@@ -46,7 +46,7 @@ const matchesTechnology = (technologies: ReadonlyArray<string | { id: string }> 
 // Get all articles that mention this technology
 const now = new Date();
 const allArticles = await getCollection("articles", ({ data }) => {
-	return !data.draft && data.publishedAt <= now && matchesTechnology(data.technologies);
+	return data.publishedAt <= now && matchesTechnology(data.technologies);
 });
 
 // Sort articles by date

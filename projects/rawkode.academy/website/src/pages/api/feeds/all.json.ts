@@ -12,7 +12,7 @@ export const GET: APIRoute = async ({ site }) => {
 	const u = (path: string) => `${baseUrl}${path}`;
 
 	const [articles, videos, news, technologies] = await Promise.all([
-		getCollection("articles", ({ data }) => !data.draft),
+		getCollection("articles"),
 		getCollection("videos"),
 		getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
 		getCollection("technologies"),

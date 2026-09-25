@@ -8,7 +8,7 @@ export const GET: APIRoute = async ({ site }) => {
 	const baseUrl = (site?.toString() ?? SITE_FALLBACK).replace(/\/$/, "");
 	const u = (path: string) => `${baseUrl}${path}`;
 
-	const articles = await getCollection("articles", ({ data }) => !data.draft);
+	const articles = await getCollection("articles");
 
 	const items: JsonFeedItem[] = [];
 	for (const article of articles) {

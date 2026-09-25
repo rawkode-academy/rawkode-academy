@@ -32,7 +32,7 @@ export const getStaticPaths: GetStaticPaths =
 	async (): Promise<GetStaticPathsResult> => {
 		const [seriesEntries, articles] = await Promise.all([
 			getCollection("series"),
-			getCollection("articles", ({ data }) => !data.draft),
+			getCollection("articles"),
 		]);
 		const publishedSeriesIds = new Set(
 			articles

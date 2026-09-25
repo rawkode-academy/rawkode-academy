@@ -99,7 +99,7 @@ export async function buildSearchIndex(): Promise<SearchEntry[]> {
 	const [videos, articles, news, courses, learningPaths, shows, technologies] =
 		await Promise.all([
 			getCollection("videos"),
-			getCollection("articles", ({ data }) => !data.draft),
+			getCollection("articles"),
 			getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
 			getCollection("courses"),
 			getCollection("learningPaths"),

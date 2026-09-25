@@ -6,7 +6,7 @@ import { articleToMarkdown } from "@/lib/article-markdown";
 export const prerender = true;
 
 export const getStaticPaths: GetStaticPaths = async () => {
-	const articles = await getCollection("articles", ({ data }) => !data.draft);
+	const articles = await getCollection("articles");
 	return articles.map((article) => ({
 		params: { slug: article.id },
 		props: { article },

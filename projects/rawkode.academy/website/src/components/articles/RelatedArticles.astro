@@ -12,7 +12,7 @@ const { currentArticle, limit = 3 } = Astro.props;
 const styles = academyRelatedContent();
 
 // Get all published articles
-const allArticles = await getCollection("articles", ({ data }) => !data.draft);
+const allArticles = await getCollection("articles");
 
 // Find related articles based on:
 // 1. Same series (if applicable)
