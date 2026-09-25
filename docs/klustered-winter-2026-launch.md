@@ -6,6 +6,7 @@ Status checked 23 September 2026.
 
 - The Winter 2026 season is already in the bracket data, with status `interest` and no published dates.
 - The public application route is `https://rawkode.academy/shows/klustered/apply`. It has not been removed; it needs an active, eligible bracket to show an application option.
+- Until the Winter relaunch is ready, the public site exposes only the Apply page. Seasons, bracket listings, schedules, the live endpoint, and the calendar feed are hidden for Klustered.
 - The public schedule currently has no Winter matches. Do not generate fixtures until applications have been reviewed and entries are ready.
 
 ## Provisional target
