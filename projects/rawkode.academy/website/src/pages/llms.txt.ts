@@ -26,7 +26,7 @@ export async function GET({ site }: APIContext) {
 	const absolute = (path: string) => new URL(path, base).href;
 
 	const articles = (
-		await getCollection("articles", ({ data }) => !data.draft)
+		await getCollection("articles")
 	).sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
 	const videos = await getPublishedVideos();
 	const courses = await getCollection("courses");

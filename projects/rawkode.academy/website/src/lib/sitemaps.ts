@@ -230,7 +230,7 @@ export async function getPagesSitemapEntries(): Promise<SitemapUrlEntry[]> {
 }
 
 export async function getArticleSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const articles = await getCollection("articles", ({ data }) => !data.draft);
+	const articles = await getCollection("articles");
 
 	const entries = articles.map((article) => ({
 		path: `/read/${article.id}`,
@@ -440,7 +440,7 @@ export async function getShowSitemapEntries(): Promise<SitemapUrlEntry[]> {
 export async function getSeriesSitemapEntries(): Promise<SitemapUrlEntry[]> {
 	const [seriesEntries, articles] = await Promise.all([
 		getCollection("series"),
-		getCollection("articles", ({ data }) => !data.draft),
+		getCollection("articles"),
 	]);
 	const publishedSeriesIds = new Set(
 		articles

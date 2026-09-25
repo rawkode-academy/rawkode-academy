@@ -7,7 +7,7 @@ export const prerender = true;
 
 export async function GET({ site }: APIContext) {
 	const articles = (
-		await getCollection("articles", ({ data }) => !data.draft)
+		await getCollection("articles")
 	).sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
 
 	const documents = await Promise.all(

@@ -16,14 +16,13 @@ const matchRef = (
 
 const personHasContribution = (
 	personId: string,
-	articles: Array<{ data: { authors: Array<unknown>; draft?: boolean } }>,
+	articles: Array<{ data: { authors: Array<unknown> } }>,
 	news: Array<{ data: { authors: Array<unknown> } }>,
 	videos: Array<{ data: { guests: Array<unknown> } }>,
 ): boolean => {
 	if (
 		articles.some(
 			(article) =>
-				!article.data.draft &&
 				Array.isArray(article.data.authors) &&
 				article.data.authors.some((author) =>
 					matchRef(author as { id?: string } | string, personId),

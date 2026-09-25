@@ -173,7 +173,7 @@ describe("News discovery publication contracts", () => {
 		["All Atom", allAtom],
 		["All JSON", allJson],
 		["Technology RSS", technologyRss],
-	] as const)("%s leaves other formats' publication rules unchanged", async (_name, handler) => {
+	] as const)("%s includes articles regardless of the legacy flag and preserves News publication rules", async (_name, handler) => {
 		collections.articles = [
 			entry("future-article", future.data.publishedAt),
 			entry("draft-article", now, { draft: true }),
@@ -182,11 +182,11 @@ describe("News discovery publication contracts", () => {
 		const text = await (await handler(context())).text();
 		expect(text).toContain("/read/future-article/");
 		expect(text).toContain("/watch/future-video/");
-		expect(text).not.toContain("/read/draft-article/");
+		expect(text).toContain("/read/draft-article/");
 		expect(text).not.toContain("/news/future/");
 	});
 
-	it("search indexes only eligible News and preserves other formats' existing gates", async () => {
+	it("search indexes eligible News and articles regardless of the legacy draft flag", async () => {
 		collections.articles = [
 			entry("future-article", future.data.publishedAt),
 			entry("draft-article", now, { draft: true }),
@@ -198,7 +198,7 @@ describe("News discovery publication contracts", () => {
 		).toEqual(["/news/boundary", "/news/past"]);
 		expect(index.map((item) => item.href)).toContain("/read/future-article");
 		expect(index.map((item) => item.href)).toContain("/watch/future-video");
-		expect(index.map((item) => item.href)).not.toContain("/read/draft-article");
+		expect(index.map((item) => item.href)).toContain("/read/draft-article");
 	});
 
 	it("regular News sitemap removes future/invalid URLs without applying the 48-hour limit", async () => {

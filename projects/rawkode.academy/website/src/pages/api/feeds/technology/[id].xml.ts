@@ -46,7 +46,7 @@ export async function GET(context: APIContext) {
 	};
 
 	const [articles, news, videos] = await Promise.all([
-		getCollection("articles", ({ data }) => !data.draft),
+		getCollection("articles"),
 		getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
 		getCollection("videos"),
 	]);
