@@ -7,7 +7,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 interface Entry {
 	id: string;
 	data: {
-		draft?: boolean;
 		series?: { id: string };
 		publishedAt?: Date;
 		updatedAt?: Date;
@@ -84,30 +83,32 @@ function collections(articles: Entry[], series: Entry[] = []) {
 beforeEach(() => getCollection.mockReset());
 
 describe("Published route and sitemap contracts", () => {
-	const published: Entry = { id: "published", data: { draft: false } };
+	const published: Entry = { id: "published", data: {} };
 	const defaultPublished: Entry = { id: "default-published", data: {} };
-	const draft: Entry = { id: "draft", data: { draft: true } };
+	const legacyFlagged: Entry = { id: "legacy-flagged", data: { draft: true } };
 
 	it.each([
 		"read/[...slug].astro",
 		"read/[slug].md.ts",
-	])("%s emits published entries and excludes drafts", async (route) => {
-		collections([draft, published, defaultPublished]);
+	])("%s emits all entries without draft gating", async (route) => {
+		collections([legacyFlagged, published, defaultPublished]);
 		const paths = await staticPathsFor(route)();
 		expect(paths.map(({ params }) => params.slug)).toEqual([
+			"legacy-flagged",
 			"published",
 			"default-published",
 		]);
 		expect(paths.map(({ props }) => props.article)).toEqual([
+			legacyFlagged,
 			published,
 			defaultPublished,
 		]);
-		collections([draft]);
+		collections([]);
 		expect(await staticPathsFor(route)()).toEqual([]);
 	});
 
 	it("keeps article sitemap URLs equal to generated HTML routes", async () => {
-		collections([draft, published, defaultPublished]);
+		collections([legacyFlagged, published, defaultPublished]);
 		const paths = await staticPathsFor("read/[...slug].astro")();
 		const entries = await getArticleSitemapEntries();
 		expect(entries.map((entry) => entry.path)).toEqual(
@@ -115,13 +116,13 @@ describe("Published route and sitemap contracts", () => {
 		);
 	});
 
-	it("includes a series once only when a published article references it, matching route eligibility", async () => {
+	it("includes a series once any article references it, matching route eligibility", async () => {
 		const updatedAt = new Date("2026-06-01T00:00:00Z");
 		collections(
 			[
 				{ ...published, data: { draft: false, series: { id: "eligible" } } },
 				{ ...defaultPublished, data: { series: { id: "eligible" } } },
-				{ ...draft, data: { draft: true, series: { id: "draft-only" } } },
+				{ ...legacyFlagged, data: { draft: true, series: { id: "formerly-hidden" } } },
 				{ id: "unresolved-reference", data: { series: { id: "missing" } } },
 				{ id: "standalone", data: {} },
 			],
@@ -146,27 +147,12 @@ describe("Published route and sitemap contracts", () => {
 		);
 	});
 
-	it.each([
-		false,
-		true,
-	])("excludes unpublishable series (draft reference: %s), retaining its empty sitemap index", async (withDraft) => {
-		collections(
-			withDraft
-				? [
-						{
-							...draft,
-							data: { draft: true, series: { id: "talos-on-hetzner" } },
-						},
-					]
-				: [],
-			[{ id: "talos-on-hetzner", data: {} }],
-		);
+	it("excludes orphan series while retaining its empty sitemap index", async () => {
+		collections([], [{ id: "orphan", data: {} }]);
 		const entries = await getSeriesSitemapEntries();
 		expect(entries).toEqual([]);
 		expect(await staticPathsFor("series/[...slug].astro")()).toEqual([]);
-		expect(renderUrlSet("https://rawkode.academy", entries)).not.toContain(
-			"<url>",
-		);
+		expect(renderUrlSet("https://rawkode.academy", entries)).not.toContain("<url>");
 		expect(
 			await buildSitemapIndexEntries([
 				{ path: "/sitemaps/series.xml", getEntries: getSeriesSitemapEntries },
