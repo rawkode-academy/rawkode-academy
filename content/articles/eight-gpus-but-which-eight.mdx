@@ -1,5 +1,5 @@
 ---
-title: "Eight GPUs, but which eight?"
+title: "A GPU count doesn't tell Kubernetes what you need"
 description: "Dynamic Resource Allocation lets Kubernetes match device claims to GPU properties. Here is what DRA changes for AI training and inference, and where it still falls short."
 slug: eight-gpus-but-which-eight
 publishedAt: 2026-09-25
@@ -74,7 +74,7 @@ Pick one serving workload and one training job. Ask the driver which attributes 
 
 If the scheduler cannot match the request to a real device, or the container cannot use the allocation it receives, DRA has not yet made that hardware contract useful. That is the test to pass before turning a new claim schema into a platform promise.
 
-## Sources checked
+## References
 
 - [Dynamic Resource Allocation concepts](https://kubernetes.io/docs/concepts/resource-management/dynamic-resource-allocation/)
 - [Allocate devices to workloads with DRA](https://kubernetes.io/docs/tasks/configure-pod-container/assign-resources/allocate-devices-dra/)
