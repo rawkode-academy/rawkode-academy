@@ -89,10 +89,7 @@ export async function getLatestContent(
 ): Promise<AcademyContentItem[]> {
 	const [videos, articles, news, courses, learningPaths] = await Promise.all([
 		getPublishedVideos(),
-		getCollection(
-			"articles",
-			({ data }) => !data.draft && data.publishedAt <= now,
-		),
+		getCollection("articles", ({ data }) => data.publishedAt <= now),
 		getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
 		getCollection("courses", ({ data }) => data.publishedAt <= now),
 		getCollection("learningPaths", ({ data }) => data.publishedAt <= now),
