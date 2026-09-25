@@ -1,0 +1,85 @@
+---
+title: "Eight GPUs, but which eight?"
+description: "Dynamic Resource Allocation lets Kubernetes match device claims to GPU properties. Here is what DRA changes for AI training and inference, and where it still falls short."
+slug: eight-gpus-but-which-eight
+publishedAt: 2026-09-25
+draft: true
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+---
+
+*DRA gives Kubernetes a richer device request than a GPU count. Some of the workload-level scheduling that makes this useful is still opt-in.*
+
+`nvidia.com/gpu: 8` answers one question: how many? It does not, by itself, say which memory profile is acceptable, whether a partitioned device will work, or whether the workers need to fit a particular topology. Teams can encode some of that elsewhere, in node labels, separate resource names or vendor-specific schedulers. Then the hardware request is spread across the platform instead of stated with the workload.
+
+Dynamic Resource Allocation (DRA) gives Kubernetes a way to describe device requirements as claims and match them to hardware. The practical change is small but important: a workload can ask for a GPU with particular reported properties, not just a number of GPU resources. Here is what that request looks like, and where it still falls short for training and inference.
+
+## What a claim tells the scheduler
+
+The core DRA API has been stable since Kubernetes 1.35. A device driver publishes inventory as `ResourceSlice` objects. A cluster administrator or driver exposes categories through `DeviceClass`. A workload uses a `ResourceClaim`, or a `ResourceClaimTemplate` when each Pod should get its own similar claim. The scheduler finds a matching device and places the Pod on a node that can access it; the node-local driver then prepares the device for the container. [Kubernetes describes DRA as a claims-based allocation API, similar in shape to claiming storage through a PersistentVolumeClaim.](https://kubernetes.io/docs/concepts/resource-management/dynamic-resource-allocation/)
+
+This template selects a device advertised as a GPU with exactly 64Gi of memory:
+
+```yaml
+apiVersion: resource.k8s.io/v1
+kind: ResourceClaimTemplate
+metadata:
+  name: example-gpu-template
+spec:
+  spec:
+    devices:
+      requests:
+      - name: gpu
+        exactly:
+          deviceClassName: example-device-class
+          selectors:
+          - cel:
+              expression: |-
+                device.attributes["driver.example.com"].type == "gpu" &&
+                device.capacity["driver.example.com"].memory == quantity("64Gi")
+```
+
+The example class and attribute names come from the installed driver and cluster configuration. The equality matters: this matches exactly 64Gi as reported by the driver. It does not mean “at least 64Gi”, and it does not carve 64Gi out of a larger GPU. A Pod references the template; its container references the resulting claim. Kubernetes can then compare that request with the device inventory before starting the workload. [The official task shows the full claim-to-Pod flow.](https://kubernetes.io/docs/tasks/configure-pod-container/assign-resources/allocate-devices-dra/)
+
+## Training is a group-placement problem too
+
+If a training job needs eight workers before it can make progress, scheduling four and leaving four pending can tie up GPUs without starting useful work. Gang scheduling addresses that by placing a configured minimum number of Pods as a group. Set `minCount` to eight when all eight are required. This is an initial scheduling guarantee, not a promise that all workers become ready together or that the group can never shrink after a deletion or eviction.
+
+Kubernetes 1.37 also lets a Workload or PodGroup reference a DRA claim shared by its member Pods. That is useful when the group shares a resource; it is not shorthand for a separate GPU allocation for every worker. Model each worker's accelerator needs explicitly, then use group scheduling for the all-or-nothing placement requirement.
+
+Both paths are Beta and disabled by default in Kubernetes 1.37. Gang scheduling uses the `GenericWorkload` feature gate; shared DRA workload claims use `DRAWorkloadResourceClaims`. Topology-aware workload scheduling is still Alpha, so a claim does not by itself guarantee placement on a particular rack or fabric. [The 1.37 scheduling update spells out the feature gates and current boundaries.](https://kubernetes.io/blog/2026/09/08/kubernetes-v1-37-advancing-workload-aware-scheduling/)
+
+## Inference needs a fallback, not a traffic router
+
+Serving fleets may have more than one acceptable accelerator class. DRA lets the platform define those classes and match device properties. Kubernetes 1.36 made prioritised device lists stable, so a request can prefer one device class and fall back to another. That can make otherwise-idle capacity usable, but it does not make the devices equivalent. Different replicas can receive different alternatives, so test the fallback against the model's serving target. [The Kubernetes 1.36 DRA update describes prioritised selection.](https://kubernetes.io/blog/2026/05/07/kubernetes-v1-36-dra-136-updates/)
+
+And this is still placement, not request routing. DRA does not choose which replica handles an HTTP request, autoscale a model server or enforce a latency objective. Those remain responsibilities of the serving and autoscaling layers.
+
+## Existing Pod requests can stay put
+
+Kubernetes 1.37 made it stable for DRA to satisfy traditional extended-resource requests. A Pod can keep asking for a resource through `resources.requests`, while the scheduler allocates a matching DRA device behind that name. This gives platform teams a way to move allocation logic without first changing every workload manifest. [The Kubernetes 1.37 DRA update documents the compatibility path.](https://kubernetes.io/blog/2026/09/03/kubernetes-v1-37-dra-updates/)
+
+That is manifest compatibility, not an automatic migration. For NVIDIA's legacy `nvidia.com/gpu` name, the GPU Operator requires a separate `DeviceClass` with `spec.extendedResourceName` set to that name. Its 26.7 `GPUCluster` workflow also does not support in-place migration from `ClusterPolicy` or a standalone DRA driver installation. Check the driver and operator's actual migration path before promising a no-disruption switch. [NVIDIA documents these prerequisites and limitations.](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/26.7/dra-intro-install.html)
+
+## The driver still decides what the claim means
+
+DRA is a Kubernetes API and scheduler integration, not a universal accelerator driver. The driver has to publish useful properties and do whatever preparation the hardware needs. The runtime and vendor stack still have to make the allocated device available inside the container. NVIDIA's current GPU Operator DRA instructions, for example, require Kubernetes 1.34.2 or later, GPU driver 580 or later, and a CDI-capable runtime configured for CDI injection.
+
+Sharing also depends on the driver and device. DRA can coordinate supported sharing, but it does not make a sharing mode fair or isolated by itself. Core DRA is stable; several workload and fine-grained capacity features are still Beta or feature-gated. Check the state of the specific capability you plan to use, not just the headline API.
+
+## A useful first test
+
+Pick one serving workload and one training job. Ask the driver which attributes it publishes, then make a claim that should match and one that should not. Check the allocated device and confirm the container can use it. For the training job, test the 1.37 PodGroup and DRA gates separately in a non-production cluster, and make the topology requirement explicit.
+
+If the scheduler cannot match the request to a real device, or the container cannot use the allocation it receives, DRA has not yet made that hardware contract useful. That is the test to pass before turning a new claim schema into a platform promise.
+
+## Sources checked
+
+- [Dynamic Resource Allocation concepts](https://kubernetes.io/docs/concepts/resource-management/dynamic-resource-allocation/)
+- [Allocate devices to workloads with DRA](https://kubernetes.io/docs/tasks/configure-pod-container/assign-resources/allocate-devices-dra/)
+- [Kubernetes 1.36 DRA updates](https://kubernetes.io/blog/2026/05/07/kubernetes-v1-36-dra-136-updates/)
+- [Kubernetes 1.37 DRA updates](https://kubernetes.io/blog/2026/09/03/kubernetes-v1-37-dra-updates/)
+- [Kubernetes 1.37 workload-aware scheduling](https://kubernetes.io/blog/2026/09/08/kubernetes-v1-37-advancing-workload-aware-scheduling/)
+- [NVIDIA GPU Operator DRA prerequisites](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/26.7/dra-intro-install.html)
