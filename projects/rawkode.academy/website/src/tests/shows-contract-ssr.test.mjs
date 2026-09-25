@@ -420,7 +420,9 @@ test("only service-confirmed participation shows Entered; native form/auth paths
 });
 
 test("mocked application handler preserves validation/auth and redirects only after successful write", async () => {
-	const user = { user: { id: "user", name: "Fixture User" } };
+	const user = {
+		user: { id: "user", name: "Fixture User", username: "fixture-user" },
+	};
 	const h = harness();
 	const { ALL } = await h.module(api);
 	assert.equal((await ALL(h.routeContext())).status, 405);
@@ -431,12 +433,25 @@ test("mocked application handler preserves validation/auth and redirects only af
 		(await ALL(h.routeContext("POST", { bracketId: " " }, user))).status,
 		400,
 	);
+	const missingUsername = await ALL(
+		h.routeContext(
+			"POST",
+			{ bracketId: "b" },
+			{ user: { id: "user", name: "Fixture User", username: null } },
+		),
+	);
+	assert.equal(missingUsername.status, 401);
 	assert.equal(h.writes.length, 0);
 	const success = await ALL(h.routeContext("POST", { bracketId: "b" }, user));
 	assert.equal(success.status, 303);
 	assert.equal(success.headers.get("Location"), "/shows/klustered/apply");
 	assert.deepEqual(JSON.parse(JSON.stringify(h.writes)), [
-		{ bracketId: "b", displayName: "Fixture User", userId: "user" },
+		{
+			bracketId: "b",
+			displayName: "Fixture User",
+			userId: "user",
+			username: "fixture-user",
+		},
 	]);
 	const rejected = harness({ writeError: true });
 	const result = await (await rejected.module(api)).ALL(

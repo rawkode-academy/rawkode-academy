@@ -13,6 +13,7 @@ export interface PortalUser {
 	email: string;
 	name: string;
 	image: string | null;
+	username: string | null;
 }
 
 declare global {
@@ -52,6 +53,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
 				email: session.user.email,
 				name: session.user.name,
 				image: session.user.image,
+				username: session.user.username ?? null,
 			};
 			const isAdmin = adminIds().includes(session.user.id);
 			context.locals.roles = isAdmin ? ["admin", "competitor"] : ["competitor"];

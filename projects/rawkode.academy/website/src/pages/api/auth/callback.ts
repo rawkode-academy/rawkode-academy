@@ -17,6 +17,7 @@ import {
 	identifyServerUser,
 } from "@/server/analytics";
 
+
 export const GET: APIRoute = async (context) => {
 	const code = context.url.searchParams.get("code");
 	const state = context.url.searchParams.get("state");
@@ -90,7 +91,7 @@ export const GET: APIRoute = async (context) => {
 
 	// Get user info
 	const userInfo = await getUserInfo(tokens.access_token);
-	if (!userInfo) {
+	if (!userInfo?.sub) {
 		console.error("[callback] User info fetch failed");
 		await captureServerEvent(
 			{
@@ -103,6 +104,13 @@ export const GET: APIRoute = async (context) => {
 		return context.redirect("/?error=userinfo_failed", 302);
 	}
 
+	const username = userInfo.username ?? userInfo.preferred_username;
+	if (!username) {
+		return new Response("GitHub username is missing from your profile", {
+			status: 502,
+		});
+	}
+
 	// Create local session
 	const sessionId = crypto.randomUUID();
 	const session: StoredSession = {
@@ -112,7 +120,7 @@ export const GET: APIRoute = async (context) => {
 			email: userInfo.email || "",
 			name: userInfo.name || "",
 			image: userInfo.picture || null,
-			username: userInfo.username ?? userInfo.preferred_username ?? null,
+			username,
 		},
 		expiresAt: Date.now() + SESSION_DURATION_SECONDS * 1000,
 	};

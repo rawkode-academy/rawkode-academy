@@ -7,6 +7,11 @@ export const prerender = false;
 export const POST: APIRoute = async ({ params, locals, redirect }) => {
 	const user = locals.user;
 	if (!user) return new Response("Unauthorized", { status: 401 });
+	if (!user.username) {
+		return new Response("GitHub username unavailable. Please sign in again.", {
+			status: 401,
+		});
+	}
 
 	const token = params.token;
 	if (!token) return new Response("missing token", { status: 400 });
@@ -17,6 +22,7 @@ export const POST: APIRoute = async ({ params, locals, redirect }) => {
 		await bracketsWrite(env).joinTeamViaInvite({
 			token,
 			userId: user.id,
+			username: user.username,
 			displayName,
 		});
 	} catch (error) {

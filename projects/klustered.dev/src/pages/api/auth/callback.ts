@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
+import { bracketsWrite } from "@/lib/brackets-write";
 import {
 	exchangeCodeForTokens,
 	getUserInfo,
@@ -42,6 +43,30 @@ export const GET: APIRoute = async ({ url, cookies, redirect }) => {
 		return new Response("Failed to fetch user info", { status: 502 });
 	}
 
+	const username = userInfo.username ?? userInfo.preferred_username;
+	if (!username) {
+		return new Response("GitHub username is missing from your profile", {
+			status: 502,
+		});
+	}
+
+	try {
+		await bracketsWrite(env).syncCompetitorUsername({
+			userId: userInfo.sub,
+			username,
+		});
+	} catch (error) {
+		console.error("[auth] Competitor username sync failed:", error);
+		const hasConflict =
+			error instanceof Error && error.message.includes("already assigned");
+		return new Response(
+			hasConflict
+				? "This GitHub username is already assigned to another competitor in that season. Please contact a Klustered admin."
+				: "Could not synchronize your competitor profile. Please try again.",
+			{ status: hasConflict ? 409 : 502 },
+		);
+	}
+
 	const sessionId = crypto.randomUUID();
 	const expiresAt = Date.now() + SESSION_DURATION_SECONDS * 1000;
 
@@ -54,6 +79,7 @@ export const GET: APIRoute = async ({ url, cookies, redirect }) => {
 				email: userInfo.email ?? "",
 				name: userInfo.name ?? userInfo.email ?? "",
 				image: userInfo.picture ?? null,
+				username,
 			},
 			expiresAt,
 		},

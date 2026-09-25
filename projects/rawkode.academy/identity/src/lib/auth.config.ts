@@ -8,6 +8,16 @@ export const auth = betterAuth({
 	database: drizzleAdapter(null as any, {
 		provider: "sqlite",
 	}),
+	user: {
+		additionalFields: {
+			username: {
+				type: "string",
+				required: false,
+				input: false,
+				returned: true,
+			},
+		},
+	},
 	plugins: [
 		jwt({
 			jwks: {

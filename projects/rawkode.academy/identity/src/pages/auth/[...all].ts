@@ -7,6 +7,68 @@ const handler: APIRoute = async (context) => {
 	const url = new URL(context.request.url);
 	const pathname = url.pathname;
 
+	const usernameClientIds = ["rawkode-academy-website", "klustered-dev"];
+	const readUsername = async (userId: string) =>
+		env.DB.prepare("SELECT username FROM user WHERE id = ?")
+			.bind(userId)
+			.first<{ username: string | null }>();
+
+	if (
+		context.request.method === "GET" &&
+		pathname === "/auth/username/continue"
+	) {
+		const next = url.searchParams.get("next");
+		if (!next) return new Response("Missing authorization request", { status: 400 });
+
+		let authorizeUrl: URL;
+		try {
+			authorizeUrl = new URL(next, url.origin);
+		} catch {
+			return new Response("Invalid authorization request", { status: 400 });
+		}
+		if (
+			authorizeUrl.origin !== url.origin ||
+			authorizeUrl.pathname !== "/auth/oauth2/authorize" ||
+			!usernameClientIds.includes(authorizeUrl.searchParams.get("client_id") ?? "")
+		) {
+			return new Response("Invalid authorization request", { status: 400 });
+		}
+
+		const session = await auth.api.getSession({
+			headers: context.request.headers,
+		});
+		if (!session) {
+			return new Response("GitHub reauthorization did not complete", { status: 401 });
+		}
+		const identityUser = await readUsername(session.user.id);
+		if (!identityUser?.username) {
+			return new Response("Could not verify your GitHub username. Please try again.", {
+				status: 503,
+			});
+		}
+		return Response.redirect(authorizeUrl.toString(), 302);
+	}
+
+	if (
+		context.request.method === "GET" &&
+		pathname === "/auth/oauth2/authorize" &&
+		usernameClientIds.includes(url.searchParams.get("client_id") ?? "")
+	) {
+		const session = await auth.api.getSession({
+			headers: context.request.headers,
+		});
+		if (session) {
+			const identityUser = await readUsername(session.user.id);
+			if (!identityUser?.username) {
+				const continuationUrl = new URL("/auth/username/continue", url.origin);
+				continuationUrl.searchParams.set("next", url.toString());
+				const signInUrl = new URL("/auth/sign-in/social", url.origin);
+				signInUrl.searchParams.set("callbackURL", continuationUrl.toString());
+				return Response.redirect(signInUrl, 302);
+			}
+		}
+	}
+
 	if (context.request.method === "GET" && pathname === "/auth/sign-in/social") {
 		const provider = "github";
 
