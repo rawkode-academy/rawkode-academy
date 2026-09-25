@@ -1,5 +1,5 @@
 import { WorkerEntrypoint } from "cloudflare:workers";
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import { createId } from "@paralleldrive/cuid2";
 import * as s from "../data-model/schema";
@@ -18,6 +18,7 @@ import {
 	SetMatchLiveState,
 	SubmitRegistration,
 } from "../data-model/integrations/zod";
+import { planSummerToWinterTransfer } from "./season-transfer";
 
 export { GenerateBracketWorkflow } from "./generateBracket";
 export { RecordResultWorkflow } from "./recordResult";
@@ -1049,6 +1050,217 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 	async deleteSeason(input: { id: string }): Promise<{ ok: true }> {
 		await this.db.delete(s.seasons).where(eq(s.seasons.id, input.id));
 		return { ok: true };
+	}
+
+	async transferSummerApplicationsToWinter(input: {
+		sourceSeasonId: string;
+		targetSeasonId: string;
+		seasonStartDate: number;
+		bracketStartsAt: number;
+	}): Promise<{
+		applicationsMoved: number;
+		competitorsMoved: number;
+		bracketsActivated: number;
+	}> {
+		const [sourceSeason, targetSeason] = await Promise.all([
+			this.db
+				.select({
+					id: s.seasons.id,
+					showId: s.seasons.showId,
+					slug: s.seasons.slug,
+				})
+				.from(s.seasons)
+				.where(eq(s.seasons.id, input.sourceSeasonId))
+				.get(),
+			this.db
+				.select({
+					id: s.seasons.id,
+					showId: s.seasons.showId,
+					slug: s.seasons.slug,
+				})
+				.from(s.seasons)
+				.where(eq(s.seasons.id, input.targetSeasonId))
+				.get(),
+		]);
+		if (!sourceSeason || !targetSeason) throw new Error("Summer or Winter season not found");
+
+		const [sourceBrackets, targetBrackets, sourceApplications] = await Promise.all([
+			this.db
+				.select()
+				.from(s.brackets)
+				.where(eq(s.brackets.seasonId, sourceSeason.id))
+				.all(),
+			this.db
+				.select()
+				.from(s.brackets)
+				.where(eq(s.brackets.seasonId, targetSeason.id))
+				.all(),
+			this.db
+				.select({
+					bracketId: s.bracketApplications.bracketId,
+					competitorId: s.bracketApplications.competitorId,
+				})
+				.from(s.bracketApplications)
+				.innerJoin(s.brackets, eq(s.bracketApplications.bracketId, s.brackets.id))
+				.where(eq(s.brackets.seasonId, sourceSeason.id))
+				.all(),
+		]);
+		const sourceBracketIds = sourceBrackets.map((bracket) => bracket.id);
+		const sourceCompetitors = await this.db
+			.select({ id: s.competitors.id })
+			.from(s.competitors)
+			.where(eq(s.competitors.seasonId, sourceSeason.id))
+			.all();
+		const targetCompetitors = await this.db
+			.select({ id: s.competitors.id })
+			.from(s.competitors)
+			.where(eq(s.competitors.seasonId, targetSeason.id))
+			.limit(1)
+			.all();
+		const targetApplications = await this.db
+			.select({ id: s.bracketApplications.id })
+			.from(s.bracketApplications)
+			.innerJoin(s.brackets, eq(s.bracketApplications.bracketId, s.brackets.id))
+			.where(eq(s.brackets.seasonId, targetSeason.id))
+			.limit(1)
+			.all();
+
+		const [
+			registrations,
+			teams,
+			entries,
+			matches,
+			breaks,
+			targetTeams,
+			targetRegistrations,
+		] = await Promise.all([
+			this.db
+				.select({ id: s.registrations.id })
+				.from(s.registrations)
+				.where(eq(s.registrations.seasonId, sourceSeason.id))
+				.limit(1)
+				.all(),
+			this.db
+				.select({ id: s.teams.id })
+				.from(s.teams)
+				.where(eq(s.teams.seasonId, sourceSeason.id))
+				.limit(1)
+				.all(),
+			sourceBracketIds.length
+				? this.db
+						.select({ id: s.bracketEntries.id })
+						.from(s.bracketEntries)
+						.where(inArray(s.bracketEntries.bracketId, sourceBracketIds))
+						.limit(1)
+						.all()
+				: Promise.resolve([]),
+			sourceBracketIds.length
+				? this.db
+						.select({ id: s.matches.id })
+						.from(s.matches)
+						.where(inArray(s.matches.bracketId, sourceBracketIds))
+						.limit(1)
+						.all()
+				: Promise.resolve([]),
+			sourceBracketIds.length
+				? this.db
+						.select({ id: s.bracketBreaks.id })
+						.from(s.bracketBreaks)
+						.where(inArray(s.bracketBreaks.bracketId, sourceBracketIds))
+						.limit(1)
+						.all()
+				: Promise.resolve([]),
+			this.db
+				.select({ id: s.teams.id })
+				.from(s.teams)
+				.where(eq(s.teams.seasonId, targetSeason.id))
+				.limit(1)
+				.all(),
+			this.db
+				.select({ id: s.registrations.id })
+				.from(s.registrations)
+				.where(eq(s.registrations.seasonId, targetSeason.id))
+				.limit(1)
+				.all(),
+		]);
+
+		const plan = planSummerToWinterTransfer({
+			sourceSeason,
+			targetSeason,
+			sourceBrackets,
+			targetBrackets,
+			applications: sourceApplications,
+			sourceCompetitorIds: sourceCompetitors.map((competitor) => competitor.id),
+			targetCompetitorCount: targetCompetitors.length,
+			targetApplicationCount: targetApplications.length,
+			unsupportedRelatedRecords: [
+				registrations.length && "registrations",
+				teams.length && "teams",
+				entries.length && "bracket entries",
+				matches.length && "matches",
+				breaks.length && "bracket breaks",
+				targetTeams.length && "Winter teams",
+				targetRegistrations.length && "Winter registrations",
+			].filter((name): name is string => Boolean(name)),
+			seasonStartDate: input.seasonStartDate,
+			bracketStartsAt: input.bracketStartsAt,
+		});
+
+		const statements: D1PreparedStatement[] = [];
+		for (const mapping of plan.bracketMappings) {
+			const source = sourceBrackets.find(
+				(bracket) => bracket.id === mapping.sourceBracketId,
+			);
+			if (!source) throw new Error("Summer bracket disappeared during transfer");
+			statements.push(
+				this.env.DB.prepare(`
+					INSERT INTO brackets (
+						id, season_id, name, slug, kind, format, status, starts_at,
+						registration_closes_at, max_entries, team_size, cadence_days
+					) VALUES (?, ?, ?, ?, ?, ?, 'active', ?, NULL, ?, ?, ?)
+				`).bind(
+					mapping.targetBracketId,
+					plan.targetSeasonId,
+					source.name,
+					source.slug,
+					source.kind,
+					source.format,
+					plan.bracketStartsAt,
+					source.maxEntries,
+					source.teamSize,
+					source.cadenceDays,
+				),
+			);
+			statements.push(
+				this.env.DB.prepare(
+					"UPDATE bracket_applications SET bracket_id = ? WHERE bracket_id = ?",
+				).bind(mapping.targetBracketId, mapping.sourceBracketId),
+			);
+		}
+
+		statements.unshift(
+			this.env.DB.prepare(
+				"UPDATE brackets SET status = 'finished' WHERE season_id = ?",
+			).bind(plan.sourceSeasonId),
+		);
+		statements.push(
+			this.env.DB.prepare(
+				"UPDATE competitors SET season_id = ? WHERE season_id = ?",
+			).bind(plan.targetSeasonId, plan.sourceSeasonId),
+			this.env.DB.prepare(`
+				UPDATE seasons
+				SET status = 'active', start_date = ?, updated_at = ?
+				WHERE id = ?
+			`).bind(plan.seasonStartDate, Date.now(), plan.targetSeasonId),
+			this.env.DB.prepare("DELETE FROM seasons WHERE id = ?").bind(plan.sourceSeasonId),
+		);
+		await this.env.DB.batch(statements);
+
+		return {
+			applicationsMoved: plan.applicationsMoved,
+			competitorsMoved: plan.competitorIds.length,
+			bracketsActivated: plan.bracketMappings.length,
+		};
 	}
 
 	async deleteBracket(input: { id: string }): Promise<{ ok: true }> {
