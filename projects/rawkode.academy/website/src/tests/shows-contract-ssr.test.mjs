@@ -477,6 +477,19 @@ test("hidden/missing shows reject every extension before read/write dispatch", a
 	}
 });
 
+test("Klustered exposes only the apply page and endpoint until the relaunch is ready", async () => {
+	const h = harness();
+	const { klusteredExtension } = await h.module("shows/klustered/index.ts");
+	assert.deepEqual(
+		klusteredExtension.pages.map((page) => page.slug),
+		["apply"],
+	);
+	assert.deepEqual(
+		klusteredExtension.endpoints?.map((endpoint) => endpoint.slug),
+		["apply"],
+	);
+});
+
 test("only active, unexpired brackets link to applications, without service calls", async () => {
 	const fixtures = [
 		bracket({ id: "finished", name: "Finished", status: "finished" }),
