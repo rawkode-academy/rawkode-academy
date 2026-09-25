@@ -16,7 +16,7 @@ const matchRef = (
 
 const personHasContribution = (
 	personId: string,
-	articles: Array<{ data: { authors: Array<unknown>; draft?: boolean } }>,
+	articles: Array<{ data: { authors: Array<unknown> } }>,
 	news: Array<{ data: { authors: Array<unknown> } }>,
 	videos: Array<{ data: { guests: Array<unknown> } }>,
 ): boolean => {
