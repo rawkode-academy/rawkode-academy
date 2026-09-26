@@ -261,7 +261,7 @@ test("Null Pointer: audience rarity freezes before contestant scoring", async ({
 		expect(late.status).toBe(202);
 		expect(late.body).toMatchObject({ queued: true });
 		await expectSocketCommandError(lateAudience, "e2e-late-null-pointer-answer", "DISTRIBUTION_FROZEN");
-		await expect(display.getByTestId("audience-distribution")).toHaveText(frozenDistribution);
+		await expect.poll(() => display.getByTestId("audience-distribution").innerText()).toBe(frozenDistribution);
 
 		await rareContestant.getByTestId("answer-input").fill("Elixir");
 		await rareContestant.getByTestId("submit-answer").click();
