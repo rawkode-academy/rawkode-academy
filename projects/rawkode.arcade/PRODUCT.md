@@ -17,7 +17,8 @@ Three audiences, in one room, on three different screens.
 
 **Operators** are Rawkode Academy staff running a live stream. They sit in a dark
 gallery behind a laptop, cut between prompts under time pressure, and cannot
-afford to hunt for a control. They are authenticated through Cloudflare Access.
+afford to hunt for a control. They sign in with their Academy account and need
+an active Arcade operator role.
 
 **Contestants and audience** are the same cloud-native engineers the Academy
 already serves. They play on a phone, one-handed, as a second screen next to the

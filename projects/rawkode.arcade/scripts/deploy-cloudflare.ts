@@ -4,8 +4,6 @@ const target = process.argv[2] === "preview" ? "preview" : "production";
 for (const name of [
 	"TICKET_SECRET",
 	"SESSION_SECRET",
-	"CF_ACCESS_TEAM_DOMAIN",
-	"CF_ACCESS_AUD",
 ] as const) {
 	if (!process.env[name]?.trim()) throw new Error(`${name} is required for deployment`);
 }
@@ -52,9 +50,6 @@ await run(
 	JSON.stringify({
 		TICKET_SECRET: process.env.TICKET_SECRET,
 		SESSION_SECRET: process.env.SESSION_SECRET,
-		...(process.env.OPERATOR_EMAILS?.trim()
-			? { OPERATOR_EMAILS: process.env.OPERATOR_EMAILS }
-			: {}),
 	}),
 );
 config.vars.ADMISSION_ENABLED = "true";
