@@ -2,6 +2,7 @@
 import { computed, ref, watch } from "vue";
 import AudienceControls from "@/components/AudienceControls.vue";
 import ConnectionPill from "@/components/ConnectionPill.vue";
+import GameBoard from "@/components/GameBoard.vue";
 import TeamRail from "@/components/TeamRail.vue";
 import { useRoomSocket } from "@/composables/use-room-socket";
 import type { GameId } from "@/lib/game-catalogue";
@@ -55,14 +56,6 @@ const progressFill = css({
 	transitionProperty: "size",
 	transitionDuration: "base",
 	transitionTimingFunction: "standard",
-});
-const spinBoard = css({
-	fontFamily: "mono",
-	fontSize: "tally",
-	fontWeight: "semibold",
-	letterSpacing: "code",
-	color: "ink",
-	wordBreak: "break-word",
 });
 const answerGrid = css({
 	display: "grid",
@@ -232,25 +225,7 @@ const submit = (input: { choiceId?: string; answer?: string }) => {
 				<span :class="slug()">{{ room.prompt?.label }}</span>
 				<h2 :class="text({ style: 'title' })">{{ room.prompt?.text }}</h2>
 
-				<div v-if="gameDefinition.id === 'spinlock'" :class="stack({ gap: 'snug' })" data-testid="spin-board">
-					<output :class="spinBoard" aria-label="Current phrase board">
-						{{ room.spinlock?.board ?? "Waiting for the first round" }}
-					</output>
-					<div :class="row({ gap: 'tight', wrap: true })" aria-label="Guessed letters">
-						<span v-if="!room.spinlock?.letters.length" :class="text({ style: 'bodySm', tone: 'mute' })">
-							No letters revealed
-						</span>
-						<b
-							v-for="letter in room.spinlock?.letters"
-							:key="letter"
-							:class="choiceKey"
-							:data-testid="`spin-letter-${letter}`"
-						>{{ letter }}</b>
-					</div>
-					<span :class="slug()" data-testid="spin-value">
-						Wheel {{ room.spinlock?.activeValue ?? 0 }} · Turn {{ (room.spinlock?.turn ?? 0) + 1 }}
-					</span>
-				</div>
+				<GameBoard :game="gameDefinition.id" :room="room" scale="live" />
 
 				<div
 					v-if="gameDefinition.id === 'principal-engineer' && room.principalEngineer && (room.principalEngineer.fiftyFiftyActive || room.principalEngineer.askAudienceActive)"

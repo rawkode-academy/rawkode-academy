@@ -36,6 +36,15 @@ async function requestJson<T>(request: Request): Promise<T | undefined> {
 function doHeaders(principal: Principal): Headers { return new Headers({ "x-arcade-principal": JSON.stringify(principal) }); }
 
 function publicPrincipal(): Principal { return { id: "public-audience", role: "audience", displayName: "Audience" }; }
+type PublicTeam = { id: string; name: string };
+async function publicTeams(directory: RoomDirectory, roomId: string): Promise<PublicTeam[] | undefined> {
+	const response = await directory.stub(roomId).fetch("https://game-room.internal/_internal/state", { headers: doHeaders(publicPrincipal()) });
+	if (!response.ok) return undefined;
+	const snapshot = await response.json() as { state?: { teams?: Record<string, { id?: string; name?: string }> } };
+	return Object.values(snapshot.state?.teams ?? {})
+		.filter((team): team is { id: string; name?: string } => typeof team.id === "string" && team.id.length > 0)
+		.map((team) => ({ id: team.id, name: typeof team.name === "string" && team.name.trim() ? team.name : team.id }));
+}
 async function downscopedPrincipal(request: Request, env: Env, roomId: string, principal: Principal | undefined, membership: { role: Role; teamId?: string; displayName?: string } | undefined): Promise<Principal | undefined> {
 	if (!principal || !membership) return undefined;
 	const requested = request.headers.get("x-arcade-view-role");
@@ -169,31 +178,48 @@ async function api(request: Request, env: Env, ctx: ExecutionContext, path: stri
 			const gameKey = new URL(request.url).searchParams.get("gameKey") ?? "merge-conflict";
 			return json({ gameKey, entries: await new Leaderboards(env).forGame(gameKey) });
 		}
-		const join = path.match(/^\/join\/([^/]+)$/);
+		const join = path.match(/^\/join\/([^/]+)(?:\/(teams))?$/);
 		if (join && (request.method === "GET" || request.method === "POST")) {
+			const code = decodeURIComponent(join[1]);
+			const previewInvite = await directory.redeemInvite(code);
+			const canonicalRoom = previewInvite ? undefined : await directory.get(code);
+			const previewTarget = previewInvite ?? (canonicalRoom ? { roomId: canonicalRoom.id, role: "audience" as Role } : undefined);
+			if (!previewTarget) return json({ error: { code: "NOT_FOUND", message: "Invite is invalid or expired" } }, 404);
+			if (join[2] === "teams") {
+				if (request.method !== "GET") return badRequest("Team rosters are read-only");
+				const teams = await publicTeams(directory, previewTarget.roomId);
+				return teams ? json({ roomId: previewTarget.roomId, teams }) : json({ error: { code: "NOT_FOUND", message: "Room is unavailable" } }, 404);
+			}
 			if (!admissionOpen(env)) return json({ error: { code: "ADMISSION_CLOSED", message: "Joining is temporarily disabled" } }, 503);
 			const joinInput = request.method === "POST" ? await requestJson<{ displayName?: string; teamId?: string }>(request) : undefined;
-			const code = decodeURIComponent(join[1]);
 			let joiningPrincipal = principal;
 			let cookie: string | undefined;
 			if (!joiningPrincipal) { const session = await createAnonymousSession(env, joinInput?.displayName); joiningPrincipal = session.principal; cookie = session.cookie; }
 			const invite = await directory.consumeInvite(code, joiningPrincipal.id);
-			const canonicalRoom = invite ? undefined : await directory.get(code);
-			const canonicalMembership = canonicalRoom ? await directory.membership(code, joiningPrincipal.id) : undefined;
-			const target = invite ?? (canonicalRoom ? { roomId: code, role: canonicalMembership?.role ?? "audience" as Role } : undefined);
+			const target = invite ?? (canonicalRoom ? { roomId: canonicalRoom.id, role: "audience" as Role } : undefined);
 			if (!target) return json({ error: { code: "NOT_FOUND", message: "Invite is invalid or expired" } }, 404);
+			const canonicalMembership = canonicalRoom ? await directory.membership(canonicalRoom.id, joiningPrincipal.id) : undefined;
 			const existingMembership = canonicalMembership ?? await directory.membership(target.roomId, joiningPrincipal.id);
 			const existingPrivileged = existingMembership && ["host", "producer", "moderator"].includes(existingMembership.role);
 			const requestedPrivileged = ["host", "producer", "moderator"].includes(target.role);
-			// A canonical room rejoin restores the durable privileged scope. Redeeming
-			// a lower-scoped invite issues only that invite's role without demoting it.
-			const role = !invite && existingPrivileged ? existingMembership.role : target.role;
-			const teamId = role === "player" && ["team-red", "team-blue"].includes(joinInput?.teamId ?? "") ? joinInput?.teamId : (!invite ? existingMembership?.teamId : undefined);
+			// Contestant access remains invite-only. A canonical room URL restores an
+			// existing membership or downscopes to audience; it never grants a seat.
+			const role = !invite && existingPrivileged ? existingMembership.role : invite?.role ?? canonicalMembership?.role ?? "audience";
+			const teams = role === "player" ? await publicTeams(directory, target.roomId) : undefined;
+			const requestedTeamId = typeof joinInput?.teamId === "string" ? joinInput.teamId : existingMembership?.teamId;
+			const teamId = role === "player" && teams?.some((team) => team.id === requestedTeamId) ? requestedTeamId : undefined;
+			if (role === "player" && !teamId) return badRequest("Choose a team from this live room.");
 			const scopedPrincipal: Principal = { ...joiningPrincipal, role, teamId, displayName: joinInput?.displayName?.slice(0, 80) || (!invite ? existingMembership?.displayName : undefined) || joiningPrincipal.displayName };
 			// An operator may intentionally open an audience/display invite in the
 			// same browser. Issue that scoped ticket, but never demote their durable
 			// room membership or strand host/recovery access.
-			if (!existingPrivileged || requestedPrivileged) await directory.admit(target.roomId, scopedPrincipal);
+			if (!existingPrivileged || requestedPrivileged) {
+				if (role === "player") {
+					const contestantTeamId = teamId;
+					if (!contestantTeamId) return badRequest("Choose a team from this live room.");
+					if (!await directory.admitContestant(target.roomId, { id: scopedPrincipal.id, teamId: contestantTeamId, displayName: scopedPrincipal.displayName })) return json({ error: { code: "CONTESTANT_CAPACITY", message: "This room already has 24 contestants." } }, 409);
+				} else await directory.admit(target.roomId, scopedPrincipal);
+			}
 			const ticket = await issueRoomTicket(env, target.roomId, scopedPrincipal);
 			const viewCookie = await issueViewScope(env, target.roomId, scopedPrincipal);
 			// The client sends wsTicket in Sec-WebSocket-Protocol; keep credentials out of logs and URLs.

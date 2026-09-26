@@ -99,7 +99,7 @@ export async function createSeededRoom(
 	await expect(page).toHaveURL(
 		new RegExp(`/host/${seeded.roomId}\\?code=${seeded.codes.host}$`),
 	);
-	await expect(page.getByTestId("connection-status")).toHaveText("connected");
+	await expect(page.getByTestId("connection-status")).toHaveAttribute("data-status", "connected");
 	await expect(page.getByTestId("host-private-answer")).toContainText(privateMarker);
 	await expect
 		.poll(() => authoritativeSecretObserved.get(page))
@@ -152,7 +152,7 @@ export async function openContestant(
 		teamId: input.teamId,
 		expectedPath: `/play/${room.codes.player}`,
 	});
-	await expect(page.getByTestId("connection-status")).toHaveText("connected");
+	await expect(page.getByTestId("connection-status")).toHaveAttribute("data-status", "connected");
 
 	return page;
 }
@@ -170,7 +170,7 @@ export async function openAudience(
 	await expect(page).toHaveURL(
 		new RegExp(`/audience/${room.codes.audience}$`),
 	);
-	await expect(page.getByTestId("connection-status")).toHaveText("connected");
+	await expect(page.getByTestId("connection-status")).toHaveAttribute("data-status", "connected");
 	return page;
 }
 
@@ -185,7 +185,7 @@ export async function openDisplay(
 	room.untrustedPages.push(page);
 	await page.goto(`/display/${encodeURIComponent(room.codes.display)}`);
 	await expect(page).toHaveURL(new RegExp(`/display/${room.codes.display}$`));
-	await expect(page.getByTestId("connection-status")).toHaveText("connected");
+	await expect(page.getByTestId("connection-status")).toHaveAttribute("data-status", "connected");
 	return page;
 }
 

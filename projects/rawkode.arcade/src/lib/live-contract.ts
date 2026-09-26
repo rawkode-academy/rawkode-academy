@@ -35,6 +35,35 @@ export type RoomPhase =
 	| "intermission"
 	| "complete";
 
+/**
+ * Safe mechanic-specific boards projected by the room reducer. Values are
+ * deliberately progress/reveal data only: no unrevealed answers, aliases, or
+ * producer notes cross this browser boundary.
+ */
+export type PublicGameBoard = {
+	mergeConflict?: {
+		entries: readonly { rank: number; label?: string; revealed: boolean }[];
+		total: number;
+	};
+	spinlock?: {
+		board: string;
+		letters: readonly string[];
+		activeValue: number;
+		turn?: number;
+	};
+	principalEngineer?: { index: number; total: number };
+	raceCondition?: {
+		teamPositions: Readonly<Record<string, number>>;
+		playerPosition: number;
+		chaserPosition: number;
+		total: number;
+	};
+	tenNines?: { found: readonly string[]; total: number };
+	nullPointer?: {
+		distribution: readonly { label: string; count: number }[];
+	};
+};
+
 export type PublicRoomState = {
 	roomId: string;
 	roomCode: string;
@@ -51,6 +80,7 @@ export type PublicRoomState = {
 	audienceResponseCount: number;
 	/** The authoritative server freeze flag, distinct from a live aggregate. */
 	audienceFrozen: boolean;
+	gameBoard?: PublicGameBoard;
 	/** Safe Spinlock state; the phrase itself remains server-private until reveal. */
 	spinlock?: {
 		board: string;

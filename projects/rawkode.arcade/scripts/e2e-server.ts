@@ -17,6 +17,12 @@ const server = Bun.spawn(
 		persist,
 		"--port",
 		"8787",
+		"--ip",
+		"127.0.0.1",
+		// Let workerd choose an ephemeral inspector socket, without Wrangler's
+		// unrelated scan of every network interface in a container.
+		"--inspector-port",
+		"0",
 		"--var",
 		"ENVIRONMENT:test",
 		"--var",

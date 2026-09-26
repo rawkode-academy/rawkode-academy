@@ -19,11 +19,7 @@ process.stdout.write(stdout);
 process.stderr.write(stderr);
 
 const transcript = `${stdout}\n${stderr}`;
-const skipped = [
-	/\bskip(?:ped)?\b/i,
-	/\bpending\b/i,
-	/\btodo\b/i,
-].some((pattern) => pattern.test(transcript));
+const skipped = reportsSkippedTests(transcript);
 
 if (exitCode !== 0 || skipped) {
 	process.stderr.write(
@@ -31,3 +27,4 @@ if (exitCode !== 0 || skipped) {
 	);
 	process.exit(1);
 }
+import { reportsSkippedTests } from "./reported-skips";

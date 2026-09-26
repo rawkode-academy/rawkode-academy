@@ -6,7 +6,9 @@ import Page from "@/wrappers/page.astro";
 export const prerender = true;
 
 const shows = await getCollection("shows");
-const publishedShows = shows.filter((show) => show.data.publish);
+const publishedShows = shows.filter(
+	(show) => show.data.publish && show.data.status !== "coming-soon",
+);
 
 const feedGroups = [
 	{
@@ -98,7 +100,7 @@ const formatNotes = [
 				<p class="editorial-kicker">Podcasts</p>
 				<h2 class="editorial-section__title">Show feeds</h2>
 				<p class="editorial-section__lede">
-					Each published show has its own podcast RSS feed.
+					Each published show with episodes has its own podcast RSS feed.
 				</p>
 			</div>
 			<div class="editorial-grid editorial-grid--2">

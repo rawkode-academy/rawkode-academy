@@ -87,6 +87,26 @@ const isGameId = (value: unknown): value is GameId =>
 const asRecord = (value: unknown): Record<string, unknown> =>
 	value && typeof value === "object" ? (value as Record<string, unknown>) : {};
 
+/**
+ * Audience votes travel through a durable admission queue. `audience.queued`
+ * only means the shard received the command; it is deliberately not a UI
+ * success state. A later `audience.accepted` or command-scoped error settles
+ * the pending control. Other command events are authoritative game commands.
+ */
+export function commandSettlement(message: ServerEnvelope):
+	| "pending"
+	| "accepted"
+	| "rejected"
+	| undefined {
+	if (message.type !== "event" && message.type !== "error") return undefined;
+	if (!message.commandId) return undefined;
+	if (message.type === "error") return "rejected";
+	if (message.type !== "event") return undefined;
+	if (message.event === "audience.queued") return "pending";
+	if (message.event === "audience.accepted") return "accepted";
+	return message.event.startsWith("audience.") ? undefined : "accepted";
+}
+
 function publicPrompt(active: Record<string, unknown>) {
 	if (typeof active.prompt !== "string") return undefined;
 	const choices = Array.isArray(active.choices)
@@ -105,7 +125,92 @@ function publicPrompt(active: Record<string, unknown>) {
 	};
 }
 
-function toPublicState(
+/** Validate the reducer's game-specific projection at the browser boundary. */
+export function mapPublicGameBoard(value: unknown): PublicRoomState["gameBoard"] {
+	const board = asRecord(value);
+	if (board.kind === "merge-conflict" && typeof board.total === "number") {
+		const entries = Array.isArray(board.entries)
+			? board.entries.flatMap((entry) => {
+				const item = asRecord(entry);
+				return typeof item.rank === "number" && typeof item.revealed === "boolean"
+					? [{
+						rank: item.rank,
+						revealed: item.revealed,
+						...(item.revealed && typeof item.label === "string" ? { label: item.label } : {}),
+					}]
+					: [];
+			})
+			: [];
+		return { mergeConflict: { entries, total: board.total } };
+	}
+	if (
+		board.kind === "spinlock" &&
+		typeof board.board === "string" &&
+		typeof board.activeValue === "number"
+	)
+		return {
+			spinlock: {
+				board: board.board,
+				letters: Array.isArray(board.letters)
+					? board.letters.filter((letter): letter is string => typeof letter === "string")
+					: [],
+				activeValue: board.activeValue,
+				...(typeof board.turn === "number" ? { turn: board.turn } : {}),
+			},
+		};
+	if (
+		board.kind === "principal-engineer" &&
+		typeof board.index === "number" &&
+		typeof board.total === "number"
+	)
+		return { principalEngineer: { index: board.index, total: board.total } };
+	if (
+		board.kind === "race-condition" &&
+		typeof board.playerPosition === "number" &&
+		typeof board.chaserPosition === "number" &&
+		typeof board.total === "number"
+	) {
+		const teamPositions = Object.fromEntries(
+			Object.entries(asRecord(board.teamPositions)).flatMap(
+				([teamId, position]) =>
+					typeof position === "number" ? [[teamId, position]] : [],
+			),
+		);
+		return {
+			raceCondition: {
+				teamPositions,
+				playerPosition: board.playerPosition,
+				chaserPosition: board.chaserPosition,
+				total: board.total,
+			},
+		};
+	}
+	if (
+		board.kind === "ten-nines" &&
+		Array.isArray(board.found) &&
+		typeof board.total === "number"
+	)
+		return {
+			tenNines: {
+				found: board.found.filter((entry): entry is string => typeof entry === "string"),
+				total: board.total,
+			},
+		};
+	if (board.kind === "null-pointer") {
+		const distribution = Array.isArray(board.distribution)
+			? board.distribution.flatMap((entry) => {
+				const item = asRecord(entry);
+				return typeof item.label === "string" && typeof item.count === "number"
+					? [{ label: item.label, count: item.count }]
+					: [];
+			})
+			: [];
+		return { nullPointer: { distribution } };
+	}
+	return {};
+}
+
+export function normalizeRoomSnapshot(
 	message: Extract<ServerEnvelope, { type: "snapshot" }>,
 	fallback: PublicRoomState,
 ): PublicRoomState {
@@ -133,6 +238,7 @@ function toPublicState(
 	const audienceDistribution = asRecord(state.audienceDistribution);
 	const spinlock = asRecord(state.spinlock);
 	const principalEngineer = asRecord(state.principalEngineer);
+	const gameBoard = mapPublicGameBoard(state.gameBoard);
 	const roundProgress = projectRoundProgress(asRecord(state.round), state.phase);
 	const audienceResponseCount = Object.values(asRecord(audience.totals)).reduce<number>(
 		(total, value) => (typeof value === "number" ? total + value : total),
@@ -160,6 +266,7 @@ function toPublicState(
 			typeof state.audienceCount === "number" ? state.audienceCount : 0,
 		audienceResponseCount,
 		audienceFrozen,
+		gameBoard,
 		// Aggregates stay available to the host for pacing, but bins are only
 		// rendered to the broadcast UI after the server freezes the distribution.
 		audienceDistribution:
@@ -265,7 +372,7 @@ export function useRoomSocket(
 				latestDeliverySequence = message.deliverySequence;
 			} else if (!acceptsRoomVersion(room.value.version, message.version))
 				return;
-			room.value = toPublicState(message, room.value);
+			room.value = normalizeRoomSnapshot(message, room.value);
 			if (input.isHost) {
 				const privateState = asRecord(asRecord(message.state).private);
 				hostPrivateMarker.value =
@@ -288,11 +395,13 @@ export function useRoomSocket(
 		if (message.type === "event") {
 			if (acceptsRoomVersion(room.value.version, message.version))
 				room.value = { ...room.value, version: message.version };
-			if (message.commandId) lastAcceptedCommandId.value = message.commandId;
+			if (commandSettlement(message) === "accepted" && message.commandId)
+				lastAcceptedCommandId.value = message.commandId;
 		}
 		if (message.type === "error") {
 			lastError.value = message.message;
-			lastErrorCommandId.value = message.commandId ?? "";
+			if (commandSettlement(message) === "rejected")
+				lastErrorCommandId.value = message.commandId ?? "";
 		}
 	};
 	const roomId = () => input.roomId ?? room.value.roomId;

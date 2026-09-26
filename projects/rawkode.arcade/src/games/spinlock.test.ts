@@ -9,3 +9,11 @@ test("Spinlock uses deterministic wheel values and only host advances", () => {
 	state = game.handle(state, { type: "solve", answer: "eventual consistency" }, rival, 4); expect(state.solvedBy).toBe(team.teamId); expect(state.scores.rivals).toBeUndefined();
 	expect(game.handle(state, { type: "next-round" }, team, 5)).toBe(state); expect(game.handle(state, { type: "next-round" }, host, 5).roundIndex).toBe(1);
 });
+
+test("Spinlock lets the host reveal and advance an unsolved phrase", () => {
+	const game = createSpinlock(spinlockSeed); let state = game.handle(game.createState(spinlockSeed), { type: "start" }, host, 0);
+	state = game.handle(state, { type: "reveal" }, host, 1);
+	expect(state.revealed).toBe(true);
+	expect(game.handle(state, { type: "guess-letter", letter: "E" }, team, 2)).toBe(state);
+	expect(game.handle(state, { type: "next-round" }, host, 3).roundIndex).toBe(1);
+});

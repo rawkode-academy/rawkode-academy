@@ -3,6 +3,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import type { Env } from "../src/env";
 import { createAnonymousSession } from "../src/server/auth";
 import { RoomDirectory } from "../src/server/rooms";
+import { issueRoomTicket } from "../src/server/tickets";
 import { migrateTestDatabase } from "./setup-d1";
 
 const bindings = env as unknown as Env;
@@ -170,7 +171,7 @@ describe("audience participation through production storage and HTTP", () => {
 		expect(await response.json()).toMatchObject({ error: { code: "BAD_REQUEST" } });
 	});
 
-	it("accepts one ballot per audience identity in a round", async () => {
+	it("queues one ballot per audience identity and rejects a fresh duplicate command", async () => {
 		const roomId = `dedupe-${crypto.randomUUID()}`;
 		const game = await room(roomId, "null-pointer");
 		await command(game, {
@@ -201,11 +202,12 @@ describe("audience participation through production storage and HTTP", () => {
 		const first = await submit("vote-one", "Rust");
 		const duplicate = await submit("vote-two", "Zig");
 		expect(first.status).toBe(202);
-		expect(await first.json()).toMatchObject({ accepted: true });
-		expect(await duplicate.json()).toMatchObject({ accepted: true, duplicate: true, shardId: "0" });
+		expect(await first.json()).toMatchObject({ queued: true, shardId: "0" });
+		expect(duplicate.status).toBe(409);
+		expect(await duplicate.json()).toMatchObject({ error: { code: "ALREADY_VOTED" } });
 	});
 
-	it("returns HTTP 409 for an audience vote after the host freezes the round", async () => {
+	it("rejects a queued HTTP vote authoritatively after the host freezes the round", async () => {
 		const roomId = `http-frozen-${crypto.randomUUID()}`;
 		const game = await room(roomId, "null-pointer");
 		await command(game, {
@@ -221,6 +223,22 @@ describe("audience participation through production storage and HTTP", () => {
 		});
 		const session = await createAnonymousSession(bindings, "Late viewer");
 		await new RoomDirectory(bindings).admit(roomId, session.principal);
+		const ticket = await issueRoomTicket(bindings, roomId, session.principal);
+		const connection = await SELF.fetch(`https://example.test/api/rooms/${encodeURIComponent(roomId)}/socket`, {
+			headers: { upgrade: "websocket", "Sec-WebSocket-Protocol": `arcade-ticket.${ticket}` },
+		});
+		expect(connection.status).toBe(101);
+		const socket = connection.webSocket!;
+		socket.accept();
+		const terminalResult = new Promise<Record<string, unknown>>((resolve, reject) => {
+			const timeout = setTimeout(() => reject(new Error("Queued late vote did not receive an authoritative rejection")), 2_000);
+			socket.addEventListener("message", (event) => {
+				const message = JSON.parse(String(event.data));
+				if (message.commandId !== "late-http-vote" || message.type !== "error") return;
+				clearTimeout(timeout);
+				resolve(message);
+			});
+		});
 		const response = await SELF.fetch(
 			`https://example.test/api/rooms/${encodeURIComponent(roomId)}/commands`,
 			{
@@ -240,9 +258,11 @@ describe("audience participation through production storage and HTTP", () => {
 			},
 		);
 
-		expect(response.status).toBe(409);
-		expect(await response.json()).toMatchObject({
-			error: { code: "DISTRIBUTION_FROZEN" },
-		});
+		expect(response.status).toBe(202);
+		expect(await response.json()).toMatchObject({ queued: true });
+		expect(await terminalResult).toMatchObject({ type: "error", code: "CONFLICT", message: "DISTRIBUTION_FROZEN", commandId: "late-http-vote" });
+		const snapshot = await (await game.fetch("https://game-room.internal/_internal/state", { headers: principal("host", "host") })).json<{ state: { audience: { totals: Record<string, number> } } }>();
+		expect(snapshot.state.audience.totals).toEqual({});
+		socket.close(1000, "Late-vote test complete");
 	});
 });

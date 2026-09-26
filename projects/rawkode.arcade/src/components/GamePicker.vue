@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { css } from "@/../styled-system/css";
+import GameMark from "@/components/GameMark.vue";
 import { games, type GameId } from "@/lib/game-catalogue";
 import {
 	control,
@@ -85,7 +86,10 @@ async function createRoom() {
 				:aria-checked="selected === game.id"
 				@click="selected = game.id"
 			>
-				<span :class="order[index].index">FMT-{{ String(index + 1).padStart(2, "0") }}</span>
+				<span :class="order[index].index">
+					<GameMark :game="game.id" scale="compact" />
+					{{ game.brand.code }}
+				</span>
 				<span :class="order[index].title">
 					{{ game.title }}
 					<small :class="[text({ style: 'bodySm', tone: 'soft' }), description]">

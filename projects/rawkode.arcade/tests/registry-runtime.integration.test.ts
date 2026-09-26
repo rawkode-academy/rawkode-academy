@@ -29,6 +29,22 @@ describe("production reducer registry", () => {
 		expect(state.teams["team-red"].score).toBe(100);
 	});
 
+	test("projects safe format boards without exposing unrevealed answer keys", () => {
+		let merge = applyCommand(newGameState("merge-board", "merge-conflict"), command("room.start", 0), host, 0).state;
+		expect(merge.gameBoard).toMatchObject({ kind: "merge-conflict", total: 5 });
+		expect(merge.gameBoard?.kind === "merge-conflict" && merge.gameBoard.entries[0]).toEqual({ rank: 1, revealed: false });
+		expect(JSON.stringify(merge.gameBoard)).not.toContain("Check the logs");
+		merge = applyCommand(merge, command("answer.submit", 1, { answer: "works on my machine" }), team, 1).state;
+		expect(merge.gameBoard?.kind === "merge-conflict" && merge.gameBoard.entries[0]).toEqual({ rank: 1, revealed: true, label: "It works on my machine" });
+
+		const principal = applyCommand(newGameState("principal-board", "principal-engineer"), command("room.start", 0), host, 0).state;
+		expect(principal.gameBoard).toEqual({ kind: "principal-engineer", index: 0, total: 2 });
+		const race = applyCommand(newGameState("race-board", "race-condition"), command("room.start", 0), host, 0).state;
+		expect(race.gameBoard).toEqual({ kind: "race-condition", teamPositions: {}, playerPosition: 0, chaserPosition: 0, total: 5 });
+		const nines = applyCommand(newGameState("nines-board", "ten-nines"), command("room.start", 0), host, 0).state;
+		expect(nines.gameBoard).toEqual({ kind: "ten-nines", found: [], total: 10 });
+	});
+
 	test("projects reducer round progress through host advance", () => {
 		let state = applyCommand(newGameState("merge-progress", "merge-conflict"), command("room.start", 0), host, 0).state;
 		expect(state.round).toMatchObject({ index: 0, total: 2, id: "merge-0", phase: "round" });
@@ -51,6 +67,24 @@ describe("production reducer registry", () => {
 		expect(state.teams["team-red"].score).toBe(1100);
 	});
 
+	test("reveals every Ten Nines answer when the host settles an incomplete list", () => {
+		let state = applyCommand(newGameState("nines-reveal", "ten-nines"), command("room.start", 0), host, 0).state;
+		state = applyCommand(state, command("answer.submit", 1, { answer: "200" }), team, 1).state;
+		state = applyCommand(state, command("prompt.reveal", 2), host, 2).state;
+		expect(state.phase).toBe("reveal");
+		expect(state.revealedAnswer).toContain("200");
+		expect(state.revealedAnswer).toContain("500");
+	});
+
+	test("lets the host reveal and advance an unsolved Spinlock round", () => {
+		let state = applyCommand(newGameState("spin-skip", "spinlock"), command("room.start", 0), host, 0).state;
+		state = applyCommand(state, command("prompt.reveal", 1), host, 1).state;
+		expect(state.revealedAnswer).toBe("eventual consistency");
+		expect(state.spinlock?.board).toBe("EVENTUAL CONSISTENCY");
+		state = applyCommand(state, command("phase.advance", 2), host, 2).state;
+		expect(state.round).toMatchObject({ index: 1, id: "spin-1", phase: "round" });
+	});
+
 	test("maps the existing buzzer envelope into Race Condition", () => {
 		let state = applyCommand(newGameState("race", "race-condition"), command("room.start", 0), host, 0).state;
 		state = applyCommand(state, command("buzzer.press", 1), team, 7).state;
@@ -66,6 +100,15 @@ describe("production reducer registry", () => {
 		expect((state.private.runtime?.state as { settled?: boolean }).settled).toBe(true);
 		expect(() => applyCommand(state, command("buzzer.press", 3), team, 3)).toThrow("CONFLICT");
 		expect(() => applyCommand(state, command("answer.submit", 3, { answer: "queue" }), team, 3)).toThrow("BAD_COMMAND");
+	});
+
+	test("allows a chaser response only after a contestant misses", () => {
+		let state = applyCommand(newGameState("race-chaser", "race-condition"), command("room.start", 0), host, 0).state;
+		expect(() => applyCommand(state, command("race.chaser-answer", 1, { answer: "queue" }), host, 1)).toThrow("BAD_COMMAND");
+		state = applyCommand(state, command("buzzer.press", 1), team, 1).state;
+		state = applyCommand(state, command("answer.submit", 2, { answer: "stack" }), team, 2).state;
+		state = applyCommand(state, command("race.chaser-answer", 3, { answer: "queue" }), host, 3).state;
+		expect(state.private.runtime?.state).toMatchObject({ chaserPosition: 1, settled: true });
 	});
 
 	test("does not score Principal Engineer answers after a host reveal", () => {
@@ -166,21 +209,6 @@ describe("production reducer registry", () => {
 		expect(principal.activePrompt?.choices).toHaveLength(4);
 		expect(principal.principalEngineer).toMatchObject({ fiftyFiftyUsed: true, askAudienceUsed: true, fiftyFiftyActive: false, askAudienceActive: false, eliminatedChoiceIds: [], audienceAdvice: {} });
 
-		let race = applyCommand(
-			newGameState("race-console", "race-condition"),
-			command("room.start", 0),
-			host,
-			0,
-		).state;
-		race = applyCommand(
-			race,
-			command("race.chaser-answer", 1, { answer: "queue" }),
-			host,
-			1,
-		).state;
-		expect(
-			(race.private.runtime?.state as { chaserPosition: number }).chaserPosition,
-		).toBe(1);
 	});
 
 	test("hydrates and pins a published Merge Conflict revision", () => {
@@ -207,6 +235,7 @@ describe("production reducer registry", () => {
 		state = applyCommand(state, command("answer.submit", 1, { answer: "Elixir" }), team, 1).state;
 		state = applyCommand(state, command("prompt.reveal", 2), host, 2).state;
 		expect(state.teams["team-red"].score).toBe(4);
+		expect(state.gameBoard).toMatchObject({ kind: "null-pointer", distribution: expect.arrayContaining([{ label: "Java", count: 4 }, { label: "Elixir", count: 1 }]) });
 		expect((state.private.runtime?.state as { revealedAnswers?: Array<{ answer: string; points: number }> }).revealedAnswers?.find((answer) => answer.answer === "Elixir")?.points).toBe(1);
 		state = applyCommand(state, command("phase.advance", 3), host, 3).state;
 		expect(state.audience.frozen).toBeUndefined();

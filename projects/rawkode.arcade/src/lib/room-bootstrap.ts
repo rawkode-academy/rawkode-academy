@@ -8,6 +8,8 @@ export type RoomBootstrap = {
 	code?: string;
 };
 
+export type JoinableTeam = { id: string; name: string };
+
 export const joinBootstrapKey = "rawkode-arcade-join-bootstrap";
 export const hostBootstrapKey = "rawkode-arcade-host-bootstrap";
 
@@ -61,6 +63,14 @@ export async function requestJoin(
 		socketUrl: value.socketUrl,
 		role: value.role,
 	};
+}
+
+/** Reads the room-owned contestant roster before the join form asks for a team. */
+export async function requestJoinableTeams(code: string): Promise<JoinableTeam[]> {
+	const response = await fetch(`/api/join/${encodeURIComponent(code)}/teams`, { credentials: "same-origin" });
+	const body = await response.json().catch(() => undefined) as { teams?: JoinableTeam[]; error?: { message?: string } } | undefined;
+	if (!response.ok) throw new Error(body?.error?.message ?? "Unable to load teams for this room.");
+	return Array.isArray(body?.teams) ? body.teams : [];
 }
 
 export async function requestExistingRoom(roomId: string): Promise<RoomBootstrap> {

@@ -41,7 +41,7 @@ async function invite(roomId: string, role: "host" | "player" | "audience" | "di
 
 async function join(
 	code: string,
-	body: { displayName: string; teamId?: string },
+	body: { displayName: string; teamId?: string; desiredRole?: "player" | "audience" },
 	cookie?: string,
 ) {
 	const response = await SELF.fetch(
@@ -107,6 +107,49 @@ async function connect(roomId: string, ticket: string) {
 }
 
 describe("production authentication and room membership", () => {
+	it("serves the room-owned roster and admits a contestant to its selected live team", async () => {
+		const host: Principal = { id: `roster-host-${crypto.randomUUID()}`, role: "host" };
+		const { record, stub } = await createRoom();
+		await directory.admit(record.id, host);
+		await stub.fetch("https://game-room.internal/_internal/command", {
+			method: "POST", headers: internalPrincipal(host),
+			body: JSON.stringify({ v: 1, id: "add-team", type: "team.upsert", expectedVersion: 0, payload: { teamId: "team-green", name: "Green Threads" }, sentAt: new Date().toISOString() }),
+		});
+		const code = await invite(record.id, "player");
+		const roster = await SELF.fetch(`https://example.test/api/join/${encodeURIComponent(code)}/teams`);
+		expect(roster.status).toBe(200);
+		expect(await roster.json()).toMatchObject({ roomId: record.id, teams: expect.arrayContaining([{ id: "team-green", name: "Green Threads" }]) });
+		const canonical = await join(record.id, { displayName: "Green player", teamId: "team-green" });
+		expect(canonical.payload).toMatchObject({ role: "audience" });
+		const joined = await join(code, { displayName: "Green player", teamId: "team-green" }, canonical.cookie);
+		expect(joined.response.status).toBe(200);
+		const ticket = await verifyRoomTicket(bindings, joined.payload.wsTicket, record.id);
+		expect(ticket?.principal).toMatchObject({ role: "player", teamId: "team-green" });
+	});
+
+	it("caps the on-camera roster at 24 contestants while retaining existing players", async () => {
+		const record = await directory.create("spinlock", `Capacity ${crypto.randomUUID()}`);
+		const admitted = await Promise.all(Array.from({ length: 25 }, (_value, index) => directory.admitContestant(record.id, { id: `contestant-${index}`, teamId: "team-red" })));
+		expect(admitted.filter(Boolean)).toHaveLength(24);
+		expect(await directory.admitContestant(record.id, { id: "contestant-0", teamId: "team-blue" })).toBe(true);
+	});
+
+	it("rejects the 25th concurrent player invitation at the admission boundary", async () => {
+		const { record } = await createRoom();
+		const codes = await Promise.all(Array.from({ length: 25 }, () => invite(record.id, "player")));
+		const joins = await Promise.all(codes.map((code, index) =>
+			SELF.fetch(`https://example.test/api/join/${encodeURIComponent(code)}`, {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ displayName: `Contestant ${index}`, teamId: "team-red" }),
+			}),
+		));
+		expect(joins.filter((response) => response.status === 200)).toHaveLength(24);
+		const rejected = joins.filter((response) => response.status === 409);
+		expect(rejected).toHaveLength(1);
+		expect(await rejected[0]!.json()).toMatchObject({ error: { code: "CONTESTANT_CAPACITY" } });
+	});
+
 	it("denies host and content administration to an anonymous request", async () => {
 		const room = await SELF.fetch("https://example.test/api/rooms", {
 			method: "POST",

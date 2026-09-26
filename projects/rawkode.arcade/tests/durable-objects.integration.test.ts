@@ -138,15 +138,63 @@ describe("GameRoom Durable Object storage", () => {
 		expect(projected?.count).toBeGreaterThan(0);
 	});
 
-	it("rejects a vote after the host freezes the audience distribution", async () => {
+	it("does not count a queued vote after the host freezes the audience distribution", async () => {
 		const roomId = `frozen-${crypto.randomUUID()}`;
 		const stub = await room(roomId, "null-pointer");
 		const hostHeaders = { ...principal("host", "host"), "content-type": "application/json" };
 		await stub.fetch("https://game-room.internal/_internal/command", { method: "POST", headers: hostHeaders, body: JSON.stringify({ v: 1, id: "freeze", type: "audience.freeze", expectedVersion: 0, payload: {}, sentAt: new Date().toISOString() }) });
 		const shard = bindings.AUDIENCE_SHARD.get(bindings.AUDIENCE_SHARD.idFromName(`${roomId}:audience:0`));
 		const response = await shard.fetch("https://audience-shard.internal/_internal/submit", { method: "POST", headers: { ...principal("viewer", "audience"), "content-type": "application/json" }, body: JSON.stringify({ roomId, shardId: "0", promptId: "round", choice: "Rust", commandId: "late" }) });
-		expect(response.status).toBe(409);
-		expect((await response.json<{ error: { code: string } }>()).error.code).toBe("DISTRIBUTION_FROZEN");
+		expect(response.status).toBe(202);
+		for (let attempt = 0; attempt < 20; attempt += 1) {
+			const pending = await (await shard.fetch("https://audience-shard.internal/_internal/testing/pending", { headers: { "x-arcade-test-secret": "test-only-local-secret" } })).json<{ pendingIntents: number }>();
+			if (pending.pendingIntents === 0) break;
+			await new Promise((resolve) => setTimeout(resolve, 25));
+		}
+		const state = await (await stub.fetch("https://game-room.internal/_internal/state", { headers: principal("host", "host") })).json<{ state: { audience: { totals: Record<string, number> } } }>();
+		expect(state.state.audience.totals).toEqual({});
+	});
+
+	it("resolves a queued WebSocket vote with a command-scoped error after freeze", async () => {
+		const roomId = `frozen-socket-${crypto.randomUUID()}`;
+		const stub = await room(roomId, "null-pointer");
+		const hostHeaders = { ...principal("host", "host"), "content-type": "application/json" };
+		await stub.fetch("https://game-room.internal/_internal/command", {
+			method: "POST",
+			headers: hostHeaders,
+			body: JSON.stringify({ v: 1, id: "start", type: "room.start", expectedVersion: 0, payload: {}, sentAt: new Date().toISOString() }),
+		});
+		const shardId = "0";
+		const shard = bindings.AUDIENCE_SHARD.get(bindings.AUDIENCE_SHARD.idFromName(`${roomId}:audience:${shardId}`));
+		const connection = await shard.fetch("https://audience-shard.internal/_internal/connect", {
+			headers: {
+				...principal("late-socket-viewer", "audience"),
+				upgrade: "websocket",
+				"x-arcade-room-id": roomId,
+				"x-arcade-shard-id": shardId,
+				"x-arcade-ticket-nonce": `late-${crypto.randomUUID()}`,
+			},
+		});
+		expect(connection.status).toBe(101);
+		const socket = connection.webSocket!;
+		socket.accept();
+		await waitForSocketMessage(socket, (message) => message.type === "snapshot");
+		await stub.fetch("https://game-room.internal/_internal/command", {
+			method: "POST",
+			headers: hostHeaders,
+			body: JSON.stringify({ v: 1, id: "freeze", type: "audience.freeze", expectedVersion: 1, payload: {}, sentAt: new Date().toISOString() }),
+		});
+
+		const commandId = `late-${crypto.randomUUID()}`;
+		const queued = waitForSocketMessage(socket, (message) => message.type === "event" && message.event === "audience.queued" && message.commandId === commandId);
+		const rejected = waitForSocketMessage(socket, (message) => message.type === "error" && message.commandId === commandId);
+		socket.send(JSON.stringify({ v: 1, id: commandId, type: "audience.vote", expectedVersion: 2, payload: { promptId: "null-0", choice: "Java" }, sentAt: new Date().toISOString() }));
+
+		expect(await queued).toMatchObject({ type: "event", event: "audience.queued", commandId });
+		expect(await rejected).toMatchObject({ type: "error", code: "CONFLICT", message: "DISTRIBUTION_FROZEN", commandId });
+		const state = await (await stub.fetch("https://game-room.internal/_internal/state", { headers: principal("host", "host") })).json<{ state: { audience: { totals: Record<string, number> } } }>();
+		expect(state.state.audience.totals).toEqual({});
+		socket.close(1000, "done");
 	});
 
 	it("lets a host freeze and reveal a Null Pointer round with zero audience responses", async () => {
@@ -253,6 +301,11 @@ describe("GameRoom Durable Object storage", () => {
 		const shard = bindings.AUDIENCE_SHARD.get(bindings.AUDIENCE_SHARD.idFromName(`${roomId}:audience:2`));
 		const accepted = await shard.fetch("https://audience-shard.internal/_internal/submit", { method: "POST", headers: { ...principal("before-freeze", "audience"), "content-type": "application/json" }, body: JSON.stringify({ roomId, shardId: "2", promptId: "freeze-round", choice: "Zig", commandId: "pre-freeze" }) });
 		expect(accepted.status).toBe(202);
+		for (let attempt = 0; attempt < 20; attempt += 1) {
+			const pending = await (await shard.fetch("https://audience-shard.internal/_internal/testing/pending", { headers: { "x-arcade-test-secret": "test-only-local-secret" } })).json<{ pendingIntents: number }>();
+			if (pending.pendingIntents === 0) break;
+			await new Promise((resolve) => setTimeout(resolve, 25));
+		}
 		await stub.fetch("https://game-room.internal/_internal/command", { method: "POST", headers: hostHeaders, body: JSON.stringify({ v: 1, id: "freeze", type: "audience.freeze", expectedVersion: 1, payload: {}, sentAt: new Date().toISOString() }) });
 		for (let attempt = 0; attempt < 20; attempt += 1) {
 			const state = await (await stub.fetch("https://game-room.internal/_internal/state", { headers: principal("host", "host") })).json<{ state: { audience: { totals: Record<string, number> } } }>();
@@ -262,7 +315,7 @@ describe("GameRoom Durable Object storage", () => {
 		const drained = await (await stub.fetch("https://game-room.internal/_internal/state", { headers: principal("host", "host") })).json<{ state: { audience: { totals: Record<string, number> } } }>();
 		expect(drained.state.audience.totals.Zig).toBe(1);
 		const late = await shard.fetch("https://audience-shard.internal/_internal/submit", { method: "POST", headers: { ...principal("after-freeze", "audience"), "content-type": "application/json" }, body: JSON.stringify({ roomId, shardId: "2", promptId: "freeze-round", choice: "Rust", commandId: "post-freeze" }) });
-		expect(late.status).toBe(409);
+		expect(late.status).toBe(202);
 	});
 
 	it("does not let a same-principal duplicate hold the freeze reveal barrier", async () => {
@@ -273,7 +326,12 @@ describe("GameRoom Durable Object storage", () => {
 		const shard = bindings.AUDIENCE_SHARD.get(bindings.AUDIENCE_SHARD.idFromName(`${roomId}:audience:4`));
 		const submit = (id: string, choice: string) => shard.fetch("https://audience-shard.internal/_internal/submit", { method: "POST", headers: { ...principal("same-viewer", "audience"), "content-type": "application/json" }, body: JSON.stringify({ roomId, shardId: "4", promptId: "null-0", choice, commandId: id }) });
 		expect((await submit("first", "Java")).status).toBe(202);
-		expect((await submit("fresh-duplicate", "Rust")).status).toBe(202);
+		expect((await submit("fresh-duplicate", "Rust")).status).toBe(409);
+		for (let attempt = 0; attempt < 20; attempt += 1) {
+			const state = await (await stub.fetch("https://game-room.internal/_internal/state", { headers: principal("host", "host") })).json<{ state: { audience: { totals: Record<string, number> } } }>();
+			if (state.state.audience.totals.Java === 1) break;
+			await new Promise((resolve) => setTimeout(resolve, 25));
+		}
 		await stub.fetch("https://game-room.internal/_internal/command", { method: "POST", headers: hostHeaders, body: JSON.stringify({ v: 1, id: "freeze", type: "audience.freeze", expectedVersion: 1, payload: {}, sentAt: new Date().toISOString() }) });
 		for (let attempt = 0; attempt < 20; attempt += 1) {
 			const state = await (await stub.fetch("https://game-room.internal/_internal/state", { headers: principal("host", "host") })).json<{ state: { audience: { totals: Record<string, number> } } }>();
@@ -294,7 +352,12 @@ describe("GameRoom Durable Object storage", () => {
 		const shard = bindings.AUDIENCE_SHARD.get(bindings.AUDIENCE_SHARD.idFromName(`${roomId}:audience:5`));
 		const submit = (viewer: string, choice: string) => shard.fetch("https://audience-shard.internal/_internal/submit", { method: "POST", headers: { ...principal(viewer, "audience"), "content-type": "application/json" }, body: JSON.stringify({ roomId, shardId: "5", promptId: "null-0", choice, commandId: "shared-command" }) });
 		const [first, duplicate] = await Promise.all([submit("viewer-a", "Go"), submit("viewer-b", "Rust")]);
-		expect(first.status).toBe(202); expect(duplicate.status).toBe(202);
+		expect([first.status, duplicate.status].sort()).toEqual([202, 409]);
+		for (let attempt = 0; attempt < 20; attempt += 1) {
+			const state = await (await stub.fetch("https://game-room.internal/_internal/state", { headers: principal("host", "host") })).json<{ state: { audience: { totals: Record<string, number> } } }>();
+			if (Object.values(state.state.audience.totals).reduce((total, value) => total + value, 0) === 1) break;
+			await new Promise((resolve) => setTimeout(resolve, 25));
+		}
 		await stub.fetch("https://game-room.internal/_internal/command", { method: "POST", headers: hostHeaders, body: JSON.stringify({ v: 1, id: "freeze", type: "audience.freeze", expectedVersion: 1, payload: {}, sentAt: new Date().toISOString() }) });
 		for (let attempt = 0; attempt < 20; attempt += 1) {
 			const state = await (await stub.fetch("https://game-room.internal/_internal/state", { headers: principal("host", "host") })).json<{ state: { audience: { totals: Record<string, number> } } }>();
@@ -323,11 +386,11 @@ describe("GameRoom Durable Object storage", () => {
 		const stub = await room(`public-metadata-${crypto.randomUUID()}`, "null-pointer");
 		const hostHeaders = { ...principal("host", "host"), "content-type": "application/json" };
 		await stub.fetch("https://game-room.internal/_internal/command", { method: "POST", headers: hostHeaders, body: JSON.stringify({ v: 1, id: "open", type: "prompt.open", expectedVersion: 0, payload: { id: "round-7", prompt: "Public round" }, sentAt: new Date().toISOString() }) });
-		await stub.fetch("https://game-room.internal/_internal/audience-presence", { method: "POST", headers: { ...principal("shard", "producer"), "content-type": "application/json" }, body: JSON.stringify({ shardId: "3", principalId: "audience-secret-id", connected: true }) });
+		await stub.fetch("https://game-room.internal/_internal/audience-presence", { method: "POST", headers: { ...principal("shard", "producer"), "content-type": "application/json" }, body: JSON.stringify({ shardId: "3", count: 1, sequence: 1 }) });
 		const snapshot = await (await stub.fetch("https://game-room.internal/_internal/state", { headers: principal("display", "display") })).json<{ state: { audienceCount: number; round: { id: string; phase: string } } }>();
 		expect(snapshot.state.audienceCount).toBe(1);
 		expect(snapshot.state.round).toMatchObject({ id: "round-7", phase: "question" });
-		expect(JSON.stringify(snapshot.state)).not.toContain("audience-secret-id");
+		expect(JSON.stringify(snapshot.state)).not.toContain("principalId");
 	});
 
 	it("does not let a delayed presence body overwrite a newer gameplay state", async () => {
@@ -336,10 +399,10 @@ describe("GameRoom Durable Object storage", () => {
 		const writer = stream.writable.getWriter();
 		const encoder = new TextEncoder();
 		const presence = stub.fetch("https://game-room.internal/_internal/audience-presence", { method: "POST", headers: { ...principal("shard", "producer"), "content-type": "application/json" }, body: stream.readable });
-		await writer.write(encoder.encode('{"shardId":"held","principalId":"viewer",'));
+		await writer.write(encoder.encode('{"shardId":"held","count":1,'));
 		await new Promise((resolve) => setTimeout(resolve, 20));
 		await stub.fetch("https://game-room.internal/_internal/command", { method: "POST", headers: { ...principal("host", "host"), "content-type": "application/json" }, body: JSON.stringify({ v: 1, id: "start", type: "room.start", expectedVersion: 0, payload: {}, sentAt: new Date().toISOString() }) });
-		await writer.write(encoder.encode('"connected":true}'));
+		await writer.write(encoder.encode('"sequence":1}'));
 		await writer.close();
 		expect((await presence).status).toBe(200);
 		const snapshot = await (await stub.fetch("https://game-room.internal/_internal/state", { headers: principal("host", "host") })).json<{ state: { status: string; version: number; audienceCount: number } }>();
@@ -360,6 +423,35 @@ describe("GameRoom Durable Object storage", () => {
 		await writer.write(encoder.encode('"shardId":"held-shard"}'));
 		await writer.close();
 		expect((await admission).status).toBe(409);
+	});
+
+	it("admits bounded vote batches idempotently and rejects late work after freeze", async () => {
+		const stub = await room(`batched-admission-${crypto.randomUUID()}`, "null-pointer");
+		const producerHeaders = { ...principal("shard", "producer"), "content-type": "application/json" };
+		const hostHeaders = { ...principal("host", "host"), "content-type": "application/json" };
+		await stub.fetch("https://game-room.internal/_internal/command", { method: "POST", headers: hostHeaders, body: JSON.stringify({ v: 1, id: "start", type: "room.start", expectedVersion: 0, payload: {}, sentAt: new Date().toISOString() }) });
+		const batch = { shardId: "batch", promptId: "null-0", submissions: Array.from({ length: 100 }, (_, index) => ({ commandId: `vote-${index}`, choice: "Java" })) };
+		const first = await stub.fetch("https://game-room.internal/_internal/audience-submit-batch", { method: "POST", headers: producerHeaders, body: JSON.stringify(batch) });
+		expect(first.status).toBe(202);
+		const admitted = await first.json<{ results: Array<{ accepted: boolean; admissionVersion?: number }> }>();
+		expect(admitted.results).toHaveLength(100);
+		expect(admitted.results.every((result) => result.accepted && result.admissionVersion === 1)).toBe(true);
+		const replay = await (await stub.fetch("https://game-room.internal/_internal/audience-submit-batch", { method: "POST", headers: producerHeaders, body: JSON.stringify(batch) })).json<{ results: Array<{ accepted: boolean; admissionVersion?: number }> }>();
+		expect(replay.results).toEqual(admitted.results);
+		await stub.fetch("https://game-room.internal/_internal/command", { method: "POST", headers: hostHeaders, body: JSON.stringify({ v: 1, id: "freeze", type: "audience.freeze", expectedVersion: 1, payload: {}, sentAt: new Date().toISOString() }) });
+		const late = await (await stub.fetch("https://game-room.internal/_internal/audience-submit-batch", { method: "POST", headers: producerHeaders, body: JSON.stringify({ shardId: "batch", promptId: "null-0", submissions: [{ commandId: "late", choice: "Java" }] }) })).json<{ results: Array<{ accepted: boolean; code?: string }> }>();
+		expect(late.results).toEqual([{ commandId: "late", accepted: false, code: "DISTRIBUTION_FROZEN" }]);
+	});
+
+	it("uses monotonic absolute shard presence without storing audience identities", async () => {
+		const stub = await room(`presence-sequence-${crypto.randomUUID()}`, "merge-conflict");
+		const headers = { ...principal("shard", "producer"), "content-type": "application/json" };
+		await stub.fetch("https://game-room.internal/_internal/audience-presence", { method: "POST", headers, body: JSON.stringify({ shardId: "a", count: 7, sequence: 2 }) });
+		await stub.fetch("https://game-room.internal/_internal/audience-presence", { method: "POST", headers, body: JSON.stringify({ shardId: "a", count: 99, sequence: 1 }) });
+		await stub.fetch("https://game-room.internal/_internal/audience-presence", { method: "POST", headers, body: JSON.stringify({ shardId: "b", count: 5, sequence: 1 }) });
+		const snapshot = await (await stub.fetch("https://game-room.internal/_internal/state", { headers: principal("host", "host") })).json<{ state: { audienceCount: number } }>();
+		expect(snapshot.state.audienceCount).toBe(12);
+		expect(JSON.stringify(snapshot)).not.toContain("principal_id");
 	});
 
 	it("flushes sustained reaction commands in bounded correlated batches", async () => {
@@ -428,6 +520,11 @@ describe("GameRoom Durable Object storage", () => {
 		await shard.fetch("https://audience-shard.internal/_internal/testing/fail-next-admission-response", { method: "POST", headers: { "x-arcade-test-secret": "test-only-local-secret" } });
 		const accepted = await shard.fetch("https://audience-shard.internal/_internal/submit", { method: "POST", headers: { ...principal("interrupted-viewer", "audience"), "content-type": "application/json" }, body: JSON.stringify({ roomId, shardId: "12", promptId: "null-0", choice: "Zig", commandId: "lost-response" }) });
 		expect(accepted.status).toBe(202);
+		for (let attempt = 0; attempt < 40; attempt += 1) {
+			const pending = await (await shard.fetch("https://audience-shard.internal/_internal/testing/pending", { headers: { "x-arcade-test-secret": "test-only-local-secret" } })).json<{ pendingIntents: number }>();
+			if (pending.pendingIntents === 0) break;
+			await new Promise((resolve) => setTimeout(resolve, 25));
+		}
 		await stub.fetch("https://game-room.internal/_internal/command", { method: "POST", headers: hostHeaders, body: JSON.stringify({ v: 1, id: "freeze", type: "audience.freeze", expectedVersion: 1, payload: {}, sentAt: new Date().toISOString() }) });
 		for (let attempt = 0; attempt < 30; attempt += 1) {
 			const state = await (await stub.fetch("https://game-room.internal/_internal/state", { headers: principal("host", "host") })).json<{ state: { audience: { totals: Record<string, number> } } }>();
@@ -474,7 +571,9 @@ describe("GameRoom Durable Object storage", () => {
 			if (state.state.audience.totals.Java === 1) break;
 			await new Promise((resolve) => setTimeout(resolve, 50));
 		}
-		expect(originalSettled).toBe(false);
+		// Submission returns a durable local receipt; coordinator admission remains
+		// asynchronous and is verified by the aggregate below.
+		expect(originalSettled).toBe(true);
 		expect((await original).status).toBe(202);
 		await new Promise((resolve) => setTimeout(resolve, 150));
 		const recovered = await (await stub.fetch("https://game-room.internal/_internal/state", { headers: principal("host", "host") })).json<{ state: { audience: { totals: Record<string, number> } } }>();
@@ -516,32 +615,23 @@ describe("GameRoom Durable Object storage", () => {
 		const originalIntent = { roomId, shardId: "23", promptId: "null-0", choice: "Java", commandId: "generation-id" };
 		const original = shard.fetch("https://audience-shard.internal/_internal/submit", { method: "POST", headers: { ...principal("generation-a", "audience"), "content-type": "application/json" }, body: JSON.stringify(originalIntent) }).finally(() => { originalSettled = true; });
 		for (let attempt = 0; attempt < 80; attempt += 1) {
-			const state = await (await stub.fetch("https://game-room.internal/_internal/state", { headers: principal("host", "host") })).json<{ state: { audience: { totals: Record<string, number> } } }>();
-			const pending = await (await shard.fetch("https://audience-shard.internal/_internal/testing/pending", { headers: testHeaders })).json<{ pendingFlushes: number; pendingAcks: number; intents: number }>();
-			const barriers = await (await stub.fetch("https://game-room.internal/_internal/testing/audience-admission-barriers", { headers: testHeaders })).json<{ before: number; after: number }>();
-			if (barriers.after === 1 && state.state.audience.totals.Java === 1 && pending.pendingFlushes === 0 && pending.pendingAcks === 0 && pending.intents === 0) break;
+			const barriers = await (await stub.fetch("https://game-room.internal/_internal/testing/audience-admission-barriers", { headers: testHeaders })).json<{ after: number }>();
+			if (barriers.after === 1) break;
 			await new Promise((resolve) => setTimeout(resolve, 25));
 		}
-		expect(originalSettled).toBe(false);
-		const drained = await (await shard.fetch("https://audience-shard.internal/_internal/testing/pending", { headers: testHeaders })).json<{ pendingFlushes: number; pendingAcks: number; intents: number }>();
-		expect(drained).toMatchObject({ pendingFlushes: 0, pendingAcks: 0, intents: 0 });
-		for (let hold = 0; hold < 2; hold += 1) await stub.fetch("https://game-room.internal/_internal/testing/hold-next-before-audience-admission", { method: "POST", headers: testHeaders });
-		const replacement = shard.fetch("https://audience-shard.internal/_internal/submit", { method: "POST", headers: { ...principal("generation-b", "audience"), "content-type": "application/json" }, body: JSON.stringify({ roomId, shardId: "23", promptId: "other-prompt", choice: "Rust", commandId: "generation-id" }) });
-		for (let attempt = 0; attempt < 80; attempt += 1) {
-			const barriers = await (await stub.fetch("https://game-room.internal/_internal/testing/audience-admission-barriers", { headers: testHeaders })).json<{ before: number; after: number }>();
-			const pending = await (await shard.fetch("https://audience-shard.internal/_internal/testing/pending", { headers: testHeaders })).json<{ intents: number }>();
-			if (barriers.before === 2 && pending.intents === 1) break;
-			await new Promise((resolve) => setTimeout(resolve, 25));
-		}
-		const held = await (await stub.fetch("https://game-room.internal/_internal/testing/audience-admission-barriers", { headers: testHeaders })).json<{ before: number; after: number }>();
-		expect(held).toEqual({ before: 2, after: 1 });
+		expect(originalSettled).toBe(true);
+		const heldIntent = await (await shard.fetch("https://audience-shard.internal/_internal/testing/pending", { headers: testHeaders })).json<{ intents: number }>();
+		expect(heldIntent.intents).toBe(1);
 		expect((await stub.fetch("https://game-room.internal/_internal/testing/release-audience-admission?phase=after", { method: "POST", headers: testHeaders })).status).toBe(200);
 		expect((await original).status).toBe(202);
-		expect((await stub.fetch("https://game-room.internal/_internal/testing/release-audience-admission?phase=before", { method: "POST", headers: testHeaders })).status).toBe(200);
-		const replacementResponse = await replacement;
-		expect(replacementResponse.status).toBe(409);
-		expect((await replacementResponse.json<{ error: { code: string } }>()).error.code).toBe("COMMAND_ID_CONFLICT");
-		await new Promise((resolve) => setTimeout(resolve, 150));
+		for (let attempt = 0; attempt < 80; attempt += 1) {
+			const pending = await (await shard.fetch("https://audience-shard.internal/_internal/testing/pending", { headers: testHeaders })).json<{ intents: number }>();
+			if (pending.intents === 0) break;
+			await new Promise((resolve) => setTimeout(resolve, 25));
+		}
+		const replacementResponse = await shard.fetch("https://audience-shard.internal/_internal/submit", { method: "POST", headers: { ...principal("generation-b", "audience"), "content-type": "application/json" }, body: JSON.stringify({ roomId, shardId: "23", promptId: "other-prompt", choice: "Rust", commandId: "generation-id" }) });
+		expect(replacementResponse.status).toBe(202);
+		await new Promise((resolve) => setTimeout(resolve, 100));
 		const final = await (await stub.fetch("https://game-room.internal/_internal/state", { headers: principal("host", "host") })).json<{ state: { audience: { totals: Record<string, number> } } }>();
 		expect(final.state.audience.totals).toEqual({ Java: 1 });
 	});
@@ -582,6 +672,30 @@ describe("GameRoom Durable Object storage", () => {
 		expect((await reveal.json<{ type: string }>()).type).toBe("event");
 	});
 
+	it("drains an admitted unfrozen ballot before changing prompts", async () => {
+		const roomId = `unfrozen-admission-${crypto.randomUUID()}`;
+		const stub = await room(roomId, "merge-conflict");
+		const producerHeaders = { ...principal("shard", "producer"), "content-type": "application/json" };
+		const hostHeaders = { ...principal("host", "host"), "content-type": "application/json" };
+		await stub.fetch("https://game-room.internal/_internal/command", { method: "POST", headers: hostHeaders, body: JSON.stringify({ v: 1, id: "start", type: "room.start", expectedVersion: 0, payload: {}, sentAt: new Date().toISOString() }) });
+		const admitted = await stub.fetch("https://game-room.internal/_internal/audience-submit-batch", {
+			method: "POST",
+			headers: producerHeaders,
+			body: JSON.stringify({ shardId: "24", promptId: "merge-0", submissions: [{ commandId: "accepted-before-advance", choice: "Git blame" }] }),
+		});
+		expect(await admitted.json()).toEqual({ results: [{ commandId: "accepted-before-advance", accepted: true, admissionVersion: 1, committed: false }] });
+		const blocked = await stub.fetch("https://game-room.internal/_internal/command", { method: "POST", headers: hostHeaders, body: JSON.stringify({ v: 1, id: "blocked-advance", type: "phase.advance", expectedVersion: 1, payload: {}, sentAt: new Date().toISOString() }) });
+		expect(await blocked.json()).toMatchObject({ type: "error", code: "CONFLICT" });
+		const flushed = await stub.fetch("https://game-room.internal/_internal/audience-flush", {
+			method: "POST",
+			headers: producerHeaders,
+			body: JSON.stringify({ mode: "vote", promptId: "merge-0", shardId: "24", totals: { "Git blame": 1 }, commandIds: ["accepted-before-advance"], admissionVersion: 1 }),
+		});
+		expect(flushed.status).toBe(200);
+		const advanced = await stub.fetch("https://game-room.internal/_internal/command", { method: "POST", headers: hostHeaders, body: JSON.stringify({ v: 1, id: "advance", type: "phase.advance", expectedVersion: 1, payload: {}, sentAt: new Date().toISOString() }) });
+		expect(await advanced.json()).toMatchObject({ type: "event", commandId: "advance" });
+	});
+
 	it("keeps shard vote recovery separate from a reaction with the same command ID", async () => {
 		const roomId = `shard-mode-scope-${crypto.randomUUID()}`;
 		const stub = await room(roomId, "null-pointer");
@@ -590,7 +704,7 @@ describe("GameRoom Durable Object storage", () => {
 		for (let failure = 0; failure < 2; failure += 1) await stub.fetch("https://game-room.internal/_internal/testing/fail-next-audience-admission", { method: "POST", headers: { "x-arcade-test-secret": "test-only-local-secret" } });
 		const shard = bindings.AUDIENCE_SHARD.get(bindings.AUDIENCE_SHARD.idFromName(`${roomId}:audience:16`));
 		const vote = await shard.fetch("https://audience-shard.internal/_internal/submit", { method: "POST", headers: { ...principal("mode-viewer", "audience"), "content-type": "application/json" }, body: JSON.stringify({ roomId, shardId: "16", promptId: "null-0", choice: "Java", commandId: "shared-mode-id" }) });
-		expect(vote.status).toBe(503);
+		expect(vote.status).toBe(202);
 		const reaction = await shard.fetch("https://audience-shard.internal/_internal/submit-reaction", { method: "POST", headers: { ...principal("mode-viewer", "audience"), "content-type": "application/json" }, body: JSON.stringify({ roomId, shardId: "16", promptId: "null-0", reaction: "like", commandId: "shared-mode-id" }) });
 		expect(reaction.status).toBe(202);
 		for (let attempt = 0; attempt < 30; attempt += 1) {
@@ -651,7 +765,7 @@ describe("GameRoom Durable Object storage", () => {
 		await stub.fetch("https://game-room.internal/_internal/testing/fail-next-audience-admission", { method: "POST", headers: { "x-arcade-test-secret": "test-only-local-secret" } });
 		const shard = bindings.AUDIENCE_SHARD.get(bindings.AUDIENCE_SHARD.idFromName(`${roomId}:audience:13`));
 		const unavailable = await shard.fetch("https://audience-shard.internal/_internal/submit", { method: "POST", headers: { ...principal("retry-viewer", "audience"), "content-type": "application/json" }, body: JSON.stringify({ roomId, shardId: "13", promptId: "null-0", choice: "Java", commandId: "precommit-retry" }) });
-		expect(unavailable.status).toBe(503);
+		expect(unavailable.status).toBe(202);
 		for (let attempt = 0; attempt < 30; attempt += 1) {
 			const state = await (await stub.fetch("https://game-room.internal/_internal/state", { headers: principal("host", "host") })).json<{ state: { audience: { totals: Record<string, number> } } }>();
 			if (state.state.audience.totals.Java === 1) break;

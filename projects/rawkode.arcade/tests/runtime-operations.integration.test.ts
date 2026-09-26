@@ -148,6 +148,9 @@ describe("terminal room outbox and leaderboard projection", () => {
 		expect(completion.status).toBe(200);
 		expect(await completion.json()).toMatchObject({ type: "event", version: 2 });
 		expect((await hostState(stub)).state.status).toBe("complete");
+		// Completion is authoritative immediately; its D1 read model is drained
+		// separately so database latency cannot delay host acknowledgement.
+		await runDurableObjectAlarm(stub);
 
 		const terminal = await bindings.DB.prepare(
 			"SELECT id, payload_json, sequence, occurred_at FROM arcade_room_outbox WHERE room_id = ? AND kind = 'result.completed'",
@@ -305,6 +308,7 @@ describe("audience shard retry and cross-shard aggregation", () => {
 			sockets.push(socket);
 		}
 		expect(observedShards.size).toBe(2);
+		for (const shardId of observedShards) await runDurableObjectAlarm(bindings.AUDIENCE_SHARD.get(bindings.AUDIENCE_SHARD.idFromName(`${record.id}:audience:${shardId}`)));
 
 		const presenceResponse = await SELF.fetch(
 			`https://example.test/api/rooms/${encodeURIComponent(record.id)}/presence`,
@@ -322,9 +326,13 @@ describe("audience shard retry and cross-shard aggregation", () => {
 		const connected = presence.presence.filter(
 			(entry) => entry.role === "audience" && displayNames.has(entry.displayName ?? ""),
 		);
-		expect(connected).toHaveLength(sockets.length);
-		expect(connected.every((entry) => entry.connections === 1)).toBe(true);
-		expect(new Set(connected.map((entry) => entry.shardId))).toEqual(observedShards);
+		// Audience presence is a shard aggregate, not one D1 identity write per
+		// socket. Operator/contestant presence remains in this private read model.
+		expect(connected).toHaveLength(0);
+		await expect.poll(async () => {
+			const response = await SELF.fetch(`https://example.test/api/rooms/${encodeURIComponent(record.id)}/state`);
+			return (await response.json<{ state: { audienceCount: number } }>()).state.audienceCount;
+		}, { interval: 25, timeout: 2_000 }).toBe(sockets.length);
 
 		const publicState = await SELF.fetch(
 			`https://example.test/api/rooms/${encodeURIComponent(record.id)}/state`,
@@ -345,16 +353,9 @@ describe("audience shard retry and cross-shard aggregation", () => {
 		let disconnected = false;
 		for (let attempt = 0; attempt < 20 && !disconnected; attempt += 1) {
 			await new Promise((resolve) => setTimeout(resolve, 25));
-			const response = await SELF.fetch(
-				`https://example.test/api/rooms/${encodeURIComponent(record.id)}/presence`,
-				{ headers: { cookie: hostJoin.cookie! } },
-			);
-			const body = await response.json<{
-				presence: Array<{ displayName?: string; connections: number }>;
-			}>();
-			disconnected = body.presence
-				.filter((entry) => displayNames.has(entry.displayName ?? ""))
-				.every((entry) => entry.connections === 0);
+			const response = await SELF.fetch(`https://example.test/api/rooms/${encodeURIComponent(record.id)}/state`);
+			const body = await response.json<{ state: { audienceCount: number } }>();
+			disconnected = body.state.audienceCount === 0;
 		}
 		expect(disconnected).toBe(true);
 	});

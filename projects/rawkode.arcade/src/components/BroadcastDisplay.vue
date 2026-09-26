@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import GameBoard from "@/components/GameBoard.vue";
 import { useRoomSocket } from "@/composables/use-room-socket";
 import type { GameId } from "@/lib/game-catalogue";
 import type { ScopedViewRole } from "@/lib/view-scope";
@@ -44,8 +45,8 @@ const bar = computed(() =>
 	castBar({ state: connection === "connected" ? "open" : "closed" }),
 );
 
-/** Four teams is the most the frame can hold before names start truncating. */
-const visibleTeams = computed(() => room.value.teams.slice(0, 4));
+/** The broadcast must honour every format's advertised team capacity. */
+const visibleTeams = computed(() => room.value.teams);
 const leadScore = computed(() =>
 	visibleTeams.value.reduce((top, team) => Math.max(top, team.score), 0),
 );
@@ -74,6 +75,7 @@ function scoreSlots(score: number) {
 		</header>
 
 		<div :class="castBody" data-testid="question">
+			<GameBoard :game="gameDefinition.id" :room="room" scale="cast" />
 			<p :class="castPrompt">{{ room.prompt?.text }}</p>
 			<p v-if="room.revealedAnswer" :class="castPrompt" data-testid="revealed-answer">
 				{{ room.revealedAnswer }}

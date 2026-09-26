@@ -111,6 +111,8 @@ export default defineConfig({
 	adapter: cloudflare({
 		imageService: "cloudflare",
 		sessionKVBindingName: "SESSION",
+		// Use an ephemeral inspector in local dev where network-interface discovery is unavailable.
+		inspectorPort: 0,
 	}),
 	trailingSlash: "never",
 	// Speculatively fetch internal links as they enter the viewport so

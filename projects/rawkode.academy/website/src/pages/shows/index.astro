@@ -60,6 +60,9 @@ const showsToRender: ShowSummary[] = await (async () => {
 		list.push({
 			id: s.data.id,
 			name: s.data.name,
+			status: s.data.status,
+			tagline: s.data.tagline,
+			gameFormatUrl: s.data.gameFormatUrl,
 			hosts,
 			episodes: eps,
 			cover: s.data.cover,

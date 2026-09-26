@@ -7,7 +7,7 @@ export async function getStaticPaths() {
 
 	const paths: { params: { showId: string; episodeId: string } }[] = [];
 
-	for (const show of shows.filter((s) => s.data.publish)) {
+	for (const show of shows.filter((s) => s.data.publish && s.data.status !== "coming-soon")) {
 		const showVideos = videos.filter((video) => {
 			const videoShow = video.data.show;
 			if (!videoShow) return false;

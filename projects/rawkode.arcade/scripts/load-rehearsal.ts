@@ -2,10 +2,14 @@
  * Production WebSocket audience rehearsal for Rawkode Arcade.
  *
  * The runner creates one signed anonymous session, joins it through an audience
- * invite, and consumes one single-use room ticket per socket. It fails closed if the server does not confirm actual
- * shard placement, if commands are rejected, if a connection drops, or if the
- * full steady-state duration is not completed.
+ * invite, consumes one single-use room ticket per socket, and sends one real
+ * audience vote per identity against the room's authoritative active prompt.
+ * It fails closed if the server does not confirm actual shard placement, if
+ * commands are rejected, if a connection drops, or if the full connection
+ * hold duration is not completed.
  */
+
+import { ProbeLedger, type ProbeSummary } from "./load-rehearsal-metrics";
 
 interface Config {
 	baseUrl: URL;
@@ -21,13 +25,15 @@ interface Config {
 	requestTimeoutMs: number;
 	connectTimeoutMs: number;
 	probeEveryMs: number;
-	probeTimeoutMs: number;
-	p95BudgetMs: number;
+	acceptanceTimeoutMs: number;
+	visibilityTimeoutMs: number;
+	acceptanceP95BudgetMs: number;
+	visibilityP95BudgetMs: number;
 	processCount: number;
 	processIndex: number;
-	probeType: string;
-	expectedEvent: string;
 	probePayload: Record<string, unknown>;
+	promptId?: string;
+	synchronizedBurst: boolean;
 }
 
 interface TicketResponse {
@@ -50,13 +56,14 @@ interface ClientRecord {
 	error?: string;
 	expectedVersion?: number;
 	actualShard?: string;
+	activePromptId?: string;
+	probeSent?: boolean;
 	pendingProbe?: {
 		id: string;
 		promptId: string;
-		sentAt: number;
-		timeout: ReturnType<typeof setTimeout>;
+		acceptanceTimeout: ReturnType<typeof setTimeout>;
+		visibilityTimeout: ReturnType<typeof setTimeout>;
 	};
-	probeTimer?: ReturnType<typeof setInterval>;
 }
 
 interface Summary {
@@ -78,27 +85,25 @@ interface Summary {
 		failed: number;
 		unexpectedlyClosed: number;
 	};
-	probes: {
-		sent: number;
-		acknowledged: number;
-		rejected: number;
-		timedOut: number;
-		lost: number;
-		p50Ms: number | null;
-		p95Ms: number | null;
-		p99Ms: number | null;
-		maxMs: number | null;
-		latencyHistogramMs: Record<string, number>;
+	probes: ProbeSummary & {
+		semantics: {
+			acceptance: string;
+			aggregateCommitVisibility: string;
+			publicSnapshotFanout: "not-correlatable";
+		};
 	};
 	observedShardConnections: Record<string, number>;
 	gates: {
 		fullDurationCompleted: boolean;
 		allConnectionsOpened: boolean;
 		allShardsObserved: boolean;
-		p95WithinBudget: boolean;
-		probeCoverageAtLeast95Percent: boolean;
-		offeredLoadSustained: boolean;
-		probeTimeoutRateAtMost1Percent: boolean;
+		acceptanceP95WithinBudget: boolean;
+		aggregateVisibilityP95WithinBudget: boolean;
+		acceptanceCoverageAtLeast95Percent: boolean;
+		aggregateVisibilityCoverageAtLeast95Percent: boolean;
+		allPlannedVotesSent: boolean;
+		acceptanceTimeoutRateAtMost1Percent: boolean;
+		aggregateVisibilityTimeoutRateAtMost1Percent: boolean;
 		noRejectedProbes: boolean;
 		passed: boolean;
 	};
@@ -119,6 +124,14 @@ function required(name: string): string {
 	return value;
 }
 
+function boolean(name: string, fallback: boolean): boolean {
+	const value = process.env[name]?.trim().toLowerCase();
+	if (value === undefined || value === "") return fallback;
+	if (value === "true" || value === "1") return true;
+	if (value === "false" || value === "0") return false;
+	throw new Error(`${name} must be true, false, 1, or 0; received ${value}`);
+}
+
 function readConfig(): Config {
 	const baseUrl = new URL(required("ARCADE_LOAD_BASE_URL"));
 	if (!/^https?:$/.test(baseUrl.protocol)) {
@@ -132,13 +145,22 @@ function readConfig(): Config {
 		throw new Error("ARCADE_LOAD_PROCESS_INDEX must be less than process count");
 	}
 
-	let probePayload: Record<string, unknown> = { reaction: "ship" };
+	let probePayload: Record<string, unknown> = { choice: "Java" };
 	if (process.env.ARCADE_LOAD_PROBE_PAYLOAD_JSON) {
 		const parsed = JSON.parse(process.env.ARCADE_LOAD_PROBE_PAYLOAD_JSON);
 		if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
 			throw new Error("ARCADE_LOAD_PROBE_PAYLOAD_JSON must be a JSON object");
 		}
 		probePayload = parsed;
+	}
+	if (
+		typeof probePayload.choice !== "string" ||
+		!probePayload.choice.trim() ||
+		probePayload.choice.length > 100
+	) {
+		throw new Error(
+			"ARCADE_LOAD_PROBE_PAYLOAD_JSON must contain a non-empty choice of at most 100 characters",
+		);
 	}
 
 	return {
@@ -157,21 +179,38 @@ function readConfig(): Config {
 			process.env.ARCADE_LOAD_SOCKET_URL ?? `/api/rooms/${roomId}/socket`,
 			baseUrl,
 		),
-		clients: integer("ARCADE_LOAD_CLIENTS", 10_000, 1),
+		clients: integer("ARCADE_LOAD_CLIENTS", 4_000, 1),
 		shards: integer("ARCADE_LOAD_SHARDS", 32, 1),
 		durationMs: integer("ARCADE_LOAD_DURATION_SECONDS", 1_800, 1) * 1_000,
 		connectConcurrency: integer("ARCADE_LOAD_CONNECT_CONCURRENCY", 200, 1),
 		requestTimeoutMs: integer("ARCADE_LOAD_REQUEST_TIMEOUT_MS", 15_000, 1),
 		connectTimeoutMs: integer("ARCADE_LOAD_CONNECT_TIMEOUT_MS", 15_000, 1),
 		probeEveryMs: integer("ARCADE_LOAD_PROBE_EVERY_MS", 5_000, 250),
-		probeTimeoutMs: integer("ARCADE_LOAD_PROBE_TIMEOUT_MS", 2_000, 100),
-		p95BudgetMs: integer("ARCADE_LOAD_P95_BUDGET_MS", 250, 1),
+		acceptanceTimeoutMs: integer(
+			"ARCADE_LOAD_ACCEPTANCE_TIMEOUT_MS",
+			integer("ARCADE_LOAD_PROBE_TIMEOUT_MS", 2_000, 100),
+			100,
+		),
+		visibilityTimeoutMs: integer(
+			"ARCADE_LOAD_VISIBILITY_TIMEOUT_MS",
+			integer("ARCADE_LOAD_PROBE_TIMEOUT_MS", 2_000, 100),
+			100,
+		),
+		acceptanceP95BudgetMs: integer(
+			"ARCADE_LOAD_ACCEPTANCE_P95_BUDGET_MS",
+			integer("ARCADE_LOAD_P95_BUDGET_MS", 250, 1),
+			1,
+		),
+		visibilityP95BudgetMs: integer(
+			"ARCADE_LOAD_VISIBILITY_P95_BUDGET_MS",
+			integer("ARCADE_LOAD_P95_BUDGET_MS", 250, 1),
+			1,
+		),
 		processCount,
 		processIndex,
-		probeType: process.env.ARCADE_LOAD_PROBE_TYPE ?? "audience.reaction",
-		expectedEvent:
-			process.env.ARCADE_LOAD_EXPECTED_EVENT ?? "audience.aggregated",
 		probePayload,
+		promptId: process.env.ARCADE_LOAD_PROMPT_ID?.trim() || undefined,
+		synchronizedBurst: boolean("ARCADE_LOAD_SYNCHRONIZED_BURST", false),
 	};
 }
 
@@ -191,10 +230,8 @@ for (
 	clients.push({ globalIndex, actorId: `load-${globalIndex}` });
 }
 
-const latencies: number[] = [];
-let probesSent = 0;
-let probesRejected = 0;
-let probesTimedOut = 0;
+const probeLedger = new ProbeLedger();
+let probeSequence = 0;
 
 function wallClock(performanceTimestamp: number | undefined): string | null {
 	if (performanceTimestamp === undefined) return null;
@@ -289,6 +326,21 @@ function findStrings(value: unknown, names: string[]): string[] | undefined {
 	return undefined;
 }
 
+function activePromptId(value: unknown): string | undefined {
+	const message = objectValue(value);
+	const state = objectValue(message?.state);
+	const activePrompt = objectValue(state?.activePrompt);
+	return typeof activePrompt?.id === "string" ? activePrompt.id : undefined;
+}
+
+function clearFinishedProbe(client: ClientRecord): void {
+	const pending = client.pendingProbe;
+	if (!pending || probeLedger.hasPending(pending.id)) return;
+	clearTimeout(pending.acceptanceTimeout);
+	clearTimeout(pending.visibilityTimeout);
+	client.pendingProbe = undefined;
+}
+
 function recordMessage(client: ClientRecord, event: MessageEvent): void {
 	let value: unknown;
 	try {
@@ -299,6 +351,7 @@ function recordMessage(client: ClientRecord, event: MessageEvent): void {
 	const message = objectValue(value);
 	if (!message) return;
 	if (typeof message.version === "number") client.expectedVersion = message.version;
+	client.activePromptId = activePromptId(message) ?? client.activePromptId;
 	const shardId = findString(message, ["shardId", "audienceShardId"]);
 	if (shardId) client.actualShard = shardId;
 
@@ -307,67 +360,91 @@ function recordMessage(client: ClientRecord, event: MessageEvent): void {
 	if (message.type === "error") {
 		const rejectedId = findString(message, ["commandId", "causationId"]);
 		if (rejectedId === pending.id) {
-			clearTimeout(pending.timeout);
-			client.pendingProbe = undefined;
-			probesRejected += 1;
+			probeLedger.recordRejected(pending.id);
+			clearFinishedProbe(client);
 		}
 		return;
 	}
-	if (message.type !== "event" || message.event !== settings.expectedEvent) return;
+	if (message.type !== "event") return;
+	if (message.event === "audience.accepted") {
+		const acceptedIds =
+			findStrings(message, ["commandIds"]) ??
+			[findString(message, ["commandId", "causationId"])].filter(
+				(value): value is string => value !== undefined,
+			);
+		if (
+			acceptedIds.includes(pending.id) &&
+			probeLedger.recordAccepted(pending.id, performance.now())
+		) {
+			clearTimeout(pending.acceptanceTimeout);
+			clearFinishedProbe(client);
+		}
+		return;
+	}
+	if (message.event !== "audience.aggregated") return;
 	const committedIds = findStrings(message, ["commandIds"]);
 	const committedPrompt = findString(message, ["promptId", "roundId"]);
 	const committedShard = findString(message, ["shardId", "audienceShardId"]);
 	if (
 		!committedIds?.includes(pending.id) ||
-		committedPrompt !== pending.promptId ||
-		committedShard !== client.actualShard
+		!committedPrompt ||
+		!committedShard
 	) {
 		return;
 	}
-
-	// There is one command in flight per connection. Only the correlated event
-	// emitted after authoritative aggregation can complete it; receipt acks,
-	// snapshots, pongs, and errors never count as latency.
-	clearTimeout(pending.timeout);
-	client.pendingProbe = undefined;
-	latencies.push(performance.now() - pending.sentAt);
+	if (
+		probeLedger.recordAggregateVisible(
+			[pending.id],
+			committedPrompt,
+			committedShard,
+			performance.now(),
+		) > 0
+	) {
+		clearTimeout(pending.visibilityTimeout);
+		clearFinishedProbe(client);
+	}
 }
 
-function startProbes(client: ClientRecord): void {
-	const send = () => {
-		if (
-			client.socket?.readyState !== WebSocket.OPEN ||
-			client.pendingProbe ||
-			client.expectedVersion === undefined
-		) {
-			return;
-		}
-		const id = `probe-${settings.processIndex}-${client.globalIndex}-${probesSent}`;
-		const promptId = `load-${Math.floor(
-			(performance.now() - (measurementStartedAt ?? performance.now())) /
-				settings.probeEveryMs,
-		)}`;
-		const sentAt = performance.now();
-		const timeout = setTimeout(() => {
-			if (client.pendingProbe?.id !== id) return;
-			client.pendingProbe = undefined;
-			probesTimedOut += 1;
-		}, settings.probeTimeoutMs);
-		client.pendingProbe = { id, promptId, sentAt, timeout };
-		probesSent += 1;
-		client.socket.send(
-			JSON.stringify({
-				v: 1,
-				id,
-				type: settings.probeType,
-				expectedVersion: client.expectedVersion,
-				sentAt: new Date().toISOString(),
-				payload: { ...settings.probePayload, promptId },
-			}),
-		);
+function sendProbe(client: ClientRecord): void {
+	if (
+		client.probeSent ||
+		client.socket?.readyState !== WebSocket.OPEN ||
+		client.expectedVersion === undefined ||
+		!client.actualShard
+	) {
+		return;
+	}
+	const promptId = settings.promptId ?? client.activePromptId;
+	if (!promptId) return;
+	const id = `probe-${settings.processIndex}-${client.globalIndex}-${probeSequence}`;
+	probeSequence += 1;
+	const sentAt = performance.now();
+	probeLedger.register({ id, promptId, shardId: client.actualShard, sentAt });
+	const acceptanceTimeout = setTimeout(() => {
+		probeLedger.recordAcceptanceTimeout(id);
+		clearFinishedProbe(client);
+	}, settings.acceptanceTimeoutMs);
+	const visibilityTimeout = setTimeout(() => {
+		probeLedger.recordVisibilityTimeout(id);
+		clearFinishedProbe(client);
+	}, settings.visibilityTimeoutMs);
+	client.pendingProbe = {
+		id,
+		promptId,
+		acceptanceTimeout,
+		visibilityTimeout,
 	};
-	client.probeTimer = setInterval(send, settings.probeEveryMs);
-	setTimeout(send, Math.floor(Math.random() * settings.probeEveryMs));
+	client.probeSent = true;
+	client.socket.send(
+		JSON.stringify({
+			v: 1,
+			id,
+			type: "audience.vote",
+			expectedVersion: client.expectedVersion,
+			sentAt: new Date().toISOString(),
+			payload: { ...settings.probePayload, promptId },
+		}),
+	);
 }
 
 async function connect(client: ClientRecord): Promise<void> {
@@ -406,7 +483,6 @@ async function connect(client: ClientRecord): Promise<void> {
 				clearTimeout(timeout);
 				client.closedAt = performance.now();
 				client.closeCode = event.code;
-				if (client.probeTimer) clearInterval(client.probeTimer);
 				fail(new Error(`WebSocket closed during handshake (${event.code})`));
 			});
 			socket.addEventListener(
@@ -435,22 +511,45 @@ async function connectAll(): Promise<void> {
 	await Promise.all(workers);
 }
 
-function percentile(sorted: number[], fraction: number): number | null {
-	if (sorted.length === 0) return null;
-	return sorted[Math.ceil(sorted.length * fraction) - 1] ?? null;
-}
-
-function rounded(value: number | null): number | null {
-	return value === null ? null : Math.round(value * 100) / 100;
-}
-
-function histogram(values: number[]): Record<string, number> {
-	const result: Record<string, number> = {};
-	for (const value of values) {
-		const bucket = String(Math.max(0, Math.ceil(value)));
-		result[bucket] = (result[bucket] ?? 0) + 1;
+async function waitForVoteBarrier(): Promise<void> {
+	const deadline = performance.now() + settings.requestTimeoutMs;
+	while (performance.now() < deadline) {
+		const ready = clients.every(
+			(client) =>
+				client.socket?.readyState === WebSocket.OPEN &&
+				client.expectedVersion !== undefined &&
+				client.actualShard !== undefined &&
+				(settings.promptId !== undefined || client.activePromptId !== undefined),
+		);
+		if (ready) {
+			const promptIds = new Set(
+				clients.map((client) => settings.promptId ?? client.activePromptId),
+			);
+			if (promptIds.size !== 1) {
+				throw new Error(
+					"audience clients observed different active prompts during the vote barrier",
+				);
+			}
+			return;
+		}
+		await Bun.sleep(25);
 	}
-	return result;
+	throw new Error(
+		"audience clients did not all receive shard and active-prompt state before the vote barrier",
+	);
+}
+
+async function dispatchVotes(): Promise<void> {
+	if (settings.synchronizedBurst) {
+		for (const client of clients) sendProbe(client);
+		return;
+	}
+	await Promise.all(
+		clients.map(async (client) => {
+			await Bun.sleep(Math.floor(Math.random() * settings.probeEveryMs));
+			sendProbe(client);
+		}),
+	);
 }
 
 function summarize(): Summary {
@@ -463,17 +562,7 @@ function summarize(): Summary {
 	const unexpectedlyClosed = clients.filter(
 		(client) => client.openedAt !== undefined && client.closedAt !== undefined,
 	).length;
-	const sorted = [...latencies].sort((left, right) => left - right);
-	const p95Ms = percentile(sorted, 0.95);
-	const acknowledged = latencies.length;
-	const probeCoverage = probesSent === 0 ? 0 : acknowledged / probesSent;
-	const probeTimeoutRate =
-		probesSent === 0 ? 1 : probesTimedOut / probesSent;
-	const expectedProbesPerClient = Math.max(
-		1,
-		Math.floor(settings.durationMs / settings.probeEveryMs) - 1,
-	);
-	const minimumExpectedProbes = expectedProbesPerClient * clients.length;
+	const probes = probeLedger.summary();
 	const observedShardConnections: Record<string, number> = {};
 	for (const client of clients) {
 		if (!client.actualShard || client.openedAt === undefined) continue;
@@ -498,11 +587,21 @@ function summarize(): Summary {
 	const allShardsObserved =
 		observedShardIds.length === expectedShardIds.size &&
 		observedShardIds.every((shardId) => expectedShardIds.has(shardId));
-	const p95WithinBudget = p95Ms !== null && p95Ms <= settings.p95BudgetMs;
-	const probeCoverageAtLeast95Percent = probeCoverage >= 0.95;
-	const offeredLoadSustained = probesSent >= minimumExpectedProbes;
-	const probeTimeoutRateAtMost1Percent = probeTimeoutRate <= 0.01;
-	const noRejectedProbes = probesRejected === 0;
+	const acceptanceP95WithinBudget =
+		probes.acceptance.p95Ms !== null &&
+		probes.acceptance.p95Ms <= settings.acceptanceP95BudgetMs;
+	const aggregateVisibilityP95WithinBudget =
+		probes.aggregateCommitVisibility.p95Ms !== null &&
+		probes.aggregateCommitVisibility.p95Ms <= settings.visibilityP95BudgetMs;
+	const acceptanceCoverageAtLeast95Percent = probes.acceptance.coverage >= 0.95;
+	const aggregateVisibilityCoverageAtLeast95Percent =
+		probes.aggregateCommitVisibility.coverage >= 0.95;
+	const allPlannedVotesSent = probes.sent === clients.length;
+	const acceptanceTimeoutRateAtMost1Percent =
+		probes.acceptance.timeoutRate <= 0.01;
+	const aggregateVisibilityTimeoutRateAtMost1Percent =
+		probes.aggregateCommitVisibility.timeoutRate <= 0.01;
+	const noRejectedProbes = probes.rejected === 0;
 
 	return {
 		type: "rawkode-arcade-load-summary",
@@ -523,38 +622,39 @@ function summarize(): Summary {
 		},
 		connections: { opened, openAtEnd, failed, unexpectedlyClosed },
 		probes: {
-			sent: probesSent,
-			acknowledged,
-			rejected: probesRejected,
-			timedOut: probesTimedOut,
-			lost: Math.max(
-				0,
-				probesSent - acknowledged - probesRejected - probesTimedOut,
-			),
-			p50Ms: rounded(percentile(sorted, 0.5)),
-			p95Ms: rounded(p95Ms),
-			p99Ms: rounded(percentile(sorted, 0.99)),
-			maxMs: rounded(sorted.at(-1) ?? null),
-			latencyHistogramMs: histogram(latencies),
+			...probes,
+			semantics: {
+				acceptance:
+					"audience.accepted after authoritative admission and local durable commit",
+				aggregateCommitVisibility:
+					"correlated audience.aggregated delivered to the originating socket after aggregate commit",
+				publicSnapshotFanout: "not-correlatable",
+			},
 		},
 		observedShardConnections,
 		gates: {
 			fullDurationCompleted,
 			allConnectionsOpened,
 			allShardsObserved,
-			p95WithinBudget,
-			probeCoverageAtLeast95Percent,
-			offeredLoadSustained,
-			probeTimeoutRateAtMost1Percent,
+			acceptanceP95WithinBudget,
+			aggregateVisibilityP95WithinBudget,
+			acceptanceCoverageAtLeast95Percent,
+			aggregateVisibilityCoverageAtLeast95Percent,
+			allPlannedVotesSent,
+			acceptanceTimeoutRateAtMost1Percent,
+			aggregateVisibilityTimeoutRateAtMost1Percent,
 			noRejectedProbes,
 			passed:
 				fullDurationCompleted &&
 				allConnectionsOpened &&
 				allShardsObserved &&
-				p95WithinBudget &&
-				probeCoverageAtLeast95Percent &&
-				offeredLoadSustained &&
-				probeTimeoutRateAtMost1Percent &&
+				acceptanceP95WithinBudget &&
+				aggregateVisibilityP95WithinBudget &&
+				acceptanceCoverageAtLeast95Percent &&
+				aggregateVisibilityCoverageAtLeast95Percent &&
+				allPlannedVotesSent &&
+				acceptanceTimeoutRateAtMost1Percent &&
+				aggregateVisibilityTimeoutRateAtMost1Percent &&
 				noRejectedProbes,
 		},
 	};
@@ -562,8 +662,10 @@ function summarize(): Summary {
 
 function closeAll(reason: string): void {
 	for (const client of clients) {
-		if (client.probeTimer) clearInterval(client.probeTimer);
-		if (client.pendingProbe) clearTimeout(client.pendingProbe.timeout);
+		if (client.pendingProbe) {
+			clearTimeout(client.pendingProbe.acceptanceTimeout);
+			clearTimeout(client.pendingProbe.visibilityTimeout);
+		}
 		if (client.socket?.readyState === WebSocket.OPEN) {
 			client.socket.close(1000, reason);
 		}
@@ -584,6 +686,10 @@ async function main(): Promise<void> {
 			localClients: clients.length,
 			shards: settings.shards,
 			durationMs: settings.durationMs,
+			probeType: "audience.vote",
+			votePattern: settings.synchronizedBurst ? "synchronized-burst" : "jittered",
+			acceptanceP95BudgetMs: settings.acceptanceP95BudgetMs,
+			visibilityP95BudgetMs: settings.visibilityP95BudgetMs,
 			processIndex: settings.processIndex,
 			processCount: settings.processCount,
 		})}\n`,
@@ -597,10 +703,24 @@ async function main(): Promise<void> {
 		process.exitCode = 1;
 		return;
 	}
+	try {
+		await waitForVoteBarrier();
+	} catch (error) {
+		for (const client of clients) {
+			if (!client.error) {
+				client.error = error instanceof Error ? error.message : String(error);
+			}
+		}
+		printSummary();
+		closeAll("vote barrier failed");
+		process.exitCode = 1;
+		return;
+	}
 
 	measurementStartedAt = performance.now();
-	for (const client of clients) startProbes(client);
-	await Bun.sleep(settings.durationMs);
+	const holdDuration = Bun.sleep(settings.durationMs);
+	await dispatchVotes();
+	await holdDuration;
 	measurementFinishedAt = performance.now();
 	measurementCompleted = true;
 	const summary = printSummary();

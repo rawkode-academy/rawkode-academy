@@ -24,8 +24,8 @@ test("a live host creates production contestant and display invitations", async 
 			teamId: "team-red",
 		});
 		const display = await openDisplay(browser, room);
-		await expect(contestant.getByTestId("connection-status")).toHaveText("connected");
-		await expect(display.getByTestId("connection-status")).toHaveText("connected");
+		await expect(contestant.getByTestId("connection-status")).toHaveAttribute("data-status", "connected");
+		await expect(display.getByTestId("connection-status")).toHaveAttribute("data-status", "connected");
 	} finally {
 		await closeRoom(room);
 	}

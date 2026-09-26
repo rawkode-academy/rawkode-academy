@@ -25,6 +25,7 @@ test("Principal Engineer persists a private random 50:50 survivor without encodi
 		state = game.handle(state, { type: "use-lifeline", lifeline: "fifty-fifty" }, team, 1);
 		expect(state.fiftyFiftyIncorrect).not.toBe(correct);
 		expect(game.redact(state, "team")).not.toHaveProperty("fiftyFiftyIncorrect");
+		expect(game.redact(state, "team")).not.toHaveProperty("fiftyFiftyDraws");
 		return [correct, state.fiftyFiftyIncorrect].sort();
 	};
 	const possibleCorrectByVisiblePair = new Map<string, Set<number>>();
@@ -49,5 +50,23 @@ test("Principal Engineer shares one 50:50 survivor across teams for a question",
 	const survivor = state.fiftyFiftyIncorrect;
 	state = game.handle(state, { type: "use-lifeline", lifeline: "fifty-fifty" }, { id: "blue", role: "team", teamId: "team-blue" }, 2);
 	expect(state.fiftyFiftyIncorrect).toBe(survivor);
-	expect(randomCalls).toBe(1);
+	expect(randomCalls).toBe(principalEngineerSeed.questions.length);
+});
+
+test("Principal Engineer replays the same initialized private draw", () => {
+	const host = { id: "host", role: "host" as const }; const team = { id: "team", role: "team" as const, teamId: "team-red" };
+	const game = createPrincipalEngineer(principalEngineerSeed, () => 1);
+	const initialized = game.createState(principalEngineerSeed);
+	const play = () => game.handle(game.handle(initialized, { type: "start" }, host, 0), { type: "use-lifeline", lifeline: "fifty-fifty" }, team, 1).fiftyFiftyIncorrect;
+	expect(play()).toBe(play());
+});
+
+test("Principal Engineer generates independent private draws for distinct initialized games", () => {
+	let nextDraw = 0;
+	const content = { title: "Security", questions: [{ prompt: "Pick", choices: ["A", "B", "C", "D"], correct: 0, prize: 100 }] };
+	const game = createPrincipalEngineer(content, () => nextDraw++);
+	const first = game.createState(content);
+	const second = game.createState(content);
+	expect(first.fiftyFiftyDraws).toEqual([0]);
+	expect(second.fiftyFiftyDraws).toEqual([1]);
 });

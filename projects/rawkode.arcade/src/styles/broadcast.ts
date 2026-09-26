@@ -89,6 +89,7 @@ export const castScores = sva({
 		root: {
 			display: "flex",
 			alignItems: "flex-end",
+			flexWrap: "wrap",
 			gap: "castSafe",
 			borderTopWidth: "rule",
 			borderTopStyle: "solid",
@@ -96,7 +97,7 @@ export const castScores = sva({
 			pt: "3",
 			width: "full",
 		},
-		row: { display: "grid", gap: "1", minWidth: "0" },
+		row: { display: "grid", gap: "1", minWidth: "0", flex: "1" },
 		name: {
 			textStyle: "castLabel",
 			color: "ink",

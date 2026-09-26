@@ -33,6 +33,7 @@ export class GameRoom implements DurableObject {
 			this.state.storage.sql.exec("CREATE TABLE IF NOT EXISTS fanout_queue (shard_id TEXT PRIMARY KEY, delivery_sequence INTEGER NOT NULL, snapshot_json TEXT NOT NULL)");
 			this.state.storage.sql.exec("CREATE TABLE IF NOT EXISTS publication_intent (id INTEGER PRIMARY KEY CHECK (id = 1), requested_at TEXT NOT NULL)");
 			this.state.storage.sql.exec("CREATE TABLE IF NOT EXISTS delivery_state (id INTEGER PRIMARY KEY CHECK (id = 1), sequence INTEGER NOT NULL)");
+			this.state.storage.sql.exec("CREATE TABLE IF NOT EXISTS room_retention (id INTEGER PRIMARY KEY CHECK (id = 1), expires_at INTEGER NOT NULL, compacted INTEGER NOT NULL DEFAULT 0)");
 			this.state.storage.sql.exec("CREATE TABLE IF NOT EXISTS outbox (sequence INTEGER PRIMARY KEY AUTOINCREMENT, kind TEXT NOT NULL, payload_json TEXT NOT NULL, occurred_at TEXT NOT NULL)");
 			this.state.storage.sql.exec("CREATE TABLE IF NOT EXISTS test_controls (key TEXT PRIMARY KEY, value INTEGER NOT NULL)");
 		});
@@ -61,6 +62,7 @@ export class GameRoom implements DurableObject {
 		if (url.pathname === "/_internal/replay") return this.replay(request);
 		if (url.pathname === "/_internal/audience-register" && request.method === "POST") return this.registerAudienceShard(request);
 		if (url.pathname === "/_internal/audience-submit" && request.method === "POST") return this.canAcceptAudience(request);
+		if (url.pathname === "/_internal/audience-submit-batch" && request.method === "POST") return this.canAcceptAudienceBatch(request);
 		if (url.pathname === "/_internal/audience-presence" && request.method === "POST") return this.audiencePresence(request);
 		if (url.pathname === "/_internal/connect") return this.upgrade(request);
 		if (url.pathname === "/_internal/command" && request.method === "POST") return this.command(request);
@@ -102,6 +104,7 @@ export class GameRoom implements DurableObject {
 		const principal = this.principal(request);
 		const game = this.load();
 		if (!principal || !game) return new Response("Unauthorized", { status: 401 });
+		if ([...this.state.storage.sql.exec<{ compacted: number }>("SELECT compacted FROM room_retention WHERE id = 1")][0]?.compacted) return new Response("Completed room archived", { status: 410 });
 		const nonce = request.headers.get("x-arcade-ticket-nonce");
 		const claimedTicket = nonce ? Array.from(this.state.storage.sql.exec<{ nonce: string }>("INSERT OR IGNORE INTO used_tickets (nonce, used_at) VALUES (?, ?) RETURNING nonce", nonce, new Date().toISOString())) : [];
 		if (claimedTicket.length !== 1) {
@@ -114,6 +117,7 @@ export class GameRoom implements DurableObject {
 		server.serializeAttachment({ principal } satisfies Attachment);
 		server.send(JSON.stringify(this.snapshot(game, principal, this.currentDeliverySequence())));
 		await this.recordPresence(game.roomId, principal, 1);
+		await this.scheduleRecovery();
 		return this.websocketResponse(client, request);
 	}
 
@@ -147,13 +151,14 @@ export class GameRoom implements DurableObject {
 		// A publication intent is committed with each authoritative state mutation.
 		// It survives eviction before the request path can stage shard fanout.
 		if (this.hasPublicationIntent()) await this.publishCurrent();
-		else await this.deliverAudienceShardFanout();
+		await this.deliverAudienceShardFanout();
+		await this.compactHistory();
 	}
 
 	private async scheduleRecovery(delayMs = 100): Promise<void> {
 		const target = Date.now() + delayMs;
 		const current = await this.state.storage.getAlarm();
-		if (current === null || current > target) await this.state.storage.setAlarm(target);
+		if (current === null || current <= Date.now() || current > target) await this.state.storage.setAlarm(target);
 	}
 
 	private async command(request: Request): Promise<Response> {
@@ -180,44 +185,103 @@ export class GameRoom implements DurableObject {
 	private async canAcceptAudience(request: Request): Promise<Response> {
 		const principal = this.principal(request);
 		const body = await request.json<{ promptId: string; commandId?: string; shardId?: string; choice?: string }>();
-		const game = this.load();
-		if (!principal || principal.role !== "producer" || !game) return new Response("Forbidden", { status: 403 });
+		if (!principal || principal.role !== "producer") return new Response("Forbidden", { status: 403 });
 		if (!body.commandId || !body.shardId) return Response.json({ error: { code: "BAD_COMMAND" } }, { status: 400 });
-		const admissionKey = `${body.shardId}:${body.commandId}`;
+		await this.waitBeforeAudienceAdmission();
+		const result = this.admitAudienceBatch(body.shardId, body.promptId, [{ commandId: body.commandId, choice: body.choice }])[0];
+		await this.waitAfterAudienceAdmission();
+		return result.accepted
+			? Response.json(result, { status: 202 })
+			: Response.json({ error: { code: result.code } }, { status: result.code === "TEMPORARILY_UNAVAILABLE" ? 503 : 409 });
+	}
+
+	private async canAcceptAudienceBatch(request: Request): Promise<Response> {
+		const principal = this.principal(request);
+		const body = await request.json<{ shardId?: string; promptId?: string; submissions?: Array<{ commandId?: string; choice?: string }> }>();
+		if (!principal || principal.role !== "producer") return new Response("Forbidden", { status: 403 });
+		if (!body.shardId || !body.promptId || !Array.isArray(body.submissions) || body.submissions.length === 0 || body.submissions.length > 100 || body.submissions.some((item) => !item.commandId || typeof item.commandId !== "string" || item.commandId.length > 200 || typeof item.choice !== "string" || item.choice.length > 100)) {
+			return Response.json({ error: { code: "BAD_COMMAND" } }, { status: 400 });
+		}
+		await this.waitBeforeAudienceAdmission();
+		const results = this.admitAudienceBatch(body.shardId, body.promptId, body.submissions as Array<{ commandId: string; choice: string }>);
+		await this.waitAfterAudienceAdmission();
+		return Response.json({ results }, { status: 202 });
+	}
+
+	/**
+	 * All state reads and admission writes deliberately happen without an await.
+	 * The Durable Object request turn therefore supplies the freeze watermark for
+	 * the whole bounded batch: every accepted intent is ordered before or after a
+	 * host freeze, never against a snapshot that can go stale mid-batch.
+	 */
+	private admitAudienceBatch(shardId: string, promptId: string, submissions: Array<{ commandId: string; choice?: string }>): Array<{ commandId: string; accepted: boolean; admissionVersion?: number; committed?: boolean; code?: string }> {
+		const game = this.load();
+		if (!game) return submissions.map(({ commandId }) => ({ commandId, accepted: false, code: "NOT_INITIALIZED" }));
+		const forceUnavailable = this.consumeTestControl("audience-admission");
+		const results: Array<{ commandId: string; accepted: boolean; admissionVersion?: number; committed?: boolean; code?: string }> = [];
+		this.state.storage.transactionSync(() => {
+			for (const submission of submissions) {
+				const admissionKey = `${shardId}:${submission.commandId}`;
+				const existing = Array.from(this.state.storage.sql.exec<{ admission_version: number; prompt_id: string; committed: number }>("SELECT admission_version, prompt_id, committed FROM audience_admission_intents WHERE admission_key = ?", admissionKey))[0];
+				if (existing) {
+					results.push(existing.prompt_id === promptId
+						? { commandId: submission.commandId, accepted: true, admissionVersion: existing.admission_version, committed: existing.committed === 1 }
+						: { commandId: submission.commandId, accepted: false, code: "COMMAND_ID_CONFLICT" });
+					continue;
+				}
+				if (forceUnavailable) {
+					results.push({ commandId: submission.commandId, accepted: false, code: "TEMPORARILY_UNAVAILABLE" });
+					continue;
+				}
+				if (game.status === "complete" || game.status === "paused") {
+					results.push({ commandId: submission.commandId, accepted: false, code: game.status === "complete" ? "ROOM_COMPLETE" : "ROOM_PAUSED" });
+					continue;
+				}
+				if (game.audience.frozen) {
+					results.push({ commandId: submission.commandId, accepted: false, code: "DISTRIBUTION_FROZEN" });
+					continue;
+				}
+				if (game.activePrompt && game.activePrompt.id !== promptId) {
+					results.push({ commandId: submission.commandId, accepted: false, code: "STALE_PROMPT" });
+					continue;
+				}
+				const canonicalChoice = typeof submission.choice === "string" ? canonicalAudienceChoice(game, submission.choice) : undefined;
+				this.state.storage.sql.exec("INSERT INTO audience_admission_intents (admission_key, command_id, prompt_id, admission_version, shard_id, canonical_choice) VALUES (?, ?, ?, ?, ?, ?)", admissionKey, submission.commandId, promptId, game.version, shardId, canonicalChoice ?? null);
+				results.push({ commandId: submission.commandId, accepted: true, admissionVersion: game.version, committed: false });
+			}
+		});
+		return results;
+	}
+
+	private async waitBeforeAudienceAdmission(): Promise<void> {
 		if (this.env.ENVIRONMENT === "test") await this.waitAtTestAdmissionBarrier("before");
 		if (this.consumeTestControl("audience-admission-before-delay")) await new Promise((resolve) => setTimeout(resolve, 500));
-		const existing = Array.from(this.state.storage.sql.exec<{ admission_version: number; prompt_id: string; canonical_choice: string | null; committed: number }>("SELECT admission_version, prompt_id, canonical_choice, committed FROM audience_admission_intents WHERE admission_key = ?", admissionKey))[0];
-		if (existing) return existing.prompt_id === body.promptId
-			? Response.json({ accepted: true, admissionVersion: existing.admission_version, committed: existing.committed === 1 }, { status: 202 })
-			: Response.json({ error: { code: "COMMAND_ID_CONFLICT" } }, { status: 409 });
-		if (this.consumeTestControl("audience-admission")) return Response.json({ error: { code: "TEMPORARILY_UNAVAILABLE" } }, { status: 503 });
-		if (game.audience.frozen) return Response.json({ error: { code: "DISTRIBUTION_FROZEN" } }, { status: 409 });
-		if (game.activePrompt && game.activePrompt.id !== body.promptId) return Response.json({ error: { code: "STALE_PROMPT" } }, { status: 409 });
-		const canonicalChoice = typeof body.choice === "string" ? canonicalAudienceChoice(game, body.choice) : undefined;
-		this.state.storage.sql.exec("INSERT OR IGNORE INTO audience_admission_intents (admission_key, command_id, prompt_id, admission_version, shard_id, canonical_choice) VALUES (?, ?, ?, ?, ?, ?)", admissionKey, body.commandId, body.promptId, game.version, body.shardId, canonicalChoice ?? null);
+	}
+
+	private async waitAfterAudienceAdmission(): Promise<void> {
+		// This seam runs only after every admission result is durable. No room state
+		// is read or mutated after this await, so a concurrent freeze stays ordered.
 		if (this.env.ENVIRONMENT === "test") await this.waitAtTestAdmissionBarrier("after");
 		if (this.consumeTestControl("audience-admission-delay")) await new Promise((resolve) => setTimeout(resolve, 500));
-		return Response.json({ accepted: true, admissionVersion: game.version }, { status: 202 });
 	}
 
 
 	private async audiencePresence(request: Request): Promise<Response> {
 		const principal = this.principal(request);
-		const body = await request.json<{ shardId: string; principalId: string; connected: boolean }>();
+		const body = await request.json<{ shardId: string; count: number; sequence: number }>();
 		await this.scheduleRecovery();
 		const game = this.load();
-		if (!principal || principal.role !== "producer" || !game || !body.shardId || !body.principalId) return new Response("Forbidden", { status: 403 });
+		if (!principal || principal.role !== "producer" || !game || !body.shardId || !Number.isSafeInteger(body.count) || body.count < 0 || !Number.isSafeInteger(body.sequence) || body.sequence < 0) return new Response("Forbidden", { status: 403 });
+		const current = game.private.audiencePresenceShards?.[body.shardId];
+		if (current && current.sequence >= body.sequence) return Response.json({ audienceCount: game.audienceCount, version: game.version, ignored: true });
 		const next = structuredClone(game);
-		next.private.audiencePresence ??= {};
-		next.private.audiencePresence[body.shardId] ??= {};
-		if (body.connected) next.private.audiencePresence[body.shardId][body.principalId] = true;
-		else delete next.private.audiencePresence[body.shardId][body.principalId];
-		next.audienceCount = Object.values(next.private.audiencePresence).reduce((count, shard) => count + Object.keys(shard).length, 0);
+		next.private.audiencePresenceShards ??= {};
+		next.private.audiencePresenceShards[body.shardId] = { count: body.count, sequence: body.sequence };
+		next.audienceCount = Object.values(next.private.audiencePresenceShards).reduce((count, shard) => count + shard.count, 0);
 		this.state.storage.transactionSync(() => {
 			this.save(next);
 			this.markPublicationIntent();
 		});
-		await this.publishCurrent();
 		return Response.json({ audienceCount: next.audienceCount, version: next.version });
 	}
 
@@ -238,7 +302,7 @@ export class GameRoom implements DurableObject {
 		const known = Array.from(this.state.storage.sql.exec<{ response_json: string }>("SELECT response_json FROM commands WHERE id = ?", command.id))[0];
 		if (known) return JSON.parse(known.response_json) as ServerMessage;
 		if (command.expectedVersion !== game.version) return this.error("CONFLICT", "State changed; request a snapshot and retry", command.id);
-		if (["prompt.reveal", "phase.advance", "prompt.open"].includes(command.type) && this.hasPendingFrozenAdmissions(game)) return this.error("CONFLICT", "Audience totals are still draining", command.id);
+		if (["prompt.reveal", "phase.advance", "prompt.open"].includes(command.type) && this.hasPendingPromptAdmissions(game)) return this.error("CONFLICT", "Audience totals are still draining", command.id);
 		// Lifecycle is enforced here rather than relying on individual reducers.
 		// That also protects the direct SQLite buzzer claim from mutating a room
 		// after a host pauses or completes it.
@@ -280,9 +344,9 @@ export class GameRoom implements DurableObject {
 				// before external D1/fanout work; alarm resumes the real outbox path.
 				return outgoing;
 			}
-			await this.deliverOutbox();
 			await this.publishCurrent();
-			if (next.status === "complete") await this.projectCompletion();
+			// D1 projection and cross-shard fanout are durable alarm work, not
+			// dependencies of an authoritative gameplay acknowledgement.
 			return outgoing;
 		} catch (error) {
 			const code = error instanceof Error && error.message === "FORBIDDEN" ? "FORBIDDEN" : error instanceof Error && error.message === "CONFLICT" ? "CONFLICT" : error instanceof Error && error.message === "DEADLINE_EXPIRED" ? "DEADLINE_EXPIRED" : "BAD_COMMAND";
@@ -300,6 +364,9 @@ export class GameRoom implements DurableObject {
 		await this.scheduleRecovery();
 		const game = this.load();
 		if (!game) return new Response("Not initialized", { status: 409 });
+		const commandIds = body.commandIds ?? [];
+		const allVotesAdmitted = body.mode === "vote" && commandIds.length > 0 && commandIds.every((commandId) => Boolean(Array.from(this.state.storage.sql.exec<{ admission_key: string }>("SELECT admission_key FROM audience_admission_intents WHERE admission_key = ? AND prompt_id = ? AND shard_id = ?", `${body.shardId}:${commandId}`, body.promptId, body.shardId))[0]));
+		if ((game.status === "complete" || game.status === "paused") && !allVotesAdmitted) return Response.json({ error: { code: game.status === "complete" ? "ROOM_COMPLETE" : "ROOM_PAUSED" } }, { status: 409 });
 		const freeze = game.private.audienceFreeze;
 		const admittedBeforeFreeze = body.mode === "vote" && game.audience.frozen && freeze?.promptId === body.promptId && Number.isInteger(body.admissionVersion) && body.admissionVersion! <= freeze.admissionVersion;
 		if (game.audience.frozen && !admittedBeforeFreeze) return Response.json({ error: { code: "DISTRIBUTION_FROZEN" } }, { status: 409 });
@@ -347,7 +414,6 @@ export class GameRoom implements DurableObject {
 		});
 		// Replay is keyed by command version; projection events share that version
 		// and would overwrite a gameplay replay event, so reconnect uses snapshot.
-		await this.deliverOutbox();
 		event.deliverySequence = await this.publishCurrent();
 		return Response.json(event);
 	}
@@ -412,8 +478,45 @@ export class GameRoom implements DurableObject {
 			if (principal) socket.send(JSON.stringify(this.snapshot(game, principal, deliverySequence)));
 		}
 		this.state.storage.sql.exec("DELETE FROM publication_intent WHERE id = 1");
-		await this.deliverAudienceShardFanout();
+		await this.scheduleRecovery();
 		return deliverySequence;
+	}
+
+	/** Keep replay/dedupe bounded without discarding undrained audience work. */
+	private async compactHistory(): Promise<void> {
+		const game = this.load();
+		if (!game) return;
+		// Socket tickets expire after five minutes. Retain a second full window
+		// so deleting a nonce can never make a still-valid ticket reusable.
+		this.state.storage.sql.exec("DELETE FROM used_tickets WHERE used_at < ?", new Date(Date.now() - 10 * 60_000).toISOString());
+		this.state.storage.sql.exec("DELETE FROM commands WHERE rowid NOT IN (SELECT rowid FROM commands ORDER BY rowid DESC LIMIT 10000)");
+		if (game.activePrompt) {
+			this.state.storage.sql.exec("DELETE FROM audience_admission_intents WHERE committed = 1 AND prompt_id != ?", game.activePrompt.id);
+			this.state.storage.sql.exec("DELETE FROM audience_admissions WHERE prompt_id != ?", game.activePrompt.id);
+			this.state.storage.sql.exec("DELETE FROM buzzers WHERE prompt_id != ?", game.activePrompt.id);
+		}
+		if (game.status !== "complete") return;
+		this.state.storage.sql.exec("INSERT OR IGNORE INTO room_retention (id, expires_at) VALUES (1, ?)", Date.now() + 24 * 60 * 60_000);
+		const retention = [...this.state.storage.sql.exec<{ expires_at: number; compacted: number }>("SELECT expires_at, compacted FROM room_retention WHERE id = 1")][0]!;
+		if (retention.compacted) return;
+		if (Date.now() < retention.expires_at) {
+			await this.scheduleRecovery(retention.expires_at - Date.now());
+			return;
+		}
+		// Never discard an undelivered leaderboard result or final snapshot.
+		const pending = [...this.state.storage.sql.exec<{ count: number }>("SELECT (SELECT COUNT(*) FROM outbox) + (SELECT COUNT(*) FROM fanout_queue) AS count")][0]?.count ?? 0;
+		if (pending > 0) { await this.scheduleRecovery(1_000); return; }
+		this.state.storage.transactionSync(() => {
+			for (const table of ["commands", "replay_events", "buzzers", "audience_admissions", "audience_admission_intents", "audience_shards"]) this.state.storage.sql.exec(`DELETE FROM ${table}`);
+			// Retain a terminal tombstone and scores so this room cannot restart.
+			game.private = {};
+			game.players = {};
+			game.audienceCount = 0;
+			for (const team of Object.values(game.teams)) team.memberIds = [];
+			this.save(game);
+			this.state.storage.sql.exec("UPDATE room_retention SET compacted = 1 WHERE id = 1");
+		});
+		for (const socket of this.state.getWebSockets()) socket.close(1000, "Completed room archived");
 	}
 
 	private markPublicationIntent(): void {
@@ -473,13 +576,6 @@ export class GameRoom implements DurableObject {
 			return Object.fromEntries(Object.entries(value as Record<string, unknown>).filter(([key]) => !["answer", "correctAnswer", "e2ePrivateMarker", "hostNotes", "notes"].includes(key)).map(([key, nested]) => [key, scrub(nested)]));
 		};
 		return { ...event, payload: scrub(event.payload) };
-	}
-
-	private async projectCompletion(): Promise<void> {
-		try {
-			await this.deliverOutbox();
-			await this.consumeProjectedOutbox();
-		} catch (error) { console.error("arcade result projection failed", error); }
 	}
 
 	private async consumeProjectedOutbox(): Promise<void> {
@@ -547,10 +643,13 @@ export class GameRoom implements DurableObject {
 		return response;
 	}
 
-	private hasPendingFrozenAdmissions(game: GameState): boolean {
-		const freeze = game.private.audienceFreeze;
-		if (!freeze?.promptId) return false;
-		const row = Array.from(this.state.storage.sql.exec<{ count: number }>("SELECT COUNT(*) AS count FROM audience_admission_intents WHERE prompt_id = ? AND admission_version <= ? AND committed = 0", freeze.promptId, freeze.admissionVersion))[0];
+	private hasPendingPromptAdmissions(game: GameState): boolean {
+		const promptId = game.activePrompt?.id ?? game.private.audienceFreeze?.promptId;
+		if (!promptId) return false;
+		// Coordinator admission is the authoritative ordering point even when the
+		// host has not explicitly frozen the audience. Never move to another prompt
+		// while an already-accepted ballot still has to reach the aggregate.
+		const row = Array.from(this.state.storage.sql.exec<{ count: number }>("SELECT COUNT(*) AS count FROM audience_admission_intents WHERE prompt_id = ? AND committed = 0", promptId))[0];
 		return (row?.count ?? 0) > 0;
 	}
 

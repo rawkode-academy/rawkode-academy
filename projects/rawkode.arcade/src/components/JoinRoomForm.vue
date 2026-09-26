@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { css } from "@/../styled-system/css";
-import { joinBootstrapKey, requestJoin } from "@/lib/room-bootstrap";
+import { joinBootstrapKey, requestJoin, requestJoinableTeams, type JoinableTeam } from "@/lib/room-bootstrap";
 import {
 	choice,
 	control,
@@ -15,15 +15,13 @@ import {
 
 const name = ref("");
 const roomCode = ref("");
-const teamId = ref("team-red");
+const teamId = ref("");
 const role = ref<"contestant" | "audience">("contestant");
 const error = ref("");
 const pending = ref(false);
-
-const teams = [
-	{ id: "team-red", label: "The Merge Queue" },
-	{ id: "team-blue", label: "Cache Invalidators" },
-];
+const loadingTeams = ref(false);
+const teams = ref<JoinableTeam[]>([]);
+let loadedCode = "";
 
 const roles = [
 	{ id: "contestant", label: "Contestant", hint: "You are on camera." },
@@ -47,6 +45,28 @@ const header = css({
 	borderBottomColor: "rule",
 });
 
+async function loadTeams() {
+	const code = roomCode.value.trim();
+	if (!code || code === loadedCode) return;
+	loadingTeams.value = true;
+	try {
+		const roster = await requestJoinableTeams(code);
+		if (code !== roomCode.value.trim()) return;
+		teams.value = roster;
+		loadedCode = code;
+		if (!roster.some((team) => team.id === teamId.value)) teamId.value = roster[0]?.id ?? "";
+	} catch (cause) {
+		if (code === roomCode.value.trim()) {
+			teams.value = [];
+			teamId.value = "";
+			loadedCode = "";
+			error.value = cause instanceof Error ? cause.message : "Unable to load teams for this room.";
+		}
+	} finally {
+		if (code === roomCode.value.trim()) loadingTeams.value = false;
+	}
+}
+
 async function join() {
 	if (!name.value.trim() || !roomCode.value.trim()) {
 		error.value = "Enter a display name and room code.";
@@ -55,10 +75,17 @@ async function join() {
 	// Invite codes are opaque and case-sensitive: preserve the entered value.
 	const code = roomCode.value.trim();
 	const desiredRole = role.value === "contestant" ? "player" : "audience";
+	if (desiredRole === "player") {
+		await loadTeams();
+		if (!teams.value.some((team) => team.id === teamId.value)) {
+			error.value = "Choose a team from this live room.";
+			return;
+		}
+	}
 	pending.value = true;
 	error.value = "";
 	try {
-		const player = { name: name.value.trim(), teamId: teamId.value };
+		const player = { name: name.value.trim(), teamId: desiredRole === "player" ? teamId.value : undefined };
 		sessionStorage.setItem("rawkode-arcade-player", JSON.stringify(player));
 		const bootstrap = await requestJoin(code, {
 			displayName: player.name,
@@ -102,6 +129,7 @@ async function join() {
 					autocapitalize="characters"
 					spellcheck="false"
 					maxlength="80"
+					@blur="loadTeams"
 					aria-describedby="join-error"
 				/>
 			</div>
@@ -120,8 +148,10 @@ async function join() {
 				/>
 			</div>
 
-			<fieldset :class="group">
+			<fieldset v-if="role === 'contestant'" :class="group">
 				<legend :class="[fieldLabel, legend]">Team</legend>
+				<p v-if="loadingTeams" :class="text({ style: 'bodySm', tone: 'soft' })">Loading live teams…</p>
+				<p v-else-if="!teams.length" :class="text({ style: 'bodySm', tone: 'soft' })">Enter a room code to load its live teams.</p>
 				<div :class="options">
 					<label
 						v-for="team in teams"
@@ -130,7 +160,7 @@ async function join() {
 						:data-testid="`team-choice-${team.id}`"
 					>
 						<input v-model="teamId" :class="radio" type="radio" name="team" :value="team.id" />
-						<span :class="text({ style: 'bodySm' })">{{ team.label }}</span>
+						<span :class="text({ style: 'bodySm' })">{{ team.name }}</span>
 					</label>
 				</div>
 			</fieldset>

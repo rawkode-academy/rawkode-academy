@@ -17,6 +17,7 @@ const labels: Record<ConnectionState, string> = {
 	<span
 		:class="statusPill({ state: props.state })"
 		data-testid="connection-status"
+		:data-status="props.state"
 		:role="props.state === 'offline' ? 'alert' : 'status'"
 		aria-live="polite"
 	>

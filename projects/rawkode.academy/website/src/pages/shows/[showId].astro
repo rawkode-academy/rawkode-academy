@@ -32,6 +32,10 @@ if (!showEntry || !showEntry.data.publish) {
 	return new Response(null, { status: 404 });
 }
 
+const isComingSoon = showEntry.data.status === "coming-soon";
+const isArchived = showEntry.data.status === "archived";
+const statusLabel = isComingSoon ? "Coming soon" : isArchived ? "Archived" : "Show";
+
 // Get published videos only (filters out future-dated for scheduled publishing)
 const videos = await getPublishedVideos();
 
@@ -72,6 +76,7 @@ const feedVideos = videosForShow
 		(a, b) =>
 			new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
 	);
+const hasEpisodeFeed = !isComingSoon && feedVideos.length > 0;
 
 Astro.response.headers.set(
 	"Cache-Control",
@@ -84,14 +89,11 @@ Astro.response.headers.set(
 );
 Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 
-// Published shows should always have a description. The fallback only
-// fires when a show was published without one - at which point it's a
-// content bug, not something the template should paper over with a
-// placeholder. Compose a sensible auto-line so meta tags still render
-// without ever shipping "coming soon" to crawlers.
 const showDescription =
 	showEntry.data.description?.trim() ||
-	`Watch ${showEntry.data.name} on Rawkode Academy.`;
+	(isComingSoon
+		? `${showEntry.data.name} is coming soon on Rawkode Academy.`
+		: `Watch ${showEntry.data.name} on Rawkode Academy.`);
 
 const breadcrumbElements = [
 	{ title: "Home", link: "/" },
@@ -99,20 +101,24 @@ const breadcrumbElements = [
 	{ title: showEntry.data.name, link: `/shows/${showEntry.data.id}` },
 ];
 
-const pageTitle = `${showEntry.data.name} Episodes`;
+const pageTitle = isComingSoon
+	? `${showEntry.data.name}: Coming soon`
+	: isArchived
+		? `${showEntry.data.name}: Archive`
+		: `${showEntry.data.name} Episodes`;
 
 const showNav = hasExtension(showEntry.data.id)
 	? getShowNav(showEntry.data.id)
 	: [];
 
-const latestEpisode = feedVideos[0];
-const totalDurationSeconds = feedVideos.reduce((sum, v) => sum + v.duration, 0);
+const latestEpisode = hasEpisodeFeed ? feedVideos[0] : undefined;
+const totalDurationSeconds = hasEpisodeFeed ? feedVideos.reduce((sum, v) => sum + v.duration, 0) : 0;
 const totalHours = Math.floor(totalDurationSeconds / 3600);
 
 let podcastImageUrl: string | undefined;
-if (showEntry.data.podcast?.artworkUrl) {
+if (hasEpisodeFeed && showEntry.data.podcast?.artworkUrl) {
 	podcastImageUrl = showEntry.data.podcast.artworkUrl;
-} else if (showEntry.data.cover) {
+} else if (hasEpisodeFeed && showEntry.data.cover) {
 	try {
 		const resolved = await getImage({ src: showEntry.data.cover.image });
 		podcastImageUrl = new URL(resolved.src, Astro.site ?? Astro.url).href;
@@ -142,26 +148,32 @@ function formatDuration(seconds: number) {
 ---
 
 <Page title={pageTitle} description={showDescription}>
- <link
- slot="extra-head"
- rel="alternate"
- type="application/rss+xml"
- title={`${showEntry.data.name} (Podcast RSS)`}
- href={`/api/feeds/shows/${showEntry.data.id}.xml`}
- />
- <PodcastSeriesJsonLd
- slot="extra-head"
- show={showEntry}
- hosts={hostEntries}
- episodeCount={feedVideos.length}
- {...(podcastImageUrl ? { imageUrl: podcastImageUrl } : {})}
- />
- <VideoMetadata
- slot="extra-head"
- title={pageTitle}
- description={showDescription}
- isVideoList={true}
- />
+ {hasEpisodeFeed && (
+	<link
+		slot="extra-head"
+		rel="alternate"
+		type="application/rss+xml"
+		title={`${showEntry.data.name} (Podcast RSS)`}
+		href={`/api/feeds/shows/${showEntry.data.id}.xml`}
+	/>
+ )}
+ {hasEpisodeFeed && (
+	<PodcastSeriesJsonLd
+		slot="extra-head"
+		show={showEntry}
+		hosts={hostEntries}
+		episodeCount={feedVideos.length}
+		{...(podcastImageUrl ? { imageUrl: podcastImageUrl } : {})}
+	/>
+ )}
+ {hasEpisodeFeed && (
+	<VideoMetadata
+		slot="extra-head"
+		title={pageTitle}
+		description={showDescription}
+		isVideoList={true}
+	/>
+ )}
 
  <!-- Hero -->
  <section class="relative overflow-hidden" style="border-bottom: 1px solid var(--surface-border)">
@@ -178,12 +190,18 @@ function formatDuration(seconds: number) {
  <svg class="h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 20.25h12m-7.5-3v3m3-3v3m-10.125-3h17.25c.621 0 1.125-.504 1.125-1.125V4.875c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125z" />
  </svg>
- <span class="text-sm font-semibold text-primary dark:text-secondary">Show</span>
+ <span class="text-sm font-semibold text-primary dark:text-secondary">{statusLabel}</span>
  </div>
 
  <h1 class="text-4xl font-extrabold tracking-tight text-primary-content sm:text-5xl lg:text-6xl">
  {showEntry.data.name}
  </h1>
+
+ {showEntry.data.tagline && (
+ <p class="font-mono text-xs font-semibold uppercase tracking-[0.14em] text-secondary">
+ {showEntry.data.tagline}
+ </p>
+ )}
 
  {hostNames.length > 0 && (
  <div class="flex flex-wrap items-center gap-2">
@@ -200,7 +218,21 @@ function formatDuration(seconds: number) {
  {showDescription}
  </p>
 
- {feedVideos.length > 0 && (
+ {showEntry.data.gameFormatUrl && (
+ <a
+ href={showEntry.data.gameFormatUrl}
+ class="focus-ring inline-flex w-fit items-center gap-2 rounded-sm border px-4 py-2 text-sm font-semibold text-primary-content transition-colors hover:border-primary hover:text-primary"
+ style="border-color: var(--surface-border)"
+ rel="noopener noreferrer"
+ >
+ Explore the game format
+ <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.5 4.5H19.5m0 0v6m0-6L10.5 13.5M8.25 6.75h-2.5a1.25 1.25 0 0 0-1.25 1.25v10.25a1.25 1.25 0 0 0 1.25 1.25H16a1.25 1.25 0 0 0 1.25-1.25v-2.5" />
+ </svg>
+ </a>
+ )}
+
+ {hasEpisodeFeed && (
  <div class="flex flex-wrap items-center gap-4 text-sm text-muted">
  <div class="flex items-center gap-1.5">
  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -272,9 +304,9 @@ function formatDuration(seconds: number) {
  <NewsletterCTA
  class="!py-0"
  audience={`show:${showEntry.data.id}`}
- badge="Get notified of new episodes"
- headline={`Subscribe to ${showEntry.data.name}`}
- subtitle="Be the first to know when new episodes drop."
+ badge={isComingSoon ? "Coming soon" : "Get notified of new episodes"}
+ headline={isComingSoon ? `Follow ${showEntry.data.name}` : `Subscribe to ${showEntry.data.name}`}
+ subtitle={isComingSoon ? "Be the first to know when this show is ready." : "Be the first to know when new episodes drop."}
  />
  </div>
  </div>
@@ -284,17 +316,23 @@ function formatDuration(seconds: number) {
  <ShowNav showId={showEntry.data.id} nav={showNav} active={null} />
  )}
 
- <!-- Episodes -->
+ <!-- Show state / episodes -->
  <section class="section-py" style="background: var(--surface-base)">
  <div class="mx-auto flex max-w-7xl flex-col gap-10 content-px">
- {feedVideos.length > 0 ? (
+ {isComingSoon ? (
+	<div class="mx-auto max-w-2xl rounded-sm paper-card p-12 text-center bleed-x-mobile">
+		<p class="font-mono text-xs font-semibold uppercase tracking-[0.14em] text-secondary">Coming soon</p>
+		<h2 class="mt-3 text-3xl text-primary-content">This show is being prepared for the stage.</h2>
+		<p class="mt-3 text-sm text-muted">Follow the show to hear when it is ready. No episodes or schedule have been announced.</p>
+	</div>
+ ) : hasEpisodeFeed ? (
  <VideoFeed
  title="Episodes"
  description={`Watch all ${feedVideos.length} episodes from ${showEntry.data.name}.`}
  videos={feedVideos}
  />
  ) : (
- <div class="mx-auto max-w-2xl rounded-sm paper-card p-12 text-center bleed-x-mobile">
+	<div class="mx-auto max-w-2xl rounded-sm paper-card p-12 text-center bleed-x-mobile">
  <svg
  class="mx-auto h-16 w-16 text-primary/30 dark:text-primary/20"
  fill="none"
@@ -310,10 +348,10 @@ function formatDuration(seconds: number) {
  />
  </svg>
  <p class="mt-4 text-lg font-medium text-secondary-content">
- No episodes yet
+ {isArchived ? "This show is archived" : "No episodes yet"}
  </p>
  <p class="mt-2 text-sm text-muted">
- Episodes for this show are coming soon. Check back later!
+ {isArchived ? "This show remains available as an archive." : "Episodes will appear here when they are published."}
  </p>
  </div>
  )}

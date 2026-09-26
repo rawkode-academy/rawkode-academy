@@ -1,5 +1,6 @@
 import type { Env } from "../env";
 import type { Role } from "../domain/protocol";
+import { MAX_CONTESTANTS_PER_ROOM } from "../domain/contestant-limits";
 import { randomId } from "./crypto";
 
 export interface RoomRecord { id: string; gameKey: string; title: string; status: string; contentRevisionId?: string; createdAt: string; }
@@ -52,6 +53,15 @@ export class RoomDirectory {
 		const now = new Date().toISOString();
 		await this.env.DB.prepare("INSERT INTO arcade_room_memberships (room_id, principal_id, role, team_id, display_name, joined_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT(room_id, principal_id) DO UPDATE SET role = excluded.role, team_id = excluded.team_id, display_name = excluded.display_name, updated_at = excluded.updated_at")
 			.bind(roomId, principal.id, principal.role, principal.teamId ?? null, principal.displayName ?? null, now, now).run();
+	}
+
+	/** Atomically accepts a player only while the small on-camera roster has space. */
+	async admitContestant(roomId: string, principal: { id: string; teamId: string; displayName?: string }): Promise<boolean> {
+		const now = new Date().toISOString();
+		const result = await this.env.DB.prepare("INSERT INTO arcade_room_memberships (room_id, principal_id, role, team_id, display_name, joined_at, updated_at) SELECT ?, ?, 'player', ?, ?, ?, ? WHERE EXISTS (SELECT 1 FROM arcade_room_memberships WHERE room_id = ? AND principal_id = ? AND role = 'player') OR (SELECT COUNT(*) FROM arcade_room_memberships WHERE room_id = ? AND role = 'player') < ? ON CONFLICT(room_id, principal_id) DO UPDATE SET role = excluded.role, team_id = excluded.team_id, display_name = excluded.display_name, updated_at = excluded.updated_at")
+			.bind(roomId, principal.id, principal.teamId, principal.displayName ?? null, now, now, roomId, principal.id, roomId, MAX_CONTESTANTS_PER_ROOM)
+			.run();
+		return (result.meta.changes ?? 0) === 1;
 	}
 
 	async presence(roomId: string): Promise<Array<{ principalId: string; role: Role; teamId?: string; displayName?: string; shardId?: string; connections: number; lastSeenAt: string }>> {

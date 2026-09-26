@@ -8,6 +8,14 @@ interface Props {
 }
 
 const { show } = Astro.props as Props;
+const isComingSoon = show.status === "coming-soon";
+const isArchived = show.status === "archived";
+const statusLabel = isComingSoon ? "Coming soon" : isArchived ? "Archived" : null;
+const cardCta = isComingSoon
+	? "Get notified →"
+	: isArchived
+		? "View archive →"
+		: "Open show →";
 
 const hostNames = (show.hosts ?? [])
 	.map((host) => [host.forename, host.surname].filter(Boolean).join(" "))
@@ -16,8 +24,9 @@ const hostNames = (show.hosts ?? [])
 const episodes = (show.episodes ?? []).filter(
 	(ep): ep is NonNullable<typeof ep> => ep !== null && ep.video !== null,
 );
+const visibleEpisodes = isComingSoon ? [] : episodes;
 
-const latestEpisode = episodes
+const latestEpisode = visibleEpisodes
 	.filter((ep) => ep.video?.thumbnailUrl && ep.video?.publishedAt)
 	.sort((a, b) => {
 		const aTime = new Date(a.video!.publishedAt!).getTime();
@@ -35,7 +44,7 @@ const latestEpisodeDate = latestEpisodePublishedAt
 	: null;
 ---
 
-<a href={`/shows/${show.id}`} class="show-card">
+<a href={`/shows/${show.id}`} class="show-card" data-show-status={show.status}>
 	<div class="show-card__frame">
 		{show.cover ? (
 			<Image
@@ -65,15 +74,23 @@ const latestEpisodeDate = latestEpisodePublishedAt
 				</svg>
 			</div>
 		)}
-		{episodes.length > 0 && (
+		{statusLabel && (
+			<span class:list={["show-card__status", { "show-card__status--archived": isArchived }]}>
+				{statusLabel}
+			</span>
+		)}
+		{visibleEpisodes.length > 0 && (
 			<span class="show-card__count">
-				{episodes.length} {episodes.length === 1 ? "episode" : "episodes"}
+				{visibleEpisodes.length} {visibleEpisodes.length === 1 ? "episode" : "episodes"}
 			</span>
 		)}
 	</div>
 
 	<div class="show-card__body">
 		<h3 class="show-card__title">{show.name}</h3>
+		{show.tagline && (
+			<p class="show-card__tagline">{show.tagline}</p>
+		)}
 		<p class="show-card__hosts">
 			{hostNames.length > 0 ? (
 				<>
@@ -94,7 +111,7 @@ const latestEpisodeDate = latestEpisodePublishedAt
 			</p>
 		)}
 		<div class="show-card__cta">
-			<MLabel tone="ink">View episodes →</MLabel>
+			<MLabel tone={isComingSoon ? "amber" : "ink"}>{cardCta}</MLabel>
 		</div>
 	</div>
 </a>
@@ -160,6 +177,25 @@ const latestEpisodeDate = latestEpisodePublishedAt
 		padding: 0.2rem 0.5rem;
 	}
 
+	.show-card__status {
+		position: absolute;
+		top: 10px;
+		left: 10px;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.66rem;
+		font-weight: 600;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--editorial-ink);
+		background: var(--editorial-amber);
+		padding: 0.2rem 0.5rem;
+	}
+
+	.show-card__status--archived {
+		color: var(--editorial-paper);
+		background: var(--editorial-ink-soft);
+	}
+
 	.show-card__body {
 		flex: 1;
 		display: flex;
@@ -182,6 +218,21 @@ const latestEpisodeDate = latestEpisodePublishedAt
 		-webkit-line-clamp: 2;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
+	}
+
+	.show-card__tagline {
+		margin: -0.25rem 0 0;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.68rem;
+		font-weight: 600;
+		letter-spacing: 0.1em;
+		line-height: 1.35;
+		text-transform: uppercase;
+		color: var(--editorial-spruce);
+	}
+
+	.show-card[data-show-status="coming-soon"] .show-card__tagline {
+		color: var(--editorial-amber-text);
 	}
 
 	.show-card:hover .show-card__title {

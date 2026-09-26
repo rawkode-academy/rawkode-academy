@@ -39,7 +39,7 @@ test("Merge Conflict: teams predict a survey answer and the host reveals it", as
 		await assertNoSecretInBrowser(contestant, room.privateMarker);
 		await assertNoSecretInBrowser(display, room.privateMarker);
 		await contestant.reload();
-		await expect(contestant.getByTestId("connection-status")).toHaveText("connected");
+		await expect(contestant.getByTestId("connection-status")).toHaveAttribute("data-status", "connected");
 		await assertNoSecretInBrowser(contestant, room.privateMarker);
 
 		await room.host.getByTestId("reveal-answer").click();

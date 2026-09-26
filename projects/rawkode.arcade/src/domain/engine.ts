@@ -1,4 +1,5 @@
 import type { CommandEnvelope, Principal, Role } from "./protocol";
+import { MAX_TEAMS_PER_ROOM } from "./contestant-limits";
 
 export type RoomStatus = "lobby" | "live" | "paused" | "complete";
 
@@ -13,6 +14,14 @@ export interface BuzzerState {
 	principalId: string;
 	at: string;
 }
+
+export type PublicGameBoard =
+	| { kind: "merge-conflict"; entries: Array<{ rank: number; label?: string; revealed: boolean }>; total: number }
+	| { kind: "spinlock"; board: string; letters: string[]; activeValue: number; solved: boolean }
+	| { kind: "principal-engineer"; index: number; total: number }
+	| { kind: "race-condition"; teamPositions: Record<string, number>; playerPosition: number; chaserPosition: number; total: number }
+	| { kind: "ten-nines"; found: string[]; total: number }
+	| { kind: "null-pointer"; distribution: Array<{ label: string; count: number }> };
 
 export interface GameState {
 	roomId: string;
@@ -29,6 +38,7 @@ export interface GameState {
 	buzzer?: BuzzerState;
 	buzzerWinner?: string;
 	spinlock?: { board: string; letters: string[]; activeValue: number; turn: number; solved?: boolean };
+	gameBoard?: PublicGameBoard;
 	principalEngineer?: { fiftyFiftyUsed: boolean; askAudienceUsed: boolean; fiftyFiftyActive: boolean; askAudienceActive: boolean; eliminatedChoiceIds: string[]; audienceAdvice: Record<string, number> };
 	revealedAnswer?: string;
 	audience: { totals: Record<string, number>; reactions: Record<string, number>; frozen?: boolean; lastFlushedAt?: string };
@@ -43,7 +53,7 @@ export interface GameState {
 		audienceReactionShards?: Record<string, Record<string, number>>;
 		runtime?: { gameKey: string; state: unknown };
 		contentSnapshot?: { revisionId: string; checksum: string; manifest: Record<string, unknown>; questions: Array<{ id: string; ordinal: number; kind: string; prompt: string; options: unknown; answer: unknown }> };
-		audiencePresence?: Record<string, Record<string, true>>;
+		audiencePresenceShards?: Record<string, { count: number; sequence: number }>;
 		audienceFreeze?: { promptId?: string; admissionVersion: number };
 	};
 }
@@ -127,6 +137,7 @@ export function applyCoreCommand(state: GameState, command: CommandEnvelope, pri
 			requireRole(principal, ["host", "producer"]);
 			const payload = command.payload as { teamId: string; name?: string };
 			if (!payload.teamId) throw new Error("BAD_COMMAND");
+			if (!next.teams[payload.teamId] && Object.keys(next.teams).length >= MAX_TEAMS_PER_ROOM) throw new Error("BAD_COMMAND");
 			next.teams[payload.teamId] ??= { id: payload.teamId, name: payload.name ?? payload.teamId, score: 0, memberIds: [] };
 			break;
 		}

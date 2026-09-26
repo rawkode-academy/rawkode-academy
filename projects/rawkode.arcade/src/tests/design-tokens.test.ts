@@ -51,13 +51,18 @@ function read(file: string): string {
 	return readFileSync(join(projectRoot, file), "utf-8");
 }
 
-/** Strip comments so prose describing a banned pattern is not a violation. */
+/** Mask comments for source inspection, never concatenate separated tokens. */
 function stripComments(source: string): string {
 	return source
-		.replace(/\/\*[\s\S]*?\*\//g, "")
-		.replace(/(^|[^:])\/\/.*$/gm, "$1")
-		.replace(/<!--[\s\S]*?-->/g, "");
+		.replace(/\/\*[\s\S]*?\*\//g, " ")
+		.replace(/(^|[^:])\/\/.*$/gm, "$1 ")
+		.replace(/<!--[\s\S]*?-->/g, " ");
 }
+
+it("comment masking does not join fragments into markup", () => {
+	expect(stripComments("<<!-- comment -->!-- example")).toBe("< !-- example");
+	expect(stripComments("<st/* comment */yle>")).toBe("<st yle>");
+});
 
 function offenders(
 	files: readonly string[],

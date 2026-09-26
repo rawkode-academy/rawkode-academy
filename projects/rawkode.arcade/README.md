@@ -46,6 +46,23 @@ reach D1 through the durable outbox and an idempotent projector; the release
 suite treats that end-to-end path as a required invariant. R2 stores content
 imports and media, not secret answers in flight.
 
+Gameplay acknowledgements follow the local authoritative commit. D1 projection
+and coalesced audience snapshot fanout drain through durable alarms, so neither
+database latency nor 32 downstream shard requests blocks the host's command.
+An accepted command is not a guarantee that every audience screen has rendered
+it yet; acceptance and audience-visible propagation must be measured separately.
+
+Room replay retains the latest 1,000 gameplay events and command dedupe retains
+the latest 10,000 responses. Older envelopes cannot reapply because their
+expected version is stale. Used socket-ticket nonces are retained for ten
+minutes, longer than the five-minute ticket validity. Committed vote admission
+records and buzzer claims are compacted after prompt rollover; outstanding
+admissions are never discarded by this cleanup. Completed rooms retain private
+runtime/recovery history for 24 hours, then compact only after durable outbox
+and fanout work drains. A terminal room tombstone and final scores remain, so an
+old room ID cannot restart. D1 leaderboard/history retention is a separate
+operator policy, not deletion of the authoritative result during room cleanup.
+
 The realtime protocol is versioned and shared by every game. Commands are
 validated before authorization, accepted at most once by command ID, reduced to
 events, committed, and only then projected to role-specific views. The room
@@ -365,9 +382,11 @@ release candidate:
   or reconnect snapshot before the reveal event;
 - duplicate command, simultaneous buzzer, replay-gap, late-answer, frozen Null
   Pointer distribution, ticket replay, and projector retry tests pass;
-- a 30-minute rehearsal sustains 10,000 audience WebSockets across 32 shards,
-  with representative votes/answers and p95 accepted-command-to-event latency
-  below 250 ms;
+- a four-person game with no audience completes normally, and a six-team game
+  admits no more than 24 contestants;
+- a 30-minute preview rehearsal sustains the intended 4,000-person audience
+  envelope across 32 shards, with separately reported p95 authoritative vote
+  acceptance and origin-socket aggregate visibility below the release budgets;
 - reconnect recovery succeeds during a rolling deploy, and a projector outage
   catches up without duplicate leaderboard effects;
 - the operator has tested host recovery, pause, correction, rollback, kill switch,
@@ -375,15 +394,25 @@ release candidate:
 - dashboards, paging routes, run sheet, content moderation, data retention, and
   the named incident commander are ready.
 
-The load command is intentionally explicit and defaults to the production goal:
+The local integration suite includes a four-person no-audience journey,
+synthetic storage/load-result bounds, and a Workers/Durable Objects correctness
+case that submits 4,000 identities through 32 real local audience shards. The
+Durable Object case verifies exact canonical totals, idempotency, frozen-state
+rejection, and aggregate batches of at most 100 command IDs. None of these local
+tests opens 4,000 sockets or proves capacity or latency. The remote preview soak
+is the evidence-producing gate and must run without production traffic or
+credentials:
 
 ```bash
 ARCADE_LOAD_BASE_URL=https://preview.play.rawkode.academy \
 ARCADE_LOAD_ROOM_ID=room_01J00000000000000000000000 \
 ARCADE_LOAD_INVITE_CODE=audience_invite_from_host_console \
-ARCADE_LOAD_CLIENTS=10000 \
+ARCADE_LOAD_CLIENTS=4000 \
 ARCADE_LOAD_SHARDS=32 \
 ARCADE_LOAD_DURATION_SECONDS=1800 \
+ARCADE_LOAD_SYNCHRONIZED_BURST=true \
+ARCADE_LOAD_ACCEPTANCE_P95_BUDGET_MS=250 \
+ARCADE_LOAD_VISIBILITY_P95_BUDGET_MS=250 \
 bun run scripts/load-rehearsal.ts
 ```
 
@@ -391,16 +420,31 @@ Create the audience invite from the production host console immediately before
 the rehearsal and keep it valid for the full connection ramp. Every generator
 uses that invite to join each anonymous identity through the production
 membership path before opening its single-use ticket over the WebSocket
-subprotocol.
+subprotocol. Start a Null Pointer room and leave one prompt open throughout the
+connection ramp; the default vote choice is `Java`. For a different immutable
+content revision, set `ARCADE_LOAD_PROBE_PAYLOAD_JSON` to a valid choice for its
+open prompt.
 
 Run the full goal from load generators with sufficient file descriptors and
 network capacity. Every virtual viewer obtains its own signed session and
-single-use ticket. The gate rotates idempotent audience reaction windows, counts only correlated
-`audience.aggregated` events emitted after the shard flush reaches the
-authoritative room, fails on command errors/timeouts or insufficient offered
-load, and derives shard counts from server-reported shard IDs.
+single-use ticket. Once every connection has received an authoritative active
+prompt and server-reported shard ID, the runner sends exactly one real
+`audience.vote` per identity. Set `ARCADE_LOAD_SYNCHRONIZED_BURST=true` to send
+the votes from the all-connected barrier, or leave it false to jitter them over
+`ARCADE_LOAD_PROBE_EVERY_MS`.
+
+The summary reports two separate distributions. `acceptance` ends at the
+correlated `audience.accepted` frame after authoritative admission and local
+durable commit. `aggregateCommitVisibility` ends when the originating socket
+receives a correlated `audience.aggregated` frame after the aggregate commit.
+This second metric is not proof that a later public snapshot reached every
+audience socket; the protocol has no command ID on that snapshot, so the runner
+reports public-snapshot fan-out as `not-correlatable`. The gate fails on errors,
+timeouts, missing votes, insufficient coverage, a dropped connection, a missing
+shard, or either p95 budget breach.
+
 For distributed generation, set `ARCADE_LOAD_PROCESS_COUNT` and a unique
 zero-based `ARCADE_LOAD_PROCESS_INDEX`. All summaries must cover the same
-30-minute overlap; merge their `latencyHistogramMs` buckets to calculate the
-global p95 and sum server-observed shard connection counts. Per-process
-percentiles must never be averaged.
+30-minute overlap; merge acceptance histograms separately from aggregate
+visibility histograms to calculate global percentiles, and sum server-observed
+shard connection counts. Per-process percentiles must never be averaged.
