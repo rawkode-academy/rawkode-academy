@@ -1,7 +1,7 @@
 ---
 id: mmc8esyg7i2qkrni256w8t5s
 slug: development-environments-with-devenv
-title: Development Environments with Devenv
+title: 'Devenv Tutorial: Reproducible Development Environments with Nix'
 description: >-
   Domen Kozar joins to walk through Devenv, the Nix-based tool for declarative
   per-project dev environments. We cover devenv.nix structure, Rust language
