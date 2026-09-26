@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { css } from "@/../styled-system/css";
 import GameBoard from "@/components/GameBoard.vue";
 import { useRoomSocket } from "@/composables/use-room-socket";
 import type { GameId } from "@/lib/game-catalogue";
@@ -42,8 +43,13 @@ const { room, connection, gameDefinition } = useRoomSocket({
 });
 
 const bar = computed(() =>
-	castBar({ state: connection === "connected" ? "open" : "closed" }),
+	castBar({ state: connection.value === "connected" ? "open" : "closed" }),
 );
+const crowdBins = css({ display: "flex", flexWrap: "wrap", gap: "4" });
+const sortedAudienceBins = computed(() => Object.entries(room.value.audienceDistribution ?? {})
+	.sort(([left, leftCount], [right, rightCount]) => rightCount - leftCount || left.localeCompare(right, "en")));
+const visibleAudienceBins = computed(() => sortedAudienceBins.value.slice(0, 8));
+const remainingAudienceBins = computed(() => sortedAudienceBins.value.slice(8));
 
 /** The broadcast must honour every format's advertised team capacity. */
 const visibleTeams = computed(() => room.value.teams);
@@ -62,7 +68,7 @@ function scoreSlots(score: number) {
 	<div :class="castStage">
 		<header :class="bar.root">
 			<span :class="bar.group">
-				<span :class="bar.tally">{{ connection === "connected" ? "On air" : "Off air" }}</span>
+				<span :class="bar.tally" data-testid="connection-status" :data-status="connection" role="status">{{ connection === "connected" ? "On air" : "Off air" }}</span>
 				<span :class="bar.label">{{ gameDefinition.title }}</span>
 			</span>
 			<span :class="bar.group">
@@ -77,6 +83,35 @@ function scoreSlots(score: number) {
 		<div :class="castBody" data-testid="question">
 			<GameBoard :game="gameDefinition.id" :room="room" scale="cast" />
 			<p :class="castPrompt">{{ room.prompt?.text }}</p>
+			<div
+				v-if="room.principalEngineer && (room.principalEngineer.fiftyFiftyActive || room.principalEngineer.askAudienceActive)"
+				:class="bar.label"
+				data-testid="principal-lifeline-effect"
+			>
+				<p v-if="room.principalEngineer.fiftyFiftyActive">
+					50:50 removed {{ room.principalEngineer.eliminatedChoiceIds.length }} options.
+				</p>
+				<p v-if="room.principalEngineer.askAudienceActive">
+					Audience advice ·
+					<template v-if="Object.keys(room.principalEngineer.audienceAdvice).length">
+						<span v-for="(count, key) in room.principalEngineer.audienceAdvice" :key="key">{{ key }}: {{ count }} · </span>
+					</template>
+					<template v-else>awaiting audience votes</template>
+				</p>
+			</div>
+			<div v-if="room.audienceFrozen && room.audienceDistribution" :class="bar.label" data-testid="audience-distribution">
+				<p>Audience frozen · {{ Object.values(room.audienceDistribution).reduce((sum, count) => sum + count, 0) }} responses</p>
+				<div :class="crowdBins">
+					<span
+						v-for="[answer, count] in visibleAudienceBins"
+						:key="answer"
+						:data-testid="`audience-bin-${String(answer).toLowerCase().replace(/[^a-z0-9]+/g, '-')}`"
+					>{{ answer }}: {{ count }}</span>
+					<span v-if="remainingAudienceBins.length">
+						{{ remainingAudienceBins.length }} more answers · {{ remainingAudienceBins.reduce((sum, [, count]) => sum + count, 0) }} responses
+					</span>
+				</div>
+			</div>
 			<p v-if="room.revealedAnswer" :class="castPrompt" data-testid="revealed-answer">
 				{{ room.revealedAnswer }}
 			</p>

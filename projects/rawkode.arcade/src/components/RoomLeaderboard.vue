@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onBeforeUnmount, onMounted, ref } from "vue";
+import { loadRoomLeaderboard, type ProjectedEntry } from "@/lib/projected-leaderboard";
 import { css } from "@/../styled-system/css";
 import {
 	control,
@@ -19,51 +20,57 @@ function slots(index: number) {
 	return scoreboard({ position: index === 0 ? "leading" : "default" });
 }
 
-type ProjectedEntry = {
-	principalId: string;
-	teamId: string | null;
-	score: number;
-	rank: number;
-};
 const roomId = ref<string | null>(null);
 const entries = ref<ProjectedEntry[]>([]);
 const error = ref("");
+const loading = ref(false);
+let activeRequest: AbortController | undefined;
 
-onMounted(async () => {
-	roomId.value = new URLSearchParams(window.location.search).get("roomId");
+async function loadResults() {
+	activeRequest?.abort();
 	if (!roomId.value) {
 		error.value =
 			"Open this page from a completed live room to view its projection.";
 		return;
 	}
+	const request = new AbortController();
+	activeRequest = request;
+	loading.value = true;
+	error.value = "";
 	try {
-		const response = await fetch(
-			`/api/rooms/${encodeURIComponent(roomId.value)}/leaderboard`,
-			{ credentials: "same-origin" },
-		);
-		if (!response.ok) throw new Error("The final result is not available yet.");
-		const value = (await response.json()) as { entries?: ProjectedEntry[] };
-		entries.value = Array.isArray(value.entries) ? value.entries : [];
+		const result = await loadRoomLeaderboard(roomId.value, request.signal);
+		if (!request.signal.aborted) entries.value = result;
 	} catch (cause) {
-		error.value =
-			cause instanceof Error
-				? cause.message
-				: "Unable to load the leaderboard.";
+		if (!request.signal.aborted) {
+			error.value = cause instanceof Error ? cause.message : "Unable to load the leaderboard.";
+		}
+	} finally {
+		if (!request.signal.aborted) loading.value = false;
 	}
+}
+
+onMounted(() => {
+	roomId.value = new URLSearchParams(window.location.search).get("roomId");
+	void loadResults();
 });
+onBeforeUnmount(() => activeRequest?.abort());
 </script>
 
 <template>
 	<div :class="[shell, board]" aria-live="polite">
 		<div :class="sectionRule">
 			<span :class="slug()">Verified result</span>
-			<span v-if="roomId" :class="slug({ tone: 'live' })">Room {{ roomId }}</span>
+			<span v-if="roomId" :class="slug({ tone: 'live' })" data-testid="leaderboard-room-id">Room {{ roomId }}</span>
 		</div>
 
 		<h1 :class="text({ style: 'headline' })">Final standings</h1>
 
-		<div v-if="error" :class="empty">
+		<div v-if="loading" :class="empty" role="status" aria-busy="true">
+			<p :class="text({ style: 'body' })">Preparing final results… This may take a few moments.</p>
+		</div>
+		<div v-else-if="error" :class="empty">
 			<p :class="[notice({ tone: 'info' }), text({ style: 'body' })]">{{ error }}</p>
+			<button v-if="roomId" :class="control({ tone: 'quiet' })" type="button" @click="loadResults">Try again</button>
 			<a :class="control({ tone: 'quiet' })" href="/">Back to formats</a>
 		</div>
 

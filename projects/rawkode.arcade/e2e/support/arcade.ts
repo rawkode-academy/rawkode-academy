@@ -257,6 +257,6 @@ export async function completeGame(
 		`leaderboard-row-${room.roomId}-${teamId}`,
 	);
 	await expect(projected).toBeVisible();
-	await expect(projected).toContainText(room.roomId);
+	await expect(display.getByTestId("leaderboard-room-id")).toContainText(room.roomId);
 	await expect(projected).toContainText(finalScore);
 }
