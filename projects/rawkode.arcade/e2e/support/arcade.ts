@@ -30,6 +30,7 @@ interface LeakProbe {
 	findings: string[];
 	pending: Set<Promise<void>>;
 	receivedSocketFrames: number;
+	commandErrors: Map<string, { code: string; message: string }>;
 }
 
 const leakProbes = new WeakMap<Page, LeakProbe>();
@@ -51,6 +52,7 @@ function watchForSecret(page: Page, secret: string): void {
 		findings: [],
 		pending: new Set(),
 		receivedSocketFrames: 0,
+		commandErrors: new Map(),
 	};
 	leakProbes.set(page, probe);
 	page.on("response", (response) => {
@@ -71,6 +73,14 @@ function watchForSecret(page: Page, secret: string): void {
 			const body = typeof payload === "string" ? payload : payload.toString();
 			if (body.includes(secret)) {
 				probe.findings.push(`WebSocket frame leaked secret: ${socket.url()}`);
+			}
+			try {
+				const frame = JSON.parse(body);
+				if (frame.type === "error" && typeof frame.commandId === "string" && typeof frame.code === "string" && typeof frame.message === "string") {
+					probe.commandErrors.set(frame.commandId, { code: frame.code, message: frame.message });
+				}
+			} catch {
+				// Non-JSON frames are still included in the raw secret audit above.
 			}
 		});
 	});
@@ -196,6 +206,18 @@ export async function openDisplay(
 export async function start(room: LiveRoom): Promise<void> {
 	await room.host.getByTestId("start-game").click();
 	await expect(room.host.getByTestId("room-phase")).not.toHaveText("lobby");
+	const phase = await room.host.getByTestId("room-phase").innerText();
+	// Audience shards receive the new prompt asynchronously. Typing before
+	// their snapshot arrives would be cleared by the prompt-change watcher.
+	await Promise.all(room.untrustedPages.map((page) =>
+		expect(page.getByTestId("room-phase")).toHaveText(phase),
+	));
+}
+
+export async function expectSocketCommandError(page: Page, commandId: string, message: string): Promise<void> {
+	const probe = leakProbes.get(page);
+	expect(probe, "socket monitoring must start before role navigation").toBeDefined();
+	await expect.poll(() => probe?.commandErrors.get(commandId)).toEqual({ code: "CONFLICT", message });
 }
 
 export async function closeRoom(room: LiveRoom): Promise<void> {

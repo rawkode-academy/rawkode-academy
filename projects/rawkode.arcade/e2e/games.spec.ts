@@ -4,6 +4,7 @@ import {
 	closeRoom,
 	completeGame,
 	createSeededRoom,
+	expectSocketCommandError,
 	openAudience,
 	openContestant,
 	openDisplay,
@@ -220,6 +221,7 @@ test("Null Pointer: audience rarity freezes before contestant scoring", async ({
 		const audienceThree = await openAudience(browser, room);
 		const lateAudience = await openAudience(browser, room);
 		const display = await openDisplay(browser, room);
+		await expect(audienceOne.getByTestId("answer-input")).toBeDisabled();
 		await start(room);
 
 		await audienceOne.getByTestId("answer-input").fill("Java");
@@ -254,16 +256,21 @@ test("Null Pointer: audience rarity freezes before contestant scoring", async ({
 			},
 			{ roomId: room.roomId },
 		);
-		expect(late.status).toBe(409);
-		expect(late.body).toMatchObject({
-			error: { code: "DISTRIBUTION_FROZEN" },
-		});
+		// HTTP acknowledges the durable queue, not admission. The coordinator
+		// must reject this exact late command over the existing live socket.
+		expect(late.status).toBe(202);
+		expect(late.body).toMatchObject({ queued: true });
+		await expectSocketCommandError(lateAudience, "e2e-late-null-pointer-answer", "DISTRIBUTION_FROZEN");
+		await expect(display.getByTestId("audience-distribution")).toHaveText(frozenDistribution);
 
 		await rareContestant.getByTestId("answer-input").fill("Elixir");
 		await rareContestant.getByTestId("submit-answer").click();
+		await expect(rareContestant.getByTestId("submit-answer")).toHaveText("Answer locked in");
 		await commonContestant.getByTestId("answer-input").fill("Java");
 		await commonContestant.getByTestId("submit-answer").click();
+		await expect(commonContestant.getByTestId("submit-answer")).toHaveText("Answer locked in");
 		await room.host.getByTestId("reveal-answer").click();
+		await expect(display.getByTestId("revealed-answer")).toContainText("Elixir");
 		expect(await display.getByTestId("audience-distribution").innerText()).toBe(frozenDistribution);
 		const rareScore = Number(
 			(await display.getByTestId("score-team-red").innerText()).replace(/\D/g, ""),

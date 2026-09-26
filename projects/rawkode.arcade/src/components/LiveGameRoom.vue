@@ -336,7 +336,7 @@ const submit = (input: { choiceId?: string; answer?: string }) => {
 
 			<AudienceControls
 				:prompt="room.prompt"
-				:disabled="connection !== 'connected' || (role === 'audience' && room.audienceFrozen)"
+				:disabled="connection !== 'connected' || room.phase === 'lobby' || room.phase === 'complete' || (role === 'audience' && room.audienceFrozen)"
 				:allow-multiple="allowMultipleSubmissions"
 				:submitted-prompt-id="submittedPromptId"
 				:submitting="isSubmitting"
