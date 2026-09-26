@@ -1,5 +1,11 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch } from "vue";
+import { css } from "@/../styled-system/css";
+import { notice } from "@/styles/arcade";
+
+const frame = css({ position: "relative", aspectRatio: "16 / 9", bg: "ground", overflow: "hidden", borderRadius: "lg" });
+const videoFrame = css({ width: "full", height: "full", objectFit: "contain" });
+const playerStatus = css({ position: "absolute", insetInline: "4", bottom: "4" });
 
 const props = defineProps<{
 	playbackUrl: string;
@@ -239,16 +245,10 @@ async function waitForIceGathering(
 </script>
 
 <template>
-	<div class="show-player">
-		<video ref="videoElement" autoplay controls muted playsinline :title="title" />
-		<p v-if="status !== 'live'" class="show-player-status" role="status">
+	<div :class="frame">
+		<video ref="videoElement" :class="videoFrame" autoplay controls muted playsinline :title="title" />
+		<p v-if="status !== 'live'" :class="[notice({ tone: status === 'failed' ? 'error' : 'live' }), playerStatus]" role="status">
 			{{ status === "failed" ? errorMessage : "Connecting live stream…" }}
 		</p>
 	</div>
 </template>
-
-<style scoped>
-.show-player { position: relative; aspect-ratio: 16 / 9; background: #000; overflow: hidden; border-radius: .75rem; }
-.show-player video { width: 100%; height: 100%; object-fit: contain; }
-.show-player-status { position: absolute; inset: auto 1rem 1rem; padding: .75rem 1rem; color: white; background: #171717d9; }
-</style>

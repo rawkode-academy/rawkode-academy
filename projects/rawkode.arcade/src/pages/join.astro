@@ -1,24 +1,21 @@
 ---
 import ArcadeLayout from "@/layouts/ArcadeLayout.astro";
 import JoinRoomForm from "@/components/JoinRoomForm.vue";
+import { css } from "@/../styled-system/css";
+import { control, shell, slug, text } from "@/styles/arcade";
+
+const joinPage = css({ display: "grid", gridTemplateColumns: { base: "1fr", md: "1fr auto" }, gap: "sectionTight", py: "section" });
+const intro = css({ display: "grid", alignContent: "start", justifyItems: "start", gap: "4", maxW: "measure" });
 ---
 
 <ArcadeLayout title="Join the live audience: Rawkode Live">
-	<section class="join-page">
-		<div>
-			<p class="eyebrow">Live show participation</p>
-			<h1>Join when invited.</h1>
-			<p>The producer opens participation during selected live shows. Use the code shared on air, or return to the live stream to watch.</p>
-			<a href="/">Watch the show</a>
+	<section class:list={[shell, joinPage]}>
+		<div class={intro}>
+			<p class={slug({ tone: "crowd" })}>Live show participation</p>
+			<h1 class={text({ style: "headline" })}>Join when invited.</h1>
+			<p class={text({ tone: "soft" })}>The producer opens participation during selected live shows. Use the code shared on air, or return to the live stream to watch.</p>
+			<a class={control({ tone: "quiet" })} href="/">Watch the show</a>
 		</div>
 		<JoinRoomForm client:load />
 	</section>
 </ArcadeLayout>
-
-<style>
-.join-page { max-width: 70rem; margin: 0 auto; padding: clamp(2rem, 6vw, 5rem) 1.5rem; display: grid; grid-template-columns: 1fr minmax(20rem, 28rem); gap: 3rem; }
-.join-page h1 { font-size: clamp(2.5rem, 6vw, 4rem); line-height: 1; }
-.join-page p { max-width: 34rem; line-height: 1.6; }
-.join-page .eyebrow { text-transform: uppercase; letter-spacing: .12em; font-size: .75rem; }
-@media (max-width: 48rem) { .join-page { grid-template-columns: 1fr; } }
-</style>

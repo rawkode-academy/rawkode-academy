@@ -547,6 +547,13 @@ export async function startStudioStream(
 			409,
 		);
 	}
+	if (session.streamEnvironment === "prod" && !session.contentVideoId && !session.startsAt) {
+		throw new StudioOperationError(
+			"bad-request",
+			"A scheduled start time is required for a production show.",
+			400,
+		);
+	}
 	if (session.streamEnvironment === "prod" && session.contentVideoId && !session.contentVideoSlug) {
 		throw new StudioOperationError(
 			"bad-request",

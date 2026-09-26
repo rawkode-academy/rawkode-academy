@@ -1,6 +1,17 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+import { css } from "@/../styled-system/css";
 import { games } from "@/lib/game-catalogue";
+import { control, field, notice, shell, slug, text } from "@/styles/arcade";
+
+const page = css({ display: "grid", gap: "sectionTight", py: "section" });
+const intro = css({ display: "grid", gap: "4", maxW: "prose" });
+const actions = css({ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "3", mt: "4" });
+const showList = css({ display: "grid", gap: "5" });
+const showRow = css({ display: "grid", gridTemplateColumns: { base: "1fr", md: "1fr auto" }, gap: "5", py: "5", borderTopWidth: "hairline", borderTopStyle: "solid", borderTopColor: "rule" });
+const showInfo = css({ display: "grid", alignContent: "start", gap: "3" });
+const showActions = css({ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: { base: "start", md: "end" }, gap: "3", maxW: "formColumn" });
+const formatLabel = css({ display: "grid", gap: "2" });
 
 type Participation = { roomId: string; enabled: boolean; gameKey: string };
 type Show = { id: string; title: string; show: string; startsAt: string; playbackUrl?: string; participation?: Participation };
@@ -54,65 +65,44 @@ onMounted(() => void load());
 </script>
 
 <template>
-	<div class="producer-page">
-		<header>
-			<p class="eyebrow">Producer dashboard</p>
-			<h1>Manage live shows</h1>
-			<p>Schedule and broadcast in Rawkode Studio. Turn audience participation on only for shows that need it.</p>
-			<div class="actions">
-				<a class="primary" href="https://rawkode.studio/">Schedule a show in Studio ↗</a>
-				<a href="/admin/content">Interactive content</a>
+	<div :class="[shell, page]">
+		<header :class="intro">
+			<p :class="slug()">Producer dashboard</p>
+			<h1 :class="text({ style: 'display' })">Manage live shows</h1>
+			<p :class="text({ tone: 'soft' })">Schedule and broadcast in Rawkode Studio. Turn audience participation on only for shows that need it.</p>
+			<div :class="actions">
+				<a :class="control({ tone: 'action' })" href="https://rawkode.studio/">Schedule a show in Studio ↗</a>
+				<a :class="control({ tone: 'quiet' })" href="/admin/content">Interactive content</a>
 			</div>
 		</header>
-		<p v-if="error" class="error" role="alert">{{ error }} <a v-if="signIn" href="/auth/sign-in?returnTo=/admin">Sign in</a></p>
-		<p v-if="loading" role="status">Loading shows…</p>
-		<p v-else-if="!shows.length && !error">No production shows are scheduled. Create one in Studio to see it here.</p>
-		<div v-else class="show-list">
-			<article v-for="show in shows" :key="show.id" class="show-row">
-				<div>
-					<p class="eyebrow">{{ show.playbackUrl ? "Live now" : dateLabel(show.startsAt) }} · {{ show.show }}</p>
-					<h2>{{ show.title }}</h2>
-					<p>Audience participation: {{ show.participation?.enabled ? "enabled" : "off" }}</p>
+		<p v-if="error" :class="notice({ tone: 'error' })" role="alert">{{ error }} <a v-if="signIn" href="/auth/sign-in?returnTo=/admin">Sign in</a></p>
+		<p v-if="loading" :class="text({ tone: 'soft' })" role="status">Loading shows…</p>
+		<p v-else-if="!shows.length && !error" :class="text({ tone: 'soft' })">No production shows are scheduled. Create one in Studio to see it here.</p>
+		<div v-else :class="showList">
+			<article v-for="show in shows" :key="show.id" :class="showRow">
+				<div :class="showInfo">
+					<p :class="slug({ tone: show.playbackUrl ? 'live' : 'default' })">{{ show.playbackUrl ? "Live now" : dateLabel(show.startsAt) }} · {{ show.show }}</p>
+					<h2 :class="text({ style: 'title' })">{{ show.title }}</h2>
+					<p :class="text({ tone: 'soft' })">Audience participation: {{ show.participation?.enabled ? "enabled" : "off" }}</p>
 				</div>
-				<div class="show-actions">
-					<a :href="`https://rawkode.studio/studio/${encodeURIComponent(show.id)}/producer`">{{ show.playbackUrl ? "Open live controls ↗" : "Prepare / go live ↗" }}</a>
+				<div :class="showActions">
+					<a :class="control({ tone: 'quiet' })" :href="`https://rawkode.studio/studio/${encodeURIComponent(show.id)}/producer`">{{ show.playbackUrl ? "Open live controls ↗" : "Prepare / go live ↗" }}</a>
 					<template v-if="show.participation">
-						<a :href="`/host/${encodeURIComponent(show.participation.roomId)}`">Interactive room</a>
-						<button :disabled="pending === show.id" @click="setParticipation(show, !show.participation.enabled)">
+						<a :class="control({ tone: 'quiet' })" :href="`/host/${encodeURIComponent(show.participation.roomId)}`">Interactive room</a>
+						<button :class="control({ tone: 'action' })" :disabled="pending === show.id" @click="setParticipation(show, !show.participation.enabled)">
 							{{ show.participation.enabled ? "Turn participation off" : "Turn participation on" }}
 						</button>
 					</template>
 					<template v-else>
-						<label>Interactive format
-							<select v-model="choices[show.id]">
+						<label :class="[formatLabel, text({ style: 'bodySm' })]">Interactive format
+							<select v-model="choices[show.id]" :class="field()">
 								<option v-for="game in games" :key="game.id" :value="game.id">{{ game.title }}</option>
 							</select>
 						</label>
-						<button :disabled="pending === show.id" @click="setParticipation(show, false)">Prepare participation</button>
+						<button :class="control({ tone: 'action' })" :disabled="pending === show.id" @click="setParticipation(show, false)">Prepare participation</button>
 					</template>
 				</div>
 			</article>
 		</div>
 	</div>
 </template>
-
-<style scoped>
-.producer-page { max-width: 68rem; margin: 0 auto; padding: clamp(2rem, 6vw, 5rem) 1.5rem; display: grid; gap: 3rem; }
-.producer-page header { max-width: 48rem; }
-.eyebrow { margin: 0 0 .5rem; font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; }
-h1 { margin: 0 0 1rem; font-size: clamp(2.5rem, 6vw, 4rem); line-height: 1; }
-h2 { margin: 0 0 .5rem; font-size: 1.5rem; }
-header p, .show-row p { color: #a7aab2; }
-.actions, .show-actions { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; margin-top: 1.25rem; }
-.actions a, .show-actions a, button { display: inline-block; border: 1px solid #4c515e; border-radius: .35rem; padding: .65rem 1rem; background: #191c22; color: #f7f7f7; text-decoration: none; font: inherit; cursor: pointer; }
-.actions .primary { background: #d9f069; color: #10120c; border-color: #d9f069; font-weight: 700; }
-button:disabled { opacity: .5; cursor: wait; }
-.error { padding: 1rem; border: 1px solid #b4564d; color: #ffb3aa; }
-.error a { color: inherit; }
-.show-list { display: grid; gap: 1rem; }
-.show-row { display: grid; grid-template-columns: 1fr auto; gap: 2rem; padding: 1.5rem; border: 1px solid #353943; border-radius: .5rem; }
-.show-actions { max-width: 26rem; justify-content: end; margin: 0; }
-label { display: grid; gap: .3rem; font-size: .85rem; }
-select { padding: .55rem; color: #f7f7f7; background: #191c22; border: 1px solid #4c515e; }
-@media (max-width: 44rem) { .show-row { grid-template-columns: 1fr; } .show-actions { justify-content: start; } }
-</style>
