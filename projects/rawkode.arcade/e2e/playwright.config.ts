@@ -6,6 +6,9 @@ export default defineConfig({
 	fullyParallel: false,
 	forbidOnly: Boolean(process.env.CI),
 	retries: process.env.CI ? 2 : 0,
+	// Keep a failing CI run short enough to inspect its original error and trace.
+	// Every scenario still runs when the suite passes.
+	maxFailures: process.env.CI ? 1 : undefined,
 	workers: process.env.CI ? 1 : undefined,
 	reporter: process.env.CI
 		? [["line"], ["html", { open: "never", outputFolder: "test-results/html" }]]
