@@ -23,8 +23,9 @@ const empty = css({
 			<h1 class={text({ style: "headline" })}>Pick a format to open a room.</h1>
 			<p class={text({ style: "body", tone: "soft" })}>
 				Creating a room issues its producer, contestant, audience and display
-				codes. Operator access is granted through Cloudflare Access.
+				codes. Sign in with your Academy account to operate a show.
 			</p>
+			<a class={control({ tone: "quiet" })} href="/auth/sign-in?returnTo=/host">Sign in with Academy</a>
 			<a class={control({ tone: "live" })} href="/#formats">Choose a format</a>
 		</div>
 	</div>

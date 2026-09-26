@@ -22,6 +22,7 @@ import {
 const selected = ref<GameId>(games[0].id);
 const creating = ref(false);
 const error = ref("");
+const needsSignIn = ref(false);
 
 const selectedGame = computed(
 	() => games.find((game) => game.id === selected.value) ?? games[0],
@@ -49,6 +50,7 @@ async function createRoom() {
 	}
 	creating.value = true;
 	error.value = "";
+	needsSignIn.value = false;
 	try {
 		const response = await fetch("/api/rooms", {
 			method: "POST",
@@ -59,6 +61,7 @@ async function createRoom() {
 				title: `${selectedGame.value.title} live`,
 			}),
 		});
+		if (response.status === 403) needsSignIn.value = true;
 		if (!response.ok)
 			throw new Error("A host session is required to create a room.");
 		const value = (await response.json()) as { room?: { id?: string } };
@@ -121,6 +124,7 @@ async function createRoom() {
 		<p v-if="error" :class="[notice({ tone: 'error' }), row({ gap: 'tight' })]" aria-live="polite">
 			<span :class="slug({ tone: 'closed' })">Error</span>
 			<span>{{ error }}</span>
+			<a v-if="needsSignIn" href="/auth/sign-in?returnTo=/" :class="control({ tone: 'quiet' })">Sign in with Academy</a>
 		</p>
 	</div>
 </template>

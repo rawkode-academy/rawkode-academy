@@ -249,7 +249,7 @@ function cookieFrom(response: Response): string {
 async function createSession(client: ClientRecord): Promise<string> {
 	const response = await fetch(settings.sessionUrl, {
 		method: "POST",
-		headers: { "content-type": "application/json" },
+		headers: { "content-type": "application/json", origin: new URL(settings.sessionUrl).origin },
 		body: JSON.stringify({ displayName: client.actorId }),
 		signal: AbortSignal.timeout(settings.requestTimeoutMs),
 	});
@@ -267,7 +267,7 @@ async function joinRoom(
 ): Promise<TicketResponse> {
 	const response = await fetch(settings.joinUrl, {
 		method: "POST",
-		headers: { "content-type": "application/json", cookie },
+		headers: { "content-type": "application/json", cookie, origin: new URL(settings.joinUrl).origin },
 		body: JSON.stringify({ displayName: client.actorId, desiredRole: "audience" }),
 		signal: AbortSignal.timeout(settings.requestTimeoutMs),
 	});

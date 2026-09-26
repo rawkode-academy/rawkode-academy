@@ -15,9 +15,6 @@ const target = process.argv[2] as Target | undefined;
 const dryRun = process.argv.includes("--dry-run");
 const provision = process.argv.includes("--provision");
 if (target !== "preview" && target !== "production") throw new Error("Usage: cloudflare-config.ts <preview|production> [--dry-run|--provision]");
-if (provision && (!process.env.CF_ACCESS_TEAM_DOMAIN?.trim() || !process.env.CF_ACCESS_AUD?.trim())) {
-	throw new Error("CF_ACCESS_TEAM_DOMAIN and CF_ACCESS_AUD are required for a deployable environment");
-}
 
 const accountId = process.env.CLOUDFLARE_ACCOUNT_ID ?? "0aeb879de8e3cdde5fb3d413025222ce";
 const databaseName = target === "preview" ? "rawkode-arcade-preview" : "rawkode-arcade";
@@ -78,9 +75,8 @@ generated.account_id = accountId;
 generated.vars = {
 	ADMISSION_ENABLED: "true",
 	ENVIRONMENT: target,
-	CF_ACCESS_TEAM_DOMAIN: process.env.CF_ACCESS_TEAM_DOMAIN ?? "",
-	CF_ACCESS_AUD: process.env.CF_ACCESS_AUD ?? "",
 };
+generated.services = [{ binding: "IDENTITY", service: "rawkode-academy-identity" }];
 generated.d1_databases = [{ binding: "DB", database_name: databaseName, database_id: databaseId, migrations_dir: "../migrations" }];
 generated.r2_buckets = [{ binding: "ARCADE_ASSETS", bucket_name: bucketName }];
 generated.assets = { ...(generated.assets ?? {}), directory: "../dist/client" };

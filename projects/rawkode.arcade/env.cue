@@ -30,17 +30,11 @@ env: {
 	TICKET_SECRET: "local-development-secret-change-me"
 	SESSION_SECRET: "local-development-secret-change-me"
 	ENVIRONMENT: "development"
-	CF_ACCESS_TEAM_DOMAIN: ""
-	CF_ACCESS_AUD: ""
-	OPERATOR_EMAILS: ""
 
 	environment: production: {
 		CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {ref: "op://sa.rawkode.academy/cloudflare/api-tokens/workers"}
 		TICKET_SECRET: schema.#OnePasswordRef & {ref: "op://sa.rawkode.academy/arcade/ticket-secret"}
 		SESSION_SECRET: schema.#OnePasswordRef & {ref: "op://sa.rawkode.academy/arcade/session-secret"}
-		CF_ACCESS_TEAM_DOMAIN: schema.#OnePasswordRef & {ref: "op://sa.rawkode.academy/arcade/access-team-domain"}
-		CF_ACCESS_AUD: schema.#OnePasswordRef & {ref: "op://sa.rawkode.academy/arcade/access-aud"}
-		OPERATOR_EMAILS: schema.#OnePasswordRef & {ref: "op://sa.rawkode.academy/arcade/operator-emails"}
 	}
 }
 
