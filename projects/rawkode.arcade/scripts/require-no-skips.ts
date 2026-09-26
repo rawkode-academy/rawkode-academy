@@ -1,3 +1,6 @@
+import { once } from "node:events";
+import { reportsSkippedTests } from "./reported-skips";
+
 const separator = process.argv.indexOf("--");
 const command = separator >= 0 ? process.argv.slice(separator + 1) : process.argv.slice(2);
 if (command.length === 0) {
@@ -10,13 +13,21 @@ const child = Bun.spawn(command, {
 	stdout: "pipe",
 	stderr: "pipe",
 });
+async function forward(stream: ReadableStream<Uint8Array>, output: NodeJS.WriteStream): Promise<string> {
+	const decoder = new TextDecoder();
+	let transcript = "";
+	for await (const chunk of stream) {
+		transcript += decoder.decode(chunk, { stream: true });
+		if (!output.write(chunk)) await once(output, "drain");
+	}
+	return transcript + decoder.decode();
+}
+
 const [stdout, stderr, exitCode] = await Promise.all([
-	new Response(child.stdout).text(),
-	new Response(child.stderr).text(),
+	forward(child.stdout, process.stdout),
+	forward(child.stderr, process.stderr),
 	child.exited,
 ]);
-process.stdout.write(stdout);
-process.stderr.write(stderr);
 
 const transcript = `${stdout}\n${stderr}`;
 const skipped = reportsSkippedTests(transcript);
@@ -27,4 +38,3 @@ if (exitCode !== 0 || skipped) {
 	);
 	process.exit(1);
 }
-import { reportsSkippedTests } from "./reported-skips";
