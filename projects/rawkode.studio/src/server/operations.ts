@@ -284,23 +284,6 @@ function requireContentBackedRecordingVideoId(session: {
 	return session.contentVideoId;
 }
 
-function requireContentBackedStreamSession(session: {
-	contentVideoId?: string | null;
-	contentVideoSlug?: string | null;
-}): { contentVideoId: string; contentVideoSlug: string } {
-	if (!session.contentVideoId || !session.contentVideoSlug) {
-		throw new StudioOperationError(
-			"bad-request",
-			"Prod streams must be attached to a Rawkode content video before going live.",
-			400,
-		);
-	}
-	return {
-		contentVideoId: session.contentVideoId,
-		contentVideoSlug: session.contentVideoSlug,
-	};
-}
-
 function requireStreamPublishUrls(liveInput: CloudflareStreamLiveInput): {
 	playbackUrl: string;
 	publishUrl: string;
@@ -327,23 +310,25 @@ function buildStreamNotification(
 		contentVideoId?: string | null;
 		contentVideoSlug?: string | null;
 		id: string;
+		showId: string;
 		title: string;
 	},
 ): SendSubjectInput {
-	const { contentVideoId, contentVideoSlug } = requireContentBackedStreamSession(
-		session,
-	);
+	const contentVideoSlug = session.contentVideoSlug;
+	const subject = contentVideoSlug ?? session.showId;
 	return {
-		subjectKey: `stream:${contentVideoSlug}`,
+		subjectKey: `stream:${subject}`,
 		title: `${session.title} is live`,
 		body: "The stream has started on Rawkode Academy.",
-		url: `https://rawkode.academy/watch/${contentVideoSlug}`,
-		tag: `stream:${contentVideoSlug}`,
+		url: contentVideoSlug
+			? `https://rawkode.academy/watch/${contentVideoSlug}`
+			: "https://play.rawkode.academy/",
+		tag: `stream:${subject}`,
 		data: {
 			cloudflareStreamLiveInputId: session.cloudflareStreamLiveInputId,
 			studioSessionId: session.id,
-			videoId: contentVideoId,
-			videoSlug: contentVideoSlug,
+			...(session.contentVideoId ? { videoId: session.contentVideoId } : {}),
+			...(contentVideoSlug ? { videoSlug: contentVideoSlug } : {}),
 		},
 	};
 }
@@ -356,6 +341,7 @@ async function notifyStudioStreamIfNeeded(
 		| "contentVideoId"
 		| "contentVideoSlug"
 		| "id"
+		| "showId"
 		| "streamEnvironment"
 		| "streamNotificationQueuedAt"
 		| "title"
@@ -368,7 +354,6 @@ async function notifyStudioStreamIfNeeded(
 		return false;
 	}
 
-	requireContentBackedStreamSession(session);
 	const notificationQueuedAt = nowSeconds();
 	const claimed = await claimStudioStreamNotification(
 		env,
@@ -486,6 +471,20 @@ export async function createStudioSession(
 			400,
 		);
 	}
+	if (!contentVideo && input.streamEnvironment === "prod" && !startsAt) {
+		throw new StudioOperationError(
+			"bad-request",
+			"A scheduled start time is required for a production show.",
+			400,
+		);
+	}
+	if (startsAt && Number.isNaN(Date.parse(startsAt))) {
+		throw new StudioOperationError(
+			"bad-request",
+			"Scheduled start time must be a valid date and time.",
+			400,
+		);
+	}
 
 	const sessionId = contentVideo
 		? createStudioSessionId(contentVideo.id)
@@ -507,7 +506,7 @@ export async function createStudioSession(
 		sessionId,
 		show,
 		showId,
-		startsAt,
+		startsAt: startsAt ? new Date(startsAt).toISOString() : undefined,
 		status: "scheduled",
 		streamEnvironment: input.streamEnvironment === "prod" ? "prod" : "test",
 		title,
@@ -548,15 +547,21 @@ export async function startStudioStream(
 			409,
 		);
 	}
-	if (session.streamEnvironment === "prod") {
-		requireContentBackedStreamSession(session);
+	if (session.streamEnvironment === "prod" && session.contentVideoId && !session.contentVideoSlug) {
+		throw new StudioOperationError(
+			"bad-request",
+			"Content-backed production streams require a video slug.",
+			400,
+		);
 	}
 	const streamToken = input.streamToken?.trim() || crypto.randomUUID();
 	const claimed = await claimStudioStreamStart(env, session.id, streamToken);
 	if (!claimed) {
 		throw new StudioOperationError(
 			"stream-active",
-			"Studio stream is already active.",
+			session.streamEnvironment === "prod"
+				? "Another production show is already starting or live. End it before starting this show."
+				: "Studio stream is already active.",
 			409,
 		);
 	}

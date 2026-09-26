@@ -2,6 +2,12 @@
 
 Astro + Vue Studio for Rawkode live production, low-latency contributor rooms, and recording-first VOD handoff.
 
+An operator can schedule a standalone production show from the Studio dashboard.
+The new session appears on `play.rawkode.academy`; its producer room owns Go live
+and End. The public `/api/studio/show-lineup` endpoint returns only upcoming
+production sessions and a confirmed live session with its playback URL.
+Content-backed sessions continue to appear on their Academy watch pages.
+
 ## Commands
 
 ```sh

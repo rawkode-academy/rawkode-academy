@@ -168,6 +168,32 @@ export interface StudioPublicLiveState {
 	} | null;
 }
 
+export interface StudioPublicShowLineup {
+	live: {
+		id: string;
+		title: string;
+		show: string;
+		startsAt: string;
+		startedAt: number | null;
+		playbackUrl: string;
+	} | null;
+	upcoming: Array<{
+		id: string;
+		title: string;
+		show: string;
+		startsAt: string;
+	}>;
+}
+
+type StudioPublicShowRow = {
+	id: string;
+	title: string;
+	show_title: string;
+	starts_at: string;
+	stream_started_at?: number | null;
+	cloudflare_stream_playback_url?: string | null;
+};
+
 type StudioInviteRow = {
 	token_hash: string;
 	session_id: string;
@@ -636,7 +662,7 @@ export async function listStudioSessions(
 				        created_at,
 				        updated_at
 				   FROM studio_sessions
-				  ORDER BY starts_at ASC, created_at ASC
+				  ORDER BY starts_at DESC, created_at DESC
 				  LIMIT 50`,
 			)
 			.all<StudioSessionRow>());
@@ -906,6 +932,64 @@ export async function getPublicStudioLiveState(
 			title: row.title,
 		},
 	};
+}
+
+export async function getPublicStudioShowLineup(
+	env: StudioEnv | undefined,
+): Promise<StudioPublicShowLineup> {
+	const db = getDb(env);
+	if (!db) return { live: null, upcoming: [] };
+
+	try {
+		const [live, upcoming] = await Promise.all([
+			db.prepare(
+				`SELECT id, title, show_title, starts_at, stream_started_at,
+				        cloudflare_stream_playback_url
+				   FROM studio_sessions
+				  WHERE stream_environment = 'prod'
+				    AND stream_status = 'live'
+				    AND status = 'live'
+				    AND cloudflare_stream_playback_url IS NOT NULL
+				  ORDER BY stream_started_at DESC, updated_at DESC
+				  LIMIT 1`,
+			).first<StudioPublicShowRow>(),
+			db.prepare(
+				`SELECT id, title, show_title, starts_at
+				   FROM studio_sessions
+				  WHERE stream_environment = 'prod'
+				    AND status = 'scheduled'
+				    AND stream_started_at IS NULL
+				    AND stream_status IN ('idle', 'ended', 'failed')
+				    AND starts_at >= ?
+				  ORDER BY starts_at ASC, created_at ASC
+				  LIMIT 50`,
+			).bind(new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()).all<StudioPublicShowRow>(),
+		]);
+
+		return {
+			live: live?.cloudflare_stream_playback_url
+				? {
+					id: live.id,
+					title: live.title,
+					show: live.show_title,
+					startsAt: live.starts_at,
+					startedAt: live.stream_started_at ?? null,
+					playbackUrl: live.cloudflare_stream_playback_url,
+				}
+				: null,
+			upcoming: (upcoming.results ?? []).map((row) => ({
+				id: row.id,
+				title: row.title,
+				show: row.show_title,
+				startsAt: row.starts_at,
+			})),
+		};
+	} catch (error) {
+		if (isMissingStudioSessionsTableError(error)) {
+			return { live: null, upcoming: [] };
+		}
+		throw error;
+	}
 }
 
 export async function listStudioRecordings(
@@ -1180,7 +1264,16 @@ export async function claimStudioStreamStart(
 			  WHERE id = ?
 			    AND status <> 'complete'
 			    AND stream_status NOT IN ('starting', 'live')
-			    AND (stream_start_token IS NULL OR stream_start_token <> ?)`,
+			    AND (stream_start_token IS NULL OR stream_start_token <> ?)
+			    AND (
+			      stream_environment <> 'prod'
+			      OR NOT EXISTS (
+			        SELECT 1 FROM studio_sessions AS active
+			         WHERE active.id <> studio_sessions.id
+			           AND active.stream_environment = 'prod'
+			           AND active.stream_status IN ('starting', 'live')
+			      )
+			    )`,
 		)
 		.bind(startToken, sessionId, startToken)
 		.run();
