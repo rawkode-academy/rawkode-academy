@@ -167,8 +167,8 @@ Create separate D1, R2, and Durable Object resources for preview and production.
 This release uses the room's durable SQLite outbox rather than a Cloudflare
 Queue. Never point a preview Worker at a production Durable Object
 namespace. Build and generate the environment-specific Wrangler file before
-every remote operation. That file carries the real D1/R2 bindings and Access
-configuration; the placeholder development config is not a production target.
+every remote operation. That file carries the real D1/R2 and Academy identity
+bindings; the placeholder development config is not a production target.
 
 ```bash
 cuenv sync -A
@@ -270,7 +270,7 @@ requests while preserving existing sockets:
 bun run build
 bun run scripts/cloudflare-config.ts production --provision
 bunx wrangler@4.96.0 deploy --config .wrangler/deploy-production.json --var ADMISSION_ENABLED:false
-curl --fail-with-body -X POST https://play.rawkode.academy/api/join/invalid
+curl --fail-with-body -X POST -H 'Origin: https://play.rawkode.academy' https://play.rawkode.academy/api/join/invalid
 ```
 
 The verification request must return the documented admission-closed response,

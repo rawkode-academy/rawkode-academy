@@ -6,6 +6,7 @@ import { authenticate, createAnonymousSession, hasRole } from "./server/auth";
 import { ContentRepository, type ContentQuestionInput } from "./server/content";
 import { Leaderboards } from "./server/leaderboards";
 import { ModerationService } from "./server/moderation";
+import { mutationOriginAllowed } from "./server/origin";
 import { ResultProjector } from "./server/results";
 import { RoomDirectory } from "./server/rooms";
 import { issueRoomTicket, verifyRoomTicket } from "./server/tickets";
@@ -22,6 +23,16 @@ function json(data: unknown, status = 200, headers?: HeadersInit): Response {
 }
 
 function badRequest(message: string): Response { return json({ error: { code: "BAD_REQUEST", message } }, 400); }
+
+function signIn(request: Request): Response {
+	const requestedPath = new URL(request.url).searchParams.get("returnTo") ?? "/host";
+	const origin = "https://play.rawkode.academy";
+	const target = requestedPath.startsWith("/") && !requestedPath.startsWith("//") && !requestedPath.includes("\\")
+		? new URL(requestedPath, origin) : new URL("/host", origin);
+	const identity = new URL("https://id.rawkode.academy/auth/sign-in/social");
+	identity.searchParams.set("callbackURL", target.origin === origin ? target.href : `${origin}/host`);
+	return Response.redirect(identity.href, 302);
+}
 
 function routePath(pathname: string): string | undefined {
 	for (const prefix of apiPrefixes) if (pathname.startsWith(prefix)) return `/${pathname.slice(prefix.length)}`;
@@ -82,6 +93,11 @@ function webSocketTicket(request: Request): string | null {
 }
 
 async function api(request: Request, env: Env, ctx: ExecutionContext, path: string): Promise<Response> {
+	// The isolated test Worker uses direct SELF.fetch calls without browser Origin
+	// headers. Deployed preview and production Workers always enforce this check.
+	if (!mutationOriginAllowed(request, env)) {
+		return json({ error: { code: "FORBIDDEN", message: "Same-origin request required" } }, 403);
+	}
 	const principal = await authenticate(request, env);
 	const directory = new RoomDirectory(env);
 	const content = new ContentRepository(env);
@@ -179,7 +195,7 @@ async function api(request: Request, env: Env, ctx: ExecutionContext, path: stri
 			return json({ gameKey, entries: await new Leaderboards(env).forGame(gameKey) });
 		}
 		const join = path.match(/^\/join\/([^/]+)(?:\/(teams))?$/);
-		if (join && (request.method === "GET" || request.method === "POST")) {
+		if (join && (request.method === "POST" || (request.method === "GET" && join[2] === "teams"))) {
 			const code = decodeURIComponent(join[1]);
 			const previewInvite = await directory.redeemInvite(code);
 			const canonicalRoom = previewInvite ? undefined : await directory.get(code);
@@ -191,7 +207,7 @@ async function api(request: Request, env: Env, ctx: ExecutionContext, path: stri
 				return teams ? json({ roomId: previewTarget.roomId, teams }) : json({ error: { code: "NOT_FOUND", message: "Room is unavailable" } }, 404);
 			}
 			if (!admissionOpen(env)) return json({ error: { code: "ADMISSION_CLOSED", message: "Joining is temporarily disabled" } }, 503);
-			const joinInput = request.method === "POST" ? await requestJson<{ displayName?: string; teamId?: string }>(request) : undefined;
+			const joinInput = await requestJson<{ displayName?: string; teamId?: string }>(request);
 			let joiningPrincipal = principal;
 			let cookie: string | undefined;
 			if (!joiningPrincipal) { const session = await createAnonymousSession(env, joinInput?.displayName); joiningPrincipal = session.principal; cookie = session.cookie; }
@@ -330,9 +346,11 @@ async function api(request: Request, env: Env, ctx: ExecutionContext, path: stri
 
 export const arcadeWorker = {
 	async fetch(request, env, ctx): Promise<Response> {
-		const path = routePath(new URL(request.url).pathname);
+		const pathname = new URL(request.url).pathname;
+		if (pathname === "/auth/sign-in" && request.method === "GET") return signIn(request);
+		const path = routePath(pathname);
 		if (path) return api(request, env, ctx, path);
-		if (new URL(request.url).pathname === "/health") return json({ ok: true, service: "rawkode-arcade" });
+		if (pathname === "/health") return json({ ok: true, service: "rawkode-arcade" });
 		const { handle } = await import("@astrojs/cloudflare/handler");
 		return handle(request, env, ctx);
 	},
