@@ -8,7 +8,7 @@ export async function getStaticPaths() {
 
 	const paths: { params: { showId: string; episodeId: string } }[] = [];
 
-	for (const show of shows.filter((s) => s.data.publish)) {
+	for (const show of shows.filter((s) => s.data.publish && s.data.status !== "coming-soon")) {
 		const showVideos = videos.filter((video) => {
 			const videoShow = video.data.show;
 			if (!videoShow) return false;
@@ -35,7 +35,7 @@ export async function GET(context: APIContext) {
 	const { showId, episodeId } = context.params;
 
 	const shows = await getCollection("shows");
-	if (!shows.some((show) => show.data.id === showId && show.data.publish)) {
+	if (!shows.some((show) => show.data.id === showId && show.data.publish && show.data.status !== "coming-soon")) {
 		return new Response("Show not found or not published", { status: 404 });
 	}
 	const videos = await getPublishedVideos();

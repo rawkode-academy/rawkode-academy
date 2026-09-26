@@ -1,0 +1,27 @@
+---
+import { css } from "@/../styled-system/css";
+import ArcadeLayout from "@/layouts/ArcadeLayout.astro";
+import { control, shell, slug, text } from "@/styles/arcade";
+
+const empty = css({
+	display: "grid",
+	gap: "4",
+	justifyItems: "start",
+	maxW: "measure",
+	py: "section",
+});
+---
+
+<ArcadeLayout title="Audience play: Rawkode Arcade" active="join">
+	<div class={shell}>
+		<div class={empty}>
+			<span class={slug({ tone: "live" })}>Audience</span>
+			<h1 class={text({ style: "headline" })}>You need a room code to play.</h1>
+			<p class={text({ style: "body", tone: "soft" })}>
+				The host reads a six-character code on air. Enter it and this device
+				becomes your buzzer.
+			</p>
+			<a class={control({ tone: "live" })} href="/join">Enter a room code</a>
+		</div>
+	</div>
+</ArcadeLayout>

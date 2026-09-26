@@ -119,7 +119,9 @@ export const GET: APIRoute = async ({ site }) => {
 			htmlUrl: u(`/people/${id}`),
 		}));
 
-	const publishedShows = shows.filter((show) => show.data.publish);
+	const publishedShows = shows.filter(
+		(show) => show.data.publish && show.data.status !== "coming-soon",
+	);
 	const showOutlines: OpmlFeed[] = publishedShows
 		.map((show) => ({ id: show.data.id, name: show.data.name }))
 		.sort((a, b) => a.name.localeCompare(b.name))

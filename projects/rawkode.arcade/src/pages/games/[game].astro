@@ -1,0 +1,56 @@
+---
+import { css } from "@/../styled-system/css";
+import GameMark from "@/components/GameMark.vue";
+import ArcadeLayout from "@/layouts/ArcadeLayout.astro";
+import { games } from "@/lib/game-catalogue";
+import { control, shell, slug, stage, stack, text } from "@/styles/arcade";
+
+const game = games.find((candidate) => candidate.id === Astro.params.game);
+if (!game) return new Response("Show not found", { status: 404 });
+const hero = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", md: "auto minmax(0, 1fr)" },
+	alignItems: "start",
+	gap: "5",
+	pt: "section",
+	maxW: "measure",
+});
+const markPanel = css({
+	display: "grid",
+	placeItems: "center",
+	width: "full",
+	minH: "route",
+	maxH: "route",
+});
+const academyUrl = `https://rawkode.academy/shows/${game.id}`;
+---
+
+<ArcadeLayout
+	title={`${game.title}: Rawkode Arcade`}
+	description={`${game.description} An upcoming Rawkode Academy show.`}
+	active="arcade"
+>
+	<div class={shell}>
+		<section class={hero} aria-labelledby="show-title">
+			<div class={`${stage({ tone: "raised", pad: "comfortable" })} ${markPanel}`}>
+				<GameMark game={game.id} scale="cast" />
+			</div>
+			<div class={stack({ gap: "base" })}>
+				<span class={slug({ tone: "live" })}>{game.brand.code} · Coming soon</span>
+				<h1 class={text({ style: "display" })} id="show-title">{game.title}</h1>
+				<p class={text({ style: "title", tone: "soft" })}>{game.kicker}</p>
+				<p class={text({ style: "body", tone: "soft", measure: "narrow" })}>
+					{game.description} This format will return here when a live room is on air.
+				</p>
+				<div class={stack({ gap: "snug" })}>
+					<span class={slug()}>{game.mechanic}</span>
+					<span class={slug()}>{game.players}</span>
+				</div>
+				<div class={css({ display: "flex", flexWrap: "wrap", gap: "3", pt: "2" })}>
+					<a class={control({ tone: "live" })} href={academyUrl}>View on Rawkode Academy</a>
+					<a class={control({ tone: "quiet" })} href="/">Explore live formats</a>
+				</div>
+			</div>
+		</section>
+	</div>
+</ArcadeLayout>

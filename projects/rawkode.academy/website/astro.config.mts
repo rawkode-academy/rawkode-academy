@@ -103,6 +103,8 @@ export default defineConfig({
 		// cards never render a broken image when the transform is unavailable.
 		imageService: "compile",
 		sessionKVBindingName: "SESSION",
+		// Use an ephemeral inspector in local dev where network-interface discovery is unavailable.
+		inspectorPort: 0,
 	}),
 	trailingSlash: "never",
 	// Speculatively fetch internal links as they enter the viewport so

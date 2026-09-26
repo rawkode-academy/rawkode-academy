@@ -1,0 +1,33 @@
+---
+import ArcadeLayout from "@/layouts/ArcadeLayout.astro";
+import { css } from "@/../styled-system/css";
+import { control, shell, slug, text } from "@/styles/arcade";
+
+/**
+ * The broadcast output needs a room. Without a display invite code there is
+ * nothing to render, so this teaches the operator how to get one instead of
+ * mounting a live room that connects to nothing.
+ */
+const empty = css({
+	display: "grid",
+	gap: "4",
+	justifyItems: "start",
+	maxW: "measure",
+	py: "section",
+});
+---
+
+<ArcadeLayout title="Broadcast display: Rawkode Arcade">
+	<div class={shell}>
+		<div class={empty}>
+			<span class={slug({ tone: "live" })}>Broadcast output</span>
+			<h1 class={text({ style: "headline" })}>This view needs a display code.</h1>
+			<p class={text({ style: "body", tone: "soft" })}>
+				Open the producer controls for a live room, create a display invite, then
+				load <code>/display/&lt;code&gt;</code> as a browser source in your
+				streaming software at 1920&times;1080.
+			</p>
+			<a class={control({ tone: "quiet" })} href="/host">Open producer controls</a>
+		</div>
+	</div>
+</ArcadeLayout>

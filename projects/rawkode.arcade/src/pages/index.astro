@@ -1,0 +1,187 @@
+---
+import { css } from "@/../styled-system/css";
+import GamePicker from "@/components/GamePicker.vue";
+import ArcadeLayout from "@/layouts/ArcadeLayout.astro";
+import { games } from "@/lib/game-catalogue";
+import {
+	control,
+	hairline,
+	sectionRule,
+	shell,
+	slug,
+	stack,
+	text,
+} from "@/styles/arcade";
+
+/**
+ * The landing page carries the one display moment on the site (Display
+ * Scarcity Rule) and the one piece of imagery: a real broadcast frame built
+ * from the same tokens the display route uses, not a decorative mockup.
+ */
+
+const hero = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", lg: "1.15fr 1fr" },
+	gap: { base: "stack", lg: "section" },
+	alignItems: "end",
+	pt: { base: "sectionTight", lg: "section" },
+	pb: "sectionTight",
+});
+
+const heroActions = css({
+	display: "flex",
+	flexWrap: "wrap",
+	gap: "3",
+	mt: "5",
+});
+
+/* The frame. A real lower third at the real proportions, so the landing page
+   shows what the product actually looks like on a stream. */
+const frame = css({
+	aspectRatio: { base: "auto", md: "16 / 9" },
+	bg: "surface",
+	borderWidth: "hairline",
+	borderStyle: "solid",
+	borderColor: "rule",
+	borderRadius: "lg",
+	display: "grid",
+	gridTemplateRows: "auto 1fr auto",
+	p: "4",
+	gap: "4",
+	overflow: "hidden",
+});
+
+const frameBar = css({
+	display: "flex",
+	flexWrap: "wrap",
+	alignItems: "center",
+	justifyContent: "space-between",
+	columnGap: "4",
+	rowGap: "2",
+});
+
+const frameScores = css({
+	display: "grid",
+	gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+	columnGap: "3",
+	rowGap: "2",
+	alignItems: "end",
+	borderTopWidth: "rule",
+	borderTopStyle: "solid",
+	borderTopColor: "ruleStrong",
+	pt: "3",
+});
+
+const frameScoreValue = css({
+	fontFamily: "mono",
+	fontSize: "title",
+	fontWeight: "semibold",
+	fontVariantNumeric: "tabular-nums",
+	lineHeight: "flat",
+});
+
+const heroFigure = css({ display: "grid", gap: "2" });
+
+const truncate = css({ overflow: "hidden", textOverflow: "ellipsis" });
+const leadScore = css({ color: "live" });
+const inkScore = css({ color: "ink" });
+
+const closing = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", md: "1fr auto" },
+	gap: "5",
+	alignItems: "center",
+	py: "section",
+});
+
+const standings = [
+	{ team: "The Merge Queue", score: 4820, lead: true },
+	{ team: "Cache Invalidators", score: 4110, lead: false },
+	{ team: "Rollback Party", score: 3675, lead: false },
+];
+---
+
+<ArcadeLayout
+	title="Rawkode Arcade: live technical game shows"
+	description="Six live game shows for cloud-native engineers. Authoritative rooms, audience play, verifiable results."
+	active="arcade"
+>
+	<div class={shell}>
+		<section class={hero}>
+			<div>
+				<h1 class={text({ style: "display" })}>
+					Six game shows for people who read the changelog.
+				</h1>
+				<p class={`${text({ style: "body", tone: "soft", measure: "narrow" })} ${css({ mt: "4" })}`}>
+					Rawkode Arcade runs live competitive formats on real engineering
+					material. Contestants play on stream, the audience plays along from a
+					phone, and every room publishes a result you can check afterwards.
+				</p>
+				<div class={heroActions}>
+					<a class={control({ tone: "live" })} href="/join">Join a live room</a>
+					<a class={control({ tone: "quiet" })} href="#formats">See the formats</a>
+				</div>
+			</div>
+
+			<figure class={heroFigure}>
+				<div class={frame}>
+					<div class={frameBar}>
+						<span class={slug({ tone: "live", wrap: "never" })}>On air</span>
+						<span class={slug({ wrap: "never" })}>FMT-01</span>
+						<span class={slug({ wrap: "never" })}>R2 · Q4</span>
+					</div>
+					<div class={css({ display: "grid", alignContent: "center", gap: "3" })}>
+						<span class={slug()}>Name a reason the deploy was rolled back</span>
+						<p class={text({ style: "headline" })}>
+							Top answer: the migration was not reversible.
+						</p>
+					</div>
+					<div class={frameScores}>
+						{
+							standings.map((entry) => (
+								<div class={css({ display: "grid", gap: "1", minWidth: "0" })}>
+									<span
+										class={`${slug({ tone: entry.lead ? "live" : "default" })} ${truncate}`}
+									>
+										{entry.team}
+									</span>
+									<span
+										class={`${frameScoreValue} ${entry.lead ? leadScore : inkScore}`}
+									>
+										{entry.score.toLocaleString("en-GB")}
+									</span>
+								</div>
+							))
+						}
+					</div>
+				</div>
+				<figcaption class={slug()}>
+					The broadcast display, as composited into the stream
+				</figcaption>
+			</figure>
+		</section>
+
+		<section id="formats" class={css({ pt: "sectionTight" })}>
+			<div class={sectionRule}>
+				<span class={slug({ wrap: "never" })}>
+					{String(games.length).padStart(2, "0")} formats
+				</span>
+			</div>
+			<GamePicker client:load />
+		</section>
+
+		<section class={`${hairline} ${closing}`}>
+			<div class={stack({ gap: "base" })}>
+				<h2 class={text({ style: "headline" })}>
+					Every finished room publishes its own result.
+				</h2>
+				<p class={text({ style: "body", tone: "soft", measure: "narrow" })}>
+					Scores are settled by the room itself, not by the host's memory. Open
+					the result link from any completed show to see the final standings and
+					how they were reached.
+				</p>
+			</div>
+			<a class={control({ tone: "quiet" })} href="/leaderboards">Open a result</a>
+		</section>
+	</div>
+</ArcadeLayout>

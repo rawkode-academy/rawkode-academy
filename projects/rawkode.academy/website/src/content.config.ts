@@ -103,6 +103,14 @@ const shows = defineCollection({
 		z.object({
 			id: z.string(),
 			name: z.string(),
+			status: z.enum(["coming-soon", "active", "archived"]).default("active"),
+			tagline: z.string().trim().min(1).optional(),
+			gameFormatUrl: z
+				.url()
+				.refine((url) => url.startsWith("https://"), {
+					message: "Game format URLs must use HTTPS.",
+				})
+				.optional(),
 			description: z.string().optional(),
 			terms: z.array(z.string().trim().min(1)).optional(),
 			hosts: z.array(reference("people")).default([]),

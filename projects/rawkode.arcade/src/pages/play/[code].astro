@@ -1,0 +1,6 @@
+---
+import LiveRoute from "@/components/LiveRoute.vue";
+import ArcadeLayout from "@/layouts/ArcadeLayout.astro";
+const code = Astro.params.code ?? "";
+---
+<ArcadeLayout title="Contestant: Rawkode Arcade"><LiveRoute client:load code={code} game="merge-conflict" role="contestant" /></ArcadeLayout>
