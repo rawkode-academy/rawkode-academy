@@ -76,7 +76,10 @@ generated.vars = {
 	ADMISSION_ENABLED: "true",
 	ENVIRONMENT: target,
 };
-generated.services = [{ binding: "IDENTITY", service: "rawkode-academy-identity" }];
+generated.services = [
+	{ binding: "IDENTITY", service: "rawkode-academy-identity" },
+	{ binding: "STUDIO", service: "rawkode-academy-studio" },
+];
 generated.d1_databases = [{ binding: "DB", database_name: databaseName, database_id: databaseId, migrations_dir: "../migrations" }];
 generated.r2_buckets = [{ binding: "ARCADE_ASSETS", bucket_name: bucketName }];
 generated.assets = { ...(generated.assets ?? {}), directory: "../dist/client" };

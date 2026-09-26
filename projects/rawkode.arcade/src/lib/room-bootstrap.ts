@@ -74,6 +74,7 @@ export async function requestJoinableTeams(code: string): Promise<JoinableTeam[]
 }
 
 export async function requestExistingRoom(roomId: string): Promise<RoomBootstrap> {
+	await fetch(`/api/rooms/${encodeURIComponent(roomId)}/operator-admit`, { method: "POST", credentials: "same-origin" });
 	const membership = await fetch(`/api/rooms/${encodeURIComponent(roomId)}/membership`, { credentials: "same-origin" });
 	if (!membership.ok) throw new Error("This account is not authorized for the room.");
 	const member = (await membership.json()) as { role?: ArcadeRole };

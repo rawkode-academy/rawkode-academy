@@ -26,6 +26,9 @@ const {
 	invite = null,
 	inviteError = null,
 } = Astro.props;
+const standaloneShows = dashboard.sessions.filter(
+	(session) => !session.contentVideoId && session.streamEnvironment === "prod",
+);
 
 function eventTiming(event: StudioEventSummary): string {
 	if (!event.startsAt) return "Unscheduled";
@@ -55,7 +58,7 @@ function eventState(event: StudioEventSummary): string {
 						<h1>
 							{
 								dashboard.isOperator
-									? "Upcoming events"
+									? "Manage live shows"
 									: "Your events"
 							}
 						</h1>
@@ -63,7 +66,7 @@ function eventState(event: StudioEventSummary): string {
 					<p>
 							{
 								dashboard.isOperator
-									? "Create RealtimeKit green rooms and choose whether the later go-live is a test or prod stream."
+									? "Schedule a show, open its producer room, and press Go live when you are ready to broadcast."
 									: "Join active Studio rooms for events where your GitHub handle is listed."
 							}
 					</p>
@@ -110,7 +113,72 @@ function eventState(event: StudioEventSummary): string {
 				) : null
 			}
 
-			<section class="session-list" aria-label={dashboard.isOperator ? "Upcoming events" : "Assigned events"}>
+			{
+				dashboard.isOperator ? (
+					<>
+						<section class="studio-form-panel show-schedule-panel" aria-label="Schedule a live show">
+							<p class="eyebrow">Production</p>
+							<h2>Schedule a show</h2>
+							<p>The show appears on play.rawkode.academy before it starts. Viewers see the live stream only after you press Go live in the producer room.</p>
+							<form method="POST" action={actions.createSession} data-show-schedule-form>
+								<input name="streamEnvironment" type="hidden" value="prod" />
+								<label>
+									Show name
+									<input name="show" type="text" placeholder="Rawkode Live" required />
+								</label>
+								<label>
+									Episode title
+									<input name="title" type="text" required />
+								</label>
+								<label>
+									Start time in your timezone
+									<input type="datetime-local" required data-show-start-time />
+								</label>
+								<input name="startsAt" type="hidden" data-show-start-iso />
+								<button class="button primary" type="submit">Schedule show</button>
+							</form>
+						</section>
+
+						<section class="session-list" aria-label="Managed shows">
+							{standaloneShows.length === 0 ? (
+								<p class="session-empty">No shows scheduled yet.</p>
+							) : standaloneShows.map((session) => (
+								<article class="session-row">
+									<div>
+										<p class="eyebrow">{session.show}</p>
+										<h2>{session.title}</h2>
+										<p>{new Date(session.startsAt).toLocaleString()}</p>
+									</div>
+									<div class="session-status">
+										<span>{session.streamStatus === "live" ? "Live" : session.status}</span>
+									</div>
+									<div class="session-actions">
+										{session.status !== "complete" ? (
+											<>
+												<a class="button primary" href={`/studio/${session.id}/producer`}>Open producer room</a>
+												<a class="button" href={`/studio/${session.id}/host`}>Host</a>
+												<form method="POST" action={actions.createInvite}>
+													<input name="sessionId" type="hidden" value={session.id} />
+													<button class="button" type="submit">Guest invite</button>
+												</form>
+												{session.streamStatus !== "live" && session.streamStatus !== "starting" ? (
+													<form method="POST" action={actions.endSession}>
+														<input name="sessionId" type="hidden" value={session.id} />
+														<button class="button" type="submit">End show</button>
+													</form>
+												) : null}
+											</>
+										) : null}
+									</div>
+								</article>
+							))}
+						</section>
+					</>
+				) : null
+			}
+
+			<section class="session-list" aria-label={dashboard.isOperator ? "Content events" : "Assigned events"}>
+				{dashboard.isOperator ? <h2>Content events</h2> : null}
 				{
 					dashboard.events.length === 0 ? (
 						<p class="session-empty">
@@ -205,3 +273,21 @@ function eventState(event: StudioEventSummary): string {
 		</>
 	)
 }
+
+<script>
+	for (const form of document.querySelectorAll<HTMLFormElement>("[data-show-schedule-form]")) {
+		form.addEventListener("submit", (event) => {
+			const localStart = form.querySelector<HTMLInputElement>("[data-show-start-time]");
+			const isoStart = form.querySelector<HTMLInputElement>("[data-show-start-iso]");
+			if (!localStart?.value || !isoStart) return;
+			const parsed = new Date(localStart.value);
+			if (Number.isNaN(parsed.getTime())) {
+				event.preventDefault();
+				localStart.setCustomValidity("Choose a valid start time.");
+				localStart.reportValidity();
+				return;
+			}
+			isoStart.value = parsed.toISOString();
+		});
+	}
+</script>

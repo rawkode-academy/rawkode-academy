@@ -5,6 +5,7 @@ import { redactSnapshot } from "../domain/redaction";
 import { PROTOCOL_VERSION, type CommandEnvelope, type EventMessage, type Principal, type ServerMessage } from "../domain/protocol";
 import type { Env } from "../env";
 import { ResultProjector } from "../server/results";
+import { roomAcceptsPublicParticipation } from "../server/shows";
 
 type PersistedRow = { value: string };
 type Attachment = { principal: Principal; rate?: { startedAt: number; frames: number } };
@@ -104,6 +105,7 @@ export class GameRoom implements DurableObject {
 		const principal = this.principal(request);
 		const game = this.load();
 		if (!principal || !game) return new Response("Unauthorized", { status: 401 });
+		if (principal.role === "audience" && !await roomAcceptsPublicParticipation(this.env, game.roomId)) return new Response("Show is off air", { status: 403 });
 		if ([...this.state.storage.sql.exec<{ compacted: number }>("SELECT compacted FROM room_retention WHERE id = 1")][0]?.compacted) return new Response("Completed room archived", { status: 410 });
 		const nonce = request.headers.get("x-arcade-ticket-nonce");
 		const claimedTicket = nonce ? Array.from(this.state.storage.sql.exec<{ nonce: string }>("INSERT OR IGNORE INTO used_tickets (nonce, used_at) VALUES (?, ?) RETURNING nonce", nonce, new Date().toISOString())) : [];
@@ -132,6 +134,8 @@ export class GameRoom implements DurableObject {
 		try { parsed = JSON.parse(typeof message === "string" ? message : new TextDecoder().decode(message)); } catch { return this.send(socket, this.error("BAD_COMMAND", "Invalid JSON")); }
 		if ((parsed as { type?: string }).type === "ping") return this.send(socket, { v: PROTOCOL_VERSION, type: "pong" });
 		if (!parsed || typeof parsed !== "object") return this.send(socket, this.error("BAD_COMMAND", "Invalid command"));
+		const game = this.load();
+		if (principal.role === "audience" && (!game || !await roomAcceptsPublicParticipation(this.env, game.roomId))) return socket.close(1008, "Show is off air");
 		await this.scheduleRecovery();
 		const response = await this.apply(parsed as CommandEnvelope, principal);
 		this.send(socket, response);
@@ -167,6 +171,8 @@ export class GameRoom implements DurableObject {
 	private async command(request: Request): Promise<Response> {
 		const principal = this.principal(request);
 		if (!principal) return new Response("Unauthorized", { status: 401 });
+		const game = this.load();
+		if (principal.role === "audience" && (!game || !await roomAcceptsPublicParticipation(this.env, game.roomId))) return new Response("Show is off air", { status: 403 });
 		const command = await request.json<CommandEnvelope>();
 		// Arm the wake-up before apply loads or commits state. A crash can therefore
 		// leave either a harmless alarm for the old state or a recoverable intent
@@ -190,6 +196,8 @@ export class GameRoom implements DurableObject {
 		const body = await request.json<{ promptId: string; commandId?: string; shardId?: string; choice?: string }>();
 		if (!principal || principal.role !== "producer") return new Response("Forbidden", { status: 403 });
 		if (!body.commandId || !body.shardId) return Response.json({ error: { code: "BAD_COMMAND" } }, { status: 400 });
+		const game = this.load();
+		if (!game || !await roomAcceptsPublicParticipation(this.env, game.roomId)) return new Response("Show is off air", { status: 403 });
 		await this.waitBeforeAudienceAdmission();
 		const result = this.admitAudienceBatch(body.shardId, body.promptId, [{ commandId: body.commandId, choice: body.choice }])[0];
 		await this.waitAfterAudienceAdmission();
@@ -205,6 +213,8 @@ export class GameRoom implements DurableObject {
 		if (!body.shardId || !body.promptId || !Array.isArray(body.submissions) || body.submissions.length === 0 || body.submissions.length > 100 || body.submissions.some((item) => !item.commandId || typeof item.commandId !== "string" || item.commandId.length > 200 || typeof item.choice !== "string" || item.choice.length > 100)) {
 			return Response.json({ error: { code: "BAD_COMMAND" } }, { status: 400 });
 		}
+		const game = this.load();
+		if (!game || !await roomAcceptsPublicParticipation(this.env, game.roomId)) return new Response("Show is off air", { status: 403 });
 		await this.waitBeforeAudienceAdmission();
 		const results = this.admitAudienceBatch(body.shardId, body.promptId, body.submissions as Array<{ commandId: string; choice: string }>);
 		await this.waitAfterAudienceAdmission();
