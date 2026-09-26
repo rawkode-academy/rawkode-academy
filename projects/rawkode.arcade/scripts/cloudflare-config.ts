@@ -55,7 +55,7 @@ async function provisionDatabase(): Promise<string> {
 
 async function ensureBucket(): Promise<void> {
 	const listed = await wrangler(["r2", "bucket", "list"]);
-	if (!listed.split(/\s+/).includes(bucketName)) await wrangler(["r2", "bucket", "create", bucketName]);
+	if (!listed.split(/[^a-zA-Z0-9_-]+/).includes(bucketName)) await wrangler(["r2", "bucket", "create", bucketName]);
 }
 
 let databaseId = process.env[databaseVariable];
