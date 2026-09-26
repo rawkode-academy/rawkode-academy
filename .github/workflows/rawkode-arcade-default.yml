@@ -15,21 +15,27 @@ on:
     - projects/rawkode.arcade/astro.config.mts/**
     - projects/rawkode.arcade/devenv.nix
     - projects/rawkode.arcade/devenv.nix/**
-    - projects/rawkode.arcade/dist/**
     - projects/rawkode.arcade/e2e/**
     - projects/rawkode.arcade/env.cue
+    - projects/rawkode.arcade/env.cue/**
     - projects/rawkode.arcade/migrations/**
     - projects/rawkode.arcade/package.json
     - projects/rawkode.arcade/package.json/**
     - projects/rawkode.arcade/panda.config.ts
     - projects/rawkode.arcade/panda.config.ts/**
+    - projects/rawkode.arcade/public/**
     - projects/rawkode.arcade/schema/**
+    - projects/rawkode.arcade/scripts/**
     - projects/rawkode.arcade/src/**
     - projects/rawkode.arcade/tests/**
     - projects/rawkode.arcade/tsconfig.json
     - projects/rawkode.arcade/tsconfig.json/**
+    - projects/rawkode.arcade/vitest.config.ts
+    - projects/rawkode.arcade/vitest.config.ts/**
     - projects/rawkode.arcade/wrangler.jsonc
     - projects/rawkode.arcade/wrangler.jsonc/**
+    - projects/rawkode.arcade/wrangler.test.jsonc
+    - projects/rawkode.arcade/wrangler.test.jsonc/**
   workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
@@ -85,7 +91,7 @@ jobs:
           aarch64|arm64) cuenv_asset="cuenv-linux-arm64" ;;
           *) echo "Unsupported Linux architecture: $arch" >&2; exit 1 ;;
         esac
-        cuenv_version="0.53.2"
+        cuenv_version="0.55.1"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi

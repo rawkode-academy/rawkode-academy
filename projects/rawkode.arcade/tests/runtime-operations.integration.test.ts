@@ -129,6 +129,27 @@ async function openSocket(
 	return { socket: response.webSocket, hello: await hello };
 }
 
+describe("WebSocket close handshake", () => {
+	it.each(["host", "audience"] as const)("acknowledges a %s client close", async (role) => {
+		const { record } = await createRoom("merge-conflict");
+		const code = await directory.createInvite(record.id, role, new Date(Date.now() + 60_000).toISOString());
+		const admitted = await joinRoom(code, "Closing client");
+		const { socket } = await openSocket(record.id, admitted.ticket);
+		const closed = new Promise<CloseEvent>((resolve, reject) => {
+			const timeout = setTimeout(() => reject(new Error(`${role} close handshake was not acknowledged`)), 2_000);
+			socket.addEventListener("close", (event) => {
+				clearTimeout(timeout);
+				resolve(event);
+			}, { once: true });
+		});
+		socket.close(1000, "Client leaving");
+		const event = await closed;
+		expect(event.code).toBe(1000);
+		expect(event.wasClean).toBe(true);
+		expect(socket.readyState).toBe(WebSocket.CLOSED);
+	});
+});
+
 describe("terminal room outbox and leaderboard projection", () => {
 	it("projects a terminal DO result once under duplicate and concurrent delivery", async () => {
 		const { record, stub } = await createRoom();

@@ -1,5 +1,6 @@
 import {
 	expect,
+	test,
 	type APIRequestContext,
 	type Browser,
 	type BrowserContext,
@@ -195,12 +196,21 @@ export async function start(room: LiveRoom): Promise<void> {
 }
 
 export async function closeRoom(room: LiveRoom): Promise<void> {
-	for (const page of room.untrustedPages) {
-		if (!page.isClosed()) {
-			await assertNoSecretInBrowser(page, room.privateMarker);
+	await test.step("Audit live-role browsers before cleanup", async () => {
+		for (const [index, page] of room.untrustedPages.entries()) {
+			if (!page.isClosed()) {
+				await test.step(`Audit live-role browser ${index + 1}`, () =>
+					assertNoSecretInBrowser(page, room.privateMarker),
+				);
+			}
 		}
-	}
-	await Promise.all(room.contexts.map((context) => context.close()));
+	});
+	console.info(`Live-room secret checks passed; closing ${room.contexts.length} role browser contexts`);
+	await test.step("Close live-role browser contexts", async () => {
+		await Promise.all(room.contexts.map((context, index) =>
+			test.step(`Close live-role browser context ${index + 1}`, () => context.close()),
+		));
+	});
 }
 
 export async function assertNoSecretInBrowser(

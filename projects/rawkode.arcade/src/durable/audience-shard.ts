@@ -130,6 +130,9 @@ export class AudienceShard implements DurableObject {
 	}
 
 	async webSocketClose(socket: WebSocket): Promise<void> {
+		// Older compatibility dates require a reciprocal close frame. Finish the
+		// handshake before presence I/O; never echo reserved codes such as 1006.
+		if (socket.readyState !== WebSocket.CLOSED) socket.close(1000, "Connection closed");
 		const attachment = socket.deserializeAttachment() as { principal: Principal; roomId: string; shardId: string } | null;
 		if (attachment) await this.updatePresence(attachment.roomId, attachment.shardId, attachment.principal.id, -1);
 	}

@@ -26,6 +26,9 @@ test("a live host creates production contestant and display invitations", async 
 		const display = await openDisplay(browser, room);
 		await expect(contestant.getByTestId("connection-status")).toHaveAttribute("data-status", "connected");
 		await expect(display.getByTestId("connection-status")).toHaveAttribute("data-status", "connected");
+	} catch (error) {
+		console.error("Live-room scenario failed before cleanup:", error);
+		throw error;
 	} finally {
 		await closeRoom(room);
 	}

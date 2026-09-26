@@ -44,6 +44,9 @@ test("all live roles are axe-clean during gameplay", async ({ browser, page, req
 		for (const rolePage of [room.host, contestant, audience, display]) {
 			await expectNoSeriousAxeFindings(rolePage);
 		}
+	} catch (error) {
+		console.error("Live-room scenario failed before cleanup:", error);
+		throw error;
 	} finally {
 		await closeRoom(room);
 	}

@@ -55,6 +55,9 @@ test("Merge Conflict: teams predict a survey answer and the host reveals it", as
 		await audience.getByTestId("answer-input").fill("Wi-Fi");
 		await audience.getByTestId("submit-answer").click();
 		await completeGame(room, display);
+	} catch (error) {
+		console.error("Live-room scenario failed before cleanup:", error);
+		throw error;
 	} finally {
 		await closeRoom(room);
 	}
@@ -88,6 +91,9 @@ test("Spinlock: a contestant solves the seeded developer phrase", async ({
 		await expect(display.getByTestId("score-team-red")).not.toHaveText("0");
 		await assertNoSecretInBrowser(contestant, room.privateMarker);
 		await completeGame(room, display);
+	} catch (error) {
+		console.error("Live-room scenario failed before cleanup:", error);
+		throw error;
 	} finally {
 		await closeRoom(room);
 	}
@@ -123,6 +129,9 @@ test("Principal Engineer: a contestant advances through a question", async ({
 		await room.host.getByTestId("advance-phase").click();
 		await expect(display.getByTestId("score-team-red")).toHaveText("100");
 		await completeGame(room, display);
+	} catch (error) {
+		console.error("Live-room scenario failed before cleanup:", error);
+		throw error;
 	} finally {
 		await closeRoom(room);
 	}
@@ -151,6 +160,9 @@ test("Race Condition: simultaneous contestants produce one buzzer winner", async
 		await expect(display.getByTestId("buzzer-winner")).toHaveText(/Radia|Barbara/);
 		await assertNoSecretInBrowser(display, room.privateMarker);
 		await completeGame(room, display);
+	} catch (error) {
+		console.error("Live-room scenario failed before cleanup:", error);
+		throw error;
 	} finally {
 		await closeRoom(room);
 	}
@@ -180,6 +192,9 @@ test("Ten Nines: a team completes the seeded technical list", async ({
 		await expect(contestant.getByTestId("question")).toContainText("Git");
 		await assertNoSecretInBrowser(contestant, room.privateMarker);
 		await completeGame(room, display);
+	} catch (error) {
+		console.error("Live-room scenario failed before cleanup:", error);
+		throw error;
 	} finally {
 		await closeRoom(room);
 	}
@@ -259,6 +274,9 @@ test("Null Pointer: audience rarity freezes before contestant scoring", async ({
 		expect(rareScore).toBeGreaterThan(commonScore);
 		await assertNoSecretInBrowser(audienceOne, room.privateMarker);
 		await completeGame(room, display);
+	} catch (error) {
+		console.error("Live-room scenario failed before cleanup:", error);
+		throw error;
 	} finally {
 		await closeRoom(room);
 	}

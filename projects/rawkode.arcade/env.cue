@@ -14,14 +14,15 @@ ci: pipelines: {
 	default: {
 		environment: "production"
 		when: { branch: ["main"], defaultBranch: true, manual: true }
-		tasks: [_t.check, _t.test, _t.build, _t.e2e, _t.deploy.main]
+		// Deployment's validation prerequisite runs every gate in sequence.
+		tasks: [_t.deploy.main]
 	}
 	pullRequest: {
 		// Pull-request validation is intentionally hermetic. Production secrets are
 		// resolved only by the default-branch deployment pipeline.
 		environment: "development"
 		when: { pullRequest: true }
-		tasks: [_t.check, _t.test, _t.build, _t.e2e, _t.deploy.preview]
+		tasks: [_t.deploy.preview]
 	}
 }
 
@@ -51,20 +52,24 @@ tasks: {
 		// panda.config.ts and astro.config.mts are load-bearing for `check`:
 		// it runs panda codegen and the design-token guard, which reads the
 		// token values straight out of the config.
-		inputs: ["src/**", "tsconfig.json", "panda.config.ts", "astro.config.mts", "package.json", "devenv.nix", "../../bun.lock"]
+		inputs: ["src/**", "scripts/**", "tsconfig.json", "panda.config.ts", "astro.config.mts", "wrangler.jsonc", "env.cue", "package.json", "devenv.nix", "../../bun.lock"]
+		outputs: ["styled-system/**", ".astro/**"]
 	}
 	test: schema.#Task & {
 		hermetic: false
 		command: "bun"
 		args: ["run", "test"]
-		inputs: ["src/**", "tests/**", "panda.config.ts", "package.json", "../../bun.lock"]
+		inputs: ["src/**", "tests/**", "scripts/**", "migrations/**", "vitest.config.ts", "wrangler.test.jsonc", "panda.config.ts", "package.json", "../../bun.lock"]
 	}
 	e2e: schema.#Task & {
 		hermetic: false
 		command: "sh"
 		args: ["-lc", "bun x playwright install --with-deps chromium && bun run test:e2e"]
+		// Task environments are explicit: do not rely on the runner's CI variable
+		// surviving cuenv's environment filtering.
+		env: CI: "true"
 		dependsOn: [_t.build]
-		inputs: ["src/**", "e2e/**", "dist/**", "package.json", "../../bun.lock"]
+		inputs: ["src/**", "e2e/**", "scripts/**", "dist/**", "wrangler.jsonc", "package.json", "../../bun.lock"]
 	}
 	dev: schema.#Task & {
 		hermetic: false
@@ -75,7 +80,18 @@ tasks: {
 		hermetic: false
 		command: "bun"
 		args: ["run", "build"]
-		outputs: ["dist/**"]
+		inputs: ["src/**", "scripts/**", "public/**", "astro.config.mts", "panda.config.ts", "tsconfig.json", "wrangler.jsonc", "env.cue", "package.json", "devenv.nix", "../../bun.lock"]
+		outputs: ["dist/**", ".wrangler/deploy/config.json"]
+	}
+	validate: schema.#Task & {
+		hermetic: false
+		command: "bun"
+		args: ["run", "validate"]
+		env: CI: "true"
+		// Keep workerd users sequential and build exactly once. A single task
+		// also avoids deeply expanded CUE task references during evaluation.
+		inputs: ["src/**", "tests/**", "e2e/**", "scripts/**", "public/**", "migrations/**", "astro.config.mts", "panda.config.ts", "tsconfig.json", "vitest.config.ts", "wrangler.jsonc", "wrangler.test.jsonc", "env.cue", "package.json", "devenv.nix", "../../bun.lock"]
+		outputs: ["dist/**", "styled-system/**", ".astro/**", ".wrangler/deploy/config.json"]
 	}
 	migrate: schema.#TaskGroup & {
 		type: "group"
@@ -92,16 +108,17 @@ tasks: {
 		main: schema.#Task & {
 			hermetic: false
 			command: "bun"
-			args: ["run", "deploy"]
-			dependsOn: [_t.build]
-				inputs: ["src/**", "tests/**", "migrations/**", "astro.config.mts", "panda.config.ts", "wrangler.jsonc", "package.json", "../../bun.lock"]
+			// Deploy the exact artifact that passed browser validation.
+			args: ["run", "deploy:built"]
+			dependsOn: [_t.validate]
+			inputs: ["src/**", "tests/**", "e2e/**", "scripts/**", "migrations/**", "astro.config.mts", "panda.config.ts", "wrangler.jsonc", "package.json", "../../bun.lock"]
 		}
 		preview: schema.#Task & {
 			hermetic: false
 			command: "bun"
-			args: ["run", "deploy:preview"]
-			dependsOn: [_t.check, _t.test, _t.build]
-				inputs: ["src/**", "tests/**", "migrations/**", "astro.config.mts", "panda.config.ts", "wrangler.jsonc", "package.json", "../../bun.lock"]
+			args: ["run", "deploy:preview:built"]
+			dependsOn: [_t.validate]
+			inputs: ["src/**", "tests/**", "e2e/**", "scripts/**", "migrations/**", "astro.config.mts", "panda.config.ts", "wrangler.jsonc", "package.json", "../../bun.lock"]
 		}
 	}
 }

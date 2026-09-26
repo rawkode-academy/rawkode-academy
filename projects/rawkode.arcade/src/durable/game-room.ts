@@ -138,6 +138,9 @@ export class GameRoom implements DurableObject {
 	}
 
 	async webSocketClose(socket: WebSocket): Promise<void> {
+		// Older compatibility dates require a reciprocal close frame. Finish the
+		// handshake before presence I/O; never echo reserved codes such as 1006.
+		if (socket.readyState !== WebSocket.CLOSED) socket.close(1000, "Connection closed");
 		const attachment = socket.deserializeAttachment() as Attachment | null;
 		const game = this.load();
 		if (attachment && game) await this.recordPresence(game.roomId, attachment.principal, -1);

@@ -80,6 +80,9 @@ for (const format of formats) {
 			await expect(contestant.getByTestId("revealed-answer")).toHaveCount(0);
 			await assertNoSecretInBrowser(contestant, room.privateMarker);
 			await assertNoSecretInBrowser(display, room.privateMarker);
+		} catch (error) {
+			console.error("Live-room scenario failed before cleanup:", error);
+			throw error;
 		} finally {
 			await closeRoom(room);
 		}
