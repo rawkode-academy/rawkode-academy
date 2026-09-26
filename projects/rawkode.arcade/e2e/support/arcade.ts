@@ -139,6 +139,9 @@ async function joinViaUi(
 	await page.goto("/join");
 	await page.getByTestId("display-name").fill(input.name);
 	await page.getByTestId("room-code-input").fill(input.code);
+	if (input.teamId) {
+		await page.getByRole("radio", { name: /Contestant/ }).check();
+	}
 	// Leaving the code field loads the room's authoritative team roster.
 	await page.getByTestId("room-code-input").press("Tab");
 	if (input.teamId) {
