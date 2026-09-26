@@ -16,7 +16,7 @@ import {
 const name = ref("");
 const roomCode = ref("");
 const teamId = ref("");
-const role = ref<"contestant" | "audience">("contestant");
+const role = ref<"contestant" | "audience">("audience");
 const error = ref("");
 const pending = ref(false);
 const loadingTeams = ref(false);

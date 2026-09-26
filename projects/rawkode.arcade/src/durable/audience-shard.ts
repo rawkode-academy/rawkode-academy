@@ -1,6 +1,7 @@
 import type { Env } from "../env";
 import { PROTOCOL_VERSION, type Principal } from "../domain/protocol";
 import { boundedAudienceBin, normalizeAudienceChoice } from "../domain/audience-choice";
+import { roomAcceptsPublicParticipation } from "../server/shows";
 
 type SubmissionIntent = { command_id: string; room_id: string; prompt_id: string; shard_id: string; principal_id: string; choice: string };
 type AdmissionResult = { commandId: string; accepted: boolean; admissionVersion?: number; committed?: boolean; code?: string };
@@ -60,6 +61,7 @@ export class AudienceShard implements DurableObject {
 		const shardId = request.headers.get("x-arcade-shard-id");
 		const nonce = request.headers.get("x-arcade-ticket-nonce");
 		if (!principal || principal.role !== "audience" || !roomId || !shardId || !nonce) return new Response("Unauthorized", { status: 401 });
+		if (!await roomAcceptsPublicParticipation(this.env, roomId)) return new Response("Show is off air", { status: 403 });
 		const claimed = Array.from(this.state.storage.sql.exec<{ nonce: string }>("INSERT OR IGNORE INTO used_tickets (nonce, used_at) VALUES (?, ?) RETURNING nonce", nonce, new Date().toISOString()));
 		if (claimed.length !== 1) return new Response("Ticket has already been used", { status: 401 });
 		const pair = new WebSocketPair();
@@ -139,6 +141,7 @@ export class AudienceShard implements DurableObject {
 
 	private async submit(principal: Principal, body: { roomId: string; choice: string; promptId: string; shardId: string; commandId?: string }): Promise<Response> {
 		if (!body.roomId || !body.promptId || !body.choice || body.choice.length > 100) return new Response("Invalid vote", { status: 400 });
+		if (!await roomAcceptsPublicParticipation(this.env, body.roomId)) return Response.json({ error: { code: "SHOW_OFF_AIR" } }, { status: 403 });
 		if (!body.commandId || typeof body.commandId !== "string" || body.commandId.trim().length === 0) return new Response("Command id required", { status: 400 });
 		const roomStatus = Array.from(this.state.storage.sql.exec<{ value: string }>("SELECT value FROM config WHERE key = 'roomStatus'"))[0]?.value;
 		if (roomStatus === "complete" || roomStatus === "paused") return Response.json({ error: { code: roomStatus === "complete" ? "ROOM_COMPLETE" : "ROOM_PAUSED" } }, { status: 409 });
@@ -185,6 +188,7 @@ export class AudienceShard implements DurableObject {
 
 	private async submitReaction(principal: Principal, body: { roomId: string; reaction: string; promptId: string; shardId: string; commandId: string }): Promise<Response> {
 		if (!body.roomId || !body.promptId || !body.reaction || body.reaction.length > 64) return new Response("Invalid reaction", { status: 400 });
+		if (!await roomAcceptsPublicParticipation(this.env, body.roomId)) return Response.json({ error: { code: "SHOW_OFF_AIR" } }, { status: 403 });
 		if (!body.commandId || typeof body.commandId !== "string" || body.commandId.trim().length === 0) return new Response("Command id required", { status: 400 });
 		const roomStatus = Array.from(this.state.storage.sql.exec<{ value: string }>("SELECT value FROM config WHERE key = 'roomStatus'"))[0]?.value;
 		if (roomStatus === "complete" || roomStatus === "paused") return Response.json({ error: { code: roomStatus === "complete" ? "ROOM_COMPLETE" : "ROOM_PAUSED" } }, { status: 409 });

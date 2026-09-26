@@ -92,6 +92,8 @@ export const server = {
 
 				return {
 					sessionId: result.session.id,
+					standaloneProductionShow: !result.session.contentVideoId &&
+						result.session.streamEnvironment === "prod",
 					provider: result.provider,
 					meeting: result.meeting,
 					status: result.status,

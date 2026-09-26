@@ -276,6 +276,36 @@ textarea:focus-visible {
   justify-self: start;
 }
 
+.show-schedule-panel {
+  width: min(1180px, calc(100vw - 32px));
+  margin: 0 auto 16px;
+}
+
+.show-schedule-panel form {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  align-items: end;
+  gap: 12px;
+}
+
+.show-schedule-panel label {
+  display: grid;
+  gap: 6px;
+  color: #a7b6bf;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.show-schedule-panel input:not([type="hidden"]) {
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  background: rgba(7, 9, 13, 0.94);
+  color: #edf4f8;
+}
+
 .invite-result {
   display: grid;
   gap: 12px;
@@ -295,6 +325,11 @@ textarea:focus-visible {
   gap: 10px;
   width: min(1180px, calc(100vw - 32px));
   margin: 0 auto 32px;
+}
+
+.session-list > h2 {
+  margin: 14px 0 0;
+  font-size: 18px;
 }
 
 .session-row {
@@ -522,6 +557,7 @@ textarea:focus-visible {
 
   .dashboard-grid,
   .studio-management,
+  .show-schedule-panel form,
   .recording-row,
   .session-row,
   .event-session-row {

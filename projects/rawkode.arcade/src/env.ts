@@ -1,6 +1,7 @@
 export interface Env {
 	ASSETS: Fetcher;
 	IDENTITY: Fetcher;
+	STUDIO?: Fetcher;
 	ARCADE_ASSETS: R2Bucket;
 	DB: D1Database;
 	GAME_ROOM: DurableObjectNamespace;

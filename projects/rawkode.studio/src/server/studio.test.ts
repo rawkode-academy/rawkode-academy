@@ -77,6 +77,7 @@ type StudioDbMockOptions = Partial<{
 	content_hosts_json: string;
 	content_video_id: string | null;
 	content_video_slug: string | null;
+	starts_at: string | null;
 	cloudflare_stream_live_input_id: string | null;
 	cloudflare_stream_playback_url: string | null;
 	realtimekit_meeting_id: string | null;
@@ -1067,7 +1068,7 @@ describe("Studio operations", () => {
 								id: "future-video",
 								slug: "future-event",
 								title: "Future event",
-								publishedAt: "2026-08-01T10:00:00.000Z",
+								publishedAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
 								guests: [],
 								episode: {
 									show: {
@@ -1399,6 +1400,7 @@ describe("Studio operations", () => {
 			{
 				show: "Rawkode Live",
 				streamEnvironment: "prod",
+				startsAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
 				title: "Rawkode Live production room",
 			},
 		);
@@ -1482,8 +1484,9 @@ describe("Studio operations", () => {
 		});
 	});
 
-	it("requires content metadata before starting prod Stream publishing", async () => {
+	it("requires a scheduled start before starting a standalone prod show", async () => {
 		const studioDb = createStudioDbMock({
+			starts_at: null,
 			stream_environment: "prod",
 		});
 
