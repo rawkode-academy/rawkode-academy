@@ -1,10 +1,14 @@
 ---
+import { academyAccount } from "@rawkodeacademy/design-system";
+const account = academyAccount();
 import { env } from "cloudflare:workers";
 import Page from "@/wrappers/page.astro";
 import EmailPreferences from "@/components/settings/EmailPreferences.vue";
 import TestEmailButton from "@/components/settings/TestEmailButton.vue";
 import Avatar from "vue-boring-avatars";
 import { createLearnerId } from "@/actions/newsletter";
+import { academyLayout } from "@rawkodeacademy/design-system";
+import "@rawkodeacademy/design-system/styles.css";
 
 export const prerender = false;
 
@@ -15,6 +19,9 @@ if (!user) {
 		`/api/auth/sign-in?returnTo=${encodeURIComponent("/settings")}`,
 	);
 }
+
+Astro.response.headers.set("Cache-Control", "private, no-store");
+let preferencesUnavailable = false;
 
 const prefixedUserId = createLearnerId(user.id);
 
@@ -29,6 +36,7 @@ let kubernetesReleaseUpdates = false;
 let marketingEmails = false;
 let serviceEmails = false;
 let technologySubscriptions: string[] = [];
+let klusteredSubscriptions: string[] = [];
 
 try {
 	const allPrefs: EmailPreference[] =
@@ -53,44 +61,57 @@ try {
 			pref.audience.startsWith("technology:")
 		) {
 			technologySubscriptions.push(pref.audience.replace("technology:", ""));
+		} else if (
+			pref.channel === "newsletter" &&
+			(pref.audience.startsWith("klustered-") || pref.audience === "show:klustered")
+		) {
+			klusteredSubscriptions.push(pref.audience);
 		}
 	}
 } catch (e) {
+	preferencesUnavailable = true;
 	console.error("Failed to fetch email preferences", e);
 }
+const layout = academyLayout({ width: "reading" });
 ---
 
-<Page title="Settings - Rawkode Academy" description="Manage your account settings and email preferences.">
-	<div class="max-w-3xl mx-auto py-8 px-4">
-		<h1 class="text-3xl font-bold text-primary-content mb-8">
+<Page noindex title="Settings - Rawkode Academy" description="Manage your account settings and email preferences.">
+	<div class={layout.root}>
+		<section class={layout.hero}>
+			<div class={layout.container}>
+				<h1 class={layout.title}>
 			Settings
 		</h1>
+				<p class={layout.description}>Manage your profile and the emails you receive.</p>
+			</div>
+		</section>
 
-		<div class="space-y-8">
+		<div class={layout.section}>
+		<div class={account.stack}>
 			<!-- Profile Section -->
-			<section class="rounded-sm bg-[var(--surface-card)] border border-[var(--surface-border)] overflow-hidden">
-				<div class="px-6 py-4 border-b border-[var(--surface-border)]">
-					<h2 class="text-lg font-semibold text-primary-content">
+			<section class={account.panel}>
+				<div class={account.header}>
+					<h2 class={account.title}>
 						Profile
 					</h2>
 				</div>
-				<div class="p-6">
-					<div class="flex items-center gap-4">
+				<div class={account.body}>
+					<div class={account.row}>
 						{user.image ? (
-							<img 
-								src={user.image} 
+							<img
+								src={user.image}
 								alt={`Profile picture for ${user.name || 'user'}`}
-								class="w-16 h-16 rounded-full"
+								class={account.avatar}
 								loading="lazy"
 							/>
 						) : (
-							<Avatar client:load name={user.name || ""} variant="pixel" class="w-16 h-16 rounded-full" />
+							<Avatar client:load name={user.name || ""} variant="pixel" class={account.avatar} />
 						)}
 						<div>
-							<p class="text-lg font-medium text-primary-content">
+							<p class={account.title}>
 								{user.name}
 							</p>
-							<p class="text-sm text-muted">
+							<p class={account.description}>
 								{user.email}
 							</p>
 						</div>
@@ -99,42 +120,44 @@ try {
 			</section>
 
 			<!-- Email Preferences Section -->
-				<section class="rounded-sm bg-[var(--surface-card)] border border-[var(--surface-border)] overflow-hidden">
-					<div class="px-6 py-4 border-b border-[var(--surface-border)]">
-						<h2 class="text-lg font-semibold text-primary-content">
+				<section class={account.panel}>
+					<div class={account.header}>
+						<h2 class={account.title}>
 							Email Preferences
 						</h2>
-					<p class="text-sm text-muted mt-1">
+					<p class={account.description}>
 						Manage what emails you receive from Rawkode Academy.
 					</p>
 				</div>
-					<div class="p-6">
-						<EmailPreferences
-							client:load
+					<div class={account.body}>
+						{preferencesUnavailable ? (<p class={account.error} role="alert">Your preferences could not be loaded. Reload this page before making changes.</p>) : (<EmailPreferences
+							client:only="vue"
 							academyNewsletter={academyNewsletter}
 							matrixNewsletter={matrixNewsletter}
 							kubernetesReleaseUpdates={kubernetesReleaseUpdates}
 							marketingEmails={marketingEmails}
 							serviceEmails={serviceEmails}
 							technologySubscriptions={technologySubscriptions}
-						/>
+							klusteredSubscriptions={klusteredSubscriptions}
+						/>)}
 					</div>
 				</section>
 
 				<!-- Email Tools -->
-				<section class="rounded-sm bg-[var(--surface-card)] border border-[var(--surface-border)] overflow-hidden">
-					<div class="px-6 py-4 border-b border-[var(--surface-border)]">
-						<h2 class="text-lg font-semibold text-primary-content">
+				<section class={account.panel}>
+					<div class={account.header}>
+						<h2 class={account.title}>
 							Email Tools
 						</h2>
-						<p class="text-sm text-muted mt-1">
+						<p class={account.description}>
 							Send yourself a quick test message to confirm email delivery works.
 						</p>
 					</div>
-					<div class="p-6">
+					<div class={account.body}>
 						<TestEmailButton client:load />
 					</div>
 				</section>
-			</div>
 		</div>
-	</Page>
+		</div>
+	</div>
+</Page>

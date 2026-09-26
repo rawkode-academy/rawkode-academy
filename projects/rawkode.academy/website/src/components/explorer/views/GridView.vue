@@ -230,7 +230,7 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  position: sticky;
  top: 0;
  z-index: 10;
- background: var(--surface-base);
+ background: var(--colors-academy-canvas);
  padding-bottom: 0.5rem;
 }
 
@@ -254,7 +254,6 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
 .header-label {
  font-size: 0.75rem;
  font-weight: 700;
- text-transform: uppercase;
  letter-spacing: 0.08em;
 }
 
@@ -287,8 +286,8 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  align-items: center;
  gap: 0.5rem;
  padding: 0.5rem 1rem 0.375rem;
- background: var(--surface-card);
- border: 1px solid var(--surface-border);
+ background: var(--colors-academy-panel);
+ border: 1px solid var(--colors-academy-border);
  border-bottom: none;
  border-radius: 8px 8px 0 0;
  margin-left: 1rem;
@@ -300,9 +299,8 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
 .tab-title {
  font-size: 0.75rem;
  font-weight: 700;
- text-transform: uppercase;
  letter-spacing: 0.08em;
- color: var(--text-primary-content);
+ color: var(--colors-academy-text);
 }
 
 .tab-count {
@@ -323,8 +321,8 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
 .grid-row {
  display: grid;
  gap: 0;
- background: var(--surface-card);
- border: 1px solid var(--surface-border);
+ background: var(--colors-academy-panel);
+ border: 1px solid var(--colors-academy-border);
  border-radius: 8px;
  /* overflow must stay visible or the name tooltips are clipped */
  overflow: visible;
@@ -341,7 +339,7 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  padding: 0.5rem;
  min-height: 50px;
  background: rgb(from var(--cell-color) r g b / 0.05);
- border-left: 1px solid var(--surface-border);
+ border-left: 1px solid var(--colors-academy-border);
 }
 
 .grid-cell:first-child {
@@ -370,8 +368,8 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  justify-content: center;
  width: 36px;
  height: 36px;
- background: var(--surface-card);
- border: 1px solid var(--surface-border);
+ background: var(--colors-academy-panel);
+ border: 1px solid var(--colors-academy-border);
  border-radius: 8px;
  text-decoration: none;
  transition: all 0.2s ease;
@@ -380,8 +378,8 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
 .tech-icon:hover,
 .tech-icon.is-hovered {
  transform: scale(1.15);
- border-color: rgb(var(--brand-primary));
- box-shadow: 0 0 0 3px rgb(var(--brand-primary) / 0.2);
+ border-color: var(--colors-academy-accent);
+ box-shadow: 0 0 0 3px color-mix(in srgb, var(--colors-academy-accent) 20%, transparent);
  z-index: 50;
 }
 
@@ -393,14 +391,14 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  left: 50%;
  transform: translateX(-50%) translateY(4px);
  padding: 0.625rem 1rem;
- background: var(--surface-card);
- border: 1px solid var(--editorial-hairline-strong);
- border-top: 2px solid rgb(var(--brand-primary));
+ background: var(--colors-academy-panel);
+ border: 1px solid var(--colors-academy-input-border);
+ border-top: 2px solid var(--colors-academy-accent);
  border-radius: var(--radius-3xl);
  font-size: 0.8rem;
  font-weight: 600;
  letter-spacing: 0.01em;
- color: var(--text-primary-content);
+ color: var(--colors-academy-text);
  white-space: nowrap;
  opacity: 0;
  visibility: hidden;
@@ -420,7 +418,7 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  height: 0;
  border-left: 8px solid transparent;
  border-right: 8px solid transparent;
- border-top: 8px solid var(--editorial-hairline-strong);
+ border-top: 8px solid var(--colors-academy-input-border);
  opacity: 0;
  visibility: hidden;
  transition: all var(--duration-base) var(--ease-standard);
@@ -464,11 +462,11 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  display: flex;
  align-items: center;
  justify-content: center;
- background: var(--surface-card-muted);
+ background: var(--colors-academy-ground);
  border-radius: 4px;
  font-size: 0.7rem;
  font-weight: 700;
- color: var(--text-primary-content);
+ color: var(--colors-academy-text);
 }
 
 .icon-trajectory {
@@ -482,22 +480,22 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  display: flex;
  align-items: center;
  justify-content: center;
- background: var(--surface-card);
+ background: var(--colors-academy-panel);
  border-radius: 50%;
- border: 1px solid var(--surface-border);
+ border: 1px solid var(--colors-academy-border);
  line-height: 1;
 }
 
 .trajectory-rising {
- color: var(--editorial-spruce);
+ color: var(--colors-academy-status-spruce);
 }
 
 .trajectory-stable {
- color: var(--editorial-ink-mute);
+ color: var(--colors-academy-text-muted);
 }
 
 .trajectory-falling {
- color: var(--editorial-rust);
+ color: var(--colors-academy-status-rust);
 }
 
 /* Empty state */
@@ -509,42 +507,41 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  gap: 0.5rem;
  padding: 4rem 2rem;
  text-align: center;
- background: var(--surface-card);
- border: 1px dashed var(--surface-border);
+ background: var(--colors-academy-panel);
+ border: 1px dashed var(--colors-academy-border);
  border-radius: 8px;
 }
 
 .empty-clear {
  margin-top: 0.75rem;
  padding: 0.625rem 1rem;
- background: var(--editorial-ink);
- color: var(--editorial-paper);
- border: 1px solid var(--editorial-ink);
+ background: var(--colors-academy-text);
+ color: var(--colors-academy-canvas);
+ border: 1px solid var(--colors-academy-text);
  border-radius: var(--radius-md);
- font-family: var(--font-jetbrains-mono), monospace;
+ font-family: var(--fonts-academy-mono), monospace;
  font-size: 0.72rem;
  font-weight: 700;
  letter-spacing: 0.1em;
- text-transform: uppercase;
  cursor: pointer;
  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .empty-clear:hover {
- background: var(--editorial-spruce);
- border-color: var(--editorial-spruce);
+ background: var(--colors-academy-status-spruce);
+ border-color: var(--colors-academy-status-spruce);
 }
 
 .empty-state h3 {
  font-size: 1.25rem;
  font-weight: 700;
- color: var(--text-primary-content);
+ color: var(--colors-academy-text);
  margin: 0 0 0.5rem;
 }
 
 .empty-state p {
  font-size: 0.9rem;
- color: var(--text-muted);
+ color: var(--colors-academy-text-muted);
  margin: 0;
 }
 
@@ -571,7 +568,7 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
 
  .grid-cell {
  border-left: none;
- border-top: 1px solid var(--surface-border);
+ border-top: 1px solid var(--colors-academy-border);
  padding: 0.75rem 1rem;
  flex-direction: column;
  align-items: flex-start;
@@ -590,7 +587,6 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  content: attr(data-column);
  font-size: 0.65rem;
  font-weight: 600;
- text-transform: uppercase;
  letter-spacing: 0.05em;
  color: var(--cell-color);
  }
@@ -621,7 +617,7 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  text-align: left;
  font-size: 0.8rem;
  font-weight: 600;
- color: var(--text-primary-content);
+ color: var(--colors-academy-text);
  }
 
  .icon-img {

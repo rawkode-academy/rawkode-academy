@@ -1,5 +1,5 @@
 <template>
-	<div class="defeat-screen">
+	<div :class="gameTheme.root" class="defeat-screen">
 		<div class="grid-bg"></div>
 
 		<div class="content">
@@ -8,7 +8,7 @@
 
 			<!-- Learned phrases section -->
 			<div v-if="learnedInsults.length > 0 || learnedComebacks.length > 0" class="learned-section">
-				<h3 class="learned-title">INTELLIGENCE GATHERED</h3>
+				<h3 class="learned-title">WHAT YOU LEARNED</h3>
 				<p class="learned-subtitle">You learned from the enemy's tactics:</p>
 
 				<div v-if="learnedInsults.length > 0" class="phrase-group">
@@ -48,6 +48,8 @@
 </template>
 
 <script setup lang="ts">
+import { academyGame } from "@rawkodeacademy/design-system";
+const gameTheme = academyGame();
 import type { Insult, Comeback } from "@/game/data/types";
 
 defineProps<{
@@ -77,8 +79,8 @@ defineEmits<{
 	position: absolute;
 	inset: 0;
 	background-image:
-		linear-gradient(rgb(231 76 60 / 0.1) 1px, transparent 1px),
-		linear-gradient(90deg, rgb(231 76 60 / 0.1) 1px, transparent 1px);
+		linear-gradient(color-mix(in srgb, var(--colors-academy-status-rust) 10.0%, transparent) 1px, transparent 1px),
+		linear-gradient(90deg, color-mix(in srgb, var(--colors-academy-status-rust) 10.0%, transparent) 1px, transparent 1px);
 	background-size: 40px 40px;
 	animation: grid-pulse 2s ease-in-out infinite;
 }
@@ -102,27 +104,27 @@ defineEmits<{
 .title {
 	font-size: 3rem;
 	font-weight: 700;
-	color: #e74c3c;
+	color: var(--colors-academy-status-rust);
 	text-shadow:
-		0 0 20px rgb(231 76 60 / 0.5),
-		0 0 40px rgb(231 76 60 / 0.3);
+		0 0 20px color-mix(in srgb, var(--colors-academy-status-rust) 50.0%, transparent),
+		0 0 40px color-mix(in srgb, var(--colors-academy-status-rust) 30.0%, transparent);
 	letter-spacing: 0.1em;
 	margin-bottom: 0.5rem;
 }
 
 .subtitle {
-	color: rgb(107 114 128);
+	color: var(--colors-academy-text-muted);
 	font-size: 1.2rem;
 	margin-bottom: 2rem;
 }
 
 :root.dark .subtitle {
-	color: rgb(204 204 204);
+	color: var(--colors-academy-text-muted);
 }
 
 .learned-section {
-	background: rgb(255 255 255 / 0.8);
-	border: 1px solid rgb(var(--brand-primary) / 0.3);
+	background: var(--colors-academy-panel);
+	border: 1px solid color-mix(in srgb, var(--colors-academy-accent) 30.0%, transparent);
 	border-radius: 12px;
 	padding: 1.5rem;
 	margin-bottom: 1.5rem;
@@ -131,11 +133,11 @@ defineEmits<{
 }
 
 :root.dark .learned-section {
-	background: rgb(0 0 0 / 0.6);
+	background: var(--colors-academy-panel);
 }
 
 .learned-title {
-	color: rgb(var(--brand-primary));
+	color: var(--colors-academy-accent);
 	font-size: 1rem;
 	letter-spacing: 0.15em;
 	margin-bottom: 0.5rem;
@@ -143,14 +145,14 @@ defineEmits<{
 }
 
 .learned-subtitle {
-	color: rgb(107 114 128);
+	color: var(--colors-academy-text-muted);
 	font-size: 0.9rem;
 	margin-bottom: 1rem;
 	text-align: center;
 }
 
 :root.dark .learned-subtitle {
-	color: rgb(156 163 175);
+	color: var(--colors-academy-text-muted);
 }
 
 .phrase-group {
@@ -162,7 +164,7 @@ defineEmits<{
 }
 
 .phrase-type {
-	color: rgb(var(--brand-secondary));
+	color: var(--colors-academy-status-violet);
 	font-size: 0.85rem;
 	letter-spacing: 0.1em;
 	margin-bottom: 0.5rem;
@@ -177,17 +179,17 @@ defineEmits<{
 
 .phrase-item {
 	padding: 0.75rem 1rem;
-	background: rgb(0 0 0 / 0.05);
+	background: var(--colors-academy-border);
 	border-radius: 6px;
 	margin-bottom: 0.5rem;
 	font-size: 0.95rem;
-	color: rgb(55 65 81);
+	color: var(--colors-academy-text);
 	border-left: 3px solid transparent;
 }
 
 :root.dark .phrase-item {
-	background: rgb(255 255 255 / 0.05);
-	color: rgb(204 204 204);
+	background: var(--colors-academy-border);
+	color: var(--colors-academy-text-muted);
 }
 
 .phrase-item:last-child {
@@ -195,31 +197,31 @@ defineEmits<{
 }
 
 .phrase-item.insult {
-	border-left-color: #e67e22;
+	border-left-color: var(--colors-academy-status-amber);
 }
 
 .phrase-item.comeback {
-	border-left-color: rgb(var(--brand-primary));
+	border-left-color: var(--colors-academy-accent);
 }
 
 .no-learned {
-	background: rgb(255 255 255 / 0.8);
-	border: 1px solid rgb(0 0 0 / 0.1);
+	background: var(--colors-academy-panel);
+	border: 1px solid var(--colors-academy-border);
 	border-radius: 12px;
 	padding: 1.5rem;
 	margin-bottom: 1.5rem;
 	backdrop-filter: blur(8px);
-	color: rgb(107 114 128);
+	color: var(--colors-academy-text-muted);
 }
 
 :root.dark .no-learned {
-	background: rgb(0 0 0 / 0.6);
-	border-color: rgb(255 255 255 / 0.1);
-	color: rgb(156 163 175);
+	background: var(--colors-academy-panel);
+	border-color: var(--colors-academy-border);
+	color: var(--colors-academy-text-muted);
 }
 
 .encouragement {
-	color: rgb(var(--brand-primary));
+	color: var(--colors-academy-accent);
 	font-size: 1rem;
 	margin-bottom: 2rem;
 	font-style: italic;
@@ -240,17 +242,17 @@ defineEmits<{
 }
 
 .action-btn.primary {
-	border: 2px solid rgb(var(--brand-primary));
-	color: rgb(var(--brand-primary));
+	border: 2px solid var(--colors-academy-accent);
+	color: var(--colors-academy-accent);
 }
 
 .action-btn.primary:hover {
-	background: rgb(var(--brand-primary));
+	background: var(--colors-academy-accent);
 	color: white;
 }
 
 :root.dark .action-btn.primary:hover {
-	color: rgb(17 24 39);
+	color: var(--colors-academy-text);
 }
 
 .btn-text {

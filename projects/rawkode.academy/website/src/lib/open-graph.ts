@@ -9,7 +9,7 @@ export const OPEN_GRAPH_IMAGE_HEIGHT = 630;
 export const IMAGE_SERVICE_URL = "https://image.rawkode.academy/image";
 
 const DEFAULT_DESCRIPTION =
-	"Hands-on cloud native lessons, articles, and field notes from Rawkode Academy.";
+	"Hands-on cloud native lessons, articles, and tutorials from Rawkode Academy.";
 
 type OpenGraphImageInput = {
 	title: string;

@@ -1,0 +1,30 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { academyCatalog } from "@rawkodeacademy/design-system";
+
+interface Props {
+	story: CollectionEntry<"news">;
+}
+
+const { story } = Astro.props;
+const styles = academyCatalog();
+// News dates are calendar days in UTC; pin the display so the day never
+// shifts for visitors west of UTC.
+const day = new Intl.DateTimeFormat("en-GB", {
+	day: "2-digit",
+	timeZone: "UTC",
+});
+const month = new Intl.DateTimeFormat("en-GB", {
+	month: "short",
+	year: "numeric",
+	timeZone: "UTC",
+});
+---
+
+<a class={styles.editorialRow} href={`/news/${story.id}`} data-media="false">
+	<time class={styles.editorialDate} datetime={story.data.publishedAt.toISOString()}><strong>{day.format(story.data.publishedAt)}</strong><span>{month.format(story.data.publishedAt)}</span></time>
+	<div class={styles.editorialBody} data-body>
+		<h3 class={styles.editorialTitle}>{story.data.title}</h3>
+		<p class={styles.editorialDescription}>{story.data.description}</p>
+	</div>
+</a>

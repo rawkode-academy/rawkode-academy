@@ -5,19 +5,26 @@
 export const SHOW_ID = "klustered";
 
 export interface BracketsWrite {
+	syncCompetitorUsername(input: {
+		userId: string;
+		username: string;
+	}): Promise<{ updated: number }>;
 	selfRegisterCompetitor(input: {
 		bracketId: string;
 		userId: string;
+		username: string;
 		displayName: string;
 	}): Promise<{ competitorId: string; seasonId: string; bracketKind: string }>;
 	formTeam(input: {
 		bracketId: string;
 		name: string;
 		userId: string;
+		username: string;
 	}): Promise<{ teamId: string; token: string }>;
 	joinTeamViaInvite(input: {
 		token: string;
 		userId: string;
+		username: string;
 		displayName: string;
 	}): Promise<{ teamId: string; seasonId: string }>;
 	renameTeam(input: {
@@ -87,6 +94,16 @@ export interface BracketsWrite {
 		startDate?: number | null;
 		endDate?: number | null;
 	}): Promise<{ ok: true }>;
+	transferSummerApplicationsToWinter(input: {
+		sourceSeasonId: string;
+		targetSeasonId: string;
+		seasonStartDate: number;
+		bracketStartsAt: number;
+	}): Promise<{
+		applicationsMoved: number;
+		competitorsMoved: number;
+		bracketsActivated: number;
+	}>;
 	deleteSeason(input: { id: string }): Promise<{ ok: true }>;
 	createBracket(input: {
 		seasonId: string;

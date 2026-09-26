@@ -1,6 +1,7 @@
 ---
 import { type CollectionEntry, getCollection } from "astro:content";
 import ArticleCard from "./ArticleCard.astro";
+import { academyRelatedContent } from "@rawkodeacademy/design-system";
 
 interface Props {
 	currentArticle: CollectionEntry<"articles">;
@@ -8,9 +9,10 @@ interface Props {
 }
 
 const { currentArticle, limit = 3 } = Astro.props;
+const styles = academyRelatedContent();
 
 // Get all published articles
-const allArticles = await getCollection("articles", ({ data }) => !data.draft);
+const allArticles = await getCollection("articles");
 
 // Find related articles based on:
 // 1. Same series (if applicable)
@@ -50,13 +52,13 @@ const finalRelatedArticles = relatedArticles.slice(0, limit);
 ---
 
 {finalRelatedArticles.length > 0 && (
-	<section class="mt-16 pt-16 border-t border-surface">
-		<h2 class="text-2xl font-bold text-primary-content mb-8">
+	<section class:list={[styles.section, styles.related]}>
+		<h2 class={styles.heading}>
 			Related Articles
 		</h2>
-		<div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+		<div class={styles.grid}>
 			{finalRelatedArticles.map((article) => (
-				<ArticleCard article={article} />
+				<ArticleCard article={article} headingLevel={3} />
 			))}
 		</div>
 	</section>

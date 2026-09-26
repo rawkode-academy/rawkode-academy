@@ -1,20 +1,14 @@
 ---
 import { getCollection, getEntries } from "astro:content";
+import { getImage } from "astro:assets";
 
 import Page from "@/wrappers/page.astro";
 import ArticleItemListJsonLd from "@/components/html/article-itemlist-jsonld.astro";
 
-import ReadMasthead from "@/components/read/ReadMasthead.astro";
-import FeaturedArticle from "@/components/read/FeaturedArticle.astro";
-import FilterRail from "@/components/read/FilterRail.astro";
-import ArticleGridItem from "@/components/read/ArticleGridItem.astro";
-import ReadFooter from "@/components/read/ReadFooter.astro";
-import MLabel from "@/components/ui/MLabel.vue";
-import EmptyState from "@/components/ui/EmptyState.vue";
-import PagerStrip from "@/components/ui/PagerStrip.astro";
-
 import { calculateReadingTime } from "@/utils/reading-time";
 import { getTypeBadgeConfig } from "@/utils/article-types";
+import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
+import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 
 export const prerender = false;
 
@@ -30,7 +24,7 @@ Astro.response.headers.set("Cache-Tag", "articles-page, articles-list");
 // ─── Data ──────────────────────────────────────────────────────
 
 const allArticles = (
-	await getCollection("articles", ({ data }) => !data.draft)
+	await getCollection("articles")
 ).sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
 
 // ─── Filters (?type=…&topic=…) ─────────────────────────────────
@@ -119,16 +113,6 @@ if (selectedType && !navTypes.some(([key]) => key === selectedType)) {
 	navTypes.push([selectedType, 0]);
 }
 
-const typeItems = [
-	{ label: "All", href: readHref({ type: undefined }) },
-	...navTypes.map(([key]) => ({
-		label: getTypeBadgeConfig(key).label,
-		href: readHref({ type: key }),
-	})),
-];
-const activeTypeIndex = selectedType
-	? Math.max(0, 1 + navTypes.findIndex(([key]) => key === selectedType))
-	: 0;
 
 // Topic rail — top topics by article count within the active type.
 const topicRailCounts = new Map<string, number>();
@@ -146,16 +130,6 @@ if (selectedTopic && !navTopics.some(([id]) => id === selectedTopic)) {
 	navTopics.push([selectedTopic, topicRailCounts.get(selectedTopic) ?? 0]);
 }
 
-const topicItems = [
-	{ label: "All", href: readHref({ topic: undefined }) },
-	...navTopics.map(([id]) => ({
-		label: formatTopicLabel(id),
-		href: readHref({ topic: id }),
-	})),
-];
-const activeTopicIndex = selectedTopic
-	? Math.max(0, 1 + navTopics.findIndex(([id]) => id === selectedTopic))
-	: 0;
 
 // ─── Featured + grid ───────────────────────────────────────────
 // The featured article only fronts page 1; later pages are grid-only.
@@ -172,15 +146,15 @@ const totalPages = Math.max(1, Math.ceil(gridArticles.length / articlesPerPage))
 // instead of an empty grid with prev/next links into a phantom crawl space.
 const page = Math.min(requestedPage, totalPages);
 const featured = page === 1 ? featuredCandidate : undefined;
-const featuredIndex = featured
-	? allArticles.findIndex((article) => article.id === featured.id)
-	: -1;
 const pagedArticles = gridArticles.slice(
 	(page - 1) * articlesPerPage,
 	page * articlesPerPage,
 );
 const hasNextPage = page < totalPages;
 const featuredAuthors = featured ? await getEntries(featured.data.authors) : [];
+const featuredImage = featured?.data.cover
+	? await getImage({ src: featured.data.cover.image, width: 1200, format: "webp" })
+	: undefined;
 
 // ─── Helpers ───────────────────────────────────────────────────
 
@@ -189,6 +163,9 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
 	day: "2-digit",
 	year: "numeric",
 });
+// Ledger dates: the day is the numeral, month and year sit beneath it.
+const dayFormatter = new Intl.DateTimeFormat("en-GB", { day: "2-digit", timeZone: "UTC" });
+const monthFormatter = new Intl.DateTimeFormat("en-GB", { month: "short", year: "numeric", timeZone: "UTC" });
 
 const compactCopy = (text: string, maxLength: number) => {
 	const normalized = text.replace(/\s+/g, " ").trim();
@@ -206,22 +183,16 @@ const articleAuthorName = async (
 	return authors.map((a) => a.data.name).join(", ");
 };
 
-const dispatchNumFor = (idx: number) =>
-	String(allArticles.length - idx).padStart(3, "0");
-
-const dispatchNumForArticle = (article: (typeof allArticles)[number]) =>
-	dispatchNumFor(
-		allArticles.findIndex((candidate) => candidate.id === article.id),
-	);
-
 // Pre-resolve authors for the grid (Astro can't await in JSX iteration cleanly).
 // Only the current page's slice — not the whole archive.
 const restWithMeta = await Promise.all(
 	pagedArticles.map(async (article) => ({
 		article,
-		dispatchNum: dispatchNumForArticle(article),
 		author: await articleAuthorName(article),
 		readingTime: calculateReadingTime(article.body || "").text,
+		cover: article.data.cover
+			? await getImage({ src: article.data.cover.image, width: 640, format: "webp" })
+			: undefined,
 	})),
 );
 
@@ -232,11 +203,12 @@ const activeFilterSummary = [
 	.filter(Boolean)
 	.join(" · ");
 
-// SERP title leads with what people search for; the "Field Notes"
-// editorial branding stays on the visible masthead.
+// SERP title leads with what people search for.
 const pageTitle = "Cloud Native & Kubernetes Articles";
 const pageDescription =
-	"Long-form articles, tutorials, and field reports on cloud native engineering — Kubernetes, eBPF, containers, supply chain — from Rawkode Academy.";
+	"Articles and tutorials on cloud native engineering — Kubernetes, eBPF, containers, supply chain — from Rawkode Academy.";
+const styles = academyLayout({ width: "wide" });
+const catalog = academyCatalog();
 ---
 
 <Page title={pageTitle} description={pageDescription} pageType="CollectionPage">
@@ -256,180 +228,55 @@ const pageDescription =
 		<link rel="alternate" type="application/atom+xml" title="Rawkode Academy - Articles (Atom)" href="/api/feeds/articles.atom" />
 	</Fragment>
 
-	<div class="read-page">
-		<ReadMasthead />
+	<div class={styles.root}>
+		<AcademyCatalogMasthead title="Articles" description="Articles and tutorials for engineers building and running production systems." figure={allArticles.length} figureLabel={allArticles.length === 1 ? "article" : "articles"} />
 
 		{featured && (
-			<FeaturedArticle
-				href={`/read/${featured.id}`}
-				kicker={getTypeBadgeConfig(featured.data.type || "tutorial").label}
-				dispatchNum={dispatchNumFor(featuredIndex)}
-				title={featured.data.title}
-				dek={compactCopy(
-					featured.data.openGraph?.subtitle || featured.data.description,
-					180,
-				)}
-				author={featuredAuthors.map((a) => a.data.name).join(", ") || undefined}
-				date={dateFormatter.format(featured.data.publishedAt)}
-				readingTime={calculateReadingTime(featured.body || "").text}
-				cover={featured.data.cover}
-			/>
+			<section class={styles.section}><div class={styles.container}>
+				<article class={catalog.featured}>
+					<div class={catalog.featuredBody}>
+						<p class={catalog.featuredKicker}>{getTypeBadgeConfig(featured.data.type || "tutorial").label}</p>
+						<h2 class={catalog.featuredTitle}>{featured.data.title}</h2>
+						<p class={catalog.featuredDescription}>{compactCopy(featured.data.openGraph?.subtitle || featured.data.description, 180)}</p>
+						<p class={catalog.rowMeta}>{featuredAuthors.map((author) => author.data.name).join(", ")} · {dateFormatter.format(featured.data.publishedAt)} · {calculateReadingTime(featured.body || "").text}</p>
+						<a class={styles.button} href={`/read/${featured.id}`}>Read the article →</a>
+					</div>
+					{featuredImage && <a class={catalog.featuredMedia} href={`/read/${featured.id}`} aria-label={`Read ${featured.data.title}`}>
+						<img class={catalog.featuredImage} src={featuredImage.src} alt={featured.data.cover?.alt ?? ""} width={featuredImage.attributes.width} height={featuredImage.attributes.height} fetchpriority="high" />
+					</a>}
+				</article>
+			</div></section>
 		)}
 
-		<FilterRail
-			label="Type"
-			ariaLabel="Article types"
-			topics={typeItems}
-			activeIndex={activeTypeIndex}
-		/>
-
-		<FilterRail
-			label="Topics"
-			ariaLabel="Article topics"
-			topics={topicItems}
-			activeIndex={activeTopicIndex}
-		/>
-
-		{isFiltered && (
-			<div class="read-filter-status">
-				<MLabel>
-					{visibleArticles.length}{" "}
-					{visibleArticles.length === 1 ? "article" : "articles"}
-					{activeFilterSummary ? ` · ${activeFilterSummary}` : ""}
-				</MLabel>
-				<div class="read-filter-status__links">
-					{selectedTopic && (
-						<a
-							class="read-filter-status__link"
-							href={`/technology/${selectedTopic}`}
-						>
-							View technology hub →
-						</a>
-					)}
-					<a class="read-filter-status__link" href="/read">Clear filters</a>
-				</div>
-			</div>
-		)}
-
-		{visibleArticles.length === 0 && (
-			<div class="read-empty">
-				<EmptyState title="No articles match these filters.">
-					<Fragment slot="actions">
-						<a href="/read">Browse all articles →</a>
-					</Fragment>
-				</EmptyState>
-			</div>
-		)}
-
-		<div class="read-grid">
-			{restWithMeta.map(({ article, dispatchNum, author, readingTime }) => (
-				<ArticleGridItem
-					href={`/read/${article.id}`}
-					dispatchNum={dispatchNum}
-					kicker={getTypeBadgeConfig(article.data.type || "tutorial").label}
-					title={article.data.title}
-					dek={compactCopy(
-						article.data.openGraph?.subtitle ||
-							article.data.subtitle ||
-							article.data.description,
-						130,
-					)}
-					author={author}
-					date={dateFormatter.format(article.data.publishedAt)}
-					readingTime={readingTime}
-					cover={article.data.cover}
-				/>
-			))}
-		</div>
-
-		{totalPages > 1 && (
-			<div class="read-pager">
-				<PagerStrip
-					page={page}
-					totalPages={totalPages}
-					prevHref={page > 1 ? readPathFor(page - 1) : undefined}
-					nextHref={hasNextPage ? readPathFor(page + 1) : undefined}
-					ariaLabel="Article pages"
-				/>
-			</div>
-		)}
-
-		<ReadFooter />
+		<section class={styles.section}><div class={styles.container}>
+			<form action="/read" method="get" class={catalog.filterForm} aria-label="Filter articles">
+				<label class={catalog.filterField}>Format
+					<select class={styles.input} name="type">
+						<option value="">All formats</option>
+						{navTypes.map(([key]) => <option value={key} selected={key === selectedType}>{getTypeBadgeConfig(key).label}</option>)}
+					</select>
+				</label>
+				<label class={catalog.filterField}>Topic
+					<select class={styles.input} name="topic">
+						<option value="">All topics</option>
+						{navTopics.map(([id]) => <option value={id} selected={id === selectedTopic}>{formatTopicLabel(id)}</option>)}
+					</select>
+				</label>
+				<button type="submit" class={styles.buttonSecondary}>Apply filters</button>
+			</form>
+			{isFiltered && <p class={styles.notice}>{visibleArticles.length} {visibleArticles.length === 1 ? "article" : "articles"}{activeFilterSummary ? ` · ${activeFilterSummary}` : ""} · <a href="/read">Clear filters</a></p>}
+			{visibleArticles.length === 0 ? <div class={styles.empty}>No articles match these filters. <a href="/read">Browse all articles →</a></div> : <div class={catalog.editorialList}>{restWithMeta.map(({ article, author, readingTime, cover }) => (
+				<a class={catalog.editorialRow} href={`/read/${article.id}`} data-media={Boolean(cover)}>
+					<time class={catalog.editorialDate} datetime={article.data.publishedAt.toISOString()}><strong>{dayFormatter.format(article.data.publishedAt)}</strong><span>{monthFormatter.format(article.data.publishedAt)}</span></time>
+					{cover && <span class={catalog.editorialMedia}><img class={catalog.editorialImage} src={cover.src} alt="" width={cover.attributes.width} height={cover.attributes.height} loading="lazy" /></span>}
+					<div class={catalog.editorialBody} data-body>
+						<p class={catalog.editorialKind}><span>{getTypeBadgeConfig(article.data.type || "tutorial").label}</span><span>·</span><span>{author ?? "Rawkode Academy"}</span><span>·</span><span>{readingTime}</span></p>
+						<h3 class={catalog.editorialTitle}>{article.data.title}</h3>
+						<p class={catalog.editorialDescription}>{compactCopy(article.data.openGraph?.subtitle || article.data.subtitle || article.data.description, 160)}</p>
+					</div>
+				</a>
+			))}</div>}
+			{totalPages > 1 && <nav class={catalog.pager} aria-label="Article pages">{page > 1 ? <a class={styles.buttonSecondary} href={readPathFor(page - 1)}>← Previous</a> : <span />}{hasNextPage && <a class={styles.button} href={readPathFor(page + 1)}>Next →</a>}</nav>}
+		</div></section>
 	</div>
 </Page>
-
-<style>
-	.read-page {
-		background: var(--editorial-paper);
-		color: var(--editorial-ink);
-	}
-
-	.read-filter-status {
-		display: flex;
-		align-items: baseline;
-		justify-content: space-between;
-		flex-wrap: wrap;
-		gap: 0.5rem 1.5rem;
-		padding: 0.75rem 2.5rem 0;
-	}
-
-	.read-filter-status__links {
-		display: flex;
-		align-items: baseline;
-		gap: 1.25rem;
-	}
-
-	.read-filter-status__link {
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.6875rem;
-		font-weight: 600;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-		color: var(--editorial-spruce);
-		text-decoration: none;
-	}
-
-	.read-filter-status__link:hover {
-		text-decoration: underline;
-		text-decoration-thickness: 1px;
-		text-underline-offset: 0.35em;
-	}
-
-	.read-empty {
-		padding: 1.5rem 2.5rem;
-	}
-
-	.read-grid {
-		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 0;
-		padding: 1.5rem 2.5rem 4rem;
-	}
-
-	.read-pager {
-		display: flex;
-		justify-content: center;
-		padding: 0 2.5rem 3rem;
-	}
-
-	@media (max-width: 960px) {
-		.read-filter-status {
-			padding-inline: 1.5rem;
-		}
-
-		.read-empty {
-			padding-inline: 1.5rem;
-		}
-
-		.read-grid {
-			grid-template-columns: 1fr;
-			padding: 1rem 1.5rem 3rem;
-		}
-	}
-
-	@media (max-width: 640px) {
-		.read-grid {
-			padding: 0.375rem 1rem 2.5rem;
-		}
-	}
-</style>

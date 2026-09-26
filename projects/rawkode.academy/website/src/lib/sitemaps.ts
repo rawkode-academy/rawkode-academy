@@ -1,6 +1,7 @@
 import { getCollection } from "astro:content";
 import { getPublishedVideos } from "@/lib/content";
 import { getCourseModuleSlug } from "@/utils/course-path";
+import { isNewsPublished } from "@/lib/news-publication";
 
 const DEFAULT_SITE_URL = "https://rawkode.academy";
 const BUILD_TIME = new Date();
@@ -229,7 +230,7 @@ export async function getPagesSitemapEntries(): Promise<SitemapUrlEntry[]> {
 }
 
 export async function getArticleSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const articles = await getCollection("articles", ({ data }) => !data.draft);
+	const articles = await getCollection("articles");
 
 	const entries = articles.map((article) => ({
 		path: `/read/${article.id}`,
@@ -437,24 +438,38 @@ export async function getShowSitemapEntries(): Promise<SitemapUrlEntry[]> {
 }
 
 export async function getSeriesSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const seriesEntries = await getCollection("series");
+	const [seriesEntries, articles] = await Promise.all([
+		getCollection("series"),
+		getCollection("articles"),
+	]);
+	const publishedSeriesIds = new Set(
+		articles
+			.map((article) => article.data.series?.id)
+			.filter((id): id is string => Boolean(id)),
+	);
 
-	const entries = seriesEntries.map((seriesEntry) => ({
-		path: `/series/${seriesEntry.id}`,
-		lastmod: pickLastmod(
-			undefined,
-			(seriesEntry.data as Record<string, unknown>).updatedAt,
-			(seriesEntry.data as Record<string, unknown>).publishedAt,
-		),
-		changefreq: "weekly" as const,
-		priority: 0.5,
-	}));
+	const entries = seriesEntries
+		.filter((series) => publishedSeriesIds.has(series.id))
+		.map((seriesEntry) => ({
+			path: `/series/${seriesEntry.id}`,
+			lastmod: pickLastmod(
+				undefined,
+				(seriesEntry.data as Record<string, unknown>).updatedAt,
+				(seriesEntry.data as Record<string, unknown>).publishedAt,
+			),
+			changefreq: "weekly" as const,
+			priority: 0.5,
+		}));
 
 	return sortByPath(entries);
 }
 
-export async function getNewsSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const newsItems = await getCollection("news");
+export async function getNewsSitemapEntries(
+	now = new Date(),
+): Promise<SitemapUrlEntry[]> {
+	const newsItems = await getCollection("news", ({ data }) =>
+		isNewsPublished(data.publishedAt, now),
+	);
 
 	const entries = newsItems.map((item) => ({
 		path: `/news/${item.id}`,
@@ -478,7 +493,10 @@ export function selectFreshNewsItems<T extends { data: { publishedAt: Date } }>(
 ): T[] {
 	const cutoff = now.getTime() - GOOGLE_NEWS_FRESHNESS_MS;
 	return [...items]
-		.filter((item) => item.data.publishedAt.getTime() >= cutoff)
+		.filter((item) =>
+			isNewsPublished(item.data.publishedAt, now) &&
+			item.data.publishedAt.getTime() >= cutoff,
+		)
 		.sort(
 			(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
 		);

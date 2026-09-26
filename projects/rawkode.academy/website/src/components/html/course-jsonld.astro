@@ -10,10 +10,17 @@ interface Props {
 
 const { course, modules, authors, imageUrl } = Astro.props;
 
-// Calculate total duration (estimated based on module count)
-const estimatedDurationPerModule = 30; // minutes
-const totalDurationMinutes = modules.length * estimatedDurationPerModule;
-const totalDurationISO = `PT${Math.floor(totalDurationMinutes / 60)}H${totalDurationMinutes % 60}M`;
+const publishedModules = modules.filter((module) => !module.data.draft);
+const hasDuration = (minutes: number | undefined): minutes is number =>
+	typeof minutes === "number" && Number.isFinite(minutes) && minutes > 0;
+const totalDurationMinutes =
+	publishedModules.length > 0 &&
+	publishedModules.every((module) => hasDuration(module.data.duration))
+		? publishedModules.reduce(
+				(total, module) => total + module.data.duration!,
+				0,
+			)
+		: undefined;
 
 // Map difficulty to skill level
 const getSkillLevel = (difficulty: string) => {
@@ -30,12 +37,14 @@ const getSkillLevel = (difficulty: string) => {
 };
 
 // Create hasCourseInstance for each module
-const courseInstances = modules.map((module) => ({
+const courseInstances = publishedModules.map((module) => ({
 	"@type": "CourseInstance",
 	name: module.data.title,
 	description: module.data.description,
 	courseMode: "online",
-	courseWorkload: "PT30M", // Estimated 30 minutes per module
+	...(hasDuration(module.data.duration)
+		? { courseWorkload: `PT${module.data.duration}M` }
+		: {}),
 }));
 
 const courseUrl = new URL(`/courses/${course.id}`, Astro.site).href;
@@ -56,8 +65,10 @@ const courseJsonLd = {
 			url: "https://rawkode.academy/android-chrome-512x512.png",
 		},
 	},
-	hasCourseInstance: courseInstances,
-	timeRequired: totalDurationISO,
+	...(courseInstances.length ? { hasCourseInstance: courseInstances } : {}),
+	...(totalDurationMinutes === undefined
+		? {}
+		: { timeRequired: `PT${totalDurationMinutes}M` }),
 	inLanguage: "en-US",
 	availableLanguage: ["en-US"],
 	datePublished: course.data.publishedAt.toISOString(),
@@ -72,7 +83,7 @@ const courseJsonLd = {
 		name: author.data.name,
 		url: author.data.github,
 	})),
-	teaches: modules.map((module) => module.data.title),
+	teaches: publishedModules.map((module) => module.data.title),
 	educationalLevel: getSkillLevel(course.data.difficulty),
 	learningResourceType: "Online Course",
 	interactivityType: "active",
@@ -81,7 +92,9 @@ const courseJsonLd = {
 		"@type": "Offer",
 		price: "0",
 		priceCurrency: "USD",
-		availability: "https://schema.org/InStock",
+		...(publishedModules.length
+			? { availability: "https://schema.org/InStock" }
+			: {}),
 		category: "Educational",
 	},
 };

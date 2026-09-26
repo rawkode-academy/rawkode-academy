@@ -1,212 +1,26 @@
 ---
-import MinimalLayout from "@/layouts/minimal.astro";
-import MastheadBar from "@/components/ui/MastheadBar.vue";
-import EditorialButton from "@/components/ui/EditorialButton.vue";
-import MLabel from "@/components/ui/MLabel.vue";
-
+import Page from "@/wrappers/page.astro";
+import { academySearch } from "@rawkodeacademy/design-system";
 export const prerender = true;
-
-const quickLinks = [
-	{ title: "Browse courses", href: "/courses" },
-	{ title: "Learning paths", href: "/learning-paths" },
-	{ title: "Technology guides", href: "/technology" },
-	{ title: "Dispatch (read)", href: "/read" },
-];
+const s = academySearch();
 ---
 
-<MinimalLayout
-	title="Page not found | Rawkode Academy"
-	description="That page doesn't exist (or doesn't exist any more). Search the catalogue, jump into a course, or browse the technology guides."
-	noindex
->
-	<main class="ed-404">
-		<MastheadBar left="Dispatch §404 · Not found" right="Lost in the cluster" />
-
-		<section class="ed-404__hero">
-			<MLabel tone="rust">
-				<span class="ed-404__dot" aria-hidden="true"></span>
-				§404 · Route not found
-			</MLabel>
-
-			<h1 class="ed-404__title">
-				This dispatch <span class="ed-404__title-soft">isn't here.</span>
-			</h1>
-
-			<p class="ed-404__lede">
-				The URL may have moved, or the typo is on us. Search the catalogue
-				or take one of the short paths below.
-			</p>
-
-			<form action="/search" method="get" class="ed-404__search">
-				<label for="not-found-search" class="ed-404__search-label">
-					<MLabel tone="ink">Search the catalogue</MLabel>
+<Page title="Page not found" description="This page could not be found. Search the Academy or return to the homepage." noindex>
+	<header class={s.header}>
+		<div class={s.headerInner}>
+			<p class={s.figure}><strong>404</strong><span>page not found</span></p>
+			<h1 class={s.title}>This page isn’t here.</h1>
+			<p class={s.lede}>The link may be out of date. Search for what you need, or head back to the Academy.</p>
+			<form action="/search" method="get" role="search" class={s.form}>
+				<label class={s.field} for="not-found-search">Search the Academy
+					<input class={s.input} type="search" name="q" id="not-found-search" placeholder="Kubernetes, eBPF, GitOps…" required />
 				</label>
-				<div class="ed-404__search-row">
-					<input
-						type="search"
-						name="q"
-						id="not-found-search"
-						placeholder="kubernetes operators, eBPF, GraphQL…"
-						class="ed-404__search-input"
-						required
-					/>
-					<EditorialButton variant="solid" size="md" type="submit" arrow>
-						Search
-					</EditorialButton>
-				</div>
+				<button class={s.button} type="submit">Search</button>
 			</form>
-
-			<div class="ed-404__actions">
-				<EditorialButton variant="outline" size="md" href="/">
-					Back to homepage
-				</EditorialButton>
-				<EditorialButton
-					variant="ghost"
-					size="md"
-					href="https://github.com/rawkode-academy/rawkode-academy/issues/new/choose"
-				>
-					Report a broken link
-				</EditorialButton>
-			</div>
-		</section>
-
-		<div class="ed-404__rail">
-			{quickLinks.map((link, i) => (
-				<a class={`ed-404__rail-item ${i === 0 ? "ed-404__rail-item--first" : ""}`} href={link.href}>
-					<MLabel tone="accent">§0{i + 1}</MLabel>
-					<span class="ed-404__rail-label">{link.title}</span>
-					<span class="ed-404__rail-arrow" aria-hidden="true">→</span>
-				</a>
-			))}
+			<nav aria-label="Page recovery" class={s.filters}>
+				<a class={s.headerLink} href="/">Back to the homepage →</a>
+				<a class={s.headerLink} href="https://github.com/rawkode-academy/rawkode-academy/issues/new/choose">Report a broken link</a>
+			</nav>
 		</div>
-	</main>
-</MinimalLayout>
-
-<style>
-	.ed-404 {
-		min-height: 100vh;
-		background: var(--editorial-paper);
-		color: var(--editorial-ink);
-		display: flex;
-		flex-direction: column;
-	}
-
-	.ed-404__hero {
-		padding: 4rem 2.5rem 5rem;
-		max-width: 56rem;
-		margin: 0 auto;
-		width: 100%;
-		display: flex;
-		flex-direction: column;
-		gap: 1.5rem;
-	}
-
-	.ed-404__dot {
-		width: 6px;
-		height: 6px;
-		border-radius: 50%;
-		background: var(--editorial-rust);
-	}
-
-	.ed-404__title {
-		font-family: var(--font-instrument-serif), serif;
-		font-style: italic;
-		font-weight: 400;
-		font-size: clamp(3rem, 8vw, 6rem);
-		line-height: 0.95;
-		letter-spacing: -0.035em;
-		color: var(--editorial-ink);
-		margin: 0.5rem 0 0;
-	}
-
-	.ed-404__title-soft {
-		color: var(--editorial-ink-soft);
-	}
-
-	.ed-404__lede {
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 1.125rem;
-		line-height: 1.5;
-		color: var(--editorial-ink-soft);
-		max-width: 36rem;
-		margin: 0.5rem 0 1.5rem;
-		border-left: 1px solid var(--editorial-hairline-strong);
-		padding-left: 1.25rem;
-	}
-
-	.ed-404__search {
-		display: flex;
-		flex-direction: column;
-		gap: 0.6rem;
-		max-width: 38rem;
-	}
-
-	.ed-404__search-row {
-		display: flex;
-		gap: 0.5rem;
-	}
-
-	.ed-404__search-input {
-		flex: 1;
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.875rem;
-		padding: 0.85rem 1rem;
-		background: var(--editorial-paper-deep);
-		border: 1px solid var(--editorial-hairline-strong);
-		border-radius: var(--radius-sm);
-		color: var(--editorial-ink);
-	}
-
-	.ed-404__search-input:focus-visible {
-		outline: 2px solid var(--editorial-ink);
-		outline-offset: 2px;
-	}
-
-	.ed-404__actions {
-		display: flex;
-		gap: 0.75rem;
-		flex-wrap: wrap;
-	}
-
-	.ed-404__rail {
-		display: grid;
-		grid-template-columns: repeat(4, 1fr);
-		border-top: 1px solid var(--editorial-hairline);
-		border-bottom: 1px solid var(--editorial-hairline);
-		margin-top: auto;
-	}
-
-	.ed-404__rail-item {
-		display: flex;
-		align-items: baseline;
-		gap: 0.75rem;
-		padding: 1.1rem 1.25rem;
-		border-left: 1px solid var(--editorial-hairline);
-		text-decoration: none;
-		color: inherit;
-		transition: background-color var(--duration-base) var(--ease-standard);
-	}
-
-	.ed-404__rail-item--first { border-left: none; }
-	.ed-404__rail-item:hover { background: var(--surface-card-muted); }
-
-	.ed-404__rail-label {
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 0.9375rem;
-		color: var(--editorial-ink);
-	}
-
-	.ed-404__rail-arrow {
-		margin-left: auto;
-		color: var(--editorial-ink-mute);
-	}
-
-	@media (max-width: 720px) {
-		.ed-404__hero { padding: 3rem 1.25rem; }
-		.ed-404__search-row { flex-direction: column; }
-		.ed-404__search-input { min-width: 0; }
-		.ed-404__rail { grid-template-columns: 1fr; }
-		.ed-404__rail-item { border-left: none; border-top: 1px solid var(--editorial-hairline); }
-		.ed-404__rail-item--first { border-top: none; }
-	}
-</style>
+	</header>
+</Page>

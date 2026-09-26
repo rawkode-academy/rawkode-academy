@@ -1,0 +1,62 @@
+---
+title: "Tip 2: History Forgets Common Commands"
+description: "With Tip 1, we looked at how we can switch our history between local directory and global. Regardles..."
+type: guide
+publishedAt: 2020-01-02
+updatedAt: 2020-01-02
+authors:
+  - rawkode
+technologies:
+  - linux
+  - zsh
+  - dotfiles
+---
+
+With [Tip 1](/read/tip-1-per-directory-zshell-history), we looked at how we can switch our history between local directory and global.
+
+Regardless of which you're using, some stuff just doesn't belong there; right?
+
+Do you really use to <kbd>Control + r</kbd> or <kbd>Up</kbd> to find `ls`, `cd`, or `rm`?
+
+No. The answer is no.
+
+## Keeping History Clean
+
+Here are 3 short and sweet options you can configure in your `zshrc` file to keep your history lean, mean, and clean.
+
+### Forget Duplicate Commands
+
+Zsh can de-duplicate your command history :smile:
+
+Enable this behaviour with `setopt HIST_IGNORE_DUPS`
+
+### Forget Common Commands
+
+The next approach to keeping our history clean is using `HISTIGNORE`.
+
+```shell
+HISTIGNORE="&:ls:[bf]g:exit:reset:clear:cd:cd ..:cd..:zh"
+```
+
+This is a global list of commands and patterns that you don't want to keep.
+
+Use this for all your trivial commands that don't warrant searching later.
+
+### Forget Space Commands
+
+Another great feature of Zsh is hiding commands preceding with a <kbd>Space</kbd>
+
+Enable this behaviour with `setopt HIST_IGNORE_SPACE`
+
+
+```shell
+# Not stored in history
+ ls
+
+# Stored in history
+ls
+```
+
+---
+
+You can find more examples of tweaking your history [here](https://gitlab.com/rawkode/dotfiles/blob/master/dotfiles/zsh/includes/history.zsh)

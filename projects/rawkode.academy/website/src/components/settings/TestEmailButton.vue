@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { academyAccount } from "@rawkodeacademy/design-system";
+const account = academyAccount();
+
 import { ref } from "vue";
 import { actions } from "astro:actions";
 
@@ -31,21 +34,21 @@ const sendTestEmail = async () => {
 </script>
 
 <template>
-	<div class="space-y-3">
-		<p class="text-sm text-neutral-600 dark:text-neutral-400">
+	<div :class="account.list">
+		<p :class="account.description">
 			Send yourself a quick test message to verify email delivery.
 		</p>
 
-		<div class="flex items-center gap-3">
+		<div :class="account.actions">
 			<button
 				type="button"
 				:disabled="isSending"
 				@click="sendTestEmail"
-				class="inline-flex items-center gap-2 rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-white shadow-md shadow-primary/30 transition hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-60"
+				:class="account.button"
 			>
 				<svg
 					v-if="isSending"
-					class="h-4 w-4 animate-spin"
+					:class="account.spinner"
 					fill="none"
 					viewBox="0 0 24 24"
 					stroke="currentColor"
@@ -56,10 +59,10 @@ const sendTestEmail = async () => {
 				<span>{{ isSending ? "Sending..." : "Send Test Email" }}</span>
 			</button>
 
-			<span v-if="success" class="text-sm text-green-600 dark:text-green-400">
+			<span v-if="success" role="status" :class="account.success">
 				{{ success }}
 			</span>
-			<span v-else-if="error" class="text-sm text-red-600 dark:text-red-400">
+			<span v-else-if="error" role="alert" :class="account.error">
 				{{ error }}
 			</span>
 		</div>

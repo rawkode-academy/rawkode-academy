@@ -4,6 +4,7 @@ import { desc, eq } from "drizzle-orm";
 import PortalLayout from "@/layouts/PortalLayout.astro";
 import { getBracketsDb, schema } from "@/db/client";
 import { SHOW_ID } from "@/lib/brackets-write";
+import { toUtcDateInput } from "@/lib/admin-dates";
 import { ADMIN_NAV } from "@/lib/nav";
 
 const db = getBracketsDb(env.BRACKETS);
@@ -13,6 +14,10 @@ const seasons = await db
 	.where(eq(schema.seasons.showId, SHOW_ID))
 	.orderBy(desc(schema.seasons.createdAt))
 	.all();
+const winterSeason = seasons.find((season) => season.slug === "w26");
+const movedApplications = Astro.url.searchParams.get("applicationsMoved");
+const movedCompetitors = Astro.url.searchParams.get("competitorsMoved");
+const activatedBrackets = Astro.url.searchParams.get("bracketsActivated");
 
 function formatDate(value: Date | null): string {
 	if (!value) return "—";
@@ -21,6 +26,13 @@ function formatDate(value: Date | null): string {
 ---
 
 <PortalLayout title="Seasons" section="admin" nav={[...ADMIN_NAV]}>
+	{movedApplications !== null && (
+		<p class="rounded-xl border border-emerald-800 bg-emerald-950/50 p-4 text-sm text-emerald-200">
+			Moved {movedApplications} applications and {movedCompetitors} competitor
+			profiles to Winter 2026; activated {activatedBrackets} brackets and deleted
+			Summer 2026.
+		</p>
+	)}
 	<section class="rounded-2xl border border-slate-800 bg-slate-900/60 p-6">
 		<h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400">
 			New season
@@ -28,7 +40,7 @@ function formatDate(value: Date | null): string {
 		<form
 			method="POST"
 			action="/api/admin/seasons"
-			class="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
+			class="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-6"
 		>
 			<label class="flex flex-col gap-1">
 				<span class="text-xs text-slate-400">Slug</span>
@@ -58,6 +70,14 @@ function formatDate(value: Date | null): string {
 					<option value="finished">Finished</option>
 				</select>
 			</label>
+			<label class="flex flex-col gap-1">
+				<span class="text-xs text-slate-400">Start date (UTC)</span>
+				<input type="date" name="startDate" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100 focus:border-fuchsia-500 focus:outline-none" />
+			</label>
+			<label class="flex flex-col gap-1">
+				<span class="text-xs text-slate-400">End date (UTC)</span>
+				<input type="date" name="endDate" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100 focus:border-fuchsia-500 focus:outline-none" />
+			</label>
 			<div class="flex items-end">
 				<button
 					class="rounded-lg bg-fuchsia-500 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-fuchsia-400"
@@ -74,6 +94,7 @@ function formatDate(value: Date | null): string {
 				<tr>
 					<th class="px-6 py-3">Slug</th>
 					<th class="px-6 py-3">Name</th>
+					<th class="px-6 py-3">Dates (UTC)</th>
 					<th class="px-6 py-3">Status</th>
 					<th class="px-6 py-3">Created</th>
 					<th class="px-6 py-3 text-right">Actions</th>
@@ -83,7 +104,7 @@ function formatDate(value: Date | null): string {
 				{
 					seasons.length === 0 ? (
 						<tr>
-							<td colspan="5" class="px-6 py-6 text-center text-sm text-slate-500">
+							<td colspan="6" class="px-6 py-6 text-center text-sm text-slate-500">
 								No seasons yet. Create one above.
 							</td>
 						</tr>
@@ -92,6 +113,17 @@ function formatDate(value: Date | null): string {
 							<tr>
 								<td class="px-6 py-3 font-mono text-xs text-slate-300">{s.slug}</td>
 								<td class="px-6 py-3">{s.name}</td>
+								<td class="px-6 py-3">
+									<form method="POST" action={`/api/admin/seasons/${s.id}/update`} class="flex flex-wrap items-end gap-2">
+										<label>
+											<input type="date" name="startDate" value={toUtcDateInput(s.startDate)} aria-label="Season start date (UTC)" class="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-100 focus:border-fuchsia-500 focus:outline-none" />
+										</label>
+										<label>
+											<input type="date" name="endDate" value={toUtcDateInput(s.endDate)} aria-label="Season end date (UTC)" class="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-100 focus:border-fuchsia-500 focus:outline-none" />
+										</label>
+										<button class="text-xs text-fuchsia-300 underline-offset-4 hover:underline">Save dates</button>
+									</form>
+								</td>
 								<td class="px-6 py-3">
 									<form method="POST" action={`/api/admin/seasons/${s.id}/update`} class="flex items-center gap-2">
 										<select
@@ -109,11 +141,54 @@ function formatDate(value: Date | null): string {
 								</td>
 								<td class="px-6 py-3 text-slate-400">{formatDate(s.createdAt)}</td>
 								<td class="px-6 py-3 text-right">
-									<form method="POST" action={`/api/admin/seasons/${s.id}/delete`} onsubmit="return confirm('Delete this season?')">
-										<button class="text-xs text-rose-400 underline-offset-4 hover:underline">
-											Delete
-										</button>
-									</form>
+									{s.slug === "s26" && winterSeason ? (
+										<div class="ml-auto max-w-80 text-left">
+											<p class="mb-2 text-xs text-amber-200">
+												This creates active Winter brackets, moves every application
+												and competitor profile, then deletes Summer. No registration
+												close date is set, so applications stay open until an admin
+												finishes the brackets.
+											</p>
+											<form
+												method="POST"
+												action="/api/admin/seasons/transfer-summer-to-winter"
+												onsubmit="return confirm('Move Summer 2026 data to Winter 2026, activate the brackets, and delete Summer?')"
+												class="flex flex-wrap items-end justify-end gap-2"
+											>
+												<input type="hidden" name="sourceSeasonId" value={s.id} />
+												<input type="hidden" name="targetSeasonId" value={winterSeason.id} />
+												<label class="text-left text-xs text-slate-400">
+													Winter start date (UTC)
+												<input
+													type="date"
+													name="startDate"
+													required
+													value="2026-10-30"
+													class="mt-1 block rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-100"
+												/>
+												</label>
+												<label class="text-left text-xs text-slate-400">
+													Bracket start time (UTC)
+												<input
+													type="time"
+													name="startsAtTime"
+													required
+													value="19:00"
+													class="mt-1 block rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-100"
+												/>
+												</label>
+												<button class="rounded-lg bg-rose-700 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-rose-600">
+													Move applications and delete Summer
+												</button>
+											</form>
+										</div>
+									) : (
+										<form method="POST" action={`/api/admin/seasons/${s.id}/delete`} onsubmit="return confirm('Delete this season?')">
+											<button class="text-xs text-rose-400 underline-offset-4 hover:underline">
+												Delete
+											</button>
+										</form>
+									)}
 								</td>
 							</tr>
 						))

@@ -1,4 +1,7 @@
 ---
+import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
+const doc = academyDocument();
+const styles = academyLayout({ width: "reading" });
 import { getImage } from "astro:assets";
 import { getEntry } from "astro:content";
 import {
@@ -26,7 +29,6 @@ import ArticleHeader from "@/components/read/ArticleHeader.astro";
 import ArticleByline from "@/components/read/ArticleByline.astro";
 import ArticleTOC from "@/components/read/ArticleTOC.astro";
 import EndSlug from "@/components/read/EndSlug.astro";
-import ReadNext from "@/components/read/ReadNext.astro";
 
 import { calculateReadingTime } from "@/utils/reading-time";
 import { getTypeBadgeConfig } from "@/utils/article-types";
@@ -133,37 +135,11 @@ const updateDate = wasUpdated
 	? dateFormatter.format(article.data.updatedAt as Date)
 	: undefined;
 
-// Dispatch number — articles ordered desc by date give this a meaningful index.
-const allArticles = (
-	await getCollection("articles", ({ data }) => !data.draft)
-).sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
-
-const indexInCorpus = allArticles.findIndex((a) => a.id === article.id);
-const dispatchNum = String(allArticles.length - indexInCorpus).padStart(3, "0");
-
-// Next 3 articles, skipping the current one.
-const readNextArticles = allArticles
-	.filter((a) => a.id !== article.id)
-	.slice(0, 3);
-
 // Breadcrumb trail.
 const breadcrumbs = [
 	{ label: "Read", href: "/read" },
-	{ label: badgeConfig.label, href: `/read?type=${articleType}` },
 	{ label: article.data.title, current: true },
 ];
-
-// Category trail under the kicker (e.g. "Containers · supply-chain")
-const categoryTrail =
-	tags
-		.slice(0, 2)
-		.map((t) => t.label)
-		.join(" · ") || undefined;
-
-// Tools list for the sticky TOC sidebar.
-const tools = (article.data.technologies ?? [])
-	.slice(0, 5)
-	.map((id) => formatTechnologyLabel(id));
 
 const subtitle = article.data.openGraph?.subtitle || article.data.subtitle;
 ---
@@ -209,15 +185,13 @@ const subtitle = article.data.openGraph?.subtitle || article.data.subtitle;
 	<link slot="extra-head" rel="alternate" type="application/atom+xml" title="Rawkode Academy - Articles (Atom)" href="/api/feeds/articles.atom" />
 	<link slot="extra-head" rel="alternate" type="application/feed+json" title="Rawkode Academy - Articles (JSON Feed)" href="/api/feeds/articles.json" />
 
-	<div class="article-page">
+	<div class={doc.root}>
+		<div class={doc.progressRule} aria-hidden="true"></div>
 		<ArticleHeader
 			breadcrumbs={breadcrumbs}
-			dispatchNum={dispatchNum}
 			kicker={badgeConfig.label}
-			categoryTrail={categoryTrail}
 			title={article.data.title}
 			dek={subtitle}
-			readingTime={readingTime.text}
 		>
 			<ArticleByline
 				authors={authors}
@@ -228,72 +202,31 @@ const subtitle = article.data.openGraph?.subtitle || article.data.subtitle;
 			/>
 		</ArticleHeader>
 
-		<div class="article-body">
-			<div class="article-body__main">
+		<div class={doc.body}>
+			<div class={doc.main}>
 				{maybeSeries && (
-					<div class="article-body__series">
+					<div class={doc.notice}>
 						<SeriesLink series={maybeSeries} />
 					</div>
 				)}
 
-				<article class="prose article-prose">
+				<article class={styles.prose}>
 					<Updates updates={article.data.updates} />
 					<Content />
 				</article>
 
-				<EndSlug dispatchNum={dispatchNum} date={publishDate} />
+				<EndSlug date={publishDate} />
 
 				<Resources resources={article.data.resources} />
-				<NewsletterCTA class="not-prose my-12" />
-				<RelatedArticles currentArticle={article} limit={3} />
-				<RelatedVideos currentArticle={article} limit={3} />
 			</div>
 
-			<ArticleTOC headings={headings} tools={tools} />
+			<ArticleTOC headings={headings} />
 		</div>
 
-		<ReadNext articles={readNextArticles} totalCount={allArticles.length} />
+		<div class={doc.section}>
+			<RelatedArticles currentArticle={article} limit={3} />
+			<RelatedVideos currentArticle={article} limit={3} />
+			<NewsletterCTA />
+		</div>
 	</div>
 </Page>
-
-<style>
-	.article-page {
-		background: var(--editorial-paper);
-		color: var(--editorial-ink);
-	}
-
-	.article-body {
-		max-width: 82.5rem;
-		margin: 0 auto;
-		padding: var(--space-section-pad-y) var(--space-section-pad-x) var(--space-page-pad-bottom);
-		display: grid;
-		grid-template-columns: minmax(0, 1fr) 16rem;
-		gap: 4rem;
-	}
-
-	.article-body__main {
-		max-width: 50rem;
-		/* Grid items default to min-content sizing on their main axis;
-		 a long word or wide code block could otherwise push the column
-		 wider than the viewport. */
-		min-width: 0;
-	}
-
-	.article-body__series {
-		margin-bottom: 1.5rem;
-		padding-bottom: 1.25rem;
-		border-bottom: 1px solid var(--editorial-hairline);
-	}
-
-	.article-prose {
-		width: 100%;
-	}
-
-	@media (max-width: 960px) {
-		.article-body {
-			grid-template-columns: 1fr;
-			gap: 2rem;
-			padding: 2.5rem 1.25rem 3rem;
-		}
-	}
-</style>

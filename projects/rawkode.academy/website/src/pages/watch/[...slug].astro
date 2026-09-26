@@ -6,6 +6,7 @@ import VideoPlayer from "@/components/video/player.vue";
 import LiveStreamGate from "@/components/video/LiveStreamGate.vue";
 import VideoReactions from "@/components/video/VideoReactions.astro";
 import VideoContentTabs from "@/components/video/video-content-tabs.vue";
+import VideoTranscript from "@/components/video/VideoTranscript.astro";
 import VideoCast from "@/components/video/VideoCast.astro";
 import TechnologyVideoSection from "@/components/video/TechnologyVideoSection.astro";
 import ShowVideoSection from "@/components/video/ShowVideoSection.astro";
@@ -17,12 +18,16 @@ import Page from "@/wrappers/page.astro";
 import { Marked } from "marked";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
-import { getVideosForTechnology } from "@/utils/get-videos-for-technology";
 import { buildWatchVideoSeoText } from "@/utils/watch-video-seo";
-import { videoTransitionName } from "@/utils/view-transition-name";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { buildVideoClips, type VideoClip } from "@/lib/video-clips";
 import { formatVideoRuntimeLabel } from "@/lib/video-runtime";
+import {
+	academyLayout,
+	academyMedia,
+	academyWatch,
+} from "@rawkodeacademy/design-system";
+import "@rawkodeacademy/design-system/styles.css";
 import {
 	getStudioLiveState,
 	shouldMountStudioLiveGate,
@@ -31,6 +36,9 @@ import {
 import { env } from "cloudflare:workers";
 
 export const prerender = false;
+const layout = academyLayout({ width: "wide" });
+const media = academyMedia();
+const watch = academyWatch();
 
 const { slug } = Astro.params;
 
@@ -112,45 +120,29 @@ const showId =
 			: null;
 const showEntry = showId ? await getEntry("shows", showId) : null;
 
-const SHOW_RELATED_LIMIT = 6;
+const RELATED_VIDEO_LIMIT = 6;
+const now = new Date();
+// Match getPublishedVideos' publishedAt <= now policy, excluding this video.
+const relatedCandidates = videos
+	.filter((candidate) => candidate.data.slug !== slug && candidate.data.publishedAt <= now)
+	.sort((a, b) => new Date(b.data.publishedAt).getTime() - new Date(a.data.publishedAt).getTime());
+const toRelatedVideo = (candidate: (typeof videos)[number]) => ({
+	id: candidate.data.id,
+	title: candidate.data.title,
+	thumbnailUrl: getVideoThumbnailUrl(candidate.data.id),
+	slug: candidate.data.slug,
+	duration: typeof candidate.data.duration === "number" ? candidate.data.duration : undefined,
+	publishedAt: candidate.data.publishedAt,
+	type: candidate.data.type,
+});
 const showRelatedAll = showEntry
-	? videos
-			.filter((v) => {
-				if (v.data.slug === slug) return false;
-				const otherShowRef = v.data.show;
-				const otherShowId =
-					typeof otherShowRef === "string"
-						? otherShowRef
-						: otherShowRef &&
-								typeof otherShowRef === "object" &&
-								"id" in otherShowRef
-							? (otherShowRef as { id: string }).id
-							: null;
-				return otherShowId === showEntry.id;
-			})
-			.sort((a, b) => {
-				const aTime =
-					a.data.publishedAt instanceof Date
-						? a.data.publishedAt.getTime()
-						: new Date(a.data.publishedAt).getTime();
-				const bTime =
-					b.data.publishedAt instanceof Date
-						? b.data.publishedAt.getTime()
-						: new Date(b.data.publishedAt).getTime();
-				return bTime - aTime;
-			})
+	? relatedCandidates.filter((candidate) => {
+		const reference = candidate.data.show;
+		const id = typeof reference === "string" ? reference : reference?.id;
+		return id?.replace(/\/index$/, "") === showEntry.id.replace(/\/index$/, "");
+	})
 	: [];
-const showRelatedVideos = showRelatedAll
-	.slice(0, SHOW_RELATED_LIMIT)
-	.map((v) => ({
-		id: v.data.id,
-		title: v.data.title,
-		thumbnailUrl: getVideoThumbnailUrl(v.data.id),
-		slug: v.data.slug,
-		duration: typeof v.data.duration === "number" ? v.data.duration : undefined,
-		publishedAt: v.data.publishedAt,
-		type: v.data.type,
-	}));
+const showRelatedVideos = showRelatedAll.slice(0, RELATED_VIDEO_LIMIT).map(toRelatedVideo);
 
 const normalizedTechIds = normalizeTechnologyReferences(
 	video.data.technologies,
@@ -167,22 +159,28 @@ const techEntries = (
 	)
 ).filter((t): t is NonNullable<typeof t> => Boolean(t));
 
-const videosPerTechnology = await Promise.all(
-	techEntries.map(async (tech) => {
-		const techId = tech.id.replace(/\/index$/, "");
-		const allVideos = await getVideosForTechnology(techId);
-		const filteredVideos = allVideos.filter((v) => v.slug !== slug).slice(0, 3);
-		return {
-			technology: tech,
-			videos: filteredVideos,
-			totalVideos: allVideos.filter((v) => v.slug !== slug).length,
+let technologyRecommendation: {
+	technology: (typeof techEntries)[number];
+	videos: typeof showRelatedVideos;
+	totalVideos: number;
+} | null = null;
+if (showRelatedVideos.length === 0) {
+	// Declaration order is intentional. Stop as soon as one technology has
+	// published alternatives; do not collect rails for every technology.
+	for (const technology of techEntries) {
+		const id = technology.id.replace(/\/index$/, "");
+		const related = relatedCandidates.filter((candidate) =>
+			normalizeTechnologyReferences(candidate.data.technologies).includes(id),
+		);
+		if (related.length === 0) continue;
+		technologyRecommendation = {
+			technology,
+			videos: related.slice(0, RELATED_VIDEO_LIMIT).map(toRelatedVideo),
+			totalVideos: related.length,
 		};
-	}),
-);
-
-const technologiesWithVideos = videosPerTechnology.filter(
-	(t) => t.videos.length > 0,
-);
+		break;
+	}
+}
 
 const hostEntries =
 	showEntry && Array.isArray(showEntry.data.hosts)
@@ -216,7 +214,6 @@ const guestEntries = Array.isArray(video.data.guests)
 const thumbnailUrl = getVideoThumbnailUrl(video.data.id);
 const streamUrl = `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`;
 const captionUrl = `https://content.rawkode.academy/videos/${video.data.id}/captions/en.vtt`;
-const now = new Date();
 const isLive = video.data.type === "live";
 const isUpcomingLive = isLive && video.data.publishedAt > now;
 const studioLiveState = isLive
@@ -275,52 +272,7 @@ const watchVideoSeoText = await buildWatchVideoSeoText({
 	description: processedDescription,
 	chapters: chapterSource,
 });
-
-// Full transcript, grouped under chapter headings, server-rendered so the
-// spoken content is crawlable in the initial HTML (the interactive
-// transcript tab hydrates separately and only ever existed client-side).
-type TranscriptSection = {
-	title: string | null;
-	startTime: number | null;
-	paragraphs: { startSeconds: number; text: string }[];
-};
-
-const transcriptSections: TranscriptSection[] = (() => {
-	const paragraphs = watchVideoSeoText.transcriptParagraphs ?? [];
-	if (paragraphs.length === 0) return [];
-	if (chapterSource.length === 0) {
-		return [{ title: null, startTime: null, paragraphs }];
-	}
-
-	const sortedChapters = [...chapterSource].sort(
-		(a, b) => a.startTime - b.startTime,
-	);
-	const leading: TranscriptSection = {
-		title: null,
-		startTime: null,
-		paragraphs: [],
-	};
-	const sections: TranscriptSection[] = sortedChapters.map((chapter) => ({
-		title: chapter.title,
-		startTime: chapter.startTime,
-		paragraphs: [],
-	}));
-
-	for (const paragraph of paragraphs) {
-		let sectionIndex = -1;
-		for (let i = 0; i < sortedChapters.length; i++) {
-			const chapter = sortedChapters[i];
-			if (chapter && paragraph.startSeconds >= chapter.startTime) {
-				sectionIndex = i;
-			}
-		}
-		(sections[sectionIndex] ?? leading).paragraphs.push(paragraph);
-	}
-
-	return [leading, ...sections].filter(
-		(section) => section.paragraphs.length > 0,
-	);
-})();
+const transcriptCues = watchVideoSeoText.transcriptParagraphs ?? [];
 
 const user = Astro.locals.user;
 const isAuthenticated = !!user;
@@ -383,14 +335,13 @@ const publishedIso =
 		? video.data.publishedAt.toISOString()
 		: String(video.data.publishedAt);
 const heroDescription =
-	video.data.tagline ?? video.data.subtitle ?? metaDescription;
-const watchStatusLabel = isUpcomingLive
-	? "Upcoming"
-	: studioLiveState.live
-		? "Live now"
-		: isLive
-			? "Live"
-			: "On demand";
+	video.data.tagline ?? video.data.subtitle;
+const isLiveNow = isLive && studioLiveState.live;
+const watchStatusLabel = isLiveNow
+	? "Live now"
+	: isUpcomingLive
+		? "Upcoming"
+		: null;
 ---
 
 <Page
@@ -433,69 +384,56 @@ const watchStatusLabel = isUpcomingLive
 	<link slot="extra-head" rel="alternate" type="application/atom+xml" title="Rawkode Academy - Videos (Atom)" href="/api/feeds/videos.atom" />
 	<link slot="extra-head" rel="alternate" type="application/feed+json" title="Rawkode Academy - Videos (JSON Feed)" href="/api/feeds/videos.json" />
 
-	<div class="watch-detail">
-		<div class="watch-detail__breadcrumb">
-			<a class="watch-detail__crumb" href="/watch">Watch</a>
-			<span class="watch-detail__sep">/</span>
+	<div class:list={[layout.root, media.root, watch.root]}>
+		<div class={watch.breadcrumb}>
+			<a class={watch.crumb} href="/watch">Watch</a>
+			<span aria-hidden="true">/</span>
 			{showEntry ? (
 				<>
-					<a class="watch-detail__crumb" href={`/shows/${showEntry.id}`}>{showEntry.data.name}</a>
+					<a class={watch.crumb} href={`/shows/${showEntry.id}`}>{showEntry.data.name}</a>
 				</>
 			) : (
 				<>
-					<span class="watch-detail__crumb">{categoryLabel}</span>
+					<span>{categoryLabel}</span>
 				</>
 			)}
-			<span class="watch-detail__spacer"></span>
-			<span class="watch-detail__meta">{watchStatusLabel}</span>
+			{watchStatusLabel && <span class={watch.breadcrumbStatus}>{watchStatusLabel}</span>}
 		</div>
 
 		<section
-			class="watch-detail__hero"
+			class={watch.hero}
 			aria-labelledby="watch-detail-title"
-			data-watch-detail-hero
+			data-watch-hero
 		>
-			<aside class="watch-detail__summary" aria-label="Video summary">
-				<div class="watch-detail__summary-copy">
-					<MLabel tone={isLive ? "amber" : "spruce"}>
-						{isLive && <LiveDot color="amber" />}
-						{isLive ? "Live · " : ""}{categoryLabel}{showEntry ? ` · ${showEntry.data.name}` : ""}
+			<header class={watch.summary}>
+				<div class={watch.summaryCopy}>
+					<MLabel tone={isLiveNow ? "amber" : "accent"}>
+						{isLiveNow && <LiveDot color="amber" />}
+						{isLiveNow ? "Live · " : ""}{categoryLabel}
 					</MLabel>
-					<h1 id="watch-detail-title" class="watch-detail__title">
+					<h1 id="watch-detail-title" class={watch.title}>
 						{video.data.title}
 					</h1>
 					{heroDescription && (
-						<p class="watch-detail__dek">{heroDescription}</p>
+						<p class={watch.dek}>{heroDescription}</p>
 					)}
 				</div>
 
-				<dl class="watch-detail__facts">
-					<div>
-						<dt>Date</dt>
-						<dd><time datetime={publishedIso}>{publishedLabel}</time></dd>
+				<dl class={watch.facts}>
+					<div class={watch.fact}>
+						<dt class={watch.factLabel}>Date</dt>
+						<dd class={watch.factValue}><time datetime={publishedIso}>{publishedLabel}</time></dd>
 					</div>
-					<div>
-						<dt>Status</dt>
-						<dd>{watchStatusLabel}</dd>
+					<div class={watch.fact}>
+						<dt class={watch.factLabel}>Runtime</dt>
+						<dd class={watch.factValue}>{runtimeLabel}</dd>
 					</div>
-					<div>
-						<dt>Runtime</dt>
-						<dd>{runtimeLabel}</dd>
-					</div>
-					{showEntry && (
-						<div>
-							<dt>Show</dt>
-							<dd>
-								<a href={`/shows/${showEntry.id}`}>{showEntry.data.name}</a>
-							</dd>
-						</div>
-					)}
-					<div>
-						<dt>Share</dt>
-						<dd>
+					<div class={watch.fact}>
+						<dt class={watch.factLabel}>Share</dt>
+						<dd class={watch.factValue}>
 							<button
 								type="button"
-								class="watch-detail__copy focus-ring"
+								class={watch.copyButton}
 								data-copy-link
 								title="Copy a link to this video at the current timestamp"
 							>
@@ -506,9 +444,9 @@ const watchStatusLabel = isUpcomingLive
 				</dl>
 
 				{isUpcomingLive && !studioLiveState.live && (
-					<div class="watch-detail__upcoming-callout" aria-label="Upcoming stream details">
-						<h2>This session has not started yet.</h2>
-						<p>
+					<div class={watch.upcoming} aria-label="Upcoming stream details">
+						<h2 class={watch.noticeTitle}>This session has not started yet.</h2>
+						<p class={watch.noticeCopy}>
 							Join us on <time datetime={publishedIso}>{scheduledLabel}</time>.
 							The player will activate when the stream is available.
 						</p>
@@ -519,15 +457,13 @@ const watchStatusLabel = isUpcomingLive
 						/>
 					</div>
 				)}
-			</aside>
+			</header>
 
-			<div
-				class="watch-detail__player-wrap"
-				style={`view-transition-name: ${videoTransitionName(video.data.slug)}`}
-			>
-				<div id="watch-detail-player" class="watch-detail__player-frame">
+			<div class={watch.playerWrap}>
+				<div id="watch-detail-player" class={watch.playerFrame} data-watch-player-frame>
 					<img
-						class="watch-detail__ssr-poster"
+						class={watch.poster}
+						data-watch-player-poster
 						src={thumbnailUrl}
 						alt=""
 						width="1280"
@@ -557,9 +493,9 @@ const watchStatusLabel = isUpcomingLive
 						/>
 					)}
 					<noscript>
-						<div class="watch-detail__noscript">
+						<div class={watch.noscript}>
 							<p>The embedded player needs JavaScript.</p>
-							<p>
+							<p class={watch.noscriptLinks}>
 								<a href={streamUrl}>Open the video stream (HLS)</a>
 								<a href={captionUrl}>Download captions (VTT)</a>
 							</p>
@@ -569,127 +505,89 @@ const watchStatusLabel = isUpcomingLive
 			</div>
 		</section>
 
-		<div class="watch-detail__body">
+		<div class={watch.body}>
 			<VideoReactions server:defer videoId={video.data.slug} />
 
-			<section class="watch-detail__overview">
-				<MLabel tone="spruce">Overview</MLabel>
-				<h2 class="watch-detail__overview-title">About this video</h2>
+			<section class={watch.section}>
+				<h2 class={watch.sectionTitle}>About this video</h2>
 				{video.data.whatYouWillLearn.length > 0 && (
-					<section class="watch-detail__learn" aria-labelledby="watch-detail-learn-heading">
-						<h3 id="watch-detail-learn-heading" class="watch-detail__learn-title">
+					<section class={watch.learn} aria-labelledby="watch-detail-learn-heading">
+						<h3 id="watch-detail-learn-heading" class={watch.learnTitle}>
 							What You'll Learn
 						</h3>
-						<ol class="watch-detail__learn-list">
+						<ol class={watch.learnList} data-academy-learn-list>
 							{video.data.whatYouWillLearn.map((item) => (
 								<li>{item}</li>
 							))}
 						</ol>
 					</section>
 				)}
-				<div class="prose" set:html={renderedDescriptionHtml} />
+				<div class:list={[layout.prose, watch.description]} data-academy-prose set:html={renderedDescriptionHtml} />
 			</section>
 
 			{chapterSource.length > 0 && (
-				<section class="watch-detail__chapters" aria-labelledby="watch-detail-chapters-heading">
-					<MLabel tone="spruce">Chapters</MLabel>
-					<h2 id="watch-detail-chapters-heading" class="watch-detail__chapters-title">
+				<section class={watch.section} aria-labelledby="watch-detail-chapters-heading">
+					<h2 id="watch-detail-chapters-heading" class={watch.sectionTitle}>
 						Jump to a chapter
 					</h2>
-					<ol class="watch-detail__chapters-list">
-						{chapterSource.map((chapter) => (
-							<li>
-								<a
-									href={`?t=${chapter.startTime}`}
-									data-chapter-link={String(chapter.startTime)}
-								>
-									<span class="watch-detail__chapter-time">
-										{formatTimestamp(chapter.startTime)}
-									</span>
-									<span class="watch-detail__chapter-name">{chapter.title}</span>
-								</a>
-							</li>
-						))}
-					</ol>
+					<details class={watch.transcriptDetails}>
+						<summary class={watch.transcriptSummary}>View {chapterSource.length} chapters</summary>
+						<ol class={watch.chapterList}>
+							{chapterSource.map((chapter) => (
+								<li>
+									<a
+										class={watch.chapterLink}
+										href={`?t=${chapter.startTime}`}
+										data-chapter-link={String(chapter.startTime)}
+									>
+										<span class={watch.chapterTime}>
+											{formatTimestamp(chapter.startTime)}
+										</span>
+										<span class={watch.chapterName}>{chapter.title}</span>
+									</a>
+								</li>
+							))}
+						</ol>
+					</details>
 				</section>
 			)}
 
-			{transcriptSections.length > 0 && (
-				<section
-					class="watch-detail__transcript"
-					aria-labelledby="watch-detail-transcript-heading"
-				>
-					<MLabel tone="spruce">Transcript</MLabel>
-					<h2
-						id="watch-detail-transcript-heading"
-						class="watch-detail__transcript-title"
-					>
-						Full transcript
-					</h2>
-					<p class="watch-detail__transcript-note">
-						Generated from the English captions. Timestamps jump the player to
-						that moment.
-					</p>
-					<details class="watch-detail__transcript-details">
-						<summary>Read the full transcript</summary>
-						<div class="watch-detail__transcript-body">
-							{transcriptSections.map((section) => (
-								<section class="watch-detail__transcript-section">
-									{section.title !== null && section.startTime !== null && (
-										<h3 class="watch-detail__transcript-chapter">
-											<a
-												href={`?t=${section.startTime}`}
-												data-chapter-link={String(section.startTime)}
-											>
-												<span class="watch-detail__transcript-time">
-													{formatTimestamp(section.startTime)}
-												</span>
-												{section.title}
-											</a>
-										</h3>
-									)}
-									{section.paragraphs.map((paragraph) => (
-										<p class="watch-detail__transcript-paragraph">
-											<a
-												class="watch-detail__transcript-time"
-												href={`?t=${paragraph.startSeconds}`}
-												data-chapter-link={String(paragraph.startSeconds)}
-											>
-												{formatTimestamp(paragraph.startSeconds)}
-											</a>{" "}
-											{paragraph.text}
-										</p>
-									))}
-								</section>
-							))}
-						</div>
+			{transcriptCues.length > 0 && (
+				<section class={watch.section} aria-labelledby="watch-detail-transcript-heading">
+					<h2 id="watch-detail-transcript-heading" class={watch.sectionTitle}>Transcript</h2>
+					<p class={watch.transcriptNote}>Generated from English captions. Select a timestamp to jump to that moment.</p>
+					<details class={watch.transcriptDetails}>
+						<summary class={watch.transcriptSummary}>Read and search the transcript</summary>
+						<VideoTranscript
+							cues={transcriptCues}
+							chapters={chapterSource}
+						/>
 					</details>
 				</section>
 			)}
 
 			{techEntries.length > 0 && (
-				<section class="watch-detail__tech" aria-labelledby="watch-detail-tech-heading">
-					<h2 id="watch-detail-tech-heading" class="sr-only">Technologies featured</h2>
-					<MLabel tone="spruce" aria-hidden="true">Technologies featured</MLabel>
-					<div class="watch-detail__tech-grid">
+				<section class={watch.section} aria-labelledby="watch-detail-tech-heading">
+					<h2 id="watch-detail-tech-heading" class={watch.sectionTitle}>Technologies featured</h2>
+					<div class={watch.techGrid}>
 						{techEntries.map((tech) => (
 							<a
 								href={`/technology/${tech.id.replace(/\/index$/, "")}`}
-								class="watch-detail__tech-chip"
+								class={watch.techChip}
 							>
-								<span class="watch-detail__tech-icon">
+								{resolveTechnologyIconUrl(tech.id, tech.data.logos) && <span class={watch.techIcon}>
 									<img
-										src={resolveTechnologyIconUrl(tech.id, tech.data.logos) || "/apple-touch-icon.png"}
-										alt={tech.data.name}
+										src={resolveTechnologyIconUrl(tech.id, tech.data.logos)!}
+										alt=""
 										width="20"
 										height="20"
 										loading="lazy"
 										decoding="async"
-										onerror="this.onerror=null; this.src='/apple-touch-icon.png'"
+										onerror="this.parentElement.hidden=true"
 									/>
-								</span>
-								<span class="watch-detail__tech-name">{tech.data.name}</span>
-								<span class="watch-detail__tech-arrow" aria-hidden="true">→</span>
+								</span>}
+								<span class={watch.techName}>{tech.data.name}</span>
+								<span class={watch.techArrow} aria-hidden="true">→</span>
 							</a>
 						))}
 					</div>
@@ -698,29 +596,26 @@ const watchStatusLabel = isUpcomingLive
 
 			<VideoCast hosts={hostEntries} guests={guestEntries} />
 
-			<NewsletterCTA class="!my-0" />
-
 			<VideoContentTabs
 				client:idle
 				videoId={video.data.id}
 				resources={video.data.resources ?? []}
 			/>
 
-			{showEntry && showRelatedVideos.length > 0 && (
+			{showEntry && showRelatedVideos.length > 0 ? (
 				<ShowVideoSection
 					show={showEntry}
 					videos={showRelatedVideos}
 					totalVideos={showRelatedAll.length}
 				/>
-			)}
-
-			{technologiesWithVideos.map(({ technology, videos, totalVideos }) => (
+			) : technologyRecommendation && (
 				<TechnologyVideoSection
-					technology={technology}
-					videos={videos}
-					totalVideos={totalVideos}
+					technology={technologyRecommendation.technology}
+					videos={technologyRecommendation.videos}
+					totalVideos={technologyRecommendation.totalVideos}
 				/>
-			))}
+			)}
+			<NewsletterCTA />
 		</div>
 
 	</div>
@@ -805,673 +700,3 @@ const watchStatusLabel = isUpcomingLive
 		});
 	}
 </script>
-
-<style>
-	.watch-detail {
-		background: var(--editorial-paper);
-		color: var(--editorial-ink);
-	}
-
-	.watch-detail__breadcrumb {
-		display: flex;
-		align-items: center;
-		gap: 0.625rem;
-		padding: 0.75rem var(--space-section-pad-x);
-		border-bottom: 1px solid var(--editorial-hairline);
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.6875rem;
-		letter-spacing: 0.14em;
-		text-transform: uppercase;
-		color: var(--editorial-ink-mute);
-	}
-
-	.watch-detail__crumb {
-		color: var(--editorial-ink-soft);
-		text-decoration: none;
-		transition: color var(--duration-base) var(--ease-standard);
-	}
-	.watch-detail__crumb:hover { color: var(--editorial-ink); }
-	.watch-detail__sep { opacity: 0.6; }
-	.watch-detail__spacer { flex: 1; }
-	.watch-detail__meta { color: var(--editorial-ink-mute); }
-
-	.watch-detail__hero {
-		max-width: 90rem;
-		margin: 0 auto;
-		padding: clamp(1rem, 2vw, 1.5rem) var(--space-section-pad-x)
-			clamp(1.25rem, 2.5vw, 2rem);
-		display: grid;
-		grid-template-columns: minmax(18rem, 22rem) minmax(0, 1fr);
-		grid-template-areas: "summary player";
-		gap: clamp(1rem, 2vw, 1.5rem);
-		align-items: start;
-	}
-
-	.watch-detail__title {
-		font-family: var(--font-instrument-serif), serif;
-		font-style: normal;
-		font-weight: 400;
-		font-size: clamp(2.25rem, 3.3vw, 3.5rem);
-		line-height: 0.96;
-		letter-spacing: 0;
-		color: var(--editorial-ink);
-		margin: 0;
-		text-wrap: balance;
-	}
-
-	.watch-detail__dek {
-		margin: 0;
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: clamp(1rem, 1.5vw, 1.125rem);
-		line-height: 1.45;
-		color: var(--editorial-ink-soft);
-		text-wrap: pretty;
-	}
-
-	.watch-detail__summary {
-		grid-area: summary;
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-		min-width: 0;
-		padding-top: 0.125rem;
-	}
-
-	.watch-detail__summary-copy {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-	}
-
-	.watch-detail__facts {
-		display: grid;
-		grid-template-columns: 1fr;
-		margin: 0;
-		border-top: 1px solid var(--editorial-hairline);
-	}
-
-	.watch-detail__facts div {
-		display: grid;
-		grid-template-columns: minmax(5rem, 0.45fr) minmax(0, 1fr);
-		gap: 0.75rem;
-		padding: 0.625rem 0;
-		border-bottom: 1px solid var(--editorial-hairline);
-	}
-
-	.watch-detail__facts dt,
-	.watch-detail__facts dd {
-		margin: 0;
-		min-width: 0;
-	}
-
-	.watch-detail__facts dt {
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.625rem;
-		font-weight: 600;
-		letter-spacing: 0.14em;
-		line-height: 1.25;
-		text-transform: uppercase;
-		color: var(--editorial-ink-mute);
-	}
-
-	.watch-detail__facts dd {
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 0.95rem;
-		line-height: 1.25;
-		color: var(--editorial-ink);
-	}
-
-	.watch-detail__facts a {
-		color: inherit;
-		text-decoration-thickness: 1px;
-		text-decoration-color: var(--editorial-hairline-strong);
-		text-underline-offset: 0.2em;
-	}
-
-	.watch-detail__facts a:hover {
-		color: var(--editorial-spruce);
-		text-decoration-color: currentColor;
-	}
-
-	.watch-detail__copy {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.5rem;
-		margin: 0;
-		padding: 0.25rem 0.625rem;
-		border: 1px solid var(--editorial-hairline-strong);
-		border-radius: var(--radius-sm);
-		background: transparent;
-		color: var(--editorial-ink);
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.625rem;
-		font-weight: 600;
-		letter-spacing: 0.14em;
-		text-transform: uppercase;
-		line-height: 1.5;
-		cursor: pointer;
-		transition:
-			border-color var(--duration-base) var(--ease-standard),
-			color var(--duration-base) var(--ease-standard);
-	}
-
-	.watch-detail__copy:hover {
-		border-color: var(--editorial-ink);
-		color: var(--editorial-spruce);
-	}
-
-	.watch-detail__upcoming-callout {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-		padding-top: 1rem;
-		border-top: 1px solid var(--editorial-hairline-strong);
-	}
-
-	.watch-detail__upcoming-callout h2 {
-		margin: 0;
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 1rem;
-		font-weight: 700;
-		line-height: 1.15;
-		letter-spacing: 0;
-		color: var(--editorial-ink);
-	}
-
-	.watch-detail__upcoming-callout p {
-		margin: 0;
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 0.95rem;
-		line-height: 1.45;
-		color: var(--editorial-ink-soft);
-	}
-
-	.watch-detail__player-wrap {
-		grid-area: player;
-		isolation: isolate;
-		position: relative;
-		width: 100%;
-		max-width: 100%;
-	}
-
-	.watch-detail__player-frame {
-		position: relative;
-		aspect-ratio: 16 / 9;
-		background: oklch(0.1 0 0);
-		border: 1px solid var(--editorial-hairline-strong);
-		overflow: hidden;
-		width: 100%;
-		transition:
-			border-color var(--duration-base) var(--ease-standard),
-			box-shadow var(--duration-base) var(--ease-standard);
-	}
-
-	.watch-detail__player-frame :global(> *) {
-		position: absolute;
-		inset: 0;
-	}
-
-	/* Server-rendered poster paints immediately; the hydrated island
-	   renders after it in the DOM and covers it. A global rule below
-	   hides it outright once a player element exists. */
-	.watch-detail__ssr-poster {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-	}
-
-	.watch-detail__noscript {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		gap: 0.5rem;
-		text-align: center;
-		padding: 1rem;
-		background: oklch(0 0 0 / 0.72);
-		color: oklch(0.97 0.008 85);
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 0.9rem;
-	}
-
-	.watch-detail__noscript p {
-		margin: 0;
-		display: flex;
-		flex-wrap: wrap;
-		justify-content: center;
-		gap: 0.375rem 1.25rem;
-	}
-
-	.watch-detail__noscript a {
-		color: oklch(0.97 0.008 85);
-		text-decoration: underline;
-		text-underline-offset: 0.2em;
-	}
-
-	:global(.watch-detail__upcoming-thumbnail) {
-		position: absolute;
-		inset: 0;
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-	}
-
-	.watch-detail__body {
-		max-width: 90rem;
-		margin: 0 auto;
-		padding: var(--space-section-pad-y) var(--space-section-pad-x) var(--space-page-pad-bottom);
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-section-gap);
-	}
-
-	.watch-detail__overview {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-block-gap);
-	}
-
-	.watch-detail__overview-title {
-		font-family: var(--font-instrument-serif), serif;
-		font-style: italic;
-		font-weight: 400;
-		font-size: 1.75rem;
-		line-height: 1.05;
-		letter-spacing: -0.02em;
-		color: var(--editorial-ink);
-		margin: 0 0 0.5rem;
-	}
-
-	.watch-detail__overview .prose { max-width: 48rem; }
-
-	.watch-detail__learn {
-		max-width: 48rem;
-		margin: 0;
-	}
-
-	.watch-detail__learn-title {
-		margin: 0 0 0.75rem;
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 0.75rem;
-		font-weight: 700;
-		letter-spacing: 0.08em;
-		line-height: 1.2;
-		text-transform: uppercase;
-		color: var(--editorial-ink-mute);
-	}
-
-	.watch-detail__learn-list {
-		counter-reset: watch-learn-item;
-		display: grid;
-		gap: 0.875rem;
-		margin: 0;
-		padding: 0;
-		list-style: none;
-	}
-
-	.watch-detail__learn-list li {
-		counter-increment: watch-learn-item;
-		display: grid;
-		grid-template-columns: 2rem minmax(0, 1fr);
-		gap: 0.875rem;
-		align-items: start;
-		color: var(--editorial-ink);
-		line-height: 1.6;
-	}
-
-	.watch-detail__learn-list li::before {
-		content: counter(watch-learn-item);
-		display: inline-grid;
-		place-items: center;
-		width: 2rem;
-		height: 2rem;
-		margin-top: 0.125rem;
-		border-radius: 999px;
-		border: 1px solid color-mix(in oklch, var(--editorial-spruce) 35%, transparent);
-		background: var(--editorial-spruce-dim);
-		color: var(--editorial-spruce);
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.75rem;
-		font-weight: 700;
-		line-height: 1;
-		font-variant-numeric: tabular-nums;
-	}
-
-	.watch-detail__chapters {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-block-gap);
-		padding-top: var(--space-section-gap);
-		border-top: 1px solid var(--editorial-hairline);
-	}
-
-	.watch-detail__chapters-title {
-		font-family: var(--font-instrument-serif), serif;
-		font-style: italic;
-		font-weight: 400;
-		font-size: 1.75rem;
-		line-height: 1.05;
-		letter-spacing: -0.02em;
-		color: var(--editorial-ink);
-		margin: 0;
-	}
-
-	.watch-detail__chapters-list {
-		max-width: 48rem;
-		margin: 0;
-		padding: 0;
-		list-style: none;
-		border-top: 1px solid var(--editorial-hairline);
-	}
-
-	.watch-detail__chapters-list a {
-		display: grid;
-		grid-template-columns: 5rem minmax(0, 1fr);
-		gap: 0.875rem;
-		align-items: baseline;
-		padding: 0.625rem 0;
-		border-bottom: 1px solid var(--editorial-hairline);
-		text-decoration: none;
-		color: var(--editorial-ink);
-		transition: color var(--duration-base) var(--ease-standard);
-	}
-
-	.watch-detail__chapters-list a:hover .watch-detail__chapter-name {
-		color: var(--editorial-spruce);
-	}
-
-	.watch-detail__chapter-time {
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.75rem;
-		font-weight: 600;
-		color: var(--editorial-ink-mute);
-		font-variant-numeric: tabular-nums;
-	}
-
-	.watch-detail__chapter-name {
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 0.95rem;
-		line-height: 1.4;
-		transition: color var(--duration-base) var(--ease-standard);
-	}
-
-	.watch-detail__transcript {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-block-gap);
-		padding-top: var(--space-section-gap);
-		border-top: 1px solid var(--editorial-hairline);
-	}
-
-	.watch-detail__transcript-title {
-		font-family: var(--font-instrument-serif), serif;
-		font-style: italic;
-		font-weight: 400;
-		font-size: 1.75rem;
-		line-height: 1.05;
-		letter-spacing: -0.02em;
-		color: var(--editorial-ink);
-		margin: 0;
-	}
-
-	.watch-detail__transcript-note {
-		max-width: 48rem;
-		margin: 0;
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 0.875rem;
-		line-height: 1.5;
-		color: var(--editorial-ink-mute);
-	}
-
-	.watch-detail__transcript-details {
-		max-width: 48rem;
-		border-top: 1px solid var(--editorial-hairline);
-	}
-
-	.watch-detail__transcript-details summary {
-		cursor: pointer;
-		padding: 0.625rem 0;
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.75rem;
-		font-weight: 600;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-		color: var(--editorial-spruce);
-	}
-
-	.watch-detail__transcript-details summary:hover {
-		text-decoration: underline;
-		text-decoration-thickness: 1px;
-		text-underline-offset: 0.35em;
-	}
-
-	.watch-detail__transcript-body {
-		padding: 0.5rem 0 0.75rem;
-	}
-
-	.watch-detail__transcript-chapter {
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 1rem;
-		font-weight: 600;
-		color: var(--editorial-ink);
-		margin: 1.75rem 0 0.75rem;
-	}
-
-	.watch-detail__transcript-chapter a {
-		display: inline-flex;
-		align-items: baseline;
-		gap: 0.875rem;
-		text-decoration: none;
-		color: inherit;
-	}
-
-	.watch-detail__transcript-chapter a:hover {
-		color: var(--editorial-spruce);
-	}
-
-	.watch-detail__transcript-paragraph {
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 0.95rem;
-		line-height: 1.6;
-		color: var(--editorial-ink-soft);
-		margin: 0 0 1rem;
-	}
-
-	.watch-detail__transcript-time {
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.75rem;
-		font-weight: 600;
-		color: var(--editorial-ink-mute);
-		font-variant-numeric: tabular-nums;
-		text-decoration: none;
-	}
-
-	a.watch-detail__transcript-time:hover {
-		color: var(--editorial-spruce);
-	}
-
-	.watch-detail__tech {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-block-gap);
-		padding-top: var(--space-section-gap);
-		border-top: 1px solid var(--editorial-hairline);
-	}
-
-	.watch-detail__tech-grid {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.625rem;
-	}
-
-	.watch-detail__tech-chip {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.5rem 0.75rem;
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 0.875rem;
-		color: var(--editorial-ink);
-		background: var(--editorial-paper-deep);
-		border: 1px solid var(--editorial-hairline);
-		text-decoration: none;
-		border-radius: var(--radius-sm);
-		transition: border-color var(--duration-base) var(--ease-standard),
-			color var(--duration-base) var(--ease-standard);
-	}
-	.watch-detail__tech-chip:hover {
-		border-color: var(--editorial-ink);
-		color: var(--editorial-spruce);
-	}
-
-	.watch-detail__tech-icon {
-		width: 1.25rem;
-		height: 1.25rem;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		overflow: hidden;
-	}
-	.watch-detail__tech-icon img {
-		width: 100%;
-		height: 100%;
-		object-fit: contain;
-	}
-
-	.watch-detail__tech-arrow {
-		font-family: var(--font-jetbrains-mono), monospace;
-		color: var(--editorial-ink-mute);
-		font-size: 0.85rem;
-	}
-
-	@media (max-width: 1500px) {
-		.watch-detail__upcoming-callout {
-			grid-column: 1 / -1;
-		}
-	}
-
-	@media (min-width: 900px) and (max-width: 1180px) {
-		.watch-detail__hero {
-			grid-template-columns: minmax(18rem, 20rem) minmax(0, 1fr);
-			grid-template-areas:
-				"copy player"
-				"facts facts";
-			gap: 1rem 1.25rem;
-		}
-
-		.watch-detail__player-wrap {
-			max-width: 20rem;
-		}
-
-		.watch-detail__summary {
-			display: contents;
-		}
-
-		.watch-detail__summary-copy {
-			grid-area: copy;
-			gap: 0.625rem;
-			align-self: start;
-		}
-
-		.watch-detail__title {
-			font-size: clamp(2.125rem, 3.8vw, 2.75rem);
-			line-height: 0.95;
-		}
-
-		.watch-detail__dek {
-			font-size: 1rem;
-			line-height: 1.35;
-		}
-
-		.watch-detail__facts {
-			grid-area: facts;
-			grid-template-columns: repeat(4, minmax(0, 1fr));
-			column-gap: 1rem;
-		}
-
-		.watch-detail__facts div {
-			grid-template-columns: 1fr;
-			gap: 0.25rem;
-			padding: 0.5rem 0;
-		}
-
-		.watch-detail__upcoming-callout {
-			grid-column: 1 / -1;
-		}
-	}
-
-	@media (max-width: 899px) {
-		.watch-detail__hero {
-			grid-template-columns: 1fr;
-			grid-template-areas:
-				"player"
-				"summary";
-		}
-
-		.watch-detail__player-wrap {
-			max-width: 100%;
-		}
-
-		.watch-detail__summary {
-			display: flex;
-			flex-direction: column;
-		}
-
-		.watch-detail__facts {
-			grid-template-columns: 1fr 1fr;
-			column-gap: 1rem;
-		}
-
-		.watch-detail__facts div {
-			grid-template-columns: 1fr;
-			gap: 0.25rem;
-		}
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.watch-detail__player-frame {
-			transition: none;
-		}
-	}
-
-	@media (max-width: 720px) {
-		.watch-detail__breadcrumb,
-		.watch-detail__hero,
-		.watch-detail__body {
-			padding-left: 1.25rem;
-			padding-right: 1.25rem;
-		}
-		.watch-detail__breadcrumb { gap: 0.4rem; }
-
-		.watch-detail__hero {
-			grid-template-columns: 1fr;
-		}
-
-		.watch-detail__summary {
-			display: flex;
-			flex-direction: column;
-		}
-	}
-
-	@media (max-width: 480px) {
-		.watch-detail__facts {
-			grid-template-columns: 1fr;
-		}
-	}
-</style>
-
-<style is:global>
-	/* Hide the server-rendered poster once the hydrated island has mounted
-	   a real player surface (vidstack <media-player>, the WHEP <video>
-	   element, an embedded YouTube <iframe>, or the upcoming-stream
-	   thumbnail). */
-	.watch-detail__player-frame:has(
-			media-player,
-			video,
-			iframe,
-			.watch-detail__upcoming-thumbnail
-		)
-		.watch-detail__ssr-poster {
-		display: none;
-	}
-</style>

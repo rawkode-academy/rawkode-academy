@@ -55,9 +55,20 @@ export const SetMatchLiveState = z.object({
 });
 export type SetMatchLiveState = z.infer<typeof SetMatchLiveState>;
 
+export const SyncCompetitorUsername = z.object({
+	userId: z.string().min(1),
+	username: z
+		.string()
+		.min(1)
+		.max(39)
+		.regex(/^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$/),
+});
+export type SyncCompetitorUsername = z.infer<typeof SyncCompetitorUsername>;
+
 export const SelfRegisterCompetitor = z.object({
 	bracketId: z.string().min(1),
 	userId: z.string().min(1),
+	username: SyncCompetitorUsername.shape.username,
 	displayName: z.string().min(1),
 });
 export type SelfRegisterCompetitor = z.infer<typeof SelfRegisterCompetitor>;
@@ -66,12 +77,14 @@ export const FormTeam = z.object({
 	bracketId: z.string().min(1),
 	name: z.string().min(1),
 	userId: z.string().min(1),
+	username: SyncCompetitorUsername.shape.username,
 });
 export type FormTeam = z.infer<typeof FormTeam>;
 
 export const JoinTeamViaInvite = z.object({
 	token: z.string().min(1),
 	userId: z.string().min(1),
+	username: SyncCompetitorUsername.shape.username,
 	displayName: z.string().min(1),
 });
 export type JoinTeamViaInvite = z.infer<typeof JoinTeamViaInvite>;

@@ -1,4 +1,7 @@
 ---
+import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
+const doc = academyDocument();
+const styles = academyLayout({ width: "reading" });
 export const prerender = true;
 
 import Page from "@/wrappers/page.astro";
@@ -9,6 +12,8 @@ import PersonJsonLd from "@/components/html/person-jsonld.astro";
 import type { ShowSummary } from "@/types/show";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import { getPersonIdentityUrls } from "@/lib/person-identity-links";
+import { isNewsPublished } from "@/lib/news-publication";
 
 export async function getStaticPaths() {
 	const people = await getCollection("people");
@@ -20,11 +25,12 @@ export async function getStaticPaths() {
 
 const { person } = Astro.props;
 
-const videos = await getCollection("videos");
-const shows = await getCollection("shows");
+const now = new Date();
+const videos = await getCollection("videos", ({ data }) => data.publishedAt <= now);
+const shows = await getCollection("shows", ({ data }) => data.publish);
 const technologies = await getCollection("technologies");
-const news = await getCollection("news");
-const articles = await getCollection("articles", ({ data }) => !data.draft);
+const news = await getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now));
+const articles = await getCollection("articles", ({ data }) => data.publishedAt <= now);
 const techNameById = new Map(
 	technologies.map((t) => [t.id.replace(/\/index$/, ""), t.data.name] as const),
 );
@@ -183,12 +189,12 @@ const pageDescription = (() => {
 	if (parts.length === 0) {
 		return `${person.data.name} on Rawkode Academy: interviews, live coding, and conversations with leaders in Cloud Native and open source.`;
 	}
-	return `${person.data.name}: ${parts.join(", ")}. Watch interviews, live coding, and deep dives on Rawkode Academy.`;
+	return `${person.data.name}: ${parts.join(", ")}. Watch interviews, live coding, and technical discussions on Rawkode Academy.`;
 })();
 
 const profileUrl = new URL(`/people/${person.data.id}`, Astro.site).href;
 
-const socialLinks = [
+const authoredSocialLinks = [
 	person.data.mastodon && {
 		name: "Mastodon",
 		url: person.data.mastodon,
@@ -221,21 +227,26 @@ const socialLinks = [
 		url: person.data.website,
 		icon: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71 M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71",
 	},
-].filter(Boolean);
+	person.data.youtube && {
+		name: "YouTube",
+		url: person.data.youtube,
+		icon: "M10 8l6 4-6 4V8Z M3 5h18v14H3V5Z",
+	},
+].filter((link) => typeof link === "object");
 
-// rel="me" advertises that this profile owns the linked accounts.
-// Mastodon's verification crawler reads this on visit (either head <link>
-// or body <a>) and shows a green checkmark on the corresponding profile
-// link. Same mechanism works for other Fediverse/IndieWeb tools.
-const relMeUrls = [
-	person.data.mastodon,
-	person.data.github,
-	person.data.bluesky,
-	person.data.twitter,
-	person.data.linkedin,
-	person.data.website,
-	person.data.youtube,
-].filter((url): url is string => typeof url === "string" && url.length > 0);
+// Exact equality only: authored fragments can identify different destinations.
+const linksByUrl = new Map<string, { name: string; url: string; icon: string; filled?: boolean }>();
+for (const link of authoredSocialLinks) {
+	const existing = linksByUrl.get(link.url);
+	if (existing) existing.name += ` / ${link.name}`;
+	else linksByUrl.set(link.url, { ...link });
+}
+const socialLinks = [...linksByUrl.values()];
+
+// Keep dedicated social-profile identity links consistent with the directory.
+// Website/YouTube links remain visible without claiming they identify a Person.
+const relMeUrls = getPersonIdentityUrls(person.data);
+const identityUrls = new Set(relMeUrls);
 ---
 
 <Page
@@ -252,15 +263,7 @@ const relMeUrls = [
  url={profileUrl}
  description={pageDescription}
  image={person.data.avatarUrl}
- sameAs={[
- person.data.github,
- person.data.twitter,
- person.data.bluesky,
- person.data.linkedin,
- person.data.website,
- person.data.youtube,
- person.data.mastodon,
- ]}
+ sameAs={relMeUrls}
  />
  <Fragment slot="extra-head">
  {relMeUrls.map((url) => (
@@ -273,201 +276,65 @@ const relMeUrls = [
  href={`/api/feeds/people/${person.data.id}.xml`}
  />
  </Fragment>
- <div class="flex flex-col stack-gap-lg section-py section-pt-0 page-px">
- <!-- Profile Header -->
- <section class="w-full">
- <div class="person-hero-card paper-panel rounded-sm p-8 md:p-12 max-w-5xl mx-auto">
- <div class="flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-12">
- <!-- Avatar -->
- <div class="flex-shrink-0">
- <div class="w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-[var(--surface-border-strong)] ">
- <img
- src={person.data.avatarUrl ?? '/apple-touch-icon.png'}
- alt={person.data.name}
- class="w-full h-full object-cover"
- onerror={`this.onerror=null; this.src='/apple-touch-icon.png';`}
- />
- </div>
- </div>
+	<div class={[doc.section, doc.stack].join(" ")}>
+		<header class={doc.personHero}>
+			<div class={doc.portrait} aria-hidden="true">
+				{person.data.avatarUrl && <img
+					src={person.data.avatarUrl}
+					alt=""
+					width="160"
+					height="160"
+					class={doc.image}
+					onerror="this.hidden=true; this.nextElementSibling.hidden=false;"
+				/>}
+				<span class={doc.portraitInitials} hidden={Boolean(person.data.avatarUrl)}>{person.data.name.split(/\s+/).map((part: string) => part[0]).slice(0, 2).join("")}</span>
+			</div>
+			<div class={doc.stack}>
+				<a href="/people" class={doc.link}>← People</a>
+				<h1 class={doc.title}>{person.data.name}</h1>
+				{(showCount > 0 || videoCount > 0 || articleCount + newsCount > 0) && <p class={doc.meta}>{
+					[
+						showCount > 0 ? `Host of ${showCount} ${showCount === 1 ? "show" : "shows"}` : undefined,
+						videoCount > 0 ? `${videoCount} guest ${videoCount === 1 ? "appearance" : "appearances"}` : undefined,
+						articleCount + newsCount > 0 ? `${articleCount + newsCount} published stories` : undefined,
+					].filter(Boolean).join(" · ")
+				}</p>}
+				{socialLinks.length > 0 && <nav class={doc.actions} aria-label={`${person.data.name}'s links`}>
+					{socialLinks.map((link: any) => <a href={link.url} target="_blank" rel={identityUrls.has(link.url) ? "me noopener noreferrer" : "noopener noreferrer"} class={doc.socialLink}>
+						<svg class={doc.iconSmall} viewBox="0 0 24 24" fill={link.filled ? "currentColor" : "none"} stroke={link.filled ? "none" : "currentColor"} stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={link.icon} /></svg>
+						{link.name}
+					</a>)}
+				</nav>}
+			</div>
+		</header>
 
- <!-- Info -->
- <div class="flex-1 text-center md:text-left space-y-6">
- <div>
- <h1 class="text-4xl md:text-5xl font-extrabold text-primary-content mb-2">
- {person.data.name}
- </h1>
- {person.data.handles.twitter && (
- <p class="text-lg text-primary font-medium">
- @{person.data.handles.twitter}
- </p>
- )}
- </div>
+		{hasBiography && <section class={styles.prose} aria-label="Biography"><BiographyContent /></section>}
+		{noindex && <p class={doc.copy}>No published contributions yet.</p>}
 
- <!-- Social Links -->
- <div class="flex flex-wrap justify-center md:justify-start gap-4">
- {socialLinks.map((link: any) => (
- <a
- href={link.url}
- target="_blank"
- rel="me noopener noreferrer"
- class="p-3 rounded-full bg-[var(--surface-card-muted)] text-muted hover:bg-primary hover:text-white dark:hover:bg-primary dark:hover:text-white transition-card shadow-sm "
- aria-label={link.name}
- >
- <svg
- xmlns="http://www.w3.org/2000/svg"
- width="24"
- height="24"
- viewBox="0 0 24 24"
- fill={link.filled ? "currentColor" : "none"}
- stroke={link.filled ? "none" : "currentColor"}
- stroke-width="2"
- stroke-linecap="round"
- stroke-linejoin="round"
- >
- <path d={link.icon} />
- </svg>
- </a>
- ))}
- </div>
- </div>
- </div>
- </div>
- </section>
+		{showSummaries.length > 0 && <section class={doc.stack} aria-labelledby="hosted-shows">
+			<h2 id="hosted-shows" class={doc.sectionTitle}>Shows</h2>
+			<div class={doc.gridTwo}>{showSummaries.map((show) => <ShowCard show={show} />)}</div>
+		</section>}
 
- <!-- SEO summary + biography (always visible body text for crawlers) -->
- <section class="w-full max-w-5xl mx-auto">
- <div class="prose prose-lg dark:prose-invert max-w-none">
- <p class="text-secondary-content">{pageDescription}</p>
- {hasBiography && <BiographyContent />}
- </div>
- </section>
+		{guestVideoFeed.length > 0 && <section class={doc.stack} aria-labelledby="guest-appearances">
+			<h2 id="guest-appearances" class={doc.sectionTitle}>Guest appearances</h2>
+			<VideoFeed title="" description="" videos={guestVideoFeed} />
+		</section>}
 
- <!-- Hosted Shows -->
- {showSummaries.length > 0 && (
- <section class="w-full max-w-7xl mx-auto">
- <div class="flex items-center gap-3 mb-8">
- <div class="p-2 rounded-sm bg-primary/10 text-primary">
- <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
- </svg>
- </div>
- <h2 class="text-2xl md:text-3xl font-bold text-primary-content">
- Shows Hosted
- </h2>
- </div>
- <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
- {showSummaries.map((show) => (
- <ShowCard show={show} />
- ))}
- </div>
- </section>
- )}
-
- <!-- Guest Appearances -->
- {guestVideoFeed.length > 0 && (
- <section class="w-full max-w-7xl mx-auto">
- <div class="flex items-center gap-3 mb-8">
- <div class="p-2 rounded-sm bg-secondary/10 text-secondary">
- <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
- </svg>
- </div>
- <h2 class="text-2xl md:text-3xl font-bold text-primary-content">
- Guest Appearances
- </h2>
- </div>
- <VideoFeed
- title=""
- description=""
- videos={guestVideoFeed}
- />
- </section>
- )}
-
- <!-- Authored Articles -->
- {authoredArticles.length > 0 && (
- <section class="w-full max-w-5xl mx-auto">
- <div class="flex items-center gap-3 mb-8">
- <div class="p-2 rounded-sm bg-primary/10 text-primary">
- <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
- </svg>
- </div>
- <h2 class="text-2xl md:text-3xl font-bold text-primary-content">
- Articles
- </h2>
- </div>
- <ul class="divide-y divide-black/10 border-y border-black/10 dark:divide-white/10 dark:border-white/10">
- {authoredArticles.map((article) => (
- <li class="py-5 sm:py-6">
- <article class="space-y-2">
- <div class="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted">
- <time datetime={article.data.publishedAt.toISOString()}>
- {formatPublishDate(article.data.publishedAt)}
- </time>
- </div>
- <h3 class="text-xl md:text-2xl font-semibold leading-tight tracking-tight text-primary-content">
- <a href={`/read/${article.id}`} class="transition-colors hover:text-primary">
- {article.data.title}
- </a>
- </h3>
- <p class="max-w-[66ch] text-base leading-7 text-secondary-content">
- {article.data.description}
- </p>
- </article>
- </li>
- ))}
- </ul>
- </section>
- )}
-
- <!-- Latest News -->
- {authoredNews.length > 0 && (
- <section class="w-full max-w-5xl mx-auto">
- <div class="flex items-center gap-3 mb-8">
- <div class="p-2 rounded-sm bg-secondary/10 text-secondary">
- <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
- </svg>
- </div>
- <h2 class="text-2xl md:text-3xl font-bold text-primary-content">
- Latest News
- </h2>
- </div>
- <ul class="divide-y divide-black/10 border-y border-black/10 dark:divide-white/10 dark:border-white/10">
- {authoredNews.map((story) => (
- <li class="py-5 sm:py-6">
- <article class="space-y-2">
- <div class="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted">
- <time datetime={story.data.publishedAt.toISOString()}>
- {formatPublishDate(story.data.publishedAt)}
- </time>
- </div>
- <h3 class="text-xl md:text-2xl font-semibold leading-tight tracking-tight text-primary-content">
- <a href={`/news/${story.id}`} class="transition-colors hover:text-primary">
- {story.data.title}
- </a>
- </h3>
- <p class="max-w-[66ch] text-base leading-7 text-secondary-content">
- {story.data.description}
- </p>
- </article>
- </li>
- ))}
- </ul>
- </section>
- )}
- </div>
+		{[
+			{ id: "articles", heading: "Articles", entries: authoredArticles, prefix: "/read" },
+			{ id: "news", heading: "News", entries: authoredNews, prefix: "/news" },
+		].map(({id, heading, entries, prefix}) => entries.length > 0 && <section class={doc.stack} aria-labelledby={id}>
+			<h2 id={id} class={doc.sectionTitle}>{heading}</h2>
+			<ul class={doc.list}>
+				{entries.map((entry) => <li class={doc.listItem}>
+					<article class={doc.stackSmall}>
+						<time class={doc.meta} datetime={entry.data.publishedAt.toISOString()}>{formatPublishDate(entry.data.publishedAt)}</time>
+						<h3 class={doc.cardTitle}><a href={`${prefix}/${entry.id}`} class={doc.link}>{entry.data.title}</a></h3>
+						<p class={doc.copy}>{entry.data.description}</p>
+					</article>
+				</li>)}
+			</ul>
+		</section>)}
+	</div>
 </Page>
-
-<style>
- /* Mobile: hero card goes edge-to-edge so the small gutter is reclaimed. */
- @media (max-width: 639px) {
- .person-hero-card {
- margin-inline: calc(50% - 50vw);
- border-radius: 0;
- border-inline: 0;
- box-shadow: none;
- }
- }
-</style>

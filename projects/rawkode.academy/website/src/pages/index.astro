@@ -1,25 +1,116 @@
 ---
 import { getCollection } from "astro:content";
-import { getPublishedVideos } from "@/lib/content";
-import {
-	getVideoThumbnailResizedUrl,
-	getVideoThumbnailUrl,
-} from "@/lib/video-thumbnail";
-
+import AcademyPage from "@/components/academy/AcademyPage.vue";
 import Page from "@/wrappers/page.astro";
+import { getLatestContent, getPublishedVideos } from "@/lib/content";
+import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 
-import LandingHero from "@/components/landing/LandingHero.astro";
-import NewsletterStrip from "@/components/landing/NewsletterStrip.astro";
-import SectionHeader from "@/components/landing/SectionHeader.astro";
-import EditorialCardRail from "@/components/landing/EditorialCardRail.astro";
-import FeaturedFeature from "@/components/landing/FeaturedFeature.astro";
-import SecondaryGrid from "@/components/landing/SecondaryGrid.astro";
-import { DIMENSIONS } from "@/lib/explorer/dimensions";
+// The homepage is format-agnostic. Collection routes such as /watch and
+// /read remain focused, but Latest is one chronological stream of everything
+// the Academy publishes.
+const now = new Date();
+const [latest, publishedVideos, learningPaths, courses, articles] =
+	await Promise.all([
+		getLatestContent(12, now),
+		getPublishedVideos(),
+		getCollection("learningPaths", ({ data }) => data.publishedAt <= now),
+		getCollection("courses", ({ data }) => data.publishedAt <= now),
+		getCollection("articles", ({ data }) => data.publishedAt <= now),
+	]);
 
-// ─── Edge caching ───────────────────────────────────────────────
-// No personalization is rendered into this page (auth UI is server:defer),
-// so it is safe to cache at the edge. Short s-maxage because the hero
-// reflects live/upcoming stream state.
+learningPaths.sort(
+	(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
+);
+
+const compactCopy = (value: string | undefined, maxLength = 220) => {
+	const normalized = (value ?? "").replace(/\s+/g, " ").trim();
+	if (!normalized)
+		return "Practical cloud native education from Rawkode Academy.";
+	const firstSentence = normalized.match(/^.*?[.!?](?:\s|$)/)?.[0]?.trim();
+	if (firstSentence && firstSentence.length <= maxLength) return firstSentence;
+	if (normalized.length <= maxLength) return normalized;
+	return `${normalized.slice(0, maxLength).trimEnd()}…`;
+};
+
+const formatDuration = (seconds?: number | null) => {
+	if (!seconds || seconds <= 0) return "Recorded session";
+	const minutes = Math.floor(seconds / 60);
+	if (minutes < 60) return `${minutes} min`;
+	const hours = Math.floor(minutes / 60);
+	const remainder = minutes % 60;
+	return remainder > 0 ? `${hours}h ${remainder}m` : `${hours}h`;
+};
+
+const formatPathDuration = (minutes?: number | null) => {
+	if (!minutes || minutes <= 0) return "Self-paced";
+	if (minutes < 60) return `${minutes} min core video`;
+	const hours = Math.floor(minutes / 60);
+	const remainder = minutes % 60;
+	return remainder > 0 ? `${hours}h ${remainder}m core video` : `${hours}h core video`;
+};
+
+const videos = publishedVideos.slice(0, 1).map((video) => ({
+	href: `/watch/${video.data.slug}`,
+	title: video.data.title,
+	description: compactCopy(video.data.subtitle || video.data.description),
+	meta: [
+		video.data.type === "live" ? "Live session" : "Recorded session",
+		formatDuration(video.data.duration),
+	],
+	mediaSrc: getVideoThumbnailUrl(video.data.id),
+}));
+
+const paths = learningPaths.slice(0, 8).map((path) => ({
+	href: `/learning-paths/${path.id}`,
+	title: path.data.title,
+	description: compactCopy(path.data.description),
+	meta: [
+		path.data.difficulty.charAt(0).toUpperCase() +
+			path.data.difficulty.slice(1),
+		formatPathDuration(path.data.estimatedDuration),
+	] as [string, string],
+}));
+
+const featured = videos[0] ?? {
+	href: "/watch",
+	title: "Cloud native is complex. It does not need to be hard.",
+	description:
+		"Hands-on cloud native lessons and build sessions for engineers, taught by people who run production systems.",
+	meta: ["Rawkode Academy", "Start here"],
+};
+const featuredMedia = "mediaSrc" in featured ? featured.mediaSrc : undefined;
+
+// The archive strip links to each collection with its real count. It is a
+// navigation aid, not a proof panel, so the numbers stay inline and small.
+const plural = (count: number, singular: string, pluralForm = `${singular}s`) =>
+	count === 1 ? singular : pluralForm;
+const archive = [
+	{
+		href: "/watch",
+		value: `${publishedVideos.length}`,
+		label: plural(publishedVideos.length, "video"),
+	},
+	{
+		href: "/read",
+		value: `${articles.length}`,
+		label: plural(articles.length, "article"),
+	},
+	{
+		href: "/learning-paths",
+		value: `${learningPaths.length}`,
+		label: plural(learningPaths.length, "learning path"),
+	},
+	{
+		href: "/courses",
+		value: `${courses.length}`,
+		label: plural(courses.length, "course"),
+	},
+].filter((link) => link.value !== "0");
+
+const pageTitle = "Cloud Native & Kubernetes Education";
+const pageDescription =
+	"Hands-on cloud native education and partnerships from Rawkode Academy for engineers and teams shipping production systems.";
+
 Astro.response.headers.set(
 	"Cache-Control",
 	"public, max-age=60, s-maxage=300, stale-while-revalidate=3600",
@@ -27,704 +118,23 @@ Astro.response.headers.set(
 Astro.response.headers.set("CDN-Cache-Control", "public, max-age=300");
 Astro.response.headers.set("Cache-Tag", "homepage");
 Astro.response.headers.set("X-Build-Time", new Date().toISOString());
-
-// ─── Data fetching ──────────────────────────────────────────────
-
-const allNews = await getCollection("news");
-const latestNews = allNews
-	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
-	.slice(0, 4);
-
-const allArticles = await getCollection("articles", ({ data }) => !data.draft);
-const latestArticles = allArticles
-	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
-	.slice(0, 4);
-const [featuredArticle, ...secondaryArticles] = latestArticles;
-
-// All videos (including future-dated) — we need them for hero state.
-const allVideosRaw = await getCollection("videos");
-const allVideosSorted = allVideosRaw.sort(
-	(a, b) =>
-		new Date(b.data.publishedAt).getTime() -
-		new Date(a.data.publishedAt).getTime(),
-);
-// Published-only convenience (for the Videos section below).
-const publishedVideos = await getPublishedVideos();
-const latestVideos = publishedVideos.slice(0, 4);
-const [featuredVideo, ...secondaryVideos] = latestVideos;
-
-const allLearningPaths = await getCollection("learningPaths");
-const latestLearningPaths = allLearningPaths
-	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
-	.slice(0, 4);
-
-const allCourses = await getCollection("courses");
-const allTechnologies = await getCollection("technologies");
-
-const matrixTechnologies = allTechnologies.filter((technology) =>
-	Boolean(technology.data.matrix?.status),
-);
-const matrixCategories = new Set(
-	matrixTechnologies
-		.map((technology) => technology.data.category)
-		.filter(Boolean),
-);
-const matrixStatusLabels = Object.fromEntries(
-	DIMENSIONS["matrix.status"].values.map((value) => [value.value, value.label]),
-);
-const matrixStatusCounts = new Map<string, number>();
-for (const technology of matrixTechnologies) {
-	const status = technology.data.matrix?.status;
-	if (!status) continue;
-	matrixStatusCounts.set(status, (matrixStatusCounts.get(status) ?? 0) + 1);
-}
-const matrixHomeStages = ["watch", "explore", "learn", "adopt", "advocate"].map(
-	(status) => ({
-		status,
-		label: matrixStatusLabels[status] ?? status,
-		count: matrixStatusCounts.get(status) ?? 0,
-	}),
-);
-
-// ─── Hero video state ───────────────────────────────────────────
-// Live: publishedAt within [now - 90min, now]
-// Upcoming: publishedAt within (now, now + 24h]
-// Fallback: most recent published video ("Now playing")
-
-const now = new Date();
-const NINETY_MIN_MS = 90 * 60 * 1000;
-const TWENTY_FOUR_H_MS = 24 * 60 * 60 * 1000;
-
-type HeroState = "live" | "upcoming" | "fallback";
-
-interface HeroVideo {
-	id: string;
-	slug: string;
-	title: string;
-	publishedAt: Date;
-	durationSeconds?: number | undefined;
-}
-
-const toHeroVideo = (v: (typeof allVideosRaw)[number]): HeroVideo => ({
-	id: v.data.id,
-	slug: v.data.slug,
-	title: v.data.title,
-	publishedAt: new Date(v.data.publishedAt),
-	...(typeof v.data.duration === "number"
-		? { durationSeconds: v.data.duration }
-		: {}),
-});
-
-// Most recent video whose publishedAt sits within the live window.
-const liveVideo = allVideosSorted.find((v) => {
-	const t = new Date(v.data.publishedAt).getTime();
-	const delta = now.getTime() - t;
-	return delta >= 0 && delta <= NINETY_MIN_MS;
-});
-
-// Earliest upcoming within 24h.
-const upcomingVideos = allVideosSorted
-	.filter((v) => {
-		const t = new Date(v.data.publishedAt).getTime();
-		const delta = t - now.getTime();
-		return delta > 0 && delta <= TWENTY_FOUR_H_MS;
-	})
-	.sort(
-		(a, b) =>
-			new Date(a.data.publishedAt).getTime() -
-			new Date(b.data.publishedAt).getTime(),
-	);
-const nextUpcoming = upcomingVideos[0];
-
-// Fallback = most recent published (could equal featuredVideo — accepted overlap).
-const fallbackVideo = publishedVideos[0];
-
-let heroState: HeroState;
-let heroVideo: HeroVideo | undefined;
-if (liveVideo) {
-	heroState = "live";
-	heroVideo = toHeroVideo(liveVideo);
-} else if (nextUpcoming) {
-	heroState = "upcoming";
-	heroVideo = toHeroVideo(nextUpcoming);
-} else if (fallbackVideo) {
-	heroState = "fallback";
-	heroVideo = toHeroVideo(
-		allVideosRaw.find((v) => v.data.id === fallbackVideo.data.id)!,
-	);
-}
-
-// "Next up" schedule rows: prefer upcoming, fall back to recent past.
-// Skip the hero video so the panel doesn't duplicate it.
-const allUpcoming = allVideosSorted.filter(
-	(v) => new Date(v.data.publishedAt).getTime() > now.getTime(),
-);
-const allRecentPast = publishedVideos.filter(
-	(v) => !heroVideo || v.data.id !== heroVideo.id,
-);
-
-const upcomingForSchedule = allUpcoming
-	.filter((v) => !heroVideo || v.data.id !== heroVideo.id)
-	.sort(
-		(a, b) =>
-			new Date(a.data.publishedAt).getTime() -
-			new Date(b.data.publishedAt).getTime(),
-	);
-
-const dateOnly = new Intl.DateTimeFormat("en-US", {
-	weekday: "short",
-	day: "2-digit",
-	month: "short",
-	timeZone: "UTC",
-});
-const timeOnly = new Intl.DateTimeFormat("en-US", {
-	hour: "2-digit",
-	minute: "2-digit",
-	hour12: false,
-	timeZone: "UTC",
-});
-
-const formatDurationShort = (s?: number | null) => {
-	if (typeof s !== "number" || s <= 0) return "";
-	const h = Math.floor(s / 3600);
-	const m = Math.floor((s % 3600) / 60);
-	if (h > 0) return `${h}h ${m}m`;
-	return `${m}m`;
-};
-
-const scheduleSource =
-	upcomingForSchedule.length > 0 ? upcomingForSchedule : allRecentPast;
-const scheduleRows = scheduleSource.slice(0, 3).map((v) => {
-	const publishedAt = new Date(v.data.publishedAt);
-	const isUpcoming = publishedAt.getTime() > now.getTime();
-	return {
-		href: `/watch/${v.data.slug}`,
-		dateLabel: dateOnly.format(publishedAt).toUpperCase(),
-		title: v.data.title,
-		timeLabel: isUpcoming
-			? `${timeOnly.format(publishedAt)} UTC`
-			: formatDurationShort(
-					typeof v.data.duration === "number" ? v.data.duration : null,
-				),
-		upcoming: isUpcoming,
-	};
-});
-
-// ─── Helpers ─────────────────────────────────────────────────────
-
-const formatLabel = (value?: string | null) => {
-	if (!value) return null;
-	return value.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-};
-
-const formatDuration = (seconds?: number | null) => {
-	if (typeof seconds !== "number" || seconds <= 0 || Number.isNaN(seconds)) {
-		return "--:--";
-	}
-	const h = Math.floor(seconds / 3600);
-	const m = Math.floor((seconds % 3600) / 60);
-	const s = seconds % 60;
-	return h > 0
-		? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
-		: `${m}:${String(s).padStart(2, "0")}`;
-};
-
-const formatPublishedDate = (date: Date) =>
-	date.toLocaleDateString("en-US", {
-		year: "numeric",
-		month: "short",
-		day: "numeric",
-	});
-
-const formatLearningPathDuration = (minutes: number): string => {
-	if (!minutes) return "Self-paced";
-	const h = Math.floor(minutes / 60);
-	const m = minutes % 60;
-	if (!h) return `${m}m`;
-	if (!m) return `${h}h`;
-	return `${h}h ${m}m`;
-};
-
-const difficultyDisplayLabel: Record<string, string> = {
-	beginner: "Beginner",
-	intermediate: "Intermediate",
-	advanced: "Advanced",
-};
-
-const compactCopy = (text: string, maxLength: number) => {
-	const normalized = text.replace(/\s+/g, " ").trim();
-	const firstSentence = normalized.match(/^.*?[.!?](?:\s|$)/)?.[0]?.trim();
-	if (firstSentence && firstSentence.length <= maxLength) return firstSentence;
-	if (normalized.length <= maxLength) return normalized;
-	return `${normalized.slice(0, maxLength).trimEnd()}…`;
-};
-
-// ─── Section payloads ────────────────────────────────────────────
-
-const newsItems = latestNews.map((item) => ({
-	href: `/news/${item.id}`,
-	meta: [formatPublishedDate(item.data.publishedAt)],
-	title: item.data.title,
-	body: compactCopy(item.data.description, 160),
-}));
-
-const learningPathItems = latestLearningPaths.map((path) => ({
-	href: `/learning-paths/${path.id}`,
-	meta: [
-		difficultyDisplayLabel[path.data.difficulty] ?? path.data.difficulty,
-		formatLearningPathDuration(path.data.estimatedDuration),
-	],
-	title: path.data.title,
-	body: compactCopy(path.data.description, 160),
-}));
-
-const videoLabel = (video: (typeof latestVideos)[number]) =>
-	formatLabel(video.data.category) ||
-	(video.data.type === "live" ? "Live Session" : "Recorded Session");
-
-const summarizeVideo = (video: (typeof latestVideos)[number]) =>
-	compactCopy(video.data.subtitle || video.data.description, 180);
-
-const articleLabel = (article: (typeof latestArticles)[number]) =>
-	formatLabel(article.data.type) || "Article";
-
-const summarizeArticle = (article: (typeof latestArticles)[number]) =>
-	compactCopy(
-		article.data.openGraph?.subtitle ||
-			article.data.subtitle ||
-			article.data.description,
-		180,
-	);
-
-const secondaryVideoItems = secondaryVideos.map((video) => ({
-	href: `/watch/${video.data.slug}`,
-	meta: [
-		videoLabel(video),
-		formatPublishedDate(video.data.publishedAt),
-		formatDuration(
-			typeof video.data.duration === "number" ? video.data.duration : undefined,
-		),
-	],
-	title: video.data.title,
-	body: summarizeVideo(video),
-	mediaSrc: getVideoThumbnailUrl(video.data.id),
-}));
-
-const secondaryArticleItems = secondaryArticles.map((article) => {
-	const item: {
-		href: string;
-		meta: string[];
-		title: string;
-		body: string;
-		mediaImage?: ImageMetadata;
-		mediaAlt?: string;
-	} = {
-		href: `/read/${article.id}`,
-		meta: [
-			articleLabel(article),
-			formatPublishedDate(article.data.publishedAt),
-		],
-		title: article.data.title,
-		body: summarizeArticle(article),
-	};
-	if (article.data.cover) {
-		item.mediaImage = article.data.cover.image;
-		item.mediaAlt = article.data.cover.alt ?? article.data.title;
-	}
-	return item;
-});
-
-// Stat row — all wired to real content collections.
-const totalSeconds = publishedVideos.reduce(
-	(acc, v) =>
-		acc +
-		(typeof v.data.duration === "number" && v.data.duration > 0
-			? v.data.duration
-			: 0),
-	0,
-);
-const totalHours = Math.floor(totalSeconds / 3600);
-
-const heroStats = [
-	{ value: `${publishedVideos.length}`, label: "Lessons" },
-	{ value: `${totalHours}+`, label: "Hours" },
-	{ value: `${allCourses.length}`, label: "Courses" },
-	{ value: "2019", label: "Since" },
-];
-
-const pageTitle = "Cloud Native & Kubernetes Education";
-const pageDescription =
-	"Hands-on cloud native education and partnerships from Rawkode Academy for engineers and teams shipping production systems.";
 ---
 
 <Page title={pageTitle} description={pageDescription}>
-	{heroVideo && (
-		<link
-			slot="extra-head"
-			rel="preload"
-			as="image"
-			href={getVideoThumbnailResizedUrl(heroVideo.id, 800)}
-			fetchpriority="high"
+		{featuredMedia && (
+			<link
+				slot="extra-head"
+				rel="preload"
+				as="image"
+				href={featuredMedia}
+				fetchpriority="high"
+			/>
+		)}
+		<AcademyPage
+			page="home"
+			featured={featured}
+			latest={latest}
+			learningPaths={paths}
+			archive={archive}
 		/>
-	)}
-	{heroVideo && (
-		<LandingHero
-			state={heroState!}
-			video={heroVideo}
-			schedule={scheduleRows}
-			stats={heroStats}
-		/>
-	)}
-
-	<section class="landing-section landing-section--matrix" aria-labelledby="matrix-home-title">
-		<div class="matrix-home">
-			<div class="matrix-home__copy">
-				<h2 id="matrix-home-title">Technology Matrix</h2>
-				<p>
-					Compare {matrixTechnologies.length} cloud native tools by adoption
-					stage, confidence, and trajectory.
-				</p>
-				<div class="matrix-home__actions">
-					<a href="/technology/matrix" class="matrix-home__primary">
-						Open matrix <span aria-hidden="true">→</span>
-					</a>
-					<a href="/technology/matrix/advanced" class="matrix-home__secondary">
-						Advanced filters <span aria-hidden="true">→</span>
-					</a>
-				</div>
-			</div>
-
-			<div class="matrix-home__panel" aria-label="Technology matrix summary">
-				<div class="matrix-home__totals">
-					<div>
-						<strong>{matrixTechnologies.length}</strong>
-						<span>Tools mapped</span>
-					</div>
-					<div>
-						<strong>{matrixCategories.size}</strong>
-						<span>Categories</span>
-					</div>
-				</div>
-				<div class="matrix-home__stages">
-					{matrixHomeStages.map((stage) => (
-						<a
-							href={`/technology/matrix/advanced?fs=${stage.status}`}
-							class={`matrix-home__stage matrix-home__stage--${stage.status}`}
-						>
-							<strong>{stage.count}</strong>
-							<span>{stage.label}</span>
-						</a>
-					))}
-				</div>
-			</div>
-		</div>
-	</section>
-
-	<section class="landing-section landing-section--company">
-		<SectionHeader
-			kicker="For Companies"
-			title="Partnerships"
-			body="Work with Rawkode to help marketing, product, DevRel, sales engineering, and technical owners find the claims, docs, demos, and operational gaps that stall technical buyers."
-			ctaLabel="Compare packages →"
-			ctaHref="/organizations/partnerships"
-		/>
-	</section>
-
-	<NewsletterStrip />
-
-	<div class="landing-stack">
-		{newsItems.length > 0 && (
-			<section class="landing-section">
-				<SectionHeader
-					kicker="Updated daily"
-					title="Latest News"
-					body="Recent updates from across the cloud native ecosystem."
-					ctaLabel="All news →"
-					ctaHref="/news"
-				/>
-				<EditorialCardRail items={newsItems} />
-			</section>
-		)}
-
-		{learningPathItems.length > 0 && (
-			<section class="landing-section">
-				<SectionHeader
-					kicker={`${allLearningPaths.length} paths`}
-					title="Learning Paths"
-					body="Structured routes through related lessons, articles, and videos."
-					ctaLabel="All paths →"
-					ctaHref="/learning-paths"
-				/>
-				<EditorialCardRail items={learningPathItems} />
-			</section>
-		)}
-
-		{featuredVideo && (
-			<section class="landing-section">
-				<SectionHeader
-					kicker={`${publishedVideos.length} in the archive`}
-					title="Latest Videos"
-					body="Recent sessions, walkthroughs, and practical demos."
-					ctaLabel="Browse videos →"
-					ctaHref="/watch"
-				/>
-
-				<FeaturedFeature
-					href={`/watch/${featuredVideo.data.slug}`}
-					meta={[
-						videoLabel(featuredVideo),
-						formatPublishedDate(featuredVideo.data.publishedAt),
-						formatDuration(
-							typeof featuredVideo.data.duration === "number"
-								? featuredVideo.data.duration
-								: undefined,
-						),
-					]}
-					title={featuredVideo.data.title}
-					body={summarizeVideo(featuredVideo)}
-					cta="Watch session"
-					mediaSrc={getVideoThumbnailUrl(featuredVideo.data.id)}
-				/>
-
-				{secondaryVideoItems.length > 0 && (
-					<SecondaryGrid items={secondaryVideoItems} withMedia />
-				)}
-			</section>
-		)}
-
-		{featuredArticle && (
-			<section class="landing-section">
-				<SectionHeader
-					kicker={`${allArticles.length} published`}
-					title="Latest Articles"
-					body="Technical guides, architecture notes, and written explanations."
-					ctaLabel="Browse articles →"
-					ctaHref="/read"
-				/>
-
-				<FeaturedFeature
-					href={`/read/${featuredArticle.id}`}
-					meta={[
-						articleLabel(featuredArticle),
-						formatPublishedDate(featuredArticle.data.publishedAt),
-					]}
-					title={featuredArticle.data.title}
-					body={summarizeArticle(featuredArticle)}
-					cta="Read article"
-					{...(featuredArticle.data.cover
-						? {
-								mediaImage: featuredArticle.data.cover.image,
-								mediaAlt:
-									featuredArticle.data.cover.alt ?? featuredArticle.data.title,
-							}
-						: { mediaPlaceholder: true })}
-				/>
-
-				{secondaryArticleItems.length > 0 && (
-					<SecondaryGrid items={secondaryArticleItems} withMedia />
-				)}
-			</section>
-		)}
-
-	</div>
 </Page>
-
-<style>
-	.landing-stack {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-section-gap-lg);
-		padding: var(--space-section-pad-y) 0 var(--space-page-pad-bottom);
-	}
-
-	.landing-section {
-		padding: 0 var(--space-section-pad-x);
-	}
-
-	.landing-section--matrix {
-		padding: 0;
-	}
-
-	.landing-section--company {
-		padding-top: clamp(2rem, 6vw, 4rem);
-		padding-bottom: clamp(2rem, 6vw, 4rem);
-		border-bottom: 1px solid color-mix(in oklab, var(--color-primary-content) 14%, transparent);
-	}
-
-	.matrix-home {
-		display: grid;
-		grid-template-columns: minmax(0, 0.9fr) minmax(20rem, 1.1fr);
-		gap: clamp(2rem, 5vw, 5rem);
-		align-items: center;
-		padding: clamp(2rem, 6vw, 4.5rem) var(--space-section-pad-x);
-		background:
-			linear-gradient(
-				90deg,
-				color-mix(in oklab, var(--editorial-paper-deep) 72%, transparent),
-				color-mix(in oklab, var(--editorial-paper) 90%, transparent)
-			);
-		border-block: 1px solid var(--editorial-hairline);
-	}
-
-	.matrix-home__copy {
-		max-width: 42rem;
-	}
-
-	.matrix-home h2 {
-		margin: 0 0 0.85rem;
-		font-family: var(--font-instrument-serif), serif;
-		font-size: clamp(2.75rem, 7vw, 6rem);
-		font-style: italic;
-		font-weight: 500;
-		line-height: 0.95;
-		letter-spacing: 0;
-		color: var(--editorial-ink);
-	}
-
-	.matrix-home p {
-		max-width: 34rem;
-		margin: 0;
-		font-size: clamp(1.08rem, 1.8vw, 1.35rem);
-		line-height: 1.45;
-		color: var(--editorial-ink-soft);
-	}
-
-	.matrix-home__actions {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.85rem;
-		margin-top: 1.65rem;
-	}
-
-	.matrix-home__primary,
-	.matrix-home__secondary {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.55rem;
-		min-height: 3rem;
-		padding: 0.75rem 1.05rem;
-		border: 1px solid var(--editorial-ink);
-		border-radius: 3px;
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.74rem;
-		font-weight: 700;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
-		text-decoration: none;
-		transition:
-			background-color var(--duration-base) var(--ease-standard),
-			color var(--duration-base) var(--ease-standard),
-			border-color var(--duration-base) var(--ease-standard);
-	}
-
-	.matrix-home__primary {
-		background: var(--editorial-ink);
-		color: var(--editorial-paper);
-	}
-
-	.matrix-home__secondary {
-		background: transparent;
-		color: var(--editorial-ink);
-	}
-
-	.matrix-home__primary:hover,
-	.matrix-home__secondary:hover {
-		background: var(--editorial-spruce);
-		border-color: var(--editorial-spruce);
-		color: var(--editorial-paper);
-	}
-
-	.matrix-home__panel {
-		display: grid;
-		gap: 1rem;
-		min-width: 0;
-	}
-
-	.matrix-home__totals {
-		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		border: 1px solid var(--editorial-hairline);
-		background: var(--editorial-paper);
-	}
-
-	.matrix-home__totals > div {
-		padding: 1rem;
-	}
-
-	.matrix-home__totals > div + div {
-		border-left: 1px solid var(--editorial-hairline);
-	}
-
-	.matrix-home__totals strong,
-	.matrix-home__stage strong {
-		display: block;
-		font-family: var(--font-jetbrains-mono), monospace;
-		color: var(--editorial-ink);
-	}
-
-	.matrix-home__totals strong {
-		font-size: clamp(1.6rem, 4vw, 2.65rem);
-		line-height: 1;
-	}
-
-	.matrix-home__totals span,
-	.matrix-home__stage span {
-		display: block;
-		margin-top: 0.35rem;
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.68rem;
-		font-weight: 650;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
-		color: var(--editorial-ink-mute);
-	}
-
-	.matrix-home__stages {
-		display: grid;
-		grid-template-columns: repeat(5, minmax(0, 1fr));
-		gap: 0.5rem;
-	}
-
-	.matrix-home__stage {
-		display: block;
-		min-width: 0;
-		padding: 0.9rem 0.75rem;
-		background: var(--editorial-paper);
-		border: 1px solid var(--editorial-hairline);
-		border-top: 3px solid var(--stage-color, var(--editorial-spruce));
-		text-decoration: none;
-	}
-
-	.matrix-home__stage--watch { --stage-color: oklch(0.66 0.13 55); }
-	.matrix-home__stage--explore { --stage-color: oklch(0.68 0.12 85); }
-	.matrix-home__stage--learn { --stage-color: oklch(0.58 0.13 245); }
-	.matrix-home__stage--adopt { --stage-color: oklch(0.58 0.13 155); }
-	.matrix-home__stage--advocate { --stage-color: var(--editorial-spruce); }
-
-	.matrix-home__stage:hover {
-		border-color: var(--editorial-hairline-strong);
-		background: var(--editorial-paper-deep);
-	}
-
-	@media (max-width: 720px) {
-		.landing-section { padding: 0 1.25rem; }
-		.landing-section--matrix { padding: 0; }
-		.landing-stack { gap: var(--space-section-gap); padding: 2.5rem 0 4rem; }
-		.matrix-home {
-			grid-template-columns: 1fr;
-			gap: 1.5rem;
-			padding: 2.25rem 1.25rem;
-		}
-		.matrix-home__actions {
-			flex-direction: column;
-		}
-		.matrix-home__primary,
-		.matrix-home__secondary {
-			width: 100%;
-		}
-		.matrix-home__stages {
-			grid-template-columns: repeat(2, minmax(0, 1fr));
-		}
-	}
-</style>

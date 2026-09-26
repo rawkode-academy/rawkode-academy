@@ -6,6 +6,7 @@ import "vidstack/player/layouts/default";
 import "vidstack/player/ui";
 import { actions } from "astro:actions";
 import { onMounted, onUnmounted, ref } from "vue";
+import { academyWatch } from "@rawkodeacademy/design-system";
 
 const props = defineProps<{
 	video: string;
@@ -14,6 +15,7 @@ const props = defineProps<{
 	initialPosition?: number;
 	isAuthenticated?: boolean;
 }>();
+const watch = academyWatch();
 
 const progressMilestones = ref<Set<number>>(new Set());
 let savePositionTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -204,10 +206,10 @@ onUnmounted(() => {
 </script>
 
 <template>
-	<div class="w-full aspect-video">
+	<div :class="watch.player">
 		<media-player
 			:autoplay="!!autoPlay"
-			class="w-full h-full"
+			:class="watch.playerSurface"
 			playsinline
 		>
 			<media-provider>
@@ -220,27 +222,3 @@ onUnmounted(() => {
 		</media-player>
 	</div>
 </template>
-
-<style scoped>
-/* Prevent automatic fullscreen on iOS */
-:deep(video) {
-	-webkit-playsinline: true;
-	playsinline: true;
-}
-
-/* Ensure video stays in its container on mobile */
-:deep(media-player) {
-	position: relative !important;
-}
-
-/* Override any fullscreen styles on mobile */
-@media (max-width: 768px) {
-	:deep(video::-webkit-media-controls-fullscreen-button) {
-		display: inline-block !important;
-	}
-	
-	:deep(.vds-fullscreen) {
-		position: relative !important;
-	}
-}
-</style>

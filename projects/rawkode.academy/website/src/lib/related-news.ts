@@ -1,3 +1,5 @@
+import { isNewsPublished } from "./news-publication";
+
 export interface RelatedNewsCandidate {
 	id: string;
 	data: {
@@ -24,20 +26,24 @@ interface ScoredCandidate<T> {
  *  2. Within an equal-overlap band (including the zero-overlap fallback band),
  *     newer `publishedAt` wins.
  *
- * The current story is always excluded.
+ * The current story and unpublished/invalid dates are always excluded.
  */
 export function selectRelatedNews<T extends RelatedNewsCandidate>(
 	currentId: string,
 	currentTechnologies: ReadonlyArray<string>,
 	candidates: ReadonlyArray<T>,
 	limit: number,
+	now = new Date(),
 ): T[] {
 	if (limit <= 0) return [];
 
 	const currentTechSet = new Set(currentTechnologies);
 
 	const scored: ScoredCandidate<T>[] = candidates
-		.filter((story) => story.id !== currentId)
+		.filter(
+			(story) =>
+				story.id !== currentId && isNewsPublished(story.data.publishedAt, now),
+		)
 		.map((story) => {
 			const shared = (story.data.technologies ?? []).reduce(
 				(count, technology) =>

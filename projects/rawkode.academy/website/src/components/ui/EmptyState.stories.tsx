@@ -59,7 +59,7 @@ export const StartAligned: Story = {
 	}),
 	args: {
 		title: "More courses launching soon",
-		body: "Kubernetes, platform engineering, and identity deep dives are next.",
+		body: "Kubernetes, platform engineering, and identity courses are next.",
 		align: "start",
 	},
 };

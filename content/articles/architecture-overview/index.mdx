@@ -10,7 +10,6 @@ cover:
   image: "./cover.jpg"
   alt: "A homemade steampunk Stargate"
 publishedAt: 2024-12-13
-draft: false
 authors:
   - rawkode
 technologies:
@@ -18,6 +17,8 @@ technologies:
   - rust
   - kubernetes
 ---
+
+import Diagram from "@/components/articles/Diagram.astro";
 
 Welcome to the Rawkode Academy! We're thrilled to start talking about our new platform, designed to provide developers with an immersive and engaging learning experience.
 
@@ -57,6 +58,8 @@ Depending on what part of the platform you interact with; you'll be hitting eith
 I've taken a few liberties with the arrows on the diagram below (on the write path) in-order to have the diagram be more readable.
 
 All write requests, and some read (such as people) go through Zitadel for AuthN.
+
+<Diagram id="academy-architecture" title="Academy read and write services" description="The website queries the Cosmo GraphQL gateway, which routes to five read services and their databases. Each database also connects to a corresponding write service behind the Restate RPC gateway.">
 
 ```d2 sketch
 # System architecture in D2
@@ -120,6 +123,8 @@ TechnologiesDB <-> TechnologiesRestate
 # Cosmo.style.fill: lightgreen
 # Restate.style.fill: lightyellow
 ```
+
+</Diagram>
 
 ## Command Query Responsibility Segregation (CQRS)
 

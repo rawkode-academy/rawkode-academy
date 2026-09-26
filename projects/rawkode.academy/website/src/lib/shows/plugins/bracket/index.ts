@@ -17,11 +17,14 @@ import {
 } from "./queries";
 
 export type BracketPageSlug = "seasons" | "brackets" | "schedule" | "apply";
+export type BracketEndpointSlug = "apply" | "live" | "schedule.ics";
 
 export interface BracketPluginConfig {
 	showId: string;
 	// Which pages to expose, in nav order. Defaults to all four.
 	enabledPages?: BracketPageSlug[];
+	// Which public endpoints to expose. Defaults to all bracket endpoints.
+	enabledEndpoints?: BracketEndpointSlug[];
 }
 
 const READ_CACHE =
@@ -85,7 +88,6 @@ export const bracketPlugin: ShowPlugin<BracketPluginConfig> = (
 						readModel,
 						user: ctx.locals.user ? { id: ctx.locals.user.id } : null,
 					}),
-					submitted: ctx.url.searchParams.get("submitted") === "1",
 				};
 			},
 			meta: () => ({ title: "Apply to compete" }),
@@ -99,10 +101,15 @@ export const bracketPlugin: ShowPlugin<BracketPluginConfig> = (
 		"schedule",
 		"apply",
 	];
+	const endpoints = bracketEndpoints(showId);
 
 	return {
 		showId,
 		pages: order.map((slug) => allPages[slug]),
-		endpoints: bracketEndpoints(showId),
+		endpoints: config.enabledEndpoints
+			? endpoints.filter((endpoint) =>
+					config.enabledEndpoints?.includes(endpoint.slug as BracketEndpointSlug),
+				)
+			: endpoints,
 	};
 };

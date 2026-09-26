@@ -3,7 +3,11 @@ import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkStringify from "remark-stringify";
 import remarkMdx from "remark-mdx";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import matter from "gray-matter";
 import { remarkTechAutolink } from "@/lib/remark-tech-autolink";
+import { loadTechLookup } from "@/lib/load-tech-lookup";
 
 const lookup = new Map<string, string>([
 	["kubernetes", "kubernetes"],
@@ -189,5 +193,90 @@ describe("remarkTechAutolink", () => {
 		].join("\n");
 		const out = await process(source);
 		expect(out).toContain("[Kubernetes](/technology/kubernetes)");
+	});
+});
+
+describe("NEWS04 ordinary-word collisions against the real technology lookup", () => {
+	const realLookup = loadTechLookup();
+	const processor = unified()
+		.use(remarkParse)
+		.use(remarkMdx)
+		.use(asPluggable(remarkTechAutolink({ lookup: realLookup })));
+	const excluded = ["namespace", "radius", "fleet", "waypoint"];
+	const collect = (tree: any, type: string): any[] => [
+		...(tree.type === type ? [tree] : []),
+		...(tree.children ?? []).flatMap((child: any) => collect(child, type)),
+	];
+	const body = (id: string) =>
+		matter(
+			readFileSync(resolve(`../../../content/news/${id}/index.mdx`), "utf8"),
+		).content;
+
+	it.each([
+		"2026-06-01-cloud-native-ai-infra-digest",
+		"2026-06-05-envoy-istio-nccl",
+		"2026-09-19-externaldns-023-dry-run-crd-registry",
+		"aks-critical-privilege-escalation-cve-2026-33105",
+		"containerd-cve-2026-46680-runasnonroot-bypass",
+		"kubernetes-1-36-dra-drivers-features-beta",
+		"ofu-fleet-scale-gpu-efficiency-arxiv",
+	])("preserves authored prose/links and avoids collisions in %s", async (id) => {
+		for (const name of excluded) expect(realLookup.get(name)).toBe(name);
+		const tree = processor.parse(body(id));
+		const explicit = collect(tree, "link").map((node) => JSON.stringify(node));
+		const text = collect(tree, "text")
+			.map((node) => node.value)
+			.join("");
+		const result = await processor.run(tree, {
+			path: `/repo/content/news/${id}/index.mdx`,
+		});
+		const links = collect(result, "link");
+		for (const link of explicit)
+			expect(links.map((node) => JSON.stringify(node))).toContain(link);
+		expect(
+			collect(result, "text")
+				.map((node) => node.value)
+				.join(""),
+		).toBe(text);
+		for (const name of excluded) {
+			const generated = links.filter(
+				(node) =>
+					node.url === `/technology/${name}` &&
+					!explicit.includes(JSON.stringify(node)),
+			);
+			expect(generated).toEqual([]);
+		}
+	});
+
+	it("retains explicit product links and still autolinks unambiguous technologies", async () => {
+		const source =
+			"Namespace radius fleet Waypoint. Kubernetes works with Envoy and Istio.\n\n" +
+			excluded.map((name) => `[${name}](/technology/${name})`).join(" ") +
+			"\n\n[Fleet documentation][fleet-docs]\n\n[fleet-docs]: https://example.test/fleet\n";
+		const tree = processor.parse(source);
+		const explicit = collect(tree, "link").map((node) => JSON.stringify(node));
+		const references = collect(tree, "linkReference").map((node) =>
+			JSON.stringify(node),
+		);
+		const result = await processor.run(tree);
+		const links = collect(result, "link");
+		for (const original of explicit)
+			expect(links.map((node) => JSON.stringify(node))).toContain(original);
+		expect(
+			collect(result, "linkReference").map((node) => JSON.stringify(node)),
+		).toEqual(references);
+		for (const name of [...excluded, "kubernetes", "envoy", "istio"]) {
+			expect(
+				links.filter((node) => node.url === `/technology/${name}`),
+			).toHaveLength(1);
+		}
+	});
+
+	it("NEWS02 digest has four peer H2s and no body H1 or skipped heading level", () => {
+		const headings = collect(
+			processor.parse(body("2026-06-01-cloud-native-ai-infra-digest")),
+			"heading",
+		);
+		expect(headings.map((node) => node.depth)).toEqual([2, 2, 2, 2]);
 	});
 });

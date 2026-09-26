@@ -1,4 +1,6 @@
 ---
+import { academyDocument } from "@rawkodeacademy/design-system";
+const doc = academyDocument();
 export const prerender = false;
 
 import { getCollection, getEntries } from "astro:content";
@@ -176,73 +178,55 @@ function formatDuration(seconds: number) {
  )}
 
  <!-- Hero -->
- <section class="relative overflow-hidden" style="border-bottom: 1px solid var(--surface-border)">
- <div class="absolute inset-0 bg-[var(--surface-card)]" aria-hidden="true"></div>
- <div class="absolute inset-0 bg-[rgba(var(--brand-primary),0.05)]" aria-hidden="true"></div>
-
- <div class="relative mx-auto max-w-7xl content-px pb-12 pt-8">
+ <section class={doc.hero}>
+ <div class={[doc.container, doc.stack].join(" ")}>
  <Breadcrumb elements={breadcrumbElements} />
 
- <div class="mt-8 flex flex-col gap-8 lg:flex-row lg:items-center lg:gap-12">
+ <div class={doc.showHero}>
  <!-- Show info -->
- <div class="flex-1 space-y-5">
- <div class="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 dark:bg-primary/20">
- <svg class="h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 20.25h12m-7.5-3v3m3-3v3m-10.125-3h17.25c.621 0 1.125-.504 1.125-1.125V4.875c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125z" />
- </svg>
- <span class="text-sm font-semibold text-primary dark:text-secondary">{statusLabel}</span>
- </div>
+ <div class={[doc.spacer, doc.stack].join(" ")}>
+ <p class={doc.kicker}>{statusLabel}</p>
 
- <h1 class="text-4xl font-extrabold tracking-tight text-primary-content sm:text-5xl lg:text-6xl">
+ <h1 class={doc.title}>
  {showEntry.data.name}
  </h1>
 
  {showEntry.data.tagline && (
- <p class="font-mono text-xs font-semibold uppercase tracking-[0.14em] text-secondary">
+ <p class={doc.kicker}>
  {showEntry.data.tagline}
  </p>
  )}
 
  {hostNames.length > 0 && (
- <div class="flex flex-wrap items-center gap-2">
- <span class="text-sm text-muted">Hosted by</span>
- {hostNames.map((host) => (
- <span class="hairline-chip text-sm font-medium text-primary-content">
- {host}
- </span>
+ <div class={doc.actions}>
+ <span class={doc.meta}>Hosted by</span>
+ {hostEntries.map((host) => (
+ <a class={doc.link} href={`/people/${host.data.id}`}>{host.data.name}</a>
  ))}
  </div>
  )}
 
- <p class="max-w-2xl text-lg leading-relaxed text-secondary-content">
+ <p class={doc.lede}>
  {showDescription}
  </p>
 
  {showEntry.data.gameFormatUrl && (
- <a
- href={showEntry.data.gameFormatUrl}
- class="focus-ring inline-flex w-fit items-center gap-2 rounded-sm border px-4 py-2 text-sm font-semibold text-primary-content transition-colors hover:border-primary hover:text-primary"
- style="border-color: var(--surface-border)"
- rel="noopener noreferrer"
- >
- Explore the game format
- <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.5 4.5H19.5m0 0v6m0-6L10.5 13.5M8.25 6.75h-2.5a1.25 1.25 0 0 0-1.25 1.25v10.25a1.25 1.25 0 0 0 1.25 1.25H16a1.25 1.25 0 0 0 1.25-1.25v-2.5" />
- </svg>
- </a>
+ <div class={doc.actions}>
+ <a href={showEntry.data.gameFormatUrl} class={doc.buttonSecondary} rel="noopener noreferrer">Explore the game format ↗</a>
+ </div>
  )}
 
  {hasEpisodeFeed && (
- <div class="flex flex-wrap items-center gap-4 text-sm text-muted">
- <div class="flex items-center gap-1.5">
- <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+ <div class={doc.meta}>
+ <div class={doc.row}>
+ <svg class={doc.iconSmall} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
  </svg>
  <span>{feedVideos.length} {feedVideos.length === 1 ? "episode" : "episodes"}</span>
  </div>
  {totalHours > 0 && (
- <div class="flex items-center gap-1.5">
- <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+ <div class={doc.row}>
+ <svg class={doc.iconSmall} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
  </svg>
  <span>{totalHours}+ hours of content</span>
@@ -251,42 +235,42 @@ function formatDuration(seconds: number) {
  </div>
  )}
 
- <SubscribeLinks links={showEntry.data.subscribeLinks} />
+ {!isComingSoon && <SubscribeLinks links={showEntry.data.subscribeLinks} />}
  </div>
 
  <!-- Cover image or latest episode thumbnail -->
  {showEntry.data.cover ? (
- <div class="flex-shrink-0 w-full lg:w-2/5 max-w-md">
- <div class="overflow-hidden rounded-sm " style="border: 1px solid var(--surface-border)">
+ <div class={doc.mediaColumn}>
+ <div class={doc.media}>
  <Image
  src={showEntry.data.cover.image}
  alt={showEntry.data.cover.alt}
- class="w-full h-auto object-cover"
+ class={doc.image}
  />
  </div>
  </div>
  ) : latestEpisode ? (
- <div class="flex-shrink-0 w-full lg:w-2/5 max-w-md">
- <a href={`/watch/${latestEpisode.slug}`} class="group block">
- <div class="relative overflow-hidden rounded-sm " style="border: 1px solid var(--surface-border)">
+ <div class={doc.mediaColumn}>
+ <a href={`/watch/${latestEpisode.slug}`} class={doc.main}>
+ <div class={doc.media}>
  <img
  src={latestEpisode.thumbnailUrl}
  alt={`Latest episode: ${latestEpisode.title}`}
- class="aspect-video w-full object-cover group-hover:scale-[1.03]"
+ class={doc.image}
  loading="eager"
  />
- <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
- <div class="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
- <div class="flex h-16 w-16 items-center justify-center rounded-full bg-primary/90 text-white ">
- <svg class="h-7 w-7 ml-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+ <div class={doc.mediaOverlay}></div>
+ <div class={doc.playOverlay} aria-hidden="true">
+ <div class={doc.play}>
+ <svg class={doc.iconLarge} fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
  <path d="M8 5v14l11-7z" />
  </svg>
  </div>
  </div>
- <div class="absolute bottom-0 left-0 right-0 p-4">
- <p class="text-xs font-medium text-white/80">Latest Episode</p>
- <p class="mt-1 line-clamp-2 text-sm font-semibold text-white">{latestEpisode.title}</p>
- <div class="mt-2 flex items-center gap-3 text-xs text-white/70">
+ <div class={doc.mediaCaption}>
+ <p class={doc.mediaMeta}>Latest Episode</p>
+ <p class={doc.mediaTitle}>{latestEpisode.title}</p>
+ <div class={doc.mediaMeta}>
  <span>{formatDate(latestEpisode.publishedAt)}</span>
  {latestEpisode.duration > 0 && (
  <span>{formatDuration(latestEpisode.duration)}</span>
@@ -299,16 +283,6 @@ function formatDuration(seconds: number) {
  ) : null}
  </div>
 
- <!-- Newsletter - full width, subtle -->
- <div class="mt-8">
- <NewsletterCTA
- class="!py-0"
- audience={`show:${showEntry.data.id}`}
- badge={isComingSoon ? "Coming soon" : "Get notified of new episodes"}
- headline={isComingSoon ? `Follow ${showEntry.data.name}` : `Subscribe to ${showEntry.data.name}`}
- subtitle={isComingSoon ? "Be the first to know when this show is ready." : "Be the first to know when new episodes drop."}
- />
- </div>
  </div>
  </section>
 
@@ -316,15 +290,15 @@ function formatDuration(seconds: number) {
  <ShowNav showId={showEntry.data.id} nav={showNav} active={null} />
  )}
 
- <!-- Show state / episodes -->
- <section class="section-py" style="background: var(--surface-base)">
- <div class="mx-auto flex max-w-7xl flex-col gap-10 content-px">
+ <!-- Episodes -->
+ <section class={doc.section}>
+ <div class={[doc.container, doc.stack].join(" ")}>
  {isComingSoon ? (
-	<div class="mx-auto max-w-2xl rounded-sm paper-card p-12 text-center bleed-x-mobile">
-		<p class="font-mono text-xs font-semibold uppercase tracking-[0.14em] text-secondary">Coming soon</p>
-		<h2 class="mt-3 text-3xl text-primary-content">This show is being prepared for the stage.</h2>
-		<p class="mt-3 text-sm text-muted">Follow the show to hear when it is ready. No episodes or schedule have been announced.</p>
-	</div>
+ <div class={doc.empty}>
+ <p class={doc.kicker}>Coming soon</p>
+ <h2 class={doc.sectionTitle}>This show is being prepared for the stage.</h2>
+ <p class={doc.copy}>Follow the show to hear when it is ready. No episodes or schedule have been announced.</p>
+ </div>
  ) : hasEpisodeFeed ? (
  <VideoFeed
  title="Episodes"
@@ -332,9 +306,9 @@ function formatDuration(seconds: number) {
  videos={feedVideos}
  />
  ) : (
-	<div class="mx-auto max-w-2xl rounded-sm paper-card p-12 text-center bleed-x-mobile">
+ <div class={doc.empty}>
  <svg
- class="mx-auto h-16 w-16 text-primary/30 dark:text-primary/20"
+ class={doc.iconLarge}
  fill="none"
  viewBox="0 0 24 24"
  stroke="currentColor"
@@ -347,14 +321,22 @@ function formatDuration(seconds: number) {
  d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z"
  />
  </svg>
- <p class="mt-4 text-lg font-medium text-secondary-content">
- {isArchived ? "This show is archived" : "No episodes yet"}
+ <p class={doc.lede}>
+ {isArchived ? "This show is archived" : "No published episodes available"}
  </p>
- <p class="mt-2 text-sm text-muted">
- {isArchived ? "This show remains available as an archive." : "Episodes will appear here when they are published."}
+ <p class={doc.meta}>
+ Browse the <a href="/shows" class={doc.link}>show archive</a> for other programs.
  </p>
  </div>
  )}
  </div>
+ </section>
+ <section class={doc.section}>
+ <NewsletterCTA
+ audience={`show:${showEntry.data.id}`}
+ badge={isComingSoon ? "Coming soon" : isArchived ? "Show updates" : "New episodes by email"}
+ headline={`Follow ${showEntry.data.name}`}
+ subtitle={isComingSoon ? "Be the first to know when this show is ready." : isArchived ? "Get an email if there is news about this show." : "Get an email when a new episode is published."}
+ />
  </section>
 </Page>

@@ -1,7 +1,8 @@
 ---
 import { type CollectionEntry, getCollection } from "astro:content";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
-import { formatVideoRuntimeLabel } from "@/lib/video-runtime";
+import { formatVideoRuntimeLabel, isUpcomingLiveVideo } from "@/lib/video-runtime";
+import { academyRelatedContent } from "@rawkodeacademy/design-system";
 
 interface Props {
 	currentArticle: CollectionEntry<"articles">;
@@ -9,6 +10,7 @@ interface Props {
 }
 
 const { currentArticle, limit = 3 } = Astro.props;
+const s = academyRelatedContent();
 
 const normalizeTechnologyId = (value: unknown): string | null => {
 	let raw: string | null = null;
@@ -81,32 +83,32 @@ if (articleTechnologySet.size > 0) {
 ---
 
 {relatedVideos.length > 0 && (
-	<section class="mt-16 pt-16 border-t border-surface">
-		<h2 class="text-2xl font-bold text-primary-content mb-8">
+	<section class:list={[s.section, s.related]}>
+		<h2 class={s.heading}>
 			Related Videos
 		</h2>
-		<div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+		<div class={s.grid}>
 			{relatedVideos.map((video) => (
 				<a
 					href={`/watch/${video.slug}`}
-					class="group block paper-card-muted rounded-sm overflow-hidden"
+					class={s.card}
 				>
-					<div class="relative aspect-video overflow-hidden bg-[var(--surface-card)]">
+					<div class={s.media}>
 						<img
 							src={video.thumbnailUrl}
 							alt={video.title}
-							class="w-full h-full object-cover group-hover:scale-105 "
+							class={s.image}
 							width="1280"
 							height="720"
 							loading="lazy"
 							decoding="async"
 						/>
-						<div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
+						{(isUpcomingLiveVideo(video) || (Number.isFinite(video.duration) && video.duration > 0)) && <span class={s.duration}>
 							{formatVideoRuntimeLabel(video)}
-						</div>
+						</span>}
 					</div>
-					<div class="p-3">
-						<h3 class="font-medium text-secondary-content group-hover:text-primary-content line-clamp-2 transition-colors text-sm">
+					<div class={s.body}>
+						<h3 class={s.title}>
 							{video.title}
 						</h3>
 					</div>

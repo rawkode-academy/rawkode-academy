@@ -5,7 +5,7 @@ difficulty: "advanced"
 estimatedDuration: 432
 prerequisites:
   - "Comfortable with Kubernetes fundamentals (control plane, nodes, pods, services, deployments)."
-  - "Daily `kubectl` user familiar with contexts, namespaces, and auth."
+  - "Daily kubectl user familiar with contexts, namespaces, and auth."
   - "Experience managing manifests with Helm/Kustomize or similar tooling."
   - "Working knowledge of Git workflows (branches, PRs) and CI/CD automation."
   - "Optional: exposure to CUE, GitOps controllers (Flux/Argo), or multi-cluster operations." 
@@ -21,8 +21,6 @@ publishedAt: "2025-10-01"
 authors:
   - "rawkode"
 ---
-
-# GitOps Landscape
 
 GitOps is more than a controller—you need packaging discipline, environment orchestration, reconciliation pipelines, and developer UX. This path assembles opinionated tools so platform engineers can scale fleets while keeping guardrails intact.
 

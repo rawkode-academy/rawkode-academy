@@ -19,7 +19,7 @@ export const Default: Story = {
 	render: (args) => ({
 		components: { MLabel },
 		setup: () => ({ args }),
-		template: `<MLabel v-bind="args">§00 · Dispatch</MLabel>`,
+		template: `<MLabel v-bind="args">Articles</MLabel>`,
 	}),
 	args: { tone: "muted" },
 };

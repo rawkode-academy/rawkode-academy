@@ -1,9 +1,10 @@
 import { getCollection } from "astro:content";
 import type { APIContext } from "astro";
+import { getPublishedVideos } from "@/lib/content";
 
 export async function getStaticPaths() {
 	const shows = await getCollection("shows");
-	const videos = await getCollection("videos");
+	const videos = await getPublishedVideos();
 
 	const paths: { params: { showId: string; episodeId: string } }[] = [];
 
@@ -33,7 +34,11 @@ export async function getStaticPaths() {
 export async function GET(context: APIContext) {
 	const { showId, episodeId } = context.params;
 
-	const videos = await getCollection("videos");
+	const shows = await getCollection("shows");
+	if (!shows.some((show) => show.data.id === showId && show.data.publish && show.data.status !== "coming-soon")) {
+		return new Response("Show not found or not published", { status: 404 });
+	}
+	const videos = await getPublishedVideos();
 	const video = videos.find((v) => {
 		const videoShow = v.data.show;
 		if (!videoShow) return false;

@@ -1,0 +1,325 @@
+---
+title: "Introduction to WebAssembly on Kubernetes with Krustlet"
+description: "Welcome! 👋 This article will aim to introduce you to something wild and wonderful - running WebAssem..."
+type: tutorial
+publishedAt: 2020-07-02
+updatedAt: 2020-07-12
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+  - webassembly
+---
+
+Welcome! 👋
+
+This article will aim to introduce you to something wild and wonderful - running WebAssembly binaries on Kubernetes, with Krustlet.
+
+## Why?
+
+WebAssembly is bytecode that can be executed in your browser, regardless of operating system or architecture; this has opened up a, potentially,
+whole new era of web programming; one that doesn't need transpiled to JavaScript.
+
+Thus far, a few languages have trialed and tested support for compiling their code to WASM for usage within the browser. You can learn about some
+of these efforts by checking out these links.
+
+- [C/C++](http://kripken.github.io/emscripten-site/)
+- [Go](https://github.com/golang/go/wiki/WebAssembly)
+- [PHP](https://github.com/oraoto/pib)
+- [Rust](https://github.com/rustwasm)
+- [Swift](https://swiftwasm.org/)
+- [TypeScript](http://assemblyscript.org/)
+
+There are more, but I think that's enough to pique your interest.
+
+**ANY** language, in the browser ... that's a pretty interesting idea, right? 😉
+
+One thing we don't often talk about when discussing the browser ... it's pretty darn secure. Running JavaScript in your browser can't
+actually do much damage to your host system. This is because the JavaScript engines, such as v8 or SpiderMonkey, run the JavaScript
+code in a sandbox; much like modern Linux container systems, like containerd.
+
+So what if we want to leverage WASM, in our many languages, and benefit from the sandbox out the browser ... but without the browser?
+
+Enter, WASI and `wasmtime`.
+
+### WebAssembly System Interface (WASI)
+
+[WASI](https://wasi.dev/) provides an interface for running WASM code as a process on your operating system, rather than
+browsers; which allows us to interact with all the things the browser doesn't: files and filesystems, Berkeley sockets, clocks, and random numbers.
+
+WASI does this in a fashion that still gives us similiar security boundaries that we get within the browser, but through a capabilities model defined
+by the runtime. WASI is not a runtime, but the interface that runtimes must adhere too. This is handled by a capability-based security model.
+
+How do capabilities work? Lets use an example. Most applications open a file by some reference, which is usually a file path on the filesystem. Any application
+that has that reference (file path) can interact with that file, provided the [Ambient Authority](https://en.wikipedia.org/wiki/Ambient_authority) allows.
+
+What does that mean? It means that if user `rawkode` executes a binary, and `rawkode` has permissions to read a file; then that binary can read that file.
+
+That's not ideal.
+
+WASI uses a [Capability model](https://en.wikipedia.org/wiki/Capability-based_security), rather than ambient authority. When you execute a WASI binary, it can ONLY access the files that you have given that binary
+the permission to.
+
+What does that mean? Think about container images when executed, they can only access the files within the container image, or explictly bind mounted in. WASI is
+the same. WASI binaries can only access files if the binary is given permission to access them, usually by providing a directory root.
+
+### wasmtime
+
+`wasmtime` is an implemention of WASI. You can think of `wasmtime` much like `node`. In the same way that `node` allowed us to execute JavaScript outside of the browser,
+`wasmtime` does that for WASM.
+
+### Krustlet
+
+[Krustlet](https://github.com/deislabs/krustlet) is a Kubelet implementation for Kubernetes that supports running WASM bytecode, with the `wasmtime` runtime, instead of
+container images with a container runtime.
+
+## Getting Started
+
+### Getting a Kubernetes cluster
+
+For today's tutorial, we're going to use [minikube](https://github.com/kubernetes/minikube). `minikube`
+gives us a full Kubernetes cluster, in a VM, on our local machine. With `minikube` installed, create a
+cluster with the following command.
+
+```console
+minikube start
+```
+
+### Building Krustlet
+
+As this is rather experimental / early stages, you'll need to compile the Krustlet from source. Depending on your
+machine, this can take anywhere from 3 minutes to 10 minutes; so you make want to go make a coffee or something ⏰
+
+```console
+# Clone the Krustlet source code to a local directory and enter it
+git clone https://github.com/deislabs/krustlet
+cd krustlet
+
+# Using Rust's build tool, Cargo, to build the application
+cargo build
+```
+
+#### Bootstrapping
+
+Now that we have the binaries needed to run our Krustlet, we need to perform some initial bootstrapping.
+
+Bootstrapping is important, because Kubernetes restricts access to the control plane. We need to provide enough
+configuration for our Krustlet to register itself with the control plane, so it can become a "Node" within the
+cluster.
+
+You can create this bootstrap configuration with the following command. **PLEASE** ensure your `KUBECONFIG` context is pointing to
+your development cluster, and not something in production.
+
+```console
+./docs/howto/assets/bootstrap.sh
+```
+
+You'll see some output, like so:
+
+```console
+secret/bootstrap-token-x4jygy created
+Switched to context "minikube".
+Context "minikube" renamed to "tls-bootstrap-token-user@kubernetes".
+User "tls-bootstrap-token-user" set.
+Context "tls-bootstrap-token-user@kubernetes" modified.
+Context "tls-bootstrap-token-user@kubernetes" modified.
+```
+
+What does this all mean? 🤓
+
+First, this bootstrap script creates a secret inside of our cluster; using our default `KUBECONFIG`.
+This will be setup for you when you spin up `minikube`.
+
+This secret is very similiar to a Kubelets bootstrap secret. It's all very 😴
+
+```console
+auth-extra-groups:                         # system:bootstrappers:kubeadm:default-node-token
+expiration: MjAyMC0wNy0wMlQxMzozOTo0OVo=   # 2020-07-02T13:39:49Z (1 hour from bootstrap)
+token-id: eDRqeWd5                         # x4jygy
+token-secret: OWR1enFtamdvM3BlaXQ3YQ==     # 9duzqmjgo3peit7a
+usage-bootstrap-authentication: dHJ1ZQ==   # true
+usage-bootstrap-signing: dHJ1ZQ==          # true
+```
+
+Next, the bootstrap script grabs your existing `KUBECONFIG`, copies it, crates a new user within your cluster,
+modifies the context to use that new user, and stores it at `~/.krustlet/config/bootstrap.conf`. This `bootstrap.conf`
+can now be used to provide authentication for our Krustlet to the control plane.
+
+#### Running the Krustlet
+
+```console
+KUBECONFIG=~/.krustlet/config/bootstrap.conf krustlet-wasi --node-ip $(minikube ip) --port 3000 --bootstrap-file ~/.krustlet/config/bootstrap.conf
+```
+
+The first time this runs, it will generate the required TLS certificates. You'll need to approve the CSR in another terminal tab / window.
+
+```console
+kubectl certificate approve $(uname -n)-tls
+```
+
+Lets confirm everything looks good, we should see 2 "nodes" now.
+
+```console
+NAME       STATUS   ROLES    AGE     VERSION   INTERNAL-IP     EXTERNAL-IP   OS-IMAGE               KERNEL-VERSION   CONTAINER-RUNTIME
+arch       Ready    agent    3m15s   0.3.0     192.168.39.37   <none>        <unknown>              <unknown>        mvp
+minikube   Ready    master   57m     v1.18.3   192.168.39.37   <none>        Buildroot 2019.02.10   4.19.107         docker://19.3.8
+```
+
+Congratulations, you've got a Krustlet running on `minikube`
+
+## Building a WASI Application
+
+Next, we're going to throw together a quick "Hello World" style application. Unfortunately, WASI hasn't defined what networking / Berkeley sockets will
+look like yet within WASI-land; so we can't run a web server or anything more interesting (yet).
+
+All in good time though 😁
+
+### TL;DR
+
+If you don't want to follow the DIY steps below, you can clone my repository and jump straight to the [Building](#Building) section.
+
+```console
+git clone https://gitlab.com/rawkode/wasi-hello-world
+```
+
+### DIY
+
+First, create a Rust project. This command generates a skeleton Rust project.
+
+```console
+cargo new --bin wasi-hello-world
+```
+
+You'll want to update `main.rs` with the following code. This code prints a message,
+and sleeps for 5 seconds; it then loops this process indefinitely.
+
+```rust
+// Code from
+// https://github.com/deislabs/krustlet/blob/master/docs/intro/tutorial01.md
+use std::thread::sleep;
+use std::time::Duration;
+
+fn main() {
+    loop {
+        println!("Hello, from WASI and Krustlet!");
+        sleep(Duration::from_secs(5));
+    }
+}
+```
+
+### Building
+
+We need to enable the WASI target, which we'll do with `rustup`. We also need to build our application, targetting WASI as a runtime.
+
+```console
+# Enable  wasm32-wasi as a compilation targeht
+rustup target add wasm32-wasi
+
+# Build WASI bytecode
+cargo build --target wasm32-wasi
+```
+
+### Running & Publishing
+
+When we build a WASI compatible binary, what we get is a `wasm` file.
+
+```console
+❯ ls target/wasm32-wasi/debug
+... wasi-hello-world.wasm ...
+```
+
+In order to run WASI bytecode, we use a WASI runtime; like `wasmtime`.
+
+```console
+❯ wasmtime ./target/wasm32-wasi/debug/wasi-hello-world.wasm
+Hello, from WASI and Krustlet!
+^C
+```
+
+Oooh, shiny! 🌠
+
+However, that's not what we want to do. We want to run this on Kubernetes using our Krustlet.
+
+In-order to do so, we need to "publish" our image to "somewhere".
+
+Fortunately, there's `wasm-to-oci` which allows publishing wasm binaries to OCI compatible registries.
+
+**Note:** Docker Hub and Quay do not support these artifacts at the time of writing, but GitLab, Google Cloud, and Azure Cloud do.
+
+Sadly, we do need to build this ourselves too; fortunately, it's I've prepared the commands 😃
+
+```console
+git clone https://github.com/engineerd/wasm-to-oci
+cd wasm-to-oci
+make
+sudo cp ./bin/wasm-to-oci /usr/local/bin/wasm-to-oci
+```
+
+Now, lets go back to our `wasi-hello-world` directory and push an image with our WASI binary.
+
+```console
+# You can use this image if you want, it's public
+wasm-to-oci push ./target/wasm32-wasi/debug/wasi-hello-world.wasm registry.gitlab.com:rawkode/wasi-hello-world:latest
+
+INFO[0008] Pushed: registry.gitlab.com/rawkode/wasi-hello-world:latest
+INFO[0008] Size: 1808571
+INFO[0008] Digest: sha256:a9617d29b859994cc4b6f5ea73f7d68096921f7225ed31e645f0dda7b27163ed
+```
+
+## The Last Kilometer
+
+OK. We're almost there. Thus far, we've:
+
+- ☑ Created a Kubernetes cluster with `minikube`
+- ☑ Cloned, compiled, and ran a Krustlet from source
+- ☑ Created a Rust application and compiled it to WASI
+- ☑ Converted our WASI binary to an OCI compatible image and pushed it to the GitLab Container Registry
+- ❌ Run our Rust WASI targetting binary on Kubernetes
+
+OK, so now we need to schedule our WASI workload on the Krustlet. Like ALL Kubernetes resources, we need YAML for this.
+
+Save the following to `pod.yaml`.
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: wasi-hello-world
+spec:
+  containers:
+    - name: wasi-hello-world
+      image: registry.gitlab.com/rawkode/wasi-hello-world:latest
+      imagePullPolicy: IfNotPresent
+  tolerations:
+    - key: "krustlet/arch"
+      operator: "Equal"
+      value: "wasm32-wasi"
+      effect: "NoExecute"
+```
+
+Apply this YAML file to your Kubernetes cluster.
+
+```console
+kubectl apply -f pod.yaml
+```
+
+💥 DONE 💥
+
+We've now deployed a WASI binary, via Krustlet, to our Kubernetes cluster.
+
+### Confirm the Awesome
+
+To confirm your WASI binary is running, you can use the Kubernetes tooling to check a few things.
+
+First, is the pod scheduled and running and do we have log output? Run the following commands.
+
+```console
+kubectl get pods
+kubectl logs -f wasi-hello-world
+```
+
+Awesome! I hope this helps you on your path to understanding, getting excited, and adopting WASM, WASI, and Krustlet.
+
+If you have any questions, grab me on [Twitter](https://twitter.com/rawkode).
+
+Until next time 🤘

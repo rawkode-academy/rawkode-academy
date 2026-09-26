@@ -2,6 +2,7 @@ import { getCollection, getEntries } from "astro:content";
 import type { APIContext } from "astro";
 import { generateRssFeed } from "feedsmith";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import { getPublishedVideos } from "@/lib/content";
 
 /**
  * Generate a squared podcast artwork URL using Cloudflare Image Resizing.
@@ -35,7 +36,7 @@ export async function GET(context: APIContext) {
 		return new Response("Show feed not found", { status: 404 });
 	}
 
-	const videos = await getCollection("videos");
+	const videos = await getPublishedVideos();
 	const showVideos = videos
 		.filter((video) => {
 			const videoShow = video.data.show;

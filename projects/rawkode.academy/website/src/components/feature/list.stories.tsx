@@ -48,7 +48,7 @@ export const Default: Story = {
 				{
 					title: "Modern Stack",
 					description:
-						"Use the latest technologies and frameworks to build cutting-edge applications.",
+						"Build applications with cloud native tools and frameworks.",
 					emoji: "💻",
 				},
 				{

@@ -1,105 +1,49 @@
 <template>
-	<div v-if="resources && resources.length > 0" class="space-y-6">
-		<header class="border-b border-black/10 pb-5 dark:border-white/10">
-			<div class="flex items-center gap-3">
-				<svg class="h-6 w-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-				</svg>
-				<h3 class="text-2xl font-bold tracking-tight text-primary-content">Resources</h3>
-			</div>
-			<p class="mt-2 text-sm leading-7 text-secondary-content">
-				Supporting materials for this module.
-			</p>
-		</header>
-
-		<div class="space-y-6">
-			<section
-				v-for="[category, categoryResources] in Object.entries(groupedResources)"
-				:key="category"
-				class="border-b border-black/8 pb-6 last:border-b-0 last:pb-0 dark:border-white/8"
-			>
-				<h4
-					class="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.2em]"
-					:class="getCategoryColorClass(category)"
-				>
-					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getCategoryIconPath(category)" />
-					</svg>
-					{{ categoryLabels[category] }}
-				</h4>
-
-				<div class="divide-y divide-black/8 dark:divide-white/8">
+	<section v-if="groupedResources.size > 0" :class="s.root" :aria-labelledby="headingId">
+		<h2 :id="headingId" :class="s.heading">Resources</h2>
+		<section
+			v-for="[category, categoryResources] in groupedResources"
+			:key="category"
+			:class="s.group"
+			:aria-labelledby="`${headingId}-${category}`"
+		>
+			<h3 :id="`${headingId}-${category}`" :class="s.category">{{ categoryLabels[category] }}</h3>
+			<ul :class="s.list" role="list">
+				<li v-for="(resource, index) in categoryResources" :key="index" :class="s.item">
 					<component
-						v-for="(resource, index) in categoryResources"
-						:key="index"
 						:is="resource.type === 'embed' ? 'button' : 'a'"
 						:type="resource.type === 'embed' ? 'button' : undefined"
-						:href="resource.type !== 'embed' ? getResourceHref(resource) : undefined"
+						:href="getResourceHref(resource)"
 						:target="resource.type === 'url' ? '_blank' : undefined"
 						:rel="resource.type === 'url' ? 'noopener noreferrer' : undefined"
+						:aria-haspopup="resource.type === 'embed' && resource.embedConfig?.container === 'iframe' ? 'dialog' : undefined"
+						:aria-describedby="`${headingId}-${category}-${index}-details`"
+						:class="s.action"
 						@click="resource.type === 'embed' && openEmbedModal(resource)"
-						class="group grid w-full grid-cols-[auto_minmax(0,1fr)_auto] gap-3 py-4 text-left transition-colors"
-					>
-						<div
-							class="mt-0.5 flex h-10 w-10 items-center justify-center rounded-full"
-							:class="getResourceIconClass(resource.type)"
-						>
-							<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									:d="getResourceIconPath(resource.type)"
-								/>
-							</svg>
-						</div>
-
-						<div class="min-w-0">
-							<h5 class="font-semibold text-primary-content transition-colors group-hover:text-primary">
-								{{ resource.title }}
-							</h5>
-							<p v-if="resource.description" class="mt-1 text-sm leading-6 text-secondary-content">
-								{{ resource.description }}
-							</p>
-							<div class="mt-3 flex items-center gap-3 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted">
-								<span :class="getResourceTypeBadgeClass(resource.type)">
-									{{ getResourceTypeLabel(resource.type) }}
-								</span>
-							</div>
-						</div>
-
-						<div class="flex items-start justify-end pt-1">
-							<svg
-								class="h-4 w-4 group-hover:translate-x-0.5"
-								:class="resource.type === 'embed' ? 'text-secondary' : 'text-primary'"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									:d="resource.type === 'file' ? 'M12 5v14m0 0l-4-4m4 4l4-4' : 'M9 5l7 7-7 7'"
-								></path>
-							</svg>
-						</div>
-					</component>
-				</div>
-			</section>
-		</div>
+					>{{ resource.title }}</component>
+					<div :id="`${headingId}-${category}-${index}-details`" :class="s.details">
+						<p v-if="resource.description" :class="s.description">{{ resource.description }}</p>
+						<p :class="s.kind">{{ getResourceTypeLabel(resource) }}</p>
+					</div>
+				</li>
+			</ul>
+		</section>
 
 		<EmbeddedAppModal
 			v-if="selectedEmbed"
 			:resource="selectedEmbed"
 			v-model="isEmbedModalOpen"
 		/>
-	</div>
+	</section>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { academyCourseResources } from "@rawkodeacademy/design-system";
+import { ref, computed, useId } from "vue";
 import EmbeddedAppModal from "./EmbeddedAppModal.vue";
+
+const s = academyCourseResources();
+const headingId = `${useId()}-resources`;
 
 interface Resource {
 	title: string;
@@ -122,7 +66,7 @@ interface Resource {
 					| undefined;
 		  }
 		| undefined;
-	category: "slides" | "code" | "documentation" | "demos" | "other";
+	category?: string | undefined;
 }
 
 const props = defineProps<{
@@ -131,117 +75,71 @@ const props = defineProps<{
 }>();
 
 const isEmbedModalOpen = ref(false);
-const selectedEmbed = ref<Resource | null>(null);
+const selectedEmbed = ref<(Resource & { type: "embed"; embedConfig: NonNullable<Resource["embedConfig"]> }) | null>(null);
 
-const categoryLabels = {
+const categoryLabels: Record<string, string> = {
 	slides: "Slides",
-	code: "Repos",
+	code: "Code",
 	documentation: "Documentation",
 	demos: "Demos",
-	other: "Other Resources",
+	other: "Other",
+};
+
+
+const isWebUrl = (value: string) => {
+	if (!value || /[\\\u0000-\u001f\u007f]/.test(value)) return false;
+	try {
+		const url = new URL(value, "https://academy.invalid");
+		return /^https?:\/\//i.test(value)
+			? url.protocol === "https:" || url.protocol === "http:"
+			: value.startsWith("/") && !value.startsWith("//") && url.origin === "https://academy.invalid";
+	} catch {
+		return false;
+	}
+};
+
+const getResourceHref = (resource: Resource): string | undefined => {
+	if (resource.type === "url") {
+		const url = resource.url?.trim();
+		return url && isWebUrl(url) ? url : undefined;
+	}
+	if (resource.type === "file") {
+		const filePath = resource.filePath?.trim();
+		if (!filePath || filePath.startsWith("/") || /[\\?#\u0000-\u001f\u007f]/.test(filePath)) return undefined;
+		const href = `/resources/${filePath}`;
+		const pathname = new URL(href, "https://academy.invalid").pathname;
+		return pathname.startsWith("/resources/") && pathname !== "/resources/" ? href : undefined;
+	}
+	return undefined;
 };
 
 const groupedResources = computed(() => {
-	return props.resources.reduce(
-		(acc, resource) => {
-			if (!acc[resource.category]) {
-				acc[resource.category] = [];
-			}
-			acc[resource.category].push(resource);
-			return acc;
-		},
-		{} as Record<string, Resource[]>,
-	);
+	const groups = new Map<string, Resource[]>();
+	for (const resource of props.resources) {
+		if (!resource.title.trim()) continue;
+		if (resource.type === "embed") {
+			const config = resource.embedConfig;
+			if (!config?.src.trim()) continue;
+			if (config.container === "iframe" ? !isWebUrl(config.src.trim()) : config.container !== "webcontainer") continue;
+		} else if (!getResourceHref(resource)) {
+			continue;
+		}
+		const category = resource.category?.trim().toLowerCase() ?? "other";
+		const key = Object.hasOwn(categoryLabels, category) ? category : "other";
+		const group = groups.get(key) ?? [];
+		group.push(resource);
+		groups.set(key, group);
+	}
+	return groups;
 });
 
-const getCategoryIconPath = (category: string) => {
-	switch (category) {
-		case "slides":
-			return "M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z";
-		case "code":
-			return "M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4";
-		case "documentation":
-			return "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z";
-		case "demos":
-			return "M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z";
-		default:
-			return "M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z";
-	}
-};
-
-const getCategoryColorClass = (category: string) => {
-	switch (category) {
-		case "slides":
-			return "text-orange-600 dark:text-orange-400";
-		case "code":
-			return "text-primary dark:text-primary";
-		case "documentation":
-			return "text-green-600 dark:text-green-400";
-		case "demos":
-			return "text-secondary dark:text-secondary";
-		default:
-			return "text-muted";
-	}
-};
-
-const getResourceIconPath = (type: string) => {
-	switch (type) {
-		case "url":
-			return "M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14";
-		case "file":
-			return "M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z";
-		case "embed":
-			return "M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z";
-		default:
-			return "M13 10V3L4 14h7v7l9-11h-7z";
-	}
-};
-
-const getResourceIconClass = (type: string) => {
-	switch (type) {
-		case "url":
-			return "bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary";
-		case "file":
-			return "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400";
-		case "embed":
-			return "bg-secondary/10 dark:bg-secondary/20 text-secondary dark:text-secondary";
-		default:
-			return "bg-[var(--surface-card-muted)] text-muted";
-	}
-};
-
-const getResourceTypeBadgeClass = (type: string) => {
-	switch (type) {
-		case "url":
-			return "text-primary";
-		case "file":
-			return "text-green-700 dark:text-green-300";
-		case "embed":
-			return "text-secondary";
-		default:
-			return "text-secondary-content";
-	}
-};
-
-const getResourceHref = (resource: Resource) => {
-	if (resource.type === "url") {
-		return resource.url;
-	} else if (resource.type === "file" && resource.filePath) {
-		return `/resources/${resource.filePath}`;
-	}
-	return "#";
-};
-
-const getResourceTypeLabel = (type: string) => {
-	switch (type) {
-		case "url":
-			return "External Link";
-		case "file":
-			return "Download";
-		case "embed":
-			return "Demo";
-		default:
-			return type;
+const getResourceTypeLabel = (resource: Resource) => {
+	switch (resource.type) {
+		case "url": return "Link · opens in a new tab";
+		case "file": return "File";
+		case "embed": return resource.embedConfig?.container === "webcontainer"
+			? "WebContainer · opens in a new window"
+			: "Interactive demo · opens a dialog";
 	}
 };
 
@@ -257,7 +155,7 @@ const openEmbedModal = (resource: Resource) => {
 				? pathParts[courseIndex + 1]
 				: props.courseId || "unknown";
 
-		const url = `/embed/webcontainer?course=${courseId}&resource=${resourceId}`;
+		const url = `/embed/webcontainer?course=${encodeURIComponent(courseId ?? "unknown")}&resource=${encodeURIComponent(resourceId)}`;
 		window.open(
 			url,
 			"webcontainer",
@@ -265,7 +163,8 @@ const openEmbedModal = (resource: Resource) => {
 		);
 	} else {
 		// Keep modal for other embed types
-		selectedEmbed.value = resource;
+		if (!resource.embedConfig) return;
+		selectedEmbed.value = { ...resource, type: "embed", embedConfig: resource.embedConfig };
 		isEmbedModalOpen.value = true;
 	}
 };

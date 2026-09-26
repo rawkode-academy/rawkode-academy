@@ -2,17 +2,19 @@ import { getCollection, getEntries } from "astro:content";
 import type { APIRoute } from "astro";
 import { buildJsonFeed, type JsonFeedItem } from "@/lib/json-feed";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import { isNewsPublished } from "@/lib/news-publication";
 
 const SITE_FALLBACK = "https://rawkode.academy";
 
 export const GET: APIRoute = async ({ site }) => {
+	const now = new Date();
 	const baseUrl = (site?.toString() ?? SITE_FALLBACK).replace(/\/$/, "");
 	const u = (path: string) => `${baseUrl}${path}`;
 
 	const [articles, videos, news, technologies] = await Promise.all([
-		getCollection("articles", ({ data }) => !data.draft),
+		getCollection("articles"),
 		getCollection("videos"),
-		getCollection("news"),
+		getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
 		getCollection("technologies"),
 	]);
 

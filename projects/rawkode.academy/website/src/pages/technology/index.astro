@@ -1,7 +1,8 @@
 ---
 export const prerender = true;
 
-import CollectionMasthead from "@/components/ui/CollectionMasthead.astro";
+import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
+import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 import Page from "@/wrappers/page.astro";
 import { getCollection } from "astro:content";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
@@ -13,8 +14,10 @@ type Technology = {
 	id: string;
 	name: string;
 	logo?: string;
-	website?: string;
-	documentation?: string;
+	category: string | undefined;
+	subcategory: string | undefined;
+	description: string | undefined;
+	terms: string[];
 };
 
 let technologies: Technology[] = [];
@@ -29,8 +32,10 @@ try {
 				id: e.id,
 				name: e.data.name,
 				...(logo && { logo }),
-				...(e.data.website && { website: e.data.website }),
-				...(e.data.documentation && { documentation: e.data.documentation }),
+				category: e.data.category,
+				subcategory: e.data.subcategory,
+				description: e.data.seo?.description,
+				terms: [...(e.data.aliases ?? []), ...(e.data.terms ?? [])],
 			};
 			return tech;
 		})
@@ -38,61 +43,99 @@ try {
 } catch (error) {
 	logger.error("Failed to load technologies from content collection", error);
 }
+// Group by first letter so a 300-entry reference reads as an A–Z index
+// instead of an endless grid. Digits and symbols share one leading group.
+const letterOf = (name: string) => {
+	const first = Array.from(name.trim())[0]?.toUpperCase() ?? "#";
+	return /[A-Z]/.test(first) ? first : "#";
+};
+const groups = new Map<string, Technology[]>();
+for (const tech of technologies) {
+	const letter = letterOf(tech.name);
+	groups.set(letter, [...(groups.get(letter) ?? []), tech]);
+}
+const indexGroups = [...groups.entries()].sort(([a], [b]) =>
+	a === "#" ? -1 : b === "#" ? 1 : a.localeCompare(b),
+);
+const styles = academyLayout({ width: "wide" });
+const catalog = academyCatalog();
 ---
 
 <Page
 	title="Cloud Native Technologies"
-	description="Cloud native technologies with tutorials, deep dives, and references."
+	description="Cloud native technologies with tutorials, articles, and reference material."
 	pageType="CollectionPage"
 >
-	<div class="technology-page">
-		<CollectionMasthead title="Technologies" dek="Tools and platforms." />
+	<div class={styles.root}>
+		<AcademyCatalogMasthead title="Technologies" description="Tools and platforms." figure={technologies.length} figureLabel={technologies.length === 1 ? "technology" : "technologies"} />
 
-		<section class="technology-page__tools" aria-label="Technology search">
-			<label class="technology-page__label" for="technology-search">Search technologies</label>
-			<input
-				id="technology-search"
-				type="search"
-				placeholder="Name"
-				class="technology-page__search-input"
-				autocomplete="off"
-			/>
-			<p class="technology-page__count">
-				Showing <span data-tech-visible-count>{technologies.length}</span> of {technologies.length}
-			</p>
-		</section>
+		<section class={styles.section} aria-label="Technology search">
+			<div class={styles.container}>
+				<div class={styles.toolbar}>
+					<label for="technology-search">Filter technologies</label>
+					<input
+						id="technology-search"
+						type="search"
+						placeholder="Name, category, or keyword"
+						class={styles.input}
+						autocomplete="off"
+						aria-controls="technologies"
+						aria-describedby="technology-count"
+					/>
+					<p id="technology-count" class={catalog.resultCount} role="status" aria-atomic="true">
+						{technologies.length} {technologies.length === 1 ? "technology" : "technologies"}
+					</p>
+				</div>
 
-		<section id="technologies" class="technology-page__grid-section" aria-label="Technologies">
-			<div class="technology-page__grid">
-				{
-					technologies.map((tech) => {
-						const searchKeywords = tech.name.toLowerCase();
+				<div id="technologies">
+					{
+						indexGroups.map(([letter, items]) => (
+							<section class={catalog.indexGroup} data-index-group aria-labelledby={`technology-letter-${letter === "#" ? "other" : letter}`}>
+								<h2 id={`technology-letter-${letter === "#" ? "other" : letter}`} class={catalog.indexLetter}>{letter}</h2>
+								<ul class={catalog.indexList}>
+									{items.map((tech) => {
+										const searchKeywords = [
+											tech.name, tech.category, tech.subcategory, tech.description, ...tech.terms,
+										].filter(Boolean).join(" ").toLowerCase();
+										const words = tech.name.trim().split(/[\s-]+/u);
+										const initials = (words.length > 1
+											? words.slice(0, 2).map((word) => Array.from(word)[0]).join("")
+											: Array.from(tech.name).slice(0, 2).join("")
+										).toUpperCase();
+										const category = tech.subcategory ?? tech.category;
+										return (
+											<li>
+												<a href={`/technology/${tech.id}`} class={catalog.indexItem} data-keywords={searchKeywords}>
+													<span class={catalog.indexMark} aria-hidden="true">
+														<span class={catalog.indexInitials} hidden={Boolean(tech.logo)}>{initials}</span>
+														{tech.logo && <img
+															src={tech.logo}
+															alt=""
+															width="20"
+															height="20"
+															class={catalog.indexLogo}
+															loading="lazy"
+															onerror="this.previousElementSibling.hidden=false; this.remove();"
+														/>}
+													</span>
+													<span>
+														<span class={catalog.indexName} data-name>{tech.name}</span>
+														{category && <span class={catalog.indexMeta}>{category}</span>}
+													</span>
+												</a>
+											</li>
+										);
+									})}
+								</ul>
+							</section>
+						))
+					}
+				</div>
 
-						return (
-							<a
-								href={`/technology/${tech.id}`}
-								class="tech-card-link"
-								data-keywords={searchKeywords}
-							>
-								<span class="tech-card-link__logo-wrap">
-									<img
-										src={tech.logo ?? "/apple-touch-icon.png"}
-										alt={`${tech.name} logo`}
-										class="tech-card-link__logo"
-										loading="lazy"
-										onerror={`this.onerror=null; this.src='/apple-touch-icon.png';`}
-									/>
-								</span>
-								<span class="tech-card-link__name">{tech.name}</span>
-							</a>
-						);
-					})
-				}
-			</div>
-
-			<div id="technology-empty-state" class="technology-page__empty hidden">
-				<h2>No technologies match your search</h2>
-				<p>Try a different term.</p>
+				<div id="technology-empty-state" class={catalog.empty} hidden={technologies.length !== 0}>
+					<h2>No technologies match your search</h2>
+					<p>Try another name, category, or keyword.</p>
+				</div>
 			</div>
 		</section>
 
@@ -100,10 +143,13 @@ try {
 			document.addEventListener("DOMContentLoaded", () => {
 				const searchInput = document.getElementById("technology-search") as HTMLInputElement | null;
 				const cards = Array.from(
-					document.querySelectorAll<HTMLElement>("#technologies .tech-card-link"),
+					document.querySelectorAll<HTMLElement>("#technologies [data-keywords]"),
 				);
 				const emptyState = document.getElementById("technology-empty-state");
-				const countTargets = document.querySelectorAll<HTMLElement>("[data-tech-visible-count]");
+				const count = document.getElementById("technology-count");
+				const groups = Array.from(
+					document.querySelectorAll<HTMLElement>("#technologies [data-index-group]"),
+				);
 
 				const applySearch = () => {
 					const query = (searchInput?.value ?? "").trim().toLowerCase();
@@ -113,18 +159,23 @@ try {
 						const keywords = card.dataset.keywords ?? "";
 						const matchesSearch = keywords.includes(query);
 
-						card.style.display = matchesSearch ? "" : "none";
+						card.hidden = !matchesSearch;
 						if (matchesSearch) {
 							visible += 1;
 						}
 					});
-
-					countTargets.forEach((el) => {
-						el.textContent = visible.toString();
+					groups.forEach((group) => {
+						group.hidden = !group.querySelector("[data-keywords]:not([hidden])");
 					});
 
+					if (count) {
+						count.textContent = query
+							? `${visible} of ${cards.length} technologies`
+							: `${cards.length} ${cards.length === 1 ? "technology" : "technologies"}`;
+					}
+
 					if (emptyState) {
-						emptyState.classList.toggle("hidden", visible !== 0);
+						emptyState.hidden = visible !== 0;
 					}
 				};
 
@@ -134,165 +185,3 @@ try {
 		</script>
 	</div>
 </Page>
-
-<style>
-	.technology-page {
-		background: var(--editorial-paper);
-		color: var(--editorial-ink);
-	}
-
-	.technology-page__tools {
-		display: grid;
-		grid-template-columns: auto minmax(14rem, 28rem) 1fr;
-		align-items: center;
-		gap: 0.875rem 1rem;
-		padding: 1rem var(--space-section-pad-x);
-		border-bottom: 1px solid var(--editorial-hairline);
-	}
-
-	.technology-page__label,
-	.technology-page__count {
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.6875rem;
-		font-weight: 600;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-		color: var(--editorial-ink-mute);
-	}
-
-	.technology-page__search-input {
-		width: 100%;
-		min-height: 2.75rem;
-		border: 1px solid var(--editorial-hairline-strong);
-		background: var(--editorial-paper-deep);
-		color: var(--editorial-ink);
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 1rem;
-		padding: 0.625rem 0.75rem;
-		border-radius: 0;
-		outline: none;
-	}
-
-	.technology-page__search-input:focus {
-		border-color: var(--editorial-ink);
-		box-shadow: 0 0 0 2px var(--editorial-paper), 0 0 0 3px var(--editorial-ink);
-	}
-
-	.technology-page__search-input::placeholder {
-		color: var(--editorial-ink-mute);
-	}
-
-	.technology-page__count {
-		justify-self: end;
-		margin: 0;
-	}
-
-	.technology-page__count span {
-		color: var(--editorial-ink);
-	}
-
-	.technology-page__grid-section {
-		padding: 2rem var(--space-section-pad-x) 3rem;
-	}
-
-	.technology-page__grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
-		gap: 1rem;
-	}
-
-	.tech-card-link {
-		display: grid;
-		grid-template-columns: 3.25rem minmax(0, 1fr);
-		align-items: center;
-		gap: 0.875rem;
-		min-width: 0;
-		border: 1px solid var(--editorial-hairline);
-		background: var(--editorial-paper-deep);
-		color: inherit;
-		text-decoration: none;
-		padding: 0.875rem;
-		transition: border-color var(--duration-base) var(--ease-standard);
-	}
-
-	.tech-card-link:hover {
-		border-color: var(--editorial-ink);
-	}
-
-	.tech-card-link__logo-wrap {
-		display: grid;
-		place-items: center;
-		width: 3.25rem;
-		height: 3.25rem;
-		background: var(--editorial-paper);
-		border: 1px solid var(--editorial-hairline);
-	}
-
-	.tech-card-link__logo {
-		width: 2rem;
-		height: 2rem;
-		object-fit: contain;
-	}
-
-	.tech-card-link__name {
-		min-width: 0;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 0.975rem;
-		font-weight: 700;
-		line-height: 1.25;
-		color: var(--editorial-ink);
-	}
-
-	.technology-page__empty {
-		border: 1px solid var(--editorial-hairline);
-		background: var(--editorial-paper-deep);
-		padding: 2rem;
-		max-width: 28rem;
-		margin: 0 auto;
-		text-align: center;
-	}
-
-	.technology-page__empty h2 {
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 1.25rem;
-		font-weight: 700;
-		letter-spacing: 0;
-		color: var(--editorial-ink);
-		margin: 0;
-	}
-
-	.technology-page__empty p {
-		font-family: var(--font-inter-tight), sans-serif;
-		color: var(--editorial-ink-soft);
-		margin: 0.5rem 0 0;
-	}
-
-	@media (max-width: 720px) {
-		.technology-page__tools {
-			grid-template-columns: 1fr;
-			padding: 0.875rem 1rem 1rem;
-		}
-		.technology-page__count {
-			justify-self: start;
-		}
-		.technology-page__grid-section {
-			padding: 1.25rem 1rem 2.5rem;
-		}
-		.technology-page__grid {
-			grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
-			gap: 0.75rem;
-		}
-		.tech-card-link {
-			grid-template-columns: 2.75rem minmax(0, 1fr);
-			gap: 0.625rem;
-			padding: 0.75rem;
-		}
-		.tech-card-link__logo-wrap {
-			width: 2.75rem;
-			height: 2.75rem;
-		}
-	}
-</style>

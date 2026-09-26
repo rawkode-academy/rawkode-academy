@@ -237,7 +237,7 @@ const articles = defineCollection({
 				description: z.string(),
 				authors: z.array(reference("people")).default(["rawkode"] as any),
 				categories: z.array(z.string()).default([]),
-				draft: z.boolean().default(false),
+
 				cover: z
 					.object({
 						image: image(),

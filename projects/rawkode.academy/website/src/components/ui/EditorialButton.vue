@@ -38,7 +38,6 @@ const tag = computed(() => (props.href ? "a" : "button"));
 	gap: 0.625rem;
 	font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
 	font-weight: 600;
-	text-transform: uppercase;
 	letter-spacing: 0.14em;
 	line-height: 1;
 	border-radius: var(--radius-sm);
