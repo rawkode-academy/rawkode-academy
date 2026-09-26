@@ -9,7 +9,9 @@ const doc = academyDocument();
 export const prerender = true;
 
 const shows = await getCollection("shows");
-const publishedShows = shows.filter((show) => show.data.publish);
+const publishedShows = shows.filter(
+	(show) => show.data.publish && show.data.status !== "coming-soon",
+);
 
 const feedGroups = [
 	{

@@ -1,0 +1,100 @@
+---
+import { css } from "@/../styled-system/css";
+import JoinRoomForm from "@/components/JoinRoomForm.vue";
+import ArcadeLayout from "@/layouts/ArcadeLayout.astro";
+import { games } from "@/lib/game-catalogue";
+import { runningOrder, sectionRule, shell, slug, text } from "@/styles/arcade";
+
+const join = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", lg: "1fr minmax(0, token(sizes.formColumn))" },
+	gap: { base: "stack", lg: "section" },
+	alignItems: "start",
+	py: "sectionTight",
+});
+
+/** A genuine ordered sequence, so the numbers carry information. */
+const steps = css({
+	display: "grid",
+	gap: "3",
+	listStyle: "none",
+	marginBlock: "0",
+	marginInline: "0",
+	paddingInline: "0",
+	paddingBlockEnd: "0",
+	paddingBlockStart: "4",
+	borderTopWidth: "hairline",
+	borderTopStyle: "solid",
+	borderTopColor: "rule",
+});
+
+const step = css({
+	display: "grid",
+	gridTemplateColumns: "auto 1fr",
+	gap: "3",
+	alignItems: "baseline",
+});
+
+const order = runningOrder();
+---
+
+<ArcadeLayout
+	title="Join a live room: Rawkode Arcade"
+	description="Enter a room code to play along with a live Rawkode Arcade show."
+	active="join"
+>
+	<div class={shell}>
+		<section class={join}>
+			<div>
+				<h1 class={text({ style: "display" })}>Bring a code.</h1>
+				<p
+					class={`${text({ style: "body", tone: "soft", measure: "narrow" })} ${css({ mt: "4" })}`}
+				>
+					Audience play needs no account. The host reads a six-character code on
+					air; enter it here and your phone becomes the second screen.
+				</p>
+				<ol class={`${steps} ${css({ marginBlockStart: "5" })}`}>
+					<li class={step}>
+						<span class={slug({ wrap: "never" })}>01</span>
+						<span class={text({ style: "bodySm", tone: "soft" })}>
+							Enter the room code exactly as the host reads it.
+						</span>
+					</li>
+					<li class={step}>
+						<span class={slug({ wrap: "never" })}>02</span>
+						<span class={text({ style: "bodySm", tone: "soft" })}>
+							Pick a name the presenter can say out loud.
+						</span>
+					</li>
+					<li class={step}>
+						<span class={slug({ wrap: "never" })}>03</span>
+						<span class={text({ style: "bodySm", tone: "soft" })}>
+							Answer inside the window. Late answers do not score.
+						</span>
+					</li>
+				</ol>
+			</div>
+
+			<JoinRoomForm client:load />
+		</section>
+
+		<section class={css({ pb: "section" })}>
+			<div class={sectionRule}>
+				<span class={slug({ wrap: "never" })}>Formats in rotation</span>
+			</div>
+			<div class={order.root}>
+				{
+					games.slice(0, 3).map((game, index) => (
+						<a class={order.item} href={`/games/${game.id}`}>
+							<span class={order.index}>
+								FMT-{String(index + 1).padStart(2, "0")}
+							</span>
+							<span class={order.title}>{game.title}</span>
+							<span class={order.action}>{game.players}</span>
+						</a>
+					))
+				}
+			</div>
+		</section>
+	</div>
+</ArcadeLayout>

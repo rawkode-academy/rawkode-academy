@@ -18,7 +18,7 @@ function getSquaredArtworkUrl(site: string, originalUrl: string): string {
 export async function getStaticPaths() {
 	const shows = await getCollection("shows");
 	return shows
-		.filter((show) => show.data.publish)
+		.filter((show) => show.data.publish && show.data.status !== "coming-soon")
 		.map((show) => ({ params: { showId: show.data.id } }));
 }
 
@@ -32,8 +32,8 @@ export async function GET(context: APIContext) {
 	const shows = await getCollection("shows");
 	const show = shows.find((s) => s.data.id === showId);
 
-	if (!show || !show.data.publish) {
-		return new Response("Show not found or not published", { status: 404 });
+	if (!show || !show.data.publish || show.data.status === "coming-soon") {
+		return new Response("Show feed not found", { status: 404 });
 	}
 
 	const videos = await getPublishedVideos();

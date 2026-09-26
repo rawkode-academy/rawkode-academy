@@ -1,0 +1,28 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "rawkode-arcade-test",
+	"main": "src/testing/worker-entry.ts",
+	"compatibility_date": "2026-03-10",
+	"compatibility_flags": ["nodejs_compat"],
+	"vars": {
+		"ENVIRONMENT": "test",
+		"ADMISSION_ENABLED": "true",
+		"E2E_SEED_SECRET": "test-only-local-secret",
+		"SESSION_SECRET": "test-only-session-signing-secret",
+		"TICKET_SECRET": "test-only-ticket-signing-secret"
+	},
+	"d1_databases": [{
+		"binding": "DB",
+		"database_name": "rawkode-arcade-test",
+		"database_id": "00000000-0000-0000-0000-000000000000"
+	}],
+	"durable_objects": {
+		"bindings": [
+			{ "name": "GAME_ROOM", "class_name": "GameRoom" },
+			{ "name": "AUDIENCE_SHARD", "class_name": "AudienceShard" }
+		]
+	},
+	"migrations": [
+		{ "tag": "v1", "new_sqlite_classes": ["GameRoom", "AudienceShard"] }
+	]
+}

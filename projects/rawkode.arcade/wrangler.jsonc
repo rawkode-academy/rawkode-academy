@@ -1,0 +1,42 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "rawkode-arcade",
+	"main": "src/worker.ts",
+	"compatibility_date": "2026-06-05",
+	"compatibility_flags": ["nodejs_compat"],
+	"workers_dev": true,
+	"vars": { "ADMISSION_ENABLED": "true", "CF_ACCESS_TEAM_DOMAIN": "", "CF_ACCESS_AUD": "", "OPERATOR_EMAILS": "" },
+	"env": {
+		"test": { "vars": { "ENVIRONMENT": "test", "ADMISSION_ENABLED": "true", "E2E_SEED_SECRET": "test-only-local-secret" } },
+		"preview": {
+			"vars": { "ENVIRONMENT": "preview", "ADMISSION_ENABLED": "true" },
+			"d1_databases": [{ "binding": "DB", "database_name": "rawkode-arcade-preview", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "migrations" }],
+			"r2_buckets": [{ "binding": "ARCADE_ASSETS", "bucket_name": "rawkode-arcade-assets-preview" }],
+			"durable_objects": { "bindings": [{ "name": "GAME_ROOM", "class_name": "GameRoom" }, { "name": "AUDIENCE_SHARD", "class_name": "AudienceShard" }] }
+		}
+	},
+	"preview_urls": true,
+	"routes": [{ "pattern": "play.rawkode.academy", "custom_domain": true }],
+	"assets": { "binding": "ASSETS", "directory": "./dist/client" },
+	"observability": { "enabled": true, "logs": { "enabled": true }, "traces": { "enabled": true } },
+	"d1_databases": [{
+		"binding": "DB",
+		"database_name": "rawkode-arcade",
+		"database_id": "00000000-0000-0000-0000-000000000000",
+		"migrations_dir": "migrations"
+	}],
+	"r2_buckets": [{
+		"binding": "ARCADE_ASSETS",
+		"bucket_name": "rawkode-arcade-assets",
+		"preview_bucket_name": "rawkode-arcade-assets-preview"
+	}],
+	"durable_objects": {
+		"bindings": [
+			{ "name": "GAME_ROOM", "class_name": "GameRoom" },
+			{ "name": "AUDIENCE_SHARD", "class_name": "AudienceShard" }
+		]
+	},
+	"migrations": [
+		{ "tag": "v1", "new_sqlite_classes": ["GameRoom", "AudienceShard"] }
+	]
+}

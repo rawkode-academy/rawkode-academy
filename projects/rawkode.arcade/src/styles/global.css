@@ -1,0 +1,10 @@
+/* Panda owns every style in this project.
+ *
+ * The palette used to be declared here a second time as `:root` custom
+ * properties, which is how 229 raw `var(--…)` references ended up in scoped
+ * <style> blocks Panda could not see. There is now exactly one source of
+ * truth: panda.config.ts. Reset, global rules, @property registration and the
+ * prefers-contrast / prefers-reduced-motion blocks all live in its
+ * `globalCss` / `globalVars`, and land in the import below.
+ */
+@import "../../styled-system/styles.css";

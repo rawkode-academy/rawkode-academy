@@ -80,6 +80,9 @@ const showSummaries: ShowSummary[] = await Promise.all(
 		return {
 			id: show.data.id,
 			name: show.data.name,
+			status: show.data.status,
+			tagline: show.data.tagline,
+			gameFormatUrl: show.data.gameFormatUrl,
 			hosts: hosts.map((h) => ({
 				forename: h.data.forename ?? null,
 				surname: h.data.surname ?? null,

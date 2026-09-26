@@ -19,7 +19,7 @@ Astro.response.headers.set("Cache-Tag", "shows-page, shows-list");
 Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 
 // Build shows from local content + videos. `publish: false` shows are
-// drafts / archived - they don't belong in the public directory.
+// drafts - they don't belong in the public directory.
 const showEntries = (await getCollection("shows")).filter(
 	(s) => s.data.publish,
 );
@@ -47,7 +47,7 @@ const showsToRender: ShowSummary[] = await (async () => {
 			};
 		});
 		const eps = videos
-			.filter((v) => getShowId(v.data.show) === s.data.id)
+			.filter((v) => s.data.status !== "coming-soon" && getShowId(v.data.show) === s.data.id)
 			.map((v) => ({
 				video: {
 					title: v.data.title,
@@ -61,6 +61,9 @@ const showsToRender: ShowSummary[] = await (async () => {
 		list.push({
 			id: s.data.id,
 			name: s.data.name,
+			status: s.data.status,
+			tagline: s.data.tagline,
+			gameFormatUrl: s.data.gameFormatUrl,
 			hosts,
 			episodes: eps,
 			cover: s.data.cover,
@@ -73,7 +76,7 @@ const hasShows = showsToRender.length > 0;
 
 const showsJsonLd = showEntries.map((s) => {
 	const episodeCount = videos.filter(
-		(v) => getShowId(v.data.show) === s.data.id,
+		(v) => s.data.status !== "coming-soon" && getShowId(v.data.show) === s.data.id,
 	).length;
 	return {
 		id: s.data.id,
@@ -105,15 +108,16 @@ const catalog = academyCatalog();
 			{hasShows ? (
 				<div class={styles.grid}>
 					{showsToRender.map((show) => (
-						<a class={styles.card} href={`/shows/${show.id}`}>
+						<a class={styles.card} href={`/shows/${show.id}`} data-show-status={show.status}>
 							{(show.cover?.image.src ?? show.episodes?.[0]?.video?.thumbnailUrl) && (
 								<span class={catalog.featuredMedia}>
 									<img class={catalog.featuredImage} src={show.cover?.image.src ?? show.episodes?.[0]?.video?.thumbnailUrl} alt="" loading="lazy" />
 								</span>
 							)}
 							<div class={styles.cardBody}>
-								<span class={catalog.rowMeta}>{show.episodes?.length ?? 0} published {show.episodes?.length === 1 ? "episode" : "episodes"}</span>
+								<span class={catalog.rowMeta}>{show.status === "coming-soon" ? "Coming soon" : `${show.status === "archived" ? "Archived · " : ""}${show.episodes?.length ?? 0} published ${show.episodes?.length === 1 ? "episode" : "episodes"}`}</span>
 								<h2 class={styles.cardTitle}>{show.name}</h2>
+								{show.tagline && <span class={catalog.rowDescription}>{show.tagline}</span>}
 								{show.episodes?.[0]?.video?.title && <span class={catalog.rowDescription}>{show.episodes[0].video.title}</span>}
 							</div>
 						</a>

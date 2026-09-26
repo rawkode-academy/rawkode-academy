@@ -1,0 +1,7 @@
+---
+import HostRoute from "@/components/HostRoute.vue";
+import ArcadeLayout from "@/layouts/ArcadeLayout.astro";
+const roomId = Astro.params.roomId ?? "room";
+const code = Astro.url.searchParams.get("code") ?? undefined;
+---
+<ArcadeLayout title="Producer controls: Rawkode Arcade"><HostRoute client:load roomId={roomId} code={code} /></ArcadeLayout>

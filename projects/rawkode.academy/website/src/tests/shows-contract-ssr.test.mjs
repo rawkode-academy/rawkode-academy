@@ -678,3 +678,20 @@ test("real RSS and chapter handlers share publication cutoff/membership and pres
 	assert.equal(h.reads.length, 0);
 	assert.equal(h.writes.length, 0);
 });
+
+
+test("coming-soon archive cards retain branding and omit episode claims", async () => {
+	const entry = show();
+	entry.data.status = "coming-soon";
+	entry.data.tagline = "A game of cluster recovery";
+	entry.data.cover = { image: { src: "/coming-soon-cover.png" } };
+	const { dom } = await harness({
+		collections: { shows: [entry], videos: fixtureVideos() },
+	}).render("pages/shows/index.astro");
+	assert.match(dom.text, /Coming soon/);
+	assert.match(dom.text, /A game of cluster recovery/);
+	assert(!dom.text.includes("published episodes") && !dom.text.includes("recent"));
+	assert.equal(dom.querySelector("img").getAttribute("src"), "/coming-soon-cover.png");
+	const metadata = JSON.parse(dom.querySelector('script[type="application/ld+json"]').text);
+	assert.equal(metadata.itemListElement[0].item.numberOfEpisodes, undefined);
+});

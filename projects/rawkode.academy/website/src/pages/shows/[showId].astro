@@ -34,6 +34,10 @@ if (!showEntry || !showEntry.data.publish) {
 	return new Response(null, { status: 404 });
 }
 
+const isComingSoon = showEntry.data.status === "coming-soon";
+const isArchived = showEntry.data.status === "archived";
+const statusLabel = isComingSoon ? "Coming soon" : isArchived ? "Archived" : "Show";
+
 // Get published videos only (filters out future-dated for scheduled publishing)
 const videos = await getPublishedVideos();
 
@@ -74,6 +78,7 @@ const feedVideos = videosForShow
 		(a, b) =>
 			new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
 	);
+const hasEpisodeFeed = !isComingSoon && feedVideos.length > 0;
 
 Astro.response.headers.set(
 	"Cache-Control",
@@ -86,14 +91,11 @@ Astro.response.headers.set(
 );
 Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 
-// Published shows should always have a description. The fallback only
-// fires when a show was published without one - at which point it's a
-// content bug, not something the template should paper over with a
-// placeholder. Compose a sensible auto-line so meta tags still render
-// without ever shipping "coming soon" to crawlers.
 const showDescription =
 	showEntry.data.description?.trim() ||
-	`Watch ${showEntry.data.name} on Rawkode Academy.`;
+	(isComingSoon
+		? `${showEntry.data.name} is coming soon on Rawkode Academy.`
+		: `Watch ${showEntry.data.name} on Rawkode Academy.`);
 
 const breadcrumbElements = [
 	{ title: "Home", link: "/" },
@@ -101,20 +103,24 @@ const breadcrumbElements = [
 	{ title: showEntry.data.name, link: `/shows/${showEntry.data.id}` },
 ];
 
-const pageTitle = `${showEntry.data.name} Episodes`;
+const pageTitle = isComingSoon
+	? `${showEntry.data.name}: Coming soon`
+	: isArchived
+		? `${showEntry.data.name}: Archive`
+		: `${showEntry.data.name} Episodes`;
 
 const showNav = hasExtension(showEntry.data.id)
 	? getShowNav(showEntry.data.id)
 	: [];
 
-const latestEpisode = feedVideos[0];
-const totalDurationSeconds = feedVideos.reduce((sum, v) => sum + v.duration, 0);
+const latestEpisode = hasEpisodeFeed ? feedVideos[0] : undefined;
+const totalDurationSeconds = hasEpisodeFeed ? feedVideos.reduce((sum, v) => sum + v.duration, 0) : 0;
 const totalHours = Math.floor(totalDurationSeconds / 3600);
 
 let podcastImageUrl: string | undefined;
-if (showEntry.data.podcast?.artworkUrl) {
+if (hasEpisodeFeed && showEntry.data.podcast?.artworkUrl) {
 	podcastImageUrl = showEntry.data.podcast.artworkUrl;
-} else if (showEntry.data.cover) {
+} else if (hasEpisodeFeed && showEntry.data.cover) {
 	try {
 		const resolved = await getImage({ src: showEntry.data.cover.image });
 		podcastImageUrl = new URL(resolved.src, Astro.site ?? Astro.url).href;
@@ -144,26 +150,32 @@ function formatDuration(seconds: number) {
 ---
 
 <Page title={pageTitle} description={showDescription}>
- <link
- slot="extra-head"
- rel="alternate"
- type="application/rss+xml"
- title={`${showEntry.data.name} (Podcast RSS)`}
- href={`/api/feeds/shows/${showEntry.data.id}.xml`}
- />
- <PodcastSeriesJsonLd
- slot="extra-head"
- show={showEntry}
- hosts={hostEntries}
- episodeCount={feedVideos.length}
- {...(podcastImageUrl ? { imageUrl: podcastImageUrl } : {})}
- />
- <VideoMetadata
- slot="extra-head"
- title={pageTitle}
- description={showDescription}
- isVideoList={true}
- />
+ {hasEpisodeFeed && (
+	<link
+		slot="extra-head"
+		rel="alternate"
+		type="application/rss+xml"
+		title={`${showEntry.data.name} (Podcast RSS)`}
+		href={`/api/feeds/shows/${showEntry.data.id}.xml`}
+	/>
+ )}
+ {hasEpisodeFeed && (
+	<PodcastSeriesJsonLd
+		slot="extra-head"
+		show={showEntry}
+		hosts={hostEntries}
+		episodeCount={feedVideos.length}
+		{...(podcastImageUrl ? { imageUrl: podcastImageUrl } : {})}
+	/>
+ )}
+ {hasEpisodeFeed && (
+	<VideoMetadata
+		slot="extra-head"
+		title={pageTitle}
+		description={showDescription}
+		isVideoList={true}
+	/>
+ )}
 
  <!-- Hero -->
  <section class={doc.hero}>
@@ -173,10 +185,17 @@ function formatDuration(seconds: number) {
  <div class={doc.showHero}>
  <!-- Show info -->
  <div class={[doc.spacer, doc.stack].join(" ")}>
+ <p class={doc.kicker}>{statusLabel}</p>
 
  <h1 class={doc.title}>
  {showEntry.data.name}
  </h1>
+
+ {showEntry.data.tagline && (
+ <p class={doc.kicker}>
+ {showEntry.data.tagline}
+ </p>
+ )}
 
  {hostNames.length > 0 && (
  <div class={doc.actions}>
@@ -191,7 +210,13 @@ function formatDuration(seconds: number) {
  {showDescription}
  </p>
 
- {feedVideos.length > 0 && (
+ {showEntry.data.gameFormatUrl && (
+ <div class={doc.actions}>
+ <a href={showEntry.data.gameFormatUrl} class={doc.buttonSecondary} rel="noopener noreferrer">Explore the game format ↗</a>
+ </div>
+ )}
+
+ {hasEpisodeFeed && (
  <div class={doc.meta}>
  <div class={doc.row}>
  <svg class={doc.iconSmall} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -210,7 +235,7 @@ function formatDuration(seconds: number) {
  </div>
  )}
 
- <SubscribeLinks links={showEntry.data.subscribeLinks} />
+ {!isComingSoon && <SubscribeLinks links={showEntry.data.subscribeLinks} />}
  </div>
 
  <!-- Cover image or latest episode thumbnail -->
@@ -268,7 +293,13 @@ function formatDuration(seconds: number) {
  <!-- Episodes -->
  <section class={doc.section}>
  <div class={[doc.container, doc.stack].join(" ")}>
- {feedVideos.length > 0 ? (
+ {isComingSoon ? (
+ <div class={doc.empty}>
+ <p class={doc.kicker}>Coming soon</p>
+ <h2 class={doc.sectionTitle}>This show is being prepared for the stage.</h2>
+ <p class={doc.copy}>Follow the show to hear when it is ready. No episodes or schedule have been announced.</p>
+ </div>
+ ) : hasEpisodeFeed ? (
  <VideoFeed
  title="Episodes"
  description={`Watch all ${feedVideos.length} episodes from ${showEntry.data.name}.`}
@@ -291,7 +322,7 @@ function formatDuration(seconds: number) {
  />
  </svg>
  <p class={doc.lede}>
- No published episodes available
+ {isArchived ? "This show is archived" : "No published episodes available"}
  </p>
  <p class={doc.meta}>
  Browse the <a href="/shows" class={doc.link}>show archive</a> for other programs.
@@ -301,6 +332,11 @@ function formatDuration(seconds: number) {
  </div>
  </section>
  <section class={doc.section}>
- <NewsletterCTA audience={`show:${showEntry.data.id}`} badge="New episodes by email" headline={`Follow ${showEntry.data.name}`} subtitle="Get an email when a new episode is published." />
+ <NewsletterCTA
+ audience={`show:${showEntry.data.id}`}
+ badge={isComingSoon ? "Coming soon" : isArchived ? "Show updates" : "New episodes by email"}
+ headline={`Follow ${showEntry.data.name}`}
+ subtitle={isComingSoon ? "Be the first to know when this show is ready." : isArchived ? "Get an email if there is news about this show." : "Get an email when a new episode is published."}
+ />
  </section>
 </Page>
