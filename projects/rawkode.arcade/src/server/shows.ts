@@ -25,6 +25,7 @@ export interface ShowParticipation {
 }
 
 const lineupUrl = "https://studio.internal/api/studio/show-lineup";
+const audienceGateCache = new Map<string, { until: number; result: Promise<boolean> }>();
 
 function isShow(value: unknown): value is StudioShow {
 	if (!value || typeof value !== "object") return false;
@@ -65,9 +66,20 @@ export async function showParticipation(env: Env, studioSessionId: string): Prom
 /** Fail closed if Studio is unavailable, the show ended, or participation is off. */
 export async function roomAcceptsPublicParticipation(env: Env, roomId: string): Promise<boolean> {
 	if (env.ENVIRONMENT === "test") return true;
-	const row = await env.DB.prepare("SELECT studio_session_id FROM arcade_show_participation WHERE room_id = ? AND enabled = 1")
-		.bind(roomId).first<{ studio_session_id: string }>();
-	if (!row) return false;
-	const lineup = await loadStudioLineup(env);
-	return lineup?.live?.id === row.studio_session_id;
+	const cached = audienceGateCache.get(roomId);
+	if (cached && cached.until > Date.now()) return cached.result;
+	const result = (async () => {
+		try {
+			const row = await env.DB.prepare("SELECT studio_session_id FROM arcade_show_participation WHERE room_id = ? AND enabled = 1")
+				.bind(roomId).first<{ studio_session_id: string }>();
+			if (!row) return false;
+			const lineup = await loadStudioLineup(env);
+			return lineup?.live?.id === row.studio_session_id;
+		} catch {
+			return false;
+		}
+	})();
+	if (audienceGateCache.size > 256) audienceGateCache.clear();
+	audienceGateCache.set(roomId, { until: Date.now() + 500, result });
+	return result;
 }

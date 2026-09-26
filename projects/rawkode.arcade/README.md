@@ -11,7 +11,9 @@ Audience participation is off by default. A producer prepares a format in
 `/admin`, opens its room to run the interactive segment, and explicitly enables
 audience participation. Invited contestants can rehearse and play regardless
 of that audience setting. Public audience joins, tickets, sockets, and votes
-are rejected when participation is off or Studio is not live.
+are rejected when participation is off or Studio is not live. Audience gate
+lookups are coalesced for 500 ms, so disabling participation can take up to
+half a second to reach an already connected audience socket.
 
 To run a show: schedule it at `rawkode.studio`, prepare participation at
 `play.rawkode.academy/admin` only if needed, open the Studio producer room,
