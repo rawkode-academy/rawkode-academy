@@ -18,6 +18,8 @@
   "dependencies": {
     "@astrojs/cloudflare": "^13.1.10",
     "@astrojs/vue": "^6.0.1",
+    "@cloudflare/realtimekit": "2.0.0",
+    "@cloudflare/realtimekit-ui": "2.0.0",
     "@remotion/player": "^4.0.473",
     "astro": "^6.4.2",
     "motion": "^12.40.0",

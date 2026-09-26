@@ -3,6 +3,17 @@ import StudioLayout from "../layouts/StudioLayout.astro";
 
 const returnTo = Astro.url.searchParams.get("returnTo") || "/";
 const loginUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(returnTo)}`;
+const authError = Astro.url.searchParams.get("error");
+
+const authErrorMessages: Record<string, string> = {
+	missing_auth_state: "The sign-in request expired or was incomplete. Please try again.",
+	session_store_unavailable: "Studio cannot create a session right now. Please try again shortly.",
+	token_exchange_failed: "GitHub sign-in could not be completed. Please try again.",
+	userinfo_failed: "Studio could not load your Rawkode identity. Please try again.",
+};
+const authErrorMessage = authError
+	? authErrorMessages[authError] ?? "Studio sign-in failed. Please try again."
+	: null;
 ---
 
 <StudioLayout title="Sign in | Rawkode Studio">
@@ -10,6 +21,7 @@ const loginUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(returnTo)}`;
 		<p class="eyebrow">rawkode.academy identity</p>
 		<h1>Sign in to Studio</h1>
 		<p>Guests, hosts, and producers use their GitHub-backed Rawkode identity.</p>
+		{authErrorMessage ? <p class="form-error" role="alert">{authErrorMessage}</p> : null}
 		<a class="button primary" href={loginUrl}>Continue with GitHub</a>
 	</section>
 </StudioLayout>

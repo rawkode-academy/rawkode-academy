@@ -18,6 +18,9 @@ export type StreamEnvironment = "prod" | "test";
 export type StudioStreamStatus = "ended" | "failed" | "idle" | "live" | "starting";
 export type StudioSessionStatus = "scheduled" | "live" | "recording" | "complete";
 
+export const studioRecordingHeartbeatIntervalMs = 30_000;
+export const studioRecordingLeaseTimeoutSeconds = 120;
+
 export interface StudioPersonSummary {
 	avatarUrl?: string | null;
 	githubHandle?: string | null;
@@ -55,6 +58,15 @@ export interface StudioSessionRecord extends StudioSessionSummary {
 	updatedAt: number;
 }
 
+export interface StudioStreamLease {
+	startToken: string | null;
+	status: StudioStreamStatus;
+}
+
+export interface StudioParticipantProviderIdentity {
+	realtimeKitParticipantId: string | null;
+}
+
 export interface StudioEventSummary {
 	id: string;
 	title: string;
@@ -77,6 +89,13 @@ export interface StudioRecordingReadyMarker {
 	sourceEtag: string;
 	sourceFormat: "mkv" | "mp4" | "webm";
 	outputPrefix: string;
+}
+
+export class StudioRecordingOutputClaimedError extends Error {
+	constructor() {
+		super("A canonical Studio recording already exists for this content video.");
+		this.name = "StudioRecordingOutputClaimedError";
+	}
 }
 
 export interface StudioTranscodeStatus {
@@ -213,7 +232,7 @@ export function createStudioSessionId(show: string): string {
 }
 
 export function createRecordingId(): string {
-	return `recording-${new Date().toISOString().replace(/[:.]/g, "-")}`;
+	return `recording-${new Date().toISOString().replace(/[:.]/g, "-")}-${crypto.randomUUID()}`;
 }
 
 export function createReadyMarkerKey(
@@ -339,6 +358,14 @@ function getDb(env: StudioEnv | undefined): D1Database | null {
 	return env?.STUDIO_DB ?? null;
 }
 
+function developmentFallbacksEnabled(env: StudioEnv | undefined): boolean {
+	const runtimeOverride = (
+		env as (StudioEnv & { STUDIO_RUNTIME_MODE?: unknown }) | undefined
+	)?.STUDIO_RUNTIME_MODE;
+	if (runtimeOverride === "production") return false;
+	return import.meta.env.DEV;
+}
+
 function isMissingStudioInviteTableError(error: unknown): boolean {
 	return error instanceof Error &&
 		error.message.includes("no such table: studio_invites");
@@ -428,6 +455,63 @@ function normalizeOutputPrefix(outputPrefix: string): string {
 	return outputPrefix.endsWith("/") ? outputPrefix : `${outputPrefix}/`;
 }
 
+function canonicalVodKeys(videoId: string): {
+	statusKey: string;
+	streamKey: string;
+} {
+	const outputPrefix = `videos/${videoId}/`;
+	return {
+		statusKey: `${outputPrefix}transcode-status.json`,
+		streamKey: `${outputPrefix}stream.m3u8`,
+	};
+}
+
+export async function hasCanonicalStudioVodOutput(
+	env: StudioEnv,
+	videoId: string,
+): Promise<boolean> {
+	if (!env.RECORDINGS) return false;
+	const { statusKey, streamKey } = canonicalVodKeys(videoId);
+	const [status, stream] = await Promise.all([
+		env.RECORDINGS.head(statusKey),
+		env.RECORDINGS.head(streamKey),
+	]);
+	return Boolean(status || stream);
+}
+
+async function assertCanonicalVodOutputAvailableForMarker(
+	env: StudioEnv,
+	marker: StudioRecordingReadyMarker,
+): Promise<void> {
+	if (!env.RECORDINGS) return;
+	const { statusKey, streamKey } = canonicalVodKeys(marker.videoId);
+	const [statusHead, streamObject] = await Promise.all([
+		env.RECORDINGS.head(statusKey),
+		env.RECORDINGS.head(streamKey),
+	]);
+	if (!statusHead && !streamObject) return;
+	if (!statusHead) throw new StudioRecordingOutputClaimedError();
+	const statusObject = await env.RECORDINGS.get(statusKey);
+	if (!statusObject) throw new StudioRecordingOutputClaimedError();
+
+	const status = (await statusObject.json().catch(() => null)) as Partial<
+		StudioRecordingReadyMarker
+	> | null;
+	if (
+		!status ||
+		status.videoId !== marker.videoId ||
+		status.studioSessionId !== marker.studioSessionId ||
+		status.recordingId !== marker.recordingId ||
+		status.sourceBucket !== marker.sourceBucket ||
+		status.sourceKey !== marker.sourceKey ||
+		status.sourceEtag !== marker.sourceEtag ||
+		status.sourceFormat !== marker.sourceFormat ||
+		status.outputPrefix !== marker.outputPrefix
+	) {
+		throw new StudioRecordingOutputClaimedError();
+	}
+}
+
 function mergePeople(
 	primary: StudioPersonSummary[],
 	secondary: StudioPersonSummary[],
@@ -505,6 +589,7 @@ function rowToRecording(row: StudioRecordingRow): StudioRecordingSummary {
 async function getTranscodeStatus(
 	env: StudioEnv | undefined,
 	recording: StudioRecordingSummary,
+	studioSessionId: string,
 ): Promise<StudioTranscodeStatus | null> {
 	if (!env?.RECORDINGS) {
 		return null;
@@ -519,9 +604,27 @@ async function getTranscodeStatus(
 
 	const status = (await object.json().catch(() => null)) as {
 		completedAt?: string;
+		outputPrefix?: string;
+		recordingId?: string;
+		sourceBucket?: string;
+		sourceEtag?: string;
+		sourceFormat?: string;
+		sourceKey?: string;
 		status?: string;
+		studioSessionId?: string;
+		videoId?: string;
 	} | null;
-	if (!status?.status) {
+	if (
+		!status?.status ||
+		status.videoId !== recording.videoId ||
+		status.studioSessionId !== studioSessionId ||
+		status.recordingId !== recording.recordingId ||
+		status.sourceBucket !== recording.sourceBucket ||
+		status.sourceKey !== recording.sourceKey ||
+		status.sourceEtag !== recording.sourceEtag ||
+		status.sourceFormat !== recording.sourceFormat ||
+		status.outputPrefix !== recording.outputPrefix
+	) {
 		return null;
 	}
 
@@ -555,6 +658,56 @@ function deriveRecordingStatus(
 	return "uploaded";
 }
 
+async function deriveStudioRecordingSummary(
+	env: StudioEnv | undefined,
+	row: StudioRecordingRow,
+): Promise<StudioRecordingSummary> {
+	const recording = rowToRecording(row);
+	const transcode = await getTranscodeStatus(env, recording, row.session_id);
+	return {
+		...recording,
+		status: deriveRecordingStatus(recording.handoffStatus, transcode),
+		transcode,
+	};
+}
+
+async function getLatestStudioRecording(
+	env: StudioEnv | undefined,
+	sessionId: string,
+): Promise<StudioRecordingSummary | null> {
+	const db = getDb(env);
+	if (!db) return null;
+
+	let row: StudioRecordingRow | null;
+	try {
+		row = await db
+			.prepare(
+				`SELECT recording_id,
+				        session_id,
+				        video_id,
+				        source_bucket,
+				        source_key,
+				        source_etag,
+				        source_format,
+				        output_prefix,
+				        ready_marker_key,
+				        status,
+				        created_at,
+				        updated_at
+				   FROM studio_recordings
+				  WHERE session_id = ?
+				  ORDER BY created_at DESC, updated_at DESC
+				  LIMIT 1`,
+			)
+			.bind(sessionId)
+			.first<StudioRecordingRow>();
+	} catch (error) {
+		if (isMissingStudioRecordingsTableError(error)) return null;
+		throw error;
+	}
+	return row ? await deriveStudioRecordingSummary(env, row) : null;
+}
+
 async function getDerivedSessionRecordingStatus(
 	env: StudioEnv | undefined,
 	session: StudioSessionRecord,
@@ -563,7 +716,7 @@ async function getDerivedSessionRecordingStatus(
 		return session.recordingStatus;
 	}
 
-	const [latestRecording] = await listStudioRecordings(env, session.id);
+	const latestRecording = await getLatestStudioRecording(env, session.id);
 	return latestRecording?.status ?? session.recordingStatus;
 }
 
@@ -605,7 +758,7 @@ export async function listStudioSessions(
 	env: StudioEnv | undefined,
 ): Promise<StudioSessionRecord[]> {
 	const db = getDb(env);
-	if (!db) return [fallbackSession()];
+	if (!db) return developmentFallbacksEnabled(env) ? [fallbackSession()] : [];
 
 	let results: StudioSessionRow[] | undefined;
 	try {
@@ -636,7 +789,19 @@ export async function listStudioSessions(
 				        created_at,
 				        updated_at
 				   FROM studio_sessions
-				  ORDER BY starts_at ASC, created_at ASC
+				  ORDER BY CASE
+				             WHEN status IN ('live', 'recording')
+				               OR stream_status IN ('starting', 'live')
+				               OR recording_status = 'recording' THEN 0
+				             WHEN status <> 'complete' THEN 1
+				             ELSE 2
+				           END ASC,
+				           CASE WHEN status <> 'complete' THEN starts_at END ASC,
+				           CASE WHEN status = 'complete'
+				             THEN COALESCE(stream_ended_at, updated_at, created_at)
+				           END DESC,
+				           updated_at DESC,
+				           created_at DESC
 				  LIMIT 50`,
 			)
 			.all<StudioSessionRow>());
@@ -707,6 +872,7 @@ export async function listStudioSessionsForUser(
 ): Promise<StudioSessionRecord[]> {
 	const db = getDb(env);
 	if (!db) {
+		if (!developmentFallbacksEnabled(env)) return [];
 		const session = fallbackSession();
 		return userOwnsStudioSession(session, user) ? [session] : [];
 	}
@@ -750,7 +916,19 @@ export async function listStudioSessionsForUser(
 				              OR studio_participants.github_handle = ?)
 				             AND studio_participants.role IN ('host', 'producer', 'program')
 				        )
-				  ORDER BY starts_at ASC, created_at ASC
+				  ORDER BY CASE
+				             WHEN status IN ('live', 'recording')
+				               OR stream_status IN ('starting', 'live')
+				               OR recording_status = 'recording' THEN 0
+				             WHEN status <> 'complete' THEN 1
+				             ELSE 2
+				           END ASC,
+				           CASE WHEN status <> 'complete' THEN starts_at END ASC,
+				           CASE WHEN status = 'complete'
+				             THEN COALESCE(stream_ended_at, updated_at, created_at)
+				           END DESC,
+				           updated_at DESC,
+				           created_at DESC
 				  LIMIT 50`,
 			)
 			.bind(
@@ -777,6 +955,7 @@ export async function getStudioSession(
 ): Promise<StudioSessionRecord | null> {
 	const db = getDb(env);
 	if (!db) {
+		if (!developmentFallbacksEnabled(env)) return null;
 		const session = fallbackSession();
 		return session.id === sessionId ? session : null;
 	}
@@ -819,9 +998,7 @@ export async function getStudioSession(
 		throw error;
 	}
 
-	if (!row) return null;
-	const [session] = await withDerivedSessionRecordingStatuses(env, [rowToSession(row)]);
-	return session ?? null;
+	return row ? rowToSession(row) : null;
 }
 
 export async function getPublicStudioLiveState(
@@ -836,7 +1013,6 @@ export async function getPublicStudioLiveState(
 			session: null,
 		};
 	}
-
 	let row: StudioSessionRow | null;
 	try {
 		row = await db
@@ -870,6 +1046,8 @@ export async function getPublicStudioLiveState(
 				    AND stream_environment = 'prod'
 				    AND stream_status = 'live'
 				    AND status = 'live'
+				    AND stream_heartbeat_at IS NOT NULL
+				    AND stream_heartbeat_at >= unixepoch() - 20
 				    AND cloudflare_stream_playback_url IS NOT NULL
 				  ORDER BY COALESCE(stream_started_at, updated_at) DESC
 				  LIMIT 1`,
@@ -933,7 +1111,8 @@ export async function listStudioRecordings(
 				        updated_at
 				   FROM studio_recordings
 				  WHERE session_id = ?
-				  ORDER BY created_at DESC, updated_at DESC`,
+				  ORDER BY created_at DESC, updated_at DESC
+				  LIMIT 50`,
 			)
 			.bind(sessionId)
 			.all<StudioRecordingRow>());
@@ -942,15 +1121,9 @@ export async function listStudioRecordings(
 		throw error;
 	}
 
-	const recordings = (results ?? []).map(rowToRecording);
-	return await Promise.all(recordings.map(async (recording) => {
-		const transcode = await getTranscodeStatus(env, recording);
-		return {
-			...recording,
-			status: deriveRecordingStatus(recording.handoffStatus, transcode),
-			transcode,
-		};
-	}));
+	return await Promise.all(
+		(results ?? []).map((row) => deriveStudioRecordingSummary(env, row)),
+	);
 }
 
 export async function userCanManageStudioSession(
@@ -1085,46 +1258,243 @@ export async function saveStudioSession(
 		.run();
 }
 
-export async function saveStudioSessionRecordingStatus(
-	env: StudioEnv,
-	sessionId: string,
-	status: RecordingStatus,
-): Promise<void> {
-	const db = getDb(env);
-	if (!db) {
-		throw new Error("STUDIO_DB binding is required to persist Studio recording status");
-	}
-
-	await db
-		.prepare(
-			`UPDATE studio_sessions
-			    SET recording_status = ?,
-			        updated_at = unixepoch()
-			  WHERE id = ?`,
-		)
-		.bind(status, sessionId)
-		.run();
-}
-
 export async function saveStudioSessionStatus(
 	env: StudioEnv,
 	sessionId: string,
 	status: StudioSessionStatus,
-): Promise<void> {
+): Promise<boolean> {
 	const db = getDb(env);
 	if (!db) {
 		throw new Error("STUDIO_DB binding is required to persist Studio session status");
 	}
 
-	await db
+	const result = await db
 		.prepare(
 			`UPDATE studio_sessions
 			    SET status = ?,
 			        updated_at = unixepoch()
-			  WHERE id = ?`,
+			  WHERE id = ?
+			    AND (
+			      ? <> 'complete'
+			      OR NOT (
+			        recording_status = 'recording'
+			        AND (
+			          (
+			            recording_lease_id IS NOT NULL
+			            AND recording_heartbeat_at IS NOT NULL
+			            AND recording_heartbeat_at >= unixepoch() - ${studioRecordingLeaseTimeoutSeconds}
+			          )
+			          OR (
+			            recording_lease_id IS NULL
+			            AND recording_lease_grace_until IS NOT NULL
+			            AND recording_lease_grace_until > unixepoch()
+			          )
+			        )
+			      )
+			    )`,
 		)
-		.bind(status, sessionId)
+		.bind(status, sessionId, status)
 		.run();
+	return d1WriteChanged(result);
+}
+
+export async function claimStudioRecordingLease(
+	env: StudioEnv,
+	sessionId: string,
+	recordingId: string,
+): Promise<boolean> {
+	const db = getDb(env);
+	if (!db) {
+		throw new Error("STUDIO_DB binding is required to claim Studio recording lease");
+	}
+
+	const result = await db
+		.prepare(
+			`UPDATE studio_sessions
+			    SET recording_status = 'recording',
+			        recording_lease_id = ?,
+			        recording_heartbeat_at = unixepoch(),
+			        recording_lease_grace_until = NULL,
+			        updated_at = unixepoch()
+			  WHERE id = ?
+			    AND stream_environment = 'prod'
+			    AND content_video_id IS NOT NULL
+			    AND (
+			      status <> 'complete'
+			      OR EXISTS (
+			        SELECT 1
+			          FROM studio_recordings AS retry
+			         WHERE retry.video_id = studio_sessions.content_video_id
+			           AND retry.session_id = studio_sessions.id
+			           AND retry.recording_id = ?
+			      )
+			    )
+			    AND recording_status <> 'recording'
+			    AND recording_lease_id IS NULL
+			    AND (
+			      NOT EXISTS (
+			        SELECT 1
+			          FROM studio_recordings AS claimed
+			         WHERE claimed.video_id = studio_sessions.content_video_id
+			      )
+			      OR EXISTS (
+			        SELECT 1
+			          FROM studio_recordings AS retry
+			         WHERE retry.video_id = studio_sessions.content_video_id
+			           AND retry.session_id = studio_sessions.id
+			           AND retry.recording_id = ?
+			      )
+			    )
+			    AND NOT EXISTS (
+			      SELECT 1
+			        FROM studio_sessions AS other
+			       WHERE other.id <> studio_sessions.id
+			         AND other.stream_environment = 'prod'
+			         AND other.content_video_id = studio_sessions.content_video_id
+			         AND other.recording_status = 'recording'
+			         AND (
+			           (
+			             other.recording_lease_id IS NOT NULL
+			             AND other.recording_heartbeat_at >= unixepoch() - ${studioRecordingLeaseTimeoutSeconds}
+			           )
+			           OR (
+			             other.recording_lease_id IS NULL
+			             AND other.recording_lease_grace_until > unixepoch()
+			           )
+			         )
+			    )`,
+		)
+		.bind(recordingId, sessionId, recordingId, recordingId)
+		.run();
+	return d1WriteChanged(result);
+}
+
+export async function hasCanonicalStudioRecording(
+	env: StudioEnv,
+	sessionId: string,
+): Promise<boolean> {
+	const db = getDb(env);
+	if (!db) {
+		throw new Error("STUDIO_DB binding is required to inspect Studio recording claims");
+	}
+
+	const row = await db
+		.prepare(
+			`SELECT 1 AS claimed
+			   FROM studio_sessions AS target
+			   JOIN studio_recordings AS recording
+			     ON recording.video_id = target.content_video_id
+			  WHERE target.id = ?
+			  LIMIT 1`,
+		)
+		.bind(sessionId)
+		.first<{ claimed: number }>();
+	return row?.claimed === 1;
+}
+
+export async function renewStudioRecordingLease(
+	env: StudioEnv,
+	sessionId: string,
+	recordingId: string,
+): Promise<boolean> {
+	const db = getDb(env);
+	if (!db) {
+		throw new Error("STUDIO_DB binding is required to renew Studio recording lease");
+	}
+
+	const result = await db
+		.prepare(
+			`UPDATE studio_sessions
+			    SET recording_lease_id = COALESCE(recording_lease_id, ?),
+			        recording_heartbeat_at = unixepoch(),
+			        recording_lease_grace_until = NULL,
+			        updated_at = unixepoch()
+			  WHERE id = ?
+			    AND status <> 'complete'
+			    AND recording_status = 'recording'
+			    AND (
+			      (
+			        recording_lease_id = ?
+			        AND recording_heartbeat_at >= unixepoch() - ${studioRecordingLeaseTimeoutSeconds}
+			      )
+			      OR (
+			        recording_lease_id IS NULL
+			        AND recording_lease_grace_until > unixepoch()
+			      )
+			    )`,
+		)
+		.bind(recordingId, sessionId, recordingId)
+		.run();
+	return d1WriteChanged(result);
+}
+
+export async function releaseStudioRecordingLease(
+	env: StudioEnv,
+	input: {
+		nextStatus: "idle" | "uploaded";
+		recordingId: string;
+		sessionId: string;
+	},
+): Promise<boolean> {
+	const db = getDb(env);
+	if (!db) {
+		throw new Error("STUDIO_DB binding is required to release Studio recording lease");
+	}
+
+	const result = await db
+		.prepare(
+			`UPDATE studio_sessions
+			    SET recording_status = ?,
+			        recording_lease_id = NULL,
+			        recording_heartbeat_at = NULL,
+			        recording_lease_grace_until = NULL,
+			        updated_at = unixepoch()
+			  WHERE id = ?
+			    AND recording_lease_id = ?`,
+		)
+		.bind(input.nextStatus, input.sessionId, input.recordingId)
+		.run();
+	return d1WriteChanged(result);
+}
+
+export async function expireStaleStudioRecordingLeases(
+	env: StudioEnv | undefined,
+	sessionId?: string,
+): Promise<number> {
+	const db = getDb(env);
+	if (!db) return 0;
+
+	const sessionFilter = sessionId ? " AND id = ?" : "";
+	const statement = db.prepare(
+		`UPDATE studio_sessions
+		    SET recording_status = CASE
+		          WHEN recording_status = 'recording' THEN 'idle'
+		          ELSE recording_status
+		        END,
+		        recording_lease_id = NULL,
+		        recording_heartbeat_at = NULL,
+		        recording_lease_grace_until = NULL,
+		        updated_at = unixepoch()
+		  WHERE (
+		      (
+		        recording_lease_id IS NOT NULL
+		        AND (
+		          recording_heartbeat_at IS NULL
+		          OR recording_heartbeat_at < unixepoch() - ${studioRecordingLeaseTimeoutSeconds}
+		        )
+		      )
+		      OR (
+		        recording_lease_id IS NULL
+		        AND recording_status = 'recording'
+			        AND (
+			          recording_lease_grace_until IS NULL
+			          OR recording_lease_grace_until <= unixepoch()
+		        )
+		      )
+		    )${sessionFilter}`,
+	);
+	const result = await statement.bind(...(sessionId ? [sessionId] : [])).run();
+	return result.meta?.changes ?? result.meta?.rows_written ?? 0;
 }
 
 export async function saveStudioStreamStart(
@@ -1147,6 +1517,7 @@ export async function saveStudioStreamStart(
 			    SET stream_status = 'starting',
 			        cloudflare_stream_live_input_id = ?,
 			        cloudflare_stream_playback_url = ?,
+			        stream_heartbeat_at = unixepoch(),
 			        stream_started_at = NULL,
 			        stream_ended_at = NULL,
 			        updated_at = unixepoch()
@@ -1174,17 +1545,80 @@ export async function claimStudioStreamStart(
 			`UPDATE studio_sessions
 			    SET stream_status = 'starting',
 			        stream_start_token = ?,
+			        stream_heartbeat_at = unixepoch(),
 			        stream_started_at = NULL,
 			        stream_ended_at = NULL,
 			        updated_at = unixepoch()
 			  WHERE id = ?
 			    AND status <> 'complete'
 			    AND stream_status NOT IN ('starting', 'live')
-			    AND (stream_start_token IS NULL OR stream_start_token <> ?)`,
+			    AND (stream_start_token IS NULL OR stream_start_token <> ?)
+			    AND (
+			      stream_environment <> 'prod'
+			      OR NOT EXISTS (
+			        SELECT 1
+			          FROM studio_sessions AS other
+			         WHERE other.id <> studio_sessions.id
+			           AND other.stream_environment = 'prod'
+			           AND (
+			             other.content_video_id = studio_sessions.content_video_id
+			             OR other.content_video_slug = studio_sessions.content_video_slug
+			           )
+			           AND (
+			             (
+			               other.stream_status = 'starting'
+			               AND other.stream_heartbeat_at >= unixepoch() - 120
+			             )
+			             OR (
+			               other.stream_status = 'live'
+			               AND other.stream_heartbeat_at >= unixepoch() - 20
+			             )
+			           )
+			      )
+			    )`,
 		)
 		.bind(startToken, sessionId, startToken)
 		.run();
 	return d1WriteChanged(result);
+}
+
+export async function hasFreshStudioContentStreamConflict(
+	env: StudioEnv,
+	sessionId: string,
+): Promise<boolean> {
+	const db = getDb(env);
+	if (!db) {
+		throw new Error("STUDIO_DB binding is required to inspect Studio content streams");
+	}
+
+	const row = await db
+		.prepare(
+			`SELECT 1 AS conflicting
+			   FROM studio_sessions AS target
+			   JOIN studio_sessions AS other
+			     ON other.id <> target.id
+			    AND other.stream_environment = 'prod'
+			    AND (
+			      other.content_video_id = target.content_video_id
+			      OR other.content_video_slug = target.content_video_slug
+			    )
+			  WHERE target.id = ?
+			    AND target.stream_environment = 'prod'
+			    AND (
+			      (
+			        other.stream_status = 'starting'
+			        AND other.stream_heartbeat_at >= unixepoch() - 120
+			      )
+			      OR (
+			        other.stream_status = 'live'
+			        AND other.stream_heartbeat_at >= unixepoch() - 20
+			      )
+			    )
+			  LIMIT 1`,
+		)
+		.bind(sessionId)
+		.first<{ conflicting: number }>();
+	return row?.conflicting === 1;
 }
 
 export async function saveStudioStreamLive(
@@ -1207,6 +1641,7 @@ export async function saveStudioStreamLive(
 			    SET status = CASE WHEN ? = 1 THEN 'live' ELSE status END,
 			        stream_status = 'live',
 			        cloudflare_stream_playback_url = ?,
+			        stream_heartbeat_at = unixepoch(),
 			        stream_started_at = CASE
 			          WHEN stream_status = 'live' THEN stream_started_at
 			          ELSE unixepoch()
@@ -1225,6 +1660,116 @@ export async function saveStudioStreamLive(
 		)
 		.run();
 	return d1WriteChanged(result);
+}
+
+export async function saveStudioStreamHeartbeat(
+	env: StudioEnv,
+	sessionId: string,
+	startToken: string,
+): Promise<boolean> {
+	const db = getDb(env);
+	if (!db) {
+		throw new Error("STUDIO_DB binding is required to renew Studio stream lease");
+	}
+
+	const result = await db
+		.prepare(
+			`UPDATE studio_sessions
+			    SET stream_heartbeat_at = unixepoch(),
+			        updated_at = unixepoch()
+			  WHERE id = ?
+			    AND stream_status IN ('starting', 'live')
+			    AND stream_start_token = ?`,
+		)
+		.bind(sessionId, startToken)
+		.run();
+	return d1WriteChanged(result);
+}
+
+export async function getStudioStreamLease(
+	env: StudioEnv,
+	sessionId: string,
+): Promise<StudioStreamLease | null> {
+	const db = getDb(env);
+	if (!db) {
+		throw new Error("STUDIO_DB binding is required to inspect Studio stream lease");
+	}
+
+	const row = await db
+		.prepare(
+			`SELECT stream_status,
+			        stream_start_token
+			   FROM studio_sessions
+			  WHERE id = ?`,
+		)
+		.bind(sessionId)
+		.first<Pick<StudioSessionRow, "stream_start_token" | "stream_status">>();
+
+	return row
+		? {
+				startToken: row.stream_start_token,
+				status: row.stream_status,
+			}
+		: null;
+}
+
+export async function takeOverStudioStreamLease(
+	env: StudioEnv,
+	sessionId: string,
+	lease: StudioStreamLease,
+): Promise<boolean> {
+	const db = getDb(env);
+	if (!db) {
+		throw new Error("STUDIO_DB binding is required to take over Studio stream lease");
+	}
+
+	const result = await db
+		.prepare(
+			`UPDATE studio_sessions
+			    SET status = CASE WHEN status = 'live' THEN 'scheduled' ELSE status END,
+			        stream_status = 'ended',
+			        stream_start_token = NULL,
+			        stream_heartbeat_at = NULL,
+			        stream_ended_at = COALESCE(stream_ended_at, unixepoch()),
+			        updated_at = unixepoch()
+			  WHERE id = ?
+			    AND stream_status = ?
+			    AND stream_start_token IS ?`,
+		)
+		.bind(sessionId, lease.status, lease.startToken)
+		.run();
+	return d1WriteChanged(result);
+}
+
+export async function expireStaleStudioStreams(
+	env: StudioEnv | undefined,
+	sessionId?: string,
+): Promise<number> {
+	const db = getDb(env);
+	if (!db) return 0;
+
+	const sessionFilter = sessionId ? " AND id = ?" : "";
+	const statement = db.prepare(
+		`UPDATE studio_sessions
+		    SET status = CASE WHEN status = 'live' THEN 'scheduled' ELSE status END,
+		        stream_status = 'ended',
+		        stream_start_token = NULL,
+		        stream_heartbeat_at = NULL,
+		        stream_ended_at = COALESCE(stream_ended_at, unixepoch()),
+		        updated_at = unixepoch()
+		  WHERE (
+		      (
+		        stream_status = 'starting'
+		        AND (stream_heartbeat_at IS NULL OR stream_heartbeat_at < unixepoch() - 120)
+		      )
+		      OR (
+		        stream_status = 'live'
+		        AND (stream_heartbeat_at IS NULL OR stream_heartbeat_at < unixepoch() - 20)
+		      )
+		    )${sessionFilter}`,
+	);
+	const result = await statement.bind(...(sessionId ? [sessionId] : [])).run();
+	return result.meta?.changes ?? result.meta?.rows_written ?? 0;
 }
 
 export async function claimStudioStreamNotification(
@@ -1283,21 +1828,25 @@ export async function saveStudioStreamEnded(
 	env: StudioEnv,
 	sessionId: string,
 	startToken?: string,
-): Promise<void> {
+): Promise<boolean> {
 	const db = getDb(env);
 	if (!db) {
 		throw new Error("STUDIO_DB binding is required to persist Studio stream status");
 	}
 
 	if (startToken) {
-		await db
+		const result = await db
 			.prepare(
 				`UPDATE studio_sessions
 				    SET status = CASE WHEN status = 'live' THEN 'scheduled' ELSE status END,
 				        stream_status = 'ended',
+				        stream_heartbeat_at = NULL,
 				        stream_start_token = CASE
-				          WHEN stream_start_token = ? THEN NULL
-				          ELSE ?
+				          WHEN stream_status IN ('starting', 'live')
+				            AND stream_start_token = ? THEN NULL
+				          WHEN stream_start_token IS NULL
+				            AND stream_status NOT IN ('starting', 'live') THEN ?
+				          ELSE stream_start_token
 				        END,
 				        stream_ended_at = COALESCE(stream_ended_at, unixepoch()),
 				        updated_at = unixepoch()
@@ -1310,23 +1859,25 @@ export async function saveStudioStreamEnded(
 				      )
 				    )`,
 			)
-			.bind(startToken, startToken, sessionId, startToken)
-			.run();
-		return;
+				.bind(startToken, startToken, sessionId, startToken)
+				.run();
+		return d1WriteChanged(result);
 	}
 
-	await db
+	const result = await db
 		.prepare(
 			`UPDATE studio_sessions
 			    SET status = CASE WHEN status = 'live' THEN 'scheduled' ELSE status END,
 			        stream_status = 'ended',
 			        stream_start_token = NULL,
+			        stream_heartbeat_at = NULL,
 			        stream_ended_at = COALESCE(stream_ended_at, unixepoch()),
 			        updated_at = unixepoch()
 			  WHERE id = ?`,
 		)
 		.bind(sessionId)
 		.run();
+	return d1WriteChanged(result);
 }
 
 export function buildStudioSession(input: {
@@ -1384,6 +1935,7 @@ export async function upsertStudioParticipant(
 	env: StudioEnv,
 	input: {
 		person?: StudioPersonSummary | null;
+		realtimeKitParticipantId?: string | null;
 		sessionId: string;
 		user: StudioUser;
 		role: StudioRole;
@@ -1401,13 +1953,18 @@ export async function upsertStudioParticipant(
 				role,
 				name,
 				image_url,
+				realtimekit_participant_id,
 				joined_at
 			)
-			VALUES (?, ?, ?, ?, ?, ?, unixepoch())
+			VALUES (?, ?, ?, ?, ?, ?, ?, unixepoch())
 			ON CONFLICT(session_id, user_id, role) DO UPDATE SET
 				github_handle = excluded.github_handle,
 				name = excluded.name,
 				image_url = excluded.image_url,
+				realtimekit_participant_id = COALESCE(
+					excluded.realtimekit_participant_id,
+					studio_participants.realtimekit_participant_id
+				),
 				joined_at = excluded.joined_at`,
 		)
 		.bind(
@@ -1420,8 +1977,37 @@ export async function upsertStudioParticipant(
 				getStudioUserGithubHandle(input.user) ||
 				"Studio participant",
 			input.person?.avatarUrl ?? input.user.image,
+			input.realtimeKitParticipantId ?? null,
 		)
 		.run();
+}
+
+export async function getStudioParticipantProviderIdentity(
+	env: StudioEnv,
+	input: {
+		sessionId: string;
+		user: StudioUser;
+		role: StudioRole;
+	},
+): Promise<StudioParticipantProviderIdentity | null> {
+	const db = getDb(env);
+	if (!db) return null;
+
+	const row = await db
+		.prepare(
+			`SELECT realtimekit_participant_id
+			   FROM studio_participants
+			  WHERE session_id = ?
+			    AND user_id = ?
+			    AND role = ?
+			  LIMIT 1`,
+		)
+		.bind(input.sessionId, getStudioUserId(input.user), input.role)
+		.first<{ realtimekit_participant_id: string | null }>();
+
+	return row
+		? { realtimeKitParticipantId: row.realtimekit_participant_id }
+		: null;
 }
 
 export async function createStudioInviteRecord(
@@ -1489,8 +2075,8 @@ export async function resolveStudioInvite(
 	user?: StudioUser,
 ): Promise<ResolvedStudioInvite | null> {
 	const db = getDb(env);
-	if (!db || token === "demo") {
-		if (token !== "demo") return null;
+	if (token === "demo") {
+		if (!developmentFallbacksEnabled(env)) return null;
 		const session = fallbackSession();
 		return {
 			invite: {
@@ -1508,6 +2094,7 @@ export async function resolveStudioInvite(
 			session,
 		};
 	}
+	if (!db) return null;
 
 	const tokenHash = await hashInviteToken(token);
 	const userId = user ? getStudioUserId(user) : "";
@@ -1544,7 +2131,7 @@ export async function resolveStudioInvite(
 			.bind(tokenHash, userId)
 			.first<StudioInviteRow>();
 	} catch (error) {
-		if (import.meta.env.DEV && isMissingStudioInviteTableError(error)) {
+		if (developmentFallbacksEnabled(env) && isMissingStudioInviteTableError(error)) {
 			return null;
 		}
 		throw error;
@@ -1566,7 +2153,62 @@ export async function redeemStudioInvite(
 	user: StudioUser,
 ): Promise<boolean> {
 	const db = getDb(env);
-	if (!db || invite.tokenHash === "demo") return true;
+	if (invite.tokenHash === "demo") return developmentFallbacksEnabled(env);
+	if (!db) return false;
+
+	const userId = getStudioUserId(user);
+	const insert = await db
+		.prepare(
+			`INSERT INTO studio_invite_redemptions (
+				token_hash,
+				user_id,
+				github_handle,
+				redeemed_at
+			)
+			SELECT ?, ?, ?, unixepoch()
+			 WHERE EXISTS (
+			   SELECT 1
+			     FROM studio_invites AS invite
+			    WHERE invite.token_hash = ?
+			      AND invite.revoked_at IS NULL
+			      AND invite.expires_at > unixepoch()
+			      AND (
+			        invite.max_uses = 0
+			        OR (
+			          SELECT COUNT(*)
+			            FROM studio_invite_redemptions AS redemption
+			           WHERE redemption.token_hash = invite.token_hash
+			        ) < invite.max_uses
+			      )
+			 )
+			ON CONFLICT(token_hash, user_id) DO NOTHING`,
+		)
+		.bind(
+			invite.tokenHash,
+			userId,
+			getStudioUserGithubHandle(user),
+			invite.tokenHash,
+		)
+		.run();
+	const insertMeta = insert.meta as {
+		changes?: number;
+		rows_written?: number;
+	};
+	await db
+		.prepare(
+			`UPDATE studio_invites
+			    SET used_count = (
+			      SELECT COUNT(*)
+			        FROM studio_invite_redemptions
+			       WHERE token_hash = ?
+			    )
+			  WHERE token_hash = ?`,
+		)
+		.bind(invite.tokenHash, invite.tokenHash)
+		.run();
+	if ((insertMeta.changes ?? insertMeta.rows_written ?? 0) > 0) {
+		return true;
+	}
 
 	const existing = await db
 		.prepare(
@@ -1576,44 +2218,63 @@ export async function redeemStudioInvite(
 			    AND user_id = ?
 			  LIMIT 1`,
 		)
-		.bind(invite.tokenHash, getStudioUserId(user))
+		.bind(invite.tokenHash, userId)
 		.first<{ user_id: string }>();
-	if (existing) return true;
+	return Boolean(existing);
+}
 
-	const update = await db
+function recordingMarkerMatchesRow(
+	row: StudioRecordingRow,
+	marker: StudioRecordingReadyMarker,
+	readyMarkerKey: string,
+): boolean {
+	return row.recording_id === marker.recordingId &&
+		row.session_id === marker.studioSessionId &&
+		row.video_id === marker.videoId &&
+		row.source_bucket === marker.sourceBucket &&
+		row.source_key === marker.sourceKey &&
+		row.source_etag === marker.sourceEtag &&
+		row.source_format === marker.sourceFormat &&
+		row.output_prefix === marker.outputPrefix &&
+		row.ready_marker_key === readyMarkerKey;
+}
+
+async function getRecordingClaimRow(
+	db: D1Database,
+	marker: StudioRecordingReadyMarker,
+): Promise<StudioRecordingRow | null> {
+	const columns = `recording_id,
+			        session_id,
+			        video_id,
+			        source_bucket,
+			        source_key,
+			        source_etag,
+			        source_format,
+			        output_prefix,
+			        ready_marker_key,
+			        status,
+			        created_at,
+			        updated_at`;
+	const videoClaim = await db
 		.prepare(
-			`UPDATE studio_invites
-			    SET used_count = used_count + 1
-			  WHERE token_hash = ?
-			    AND revoked_at IS NULL
-			    AND expires_at > unixepoch()
-			    AND (max_uses = 0 OR used_count < max_uses)`,
+			`SELECT ${columns}
+			   FROM studio_recordings
+			  WHERE video_id = ?
+			  LIMIT 1`,
 		)
-		.bind(invite.tokenHash)
-		.run();
-	const updateMeta = update.meta as {
-		changes?: number;
-		rows_written?: number;
-	};
-	if ((updateMeta.changes ?? updateMeta.rows_written ?? 0) < 1) {
-		return false;
-	}
+		.bind(marker.videoId)
+		.first<StudioRecordingRow>();
+	if (videoClaim) return videoClaim;
 
-	await db
+	return await db
 		.prepare(
-			`INSERT INTO studio_invite_redemptions (
-				token_hash,
-				user_id,
-				github_handle,
-				redeemed_at
-			)
-			VALUES (?, ?, ?, unixepoch())
-			ON CONFLICT(token_hash, user_id) DO NOTHING`,
+			`SELECT ${columns}
+			   FROM studio_recordings
+			  WHERE recording_id = ?
+			  LIMIT 1`,
 		)
-		.bind(invite.tokenHash, getStudioUserId(user), getStudioUserGithubHandle(user))
-		.run();
-
-	return true;
+		.bind(marker.recordingId)
+		.first<StudioRecordingRow>();
 }
 
 export async function saveRecordingReadyMarker(
@@ -1624,6 +2285,7 @@ export async function saveRecordingReadyMarker(
 		marker.studioSessionId,
 		marker.recordingId,
 	);
+	await assertCanonicalVodOutputAvailableForMarker(env, marker);
 	const source = env.RECORDINGS
 		? await env.RECORDINGS.head(marker.sourceKey)
 		: null;
@@ -1654,18 +2316,13 @@ export async function saveRecordingReadyMarker(
 					created_at,
 					updated_at
 				)
-				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'marker-pending', unixepoch(), unixepoch())
-				ON CONFLICT(recording_id) DO UPDATE SET
-					session_id = excluded.session_id,
-					video_id = excluded.video_id,
-					source_bucket = excluded.source_bucket,
-					source_key = excluded.source_key,
-					source_etag = excluded.source_etag,
-					source_format = excluded.source_format,
-					output_prefix = excluded.output_prefix,
-					ready_marker_key = excluded.ready_marker_key,
-					status = 'marker-pending',
-					updated_at = excluded.updated_at`,
+				SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, 'marker-pending', unixepoch(), unixepoch()
+				 WHERE NOT EXISTS (
+				   SELECT 1
+				     FROM studio_recordings
+				    WHERE video_id = ?
+				 )
+				ON CONFLICT DO NOTHING`,
 			)
 			.bind(
 				marker.recordingId,
@@ -1677,8 +2334,14 @@ export async function saveRecordingReadyMarker(
 				marker.sourceFormat,
 				marker.outputPrefix,
 				readyMarkerKey,
+				marker.videoId,
 			)
 			.run();
+
+		const claimed = await getRecordingClaimRow(db, marker);
+		if (!claimed || !recordingMarkerMatchesRow(claimed, marker, readyMarkerKey)) {
+			throw new StudioRecordingOutputClaimedError();
+		}
 	}
 
 	if (env.RECORDINGS) {
@@ -1693,12 +2356,44 @@ export async function saveRecordingReadyMarker(
 				`UPDATE studio_recordings
 				    SET status = 'ready',
 				        updated_at = unixepoch()
-				  WHERE recording_id = ?`,
+				  WHERE recording_id = ?
+				    AND session_id = ?
+				    AND video_id = ?
+				    AND source_bucket = ?
+				    AND source_key = ?
+				    AND source_etag = ?
+				    AND source_format = ?
+				    AND output_prefix = ?
+				    AND ready_marker_key = ?`,
 			)
-			.bind(marker.recordingId)
+			.bind(
+				marker.recordingId,
+				marker.studioSessionId,
+				marker.videoId,
+				marker.sourceBucket,
+				marker.sourceKey,
+				marker.sourceEtag,
+				marker.sourceFormat,
+				marker.outputPrefix,
+				readyMarkerKey,
+			)
 			.run();
 
-		await saveStudioSessionRecordingStatus(env, marker.studioSessionId, "uploaded");
+		await db
+			.prepare(
+				`UPDATE studio_sessions
+				    SET recording_status = 'uploaded',
+				        updated_at = unixepoch()
+				  WHERE id = ?
+				    AND recording_lease_id IS NULL
+				    AND (
+				      recording_status <> 'recording'
+				      OR recording_lease_grace_until IS NULL
+				      OR recording_lease_grace_until <= unixepoch()
+				    )`,
+			)
+			.bind(marker.studioSessionId)
+			.run();
 	}
 
 	return { readyMarkerKey, sourceVerified: Boolean(source) };

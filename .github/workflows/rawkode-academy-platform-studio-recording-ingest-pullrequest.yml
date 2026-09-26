@@ -6,11 +6,15 @@ on:
   pull_request:
     paths:
     - .github/workflows/rawkode-academy-platform-studio-recording-ingest-pullrequest.yml
+    - bun.lock
+    - bun.lock/**
     - cue.mod/**
+    - projects/rawkode.academy/platform/studio-recording-ingest/data-model/**
     - projects/rawkode.academy/platform/studio-recording-ingest/env.cue
     - projects/rawkode.academy/platform/studio-recording-ingest/package.json
     - projects/rawkode.academy/platform/studio-recording-ingest/package.json/**
     - projects/rawkode.academy/platform/studio-recording-ingest/schema/**
+    - projects/rawkode.academy/platform/studio-recording-ingest/scripts/**
     - projects/rawkode.academy/platform/studio-recording-ingest/src/**
     - projects/rawkode.academy/platform/studio-recording-ingest/tests/**
     - projects/rawkode.academy/platform/studio-recording-ingest/tsconfig.json
@@ -28,7 +32,6 @@ jobs:
   rawkode-academy-platform-studio-recording-ingest-pullRequest:
     name: rawkode-academy-platform-studio-recording-ingest-pullRequest
     runs-on: namespace-profile-linux-x86
-    environment: production
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -84,10 +87,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Install Bun dependencies
       run: cuenv exec -- bun install --frozen-lockfile
-    - name: Setup 1Password
-      run: cuenv exec -- cuenv secrets setup onepassword
-      env:
-        OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
     - name: 'Run pipeline: pullRequest'
       run: cuenv ci --pipeline pullRequest --path projects/rawkode.academy/platform/studio-recording-ingest
       env:
@@ -95,5 +94,3 @@ jobs:
         GITHUB_ACTOR: ${{ github.actor }}
         GITHUB_REF_TYPE: ${{ github.ref_type }}
         GITHUB_REF_NAME: ${{ github.ref_name }}
-        CUENV_ENVIRONMENT: production
-        OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}

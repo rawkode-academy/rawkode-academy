@@ -1,0 +1,25 @@
+---
+import BroadcastOutputs from "../../../components/BroadcastOutputs.vue";
+import StudioLayout from "../../../layouts/StudioLayout.astro";
+import { getStudioSession, userCanManageStudioSession } from "../../../server/studio";
+import { env } from "cloudflare:workers";
+
+if (!Astro.locals.user) {
+	return Astro.redirect(`/login?returnTo=${encodeURIComponent(Astro.url.pathname)}`);
+}
+
+const sessionId = Astro.params.sessionId ?? "";
+const session = await getStudioSession(env, sessionId);
+if (!session) return new Response("Studio session not found", { status: 404 });
+if (!(await userCanManageStudioSession(env, session, Astro.locals.user))) {
+	return new Response("Studio session management access is required", { status: 403 });
+}
+---
+
+<StudioLayout title={`Broadcast outputs ${session.title} | Rawkode Studio`} active="producer">
+	<BroadcastOutputs
+		client:load
+		producerUrl={`/studio/${encodeURIComponent(session.id)}/producer`}
+		sessionId={session.id}
+	/>
+</StudioLayout>
