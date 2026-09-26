@@ -9,6 +9,7 @@ import { ModerationService } from "./server/moderation";
 import { mutationOriginAllowed } from "./server/origin";
 import { ResultProjector } from "./server/results";
 import { RoomDirectory } from "./server/rooms";
+import { loadStudioLineup, roomAcceptsPublicParticipation, showParticipation } from "./server/shows";
 import { issueRoomTicket, verifyRoomTicket } from "./server/tickets";
 import { issueViewScope, readViewScope } from "./server/view-scope";
 
@@ -101,6 +102,50 @@ async function api(request: Request, env: Env, ctx: ExecutionContext, path: stri
 	const principal = await authenticate(request, env);
 	const directory = new RoomDirectory(env);
 	const content = new ContentRepository(env);
+	if (path === "/show-lineup" && request.method === "GET") {
+		const lineup = await loadStudioLineup(env);
+		if (!lineup) return json({ error: { code: "UPSTREAM_UNAVAILABLE", message: "Show schedule is unavailable" } }, 503);
+		const participation = lineup.live ? await showParticipation(env, lineup.live.id) : undefined;
+		return json({ ...lineup, participation: participation?.enabled ? { roomId: participation.roomId, gameKey: participation.gameKey } : null });
+	}
+	if (path === "/admin/show-lineup" && request.method === "GET") {
+		if (!hasRole(principal, ["producer", "host"])) return json({ error: { code: "FORBIDDEN", message: "Producer role required" } }, 403);
+		const lineup = await loadStudioLineup(env);
+		if (!lineup) return json({ error: { code: "UPSTREAM_UNAVAILABLE", message: "Show schedule is unavailable" } }, 503);
+		const shows = [lineup.live, ...lineup.upcoming].filter((show): show is NonNullable<typeof show> => Boolean(show));
+		return json({ shows: await Promise.all(shows.map(async (show) => ({ ...show, participation: await showParticipation(env, show.id) }))) });
+	}
+	const participationRoute = path.match(/^\/admin\/shows\/([^/]+)\/participation$/);
+	if (participationRoute && request.method === "POST") {
+		if (!hasRole(principal, ["producer", "host"])) return json({ error: { code: "FORBIDDEN", message: "Producer role required" } }, 403);
+		const sessionId = decodeURIComponent(participationRoute[1]);
+		const lineup = await loadStudioLineup(env);
+		if (!lineup) return json({ error: { code: "UPSTREAM_UNAVAILABLE", message: "Show schedule is unavailable" } }, 503);
+		const show = [lineup.live, ...lineup.upcoming].find((entry) => entry?.id === sessionId);
+		if (!show) return json({ error: { code: "NOT_FOUND", message: "Production show not found" } }, 404);
+		const body = await requestJson<{ enabled?: boolean; gameKey?: string }>(request);
+		if (!body || typeof body.enabled !== "boolean") return badRequest("enabled is required");
+		let participation = await showParticipation(env, sessionId);
+		if (!participation) {
+			if (!admissionOpen(env)) return json({ error: { code: "ADMISSION_CLOSED", message: "New interactive rooms are temporarily disabled" } }, 503);
+			if (!body.gameKey || !content.getGame(body.gameKey)) return badRequest("Choose an interactive format first");
+			const revision = await content.publishedRoomContent(body.gameKey);
+			const room = await directory.create(body.gameKey, `${show.title} audience participation`, principal.id, revision?.revisionId);
+			await directory.admit(room.id, principal);
+			const initialized = await directory.stub(room.id).fetch("https://game-room.internal/_internal/init", {
+				method: "POST", body: JSON.stringify({ roomId: room.id, gameKey: body.gameKey, content: revision }),
+			});
+			if (!initialized.ok) return json({ error: { code: "ROOM_UNAVAILABLE", message: "Interactive room could not be prepared" } }, 503);
+			const now = new Date().toISOString();
+			await env.DB.prepare("INSERT OR IGNORE INTO arcade_show_participation (studio_session_id, room_id, enabled, created_by, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)")
+				.bind(sessionId, room.id, body.enabled ? 1 : 0, principal.id, now, now).run();
+		} else {
+			await env.DB.prepare("UPDATE arcade_show_participation SET enabled = ?, updated_at = ? WHERE studio_session_id = ?")
+				.bind(body.enabled ? 1 : 0, new Date().toISOString(), sessionId).run();
+		}
+		participation = await showParticipation(env, sessionId);
+		return json({ participation });
+	}
 
 	if (path === "/games" && request.method === "GET") return json({ games: content.listGames() });
 	if (path === "/content/packs" && request.method === "GET") {
@@ -201,6 +246,12 @@ async function api(request: Request, env: Env, ctx: ExecutionContext, path: stri
 			const canonicalRoom = previewInvite ? undefined : await directory.get(code);
 			const previewTarget = previewInvite ?? (canonicalRoom ? { roomId: canonicalRoom.id, role: "audience" as Role } : undefined);
 			if (!previewTarget) return json({ error: { code: "NOT_FOUND", message: "Invite is invalid or expired" } }, 404);
+			const previewMembership = principal
+				? await directory.membership(previewTarget.roomId, principal.id) : undefined;
+			if (previewTarget.role === "audience" && (!previewMembership || previewMembership.role === "audience") &&
+				!await roomAcceptsPublicParticipation(env, previewTarget.roomId)) {
+				return json({ error: { code: "SHOW_OFF_AIR", message: "Audience participation is unavailable" } }, 403);
+			}
 			if (join[2] === "teams") {
 				if (request.method !== "GET") return badRequest("Team rosters are read-only");
 				const teams = await publicTeams(directory, previewTarget.roomId);
@@ -253,8 +304,19 @@ async function api(request: Request, env: Env, ctx: ExecutionContext, path: stri
 	const stub = directory.stub(roomId);
 	const membership = principal ? await directory.membership(roomId, principal.id) : undefined;
 	const roomPrincipal = await downscopedPrincipal(request, env, roomId, principal, membership);
+	if (action === "operator-admit" && request.method === "POST") {
+		if (!hasRole(principal, ["host", "producer"])) return json({ error: { code: "FORBIDDEN", message: "Producer role required" } }, 403);
+		const associated = await env.DB.prepare("SELECT 1 AS found FROM arcade_show_participation WHERE room_id = ?")
+			.bind(roomId).first<{ found: number }>();
+		if (!associated) return json({ error: { code: "NOT_FOUND", message: "Managed show room not found" } }, 404);
+		await directory.admit(roomId, principal);
+		return json({ ok: true });
+	}
 
-	if (action === "" && request.method === "GET") return json({ room });
+	if (action === "" && request.method === "GET") {
+		if (!hasRole(roomPrincipal, ["host", "producer", "moderator", "player", "display"]) && !await roomAcceptsPublicParticipation(env, roomId)) return json({ error: { code: "SHOW_OFF_AIR", message: "Show is off air" } }, 403);
+		return json({ room });
+	}
 	if (action === "membership" && request.method === "GET") {
 		if (!roomPrincipal) return json({ error: { code: "FORBIDDEN", message: "Join this room first" } }, 403);
 		return json({ role: roomPrincipal.role, teamId: roomPrincipal.teamId, displayName: roomPrincipal.displayName });
@@ -265,6 +327,7 @@ async function api(request: Request, env: Env, ctx: ExecutionContext, path: stri
 	}
 
 	if (action === "state" && request.method === "GET") {
+		if (!hasRole(roomPrincipal, ["host", "producer", "moderator", "player", "display"]) && !await roomAcceptsPublicParticipation(env, roomId)) return json({ error: { code: "SHOW_OFF_AIR", message: "Show is off air" } }, 403);
 		const viewer = roomPrincipal ?? publicPrincipal();
 		const response = await stub.fetch("https://game-room.internal/_internal/state", { headers: doHeaders(viewer) });
 		return response;
@@ -273,12 +336,14 @@ async function api(request: Request, env: Env, ctx: ExecutionContext, path: stri
 		if (!admissionOpen(env)) return json({ error: { code: "ADMISSION_CLOSED", message: "New sessions are temporarily disabled" } }, 503);
 		if (!principal) return json({ error: { code: "UNAUTHORIZED", message: "A session is required" } }, 401);
 		if (!roomPrincipal) return json({ error: { code: "FORBIDDEN", message: "Join this room before requesting a ticket" } }, 403);
+		if (roomPrincipal.role === "audience" && !await roomAcceptsPublicParticipation(env, roomId)) return json({ error: { code: "SHOW_OFF_AIR", message: "Audience participation is unavailable" } }, 403);
 		return json({ ticket: await issueRoomTicket(env, roomId, roomPrincipal), expiresIn: 300 });
 	}
 	if (action === "socket" && request.method === "GET") {
 		if (request.headers.get("Upgrade") !== "websocket") return new Response("Expected websocket upgrade", { status: 426 });
 		const ticket = await verifyRoomTicket(env, webSocketTicket(request), roomId);
 		if (!ticket) return new Response("Invalid or expired ticket", { status: 401 });
+		if (ticket.principal.role === "audience" && !await roomAcceptsPublicParticipation(env, roomId)) return new Response("Audience participation is unavailable", { status: 403 });
 		const headers = new Headers(request.headers);
 		headers.set("x-arcade-principal", JSON.stringify(ticket.principal));
 		headers.set("x-arcade-ticket-nonce", ticket.nonce);
@@ -295,6 +360,7 @@ async function api(request: Request, env: Env, ctx: ExecutionContext, path: stri
 	if (action === "commands" && request.method === "POST") {
 		if (!principal) return json({ error: { code: "UNAUTHORIZED", message: "A session is required" } }, 401);
 		if (!roomPrincipal) return json({ error: { code: "FORBIDDEN", message: "Join this room before sending commands" } }, 403);
+		if (roomPrincipal.role === "audience" && !await roomAcceptsPublicParticipation(env, roomId)) return json({ error: { code: "SHOW_OFF_AIR", message: "Audience participation is unavailable" } }, 403);
 		const command = await requestJson<CommandEnvelope>(request);
 		if (!command) return badRequest("A command envelope is required");
 		if (!command.id || typeof command.id !== "string" || command.id.trim().length === 0) return badRequest("A command id is required");

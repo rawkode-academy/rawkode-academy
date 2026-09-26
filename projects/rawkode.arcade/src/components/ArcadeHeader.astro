@@ -5,9 +5,9 @@ import { control, row, slug } from "@/styles/arcade";
 const { active = "" } = Astro.props;
 
 const links = [
-	{ href: "/", label: "Formats", key: "arcade" },
-	{ href: "/leaderboards", label: "Results", key: "leaderboard" },
-	{ href: "/join", label: "Join", key: "join" },
+	{ href: "/", label: "Watch", key: "watch" },
+	{ href: "/#upcoming", label: "Upcoming", key: "upcoming" },
+	{ href: "https://rawkode.academy", label: "Academy", key: "academy" },
 ];
 
 const masthead = css({
@@ -70,8 +70,8 @@ const navLink = css({
 
 <div class={mastheadOuter}>
 	<div class={masthead}>
-		<a class={brand} href="/" aria-label="Rawkode Arcade home">
-			Rawkode <span class={brandLive}>Arcade</span>
+		<a class={brand} href="/" aria-label="Rawkode Live home">
+			Rawkode <span class={brandLive}>Live</span>
 		</a>
 		<nav class={nav} aria-label="Primary">
 			{
@@ -90,8 +90,8 @@ const navLink = css({
 			<span class={`${slug({ tone: "default" })} ${css({ hideBelow: "md" })}`}>
 				play.rawkode.academy
 			</span>
-			<a class={control({ tone: "quiet", size: "sm" })} href="/host">
-				Open a room
+			<a class={control({ tone: "quiet", size: "sm" })} href="/admin">
+				Producer
 			</a>
 		</div>
 	</div>

@@ -12,8 +12,8 @@ interface Props {
 }
 
 const {
-	title = "Rawkode Arcade",
-	description = "Live technical game shows for cloud-native engineers.",
+	title = "Rawkode Live",
+	description = "Live shows from Rawkode Academy.",
 	active = "",
 } = Astro.props;
 
@@ -68,7 +68,7 @@ const skipLink = css({
 			<slot />
 		</main>
 		<footer class={`${hairline} ${footer}`}>
-			<span class={slug()}>Rawkode Arcade</span>
+			<span class={slug()}>Rawkode Live</span>
 			<span class={slug()}>A Rawkode Academy production</span>
 			<span class={slug()}>&copy; {new Date().getFullYear()}</span>
 		</footer>

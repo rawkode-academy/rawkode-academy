@@ -1,5 +1,8 @@
 ---
-import ContentAdmin from "@/components/ContentAdmin.vue";
 import ArcadeLayout from "@/layouts/ArcadeLayout.astro";
+import ShowAdmin from "@/components/ShowAdmin.vue";
 ---
-<ArcadeLayout title="Content studio: Rawkode Arcade"><ContentAdmin client:load /></ArcadeLayout>
+
+<ArcadeLayout title="Producer: Rawkode Live" active="admin">
+	<ShowAdmin client:load />
+</ArcadeLayout>
