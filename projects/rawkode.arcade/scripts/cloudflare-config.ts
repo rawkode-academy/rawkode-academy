@@ -55,7 +55,22 @@ async function provisionDatabase(): Promise<string> {
 
 async function ensureBucket(): Promise<void> {
 	const listed = await wrangler(["r2", "bucket", "list"]);
-	if (!listed.split(/[^a-zA-Z0-9_-]+/).includes(bucketName)) await wrangler(["r2", "bucket", "create", bucketName]);
+	if (listed.split(/[^a-zA-Z0-9_-]+/).includes(bucketName)) return;
+	const child = Bun.spawn(["bun", "x", "wrangler", "r2", "bucket", "create", bucketName], {
+		stdout: "pipe",
+		stderr: "pipe",
+		env: process.env,
+	});
+	const [stdout, stderr, exitCode] = await Promise.all([
+		new Response(child.stdout).text(),
+		new Response(child.stderr).text(),
+		child.exited,
+	]);
+	if (exitCode === 0) return;
+	// Wrangler can omit an owned bucket from the list yet reject its creation.
+	const message = `${stdout}\n${stderr}`.replace(/\x1b\[[0-9;]*m/g, "");
+	if (message.includes("already exists, and you own it") && message.includes("[code: 10004]")) return;
+	throw new Error(`wrangler r2 bucket create ${bucketName} failed: ${message}`);
 }
 
 let databaseId = process.env[databaseVariable];
