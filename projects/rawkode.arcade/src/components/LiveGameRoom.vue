@@ -26,7 +26,8 @@ import {
 
 const layout = css({
 	display: "grid",
-	gridTemplateColumns: { base: "1fr", lg: "minmax(0, 1fr) minmax(0, token(sizes.rail))" },
+	gridTemplateColumns: { base: "minmax(0, 1fr)", lg: "minmax(0, 1fr) minmax(0, token(sizes.rail))" },
+	overflowWrap: "anywhere",
 	gap: "stack",
 	py: "stackSm",
 	alignItems: "start",
@@ -42,6 +43,7 @@ const stageMeta = css({
 	borderBottomColor: "rule",
 });
 const gameTitle = css({ mt: "2" });
+const roomCode = css({ minWidth: "0", overflowWrap: "anywhere" });
 const progressBlock = css({ display: "grid", gap: "2" });
 const progressTrack = css({
 	height: "1",
@@ -183,7 +185,7 @@ const submit = (input: { choiceId?: string; answer?: string }) => {
 			<div :class="stageMeta">
 				<span :class="slug({ tone: 'live' })">
 					<i :class="statusDot({ pulse: true })" aria-hidden="true" />
-					Live · <b data-testid="room-code">{{ room.roomCode }}</b>
+					Live · <b :class="roomCode" data-testid="room-code">{{ room.roomCode }}</b>
 				</span>
 				<ConnectionPill :state="connection" />
 				<button

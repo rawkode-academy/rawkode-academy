@@ -29,7 +29,7 @@ export const shellWide = css({
 });
 
 export const stack = cva({
-	base: { display: "flex", flexDirection: "column" },
+	base: { display: "flex", flexDirection: "column", minWidth: "0" },
 	variants: {
 		gap: {
 			tight: { gap: "2" },
@@ -238,6 +238,7 @@ export const control = cva({
 
 export const field = cva({
 	base: {
+		minWidth: "0",
 		bg: "ground",
 		color: "ink",
 		borderWidth: "hairline",
@@ -372,7 +373,7 @@ export const scoreboard = sva({
 		root: { display: "flex", flexDirection: "column", minWidth: "0" },
 		row: {
 			display: "grid",
-			gridTemplateColumns: "auto 1fr auto",
+			gridTemplateColumns: "auto minmax(0, 1fr) auto",
 			alignItems: "center",
 			gap: "3",
 			py: "2",
@@ -489,6 +490,8 @@ export const statusDot = cva({
 
 export const choice = cva({
 	base: {
+		minWidth: "0",
+		overflowWrap: "anywhere",
 		display: "flex",
 		alignItems: "center",
 		gap: "3",

@@ -35,10 +35,26 @@ async function expectNoHorizontalOverflow(page: import("@playwright/test").Page)
 		viewport: window.innerWidth,
 		document: document.documentElement.scrollWidth,
 		body: document.body.scrollWidth,
+		overflowingElements: [...document.body.querySelectorAll("*")].flatMap((element) => {
+			const box = element.getBoundingClientRect();
+			if (box.right <= window.innerWidth && box.left >= 0) return [];
+			const style = getComputedStyle(element);
+			return [{
+				tag: element.tagName,
+				testId: element.getAttribute("data-testid"),
+				text: element.textContent?.trim().slice(0, 60),
+				left: box.left,
+				right: box.right,
+				width: box.width,
+				minWidth: style.minWidth,
+				display: style.display,
+				whiteSpace: style.whiteSpace,
+			}];
+		}).sort((left, right) => right.right - left.right).slice(0, 12),
 	}));
 	expect(
 		Math.max(dimensions.document, dimensions.body),
-		`mobile document overflowed ${dimensions.viewport}px viewport`,
+		`mobile document overflowed ${dimensions.viewport}px viewport: ${JSON.stringify(dimensions.overflowingElements)}`,
 	).toBeLessThanOrEqual(dimensions.viewport);
 }
 

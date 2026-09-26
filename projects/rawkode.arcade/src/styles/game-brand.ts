@@ -43,6 +43,7 @@ export const gameFrame = sva({
 		},
 		meta: {
 			display: "flex",
+			flexWrap: "wrap",
 			alignItems: "center",
 			gap: "2",
 			textStyle: "label",
@@ -50,6 +51,9 @@ export const gameFrame = sva({
 		},
 		board: { minWidth: "0" },
 		cell: {
+			minWidth: "0",
+			maxWidth: "full",
+			overflowWrap: "anywhere",
 			borderWidth: "hairline",
 			borderStyle: "solid",
 			borderColor: "ruleStrong",
@@ -64,7 +68,7 @@ export const gameFrame = sva({
 			diff: {
 				root: { borderTopWidth: "rule", borderTopStyle: "solid", borderTopColor: "action", pt: "3" },
 				board: { display: "grid", gap: "1", fontFamily: "mono", textStyle: "bodySm" },
-				cell: { display: "grid", gridTemplateColumns: "auto 1fr", gap: "2", px: "2", py: "2" },
+				cell: { display: "grid", gridTemplateColumns: "auto minmax(0, 1fr)", gap: "2", px: "2", py: "2" },
 				signal: { color: "action" },
 			},
 			wheel: {
@@ -82,7 +86,7 @@ export const gameFrame = sva({
 				board: { display: "grid", gap: "3" },
 				track: {
 					display: "grid",
-					gridTemplateColumns: "auto 1fr auto",
+					gridTemplateColumns: "auto minmax(0, 1fr) auto",
 					alignItems: "center",
 					gap: "2",
 					borderTopWidth: "rule",

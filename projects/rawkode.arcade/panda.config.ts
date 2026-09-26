@@ -29,9 +29,6 @@ const globalCss = defineGlobalStyles({
 		WebkitTextSizeAdjust: "100%",
 	},
 	body: {
-		// A stray nowrap label used to push the page wider than a 390px
-		// viewport. Nothing should scroll the page sideways.
-		overflowX: "hidden",
 		margin: "0",
 		minHeight: "100dvh",
 		minWidth: "320px",
