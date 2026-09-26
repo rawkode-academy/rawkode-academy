@@ -206,7 +206,9 @@ export async function openDisplay(
 export async function start(room: LiveRoom): Promise<void> {
 	await room.host.getByTestId("start-game").click();
 	await expect(room.host.getByTestId("room-phase")).not.toHaveText("lobby");
-	const phase = await room.host.getByTestId("room-phase").innerText();
+	// Read DOM text rather than CSS-transformed (uppercase) presentation.
+	const phase = (await room.host.getByTestId("room-phase").textContent())?.trim() ?? "";
+	expect(phase).not.toBe("");
 	// Audience shards receive the new prompt asynchronously. Typing before
 	// their snapshot arrives would be cleared by the prompt-change watcher.
 	await Promise.all(room.untrustedPages.map((page) =>
