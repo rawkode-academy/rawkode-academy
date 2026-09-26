@@ -494,9 +494,10 @@ onMounted(load);
 			<span :class="slugStyle({ tone: 'closed' })">Access required</span>
 			<h2 :class="text({ style: 'headline' })">Producer sign-in needed.</h2>
 			<p :class="text({ style: 'body', tone: 'soft' })">
-				Sign in with a host or producer session through Cloudflare Access, then
-				reload the content studio.
+				Sign in with your Academy account. An active host or producer role is
+				required for the content studio.
 			</p>
+			<a href="/auth/sign-in?returnTo=/admin/content" :class="control({ tone: 'live' })">Sign in with Academy</a>
 		</section>
 	</div>
 </template>

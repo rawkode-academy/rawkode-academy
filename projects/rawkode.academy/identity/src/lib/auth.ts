@@ -346,6 +346,7 @@ export const createAuth = async (env: AuthEnv) => {
 
 		trustedOrigins: [
 			"https://rawkode.academy",
+			"https://play.rawkode.academy",
 			"http://localhost:4321",
 			"https://klustered.dev",
 			"http://localhost:4322",

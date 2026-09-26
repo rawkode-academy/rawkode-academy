@@ -11,7 +11,7 @@
 		"panda": "panda codegen && panda cssgen",
 		"check": "bun run panda && bun run design && astro check && tsc --noEmit",
 		"test": "bun run test:unit && bun run test:integration",
-		"test:unit": "bun run scripts/require-no-skips.ts -- bun test src/games src/tests tests/content-and-results.test.ts tests/access-auth.test.ts",
+		"test:unit": "bun run scripts/require-no-skips.ts -- bun test src/games src/tests tests/content-and-results.test.ts tests/operator-auth.test.ts",
 		"test:integration": "bun run scripts/require-no-skips.ts -- vitest run --config vitest.config.ts",
 		"test:e2e": "bun run scripts/require-no-skips.ts -- playwright test --config e2e/playwright.config.ts",
 		"build": "bun run check && bun run build:assets",

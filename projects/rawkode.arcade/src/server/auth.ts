@@ -1,7 +1,7 @@
 import type { Principal, Role } from "../domain/protocol";
 import type { Env } from "../env";
 import { randomId, signJson, verifyJson } from "./crypto";
-import { authenticateAccess } from "./access";
+import { authenticateOperator } from "./identity";
 
 interface SessionPayload extends Principal { exp: number; }
 
@@ -14,8 +14,8 @@ export async function createAnonymousSession(env: Env, displayName = "Anonymous 
 }
 
 export async function authenticate(request: Request, env: Env): Promise<Principal | undefined> {
-	const access = await authenticateAccess(request, env);
-	if (access) return access;
+	const operator = await authenticateOperator(request, env);
+	if (operator) return operator;
 	const match = request.headers.get("Cookie")?.match(new RegExp(`(?:^|;\\s*)${sessionCookie}=([^;]+)`));
 	if (!match) return undefined;
 	const payload = await verifyJson<SessionPayload>(match[1], env.SESSION_SECRET);

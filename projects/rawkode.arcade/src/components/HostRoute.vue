@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, onMounted, ref } from "vue";
+import { computed, nextTick, onMounted, ref } from "vue";
 import HostControlDeck from "@/components/HostControlDeck.vue";
 import { gameById, type GameId } from "@/lib/game-catalogue";
 import {
@@ -29,6 +29,11 @@ const props = withDefaults(
 const bootstrap = ref<RoomBootstrap>();
 const error = ref("");
 const roomGame = ref<GameId>(props.game);
+const signInHref = computed(() => {
+	const path = `/host/${encodeURIComponent(props.roomId)}`;
+	const returnTo = props.code ? `${path}?code=${encodeURIComponent(props.code)}` : path;
+	return `/auth/sign-in?returnTo=${encodeURIComponent(returnTo)}`;
+});
 
 async function loadRoomMetadata(roomId: string) {
 	const response = await fetch(
@@ -84,5 +89,6 @@ onMounted(connectHost);
 			{{ error || "Opening producer controls" }}
 		</h1>
 		<a v-if="error" :class="control({ tone: 'quiet' })" href="/">Back to formats</a>
+		<a v-if="error" :class="control({ tone: 'live' })" :href="signInHref">Sign in with Academy</a>
 	</section>
 </template>
