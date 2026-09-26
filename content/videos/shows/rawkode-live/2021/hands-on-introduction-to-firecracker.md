@@ -1,7 +1,7 @@
 ---
 id: czi3j87pkjuupnifphnpqnor
 slug: hands-on-introduction-to-firecracker
-title: Hands-on Introduction to Firecracker
+title: 'Firecracker MicroVMs: Hands-On Introduction and Demo'
 description: >-
   Radu and Gabriel from AWS demo Firecracker from the ground up. They walk
   through firecracker and jailer binaries, booting a microVM over the REST API
