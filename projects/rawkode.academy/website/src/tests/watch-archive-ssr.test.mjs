@@ -208,12 +208,11 @@ test("Watch is a static server-rendered archive with labeled GET search, existin
 		],
 	);
 	assert.equal(pageProps[0].title, "Watch Cloud Native Sessions");
-	assert.deepEqual(newsletterProps, [
+	assert.deepEqual(JSON.parse(JSON.stringify(newsletterProps)), [
 		{
 			badge: "New sessions by email",
 			headline: "Follow the video archive",
-			subtitle:
-				"Get an email when a new Rawkode Academy session is published.",
+			subtitle: "Get an email when a new Rawkode Academy session is published.",
 			pagePath: "/watch",
 		},
 	]);

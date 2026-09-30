@@ -88,6 +88,10 @@ describe("Academy document migration", () => {
 			"DISCORD_INVITE_URL",
 		);
 		const technology = source("pages/technology/[id].astro");
+		expect(technology).toContain(
+			'const blockedCommunityKinds = new Set(["discord", "zulip"])',
+		);
+		expect(technology).not.toContain('discord: "Discord"');
 		for (const host of [
 			"discord.com",
 			"discord.gg",
