@@ -437,13 +437,19 @@ const isBlockedCommunityUrl = (url: string) => {
 		return true;
 	}
 };
+const isVisibleCommunityEntry = (
+	entry: [string, string | undefined],
+): entry is [string, string] => {
+	const [kind, url] = entry;
+	return (
+		typeof url === "string" &&
+		url.length > 0 &&
+		!blockedCommunityKinds.has(kind.toLowerCase()) &&
+		!isBlockedCommunityUrl(url)
+	);
+};
 const communityLinks = Object.entries(technology.community ?? {})
-	.filter(
-		(entry): entry is [string, string] =>
-			Boolean(entry[1]) &&
-			!blockedCommunityKinds.has(entry[0].toLowerCase()) &&
-			!isBlockedCommunityUrl(entry[1]),
-	)
+	.filter(isVisibleCommunityEntry)
 	.map(([key, url]) => [communityLabels[key] ?? key, url]);
 const cncfDates = [
 	["Accepted", technology.cncf?.accepted],
