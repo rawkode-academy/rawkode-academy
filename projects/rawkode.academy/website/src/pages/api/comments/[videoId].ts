@@ -1,6 +1,5 @@
 import { getCollection } from "astro:content";
 import type { APIRoute } from "astro";
-import { DISCORD_INVITE_URL } from "astro:env/server";
 import { createLogger } from "@/lib/logger";
 
 export const prerender = false;
@@ -22,19 +21,15 @@ export const GET: APIRoute = async ({ params }) => {
 		const video = videos.find((v) => v.data.id === videoId);
 
 		if (!video) {
-			return new Response(
-				JSON.stringify({ comments: [], discordInviteUrl: DISCORD_INVITE_URL }),
-				{
-					status: 200,
-					headers: { "Content-Type": "application/json" },
-				},
-			);
+			return new Response(JSON.stringify({ comments: [] }), {
+				status: 200,
+				headers: { "Content-Type": "application/json" },
+			});
 		}
 
 		return new Response(
 			JSON.stringify({
 				comments: [],
-				discordInviteUrl: DISCORD_INVITE_URL,
 				topic: video.data.title,
 			}),
 			{
@@ -48,7 +43,6 @@ export const GET: APIRoute = async ({ params }) => {
 			JSON.stringify({
 				error: "Failed to fetch comments",
 				message: error instanceof Error ? error.message : "Unknown error",
-				discordInviteUrl: DISCORD_INVITE_URL,
 			}),
 			{
 				status: 500,

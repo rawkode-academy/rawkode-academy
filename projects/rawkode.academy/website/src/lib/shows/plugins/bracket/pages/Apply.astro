@@ -12,14 +12,6 @@ const cards = participation.brackets;
 const applyPath = `/shows/${showId}/apply`;
 const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(applyPath)}`;
 const actionUrl = `/api/shows/${showId}/apply`;
-const manageUrl = (kind: string) =>
-	kind === "team"
-		? "https://klustered.dev/me/team"
-		: "https://klustered.dev/me/profile";
-const manageLabel = (kind: string, hasTeam: boolean) => {
-	if (kind !== "team") return "Manage your profile";
-	return hasTeam ? "Manage your team" : "Set up your team";
-};
 ---
 
 <div class="mx-auto max-w-3xl">
@@ -71,13 +63,10 @@ const manageLabel = (kind: string, hasTeam: boolean) => {
 									Sign in to apply
 								</a>
 							) : card.applied ? (
-								<a
-									href={manageUrl(card.bracketKind)}
-									class="focus-ring inline-flex rounded-sm border px-4 py-2 text-sm font-semibold text-primary-content"
-									style="border-color: var(--surface-border)"
-								>
-									{manageLabel(card.bracketKind, Boolean(card.team))}
-								</a>
+								<p class="text-sm text-muted">
+									Application submitted. Entry management will be available here
+									when it is ready.
+								</p>
 							) : (
 								<form method="POST" action={actionUrl}>
 									<input type="hidden" name="bracketId" value={card.bracketId} />

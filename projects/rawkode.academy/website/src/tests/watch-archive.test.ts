@@ -200,7 +200,7 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 		})),
 		archive: [{ href: "/watch", value: "329", label: "sessions" }],
 	};
-	it("keeps Home's feature, feed, first three paths and newsletter", async () => {
+	it("keeps Home's feature, feed, and first three paths server-rendered", async () => {
 		const html = await renderToString(
 			createSSRApp(AcademyPage, { ...props, page: "home" }),
 		);
@@ -208,8 +208,15 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 		expect(html).toContain("Recently published");
 		expect(html).toContain('href="/learning-paths/path-2"');
 		expect(html).not.toContain('href="/learning-paths/path-3"');
-		expect(html).toContain('action="https://email.rawkode.academy/subscribe"');
+		expect(html).not.toContain("email.rawkode.academy");
 		expect(html).not.toContain("video-search");
+	});
+	it("renders the shared newsletter action at Home's stable join anchor", () => {
+		const source = readFileSync("src/pages/index.astro", "utf8");
+		expect(source).toContain('id="join"');
+		expect(source).toContain("<NewsletterCTA");
+		expect(source).toContain('headline="Keep learning"');
+		expect(source).not.toContain("email.rawkode.academy");
 	});
 	it("defaults to exactly the Home branch when page is omitted", async () => {
 		const implicit = await renderToString(createSSRApp(AcademyPage, props));

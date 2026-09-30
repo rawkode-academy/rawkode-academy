@@ -352,6 +352,48 @@ test("future-only detail has an honest empty state/archive link; hidden detail r
 	);
 });
 
+test("show detail surfaces the configured Winter 2026 announcement", async () => {
+	const announced = show();
+	announced.data.announcement = {
+		title: "Winter 2026 starts 30 October",
+		description: "Klustered returns with live Kubernetes troubleshooting.",
+		href: "/read/klustered-winter-2026",
+		label: "Read the Winter 2026 announcement",
+	};
+	const h = harness({ collections: { shows: [announced], videos: [] } });
+	const { dom } = await h.render(
+		"pages/shows/[showId].astro",
+		{},
+		{ params: { showId: "klustered" } },
+	);
+	assert.match(dom.text, /Winter 2026 starts 30 October/);
+	assert.equal(
+		dom
+			.querySelector('a[href="/read/klustered-winter-2026"]')
+			.text.trim(),
+		"Read the Winter 2026 announcement →",
+	);
+});
+
+test("show detail suppresses links to the retired game host", async () => {
+	const arcadeShow = show("principal-engineer");
+	arcadeShow.data.status = "coming-soon";
+	arcadeShow.data.gameFormatUrl =
+		"https://play.rawkode.academy/games/principal-engineer";
+	const h = harness({ collections: { shows: [arcadeShow], videos: [] } });
+	const { dom } = await h.render(
+		"pages/shows/[showId].astro",
+		{},
+		{ params: { showId: "principal-engineer" } },
+	);
+	assert.equal(
+		dom.querySelectorAll('a[href^="https://play.rawkode.academy"]').length,
+		0,
+	);
+	assert.doesNotMatch(dom.text, /Explore the game format/);
+	assert.match(dom.text, /Coming soon/);
+});
+
 test("forged success GET cannot claim saved/entered or call registration", async () => {
 	for (const locals of [{}, { user: { id: "user" } }]) {
 		const h = harness();
@@ -365,100 +407,42 @@ test("forged success GET cannot claim saved/entered or call registration", async
 			},
 		);
 		assert.equal(result.status, 200);
-		assert.match(result.dom.text, /Applications are closed/);
+		assert.match(result.dom.text, /Applications paused/);
 		assert.doesNotMatch(result.dom.text, /Application saved|Entered/);
 		assert.equal(result.dom.querySelectorAll("form").length, 0);
+		assert.equal(h.reads.length, 0);
 		assert.equal(h.writes.length, 0);
 	}
 });
 
-test("only service-confirmed participation shows Entered; native form/auth paths are preserved", async () => {
-	for (const signedIn of [false, true]) {
-		for (const applied of [false, true]) {
-			const h = harness({ participation: [card({ applied })] });
-			const { dom } = await h.render(
-				extras,
-				{},
-				{
-					params: { showId: "klustered", slug: "apply" },
-					locals: signedIn ? { user: { id: "user" } } : {},
-				},
-			);
-			assert.equal(dom.text.includes("Entered"), applied);
-			assert.equal(
-				dom.querySelectorAll("form").length,
-				signedIn && !applied ? 1 : 0,
-			);
-			if (!signedIn)
-				assert.match(
-					dom.querySelector("a").getAttribute("href"),
-					/^\/api\/auth\/sign-in\?returnTo=/,
-				);
-			if (signedIn && applied)
-				assert.equal(
-					dom.querySelector("a").getAttribute("href"),
-					"https://klustered.dev/me/profile",
-				);
-			if (signedIn && !applied) {
-				assert.equal(dom.querySelector("form").getAttribute("method"), "POST");
-				assert.equal(
-					dom.querySelector("form").getAttribute("action"),
-					"/api/shows/klustered/apply",
-				);
-				assert.equal(
-					dom.querySelector('input[name="bracketId"]').getAttribute("value"),
-					"b",
-				);
-			}
-			assert.equal(h.writes.length, 0);
-			assert.equal(
-				h.reads[0].headers["X-Gateway-User-Id"],
-				signedIn ? "user" : undefined,
-			);
-		}
-	}
+test("Klustered application landing has no form, auth redirect, or external management link", async () => {
+	const h = harness({ participation: [card({ applied: true })] });
+	const { dom } = await h.render(
+		extras,
+		{},
+		{ params: { showId: "klustered", slug: "apply" } },
+	);
+	assert.match(dom.text, /Winter 2026 applications are not available here yet/);
+	assert.equal(dom.querySelectorAll("form").length, 0);
+	assert.equal(dom.querySelectorAll('a[href^="/api/auth/"]').length, 0);
+	assert.equal(dom.querySelectorAll('a[href^="https://klustered.dev"]').length, 0);
+	assert(dom.querySelector('a[href="/read/klustered-winter-2026"]'));
+	assert.equal(h.reads.length, 0);
+	assert.equal(h.writes.length, 0);
 });
 
-test("mocked application handler preserves validation/auth and redirects only after successful write", async () => {
+test("Klustered application endpoint is unavailable while applications are paused", async () => {
 	const user = {
 		user: { id: "user", name: "Fixture User", username: "fixture-user" },
 	};
 	const h = harness();
 	const { ALL } = await h.module(api);
-	assert.equal((await ALL(h.routeContext())).status, 405);
-	const anonymous = await ALL(h.routeContext("POST", { bracketId: "b" }));
-	assert.equal(anonymous.status, 303);
-	assert.match(anonymous.headers.get("Location"), /^\/api\/auth\/sign-in/);
+	assert.equal((await ALL(h.routeContext())).status, 404);
 	assert.equal(
-		(await ALL(h.routeContext("POST", { bracketId: " " }, user))).status,
-		400,
+		(await ALL(h.routeContext("POST", { bracketId: "b" }, user))).status,
+		404,
 	);
-	const missingUsername = await ALL(
-		h.routeContext(
-			"POST",
-			{ bracketId: "b" },
-			{ user: { id: "user", name: "Fixture User", username: null } },
-		),
-	);
-	assert.equal(missingUsername.status, 401);
 	assert.equal(h.writes.length, 0);
-	const success = await ALL(h.routeContext("POST", { bracketId: "b" }, user));
-	assert.equal(success.status, 303);
-	assert.equal(success.headers.get("Location"), "/shows/klustered/apply");
-	assert.deepEqual(JSON.parse(JSON.stringify(h.writes)), [
-		{
-			bracketId: "b",
-			displayName: "Fixture User",
-			userId: "user",
-			username: "fixture-user",
-		},
-	]);
-	const rejected = harness({ writeError: true });
-	const result = await (await rejected.module(api)).ALL(
-		rejected.routeContext("POST", { bracketId: "b" }, user),
-	);
-	assert.equal(result.status, 400);
-	assert.equal(result.headers.get("Location"), null);
 });
 
 test("hidden/missing shows reject every extension before read/write dispatch", async () => {
@@ -492,7 +476,7 @@ test("hidden/missing shows reject every extension before read/write dispatch", a
 	}
 });
 
-test("Klustered exposes only the apply page and endpoint until the relaunch is ready", async () => {
+test("Klustered exposes only the paused apply page until the account flow is ready", async () => {
 	const h = harness();
 	const { klusteredExtension } = await h.module("shows/klustered/index.ts");
 	assert.equal(
@@ -501,7 +485,7 @@ test("Klustered exposes only the apply page and endpoint until the relaunch is r
 	);
 	assert.equal(
 		klusteredExtension.endpoints?.map((endpoint) => endpoint.slug).join(","),
-		"apply",
+		"",
 	);
 });
 

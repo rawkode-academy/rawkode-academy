@@ -77,6 +77,29 @@ describe("Academy document migration", () => {
 		expect(endSlug).not.toContain("discord.gg/rawkode");
 	});
 
+	it("does not expose Rawkode chat endpoints or Discord preconnects", () => {
+		expect(source("components/html/head.astro")).not.toMatch(
+			/discord|zulip|rawkode\.chat|chat\.rawkode\.academy/i,
+		);
+		expect(source("pages/api/comments/[videoId].ts")).not.toMatch(
+			/discordInviteUrl|DISCORD_INVITE_URL/,
+		);
+		expect(readFileSync("astro.config.mts", "utf8")).not.toContain(
+			"DISCORD_INVITE_URL",
+		);
+		const technology = source("pages/technology/[id].astro");
+		for (const host of [
+			"discord.com",
+			"discord.gg",
+			"zulip.com",
+			"zulipchat.com",
+			"rawkode.chat",
+			"chat.rawkode.academy",
+		]) {
+			expect(technology).toContain(`"${host}"`);
+		}
+	});
+
 	it("keeps accessible active-location state independent of generated class names", () => {
 		const toc = source("components/read/ArticleTOC.astro");
 		expect(toc).toContain('aria-label="On this page"');

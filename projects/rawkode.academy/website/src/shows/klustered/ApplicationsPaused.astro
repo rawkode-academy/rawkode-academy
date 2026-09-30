@@ -1,0 +1,30 @@
+---
+import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
+import { academyDocument } from "@rawkodeacademy/design-system";
+
+const doc = academyDocument();
+---
+
+<div class={doc.stack}>
+	<div class={doc.empty}>
+		<p class={doc.kicker}>Applications paused</p>
+		<h2 class={doc.sectionTitle}>Winter 2026 applications are not available here yet.</h2>
+		<p class={doc.copy}>
+			The season starts 30 October. Entry details will be published when the
+			application and account flow is ready.
+		</p>
+		<div class={doc.actions}>
+			<a href="/read/klustered-winter-2026" class={doc.buttonSecondary}>
+				Read the Winter 2026 announcement →
+			</a>
+			<a href="/shows/klustered" class={doc.link}>Back to Klustered</a>
+		</div>
+	</div>
+
+	<NewsletterCTA
+		audience="klustered-compete"
+		badge="Klustered competition updates"
+		headline="Hear when applications open"
+		subtitle="Get an email when Winter 2026 entry details are ready."
+	/>
+</div>

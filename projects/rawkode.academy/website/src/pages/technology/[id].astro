@@ -402,8 +402,29 @@ const communityLabels: Record<string, string> = {
 	twitter: "Twitter / X", youtube: "YouTube", slack: "Slack", discord: "Discord",
 	blog: "Blog", mailingList: "Mailing list", githubDiscussions: "GitHub discussions", chat: "Chat",
 };
+const blockedCommunityHosts = [
+	"discord.com",
+	"discord.gg",
+	"zulip.com",
+	"zulipchat.com",
+	"rawkode.chat",
+	"chat.rawkode.academy",
+];
+const isBlockedCommunityUrl = (url: string) => {
+	try {
+		const hostname = new URL(url).hostname.toLowerCase();
+		return blockedCommunityHosts.some(
+			(host) => hostname === host || hostname.endsWith(`.${host}`),
+		);
+	} catch {
+		return true;
+	}
+};
 const communityLinks = Object.entries(technology.community ?? {})
-	.filter((entry): entry is [string, string] => Boolean(entry[1]))
+	.filter(
+		(entry): entry is [string, string] =>
+			Boolean(entry[1]) && !isBlockedCommunityUrl(entry[1]),
+	)
 	.map(([key, url]) => [communityLabels[key] ?? key, url]);
 const cncfDates = [
 	["Accepted", technology.cncf?.accepted],

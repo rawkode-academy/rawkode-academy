@@ -265,11 +265,6 @@ export default defineConfig({
 	env: {
 		validateSecrets: true,
 		schema: {
-			DISCORD_INVITE_URL: envField.string({
-				context: "server",
-				access: "public",
-				default: "https://discord.gg/rawkode",
-			}),
 			GRAPHQL_ENDPOINT: envField.string({
 				context: "server",
 				access: "public",

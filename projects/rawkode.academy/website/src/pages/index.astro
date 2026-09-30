@@ -1,6 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import AcademyPage from "@/components/academy/AcademyPage.vue";
+import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Page from "@/wrappers/page.astro";
 import { getLatestContent, getPublishedVideos } from "@/lib/content";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
@@ -137,4 +138,13 @@ Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 			learningPaths={paths}
 			archive={archive}
 		/>
+		<div id="join">
+			<NewsletterCTA
+				variant="section"
+				badge="Rawkode Academy newsletter"
+				headline="Keep learning"
+				subtitle="New sessions, articles, and courses from the Academy, sent when they publish. Nothing else."
+				pagePath="/"
+			/>
+		</div>
 </Page>

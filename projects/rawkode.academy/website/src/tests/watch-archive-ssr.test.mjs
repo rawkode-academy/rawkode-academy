@@ -62,6 +62,7 @@ async function renderArchive(search = "", data = collections) {
 		__NEWS_DEPLOYMENT_CUTOFF_MS__: Date.parse("2100-01-01"),
 	});
 	const pageProps = [];
+	const newsletterProps = [];
 	const mocks = {
 		"astro/runtime/server/index.js": { ...runtime, createMetadata: () => ({}) },
 		"astro:content": {
@@ -74,6 +75,12 @@ async function renderArchive(search = "", data = collections) {
 		},
 		"@/lib/video-thumbnail": {
 			getVideoThumbnailUrl: (id) => `https://images.example.test/${id}.webp`,
+		},
+		"@/components/newsletter/NewsletterCTA.astro": {
+			default: runtime.createComponent((_result, props) => {
+				newsletterProps.push(props);
+				return runtime.render`<div data-newsletter="watch">${props.headline}</div>`;
+			}),
 		},
 		"@/wrappers/page.astro": {
 			default: runtime.createComponent((result, props, slots) => {
@@ -148,11 +155,11 @@ async function renderArchive(search = "", data = collections) {
 	const jsonLd = JSON.parse(
 		dom.querySelector('script[type="application/ld+json"]').textContent,
 	);
-	return { html, dom, jsonLd, pageProps };
+	return { html, dom, jsonLd, pageProps, newsletterProps };
 }
 
 test("Watch is a static server-rendered archive with labeled GET search, existing SEO title and feeds", async () => {
-	const { dom, html, pageProps } = await renderArchive();
+	const { dom, html, pageProps, newsletterProps } = await renderArchive();
 	assert.equal(dom.querySelector("h1").text, "Videos");
 	assert.equal(dom.querySelectorAll(".archive-feedGrid > a").length, 23);
 	assert.equal(dom.querySelectorAll('a[href="/watch/session-0"]').length, 1);
@@ -201,6 +208,15 @@ test("Watch is a static server-rendered archive with labeled GET search, existin
 		],
 	);
 	assert.equal(pageProps[0].title, "Watch Cloud Native Sessions");
+	assert.deepEqual(newsletterProps, [
+		{
+			badge: "New sessions by email",
+			headline: "Follow the video archive",
+			subtitle:
+				"Get an email when a new Rawkode Academy session is published.",
+			pagePath: "/watch",
+		},
+	]);
 	assert(!source.includes("client:") && !source.includes("AcademyPage"));
 	assert(!html.includes("astro-island"));
 	assert(!html.includes('href="/watch/future"'));

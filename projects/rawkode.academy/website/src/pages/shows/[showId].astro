@@ -37,6 +37,11 @@ if (!showEntry || !showEntry.data.publish) {
 const isComingSoon = showEntry.data.status === "coming-soon";
 const isArchived = showEntry.data.status === "archived";
 const statusLabel = isComingSoon ? "Coming soon" : isArchived ? "Archived" : "Show";
+const gameFormatUrl =
+	showEntry.data.gameFormatUrl &&
+	new URL(showEntry.data.gameFormatUrl).hostname !== "play.rawkode.academy"
+		? showEntry.data.gameFormatUrl
+		: undefined;
 
 // Get published videos only (filters out future-dated for scheduled publishing)
 const videos = await getPublishedVideos();
@@ -210,9 +215,9 @@ function formatDuration(seconds: number) {
  {showDescription}
  </p>
 
- {showEntry.data.gameFormatUrl && (
+ {gameFormatUrl && (
  <div class={doc.actions}>
- <a href={showEntry.data.gameFormatUrl} class={doc.buttonSecondary} rel="noopener noreferrer">Explore the game format ↗</a>
+ <a href={gameFormatUrl} class={doc.buttonSecondary} rel="noopener noreferrer">Explore the game format ↗</a>
  </div>
  )}
 
@@ -288,6 +293,21 @@ function formatDuration(seconds: number) {
 
  {showNav.length > 0 && (
  <ShowNav showId={showEntry.data.id} nav={showNav} active={null} />
+ )}
+
+ {showEntry.data.announcement && (
+ <section class={doc.section} aria-labelledby="show-announcement-title">
+ <div class={[doc.container, doc.stack].join(" ")}>
+ <div class={doc.empty}>
+ <p class={doc.kicker}>Season announcement</p>
+ <h2 id="show-announcement-title" class={doc.sectionTitle}>{showEntry.data.announcement.title}</h2>
+ <p class={doc.copy}>{showEntry.data.announcement.description}</p>
+ <div class={doc.actions}>
+ <a href={showEntry.data.announcement.href} class={doc.buttonSecondary}>{showEntry.data.announcement.label} →</a>
+ </div>
+ </div>
+ </div>
+ </section>
  )}
 
  <!-- Episodes -->

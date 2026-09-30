@@ -66,7 +66,7 @@ describe("Arcade show publishing", () => {
 		}
 	});
 
-	it("renders coming-soon status instead of episode and feed affordances", () => {
+	it("renders coming-soon status without linking to the retired game host", () => {
 		const card = readFileSync(resolve(websiteDirectory, "src/components/show/ShowCard.astro"), "utf8");
 		const detail = readFileSync(resolve(websiteDirectory, "src/pages/shows/[showId].astro"), "utf8");
 		expect(card).toContain("show.status");
@@ -77,8 +77,8 @@ describe("Arcade show publishing", () => {
 		expect(detail).toContain("const isComingSoon");
 		expect(detail).toContain("const hasEpisodeFeed = !isComingSoon && feedVideos.length > 0");
 		expect(detail).toContain("No episodes or schedule have been announced.");
-		expect(detail).toContain("Explore the game format");
-		expect(detail).toContain("showEntry.data.gameFormatUrl");
+		expect(detail).toContain('new URL(showEntry.data.gameFormatUrl).hostname !== "play.rawkode.academy"');
+		expect(detail).toContain("href={gameFormatUrl}");
 		const feed = readFileSync(resolve(websiteDirectory, "src/pages/api/feeds/shows/[showId].xml.ts"), "utf8");
 		expect(feed).toContain('show.data.status === "coming-soon"');
 	});

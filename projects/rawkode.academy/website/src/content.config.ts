@@ -113,6 +113,14 @@ const shows = defineCollection({
 				.optional(),
 			description: z.string().optional(),
 			terms: z.array(z.string().trim().min(1)).optional(),
+			announcement: z
+				.object({
+					title: z.string().trim().min(1),
+					description: z.string().trim().min(1),
+					href: z.string().startsWith("/"),
+					label: z.string().trim().min(1),
+				})
+				.optional(),
 			hosts: z.array(reference("people")).default([]),
 			publish: z.boolean().default(false),
 			cover: z

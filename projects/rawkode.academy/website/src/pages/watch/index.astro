@@ -4,6 +4,7 @@ export const prerender = false;
 import { getCollection } from "astro:content";
 import { academyPage } from "@rawkodeacademy/design-system";
 import Page from "@/wrappers/page.astro";
+import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import VideoItemListJsonLd from "@/components/html/video-itemlist-jsonld.astro";
 import { getPublishedVideos } from "@/lib/content";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
@@ -148,6 +149,14 @@ const pageDescription =
 					</div>
 				</nav>
 			)}
+		</section>
+		<section class={styles.section} aria-label="Newsletter">
+			<NewsletterCTA
+				badge="New sessions by email"
+				headline="Follow the video archive"
+				subtitle="Get an email when a new Rawkode Academy session is published."
+				pagePath="/watch"
+			/>
 		</section>
 	</div>
 </Page>
