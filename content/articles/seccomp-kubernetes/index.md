@@ -11,17 +11,17 @@ technologies:
   - kubernetes
 ---
 
-A generated seccomp profile can let your API pass its health check and still break its first database reconnect or worker reload. The recorder captured calls from the paths you exercised. Its allowlist can block calls needed by the rest of the application.
+If you build a seccomp profile by starting your API and hitting its health endpoint, you've only recorded what it needs to do those two things. When a database connection drops or a worker reloads, the application may need a syscall that never made it into the recording, and your new profile can block it.
 
-Start with `RuntimeDefault`, record a representative workload, review the permissions, and test a versioned profile before enforcing it. We'll use one API throughout, including the awkward parts: library fallbacks, distroless verification, and an API reaching a new node before its profile does.
+We'll work through that problem with one API, starting with `RuntimeDefault` and using the Security Profiles Operator to record, review, and test a custom profile. Along the way, we'll deal with library fallbacks, verification in a distroless container, and what happens when the API reaches a new node before its profile does.
 
 ## Start with RuntimeDefault
 
-On a conventional Linux container runtime, your application shares the node's kernel. Removing the shell and running as a non-root user changes the application environment; kernel operations still happen through system calls.
+On a conventional Linux container runtime, your application shares the node's kernel, even if you've removed the shell and run it as a non-root user. Those are useful precautions, but the application still reaches the kernel through system calls, including any calls an attacker can make after compromising it.
 
-Seccomp filters those requests. Blocking an unnecessary syscall removes one route into kernel behaviour an attacker might otherwise reach after compromising the application. Use it alongside kernel patching, restricted credentials and capabilities, and network controls.
+Seccomp lets you restrict which of those calls the application can make. If it never needs a particular syscall, blocking it removes one route into kernel behaviour that an attacker might otherwise reach. That makes seccomp a useful addition to kernel patching, restricted credentials and capabilities, and network controls.
 
-Enable the baseline before building anything custom. In a Deployment's Pod template:
+The first step is to enable `RuntimeDefault` in your Deployment's Pod template, which gives you the runtime's baseline policy while you work out whether a custom profile is worth maintaining:
 
 ```yaml
 spec:
@@ -32,25 +32,25 @@ spec:
           type: RuntimeDefault
 ```
 
-Containers inherit this setting unless they specify their own profile. The runtime supplies the rules, so changing runtime or version can change the policy. Privileged containers run unconfined. The [Kubernetes seccomp reference](https://kubernetes.io/docs/reference/node/seccomp/) describes these selection rules.
+Your containers inherit this setting unless they specify their own profile, although privileged containers run unconfined. Because the runtime supplies the rules, changing the runtime or its version can also change the policy. The [Kubernetes seccomp reference](https://kubernetes.io/docs/reference/node/seccomp/) describes how Kubernetes selects the profile.
 
-Keep the field explicit. An omitted profile becomes `Unconfined` unless the node has seccomp defaulting enabled. An explicit `RuntimeDefault` also satisfies the seccomp requirement in the [Restricted Pod Security Standard](https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted).
+Keep the field explicit, because omitting it leaves the container `Unconfined` unless the node has seccomp defaulting enabled. Setting `RuntimeDefault` also satisfies the seccomp requirement in the [Restricted Pod Security Standard](https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted).
 
 ## Decide whether a custom profile is worth maintaining
 
-A runtime default accommodates many applications. A custom profile can remove operations your application never needs, but you'll need to test it when the application, dependencies, base image, or runtime changes. The profile becomes part of the application's release work.
+The runtime's default has to accommodate many applications, so it allows operations your API may never need. A custom profile can restrict those permissions further, but you're also taking on the work of testing it whenever the application, its dependencies, the base image, or the runtime changes. Once you ship a profile, maintaining it becomes part of releasing the application.
 
-Consider a custom profile for workloads that accept untrusted input, share nodes with other tenants, or expose components where code execution vulnerabilities are a realistic concern. You need tests that exercise more than startup and a health check. Keep `RuntimeDefault` while you build that coverage.
+That work is worth considering for workloads that accept untrusted input, share nodes with other tenants, or expose components where code execution vulnerabilities are a realistic concern. Before taking it on, though, you need tests that exercise more than startup and a health check; until you have that coverage, keep `RuntimeDefault`.
 
-For hostile or mutually untrusted workloads, compare the isolation boundary itself. [gVisor](https://gvisor.dev/docs/) implements an application kernel in userspace. [Kata Containers](https://github.com/kata-containers/kata-containers) runs workloads in lightweight virtual machines. Both can be integrated through Kubernetes RuntimeClass when the corresponding runtime handler is installed.
+If you're running hostile or mutually untrusted workloads, you should also look at the isolation boundary itself. [gVisor](https://gvisor.dev/docs/) implements an application kernel in userspace, while [Kata Containers](https://github.com/kata-containers/kata-containers) runs workloads in lightweight virtual machines. Both can be integrated through Kubernetes RuntimeClass when the corresponding runtime handler is installed.
 
-Check their compatibility, performance, and platform requirements against your workload. A shorter syscall list alone doesn't create a separate kernel boundary.
+You'll need to check their compatibility, performance, and platform requirements against your workload, but they address an isolation decision that a shorter syscall list alone can't resolve: how the application is separated from the host kernel.
 
 ## Record the API where it runs
 
-The Security Profiles Operator, or SPO, records workloads and distributes profile files to nodes. The examples here target [SPO 1.1.0](https://github.com/kubernetes-sigs/security-profiles-operator/releases/tag/v1.1.0); API details were checked against upstream documentation and source on 1 October 2026. Its `SeccompProfile` resources are cluster-scoped; `ProfileRecording` resources are namespaced. Use names that won't collide across application namespaces.
+The Security Profiles Operator, or SPO, handles both recording workloads and distributing profile files to nodes. These examples target [SPO 1.1.0](https://github.com/kubernetes-sigs/security-profiles-operator/releases/tag/v1.1.0), with API details checked against upstream documentation and source on 1 October 2026. One detail to keep in mind as you name resources: `ProfileRecording` is namespaced, but `SeccompProfile` is cluster-scoped, so profile names need to be unique across your application namespaces.
 
-Prepare a controlled Linux test cluster using the release's [installation guide](https://github.com/kubernetes-sigs/security-profiles-operator/blob/v1.1.0/installation.md). An ordinary installation requires cert-manager. BPF recording requires kernel BTF at `/sys/kernel/btf/vmlinux` and permission to run the privileged recorder and host-PID daemon.
+Use the release's [installation guide](https://github.com/kubernetes-sigs/security-profiles-operator/blob/v1.1.0/installation.md) to prepare a controlled Linux test cluster. An ordinary installation requires cert-manager, and BPF recording also needs kernel BTF at `/sys/kernel/btf/vmlinux`, along with permission to run the privileged recorder and host-PID daemon.
 
 With SPO installed in `security-profiles-operator`, enable the recorder:
 
@@ -59,25 +59,23 @@ kubectl -n security-profiles-operator patch spod spod --type=merge \
   -p '{"spec":{"enricher":{"enableBpfRecorder":true}}}'
 ```
 
-Wait for the operator to add the BPF recorder to the DaemonSet's Pod template, then check the new rollout:
+The operator adds the BPF recorder to the DaemonSet asynchronously, so check that it has appeared in the Pod template before checking the rollout. Otherwise, this command can report that the previous revision is healthy while the recorder is still being configured:
 
 ```sh
 kubectl -n security-profiles-operator rollout status daemonset/spod \
   --timeout=120s
 ```
 
-Confirm the recorder containers are present and ready, and inspect their startup logs on the nodes you'll use. If BTF is missing or the recorder can't start, fix that before creating the application.
+Once the rollout finishes, confirm that the recorder containers are present and ready, and inspect their startup logs on the nodes you'll use. Missing BTF or a recorder that can't start needs fixing before you create the application, otherwise there won't be a recording to review.
 
-The operator reconciles asynchronously. Running the rollout check immediately after the patch can report that the previous DaemonSet revision is healthy. Check that the recorder has appeared in the Pod template before trusting that result.
-
-Create a namespace and opt it into recording:
+Next, create a namespace and opt it into recording with the label that enables SPO's recording webhook:
 
 ```sh
 kubectl create namespace seccomp-demo
 kubectl label namespace seccomp-demo spo.x-k8s.io/enable-recording=true
 ```
 
-The label enables the recording webhook for this namespace. Save the following as `recording.yaml`:
+Within that namespace, the `ProfileRecording` selects the Pods and containers to record. Save this as `recording.yaml`:
 
 ```yaml
 apiVersion: security-profiles-operator.x-k8s.io/v1
@@ -97,17 +95,15 @@ spec:
       app: seccomp-demo-api
 ```
 
-This records container `api` in matching Pods. `mergeStrategy: Containers` combines recordings from replicas by container name. With `disableProfileAfterRecording: true`, the generated profile stays disabled so you can review it before installation.
+This selects container `api` in Pods labelled `app: seccomp-demo-api`. With `mergeStrategy: Containers`, SPO combines recordings from replicas by container name, while `disableProfileAfterRecording: true` keeps the generated profile disabled so you can review it before explicitly enabling it.
 
-Apply the recording:
+Apply the recording before creating the application Pods, because the webhook instruments new Pods and can't attach to a container that's already running:
 
 ```sh
 kubectl apply -f recording.yaml
 ```
 
-Do this before creating the application Pods. The webhook instruments new Pods; it can't attach recording to a container that's already running.
-
-Use your API's image and normal configuration. Replace the example image in this Deployment with yours, preferably pinned by digest, and include its usual arguments, environment, volumes, and probes. Keep the resource and container names so the later commands match. This template assumes an image that runs as a non-root user.
+For the Deployment, use your API's image and normal configuration so the recording reflects what you actually deploy. Replace the example image below with yours, preferably pinned by digest, and include its usual arguments, environment, volumes, and probes. The template assumes an image that runs as a non-root user; keep the resource and container names so the later commands match.
 
 ```yaml
 apiVersion: apps/v1
@@ -146,11 +142,11 @@ kubectl -n seccomp-demo rollout status deployment/seccomp-demo-api \
   --timeout=120s
 ```
 
-The new Pod matches the recording selector and keeps `RuntimeDefault` during BPF recording. Match production's architecture, libraries, runtime, and configuration. If the application fails under the baseline, investigate that failure first.
+The new Pod matches the recording selector and keeps `RuntimeDefault` while the BPF recorder observes it. Check that the architecture, libraries, runtime, and configuration match production, and if the application fails under the baseline, investigate that before trying to build a custom policy around it.
 
 ## Exercise the paths a health check misses
 
-Build the recording exercise around integration tests, then add the operational paths they miss:
+Start the recording exercise with your integration tests, then add any operational paths they miss, including how the application recovers when something fails:
 
 | Scenario | Behaviour to exercise |
 | --- | --- |
@@ -162,13 +158,11 @@ Build the recording exercise around integration tests, then add the operational 
 | Operational tasks | Backups, scheduled jobs, and maintenance commands |
 | Supported environments | Every production architecture and relevant feature configuration |
 
-Repeating one request thousands of times adds little coverage. Exercise different behaviour, including graceful termination.
+Repeating one request thousands of times won't tell you much about the paths it never touches. Spend that time exercising different behaviour, including graceful termination, so the recording captures how the application exits as well as how it starts.
 
-Record the API, migration container, and telemetry sidecar separately. Combining their observations gives each container permissions that only another container needed.
+Record the API, migration container, and telemetry sidecar separately, because combining their observations gives each container permissions that only another container needed. For the same reason, keep investigative commands out of the application container during recording: a shell or debugging binary can add syscalls that the application itself never uses.
 
-Keep investigative commands out of the application container during recording for the same reason. A shell or debugging binary can add calls to the recording that the application doesn't need.
-
-Use separate recordings for different architectures or incompatible environments. SPO's container merge retains an architecture list from a partial profile; merging heterogeneous recordings won't produce a portable policy.
+Different architectures or incompatible environments also need separate recordings. SPO's container merge retains an architecture list from a partial profile, so merging heterogeneous recordings won't give you a portable policy.
 
 ## Finish collection before merging
 
@@ -186,7 +180,7 @@ kubectl get seccompprofiles \
   -o yaml
 ```
 
-Graceful termination finishes each recording, but collection is asynchronous. Don't delete the recording as soon as the Pod disappears. Wait until the expected partial profile for every recorded Pod and container appears. If a result is missing, inspect the recorder logs before continuing.
+Graceful termination finishes each recording, but SPO still needs time to collect the results after the Pod disappears. Wait until you can see the expected partial profile for every recorded Pod and container before deleting the recording; if one is missing, check the recorder logs to find out why.
 
 Once all partials are saved, delete the `ProfileRecording` to trigger the container merge:
 
@@ -195,23 +189,19 @@ kubectl -n seccomp-demo delete profilerecording seccomp-demo-api-v1
 kubectl get seccompprofile seccomp-demo-api-v1-api -o yaml
 ```
 
-Expect a merged profile named `seccomp-demo-api-v1-api`. If merging fails, inspect the operator's reconciliation errors before using the output. The [recording guide](https://github.com/kubernetes-sigs/security-profiles-operator/blob/v1.1.0/profiles.md#recording-based-on-ebpf-instrumentation) covers the collection workflow.
+You should now have a merged profile named `seccomp-demo-api-v1-api`. If the merge fails, inspect the operator's reconciliation errors before using any output; the [recording guide](https://github.com/kubernetes-sigs/security-profiles-operator/blob/v1.1.0/profiles.md#recording-based-on-ebpf-instrumentation) covers this collection workflow.
 
-Next, save a clean resource in your repository. Keep `apiVersion`, `kind`, `metadata.name`, and `spec`; remove status and server-generated metadata. Name the reviewed version `seccomp-demo-api-v1-reviewed` and leave `spec.state: Disabled` while inspecting it. `SeccompProfile` is cluster-scoped, so it has no `metadata.namespace`.
+To put that profile under version control, save a clean resource containing `apiVersion`, `kind`, `metadata.name`, and `spec`, without status or server-generated metadata. Call the reviewed version `seccomp-demo-api-v1-reviewed` and leave `spec.state: Disabled` while you inspect it. Since `SeccompProfile` is cluster-scoped, there's no `metadata.namespace` to include.
 
 ## Review permissions and error behaviour
 
-A shorter syscall list can still grant a wider permission.
+When you select `Localhost`, Kubernetes uses your profile in place of `RuntimeDefault`, so you need to compare the candidate with the actual runtime baseline before switching. That comparison includes argument restrictions: a profile with fewer syscall names can still grant wider permissions if it drops the restrictions the runtime applied.
 
-Selecting `Localhost` replaces Kubernetes' selection of `RuntimeDefault`; it doesn't add your rules on top of the runtime profile. Compare the candidate with the actual runtime baseline before switching, including any argument restrictions it applies.
+The BPF candidate records syscall names without argument constraints. For example, if the baseline permits `socket` only when its first argument is `AF_INET`, replacing it with an unrestricted `socket` rule also allows other families, such as `AF_VSOCK`. Keep the argument restrictions your policy needs as you review the recording.
 
-The BPF candidate allows syscall names without recording argument constraints. Suppose a baseline permits `socket` only when its first argument is `AF_INET`. An unrestricted `socket` rule also admits other families, such as `AF_VSOCK`. Preserve the argument restrictions your policy needs.
+There are limits to what those restrictions can express. Ordinary seccomp filters can inspect numeric arguments, but they can't dereference a pointer to inspect a filename. If you need filesystem access control, an application or launcher can apply [Landlock](https://docs.kernel.org/userspace-api/landlock.html) restrictions on a supported kernel, although Kubernetes' `seccompProfile` setting doesn't configure them.
 
-Ordinary seccomp filters can inspect numeric arguments but can't dereference a pointer to inspect a filename. For filesystem access control, an application or launcher can apply [Landlock](https://docs.kernel.org/userspace-api/landlock.html) restrictions on a supported kernel. Kubernetes' `seccompProfile` setting doesn't configure Landlock.
-
-In glibc 2.42's [internal clone helper](https://github.com/bminor/glibc/blob/glibc-2.42/sysdeps/unix/sysv/linux/clone-internal.c#L94-L109), `ENOSYS` from `clone3` triggers a fallback to `clone`. An `EPERM` return takes a different path.
-
-Changing the errno can therefore change application behaviour even though the syscall is denied in both cases. A library update can change that behaviour without any change to your own source code.
+You also need to check what happens when a call is denied, because the error can determine what the application does next. In glibc 2.42's [internal clone helper](https://github.com/bminor/glibc/blob/glibc-2.42/sysdeps/unix/sysv/linux/clone-internal.c#L94-L109), `ENOSYS` from `clone3` triggers a fallback to `clone`, while `EPERM` takes a different path. Both deny the call, but they can produce different application behaviour, and a library update can change that behaviour without any change to your own source.
 
 If your tested application needs that fallback, a targeted rule can preserve it. This fragment belongs under `spec.syscalls` for an amd64 or arm64 profile, where errno 38 is `ENOSYS`:
 
@@ -221,13 +211,13 @@ If your tested application needs that fallback, a targeted rule can preserve it.
   errnoRet: 38
 ```
 
-Remove `clone3` from any existing allow rule before adding the denial. Then verify that the caller falls back as expected and that the older syscall is permitted. Other libraries and syscalls have different conditions; returning `ENOSYS` for everything changes feature detection across the application.
+Remove `clone3` from any existing allow rule before adding the denial, then verify that the caller falls back as expected and that the older syscall is permitted. This rule depends on the behaviour of the caller: other libraries and syscalls have different fallback conditions, so returning `ENOSYS` for everything can change feature detection across the application.
 
-The OCI JSON format supports `defaultErrnoRet`, but SPO 1.1.0 exposes per-rule `errnoRet` and has no `spec.defaultErrnoRet` field. Use the release's [SeccompProfile schema](https://github.com/kubernetes-sigs/security-profiles-operator/blob/v1.1.0/deploy/base-crds/crds/seccompprofile.yaml) when editing the resource. Check the observed errno under your runtime, which may add compatibility handling of its own.
+SPO's resource also differs from the OCI JSON format here: OCI supports `defaultErrnoRet`, but SPO 1.1.0 exposes per-rule `errnoRet` and has no `spec.defaultErrnoRet` field. Use the release's [SeccompProfile schema](https://github.com/kubernetes-sigs/security-profiles-operator/blob/v1.1.0/deploy/base-crds/crds/seccompprofile.yaml) when editing the resource, and check the observed errno under your runtime, which may add compatibility handling of its own.
 
 ## Install a logging version first
 
-Before testing the enforcement profile, make an observation copy of the reviewed candidate called `observe-profile.yaml`. Retain its architectures and reviewed syscall rules, and change these fields:
+Before enforcing the candidate, give yourself a way to see which calls the recording missed without blocking all of them. Copy the reviewed profile to `observe-profile.yaml`, keeping its architectures and reviewed syscall rules, then change these fields:
 
 ```yaml
 # Fragment of the copied SeccompProfile
@@ -238,7 +228,7 @@ spec:
   defaultAction: SCMP_ACT_LOG
 ```
 
-Calls matching an allow rule run normally. Calls reaching `SCMP_ACT_LOG` are permitted and eligible for logging. Explicit denial rules still deny. This broadens access for the exercise, so use isolated staging with test data.
+With `SCMP_ACT_LOG` as the default, calls that don't match a rule are permitted and eligible for logging, while your allow rules continue to work as before. Any explicit denial rules still deny, so this isn't a way to turn off the whole policy. It does broaden access for the exercise, which is why it belongs in isolated staging with test data.
 
 For seccomp enrichment in SPO 1.1.0, configure the audit-log source:
 
@@ -254,7 +244,7 @@ kubectl -n security-profiles-operator rollout status daemonset/spod \
   --timeout=120s
 ```
 
-The enricher needs auditd output at `/var/log/audit/audit.log`, or the documented `/var/log/syslog` fallback. Check that the node's `kernel.seccomp.actions_logged` includes `log` and that audit delivery works. The [SPO logging prerequisites](https://github.com/kubernetes-sigs/security-profiles-operator/blob/v1.1.0/profiles.md#recording-based-on-audit-log) and [kernel action semantics](https://docs.kernel.org/userspace-api/seccomp_filter.html#return-values) explain those requirements.
+The enricher reads auditd output from `/var/log/audit/audit.log`, with a documented fallback to `/var/log/syslog`, so you'll need a working audit path on the node. Check that `kernel.seccomp.actions_logged` includes `log` and that records actually reach that path; the [SPO logging prerequisites](https://github.com/kubernetes-sigs/security-profiles-operator/blob/v1.1.0/profiles.md#recording-based-on-audit-log) and [kernel action semantics](https://docs.kernel.org/userspace-api/seccomp_filter.html#return-values) explain the requirements.
 
 Install the observation profile and read its node-relative path:
 
@@ -266,9 +256,9 @@ kubectl get seccompprofile seccomp-demo-api-v1-observe \
   -o jsonpath='{.status.localhostProfile}{"\n"}'
 ```
 
-Expect `Installed` and a path to the generated JSON file. Use the path SPO returns and check that the profile is installed on every node eligible to run the application.
+Once the profile reports `Installed`, the final command should return the path to its generated JSON file. Use that returned path in the Deployment, and check that the profile has been installed on every node eligible to run the application before starting it.
 
-Apply it to the API container while retaining the Pod default for other containers:
+The API container gets the custom profile, while the Pod's `RuntimeDefault` setting remains the default for other containers:
 
 ```yaml
 # Fragment of the Deployment's Pod template
@@ -284,22 +274,18 @@ spec:
           localhostProfile: <path-returned-by-the-operator>
 ```
 
-Add the container profile to `api.yaml`, preserving its other settings, and set `replicas: 1`. Apply it to create a fresh API container with the observation filter.
-
-Start the exercise after the enricher is running, then inspect the enriched events:
+Add the container profile to `api.yaml`, preserving its other settings, set `replicas: 1`, and apply it to create a fresh API container with the observation filter. With the enricher running, repeat the workload exercise and inspect the enriched events:
 
 ```sh
 kubectl -n security-profiles-operator logs \
   -l name=spod -c log-enricher --since=10m --prefix=true
 ```
 
-This reads the selected daemon logs, including the application node. Look for syscall events attributed to your test workload. Every unexpected call needs an explanation before you add it to the allowlist.
+This reads logs from the selected daemons, including the one on the application node, where you should look for syscall events attributed to your test workload. For each unexpected call, work out which code path needs it before adding a permission to the allowlist.
 
-Prove that the logging path works before relying on an empty result. Use the harmless probe below with a disposable observation copy named `seccomp-demo-api-v1-log-check`. Remove `getppid` from existing rules so the `SCMP_ACT_LOG` default handles it.
+An empty log needs checking too, because it can mean missing events, attribution failures, or dropped audit records. To check the logging path, use the harmless probe later in this article with a disposable observation copy named `seccomp-demo-api-v1-log-check`, removing `getppid` from existing rules so the `SCMP_ACT_LOG` default handles it.
 
-Install that version, read its path, and start fresh test containers before running the probe. Confirm the event arrives, then return to the observation candidate.
-
-Empty logs can mean missing events, attribution failures, or dropped audit records. Rerun the scenario table under enforcement even if the logs are empty.
+Install that version, read its path, and start fresh test containers before running the probe. Once you've confirmed that its event arrives, return to the observation candidate. Even with a working logging path and no unexpected events, you'll still need to rerun the scenario table under enforcement.
 
 ## Enforce the reviewed version and canary it
 
@@ -313,29 +299,27 @@ kubectl get seccompprofile seccomp-demo-api-v1-reviewed \
   -o jsonpath='{.status.localhostProfile}{"\n"}'
 ```
 
-Use this version's returned path in `api.yaml`, apply the Deployment, and start fresh containers. Rerun the complete exercise: startup, fallback paths, normal requests, graceful shutdown, and recovery after failures.
+Use this version's returned path in `api.yaml` and apply the Deployment to start fresh containers, then rerun the complete exercise. This is where you check that startup, fallback paths, normal requests, graceful shutdown, and recovery after failures all work when the policy can actually block calls.
 
-If a test fails, resist the temptation to add the syscall that appears closest to the error. `EPERM` can also come from filesystem permissions or another security control. Use the logging evidence and a controlled comparison to identify the syscall and code path before adding a permission.
+If a test fails with `EPERM`, don't assume the nearest syscall in a log needs adding to the profile. Filesystem permissions or another security control can produce the same error, so use the logging evidence and a controlled comparison to establish which syscall and code path are involved before changing a permission.
 
-Canary the profile, then roll it out. Keep the previous profile available for rollback. An updated file doesn't replace the filter in an existing process: new profile versions need new containers.
+Once those tests pass, canary the profile before rolling it out, keeping the previous version available for rollback. Updating a profile file won't replace the filter in an existing process, so both a new version and a rollback need new containers to pick up the intended rules.
 
 ### What happens when a node joins?
 
-A `Localhost` profile's file must exist on the node before the container starts. If the scheduler places the API there before SPO installs the file, container creation fails and Kubernetes retries. You'll commonly see `CreateContainerError`; Kubernetes won't quietly use `RuntimeDefault` instead.
+The `Localhost` profile's file has to be on the node before the container can start. If the scheduler places the API on a newly joined node before SPO installs it, container creation fails and Kubernetes retries, commonly reporting `CreateContainerError`. There's no automatic fallback to `RuntimeDefault` while the file is missing.
 
-You can accept that startup delay, or have node provisioning register new nodes with a `NoSchedule` startup taint. Allow the SPO daemon to tolerate the taint; remove it only after every required profile reports `Installed` for that node. A required node-affinity label maintained on the same condition is another option.
+If that startup delay is acceptable, you can let Kubernetes retry while SPO installs the profile. If it isn't, have node provisioning register new nodes with a `NoSchedule` startup taint that the SPO daemon tolerates, then remove the taint only after every required profile reports `Installed` for that node. A required node-affinity label maintained on the same condition is another option.
 
-That gate is platform provisioning or controller work. SPO daemon readiness alone doesn't guarantee the files exist, and one aggregate status check won't protect nodes added later. The [installation guide](https://github.com/kubernetes-sigs/security-profiles-operator/blob/v1.1.0/installation.md#constrain-spod-scheduling) describes daemon scheduling configuration.
+You'll need to implement that gate in platform provisioning or a controller, since a ready SPO daemon doesn't guarantee that the files exist, and one aggregate status check won't protect nodes added later. The [installation guide](https://github.com/kubernetes-sigs/security-profiles-operator/blob/v1.1.0/installation.md#constrain-spod-scheduling) describes the daemon scheduling configuration you'll need for it.
 
 ## Verify a distroless container
 
-The application doesn't need a shell to have its filter inspected. An administrator can find its host PID through the node's container runtime and read `/proc/<pid>/status` there.
+You can check whether the application has a filter even when its image has no shell. An administrator can find the application's host PID through the node's container runtime and read `/proc/<pid>/status` on the node.
 
-Alternatively, a [targeted ephemeral debug container](https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/#example-debugging-using-ephemeral-containers) can inspect the application's process when the runtime supports joining its PID namespace. A Pod configured with a shared process namespace is another route.
+A [targeted ephemeral debug container](https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/#example-debugging-using-ephemeral-containers) can also inspect that process when the runtime supports joining its PID namespace, or you can use a Pod configured with a shared process namespace.
 
-Read the status of the application PID, not the debugger's PID. `Seccomp: 2` means that process is in filter mode. It tells you a filter is attached, but doesn't identify its rules. Use the known profile path and a behavioural test to check the rule you care about.
-
-An ephemeral debug container has its own seccomp profile. Running a probe inside it tests that container, even when it can see the application's processes.
+Whichever route you use, read the status for the application's PID: `Seccomp: 2` tells you that process is in filter mode, but doesn't identify which rules it has. To check a particular rule's behaviour, combine the expected profile path with a test inside the application container. The debug container has its own seccomp profile, so running a probe there tests the debugger's rules even if it can see the application's processes.
 
 ### Run a harmless syscall probe in the API container
 
@@ -366,7 +350,7 @@ kubectl -n seccomp-demo create configmap seccomp-probe \
   --from-file=seccomp-probe
 ```
 
-The binary calls `getppid` directly and reports its result. Mounting the ConfigMap supplies it to the test container without adding a shell or compiler to the image. Keep the binary below the ConfigMap size limit.
+The binary calls `getppid` directly and reports the result, and mounting it from the ConfigMap lets you run it in the test container without adding a shell or compiler to the image. Just keep the binary below the ConfigMap size limit.
 
 Add these fields to the test Deployment's Pod template, preserving the API container's image, profile, and other settings:
 
@@ -396,7 +380,7 @@ kubectl -n seccomp-demo exec deployment/seccomp-demo-api -c api -- \
   /diagnostics/seccomp-probe
 ```
 
-Expect a parent PID and exit status zero. Keep the image, mount, and other security settings constant for the remaining runs.
+You should get a parent PID and exit status zero, confirming that the binary can run in this container. Keep the image, mount, and other security settings constant for the remaining runs so you can compare the effect of changing the profile.
 
 Next, create a disposable copy of the reviewed candidate named `seccomp-demo-api-v1-probe-control`. Remove `getppid` from existing rules and add this rule under `spec.syscalls`:
 
@@ -405,9 +389,9 @@ Next, create a disposable copy of the reviewed candidate named `seccomp-demo-api
   action: SCMP_ACT_ALLOW
 ```
 
-Install this version, read its path, and start fresh test containers with it. Before testing the denial, require the probe to print a parent PID and exit successfully under this control profile.
+Install this version, read its path, and start fresh test containers with it, then check that the probe prints a parent PID and exits successfully. That control matters because the static helper may need startup or output syscalls that the API recording missed; you need to know it works before testing whether the profile can deny `getppid`.
 
-A static helper can need startup or output syscalls that the API recording missed. If you need extra permissions to make it work, keep them confined to these validation copies. They don't belong in the production policy.
+If extra permissions are needed to run the helper, add them only to these validation copies. They support the test binary and shouldn't make their way into the production policy.
 
 Copy that working control as `seccomp-demo-api-v1-probe` and replace only its `getppid` rule:
 
@@ -417,15 +401,15 @@ Copy that working control as `seccomp-demo-api-v1-probe` and replace only its `g
   errnoRet: 1
 ```
 
-On amd64 and arm64, errno 1 is `EPERM`. Install this version, wait for distribution, and use its returned path to start fresh API containers. Confirm that the application can start with the temporary rule, then run the same command again.
+On amd64 and arm64, errno 1 is `EPERM`. Install this version, wait for distribution, and use its returned path to start fresh API containers, checking that the application can start with the temporary rule before running the same probe command again.
 
-Expect `getppid: Operation not permitted` and a non-zero exit status. If the helper fails before reaching that call, diagnose its startup separately.
+This time, you should get `getppid: Operation not permitted` and a non-zero exit status. Since the helper worked under the control profile and you've changed only its `getppid` rule, the comparison tests that denial inside the application container. If the helper fails before reaching the call, you'll need to diagnose its startup separately.
 
-Because the helper worked under the control profile and only the `getppid` rule changed, this comparison tests the denial inside the application container. Keep the validation profiles out of production and run the application's full integration exercise to check compatibility.
+The validation profiles stay out of production; use the application's full integration exercise to check that the reviewed profile is compatible with the API itself.
 
 ## Ship the profile with the application
 
-Store the reviewed profile alongside the application and tie it to the image digest you tested. Keep the architecture, runtime, node environment, and exercised scenarios with the validation evidence for that version.
+Store the reviewed profile alongside the application, tied to the image digest you tested, so you can tell which policy was validated for each release. Keep the architecture, runtime, node environment, and exercised scenarios with that version's validation evidence too.
 
 For a local Linux workflow, SPO's [spoc CLI](https://github.com/kubernetes-sigs/security-profiles-operator/blob/v1.1.0/cli.md) can record a command and convert the output:
 
@@ -434,6 +418,6 @@ sudo spoc record -o api-candidate.yaml ./api
 spoc convert -o api-candidate.json api-candidate.yaml
 ```
 
-Exercise the application while it runs, then terminate it to finish the recording. The CLI adds OCI compatibility syscalls by default; review those alongside the observed calls. Test the resulting profile with the container image and Kubernetes runtime you'll deploy.
+Exercise the application while it runs, then terminate it to finish the recording. The CLI adds OCI compatibility syscalls by default, so review those alongside the observed calls before testing the resulting profile with the container image and Kubernetes runtime you'll deploy.
 
-Re-record when the application, libraries, base image, runtime, architecture, or relevant node environment changes. Review the diff before accepting the new recording. Repeat the logging and enforcement tests, roll out a new profile name, and keep the previous version available for rollback.
+When the application, libraries, base image, runtime, architecture, or relevant node environment changes, make a new recording and review the diff before accepting it. Repeat the logging and enforcement tests for that version, then roll it out under a new profile name with the previous version still available for rollback.
