@@ -11,6 +11,9 @@ technologies:
   - kubernetes
 ---
 
+import VideoPlayer from "@/components/video/player.vue";
+import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+
 If you build a seccomp profile by starting your API and hitting its health endpoint, you've only recorded what it needs to do those two things. When a database connection drops or a worker reloads, the application may need a syscall that never made it into the recording, and your new profile can block it.
 
 We'll work through that problem with one API, starting with `RuntimeDefault` and using the Security Profiles Operator to record, review, and test a custom profile. Along the way, we'll deal with library fallbacks, verification in a distroless container, and what happens when the API reaches a new node before its profile does.
@@ -45,6 +48,14 @@ That work is worth considering for workloads that accept untrusted input, share 
 If you're running hostile or mutually untrusted workloads, you should also look at the isolation boundary itself. [gVisor](https://gvisor.dev/docs/) implements an application kernel in userspace, while [Kata Containers](https://github.com/kata-containers/kata-containers) runs workloads in lightweight virtual machines. Both can be integrated through Kubernetes RuntimeClass when the corresponding runtime handler is installed.
 
 You'll need to check their compatibility, performance, and platform requirements against your workload, but they address an isolation decision that a shorter syscall list alone can't resolve: how the application is separated from the host kernel.
+
+Daniel Mangum and Sascha Grunert demonstrate applying profiles and tracing blocked calls in [this session from 2020](https://rawkode.academy/watch/introduction-to-the-kubernetes-seccomp-operator-rtfm-with-rawkode). The operator has changed since then, so use the SPO 1.1.0 examples below for the current recording workflow.
+
+<VideoPlayer
+  client:only="vue"
+  video="jk9tbioqoc16ukeec1z9fi5h"
+  thumbnailUrl={getVideoThumbnailUrl("jk9tbioqoc16ukeec1z9fi5h")}
+/>
 
 ## Record the API where it runs
 
