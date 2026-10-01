@@ -38,11 +38,9 @@ controls, and duplicate recommendations.
   decoration where it can carry something real:
   - On the homepage it is a living system. Nodes and pods sit on its
     intersections and talk over routes that follow its lines. Clicking a pod
-    or a node breaks it, the scheduler places the work on the least loaded
-    healthy node, and a readout under the hero actions reports what happened.
-    It is decoration, so it carries no content and has no control of its own;
-    failures a visitor causes are announced in a polite live region,
-    autonomous ones are not. It keeps clear of every
+    or a node breaks it and the scheduler places the work on the least loaded
+    healthy node. It is pure animation: no readout, no controls, no
+    announcements, and it carries no content. It keeps clear of every
     element marked `data-system-avoid`, pauses off screen and in hidden tabs,
     and with reduced motion renders still frames with no packets or
     autonomous failures (`src/lib/system-canvas.ts`).
