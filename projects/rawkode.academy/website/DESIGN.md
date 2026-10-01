@@ -31,10 +31,28 @@ controls, and duplicate recommendations.
   and close every page in ink. In dark mode the same tokens
   resolve to a raised, bordered panel so the rhythm survives without a second
   dark canvas.
-- The system grid is the one decorative motif: a 4rem measurement grid drawn
-  in the ink hairline colour, masked so it fades away from the edge it rises
-  from (the top of a hero, the bottom of the footer). It lives only on ink
-  surfaces and never on the canvas or on reading pages.
+- The system grid is the one motif: a 4rem measurement grid drawn in the ink
+  hairline colour, masked so it fades away from the edge it rises from (the
+  top of a hero, the bottom of the footer). It lives only on ink surfaces and
+  never on the canvas or on reading pages. The grid is never empty
+  decoration where it can carry something real:
+  - On the homepage it is a living system. Nodes and pods sit on its
+    intersections and talk over routes that follow its lines. Clicking a pod
+    or a node breaks it, the scheduler places the work on the least loaded
+    healthy node, and a readout under the hero actions reports what happened.
+    It is decoration, so it carries no content and has no control of its own;
+    failures a visitor causes are announced in a polite live region,
+    autonomous ones are not. It keeps clear of every
+    element marked `data-system-avoid`, pauses off screen and in hidden tabs,
+    and with reduced motion renders still frames with no packets or
+    autonomous failures (`src/lib/system-canvas.ts`).
+  - On collection mastheads the collection's own artwork is scheduled into
+    its cells on wide screens: stills as a bricked wall of 3×2 screens,
+    portraits as staggered 2×2 squares, logos as single cells on paper tiles
+    (`src/lib/masthead-mosaic.ts`). The lead tile (the newest, or the most
+    relevant) is in full colour; the rest are printed in the ink as a navy
+    duotone so the wall reads as one surface. Tiles never enter the title's
+    cells and fade in from the left so the title always reads.
 - Type runs to poster scale where the title is the composition. The homepage
   statement uses `academy-poster` (up to 10rem, 0.9 leading, -0.05em
   tracking); collection mastheads use `academy-masthead`; section titles use
@@ -42,7 +60,9 @@ controls, and duplicate recommendations.
   name wraps at word boundaries; the description and the collection's real
   count share the row beneath it.
 - Numerals are a recurring signal, always backed by a real count: the archive
-  rail on the homepage, the figure beside a masthead title, the two-digit day
+  rail on the homepage and each masthead set the collection's name with its
+  count as an accent mono superscript (`Videos³²⁹`), the same form in both
+  places so the homepage previews the page you land on; the two-digit day
   that leads every ledger row, and the ghost index on a learning path (quiet
   by default, lit in the accent on hover). Numerals are Red Hat Display
   extrabold with tabular figures; their labels are sentence-case mono.
@@ -55,7 +75,9 @@ controls, and duplicate recommendations.
 - Borders include their semantic color. Hairlines must not default to text color.
 - Flat surfaces and modest 3–6px radii. Reserve shadows for floating layers.
 - Motion is one entrance sequence on the homepage hero (staggered rise, 720ms,
-  ease-out), a scroll-driven reveal on ledger rows, path cards, and library
+  ease-out) with the living system fading in over the grid, a masthead
+  entrance where the title rises and the mosaic tiles open from their centres
+  in a sweep across the lattice (`academy-schedule`), a scroll-driven reveal on ledger rows, path cards, and library
   cards (`animation-timeline: view()`, guarded by `@supports` so browsers
   without scroll timelines render the rows static), and interaction feedback
   elsewhere (title colour, arrow travel, a slow thumbnail scale, the body of
@@ -75,6 +97,11 @@ Use space and rules before boxes. Cards earn a frame when they are independent
 linked items or contain an interactive task. Do not wrap a whole reading page
 in a card or put cards inside redundant cards.
 
+A collection masthead is six grid cells tall on wide screens (24rem), with
+the title's cap height on a grid line, so the collection starts in the first
+viewport. The `<h1>` holds only the collection's name; the count beside it is
+`aria-hidden` and restated for assistive technology in a visually hidden line.
+
 Directory pages explain the collection and show real choices. Filters have
 labels, real results, and an empty state. A decorative tab or fake pagination
 label is not acceptable. Keep critical content server-rendered.
@@ -85,7 +112,13 @@ in mono beneath it, an optional 16:9 still, then kind, title, and a
 one-sentence description, separated by hairlines. Learning paths use the
 same rule with a two-digit index and a three-bar difficulty meter. Video
 libraries use a 16:9 grid because the still is the primary way to recognise
-a session.
+a session. On wide screens a ledger row's still sits in its own trailing
+column so every title in the ledger starts on the same line whether or not
+the row has a still.
+
+People is a contact sheet: square portraits without frames, printed in
+greyscale so mismatched photographs read as one set, each coming into colour
+under the pointer or focus. Missing portraits show honest initials.
 
 The footer closes every page with the Academy's statement at
 `academy-statement` scale above the navigation groups; each sentence is one
@@ -102,9 +135,11 @@ Use available content artwork and genuine photography. Preserve logos' aspect
 ratios. Missing people or project artwork uses honest initials, not the Academy
 logo presented as someone else's identity.
 
-News has no story artwork and does not pretend to: the lead story is a
-typographic ink panel with the publication day as its numeral, and ledger rows
-are text-led. No artificial first-letter image tiles, empty media
+News has no story artwork and does not pretend to: the lead story is set
+like a front page on the canvas beneath the ink masthead (a heavy rule, the
+publication day as an accent numeral, the headline at section scale), and
+ledger rows are text-led. Its masthead schedules the logos of the projects
+the stories cover. No artificial first-letter image tiles, empty media
 placeholders, repeated section art, or stock imagery added merely to fill
 space.
 

@@ -6,6 +6,7 @@ import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.
 import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 import Page from "@/wrappers/page.astro";
 import { getCollection } from "astro:content";
+import { getPublishedVideos } from "@/lib/content";
 import { getPersonIdentityUrls } from "@/lib/person-identity-links";
 
 const people = await getCollection("people");
@@ -19,8 +20,21 @@ const peopleJsonLd = sortedPeople.map((person) => ({
 	avatarUrl: person.data.avatarUrl,
 	sameAs: getPersonIdentityUrls(person.data),
 }));
+// The masthead shows the most recent guests first, in the order they
+// appeared on the Academy, then fills with everyone else who has a portrait.
+const recentGuestIds = (await getPublishedVideos())
+	.slice(0, 40)
+	.flatMap((video) => video.data.guests.map((guest) => guest.id));
+const portraitOf = new Map(
+	sortedPeople
+		.filter((person) => person.data.avatarUrl)
+		.map((person) => [person.id, person.data.avatarUrl as string]),
+);
+const mosaic = [...new Set([...recentGuestIds, ...portraitOf.keys()])]
+	.map((id) => portraitOf.get(id))
+	.filter((src): src is string => Boolean(src));
 const styles = academyLayout({ width: "wide" });
-const catalog = academyCatalog({ identityLayout: "tile" });
+const catalog = academyCatalog({ identityLayout: "portrait" });
 ---
 
 <Page
@@ -35,7 +49,7 @@ const catalog = academyCatalog({ identityLayout: "tile" });
 		listName="Rawkode Academy People"
 	/>
 	<div class={styles.root}>
-		<AcademyCatalogMasthead title="People" description="Hosts, guests, and contributors." figure={sortedPeople.length} figureLabel="people" />
+		<AcademyCatalogMasthead title="People" description="The hosts, guests, and contributors who build, break, and explain things on the Academy." figure={sortedPeople.length} figureLabel="people" mosaic={mosaic} mosaicShape="portrait" />
 
 		<section class={styles.section} aria-label="People search">
 			<div class={styles.container}>
@@ -83,15 +97,15 @@ const catalog = academyCatalog({ identityLayout: "tile" });
 										{person.data.avatarUrl && <img
 											src={person.data.avatarUrl}
 											alt=""
-											width="48"
-											height="48"
+											width="192"
+											height="192"
 											class={catalog.identityAvatar}
 											loading="lazy"
 											onerror="this.previousElementSibling.hidden=false; this.remove();"
 										/>}
 									</span>
 									<span class={catalog.identityBody}>
-										<span id={`person-${person.data.id}`} class={catalog.identityTitle}>{person.data.name}</span>
+										<span id={`person-${person.data.id}`} class={catalog.identityTitle} data-name>{person.data.name}</span>
 										{handle && <span class={catalog.identityMeta}>@{handle.replace(/^@/, "")}</span>}
 									</span>
 									<span class={catalog.identityArrow} aria-hidden="true">→</span>

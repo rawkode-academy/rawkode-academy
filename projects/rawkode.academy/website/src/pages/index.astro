@@ -80,30 +80,30 @@ const featured = videos[0] ?? {
 };
 const featuredMedia = "mediaSrc" in featured ? featured.mediaSrc : undefined;
 
-// The archive strip links to each collection with its real count. It is a
-// navigation aid, not a proof panel, so the numbers stay inline and small.
+// The archive strip links to each collection by name, with its real count
+// set beside it exactly as the collection's own masthead sets it.
 const plural = (count: number, singular: string, pluralForm = `${singular}s`) =>
 	count === 1 ? singular : pluralForm;
 const archive = [
 	{
 		href: "/watch",
 		value: `${publishedVideos.length}`,
-		label: plural(publishedVideos.length, "video"),
+		label: plural(publishedVideos.length, "Video"),
 	},
 	{
 		href: "/read",
 		value: `${articles.length}`,
-		label: plural(articles.length, "article"),
+		label: plural(articles.length, "Article"),
 	},
 	{
 		href: "/learning-paths",
 		value: `${learningPaths.length}`,
-		label: plural(learningPaths.length, "learning path"),
+		label: plural(learningPaths.length, "Learning path"),
 	},
 	{
 		href: "/courses",
 		value: `${courses.length}`,
-		label: plural(courses.length, "course"),
+		label: plural(courses.length, "Course"),
 	},
 ].filter((link) => link.value !== "0");
 
@@ -138,3 +138,10 @@ Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 			archive={archive}
 		/>
 </Page>
+
+<script>
+	import { mountSystem } from "@/lib/system-canvas";
+
+	const hero = document.querySelector<HTMLElement>("[data-system]");
+	if (hero) mountSystem(hero);
+</script>

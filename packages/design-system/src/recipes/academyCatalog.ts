@@ -88,13 +88,14 @@ export const academyCatalog = sva({
 			borderColor: "academy.border",
 			color: "academy.text",
 			textDecoration: "none",
-			"&[data-media='false']": {
-				gridTemplateColumns: "minmax(0, 1fr)",
-				_lg: { gridTemplateColumns: "6.5rem minmax(0, 1fr)" },
-			},
-			"&[data-media='false'] > :nth-child(2)": { _lg: { gridColumn: "2" } },
+			"&[data-media='false']": { gridTemplateColumns: "minmax(0, 1fr)" },
+			// On wide screens the still sits in its own trailing column so every
+			// title in the ledger starts on the same line, still or not.
 			_lg: {
-				gridTemplateColumns: "6.5rem 11rem minmax(0, 1fr)",
+				gridTemplateColumns: "6.5rem minmax(0, 1fr) 12rem",
+				"&[data-media='false']": {
+					gridTemplateColumns: "6.5rem minmax(0, 1fr) 12rem",
+				},
 				columnGap: "8",
 				paddingBlock: "6",
 			},
@@ -143,6 +144,7 @@ export const academyCatalog = sva({
 			},
 		},
 		editorialMedia: {
+			_lg: { gridColumn: "3", gridRow: "1" },
 			display: "block",
 			overflow: "hidden",
 			aspectRatio: "academy-video",
@@ -159,6 +161,7 @@ export const academyCatalog = sva({
 			_motionReduce: { transitionDuration: "none" },
 		},
 		editorialBody: {
+			_lg: { gridColumn: "2", gridRow: "1" },
 			display: "grid",
 			gap: "2",
 			minWidth: "0",
@@ -299,74 +302,61 @@ export const academyCatalog = sva({
 			alignItems: "center",
 			_lg: { gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "10" },
 		},
-		// The lead story is typographic: an ink panel on the system grid with
-		// the publication day as the numeral. No placeholder artwork.
+		// The lead story is typographic, set like a front page beneath the ink
+		// masthead: a heavy rule, the publication day as an accent numeral,
+		// and the headline at section scale. No panel and no placeholder art.
 		lead: {
-			position: "relative",
-			overflow: "hidden",
 			display: "grid",
-			gap: "6",
-			padding: "8",
-			border: "hairline",
-			borderColor: "academy.inkBorder",
-			borderRadius: "academy-l",
-			backgroundColor: "academy.ink",
-			color: "academy.inkText",
+			gap: "5",
+			paddingBlock: "8",
+			borderTop: "[3px solid]",
+			borderBottom: "hairline",
+			borderTopColor: "academy.text",
+			borderBottomColor: "academy.border",
+			color: "academy.text",
 			_lg: {
-				gridTemplateColumns: "auto minmax(0, 1fr)",
-				gap: "12",
-				padding: "12",
+				gridTemplateColumns: "[12rem minmax(0, 1fr)]",
+				gap: "10",
+				paddingBlock: "10",
 			},
-			"--academy-grid-line":
-				"color-mix(in srgb, var(--colors-academy-ink-border) 70%, transparent)",
-			_before: {
-				content: '""',
-				position: "absolute",
-				inset: "0",
-				pointerEvents: "none",
-				backgroundImage:
-					"[linear-gradient(var(--academy-grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--academy-grid-line) 1px, transparent 1px)]",
-				backgroundSize: "[4rem 4rem]",
-				backgroundPosition: "[center top]",
-				maskImage:
-					"[radial-gradient(120% 100% at 50% 0%, black 20%, transparent 100%)]",
-			},
-			"& > *": { position: "relative" },
 		},
 		leadDate: {
-			display: "grid",
-			gap: "1",
+			display: "flex",
+			alignItems: "baseline",
+			gap: "3",
 			margin: "0",
-			color: "academy.inkTextMuted",
+			color: "academy.textMuted",
 			fontFamily: "academy-mono",
 			fontSize: "sm",
+			"& time": { display: "contents" },
 			"& strong": {
 				display: "block",
-				color: "academy.inkText",
+				color: "academy.accent",
 				fontFamily: "academy-display",
 				fontSize: "academy-masthead",
 				fontWeight: "extrabold",
 				letterSpacing: "academy-poster",
-				lineHeight: "none",
+				lineHeight: "academy-poster",
 				fontVariantNumeric: "tabular-nums",
 			},
+			_lg: { display: "grid", alignContent: "start", gap: "2" },
 		},
 		leadBody: {
 			display: "grid",
 			gap: "4",
-			alignContent: "center",
+			alignContent: "start",
 			justifyItems: "start",
 			minWidth: "0",
 		},
 		leadKicker: {
 			margin: "0",
-			color: "academy.inkAccent",
+			color: "academy.accent",
 			fontFamily: "academy-mono",
 			fontSize: "sm",
 		},
 		leadTitle: {
 			margin: "0",
-			color: "academy.inkText",
+			color: "academy.text",
 			fontFamily: "academy-display",
 			fontSize: "academy-section",
 			fontWeight: "extrabold",
@@ -376,8 +366,8 @@ export const academyCatalog = sva({
 		},
 		leadDescription: {
 			margin: "0",
-			maxWidth: "academy-lede",
-			color: "academy.inkTextSoft",
+			maxWidth: "academy-copy",
+			color: "academy.textSoft",
 			fontSize: "academy-lede",
 			lineHeight: "academy-reading",
 			textWrap: "pretty",
@@ -429,15 +419,17 @@ export const academyCatalog = sva({
 			gap: "2",
 			alignItems: "center",
 		},
+		// Sits in the ink masthead, so it takes the ink palette.
 		feedLink: {
-			color: "academy.text",
+			color: "academy.inkText",
+			fontFamily: "academy-mono",
 			fontSize: "sm",
-			fontWeight: "semibold",
-			textUnderlineOffset: "0.2em",
-			_hover: { color: "academy.accent" },
+			textUnderlineOffset: "0.25em",
+			textDecorationColor: "academy.inkAccent",
+			_hover: { color: "academy.inkAccent" },
 			_focusVisible: {
 				outline: "focus",
-				outlineColor: "academy.accent",
+				outlineColor: "academy.inkAccent",
 				outlineOffset: "focus",
 			},
 		},
@@ -697,33 +689,65 @@ export const academyCatalog = sva({
 	variants: {
 		identityLayout: {
 			row: {},
-			tile: {
+			// A contact sheet: square portraits printed in greyscale so a wall
+			// of mismatched photographs reads as one set, each coming into
+			// colour when you reach for it. No frames; the faces are the grid.
+			portrait: {
 				identityGrid: {
-					gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-					gap: "2",
+					gridTemplateColumns:
+						"repeat(auto-fill, minmax(min(100%, 8.5rem), 1fr))",
+					columnGap: "4",
+					rowGap: "8",
 					_sm: {
 						gridTemplateColumns:
-							"repeat(auto-fill, minmax(min(100%, 11rem), 1fr))",
-						gap: "3",
+							"repeat(auto-fill, minmax(min(100%, 10rem), 1fr))",
+						columnGap: "5",
+						rowGap: "10",
 					},
 				},
 				identity: {
 					gridTemplateColumns: "minmax(0, 1fr)",
-					justifyItems: "start",
 					alignContent: "start",
 					gap: "3",
 					minHeight: "0",
-					padding: "3",
-					_hover: { "& img": { transform: "scale(1.04)" } },
+					padding: "0",
+					border: "none",
+					borderRadius: "[0]",
+					background: "[transparent]",
+					_hover: {
+						background: "[transparent]",
+						"& img": { filter: "[none]", transform: "scale(1.035)" },
+						"& [data-name]": { color: "academy.accent" },
+					},
+					_focusVisible: { "& img": { filter: "[none]" } },
 				},
-				identityPortrait: { width: "14", height: "14" },
+				identityPortrait: {
+					width: "full",
+					height: "auto",
+					aspectRatio: "square",
+					border: "none",
+					borderRadius: "academy-s",
+					background: "academy.ground",
+				},
 				identityAvatar: {
-					transitionProperty: "[transform]",
-					transitionDuration: "slow",
+					filter: "[grayscale(1) contrast(1.05)]",
+					transitionProperty: "[filter, transform]",
+					transitionDuration: "reveal",
 					transitionTimingFunction: "academy-out",
 					_motionReduce: { transitionDuration: "none" },
 				},
-				identityTitle: { fontSize: "md" },
+				identityInitials: {
+					color: "academy.textMuted",
+					fontFamily: "academy-display",
+					fontSize: "3xl",
+					fontWeight: "extrabold",
+					letterSpacing: "academy-tight",
+				},
+				identityTitle: {
+					fontSize: "md",
+					transitionProperty: "colors",
+					transitionDuration: "base",
+				},
 				identityArrow: { display: "none" },
 			},
 		},

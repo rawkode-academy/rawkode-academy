@@ -14,8 +14,13 @@ export const academyLayout = sva({
 		"mastheadAside",
 		"mastheadKicker",
 		"mastheadTitle",
+		"mastheadHeading",
 		"mastheadDescription",
-		"mastheadFigure",
+		"mastheadCount",
+		"mastheadSummary",
+		"mastheadMosaic",
+		"mastheadTile",
+		"mastheadImage",
 		"container",
 		"kicker",
 		"title",
@@ -72,18 +77,26 @@ export const academyLayout = sva({
 		},
 		heroCopy: { display: "grid", gap: "4", minWidth: "0" },
 		// Collection mastheads open in ink with the title at poster scale and
-		// the collection's real size as a numeral. Reading pages keep the
+		// the collection's real size set beside it. The system grid is the
+		// masthead's ground: on wide screens the collection's own artwork is
+		// scheduled into its cells (see mastheadMosaic), so the motif carries
+		// the work instead of decorating an empty panel. Reading pages keep the
 		// canvas hero above.
 		masthead: {
 			position: "relative",
 			overflow: "hidden",
-			paddingBlock: "academy-hero-tight",
+			paddingBlockStart: "academy-hero-tight",
+			paddingBlockEnd: "10",
 			paddingInline: "academy-gutter",
 			backgroundColor: "academy.ink",
 			color: "academy.inkText",
 			borderBottom: "hairline",
 			borderColor: "academy.inkBorder",
-			_lg: { paddingBlock: "academy-hero" },
+			_lg: {
+				minHeight: "academy-masthead",
+				paddingBlockStart: "academy-masthead-top",
+				paddingBlockEnd: "12",
+			},
 			"--academy-grid-line":
 				"color-mix(in srgb, var(--colors-academy-ink-border) 70%, transparent)",
 			_before: {
@@ -100,20 +113,19 @@ export const academyLayout = sva({
 			},
 			"& > *": { position: "relative" },
 		},
-		// The title takes the whole row so a long name never breaks mid-word;
-		// the description and numeral share the row beneath it.
-		mastheadInner: { display: "grid", gap: "8", _lg: { gap: "10" } },
+		mastheadInner: {
+			display: "grid",
+			gap: "5",
+			alignContent: "start",
+			_lg: { gap: "6", maxWidth: "academy-masthead-copy" },
+		},
 		mastheadCopy: { display: "grid", gap: "5", minWidth: "0" },
 		mastheadAside: {
-			display: "grid",
-			gap: "6",
-			alignItems: "end",
-			minWidth: "0",
-			_lg: {
-				gridTemplateColumns: "minmax(0, 1fr) auto",
-				gap: "16",
-				"& > :last-child": { textAlign: "end" },
-			},
+			display: "flex",
+			flexWrap: "wrap",
+			alignItems: "center",
+			gap: "4",
+			"&:empty": { display: "none" },
 		},
 		mastheadKicker: {
 			margin: "0",
@@ -131,7 +143,38 @@ export const academyLayout = sva({
 			letterSpacing: "academy-poster",
 			textWrap: "balance",
 			overflowWrap: "anywhere",
+			animation: "academy-rise",
+			_motionReduce: { animation: "none" },
 		},
+		// The heading sits inline in the title row so the count can follow
+		// its last word; it takes the row's type.
+		mastheadHeading: {
+			display: "inline",
+			margin: "0",
+			font: "inherit",
+			letterSpacing: "inherit",
+			color: "inherit",
+		},
+		// The collection's real size, set as a superscript numeral beside the
+		// title. It is aria-hidden; mastheadSummary carries it for assistive
+		// technology so the heading stays the collection's name.
+		mastheadCount: {
+			position: "relative",
+			top: "[0.35em]",
+			display: "inline-block",
+			marginInlineStart: "[0.12em]",
+			color: "academy.inkAccent",
+			fontFamily: "academy-mono",
+			// Never smaller than the smallest metadata, so it stays legible
+			// when the title steps down on a phone.
+			fontSize: "[max(0.2em, 0.8125rem)]",
+			fontWeight: "medium",
+			letterSpacing: "[0]",
+			lineHeight: "none",
+			verticalAlign: "top",
+			fontVariantNumeric: "tabular-nums",
+		},
+		mastheadSummary: { srOnly: true },
 		mastheadDescription: {
 			margin: "0",
 			maxWidth: "academy-lede",
@@ -139,24 +182,75 @@ export const academyLayout = sva({
 			fontSize: "academy-lede",
 			lineHeight: "academy-reading",
 			textWrap: "pretty",
+			animation: "academy-rise",
+			animationDelay: "stagger-2",
+			_motionReduce: { animation: "none" },
 		},
-		mastheadFigure: {
-			display: "grid",
-			gap: "1",
-			margin: "0",
-			color: "academy.inkTextMuted",
-			fontFamily: "academy-mono",
-			fontSize: "sm",
-			"& strong": {
+		// The mosaic sits on the same 4rem lattice as the grid behind it. Its
+		// origin is one cell right of the centre line, and each tile is placed
+		// by whole cells (--x, --y, --w, --h) and inset by the hairline so the
+		// grid still reads between the pictures. Tiles fade in from the left
+		// so a long title always reads over them.
+		mastheadMosaic: {
+			display: "none",
+			_lg: {
 				display: "block",
-				color: "academy.inkText",
-				fontFamily: "academy-display",
-				fontSize: "academy-numeral",
-				fontWeight: "extrabold",
-				letterSpacing: "academy-poster",
-				lineHeight: "none",
-				fontVariantNumeric: "tabular-nums",
+				position: "absolute",
+				insetBlock: "0",
+				insetInlineEnd: "0",
+				// One cell further out until the shell is wide enough for a
+				// masthead title and the wall to sit side by side.
+				insetInlineStart: "[calc(50% + 6rem)]",
+				"@media (min-width: 1280px)": {
+					insetInlineStart: "[calc(50% + 2rem)]",
+				},
+				pointerEvents: "none",
+				maskImage:
+					"[linear-gradient(90deg, transparent 0, black 14rem), linear-gradient(180deg, black 72%, transparent 100%)]",
+				maskComposite: "intersect",
 			},
+		},
+		mastheadTile: {
+			position: "absolute",
+			left: "[calc(var(--x) * 4rem + 1px)]",
+			top: "[calc(var(--y) * 4rem + 1px)]",
+			width: "[calc(var(--w) * 4rem - 1px)]",
+			height: "[calc(var(--h) * 4rem - 1px)]",
+			overflow: "hidden",
+			backgroundColor: "academy.inkRaised",
+			animation: "academy-schedule",
+			animationDelay: "[calc(160ms + var(--i) * 70ms)]",
+			_motionReduce: { animation: "none" },
+			"&[data-shape='logo']": {
+				display: "grid",
+				placeItems: "center",
+				padding: "3",
+				backgroundColor: "academy.inkText",
+			},
+		},
+		mastheadImage: {
+			display: "block",
+			width: "full",
+			height: "full",
+			objectFit: "cover",
+			// Everything but the lead tile is printed in the ink itself, a
+			// navy duotone, so the wall reads as one surface and the lead as
+			// the thing on air.
+			filter: "[grayscale(1) contrast(1.1)]",
+			mixBlendMode: "luminosity",
+			opacity: "0.72",
+			"[data-lit] > &": {
+				filter: "[none]",
+				mixBlendMode: "normal",
+				opacity: "1",
+			},
+			"[data-shape='logo'] > &": {
+				objectFit: "contain",
+				filter: "[grayscale(1)]",
+				mixBlendMode: "normal",
+				opacity: "0.7",
+			},
+			"[data-shape='logo'][data-lit] > &": { filter: "[none]", opacity: "1" },
 		},
 		heroAside: {
 			display: "grid",

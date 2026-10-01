@@ -101,7 +101,7 @@ const catalog = academyCatalog();
 		listName="Rawkode Academy Shows"
 	/>
 	<div class={styles.root}>
-		<AcademyCatalogMasthead title="Shows" description="Long-form programs." figure={showsToRender.length} figureLabel={showsToRender.length === 1 ? "show" : "shows"} />
+		<AcademyCatalogMasthead title="Shows" description="Recurring programmes, each with its own format, hosts, and archive of episodes." figure={showsToRender.length} figureLabel={showsToRender.length === 1 ? "show" : "shows"} mosaic={showsToRender.map((show) => show.cover?.image.src ?? show.episodes?.[0]?.video?.thumbnailUrl).filter((src): src is string => Boolean(src))} mosaicShape="video" />
 
 		<section class={styles.section} aria-label="Shows">
 			<div class={styles.container}>
