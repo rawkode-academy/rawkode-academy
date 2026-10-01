@@ -6,6 +6,7 @@ import Page from "@/wrappers/page.astro";
 import NewsSubscribeCard from "@/components/news/NewsSubscribeCard.astro";
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
 import NewsStoryRow from "@/components/news/NewsStoryRow.astro";
+import { getTechnologyLogos, logosFor } from "@/lib/technology-logos";
 import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 
 export const prerender = true;
@@ -17,6 +18,12 @@ const allNews = (
 	)
 ).sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
 const [leadStory, ...archive] = allNews;
+// News has no artwork of its own, so the masthead schedules the projects the
+// stories cover, newest story first.
+const mosaic = logosFor(
+	allNews.flatMap((story) => story.data.technologies),
+	await getTechnologyLogos(),
+);
 // The lead story shows its publication day as a numeral with the month and
 // year beneath it. Dates are calendar days in UTC.
 const dayFormatter = new Intl.DateTimeFormat("en-GB", {
@@ -40,7 +47,7 @@ const catalog = academyCatalog();
 		<link rel="alternate" type="application/feed+json" title="Rawkode Academy - News (JSON Feed)" href="/api/feeds/news.json" />
 	</Fragment>
 	<div class={styles.root}>
-		<AcademyCatalogMasthead title="News" description="Releases, security updates, and changes worth understanding." figure={allNews.length} figureLabel={allNews.length === 1 ? "story" : "stories"}>
+		<AcademyCatalogMasthead title="News" description="Releases, security updates, and changes worth understanding." figure={allNews.length} figureLabel={allNews.length === 1 ? "story" : "stories"} mosaic={mosaic} mosaicShape="logo">
 			<a slot="actions" class={catalog.feedLink} href="/api/feeds/news.xml">Follow the RSS feed ↗</a>
 		</AcademyCatalogMasthead>
 

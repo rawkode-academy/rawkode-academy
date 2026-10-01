@@ -229,7 +229,7 @@ const catalog = academyCatalog();
 	</Fragment>
 
 	<div class={styles.root}>
-		<AcademyCatalogMasthead title="Articles" description="Articles and tutorials for engineers building and running production systems." figure={allArticles.length} figureLabel={allArticles.length === 1 ? "article" : "articles"} />
+		<AcademyCatalogMasthead title="Articles" description="Articles and tutorials for engineers building and running production systems." figure={allArticles.length} figureLabel={allArticles.length === 1 ? "article" : "articles"} mosaic={restWithMeta.map(({ cover }) => cover?.src).filter((src): src is string => Boolean(src))} mosaicShape="video" />
 
 		{featured && (
 			<section class={styles.section}><div class={styles.container}>

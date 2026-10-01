@@ -71,6 +71,8 @@ async function renderArchive(search = "", data = collections) {
 		"@rawkodeacademy/design-system": {
 			academyPage: () =>
 				new Proxy({}, { get: (_, slot) => `archive-${String(slot)}` }),
+			academyLayout: () =>
+				new Proxy({}, { get: (_, slot) => `layout-${String(slot)}` }),
 		},
 		"@/lib/video-thumbnail": {
 			getVideoThumbnailUrl: (id) => `https://images.example.test/${id}.webp`,
@@ -121,6 +123,7 @@ async function renderArchive(search = "", data = collections) {
 		return module;
 	}
 	for (const name of [
+		"masthead-mosaic",
 		"news-publication",
 		"watch-archive",
 		"content",
@@ -131,6 +134,14 @@ async function renderArchive(search = "", data = collections) {
 			await compile(name, readSource(`lib/${name}.ts`)),
 		);
 	}
+	modules.set(
+		"@/components/academy/AcademyCatalogMasthead.astro",
+		await compile(
+			"AcademyCatalogMasthead.astro",
+			readSource("components/academy/AcademyCatalogMasthead.astro"),
+			true,
+		),
+	);
 	modules.set(
 		"@/components/html/video-itemlist-jsonld.astro",
 		await compile(
@@ -165,7 +176,11 @@ test("Watch is a static server-rendered archive with labeled GET search, existin
 		dom.querySelector('nav[aria-label="Video library pages"] p').text,
 		"Page 1 of 14",
 	);
-	assert.equal((dom.text.match(/329 videos/g) ?? []).length, 1);
+	assert.equal((dom.text.match(/of 329 videos/g) ?? []).length, 1);
+	assert.equal(
+		dom.querySelector(".layout-mastheadSummary").text,
+		"329 videos in the library",
+	);
 	assert(!dom.text.includes("per page"));
 	assert.deepEqual(
 		dom.querySelectorAll(".archive-cardMeta").map((meta) => meta.text),
@@ -318,7 +333,13 @@ test("page bounds, clear search, escaped no-results copy, and empty archive are 
 		`?q=${encodeURIComponent(query)}&page=999`,
 	);
 	assert.equal(emptySearch.dom.querySelectorAll(".archive-card").length, 0);
-	assert.equal(emptySearch.dom.querySelectorAll("img").length, 0);
+	// The masthead's decorative mosaic is the library, not a result.
+	assert.equal(
+		emptySearch.dom
+			.querySelectorAll("img")
+			.filter((img) => !img.closest(".layout-mastheadMosaic")).length,
+		0,
+	);
 	assert.equal(emptySearch.dom.querySelectorAll("nav").length, 0);
 	assert.equal(
 		emptySearch.dom.querySelector("#video-search").getAttribute("value"),

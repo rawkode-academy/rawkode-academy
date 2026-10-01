@@ -65,18 +65,24 @@ const dateParts = (iso: string) => {
 <template>
 	<div :class="styles.root">
 		<template v-if="props.page === 'home'">
-			<section :class="styles.hero" aria-labelledby="home-title">
+			<section :class="styles.hero" aria-labelledby="home-title" data-system>
+				<canvas :class="styles.system" data-system-canvas aria-hidden="true" />
 				<div :class="styles.container">
-					<h1 id="home-title" :class="styles.title"><span :class="styles.titleLine">Understand</span><span :class="[styles.titleLine, styles.titleAccent]">the system.</span></h1>
+					<h1 id="home-title" :class="styles.title"><span :class="styles.titleLine" data-system-avoid="text">Understand</span><span :class="[styles.titleLine, styles.titleAccent]" data-system-avoid="text">the system.</span></h1>
 					<div :class="styles.heroGrid">
-						<div :class="styles.heroCopy">
+						<div :class="styles.heroCopy" data-system-avoid>
 							<p :class="styles.heroLede">Cloud native, taught by the engineers doing the work, with every decision on screen.</p>
 							<div :class="styles.actions">
 								<a :href="props.featured.href" :class="styles.buttonPrimary">Watch the latest session <span aria-hidden="true">→</span></a>
 								<a href="/watch" :class="styles.buttonGhost">Browse the library</a>
 							</div>
+							<div :class="styles.systemStatus" data-system-status hidden>
+								<p :class="styles.systemSummary" data-system-summary aria-hidden="true" />
+								<p :class="styles.systemLog" data-system-log aria-hidden="true" />
+								<p :class="styles.systemAnnounce" data-system-announce role="status" />
+							</div>
 						</div>
-						<a :href="props.featured.href" :class="styles.featureCard" :aria-label="`Watch ${props.featured.title}`">
+						<a :href="props.featured.href" :class="styles.featureCard" :aria-label="`Watch ${props.featured.title}`" data-system-avoid>
 							<span :class="styles.featureArt">
 								<img v-if="props.featured.mediaSrc" :src="props.featured.mediaSrc" alt="" :class="styles.featureImage" width="1280" height="720" fetchpriority="high" />
 								<span :class="styles.play" data-play aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12-7.5z" /></svg></span>
@@ -88,8 +94,8 @@ const dateParts = (iso: string) => {
 							</span>
 						</a>
 					</div>
-					<nav :class="styles.archive" aria-label="Academy archive">
-						<a v-for="link in props.archive" :key="link.href" :href="link.href" :class="styles.archiveLink"><strong>{{ link.value }}</strong><span>{{ link.label }}</span></a>
+					<nav :class="styles.archive" aria-label="Academy archive" data-system-avoid>
+						<a v-for="link in props.archive" :key="link.href" :href="link.href" :class="styles.archiveLink" :aria-label="`${link.label}, ${link.value}`">{{ link.label }}<sup aria-hidden="true">{{ link.value }}</sup></a>
 						<span :class="styles.archiveNote">Open to everyone.</span>
 					</nav>
 				</div>
@@ -112,17 +118,6 @@ const dateParts = (iso: string) => {
 				</div>
 			</section>
 		</template>
-		<section v-else :class="styles.pageHero">
-			<div :class="styles.container">
-				<div :class="styles.pageHeroGrid">
-					<h1 :class="styles.pageTitle">Learning paths</h1>
-					<div :class="styles.pageHeroAside">
-						<p :class="styles.pageLede">A sequence of related lessons, articles, and working sessions. Start at the top and follow the order.</p>
-						<p :class="styles.heroFigure"><strong>{{ props.learningPaths.length }}</strong><span>{{ props.learningPaths.length === 1 ? "learning path" : "learning paths" }}</span></p>
-					</div>
-				</div>
-			</div>
-		</section>
 		<section v-if="props.learningPaths.length" :class="styles.section" :aria-labelledby="props.page === 'home' ? 'paths-title' : undefined" :aria-label="props.page === 'learn' ? 'Available learning paths' : undefined">
 			<div v-if="props.page === 'home'" :class="styles.sectionHead">
 				<div><h2 id="paths-title" :class="styles.sectionTitle">Choose a learning path</h2><p :class="styles.sectionLede">Ordered routes through the archive, with the hours of core video counted honestly.</p></div>

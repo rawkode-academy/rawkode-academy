@@ -98,7 +98,7 @@ const catalog = academyCatalog();
 		listName="Cloud Native Courses"
 	/>
 	<div class={styles.root}>
-		<AcademyCatalogMasthead title="Courses" description="Structured courses and labs." figure={allCourses.length} figureLabel={allCourses.length === 1 ? "course" : "courses"} />
+		<AcademyCatalogMasthead title="Courses" description="Structured courses and labs, taken lesson by lesson." figure={allCourses.length} figureLabel={allCourses.length === 1 ? "course" : "courses"} mosaic={allCourses.map((course) => courseImages.get(course.id)).filter((src): src is string => Boolean(src))} mosaicShape="video" />
 		<section class={styles.section}>
 			<div class={styles.container}>
 			{featuredCourse ? (

@@ -253,7 +253,15 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 		const source = readFileSync(`src/pages/${route}`, "utf8");
 		expect(source).not.toMatch(/client:(load|idle|visible|only|media)/);
 	});
-	it("keeps Learn's title and complete path list without Watch controls", async () => {
+	it("titles Learn with the shared collection masthead", () => {
+		const source = readFileSync("src/pages/learning-paths/index.astro", "utf8");
+		const masthead = source.match(
+			/<AcademyCatalogMasthead\b([\s\S]*?)\/>/,
+		)?.[1];
+		expect(masthead).toMatch(/title="Learning paths"/);
+		expect(masthead).toMatch(/figure=\{paths\.length\}/);
+	});
+	it("keeps Learn's complete path list without Watch controls", async () => {
 		const app = createSSRApp(AcademyPage, {
 			page: "learn",
 			learningPaths: props.learningPaths,
@@ -262,7 +270,7 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 		app.config.warnHandler = (message) => warnings.push(message);
 		const html = await renderToString(app);
 		expect(warnings).toEqual([]);
-		expect(html).toContain("Learning paths");
+		expect(html).toContain('aria-label="Available learning paths"');
 		expect(html).toContain('href="/learning-paths/path-4"');
 		expect(html).not.toContain("video-search");
 		expect(html).not.toContain("Show more sessions");
