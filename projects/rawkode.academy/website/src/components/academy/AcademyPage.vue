@@ -76,11 +76,6 @@ const dateParts = (iso: string) => {
 								<a :href="props.featured.href" :class="styles.buttonPrimary">Watch the latest session <span aria-hidden="true">→</span></a>
 								<a href="/watch" :class="styles.buttonGhost">Browse the library</a>
 							</div>
-							<div :class="styles.systemStatus" data-system-status hidden>
-								<p :class="styles.systemSummary" data-system-summary aria-hidden="true" />
-								<p :class="styles.systemLog" data-system-log aria-hidden="true" />
-								<p :class="styles.systemAnnounce" data-system-announce role="status" />
-							</div>
 						</div>
 						<a :href="props.featured.href" :class="styles.featureCard" :aria-label="`Watch ${props.featured.title}`" data-system-avoid>
 							<span :class="styles.featureArt">
