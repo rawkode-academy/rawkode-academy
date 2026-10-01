@@ -3,6 +3,7 @@ export const prerender = false;
 
 import { getCollection } from "astro:content";
 import { academyPage } from "@rawkodeacademy/design-system";
+import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
 import Page from "@/wrappers/page.astro";
 import VideoItemListJsonLd from "@/components/html/video-itemlist-jsonld.astro";
 import { getPublishedVideos } from "@/lib/content";
@@ -50,6 +51,9 @@ const videos = archive.items.map((video) => ({
 	mediaSrc: getVideoThumbnailUrl(video.data.id),
 }));
 const featured = archive.showFeatured ? videos[0] : undefined;
+// The latest session gets its own feature below, so the masthead schedules
+// the sessions that came before it.
+const mosaic = publishedVideos.slice(1, 10).map((video) => getVideoThumbnailUrl(video.data.id));
 const libraryVideos = featured ? videos.slice(1) : videos;
 const listUrl = new URL(watchArchiveHref(archive.query, archive.page), Astro.site ?? Astro.url).href;
 
@@ -82,17 +86,14 @@ const pageDescription =
 		/>
 	</Fragment>
 	<div class={styles.root}>
-		<section class={styles.pageHero} aria-labelledby="watch-title">
-			<div class={styles.container}>
-				<div class={styles.pageHeroGrid}>
-					<h1 id="watch-title" class={styles.pageTitle}>Videos</h1>
-					<div class={styles.pageHeroAside}>
-						<p class={styles.pageLede}>Live builds, deep dives, and honest conversations with the people behind the tools. Every session is recorded and searchable.</p>
-						<p class={styles.heroFigure}><strong>{publishedVideos.length}</strong><span>{publishedVideos.length === 1 ? "video" : "videos"} in the library</span></p>
-					</div>
-				</div>
-			</div>
-		</section>
+		<AcademyCatalogMasthead
+			title="Videos"
+			description="Live builds, deep dives, and honest conversations with the people behind the tools. Every session is recorded and searchable."
+			figure={publishedVideos.length}
+			figureLabel={publishedVideos.length === 1 ? "video in the library" : "videos in the library"}
+			mosaic={mosaic}
+			mosaicShape="video"
+		/>
 		{featured && (
 			<section class={styles.section} aria-label="Featured session">
 				<a href={featured.href} class={styles.watchFeature}>

@@ -84,6 +84,9 @@ export default defineConfig({
 					"academy-join": { value: "72px" },
 					"academy-hero": { value: "clamp(3rem, 7vw, 6rem)" },
 					"academy-hero-tight": { value: "clamp(2rem, 4vw, 3.5rem)" },
+					// Masthead copy starts one grid cell down so the title's cap
+					// height sits on a line of the system grid.
+					"academy-masthead-top": { value: "4rem" },
 				},
 				sizes: {
 					"academy-lede": { value: "42ch" },
@@ -103,6 +106,11 @@ export default defineConfig({
 					"academy-hero-copy": { value: "36rem" },
 					"academy-ledger-date": { value: "6.5rem" },
 					"academy-path-index": { value: "8rem" },
+					// Six cells of the 4rem system grid: tall enough for the
+					// artwork mosaic, short enough to put the collection in the
+					// first viewport.
+					"academy-masthead": { value: "24rem" },
+					"academy-masthead-copy": { value: "48rem" },
 				},
 				aspectRatios: {
 					"academy-video": { value: "16 / 9" },
@@ -115,6 +123,7 @@ export default defineConfig({
 					"academy-masthead": { value: "clamp(2.75rem, 9vw, 7.5rem)" },
 					"academy-numeral": { value: "clamp(2.25rem, 4.5vw, 3.75rem)" },
 					"academy-statement": { value: "clamp(2rem, 5.5vw, 4.5rem)" },
+					"academy-archive": { value: "clamp(1.75rem, 3.2vw, 2.75rem)" },
 					"academy-ledger-day": { value: "clamp(1.75rem, 2.4vw, 2.25rem)" },
 					"academy-lede": { value: "clamp(1.125rem, 1.4vw, 1.375rem)" },
 					"academy-title": { value: "clamp(2.4rem, 5vw, 4rem)" },
@@ -175,6 +184,11 @@ export default defineConfig({
 					// rise as they enter the viewport. Browsers without scroll
 					// timelines never apply it (see the @supports guards).
 					"academy-reveal": { value: "academy-reveal linear both" },
+					// A tile being placed into a grid cell: it opens from its
+					// centre, the way the scheduler fills a node.
+					"academy-schedule": {
+						value: "academy-schedule 640ms cubic-bezier(0.22, 1, 0.36, 1) both",
+					},
 					// Scroll-driven: paired with animation-timeline: scroll(root) so
 					// the reading rule tracks the document.
 					"academy-progress": { value: "academy-progress linear both" },
@@ -210,6 +224,10 @@ export default defineConfig({
 				"academy-reveal": {
 					from: { opacity: "0", transform: "translateY(1.5rem)" },
 					to: { opacity: "1", transform: "translateY(0)" },
+				},
+				"academy-schedule": {
+					from: { opacity: "0", clipPath: "inset(50% 50% 50% 50%)" },
+					to: { opacity: "1", clipPath: "inset(0 0 0 0)" },
 				},
 				"academy-progress": {
 					from: { transform: "scaleX(0)" },

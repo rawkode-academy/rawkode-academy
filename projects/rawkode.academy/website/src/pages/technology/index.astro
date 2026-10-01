@@ -5,6 +5,7 @@ import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.
 import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 import Page from "@/wrappers/page.astro";
 import { getCollection } from "astro:content";
+import { getPublishedVideos } from "@/lib/content";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { createLogger } from "@/lib/logger";
 
@@ -43,6 +44,17 @@ try {
 } catch (error) {
 	logger.error("Failed to load technologies from content collection", error);
 }
+// The masthead schedules the tools the latest sessions covered, newest first,
+// then any other technology with a real logo.
+const logoOf = new Map(
+	technologies.filter((tech) => tech.logo).map((tech) => [tech.id, tech.logo as string]),
+);
+const recentTechnologyIds = (await getPublishedVideos().catch(() => []))
+	.slice(0, 40)
+	.flatMap((video) => (video.data.technologies ?? []).map((tech) => tech.id));
+const mosaic = [...new Set([...recentTechnologyIds, ...logoOf.keys()])]
+	.map((id) => logoOf.get(id))
+	.filter((src): src is string => Boolean(src));
 // Group by first letter so a 300-entry reference reads as an A–Z index
 // instead of an endless grid. Digits and symbols share one leading group.
 const letterOf = (name: string) => {
@@ -67,7 +79,7 @@ const catalog = academyCatalog();
 	pageType="CollectionPage"
 >
 	<div class={styles.root}>
-		<AcademyCatalogMasthead title="Technologies" description="Tools and platforms." figure={technologies.length} figureLabel={technologies.length === 1 ? "technology" : "technologies"} />
+		<AcademyCatalogMasthead title="Technologies" description="The tools and platforms the Academy covers, indexed A to Z." figure={technologies.length} figureLabel={technologies.length === 1 ? "technology" : "technologies"} mosaic={mosaic} mosaicShape="logo" />
 
 		<section class={styles.section} aria-label="Technology search">
 			<div class={styles.container}>

@@ -1,14 +1,21 @@
 ---
 import { academyLayout } from "@rawkodeacademy/design-system";
+import { layoutMosaic, type MosaicShape } from "@/lib/masthead-mosaic";
 
 interface Props {
 	kicker?: string;
 	title: string;
 	description?: string;
 	width?: "wide" | "reading";
-	/** The collection's real size, shown as a numeral beside the title. */
+	/** The collection's real size, set beside the title. */
 	figure?: number | string;
 	figureLabel?: string;
+	/**
+	 * Artwork from the collection itself (stills, portraits, logos), newest
+	 * or most relevant first. Wide screens schedule it into the system grid.
+	 */
+	mosaic?: readonly string[];
+	mosaicShape?: MosaicShape;
 }
 
 const {
@@ -18,22 +25,38 @@ const {
 	width = "wide",
 	figure,
 	figureLabel,
+	mosaic = [],
+	mosaicShape = "video",
 } = Astro.props as Props;
 const styles = academyLayout({ width });
+const tiles = layoutMosaic(mosaic, mosaicShape, title);
+const hasActions = Astro.slots.has("actions");
 ---
 
-<header class={styles.masthead}>
+<header class={styles.masthead} data-mosaic={tiles.length > 0 ? mosaicShape : undefined}>
+	{tiles.length > 0 && (
+		<div class={styles.mastheadMosaic} aria-hidden="true">
+			{tiles.map((tile) => (
+				<span
+					class={styles.mastheadTile}
+					data-shape={mosaicShape}
+					data-lit={tile.lit ? "" : undefined}
+					style={`--x:${tile.x};--y:${tile.y};--w:${tile.w};--h:${tile.h};--i:${tile.order}`}
+				>
+					<img class={styles.mastheadImage} src={tile.src} alt="" loading="lazy" decoding="async" fetchpriority="low" />
+				</span>
+			))}
+		</div>
+	)}
 	<div class={styles.container}>
 		<div class={styles.mastheadInner}>
 			<div class={styles.mastheadCopy}>
 				{kicker && <p class={styles.mastheadKicker}>{kicker}</p>}
-				<h1 class={styles.mastheadTitle}>{title}</h1>
+				<div class={styles.mastheadTitle}><h1 class={styles.mastheadHeading}>{title}</h1>{figure !== undefined && <span class={styles.mastheadCount} aria-hidden="true">{figure}</span>}</div>
+				{figure !== undefined && <p class={styles.mastheadSummary}>{figure} {figureLabel}</p>}
 			</div>
-			<div class={styles.mastheadAside}>
-				{description && <p class={styles.mastheadDescription}>{description}</p>}
-				{figure !== undefined && <p class={styles.mastheadFigure}><strong>{figure}</strong>{figureLabel && <span>{figureLabel}</span>}</p>}
-				<slot name="actions" />
-			</div>
+			{description && <p class={styles.mastheadDescription}>{description}</p>}
+			{hasActions && <div class={styles.mastheadAside}><slot name="actions" /></div>}
 		</div>
 	</div>
 </header>

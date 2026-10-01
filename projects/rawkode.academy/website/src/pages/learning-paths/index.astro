@@ -3,6 +3,8 @@ export const prerender = true;
 
 import { getCollection, getEntries } from "astro:content";
 import AcademyPage from "@/components/academy/AcademyPage.vue";
+import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
+import { getTechnologyLogos, logosFor } from "@/lib/technology-logos";
 import Page from "@/wrappers/page.astro";
 import LearningPathItemListJsonLd from "@/components/html/learning-path-itemlist-jsonld.astro";
 
@@ -23,6 +25,11 @@ for (const technology of technologies) {
 		technology.data.name,
 	);
 }
+// The masthead schedules the tools the paths teach, newest path first.
+const mosaic = logosFor(
+	learningPaths.flatMap((path) => path.data.technologies ?? []),
+	await getTechnologyLogos(),
+);
 
 const itemListPaths = await Promise.all(
 	learningPaths.map(async (path) => {
@@ -79,6 +86,14 @@ const pageDescription =
 			paths={itemListPaths}
 			listUrl={new URL("/learning-paths", Astro.site ?? Astro.url).href}
 			listName="Rawkode Academy Learning Paths"
+		/>
+		<AcademyCatalogMasthead
+			title="Learning paths"
+			description="A sequence of related lessons, articles, and working sessions. Start at the top and follow the order."
+			figure={paths.length}
+			figureLabel={paths.length === 1 ? "learning path" : "learning paths"}
+			mosaic={mosaic}
+			mosaicShape="logo"
 		/>
 		<AcademyPage
 			page="learn"
