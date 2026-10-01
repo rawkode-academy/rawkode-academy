@@ -19,7 +19,7 @@
     "@astrojs/cloudflare": "^13.1.10",
     "@astrojs/vue": "^6.0.1",
     "@remotion/player": "^4.0.473",
-    "astro": "^6.4.2",
+    "astro": "^7.3.4",
     "motion": "^12.40.0",
     "notifications": "workspace:*",
     "react": "^19.2.7",
@@ -32,7 +32,7 @@
     "@cloudflare/workers-types": "^4.20250426.0",
     "@vitejs/plugin-vue": "^6.0.7",
     "vite": "^7.3.5",
-    "vitest": "^4.1.8",
+    "vitest": "^5.0.1",
     "typescript": "^5.9.3",
     "wrangler": "^4.96.0"
   }
