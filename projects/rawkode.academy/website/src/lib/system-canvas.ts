@@ -2,7 +2,7 @@
  * The homepage's living system: a small cluster drawn on the hero's 4rem
  * grid. Nodes and pods sit on grid intersections and talk over routes that
  * follow the grid lines. Break a pod, or a whole node, and the scheduler
- * places the work somewhere healthy while the readout says what happened.
+ * places the work somewhere healthy.
  *
  * It is decoration with a point of view, so it never covers content (every
  * element marked `data-system-avoid` is kept clear), it stops drawing when
@@ -94,10 +94,6 @@ const along = (route: Route, distance: number): Point => {
 
 export function mountSystem(hero: HTMLElement) {
 	const canvas = hero.querySelector<HTMLCanvasElement>("[data-system-canvas]");
-	const readout = hero.querySelector<HTMLElement>("[data-system-status]");
-	const summary = hero.querySelector<HTMLElement>("[data-system-summary]");
-	const log = hero.querySelector<HTMLElement>("[data-system-log]");
-	const announcer = hero.querySelector<HTMLElement>("[data-system-announce]");
 	const context = canvas?.getContext("2d");
 	if (!canvas || !context) return;
 
@@ -126,22 +122,8 @@ export function mountSystem(hero: HTMLElement) {
 			muted: token("--colors-academy-ink-text-muted", "#8fa0b8"),
 			accent: token("--colors-academy-ink-accent", "#ff7ab6"),
 			ground: token("--colors-academy-ink", "#0c1626"),
-			font:
-				getComputedStyle(readout ?? hero).fontFamily ||
-				"ui-monospace, monospace",
+			font: token("--fonts-academy-mono", "ui-monospace, monospace"),
 		};
-	};
-
-	const say = (message: string, announce = false) => {
-		if (log) log.textContent = message;
-		if (announce && announcer) announcer.textContent = message;
-	};
-
-	const updateSummary = () => {
-		if (!summary) return;
-		const running = pods.filter((pod) => pod.phase === "running").length;
-		const ready = nodes.filter((node) => node.ready).length;
-		summary.textContent = `${running}/${pods.length} pods ready · ${ready}/${nodes.length} nodes`;
 	};
 
 	const occupied = (point: Point) =>
@@ -284,19 +266,15 @@ export function mountSystem(hero: HTMLElement) {
 			const at = node && placeNear(node);
 			if (node && at) pods.push(spawn(node, at, now, "running"));
 		}
-		updateSummary();
-		if (log && !log.textContent) say("Click a pod or a node to break it.");
 	};
 
-	const breakPod = (pod: Pod, now: number, announce: boolean) => {
+	const breakPod = (pod: Pod, now: number) => {
 		if (pod.phase !== "running") return;
 		pod.phase = "failing";
 		pod.since = now;
-		say(`pod/${pod.name} OOMKilled on ${pod.node.name}`, announce);
-		updateSummary();
 	};
 
-	const breakNode = (node: Node, now: number, announce: boolean) => {
+	const breakNode = (node: Node, now: number) => {
 		if (!node.ready) return;
 		node.ready = false;
 		node.downAt = now;
@@ -307,11 +285,6 @@ export function mountSystem(hero: HTMLElement) {
 			pod.phase = "failing";
 			pod.since = now + index * 90;
 		});
-		say(
-			`${node.name} NotReady · evicting ${affected.length} ${affected.length === 1 ? "pod" : "pods"}`,
-			announce,
-		);
-		updateSummary();
 		// Bring the node back even when no animation frames are running.
 		window.setTimeout(() => settle(), NODE_DOWN_MS + 50);
 	};
@@ -321,8 +294,6 @@ export function mountSystem(hero: HTMLElement) {
 		for (const node of nodes) {
 			if (!node.ready && now - node.downAt > NODE_DOWN_MS) {
 				node.ready = true;
-				say(`${node.name} Ready`);
-				updateSummary();
 			}
 		}
 		for (const pod of [...pods]) {
@@ -333,9 +304,7 @@ export function mountSystem(hero: HTMLElement) {
 				const node = schedule(pod.node.ready ? undefined : pod.node);
 				const at = node && placeNear(node);
 				if (node && at) {
-					const replacement = spawn(node, at, now);
-					pods.push(replacement);
-					say(`pod/${replacement.name} scheduled on ${node.name}`);
+					pods.push(spawn(node, at, now));
 				}
 			} else if (pod.phase === "terminating") {
 				pod.link = instant ? 0 : 1 - ease(age / TERMINATE_MS);
@@ -345,7 +314,6 @@ export function mountSystem(hero: HTMLElement) {
 				if (instant || age > SCHEDULE_MS) {
 					pod.phase = "running";
 					pod.since = now;
-					updateSummary();
 				}
 			} else if (pod.phase === "running" && !instant) {
 				const length = routeLength(pod.route);
@@ -356,23 +324,19 @@ export function mountSystem(hero: HTMLElement) {
 		// With nobody at the controls, the cluster has the occasional bad day.
 		if (!instant && now > nextChaos && now - lastInteraction > 8000) {
 			nextChaos = now + 7000 + Math.random() * 5000;
-			breakSomething(now, 0.25, false);
+			breakSomething(now, 0.25);
 		}
 	};
 
 	// Takes down a node (with the given chance, and never the last one
 	// standing) or else a single pod.
-	const breakSomething = (
-		now: number,
-		nodeChance: number,
-		announce: boolean,
-	) => {
+	const breakSomething = (now: number, nodeChance: number) => {
 		const ready = nodes.filter((node) => node.ready);
 		const node =
 			ready.length > 1 && Math.random() < nodeChance ? pick(ready) : undefined;
-		if (node) return breakNode(node, now, announce);
+		if (node) return breakNode(node, now);
 		const pod = pick(pods.filter((candidate) => candidate.phase === "running"));
-		if (pod) breakPod(pod, now, announce);
+		if (pod) breakPod(pod, now);
 	};
 
 	const crisp = (value: number) => Math.round(value) + 0.5;
@@ -590,8 +554,8 @@ export function mountSystem(hero: HTMLElement) {
 		if (!target) return;
 		const now = performance.now();
 		lastInteraction = now;
-		if ("ready" in target) breakNode(target, now, true);
-		else breakPod(target, now, true);
+		if ("ready" in target) breakNode(target, now);
+		else breakPod(target, now);
 		settle();
 		// Reduced motion has no animation frames to play out the failure.
 		if (reduced.matches) window.setTimeout(settle, 0);
@@ -619,7 +583,6 @@ export function mountSystem(hero: HTMLElement) {
 
 	readPalette();
 	layout();
-	if (readout) readout.hidden = false;
 	canvas.dataset.ready = "";
 	settle();
 }
