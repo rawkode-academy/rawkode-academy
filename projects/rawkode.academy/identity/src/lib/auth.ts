@@ -304,6 +304,20 @@ export const createAuth = async (env: AuthEnv) => {
 						skipConsent: true,
 						metadata: null,
 					},
+					{
+						clientId: "tartan",
+						name: "Tartan",
+						type: "public",
+						// Workaround for https://github.com/better-auth/better-auth/issues/6651
+						// Better Auth incorrectly requires a secret for ID token signing even for public clients
+						clientSecret: "pkce-public-client-placeholder",
+						redirectUrls: [
+							"https://code.rawkode.academy/-/auth/callback",
+						],
+						disabled: false,
+						skipConsent: true,
+						metadata: null,
+					},
 				],
 			}),
 			organization({
