@@ -134,10 +134,5 @@ const dateParts = (iso: string) => {
 				</a>
 			</div>
 		</section>
-
-		<section v-if="props.page === 'home'" id="join" :class="styles.newsletter" aria-labelledby="newsletter-title">
-			<div :class="styles.newsletterCopy"><h2 id="newsletter-title" :class="styles.sectionTitle">Keep learning</h2><p :class="styles.lede">New sessions, articles, and courses from the Academy, sent when they publish. Nothing else.</p></div>
-			<form :class="styles.newsletterForm" action="https://email.rawkode.academy/subscribe" method="post"><label for="academy-email">Your email address</label><div :class="styles.newsletterRow"><input id="academy-email" name="email" type="email" required autocomplete="email" placeholder="you@example.com" :class="styles.input" /><button type="submit" :class="styles.buttonPrimary">Subscribe <span aria-hidden="true">→</span></button></div><p :class="styles.finePrint">Unsubscribe at any time. <a href="/privacy">Privacy policy</a></p></form>
-		</section>
 	</div>
 </template>
