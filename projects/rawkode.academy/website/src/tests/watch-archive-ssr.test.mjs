@@ -62,6 +62,9 @@ async function renderArchive(search = "", data = collections) {
 		__NEWS_DEPLOYMENT_CUTOFF_MS__: Date.parse("2100-01-01"),
 	});
 	const pageProps = [];
+	const newsletterCta = runtime.createComponent(
+		() => runtime.render`<section data-newsletter-cta></section>`,
+	);
 	const mocks = {
 		"astro/runtime/server/index.js": { ...runtime, createMetadata: () => ({}) },
 		"astro:content": {
@@ -76,6 +79,9 @@ async function renderArchive(search = "", data = collections) {
 		},
 		"@/lib/video-thumbnail": {
 			getVideoThumbnailUrl: (id) => `https://images.example.test/${id}.webp`,
+		},
+		"@/components/newsletter/NewsletterCTA.astro": {
+			default: newsletterCta,
 		},
 		"@/wrappers/page.astro": {
 			default: runtime.createComponent((result, props, slots) => {
@@ -216,6 +222,7 @@ test("Watch is a static server-rendered archive with labeled GET search, existin
 		],
 	);
 	assert.equal(pageProps[0].title, "Watch Cloud Native Sessions");
+	assert.equal(dom.querySelectorAll("[data-newsletter-cta]").length, 1);
 	assert(!source.includes("client:") && !source.includes("AcademyPage"));
 	assert(!html.includes("astro-island"));
 	assert(!html.includes('href="/watch/future"'));

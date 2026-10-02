@@ -1,9 +1,13 @@
 ---
 import { getCollection } from "astro:content";
+import { academyPage } from "@rawkodeacademy/design-system";
 import AcademyPage from "@/components/academy/AcademyPage.vue";
+import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Page from "@/wrappers/page.astro";
 import { getLatestContent, getPublishedVideos } from "@/lib/content";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+
+const styles = academyPage();
 
 // The homepage is format-agnostic. Collection routes such as /watch and
 // /read remain focused, but Latest is one chronological stream of everything
@@ -137,6 +141,13 @@ Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 			learningPaths={paths}
 			archive={archive}
 		/>
+		<div id="join" class={styles.section}>
+			<NewsletterCTA
+				badge="Rawkode Academy newsletter"
+				headline="Keep learning"
+				subtitle="New sessions, articles, and courses from the Academy, sent when they publish. Nothing else."
+			/>
+		</div>
 </Page>
 
 <script>
