@@ -99,6 +99,13 @@
       "when": 1780731921000,
       "tag": "0014_update_rawkode_studio_oauth",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1790956800000,
+      "tag": "0015_add_tartan_oauth",
+      "breakpoints": true
     }
   ]
 }
