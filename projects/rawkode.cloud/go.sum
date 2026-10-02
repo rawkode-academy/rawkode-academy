@@ -483,8 +483,8 @@ github.com/santhosh-tekuri/jsonschema/v6 v6.0.2 h1:KRzFb2m7YtdldCEkzs6KqmJw4nqEV
 github.com/santhosh-tekuri/jsonschema/v6 v6.0.2/go.mod h1:JXeL+ps8p7/KNMjDQk3TCwPpBy0wYklyWTfbkIzdIFU=
 github.com/sasha-s/go-deadlock v0.3.6 h1:TR7sfOnZ7x00tWPfD397Peodt57KzMDo+9Ae9rMiUmw=
 github.com/sasha-s/go-deadlock v0.3.6/go.mod h1:CUqNyyvMxTyjFqDT7MRg9mb4Dv/btmGTqSR+rky/UXo=
-github.com/scaleway/scaleway-sdk-go v1.0.0-beta.36 h1:ObX9hZmK+VmijreZO/8x9pQ8/P/ToHD/bdSb4Eg4tUo=
-github.com/scaleway/scaleway-sdk-go v1.0.0-beta.36/go.mod h1:LEsDu4BubxK7/cWhtlQWfuxwL4rf/2UEpxXz1o1EMtM=
+github.com/scaleway/scaleway-sdk-go v1.0.0-beta.37 h1:1Q6K8D0BagYYEnCTkT9fn3YHUFb06bS1OvIHWcc3JQM=
+github.com/scaleway/scaleway-sdk-go v1.0.0-beta.37/go.mod h1:Rtb4r3WZ5x4AqmL3t/wiF/DmQi+7GlU/nCRdqFbClV4=
 github.com/sergi/go-diff v1.4.0 h1:n/SP9D5ad1fORl+llWyN+D6qoUETXNZARKjyY2/KVCw=
 github.com/sergi/go-diff v1.4.0/go.mod h1:A0bzQcvG0E7Rwjx0REVgAGH58e96+X0MeOfepqsbeW4=
 github.com/shopspring/decimal v1.4.0 h1:bxl37RwXBklmTi0C79JfXCEBD1cqqHt0bbgBAGFp81k=
