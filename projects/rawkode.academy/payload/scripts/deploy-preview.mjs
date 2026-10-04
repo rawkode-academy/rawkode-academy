@@ -12,7 +12,15 @@ console.log(`Starting Wrangler Preview ${previewName} (Cloudflare token configur
 
 const child = spawn(
   'node',
-  ['node_modules/wrangler/bin/wrangler.js', 'preview', '--name', previewName, '--json'],
+  [
+    'node_modules/wrangler/bin/wrangler.js',
+    'preview',
+    '--name',
+    previewName,
+    '--secrets-file',
+    '.dev.vars',
+    '--json',
+  ],
   { env: {...process.env, CI: 'true'}, stdio: ['ignore', 'pipe', 'pipe'] },
 )
 
