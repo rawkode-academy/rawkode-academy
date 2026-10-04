@@ -2,6 +2,15 @@ import type { CollectionSlug, Payload } from 'payload'
 import type { CatalogueCollection } from './catalogue'
 
 export type Reference = { collection: CatalogueCollection; legacyId: string }
+export type SourceAsset = { relativePath: string; r2Key: string; mimeType: string; bytes: number; checksum: string }
+export type SourceMetadata = {
+  path: string
+  format: 'md' | 'mdx' | 'yaml' | 'yml' | 'json'
+  data?: Record<string, unknown>
+  raw?: string
+  body?: string
+  assets?: SourceAsset[]
+}
 export type CatalogueRecord = {
   collection: CatalogueCollection
   legacyId: string
@@ -12,6 +21,7 @@ export type CatalogueRecord = {
   tombstone?: boolean
   data: Record<string, unknown>
   relationships?: Record<string, Reference | Reference[] | null>
+  source?: SourceMetadata
 }
 export type CatalogueSnapshot = {
   sourceSystem: string
@@ -29,24 +39,54 @@ export type ImportResult = {
   unresolved: { collection: CatalogueCollection; legacyId: string; field: string; reference: Reference }[]
 }
 
-const collections = new Set<CatalogueCollection>(['videos', 'articles', 'courses', 'course-modules', 'learning-paths', 'shows', 'episodes', 'technologies', 'people', 'chapters', 'learning-resources'])
+const collections = new Set<CatalogueCollection>([
+  'videos', 'articles', 'courses', 'course-modules', 'learning-paths', 'shows', 'episodes', 'technologies', 'people', 'chapters', 'learning-resources',
+  'series', 'adrs', 'testimonials', 'news', 'changelog', 'static-assets',
+  'seasons', 'competitors', 'brackets', 'bracket-applications', 'teams', 'team-members', 'team-invites', 'bracket-breaks', 'bracket-entries', 'matches', 'match-results', 'registrations',
+])
 const relations: Partial<Record<CatalogueCollection, Record<string, { collection: CatalogueCollection; many: boolean }>>> = {
-  videos: { technologies: { collection: 'technologies', many: true }, guests: { collection: 'people', many: true }, episode: { collection: 'episodes', many: false }, chapters: { collection: 'chapters', many: true } },
+  videos: { technologies: { collection: 'technologies', many: true }, guests: { collection: 'people', many: true }, show: { collection: 'shows', many: false }, episode: { collection: 'episodes', many: false }, chapters: { collection: 'chapters', many: true } },
   shows: { hosts: { collection: 'people', many: true }, episodes: { collection: 'episodes', many: true } },
   episodes: { video: { collection: 'videos', many: false }, show: { collection: 'shows', many: false } },
   technologies: { learningResources: { collection: 'learning-resources', many: false } },
   courses: { modules: { collection: 'course-modules', many: true }, authors: { collection: 'people', many: true }, technologies: { collection: 'technologies', many: true } },
-  'course-modules': { course: { collection: 'courses', many: false }, video: { collection: 'videos', many: false }, resources: { collection: 'learning-resources', many: true } },
-  articles: { authors: { collection: 'people', many: true }, technologies: { collection: 'technologies', many: true }, resources: { collection: 'learning-resources', many: true } },
-  'learning-paths': { courses: { collection: 'courses', many: true }, videos: { collection: 'videos', many: true }, technologies: { collection: 'technologies', many: true } },
+  'course-modules': { course: { collection: 'courses', many: false }, video: { collection: 'videos', many: false }, authors: { collection: 'people', many: true }, resources: { collection: 'learning-resources', many: true } },
+  articles: { authors: { collection: 'people', many: true }, technologies: { collection: 'technologies', many: true }, series: { collection: 'series', many: false }, resources: { collection: 'learning-resources', many: true } },
+  'learning-paths': { authors: { collection: 'people', many: true }, courses: { collection: 'courses', many: true }, videos: { collection: 'videos', many: true }, technologies: { collection: 'technologies', many: true } },
+  adrs: { authors: { collection: 'people', many: true } },
+  news: { authors: { collection: 'people', many: true }, technologies: { collection: 'technologies', many: true } },
+  changelog: { author: { collection: 'people', many: false } },
+  seasons: { show: { collection: 'shows', many: false } },
+  competitors: { season: { collection: 'seasons', many: false } },
+  brackets: { season: { collection: 'seasons', many: false } },
+  'bracket-applications': { bracket: { collection: 'brackets', many: false }, competitor: { collection: 'competitors', many: false } },
+  teams: { season: { collection: 'seasons', many: false }, bracket: { collection: 'brackets', many: false } },
+  'team-members': { team: { collection: 'teams', many: false }, bracket: { collection: 'brackets', many: false }, competitor: { collection: 'competitors', many: false } },
+  'team-invites': { team: { collection: 'teams', many: false }, bracket: { collection: 'brackets', many: false } },
+  'bracket-breaks': { bracket: { collection: 'brackets', many: false } },
+  'bracket-entries': { bracket: { collection: 'brackets', many: false }, competitor: { collection: 'competitors', many: false }, team: { collection: 'teams', many: false } },
+  matches: { bracket: { collection: 'brackets', many: false }, teamA: { collection: 'teams', many: false }, teamB: { collection: 'teams', many: false }, entryA: { collection: 'bracket-entries', many: false }, entryB: { collection: 'bracket-entries', many: false }, winnerTeam: { collection: 'teams', many: false }, winnerEntry: { collection: 'bracket-entries', many: false } },
+  'match-results': { match: { collection: 'matches', many: false }, winnerTeam: { collection: 'teams', many: false }, winnerEntry: { collection: 'bracket-entries', many: false } },
+  registrations: { season: { collection: 'seasons', many: false }, bracket: { collection: 'brackets', many: false } },
 }
-const reserved = new Set(['id', 'legacyId', 'legacyType', 'slug', 'sourceSystem', 'sourceRevision', 'sourceHash', 'sourceSequence', 'sourceFields', 'mappingVersion', 'importedAt', 'locallyEdited', 'importState', 'tombstone', '_status', 'createdAt', 'updatedAt'])
+const reserved = new Set(['id', 'legacyId', 'legacyType', 'slug', 'sourceSystem', 'sourceRevision', 'sourceHash', 'sourceSequence', 'sourceFields', 'mappingVersion', 'importedAt', 'locallyEdited', 'importState', 'sourcePath', 'sourceFormat', 'sourceData', 'sourceRaw', 'sourceAssets', 'tombstone', '_status', 'createdAt', 'updatedAt'])
 
 function key(reference: Reference): string { return `${reference.collection}:${reference.legacyId}` }
 function canonical(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`
   if (value !== null && typeof value === 'object') return `{${Object.entries(value).sort(([a], [b]) => a.localeCompare(b)).map(([name, child]) => `${JSON.stringify(name)}:${canonical(child)}`).join(',')}}`
   return JSON.stringify(value) ?? 'null'
+}
+function sourceData(record: CatalogueRecord): Record<string, unknown> {
+  if (!record.source) return {}
+  return {
+    sourcePath: record.source.path,
+    sourceFormat: record.source.format,
+    sourceData: record.source.data ?? null,
+    sourceRaw: record.source.raw ?? null,
+    sourceBody: record.source.body ?? null,
+    sourceAssets: record.source.assets ?? [],
+  }
 }
 export async function sourceHash(record: CatalogueRecord, mappingVersion: string): Promise<string> {
   const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(canonical({ mappingVersion, record })))
@@ -100,7 +140,9 @@ export async function importCatalogue(payload: Payload, user: NonNullable<Parame
   // by seeing pending even when the source hash already matches.
   for (const [index, input] of snapshot.records.entries()) {
     const record = { ...input, data: { sourceOrder: index, ...input.data } }
-    const hash = await sourceHash(record, snapshot.mappingVersion)
+    // sourceOrder is an importer-owned presentation hint. Keep it out of the
+    // source hash so optional sensitive exports cannot renumber unrelated rows.
+    const hash = await sourceHash(input, snapshot.mappingVersion)
     const markers = await payload.find({ collection: 'deletion-markers' as CollectionSlug, where: { key: { equals: key(record) } }, limit: 1, depth: 0, overrideAccess: false, user })
     if (markers.docs.length) {
       conflict(record, 'An editor deleted this legacy ID; explicit reconciliation is required before resurrection.')
@@ -129,8 +171,8 @@ export async function importCatalogue(payload: Payload, user: NonNullable<Parame
     pending.push({ record, hash, created: !existing })
     eligibleSourceNodes.add(key(record))
     if (result.dryRun) continue
-    const data = { ...record.data, legacyId: record.legacyId, legacyType: record.legacyType, slug: record.slug, sourceSystem: snapshot.sourceSystem, sourceRevision: record.sourceRevision, sourceHash: hash, sourceSequence: snapshot.sequence, sourceFields, mappingVersion: snapshot.mappingVersion, importedAt: new Date().toISOString(), locallyEdited: false, importState: 'pending', tombstone: record.tombstone ?? false, _status: 'draft' as const }
-    const shared = { collection: record.collection as CollectionSlug, data, draft: true, depth: 0, overrideAccess: false, user, context: { importing: true } }
+    const data = { ...record.data, ...sourceData(record), legacyId: record.legacyId, legacyType: record.legacyType, slug: record.slug, sourceSystem: snapshot.sourceSystem, sourceRevision: record.sourceRevision, sourceHash: hash, sourceSequence: snapshot.sequence, sourceFields, mappingVersion: snapshot.mappingVersion, importedAt: new Date().toISOString(), locallyEdited: false, importState: 'pending', tombstone: record.tombstone ?? false, _status: 'draft' as const }
+    const shared = { collection: record.collection as CollectionSlug, data, draft: true, depth: 0, overrideAccess: false, user, context: { importing: true, pipelineMachine: true } }
     const saved = existing ? await payload.update({ ...shared, id: existing.id }) : await payload.create(shared)
     documents.set(key(record), saved as unknown as Document)
   }
@@ -185,7 +227,7 @@ export async function importCatalogue(payload: Payload, user: NonNullable<Parame
       }
       // Explicitly materialize the staged fields: publishing a relationship-only
       // patch must not depend on Payload merging the latest draft into the row.
-      await payload.update({ collection: record.collection as CollectionSlug, id: latest.id, data: { ...record.data, ...relationshipData, legacyId: record.legacyId, legacyType: record.legacyType, slug: record.slug, sourceSystem: snapshot.sourceSystem, sourceRevision: record.sourceRevision, sourceHash: hash, sourceSequence: snapshot.sequence, sourceFields: [...Object.keys(record.data), ...Object.keys(record.relationships ?? {})].sort(), mappingVersion: snapshot.mappingVersion, importedAt: latest.importedAt, locallyEdited: false, tombstone: record.tombstone ?? false, importState: 'complete', _status: record.tombstone ? 'draft' : record.status ?? 'draft' }, draft: false, depth: 0, overrideAccess: false, user, context: { importing: true } })
+      await payload.update({ collection: record.collection as CollectionSlug, id: latest.id, data: { ...record.data, ...sourceData(record), ...relationshipData, legacyId: record.legacyId, legacyType: record.legacyType, slug: record.slug, sourceSystem: snapshot.sourceSystem, sourceRevision: record.sourceRevision, sourceHash: hash, sourceSequence: snapshot.sequence, sourceFields: [...Object.keys(record.data), ...Object.keys(record.relationships ?? {})].sort(), mappingVersion: snapshot.mappingVersion, importedAt: latest.importedAt, locallyEdited: false, tombstone: record.tombstone ?? false, importState: 'complete', _status: record.tombstone ? 'draft' : record.status ?? 'draft' }, draft: false, depth: 0, overrideAccess: false, user, context: { importing: true, pipelineMachine: true } })
     }
     const action = record.tombstone ? 'tombstone' : created ? 'create' : 'update'
     if (record.tombstone) result.counts.tombstoned += 1

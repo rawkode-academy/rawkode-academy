@@ -1,7 +1,11 @@
 import type { CollectionSlug, Payload } from 'payload'
 
 export type CatalogueDocument = Record<string, unknown> & { id: number | string; legacyId: string }
-export type CatalogueCollection = 'videos' | 'articles' | 'courses' | 'course-modules' | 'learning-paths' | 'shows' | 'episodes' | 'technologies' | 'people' | 'chapters' | 'learning-resources'
+export type CatalogueCollection =
+  | 'videos' | 'articles' | 'courses' | 'course-modules' | 'learning-paths' | 'shows' | 'episodes' | 'technologies' | 'people' | 'chapters' | 'learning-resources'
+  | 'series' | 'adrs' | 'testimonials' | 'news' | 'changelog' | 'static-assets'
+  | 'seasons' | 'competitors' | 'brackets' | 'bracket-applications' | 'teams' | 'team-members' | 'team-invites'
+  | 'bracket-breaks' | 'bracket-entries' | 'matches' | 'match-results' | 'registrations'
 
 /** A request-scoped, anonymous, published-only view; never share this cache across requests. */
 export class Catalogue {

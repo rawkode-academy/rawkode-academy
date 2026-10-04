@@ -68,8 +68,10 @@ tasks: {
 		env: PATH: _taskPath
 		inputs: [
 			"src/**",
+			"src/migrations/**",
 			"tests/**",
 			"fixtures/**",
+			"evidence/**",
 			"package.json",
 			"../../../bun.lock",
 		]
@@ -92,8 +94,10 @@ tasks: {
 		inputs: [
 			"app/**",
 			"src/**",
+			"src/migrations/**",
 			"scripts/**",
 			"fixtures/**",
+			"evidence/**",
 			"payload.config.ts",
 			"worker.ts",
 			"open-next.config.ts",
