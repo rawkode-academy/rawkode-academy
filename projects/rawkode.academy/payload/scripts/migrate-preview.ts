@@ -1,7 +1,6 @@
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { getPayload } from 'payload'
-import { cloudflare } from '../src/cloudflare'
 
 const projectDir = process.cwd()
 const sourceConfigPath = path.join(projectDir, 'wrangler.jsonc')
@@ -41,6 +40,11 @@ process.env.POC_CLI = '1'
 process.env.POC_REMOTE_BINDINGS = '1'
 process.env.POC_CLOUDFLARE_CONFIG_PATH = migrationConfigPath
 process.env.POC_CLOUDFLARE_ENV_FILE = path.join(projectDir, '.dev.vars')
+
+// Import after setting the proxy configuration. The module initializes the
+// Cloudflare platform proxy at import time, so importing it earlier would
+// migrate the default/base binding instead of the isolated Preview D1.
+const { cloudflare } = await import('../src/cloudflare')
 
 try {
   const {default: config} = await import('../payload.config')
