@@ -20,6 +20,7 @@ const preview = sourceConfig.previews
 if (!preview?.d1_databases?.length || !preview.r2_buckets?.length) {
   throw new Error('wrangler.jsonc must define preview D1 and R2 bindings before remote migration')
 }
+const remoteBindings = <T extends Record<string, unknown>>(bindings: T[]) => bindings.map(binding => ({...binding, remote: true}))
 
 const runtimeDir = path.join(projectDir, '.runtime')
 const migrationConfigPath = path.join(runtimeDir, 'wrangler.preview-migration.json')
@@ -31,8 +32,8 @@ writeFileSync(migrationConfigPath, JSON.stringify({
   compatibility_date: sourceConfig.compatibility_date,
   compatibility_flags: sourceConfig.compatibility_flags,
   workers_dev: false,
-  d1_databases: preview.d1_databases,
-  r2_buckets: preview.r2_buckets,
+  d1_databases: remoteBindings(preview.d1_databases as Record<string, unknown>[]),
+  r2_buckets: remoteBindings(preview.r2_buckets as Record<string, unknown>[]),
   vars: preview.vars,
 }, null, 2))
 
