@@ -328,6 +328,7 @@ export const createAuth = async (env: AuthEnv) => {
 						redirectUrls: [
 							"https://preview.rawkode.academy/api/auth/callback",
 							"https://admin.rawkode.academy/api/auth/callback",
+							"https://pr-local-rawkode-academy-payload.rawkodeacademy.workers.dev/api/auth/callback",
 							"http://127.0.0.1:3100/api/auth/callback",
 						],
 						disabled: false,
@@ -385,6 +386,7 @@ export const createAuth = async (env: AuthEnv) => {
 			"https://code.rawkode.academy",
 			"https://preview.rawkode.academy",
 			"https://admin.rawkode.academy",
+			"https://pr-local-rawkode-academy-payload.rawkodeacademy.workers.dev",
 			"http://127.0.0.1:3100",
 		],
 
