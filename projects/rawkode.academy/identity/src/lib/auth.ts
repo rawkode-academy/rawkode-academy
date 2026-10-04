@@ -327,6 +327,7 @@ export const createAuth = async (env: AuthEnv) => {
 						clientSecret: "pkce-public-client-placeholder",
 						redirectUrls: [
 							"https://preview.rawkode.academy/api/auth/callback",
+							"https://admin.rawkode.academy/api/auth/callback",
 							"http://127.0.0.1:3100/api/auth/callback",
 						],
 						disabled: false,
@@ -383,6 +384,7 @@ export const createAuth = async (env: AuthEnv) => {
 			"http://localhost:3000",
 			"https://code.rawkode.academy",
 			"https://preview.rawkode.academy",
+			"https://admin.rawkode.academy",
 			"http://127.0.0.1:3100",
 		],
 
