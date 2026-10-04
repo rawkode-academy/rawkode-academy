@@ -8,10 +8,12 @@ const safeName = sourceName
   .slice(0, 48) || 'local'
 const previewName = `pr-${safeName}`
 
+console.log(`Starting Wrangler Preview ${previewName} (Cloudflare token configured: ${Boolean(process.env.CLOUDFLARE_API_TOKEN)})`)
+
 const child = spawn(
-  'bun',
-  ['x', 'wrangler', 'preview', '--name', previewName, '--json'],
-  { env: process.env, stdio: ['ignore', 'pipe', 'pipe'] },
+  'node',
+  ['node_modules/wrangler/bin/wrangler.js', 'preview', '--name', previewName, '--json'],
+  { env: {...process.env, CI: 'true'}, stdio: ['ignore', 'pipe', 'pipe'] },
 )
 
 let stdout = ''
