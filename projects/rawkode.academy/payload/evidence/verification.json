@@ -1,0 +1,97 @@
+{
+  "checkedAt": "2026-10-04T15:58:15.841444+00:00",
+  "environment": "Isolated local Cloudflare workerd with local D1, R2 and native Workflows",
+  "versions": {
+    "node": "26.10.0",
+    "npm": "11.19.1",
+    "payload": "3.90.2",
+    "wrangler": "4.116.0",
+    "opennext": "1.20.1",
+    "next": "16.3.8",
+    "graphql": "16.14.2"
+  },
+  "checks": [
+    {
+      "command": "npm run build:worker",
+      "exitCode": 0,
+      "scope": "Next webpack build, OpenNext transformation and Worker bundle; no deployment"
+    },
+    {
+      "command": "npm run typecheck",
+      "exitCode": 0
+    },
+    {
+      "command": "node --import tsx scripts/check-schema.ts",
+      "exitCode": 0,
+      "scope": "Exact captured gateway SDL/directives, zero breaking/dangerous changes, representative operation validation"
+    },
+    {
+      "command": "npm test",
+      "exitCode": 0,
+      "passed": 17,
+      "failed": 0,
+      "scope": "7 semantic tests plus 9 Worker integration subtests and parent test"
+    },
+    {
+      "command": "node --import tsx scripts/test-admin.ts",
+      "exitCode": 0,
+      "scope": "Headless Chrome login, create draft, edit draft, reload persistence and screenshot"
+    },
+    {
+      "command": "node --import tsx scripts/test-pipeline.ts",
+      "exitCode": 0,
+      "scope": "Native local Workflows fork/join, independent real retries, immutable upload, review/approval gates; fixture processors"
+    },
+    {
+      "command": "npm ls --depth=0",
+      "exitCode": 0,
+      "scope": "Installed direct dependencies match pinned manifest"
+    },
+    {
+      "command": "node --import tsx scripts/test-mcp.ts",
+      "exitCode": 1,
+      "scope": "Optional enabled build only; initialize hung; excluded from final default Worker"
+    }
+  ],
+  "workaround": "Pinned D1 upsert failed insert-on-miss before src/d1-adapter.ts; retained regression passes after workaround. Not atomic concurrency certification.",
+  "review": {
+    "independentReadOnlyReview": true,
+    "fixed": [
+      "Published pipeline video PATCH without _status bypass",
+      "Shared retry marker and synthetic attempt count",
+      "Transitive unresolved source dependency publication"
+    ],
+    "reviewedWorkaround": "D1 init wrapper enables upsert option, preserves regular updateOne",
+    "remainingBlockingForLocalSerializedPOC": []
+  },
+  "limits": [
+    "Named Cloudflare Worker Preview smoke-tested; no production route or production mutation",
+    "No full source exporter or production catalogue import",
+    "No live Academy identity sign-in or external interaction/preferences/brackets domain behavior",
+    "MCP authorized initialization failed; no tool mutations reached",
+    "No Workers AI or Container/Sandbox execution; manifests not playable",
+    "No atomic concurrency protocol or full-load performance test",
+    "No direct R2 tampering negative test",
+    "No Vue/Nuxt, Panda or Ark implementation"
+  ],
+  "decisions": {
+    "catalogueExperiment": "continue",
+    "publicGatewayCutover": "no-go",
+    "officialMcpReplacementOnWorkers": "no-go",
+    "realMediaProcessing": "no-go"
+  },
+  "sourceSha256": {
+    "payload.config.ts": "583bd3a8c38fafe1eb35a7aee5790cf20dd96aec1b16c2020163555ba4e2432b",
+    "worker.ts": "7bf3e789b408d6152529621fccc175049b9a5572a7e701000937cc078fde06ec",
+    "src/d1-adapter.ts": "19413a4409a95a8afebc53b677a9e0ad78aedc363af769162c95b1963760d4d9",
+    "src/collections.ts": "571647eb018c6ee0fcf8d80ef9b02364190ab9943357a2e136120997de7e1f3e",
+    "src/importer.ts": "d9879afe12f5eeab823e3c87147ec30b1edde2bc6d91d72d3e3fe2c958b016dc",
+    "src/compat.ts": "63557ce501abfc5f7236098e88ffff637e2cc81d98240b307eda7d3d51601b84",
+    "src/catalogue.ts": "14695651b2aeff89000aa2d3aab540a4979a8910b25ed2806cd0d46b7809c435",
+    "src/media-workflow.ts": "21a60f0bace1369f790ed1c32850dd1c7ee35346c077861fed2e6d4f04ce8d24",
+    "src/pipeline.ts": "6caea0dcf00bc35059bbda75a3d805a488446444d1d4020074ba98bedcdb2922",
+    "src/optional-mcp.ts": "5ff962a1b78863065d373b2e34afcb604d3e5db18c2b7ba6db628efb1cf8d55d",
+    "package.json": "832c8383835a86c36131eb15e2a39b36d3479e690c9df74c01f4ee2fb5606749",
+    "package-lock.json": "29d0c23c1d3042f0cfbe0d206b513acd7ffa3d6fc86d8a2bb45b8755b7ce05c9"
+  }
+}

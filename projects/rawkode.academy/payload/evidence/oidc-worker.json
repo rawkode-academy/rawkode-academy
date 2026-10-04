@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "at": "2026-10-04T16:26:35.399Z",
+  "runtime": "local Cloudflare workerd/D1",
+  "checks": [
+    "Opaque session resolves synthetic customer; anonymous/expired denied; profile allowlist",
+    "Own user readable; customer list scoped to self; other customer and self-promotion denied",
+    "Customer denied admin, private drafts/media/pipeline, REST/import/pipeline/GraphQL mutations",
+    "Cross-origin and absent-Origin cookie mutations denied at Worker boundary",
+    "Local login/bootstrap/password reset and native JWT refresh disabled with default configuration",
+    "Invalid callback fails closed without token exchange",
+    "Live public discovery creates correct authorization URL; redirect was not followed",
+    "Payload native admin logout also revokes the OIDC session",
+    "Same-origin logout revokes session; subsequent session request denied"
+  ],
+  "limits": [
+    "Successful protocol exchange uses synthetic provider tests, not live sign-in",
+    "Sessions were seeded through trusted local CLI; no public test-auth endpoint",
+    "Customer project grants not implemented; all private catalogue access denied",
+    "Production callback/client deployment not tested"
+  ]
+}

@@ -1,0 +1,23 @@
+
+> academy-payload-compatibility-experiment@0.0.0 test:worker
+> tsx --test --test-concurrency=1 tests/worker.test.ts
+
+▶ actual Workers / D1 / R2 compatibility and mutation contract
+  ✔ exact gateway schema and query-only surface (17.583958ms)
+  ✔ node-first broad import, dry-run and unchanged replay (413.404875ms)
+  ✔ relationships, legacy IDs, date, enum and private isolation (63.396875ms)
+  ✔ REST draft edit does not replace public revision; explicit publish does (110.391083ms)
+  ✔ relationship edit and deletion cannot silently resurrect (74.97675ms)
+  ✔ stale source, explicit clearing, tombstone and unresolved replay (157.834416ms)
+  ✔ generated Payload GraphQL serves real collections and CRUD (137.702459ms)
+  ✔ D1 preference upsert persists create and update (20.760375ms)
+  ✔ local R2 upload stays authenticated (25.37575ms)
+✔ actual Workers / D1 / R2 compatibility and mutation contract (1088.61025ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1242.043959

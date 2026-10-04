@@ -1,0 +1,25 @@
+{
+  "checks": [
+    "schema: exact captured gateway SDL; no mutation root",
+    "18 nodes / 11 catalogue types imported; dry-run no writes; replay unchanged",
+    "legacy IDs, nullable misses, dates, enums, pagination, nested relations, draft exclusion",
+    "REST draft -> publish verified; edited import conflict; anonymous mutation denied",
+    "relationship update and real DELETE; durable deletion marker prevents reimport resurrection",
+    "stale and inconsistent snapshots rejected; explicit clearing; tombstone; unresolved node stays private then replay resolves",
+    "generated GraphQL introspection + authenticated createArticle executed in workerd",
+    "D1 preference upsert persisted first insert and later update across requests",
+    "R2 adapter upload/read and anonymous denial in local Workers runtime"
+  ],
+  "at": "2026-10-04T16:27:57.397Z",
+  "runtime": {
+    "experimental": true,
+    "runtime": "Cloudflare-Workers",
+    "d1": {
+      "bindingCheck": 1
+    },
+    "bindings": {
+      "D1": true,
+      "R2": true
+    }
+  }
+}

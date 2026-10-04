@@ -1,0 +1,35 @@
+query CatalogueCompatibility {
+  videoByID(id: "fixture-video-1") {
+    id slug title subtitle description duration publishedAt type category streamUrl thumbnailUrl terms
+    chapters { startTime title }
+    guests { id forename surname name biography terms links { name url } guestAppearances { id } hostedShows { id } }
+    technologies { id name category subcategory aliases features relatedTechnologies useCases terms icon logo documentation website source status learningResources { official community tutorials } videos { id } }
+    episode { id code terms show { id name hosts { id } episodes { id } } video { id } }
+  }
+  getAllVideos { id }
+  getLatestVideos(limit: 2, offset: 1) { id }
+  getRandomVideos(limit: 2) { id }
+  getTechnologies(limit: 2, offset: 1) { id }
+  simpleSearch(term: "kubernetes", limit: 2) { id }
+  allShows { id }
+  showById(id: "fixture-show") { id }
+  episodeByShowCode(showId: "fixture-show", code: "001") { id }
+  episodeByVideoId(videoId: "fixture-video-1") { id }
+  episodesForShow(showId: "fixture-show") { id }
+  me { id }
+}
+
+query InteractionContract {
+  videoByID(id: "fixture-video-1") {
+    emojiReactions { emoji count }
+    hasReacted(emoji: "👍", personId: "identity-subject")
+    watchPosition(userId: "identity-subject") { positionSeconds updatedAt videoId }
+  }
+  getEmojiReactionsForContent(contentId: "fixture-video-1") { emoji count }
+  getTopEmojiReactions(limit: 2) { emoji count }
+  getWatchPosition(userId: "identity-subject", videoId: "fixture-video-1") { videoId }
+  continueWatching(userId: "identity-subject", limit: 2) { videoId }
+  bracket(id: "example") { id matches { id } }
+  seasons(showId: "example") { id }
+  myBracketParticipation(showId: "example") { brackets { bracketId } }
+}

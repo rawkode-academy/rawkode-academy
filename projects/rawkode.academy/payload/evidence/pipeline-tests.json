@@ -1,0 +1,55 @@
+{
+  "passed": true,
+  "startedAt": "2026-10-04T16:28:03.019Z",
+  "finishedAt": "2026-10-04T16:28:05.316Z",
+  "runtime": "local workerd with native Cloudflare Workflows, D1 and R2 bindings",
+  "runtimeProbe": {
+    "experimental": true,
+    "runtime": "Cloudflare-Workers",
+    "d1": {
+      "bindingCheck": 1
+    },
+    "bindings": {
+      "D1": true,
+      "R2": true
+    }
+  },
+  "videoId": 34,
+  "runId": 7,
+  "retryEvidence": [
+    {
+      "runId": 7,
+      "workflowId": "media-c22644a342de4f832de3a379b884e4b367b1afd6f12614d7c6fbb8246920da74",
+      "manifestKey": "pipeline/media-c22644a342de4f832de3a379b884e4b367b1afd6f12614d7c6fbb8246920da74/run-7/13498583cd70db12cf2381b58e2de1d49680018e15dcdde12dfe314c8a5e512a/encoding.json",
+      "transcriptionAttempts": 2
+    },
+    {
+      "runId": 8,
+      "workflowId": "media-42e3ab0d5e06bb9a83ac39c8316f1d4ae0b19942c3dd46b497ec6342c2a7a7f8",
+      "manifestKey": "pipeline/media-42e3ab0d5e06bb9a83ac39c8316f1d4ae0b19942c3dd46b497ec6342c2a7a7f8/run-8/13498583cd70db12cf2381b58e2de1d49680018e15dcdde12dfe314c8a5e512a/encoding.json",
+      "transcriptionAttempts": 2
+    }
+  ],
+  "assertions": [
+    "private upload and draft",
+    "idempotent registration",
+    "media PATCH/DELETE rejected",
+    "native retry after injected failure",
+    "separate runs with same checksum/version have independent durable attempt counters",
+    "fork/join checkpoint completion",
+    "bounded human edits and stale revision rejection",
+    "generic publish bypass rejected with or without _status",
+    "approved review edits rejected",
+    "approval exercised original R2 checksum validation",
+    "explicit approval reflected through compatibility GraphQL"
+  ],
+  "limitations": [
+    "transcription/enrichment providers deterministic fixtures",
+    "encoding manifest is not playable media",
+    "Workers AI and Containers were not called",
+    "approval/edit operations require serialized execution; no atomic CAS",
+    "direct R2 mutation and checksum-mismatch rejection not exercised",
+    "fixture uploads limited to 2 MiB",
+    "no cloud deployment"
+  ]
+}

@@ -1,0 +1,116 @@
+{
+  "at": "2026-10-04T16:31:07.884416+00:00",
+  "implemented": true,
+  "deployed": false,
+  "identityServiceModified": false,
+  "liveProviderSignInVerified": false,
+  "checks": [
+    {
+      "command": "npm run typecheck",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run build:worker",
+      "exitCode": 0
+    },
+    {
+      "command": "npm test",
+      "passed": 61,
+      "failed": 0,
+      "scope": "54 OIDC protocol/access/mapper tests plus 7 compatibility tests; synthetic OAuth provider and real WebCrypto"
+    },
+    {
+      "command": "npm run seed:oidc:tests",
+      "exitCode": 0,
+      "scope": "Local D1 atomic concurrent transaction consumption and protected identity mapping; trusted synthetic sessions"
+    },
+    {
+      "command": "npm run test:oidc:worker",
+      "exitCode": 0,
+      "scope": "Default-disabled native auth, session expiry, cross-customer/private/admin/mutation denial, both logout paths, native refresh rejection, public discovery redirect generation"
+    },
+    {
+      "command": "Node development mutation-origin HTTP checks",
+      "passed": 8,
+      "failed": 0
+    },
+    {
+      "command": "node --import tsx scripts/test-oidc-staff.ts",
+      "exitCode": 0,
+      "scope": "Synthetic allowlisted OIDC subject accesses actual admin in Chrome and staff CRUD"
+    },
+    {
+      "command": "Restore empty allowlist and recheck same session",
+      "exitCode": 0,
+      "scope": "Existing session demoted immediately and private access denied; fixture sessions revoked"
+    },
+    {
+      "command": "npm run test:worker",
+      "passed": 10,
+      "failed": 0,
+      "scope": "Catalogue regression with explicit POC_DEV_LOCAL_AUTH:true"
+    },
+    {
+      "command": "npm run test:admin",
+      "exitCode": 0,
+      "scope": "Chrome create/edit/reload under explicit development fallback"
+    },
+    {
+      "command": "npm run test:pipeline",
+      "exitCode": 0,
+      "scope": "Native Workflow fixture regression under explicit development fallback"
+    }
+  ],
+  "review": {
+    "independentReadOnlySecurityReview": true,
+    "fixed": [
+      "Replaced all users-collection staff shortcuts with explicit role check",
+      "Atomic browser-bound OIDC transaction consumption",
+      "Shared CSRF guards for Worker and Next entry points",
+      "Explicit native refresh restriction and native admin logout revocation",
+      "Strict loopback normalization for Next internal localhost request URLs"
+    ],
+    "unresolvedCodeBlockersForLocalScope": []
+  },
+  "currentDefaults": {
+    "staffSubjects": [],
+    "localStaffFallback": false,
+    "syntheticSessionsRevoked": true
+  },
+  "deployment": {
+    "authorizedByCoordinatingChat": true,
+    "performedHere": false,
+    "hostBlocker": "admin.rawkode.academy is incompatible with preview.rawkode.academy callback under the current single-origin and host-only cookie contract",
+    "remoteMigrationRunnerVerified": false,
+    "details": "deployment-prerequisites.md"
+  },
+  "limits": [
+    "No live authorization code exchange or live userinfo call",
+    "Production client registration and callbacks not verified",
+    "Remote D1/R2/Workflow deployment not performed",
+    "No customer project grants; private access fails closed",
+    "No provider back-channel logout; fixed local session expiry bounds revocation delay",
+    "Public GraphQL me remains deliberately anonymous",
+    "No credentials or real staff subjects copied or invented"
+  ],
+  "sha256": {
+    "src/auth/config.ts": "14afa0db64c5eed833c248ea25e5e746d181feb8695be7fa09e39c402203cd03",
+    "src/auth/oidc.ts": "4578f3d858966d2c63c378aa2845ece15d2f87b41f7ae91d736ec62d476ce76f",
+    "src/auth/store.ts": "a872295af807b781394d38f11c5491164d88176413199c5a6782dbf53ecc3cfa",
+    "src/auth/payload.ts": "1799a07a5cbed3fcb78ba5db3dc77048a8182bd6eed386714a9f792d2fa13149",
+    "src/auth/access.ts": "311c7ebd5aa15cc57b4ae43dfd606de6852adbad1c5b05922b3e9627c0c686ed",
+    "src/auth/csrf.ts": "a023ce876ccebfe861ce2e413097d9645f25f5d24ff4f64807323ee5a6bfb24b",
+    "src/auth/guard.ts": "8bb7602dae73c9a249337ac2124937d8e8ea93bb67d1be8a58a5ea316a25d72e",
+    "src/auth/runtime.ts": "1aea2e2b68d796623e36e21575bcd2f0dc206390ccaa5ccffbb96f9b9697fd86",
+    "src/cloudflare.ts": "9e3d38d6530adbac5f3d099daeb889fa8b8e7b05fce1a074533a47aca141116d",
+    "src/collections.ts": "d93fe51b9fcfeb141309e95b9d3598cf9b032ec9a84a06790e9da10916282410",
+    "src/pipeline.ts": "298593e919ef1dd87d2238f2fcc660866fa78c1a59de11f3841aa89ad73ef955",
+    "src/mcp.ts": "432874dcf42f73caed49c6771d377633c37706470eb0cbb882601d0f4bb962f7",
+    "worker.ts": "5ce6468293c73667e16032c3471531511796747a0322979b258df6a42254216f",
+    "payload.config.ts": "84ff3a6bcce1efbc8da386cfbe57879ff5c9e54d47678a1f831d8043bdfa31d1",
+    "wrangler.jsonc": "4d5934d9c8220b34cbd4018738d0446990e10a023cc2a7951760ce50c3cd7e2c",
+    "package.json": "1d3b2a43b695cf07a8eb2a43ff1a5c3e4d582bcddb46dea6e6f055c984b6c052",
+    "package-lock.json": "3cb4411228715c1e5114e3154c236640f49b86224dcd9fdf05e50ec3cf5f8c4e",
+    "src/migrations/20261004_161607_oidc.ts": "90ecb02a46e0943bec1de0fa41cc11929a62662ab543ba12ecd12b8ed3268c54"
+  }
+}

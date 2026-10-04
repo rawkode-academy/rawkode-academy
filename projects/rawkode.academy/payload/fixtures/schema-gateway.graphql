@@ -1,0 +1,246 @@
+type Bracket {
+  cadenceDays: Int
+  entries: [MatchSide!]
+  format: String
+  id: String
+  kind: String
+  matches: [BracketMatch!]
+  maxEntries: Int
+  name: String
+  registrationClosesAt: DateTime
+  seasonId: String
+  slug: String
+  startsAt: DateTime
+  status: String
+  teamSize: Int
+}
+
+type BracketMatch {
+  bracketId: String
+  endedAt: DateTime
+  id: String
+  positionInRound: Int
+  roundNumber: Int
+  scheduledAt: DateTime
+  sideA: MatchSide
+  sideB: MatchSide
+  startedAt: DateTime
+  status: String
+  winner: MatchSide
+}
+
+type BracketSeason {
+  brackets: [Bracket!]
+  endDate: DateTime
+  id: String
+  name: String
+  slug: String
+  startDate: DateTime
+  status: String
+}
+
+type Chapter {
+  startTime: Int
+  title: String
+}
+
+"""
+A date string, such as 2007-12-03, compliant with the `full-date` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
+"""
+scalar Date
+
+"""
+A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
+"""
+scalar DateTime
+
+type EmailPreference {
+  audience: String
+  channel: String
+  createdAt: String
+  userId: String
+}
+
+enum EmailPreferenceAction {
+  SUBSCRIBED
+  UNSUBSCRIBED
+}
+
+type EmailPreferenceEvent {
+  action: EmailPreferenceAction
+  audience: String
+  channel: String
+  id: String
+  occurredAt: String
+  userId: String
+}
+
+type EmojiReaction {
+  count: Int
+  emoji: String
+}
+
+type Episode {
+  code: String
+  id: String
+  show: Show
+  terms: [String!]
+  video: Video
+}
+
+type LearningResources {
+  community: [String!]
+  official: [String!]
+  tutorials: [String!]
+}
+
+type MatchSide {
+  displayName: String
+  id: String
+  kind: String
+  seed: Int
+}
+
+type MyBracketParticipation {
+  applied: Boolean
+  bracketId: String
+  bracketKind: String
+  bracketName: String
+  bracketSlug: String
+  registrationClosesAt: DateTime
+  team: MyTeam
+  teamSize: Int
+}
+
+type MyParticipation {
+  brackets: [MyBracketParticipation!]
+}
+
+type MyTeam {
+  id: String
+  isCaptain: Boolean
+  memberCount: Int
+  name: String
+  slug: String
+}
+
+type Person {
+  biography: String
+  emailPreferenceEvents(audience: String, channel: String, limit: Int): [EmailPreferenceEvent!]
+  emailPreferences(audience: String, channel: String): [EmailPreference!]
+  forename: String
+  guestAppearances: [Video!]
+  hostedShows: [Show!]
+  id: String
+  links: [PersonLink!]
+  name: String
+  surname: String
+  terms: [String!]
+}
+
+type PersonLink {
+  name: String
+  url: String
+}
+
+type Query {
+  allShows: [Show!]
+  bracket(id: String!): Bracket
+  bracketBySlug(bracketSlug: String!, seasonSlug: String!, showId: String!): Bracket
+  brackets(seasonSlug: String, showId: String!, status: String): [Bracket!]
+  continueWatching(limit: Int, userId: String!): [WatchPosition!]
+  episodeByShowCode(code: String!, showId: String!): Episode
+  episodeByVideoId(videoId: String!): Episode
+  episodesForShow(showId: String!): [Episode!]
+  getAllVideos: [Video!]
+  getEmojiReactionsForContent(contentId: String!): [EmojiReaction!]
+  getLatestVideos(limit: Int = 15, offset: Int = 0): [Video!]
+  getRandomVideos(limit: Int = 5): [Video!]
+  getTechnologies(limit: Int = 15, offset: Int = 0): [Technology!]
+  getTopEmojiReactions(limit: Int): [EmojiReaction!]
+  getWatchPosition(userId: String!, videoId: String!): WatchPosition
+  liveMatch(showId: String!): BracketMatch
+  me: Person
+  myBracketParticipation(showId: String!): MyParticipation
+  openBrackets(showId: String!): [Bracket!]
+  schedule(seasonSlug: String, showId: String!): [BracketMatch!]
+  seasons(showId: String!): [BracketSeason!]
+  showById(id: String!): Show
+  simpleSearch(limit: Int = 15, term: String!): [Video!]
+  videoByID(id: String!): Video
+}
+
+type Show {
+  brackets(seasonSlug: String, status: String): [Bracket!]
+  episodes: [Episode!]
+  hosts: [Person!]
+  id: String
+  liveMatch: BracketMatch
+  myParticipation: MyParticipation
+  name: String
+  openBrackets: [Bracket!]
+  schedule(seasonSlug: String): [BracketMatch!]
+  seasons: [BracketSeason!]
+  terms: [String!]
+}
+
+type Technology {
+  aliases: [String!]
+  category: String
+  documentation: String
+  features: [String!]
+  icon: String
+  id: ID
+  learningResources: LearningResources
+  logo: String
+  name: String
+  relatedTechnologies: [String!]
+  source: String
+  status: String
+  subcategory: String
+  terms: [String!]
+  useCases: [String!]
+  videos: [Video!]
+  website: String
+}
+
+type Video {
+  category: VideoCategory
+  chapters: [Chapter!]
+  description: String
+  duration: Int
+  emojiReactions: [EmojiReaction!]
+  episode: Episode
+  guests: [Person!]
+  hasReacted(emoji: String!, personId: String!): Boolean
+  id: String
+  publishedAt: Date
+  slug: String
+  streamUrl: String
+  subtitle: String
+  technologies: [Technology!]
+  terms: [String!]
+  thumbnailUrl: String
+  title: String
+  type: VideoType
+  watchPosition(userId: String!): WatchPosition
+}
+
+enum VideoCategory {
+  announcement
+  editorial
+  interview
+  review
+  tutorial
+}
+
+enum VideoType {
+  live
+  recorded
+}
+
+type WatchPosition {
+  positionSeconds: Int
+  updatedAt: String
+  videoId: String
+}

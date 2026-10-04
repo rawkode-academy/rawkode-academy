@@ -1,0 +1,9 @@
+node_modules/
+.next/
+.runtime/
+*.tsbuildinfo
+payload-types.ts
+.env*
+.dev.vars
+.wrangler/
+.open-next/

@@ -1,0 +1,50 @@
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import path from 'node:path'
+import { getPayload } from 'payload'
+
+const projectDir = process.cwd()
+const sourceConfigPath = path.join(projectDir, 'wrangler.jsonc')
+const sourceConfig = JSON.parse(readFileSync(sourceConfigPath, 'utf8')) as {
+  name: string
+  main: string
+  compatibility_date: string
+  compatibility_flags?: string[]
+  previews?: {
+    d1_databases?: unknown[]
+    r2_buckets?: unknown[]
+    vars?: Record<string, string>
+  }
+}
+const preview = sourceConfig.previews
+if (!preview?.d1_databases?.length || !preview.r2_buckets?.length) {
+  throw new Error('wrangler.jsonc must define preview D1 and R2 bindings before remote migration')
+}
+
+const runtimeDir = path.join(projectDir, '.runtime')
+const migrationConfigPath = path.join(runtimeDir, 'wrangler.preview-migration.json')
+mkdirSync(runtimeDir, {recursive: true})
+writeFileSync(migrationConfigPath, JSON.stringify({
+  name: `${sourceConfig.name}-migration`,
+  main: sourceConfig.main,
+  compatibility_date: sourceConfig.compatibility_date,
+  compatibility_flags: sourceConfig.compatibility_flags,
+  workers_dev: false,
+  d1_databases: preview.d1_databases,
+  r2_buckets: preview.r2_buckets,
+  vars: preview.vars,
+}, null, 2))
+
+process.env.POC_CLI = '1'
+process.env.POC_REMOTE_BINDINGS = '1'
+process.env.POC_CLOUDFLARE_CONFIG_PATH = migrationConfigPath
+process.env.POC_CLOUDFLARE_ENV_FILE = path.join(projectDir, '.dev.vars')
+
+try {
+  const {default: config} = await import('../payload.config')
+  const payload = await getPayload({config, disableOnInit: true})
+  await payload.db.migrate()
+  await payload.destroy()
+  console.log('Preview D1 migrations applied')
+} finally {
+  rmSync(migrationConfigPath, {force: true})
+}

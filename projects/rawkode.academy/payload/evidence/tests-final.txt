@@ -1,0 +1,30 @@
+
+> academy-payload-compatibility-experiment@0.0.0 test
+> tsx --test --test-concurrency=1 tests/*.test.ts
+
+✔ schema exactly preserves dated gateway contract and validates representative operations (14.168041ms)
+✔ legacy IDs, source ordering, date scalars, enums and arbitrary offset slices (2.501125ms)
+✔ relationship traversal preserves array order and filters future reverse video links (1.422042ms)
+✔ search and random use only date-published catalogue; episode code is case-insensitive (1.042916ms)
+✔ missing and protected records return nullable roots with no private relationship leakage (0.844541ms)
+✔ unsupported external domains fail explicitly without fabricating state (1.563125ms)
+✔ HTTP facade ignores spoofed identity headers and has no mutation root (14.3925ms)
+▶ actual Workers / D1 / R2 compatibility and mutation contract
+  ✔ exact gateway schema and query-only surface (33.758208ms)
+  ✔ node-first broad import, dry-run and unchanged replay (443.435ms)
+  ✔ relationships, legacy IDs, date, enum and private isolation (58.145625ms)
+  ✔ REST draft edit does not replace public revision; explicit publish does (123.984708ms)
+  ✔ relationship edit and deletion cannot silently resurrect (107.574208ms)
+  ✔ stale source, explicit clearing, tombstone and unresolved replay (184.573666ms)
+  ✔ generated Payload GraphQL serves real collections and CRUD (185.757459ms)
+  ✔ D1 preference upsert persists create and update (28.777042ms)
+  ✔ local R2 upload stays authenticated (21.844958ms)
+✔ actual Workers / D1 / R2 compatibility and mutation contract (1484.171417ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1888.623875

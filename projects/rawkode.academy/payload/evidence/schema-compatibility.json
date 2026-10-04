@@ -1,0 +1,80 @@
+{
+  "checkedAt": "2026-10-04T15:55:26.351Z",
+  "exactSDL": true,
+  "exactDirectives": true,
+  "breaking": [],
+  "dangerous": [],
+  "operationErrors": [],
+  "mutationRoot": null,
+  "drift": [
+    {
+      "type": "Query",
+      "subgraphOnly": [
+        "_entities",
+        "_service",
+        "getUpcomingVideos",
+        "personByGithub"
+      ],
+      "gatewayOnly": [
+        "bracket",
+        "bracketBySlug",
+        "brackets",
+        "continueWatching",
+        "getEmojiReactionsForContent",
+        "getTopEmojiReactions",
+        "getWatchPosition",
+        "liveMatch",
+        "myBracketParticipation",
+        "openBrackets",
+        "schedule",
+        "seasons"
+      ],
+      "sourceOnlyVsSubgraph": [],
+      "subgraphOnlyVsSource": []
+    },
+    {
+      "type": "Person",
+      "subgraphOnly": [
+        "avatarUrl",
+        "githubHandle",
+        "githubUrl"
+      ],
+      "gatewayOnly": [
+        "emailPreferenceEvents",
+        "emailPreferences"
+      ],
+      "sourceOnlyVsSubgraph": [],
+      "subgraphOnlyVsSource": []
+    },
+    {
+      "type": "Video",
+      "subgraphOnly": [],
+      "gatewayOnly": [
+        "emojiReactions",
+        "hasReacted",
+        "watchPosition"
+      ],
+      "sourceOnlyVsSubgraph": [],
+      "subgraphOnlyVsSource": []
+    },
+    {
+      "type": "Show",
+      "subgraphOnly": [],
+      "gatewayOnly": [
+        "brackets",
+        "liveMatch",
+        "myParticipation",
+        "openBrackets",
+        "schedule",
+        "seasons"
+      ],
+      "sourceOnlyVsSubgraph": [],
+      "subgraphOnlyVsSource": []
+    }
+  ],
+  "limitations": [
+    "Exact type compatibility does not establish runtime parity for external domains.",
+    "Authenticated me and interaction/bracket implementations are intentionally unavailable.",
+    "Captured fixtures are dated evidence; run capture:schema to refresh explicitly."
+  ]
+}

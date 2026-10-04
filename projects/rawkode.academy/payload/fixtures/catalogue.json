@@ -1,0 +1,566 @@
+{
+  "sourceSystem": "synthetic-academy",
+  "mappingVersion": "poc-v1",
+  "records": [
+    {
+      "collection": "people",
+      "legacyId": "fixture-person-alex",
+      "legacyType": "Person",
+      "slug": "fixture-person-alex",
+      "sourceRevision": "synthetic-fixture-v1",
+      "status": "published",
+      "data": {
+        "name": "Alex Example (synthetic)",
+        "biography": "An invented educator for this isolated experiment.",
+        "links": [
+          {
+            "name": "Example profile",
+            "url": "https://example.com/alex"
+          }
+        ],
+        "githubHandle": "synthetic-alex",
+        "terms": [
+          {
+            "value": "synthetic"
+          },
+          {
+            "value": "fixture"
+          }
+        ]
+      }
+    },
+    {
+      "collection": "people",
+      "legacyId": "fixture-person-sam",
+      "legacyType": "Person",
+      "slug": "fixture-person-sam",
+      "sourceRevision": "synthetic-fixture-v1",
+      "status": "published",
+      "data": {
+        "name": "Sam Example (synthetic)",
+        "biography": "An invented guest.",
+        "links": [],
+        "githubHandle": "synthetic-sam",
+        "terms": [
+          {
+            "value": "synthetic"
+          },
+          {
+            "value": "fixture"
+          }
+        ]
+      }
+    },
+    {
+      "collection": "learning-resources",
+      "legacyId": "fixture-resources",
+      "legacyType": "LearningResources",
+      "slug": "fixture-resources",
+      "sourceRevision": "synthetic-fixture-v1",
+      "status": "published",
+      "data": {
+        "title": "Synthetic learning links",
+        "official": [
+          {
+            "url": "https://example.com/docs"
+          }
+        ],
+        "community": [
+          {
+            "url": "https://example.com/community"
+          }
+        ],
+        "tutorials": [
+          {
+            "url": "https://example.com/tutorial"
+          }
+        ]
+      }
+    },
+    {
+      "collection": "technologies",
+      "legacyId": "fixture-technology",
+      "legacyType": "Technology",
+      "slug": "fixture-technology",
+      "sourceRevision": "synthetic-fixture-v1",
+      "status": "published",
+      "data": {
+        "name": "Fixture Technology",
+        "website": "https://example.com",
+        "logo": "https://example.com/fixture-logo.svg",
+        "relatedTechnologies": [
+          {
+            "value": "fixture-technology-companion"
+          }
+        ],
+        "terms": [
+          {
+            "value": "synthetic"
+          },
+          {
+            "value": "fixture"
+          }
+        ]
+      },
+      "relationships": {
+        "learningResources": {
+          "collection": "learning-resources",
+          "legacyId": "fixture-resources"
+        }
+      }
+    },
+    {
+      "collection": "technologies",
+      "legacyId": "fixture-technology-companion",
+      "legacyType": "Technology",
+      "slug": "fixture-technology-companion",
+      "sourceRevision": "synthetic-fixture-v1",
+      "status": "published",
+      "data": {
+        "name": "Fixture Companion",
+        "website": "https://example.com/companion",
+        "relatedTechnologies": [
+          {
+            "value": "fixture-technology"
+          }
+        ],
+        "terms": [
+          {
+            "value": "synthetic"
+          },
+          {
+            "value": "fixture"
+          }
+        ]
+      },
+      "relationships": {
+        "learningResources": {
+          "collection": "learning-resources",
+          "legacyId": "fixture-resources"
+        }
+      }
+    },
+    {
+      "collection": "chapters",
+      "legacyId": "fixture-chapter-intro",
+      "legacyType": "Chapter",
+      "slug": "fixture-chapter-intro",
+      "sourceRevision": "synthetic-fixture-v1",
+      "status": "published",
+      "data": {
+        "title": "Synthetic introduction",
+        "startTime": 0
+      }
+    },
+    {
+      "collection": "chapters",
+      "legacyId": "fixture-chapter-demo",
+      "legacyType": "Chapter",
+      "slug": "fixture-chapter-demo",
+      "sourceRevision": "synthetic-fixture-v1",
+      "status": "published",
+      "data": {
+        "title": "Synthetic demonstration",
+        "startTime": 65
+      }
+    },
+    {
+      "collection": "shows",
+      "legacyId": "fixture-show",
+      "legacyType": "Show",
+      "slug": "fixture-show",
+      "sourceRevision": "synthetic-fixture-v1",
+      "status": "published",
+      "data": {
+        "name": "Synthetic Academy Show",
+        "description": "A fictional show for local development.",
+        "terms": [
+          {
+            "value": "synthetic"
+          },
+          {
+            "value": "fixture"
+          }
+        ]
+      },
+      "relationships": {
+        "hosts": [
+          {
+            "collection": "people",
+            "legacyId": "fixture-person-alex"
+          }
+        ],
+        "episodes": [
+          {
+            "collection": "episodes",
+            "legacyId": "fixture-episode-2"
+          },
+          {
+            "collection": "episodes",
+            "legacyId": "fixture-episode-1"
+          }
+        ]
+      }
+    },
+    {
+      "collection": "episodes",
+      "legacyId": "fixture-episode-1",
+      "legacyType": "Episode",
+      "slug": "fixture-episode-1",
+      "sourceRevision": "synthetic-fixture-v1",
+      "status": "published",
+      "data": {
+        "code": "S01E01",
+        "terms": [
+          {
+            "value": "synthetic"
+          },
+          {
+            "value": "fixture"
+          }
+        ]
+      },
+      "relationships": {
+        "show": {
+          "collection": "shows",
+          "legacyId": "fixture-show"
+        },
+        "video": {
+          "collection": "videos",
+          "legacyId": "fixture-video-1"
+        }
+      }
+    },
+    {
+      "collection": "episodes",
+      "legacyId": "fixture-episode-2",
+      "legacyType": "Episode",
+      "slug": "fixture-episode-2",
+      "sourceRevision": "synthetic-fixture-v1",
+      "status": "published",
+      "data": {
+        "code": "S01E02",
+        "terms": [
+          {
+            "value": "synthetic"
+          },
+          {
+            "value": "fixture"
+          }
+        ]
+      },
+      "relationships": {
+        "show": {
+          "collection": "shows",
+          "legacyId": "fixture-show"
+        },
+        "video": {
+          "collection": "videos",
+          "legacyId": "fixture-video-future"
+        }
+      }
+    },
+    {
+      "collection": "videos",
+      "legacyId": "fixture-video-1",
+      "legacyType": "Video",
+      "slug": "fixture-video-1",
+      "sourceRevision": "synthetic-fixture-v1",
+      "status": "published",
+      "data": {
+        "title": "Synthetic introduction to Fixture Technology",
+        "description": "PUBLIC SYNTHETIC FIXTURE. No media binary is imported.",
+        "publishedAt": "2026-01-10T00:00:00.000Z",
+        "duration": 600,
+        "type": "recorded",
+        "category": "tutorial",
+        "sourceBody": "# Synthetic lesson\n\nSee [the companion article](/articles/fixture-article).\n\n<Demo technology=\"fixture-technology\" />",
+        "mediaReference": "fixture-only:video-1",
+        "thumbnailUrl": "https://example.com/video-1.webp",
+        "terms": [
+          {
+            "value": "synthetic"
+          },
+          {
+            "value": "fixture"
+          }
+        ]
+      },
+      "relationships": {
+        "technologies": [
+          {
+            "collection": "technologies",
+            "legacyId": "fixture-technology-companion"
+          },
+          {
+            "collection": "technologies",
+            "legacyId": "fixture-technology"
+          }
+        ],
+        "guests": [
+          {
+            "collection": "people",
+            "legacyId": "fixture-person-sam"
+          },
+          {
+            "collection": "people",
+            "legacyId": "fixture-person-alex"
+          }
+        ],
+        "episode": {
+          "collection": "episodes",
+          "legacyId": "fixture-episode-1"
+        },
+        "chapters": [
+          {
+            "collection": "chapters",
+            "legacyId": "fixture-chapter-intro"
+          },
+          {
+            "collection": "chapters",
+            "legacyId": "fixture-chapter-demo"
+          }
+        ]
+      }
+    },
+    {
+      "collection": "videos",
+      "legacyId": "fixture-video-future",
+      "legacyType": "Video",
+      "slug": "fixture-video-future",
+      "sourceRevision": "synthetic-fixture-v1",
+      "status": "published",
+      "data": {
+        "title": "Synthetic upcoming livestream",
+        "description": "Future public catalogue metadata; this is not private preview content.",
+        "publishedAt": "2099-01-01T12:00:00.000Z",
+        "duration": 0,
+        "type": "live",
+        "category": "tutorial",
+        "mediaReference": "fixture-only:future-unavailable",
+        "terms": [
+          {
+            "value": "synthetic"
+          },
+          {
+            "value": "fixture"
+          }
+        ]
+      },
+      "relationships": {
+        "technologies": [
+          {
+            "collection": "technologies",
+            "legacyId": "fixture-technology"
+          }
+        ],
+        "guests": [
+          {
+            "collection": "people",
+            "legacyId": "fixture-person-alex"
+          }
+        ],
+        "episode": {
+          "collection": "episodes",
+          "legacyId": "fixture-episode-2"
+        },
+        "chapters": []
+      }
+    },
+    {
+      "collection": "videos",
+      "legacyId": "fixture-video-private",
+      "legacyType": "Video",
+      "slug": "fixture-video-private",
+      "sourceRevision": "synthetic-fixture-v1",
+      "status": "draft",
+      "data": {
+        "title": "SYNTHETIC PRIVATE DRAFT - must never appear publicly",
+        "description": "Invented confidential review cut with no media URL or binary.",
+        "publishedAt": "2026-02-01T00:00:00.000Z",
+        "duration": 120,
+        "type": "recorded",
+        "category": "tutorial",
+        "mediaReference": "fixture-only:private-no-asset",
+        "terms": [
+          {
+            "value": "synthetic"
+          },
+          {
+            "value": "fixture"
+          }
+        ]
+      },
+      "relationships": {
+        "technologies": [],
+        "guests": [
+          {
+            "collection": "people",
+            "legacyId": "fixture-person-sam"
+          }
+        ],
+        "episode": null,
+        "chapters": []
+      }
+    },
+    {
+      "collection": "articles",
+      "legacyId": "fixture-article",
+      "legacyType": "Article",
+      "slug": "fixture-article",
+      "sourceRevision": "synthetic-fixture-v1",
+      "status": "published",
+      "data": {
+        "title": "Synthetic companion article",
+        "description": "A lossless source-body and ordered relation fixture.",
+        "publishedAt": "2026-01-11T00:00:00.000Z",
+        "sourceBody": "---\ntitle: Synthetic companion article\n---\n\n# Learn together\n\nWatch [the lesson](/videos/fixture-video-1).\n\n<Video id=\"fixture-video-1\" />\n"
+      },
+      "relationships": {
+        "authors": [
+          {
+            "collection": "people",
+            "legacyId": "fixture-person-alex"
+          }
+        ],
+        "technologies": [
+          {
+            "collection": "technologies",
+            "legacyId": "fixture-technology"
+          }
+        ],
+        "resources": [
+          {
+            "collection": "learning-resources",
+            "legacyId": "fixture-resources"
+          }
+        ]
+      }
+    },
+    {
+      "collection": "courses",
+      "legacyId": "fixture-course",
+      "legacyType": "Course",
+      "slug": "fixture-course",
+      "sourceRevision": "synthetic-fixture-v1",
+      "status": "published",
+      "data": {
+        "title": "Synthetic foundations",
+        "description": "A synthetic course whose module order is intentional."
+      },
+      "relationships": {
+        "modules": [
+          {
+            "collection": "course-modules",
+            "legacyId": "fixture-module-2"
+          },
+          {
+            "collection": "course-modules",
+            "legacyId": "fixture-module-1"
+          }
+        ],
+        "authors": [
+          {
+            "collection": "people",
+            "legacyId": "fixture-person-alex"
+          }
+        ],
+        "technologies": [
+          {
+            "collection": "technologies",
+            "legacyId": "fixture-technology"
+          }
+        ]
+      }
+    },
+    {
+      "collection": "course-modules",
+      "legacyId": "fixture-module-1",
+      "legacyType": "CourseModule",
+      "slug": "fixture-module-1",
+      "sourceRevision": "synthetic-fixture-v1",
+      "status": "published",
+      "data": {
+        "title": "Synthetic module one",
+        "description": "First by number; second in the explicit course relation order.",
+        "sourceBody": "# Practice\n\n[Resource](https://example.com/docs)"
+      },
+      "relationships": {
+        "course": {
+          "collection": "courses",
+          "legacyId": "fixture-course"
+        },
+        "video": {
+          "collection": "videos",
+          "legacyId": "fixture-video-1"
+        },
+        "resources": [
+          {
+            "collection": "learning-resources",
+            "legacyId": "fixture-resources"
+          }
+        ]
+      }
+    },
+    {
+      "collection": "course-modules",
+      "legacyId": "fixture-module-2",
+      "legacyType": "CourseModule",
+      "slug": "fixture-module-2",
+      "sourceRevision": "synthetic-fixture-v1",
+      "status": "published",
+      "data": {
+        "title": "Synthetic module two",
+        "description": "First in the explicit course relation order."
+      },
+      "relationships": {
+        "course": {
+          "collection": "courses",
+          "legacyId": "fixture-course"
+        },
+        "video": {
+          "collection": "videos",
+          "legacyId": "fixture-video-1"
+        },
+        "resources": []
+      }
+    },
+    {
+      "collection": "learning-paths",
+      "legacyId": "fixture-path",
+      "legacyType": "LearningPath",
+      "slug": "fixture-path",
+      "sourceRevision": "synthetic-fixture-v1",
+      "status": "published",
+      "data": {
+        "title": "Synthetic learning path",
+        "description": "A synthetic graph across courses, videos and technologies."
+      },
+      "relationships": {
+        "courses": [
+          {
+            "collection": "courses",
+            "legacyId": "fixture-course"
+          }
+        ],
+        "videos": [
+          {
+            "collection": "videos",
+            "legacyId": "fixture-video-1"
+          }
+        ],
+        "technologies": [
+          {
+            "collection": "technologies",
+            "legacyId": "fixture-technology-companion"
+          },
+          {
+            "collection": "technologies",
+            "legacyId": "fixture-technology"
+          }
+        ]
+      }
+    }
+  ],
+  "sequence": 1
+}
