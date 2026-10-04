@@ -75,11 +75,20 @@ tasks: {
 		]
 	}
 
+	setup: schema.#Task & {
+		hermetic: false
+		command: "sh"
+		args: ["-lc", "\(_toolchain) bun run setup"]
+		env: PATH: _taskPath
+		inputs: ["scripts/setup.mjs", "package.json"]
+	}
+
 	build: schema.#Task & {
 		hermetic: false
 		command: "sh"
-		args: ["-lc", "\(_toolchain) sh -lc 'bun run setup && bun run build:worker'"]
+		args: ["-lc", "\(_toolchain) bun run build:worker"]
 		env: PATH: _taskPath
+		dependsOn: [_t.setup]
 		inputs: [
 			"app/**",
 			"src/**",
@@ -99,12 +108,20 @@ tasks: {
 
 	deploy: schema.#TaskGroup & {
 		type: "group"
+		migrate: schema.#Task & {
+			hermetic: false
+			command: "sh"
+			args: ["-lc", "\(_toolchain) bun run migrate:preview"]
+			env: PATH: _taskPath
+			dependsOn: [_t.build]
+		}
+
 		preview: schema.#Task & {
 			hermetic: false
 			command: "sh"
-			args: ["-lc", "\(_toolchain) sh -lc 'bun run migrate:preview && bun run deploy:preview'"]
+			args: ["-lc", "\(_toolchain) bun run deploy:preview"]
 			env: PATH: _taskPath
-			dependsOn: [_t.build]
+			dependsOn: [_t.deploy.migrate]
 			captures: previewUrl: {
 				pattern: "Preview URL: (.+)"
 			}
