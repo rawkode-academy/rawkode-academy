@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { authConfig, type AuthEnvironment } from '../src/auth/config'
+import { authConfig, type AuthEnvironment, WORKER_PREVIEW_CALLBACK_URI } from '../src/auth/config'
 import { isStaff } from '../src/auth/access'
 import { identityMapping } from '../src/auth/payload'
 import { hasOidcCookie, rejectOidcMutation } from '../src/auth/csrf'
@@ -343,6 +343,7 @@ test('configuration rejects unexpected issuer/client/callback, unsafe local fall
   assert.equal(authConfig({}).localAuth, false)
   assert.equal(authConfig({ POC_DEV_LOCAL_AUTH: 'true' }).localAuth, true)
   assert.equal(authConfig({ OIDC_REDIRECT_URI: 'https://preview.rawkode.academy/api/auth/callback' }).localAuth, false)
+  assert.equal(authConfig({ OIDC_REDIRECT_URI: WORKER_PREVIEW_CALLBACK_URI }).origin, 'https://pr-local-rawkode-academy-payload.rawkodeacademy.workers.dev')
 })
 
 test('Next internal localhost spelling with registered loopback Host preserves exact authorization and token redirects', async () => {

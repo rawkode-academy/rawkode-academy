@@ -7,12 +7,13 @@ export type AuthEnvironment = {
   POC_DEV_LOCAL_AUTH?: string
 }
 export type AuthConfig = ReturnType<typeof authConfig>
+export const WORKER_PREVIEW_CALLBACK_URI = 'https://pr-local-rawkode-academy-payload.rawkodeacademy.workers.dev/api/auth/callback'
 export function authConfig(env: AuthEnvironment) {
   const issuer = env.OIDC_ISSUER ?? 'https://id.rawkode.academy'
   const clientId = env.OIDC_CLIENT_ID ?? 'rawkode-academy-preview'
   const redirectUri = env.OIDC_REDIRECT_URI ?? 'http://127.0.0.1:3100/api/auth/callback'
   if (issuer !== 'https://id.rawkode.academy' || clientId !== 'rawkode-academy-preview') throw new Error('Unexpected Academy identity configuration')
-  if (!['http://127.0.0.1:3100/api/auth/callback','https://preview.rawkode.academy/api/auth/callback','https://admin.rawkode.academy/api/auth/callback'].includes(redirectUri)) throw new Error('Unregistered callback URI')
+  if (!['http://127.0.0.1:3100/api/auth/callback','https://preview.rawkode.academy/api/auth/callback','https://admin.rawkode.academy/api/auth/callback',WORKER_PREVIEW_CALLBACK_URI].includes(redirectUri)) throw new Error('Unregistered callback URI')
   const origin = new URL(redirectUri).origin
   const local = origin === 'http://127.0.0.1:3100'
   const localAuth = env.POC_DEV_LOCAL_AUTH === 'true'
