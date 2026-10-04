@@ -35,7 +35,7 @@ ci: pipelines: {
 	pullRequest: {
 		environment: "production"
 		when: pullRequest: true
-		tasks: [_t.check, _t.test, _t.build, _t.deploy.preview]
+		tasks: [_t.deploy.preview]
 		annotations: "Preview URL": schema.#TaskCaptureRef & {
 			cuenvTask: "deploy.preview"
 			cuenvCapture: "previewUrl"
@@ -121,7 +121,7 @@ tasks: {
 			command: "sh"
 			args: ["-lc", "\(_toolchain) bun run deploy:preview"]
 			env: PATH: _taskPath
-			dependsOn: [_t.deploy.migrate]
+			dependsOn: [_t.check, _t.test, _t.deploy.migrate]
 			captures: previewUrl: {
 				pattern: "Preview URL: (.+)"
 			}
