@@ -1,0 +1,42 @@
+
+> academy-payload-compatibility-experiment@0.0.0 test
+> tsx --test --test-concurrency=1 tests/*.test.ts
+
+✔ schema exactly preserves dated gateway contract and validates representative operations (14.3585ms)
+✔ legacy IDs, source ordering, date scalars, enums and arbitrary offset slices (2.193917ms)
+✔ relationship traversal preserves array order and filters future reverse video links (1.327458ms)
+✔ search and random use only date-published catalogue; episode code is case-insensitive (0.989125ms)
+✔ missing and protected records return nullable roots with no private relationship leakage (1.251333ms)
+✔ unsupported external domains fail explicitly without fabricating state (1.497042ms)
+✔ HTTP facade ignores spoofed identity headers and has no mutation root (12.760208ms)
+▶ actual Workers / D1 / R2 compatibility and mutation contract
+  ✔ exact gateway schema and query-only surface (33.975625ms)
+  ✔ node-first broad import, dry-run and unchanged replay (408.787ms)
+  ✔ relationships, legacy IDs, date, enum and private isolation (43.439375ms)
+  ✔ REST draft edit does not replace public revision; explicit publish does (118.2805ms)
+  ✔ relationship edit and deletion cannot silently resurrect (69.434958ms)
+  ✔ stale source, explicit clearing, tombstone and unresolved replay (149.659041ms)
+  ✔ generated Payload GraphQL serves real collections and CRUD (168.852917ms)
+  ✖ D1 preference upsert persists create and update (7.565292ms)
+  ✔ local R2 upload stays authenticated (18.566917ms)
+✖ actual Workers / D1 / R2 compatibility and mutation contract (1312.900209ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 15
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1735.929125
+
+✖ failing tests:
+
+test at tests/worker.test.ts:139:11
+✖ D1 preference upsert persists create and update (7.565292ms)
+  TypeError [Error]: Cannot read properties of null (reading 'order')
+      at TestContext.<anonymous> (/Users/rawkode/Documents/Codex/2026-10-04/payload-coexistence-review/outputs/payload-poc/tests/worker.test.ts:142:41)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async TestContext.<anonymous> (/Users/rawkode/Documents/Codex/2026-10-04/payload-coexistence-review/outputs/payload-poc/tests/worker.test.ts:139:3)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3)

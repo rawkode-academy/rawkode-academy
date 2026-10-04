@@ -1,0 +1,32 @@
+{
+  "sourceRevision": "31edd9fd9d86c21a7e9a3a34cfe1933b44e99598",
+  "sourceBase": "https://github.com/rawkode-academy/rawkode-academy/blob/31edd9fd9d86c21a7e9a3a34cfe1933b44e99598/projects/rawkode.academy/website/src/subgraph/",
+  "inspectedFiles": ["loaders/videos.ts", "loaders/technologies.ts", "loaders/episodes.ts", "loaders/shows.ts", "domains/videos.ts", "domains/relationships.ts", "domains/episodes.ts", "domains/shows.ts"],
+  "preserved": [
+    "Exact captured gateway SDL, including String vs ID scalars, nullability, arguments, defaults, enum values and query-only operation surface",
+    "getAllVideos and allShows source ordering via explicit sourceOrder; future public records remain present",
+    "Latest/search/random only include publishedAt <= now; latest/search descending date",
+    "Search performs case-insensitive substring matching against title, subtitle, description only",
+    "Pagination uses Array.slice(offset, offset + limit), including zero, negative and null/default semantics",
+    "Guest/technology/chapter/host relationship ordering preserved",
+    "Technology.videos and Person.guestAppearances omit future videos but preserve source ordering",
+    "Episode code lookup is case-insensitive; show episodes preserve source ordering",
+    "Date uses graphql-scalars DateResolver with Payload timestamp converted to Date",
+    "Missing singular records return null; absent relation lists return empty lists"
+  ],
+  "differences": [
+    { "severity": "blocking-for-public-replacement", "surface": "Interactions, preferences, watch history and bracket fields", "behavior": "Retained in SDL; GraphQL DOMAIN_NOT_IMPLEMENTED errors with nullable data", "migration": "Integrate existing authoritative domain services and verify cross-domain requests before replacement" },
+    { "severity": "blocking-for-authenticated-clients", "surface": "me", "behavior": "Always anonymous null; forwarded identity headers ignored", "migration": "Integrate and verify Academy identity using stable subject identifiers" },
+    { "severity": "non-blocking-for-POC", "surface": "Random selection", "behavior": "Uniform Fisher-Yates shuffle replaces source random comparator; sequence is unspecified", "migration": "Retain membership and count tests" },
+    { "severity": "non-blocking-for-POC", "surface": "GraphQL data loading", "behavior": "Request-scoped full collection reads in paginated batches rather than optimized per-ID queries", "migration": "Batch indexed legacy-ID and reverse relation lookups with measured cost/latency" },
+    { "severity": "intentional-access-boundary", "surface": "All catalogue reads", "behavior": "Only published non-tombstoned records; relationship targets re-read with anonymous access checks", "migration": "Keep unpublished private content outside compatibility API" },
+    { "severity": "must-model-before-full-import", "surface": "Episode lifecycle", "behavior": "Existing source derives episode ID/code from video metadata; POC stores explicit imported values and relationship records", "migration": "Preserve imported values; define editorial commands/invariants for future episode changes" },
+    { "severity": "intentional", "surface": "Subgraph-only fields", "behavior": "getUpcomingVideos, personByGithub, Person avatarUrl/githubHandle/githubUrl and federation _entities/_service are not added to gateway contract", "migration": "Treat additions as independent schema changes; facade is not a federation subgraph replacement" }
+  ],
+  "verification": {
+    "command": "node --import tsx --test tests/compatibility.test.ts",
+    "result": "7 passed, 0 failed",
+    "scope": "Real GraphQL/Yoga execution, in-memory mock Payload; real database/Worker verification is separate",
+    "typecheck": "./node_modules/.bin/tsc --noEmit --pretty false: exit 0"
+  }
+}

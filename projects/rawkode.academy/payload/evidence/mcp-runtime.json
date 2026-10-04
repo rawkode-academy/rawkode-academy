@@ -1,0 +1,52 @@
+{
+  "checkedAt": "2026-10-04T15:47:04Z",
+  "experimental": true,
+  "status": "blocked",
+  "command": "node --import tsx scripts/test-mcp.ts",
+  "exitCode": 1,
+  "endpoint": "http://127.0.0.1:3100/api/mcp",
+  "runtime": {
+    "navigatorUserAgent": "Cloudflare-Workers",
+    "wrangler": "4.116.0",
+    "compatibilityDate": "2025-08-15",
+    "D1Binding": true,
+    "R2Binding": true,
+    "testClientNode": "v26.10.0"
+  },
+  "packages": {
+    "payload": "3.90.2",
+    "@payloadcms/plugin-mcp": "3.90.2",
+    "mcp-handler": "1.1.0",
+    "pluginMcpSdk": "1.30.0",
+    "handlerNestedMcpSdk": "1.26.0",
+    "pluginZod": "3.25.76"
+  },
+  "passed": [
+    "Actual local Workers runtime and D1/R2 binding identity checked",
+    "Local experimental staff login through Payload REST",
+    "Anonymous MCP request rejected",
+    "Authenticated REST creation of disposable MCP API key",
+    "Disposable MCP API keys revoked during finally cleanup; follow-up query found zero matching keys"
+  ],
+  "observedFailure": {
+    "method": "initialize",
+    "protocolVersion": "2025-03-26",
+    "boundedRerun": "MCP initialize: non-JSON response HTTP 500",
+    "initialRun": "MCP initialize: non-JSON response HTTP 503",
+    "workerLogTimestamp": "2026-10-04T15:46:12.081Z",
+    "workerLog": "The Workers runtime canceled this request because it detected that your Worker's code had hung and would never generate a response.",
+    "rootCause": "Not established. Failure occurs before authorized protocol initialization completes. No claim that document hooks or schema conversion caused this observed hang."
+  },
+  "notReached": [
+    "Authorized collection/global/custom tool discovery",
+    "Custom resource discovery/read",
+    "MCP collection create/update/read and draft/publish",
+    "MCP global read/write",
+    "MCP compatibility GraphQL publication reflection",
+    "Per-key write capability revocation and deleted-key protocol rejection"
+  ],
+  "independentStaticRisk": "Pinned schema conversion uses TypeScript transpilation and new Function; its permissive fallback may lose create/update field definitions under Workers. This is not the observed runtime failure.",
+  "decision": "Exclude plugin from the default Worker bundle; retain optional evaluation source and test. Do not replace bespoke MCP or claim Worker MCP write compatibility.",
+  "productionChanges": false,
+  "credentialMaterialRecorded": false
+}

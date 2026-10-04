@@ -1,0 +1,8 @@
+{
+  "at": "2026-10-04T16:28:36.335Z",
+  "runtime": "local D1 via Wrangler workerd proxy",
+  "distinctSubjectIds": true,
+  "atomicConcurrentTransactionConsumption": true,
+  "opaqueSessionHashStorage": true,
+  "scope": "Trusted fixture provisioning, not an actual provider callback"
+}

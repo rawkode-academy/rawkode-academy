@@ -1,0 +1,63 @@
+{
+  "name": "@rawkodeacademy/payload",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "dev": "WRANGLER_LOG_PATH=.runtime/wrangler.log next dev --hostname 127.0.0.1 --port 3100",
+    "build": "WRANGLER_LOG_PATH=.runtime/wrangler.log POC_CLI=1 POC_BUILD=1 NEXT_TELEMETRY_DISABLED=1 next build --webpack",
+    "start": "next start --hostname 127.0.0.1 --port 3100",
+    "typecheck": "tsc --noEmit",
+    "import": "tsx scripts/import.ts",
+    "capture:schema": "tsx scripts/capture-schema.ts",
+    "check:schema": "tsx scripts/check-schema.ts",
+    "test": "node --import tsx --test --test-concurrency=1 tests/compatibility.test.ts tests/oidc.test.ts",
+    "demo:mutations": "npm run test:worker",
+    "build:worker": "WRANGLER_LOG_PATH=.runtime/wrangler.log opennextjs-cloudflare build",
+    "deploy:preview": "node scripts/deploy-preview.mjs",
+    "preview": "WRANGLER_LOG_PATH=.runtime/wrangler.log wrangler dev --local --ip 127.0.0.1 --port 3100",
+    "setup": "node scripts/setup.mjs",
+    "migrate:create": "WRANGLER_LOG_PATH=.runtime/wrangler.log POC_CLI=1 payload migrate:create",
+    "migrate": "WRANGLER_LOG_PATH=.runtime/wrangler.log POC_CLI=1 payload migrate",
+    "migrate:preview": "tsx scripts/migrate-preview.ts",
+    "generate:importmap": "WRANGLER_LOG_PATH=.runtime/wrangler.log POC_CLI=1 payload generate:importmap",
+    "types:cloudflare": "WRANGLER_LOG_PATH=.runtime/wrangler.log wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "test:worker": "tsx --test --test-concurrency=1 tests/worker.test.ts",
+    "test:mcp": "tsx scripts/test-mcp.ts",
+    "test:pipeline": "tsx scripts/test-pipeline.ts",
+    "bootstrap": "node scripts/bootstrap.mjs",
+    "test:admin": "tsx scripts/test-admin.ts",
+    "test:oidc": "node --import tsx --test tests/oidc.test.ts",
+    "test:oidc:worker": "node --import tsx scripts/test-oidc-worker.ts",
+    "seed:oidc:tests": "WRANGLER_LOG_PATH=.runtime/wrangler.log POC_CLI=1 node --import tsx scripts/seed-oidc-tests.ts"
+  },
+  "dependencies": {
+    "@opennextjs/cloudflare": "1.20.1",
+    "@payloadcms/db-d1-sqlite": "3.90.2",
+    "@payloadcms/graphql": "3.90.2",
+    "@payloadcms/next": "3.90.2",
+    "@payloadcms/plugin-mcp": "3.90.2",
+    "@payloadcms/storage-r2": "3.90.2",
+    "graphql": "16.14.2",
+    "graphql-scalars": "1.25.0",
+    "graphql-yoga": "5.24.1",
+    "next": "16.3.8",
+    "oauth4webapi": "3.8.8",
+    "payload": "3.90.2",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "zod": "4.1.12"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.58.2",
+    "@types/node": "26.6.4",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.2.3",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3",
+    "wrangler": "4.147.0"
+  }
+}

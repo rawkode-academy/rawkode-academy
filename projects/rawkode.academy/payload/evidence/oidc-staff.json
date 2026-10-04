@@ -1,0 +1,21 @@
+{
+  "at": "2026-10-04T16:29:25.782Z",
+  "passed": true,
+  "runtime": "local workerd and headless Chrome",
+  "checks": [
+    "Exact allowlisted synthetic subject receives staff",
+    "Other synthetic subject remains customer",
+    "OIDC staff reads private draft and creates article",
+    "Opaque OIDC session opens actual Payload admin editor",
+    "Removing allowlist subject demotes an existing opaque session immediately; private access denied"
+  ],
+  "limits": [
+    "Locally seeded session, not a live provider sign-in",
+    "Fixture allowlist override only; default allowlist remains empty"
+  ],
+  "restoredDefaults": {
+    "localFallback": false,
+    "staffSubjects": [],
+    "fixtureSessionsRevoked": true
+  }
+}

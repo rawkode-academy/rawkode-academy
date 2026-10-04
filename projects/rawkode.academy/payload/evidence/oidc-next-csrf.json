@@ -1,0 +1,47 @@
+{
+  "at": "2026-10-04T16:20:45.126Z",
+  "runtime": "Next Node development server",
+  "passed": true,
+  "results": [
+    {
+      "path": "/api/graphql",
+      "origin": "https://attacker.invalid",
+      "status": 403
+    },
+    {
+      "path": "/api/graphql",
+      "origin": null,
+      "status": 403
+    },
+    {
+      "path": "/api/videos",
+      "origin": "https://attacker.invalid",
+      "status": 403
+    },
+    {
+      "path": "/api/videos",
+      "origin": null,
+      "status": 403
+    },
+    {
+      "path": "/api/poc/import",
+      "origin": "https://attacker.invalid",
+      "status": 403
+    },
+    {
+      "path": "/api/poc/import",
+      "origin": null,
+      "status": 403
+    },
+    {
+      "path": "/api/poc/pipeline",
+      "origin": "https://attacker.invalid",
+      "status": 403
+    },
+    {
+      "path": "/api/poc/pipeline",
+      "origin": null,
+      "status": 403
+    }
+  ]
+}
