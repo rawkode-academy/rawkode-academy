@@ -78,7 +78,7 @@ tasks: {
 	build: schema.#Task & {
 		hermetic: false
 		command: "sh"
-		args: ["-lc", "\(_toolchain) bun run setup && bun run build:worker"]
+		args: ["-lc", "\(_toolchain) sh -lc 'bun run setup && bun run build:worker'"]
 		env: PATH: _taskPath
 		inputs: [
 			"app/**",
@@ -102,7 +102,7 @@ tasks: {
 		preview: schema.#Task & {
 			hermetic: false
 			command: "sh"
-			args: ["-lc", "\(_toolchain) bun run migrate:preview && bun run deploy:preview"]
+			args: ["-lc", "\(_toolchain) sh -lc 'bun run migrate:preview && bun run deploy:preview'"]
 			env: PATH: _taskPath
 			dependsOn: [_t.build]
 			captures: previewUrl: {
