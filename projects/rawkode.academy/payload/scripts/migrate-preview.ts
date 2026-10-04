@@ -6,6 +6,7 @@ const projectDir = process.cwd()
 const sourceConfigPath = path.join(projectDir, 'wrangler.jsonc')
 const sourceConfig = JSON.parse(readFileSync(sourceConfigPath, 'utf8')) as {
   name: string
+  account_id?: string
   main: string
   compatibility_date: string
   compatibility_flags?: string[]
@@ -25,6 +26,7 @@ const migrationConfigPath = path.join(runtimeDir, 'wrangler.preview-migration.js
 mkdirSync(runtimeDir, {recursive: true})
 writeFileSync(migrationConfigPath, JSON.stringify({
   name: `${sourceConfig.name}-migration`,
+  account_id: sourceConfig.account_id,
   main: sourceConfig.main,
   compatibility_date: sourceConfig.compatibility_date,
   compatibility_flags: sourceConfig.compatibility_flags,

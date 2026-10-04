@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "rawkode-academy-payload",
+  "account_id": "0aeb879de8e3cdde5fb3d413025222ce",
   "main": "worker.ts",
   "compatibility_date": "2026-10-04",
   "compatibility_flags": [
