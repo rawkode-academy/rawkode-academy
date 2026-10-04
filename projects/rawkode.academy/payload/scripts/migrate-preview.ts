@@ -1,6 +1,7 @@
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { getPayload } from 'payload'
+import { cloudflare } from '../src/cloudflare'
 
 const projectDir = process.cwd()
 const sourceConfigPath = path.join(projectDir, 'wrangler.jsonc')
@@ -49,4 +50,7 @@ try {
   console.log('Preview D1 migrations applied')
 } finally {
   rmSync(migrationConfigPath, {force: true})
+  if ('dispose' in cloudflare && typeof cloudflare.dispose === 'function') {
+    await cloudflare.dispose()
+  }
 }
