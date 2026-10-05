@@ -226,8 +226,21 @@ test('managed video, versions, relationships and arrays resist legacy writes and
   assert.equal((await h.service.read(10, client)).revisions.length, 1)
 })
 
-test('migration is additive, empty downgrade works, and legacy pipeline cannot enroll', async t => {
+test('migration matches snapshot indexes, empty downgrade works, and legacy pipeline cannot enroll', async t => {
   const h = await harness(t)
+  const snapshot = JSON.parse(await readFile(new URL('../src/migrations/20261005_120000_video_review.json', import.meta.url), 'utf8')) as {
+    tables: Record<string, { indexes: Record<string, { name: string; columns: string[]; isUnique: boolean }> }>
+  }
+  for (const collection of reviewCollections) {
+    const table = collection.slug.replaceAll('-', '_')
+    const expected = Object.values(snapshot.tables[table].indexes).sort((a, b) => a.name.localeCompare(b.name))
+    const actual = h.sqlite.prepare(`SELECT name, "unique" AS is_unique FROM pragma_index_list(?) WHERE origin='c'`).all(table).map(index => ({
+      name: String(index.name),
+      columns: h.sqlite.prepare('SELECT name FROM pragma_index_info(?) ORDER BY seqno').all(String(index.name)).map(column => String(column.name)),
+      isUnique: Boolean(index.is_unique),
+    })).sort((a, b) => a.name.localeCompare(b.name))
+    assert.deepEqual(actual, expected, `${table} indexes must match the generated schema snapshot`)
+  }
   assert.equal(h.sqlite.prepare('SELECT count(*) AS n FROM video_review_state').get()?.n, 0)
   h.sqlite.exec("INSERT INTO pipeline_runs(id,key,video_id,media_id,state) VALUES(1,'legacy',10,20,'registered')")
   await assert.rejects(h.prepare(), { status: 409 })
