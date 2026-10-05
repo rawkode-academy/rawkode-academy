@@ -49,7 +49,9 @@ if (
   const config = JSON.parse(await readFile('wrangler.jsonc', 'utf8'))
   delete config.containers
   delete config.durable_objects
-  delete config.exports
+  // Keep `exports`: Cloudflare retains previously provisioned Durable Object
+  // classes for a named Preview and requires every such class to remain
+  // declared, even when the degraded retry removes the binding.
   if (config.previews) {
     delete config.previews.containers
     delete config.previews.durable_objects
