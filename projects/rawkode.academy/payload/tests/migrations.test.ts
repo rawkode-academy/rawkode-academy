@@ -25,7 +25,7 @@ test('content rollback preserves video IDs and relationships with foreign keys e
     },
   } as unknown as MigrateUpArgs
   const apply = async (migration: (args: MigrateUpArgs) => Promise<void>) => {
-    sqlite.exec('BEGIN; PRAGMA defer_foreign_keys=ON;')
+    sqlite.exec('BEGIN;')
     try {
       await migration(args)
       sqlite.exec('COMMIT;')
@@ -65,10 +65,14 @@ test('content rollback preserves video IDs and relationships with foreign keys e
       INSERT INTO _learning_paths_v_rels (id, "order", parent_id, path, videos_id) VALUES (114, 1, 112, 'version.videos', 41);
       INSERT INTO media (id) VALUES (120);
       INSERT INTO pipeline_runs (id, key, video_id, media_id, state) VALUES (121, 'run', 41, 120, 'completed');
+      INSERT INTO articles (id) VALUES (141);
+      INSERT INTO articles_rels (id, parent_id, path, people_id) VALUES (142, 141, 'authors', 11);
+      INSERT INTO _articles_v (id, parent_id) VALUES (143, 141);
+      INSERT INTO _articles_v_rels (id, parent_id, path, people_id) VALUES (144, 143, 'version.authors', 11);
       INSERT INTO payload_locked_documents (id) VALUES (131);
       INSERT INTO payload_locked_documents_rels (id, parent_id, path, videos_id) VALUES (132, 131, 'document', 41);
     `)
-    const tables = ['videos', '_videos_v', 'videos_terms', '_videos_v_version_terms', 'videos_rels', '_videos_v_rels', 'episodes', '_episodes_v', 'course_modules', '_course_modules_v', 'learning_paths_rels', '_learning_paths_v_rels', 'pipeline_runs', 'payload_locked_documents_rels']
+    const tables = ['videos', '_videos_v', 'videos_terms', '_videos_v_version_terms', 'videos_rels', '_videos_v_rels', 'episodes', '_episodes_v', 'course_modules', '_course_modules_v', 'learning_paths_rels', '_learning_paths_v_rels', 'pipeline_runs', 'payload_locked_documents_rels', 'articles', 'articles_rels', '_articles_v', '_articles_v_rels']
     const before = Object.fromEntries(tables.map(table => [table, rows(table)]))
     const videoSchema = () => Object.fromEntries(['videos', '_videos_v'].map(table => [table, {
       columns: sqlite.prepare(`PRAGMA table_info("${table}")`).all(),
@@ -79,9 +83,15 @@ test('content rollback preserves video IDs and relationships with foreign keys e
     await apply(migrations[target].up)
     sqlite.exec(`UPDATE videos SET show_id=15, source_data='{"draft":false}', body='Imported body' WHERE id=41;
       UPDATE _videos_v SET version_show_id=15, version_source_data='{"draft":false}', version_body='Imported body' WHERE id=51;`)
+    // A populated article->series edge also catches invalid parent-drop order.
+    sqlite.exec(`INSERT INTO series (id) VALUES (151);
+      UPDATE articles SET series_id=151 WHERE id=141;
+      UPDATE _articles_v SET version_series_id=151 WHERE id=143;`)
     await apply(migrations[target].down)
     for (const table of tables) assert.deepEqual(rows(table), before[table], `${table}: all rows, IDs, and references survive`)
     assert.deepEqual(videoSchema(), schemaBefore, 'video columns, indexes, and foreign keys return to the prior schema')
+    assert.deepEqual(sqlite.prepare('PRAGMA foreign_key_check').all(), [])
+    await apply(migrations[target].up)
     assert.deepEqual(sqlite.prepare('PRAGMA foreign_key_check').all(), [])
   } finally {
     sqlite.close()

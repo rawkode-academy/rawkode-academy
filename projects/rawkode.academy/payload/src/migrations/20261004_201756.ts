@@ -1825,7 +1825,6 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   await db.run(sql`CREATE INDEX \`_registrations_v_created_at_idx\` ON \`_registrations_v\` (\`created_at\`);`)
   await db.run(sql`CREATE INDEX \`_registrations_v_updated_at_idx\` ON \`_registrations_v\` (\`updated_at\`);`)
   await db.run(sql`CREATE INDEX \`_registrations_v_latest_idx\` ON \`_registrations_v\` (\`latest\`);`)
-  await db.run(sql`PRAGMA foreign_keys=OFF;`)
   await db.run(sql`CREATE TABLE \`__new_payload_locked_documents_rels\` (
 	\`id\` integer PRIMARY KEY NOT NULL,
 	\`order\` integer,
@@ -1905,7 +1904,6 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   await db.run(sql`INSERT INTO \`__new_payload_locked_documents_rels\`("id", "order", "parent_id", "path", "pipeline_runs_id", "users_id", "deletion_markers_id", "videos_id", "people_id", "technologies_id", "shows_id", "episodes_id", "chapters_id", "learning_resources_id", "articles_id", "courses_id", "course_modules_id", "learning_paths_id", "media_id", "payload_mcp_api_keys_id", "series_id", "adrs_id", "testimonials_id", "news_id", "changelog_id", "static_assets_id", "seasons_id", "competitors_id", "brackets_id", "bracket_applications_id", "teams_id", "team_members_id", "team_invites_id", "bracket_breaks_id", "bracket_entries_id", "matches_id", "match_results_id", "registrations_id") SELECT "id", "order", "parent_id", "path", "pipeline_runs_id", "users_id", "deletion_markers_id", "videos_id", "people_id", "technologies_id", "shows_id", "episodes_id", "chapters_id", "learning_resources_id", "articles_id", "courses_id", "course_modules_id", "learning_paths_id", "media_id", "payload_mcp_api_keys_id", NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM \`payload_locked_documents_rels\`;`)
   await db.run(sql`DROP TABLE \`payload_locked_documents_rels\`;`)
   await db.run(sql`ALTER TABLE \`__new_payload_locked_documents_rels\` RENAME TO \`payload_locked_documents_rels\`;`)
-  await db.run(sql`PRAGMA foreign_keys=ON;`)
   await db.run(sql`CREATE INDEX \`payload_locked_documents_rels_order_idx\` ON \`payload_locked_documents_rels\` (\`order\`);`)
   await db.run(sql`CREATE INDEX \`payload_locked_documents_rels_parent_idx\` ON \`payload_locked_documents_rels\` (\`parent_id\`);`)
   await db.run(sql`CREATE INDEX \`payload_locked_documents_rels_path_idx\` ON \`payload_locked_documents_rels\` (\`path\`);`)
@@ -2275,81 +2273,36 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   await db.run(sql`ALTER TABLE \`_videos_v\` DROP COLUMN \`version_podcast\`;`)
   await db.run(sql`ALTER TABLE \`_videos_v\` DROP COLUMN \`version_subscribe_links\`;`)
   await db.run(sql`ALTER TABLE \`_videos_v\` DROP COLUMN \`version_show_id\`;`)
-  await db.run(sql`CREATE TABLE \`__new_articles\` (
-	\`id\` integer PRIMARY KEY NOT NULL,
-	\`legacy_id\` text,
-	\`legacy_type\` text,
-	\`slug\` text,
-	\`source_system\` text,
-	\`source_revision\` text,
-	\`source_hash\` text,
-	\`mapping_version\` text,
-	\`imported_at\` text,
-	\`import_state\` text,
-	\`locally_edited\` integer DEFAULT true,
-	\`source_fields\` text,
-	\`source_sequence\` numeric,
-	\`source_order\` numeric DEFAULT 0,
-	\`source_body\` text,
-	\`tombstone\` integer DEFAULT false,
-	\`title\` text,
-	\`description\` text,
-	\`published_at\` text,
-	\`updated_at\` text DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')) NOT NULL,
-	\`created_at\` text DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')) NOT NULL,
-	\`_status\` text DEFAULT 'draft'
-  );
-  `)
-  await db.run(sql`INSERT INTO \`__new_articles\`("id", "legacy_id", "legacy_type", "slug", "source_system", "source_revision", "source_hash", "mapping_version", "imported_at", "import_state", "locally_edited", "source_fields", "source_sequence", "source_order", "source_body", "tombstone", "title", "description", "published_at", "updated_at", "created_at", "_status") SELECT "id", "legacy_id", "legacy_type", "slug", "source_system", "source_revision", "source_hash", "mapping_version", "imported_at", "import_state", "locally_edited", "source_fields", "source_sequence", "source_order", "source_body", "tombstone", "title", "description", "published_at", "updated_at", "created_at", "_status" FROM \`articles\`;`)
-  await db.run(sql`DROP TABLE \`articles\`;`)
-  await db.run(sql`ALTER TABLE \`__new_articles\` RENAME TO \`articles\`;`)
-  await db.run(sql`CREATE UNIQUE INDEX \`articles_legacy_id_idx\` ON \`articles\` (\`legacy_id\`);`)
-  await db.run(sql`CREATE INDEX \`articles_slug_idx\` ON \`articles\` (\`slug\`);`)
+  await db.run(sql`DROP INDEX \`articles_series_idx\`;`)
+  await db.run(sql`ALTER TABLE \`articles\` DROP COLUMN \`source_path\`;`)
+  await db.run(sql`ALTER TABLE \`articles\` DROP COLUMN \`source_format\`;`)
+  await db.run(sql`ALTER TABLE \`articles\` DROP COLUMN \`source_data\`;`)
+  await db.run(sql`ALTER TABLE \`articles\` DROP COLUMN \`source_raw\`;`)
+  await db.run(sql`ALTER TABLE \`articles\` DROP COLUMN \`source_assets\`;`)
+  await db.run(sql`ALTER TABLE \`articles\` DROP COLUMN \`body\`;`)
+  await db.run(sql`ALTER TABLE \`articles\` DROP COLUMN \`cover\`;`)
+  await db.run(sql`ALTER TABLE \`articles\` DROP COLUMN \`content_resources\`;`)
+  await db.run(sql`ALTER TABLE \`articles\` DROP COLUMN \`editorial_data\`;`)
+  await db.run(sql`ALTER TABLE \`articles\` DROP COLUMN \`subtitle\`;`)
+  await db.run(sql`ALTER TABLE \`articles\` DROP COLUMN \`type\`;`)
+  await db.run(sql`ALTER TABLE \`articles\` DROP COLUMN \`howto\`;`)
+  await db.run(sql`ALTER TABLE \`articles\` DROP COLUMN \`series_id\`;`)
   await db.run(sql`CREATE INDEX \`articles_updated_at_idx\` ON \`articles\` (\`updated_at\`);`)
-  await db.run(sql`CREATE INDEX \`articles_created_at_idx\` ON \`articles\` (\`created_at\`);`)
-  await db.run(sql`CREATE INDEX \`articles__status_idx\` ON \`articles\` (\`_status\`);`)
-  await db.run(sql`CREATE TABLE \`__new__articles_v\` (
-	\`id\` integer PRIMARY KEY NOT NULL,
-	\`parent_id\` integer,
-	\`version_legacy_id\` text,
-	\`version_legacy_type\` text,
-	\`version_slug\` text,
-	\`version_source_system\` text,
-	\`version_source_revision\` text,
-	\`version_source_hash\` text,
-	\`version_mapping_version\` text,
-	\`version_imported_at\` text,
-	\`version_import_state\` text,
-	\`version_locally_edited\` integer DEFAULT true,
-	\`version_source_fields\` text,
-	\`version_source_sequence\` numeric,
-	\`version_source_order\` numeric DEFAULT 0,
-	\`version_source_body\` text,
-	\`version_tombstone\` integer DEFAULT false,
-	\`version_title\` text,
-	\`version_description\` text,
-	\`version_published_at\` text,
-	\`version_updated_at\` text,
-	\`version_created_at\` text,
-	\`version__status\` text DEFAULT 'draft',
-	\`created_at\` text DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')) NOT NULL,
-	\`updated_at\` text DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')) NOT NULL,
-	\`latest\` integer,
-	FOREIGN KEY (\`parent_id\`) REFERENCES \`articles\`(\`id\`) ON UPDATE no action ON DELETE set null
-  );
-  `)
-  await db.run(sql`INSERT INTO \`__new__articles_v\`("id", "parent_id", "version_legacy_id", "version_legacy_type", "version_slug", "version_source_system", "version_source_revision", "version_source_hash", "version_mapping_version", "version_imported_at", "version_import_state", "version_locally_edited", "version_source_fields", "version_source_sequence", "version_source_order", "version_source_body", "version_tombstone", "version_title", "version_description", "version_published_at", "version_updated_at", "version_created_at", "version__status", "created_at", "updated_at", "latest") SELECT "id", "parent_id", "version_legacy_id", "version_legacy_type", "version_slug", "version_source_system", "version_source_revision", "version_source_hash", "version_mapping_version", "version_imported_at", "version_import_state", "version_locally_edited", "version_source_fields", "version_source_sequence", "version_source_order", "version_source_body", "version_tombstone", "version_title", "version_description", "version_published_at", "version_updated_at", "version_created_at", "version__status", "created_at", "updated_at", "latest" FROM \`_articles_v\`;`)
-  await db.run(sql`DROP TABLE \`_articles_v\`;`)
-  await db.run(sql`ALTER TABLE \`__new__articles_v\` RENAME TO \`_articles_v\`;`)
-  await db.run(sql`CREATE INDEX \`_articles_v_parent_idx\` ON \`_articles_v\` (\`parent_id\`);`)
-  await db.run(sql`CREATE INDEX \`_articles_v_version_version_legacy_id_idx\` ON \`_articles_v\` (\`version_legacy_id\`);`)
-  await db.run(sql`CREATE INDEX \`_articles_v_version_version_slug_idx\` ON \`_articles_v\` (\`version_slug\`);`)
+  await db.run(sql`DROP INDEX \`_articles_v_version_version_series_idx\`;`)
+  await db.run(sql`ALTER TABLE \`_articles_v\` DROP COLUMN \`version_source_path\`;`)
+  await db.run(sql`ALTER TABLE \`_articles_v\` DROP COLUMN \`version_source_format\`;`)
+  await db.run(sql`ALTER TABLE \`_articles_v\` DROP COLUMN \`version_source_data\`;`)
+  await db.run(sql`ALTER TABLE \`_articles_v\` DROP COLUMN \`version_source_raw\`;`)
+  await db.run(sql`ALTER TABLE \`_articles_v\` DROP COLUMN \`version_source_assets\`;`)
+  await db.run(sql`ALTER TABLE \`_articles_v\` DROP COLUMN \`version_body\`;`)
+  await db.run(sql`ALTER TABLE \`_articles_v\` DROP COLUMN \`version_cover\`;`)
+  await db.run(sql`ALTER TABLE \`_articles_v\` DROP COLUMN \`version_content_resources\`;`)
+  await db.run(sql`ALTER TABLE \`_articles_v\` DROP COLUMN \`version_editorial_data\`;`)
+  await db.run(sql`ALTER TABLE \`_articles_v\` DROP COLUMN \`version_subtitle\`;`)
+  await db.run(sql`ALTER TABLE \`_articles_v\` DROP COLUMN \`version_type\`;`)
+  await db.run(sql`ALTER TABLE \`_articles_v\` DROP COLUMN \`version_howto\`;`)
+  await db.run(sql`ALTER TABLE \`_articles_v\` DROP COLUMN \`version_series_id\`;`)
   await db.run(sql`CREATE INDEX \`_articles_v_version_version_updated_at_idx\` ON \`_articles_v\` (\`version_updated_at\`);`)
-  await db.run(sql`CREATE INDEX \`_articles_v_version_version_created_at_idx\` ON \`_articles_v\` (\`version_created_at\`);`)
-  await db.run(sql`CREATE INDEX \`_articles_v_version_version__status_idx\` ON \`_articles_v\` (\`version__status\`);`)
-  await db.run(sql`CREATE INDEX \`_articles_v_created_at_idx\` ON \`_articles_v\` (\`created_at\`);`)
-  await db.run(sql`CREATE INDEX \`_articles_v_updated_at_idx\` ON \`_articles_v\` (\`updated_at\`);`)
-  await db.run(sql`CREATE INDEX \`_articles_v_latest_idx\` ON \`_articles_v\` (\`latest\`);`)
   await db.run(sql`CREATE TABLE \`__new_course_modules_rels\` (
 	\`id\` integer PRIMARY KEY NOT NULL,
 	\`order\` integer,
