@@ -43,6 +43,15 @@ export class ReviewService {
     if (!row) throw new ReviewError(404, 'Revision not found')
     return row
   }
+  async list(actor: ReviewActor, after = 0) {
+    const rows = await this.store.all<{ videoId: number; revisionId: string; metadata: string; state: string; reviewVersion: number }>(
+      `SELECT s.video_id AS videoId,r.id AS revisionId,r.metadata,r.state,r.review_version AS reviewVersion
+       FROM video_review_state s JOIN video_revisions r ON r.id=s.current_revision
+       WHERE s.video_id>? AND (?='staff' OR EXISTS(SELECT 1 FROM video_review_grants g WHERE g.video_id=s.video_id AND g.user_id=? AND g.active=1))
+       ORDER BY s.video_id LIMIT 51`, after, actor.role, actor.id)
+    const items = rows.slice(0, 50).map(({ metadata, ...row }) => ({ ...row, title: (JSON.parse(metadata) as ReviewMetadata).title }))
+    return { items, nextCursor: rows.length > 50 ? items.at(-1)!.videoId : null }
+  }
   async read(videoId: number, actor: ReviewActor) {
     await this.authorize(videoId, actor)
     const state = await this.state(videoId)
@@ -50,7 +59,7 @@ export class ReviewService {
     const revisions = await this.store.all<Revision>('SELECT * FROM video_revisions WHERE video_id=? ORDER BY created_at,id', videoId)
     const comments = await this.store.all('SELECT id,revision_id AS revisionId,author_id AS authorId,start_ms AS startMs,end_ms AS endMs,body,resolved,resolved_by_id AS resolvedById,resolved_at AS resolvedAt,created_at AS createdAt FROM review_comments WHERE video_id=? ORDER BY created_at,id', videoId)
     const decisions = await this.store.all('SELECT id,revision_id AS revisionId,author_id AS authorId,review_version AS reviewVersion,decision,note,created_at AS createdAt FROM review_decisions WHERE video_id=? ORDER BY created_at,id', videoId)
-    return { videoId, currentRevisionId: state.current_revision, revisions: revisions.map(row => ({
+    return { videoId, viewerId: actor.id, canApprove: actor.role === 'customer' && Boolean((await this.grant(videoId, actor.id))?.can_approve), currentRevisionId: state.current_revision, revisions: revisions.map(row => ({
       id: row.id, durationMs: row.duration_ms, reviewVersion: row.review_version, state: row.state,
       metadata: JSON.parse(row.metadata), createdAt: row.created_at,
       mediaUrl: `/api/review/media?videoId=${videoId}&revisionId=${row.id}`,

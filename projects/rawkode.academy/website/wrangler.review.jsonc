@@ -1,0 +1,30 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "rawkode-academy-review",
+  "main": "@astrojs/cloudflare/entrypoints/server",
+  "compatibility_date": "2026-03-12",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "workers_dev": false,
+  "preview_urls": false,
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "./dist-review"
+  },
+  "routes": [
+    {
+      "pattern": "preview.rawkode.academy",
+      "custom_domain": true
+    }
+  ],
+  "vars": {
+    "REVIEW_ORIGIN": "https://preview.rawkode.academy"
+  },
+  "services": [
+    {
+      "binding": "REVIEW_BACKEND",
+      "service": "rawkode-academy-review-backend"
+    }
+  ]
+}

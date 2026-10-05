@@ -1,7 +1,7 @@
 import { ReviewError, type ReviewActor } from './contracts'
 import type { ReviewService } from './service'
 
-export type ReviewRuntime = { service: ReviewService; actor: ReviewActor; origin: string }
+export type ReviewRuntime = { service: ReviewService; actor: ReviewActor; origin: string; publicationAvailable?: boolean }
 const privateHeaders = { 'cache-control': 'private, no-store', 'referrer-policy': 'no-referrer' }
 export function reviewFailure(error: unknown): Response {
   if (error instanceof ReviewError) return Response.json({ error: error.message }, { status: error.status, headers: privateHeaders })
@@ -34,8 +34,14 @@ export function createReviewHandlers(runtime: (request: Request) => Promise<Revi
   return {
     async GET(request: Request) {
       try {
-        const { service, actor } = await runtime(request)
-        return Response.json(await service.read(videoIdFrom(request), actor), { headers: privateHeaders })
+        const { service, actor, publicationAvailable = false } = await runtime(request)
+        const params = new URL(request.url).searchParams
+        if (!params.has('videoId')) {
+          const after = params.get('after') ?? '0'
+          if (!/^(0|[1-9]\d*)$/.test(after) || !Number.isSafeInteger(Number(after))) throw new ReviewError(400, 'Invalid review cursor')
+          return Response.json(await service.list(actor, Number(after)), { headers: privateHeaders })
+        }
+        return Response.json({ ...await service.read(videoIdFrom(request), actor), publicationAvailable }, { headers: privateHeaders })
       } catch (error) { return reviewFailure(error) }
     },
     async POST(request: Request) {

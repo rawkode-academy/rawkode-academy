@@ -24,7 +24,10 @@
 		"check:cwv": "bun scripts/check-cwv.ts --base https://rawkode.academy",
 		"sync:technologies": "bun scripts/sync-technologies.ts",
 		"subgraph:sdl": "bun scripts/publish-subgraph.ts",
-		"knip": "knip"
+		"knip": "knip",
+		"review:dev": "node node_modules/astro/bin/astro.mjs dev --config astro.review.config.mts",
+		"review:build": "cd ../../../packages/design-system && node node_modules/@pandacss/dev/bin.js build && cd ../../projects/rawkode.academy/website && node node_modules/astro/bin/astro.mjs build --config astro.review.config.mts",
+		"review:test": "node node_modules/vitest/vitest.mjs run --config vitest.review.config.ts"
 	},
 	"dependencies": {
 		"@ark-ui/vue": "5.39.2",

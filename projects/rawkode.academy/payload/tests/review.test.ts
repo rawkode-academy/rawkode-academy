@@ -360,3 +360,40 @@ test('retry records the ETag of verified bytes even if the release changes immed
   assert.equal(release.etag, 'approved-etag')
   await assert.rejects(mediaResponse(new Request('https://preview.example/public'), bucket, release.key, true, release), { status: 409 })
 })
+
+
+test('review list exposes only active customer grants and safe summary fields', async t => {
+  const h = await harness(t); await h.prepare()
+  await h.service.execute(staff, command('create-revision', { videoId: 11, mediaId: 20, deliverableMediaId: 21, metadata: { ...metadata, title: 'Other customer secret' } }))
+  await h.service.execute(staff, command('grant', { videoId: 11, userId: 3, canApprove: true }))
+  assert.deepEqual((await h.service.list(client)).items.map(item => item.videoId), [10])
+  assert.deepEqual((await h.service.list(stranger)).items.map(item => item.videoId), [11])
+  assert.deepEqual((await h.service.list(staff)).items.map(item => item.videoId), [10, 11])
+  const handlers = createReviewHandlers(async () => ({ service: h.service, actor: client, origin: 'https://preview.rawkode.academy' }))
+  const response = await handlers.GET(new Request('https://preview.rawkode.academy/api/review'))
+  const listing = await response.json() as Awaited<ReturnType<ReviewService['list']>>
+  assert.equal(response.status, 200)
+  assert.equal(response.headers.get('cache-control'), 'private, no-store')
+  assert.deepEqual(Object.keys(listing.items[0]).sort(), ['reviewVersion', 'revisionId', 'state', 'title', 'videoId'])
+  assert.equal(JSON.stringify(listing).includes('Other customer secret'), false)
+  assert.equal((await h.service.read(10, client)).canApprove, true)
+  await h.service.execute(staff, command('grant', { userId: 2, canApprove: false }))
+  assert.equal((await h.service.read(10, client)).canApprove, false)
+  await h.service.execute(staff, command('revoke', { userId: 2 }))
+  assert.deepEqual((await h.service.list(client)).items, [])
+  assert.equal((await handlers.GET(new Request('https://preview.rawkode.academy/api/review?videoId=10'))).status, 404)
+  for (const cursor of ['-1', '1.2', 'x', '9007199254740992']) assert.equal((await handlers.GET(new Request(`https://preview.rawkode.academy/api/review?after=${cursor}`))).status, 400)
+})
+
+test('review list paginates by stable video ID without skipping customer grants', async t => {
+  const h = await harness(t)
+  for (let id = 100; id < 151; id++) {
+    h.sqlite.prepare('INSERT INTO videos(id,legacy_id,legacy_type,slug,title,_status) VALUES(?,?,?,?,?,?)').run(id, `video-${id}`, 'Video', `video-${id}`, 'Review', 'draft')
+    await h.service.execute(staff, command('create-revision', { videoId: id, mediaId: 20, deliverableMediaId: 21, metadata }))
+    await h.service.execute(staff, command('grant', { videoId: id, userId: 2, canApprove: false }))
+  }
+  const first = await h.service.list(client)
+  assert.equal(first.items.length, 50); assert.equal(first.nextCursor, 149)
+  const next = await h.service.list(client, first.nextCursor!)
+  assert.deepEqual(next.items.map(item => item.videoId), [150]); assert.equal(next.nextCursor, null)
+})

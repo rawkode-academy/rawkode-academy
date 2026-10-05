@@ -34,7 +34,7 @@ export async function reviewBackend() {
     },
     publicMediaUrl: (videoId, publicationId) => `${auth.origin}/api/review/published-media?videoId=${videoId}&publicationId=${publicationId}`,
   })
-  return { payload, store, service, origin: auth.origin, bucket: cloudflare.env.R2 }
+  return { payload, store, service, origin: auth.origin, publicationAvailable: auth.local && fixtureEnabled, bucket: cloudflare.env.R2 }
 }
 export async function reviewRuntime(request: Request) {
   const backend = await reviewBackend()
