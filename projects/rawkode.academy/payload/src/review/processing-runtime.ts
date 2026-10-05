@@ -10,6 +10,11 @@ export type MediaRuntime = {
   REVIEW_MEDIA_RECIPE?: string;
 }
 export function configuredMediaAdapter(env?: MediaRuntime, store?: ReviewStore) {
-  if (!env?.AI || !env.REVIEW_FFMPEG || !env.REVIEW_MEDIA_WORKFLOW || env.REVIEW_MEDIA_RECIPE !== mediaRecipe || !store) return undefined
+  // The request Worker only dispatches the durable Workflow. The Workflow's
+  // hosting Worker owns Workers AI, the Container binding, and its D1/R2
+  // resources. This distinction is required for Cloudflare Worker Previews:
+  // Preview Workflow bindings attach to an existing Workflow rather than
+  // provisioning a Workflow in the Preview itself.
+  if (!env?.REVIEW_MEDIA_WORKFLOW || env.REVIEW_MEDIA_RECIPE !== mediaRecipe || !store) return undefined
   return new WorkflowMediaAdapter(mediaRecipe, env.REVIEW_MEDIA_WORKFLOW, new ProcessingJobs(store, env.R2))
 }

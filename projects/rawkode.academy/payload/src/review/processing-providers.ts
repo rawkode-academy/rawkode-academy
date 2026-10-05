@@ -55,7 +55,10 @@ export class ContainerFFmpegClient implements FFmpegBoundary {
   private async call(operation: 'encode' | 'audio', job: ProcessingJob) {
     const binding = 'getByName' in this.binding ? this.binding.getByName(`${job.jobId}:${operation}:${job.recipe}`) : this.binding
     const response = await binding.fetch(`https://review-ffmpeg.internal/jobs/${job.jobId}/${operation}`, {
-      method: 'POST', redirect: 'error', signal: AbortSignal.timeout(120000),
+      // Workers fetch supports only "follow" and "manual". We do not follow
+      // redirects from the internal Container boundary; the Container contract
+      // is expected to return a direct artifact response.
+      method: 'POST', redirect: 'manual', signal: AbortSignal.timeout(120000),
       headers: { 'content-type': 'application/json' }, body: JSON.stringify({ protocol: 1, job }),
     })
     if (!response.ok) { await response.body?.cancel(); throw new ReviewError(502, 'Container processing request failed') }

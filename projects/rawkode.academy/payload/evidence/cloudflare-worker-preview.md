@@ -1,6 +1,6 @@
 # Cloudflare Worker Preview deployment
 
-The Payload preview is deployed with Wrangler's Worker Preview workflow rather than a second production Worker. The `previews` block gives each branch its own Durable Object and Container resources where Cloudflare supports automatic provisioning. The configured D1 database ID and R2 bucket name are currently shared by previews, so preview data is staging data and must not contain production or customer material. Workflows are different: a Preview binds to an already deployed Workflow, so the Workflow names must exist before the media path can be exercised.
+The Payload preview is deployed with Wrangler's Worker Preview workflow rather than a second production Worker. The `previews` block gives each branch its own Durable Object and Container resources where Cloudflare supports automatic provisioning. The configured D1 database ID and R2 bucket name are currently shared by previews, so preview data is staging data and must not contain production or customer material. Workflows are different: a Preview binds to an already deployed Workflow, so the Workflow names must exist before the media path can be exercised. The media Preview therefore points at the persistent, non-production `rawkode-academy-payload-review-runtime` Worker, which owns the review Workflow, Container, Workers AI, and the named Preview data plane.
 
 References:
 
@@ -15,3 +15,5 @@ The shared `cloudflare/api-tokens/workers` token can deploy the Worker and provi
 `scripts/deploy-preview.mjs` therefore has an explicit CI fallback controlled by `CLOUDFLARE_PREVIEW_ALLOW_DEGRADED_CONTAINERS=true`. On that exact Containers authentication failure it retries the same named Preview with the container and Durable Object bindings removed. The resulting preview is useful for identity, Payload, D1, R2, and review UI checks; `configuredMediaAdapter()` remains fail-closed, so an upload cannot claim to have been processed without the real providers.
 
 To enable the complete media path, grant the preview deployment token the Cloudflare Containers edit permission, remove the fallback environment variable, and verify the Preview's generated container app starts before accepting a real upload. This is intentionally a deployment prerequisite, not a silent production downgrade.
+
+The host-authenticated Preview used for the hosted synthetic acceptance run had the Containers permission and used the full path. The shared CI token still lacks that permission and may therefore exercise only the explicit data/auth fallback. CI success alone is not evidence that media processing is available.
