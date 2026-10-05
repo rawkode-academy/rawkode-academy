@@ -2,6 +2,7 @@ import { afterEach, describe, it, expect, vi } from "vitest";
 import { mount, flushPromises } from "@vue/test-utils";
 import ReviewApp from "../components/ReviewApp.vue";
 import ReviewPanel from "../components/ReviewPanel.vue";
+import StaffUploadPanel from "../components/StaffUploadPanel.vue";
 import type { Review } from "../types";
 const cut = "00000000-0000-4000-8000-000000000001";
 function review(): Review { return { videoId: 10, viewerId: 2, canApprove: true, publicationAvailable: true, currentRevisionId: cut, revisions: [{ id: cut, reviewVersion: 3, durationMs: 60000, state: "ready", createdAt: "2026-10-05", mediaUrl: `/api/review/media?videoId=10&revisionId=${cut}`, metadata: { title: "Customer video", description: "Private cut" } }], comments: [], decisions: [] }; }
@@ -52,6 +53,35 @@ describe("review actions", () => {
     const customer = mount(ReviewPanel, { props: { review: value, user } }); wrappers.push(customer);
     expect(button(customer, "Publish approved revision")).toBeUndefined();
     expect(button(customer, "Approve this revision")).toBeUndefined();
+  });
+});
+
+describe("staff upload intake", () => {
+  it("reuses the begin command and session after processing fails", async () => {
+    sessionStorage.clear();
+    const source = new File(["fixture"], "cut.mp4", { type: "video/mp4" });
+    const fetch = vi.fn(async (url: string, init?: RequestInit) => {
+      if (url.startsWith("/api/review/upload-targets")) return Response.json({ videos: [{ videoId: 10, legacyId: "one", slug: "one", title: "One", description: "Description", reviewState: "no-review" }] });
+      if (url.startsWith("/api/review/reviewers")) return Response.json({ reviewers: [{ userId: 2, name: "Customer", profileEmail: "customer@example.invalid" }] });
+      if (url.startsWith("/api/review/uploads?") && !init?.method) return Response.json({ sessionId: "session", state: "uploaded", expiresAt: 9999999999, processingAvailable: true });
+      if (url.startsWith("/api/review/uploads?") && init?.method === "PUT") return Response.json({ state: "uploaded" });
+      if (url === "/api/review/uploads" && init?.method === "POST") {
+        const body = JSON.parse(String(init.body)) as { action: string; commandId?: string };
+        if (body.action === "begin") return Response.json({ sessionId: "session" });
+        return Response.json({ error: "provider unavailable" }, { status: 503 });
+      }
+      throw new Error(`Unexpected request: ${url}`);
+    });
+    vi.stubGlobal("fetch", fetch);
+    const wrapper = mount(StaffUploadPanel); wrappers.push(wrapper); await flushPromises();
+    const input = wrapper.find('input[type="file"]').element as HTMLInputElement;
+    Object.defineProperty(input, "files", { value: [source] }); await wrapper.find('input[type="file"]').trigger("change");
+    await button(wrapper, "Upload and assign review").trigger("click"); await flushPromises();
+    await button(wrapper, "Resume upload and assign review").trigger("click"); await flushPromises();
+    const begins = fetch.mock.calls.filter(([url, init]) => url === "/api/review/uploads" && init?.method === "POST" && JSON.parse(String(init.body)).action === "begin");
+    expect(begins).toHaveLength(1);
+    expect(wrapper.text()).toContain("Media processing is not enabled in this preview yet.");
+    sessionStorage.clear();
   });
 });
 
