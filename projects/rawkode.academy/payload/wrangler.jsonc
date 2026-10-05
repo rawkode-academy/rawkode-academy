@@ -97,11 +97,11 @@
     },
     "ai": {
       "binding": "AI",
-      "remote": false
+      "remote": true
     }
   },
   "ai": {
     "binding": "AI",
-    "remote": false
+    "remote": true
   }
 }

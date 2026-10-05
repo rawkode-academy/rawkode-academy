@@ -55,6 +55,6 @@
   },
   "ai": {
     "binding": "AI",
-    "remote": false
+    "remote": true
   }
 }
