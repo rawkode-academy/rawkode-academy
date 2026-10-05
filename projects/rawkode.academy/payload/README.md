@@ -1,6 +1,6 @@
 # Payload catalogue / Cloudflare Worker Preview
 
-**Decision: continue the isolated catalogue experiment; do not replace the public gateway yet.** Payload editing, D1, R2 and the generated GraphQL API work in local workerd. The public compatibility facade preserves the captured gateway schema, but external domain resolvers are incomplete. Academy OIDC is now implemented for preview/Payload sessions; successful live sign-in remains unverified. The official MCP plugin failed its Workers initialization gate and is excluded by default. Media orchestration is real local Cloudflare Workflows; media processing uses explicitly labelled fixtures.
+**Decision: continue the isolated catalogue experiment; do not replace the public gateway yet.** Payload editing, D1, R2 and the generated GraphQL API work in local workerd. The public compatibility facade preserves the captured gateway schema, but external domain resolvers are incomplete. Academy OIDC is now implemented for preview/Payload sessions; successful live sign-in remains unverified. The official MCP plugin failed its Workers initialization gate and is excluded by default. The named non-production Preview now runs the real Container/Workers AI media path for the checked-in synthetic fixture; production media remains gated.
 
 This is the first Academy checkout integration of the Payload catalogue experiment and video-review foundation. It is deliberately additive: the existing public gateway and domain services remain authoritative while this project is evaluated. No production route, DNS change, production mutation, real email, private media import or copied production credential is part of this change. A named Cloudflare Worker Preview has been smoke-tested from the PR deployment path with isolated preview D1/R2 resources. All fixture records are synthetic; only public schema/source reads informed the model. `.dev.vars`, `.runtime`, `.wrangler`, build products and dependencies are local ignored state.
 
@@ -60,8 +60,8 @@ flowchart LR
   Published --> Payload
   Upload[Private immutable upload] --> R2[Local R2]
   Payload --> Workflow[Native Cloudflare Workflow]
-  Workflow --> Fixtures[Parallel fixture processors]
-  Fixtures --> Review[Human revision and explicit approval]
+  Workflow --> Processors[Parallel Container + Workers AI processors]
+  Processors --> Review[Human revision and explicit approval]
   Review --> Payload
 ```
 
@@ -77,7 +77,7 @@ flowchart LR
 | `/api/poc/runtime` | Local runtime/binding probe. |
 | `/api/mcp` | Absent by default following failed Workers evaluation. |
 
-OIDC users default to customers. Only subjects explicitly listed in `OIDC_STAFF_SUBJECTS` receive staff access. Identity mapping uses issuer and subject, never email. Local password accounts are available only with the explicit development flag and loopback callback configuration. Source media is private and immutable through the API after upload. Public catalogue metadata does not grant access to private R2 objects. There is no playable private-media delivery implementation here.
+OIDC users default to customers. Only subjects explicitly listed in `OIDC_STAFF_SUBJECTS` receive staff access. Identity mapping uses issuer and subject, never email. Local password accounts are available only with the explicit development flag and loopback callback configuration. Source media is private and immutable through the API after upload. Public catalogue metadata does not grant access to private R2 objects. The named Preview has authenticated private playback and published byte-range delivery for the verified synthetic workflow; this is not yet a production watch-page integration.
 
 ## Model and import rules
 
@@ -133,11 +133,11 @@ The adapter currently reads required collections in batches of 100 and caches on
 
 ## Media orchestration and MCP result
 
-The native Workflow verifies source bytes, forks deterministic transcription and encoding fixture steps, joins a fixture summary/chapter result, and delivers a separately authenticated callback. A per-run persisted execution counter proves fail-once retry behavior. Outputs explicitly report `encoded:false`, `playable:false`. The one-second synthetic MP4 is not customer media. Fixture processing is limited to 2 MiB.
+The native Workflow verifies source bytes, forks Container encoding and Workers AI transcription, joins the verified result, and attaches it to a human review revision. The hosted named Preview completed the full synthetic path, including private intake, timestamped comments, exact-revision approval, publication and byte-range playback. The one-second synthetic MP4 is not a claim about arbitrary customer media; production capacity, quotas, and footage acceptance remain separate gates.
 
 A run is keyed by video/version/checksum; a new cut requires a new private video record in this POC. Completed machine callbacks cannot overwrite reviewed state. Human summary edits change the approval revision. Approval rechecks source bytes and the review revision, creates chapters and publishes metadata; stale approval and generic publication of linked pipeline videos are rejected. Approval/edit/registration still require serialized operation: read-then-write checks are not an atomic concurrency protocol. There is no complete immutable `video_versions` product model yet.
 
-[Target media provider plan](evidence/media-providers.md) covers Workers AI Whisper, Workers AI Llama, Container/Sandbox ffmpeg, chunking, provenance, retries and cloud acceptance gates. These live adapters are **not implemented or verified**. Publishing fixture metadata does not establish working video playback or a production publishable media manifest.
+[Target media provider plan](evidence/media-providers.md) covers Workers AI Whisper, Workers AI Llama, Container/Sandbox ffmpeg, chunking, provenance, retries and cloud acceptance gates. The Whisper/Container adapters are implemented and verified in the named non-production Preview for the synthetic fixture; real customer footage, capacity and production publication remain unverified.
 
 The official `@payloadcms/plugin-mcp` configuration was built and exercised in workerd. Staff authentication/key creation and anonymous denial passed, but authorized `initialize` failed with HTTP 500 (an earlier run ended 503); workerd reported a hung request. Discovery and read/write tools were never reached. No MCP replacement is justified. Disposable test keys were removed. See [MCP findings](evidence/mcp-notes.md) and `evidence/mcp-runtime.json`.
 
@@ -157,7 +157,7 @@ Recommended coexistence: keep the existing gateway and interaction/preference/co
 4. Run real consumer operations against both old and candidate endpoints, compare data/errors/URLs, and rehearse a bounded switch with a write freeze and source watermark. Keep the old authority available for rollback.
 5. Roll back by stopping candidate writes, exporting/reconciling every accepted post-watermark edit, then restoring routing to the previous authority. Restoring an old database alone loses edits; dual writes are not a rollback strategy.
 
-The local POC is a **go for further catalogue work**, a **no-go for public gateway cutover**, a **no-go for official MCP replacement on Workers**, and a **no-go for real media processing** until the documented gates pass.
+The local POC and named Preview are a **go for further catalogue and review-workflow work**, a **no-go for public gateway cutover**, a **no-go for official MCP replacement on Workers**, and a **no-go for production media processing** until the documented gates pass.
 
 [Frontend design note](evidence/frontend-architecture.md): supported React/Next Payload admin; proposed Vue/Nuxt customer preview; `live-preview-vue`; shared Panda CSS v2 tokens/recipes/CSS and framework-specific Ark UI components. The stock admin and a minimal account/sign-in page exist here.
 
