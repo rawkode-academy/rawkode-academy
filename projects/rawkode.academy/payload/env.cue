@@ -146,7 +146,7 @@ tasks: {
 			command: "sh"
 			args: ["-lc", "\(_toolchain) bun x wrangler deploy"]
 			env: PATH: _taskPath
-			dependsOn: [_t.build, _t.deploy.migrate]
+			dependsOn: [_t.build, _t.deploy.migrate, _t.deploy.reviewRuntime]
 			inputs: [
 				"app/**",
 				"src/**",
@@ -158,6 +158,28 @@ tasks: {
 				"next.config.mjs",
 				"package.json",
 				"wrangler.jsonc",
+				"tsconfig.json",
+				"../../../bun.lock",
+			]
+		}
+
+		reviewRuntime: schema.#Task & {
+			hermetic: false
+			command: "sh"
+			args: ["-lc", "\(_toolchain) bun run deploy:preview-runtime"]
+			env: PATH: _taskPath
+			dependsOn: [_t.build, _t.deploy.migrate]
+			inputs: [
+				"src/**",
+				"src/migrations/**",
+				"container/**",
+				"scripts/check-review-container-recipe.mjs",
+				"worker.ts",
+				"payload.config.ts",
+				"open-next.config.ts",
+				"next.config.mjs",
+				"package.json",
+				"wrangler.preview-runtime.jsonc",
 				"tsconfig.json",
 				"../../../bun.lock",
 			]
