@@ -6,7 +6,7 @@ import { actorFromUser, ReviewError, type ReviewActor } from './contracts'
 import { ReviewStore } from './store'
 import { ReviewService } from './service'
 import { ReviewIntake } from './intake'
-import { configuredMediaAdapter } from './intake-contracts'
+import { configuredMediaAdapter } from './processing-runtime'
 import { TrustedAssets, assetObject } from './intake-storage'
 import { boundedObject, stageReleaseObject, verifiedDeliverable } from './artifacts'
 
@@ -50,7 +50,7 @@ export async function reviewBackend() {
     },
     publicMediaUrl: (videoId, publicationId) => `${auth.origin}/api/review/published-media?videoId=${videoId}&publicationId=${publicationId}`,
   })
-  const intake = new ReviewIntake(store, cloudflare.env.R2, service, configuredMediaAdapter())
+  const intake = new ReviewIntake(store, cloudflare.env.R2, service, configuredMediaAdapter(cloudflare.env, store))
   const publicationAvailable = async (videoId: number) => (auth.local && fixtureEnabled) || Boolean(await store.one('SELECT a.media_id FROM video_review_state s JOIN video_revisions r ON r.id=s.current_revision JOIN review_intake_assets a ON a.media_id=r.deliverable_media_id AND a.video_id=s.video_id AND a.kind=? WHERE s.video_id=?', 'deliverable', videoId))
   return { payload, store, service, intake, assets, origin: auth.origin, publicationAvailable, bucket: cloudflare.env.R2 }
 }

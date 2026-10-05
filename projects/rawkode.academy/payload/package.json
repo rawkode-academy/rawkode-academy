@@ -17,9 +17,9 @@
     "export:klustered": "tsx scripts/export-klustered.ts",
     "capture:schema": "tsx scripts/capture-schema.ts",
     "check:schema": "tsx scripts/check-schema.ts",
-    "test": "node --import tsx --test --test-concurrency=1 tests/compatibility.test.ts tests/oidc.test.ts tests/content-import.test.ts tests/media-security.test.ts tests/migrations.test.ts tests/review.test.ts tests/intake.test.ts",
+    "test": "node --import tsx --test --test-concurrency=1 tests/compatibility.test.ts tests/oidc.test.ts tests/content-import.test.ts tests/media-security.test.ts tests/migrations.test.ts tests/review.test.ts tests/intake.test.ts tests/review-container.test.ts",
     "demo:mutations": "npm run test:worker",
-    "build:worker": "WRANGLER_LOG_PATH=.runtime/wrangler.log opennextjs-cloudflare build",
+    "build:worker": "node scripts/check-review-container-recipe.mjs && WRANGLER_LOG_PATH=.runtime/wrangler.log opennextjs-cloudflare build",
     "deploy:preview": "node scripts/deploy-preview.mjs",
     "preview": "WRANGLER_LOG_PATH=.runtime/wrangler.log wrangler dev --local --ip 127.0.0.1 --port 3100",
     "setup": "node scripts/setup.mjs",
@@ -36,7 +36,8 @@
     "test:admin": "tsx scripts/test-admin.ts",
     "test:oidc": "node --import tsx --test tests/oidc.test.ts",
     "test:oidc:worker": "node --import tsx scripts/test-oidc-worker.ts",
-    "seed:oidc:tests": "WRANGLER_LOG_PATH=.runtime/wrangler.log POC_CLI=1 node --import tsx scripts/seed-oidc-tests.ts"
+    "seed:oidc:tests": "WRANGLER_LOG_PATH=.runtime/wrangler.log POC_CLI=1 node --import tsx scripts/seed-oidc-tests.ts",
+    "test:container": "node scripts/check-review-container-recipe.mjs && node --test container/runner.test.mjs"
   },
   "dependencies": {
     "@opennextjs/cloudflare": "1.20.1",

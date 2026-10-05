@@ -53,7 +53,8 @@
     "OIDC_REDIRECT_URI": "http://127.0.0.1:3100/api/auth/callback",
     "OIDC_STAFF_SUBJECTS": "[]",
     "OIDC_SESSION_TTL_SECONDS": "3600",
-    "POC_DEV_LOCAL_AUTH": "false"
+    "POC_DEV_LOCAL_AUTH": "false",
+    "REVIEW_MEDIA_RECIPE": "ab74d9377bb060d7c2ceb17990b99a60ba0b3f0cb86cb0a60f4dba977a394fbe"
   },
   "previews": {
     "workflows": [
@@ -93,15 +94,58 @@
       "OIDC_REDIRECT_URI": "https://pr-local-rawkode-academy-payload.rawkodeacademy.workers.dev/api/auth/callback",
       "OIDC_STAFF_SUBJECTS": "[\"HmYDQjc3JVFo7visJIL5FneGFzNAJjDT\"]",
       "OIDC_SESSION_TTL_SECONDS": "3600",
-      "POC_DEV_LOCAL_AUTH": "false"
+      "POC_DEV_LOCAL_AUTH": "false",
+      "REVIEW_MEDIA_RECIPE": "ab74d9377bb060d7c2ceb17990b99a60ba0b3f0cb86cb0a60f4dba977a394fbe"
     },
     "ai": {
       "binding": "AI",
       "remote": true
+    },
+    "containers": [
+      {
+        "class_name": "ReviewFFmpegContainer",
+        "image": "./container/Dockerfile",
+        "image_build_context": "./container",
+        "scheduling_policy": "default",
+        "instance_type": "standard-1",
+        "max_instances": 4
+      }
+    ],
+    "durable_objects": {
+      "bindings": [
+        {
+          "name": "REVIEW_FFMPEG",
+          "class_name": "ReviewFFmpegContainer"
+        }
+      ]
     }
   },
   "ai": {
     "binding": "AI",
     "remote": true
+  },
+  "containers": [
+    {
+      "class_name": "ReviewFFmpegContainer",
+      "image": "./container/Dockerfile",
+      "image_build_context": "./container",
+      "scheduling_policy": "default",
+      "instance_type": "standard-1",
+      "max_instances": 4
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "REVIEW_FFMPEG",
+        "class_name": "ReviewFFmpegContainer"
+      }
+    ]
+  },
+  "exports": {
+    "ReviewFFmpegContainer": {
+      "type": "durable-object",
+      "storage": "sqlite"
+    }
   }
 }

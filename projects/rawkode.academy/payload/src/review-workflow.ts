@@ -6,13 +6,12 @@ import { ProcessingJobs } from './review/processing-jobs'
 import { ContainerFFmpegClient, WorkersWhisper } from './review/processing-providers'
 import { runReviewProcessing, type DurableSteps } from './review/processing-workflow'
 import type { ReviewWorkflowParams } from './review/workflow-adapter'
-type Env = { D1: D1Database; R2: R2Bucket; AI: Ai; REVIEW_FFMPEG?: Fetcher }
+import { mediaRecipe, type MediaRuntime } from './review/processing-runtime'
+type Env = MediaRuntime
 export class ReviewMediaWorkflow extends WorkflowEntrypoint<Env, ReviewWorkflowParams> {
   async run(event: WorkflowEvent<ReviewWorkflowParams>, step: WorkflowStep) {
     if (event.instanceId !== event.payload.jobId) throw new NonRetryableError('Workflow ID must equal the registered job')
-    // No Container binding is configured until an immutable FFmpeg image and its
-    // actual probe/encode evidence are verified. AI alone cannot open this gate.
-    if (!this.env.REVIEW_FFMPEG || !this.env.AI) throw new NonRetryableError('Verified Container and AI providers are required')
+    if (!this.env.REVIEW_FFMPEG || !this.env.AI || this.env.REVIEW_MEDIA_RECIPE !== mediaRecipe) throw new NonRetryableError('Verified Container recipe and AI providers are required')
     const jobs = new ProcessingJobs(new ReviewStore(this.env.D1), this.env.R2)
     const steps: DurableSteps = { do: (name, callback) => step.do(name, { retries: { limit: 2, delay: '5 seconds', backoff: 'exponential' }, timeout: '3 minutes' }, async () => {
       try { return await callback() }

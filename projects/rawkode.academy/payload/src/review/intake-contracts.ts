@@ -47,8 +47,3 @@ export interface ContainerMediaAdapter {
 export interface WorkersAITranscriptionAdapter {
   transcribe(input: { jobId: string; audio: StoredObject; model: string }): Promise<{ transcript: string; model: string; sourceChecksum: string }>
 }
-// Workflow/Whisper adapters exist, but no verified Container image/FFmpeg runner
-// is installed. Keep activation closed until its real probe evidence is tested.
-// Installing an implementation requires an explicit runtime binding, not an env
-// flag that makes a caller-supplied attestation trusted.
-export function configuredMediaAdapter(): ContainerMediaAdapter | undefined { return undefined }

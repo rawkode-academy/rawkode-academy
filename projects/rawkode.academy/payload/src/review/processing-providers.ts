@@ -32,7 +32,7 @@ export interface FFmpegBoundary {
   encode(job: ProcessingJob): Promise<unknown>
   extractAudio(job: ProcessingJob): Promise<unknown>
 }
-async function boundedBytes(body: ReadableStream<Uint8Array> | null, maximum: number) {
+export async function boundedBytes(body: ReadableStream<Uint8Array> | null, maximum: number) {
   if (!body) throw new ReviewError(502, 'Provider response has no body')
   const reader = body.getReader(), parts: Uint8Array[] = []
   let length = 0
@@ -48,15 +48,13 @@ async function boundedBytes(body: ReadableStream<Uint8Array> | null, maximum: nu
   for (const part of parts) { bytes.set(part, offset); offset += part.length }
   return bytes
 }
-/** Machine-only binding to a future Container-owning Worker. It must run the
- * pinned FFmpeg image and derive evidence from actual decode/probe operations.
- * Schema checks and a recipe echoed by an arbitrary HTTP server are NOT proof.
- * This client is deliberately not installed by configuredMediaAdapter().
- */
+/** Machine-only client. The DO loads the trusted D1 job, owns R2 access, and
+ * accepts artifacts only from its image-baked recipe. */
 export class ContainerFFmpegClient implements FFmpegBoundary {
-  constructor(readonly binding: Fetcher) {}
+  constructor(readonly binding: Pick<Fetcher, 'fetch'> | DurableObjectNamespace) {}
   private async call(operation: 'encode' | 'audio', job: ProcessingJob) {
-    const response = await this.binding.fetch(`https://review-ffmpeg.internal/jobs/${job.jobId}/${operation}`, {
+    const binding = 'getByName' in this.binding ? this.binding.getByName(`${job.jobId}:${operation}:${job.recipe}`) : this.binding
+    const response = await binding.fetch(`https://review-ffmpeg.internal/jobs/${job.jobId}/${operation}`, {
       method: 'POST', redirect: 'error', signal: AbortSignal.timeout(120000),
       headers: { 'content-type': 'application/json' }, body: JSON.stringify({ protocol: 1, job }),
     })

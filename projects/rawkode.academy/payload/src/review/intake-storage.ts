@@ -13,12 +13,15 @@ export async function verifyStored(bucket: R2Bucket, expected: StoredObject, con
 }
 export type LengthStream = (bytes: number) => { readable: ReadableStream<Uint8Array>; writable: WritableStream<Uint8Array> }
 export const fixedLengthStream: LengthStream = bytes => new FixedLengthStream(bytes)
-export async function uploadSource(bucket: R2Bucket, key: string, body: ReadableStream<Uint8Array>, bytes: number, checksum: string, lengthStream = fixedLengthStream): Promise<StoredObject> {
+export function uploadSource(bucket: R2Bucket, key: string, body: ReadableStream<Uint8Array>, bytes: number, checksum: string, lengthStream = fixedLengthStream) {
+  return uploadImmutable(bucket, key, body, bytes, checksum, 'application/octet-stream', lengthStream)
+}
+export async function uploadImmutable(bucket: R2Bucket, key: string, body: ReadableStream<Uint8Array>, bytes: number, checksum: string, contentType: string, lengthStream = fixedLengthStream): Promise<StoredObject> {
   if (!Number.isSafeInteger(bytes) || bytes < 1 || bytes > maximumIntakeBytes) throw new ReviewError(413, 'Upload must be at most 64 MiB')
   const existing = await bucket.head(key)
   if (existing) {
     await body.cancel()
-    return verifyStored(bucket, { key, etag: existing.etag, bytes, checksum }, 'application/octet-stream')
+    return verifyStored(bucket, { key, etag: existing.etag, bytes, checksum }, contentType)
   }
   const fixed = lengthStream(bytes)
   const abort = new AbortController()
@@ -26,16 +29,16 @@ export async function uploadSource(bucket: R2Bucket, key: string, body: Readable
   // Attach rejection handling immediately; put and pipe run concurrently.
   const settled = pumping.then(() => null, error => error as unknown)
   try {
-    const object = await bucket.put(key, fixed.readable, { sha256: checksum, onlyIf: { etagDoesNotMatch: '*' }, httpMetadata: { contentType: 'application/octet-stream' } })
+    const object = await bucket.put(key, fixed.readable, { sha256: checksum, onlyIf: { etagDoesNotMatch: '*' }, httpMetadata: { contentType } })
     if (!object) {
       abort.abort()
       await settled
       const winner = await bucket.head(key)
       if (!winner) throw new ReviewError(409, 'Upload did not complete')
-      return verifyStored(bucket, { key, etag: winner.etag, bytes, checksum }, 'application/octet-stream')
+      return verifyStored(bucket, { key, etag: winner.etag, bytes, checksum }, contentType)
     }
     if (await settled !== null) throw new ReviewError(400, 'Upload length does not match the session')
-    return verifyStored(bucket, { key, etag: object.etag, bytes, checksum }, 'application/octet-stream')
+    return verifyStored(bucket, { key, etag: object.etag, bytes, checksum }, contentType)
   } catch (error) {
     abort.abort(); await settled
     if (error instanceof ReviewError) throw error

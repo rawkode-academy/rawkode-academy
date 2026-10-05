@@ -23,3 +23,5 @@ export default {
 export {MediaWorkflow} from './src/media-workflow'
 
 export { ReviewMediaWorkflow } from './src/review-workflow'
+
+export { ReviewFFmpegContainer } from './src/review-container'
