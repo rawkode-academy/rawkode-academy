@@ -21,3 +21,5 @@ export default {
   },
 } satisfies ExportedHandler<CloudflareEnv>
 export {MediaWorkflow} from './src/media-workflow'
+
+export { ReviewMediaWorkflow } from './src/review-workflow'

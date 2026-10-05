@@ -3,6 +3,7 @@ import { metadataSchema } from './contracts'
 
 export const maximumIntakeBytes = 64 * 1024 * 1024
 export const sourceTypes = ['video/mp4', 'video/quicktime', 'video/webm'] as const
+export const whisperModel = '@cf/openai/whisper-large-v3-turbo' as const
 const sha = z.string().regex(/^[a-f0-9]{64}$/)
 const bytes = z.number().int().positive().max(maximumIntakeBytes)
 export const intakeCommand = z.discriminatedUnion('action', [
@@ -11,7 +12,9 @@ export const intakeCommand = z.discriminatedUnion('action', [
 ])
 export const storedObject = z.object({ key: z.string().min(1).max(300), etag: z.string().min(1).max(200), checksum: sha, bytes }).strict()
 export type StoredObject = z.infer<typeof storedObject>
+export const transcriptionResult = z.object({ model: z.literal(whisperModel), sourceChecksum: sha, transcript: z.string().max(100000) }).strict()
 export const probeResult = z.object({
+  transcription: transcriptionResult.optional(),
   jobId: z.string().uuid(), recipe: sha,
   source: storedObject.extend({ contentType: z.enum(sourceTypes) }).strict(),
   deliverable: storedObject.extend({
@@ -32,9 +35,10 @@ export type ProbeResult = z.infer<typeof probeResult>
  * if-none-match write. Same job/recipe retries must return identical artifacts.
  * No shell strings, customer URLs, keys or executable arguments enter this API.
  */
+export type MediaProcessInput = { jobId: string; source: StoredObject; outputKey: string; maximumBytes: number; maximumDurationMs: number }
 export interface ContainerMediaAdapter {
   readonly recipe: string // Immutable image/encoding recipe SHA-256.
-  process(input: { jobId: string; source: StoredObject; outputKey: string; maximumBytes: number; maximumDurationMs: number }): Promise<ProbeResult | { state: 'processing' }>
+  process(input: MediaProcessInput): Promise<ProbeResult | { state: 'processing' }>
 }
 /** Separate future Workers AI boundary. The provider owns bounded audio chunks,
  * verified audio extraction, model/version and timeout/retry policy. Generated
@@ -43,7 +47,8 @@ export interface ContainerMediaAdapter {
 export interface WorkersAITranscriptionAdapter {
   transcribe(input: { jobId: string; audio: StoredObject; model: string }): Promise<{ transcript: string; model: string; sourceChecksum: string }>
 }
-// There is no configured Container/FFmpeg or Workers AI provider in this repo.
+// Workflow/Whisper adapters exist, but no verified Container image/FFmpeg runner
+// is installed. Keep activation closed until its real probe evidence is tested.
 // Installing an implementation requires an explicit runtime binding, not an env
 // flag that makes a caller-supplied attestation trusted.
 export function configuredMediaAdapter(): ContainerMediaAdapter | undefined { return undefined }

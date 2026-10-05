@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { ProcessingJobs } from './processing-jobs'
 import { ReviewError, validateMetadata, type ReviewActor } from './contracts'
 import { intakeCommand, maximumIntakeBytes, probeResult, type ContainerMediaAdapter, type ProbeResult } from './intake-contracts'
 import { uploadSource, verifyStored, type LengthStream } from './intake-storage'
@@ -9,6 +10,7 @@ type Session = { id: string; begin_command: string; begin_input: string; owner_i
 const statement = (sql: string, ...values: Statement['values']): Statement => ({ sql, values })
 export class ReviewIntake {
   constructor(readonly store: ReviewStore, readonly bucket: R2Bucket, readonly review: ReviewService, readonly adapter?: ContainerMediaAdapter, readonly lengthStream?: LengthStream, readonly now = () => Math.floor(Date.now() / 1000)) {}
+  private get jobs() { return new ProcessingJobs(this.store, this.bucket, this.now) }
   private staff(actor: ReviewActor) { if (actor.role !== 'staff') throw new ReviewError(403, 'Staff access required') }
   private async session(actor: ReviewActor, id: string) {
     this.staff(actor)
@@ -23,11 +25,12 @@ export class ReviewIntake {
     if (row.expires_at <= this.now()) throw new ReviewError(410, 'Upload session expired')
   }
   private async batch(statements: Statement[]) { await this.store.db.batch(statements.map(s => this.store.db.prepare(s.sql).bind(...s.values))) }
-  private async change(row: Session, states: Session['state'][], statements: Statement[]) {
+  private async change(row: Session, states: Session['state'][], statements: Statement[], expiry: 'upload' | 'completed' | 'ignore' = 'upload') {
     const token = crypto.randomUUID()
+    const permitted = expiry === 'upload' ? `expires_at>${this.now()}` : expiry === 'completed' ? 'EXISTS(SELECT 1 FROM review_processing_jobs j WHERE j.session_id=review_upload_sessions.id AND j.result IS NOT NULL)' : '1=1'
     try {
       await this.batch([
-        statement(`INSERT INTO review_command_guards(id,valid) SELECT ?,CASE WHEN EXISTS(SELECT 1 FROM review_upload_sessions WHERE id=? AND owner_id=? AND state IN (${states.map(() => '?').join(',')}) AND expires_at>?) THEN 1 ELSE 0 END`, token, row.id, row.owner_id, ...states, this.now()),
+        statement(`INSERT INTO review_command_guards(id,valid) SELECT ?,CASE WHEN EXISTS(SELECT 1 FROM review_upload_sessions WHERE id=? AND owner_id=? AND state IN (${states.map(() => '?').join(',')}) AND ${permitted}) THEN 1 ELSE 0 END`, token, row.id, row.owner_id, ...states),
         ...statements, statement('DELETE FROM review_command_guards WHERE id=?', token),
       ])
     } catch (error) {
@@ -64,8 +67,7 @@ export class ReviewIntake {
     const row = await this.session(actor, input.sessionId)
     if (input.action === 'process') return this.process(actor, row)
     if (row.state === 'cancelled') return this.summary(row)
-    this.active(row)
-    await this.change(row, ['pending', 'uploaded', 'processing'], [statement("UPDATE review_upload_sessions SET state='cancelled' WHERE id=?", row.id)])
+    await this.change(row, ['pending', 'uploaded', 'processing'], [statement("UPDATE review_upload_sessions SET state='cancelled' WHERE id=?", row.id)], 'ignore')
     return this.read(actor, row.id)
   }
   async upload(actor: ReviewActor, id: string, request: Request) {
@@ -82,29 +84,28 @@ export class ReviewIntake {
   }
   private async attach(actor: ReviewActor, row: Session) {
     const assets = await this.store.all<{ kind: string; media_id: number }>('SELECT kind,media_id FROM review_intake_assets WHERE session_id=?', row.id)
-    const result = await this.review.execute(actor, { action: 'create-revision', videoId: row.video_id, commandId: row.revision_command, mediaId: assets.find(a => a.kind === 'source')?.media_id, deliverableMediaId: assets.find(a => a.kind === 'deliverable')?.media_id, metadata: JSON.parse(row.metadata) })
+    const savedJob = await this.jobs.row(row.id)
+    const expectation = savedJob ? (await this.jobs.load(row.id)).job.expectedCurrentRevisionId : null
+    const metadata = JSON.parse(row.metadata)
+    const transcription = row.attestation ? probeResult.parse(JSON.parse(row.attestation)).transcription : undefined
+    if (!metadata.transcript && transcription) metadata.transcript = transcription.transcript
+    const result = await this.review.execute(actor, { action: 'create-revision', videoId: row.video_id, commandId: row.revision_command, mediaId: assets.find(a => a.kind === 'source')?.media_id, deliverableMediaId: assets.find(a => a.kind === 'deliverable')?.media_id, metadata }, { currentRevisionId: expectation })
     return { ...this.summary(row), revision: result }
   }
   private async process(actor: ReviewActor, row: Session) {
     if (row.state === 'ready') return this.attach(actor, row)
-    this.active(row)
     if (!['uploaded', 'processing'].includes(row.state) || !row.source_etag) throw new ReviewError(409, 'Complete the source upload first')
     if (!this.adapter) throw new ReviewError(503, 'Container media probe/encode provider is not configured')
-    const source = { key: row.object_key, etag: row.source_etag, bytes: row.expected_bytes, checksum: row.expected_checksum }
-    await verifyStored(this.bucket, source, 'application/octet-stream')
-    await this.change(row, ['uploaded', 'processing'], [statement("UPDATE review_upload_sessions SET state='processing' WHERE id=?", row.id)])
-    const result = await this.adapter.process({ jobId: row.id, source, outputKey: row.output_key, maximumBytes: maximumIntakeBytes, maximumDurationMs: 86400000 })
+    const job = await this.jobs.start(row, this.adapter.recipe)
+    await verifyStored(this.bucket, job.source, 'application/octet-stream')
+    const saved = await this.jobs.load(row.id)
+    const result = saved.result ?? await this.adapter.process({ jobId: row.id, source: job.source, outputKey: job.outputKey, maximumBytes: job.maximumBytes, maximumDurationMs: job.maximumDurationMs })
     if (z.object({ state: z.literal('processing') }).strict().safeParse(result).success) return this.read(actor, row.id)
-    const parsed = probeResult.safeParse(result)
-    if (!parsed.success) throw new ReviewError(409, 'Provider returned invalid media evidence')
-    const evidence = parsed.data
-    if (evidence.jobId !== row.id || evidence.recipe !== this.adapter.recipe || evidence.source.key !== source.key || evidence.source.etag !== source.etag || evidence.source.checksum !== source.checksum || evidence.source.bytes !== source.bytes || evidence.source.contentType !== row.claimed_type || evidence.deliverable.key !== row.output_key) throw new ReviewError(409, 'Provider evidence does not match this upload and encoding recipe')
-    await verifyStored(this.bucket, source, 'application/octet-stream')
-    await verifyStored(this.bucket, evidence.deliverable, 'video/mp4')
+    const evidence = await this.jobs.complete(job, result)
     validateMetadata(JSON.parse(row.metadata), evidence.deliverable.durationMs)
     const attestation = JSON.stringify(evidence)
     try {
-      await this.change(row, ['processing'], [...this.register(row, evidence), statement("UPDATE review_upload_sessions SET state='ready',attestation=? WHERE id=?", attestation, row.id)])
+      await this.change(row, ['processing'], [...this.register(row, evidence), statement("UPDATE review_upload_sessions SET state='ready',attestation=? WHERE id=?", attestation, row.id)], 'completed')
     } catch (error) {
       const current = await this.session(actor, row.id)
       if (current.state !== 'ready' || current.attestation !== attestation) throw error

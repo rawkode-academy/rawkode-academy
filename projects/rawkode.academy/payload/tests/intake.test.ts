@@ -10,6 +10,10 @@ import { createIntakeHandlers } from '../src/review/intake-http'
 import { TrustedAssets, assetObject, uploadSource, verifyStored, hex, type LengthStream } from '../src/review/intake-storage'
 import { configuredMediaAdapter, maximumIntakeBytes, type ContainerMediaAdapter, type ProbeResult } from '../src/review/intake-contracts'
 import { mediaResponse } from '../src/review/media'
+import { ProcessingJobs } from '../src/review/processing-jobs'
+import { WorkflowMediaAdapter } from '../src/review/workflow-adapter'
+import { WorkersWhisper, ContainerFFmpegClient, validateAudio, joinTranscript } from '../src/review/processing-providers'
+import { runReviewProcessing, type DurableSteps } from '../src/review/processing-workflow'
 import type { ReviewActor } from '../src/review/contracts'
 
 const staff: ReviewActor = { id: 1, collection: 'users', role: 'staff' }
@@ -93,7 +97,7 @@ async function harness(t: TestContext, provider = true) {
   function request(id: string, body = sourceBytes, headers = {}) { return new Request(`${origin}/api/review/uploads?sessionId=${id}`, { method: 'PUT', headers: { origin, 'content-type': 'video/mp4', 'content-length': String(sourceBytes.length), ...headers }, body: body as BodyInit }) }
   async function uploaded() { const s = await begin(); await intake.upload(staff, s.sessionId, request(s.sessionId)); return s }
   const process = (id: string) => intake.execute(staff, { action: 'process', sessionId: id }) as unknown as Promise<{ revision: { revisionId: string; reviewVersion: number } }>
-  return { sqlite, args, store, review, assets, r2, adapter, intake, handlers, begin, request, uploaded, process, fail: (pattern?: RegExp) => { failSQL = pattern }, tick: () => { clock += 3600 }, alter: (fn: typeof alter) => { alter = fn }, during: (fn: typeof duringProcess) => { duringProcess = fn } }
+  return { sqlite, args, store, review, assets, r2, adapter, now: () => clock, intake, handlers, begin, request, uploaded, process, fail: (pattern?: RegExp) => { failSQL = pattern }, tick: (seconds = 3600) => { clock += seconds }, alter: (fn: typeof alter) => { alter = fn }, during: (fn: typeof duringProcess) => { duringProcess = fn } }
 }
 
 test('staff intake binds immutable assets, creates one revision and publishes only after client approval', async t => {
@@ -231,9 +235,9 @@ test('cross-video/source pairing and replacement before playback or publication 
 
 test('empty migration rollback succeeds and any intake record blocks destructive downgrade', async t => {
   const empty = await harness(t), populated = await harness(t)
-  await migrations.at(-1)!.down(empty.args)
+  await migrations.find(m => m.name === '20261005_180000_review_intake')!.down(empty.args)
   await populated.begin()
-  await assert.rejects(migrations.at(-1)!.down(populated.args), /CHECK constraint/)
+  await assert.rejects(migrations.find(m => m.name === '20261005_180000_review_intake')!.down(populated.args), /CHECK constraint/)
   assert.equal(populated.sqlite.prepare('SELECT count(*) n FROM review_upload_sessions').get()?.n, 1)
 })
 
@@ -257,4 +261,167 @@ test('durable adapter may return pending without registering media, then be poll
   assert.equal(h.sqlite.prepare('SELECT count(*) n FROM media').get()?.n, 0)
   h.adapter.process = finish
   assert.ok((await h.process(s.sessionId)).revision.revisionId)
+})
+
+
+function durableBinding() {
+  const ids = new Set<string>(), params: unknown[] = []
+  let status = 'running', loseReply = true
+  const instance = { async status() { return { status, output: { deliverable: 'forged result ignored' } } } } as unknown as WorkflowInstance
+  const binding = {
+    async create(input: WorkflowInstanceCreateOptions<{ jobId: string }>) {
+      assert.equal(input.id, input.params?.jobId)
+      params.push(input.params)
+      if (ids.has(input.id!)) throw Error('exists')
+      ids.add(input.id!)
+      if (loseReply) { loseReply = false; throw Error('lost acknowledgement') }
+      return instance
+    },
+    async get(id: string) { if (!ids.has(id)) throw Error('missing'); return instance },
+  }
+  return { binding, ids, params, status: (value: string) => { status = value } }
+}
+
+test('durable admission survives lost dispatch replies and upload expiry without renewing its deadline', async t => {
+  const h = await harness(t), s = await h.uploaded(), jobs = new ProcessingJobs(h.store, h.r2.bucket, h.now), workflow = durableBinding()
+  const adapter = new WorkflowMediaAdapter(h.adapter.recipe, workflow.binding, jobs)
+  h.adapter.process = input => adapter.process(input)
+  await h.process(s.sessionId)
+  const before = (await jobs.load(s.sessionId)).job
+  assert.equal(before.deadline - before.startedAt, 86400)
+  h.tick(3601); await h.process(s.sessionId)
+  assert.deepEqual((await jobs.load(s.sessionId)).job, before)
+  assert.equal(workflow.ids.size, 1)
+  assert.deepEqual(workflow.params, [{ jobId: s.sessionId }, { jobId: s.sessionId }])
+  workflow.status('complete')
+  await assert.rejects(h.process(s.sessionId), { status: 409 }, 'Workflow output is not an attestation')
+  h.tick(86400)
+  await assert.rejects(h.process(s.sessionId), { status: 410 })
+  await h.intake.execute(staff, { action: 'cancel', sessionId: s.sessionId })
+  assert.equal((await h.intake.read(staff, s.sessionId)).state, 'cancelled')
+})
+
+test('job admission is atomic and concurrent callers retain one manifest; changed recipe cannot resume it', async t => {
+  const h = await harness(t), s = await h.uploaded(), workflow = durableBinding(), jobs = new ProcessingJobs(h.store, h.r2.bucket, h.now)
+  const adapter = new WorkflowMediaAdapter(h.adapter.recipe, workflow.binding, jobs)
+  h.adapter.process = input => adapter.process(input)
+  h.fail(/INSERT INTO review_processing_jobs/)
+  await assert.rejects(h.process(s.sessionId), /Injected D1/)
+  assert.equal(workflow.ids.size, 0)
+  assert.equal((await h.intake.read(staff, s.sessionId)).state, 'uploaded')
+  h.fail(); await Promise.all([h.process(s.sessionId), h.process(s.sessionId)])
+  assert.equal(h.sqlite.prepare('SELECT count(*) n FROM review_processing_jobs').get()?.n, 1)
+  assert.equal(workflow.ids.size, 1)
+  const changed = new ReviewIntake(h.store, h.r2.bucket, h.review, { recipe: 'b'.repeat(64), process: h.adapter.process }, lengthStream, h.now)
+  await assert.rejects(changed.execute(staff, { action: 'process', sessionId: s.sessionId }), { status: 409 })
+  assert.throws(() => h.sqlite.exec("UPDATE review_processing_jobs SET manifest='{}'"), /immutable/)
+})
+
+test('completed durable evidence survives deadline and Workflow retention; unfinished work cannot finalize late', async t => {
+  const h = await harness(t), s = await h.uploaded(), produce = h.adapter.process, jobs = new ProcessingJobs(h.store, h.r2.bucket, h.now)
+  h.adapter.process = async () => ({ state: 'processing' }); await h.process(s.sessionId)
+  const { job } = await jobs.load(s.sessionId)
+  const evidence = await produce(job)
+  await jobs.complete(job, evidence)
+  h.tick(90000)
+  h.adapter.process = async () => { throw Error('must not contact provider after retained completion') }
+  assert.ok((await h.process(s.sessionId)).revision.revisionId)
+  const late = await harness(t), pending = await late.uploaded(), lateProduce = late.adapter.process, lateJobs = new ProcessingJobs(late.store, late.r2.bucket, late.now)
+  late.adapter.process = async () => ({ state: 'processing' }); await late.process(pending.sessionId)
+  const lateJob = (await lateJobs.load(pending.sessionId)).job
+  const lateResult = await lateProduce(lateJob)
+  late.tick(86400)
+  await assert.rejects(lateJobs.complete(lateJob, lateResult), { status: 410 })
+  assert.equal((await lateJobs.row(pending.sessionId))?.result, null)
+})
+
+test('late completion retains assets and cannot supersede newer revisions, including a captured null current', async t => {
+  for (const existingCurrent of [false, true]) {
+    const h = await harness(t)
+    if (existingCurrent) { const seed = await h.uploaded(); await h.process(seed.sessionId) }
+    const a = await h.uploaded(), b = await h.uploaded(), produce = h.adapter.process
+    h.adapter.process = async () => ({ state: 'processing' }); await h.process(a.sessionId)
+    h.adapter.process = produce
+    const latest = await h.process(b.sessionId)
+    await assert.rejects(h.process(a.sessionId), { status: 409 })
+    await assert.rejects(h.process(a.sessionId), { status: 409 })
+    assert.equal((await h.intake.read(staff, a.sessionId)).state, 'ready')
+    assert.equal((await h.review.read(10, staff)).currentRevisionId, latest.revision.revisionId)
+    assert.equal(h.sqlite.prepare('SELECT count(*) n FROM review_intake_assets WHERE session_id=?').get(a.sessionId)?.n, 2)
+  }
+})
+
+test('Workflow forks encoding and bounded Whisper audio, persists trusted completion and attaches generated editorial text', async t => {
+  const h = await harness(t), s = await h.uploaded(), produce = h.adapter.process, jobs = new ProcessingJobs(h.store, h.r2.bucket, h.now)
+  h.adapter.process = async () => ({ state: 'processing' }); await h.process(s.sessionId)
+  const { job } = await jobs.load(s.sessionId)
+  let encodingStarted = false, speechStarted!: () => void, aiCalls = 0
+  const speech = new Promise<void>(resolve => { speechStarted = resolve })
+  const container = {
+    async encode() { encodingStarted = true; await speech; return produce(job) },
+    async extractAudio() {
+      assert.equal(encodingStarted, true)
+      const key = `review-intake/${job.jobId}/audio/0.wav`, checksum = await digest(sourceBytes)
+      const object = await h.r2.bucket.put(key, stream(), { sha256: checksum, onlyIf: { etagDoesNotMatch: '*' }, httpMetadata: { contentType: 'audio/wav' } })
+      return { jobId: job.jobId, recipe: job.recipe, source: job.source, noAudio: false, durationMs: 10000, chunks: [{ key, etag: object!.etag, checksum, bytes: sourceBytes.length, index: 0, startMs: 0, durationMs: 10000, contentType: 'audio/wav', codec: 'pcm_s16le', sampleRate: 16000, channels: 1 }] }
+    },
+  }
+  const whisper = new WorkersWhisper({ async run(model, input) {
+    assert.equal(model, '@cf/openai/whisper-large-v3-turbo'); assert.equal(input.task, 'transcribe')
+    assert.equal(atob(input.audio), new TextDecoder().decode(sourceBytes))
+    aiCalls++; speechStarted(); return { text: 'Actual adapter-shaped transcription fixture' }
+  } }, h.r2.bucket)
+  const completed = new Map<string, unknown>()
+  const steps: DurableSteps = { async do(name, fn) { const result = await fn(); completed.set(name, result); return result } }
+  await runReviewProcessing(s.sessionId, jobs, container, whisper, steps)
+  assert.equal(aiCalls, 1); assert.ok(completed.has('persist verified completion'))
+  await runReviewProcessing(s.sessionId, jobs, container, whisper, steps)
+  assert.equal(aiCalls, 1, 'completed jobs do not re-run paid providers')
+  const revision = (await h.process(s.sessionId)).revision
+  assert.equal((await h.review.read(10, staff)).revisions.find(r => r.id === revision.revisionId)?.metadata.transcript, 'Actual adapter-shaped transcription fixture')
+  const persisted = (await jobs.load(s.sessionId)).result!
+  await assert.rejects(jobs.complete(job, { ...persisted, transcription: { ...persisted.transcription!, transcript: 'conflict' } }), { status: 409 })
+})
+
+test('audio coverage, source, chunk budget and digest are checked before Whisper calls', async t => {
+  const h = await harness(t), s = await h.uploaded(), jobs = new ProcessingJobs(h.store, h.r2.bucket, h.now)
+  h.adapter.process = async () => ({ state: 'processing' }); await h.process(s.sessionId)
+  const { job } = await jobs.load(s.sessionId), key = `review-intake/${s.sessionId}/audio/0.wav`, checksum = await digest(sourceBytes)
+  const object = await h.r2.bucket.put(key, stream(), { sha256: checksum, onlyIf: { etagDoesNotMatch: '*' }, httpMetadata: { contentType: 'audio/wav' } })
+  const chunk = { key, etag: object!.etag, checksum, bytes: sourceBytes.length, index: 0, startMs: 0, durationMs: 10000, contentType: 'audio/wav' as const, codec: 'pcm_s16le' as const, sampleRate: 16000 as const, channels: 1 as const }
+  const audio = { jobId: job.jobId, recipe: job.recipe, source: job.source, noAudio: false, durationMs: 10000, chunks: [chunk] }
+  assert.equal(validateAudio(job, audio).chunks.length, 1)
+  for (const value of [{ ...audio, source: { ...job.source, key: 'wrong' } }, { ...audio, chunks: [{ ...chunk, startMs: 1 }] }, { ...audio, chunks: [{ ...chunk, bytes: 2097153 }] }, { ...audio, chunks: Array.from({ length: 121 }, () => chunk) }, { ...audio, chunks: [] }]) assert.throws(() => validateAudio(job, value), { status: 409 })
+  assert.throws(() => joinTranscript(job, ['x'.repeat(100001)]), { status: 409 })
+  let calls = 0
+  const whisper = new WorkersWhisper({ async run() { calls++; return { text: 'never' } } }, h.r2.bucket)
+  h.r2.objects.get(key)!.bytes[0] ^= 1
+  await assert.rejects(whisper.transcribe(chunk), { status: 409 })
+  assert.equal(calls, 0)
+})
+
+test('Container protocol uses only the machine binding and bounds provider JSON', async t => {
+  const h = await harness(t), s = await h.uploaded(), jobs = new ProcessingJobs(h.store, h.r2.bucket, h.now)
+  h.adapter.process = async () => ({ state: 'processing' }); await h.process(s.sessionId)
+  const { job } = await jobs.load(s.sessionId)
+  let mode = 'valid'
+  const client = new ContainerFFmpegClient({ async fetch(url: string, init: RequestInit) {
+    assert.equal(url, `https://review-ffmpeg.internal/jobs/${job.jobId}/encode`)
+    assert.deepEqual(JSON.parse(String(init.body)), { protocol: 1, job })
+    return mode === 'valid' ? Response.json({ accepted: true }) : new Response('x'.repeat(262145))
+  } } as unknown as Fetcher)
+  assert.deepEqual(await client.encode(job), { accepted: true }, 'raw JSON still requires job/R2 evidence validation')
+  mode = 'large'; await assert.rejects(client.encode(job), { status: 502 })
+})
+
+test('legacy processing sessions without admission fail closed and processing migration preserves session data', async t => {
+  const h = await harness(t), s = await h.uploaded(), migration = migrations.find(m => m.name === '20261005_200000_review_jobs')!
+  await migration.down(h.args)
+  h.sqlite.prepare("UPDATE review_upload_sessions SET state='processing' WHERE id=?").run(s.sessionId)
+  await migration.up(h.args)
+  await assert.rejects(h.process(s.sessionId), { status: 410 })
+  assert.equal((await h.intake.read(staff, s.sessionId)).state, 'processing')
+  assert.equal(h.sqlite.prepare('SELECT count(*) n FROM review_processing_jobs').get()?.n, 0)
+  const active = await h.uploaded(); h.adapter.process = async () => ({ state: 'processing' }); await h.process(active.sessionId)
+  await assert.rejects(migration.down(h.args), /CHECK constraint/)
 })

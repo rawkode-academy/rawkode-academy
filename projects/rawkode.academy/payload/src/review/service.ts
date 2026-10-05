@@ -68,7 +68,7 @@ export class ReviewService {
       ...(actor.role === 'staff' ? { grants: await this.store.all('SELECT user_id AS userId,can_approve AS canApprove,active FROM video_review_grants WHERE video_id=?', videoId) } : {}),
     }
   }
-  async execute(actor: ReviewActor, value: unknown) {
+  async execute(actor: ReviewActor, value: unknown, expected?: { currentRevisionId: string | null }) {
     const parsed = commandSchema.safeParse(value)
     if (!parsed.success) throw new ReviewError(400, 'Invalid review command')
     const input = parsed.data
@@ -98,6 +98,7 @@ export class ReviewService {
       result = { action: input.action, userId: input.userId }
     } else if (input.action === 'create-revision') {
       staff(actor)
+      if (expected && (state?.current_revision ?? null) !== expected.currentRevisionId) throw new ReviewError(409, 'A newer review revision is current; this processed cut was retained without replacing it')
       await this.dependencies.video(input.videoId, actor)
       if (input.mediaId === input.deliverableMediaId) throw new ReviewError(400, 'Keep the original private; upload a separate review deliverable')
       await this.dependencies.assertPair?.(input.videoId, input.mediaId, input.deliverableMediaId)

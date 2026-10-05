@@ -2,6 +2,8 @@
 
 This slice supplies the staff API, streaming quarantine upload, and trusted deliverable contract. It does not install a Container/FFmpeg or Workers AI provider, add an upload UI, deploy, migrate remote databases, or alter the public watch page. `configuredMediaAdapter()` returns undefined: a successfully uploaded source remains private and `process` returns 503. Synthetic fixture review remains available only under its existing explicit loopback gate.
 
+The later [durable processing boundary](video-review-processing.md) supersedes the shared one-hour processing deadline and completion-order attachment described below. It adds a persisted 24-hour job deadline and expected-current guard; the configured provider remains unavailable.
+
 ## Staff API
 
 All requests use the existing authenticated Payload/OIDC staff identity. POST and PUT require the exact configured Origin, including through the preview bridge. Session ownership and video access are checked before reading upload bytes. JSON commands are capped at 256 KiB.
