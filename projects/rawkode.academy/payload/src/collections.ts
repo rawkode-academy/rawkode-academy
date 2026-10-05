@@ -1,3 +1,4 @@
+import {reviewCollections} from './review/collections'
 import {isStaff} from './auth/access'
 import {usersCollection} from './auth/payload'
 import type {AuthConfig} from './auth/config'
@@ -135,6 +136,7 @@ const klusteredCollections: CollectionConfig[] = [
   domain('registrations', [sourceText('seasonId'), relation('season', 'seasons'), sourceText('bracketId'), relation('bracket', 'brackets'), { name: 'entryType', type: 'select', options: ['solo','team'] }, text('teamName'), { name: 'preferredSlot', type: 'number' }, text('userId'), text('displayName'), text('email'), text('message'), { name: 'status', type: 'select', options: ['pending','approved','rejected'] }, date('submittedAt'), date('reviewedAt'), text('reviewedByUserId')], 'displayName'),
 ]
 export const createCollections = (config:AuthConfig,db:D1Database): CollectionConfig[] => [
+  ...reviewCollections,
   pipelineCollection,
   usersCollection(config,db),
   {

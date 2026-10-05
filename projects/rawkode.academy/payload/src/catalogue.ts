@@ -35,6 +35,20 @@ export class Catalogue {
       if (!result.hasNextPage) break
       page += 1
     }
+    if (collection === 'videos') {
+      let releasePage = 1
+      for (;;) {
+        const releases = await this.payload.find({ collection: 'video-publications', overrideAccess: false, user: null, depth: 0, limit: 100, page: releasePage })
+        for (const release of releases.docs) {
+          const document = release.document as CatalogueDocument
+          const previous = documents.findIndex(video => video.id === document.id)
+          if (previous >= 0) documents[previous] = document
+          else documents.push(document)
+        }
+        if (!releases.hasNextPage) break
+        releasePage += 1
+      }
+    }
     // sourceOrder is retained by import; stable legacy ID breaks ties for new records.
     return documents.sort((a, b) => Number(a.sourceOrder ?? Number.MAX_SAFE_INTEGER) - Number(b.sourceOrder ?? Number.MAX_SAFE_INTEGER) || a.legacyId.localeCompare(b.legacyId))
   }

@@ -1,3 +1,4 @@
+import * as migration_20261005_120000_video_review from './20261005_120000_video_review';
 import * as migration_20261004_153744 from './20261004_153744';
 import * as migration_20261004_154006 from './20261004_154006';
 import * as migration_20261004_154154 from './20261004_154154';
@@ -60,4 +61,5 @@ export const migrations = [
     down: migration_20261004_210158.down,
     name: '20261004_210158'
   },
+  { up: migration_20261005_120000_video_review.up, down: migration_20261005_120000_video_review.down, name: '20261005_120000_video_review' },
 ];

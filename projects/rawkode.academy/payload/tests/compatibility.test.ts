@@ -27,6 +27,7 @@ function harness() {
   const payload = { find: async (options: Record<string, unknown>) => {
     calls.push(options)
     assert.equal(options.overrideAccess, false)
+    if (options.collection === 'video-publications') return { docs: [], hasNextPage: false }
     assert.equal(options.draft, false)
     assert.equal(options.user, null)
     assert.equal(options.depth, 0)
