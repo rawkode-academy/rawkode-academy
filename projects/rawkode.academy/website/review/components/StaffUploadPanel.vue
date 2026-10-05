@@ -1,0 +1,198 @@
+<script setup lang="ts">
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { ApiError, requestJSON } from "../api";
+import type { ReviewCustomer, UploadTarget } from "../types";
+
+const maximumBytes = 64 * 1024 * 1024;
+const sourceTypes = ["video/mp4", "video/quicktime", "video/webm"] as const;
+const pendingKey = "rawkode-academy-review-upload";
+type Metadata = { title: string; description: string; transcript: string; chapters: never[] };
+type BeginInput = { action: "begin"; commandId: string; videoId: number; bytes: number; checksum: string; contentType: typeof sourceTypes[number]; metadata: Metadata };
+type PendingUpload = { input: BeginInput; fingerprint: string; customerId: number; sessionId: string | null; grantCommandId: string; stage: "begin" | "upload" | "process" | "grant" };
+type SessionStatus = { sessionId: string; state: string; expiresAt: number; processingAvailable: boolean };
+
+const emit = defineEmits<{ created: [videoId: number] }>();
+const targets = ref<UploadTarget[]>([]), customers = ref<ReviewCustomer[]>([]);
+const selectedVideoId = ref<number | null>(null), selectedCustomerId = ref<number | null>(null);
+const title = ref(""), description = ref(""), search = ref(""), customerSearch = ref(""), file = ref<File | null>(null);
+const pending = ref<PendingUpload | null>(null), sessionStatus = ref<SessionStatus | null>(null);
+const loading = ref(true), busy = ref(false), error = ref(""), progress = ref("");
+let mounted = true, optionsReady = false, optionsGeneration = 0, searchTimer: ReturnType<typeof setTimeout> | undefined;
+const controller = new AbortController();
+
+const visibleTargets = computed(() => {
+  const needle = search.value.trim().toLowerCase();
+  return needle ? targets.value.filter(item => [item.title, item.slug, item.legacyId].some(value => value.toLowerCase().includes(needle))) : targets.value;
+});
+const selectedTarget = computed(() => visibleTargets.value.find(item => item.videoId === selectedVideoId.value));
+const visibleCustomers = computed(() => {
+  const needle = customerSearch.value.trim().toLowerCase();
+  return needle ? customers.value.filter(item => [item.name, item.profileEmail].some(value => value.toLowerCase().includes(needle))) : customers.value;
+});
+const resumable = computed(() => {
+  const item = pending.value;
+  return Boolean(item?.sessionId && item.customerId === selectedCustomerId.value && item.input.videoId === selectedVideoId.value && item.input.metadata.title === title.value.trim() && item.input.metadata.description === description.value.trim() && item.stage !== "upload");
+});
+const canSubmit = computed(() => Boolean(selectedTarget.value && selectedCustomerId.value && title.value.trim() && description.value.trim() && (file.value || resumable.value)) && !busy.value);
+
+function api<T>(url: string, init?: RequestInit) { return requestJSON<T>(url, { ...init, signal: controller.signal }); }
+function fingerprint(input: BeginInput) { return JSON.stringify({ videoId: input.videoId, bytes: input.bytes, checksum: input.checksum, contentType: input.contentType, metadata: input.metadata }); }
+function savePending(value: PendingUpload | null) {
+  pending.value = value;
+  try { if (value) sessionStorage.setItem(pendingKey, JSON.stringify(value)); else sessionStorage.removeItem(pendingKey); } catch { /* Private browsing may not expose session storage. */ }
+}
+function restorePending() {
+  try {
+    const value = sessionStorage.getItem(pendingKey);
+    if (value) {
+      pending.value = JSON.parse(value) as PendingUpload;
+      selectedVideoId.value = pending.value.input.videoId;
+      selectedCustomerId.value = pending.value.customerId;
+      title.value = pending.value.input.metadata.title;
+      description.value = pending.value.input.metadata.description;
+    }
+  } catch { pending.value = null; }
+}
+async function loadOptions() {
+  const generation = ++optionsGeneration;
+  const [videoResult, customerResult] = await Promise.all([
+    api<{ videos: UploadTarget[] }>(`/api/review/upload-targets${search.value.trim() ? `?q=${encodeURIComponent(search.value.trim())}` : ""}`),
+    api<{ reviewers: ReviewCustomer[] }>(`/api/review/reviewers${customerSearch.value.trim() ? `?q=${encodeURIComponent(customerSearch.value.trim())}` : ""}`),
+  ]);
+  if (!mounted || generation !== optionsGeneration) return;
+  targets.value = videoResult.videos; customers.value = customerResult.reviewers;
+  if (!selectedVideoId.value || !visibleTargets.value.some(item => item.videoId === selectedVideoId.value)) {
+    if (visibleTargets.value[0]) chooseVideo(visibleTargets.value[0].videoId);
+    else { selectedVideoId.value = null; title.value = ""; description.value = ""; }
+  }
+  if (!selectedCustomerId.value || !visibleCustomers.value.some(item => item.userId === selectedCustomerId.value)) selectedCustomerId.value = visibleCustomers.value[0]?.userId ?? null;
+}
+async function load() {
+  loading.value = true; error.value = "";
+  try {
+    restorePending();
+    await loadOptions();
+    const item = pending.value;
+    if (item?.sessionId) sessionStatus.value = await api<SessionStatus>(`/api/review/uploads?sessionId=${encodeURIComponent(item.sessionId)}`);
+  } catch (reason) { if (mounted) error.value = reason instanceof Error ? reason.message : "Could not load upload options."; }
+  finally { if (mounted) { loading.value = false; optionsReady = true; } }
+}
+function scheduleOptions() {
+  if (!optionsReady) return;
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => { void loadOptions().catch(reason => { if (mounted) error.value = reason instanceof Error ? reason.message : "Could not search upload options."; }); }, 250);
+}
+watch(search, scheduleOptions);
+watch(customerSearch, scheduleOptions);
+function chooseVideo(videoId: number) {
+  selectedVideoId.value = videoId;
+  const target = targets.value.find(item => item.videoId === videoId);
+  if (target) { title.value = target.title; description.value = target.description; }
+}
+function chooseVideoFromEvent(event: Event) { chooseVideo(Number((event.target as HTMLSelectElement).value)); }
+function clearRetry() { savePending(null); sessionStatus.value = null; progress.value = ""; error.value = ""; }
+function chooseFile(event: Event) {
+  const candidate = (event.target as HTMLInputElement).files?.[0] ?? null;
+  file.value = candidate;
+  if (!candidate) return;
+  if (!(sourceTypes as readonly string[]).includes(candidate.type)) error.value = "Choose an MP4, QuickTime, or WebM video.";
+  else if (candidate.size > maximumBytes) error.value = "The source video must be 64 MiB or smaller.";
+  else error.value = "";
+}
+function digest(bytes: ArrayBuffer) {
+  return crypto.subtle.digest("SHA-256", bytes).then(value => Array.from(new Uint8Array(value), byte => byte.toString(16).padStart(2, "0")).join(""));
+}
+function wait(ms: number) { return new Promise(resolve => setTimeout(resolve, ms)); }
+async function process(sessionId: string) {
+  for (let attempt = 0; attempt < 90; attempt++) {
+    if (!mounted) throw new DOMException("Upload panel was closed", "AbortError");
+    const result = await api<{ state: string; revision?: unknown }>("/api/review/uploads", {
+      method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "process", sessionId }),
+    });
+    if (result.revision) return result;
+    progress.value = result.state === "processing" ? `Processing media… check ${attempt + 1}/90` : `Processing state: ${result.state}`;
+    await wait(2000);
+  }
+  throw new Error("Processing is taking longer than this review session allows. The upload session was kept; retry to resume it.");
+}
+async function submit() {
+  if (!canSubmit.value || !selectedVideoId.value || !selectedCustomerId.value) return;
+  const source = file.value;
+  busy.value = true; error.value = ""; progress.value = "Preparing upload…";
+  try {
+    let input: BeginInput;
+    if (source) {
+      if (!(sourceTypes as readonly string[]).includes(source.type) || source.size > maximumBytes) return;
+      const metadata: Metadata = { title: title.value.trim(), description: description.value.trim(), transcript: "", chapters: [] };
+      input = { action: "begin", commandId: pending.value?.input.commandId ?? crypto.randomUUID(), videoId: selectedVideoId.value, bytes: source.size, checksum: await digest(await source.arrayBuffer()), contentType: source.type as typeof sourceTypes[number], metadata };
+      if (pending.value && pending.value.fingerprint !== fingerprint(input)) savePending(null);
+    } else if (resumable.value && pending.value) input = pending.value.input;
+    else return;
+    let item = pending.value;
+    if (!item) {
+      item = { input, fingerprint: fingerprint(input), customerId: selectedCustomerId.value, sessionId: null, grantCommandId: crypto.randomUUID(), stage: "begin" };
+      savePending(item);
+    }
+    if (!item.sessionId) {
+      item.stage = "begin"; savePending(item);
+      const begin = await api<{ sessionId: string }>("/api/review/uploads", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(item.input) });
+      item.sessionId = begin.sessionId; item.stage = "upload"; savePending(item);
+    }
+    const status = await api<SessionStatus>(`/api/review/uploads?sessionId=${encodeURIComponent(item.sessionId)}`);
+    sessionStatus.value = status;
+    if (["pending", "uploaded"].includes(status.state)) {
+      if (!source) throw new Error("Select the same source video to resume this upload.");
+      progress.value = "Uploading source video…"; item.stage = "upload"; savePending(item);
+      await api(`/api/review/uploads?sessionId=${encodeURIComponent(item.sessionId)}`, { method: "PUT", headers: { "content-type": source.type, "x-upload-length": String(source.size) }, body: source });
+    }
+    progress.value = "Starting transcription and encoding…"; item.stage = "process"; savePending(item);
+    await process(item.sessionId);
+    progress.value = "Assigning client approval…"; item.stage = "grant"; savePending(item);
+    await api("/api/review", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "grant", videoId: item.input.videoId, commandId: item.grantCommandId, userId: item.customerId, canApprove: true }) });
+    const videoId = item.input.videoId;
+    savePending(null); sessionStatus.value = null; file.value = null; progress.value = "Review created and assigned.";
+    await loadOptions();
+    if (mounted) emit("created", videoId);
+  } catch (reason) {
+    if (!mounted) return;
+    if (reason instanceof ApiError && reason.status === 503) error.value = "Media processing is not enabled in this preview yet.";
+    else error.value = reason instanceof Error ? reason.message : "The upload failed.";
+    progress.value = "";
+  } finally { if (mounted) busy.value = false; }
+}
+onMounted(load);
+onUnmounted(() => { mounted = false; controller.abort(); clearTimeout(searchTimer); });
+</script>
+
+<template>
+  <details class="staff-upload" open>
+    <summary>Upload a review cut</summary>
+    <div class="staff-upload-body">
+      <p class="muted">Upload the original cut, process it, and assign one Academy customer to approve the resulting revision.</p>
+      <p v-if="loading" role="status" class="muted">Loading upload options…</p>
+      <template v-else>
+        <label>Video target
+          <input v-model="search" type="search" placeholder="Search videos" :disabled="busy || Boolean(pending)" />
+          <select :value="selectedVideoId ?? undefined" :disabled="busy || Boolean(pending) || !visibleTargets.length" @change="chooseVideoFromEvent">
+            <option v-for="item in visibleTargets" :key="item.videoId" :value="item.videoId">{{ item.title }} · {{ item.reviewState.replaceAll('-', ' ') }}</option>
+          </select>
+        </label>
+        <label>Approving customer
+          <input v-model="customerSearch" type="search" placeholder="Search customers" :disabled="busy || Boolean(pending)" />
+          <select v-model.number="selectedCustomerId" :disabled="busy || Boolean(pending) || !visibleCustomers.length">
+            <option v-for="customer in visibleCustomers" :key="customer.userId" :value="customer.userId">{{ customer.name }}{{ customer.profileEmail ? ` · ${customer.profileEmail}` : '' }}</option>
+          </select>
+        </label>
+        <label>Review title<input v-model="title" maxlength="300" required :disabled="busy || Boolean(pending)" /></label>
+        <label>Description<textarea v-model="description" maxlength="8000" rows="3" required :disabled="busy || Boolean(pending)"></textarea></label>
+        <label>Source video<input type="file" accept="video/mp4,video/quicktime,video/webm" :required="!resumable" :disabled="busy" @change="chooseFile" /></label>
+        <p class="muted">Maximum 64 MiB. The original is retained privately; the client reviews a verified H.264 deliverable.</p>
+        <p v-if="selectedTarget && selectedTarget.reviewState !== 'no-review'" class="review-banner">This creates a new revision for the selected video. Existing approval history is retained.</p>
+        <p v-if="pending" class="review-banner">An unfinished upload is saved for retry{{ sessionStatus ? ` · ${sessionStatus.state}` : '' }}. <button class="quiet" :disabled="busy" @click="clearRetry">Start a different review</button></p>
+        <button class="primary" :disabled="!canSubmit" @click="submit">{{ busy ? progress || 'Working…' : pending ? 'Resume upload and assign review' : 'Upload and assign review' }}</button>
+      </template>
+      <p v-if="progress" role="status" class="review-banner">{{ progress }}</p>
+      <p v-if="error" role="alert" class="review-error">{{ error }} <button class="quiet" :disabled="busy" @click="submit">Retry</button> <button class="quiet" :disabled="busy" @click="load">Reload options</button></p>
+    </div>
+  </details>
+</template>

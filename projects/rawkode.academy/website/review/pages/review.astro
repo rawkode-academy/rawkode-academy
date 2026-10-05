@@ -1,0 +1,17 @@
+---
+import ReviewApp from "../components/ReviewApp.vue";
+import "@rawkodeacademy/design-system/styles.css";
+import "../../src/styles/global.css";
+import { privateHeaders } from "../bridge";
+for (const [key, value] of Object.entries(privateHeaders)) Astro.response.headers.set(key, value);
+Astro.response.headers.set("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" /><meta name="viewport" content="width=device-width" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>Video review · Rawkode Academy</title>
+  </head>
+  <body><ReviewApp client:load /><noscript>JavaScript is required to sign in and review videos.</noscript></body>
+</html>

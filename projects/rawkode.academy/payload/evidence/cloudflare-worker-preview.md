@@ -1,0 +1,17 @@
+# Cloudflare Worker Preview deployment
+
+The Payload preview is deployed with Wrangler's Worker Preview workflow rather than a second production Worker. The `previews` block gives each branch its own Durable Object and Container resources where Cloudflare supports automatic provisioning. The configured D1 database ID and R2 bucket name are currently shared by previews, so preview data is staging data and must not contain production or customer material. Workflows are different: a Preview binds to an already deployed Workflow, so the Workflow names must exist before the media path can be exercised.
+
+References:
+
+- <https://developers.cloudflare.com/workers/previews/get-started/>
+- <https://developers.cloudflare.com/workers/previews/resources/>
+- <https://developers.cloudflare.com/workers/previews/compare-workflows/>
+
+## Current CI gate
+
+The shared `cloudflare/api-tokens/workers` token can deploy the Worker and provision the data/auth preview, but the first Container-enabled preview attempt returned `403 Authentication error` from `GET /accounts/<account>/containers/me`. This was observed in the Payload PR pipeline on 2026-10-05; no media container was started.
+
+`scripts/deploy-preview.mjs` therefore has an explicit CI fallback controlled by `CLOUDFLARE_PREVIEW_ALLOW_DEGRADED_CONTAINERS=true`. On that exact Containers authentication failure it retries the same named Preview with the container and Durable Object bindings removed. The resulting preview is useful for identity, Payload, D1, R2, and review UI checks; `configuredMediaAdapter()` remains fail-closed, so an upload cannot claim to have been processed without the real providers.
+
+To enable the complete media path, grant the preview deployment token the Cloudflare Containers edit permission, remove the fallback environment variable, and verify the Preview's generated container app starts before accepting a real upload. This is intentionally a deployment prerequisite, not a silent production downgrade.

@@ -91,8 +91,14 @@ OIDC users default to customers. Only subjects explicitly listed in `OIDC_STAFF_
 | `articles` | Text/source body, publication date, authors, technologies and resources. |
 | `courses`, `course-modules` | Ordered module relationships, course/video/resources, section/order and source body. |
 | `learning-paths` | Ordered courses/videos, technologies, prerequisites, difficulty and duration. |
+| `series`, `adrs`, `testimonials`, `news`, `changelog` | Static editorial records with source frontmatter/body retained for editing and reconciliation. |
+| `static-assets` | Local Astro assets uploaded to checksum-addressed R2 keys with source paths and checksums. |
+| `seasons`, `competitors`, `brackets`, `bracket-applications`, `teams`, `team-members`, `bracket-breaks`, `bracket-entries`, `matches`, `match-results` | Pre-launch Klustered competition data imported by stable source IDs and linked relationships. |
+| `team-invites`, `registrations` | Sensitive Klustered records; excluded by default and imported only with an explicit `--include-sensitive` gate. |
 
-All 11 catalogue types support Payload versions/drafts. REST and generated GraphQL expose real editing. The fixture contains 18 records across all types, including cycles, future publication dates and a private video. `sourceBody` preserves source Markdown/MDX verbatim; no rich-text/MDX conversion or complete repository exporter is claimed. The fixture is representative, not a full production export. Existing stream/thumbnail URLs are retained as data; media is not fetched from them.
+All catalogue and Klustered collections support Payload versions/drafts where editorial review is useful. REST and generated GraphQL expose real editing and mutations. `sourceBody` preserves source Markdown/MDX verbatim, while `sourceData` preserves the original frontmatter/YAML object. The static importer walks the repository content tree, derives chapters and learning resources, records local assets, and can upload them to R2. The Klustered exporter reads the existing `platform-brackets` D1 database into a stable JSON snapshot. Existing stream/thumbnail URLs are retained as data; media is not fetched automatically as part of this migration.
+
+The complete migration procedure, sensitive-data gate, reconciliation requirements and rollback are documented in [content migration evidence](evidence/content-migration.md).
 
 `legacyId` is a unique string within its collection and is returned by the compatibility layer. Numeric Payload database IDs stay internal. New editorial records need a deliberate legacy ID, legacy type and slug. Publication does not mint replacement public IDs. URL redirect/slug-change policy still needs production decisions.
 

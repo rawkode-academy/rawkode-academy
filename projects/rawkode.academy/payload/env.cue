@@ -18,6 +18,10 @@ env: {
 		CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {
 			ref: "op://sa.rawkode.academy/cloudflare/api-tokens/workers"
 		}
+		// The shared Workers token currently cannot provision Containers. Pull
+		// requests still get an isolated auth/D1/R2 preview while media remains
+		// fail-closed; remove this once the token has Containers:Edit.
+		CLOUDFLARE_PREVIEW_ALLOW_DEGRADED_CONTAINERS: "true"
 	}
 }
 
@@ -29,7 +33,7 @@ ci: pipelines: {
 			defaultBranch: true
 			manual: true
 		}
-		tasks: [_t.check, _t.test, _t.build]
+		tasks: [_t.check, _t.test, _t.deploy.main]
 	}
 
 	pullRequest: {
@@ -68,8 +72,10 @@ tasks: {
 		env: PATH: _taskPath
 		inputs: [
 			"src/**",
+			"src/migrations/**",
 			"tests/**",
 			"fixtures/**",
+			"evidence/**",
 			"package.json",
 			"../../../bun.lock",
 		]
@@ -92,8 +98,10 @@ tasks: {
 		inputs: [
 			"app/**",
 			"src/**",
+			"src/migrations/**",
 			"scripts/**",
 			"fixtures/**",
+			"evidence/**",
 			"payload.config.ts",
 			"worker.ts",
 			"open-next.config.ts",
@@ -111,9 +119,48 @@ tasks: {
 		migrate: schema.#Task & {
 			hermetic: false
 			command: "sh"
+			args: ["-lc", "\(_toolchain) bun run migrate:remote"]
+			env: PATH: _taskPath
+			dependsOn: [_t.setup]
+			inputs: [
+				"src/migrations/**",
+				"src/**",
+				"payload.config.ts",
+				"scripts/setup.mjs",
+				"package.json",
+				"wrangler.jsonc",
+				"../../../bun.lock",
+			]
+		}
+
+		migratePreview: schema.#Task & {
+			hermetic: false
+			command: "sh"
 			args: ["-lc", "\(_toolchain) bun run migrate:preview"]
 			env: PATH: _taskPath
 			dependsOn: [_t.build]
+		}
+
+		main: schema.#Task & {
+			hermetic: false
+			command: "sh"
+			args: ["-lc", "\(_toolchain) bun x wrangler deploy"]
+			env: PATH: _taskPath
+			dependsOn: [_t.build, _t.deploy.migrate]
+			inputs: [
+				"app/**",
+				"src/**",
+				"src/migrations/**",
+				"scripts/**",
+				"payload.config.ts",
+				"worker.ts",
+				"open-next.config.ts",
+				"next.config.mjs",
+				"package.json",
+				"wrangler.jsonc",
+				"tsconfig.json",
+				"../../../bun.lock",
+			]
 		}
 
 		preview: schema.#Task & {
@@ -121,7 +168,7 @@ tasks: {
 			command: "sh"
 			args: ["-lc", "\(_toolchain) bun run deploy:preview"]
 			env: PATH: _taskPath
-			dependsOn: [_t.check, _t.test, _t.deploy.migrate]
+			dependsOn: [_t.check, _t.test, _t.deploy.migratePreview]
 			captures: previewUrl: {
 				pattern: "Preview URL: (.+)"
 			}

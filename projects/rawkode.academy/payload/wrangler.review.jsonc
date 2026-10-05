@@ -1,0 +1,85 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "rawkode-academy-review-backend",
+  "account_id": "0aeb879de8e3cdde5fb3d413025222ce",
+  "main": "worker.ts",
+  "compatibility_date": "2026-10-04",
+  "compatibility_flags": [
+    "nodejs_compat",
+    "global_fetch_strictly_public"
+  ],
+  "workers_dev": false,
+  "preview_urls": false,
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "d1_databases": [
+    {
+      "binding": "D1",
+      "database_id": "dffc7272-ef5e-4d7f-91ac-d85f504ca2ae",
+      "database_name": "rawkode-academy-payload-preview"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "R2",
+      "bucket_name": "rawkode-academy-payload-preview"
+    }
+  ],
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "rawkode-academy-review-backend"
+    }
+  ],
+  "workflows": [
+    {
+      "binding": "MEDIA_WORKFLOW",
+      "name": "rawkode-academy-review-media",
+      "class_name": "MediaWorkflow"
+    },
+    {
+      "binding": "REVIEW_MEDIA_WORKFLOW",
+      "name": "rawkode-academy-review-processing",
+      "class_name": "ReviewMediaWorkflow"
+    }
+  ],
+  "vars": {
+    "OIDC_ISSUER": "https://id.rawkode.academy",
+    "OIDC_CLIENT_ID": "rawkode-academy-preview",
+    "OIDC_REDIRECT_URI": "https://preview.rawkode.academy/api/auth/callback",
+    "OIDC_STAFF_SUBJECTS": "[\"HmYDQjc3JVFo7visJIL5FneGFzNAJjDT\"]",
+    "OIDC_SESSION_TTL_SECONDS": "3600",
+    "POC_DEV_LOCAL_AUTH": "false",
+    "REVIEW_MEDIA_RECIPE": "ab74d9377bb060d7c2ceb17990b99a60ba0b3f0cb86cb0a60f4dba977a394fbe"
+  },
+  "ai": {
+    "binding": "AI",
+    "remote": true
+  },
+  "containers": [
+    {
+      "class_name": "ReviewFFmpegContainer",
+      "image": "./container/Dockerfile",
+      "image_build_context": "./container",
+      "scheduling_policy": "default",
+      "instance_type": "standard-1",
+      "max_instances": 4
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "REVIEW_FFMPEG",
+        "class_name": "ReviewFFmpegContainer"
+      }
+    ]
+  },
+  "exports": {
+    "ReviewFFmpegContainer": {
+      "type": "durable-object",
+      "storage": "sqlite"
+    }
+  }
+}

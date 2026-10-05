@@ -82,8 +82,9 @@ export function createCompatibilitySchema(payload: Payload): GraphQLSchema {
   // No fake identity bridge: this POC public facade is anonymous, regardless of request headers.
   set('Query', 'me', () => null)
 
-  for (const [field, collection] of [['technologies', 'technologies'], ['guests', 'people'], ['chapters', 'chapters']] as const)
+  for (const [field, collection] of [['technologies', 'technologies'], ['guests', 'people']] as const)
     set('Video', field, (video, _, context) => catalogue(context).relationships(collection, video[field]))
+  set('Video', 'chapters', (video, _, context) => video.reviewChapters ?? catalogue(context).relationships('chapters', video.chapters))
   set('Video', 'episode', async (video, _, context) => {
     const view = catalogue(context)
     return video.episode ? view.relationship('episodes', video.episode) : (await view.reverse('episodes', 'video', video))[0] ?? null

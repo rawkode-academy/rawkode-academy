@@ -1,0 +1,18 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": [
+      "node",
+      "vite/client"
+    ],
+    "skipLibCheck": true
+  },
+  "include": [
+    "review/components/**/*.vue",
+    "review/api.ts",
+    "review/types.ts",
+    "review/bridge.ts",
+    "review/tests/**/*.ts"
+  ]
+}
