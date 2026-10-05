@@ -217,11 +217,12 @@ test('an artifact cancellation drains precisely its frame and preserves the next
   assert.equal(await new Response(frames.artifact(second.length)).text(), 'second')
   await frames.finish()
 })
-test('runtime activation requires every provider binding, the baked recipe and a store', () => {
+test('request-worker activation requires the Workflow binding, baked recipe and store', () => {
   const store = new ReviewStore({} as D1Database)
   const env = { D1: {} as D1Database, R2: {} as R2Bucket, AI: {} as Ai, REVIEW_FFMPEG: {} as DurableObjectNamespace, REVIEW_MEDIA_WORKFLOW: {} as MediaRuntime['REVIEW_MEDIA_WORKFLOW'], REVIEW_MEDIA_RECIPE: mediaRecipe }
   assert.equal(configuredMediaAdapter(), undefined); assert.equal(configuredMediaAdapter(env), undefined)
-  for (const name of ['AI', 'REVIEW_FFMPEG', 'REVIEW_MEDIA_WORKFLOW', 'REVIEW_MEDIA_RECIPE'] as const) assert.equal(configuredMediaAdapter({ ...env, [name]: undefined }, store), undefined)
+  for (const name of ['REVIEW_MEDIA_WORKFLOW', 'REVIEW_MEDIA_RECIPE'] as const) assert.equal(configuredMediaAdapter({ ...env, [name]: undefined }, store), undefined)
+  assert.ok(configuredMediaAdapter({ ...env, AI: undefined, REVIEW_FFMPEG: undefined }, store))
   assert.equal(configuredMediaAdapter({ ...env, REVIEW_MEDIA_RECIPE: 'different recipe' }, store), undefined)
   const adapter = configuredMediaAdapter(env, store)
   assert.ok(adapter instanceof WorkflowMediaAdapter); assert.equal(adapter.recipe, mediaRecipe)

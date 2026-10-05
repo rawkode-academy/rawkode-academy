@@ -1,6 +1,6 @@
 # Customer video review preview
 
-Implemented as a separate Astro/Vue entry in the existing website package. The public website build, routes, session implementation, DNS and GraphQL schema are unchanged. No code was pushed, merged or deployed.
+Implemented as a separate Astro/Vue entry in the existing website package. The public website build, routes, session implementation, DNS and GraphQL schema are unchanged. The media-capable backend and review UI are deployed to a named Cloudflare Worker Preview; production DNS and the public watch-page path remain unchanged.
 
 ## Files and behavior
 
@@ -28,7 +28,7 @@ The website package has `review:build`, `review:dev`, and `review:test` commands
 
 `review:dev` starts the UI on 127.0.0.1:3100. Its checked-in binding/origin configuration targets the remote preview and does not establish a local paired backend by itself. For a real paired local test, configure the UI's REVIEW_ORIGIN and the backend OIDC_REDIRECT_URI consistently to `http://127.0.0.1:3100` and its `/api/auth/callback`, run both named Workers with the private binding, and apply migrations to local data. Keep POC_DEV_LOCAL_AUTH false. This paired runtime remains unverified. The browser fixture script instead uses the local UI on port 4319 and intercepts its APIs explicitly; it cannot submit real approvals.
 
-**Normal customer footage is not supported by the current backend media gate.** It accepts only the explicitly enabled known synthetic MP4 on loopback and buffers/caps reads at 32 MiB. On remote preview, publication is disabled in the interface until trusted media probing exists; backend enforcement is unchanged. Do not claim arbitrary footage or live Cloudflare media works from these results.
+**Normal customer footage is not yet production-approved by the current media gate.** The hosted Preview now accepts and processes the checked-in synthetic MP4 through the native Container/Workflow/Workers AI path. Arbitrary footage still requires acceptance against the pinned probe/encode policy, capacity and quota controls, and production deployment. Do not generalize the synthetic Preview result to production media.
 
 **Publication does not cut over the public Academy watch page.** It creates the existing backend publication artifact/snapshot; the public watch route still uses content.rawkode.academy HLS. That integration remains a separate gate. Runtime request revocation cannot retract video bytes already downloaded into a browser buffer.
 

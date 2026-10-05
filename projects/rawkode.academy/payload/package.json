@@ -21,6 +21,7 @@
     "demo:mutations": "npm run test:worker",
     "build:worker": "node scripts/check-review-container-recipe.mjs && WRANGLER_LOG_PATH=.runtime/wrangler.log opennextjs-cloudflare build",
     "deploy:preview": "node scripts/deploy-preview.mjs",
+    "deploy:preview-runtime": "node scripts/check-review-container-recipe.mjs && wrangler deploy --config wrangler.preview-runtime.jsonc --secrets-file .dev.vars",
     "preview": "WRANGLER_LOG_PATH=.runtime/wrangler.log wrangler dev --local --ip 127.0.0.1 --port 3100",
     "setup": "node scripts/setup.mjs",
     "migrate:create": "WRANGLER_LOG_PATH=.runtime/wrangler.log POC_CLI=1 payload migrate:create",

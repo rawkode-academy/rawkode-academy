@@ -40,7 +40,7 @@ export class ReviewFFmpegContainer extends DurableObject<MediaRuntime> {
     await this.live(job)
     const source = await this.env.R2.get(job.source.key, { onlyIf: { etagMatches: job.source.etag } })
     if (!source || !('body' in source)) throw new ReviewError(409, 'Source changed before Container processing')
-    return port.fetch(`http://container/${operation}`, { method: 'POST', redirect: 'error', signal: AbortSignal.timeout(108000), headers: { 'content-type': 'application/octet-stream', 'content-length': String(job.source.bytes), 'x-review-recipe': mediaRecipe, 'x-review-job': JSON.stringify(job) }, body: source.body })
+    return port.fetch(`http://container/${operation}`, { method: 'POST', redirect: 'manual', signal: AbortSignal.timeout(108000), headers: { 'content-type': 'application/octet-stream', 'content-length': String(job.source.bytes), 'x-review-recipe': mediaRecipe, 'x-review-job': JSON.stringify(job) }, body: source.body })
   }
   async fetch(request: Request) {
     try {
