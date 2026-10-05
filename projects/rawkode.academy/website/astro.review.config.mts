@@ -1,4 +1,4 @@
-import { defineConfig, sessionDrivers } from "astro/config";
+import { defineConfig } from "astro/config";
 import cloudflare from "@astrojs/cloudflare";
 import vue from "@astrojs/vue";
 
@@ -7,8 +7,9 @@ export default defineConfig({
   srcDir: "./review", outDir: "./dist-review", cacheDir: "./.astro/review",
   publicDir: "./review/public", output: "server", site: "https://preview.rawkode.academy",
   // The review bridge owns authentication with Payload/OIDC; this entrypoint
-  // does not use Astro sessions, so do not provision an unrelated KV binding.
-  session: { driver: sessionDrivers.null() },
+  // does not use Astro sessions, so use a local no-op driver rather than
+  // letting the Cloudflare adapter provision an unrelated KV binding.
+  session: { driver: { entrypoint: new URL("./review/no-session-driver.ts", import.meta.url) } },
   adapter: cloudflare({ configPath: "wrangler.review.jsonc", imageService: "compile", inspectorPort: false }),
   integrations: [vue()],
   vite: { cacheDir: "./.astro/review/vite", resolve: { dedupe: ["vue"] } },
