@@ -1,7 +1,7 @@
 import { ReviewError, type ReviewActor } from './contracts'
 import type { ReviewService } from './service'
 
-export type ReviewRuntime = { service: ReviewService; actor: ReviewActor; origin: string; publicationAvailable?: boolean }
+export type ReviewRuntime = { service: ReviewService; actor: ReviewActor; origin: string; publicationAvailable?: boolean | ((videoId: number) => Promise<boolean>) }
 const privateHeaders = { 'cache-control': 'private, no-store', 'referrer-policy': 'no-referrer' }
 export function reviewFailure(error: unknown): Response {
   if (error instanceof ReviewError) return Response.json({ error: error.message }, { status: error.status, headers: privateHeaders })
@@ -12,7 +12,7 @@ export function videoIdFrom(request: Request): number {
   if (!value || !/^[1-9]\d*$/.test(value) || !Number.isSafeInteger(Number(value))) throw new ReviewError(400, 'A videoId is required')
   return Number(value)
 }
-async function readCommand(request: Request) {
+export async function readCommand(request: Request) {
   const reader = request.body?.getReader()
   if (!reader) throw new ReviewError(400, 'A JSON command is required')
   const chunks: Uint8Array[] = []
@@ -41,7 +41,9 @@ export function createReviewHandlers(runtime: (request: Request) => Promise<Revi
           if (!/^(0|[1-9]\d*)$/.test(after) || !Number.isSafeInteger(Number(after))) throw new ReviewError(400, 'Invalid review cursor')
           return Response.json(await service.list(actor, Number(after)), { headers: privateHeaders })
         }
-        return Response.json({ ...await service.read(videoIdFrom(request), actor), publicationAvailable }, { headers: privateHeaders })
+        const videoId = videoIdFrom(request)
+        const review = await service.read(videoId, actor)
+        return Response.json({ ...review, publicationAvailable: typeof publicationAvailable === 'function' ? await publicationAvailable(videoId) : publicationAvailable }, { headers: privateHeaders })
       } catch (error) { return reviewFailure(error) }
     },
     async POST(request: Request) {

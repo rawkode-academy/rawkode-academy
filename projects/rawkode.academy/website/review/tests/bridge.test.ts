@@ -29,6 +29,20 @@ describe("same-origin preview bridge", () => {
     expect(fetch.mock.calls[0]![0].headers.get("origin")).toBe(origin);
     expect(await fetch.mock.calls[0]![0].text()).toBe("{}");
   });
+  it("streams bounded intake PUTs and checks origin before forwarding", async () => {
+    const { env, fetch } = setup();
+    for (const requestOrigin of [undefined, "https://evil.example", origin]) {
+      const headers: Record<string, string> = { "content-type": "video/mp4", "content-length": "5" };
+      if (requestOrigin) headers.origin = requestOrigin;
+      const response = await reviewBridge(new Request(`${origin}/api/review/uploads?sessionId=fixture`, { method: "PUT", headers, body: "bytes" }), env);
+      expect(response.status).toBe(requestOrigin === origin ? 200 : 403);
+    }
+    expect(fetch).toHaveBeenCalledTimes(1);
+    const sent = fetch.mock.calls[0]![0];
+    expect(sent.headers.get("content-length")).toBe("5");
+    expect(sent.headers.get("content-type")).toBe("video/mp4");
+    expect(await sent.text()).toBe("bytes");
+  });
   it("rejects unconfigured origins, missing bindings and every non-allowlisted API", async () => {
     const { env, fetch } = setup();
     expect((await reviewBridge(new Request("https://evil.example/api/review"), env)).status).toBe(403);

@@ -4,6 +4,8 @@ This additive backend preserves the captured public GraphQL schema. It does not 
 
 ## Runnable scope and media gate
 
+The subsequent [bounded intake contract](video-review-intake.md) adds staff-owned streaming quarantine uploads and trusted asset wiring. Its production provider remains unconfigured. The statements below about 32 MiB reads and synthetic probes describe the original fixture path; attested intake playback uses HEAD validation and conditional streaming, and publication retains the existing immutable deliverable key.
+
 Staff upload originals and review deliverables through the existing authenticated `/api/media` upload API. Each revision references two distinct immutable media records; the original remains private. All verification reads are bounded to 32 MiB.
 
 **Arbitrary media cannot enter this review/publish flow yet.** The runtime requires a trusted deliverable probe. The only implemented probe is the exact checked-in `fixtures/synthetic.mp4` SHA-256, enabled only with `POC_REVIEW_FIXTURE_MEDIA=true` and the loopback OIDC origin. Its H.264/AAC streams, 1000 ms duration, and full decode were checked locally. Outside that explicit fixture mode, revision creation fails with 503. Caller MIME and duration do not establish playability. Real media requires a trusted probe/processing adapter returning verified checksum, duration and content type; that adapter is deliberately a remaining gate.

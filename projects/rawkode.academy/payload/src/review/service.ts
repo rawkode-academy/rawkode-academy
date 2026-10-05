@@ -8,8 +8,9 @@ type PublicVideo = Record<string, unknown> & { id: number; legacyId: string }
 export type ReviewDependencies = {
   video(id: number, actor: ReviewActor): Promise<PublicVideo>
   publicMediaUrl(videoId: number, publicationId: string): string
-  source(mediaId: number, actor: ReviewActor): Promise<{ checksum: string }>
-  deliverable(mediaId: number, actor: ReviewActor): Promise<{ checksum: string; durationMs: number; contentType: string }>
+  source(mediaId: number, actor: ReviewActor, videoId: number): Promise<{ checksum: string }>
+  deliverable(mediaId: number, actor: ReviewActor, videoId: number): Promise<{ checksum: string; durationMs: number; contentType: string }>
+  assertPair?(videoId: number, sourceId: number, deliverableId: number): Promise<void>
   stageRelease(videoId: number, publicationId: string, mediaId: number, checksum: string, actor: ReviewActor): Promise<{ key: string; etag: string; checksum: string; bytes: number; contentType: string }>
 }
 const sql = (statement: string, ...values: Statement['values']): Statement => ({ sql: statement, values })
@@ -99,8 +100,9 @@ export class ReviewService {
       staff(actor)
       await this.dependencies.video(input.videoId, actor)
       if (input.mediaId === input.deliverableMediaId) throw new ReviewError(400, 'Keep the original private; upload a separate review deliverable')
-      const source = await this.dependencies.source(input.mediaId, actor)
-      const deliverable = await this.dependencies.deliverable(input.deliverableMediaId, actor)
+      await this.dependencies.assertPair?.(input.videoId, input.mediaId, input.deliverableMediaId)
+      const source = await this.dependencies.source(input.mediaId, actor, input.videoId)
+      const deliverable = await this.dependencies.deliverable(input.deliverableMediaId, actor, input.videoId)
       if (input.durationMs !== undefined && input.durationMs !== deliverable.durationMs) throw new ReviewError(400, 'Duration does not match the verified deliverable')
       validateMetadata(input.metadata, deliverable.durationMs)
       mutations.push(sql('INSERT INTO video_revisions(id,video_id,media_id,checksum,deliverable_media_id,deliverable_checksum,duration_ms,review_version,state,metadata,created_by_id,created_at) VALUES(?,?,?,?,?,?,?,1,?,?,?,?)', resultId, input.videoId, input.mediaId, source.checksum, input.deliverableMediaId, deliverable.checksum, deliverable.durationMs, 'ready', JSON.stringify(input.metadata), actor.id, at))
@@ -140,8 +142,8 @@ export class ReviewService {
           if (await this.store.one('SELECT id FROM review_comments WHERE revision_id=? AND resolved=0 LIMIT 1', revision.id)) throw new ReviewError(409, 'Resolve all comments on this revision before publication')
           const approvalGrant = await this.grant(input.videoId, decision.author_id)
           if (!approvalGrant?.can_approve || approvalGrant.version !== decision.grant_version) throw new ReviewError(409, 'The approval grant changed; a new revision and decision are required')
-          if ((await this.dependencies.source(revision.media_id, actor)).checksum !== revision.checksum) throw new ReviewError(409, 'Source bytes changed since review')
-          if ((await this.dependencies.deliverable(revision.deliverable_media_id, actor)).checksum !== revision.deliverable_checksum) throw new ReviewError(409, 'Deliverable bytes changed since review')
+          if ((await this.dependencies.source(revision.media_id, actor, input.videoId)).checksum !== revision.checksum) throw new ReviewError(409, 'Source bytes changed since review')
+          if ((await this.dependencies.deliverable(revision.deliverable_media_id, actor, input.videoId)).checksum !== revision.deliverable_checksum) throw new ReviewError(409, 'Deliverable bytes changed since review')
           const release = await this.dependencies.stageRelease(input.videoId, resultId, revision.deliverable_media_id, revision.deliverable_checksum, actor)
           if (release.checksum !== revision.deliverable_checksum) throw new ReviewError(409, 'Release does not match the approved deliverable')
           const video = await this.dependencies.video(input.videoId, actor)

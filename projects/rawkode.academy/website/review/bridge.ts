@@ -6,6 +6,7 @@ const routes: Record<string, string[]> = {
   "/api/auth/login": ["GET"], "/api/auth/callback": ["GET"],
   "/api/auth/session": ["GET"], "/api/auth/logout": ["POST"],
   "/api/review": ["GET", "POST"],
+  "/api/review/uploads": ["GET", "POST", "PUT"],
   "/api/review/media": ["GET", "HEAD"],
   "/api/review/published-media": ["GET", "HEAD"],
 };
@@ -23,7 +24,7 @@ export async function reviewBridge(request: Request, env: ReviewEnvironment): Pr
   const methods = routes[url.pathname];
   if (!methods) return fail(404, "Not found");
   if (!methods.includes(request.method)) return fail(405, "Method not allowed");
-  if (request.method === "POST" && request.headers.get("origin") !== env.REVIEW_ORIGIN) return fail(403, "Untrusted request origin");
+  if (["POST", "PUT"].includes(request.method) && request.headers.get("origin") !== env.REVIEW_ORIGIN) return fail(403, "Untrusted request origin");
   if (!env.REVIEW_BACKEND) return fail(503, "Review service is unavailable");
   const secure = url.protocol === "https:";
   const prefix = secure ? "__Host-" : "";
@@ -31,7 +32,7 @@ export async function reviewBridge(request: Request, env: ReviewEnvironment): Pr
   const cookies = (request.headers.get("cookie") ?? "").split(";").map(value => value.trim());
   const allowedCookies = new Set([`${prefix}poc-oidc-session`, `${prefix}poc-oidc-transaction`]);
   const headers = new Headers();
-  for (const name of ["origin", "content-type", "accept", "range", "if-range"]) {
+  for (const name of ["origin", "content-type", "content-length", "accept", "range", "if-range"]) {
     const value = request.headers.get(name);
     if (value) headers.set(name, value);
   }

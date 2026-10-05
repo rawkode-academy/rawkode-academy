@@ -222,7 +222,7 @@ test('managed video, versions, relationships and arrays resist legacy writes and
   }
   assert.throws(() => h.sqlite.exec("INSERT INTO pipeline_runs(id,key,video_id,media_id,state) VALUES(1,'bypass',10,20,'registered')"), /Managed video/)
   assert.deepEqual(tables.map(table => h.sqlite.prepare(`SELECT * FROM ${table}`).all()), before)
-  await assert.rejects(migrations.at(-1)!.down(h.migrationArgs), /CHECK constraint/)
+  await assert.rejects(migrations.find(m => m.name === '20261005_120000_video_review')!.down(h.migrationArgs), /CHECK constraint/)
   assert.equal((await h.service.read(10, client)).revisions.length, 1)
 })
 
@@ -244,7 +244,7 @@ test('migration matches snapshot indexes, empty downgrade works, and legacy pipe
   assert.equal(h.sqlite.prepare('SELECT count(*) AS n FROM video_review_state').get()?.n, 0)
   h.sqlite.exec("INSERT INTO pipeline_runs(id,key,video_id,media_id,state) VALUES(1,'legacy',10,20,'registered')")
   await assert.rejects(h.prepare(), { status: 409 })
-  await migrations.at(-1)!.down(h.migrationArgs)
+  await migrations.find(m => m.name === '20261005_120000_video_review')!.down(h.migrationArgs)
   assert.equal(h.sqlite.prepare('SELECT count(*) AS n FROM videos').get()?.n, 2)
 })
 
