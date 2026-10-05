@@ -23,6 +23,11 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 .review-workspace { display: grid; grid-template-columns: 15rem minmax(0, 1fr); gap: 2.5rem; padding-block: 2.5rem; min-height: 70vh; }
 .review-library h1 { margin-bottom: 1.5rem; }
 .review-video-list { display: grid; gap: .5rem; }
+.staff-upload { border: 1px solid var(--surface-border); border-radius: .5rem; background: var(--surface-card); margin-block: 1.5rem; }
+.staff-upload summary { cursor: pointer; padding: .85rem; font-weight: 700; }
+.staff-upload-body { display: grid; gap: .75rem; padding: 0 .85rem .85rem; }
+.staff-upload-body .review-banner,.staff-upload-body .review-error { margin-block: .25rem; }
+.staff-upload-body button { width: 100%; }
 .review-video-list button { width: 100%; display: grid; justify-content: start; text-align: left; gap: .65rem; background: transparent; border-color: transparent; padding: 1rem; }
 .review-video-list button[aria-current] { border-color: var(--editorial-spruce); background: var(--surface-card); }
 .status-pill { font-size: .7rem; width: fit-content; text-transform: uppercase; letter-spacing: .04em; border: 1px solid var(--surface-border); padding: .2rem .45rem; border-radius: .25rem; font-weight: 500; }

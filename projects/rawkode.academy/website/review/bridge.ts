@@ -7,6 +7,8 @@ const routes: Record<string, string[]> = {
   "/api/auth/session": ["GET"], "/api/auth/logout": ["POST"],
   "/api/review": ["GET", "POST"],
   "/api/review/uploads": ["GET", "POST", "PUT"],
+  "/api/review/upload-targets": ["GET"],
+  "/api/review/reviewers": ["GET"],
   "/api/review/media": ["GET", "HEAD"],
   "/api/review/published-media": ["GET", "HEAD"],
 };
@@ -32,7 +34,7 @@ export async function reviewBridge(request: Request, env: ReviewEnvironment): Pr
   const cookies = (request.headers.get("cookie") ?? "").split(";").map(value => value.trim());
   const allowedCookies = new Set([`${prefix}poc-oidc-session`, `${prefix}poc-oidc-transaction`]);
   const headers = new Headers();
-  for (const name of ["origin", "content-type", "content-length", "accept", "range", "if-range"]) {
+  for (const name of ["origin", "content-type", "content-length", "x-upload-length", "accept", "range", "if-range"]) {
     const value = request.headers.get(name);
     if (value) headers.set(name, value);
   }

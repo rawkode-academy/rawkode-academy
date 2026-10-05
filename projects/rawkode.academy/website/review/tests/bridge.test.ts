@@ -43,6 +43,15 @@ describe("same-origin preview bridge", () => {
     expect(sent.headers.get("content-type")).toBe("video/mp4");
     expect(await sent.text()).toBe("bytes");
   });
+  it("forwards the browser-safe upload length header and staff lookup routes", async () => {
+    const { env, fetch } = setup();
+    const response = await reviewBridge(new Request(`${origin}/api/review/uploads?sessionId=fixture`, { method: "PUT", headers: { origin, "content-type": "video/mp4", "x-upload-length": "5" }, body: "bytes" }), env);
+    expect(response.status).toBe(200);
+    expect(fetch.mock.calls[0]![0].headers.get("x-upload-length")).toBe("5");
+    await reviewBridge(new Request(`${origin}/api/review/upload-targets`), env);
+    await reviewBridge(new Request(`${origin}/api/review/reviewers`), env);
+    expect(fetch).toHaveBeenCalledTimes(3);
+  });
   it("rejects unconfigured origins, missing bindings and every non-allowlisted API", async () => {
     const { env, fetch } = setup();
     expect((await reviewBridge(new Request("https://evil.example/api/review"), env)).status).toBe(403);

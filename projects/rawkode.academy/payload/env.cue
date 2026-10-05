@@ -18,6 +18,10 @@ env: {
 		CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {
 			ref: "op://sa.rawkode.academy/cloudflare/api-tokens/workers"
 		}
+		// The shared Workers token currently cannot provision Containers. Pull
+		// requests still get an isolated auth/D1/R2 preview while media remains
+		// fail-closed; remove this once the token has Containers:Edit.
+		CLOUDFLARE_PREVIEW_ALLOW_DEGRADED_CONTAINERS: "true"
 	}
 }
 

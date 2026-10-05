@@ -1,4 +1,6 @@
 export type Reviewer = { id: number; name?: string; role: "staff" | "customer" };
+export type UploadTarget = { videoId: number; legacyId: string; slug: string; title: string; description: string; reviewState: string };
+export type ReviewCustomer = { userId: number; name: string; profileEmail: string };
 export type ReviewItem = { videoId: number; revisionId: string; title: string; state: string; reviewVersion: number };
 export type ReviewList = { items: ReviewItem[]; nextCursor: number | null };
 export type Revision = { id: string; reviewVersion: number; durationMs: number; state: string; createdAt: string; mediaUrl: string; metadata: { title: string; description: string } };

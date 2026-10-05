@@ -1,4 +1,5 @@
 import { spawn } from 'node:child_process'
+import { readFile, unlink, writeFile } from 'node:fs/promises'
 
 const sourceName = process.env.CLOUDFLARE_PREVIEW_NAME ?? process.env.GITHUB_HEAD_REF ?? process.env.GITHUB_REF_NAME ?? 'local'
 const safeName = sourceName
@@ -10,9 +11,8 @@ const previewName = `pr-${safeName}`
 
 console.log(`Starting Wrangler Preview ${previewName} (Cloudflare token configured: ${Boolean(process.env.CLOUDFLARE_API_TOKEN)})`)
 
-const child = spawn(
-  'node',
-  [
+async function runPreview(configPath) {
+  const args = [
     'node_modules/wrangler/bin/wrangler.js',
     'preview',
     '--name',
@@ -20,25 +20,48 @@ const child = spawn(
     '--secrets-file',
     '.dev.vars',
     '--json',
-  ],
-  { env: {...process.env, CI: 'true'}, stdio: ['ignore', 'pipe', 'pipe'] },
-)
+  ]
+  if (configPath) args.push('--config', configPath)
+  const child = spawn('node', args, { env: {...process.env, CI: 'true'}, stdio: ['ignore', 'pipe', 'pipe'] })
+  let stdout = '', stderr = ''
+  child.stdout.setEncoding('utf8')
+  child.stderr.setEncoding('utf8')
+  child.stdout.on('data', (chunk) => { stdout += chunk; process.stdout.write(chunk) })
+  child.stderr.on('data', (chunk) => { stderr += chunk; process.stderr.write(chunk) })
+  const result = await new Promise((resolve, reject) => {
+    child.once('error', reject)
+    child.once('close', (status, signal) => resolve({ status, signal }))
+  })
+  return { ...result, stdout, stderr }
+}
 
-let stdout = ''
-child.stdout.setEncoding('utf8')
-child.stderr.setEncoding('utf8')
-child.stdout.on('data', (chunk) => {
-  stdout += chunk
-  process.stdout.write(chunk)
-})
-child.stderr.on('data', (chunk) => {
-  process.stderr.write(chunk)
-})
-
-const result = await new Promise((resolve, reject) => {
-  child.once('error', reject)
-  child.once('close', (status, signal) => resolve({ status, signal }))
-})
+let result = await runPreview()
+let degradedConfig
+if (
+  result.status !== 0 &&
+  process.env.CLOUDFLARE_PREVIEW_ALLOW_DEGRADED_CONTAINERS === 'true' &&
+  /containers\/me/.test(result.stderr) &&
+  /Forbidden|Authentication error/.test(result.stderr)
+) {
+  // Worker Preview can provision an isolated D1/R2/DO environment without
+  // Containers. Keep this fallback explicit: the media adapter stays
+  // fail-closed until a token with Containers permission is supplied.
+  const config = JSON.parse(await readFile('wrangler.jsonc', 'utf8'))
+  delete config.containers
+  delete config.durable_objects
+  delete config.exports
+  if (config.previews) {
+    delete config.previews.containers
+    delete config.previews.durable_objects
+  }
+  // Keep the temporary config beside wrangler.jsonc: Wrangler resolves main,
+  // assets and build-context paths relative to the config file.
+  degradedConfig = 'wrangler.preview.degraded.json'
+  await writeFile(degradedConfig, `${JSON.stringify(config, null, 2)}\n`)
+  console.warn('Cloudflare Containers Preview is not permitted for this token; retrying a fail-closed data/auth preview without the container binding.')
+  result = await runPreview(degradedConfig)
+  await unlink(degradedConfig).catch(() => {})
+}
 
 if (result.status !== 0) {
   if (result.signal) console.error(`Wrangler exited from signal ${result.signal}`)
@@ -47,8 +70,8 @@ if (result.status !== 0) {
 
 let payload
 try {
-  const jsonStart = stdout.lastIndexOf('{\n  "preview"')
-  payload = JSON.parse(stdout.slice(jsonStart >= 0 ? jsonStart : 0).trim())
+  const jsonStart = result.stdout.lastIndexOf('{\n  "preview"')
+  payload = JSON.parse(result.stdout.slice(jsonStart >= 0 ? jsonStart : 0).trim())
 } catch (error) {
   console.error('Wrangler did not return preview JSON:', error)
   process.exit(1)

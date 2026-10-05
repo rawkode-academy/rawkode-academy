@@ -3,6 +3,7 @@ import { computed, onMounted, onUnmounted, ref } from "vue";
 import { ApiError, requestJSON } from "../api";
 import type { Review, ReviewItem, Reviewer, ReviewList } from "../types";
 import ReviewPanel from "./ReviewPanel.vue";
+import StaffUploadPanel from "./StaffUploadPanel.vue";
 import "../review.css";
 
 const user = ref<Reviewer | null>(null);
@@ -108,6 +109,7 @@ onUnmounted(() => {
         <aside class="review-library" aria-label="Your videos">
           <p class="eyebrow">{{ user.role === "staff" ? "Publication desk" : "Shared with you" }}</p>
           <h1>{{ user.role === "staff" ? "Video reviews" : "Your reviews" }}</h1>
+          <StaffUploadPanel v-if="user.role === 'staff'" @created="videoId => select(videoId)" />
           <p v-if="!videos.length" class="muted">No videos have been shared with you yet.</p>
           <ul class="review-video-list">
             <li v-for="video in videos" :key="video.videoId">
