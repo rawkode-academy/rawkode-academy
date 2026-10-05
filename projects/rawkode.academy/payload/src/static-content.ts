@@ -176,6 +176,8 @@ async function readSource(absolutePath: string, contentRoot: string, collection:
 }
 
 function statusFor(collection: string, data: Record<string, unknown>): 'draft' | 'published' {
+  // Astro creates public article routes regardless of the legacy draft metadata.
+  if (collection === 'articles') return 'published'
   if (data.draft === true) return 'draft'
   if (collection === 'shows' && data.publish === false) return 'draft'
   return 'published'

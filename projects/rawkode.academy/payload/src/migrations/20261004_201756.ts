@@ -2238,163 +2238,43 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
 export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
   // payload_mcp_api_keys and academy_settings predate this migration and are
   // intentionally preserved even though the optional MCP plugin is disabled.
-  await db.run(sql`DROP TABLE \`videos_what_you_will_learn\`;`)
-  await db.run(sql`DROP TABLE \`_videos_v_version_what_you_will_learn\`;`)
-  await db.run(sql`DROP TABLE \`courses_learning_path\`;`)
-  await db.run(sql`DROP TABLE \`_courses_v_version_learning_path\`;`)
-  await db.run(sql`DROP TABLE \`series\`;`)
-  await db.run(sql`DROP TABLE \`_series_v\`;`)
-  await db.run(sql`DROP TABLE \`adrs\`;`)
-  await db.run(sql`DROP TABLE \`adrs_rels\`;`)
-  await db.run(sql`DROP TABLE \`_adrs_v\`;`)
-  await db.run(sql`DROP TABLE \`_adrs_v_rels\`;`)
-  await db.run(sql`DROP TABLE \`testimonials\`;`)
-  await db.run(sql`DROP TABLE \`_testimonials_v\`;`)
-  await db.run(sql`DROP TABLE \`news\`;`)
-  await db.run(sql`DROP TABLE \`news_rels\`;`)
-  await db.run(sql`DROP TABLE \`_news_v\`;`)
-  await db.run(sql`DROP TABLE \`_news_v_rels\`;`)
-  await db.run(sql`DROP TABLE \`changelog\`;`)
-  await db.run(sql`DROP TABLE \`changelog_rels\`;`)
-  await db.run(sql`DROP TABLE \`_changelog_v\`;`)
-  await db.run(sql`DROP TABLE \`_changelog_v_rels\`;`)
-  await db.run(sql`DROP TABLE \`static_assets\`;`)
-  await db.run(sql`DROP TABLE \`_static_assets_v\`;`)
-  await db.run(sql`DROP TABLE \`seasons\`;`)
-  await db.run(sql`DROP TABLE \`_seasons_v\`;`)
-  await db.run(sql`DROP TABLE \`competitors\`;`)
-  await db.run(sql`DROP TABLE \`_competitors_v\`;`)
-  await db.run(sql`DROP TABLE \`brackets\`;`)
-  await db.run(sql`DROP TABLE \`_brackets_v\`;`)
-  await db.run(sql`DROP TABLE \`bracket_applications\`;`)
-  await db.run(sql`DROP TABLE \`_bracket_applications_v\`;`)
-  await db.run(sql`DROP TABLE \`teams\`;`)
-  await db.run(sql`DROP TABLE \`_teams_v\`;`)
-  await db.run(sql`DROP TABLE \`team_members\`;`)
-  await db.run(sql`DROP TABLE \`_team_members_v\`;`)
-  await db.run(sql`DROP TABLE \`team_invites\`;`)
-  await db.run(sql`DROP TABLE \`_team_invites_v\`;`)
-  await db.run(sql`DROP TABLE \`bracket_breaks\`;`)
-  await db.run(sql`DROP TABLE \`_bracket_breaks_v\`;`)
-  await db.run(sql`DROP TABLE \`bracket_entries\`;`)
-  await db.run(sql`DROP TABLE \`_bracket_entries_v\`;`)
-  await db.run(sql`DROP TABLE \`matches\`;`)
-  await db.run(sql`DROP TABLE \`_matches_v\`;`)
-  await db.run(sql`DROP TABLE \`match_results\`;`)
-  await db.run(sql`DROP TABLE \`_match_results_v\`;`)
-  await db.run(sql`DROP TABLE \`registrations\`;`)
-  await db.run(sql`DROP TABLE \`_registrations_v\`;`)
-  await db.run(sql`PRAGMA foreign_keys=OFF;`)
-  await db.run(sql`CREATE TABLE \`__new_videos\` (
-	\`id\` integer PRIMARY KEY NOT NULL,
-	\`legacy_id\` text,
-	\`legacy_type\` text,
-	\`slug\` text,
-	\`source_system\` text,
-	\`source_revision\` text,
-	\`source_hash\` text,
-	\`mapping_version\` text,
-	\`imported_at\` text,
-	\`import_state\` text,
-	\`locally_edited\` integer DEFAULT true,
-	\`source_fields\` text,
-	\`source_sequence\` numeric,
-	\`source_order\` numeric DEFAULT 0,
-	\`source_body\` text,
-	\`tombstone\` integer DEFAULT false,
-	\`processing_state\` text,
-	\`transcript\` text,
-	\`summary\` text,
-	\`media_checksum\` text,
-	\`media_version\` text,
-	\`approval_revision\` text,
-	\`processing_run\` text,
-	\`title\` text,
-	\`subtitle\` text,
-	\`description\` text,
-	\`published_at\` text,
-	\`duration\` numeric,
-	\`type\` text,
-	\`category\` text,
-	\`stream_url\` text,
-	\`thumbnail_url\` text,
-	\`media_reference\` text,
-	\`episode_id\` integer,
-	\`updated_at\` text DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')) NOT NULL,
-	\`created_at\` text DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')) NOT NULL,
-	\`_status\` text DEFAULT 'draft',
-	FOREIGN KEY (\`episode_id\`) REFERENCES \`episodes\`(\`id\`) ON UPDATE no action ON DELETE set null
-  );
-  `)
-  await db.run(sql`INSERT INTO \`__new_videos\`("id", "legacy_id", "legacy_type", "slug", "source_system", "source_revision", "source_hash", "mapping_version", "imported_at", "import_state", "locally_edited", "source_fields", "source_sequence", "source_order", "source_body", "tombstone", "processing_state", "transcript", "summary", "media_checksum", "media_version", "approval_revision", "processing_run", "title", "subtitle", "description", "published_at", "duration", "type", "category", "stream_url", "thumbnail_url", "media_reference", "episode_id", "updated_at", "created_at", "_status") SELECT "id", "legacy_id", "legacy_type", "slug", "source_system", "source_revision", "source_hash", "mapping_version", "imported_at", "import_state", "locally_edited", "source_fields", "source_sequence", "source_order", "source_body", "tombstone", "processing_state", "transcript", "summary", "media_checksum", "media_version", "approval_revision", "processing_run", "title", "subtitle", "description", "published_at", "duration", "type", "category", "stream_url", "thumbnail_url", "media_reference", "episode_id", "updated_at", "created_at", "_status" FROM \`videos\`;`)
-  await db.run(sql`DROP TABLE \`videos\`;`)
-  await db.run(sql`ALTER TABLE \`__new_videos\` RENAME TO \`videos\`;`)
-  await db.run(sql`PRAGMA foreign_keys=ON;`)
-  await db.run(sql`CREATE UNIQUE INDEX \`videos_legacy_id_idx\` ON \`videos\` (\`legacy_id\`);`)
-  await db.run(sql`CREATE INDEX \`videos_slug_idx\` ON \`videos\` (\`slug\`);`)
-  await db.run(sql`CREATE INDEX \`videos_episode_idx\` ON \`videos\` (\`episode_id\`);`)
-  await db.run(sql`CREATE INDEX \`videos_updated_at_idx\` ON \`videos\` (\`updated_at\`);`)
-  await db.run(sql`CREATE INDEX \`videos_created_at_idx\` ON \`videos\` (\`created_at\`);`)
-  await db.run(sql`CREATE INDEX \`videos__status_idx\` ON \`videos\` (\`_status\`);`)
-  await db.run(sql`CREATE TABLE \`__new__videos_v\` (
-	\`id\` integer PRIMARY KEY NOT NULL,
-	\`parent_id\` integer,
-	\`version_legacy_id\` text,
-	\`version_legacy_type\` text,
-	\`version_slug\` text,
-	\`version_source_system\` text,
-	\`version_source_revision\` text,
-	\`version_source_hash\` text,
-	\`version_mapping_version\` text,
-	\`version_imported_at\` text,
-	\`version_import_state\` text,
-	\`version_locally_edited\` integer DEFAULT true,
-	\`version_source_fields\` text,
-	\`version_source_sequence\` numeric,
-	\`version_source_order\` numeric DEFAULT 0,
-	\`version_source_body\` text,
-	\`version_tombstone\` integer DEFAULT false,
-	\`version_processing_state\` text,
-	\`version_transcript\` text,
-	\`version_summary\` text,
-	\`version_media_checksum\` text,
-	\`version_media_version\` text,
-	\`version_approval_revision\` text,
-	\`version_processing_run\` text,
-	\`version_title\` text,
-	\`version_subtitle\` text,
-	\`version_description\` text,
-	\`version_published_at\` text,
-	\`version_duration\` numeric,
-	\`version_type\` text,
-	\`version_category\` text,
-	\`version_stream_url\` text,
-	\`version_thumbnail_url\` text,
-	\`version_media_reference\` text,
-	\`version_episode_id\` integer,
-	\`version_updated_at\` text,
-	\`version_created_at\` text,
-	\`version__status\` text DEFAULT 'draft',
-	\`created_at\` text DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')) NOT NULL,
-	\`updated_at\` text DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')) NOT NULL,
-	\`latest\` integer,
-	FOREIGN KEY (\`parent_id\`) REFERENCES \`videos\`(\`id\`) ON UPDATE no action ON DELETE set null,
-	FOREIGN KEY (\`version_episode_id\`) REFERENCES \`episodes\`(\`id\`) ON UPDATE no action ON DELETE set null
-  );
-  `)
-  await db.run(sql`INSERT INTO \`__new__videos_v\`("id", "parent_id", "version_legacy_id", "version_legacy_type", "version_slug", "version_source_system", "version_source_revision", "version_source_hash", "version_mapping_version", "version_imported_at", "version_import_state", "version_locally_edited", "version_source_fields", "version_source_sequence", "version_source_order", "version_source_body", "version_tombstone", "version_processing_state", "version_transcript", "version_summary", "version_media_checksum", "version_media_version", "version_approval_revision", "version_processing_run", "version_title", "version_subtitle", "version_description", "version_published_at", "version_duration", "version_type", "version_category", "version_stream_url", "version_thumbnail_url", "version_media_reference", "version_episode_id", "version_updated_at", "version_created_at", "version__status", "created_at", "updated_at", "latest") SELECT "id", "parent_id", "version_legacy_id", "version_legacy_type", "version_slug", "version_source_system", "version_source_revision", "version_source_hash", "version_mapping_version", "version_imported_at", "version_import_state", "version_locally_edited", "version_source_fields", "version_source_sequence", "version_source_order", "version_source_body", "version_tombstone", "version_processing_state", "version_transcript", "version_summary", "version_media_checksum", "version_media_version", "version_approval_revision", "version_processing_run", "version_title", "version_subtitle", "version_description", "version_published_at", "version_duration", "version_type", "version_category", "version_stream_url", "version_thumbnail_url", "version_media_reference", "version_episode_id", "version_updated_at", "version_created_at", "version__status", "created_at", "updated_at", "latest" FROM \`_videos_v\`;`)
-  await db.run(sql`DROP TABLE \`_videos_v\`;`)
-  await db.run(sql`ALTER TABLE \`__new__videos_v\` RENAME TO \`_videos_v\`;`)
-  await db.run(sql`CREATE INDEX \`_videos_v_parent_idx\` ON \`_videos_v\` (\`parent_id\`);`)
-  await db.run(sql`CREATE INDEX \`_videos_v_version_version_legacy_id_idx\` ON \`_videos_v\` (\`version_legacy_id\`);`)
-  await db.run(sql`CREATE INDEX \`_videos_v_version_version_slug_idx\` ON \`_videos_v\` (\`version_slug\`);`)
-  await db.run(sql`CREATE INDEX \`_videos_v_version_version_episode_idx\` ON \`_videos_v\` (\`version_episode_id\`);`)
-  await db.run(sql`CREATE INDEX \`_videos_v_version_version_updated_at_idx\` ON \`_videos_v\` (\`version_updated_at\`);`)
-  await db.run(sql`CREATE INDEX \`_videos_v_version_version_created_at_idx\` ON \`_videos_v\` (\`version_created_at\`);`)
-  await db.run(sql`CREATE INDEX \`_videos_v_version_version__status_idx\` ON \`_videos_v\` (\`version__status\`);`)
-  await db.run(sql`CREATE INDEX \`_videos_v_created_at_idx\` ON \`_videos_v\` (\`created_at\`);`)
-  await db.run(sql`CREATE INDEX \`_videos_v_updated_at_idx\` ON \`_videos_v\` (\`updated_at\`);`)
-  await db.run(sql`CREATE INDEX \`_videos_v_latest_idx\` ON \`_videos_v\` (\`latest\`);`)
+  // D1 keeps foreign keys enabled. Dropping either parent table would cascade
+  // relationship/array rows and null incoming video references, even if checks
+  // were deferred. Remove only the columns introduced by up() in place.
+  await db.run(sql`DROP INDEX \`videos_show_idx\`;`)
+  await db.run(sql`DROP INDEX \`_videos_v_version_version_show_idx\`;`)
+  await db.run(sql`ALTER TABLE \`videos\` DROP COLUMN \`source_path\`;`)
+  await db.run(sql`ALTER TABLE \`videos\` DROP COLUMN \`source_format\`;`)
+  await db.run(sql`ALTER TABLE \`videos\` DROP COLUMN \`source_data\`;`)
+  await db.run(sql`ALTER TABLE \`videos\` DROP COLUMN \`source_raw\`;`)
+  await db.run(sql`ALTER TABLE \`videos\` DROP COLUMN \`source_assets\`;`)
+  await db.run(sql`ALTER TABLE \`videos\` DROP COLUMN \`body\`;`)
+  await db.run(sql`ALTER TABLE \`videos\` DROP COLUMN \`cover\`;`)
+  await db.run(sql`ALTER TABLE \`videos\` DROP COLUMN \`content_resources\`;`)
+  await db.run(sql`ALTER TABLE \`videos\` DROP COLUMN \`editorial_data\`;`)
+  await db.run(sql`ALTER TABLE \`videos\` DROP COLUMN \`tagline\`;`)
+  await db.run(sql`ALTER TABLE \`videos\` DROP COLUMN \`audio_file_size\`;`)
+  await db.run(sql`ALTER TABLE \`videos\` DROP COLUMN \`youtube_id\`;`)
+  await db.run(sql`ALTER TABLE \`videos\` DROP COLUMN \`realtime_kit\`;`)
+  await db.run(sql`ALTER TABLE \`videos\` DROP COLUMN \`podcast\`;`)
+  await db.run(sql`ALTER TABLE \`videos\` DROP COLUMN \`subscribe_links\`;`)
+  await db.run(sql`ALTER TABLE \`videos\` DROP COLUMN \`show_id\`;`)
+  await db.run(sql`ALTER TABLE \`_videos_v\` DROP COLUMN \`version_source_path\`;`)
+  await db.run(sql`ALTER TABLE \`_videos_v\` DROP COLUMN \`version_source_format\`;`)
+  await db.run(sql`ALTER TABLE \`_videos_v\` DROP COLUMN \`version_source_data\`;`)
+  await db.run(sql`ALTER TABLE \`_videos_v\` DROP COLUMN \`version_source_raw\`;`)
+  await db.run(sql`ALTER TABLE \`_videos_v\` DROP COLUMN \`version_source_assets\`;`)
+  await db.run(sql`ALTER TABLE \`_videos_v\` DROP COLUMN \`version_body\`;`)
+  await db.run(sql`ALTER TABLE \`_videos_v\` DROP COLUMN \`version_cover\`;`)
+  await db.run(sql`ALTER TABLE \`_videos_v\` DROP COLUMN \`version_content_resources\`;`)
+  await db.run(sql`ALTER TABLE \`_videos_v\` DROP COLUMN \`version_editorial_data\`;`)
+  await db.run(sql`ALTER TABLE \`_videos_v\` DROP COLUMN \`version_tagline\`;`)
+  await db.run(sql`ALTER TABLE \`_videos_v\` DROP COLUMN \`version_audio_file_size\`;`)
+  await db.run(sql`ALTER TABLE \`_videos_v\` DROP COLUMN \`version_youtube_id\`;`)
+  await db.run(sql`ALTER TABLE \`_videos_v\` DROP COLUMN \`version_realtime_kit\`;`)
+  await db.run(sql`ALTER TABLE \`_videos_v\` DROP COLUMN \`version_podcast\`;`)
+  await db.run(sql`ALTER TABLE \`_videos_v\` DROP COLUMN \`version_subscribe_links\`;`)
+  await db.run(sql`ALTER TABLE \`_videos_v\` DROP COLUMN \`version_show_id\`;`)
   await db.run(sql`CREATE TABLE \`__new_articles\` (
 	\`id\` integer PRIMARY KEY NOT NULL,
 	\`legacy_id\` text,
@@ -2810,4 +2690,52 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   await db.run(sql`ALTER TABLE \`_learning_paths_v\` DROP COLUMN \`version_cover\`;`)
   await db.run(sql`ALTER TABLE \`_learning_paths_v\` DROP COLUMN \`version_content_resources\`;`)
   await db.run(sql`ALTER TABLE \`_learning_paths_v\` DROP COLUMN \`version_editorial_data\`;`)
+  // Remove the new tables only after their incoming references above have been
+  // removed. Drop children before parents so D1 never sees a missing FK target.
+  await db.run(sql`DROP TABLE \`_registrations_v\`;`)
+  await db.run(sql`DROP TABLE \`registrations\`;`)
+  await db.run(sql`DROP TABLE \`_match_results_v\`;`)
+  await db.run(sql`DROP TABLE \`match_results\`;`)
+  await db.run(sql`DROP TABLE \`_matches_v\`;`)
+  await db.run(sql`DROP TABLE \`matches\`;`)
+  await db.run(sql`DROP TABLE \`_bracket_entries_v\`;`)
+  await db.run(sql`DROP TABLE \`bracket_entries\`;`)
+  await db.run(sql`DROP TABLE \`_bracket_breaks_v\`;`)
+  await db.run(sql`DROP TABLE \`bracket_breaks\`;`)
+  await db.run(sql`DROP TABLE \`_team_invites_v\`;`)
+  await db.run(sql`DROP TABLE \`team_invites\`;`)
+  await db.run(sql`DROP TABLE \`_team_members_v\`;`)
+  await db.run(sql`DROP TABLE \`team_members\`;`)
+  await db.run(sql`DROP TABLE \`_teams_v\`;`)
+  await db.run(sql`DROP TABLE \`teams\`;`)
+  await db.run(sql`DROP TABLE \`_bracket_applications_v\`;`)
+  await db.run(sql`DROP TABLE \`bracket_applications\`;`)
+  await db.run(sql`DROP TABLE \`_brackets_v\`;`)
+  await db.run(sql`DROP TABLE \`brackets\`;`)
+  await db.run(sql`DROP TABLE \`_competitors_v\`;`)
+  await db.run(sql`DROP TABLE \`competitors\`;`)
+  await db.run(sql`DROP TABLE \`_seasons_v\`;`)
+  await db.run(sql`DROP TABLE \`seasons\`;`)
+  await db.run(sql`DROP TABLE \`_static_assets_v\`;`)
+  await db.run(sql`DROP TABLE \`static_assets\`;`)
+  await db.run(sql`DROP TABLE \`_changelog_v_rels\`;`)
+  await db.run(sql`DROP TABLE \`_changelog_v\`;`)
+  await db.run(sql`DROP TABLE \`changelog_rels\`;`)
+  await db.run(sql`DROP TABLE \`changelog\`;`)
+  await db.run(sql`DROP TABLE \`_news_v_rels\`;`)
+  await db.run(sql`DROP TABLE \`_news_v\`;`)
+  await db.run(sql`DROP TABLE \`news_rels\`;`)
+  await db.run(sql`DROP TABLE \`news\`;`)
+  await db.run(sql`DROP TABLE \`_testimonials_v\`;`)
+  await db.run(sql`DROP TABLE \`testimonials\`;`)
+  await db.run(sql`DROP TABLE \`_adrs_v_rels\`;`)
+  await db.run(sql`DROP TABLE \`_adrs_v\`;`)
+  await db.run(sql`DROP TABLE \`adrs_rels\`;`)
+  await db.run(sql`DROP TABLE \`adrs\`;`)
+  await db.run(sql`DROP TABLE \`_series_v\`;`)
+  await db.run(sql`DROP TABLE \`series\`;`)
+  await db.run(sql`DROP TABLE \`_courses_v_version_learning_path\`;`)
+  await db.run(sql`DROP TABLE \`courses_learning_path\`;`)
+  await db.run(sql`DROP TABLE \`_videos_v_version_what_you_will_learn\`;`)
+  await db.run(sql`DROP TABLE \`videos_what_you_will_learn\`;`)
 }

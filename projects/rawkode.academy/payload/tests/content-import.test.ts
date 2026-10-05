@@ -1,10 +1,47 @@
 import assert from 'node:assert/strict'
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
 import { buildKlusteredSnapshot } from '../src/klustered-content'
 import { buildStaticSnapshot } from '../src/static-content'
 
 const repositoryRoot = path.resolve(process.cwd(), '../../..')
+
+test('static content preserves public article routes without publishing draft courses or modules', async (t) => {
+  const root = await mkdtemp(path.join(tmpdir(), 'static-publication-'))
+  t.after(() => rm(root, { recursive: true, force: true }))
+  const fixtures = [
+    { collection: 'articles', directory: 'articles', draft: true, status: 'published' },
+    { collection: 'articles', directory: 'articles', draft: false, status: 'published' },
+    { collection: 'articles', directory: 'articles', draft: undefined, status: 'published' },
+    { collection: 'courses', directory: 'courses', draft: true, status: 'draft' },
+    { collection: 'courses', directory: 'courses', draft: false, status: 'published' },
+    { collection: 'course-modules', directory: 'courses/example', draft: true, status: 'draft' },
+    { collection: 'course-modules', directory: 'courses/example', draft: false, status: 'published' },
+  ] as const
+  for (const fixture of fixtures) {
+    const directory = path.join(root, fixture.directory)
+    await mkdir(directory, { recursive: true })
+    const frontmatter = fixture.draft === undefined ? '' : `draft: ${fixture.draft}\n`
+    await writeFile(path.join(directory, `${fixture.draft ?? 'unspecified'}.mdx`), `---\ntitle: Publication fixture\n${frontmatter}---\nFixture body.\n`)
+  }
+
+  const snapshot = await buildStaticSnapshot({ root, sequence: 1 })
+  assert.equal(snapshot.records.length, fixtures.length)
+  for (const fixture of fixtures) {
+    const sourcePath = `${fixture.directory}/${fixture.draft ?? 'unspecified'}.mdx`
+    const record = snapshot.records.find(candidate => candidate.source?.path === sourcePath)
+    assert.ok(record, sourcePath)
+    assert.equal(record.collection, fixture.collection, sourcePath)
+    assert.equal(record.status, fixture.status, sourcePath)
+    assert.equal(record.data.draft, fixture.draft, sourcePath)
+    assert.equal((record.data.editorialData as Record<string, unknown>).draft, fixture.draft, sourcePath)
+    assert.equal(record.source?.data?.draft, fixture.draft, sourcePath)
+    assert.equal(record.slug, record.legacyId, sourcePath)
+    assert.equal(record.slug, `${fixture.collection === 'course-modules' ? 'example/' : ''}${fixture.draft ?? 'unspecified'}`, sourcePath)
+  }
+})
 
 test('static content snapshot preserves bodies, source metadata, relationships, and assets', async () => {
   const snapshot = await buildStaticSnapshot({ root: path.join(repositoryRoot, 'content'), sequence: 1 })

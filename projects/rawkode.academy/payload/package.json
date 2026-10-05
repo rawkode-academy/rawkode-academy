@@ -17,7 +17,7 @@
     "export:klustered": "tsx scripts/export-klustered.ts",
     "capture:schema": "tsx scripts/capture-schema.ts",
     "check:schema": "tsx scripts/check-schema.ts",
-    "test": "node --import tsx --test --test-concurrency=1 tests/compatibility.test.ts tests/oidc.test.ts tests/content-import.test.ts tests/media-security.test.ts",
+    "test": "node --import tsx --test --test-concurrency=1 tests/compatibility.test.ts tests/oidc.test.ts tests/content-import.test.ts tests/media-security.test.ts tests/migrations.test.ts",
     "demo:mutations": "npm run test:worker",
     "build:worker": "WRANGLER_LOG_PATH=.runtime/wrangler.log opennextjs-cloudflare build",
     "deploy:preview": "node scripts/deploy-preview.mjs",
