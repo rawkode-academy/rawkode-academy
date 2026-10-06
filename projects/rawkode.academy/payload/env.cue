@@ -58,6 +58,9 @@ tasks: {
 			"package.json",
 			"tsconfig.json",
 			"../../../bun.lock",
+			// CI change detection compares repository-relative paths; retain the
+			// project-relative globs above for local task resolution.
+			"../../../projects/rawkode.academy/payload/**",
 		]
 	}
 
@@ -74,6 +77,7 @@ tasks: {
 			"evidence/**",
 			"package.json",
 			"../../../bun.lock",
+			"../../../projects/rawkode.academy/payload/**",
 		]
 	}
 
@@ -106,6 +110,7 @@ tasks: {
 			"wrangler.jsonc",
 			"tsconfig.json",
 			"../../../bun.lock",
+			"../../../projects/rawkode.academy/payload/**",
 		]
 		outputs: [".open-next/**"]
 	}
@@ -127,6 +132,7 @@ tasks: {
 				"package.json",
 				"wrangler.jsonc",
 				"../../../bun.lock",
+				"../../../projects/rawkode.academy/payload/**",
 			]
 		}
 
@@ -136,7 +142,12 @@ tasks: {
 			args: ["-lc", "set -eu; secrets=$(\(_toolchain) bun x wrangler secret list --config wrangler.jsonc); for name in PAYLOAD_SECRET PIPELINE_CALLBACK_SECRET; do if ! printf '%s' \"$secrets\" | grep -q \"$name\"; then \(_toolchain) bun -e 'process.stdout.write(require(\"node:crypto\").randomBytes(32).toString(\"hex\"))' | \(_toolchain) bun x wrangler secret put \"$name\" --config wrangler.jsonc; fi; done"]
 			env: PATH: _taskPath
 			dependsOn: [_t.setup]
-			inputs: ["wrangler.jsonc", "package.json", "../../../bun.lock"]
+			inputs: [
+				"wrangler.jsonc",
+				"package.json",
+				"../../../bun.lock",
+				"../../../projects/rawkode.academy/payload/**",
+			]
 		}
 
 		migratePreview: schema.#Task & {
@@ -166,6 +177,7 @@ tasks: {
 				"wrangler.jsonc",
 				"tsconfig.json",
 				"../../../bun.lock",
+				"../../../projects/rawkode.academy/payload/**",
 			]
 		}
 
@@ -188,6 +200,7 @@ tasks: {
 				"wrangler.preview-runtime.jsonc",
 				"tsconfig.json",
 				"../../../bun.lock",
+				"../../../projects/rawkode.academy/payload/**",
 			]
 		}
 
