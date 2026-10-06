@@ -1,96 +1,111 @@
+const cmsUrl = '/admin'
 const reviewUrl = 'https://preview.rawkode.academy/review'
 
 export default function Page() {
   return (
-    <main className="portal">
-      <header className="portal-header">
+    <main className="workspace">
+      <header className="workspace-header">
         <a className="wordmark" href="/" aria-label="Rawkode Academy home">
           <span className="wordmark-mark" aria-hidden="true">R</span>
           <span>RAWKODE <strong>ACADEMY</strong></span>
         </a>
-        <nav className="portal-nav" aria-label="Main navigation">
-          <a href="#how-it-works">How it works</a>
-          <a className="nav-sign-in" href={reviewUrl}>Sign in <span aria-hidden="true">↗</span></a>
+        <nav className="workspace-nav" aria-label="Main navigation">
+          <a href="#workflows">Workflows</a>
+          <a href={reviewUrl}>Customer review <span aria-hidden="true">↗</span></a>
+          <a className="nav-action" href={cmsUrl}>Open CMS <span aria-hidden="true">→</span></a>
         </nav>
       </header>
 
       <section className="hero" aria-labelledby="hero-title">
         <div className="hero-copy">
-          <p className="eyebrow">Private video review</p>
-          <h1 id="hero-title">Your next cut, <em>together.</em></h1>
-          <p className="hero-lede">A calm, private space to watch your video, leave precise feedback, and approve the final version for publication.</p>
+          <p className="eyebrow">Rawkode Academy CMS</p>
+          <h1 id="hero-title">Everything behind the Academy, <em>in one place.</em></h1>
+          <p className="hero-lede">Manage structured content, media, publishing, and customer review from a single, calm workspace.</p>
           <div className="hero-actions">
-            <a className="button button-light" href={reviewUrl}>Open your review room <span aria-hidden="true">→</span></a>
-            <span className="hero-note">For invited Academy customers</span>
+            <a className="button button-light" href={cmsUrl}>Open the CMS <span aria-hidden="true">→</span></a>
+            <a className="text-link text-link-light" href={reviewUrl}>Go to customer review <span aria-hidden="true">↗</span></a>
           </div>
         </div>
 
-        <div className="review-card" aria-label="Illustration of a video review">
-          <div className="review-card-topline">
-            <span className="mini-brand"><span aria-hidden="true">R</span> REVIEW ROOM</span>
-            <span className="live-dot"><i aria-hidden="true" /> Private</span>
+        <div className="workspace-card" aria-label="Illustration of the Rawkode Academy content workspace">
+          <div className="workspace-card-topline">
+            <span className="mini-brand"><span aria-hidden="true">R</span> CONTENT WORKSPACE</span>
+            <span className="workspace-status"><i aria-hidden="true" /> Operations</span>
           </div>
-          <div className="video-frame">
-            <div className="video-glow" />
-            <div className="video-title">A better way to<br /><strong>ship the story.</strong></div>
-            <span className="play-button" aria-hidden="true">▶</span>
-            <span className="frame-label">01:24 / 08:42</span>
-          </div>
-          <div className="timeline" aria-hidden="true">
-            <span className="timeline-progress" />
-            <b className="timeline-marker marker-one" />
-            <b className="timeline-marker marker-two" />
-            <b className="timeline-marker marker-three" />
-          </div>
-          <div className="review-card-footer">
-            <div><strong>Latest revision</strong><span>3 comments · 1 open</span></div>
-            <span className="approval-badge">Needs review</span>
+          <div className="workspace-card-body">
+            <aside className="workspace-sidebar" aria-hidden="true">
+              <span className="sidebar-label">Workspace</span>
+              <strong>Rawkode Academy</strong>
+              <span className="sidebar-item sidebar-item-active">Overview</span>
+              <span className="sidebar-item">Content</span>
+              <span className="sidebar-item">Media</span>
+              <span className="sidebar-item">Review</span>
+            </aside>
+            <div className="workspace-main">
+              <div className="workspace-heading">
+                <div><span className="muted-label">Overview</span><strong>Content workspace</strong></div>
+                <span className="date-label">Editorial operations</span>
+              </div>
+              <div className="workspace-metrics">
+                <div><span>Catalogue</span><strong>Ready</strong><small>Structured content</small></div>
+                <div><span>Review queue</span><strong>Open</strong><small>Media &amp; feedback</small></div>
+              </div>
+              <div className="workspace-list">
+                <span className="muted-label">Recent activity</span>
+                <div><i className="activity-dot activity-dot-accent" /><span>Customer review opened</span><small>Review</small></div>
+                <div><i className="activity-dot" /><span>Content updated</span><small>Article</small></div>
+                <div><i className="activity-dot activity-dot-soft" /><span>Media processed</span><small>Asset</small></div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="trust-row" aria-label="Review room benefits">
-        <div><span className="trust-icon">✦</span><div><strong>Private by default</strong><span>Only invited accounts can view</span></div></div>
-        <div><span className="trust-icon">⌁</span><div><strong>Feedback in context</strong><span>Comments stay with the exact moment</span></div></div>
-        <div><span className="trust-icon">✓</span><div><strong>Clear approval</strong><span>One decision before publication</span></div></div>
+      <section className="capability-row" aria-label="Workspace capabilities">
+        <div><span className="capability-icon">✦</span><div><strong>Structured content</strong><span>Keep the Academy catalogue coherent</span></div></div>
+        <div><span className="capability-icon">⌁</span><div><strong>Media &amp; assets</strong><span>Bring the publishing pipeline together</span></div></div>
+        <div><span className="capability-icon">✓</span><div><strong>Review &amp; publish</strong><span>Move work forward with confidence</span></div></div>
       </section>
 
-      <section className="intro-section" id="how-it-works" aria-labelledby="intro-title">
+      <section className="intro-section" id="workflows" aria-labelledby="intro-title">
         <div className="section-heading">
-          <p className="eyebrow">A better handoff</p>
-          <h2 id="intro-title">Less back-and-forth.<br /><em>Better work.</em></h2>
+          <p className="eyebrow">One workspace, many workflows</p>
+          <h2 id="intro-title">From first draft to <em>published.</em></h2>
         </div>
         <div className="feature-grid">
           <article className="feature-card feature-card-dark">
             <span className="feature-number">01</span>
-            <h3>Watch the cut</h3>
-            <p>Open a private video delivered for your project, wherever you are, on any device.</p>
+            <h3>Build the catalogue</h3>
+            <p>Shape articles, technologies, shows, seasons, and the rest of the Academy content model.</p>
           </article>
           <article className="feature-card">
             <span className="feature-number">02</span>
-            <h3>Mark the moment</h3>
-            <p>Leave a note at an exact timestamp so every suggestion is clear to the editing team.</p>
+            <h3>Coordinate the work</h3>
+            <p>Keep media, processing, customer feedback, and editorial decisions connected.</p>
           </article>
           <article className="feature-card">
             <span className="feature-number">03</span>
-            <h3>Approve with confidence</h3>
-            <p>When the revision is right, approve it once. The approved version becomes the source for publication.</p>
+            <h3>Publish with confidence</h3>
+            <p>Review changes, approve the right version, and make the finished work available.</p>
           </article>
         </div>
       </section>
 
       <section className="closing-card" aria-labelledby="closing-title">
         <div>
-          <p className="eyebrow">Ready when you are</p>
-          <h2 id="closing-title">Your review is waiting.</h2>
-          <p>Sign in with the Academy account that received your invitation.</p>
+          <p className="eyebrow">Pick up where you left off</p>
+          <h2 id="closing-title">Open the Academy workspace.</h2>
+          <p>Staff can manage content in the CMS. Invited customers can open their private review room.</p>
         </div>
-        <a className="button button-accent" href={reviewUrl}>Sign in to continue <span aria-hidden="true">→</span></a>
+        <div className="closing-actions">
+          <a className="button button-accent" href={cmsUrl}>Open the CMS <span aria-hidden="true">→</span></a>
+          <a className="text-link" href={reviewUrl}>Customer review <span aria-hidden="true">↗</span></a>
+        </div>
       </section>
 
-      <footer className="portal-footer">
-        <span>RAWKODE ACADEMY</span>
-        <span>Private customer portal</span>
+      <footer className="workspace-footer">
+        <span>RAWKODE ACADEMY CMS</span>
+        <span>Content operations workspace</span>
       </footer>
     </main>
   )
