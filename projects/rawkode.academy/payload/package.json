@@ -26,7 +26,7 @@
     "setup": "node scripts/setup.mjs",
     "migrate:create": "WRANGLER_LOG_PATH=.runtime/wrangler.log POC_CLI=1 payload migrate:create",
     "migrate": "WRANGLER_LOG_PATH=.runtime/wrangler.log POC_CLI=1 payload migrate",
-    "migrate:remote": "WRANGLER_LOG_PATH=.runtime/wrangler.log POC_CLI=1 POC_REMOTE_BINDINGS=1 payload migrate",
+    "migrate:remote": "WRANGLER_LOG_PATH=.runtime/wrangler.log tsx scripts/migrate-production.ts",
     "migrate:preview": "tsx scripts/migrate-preview.ts",
     "generate:importmap": "WRANGLER_LOG_PATH=.runtime/wrangler.log POC_CLI=1 payload generate:importmap",
     "types:cloudflare": "WRANGLER_LOG_PATH=.runtime/wrangler.log wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",

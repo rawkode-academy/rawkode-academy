@@ -121,6 +121,7 @@ tasks: {
 			inputs: [
 				"src/migrations/**",
 				"src/**",
+				"scripts/migrate-production.ts",
 				"payload.config.ts",
 				"scripts/setup.mjs",
 				"package.json",
