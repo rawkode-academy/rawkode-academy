@@ -18,10 +18,6 @@ env: {
 		CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {
 			ref: "op://sa.rawkode.academy/cloudflare/api-tokens/workers"
 		}
-		// The shared Workers token currently cannot provision Containers. Pull
-		// requests still get an isolated auth/D1/R2 preview while media remains
-		// fail-closed; remove this once the token has Containers:Edit.
-		CLOUDFLARE_PREVIEW_ALLOW_DEGRADED_CONTAINERS: "true"
 	}
 }
 
@@ -121,7 +117,7 @@ tasks: {
 			command: "sh"
 			args: ["-lc", "\(_toolchain) bun run migrate:remote"]
 			env: PATH: _taskPath
-			dependsOn: [_t.setup]
+			dependsOn: [_t.setup, _t.deploy.ensureSecrets]
 			inputs: [
 				"src/migrations/**",
 				"src/**",
@@ -131,6 +127,15 @@ tasks: {
 				"wrangler.jsonc",
 				"../../../bun.lock",
 			]
+		}
+
+		ensureSecrets: schema.#Task & {
+			hermetic: false
+			command: "sh"
+			args: ["-lc", "set -eu; secrets=$(\(_toolchain) bun x wrangler secret list --config wrangler.jsonc); for name in PAYLOAD_SECRET PIPELINE_CALLBACK_SECRET; do if ! printf '%s' \"$secrets\" | grep -q \"$name\"; then \(_toolchain) bun -e 'process.stdout.write(require(\"node:crypto\").randomBytes(32).toString(\"hex\"))' | \(_toolchain) bun x wrangler secret put \"$name\" --config wrangler.jsonc; fi; done"]
+			env: PATH: _taskPath
+			dependsOn: [_t.setup]
+			inputs: ["wrangler.jsonc", "package.json", "../../../bun.lock"]
 		}
 
 		migratePreview: schema.#Task & {
