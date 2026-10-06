@@ -58,9 +58,6 @@ tasks: {
 			"package.json",
 			"tsconfig.json",
 			"../../../bun.lock",
-			// CI change detection compares repository-relative paths; retain the
-			// project-relative globs above for local task resolution.
-			"../../../projects/rawkode.academy/payload/**",
 		]
 	}
 
@@ -77,7 +74,6 @@ tasks: {
 			"evidence/**",
 			"package.json",
 			"../../../bun.lock",
-			"../../../projects/rawkode.academy/payload/**",
 		]
 	}
 
@@ -110,7 +106,6 @@ tasks: {
 			"wrangler.jsonc",
 			"tsconfig.json",
 			"../../../bun.lock",
-			"../../../projects/rawkode.academy/payload/**",
 		]
 		outputs: [".open-next/**"]
 	}
@@ -132,7 +127,6 @@ tasks: {
 				"package.json",
 				"wrangler.jsonc",
 				"../../../bun.lock",
-				"../../../projects/rawkode.academy/payload/**",
 			]
 		}
 
@@ -146,7 +140,6 @@ tasks: {
 				"wrangler.jsonc",
 				"package.json",
 				"../../../bun.lock",
-				"../../../projects/rawkode.academy/payload/**",
 			]
 		}
 
@@ -164,21 +157,9 @@ tasks: {
 			args: ["-lc", "\(_toolchain) bun x wrangler deploy"]
 			env: PATH: _taskPath
 			dependsOn: [_t.build, _t.deploy.migrate, _t.deploy.reviewRuntime]
-			inputs: [
-				"app/**",
-				"src/**",
-				"src/migrations/**",
-				"scripts/**",
-				"payload.config.ts",
-				"worker.ts",
-				"open-next.config.ts",
-				"next.config.mjs",
-				"package.json",
-				"wrangler.jsonc",
-				"tsconfig.json",
-				"../../../bun.lock",
-				"../../../projects/rawkode.academy/payload/**",
-			]
+			// This is the production delivery root. The generated GitHub workflow
+			// already limits invocations to this project; leaving inputs unset
+			// makes cuenv run the deploy on every main invocation.
 		}
 
 		reviewRuntime: schema.#Task & {
@@ -200,7 +181,6 @@ tasks: {
 				"wrangler.preview-runtime.jsonc",
 				"tsconfig.json",
 				"../../../bun.lock",
-				"../../../projects/rawkode.academy/payload/**",
 			]
 		}
 
