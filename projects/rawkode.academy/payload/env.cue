@@ -143,6 +143,19 @@ tasks: {
 			]
 		}
 
+		ensureReviewSecrets: schema.#Task & {
+			hermetic: false
+			command: "sh"
+			args: ["-lc", "set -eu; secrets=$(\(_toolchain) bun x wrangler secret list --config wrangler.review.jsonc); for name in PAYLOAD_SECRET PIPELINE_CALLBACK_SECRET; do if ! printf '%s' \"$secrets\" | grep -q \"$name\"; then \(_toolchain) bun -e 'process.stdout.write(require(\"node:crypto\").randomBytes(32).toString(\"hex\"))' | \(_toolchain) bun x wrangler secret put \"$name\" --config wrangler.review.jsonc; fi; done"]
+			env: PATH: _taskPath
+			dependsOn: [_t.setup]
+			inputs: [
+				"wrangler.review.jsonc",
+				"package.json",
+				"../../../bun.lock",
+			]
+		}
+
 		migratePreview: schema.#Task & {
 			hermetic: false
 			command: "sh"
@@ -156,10 +169,32 @@ tasks: {
 			command: "sh"
 			args: ["-lc", "\(_toolchain) bun x wrangler deploy"]
 			env: PATH: _taskPath
-			dependsOn: [_t.build, _t.deploy.migrate, _t.deploy.reviewRuntime]
+			dependsOn: [_t.build, _t.deploy.migrate, _t.deploy.reviewRuntime, _t.deploy.reviewBackend]
 			// This is the production delivery root. The generated GitHub workflow
 			// already limits invocations to this project; leaving inputs unset
 			// makes cuenv run the deploy on every main invocation.
+		}
+
+		reviewBackend: schema.#Task & {
+			hermetic: false
+			command: "sh"
+			args: ["-lc", "\(_toolchain) bun x wrangler deploy --config wrangler.review.jsonc"]
+			env: PATH: _taskPath
+			dependsOn: [_t.build, _t.deploy.ensureReviewSecrets, _t.deploy.migratePreview]
+			inputs: [
+				"src/**",
+				"src/migrations/**",
+				"container/**",
+				"scripts/check-review-container-recipe.mjs",
+				"payload.config.ts",
+				"worker.ts",
+				"open-next.config.ts",
+				"next.config.mjs",
+				"package.json",
+				"wrangler.review.jsonc",
+				"tsconfig.json",
+				"../../../bun.lock",
+			]
 		}
 
 		reviewRuntime: schema.#Task & {

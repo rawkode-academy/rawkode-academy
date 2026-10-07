@@ -397,3 +397,24 @@ test('review list paginates by stable video ID without skipping customer grants'
   const next = await h.service.list(client, first.nextCursor!)
   assert.deepEqual(next.items.map(item => item.videoId), [150]); assert.equal(next.nextCursor, null)
 })
+
+
+test('thumbnail snapshots remain video-owned, private and unchanged on older revisions', async t => {
+  const h = await harness(t)
+  h.service.dependencies.thumbnail = async (videoId, thumbnailId) => {
+    if (videoId !== 10 || ![30, 31].includes(thumbnailId)) throw new Error('Thumbnail belongs to another video')
+  }
+  await assert.rejects(h.service.execute(staff, command('create-revision', { mediaId: 20, deliverableMediaId: 21, metadata: { ...metadata, thumbnailId: 99 } })), /another video/)
+  const first = await h.service.execute(staff, command('create-revision', { mediaId: 20, deliverableMediaId: 21, metadata: { ...metadata, thumbnailId: 30 } }))
+  await h.service.execute(staff, command('grant', { userId: 2, canApprove: true }))
+  await assert.rejects(h.service.execute(staff, command('edit', { revisionId: first.revisionId, expectedReviewVersion: 1, metadata: { ...metadata, thumbnailId: 31 } })), { status: 409 })
+  await assert.rejects(h.service.execute(staff, command('edit', { revisionId: first.revisionId, expectedReviewVersion: 1, metadata })), { status: 409 })
+  await h.service.execute(staff, command('edit', { revisionId: first.revisionId, expectedReviewVersion: 1, metadata: { ...metadata, title: 'Edited title', thumbnailId: 30 } }))
+  const second = await h.service.execute(staff, command('create-revision', { mediaId: 20, deliverableMediaId: 22, metadata: { ...metadata, thumbnailId: 31 } }))
+  const result = await h.service.read(10, client)
+  assert.deepEqual(result.revisions.map(item => item.metadata.thumbnailId), [30, 31])
+  assert.deepEqual(result.revisions.map(item => item.thumbnailUrl), [first, second].map(item => `/api/review/thumbnail?videoId=10&revisionId=${item.revisionId}`))
+  await assert.rejects(h.service.read(10, stranger), { status: 404 })
+  await h.service.execute(staff, command('revoke', { userId: 2 }))
+  await assert.rejects(h.service.revision(10, String(first.revisionId), client), { status: 404 })
+})

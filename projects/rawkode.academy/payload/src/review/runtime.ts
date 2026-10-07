@@ -6,6 +6,7 @@ import { actorFromUser, ReviewError, type ReviewActor } from './contracts'
 import { ReviewStore } from './store'
 import { ReviewService } from './service'
 import { ReviewIntake } from './intake'
+import { assertThumbnail } from './thumbnails'
 import { configuredMediaAdapter } from './processing-runtime'
 import { TrustedAssets, assetObject } from './intake-storage'
 import { boundedObject, stageReleaseObject, verifiedDeliverable } from './artifacts'
@@ -26,6 +27,7 @@ export async function reviewBackend() {
       if (video.tombstone || video.processingRun) throw new ReviewError(409, 'Choose a video outside the legacy pipeline')
       return video as { id: number; legacyId: string }
     },
+    thumbnail: async (videoId, thumbnailId) => { await assertThumbnail(store, videoId, thumbnailId) },
     assertPair: (videoId, sourceId, deliverableId) => assets.pair(videoId, sourceId, deliverableId),
     async source(mediaId, actor, videoId) {
       const asset = await assets.resolve(mediaId, videoId, 'source')

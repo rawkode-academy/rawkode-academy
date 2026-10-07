@@ -7,8 +7,9 @@ const routes: Record<string, string[]> = {
   "/api/auth/session": ["GET"], "/api/auth/logout": ["POST"],
   "/api/review": ["GET", "POST"],
   "/api/review/uploads": ["GET", "POST", "PUT"],
-  "/api/review/upload-targets": ["GET"],
+  "/api/review/upload-targets": ["GET", "POST"],
   "/api/review/reviewers": ["GET"],
+  "/api/review/thumbnail": ["GET", "HEAD", "POST"],
   "/api/review/media": ["GET", "HEAD"],
   "/api/review/published-media": ["GET", "HEAD"],
 };
