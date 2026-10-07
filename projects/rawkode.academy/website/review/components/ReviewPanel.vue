@@ -77,7 +77,7 @@ function confirm() {
         </select>
       </label>
     </header>
-    <video :key="revision.id" ref="video" :src="revision.mediaUrl" controls playsinline preload="metadata" aria-label="Private review video" @error="mediaError = true"></video>
+    <video :key="revision.id" ref="video" :src="revision.mediaUrl" :poster="revision.thumbnailUrl" controls playsinline preload="metadata" aria-label="Private review video" @error="mediaError = true"></video>
     <p v-if="mediaError" role="alert" class="review-error">Playback is unavailable. Refresh the review to check your access. <button class="quiet" @click="refresh().catch(reason => emit('denied', reason))">Refresh review</button></p>
     <p class="review-description">{{ revision.metadata.description }}</p>
     <p class="revision-reference">Revision {{ revision.id }} · version {{ revision.reviewVersion }}</p>

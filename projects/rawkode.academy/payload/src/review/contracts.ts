@@ -4,7 +4,7 @@ const id = z.string().uuid()
 const positiveId = z.number().int().positive()
 const text = (max: number) => z.string().trim().min(1).max(max)
 export const metadataSchema = z.object({
-  title: text(300), description: text(8000), transcript: z.string().max(100000).default(''),
+  title: text(300), description: text(8000), thumbnailId: positiveId.optional(), transcript: z.string().max(100000).default(''),
   chapters: z.array(z.object({ title: text(200), startTime: z.number().int().nonnegative() }).strict()).max(100).default([]),
 }).strict()
 const base = { videoId: positiveId, commandId: id }

@@ -426,3 +426,23 @@ test('legacy processing sessions without admission fail closed and processing mi
   const active = await h.uploaded(); h.adapter.process = async () => ({ state: 'processing' }); await h.process(active.sessionId)
   await assert.rejects(migration.down(h.args), /CHECK constraint/)
 })
+
+
+test('intake validates thumbnail ownership before admission and carries its snapshot into the revision', async t => {
+  const h = await harness(t)
+  const checked: number[][] = []
+  h.review.dependencies.thumbnail = async (videoId, thumbnailId) => {
+    checked.push([videoId, thumbnailId])
+    assert.equal(videoId, 10)
+    if (thumbnailId !== 30) throw new Error('Thumbnail belongs to another video')
+  }
+  const metadata = { title: 'Cut with thumbnail', description: 'Private thumbnail snapshot', chapters: [], thumbnailId: 30 }
+  await assert.rejects(h.begin({ metadata: { ...metadata, thumbnailId: 31 } }), /another video/)
+  assert.equal(h.sqlite.prepare('SELECT count(*) n FROM review_upload_sessions').get()?.n, 0)
+  const session = await h.begin({ metadata })
+  await h.intake.upload(staff, session.sessionId, h.request(session.sessionId))
+  const processed = await h.process(session.sessionId)
+  const revision = await h.review.revision(10, processed.revision.revisionId, staff)
+  assert.equal(JSON.parse(revision.metadata).thumbnailId, 30)
+  assert.deepEqual(checked, [[10,31], [10,30], [10,30]])
+})

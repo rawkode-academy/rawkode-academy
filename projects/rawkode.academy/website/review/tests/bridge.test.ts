@@ -19,10 +19,10 @@ describe("same-origin preview bridge", () => {
   });
   it("does not invent a trusted Origin for mutations", async () => {
     const { env, fetch } = setup();
-    for (const requestOrigin of [undefined, "https://evil.example"]) {
+    for (const path of ["/api/review", "/api/review/upload-targets", "/api/review/thumbnail?videoId=42"]) for (const requestOrigin of [undefined, "https://evil.example"]) {
       const headers: Record<string, string> = { "content-type": "application/json" };
       if (requestOrigin) headers.origin = requestOrigin;
-      expect((await reviewBridge(new Request(`${origin}/api/review`, { method: "POST", headers, body: "{}" }), env)).status).toBe(403);
+      expect((await reviewBridge(new Request(`${origin}${path}`, { method: "POST", headers, body: "{}" }), env)).status).toBe(403);
     }
     expect(fetch).not.toHaveBeenCalled();
     await reviewBridge(new Request(`${origin}/api/review`, { method: "POST", headers: { origin, "content-type": "application/json" }, body: "{}" }), env);
@@ -49,8 +49,20 @@ describe("same-origin preview bridge", () => {
     expect(response.status).toBe(200);
     expect(fetch.mock.calls[0]![0].headers.get("x-upload-length")).toBe("5");
     await reviewBridge(new Request(`${origin}/api/review/upload-targets`), env);
+    await reviewBridge(new Request(`${origin}/api/review/upload-targets`, { method: "POST", headers: { origin, "content-type": "application/json" }, body: JSON.stringify({ title: "Datum", description: "Review" }) }), env);
     await reviewBridge(new Request(`${origin}/api/review/reviewers`), env);
-    expect(fetch).toHaveBeenCalledTimes(3);
+    expect(fetch).toHaveBeenCalledTimes(4);
+    expect(fetch.mock.calls[2]![0].headers.get("origin")).toBe(origin);
+    expect(await fetch.mock.calls[2]![0].json()).toEqual({ title: "Datum", description: "Review" });
+  });
+  it("forwards private thumbnail bytes and revision-bound delivery", async () => {
+    const { env, fetch } = setup();
+    await reviewBridge(new Request(`${origin}/api/review/thumbnail?videoId=42`, { method: "POST", headers: { origin, "content-type": "image/png", "x-upload-length": "5" }, body: "image" }), env);
+    expect(await fetch.mock.calls[0]![0].text()).toBe("image");
+    expect(fetch.mock.calls[0]![0].headers.get("content-type")).toBe("image/png");
+    const response = await reviewBridge(new Request(`${origin}/api/review/thumbnail?videoId=42&revisionId=cut`, { method: "HEAD" }), env);
+    expect(response.headers.get("cache-control")).toBe("private, no-store");
+    expect(await response.text()).toBe("");
   });
   it("rejects unconfigured origins, missing bindings and every non-allowlisted API", async () => {
     const { env, fetch } = setup();

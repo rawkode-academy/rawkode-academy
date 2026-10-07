@@ -124,6 +124,27 @@ tasks: {
 				"src/**",
 				"wrangler.jsonc",
 			]
+			dependsOn: [_t.deploy.review]
+		}
+		review: schema.#Task & {
+			hermetic: false
+			command:  "sh"
+			args: [
+				"-lc",
+				"\(_toolchain) bun run review:build && \(_toolchain) bun x wrangler deploy --config ./dist-review/server/wrangler.json",
+			]
+			env: PATH: _taskPath
+			inputs: [
+				"review/**",
+				"astro.review.config.mts",
+				"env.cue",
+				"../../../packages/design-system/**",
+				"package.json",
+				"../../../bun.lock",
+				"wrangler.review.jsonc",
+				"tsconfig.review.json",
+			]
+			outputs: ["dist-review/**"]
 		}
 		preview: schema.#Task & {
 			hermetic: false

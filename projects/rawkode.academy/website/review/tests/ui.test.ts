@@ -7,7 +7,7 @@ import type { Review } from "../types";
 const cut = "00000000-0000-4000-8000-000000000001";
 function review(): Review { return { videoId: 10, viewerId: 2, canApprove: true, publicationAvailable: true, currentRevisionId: cut, revisions: [{ id: cut, reviewVersion: 3, durationMs: 60000, state: "ready", createdAt: "2026-10-05", mediaUrl: `/api/review/media?videoId=10&revisionId=${cut}`, metadata: { title: "Customer video", description: "Private cut" } }], comments: [], decisions: [] }; }
 const wrappers: ReturnType<typeof mount>[] = [];
-afterEach(() => { for (const wrapper of wrappers.splice(0)) wrapper.unmount(); vi.unstubAllGlobals(); });
+afterEach(() => { for (const wrapper of wrappers.splice(0)) wrapper.unmount(); vi.unstubAllGlobals(); vi.useRealTimers(); sessionStorage.clear(); });
 const user = { id: 2, role: "customer" as const, name: "Reviewer" };
 const button = (wrapper: ReturnType<typeof mount>, text: string) => wrapper.findAll("button").find(item => item.text() === text)!;
 
@@ -18,6 +18,15 @@ describe("review actions", () => {
     expect(wrapper.find(".comment-body").text()).toBe(value.comments[0]!.body);
     expect(wrapper.find(".comment-body img").exists()).toBe(false);
     expect(button(wrapper, "Resolve comment")).toBeUndefined();
+  });
+  it("changes the private poster with the selected revision", async () => {
+    const value = review();
+    value.revisions[0]!.thumbnailUrl = `/api/review/thumbnail?videoId=10&revisionId=${cut}`;
+    value.revisions.push({ ...value.revisions[0]!, id: "older", thumbnailUrl: "/api/review/thumbnail?videoId=10&revisionId=older" });
+    const wrapper = mount(ReviewPanel, { props: { review: value, user } }); wrappers.push(wrapper);
+    expect(wrapper.find("video").attributes("poster")).toBe(value.revisions[0]!.thumbnailUrl);
+    await wrapper.find("select").setValue("older");
+    expect(wrapper.find("video").attributes("poster")).toBe(value.revisions[1]!.thumbnailUrl);
   });
   it("requires confirmation and sends approval for the exact version with a command UUID", async () => {
     const value = review(); const fetch = vi.fn(async (_url: string, _init?: RequestInit) => Response.json(value)); vi.stubGlobal("fetch", fetch);
@@ -57,6 +66,113 @@ describe("review actions", () => {
 });
 
 describe("staff upload intake", () => {
+  it("creates a draft target, uploads through intake, processes and grants the customer", async () => {
+    sessionStorage.clear();
+    const fetch = vi.fn(async (url: string, init?: RequestInit) => {
+      if (url.startsWith("/api/review/upload-targets") && init?.method === "POST") return Response.json({ video: { videoId: 42, legacyId: "review-datum", slug: "review-datum", title: "Datum review", description: "Private Datum cut", reviewState: "no-review" } }, { status: 201 });
+      if (url.startsWith("/api/review/upload-targets")) return Response.json({ videos: [] });
+      if (url.startsWith("/api/review/thumbnail?")) return Response.json({ thumbnailId: 70, videoId: 42 });
+      if (url.startsWith("/api/review/uploads?") && !init?.method) return Response.json({ state: "pending", processingAvailable: true });
+      if (url.startsWith("/api/review/uploads?") && init?.method === "PUT") return Response.json({ state: "uploaded" });
+      if (url === "/api/review/uploads") return Response.json(JSON.parse(String(init?.body)).action === "begin" ? { sessionId: "new-session" } : { state: "ready", revision: { id: cut } });
+      if (url === "/api/review") return Response.json({ ok: true });
+      if (url.startsWith("/api/review/reviewers")) return Response.json({ reviewers: [{ userId: 2, name: "Customer", profileEmail: "customer@example.invalid" }] });
+      throw new Error(`Unexpected request: ${url}`);
+    });
+    vi.stubGlobal("fetch", fetch);
+    const wrapper = mount(StaffUploadPanel); wrappers.push(wrapper); await flushPromises();
+    await wrapper.find(".staff-upload-create input").setValue("Datum review");
+    await wrapper.find(".staff-upload-create textarea").setValue("Private Datum cut");
+    await button(wrapper, "Create video target").trigger("click"); await flushPromises();
+    expect(fetch.mock.calls.some(([url, init]) => url === "/api/review/upload-targets" && init?.method === "POST")).toBe(true);
+    expect((wrapper.find("select").element as HTMLSelectElement).value).toBe("42");
+    expect(wrapper.text()).toContain("Video target created");
+    const source = new File(["fixture"], "cut.mp4", { type: "video/mp4" });
+    Object.defineProperty(wrapper.find('input[type="file"]').element, "files", { value: [source] });
+    await wrapper.find('input[type="file"]').trigger("change");
+    const thumbnailInput = wrapper.findAll('input[type="file"]')[1]!;
+    Object.defineProperty(thumbnailInput.element, "files", { value: [new File(["image fixture"], "thumbnail.png", { type: "image/png" })] });
+    await thumbnailInput.trigger("change");
+    await button(wrapper, "Upload and assign review").trigger("click"); await flushPromises();
+    await vi.waitFor(() => expect(wrapper.emitted("created")).toEqual([[42]]));
+    const commands = fetch.mock.calls.filter(([url, init]) => init?.method === "POST" && !url.startsWith("/api/review/thumbnail?")).map(([url, init]) => ({ url, body: JSON.parse(String(init?.body)) }));
+    expect(commands.map(command => command.body.action ?? "create")).toEqual(["create", "begin", "process", "grant"]);
+    expect(commands[1]!.body).toMatchObject({ videoId: 42, bytes: source.size, contentType: "video/mp4", metadata: { title: "Datum review", description: "Private Datum cut", thumbnailId: 70 } });
+    expect(fetch.mock.calls.find(([url]) => url.startsWith("/api/review/thumbnail?"))?.[0]).toBe("/api/review/thumbnail?videoId=42");
+    expect(commands[1]!.body.checksum).toMatch(/^[a-f0-9]{64}$/);
+    expect(commands[3]!.body).toMatchObject({ videoId: 42, userId: 2, canApprove: true });
+    expect(fetch.mock.calls.find(([, init]) => init?.method === "PUT")?.[0]).toBe("/api/review/uploads?sessionId=new-session");
+    expect(wrapper.emitted("created")).toEqual([[42]]);
+    sessionStorage.clear();
+  });
+
+  it("keeps the new target selected after stale searches and blocks upload during creation", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    let finishSearch!: (response: Response) => void, finishCreate!: (response: Response) => void;
+    const old = { videoId: 10, legacyId: "one", slug: "one", title: "One", description: "Old cut", reviewState: "no-review" };
+    const created = { ...old, videoId: 42, title: "Datum", description: "New cut" };
+    const fetch = vi.fn(async (url: string, init?: RequestInit): Promise<Response> => {
+      if (url.startsWith("/api/review/upload-targets") && init?.method === "POST") return new Promise(resolve => { finishCreate = resolve; });
+      if (url.includes("upload-targets?q=")) return new Promise(resolve => { finishSearch = resolve; });
+      if (url.startsWith("/api/review/upload-targets")) return Response.json({ videos: [old] });
+      if (url.startsWith("/api/review/reviewers")) return Response.json({ reviewers: [{ userId: 2, name: "Customer", profileEmail: "customer@example.invalid" }] });
+      throw new Error(`Unexpected request: ${url}`);
+    });
+    vi.stubGlobal("fetch", fetch);
+    const wrapper = mount(StaffUploadPanel); wrappers.push(wrapper); await flushPromises();
+    Object.defineProperty(wrapper.find('input[type="file"]').element, "files", { value: [new File(["fixture"], "cut.mp4", { type: "video/mp4" })] });
+    await wrapper.find('input[type="file"]').trigger("change");
+    await wrapper.find('input[type="search"]').setValue("one");
+    await vi.advanceTimersByTimeAsync(250); await flushPromises();
+    await wrapper.find(".staff-upload-create input").setValue("Datum");
+    await wrapper.find(".staff-upload-create textarea").setValue("New cut");
+    await button(wrapper, "Create video target").trigger("click"); await flushPromises();
+    expect(button(wrapper, "Upload and assign review").attributes("disabled")).toBeDefined();
+    finishCreate(Response.json({ video: created }, { status: 201 })); await flushPromises();
+    finishSearch(Response.json({ videos: [old] })); await flushPromises();
+    await vi.advanceTimersByTimeAsync(300); await flushPromises();
+    expect((wrapper.find("select").element as HTMLSelectElement).value).toBe("42");
+    // Customer searches must also retain a target outside the first result page.
+    await wrapper.findAll('input[type="search"]')[1]!.setValue("Customer");
+    await vi.advanceTimersByTimeAsync(250); await flushPromises();
+    expect((wrapper.find("select").element as HTMLSelectElement).value).toBe("42");
+  });
+
+  it("freezes the video and customer while a thumbnail uploads despite an earlier search", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    let finishSearch!: (response: Response) => void, finishThumbnail!: (response: Response) => void;
+    let queried = false;
+    const old = { videoId: 10, legacyId: "one", slug: "one", title: "One", description: "Cut", reviewState: "no-review" };
+    const fetch = vi.fn(async (url: string, init?: RequestInit): Promise<Response> => {
+      if (url.includes("upload-targets?q=") && !queried) { queried = true; return new Promise(resolve => { finishSearch = resolve; }); }
+      if (url.startsWith("/api/review/upload-targets")) return Response.json({ videos: [old] });
+      if (url.startsWith("/api/review/reviewers")) return Response.json({ reviewers: [{ userId: queried ? 3 : 2, name: "Customer", profileEmail: "customer@example.invalid" }] });
+      if (url.startsWith("/api/review/thumbnail?")) return new Promise(resolve => { finishThumbnail = resolve; });
+      if (url === "/api/review/uploads") return Response.json(JSON.parse(String(init?.body)).action === "begin" ? { sessionId: "session" } : { revision: { id: cut } });
+      if (url.startsWith("/api/review/uploads?")) return Response.json({ state: "pending" });
+      if (url === "/api/review") return Response.json({ ok: true });
+      throw new Error(`Unexpected request: ${url}`);
+    });
+    vi.stubGlobal("fetch", fetch);
+    const wrapper = mount(StaffUploadPanel); wrappers.push(wrapper); await flushPromises();
+    const inputs = wrapper.findAll('input[type="file"]');
+    Object.defineProperty(inputs[0]!.element, "files", { value: [new File(["source"], "cut.mp4", { type: "video/mp4" })] });
+    Object.defineProperty(inputs[1]!.element, "files", { value: [new File(["image"], "poster.png", { type: "image/png" })] });
+    await inputs[0]!.trigger("change"); await inputs[1]!.trigger("change");
+    await wrapper.find('input[type="search"]').setValue("one");
+    await vi.advanceTimersByTimeAsync(250); await flushPromises();
+    await button(wrapper, "Upload and assign review").trigger("click"); await flushPromises();
+    finishSearch(Response.json({ videos: [{ ...old, videoId: 11 }] })); await flushPromises();
+    expect((wrapper.findAll("select")[0]!.element as HTMLSelectElement).value).toBe("10");
+    expect((wrapper.findAll("select")[1]!.element as HTMLSelectElement).value).toBe("2");
+    finishThumbnail(Response.json({ thumbnailId: 70 })); await flushPromises();
+    await vi.waitFor(() => expect(wrapper.emitted("created")).toEqual([[10]]));
+    const begin = fetch.mock.calls.find(([url, init]) => url === "/api/review/uploads" && JSON.parse(String(init?.body)).action === "begin");
+    expect(JSON.parse(String(begin?.[1]?.body))).toMatchObject({ videoId: 10, metadata: { title: "One", thumbnailId: 70 } });
+    const grant = fetch.mock.calls.find(([url]) => url === "/api/review");
+    expect(JSON.parse(String(grant?.[1]?.body))).toMatchObject({ videoId: 10, userId: 2 });
+  });
+
   it("reuses the begin command and session after processing fails", async () => {
     sessionStorage.clear();
     const source = new File(["fixture"], "cut.mp4", { type: "video/mp4" });

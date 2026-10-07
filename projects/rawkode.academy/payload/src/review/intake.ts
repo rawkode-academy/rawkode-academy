@@ -47,6 +47,7 @@ export class ReviewIntake {
     const input = parsed.data
     if (input.action === 'begin') {
       await this.review.dependencies.video(input.videoId, actor)
+      await this.review.validateThumbnail(input.videoId, input.metadata.thumbnailId)
       const prior = () => this.store.one<Session>('SELECT * FROM review_upload_sessions WHERE begin_command=?', input.commandId)
       const replay = (row: Session) => {
         if (row.owner_id !== actor.id || row.begin_input !== JSON.stringify(input)) throw new ReviewError(409, 'Command ID was used for another intake')

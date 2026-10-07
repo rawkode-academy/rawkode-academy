@@ -10,6 +10,7 @@ export type ReviewDependencies = {
   publicMediaUrl(videoId: number, publicationId: string): string
   source(mediaId: number, actor: ReviewActor, videoId: number): Promise<{ checksum: string }>
   deliverable(mediaId: number, actor: ReviewActor, videoId: number): Promise<{ checksum: string; durationMs: number; contentType: string }>
+  thumbnail?(videoId: number, thumbnailId: number): Promise<void>
   assertPair?(videoId: number, sourceId: number, deliverableId: number): Promise<void>
   stageRelease(videoId: number, publicationId: string, mediaId: number, checksum: string, actor: ReviewActor): Promise<{ key: string; etag: string; checksum: string; bytes: number; contentType: string }>
 }
@@ -33,6 +34,11 @@ function publicProjection(video: PublicVideo, revision: Revision, at: string, me
 }
 export class ReviewService {
   constructor(readonly store: ReviewStore, readonly dependencies: ReviewDependencies) {}
+  async validateThumbnail(videoId: number, thumbnailId?: number) {
+    if (thumbnailId === undefined) return
+    if (!this.dependencies.thumbnail) throw new ReviewError(503, 'Thumbnail verification is unavailable')
+    await this.dependencies.thumbnail(videoId, thumbnailId)
+  }
   private state(videoId: number) { return this.store.one<ReviewState>('SELECT * FROM video_review_state WHERE video_id=?', videoId) }
   private grant(videoId: number, userId: number) { return this.store.one<Grant>('SELECT * FROM video_review_grants WHERE video_id=? AND user_id=? AND active=1', videoId, userId) }
   private async authorize(videoId: number, actor: ReviewActor) {
@@ -64,6 +70,7 @@ export class ReviewService {
       id: row.id, durationMs: row.duration_ms, reviewVersion: row.review_version, state: row.state,
       metadata: JSON.parse(row.metadata), createdAt: row.created_at,
       mediaUrl: `/api/review/media?videoId=${videoId}&revisionId=${row.id}`,
+      ...(JSON.parse(row.metadata).thumbnailId ? { thumbnailUrl: `/api/review/thumbnail?videoId=${videoId}&revisionId=${row.id}` } : {}),
     })), comments, decisions, resolutions: await this.store.all('SELECT comment_id AS commentId,actor_id AS actorId,resolved,created_at AS createdAt FROM review_comment_resolutions WHERE video_id=? ORDER BY created_at,id', videoId),
       ...(actor.role === 'staff' ? { grants: await this.store.all('SELECT user_id AS userId,can_approve AS canApprove,active FROM video_review_grants WHERE video_id=?', videoId) } : {}),
     }
@@ -105,6 +112,7 @@ export class ReviewService {
       const source = await this.dependencies.source(input.mediaId, actor, input.videoId)
       const deliverable = await this.dependencies.deliverable(input.deliverableMediaId, actor, input.videoId)
       if (input.durationMs !== undefined && input.durationMs !== deliverable.durationMs) throw new ReviewError(400, 'Duration does not match the verified deliverable')
+      await this.validateThumbnail(input.videoId, input.metadata.thumbnailId)
       validateMetadata(input.metadata, deliverable.durationMs)
       mutations.push(sql('INSERT INTO video_revisions(id,video_id,media_id,checksum,deliverable_media_id,deliverable_checksum,duration_ms,review_version,state,metadata,created_by_id,created_at) VALUES(?,?,?,?,?,?,?,1,?,?,?,?)', resultId, input.videoId, input.mediaId, source.checksum, input.deliverableMediaId, deliverable.checksum, deliverable.durationMs, 'ready', JSON.stringify(input.metadata), actor.id, at))
       mutations.push(sql('UPDATE video_review_state SET current_revision=? WHERE video_id=?', resultId, input.videoId))
@@ -127,6 +135,8 @@ export class ReviewService {
         if (input.action !== 'publish' && ['approved', 'published'].includes(revision.state)) throw new ReviewError(409, 'Approved revisions are final; create a new revision')
         if (input.action === 'edit') {
           staff(actor)
+          if (input.metadata.thumbnailId !== (JSON.parse(revision.metadata) as ReviewMetadata).thumbnailId) throw new ReviewError(409, 'Create a new revision to change its thumbnail')
+          await this.validateThumbnail(input.videoId, input.metadata.thumbnailId)
           validateMetadata(input.metadata, revision.duration_ms)
           mutations.push(sql('UPDATE video_revisions SET metadata=?,review_version=review_version+1,state=?,decision_id=NULL WHERE id=?', JSON.stringify(input.metadata), 'ready', revision.id))
           result = { revisionId: revision.id, reviewVersion: revision.review_version + 1 }
