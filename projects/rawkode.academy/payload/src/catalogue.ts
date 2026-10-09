@@ -1,4 +1,5 @@
 import type { CollectionSlug, Payload } from 'payload'
+import type { TimesRow } from './editorial/effective'
 
 export type CatalogueDocument = Record<string, unknown> & { id: number | string; legacyId: string }
 export type CatalogueCollection =
@@ -10,7 +11,15 @@ export type CatalogueCollection =
 /** A request-scoped, anonymous, published-only view; never share this cache across requests. */
 export class Catalogue {
   private cache = new Map<CatalogueCollection, Promise<CatalogueDocument[]>>()
-  constructor(private readonly payload: Payload) {}
+  constructor(private readonly payload: Payload, private readonly db?: Pick<D1Database, 'prepare'>) {}
+
+  // Side-table editorial times for a page of videos, in one query. A single JSON
+  // parameter avoids D1's bound-parameter limit. Empty without a database.
+  async editorialTimes(ids: number[]): Promise<Map<number, TimesRow>> {
+    if (!this.db || !ids.length) return new Map()
+    const { results } = await this.db.prepare('SELECT * FROM video_editorial_times WHERE id IN (SELECT value FROM json_each(?))').bind(JSON.stringify(ids)).all<TimesRow>()
+    return new Map(results.map(row => [Number(row.id), row]))
+  }
 
   all(collection: CatalogueCollection): Promise<CatalogueDocument[]> {
     let cached = this.cache.get(collection)

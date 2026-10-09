@@ -33,6 +33,8 @@ export function stamp(request:Request,allowed:readonly string[]):{headers:Header
 // WORKER_SELF_REFERENCE self-calls. Soft gate: an unlisted host runs unstamped, so every
 // OIDC surface fails closed while public reads and bearer callbacks keep working.
 export async function serveDirect(request:Request,config:AuthConfig,next:Downstream):Promise<Response> {
+  // The published read contract is served only through the PublishedContent entrypoint.
+  if(isPublishedPath(new URL(request.url).pathname))return Response.json({error:'Not found'},{status:404,headers:noStore})
   const {headers}=stamp(request,config.directOrigins)
   if(rejectOidcMutationFor(request,requestOrigin(headers,config)))return untrusted()
   const stamped=new Request(request,{headers})
@@ -55,4 +57,22 @@ export async function serveBridge(request:Request,config:AuthConfig,next:Downstr
   const {headers,origin}=stamp(request,config.bridgeOrigins)
   if(rejectOidcMutationFor(request,origin))return untrusted()
   return next(new Request(request,{headers}))
+}
+// PublishedContent entrypoint: reachable only through a service binding (the website,
+// workstream G5). Anonymous and read-only: GET or HEAD on the v1 video routes, with
+// every credential and origin header dropped before it reaches the app.
+export const PUBLISHED_ROUTE=/^\/api\/published\/v1\/videos(\/[A-Za-z0-9._-]{1,200})?$/
+// Normalised so encoded or doubled slashes cannot slip past the public 404.
+export function isPublishedPath(pathname:string):boolean {
+  let path=pathname
+  try{path=decodeURIComponent(pathname)}catch{}
+  return path.replace(/\/{2,}/g,'/').toLowerCase().startsWith('/api/published')
+}
+export async function servePublished(request:Request,next:Downstream):Promise<Response> {
+  const url=new URL(request.url)
+  if(!PUBLISHED_ROUTE.test(url.pathname))return Response.json({error:'Not found'},{status:404,headers:noStore})
+  if(request.method!=='GET'&&request.method!=='HEAD')return Response.json({error:'Method not allowed'},{status:405,headers:noStore})
+  const headers=new Headers(request.headers)
+  for(const name of ['cookie','authorization',PUBLIC_ORIGIN_HEADER,'origin'])headers.delete(name)
+  return next(new Request(url,{method:request.method,headers}))
 }

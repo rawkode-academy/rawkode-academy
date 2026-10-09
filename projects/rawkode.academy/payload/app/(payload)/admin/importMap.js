@@ -1,4 +1,5 @@
 import { ReviewFreezeNotice as ReviewFreezeNotice_4c9d8d7e67c47c84519e980885c045b4 } from '../../../src/admin/fields/ReviewFreeze'
+import { EditorialTimesField as EditorialTimesField_1ce8b373cbd08a3c1ef76eb103aa4e34 } from '../../../src/admin/fields/EditorialTimes'
 import { ReviewPanel as ReviewPanel_10f43ce177b238389bd9b1c568d619e3 } from '../../../src/admin/fields/ReviewPanel'
 import { VideoPublishControl as VideoPublishControl_4c9d8d7e67c47c84519e980885c045b4 } from '../../../src/admin/fields/ReviewFreeze'
 import { VideoSaveDraftControl as VideoSaveDraftControl_4c9d8d7e67c47c84519e980885c045b4 } from '../../../src/admin/fields/ReviewFreeze'
@@ -19,6 +20,7 @@ import { R2ClientUploadHandler as R2ClientUploadHandler_85cc02ed84006fcc91d3aff3
 /** @type import('payload').ImportMap */
 export const importMap = {
   "./src/admin/fields/ReviewFreeze#ReviewFreezeNotice": ReviewFreezeNotice_4c9d8d7e67c47c84519e980885c045b4,
+  "./src/admin/fields/EditorialTimes#EditorialTimesField": EditorialTimesField_1ce8b373cbd08a3c1ef76eb103aa4e34,
   "./src/admin/fields/ReviewPanel#ReviewPanel": ReviewPanel_10f43ce177b238389bd9b1c568d619e3,
   "./src/admin/fields/ReviewFreeze#VideoPublishControl": VideoPublishControl_4c9d8d7e67c47c84519e980885c045b4,
   "./src/admin/fields/ReviewFreeze#VideoSaveDraftControl": VideoSaveDraftControl_4c9d8d7e67c47c84519e980885c045b4,

@@ -477,6 +477,20 @@ html[data-theme="dark"] .academy-stat {
 .academy-stat--no-revision {
 	border-left-color: var(--academy-violet);
 }
+/* Derived queue statuses (src/review/queue.ts). */
+.academy-stat--ready-to-publish,
+.academy-stat--published {
+	border-left-color: var(--academy-spruce);
+}
+.academy-stat--approval-invalidated,
+.academy-stat--approved-open-comments {
+	border-left-color: var(--academy-rust);
+}
+.academy-stat--needs-share,
+.academy-stat--awaiting-client,
+.academy-stat--processing {
+	border-left-color: var(--academy-sky);
+}
 .academy-list {
 	display: grid;
 	gap: 0;
@@ -537,6 +551,128 @@ html[data-theme="dark"] .academy-stat {
 .academy-pill--draft {
 	background: var(--theme-elevation-100);
 	color: var(--theme-elevation-600);
+}
+.academy-pill--ready-to-publish,
+.academy-pill--broadcast-live {
+	background: var(--theme-success-100);
+	color: var(--theme-success-800);
+}
+.academy-pill--approval-invalidated,
+.academy-pill--approved-open-comments,
+.academy-pill--needs-share,
+.academy-pill--broadcast-stale,
+.academy-pill--broadcast-overdue {
+	background: var(--theme-warning-100);
+	color: var(--theme-warning-800);
+}
+.academy-pill--awaiting-client,
+.academy-pill--processing,
+.academy-pill--broadcast-scheduled {
+	background: var(--theme-elevation-100);
+	color: var(--theme-elevation-800);
+}
+/* Guarded staff actions (src/admin/fields/ReviewActions.tsx, EditorialTimes.tsx). */
+.academy-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 8px 12px;
+	margin-block: 4px 12px;
+}
+.academy-actions--compact {
+	flex-basis: 100%;
+	margin-block: 4px 0;
+}
+.academy-actions .btn {
+	margin-block: 0;
+}
+.academy-actions__field {
+	display: grid;
+	gap: 4px;
+	min-width: 0;
+}
+.academy-actions__label {
+	color: var(--theme-elevation-600);
+	font-size: 12px;
+}
+.academy-actions select,
+.academy-actions input,
+.academy-times input,
+.academy-times textarea {
+	min-height: 32px;
+	max-width: 100%;
+	padding: 4px 8px;
+	/* No border or background: native controls keep their focus and invalid states. */
+	color: var(--theme-text);
+	font: inherit;
+}
+.academy-actions__check {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	min-height: 32px;
+}
+.academy-actions__confirm,
+.academy-actions__share,
+.academy-times__row,
+.academy-times__correct {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 8px 12px;
+}
+.academy-actions__share {
+	flex-basis: 100%;
+	padding: 12px;
+	border: 1px solid var(--theme-elevation-150);
+	border-radius: var(--style-radius-m);
+}
+.academy-actions__error,
+.academy-actions__ok {
+	flex-basis: 100%;
+	margin: 0;
+	font-size: 13px;
+}
+.academy-actions__error {
+	color: var(--theme-error-800);
+}
+.academy-actions__ok {
+	color: var(--theme-success-800);
+}
+.academy-times {
+	display: grid;
+	gap: 12px;
+	justify-items: start;
+}
+.academy-times__list {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	gap: 8px 24px;
+	width: 100%;
+	margin: 0;
+}
+.academy-times__item dt {
+	color: var(--theme-elevation-400);
+	font-size: 12px;
+}
+.academy-times__item dd {
+	margin: 0;
+	font-variant-numeric: tabular-nums;
+}
+.academy-times__correct {
+	width: 100%;
+	padding: 12px;
+	border: 1px solid var(--theme-elevation-150);
+	border-radius: var(--style-radius-m);
+}
+.academy-times__note {
+	flex: 1 1 100%;
+}
+.academy-times__note textarea {
+	width: 100%;
+}
+.academy-calendar {
+	margin-top: 40px;
 }
 .academy-links {
 	display: grid;

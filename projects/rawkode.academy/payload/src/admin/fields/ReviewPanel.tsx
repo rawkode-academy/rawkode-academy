@@ -2,23 +2,27 @@ import { Link } from '@payloadcms/ui'
 import type { UIFieldServerProps } from 'payload'
 import { isStaff } from '../../auth/access'
 import { cloudflare } from '../../cloudflare'
-import { reviewHistory } from '../../review/queue'
+import { reviewHistory, reviewQueueRow, type ReviewQueueRow } from '../../review/queue'
 import { ReviewStore } from '../../review/store'
 import { plural, timeAgo } from '../format'
 import { collectionPath, previewReviewUrl, reviewQueuePath } from '../links'
-import { ReviewStatePill } from '../views/ReviewStatePill'
+import { publicationAvailable, staffDirectory } from '../review-data'
+import { QueueStatusPill, ReviewStatePill } from '../views/ReviewStatePill'
+import { ReviewActions } from './ReviewActions'
 
-// Server-rendered Review tab for a video. Read-only, and deliberately not join
-// fields: no extra subqueries on public reads and no grant data in form state.
-// Extension points: workstream D's share link and F's publish-approved action
-// mount below the history as a small client child.
+// Server-rendered Review tab for a video, deliberately not join fields: no extra
+// subqueries on public reads and no grant data in form state. The guarded staff
+// actions (assign, share the current cut, publish) are a small client child that
+// posts to POST /api/review.
 export async function ReviewPanel({ id, req }: UIFieldServerProps) {
 	if (!isStaff(req.user) || id === undefined) return null
 	const videoId = Number(id)
 	let history: Awaited<ReturnType<typeof reviewHistory>> = null
+	let row: ReviewQueueRow | null = null
 	let failed = false
 	try {
-		history = await reviewHistory(new ReviewStore(cloudflare.env.D1), videoId)
+		const store = new ReviewStore(cloudflare.env.D1)
+		;[history, row] = await Promise.all([reviewHistory(store, videoId), reviewQueueRow(store, videoId)])
 	} catch (error) {
 		failed = true
 		console.error(JSON.stringify({ level: 'error', message: 'review history failed', error: String(error) }))
@@ -40,14 +44,32 @@ export async function ReviewPanel({ id, req }: UIFieldServerProps) {
 		)
 	}
 	const current = history.revisions.find(revision => revision.id === history.currentRevisionId)
+	const staff = await staffDirectory(req.payload)
+	const available = row?.status === 'ready-to-publish' ? await publicationAvailable(videoId) : false
 	return (
 		<div className="academy-panel">
 			<div className="academy-panel__summary">
-				<ReviewStatePill state={current?.state ?? null} />
+				{row ? <QueueStatusPill status={row.status} /> : <ReviewStatePill state={current?.state ?? null} />}
 				<span>{current ? `Revision v${current.reviewVersion}, cut ${timeAgo(current.createdAt)}` : 'No cut uploaded yet'}</span>
 				<span>{plural(history.openComments, 'open comment')}</span>
 				<span>{plural(history.activeReviewers, 'reviewer')}</span>
 			</div>
+			{row ? (
+				<ReviewActions
+					row={{
+						videoId,
+						title: row.videoTitle || `Video ${videoId}`,
+						status: row.status,
+						revisionId: row.revisionId,
+						reviewVersion: row.reviewVersion,
+						decisionId: row.decisionId,
+						assignee: row.assignee,
+						assignmentVersion: row.assignmentVersion,
+						publicationAvailable: available,
+					}}
+					staff={staff}
+				/>
+			) : null}
 			<div className="academy-panel__actions">
 				<Link href={reviewQueuePath} prefetch={false}>
 					Review queue

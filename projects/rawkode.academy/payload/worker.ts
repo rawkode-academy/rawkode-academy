@@ -1,6 +1,6 @@
 import {WorkerEntrypoint} from 'cloudflare:workers'
 import {authConfig} from './src/auth/config'
-import {serveBridge,serveDirect} from './src/ingress'
+import {serveBridge,serveDirect,servePublished} from './src/ingress'
 // OpenNext creates this module during build:worker.
 // @ts-ignore Generated Workers entry point has no TypeScript declaration.
 import openNextHandler from './.open-next/worker.js'
@@ -17,6 +17,14 @@ export default {
 export class ReviewBridge extends WorkerEntrypoint<CloudflareEnv> {
   fetch(request: Request) {
     return serveBridge(request,authConfig(this.env),async req=>handler.fetch!(req as IncomingRequest,this.env,this.ctx))
+  }
+}
+// Bound by the website Worker (workstream G5) as rawkode-academy-payload#PublishedContent
+// for the published read contract v1 (src/published/contract.ts). It has no public
+// route: the default entrypoint answers 404 for /api/published/.
+export class PublishedContent extends WorkerEntrypoint<CloudflareEnv> {
+  fetch(request: Request) {
+    return servePublished(request,async req=>handler.fetch!(req as IncomingRequest,this.env,this.ctx))
   }
 }
 export {MediaWorkflow} from './src/media-workflow'

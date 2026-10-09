@@ -93,6 +93,20 @@ export class ReviewAccess {
   activeReviewersSubquery(videoColumn: string): { sql: string; params: [string] } {
     return { sql: `(SELECT COUNT(DISTINCT g.user_id) FROM review_revision_grants g WHERE g.video_id=${videoColumn} AND ${active('g')})`, params: [this.at()] }
   }
+  // Columns for the staff review queue over a video_revisions alias (the current
+  // revision) and a video id column: the combined team state, active approvers on
+  // this revision, distinct active reviewers on the video, and the approval that
+  // publish would use (each author's latest decision, with its grant unchanged).
+  queueColumns(revision: string, videoColumn: string): Statement {
+    const reviewers = this.activeReviewersSubquery(videoColumn)
+    return {
+      sql: `${teamState(revision)} AS teamState,
+        (SELECT COUNT(DISTINCT g.user_id) FROM review_revision_grants g WHERE g.revision_id=${revision}.id AND g.can_approve=1 AND ${active('g')}) AS approverCount,
+        ${reviewers.sql} AS activeReviewers,
+        (SELECT d.id ${latestDecisions(revision)} AND d.decision='approved' AND EXISTS(${approverGrant} AND g.id=d.grant_id AND g.version=d.grant_version) ORDER BY d.rowid DESC LIMIT 1) AS approvedDecisionId`,
+      values: [this.at(), ...reviewers.params],
+    }
+  }
   async activeReviewerCount(videoId: number) {
     const row = await this.store.one<{ total: number }>(`SELECT COUNT(DISTINCT g.user_id) AS total FROM review_revision_grants g WHERE g.video_id=? AND ${active('g')}`, videoId, this.at())
     return Number(row?.total ?? 0)

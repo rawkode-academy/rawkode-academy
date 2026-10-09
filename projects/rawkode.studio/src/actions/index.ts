@@ -134,7 +134,9 @@ export const server = {
 			const user = requireUser(context);
 			const studioEnv = env as StudioEnv;
 			try {
-				return await confirmStudioStream(studioEnv, user, input);
+				return await confirmStudioStream(studioEnv, user, input, {
+					defer: (promise) => waitUntil(promise),
+				});
 			} catch (error) {
 				toActionError(error);
 			}
@@ -150,7 +152,9 @@ export const server = {
 			const user = requireUser(context);
 			const studioEnv = env as StudioEnv;
 			try {
-				return await stopStudioStream(studioEnv, user, input);
+				return await stopStudioStream(studioEnv, user, input, {
+					defer: (promise) => waitUntil(promise),
+				});
 			} catch (error) {
 				toActionError(error);
 			}
@@ -166,7 +170,9 @@ export const server = {
 			const user = requireUser(context);
 			const studioEnv = env as StudioEnv;
 			try {
-				return await endStudioSession(studioEnv, user, input);
+				return await endStudioSession(studioEnv, user, input, {
+					defer: (promise) => waitUntil(promise),
+				});
 			} catch (error) {
 				toActionError(error);
 			}

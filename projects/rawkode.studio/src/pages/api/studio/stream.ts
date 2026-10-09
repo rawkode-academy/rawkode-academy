@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { env } from "cloudflare:workers";
+import { env, waitUntil } from "cloudflare:workers";
 import type { StudioEnv } from "../../../env";
 import {
 	json,
@@ -40,13 +40,13 @@ export const POST: APIRoute = async ({ locals, request }) => {
 			return json(await confirmStudioStream(env as StudioEnv, locals.user, {
 				sessionId: body.sessionId,
 				streamToken: body.streamToken,
-			}));
+			}, { defer: (promise) => waitUntil(promise) }));
 		}
 		if (body.action === "stop") {
 			return json(await stopStudioStream(env as StudioEnv, locals.user, {
 				sessionId: body.sessionId,
 				streamToken: body.streamToken,
-			}));
+			}, { defer: (promise) => waitUntil(promise) }));
 		}
 		return json({ error: "action must be start, confirm, or stop." }, 400);
 	} catch (error) {

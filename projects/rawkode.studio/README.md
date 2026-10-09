@@ -63,7 +63,15 @@ A take that will never be published (a rejected cut, or a transcode that used ev
 
 Only a configured operator can turn review off, and only before the session has a recording. A public recording is refused for a content video that still has a review take that is not promoted or withdrawn. Each take keeps a fresh recording ID; re-marking it with another source is refused. Requests carry the operator's Academy issuer and subject plus GitHub handle as `requestedBy`.
 
-Payload outage drill: point `PAYLOAD_HANDOFF_URL` at a missing path (or rotate the Studio copy of `STUDIO_MACHINE_SECRET`) during a test session. Live streaming, recording, upload and recording-ready must all succeed; the recording shows `pending` with a `Payload 404` or `Payload 401` error on the recordings page. Restore the setting and confirm the cron delivers the adoption at the next retry (the backoff is at most 15 minutes after three failed attempts).
+Payload outage drill: point `PAYLOAD_HANDOFF_URL` at a missing path (or rotate the Studio copy of `STUDIO_MACHINE_SECRET`) during a test session. Live streaming, recording, upload and recording-ready must all succeed (for a production content session, broadcast events stay `pending` in `studio_broadcast_events` and are delivered later); the recording shows `pending` with a `Payload 404` or `Payload 401` error on the recordings page. Restore the setting and confirm the cron delivers the adoption at the next retry (the backoff is at most 15 minutes after three failed attempts).
+
+## Broadcast Times
+
+Payload records when a live video actually started and ended (its editorial times). When a production session that is linked to a content video goes live, Studio queues a `broadcast-started` event in `studio_broadcast_events` (migration `0005_editorial_broadcast.sql`). Stopping the stream, or ending the session, queues `broadcast-ended`. Test streams and standalone shows without a content video report nothing.
+
+- Each event is sent to Payload's `POST /api/editorial/broadcast` over the `PAYLOAD` binding, signed with `STUDIO_MACHINE_SECRET`. It carries the content video ID as `legacyId` and the stream time Studio stored, and the event id is the command id and the `Idempotency-Key`, so retries never record twice.
+- Sending is fire-and-forget through `waitUntil`; going live or stopping never waits for Payload. The `*/5` cron resends pending events (backoff 1, 5 and 15 minutes, then hourly, so every retry lands inside Payload's 24 hour window) and keeps each session's end behind its start. It also re-queues the start or end of a production session from the last 23 hours whose outbox write was lost. A 400 or 409 from Payload is final (staff correct the times in Payload); a 5xx, including a race with a staff edit, is retried; after 20 failed attempts an event is marked `rejected`.
+- Payload only accepts these for `live` videos, within 24 hours of the event. A stream stopped and restarted on the same session reports a second start after the first end: Payload keeps the first start and clears the end, so the show reads live again until the final end.
 
 ## Guest Access
 

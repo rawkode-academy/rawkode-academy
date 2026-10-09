@@ -1,19 +1,24 @@
 import { Link } from '@payloadcms/ui'
 import type { WidgetServerProps } from 'payload'
 import { isStaff } from '../../auth/access'
-import { queueState, reviewStateLabels, staffActionStates } from '../../review/queue'
+import { queueStatusLabels, staffActionStatuses, type QueueStatus } from '../../review/queue'
+import { ReviewActions } from '../fields/ReviewActions'
 import { timeAgo } from '../format'
 import { documentPath, previewReviewUrl, reviewQueuePath } from '../links'
-import { reviewSnapshot } from '../review-data'
-import { ReviewStatePill } from '../views/ReviewStatePill'
+import { publicationAvailable, reviewSnapshot, staffDirectory } from '../review-data'
+import { QueueStatusPill } from '../views/ReviewStatePill'
 
-// Read-only summary. Extension point: when workstream F lands its guarded
-// share/publish commands, row actions go here, posting to those commands only.
-export async function ReviewQueueWidget({ user }: WidgetServerProps) {
+// Summary of the queue, with compact guarded actions on the rows waiting on
+// staff. Actions post to POST /api/review only; the full list is the queue view.
+export async function ReviewQueueWidget({ req, user }: WidgetServerProps) {
 	if (!isStaff(user)) return null
-	const snapshot = await reviewSnapshot()
-	const waiting = snapshot.rows.filter(row => staffActionStates.includes(queueState(row.state))).slice(0, 5)
-	const order = ['changes-requested', 'approved', 'no-revision', 'ready', 'published'] as const
+	const [snapshot, staff] = await Promise.all([reviewSnapshot(), staffDirectory(req.payload)])
+	const waiting = snapshot.rows.filter(row => staffActionStatuses.includes(row.status)).slice(0, 5)
+	const available = new Map(
+		await Promise.all(waiting.filter(row => row.status === 'ready-to-publish').map(async row => [row.videoId, await publicationAvailable(row.videoId)] as const)),
+	)
+	// Every staff-action status gets a tile, so the tiles add up to the nav badge.
+	const order: QueueStatus[] = ['ready-to-publish', 'changes-requested', 'approval-invalidated', 'approved-open-comments', 'needs-share', 'no-revision', 'awaiting-client', 'published']
 	return (
 		<section className="academy-widget" aria-label="Review queue">
 			<header className="academy-widget__header">
@@ -28,30 +33,47 @@ export async function ReviewQueueWidget({ user }: WidgetServerProps) {
 				</div>
 			</header>
 			{snapshot.error ? <p className="academy-widget__error">{snapshot.error}</p> : null}
-			<ul className="academy-stats" aria-label="Videos in review by state">
-				{order.map(state => (
-					<li key={state} className={`academy-stat academy-stat--${state}`}>
-						<span className="academy-stat__value">{snapshot.counts[state]}</span>
-						<span className="academy-stat__label">{reviewStateLabels[state]}</span>
+			<ul className="academy-stats" aria-label="Videos in review by status">
+				{order.map(status => (
+					<li key={status} className={`academy-stat academy-stat--${status}`}>
+						<span className="academy-stat__value">{snapshot.counts[status]}</span>
+						<span className="academy-stat__label">{queueStatusLabels[status]}</span>
 					</li>
 				))}
 			</ul>
 			{waiting.length ? (
 				<ol className="academy-list">
-					{waiting.map(row => (
-						<li key={row.videoId} className="academy-list__row">
-							<Link className="academy-list__title" href={documentPath('videos', row.videoId)} prefetch={false}>
-								{row.videoTitle || `Video ${row.videoId}`}
-							</Link>
-							<ReviewStatePill state={row.state} />
-							<span className="academy-list__meta">
-								{row.createdAt
-									? [row.reviewVersion ? `v${row.reviewVersion}` : null, `cut ${timeAgo(row.createdAt)}`].filter(Boolean).join(' · ')
-									: 'no cut yet'}
-							</span>
-							{row.revisionTitle ? <span className="academy-list__note">{row.revisionTitle}</span> : null}
-						</li>
-					))}
+					{waiting.map(row => {
+						const title = row.videoTitle || `Video ${row.videoId}`
+						return (
+							<li key={row.videoId} className="academy-list__row">
+								<Link className="academy-list__title" href={documentPath('videos', row.videoId)} prefetch={false}>
+									{title}
+								</Link>
+								<QueueStatusPill status={row.status} />
+								<span className="academy-list__meta">
+									{row.createdAt
+										? [row.reviewVersion ? `v${row.reviewVersion}` : null, `cut ${timeAgo(row.createdAt)}`].filter(Boolean).join(' · ')
+										: 'no cut yet'}
+								</span>
+								<ReviewActions
+									compact
+									row={{
+										videoId: row.videoId,
+										title,
+										status: row.status,
+										revisionId: row.revisionId,
+										reviewVersion: row.reviewVersion,
+										decisionId: row.decisionId,
+										assignee: row.assignee,
+										assignmentVersion: row.assignmentVersion,
+										publicationAvailable: available.get(row.videoId) ?? false,
+									}}
+									staff={staff}
+								/>
+							</li>
+						)
+					})}
 				</ol>
 			) : (
 				<p className="academy-widget__empty">Nothing is waiting on staff. Client reviews in progress are listed in the queue.</p>

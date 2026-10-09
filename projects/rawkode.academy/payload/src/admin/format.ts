@@ -17,3 +17,13 @@ export function timeAgo(value: unknown, now = Date.now()): string {
 }
 
 export const plural = (count: number, one: string, many = `${one}s`) => `${count} ${count === 1 ? one : many}`
+
+// Absolute times. Server components pass UTC so the markup never depends on the
+// Worker's zone; client components omit it to show the viewer's local time.
+export function formatTime(value: string | null | undefined, timeZone?: string): string {
+	if (!value) return 'Not set'
+	const date = new Date(value)
+	if (Number.isNaN(date.getTime())) return 'unknown'
+	// Explicit components: dateStyle and timeStyle cannot be combined with timeZoneName.
+	return new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone, timeZoneName: 'short' }).format(date)
+}
