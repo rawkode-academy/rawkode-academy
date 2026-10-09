@@ -234,7 +234,12 @@ function deployedVersions(deps: GateDeps): DeployedVersion[] {
 				"--json",
 			]),
 		);
-		return { tag: versionTag(raw), message: versionMessage(raw) };
+		const tag = versionTag(raw);
+		const message = versionMessage(raw);
+		return {
+			...(tag === undefined ? {} : { tag }),
+			...(message === undefined ? {} : { message }),
+		};
 	});
 }
 
