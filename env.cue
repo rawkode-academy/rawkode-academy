@@ -59,14 +59,29 @@ let _NamespaceNix = schema.#Contributor & {
 
 schema.#Base
 
+// A project may set _cuenvBinary to pin a different cuenv release for its own
+// generated workflows; every other project keeps the repository-wide pin.
+_cuenvBinary?: string
+
 config: ci: cuenv: {
-	source:  "release"
-	version: "0.55.1"
+	source: "release"
+	if _cuenvBinary == _|_ {
+		version: "0.55.1"
+	}
+	if _cuenvBinary != _|_ {
+		version: _cuenvBinary
+	}
 }
 
 runtime: schema.#DevenvRuntime
 
 hooks: onEnter: devenv: schema.#Devenv
+
+// A project may set _ciRequireReport to its repository-relative path. `cuenv
+// ci` skips a project whose env.cue fails to evaluate and still exits 0, so the
+// generated workflow then fails unless cuenv wrote that project's pipeline
+// report (.cuenv/reports/<sha>/<absolute project path with / as ->.json).
+_ciRequireReport?: string
 
 ci: providers: ["github"]
 ci: contributors: [
@@ -74,6 +89,23 @@ ci: contributors: [
 	c.#BunWorkspace,
 	c.#CuenvRelease,
 	c.#OnePassword,
+	if _ciRequireReport != _|_ {
+		schema.#Contributor & {
+			id: "requireReport"
+			tasks: [{
+				id:       "requireReport.verify"
+				label:    "Verify cuenv ran \(_ciRequireReport)"
+				priority: 90
+				script: """
+					suffix=$(printf '%s' '\(_ciRequireReport)' | tr '/' '-')
+					if ! ls ".cuenv/reports/${GITHUB_SHA}/"*"-${suffix}.json" >/dev/null 2>&1; then
+					  echo "::error::cuenv ci wrote no pipeline report for \(_ciRequireReport). It skipped the project (evaluation failed or timed out; look for 'Failed to evaluate env.cue' above) or found no affected tasks."
+					  exit 1
+					fi
+					"""
+			}]
+		}
+	},
 ]
 
 ci: provider: github: {

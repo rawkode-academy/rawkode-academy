@@ -34,15 +34,24 @@ on:
     - projects/rawkode.academy/website/schema/**
     - projects/rawkode.academy/website/scripts/**
     - projects/rawkode.academy/website/src/**
-    - projects/rawkode.academy/website/vitest.config.ts
-    - projects/rawkode.academy/website/vitest.config.ts/**
+    - projects/rawkode.academy/website/src/styles/**
     - projects/rawkode.academy/website/tsconfig.review.json
     - projects/rawkode.academy/website/tsconfig.review.json/**
-    - projects/rawkode.academy/website/wrangler.review.jsonc
-    - projects/rawkode.academy/website/wrangler.review.jsonc/**
+    - projects/rawkode.academy/website/vitest.config.ts
+    - projects/rawkode.academy/website/vitest.config.ts/**
+    - projects/rawkode.academy/website/vitest.review.config.ts
+    - projects/rawkode.academy/website/vitest.review.config.ts/**
     - projects/rawkode.academy/website/wrangler.jsonc
     - projects/rawkode.academy/website/wrangler.jsonc/**
-  workflow_dispatch: {}
+    - projects/rawkode.academy/website/wrangler.review.jsonc
+    - projects/rawkode.academy/website/wrangler.review.jsonc/**
+  workflow_dispatch:
+    inputs:
+      skip_payload_wait:
+        description: Deploy the review frontend without waiting for the Payload deploy of this commit
+        required: false
+        default: 'false'
+        type: boolean
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
@@ -50,6 +59,7 @@ permissions:
   contents: read
   checks: write
   pull-requests: write
+  packages: write
 jobs:
   rawkode-academy-website-default:
     name: rawkode-academy-website-default
