@@ -1,6 +1,7 @@
 import { ReviewError, type ReviewActor } from './contracts'
 import type { Payload, Where } from 'payload'
 import type { ReviewStore } from './store'
+import { currentReviewStates } from './queue'
 
 const privateHeaders = { 'cache-control': 'private, no-store', 'referrer-policy': 'no-referrer' }
 type Runtime = { payload: Payload; store: ReviewStore; actor: ReviewActor; origin: string }
@@ -81,11 +82,7 @@ export function createStaffVideoHandlers(runtime: (request: Request) => Promise<
           collection: 'videos', depth: 0, draft: true, limit: 100, sort: '-updatedAt',
           where, overrideAccess: false, user: actor,
         })
-        const reviewRows = await store.all<{ videoId: number; state: string }>(
-          `SELECT s.video_id AS videoId,r.state
-           FROM video_review_state s LEFT JOIN video_revisions r ON r.id=s.current_revision
-           ORDER BY s.video_id`,
-        )
+        const reviewRows = await currentReviewStates(store)
         const reviewStates = new Map(reviewRows.map(row => [row.videoId, row.state ?? 'no-revision']))
         const videos = result.docs
           .filter(doc => !doc.tombstone && !doc.processingRun)

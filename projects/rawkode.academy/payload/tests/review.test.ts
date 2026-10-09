@@ -11,6 +11,7 @@ import { ReviewService } from '../src/review/service'
 import { ReviewStore } from '../src/review/store'
 import { actorFromUser, type ReviewActor } from '../src/review/contracts'
 import { reviewCollections } from '../src/review/collections'
+import { noDevelopers } from '../src/admin/access'
 import { createReviewHandlers } from '../src/review/http'
 import { byteRange, mediaResponse } from '../src/review/media'
 import { digestBytes, fixtureChecksum, verifiedDeliverable, stageReleaseObject } from '../src/review/artifacts'
@@ -233,7 +234,7 @@ test('migration matches snapshot indexes, empty downgrade works, and legacy pipe
   const snapshot = JSON.parse(await readFile(new URL('../src/migrations/20261005_120000_video_review.json', import.meta.url), 'utf8')) as {
     tables: Record<string, { indexes: Record<string, { name: string; columns: string[]; isUnique: boolean }> }>
   }
-  for (const collection of reviewCollections) {
+  for (const collection of reviewCollections(noDevelopers)) {
     const table = collection.slug.replaceAll('-', '_')
     const expected = Object.values(snapshot.tables[table].indexes).sort((a, b) => a.name.localeCompare(b.name))
     const actual = h.sqlite.prepare(`SELECT name, "unique" AS is_unique FROM pragma_index_list(?) WHERE origin='c'`).all(table).map(index => ({
@@ -273,7 +274,7 @@ test('unresolved comments block publication, and a failed publication batch leav
 })
 
 test('Payload review collections deny generic mutations and customer raw reads', async () => {
-  for (const collection of reviewCollections) {
+  for (const collection of reviewCollections(noDevelopers)) {
     for (const action of ['create','update','delete'] as const) assert.equal(await collection.access![action]!({ req: { user: staff } } as never), false)
     assert.equal(await collection.access!.read!({ req: { user: client } } as never), collection.slug === 'video-publications')
   }

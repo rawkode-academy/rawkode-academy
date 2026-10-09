@@ -1,4 +1,6 @@
 import {isStaff} from './auth/access'
+import type {AdminAccess} from './admin/access'
+import {applyPreset} from './admin/collection-admin'
 import type { CollectionConfig, Field, Payload } from 'payload'
 
 type User = NonNullable<Parameters<Payload['find']>[0]['user']>
@@ -10,8 +12,8 @@ export const pipelineVideoFields: Field[] = [
   { name: 'mediaChecksum', type: 'text' }, { name: 'mediaVersion', type: 'text' },
   { name: 'approvalRevision', type: 'text' }, { name: 'processingRun', type: 'text' },
 ]
-export const pipelineCollection: CollectionConfig = {
-  slug: 'pipeline-runs', admin: { useAsTitle: 'key' },
+export const pipelineCollection = (access: AdminAccess): CollectionConfig => applyPreset({
+  slug: 'pipeline-runs',
   access: { read: ({ req }) => isStaff(req.user) || req.context.pipelineMachine === true, create: ({ req }) => req.context.pipelineInternal === true && (isStaff(req.user) || req.context.pipelineMachine === true), update: ({ req }) => req.context.pipelineInternal === true && (isStaff(req.user) || req.context.pipelineMachine === true), delete: () => false },
   fields: [
     { name: 'key', type: 'text', unique: true, required: true },
@@ -24,7 +26,7 @@ export const pipelineCollection: CollectionConfig = {
     { name: 'chapters', type: 'json' }, { name: 'transcriptionAttempts', type: 'number' },
     { name: 'humanEdited', type: 'checkbox', defaultValue: false },
   ],
-}
+}, access)
 
 function staff(user: User): void { if (!isStaff(user)) throw new Error('Staff authentication required') }
 const maximumSummaryCharacters = 8_000
