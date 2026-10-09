@@ -11,14 +11,17 @@ import {
 	endStudioSession,
 	issueStudioParticipantToken,
 	markStudioRecordingReady,
+	setStudioSessionReviewRequired,
 	startStudioStream,
 	stopStudioStream,
 	uploadStudioRecordingPart,
+	withdrawStudioReviewRecording,
 } from "./operations";
 import {
 	buildStudioSession,
 	createReadyMarker,
 	createReadyMarkerKey,
+	createReviewReadyMarker,
 	getPublicStudioLiveState,
 	getStudioSession,
 	getStudioSessionWatchUrl,
@@ -26,8 +29,11 @@ import {
 	listStudioRecordings,
 	loadStudioDashboard,
 	resolveStudioInvite,
+	saveRecordingReadyMarker,
+	saveStudioSession,
 	userCanManageStudioSession,
 } from "./studio";
+import { createBucketDouble, createSqliteD1 } from "./testing/doubles";
 
 const user = {
 	id: "rawkode",
@@ -3066,5 +3072,250 @@ describe("Studio operations", () => {
 		await expect(
 			userCanManageStudioSession({} as StudioEnv, session, guestUser),
 		).resolves.toBe(false);
+	});
+});
+
+describe("Studio client review recordings", () => {
+	const reviewSourceKey = "studio/recordings/session-1/recording-1/source.webm";
+	const reviewReadyKey = "studio/recordings/session-1/recording-1/ready.json";
+	const markerInput = {
+		videoId: "video-1",
+		studioSessionId: "session-1",
+		recordingId: "recording-1",
+		sourceBucket: "rawkode-academy-content",
+		sourceKey: reviewSourceKey,
+		sourceEtag: "source-etag-1",
+		sourceFormat: "webm" as const,
+	};
+
+	async function reviewHarness(reviewRequired: boolean, sessionId = "session-1") {
+		const d1 = createSqliteD1();
+		const content = createBucketDouble();
+		const env: StudioEnv = {
+			STUDIO_DB: d1.db,
+			RECORDINGS: content.bucket,
+			RECORDINGS_BUCKET_NAME: "rawkode-academy-content",
+			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
+		};
+		const addSession = (id: string, review: boolean) =>
+			saveStudioSession(env, buildStudioSession({
+				contentVideoId: "video-1",
+				createdBy: user,
+				meeting: null,
+				reviewRequired: review,
+				sessionId: id,
+				show: "Rawkode Live",
+				title: "Take",
+			}));
+		await addSession(sessionId, reviewRequired);
+		content.set(reviewSourceKey, "x".repeat(2048), "source-etag-1");
+		const mark = (input: Record<string, unknown> = {}, options = {}) =>
+			markStudioRecordingReady(env, user, {
+				recordingId: "recording-1",
+				sessionId: "session-1",
+				sourceEtag: "source-etag-1",
+				sourceFormat: "webm",
+				sourceKey: reviewSourceKey,
+				...input,
+			}, options);
+		const row = (id = "recording-1") =>
+			d1.row("SELECT * FROM studio_recordings WHERE recording_id = ?", id)!;
+		return { d1, content, env, addSession, mark, row };
+	}
+
+	it("keeps the v1 marker and recording row byte-identical when review is off", async () => {
+		const h = await reviewHarness(false);
+		const marker = await h.mark();
+		expect(h.content.text(reviewReadyKey)).toBe(
+			JSON.stringify(createReadyMarker(markerInput), null, 2),
+		);
+		expect(marker).toMatchObject({ contractVersion: 1, outputPrefix: "videos/video-1/" });
+		expect(h.row()).toMatchObject({
+			visibility: "public",
+			output_prefix: "videos/video-1/",
+			status: "ready",
+			review_state: null,
+			review_prefix: null,
+			review_marker_etag: null,
+			source_bytes: null,
+		});
+	});
+
+	it("writes a private v2 marker with attempt 0 when review is required, whatever the client sends", async () => {
+		const h = await reviewHarness(true);
+		const marker = await h.mark({ visibility: "public", outputPrefix: "videos/video-1/" });
+		expect(JSON.parse(h.content.text(reviewReadyKey)!)).toEqual(
+			createReviewReadyMarker(markerInput, 0),
+		);
+		expect(marker).toMatchObject({
+			contractVersion: 2,
+			visibility: "review",
+			outputMode: "review-proxy",
+			transcodeAttempt: 0,
+			outputPrefix: "studio/recordings/session-1/recording-1/review/",
+		});
+		expect(h.row()).toMatchObject({
+			visibility: "review",
+			status: "ready",
+			source_bytes: 2048,
+			review_state: "pending",
+			review_prefix: "studio/recordings/session-1/recording-1/review/",
+			review_idempotency_key: "studio:session-1:recording-1:source-etag-1",
+			review_marker_etag: h.content.etag(reviewReadyKey),
+		});
+		expect(JSON.parse(String(h.row().review_requested_by))).toEqual({ githubHandle: "rawkode" });
+	});
+
+	it("rejects a review recording whose source key is not the canonical one", async () => {
+		const h = await reviewHarness(true);
+		const otherKey = "studio/recordings/session-1/recording-1/other.webm";
+		h.content.set(otherKey, "x", "e");
+		await expect(h.mark({ sourceKey: otherKey })).rejects.toMatchObject({ status: 400 });
+	});
+
+	it("lets only an operator lift review, and only before any recording exists", async () => {
+		const h = await reviewHarness(true);
+		const guest = { ...guestUser };
+		h.d1.sqlite.prepare("INSERT INTO studio_participants (session_id, user_id, github_handle, role, name) VALUES ('session-1', 'guest', 'guest', 'producer', 'Guest')").run();
+		await expect(setStudioSessionReviewRequired(h.env, guest, { sessionId: "session-1", reviewRequired: false })).rejects.toMatchObject({ status: 403 });
+		await expect(setStudioSessionReviewRequired(h.env, guest, { sessionId: "session-1", reviewRequired: true })).resolves.toEqual({ sessionId: "session-1", reviewRequired: true });
+		await expect(setStudioSessionReviewRequired(h.env, user, { sessionId: "session-1", reviewRequired: false })).resolves.toEqual({ sessionId: "session-1", reviewRequired: false });
+		await setStudioSessionReviewRequired(h.env, user, { sessionId: "session-1", reviewRequired: true });
+		await h.mark();
+		await expect(setStudioSessionReviewRequired(h.env, user, { sessionId: "session-1", reviewRequired: false })).rejects.toMatchObject({ status: 409 });
+		expect((await getStudioSession(h.env, "session-1"))?.reviewRequired).toBe(true);
+	});
+
+	it("refuses a different source for a handed-off take and never rewrites after promotion", async () => {
+		const h = await reviewHarness(true);
+		await h.mark();
+		h.content.set(reviewSourceKey, "y".repeat(10), "source-etag-2");
+		await expect(h.mark({ sourceEtag: "source-etag-2" })).rejects.toMatchObject({ status: 409 });
+		h.content.set(reviewSourceKey, "x".repeat(2048), "source-etag-1");
+		h.content.set(reviewReadyKey, "{\"promoted\":true}", "promoted-etag");
+		h.d1.sqlite.prepare("UPDATE studio_recordings SET review_state = 'promoted', output_prefix = 'videos/video-1/' WHERE recording_id = 'recording-1'").run();
+		const puts = h.content.puts.length;
+		await expect(h.mark()).resolves.toMatchObject({ readyMarkerKey: reviewReadyKey });
+		expect(h.content.puts.length).toBe(puts);
+		expect(h.content.text(reviewReadyKey)).toBe("{\"promoted\":true}");
+		expect(h.row()).toMatchObject({ output_prefix: "videos/video-1/", review_state: "promoted" });
+	});
+
+	it("refuses a public marker for a video with an unpromoted review recording", async () => {
+		const h = await reviewHarness(true);
+		await h.mark();
+		await h.addSession("session-2", false);
+		const publicKey = "studio/recordings/session-2/recording-9/source.webm";
+		h.content.set(publicKey, "z", "public-etag");
+		const publish = () => markStudioRecordingReady(h.env, user, { recordingId: "recording-9", sessionId: "session-2", sourceEtag: "public-etag", sourceFormat: "webm", sourceKey: publicKey });
+		await expect(publish()).rejects.toMatchObject({ status: 409 });
+		h.d1.sqlite.prepare("UPDATE studio_recordings SET review_state = 'promoted' WHERE recording_id = 'recording-1'").run();
+		await expect(publish()).resolves.toMatchObject({ contractVersion: 1 });
+	});
+
+	it("never lets a public marker take over a recording ID from another session or a review take", async () => {
+		const h = await reviewHarness(true);
+		await h.mark();
+		h.d1.sqlite.prepare("UPDATE studio_recordings SET review_state = 'attached' WHERE recording_id = 'recording-1'").run();
+		await h.addSession("session-2", false);
+		const otherKey = "studio/recordings/session-2/recording-1/source.webm";
+		h.content.set(otherKey, "z", "other-etag");
+		const before = h.row();
+		const marker = h.content.text(reviewReadyKey);
+		const takeover = () => markStudioRecordingReady(h.env, user, { recordingId: "recording-1", sessionId: "session-2", sourceEtag: "other-etag", sourceFormat: "webm", sourceKey: otherKey });
+		await expect(takeover()).rejects.toMatchObject({ status: 409 });
+		// Withdrawn or promoted, the review row still belongs to session-1.
+		h.d1.sqlite.prepare("UPDATE studio_recordings SET review_state = 'withdrawn' WHERE recording_id = 'recording-1'").run();
+		await expect(takeover()).rejects.toMatchObject({ status: 409 });
+		expect(h.row()).toMatchObject({ ...before, review_state: "withdrawn", updated_at: h.row().updated_at });
+		expect(h.content.text(reviewReadyKey)).toBe(marker);
+		expect(h.content.text("studio/recordings/session-2/recording-1/ready.json")).toBeNull();
+		// The SQL guard holds even if the pre-check is bypassed by a race.
+		await expect(saveRecordingReadyMarker(h.env, createReadyMarker({ videoId: "video-1", studioSessionId: "session-2", recordingId: "recording-1", sourceBucket: "rawkode-academy-content", sourceKey: otherKey, sourceEtag: "other-etag", sourceFormat: "webm" }))).rejects.toThrow("belongs to another session");
+		expect(h.row().session_id).toBe("session-1");
+	});
+
+	it("lets an operator withdraw a review take that will never be published, which stops blocking public markers", async () => {
+		const h = await reviewHarness(true);
+		await h.mark();
+		h.d1.sqlite.prepare("UPDATE studio_recordings SET review_state = 'attached', review_next_attempt_at = 10 WHERE recording_id = 'recording-1'").run();
+		await h.addSession("session-2", false);
+		const publicKey = "studio/recordings/session-2/recording-9/source.webm";
+		h.content.set(publicKey, "z", "public-etag");
+		const publish = () => markStudioRecordingReady(h.env, user, { recordingId: "recording-9", sessionId: "session-2", sourceEtag: "public-etag", sourceFormat: "webm", sourceKey: publicKey });
+		await expect(publish()).rejects.toMatchObject({ status: 409 });
+		const withdraw = (who = user) => withdrawStudioReviewRecording(h.env, who, { sessionId: "session-1", recordingId: "recording-1" });
+		h.d1.sqlite.prepare("INSERT INTO studio_participants (session_id, user_id, github_handle, role, name) VALUES ('session-1', 'guest', 'guest', 'producer', 'Guest')").run();
+		await expect(withdraw({ ...guestUser })).rejects.toMatchObject({ status: 403 });
+		await expect(withdraw()).resolves.toEqual({ sessionId: "session-1", recordingId: "recording-1", reviewState: "withdrawn" });
+		expect(h.row()).toMatchObject({ review_state: "withdrawn", review_next_attempt_at: null, review_last_error: "Withdrawn by rawkode" });
+		const [listed] = await listStudioRecordings(h.env, "session-1");
+		expect(listed?.status).toBe("withdrawn");
+		await expect(publish()).resolves.toMatchObject({ contractVersion: 1 });
+		await expect(withdraw()).rejects.toMatchObject({ status: 409 });
+		// A published take is already on its way to public HLS.
+		h.d1.sqlite.prepare("UPDATE studio_recordings SET review_state = 'published' WHERE recording_id = 'recording-1'").run();
+		await expect(withdraw()).rejects.toMatchObject({ status: 409 });
+	});
+
+	it("returns normally whether the deferred handoff hangs, rejects or is absent", async () => {
+		for (const defer of [
+			() => new Promise(() => undefined),
+			() => Promise.reject(new Error("Payload down")).catch(() => undefined),
+			undefined,
+		]) {
+			const h = await reviewHarness(true);
+			const handed: Promise<unknown>[] = [];
+			await expect(h.mark({}, defer ? { defer: (promise: Promise<unknown>) => { handed.push(promise); defer(); } } : {})).resolves.toMatchObject({ visibility: "review" });
+			expect(handed.length).toBe(defer ? 1 : 0);
+		}
+	});
+
+	it("never exposes a public stream URL for an unpromoted review recording", async () => {
+		const h = await reviewHarness(true);
+		await h.mark();
+		h.content.set(
+			"studio/recordings/session-1/recording-1/review/transcode-status.json",
+			JSON.stringify({ status: "complete", completedAt: "2026-10-09T12:00:00.000Z" }),
+			"status-etag",
+		);
+		h.content.set(
+			"videos/video-1/transcode-status.json",
+			JSON.stringify({ status: "complete", completedAt: "2026-01-01T00:00:00.000Z" }),
+			"old-public-status",
+		);
+		const [recording] = await listStudioRecordings(h.env, "session-1");
+		expect(recording?.transcode).toMatchObject({ status: "complete", streamUrl: null, statusKey: "studio/recordings/session-1/recording-1/review/transcode-status.json" });
+		expect(recording?.status).toBe("transcoding");
+		expect(recording?.visibility).toBe("review");
+		h.d1.sqlite.prepare("UPDATE studio_recordings SET review_state = 'attached', review_payload_video_id = 42 WHERE recording_id = 'recording-1'").run();
+		const [attached] = await listStudioRecordings(h.env, "session-1");
+		expect(attached).toMatchObject({ status: "in-review", reviewUrl: "https://preview.rawkode.academy/review?videoId=42" });
+		h.d1.sqlite.prepare("UPDATE studio_recordings SET review_state = 'promoted', output_prefix = 'videos/video-1/' WHERE recording_id = 'recording-1'").run();
+		const [promoted] = await listStudioRecordings(h.env, "session-1");
+		expect(promoted?.transcode?.streamUrl).toBe("https://content.rawkode.academy/videos/video-1/stream.m3u8");
+		expect(promoted?.status).toBe("vod-ready");
+	});
+
+	it("ships the review migration, cron, Payload binding and custom entry", () => {
+		const migration = readFileSync(new URL("../../data-model/0004_review_handoff.sql", import.meta.url), "utf8");
+		expect(migration).toContain("ADD COLUMN review_required INTEGER NOT NULL DEFAULT 0");
+		expect(migration).toContain("ADD COLUMN visibility TEXT NOT NULL DEFAULT 'public'");
+		const wrangler = JSON.parse(readFileSync(new URL("../../wrangler.jsonc", import.meta.url), "utf8")) as {
+			main: string;
+			services: Array<Record<string, string>>;
+			triggers: { crons: string[] };
+			vars: Record<string, string>;
+			secrets_store_secrets: Array<Record<string, string>>;
+		};
+		expect(wrangler.main).toBe("./src/worker.ts");
+		expect(wrangler.triggers.crons).toEqual(["*/5 * * * *"]);
+		expect(wrangler.services).toContainEqual({ binding: "PAYLOAD", service: "rawkode-academy-payload" });
+		expect(wrangler.vars.PAYLOAD_HANDOFF_URL).toBe("https://admin.rawkode.academy/api/studio-handoff/adoptions");
+		expect(wrangler.secrets_store_secrets).toContainEqual(expect.objectContaining({ binding: "STUDIO_MACHINE_SECRET", secret_name: "STUDIO_MACHINE_SECRET" }));
+		// Studio's server modules stay importable under plain vitest.
+		for (const file of ["./operations.ts", "./studio.ts", "./payload-handoff.ts", "./machine-auth.ts"]) {
+			expect(readFileSync(new URL(file, import.meta.url), "utf8")).not.toMatch(/from\s+["']cloudflare:workers["']/);
+		}
 	});
 });

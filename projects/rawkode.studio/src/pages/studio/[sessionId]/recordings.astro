@@ -1,10 +1,13 @@
 ---
+import { actions } from "astro:actions";
 import StudioLayout from "../../../layouts/StudioLayout.astro";
+import type { StudioEnv } from "../../../env";
 import {
 	listStudioRecordings,
 	getStudioSession,
 	getStudioSessionWatchUrl,
 	userCanManageStudioSession,
+	userIsConfiguredStudioOperator,
 } from "../../../server/studio";
 import { env } from "cloudflare:workers";
 
@@ -22,6 +25,9 @@ if (!(await userCanManageStudioSession(env, session, Astro.locals.user))) {
 		status: 403,
 	});
 }
+const withdrawResult = Astro.getActionResult(actions.withdrawReviewRecording);
+const canWithdraw = userIsConfiguredStudioOperator(env as StudioEnv, Astro.locals.user);
+const withdrawable = new Set(["pending", "awaiting-transcode", "failed", "attached"]);
 const readyMarkerKey = `studio/recordings/${sessionId}/<recording-id>/ready.json`;
 const recordings = await listStudioRecordings(env, session.id);
 const publicVodUrl = getStudioSessionWatchUrl(session);
@@ -58,6 +64,14 @@ const publicVodUrl = getStudioSessionWatchUrl(session);
 					) : null
 				}
 				<div>
+					<dt>CLIENT_REVIEW</dt>
+					<dd>
+						{session.reviewRequired
+							? "Required: takes stay private until published from Payload review"
+							: "Off: takes publish as public VOD"}
+					</dd>
+				</div>
+				<div>
 					<dt>SOURCE_KEY</dt>
 					<dd>private R2 recording object path</dd>
 				</div>
@@ -70,6 +84,9 @@ const publicVodUrl = getStudioSessionWatchUrl(session);
 	</section>
 
 	<section class="recording-list" aria-label="Studio recordings">
+		{withdrawResult?.error ? (
+			<p class="form-error" role="alert">{withdrawResult.error.message}</p>
+		) : null}
 		{
 			recordings.length === 0 ? (
 				<p class="recording-empty">No recordings have been handed off yet.</p>
@@ -112,6 +129,35 @@ const publicVodUrl = getStudioSessionWatchUrl(session);
 								<dt>Handoff</dt>
 								<dd>{recording.handoffStatus}</dd>
 							</div>
+							{recording.visibility === "review" ? (
+								<div>
+									<dt>Client review</dt>
+									<dd>
+										<span class="review-badge">{recording.reviewState ?? "pending"}</span>
+										{recording.reviewUrl ? (
+											<>
+												{" "}
+												<a href={recording.reviewUrl}>open review</a>
+											</>
+										) : null}
+										{recording.reviewLastError &&
+										(recording.reviewState === "failed" || recording.reviewState === "pending" || recording.reviewState === "awaiting-transcode") ? (
+											<p class="form-error" role="status">{recording.reviewLastError}</p>
+										) : null}
+										{recording.reviewLastError &&
+										(recording.reviewState === "withdrawn" || recording.reviewState === "promoted") ? (
+											<p role="status">{recording.reviewLastError}</p>
+										) : null}
+										{canWithdraw && withdrawable.has(recording.reviewState ?? "pending") ? (
+											<form method="POST" action={actions.withdrawReviewRecording}>
+												<input type="hidden" name="sessionId" value={session.id} />
+												<input type="hidden" name="recordingId" value={recording.recordingId} />
+												<button type="submit">Withdraw take</button>
+											</form>
+										) : null}
+									</dd>
+								</div>
+							) : null}
 							<div>
 								<dt>Updated</dt>
 								<dd>{new Date(recording.updatedAt * 1000).toLocaleString()}</dd>

@@ -14,7 +14,7 @@ export interface R2EventNotification {
 	};
 }
 
-export interface StudioRecordingReadyMarker {
+export interface StudioRecordingPublicMarker {
 	contractVersion: 1;
 	videoId: string;
 	studioSessionId: string;
@@ -24,6 +24,36 @@ export interface StudioRecordingReadyMarker {
 	sourceEtag: string;
 	sourceFormat: "mkv" | "mp4" | "webm";
 	outputPrefix: string;
+}
+
+// Contract v2. "review" transcodes only a private 720p review proxy under the
+// recording's own review/ prefix. "public" + "hls-approved" is Studio's promotion
+// of an approved review recording: public HLS under videos/{videoId}/ without the
+// raw source or original.mkv. Contract v1 (above) is unchanged.
+export type StudioOutputMode = "hls" | "review-proxy" | "hls-approved";
+export interface StudioRecordingReviewMarker
+	extends Omit<StudioRecordingPublicMarker, "contractVersion"> {
+	contractVersion: 2;
+	visibility: "review";
+	outputMode: "review-proxy";
+	transcodeAttempt: number;
+}
+export interface StudioRecordingApprovedMarker
+	extends Omit<StudioRecordingPublicMarker, "contractVersion"> {
+	contractVersion: 2;
+	visibility: "public";
+	outputMode: "hls-approved";
+	transcodeAttempt: number;
+}
+export type StudioRecordingReadyMarker =
+	| StudioRecordingPublicMarker
+	| StudioRecordingReviewMarker
+	| StudioRecordingApprovedMarker;
+
+export const maximumTranscodeAttempt = 10;
+
+export function getMarkerOutputMode(marker: StudioRecordingReadyMarker): StudioOutputMode {
+	return marker.contractVersion === 2 ? marker.outputMode : "hls";
 }
 
 export interface StudioTranscodeStatusDocument {
@@ -36,6 +66,7 @@ export interface StudioTranscodeStatusDocument {
 	sourceEtag: string;
 	sourceFormat: "mkv" | "mp4" | "webm";
 	outputPrefix: string;
+	outputMode?: StudioOutputMode;
 	queuedAt?: string;
 	failedAt?: string;
 	error?: string;
@@ -93,7 +124,7 @@ export function createTranscodeStatus(
 	fields: Pick<StudioTranscodeStatusDocument, "status"> &
 		Partial<Pick<StudioTranscodeStatusDocument, "error" | "failedAt" | "queuedAt">>,
 ): StudioTranscodeStatusDocument {
-	return {
+	const document: StudioTranscodeStatusDocument = {
 		status: fields.status,
 		videoId: marker.videoId,
 		studioSessionId: marker.studioSessionId,
@@ -107,6 +138,10 @@ export function createTranscodeStatus(
 		failedAt: fields.failedAt,
 		error: fields.error,
 	};
+	if (marker.contractVersion === 2) {
+		document.outputMode = marker.outputMode;
+	}
+	return document;
 }
 
 export function assertReadyMarkerPathContract(
@@ -135,7 +170,10 @@ export function assertReadyMarkerPathContract(
 		throw new Error(`sourceKey must end with .${marker.sourceFormat}`);
 	}
 
-	const expectedOutputPrefix = `videos/${marker.videoId}/`;
+	const expectedOutputPrefix =
+		marker.contractVersion === 2 && marker.visibility === "review"
+			? `${recordingPrefix}review/`
+			: `videos/${marker.videoId}/`;
 	if (marker.outputPrefix !== expectedOutputPrefix) {
 		throw new Error(`outputPrefix must be ${expectedOutputPrefix}`);
 	}
@@ -163,10 +201,34 @@ export function assertReadyMarker(
 			throw new Error(`ready marker missing ${key}`);
 		}
 	}
-	if (marker.contractVersion !== 1) {
+	if (marker.contractVersion === 2) {
+		const reviewMode =
+			marker.visibility === "review" && marker.outputMode === "review-proxy";
+		const approvedMode =
+			marker.visibility === "public" && marker.outputMode === "hls-approved";
+		if (!reviewMode && !approvedMode) {
+			throw new Error("unsupported ready marker visibility or outputMode");
+		}
+		if (
+			!Number.isInteger(marker.transcodeAttempt) ||
+			(marker.transcodeAttempt as number) < 0 ||
+			(marker.transcodeAttempt as number) > maximumTranscodeAttempt
+		) {
+			throw new Error("ready marker transcodeAttempt is out of range");
+		}
+	} else if (marker.contractVersion !== 1) {
 		throw new Error("unsupported ready marker contractVersion");
 	}
 	if (!["mkv", "mp4", "webm"].includes(marker.sourceFormat as string)) {
 		throw new Error("unsupported sourceFormat");
+	}
+}
+
+export function assertSourceBucket(
+	marker: Pick<StudioRecordingReadyMarker, "sourceBucket">,
+	expectedBucket: string | undefined,
+): void {
+	if (expectedBucket && marker.sourceBucket !== expectedBucket) {
+		throw new Error(`sourceBucket must be ${expectedBucket}`);
 	}
 }

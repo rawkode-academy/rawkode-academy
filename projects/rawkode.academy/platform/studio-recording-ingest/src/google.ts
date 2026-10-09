@@ -1,10 +1,14 @@
-import type { StudioRecordingReadyMarker } from "./contracts.js";
+import { getMarkerOutputMode, type StudioRecordingReadyMarker } from "./contracts.js";
 
 export interface GoogleServiceAccount {
 	client_email: string;
 	private_key: string;
 	token_uri?: string;
 }
+
+// Sized for a two hour 720p Studio recording; see tasks/transcoding-job/README.md.
+// The job's own task timeout must be at least this long.
+export const transcodingTaskTimeout = "10800s";
 
 export interface CloudRunConfig {
 	jobName: string;
@@ -112,6 +116,7 @@ export async function runTranscodingJob(
 			},
 			body: JSON.stringify({
 				overrides: {
+					timeout: transcodingTaskTimeout,
 					containerOverrides: [
 						{
 							env: [
@@ -123,6 +128,7 @@ export async function runTranscodingJob(
 								{ name: "SOURCE_ETAG", value: marker.sourceEtag },
 								{ name: "SOURCE_FORMAT", value: marker.sourceFormat },
 								{ name: "OUTPUT_PREFIX", value: marker.outputPrefix },
+								{ name: "OUTPUT_MODE", value: getMarkerOutputMode(marker) },
 							],
 						},
 					],

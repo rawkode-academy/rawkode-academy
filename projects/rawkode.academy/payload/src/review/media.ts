@@ -9,7 +9,7 @@ export function byteRange(header: string | null, size: number): { offset: number
   if (!Number.isSafeInteger(first) || !Number.isSafeInteger(last) || first < 0 || first >= size || last < first) throw new ReviewError(416, 'Byte range is outside the media')
   return { offset: first, length: last - first + 1 }
 }
-export async function mediaResponse(request: Request, bucket: R2Bucket, key: string, isPublic = false, expected?: { etag: string; bytes: number; contentType: string }) {
+export async function mediaResponse(request: Request, bucket: Pick<R2Bucket, 'head' | 'get'>, key: string, isPublic = false, expected?: { etag: string; bytes: number; contentType: string }) {
   const head = await bucket.head(key)
   if (!head) throw new ReviewError(404, 'Media not found')
   if (expected && (head.etag !== expected.etag || head.size !== expected.bytes)) throw new ReviewError(409, 'Immutable release object changed')

@@ -27,6 +27,15 @@ The `ready.json` object is the durable handoff contract. R2 Event Notifications 
 }
 ```
 
+Contract version 1 is unchanged and produces the public HLS VOD (`OUTPUT_MODE=hls`).
+
+Contract version 2 carries `visibility`, `outputMode` and `transcodeAttempt` (0 to 10) for Studio sessions that require client review:
+
+- `visibility: "review"`, `outputMode: "review-proxy"`: `outputPrefix` must be the recording's private `studio/recordings/{studioSessionId}/{recordingId}/review/`. The job writes a single 720p `review.mp4` there for Payload review and nothing public.
+- `visibility: "public"`, `outputMode: "hls-approved"`: Studio's promotion after Payload publishes the approved revision. `outputPrefix` must be `videos/{videoId}/`; the job publishes HLS without the raw source or `original.mkv`.
+
+Studio re-triggers a failed review transcode by rewriting `ready.json` with `transcodeAttempt + 1`; the new etag is a new event. Every marker must name `RECORDINGS_BUCKET_NAME` as its `sourceBucket`. Each Cloud Run execution gets `OUTPUT_MODE` and a 10800 second timeout override (see `tasks/transcoding-job/README.md`).
+
 ## Cloudflare Resources
 
 Create the Cloudflare resources, apply the D1 migration, deploy the Worker, then attach the R2 notification rule:
@@ -49,6 +58,7 @@ The Worker needs:
 - `GCP_PROJECT_ID`: Google Cloud project containing the transcode job, currently `rawkode-academy-production`.
 - `GCP_REGION`: Cloud Run job region, currently `europe-west2`.
 - `GCP_TRANSCODING_JOB`: Cloud Run job name, currently `transcoding-job`.
+- `RECORDINGS_BUCKET_NAME`: `rawkode-academy-content`; markers that name another source bucket are refused.
 - `GCP_SERVICE_ACCOUNT_JSON`: Secrets Store binding containing service account JSON with permission to run that Cloud Run job.
 
 The deployable `wrangler.jsonc` pins the production D1 UUID because Wrangler requires `database_id` for remote migration operations. Run `bun run verify:live` after deployment to verify Cloudflare auth, D1 schema, queue/DLQ, Worker deployment, the `GCP_SERVICE_ACCOUNT_JSON` Secrets Store entry, the R2 ready-marker notification, and the Cloud Run transcoding job.

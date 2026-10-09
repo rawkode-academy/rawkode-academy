@@ -359,6 +359,27 @@ textarea:focus-visible {
   font-weight: 800;
 }
 
+.review-required-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  color: #a7b6bf;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.review-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border: 1px solid rgba(255, 196, 0, 0.45);
+  border-radius: 999px;
+  color: #ffd666;
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .stream-environment-field select {
   min-height: 34px;
   border: 1px solid rgba(255, 255, 255, 0.12);

@@ -20,30 +20,39 @@ import {
 	getRealtimeKitConfig,
 	type RealtimeKitRole,
 } from "./realtimekit";
+import { requestReviewAdoption } from "./payload-handoff";
 import {
 	buildStudioSession,
 	claimStudioStreamStart,
 	claimStudioStreamNotification,
+	countStudioRecordings,
 	createInviteToken,
 	createReadyMarker,
+	createReviewReadyMarker,
 	createRecordingId,
 	createStudioSessionId,
 	createStudioInviteRecord,
+	getStudioReviewRecording,
 	getStudioSession,
 	getStudioUserGithubHandle,
 	getStudioUserId,
 	hashInviteToken,
+	hasUnpromotedReviewRecording,
 	isStudioSessionActive,
+	normalizeEtag,
 	redeemStudioInvite,
 	releaseStudioStreamNotificationClaim,
 	resolveStudioInvite,
 	saveRecordingReadyMarker,
+	saveReviewRecordingMarker,
 	saveStudioSessionRecordingStatus,
+	saveStudioSessionReviewRequired,
 	saveStudioSessionStatus,
 	saveStudioSession,
 	saveStudioStreamEnded,
 	saveStudioStreamLive,
 	saveStudioStreamStart,
+	StudioRecordingConflictError,
 	upsertStudioParticipant,
 	userCanManageStudioSession,
 	userCanJoinStudioSessionAsGuest,
@@ -57,6 +66,7 @@ import {
 export class StudioOperationError extends Error {
 	readonly code:
 		| "bad-request"
+		| "conflict"
 		| "content-unavailable"
 		| "not-found"
 			| "provider-not-configured"
@@ -78,6 +88,7 @@ export class StudioOperationError extends Error {
 }
 
 export interface CreateStudioSessionInput {
+	reviewRequired?: boolean;
 	show?: string;
 	showId?: string;
 	startsAt?: string;
@@ -116,6 +127,17 @@ export interface MarkRecordingReadyInput {
 	sourceFormat: "mkv" | "mp4" | "webm";
 	sourceKey: string;
 	videoId?: string;
+}
+
+export interface SetStudioSessionReviewRequiredInput {
+	reviewRequired: boolean;
+	sessionId: string;
+}
+
+// Routes and actions pass cloudflare:workers waitUntil here. This module never
+// imports cloudflare:workers, so it stays testable under plain vitest.
+export interface MarkRecordingReadyOptions {
+	defer?: (promise: Promise<unknown>) => void;
 }
 
 export interface CreateRecordingUploadInput {
@@ -509,6 +531,7 @@ export async function createStudioSession(
 		startsAt: startsAt ? new Date(startsAt).toISOString() : undefined,
 		status: "scheduled",
 		streamEnvironment: input.streamEnvironment === "prod" ? "prod" : "test",
+		reviewRequired: input.reviewRequired === true,
 		title,
 	});
 	await saveStudioSession(env, session);
@@ -524,6 +547,41 @@ export async function createStudioSession(
 		provider: "realtimekit" as const,
 		status: meeting ? "ready" : "provider-not-configured",
 	};
+}
+
+// Any session manager may require review. Only a configured operator may lift it,
+// and only before the session has a recording.
+export async function setStudioSessionReviewRequired(
+	env: StudioEnv,
+	user: StudioUser,
+	input: SetStudioSessionReviewRequiredInput,
+) {
+	requireStudioDb(env);
+	const session = await requireSessionManager(env, user, input.sessionId);
+	if (!input.reviewRequired) {
+		if (!userIsConfiguredStudioOperator(env, user)) {
+			throw new StudioOperationError(
+				"unauthorized",
+				"Only a Studio operator can turn off client review.",
+				403,
+			);
+		}
+		if (await countStudioRecordings(env, session.id) > 0) {
+			throw new StudioOperationError(
+				"conflict",
+				"Client review cannot be turned off after a recording exists.",
+				409,
+			);
+		}
+	}
+	if (!(await saveStudioSessionReviewRequired(env, session.id, input.reviewRequired))) {
+		throw new StudioOperationError(
+			"conflict",
+			"Client review cannot be turned off after a recording exists.",
+			409,
+		);
+	}
+	return { sessionId: session.id, reviewRequired: input.reviewRequired };
 }
 
 export async function startStudioStream(
@@ -948,6 +1006,7 @@ export async function completeStudioRecordingUpload(
 	env: StudioEnv,
 	user: StudioUser,
 	input: CompleteRecordingUploadInput,
+	options: MarkRecordingReadyOptions = {},
 ) {
 	const session = await requireSessionManager(env, user, input.sessionId);
 	const bucket = requirePersistentRecordingsBucket(env);
@@ -986,7 +1045,7 @@ export async function completeStudioRecordingUpload(
 		sourceFormat: input.sourceFormat,
 		sourceKey,
 		videoId,
-	});
+	}, options);
 }
 
 export async function abortStudioRecordingUpload(
@@ -1017,6 +1076,7 @@ export async function markStudioRecordingReady(
 	env: StudioEnv,
 	user: StudioUser,
 	input: MarkRecordingReadyInput,
+	options: MarkRecordingReadyOptions = {},
 ) {
 	const session = await requireSessionManager(env, user, input.sessionId);
 	if (env.STUDIO_DB && !env.RECORDINGS) {
@@ -1063,6 +1123,38 @@ export async function markStudioRecordingReady(
 		);
 	}
 
+	// Visibility comes only from the session, never from the client.
+	if (session.reviewRequired) {
+		return await markReviewRecordingReady(env, user, {
+			persistentHandoff,
+			recordingId,
+			session,
+			sourceBucket,
+			videoId,
+			input,
+		}, options);
+	}
+	if (persistentHandoff) {
+		const existing = await getStudioReviewRecording(env, recordingId);
+		if (
+			existing &&
+			(existing.session_id !== session.id || existing.visibility !== "public")
+		) {
+			throw new StudioOperationError(
+				"conflict",
+				"This recording ID was already handed off.",
+				409,
+			);
+		}
+		if (await hasUnpromotedReviewRecording(env, videoId)) {
+			throw new StudioOperationError(
+				"conflict",
+				"This video has a recording in client review; publish it through review or withdraw the take first.",
+				409,
+			);
+		}
+	}
+
 	const marker = createReadyMarker({
 		videoId,
 		studioSessionId: input.sessionId,
@@ -1072,7 +1164,161 @@ export async function markStudioRecordingReady(
 		sourceEtag: input.sourceEtag,
 		sourceFormat: input.sourceFormat,
 	});
-	const handoff = await saveRecordingReadyMarker(env, marker);
+	let handoff: Awaited<ReturnType<typeof saveRecordingReadyMarker>>;
+	try {
+		handoff = await saveRecordingReadyMarker(env, marker);
+	} catch (error) {
+		if (error instanceof StudioRecordingConflictError) {
+			throw new StudioOperationError(
+				"conflict",
+				"This recording ID was already handed off.",
+				409,
+			);
+		}
+		throw error;
+	}
 
+	return { ...marker, ...handoff };
+}
+
+export interface WithdrawReviewRecordingInput {
+	recordingId: string;
+	sessionId: string;
+}
+
+// Operator escape hatch for a review take that will never be published (a
+// rejected cut, or a transcode that used every retry). A withdrawn take is never
+// polled, promoted or counted as blocking public markers for its video. A take
+// already published in Payload is past withdrawal: its promotion is under way.
+export async function withdrawStudioReviewRecording(
+	env: StudioEnv,
+	user: StudioUser,
+	input: WithdrawReviewRecordingInput,
+) {
+	const db = env.STUDIO_DB;
+	if (!db) {
+		throw new StudioOperationError(
+			"storage-not-configured",
+			"STUDIO_DB binding is required to withdraw review takes.",
+			503,
+		);
+	}
+	if (!userIsConfiguredStudioOperator(env, user)) {
+		throw new StudioOperationError(
+			"unauthorized",
+			"Only Studio operators can withdraw a review take.",
+			403,
+		);
+	}
+	const session = await requireSessionManager(env, user, input.sessionId);
+	assertRecordingId(input.recordingId);
+	const handle = getStudioUserGithubHandle(user) ?? getStudioUserId(user);
+	const withdrawn = await db
+		.prepare(
+			`UPDATE studio_recordings
+			    SET review_state = 'withdrawn',
+			        review_next_attempt_at = NULL,
+			        review_last_error = ?,
+			        updated_at = unixepoch()
+			  WHERE recording_id = ?
+			    AND session_id = ?
+			    AND visibility = 'review'
+			    AND review_state IN ('pending', 'awaiting-transcode', 'failed', 'attached')
+			RETURNING recording_id`,
+		)
+		.bind(`Withdrawn by ${handle}`, input.recordingId, session.id)
+		.first<{ recording_id: string }>();
+	if (!withdrawn) {
+		throw new StudioOperationError(
+			"conflict",
+			"Only a review take that is not yet published can be withdrawn.",
+			409,
+		);
+	}
+	return { recordingId: input.recordingId, sessionId: session.id, reviewState: "withdrawn" as const };
+}
+
+function reviewRequestedBy(user: StudioUser): string {
+	return JSON.stringify({
+		githubHandle: getStudioUserGithubHandle(user) ?? undefined,
+		issuer: user.issuer ?? undefined,
+		subject: user.subject ?? undefined,
+	});
+}
+
+async function markReviewRecordingReady(
+	env: StudioEnv,
+	user: StudioUser,
+	context: {
+		input: MarkRecordingReadyInput;
+		persistentHandoff: boolean;
+		recordingId: string;
+		session: StudioSessionRecord;
+		sourceBucket: string;
+		videoId: string;
+	},
+	options: MarkRecordingReadyOptions,
+) {
+	const { input, recordingId, session, sourceBucket, videoId } = context;
+	if (!context.persistentHandoff) {
+		throw new StudioOperationError(
+			"storage-not-configured",
+			"Client review recordings need STUDIO_DB and RECORDINGS.",
+			503,
+		);
+	}
+	const expectedSourceKey =
+		`${session.recordingPrefix}${recordingId}/source.${input.sourceFormat}`;
+	if (input.sourceKey !== expectedSourceKey) {
+		throw new StudioOperationError(
+			"bad-request",
+			`Review recording source key must be ${expectedSourceKey}.`,
+			400,
+		);
+	}
+	const marker = createReviewReadyMarker({
+		videoId,
+		studioSessionId: session.id,
+		recordingId,
+		sourceBucket,
+		sourceKey: input.sourceKey,
+		sourceEtag: normalizeEtag(input.sourceEtag),
+		sourceFormat: input.sourceFormat,
+	}, 0);
+	const existing = await getStudioReviewRecording(env, recordingId);
+	if (existing) {
+		if (existing.session_id !== session.id || existing.visibility !== "review") {
+			throw new StudioOperationError(
+				"conflict",
+				"This recording ID was already handed off.",
+				409,
+			);
+		}
+		if (normalizeEtag(existing.source_etag) !== normalizeEtag(input.sourceEtag)) {
+			throw new StudioOperationError(
+				"conflict",
+				"Review recording already handed off; record a new take.",
+				409,
+			);
+		}
+		if (existing.review_state !== "pending") {
+			// Already with Payload or promoted: never rewrite ready.json.
+			return {
+				...marker,
+				readyMarkerKey: existing.ready_marker_key,
+				sourceVerified: true,
+			};
+		}
+	}
+	const handoff = await saveReviewRecordingMarker(env, marker, {
+		requestedBy: reviewRequestedBy(user),
+	});
+	// Fire and forget: the response never waits on Payload. Without defer, the
+	// 5 minute cron picks the recording up.
+	options.defer?.(
+		requestReviewAdoption(env, recordingId).catch((error: unknown) => {
+			console.error("studio_review_handoff_failed", recordingId, error);
+		}),
+	);
 	return { ...marker, ...handoff };
 }

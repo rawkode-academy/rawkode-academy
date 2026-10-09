@@ -24,6 +24,8 @@ describe("Studio identity normalization", () => {
 			image: "https://example.com/rawkode.png",
 			username: "rawkode",
 		});
+		expect(session.issuer).toBe("https://id.rawkode.academy");
+		expect(session.subject).toBe("better-auth-user-id");
 	});
 
 	it("falls back to preferred_username before opaque identity subjects", () => {
