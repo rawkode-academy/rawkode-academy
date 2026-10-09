@@ -12,6 +12,7 @@ export const REVIEW_BRIDGE_ROUTES: Readonly<Record<string, readonly string[]>> =
   '/api/review/thumbnail': ['GET', 'HEAD', 'POST'],
   '/api/review/media': ['GET', 'HEAD'],
   '/api/review/published-media': ['GET', 'HEAD'],
+  '/api/review/feedback-export': ['GET'],
 }
 export type Downstream = (request:Request)=>Promise<Response>
 const noStore = {'cache-control':'no-store'}

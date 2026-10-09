@@ -5,7 +5,7 @@ import ReviewPanel from "../components/ReviewPanel.vue";
 import StaffUploadPanel from "../components/StaffUploadPanel.vue";
 import type { Review } from "../types";
 const cut = "00000000-0000-4000-8000-000000000001";
-function review(): Review { return { videoId: 10, viewerId: 2, canApprove: true, publicationAvailable: true, currentRevisionId: cut, revisions: [{ id: cut, reviewVersion: 3, durationMs: 60000, state: "ready", createdAt: "2026-10-05", mediaUrl: `/api/review/media?videoId=10&revisionId=${cut}`, metadata: { title: "Customer video", description: "Private cut" } }], comments: [], decisions: [] }; }
+function review(): Review { return { videoId: 10, viewerId: 2, canApprove: true, publicationAvailable: true, currentRevisionId: cut, revisions: [{ id: cut, reviewVersion: 3, durationMs: 60000, state: "ready", createdAt: "2026-10-05", mediaUrl: `/api/review/media?videoId=10&revisionId=${cut}`, metadata: { title: "Customer video", description: "Private cut" }, canApprove: true, expiresAt: "2026-11-08T12:00:00.000Z" }], comments: [], decisions: [] }; }
 const wrappers: ReturnType<typeof mount>[] = [];
 afterEach(() => { for (const wrapper of wrappers.splice(0)) wrapper.unmount(); vi.unstubAllGlobals(); vi.useRealTimers(); sessionStorage.clear(); });
 const user = { id: 2, role: "customer" as const, name: "Reviewer" };
@@ -54,8 +54,67 @@ describe("review actions", () => {
     await button(wrapper, "Retry last action").trigger("click"); await flushPromises();
     expect(fetch.mock.calls[0]![1].body).toBe(fetch.mock.calls[1]![1].body);
   });
+  it("hides approval when this revision's grant cannot approve", () => {
+    const value = review(); value.revisions[0]!.canApprove = false;
+    const wrapper = mount(ReviewPanel, { props: { review: value, user } }); wrappers.push(wrapper);
+    expect(button(wrapper, "Approve this revision")).toBeUndefined();
+    expect(wrapper.text()).toContain("Access until");
+  });
+  it("links the feedback export for the selected revision", async () => {
+    const value = review(); value.revisions.unshift({ ...value.revisions[0]!, id: "older" });
+    const wrapper = mount(ReviewPanel, { props: { review: value, user } }); wrappers.push(wrapper);
+    expect(wrapper.find('a[download]').attributes("href")).toBe(`/api/review/feedback-export?videoId=10&revisionId=${cut}`);
+    await wrapper.find("select").setValue("older");
+    expect(wrapper.find('a[download]').attributes("href")).toBe("/api/review/feedback-export?videoId=10&revisionId=older");
+  });
+  it("keeps sign-off closed on a shared cut that is no longer the real current one", () => {
+    for (const currentRevisionId of [cut, null]) {
+      const value = review(); value.currentRevisionId = currentRevisionId; value.canApprove = false;
+      value.revisions.unshift({ ...value.revisions[0]!, id: "older", metadata: { title: "Older cut", description: "Earlier" } });
+      const wrapper = mount(ReviewPanel, { props: { review: value, user } }); wrappers.push(wrapper);
+      expect((wrapper.find("select").element as HTMLSelectElement).value).toBe(cut);
+      expect(wrapper.text()).toContain("Current revision");
+      expect(wrapper.text()).toContain("Sign-off is not open on this cut.");
+      expect(wrapper.text()).not.toContain("Choose the current revision");
+      expect(wrapper.text()).not.toContain("newer cut");
+      expect(button(wrapper, "Approve this revision")).toBeUndefined();
+    }
+  });
+  it("lets staff share and revoke the selected revision", async () => {
+    const value = review(); delete value.revisions[0]!.canApprove; delete value.revisions[0]!.expiresAt;
+    value.grants = [{ revisionId: cut, userId: 2, canApprove: true, version: 1, expiresAt: "2020-01-01T00:00:00.000Z", revokedAt: null }, { revisionId: "other", userId: 3, canApprove: false, version: 1, expiresAt: "2099-01-01T00:00:00.000Z", revokedAt: null }];
+    const fetch = vi.fn(async (url: string, _init?: RequestInit) => url.startsWith("/api/review/reviewers") ? Response.json({ reviewers: [{ userId: 2, name: "Client", profileEmail: "client@example.invalid" }] }) : url === "/api/review" ? Response.json({ ok: true }) : Response.json(value));
+    vi.stubGlobal("fetch", fetch);
+    const wrapper = mount(ReviewPanel, { props: { review: value, user: { id: 1, role: "staff" } } }); wrappers.push(wrapper); await flushPromises();
+    expect(wrapper.find(".review-grants").text()).toContain("Client · approver");
+    expect(wrapper.find(".review-grants").text()).toContain("Expired");
+    expect(wrapper.findAll(".review-grants li")).toHaveLength(1);
+    await wrapper.find(".review-share").trigger("submit"); await flushPromises();
+    const shared = JSON.parse(String(fetch.mock.calls.find(([url]) => url === "/api/review")![1]!.body));
+    expect(shared).toMatchObject({ action: "share", videoId: 10, revisionId: cut, userId: 2, canApprove: true });
+    expect(shared.expiresInDays).toBe(30);
+    expect(shared).not.toHaveProperty("expiresAt");
+    await button(wrapper, "Revoke").trigger("click"); await flushPromises();
+    const revoked = JSON.parse(String(fetch.mock.calls.filter(([url]) => url === "/api/review")[1]![1]!.body));
+    expect(revoked).toMatchObject({ action: "revoke", videoId: 10, userId: 2, revisionId: cut });
+  });
+  it("re-evaluates grant expiry when an open staff panel refreshes", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    try {
+      vi.setSystemTime(new Date("2026-10-09T00:00:00.000Z"));
+      const value = review(); delete value.revisions[0]!.canApprove; delete value.revisions[0]!.expiresAt;
+      value.grants = [{ revisionId: cut, userId: 2, canApprove: true, version: 1, expiresAt: "2026-10-10T00:00:00.000Z", revokedAt: null }];
+      vi.stubGlobal("fetch", vi.fn(async () => Response.json({ reviewers: [] })));
+      const wrapper = mount(ReviewPanel, { props: { review: value, user: { id: 1, role: "staff" } } }); wrappers.push(wrapper); await flushPromises();
+      expect(wrapper.find(".review-grants").text()).toContain("Until");
+      vi.setSystemTime(new Date("2026-10-11T00:00:00.000Z"));
+      await wrapper.setProps({ review: { ...value } });
+      expect(wrapper.find(".review-grants").text()).toContain("Expired");
+    } finally { vi.useRealTimers(); }
+  });
   it("shows the remote publication gate and never lets a customer publish", () => {
     const value = review(); value.revisions[0]!.state = "approved"; value.publicationAvailable = false;
+    vi.stubGlobal("fetch", vi.fn(async () => Response.json({ reviewers: [] })));
     const wrapper = mount(ReviewPanel, { props: { review: value, user: { id: 1, role: "staff" } } }); wrappers.push(wrapper);
     expect(wrapper.text()).toContain("trusted media verification");
     expect(button(wrapper, "Publish approved revision").attributes("disabled")).toBeDefined();
@@ -74,7 +133,7 @@ describe("staff upload intake", () => {
       if (url.startsWith("/api/review/thumbnail?")) return Response.json({ thumbnailId: 70, videoId: 42 });
       if (url.startsWith("/api/review/uploads?") && !init?.method) return Response.json({ state: "pending", processingAvailable: true });
       if (url.startsWith("/api/review/uploads?") && init?.method === "PUT") return Response.json({ state: "uploaded" });
-      if (url === "/api/review/uploads") return Response.json(JSON.parse(String(init?.body)).action === "begin" ? { sessionId: "new-session" } : { state: "ready", revision: { id: cut } });
+      if (url === "/api/review/uploads") return Response.json(JSON.parse(String(init?.body)).action === "begin" ? { sessionId: "new-session" } : { state: "ready", revision: { revisionId: cut, reviewVersion: 1 } });
       if (url === "/api/review") return Response.json({ ok: true });
       if (url.startsWith("/api/review/reviewers")) return Response.json({ reviewers: [{ userId: 2, name: "Customer", profileEmail: "customer@example.invalid" }] });
       throw new Error(`Unexpected request: ${url}`);
@@ -96,14 +155,64 @@ describe("staff upload intake", () => {
     await button(wrapper, "Upload and assign review").trigger("click"); await flushPromises();
     await vi.waitFor(() => expect(wrapper.emitted("created")).toEqual([[42]]));
     const commands = fetch.mock.calls.filter(([url, init]) => init?.method === "POST" && !url.startsWith("/api/review/thumbnail?")).map(([url, init]) => ({ url, body: JSON.parse(String(init?.body)) }));
-    expect(commands.map(command => command.body.action ?? "create")).toEqual(["create", "begin", "process", "grant"]);
+    expect(commands.map(command => command.body.action ?? "create")).toEqual(["create", "begin", "process", "share"]);
     expect(commands[1]!.body).toMatchObject({ videoId: 42, bytes: source.size, contentType: "video/mp4", metadata: { title: "Datum review", description: "Private Datum cut", thumbnailId: 70 } });
     expect(fetch.mock.calls.find(([url]) => url.startsWith("/api/review/thumbnail?"))?.[0]).toBe("/api/review/thumbnail?videoId=42");
     expect(commands[1]!.body.checksum).toMatch(/^[a-f0-9]{64}$/);
-    expect(commands[3]!.body).toMatchObject({ videoId: 42, userId: 2, canApprove: true });
+    expect(commands[3]!.body).toMatchObject({ videoId: 42, revisionId: cut, userId: 2, canApprove: true });
+    expect(commands[3]!.body.expiresInDays).toBe(30);
     expect(fetch.mock.calls.find(([, init]) => init?.method === "PUT")?.[0]).toBe("/api/review/uploads?sessionId=new-session");
     expect(wrapper.emitted("created")).toEqual([[42]]);
     sessionStorage.clear();
+  });
+
+  it("retries the share step with the identical body after a lost response", async () => {
+    let uploaded = false, shares = 0;
+    const target = { videoId: 42, legacyId: "datum", slug: "datum", title: "Datum review", description: "Private Datum cut", reviewState: "no-review" };
+    const fetch = vi.fn(async (url: string, init?: RequestInit) => {
+      if (url.startsWith("/api/review/upload-targets")) return Response.json({ videos: [target] });
+      if (url.startsWith("/api/review/reviewers")) return Response.json({ reviewers: [{ userId: 2, name: "Customer", profileEmail: "customer@example.invalid" }] });
+      if (url.startsWith("/api/review/uploads?") && !init?.method) return Response.json({ state: uploaded ? "ready" : "pending", processingAvailable: true });
+      if (url.startsWith("/api/review/uploads?") && init?.method === "PUT") { uploaded = true; return Response.json({ state: "uploaded" }); }
+      if (url === "/api/review/uploads") return Response.json(JSON.parse(String(init?.body)).action === "begin" ? { sessionId: "retry-session" } : { state: "ready", revision: { revisionId: cut, reviewVersion: 1 } });
+      if (url === "/api/review" && ++shares === 1) throw new TypeError("Network lost");
+      if (url === "/api/review") return Response.json({ action: "share" });
+      throw new Error(`Unexpected request: ${url}`);
+    });
+    vi.stubGlobal("fetch", fetch);
+    const wrapper = mount(StaffUploadPanel); wrappers.push(wrapper); await flushPromises();
+    Object.defineProperty(wrapper.find('input[type="file"]').element, "files", { value: [new File(["fixture"], "cut.mp4", { type: "video/mp4" })] });
+    await wrapper.find('input[type="file"]').trigger("change");
+    await button(wrapper, "Upload and assign review").trigger("click"); await flushPromises();
+    await vi.waitFor(() => expect(wrapper.text()).toContain("Network lost"));
+    expect(JSON.parse(sessionStorage.getItem("rawkode-academy-review-upload")!)).toMatchObject({ stage: "share", revisionId: cut });
+    await button(wrapper, "Retry").trigger("click"); await flushPromises();
+    await vi.waitFor(() => expect(wrapper.emitted("created")).toEqual([[42]]));
+    const sent = fetch.mock.calls.filter(([url]) => url === "/api/review").map(([, init]) => String(init?.body));
+    expect(sent).toHaveLength(2);
+    expect(sent[1]).toBe(sent[0]);
+    expect(fetch.mock.calls.filter(([url, init]) => url === "/api/review/uploads" && JSON.parse(String(init?.body)).action === "process")).toHaveLength(1);
+  });
+
+  it("restores a pending upload saved before revision grants as a share step", async () => {
+    const legacyCommand = "00000000-0000-4000-8000-0000000000aa";
+    const input = { action: "begin", commandId: "00000000-0000-4000-8000-0000000000bb", videoId: 42, bytes: 7, checksum: "a".repeat(64), contentType: "video/mp4", metadata: { title: "Datum review", description: "Private Datum cut", transcript: "", chapters: [] } };
+    sessionStorage.setItem("rawkode-academy-review-upload", JSON.stringify({ input, fingerprint: "legacy", customerId: 2, sessionId: "legacy-session", grantCommandId: legacyCommand, stage: "grant" }));
+    const target = { videoId: 42, legacyId: "datum", slug: "datum", title: "Datum review", description: "Private Datum cut", reviewState: "in-review" };
+    const fetch = vi.fn(async (url: string, init?: RequestInit) => {
+      if (url.startsWith("/api/review/upload-targets")) return Response.json({ videos: [target] });
+      if (url.startsWith("/api/review/reviewers")) return Response.json({ reviewers: [{ userId: 2, name: "Customer", profileEmail: "customer@example.invalid" }] });
+      if (url.startsWith("/api/review/uploads?")) return Response.json({ state: "ready", processingAvailable: true });
+      if (url === "/api/review/uploads") return Response.json({ state: "ready", revision: { revisionId: cut, reviewVersion: 1 } });
+      if (url === "/api/review") return Response.json({ action: "share" });
+      throw new Error(`Unexpected request: ${url} ${init?.method}`);
+    });
+    vi.stubGlobal("fetch", fetch);
+    const wrapper = mount(StaffUploadPanel); wrappers.push(wrapper); await flushPromises();
+    await button(wrapper, "Resume upload and assign review").trigger("click"); await flushPromises();
+    await vi.waitFor(() => expect(wrapper.emitted("created")).toEqual([[42]]));
+    const share = JSON.parse(String(fetch.mock.calls.find(([url]) => url === "/api/review")![1]!.body));
+    expect(share).toMatchObject({ action: "share", commandId: legacyCommand, revisionId: cut, videoId: 42, userId: 2, canApprove: true });
   });
 
   it("keeps the new target selected after stale searches and blocks upload during creation", async () => {
@@ -148,7 +257,7 @@ describe("staff upload intake", () => {
       if (url.startsWith("/api/review/upload-targets")) return Response.json({ videos: [old] });
       if (url.startsWith("/api/review/reviewers")) return Response.json({ reviewers: [{ userId: queried ? 3 : 2, name: "Customer", profileEmail: "customer@example.invalid" }] });
       if (url.startsWith("/api/review/thumbnail?")) return new Promise(resolve => { finishThumbnail = resolve; });
-      if (url === "/api/review/uploads") return Response.json(JSON.parse(String(init?.body)).action === "begin" ? { sessionId: "session" } : { revision: { id: cut } });
+      if (url === "/api/review/uploads") return Response.json(JSON.parse(String(init?.body)).action === "begin" ? { sessionId: "session" } : { revision: { revisionId: cut, reviewVersion: 1 } });
       if (url.startsWith("/api/review/uploads?")) return Response.json({ state: "pending" });
       if (url === "/api/review") return Response.json({ ok: true });
       throw new Error(`Unexpected request: ${url}`);

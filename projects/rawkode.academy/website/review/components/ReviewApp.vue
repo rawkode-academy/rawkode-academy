@@ -15,7 +15,9 @@ const signInUrl = computed(() => `/api/auth/login?returnTo=${encodeURIComponent(
 function clearPrivateData() { user.value = null; review.value = null; videos.value = []; nextCursor.value = null; loadingVideo.value = false; loadingMore.value = false; }
 function failure(reason: unknown) {
   if (reason instanceof ApiError && reason.status === 401) { generation++; clearPrivateData(); loading.value = false; }
-  error.value = reason instanceof Error ? reason.message : "Unable to load your reviews.";
+  // Expired, revoked and unshared reviews are a uniform 404 by design.
+  if (reason instanceof ApiError && reason.status === 404) error.value = "This review is not available to you. Access to each cut is time-limited; ask the Rawkode Academy team to share it again if you still need it.";
+  else error.value = reason instanceof Error ? reason.message : "Unable to load your reviews.";
 }
 function currentRoute() {
   const id = new URLSearchParams(window.location.search).get("videoId");

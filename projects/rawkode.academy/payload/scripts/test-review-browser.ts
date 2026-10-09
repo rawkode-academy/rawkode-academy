@@ -11,7 +11,7 @@ const cut = '00000000-0000-4000-8000-000000000001'
 let authenticated = false, revoked = false, staff = false, stale = false, returnTo = '/review', rangeRequests = 0
 let state = 'ready', version = 1
 const comments: Record<string, unknown>[] = [], decisions: Record<string, unknown>[] = [], commands: Record<string, unknown>[] = []
-const revision = () => ({ id: cut, reviewVersion: version, durationMs: 1000, state, createdAt: '2026-10-05T12:00:00Z', mediaUrl: `/api/review/media?videoId=10&revisionId=${cut}`, metadata: { title: 'A clearer Kubernetes demo', description: 'Please check the opening example before we publish.' } })
+const revision = () => ({ id: cut, reviewVersion: version, durationMs: 1000, state, createdAt: '2026-10-05T12:00:00Z', mediaUrl: `/api/review/media?videoId=10&revisionId=${cut}`, metadata: { title: 'A clearer Kubernetes demo', description: 'Please check the opening example before we publish.' }, ...(staff ? {} : { canApprove: true, expiresAt: '2026-11-08T12:00:00.000Z' }) })
 const review = () => ({ videoId: 10, viewerId: staff ? 1 : 2, canApprove: !staff, publicationAvailable: true, currentRevisionId: cut, revisions: [revision()], comments, decisions })
 const browser = await chromium.launch({ headless: true, executablePath: process.env.REVIEW_CHROMIUM_PATH })
 try {

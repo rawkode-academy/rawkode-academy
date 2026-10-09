@@ -66,9 +66,9 @@ const revisionId = String(processed.revision.revisionId)
 report.processingStates = processingStates
 report.checks.push('Cloudflare Workflow completed Container/Workers AI processing and attached a review revision')
 
-const grant = await command(staff, {action:'grant', commandId:randomUUID(), videoId:fixture.videoId, userId:Number(fixture.customer), canApprove:true})
-if (grant.action !== 'grant') throw new Error(`Grant failed: ${JSON.stringify(grant)}`)
-report.checks.push('staff assigned the customer with approval rights')
+const share = await command(staff, {action:'share', commandId:randomUUID(), videoId:fixture.videoId, revisionId, userId:Number(fixture.customer), canApprove:true, expiresAt:new Date(Date.now() + 86400000).toISOString()})
+if (share.action !== 'share') throw new Error(`Share failed: ${JSON.stringify(share)}`)
+report.checks.push('staff shared this revision with the customer with approval rights')
 
 const customerList = await request('/api/review', customer)
 if (!customerList.items?.some((item:JsonRecord) => item.videoId === fixture.videoId)) throw new Error('Customer cannot see the granted review')

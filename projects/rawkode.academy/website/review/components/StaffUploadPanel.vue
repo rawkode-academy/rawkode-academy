@@ -8,7 +8,10 @@ const sourceTypes = ["video/mp4", "video/quicktime", "video/webm"] as const;
 const pendingKey = "rawkode-academy-review-upload";
 type Metadata = { title: string; description: string; transcript: string; thumbnailId?: number; chapters: never[] };
 type BeginInput = { action: "begin"; commandId: string; videoId: number; bytes: number; checksum: string; contentType: typeof sourceTypes[number]; metadata: Metadata };
-type PendingUpload = { input: BeginInput; fingerprint: string; customerId: number; sessionId: string | null; grantCommandId: string; stage: "begin" | "upload" | "process" | "grant" };
+type PendingUpload = { input: BeginInput; fingerprint: string; customerId: number; sessionId: string | null; shareCommandId: string; revisionId: string | null; stage: "begin" | "upload" | "process" | "share" };
+// Before revision grants, saved uploads used grantCommandId and a "grant" stage.
+type StoredUpload = Omit<PendingUpload, "shareCommandId" | "revisionId" | "stage"> & { shareCommandId?: string; grantCommandId?: string; revisionId?: string | null; stage: PendingUpload["stage"] | "grant" };
+const shareDays = 30;
 type SessionStatus = { sessionId: string; state: string; expiresAt: number; processingAvailable: boolean };
 
 const emit = defineEmits<{ created: [videoId: number] }>();
@@ -49,7 +52,8 @@ function restorePending() {
   try {
     const value = sessionStorage.getItem(pendingKey);
     if (value) {
-      pending.value = JSON.parse(value) as PendingUpload;
+      const { grantCommandId, ...stored } = JSON.parse(value) as StoredUpload;
+      pending.value = { ...stored, shareCommandId: stored.shareCommandId ?? grantCommandId ?? crypto.randomUUID(), revisionId: stored.revisionId ?? null, stage: stored.stage === "grant" ? "share" : stored.stage };
       selectedVideoId.value = pending.value.input.videoId;
       selectedCustomerId.value = pending.value.customerId;
       title.value = pending.value.input.metadata.title;
@@ -138,7 +142,7 @@ function wait(ms: number) { return new Promise(resolve => setTimeout(resolve, ms
 async function process(sessionId: string) {
   for (let attempt = 0; attempt < 90; attempt++) {
     if (!mounted) throw new DOMException("Upload panel was closed", "AbortError");
-    const result = await api<{ state: string; revision?: unknown }>("/api/review/uploads", {
+    const result = await api<{ state: string; revision?: { revisionId?: string } }>("/api/review/uploads", {
       method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "process", sessionId }),
     });
     if (result.revision) return result;
@@ -172,7 +176,7 @@ async function submit() {
     else return;
     let item = pending.value;
     if (!item) {
-      item = { input, fingerprint: fingerprint(input), customerId, sessionId: null, grantCommandId: crypto.randomUUID(), stage: "begin" };
+      item = { input, fingerprint: fingerprint(input), customerId, sessionId: null, shareCommandId: crypto.randomUUID(), revisionId: null, stage: "begin" };
       savePending(item);
     }
     if (!item.sessionId) {
@@ -187,12 +191,20 @@ async function submit() {
       progress.value = "Uploading source video…"; item.stage = "upload"; savePending(item);
       await api(`/api/review/uploads?sessionId=${encodeURIComponent(item.sessionId)}`, { method: "PUT", headers: { "content-type": source.type, "x-upload-length": String(source.size) }, body: source });
     }
-    progress.value = "Starting transcription and encoding…"; item.stage = "process"; savePending(item);
-    await process(item.sessionId);
-    progress.value = "Assigning client approval…"; item.stage = "grant"; savePending(item);
-    await api("/api/review", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "grant", videoId: item.input.videoId, commandId: item.grantCommandId, userId: item.customerId, canApprove: true }) });
+    if (!item.revisionId) {
+      progress.value = "Starting transcription and encoding…"; item.stage = "process"; savePending(item);
+      // A resumed, already attached session replays create-revision and returns the same revision.
+      let revisionId = (await process(item.sessionId)).revision?.revisionId;
+      if (!revisionId) revisionId = (await process(item.sessionId)).revision?.revisionId;
+      if (!revisionId) throw new Error("Processing finished without a revision. Retry to resume it.");
+      item.revisionId ??= revisionId;
+    }
+    // A day count keeps a retry's body identical, so the service replays the saved command,
+    // and the expiry comes from the server clock.
+    progress.value = "Sharing this revision with the client…"; item.stage = "share"; savePending(item);
+    await api("/api/review", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "share", videoId: item.input.videoId, revisionId: item.revisionId, commandId: item.shareCommandId, userId: item.customerId, canApprove: true, expiresInDays: shareDays }) });
     const videoId = item.input.videoId;
-    savePending(null); sessionStatus.value = null; file.value = null; resetThumbnail(); progress.value = "Review created and assigned.";
+    savePending(null); sessionStatus.value = null; file.value = null; resetThumbnail(); progress.value = "Review created and shared.";
     await loadOptions();
     if (mounted) emit("created", videoId);
   } catch (reason) {
@@ -210,7 +222,7 @@ onUnmounted(() => { mounted = false; controller.abort(); clearTimeout(searchTime
   <details class="staff-upload" open>
     <summary>Upload a review cut</summary>
     <div class="staff-upload-body">
-      <p class="muted">Upload the original cut, process it, and assign one Academy customer to approve the resulting revision.</p>
+      <p class="muted">Upload the original cut, process it, and share the resulting revision with one Academy customer for {{ shareDays }} days. Later revisions stay hidden until you share them.</p>
       <p v-if="loading" role="status" class="muted">Loading upload options…</p>
       <template v-else>
         <details class="staff-upload-create" :open="!targets.length">

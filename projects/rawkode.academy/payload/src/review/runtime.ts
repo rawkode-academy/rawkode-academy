@@ -52,6 +52,7 @@ export async function reviewBackend() {
       return stageReleaseObject(cloudflare.env.R2, `review-releases/${videoId}/${publicationId}/${checksum}.mp4`, content.bytes, checksum, probe.contentType)
     },
     publicMediaUrl: publishedMediaUrl(auth),
+    now: () => new Date(),
   })
   const intake = new ReviewIntake(store, cloudflare.env.R2, service, configuredMediaAdapter(cloudflare.env, store))
   const publicationAvailable = async (videoId: number) => (auth.local && fixtureEnabled) || Boolean(await store.one('SELECT a.media_id FROM video_review_state s JOIN video_revisions r ON r.id=s.current_revision JOIN review_intake_assets a ON a.media_id=r.deliverable_media_id AND a.video_id=s.video_id AND a.kind=? WHERE s.video_id=?', 'deliverable', videoId))

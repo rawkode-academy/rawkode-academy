@@ -199,7 +199,7 @@ export const collectionOrder = [
   'media',
   'seasons','brackets','matches','match-results','competitors','teams','bracket-applications','team-members','bracket-entries','bracket-breaks','registrations',
   'changelog','adrs',
-  'pipeline-runs','deletion-markers','static-assets','video-review-grants','video-publications','team-invites',
+  'pipeline-runs','deletion-markers','static-assets','video-review-grants','review-revision-grants','video-publications','team-invites',
   'video-revisions','review-comments','review-decisions','chapters','learning-resources',
 ] as const
 // Payload numbers colliding compound index names (bracket_competitor_1_idx,
