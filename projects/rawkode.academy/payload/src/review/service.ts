@@ -11,7 +11,9 @@ export type ReviewDependencies = {
   deliverable(mediaId: number, actor: ReviewActor, videoId: number): Promise<{ checksum: string; durationMs: number; contentType: string }>
   thumbnail?(videoId: number, thumbnailId: number): Promise<void>
   assertPair?(videoId: number, sourceId: number, deliverableId: number): Promise<void>
-  stageRelease(videoId: number, publicationId: string, mediaId: number, checksum: string, actor: ReviewActor): Promise<{ key: string; etag: string; checksum: string; bytes: number; contentType: string }>
+  // publicUrl, when present, is where the approved rendition is served publicly (a
+  // Studio recording publishes its HLS on the content CDN); otherwise publicMediaUrl.
+  stageRelease(videoId: number, publicationId: string, mediaId: number, checksum: string, actor: ReviewActor): Promise<{ key: string; etag: string; checksum: string; bytes: number; contentType: string; publicUrl?: string }>
   now?(): Date
 }
 // One answer for every reason a customer cannot sign off, so the refusal never reveals
@@ -192,7 +194,7 @@ export class ReviewService {
           const release = await this.dependencies.stageRelease(input.videoId, resultId, revision.deliverable_media_id, revision.deliverable_checksum, actor)
           if (release.checksum !== revision.deliverable_checksum || release.checksum !== decision.deliverable_checksum) throw new ReviewError(409, 'Release does not match the approved deliverable')
           const video = await this.dependencies.video(input.videoId, actor)
-          mutations.push(sql('INSERT INTO video_publications(id,document) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET document=excluded.document', input.videoId, JSON.stringify(publicProjection(video, revision, at, this.dependencies.publicMediaUrl(input.videoId, resultId)))))
+          mutations.push(sql('INSERT INTO video_publications(id,document) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET document=excluded.document', input.videoId, JSON.stringify(publicProjection(video, revision, at, release.publicUrl ?? this.dependencies.publicMediaUrl(input.videoId, resultId)))))
           mutations.push(sql('UPDATE video_revisions SET state=? WHERE id=?', 'published', revision.id))
           mutations.push(sql('INSERT INTO review_publication_events(id,video_id,revision_id,decision_id,published_by_id,published_at,object_key,object_etag,checksum,bytes,content_type) VALUES(?,?,?,?,?,?,?,?,?,?,?)', resultId, input.videoId, revision.id, decision.id, actor.id, at, release.key, release.etag, release.checksum, release.bytes, release.contentType))
           result = { publicationId: resultId, revisionId: revision.id, publishedAt: at }

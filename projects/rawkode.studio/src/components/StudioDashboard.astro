@@ -135,6 +135,10 @@ function eventState(event: StudioEventSummary): string {
 									<input type="datetime-local" required data-show-start-time />
 								</label>
 								<input name="startsAt" type="hidden" data-show-start-iso />
+								<label class="review-required-field">
+									<input name="reviewRequired" type="checkbox" value="true" />
+									<span>Requires client review before publishing</span>
+								</label>
 								<button class="button primary" type="submit">Schedule show</button>
 							</form>
 						</section>
@@ -151,6 +155,7 @@ function eventState(event: StudioEventSummary): string {
 									</div>
 									<div class="session-status">
 										<span>{session.streamStatus === "live" ? "Live" : session.status}</span>
+										{session.reviewRequired ? <span class="review-badge">Client review</span> : null}
 									</div>
 									<div class="session-actions">
 										{session.status !== "complete" ? (
@@ -213,6 +218,10 @@ function eventState(event: StudioEventSummary): string {
 														<option value="prod">Prod</option>
 													</select>
 												</label>
+												<label class="review-required-field">
+													<input name="reviewRequired" type="checkbox" value="true" />
+													<span>Requires client review before publishing</span>
+												</label>
 												<button class="button primary" type="submit">
 													Create room
 												</button>
@@ -232,6 +241,7 @@ function eventState(event: StudioEventSummary): string {
 														<span>{session.status}</span>
 														<span>{session.streamEnvironment}</span>
 														<span>{session.streamStatus}</span>
+														{session.reviewRequired ? <span class="review-badge">Client review</span> : null}
 													</div>
 													<div class="session-actions">
 														{

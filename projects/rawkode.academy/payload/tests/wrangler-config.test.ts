@@ -5,7 +5,8 @@ import { authConfig, WORKER_PREVIEW_ORIGIN } from '../src/auth/config'
 
 // scripts/migrate-production.ts reads wrangler.jsonc with JSON.parse, so both
 // configs must stay comment-free JSON.
-type Config = { vars: Record<string, string>; previews: { vars: Record<string, string> }; services?: unknown; secrets_store_secrets?: unknown }
+type Binding = { binding: string; bucket_name?: string; secret_name?: string }
+type Config = { vars: Record<string, string>; previews: { vars: Record<string, string>; r2_buckets?: Binding[]; secrets_store_secrets?: Binding[] }; services?: unknown; secrets_store_secrets?: Binding[]; r2_buckets?: Binding[] }
 const read = (file: string) => ({ text: readFileSync(file, 'utf8'), config: JSON.parse(readFileSync(file, 'utf8')) as Config })
 const main = read('wrangler.jsonc')
 const runtime = read('wrangler.preview-runtime.jsonc')
@@ -39,4 +40,15 @@ test('migrate-production config (vars only, no secrets or services) still loads 
 test('single-origin configuration and the separate review backend are gone', () => {
   for (const { text } of [main, runtime]) assert.equal(text.includes('OIDC_REDIRECT_URI'), false)
   assert.equal(existsSync('wrangler.review.jsonc'), false)
+})
+
+test('only production binds the Studio content bucket and machine secret', () => {
+  assert.deepEqual(main.config.r2_buckets?.find(binding => binding.binding === 'STUDIO_CONTENT')?.bucket_name, 'rawkode-academy-content')
+  assert.equal(main.config.vars.STUDIO_CONTENT_BUCKET_NAME, 'rawkode-academy-content')
+  assert.equal(main.config.secrets_store_secrets?.find(binding => binding.binding === 'STUDIO_MACHINE_SECRET')?.secret_name, 'STUDIO_MACHINE_SECRET')
+  for (const config of [main.config.previews, runtime.config as unknown as Config['previews']]) {
+    assert.equal(config.r2_buckets?.some(binding => binding.binding === 'STUDIO_CONTENT') ?? false, false)
+    assert.equal(config.secrets_store_secrets?.some(binding => binding.binding === 'STUDIO_MACHINE_SECRET') ?? false, false)
+    assert.equal('STUDIO_CONTENT_BUCKET_NAME' in config.vars, false)
+  }
 })

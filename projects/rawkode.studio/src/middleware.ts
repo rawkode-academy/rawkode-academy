@@ -15,6 +15,8 @@ function toLocalUser(session: StoredSession) {
 		name: session.user.name,
 		image: session.user.image,
 		username: session.user.username,
+		issuer: session.issuer ?? null,
+		subject: session.subject ?? null,
 	};
 }
 
