@@ -6,15 +6,25 @@ import { buildConfig } from 'payload'
 import { optionalPlugins, optionalGlobals } from './src/optional-mcp'
 import { createCollections } from './src/collections'
 import {authConfig} from './src/auth/config'
+import {adminConfig} from './src/admin/config'
+import {parseDeveloperSubjects,type AdminAccess} from './src/admin/access'
 
 const secret = cloudflare.env.PAYLOAD_SECRET || process.env.PAYLOAD_SECRET
 if (!secret) throw new Error('Run bun run setup to generate isolated local secrets first')
 const auth = authConfig(cloudflare.env)
+// Admin visibility only (nav, Source tab, System tables). Same strict JSON-array
+// format as OIDC_STAFF_SUBJECTS; malformed values fail closed at startup.
+const adminAccess: AdminAccess = {
+  developerSubjects: parseDeveloperSubjects((cloudflare.env as {DEVELOPER_SUBJECTS?: string}).DEVELOPER_SUBJECTS, auth.staffSubjects),
+  localAuth: auth.localAuth,
+}
 const log = (level:string) => (value:unknown, message?:string) => console.log(JSON.stringify({level, message, value},(_key,item)=>item instanceof Error?{name:item.name,message:item.message}:item))
 export default buildConfig({
-  admin: { user:'users', importMap:{baseDir:path.resolve(process.cwd())},components:{beforeLogin:['./src/components/AcademyLogin#AcademyLogin']} },
+  admin: { user:'users', importMap:{baseDir:path.resolve(process.cwd())}, ...adminConfig },
   csrf:auth.origins,
-  collections:createCollections(auth,cloudflare.env.D1),
+  // Server-only. adminAccess is read by admin server components; never put it in admin.custom.
+  custom:{adminAccess},
+  collections:createCollections(auth,cloudflare.env.D1,adminAccess),
   graphQL:{disableIntrospectionInProduction:false},
   globals:optionalGlobals,
   secret,

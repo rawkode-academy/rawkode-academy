@@ -5,6 +5,11 @@ import type {AuthConfig} from './auth/config'
 import {pipelineCollection,pipelineVideoFields} from './pipeline'
 import {filterExternalFileHeaders} from './media-security'
 import type { Access, CollectionConfig, Field, RelationshipField, Where } from 'payload'
+import {type AdminAccess,noDevelopers} from './admin/access'
+import {applyPreset} from './admin/collection-admin'
+import {computedLabel,fillEditorialIdentity,provenanceDefaults,relationTitle} from './admin/fields'
+import {arrange,type LayoutOptions} from './admin/layout'
+import {fieldComponents} from './admin/config'
 
 const staff: Access = ({ req }) => isStaff(req.user) || req.context.pipelineMachine === true
 const readable: Access = ({ req }) => {
@@ -32,10 +37,17 @@ const domainRelationshipIndexes: Record<string, NonNullable<CollectionConfig['in
   'match-results': [{ unique: true, fields: ['match'] }],
 }
 const protectedFields = ['legacyId','legacyType','sourceSystem','sourceRevision','sourceHash','mappingVersion','importedAt','importState','locallyEdited','sourceSequence','sourceFields','sourcePath','sourceFormat','sourceData','sourceRaw','sourceBody','sourceAssets']
-const provenance: Field[] = [
-  { name: 'legacyId', type: 'text', required: true, unique: true, index: true },
-  { name: 'legacyType', type: 'text', required: true },
-  { name: 'slug', type: 'text', required: true, index: true },
+// legacyType for editor-created records, matching the importer's spelling.
+const legacyTypeOverrides: Record<string, string> = { people: 'Person', technologies: 'Technology', series: 'Series', news: 'News', adrs: 'ADR', changelog: 'Changelog', matches: 'Match', 'learning-resources': 'LearningResources' }
+const singularOf = (slug: string) => legacyTypeOverrides[slug] ?? slug.split('-').map(part => part[0].toUpperCase() + part.slice(1)).join('').replace(/ies$/, 'y').replace(/s$/, '')
+// Stored shape is unchanged; provenanceDefaults only adds function defaults and
+// an editorial-create slug validator (no DDL). See src/admin/fields.ts.
+const provenanceFor = (slug: string): Field[] => {
+  const defaults = provenanceDefaults(slug, singularOf(slug))
+  return [
+  { name: 'legacyId', type: 'text', required: true, unique: true, index: true, ...defaults.legacyId },
+  { name: 'legacyType', type: 'text', required: true, ...defaults.legacyType },
+  { name: 'slug', type: 'text', required: true, index: true, ...defaults.slug } as Field,
   ...['sourceSystem','sourceRevision','sourceHash','mappingVersion'].map(name => text(name)),
   { name: 'importedAt', type: 'date' },
   { name: 'importState', type: 'select', options: ['pending','complete'] },
@@ -51,7 +63,9 @@ const provenance: Field[] = [
   json('sourceAssets'),
   { name: 'tombstone', type: 'checkbox', defaultValue: false },
 ]
+}
 const editorialHooks = (slug: string) => ({
+  beforeValidate: [fillEditorialIdentity(slug, singularOf(slug))],
   beforeChange: [({ data, originalDoc, req, operation }: { data: Record<string, any>; originalDoc?: Record<string, any>; req: any; operation: string }) => {
     if(slug === 'videos') {
       const linked = data.processingRun || originalDoc?.processingRun
@@ -83,87 +97,137 @@ const editorialHooks = (slug: string) => ({
       data: { key: `${slug}:${doc.legacyId}`, collectionSlug: slug, legacyId: doc.legacyId, sourceHash: doc.sourceHash ?? '' } })
   }],
 })
-function content(slug: string, fields: Field[]): CollectionConfig {
-  return {
-    slug, admin: { useAsTitle: fields.some(f => 'name' in f && f.name === 'title') ? 'title' : 'legacyId' },
+type Builder = (access: AdminAccess) => CollectionConfig
+function content(slug: string, fields: Field[], layout: LayoutOptions = {}): Builder {
+  return access => applyPreset({
+    slug,
     access: { read: readable, create: staff, update: staff, delete: staff, readVersions: staff },
     versions: { drafts: true, maxPerDoc: 30 },
-    fields: [...provenance, { name: 'body', type: 'textarea' }, json('cover'), json('contentResources'), json('editorialData'), ...fields],
+    fields: arrange([...provenanceFor(slug), ...fields, { name: 'body', type: 'textarea' }, json('cover'), json('contentResources'), json('editorialData')], access, layout),
     hooks: editorialHooks(slug),
-  }
+  }, access)
 }
 const terms = strings('terms')
 const title = text('title')
 const description: Field = { name: 'description', type: 'textarea' }
-const domain = (slug: string, fields: Field[], useAsTitle = 'legacyId', indexes: CollectionConfig['indexes'] = []): CollectionConfig => ({
+const domain = (slug: string, fields: Field[], indexes: CollectionConfig['indexes'] = [], layout: LayoutOptions = {}): Builder => access => applyPreset({
   slug,
-  admin: { useAsTitle },
   access: { read: staff, create: staff, update: staff, delete: staff, readVersions: staff },
   versions: { drafts: true, maxPerDoc: 30 },
-  fields: [...provenance, ...fields],
+  fields: arrange([...provenanceFor(slug), ...fields], access, layout),
   indexes: [...(domainRelationshipIndexes[slug] ?? []), ...indexes],
   hooks: editorialHooks(slug),
-})
+}, access)
+const competitorTitle: LayoutOptions = { top: [relationTitle('competitorName', 'competitor.displayName', 'Competitor')] }
+const ordinal = (value: unknown) => typeof value === 'number' ? String(value) : '?'
 
-const staticCollections: CollectionConfig[] = [
-  content('series', [title]),
-  content('adrs', [title, date('adoptedAt'), authors()]),
-  content('testimonials', [text('quote'), json('author'), { name: 'type', type: 'select', options: ['maintainer','partner','viewer'] }]),
-  content('news', [title, description, date('publishedAt'), authors(), technologies]),
-  content('changelog', [title, description, date('date'), { name: 'type', type: 'select', options: ['feature','fix','improvement','breaking'] }, { name: 'pullRequest', type: 'number' }, relation('author', 'people')]),
-  {
+const withEditComponents = (config: CollectionConfig, edit: NonNullable<NonNullable<NonNullable<CollectionConfig['admin']>['components']>['edit']>): CollectionConfig =>
+  ({ ...config, admin: { ...config.admin, components: { ...config.admin?.components, edit: { ...config.admin?.components?.edit, ...edit } } } })
+const updatedAtDescription = 'Shown to readers as Last updated. This is the system timestamp and changes on every save.'
+const people: LayoutOptions = {
+  rows: [['forename','surname']],
+  collapsibles: { Social: ['github','githubHandle','githubUrl','twitter','bluesky','mastodon','linkedin','website','youtube','links'] },
+}
+const builders: Record<string, Builder> = {
+  // Publishing
+  videos: access => withEditComponents(content('videos', [title,text('tagline'),text('subtitle'),description,strings('whatYouWillLearn'),terms,{name:'publishedAt',type:'date',admin:{date:{pickerAppearance:'dayAndTime'}}}, {name:'duration',type:'number'}, {name:'audioFileSize',type:'number'},
+    {name:'type',type:'select',options:['live','recorded']}, {name:'category',type:'select',options:['announcement','editorial','interview','review','tutorial']},
+    text('streamUrl'),text('thumbnailUrl'),text('mediaReference'),text('youtubeId'),json('realtimeKit'),json('podcast'),json('subscribeLinks'),relation('show','shows'),technologies,relation('guests','people',true),relation('episode','episodes'),relation('chapters','chapters',true)], {
+    processing: { fields: pipelineVideoFields, condition: data => Boolean(data?.processingRun || data?.processingState) },
+    // Read-only review history. Extension point for workstreams D (grants)
+    // and F (guarded share/publish commands).
+    review: [{ name: 'reviewPanel', type: 'ui', admin: { components: { Field: fieldComponents.reviewPanel }, condition: data => Boolean(data?.id) } }],
+    // Videos in client review are frozen by database triggers; say so and
+    // swap the save buttons rather than fail with a generic toast.
+    top: [{ name: 'reviewFreeze', type: 'ui', admin: { components: { Field: fieldComponents.reviewFreezeNotice }, condition: data => Boolean(data?.id) } }],
+  })(access), {
+    PublishButton: fieldComponents.videoPublishControl,
+    SaveDraftButton: fieldComponents.videoSaveDraftControl,
+    UnpublishButton: fieldComponents.videoUnpublishControl,
+  }),
+  shows: content('shows', [text('name'),{name:'status',type:'select',options:['coming-soon','active','archived']},text('tagline'),text('gameFormatUrl'),description,json('podcast'),json('subscribeLinks'),terms,relation('hosts','people',true),{...relation('episodes','episodes',true),admin:{readOnly:true,description:'Imported source list. Public show episodes are derived from Episode.show; edit that relationship on the episode.'}}]),
+  episodes: content('episodes', [text('code'),terms,relation('video','videos'),relation('show','shows')]),
+  articles: content('articles', [title,description,date('publishedAt'),date('updatedAt'),text('subtitle'),{name:'type',type:'select',options:['tutorial','article','guide','news']},{name:'howto',type:'checkbox'},authors(),technologies,relation('series','series'),relation('resources','learning-resources',true)], { sidebarDescriptions: { updatedAt: updatedAtDescription } }),
+  news: content('news', [title, description, date('publishedAt'), authors(), technologies]),
+  series: content('series', [title]),
+  // Learning
+  courses: content('courses', [title,description,date('publishedAt'),date('updatedAt'),authors(),text('difficulty'),strings('learningPath'),technologies,relation('modules','course-modules',true)], { sidebarDescriptions: { updatedAt: updatedAtDescription } }),
+  'course-modules': content('course-modules', [title,description,date('publishedAt'),text('difficulty'),strings('learningPath'),{name:'order',type:'number'},text('section'),relation('course','courses'),relation('video','videos'),authors(),relation('resources','learning-resources',true)]),
+  'learning-paths': content('learning-paths', [title,description,date('publishedAt'),text('difficulty'),{name:'estimatedDuration',type:'number'},strings('prerequisites'),authors(),relation('courses','courses',true),relation('videos','videos',true),technologies]),
+  technologies: content('technologies', [text('name'),json('seo'),json('logos'),text('category'),text('subcategory'),text('documentation'),text('icon'),text('logo'),text('source'),text('license'),text('status'),text('website'),json('cncf'),json('community'),json('matrix'),terms,strings('aliases'),strings('features'),strings('relatedTechnologies'),strings('useCases'),relation('learningResources','learning-resources')]),
+  // People
+  people: content('people', [text('name'),text('forename'),text('surname'),text('github'),text('twitter'),text('bluesky'),text('mastodon'),text('linkedin'),text('website'),text('youtube'),text('githubHandle'),text('githubUrl'),text('avatarUrl'),{name:'biography',type:'textarea'},terms,{name:'links',type:'array',fields:[text('name'),text('url')]}], people),
+  testimonials: content('testimonials', [text('quote'), json('author'), { name: 'type', type: 'select', options: ['maintainer','partner','viewer'] }]),
+  // Klustered
+  seasons: domain('seasons', [sourceText('showId'), relation('show', 'shows'), text('name'), { name: 'status', type: 'select', options: ['interest','active','finished'] }, date('startDate'), date('endDate'), date('sourceCreatedAt'), date('sourceUpdatedAt')], [{ unique: true, fields: ['sourceShowId', 'slug'] }]),
+  brackets: domain('brackets', [sourceText('seasonId'), relation('season', 'seasons'), text('name'), { name: 'kind', type: 'select', options: ['solo','team'] }, { name: 'format', type: 'select', options: ['single_elimination'] }, { name: 'status', type: 'select', options: ['draft','active','finished'] }, date('startsAt'), date('registrationClosesAt'), { name: 'maxEntries', type: 'number' }, { name: 'teamSize', type: 'number' }, { name: 'cadenceDays', type: 'number' }, date('sourceCreatedAt'), date('sourceUpdatedAt')], [{ unique: true, fields: ['sourceSeasonId', 'slug'] }]),
+  matches: domain('matches', [sourceText('bracketId'), relation('bracket', 'brackets'), { name: 'roundNumber', type: 'number' }, { name: 'positionInRound', type: 'number' }, date('scheduledAt'), { name: 'status', type: 'select', options: ['scheduled','live','completed','cancelled'] }, sourceText('teamAId'), relation('teamA', 'teams'), sourceText('teamBId'), relation('teamB', 'teams'), sourceText('entryAId'), relation('entryA', 'bracket-entries'), sourceText('entryBId'), relation('entryB', 'bracket-entries'), text('judgeUserId'), sourceText('winnerTeamId'), relation('winnerTeam', 'teams'), sourceText('winnerEntryId'), relation('winnerEntry', 'bracket-entries'), date('startedAt'), date('endedAt'), date('sourceCreatedAt'), date('sourceUpdatedAt')], [],
+    { top: [computedLabel('label', doc => `Round ${ordinal(doc.roundNumber)}, match ${ordinal(doc.positionInRound)}`)] }),
+  competitors: domain('competitors', [sourceText('seasonId'), relation('season', 'seasons'), text('personSlug'), text('displayName'), text('bio'), text('userId'), date('sourceCreatedAt'), date('sourceUpdatedAt')], [{ unique: true, fields: ['sourceSeasonId', 'personSlug'] }, { unique: true, fields: ['sourceSeasonId', 'userId'] }]),
+  teams: domain('teams', [sourceText('seasonId'), relation('season', 'seasons'), sourceText('bracketId'), relation('bracket', 'brackets'), text('name'), date('sourceCreatedAt'), date('sourceUpdatedAt')], [{ unique: true, fields: ['sourceBracketId', 'slug'] }]),
+  'bracket-applications': domain('bracket-applications', [sourceText('bracketId'), relation('bracket', 'brackets'), sourceText('competitorId'), relation('competitor', 'competitors'), { name: 'status', type: 'select', options: ['pending','approved','rejected'] }, date('sourceCreatedAt'), date('reviewedAt'), text('reviewedByUserId')], [{ unique: true, fields: ['sourceBracketId', 'sourceCompetitorId'] }], competitorTitle),
+  registrations: domain('registrations', [sourceText('seasonId'), relation('season', 'seasons'), sourceText('bracketId'), relation('bracket', 'brackets'), { name: 'entryType', type: 'select', options: ['solo','team'] }, text('teamName'), { name: 'preferredSlot', type: 'number' }, text('userId'), text('displayName'), text('email'), text('message'), { name: 'status', type: 'select', options: ['pending','approved','rejected'] }, date('submittedAt'), date('reviewedAt'), text('reviewedByUserId')], [],
+    { fieldAdmin: { email: { readOnly: true, description: 'Personal data. Visible to developers only.' } } }),
+  // Site
+  changelog: content('changelog', [title, description, date('date'), { name: 'type', type: 'select', options: ['feature','fix','improvement','breaking'] }, { name: 'pullRequest', type: 'number' }, relation('author', 'people')]),
+  adrs: content('adrs', [title, date('adoptedAt'), authors()]),
+  // System
+  'static-assets': access => applyPreset({
     slug: 'static-assets',
-    admin: { useAsTitle: 'sourcePath' },
     access: { read: staff, create: staff, update: staff, delete: staff, readVersions: staff },
     versions: { drafts: false },
-    fields: [...provenance, text('r2Key'), text('mimeType'), { name: 'bytes', type: 'number' }, text('checksum'), text('alt')],
+    fields: arrange([...provenanceFor('static-assets'), text('r2Key'), text('mimeType'), { name: 'bytes', type: 'number' }, text('checksum'), text('alt')], access),
     hooks: editorialHooks('static-assets'),
-  },
-]
+  }, access),
+  'team-invites': domain('team-invites', [text('token'), sourceText('teamId'), relation('team', 'teams'), sourceText('bracketId'), relation('bracket', 'brackets'), text('createdByUserId'), date('sourceCreatedAt'), date('revokedAt')]),
+  // Out of the nav: child records edited from their parent.
+  chapters: content('chapters', [title,{name:'startTime',type:'number',min:0}]),
+  'learning-resources': content('learning-resources', [title,refs('official'),refs('community'),refs('tutorials')]),
+  'bracket-entries': domain('bracket-entries', [sourceText('bracketId'), relation('bracket', 'brackets'), sourceText('competitorId'), relation('competitor', 'competitors'), sourceText('teamId'), relation('team', 'teams'), text('displayName'), { name: 'seed', type: 'number' }, { name: 'status', type: 'select', options: ['pending','confirmed','withdrawn'] }, date('sourceCreatedAt'), date('sourceUpdatedAt')], [{ unique: true, fields: ['sourceBracketId', 'seed'] }, { unique: true, fields: ['sourceBracketId', 'sourceCompetitorId'] }, { unique: true, fields: ['sourceBracketId', 'sourceTeamId'] }]),
+  'bracket-breaks': domain('bracket-breaks', [sourceText('bracketId'), relation('bracket', 'brackets'), text('label'), date('startsAt'), date('endsAt'), date('sourceCreatedAt')]),
+  'team-members': domain('team-members', [sourceText('teamId'), relation('team', 'teams'), sourceText('bracketId'), relation('bracket', 'brackets'), sourceText('competitorId'), relation('competitor', 'competitors'), text('role'), date('sourceCreatedAt')], [{ unique: true, fields: ['sourceTeamId', 'sourceCompetitorId'] }, { unique: true, fields: ['sourceBracketId', 'sourceCompetitorId'] }], competitorTitle),
+  'match-results': domain('match-results', [sourceText('matchId'), relation('match', 'matches'), sourceText('winnerTeamId'), relation('winnerTeam', 'teams'), sourceText('winnerEntryId'), relation('winnerEntry', 'bracket-entries'), { name: 'timeToResolveSeconds', type: 'number' }, { name: 'scoreA', type: 'number' }, { name: 'scoreB', type: 'number' }, text('notes'), date('recordedAt'), text('recordedByUserId')], [{ unique: true, fields: ['sourceMatchId'] }],
+    { top: [computedLabel('label', doc => `${ordinal(doc.scoreA)} to ${ordinal(doc.scoreB)}`)] }),
+}
 
-const klusteredCollections: CollectionConfig[] = [
-  domain('seasons', [sourceText('showId'), relation('show', 'shows'), text('name'), { name: 'status', type: 'select', options: ['interest','active','finished'] }, date('startDate'), date('endDate'), date('sourceCreatedAt'), date('sourceUpdatedAt')], 'name', [{ unique: true, fields: ['sourceShowId', 'slug'] }]),
-  domain('competitors', [sourceText('seasonId'), relation('season', 'seasons'), text('personSlug'), text('displayName'), text('bio'), text('userId'), date('sourceCreatedAt'), date('sourceUpdatedAt')], 'displayName', [{ unique: true, fields: ['sourceSeasonId', 'personSlug'] }, { unique: true, fields: ['sourceSeasonId', 'userId'] }]),
-  domain('brackets', [sourceText('seasonId'), relation('season', 'seasons'), text('name'), { name: 'kind', type: 'select', options: ['solo','team'] }, { name: 'format', type: 'select', options: ['single_elimination'] }, { name: 'status', type: 'select', options: ['draft','active','finished'] }, date('startsAt'), date('registrationClosesAt'), { name: 'maxEntries', type: 'number' }, { name: 'teamSize', type: 'number' }, { name: 'cadenceDays', type: 'number' }, date('sourceCreatedAt'), date('sourceUpdatedAt')], 'name', [{ unique: true, fields: ['sourceSeasonId', 'slug'] }]),
-  domain('bracket-applications', [sourceText('bracketId'), relation('bracket', 'brackets'), sourceText('competitorId'), relation('competitor', 'competitors'), { name: 'status', type: 'select', options: ['pending','approved','rejected'] }, date('sourceCreatedAt'), date('reviewedAt'), text('reviewedByUserId')], 'legacyId', [{ unique: true, fields: ['sourceBracketId', 'sourceCompetitorId'] }]),
-  domain('teams', [sourceText('seasonId'), relation('season', 'seasons'), sourceText('bracketId'), relation('bracket', 'brackets'), text('name'), date('sourceCreatedAt'), date('sourceUpdatedAt')], 'name', [{ unique: true, fields: ['sourceBracketId', 'slug'] }]),
-  domain('team-members', [sourceText('teamId'), relation('team', 'teams'), sourceText('bracketId'), relation('bracket', 'brackets'), sourceText('competitorId'), relation('competitor', 'competitors'), text('role'), date('sourceCreatedAt')], 'legacyId', [{ unique: true, fields: ['sourceTeamId', 'sourceCompetitorId'] }, { unique: true, fields: ['sourceBracketId', 'sourceCompetitorId'] }]),
-  domain('team-invites', [text('token'), sourceText('teamId'), relation('team', 'teams'), sourceText('bracketId'), relation('bracket', 'brackets'), text('createdByUserId'), date('sourceCreatedAt'), date('revokedAt')], 'token'),
-  domain('bracket-breaks', [sourceText('bracketId'), relation('bracket', 'brackets'), text('label'), date('startsAt'), date('endsAt'), date('sourceCreatedAt')], 'label'),
-  domain('bracket-entries', [sourceText('bracketId'), relation('bracket', 'brackets'), sourceText('competitorId'), relation('competitor', 'competitors'), sourceText('teamId'), relation('team', 'teams'), text('displayName'), { name: 'seed', type: 'number' }, { name: 'status', type: 'select', options: ['pending','confirmed','withdrawn'] }, date('sourceCreatedAt'), date('sourceUpdatedAt')], 'displayName', [{ unique: true, fields: ['sourceBracketId', 'seed'] }, { unique: true, fields: ['sourceBracketId', 'sourceCompetitorId'] }, { unique: true, fields: ['sourceBracketId', 'sourceTeamId'] }]),
-  domain('matches', [sourceText('bracketId'), relation('bracket', 'brackets'), { name: 'roundNumber', type: 'number' }, { name: 'positionInRound', type: 'number' }, date('scheduledAt'), { name: 'status', type: 'select', options: ['scheduled','live','completed','cancelled'] }, sourceText('teamAId'), relation('teamA', 'teams'), sourceText('teamBId'), relation('teamB', 'teams'), sourceText('entryAId'), relation('entryA', 'bracket-entries'), sourceText('entryBId'), relation('entryB', 'bracket-entries'), text('judgeUserId'), sourceText('winnerTeamId'), relation('winnerTeam', 'teams'), sourceText('winnerEntryId'), relation('winnerEntry', 'bracket-entries'), date('startedAt'), date('endedAt'), date('sourceCreatedAt'), date('sourceUpdatedAt')]),
-  domain('match-results', [sourceText('matchId'), relation('match', 'matches'), sourceText('winnerTeamId'), relation('winnerTeam', 'teams'), sourceText('winnerEntryId'), relation('winnerEntry', 'bracket-entries'), { name: 'timeToResolveSeconds', type: 'number' }, { name: 'scoreA', type: 'number' }, { name: 'scoreB', type: 'number' }, text('notes'), date('recordedAt'), text('recordedByUserId')], 'legacyId', [{ unique: true, fields: ['sourceMatchId'] }]),
-  domain('registrations', [sourceText('seasonId'), relation('season', 'seasons'), sourceText('bracketId'), relation('bracket', 'brackets'), { name: 'entryType', type: 'select', options: ['solo','team'] }, text('teamName'), { name: 'preferredSlot', type: 'number' }, text('userId'), text('displayName'), text('email'), text('message'), { name: 'status', type: 'select', options: ['pending','approved','rejected'] }, date('submittedAt'), date('reviewedAt'), text('reviewedByUserId')], 'displayName'),
-]
-export const createCollections = (config:AuthConfig,db:D1Database): CollectionConfig[] => [
-  ...reviewCollections,
-  pipelineCollection,
-  usersCollection(config,db),
-  {
-    slug: 'deletion-markers', access: { read: staff, create: staff, update: () => false, delete: () => false },
-    fields: [{ name: 'key', type: 'text', unique: true, required: true }, text('collectionSlug'), text('legacyId'), text('sourceHash')],
-  },
-  content('videos', [...pipelineVideoFields,title,text('tagline'),text('subtitle'),description,strings('whatYouWillLearn'),terms,date('publishedAt'), {name:'duration',type:'number'}, {name:'audioFileSize',type:'number'},
-    {name:'type',type:'select',options:['live','recorded']}, {name:'category',type:'select',options:['announcement','editorial','interview','review','tutorial']},
-    text('streamUrl'),text('thumbnailUrl'),text('mediaReference'),text('youtubeId'),json('realtimeKit'),json('podcast'),json('subscribeLinks'),relation('show','shows'),technologies,relation('guests','people',true),relation('episode','episodes'),relation('chapters','chapters',true)]),
-  content('people', [text('name'),text('forename'),text('surname'),text('github'),text('twitter'),text('bluesky'),text('mastodon'),text('linkedin'),text('website'),text('youtube'),text('githubHandle'),text('githubUrl'),text('avatarUrl'),{name:'biography',type:'textarea'},terms,{name:'links',type:'array',fields:[text('name'),text('url')]}]),
-  content('technologies', [text('name'),json('seo'),json('logos'),text('category'),text('subcategory'),text('documentation'),text('icon'),text('logo'),text('source'),text('license'),text('status'),text('website'),json('cncf'),json('community'),json('matrix'),terms,strings('aliases'),strings('features'),strings('relatedTechnologies'),strings('useCases'),relation('learningResources','learning-resources')]),
-  content('shows', [text('name'),{name:'status',type:'select',options:['coming-soon','active','archived']},text('tagline'),text('gameFormatUrl'),description,json('podcast'),json('subscribeLinks'),terms,relation('hosts','people',true),{...relation('episodes','episodes',true),admin:{readOnly:true,description:'Imported source list. Public show episodes are derived from Episode.show; edit that relationship on the episode.'}}]),
-  content('episodes', [text('code'),terms,relation('video','videos'),relation('show','shows')]),
-  content('chapters', [title,{name:'startTime',type:'number',min:0}]),
-  content('learning-resources', [title,refs('official'),refs('community'),refs('tutorials')]),
-  content('articles', [title,description,date('publishedAt'),date('updatedAt'),text('subtitle'),{name:'type',type:'select',options:['tutorial','article','guide','news']},{name:'howto',type:'checkbox'},authors(),technologies,relation('series','series'),relation('resources','learning-resources',true)]),
-  content('courses', [title,description,date('publishedAt'),date('updatedAt'),authors(),text('difficulty'),strings('learningPath'),technologies,relation('modules','course-modules',true)]),
-  content('course-modules', [title,description,date('publishedAt'),text('difficulty'),strings('learningPath'),{name:'order',type:'number'},text('section'),relation('course','courses'),relation('video','videos'),authors(),relation('resources','learning-resources',true)]),
-  content('learning-paths', [title,description,date('publishedAt'),text('difficulty'),{name:'estimatedDuration',type:'number'},strings('prerequisites'),authors(),relation('courses','courses',true),relation('videos','videos',true),technologies]),
-  {
-    slug:'media', access:{read:staff,create:staff,update:()=>false,delete:()=>false},
-    // Keep Payload's URL-fetch safety checks enabled. Staff media URLs may
-    // still be used during migration, but must not forward Academy cookies to
-    // an external origin.
-    upload:{disableLocalStorage:true,crop:false,focalPoint:false,externalFileHeaderFilter:filterExternalFileHeaders},
-    fields:[text('alt')],
-  },
-  ...staticCollections,
-  ...klusteredCollections,
-]
+// Nav order is first appearance in this list (see NAV_ORDER), followed by the
+// group:false collections. Order does not affect the stored schema.
+export const collectionOrder = [
+  'videos','shows','episodes','articles','news','series',
+  'courses','course-modules','learning-paths','technologies',
+  'people','testimonials','users',
+  'media',
+  'seasons','brackets','matches','match-results','competitors','teams','bracket-applications','team-members','bracket-entries','bracket-breaks','registrations',
+  'changelog','adrs',
+  'pipeline-runs','deletion-markers','static-assets','video-review-grants','video-publications','team-invites',
+  'video-revisions','review-comments','review-decisions','chapters','learning-resources',
+] as const
+// Payload numbers colliding compound index names (bracket_competitor_1_idx,
+// _2_idx) in collection order. These three share [bracket, competitor] and
+// [sourceBracketId, sourceCompetitorId], so they must keep this relative order
+// or migrate:create emits index renames.
+export const compoundIndexOrder = ['bracket-applications','team-members','bracket-entries'] as const
+
+export const createCollections = (config:AuthConfig,db:D1Database,access:AdminAccess=noDevelopers): CollectionConfig[] => {
+  const all: CollectionConfig[] = [
+    ...reviewCollections(access),
+    pipelineCollection(access),
+    applyPreset(usersCollection(config,db),access),
+    applyPreset({
+      slug: 'deletion-markers', access: { read: staff, create: staff, update: () => false, delete: () => false },
+      fields: [{ name: 'key', type: 'text', unique: true, required: true }, text('collectionSlug'), text('legacyId'), text('sourceHash')],
+    },access),
+    applyPreset({
+      slug:'media', access:{read:staff,create:staff,update:()=>false,delete:()=>false},
+      // Keep Payload's URL-fetch safety checks enabled. Staff media URLs may
+      // still be used during migration, but must not forward Academy cookies to
+      // an external origin.
+      upload:{disableLocalStorage:true,crop:false,focalPoint:false,externalFileHeaderFilter:filterExternalFileHeaders},
+      fields:[text('alt')],
+    },access),
+    ...Object.values(builders).map(build => build(access)),
+  ]
+  const bySlug = new Map(all.map(collection => [collection.slug, collection]))
+  if (bySlug.size !== collectionOrder.length || all.some(collection => !(collectionOrder as readonly string[]).includes(collection.slug))) throw new Error('Every collection must appear exactly once in collectionOrder')
+  return collectionOrder.map(slug => bySlug.get(slug)!)
+}
