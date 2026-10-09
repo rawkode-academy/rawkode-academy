@@ -17,7 +17,8 @@ export interface Env {
 	GCP_PROJECT_ID: string;
 	GCP_REGION: string;
 	GCP_TRANSCODING_JOB: string;
-	GCP_SERVICE_ACCOUNT_JSON: string;
+	// Secrets Store binding in production; a plain string in local dev and tests.
+	GCP_SERVICE_ACCOUNT_JSON: SecretsStoreSecret | string;
 }
 
 interface HandleR2EventOptions {
@@ -100,12 +101,26 @@ async function markEvent(
 		.run();
 }
 
-function getCloudRunConfig(env: Env): CloudRunConfig {
+async function readServiceAccountJson(env: Env): Promise<string> {
+	const secret = env.GCP_SERVICE_ACCOUNT_JSON;
+	return typeof secret === "string" ? secret : await secret.get();
+}
+
+async function getCloudRunConfig(env: Env): Promise<CloudRunConfig> {
+	const serviceAccountJson = await readServiceAccountJson(env);
+	let serviceAccount: CloudRunConfig["serviceAccount"];
+	try {
+		serviceAccount = JSON.parse(serviceAccountJson);
+	} catch {
+		// JSON.parse errors quote the input, and handleR2Event persists error
+		// messages to D1 and the content bucket, so never surface the cause.
+		throw new Error("GCP_SERVICE_ACCOUNT_JSON is not valid JSON");
+	}
 	return {
 		projectId: env.GCP_PROJECT_ID,
 		location: env.GCP_REGION,
 		jobName: env.GCP_TRANSCODING_JOB,
-		serviceAccount: JSON.parse(env.GCP_SERVICE_ACCOUNT_JSON),
+		serviceAccount,
 	};
 }
 
@@ -155,8 +170,9 @@ export async function handleR2Event(
 			status: "queued",
 			queuedAt: new Date().toISOString(),
 		});
+		const cloudRunConfig = await getCloudRunConfig(env);
 		const cloudRunExecution = await (options.runTranscodingJob ?? runTranscodingJob)(
-			getCloudRunConfig(env),
+			cloudRunConfig,
 			marker,
 		);
 		await markEvent(env, eventId, "triggered", { cloudRunExecution });

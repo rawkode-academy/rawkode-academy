@@ -37,7 +37,7 @@ ci: pipelines: {
 		when: {
 			pullRequest: true
 		}
-		tasks: [_t.check, _t.test, _t."deploy.dry-run"]
+		tasks: [_t.check, _t.test, _t.deployDryRun]
 	}
 }
 
@@ -79,7 +79,7 @@ tasks: {
 		]
 	}
 
-	"deploy.dry-run": schema.#Task & {
+	deployDryRun: schema.#Task & {
 		command: "sh"
 		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run deploy:dry-run"]
 		env: PATH: _taskPath
@@ -101,19 +101,19 @@ tasks: {
 		]
 	}
 
-	"queues.create": schema.#Task & {
+	queuesCreate: schema.#Task & {
 		command: "sh"
 		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun x wrangler queues create \(_queueName) && bun x wrangler queues create \(_queueName)-dlq"]
 		env: PATH: _taskPath
 	}
 
-	"notify.create": schema.#Task & {
+	notifyCreate: schema.#Task & {
 		command: "sh"
 		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun x wrangler r2 bucket notification create \(_contentBucket) --event-type object-create --queue \(_queueName) --prefix \"studio/recordings/\" --suffix \"/ready.json\""]
 		env: PATH: _taskPath
 	}
 
-	"notify.list": schema.#Task & {
+	notifyList: schema.#Task & {
 		command: "sh"
 		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun x wrangler r2 bucket notification list \(_contentBucket)"]
 		env: PATH: _taskPath

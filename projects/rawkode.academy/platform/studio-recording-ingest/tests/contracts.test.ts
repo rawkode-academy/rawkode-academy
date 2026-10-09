@@ -368,6 +368,97 @@ describe("studio recording ingest worker", () => {
 		]);
 	});
 
+	it("reads the service account from a Secrets Store binding", async () => {
+		const marker = createReadyMarker();
+		const db = createDbMock();
+		const recordings = createRecordingsMock(marker);
+		const env = createEnv(db.db, recordings.bucket);
+		const serviceAccountJson = env.GCP_SERVICE_ACCOUNT_JSON as string;
+		let secretReads = 0;
+		const secret: SecretsStoreSecret = {
+			get: async () => {
+				secretReads += 1;
+				return serviceAccountJson;
+			},
+		};
+		const configs: CloudRunConfig[] = [];
+
+		const result = await handleR2Event(
+			{ ...env, GCP_SERVICE_ACCOUNT_JSON: secret },
+			createReadyEvent(),
+			{
+				runTranscodingJob: async (config) => {
+					configs.push(config);
+					return "operations/transcode-secret";
+				},
+			},
+		);
+
+		expect(result).toMatchObject({
+			cloudRunExecution: "operations/transcode-secret",
+		});
+		expect(secretReads).toBe(1);
+		expect(configs).toHaveLength(1);
+		expect(configs[0]?.serviceAccount).toEqual(JSON.parse(serviceAccountJson));
+		expect(db.writes.at(-1)?.params[0]).toBe("triggered");
+	});
+
+	it("marks transcode status as failed when the Secrets Store read fails", async () => {
+		const marker = createReadyMarker();
+		const db = createDbMock();
+		const recordings = createRecordingsMock(marker);
+		let cloudRunCalls = 0;
+
+		await expect(
+			handleR2Event(
+				{
+					...createEnv(db.db, recordings.bucket),
+					GCP_SERVICE_ACCOUNT_JSON: {
+						get: async () => {
+							throw new Error("secret not found");
+						},
+					},
+				},
+				createReadyEvent(),
+				{
+					runTranscodingJob: async () => {
+						cloudRunCalls += 1;
+						return "operations/unreachable";
+					},
+				},
+			),
+		).rejects.toThrow("secret not found");
+
+		expect(cloudRunCalls).toBe(0);
+		expect(JSON.parse(recordings.writes.at(-1)?.value ?? "{}")).toMatchObject({
+			status: "failed",
+			error: "secret not found",
+		});
+		expect(db.writes.at(-1)?.params[0]).toBe("failed");
+	});
+
+	it("never persists service account material when the secret is malformed", async () => {
+		const marker = createReadyMarker();
+		const db = createDbMock();
+		const recordings = createRecordingsMock(marker);
+		const leaked = "-----BEGIN PRIVATE KEY-----MIIEvQIBADANBg";
+
+		await expect(
+			handleR2Event(
+				{
+					...createEnv(db.db, recordings.bucket),
+					GCP_SERVICE_ACCOUNT_JSON: { get: async () => leaked },
+				},
+				createReadyEvent(),
+				{ runTranscodingJob: async () => "operations/unreachable" },
+			),
+		).rejects.toThrow("GCP_SERVICE_ACCOUNT_JSON is not valid JSON");
+
+		const persisted = JSON.stringify([recordings.writes, db.writes]);
+		expect(persisted).not.toContain("PRIVATE KEY");
+		expect(persisted).not.toContain("MIIEvQ");
+	});
+
 	it("does not rewrite status or run Cloud Run for duplicate events", async () => {
 		const marker = createReadyMarker();
 		const event = createReadyEvent();
