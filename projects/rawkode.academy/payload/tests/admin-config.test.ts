@@ -196,7 +196,7 @@ test('provenance sits read-only in a developer-only Source tab, after editorial 
 })
 
 test('developer-only collections are hidden from staff and visible to developers', () => {
-	const developerOnly = ['pipeline-runs', 'deletion-markers', 'static-assets', 'video-review-grants', 'video-publications', 'team-invites', 'registrations']
+	const developerOnly = ['pipeline-runs', 'deletion-markers', 'static-assets', 'video-review-grants', 'review-revision-grants', 'video-publications', 'team-invites', 'registrations']
 	for (const slug of developerOnly) {
 		const hidden = bySlug.get(slug)?.admin?.hidden
 		assert.equal(typeof hidden, 'function', slug)
@@ -311,6 +311,7 @@ test('SCHEMA GUARD: the stored data shape matches the pre-change snapshot', asyn
 		'matches.label',
 		'review-comments.videoTitle',
 		'review-decisions.videoTitle',
+		'review-revision-grants.videoTitle',
 		'team-members.competitorName',
 		'video-revisions.videoTitle',
 	])

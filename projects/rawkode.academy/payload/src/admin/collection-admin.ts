@@ -259,9 +259,17 @@ export const adminPresets: Record<string, AdminPreset> = {
 	'video-review-grants': {
 		group: 'System',
 		developerOnly: true,
-		description: 'Client reviewer grants. Managed by review commands.',
+		description: 'Retired: superseded by review-revision-grants. Kept read-only until the enforce migration.',
 		useAsTitle: 'id',
 		defaultColumns: ['id', 'video', 'user', 'canApprove', 'active'],
+	},
+	'review-revision-grants': {
+		group: 'System',
+		developerOnly: true,
+		description: 'Per-revision client review access. Managed by the share and revoke review commands.',
+		useAsTitle: 'videoTitle',
+		defaultColumns: ['videoTitle', 'revision', 'user', 'canApprove', 'expiresAt', 'revokedAt'],
+		defaultSort: '-grantedAt',
 	},
 	'video-publications': {
 		group: 'System',

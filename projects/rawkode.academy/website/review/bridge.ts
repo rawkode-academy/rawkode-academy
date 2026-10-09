@@ -13,6 +13,7 @@ export const reviewRoutes: Readonly<Record<string, readonly string[]>> = {
   "/api/review/thumbnail": ["GET", "HEAD", "POST"],
   "/api/review/media": ["GET", "HEAD"],
   "/api/review/published-media": ["GET", "HEAD"],
+  "/api/review/feedback-export": ["GET"],
 };
 export const privateHeaders = {
   "cache-control": "private, no-store", "referrer-policy": "no-referrer",

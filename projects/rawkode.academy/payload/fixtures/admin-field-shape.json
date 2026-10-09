@@ -3494,6 +3494,15 @@
 				"required": true
 			},
 			{
+				"name": "deliverableChecksum",
+				"type": "text"
+			},
+			{
+				"name": "grant",
+				"type": "relationship",
+				"relationTo": "review-revision-grants"
+			},
+			{
 				"name": "grantVersion",
 				"type": "number",
 				"required": true
@@ -3516,6 +3525,76 @@
 				"name": "revision",
 				"type": "relationship",
 				"relationTo": "video-revisions",
+				"required": true
+			},
+			{
+				"name": "sourceChecksum",
+				"type": "text"
+			},
+			{
+				"name": "video",
+				"type": "relationship",
+				"relationTo": "videos",
+				"required": true
+			}
+		]
+	},
+	{
+		"slug": "review-revision-grants",
+		"timestamps": false,
+		"drafts": false,
+		"auth": false,
+		"upload": false,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "canApprove",
+				"type": "checkbox"
+			},
+			{
+				"name": "expiresAt",
+				"type": "date",
+				"required": true
+			},
+			{
+				"name": "grantedAt",
+				"type": "date",
+				"required": true
+			},
+			{
+				"name": "grantedBy",
+				"type": "relationship",
+				"relationTo": "users"
+			},
+			{
+				"name": "id",
+				"type": "text",
+				"required": true
+			},
+			{
+				"name": "revision",
+				"type": "relationship",
+				"relationTo": "video-revisions",
+				"required": true
+			},
+			{
+				"name": "revokedAt",
+				"type": "date"
+			},
+			{
+				"name": "revokedBy",
+				"type": "relationship",
+				"relationTo": "users"
+			},
+			{
+				"name": "user",
+				"type": "relationship",
+				"relationTo": "users",
+				"required": true
+			},
+			{
+				"name": "version",
+				"type": "number",
 				"required": true
 			},
 			{

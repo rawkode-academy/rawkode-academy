@@ -8,11 +8,13 @@ export const metadataSchema = z.object({
   chapters: z.array(z.object({ title: text(200), startTime: z.number().int().nonnegative() }).strict()).max(100).default([]),
 }).strict()
 const base = { videoId: positiveId, commandId: id }
+// A revision grant may last at most this long; staff re-share to extend it.
+export const maximumGrantDays = 90
 const revision = { revisionId: id, expectedReviewVersion: positiveId }
 export const commandSchema = z.discriminatedUnion('action', [
   z.object({ ...base, action: z.literal('create-revision'), mediaId: positiveId, deliverableMediaId: positiveId, durationMs: positiveId.max(86400000).optional(), metadata: metadataSchema }).strict(),
-  z.object({ ...base, action: z.literal('grant'), userId: positiveId, canApprove: z.boolean() }).strict(),
-  z.object({ ...base, action: z.literal('revoke'), userId: positiveId }).strict(),
+  z.object({ ...base, action: z.literal('share'), revisionId: id, userId: positiveId, canApprove: z.boolean(), expiresAt: z.iso.datetime().optional(), expiresInDays: z.number().int().min(1).max(maximumGrantDays).optional() }).strict(),
+  z.object({ ...base, action: z.literal('revoke'), userId: positiveId, revisionId: id.optional() }).strict(),
   z.object({ ...base, ...revision, action: z.literal('edit'), metadata: metadataSchema }).strict(),
   z.object({ ...base, action: z.literal('comment'), revisionId: id, startMs: z.number().int().nonnegative(), endMs: z.number().int().nonnegative().optional(), body: text(8000) }).strict(),
   z.object({ ...base, action: z.literal('resolve-comment'), commentId: id, resolved: z.boolean() }).strict(),

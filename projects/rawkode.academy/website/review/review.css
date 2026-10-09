@@ -56,6 +56,11 @@ video { width: 100%; aspect-ratio: 16/9; background: var(--terminal-bg); border-
 .review-banner,.review-error { background: var(--surface-card-muted); border-left: 3px solid var(--editorial-spruce); padding: 1rem; margin-block: 1rem; font-size: .9rem; }
 .review-error { border-left-color: var(--editorial-rust); }
 .decision-history { border-top: 1px solid var(--surface-border); padding-top: 1rem; font-size: .85rem; }
+.review-access { border-top: 1px solid var(--surface-border); padding-top: 1rem; display: grid; gap: .75rem; }
+.review-grants li { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; font-size: .85rem; padding-block: .35rem; }
+.review-grants li > span:first-child { flex: 1 1 8rem; overflow-wrap: anywhere; }
+.review-checkbox { display: flex; align-items: center; gap: .5rem; font-weight: 500; }
+.review-checkbox input { width: auto; min-height: auto; }
 .review-empty { padding-block: 4rem; }
 .review-footer { border-top: 1px solid var(--surface-border); padding: 1.5rem 0; font-size: .8rem; color: var(--editorial-ink-mute); }
 @media (max-width: 1000px) { .review-workspace { grid-template-columns: 12rem minmax(0, 1fr); gap: 1.5rem; } .review-feedback-grid { grid-template-columns: 1fr; } .review-title { flex-direction: column; } }

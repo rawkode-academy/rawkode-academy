@@ -1,3 +1,4 @@
+import { ReviewAccess } from './access'
 import type { ReviewStore } from './store'
 
 // Read-only projections of the review tables for staff surfaces (the staff
@@ -46,12 +47,13 @@ export function currentReviewStates(store: ReviewStore): Promise<ReviewStateRow[
 
 export function listReviewQueue(store: ReviewStore, { limit = 50 }: { limit?: number } = {}): Promise<ReviewQueueRow[]> {
 	const bounded = Math.max(1, Math.min(200, Math.trunc(limit)))
+	const reviewers = new ReviewAccess(store).activeReviewersSubquery('s.video_id')
 	return store.all<ReviewQueueRow>(
 		`SELECT s.video_id AS videoId,v.title AS videoTitle,v.slug AS videoSlug,
 		   r.id AS revisionId,json_extract(r.metadata,'$.title') AS revisionTitle,r.state,
 		   r.review_version AS reviewVersion,r.created_at AS createdAt,
 		   (SELECT COUNT(*) FROM review_comments c WHERE c.revision_id=r.id AND c.resolved=0) AS openComments,
-		   (SELECT COUNT(*) FROM video_review_grants g WHERE g.video_id=s.video_id AND g.active=1) AS activeReviewers,
+		   ${reviewers.sql} AS activeReviewers,
 		   (SELECT d.decision FROM review_decisions d WHERE d.video_id=s.video_id ORDER BY d.created_at DESC,d.id DESC LIMIT 1) AS latestDecision,
 		   (SELECT d.created_at FROM review_decisions d WHERE d.video_id=s.video_id ORDER BY d.created_at DESC,d.id DESC LIMIT 1) AS latestDecisionAt
 		 FROM video_review_state s
@@ -59,6 +61,7 @@ export function listReviewQueue(store: ReviewStore, { limit = 50 }: { limit?: nu
 		 LEFT JOIN videos v ON v.id=s.video_id
 		 ORDER BY CASE WHEN r.state='published' THEN 1 ELSE 0 END,COALESCE(r.created_at,'') ASC,s.video_id ASC
 		 LIMIT ?`,
+		...reviewers.params,
 		bounded,
 	)
 }
@@ -114,13 +117,13 @@ export async function reviewHistory(store: ReviewStore, videoId: number): Promis
 			 FROM review_decisions WHERE video_id=? ORDER BY created_at DESC,id DESC LIMIT 5`,
 			videoId,
 		),
-		store.one<{ total: number }>('SELECT COUNT(*) AS total FROM video_review_grants WHERE video_id=? AND active=1', videoId),
+		new ReviewAccess(store).activeReviewerCount(videoId),
 	])
 	return {
 		currentRevisionId: state.current_revision,
 		revisions,
 		openComments: Number(comments?.total ?? 0),
 		decisions,
-		activeReviewers: Number(reviewers?.total ?? 0),
+		activeReviewers: reviewers,
 	}
 }

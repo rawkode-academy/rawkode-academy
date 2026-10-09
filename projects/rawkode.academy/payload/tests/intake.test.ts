@@ -112,7 +112,7 @@ test('staff intake binds immutable assets, creates one revision and publishes on
   const response = await mediaResponse(new Request(origin, { headers: { range: 'bytes=2-5' } }), h.r2.bucket, asset.object_key, false, { etag: asset.object_etag, bytes: asset.bytes, contentType: asset.content_type })
   assert.equal(response.status, 206); assert.equal(await response.text(), 'code')
   const cmd = (action: string, extra: object) => ({ action, videoId: 10, commandId: crypto.randomUUID(), ...extra })
-  await h.review.execute(staff, cmd('grant', { userId: 2, canApprove: true }))
+  await h.review.execute(staff, cmd('share', { revisionId: result.revision.revisionId, userId: 2, canApprove: true, expiresAt: new Date(Date.now() + 86400000).toISOString() }))
   const decision = await h.review.execute(customer, cmd('decide', { revisionId: row.id, expectedReviewVersion: 1, decision: 'approved' }))
   await h.review.execute(staff, cmd('publish', { revisionId: row.id, expectedReviewVersion: 1, decisionId: decision.decisionId }))
   assert.equal(h.sqlite.prepare('SELECT object_key FROM review_publication_events').get()?.object_key, asset.object_key)

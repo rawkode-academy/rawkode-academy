@@ -1,15 +1,12 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
-import { DatabaseSync } from 'node:sqlite'
 import test, { type TestContext } from 'node:test'
-import { sql, type MigrateUpArgs } from '@payloadcms/db-d1-sqlite'
 import type { Payload } from 'payload'
 import { graphql } from 'graphql'
 import { createCompatibilitySchema, createCompatibilityContext } from '../src/compat'
 import { migrations } from '../src/migrations'
 import { ReviewService } from '../src/review/service'
-import { ReviewStore } from '../src/review/store'
-import { actorFromUser, type ReviewActor } from '../src/review/contracts'
+import { actorFromUser } from '../src/review/contracts'
 import { reviewCollections } from '../src/review/collections'
 import { noDevelopers } from '../src/admin/access'
 import { createReviewHandlers } from '../src/review/http'
@@ -19,81 +16,9 @@ import { Catalogue } from '../src/catalogue'
 import { authConfig } from '../src/auth/config'
 import { publishedMediaUrl } from '../src/review/host'
 
-const staff: ReviewActor = { id: 1, collection: 'users', role: 'staff' }
-const client: ReviewActor = { id: 2, collection: 'users', role: 'customer' }
-const stranger: ReviewActor = { id: 3, collection: 'users', role: 'customer' }
-const metadata = { title: 'Reviewed cut', description: 'Approved public summary', chapters: [{ title: 'Start', startTime: 0 }] }
-const command = (action: string, data = {}) => ({ action, videoId: 10, commandId: crypto.randomUUID(), ...data })
+import { client, command, harness as reviewHarness, metadata, staff, stranger } from './helpers/review-harness'
 
-async function harness(t: TestContext, publicMediaUrl = (videoId: number, publicationId: string) => `https://preview.example/api/review/published-media?videoId=${videoId}&publicationId=${publicationId}`) {
-  const sqlite = new DatabaseSync(':memory:')
-  t.after(() => sqlite.close())
-  sqlite.exec('PRAGMA foreign_keys=ON')
-  const migrationArgs = { db: { run(statement: ReturnType<typeof sql>) {
-    const query = statement.toQuery({ casing: undefined as never, escapeName: value => `"${value}"`, escapeParam: () => '?', escapeString: value => `'${value.replaceAll("'", "''")}'` })
-    assert.equal(query.params.length, 0)
-    sqlite.exec(query.sql)
-  } } } as unknown as MigrateUpArgs
-  for (const migration of migrations) {
-    sqlite.exec('BEGIN; PRAGMA defer_foreign_keys=ON')
-    await migration.up(migrationArgs)
-    sqlite.exec('COMMIT')
-  }
-  sqlite.exec(`INSERT INTO users(id,email,role) VALUES(1,'staff@example.invalid','staff'),(2,'client@example.invalid','customer'),(3,'stranger@example.invalid','customer');
-    INSERT INTO videos(id,legacy_id,legacy_type,slug,title,_status) VALUES(10,'stable-video','Video','stable-video','Old title','draft'),(11,'other-video','Video','other-video','Other','draft');
-    INSERT INTO media(id,filename) VALUES(20,'original.mp4'),(21,'deliverable.mp4'),(22,'second-cut.mp4');
-    INSERT INTO _videos_v(id,parent_id,version_legacy_id,version__status,latest) VALUES(30,10,'stable-video','draft',1);
-    INSERT INTO videos_terms(id,_order,_parent_id,value) VALUES('term',1,10,'old');
-    INSERT INTO _videos_v_version_terms(id,_order,_parent_id,value) VALUES(31,1,30,'old');
-    INSERT INTO videos_rels(id,parent_id,path) VALUES(32,10,'guests');
-    INSERT INTO _videos_v_rels(id,parent_id,path) VALUES(33,30,'version.guests');
-    INSERT INTO videos_what_you_will_learn(id,_order,_parent_id,value) VALUES('learn',1,10,'old');
-    INSERT INTO _videos_v_version_what_you_will_learn(id,_order,_parent_id,value) VALUES(34,1,30,'old');`)
-  let failAfter = -1
-  class Prepared {
-    values: (string | number | null)[] = []
-    constructor(readonly query: string) {}
-    bind(...values: (string | number | null)[]) { this.values = values; return this }
-    async first() { return sqlite.prepare(this.query).get(...this.values) ?? null }
-    async all() { return { results: sqlite.prepare(this.query).all(...this.values) } }
-  }
-  const db = {
-    prepare: (query: string) => new Prepared(query),
-    async batch(statements: Prepared[]) {
-      sqlite.exec('BEGIN')
-      try {
-        for (const [index, statement] of statements.entries()) {
-          sqlite.prepare(statement.query).run(...statement.values)
-          if (index === failAfter) throw new Error('Injected database failure')
-        }
-        sqlite.exec('COMMIT'); return []
-      } catch (error) { sqlite.exec('ROLLBACK'); throw error }
-    },
-  } as unknown as D1Database
-  const store = new ReviewStore(db)
-  const sources = new Map([[20, 'a'.repeat(64)], [21, 'b'.repeat(64)], [22, 'c'.repeat(64)]])
-  let sourceWait: (() => Promise<void>) | undefined
-  const service = new ReviewService(store, {
-    async video(id) {
-      const row = sqlite.prepare('SELECT * FROM videos WHERE id=?').get(id)
-      if (!row) throw new Error('missing video')
-      return { id, legacyId: String(row.legacy_id), slug: 'stable-video', type: 'recorded', title: 'Old title', streamUrl: 'https://wrong.invalid/old.m3u8', sourceData: { private: true }, sourceOrder: 0 }
-    },
-    async source(id) { await sourceWait?.(); return { checksum: sources.get(id)! } },
-    async deliverable(id) { return { checksum: sources.get(id)!, durationMs: 60000, contentType: 'video/mp4' } },
-    async stageRelease(videoId, publicationId, mediaId, checksum) { return { key: `review-releases/${videoId}/${publicationId}/${checksum}.mp4`, etag: 'release-etag', checksum: sources.get(mediaId)!, bytes: 10, contentType: 'video/mp4' } },
-    publicMediaUrl,
-  })
-  async function prepare() {
-    const revision = await service.execute(staff, command('create-revision', { mediaId: 20, deliverableMediaId: 21, durationMs: 60000, metadata }))
-    await service.execute(staff, command('grant', { userId: 2, canApprove: true }))
-    return revision as { revisionId: string; reviewVersion: number }
-  }
-  async function approve(revision: { revisionId: string; reviewVersion: number }) {
-    return service.execute(client, command('decide', { revisionId: revision.revisionId, expectedReviewVersion: revision.reviewVersion, decision: 'approved' }))
-  }
-  return { sqlite, migrationArgs, db, store, service, prepare, approve, sources, fail: (index: number) => { failAfter = index }, pauseSource: (fn?: () => Promise<void>) => { sourceWait = fn } }
-}
+const harness = (t: TestContext, publicMediaUrl?: (videoId: number, publicationId: string) => string) => reviewHarness(t, { publicMediaUrl })
 
 test('client review, immutable cuts, explicit approval and separate atomic staff publication', async t => {
   const h = await harness(t), revision = await h.prepare()
@@ -133,7 +58,10 @@ test('client review, immutable cuts, explicit approval and separate atomic staff
   assert.equal(JSON.stringify(read).includes('original.mp4'), false)
   const next = await h.service.execute(staff, command('create-revision', { mediaId: 20, deliverableMediaId: 22, durationMs: 60000, metadata: { ...metadata, title: 'Next cut' } }))
   assert.notEqual(next.revisionId, revision.revisionId)
-  assert.equal((await h.service.read(10, client)).comments.length, 1)
+  const afterNext = await h.service.read(10, client)
+  assert.equal(afterNext.comments.length, 1)
+  assert.deepEqual(afterNext.revisions.map(item => item.id), [revision.revisionId], 'a new cut stays hidden until staff share it')
+  assert.equal(afterNext.currentRevisionId, revision.revisionId, 'the client still sees their newest shared cut as current')
   assert.equal(JSON.parse(String(h.sqlite.prepare('SELECT document FROM video_publications').get()?.document)).title, metadata.title)
   assert.deepEqual(h.sqlite.prepare('PRAGMA foreign_key_check').all(), [])
 })
@@ -147,10 +75,12 @@ test('approval freezes revisions and grant changes cannot resurrect an old decis
   await assert.rejects(h.service.execute(client, command('decide', { revisionId: revision.revisionId, expectedReviewVersion: 2, decision: 'changes-requested' })), { status: 409 })
   await h.service.execute(staff, command('revoke', { userId: 2 }))
   await assert.rejects(h.service.read(10, client), { status: 404 })
-  await h.service.execute(staff, command('grant', { userId: 2, canApprove: true }))
+  await h.share(revision.revisionId)
   await assert.rejects(h.service.execute(staff, command('publish', { revisionId: revision.revisionId, expectedReviewVersion: 2, decisionId: approved.decisionId })), { status: 409 })
   assert.equal((await h.service.read(10, client)).revisions[0].state, 'approved')
   const next = await h.service.execute(staff, command('create-revision', { mediaId: 20, deliverableMediaId: 22, durationMs: 60000, metadata }))
+  await assert.rejects(h.service.execute(client, command('decide', { revisionId: next.revisionId, expectedReviewVersion: 1, decision: 'changes-requested' })), { status: 404 })
+  await h.share(next.revisionId)
   await h.service.execute(client, command('decide', { revisionId: next.revisionId, expectedReviewVersion: 1, decision: 'changes-requested', note: 'Fix the example' }))
   assert.equal((await h.service.revision(10, next.revisionId, client)).state, 'changes-requested')
 })
@@ -231,7 +161,7 @@ test('managed video, versions, relationships and arrays resist legacy writes and
 
 test('migration matches snapshot indexes, empty downgrade works, and legacy pipeline cannot enroll', async t => {
   const h = await harness(t)
-  const snapshot = JSON.parse(await readFile(new URL('../src/migrations/20261005_120000_video_review.json', import.meta.url), 'utf8')) as {
+  const snapshot = JSON.parse(await readFile(new URL('../src/migrations/20261009_130000_review_revision_grants.json', import.meta.url), 'utf8')) as {
     tables: Record<string, { indexes: Record<string, { name: string; columns: string[]; isUnique: boolean }> }>
   }
   for (const collection of reviewCollections(noDevelopers)) {
@@ -247,6 +177,8 @@ test('migration matches snapshot indexes, empty downgrade works, and legacy pipe
   assert.equal(h.sqlite.prepare('SELECT count(*) AS n FROM video_review_state').get()?.n, 0)
   h.sqlite.exec("INSERT INTO pipeline_runs(id,key,video_id,media_id,state) VALUES(1,'legacy',10,20,'registered')")
   await assert.rejects(h.prepare(), { status: 409 })
+  // Roll back in reverse order: the revision grant expand first.
+  await migrations.find(m => m.name === '20261009_130000_review_revision_grants')!.down(h.migrationArgs)
   await migrations.find(m => m.name === '20261005_120000_video_review')!.down(h.migrationArgs)
   assert.equal(h.sqlite.prepare('SELECT count(*) AS n FROM videos').get()?.n, 2)
 })
@@ -282,11 +214,12 @@ test('Payload review collections deny generic mutations and customer raw reads',
 
 test('assigned clients resolve only their own comments, staff resolve any, revoked clients resolve none', async t => {
   const h = await harness(t), revision = await h.prepare()
-  await h.service.execute(staff, command('grant', { userId: 3, canApprove: false }))
+  await h.share(revision.revisionId, 3, false)
   const own = await h.service.execute(client, command('comment', { revisionId: revision.revisionId, startMs: 0, body: 'Client comment' }))
   const other = await h.service.execute(stranger, command('comment', { revisionId: revision.revisionId, startMs: 0, body: 'Other client comment' }))
   await h.service.execute(client, command('resolve-comment', { commentId: own.commentId, resolved: true }))
-  await assert.rejects(h.service.execute(client, command('resolve-comment', { commentId: other.commentId, resolved: true })), { status: 403 })
+  // Another customer's comment is invisible, so it is reported exactly like a missing one.
+  await assert.rejects(h.service.execute(client, command('resolve-comment', { commentId: other.commentId, resolved: true })), { status: 404, message: 'Comment not found' })
   await h.service.execute(staff, command('resolve-comment', { commentId: other.commentId, resolved: true }))
   await h.service.execute(staff, command('revoke', { userId: 2 }))
   await assert.rejects(h.service.execute(client, command('resolve-comment', { commentId: own.commentId, resolved: false })), { status: 404 })
@@ -366,9 +299,9 @@ test('retry records the ETag of verified bytes even if the release changes immed
 
 
 test('review list exposes only active customer grants and safe summary fields', async t => {
-  const h = await harness(t); await h.prepare()
-  await h.service.execute(staff, command('create-revision', { videoId: 11, mediaId: 20, deliverableMediaId: 21, metadata: { ...metadata, title: 'Other customer secret' } }))
-  await h.service.execute(staff, command('grant', { videoId: 11, userId: 3, canApprove: true }))
+  const h = await harness(t); const first = await h.prepare()
+  const other = await h.service.execute(staff, command('create-revision', { videoId: 11, mediaId: 20, deliverableMediaId: 21, metadata: { ...metadata, title: 'Other customer secret' } }))
+  await h.share(other.revisionId, 3, true, 1, 11)
   assert.deepEqual((await h.service.list(client)).items.map(item => item.videoId), [10])
   assert.deepEqual((await h.service.list(stranger)).items.map(item => item.videoId), [11])
   assert.deepEqual((await h.service.list(staff)).items.map(item => item.videoId), [10, 11])
@@ -380,20 +313,25 @@ test('review list exposes only active customer grants and safe summary fields', 
   assert.deepEqual(Object.keys(listing.items[0]).sort(), ['reviewVersion', 'revisionId', 'state', 'title', 'videoId'])
   assert.equal(JSON.stringify(listing).includes('Other customer secret'), false)
   assert.equal((await h.service.read(10, client)).canApprove, true)
-  await h.service.execute(staff, command('grant', { userId: 2, canApprove: false }))
-  assert.equal((await h.service.read(10, client)).canApprove, false)
+  const version = () => h.sqlite.prepare('SELECT version FROM review_revision_grants WHERE revision_id=? AND user_id=2').get(first.revisionId)?.version
+  assert.equal(version(), 1)
+  await h.share(first.revisionId, 2, false)
+  assert.equal(version(), 2, 'changing approval rights bumps the grant version')
+  const read = await h.service.read(10, client)
+  assert.equal(read.canApprove, false); assert.equal(read.revisions[0].canApprove, false)
   await h.service.execute(staff, command('revoke', { userId: 2 }))
   assert.deepEqual((await h.service.list(client)).items, [])
   assert.equal((await handlers.GET(new Request('https://preview.rawkode.academy/api/review?videoId=10'))).status, 404)
   for (const cursor of ['-1', '1.2', 'x', '9007199254740992']) assert.equal((await handlers.GET(new Request(`https://preview.rawkode.academy/api/review?after=${cursor}`))).status, 400)
+  await assert.rejects(h.service.execute(staff, command('grant', { userId: 2, canApprove: true })), { status: 400 }, 'the video-wide grant command is gone')
 })
 
 test('review list paginates by stable video ID without skipping customer grants', async t => {
   const h = await harness(t)
   for (let id = 100; id < 151; id++) {
     h.sqlite.prepare('INSERT INTO videos(id,legacy_id,legacy_type,slug,title,_status) VALUES(?,?,?,?,?,?)').run(id, `video-${id}`, 'Video', `video-${id}`, 'Review', 'draft')
-    await h.service.execute(staff, command('create-revision', { videoId: id, mediaId: 20, deliverableMediaId: 21, metadata }))
-    await h.service.execute(staff, command('grant', { videoId: id, userId: 2, canApprove: false }))
+    const revision = await h.service.execute(staff, command('create-revision', { videoId: id, mediaId: 20, deliverableMediaId: 21, metadata }))
+    await h.share(revision.revisionId, 2, false, 1, id)
   }
   const first = await h.service.list(client)
   assert.equal(first.items.length, 50); assert.equal(first.nextCursor, 149)
@@ -409,11 +347,12 @@ test('thumbnail snapshots remain video-owned, private and unchanged on older rev
   }
   await assert.rejects(h.service.execute(staff, command('create-revision', { mediaId: 20, deliverableMediaId: 21, metadata: { ...metadata, thumbnailId: 99 } })), /another video/)
   const first = await h.service.execute(staff, command('create-revision', { mediaId: 20, deliverableMediaId: 21, metadata: { ...metadata, thumbnailId: 30 } }))
-  await h.service.execute(staff, command('grant', { userId: 2, canApprove: true }))
+  await h.share(first.revisionId)
   await assert.rejects(h.service.execute(staff, command('edit', { revisionId: first.revisionId, expectedReviewVersion: 1, metadata: { ...metadata, thumbnailId: 31 } })), { status: 409 })
   await assert.rejects(h.service.execute(staff, command('edit', { revisionId: first.revisionId, expectedReviewVersion: 1, metadata })), { status: 409 })
   await h.service.execute(staff, command('edit', { revisionId: first.revisionId, expectedReviewVersion: 1, metadata: { ...metadata, title: 'Edited title', thumbnailId: 30 } }))
   const second = await h.service.execute(staff, command('create-revision', { mediaId: 20, deliverableMediaId: 22, metadata: { ...metadata, thumbnailId: 31 } }))
+  await h.share(second.revisionId)
   const result = await h.service.read(10, client)
   assert.deepEqual(result.revisions.map(item => item.metadata.thumbnailId), [30, 31])
   assert.deepEqual(result.revisions.map(item => item.thumbnailUrl), [first, second].map(item => `/api/review/thumbnail?videoId=10&revisionId=${item.revisionId}`))

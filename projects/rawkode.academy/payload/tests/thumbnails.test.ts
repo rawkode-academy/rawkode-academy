@@ -5,6 +5,7 @@ import { deflateSync } from 'node:zlib'
 import test, { type TestContext } from 'node:test'
 import { assertThumbnail, createThumbnailHandlers, maximumThumbnailBytes } from '../src/review/thumbnails'
 import { reviewThumbnailSchema } from '../src/migrations/20261007_140000_review_thumbnails'
+import { revisionGrantSchema } from '../src/migrations/20261009_130000_review_revision_grants'
 import { ReviewStore } from '../src/review/store'
 import { ReviewService } from '../src/review/service'
 import { ReviewError, type ReviewActor } from '../src/review/contracts'
@@ -31,16 +32,18 @@ function request(body: Buffer = bytes, type = 'image/png', extra: Record<string,
   return new Request(`${origin}/api/review/thumbnail?videoId=10`, { method: 'POST', headers: { origin, 'content-type': type, ...extra }, body: new Uint8Array(body) })
 }
 function harness(t: TestContext) {
+  const fixed = new Date()
   const sqlite = new DatabaseSync(':memory:')
   t.after(() => sqlite.close())
-  sqlite.exec("PRAGMA foreign_keys=ON; CREATE TABLE videos(id INTEGER PRIMARY KEY); INSERT INTO videos VALUES(10),(11); CREATE TABLE media(id INTEGER PRIMARY KEY); CREATE TABLE video_review_grants(video_id INTEGER,user_id INTEGER,active INTEGER); CREATE TABLE video_revisions(id TEXT PRIMARY KEY,video_id INTEGER,metadata TEXT)")
-  for (const query of reviewThumbnailSchema) sqlite.exec(query)
+  sqlite.exec("PRAGMA foreign_keys=ON; CREATE TABLE videos(id INTEGER PRIMARY KEY); INSERT INTO videos VALUES(10),(11); CREATE TABLE media(id INTEGER PRIMARY KEY); CREATE TABLE users(id INTEGER PRIMARY KEY, role TEXT); INSERT INTO users VALUES(1,'staff'),(2,'customer'); CREATE TABLE video_revisions(id TEXT PRIMARY KEY, video_id INTEGER, metadata TEXT, created_at TEXT)")
+  for (const query of [...reviewThumbnailSchema, ...revisionGrantSchema]) sqlite.exec(query)
   class Prepared {
     values: (number | string | null)[] = []
     constructor(readonly query: string) {}
     bind(...values: (number | string | null)[]) { this.values = values; return this }
     async first() { return sqlite.prepare(this.query).get(...this.values) ?? null }
     async run() { return sqlite.prepare(this.query).run(...this.values) }
+    async all() { return { results: sqlite.prepare(this.query).all(...this.values) } }
   }
   const store = new ReviewStore({ prepare: (query: string) => new Prepared(query) } as unknown as D1Database)
   const objects = new Map<string, { bytes: Buffer; etag: string; type: string }>()
@@ -82,12 +85,16 @@ function harness(t: TestContext) {
       if (!eligible || ![10,11].includes(id)) throw new ReviewError(409, 'Ineligible video')
       return { id, legacyId: String(id) }
     },
+    now: () => fixed,
   } as never)
   const handler = (actor = staff) => createThumbnailHandlers(async () => ({ payload, store, service, actor, origin, bucket }) as never)
   function revision(id: string, videoId: number, thumbnailId?: number) {
-    sqlite.prepare('INSERT INTO video_revisions VALUES(?,?,?)').run(id, videoId, JSON.stringify(thumbnailId ? { thumbnailId } : {}))
+    sqlite.prepare('INSERT INTO video_revisions VALUES(?,?,?,?)').run(id, videoId, JSON.stringify(thumbnailId ? { thumbnailId } : {}), fixed.toISOString())
   }
-  return { sqlite, store, objects, creates, handler, revision, heads: () => heads, ineligible: () => { eligible = false }, corrupt: () => { corruptStorage = true }, concurrent: () => { concurrent = true } }
+  function share(revisionId: string, videoId: number) {
+    sqlite.prepare('INSERT INTO review_revision_grants(id,video_id,revision_id,user_id,can_approve,version,granted_at,expires_at) VALUES(?,?,?,2,1,1,?,?)').run(`grant-${revisionId}`, videoId, revisionId, fixed.toISOString(), new Date(fixed.getTime() + 86400000).toISOString())
+  }
+  return { sqlite, share, store, objects, creates, handler, revision, heads: () => heads, ineligible: () => { eligible = false }, corrupt: () => { corruptStorage = true }, concurrent: () => { concurrent = true } }
 }
 
 test('staff thumbnail upload fixes access, verifies bytes and reuses identical upload', async t => {
@@ -150,7 +157,10 @@ test('customers retrieve only the selected authorized revision thumbnail, includ
   const previousHeads = h.heads()
   assert.equal((await read('new')).status, 404)
   assert.equal(h.heads(), previousHeads)
-  h.sqlite.exec('INSERT INTO video_review_grants VALUES(10,2,1),(11,2,1)')
+  h.share('old', 10)
+  h.share('wrong-video', 11)
+  assert.equal((await read('new')).status, 404, 'a grant on another revision does not expose this thumbnail')
+  h.share('new', 10)
   assert.equal((await read('old')).status, 404)
   assert.equal((await read('wrong-video')).status, 404)
   assert.equal((await read('wrong-video', 11)).status, 404)
@@ -163,7 +173,7 @@ test('customers retrieve only the selected authorized revision thumbnail, includ
   const head = await read('new', 10, 'HEAD')
   assert.equal(head.status, 200)
   assert.equal((await head.arrayBuffer()).byteLength, 0)
-  h.sqlite.exec('UPDATE video_review_grants SET active=0 WHERE video_id=10')
+  h.sqlite.exec(`UPDATE review_revision_grants SET revoked_at='${new Date().toISOString()}',version=version+1 WHERE video_id=10`)
   assert.equal((await read('new')).status, 404)
 })
 

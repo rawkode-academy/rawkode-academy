@@ -57,6 +57,19 @@ describe("same-origin preview bridge", () => {
     expect(fetch.mock.calls[2]![0].headers.get("origin")).toBe(origin);
     expect(await fetch.mock.calls[2]![0].json()).toEqual({ title: "Datum", description: "Review" });
   });
+  it("forwards the feedback export download privately and refuses other methods", async () => {
+    const { env, fetch } = setup(new Response("\uFEFFcomment_id\r\n", { headers: { "content-type": "text/csv; charset=utf-8", "content-disposition": 'attachment; filename="review-10-r-feedback.csv"', "cache-control": "public, max-age=60" } }));
+    const response = await reviewBridge(new Request(`${origin}/api/review/feedback-export?videoId=10&revisionId=r`, { headers: { cookie: "__Host-poc-oidc-session=opaque; payload-token=admin" } }), env);
+    expect(response.status).toBe(200);
+    expect(fetch.mock.calls[0]![0].headers.get("cookie")).toBe("__Host-poc-oidc-session=opaque");
+    expect(response.headers.get("content-disposition")).toBe('attachment; filename="review-10-r-feedback.csv"');
+    expect(response.headers.get("content-type")).toBe("text/csv; charset=utf-8");
+    expect(response.headers.get("cache-control")).toBe("private, no-store");
+    expect(response.headers.get("x-robots-tag")).toBe("noindex, nofollow");
+    const post = await reviewBridge(new Request(`${origin}/api/review/feedback-export?videoId=10&revisionId=r`, { method: "POST", headers: { origin, "content-type": "application/json" }, body: "{}" }), env);
+    expect(post.status).toBe(405);
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
   it("forwards private thumbnail bytes and revision-bound delivery", async () => {
     const { env, fetch } = setup();
     await reviewBridge(new Request(`${origin}/api/review/thumbnail?videoId=42`, { method: "POST", headers: { origin, "content-type": "image/png", "x-upload-length": "5" }, body: "image" }), env);
