@@ -34,5 +34,16 @@ try{
   await page.reload()
   await expect(page.locator('#field-title')).toHaveValue('Edited through the Workers admin')
   await page.screenshot({path:'evidence/admin-edit-view.png',fullPage:true})
-  writeFileSync('evidence/admin-test.json',JSON.stringify({at:new Date().toISOString(),runtime:'local workerd',login:true,editViewRendered:true,createDraft:true,editDraft:true,reloadPersistence:true},null,2)+'\n')
+  // Editorial times panel and the review queue with its broadcast calendar.
+  await page.locator('.tabs-field__tab-button',{hasText:'Times'}).click()
+  await expect(page.getByRole('heading',{name:'Broadcast and publication times'})).toBeVisible()
+  const queue=await page.goto(base+'/admin/review')
+  assert.equal(queue?.status(),200)
+  await expect(page.getByRole('heading',{name:'Review queue',level:1})).toBeVisible()
+  await expect(page.getByRole('heading',{name:'Broadcast calendar'})).toBeVisible()
+  const anonymous=await browser.newPage()
+  const refused=await anonymous.request.get(base+'/api/review/queue')
+  assert.ok([401,403,404].includes(refused.status()),`anonymous queue read answered ${refused.status()}`)
+  await anonymous.close()
+  writeFileSync('evidence/admin-test.json',JSON.stringify({at:new Date().toISOString(),runtime:'local workerd',login:true,editViewRendered:true,createDraft:true,editDraft:true,reloadPersistence:true,timesPanel:true,reviewQueue:true},null,2)+'\n')
 }finally{await browser.close()}

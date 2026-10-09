@@ -2,6 +2,7 @@ import { ReviewError, type ReviewActor } from './contracts'
 import type { Payload, Where } from 'payload'
 import type { ReviewStore } from './store'
 import { currentReviewStates } from './queue'
+import { isSystemIdentity } from '../machine-auth'
 
 const privateHeaders = { 'cache-control': 'private, no-store', 'referrer-policy': 'no-referrer' }
 type Runtime = { payload: Payload; store: ReviewStore; actor: ReviewActor; origin: string }
@@ -143,6 +144,28 @@ export function createStaffReviewerHandlers(runtime: (request: Request) => Promi
           profileEmail: typeof doc.profileEmail === 'string' ? doc.profileEmail : '',
         }))
         return Response.json({ reviewers }, { headers: privateHeaders })
+      } catch (error) { return failure(error) }
+    },
+  }
+}
+
+// Staff directory for the queue's assign picker. System principals (the Studio
+// handoff user) hold role staff so review commands accept them, but they are never
+// people and never assignable.
+export function createStaffDirectoryHandlers(runtime: (request: Request) => Promise<Runtime>) {
+  return {
+    async GET(request: Request) {
+      try {
+        const { payload, actor } = await runtime(request)
+        staff(actor)
+        const result = await payload.find({
+          collection: 'users', depth: 0, limit: 200, sort: 'name',
+          where: { role: { equals: 'staff' } }, overrideAccess: false, user: actor,
+        })
+        const people = result.docs
+          .filter(doc => !isSystemIdentity((doc as { identityKey?: unknown }).identityKey))
+          .map(doc => ({ id: Number(doc.id), name: typeof doc.name === 'string' && doc.name.trim() ? doc.name : `Staff ${doc.id}` }))
+        return Response.json({ staff: people }, { headers: privateHeaders })
       } catch (error) { return failure(error) }
     },
   }

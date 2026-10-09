@@ -26,6 +26,7 @@ export const adminComponents = {
 // Field-level components registered on collections (src/collections.ts).
 export const fieldComponents = {
 	reviewPanel: component('fields/ReviewPanel#ReviewPanel'),
+	editorialTimes: component('fields/EditorialTimes#EditorialTimesField'),
 	reviewFreezeNotice: component('fields/ReviewFreeze#ReviewFreezeNotice'),
 	videoPublishControl: component('fields/ReviewFreeze#VideoPublishControl'),
 	videoSaveDraftControl: component('fields/ReviewFreeze#VideoSaveDraftControl'),

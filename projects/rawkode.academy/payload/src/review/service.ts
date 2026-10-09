@@ -1,6 +1,8 @@
 import { commandSchema, maximumGrantDays, ReviewError, validateMetadata, type ReviewActor, type ReviewMetadata } from './contracts'
 import { ReviewAccess, type Revision } from './access'
 import { ReviewStore, type ReviewState, type Statement } from './store'
+import { effectiveTimes } from '../editorial/effective'
+import { humanUserSql } from '../machine-auth'
 
 type Decision = { id: string; author_id: number; revision_id: string; review_version: number; grant_version: number; decision: string; deliverable_checksum: string | null; source_checksum: string | null; grant_id: string | null }
 type PublicVideo = Record<string, unknown> & { id: number; legacyId: string }
@@ -26,14 +28,16 @@ async function hash(value: unknown) {
 function staff(actor: ReviewActor) {
   if (actor.role !== 'staff') throw new ReviewError(403, 'Staff access required')
 }
-function publicProjection(video: PublicVideo, revision: Revision, at: string, mediaUrl: string) {
+// publishedAt is the first public release (src/editorial/effective.ts), stable across
+// republishes; review_publication_events keeps each release's own time.
+function publicProjection(video: PublicVideo, revision: Revision, publishedAt: string, mediaUrl: string) {
   const document: Record<string, unknown> = {}
   for (const field of ['id', 'legacyId', 'legacyType', 'slug', 'sourceOrder', 'subtitle', 'tagline', 'type', 'category', 'technologies', 'guests', 'episode', 'show', 'terms', 'thumbnailUrl']) {
     if (video[field] !== undefined) document[field] = video[field]
   }
   const metadata: ReviewMetadata = JSON.parse(revision.metadata)
   return { ...document, title: metadata.title, description: metadata.description, duration: Math.ceil(revision.duration_ms / 1000),
-    streamUrl: mediaUrl, publishedAt: at, _status: 'published', tombstone: false,
+    streamUrl: mediaUrl, publishedAt, _status: 'published', tombstone: false,
     reviewChapters: metadata.chapters.map((chapter, index) => ({ ...chapter, legacyId: `${video.legacyId}-${revision.id}-${index}` })),
   }
 }
@@ -141,6 +145,16 @@ export class ReviewService {
       mutations.push(sql('INSERT INTO video_revisions(id,video_id,media_id,checksum,deliverable_media_id,deliverable_checksum,duration_ms,review_version,state,metadata,created_by_id,created_at) VALUES(?,?,?,?,?,?,?,1,?,?,?,?)', resultId, input.videoId, input.mediaId, source.checksum, input.deliverableMediaId, deliverable.checksum, deliverable.durationMs, 'ready', JSON.stringify(input.metadata), actor.id, at))
       mutations.push(sql('UPDATE video_review_state SET current_revision=? WHERE video_id=?', resultId, input.videoId))
       result = { revisionId: resultId, reviewVersion: 1 }
+    } else if (input.action === 'assign') {
+      staff(actor)
+      if (!state) throw new ReviewError(404, 'Review not found')
+      // System principals (such as the Studio handoff) are staff rows but never assignees.
+      if (input.assigneeId !== null && !await this.store.one(`SELECT id FROM users WHERE id=? AND role='staff' AND ${humanUserSql()}`, input.assigneeId)) throw new ReviewError(400, 'Choose a staff member')
+      const assignment = await this.store.one<{ version: number }>('SELECT version FROM review_assignments WHERE video_id=?', input.videoId)
+      if ((assignment?.version ?? 0) !== input.expectedAssignmentVersion) throw new ReviewError(409, 'The assignment changed; reload and retry')
+      // Only this command writes review_assignments, so the generation fence serialises it.
+      mutations.push(sql('INSERT INTO review_assignments(video_id,assignee_id,version,assigned_by_id,assigned_at) VALUES(?,?,1,?,?) ON CONFLICT(video_id) DO UPDATE SET assignee_id=excluded.assignee_id,version=review_assignments.version+1,assigned_by_id=excluded.assigned_by_id,assigned_at=excluded.assigned_at', input.videoId, input.assigneeId, actor.id, at))
+      result = { assigneeId: input.assigneeId, assignmentVersion: (assignment?.version ?? 0) + 1 }
     } else if (input.action === 'resolve-comment') {
       const comment = await this.store.one<{ author_id: number; revision_id: string }>('SELECT author_id,revision_id FROM review_comments WHERE id=? AND video_id=?', input.commentId, input.videoId)
       // A comment the caller cannot see is reported exactly like a missing one.
@@ -194,10 +208,19 @@ export class ReviewService {
           const release = await this.dependencies.stageRelease(input.videoId, resultId, revision.deliverable_media_id, revision.deliverable_checksum, actor)
           if (release.checksum !== revision.deliverable_checksum || release.checksum !== decision.deliverable_checksum) throw new ReviewError(409, 'Release does not match the approved deliverable')
           const video = await this.dependencies.video(input.videoId, actor)
-          mutations.push(sql('INSERT INTO video_publications(id,document) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET document=excluded.document', input.videoId, JSON.stringify(publicProjection(video, revision, at, release.publicUrl ?? this.dependencies.publicMediaUrl(input.videoId, resultId)))))
+          // SQL, not dependencies.video: that reads the draft, and the fallback needs the stored status.
+          const times = await this.store.one<{ published_at: string | null }>('SELECT published_at FROM video_editorial_times WHERE id=?', input.videoId)
+          const legacy = await this.store.one<{ _status: string | null; published_at: string | null }>('SELECT _status,published_at FROM videos WHERE id=?', input.videoId)
+          const firstPublishedAt = effectiveTimes(times, { _status: legacy?._status, publishedAt: legacy?.published_at }).publishedAt ?? at
+          if (!times?.published_at) {
+            // COALESCE keeps the first writer's value; the generation fence serialises publishes.
+            mutations.push(sql("INSERT INTO video_editorial_times(id,published_at,source) VALUES(?,?,'review') ON CONFLICT(id) DO UPDATE SET published_at=COALESCE(video_editorial_times.published_at,excluded.published_at),version=video_editorial_times.version+1,source='review'", input.videoId, firstPublishedAt))
+            mutations.push(sql('INSERT INTO editorial_time_events(id,video_id,action,actor,field,previous,next,note,created_at) VALUES(?,?,?,?,?,?,?,?,?)', `${resultId}:publishedAt`, input.videoId, 'publish', `user:${actor.id}`, 'publishedAt', null, firstPublishedAt, '', at))
+          }
+          mutations.push(sql('INSERT INTO video_publications(id,document) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET document=excluded.document', input.videoId, JSON.stringify(publicProjection(video, revision, firstPublishedAt, release.publicUrl ?? this.dependencies.publicMediaUrl(input.videoId, resultId)))))
           mutations.push(sql('UPDATE video_revisions SET state=? WHERE id=?', 'published', revision.id))
           mutations.push(sql('INSERT INTO review_publication_events(id,video_id,revision_id,decision_id,published_by_id,published_at,object_key,object_etag,checksum,bytes,content_type) VALUES(?,?,?,?,?,?,?,?,?,?,?)', resultId, input.videoId, revision.id, decision.id, actor.id, at, release.key, release.etag, release.checksum, release.bytes, release.contentType))
-          result = { publicationId: resultId, revisionId: revision.id, publishedAt: at }
+          result = { publicationId: resultId, revisionId: revision.id, publishedAt: at, firstPublishedAt }
         }
       }
     }

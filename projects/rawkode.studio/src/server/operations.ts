@@ -20,6 +20,7 @@ import {
 	getRealtimeKitConfig,
 	type RealtimeKitRole,
 } from "./realtimekit";
+import { recordStudioBroadcast } from "./payload-broadcast";
 import { requestReviewAdoption } from "./payload-handoff";
 import {
 	buildStudioSession,
@@ -139,6 +140,10 @@ export interface SetStudioSessionReviewRequiredInput {
 export interface MarkRecordingReadyOptions {
 	defer?: (promise: Promise<unknown>) => void;
 }
+
+// Stream transitions report broadcast times to Payload through the same
+// fire-and-forget pattern (./payload-broadcast.ts).
+export type StudioStreamOptions = MarkRecordingReadyOptions;
 
 export interface CreateRecordingUploadInput {
 	sessionId: string;
@@ -674,6 +679,7 @@ export async function confirmStudioStream(
 	env: StudioEnv,
 	user: StudioUser,
 	input: StudioStreamInput,
+	options: StudioStreamOptions = {},
 ) {
 	requireStudioDb(env);
 	const session = await requireSessionManager(env, user, input.sessionId);
@@ -692,6 +698,8 @@ export async function confirmStudioStream(
 		);
 	}
 	if (session.streamStatus === "live") {
+		// Idempotent: queues the start only if the first confirm lost its outbox write.
+		await recordStudioBroadcast(env, session.id, "broadcast-started", options.defer);
 		return {
 			sessionId: session.id,
 			streamStatus: "live" as const,
@@ -744,6 +752,7 @@ export async function confirmStudioStream(
 	if (!savedLive) {
 		const latest = await getStudioSession(env, session.id);
 		if (latest?.streamStatus === "live") {
+			await recordStudioBroadcast(env, session.id, "broadcast-started", options.defer);
 			return {
 				sessionId: session.id,
 				streamStatus: "live" as const,
@@ -757,6 +766,7 @@ export async function confirmStudioStream(
 		);
 	}
 
+	await recordStudioBroadcast(env, session.id, "broadcast-started", options.defer);
 	const notified = await notifyStudioStreamIfNeeded(env, session);
 
 	return {
@@ -770,10 +780,12 @@ export async function stopStudioStream(
 	env: StudioEnv,
 	user: StudioUser,
 	input: StudioStreamInput,
+	options: StudioStreamOptions = {},
 ) {
 	requireStudioDb(env);
 	const session = await requireSessionManager(env, user, input.sessionId);
 	await saveStudioStreamEnded(env, session.id, input.streamToken);
+	await recordStudioBroadcast(env, session.id, "broadcast-ended", options.defer);
 
 	return {
 		sessionId: session.id,
@@ -823,6 +835,7 @@ export async function endStudioSession(
 	env: StudioEnv,
 	user: StudioUser,
 	input: EndStudioSessionInput,
+	options: StudioStreamOptions = {},
 ) {
 	const session = await requireSessionManager(env, user, input.sessionId);
 	if (session.realtimeKitMeetingId) {
@@ -830,6 +843,7 @@ export async function endStudioSession(
 		await endRealtimeKitSession(config, session.realtimeKitMeetingId);
 	}
 	await saveStudioStreamEnded(env, session.id);
+	await recordStudioBroadcast(env, session.id, "broadcast-ended", options.defer);
 	await saveStudioSessionStatus(env, session.id, "complete");
 
 	return {

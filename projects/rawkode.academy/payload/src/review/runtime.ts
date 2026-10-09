@@ -14,6 +14,7 @@ import { boundedObject, stageReleaseObject, verifiedDeliverable } from './artifa
 import { readOnlyStudioContent, type StudioBindings } from './studio-content'
 import { StudioAssets, StudioHandoff, listPendingStudioAdoptions, studioStageRelease } from './studio-handoff'
 import { ensureMachineActor } from '../machine-auth'
+import { publicationAvailability } from './publication'
 
 export function studioBindings() { return cloudflare.env as unknown as StudioBindings }
 
@@ -71,10 +72,7 @@ export async function reviewBackend() {
     now: () => new Date(),
   })
   const intake = new ReviewIntake(store, cloudflare.env.R2, service, configuredMediaAdapter(cloudflare.env, store))
-  const publicationAvailable = async (videoId: number) => (auth.local && fixtureEnabled) || Boolean(await store.one(
-    `SELECT a.media_id FROM video_review_state s JOIN video_revisions r ON r.id=s.current_revision JOIN review_intake_assets a ON a.media_id=r.deliverable_media_id AND a.video_id=s.video_id AND a.kind=? WHERE s.video_id=?
-     UNION ALL SELECT a.media_id FROM video_review_state s JOIN video_revisions r ON r.id=s.current_revision JOIN review_studio_assets a ON a.media_id=r.deliverable_media_id AND a.video_id=s.video_id AND a.kind=? WHERE s.video_id=? AND ?`,
-    'deliverable', videoId, 'deliverable', videoId, studioAssets ? 1 : 0))
+  const publicationAvailable = publicationAvailability(store, { fixture: auth.local && fixtureEnabled, studio: Boolean(studioAssets) })
   return { payload, store, service, intake, assets, studioAssets, studioContent, auth, publicationAvailable, bucket: cloudflare.env.R2 }
 }
 export async function reviewRuntime(request: Request) {

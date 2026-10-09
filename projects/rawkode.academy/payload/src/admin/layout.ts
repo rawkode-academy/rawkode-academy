@@ -86,6 +86,7 @@ export type LayoutOptions = {
 	collapsibles?: Record<string, string[]>
 	rows?: string[][]
 	processing?: { fields: Field[]; condition?: Condition }
+	times?: Field[]
 	review?: Field[]
 	fieldAdmin?: Record<string, Record<string, unknown>>
 	sidebarDescriptions?: Record<string, string>
@@ -144,6 +145,7 @@ export function arrange(fields: Field[], access: AdminAccess, options: LayoutOpt
 	const tabs: Tab[] = [
 		...(titled || !relations.length ? editorial : editorial.reverse()),
 		{ label: 'Media', fields: [...mediaPlain, ...advanced(mediaJson)] },
+		...(options.times ? [{ label: 'Times', fields: options.times }] : []),
 		...(options.processing
 			? [
 					{

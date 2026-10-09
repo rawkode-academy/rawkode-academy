@@ -185,7 +185,7 @@ test('provenance sits read-only in a developer-only Source tab, after editorial 
 	const videos = tabsOf(bySlug.get('videos')!)
 	assert.deepEqual(
 		videos.map(tab => tab.label),
-		['Content', 'Relations', 'Media', 'Processing', 'Review', 'Source'],
+		['Content', 'Relations', 'Media', 'Times', 'Processing', 'Review', 'Source'],
 	)
 	assert.equal(allNamed(videos[0].fields)[0] && nameOf(allNamed(videos[0].fields)[0]), 'title')
 	const sidebar = bySlug
@@ -279,6 +279,10 @@ test('videos guard Save and Publish for review-frozen and pipeline-linked videos
 	assert.ok(videos.fields.indexOf(notice!) < videos.fields.findIndex(field => field.type === 'tabs'), 'freeze notice sits above the tabs')
 	const review = tabsOf(videos).find(tab => tab.label === 'Review')!
 	assert.equal(review.fields[0].type, 'ui')
+	// Editorial times live outside the document: a ui field, never a column.
+	const times = tabsOf(videos).find(tab => tab.label === 'Times')!
+	assert.deepEqual(times.fields.map(field => [field.type, nameOf(field)]), [['ui', 'editorialTimes']])
+	assert.equal(times.fields[0].admin?.components?.Field, './src/admin/fields/EditorialTimes#EditorialTimesField')
 	const processing = tabsOf(videos).find(tab => tab.label === 'Processing')!
 	for (const field of allNamed(processing.fields)) assert.equal(readOnlyOf(field), true)
 	assert.equal(processing.admin?.condition?.({}, {}, {} as never), false)

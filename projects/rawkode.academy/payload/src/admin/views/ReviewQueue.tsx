@@ -3,23 +3,28 @@ import { Gutter, Link } from '@payloadcms/ui'
 import { notFound } from 'next/navigation'
 import type { AdminViewServerProps } from 'payload'
 import { isStaff } from '../../auth/access'
-import { reviewStateLabels } from '../../review/queue'
-import { plural, timeAgo } from '../format'
+import { queueStatusLabels, type QueueStatus } from '../../review/queue'
+import { ReviewActions } from '../fields/ReviewActions'
+import { formatTime, plural, timeAgo } from '../format'
 import { collectionPath, documentPath, previewReviewUrl } from '../links'
-import { reviewSnapshot } from '../review-data'
-import { ReviewStatePill } from './ReviewStatePill'
+import { publicationAvailable, reviewSnapshot, staffDirectory } from '../review-data'
+import { BroadcastCalendar } from './BroadcastCalendar'
+import { QueueStatusPill } from './ReviewStatePill'
 
-// /admin/review. Read-only: it lists existing review state and links to the
-// video, its audit records and the client Preview review UI. It issues no
-// commands and writes no grants.
-// Extension points:
-// - Workstream D: per-row reviewer grants (read and issue through D's API).
-// - Workstream F: guarded Share and Publish actions with a confirm dialog that
-//   call F's staff commands.
+const summary: QueueStatus[] = ['ready-to-publish', 'changes-requested', 'approval-invalidated', 'approved-open-comments', 'needs-share', 'no-revision', 'processing', 'awaiting-client', 'published']
+
+// /admin/review. Lists every video in the review flow with its derived status,
+// and carries the guarded staff actions (assign, share a cut with a client,
+// publish an approved cut). Each action posts to POST /api/review, which
+// re-checks every guard; nothing here writes directly. Below the queue, the
+// broadcast calendar lists scheduled and running live videos.
 export async function ReviewQueueView({ initPageResult, params, searchParams }: AdminViewServerProps) {
 	const { req, permissions, locale, visibleEntities } = initPageResult
 	if (!isStaff(req.user)) notFound()
-	const snapshot = await reviewSnapshot(200)
+	const [snapshot, staff] = await Promise.all([reviewSnapshot(200), staffDirectory(req.payload)])
+	const available = new Map(
+		await Promise.all(snapshot.rows.filter(row => row.status === 'ready-to-publish').map(async row => [row.videoId, await publicationAvailable(row.videoId)] as const)),
+	)
 	const audit = (slug: string, videoId: number) => `${collectionPath(slug)}?where[video][equals]=${videoId}`
 	return (
 		<DefaultTemplate
@@ -36,7 +41,8 @@ export async function ReviewQueueView({ initPageResult, params, searchParams }: 
 				<header className="academy-view__header">
 					<h1 className="academy-view__title">Review queue</h1>
 					<p className="academy-view__lede">
-						Client review status for every video in the review flow, oldest cut first. Change review state in{' '}
+						Every video in client review, with the next step first. Assign an owner, share the current cut with a client, and publish once it is approved.
+						Clients review in{' '}
 						<a href={previewReviewUrl} target="_blank" rel="noopener noreferrer">
 							Preview review<span className="academy-visually-hidden"> (opens in a new tab)</span>
 						</a>
@@ -48,11 +54,11 @@ export async function ReviewQueueView({ initPageResult, params, searchParams }: 
 						{snapshot.error}
 					</p>
 				) : null}
-				<ul className="academy-stats" aria-label="Videos in review by state">
-					{(['changes-requested', 'approved', 'no-revision', 'ready', 'published'] as const).map(state => (
-						<li key={state} className={`academy-stat academy-stat--${state}`}>
-							<span className="academy-stat__value">{snapshot.counts[state]}</span>
-							<span className="academy-stat__label">{reviewStateLabels[state]}</span>
+				<ul className="academy-stats" aria-label="Videos in review by status">
+					{summary.map(status => (
+						<li key={status} className={`academy-stat academy-stat--${status}`}>
+							<span className="academy-stat__value">{snapshot.counts[status]}</span>
+							<span className="academy-stat__label">{queueStatusLabels[status]}</span>
 						</li>
 					))}
 				</ul>
@@ -63,56 +69,72 @@ export async function ReviewQueueView({ initPageResult, params, searchParams }: 
 							<thead>
 								<tr>
 									<th scope="col">Video</th>
-									<th scope="col">State</th>
-									<th scope="col">Revision</th>
+									<th scope="col">Status</th>
+									<th scope="col">Actions</th>
 									<th scope="col">Cut</th>
 									<th scope="col">Open comments</th>
 									<th scope="col">Reviewers</th>
-									<th scope="col">Latest decision</th>
+									<th scope="col">First published</th>
 									<th scope="col">Audit</th>
 								</tr>
 							</thead>
 							<tbody>
-								{snapshot.rows.map(row => (
-									<tr key={row.videoId}>
-										<th scope="row">
-											<Link href={documentPath('videos', row.videoId)} prefetch={false}>
-												{row.videoTitle || `Video ${row.videoId}`}
-											</Link>
-											{row.revisionTitle ? <span className="academy-table__sub">{row.revisionTitle}</span> : null}
-										</th>
-										<td>
-											<ReviewStatePill state={row.state} />
-										</td>
-										<td>{row.reviewVersion ? `v${row.reviewVersion}` : <span className="academy-muted">None</span>}</td>
-										<td>{row.createdAt ? timeAgo(row.createdAt) : <span className="academy-muted">None</span>}</td>
-										<td>{row.openComments ? <strong>{row.openComments}</strong> : <span className="academy-muted">0</span>}</td>
-										<td>{row.activeReviewers ? plural(row.activeReviewers, 'reviewer') : <span className="academy-muted">None</span>}</td>
-										<td>
-											{row.latestDecision ? (
-												<>
-													{row.latestDecision === 'approved' ? 'Approved' : 'Changes requested'}
-													{row.latestDecisionAt ? <span className="academy-table__when">{timeAgo(row.latestDecisionAt)}</span> : null}
-												</>
-											) : (
-												<span className="academy-muted">None</span>
-											)}
-										</td>
-										<td>
-											<div className="academy-table__links">
-												<Link href={audit('video-revisions', row.videoId)} prefetch={false}>
-													Revisions
+								{snapshot.rows.map(row => {
+									const title = row.videoTitle || `Video ${row.videoId}`
+									return (
+										<tr key={row.videoId}>
+											<th scope="row">
+												<Link href={documentPath('videos', row.videoId)} prefetch={false}>
+													{title}
 												</Link>
-												<Link href={audit('review-comments', row.videoId)} prefetch={false}>
-													Comments
-												</Link>
-												<Link href={audit('review-decisions', row.videoId)} prefetch={false}>
-													Decisions
-												</Link>
-											</div>
-										</td>
-									</tr>
-								))}
+												{row.revisionTitle ? <span className="academy-table__sub">{row.revisionTitle}</span> : null}
+											</th>
+											<td>
+												<QueueStatusPill status={row.status} />
+												{row.latestDecisionAt ? <span className="academy-table__when">Decision {timeAgo(row.latestDecisionAt)}</span> : null}
+											</td>
+											<td>
+												<ReviewActions
+													row={{
+														videoId: row.videoId,
+														title,
+														status: row.status,
+														revisionId: row.revisionId,
+														reviewVersion: row.reviewVersion,
+														decisionId: row.decisionId,
+														assignee: row.assignee,
+														assignmentVersion: row.assignmentVersion,
+														publicationAvailable: available.get(row.videoId) ?? false,
+													}}
+													staff={staff}
+												/>
+											</td>
+											<td>
+												{row.reviewVersion ? `v${row.reviewVersion}` : <span className="academy-muted">None</span>}
+												{row.createdAt ? <span className="academy-table__when">{timeAgo(row.createdAt)}</span> : null}
+											</td>
+											<td>{row.openComments ? <strong>{row.openComments}</strong> : <span className="academy-muted">0</span>}</td>
+											<td>
+												{row.activeReviewers ? plural(row.activeReviewers, 'reviewer') : <span className="academy-muted">None</span>}
+												{row.revisionId ? <span className="academy-table__sub">{plural(row.approverCount, 'approver')} on this cut</span> : null}
+											</td>
+											<td>{row.times.publishedAt ? formatTime(row.times.publishedAt, 'UTC') : <span className="academy-muted">Not yet</span>}</td>
+											<td>
+												<div className="academy-table__links">
+													<Link href={audit('video-revisions', row.videoId)} prefetch={false}>
+														Revisions
+													</Link>
+													<Link href={audit('review-comments', row.videoId)} prefetch={false}>
+														Comments
+													</Link>
+													<Link href={audit('review-decisions', row.videoId)} prefetch={false}>
+														Decisions
+													</Link>
+												</div>
+											</td>
+										</tr>
+									)
+								})}
 							</tbody>
 						</table>
 					</div>
@@ -128,6 +150,7 @@ export async function ReviewQueueView({ initPageResult, params, searchParams }: 
 						</p>
 					</div>
 				)}
+				<BroadcastCalendar rows={snapshot.broadcasts} />
 			</Gutter>
 		</DefaultTemplate>
 	)

@@ -20,6 +20,8 @@ export const commandSchema = z.discriminatedUnion('action', [
   z.object({ ...base, action: z.literal('resolve-comment'), commentId: id, resolved: z.boolean() }).strict(),
   z.object({ ...base, ...revision, action: z.literal('decide'), decision: z.enum(['approved', 'changes-requested']), note: z.string().trim().max(8000).default('') }).strict(),
   z.object({ ...base, ...revision, action: z.literal('publish'), decisionId: id }).strict(),
+  // Staff ownership of a review. null unassigns; the version fences concurrent reassignment.
+  z.object({ ...base, action: z.literal('assign'), assigneeId: positiveId.nullable(), expectedAssignmentVersion: z.number().int().nonnegative() }).strict(),
 ])
 export type ReviewCommand = z.infer<typeof commandSchema>
 export type ReviewMetadata = z.infer<typeof metadataSchema>

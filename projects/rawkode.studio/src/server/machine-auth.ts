@@ -3,10 +3,10 @@
 // projects/rawkode.academy/payload/src/machine-auth.ts; this file must sign exactly
 // the same canonical string, and MACHINE_AUTH_TEST_VECTOR must stay byte-identical.
 //
-// Every machine call from Studio to Payload (the review handoff, and the
-// broadcast-time calls of workstream F) signs with this module and the shared
-// STUDIO_MACHINE_SECRET from Cloudflare Secrets Store, and travels over the
-// PAYLOAD service binding without cookies.
+// Every machine call from Studio to Payload (the review handoff in
+// ./payload-handoff.ts and the broadcast times in ./payload-broadcast.ts) signs
+// with this module and the shared STUDIO_MACHINE_SECRET from Cloudflare Secrets
+// Store, and travels over the PAYLOAD service binding without cookies.
 
 export const MACHINE_AUTH_SCHEME = "RAWKODE-HMAC-SHA256";
 export const STUDIO_MACHINE_PRINCIPAL = "rawkode-studio";

@@ -10,6 +10,7 @@ import {applyPreset} from './admin/collection-admin'
 import {computedLabel,fillEditorialIdentity,provenanceDefaults,relationTitle} from './admin/fields'
 import {arrange,type LayoutOptions} from './admin/layout'
 import {fieldComponents} from './admin/config'
+import {videoDeleteGuard} from './editorial/delete-guard'
 
 const staff: Access = ({ req }) => isStaff(req.user) || req.context.pipelineMachine === true
 const readable: Access = ({ req }) => {
@@ -64,7 +65,8 @@ const provenanceFor = (slug: string): Field[] => {
   { name: 'tombstone', type: 'checkbox', defaultValue: false },
 ]
 }
-const editorialHooks = (slug: string) => ({
+type ExtraHooks = { beforeDelete?: ((args: { id: string | number; req: any }) => Promise<void>)[] }
+const editorialHooks = (slug: string, extra: ExtraHooks = {}) => ({
   beforeValidate: [fillEditorialIdentity(slug, singularOf(slug))],
   beforeChange: [({ data, originalDoc, req, operation }: { data: Record<string, any>; originalDoc?: Record<string, any>; req: any; operation: string }) => {
     if(slug === 'videos') {
@@ -90,21 +92,22 @@ const editorialHooks = (slug: string) => ({
     data.locallyEdited = true
     return data
   }],
-  beforeDelete: [async ({ id, req }: { id: string | number; req: any }) => {
+  // Extra guards run first, so a refused delete never leaves a deletion marker.
+  beforeDelete: [...(extra.beforeDelete ?? []), async ({ id, req }: { id: string | number; req: any }) => {
     // Keep a durable deletion marker so re-import cannot resurrect an editor-deleted record.
     const doc = await req.payload.findByID({ collection: slug, id, draft: true, req, overrideAccess: false })
     await req.payload.create({ collection: 'deletion-markers', req, overrideAccess: false,
       data: { key: `${slug}:${doc.legacyId}`, collectionSlug: slug, legacyId: doc.legacyId, sourceHash: doc.sourceHash ?? '' } })
   }],
 })
-type Builder = (access: AdminAccess) => CollectionConfig
-function content(slug: string, fields: Field[], layout: LayoutOptions = {}): Builder {
+type Builder = (access: AdminAccess, db: D1Database) => CollectionConfig
+function content(slug: string, fields: Field[], layout: LayoutOptions = {}, extraHooks: ExtraHooks = {}): Builder {
   return access => applyPreset({
     slug,
     access: { read: readable, create: staff, update: staff, delete: staff, readVersions: staff },
     versions: { drafts: true, maxPerDoc: 30 },
     fields: arrange([...provenanceFor(slug), ...fields, { name: 'body', type: 'textarea' }, json('cover'), json('contentResources'), json('editorialData')], access, layout),
-    hooks: editorialHooks(slug),
+    hooks: editorialHooks(slug, extraHooks),
   }, access)
 }
 const terms = strings('terms')
@@ -130,17 +133,19 @@ const people: LayoutOptions = {
 }
 const builders: Record<string, Builder> = {
   // Publishing
-  videos: access => withEditComponents(content('videos', [title,text('tagline'),text('subtitle'),description,strings('whatYouWillLearn'),terms,{name:'publishedAt',type:'date',admin:{date:{pickerAppearance:'dayAndTime'}}}, {name:'duration',type:'number'}, {name:'audioFileSize',type:'number'},
+  videos: (access, db) => withEditComponents(content('videos', [title,text('tagline'),text('subtitle'),description,strings('whatYouWillLearn'),terms,{name:'publishedAt',type:'date',admin:{date:{pickerAppearance:'dayAndTime'},description:'Imported git value. Once a video is published through review, its public release time follows the Times tab.'}}, {name:'duration',type:'number'}, {name:'audioFileSize',type:'number'},
     {name:'type',type:'select',options:['live','recorded']}, {name:'category',type:'select',options:['announcement','editorial','interview','review','tutorial']},
     text('streamUrl'),text('thumbnailUrl'),text('mediaReference'),text('youtubeId'),json('realtimeKit'),json('podcast'),json('subscribeLinks'),relation('show','shows'),technologies,relation('guests','people',true),relation('episode','episodes'),relation('chapters','chapters',true)], {
     processing: { fields: pipelineVideoFields, condition: data => Boolean(data?.processingRun || data?.processingState) },
-    // Read-only review history. Extension point for workstreams D (grants)
-    // and F (guarded share/publish commands).
+    // Broadcast and publication times live outside the document (src/editorial),
+    // written by guarded commands; a ui field has no column and no GraphQL shape.
+    times: [{ name: 'editorialTimes', type: 'ui', label: 'Broadcast and publication times', admin: { components: { Field: fieldComponents.editorialTimes }, condition: data => Boolean(data?.id) } }],
+    // Review history plus the guarded assign, share and publish actions.
     review: [{ name: 'reviewPanel', type: 'ui', admin: { components: { Field: fieldComponents.reviewPanel }, condition: data => Boolean(data?.id) } }],
     // Videos in client review are frozen by database triggers; say so and
     // swap the save buttons rather than fail with a generic toast.
     top: [{ name: 'reviewFreeze', type: 'ui', admin: { components: { Field: fieldComponents.reviewFreezeNotice }, condition: data => Boolean(data?.id) } }],
-  })(access), {
+  }, { beforeDelete: [videoDeleteGuard(db)] })(access, db), {
     PublishButton: fieldComponents.videoPublishControl,
     SaveDraftButton: fieldComponents.videoSaveDraftControl,
     UnpublishButton: fieldComponents.videoUnpublishControl,
@@ -225,7 +230,7 @@ export const createCollections = (config:AuthConfig,db:D1Database,access:AdminAc
       upload:{disableLocalStorage:true,crop:false,focalPoint:false,externalFileHeaderFilter:filterExternalFileHeaders},
       fields:[text('alt')],
     },access),
-    ...Object.values(builders).map(build => build(access)),
+    ...Object.values(builders).map(build => build(access, db)),
   ]
   const bySlug = new Map(all.map(collection => [collection.slug, collection]))
   if (bySlug.size !== collectionOrder.length || all.some(collection => !(collectionOrder as readonly string[]).includes(collection.slug))) throw new Error('Every collection must appear exactly once in collectionOrder')

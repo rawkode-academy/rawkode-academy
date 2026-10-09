@@ -2,7 +2,8 @@ import type { Payload } from 'payload'
 
 /**
  * The one machine-to-machine scheme for every Rawkode Studio -> Payload call
- * (the review handoff today, broadcast-time calls in workstream F next).
+ * (the review handoff at /api/studio-handoff/adoptions and the broadcast times at
+ * /api/editorial/broadcast).
  *
  * Transport: Studio's PAYLOAD service binding to rawkode-academy-payload, default
  * entrypoint. The request carries no cookie, so the OIDC CSRF gate in ingress.ts
