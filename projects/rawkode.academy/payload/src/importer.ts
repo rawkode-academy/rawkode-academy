@@ -44,7 +44,7 @@ const collections = new Set<CatalogueCollection>([
   'series', 'adrs', 'testimonials', 'news', 'changelog', 'static-assets',
   'seasons', 'competitors', 'brackets', 'bracket-applications', 'teams', 'team-members', 'team-invites', 'bracket-breaks', 'bracket-entries', 'matches', 'match-results', 'registrations',
 ])
-const relations: Partial<Record<CatalogueCollection, Record<string, { collection: CatalogueCollection; many: boolean }>>> = {
+export const relations: Partial<Record<CatalogueCollection, Record<string, { collection: CatalogueCollection; many: boolean }>>> = {
   videos: { technologies: { collection: 'technologies', many: true }, guests: { collection: 'people', many: true }, show: { collection: 'shows', many: false }, episode: { collection: 'episodes', many: false }, chapters: { collection: 'chapters', many: true } },
   shows: { hosts: { collection: 'people', many: true }, episodes: { collection: 'episodes', many: true } },
   episodes: { video: { collection: 'videos', many: false }, show: { collection: 'shows', many: false } },
