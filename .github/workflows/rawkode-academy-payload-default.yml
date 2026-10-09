@@ -11,7 +11,42 @@ on:
     - bun.lock
     - bun.lock/**
     - cue.mod/**
-    - projects/rawkode.academy/payload/**
+    - projects/rawkode.academy/payload/app/**
+    - projects/rawkode.academy/payload/cloudflare-env.d.ts
+    - projects/rawkode.academy/payload/cloudflare-env.d.ts/**
+    - projects/rawkode.academy/payload/container/**
+    - projects/rawkode.academy/payload/env.cue
+    - projects/rawkode.academy/payload/evidence/**
+    - projects/rawkode.academy/payload/fixtures/**
+    - projects/rawkode.academy/payload/next-env.d.ts
+    - projects/rawkode.academy/payload/next-env.d.ts/**
+    - projects/rawkode.academy/payload/next.config.mjs
+    - projects/rawkode.academy/payload/next.config.mjs/**
+    - projects/rawkode.academy/payload/open-next.config.ts
+    - projects/rawkode.academy/payload/open-next.config.ts/**
+    - projects/rawkode.academy/payload/package.json
+    - projects/rawkode.academy/payload/package.json/**
+    - projects/rawkode.academy/payload/payload.config.ts
+    - projects/rawkode.academy/payload/payload.config.ts/**
+    - projects/rawkode.academy/payload/schema/**
+    - projects/rawkode.academy/payload/scripts/**
+    - projects/rawkode.academy/payload/scripts/check-review-container-recipe.mjs
+    - projects/rawkode.academy/payload/scripts/check-review-container-recipe.mjs/**
+    - projects/rawkode.academy/payload/scripts/migrate-production.ts
+    - projects/rawkode.academy/payload/scripts/migrate-production.ts/**
+    - projects/rawkode.academy/payload/scripts/setup.mjs
+    - projects/rawkode.academy/payload/scripts/setup.mjs/**
+    - projects/rawkode.academy/payload/src/**
+    - projects/rawkode.academy/payload/src/migrations/**
+    - projects/rawkode.academy/payload/tests/**
+    - projects/rawkode.academy/payload/tsconfig.json
+    - projects/rawkode.academy/payload/tsconfig.json/**
+    - projects/rawkode.academy/payload/worker.ts
+    - projects/rawkode.academy/payload/worker.ts/**
+    - projects/rawkode.academy/payload/wrangler.jsonc
+    - projects/rawkode.academy/payload/wrangler.jsonc/**
+    - projects/rawkode.academy/payload/wrangler.preview-runtime.jsonc
+    - projects/rawkode.academy/payload/wrangler.preview-runtime.jsonc/**
   workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
@@ -67,7 +102,7 @@ jobs:
           aarch64|arm64) cuenv_asset="cuenv-linux-arm64" ;;
           *) echo "Unsupported Linux architecture: $arch" >&2; exit 1 ;;
         esac
-        cuenv_version="0.55.1"
+        cuenv_version="0.56.1"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi
@@ -94,3 +129,11 @@ jobs:
         GITHUB_REF_NAME: ${{ github.ref_name }}
         CUENV_ENVIRONMENT: production
         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+    - name: Verify cuenv ran projects/rawkode.academy/payload
+      if: success()
+      run: |-
+        suffix=$(printf '%s' 'projects/rawkode.academy/payload' | tr '/' '-')
+        if ! ls ".cuenv/reports/${GITHUB_SHA}/"*"-${suffix}.json" >/dev/null 2>&1; then
+          echo "::error::cuenv ci wrote no pipeline report for projects/rawkode.academy/payload. It skipped the project (evaluation failed or timed out; look for 'Failed to evaluate env.cue' above) or found no affected tasks."
+          exit 1
+        fi

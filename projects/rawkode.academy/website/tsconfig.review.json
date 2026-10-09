@@ -13,6 +13,7 @@
     "review/api.ts",
     "review/types.ts",
     "review/bridge.ts",
+    "review/deploy/**/*.ts",
     "review/tests/**/*.ts"
   ]
 }
