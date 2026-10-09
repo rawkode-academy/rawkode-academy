@@ -71,7 +71,7 @@ flowchart LR
 | `/api/graphql` | Payload-generated schema and authenticated catalogue mutations. Deliberately separate from the public contract. |
 | `/api/{collection}` | Payload REST. Staff CRUD; public catalogue reads filter drafts/tombstones. |
 | `/admin` | Stock React/Next Payload admin with Academy OIDC staff authorization. |
-| `/api/poc/import` | Staff-only snapshot import. No remote source fetching; dry-run supported. |
+| `/api/poc/import` | Staff-only snapshot import, served on loopback only (404 on deployed Workers). No remote source fetching; dry-run supported. Remote imports use the `--target` CLI. |
 | `/api/poc/pipeline` | Staff registration, resume, review edit and approval commands. |
 | `/api/poc/pipeline/callback` | Separate local machine secret for Workflow results. |
 | `/api/poc/runtime` | Local runtime/binding probe. |

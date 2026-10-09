@@ -86,9 +86,11 @@ tasks: {
 		inputs: [
 			"src/**",
 			"src/migrations/**",
+			"scripts/**",
 			"tests/**",
 			"fixtures/**",
 			"evidence/**",
+			"wrangler.jsonc",
 			"package.json",
 			"../../../bun.lock",
 		]
@@ -130,6 +132,81 @@ tasks: {
 		outputs: [".open-next/**"]
 	}
 
+	// Content cutover (workstream G). Operator-run only: none of these tasks is
+	// listed in a CI pipeline. Rehearsal needs REHEARSAL_D1_ID and
+	// REHEARSAL_R2_BUCKET for a disposable D1/R2 pair. Production needs
+	// CONFIRM_PRODUCTION_IMPORT=rawkode-academy-payload, STATIC_CONTENT_SEQUENCE
+	// and a clean checkout; run with `cuenv task -e production <task>`.
+	// Klustered only has a rehearsal task: the first production window imports
+	// static content only.
+	migrate: schema.#TaskGroup & {
+		type: "group"
+		rehearsal: schema.#Task & {
+			hermetic: false
+			command: "sh"
+			args: ["-lc", "\(_toolchain) bun run migrate:rehearsal"]
+			env: PATH: _taskPath
+			dependsOn: [_t.setup]
+		}
+		status: schema.#Task & {
+			hermetic: false
+			command: "sh"
+			args: ["-lc", "\(_toolchain) bun run migrate:status -- --target=production"]
+			env: PATH: _taskPath
+			dependsOn: [_t.setup]
+		}
+	}
+
+	"import": schema.#TaskGroup & {
+		type: "group"
+		rehearsal: schema.#Task & {
+			hermetic: false
+			command: "sh"
+			args: ["-lc", "\(_toolchain) bun run import:static -- --target=rehearsal"]
+			env: PATH: _taskPath
+			dependsOn: [_t.migrate.rehearsal]
+		}
+		productionDryRun: schema.#Task & {
+			hermetic: false
+			command: "sh"
+			args: ["-lc", "\(_toolchain) bun run import:static -- --target=production --dry-run"]
+			env: PATH: _taskPath
+			dependsOn: [_t.migrate.status]
+		}
+		production: schema.#Task & {
+			hermetic: false
+			command: "sh"
+			args: ["-lc", "\(_toolchain) bun run import:static -- --target=production"]
+			env: PATH: _taskPath
+			dependsOn: [_t.migrate.status]
+		}
+		klusteredRehearsal: schema.#Task & {
+			hermetic: false
+			command: "sh"
+			args: ["-lc", "\(_toolchain) bun run import:klustered -- --target=rehearsal \"${KLUSTERED_SNAPSHOT_PATH:?set KLUSTERED_SNAPSHOT_PATH}\""]
+			env: PATH: _taskPath
+			dependsOn: [_t.migrate.rehearsal]
+		}
+	}
+
+	reconcile: schema.#TaskGroup & {
+		type: "group"
+		rehearsal: schema.#Task & {
+			hermetic: false
+			command: "sh"
+			args: ["-lc", "\(_toolchain) bun run reconcile:static -- --target=rehearsal"]
+			env: PATH: _taskPath
+			dependsOn: [_t.setup]
+		}
+		production: schema.#Task & {
+			hermetic: false
+			command: "sh"
+			args: ["-lc", "\(_toolchain) bun run reconcile:static -- --target=production"]
+			env: PATH: _taskPath
+			dependsOn: [_t.setup]
+		}
+	}
+
 	deploy: schema.#TaskGroup & {
 		type: "group"
 		migrate: schema.#Task & {
@@ -142,6 +219,7 @@ tasks: {
 				"src/migrations/**",
 				"src/**",
 				"scripts/migrate-production.ts",
+				"scripts/lib/**",
 				"payload.config.ts",
 				"scripts/setup.mjs",
 				"package.json",

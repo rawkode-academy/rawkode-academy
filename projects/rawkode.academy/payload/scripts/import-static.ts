@@ -1,43 +1,85 @@
 import path from 'node:path'
-import { readFile } from 'node:fs/promises'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { getPayload } from 'payload'
+import { assertProductionImportAllowed, assertSequenceAdvances, gitCommitWatermark, gitSha, gitTreeClean, parseImportTarget, resolveSequence, storedMaxSequence, type Watermark } from './lib/import-target'
+import { disposeCloudflare, prepareTarget, TargetError } from './lib/remote-target'
 
-const args = new Set(process.argv.slice(2))
-const remote = args.has('--remote')
-const dryRun = args.has('--dry-run')
+const argv = process.argv.slice(2)
+const dryRun = argv.includes('--dry-run')
+const resume = argv.includes('--resume')
 const projectDir = process.cwd()
-const contentRoot = path.resolve(projectDir, process.env.STATIC_CONTENT_ROOT ?? '../../../content')
+const defaultContentRoot = path.resolve(projectDir, '../../../content')
+const contentRoot = path.resolve(projectDir, process.env.STATIC_CONTENT_ROOT ?? defaultContentRoot)
 
-process.env.POC_CLI = '1'
-if (remote) process.env.POC_REMOTE_BINDINGS = '1'
+let target: ReturnType<typeof parseImportTarget>
+let watermark: Watermark
+try {
+  target = parseImportTarget(argv)
+  // The watermark is the newest commit that can change the mapped output: the
+  // content itself or the mapping code.
+  const sourceWatermark = gitCommitWatermark(projectDir, [contentRoot, path.join(projectDir, 'src/static-content.ts')])
+  watermark = { gitSha: gitSha(projectDir), ...resolveSequence(process.env.STATIC_CONTENT_SEQUENCE, sourceWatermark ? { sequence: sourceWatermark, source: 'git' } : { sequence: 1, source: 'default' }) }
+  if (target === 'production' && contentRoot !== defaultContentRoot) throw new TargetError('Refusing the production import: STATIC_CONTENT_ROOT must not override the repository content/ directory.')
+  assertProductionImportAllowed({
+    target, argv, env: process.env, gitClean: target === 'production' ? gitTreeClean(projectDir) : true,
+    sequenceVariable: 'STATIC_CONTENT_SEQUENCE', watermark, minimumSequence: sourceWatermark || undefined,
+  })
+} catch (error) {
+  if (!(error instanceof TargetError)) throw error
+  console.error(error.message)
+  process.exit(1)
+}
 
-const { buildStaticSnapshot } = await import('../src/static-content')
+const prepared = prepareTarget(target)
+const { buildStaticSnapshot, staticContentCollections } = await import('../src/static-content')
 const { cloudflare } = await import('../src/cloudflare')
 const { default: config } = await import('../payload.config')
 const { importCatalogue } = await import('../src/importer')
 
 type ImportUser = NonNullable<Parameters<Awaited<ReturnType<typeof getPayload>>['find']>[0]['user']>
 const user = { id: 'static-content-importer', collection: 'users', role: 'staff' } as ImportUser
-const snapshot = await buildStaticSnapshot({ root: contentRoot })
+const snapshot = await buildStaticSnapshot({ root: contentRoot, sequence: watermark.sequence })
 const payload = await getPayload({ config, disableOnInit: true })
 
 try {
+  if (target !== 'local') {
+    const collections = [...new Set([...staticContentCollections, ...snapshot.records.map(record => record.collection)])]
+    assertSequenceAdvances(snapshot.sequence, await storedMaxSequence(payload, user, collections, snapshot.sourceSystem), { resume })
+  }
   // Upload immutable assets before publishing metadata. A failed asset upload
   // can leave orphaned content-addressed objects, but cannot leave a published
   // record pointing at an object that was never written.
+  const startedAt = Date.now()
+  const assets = { uploaded: 0, skipped: 0 }
   if (!dryRun) {
     for (const asset of snapshot.assetFiles) {
+      const existing = await cloudflare.env.R2.head(asset.r2Key)
+      if (existing && existing.size === asset.bytes && existing.customMetadata?.checksum === asset.checksum) {
+        assets.skipped += 1
+        continue
+      }
       const bytes = await readFile(asset.absolutePath)
       await cloudflare.env.R2.put(asset.r2Key, bytes, {
         httpMetadata: { contentType: asset.mimeType },
         customMetadata: { checksum: asset.checksum, sourcePath: asset.relativePath },
       })
+      assets.uploaded += 1
     }
   }
   const result = await importCatalogue(payload, user, snapshot, { dryRun })
-  console.log(JSON.stringify({ source: contentRoot, records: snapshot.records.length, assets: snapshot.assetFiles.length, ...result }, null, 2))
+  const report = { target, resources: prepared.expected ?? null, watermark, source: contentRoot, records: snapshot.records.length, assetFiles: snapshot.assetFiles.length, assets, elapsedMs: Date.now() - startedAt, ...result }
+  const reportPath = path.join(projectDir, '.runtime', `import-${target}-${watermark.gitSha.slice(0, 12)}${dryRun ? '-dry-run' : ''}.json`)
+  await mkdir(path.dirname(reportPath), { recursive: true })
+  await writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`)
+  console.log(JSON.stringify(report, null, 2))
+  console.error(`Import report written to ${reportPath}`)
   if (result.conflicts.length || result.unresolved.length) process.exitCode = 2
+} catch (error) {
+  if (!(error instanceof TargetError)) throw error
+  console.error(error.message)
+  process.exitCode = 1
 } finally {
   await payload.destroy()
-  if ('dispose' in cloudflare && typeof cloudflare.dispose === 'function') await cloudflare.dispose()
+  await disposeCloudflare(cloudflare)
+  prepared.cleanup()
 }

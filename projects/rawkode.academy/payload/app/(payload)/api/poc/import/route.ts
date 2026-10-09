@@ -3,7 +3,10 @@ import {isStaff} from '../../../../../src/auth/access'
 import config from '@payload-config'
 import {getPayload} from 'payload'
 import {importCatalogue} from '../../../../../src/importer'
+import {isLoopbackRequest} from '../../../../../src/local-request'
 export async function POST(request:Request){
+  // Remote imports go through the CLI target guard (scripts/import-static.ts).
+  if(!isLoopbackRequest(request))return Response.json({error:'Not found'},{status:404})
   const csrfFailure=await oidcCsrfFailure(request);if(csrfFailure)return csrfFailure
   const payload=await getPayload({config})
   const {user}=await payload.auth({headers:request.headers})
