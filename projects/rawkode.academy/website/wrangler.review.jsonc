@@ -24,7 +24,8 @@
   "services": [
     {
       "binding": "REVIEW_BACKEND",
-      "service": "rawkode-academy-payload"
+      "service": "rawkode-academy-payload",
+      "entrypoint": "ReviewBridge"
     }
   ]
 }

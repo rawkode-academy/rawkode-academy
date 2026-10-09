@@ -2,7 +2,7 @@
 import {writeFileSync} from 'node:fs'
 import {getPayload} from 'payload'
 import config from '../payload.config'
-import {authConfig} from '../src/auth/config'
+import {authConfig,callbackUri} from '../src/auth/config'
 import {identityMapping} from '../src/auth/payload'
 import {D1AuthStore} from '../src/auth/store'
 import {digest} from '../src/auth/oidc'
@@ -18,7 +18,7 @@ const store=new D1AuthStore(db),now=Math.floor(Date.now()/1000)
 const tokens={a:crypto.randomUUID(),b:crypto.randomUUID(),expired:crypto.randomUUID()}
 for(const [key,token] of Object.entries(tokens))await store.putSession({tokenHash:await digest(token),userId:key==='b'?b:a,expiresAt:now+(key==='expired'?-10:1800)})
 const stateHash=await digest(crypto.randomUUID()),bindingHash=await digest(crypto.randomUUID())
-await store.putTransaction({stateHash,bindingHash,verifier:'fixture',nonce:'fixture',redirectUri:settings.redirectUri,expiresAt:now+60})
+await store.putTransaction({stateHash,bindingHash,verifier:'fixture',nonce:'fixture',redirectUri:callbackUri(settings.directOrigins[0]),expiresAt:now+60})
 const consumption=await Promise.all([store.consumeTransaction(stateHash,bindingHash,now),store.consumeTransaction(stateHash,bindingHash,now)])
 if(consumption.filter(Boolean).length!==1)throw new Error('D1 callback consumption not atomic')
 const stamp=Date.now()

@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { authConfig, type AuthEnvironment, WORKER_PREVIEW_CALLBACK_URI } from '../src/auth/config'
+import { authConfig, type AuthEnvironment, WORKER_PREVIEW_ORIGIN, WORKER_PREVIEW_CALLBACK_URI, LOOPBACK_ORIGIN, callbackUri } from '../src/auth/config'
+import { PUBLIC_ORIGIN_HEADER, UntrustedOrigin } from '../src/auth/origin'
 import { isStaff } from '../src/auth/access'
 import { identityMapping } from '../src/auth/payload'
-import { hasOidcCookie, rejectOidcMutation } from '../src/auth/csrf'
+import { hasOidcCookie, rejectOidcMutation, rejectOidcMutationFor } from '../src/auth/csrf'
 import { digest, OidcService, readCookie, type AuthUser, type Identity } from '../src/auth/oidc'
 import type { AuthStore, Session, Transaction } from '../src/auth/store'
 
@@ -36,8 +37,19 @@ class MemoryStore implements AuthStore {
     for (const [key, s] of this.sessions) if (s.expiresAt <= now) this.sessions.delete(key)
   }
 }
+const ADMIN = 'https://admin.rawkode.academy', PREVIEW = 'https://preview.rawkode.academy'
+const PROD: AuthEnvironment = { OIDC_DIRECT_ORIGINS: JSON.stringify([ADMIN]), OIDC_BRIDGE_ORIGINS: JSON.stringify([PREVIEW]), REVIEW_PUBLIC_MEDIA_ORIGIN: ADMIN }
+// Mirrors ingress: hosted requests carry the stamped public origin; `next dev`
+// loopback requests carry only the registered Host.
+function at(config: ReturnType<typeof authConfig>, origin: string, input: string | URL, init: RequestInit = {}) {
+  const headers = new Headers(init.headers)
+  if (config.local) { if (!headers.has('host')) headers.set('host', '127.0.0.1:3100') }
+  else headers.set(PUBLIC_ORIGIN_HEADER, origin)
+  return new Request(input, { ...init, headers })
+}
 type Options = {
   env?: AuthEnvironment
+  origin?: string
   claims?: Record<string, unknown>
   removeClaim?: string
   wrongKey?: boolean
@@ -47,6 +59,9 @@ type Options = {
 }
 async function fixture(options: Options = {}) {
   const config = authConfig(options.env ?? {})
+  const origin = options.origin ?? config.directOrigins[0]
+  const redirectUri = callbackUri(origin)
+  const site = (input: string | URL, init?: RequestInit) => at(config, origin, input, init)
   const store = new MemoryStore()
   let now = Math.floor(Date.now() / 1000)
   let nonce = ''
@@ -88,7 +103,7 @@ async function fixture(options: Options = {}) {
     async user(id: number) { return users.has(id) ? { ...users.get(id)! } : null },
   }
   const service = new OidcService(config, store, mapping, fetcher, () => now)
-  async function begin(request = new Request(`${config.origin}/api/auth/login`)) {
+  async function begin(request = site(`${origin}/api/auth/login`)) {
     const response = await service.begin(request)
     const url = new URL(response.headers.get('location')!)
     nonce = url.searchParams.get('nonce')!
@@ -97,13 +112,13 @@ async function fixture(options: Options = {}) {
   }
   const started = await begin()
   function request(changes: Record<string, string | null> = {}, cookie = started.cookie) {
-    const url = new URL(config.redirectUri)
+    const url = new URL(redirectUri)
     url.searchParams.set('state', started.state)
     url.searchParams.set('code', 'test-authorization-code')
     for (const [key, value] of Object.entries(changes)) value === null ? url.searchParams.delete(key) : url.searchParams.set(key, value)
-    return new Request(url, { headers: { cookie } })
+    return site(url, { headers: { cookie } })
   }
-  return { config, store, service, mapping, identities, users, ids, requests, started, begin, request, advance: (seconds: number) => { now += seconds } }
+  return { config, origin, redirectUri, site, store, service, mapping, identities, users, ids, requests, started, begin, request, advance: (seconds: number) => { now += seconds } }
 }
 function sessionHeaders(response: Response, name: string) {
   const value = response.headers.getSetCookie().find(cookie => cookie.startsWith(`${name}=`))
@@ -121,7 +136,7 @@ test('begin binds random state/nonce/PKCE S256 to hashed transaction and HttpOnl
   const f = await fixture()
   assert.equal(f.started.response.status, 302)
   const params = f.started.url.searchParams
-  for (const [key, value] of Object.entries({ client_id: f.config.clientId, redirect_uri: f.config.redirectUri, response_type: 'code', response_mode: 'query', scope: 'openid profile email', code_challenge_method: 'S256' })) assert.equal(params.get(key), value)
+  for (const [key, value] of Object.entries({ client_id: f.config.clientId, redirect_uri: f.redirectUri, response_type: 'code', response_mode: 'query', scope: 'openid profile email', code_challenge_method: 'S256' })) assert.equal(params.get(key), value)
   assert.match(f.started.state, /^[A-Za-z0-9_-]{32,128}$/)
   assert.notEqual(params.get('nonce'), f.started.state)
   const tx = f.store.transactions.get(await digest(f.started.state))!
@@ -147,7 +162,7 @@ test('successful code exchange validates real RS256 signature, public-client PKC
   assert.equal(token.body.get('grant_type'), 'authorization_code')
   assert.equal(token.body.get('client_id'), f.config.clientId)
   assert.equal(token.body.get('code_verifier'), tx.verifier)
-  assert.equal(token.body.get('redirect_uri'), f.config.redirectUri)
+  assert.equal(token.body.get('redirect_uri'), f.redirectUri)
   assert.equal(token.body.get('code'), 'test-authorization-code')
   assert.equal(token.body.has('client_secret'), false)
   assert.equal(token.headers.has('authorization'), false)
@@ -187,7 +202,7 @@ for (const key of ['state', 'code', 'error', 'iss']) test(`callback rejects dupl
   const url = new URL(f.request().url)
   if (!url.searchParams.has(key)) url.searchParams.append(key, 'first')
   url.searchParams.append(key, 'duplicate')
-  await rejected(await f.service.callback(new Request(url, { headers: { cookie: f.started.cookie } })))
+  await rejected(await f.service.callback(f.site(url, { headers: { cookie: f.started.cookie } })))
   assert.equal(f.requests.some(r => r.url.endsWith('/token')), false)
 })
 
@@ -285,9 +300,9 @@ test('new successful sign-in rotates and invalidates the previous opaque session
   const f = await fixture()
   const oldHeaders = sessionHeaders(await f.service.callback(f.request()), f.config.sessionCookie)
   const next = await f.begin()
-  const url = new URL(f.config.redirectUri)
+  const url = new URL(f.redirectUri)
   url.searchParams.set('state', next.state); url.searchParams.set('code', 'second-code')
-  const response = await f.service.callback(new Request(url, { headers: { cookie: `${next.cookie}; ${oldHeaders.get('cookie')}` } }))
+  const response = await f.service.callback(f.site(url, { headers: { cookie: `${next.cookie}; ${oldHeaders.get('cookie')}` } }))
   assert.equal(response.status, 303)
   assert.equal(await f.service.session(oldHeaders), null)
   assert(await f.service.session(sessionHeaders(response, f.config.sessionCookie)))
@@ -307,10 +322,10 @@ test('logout requires matching Origin and revokes session with no-store response
   const headers = sessionHeaders(await f.service.callback(f.request()), f.config.sessionCookie)
   const cookie = headers.get('cookie')!
   for (const origin of ['', 'https://untrusted.example.invalid']) {
-    assert.equal((await f.service.logout(new Request(`${f.config.origin}/api/auth/logout`, { method: 'POST', headers: { cookie, origin } }))).status, 403)
+    assert.equal((await f.service.logout(f.site(`${f.origin}/api/auth/logout`, { method: 'POST', headers: { cookie, origin } }))).status, 403)
     assert(await f.service.session(headers))
   }
-  const response = await f.service.logout(new Request(`${f.config.origin}/api/auth/logout`, { method: 'POST', headers: { cookie, origin: f.config.origin } }))
+  const response = await f.service.logout(f.site(`${f.origin}/api/auth/logout`, { method: 'POST', headers: { cookie, origin: f.origin } }))
   assert.equal(response.status, 200)
   assert.equal(response.headers.get('cache-control'), 'no-store')
   assert(response.headers.get('set-cookie')?.includes('Max-Age=0'))
@@ -319,39 +334,55 @@ test('logout requires matching Origin and revokes session with no-store response
 test('begin and callback reject untrusted application origins and callback paths', async () => {
   const f = await fixture()
   await assert.rejects(f.service.begin(new Request('https://evil.example.invalid/api/auth/login')))
-  await rejected(await f.service.callback(new Request(f.request().url.replace(f.config.origin, 'https://evil.example.invalid'), { headers: { cookie: f.started.cookie } })))
-  await rejected(await f.service.callback(new Request(f.request().url.replace('/api/auth/callback', '/wrong'), { headers: { cookie: f.started.cookie } })))
+  await rejected(await f.service.callback(new Request(f.request().url.replace(f.origin, 'https://evil.example.invalid'), { headers: { cookie: f.started.cookie } })))
+  await rejected(await f.service.callback(f.site(f.request().url.replace('/api/auth/callback', '/wrong'), { headers: { cookie: f.started.cookie } })))
 })
 test('discovery rejects cross-origin provider endpoints and lack of S256', async () => {
   await assert.rejects(fixture({ discovery: { token_endpoint: 'https://evil.example.invalid/token' } }), /Untrusted provider endpoint/)
   await assert.rejects(fixture({ discovery: { code_challenge_methods_supported: ['plain'] } }), /PKCE S256 required/)
 })
-test('production cookies use __Host prefix, Secure and fixed host-only path', async () => {
-  const f = await fixture({ env: { OIDC_REDIRECT_URI: 'https://preview.rawkode.academy/api/auth/callback' } })
-  const response = await f.service.callback(f.request())
-  assert.equal(response.status, 303)
-  for (const value of response.headers.getSetCookie()) { assert(value.startsWith('__Host-')); assert(value.includes('Path=/')); assert(value.includes('; Secure')); assert(!value.includes('Domain=')) }
+test('production cookies use __Host prefix, Secure and fixed host-only path on both hosts', async () => {
+  for (const origin of [ADMIN, PREVIEW]) {
+    const f = await fixture({ env: PROD, origin })
+    const response = await f.service.callback(f.request())
+    assert.equal(response.status, 303)
+    for (const value of [...f.started.response.headers.getSetCookie(), ...response.headers.getSetCookie()]) { assert(value.startsWith('__Host-')); assert(value.includes('Path=/')); assert(value.includes('; Secure')); assert(!value.includes('Domain=')) }
+  }
 })
 test('configuration rejects unexpected issuer/client/callback, unsafe local fallback and invalid limits', () => {
   for (const env of [
     { OIDC_ISSUER: 'https://evil.example.invalid' }, { OIDC_CLIENT_ID: 'other' },
-    { OIDC_REDIRECT_URI: 'https://preview.rawkode.academy.evil.invalid/api/auth/callback' },
-    { OIDC_REDIRECT_URI: 'https://preview.rawkode.academy/api/auth/callback', POC_DEV_LOCAL_AUTH: 'true' },
+    { OIDC_DIRECT_ORIGINS: '["https://preview.rawkode.academy.evil.invalid"]' },
+    { OIDC_DIRECT_ORIGINS: '["https://admin.rawkode.academy/"]' },
+    { OIDC_DIRECT_ORIGINS: '["https://admin.rawkode.academy/api/auth/callback"]' },
+    { OIDC_DIRECT_ORIGINS: '["https://admin.rawkode.academy","https://admin.rawkode.academy"]' },
+    { OIDC_DIRECT_ORIGINS: '["https://admin.rawkode.academy"]', OIDC_BRIDGE_ORIGINS: '["https://admin.rawkode.academy"]' },
+    { OIDC_DIRECT_ORIGINS: '["http://127.0.0.1:3100","https://admin.rawkode.academy"]' },
+    { OIDC_DIRECT_ORIGINS: '["http://127.0.0.1:3100"]', OIDC_BRIDGE_ORIGINS: '["https://preview.rawkode.academy"]' },
+    { OIDC_DIRECT_ORIGINS: '[]' },
+    { OIDC_DIRECT_ORIGINS: '["https://admin.rawkode.academy"]', OIDC_BRIDGE_ORIGINS: '["http://127.0.0.1:3100"]' },
+    { ...PROD, POC_DEV_LOCAL_AUTH: 'true' },
+    { ...PROD, REVIEW_PUBLIC_MEDIA_ORIGIN: PREVIEW },
+    { OIDC_DIRECT_ORIGINS: '"https://admin.rawkode.academy"' }, { OIDC_BRIDGE_ORIGINS: '{}' }, { OIDC_DIRECT_ORIGINS: 'not json' },
     { OIDC_SESSION_TTL_SECONDS: '0' }, { OIDC_SESSION_TTL_SECONDS: '3601' }, { OIDC_SESSION_TTL_SECONDS: '1.5' }, { OIDC_SESSION_TTL_SECONDS: 'NaN' },
     { OIDC_STAFF_SUBJECTS: '"everyone"' }, { OIDC_STAFF_SUBJECTS: '[""]' }, { OIDC_STAFF_SUBJECTS: '[1]' },
   ]) assert.throws(() => authConfig(env))
   assert.equal(authConfig({}).localAuth, false)
   assert.equal(authConfig({ POC_DEV_LOCAL_AUTH: 'true' }).localAuth, true)
-  assert.equal(authConfig({ OIDC_REDIRECT_URI: 'https://preview.rawkode.academy/api/auth/callback' }).localAuth, false)
-  assert.equal(authConfig({ OIDC_REDIRECT_URI: WORKER_PREVIEW_CALLBACK_URI }).origin, 'https://pr-local-rawkode-academy-payload.rawkodeacademy.workers.dev')
+  assert.equal(authConfig(PROD).localAuth, false)
+  assert.deepEqual(authConfig(PROD).origins, [ADMIN, PREVIEW])
+  assert.equal(authConfig(PROD).publicMediaOrigin, ADMIN)
+  assert.equal(authConfig({}).publicMediaOrigin, LOOPBACK_ORIGIN)
+  assert.equal(authConfig({ OIDC_DIRECT_ORIGINS: JSON.stringify([WORKER_PREVIEW_ORIGIN]) }).publicMediaOrigin, WORKER_PREVIEW_ORIGIN)
+  assert.equal(callbackUri(WORKER_PREVIEW_ORIGIN), WORKER_PREVIEW_CALLBACK_URI)
 })
 
 test('Next internal localhost spelling with registered loopback Host preserves exact authorization and token redirects', async () => {
   const f = await fixture()
   const started = await f.begin(new Request('http://localhost:3100/api/auth/login', { headers: { host: '127.0.0.1:3100' } }))
   assert.equal(started.response.status, 302)
-  assert.equal(started.url.searchParams.get('redirect_uri'), f.config.redirectUri)
-  assert.equal(f.store.transactions.get(await digest(started.state))?.redirectUri, f.config.redirectUri)
+  assert.equal(started.url.searchParams.get('redirect_uri'), f.redirectUri)
+  assert.equal(f.store.transactions.get(await digest(started.state))?.redirectUri, f.redirectUri)
   const url = new URL('http://localhost:3100/api/auth/callback')
   url.searchParams.set('state', started.state)
   url.searchParams.set('code', 'internal-normalized-callback-code')
@@ -381,15 +412,15 @@ for (const [origin, host] of [
 })
 
 test('production configuration never accepts internal localhost spelling or a loopback Host exception', async () => {
-  const f = await fixture({ env: { OIDC_REDIRECT_URI: 'https://preview.rawkode.academy/api/auth/callback' } })
+  const f = await fixture({ env: PROD, origin: PREVIEW })
   const headers = { host: '127.0.0.1:3100', cookie: f.started.cookie }
   await assert.rejects(f.service.begin(new Request('http://localhost:3100/api/auth/login', { headers })))
-  await rejected(await f.service.callback(new Request(f.request().url.replace(f.config.origin, 'http://localhost:3100'), { headers })))
+  await rejected(await f.service.callback(new Request(f.request().url.replace(f.origin, 'http://localhost:3100'), { headers })))
 })
 
 test('normalized loopback callback still rejects any path other than the exact registered callback', async () => {
   const f = await fixture()
-  const callback = f.request().url.replace(f.config.origin, 'http://localhost:3100').replace('/api/auth/callback', '/api/auth/other')
+  const callback = f.request().url.replace(f.origin, 'http://localhost:3100').replace('/api/auth/callback', '/api/auth/other')
   await rejected(await f.service.callback(new Request(callback, { headers: { host: '127.0.0.1:3100', cookie: f.started.cookie } })))
   assert.equal(f.requests.some(r => r.url.endsWith('/token')), false)
 })
@@ -417,4 +448,51 @@ test('CSRF guard leaves safe methods and requests without an OIDC session cookie
     assert.equal(hasOidcCookie(new Headers({ cookie })), false)
     assert.equal(rejectOidcMutation(new Request(`${origin}/api/videos`, { method: 'POST', headers: { cookie } }), origin), false)
   }
+})
+
+test('null origin rejects every cookie-bearing mutation and leaves cookieless requests alone', () => {
+  const url = 'https://pr-feature-rawkode-academy-payload.rawkodeacademy.workers.dev/api/videos'
+  for (const origin of ['', 'null', ADMIN]) assert.equal(rejectOidcMutationFor(new Request(url, { method: 'POST', headers: { cookie: '__Host-poc-oidc-session=test', ...(origin ? { origin } : {}) } }), null), true)
+  assert.equal(rejectOidcMutationFor(new Request(url, { method: 'POST', headers: { authorization: 'Bearer pipeline' } }), null), false)
+  assert.equal(rejectOidcMutationFor(new Request(url, { method: 'GET', headers: { cookie: '__Host-poc-oidc-session=test' } }), null), false)
+  assert.equal(rejectOidcMutationFor(new Request(url, { method: 'POST', headers: { cookie: '__Host-poc-oidc-session=test', origin: ADMIN } }), ADMIN), false)
+})
+
+test('begin sends and stores the redirect URI of the host it runs on', async () => {
+  for (const origin of [ADMIN, PREVIEW]) {
+    const f = await fixture({ env: PROD, origin })
+    assert.equal(f.started.url.searchParams.get('redirect_uri'), `${origin}/api/auth/callback`)
+    assert.equal(f.store.transactions.get(await digest(f.started.state))?.redirectUri, `${origin}/api/auth/callback`)
+  }
+})
+
+test('a login begun on admin cannot be completed on preview', async () => {
+  const f = await fixture({ env: PROD, origin: ADMIN })
+  const url = new URL(f.request().url.replace(ADMIN, PREVIEW))
+  const response = await f.service.callback(at(f.config, PREVIEW, url, { headers: { cookie: f.started.cookie } }))
+  await rejected(response)
+  assert.equal(f.requests.some(r => r.url.endsWith('/token')), false)
+  assert.equal(f.store.transactions.size, 0, 'The transaction is consumed: single use')
+  assert.equal(f.identities.length, 0)
+})
+
+test('begin rejects unlisted, unconfigured and unstamped hosted origins', async () => {
+  const f = await fixture({ env: PROD })
+  for (const origin of ['https://evil.example.invalid', WORKER_PREVIEW_ORIGIN, LOOPBACK_ORIGIN]) {
+    await assert.rejects(f.service.begin(new Request(`${origin}/api/auth/login`, { headers: { [PUBLIC_ORIGIN_HEADER]: origin } })), UntrustedOrigin)
+  }
+  await assert.rejects(f.service.begin(new Request(`${ADMIN}/api/auth/login`)), UntrustedOrigin)
+  await assert.rejects(f.service.begin(new Request(`${ADMIN}/api/auth/login`, { headers: { host: '127.0.0.1:3100' } })), UntrustedOrigin)
+})
+
+test('logout is bound to its own host and never throws for an untrusted host', async () => {
+  const f = await fixture({ env: PROD, origin: PREVIEW })
+  const headers = sessionHeaders(await f.service.callback(f.request()), f.config.sessionCookie)
+  const cookie = headers.get('cookie')!
+  assert.equal((await f.service.logout(f.site(`${PREVIEW}/api/auth/logout`, { method: 'POST', headers: { cookie, origin: ADMIN } }))).status, 403)
+  const untrusted = await f.service.logout(new Request(`${PREVIEW}/api/auth/logout`, { method: 'POST', headers: { cookie, origin: PREVIEW, [PUBLIC_ORIGIN_HEADER]: 'https://evil.example.invalid' } }))
+  assert.equal(untrusted.status, 403)
+  assert.equal(untrusted.headers.get('cache-control'), 'no-store')
+  assert(await f.service.session(headers))
+  assert.equal((await f.service.logout(f.site(`${PREVIEW}/api/auth/logout`, { method: 'POST', headers: { cookie, origin: PREVIEW } }))).status, 200)
 })

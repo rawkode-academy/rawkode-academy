@@ -9,12 +9,12 @@ import {authConfig} from './src/auth/config'
 
 const secret = cloudflare.env.PAYLOAD_SECRET || process.env.PAYLOAD_SECRET
 if (!secret) throw new Error('Run bun run setup to generate isolated local secrets first')
+const auth = authConfig(cloudflare.env)
 const log = (level:string) => (value:unknown, message?:string) => console.log(JSON.stringify({level, message, value},(_key,item)=>item instanceof Error?{name:item.name,message:item.message}:item))
 export default buildConfig({
   admin: { user:'users', importMap:{baseDir:path.resolve(process.cwd())},components:{beforeLogin:['./src/components/AcademyLogin#AcademyLogin']} },
-  csrf:[authConfig(cloudflare.env).origin],
-  custom:{oidcOrigin:authConfig(cloudflare.env).origin},
-  collections:createCollections(authConfig(cloudflare.env),cloudflare.env.D1),
+  csrf:auth.origins,
+  collections:createCollections(auth,cloudflare.env.D1),
   graphQL:{disableIntrospectionInProduction:false},
   globals:optionalGlobals,
   secret,

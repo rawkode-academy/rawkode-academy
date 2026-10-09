@@ -1,6 +1,7 @@
 import * as oauth from 'oauth4webapi'
 import type {AuthConfig} from './config'
 import type {AuthStore} from './store'
+import {requestSite,UntrustedOrigin} from './origin'
 export type Identity = {issuer:string;subject:string;name?:string;email?:string}
 export type AuthUser = {id:number;collection:'users';role:'staff'|'customer';name?:string;oidcIssuer?:string;oidcSubject?:string}
 export type IdentityMapping = {map(identity:Identity):Promise<number>;user(id:number):Promise<AuthUser|null>}
@@ -15,14 +16,6 @@ export class OidcService {
   constructor(readonly config:AuthConfig,readonly store:AuthStore,readonly mapping:IdentityMapping,private readonly fetcher:typeof fetch=fetch,private readonly now:()=>number=()=>Math.floor(Date.now()/1000)) {}
   private cookie(name:string,value:string,maxAge:number) { return `${name}=${value}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}${this.config.local?'':'; Secure'}` }
   private headers() { return new Headers({'cache-control':'no-store','pragma':'no-cache','referrer-policy':'no-referrer'}) }
-  private validOrigin(request:Request) {
-    const url=new URL(request.url)
-    // Next normalizes its loopback request URL to localhost. Accept only this
-    // observed internal spelling when the actual Host is the registered 127.0.0.1.
-    if(this.config.local&&url.origin==='http://localhost:3100'&&request.headers.get('host')==='127.0.0.1:3100')url.hostname='127.0.0.1'
-    if(url.origin!==this.config.origin)throw new Error('Untrusted application origin')
-    return url
-  }
   private async discovery() {
     const issuer=new URL(this.config.issuer)
     const options={[oauth.customFetch]:this.fetcher,signal:AbortSignal.timeout(10000)}
@@ -35,26 +28,27 @@ export class OidcService {
     return server
   }
   async begin(request:Request):Promise<Response> {
-    this.validOrigin(request)
+    const site=requestSite(request,this.config)
     const server=await this.discovery()
     const state=oauth.generateRandomState(),binding=oauth.generateRandomState(),verifier=oauth.generateRandomCodeVerifier(),nonce=oauth.generateRandomNonce()
     await this.store.cleanup(this.now())
-    await this.store.putTransaction({stateHash:await digest(state),bindingHash:await digest(binding),verifier,nonce,redirectUri:this.config.redirectUri,expiresAt:this.now()+this.config.transactionTTL})
+    await this.store.putTransaction({stateHash:await digest(state),bindingHash:await digest(binding),verifier,nonce,redirectUri:site.redirectUri,expiresAt:this.now()+this.config.transactionTTL})
     const url=new URL(server.authorization_endpoint!)
-    for(const [name,value] of Object.entries({client_id:this.config.clientId,redirect_uri:this.config.redirectUri,response_type:'code',response_mode:'query',scope:'openid profile email',state,nonce,code_challenge:await oauth.calculatePKCECodeChallenge(verifier),code_challenge_method:'S256'}))url.searchParams.set(name,value)
+    for(const [name,value] of Object.entries({client_id:this.config.clientId,redirect_uri:site.redirectUri,response_type:'code',response_mode:'query',scope:'openid profile email',state,nonce,code_challenge:await oauth.calculatePKCECodeChallenge(verifier),code_challenge_method:'S256'}))url.searchParams.set(name,value)
     const headers=this.headers();headers.set('location',url.href);headers.append('set-cookie',this.cookie(this.config.transactionCookie,binding,this.config.transactionTTL))
     return new Response(null,{status:302,headers})
   }
   async callback(request:Request):Promise<Response> {
     const headers=this.headers();headers.append('set-cookie',this.cookie(this.config.transactionCookie,'',0))
     try {
-      const url=this.validOrigin(request)
-      if(url.origin+url.pathname!==this.config.redirectUri)throw new Error('Wrong callback')
+      const site=requestSite(request,this.config),url=site.url
+      if(url.origin+url.pathname!==site.redirectUri)throw new Error('Wrong callback')
       for(const key of ['state','code','error','iss'])if(url.searchParams.getAll(key).length>1)throw new Error('Duplicate callback parameter')
       const state=url.searchParams.get('state'),binding=readCookie(request.headers,this.config.transactionCookie)
       if(!state||!binding||!/^[A-Za-z0-9_-]{32,128}$/.test(state))throw new Error('Missing transaction')
       const tx=await this.store.consumeTransaction(await digest(state),await digest(binding),this.now())
-      if(!tx||tx.redirectUri!==this.config.redirectUri)throw new Error('Expired or replayed transaction')
+      // A login begun on one host can never be completed on another.
+      if(!tx||tx.redirectUri!==site.redirectUri)throw new Error('Expired or replayed transaction')
       const server=await this.discovery()
       const client:oauth.Client={client_id:this.config.clientId,id_token_signed_response_alg:'RS256',[oauth.clockTolerance]:0}
       const params=oauth.validateAuthResponse(server,client,url.searchParams,state)
@@ -92,8 +86,10 @@ export class OidcService {
     return {user,expiresAt:session.expiresAt}
   }
   async logout(request:Request):Promise<Response> {
-    this.validOrigin(request)
-    if(request.headers.get('origin')!==this.config.origin)return Response.json({error:'Forbidden'},{status:403,headers:this.headers()})
+    let origin:string
+    try {origin=requestSite(request,this.config).origin}
+    catch(error) {if(error instanceof UntrustedOrigin)return Response.json({error:'Forbidden'},{status:403,headers:this.headers()});throw error}
+    if(request.headers.get('origin')!==origin)return Response.json({error:'Forbidden'},{status:403,headers:this.headers()})
     const token=readCookie(request.headers,this.config.sessionCookie)
     if(token)await this.store.deleteSession(await digest(token))
     const headers=this.headers();headers.append('set-cookie',this.cookie(this.config.sessionCookie,'',0))

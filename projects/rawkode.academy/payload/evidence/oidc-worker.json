@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "at": "2026-10-04T16:26:35.399Z",
+  "at": "2026-10-09T16:34:03.214Z",
   "runtime": "local Cloudflare workerd/D1",
   "checks": [
     "Opaque session resolves synthetic customer; anonymous/expired denied; profile allowlist",

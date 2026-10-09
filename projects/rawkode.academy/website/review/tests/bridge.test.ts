@@ -1,4 +1,6 @@
 // @vitest-environment node
+import { existsSync, readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { describe, it, expect, vi } from "vitest";
 import { reviewBridge, reviewReturnPath } from "../bridge";
 const origin = "https://preview.rawkode.academy";
@@ -112,5 +114,17 @@ describe("same-origin preview bridge", () => {
     expect((await reviewBridge(new Request(`${origin}/api/review/media`), revoked.env)).status).toBe(404);
     expect((await reviewBridge(new Request(`${origin}/api/review/media`), revoked.env)).status).toBe(404);
     expect(revoked.fetch).toHaveBeenCalledTimes(2);
+  });
+  it("never forwards a browser-supplied public origin header", async () => {
+    const { env, fetch } = setup();
+    await reviewBridge(new Request(`${origin}/api/review?videoId=10`, { headers: { "x-academy-public-origin": "https://admin.rawkode.academy" } }), env);
+    await reviewBridge(new Request(`${origin}/api/review`, { method: "POST", headers: { origin, "content-type": "application/json", "x-academy-public-origin": "https://admin.rawkode.academy" }, body: "{}" }), env);
+    expect(fetch).toHaveBeenCalledTimes(2);
+    for (const [sent] of fetch.mock.calls) expect(sent.headers.has("x-academy-public-origin")).toBe(false);
+  });
+  const built = fileURLToPath(new URL("../../dist-review/server/wrangler.json", import.meta.url));
+  it.skipIf(!existsSync(built))("built review Worker binds the Payload ReviewBridge entrypoint", () => {
+    const services = JSON.parse(readFileSync(built, "utf8")).services as { binding: string; service: string; entrypoint?: string }[];
+    expect(services.find(service => service.binding === "REVIEW_BACKEND")).toMatchObject({ service: "rawkode-academy-payload", entrypoint: "ReviewBridge" });
   });
 });

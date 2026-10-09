@@ -73,14 +73,29 @@
     "unresolvedCodeBlockersForLocalScope": []
   },
   "currentDefaults": {
-    "staffSubjects": [],
+    "staffSubjects": [
+      "HmYDQjc3JVFo7visJIL5FneGFzNAJjDT"
+    ],
     "localStaffFallback": false,
     "syntheticSessionsRevoked": true
   },
   "deployment": {
     "authorizedByCoordinatingChat": true,
     "performedHere": false,
-    "hostBlocker": "admin.rawkode.academy is incompatible with preview.rawkode.academy callback under the current single-origin and host-only cookie contract",
+    "hostResolution": {
+      "model": "direct (soft stamp) + ReviewBridge service-binding entrypoint (hard gate)",
+      "directOrigins": [
+        "https://admin.rawkode.academy"
+      ],
+      "bridgeOrigins": [
+        "https://preview.rawkode.academy"
+      ],
+      "tests": [
+        "tests/oidc.test.ts",
+        "tests/ingress.test.ts",
+        "tests/wrangler-config.test.ts"
+      ]
+    },
     "remoteMigrationRunnerVerified": false,
     "details": "deployment-prerequisites.md"
   },
@@ -94,23 +109,25 @@
     "No credentials or real staff subjects copied or invented"
   ],
   "sha256": {
-    "src/auth/config.ts": "14afa0db64c5eed833c248ea25e5e746d181feb8695be7fa09e39c402203cd03",
-    "src/auth/oidc.ts": "4578f3d858966d2c63c378aa2845ece15d2f87b41f7ae91d736ec62d476ce76f",
+    "src/auth/config.ts": "0bc253819e2a29c8ff9a8d396478349493ccfecfb31ef66844eec0becd27af18",
+    "src/auth/oidc.ts": "7ddba3c2613daf396d3d614a7acd6bd616858d4f3b9dadd1972bd4dbf9641a70",
     "src/auth/store.ts": "a872295af807b781394d38f11c5491164d88176413199c5a6782dbf53ecc3cfa",
-    "src/auth/payload.ts": "1799a07a5cbed3fcb78ba5db3dc77048a8182bd6eed386714a9f792d2fa13149",
+    "src/auth/payload.ts": "89385c28edd205ba0e91233fde1766706887fc527440fb376abe92e002424cae",
     "src/auth/access.ts": "311c7ebd5aa15cc57b4ae43dfd606de6852adbad1c5b05922b3e9627c0c686ed",
-    "src/auth/csrf.ts": "a023ce876ccebfe861ce2e413097d9645f25f5d24ff4f64807323ee5a6bfb24b",
-    "src/auth/guard.ts": "8bb7602dae73c9a249337ac2124937d8e8ea93bb67d1be8a58a5ea316a25d72e",
-    "src/auth/runtime.ts": "1aea2e2b68d796623e36e21575bcd2f0dc206390ccaa5ccffbb96f9b9697fd86",
-    "src/cloudflare.ts": "9e3d38d6530adbac5f3d099daeb889fa8b8e7b05fce1a074533a47aca141116d",
-    "src/collections.ts": "d93fe51b9fcfeb141309e95b9d3598cf9b032ec9a84a06790e9da10916282410",
+    "src/auth/csrf.ts": "a4a0c7215e4c508b0fd92d6df083d820014e6be76e4038979ba41a7647e5f8e2",
+    "src/auth/guard.ts": "d64658e5a3306bc5fc468cbd29753f685394c323ca825065f2321bd0f2447f1b",
+    "src/auth/runtime.ts": "d7694518d721bd8d177d9f82c0e15f4675d6a090ec7f8021c63274388feb8f1c",
+    "src/cloudflare.ts": "267e4bb0beeae62854a1098b1da89bc7c748c0304f780f0128a5f5340577cfa0",
+    "src/collections.ts": "453c7a0c62e7409ee1c5190506f6551db6e00fa236ad26aabfcc8d0a36920355",
     "src/pipeline.ts": "298593e919ef1dd87d2238f2fcc660866fa78c1a59de11f3841aa89ad73ef955",
     "src/mcp.ts": "432874dcf42f73caed49c6771d377633c37706470eb0cbb882601d0f4bb962f7",
-    "worker.ts": "5ce6468293c73667e16032c3471531511796747a0322979b258df6a42254216f",
-    "payload.config.ts": "84ff3a6bcce1efbc8da386cfbe57879ff5c9e54d47678a1f831d8043bdfa31d1",
-    "wrangler.jsonc": "4d5934d9c8220b34cbd4018738d0446990e10a023cc2a7951760ce50c3cd7e2c",
-    "package.json": "1d3b2a43b695cf07a8eb2a43ff1a5c3e4d582bcddb46dea6e6f055c984b6c052",
+    "worker.ts": "1b0a6aeaa81ef1ed80f4b679190c6ece46710daa035d39ecfec610ef2994b134",
+    "payload.config.ts": "9e28623f77c6b5330ebf1346e6ae2f0b2f8a2ed3995bafe170e2993d6eee8d72",
+    "wrangler.jsonc": "0851cea6a9ed8ab73513e92cc84a72eb1099dba9945b0b49707f236c33e63859",
+    "package.json": "7677451cc94563b6da4d70a72a9c474ae045d8d8686863564530af73b1fded06",
     "package-lock.json": "3cb4411228715c1e5114e3154c236640f49b86224dcd9fdf05e50ec3cf5f8c4e",
-    "src/migrations/20261004_161607_oidc.ts": "90ecb02a46e0943bec1de0fa41cc11929a62662ab543ba12ecd12b8ed3268c54"
+    "src/migrations/20261004_161607_oidc.ts": "90ecb02a46e0943bec1de0fa41cc11929a62662ab543ba12ecd12b8ed3268c54",
+    "src/auth/origin.ts": "15024f0341f0c8f5de832fa6a73515ccfa3e3fc2475a171b888be7cf78194711",
+    "src/ingress.ts": "cb9e0cd300a11badd3976bb319de74dab9ce613a915a998d3d89d4222edf9c85"
   }
 }

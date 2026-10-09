@@ -10,7 +10,7 @@ const require = createRequire(import.meta.url)
 const wrangler = createRequire(require.resolve('wrangler/package.json'))
 const { build } = wrangler('esbuild'), { Miniflare } = wrangler('miniflare')
 const directory = await mkdtemp(join(tmpdir(), 'review-intake-worker-'))
-const bundle = async (contents: string) => (await build({ stdin: { contents, resolveDir: process.cwd(), loader: 'ts' }, bundle: true, write: false, format: 'esm', platform: 'browser', target: 'es2022' })).outputFiles[0].text
+const bundle = async (contents: string) => (await build({ stdin: { contents, resolveDir: process.cwd(), loader: 'ts' }, bundle: true, write: false, format: 'esm', platform: 'browser', target: 'es2022', external: ['cloudflare:workers'] })).outputFiles[0].text
 const gateway = await bundle(`import { reviewBridge } from '../website/review/bridge'; export default { fetch: reviewBridge }`)
 const backend = await bundle(`
 import { ReviewIntake } from './src/review/intake';
@@ -18,7 +18,8 @@ import { ReviewStore } from './src/review/store';
 import { createIntakeHandlers } from './src/review/intake-http';
 import { uploadSource } from './src/review/intake-storage';
 import { reviewFailure } from './src/review/http';
-export default { async fetch(request,env) {
+import { WorkerEntrypoint } from 'cloudflare:workers';
+const handler = { async fetch(request,env) {
   if (new URL(request.url).pathname === '/fixture-length') {
     const size=Number(new URL(request.url).searchParams.get('size'));
     const body=new ReadableStream({start(controller){controller.enqueue(new Uint8Array(size));controller.close()}});
@@ -27,14 +28,18 @@ export default { async fetch(request,env) {
   }
   // Explicit local identity fixture; production OIDC is outside this check.
   const actor={id:1,collection:'users',role:'staff'};
-  const review={dependencies:{video:async id=>({id,legacyId:'fixture'})}};
+  const review={dependencies:{video:async id=>({id,legacyId:'fixture'})},validateThumbnail:async()=>{}};
   const intake=new ReviewIntake(new ReviewStore(env.D1),env.R2,review);
   const handlers=createIntakeHandlers(async()=>({intake,actor,origin:'https://preview.rawkode.academy'}));
   return handlers[request.method](request);
-}}`)
+}};
+export default handler;
+// Mirrors worker.ts: the website binds the named ReviewBridge entrypoint, not the default one.
+export class ReviewBridge extends WorkerEntrypoint { fetch(request) { return handler.fetch(request, this.env) } }
+`)
 const manifest = (contents: string) => ({ mainModule: 'worker.js', modules: { 'worker.js': { type: 'esm', contents } } })
 const runtime = new Miniflare({ workers: [
-  { config: { name: 'gateway', manifest: manifest(gateway), compatibilityDate: '2026-10-01', env: { REVIEW_ORIGIN: { type: 'text', value: 'https://preview.rawkode.academy' }, REVIEW_BACKEND: { type: 'worker', worker: 'backend' } } } },
+  { config: { name: 'gateway', manifest: manifest(gateway), compatibilityDate: '2026-10-01', env: { REVIEW_ORIGIN: { type: 'text', value: 'https://preview.rawkode.academy' }, REVIEW_BACKEND: { type: 'worker', worker: 'backend', exportName: 'ReviewBridge' } } } },
   { config: { name: 'backend', manifest: manifest(backend), compatibilityDate: '2026-10-01', env: { D1: { type: 'd1', id: 'intake-fixture' }, R2: { type: 'r2', name: 'intake-fixture' } } } },
 ], isolatedResourcePersistencePath: directory, telemetry: { enabled: false } })
 try {
@@ -45,7 +50,7 @@ try {
   const checksum = Buffer.from(await crypto.subtle.digest('SHA-256', bytes)).toString('hex')
   const post = async (input: object) => runtime.dispatchFetch(`${origin}/api/review/uploads`, { method: 'POST', headers: { origin, 'content-type': 'application/json' }, body: JSON.stringify(input) })
   const beginInput = { action: 'begin', commandId: crypto.randomUUID(), videoId: 10, bytes: bytes.length, checksum, contentType: 'video/mp4', metadata: { title: 'Native binary fixture', description: 'Not actual playable media' } }
-  const begin = await post(beginInput); assert.equal(begin.status, 200)
+  const begin = await post(beginInput); assert.equal(begin.status, 200, await begin.clone().text())
   const session = await begin.json() as { uploadUrl: string; sessionId: string }
   assert.deepEqual(await (await post(beginInput)).json(), session)
   const put = (body: Uint8Array, url = session.uploadUrl, extra = {}) => runtime.dispatchFetch(origin + url, { method: 'PUT', headers: { origin, 'content-type': 'video/mp4', 'content-length': String(bytes.length), ...extra }, body })

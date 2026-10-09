@@ -86,9 +86,9 @@ try {
     videoId: Number(video.id),
     tokens,
     expiresAt,
-    origin: settings.origin,
+    origin: settings.bridgeOrigins[0] ?? settings.directOrigins[0],
   }, null, 2), {mode: 0o600})
-  console.log(JSON.stringify({runId, videoId: Number(video.id), origin: settings.origin, expiresAt}))
+  console.log(JSON.stringify({runId, videoId: Number(video.id), origin: settings.bridgeOrigins[0] ?? settings.directOrigins[0], expiresAt}))
 } finally {
   await payload.destroy()
   rmSync(bindingConfig, {force: true})

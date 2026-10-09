@@ -15,6 +15,8 @@ import { createReviewHandlers } from '../src/review/http'
 import { byteRange, mediaResponse } from '../src/review/media'
 import { digestBytes, fixtureChecksum, verifiedDeliverable, stageReleaseObject } from '../src/review/artifacts'
 import { Catalogue } from '../src/catalogue'
+import { authConfig } from '../src/auth/config'
+import { publishedMediaUrl } from '../src/review/host'
 
 const staff: ReviewActor = { id: 1, collection: 'users', role: 'staff' }
 const client: ReviewActor = { id: 2, collection: 'users', role: 'customer' }
@@ -22,7 +24,7 @@ const stranger: ReviewActor = { id: 3, collection: 'users', role: 'customer' }
 const metadata = { title: 'Reviewed cut', description: 'Approved public summary', chapters: [{ title: 'Start', startTime: 0 }] }
 const command = (action: string, data = {}) => ({ action, videoId: 10, commandId: crypto.randomUUID(), ...data })
 
-async function harness(t: TestContext) {
+async function harness(t: TestContext, publicMediaUrl = (videoId: number, publicationId: string) => `https://preview.example/api/review/published-media?videoId=${videoId}&publicationId=${publicationId}`) {
   const sqlite = new DatabaseSync(':memory:')
   t.after(() => sqlite.close())
   sqlite.exec('PRAGMA foreign_keys=ON')
@@ -79,7 +81,7 @@ async function harness(t: TestContext) {
     async source(id) { await sourceWait?.(); return { checksum: sources.get(id)! } },
     async deliverable(id) { return { checksum: sources.get(id)!, durationMs: 60000, contentType: 'video/mp4' } },
     async stageRelease(videoId, publicationId, mediaId, checksum) { return { key: `review-releases/${videoId}/${publicationId}/${checksum}.mp4`, etag: 'release-etag', checksum: sources.get(mediaId)!, bytes: 10, contentType: 'video/mp4' } },
-    publicMediaUrl: (videoId, publicationId) => `https://preview.example/api/review/published-media?videoId=${videoId}&publicationId=${publicationId}`,
+    publicMediaUrl,
   })
   async function prepare() {
     const revision = await service.execute(staff, command('create-revision', { mediaId: 20, deliverableMediaId: 21, durationMs: 60000, metadata }))
@@ -417,4 +419,17 @@ test('thumbnail snapshots remain video-owned, private and unchanged on older rev
   await assert.rejects(h.service.read(10, stranger), { status: 404 })
   await h.service.execute(staff, command('revoke', { userId: 2 }))
   await assert.rejects(h.service.revision(10, String(first.revisionId), client), { status: 404 })
+})
+
+test('published media URL is canonical whichever host runs publish', async t => {
+  const auth = authConfig({ OIDC_DIRECT_ORIGINS: '["https://admin.rawkode.academy"]', OIDC_BRIDGE_ORIGINS: '["https://preview.rawkode.academy"]', REVIEW_PUBLIC_MEDIA_ORIGIN: 'https://admin.rawkode.academy' })
+  for (const origin of auth.origins) {
+    const h = await harness(t, publishedMediaUrl(auth)), revision = await h.prepare()
+    const decision = await h.approve(revision)
+    const handlers = createReviewHandlers(async () => ({ service: h.service, actor: staff, origin }))
+    const response = await handlers.POST(new Request(`${origin}/api/review`, { method: 'POST', headers: { origin, 'content-type': 'application/json' }, body: JSON.stringify(command('publish', { revisionId: revision.revisionId, expectedReviewVersion: 1, decisionId: decision.decisionId })) }))
+    assert.equal(response.status, 200, await response.clone().text())
+    const projection = JSON.parse(String(h.sqlite.prepare('SELECT document FROM video_publications').get()?.document))
+    assert.match(projection.streamUrl, /^https:\/\/admin\.rawkode\.academy\/api\/review\/published-media\?videoId=10&publicationId=/, origin)
+  }
 })

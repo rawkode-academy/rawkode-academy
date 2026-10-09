@@ -24,10 +24,14 @@ There is **no `OIDC_CLIENT_SECRET` requirement** and provider secrets must not b
 | --- | --- | --- |
 | `OIDC_ISSUER` | `https://id.rawkode.academy` | Same exact issuer |
 | `OIDC_CLIENT_ID` | `rawkode-academy-preview` | Same exact client ID |
-| `OIDC_REDIRECT_URI` | `http://127.0.0.1:3100/api/auth/callback` | `https://admin.rawkode.academy/api/auth/callback` for this admin deployment; `https://preview.rawkode.academy/api/auth/callback` for the customer preview app |
+| `OIDC_DIRECT_ORIGINS` | `["http://127.0.0.1:3100"]` (default) | `["https://admin.rawkode.academy"]`; PR previews and review-runtime use `["https://pr-local-rawkode-academy-payload.rawkodeacademy.workers.dev"]` |
+| `OIDC_BRIDGE_ORIGINS` | `[]` (default); bridge origins must be `https` | `["https://preview.rawkode.academy"]`, accepted only through the `ReviewBridge` entrypoint; PR previews and review-runtime use `[]` |
+| `REVIEW_PUBLIC_MEDIA_ORIGIN` | `http://127.0.0.1:3100` (default: first direct origin) | `https://admin.rawkode.academy`; must be a direct origin; PR previews and review-runtime use the pr-local origin |
 | `OIDC_STAFF_SUBJECTS` | JSON array; default `[]` | Explicit JSON array of approved Academy subject IDs; default deny |
 | `OIDC_SESSION_TTL_SECONDS` | `3600`; allowed 60–3600 | Same bound; further capped by ID/access-token expiry |
-| `POC_DEV_LOCAL_AUTH` | `false` by default; literal `true` is an explicit development opt-in | Must be `false`; startup rejects `true` with the production callback |
+| `POC_DEV_LOCAL_AUTH` | `false` by default; literal `true` is an explicit development opt-in | Must be `false`; startup rejects `true` unless every origin is loopback |
+
+The redirect URI is no longer configured: each request uses `<validated origin>/api/auth/callback`, stored per transaction. Origin lists accept only exact registered origins. Local values come from `wrangler dev --var` (`scripts/preview-local.mjs`) and the gitignored `.runtime/local.vars` (`next dev`, seed scripts), never from `.dev.vars`, which is shipped to remote previews as `--secrets-file`.
 
 Scope and token-auth method are fixed in code, not guessed from environment variables. Existing `D1`, `PAYLOAD_SECRET` and `PIPELINE_CALLBACK_SECRET` remain local application bindings/secrets. No additional signing secret is needed for opaque OIDC sessions: D1 stores only the random session token's SHA-256 hash.
 
@@ -37,7 +41,7 @@ The development flag is a configuration restriction, not a deployment-prevention
 
 `GET /api/auth/login` discovers the pinned issuer and creates independent random state, nonce, PKCE verifier and browser binding. Only trusted same-issuer HTTPS endpoints are used. A ten-minute D1 transaction stores the verifier/nonce; the browser receives an opaque host-only HttpOnly SameSite=Lax transaction cookie. Production cookies are Secure and use the `__Host-` prefix.
 
-`GET /api/auth/callback` requires the configured origin/path, one state/code/error parameter each, matching browser binding, and an unexpired transaction. One `DELETE ... WHERE state_hash=? AND binding_hash=? AND expires_at>? RETURNING ...` statement consumes the transaction before exchange. Replay and concurrent callback consumption cannot reuse it. A failed exchange requires starting again.
+`GET /api/auth/callback` requires the validated request origin with the exact callback path, a transaction whose stored redirect URI matches that host, one state/code/error parameter each, matching browser binding, and an unexpired transaction. One `DELETE ... WHERE state_hash=? AND binding_hash=? AND expires_at>? RETURNING ...` statement consumes the transaction before exchange. Replay and concurrent callback consumption cannot reuse it. A failed exchange requires starting again.
 
 The pinned `oauth4webapi` library validates the authorization response and ID-token claims, followed by explicit JWKS signature validation. Issuer, audience/authorized party, expiry, issued-at and nonce are checked. Userinfo must match the verified ID-token subject. The POC uses public-client token authentication and sends the exact registered callback and original verifier. Provider tokens stay in memory for that request, are not persisted, and are never returned to the browser. No refresh-token flow or silent session extension is implemented.
 
