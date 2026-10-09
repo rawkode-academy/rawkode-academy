@@ -192,8 +192,12 @@ describe("staff upload intake", () => {
     const wrapper = mount(StaffUploadPanel); wrappers.push(wrapper); await flushPromises();
     const input = wrapper.find('input[type="file"]').element as HTMLInputElement;
     Object.defineProperty(input, "files", { value: [source] }); await wrapper.find('input[type="file"]').trigger("change");
-    await button(wrapper, "Upload and assign review").trigger("click"); await flushPromises();
-    await button(wrapper, "Resume upload and assign review").trigger("click"); await flushPromises();
+    await button(wrapper, "Upload and assign review").trigger("click");
+    // The checksum uses File.arrayBuffer() and crypto.subtle.digest, which can
+    // settle after a single flushPromises(), so wait for the resulting UI state.
+    await vi.waitFor(() => expect(button(wrapper, "Resume upload and assign review")).toBeDefined());
+    await button(wrapper, "Resume upload and assign review").trigger("click");
+    await vi.waitFor(() => expect(wrapper.text()).toContain("Media processing is not enabled in this preview yet."));
     const begins = fetch.mock.calls.filter(([url, init]) => url === "/api/review/uploads" && init?.method === "POST" && JSON.parse(String(init.body)).action === "begin");
     expect(begins).toHaveLength(1);
     expect(wrapper.text()).toContain("Media processing is not enabled in this preview yet.");
