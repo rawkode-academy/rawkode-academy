@@ -2,7 +2,8 @@ import config from '@payload-config'
 import { getPayload } from 'payload'
 import { cloudflare } from '../cloudflare'
 import { authConfig } from '../auth/config'
-import { actorFromUser, ReviewError, type ReviewActor } from './contracts'
+import { ReviewError, type ReviewActor } from './contracts'
+import { publishedMediaUrl, reviewRequestActor } from './host'
 import { ReviewStore } from './store'
 import { ReviewService } from './service'
 import { ReviewIntake } from './intake'
@@ -50,16 +51,16 @@ export async function reviewBackend() {
       if (content.checksum !== checksum) throw new ReviewError(409, 'Deliverable changed since approval')
       return stageReleaseObject(cloudflare.env.R2, `review-releases/${videoId}/${publicationId}/${checksum}.mp4`, content.bytes, checksum, probe.contentType)
     },
-    publicMediaUrl: (videoId, publicationId) => `${auth.origin}/api/review/published-media?videoId=${videoId}&publicationId=${publicationId}`,
+    publicMediaUrl: publishedMediaUrl(auth),
   })
   const intake = new ReviewIntake(store, cloudflare.env.R2, service, configuredMediaAdapter(cloudflare.env, store))
   const publicationAvailable = async (videoId: number) => (auth.local && fixtureEnabled) || Boolean(await store.one('SELECT a.media_id FROM video_review_state s JOIN video_revisions r ON r.id=s.current_revision JOIN review_intake_assets a ON a.media_id=r.deliverable_media_id AND a.video_id=s.video_id AND a.kind=? WHERE s.video_id=?', 'deliverable', videoId))
-  return { payload, store, service, intake, assets, origin: auth.origin, publicationAvailable, bucket: cloudflare.env.R2 }
+  return { payload, store, service, intake, assets, auth, publicationAvailable, bucket: cloudflare.env.R2 }
 }
 export async function reviewRuntime(request: Request) {
   const backend = await reviewBackend()
   const { user } = await backend.payload.auth({ headers: request.headers })
-  return { ...backend, actor: actorFromUser(user) }
+  return { ...backend, ...reviewRequestActor(request.headers, backend.auth, user) }
 }
 // Call only after a revision grant has been checked. Public delivery uses a
 // committed release object key and never resolves an upload filename.

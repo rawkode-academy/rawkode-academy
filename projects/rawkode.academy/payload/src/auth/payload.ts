@@ -3,6 +3,7 @@ import type {AuthConfig} from './config'
 import {isStaff} from './access'
 import {digest,readCookie,OidcService,type AuthUser,type IdentityMapping} from './oidc'
 import {D1AuthStore} from './store'
+import {requestOrigin} from './origin'
 
 export function identityMapping(payload:Payload,config:AuthConfig):IdentityMapping {
   return {
@@ -38,7 +39,11 @@ export function usersCollection(config:AuthConfig,db:D1Database):CollectionConfi
   return {
     slug:'users',admin:{useAsTitle:'name'},
     auth:{useSessions:true,disableLocalStrategy:config.localAuth?undefined:{enableFields:true,optionalPassword:true},strategies:[{
-      name:'academy-oidc',authenticate:async({headers,payload})=>({user:headers.has('origin')&&headers.get('origin')!==config.origin?null:(await oidcService(payload,config,db).session(headers))?.user??null}),
+      name:'academy-oidc',authenticate:async({headers,payload})=>{
+        const origin=requestOrigin(headers,config)
+        if(!origin||(headers.has('origin')&&headers.get('origin')!==origin))return {user:null}
+        return {user:(await oidcService(payload,config,db).session(headers))?.user??null}
+      },
     }]},
     access:{
       read:({req})=>isStaff(req.user)?true:req.user?.collection==='users'?{id:{equals:req.user.id}}:false,

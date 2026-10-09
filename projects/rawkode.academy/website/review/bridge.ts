@@ -2,7 +2,8 @@ export type ReviewEnvironment = {
   REVIEW_ORIGIN?: string;
   REVIEW_BACKEND?: { fetch(request: Request): Promise<Response> };
 };
-const routes: Record<string, string[]> = {
+// Mirrored by REVIEW_BRIDGE_ROUTES in payload/src/ingress.ts, which enforces it again.
+export const reviewRoutes: Readonly<Record<string, readonly string[]>> = {
   "/api/auth/login": ["GET"], "/api/auth/callback": ["GET"],
   "/api/auth/session": ["GET"], "/api/auth/logout": ["POST"],
   "/api/review": ["GET", "POST"],
@@ -24,7 +25,7 @@ export async function reviewBridge(request: Request, env: ReviewEnvironment): Pr
   const url = new URL(request.url);
   const fail = (status: number, error: string) => Response.json({ error }, { status, headers: privateHeaders });
   if (!["https://preview.rawkode.academy", "http://127.0.0.1:3100"].includes(env.REVIEW_ORIGIN ?? "") || url.origin !== env.REVIEW_ORIGIN) return fail(403, "Untrusted preview origin");
-  const methods = routes[url.pathname];
+  const methods = reviewRoutes[url.pathname];
   if (!methods) return fail(404, "Not found");
   if (!methods.includes(request.method)) return fail(405, "Method not allowed");
   if (["POST", "PUT"].includes(request.method) && request.headers.get("origin") !== env.REVIEW_ORIGIN) return fail(403, "Untrusted request origin");
@@ -42,7 +43,8 @@ export async function reviewBridge(request: Request, env: ReviewEnvironment): Pr
   headers.set("host", url.host);
   headers.set("cookie", cookies.filter(value => allowedCookies.has(value.split("=", 1)[0]!)).join("; "));
   try {
-    // The binding selects the backend; URL and Origin remain the browser's origin.
+    // The binding targets the Payload ReviewBridge entrypoint, which stamps the trusted
+    // public origin itself. URL and Origin remain the browser's origin.
     const response = await env.REVIEW_BACKEND.fetch(new Request(request, { headers, redirect: "manual" }));
     const outgoing = new Headers(response.headers);
     // Explicit append keeps callback's transaction-clear and session-set separate.
