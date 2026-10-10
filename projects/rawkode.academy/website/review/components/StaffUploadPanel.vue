@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { ApiError, requestJSON } from "../api";
+import { createReviewId, isReviewId } from "../id";
 import type { ReviewCustomer, UploadTarget } from "../types";
 
 const maximumBytes = 64 * 1024 * 1024;
@@ -53,7 +54,18 @@ function restorePending() {
     const value = sessionStorage.getItem(pendingKey);
     if (value) {
       const { grantCommandId, ...stored } = JSON.parse(value) as StoredUpload;
-      pending.value = { ...stored, shareCommandId: stored.shareCommandId ?? grantCommandId ?? crypto.randomUUID(), revisionId: stored.revisionId ?? null, stage: stored.stage === "grant" ? "share" : stored.stage };
+      const input = {
+        ...stored.input,
+        commandId: isReviewId(stored.input.commandId) ? stored.input.commandId : createReviewId(),
+      };
+      const storedShareCommandId = stored.shareCommandId ?? grantCommandId;
+      pending.value = {
+        ...stored,
+        input,
+        shareCommandId: isReviewId(storedShareCommandId) ? storedShareCommandId : createReviewId(),
+        revisionId: stored.revisionId ?? null,
+        stage: stored.stage === "grant" ? "share" : stored.stage,
+      };
       selectedVideoId.value = pending.value.input.videoId;
       selectedCustomerId.value = pending.value.customerId;
       title.value = pending.value.input.metadata.title;
@@ -170,13 +182,13 @@ async function submit() {
         });
         metadata.thumbnailId = uploaded.thumbnailId;
       }
-      input = { action: "begin", commandId: pending.value?.input.commandId ?? crypto.randomUUID(), videoId: targetId, bytes: source.size, checksum: await digest(await source.arrayBuffer()), contentType: source.type as typeof sourceTypes[number], metadata };
+      input = { action: "begin", commandId: pending.value?.input.commandId && isReviewId(pending.value.input.commandId) ? pending.value.input.commandId : createReviewId(), videoId: targetId, bytes: source.size, checksum: await digest(await source.arrayBuffer()), contentType: source.type as typeof sourceTypes[number], metadata };
       if (pending.value && pending.value.fingerprint !== fingerprint(input)) savePending(null);
     } else if (resumable.value && pending.value) input = pending.value.input;
     else return;
     let item = pending.value;
     if (!item) {
-      item = { input, fingerprint: fingerprint(input), customerId, sessionId: null, shareCommandId: crypto.randomUUID(), revisionId: null, stage: "begin" };
+      item = { input, fingerprint: fingerprint(input), customerId, sessionId: null, shareCommandId: createReviewId(), revisionId: null, stage: "begin" };
       savePending(item);
     }
     if (!item.sessionId) {

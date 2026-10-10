@@ -1,5 +1,5 @@
 import { ActionError, defineAction } from "astro:actions";
-import { getCollection } from "astro:content";
+import { getEntry } from "@/lib/payload-content";
 import { z } from "astro/zod";
 import { env } from "cloudflare:workers";
 import {
@@ -19,8 +19,7 @@ const PushSubscriptionSchema = z.object({
 });
 
 async function getUpcomingLiveVideo(slug: string) {
-	const videos = await getCollection("videos");
-	const video = videos.find((entry) => entry.data.slug === slug);
+	const video = await getEntry("videos", { slug }, { view: "summary" });
 	if (!video) {
 		throw new ActionError({
 			code: "NOT_FOUND",

@@ -3,8 +3,8 @@ import type {AuthConfig} from './config'
 import type {AuthStore} from './store'
 import {requestSite,UntrustedOrigin} from './origin'
 export type Identity = {issuer:string;subject:string;name?:string;email?:string}
-export type AuthUser = {id:number;collection:'users';role:'staff'|'customer';name?:string;oidcIssuer?:string;oidcSubject?:string}
-export type IdentityMapping = {map(identity:Identity):Promise<number>;user(id:number):Promise<AuthUser|null>}
+export type AuthUser = {id:string;collection:'users';role:'staff'|'customer';name?:string;oidcIssuer?:string;oidcSubject?:string}
+export type IdentityMapping = {map(identity:Identity):Promise<string>;user(id:string):Promise<AuthUser|null>}
 export async function digest(value:string) { return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value))),b=>b.toString(16).padStart(2,'0')).join('') }
 export function readCookie(headers:Headers,name:string):string|null {
   const matches=(headers.get('cookie')??'').split(';').map(v=>v.trim()).filter(v=>v.startsWith(name+'='))

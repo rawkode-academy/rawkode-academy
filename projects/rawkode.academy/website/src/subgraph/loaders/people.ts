@@ -1,4 +1,4 @@
-import type { CollectionEntry } from "astro:content";
+import type { CollectionEntry } from "@/lib/payload-content";
 
 export type PersonEntry = CollectionEntry<"people">;
 
@@ -39,9 +39,9 @@ function parseName(fullName: string): { forename: string; surname: string } {
 }
 
 export async function listPeople(): Promise<PersonItem[]> {
-	const { getCollection } = await import("astro:content");
+	const { getAllCollection } = await import("@/lib/payload-content");
 
-	const items = await getCollection("people");
+	const items = await getAllCollection("people");
 	return items.map((e: PersonEntry) => {
 		const data = e.data;
 		const parsed = parseName(data.name);

@@ -4,6 +4,7 @@ import {
 	parseState,
 	exchangeCodeForTokens,
 	getUserInfo,
+	isIdentityDisabled,
 	PKCE_COOKIE_NAME,
 	SESSION_COOKIE_NAME,
 	SESSION_DURATION_SECONDS,
@@ -19,6 +20,12 @@ import {
 
 
 export const GET: APIRoute = async (context) => {
+	if (isIdentityDisabled(env as { PAYLOAD_PREVIEW_PR?: string })) {
+		return new Response("Sign-in callbacks are disabled in this review preview.", {
+			status: 503,
+			headers: { "Cache-Control": "no-store" },
+		});
+	}
 	const code = context.url.searchParams.get("code");
 	const state = context.url.searchParams.get("state");
 	const error = context.url.searchParams.get("error");
@@ -75,6 +82,7 @@ export const GET: APIRoute = async (context) => {
 		code,
 		context.url.origin,
 		codeVerifier,
+		env as { PAYLOAD_PREVIEW_PR?: string },
 	);
 	if (!tokens) {
 		console.error("[callback] Token exchange failed");
@@ -90,7 +98,10 @@ export const GET: APIRoute = async (context) => {
 	}
 
 	// Get user info
-	const userInfo = await getUserInfo(tokens.access_token);
+	const userInfo = await getUserInfo(
+		tokens.access_token,
+		env as { PAYLOAD_PREVIEW_PR?: string },
+	);
 	if (!userInfo?.sub) {
 		console.error("[callback] User info fetch failed");
 		await captureServerEvent(

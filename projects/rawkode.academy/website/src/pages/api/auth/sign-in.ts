@@ -1,9 +1,19 @@
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
-import { buildAuthorizationUrl, PKCE_COOKIE_NAME } from "@/lib/auth/server";
+import {
+	buildAuthorizationUrl,
+	isIdentityDisabled,
+	PKCE_COOKIE_NAME,
+} from "@/lib/auth/server";
 import { captureServerEvent, getDistinctId } from "@/server/analytics";
 
 export const GET: APIRoute = async (context) => {
+	if (isIdentityDisabled(env as { PAYLOAD_PREVIEW_PR?: string })) {
+		return new Response("Sign-in is disabled in this review preview.", {
+			status: 503,
+			headers: { "Cache-Control": "no-store" },
+		});
+	}
 	let returnTo = context.url.searchParams.get("returnTo") || "/";
 
 	// Fallback to Referer header if returnTo is a server island path
@@ -39,7 +49,11 @@ export const GET: APIRoute = async (context) => {
 		analytics,
 	);
 
-	const { url, codeVerifier } = await buildAuthorizationUrl(origin, returnTo);
+	const { url, codeVerifier } = await buildAuthorizationUrl(
+		origin,
+		returnTo,
+		env as { PAYLOAD_PREVIEW_PR?: string },
+	);
 
 	// Store code verifier in a secure, short-lived cookie for the callback
 	context.cookies.set(PKCE_COOKIE_NAME, codeVerifier, {

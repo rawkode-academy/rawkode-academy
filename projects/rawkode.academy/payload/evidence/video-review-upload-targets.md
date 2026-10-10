@@ -17,7 +17,7 @@ Paths below are relative to `projects/rawkode.academy/`, except the GitHub workf
 - `payload/app/(payload)/api/review/upload-targets/route.ts`, `payload/src/review/staff-http.ts`: POST draft creation and validation.
 - `payload/app/(payload)/api/review/thumbnail/route.ts`, `payload/src/review/thumbnails.ts`: private upload and revision-authorized delivery.
 - `payload/src/review/{contracts,intake,runtime,service}.ts`: thumbnail ownership validation, snapshot propagation and private poster URLs.
-- `payload/src/migrations/20261007_140000_review_thumbnails.ts`, `payload/src/migrations/index.ts`: immutable image associations and guarded rollback.
+- `payload/src/migrations-cuid2/cuid2_20261007_140000_review_thumbnails.ts`, `payload/src/migrations-cuid2/index.ts`: immutable image associations and guarded rollback in the fresh CUID2 chain.
 - `payload/tests/{staff-http,intake,review,thumbnails}.test.ts`, `payload/package.json`: regression coverage and standard test registration.
 - `website/review/{bridge,types}.ts`, `website/review/components/{StaffUploadPanel,ReviewPanel}.vue`, `website/review/tests/{bridge,ui}.test.ts`: target creation, optional image, poster rendering, private proxy and race tests.
 - `payload/env.cue`, `website/env.cue`: retained candidate deployment work, corrected preview migration dependency and generated `dist-review/server/wrangler.json` deployment config/toolchain.

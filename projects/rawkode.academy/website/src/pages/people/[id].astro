@@ -2,10 +2,9 @@
 import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
 const styles = academyLayout({ width: "reading" });
-export const prerender = true;
-
 import Page from "@/wrappers/page.astro";
-import { getCollection, getEntries, render } from "astro:content";
+import { getEntry, getEntries, getAllCollection } from "@/lib/payload-content";
+import CmsBody from "@/components/content/CmsBody.astro";
 import VideoFeed from "@/components/video/video-feed.astro";
 import ShowCard from "@/components/show/ShowCard.astro";
 import PersonJsonLd from "@/components/html/person-jsonld.astro";
@@ -14,26 +13,22 @@ import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { getPersonIdentityUrls } from "@/lib/person-identity-links";
 import { isNewsPublished } from "@/lib/news-publication";
+export const prerender = false;
 
-export async function getStaticPaths() {
-	const people = await getCollection("people");
-	return people.map((person) => ({
-		params: { id: person.data.id },
-		props: { person },
-	}));
-}
-
-const { person } = Astro.props;
+const personSlug = Astro.params.id;
+const person = personSlug ? await getEntry("people", { slug: personSlug }) : undefined;
+if (!person) return new Response(null, { status: 404 });
 
 const now = new Date();
-const videos = await getCollection("videos", ({ data }) => data.publishedAt <= now);
-const shows = await getCollection("shows", ({ data }) => data.publish);
-const technologies = await getCollection("technologies");
-const news = await getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now));
-const articles = await getCollection("articles", ({ data }) => data.publishedAt <= now);
-const techNameById = new Map(
-	technologies.map((t) => [t.id.replace(/\/index$/, ""), t.data.name] as const),
-);
+const [videos, shows, news, articles] = await Promise.all([
+	getAllCollection("videos", undefined, { personId: person.id }),
+	getAllCollection("shows", undefined, { personId: person.id }),
+	getAllCollection("news", undefined, { personId: person.id }),
+	getAllCollection("articles", undefined, { personId: person.id }),
+]);
+const publishedVideos = videos.filter((video) => video.data.publishedAt <= now);
+const publishedNews = news.filter((story) => isNewsPublished(story.data.publishedAt, now));
+const publishedArticles = articles.filter((article) => article.data.publishedAt <= now);
 
 // Helper to match references
 const matchRef = (
@@ -45,22 +40,22 @@ const matchRef = (
 };
 
 const hostedShows = shows.filter((show) =>
-	show.data.hosts.some((h) => matchRef(h, person.data.id)),
+	show.data.hosts.some((h) => matchRef(h, person.id)),
 );
 
-const guestVideos = videos.filter((video) =>
-	video.data.guests.some((g) => matchRef(g, person.data.id)),
+const guestVideos = publishedVideos.filter((video) =>
+	video.data.guests.some((g) => matchRef(g, person.id)),
 );
 
-const authoredNews = news
+const authoredNews = publishedNews
 	.filter((story) =>
-		story.data.authors.some((author) => matchRef(author, person.data.id)),
+		story.data.authors.some((author) => matchRef(author, person.id)),
 	)
 	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
 
-const authoredArticles = articles
+const authoredArticles = publishedArticles
 	.filter((article) =>
-		article.data.authors.some((author) => matchRef(author, person.data.id)),
+		article.data.authors.some((author) => matchRef(author, person.id)),
 	)
 	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
 
@@ -74,11 +69,12 @@ const formatPublishDate = (date: Date) =>
 // Prepare Show Summaries
 const showSummaries: ShowSummary[] = await Promise.all(
 	hostedShows.map(async (show) => {
-		const showVideos = videos.filter((v) => v.data.show?.id === show.data.id);
+		const showVideos = guestVideos.filter((v) => v.data.show?.id === show.id);
 		const hosts = await getEntries(show.data.hosts);
 
 		return {
-			id: show.data.id,
+			id: show.id,
+			slug: show.slug,
 			name: show.data.name,
 			status: show.data.status,
 			tagline: show.data.tagline,
@@ -102,7 +98,7 @@ const showSummaries: ShowSummary[] = await Promise.all(
 // Prepare Guest Videos for Feed
 const guestVideoFeed = guestVideos
 	.map((video) => ({
-		id: video.data.id,
+		id: video.id,
 		title: video.data.title,
 		thumbnailUrl: getVideoThumbnailUrl(video.data.id),
 		streamUrl: `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`,
@@ -119,8 +115,7 @@ const guestVideoFeed = guestVideos
 			new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
 	);
 
-// Render any biography MDX body content (most people have empty bodies)
-const { Content: BiographyContent } = await render(person);
+// Most profiles have no biography; all authored body content uses the finite renderer.
 const hasBiography = Boolean(person.body && person.body.trim().length > 0);
 
 // Build a data-driven description so each profile is unique to Google
@@ -138,7 +133,15 @@ for (const v of guestVideos) {
 const topTechNames = [...techCounts.entries()]
 	.sort((a, b) => b[1] - a[1])
 	.slice(0, 5)
-	.map(([id]) => techNameById.get(id) ?? id);
+	.map(([id]) => id);
+const topTechnologies = await Promise.all(
+	topTechNames.map(async (id) => [
+		id,
+		(await getEntry("technologies", { slug: id }))?.data.name ?? id,
+	] as const),
+);
+const techNameById = new Map(topTechnologies);
+const displayTechNames = topTechNames.map((id) => techNameById.get(id) ?? id);
 
 const showNames = hostedShows.map((s) => s.data.name);
 
@@ -160,7 +163,7 @@ const pageTitle = (() => {
 		return `${person.data.name}: Host of ${showNames[0]}`;
 	}
 	if (topTechNames.length > 0) {
-		return `${person.data.name}: Talks on ${topTechNames.slice(0, 2).join(" & ")}`;
+		return `${person.data.name}: Talks on ${displayTechNames.slice(0, 2).join(" & ")}`;
 	}
 	return person.data.name;
 })();
@@ -184,7 +187,7 @@ const pageDescription = (() => {
 		);
 	}
 	if (topTechNames.length > 0) {
-		parts.push(`covering ${topTechNames.slice(0, 4).join(", ")}`);
+		parts.push(`covering ${displayTechNames.slice(0, 4).join(", ")}`);
 	}
 	if (parts.length === 0) {
 		return `${person.data.name} on Rawkode Academy: interviews, live coding, and conversations with leaders in Cloud Native and open source.`;
@@ -192,7 +195,7 @@ const pageDescription = (() => {
 	return `${person.data.name}: ${parts.join(", ")}. Watch interviews, live coding, and technical discussions on Rawkode Academy.`;
 })();
 
-const profileUrl = new URL(`/people/${person.data.id}`, Astro.site).href;
+const profileUrl = new URL(`/people/${person.slug}`, Astro.site ?? Astro.url).href;
 
 const authoredSocialLinks = [
 	person.data.mastodon && {
@@ -273,7 +276,7 @@ const identityUrls = new Set(relMeUrls);
  rel="alternate"
  type="application/rss+xml"
  title={`Rawkode Academy: ${person.data.name} (RSS)`}
- href={`/api/feeds/people/${person.data.id}.xml`}
+ href={`/api/feeds/people/${person.slug}.xml`}
  />
  </Fragment>
 	<div class={[doc.section, doc.stack].join(" ")}>
@@ -308,7 +311,7 @@ const identityUrls = new Set(relMeUrls);
 			</div>
 		</header>
 
-		{hasBiography && <section class={styles.prose} aria-label="Biography"><BiographyContent /></section>}
+		{hasBiography && <section class={styles.prose} aria-label="Biography"><CmsBody entry={person} /></section>}
 		{noindex && <p class={doc.copy}>No published contributions yet.</p>}
 
 		{showSummaries.length > 0 && <section class={doc.stack} aria-labelledby="hosted-shows">
@@ -330,7 +333,7 @@ const identityUrls = new Set(relMeUrls);
 				{entries.map((entry) => <li class={doc.listItem}>
 					<article class={doc.stackSmall}>
 						<time class={doc.meta} datetime={entry.data.publishedAt.toISOString()}>{formatPublishDate(entry.data.publishedAt)}</time>
-						<h3 class={doc.cardTitle}><a href={`${prefix}/${entry.id}`} class={doc.link}>{entry.data.title}</a></h3>
+						<h3 class={doc.cardTitle}><a href={`${prefix}/${entry.slug}`} class={doc.link}>{entry.data.title}</a></h3>
 						<p class={doc.copy}>{entry.data.description}</p>
 					</article>
 				</li>)}

@@ -1,7 +1,7 @@
 ---
 import { academyAccount } from "@rawkodeacademy/design-system";
 const account = academyAccount();
-import { getCollection } from "astro:content";
+import { getEntry } from "@/lib/payload-content";
 import VideoFeed from "@/components/video/video-feed.astro";
 import Page from "@/wrappers/page.astro";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
@@ -59,13 +59,10 @@ try {
 	historyUnavailable = true;
 }
 
-// Get all videos from collection to match with watch history
-const allVideos = await getCollection("videos");
-
 // Map watch history to video data, preserving the order from watch history
 const continueWatchingVideos = continueWatchingData
-	.map((watchItem) => {
-		const video = allVideos.find((v) => v.data.id === watchItem.videoId);
+	.map(async (watchItem) => {
+		const video = await getEntry("videos", { id: watchItem.videoId });
 		if (!video) return null;
 
 		return {
@@ -83,6 +80,10 @@ const continueWatchingVideos = continueWatchingData
 			type: video.data.type,
 		};
 	})
+;
+
+const resolvedContinueWatchingVideos = await Promise.all(continueWatchingVideos);
+const visibleContinueWatchingVideos = resolvedContinueWatchingVideos
 	.filter((v): v is NonNullable<typeof v> => v !== null);
 
 // Build watch positions map for progress bars
@@ -110,11 +111,11 @@ const layout = academyLayout({ width: "wide" });
 		</section>
 
 		<section class={layout.section}>
-			{continueWatchingVideos.length > 0 ? (
+			{visibleContinueWatchingVideos.length > 0 ? (
 				<VideoFeed
 					title="Continue Watching"
 					description="Resume your recently watched videos"
-					videos={continueWatchingVideos}
+					videos={visibleContinueWatchingVideos}
 					watchPositions={watchPositionsMap}
 					isAuthenticated={true}
 				/>

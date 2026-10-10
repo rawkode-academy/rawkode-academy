@@ -17,3 +17,7 @@ The shared `cloudflare/api-tokens/workers` token can deploy the Worker and provi
 To enable the complete media path, grant the preview deployment token the Cloudflare Containers edit permission, remove the fallback environment variable, and verify the Preview's generated container app starts before accepting a real upload. This is intentionally a deployment prerequisite, not a silent production downgrade.
 
 The host-authenticated Preview used for the hosted synthetic acceptance run had the Containers permission and used the full path. The shared CI token still lacks that permission and may therefore exercise only the explicit data/auth fallback. CI success alone is not evidence that media processing is available.
+
+## PR D2 rendering
+
+PR deployment first keeps the isolated `D2_RENDERER` Container binding so a permitted token can validate Payload's save-time D2 render path. If Cloudflare returns the known Containers permission error, the explicit fallback deploys without Container and Durable Object bindings. The PR import still renders D2 in the Node CI process and seeds checksum-addressed SVGs into that PR's R2 bucket, so the website can validate bridge delivery and SVG rendering. In the degraded fallback, the preview cannot validate the D2 Container image startup, WASM rendering in Cloudflare's Node Container, renderer-to-R2 writes, or CMS saves of documents containing D2; those saves fail closed because `D2_RENDERER` is absent.

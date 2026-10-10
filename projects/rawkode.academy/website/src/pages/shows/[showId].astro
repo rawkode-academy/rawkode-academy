@@ -3,9 +3,8 @@ import { academyDocument } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
 export const prerender = false;
 
-import { getCollection, getEntries } from "astro:content";
+import { getEntry, getAllCollection, getEntries } from "@/lib/payload-content";
 import { getImage } from "astro:assets";
-import { getPublishedVideos } from "@/lib/content";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import VideoMetadata from "@/components/html/video-metadata.astro";
 import PodcastSeriesJsonLd from "@/components/html/podcast-series-jsonld.astro";
@@ -27,10 +26,9 @@ if (!showId) {
 	return new Response(null, { status: 404 });
 }
 
-const shows = await getCollection("shows");
-const showEntry = shows.find((s) => s.data.id === showId);
+const showEntry = await getEntry("shows", { slug: showId });
 
-if (!showEntry || !showEntry.data.publish) {
+if (!showEntry) {
 	return new Response(null, { status: 404 });
 }
 
@@ -39,7 +37,11 @@ const isArchived = showEntry.data.status === "archived";
 const statusLabel = isComingSoon ? "Coming soon" : isArchived ? "Archived" : "Show";
 
 // Get published videos only (filters out future-dated for scheduled publishing)
-const videos = await getPublishedVideos();
+const videos = await getAllCollection(
+	"videos",
+	({ data }) => data.publishedAt <= new Date(),
+	{ showId: showEntry.id },
+);
 
 const getShowId = (value: unknown): string | null => {
 	if (!value) return null;
@@ -100,7 +102,7 @@ const showDescription =
 const breadcrumbElements = [
 	{ title: "Home", link: "/" },
 	{ title: "Shows", link: "/shows" },
-	{ title: showEntry.data.name, link: `/shows/${showEntry.data.id}` },
+	{ title: showEntry.data.name, link: `/shows/${showEntry.slug}` },
 ];
 
 const pageTitle = isComingSoon
@@ -109,8 +111,8 @@ const pageTitle = isComingSoon
 		? `${showEntry.data.name}: Archive`
 		: `${showEntry.data.name} Episodes`;
 
-const showNav = hasExtension(showEntry.data.id)
-	? getShowNav(showEntry.data.id)
+const showNav = hasExtension(showEntry.slug)
+	? getShowNav(showEntry.slug)
 	: [];
 
 const latestEpisode = hasEpisodeFeed ? feedVideos[0] : undefined;
@@ -156,7 +158,7 @@ function formatDuration(seconds: number) {
 		rel="alternate"
 		type="application/rss+xml"
 		title={`${showEntry.data.name} (Podcast RSS)`}
-		href={`/api/feeds/shows/${showEntry.data.id}.xml`}
+		href={`/api/feeds/shows/${showEntry.slug}.xml`}
 	/>
  )}
  {hasEpisodeFeed && (
@@ -201,7 +203,7 @@ function formatDuration(seconds: number) {
  <div class={doc.actions}>
  <span class={doc.meta}>Hosted by</span>
  {hostEntries.map((host) => (
- <a class={doc.link} href={`/people/${host.data.id}`}>{host.data.name}</a>
+ <a class={doc.link} href={`/people/${host.slug}`}>{host.data.name}</a>
  ))}
  </div>
  )}
@@ -287,7 +289,7 @@ function formatDuration(seconds: number) {
  </section>
 
  {showNav.length > 0 && (
- <ShowNav showId={showEntry.data.id} nav={showNav} active={null} />
+ <ShowNav showId={showEntry.slug} nav={showNav} active={null} />
  )}
 
  <!-- Episodes -->

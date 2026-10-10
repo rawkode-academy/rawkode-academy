@@ -122,6 +122,14 @@
         "scheduling_policy": "default",
         "instance_type": "standard-1",
         "max_instances": 4
+      },
+      {
+        "class_name": "D2RenderContainer",
+        "image": "./container/d2/Dockerfile",
+        "image_build_context": "./container/d2",
+        "scheduling_policy": "default",
+        "instance_type": "standard-1",
+        "max_instances": 1
       }
     ],
     "durable_objects": {
@@ -129,6 +137,10 @@
         {
           "name": "REVIEW_FFMPEG",
           "class_name": "ReviewFFmpegContainer"
+        },
+        {
+          "name": "D2_RENDERER",
+          "class_name": "D2RenderContainer"
         }
       ]
     }
@@ -145,6 +157,14 @@
       "scheduling_policy": "default",
       "instance_type": "standard-1",
       "max_instances": 4
+    },
+    {
+      "class_name": "D2RenderContainer",
+      "image": "./container/d2/Dockerfile",
+      "image_build_context": "./container/d2",
+      "scheduling_policy": "default",
+      "instance_type": "standard-1",
+      "max_instances": 1
     }
   ],
   "durable_objects": {
@@ -152,11 +172,19 @@
       {
         "name": "REVIEW_FFMPEG",
         "class_name": "ReviewFFmpegContainer"
+      },
+      {
+        "name": "D2_RENDERER",
+        "class_name": "D2RenderContainer"
       }
     ]
   },
   "exports": {
     "ReviewFFmpegContainer": {
+      "type": "durable-object",
+      "storage": "sqlite"
+    },
+    "D2RenderContainer": {
       "type": "durable-object",
       "storage": "sqlite"
     }

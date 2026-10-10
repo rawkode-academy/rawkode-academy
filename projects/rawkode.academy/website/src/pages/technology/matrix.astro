@@ -1,7 +1,7 @@
 ---
-export const prerender = true;
+export const prerender = false;
 
-import { getCollection } from "astro:content";
+import { getAllCollection } from "@/lib/payload-content";
 import Page from "@/wrappers/page.astro";
 import { Container } from "@/components/ui";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
@@ -21,7 +21,7 @@ function normalizeTechnologyRef(value: unknown): string | undefined {
 }
 
 // Compute video counts per technology
-const allVideos = await getCollection("videos");
+const allVideos = await getAllCollection("videos");
 const videoCountsByTech = new Map<string, number>();
 for (const video of allVideos) {
 	const techs = video.data.technologies;
@@ -90,15 +90,16 @@ const trajectoryEmoji: Record<Trajectory, string> = {
 };
 
 // Get all technologies with matrix data
-const allTechnologies = await getCollection("technologies");
+const allTechnologies = await getAllCollection("technologies");
 const matrixTechnologies = allTechnologies
 	.filter((tech) => tech.data.matrix?.status)
 	.map((tech) => ({
 		id: tech.id,
+		slug: tech.slug,
 		name: tech.data.name,
 		category: (tech.data.category as string | undefined) ?? "Uncategorized",
 		status: tech.data.matrix!.status as PipelineStage,
-		icon: resolveTechnologyIconUrl(tech.id, tech.data.logos),
+		icon: resolveTechnologyIconUrl(tech.slug, tech.data.logos, tech.mediaAssets),
 		confidence: tech.data.matrix!.confidence as Confidence | undefined,
 		trajectory: tech.data.matrix!.trajectory as Trajectory | undefined,
 		// Card back fields
@@ -179,9 +180,10 @@ const graveyardTechnologies = allTechnologies
 	)
 	.map((tech) => ({
 		id: tech.id,
+		slug: tech.slug,
 		name: tech.data.name,
 		category: tech.data.category as string | undefined,
-		icon: resolveTechnologyIconUrl(tech.id, tech.data.logos),
+		icon: resolveTechnologyIconUrl(tech.slug, tech.data.logos, tech.mediaAssets),
 		videoCount: videoCountsByTech.get(tech.id) || 0,
 	}));
 
@@ -327,7 +329,8 @@ const media = academyMedia();
 														type="button"
 														class={`tech-icon chip-${stage}`}
 														data-name={tech.name}
-														data-id={tech.id}
+										data-id={tech.id}
+										data-slug={tech.slug}
 														data-status={tech.status}
 														data-category={tech.category}
 														data-why={tech.why || ""}
@@ -395,7 +398,8 @@ const media = academyMedia();
 											type="button"
 											class="other-item"
 											data-name={tech.name}
-											data-id={tech.id}
+										data-id={tech.id}
+										data-slug={tech.slug}
 											data-status={tech.status}
 											data-category={tech.category}
 											data-why={tech.why || ""}
@@ -433,7 +437,8 @@ const media = academyMedia();
 											type="button"
 											class="other-item graveyard"
 											data-name={tech.name}
-											data-id={tech.id}
+										data-id={tech.id}
+										data-slug={tech.slug}
 											data-status="graveyard"
 											data-category={tech.category || ""}
 											data-why=""
@@ -2027,6 +2032,7 @@ const media = academyMedia();
 
 	function showModal(button: Element) {
 		const id = button.getAttribute('data-id') || "";
+		const slug = button.getAttribute('data-slug') || id;
 		const name = button.getAttribute('data-name') || "";
 		const status = button.getAttribute('data-status') || "";
 		const category = button.getAttribute('data-category') || "";
@@ -2092,7 +2098,7 @@ const media = academyMedia();
 		}
 
 		if (modalCtaLink) {
-			modalCtaLink.href = `/technology/${id}`;
+			modalCtaLink.href = `/technology/${slug}`;
 		}
 
 		// Native <dialog> handles focus trapping, Escape, and focus return.

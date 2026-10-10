@@ -1,7 +1,7 @@
 ---
-export const prerender = true;
+export const prerender = false;
 
-import { getCollection } from "astro:content";
+import { getAllCollection } from "@/lib/payload-content";
 import Page from "@/wrappers/page.astro";
 import { Container } from "@/components/ui";
 import {
@@ -27,7 +27,7 @@ function normalizeTechnologyRef(value: unknown): string | undefined {
 }
 
 // Compute video counts per technology
-const allVideos = await getCollection("videos");
+const allVideos = await getAllCollection("videos");
 const videoCountsByTech = new Map<string, number>();
 for (const video of allVideos) {
 	const techs = video.data.technologies;
@@ -42,16 +42,16 @@ for (const video of allVideos) {
 }
 
 // Get all technologies
-const allTechnologies = await getCollection("technologies");
+const allTechnologies = await getAllCollection("technologies");
 
 // Normalize technologies for the explorer
 const normalizedTechnologies = allTechnologies.map((tech) => {
 	const rawTech: RawTechnology = {
 		id: tech.id,
+		slug: tech.slug,
 		data: tech.data as RawTechnology["data"],
 	};
-	// Resolve icon URL using Vite's asset processing
-	const iconUrl = resolveTechnologyIconUrl(tech.id, tech.data.logos) ?? null;
+	const iconUrl = resolveTechnologyIconUrl(tech.slug, tech.data.logos, tech.mediaAssets) ?? null;
 	return normalizeTechnology(
 		rawTech,
 		videoCountsByTech.get(tech.id) || 0,

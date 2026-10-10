@@ -1,10 +1,10 @@
 export interface AdrAuthor {
-	id: string;
+	slug: string;
 	name: string;
 }
 
 export interface AdrSource {
-	id: string;
+	slug: string;
 	title: string;
 	adoptedAt: Date;
 }
@@ -40,7 +40,7 @@ export function buildAdrJsonLd(
 ): Record<string, unknown> {
 	const { siteUrl, adrUrl, source, authors } = input;
 	const adoptedAtIso = new Date(source.adoptedAt).toISOString();
-	const adrNumber = extractAdrNumber(source.id);
+	const adrNumber = extractAdrNumber(source.slug);
 	const headline = adrNumber
 		? `ADR-${adrNumber}: ${source.title}`
 		: source.title;
@@ -78,7 +78,7 @@ export function buildAdrJsonLd(
 		jsonLd.author = authors.map((author) => ({
 			"@type": "Person",
 			name: author.name,
-			url: joinUrl(siteUrl, `/people/${author.id}`),
+			url: joinUrl(siteUrl, `/people/${author.slug}`),
 		}));
 	}
 

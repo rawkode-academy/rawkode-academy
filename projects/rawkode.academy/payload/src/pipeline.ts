@@ -4,8 +4,8 @@ import {applyPreset} from './admin/collection-admin'
 import type { CollectionConfig, Field, Payload } from 'payload'
 
 type User = NonNullable<Parameters<Payload['find']>[0]['user']>
-type Run = Record<string, unknown> & { id: number | string; key: string; video: number | string; media: number | string; checksum: string; videoVersion: string; state: string; generatedRevision?: string }
-export type PipelineOutput = { runId: number | string; checksum: string; videoVersion: string; transcript: string; summary: string; chapters: { title: string; startTime: number }[]; manifestKey: string; provider: 'deterministic-fixture'; transcriptionAttempts: number }
+type Run = Record<string, unknown> & { id: string; key: string; video: string; media: string; checksum: string; videoVersion: string; state: string; generatedRevision?: string }
+export type PipelineOutput = { runId: string; checksum: string; videoVersion: string; transcript: string; summary: string; chapters: { title: string; startTime: number }[]; manifestKey: string; provider: 'deterministic-fixture'; transcriptionAttempts: number }
 export const pipelineVideoFields: Field[] = [
   { name: 'processingState', type: 'select', options: ['processing', 'awaiting-review', 'published'] },
   { name: 'transcript', type: 'textarea' }, { name: 'summary', type: 'textarea' },
@@ -36,10 +36,10 @@ export async function sha256(value: string): Promise<string> {
   return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('')
 }
 function scope(user?: User) { return { overrideAccess: false, user: user ?? null, context: { pipelineInternal: true, pipelineMachine: !user } } }
-async function runById(payload: Payload, id: number | string, user?: User): Promise<Run> {
+async function runById(payload: Payload, id: string, user?: User): Promise<Run> {
   return await payload.findByID({ collection: 'pipeline-runs', id, depth: 0, ...scope(user) }) as unknown as Run
 }
-export async function registerPipeline(payload: Payload, user: User, input: { videoId: number | string; mediaId: number | string; checksum: string; videoVersion: string }): Promise<Run> {
+export async function registerPipeline(payload: Payload, user: User, input: { videoId: string; mediaId: string; checksum: string; videoVersion: string }): Promise<Run> {
   staff(user)
   if (!/^[a-f0-9]{64}$/.test(input.checksum) || !/^[a-zA-Z0-9_-]{1,80}$/.test(input.videoVersion)) throw new Error('A SHA-256 checksum and bounded immutable videoVersion are required')
   const video = await payload.findByID({ collection: 'videos', id: input.videoId, draft: true, depth: 0, user, overrideAccess: false })
@@ -59,7 +59,7 @@ export async function registerPipeline(payload: Payload, user: User, input: { vi
   await payload.update({ collection: 'videos', id: input.videoId, draft: true, user, overrideAccess: false, context: { pipelineInternal: true }, data: { processingState: 'processing', mediaChecksum: input.checksum, mediaVersion: input.videoVersion, processingRun: String(run.id), _status: 'draft' } })
   return run as unknown as Run
 }
-export async function startPipeline(payload: Payload, user: User, env: { MEDIA_WORKFLOW: Workflow; }, runId: number | string, injectFailure = false): Promise<Run> {
+export async function startPipeline(payload: Payload, user: User, env: { MEDIA_WORKFLOW: Workflow; }, runId: string, injectFailure = false): Promise<Run> {
   staff(user)
   const run = await runById(payload, runId, user)
   if (run.state === 'awaiting-review' || run.state === 'approved') return run
@@ -93,14 +93,14 @@ export async function completePipeline(payload: Payload, input: PipelineOutput):
   const saved = await payload.update({ collection: 'pipeline-runs', id: run.id, ...scope(), data: { ...input, state: 'awaiting-review', generatedRevision: revision } })
   return saved as unknown as Run
 }
-export async function editPipelineReview(payload: Payload, user: User, input: { runId: number | string; generatedRevision: string; summary: string }): Promise<Run> {
+export async function editPipelineReview(payload: Payload, user: User, input: { runId: string; generatedRevision: string; summary: string }): Promise<Run> {
   staff(user)
   const run = await runById(payload, input.runId, user)
   if (run.state !== 'awaiting-review' || run.generatedRevision !== input.generatedRevision || typeof input.summary !== 'string' || !input.summary.trim() || input.summary.length > maximumSummaryCharacters) throw new Error('Stale or invalid review edit; summary must contain 1–8000 characters')
   const revision = await sha256(`${run.generatedRevision}:${input.summary}`)
   return await payload.update({ collection: 'pipeline-runs', id: run.id, ...scope(user), data: { summary: input.summary, generatedRevision: revision, humanEdited: true } }) as unknown as Run
 }
-export async function approvePipeline(payload: Payload, user: User, input: { runId: number | string; generatedRevision: string }, env: { R2: R2Bucket }): Promise<Run> {
+export async function approvePipeline(payload: Payload, user: User, input: { runId: string; generatedRevision: string }, env: { R2: R2Bucket }): Promise<Run> {
   staff(user)
   const run = await runById(payload, input.runId, user)
   if (run.generatedRevision !== input.generatedRevision) throw new Error('Approval revision is stale')
@@ -117,11 +117,11 @@ export async function approvePipeline(payload: Payload, user: User, input: { run
   // Production needs durable serialization spanning approval and media changes.
   const latestRun = await runById(payload, run.id, user)
   if (latestRun.state !== 'awaiting-review' || latestRun.generatedRevision !== input.generatedRevision) throw new Error('Review changed during approval')
-  const chapterIds: (string | number)[] = []
+  const chapterIds: string[] = []
   for (const [index, chapter] of (run.chapters as {title: string;startTime:number}[]).entries()) {
-    const legacyId = `${video.legacyId}-generated-${run.generatedRevision!.slice(0, 12)}-${index}`
+    const legacyId = `${video.id}-generated-${run.generatedRevision!.slice(0, 12)}-${index}`
     const existing = await payload.find({ collection: 'chapters', where: { legacyId: { equals: legacyId } }, limit: 1, depth: 0, overrideAccess: false, user, draft: true })
-    const doc = existing.docs[0] ?? await payload.create({ collection: 'chapters', user, overrideAccess: false, data: { legacyId, legacyType: 'Chapter', slug: legacyId, title: chapter.title, startTime: chapter.startTime, _status: 'published' } })
+    const doc = existing.docs[0] ?? await payload.create({ collection: 'chapters', user, overrideAccess: false, data: { legacyId, slug: legacyId, title: chapter.title, startTime: chapter.startTime, _status: 'published' } })
     chapterIds.push(doc.id)
   }
   await payload.update({ collection: 'videos', id: run.video, user, overrideAccess: false, draft: false, context: { pipelineApproval: true }, data: { processingState: 'published', transcript: run.transcript, summary: run.summary, description: run.summary, chapters: chapterIds, approvalRevision: run.generatedRevision, _status: 'published' } })

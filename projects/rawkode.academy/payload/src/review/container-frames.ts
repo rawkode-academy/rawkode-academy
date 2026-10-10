@@ -1,10 +1,11 @@
 import { z } from 'zod'
+import { isCuid2 } from '../cuid2'
 import { ReviewError } from './contracts'
 import { sourceTypes } from './intake-contracts'
 import type { ProcessingJob } from './processing-jobs'
 
 const artifact = z.object({ kind: z.enum(['deliverable', 'audio']), index: z.number().int().nonnegative(), bytes: z.number().int().positive().max(67108864), checksum: z.string().regex(/^[a-f0-9]{64}$/), startMs: z.number().int().nonnegative().optional(), durationMs: z.number().int().positive().max(60000).optional() }).strict()
-const common = { protocol: z.literal(1), jobId: z.string().uuid(), recipe: z.string(), source: z.object({ contentType: z.enum(sourceTypes) }).strict(), durationMs: z.number().int().positive().max(7200000), artifacts: z.array(artifact).max(120) }
+const common = { protocol: z.literal(1), jobId: z.string().refine(isCuid2), recipe: z.string(), source: z.object({ contentType: z.enum(sourceTypes) }).strict(), durationMs: z.number().int().positive().max(7200000), artifacts: z.array(artifact).max(120) }
 const reportSchema = z.discriminatedUnion('operation', [
   z.object({ ...common, operation: z.literal('encode'), videoCodec: z.literal('h264'), audioCodec: z.enum(['aac', 'none']), width: z.number().int().positive().max(1280), height: z.number().int().positive().max(720), fastStart: z.literal(true), fullDecode: z.literal(true) }).strict(),
   z.object({ ...common, operation: z.literal('audio'), noAudio: z.boolean() }).strict(),

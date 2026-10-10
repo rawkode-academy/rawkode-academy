@@ -1,5 +1,5 @@
 ---
-import { getCollection, getEntries } from "astro:content";
+import { getAllCollection, getEntries } from "@/lib/payload-content";
 import { getImage } from "astro:assets";
 
 import Page from "@/wrappers/page.astro";
@@ -23,9 +23,9 @@ Astro.response.headers.set("Cache-Tag", "articles-page, articles-list");
 
 // ─── Data ──────────────────────────────────────────────────────
 
-const allArticles = (
-	await getCollection("articles")
-).sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+const allArticles = (await getAllCollection("articles")).sort(
+	(a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf(),
+);
 
 // ─── Filters (?type=…&topic=…) ─────────────────────────────────
 
@@ -239,9 +239,9 @@ const catalog = academyCatalog();
 						<h2 class={catalog.featuredTitle}>{featured.data.title}</h2>
 						<p class={catalog.featuredDescription}>{compactCopy(featured.data.openGraph?.subtitle || featured.data.description, 180)}</p>
 						<p class={catalog.rowMeta}>{featuredAuthors.map((author) => author.data.name).join(", ")} · {dateFormatter.format(featured.data.publishedAt)} · {calculateReadingTime(featured.body || "").text}</p>
-						<a class={styles.button} href={`/read/${featured.id}`}>Read the article →</a>
+						<a class={styles.button} href={`/read/${featured.slug}`}>Read the article →</a>
 					</div>
-					{featuredImage && <a class={catalog.featuredMedia} href={`/read/${featured.id}`} aria-label={`Read ${featured.data.title}`}>
+					{featuredImage && <a class={catalog.featuredMedia} href={`/read/${featured.slug}`} aria-label={`Read ${featured.data.title}`}>
 						<img class={catalog.featuredImage} src={featuredImage.src} alt={featured.data.cover?.alt ?? ""} width={featuredImage.attributes.width} height={featuredImage.attributes.height} fetchpriority="high" />
 					</a>}
 				</article>
@@ -266,7 +266,7 @@ const catalog = academyCatalog();
 			</form>
 			{isFiltered && <p class={styles.notice}>{visibleArticles.length} {visibleArticles.length === 1 ? "article" : "articles"}{activeFilterSummary ? ` · ${activeFilterSummary}` : ""} · <a href="/read">Clear filters</a></p>}
 			{visibleArticles.length === 0 ? <div class={styles.empty}>No articles match these filters. <a href="/read">Browse all articles →</a></div> : <div class={catalog.editorialList}>{restWithMeta.map(({ article, author, readingTime, cover }) => (
-				<a class={catalog.editorialRow} href={`/read/${article.id}`} data-media={Boolean(cover)}>
+				<a class={catalog.editorialRow} href={`/read/${article.slug}`} data-media={Boolean(cover)}>
 					<time class={catalog.editorialDate} datetime={article.data.publishedAt.toISOString()}><strong>{dayFormatter.format(article.data.publishedAt)}</strong><span>{monthFormatter.format(article.data.publishedAt)}</span></time>
 					{cover && <span class={catalog.editorialMedia}><img class={catalog.editorialImage} src={cover.src} alt="" width={cover.attributes.width} height={cover.attributes.height} loading="lazy" /></span>}
 					<div class={catalog.editorialBody} data-body>

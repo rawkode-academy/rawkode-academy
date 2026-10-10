@@ -50,11 +50,5 @@ export const academyMcpPlugin = mcpPlugin({
         return { content: [{ type: 'text', text: JSON.stringify({ locallyEditedVideos: result.totalDocs, policy: 'Re-import must report conflicts; never silently overwrite local edits.' }) }] }
       },
     }],
-    resources: [{
-      name: 'academyCompatibilityPolicy', title: 'Academy compatibility and import policy',
-      description: 'Boundaries of this local compatibility experiment.',
-      uri: 'academy://compatibility/policy', mimeType: 'text/plain',
-      handler: uri => ({ contents: [{ uri: uri.href, text: 'Public compatibility GraphQL stays query-only. Internal Payload and MCP write drafts and publish explicitly. Legacy identifiers are distinct from database IDs. Imported provenance is immutable through editorial writes. Re-import reports edited records as conflicts. No production publication, customer identity or private playback is implemented.' }] }),
-    }],
   },
 })

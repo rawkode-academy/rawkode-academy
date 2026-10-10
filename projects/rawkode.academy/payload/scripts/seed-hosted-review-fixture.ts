@@ -5,6 +5,7 @@ import { digest } from '../src/auth/oidc'
 import { authConfig } from '../src/auth/config'
 import { D1AuthStore } from '../src/auth/store'
 import { identityMapping } from '../src/auth/payload'
+import { assertCuid2DocumentSchema } from '../src/id-schema'
 
 const projectDir = process.cwd()
 const sourceConfig = JSON.parse(readFileSync(path.join(projectDir, 'wrangler.jsonc'), 'utf8')) as {
@@ -36,6 +37,7 @@ writeFileSync(bindingConfig, JSON.stringify({
 }, null, 2))
 
 process.env.POC_CLI = '1'
+process.env.POC_MIGRATION_CHAIN = 'cuid2'
 process.env.POC_REMOTE_BINDINGS = '1'
 process.env.POC_CLOUDFLARE_CONFIG_PATH = bindingConfig
 process.env.POC_CLOUDFLARE_ENV_FILE = path.join(projectDir, '.dev.vars')
@@ -44,6 +46,7 @@ const [{cloudflare}, {default: config}] = await Promise.all([
   import('../src/cloudflare'),
   import('../payload.config'),
 ])
+await assertCuid2DocumentSchema(cloudflare.env.D1)
 const payload = await getPayload({config, disableOnInit: true})
 const settings = authConfig(cloudflare.env)
 const mapping = identityMapping(payload, settings)
@@ -72,8 +75,6 @@ try {
     store.putSession({tokenHash: await digest(tokens.customer), userId: customer, expiresAt}),
   ])
   const video = await payload.create({collection: 'videos', overrideAccess: true, data: {
-    legacyId: `hosted-review-${runId}`,
-    legacyType: 'Video',
     slug: `hosted-review-${runId}`,
     title: `Synthetic hosted review ${runId}`,
     description: 'Disposable synthetic fixture for the deployed review lifecycle.',
@@ -83,12 +84,12 @@ try {
     runId,
     staff,
     customer,
-    videoId: Number(video.id),
+    videoId: String(video.id),
     tokens,
     expiresAt,
     origin: settings.bridgeOrigins[0] ?? settings.directOrigins[0],
   }, null, 2), {mode: 0o600})
-  console.log(JSON.stringify({runId, videoId: Number(video.id), origin: settings.bridgeOrigins[0] ?? settings.directOrigins[0], expiresAt}))
+  console.log(JSON.stringify({runId, videoId: String(video.id), origin: settings.bridgeOrigins[0] ?? settings.directOrigins[0], expiresAt}))
 } finally {
   await payload.destroy()
   rmSync(bindingConfig, {force: true})

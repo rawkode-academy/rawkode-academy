@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { isCuid2 } from '../cuid2'
 import { ReviewError, type ReviewActor } from './contracts'
 import type { ReviewService } from './service'
 
@@ -22,8 +22,8 @@ export function feedbackCsv(rows: FeedbackRow[], revisionId: string): string {
 export function feedbackHeaders(filename: string) {
   return { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': `attachment; filename="${filename}"`, 'cache-control': 'private, no-store', 'referrer-policy': 'no-referrer', 'x-content-type-options': 'nosniff', 'x-robots-tag': 'noindex, nofollow' }
 }
-export async function feedbackExport(service: ReviewService, actor: ReviewActor, videoId: number, revisionId: string): Promise<{ filename: string; csv: string }> {
-  if (!z.string().uuid().safeParse(revisionId).success) throw new ReviewError(400, 'A revisionId is required')
+export async function feedbackExport(service: ReviewService, actor: ReviewActor, videoId: string, revisionId: string): Promise<{ filename: string; csv: string }> {
+  if (!isCuid2(revisionId)) throw new ReviewError(400, 'A revisionId is required')
   await service.access.require(actor, videoId, revisionId, 'export')
   const filter = service.access.commentFilter(actor)
   // Never select an email column: the export may leave the review surface.

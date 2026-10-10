@@ -1,4 +1,4 @@
-import type { CollectionEntry } from "astro:content";
+import type { CollectionEntry } from "@/lib/payload-content";
 
 export type ShowEntry = CollectionEntry<"shows">;
 
@@ -11,9 +11,9 @@ export interface ShowItem {
 }
 
 export async function listShows(): Promise<ShowItem[]> {
-	const { getCollection } = await import("astro:content");
+	const { getAllCollection } = await import("@/lib/payload-content");
 
-	const items = await getCollection("shows");
+	const items = await getAllCollection("shows");
 	return items.map((e: ShowEntry) => {
 		const data = e.data;
 		return {

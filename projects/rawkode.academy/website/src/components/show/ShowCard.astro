@@ -46,7 +46,7 @@ const latestEpisodeDate = latestEpisodePublishedAt
 	: null;
 ---
 
-<a href={`/shows/${show.id}`} class="show-card" data-show-status={show.status}>
+<a href={`/shows/${show.slug}`} class="show-card" data-show-status={show.status}>
 	{(show.cover || thumbnailUrl) && <div class="show-card__frame">
 		{show.cover ? (
 			<Image

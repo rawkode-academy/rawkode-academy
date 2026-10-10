@@ -1,5 +1,5 @@
 export interface CourseListEntry {
-	id: string;
+	slug: string;
 	data: {
 		title: string;
 		description: string;
@@ -57,7 +57,7 @@ export function buildCourseItemListJsonLd(
 	};
 
 	const itemListElement = ordered.map((course, index) => {
-		const courseUrl = joinUrl(siteUrl, `/courses/${course.id}`);
+		const courseUrl = joinUrl(siteUrl, `/courses/${course.slug}`);
 		return {
 			"@type": "ListItem",
 			position: index + 1,

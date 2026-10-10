@@ -3,29 +3,36 @@ import { readdir } from 'node:fs/promises'
 import { DatabaseSync } from 'node:sqlite'
 import test from 'node:test'
 import { sql, type MigrateUpArgs } from '@payloadcms/db-d1-sqlite'
-import { migrations } from '../src/migrations'
+import { migrations } from '../src/migrations-cuid2'
+import { cuid2DocumentTables } from '../src/id-schema'
+import { createCuid2, isCuid2 } from '../src/cuid2'
 import * as enforce from '../src/pending-migrations/20261009_160000_review_revision_grants_enforce'
+
+const cuid = (prefix: string) => `${prefix}${'0'.repeat(23)}`
+const queryOf = (statement: ReturnType<typeof sql>) => statement.toQuery({
+  casing: undefined as never,
+  escapeName: name => `"${name}"`,
+  escapeParam: () => '?',
+  escapeString: value => `'${value.replaceAll("'", "''")}'`,
+})
+const migrationDB = (sqlite: DatabaseSync) => ({
+  async run(statement: ReturnType<typeof sql>) {
+    const query = queryOf(statement)
+    if (query.params.length) sqlite.prepare(query.sql).run(...query.params as (string | number | null)[])
+    else sqlite.exec(query.sql)
+  },
+  async all(statement: ReturnType<typeof sql>) {
+    const query = queryOf(statement)
+    return sqlite.prepare(query.sql).all(...query.params as (string | number | null)[])
+  },
+})
 
 // Run real migrations with FK enforcement held on, as in D1. SQLite ignores
 // foreign_keys changes inside a transaction. Deferred checks do not defer
 // cascades or SET NULL actions, so a parent rebuild still loses relationships.
 test('content rollback preserves video IDs and relationships with foreign keys enabled', async () => {
   const sqlite = new DatabaseSync(':memory:')
-  const args = {
-    db: {
-      run(statement: ReturnType<typeof sql>) {
-        const query = statement.toQuery({
-          casing: undefined as never,
-          escapeName: name => `"${name}"`,
-          escapeParam: () => '?',
-          escapeString: value => `'${value.replaceAll("'", "''")}'`,
-        })
-        assert.equal(query.params.length, 0, 'migration uses literal SQL')
-        sqlite.exec(query.sql)
-        assert.equal(sqlite.prepare('PRAGMA foreign_keys').get()?.foreign_keys, 1)
-      },
-    },
-  } as unknown as MigrateUpArgs
+  const args = { db: migrationDB(sqlite) } as unknown as MigrateUpArgs
   const apply = async (migration: (args: MigrateUpArgs) => Promise<void>) => {
     sqlite.exec('BEGIN;')
     try {
@@ -37,42 +44,46 @@ test('content rollback preserves video IDs and relationships with foreign keys e
     }
   }
   const rows = (table: string) => sqlite.prepare(`SELECT * FROM "${table}" ORDER BY id`).all()
+  const id = {
+    person: cuid('p'), technology: cuid('t'), chapter: cuid('c'), show: cuid('s'), video: cuid('v'), draftVideo: cuid('w'),
+    term: cuid('a'), episode: cuid('j'), module: cuid('l'), path: cuid('n'), media: cuid('u'), pipelineRun: cuid('z'), article: cuid('b'), series: cuid('g'),
+  }
   try {
     sqlite.exec('PRAGMA foreign_keys=ON;')
-    const target = migrations.findIndex(migration => migration.name === '20261004_201756')
+    const target = migrations.findIndex(migration => migration.name === 'cuid2_20261004_201756')
     assert.ok(target > 0)
     for (const migration of migrations.slice(0, target)) await apply(migration.up)
     sqlite.exec(`
-      INSERT INTO people (id, legacy_id) VALUES (11, 'guest');
-      INSERT INTO technologies (id, legacy_id) VALUES (12, 'technology');
-      INSERT INTO chapters (id, legacy_id) VALUES (13, 'chapter');
-      INSERT INTO shows (id, legacy_id) VALUES (15, 'show');
-      INSERT INTO videos (id, legacy_id, title, _status) VALUES (41, 'video-public', 'Public video', 'published'), (42, 'video-draft', 'Draft video', 'draft');
-      INSERT INTO _videos_v (id, parent_id, version_legacy_id, version__status, latest) VALUES (51, 41, 'video-public', 'published', 1), (52, 42, 'video-draft', 'draft', 1);
-      INSERT INTO videos_terms (id, _order, _parent_id, value) VALUES ('term-live', 1, 41, 'Kubernetes');
-      INSERT INTO _videos_v_version_terms (id, _order, _parent_id, value, _uuid) VALUES (61, 1, 51, 'Kubernetes', 'term-version');
+      INSERT INTO people (id, legacy_id) VALUES ('${id.person}', 'guest');
+      INSERT INTO technologies (id, legacy_id) VALUES ('${id.technology}', 'technology');
+      INSERT INTO chapters (id, legacy_id) VALUES ('${id.chapter}', 'chapter');
+      INSERT INTO shows (id, legacy_id) VALUES ('${id.show}', 'show');
+      INSERT INTO videos (id, legacy_id, title, _status) VALUES ('${id.video}', 'video-public', 'Public video', 'published'), ('${id.draftVideo}', 'video-draft', 'Draft video', 'draft');
+      INSERT INTO _videos_v (id, parent_id, version_legacy_id, version__status, latest) VALUES (51, '${id.video}', 'video-public', 'published', 1), (52, '${id.draftVideo}', 'video-draft', 'draft', 1);
+      INSERT INTO videos_terms (id, _order, _parent_id, value) VALUES ('${id.term}', 1, '${id.video}', 'Kubernetes');
+      INSERT INTO _videos_v_version_terms (id, _order, _parent_id, value, _uuid) VALUES (61, 1, 51, 'Kubernetes', '${cuid('q')}');
       INSERT INTO videos_rels (id, "order", parent_id, path, people_id, technologies_id, chapters_id) VALUES
-        (71, 1, 41, 'guests', 11, NULL, NULL), (72, 1, 41, 'technologies', NULL, 12, NULL), (73, 1, 42, 'chapters', NULL, NULL, 13);
+        (71, 1, '${id.video}', 'guests', '${id.person}', NULL, NULL), (72, 1, '${id.video}', 'technologies', NULL, '${id.technology}', NULL), (73, 1, '${id.draftVideo}', 'chapters', NULL, NULL, '${id.chapter}');
       INSERT INTO _videos_v_rels (id, "order", parent_id, path, people_id, technologies_id, chapters_id) VALUES
-        (81, 1, 51, 'version.guests', 11, NULL, NULL), (82, 1, 51, 'version.technologies', NULL, 12, NULL), (83, 1, 52, 'version.chapters', NULL, NULL, 13);
-      INSERT INTO episodes (id, legacy_id, video_id) VALUES (91, 'episode', 41);
-      UPDATE videos SET episode_id=91 WHERE id=41;
-      UPDATE _videos_v SET version_episode_id=91 WHERE id=51;
-      INSERT INTO _episodes_v (id, parent_id, version_video_id) VALUES (92, 91, 41);
-      INSERT INTO course_modules (id, legacy_id, video_id) VALUES (101, 'module', 41);
-      INSERT INTO _course_modules_v (id, parent_id, version_video_id) VALUES (102, 101, 41);
-      INSERT INTO learning_paths (id, legacy_id) VALUES (111, 'path');
-      INSERT INTO _learning_paths_v (id, parent_id) VALUES (112, 111);
-      INSERT INTO learning_paths_rels (id, "order", parent_id, path, videos_id) VALUES (113, 1, 111, 'videos', 41);
-      INSERT INTO _learning_paths_v_rels (id, "order", parent_id, path, videos_id) VALUES (114, 1, 112, 'version.videos', 41);
-      INSERT INTO media (id) VALUES (120);
-      INSERT INTO pipeline_runs (id, key, video_id, media_id, state) VALUES (121, 'run', 41, 120, 'completed');
-      INSERT INTO articles (id) VALUES (141);
-      INSERT INTO articles_rels (id, parent_id, path, people_id) VALUES (142, 141, 'authors', 11);
-      INSERT INTO _articles_v (id, parent_id) VALUES (143, 141);
-      INSERT INTO _articles_v_rels (id, parent_id, path, people_id) VALUES (144, 143, 'version.authors', 11);
+        (81, 1, 51, 'version.guests', '${id.person}', NULL, NULL), (82, 1, 51, 'version.technologies', NULL, '${id.technology}', NULL), (83, 1, 52, 'version.chapters', NULL, NULL, '${id.chapter}');
+      INSERT INTO episodes (id, legacy_id, video_id) VALUES ('${id.episode}', 'episode', '${id.video}');
+      UPDATE videos SET episode_id='${id.episode}' WHERE id='${id.video}';
+      UPDATE _videos_v SET version_episode_id='${id.episode}' WHERE id=51;
+      INSERT INTO _episodes_v (id, parent_id, version_video_id) VALUES (92, '${id.episode}', '${id.video}');
+      INSERT INTO course_modules (id, legacy_id, video_id) VALUES ('${id.module}', 'module', '${id.video}');
+      INSERT INTO _course_modules_v (id, parent_id, version_video_id) VALUES (102, '${id.module}', '${id.video}');
+      INSERT INTO learning_paths (id, legacy_id) VALUES ('${id.path}', 'path');
+      INSERT INTO _learning_paths_v (id, parent_id) VALUES (112, '${id.path}');
+      INSERT INTO learning_paths_rels (id, "order", parent_id, path, videos_id) VALUES (113, 1, '${id.path}', 'videos', '${id.video}');
+      INSERT INTO _learning_paths_v_rels (id, "order", parent_id, path, videos_id) VALUES (114, 1, 112, 'version.videos', '${id.video}');
+      INSERT INTO media (id) VALUES ('${id.media}');
+      INSERT INTO pipeline_runs (id, key, video_id, media_id, state) VALUES ('${cuid('s')}', 'run', '${id.video}', '${id.media}', 'completed');
+      INSERT INTO articles (id) VALUES ('${id.article}');
+      INSERT INTO articles_rels (id, parent_id, path, people_id) VALUES (142, '${id.article}', 'authors', '${id.person}');
+      INSERT INTO _articles_v (id, parent_id) VALUES (143, '${id.article}');
+      INSERT INTO _articles_v_rels (id, parent_id, path, people_id) VALUES (144, 143, 'version.authors', '${id.person}');
       INSERT INTO payload_locked_documents (id) VALUES (131);
-      INSERT INTO payload_locked_documents_rels (id, parent_id, path, videos_id) VALUES (132, 131, 'document', 41);
+      INSERT INTO payload_locked_documents_rels (id, parent_id, path, videos_id) VALUES (132, 131, 'document', '${id.video}');
     `)
     const tables = ['videos', '_videos_v', 'videos_terms', '_videos_v_version_terms', 'videos_rels', '_videos_v_rels', 'episodes', '_episodes_v', 'course_modules', '_course_modules_v', 'learning_paths_rels', '_learning_paths_v_rels', 'pipeline_runs', 'payload_locked_documents_rels', 'articles', 'articles_rels', '_articles_v', '_articles_v_rels']
     const before = Object.fromEntries(tables.map(table => [table, rows(table)]))
@@ -83,12 +94,12 @@ test('content rollback preserves video IDs and relationships with foreign keys e
     }]))
     const schemaBefore = videoSchema()
     await apply(migrations[target].up)
-    sqlite.exec(`UPDATE videos SET show_id=15, source_data='{"draft":false}', body='Imported body' WHERE id=41;
-      UPDATE _videos_v SET version_show_id=15, version_source_data='{"draft":false}', version_body='Imported body' WHERE id=51;`)
+    sqlite.exec(`UPDATE videos SET show_id='${id.show}', source_data='{"draft":false}', body='Imported body' WHERE id='${id.video}';
+      UPDATE _videos_v SET version_show_id='${id.show}', version_source_data='{"draft":false}', version_body='Imported body' WHERE id=51;`)
     // A populated article->series edge also catches invalid parent-drop order.
-    sqlite.exec(`INSERT INTO series (id) VALUES (151);
-      UPDATE articles SET series_id=151 WHERE id=141;
-      UPDATE _articles_v SET version_series_id=151 WHERE id=143;`)
+    sqlite.exec(`INSERT INTO series (id) VALUES ('${id.series}');
+      UPDATE articles SET series_id='${id.series}' WHERE id='${id.article}';
+      UPDATE _articles_v SET version_series_id='${id.series}' WHERE id=143;`)
     await apply(migrations[target].down)
     for (const table of tables) assert.deepEqual(rows(table), before[table], `${table}: all rows, IDs, and references survive`)
     assert.deepEqual(videoSchema(), schemaBefore, 'video columns, indexes, and foreign keys return to the prior schema')
@@ -100,24 +111,64 @@ test('content rollback preserves video IDs and relationships with foreign keys e
   }
 })
 
-test('revision grant expand preserves reviewers, mirrors legacy writes, and enforce retires legacy grants', async t => {
+test('fresh Payload schema stores every document ID and document reference as TEXT', async () => {
+  const sqlite = new DatabaseSync(':memory:')
+  try {
+    sqlite.exec('PRAGMA foreign_keys=ON;')
+    const args = { db: migrationDB(sqlite) } as unknown as MigrateUpArgs
+    for (const migration of migrations) await migration.up(args)
+    for (const table of cuid2DocumentTables) {
+      const column = sqlite.prepare(`PRAGMA table_info("${table}")`).all().find(row => row.name === 'id')
+      assert.ok(column, `${table}.id exists`)
+      assert.equal(String(column.type).toLowerCase(), 'text', `${table}.id is text`)
+    }
+    for (const [table, name] of [['static_assets', 'legacy_id'], ['_static_assets_v', 'version_legacy_id']] as const) {
+      const column = sqlite.prepare(`PRAGMA table_info("${table}")`).all().find(row => row.name === name)
+      assert.ok(column, `${table}.${name} exists`)
+      assert.equal(column.notnull, 0, `${table}.${name} is optional for editor-authored assets`)
+    }
+    for (const table of ['videos', '_videos_v', 'static_assets', '_static_assets_v']) {
+      const names = sqlite.prepare(`PRAGMA table_info("${table}")`).all().map(row => String(row.name))
+      assert.ok(!names.some(name => /legacy_type|source_(format|data|raw|body)|editorial_data/.test(name)), `${table} has no duplicated source payload`)
+    }
+    for (const [table, column, index] of [
+      ['videos', 'legacy_id', 'videos_legacy_id_idx'],
+      ['_videos_v', 'version_legacy_id', '_videos_v_version_version_legacy_id_idx'],
+    ] as const) {
+      const columns = sqlite.prepare(`PRAGMA table_info("${table}")`).all().map(row => String(row.name))
+      assert.ok(!columns.includes(column), `${table}.${column} does not duplicate the video's R2 content ID`)
+      assert.equal(sqlite.prepare("SELECT count(*) AS n FROM sqlite_master WHERE type='index' AND name=?").get(index)?.n, 0, `${index} is removed`)
+    }
+    const tables = sqlite.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as { name: string }[]
+    for (const { name } of tables) {
+      const columns = new Map((sqlite.prepare(`PRAGMA table_info("${name}")`).all() as { name: string; type: string }[]).map(column => [column.name, column.type.toLowerCase()]))
+      const foreignKeys = sqlite.prepare(`PRAGMA foreign_key_list("${name}")`).all() as { from: string; table: string }[]
+      for (const foreignKey of foreignKeys) {
+        if (cuid2DocumentTables.includes(foreignKey.table as typeof cuid2DocumentTables[number])) {
+          assert.equal(columns.get(foreignKey.from), 'text', `${name}.${foreignKey.from} references ${foreignKey.table}.id as text`)
+        }
+      }
+    }
+    assert.deepEqual(sqlite.prepare('PRAGMA foreign_key_check').all(), [])
+  } finally {
+    sqlite.close()
+  }
+})
+
+test('revision grant expand preserves reviewers with canonical CUID2 IDs and enforce retires legacy grants', async t => {
   const sqlite = new DatabaseSync(':memory:')
   t.after(() => sqlite.close())
   sqlite.exec('PRAGMA foreign_keys=ON;')
-  const args = { db: { run(statement: ReturnType<typeof sql>) {
-    const query = statement.toQuery({ casing: undefined as never, escapeName: name => `"${name}"`, escapeParam: () => '?', escapeString: value => `'${value.replaceAll("'", "''")}'` })
-    assert.equal(query.params.length, 0, 'migration uses literal SQL')
-    sqlite.exec(query.sql)
-  } } } as unknown as MigrateUpArgs
+  const args = { db: migrationDB(sqlite) } as unknown as MigrateUpArgs
   const apply = async (migration: (args: MigrateUpArgs) => Promise<void>) => {
     sqlite.exec('BEGIN;')
     try { await migration(args); sqlite.exec('COMMIT;') } catch (error) { sqlite.exec('ROLLBACK;'); throw error }
   }
-  const thumbnails = migrations.findIndex(migration => migration.name === '20261007_140000_review_thumbnails')
+  const thumbnails = migrations.findIndex(migration => migration.name === 'cuid2_20261007_140000_review_thumbnails')
   assert.ok(thumbnails > 0)
   for (const migration of migrations.slice(0, thumbnails + 1)) await apply(migration.up)
   const expand = migrations[thumbnails + 1]!
-  assert.equal(expand.name, '20261009_130000_review_revision_grants')
+  assert.equal(expand.name, 'cuid2_20261009_130000_review_revision_grants')
   const checksum = (letter: string) => letter.repeat(64)
   sqlite.exec(`INSERT INTO users(id,email,role) VALUES(1,'staff@example.invalid','staff'),(2,'approver@example.invalid','customer'),(3,'commenter@example.invalid','customer'),(4,'inactive@example.invalid','customer');
     INSERT INTO videos(id,legacy_id,title,_status) VALUES(10,'video','Video','draft');
@@ -134,6 +185,9 @@ test('revision grant expand preserves reviewers, mirrors legacy writes, and enfo
   const grant = (revision: string, user: number) => sqlite.prepare('SELECT * FROM review_revision_grants WHERE revision_id=? AND user_id=?').get(revision, user)
   const approver = grant('current', 2)!
   assert.equal(approver.can_approve, 1); assert.equal(approver.version, 3)
+  const migratedIds = sqlite.prepare('SELECT id FROM review_revision_grants').all().map(row => String(row.id))
+  assert.equal(migratedIds.length, 4, 'current grants and prior-review history are retained')
+  assert.ok(migratedIds.every(isCuid2), 'migration allocates every row ID through the CUID2 generator')
   assert.equal(grant('current', 3)?.can_approve, 0)
   assert.equal(grant('old', 3)?.can_approve, 0, 'the commenter keeps the cut they commented on'); assert.equal(grant('old', 3)?.version, 1)
   assert.equal(grant('old', 2)?.can_approve, 0, 'the decider keeps the cut they decided on')
@@ -152,106 +206,50 @@ test('revision grant expand preserves reviewers, mirrors legacy writes, and enfo
   assert.throws(() => sqlite.exec("UPDATE review_revision_grants SET user_id=4"), /Grant identity is immutable/)
   assert.throws(() => sqlite.exec('DELETE FROM review_revision_grants'), /Grant history is retained/)
 
-  // The previous Worker still writes legacy grants during the deploy window.
-  sqlite.exec("INSERT INTO video_review_grants(id,video_id,user_id,can_approve,active) VALUES('approver-revoke',10,2,0,0) ON CONFLICT(video_id,user_id) DO UPDATE SET can_approve=excluded.can_approve,active=excluded.active,version=video_review_grants.version+1")
-  assert.equal(sqlite.prepare('SELECT count(*) AS n FROM review_revision_grants WHERE user_id=2 AND revoked_at IS NULL').get()?.n, 0, 'a legacy revoke revokes every revision grant')
-  sqlite.exec("INSERT INTO video_review_grants(id,video_id,user_id,can_approve,active) VALUES('approver-again',10,2,1,1) ON CONFLICT(video_id,user_id) DO UPDATE SET can_approve=excluded.can_approve,active=excluded.active,version=video_review_grants.version+1")
-  assert.equal(grant('current', 2)?.revoked_at, null, 'a legacy grant re-activates the current cut')
-  assert.equal(grant('current', 2)?.version, 5)
-  assert.equal(grant('old', 2)?.revoked_at === null, false, 'older cuts stay revoked')
-  sqlite.exec("INSERT INTO users(id,email,role) VALUES(5,'new@example.invalid','customer'); INSERT INTO video_review_grants(id,video_id,user_id,can_approve,active) VALUES('new',10,5,1,1)")
-  assert.equal(grant('current', 5)?.id, 'mirror-new-current')
-  // Expand installs no pin, so the old Worker's decision insert still succeeds.
-  sqlite.exec("INSERT INTO review_decisions(id,video_id,revision_id,author_id,review_version,grant_version,decision,note,created_at) VALUES('window',10,'current',5,1,1,'changes-requested','','2026-10-09T00:00:00.000Z')")
-  assert.equal(sqlite.prepare("SELECT grant_id FROM review_decisions WHERE id='window'").get()?.grant_id, null)
+  const currentGrantId = String(approver.id)
+  assert.ok(isCuid2(currentGrantId))
+  const windowDecisionId = createCuid2()
+  sqlite.prepare('INSERT INTO review_decisions(id,video_id,revision_id,author_id,review_version,grant_version,decision,note,created_at) VALUES(?,?,?,?,?,?,?, ?,?)')
+    .run(windowDecisionId, 10, 'current', 2, 1, 3, 'approved', '', '2026-10-09T00:00:00.000Z')
+  assert.equal(sqlite.prepare('SELECT grant_id FROM review_decisions WHERE id=?').get(windowDecisionId)?.grant_id, null)
+  const triggersBeforeEnforce = sqlite.prepare("SELECT name FROM sqlite_master WHERE type='trigger' AND name LIKE '%mirror%'").all()
+  assert.deepEqual(triggersBeforeEnforce, [], 'no SQL trigger generates or mirrors revision grant document IDs')
 
   await apply(enforce.up)
-  assert.deepEqual({ ...sqlite.prepare("SELECT deliverable_checksum,source_checksum,grant_id FROM review_decisions WHERE id='window'").get() }, { deliverable_checksum: checksum('c'), source_checksum: checksum('a'), grant_id: 'mirror-new-current' })
+  assert.deepEqual({ ...sqlite.prepare('SELECT deliverable_checksum,source_checksum,grant_id FROM review_decisions WHERE id=?').get(windowDecisionId) }, { deliverable_checksum: checksum('c'), source_checksum: checksum('a'), grant_id: currentGrantId })
   assert.throws(() => sqlite.exec("INSERT INTO video_review_grants(id,video_id,user_id) VALUES('late',10,3)"), /Use revision grants/)
   assert.throws(() => sqlite.exec("UPDATE video_review_grants SET active=0"), /Use revision grants/)
   const triggers = () => sqlite.prepare("SELECT name FROM sqlite_master WHERE type='trigger' AND (name LIKE 'video_review_grants_%' OR name LIKE 'review_decision_%') ORDER BY name").all().map(row => String(row.name))
   assert.deepEqual(triggers(), ['review_decision_delete', 'review_decision_pin', 'review_decision_update', 'video_review_grants_retired_delete', 'video_review_grants_retired_insert', 'video_review_grants_retired_update'])
-  for (const values of [`'${checksum('x')}','${checksum('a')}','mirror-new-current'`, `NULL,'${checksum('a')}','mirror-new-current'`, `'${checksum('c')}','${checksum('a')}',NULL`]) {
+  for (const values of [`'${checksum('x')}','${checksum('a')}','${currentGrantId}'`, `NULL,'${checksum('a')}','${currentGrantId}'`, `'${checksum('c')}','${checksum('a')}',NULL`]) {
     assert.throws(() => sqlite.exec(`INSERT INTO review_decisions(id,video_id,revision_id,author_id,review_version,grant_version,decision,note,created_at,deliverable_checksum,source_checksum,grant_id) VALUES('pinned',10,'current',5,1,1,'approved','','2026-10-09T00:00:00.000Z',${values})`), /Decision must pin/)
   }
 
   // A staff-created grant makes the expand rollback refuse.
   await apply(enforce.down)
-  assert.deepEqual(triggers().filter(name => name.includes('mirror')), ['video_review_grants_mirror_insert', 'video_review_grants_mirror_revoke', 'video_review_grants_mirror_update'])
-  sqlite.exec(`UPDATE review_revision_grants SET granted_by_id=1 WHERE id='mirror-new-current'`)
+  assert.deepEqual(triggers().filter(name => name.includes('mirror')), [], 'rollback does not restore SQL-generated legacy mirror triggers')
+  sqlite.prepare('UPDATE review_revision_grants SET granted_by_id=1 WHERE id=?').run(currentGrantId)
   await assert.rejects(apply(expand.down), /CHECK constraint/)
-  assert.ok(grant('current', 5), 'refused rollback keeps every grant')
+  assert.ok(grant('current', 2), 'refused rollback keeps every grant')
 })
 
 test('revision grant migrations go up, down and up again on an empty review schema', async t => {
   const sqlite = new DatabaseSync(':memory:')
   t.after(() => sqlite.close())
   sqlite.exec('PRAGMA foreign_keys=ON;')
-  const args = { db: { run(statement: ReturnType<typeof sql>) {
-    sqlite.exec(statement.toQuery({ casing: undefined as never, escapeName: name => `"${name}"`, escapeParam: () => '?', escapeString: value => `'${value.replaceAll("'", "''")}'` }).sql)
-  } } } as unknown as MigrateUpArgs
+  const args = { db: migrationDB(sqlite) } as unknown as MigrateUpArgs
   for (const migration of migrations) await migration.up(args)
   const schema = () => sqlite.prepare("SELECT type,name,sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY type,name").all()
   const expanded = schema()
+  const revisionGrants = migrations.find(migration => migration.name === 'cuid2_20261009_130000_review_revision_grants')!
   await enforce.up(args)
   await enforce.down(args)
   assert.deepEqual(schema(), expanded)
-  await migrations.at(-1)!.down(args)
+  await revisionGrants.down(args)
   assert.equal(sqlite.prepare("SELECT count(*) AS n FROM pragma_table_info('review_decisions') WHERE name IN ('grant_id','source_checksum','deliverable_checksum')").get()?.n, 0, 'DROP COLUMN removes the pin columns')
   assert.equal(sqlite.prepare("SELECT count(*) AS n FROM sqlite_master WHERE name='review_decision_update'").get()?.n, 1)
-  await migrations.at(-1)!.up(args)
+  await revisionGrants.up(args)
   await enforce.up(args)
-  assert.deepEqual(sqlite.prepare('PRAGMA foreign_key_check').all(), [])
-})
-
-test('revision grant expand keeps old-Worker window decisions publishable and mirrors revocations back', async t => {
-  const sqlite = new DatabaseSync(':memory:')
-  t.after(() => sqlite.close())
-  sqlite.exec('PRAGMA foreign_keys=ON;')
-  const args = { db: { run(statement: ReturnType<typeof sql>) {
-    sqlite.exec(statement.toQuery({ casing: undefined as never, escapeName: name => `"${name}"`, escapeParam: () => '?', escapeString: value => `'${value.replaceAll("'", "''")}'` }).sql)
-  } } } as unknown as MigrateUpArgs
-  const expandIndex = migrations.findIndex(migration => migration.name === '20261009_130000_review_revision_grants')
-  for (const migration of migrations.slice(0, expandIndex)) await migration.up(args)
-  const checksum = (letter: string) => letter.repeat(64)
-  const revision = (id: string, createdAt: string) => `INSERT INTO video_revisions(id,video_id,media_id,checksum,deliverable_media_id,deliverable_checksum,duration_ms,review_version,state,metadata,created_by_id,created_at) VALUES('${id}',10,20,'${checksum('a')}',21,'${checksum('b')}',1000,1,'ready','{}',1,'${createdAt}')`
-  const legacyGrant = (id: string, user: number, active: number) => `INSERT INTO video_review_grants(id,video_id,user_id,can_approve,active) VALUES('${id}',10,${user},1,${active}) ON CONFLICT(video_id,user_id) DO UPDATE SET can_approve=excluded.can_approve,active=excluded.active,version=video_review_grants.version+1`
-  sqlite.exec(`INSERT INTO users(id,email,role) VALUES(1,'staff@example.invalid','staff'),(2,'approver@example.invalid','customer'),(3,'second@example.invalid','customer');
-    INSERT INTO videos(id,legacy_id,title,_status) VALUES(10,'video','Video','draft');
-    INSERT INTO media(id,filename) VALUES(20,'source.mp4'),(21,'cut.mp4');
-    ${revision('r1', '2026-10-01T00:00:00.000Z')};
-    INSERT INTO video_review_state(video_id,generation,current_revision) VALUES(10,1,'r1');
-    INSERT INTO video_review_grants(id,video_id,user_id,version,can_approve,active) VALUES('approver',10,2,3,1,1),('second',10,3,1,1,1);`)
-  await migrations[expandIndex]!.up(args)
-  const grant = (revisionId: string, user: number) => sqlite.prepare('SELECT * FROM review_revision_grants WHERE revision_id=? AND user_id=?').get(revisionId, user)
-  const legacy = (user: number) => sqlite.prepare('SELECT active,version FROM video_review_grants WHERE video_id=10 AND user_id=?').get(user)
-
-  // The previous Worker creates a revision, assigns the approver, and records a decision.
-  sqlite.exec(`${revision('r2', '2026-10-09T00:00:00.000Z')}; UPDATE video_review_state SET current_revision='r2' WHERE video_id=10; ${legacyGrant('approver-again', 2, 1)}`)
-  assert.equal(legacy(2)?.version, 4)
-  assert.equal(grant('r2', 2)?.version, 4, 'the mirrored grant carries the legacy version')
-  sqlite.exec("INSERT INTO review_decisions(id,video_id,revision_id,author_id,review_version,grant_version,decision,note,created_at) VALUES('window',10,'r2',2,1,4,'approved','','2026-10-09T01:00:00.000Z')")
-  await enforce.up(args)
-  const decision = sqlite.prepare("SELECT grant_id,grant_version FROM review_decisions WHERE id='window'").get()!
-  assert.equal(decision.grant_id, grant('r2', 2)!.id)
-  assert.equal(decision.grant_version, grant('r2', 2)!.version, 'the window approval still matches its grant version')
-  await enforce.down(args)
-
-  // A revocation through the new Worker deactivates the legacy grant once none remain,
-  // so a code-only rollback cannot restore access.
-  const revoke = (revisionId: string, user: number) => sqlite.prepare("UPDATE review_revision_grants SET revoked_at=?,revoked_by_id=1,version=version+1 WHERE revision_id=? AND user_id=? AND revoked_at IS NULL").run(new Date().toISOString(), revisionId, user)
-  revoke('r1', 2)
-  assert.equal(legacy(2)?.active, 1, 'the approver still holds the current cut')
-  revoke('r2', 2)
-  assert.deepEqual({ ...legacy(2) }, { active: 0, version: 4 })
-  // Revoking the last active grant must not cascade back through the legacy revoke
-  // mirror into an expired grant: an approval recorded on it stays publishable.
-  sqlite.exec(`INSERT INTO review_revision_grants(id,video_id,revision_id,user_id,can_approve,version,granted_by_id,granted_at,expires_at) VALUES('share-r2-3',10,'r2',3,1,1,1,'${new Date().toISOString()}','2099-01-01T00:00:00.000Z')`)
-  sqlite.exec("UPDATE review_revision_grants SET granted_at='2026-01-01T00:00:00.000Z',expires_at='2026-01-02T00:00:00.000Z' WHERE revision_id='r1' AND user_id=3")
-  const expired = { ...grant('r1', 3) }
-  revoke('r2', 3)
-  assert.equal(legacy(3)?.active, 0)
-  assert.deepEqual({ ...grant('r1', 3) }, expired, 'the expired grant is neither revoked nor re-versioned')
   assert.deepEqual(sqlite.prepare('PRAGMA foreign_key_check').all(), [])
 })
 
@@ -259,7 +257,7 @@ test('revision grant expand keeps old-Worker window decisions publishable and mi
 // migrationDir and ignores index.ts, so an unregistered file there still ships. Staged
 // contract migrations wait in src/pending-migrations instead.
 test('every migration file in migrationDir is registered in index.ts, in order', async () => {
-  const files = (await readdir(new URL('../src/migrations/', import.meta.url))).filter(name => (name.endsWith('.ts') || name.endsWith('.js')) && !name.startsWith('index.')).map(name => name.split('.')[0]).sort()
+  const files = (await readdir(new URL('../src/migrations-cuid2/', import.meta.url))).filter(name => (name.endsWith('.ts') || name.endsWith('.js')) && !name.startsWith('index.')).map(name => name.split('.')[0]).sort()
   assert.deepEqual(migrations.map(migration => migration.name), files)
   assert.equal(files.some(name => name.includes('enforce')), false, 'the contract step is not released with the expand step')
 })

@@ -1,4 +1,4 @@
-import type { CollectionEntry } from "astro:content";
+import type { CollectionEntry } from "@/lib/payload-content";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 
 export type VideoEntry = CollectionEntry<"videos">;
@@ -70,9 +70,9 @@ function toVideoItem(e: VideoEntry): VideoItem {
 }
 
 async function loadVideoStore(): Promise<VideoStore> {
-	const { getCollection } = await import("astro:content");
+	const { getAllCollection } = await import("@/lib/payload-content");
 
-	const items = await getCollection("videos");
+	const items = await getAllCollection("videos");
 	const videos = items.map((e: VideoEntry) => toVideoItem(e));
 	const byId = new Map<string, VideoItem>();
 	const bySlug = new Map<string, VideoItem>();

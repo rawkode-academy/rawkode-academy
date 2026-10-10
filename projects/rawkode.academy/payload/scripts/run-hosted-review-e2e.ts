@@ -1,8 +1,9 @@
 import {readFileSync, writeFileSync} from 'node:fs'
 import path from 'node:path'
-import {createHash, randomUUID} from 'node:crypto'
+import {createHash} from 'node:crypto'
+import {createCuid2} from '../src/cuid2'
 
-type Fixture = {videoId:number;staff:number;customer:number;tokens:{staff:string;customer:string};origin:string;runId:string}
+type Fixture = {videoId:string;staff:string;customer:string;tokens:{staff:string;customer:string};origin:string;runId:string}
 type JsonRecord = Record<string, any>
 const projectDir = process.cwd()
 const fixture = JSON.parse(readFileSync(path.join(projectDir, '.runtime/hosted-review-fixture.json'), 'utf8')) as Fixture
@@ -40,7 +41,7 @@ if (!reviewers.reviewers?.some((reviewer:JsonRecord) => reviewer.userId === fixt
 report.checks.push('staff can enumerate the synthetic customer reviewer')
 
 const begin = await request('/api/review/uploads', staff, {method:'POST', body:JSON.stringify({
-  action:'begin', commandId:randomUUID(), videoId:fixture.videoId, bytes:media.byteLength, checksum,
+  action:'begin', commandId:createCuid2(), videoId:fixture.videoId, bytes:media.byteLength, checksum,
   contentType:'video/mp4', metadata:{title:'Hosted review acceptance fixture',description:'Synthetic end-to-end review artifact.',transcript:'',chapters:[]},
 })})
 const sessionId = String(begin.sessionId)
@@ -66,7 +67,7 @@ const revisionId = String(processed.revision.revisionId)
 report.processingStates = processingStates
 report.checks.push('Cloudflare Workflow completed Container/Workers AI processing and attached a review revision')
 
-const share = await command(staff, {action:'share', commandId:randomUUID(), videoId:fixture.videoId, revisionId, userId:Number(fixture.customer), canApprove:true, expiresAt:new Date(Date.now() + 86400000).toISOString()})
+const share = await command(staff, {action:'share', commandId:createCuid2(), videoId:fixture.videoId, revisionId, userId:fixture.customer, canApprove:true, expiresAt:new Date(Date.now() + 86400000).toISOString()})
 if (share.action !== 'share') throw new Error(`Share failed: ${JSON.stringify(share)}`)
 report.checks.push('staff shared this revision with the customer with approval rights')
 
@@ -76,23 +77,23 @@ const customerReview = await request(`/api/review?videoId=${fixture.videoId}`, c
 if (customerReview.currentRevisionId !== revisionId || customerReview.canApprove !== true) throw new Error(`Customer review access is wrong: ${JSON.stringify(customerReview)}`)
 report.checks.push('customer sees only the granted review and can approve it')
 
-const comment = await command(customer, {action:'comment', commandId:randomUUID(), videoId:fixture.videoId, revisionId, startMs:0, body:'Please keep this opening frame; synthetic acceptance comment.'})
+const comment = await command(customer, {action:'comment', commandId:createCuid2(), videoId:fixture.videoId, revisionId, startMs:0, body:'Please keep this opening frame; synthetic acceptance comment.'})
 const commentId = String(comment.commentId)
 if (!commentId) throw new Error(`Comment was not created: ${JSON.stringify(comment)}`)
 report.checks.push('customer added a timestamped comment at 00:00')
 
 const beforeResolve = await request(`/api/review?videoId=${fixture.videoId}`, staff)
 if (!beforeResolve.comments?.some((item:JsonRecord) => item.id === commentId && item.startMs === 0)) throw new Error('Timestamped comment was not visible to staff')
-const resolved = await command(staff, {action:'resolve-comment', commandId:randomUUID(), videoId:fixture.videoId, commentId, resolved:true})
+const resolved = await command(staff, {action:'resolve-comment', commandId:createCuid2(), videoId:fixture.videoId, commentId, resolved:true})
 if (resolved.resolved !== true) throw new Error(`Comment was not resolved: ${JSON.stringify(resolved)}`)
 report.checks.push('staff can resolve the timestamped comment before publication')
 
-const decision = await command(customer, {action:'decide', commandId:randomUUID(), videoId:fixture.videoId, revisionId, expectedReviewVersion:1, decision:'approved', note:'Approved synthetic review fixture.'})
+const decision = await command(customer, {action:'decide', commandId:createCuid2(), videoId:fixture.videoId, revisionId, expectedReviewVersion:1, decision:'approved', note:'Approved synthetic review fixture.'})
 if (decision.decision !== 'approved') throw new Error(`Approval failed: ${JSON.stringify(decision)}`)
 const decisionId = String(decision.decisionId)
 report.checks.push('customer approved the exact current revision')
 
-const publish = await command(staff, {action:'publish', commandId:randomUUID(), videoId:fixture.videoId, revisionId, expectedReviewVersion:1, decisionId})
+const publish = await command(staff, {action:'publish', commandId:createCuid2(), videoId:fixture.videoId, revisionId, expectedReviewVersion:1, decisionId})
 const publicationId = String(publish.publicationId)
 if (!publicationId || publish.revisionId !== revisionId) throw new Error(`Publication failed: ${JSON.stringify(publish)}`)
 report.checks.push('staff published only the customer-approved revision')

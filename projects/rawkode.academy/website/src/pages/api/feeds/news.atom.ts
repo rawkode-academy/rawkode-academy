@@ -1,4 +1,4 @@
-import { getCollection, getEntries } from "astro:content";
+import { getAllCollection, getEntries } from "@/lib/payload-content";
 import type { APIContext } from "astro";
 import { isNewsPublished } from "@/lib/news-publication";
 
@@ -23,7 +23,7 @@ function escapeXml(value: string): string {
 
 export async function GET(context: APIContext) {
 	const now = new Date();
-	const news = await getCollection("news", ({ data }) =>
+	const news = await getAllCollection("news", ({ data }) =>
 		isNewsPublished(data.publishedAt, now),
 	);
 
@@ -46,7 +46,7 @@ export async function GET(context: APIContext) {
 
 	const entries = await Promise.all(
 		sortedNews.map(async (story) => {
-			const storyUrl = `${site}/news/${story.id}/`;
+			const storyUrl = `${site}/news/${story.slug}/`;
 			const published = new Date(story.data.publishedAt).toISOString();
 			const authors = await getEntries(story.data.authors);
 

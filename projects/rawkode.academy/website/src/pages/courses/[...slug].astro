@@ -2,51 +2,27 @@
 import { academyCourse, academyLayout } from "@rawkodeacademy/design-system";
 const s = academyCourse();
 const styles = academyLayout({ width: "reading" });
-import { getImage } from "astro:assets";
-import {
-	type CollectionEntry,
-	getCollection,
-	getEntries,
-	render,
-} from "astro:content";
+import { getEntry, getEntries, getAllCollection } from "@/lib/payload-content";
+import type { CollectionEntry } from "@/lib/payload-content";
+import CmsBody from "@/components/content/CmsBody.astro";
 import CourseModules from "@/components/courses/CourseModules.astro";
 import CourseSignupFormCompact from "@/components/courses/CourseSignupFormCompact.astro";
 import CourseDetailHero from "@/components/courses/CourseDetailHero.vue";
 import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
 import CourseJsonLd from "@/components/html/course-jsonld.astro";
 import Page from "@/wrappers/page.astro";
-import type { GetStaticPaths, GetStaticPathsResult } from "astro";
+export const prerender = false;
 
-export const prerender = true;
-
-type Props = {
-	course: CollectionEntry<"courses">;
-};
-
-export const getStaticPaths: GetStaticPaths =
-	async (): Promise<GetStaticPathsResult> => {
-		const courses = await getCollection("courses");
-
-		return courses.map((course: CollectionEntry<"courses">) => {
-			return {
-				params: {
-					slug: course.id,
-				},
-				props: {
-					course,
-				},
-			};
-		});
-	};
-
-const { course } = Astro.props;
-
-const { Content } = await render(course);
+const courseSlug = Astro.params.slug;
+const course = courseSlug ? await getEntry("courses", { slug: courseSlug }) : undefined;
+if (!course) return new Response(null, { status: 404 });
 const authors = await getEntries(course.data.authors);
 
 // Get all modules for this course
-const allCourseModules = (await getCollection("courseModules"))
-	.filter((module) => module.data.course.id === course.id)
+const allCourseModules = await getAllCollection("courseModules", undefined, {
+	courseId: course.id,
+});
+allCourseModules
 	.sort((a, b) => a.data.order - b.data.order);
 
 const totalModules = allCourseModules.length;
@@ -75,17 +51,17 @@ function formatDuration(minutes: number): string {
 	return `${hours}h ${mins}m`;
 }
 
-const coverImage = course.data.cover
-	? await getImage({ src: course.data.cover.image })
+const coverImage = course.data.cover?.image;
+const imageUrl = coverImage?.src
+	? new URL(coverImage.src, Astro.site ?? Astro.url)
 	: undefined;
-const imageUrl = coverImage ? new URL(coverImage.src, Astro.site) : undefined;
 const cover =
 	coverImage && course.data.cover
 		? {
 				src: coverImage.src,
 				alt: course.data.cover.alt,
-				width: course.data.cover.image.width,
-				height: course.data.cover.image.height,
+				width: coverImage.width ?? 1280,
+				height: coverImage.height ?? 720,
 			}
 		: undefined;
 const hasCourseResources = Boolean(course.data.resources?.length);
@@ -96,7 +72,7 @@ const hasSupplementaryContent = Boolean(
 // Format authors for the hero component
 const formattedAuthors = authors.map((author) => ({
 	name: author.data.name,
-	href: `/people/${author.data.id}`,
+	href: `/people/${author.slug}`,
 	avatarUrl: author.data.avatarUrl,
 }));
 
@@ -138,7 +114,7 @@ function getResourceHref(
 		elements={[
 			{ title: "Home", link: "/" },
 			{ title: "Courses", link: "/courses" },
-			{ title: course.data.title, link: `/courses/${course.id}` },
+			{ title: course.data.title, link: `/courses/${course.slug}` },
 		]}
 	/>
 	
@@ -170,7 +146,7 @@ function getResourceHref(
 					</section>
 				)}
 				<article class={styles.prose}>
-					<Content />
+					<CmsBody entry={course} />
 				</article>
 			</div>
 

@@ -1,4 +1,4 @@
-import { getCollection, getEntries } from "astro:content";
+import { getAllCollection, getEntries } from "@/lib/payload-content";
 import type { APIRoute } from "astro";
 import { buildJsonFeed, type JsonFeedItem } from "@/lib/json-feed";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
@@ -12,10 +12,10 @@ export const GET: APIRoute = async ({ site }) => {
 	const u = (path: string) => `${baseUrl}${path}`;
 
 	const [articles, videos, news, technologies] = await Promise.all([
-		getCollection("articles"),
-		getCollection("videos"),
-		getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
-		getCollection("technologies"),
+		getAllCollection("articles"),
+		getAllCollection("videos"),
+		getAllCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
+		getAllCollection("technologies"),
 	]);
 
 	const techName = new Map(
@@ -26,7 +26,7 @@ export const GET: APIRoute = async ({ site }) => {
 
 	for (const article of articles) {
 		const authors = await getEntries(article.data.authors);
-		const url = u(`/read/${article.id}/`);
+		const url = u(`/read/${article.slug}/`);
 		items.push({
 			id: url,
 			url,
@@ -38,7 +38,7 @@ export const GET: APIRoute = async ({ site }) => {
 				: {}),
 			authors: authors.map((author) => ({
 				name: author.data.name,
-				url: u(`/people/${author.data.id}`),
+				url: u(`/people/${author.slug}`),
 			})),
 			tags: [
 				"Article",
@@ -49,7 +49,7 @@ export const GET: APIRoute = async ({ site }) => {
 
 	for (const story of news) {
 		const authors = await getEntries(story.data.authors);
-		const url = u(`/news/${story.id}/`);
+		const url = u(`/news/${story.slug}/`);
 		items.push({
 			id: url,
 			url,
@@ -58,14 +58,14 @@ export const GET: APIRoute = async ({ site }) => {
 			date_published: new Date(story.data.publishedAt).toISOString(),
 			authors: authors.map((author) => ({
 				name: author.data.name,
-				url: u(`/people/${author.data.id}`),
+				url: u(`/people/${author.slug}`),
 			})),
 			tags: ["News", ...(story.data.technologies ?? [])],
 		});
 	}
 
 	for (const video of videos) {
-		const url = u(`/watch/${video.data.slug}/`);
+		const url = u(`/watch/${video.slug}/`);
 		const techIds = video.data.technologies as ReadonlyArray<unknown>;
 		const tagNames = (Array.isArray(techIds) ? techIds : [])
 			.map((id) => {
@@ -117,9 +117,9 @@ export const GET: APIRoute = async ({ site }) => {
 	return new Response(JSON.stringify(feed), {
 		headers: {
 			"Content-Type": "application/feed+json; charset=utf-8",
-			"Cache-Control": "public, max-age=3600",
+			"Cache-Control": "public, max-age=3600, s-maxage=3600",
 		},
 	});
 };
 
-export const prerender = true;
+export const prerender = false;

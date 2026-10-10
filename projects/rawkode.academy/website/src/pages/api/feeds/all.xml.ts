@@ -1,4 +1,4 @@
-import { getCollection, getEntries } from "astro:content";
+import { getAllCollection, getEntries } from "@/lib/payload-content";
 import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
 import {
@@ -21,10 +21,10 @@ export async function GET(context: APIContext) {
 	);
 
 	const [articles, videos, technologies, news] = await Promise.all([
-		getCollection("articles"),
-		getCollection("videos"),
-		getCollection("technologies"),
-		getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
+		getAllCollection("articles"),
+		getAllCollection("videos"),
+		getAllCollection("technologies"),
+		getAllCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
 	]);
 
 	const techName = new Map(
@@ -55,7 +55,7 @@ export async function GET(context: APIContext) {
 					title,
 					description,
 					pubDate: new Date(article.data.publishedAt),
-					link: `/read/${article.id}/`,
+					link: `/read/${article.slug}/`,
 					categories: article.data.series?.id ? [article.data.series.id] : [],
 				};
 				if (authors.length > 0) {
@@ -140,7 +140,7 @@ export async function GET(context: APIContext) {
 					title,
 					description,
 					pubDate: new Date(story.data.publishedAt),
-					link: `/news/${story.id}/`,
+					link: `/news/${story.slug}/`,
 					categories: [...(story.data.technologies ?? [])],
 				};
 				if (authors.length > 0) {

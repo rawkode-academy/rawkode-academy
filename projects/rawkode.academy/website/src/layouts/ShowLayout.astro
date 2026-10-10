@@ -1,5 +1,5 @@
 ---
-import type { CollectionEntry } from "astro:content";
+import type { CollectionEntry } from "@/lib/payload-content";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import ShowNav from "@/components/show/ShowNav.astro";
 import type { ShowNavItem } from "@/lib/shows/types";
@@ -21,12 +21,12 @@ const layout = showLayoutStyles;
 const breadcrumbElements = [
 	{ title: "Home", link: "/" },
 	{ title: "Shows", link: "/shows" },
-	{ title: show.data.name, link: `/shows/${show.data.id}` },
+	{ title: show.data.name, link: `/shows/${show.slug}` },
 	...(activeTab
 		? [
 				{
 					title: activeTab.label,
-					link: `/shows/${show.data.id}/${activeTab.slug}`,
+					link: `/shows/${show.slug}/${activeTab.slug}`,
 				},
 			]
 		: []),
@@ -44,7 +44,7 @@ const breadcrumbElements = [
 		</div>
 	</section>
 
-	<ShowNav showId={show.data.id} nav={nav} active={active} />
+	<ShowNav showId={show.slug} nav={nav} active={active} />
 
 	<section class={layout.section}>
 		<div class={layout.container}>

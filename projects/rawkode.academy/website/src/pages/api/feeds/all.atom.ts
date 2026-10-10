@@ -1,4 +1,4 @@
-import { getCollection, getEntries } from "astro:content";
+import { getAllCollection, getEntries } from "@/lib/payload-content";
 import type { APIContext } from "astro";
 import { renderAndSanitizeArticles } from "../../../lib/feed-utils";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
@@ -21,10 +21,10 @@ interface AtomEntry {
 export async function GET(context: APIContext) {
 	const now = new Date();
 	const [articles, videos, technologies, news] = await Promise.all([
-		getCollection("articles"),
-		getCollection("videos"),
-		getCollection("technologies"),
-		getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
+		getAllCollection("articles"),
+		getAllCollection("videos"),
+		getAllCollection("technologies"),
+		getAllCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
 	]);
 
 	const techName = new Map(
@@ -51,7 +51,7 @@ export async function GET(context: APIContext) {
 			entries.push({
 				title: article.data.title,
 				description: article.data.description,
-				url: `${site}/read/${article.id}/`,
+				url: `${site}/read/${article.slug}/`,
 				published: new Date(article.data.publishedAt).toISOString(),
 				updated: article.data.updatedAt
 					? new Date(article.data.updatedAt).toISOString()
@@ -91,7 +91,7 @@ export async function GET(context: APIContext) {
 			entries.push({
 				title: story.data.title,
 				description: story.data.description,
-				url: `${site}/news/${story.id}/`,
+				url: `${site}/news/${story.slug}/`,
 				published: new Date(story.data.publishedAt).toISOString(),
 				updated: new Date(story.data.publishedAt).toISOString(),
 				categories: [...(story.data.technologies ?? [])],

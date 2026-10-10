@@ -7,6 +7,7 @@ import { REVIEW_BRIDGE_ROUTES, serveBridge, serveDirect } from '../src/ingress'
 import { reviewRequestActor } from '../src/review/host'
 import { ReviewError } from '../src/review/contracts'
 import { reviewRoutes } from '../../website/review/bridge'
+import { CLIENT_ID, STAFF_ID } from './helpers/ids'
 
 const ADMIN = 'https://admin.rawkode.academy', PREVIEW = 'https://preview.rawkode.academy'
 const PROD: AuthEnvironment = { OIDC_DIRECT_ORIGINS: JSON.stringify([ADMIN]), OIDC_BRIDGE_ORIGINS: JSON.stringify([PREVIEW]), REVIEW_PUBLIC_MEDIA_ORIGIN: ADMIN }
@@ -73,12 +74,12 @@ test('ingress rejections answer the original request without consuming or moving
   assert.equal(seen.length, 0)
 })
 
-test('direct: root GraphQL rewrite keeps the stamped origin', async () => {
+test('direct: root requests pass through unchanged with the stamped origin', async () => {
   const { seen, next } = downstream()
   await serveDirect(new Request(`${ADMIN}/`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{"query":"{__typename}"}' }), prod, next)
   await serveDirect(new Request(`${ADMIN}/?query=%7B__typename%7D`), prod, next)
   await serveDirect(new Request(`${ADMIN}/`), prod, next)
-  assert.deepEqual(seen.map(request => new URL(request.url).pathname), ['/graphql', '/graphql', '/'])
+  assert.deepEqual(seen.map(request => new URL(request.url).pathname), ['/', '/', '/'])
   assert.equal(stamped(seen[0]), ADMIN)
   assert.equal(await seen[0].text(), '{"query":"{__typename}"}')
 })
@@ -132,8 +133,8 @@ test('Payload strategy returns no user for an untrusted or mismatched origin', a
 })
 
 test('review API on a direct origin is staff only when a bridge exists; customers use the bridge', () => {
-  const staff = { id: 1, collection: 'users', role: 'staff' }
-  const customer = { id: 2, collection: 'users', role: 'customer' }
+  const staff = { id: STAFF_ID, collection: 'users', role: 'staff' }
+  const customer = { id: CLIENT_ID, collection: 'users', role: 'customer' }
   const at = (origin: string) => new Headers({ [PUBLIC_ORIGIN_HEADER]: origin })
   const status = (fn: () => unknown) => { try { fn(); return 200 } catch (error) { assert(error instanceof ReviewError); return error.status } }
   assert.deepEqual(reviewRequestActor(at(ADMIN), prod, staff), { origin: ADMIN, actor: staff })

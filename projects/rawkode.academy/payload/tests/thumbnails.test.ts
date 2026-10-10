@@ -4,15 +4,20 @@ import { DatabaseSync } from 'node:sqlite'
 import { deflateSync } from 'node:zlib'
 import test, { type TestContext } from 'node:test'
 import { assertThumbnail, createThumbnailHandlers, maximumThumbnailBytes } from '../src/review/thumbnails'
-import { reviewThumbnailSchema } from '../src/migrations/20261007_140000_review_thumbnails'
-import { revisionGrantSchema } from '../src/migrations/20261009_130000_review_revision_grants'
+import { reviewThumbnailSchema } from '../src/migrations-cuid2/cuid2_20261007_140000_review_thumbnails'
+import { revisionGrantSchema } from '../src/migrations-cuid2/cuid2_20261009_130000_review_revision_grants'
 import { ReviewStore } from '../src/review/store'
 import { ReviewService } from '../src/review/service'
 import { ReviewError, type ReviewActor } from '../src/review/contracts'
+import { createCuid2 } from '../src/cuid2'
+import { CLIENT_ID, OTHER_VIDEO_ID, STAFF_ID, THUMBNAIL_ID, VIDEO_ID } from './helpers/ids'
 
 const origin = 'https://preview.rawkode.academy'
-const staff: ReviewActor = { id: 1, collection: 'users', role: 'staff' }
-const customer: ReviewActor = { id: 2, collection: 'users', role: 'customer' }
+const staff: ReviewActor = { id: STAFF_ID, collection: 'users', role: 'staff' }
+const customer: ReviewActor = { id: CLIENT_ID, collection: 'users', role: 'customer' }
+const oldRevisionId = `r${'0'.repeat(23)}`
+const newRevisionId = `n${'0'.repeat(23)}`
+const wrongVideoRevisionId = `w${'0'.repeat(23)}`
 function png(width = 1, height = 1) {
   function chunk(name: string, data: Buffer) {
     const type = Buffer.from(name), content = Buffer.concat([type, data])
@@ -29,13 +34,13 @@ function png(width = 1, height = 1) {
 const bytes = png()
 const hash = async (data: Buffer) => Buffer.from(await crypto.subtle.digest('SHA-256', new Uint8Array(data))).toString('hex')
 function request(body: Buffer = bytes, type = 'image/png', extra: Record<string, string> = {}) {
-  return new Request(`${origin}/api/review/thumbnail?videoId=10`, { method: 'POST', headers: { origin, 'content-type': type, ...extra }, body: new Uint8Array(body) })
+  return new Request(`${origin}/api/review/thumbnail?videoId=${VIDEO_ID}`, { method: 'POST', headers: { origin, 'content-type': type, ...extra }, body: new Uint8Array(body) })
 }
 function harness(t: TestContext) {
   const fixed = new Date()
   const sqlite = new DatabaseSync(':memory:')
   t.after(() => sqlite.close())
-  sqlite.exec("PRAGMA foreign_keys=ON; CREATE TABLE videos(id INTEGER PRIMARY KEY); INSERT INTO videos VALUES(10),(11); CREATE TABLE media(id INTEGER PRIMARY KEY); CREATE TABLE users(id INTEGER PRIMARY KEY, role TEXT); INSERT INTO users VALUES(1,'staff'),(2,'customer'); CREATE TABLE video_revisions(id TEXT PRIMARY KEY, video_id INTEGER, metadata TEXT, created_at TEXT)")
+  sqlite.exec(`PRAGMA foreign_keys=ON; CREATE TABLE videos(id TEXT PRIMARY KEY); INSERT INTO videos VALUES('${VIDEO_ID}'),('${OTHER_VIDEO_ID}'); CREATE TABLE media(id TEXT PRIMARY KEY); CREATE TABLE users(id TEXT PRIMARY KEY, role TEXT); INSERT INTO users VALUES('${STAFF_ID}','staff'),('${CLIENT_ID}','customer'); CREATE TABLE video_revisions(id TEXT PRIMARY KEY, video_id TEXT, metadata TEXT, created_at TEXT)`)
   for (const query of [...reviewThumbnailSchema, ...revisionGrantSchema]) sqlite.exec(query)
   class Prepared {
     values: (number | string | null)[] = []
@@ -68,7 +73,7 @@ function harness(t: TestContext) {
   const payload = {
     async create(options: any) {
       creates.push(options)
-      const id = creates.length + 100, filename = options.file.name
+      const id = THUMBNAIL_ID, filename = options.file.name
       const body = Buffer.from(options.file.data)
       if (corruptStorage) body[body.length - 1] ^= 1
       objects.set(filename, { bytes: body, type: options.file.mimetype, etag: await hash(body) })
@@ -81,18 +86,18 @@ function harness(t: TestContext) {
     },
   }
   const service = new ReviewService(store, {
-    async video(id: number) {
-      if (!eligible || ![10,11].includes(id)) throw new ReviewError(409, 'Ineligible video')
+    async video(id: string) {
+      if (!eligible || ![VIDEO_ID,OTHER_VIDEO_ID].includes(id)) throw new ReviewError(409, 'Ineligible video')
       return { id, legacyId: String(id) }
     },
     now: () => fixed,
   } as never)
   const handler = (actor = staff) => createThumbnailHandlers(async () => ({ payload, store, service, actor, origin, bucket }) as never)
-  function revision(id: string, videoId: number, thumbnailId?: number) {
+  function revision(id: string, videoId: string, thumbnailId?: string) {
     sqlite.prepare('INSERT INTO video_revisions VALUES(?,?,?,?)').run(id, videoId, JSON.stringify(thumbnailId ? { thumbnailId } : {}), fixed.toISOString())
   }
-  function share(revisionId: string, videoId: number) {
-    sqlite.prepare('INSERT INTO review_revision_grants(id,video_id,revision_id,user_id,can_approve,version,granted_at,expires_at) VALUES(?,?,?,2,1,1,?,?)').run(`grant-${revisionId}`, videoId, revisionId, fixed.toISOString(), new Date(fixed.getTime() + 86400000).toISOString())
+  function share(revisionId: string, videoId: string) {
+    sqlite.prepare('INSERT INTO review_revision_grants(id,video_id,revision_id,user_id,can_approve,version,granted_at,expires_at) VALUES(?,?,?,?,1,1,?,?)').run(createCuid2(), videoId, revisionId, CLIENT_ID, fixed.toISOString(), new Date(fixed.getTime() + 86400000).toISOString())
   }
   return { sqlite, share, store, objects, creates, handler, revision, heads: () => heads, ineligible: () => { eligible = false }, corrupt: () => { corruptStorage = true }, concurrent: () => { concurrent = true } }
 }
@@ -102,19 +107,19 @@ test('staff thumbnail upload fixes access, verifies bytes and reuses identical u
   const response = await handler.POST(request())
   assert.equal(response.status, 201)
   assert.equal(response.headers.get('cache-control'), 'private, no-store')
-  assert.deepEqual(await response.json(), { thumbnailId: 101, videoId: 10 })
+  assert.deepEqual(await response.json(), { thumbnailId: THUMBNAIL_ID, videoId: VIDEO_ID })
   assert.equal(h.creates[0].overrideAccess, false)
   assert.equal(h.creates[0].user, staff)
   assert.equal(h.creates[0].collection, 'media')
-  assert.match(h.creates[0].file.name, /^review-thumbnail-[0-9a-f-]+\.png$/)
-  const asset = await assertThumbnail(h.store, 10, 101)
+  assert.match(h.creates[0].file.name, /^review-thumbnail-[a-z][a-z0-9]{23}\.png$/)
+  const asset = await assertThumbnail(h.store, VIDEO_ID, THUMBNAIL_ID)
   assert.equal(asset.checksum, await hash(bytes))
   assert.equal(asset.bytes, bytes.length)
   const retry = await handler.POST(request())
   assert.equal(retry.status, 200)
-  assert.deepEqual(await retry.json(), { thumbnailId: 101, videoId: 10 })
+  assert.deepEqual(await retry.json(), { thumbnailId: THUMBNAIL_ID, videoId: VIDEO_ID })
   assert.equal(h.creates.length, 1)
-  await assert.rejects(assertThumbnail(h.store, 11, 101), /Thumbnail not found/)
+  await assert.rejects(assertThumbnail(h.store, OTHER_VIDEO_ID, THUMBNAIL_ID), /Thumbnail not found/)
 })
 
 test('authorization, origin and eligible video are checked before reading upload', async t => {
@@ -150,42 +155,42 @@ test('stored bytes must match before the thumbnail is associated', async t => {
 
 test('customers retrieve only the selected authorized revision thumbnail, including HEAD', async t => {
   const h = harness(t); await h.handler().POST(request())
-  h.revision('old', 10)
-  h.revision('new', 10, 101)
-  h.revision('wrong-video', 11, 101)
-  const read = (revision: string, videoId = 10, method = 'GET') => h.handler(customer)[method === 'HEAD' ? 'HEAD' : 'GET'](new Request(`${origin}/api/review/thumbnail?videoId=${videoId}&revisionId=${revision}&thumbnailId=101`, { method }))
+  h.revision(oldRevisionId, VIDEO_ID)
+  h.revision(newRevisionId, VIDEO_ID, THUMBNAIL_ID)
+  h.revision(wrongVideoRevisionId, OTHER_VIDEO_ID, THUMBNAIL_ID)
+  const read = (revision: string, videoId = VIDEO_ID, method = 'GET') => h.handler(customer)[method === 'HEAD' ? 'HEAD' : 'GET'](new Request(`${origin}/api/review/thumbnail?videoId=${videoId}&revisionId=${revision}&thumbnailId=${THUMBNAIL_ID}`, { method }))
   const previousHeads = h.heads()
-  assert.equal((await read('new')).status, 404)
+  assert.equal((await read(newRevisionId)).status, 404)
   assert.equal(h.heads(), previousHeads)
-  h.share('old', 10)
-  h.share('wrong-video', 11)
-  assert.equal((await read('new')).status, 404, 'a grant on another revision does not expose this thumbnail')
-  h.share('new', 10)
-  assert.equal((await read('old')).status, 404)
-  assert.equal((await read('wrong-video')).status, 404)
-  assert.equal((await read('wrong-video', 11)).status, 404)
-  const response = await read('new')
+  h.share(oldRevisionId, VIDEO_ID)
+  h.share(wrongVideoRevisionId, OTHER_VIDEO_ID)
+  assert.equal((await read(newRevisionId)).status, 404, 'a grant on another revision does not expose this thumbnail')
+  h.share(newRevisionId, VIDEO_ID)
+  assert.equal((await read(oldRevisionId)).status, 404)
+  assert.equal((await read(wrongVideoRevisionId)).status, 404)
+  assert.equal((await read(wrongVideoRevisionId, OTHER_VIDEO_ID)).status, 404)
+  const response = await read(newRevisionId)
   assert.equal(response.status, 200)
   assert.equal(response.headers.get('cache-control'), 'private, no-store')
   assert.equal(response.headers.get('content-type'), 'image/png')
   assert.equal(response.headers.get('x-content-type-options'), 'nosniff')
   assert.deepEqual(Buffer.from(await response.arrayBuffer()), bytes)
-  const head = await read('new', 10, 'HEAD')
+  const head = await read(newRevisionId, VIDEO_ID, 'HEAD')
   assert.equal(head.status, 200)
   assert.equal((await head.arrayBuffer()).byteLength, 0)
-  h.sqlite.exec(`UPDATE review_revision_grants SET revoked_at='${new Date().toISOString()}',version=version+1 WHERE video_id=10`)
-  assert.equal((await read('new')).status, 404)
+  h.sqlite.exec(`UPDATE review_revision_grants SET revoked_at='${new Date().toISOString()}',version=version+1 WHERE video_id='${VIDEO_ID}'`)
+  assert.equal((await read(newRevisionId)).status, 404)
 })
 
 test('changed R2 identity fails closed and association rows cannot be replaced or deleted', async t => {
   const h = harness(t); await h.handler().POST(request())
-  const asset = await assertThumbnail(h.store, 10, 101)
+  const asset = await assertThumbnail(h.store, VIDEO_ID, THUMBNAIL_ID)
   assert.throws(() => h.sqlite.exec("UPDATE review_thumbnail_assets SET object_key='other'"), /immutable/)
   assert.throws(() => h.sqlite.exec('DELETE FROM review_thumbnail_assets'), /retained/)
   h.objects.get(asset.object_key)!.etag = 'changed'
   assert.equal((await h.handler().POST(request())).status, 409)
-  h.revision('new', 10, 101)
-  assert.equal((await h.handler().GET(new Request(`${origin}/api/review/thumbnail?videoId=10&revisionId=new`))).status, 409)
+  h.revision(newRevisionId, VIDEO_ID, THUMBNAIL_ID)
+  assert.equal((await h.handler().GET(new Request(`${origin}/api/review/thumbnail?videoId=${VIDEO_ID}&revisionId=${newRevisionId}`))).status, 409)
 })
 
 test('concurrent identical uploads choose one immutable association', async t => {

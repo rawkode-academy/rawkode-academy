@@ -1,7 +1,7 @@
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 
-export type RemoteTargetName = 'rehearsal' | 'preview' | 'production'
+export type RemoteTargetName = 'rehearsal' | 'preview' | 'pr-preview' | 'production'
 export type TargetName = 'local' | RemoteTargetName
 
 type Binding = Record<string, unknown> & { binding?: string }
@@ -103,6 +103,37 @@ export function rehearsalResources(env: Record<string, string | undefined>): Exp
   return { databaseId: databaseId!, databaseName, bucketName: bucketName! }
 }
 
+/**
+ * PR previews use a disposable D1/R2 pair provisioned by
+ * `scripts/pr-preview-resources.mjs`. Never resolve this target from Wrangler's
+ * shared `previews` block: that D1 also holds live review data.
+ */
+export function pullRequestPreviewResources(env: Record<string, string | undefined>): ExpectedResources {
+  const manifestPath = path.join(process.cwd(), '.runtime', 'pr-preview-resources.json')
+  let manifest: Record<string, unknown> = {}
+  try { manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as Record<string, unknown> }
+  catch { /* an explicit env-only target may be used by a controlled rehearsal */ }
+
+  const databaseId = env.PR_PREVIEW_D1_ID?.trim() || String(manifest.databaseId ?? '').trim()
+  const databaseName = env.PR_PREVIEW_D1_NAME?.trim() || String(manifest.databaseName ?? '').trim()
+  const bucketName = env.PR_PREVIEW_R2_BUCKET?.trim() || String(manifest.bucketName ?? '').trim()
+  const prNumber = env.PR_PREVIEW_NUMBER?.trim() || String(manifest.pullRequestNumber ?? '').trim()
+  const sha = env.PR_PREVIEW_SHA?.trim() || String(manifest.sha ?? '').trim()
+  const suffix = `pr-${prNumber}-${sha.slice(0, 12)}`
+
+  if (!/^\d+$/.test(prNumber) || !/^[0-9a-f]{40}$/.test(sha)) {
+    throw new TargetError('pr-preview: expected a PR number and full workflow SHA in PR_PREVIEW_NUMBER/PR_PREVIEW_SHA or the generated .runtime manifest.')
+  }
+  if (!canonicalUuid.test(databaseId)) throw new TargetError('pr-preview: PR_PREVIEW_D1_ID must be a lowercase hyphenated UUID.')
+  if (databaseName !== `rawkode-academy-payload-${suffix}` || bucketName !== `rawkode-academy-payload-${suffix}`) {
+    throw new TargetError('pr-preview: D1/R2 names do not match the current PR number and SHA.')
+  }
+  if (sameDatabaseId(databaseId, PRODUCTION_RESOURCES.databaseId) || sameDatabaseId(databaseId, PREVIEW_RESOURCES.databaseId) || databaseName === PRODUCTION_RESOURCES.databaseName || databaseName === PREVIEW_RESOURCES.databaseName || bucketName === PRODUCTION_RESOURCES.bucketName || bucketName === PREVIEW_RESOURCES.bucketName || bucketName === CONTENT_CDN_BUCKET) {
+    throw new TargetError('pr-preview: refusing production, shared Preview, or published-content resources.')
+  }
+  return { databaseId, databaseName, bucketName }
+}
+
 function single(bindings: Binding[] | undefined, binding: string, label: string): Binding {
   const matches = (bindings ?? []).filter(candidate => candidate.binding === binding)
   if (matches.length !== 1) throw new TargetError(`${label}: expected exactly one ${binding} binding, found ${matches.length}`)
@@ -138,6 +169,16 @@ export function buildRemoteTargetConfig(target: RemoteTargetName, source: Source
     const r2 = single(source.previews?.r2_buckets, 'R2', 'wrangler.jsonc previews')
     const config = { ...base, d1_databases: [remote(d1)], r2_buckets: [remote(r2)], vars: source.previews?.vars }
     return assertRemoteTargetConfig({ target, expected: PREVIEW_RESOURCES, config })
+  }
+  if (target === 'pr-preview') {
+    const expected = pullRequestPreviewResources(env)
+    const config = {
+      ...base,
+      d1_databases: [{ binding: 'D1', database_id: expected.databaseId, database_name: expected.databaseName, remote: true }],
+      r2_buckets: [{ binding: 'R2', bucket_name: expected.bucketName, remote: true }],
+      vars: source.previews?.vars,
+    }
+    return assertRemoteTargetConfig({ target, expected, config })
   }
   if (target === 'rehearsal') {
     const expected = rehearsalResources(env)
@@ -175,7 +216,14 @@ export function assertRemoteTargetConfig(resolved: ResolvedRemoteTarget): Resolv
   return resolved
 }
 
-export type PreparedTarget = { target: TargetName; expected?: ExpectedResources; configPath?: string; cleanup: () => void }
+export type MigrationChain = 'legacy' | 'cuid2'
+
+/** Only a disposable fresh target may use the new CUID2 schema chain. */
+export function migrationChainForTarget(target: TargetName): MigrationChain {
+  return target === 'preview' ? 'legacy' : 'cuid2'
+}
+
+export type PreparedTarget = { target: TargetName; migrationChain: MigrationChain; expected?: ExpectedResources; configPath?: string; cleanup: () => void }
 
 /**
  * Point the Cloudflare platform proxy at one target. This must run before
@@ -186,6 +234,13 @@ export function prepareTarget(target: TargetName, options: { projectDir?: string
   const projectDir = options.projectDir ?? process.cwd()
   const env = options.env ?? process.env
   const log = options.log ?? ((message: string) => console.error(message))
+  const migrationChain = migrationChainForTarget(target)
+  const previousMigrationChain = env.POC_MIGRATION_CHAIN
+  env.POC_MIGRATION_CHAIN = migrationChain
+  const restoreMigrationChain = () => {
+    if (previousMigrationChain === undefined) delete env.POC_MIGRATION_CHAIN
+    else env.POC_MIGRATION_CHAIN = previousMigrationChain
+  }
   env.POC_CLI = '1'
   if (target === 'local') {
     // Local means the persisted Miniflare state. Clear any inherited remote
@@ -193,7 +248,7 @@ export function prepareTarget(target: TargetName, options: { projectDir?: string
     delete env.POC_REMOTE_BINDINGS
     delete env.POC_CLOUDFLARE_CONFIG_PATH
     log('Target local: Miniflare D1/R2 under .wrangler/state')
-    return { target, cleanup: () => {} }
+    return { target, migrationChain, cleanup: restoreMigrationChain }
   }
   const source = JSON.parse(readFileSync(path.join(projectDir, 'wrangler.jsonc'), 'utf8')) as SourceWranglerConfig
   const resolved = buildRemoteTargetConfig(target, source, env)
@@ -205,7 +260,10 @@ export function prepareTarget(target: TargetName, options: { projectDir?: string
   env.POC_CLOUDFLARE_CONFIG_PATH = configPath
   env.POC_CLOUDFLARE_ENV_FILE = path.join(projectDir, '.dev.vars')
   log(`Target ${target}: D1 ${resolved.expected.databaseName} (${resolved.expected.databaseId}), R2 ${resolved.expected.bucketName}`)
-  return { target, expected: resolved.expected, configPath, cleanup: () => rmSync(configPath, { force: true }) }
+  return { target, migrationChain, expected: resolved.expected, configPath, cleanup: () => {
+    rmSync(configPath, { force: true })
+    restoreMigrationChain()
+  } }
 }
 
 export async function disposeCloudflare(cloudflare: unknown): Promise<void> {

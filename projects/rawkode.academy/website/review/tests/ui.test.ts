@@ -28,14 +28,14 @@ describe("review actions", () => {
     await wrapper.find("select").setValue("older");
     expect(wrapper.find("video").attributes("poster")).toBe(value.revisions[1]!.thumbnailUrl);
   });
-  it("requires confirmation and sends approval for the exact version with a command UUID", async () => {
+  it("requires confirmation and sends approval for the exact version with a CUID2 command ID", async () => {
     const value = review(); const fetch = vi.fn(async (_url: string, _init?: RequestInit) => Response.json(value)); vi.stubGlobal("fetch", fetch);
     const wrapper = mount(ReviewPanel, { props: { review: value, user } }); wrappers.push(wrapper);
     await button(wrapper, "Approve this revision").trigger("click"); expect(fetch).not.toHaveBeenCalled();
     await button(wrapper, "Confirm approval").trigger("click"); await flushPromises();
     const command = JSON.parse(String(fetch.mock.calls[0]![1]?.body));
     expect(command).toMatchObject({ action: "decide", videoId: 10, revisionId: cut, expectedReviewVersion: 3, decision: "approved" });
-    expect(command.commandId).toMatch(/^[a-f0-9-]{36}$/);
+    expect(command.commandId).toMatch(/^[a-z][a-z0-9]{23}$/);
   });
   it("refetches a stale revision and requires a new decision after 409", async () => {
     const value = review(); const fresh = review(); fresh.revisions[0]!.reviewVersion = 4;
@@ -212,7 +212,9 @@ describe("staff upload intake", () => {
     await button(wrapper, "Resume upload and assign review").trigger("click"); await flushPromises();
     await vi.waitFor(() => expect(wrapper.emitted("created")).toEqual([[42]]));
     const share = JSON.parse(String(fetch.mock.calls.find(([url]) => url === "/api/review")![1]!.body));
-    expect(share).toMatchObject({ action: "share", commandId: legacyCommand, revisionId: cut, videoId: 42, userId: 2, canApprove: true });
+    expect(share).toMatchObject({ action: "share", revisionId: cut, videoId: 42, userId: 2, canApprove: true });
+    expect(share.commandId).toMatch(/^[a-z][a-z0-9]{23}$/);
+    expect(share.commandId).not.toBe(legacyCommand);
   });
 
   it("keeps the new target selected after stale searches and blocks upload during creation", async () => {

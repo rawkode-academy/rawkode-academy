@@ -1,6 +1,9 @@
 import {WorkerEntrypoint} from 'cloudflare:workers'
+import {getPayload} from 'payload'
+import config from '@payload-config'
 import {authConfig} from './src/auth/config'
 import {serveBridge,serveDirect} from './src/ingress'
+import {publicContentBridge} from './src/public-content-bridge'
 // OpenNext creates this module during build:worker.
 // @ts-ignore Generated Workers entry point has no TypeScript declaration.
 import openNextHandler from './.open-next/worker.js'
@@ -19,8 +22,18 @@ export class ReviewBridge extends WorkerEntrypoint<CloudflareEnv> {
     return serveBridge(request,authConfig(this.env),async req=>handler.fetch!(req as IncomingRequest,this.env,this.ctx))
   }
 }
+// Bound only to the Astro site Worker. It exposes the explicitly projected,
+// published content read model and never adds a public Payload REST route.
+export class PublicContentBridge extends WorkerEntrypoint<CloudflareEnv> {
+  async fetch(request: Request) {
+    const payload = await getPayload({ config })
+    return publicContentBridge(request, payload, this.env.R2)
+  }
+}
 export {MediaWorkflow} from './src/media-workflow'
 
 export { ReviewMediaWorkflow } from './src/review-workflow'
 
 export { ReviewFFmpegContainer } from './src/review-container'
+
+export { D2RenderContainer } from './src/d2-container'

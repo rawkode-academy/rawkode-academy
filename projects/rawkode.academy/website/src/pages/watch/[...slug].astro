@@ -1,5 +1,9 @@
 ---
-import { getCollection, getEntry } from "astro:content";
+import {
+	getEntry,
+	getPayloadCollectionPage,
+	type PayloadEntry,
+} from "@/lib/payload-content";
 import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
 import VideoMetadata from "@/components/html/video-metadata.astro";
 import VideoPlayer from "@/components/video/player.vue";
@@ -41,11 +45,7 @@ const media = academyMedia();
 const watch = academyWatch();
 
 const { slug } = Astro.params;
-
-const videos = await getCollection("videos");
-let video: (typeof videos)[0] | undefined = videos.find(
-	(v) => v.data.slug === slug,
-);
+const video = slug ? await getEntry("videos", { slug }) : undefined;
 
 if (!video) {
 	return new Response(null, { status: 404 });
@@ -118,31 +118,32 @@ const showId =
 		: showRef && typeof showRef === "object" && "id" in showRef
 			? (showRef as { id: string }).id
 			: null;
-const showEntry = showId ? await getEntry("shows", showId) : null;
+const showEntry = showId ? await getEntry("shows", { id: showId }) : null;
 
 const RELATED_VIDEO_LIMIT = 6;
 const now = new Date();
-// Match getPublishedVideos' publishedAt <= now policy, excluding this video.
-const relatedCandidates = videos
-	.filter((candidate) => candidate.data.slug !== slug && candidate.data.publishedAt <= now)
-	.sort((a, b) => new Date(b.data.publishedAt).getTime() - new Date(a.data.publishedAt).getTime());
-const toRelatedVideo = (candidate: (typeof videos)[number]) => ({
+const toRelatedVideo = (candidate: PayloadEntry<"videos">) => ({
 	id: candidate.data.id,
 	title: candidate.data.title,
 	thumbnailUrl: getVideoThumbnailUrl(candidate.data.id),
-	slug: candidate.data.slug,
+	slug: candidate.slug,
 	duration: typeof candidate.data.duration === "number" ? candidate.data.duration : undefined,
 	publishedAt: candidate.data.publishedAt,
 	type: candidate.data.type,
 });
-const showRelatedAll = showEntry
-	? relatedCandidates.filter((candidate) => {
-		const reference = candidate.data.show;
-		const id = typeof reference === "string" ? reference : reference?.id;
-		return id?.replace(/\/index$/, "") === showEntry.id.replace(/\/index$/, "");
-	})
+const showRelatedPage = showEntry
+	? await getPayloadCollectionPage("videos", { showId: showEntry.id, limit: 7 })
+	: undefined;
+const showRelatedAll = showRelatedPage
+	? showRelatedPage.docs.filter(
+			(candidate) =>
+				candidate.slug !== video.slug && candidate.data.publishedAt <= now,
+		)
 	: [];
 const showRelatedVideos = showRelatedAll.slice(0, RELATED_VIDEO_LIMIT).map(toRelatedVideo);
+const showHasMore = Boolean(
+	showRelatedPage?.hasNextPage || showRelatedAll.length > RELATED_VIDEO_LIMIT,
+);
 
 const normalizedTechIds = normalizeTechnologyReferences(
 	video.data.technologies,
@@ -151,7 +152,7 @@ const techEntries = (
 	await Promise.all(
 		normalizedTechIds.map(async (id) => {
 			try {
-				return await getEntry("technologies", id);
+				return await getEntry("technologies", { id });
 			} catch {
 				return null;
 			}
@@ -162,21 +163,27 @@ const techEntries = (
 let technologyRecommendation: {
 	technology: (typeof techEntries)[number];
 	videos: typeof showRelatedVideos;
-	totalVideos: number;
+	hasMoreVideos: boolean;
 } | null = null;
 if (showRelatedVideos.length === 0) {
 	// Declaration order is intentional. Stop as soon as one technology has
 	// published alternatives; do not collect rails for every technology.
 	for (const technology of techEntries) {
 		const id = technology.id.replace(/\/index$/, "");
-		const related = relatedCandidates.filter((candidate) =>
-			normalizeTechnologyReferences(candidate.data.technologies).includes(id),
+		const relatedPage = await getPayloadCollectionPage("videos", {
+			technologyId: id,
+			limit: 7,
+		});
+		const related = relatedPage.docs.filter(
+			(candidate) =>
+				candidate.slug !== video.slug && candidate.data.publishedAt <= now,
 		);
 		if (related.length === 0) continue;
 		technologyRecommendation = {
 			technology,
 			videos: related.slice(0, RELATED_VIDEO_LIMIT).map(toRelatedVideo),
-			totalVideos: related.length,
+			hasMoreVideos:
+				relatedPage.hasNextPage || related.length > RELATED_VIDEO_LIMIT,
 		};
 		break;
 	}
@@ -188,7 +195,7 @@ const hostEntries =
 				await Promise.all(
 					showEntry.data.hosts.map(async (hostRef) => {
 						try {
-							return await getEntry("people", hostRef.id);
+							return await getEntry("people", { id: hostRef.id });
 						} catch {
 							return null;
 						}
@@ -202,7 +209,7 @@ const guestEntries = Array.isArray(video.data.guests)
 			await Promise.all(
 				video.data.guests.map(async (guestRef) => {
 					try {
-						return await getEntry("people", guestRef.id);
+						return await getEntry("people", { id: guestRef.id });
 					} catch {
 						return null;
 					}
@@ -252,19 +259,19 @@ const creatorRefs =
 	hostEntries.length > 0
 		? hostEntries.map((host) => ({
 				name: host.data.name,
-				url: `https://rawkode.academy/people/${host.id}`,
+				url: `https://rawkode.academy/people/${host.slug}`,
 			}))
 		: undefined;
 
 const guestRefs = guestEntries.map((guest) => ({
 	name: guest.data.name,
-	url: `https://rawkode.academy/people/${guest.id}`,
+	url: `https://rawkode.academy/people/${guest.slug}`,
 }));
 
 const partOfSeriesRef = showEntry
 	? {
 			name: showEntry.data.name,
-			url: `https://rawkode.academy/shows/${showEntry.id}`,
+			url: `https://rawkode.academy/shows/${showEntry.slug}`,
 		}
 	: undefined;
 const watchVideoSeoText = await buildWatchVideoSeoText({
@@ -375,7 +382,7 @@ const watchStatusLabel = isLiveNow
 			{ title: "Home", link: "/" },
 			{ title: "Watch", link: "/watch" },
 			...(showEntry
-				? [{ title: showEntry.data.name, link: `/shows/${showEntry.id}` }]
+				? [{ title: showEntry.data.name, link: `/shows/${showEntry.slug}` }]
 				: []),
 			{ title: video.data.title, link: `/watch/${video.data.slug}` },
 		]}
@@ -390,7 +397,7 @@ const watchStatusLabel = isLiveNow
 			<span aria-hidden="true">/</span>
 			{showEntry ? (
 				<>
-					<a class={watch.crumb} href={`/shows/${showEntry.id}`}>{showEntry.data.name}</a>
+					<a class={watch.crumb} href={`/shows/${showEntry.slug}`}>{showEntry.data.name}</a>
 				</>
 			) : (
 				<>
@@ -572,12 +579,12 @@ const watchStatusLabel = isLiveNow
 					<div class={watch.techGrid}>
 						{techEntries.map((tech) => (
 							<a
-								href={`/technology/${tech.id.replace(/\/index$/, "")}`}
+								href={`/technology/${tech.slug}`}
 								class={watch.techChip}
 							>
-								{resolveTechnologyIconUrl(tech.id, tech.data.logos) && <span class={watch.techIcon}>
+				{resolveTechnologyIconUrl(tech.slug, tech.data.logos, tech.mediaAssets) && <span class={watch.techIcon}>
 									<img
-										src={resolveTechnologyIconUrl(tech.id, tech.data.logos)!}
+						src={resolveTechnologyIconUrl(tech.slug, tech.data.logos, tech.mediaAssets)!}
 										alt=""
 										width="20"
 										height="20"
@@ -606,13 +613,13 @@ const watchStatusLabel = isLiveNow
 				<ShowVideoSection
 					show={showEntry}
 					videos={showRelatedVideos}
-					totalVideos={showRelatedAll.length}
+					hasMoreVideos={showHasMore}
 				/>
 			) : technologyRecommendation && (
 				<TechnologyVideoSection
 					technology={technologyRecommendation.technology}
 					videos={technologyRecommendation.videos}
-					totalVideos={technologyRecommendation.totalVideos}
+					hasMoreVideos={technologyRecommendation.hasMoreVideos}
 				/>
 			)}
 			<NewsletterCTA />

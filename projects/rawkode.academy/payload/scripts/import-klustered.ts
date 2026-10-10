@@ -3,6 +3,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { getPayload } from 'payload'
 import { assertProductionImportAllowed, assertSequenceAdvances, gitSha, KLUSTERED_PRODUCTION_CONFIRMATION, gitTreeClean, parseImportTarget, positionalArguments, resolveSequence, storedMaxSequence, type Watermark } from './lib/import-target'
 import { disposeCloudflare, prepareTarget, TargetError } from './lib/remote-target'
+import { assertCuid2DocumentSchema } from '../src/id-schema'
 
 const argv = process.argv.slice(2)
 const includeSensitive = argv.includes('--include-sensitive') || process.env.KLUSTERED_INCLUDE_SENSITIVE === 'true'
@@ -37,6 +38,7 @@ try {
 const prepared = prepareTarget(target)
 const { buildKlusteredSnapshot } = await import('../src/klustered-content')
 const { cloudflare } = await import('../src/cloudflare')
+await assertCuid2DocumentSchema(cloudflare.env.D1)
 const { default: config } = await import('../payload.config')
 const { importCatalogue } = await import('../src/importer')
 

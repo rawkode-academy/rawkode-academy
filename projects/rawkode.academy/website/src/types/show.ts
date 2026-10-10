@@ -17,6 +17,7 @@ export interface ShowEpisode {
 
 export interface ShowSummary {
 	id: string;
+	slug: string;
 	name: string;
 	status: ShowStatus;
 	tagline?: string | null | undefined;

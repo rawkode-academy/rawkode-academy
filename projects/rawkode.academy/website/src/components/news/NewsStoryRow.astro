@@ -1,5 +1,5 @@
 ---
-import type { CollectionEntry } from "astro:content";
+import type { CollectionEntry } from "@/lib/payload-content";
 import { academyCatalog } from "@rawkodeacademy/design-system";
 
 interface Props {
@@ -21,7 +21,7 @@ const month = new Intl.DateTimeFormat("en-GB", {
 });
 ---
 
-<a class={styles.editorialRow} href={`/news/${story.id}`} data-media="false">
+<a class={styles.editorialRow} href={`/news/${story.slug}`} data-media="false">
 	<time class={styles.editorialDate} datetime={story.data.publishedAt.toISOString()}><strong>{day.format(story.data.publishedAt)}</strong><span>{month.format(story.data.publishedAt)}</span></time>
 	<div class={styles.editorialBody} data-body>
 		<h3 class={styles.editorialTitle}>{story.data.title}</h3>

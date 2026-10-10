@@ -1,17 +1,18 @@
 import { commandSchema, maximumGrantDays, ReviewError, validateMetadata, type ReviewActor, type ReviewMetadata } from './contracts'
 import { ReviewAccess, type Revision } from './access'
 import { ReviewStore, type ReviewState, type Statement } from './store'
+import { createCuid2 } from '../cuid2'
 
-type Decision = { id: string; author_id: number; revision_id: string; review_version: number; grant_version: number; decision: string; deliverable_checksum: string | null; source_checksum: string | null; grant_id: string | null }
-type PublicVideo = Record<string, unknown> & { id: number; legacyId: string }
+type Decision = { id: string; author_id: string; revision_id: string; review_version: number; grant_version: number; decision: string; deliverable_checksum: string | null; source_checksum: string | null; grant_id: string | null }
+type PublicVideo = Record<string, unknown> & { id: string }
 export type ReviewDependencies = {
-  video(id: number, actor: ReviewActor): Promise<PublicVideo>
-  publicMediaUrl(videoId: number, publicationId: string): string
-  source(mediaId: number, actor: ReviewActor, videoId: number): Promise<{ checksum: string }>
-  deliverable(mediaId: number, actor: ReviewActor, videoId: number): Promise<{ checksum: string; durationMs: number; contentType: string }>
-  thumbnail?(videoId: number, thumbnailId: number): Promise<void>
-  assertPair?(videoId: number, sourceId: number, deliverableId: number): Promise<void>
-  stageRelease(videoId: number, publicationId: string, mediaId: number, checksum: string, actor: ReviewActor): Promise<{ key: string; etag: string; checksum: string; bytes: number; contentType: string }>
+  video(id: string, actor: ReviewActor): Promise<PublicVideo>
+  publicMediaUrl(videoId: string, publicationId: string): string
+  source(mediaId: string, actor: ReviewActor, videoId: string): Promise<{ checksum: string }>
+  deliverable(mediaId: string, actor: ReviewActor, videoId: string): Promise<{ checksum: string; durationMs: number; contentType: string }>
+  thumbnail?(videoId: string, thumbnailId: string): Promise<void>
+  assertPair?(videoId: string, sourceId: string, deliverableId: string): Promise<void>
+  stageRelease(videoId: string, publicationId: string, mediaId: string, checksum: string, actor: ReviewActor): Promise<{ key: string; etag: string; checksum: string; bytes: number; contentType: string }>
   now?(): Date
 }
 // One answer for every reason a customer cannot sign off, so the refusal never reveals
@@ -26,33 +27,33 @@ function staff(actor: ReviewActor) {
 }
 function publicProjection(video: PublicVideo, revision: Revision, at: string, mediaUrl: string) {
   const document: Record<string, unknown> = {}
-  for (const field of ['id', 'legacyId', 'legacyType', 'slug', 'sourceOrder', 'subtitle', 'tagline', 'type', 'category', 'technologies', 'guests', 'episode', 'show', 'terms', 'thumbnailUrl']) {
+  for (const field of ['id', 'slug', 'sourceOrder', 'subtitle', 'tagline', 'type', 'category', 'technologies', 'guests', 'episode', 'show', 'terms', 'thumbnailUrl']) {
     if (video[field] !== undefined) document[field] = video[field]
   }
   const metadata: ReviewMetadata = JSON.parse(revision.metadata)
   return { ...document, title: metadata.title, description: metadata.description, duration: Math.ceil(revision.duration_ms / 1000),
     streamUrl: mediaUrl, publishedAt: at, _status: 'published', tombstone: false,
-    reviewChapters: metadata.chapters.map((chapter, index) => ({ ...chapter, legacyId: `${video.legacyId}-${revision.id}-${index}` })),
+    reviewChapters: metadata.chapters.map((chapter, index) => ({ ...chapter, legacyId: `${video.id}-${revision.id}-${index}` })),
   }
 }
 export class ReviewService {
   constructor(readonly store: ReviewStore, readonly dependencies: ReviewDependencies, readonly access = new ReviewAccess(store, dependencies.now)) {}
-  async validateThumbnail(videoId: number, thumbnailId?: number) {
+  async validateThumbnail(videoId: string, thumbnailId?: string) {
     if (thumbnailId === undefined) return
     if (!this.dependencies.thumbnail) throw new ReviewError(503, 'Thumbnail verification is unavailable')
     await this.dependencies.thumbnail(videoId, thumbnailId)
   }
-  private state(videoId: number) { return this.store.one<ReviewState>('SELECT * FROM video_review_state WHERE video_id=?', videoId) }
+  private state(videoId: string) { return this.store.one<ReviewState>('SELECT * FROM video_review_state WHERE video_id=?', videoId) }
   // Media, thumbnail and byte-range routes call this on every GET, HEAD and Range request.
-  async revision(videoId: number, revisionId: string, actor: ReviewActor): Promise<Revision> {
+  async revision(videoId: string, revisionId: string, actor: ReviewActor): Promise<Revision> {
     return (await this.access.require(actor, videoId, revisionId, 'view')).revision
   }
-  async list(actor: ReviewActor, after = 0) {
+  async list(actor: ReviewActor, after: string | null = null) {
     const rows = await this.access.listVisible(actor, after)
     const items = rows.slice(0, 50).map(({ metadata, ...row }) => ({ ...row, title: (JSON.parse(metadata) as ReviewMetadata).title }))
     return { items, nextCursor: rows.length > 50 ? items.at(-1)!.videoId : null }
   }
-  async read(videoId: number, actor: ReviewActor) {
+  async read(videoId: string, actor: ReviewActor) {
     await this.access.requireVideo(actor, videoId)
     const state = await this.state(videoId)
     if (!state) throw new ReviewError(404, 'Review not found')
@@ -65,7 +66,7 @@ export class ReviewService {
     const revisions = await this.store.all<Revision & { viewer_state: string }>(`SELECT r.*,${stateColumn.sql} AS viewer_state FROM video_revisions r WHERE r.video_id=?${revisionFilter.sql} ORDER BY r.created_at,r.id`, ...stateColumn.values, videoId, ...revisionFilter.values)
     const commentRows = await this.store.all(`SELECT c.id,c.revision_id AS revisionId,c.author_id AS authorId,c.start_ms AS startMs,c.end_ms AS endMs,c.body,c.resolved,c.resolved_by_id AS resolvedById,c.resolved_at AS resolvedAt,c.created_at AS createdAt FROM review_comments c WHERE c.video_id=?${commentRevisions.sql}${comments.sql} ORDER BY c.created_at,c.id`, videoId, ...commentRevisions.values, ...comments.values)
     const own = visible('revision_id')
-    const decisions = await this.store.all<{ id: string; revisionId: string; authorId: number; reviewVersion: number; decision: string; note: string; createdAt: string }>(`SELECT id,revision_id AS revisionId,author_id AS authorId,review_version AS reviewVersion,decision,note,created_at AS createdAt FROM review_decisions WHERE video_id=?${grants === 'all' ? '' : ' AND author_id=?'}${own.sql} ORDER BY created_at,id`, videoId, ...(grants === 'all' ? [] : [actor.id]), ...own.values)
+    const decisions = await this.store.all<{ id: string; revisionId: string; authorId: string; reviewVersion: number; decision: string; note: string; createdAt: string }>(`SELECT id,revision_id AS revisionId,author_id AS authorId,review_version AS reviewVersion,decision,note,created_at AS createdAt FROM review_decisions WHERE video_id=?${grants === 'all' ? '' : ' AND author_id=?'}${own.sql} ORDER BY created_at,id`, videoId, ...(grants === 'all' ? [] : [actor.id]), ...own.values)
     const resolutions = await this.store.all(`SELECT r.comment_id AS commentId,r.actor_id AS actorId,r.resolved,r.created_at AS createdAt FROM review_comment_resolutions r JOIN review_comments c ON c.id=r.comment_id WHERE r.video_id=?${commentRevisions.sql}${comments.sql} ORDER BY r.created_at,r.id`, videoId, ...commentRevisions.values, ...comments.values)
     const grantFor = (revisionId: string) => grants === 'all' ? undefined : grants.find(grant => grant.revision_id === revisionId)
     const shared = state.current_revision && revisions.some(row => row.id === state.current_revision) ? state.current_revision : null
@@ -92,7 +93,7 @@ export class ReviewService {
     // Before the replay below, so a revoked or expired customer cannot read a stored result.
     await this.access.requireVideo(actor, input.videoId)
     const inputHash = await hash(input)
-    const prior = await this.store.one<{ video_id: number; actor_id: number; input_hash: string; result: string }>('SELECT * FROM review_commands WHERE id=?', input.commandId)
+    const prior = await this.store.one<{ video_id: string; actor_id: string; input_hash: string; result: string }>('SELECT * FROM review_commands WHERE id=?', input.commandId)
     if (prior) {
       if (prior.video_id !== input.videoId || prior.actor_id !== actor.id || prior.input_hash !== inputHash) throw new ReviewError(409, 'Command ID was used for another request')
       return JSON.parse(prior.result)
@@ -118,7 +119,7 @@ export class ReviewService {
         // expiresInDays uses the server clock, so browser clock skew cannot push a share past the limit.
         const now = this.access.now().getTime(), expires = new Date(input.expiresAt ?? now + input.expiresInDays! * 86400000)
         if (!(expires.getTime() > now && expires.getTime() <= now + maximumGrantDays * 86400000)) throw new ReviewError(400, `Choose an expiry within ${maximumGrantDays} days`)
-        mutations.push(this.access.shareStatement({ id: resultId, videoId: input.videoId, revisionId: input.revisionId, userId: input.userId, canApprove: input.canApprove, grantedBy: actor.id, at, expiresAt: expires.toISOString() }))
+        mutations.push(this.access.shareStatement({ id: createCuid2(), videoId: input.videoId, revisionId: input.revisionId, userId: input.userId, canApprove: input.canApprove, grantedBy: actor.id, at, expiresAt: expires.toISOString() }))
         result = { action: 'share', revisionId: input.revisionId, userId: input.userId, expiresAt: expires.toISOString() }
       } else {
         if (input.revisionId) await this.access.require(actor, input.videoId, input.revisionId, 'manage')
@@ -140,7 +141,7 @@ export class ReviewService {
       mutations.push(sql('UPDATE video_review_state SET current_revision=? WHERE video_id=?', resultId, input.videoId))
       result = { revisionId: resultId, reviewVersion: 1 }
     } else if (input.action === 'resolve-comment') {
-      const comment = await this.store.one<{ author_id: number; revision_id: string }>('SELECT author_id,revision_id FROM review_comments WHERE id=? AND video_id=?', input.commentId, input.videoId)
+      const comment = await this.store.one<{ author_id: string; revision_id: string }>('SELECT author_id,revision_id FROM review_comments WHERE id=? AND video_id=?', input.commentId, input.videoId)
       // A comment the caller cannot see is reported exactly like a missing one.
       if (!comment || !await this.access.canSeeComment(actor, comment)) throw new ReviewError(404, 'Comment not found')
       if (actor.role !== 'staff' && comment.author_id !== actor.id) throw new ReviewError(403, 'Only the author or staff can resolve this comment')

@@ -1,7 +1,7 @@
 ---
 import PageWrapper from "@/wrappers/page.astro";
 import { DISABLE_GAME_AUTH } from "astro:env/server";
-import { getCollection } from "astro:content";
+import { getAllCollection } from "@/lib/payload-content";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { weekKey, buildWeeklyRounds, type CncfStatus } from "@/lib/games/guess-the-logo";
 import { academyLayout, academyMedia } from "@rawkodeacademy/design-system";
@@ -19,10 +19,10 @@ let weekStart = "";
 let roundsJson = "[]";
 let poolSize = 0;
 if (canPlay) {
-	const entries = await getCollection("technologies");
+	const entries = await getAllCollection("technologies");
 	const logos = entries
 		.map((entry) => {
-			const iconUrl = resolveTechnologyIconUrl(entry.id, entry.data.logos);
+			const iconUrl = resolveTechnologyIconUrl(entry.slug, entry.data.logos, entry.mediaAssets);
 			if (!iconUrl) return null;
 			return {
 				name: entry.data.name,

@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { getCollection } from "astro:content";
+import { getEntry } from "@/lib/payload-content";
 import { createLogger } from "@/lib/logger";
 
 const logger = createLogger("chapters");
@@ -77,8 +77,7 @@ export const GET: APIRoute = async ({ params }): Promise<Response> => {
 			return new Response("Video ID is required", { status: 400 });
 		}
 
-		const videos = await getCollection("videos");
-		const localVideo = videos.find((entry) => entry.data.id === videoId);
+		const localVideo = await getEntry("videos", { id: videoId });
 		if (!localVideo) {
 			return new Response("Video not found", { status: 404 });
 		}

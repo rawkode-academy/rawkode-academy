@@ -4,10 +4,10 @@ const doc = academyDocument();
 const styles = academyLayout({ width: "reading" });
 import {
 	type CollectionEntry,
-	getCollection,
 	getEntries,
-	render,
-} from "astro:content";
+	getEntry,
+} from "@/lib/payload-content";
+import CmsBody from "@/components/content/CmsBody.astro";
 import ArticleHeader from "@/components/read/ArticleHeader.astro";
 import ArticleByline from "@/components/read/ArticleByline.astro";
 import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
@@ -17,36 +17,22 @@ import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Page from "@/wrappers/page.astro";
 import { calculateReadingTime } from "@/utils/reading-time";
 import { isNewsPublished } from "@/lib/news-publication";
-import type { GetStaticPaths, GetStaticPathsResult } from "astro";
+export const prerender = false;
 
-export const prerender = true;
-
-type Props = {
-	article: CollectionEntry<"news">;
-};
-
-export const getStaticPaths: GetStaticPaths =
-	async (): Promise<GetStaticPathsResult> => {
-		const now = new Date();
-		const articles = await getCollection("news", ({ data }) =>
-			isNewsPublished(data.publishedAt, now),
-		);
-		return articles.map((article: CollectionEntry<"news">) => ({
-			params: { slug: article.id },
-			props: { article },
-		}));
-	};
-
-const { article } = Astro.props;
-const { Content } = await render(article);
+const slug = Astro.params.slug;
+const article = slug ? await getEntry("news", { slug }) : undefined;
+if (!article || !isNewsPublished(article.data.publishedAt, new Date())) {
+	return new Response(null, { status: 404 });
+}
 const authors = await getEntries(article.data.authors);
 
-const allTechnologies = await getCollection("technologies");
-const technologyNameById = new Map<string, string>();
-for (const technology of allTechnologies) {
-	const rawId = technology.id.replace(/\/index$/, "");
-	technologyNameById.set(rawId, technology.data.name);
-}
+const technologyNames = await Promise.all(
+	(article.data.technologies ?? []).map(async (technologyId) => {
+		const technology = await getEntry("technologies", technologyId);
+		return [technologyId, technology?.data.name] as const;
+	}),
+);
+const technologyNameById = new Map(technologyNames);
 
 function formatTechnologyLabel(value: string): string {
 	const fromCollection = technologyNameById.get(value);
@@ -95,7 +81,7 @@ const breadcrumbItems = [{ label: "News", href: "/news" }];
 			elements={[
 				{ title: "Home", link: "/" },
 				{ title: "News", link: "/news" },
-				{ title: article.data.title, link: `/news/${article.id}` },
+				{ title: article.data.title, link: `/news/${article.slug}` },
 			]}
 		/>
 		<link
@@ -136,7 +122,7 @@ const breadcrumbItems = [{ label: "News", href: "/news" }];
 
 		<div class={doc.reading}>
 			<article class={styles.prose}>
-				<Content />
+				<CmsBody entry={article} />
 			</article>
 
 		</div>

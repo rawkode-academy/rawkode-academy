@@ -18,6 +18,7 @@ interface __BaseEnv_CloudflareEnv {
 	PAYLOAD_SECRET: string;
 	PIPELINE_CALLBACK_SECRET: string;
 	REVIEW_FFMPEG: DurableObjectNamespace<import("./worker").ReviewFFmpegContainer>;
+	D2_RENDERER: DurableObjectNamespace<import("./worker").D2RenderContainer>;
 	WORKER_SELF_REFERENCE: Service<typeof import("./worker").default>;
 	MEDIA_WORKFLOW: Workflow<Parameters<import("./worker").MediaWorkflow['run']>[0]['payload']>;
 	REVIEW_MEDIA_WORKFLOW: Workflow<Parameters<import("./worker").ReviewMediaWorkflow['run']>[0]['payload']>;
@@ -25,7 +26,7 @@ interface __BaseEnv_CloudflareEnv {
 declare namespace Cloudflare {
 	interface GlobalProps {
 		mainModule: typeof import("./worker");
-		durableNamespaces: "ReviewFFmpegContainer";
+		durableNamespaces: "ReviewFFmpegContainer" | "D2RenderContainer";
 	}
 	interface Env extends __BaseEnv_CloudflareEnv {}
 }

@@ -1,7 +1,6 @@
-import { getCollection } from "astro:content";
+import { listPayloadContent } from "@/lib/payload-content";
 import { createLogger } from "@/lib/logger";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
-import { normalizeTechnologyReferences } from "./normalize-technology-refs";
 
 const logger = createLogger("videos");
 
@@ -12,18 +11,11 @@ const logger = createLogger("videos");
  */
 export async function getVideosForTechnology(technologyId: string) {
 	try {
-		// Strip /index suffix if present to get the base technology ID
-		const normalizedTechId = technologyId.endsWith("/index")
-			? technologyId.slice(0, -6)
-			: technologyId;
-
 		const now = new Date();
-		const allVideos = await getCollection("videos", ({ data }) => {
-			const technologyRefs = normalizeTechnologyReferences(data.technologies);
-			return (
-				data.publishedAt <= now && technologyRefs.includes(normalizedTechId)
-			);
-		});
+		const allVideos = (await listPayloadContent("videos", {
+			technologyId,
+			limit: 100,
+		})).filter((video) => video.data.publishedAt <= now);
 
 		// Sort by published date, most recent first
 		const sortedVideos = allVideos.sort(
@@ -34,10 +26,10 @@ export async function getVideosForTechnology(technologyId: string) {
 
 		// Map to the expected format
 		return sortedVideos.map((video) => ({
-			id: video.data.id, // video asset ID
+			id: video.id, // Video IDs are the existing R2 object IDs.
 			title: video.data.title,
-			thumbnailUrl: getVideoThumbnailUrl(video.data.id),
-			slug: video.data.slug,
+			thumbnailUrl: getVideoThumbnailUrl(video.id),
+			slug: video.slug,
 			duration: video.data.duration,
 			publishedAt: video.data.publishedAt,
 			type: video.data.type,

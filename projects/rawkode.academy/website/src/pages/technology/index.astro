@@ -1,10 +1,10 @@
 ---
-export const prerender = true;
+export const prerender = false;
 
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
 import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 import Page from "@/wrappers/page.astro";
-import { getCollection } from "astro:content";
+import { getAllCollection } from "@/lib/payload-content";
 import { getPublishedVideos } from "@/lib/content";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { createLogger } from "@/lib/logger";
@@ -13,6 +13,7 @@ const logger = createLogger("technology");
 
 type Technology = {
 	id: string;
+	slug: string;
 	name: string;
 	logo?: string;
 	category: string | undefined;
@@ -23,14 +24,15 @@ type Technology = {
 
 let technologies: Technology[] = [];
 try {
-	const items = await getCollection("technologies");
+	const items = await getAllCollection("technologies");
 
 	technologies = items
 		.map((e) => {
-			const logo = resolveTechnologyIconUrl(e.id, e.data.logos);
+			const logo = resolveTechnologyIconUrl(e.slug, e.data.logos, e.mediaAssets);
 
 			const tech: Technology = {
 				id: e.id,
+				slug: e.slug,
 				name: e.data.name,
 				...(logo && { logo }),
 				category: e.data.category,
@@ -117,7 +119,7 @@ const catalog = academyCatalog();
 										const category = tech.subcategory ?? tech.category;
 										return (
 											<li>
-												<a href={`/technology/${tech.id}`} class={catalog.indexItem} data-keywords={searchKeywords}>
+								<a href={`/technology/${tech.slug}`} class={catalog.indexItem} data-keywords={searchKeywords}>
 													<span class={catalog.indexMark} aria-hidden="true">
 														<span class={catalog.indexInitials} hidden={Boolean(tech.logo)}>{initials}</span>
 														{tech.logo && <img

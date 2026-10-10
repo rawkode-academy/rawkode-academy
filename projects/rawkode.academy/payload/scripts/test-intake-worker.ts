@@ -3,7 +3,11 @@ import { createRequire } from 'node:module'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { intakeSchema } from '../src/migrations/20261005_180000_review_intake'
+import { intakeSchema } from '../src/migrations-cuid2/cuid2_20261005_180000_review_intake'
+import { createCuid2 } from '../src/cuid2'
+
+const staffId = `s${'0'.repeat(23)}`
+const videoId = `v${'0'.repeat(23)}`
 
 // Use Wrangler's already-installed runtime/bundler; no install or remote binding.
 const require = createRequire(import.meta.url)
@@ -27,7 +31,7 @@ const handler = { async fetch(request,env) {
     catch(error){ return reviewFailure(error); }
   }
   // Explicit local identity fixture; production OIDC is outside this check.
-  const actor={id:1,collection:'users',role:'staff'};
+  const actor={id:'${staffId}',collection:'users',role:'staff'};
   const review={dependencies:{video:async id=>({id,legacyId:'fixture'})},validateThumbnail:async()=>{}};
   const intake=new ReviewIntake(new ReviewStore(env.D1),env.R2,review);
   const handlers=createIntakeHandlers(async()=>({intake,actor,origin:'https://preview.rawkode.academy'}));
@@ -44,12 +48,12 @@ const runtime = new Miniflare({ workers: [
 ], isolatedResourcePersistencePath: directory, telemetry: { enabled: false } })
 try {
   const db = await runtime.getD1Database('D1', 'backend')
-  for (const statement of ['CREATE TABLE users(id INTEGER PRIMARY KEY)', 'CREATE TABLE videos(id INTEGER PRIMARY KEY)', 'CREATE TABLE media(id INTEGER PRIMARY KEY)', 'CREATE TABLE review_command_guards(id TEXT PRIMARY KEY,valid INTEGER CHECK(valid=1))', ...intakeSchema, 'INSERT INTO users VALUES(1)', 'INSERT INTO videos VALUES(10)']) await db.prepare(statement).run()
+  for (const statement of ['CREATE TABLE users(id TEXT PRIMARY KEY)', 'CREATE TABLE videos(id TEXT PRIMARY KEY)', 'CREATE TABLE media(id TEXT PRIMARY KEY)', 'CREATE TABLE review_command_guards(id TEXT PRIMARY KEY,valid INTEGER CHECK(valid=1))', ...intakeSchema, `INSERT INTO users VALUES('${staffId}')`, `INSERT INTO videos VALUES('${videoId}')`]) await db.prepare(statement).run()
   const origin = 'https://preview.rawkode.academy'
   const bytes = new Uint8Array(1024 * 1024 + 7).map((_, index) => index % 251)
   const checksum = Buffer.from(await crypto.subtle.digest('SHA-256', bytes)).toString('hex')
   const post = async (input: object) => runtime.dispatchFetch(`${origin}/api/review/uploads`, { method: 'POST', headers: { origin, 'content-type': 'application/json' }, body: JSON.stringify(input) })
-  const beginInput = { action: 'begin', commandId: crypto.randomUUID(), videoId: 10, bytes: bytes.length, checksum, contentType: 'video/mp4', metadata: { title: 'Native binary fixture', description: 'Not actual playable media' } }
+  const beginInput = { action: 'begin', commandId: createCuid2(), videoId, bytes: bytes.length, checksum, contentType: 'video/mp4', metadata: { title: 'Native binary fixture', description: 'Not actual playable media' } }
   const begin = await post(beginInput); assert.equal(begin.status, 200, await begin.clone().text())
   const session = await begin.json() as { uploadUrl: string; sessionId: string }
   assert.deepEqual(await (await post(beginInput)).json(), session)
@@ -66,7 +70,7 @@ try {
   // Use truthful short/long Content-Length to verify the session boundary, then
   // inject short/long streams inside workerd to exercise native FixedLengthStream.
   for (const body of [bytes.slice(1), new Uint8Array(bytes.length + 1), new Uint8Array(bytes.length)]) {
-    const next = await (await post({ ...beginInput, commandId: crypto.randomUUID() })).json() as { uploadUrl: string }
+    const next = await (await post({ ...beginInput, commandId: createCuid2() })).json() as { uploadUrl: string }
     const result = await put(body, next.uploadUrl, { 'content-length': String(body.length) })
     assert.equal(result.status, 400, await result.text())
   }

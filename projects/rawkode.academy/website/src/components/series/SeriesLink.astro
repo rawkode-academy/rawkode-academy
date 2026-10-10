@@ -1,7 +1,7 @@
 ---
 import { academyDocument } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
-import type { CollectionEntry } from "astro:content";
+import type { CollectionEntry } from "@/lib/payload-content";
 
 type Props = {
 	series: CollectionEntry<"series">;
@@ -13,6 +13,6 @@ const { series } = Astro.props;
 <p class={doc.cardTitle}>
 	Part of the series: <a
 		class={doc.link}
-		href={`/series/${series.id}`}>{series.data.title}</a
+		href={`/series/${series.slug}`}>{series.data.title}</a
 	>
 </p>

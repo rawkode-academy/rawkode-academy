@@ -3,10 +3,10 @@ import { readdir, readFile, stat } from 'node:fs/promises'
 import path from 'node:path'
 import matter from 'gray-matter'
 import { parse as parseYaml } from 'yaml'
-import type { CatalogueRecord, CatalogueSnapshot, Reference, SourceAsset } from './importer'
+import type { ContentReference, ImportRecord, ImportSnapshot, SourceAsset } from './import-types'
 
 export type StaticAssetFile = SourceAsset & { absolutePath: string; alt?: string }
-export type StaticContentSnapshot = CatalogueSnapshot & { assetFiles: StaticAssetFile[] }
+export type StaticContentSnapshot = ImportSnapshot & { assetFiles: StaticAssetFile[] }
 
 type Format = 'md' | 'mdx' | 'yaml' | 'yml'
 type SourceFile = {
@@ -35,11 +35,6 @@ const specs = [
   { collection: 'news', directory: 'news', formats: ['md', 'mdx'] as Format[] },
 ] as const
 
-const legacyTypes: Record<string, string> = {
-  videos: 'Video', shows: 'Show', people: 'Person', articles: 'Article', technologies: 'Technology', series: 'Series',
-  adrs: 'ADR', testimonials: 'Testimonial', courses: 'Course', 'course-modules': 'CourseModule', changelog: 'Changelog',
-  'learning-paths': 'LearningPath', news: 'News', chapters: 'Chapter', 'learning-resources': 'LearningResources', 'static-assets': 'StaticAsset',
-}
 const assetMimeTypes: Record<string, string> = {
   '.avif': 'image/avif', '.gif': 'image/gif', '.jpeg': 'image/jpeg', '.jpg': 'image/jpeg', '.png': 'image/png',
   '.svg': 'image/svg+xml', '.webp': 'image/webp', '.ico': 'image/x-icon', '.mp4': 'video/mp4', '.webm': 'video/webm', '.woff': 'font/woff', '.woff2': 'font/woff2',
@@ -54,7 +49,7 @@ const directKeys = new Set([
   'githubHandle', 'githubUrl', 'avatarUrl', 'biography', 'quote', 'category', 'subcategory', 'documentation', 'icon', 'logo', 'source', 'license', 'status', 'terms',
   'aliases', 'features', 'relatedTechnologies', 'useCases', 'publishedAt', 'date', 'adoptedAt', 'duration', 'audioFileSize', 'type', 'howto',
   'youtubeId', 'streamUrl', 'thumbnailUrl', 'mediaReference', 'realtimeKit', 'podcast', 'subscribeLinks', 'gameFormatUrl', 'code', 'order', 'section',
-  'difficulty', 'estimatedDuration', 'prerequisites', 'learningPath', 'pullRequest', 'publish', 'draft', 'links', 'cncf', 'community', 'matrix', 'seo', 'logos',
+  'difficulty', 'estimatedDuration', 'prerequisites', 'learningPath', 'pullRequest', 'links', 'cncf', 'community', 'matrix', 'seo', 'logos',
 ])
 
 function normalise(value: unknown): unknown {
@@ -85,14 +80,14 @@ function cleanReference(value: unknown): string | null {
   return null
 }
 
-function reference(collection: Reference['collection'], value: unknown): Reference | null {
+function reference(collection: ContentReference['collection'], value: unknown): ContentReference | null {
   const legacyId = cleanReference(value)
   return legacyId ? { collection, legacyId } : null
 }
 
-function references(collection: Reference['collection'], value: unknown, defaultValue: unknown[] = []): Reference[] {
+function references(collection: ContentReference['collection'], value: unknown, defaultValue: unknown[] = []): ContentReference[] {
   const input = Array.isArray(value) ? value : value == null ? defaultValue : [value]
-  return input.map(item => reference(collection, item)).filter((item): item is Reference => Boolean(item))
+  return input.map(item => reference(collection, item)).filter((item): item is ContentReference => Boolean(item))
 }
 
 function rows(value: unknown): { value: string }[] {
@@ -185,7 +180,7 @@ function statusFor(collection: string, data: Record<string, unknown>): 'draft' |
 
 function directData(collection: string, source: SourceFile): Record<string, unknown> {
   const input = source.data
-  const data: Record<string, unknown> = { body: source.body, editorialData: input }
+  const data: Record<string, unknown> = { body: source.body }
   for (const key of directKeys) if (key in input) data[key] = input[key]
   for (const key of ['terms', 'whatYouWillLearn', 'aliases', 'features', 'relatedTechnologies', 'useCases', 'prerequisites', 'learningPath']) if (key in input) data[key] = rows(input[key])
   if (Array.isArray(input.links)) data.links = input.links
@@ -199,14 +194,14 @@ function directData(collection: string, source: SourceFile): Record<string, unkn
   return data
 }
 
-function relationsFor(collection: string, source: SourceFile): Record<string, Reference | Reference[] | null> {
+function relationsFor(collection: string, source: SourceFile): Record<string, ContentReference | ContentReference[] | null> {
   const input = source.data
-  const relationships: Record<string, Reference | Reference[] | null> = {}
-  const addMany = (field: string, target: Reference['collection'], value: unknown, defaults?: unknown[]) => {
+  const relationships: Record<string, ContentReference | ContentReference[] | null> = {}
+  const addMany = (field: string, target: ContentReference['collection'], value: unknown, defaults?: unknown[]) => {
     const valueReferences = references(target, value, defaults)
     if (valueReferences.length || value !== undefined || defaults) relationships[field] = valueReferences
   }
-  const addOne = (field: string, target: Reference['collection'], value: unknown) => {
+  const addOne = (field: string, target: ContentReference['collection'], value: unknown) => {
     if (value !== undefined) relationships[field] = reference(target, value)
   }
   if (['articles', 'courses', 'course-modules', 'learning-paths', 'adrs', 'news'].includes(collection)) addMany('authors', 'people', input.authors, ['rawkode'])
@@ -236,26 +231,26 @@ function relationsFor(collection: string, source: SourceFile): Record<string, Re
   return relationships
 }
 
-function contentRecord(collection: string, source: SourceFile): CatalogueRecord {
+function contentRecord(collection: string, source: SourceFile): ImportRecord {
   const input = source.data
   const legacyId = typeof input.id === 'string' && input.id.trim() ? input.id : sourceId(source.relativePath.replace(new RegExp(`^${collection === 'course-modules' ? 'courses' : collection}/`), ''))
   const slug = typeof input.slug === 'string' && input.slug.trim() ? input.slug : legacyId
   return {
-    collection: collection as CatalogueRecord['collection'], legacyId, legacyType: legacyTypes[collection] ?? collection, slug,
+    collection: collection as ImportRecord['collection'], legacyId, slug,
     sourceRevision: source.checksum, status: statusFor(collection, input), data: directData(collection, source), relationships: relationsFor(collection, source),
-    source: { path: source.relativePath, format: source.format, data: input, raw: source.raw, body: source.body, assets: source.assets.map(({ absolutePath: _absolutePath, ...asset }) => asset) },
+    source: { path: source.relativePath, assets: source.assets.map(({ absolutePath: _absolutePath, ...asset }) => asset) },
   }
 }
 
-function derivedChapterRecords(source: SourceFile, video: CatalogueRecord): CatalogueRecord[] {
+function derivedChapterRecords(source: SourceFile, video: ImportRecord): ImportRecord[] {
   const chapters = Array.isArray(source.data.chapters) ? source.data.chapters : []
   return chapters.map((chapter, index) => {
     const value = chapter as Record<string, unknown>
     const legacyId = `${video.legacyId}-chapter-${index}`
     return {
-      collection: 'chapters', legacyId, legacyType: 'Chapter', slug: legacyId, sourceRevision: source.checksum, status: video.status,
+      collection: 'chapters', legacyId, slug: legacyId, sourceRevision: source.checksum, status: video.status,
       data: { title: String(value.title ?? `Chapter ${index + 1}`), startTime: Number(value.startTime ?? 0) },
-      source: { path: `${source.relativePath}#chapters/${index}`, format: source.format, data: value },
+      source: { path: `${source.relativePath}#chapters/${index}` },
     }
   })
 }
@@ -267,37 +262,36 @@ function episodeCode(slug: string): string {
   return match[1] ? `S${match[1].padStart(2, '0')}${episode}` : episode
 }
 
-function derivedEpisodeRecord(source: SourceFile, video: CatalogueRecord): CatalogueRecord | null {
+function derivedEpisodeRecord(source: SourceFile, video: ImportRecord): ImportRecord | null {
   const show = video.relationships?.show
   if (!show || Array.isArray(show)) return null
   const legacyId = `${show.legacyId}-${video.legacyId}`
   return {
-    collection: 'episodes', legacyId, legacyType: 'Episode', slug: legacyId, sourceRevision: video.sourceRevision, status: video.status,
+    collection: 'episodes', legacyId, slug: legacyId, sourceRevision: video.sourceRevision, status: video.status,
     data: { code: episodeCode(video.slug), terms: rows(source.data.terms) },
     relationships: { video: { collection: 'videos', legacyId: video.legacyId }, show },
-    source: { path: `${source.relativePath}#episode`, format: source.format, data: { show: show.legacyId, video: video.legacyId, code: episodeCode(video.slug) } },
+    source: { path: `${source.relativePath}#episode` },
   }
 }
 
-function derivedResourceRecord(source: SourceFile, technology: CatalogueRecord): CatalogueRecord | null {
+function derivedResourceRecord(source: SourceFile, technology: ImportRecord): ImportRecord | null {
   const value = source.data.learningResources
   if (!value || typeof value !== 'object') return null
   const input = value as Record<string, unknown>
   if (!Object.values(input).some(item => Array.isArray(item) && item.length)) return null
   const legacyId = `${technology.legacyId}:learning-resources`
   return {
-    collection: 'learning-resources', legacyId, legacyType: 'LearningResources', slug: legacyId, sourceRevision: source.checksum, status: technology.status,
+    collection: 'learning-resources', legacyId, slug: legacyId, sourceRevision: source.checksum, status: technology.status,
     data: { title: `${String(source.data.name ?? technology.legacyId)} learning resources`, official: urls(input.official), community: urls(input.community), tutorials: urls(input.tutorials) },
-    source: { path: `${source.relativePath}#learning-resources`, format: source.format, data: input },
+    source: { path: `${source.relativePath}#learning-resources` },
   }
 }
 
-function assetRecord(asset: StaticAssetFile): CatalogueRecord {
-  const sourceData = { relativePath: asset.relativePath, r2Key: asset.r2Key, mimeType: asset.mimeType, bytes: asset.bytes, checksum: asset.checksum }
+function assetRecord(asset: StaticAssetFile): ImportRecord {
   return {
-    collection: 'static-assets', legacyId: asset.relativePath, legacyType: 'StaticAsset', slug: asset.relativePath, sourceRevision: asset.checksum, status: 'published',
+    collection: 'static-assets', legacyId: asset.relativePath, slug: asset.relativePath, sourceRevision: asset.checksum, status: 'published',
     data: { r2Key: asset.r2Key, mimeType: asset.mimeType, bytes: asset.bytes, checksum: asset.checksum },
-    source: { path: asset.relativePath, format: 'json', data: sourceData, raw: JSON.stringify(sourceData) },
+    source: { path: asset.relativePath },
   }
 }
 
@@ -316,7 +310,7 @@ export async function buildStaticSnapshot(options: { root: string; sequence?: nu
       files.push({ collection, source: await readSource(absolutePath, contentRoot, collection) })
     }
   }
-  const records: CatalogueRecord[] = []
+  const records: ImportRecord[] = []
   const assetFiles = new Map<string, StaticAssetFile>()
   for (const { collection, source } of files) {
     const record = contentRecord(collection, source)
@@ -324,7 +318,7 @@ export async function buildStaticSnapshot(options: { root: string; sequence?: nu
     for (const asset of source.assets) assetFiles.set(asset.relativePath, asset)
     if (collection === 'videos') {
       for (const chapter of derivedChapterRecords(source, record)) {
-        record.relationships = { ...(record.relationships ?? {}), chapters: [...((record.relationships?.chapters as Reference[] | undefined) ?? []), { collection: 'chapters', legacyId: chapter.legacyId }] }
+        record.relationships = { ...(record.relationships ?? {}), chapters: [...((record.relationships?.chapters as ContentReference[] | undefined) ?? []), { collection: 'chapters', legacyId: chapter.legacyId }] }
         records.push(chapter)
       }
       const episode = derivedEpisodeRecord(source, record)

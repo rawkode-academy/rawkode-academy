@@ -25,8 +25,10 @@ export const reviewCollections = (access: AdminAccess): CollectionConfig[] => [
   privateCollection('review-decisions', [relation('video', 'videos'), relation('revision', 'video-revisions'), relation('author', 'users'), number('reviewVersion'), number('grantVersion'), text('decision'), { name: 'note', type: 'textarea' }, { name: 'createdAt', type: 'date', required: true }, { name: 'deliverableChecksum', type: 'text' }, { name: 'sourceChecksum', type: 'text' }, { name: 'grant', type: 'relationship', relationTo: 'review-revision-grants' }], access),
   applyPreset({
     slug: 'video-publications', timestamps: false, lockDocuments: false,
-    access: { read: () => true, create: () => false, update: () => false, delete: () => false },
+    access: { read: ({ req }) => isStaff(req.user), create: () => false, update: () => false, delete: () => false },
     // Only the approved public projection lives here. No source keys, grants, comments or decisions.
-    fields: [{ name: 'id', type: 'number', required: true }, { name: 'document', type: 'json', required: true }],
+    // This document ID is the video's stable R2/content ID; it is not a second
+    // numeric review identity.
+    fields: [{ name: 'id', type: 'text', required: true }, { name: 'document', type: 'json', required: true }],
   }, access),
 ]

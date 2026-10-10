@@ -1,4 +1,4 @@
-import { getCollection } from "astro:content";
+import { getAllCollection, listPayloadContent } from "@/lib/payload-content";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { isNewsPublished } from "@/lib/news-publication";
 
@@ -52,11 +52,14 @@ const formatDuration = (seconds: number) => {
  * Get published videos (excludes future-dated content for scheduled publishing).
  * Videos are filtered by publishedAt <= now and sorted newest first.
  */
-export async function getPublishedVideos() {
+export async function getPublishedVideos(limit?: number) {
 	const now = new Date();
-	const videos = await getCollection("videos", ({ data }) => {
-		return data.publishedAt <= now;
-	});
+	const records = limit === undefined
+		? await getAllCollection("videos")
+		: await listPayloadContent("videos", { limit });
+	const videos = records.filter(
+		({ data }) => data.publishedAt <= now,
+	);
 	return videos.sort(
 		(a, b) =>
 			new Date(b.data.publishedAt).getTime() -
@@ -66,9 +69,9 @@ export async function getPublishedVideos() {
 
 export async function getUpcomingVideos() {
 	const now = new Date();
-	const videos = await getCollection("videos", ({ data }) => {
-		return data.type === "live" && data.publishedAt > now;
-	});
+	const videos = (await listPayloadContent("videos", { type: "live", limit: 20 })).filter(
+		({ data }) => data.publishedAt > now,
+	);
 	return videos.sort(
 		(a, b) =>
 			new Date(a.data.publishedAt).getTime() -
@@ -88,17 +91,17 @@ export async function getLatestContent(
 	now = new Date(),
 ): Promise<AcademyContentItem[]> {
 	const [videos, articles, news, courses, learningPaths] = await Promise.all([
-		getPublishedVideos(),
-		getCollection("articles", ({ data }) => data.publishedAt <= now),
-		getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
-		getCollection("courses", ({ data }) => data.publishedAt <= now),
-		getCollection("learningPaths", ({ data }) => data.publishedAt <= now),
+		getPublishedVideos(Math.max(20, limit)),
+		listPayloadContent("articles", { limit: Math.max(20, limit) }).then((items) => items.filter(({ data }) => data.publishedAt <= now)),
+		listPayloadContent("news", { limit: Math.max(20, limit) }).then((items) => items.filter(({ data }) => isNewsPublished(data.publishedAt, now))),
+		listPayloadContent("courses", { limit: Math.max(20, limit) }).then((items) => items.filter(({ data }) => data.publishedAt <= now)),
+		listPayloadContent("learningPaths", { limit: Math.max(20, limit) }).then((items) => items.filter(({ data }) => data.publishedAt <= now)),
 	]);
 
 	const items: AcademyContentItem[] = [
 		...videos.map((video) => ({
 			kind: "Video" as const,
-			href: `/watch/${video.data.slug}`,
+			href: `/watch/${video.slug}`,
 			title: video.data.title,
 			description: compactCopy(video.data.subtitle || video.data.description),
 			publishedAt: video.data.publishedAt.toISOString(),
@@ -111,7 +114,7 @@ export async function getLatestContent(
 		})),
 		...articles.map((article) => ({
 			kind: "Article" as const,
-			href: `/read/${article.id}`,
+			href: `/read/${article.slug}`,
 			title: article.data.title,
 			description: compactCopy(
 				article.data.openGraph?.subtitle ||
@@ -126,7 +129,7 @@ export async function getLatestContent(
 		})),
 		...news.map((item) => ({
 			kind: "News" as const,
-			href: `/news/${item.id}`,
+			href: `/news/${item.slug}`,
 			title: item.data.title,
 			description: compactCopy(item.data.description),
 			publishedAt: item.data.publishedAt.toISOString(),
@@ -134,7 +137,7 @@ export async function getLatestContent(
 		})),
 		...courses.map((course) => ({
 			kind: "Course" as const,
-			href: `/courses/${course.id}`,
+			href: `/courses/${course.slug}`,
 			title: course.data.title,
 			description: compactCopy(course.data.description),
 			publishedAt: course.data.publishedAt.toISOString(),
@@ -145,7 +148,7 @@ export async function getLatestContent(
 		})),
 		...learningPaths.map((path) => ({
 			kind: "Learning path" as const,
-			href: `/learning-paths/${path.id}`,
+			href: `/learning-paths/${path.slug}`,
 			title: path.data.title,
 			description: compactCopy(path.data.description),
 			publishedAt: path.data.publishedAt.toISOString(),

@@ -1,4 +1,4 @@
-import { getCollection } from "astro:content";
+import { getAllCollection } from "@/lib/payload-content";
 import type { APIRoute } from "astro";
 import { getPublishedVideos } from "@/lib/content";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
@@ -43,7 +43,7 @@ function escapeXml(value: unknown): string {
 
 export const GET: APIRoute = async ({ site }) => {
 	const videos = await getPublishedVideos();
-	const technologies = await getCollection("technologies");
+	const technologies = await getAllCollection("technologies");
 	const siteUrl = site ?? new URL(DEFAULT_SITE_URL);
 	const techName = new Map(
 		technologies.map((t) => [t.id, t.data.name] as const),
@@ -117,4 +117,4 @@ ${sortedVideos
 };
 
 // Prerender at build time
-export const prerender = true;
+export const prerender = false;

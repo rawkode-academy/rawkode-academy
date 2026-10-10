@@ -1,4 +1,4 @@
-import { getCollection, getEntries } from "astro:content";
+import { getAllCollection, getEntries } from "@/lib/payload-content";
 import type { APIRoute } from "astro";
 import { buildJsonFeed, type JsonFeedItem } from "@/lib/json-feed";
 
@@ -8,12 +8,12 @@ export const GET: APIRoute = async ({ site }) => {
 	const baseUrl = (site?.toString() ?? SITE_FALLBACK).replace(/\/$/, "");
 	const u = (path: string) => `${baseUrl}${path}`;
 
-	const articles = await getCollection("articles");
+	const articles = await getAllCollection("articles");
 
 	const items: JsonFeedItem[] = [];
 	for (const article of articles) {
 		const authors = await getEntries(article.data.authors);
-		const url = u(`/read/${article.id}/`);
+		const url = u(`/read/${article.slug}/`);
 		items.push({
 			id: url,
 			url,
@@ -25,7 +25,7 @@ export const GET: APIRoute = async ({ site }) => {
 				: {}),
 			authors: authors.map((author) => ({
 				name: author.data.name,
-				url: u(`/people/${author.data.id}`),
+				url: u(`/people/${author.slug}`),
 			})),
 			tags: article.data.series?.id ? [article.data.series.id] : [],
 		});
@@ -51,9 +51,9 @@ export const GET: APIRoute = async ({ site }) => {
 	return new Response(JSON.stringify(feed), {
 		headers: {
 			"Content-Type": "application/feed+json; charset=utf-8",
-			"Cache-Control": "public, max-age=3600",
+			"Cache-Control": "public, max-age=3600, s-maxage=3600",
 		},
 	});
 };
 
-export const prerender = true;
+export const prerender = false;

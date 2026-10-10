@@ -7,7 +7,8 @@ import { actualFromDocuments, expectedFromSnapshot, reconcile, renderMarkdown, t
 import { relations, type Reference } from '../src/importer'
 import { buildStaticSnapshot, type StaticContentSnapshot } from '../src/static-content'
 
-type Document = Record<string, unknown> & { id: number }
+type Document = Record<string, unknown> & { id: string }
+const id = (value: number) => `c${String(value).padStart(23, '0')}`
 
 async function fixture(root: string): Promise<void> {
   const files: Record<string, string> = {
@@ -34,13 +35,13 @@ async function fixture(root: string): Promise<void> {
 /** What a complete, correct import leaves in Payload and R2. */
 async function simulateImport(snapshot: StaticContentSnapshot): Promise<{ documents: Record<string, Document[]>; objects: ActualObject[] }> {
   const expected = await expectedFromSnapshot(snapshot)
-  const ids = new Map<string, number>()
-  snapshot.records.forEach((record, index) => ids.set(`${record.collection}:${record.legacyId}`, index + 1))
+  const ids = new Map<string, string>()
+  snapshot.records.forEach((record, index) => ids.set(`${record.collection}:${record.legacyId}`, record.collection === 'videos' ? record.legacyId : id(index + 1)))
   const documents: Record<string, Document[]> = {}
   snapshot.records.forEach((record, index) => {
     const rules = relations[record.collection] ?? {}
     const doc: Document = {
-      id: index + 1, legacyId: record.legacyId, slug: record.slug, sourceSystem: snapshot.sourceSystem, sourceRevision: record.sourceRevision,
+      id: snapshot.records[index]!.collection === 'videos' ? record.legacyId : id(index + 1), legacyId: record.legacyId, slug: record.slug, sourceSystem: snapshot.sourceSystem, sourceRevision: record.sourceRevision,
       sourceHash: expected.records[index]!.sourceHash, sourceSequence: snapshot.sequence, importState: 'complete', locallyEdited: false, tombstone: false,
     }
     // static-assets has versions.drafts false, so Payload stores no _status.
@@ -99,14 +100,14 @@ test('reconciliation reports zero diffs after a complete import and detects each
 
   const chapterOrder = run(({ documents }) => {
     const video = find(documents, 'videos', 'abcdefghijklmnopqrstuvwx')
-    video.chapters = [...(video.chapters as number[])].reverse()
+    video.chapters = [...(video.chapters as string[])].reverse()
   })
   assert.deepEqual(kinds(chapterOrder), ['edges'])
   assert.equal(chapterOrder.diffs[0]?.field, 'chapters')
 
   const technologyOrder = run(({ documents }) => {
     const video = find(documents, 'videos', 'abcdefghijklmnopqrstuvwx')
-    video.technologies = [...(video.technologies as number[])].reverse()
+    video.technologies = [...(video.technologies as string[])].reverse()
   })
   assert.deepEqual(technologyOrder.diffs.map(diff => [diff.kind, diff.field]), [['edges', 'technologies']])
   assert.deepEqual(technologyOrder.diffs[0]?.expected, ['technologies:kubernetes', 'technologies:cilium'])
@@ -129,12 +130,12 @@ test('reconciliation reports zero diffs after a complete import and detects each
   const missingAsset = run(state => { state.objects = state.objects.filter(object => object.key !== asset.r2Key) })
   assert.deepEqual(kinds(missingAsset), ['asset-missing'])
 
-  const extra = run(({ documents }) => { documents.people!.push({ ...find(documents, 'people', 'guest'), id: 9_999, legacyId: 'not-in-content', slug: 'not-in-content' }) })
+  const extra = run(({ documents }) => { documents.people!.push({ ...find(documents, 'people', 'guest'), id: id(9_999), legacyId: 'not-in-content', slug: 'not-in-content' }) })
   assert.deepEqual(kinds(extra), ['extra'])
   assert.equal(extra.diffs[0]?.legacyId, 'not-in-content')
   assert.deepEqual(extra.collections.people, { expected: 2, actual: 3 })
 
-  const editorCreated = run(({ documents }) => { documents.people!.push({ id: 10_000, name: 'Created in admin' }) })
+  const editorCreated = run(({ documents }) => { documents.people!.push({ id: id(10_000), name: 'Created in admin' }) })
   assert.deepEqual(kinds(editorCreated), ['extra'])
 
   // Orphaned static/ objects fail the report by default.

@@ -31,6 +31,7 @@
 	},
 	"dependencies": {
 		"@ark-ui/vue": "5.39.2",
+		"@paralleldrive/cuid2": "^2.2.2",
 		"@astrojs/check": "0.9.8",
 		"@astrojs/cloudflare": "13.1.10",
 		"@astrojs/mdx": "5.0.3",

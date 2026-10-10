@@ -51,10 +51,6 @@ ci: pipelines: {
 		environment: "production"
 		when: pullRequest: true
 		tasks: [_t.deploy.preview]
-		annotations: "Preview URL": schema.#TaskCaptureRef & {
-			cuenvTask: "deploy.preview"
-			cuenvCapture: "previewUrl"
-		}
 	}
 }
 
@@ -86,6 +82,7 @@ tasks: {
 		inputs: [
 			"src/**",
 			"src/migrations/**",
+			"src/migrations-cuid2/**",
 			"scripts/**",
 			"tests/**",
 			"fixtures/**",
@@ -217,6 +214,7 @@ tasks: {
 			dependsOn: [_t.setup, _t.deploy.ensureSecrets]
 			inputs: [
 				"src/migrations/**",
+				"src/migrations-cuid2/**",
 				"src/**",
 				"scripts/migrate-production.ts",
 				"scripts/lib/**",
@@ -245,8 +243,28 @@ tasks: {
 			hermetic: false
 			command: "sh"
 			args: ["-lc", "\(_toolchain) bun run migrate:preview"]
-			env: PATH: _taskPath
+			env: {
+				PATH:                  _taskPath
+				CI:                    schema.#EnvPassthrough
+				CLOUDFLARE_API_TOKEN:  schema.#EnvPassthrough
+				CLOUDFLARE_PREVIEW_ALLOW_DEGRADED_CONTAINERS: "true"
+				GITHUB_EVENT_NAME:     schema.#EnvPassthrough
+				GITHUB_EVENT_PATH:     schema.#EnvPassthrough
+				GITHUB_SHA:            schema.#EnvPassthrough
+			}
 			dependsOn: [_t.build]
+			inputs: [
+				"src/migrations-cuid2/**",
+				"scripts/migrate-preview.ts",
+				"scripts/import-static.ts",
+				"scripts/lib/import-target.ts",
+				"scripts/lib/remote-target.ts",
+				"scripts/pr-preview-resources.mjs",
+				"src/static-content.ts",
+				"../../../content/**",
+				"../../../projects/rawkode.academy/website/**",
+				"../../../bun.lock",
+			]
 		}
 
 		main: schema.#Task & {
@@ -293,7 +311,15 @@ tasks: {
 			hermetic: false
 			command: "sh"
 			args: ["-lc", "\(_toolchain) bun run deploy:preview"]
-			env: PATH: _taskPath
+			env: {
+				PATH:                  _taskPath
+				CLOUDFLARE_API_TOKEN:  schema.#EnvPassthrough
+				CLOUDFLARE_PREVIEW_ALLOW_DEGRADED_CONTAINERS: "true"
+				GITHUB_EVENT_NAME:     schema.#EnvPassthrough
+				GITHUB_EVENT_PATH:     schema.#EnvPassthrough
+				GITHUB_OUTPUT:         schema.#EnvPassthrough
+				GITHUB_SHA:            schema.#EnvPassthrough
+			}
 			dependsOn: [_t.check, _t.test, _t.deploy.migratePreview]
 			captures: previewUrl: {
 				pattern: "Preview URL: (.+)"

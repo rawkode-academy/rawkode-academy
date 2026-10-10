@@ -9,6 +9,9 @@
 		"directory": "./dist",
 		"html_handling": "drop-trailing-slash"
 	},
+	"images": {
+		"binding": "IMAGES"
+	},
 	"workers_dev": true,
 	"preview_urls": true,
 	"observability": {
@@ -44,6 +47,11 @@
 		"NOTIFICATIONS_VAPID_PUBLIC_KEY": "BDgtSVztEoFZDmO0Iz-MpBNaYv8ukGIQQYS8SwUBt7vMLXQT60-zjsyMTY8opukUBHoptdgm2u-uonWthz6e1SE"
 	},
 	"services": [
+		{
+			"binding": "PAYLOAD_CONTENT",
+			"service": "rawkode-academy-payload",
+			"entrypoint": "PublicContentBridge"
+		},
 		{
 			"binding": "EMOJI_REACTIONS",
 			"service": "platform-emoji-reactions-write-model"

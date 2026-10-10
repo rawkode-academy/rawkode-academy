@@ -1,12 +1,13 @@
 // Trusted local fixture setup only. No HTTP endpoint or production identity action.
 import {writeFileSync} from 'node:fs'
 import {getPayload} from 'payload'
-import config from '../payload.config'
 import {authConfig,callbackUri} from '../src/auth/config'
 import {identityMapping} from '../src/auth/payload'
 import {D1AuthStore} from '../src/auth/store'
 import {digest} from '../src/auth/oidc'
 if(process.env.POC_CLI!=='1')throw new Error('Local CLI mode required')
+if(process.env.POC_MIGRATION_CHAIN!=='cuid2')throw new Error('Local CUID2 migration chain must be selected')
+const {default:config}=await import('../payload.config')
 const payload=await getPayload({config})
 const db=(payload.db as unknown as {binding:D1Database}).binding
 const settings=authConfig({})
@@ -22,7 +23,7 @@ await store.putTransaction({stateHash,bindingHash,verifier:'fixture',nonce:'fixt
 const consumption=await Promise.all([store.consumeTransaction(stateHash,bindingHash,now),store.consumeTransaction(stateHash,bindingHash,now)])
 if(consumption.filter(Boolean).length!==1)throw new Error('D1 callback consumption not atomic')
 const stamp=Date.now()
-const video=await payload.create({collection:'videos',overrideAccess:true,data:{legacyId:`oidc-private-${stamp}`,legacyType:'Video',slug:`oidc-private-${stamp}`,title:'Private staff-only fixture',_status:'draft'}})
+const video=await payload.create({collection:'videos',overrideAccess:true,data:{slug:`oidc-private-${stamp}`,title:'Private staff-only fixture',_status:'draft'}})
 writeFileSync('.runtime/oidc-fixtures.json',JSON.stringify({a,b,tokens,privateVideoId:video.id,expiresAt:now+1800}),{mode:0o600})
 writeFileSync('evidence/oidc-d1.json',JSON.stringify({at:new Date().toISOString(),runtime:'local D1 via Wrangler workerd proxy',distinctSubjectIds:true,atomicConcurrentTransactionConsumption:true,opaqueSessionHashStorage:true,scope:'Trusted fixture provisioning, not an actual provider callback'},null,2)+'\n')
 console.log('Synthetic OIDC session fixtures created locally; values kept in ignored runtime file.')

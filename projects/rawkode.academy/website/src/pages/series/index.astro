@@ -1,13 +1,15 @@
 ---
-export const prerender = true;
+export const prerender = false;
 
-import { getCollection } from "astro:content";
+import { getAllCollection } from "@/lib/payload-content";
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
 import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 import Page from "@/wrappers/page.astro";
 
-const seriesEntries = await getCollection("series");
-const articles = await getCollection("articles");
+const [seriesEntries, articles] = await Promise.all([
+	getAllCollection("series"),
+	getAllCollection("articles"),
+]);
 const publishedSeriesIds = new Set(
 	articles
 		.map((article) => article.data.series?.id)
@@ -32,7 +34,7 @@ const seriesList = seriesEntries
 		const first = seriesArticles.at(0);
 
 		return {
-			id: series.id,
+			slug: series.slug,
 			title: series.data.title,
 			articleCount: seriesArticles.length,
 			latest,
@@ -63,7 +65,7 @@ const catalog = academyCatalog();
 				<ul class={styles.grid}>
 					{seriesList.map((series) => (
 						<li>
-							<a class={styles.card} href={`/series/${series.id}`}>
+							<a class={styles.card} href={`/series/${series.slug}`}>
 								<span class={catalog.rowMeta}>
 									<span>
 										{series.articleCount}{" "}

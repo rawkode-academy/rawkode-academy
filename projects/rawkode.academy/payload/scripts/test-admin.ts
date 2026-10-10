@@ -12,10 +12,7 @@ try{
   await page.getByRole('button',{name:'Login',exact:true}).click()
   await page.waitForURL(base+'/admin')
   await page.goto(base+'/admin/collections/videos/create')
-  await page.locator('#field-legacyId').waitFor({state:'visible'})
   const id=`ui-${Date.now()}`
-  await page.locator('#field-legacyId').fill(id)
-  await page.locator('#field-legacyType').fill('Video')
   await page.locator('#field-slug').fill(id)
   await page.locator('#field-title').fill('Created through the Workers admin')
   const saved=page.waitForResponse(r=>r.request().method()==='POST' && r.url().includes('/api/videos'))

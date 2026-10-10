@@ -72,7 +72,7 @@
 
  <!-- Footer -->
  <div class="card-footer">
- <a :href="`/technology/${technology.id}`" class="card-cta">
+ <a :href="`/technology/${technology.slug}`" class="card-cta">
  <span>View Details</span>
  <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

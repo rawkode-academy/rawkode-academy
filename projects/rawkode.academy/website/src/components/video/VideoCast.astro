@@ -1,5 +1,5 @@
 ---
-import type { CollectionEntry } from "astro:content";
+import type { CollectionEntry } from "@/lib/payload-content";
 import { academyWatch } from "@rawkodeacademy/design-system";
 
 interface Props {
@@ -22,7 +22,7 @@ const watch = academyWatch();
 		<h2 class={watch.railTitle}>Meet the Cast</h2>
 		<div class={watch.castGrid}>
 			{speakers.map(({ person, role }) => (
-				<a href={`/people/${person.data.id}`} class={watch.castCard}>
+				<a href={`/people/${person.slug}`} class={watch.castCard}>
 					<div class={watch.castAvatarWrap}>
 						{person.data.avatarUrl && <img
 							src={person.data.avatarUrl}

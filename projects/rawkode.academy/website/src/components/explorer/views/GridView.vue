@@ -46,7 +46,7 @@
  <a
  v-for="tech in getCellTechnologies(yValue, xValue)"
  :key="tech.id"
- :href="`/technology/${tech.id}`"
+ :href="`/technology/${tech.slug}`"
  class="tech-icon"
  :data-name="tech.name"
  :class="{ 'is-hovered': hoveredTechId === tech.id }"

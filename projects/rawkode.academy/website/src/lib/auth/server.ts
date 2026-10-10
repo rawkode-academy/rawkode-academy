@@ -6,6 +6,12 @@
  */
 
 const ID_PROVIDER_URL = "https://id.rawkode.academy";
+type AuthEnvironment = { PAYLOAD_PREVIEW_PR?: string };
+
+export function isIdentityDisabled(env?: AuthEnvironment | null): boolean {
+	return Boolean(env?.PAYLOAD_PREVIEW_PR);
+}
+
 export const CLIENT_ID = "rawkode-academy-website";
 export const PKCE_COOKIE_NAME = "pkce_verifier";
 export const SESSION_COOKIE_NAME = "rawkode-session";
@@ -61,7 +67,11 @@ export function getCallbackUrl(origin: string): string {
 export async function buildAuthorizationUrl(
 	origin: string,
 	returnTo: string,
+	env?: AuthEnvironment | null,
 ): Promise<{ url: string; codeVerifier: string }> {
+	if (isIdentityDisabled(env)) {
+		throw new Error("Identity sign-in is disabled in Payload review previews.");
+	}
 	const codeVerifier = generateCodeVerifier();
 	const codeChallenge = await generateCodeChallenge(codeVerifier);
 	const state = encodeBase64Url(JSON.stringify({ returnTo }));
@@ -92,7 +102,9 @@ export async function exchangeCodeForTokens(
 	code: string,
 	origin: string,
 	codeVerifier: string,
+	env?: AuthEnvironment | null,
 ): Promise<{ access_token: string; id_token?: string } | null> {
+	if (isIdentityDisabled(env)) return null;
 	const callbackUrl = getCallbackUrl(origin);
 	const tokenUrl = `${ID_PROVIDER_URL}/auth/oauth2/token`;
 
@@ -129,7 +141,10 @@ export async function exchangeCodeForTokens(
 	return await tokenResponse.json();
 }
 
-export async function getUserInfo(accessToken: string): Promise<{
+export async function getUserInfo(
+	accessToken: string,
+	env?: AuthEnvironment | null,
+): Promise<{
 	sub: string;
 	email?: string;
 	name?: string;
@@ -137,6 +152,7 @@ export async function getUserInfo(accessToken: string): Promise<{
 	username?: string;
 	preferred_username?: string;
 } | null> {
+	if (isIdentityDisabled(env)) return null;
 	const userinfoUrl = `${ID_PROVIDER_URL}/auth/oauth2/userinfo`;
 
 	const userResponse = await fetch(userinfoUrl, {
@@ -221,6 +237,7 @@ export async function getSession(
 	cookies: string,
 	env?: any,
 ): Promise<SessionResponse | null> {
+	if (isIdentityDisabled(env)) return null;
 	const authCookies = getAuthCookies(cookies);
 
 	if (!authCookies) {
@@ -270,7 +287,11 @@ export async function getSession(
 /**
  * Get the sign-in URL for the identity provider
  */
-export function getSignInUrl(callbackUrl?: string): string {
+export function getSignInUrl(
+	callbackUrl?: string,
+	env?: AuthEnvironment | null,
+): string {
+	if (isIdentityDisabled(env)) return "/api/auth/sign-in";
 	const params = new URLSearchParams();
 	params.set("provider", "github");
 	if (callbackUrl) {
@@ -290,6 +311,7 @@ export function getSignOutUrl(): string {
  * Sign out by calling the identity provider
  */
 export async function signOut(cookies: string, env?: any): Promise<boolean> {
+	if (isIdentityDisabled(env)) return false;
 	const authCookies = getAuthCookies(cookies);
 
 	try {

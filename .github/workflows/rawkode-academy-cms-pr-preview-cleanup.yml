@@ -1,0 +1,68 @@
+# Hand-authored cleanup for disposable Payload and website PR preview resources.
+# Do not regenerate this file with `cuenv sync ci`.
+name: rawkode-academy-cms-pr-preview-cleanup
+
+on:
+  pull_request_target:
+    types: [closed]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  cleanup:
+    if: github.event.pull_request.number != ''
+    runs-on: namespace-profile-linux-x86
+    environment: production
+    steps:
+      - name: Checkout the base branch only
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 1
+      - name: Cache /nix on Namespace volume
+        uses: namespacelabs/nscloud-cache-action@v1
+        with:
+          cache: nix
+      - name: Prepare Determinate receipt
+        run: |
+          if [ -e /nix/receipt.json ]; then
+            if command -v sudo >/dev/null 2>&1; then sudo rm -f /nix/receipt.json; else rm -f /nix/receipt.json; fi
+          fi
+      - name: Install Determinate Nix
+        uses: DeterminateSystems/determinate-nix-action@v3
+        with:
+          extra-conf: accept-flake-config = true
+      - name: Prune Determinate Nix receipt
+        run: |
+          if [ -e /nix/receipt.json ]; then
+            if command -v sudo >/dev/null 2>&1; then sudo rm -f /nix/receipt.json; else rm -f /nix/receipt.json; fi
+          fi
+      - name: Setup cuenv
+        run: |
+          arch="$(uname -m)"
+          case "$arch" in
+            x86_64|amd64) cuenv_asset="cuenv-linux-x64" ;;
+            aarch64|arm64) cuenv_asset="cuenv-linux-arm64" ;;
+            *) echo "Unsupported Linux architecture: $arch" >&2; exit 1 ;;
+          esac
+          cuenv_version="0.56.1"
+          cuenv_url="https://github.com/cuenv/cuenv/releases/download/${cuenv_version}/${cuenv_asset}"
+          curl -fsSL -o /usr/local/bin/cuenv "$cuenv_url"
+          chmod +x /usr/local/bin/cuenv
+          cuenv sync -A
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup 1Password
+        working-directory: projects/rawkode.academy/payload
+        run: cuenv exec -- cuenv secrets setup onepassword
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          CUENV_ENVIRONMENT: production
+      - name: Delete PR preview resources
+        working-directory: projects/rawkode.academy/payload
+        run: nix shell nixpkgs#nodejs_24 -c cuenv exec -- node scripts/pr-preview-resources.mjs cleanup --pr="$PR_NUMBER"
+        env:
+          CUENV_ENVIRONMENT: production
+          PR_NUMBER: ${{ github.event.pull_request.number }}

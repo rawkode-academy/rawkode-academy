@@ -1,16 +1,16 @@
 import { ReviewError, type ReviewActor } from './contracts'
 import type { ReviewService } from './service'
 
-export type ReviewRuntime = { service: ReviewService; actor: ReviewActor; origin: string; publicationAvailable?: boolean | ((videoId: number) => Promise<boolean>) }
+export type ReviewRuntime = { service: ReviewService; actor: ReviewActor; origin: string; publicationAvailable?: boolean | ((videoId: string) => Promise<boolean>) }
 const privateHeaders = { 'cache-control': 'private, no-store', 'referrer-policy': 'no-referrer' }
 export function reviewFailure(error: unknown): Response {
   if (error instanceof ReviewError) return Response.json({ error: error.message }, { status: error.status, headers: privateHeaders })
   return Response.json({ error: 'Review request failed' }, { status: 500, headers: privateHeaders })
 }
-export function videoIdFrom(request: Request): number {
+export function videoIdFrom(request: Request): string {
   const value = new URL(request.url).searchParams.get('videoId')
-  if (!value || !/^[1-9]\d*$/.test(value) || !Number.isSafeInteger(Number(value))) throw new ReviewError(400, 'A videoId is required')
-  return Number(value)
+  if (!value || !/^[a-z][a-z0-9]{23}$/.test(value)) throw new ReviewError(400, 'A videoId is required')
+  return value
 }
 export async function readCommand(request: Request) {
   const reader = request.body?.getReader()
@@ -37,9 +37,9 @@ export function createReviewHandlers(runtime: (request: Request) => Promise<Revi
         const { service, actor, publicationAvailable = false } = await runtime(request)
         const params = new URL(request.url).searchParams
         if (!params.has('videoId')) {
-          const after = params.get('after') ?? '0'
-          if (!/^(0|[1-9]\d*)$/.test(after) || !Number.isSafeInteger(Number(after))) throw new ReviewError(400, 'Invalid review cursor')
-          return Response.json(await service.list(actor, Number(after)), { headers: privateHeaders })
+          const after = params.get('after')
+          if (after && !/^[a-z][a-z0-9]{23}$/.test(after)) throw new ReviewError(400, 'Invalid review cursor')
+          return Response.json(await service.list(actor, after), { headers: privateHeaders })
         }
         const videoId = videoIdFrom(request)
         const review = await service.read(videoId, actor)

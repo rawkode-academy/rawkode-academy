@@ -1,4 +1,4 @@
-import { getCollection, getEntries } from "astro:content";
+import { getAllCollection, getEntries } from "@/lib/payload-content";
 import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
 import {
@@ -7,7 +7,7 @@ import {
 } from "../../../lib/feed-utils";
 
 export async function GET(context: APIContext) {
-	const articles = await getCollection("articles");
+	const articles = await getAllCollection("articles");
 
 	// Sort by publishedAt desc
 	const sortedArticles = articles.sort(
@@ -29,7 +29,7 @@ export async function GET(context: APIContext) {
 				title: article.data.title,
 				description: article.data.description,
 				pubDate: new Date(article.data.publishedAt),
-				link: `/read/${article.id}/`,
+				link: `/read/${article.slug}/`,
 				author: authors.map((author) => author.data.name).join(", "),
 				categories: article.data.series?.id ? [article.data.series.id] : [],
 				...(renderResult?.content && { content: renderResult.content }),

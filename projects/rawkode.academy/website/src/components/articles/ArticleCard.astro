@@ -1,6 +1,6 @@
 ---
 import { Image } from "astro:assets";
-import { type CollectionEntry, getEntries } from "astro:content";
+import { type CollectionEntry, getEntries } from "@/lib/payload-content";
 import BaseCard from "../common/BaseCard.vue";
 import { calculateReadingTime } from "@/utils/reading-time";
 import { getTypeBadgeConfig } from "@/utils/article-types";
@@ -28,7 +28,7 @@ const formattedDate = new Intl.DateTimeFormat("en-US", {
 ---
 
 <BaseCard
-	href={`/read/${article.id}`}
+	href={`/read/${article.slug}`}
 	aria-label={article.data.title}
 	showCover={Boolean(article.data.cover)}
 	showFooter={authors.length > 0}

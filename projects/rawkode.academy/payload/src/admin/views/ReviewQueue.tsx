@@ -20,7 +20,7 @@ export async function ReviewQueueView({ initPageResult, params, searchParams }: 
 	const { req, permissions, locale, visibleEntities } = initPageResult
 	if (!isStaff(req.user)) notFound()
 	const snapshot = await reviewSnapshot(200)
-	const audit = (slug: string, videoId: number) => `${collectionPath(slug)}?where[video][equals]=${videoId}`
+	const audit = (slug: string, videoId: string) => `${collectionPath(slug)}?where[video][equals]=${encodeURIComponent(videoId)}`
 	return (
 		<DefaultTemplate
 			i18n={req.i18n}

@@ -17,7 +17,9 @@ try {
 const prepared = prepareTarget(target)
 const { cloudflare } = await import('../src/cloudflare')
 const { default: config } = await import('../payload.config')
-const { migrations } = await import('../src/migrations')
+const { migrations } = prepared.migrationChain === 'cuid2'
+  ? await import('../src/migrations-cuid2')
+  : await import('../src/migrations')
 const payload = await getPayload({ config, disableOnInit: true })
 
 try {

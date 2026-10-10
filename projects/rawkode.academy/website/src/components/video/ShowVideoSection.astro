@@ -1,5 +1,5 @@
 ---
-import type { CollectionEntry } from "astro:content";
+import type { CollectionEntry } from "@/lib/payload-content";
 import { formatVideoRuntimeLabel } from "@/lib/video-runtime";
 import { academyWatch } from "@rawkodeacademy/design-system";
 
@@ -31,7 +31,7 @@ const watch = academyWatch();
 				More from {show.data.name}
 			</h2>
 			<a
-				href={`/shows/${show.id}`}
+				href={`/shows/${show.slug}`}
 				class={watch.railLink}
 			>
 				{hasMoreVideos ? `View all ${totalVideos} episodes` : "View show"}

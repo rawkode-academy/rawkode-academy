@@ -1,7 +1,8 @@
-import { getCollection } from "astro:content";
+import {
+	getAllCollection,
+	listPayloadContent,
+} from "@/lib/payload-content";
 import type { APIRoute } from "astro";
-import { GRAPHQL_ENDPOINT } from "astro:env/server";
-import { request } from "graphql-request";
 import { createLogger } from "@/lib/logger";
 
 const logger = createLogger("sitemap");
@@ -13,36 +14,6 @@ interface NavigationItem {
 	href: string;
 	category: string;
 	keywords?: string[];
-}
-
-interface Technology {
-	id: string;
-	name: string;
-	logo?: string;
-}
-
-interface GetTechnologiesResponse {
-	getTechnologies: Technology[];
-}
-
-interface Show {
-	id: string;
-	name: string;
-}
-
-interface GetShowsResponse {
-	allShows?: (Show | null)[] | null;
-}
-
-interface Video {
-	id: string;
-	slug: string;
-	title: string;
-	description?: string;
-}
-
-interface GetVideosResponse {
-	getLatestVideos: Video[];
 }
 
 // External links that aren't in the sitemap
@@ -226,16 +197,24 @@ async function generateNavigationItems(
 	});
 
 	try {
-		const publishedArticles = await getCollection("articles");
+		const [publishedArticles, series, courses, shows, technologies, videos] =
+			await Promise.all([
+				getAllCollection("articles"),
+				getAllCollection("series"),
+				getAllCollection("courses"),
+				getAllCollection("shows"),
+				getAllCollection("technologies"),
+				listPayloadContent("videos", { limit: 50 }),
+			]);
 
 		// Add articles only if requested
 		if (includeArticles) {
 			publishedArticles.forEach((article) => {
 				navigationItems.push({
-					id: `/read/${article.id}`,
+					id: `/read/${article.slug}`,
 					title: article.data.title,
 					description: article.data.description || "Read this article",
-					href: `/read/${article.id}`,
+					href: `/read/${article.slug}`,
 					category: "Articles",
 					keywords: [article.data.title.toLowerCase(), "article", "read"],
 				});
@@ -243,7 +222,6 @@ async function generateNavigationItems(
 		}
 
 		// Add series
-		const series = await getCollection("series");
 		const publishedSeriesIds = new Set(
 			publishedArticles
 				.map((article) => article.data.series?.id)
@@ -251,110 +229,60 @@ async function generateNavigationItems(
 		);
 		series.filter((s) => publishedSeriesIds.has(s.id)).forEach((s) => {
 			navigationItems.push({
-				id: `/series/${s.id}`,
+				id: `/series/${s.slug}`,
 				title: s.data.title,
 				description: "Read this series",
-				href: `/series/${s.id}`,
+				href: `/series/${s.slug}`,
 				category: "Series",
 				keywords: [s.data.title.toLowerCase(), "series", "read", "articles"],
 			});
 		});
 
 		// Add courses
-		const courses = await getCollection("courses");
 		courses.forEach((course) => {
 			navigationItems.push({
-				id: `/courses/${course.id}`,
+				id: `/courses/${course.slug}`,
 				title: course.data.title,
 				description: course.data.description || "Learn this course",
-				href: `/courses/${course.id}`,
+				href: `/courses/${course.slug}`,
 				category: "Learning",
 				keywords: [course.data.title.toLowerCase(), "course", "learn"],
 			});
 		});
 
-		const endpoint = GRAPHQL_ENDPOINT;
-
 		// Add shows
-		const getShowsQuery = /* GraphQL */ `
-      query GetShows {
-        allShows {
-          id
-          name
-        }
-      }
-    `;
-
-		const showData = await request<GetShowsResponse>(endpoint, getShowsQuery);
-
-		showData.allShows?.forEach((show) => {
-			if (!show?.id || !show?.name) {
-				return;
-			}
-
+		shows.forEach((show) => {
 			navigationItems.push({
-				id: `/shows/${show.id}`,
-				title: show.name,
+				id: `/shows/${show.slug}`,
+				title: show.data.name,
 				description: "Browse episodes from this show",
-				href: `/shows/${show.id}`,
+				href: `/shows/${show.slug}`,
 				category: "Shows",
-				keywords: [show.name.toLowerCase(), "show", "shows"],
+				keywords: [show.data.name.toLowerCase(), "show", "shows"],
 			});
 		});
 
 		// Add technologies
-		const getTechnologiesQuery = /* GraphQL */ `
-      query GetTechnologies($limit: Int) {
-        getTechnologies(limit: $limit) {
-          id
-          name
-        }
-      }
-    `;
-
-		const techData = await request<GetTechnologiesResponse>(
-			endpoint,
-			getTechnologiesQuery,
-			{ limit: 100 }, // Fetch up to 100 technologies for command palette
-		);
-
-		techData.getTechnologies.forEach((tech) => {
+		technologies.forEach((tech) => {
 			navigationItems.push({
-				id: `/technology/${tech.id}`,
-				title: tech.name,
+				id: `/technology/${tech.slug}`,
+				title: tech.data.name,
 				description: "Explore this technology",
-				href: `/technology/${tech.id}`,
+				href: `/technology/${tech.slug}`,
 				category: "Technology",
-				keywords: [tech.name.toLowerCase(), "technology", "tech"],
+				keywords: [tech.data.name.toLowerCase(), "technology", "tech"],
 			});
 		});
 
 		// Add videos
-		const getVideosQuery = /* GraphQL */ `
-      query GetVideos($limit: Int) {
-        getLatestVideos(limit: $limit) {
-          id
-          slug
-          title
-          description
-        }
-      }
-    `;
-
-		const videoData = await request<GetVideosResponse>(
-			endpoint,
-			getVideosQuery,
-			{ limit: 50 }, // Fetch up to 50 videos for command palette
-		);
-
-		videoData.getLatestVideos.forEach((video) => {
+		videos.forEach((video) => {
 			navigationItems.push({
 				id: `/watch/${video.slug}`,
-				title: video.title,
-				description: video.description || "Watch this video",
+				title: video.data.title,
+				description: video.data.description || "Watch this video",
 				href: `/watch/${video.slug}`,
 				category: "Videos",
-				keywords: [video.title.toLowerCase(), "video", "watch"],
+				keywords: [video.data.title.toLowerCase(), "video", "watch"],
 			});
 		});
 	} catch (error) {
@@ -365,7 +293,7 @@ async function generateNavigationItems(
 }
 
 // Prerender this endpoint at build time
-export const prerender = true;
+export const prerender = false;
 
 export const GET: APIRoute = async ({ url }) => {
 	try {

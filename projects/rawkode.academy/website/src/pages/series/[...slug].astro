@@ -2,62 +2,20 @@
 import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
 const styles = academyLayout({ width: "reading" });
-import { getImage } from "astro:assets";
-import { type CollectionEntry, getCollection, render } from "astro:content";
+import { getEntry } from "@/lib/payload-content";
+import CmsBody from "@/components/content/CmsBody.astro";
 import SeriesArticles from "@/components/articles/series/SeriesArticles.astro";
 import ArticleHeader from "@/components/read/ArticleHeader.astro";
 import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
 import Page from "@/wrappers/page.astro";
-import type { GetStaticPaths, GetStaticPathsResult } from "astro";
+export const prerender = false;
 
-export const prerender = true;
-
-type Props = {
-	series: CollectionEntry<"series">;
-};
-
-const computeImageUrl = async (
-	series: CollectionEntry<"series">,
-): Promise<URL | undefined> => {
-	if (series.data.cover) {
-		const image = await getImage({ src: series.data.cover.image });
-
-		return new URL(image.src, Astro.site);
-	}
-
-	return undefined;
-};
-
-export const getStaticPaths: GetStaticPaths =
-	async (): Promise<GetStaticPathsResult> => {
-		const [seriesEntries, articles] = await Promise.all([
-			getCollection("series"),
-			getCollection("articles"),
-		]);
-		const publishedSeriesIds = new Set(
-			articles
-				.map((article) => article.data.series?.id)
-				.filter((id): id is string => Boolean(id)),
-		);
-
-		return seriesEntries
-			.filter((series) => publishedSeriesIds.has(series.id))
-			.map((series) => {
-				return {
-					params: {
-						slug: series.id,
-					},
-					props: {
-						series,
-					},
-				};
-			});
-	};
-
-const { series } = Astro.props;
-const { Content } = await render(series);
-
-const imageUrl = await computeImageUrl(series);
+const slug = Astro.params.slug;
+const series = slug ? await getEntry("series", { slug }) : undefined;
+if (!series) return new Response(null, { status: 404 });
+const imageUrl = series.data.cover?.image?.src
+	? new URL(series.data.cover.image.src, Astro.site ?? Astro.url)
+	: undefined;
 ---
 
 <Page
@@ -70,7 +28,7 @@ const imageUrl = await computeImageUrl(series);
 		elements={[
 			{ title: "Home", link: "/" },
 			{ title: "Series", link: "/series" },
-			{ title: series.data.title, link: `/series/${series.id}` },
+			{ title: series.data.title, link: `/series/${series.slug}` },
 		]}
 	/>
 	<ArticleHeader
@@ -79,7 +37,7 @@ const imageUrl = await computeImageUrl(series);
 		title={series.data.title}
 	/>
 	<article class={[doc.reading, styles.prose].join(" ")}>
-		<Content />
+		<CmsBody entry={series} />
 	</article>
 	<section class={[doc.section, doc.stack].join(" ")}>
 		<h2 class={doc.sectionTitle}>Articles</h2>

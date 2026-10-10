@@ -5,6 +5,7 @@ import "github.com/cuenv/cuenv/schema"
 schema.#Project
 
 name: "rawkode-academy-website"
+_cuenvBinary: "0.56.1"
 
 runtime: schema.#DevenvRuntime
 hooks: onEnter: devenv: schema.#Devenv
@@ -35,6 +36,9 @@ env: {
 	DISABLE_GAME_AUTH: true
 	environment: production: {
 		DISABLE_GAME_AUTH: false
+		CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {
+			ref: "op://sa.rawkode.academy/cloudflare/api-tokens/workers"
+		}
 	}
 }
 
@@ -204,14 +208,33 @@ tasks: {
 		preview: schema.#Task & {
 			hermetic: false
 			command:  "sh"
-			args: ["-lc", "\(_toolchain) bun x wrangler versions upload"]
-			env: PATH: _taskPath
+			args: ["-lc", "\(_toolchain) bun review/deploy/deploy-cms-preview.mjs"]
+			env: {
+				PATH:                  _taskPath
+				CLOUDFLARE_API_TOKEN:  schema.#EnvPassthrough
+				GITHUB_API_URL:        schema.#EnvPassthrough
+				GITHUB_EVENT_NAME:     schema.#EnvPassthrough
+				GITHUB_EVENT_PATH:     schema.#EnvPassthrough
+				GITHUB_OUTPUT:         schema.#EnvPassthrough
+				GITHUB_REPOSITORY:     schema.#EnvPassthrough
+				GITHUB_SHA:            schema.#EnvPassthrough
+				GITHUB_STEP_SUMMARY:   schema.#EnvPassthrough
+				GITHUB_TOKEN:          schema.#EnvPassthrough
+			}
 			dependsOn: [_t.build]
 			// A pull-request preview is the pipeline's deliverable, so it must run
 			// whenever this pipeline is invoked. The build remains its dependency.
 			captures: previewUrl: {
 				pattern: "Version Preview URL: (.+)"
 			}
+			inputs: [
+				"review/deploy/deploy-cms-preview.mjs",
+				"scripts/preview-isolation-worker.mjs",
+				"../../../projects/rawkode.academy/payload/scripts/pr-preview-resources.mjs",
+				"../../../projects/rawkode.academy/payload/wrangler.jsonc",
+				"../../../projects/rawkode.academy/payload/**",
+				"../../../bun.lock",
+			]
 		}
 	}
 }

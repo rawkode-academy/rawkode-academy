@@ -4,6 +4,7 @@ import { getPayload, type CollectionSlug } from 'payload'
 import { gitCommitWatermark, gitSha, parseImportTarget, resolveSequence } from './lib/import-target'
 import { actualFromDocuments, expectedFromSnapshot, reconcile, renderMarkdown, type ActualObject } from './lib/reconcile'
 import { disposeCloudflare, prepareTarget, TargetError } from './lib/remote-target'
+import { assertCuid2DocumentSchema } from '../src/id-schema'
 
 // Read-only: compares the content/ snapshot at this checkout with what an
 // import left in the target, and exits 1 on any difference.
@@ -37,6 +38,7 @@ const outDir = path.resolve(projectDir, outFlag ?? (target === 'local' ? '.runti
 const prepared = prepareTarget(target)
 const { buildStaticSnapshot, staticContentCollections } = await import('../src/static-content')
 const { cloudflare } = await import('../src/cloudflare')
+await assertCuid2DocumentSchema(cloudflare.env.D1)
 const { default: config } = await import('../payload.config')
 
 type ReadUser = NonNullable<Parameters<Awaited<ReturnType<typeof getPayload>>['find']>[0]['user']>

@@ -1,5 +1,5 @@
 export interface ShowListEntry {
-	id: string;
+	slug: string;
 	name: string;
 	description?: string | undefined;
 	imageUrl?: string | undefined;
@@ -38,7 +38,7 @@ export function buildShowItemListJsonLd(
 	};
 
 	const itemListElement = shows.map((show, index) => {
-		const showUrl = joinUrl(siteUrl, `/shows/${show.id}`);
+		const showUrl = joinUrl(siteUrl, `/shows/${show.slug}`);
 		const item: Record<string, unknown> = {
 			"@type": "PodcastSeries",
 			name: show.name,

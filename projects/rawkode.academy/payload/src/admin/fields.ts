@@ -15,7 +15,7 @@ const withAdmin = (field: Field, admin: Record<string, unknown>): Field => ({ ..
 export const readOnly = (field: Field): Field => withAdmin(field, { readOnly: true })
 export const readOnlyAll = (fields: Field[]): Field[] => fields.map(readOnly)
 
-const rawSourceFields = new Set(['sourceFields', 'sourceData', 'sourceRaw', 'sourceBody', 'sourceAssets', 'editorialData'])
+const rawSourceFields = new Set(['sourceFields', 'sourceAssets'])
 
 const labels: Record<string, string> = {
 	youtubeId: 'YouTube ID',
@@ -43,7 +43,7 @@ const descriptions: Record<string, string> = {
 	estimatedDuration: 'Minutes.',
 	slug: 'URL segment. Generated from the title on create when left empty.',
 	tombstone: 'Hidden from public reads. Set by importer reconciliation.',
-	legacyId: 'Stable identity used by the importer. Editor-created records get a payload: prefix.',
+	legacyId: 'Stable identity used by the importer and relationship resolver.',
 }
 
 export function decorate(field: Field): Field {
@@ -115,14 +115,10 @@ export const slugify = (value: string): string =>
 const titleKeys = ['title', 'name', 'displayName', 'code', 'label', 'quote'] as const
 
 // Editor-created records need importer identity values they cannot see.
-// legacyId/legacyType get function defaults (no column default, so no DDL),
-// and slug may be left empty on an editorial create; fillEditorialIdentity
-// then derives it before validation. NOT NULL still protects the database.
-export function provenanceDefaults(slug: string, singular: string) {
+// Slug may be left empty on an editorial create; fillEditorialIdentity derives
+// it before validation. NOT NULL still protects the database.
+export function provenanceDefaults(slug: string) {
 	return {
-		legacyId: { defaultValue: () => `payload:${slug}:${crypto.randomUUID()}` },
-		// Function, never a literal: a literal default would become a column DEFAULT.
-		legacyType: { defaultValue: () => singular },
 		slug: {
 			validate: (value: unknown, options: { operation?: string; req?: { context?: Record<string, unknown> } }) => {
 				if (typeof value === 'string' && value.trim()) return true
@@ -134,14 +130,13 @@ export function provenanceDefaults(slug: string, singular: string) {
 }
 
 export const fillEditorialIdentity =
-	(slug: string, singular: string): CollectionBeforeValidateHook =>
+	(slug: string): CollectionBeforeValidateHook =>
 	async ({ data, operation, req }) => {
 		if (operation !== 'create' || !data || req.context?.importing === true) return data
-		if (!data.legacyId) data.legacyId = `payload:${slug}:${crypto.randomUUID()}`
-		if (!data.legacyType) data.legacyType = singular
 		if (typeof data.slug === 'string' && data.slug.trim()) return data
 		const source = titleKeys.map(key => data[key]).find(value => typeof value === 'string' && value.trim()) as string | undefined
-		const base = slugify(source ?? '') || slugify(String(data.legacyId).split(':').pop() ?? '') || slug
+		const identity = slug === 'videos' ? '' : String(data.legacyId ?? '')
+		const base = slugify(source ?? '') || slugify(identity.split(':').pop() ?? '') || slug
 		// Best effort: the slug index is not unique for most collections, so a
 		// concurrent create can still collide. That is a UX issue, not a crash.
 		let candidate = base

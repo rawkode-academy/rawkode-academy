@@ -1,5 +1,5 @@
 ---
-import type { CollectionEntry } from "astro:content";
+import type { CollectionEntry } from "@/lib/payload-content";
 import { buildLearningPathJsonLd } from "@/lib/learning-path-jsonld";
 
 interface Props {
@@ -12,7 +12,7 @@ interface Props {
 const { learningPath, authors, technologyLabels } = Astro.props;
 
 const siteUrl = (Astro.site ?? Astro.url).origin;
-const pathUrl = new URL(`/learning-paths/${learningPath.id}`, siteUrl).href;
+const pathUrl = new URL(`/learning-paths/${learningPath.slug}`, siteUrl).href;
 
 const jsonLd = buildLearningPathJsonLd({
 	siteUrl,
@@ -26,7 +26,7 @@ const jsonLd = buildLearningPathJsonLd({
 		publishedAt: learningPath.data.publishedAt,
 	},
 	authors: authors.map((author) => ({
-		id: author.data.id,
+		slug: author.slug,
 		name: author.data.name,
 	})),
 });

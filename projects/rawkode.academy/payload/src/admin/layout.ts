@@ -9,7 +9,6 @@ import { advanced, collapsible, decorate, readOnlyAll, sourceTab } from './field
 
 export const provenanceNames = new Set([
 	'legacyId',
-	'legacyType',
 	'sourceSystem',
 	'sourceRevision',
 	'sourceHash',
@@ -21,12 +20,7 @@ export const provenanceNames = new Set([
 	'sourceFields',
 	'sourceOrder',
 	'sourcePath',
-	'sourceFormat',
-	'sourceData',
-	'sourceRaw',
-	'sourceBody',
 	'sourceAssets',
-	'editorialData',
 	// Importer reconciliation hides records with it. Editors unpublish with
 	// Draft status instead, so it stays read-only and developer-only.
 	'tombstone',

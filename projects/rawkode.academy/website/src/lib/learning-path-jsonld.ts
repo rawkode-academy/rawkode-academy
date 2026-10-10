@@ -1,5 +1,5 @@
 export interface LearningPathAuthor {
-	id: string;
+	slug: string;
 	name: string;
 }
 
@@ -103,7 +103,7 @@ export function buildLearningPathJsonLd(
 		jsonLd.author = authors.map((author) => ({
 			"@type": "Person",
 			name: author.name,
-			url: joinUrl(siteUrl, `/people/${author.id}`),
+			url: joinUrl(siteUrl, `/people/${author.slug}`),
 		}));
 	}
 

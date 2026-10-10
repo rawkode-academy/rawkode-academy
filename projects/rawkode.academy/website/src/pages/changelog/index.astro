@@ -1,12 +1,12 @@
 ---
-import { getCollection, getEntry } from "astro:content";
+import { getAllCollection, getEntry } from "@/lib/payload-content";
 import EditorialShell from "@/components/ui/EditorialShell.astro";
 import Page from "@/wrappers/page.astro";
 import { academyDocument } from "@rawkodeacademy/design-system";
 
 const doc = academyDocument();
 
-const changelogEntries = await getCollection("changelog");
+const changelogEntries = await getAllCollection("changelog");
 
 const sortedChangelog = changelogEntries.sort((a, b) => {
 	return b.data.date.getTime() - a.data.date.getTime();

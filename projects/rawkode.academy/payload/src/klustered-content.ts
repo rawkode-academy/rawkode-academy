@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import type { CatalogueRecord, CatalogueSnapshot, Reference } from './importer'
+import type { ContentReference, ImportRecord, ImportSnapshot } from './import-types'
 
 export type KlusteredTable = 'seasons' | 'competitors' | 'brackets' | 'bracket_applications' | 'teams' | 'team_members' | 'team_invites' | 'bracket_breaks' | 'bracket_entries' | 'matches' | 'match_results' | 'registrations'
 export type KlusteredRows = Partial<Record<KlusteredTable, Record<string, unknown>[]>>
@@ -9,13 +9,9 @@ const tableAliases: Record<KlusteredTable, string[]> = {
   teams: ['teams'], team_members: ['team_members', 'teamMembers'], team_invites: ['team_invites', 'teamInvites'], bracket_breaks: ['bracket_breaks', 'bracketBreaks'],
   bracket_entries: ['bracket_entries', 'bracketEntries'], matches: ['matches'], match_results: ['match_results', 'matchResults'], registrations: ['registrations'],
 }
-const collectionFor: Record<KlusteredTable, CatalogueRecord['collection']> = {
+const collectionFor: Record<KlusteredTable, ImportRecord['collection']> = {
   seasons: 'seasons', competitors: 'competitors', brackets: 'brackets', bracket_applications: 'bracket-applications', teams: 'teams', team_members: 'team-members',
   team_invites: 'team-invites', bracket_breaks: 'bracket-breaks', bracket_entries: 'bracket-entries', matches: 'matches', match_results: 'match-results', registrations: 'registrations',
-}
-const legacyTypeFor: Record<KlusteredTable, string> = {
-  seasons: 'Season', competitors: 'Competitor', brackets: 'Bracket', bracket_applications: 'BracketApplication', teams: 'Team', team_members: 'TeamMember',
-  team_invites: 'TeamInvite', bracket_breaks: 'BracketBreak', bracket_entries: 'BracketEntry', matches: 'Match', match_results: 'MatchResult', registrations: 'Registration',
 }
 const dateFields = new Set(['startDate', 'endDate', 'startsAt', 'endsAt', 'registrationClosesAt', 'createdAt', 'updatedAt', 'reviewedAt', 'revokedAt', 'scheduledAt', 'startedAt', 'endedAt', 'recordedAt', 'submittedAt'])
 const sourceIdentifierFields = new Set(['showId', 'seasonId', 'bracketId', 'competitorId', 'teamId', 'teamAId', 'teamBId', 'entryAId', 'entryBId', 'winnerTeamId', 'winnerEntryId', 'matchId'])
@@ -52,7 +48,7 @@ function sensitiveLegacyId(value: string): string {
   return `invite-${createHash('sha256').update(`team-invite:${value}`).digest('hex')}`
 }
 
-function ref(collection: Reference['collection'], value: unknown): Reference | null {
+function ref(collection: ContentReference['collection'], value: unknown): ContentReference | null {
   return value === null || value === undefined || value === '' ? null : { collection, legacyId: String(value) }
 }
 
@@ -66,12 +62,11 @@ function fields(row: Record<string, unknown>, names: string[]): Record<string, u
   return output
 }
 
-function sourceFor(table: KlusteredTable, row: Record<string, unknown>, sourceId: string): { path: string; format: 'json'; data: Record<string, unknown>; raw: string } {
-  const data = sourceValue(row) as Record<string, unknown>
-  return { path: `platform-brackets/${table}/${sourceId}`, format: 'json', data, raw: JSON.stringify(data) }
+function sourceFor(table: KlusteredTable, sourceId: string): { path: string } {
+  return { path: `platform-brackets/${table}/${sourceId}` }
 }
 
-function recordFor(table: KlusteredTable, row: Record<string, unknown>): CatalogueRecord {
+function recordFor(table: KlusteredTable, row: Record<string, unknown>): ImportRecord {
   const seasonId = rowValue(row, 'seasonId')
   const bracketId = rowValue(row, 'bracketId')
   const teamId = rowValue(row, 'teamId')
@@ -108,7 +103,7 @@ function recordFor(table: KlusteredTable, row: Record<string, unknown>): Catalog
     match_results: ['matchId', 'winnerTeamId', 'winnerEntryId', 'timeToResolveSeconds', 'scoreA', 'scoreB', 'notes', 'recordedAt', 'recordedByUserId'],
     registrations: ['seasonId', 'bracketId', 'entryType', 'teamName', 'preferredSlot', 'userId', 'displayName', 'email', 'message', 'status', 'submittedAt', 'reviewedAt', 'reviewedByUserId'],
   }[table])
-  const relationships: Record<string, Reference | null> = {}
+  const relationships: Record<string, ContentReference | null> = {}
   if (table === 'seasons') relationships.show = ref('shows', rowValue(row, 'showId'))
   if (table === 'competitors') relationships.season = ref('seasons', seasonId)
   if (table === 'brackets') relationships.season = ref('seasons', seasonId)
@@ -129,13 +124,13 @@ function recordFor(table: KlusteredTable, row: Record<string, unknown>): Catalog
   if (table === 'registrations') { relationships.season = ref('seasons', seasonId); relationships.bracket = ref('brackets', bracketId) }
   const { createdAt, updatedAt, ...editable } = data
   return {
-    collection, legacyId, legacyType: legacyTypeFor[table], slug, sourceRevision: createHash('sha256').update(JSON.stringify(sourceValue(row))).digest('hex'), status: 'published',
-    data: { ...editable, sourceCreatedAt: createdAt, sourceUpdatedAt: updatedAt }, relationships, source: sourceFor(table, row, legacyId),
+    collection, legacyId, slug, sourceRevision: createHash('sha256').update(JSON.stringify(sourceValue(row))).digest('hex'), status: 'published',
+    data: { ...editable, sourceCreatedAt: createdAt, sourceUpdatedAt: updatedAt }, relationships, source: sourceFor(table, legacyId),
   }
 }
 
-export function buildKlusteredSnapshot(input: KlusteredRows, options: { sequence?: number; includeSensitive?: boolean } = {}): CatalogueSnapshot {
-  const records: CatalogueRecord[] = []
+export function buildKlusteredSnapshot(input: KlusteredRows, options: { sequence?: number; includeSensitive?: boolean } = {}): ImportSnapshot {
+  const records: ImportRecord[] = []
   for (const table of Object.keys(tableAliases) as KlusteredTable[]) {
     if (!options.includeSensitive && (table === 'team_invites' || table === 'registrations')) continue
     const rows = tableAliases[table].map(alias => input[alias as KlusteredTable]).find(value => Array.isArray(value)) ?? []

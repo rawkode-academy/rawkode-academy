@@ -4,7 +4,7 @@ import type { TargetName } from './remote-target'
 import { TargetError } from './remote-target'
 
 export type ImportTarget = Exclude<TargetName, 'preview'>
-const importTargets: readonly ImportTarget[] = ['local', 'rehearsal', 'production']
+const importTargets: readonly ImportTarget[] = ['local', 'rehearsal', 'pr-preview', 'production']
 export const PRODUCTION_CONFIRMATION = 'rawkode-academy-payload'
 
 export type ProductionConfirmation = { variable: string; flag: string; value: string }
@@ -18,7 +18,7 @@ export const KLUSTERED_PRODUCTION_CONFIRMATION: ProductionConfirmation = Object.
 
 const remoteFlagGuidance = '--remote is no longer supported: it resolved local or preview bindings, never production. Use --target=local, --target=rehearsal (with REHEARSAL_D1_ID and REHEARSAL_R2_BUCKET) or --target=production (with CONFIRM_PRODUCTION_IMPORT=rawkode-academy-payload).'
 
-/** Parse --target. Absent means local; preview is never an import target. */
+/** Parse --target. Absent means local; the shared Preview is never an import target. */
 export function parseImportTarget(argv: readonly string[]): ImportTarget {
   if (argv.some(argument => /^--remote(=|$)/.test(argument))) throw new TargetError(remoteFlagGuidance)
   const values = argv.flatMap((argument, index) => {
@@ -28,7 +28,7 @@ export function parseImportTarget(argv: readonly string[]): ImportTarget {
   })
   if (values.length > 1) throw new TargetError('Pass --target once')
   const value = values[0] ?? 'local'
-  if (value === 'preview') throw new TargetError('The preview D1 holds live review data and has no reset path; import into --target=rehearsal instead.')
+  if (value === 'preview') throw new TargetError('The shared preview D1 holds live review data and has no reset path; use --target=pr-preview for the disposable PR/SHA-bound D1/R2 pair.')
   if (!importTargets.includes(value as ImportTarget)) throw new TargetError(`Unknown --target=${value}. Expected one of ${importTargets.join(', ')}.`)
   return value as ImportTarget
 }

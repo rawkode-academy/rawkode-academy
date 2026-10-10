@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { isCuid2 } from '../cuid2'
 import { ReviewError } from './contracts'
 import { storedObject, whisperModel, type ProbeResult } from './intake-contracts'
 import { hex, verifyStored } from './intake-storage'
@@ -10,7 +11,7 @@ const audioChunk = storedObject.extend({
   durationMs: z.number().int().positive().max(audioPolicy.maximumChunkDurationMs),
   contentType: z.literal('audio/wav'), codec: z.literal('pcm_s16le'), sampleRate: z.literal(16000), channels: z.literal(1),
 }).strict()
-export const audioManifest = z.object({ jobId: z.string().uuid(), recipe: z.string(), source: storedObject,
+export const audioManifest = z.object({ jobId: z.string().refine(isCuid2), recipe: z.string(), source: storedObject,
   durationMs: z.number().int().positive().max(7200000), noAudio: z.boolean(), chunks: z.array(audioChunk).max(audioPolicy.maximumChunks),
 }).strict()
 export type AudioManifest = z.infer<typeof audioManifest>

@@ -1,18 +1,18 @@
 ---
-import { getCollection, getEntries } from "astro:content";
+import { getAllCollection, getEntries } from "@/lib/payload-content";
 import { createLogger } from "@/lib/logger";
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
 import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 import Page from "@/wrappers/page.astro";
 
-export const prerender = true;
+export const prerender = false;
 
 const logger = createLogger("adrs");
-const allAdrs = await getCollection("adrs");
+const allAdrs = await getAllCollection("adrs");
 
 allAdrs.sort((a, b) => {
-	const adrNumberA = a.id.match(/^(\d{4})-/)?.[1] || "0000";
-	const adrNumberB = b.id.match(/^(\d{4})-/)?.[1] || "0000";
+			const adrNumberA = a.slug.match(/^(\d{4})-/)?.[1] || "0000";
+			const adrNumberB = b.slug.match(/^(\d{4})-/)?.[1] || "0000";
 	return Number.parseInt(adrNumberA) - Number.parseInt(adrNumberB);
 });
 
@@ -64,7 +64,7 @@ const catalog = academyCatalog();
 					const adrNumber = getAdrNumber(adr.id);
 
 					return (
-						<a href={`/adrs/${adr.id}`} class={catalog.row}>
+						<a href={`/adrs/${adr.slug}`} class={catalog.row}>
 							<span class={catalog.rowIndex}>ADR-{adrNumber}</span>
 							<div class={catalog.rowMain}>
 								<h2 class={catalog.rowTitle}>{adr.data.title}</h2>

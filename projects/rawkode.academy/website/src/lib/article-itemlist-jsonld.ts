@@ -1,5 +1,5 @@
 export interface ArticleListEntry {
-	id: string;
+	slug: string;
 	data: {
 		title: string;
 		description: string;
@@ -40,7 +40,7 @@ export function buildArticleItemListJsonLd(
 		.slice(0, Math.max(0, limit));
 
 	const itemListElement = ordered.map((article, index) => {
-		const articleUrl = joinUrl(siteUrl, `/read/${article.id}`);
+		const articleUrl = joinUrl(siteUrl, `/read/${article.slug}`);
 		const datePublished = new Date(article.data.publishedAt).toISOString();
 		const dateModified = new Date(
 			article.data.updatedAt ?? article.data.publishedAt,

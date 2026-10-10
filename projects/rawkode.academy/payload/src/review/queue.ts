@@ -5,10 +5,10 @@ import type { ReviewStore } from './store'
 // video picker, the admin Review queue, the dashboard widget and the nav
 // badge). Nothing here writes; commands stay in ReviewService.
 
-export type ReviewStateRow = { videoId: number; state: string | null }
+export type ReviewStateRow = { videoId: string; state: string | null }
 
 export type ReviewQueueRow = {
-	videoId: number
+	videoId: string
 	videoTitle: string | null
 	videoSlug: string | null
 	revisionId: string | null
@@ -87,7 +87,7 @@ export const needsStaff = (counts: Record<ReviewQueueState, number>): number => 
 
 // Any video_review_state row makes the video managed: the review_freeze_*
 // triggers then reject every Payload write to it and its child tables.
-export async function isReviewManaged(store: ReviewStore, videoId: number): Promise<boolean> {
+export async function isReviewManaged(store: ReviewStore, videoId: string): Promise<boolean> {
 	return Boolean(await store.one<{ managed: number }>('SELECT 1 AS managed FROM video_review_state WHERE video_id=?', videoId))
 }
 
@@ -101,7 +101,7 @@ export type ReviewHistory = {
 
 // Read-only history for one video's Review tab. Grant rows are counted, never
 // returned, so no reviewer identities or grant state reach form state.
-export async function reviewHistory(store: ReviewStore, videoId: number): Promise<ReviewHistory | null> {
+export async function reviewHistory(store: ReviewStore, videoId: string): Promise<ReviewHistory | null> {
 	const state = await store.one<{ current_revision: string | null }>('SELECT current_revision FROM video_review_state WHERE video_id=?', videoId)
 	if (!state) return null
 	const [revisions, comments, decisions, reviewers] = await Promise.all([

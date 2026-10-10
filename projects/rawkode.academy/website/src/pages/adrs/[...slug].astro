@@ -2,39 +2,22 @@
 import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
 const styles = academyLayout({ width: "reading" });
-import { getCollection, getEntries, render } from "astro:content";
-import type { CollectionEntry } from "astro:content";
-import type { GetStaticPaths, GetStaticPathsResult } from "astro";
+import { getEntry, getEntries } from "@/lib/payload-content";
+import type { CollectionEntry } from "@/lib/payload-content";
 import AdrJsonLd from "@/components/html/adr-jsonld.astro";
 import { createLogger } from "@/lib/logger";
 import ArticleHeader from "@/components/read/ArticleHeader.astro";
 import ArticleByline from "@/components/read/ArticleByline.astro";
 import Page from "@/wrappers/page.astro";
+import CmsBody from "@/components/content/CmsBody.astro";
 
-export const prerender = true;
+export const prerender = false;
 
 const logger = createLogger("adrs");
 
-type Props = {
-	adr: CollectionEntry<"adrs">;
-};
-
-export const getStaticPaths: GetStaticPaths =
-	async (): Promise<GetStaticPathsResult> => {
-		const adrs = await getCollection("adrs");
-
-		return adrs.map((adr) => ({
-			params: {
-				slug: adr.id,
-			},
-			props: {
-				adr,
-			},
-		}));
-	};
-
-const { adr } = Astro.props;
-const { Content } = await render(adr);
+const slug = Astro.params.slug;
+const adr = slug ? await getEntry("adrs", { slug }) : undefined;
+if (!adr) return new Response(null, { status: 404 });
 
 let authors: CollectionEntry<"people">[] = [];
 try {
@@ -73,7 +56,7 @@ const validAuthors = authors.filter((author) => author && author.data);
 
 		<section class={doc.reading}>
 			<article class={[styles.prose, doc.adrProse].join(" ")}>
-				<Content />
+				<CmsBody entry={adr} />
 			</article>
 		</section>
 </Page>

@@ -1,4 +1,5 @@
-import { relations, sourceHash, type CatalogueRecord, type CatalogueSnapshot, type SourceAsset } from '../../src/importer'
+import { relations, sourceHash } from '../../src/importer'
+import type { ImportRecord, ImportSnapshot, SourceAsset } from '../../src/import-types'
 
 /** Relationship edges as ordered `collection:legacyId` keys, per field. */
 export type Edges = Record<string, string[]>
@@ -78,7 +79,7 @@ function refKey(collection: string, legacyId: string): string {
   return `${collection}:${legacyId}`
 }
 
-function edgesFor(record: CatalogueRecord): Edges {
+function edgesFor(record: ImportRecord): Edges {
   const edges: Edges = {}
   if (record.tombstone) return edges
   for (const [field, value] of Object.entries(record.relationships ?? {})) {
@@ -88,7 +89,7 @@ function edgesFor(record: CatalogueRecord): Edges {
 }
 
 /** The state a complete import of this snapshot must leave in the target. */
-export async function expectedFromSnapshot(snapshot: CatalogueSnapshot & { assetFiles?: ExpectedAsset[] }): Promise<{ records: ExpectedRecord[]; assets: ExpectedAsset[] }> {
+export async function expectedFromSnapshot(snapshot: ImportSnapshot & { assetFiles?: ExpectedAsset[] }): Promise<{ records: ExpectedRecord[]; assets: ExpectedAsset[] }> {
   const records: ExpectedRecord[] = []
   for (const record of snapshot.records) {
     records.push({
