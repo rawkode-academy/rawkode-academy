@@ -409,7 +409,6 @@ function customComponentPattern(): RegExp {
 function componentBlock(
 	name: string,
 	attributesSource: string,
-	inner: string | undefined,
 	assets: PayloadMediaAsset[],
 	imports: Map<string, string>,
 ): SafeBodyBlock | undefined {
@@ -495,7 +494,6 @@ export async function parseSafeCmsBody(
 			const component = componentBlock(
 				name,
 				attributes,
-				inner,
 				assets,
 				assetImports,
 			);

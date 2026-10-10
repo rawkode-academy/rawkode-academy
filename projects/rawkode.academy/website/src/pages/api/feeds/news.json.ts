@@ -13,6 +13,8 @@ export const GET: APIRoute = async ({ site }) => {
 	const news = await getAllCollection("news", ({ data }) =>
 		isNewsPublished(data.publishedAt, now),
 	);
+	const technologies = await getAllCollection("technologies");
+	const technologyNames = new Map(technologies.map((technology) => [technology.id, technology.data.name] as const));
 
 	const items: JsonFeedItem[] = [];
 	for (const story of news) {
@@ -28,7 +30,9 @@ export const GET: APIRoute = async ({ site }) => {
 				name: author.data.name,
 				url: u(`/people/${author.slug}`),
 			})),
-			tags: [...(story.data.technologies ?? [])],
+			tags: story.data.technologies.map(
+				(technology) => technologyNames.get(technology.id) ?? technology.slug ?? technology.id,
+			),
 		});
 	}
 

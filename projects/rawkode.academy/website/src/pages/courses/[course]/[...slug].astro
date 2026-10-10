@@ -93,8 +93,8 @@ const nextModule =
 		? allCourseModules[currentIndex + 1]
 		: null;
 
-function moduleHref(entry: CollectionEntry<"courseModules">) {
-	return `/courses/${course.slug}/${getCourseModuleSlug(course.slug, entry.slug)}`;
+function moduleHref(courseSlug: string, entry: CollectionEntry<"courseModules">) {
+	return `/courses/${courseSlug}/${getCourseModuleSlug(courseSlug, entry.slug)}`;
 }
 
 function formatDuration(minutes?: number) {
@@ -189,7 +189,7 @@ function formatDuration(minutes?: number) {
 						<div class={doc.gridTwo}>
 							{previousModule && (
 								<a
-									href={moduleHref(previousModule)}
+									href={moduleHref(course.slug, previousModule)}
 									class={doc.link}
 								>
 									<p class={doc.kicker}>Previous</p>
@@ -204,7 +204,7 @@ function formatDuration(minutes?: number) {
 
 							{nextModule && (
 								<a
-									href={moduleHref(nextModule)}
+									href={moduleHref(course.slug, nextModule)}
 									class={doc.link}
 								>
 									<p class={doc.kicker}>Next</p>

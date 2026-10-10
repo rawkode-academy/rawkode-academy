@@ -3,7 +3,7 @@ import { academyCourse, academyLayout } from "@rawkodeacademy/design-system";
 const s = academyCourse();
 const styles = academyLayout({ width: "reading" });
 import { getEntry, getEntries, getAllCollection } from "@/lib/payload-content";
-import type { CollectionEntry } from "@/lib/payload-content";
+import type { ContentResource } from "@/lib/payload-content";
 import CmsBody from "@/components/content/CmsBody.astro";
 import CourseModules from "@/components/courses/CourseModules.astro";
 import CourseSignupFormCompact from "@/components/courses/CourseSignupFormCompact.astro";
@@ -77,7 +77,7 @@ const formattedAuthors = authors.map((author) => ({
 }));
 
 function getResourceHref(
-	resource: NonNullable<typeof course.data.resources>[number],
+	resource: ContentResource,
 ) {
 	if (resource.type === "url") return resource.url;
 	if (resource.type === "file" && resource.filePath)

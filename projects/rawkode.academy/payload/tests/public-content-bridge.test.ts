@@ -122,8 +122,8 @@ test('published video overlay is applied after base visibility and remains expli
   assert.equal(publicationRead.user, null)
 })
 
-test('full course and course-module projections include authored contentResources', async () => {
-  for (const [collection, slug] of [['courses', 'course'], ['course-modules', 'module']] as const) {
+test('full content projections include authored contentResources', async () => {
+  for (const [collection, slug] of [['videos', 'video'], ['articles', 'article'], ['courses', 'course'], ['course-modules', 'module']] as const) {
     const contentResources = [{ title: 'Reference', url: 'https://example.invalid/reference' }]
     const queries: Record<string, unknown>[] = []
     const payload = { async find(args: Record<string, unknown>) {
@@ -136,6 +136,28 @@ test('full course and course-module projections include authored contentResource
     assert.deepEqual(body.doc.contentResources, contentResources)
     assert.equal((queries.find(query => query.collection === collection)?.select as Record<string, unknown>).contentResources, true)
   }
+})
+
+test('full video projections restore ordered chapter objects from Payload relations', async () => {
+  const payload = { async find(args: Record<string, unknown>) {
+    if (args.collection === 'videos') return { docs: [{
+      id: videoID, slug: 'chapter-video', chapters: ['chapter-b', 'chapter-a', 'chapter-draft'],
+      _status: 'published', tombstone: false,
+    }], hasNextPage: false }
+    if (args.collection === 'video-publications') return { docs: [], hasNextPage: false }
+    if (args.collection === 'chapters') return { docs: [
+      { id: 'chapter-a', title: 'Second', startTime: 60, _status: 'published', tombstone: false },
+      { id: 'chapter-b', title: 'First', startTime: 0, _status: 'published', tombstone: false },
+      { id: 'chapter-draft', title: 'Draft', startTime: 120, _status: 'draft', tombstone: false },
+    ], hasNextPage: false }
+    return { docs: [], hasNextPage: false }
+  } }
+  const response = await collectionResponse(new Request('https://payload.internal/v1/collections/videos?slug=chapter-video'), payload as never, now)
+  const body = await response.json() as { doc: { chapters: unknown[] } }
+  assert.deepEqual(body.doc.chapters, [
+    { title: 'First', startTime: 0 },
+    { title: 'Second', startTime: 60 },
+  ])
 })
 
 test('asset bridge streams published objects without returning the R2 key', async () => {

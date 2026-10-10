@@ -1,4 +1,5 @@
 import { AsyncLocalStorage } from "node:async_hooks";
+import type { TechnologyData } from "@rawkodeacademy/content";
 
 /** The public record shapes returned by Payload's PublicContentBridge. */
 export type PayloadCollectionName =
@@ -63,13 +64,274 @@ export interface PayloadDocument {
 	[key: string]: unknown;
 }
 
+/** Relationships are normalized to explicit Payload document IDs at the
+ * bridge boundary. A populated slug is optional and remains the URL identity. */
+export interface PayloadReference {
+	id: string;
+	slug?: string;
+}
+
+/** Extract a relation key while preserving whether it was supplied as a slug. */
+export function payloadReferenceId(reference: PayloadReference): string {
+	return reference.id;
+}
+
+export interface CmsImage {
+	src: string;
+	alt: string;
+	width?: number;
+	height?: number;
+}
+
+export interface CmsCover {
+	image: CmsImage;
+	alt: string;
+}
+
+export interface ContentResource {
+	id?: string;
+	title: string;
+	description?: string;
+	type: "url" | "file" | "embed";
+	url?: string;
+	filePath?: string;
+	embedConfig?: {
+		container: "webcontainer" | "iframe";
+		src: string;
+		height?: string;
+		width?: string;
+		files?: Record<string, string>;
+		import?: { localDir: string };
+		startCommand?: string;
+	};
+	category?: "slides" | "code" | "documentation" | "demos" | "other";
+}
+
+export interface PayloadVideoData {
+	id: string;
+	slug: string;
+	title: string;
+	tagline?: string;
+	subtitle?: string;
+	description: string;
+	whatYouWillLearn: string[];
+	terms?: string[];
+	publishedAt: Date;
+	duration: number;
+	audioFileSize?: number;
+	type?: "live" | "recorded";
+	realtimeKit?: {
+		streamId?: string;
+		meetingId?: string;
+		livestreamName?: string;
+		roomName?: string;
+	};
+	youtubeId?: string;
+	category?: "editorial" | "tutorial" | "review" | "interview" | "announcement";
+	technologies: PayloadReference[];
+	show?: PayloadReference;
+	chapters: Array<{ startTime: number; title: string }>;
+	guests: PayloadReference[];
+	resources?: ContentResource[];
+}
+
+export interface PayloadShowData {
+	id?: string;
+	name: string;
+	status: "coming-soon" | "active" | "archived";
+	tagline?: string;
+	gameFormatUrl?: string;
+	description?: string;
+	terms?: string[];
+	hosts: PayloadReference[];
+	publish: boolean;
+	cover?: CmsCover;
+	podcast?: {
+		guid?: string;
+		email: string;
+		category: string;
+		subcategory?: string;
+		explicit: boolean;
+		copyright?: string;
+		artworkUrl?: string;
+	};
+	subscribeLinks: Array<{
+		platform: string;
+		url: string;
+		icon:
+			| "apple-podcasts"
+			| "spotify"
+			| "youtube"
+			| "pocket-casts"
+			| "amazon-music"
+			| "overcast"
+			| "rss"
+			| "other";
+	}>;
+}
+
+export interface PayloadPersonData {
+	id: string;
+	slug: string;
+	name: string;
+	terms?: string[];
+	github?: string;
+	twitter?: string;
+	bluesky?: string;
+	mastodon?: string;
+	linkedin?: string;
+	website?: string;
+	youtube?: string;
+	forename?: string;
+	surname?: string;
+	links: Array<{ url: string; name: string }>;
+	avatarUrl?: string;
+	handles: {
+		github?: string;
+		twitter?: string;
+		bluesky?: string;
+		linkedin?: string;
+	};
+}
+
+export interface PayloadArticleData {
+	title: string;
+	publishedAt: Date;
+	updatedAt?: Date;
+	subtitle?: string;
+	description: string;
+	authors: PayloadReference[];
+	categories: string[];
+	cover?: CmsCover;
+	type: "tutorial" | "article" | "guide" | "news";
+	howto: boolean;
+	series?: PayloadReference;
+	technologies: PayloadReference[];
+	openGraph?: { title: string; subtitle?: string };
+	updates?: Array<{ date: Date; description: string }>;
+	resources?: ContentResource[];
+	contentResources?: ContentResource[];
+}
+
+export interface PayloadNewsData {
+	title: string;
+	description: string;
+	publishedAt: Date;
+	authors: PayloadReference[];
+	technologies: PayloadReference[];
+	cover?: CmsCover;
+}
+
+export interface PayloadCourseData {
+	title: string;
+	description: string;
+	cover?: CmsCover;
+	publishedAt: Date;
+	updatedAt?: Date;
+	authors: PayloadReference[];
+	difficulty: "beginner" | "intermediate" | "advanced";
+	learningPath: string[];
+	technologies: PayloadReference[];
+	resources?: ContentResource[];
+	contentResources?: ContentResource[];
+	signupConfig?: {
+		audienceId: string;
+		sponsor?: string;
+		sponsorAudienceId?: string;
+		allowSponsorContact: boolean;
+	};
+}
+
+export interface PayloadCourseModuleData {
+	title: string;
+	description: string;
+	course: PayloadReference;
+	section?: string;
+	order: number;
+	video?: {
+		id: string;
+		thumbnailUrl?: string;
+		youtube?: string;
+		rawkode?: string;
+		poster?: string;
+	};
+	duration?: number;
+	cover?: CmsCover;
+	publishedAt: Date;
+	updatedAt?: Date;
+	draft: boolean;
+	difficulty?: "beginner" | "intermediate" | "advanced";
+	authors: PayloadReference[];
+	resources?: ContentResource[];
+	contentResources?: ContentResource[];
+}
+
+export interface PayloadLearningPathData {
+	title: string;
+	description: string;
+	difficulty: "beginner" | "intermediate" | "advanced";
+	estimatedDuration: number;
+	prerequisites: string[];
+	technologies: PayloadReference[];
+	publishedAt: Date;
+	authors: PayloadReference[];
+}
+
+export interface PayloadAdrData {
+	title: string;
+	adoptedAt: Date;
+	authors: PayloadReference[];
+	cover?: CmsCover;
+}
+
+export interface PayloadChangelogData {
+	title: string;
+	date: Date;
+	type: "feature" | "fix" | "improvement" | "breaking";
+	description: string;
+	pullRequest?: number;
+	author: PayloadReference;
+}
+
+export interface PayloadTestimonialData {
+	quote: string;
+	author: { name: string; title: string; image: string; link?: string };
+	type: "maintainer" | "partner" | "viewer";
+}
+
+export type PayloadTechnologyData = TechnologyData & {
+	description?: string;
+	icon?: string;
+	logo?: string;
+	cover?: CmsCover;
+};
+
+/** Mirrors the former Astro collection data schemas without restoring their
+ * build-time content loader. Keeping this map lets each SSR collection retain
+ * its authored field and relationship contract. */
+export interface PayloadEntryDataByCollection {
+	videos: PayloadVideoData;
+	articles: PayloadArticleData & { id: string; slug: string };
+	news: PayloadNewsData & { id: string; slug: string };
+	courses: PayloadCourseData & { id: string; slug: string };
+	courseModules: PayloadCourseModuleData & { id: string; slug: string };
+	learningPaths: PayloadLearningPathData & { id: string; slug: string };
+	people: PayloadPersonData;
+	shows: PayloadShowData & { id: string; slug: string };
+	technologies: PayloadTechnologyData & { id: string; slug: string };
+	series: { id: string; slug: string; title: string; cover?: CmsCover };
+	adrs: PayloadAdrData & { id: string; slug: string };
+	changelog: PayloadChangelogData & { id: string; slug: string };
+	testimonials: PayloadTestimonialData & { id: string; slug: string };
+}
+
 /** Astro-shaped entry used by the existing presentation helpers. */
 export interface PayloadEntry<C extends WebsiteCollectionName = WebsiteCollectionName> {
 	id: string;
 	slug: string;
 	collection: C;
-	body?: string;
-	data: Record<string, any>;
+	body: string | undefined;
+	data: PayloadEntryDataByCollection[C];
 	mediaAssets: PayloadMediaAsset[];
 }
 
@@ -111,8 +373,20 @@ export interface WebsiteRuntimeEnv {
 }
 
 export interface PayloadRequestState {
-	env?: WebsiteRuntimeEnv;
+	env?: WebsiteRuntimeEnv | undefined;
 	nextReleaseAt?: number;
+}
+
+interface CloudflareCacheStorage extends CacheStorage {
+	default: Cache;
+}
+
+/** Cloudflare exposes `caches.default`; the standard DOM CacheStorage type
+ * does not include that Worker-specific property. */
+export function getDefaultWorkerCache(): Cache | undefined {
+	return typeof caches === "undefined"
+		? undefined
+		: (caches as CloudflareCacheStorage).default;
 }
 
 const payloadRequestStorage = new AsyncLocalStorage<PayloadRequestState>();
@@ -192,7 +466,7 @@ async function getBridgeJson<T>(path: string): Promise<T> {
 
 	const bridgeUrl = new URL(path, "https://payload-content.internal");
 	const cacheKey = contentCacheKey(bridgeUrl, state?.env);
-	const edgeCache = typeof caches !== "undefined" ? caches.default : undefined;
+	const edgeCache = getDefaultWorkerCache();
 	if (edgeCache) {
 		const cached = await edgeCache.match(cacheKey);
 		if (cached) {
@@ -301,7 +575,6 @@ const RELATION_FIELDS = new Set([
 	"video",
 	"videos",
 	"resources",
-	"learningPath",
 	"learningResources",
 ]);
 
@@ -312,26 +585,75 @@ function normalizeRelationshipValues(value: unknown, field: string): unknown {
 	return Array.isArray(value) ? value.map(normalize) : normalize(value);
 }
 
+function socialUrl(value: unknown, base: string): string | undefined {
+	if (typeof value !== "string" || !value.trim()) return undefined;
+	const normalized = value.trim();
+	if (/^https?:\/\//i.test(normalized)) return normalized;
+	return `${base}/${normalized.replace(/^@/, "")}`;
+}
+
+function normalizePersonData(data: Record<string, unknown>): void {
+	const githubHandle =
+		(typeof data.githubHandle === "string" && data.githubHandle) ||
+		(typeof data.github === "string" && !/^https?:\/\//i.test(data.github)
+			? data.github
+			: undefined);
+	const twitterHandle =
+		(typeof data.twitter === "string" && !/^https?:\/\//i.test(data.twitter)
+			? data.twitter
+			: undefined) ??
+		(typeof data.twitterHandle === "string" ? data.twitterHandle : undefined);
+	const blueskyHandle =
+		(typeof data.bluesky === "string" && !/^https?:\/\//i.test(data.bluesky)
+			? data.bluesky
+			: undefined) ??
+		(typeof data.blueskyHandle === "string" ? data.blueskyHandle : undefined);
+	const linkedinHandle =
+		(typeof data.linkedin === "string" && !/^https?:\/\//i.test(data.linkedin)
+			? data.linkedin
+			: undefined) ??
+		(typeof data.linkedinHandle === "string" ? data.linkedinHandle : undefined);
+	data.handles = {
+		...(githubHandle ? { github: githubHandle } : {}),
+		...(twitterHandle ? { twitter: twitterHandle } : {}),
+		...(blueskyHandle ? { bluesky: blueskyHandle } : {}),
+		...(linkedinHandle ? { linkedin: linkedinHandle } : {}),
+	};
+	data.github = socialUrl(data.githubUrl ?? data.github ?? githubHandle, "https://github.com");
+	data.twitter = socialUrl(data.twitter, "https://x.com");
+	data.bluesky = socialUrl(data.bluesky, "https://bsky.app/profile");
+	data.linkedin = socialUrl(data.linkedin, "https://www.linkedin.com/in");
+	if (
+		typeof data.avatarUrl !== "string" &&
+		typeof githubHandle === "string" &&
+		githubHandle.length > 0
+	) {
+		data.avatarUrl = `https://avatars.githubusercontent.com/${githubHandle}`;
+	}
+}
+
 function toEntry<C extends WebsiteCollectionName>(
 	collection: C,
 	doc: PayloadDocument,
 ): PayloadEntry<C> {
 	const mediaAssets = Array.isArray(doc.mediaAssets) ? doc.mediaAssets : [];
-	const data = normalizeDateFields(
+	const normalizedData = normalizeDateFields(
 		normalizeMediaValue(doc, mediaAssets),
-	) as Record<string, any>;
-	for (const [key, value] of Object.entries(data)) {
-		data[key] = normalizeRelationshipValues(value, key);
+	) as Record<string, unknown>;
+	for (const [key, value] of Object.entries(normalizedData)) {
+		normalizedData[key] = normalizeRelationshipValues(value, key);
 	}
+	if (collection === "people") normalizePersonData(normalizedData);
 	if (
-		(collection === "courses" || collection === "courseModules") &&
-		Array.isArray(data.contentResources)
+		["videos", "articles", "courses", "courseModules"].includes(collection) &&
+		Array.isArray(normalizedData.contentResources)
 	) {
-		// Static imports preserve the author-authored links, embeds, and
-		// WebContainer configurations in contentResources. Keep the
-		// presentation contract used by course pages and ResourceList.
-		data.resources = data.contentResources;
+		// Static imports preserve authored links, embeds, and WebContainer
+		// configurations in contentResources. Restore the former website field
+		// consumed by video, article, and course resource components.
+		normalizedData.resources = normalizedData.contentResources;
 	}
+	const data = normalizedData as PayloadEntryDataByCollection[C];
 	return {
 		id: doc.id,
 		slug: doc.slug,
@@ -471,10 +793,13 @@ export async function getEntry<C extends WebsiteCollectionName>(
 }
 
 export async function getEntries(
-	references: Array<string | { id?: string; slug?: string }>,
-): Promise<Array<PayloadEntry<"people"> | undefined>> {
-	return Promise.all(
+	references: readonly PayloadReference[],
+): Promise<PayloadEntry<"people">[]> {
+	const resolved = await Promise.all(
 		references.map((reference) => getEntry("people", reference)),
+	);
+	return resolved.filter(
+		(entry): entry is PayloadEntry<"people"> => entry !== undefined,
 	);
 }
 
@@ -493,7 +818,7 @@ export function resolveMediaAsset(
 	const params = new URLSearchParams({ v: asset.checksum, w: String(width) });
 	return {
 		url: `/cms-assets/${encodeURIComponent(asset.assetId)}?${params}`,
-		alt: asset.alt,
+		...(asset.alt !== undefined ? { alt: asset.alt } : {}),
 		asset,
 	};
 }

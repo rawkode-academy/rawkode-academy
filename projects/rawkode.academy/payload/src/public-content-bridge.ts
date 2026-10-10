@@ -13,7 +13,7 @@ type PublicPayload = Pick<Payload, 'find'>
 const collectionSet = new Set<string>(publicContentCollections)
 const dateCollections = new Set<PublicContentCollection>(['videos', 'articles', 'news', 'courses', 'course-modules', 'learning-paths'])
 const collectionFields: Record<PublicContentCollection, { summary: string[]; full: string[]; searchable: string[] }> = {
-  videos: { summary: ['slug','title','tagline','subtitle','description','publishedAt','duration','type','category','thumbnailUrl','show','technologies','guests','episode','terms','cover'], full: ['whatYouWillLearn','streamUrl','youtubeId','podcast','subscribeLinks','chapters','audioFileSize','body'], searchable: ['title','description','subtitle'] },
+  videos: { summary: ['slug','title','tagline','subtitle','description','publishedAt','duration','type','category','thumbnailUrl','show','technologies','guests','episode','terms','cover'], full: ['whatYouWillLearn','streamUrl','youtubeId','podcast','subscribeLinks','chapters','audioFileSize','body','contentResources'], searchable: ['title','description','subtitle'] },
   articles: { summary: ['slug','title','description','subtitle','publishedAt','updatedAt','type','howto','authors','technologies','series','cover'], full: ['resources','body','contentResources'], searchable: ['title','description','subtitle'] },
   news: { summary: ['slug','title','description','publishedAt','authors','technologies','cover'], full: ['body'], searchable: ['title','description'] },
   shows: { summary: ['slug','name','status','tagline','description','hosts','cover'], full: ['episodes','podcast','subscribeLinks','gameFormatUrl','terms','body'], searchable: ['name','description','tagline'] },
@@ -190,6 +190,49 @@ function projectFields(doc: Doc, collection: PublicContentCollection, view: 'sum
   return output
 }
 
+function chapterReferenceId(value: unknown): string | null {
+  if (typeof value === 'string' || typeof value === 'number') return String(value)
+  if (!value || typeof value !== 'object') return null
+  const record = value as Record<string, unknown>
+  if (typeof record.id === 'string' || typeof record.id === 'number') return String(record.id)
+  if (typeof record.value === 'string' || typeof record.value === 'number') return String(record.value)
+  return null
+}
+
+function isChapterData(value: unknown): value is { title: string; startTime: number } {
+  if (!value || typeof value !== 'object') return false
+  const record = value as Record<string, unknown>
+  return typeof record.title === 'string' && typeof record.startTime === 'number'
+}
+
+/** Restore the former inline video chapter shape from Payload's normalized relation IDs. */
+async function hydrateVideoChapters(payload: PublicPayload, docs: Record<string, unknown>[]): Promise<void> {
+  const references = docs.flatMap(doc => Array.isArray(doc.chapters) ? doc.chapters.filter(value => !isChapterData(value)).map(chapterReferenceId).filter((id): id is string => id !== null) : [])
+  const ids = [...new Set(references)].slice(0, 8000)
+  const chapters = new Map<string, { title: string; startTime: number }>()
+  for (let index = 0; index < ids.length; index += 100) {
+    const batch = ids.slice(index, index + 100)
+    const result = await payload.find({
+      collection: 'chapters', where: { id: { in: batch } }, depth: 0, draft: false,
+      overrideAccess: true, user: null, page: 1, limit: batch.length,
+      select: { id: true, title: true, startTime: true, _status: true, tombstone: true },
+    } as never)
+    for (const chapter of result.docs as unknown as Doc[]) {
+      if (!isVisibleDocument('chapters', chapter) || typeof chapter.title !== 'string' || typeof chapter.startTime !== 'number') continue
+      chapters.set(String(chapter.id), { title: chapter.title, startTime: chapter.startTime })
+    }
+  }
+  for (const doc of docs) {
+    if (!Array.isArray(doc.chapters)) continue
+    doc.chapters = doc.chapters.flatMap(value => {
+      if (isChapterData(value)) return [value]
+      const id = chapterReferenceId(value)
+      const chapter = id ? chapters.get(id) : undefined
+      return chapter ? [chapter] : []
+    })
+  }
+}
+
 function assetReferencePaths(doc: Doc, collection: PublicContentCollection, view: 'summary' | 'full'): string[] {
   if (typeof doc.sourcePath !== 'string' || !Array.isArray(doc.sourceAssets)) return []
   const ownerDirectory = dirname(doc.sourcePath)
@@ -298,6 +341,7 @@ export async function collectionResponse(request: Request, payload: PublicPayloa
     })
     return { ...merged, mediaAssets: assets }
   })
+  if (parsed.collection === 'videos' && parsed.view === 'full') await hydrateVideoChapters(payload, docs)
   const nextReleaseAt = exact
     ? (visible[0] && visible[0].publishedAt && Date.parse(String(visible[0].publishedAt)) > now ? new Date(Date.parse(String(visible[0].publishedAt))).toISOString() : null)
     : await earliestNextRelease(payload, parsed, now)

@@ -31,6 +31,7 @@ export function renderGoogleNewsSitemap(
 	site: URL | string | undefined,
 	items: ReadonlyArray<{
 		id: string;
+		slug: string;
 		data: { title: string; publishedAt: Date };
 	}>,
 ): string {

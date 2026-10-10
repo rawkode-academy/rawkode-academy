@@ -208,16 +208,31 @@ function pageHasTopicContent(collections, technologyId = "kubernetes/index") {
 	});
 }
 
-test("technology guard counts Payload-filtered rows and TopicHub queries by Payload technology ID", async () => {
-	const relatedArticle = entry("object-reference-only", {
-		technologies: [{ id: topicTechnologyId }],
-	});
-	assert.equal(pageHasTopicContent({ articles: [relatedArticle] }), true);
+test("technology guard recognizes already-related rows and TopicHub queries by Payload technology ID", async () => {
+	for (const technologyId of ["kubernetes", "kubernetes/index"]) {
+		for (const reference of [
+			"kubernetes",
+			"kubernetes/index",
+			{ id: "kubernetes" },
+			{ id: "kubernetes/index", collection: "technologies" },
+		]) {
+			const collections = {
+				articles: [
+					entry("object-reference-only", { technologies: [reference] }),
+				],
+			};
+			assert.equal(pageHasTopicContent(collections, technologyId), true);
+		}
+	}
 	const { dom } = await render(
 		"technology/TopicHub.astro",
 		topic,
 		{
-			articles: [relatedArticle],
+			articles: [
+				entry("object-reference-only", {
+					technologies: [{ id: topicTechnologyId }],
+				}),
+			],
 		},
 	);
 	assert.equal(
@@ -226,54 +241,39 @@ test("technology guard counts Payload-filtered rows and TopicHub queries by Payl
 	);
 });
 
-test("technology guard trusts Payload relation filtering, excludes empty windows and ignores legacy draft flags", async () => {
+test("technology page ignores legacy article draft flags and retains news/path matches", () => {
 	for (const collection of ["articles", "news", "learningPaths"]) {
-		const related = entry("match", {
-			technologies: [{ id: topicTechnologyId }],
-		});
-		const relatedFixture = createPayloadContentFixtures({ [collection]: [related] });
-		const relatedRows = await relatedFixture.listPayloadContent(collection, {
-			technologyId: topicTechnologyId,
-		});
-		assert.equal(relatedRows.length, 1);
-		assert.equal(pageHasTopicContent({ [collection]: relatedRows }), true);
-
+		for (const reference of ["kubernetes", { id: "kubernetes/index" }]) {
+			assert.equal(
+				pageHasTopicContent({
+					[collection]: [entry("match", { technologies: [reference] })],
+				}),
+				true,
+			);
+		}
 		for (const technologies of [
 			undefined,
 			[],
-			["technology-other-payload-cuid"],
-			[{ id: "technology-other-payload-cuid" }],
+			["kubernetes-other"],
+			[{ id: "docker/index" }],
 		]) {
-			const unrelated = entry("unmatched", { technologies });
-			const unrelatedFixture = createPayloadContentFixtures({
-				[collection]: [unrelated],
-			});
-			const filteredRows = await unrelatedFixture.listPayloadContent(collection, {
-				technologyId: topicTechnologyId,
-			});
 			assert.equal(
-				filteredRows.length,
-				0,
-			);
-			assert.equal(
-				pageHasTopicContent({ [collection]: filteredRows }),
+				pageHasTopicContent({
+					[collection]: [entry("unmatched", { technologies })],
+				}),
 				false,
 			);
 		}
 	}
-	const legacyFlaggedFixture = createPayloadContentFixtures({
-		articles: [
-			entry("legacy-flagged", {
-				draft: true,
-				technologies: [{ id: topicTechnologyId }],
-			}),
-		],
-	});
-	const legacyFlaggedRows = await legacyFlaggedFixture.listPayloadContent("articles", {
-		technologyId: topicTechnologyId,
-	});
 	assert.equal(
-		pageHasTopicContent({ articles: legacyFlaggedRows }),
+		pageHasTopicContent({
+			articles: [
+				entry("legacy-flagged", {
+					draft: true,
+					technologies: [{ id: "kubernetes/index" }],
+				}),
+			],
+		}),
 		true,
 	);
 	assert.equal(pageHasTopicContent({}), false);

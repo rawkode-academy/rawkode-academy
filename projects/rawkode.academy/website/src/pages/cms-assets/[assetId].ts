@@ -51,7 +51,7 @@ function assetCacheKey(url: URL, env: WebsiteEnvironment): Request {
 		: "production";
 	const safeNamespace = namespace.toLowerCase().replace(/[^a-z0-9-]/g, "-");
 	return new Request(
-		"https://cms-asset-cache.rawkode.academy/" +
+		"https://cms-asset-cache-v2.rawkode.academy/" +
 			safeNamespace +
 			url.pathname +
 			url.search,
@@ -155,15 +155,14 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
 			new Response(transformed.image(), { headers }),
 		);
 	} catch {
-		// If Cloudflare Images cannot transform the source, the immutable URL
-		// still identifies the source bytes and requested delivery variant.
+		// Keep the original image usable during a transform outage, but do not
+		// cache it under a URL whose requested variant is WebP.
 		if (!fallbackSource.body) return errorResponse(502);
 		headers.set("ETag", '"' + checksum.toLowerCase() + '-original"');
 		headers.set("Content-Type", sourceType);
-		return cacheImmutableImage(
-			cache,
-			cacheKey,
-			new Response(fallbackSource.body, { headers }),
-		);
+		headers.set("Cache-Control", "no-store");
+		headers.set("CDN-Cache-Control", "no-store");
+		headers.set("X-Image-Transform", "fallback");
+		return new Response(fallbackSource.body, { headers });
 	}
 };

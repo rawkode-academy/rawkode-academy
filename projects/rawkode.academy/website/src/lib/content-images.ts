@@ -31,9 +31,17 @@ export async function getContentImage(
 			width,
 			format: "webp",
 		});
+		const transformedWidth =
+			typeof transformed.attributes.width === "number"
+				? transformed.attributes.width
+				: width;
+		const transformedHeight =
+			typeof transformed.attributes.height === "number"
+				? transformed.attributes.height
+				: Math.round((transformedWidth * 9) / 16);
 		return {
 			src: transformed.src,
-			attributes: transformed.attributes,
+			attributes: { width: transformedWidth, height: transformedHeight },
 		};
 	} catch {
 		const source =

@@ -69,11 +69,10 @@ ${sortedVideos
 
 		// Create tags from technologies
 		const tags = (video.data.technologies || [])
-			.map((id) => {
-				if (typeof id !== "string") return undefined;
-				return techName.get(id) ?? id.replace(/\/index$/, "");
+			.map((technology) => {
+				return techName.get(technology.id) ?? technology.slug ?? technology.id;
 			})
-			.filter((tag): tag is string => typeof tag === "string" && tag.length > 0)
+			.filter((tag) => tag.length > 0)
 			.slice(0, 32);
 
 		const tagsXml = tags.length

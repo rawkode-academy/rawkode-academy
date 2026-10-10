@@ -17,6 +17,48 @@ interface RuntimeLocals {
 
 export const prerender = false;
 
+interface ScheduledVideoEvidence {
+	id: string;
+	slug: string;
+	title: string;
+	publishedAt: string;
+}
+
+interface D2SaveEvidence {
+	articleSlug: string;
+	articleId: string;
+	articleStatus: "draft";
+	sourceHash: string;
+	svgChecksum: string;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === "object" && value !== null;
+}
+
+function isScheduledVideoEvidence(value: unknown): value is ScheduledVideoEvidence {
+	return (
+		isRecord(value) &&
+		typeof value.id === "string" &&
+		typeof value.slug === "string" &&
+		typeof value.title === "string" &&
+		typeof value.publishedAt === "string"
+	);
+}
+
+function isD2SaveEvidence(value: unknown): value is D2SaveEvidence {
+	return (
+		isRecord(value) &&
+		typeof value.articleSlug === "string" &&
+		typeof value.articleId === "string" &&
+		value.articleStatus === "draft" &&
+		typeof value.sourceHash === "string" &&
+		/^[a-f0-9]{64}$/.test(value.sourceHash) &&
+		typeof value.svgChecksum === "string" &&
+		/^[a-f0-9]{64}$/.test(value.svgChecksum)
+	);
+}
+
 export const POST: APIRoute = async ({ locals }) => {
 	const env = (locals as typeof locals & RuntimeLocals).runtime?.env;
 	if (!env?.PAYLOAD_PREVIEW_PR) {
@@ -43,23 +85,19 @@ export const POST: APIRoute = async ({ locals }) => {
 		if (!readinessResponse.ok) {
 			throw new Error("The isolated Payload preview readiness check failed.");
 		}
-		const readiness = await readinessResponse.json();
-		const scheduledVideo = readiness?.scheduledVideo;
-		const d2SaveCapability = readiness?.d2SaveCapability;
-		const d2Save = readiness?.d2Save;
+		const readinessValue: unknown = await readinessResponse.json();
+		if (!isRecord(readinessValue)) {
+			throw new Error("The isolated Payload preview returned invalid readiness evidence.");
+		}
+		const scheduledVideo = readinessValue.scheduledVideo;
+		const d2SaveCapability = readinessValue.d2SaveCapability;
+		const d2Save = readinessValue.d2Save;
 		if (
-			typeof scheduledVideo?.id !== "string" ||
-			typeof scheduledVideo?.slug !== "string" ||
-			typeof scheduledVideo?.title !== "string" ||
-			typeof scheduledVideo?.publishedAt !== "string" ||
+			!isScheduledVideoEvidence(scheduledVideo) ||
 			(d2SaveCapability !== "available" &&
 				d2SaveCapability !== "unavailable") ||
 			(d2SaveCapability === "available" &&
-				(typeof d2Save?.articleSlug !== "string" ||
-					typeof d2Save?.articleId !== "string" ||
-					d2Save?.articleStatus !== "draft" ||
-					!/^[a-f0-9]{64}$/.test(d2Save?.sourceHash ?? "") ||
-					!/^[a-f0-9]{64}$/.test(d2Save?.svgChecksum ?? "")))
+				!isD2SaveEvidence(d2Save))
 		) {
 			throw new Error("The isolated Payload preview returned invalid readiness evidence.");
 		}
@@ -85,6 +123,9 @@ export const POST: APIRoute = async ({ locals }) => {
 			  }
 			| undefined;
 		if (d2SaveCapability === "available") {
+			if (!isD2SaveEvidence(d2Save)) {
+				throw new Error("The Payload preview D2 save evidence is invalid.");
+			}
 			const draftArticle = await getEntry("articles", { slug: d2Save.articleSlug });
 			if (draftArticle) {
 				throw new Error("A Payload draft article is visible to the public bridge.");

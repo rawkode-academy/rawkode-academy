@@ -2,8 +2,7 @@
 import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
 const styles = academyLayout({ width: "reading" });
-import { getEntry, getCollection, getEntries } from "@/lib/payload-content";
-import type { CollectionEntry } from "@/lib/payload-content";
+import { getEntry, getEntries } from "@/lib/payload-content";
 
 import Page from "@/wrappers/page.astro";
 
@@ -62,17 +61,16 @@ const howToJsonLd = article.data.howto
 const readingTime = calculateReadingTime(article.body || "");
 
 // Technology → readable label
-const technologyNames = await Promise.all(
-	(article.data.technologies ?? []).map(async (technologyId) => {
-		const technology = await getEntry("technologies", technologyId);
-		return [technologyId, technology?.data.name] as const;
-	}),
-);
-const technologyNameById = new Map(technologyNames);
+const technologyEntries = (
+	await Promise.all(
+		article.data.technologies.map((reference) =>
+			getEntry("technologies", reference),
+		),
+	)
+).filter((entry): entry is NonNullable<typeof entry> => entry !== undefined);
+const technologyById = new Map(technologyEntries.map((entry) => [entry.id, entry] as const));
 
 function formatTechnologyLabel(value: string): string {
-	const fromCollection = technologyNameById.get(value);
-	if (fromCollection) return fromCollection;
 	return value
 		.split(/[-/]/g)
 		.filter(Boolean)
@@ -84,10 +82,15 @@ function formatTechnologyLabel(value: string): string {
 		.join(" ");
 }
 
-const tags = (article.data.technologies ?? []).map((technologyId) => ({
-	label: formatTechnologyLabel(technologyId),
-	href: `/technology/${technologyId}`,
-}));
+const tags = article.data.technologies.map((reference) => {
+	const technology = technologyById.get(reference.id);
+	const slug = technology?.slug ?? reference.slug;
+	if (!slug) return undefined;
+	return {
+		label: technology?.data.name ?? formatTechnologyLabel(slug),
+		href: `/technology/${slug}`,
+	};
+}).filter((tag) => tag !== undefined);
 
 const articleType = article.data.type || "tutorial";
 const badgeConfig = getTypeBadgeConfig(articleType);

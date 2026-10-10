@@ -29,11 +29,9 @@ const normalizeTechnologyId = (value: unknown): string | null => {
 	return raw.replace(/\/index$/, "");
 };
 
-const articleTechnologyIds = Array.isArray(currentArticle.data.technologies)
-	? currentArticle.data.technologies
-			.map(normalizeTechnologyId)
-			.filter((technologyId): technologyId is string => Boolean(technologyId))
-	: [];
+const articleTechnologyIds = currentArticle.data.technologies
+	.map(normalizeTechnologyId)
+	.filter((technologyId): technologyId is string => Boolean(technologyId));
 const articleTechnologySet = new Set(articleTechnologyIds);
 
 let relatedVideos: {

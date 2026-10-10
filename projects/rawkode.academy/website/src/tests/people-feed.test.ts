@@ -1,6 +1,6 @@
 import type { APIContext } from "astro";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getAllCollection, getEntry } from "@/lib/payload-content";
+import { getEntry } from "@/lib/payload-content";
 
 const { collections, getAllCollectionMock, getEntryMock } = vi.hoisted(() => ({
 	collections: {} as Record<string, any[]>,

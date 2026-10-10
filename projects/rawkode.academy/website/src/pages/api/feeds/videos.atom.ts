@@ -41,9 +41,9 @@ ${sortedVideos
 			.toString()
 			.padStart(2, "0")}`;
 
-		const categories = ((video.data.technologies as string[]) || [])
-			.map((id) => {
-				const name = techName.get(id) || id;
+		const categories = video.data.technologies
+			.map((technology) => {
+				const name = techName.get(technology.id) || technology.slug || technology.id;
 				return `<category term=\"${name}\" label=\"${name}\"/>`;
 			})
 			.join("\\n\\t\\t");

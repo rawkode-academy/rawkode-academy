@@ -21,16 +21,9 @@ export const GET: APIRoute = async ({ site }) => {
 	const items: JsonFeedItem[] = videos
 		.map((video) => {
 			const url = u(`/watch/${video.slug}/`);
-			const techIds = video.data.technologies as ReadonlyArray<unknown>;
-			const tagNames = (Array.isArray(techIds) ? techIds : [])
-				.map((id) => {
-					const techId =
-						typeof id === "string"
-							? id
-							: id && typeof id === "object" && "id" in id
-								? ((id as { id: string }).id as string)
-								: undefined;
-					if (!techId) return undefined;
+			const tagNames = video.data.technologies
+				.map((technology) => {
+					const techId = technology.id;
 					const normalised = techId.endsWith("/index")
 						? techId.slice(0, -"/index".length)
 						: techId;

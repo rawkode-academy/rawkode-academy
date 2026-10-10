@@ -59,7 +59,11 @@ export function articleToMarkdown(
 	}
 
 	if ((article.data.technologies ?? []).length > 0) {
-		lines.push(`- Technologies: ${article.data.technologies.join(", ")}`);
+		lines.push(
+			`- Technologies: ${article.data.technologies
+				.map((technology) => technology.slug ?? technology.id)
+				.join(", ")}`,
+		);
 	}
 
 	lines.push("", stripLeadingMdxImports(article.body ?? ""), "");

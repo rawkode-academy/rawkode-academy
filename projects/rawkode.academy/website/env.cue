@@ -211,7 +211,9 @@ tasks: {
 			args: ["-lc", "\(_toolchain) bun review/deploy/deploy-cms-preview.mjs"]
 			env: {
 				PATH:                  _taskPath
-				CLOUDFLARE_API_TOKEN:  schema.#EnvPassthrough
+				CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {
+					ref: "op://sa.rawkode.academy/cloudflare/api-tokens/workers"
+				}
 				GITHUB_API_URL:        schema.#EnvPassthrough
 				GITHUB_EVENT_NAME:     schema.#EnvPassthrough
 				GITHUB_EVENT_PATH:     schema.#EnvPassthrough

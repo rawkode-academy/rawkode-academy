@@ -14,7 +14,10 @@ export async function GET(context: APIContext) {
 		showId: show.id,
 		limit: 100,
 	});
-	const video = videos.find((entry) => entry.slug === context.params.episodeId);
+	const videoSummary = videos.find((entry) => entry.slug === context.params.episodeId);
+	const video = videoSummary
+		? await getEntry("videos", { id: videoSummary.id })
+		: undefined;
 
 	if (!video || !video.data.chapters || video.data.chapters.length === 0) {
 		return new Response("Chapters not found", { status: 404 });

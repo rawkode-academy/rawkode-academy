@@ -43,7 +43,7 @@ export async function GET(context: APIContext) {
 			// Resolve author and series references
 			const authors = await getEntries(article.data.authors);
 			const series = article.data.series
-				? await getEntry(article.data.series)
+				? await getEntry("series", article.data.series)
 				: null;
 
 			return `	<entry>

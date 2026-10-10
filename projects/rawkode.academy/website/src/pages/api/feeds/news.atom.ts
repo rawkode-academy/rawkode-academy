@@ -26,6 +26,8 @@ export async function GET(context: APIContext) {
 	const news = await getAllCollection("news", ({ data }) =>
 		isNewsPublished(data.publishedAt, now),
 	);
+	const technologies = await getAllCollection("technologies");
+	const technologyNames = new Map(technologies.map((technology) => [technology.id, technology.data.name] as const));
 
 	const sortedNews = [...news].sort(
 		(a, b) =>
@@ -58,7 +60,7 @@ export async function GET(context: APIContext) {
 				.join("\n\t\t");
 
 			const categoryTags = (story.data.technologies ?? [])
-				.map((technology) => `<category term="${escapeXml(technology)}"/>`)
+				.map((technology) => `<category term="${escapeXml(technologyNames.get(technology.id) ?? technology.slug ?? technology.id)}"/>`)
 				.join("\n\t\t");
 
 			return `	<entry>

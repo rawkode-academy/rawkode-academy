@@ -39,10 +39,17 @@ for (const article of allArticles) {
 }
 
 // Topics — derived from technologies referenced across the corpus.
+const technologies = await getAllCollection("technologies");
+const technologyById = new Map(technologies.map((technology) => [technology.id, technology] as const));
+const technologyBySlug = new Map(technologies.map((technology) => [technology.slug, technology] as const));
+const technologyKey = (reference: (typeof allArticles)[number]["data"]["technologies"][number]) =>
+	technologyById.get(reference.id)?.slug ?? reference.slug ?? reference.id;
+
 const topicCounts = new Map<string, number>();
 for (const article of allArticles) {
 	for (const tech of article.data.technologies ?? []) {
-		topicCounts.set(tech, (topicCounts.get(tech) ?? 0) + 1);
+		const key = technologyKey(tech);
+		topicCounts.set(key, (topicCounts.get(key) ?? 0) + 1);
 	}
 }
 
@@ -61,7 +68,7 @@ const isFiltered = Boolean(selectedType || selectedTopic);
 const matchesType = (article: (typeof allArticles)[number]) =>
 	!selectedType || typeKeyFor(article) === selectedType;
 const matchesTopic = (article: (typeof allArticles)[number]) =>
-	!selectedTopic || (article.data.technologies ?? []).includes(selectedTopic);
+	!selectedTopic || (article.data.technologies ?? []).some((tech) => technologyKey(tech) === selectedTopic);
 
 const visibleArticles = allArticles.filter(
 	(article) => matchesType(article) && matchesTopic(article),
@@ -119,7 +126,8 @@ const topicRailCounts = new Map<string, number>();
 for (const article of allArticles) {
 	if (!matchesType(article)) continue;
 	for (const tech of article.data.technologies ?? []) {
-		topicRailCounts.set(tech, (topicRailCounts.get(tech) ?? 0) + 1);
+		const key = technologyKey(tech);
+		topicRailCounts.set(key, (topicRailCounts.get(key) ?? 0) + 1);
 	}
 }
 
@@ -198,7 +206,7 @@ const restWithMeta = await Promise.all(
 
 const activeFilterSummary = [
 	selectedType ? getTypeBadgeConfig(selectedType).label : undefined,
-	selectedTopic ? formatTopicLabel(selectedTopic) : undefined,
+	selectedTopic ? technologyBySlug.get(selectedTopic)?.data.name ?? formatTopicLabel(selectedTopic) : undefined,
 ]
 	.filter(Boolean)
 	.join(" · ");

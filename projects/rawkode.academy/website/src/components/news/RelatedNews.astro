@@ -11,7 +11,13 @@ interface Props {
 
 const { currentStory, limit = 3 } = Astro.props;
 const layout = academyLayout({ width: "wide" });
-const related = selectRelatedNews(currentStory.id, currentStory.data.technologies ?? [], await getCollection("news"), limit);
+const candidates = await getCollection("news");
+const related = selectRelatedNews<CollectionEntry<"news">>(
+	currentStory.id,
+	currentStory.data.technologies,
+	candidates,
+	limit,
+);
 const catalog = academyCatalog();
 ---
 

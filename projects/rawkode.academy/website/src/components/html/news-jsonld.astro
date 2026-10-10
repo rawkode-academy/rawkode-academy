@@ -1,5 +1,5 @@
 ---
-import type { CollectionEntry } from "@/lib/payload-content";
+import { getEntry, type CollectionEntry } from "@/lib/payload-content";
 import {
 	encodeImageServicePayload,
 	IMAGE_SERVICE_TEMPLATE_VERSION,
@@ -15,6 +15,12 @@ interface Props {
 }
 
 const { article, authors } = Astro.props;
+const technologyNames = await Promise.all(
+	article.data.technologies.map(async (technology) => {
+		const entry = await getEntry("technologies", technology);
+		return entry?.data.name ?? technology.slug ?? technology.id;
+	}),
+);
 const reading = calculateReadingTime(article.body || "");
 const wordCount = (article.body || "")
 	.replace(/```[\s\S]*?```/g, "")
@@ -36,6 +42,7 @@ const imageUrl = `https://image.rawkode.academy/image?v=${IMAGE_SERVICE_TEMPLATE
 const jsonLd = buildNewsArticleJsonLd({
 	article: {
 		...article.data,
+		technologies: technologyNames,
 		wordCount,
 		readingMinutes: reading.minutes,
 	},

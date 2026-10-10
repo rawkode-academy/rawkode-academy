@@ -80,7 +80,7 @@ async function select(videos, showEntry = show, video = current) {
 		{ now: new Date("2026-09-20T12:00:00Z") },
 	);
 	const selected = await vm.runInNewContext(
-		`(async () => { ${transpile(selection)}; return { showEntry, showRelatedAll, showRelatedVideos, showHasMore, technologyRecommendation, techEntries }; })()`,
+		`(async () => { ${transpile(selection)}; return { showEntry, showRelatedAll, showRelatedVideos, technologyRecommendation, techEntries }; })()`,
 		{
 			videos,
 			video,
@@ -108,7 +108,7 @@ async function renderRecommendations(props) {
 		source.indexOf("<NewsletterCTA />"),
 	);
 	assert(markup.includes("TechnologyVideoSection"));
-	const input = `---\nimport ShowVideoSection from "show";\nimport TechnologyVideoSection from "technology";\nconst { showEntry, showRelatedAll, showRelatedVideos, showHasMore, technologyRecommendation } = Astro.props;\n---\n${markup}`;
+	const input = `---\nimport ShowVideoSection from "show";\nimport TechnologyVideoSection from "technology";\nconst { showEntry, showRelatedAll, showRelatedVideos, technologyRecommendation } = Astro.props;\n---\n${markup}`;
 	const compiled = await transform(input, {
 		filename: "recommendations.astro",
 	});

@@ -85,13 +85,9 @@ export async function GET(context: APIContext) {
 			const duration =
 				typeof video.data.duration === "number" ? video.data.duration : null;
 
-			const categories = (video.data.technologies as string[])
-				.map((id) => {
-					// Handle both string IDs and reference objects
-					const techId = typeof id === "string" ? id : (id as any).id || id;
-					const normalizedId = techId.endsWith?.("/index")
-						? techId.slice(0, -6)
-						: techId;
+			const categories = video.data.technologies
+				.map((technology) => {
+					const normalizedId = technology.id.replace(/\/index$/, "");
 					return (
 						techName.get(normalizedId + "/index") ||
 						techName.get(normalizedId) ||
@@ -141,7 +137,9 @@ export async function GET(context: APIContext) {
 					description,
 					pubDate: new Date(story.data.publishedAt),
 					link: `/news/${story.slug}/`,
-					categories: [...(story.data.technologies ?? [])],
+					categories: story.data.technologies.map(
+						(technology) => technology.slug ?? technology.id,
+					),
 				};
 				if (authors.length > 0) {
 					item.author = authors.map((author) => author.data.name).join(", ");

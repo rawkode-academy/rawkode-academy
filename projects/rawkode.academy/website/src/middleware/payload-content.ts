@@ -1,5 +1,6 @@
 import { defineMiddleware } from "astro:middleware";
 import {
+	getDefaultWorkerCache,
 	runWithPayloadRequest,
 	type PayloadRequestState,
 	type WebsiteRuntimeEnv,
@@ -292,7 +293,7 @@ export const payloadContentMiddleware = defineMiddleware(
 		const locals = context.locals as typeof context.locals & CloudflareLocals;
 		const state: PayloadRequestState = { env: locals.runtime?.env };
 		const request = context.request;
-		const cache = typeof caches !== "undefined" ? caches.default : undefined;
+		const cache = getDefaultWorkerCache();
 		const cacheableRequest = Boolean(
 			cache && !locals.user && canReadHtmlCache(request),
 		);

@@ -9,7 +9,7 @@ This slice implements the FFmpeg runner, native Cloudflare Container Durable Obj
 - Bounds: 64 MiB input/output, two-hour duration, 120 one-minute audio chunks of at most 2 MiB, geometry/frame rate, logs/probe output, scratch reservations and file-growth checks. The 105-second whole-request deadline means the two-hour admission bound is not a completion guarantee.
 - Strict framing, server-derived R2 keys, fixed-length/SHA-256 conditional writes, cancellation/deadline rechecks, duplicate coalescing and persistent job/operation identity protect the bridge. The expected report is saved before uploads. Receipt-loss retries may recompute but must reproduce that report; existing objects are verified and never overwritten. A complete framing check remains required before saving a receipt.
 - The request runtime installs the Workflow adapter with the Workflow binding and exact compiled recipe; the Workflow host owns AI and Container bindings. Both Wrangler configs and the production config's preview section have structural Container/DO bindings. Existing remote AI settings are preserved.
-- Linux amd64 Node and static FFmpeg binary-bearing image manifests are pinned. Recipe `8a93818133f7c9f7959ac624197b008b6146aaedde3d0a499149d7c380378fcf` covers the Dockerfile and executable modules. Production startup verifies their hashes; `build:worker` checks recipe drift.
+- Linux amd64 Node and static FFmpeg binary-bearing image manifests are pinned. Recipe `ab74d9377bb060d7c2ceb17990b99a60ba0b3f0cb86cb0a60f4dba977a394fbe` covers the Dockerfile and executable modules. Production startup verifies their hashes; `build:worker` checks recipe drift.
 
 ## Verification on 2026-10-05
 

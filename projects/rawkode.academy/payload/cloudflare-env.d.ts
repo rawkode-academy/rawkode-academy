@@ -14,7 +14,7 @@ interface __BaseEnv_CloudflareEnv {
 	OIDC_STAFF_SUBJECTS: "[\"HmYDQjc3JVFo7visJIL5FneGFzNAJjDT\"]";
 	OIDC_SESSION_TTL_SECONDS: "3600";
 	POC_DEV_LOCAL_AUTH: "false";
-	REVIEW_MEDIA_RECIPE: "8a93818133f7c9f7959ac624197b008b6146aaedde3d0a499149d7c380378fcf";
+	REVIEW_MEDIA_RECIPE: "ab74d9377bb060d7c2ceb17990b99a60ba0b3f0cb86cb0a60f4dba977a394fbe";
 	PAYLOAD_SECRET: string;
 	PIPELINE_CALLBACK_SECRET: string;
 	REVIEW_FFMPEG: DurableObjectNamespace<import("./worker").ReviewFFmpegContainer>;

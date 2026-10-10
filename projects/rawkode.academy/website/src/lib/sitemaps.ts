@@ -492,7 +492,7 @@ export async function getNewsSitemapEntries(
 
 export const GOOGLE_NEWS_FRESHNESS_MS = 2 * 24 * 60 * 60 * 1000;
 
-export function selectFreshNewsItems<T extends { data: { publishedAt: Date } }>(
+export function selectFreshNewsItems<T extends { slug: string; data: { publishedAt: Date } }>(
 	items: readonly T[],
 	now: Date = new Date(),
 ): T[] {

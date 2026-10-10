@@ -4,6 +4,7 @@ const doc = academyDocument();
 const styles = academyLayout({ width: "reading" });
 import Page from "@/wrappers/page.astro";
 import { getEntry, getEntries, getAllCollection } from "@/lib/payload-content";
+import type { PayloadReference } from "@/lib/payload-content";
 import CmsBody from "@/components/content/CmsBody.astro";
 import VideoFeed from "@/components/video/video-feed.astro";
 import ShowCard from "@/components/show/ShowCard.astro";
@@ -31,13 +32,7 @@ const publishedNews = news.filter((story) => isNewsPublished(story.data.publishe
 const publishedArticles = articles.filter((article) => article.data.publishedAt <= now);
 
 // Helper to match references
-const matchRef = (
-	ref: { collection: string; id: string } | string,
-	id: string,
-) => {
-	if (typeof ref === "string") return ref === id;
-	return ref.id === id;
-};
+const matchRef = (ref: PayloadReference, id: string) => ref.id === id;
 
 const hostedShows = shows.filter((show) =>
 	show.data.hosts.some((h) => matchRef(h, person.id)),

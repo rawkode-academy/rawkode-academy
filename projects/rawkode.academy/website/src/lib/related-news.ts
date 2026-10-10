@@ -1,4 +1,7 @@
 import { isNewsPublished } from "./news-publication";
+import type { PayloadReference } from "./payload-content";
+
+type TechnologyReference = PayloadReference | string;
 
 export interface RelatedNewsCandidate {
 	id: string;
@@ -6,7 +9,7 @@ export interface RelatedNewsCandidate {
 		title: string;
 		description: string;
 		publishedAt: Date;
-		technologies?: ReadonlyArray<string>;
+		technologies?: ReadonlyArray<TechnologyReference>;
 	};
 }
 
@@ -30,14 +33,16 @@ interface ScoredCandidate<T> {
  */
 export function selectRelatedNews<T extends RelatedNewsCandidate>(
 	currentId: string,
-	currentTechnologies: ReadonlyArray<string>,
+	currentTechnologies: ReadonlyArray<TechnologyReference>,
 	candidates: ReadonlyArray<T>,
 	limit: number,
 	now = new Date(),
 ): T[] {
 	if (limit <= 0) return [];
 
-	const currentTechSet = new Set(currentTechnologies);
+	const relationKey = (reference: TechnologyReference) =>
+		typeof reference === "string" ? reference : reference.id;
+	const currentTechSet = new Set(currentTechnologies.map(relationKey));
 
 	const scored: ScoredCandidate<T>[] = candidates
 		.filter(
@@ -47,7 +52,7 @@ export function selectRelatedNews<T extends RelatedNewsCandidate>(
 		.map((story) => {
 			const shared = (story.data.technologies ?? []).reduce(
 				(count, technology) =>
-					currentTechSet.has(technology) ? count + 1 : count,
+					currentTechSet.has(relationKey(technology)) ? count + 1 : count,
 				0,
 			);
 			return {

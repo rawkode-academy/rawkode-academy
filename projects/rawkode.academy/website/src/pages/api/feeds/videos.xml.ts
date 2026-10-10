@@ -40,10 +40,9 @@ export async function GET(context: APIContext) {
 							.padStart(2, "0")}</itunes:duration>
 						<itunes:image href="${itunesImageUrl}" />
 					`,
-					categories: (video.data.technologies as string[])
-						.map((id) => {
-							// Handle both string IDs and reference objects
-							const techId = typeof id === "string" ? id : (id as any).id || id;
+					categories: video.data.technologies
+						.map((technology) => {
+							const techId = technology.id;
 							const normalizedId = techId.endsWith?.("/index")
 								? techId.slice(0, -6)
 								: techId;

@@ -29,7 +29,7 @@ const cleanSummary = (description: string) =>
 
 const processedChangelog = await Promise.all(
 	sortedChangelog.map(async (entry) => {
-		const authorEntry = await getEntry(entry.data.author);
+		const authorEntry = await getEntry("people", entry.data.author);
 
 		return {
 			...entry.data,

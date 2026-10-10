@@ -246,7 +246,9 @@ tasks: {
 			env: {
 				PATH:                  _taskPath
 				CI:                    schema.#EnvPassthrough
-				CLOUDFLARE_API_TOKEN:  schema.#EnvPassthrough
+				CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {
+					ref: "op://sa.rawkode.academy/cloudflare/api-tokens/workers"
+				}
 				CLOUDFLARE_PREVIEW_ALLOW_DEGRADED_CONTAINERS: "true"
 				GITHUB_EVENT_NAME:     schema.#EnvPassthrough
 				GITHUB_EVENT_PATH:     schema.#EnvPassthrough
@@ -313,7 +315,9 @@ tasks: {
 			args: ["-lc", "\(_toolchain) bun run deploy:preview"]
 			env: {
 				PATH:                  _taskPath
-				CLOUDFLARE_API_TOKEN:  schema.#EnvPassthrough
+				CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {
+					ref: "op://sa.rawkode.academy/cloudflare/api-tokens/workers"
+				}
 				CLOUDFLARE_PREVIEW_ALLOW_DEGRADED_CONTAINERS: "true"
 				GITHUB_EVENT_NAME:     schema.#EnvPassthrough
 				GITHUB_EVENT_PATH:     schema.#EnvPassthrough

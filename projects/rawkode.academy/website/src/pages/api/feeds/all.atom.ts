@@ -72,8 +72,8 @@ export async function GET(context: APIContext) {
 			url: `${site}/watch/${video.data.slug}/`,
 			published: new Date(video.data.publishedAt).toISOString(),
 			updated: new Date(video.data.publishedAt).toISOString(),
-			categories: (video.data.technologies as string[]).map(
-				(id) => techName.get(id) || id,
+			categories: video.data.technologies.map(
+				(technology) => techName.get(technology.id) || technology.slug || technology.id,
 			),
 			thumbnail: getVideoThumbnailUrl(video.data.id),
 			type: "video",
@@ -94,7 +94,9 @@ export async function GET(context: APIContext) {
 				url: `${site}/news/${story.slug}/`,
 				published: new Date(story.data.publishedAt).toISOString(),
 				updated: new Date(story.data.publishedAt).toISOString(),
-				categories: [...(story.data.technologies ?? [])],
+				categories: story.data.technologies.map(
+					(technology) => technology.slug ?? technology.id,
+				),
 				author: authors.map((author) => author.data.name).join(", "),
 				type: "news",
 			});

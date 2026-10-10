@@ -41,7 +41,7 @@ const itemListPaths = await Promise.all(
 				name: author.data.name,
 			})),
 			technologyLabels: (path.data.technologies ?? []).map(
-				(technologyId) => technologyNameById.get(technologyId) ?? technologyId,
+				(technology) => technologyNameById.get(technology.id) ?? technology.slug ?? technology.id,
 			),
 		};
 	}),
