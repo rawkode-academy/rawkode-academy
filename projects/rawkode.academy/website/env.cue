@@ -198,7 +198,18 @@ tasks: {
 				REVIEW_PAYLOAD_WAIT_SECONDS: schema.#EnvPassthrough
 				PAYLOAD_GATE_MODE:           "review"
 			}
-			inputs: _reviewInputs + ["../../../.github/workflows/rawkode-academy-payload-default.yml"]
+			inputs: [
+				"review/**",
+				"astro.review.config.mts",
+				"env.cue",
+				"../../../packages/design-system/**",
+				"package.json",
+				"../../../bun.lock",
+				"wrangler.review.jsonc",
+				"tsconfig.review.json",
+				"src/styles/**",
+				"../../../.github/workflows/rawkode-academy-payload-default.yml",
+			]
 		}
 		awaitPayloadForSite: schema.#Task & {
 			hermetic: false
@@ -212,7 +223,21 @@ tasks: {
 			}
 			// Use the same path set as the public site deploy so this prerequisite
 			// runs whenever Astro is changed, even if review-only files are untouched.
-			inputs: _siteDeployInputs + ["../../../.github/workflows/rawkode-academy-payload-default.yml"]
+			inputs: [
+				"content/**",
+				"../../../content/**",
+				"astro.config.mts",
+				"env.cue",
+				"../../../packages/design-system/**",
+				"package.json",
+				"../../../bun.lock",
+				"scripts/**",
+				"vitest.config.ts",
+				"public/**",
+				"src/**",
+				"wrangler.jsonc",
+				"../../../.github/workflows/rawkode-academy-payload-default.yml",
+			]
 		}
 		review: schema.#Task & {
 			hermetic: false
@@ -246,7 +271,19 @@ tasks: {
 			captures: previewUrl: {
 				pattern: "Version Preview URL: (.+)"
 			}
-			inputs: _siteDeployInputs + [
+			inputs: [
+				"content/**",
+				"../../../content/**",
+				"astro.config.mts",
+				"env.cue",
+				"../../../packages/design-system/**",
+				"package.json",
+				"../../../bun.lock",
+				"scripts/**",
+				"vitest.config.ts",
+				"public/**",
+				"src/**",
+				"wrangler.jsonc",
 				// Source and content changes must make the hosted Astro preview an
 				// affected task; otherwise the PR pipeline can be a no-op.
 				"review/deploy/deploy-cms-preview.mjs",
