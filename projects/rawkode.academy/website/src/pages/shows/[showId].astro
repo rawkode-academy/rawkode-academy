@@ -4,7 +4,6 @@ const doc = academyDocument();
 export const prerender = false;
 
 import { getEntry, getAllCollection, getEntries } from "@/lib/payload-content";
-import { getImage } from "astro:assets";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import VideoMetadata from "@/components/html/video-metadata.astro";
 import PodcastSeriesJsonLd from "@/components/html/podcast-series-jsonld.astro";
@@ -12,11 +11,11 @@ import VideoFeed from "@/components/video/video-feed.astro";
 import SubscribeLinks from "@/components/show/SubscribeLinks.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Page from "@/wrappers/page.astro";
-import { Image } from "astro:assets";
 import { createLogger } from "@/lib/logger";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import ShowNav from "@/components/show/ShowNav.astro";
 import { getShowNav, hasExtension } from "@/lib/shows/registry";
+import { getPayloadImageVariant } from "@/lib/payload-content";
 
 const logger = createLogger("shows");
 const { showId } = Astro.params;
@@ -54,7 +53,7 @@ const getShowId = (value: unknown): string | null => {
 };
 
 const videosForShow = videos.filter(
-	(video) => getShowId(video.data.show) === showEntry.data.id,
+	(video) => getShowId(video.data.show) === showEntry.id,
 );
 
 const hostEntries = await getEntries(showEntry.data.hosts);
@@ -89,7 +88,7 @@ Astro.response.headers.set(
 Astro.response.headers.set("CDN-Cache-Control", "public, max-age=7200");
 Astro.response.headers.set(
 	"Cache-Tag",
-	`show-${showEntry.data.id}, shows-page, show-detail`,
+	`show-${showEntry.id}, shows-page, show-detail`,
 );
 Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 
@@ -123,13 +122,14 @@ let podcastImageUrl: string | undefined;
 if (hasEpisodeFeed && showEntry.data.podcast?.artworkUrl) {
 	podcastImageUrl = showEntry.data.podcast.artworkUrl;
 } else if (hasEpisodeFeed && showEntry.data.cover) {
-	try {
-		const resolved = await getImage({ src: showEntry.data.cover.image });
-		podcastImageUrl = new URL(resolved.src, Astro.site ?? Astro.url).href;
-	} catch {
-		// Fall through with no image - JSON-LD `image` is optional.
+	const cmsVariant = getPayloadImageVariant(showEntry.data.cover.image, 1280);
+	if (cmsVariant) {
+		podcastImageUrl = new URL(cmsVariant, Astro.site ?? Astro.url).href;
 	}
 }
+const cmsCoverUrl = showEntry.data.cover
+	? getPayloadImageVariant(showEntry.data.cover.image, 1280)
+	: undefined;
 
 function formatDate(dateString: string) {
 	return new Date(dateString).toLocaleDateString("en-US", {
@@ -244,11 +244,11 @@ function formatDuration(seconds: number) {
  {showEntry.data.cover ? (
  <div class={doc.mediaColumn}>
  <div class={doc.media}>
- <Image
- src={showEntry.data.cover.image}
- alt={showEntry.data.cover.alt}
- class={doc.image}
- />
+ {cmsCoverUrl ? (
+  <img src={cmsCoverUrl} alt={showEntry.data.cover.alt ?? ""} class={doc.image} width="1280" height="720" loading="eager" />
+ ) : (
+  <div class={doc.image} role="img" aria-label={showEntry.data.cover.alt ?? showEntry.data.name} />
+ )}
  </div>
  </div>
  ) : latestEpisode ? (
@@ -335,7 +335,7 @@ function formatDuration(seconds: number) {
  </section>
  <section class={doc.section}>
  <NewsletterCTA
- audience={`show:${showEntry.data.id}`}
+ audience={`show:${showEntry.id}`}
  badge={isComingSoon ? "Coming soon" : isArchived ? "Show updates" : "New episodes by email"}
  headline={`Follow ${showEntry.data.name}`}
  subtitle={isComingSoon ? "Be the first to know when this show is ready." : isArchived ? "Get an email if there is news about this show." : "Get an email when a new episode is published."}

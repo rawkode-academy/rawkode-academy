@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
 import { actualFromDocuments, expectedFromSnapshot, reconcile, renderMarkdown, type ActualObject, type ReconcileInput } from '../scripts/lib/reconcile'
-import { relations, type Reference } from '../src/importer'
+import { relations, type ContentReference } from '../src/importer'
 import { buildStaticSnapshot, type StaticContentSnapshot } from '../src/static-content'
 
 type Document = Record<string, unknown> & { id: string }
@@ -49,7 +49,7 @@ async function simulateImport(snapshot: StaticContentSnapshot): Promise<{ docume
     for (const field of Object.keys(rules)) {
       const value = record.relationships?.[field]
       const refs = value === null || value === undefined ? [] : Array.isArray(value) ? value : [value]
-      const mapped = refs.map((ref: Reference) => ids.get(`${ref.collection}:${ref.legacyId}`)!)
+      const mapped = refs.map((ref: ContentReference) => ids.get(`${ref.collection}:${ref.legacyId}`)!)
       doc[field] = rules[field]!.many ? mapped : mapped[0] ?? null
     }
     ;(documents[record.collection] ??= []).push(doc)

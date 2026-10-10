@@ -4,6 +4,7 @@ import config from '@payload-config'
 import {authConfig} from './src/auth/config'
 import {serveBridge,serveDirect} from './src/ingress'
 import {publicContentBridge} from './src/public-content-bridge'
+import {cmsPreviewReadiness} from './src/preview-readiness'
 // OpenNext creates this module during build:worker.
 // @ts-ignore Generated Workers entry point has no TypeScript declaration.
 import openNextHandler from './.open-next/worker.js'
@@ -26,6 +27,21 @@ export class ReviewBridge extends WorkerEntrypoint<CloudflareEnv> {
 // published content read model and never adds a public Payload REST route.
 export class PublicContentBridge extends WorkerEntrypoint<CloudflareEnv> {
   async fetch(request: Request) {
+    const url = new URL(request.url)
+    if (url.pathname === '/v1/preview/readiness') {
+      const env = this.env as CloudflareEnv & {PAYLOAD_PREVIEW_PR?: string; PAYLOAD_PREVIEW_SHA?: string}
+      const pullRequest = Number(env.PAYLOAD_PREVIEW_PR)
+      if (!env.PAYLOAD_PREVIEW_PR || !env.PAYLOAD_PREVIEW_SHA || !Number.isSafeInteger(pullRequest) || pullRequest < 1) {
+        return Response.json({error:'Not found'}, {status:404,headers:{'Cache-Control':'no-store'}})
+      }
+      try {
+        const payload = await getPayload({ config })
+        return await cmsPreviewReadiness(request,payload,this.env.R2,{pullRequest,sha:env.PAYLOAD_PREVIEW_SHA},Boolean(this.env.D2_RENDERER))
+      } catch (error) {
+        console.error('CMS preview readiness failed',error)
+        return Response.json({error:'CMS preview readiness failed'}, {status:503,headers:{'Cache-Control':'no-store'}})
+      }
+    }
     const payload = await getPayload({ config })
     return publicContentBridge(request, payload, this.env.R2)
   }

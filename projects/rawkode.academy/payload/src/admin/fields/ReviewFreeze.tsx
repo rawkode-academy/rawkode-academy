@@ -14,12 +14,12 @@ import { VideoPublishButton } from './VideoPublishButton'
 
 const frozenHint = 'This video is in client review, so it cannot be edited here. Change it through Preview review.'
 
-type SlotProps = { id?: string; user?: unknown }
+type SlotProps = { id?: string | number; user?: unknown }
 
-const managed = async ({ id }: SlotProps) => id !== undefined && (await videoInReview(id))
+const managed = async ({ id }: SlotProps) => id !== undefined && (await videoInReview(String(id)))
 
 export async function ReviewFreezeNotice({ id, req }: UIFieldServerProps) {
-	if (!isStaff(req.user) || id === undefined || !(await videoInReview(id))) return null
+	if (!isStaff(req.user) || id === undefined || !(await videoInReview(String(id)))) return null
 	return (
 		<div className="academy-freeze" role="status">
 			<strong className="academy-freeze__title">In client review: read-only</strong>

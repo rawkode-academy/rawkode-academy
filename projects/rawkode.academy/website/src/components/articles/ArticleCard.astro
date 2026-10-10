@@ -1,6 +1,6 @@
 ---
-import { Image } from "astro:assets";
 import { type CollectionEntry, getEntries } from "@/lib/payload-content";
+import { getContentImage } from "@/lib/content-images";
 import BaseCard from "../common/BaseCard.vue";
 import { calculateReadingTime } from "@/utils/reading-time";
 import { getTypeBadgeConfig } from "@/utils/article-types";
@@ -16,6 +16,9 @@ const Heading = headingLevel === 3 ? "h3" : "h2";
 const doc = academyDocument();
 const authors = await getEntries(article.data.authors);
 const readingTime = calculateReadingTime(article.body || "");
+const coverImage = article.data.cover
+	? await getContentImage(article.data.cover.image, 640)
+	: undefined;
 
 const articleType = article.data.type || "tutorial";
 const badgeConfig = getTypeBadgeConfig(articleType);
@@ -33,12 +36,15 @@ const formattedDate = new Intl.DateTimeFormat("en-US", {
 	showCover={Boolean(article.data.cover)}
 	showFooter={authors.length > 0}
 >
-	{article.data.cover && (
+	{coverImage && (
 		<Fragment slot="cover">
-			<Image
-				src={article.data.cover.image}
-				alt={article.data.cover.alt}
+			<img
+				src={coverImage.src}
+				alt={article.data.cover?.alt ?? ""}
+				width={coverImage.attributes.width}
+				height={coverImage.attributes.height}
 				loading="lazy"
+				decoding="async"
 			/>
 		</Fragment>
 	)}

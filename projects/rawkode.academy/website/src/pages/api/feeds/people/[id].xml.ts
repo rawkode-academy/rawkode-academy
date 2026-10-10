@@ -29,8 +29,8 @@ export async function GET(context: APIContext) {
 	// Every known profile has a valid feed, including an honestly empty feed
 	// for host-only profiles. Hosting does not manufacture guest appearances.
 	const [articles, news, videos] = await Promise.all([
-		getAllCollection("articles", undefined, { personId }),
-		getAllCollection("news", undefined, { personId }),
+		getAllCollection("articles", undefined, { authorId: personId }),
+		getAllCollection("news", undefined, { authorId: personId }),
 		getAllCollection("videos", undefined, { personId }),
 	]);
 

@@ -41,6 +41,8 @@ if (pullRequest) {
   config.services = [{ binding: 'WORKER_SELF_REFERENCE', service: workerName }]
   config.vars = {
     ...(config.vars ?? {}),
+    PAYLOAD_PREVIEW_PR: String(identity.pullRequestNumber),
+    PAYLOAD_PREVIEW_SHA: identity.sha,
     // The preview is a public read service with no provisioned users. Keep
     // Payload's origin validator on the safe loopback-only configuration; its
     // workers.dev URL is not an identity origin and must not gain admin auth.

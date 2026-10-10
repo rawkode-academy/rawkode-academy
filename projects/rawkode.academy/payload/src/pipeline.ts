@@ -122,7 +122,7 @@ export async function approvePipeline(payload: Payload, user: User, input: { run
     const legacyId = `${video.id}-generated-${run.generatedRevision!.slice(0, 12)}-${index}`
     const existing = await payload.find({ collection: 'chapters', where: { legacyId: { equals: legacyId } }, limit: 1, depth: 0, overrideAccess: false, user, draft: true })
     const doc = existing.docs[0] ?? await payload.create({ collection: 'chapters', user, overrideAccess: false, data: { legacyId, slug: legacyId, title: chapter.title, startTime: chapter.startTime, _status: 'published' } })
-    chapterIds.push(doc.id)
+    chapterIds.push(String(doc.id))
   }
   await payload.update({ collection: 'videos', id: run.video, user, overrideAccess: false, draft: false, context: { pipelineApproval: true }, data: { processingState: 'published', transcript: run.transcript, summary: run.summary, description: run.summary, chapters: chapterIds, approvalRevision: run.generatedRevision, _status: 'published' } })
   return await payload.update({ collection: 'pipeline-runs', id: run.id, ...scope(user), data: { state: 'approved', approvedRevision: run.generatedRevision } }) as unknown as Run

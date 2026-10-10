@@ -11,7 +11,11 @@ export async function d2SourceHash(source: string): Promise<string> {
 }
 
 export async function sha256Hex(bytes: Uint8Array): Promise<string> {
-  const digest = await crypto.subtle.digest('SHA-256', bytes)
+  // WebCrypto's BufferSource excludes views backed by SharedArrayBuffer in
+  // current TypeScript DOM types. Copy to an ArrayBuffer-backed view first.
+  const input = new Uint8Array(bytes.byteLength)
+  input.set(bytes)
+  const digest = await crypto.subtle.digest('SHA-256', input.buffer)
   return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, '0')).join('')
 }
 

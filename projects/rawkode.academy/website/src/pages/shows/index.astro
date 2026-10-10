@@ -49,7 +49,7 @@ const showsToRender: ShowSummary[] = await (async () => {
 			};
 		});
 		const eps = videos
-			.filter((v) => s.data.status !== "coming-soon" && getShowId(v.data.show) === s.data.id)
+			.filter((v) => s.data.status !== "coming-soon" && getShowId(v.data.show) === s.id)
 			.map((v) => ({
 				video: {
 					title: v.data.title,
@@ -79,7 +79,7 @@ const hasShows = showsToRender.length > 0;
 
 const showsJsonLd = showEntries.map((s) => {
 	const episodeCount = videos.filter(
-		(v) => s.data.status !== "coming-soon" && getShowId(v.data.show) === s.data.id,
+		(v) => s.data.status !== "coming-soon" && getShowId(v.data.show) === s.id,
 	).length;
 	return {
 		slug: s.slug,

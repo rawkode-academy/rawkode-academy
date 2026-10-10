@@ -498,6 +498,28 @@ export function resolveMediaAsset(
 	};
 }
 
+/** Return a checksum-addressed Cloudflare Images variant for a CMS media URL. */
+export function getPayloadImageVariant(
+	image: unknown,
+	width: number,
+): string | undefined {
+	const source =
+		typeof image === "string"
+			? image
+			: image && typeof image === "object" && "src" in image
+				? (image as { src?: unknown }).src
+				: undefined;
+	if (typeof source !== "string") return undefined;
+	try {
+		const url = new URL(source, "https://rawkode.academy");
+		if (!url.pathname.startsWith("/cms-assets/")) return undefined;
+		url.searchParams.set("w", String(width));
+		return `${url.pathname}${url.search}`;
+	} catch {
+		return undefined;
+	}
+}
+
 export function getNextPayloadReleaseAt(): number | undefined {
 	const value = payloadRequestStorage.getStore()?.nextReleaseAt;
 	return value === Infinity ? undefined : value;

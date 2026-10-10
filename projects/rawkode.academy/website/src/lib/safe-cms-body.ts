@@ -210,7 +210,8 @@ async function markdownToSafeHtml(
 	html = html.replace(/<!--cms-code-(\d+)-->/g, (_marker, index: string) =>
 		highlighted[Number(index)] ?? "",
 	);
-	return sanitizeHtml(addHeadingIds(html), sanitizeOptions);
+	// Sanitize CMS markup before adding our own escaped, generated heading IDs.
+	return addHeadingIds(sanitizeHtml(html, sanitizeOptions));
 }
 
 const supportedLanguages = new Set([
@@ -224,6 +225,21 @@ function escapeHtml(value: string): string {
 		.replaceAll("&", "&amp;")
 		.replaceAll("<", "&lt;")
 		.replaceAll(">", "&gt;");
+}
+
+/** Read parser-decoded text nodes; tag syntax and attributes cannot enter IDs. */
+function extractHeadingText(markup: string): string {
+	let textContent = "";
+	sanitizeHtml(markup, {
+		allowedTags: [],
+		allowedAttributes: {},
+		nonTextTags: ["script", "style", "textarea", "option"],
+		textFilter: (text) => {
+			textContent += text;
+			return text;
+		},
+	});
+	return textContent;
 }
 
 async function highlightCode(code: string, requestedLanguage: string): Promise<string> {
@@ -244,7 +260,7 @@ async function highlightCode(code: string, requestedLanguage: string): Promise<s
 function addHeadingIds(html: string): string {
 	const counts = new Map<string, number>();
 	return html.replace(/<h([1-6])>([\s\S]*?)<\/h\1>/g, (_whole, depth: string, inner: string) => {
-		const text = inner.replace(/<[^>]+>/g, "").replace(/&(?:amp|lt|gt|quot|#39);/g, " ").trim();
+		const text = extractHeadingText(inner).trim();
 		const base = text.toLowerCase().replace(/[^\p{L}\p{N}\s-]/gu, "").trim().replace(/\s+/g, "-");
 		const count = counts.get(base) ?? 0;
 		counts.set(base, count + 1);

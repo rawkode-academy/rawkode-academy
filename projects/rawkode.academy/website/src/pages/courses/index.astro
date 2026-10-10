@@ -1,6 +1,6 @@
 ---
 import { getAllCollection, getEntries } from "@/lib/payload-content";
-import { getImage } from "astro:assets";
+import { getContentImage } from "@/lib/content-images";
 import AcademyCatalogCard from "@/components/academy/AcademyCatalogCard.astro";
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
 import CourseItemListJsonLd from "@/components/html/course-itemlist-jsonld.astro";
@@ -33,13 +33,9 @@ const courseImages = new Map(
 				[
 					course.id,
 					course.data.cover
-						? (
-								await getImage({
-									src: course.data.cover.image,
-									width: 960,
-									format: "webp",
-								})
-							).src
+							? (
+								await getContentImage(course.data.cover.image, 960)
+							)?.src
 						: undefined,
 				] as const,
 		),

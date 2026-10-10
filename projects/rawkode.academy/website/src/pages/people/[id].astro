@@ -23,8 +23,8 @@ const now = new Date();
 const [videos, shows, news, articles] = await Promise.all([
 	getAllCollection("videos", undefined, { personId: person.id }),
 	getAllCollection("shows", undefined, { personId: person.id }),
-	getAllCollection("news", undefined, { personId: person.id }),
-	getAllCollection("articles", undefined, { personId: person.id }),
+	getAllCollection("news", undefined, { authorId: person.id }),
+	getAllCollection("articles", undefined, { authorId: person.id }),
 ]);
 const publishedVideos = videos.filter((video) => video.data.publishedAt <= now);
 const publishedNews = news.filter((story) => isNewsPublished(story.data.publishedAt, now));

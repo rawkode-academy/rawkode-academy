@@ -4,7 +4,6 @@
 	"scripts": {
 		"build-storybook": "storybook build",
 		"build": "bun run check:academy-shell && cd ../../../packages/design-system && bun run build && cd ../../projects/rawkode.academy/website && bun run check:academy-interactions && bun run check:academy-ssr && astro check && astro build",
-		"sync:content": "tsx scripts/sync-graphql-content.ts",
 		"codegen": "graphql-codegen --config graphql-codegen.ts",
 		"dev": "astro dev",
 		"format": "biome format --write",

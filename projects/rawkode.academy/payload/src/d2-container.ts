@@ -80,8 +80,11 @@ export class D2RenderContainer extends DurableObject<D2Runtime> {
       const key = `derived-diagrams/${sourceHash}.svg`
       const existing = await this.env.R2.head(key)
       if (existing) {
-        const result = { sourceChecksum: existing.customMetadata?.sourceChecksum, svgChecksum: existing.customMetadata?.svgChecksum }
-        if (result.sourceChecksum === sourceHash && /^[a-f0-9]{64}$/.test(String(result.svgChecksum)) && existing.size <= maximumSvgBytes) return Response.json(result satisfies DiagramResult)
+        const sourceChecksum = existing.customMetadata?.sourceChecksum
+        const svgChecksum = existing.customMetadata?.svgChecksum
+        if (sourceChecksum === sourceHash && typeof svgChecksum === 'string' && /^[a-f0-9]{64}$/.test(svgChecksum) && existing.size <= maximumSvgBytes) {
+          return Response.json({ sourceChecksum, svgChecksum } satisfies DiagramResult)
+        }
         return Response.json({ error: 'Invalid existing D2 artifact' }, { status: 500 })
       }
       const rendered = await this.render(source, sourceHash)

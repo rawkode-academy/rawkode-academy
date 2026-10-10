@@ -2,6 +2,7 @@ import { z } from 'zod'
 
 const cuid2 = z.string().regex(/^[a-z][a-z0-9]{23}$/)
 const id = cuid2
+const positiveId = z.number().int().positive()
 const text = (max: number) => z.string().trim().min(1).max(max)
 export const metadataSchema = z.object({
   title: text(300), description: text(8000), thumbnailId: cuid2.optional(), transcript: z.string().max(100000).default(''),

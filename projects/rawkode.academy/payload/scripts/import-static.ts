@@ -71,7 +71,7 @@ try {
   }
   let diagrams = 0
   if (!dryRun) {
-    for (const record of snapshot.records) diagrams += await precomputeD2Artifacts(record.source?.body ?? String(record.data.body ?? ''), cloudflare.env.R2)
+    for (const record of snapshot.records) diagrams += await precomputeD2Artifacts(String(record.data.body ?? ''), cloudflare.env.R2)
   }
   const result = await importCatalogue(payload, user, snapshot, { dryRun })
   const report = { target, resources: prepared.expected ?? null, watermark, source: contentRoot, records: snapshot.records.length, assetFiles: snapshot.assetFiles.length, assets, diagrams, elapsedMs: Date.now() - startedAt, ...result }

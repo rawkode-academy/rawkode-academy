@@ -1,6 +1,6 @@
 ---
 import { getAllCollection, getEntries } from "@/lib/payload-content";
-import { getImage } from "astro:assets";
+import { getContentImage } from "@/lib/content-images";
 
 import Page from "@/wrappers/page.astro";
 import ArticleItemListJsonLd from "@/components/html/article-itemlist-jsonld.astro";
@@ -153,7 +153,7 @@ const pagedArticles = gridArticles.slice(
 const hasNextPage = page < totalPages;
 const featuredAuthors = featured ? await getEntries(featured.data.authors) : [];
 const featuredImage = featured?.data.cover
-	? await getImage({ src: featured.data.cover.image, width: 1200, format: "webp" })
+	? await getContentImage(featured.data.cover.image, 1280)
 	: undefined;
 
 // ─── Helpers ───────────────────────────────────────────────────
@@ -191,7 +191,7 @@ const restWithMeta = await Promise.all(
 		author: await articleAuthorName(article),
 		readingTime: calculateReadingTime(article.body || "").text,
 		cover: article.data.cover
-			? await getImage({ src: article.data.cover.image, width: 640, format: "webp" })
+			? await getContentImage(article.data.cover.image, 640)
 			: undefined,
 	})),
 );

@@ -7,10 +7,10 @@ import * as enforceMigration from '../../src/pending-migrations/20261009_160000_
 import { ReviewService } from '../../src/review/service'
 import { ReviewStore } from '../../src/review/store'
 import type { ReviewActor } from '../../src/review/contracts'
-import { CLIENT_ID, DELIVERABLE_MEDIA_ID, OTHER_VIDEO_ID, SECOND_CLIENT_ID, SECOND_DELIVERABLE_MEDIA_ID, SOURCE_MEDIA_ID, STAFF_ID, STRANGER_ID, VIDEO_ID } from './ids'
+import { CLIENT_ID, DELIVERABLE_MEDIA_ID, OTHER_THUMBNAIL_ID, OTHER_VIDEO_ID, SECOND_CLIENT_ID, SECOND_DELIVERABLE_MEDIA_ID, SOURCE_MEDIA_ID, STAFF_ID, STRANGER_ID, THUMBNAIL_ID, VIDEO_ID } from './ids'
 import { createCuid2 } from '../../src/cuid2'
 
-export { CLIENT_ID, DELIVERABLE_MEDIA_ID, OTHER_VIDEO_ID, SECOND_CLIENT_ID, SECOND_DELIVERABLE_MEDIA_ID, SOURCE_MEDIA_ID, STAFF_ID, STRANGER_ID, VIDEO_ID }
+export { CLIENT_ID, DELIVERABLE_MEDIA_ID, OTHER_THUMBNAIL_ID, OTHER_VIDEO_ID, SECOND_CLIENT_ID, SECOND_DELIVERABLE_MEDIA_ID, SOURCE_MEDIA_ID, STAFF_ID, STRANGER_ID, THUMBNAIL_ID, VIDEO_ID }
 export const staff: ReviewActor = { id: STAFF_ID, collection: 'users', role: 'staff' }
 export const client: ReviewActor = { id: CLIENT_ID, collection: 'users', role: 'customer' }
 export const stranger: ReviewActor = { id: STRANGER_ID, collection: 'users', role: 'customer' }
