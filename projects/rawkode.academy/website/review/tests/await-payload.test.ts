@@ -58,6 +58,7 @@ type Fixture = {
 	env?: Record<string, string | undefined>;
 	event?: unknown;
 	workflow?: string;
+	mode?: GateDeps["mode"];
 	// Commits that contain SHA, for `merge-base --is-ancestor`.
 	descendants?: string[];
 	// Commits missing from the shallow checkout until fetched.
@@ -109,6 +110,7 @@ function harness(fixture: Fixture = {}) {
 			return JSON.stringify(found);
 		},
 		env: fixture.env ?? {},
+		mode: fixture.mode,
 		async sleep(ms) {
 			clock += ms;
 		},
@@ -352,6 +354,21 @@ describe("run", () => {
 				REVIEW_PAYLOAD_WAIT_SECONDS: "0",
 			},
 			event: { inputs: { skip_payload_wait: "false" } },
+		});
+		await expect(run(deps)).resolves.toBe(1);
+		expect(wranglerCalls.length).toBeGreaterThan(0);
+	});
+
+	it("production mode ignores review skip flags", async () => {
+		const { deps, wranglerCalls } = harness({
+			changed: payloadChange,
+			mode: "production",
+			env: {
+				GITHUB_EVENT_PATH: "/event.json",
+				REVIEW_SKIP_PAYLOAD_WAIT: "1",
+				REVIEW_PAYLOAD_WAIT_SECONDS: "0",
+			},
+			event: { inputs: { skip_payload_wait: true } },
 		});
 		await expect(run(deps)).resolves.toBe(1);
 		expect(wranglerCalls.length).toBeGreaterThan(0);

@@ -361,6 +361,13 @@ export interface PayloadListResult<C extends WebsiteCollectionName> {
 	nextReleaseAt?: string | null;
 }
 
+export interface PayloadWebContainerDemo {
+	title: string;
+	description?: string;
+	files: Record<string, string>;
+	startCommand?: string;
+}
+
 interface ServiceBinding {
 	fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
 }
@@ -370,6 +377,7 @@ export interface WebsiteRuntimeEnv {
 	IMAGES?: unknown;
 	PAYLOAD_PREVIEW_PR?: string;
 	PAYLOAD_PREVIEW_SHA?: string;
+	PUBLIC_SSR_CACHE_ENABLED?: string;
 }
 
 export interface PayloadRequestState {
@@ -769,6 +777,28 @@ export async function getPayloadEntry<C extends WebsiteCollectionName>(
 			nextReleaseAt?: string | null;
 		}>(`/v1/collections/${collectionSlug(collection)}?${params}`);
 		return toEntry(collection, response.doc);
+	} catch (error) {
+		if (error instanceof PayloadNotFoundError) return undefined;
+		throw error;
+	}
+}
+
+/** Fetches one public demo's code separately from content projections so file
+ * contents and importer provenance never enter ordinary CMS collection reads. */
+export async function getWebContainerDemo(
+	courseSlug: string,
+	moduleSlug: string,
+	resourceKey: string,
+): Promise<PayloadWebContainerDemo | undefined> {
+	const params = new URLSearchParams({
+		course: courseSlug,
+		module: moduleSlug,
+		resource: resourceKey,
+	});
+	try {
+		return await getBridgeJson<PayloadWebContainerDemo>(
+			`/v1/demos?${params.toString()}`,
+		);
 	} catch (error) {
 		if (error instanceof PayloadNotFoundError) return undefined;
 		throw error;

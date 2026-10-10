@@ -8,7 +8,7 @@ import {
 
 type CloudflareLocals = {
 	runtime?: {
-		env?: WebsiteRuntimeEnv;
+		env?: WebsiteRuntimeEnv & { PUBLIC_SSR_CACHE_ENABLED?: string };
 	};
 	user?: unknown;
 };
@@ -87,6 +87,76 @@ function requestIsInteractiveApi(request: Request): boolean {
 	);
 }
 
+function responseCacheKey(request: Request, env?: WebsiteRuntimeEnv): Request {
+	const url = new URL(request.url);
+	const namespace = env?.PAYLOAD_PREVIEW_PR
+		? `preview-${env.PAYLOAD_PREVIEW_PR}-${env.PAYLOAD_PREVIEW_SHA ?? "unknown"}`
+		: "production";
+	const safeNamespace = namespace.toLowerCase().replace(/[^a-z0-9-]/g, "-");
+	return new Request(
+		`https://website-response-cache.rawkode.academy/${safeNamespace}/${encodeURIComponent(url.host)}${url.pathname}${url.search}`,
+	);
+}
+
+function requestCanUseResponseCache(request: Request): boolean {
+	if (request.method !== "GET") return false;
+	const pathname = new URL(request.url).pathname;
+	if (
+		pathname.startsWith("/api/") &&
+		!/^\/api\/feeds\//.test(pathname) &&
+		pathname !== "/api/search.json" &&
+		pathname !== "/api/sitemap-pages.json" &&
+		!/^\/api\/chapters\//.test(pathname)
+	) {
+		return false;
+	}
+	if (
+		pathname.startsWith("/cms-assets/") ||
+		pathname.startsWith("/cms-diagrams/") ||
+		pathname === "/__cms-preview-check"
+	) {
+		return false;
+	}
+	if (
+		request.headers.has("Cookie") ||
+		request.headers.has("Authorization") ||
+		request.headers.has("CF-Access-JWT-Assertion") ||
+		request.headers.has("Range") ||
+		request.headers.has("If-Range") ||
+		request.headers.has("If-None-Match") ||
+		request.headers.has("If-Modified-Since") ||
+		request.headers.has("If-Match") ||
+		request.headers.has("If-Unmodified-Since") ||
+		[
+			"x-http-method-override",
+			"x-http-method",
+			"x-method-override",
+			"x-forwarded-host",
+			"x-host",
+			"x-forwarded-scheme",
+			"x-original-url",
+			"x-rewrite-url",
+			"forwarded",
+		].some((name) => request.headers.has(name)) ||
+		/\b(?:no-cache|no-store)\b|(?:^|,)\s*max-age=0(?:,|$)/i.test(
+			request.headers.get("Cache-Control") ?? "",
+		)
+	) {
+		return false;
+	}
+	return true;
+}
+
+function responseCanUseCache(request: Request, response: Response): boolean {
+	return (
+		response.status === 200 &&
+		!response.headers.has("Set-Cookie") &&
+		!responseHasPrivateCachePolicy(response) &&
+		!responseHasUnsafeVary(response) &&
+		isPublicContentResponse(request, response)
+	);
+}
+
 function isCacheableStatus(status: number): boolean {
 	return status === 200 || [301, 302, 303, 307, 308].includes(status);
 }
@@ -130,89 +200,6 @@ function isPublicContentResponse(request: Request, response: Response): boolean 
 	);
 }
 
-function htmlCacheKey(request: Request, env?: WebsiteRuntimeEnv): Request {
-	const url = new URL(request.url);
-	const namespace = env?.PAYLOAD_PREVIEW_PR
-		? "preview-" + env.PAYLOAD_PREVIEW_PR + "-" + (env.PAYLOAD_PREVIEW_SHA ?? "unknown")
-		: "production";
-	const safeNamespace = namespace.toLowerCase().replace(/[^a-z0-9-]/g, "-");
-	const key = new URL(
-		"https://ssr-html-cache.rawkode.academy/" +
-			safeNamespace +
-			"/" +
-			encodeURIComponent(url.host) +
-			url.pathname +
-			url.search,
-	);
-	return new Request(key);
-}
-
-function canReadHtmlCache(request: Request): boolean {
-	if (request.method !== "GET") return false;
-	const url = new URL(request.url);
-	if (
-		url.pathname.startsWith("/api/") ||
-		url.pathname.startsWith("/cms-assets/") ||
-		url.pathname.startsWith("/cms-diagrams/") ||
-		url.pathname === "/__cms-preview-check"
-	) {
-		return false;
-	}
-	if (
-		request.headers.has("Cookie") ||
-		request.headers.has("Authorization") ||
-		request.headers.has("CF-Access-JWT-Assertion") ||
-		/\b(?:no-cache|no-store)\b|(?:^|,)\s*max-age=0(?:,|$)/i.test(
-			request.headers.get("Cache-Control") ?? "",
-		)
-	) {
-		return false;
-	}
-	return true;
-}
-
-function cacheableHtmlResponse(response: Response): boolean {
-	if (response.status !== 200) return false;
-	if (!response.headers.get("Content-Type")?.toLowerCase().includes("text/html")) {
-		return false;
-	}
-	if (response.headers.has("Set-Cookie")) return false;
-	const cacheControl = response.headers.get("Cache-Control") ?? "";
-	if (/\b(?:private|no-store|no-cache)\b/i.test(cacheControl)) return false;
-	const vary = response.headers
-		.get("Vary")
-		?.split(",")
-		.map((value) => value.trim().toLowerCase())
-		.filter(Boolean);
-	return !vary?.some((value) => value !== "accept-encoding");
-}
-
-function htmlCacheLifetime(response: Response, state: PayloadRequestState): number {
-	const cacheControl =
-		response.headers.get("CDN-Cache-Control") ?? response.headers.get("Cache-Control");
-	const sharedMaxAge = directiveSeconds(cacheControl, "s-maxage");
-	const maxAge = directiveSeconds(cacheControl, "max-age");
-	const declared = sharedMaxAge ?? maxAge ?? 30;
-	let lifetime = Math.min(30, declared);
-	if (state.nextReleaseAt !== undefined) {
-		lifetime = Math.min(
-			lifetime,
-			Math.floor((state.nextReleaseAt - Date.now()) / 1000),
-		);
-	}
-	return Math.max(0, lifetime);
-}
-
-function responseWithHtmlCacheHeaders(response: Response, lifetime: number): Response {
-	const headers = new Headers(response.headers);
-	const control =
-		"public, max-age=" + lifetime + ", s-maxage=" + lifetime;
-	headers.set("Cache-Control", control);
-	headers.set("CDN-Cache-Control", control);
-	headers.set("Expires", new Date(Date.now() + lifetime * 1000).toUTCString());
-	return withHeaders(response, headers);
-}
-
 function withHeaders(response: Response, headers: Headers): Response {
 	return new Response(response.body, {
 		status: response.status,
@@ -245,14 +232,14 @@ function applyPublicResponseCachePolicy(
 	}
 
 	if (response.status >= 400) return noStoreResponse(response, false);
-	if (!isCacheableStatus(response.status)) return response;
+	if (!isCacheableStatus(response.status)) return noStoreResponse(response, false);
 
 	if (responseHasPrivateCachePolicy(response)) {
 		return noStoreResponse(response, hasDirective(response.headers.get("Cache-Control"), "private"));
 	}
 	if (responseIsImmutable(response)) return response;
 	if (responseHasUnsafeVary(response)) return noStoreResponse(response, false);
-	if (!isPublicContentResponse(request, response)) return response;
+	if (!isPublicContentResponse(request, response)) return noStoreResponse(response, false);
 
 	const headers = new Headers(response.headers);
 	const oldCacheControl = headers.get("Cache-Control");
@@ -278,12 +265,13 @@ function applyPublicResponseCachePolicy(
 	}
 	if (lifetime <= 0) return noStoreResponse(response, false);
 
-	const cacheControl = `public, max-age=${lifetime}, s-maxage=${lifetime}`;
-	const cdnCacheControl = `public, max-age=${lifetime}`;
+	const cacheControl = `public, max-age=${lifetime}, s-maxage=${lifetime}, must-revalidate`;
+	const cdnCacheControl = `public, max-age=${lifetime}, must-revalidate`;
 	// Replace cache directives on mutable public content so no prior long TTL or
 	// stale directive can outlive the 30-second freshness window.
 	headers.set("Cache-Control", withoutStaleDirectives(cacheControl));
 	headers.set("CDN-Cache-Control", withoutStaleDirectives(cdnCacheControl));
+	headers.set("Cloudflare-CDN-Cache-Control", withoutStaleDirectives(cdnCacheControl));
 	headers.set("Expires", new Date(Date.now() + lifetime * 1000).toUTCString());
 	return withHeaders(response, headers);
 }
@@ -293,23 +281,25 @@ export const payloadContentMiddleware = defineMiddleware(
 		const locals = context.locals as typeof context.locals & CloudflareLocals;
 		const state: PayloadRequestState = { env: locals.runtime?.env };
 		const request = context.request;
-		const cache = getDefaultWorkerCache();
-		const cacheableRequest = Boolean(
-			cache && !locals.user && canReadHtmlCache(request),
-		);
-		const cacheKey = cacheableRequest
-			? htmlCacheKey(request, state.env)
+		// A PR preview can test Cloudflare's native Workers Cache at the named
+		// CachedAstro entrypoint. Avoid a second HTML cache underneath it so the
+		// observed edge TTL is the only page-response freshness layer.
+		const cache = state.env?.PUBLIC_SSR_CACHE_ENABLED === "true"
+			? undefined
+			: getDefaultWorkerCache();
+		const cacheKey = cache && requestCanUseResponseCache(request)
+			? responseCacheKey(request, state.env)
 			: undefined;
 		if (cache && cacheKey) {
 			try {
 				const hit = await cache.match(cacheKey);
 				if (hit) {
 					const headers = new Headers(hit.headers);
-					headers.set("X-SSR-Cache", "HIT");
+					headers.set("X-Website-Cache", "HIT");
 					return withHeaders(hit, headers);
 				}
 			} catch {
-				// Cache API failures should not prevent a live content response.
+				// Cache misses fall through to live Astro rendering.
 			}
 		}
 		return runWithPayloadRequest(state, async () => {
@@ -320,26 +310,20 @@ export const payloadContentMiddleware = defineMiddleware(
 				state,
 				requestIsPrivate(request, Boolean(locals.user)),
 			);
-			if (
-				cache &&
-				cacheKey &&
-				!locals.user &&
-				cacheableHtmlResponse(response)
-			) {
-				const lifetime = htmlCacheLifetime(response, state);
-				if (lifetime > 0) {
-					const cached = responseWithHtmlCacheHeaders(response, lifetime);
-					try {
-						await cache.put(cacheKey, cached.clone());
-					} catch {
-						// A cache write is an optimization; return the rendered page on failure.
-					}
-					response = cached;
-				}
-			}
-			if (cacheableRequest && response.headers.get("X-SSR-Cache") !== "HIT") {
+			if (cacheKey && !requestIsPrivate(request, Boolean(locals.user))) {
 				const headers = new Headers(response.headers);
-				headers.set("X-SSR-Cache", "MISS");
+				headers.set("X-Website-Cache", "MISS");
+				response = withHeaders(response, headers);
+				if (cache && responseCanUseCache(request, response)) {
+					try {
+						await cache.put(cacheKey, response.clone());
+					} catch {
+						// Cache storage is an optimization; the live response still succeeds.
+					}
+				}
+			} else {
+				const headers = new Headers(response.headers);
+				headers.set("X-Website-Cache", "BYPASS");
 				response = withHeaders(response, headers);
 			}
 			return response;

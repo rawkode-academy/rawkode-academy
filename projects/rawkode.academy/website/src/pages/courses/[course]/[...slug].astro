@@ -64,6 +64,31 @@ const dedupedResources = Array.from(
 	).values(),
 );
 
+// WebContainer file contents are fetched on the dedicated SSR route. Keep
+// only display and lookup fields in the hydrated ResourceList island.
+const resourceListResources = dedupedResources.map((resource) => ({
+	...(resource.id ? { id: resource.id } : {}),
+	title: resource.title,
+	type: resource.type,
+	...(resource.description ? { description: resource.description } : {}),
+	...(resource.url ? { url: resource.url } : {}),
+	...(resource.filePath ? { filePath: resource.filePath } : {}),
+	...(resource.category ? { category: resource.category } : {}),
+	...(resource.embedConfig
+		? {
+			embedConfig: {
+				container: resource.embedConfig.container,
+				src: resource.embedConfig.src,
+				...(resource.embedConfig.height ? { height: resource.embedConfig.height } : {}),
+				...(resource.embedConfig.width ? { width: resource.embedConfig.width } : {}),
+				...(resource.embedConfig.startCommand
+					? { startCommand: resource.embedConfig.startCommand }
+					: {}),
+			},
+		}
+		: {}),
+}));
+
 const imageUrl = module.data.cover?.image?.src ?? null;
 const relativeModuleSlug = getCourseModuleSlug(course.slug, module.slug);
 
@@ -180,7 +205,7 @@ function formatDuration(minutes?: number) {
 
 				{dedupedResources.length > 0 && (
 					<aside class={doc.moduleRail}>
-						<ResourceList resources={dedupedResources} courseId={course.id} client:load />
+					<ResourceList resources={resourceListResources} courseSlug={course.slug} moduleSlug={relativeModuleSlug} client:load />
 					</aside>
 				)}
 

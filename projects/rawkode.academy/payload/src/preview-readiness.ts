@@ -46,11 +46,9 @@ export async function cmsPreviewReadiness(
 		user: null,
 	} as never)
 	const video = existingVideo.docs[0] as Record<string, unknown> | undefined
-	// Leave a five-minute window for the serial SSR, D2, and Images checks before
-	// the post-boundary request proves scheduled visibility.
-	const priorPublishedAt = video?.publishedAt
-	const priorRelease = typeof priorPublishedAt === 'string' ? Date.parse(priorPublishedAt) : Number.NaN
-	const publishedAt = new Date(priorRelease > Date.now() + 10_000 ? priorRelease : Date.now() + 5 * 60_000).toISOString()
+  // Refresh the fixture on every readiness call so a CI retry always gets a
+  // full five-minute window for serial SSR, D2, Images, and boundary checks.
+  const publishedAt = new Date(Date.now() + 5 * 60_000).toISOString()
 	const videoData = {
 		slug: videoSlug,
 		title: `Scheduled CMS preview ${identity.sha.slice(0, 12)}`,

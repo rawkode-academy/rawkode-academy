@@ -94,6 +94,10 @@ export function parseCollectionRequest(url: URL): CollectionRequest | null {
   const segments = url.pathname.split('/').filter(Boolean)
   if (segments.length !== 3 || segments[0] !== 'v1' || segments[1] !== 'collections' || !collectionSet.has(segments[2]!)) return null
   const collection = segments[2] as PublicContentCollection
+  // Chapters are child records. Expose them only through a visible video's
+  // full projection so a future video's derived chapters cannot be listed or
+  // fetched independently of their parent publication date.
+  if (collection === 'chapters') return null
   const allowed = new Set(['id','slug','view','page','limit','authorId','technologyId','showId','courseId','seriesId','personId','type','category','q'])
   for (const key of url.searchParams.keys()) if (!allowed.has(key) || url.searchParams.getAll(key).length !== 1) throw new RequestError(400, 'Invalid query parameters')
   const values = Object.fromEntries(url.searchParams.entries())
@@ -181,13 +185,40 @@ function safeValue(value: unknown): unknown {
 
 function projectFields(doc: Doc, collection: PublicContentCollection, view: 'summary' | 'full', metadataOnly = false): Record<string, unknown> {
   const allowed = new Set(['id','slug', ...collectionFields[collection].summary, ...(view === 'full' ? collectionFields[collection].full : [])])
+  const summary = new Set(collectionFields[collection].summary)
   const output: Record<string, unknown> = { id: String(doc.id) }
   for (const field of allowed) {
     if (field === 'id' || privateFields.has(field) || !(field in doc)) continue
-    if (metadataOnly && ['streamUrl','youtubeId','podcast'].includes(field)) continue
-    output[field] = safeValue(doc[field])
+    // Future live streams may advertise public metadata, but exact ID/slug
+    // lookups default to the full view. Keep them on the summary projection
+    // until publishedAt, including when a publication overlay is present.
+    if (metadataOnly && !summary.has(field)) continue
+    output[field] = field === 'contentResources' ? publicContentResources(doc[field]) : safeValue(doc[field])
   }
   return output
+}
+
+/** Demo source stays on the selected-resource bridge route, not general CMS projections. */
+function publicContentResources(value: unknown): unknown {
+  const safe = safeValue(value)
+  const stripDemoInternals = (current: unknown): unknown => {
+    if (Array.isArray(current)) return current.map(stripDemoInternals)
+    if (!current || typeof current !== 'object') return current
+    const record = current as Record<string, unknown>
+    const output: Record<string, unknown> = {}
+    for (const [key, child] of Object.entries(record)) {
+      if (key === 'embedConfig' && child && typeof child === 'object' && !Array.isArray(child)) {
+        const config = child as Record<string, unknown>
+        const publicConfig: Record<string, unknown> = {}
+        for (const [field, nested] of Object.entries(config)) if (field !== 'files' && field !== 'import') publicConfig[field] = stripDemoInternals(nested)
+        output[key] = publicConfig
+      } else {
+        output[key] = stripDemoInternals(child)
+      }
+    }
+    return output
+  }
+  return stripDemoInternals(safe)
 }
 
 function chapterReferenceId(value: unknown): string | null {
@@ -206,19 +237,20 @@ function isChapterData(value: unknown): value is { title: string; startTime: num
 }
 
 /** Restore the former inline video chapter shape from Payload's normalized relation IDs. */
-async function hydrateVideoChapters(payload: PublicPayload, docs: Record<string, unknown>[]): Promise<void> {
+async function hydrateVideoChapters(payload: PublicPayload, docs: Record<string, unknown>[], now = Date.now()): Promise<void> {
   const references = docs.flatMap(doc => Array.isArray(doc.chapters) ? doc.chapters.filter(value => !isChapterData(value)).map(chapterReferenceId).filter((id): id is string => id !== null) : [])
   const ids = [...new Set(references)].slice(0, 8000)
   const chapters = new Map<string, { title: string; startTime: number }>()
   for (let index = 0; index < ids.length; index += 100) {
     const batch = ids.slice(index, index + 100)
     const result = await payload.find({
-      collection: 'chapters', where: { id: { in: batch } }, depth: 0, draft: false,
+      collection: 'chapters', where: { and: [{ id: { in: batch } }, { _status: { equals: 'published' } }, { tombstone: { not_equals: true } }] }, depth: 0, draft: false,
       overrideAccess: true, user: null, page: 1, limit: batch.length,
       select: { id: true, title: true, startTime: true, _status: true, tombstone: true },
     } as never)
     for (const chapter of result.docs as unknown as Doc[]) {
-      if (!isVisibleDocument('chapters', chapter) || typeof chapter.title !== 'string' || typeof chapter.startTime !== 'number') continue
+      const visible = isVisibleDocument('chapters', chapter, now).visible
+      if (!visible || typeof chapter.title !== 'string' || typeof chapter.startTime !== 'number') continue
       chapters.set(String(chapter.id), { title: chapter.title, startTime: chapter.startTime })
     }
   }
@@ -326,14 +358,21 @@ export async function collectionResponse(request: Request, payload: PublicPayloa
   const visible = rawDocs.filter(doc => isVisibleDocument(parsed!.collection, doc, now).visible)
   if (exact && visible.length > 1) return Response.json({ error: 'The requested slug is ambiguous' }, { status: 409 })
   const overlay = parsed.collection === 'videos' ? await overlayVideos(payload, visible) : new Map<string, Record<string, unknown>>()
-  const assetPaths = visible.flatMap(doc => assetReferencePaths(doc, parsed!.collection, parsed!.view))
+  const viewForDoc = (doc: Doc): 'summary' | 'full' =>
+    isVisibleDocument(parsed!.collection, doc, now).metadataOnly ? 'summary' : parsed!.view
+  const assetPaths = visible.flatMap(doc => assetReferencePaths(doc, parsed!.collection, viewForDoc(doc)))
   const assetDocs = await loadAssetDocs(payload, assetPaths)
   const docs = visible.map(doc => {
     const visibility = isVisibleDocument(parsed!.collection, doc, now)
     const base = projectFields(doc, parsed!.collection, parsed!.view, visibility.metadataOnly)
     const released = overlay.get(String(doc.id))
-    const merged = released && isVisibleDocument('videos', released, now).visible ? projectFields({ ...doc, ...released, id: doc.id }, 'videos', parsed!.view, visibility.metadataOnly) : base
-    const assets = assetReferencePaths(doc, parsed!.collection, parsed!.view).flatMap(rootPath => {
+    const publishedDocument = released && isVisibleDocument('videos', released, now).visible
+      ? { ...doc, ...released, ...(Array.isArray(released.reviewChapters) ? { chapters: released.reviewChapters } : {}), id: doc.id }
+      : undefined
+    const merged = publishedDocument
+      ? projectFields(publishedDocument, 'videos', parsed!.view, visibility.metadataOnly)
+      : base
+    const assets = assetReferencePaths(doc, parsed!.collection, viewForDoc(doc)).flatMap(rootPath => {
       const asset = assetDocs.get(rootPath)
       if (!asset) return []
       const ownerDirectory = typeof doc.sourcePath === 'string' ? dirname(doc.sourcePath) : ''
@@ -341,7 +380,7 @@ export async function collectionResponse(request: Request, payload: PublicPayloa
     })
     return { ...merged, mediaAssets: assets }
   })
-  if (parsed.collection === 'videos' && parsed.view === 'full') await hydrateVideoChapters(payload, docs)
+  if (parsed.collection === 'videos' && parsed.view === 'full') await hydrateVideoChapters(payload, docs, now)
   const nextReleaseAt = exact
     ? (visible[0] && visible[0].publishedAt && Date.parse(String(visible[0].publishedAt)) > now ? new Date(Date.parse(String(visible[0].publishedAt))).toISOString() : null)
     : await earliestNextRelease(payload, parsed, now)
@@ -358,17 +397,22 @@ export async function assetResponse(request: Request, payload: PublicPayload, bu
   const segments = new URL(request.url).pathname.split('/').filter(Boolean)
   if (new URL(request.url).searchParams.size || segments.length !== 3 || segments[0] !== 'v1' || segments[1] !== 'assets' || !isCuid2(segments[2])) return Response.json({ error: 'Not found' }, { status: 404 })
   const doc = await (payload as Payload).findByID({ collection: 'static-assets', id: segments[2], depth: 0, draft: false, overrideAccess: true, user: null } as never).catch(() => null) as unknown as Doc | null
-  if (!doc || !isVisibleDocument('static-assets', doc, now).visible || typeof doc.r2Key !== 'string' || !doc.r2Key) return Response.json({ error: 'Not found' }, { status: 404 })
-  const object = await bucket.get(doc.r2Key)
-  if (!object) return Response.json({ error: 'Not found' }, { status: 404 })
+  const checksum = typeof doc?.checksum === 'string' ? doc.checksum : ''
+  const r2Key = typeof doc?.r2Key === 'string' ? doc.r2Key : ''
+  const sourcePath = typeof doc?.slug === 'string' ? doc.slug : ''
+  const bytes = doc?.bytes
+  const mimeType = typeof doc?.mimeType === 'string' ? doc.mimeType : ''
+  const keyParts = r2Key.split('/')
+  if (!doc || !isVisibleDocument('static-assets', doc, now).visible || !sha256Pattern.test(checksum) || !sourcePath || !Number.isSafeInteger(bytes) || (bytes as number) <= 0 || !mimeType || keyParts.length < 3 || keyParts[0] !== 'static' || keyParts[1] !== checksum.slice(0, 16) || keyParts.slice(2).join('/') !== sourcePath || keyParts.some(part => !part || part === '.' || part === '..' || part.includes('\\'))) return Response.json({ error: 'Not found' }, { status: 404 })
+  const object = await bucket.get(r2Key)
+  if (!object || object.customMetadata?.checksum !== checksum || object.customMetadata?.sourcePath !== sourcePath || object.size !== bytes || object.httpMetadata?.contentType !== mimeType) return Response.json({ error: 'Not found' }, { status: 404 })
   const headers = new Headers({
-    'Content-Type': typeof doc.mimeType === 'string' ? doc.mimeType : 'application/octet-stream',
+    'Content-Type': mimeType,
     'Cache-Control': 'public, max-age=0, s-maxage=31536000, immutable',
     'X-Content-Type-Options': 'nosniff',
   })
-  const checksum = typeof doc.checksum === 'string' ? doc.checksum : ''
-  if (checksum) headers.set('ETag', `"${checksum}"`)
-  if (typeof doc.bytes === 'number' && doc.bytes >= 0) headers.set('Content-Length', String(doc.bytes))
+  headers.set('ETag', `"${checksum}"`)
+  headers.set('Content-Length', String(bytes))
   return new Response(object.body, { headers })
 }
 
@@ -396,9 +440,131 @@ export async function diagramResponse(request: Request, bucket: R2Bucket): Promi
   return new Response(object.body, { headers })
 }
 
+export type DemoRequest = { course: string; module: string; resource: string }
+const demoSlugPattern = /^[A-Za-z0-9][A-Za-z0-9._-]{0,159}$/
+const demoFileExtensions = new Set(['.astro','.c','.cc','.cpp','.cs','.cjs','.css','.go','.graphql','.h','.hpp','.html','.java','.js','.json','.jsonc','.jsx','.md','.mdx','.mjs','.php','.py','.rb','.rs','.sh','.sql','.svg','.toml','.ts','.tsx','.txt','.vue','.xml','.yaml','.yml'])
+const demoFileNames = new Set(['dockerfile','license','makefile'])
+const maxDemoFiles = 100
+const maxDemoFileBytes = 256 * 1024
+const maxDemoBytes = 1024 * 1024
+const maxDemoPathLength = 240
+
+export function parseDemoRequest(url: URL): DemoRequest | null {
+  if (url.pathname !== '/v1/demos') return null
+  const allowed = new Set(['course','module','resource'])
+  for (const key of url.searchParams.keys()) if (!allowed.has(key) || url.searchParams.getAll(key).length !== 1) throw new RequestError(400, 'Invalid demo query parameters')
+  const course = url.searchParams.get('course') ?? ''
+  const module = url.searchParams.get('module') ?? ''
+  const resource = url.searchParams.get('resource') ?? ''
+  const moduleParts = module.split('/')
+  if (!demoSlugPattern.test(course) || !demoSlugPattern.test(resource) || module.length > 240 || moduleParts.length < 2 || moduleParts[0] !== course || moduleParts.some(part => !demoSlugPattern.test(part) || part === '.' || part === '..')) {
+    throw new RequestError(400, 'course, module, and resource must be valid matching slugs')
+  }
+  if (url.searchParams.size !== 3) throw new RequestError(400, 'course, module, and resource are required')
+  return { course, module, resource }
+}
+
+function relationID(value: unknown): string | null {
+  if (typeof value === 'string' || typeof value === 'number') return String(value)
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null
+  const id = (value as Record<string, unknown>).id
+  return typeof id === 'string' || typeof id === 'number' ? String(id) : null
+}
+
+function nextVisibleBoundary(documents: Doc[], now: number): string | null {
+  const future = documents.flatMap(doc => {
+    if (doc._status !== 'published' || doc.tombstone === true || doc.publishedAt === undefined || doc.publishedAt === null) return []
+    const value = Date.parse(String(doc.publishedAt))
+    return Number.isFinite(value) && value > now ? [value] : []
+  })
+  return future.length ? new Date(Math.min(...future)).toISOString() : null
+}
+
+function inlineDemoFiles(value: unknown): Record<string, string> | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null
+  const entries = Object.entries(value as Record<string, unknown>)
+  if (!entries.length || entries.length > maxDemoFiles) return null
+  const output: Record<string, string> = {}
+  let totalBytes = 0
+  for (const [filePath, content] of entries) {
+    const segments = filePath.split('/')
+    const filename = filePath.split('/').at(-1)?.toLowerCase() ?? ''
+    const extension = filePath.slice(filePath.lastIndexOf('.')).toLowerCase()
+    if (!filePath || filePath.length > maxDemoPathLength || filePath.startsWith('/') || filePath.includes('\\') || /[\u0000-\u001f\u007f]/.test(filePath) || segments.some(part => !part || part === '.' || part === '..' || part.startsWith('.')) || (!demoFileExtensions.has(extension) && !demoFileNames.has(filename)) || typeof content !== 'string') return null
+    const bytes = new TextEncoder().encode(content).byteLength
+    if (bytes > maxDemoFileBytes) return null
+    totalBytes += bytes
+    if (totalBytes > maxDemoBytes) return null
+    output[filePath] = content
+  }
+  return output
+}
+
+export async function demoResponse(request: Request, payload: PublicPayload, now = Date.now()): Promise<Response> {
+  if (request.method !== 'GET') return new Response('Method not allowed', { status: 405, headers: { Allow: 'GET' } })
+  let parsed: DemoRequest | null
+  try { parsed = parseDemoRequest(new URL(request.url)) } catch (error) {
+    if (error instanceof RequestError) return Response.json({ error: error.message }, { status: error.status })
+    throw error
+  }
+  if (!parsed) return Response.json({ error: 'Not found' }, { status: 404 })
+
+  const courseResult = await payload.find({
+    collection: 'courses', where: { and: [{ slug: { equals: parsed.course } }, { _status: { equals: 'published' } }, { tombstone: { not_equals: true } }] },
+    depth: 0, draft: false, overrideAccess: true, user: null, page: 1, limit: 2,
+    select: { id: true, slug: true, _status: true, tombstone: true, publishedAt: true },
+  } as never)
+  const courseDocs = courseResult.docs as unknown as Doc[]
+  const course = courseDocs.length === 1 ? courseDocs[0] : undefined
+  if (!course || !isVisibleDocument('courses', course, now).visible) {
+    return Response.json({ error: 'Not found' }, { status: 404, headers: cacheHeaders(nextVisibleBoundary(courseDocs, now), now) })
+  }
+
+  const moduleResult = await payload.find({
+    collection: 'course-modules', where: { and: [{ slug: { equals: parsed.module } }, { course: { equals: course.id } }, { _status: { equals: 'published' } }, { tombstone: { not_equals: true } }] },
+    depth: 0, draft: false, overrideAccess: true, user: null, page: 1, limit: 2,
+    select: { id: true, slug: true, course: true, _status: true, tombstone: true, publishedAt: true, contentResources: true },
+  } as never)
+  const moduleDocs = moduleResult.docs as unknown as Doc[]
+  const module = moduleDocs.length === 1 ? moduleDocs[0] : undefined
+  if (!module || relationID(module.course) !== String(course.id) || !isVisibleDocument('course-modules', module, now).visible) {
+    return Response.json({ error: 'Not found' }, { status: 404, headers: cacheHeaders(nextVisibleBoundary(moduleDocs, now), now) })
+  }
+
+  const resources = Array.isArray(module.contentResources) ? module.contentResources : []
+  const matches = resources.filter(value => {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return false
+    const resource = value as Record<string, unknown>
+    const embedConfig = resource.embedConfig
+    if (resource.type !== 'embed' || !embedConfig || typeof embedConfig !== 'object' || Array.isArray(embedConfig)) return false
+    const config = embedConfig as Record<string, unknown>
+    const identifiers = [resource.id, resource.slug, config.src].filter((value): value is string => typeof value === 'string')
+    return config.container === 'webcontainer' && identifiers.includes(parsed!.resource)
+  }) as Record<string, unknown>[]
+  if (matches.length !== 1) return Response.json({ error: 'Not found' }, { status: 404, headers: cacheHeaders(null, now) })
+  const embedConfig = matches[0]!.embedConfig as Record<string, unknown>
+  const files = inlineDemoFiles(embedConfig.files)
+  const startCommand = embedConfig.startCommand
+  if (!files) {
+    return Response.json({ error: 'Not found' }, { status: 404, headers: cacheHeaders(null, now) })
+  }
+  const resource = matches[0]!
+  const title = typeof resource.title === 'string' && resource.title.trim() && resource.title.length <= 200 && !/[\u0000-\u001f\u007f]/.test(resource.title)
+    ? resource.title
+    : parsed.resource
+  const description = typeof resource.description === 'string' && resource.description.trim() && resource.description.length <= 500 && !/[\u0000-\u001f\u007f]/.test(resource.description)
+    ? resource.description
+    : undefined
+  const safeStartCommand = typeof startCommand === 'string' && startCommand.trim() && startCommand.length <= 200 && !/[\u0000-\u001f\u007f]/.test(startCommand)
+    ? startCommand
+    : undefined
+  return Response.json({ title, ...(description ? { description } : {}), files, ...(safeStartCommand ? { startCommand: safeStartCommand } : {}) }, { headers: cacheHeaders(null, now) })
+}
+
 export async function publicContentBridge(request: Request, payload: PublicPayload, bucket: R2Bucket): Promise<Response> {
   const url = new URL(request.url)
   if (url.pathname.startsWith('/v1/assets/')) return assetResponse(request, payload, bucket)
   if (url.pathname.startsWith('/v1/diagrams/')) return diagramResponse(request, bucket)
+  if (url.pathname === '/v1/demos') return demoResponse(request, payload)
   return collectionResponse(request, payload)
 }

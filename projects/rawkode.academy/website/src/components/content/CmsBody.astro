@@ -62,7 +62,7 @@ const blocks = await parseSafeCmsBody(entry);
 					lightSrc={block.lightSrc}
 					darkSrc={block.darkSrc}
 					alt={block.alt}
-					class={block.className}
+					class={block.className ?? ""}
 				/>
 			);
 		}

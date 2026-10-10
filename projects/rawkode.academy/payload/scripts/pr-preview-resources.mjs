@@ -20,9 +20,11 @@ export function pullRequestIdentity(env = process.env) {
   if (!env.GITHUB_EVENT_PATH) throw new Error('GITHUB_EVENT_PATH is required to identify the pull request.')
   const event = JSON.parse(requireEvent(env.GITHUB_EVENT_PATH))
   const pullRequestNumber = Number(event.pull_request?.number)
-  const sha = String(env.GITHUB_SHA || '').toLowerCase()
+  // On pull_request workflows, GITHUB_SHA is the synthetic merge commit.
+  // Preview checks/resources must use the PR head SHA, where project checks run.
+  const sha = String(event.pull_request?.head?.sha || '').toLowerCase()
   if (!Number.isSafeInteger(pullRequestNumber) || pullRequestNumber < 1) throw new Error('The GitHub event has no valid pull request number.')
-  if (!/^[0-9a-f]{40}$/.test(sha)) throw new Error('GITHUB_SHA must be the full 40-character workflow SHA.')
+  if (!/^[0-9a-f]{40}$/.test(sha)) throw new Error('The pull_request event must contain a full 40-character head SHA.')
   return { pullRequestNumber, sha, sha12: sha.slice(0, 12) }
 }
 

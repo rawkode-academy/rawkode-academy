@@ -58,7 +58,6 @@ function searchForWorkspaceRoot(current: string): string {
 	return current;
 }
 import { vite as vidstackPlugin } from "vidstack/plugins";
-import { webcontainerDemosPlugin } from "./src/utils/vite-plugin-webcontainer-demos";
 
 type AstroUserConfig = Parameters<typeof defineConfig>[0];
 type AstroVitePlugins = NonNullable<
@@ -189,7 +188,6 @@ export default defineConfig({
 	],
 	vite: {
 		plugins: asAstroVitePlugins([
-			webcontainerDemosPlugin(),
 			vidstackPlugin({ include: /components\/video\// }),
 			...(process.env.NODE_ENV === "production" &&
 			process.env.GRAFANA_SOURCEMAP_API_KEY

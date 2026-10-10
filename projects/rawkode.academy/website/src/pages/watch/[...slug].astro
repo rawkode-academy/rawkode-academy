@@ -141,7 +141,7 @@ const showRelatedAll = showRelatedPage
 		)
 	: [];
 const showRelatedVideos = showRelatedAll.slice(0, RELATED_VIDEO_LIMIT).map(toRelatedVideo);
-const showHasMore = Boolean(
+const showHasMoreVideos = Boolean(
 	showRelatedPage?.hasNextPage || showRelatedAll.length > RELATED_VIDEO_LIMIT,
 );
 
@@ -613,7 +613,7 @@ const watchStatusLabel = isLiveNow
 				<ShowVideoSection
 					show={showEntry}
 					videos={showRelatedVideos}
-					hasMoreVideos={showHasMore}
+					hasMoreVideos={showHasMoreVideos}
 				/>
 			) : technologyRecommendation && (
 				<TechnologyVideoSection

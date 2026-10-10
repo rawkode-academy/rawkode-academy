@@ -30,6 +30,10 @@ interface RuntimeLocals {
 	runtime?: { env?: WebsiteEnvironment };
 }
 
+interface CloudflareCacheStorage extends CacheStorage {
+	default: Cache;
+}
+
 const IMAGE_WIDTHS = new Set([320, 640, 960, 1280, 1600, 2048]);
 const SHA256_CHECKSUM = /^[a-f0-9]{64}$/i;
 const ASSET_ID = /^[a-zA-Z0-9_-]{8,128}$/;
@@ -45,34 +49,46 @@ function errorResponse(status: number): Response {
 	});
 }
 
-function assetCacheKey(url: URL, env: WebsiteEnvironment): Request {
-	const namespace = env.PAYLOAD_PREVIEW_PR
-		? "preview-" + env.PAYLOAD_PREVIEW_PR + "-" + (env.PAYLOAD_PREVIEW_SHA ?? "unknown")
+function assetCacheKey(url: URL, env?: WebsiteEnvironment): Request {
+	const namespace = env?.PAYLOAD_PREVIEW_PR
+		? `preview-${env.PAYLOAD_PREVIEW_PR}-${env.PAYLOAD_PREVIEW_SHA ?? "unknown"}`
 		: "production";
 	const safeNamespace = namespace.toLowerCase().replace(/[^a-z0-9-]/g, "-");
 	return new Request(
-		"https://cms-asset-cache-v2.rawkode.academy/" +
-			safeNamespace +
-			url.pathname +
-			url.search,
+		`https://cms-asset-cache.rawkode.academy/${safeNamespace}/${encodeURIComponent(url.host)}${url.pathname}${url.search}`,
 	);
 }
 
-async function cacheImmutableImage(
+async function respondFromCache(
 	cache: Cache | undefined,
 	key: Request,
-	response: Response,
-): Promise<Response> {
-	if (!cache) return response;
+): Promise<Response | undefined> {
+	if (!cache) return undefined;
 	try {
-		await cache.put(key, response.clone());
+		const hit = await cache.match(key);
+		if (!hit) return undefined;
+		const headers = new Headers(hit.headers);
+		headers.set("X-Image-Cache", "HIT");
+		return new Response(hit.body, { status: hit.status, statusText: hit.statusText, headers });
 	} catch {
-		// Returning the transformed image does not depend on a successful cache write.
+		return undefined;
 	}
-	return response;
 }
 
-export const GET: APIRoute = async ({ params, url, locals }) => {
+async function cacheImmutableImage(cache: Cache | undefined, key: Request, response: Response): Promise<Response> {
+	if (!cache) return response;
+	const headers = new Headers(response.headers);
+	headers.set("X-Image-Cache", "MISS");
+	const result = new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+	try {
+		await cache.put(key, result.clone());
+	} catch {
+		// A cache write is an optimization; the image response remains usable.
+	}
+	return result;
+}
+
+export const GET: APIRoute = async ({ params, url, locals, request }) => {
 	const assetId = params.assetId ?? "";
 	const checksum = url.searchParams.get("v") ?? "";
 	const requestedWidth = Number(url.searchParams.get("w") ?? "1280");
@@ -83,24 +99,15 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
 	}
 
 	const env = (locals as typeof locals & RuntimeLocals).runtime?.env;
-	const cache = typeof caches !== "undefined" ? caches.default : undefined;
-	const cacheKey = assetCacheKey(url, env ?? {});
-	if (cache) {
-		try {
-			const hit = await cache.match(cacheKey);
-			if (hit) {
-				const headers = new Headers(hit.headers);
-				headers.set("X-Image-Cache", "HIT");
-				return new Response(hit.body, {
-					status: hit.status,
-					statusText: hit.statusText,
-					headers,
-				});
-			}
-		} catch {
-			// The bridge remains the source of truth if the Worker cache is unavailable.
-		}
-	}
+	const cache = typeof caches === "undefined"
+		? undefined
+		: (caches as CloudflareCacheStorage).default;
+	const cacheKey = assetCacheKey(url, env);
+	const bypassCache = /\b(?:no-cache|no-store)\b|(?:^|,)\s*max-age=0(?:,|$)/i.test(
+		request.headers.get("Cache-Control") ?? "",
+	);
+	const cached = bypassCache ? undefined : await respondFromCache(cache, cacheKey);
+	if (cached) return cached;
 	const payload = env?.PAYLOAD_CONTENT;
 	if (!payload) return errorResponse(503);
 
@@ -132,14 +139,20 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
 		"X-Content-Type-Options": "nosniff",
 	});
 
-	if (sourceType === "image/svg+xml" || !env?.IMAGES) {
+	if (sourceType === "image/svg+xml") {
 		headers.set("ETag", '"' + checksum.toLowerCase() + '-original"');
 		headers.set("Content-Type", sourceType);
-		return cacheImmutableImage(
-			cache,
-			cacheKey,
-			new Response(source.body, { headers }),
-		);
+		return cacheImmutableImage(bypassCache ? undefined : cache, cacheKey, new Response(source.body, { headers }));
+	}
+
+	if (!env?.IMAGES) {
+		if (!fallbackSource.body) return errorResponse(502);
+		headers.set("ETag", '"' + checksum.toLowerCase() + '-original"');
+		headers.set("Content-Type", sourceType);
+		headers.set("Cache-Control", "no-store");
+		headers.set("CDN-Cache-Control", "no-store");
+		headers.set("X-Image-Transform", "unavailable");
+		return new Response(fallbackSource.body, { headers });
 	}
 
 	try {
@@ -149,11 +162,7 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
 		}).output({ format: "image/webp", quality: 82 });
 		headers.set("ETag", '"' + checksum.toLowerCase() + '-' + width + '-webp"');
 		headers.set("Content-Type", transformed.contentType());
-		return cacheImmutableImage(
-			cache,
-			cacheKey,
-			new Response(transformed.image(), { headers }),
-		);
+		return cacheImmutableImage(bypassCache ? undefined : cache, cacheKey, new Response(transformed.image(), { headers }));
 	} catch {
 		// Keep the original image usable during a transform outage, but do not
 		// cache it under a URL whose requested variant is WebP.

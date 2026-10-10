@@ -57,7 +57,7 @@ try {
   if (!dryRun) {
     for (const asset of snapshot.assetFiles) {
       const existing = await cloudflare.env.R2.head(asset.r2Key)
-      if (existing && existing.size === asset.bytes && existing.customMetadata?.checksum === asset.checksum) {
+      if (existing && existing.size === asset.bytes && existing.customMetadata?.checksum === asset.checksum && existing.customMetadata?.sourcePath === asset.relativePath && existing.httpMetadata?.contentType === asset.mimeType) {
         assets.skipped += 1
         continue
       }

@@ -1,9 +1,9 @@
 {
 	"$schema": "./node_modules/wrangler/config-schema.json",
 	"name": "rawkode-academy-website",
-	"main": "@astrojs/cloudflare/entrypoints/server",
+	"main": "./src/worker.ts",
 	"compatibility_date": "2026-03-12",
-	"compatibility_flags": ["nodejs_compat"],
+	"compatibility_flags": ["nodejs_compat", "enable_ctx_exports"],
 	"assets": {
 		"binding": "ASSETS",
 		"directory": "./dist",
@@ -14,6 +14,10 @@
 	},
 	"workers_dev": true,
 	"preview_urls": true,
+	"exports": {
+		"default": { "type": "worker", "cache": { "enabled": false } },
+		"CachedAstro": { "type": "worker", "cache": { "enabled": false } }
+	},
 	"observability": {
 		"traces": {
 			"enabled": true,

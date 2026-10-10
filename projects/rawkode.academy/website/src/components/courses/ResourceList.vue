@@ -46,6 +46,7 @@ const s = academyCourseResources();
 const headingId = `${useId()}-resources`;
 
 interface Resource {
+	id?: string;
 	title: string;
 	description?: string | undefined;
 	type: "url" | "file" | "embed";
@@ -55,15 +56,9 @@ interface Resource {
 		| {
 				container: "webcontainer" | "iframe";
 				src: string;
-				height: string;
-				width: string;
+				height?: string | undefined;
+				width?: string | undefined;
 				startCommand?: string | undefined;
-				files?: Record<string, string> | undefined;
-				import?:
-					| {
-							localDir: string;
-					  }
-					| undefined;
 		  }
 		| undefined;
 	category?: string | undefined;
@@ -71,7 +66,8 @@ interface Resource {
 
 const props = defineProps<{
 	resources: Resource[];
-	courseId?: string;
+	courseSlug?: string;
+	moduleSlug?: string;
 }>();
 
 const isEmbedModalOpen = ref(false);
@@ -146,16 +142,26 @@ const getResourceTypeLabel = (resource: Resource) => {
 const openEmbedModal = (resource: Resource) => {
 	if (resource.embedConfig?.container === "webcontainer") {
 		// Open WebContainer in a new window
-		const resourceId = resource.embedConfig.src;
-		// Get course ID from the current URL path
+		const resourceId = resource.id || resource.embedConfig.src;
+		// The URL fallback supports ResourceList previews outside course pages.
 		const pathParts = window.location.pathname.split("/");
 		const courseIndex = pathParts.indexOf("courses");
-		const courseId =
-			courseIndex >= 0
-				? pathParts[courseIndex + 1]
-				: props.courseId || "unknown";
+		const courseSlug =
+			props.courseSlug ||
+			(courseIndex >= 0 ? pathParts[courseIndex + 1] : undefined);
+		const moduleSlug =
+			props.moduleSlug ||
+			(courseIndex >= 0
+				? pathParts.slice(courseIndex + 2).join("/")
+				: undefined);
+		if (!courseSlug || !moduleSlug || !resourceId) return;
 
-		const url = `/embed/webcontainer?course=${encodeURIComponent(courseId ?? "unknown")}&resource=${encodeURIComponent(resourceId)}`;
+		const params = new URLSearchParams({
+			course: courseSlug,
+			module: moduleSlug,
+			resource: resourceId,
+		});
+		const url = `/embed/webcontainer?${params.toString()}`;
 		window.open(
 			url,
 			"webcontainer",

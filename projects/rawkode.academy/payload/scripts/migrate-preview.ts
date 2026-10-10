@@ -3,6 +3,7 @@ import { execFileSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { disposeCloudflare, prepareTarget } from './lib/remote-target'
 import { assertLegacyMigrationTarget, assertMigrationTarget } from '../src/id-schema'
+import { pullRequestIdentity } from './pr-preview-resources.mjs'
 
 // prepareTarget writes an explicit remote-only Wrangler config without a
 // `previews` block and asserts the resolved D1/R2 IDs before anything connects.
@@ -35,7 +36,7 @@ if (pullRequest) {
   // Seed only this isolated PR target with public repository content and its
   // static assets. The importer validates the resource identity again.
   const manifest = JSON.parse(readFileSync('.runtime/pr-preview-resources.json', 'utf8')) as { sha: string }
-  if (manifest.sha !== process.env.GITHUB_SHA?.toLowerCase()) throw new Error('PR preview manifest does not match this workflow SHA.')
+  if (manifest.sha !== pullRequestIdentity().sha) throw new Error('PR preview manifest does not match the pull request head SHA.')
   execFileSync('bun', ['run', 'import:static', '--', '--target=pr-preview'], { stdio: 'inherit', env: process.env })
 }
 console.log('Preview D1 migrations applied')

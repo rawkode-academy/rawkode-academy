@@ -61,6 +61,15 @@ test('static content snapshot preserves bodies, source metadata, relationships, 
   assert.equal(snapshot.records.some(record => record.collection === 'course-modules' && record.legacyId.includes('/examples/')), false)
   const module = snapshot.records.find(record => record.collection === 'course-modules' && record.legacyId === 'complete-guide-zitadel/01-introduction')
   assert.deepEqual(module?.relationships?.course, { collection: 'courses', legacyId: 'complete-guide-zitadel' })
+  const demoResource = (module?.data.contentResources as Record<string, unknown>[]).find(resource => (resource.embedConfig as Record<string, unknown> | undefined)?.src === 'oauth-pkce-app')
+  const demoConfig = demoResource?.embedConfig as Record<string, unknown> | undefined
+  const demoFiles = demoConfig?.files as Record<string, string> | undefined
+  assert.ok(demoFiles)
+  assert.match(demoFiles?.['server.js'] ?? '', /listen/)
+  assert.match(demoFiles?.['public/index.html'] ?? '', /html/i)
+  assert.equal('.webcontainer.json' in (demoFiles ?? {}), false)
+  assert.equal(demoConfig?.startCommand, 'node server.js')
+  assert.equal(demoConfig && 'import' in demoConfig, false)
   assert.ok(snapshot.records.some(record => record.collection === 'news'))
   assert.ok(snapshot.records.some(record => record.collection === 'testimonials'))
   const article = snapshot.records.find(record => record.collection === 'articles' && record.source?.path.endsWith('introducing-cuenv/index.mdx'))
@@ -74,12 +83,39 @@ test('static content snapshot preserves bodies, source metadata, relationships, 
   const asset = snapshot.assetFiles.find(candidate => candidate.relativePath.endsWith('introducing-cuenv/cover.png'))
   assert.ok(asset)
   assert.equal(asset?.r2Key.startsWith('static/'), true)
-  assert.ok(snapshot.assetFiles.some(candidate => candidate.relativePath.endsWith('examples/oauth-pkce-app/server.js')))
-  assert.ok(snapshot.assetFiles.some(candidate => candidate.relativePath.endsWith('examples/oauth-pkce-app/.webcontainer.json')))
+  assert.equal(snapshot.assetFiles.some(candidate => candidate.relativePath.includes('/examples/')), false)
   const video = snapshot.records.find(record => record.collection === 'videos')
   assert.match(String(video?.data.streamUrl), /^https:\/\/content\.rawkode\.academy\/videos\/.+\/stream\.m3u8$/)
   assert.match(String(video?.data.thumbnailUrl), /^https:\/\/content\.rawkode\.academy\/videos\/.+\/thumbnail\.webp$/)
   if (video?.relationships?.show) assert.ok(snapshot.records.some(record => record.collection === 'episodes' && record.relationships?.video && !Array.isArray(record.relationships.video)))
+})
+
+test('WebContainer import rejects unsafe or oversized example directories', async (t) => {
+  const root = await mkdtemp(path.join(tmpdir(), 'static-webcontainer-bounds-'))
+  t.after(() => rm(root, { recursive: true, force: true }))
+  const moduleDir = path.join(root, 'courses', 'fixture-course')
+  const examplesDir = path.join(moduleDir, 'examples', 'sample')
+  await mkdir(examplesDir, { recursive: true })
+  await writeFile(path.join(moduleDir, '01-introduction.mdx'), `---\ntitle: Demo\nresources:\n  - title: Sample\n    type: embed\n    embedConfig:\n      container: webcontainer\n      src: sample\n      import:\n        localDir: ./examples/sample\n---\nLesson.\n`)
+  await writeFile(path.join(examplesDir, 'server.js'), 'console.log("ok")\n')
+  const valid = await buildStaticSnapshot({ root, sequence: 1 })
+  const module = valid.records.find(record => record.collection === 'course-modules')
+  const resources = module?.data.contentResources as Record<string, unknown>[]
+  const files = (resources[0]?.embedConfig as Record<string, unknown>).files as Record<string, string>
+  assert.deepEqual(Object.keys(files), ['server.js'])
+  assert.equal(valid.assetFiles.some(asset => asset.relativePath.includes('/examples/')), false)
+
+  await writeFile(path.join(examplesDir, 'large.js'), Buffer.alloc(256 * 1024 + 1, 97))
+  await assert.rejects(buildStaticSnapshot({ root, sequence: 2 }), /exceeds 262144 bytes/)
+})
+
+test('WebContainer import refuses paths outside the owning course examples directory', async (t) => {
+  const root = await mkdtemp(path.join(tmpdir(), 'static-webcontainer-path-'))
+  t.after(() => rm(root, { recursive: true, force: true }))
+  const moduleDir = path.join(root, 'courses', 'fixture-course')
+  await mkdir(moduleDir, { recursive: true })
+  await writeFile(path.join(moduleDir, '01-introduction.mdx'), `---\ntitle: Demo\nresources:\n  - title: Sample\n    type: embed\n    embedConfig:\n      container: webcontainer\n      src: sample\n      import:\n        localDir: ../../outside/sample\n---\nLesson.\n`)
+  await assert.rejects(buildStaticSnapshot({ root, sequence: 1 }), /must resolve to its course examples/)
 })
 
 test('Klustered snapshot preserves domain IDs and excludes sensitive tables by default', () => {

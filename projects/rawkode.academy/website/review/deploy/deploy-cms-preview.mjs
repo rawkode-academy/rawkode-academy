@@ -56,6 +56,9 @@ function hasValidD2SaveEvidence(value) {
 }
 
 function assertPublicSsrCachePolicy(response) {
+	// Cloudflare consumes and strips Cloudflare-CDN-Cache-Control before the
+	// response reaches clients. Check the client-visible policies and verify
+	// the actual release boundary with CF-Cache-Status below.
 	const headers = ['cache-control', 'cdn-cache-control']
 		.map(name => [name, response.headers.get(name)])
 		.filter(([, value]) => value)
@@ -81,6 +84,18 @@ function assertPublicSsrCachePolicy(response) {
 		}
 	}
 	if (!foundMaxAge) throw new Error('The Astro SSR response did not expose a max-age or s-maxage freshness bound.')
+	const cachePolicy = response.headers.get('cache-control')?.toLowerCase() ?? ''
+	if (!/(?:^|,)\s*must-revalidate(?:,|$)/i.test(cachePolicy)) {
+		throw new Error('The client-visible Cache-Control policy must forbid stale responses; the scheduled release probe verifies Cloudflare edge behavior.')
+	}
+}
+
+function responseCacheAges(response) {
+	return ['cache-control', 'cdn-cache-control', 'cloudflare-cdn-cache-control']
+		.flatMap(name => (response.headers.get(name) ?? '').split(',').map(part => part.trim()))
+		.filter(part => /^(?:s-maxage|max-age)=/i.test(part))
+		.map(part => Number(part.slice(part.indexOf('=') + 1).replace(/^"|"$/g, '')))
+		.filter(Number.isSafeInteger)
 }
 
 // Both PR workflows are triggered by changes under either project. Wait for
@@ -138,6 +153,22 @@ const configPath = path.resolve('dist/server/wrangler.json')
 const previewConfigPath = path.resolve('dist/server/wrangler.pr-preview.json')
 const isolationConfigPath = path.resolve('dist/server/wrangler.isolation.pr-preview.json')
 const config = JSON.parse(await readFile(configPath, 'utf8'))
+if (!Array.isArray(config.compatibility_flags) || !config.compatibility_flags.includes('enable_ctx_exports')) {
+	throw new Error('The generated Astro Wrangler config must preserve enable_ctx_exports for the custom WorkerEntrypoint exports.')
+}
+if (typeof config.main !== 'string' || !config.main.trim() || config.main === '@astrojs/cloudflare/entrypoints/server') {
+	throw new Error('The generated Astro Wrangler config must point at the custom Astro Worker entrypoint.')
+}
+const generatedWorkerEntrypoint = path.resolve(path.dirname(configPath), config.main)
+let generatedWorkerSource
+try {
+	generatedWorkerSource = await readFile(generatedWorkerEntrypoint, 'utf8')
+} catch (error) {
+	throw new Error(`The generated custom Astro Worker entrypoint is not readable at ${generatedWorkerEntrypoint}: ${error instanceof Error ? error.message : String(error)}`)
+}
+if (!generatedWorkerSource.includes('CachedAstro') || !generatedWorkerSource.includes('PUBLIC_SSR_CACHE_ENABLED')) {
+	throw new Error(`The generated Wrangler main ${config.main} does not contain the custom CachedAstro WorkerEntrypoint.`)
+}
 config.name = names.websiteWorkerName
 config.workers_dev = true
 config.preview_urls = true
@@ -168,7 +199,13 @@ config.vars = {
 	...(config.vars ?? {}),
 	PAYLOAD_PREVIEW_PR: String(identity.pullRequestNumber),
 	PAYLOAD_PREVIEW_SHA: identity.sha,
+	PUBLIC_SSR_CACHE_ENABLED: 'true',
 }
+// Keep the public request gateway uncached. Only its named inner Astro entrypoint
+// uses Workers Cache after the gateway has excluded credentials and interactive routes.
+config.exports = { ...(config.exports ?? {}) }
+config.exports.default = { ...(config.exports.default ?? {}), type: 'worker', cache: { ...(config.exports.default?.cache ?? {}), enabled: false } }
+config.exports.CachedAstro = { ...(config.exports.CachedAstro ?? {}), type: 'worker', cache: { ...(config.exports.CachedAstro?.cache ?? {}), enabled: true } }
 
 const accountId = config.account_id ?? config.vars?.CLOUDFLARE_ACCOUNT_ID
 if (typeof accountId !== 'string' || !/^[0-9a-f]{32}$/i.test(accountId)) {
@@ -284,6 +321,7 @@ try {
 	// diagnostic before surfacing the preview URL.
 	const sentinelPath = `/watch/${encodeURIComponent(sentinel.slug)}`
 	const sentinelUrl = new URL(sentinelPath, previewUrl)
+	sentinelUrl.searchParams.set('cmsCacheProbe', `${identity.sha.slice(0, 12)}-${Date.now()}`)
 	const renderedDeadline = Date.now() + Math.min(waitSeconds, 120) * 1000
 	let rendered = false
 	let renderState = 'no response'
@@ -294,10 +332,52 @@ try {
 			const escapedTitle = sentinel.title.replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character])
 			if (response.ok && (html.includes(sentinel.title) || html.includes(escapedTitle))) {
 				assertPublicSsrCachePolicy(response)
-				rendered = true
-				break
+				const cacheProbe = await fetch(sentinelUrl, { headers: { accept: 'text/html' }, signal: AbortSignal.timeout(15_000) })
+				const cacheProbeHtml = await cacheProbe.text()
+				const cacheStatus = cacheProbe.headers.get('cf-cache-status')?.toUpperCase()
+				if (
+					cacheProbe.ok &&
+					(cacheProbeHtml.includes(sentinel.title) || cacheProbeHtml.includes(escapedTitle)) &&
+					cacheStatus === 'HIT'
+				) {
+					assertPublicSsrCachePolicy(cacheProbe)
+					const cookieProbe = await fetch(sentinelUrl, {
+						headers: { accept: 'text/html', cookie: 'rawkode-session=cache-bypass-probe' },
+						signal: AbortSignal.timeout(15_000),
+					})
+					const cookieProbeHtml = await cookieProbe.text()
+					const cookieCacheControl = cookieProbe.headers.get('cache-control')?.toLowerCase() ?? ''
+					const cookieCacheState = cookieProbe.headers.get('x-website-cache-route')?.toUpperCase()
+					const cookieEdgeCacheState = cookieProbe.headers.get('cf-cache-status')?.toUpperCase()
+					if (
+						!cookieProbe.ok ||
+						(!cookieProbeHtml.includes(sentinel.title) && !cookieProbeHtml.includes(escapedTitle)) ||
+						cookieCacheState !== 'BYPASS' ||
+						cookieEdgeCacheState === 'HIT' ||
+						!/(?:^|,)\s*private(?:,|$)/i.test(cookieCacheControl) ||
+						!/(?:^|,)\s*no-store(?:,|$)/i.test(cookieCacheControl)
+					) {
+						throw new Error(`Cookie-bearing Astro requests must bypass the public response cache and return private, no-store responses (HTTP ${cookieProbe.status}, gateway ${cookieCacheState ?? 'missing'}, edge ${cookieEdgeCacheState ?? 'missing'}, Cache-Control ${cookieCacheControl || 'missing'}).`)
+					}
+					for (const [label, authHeaders] of [
+						['Authorization', { authorization: 'Bearer preview-cache-bypass' }],
+						['Cloudflare Access', { 'cf-access-jwt-assertion': 'preview-cache-bypass' }],
+					]) {
+						const privateProbe = await fetch(sentinelUrl, { headers: { accept: 'text/html', ...authHeaders }, signal: AbortSignal.timeout(15_000) })
+						const privateHeaders = privateProbe.headers.get('cache-control')?.toLowerCase() ?? ''
+						const privateRoute = privateProbe.headers.get('x-website-cache-route')?.toUpperCase()
+						const privateEdge = privateProbe.headers.get('cf-cache-status')?.toUpperCase()
+						await privateProbe.body?.cancel().catch(() => {})
+						if (privateRoute !== 'BYPASS' || privateEdge === 'HIT' || !/(?:^|,)\s*private(?:,|$)/i.test(privateHeaders) || !/(?:^|,)\s*no-store(?:,|$)/i.test(privateHeaders)) {
+							throw new Error(`${label}-bearing Astro requests must bypass Workers Cache and return private, no-store responses.`)
+						}
+					}
+					rendered = true
+					break
+				}
+				renderState = `SSR rendered, but the second request did not hit Cloudflare Workers Cache (HTTP ${cacheProbe.status}, CF-Cache-Status ${cacheStatus ?? 'missing'})`
 			}
-			renderState = `HTTP ${response.status}, expected Payload video title was absent from SSR HTML`
+			else renderState = `HTTP ${response.status}, expected Payload video title was absent from SSR HTML`
 		} catch (error) {
 			renderState = error instanceof Error ? error.message : String(error)
 		}
@@ -305,7 +385,43 @@ try {
 		await new Promise(resolve => setTimeout(resolve, 5_000))
 	}
 	if (!rendered) throw new Error(`Astro preview SSR/cache checks did not pass at ${sentinelUrl}: ${renderState}`)
-	console.log(`SSR content check passed: ${sentinelPath} rendered Payload video “${sentinel.title}”; public cache TTL is at most 30 seconds with no stale directives.`)
+	console.log(`SSR content and cache checks passed: ${sentinelPath} rendered Payload video “${sentinel.title}”; a repeat request hit Cloudflare Workers Cache, while cookie, Authorization, and Cloudflare Access requests bypassed it. Public TTL is at most 30 seconds.`)
+
+	// This imported course demo proves its title and file contents come through
+	// the Payload-only endpoint on the SSR route. COOP/COEP are required by the
+	// browser WebContainer runtime and are added by the embed route middleware.
+	const webContainerPath = '/embed/webcontainer?course=complete-guide-zitadel&module=01-introduction&resource=oauth-pkce-app'
+	const webContainerUrl = new URL(webContainerPath, previewUrl)
+	const webContainerDeadline = Date.now() + Math.min(waitSeconds, 120) * 1000
+	let webContainerReady = false
+	let webContainerState = 'no response'
+	while (Date.now() < webContainerDeadline) {
+		try {
+			const response = await fetch(webContainerUrl, {
+				headers: { accept: 'text/html' },
+				signal: AbortSignal.timeout(15_000),
+			})
+			const html = await response.text()
+			const title = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] ?? ''
+			const titleRendered = title.includes('OAuth PKCE Interactive Demo')
+			const demoContentRendered = html.includes('public/index.html') && html.includes('OAuth PKCE Authentication')
+			const coop = response.headers.get('cross-origin-opener-policy')?.toLowerCase()
+			const coep = response.headers.get('cross-origin-embedder-policy')?.toLowerCase()
+			if (response.ok && titleRendered && demoContentRendered && coop === 'same-origin' && coep === 'require-corp') {
+				webContainerReady = true
+				break
+			}
+			webContainerState = `HTTP ${response.status}, title ${titleRendered ? 'present' : 'missing'}, demo file content ${demoContentRendered ? 'present' : 'missing'}, COOP ${coop ?? 'missing'}, COEP ${coep ?? 'missing'}`
+		} catch (error) {
+			webContainerState = error instanceof Error ? error.message : String(error)
+		}
+		console.log(`Waiting for the Payload-backed WebContainer SSR route ${webContainerPath}: ${webContainerState}`)
+		await new Promise(resolve => setTimeout(resolve, 5_000))
+	}
+	if (!webContainerReady) {
+		throw new Error(`The Payload-backed WebContainer SSR check failed at ${webContainerUrl}: ${webContainerState}`)
+	}
+	console.log(`WebContainer SSR check passed: ${webContainerPath} rendered the imported demo title and file content with COOP same-origin and COEP require-corp.`)
 
 	// Verify the scheduled fixture is hidden while its explicit publishedAt
 	// remains comfortably in the future. This happens before slower media checks.
@@ -324,6 +440,30 @@ try {
 		throw new Error(`Scheduled video ${scheduledVideo.slug} should be hidden before ${scheduledVideo.publishedAt}; Astro returned HTTP ${preRelease.status}.`)
 	}
 	console.log(`Scheduled publication pre-check passed: ${scheduledVideo.slug} is hidden until ${scheduledVideo.publishedAt}.`)
+
+	// Warm the public archive while the video is still scheduled. Its cached
+	// response must expire at the next Payload release boundary, then re-render
+	// the archive with the newly published video without a deployment.
+	const archiveUrl = new URL('/watch', previewUrl)
+	archiveUrl.searchParams.set('cmsReleaseProbe', `${identity.sha.slice(0, 12)}-${Date.now()}`)
+	const archiveBefore = await fetch(archiveUrl, {
+		headers: { accept: 'text/html' },
+		signal: AbortSignal.timeout(15_000),
+	})
+	const archiveBeforeHtml = await archiveBefore.text()
+	const scheduledHref = `/watch/${encodeURIComponent(scheduledVideo.slug)}`
+	if (!archiveBefore.ok || archiveBeforeHtml.includes(scheduledHref)) {
+		throw new Error(`The watch archive should hide the future-dated video ${scheduledVideo.slug} before ${scheduledVideo.publishedAt}; Astro returned HTTP ${archiveBefore.status}.`)
+	}
+	const archiveWarm = await fetch(archiveUrl, {
+		headers: { accept: 'text/html' },
+		signal: AbortSignal.timeout(15_000),
+	})
+	await archiveWarm.body?.cancel().catch(() => {})
+	if (!archiveWarm.ok || archiveWarm.headers.get('cf-cache-status')?.toUpperCase() !== 'HIT') {
+		throw new Error(`The pre-release watch archive response did not warm Cloudflare Workers Cache (HTTP ${archiveWarm.status}, CF-Cache-Status ${archiveWarm.headers.get('cf-cache-status') ?? 'missing'}).`)
+	}
+	console.log(`Scheduled publication cache probe passed: warmed /watch hides ${scheduledVideo.slug} until ${scheduledVideo.publishedAt}.`)
 
 	if (d2SaveCapability === 'available') {
 		// The preview diagnostic creates a draft article through Payload's normal
@@ -428,7 +568,7 @@ try {
 	while (Date.now() < diagramDeadline) {
 		try {
 			const response = await fetch(diagramUrl, {
-				headers: { accept: 'image/svg+xml', 'cache-control': 'no-store' },
+				headers: { accept: 'image/svg+xml' },
 				signal: AbortSignal.timeout(15_000),
 			})
 			const contentType = response.headers.get('content-type')?.split(';')[0]?.trim()
@@ -442,10 +582,21 @@ try {
 				/^[a-f0-9]{64}$/i.test(returnedSvgChecksum ?? '') &&
 				etag === returnedSvgChecksum
 			) {
-				diagramReady = true
-				break
+				await response.body?.cancel().catch(() => {})
+				const cacheProbe = await fetch(diagramUrl, {
+					headers: { accept: 'image/svg+xml' },
+					signal: AbortSignal.timeout(15_000),
+				})
+				const cacheStatus = cacheProbe.headers.get('cf-cache-status')?.toUpperCase()
+				const cacheProbeEtag = cacheProbe.headers.get('etag')?.replace(/^W\//, '').replace(/^"|"$/g, '')
+				await cacheProbe.body?.cancel().catch(() => {})
+				if (cacheProbe.ok && cacheProbeEtag === returnedSvgChecksum && cacheStatus === 'HIT') {
+					diagramReady = true
+					break
+				}
+				diagramState = `D2 SVG passed, but its second request did not hit Cloudflare Workers Cache (HTTP ${cacheProbe.status}, CF-Cache-Status ${cacheStatus ?? 'missing'})`
 			}
-			diagramState = `HTTP ${response.status}, D2 SVG type/checksum headers were missing or mismatched`
+			else diagramState = `HTTP ${response.status}, D2 SVG type/checksum headers were missing or mismatched`
 		} catch (error) {
 			diagramState = error instanceof Error ? error.message : String(error)
 		}
@@ -461,7 +612,7 @@ try {
 	while (Date.now() < imageDeadline) {
 		try {
 			const response = await fetch(assetUrl, {
-				headers: { accept: 'image/webp', 'cache-control': 'no-store' },
+				headers: { accept: 'image/webp' },
 				signal: AbortSignal.timeout(15_000),
 			})
 			const contentType = response.headers.get('content-type')?.split(';')[0]?.trim().toLowerCase()
@@ -473,11 +624,23 @@ try {
 				? await hasWebpSignature(response)
 				: false
 			if (response.ok && contentType === 'image/webp' && etag === expectedImageEtag && signatureValid) {
-				imageReady = true
-				break
+				const cacheProbe = await fetch(assetUrl, {
+					headers: { accept: 'image/webp' },
+					signal: AbortSignal.timeout(15_000),
+				})
+				const cacheStatus = cacheProbe.headers.get('cf-cache-status')?.toUpperCase()
+				const cacheProbeEtag = cacheProbe.headers.get('etag')?.replace(/^W\//, '').replace(/^"|"$/g, '').toLowerCase()
+				await cacheProbe.body?.cancel().catch(() => {})
+				if (cacheProbe.ok && cacheProbeEtag === expectedImageEtag && cacheStatus === 'HIT') {
+					imageReady = true
+					break
+				}
+				imageState = `WebP transform passed, but its second request did not hit Cloudflare Workers Cache (HTTP ${cacheProbe.status}, CF-Cache-Status ${cacheStatus ?? 'missing'})`
+				await response.body?.cancel().catch(() => {})
+			} else {
+				await response.body?.cancel().catch(() => {})
+				imageState = `HTTP ${response.status}, expected image/webp with ETag ending -${assetWidth}-webp and a RIFF/WEBP body signature; received ${contentType ?? 'no content type'} and ${etag ?? 'no ETag'}`
 			}
-			await response.body?.cancel().catch(() => {})
-			imageState = `HTTP ${response.status}, expected image/webp with ETag ending -${assetWidth}-webp and a RIFF/WEBP body signature; received ${contentType ?? 'no content type'} and ${etag ?? 'no ETag'}`
 		} catch (error) {
 			imageState = error instanceof Error ? error.message : String(error)
 		}
@@ -488,6 +651,48 @@ try {
 		throw new Error(`Astro preview did not serve a verified Cloudflare Images WebP transform at ${assetUrl}: ${imageState}`)
 	}
 	console.log(`CMS media checks passed: D2 SVG ${sourceHash} and Cloudflare Images WebP ${assetUrl.pathname} at ${assetWidth}px.`)
+
+	// The first /watch entry was warmed earlier in this run. Re-render that same
+	// URL in the final 20 seconds before release and prove every shared TTL is
+	// clipped to the remaining time, then confirm that response is cached.
+	const boundaryProbeAt = releaseAt - 15_000
+	while (Date.now() < boundaryProbeAt) {
+		await new Promise(resolve => setTimeout(resolve, Math.min(5_000, boundaryProbeAt - Date.now())))
+	}
+	const boundaryRequestStartedAt = Date.now()
+	const secondsUntilRelease = Math.floor((releaseAt - boundaryRequestStartedAt) / 1000)
+	if (secondsUntilRelease < 1 || secondsUntilRelease > 20) {
+		throw new Error(`The scheduled archive cache probe did not run in its final 20 seconds before ${scheduledVideo.publishedAt}.`)
+	}
+	const boundaryWarm = await fetch(archiveUrl, {
+		headers: { accept: 'text/html' },
+		signal: AbortSignal.timeout(15_000),
+	})
+	const boundaryHtml = await boundaryWarm.text()
+	const boundaryCacheState = boundaryWarm.headers.get('cf-cache-status')?.toUpperCase()
+	const boundaryAges = responseCacheAges(boundaryWarm)
+	if (
+		!boundaryWarm.ok ||
+		boundaryHtml.includes(scheduledHref) ||
+		!['MISS', 'EXPIRED'].includes(boundaryCacheState ?? '') ||
+		!boundaryAges.length ||
+		boundaryAges.some(age => age > secondsUntilRelease)
+	) {
+		throw new Error(`The pre-release /watch response must be a cache MISS without ${scheduledVideo.slug}, with every shared TTL at or below ${secondsUntilRelease}s (HTTP ${boundaryWarm.status}, CF-Cache-Status ${boundaryCacheState ?? 'missing'}, TTLs ${boundaryAges.join(',') || 'missing'}).`)
+	}
+	const boundaryHit = await fetch(archiveUrl, {
+		headers: { accept: 'text/html' },
+		signal: AbortSignal.timeout(15_000),
+	})
+	const boundaryHitHtml = await boundaryHit.text()
+	if (
+		!boundaryHit.ok ||
+		boundaryHitHtml.includes(scheduledHref) ||
+		boundaryHit.headers.get('cf-cache-status')?.toUpperCase() !== 'HIT'
+	) {
+		throw new Error(`The clipped pre-release /watch response did not produce a cache HIT without ${scheduledVideo.slug} on the same URL (HTTP ${boundaryHit.status}, CF-Cache-Status ${boundaryHit.headers.get('cf-cache-status') ?? 'missing'}).`)
+	}
+	console.log(`Scheduled archive boundary warm passed: /watch was re-rendered ${secondsUntilRelease}s before release with clipped TTLs (${boundaryAges.join('/')}s), then served from cache.`)
 
 	// Wait through the saved future boundary and verify live Astro SSR sees it.
 	const scheduledDeadline = releaseAt + Math.min(waitSeconds, 90) * 1000
@@ -520,6 +725,32 @@ try {
 		throw new Error(`Astro preview did not reveal scheduled Payload video ${scheduledVideo.slug} after ${scheduledVideo.publishedAt}: ${scheduledState}`)
 	}
 	console.log(`Scheduled publication check passed: ${scheduledUrl.pathname} rendered after ${scheduledVideo.publishedAt}.`)
+	const archiveAfterDeadline = releaseAt + Math.min(waitSeconds, 90) * 1000
+	let scheduledArchiveVisible = false
+	let scheduledArchiveState = 'waiting for the scheduled archive response'
+	while (Date.now() < archiveAfterDeadline) {
+		try {
+			const response = await fetch(archiveUrl, {
+				headers: { accept: 'text/html' },
+				signal: AbortSignal.timeout(15_000),
+			})
+			const html = await response.text()
+			const cacheState = response.headers.get('cf-cache-status')?.toUpperCase()
+			if (response.ok && html.includes(scheduledHref) && ['MISS', 'EXPIRED'].includes(cacheState ?? '')) {
+				scheduledArchiveVisible = true
+				break
+			}
+			scheduledArchiveState = `HTTP ${response.status}, scheduled archive link ${html.includes(scheduledHref) ? 'was present' : 'is absent'}; CF-Cache-Status ${cacheState ?? 'missing'}`
+		} catch (error) {
+			scheduledArchiveState = error instanceof Error ? error.message : String(error)
+		}
+		console.log(`Waiting for the warmed watch archive to expire at ${scheduledVideo.publishedAt}: ${scheduledArchiveState}`)
+		await new Promise(resolve => setTimeout(resolve, 5_000))
+	}
+	if (!scheduledArchiveVisible) {
+		throw new Error(`The warmed /watch archive did not reveal scheduled video ${scheduledVideo.slug} after ${scheduledVideo.publishedAt}: ${scheduledArchiveState}`)
+	}
+	console.log(`Scheduled archive cache check passed: warmed /watch hid ${scheduledVideo.slug} before release and showed it after its Payload publishedAt boundary.`)
 	console.log(`Version Preview URL: ${previewUrl}`)
 	if (process.env.GITHUB_OUTPUT) {
 		await appendFile(process.env.GITHUB_OUTPUT, `website_preview_url=${previewUrl}\nwebsite_preview_worker=${names.websiteWorkerName}\n`)
@@ -528,7 +759,7 @@ try {
 		const d2EditingSummary = d2SaveCapability === 'available'
 			? 'CMS D2 save hook verified'
 			: 'CMS D2 editing: unverified/unavailable in this preview'
-		await appendFile(process.env.GITHUB_STEP_SUMMARY, `## Website preview\n\n[Open the Astro SSR preview](${previewUrl})\n\nPaired Payload preview SHA: \`${identity.sha}\`. SSR verified ${sentinelPath}, ${d2EditingSummary}, Cloudflare Images delivery, scheduled visibility for ${scheduledVideo.slug}, and a public cache TTL of at most 30 seconds without stale directives.\n`)
+		await appendFile(process.env.GITHUB_STEP_SUMMARY, `## Website preview\n\n[Open the Astro SSR preview](${previewUrl})\n\nPaired Payload preview SHA: \`${identity.sha}\`. SSR verified ${sentinelPath}, a Workers Cache hit for SSR/D2/Cloudflare Images, cookie-bearing bypass, ${d2EditingSummary}, the warmed /watch archive hiding then revealing ${scheduledVideo.slug} at its Payload release boundary, and a public cache TTL of at most 30 seconds.\n`)
 	}
 } finally {
 	await unlink(previewConfigPath).catch(() => {})

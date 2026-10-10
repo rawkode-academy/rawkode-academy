@@ -15,12 +15,17 @@ interface Props {
 		type?: string | undefined;
 	}>;
 	totalVideos?: number;
+	hasMoreVideos?: boolean;
 }
 
-const { show, videos, totalVideos } = Astro.props;
+const { show, videos, totalVideos, hasMoreVideos: hasMoreVideosProp } = Astro.props;
 
 const hasMoreVideos =
-	typeof totalVideos === "number" && totalVideos > videos.length;
+	hasMoreVideosProp ??
+	(typeof totalVideos === "number" && totalVideos > videos.length);
+const allEpisodesLabel = typeof totalVideos === "number"
+	? `View all ${totalVideos} episodes`
+	: hasMoreVideos ? "View all episodes" : "View show";
 const watch = academyWatch();
 ---
 
@@ -34,7 +39,7 @@ const watch = academyWatch();
 				href={`/shows/${show.slug}`}
 				class={watch.railLink}
 			>
-				{hasMoreVideos ? `View all ${totalVideos} episodes` : "View show"}
+				{allEpisodesLabel}
 				<svg
 					class={watch.railIcon}
 					fill="none"
