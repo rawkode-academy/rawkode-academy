@@ -3,11 +3,10 @@ import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
 const styles = academyLayout({ width: "reading" });
 import {
-	type CollectionEntry,
-	getCollection,
 	getEntries,
-	render,
-} from "astro:content";
+	getEntry,
+} from "@/lib/payload-content";
+import CmsBody from "@/components/content/CmsBody.astro";
 import ArticleHeader from "@/components/read/ArticleHeader.astro";
 import ArticleByline from "@/components/read/ArticleByline.astro";
 import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
@@ -17,40 +16,25 @@ import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Page from "@/wrappers/page.astro";
 import { calculateReadingTime } from "@/utils/reading-time";
 import { isNewsPublished } from "@/lib/news-publication";
-import type { GetStaticPaths, GetStaticPathsResult } from "astro";
+export const prerender = false;
 
-export const prerender = true;
-
-type Props = {
-	article: CollectionEntry<"news">;
-};
-
-export const getStaticPaths: GetStaticPaths =
-	async (): Promise<GetStaticPathsResult> => {
-		const now = new Date();
-		const articles = await getCollection("news", ({ data }) =>
-			isNewsPublished(data.publishedAt, now),
-		);
-		return articles.map((article: CollectionEntry<"news">) => ({
-			params: { slug: article.id },
-			props: { article },
-		}));
-	};
-
-const { article } = Astro.props;
-const { Content } = await render(article);
+const slug = Astro.params.slug;
+const article = slug ? await getEntry("news", { slug }) : undefined;
+if (!article || !isNewsPublished(article.data.publishedAt, new Date())) {
+	return new Response(null, { status: 404 });
+}
 const authors = await getEntries(article.data.authors);
 
-const allTechnologies = await getCollection("technologies");
-const technologyNameById = new Map<string, string>();
-for (const technology of allTechnologies) {
-	const rawId = technology.id.replace(/\/index$/, "");
-	technologyNameById.set(rawId, technology.data.name);
-}
+const technologyEntries = (
+	await Promise.all(
+		article.data.technologies.map((reference) =>
+			getEntry("technologies", reference),
+		),
+	)
+).filter((entry): entry is NonNullable<typeof entry> => entry !== undefined);
+const technologyById = new Map(technologyEntries.map((entry) => [entry.id, entry] as const));
 
 function formatTechnologyLabel(value: string): string {
-	const fromCollection = technologyNameById.get(value);
-	if (fromCollection) return fromCollection;
 	return value
 		.split(/[-/]/g)
 		.filter(Boolean)
@@ -62,11 +46,16 @@ function formatTechnologyLabel(value: string): string {
 		.join(" ");
 }
 
-const tags = (article.data.technologies ?? []).map((technologyId) => ({
-	id: technologyId,
-	label: formatTechnologyLabel(technologyId),
-	href: `/technology/${technologyId}`,
-}));
+const tags = article.data.technologies.map((reference) => {
+	const technology = technologyById.get(reference.id);
+	const slug = technology?.slug ?? reference.slug;
+	if (!slug) return undefined;
+	return {
+		id: reference.id,
+		label: technology?.data.name ?? formatTechnologyLabel(slug),
+		href: `/technology/${slug}`,
+	};
+}).filter((tag) => tag !== undefined);
 
 const publishDate = new Intl.DateTimeFormat("en-US", {
 	month: "short",
@@ -95,7 +84,7 @@ const breadcrumbItems = [{ label: "News", href: "/news" }];
 			elements={[
 				{ title: "Home", link: "/" },
 				{ title: "News", link: "/news" },
-				{ title: article.data.title, link: `/news/${article.id}` },
+				{ title: article.data.title, link: `/news/${article.slug}` },
 			]}
 		/>
 		<link
@@ -136,7 +125,7 @@ const breadcrumbItems = [{ label: "News", href: "/news" }];
 
 		<div class={doc.reading}>
 			<article class={styles.prose}>
-				<Content />
+				<CmsBody entry={article} />
 			</article>
 
 		</div>

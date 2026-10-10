@@ -45,7 +45,7 @@ Removed: **exactly the 32 approved files in the removal table**. All were Git-tr
 | Storybook | `.storybook/main.ts:4` discovers `src/**/*.stories.@(js\|jsx\|mjs\|ts\|tsx)`. The one proposed story is intentionally removed together with its only component; all surviving stories are retained. This is not a production component loader. |
 | Technology icons | `src/utils/resolve-technology-icon.ts:3,7` globs technology SVG assets only. No candidate component matches. |
 | Course examples | `src/utils/vite-plugin-webcontainer-demos.ts:126` generates raw-file globs rooted in discovered course examples under the resolved content courses directory. No candidate component matches. |
-| Astro content | `src/content.config.ts` glob loaders select content collections, not website UI component files. Content MDX imports were included in the graph. |
+| Astro content | Payload supplies the website content at request time; the former Astro glob collection registry has been removed. Content MDX imports are rendered through the finite CMS component registry. |
 | Test/source walkers | `scripts/check-academy-shell.mjs` and `src/tests/design-tokens.test.ts` walk existing files for assertions, not runtime rendering. Explicit file reads were separately protected. |
 | Nonliteral imports | The website shell guard imports `src/lib/theme.ts` through `new URL`; external tooling under `.claude/skills/impeccable` and `.github/skills/impeccable` has detector/browser-adapter imports. None is a production Astro component loader. Declaration-method names and shell strings were classified separately. |
 | Vue dynamic components | Inspected `<component :is>` usages select passed icons/components, not legacy component filenames from a registry. |

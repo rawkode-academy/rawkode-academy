@@ -11,6 +11,7 @@ import * as runtime from "astro/runtime/server/index.js";
 import { parse as parseVue, compileScript } from "vue/compiler-sfc";
 import { parse } from "node-html-parser";
 import ts from "typescript";
+import { createPayloadContentFixtures } from "./helpers/payload-content-fixtures.mjs";
 
 const require = createRequire(import.meta.url);
 function evaluate(source, imports = {}) {
@@ -21,8 +22,18 @@ function evaluate(source, imports = {}) {
 		},
 	}).outputText;
 	const exports = {};
+	const resolveImport = (id) => {
+		if (Object.hasOwn(imports, id)) return imports[id];
+		const normalized = id.replace(/[?#].*$/, "").replace(/\.(?:[cm]?[jt]sx?)$/, "");
+		if (normalized.endsWith("/lib/content-images"))
+			return imports["@/lib/content-images"];
+		if (normalized.endsWith("/lib/payload-content"))
+			return imports["@/lib/payload-content"];
+		if (normalized === "astro:assets") return imports["astro:assets"];
+		return undefined;
+	};
 	new Function("require", "exports", code)(
-		(id) => imports[id] ?? require(id),
+		(id) => resolveImport(id) ?? require(id),
 		exports,
 	);
 	return exports;
@@ -54,14 +65,25 @@ const compiled = await transform(
 );
 assert.deepEqual(compiled.diagnostics, []);
 const styles = new Proxy({}, { get: (_, slot) => `card-${String(slot)}` });
+const author = {
+	id: "person-payload-cuid",
+	slug: "david-flanagan",
+	data: { name: "David Flanagan" },
+};
+const payload = createPayloadContentFixtures({ people: [author] });
 const card = evaluate(compiled.code, {
 	"<stdin>?astro&type=style&index=0&lang.css": {}, // CSS is verified in Browser.
 	"astro/runtime/server/index.js": { ...runtime, createMetadata: () => ({}) },
-	"astro:content": { getEntries: async (entries) => entries },
+	"@/lib/payload-content": payload,
+	"@/lib/content-images": {
+		getContentImage: async (image, width) => ({
+			src: image.src.replace(/([?&])w=\d+/, `$1w=${width}`),
+			attributes: { width, height: Math.round((width * 9) / 16) },
+		}),
+	},
 	"astro:assets": {
 		Image: runtime.createComponent(
-			(_, props) =>
-				runtime.render`<img src="${props.src}" alt="${props.alt}" loading="${props.loading}">`,
+			(_, props) => runtime.render`<img src="${typeof props.src === "string" ? props.src : props.src.src}" alt="${props.alt}" loading="${props.loading}">`,
 		),
 	},
 	"../common/BaseCard.vue": baseCard,
@@ -72,13 +94,14 @@ const card = evaluate(compiled.code, {
 const container = await AstroContainer.create();
 container.addServerRenderer({ name: "@astrojs/vue", renderer });
 const article = (data = {}) => ({
-	id: "no-cover",
+	id: "article-payload-cuid",
+	slug: "no-cover",
 	body: "A useful technical explanation.",
 	data: {
 		title: "Containers <without> decoration & noise",
 		type: "tutorial",
 		publishedAt: new Date("2026-05-19"),
-		authors: [{ data: { name: "David Flanagan" } }],
+		authors: [{ id: author.id }],
 		openGraph: { subtitle: "A practical guide." },
 		...data,
 	},
@@ -105,14 +128,15 @@ test("coverless article has no empty media frame across the Astro/Vue slot bound
 	assert.match(dom.querySelector(".base-card__footer").text, /David Flanagan/);
 	assert.match(dom.text, /A practical guide/);
 	assert.equal(dom.querySelectorAll("astro-island").length, 0);
+	assert.deepEqual(payload.calls.filter((call) => call.kind === "entries").at(-1).references, [{ id: author.id }]);
 });
 
-test("authored cover and its alternative remain, with default level-two title", async () => {
+test("authored CMS cover uses its transformed variant and alternative", async () => {
 	const dom = await render(
-		article({ cover: { image: "/cover.webp", alt: "Container architecture" } }),
+		article({ cover: { image: { src: "/cms-assets/asset-cover?v=checksum-123&w=1280", alt: "Container architecture" }, alt: "Container architecture" } }),
 	);
 	const image = dom.querySelector(".base-card__cover img");
-	assert.equal(image.getAttribute("src"), "/cover.webp");
+	assert.equal(image.getAttribute("src"), "/cms-assets/asset-cover?v=checksum-123&w=640");
 	assert.equal(image.getAttribute("alt"), "Container architecture");
 	assert.equal(image.getAttribute("loading"), "lazy");
 	assert.ok(dom.querySelector("h2"));

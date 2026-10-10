@@ -1,29 +1,22 @@
-import { getCollection, getEntries } from "astro:content";
-import type { CollectionEntry } from "astro:content";
-import type { APIContext, GetStaticPaths } from "astro";
+import { getEntry, getEntries } from "@/lib/payload-content";
+import type { APIContext } from "astro";
 import { articleToMarkdown } from "@/lib/article-markdown";
 
-export const prerender = true;
+export const prerender = false;
 
-export const getStaticPaths: GetStaticPaths = async () => {
-	const articles = await getCollection("articles");
-	return articles.map((article) => ({
-		params: { slug: article.id },
-		props: { article },
-	}));
-};
-
-type Props = {
-	article: CollectionEntry<"articles">;
-};
-
-export async function GET({ props, site }: APIContext) {
-	const { article } = props as Props;
+export async function GET({ params, site }: APIContext) {
+	const article = params.slug
+		? await getEntry("articles", { slug: params.slug })
+		: undefined;
+	if (!article || article.data.publishedAt > new Date()) {
+		return new Response(null, { status: 404 });
+	}
 	const authors = await getEntries(article.data.authors);
 
 	return new Response(articleToMarkdown(article, authors, site), {
 		headers: {
 			"Content-Type": "text/markdown; charset=utf-8",
+			"Cache-Control": "public, max-age=60, s-maxage=60",
 		},
 	});
 }

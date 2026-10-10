@@ -1,5 +1,5 @@
 export interface PersonListEntry {
-	id: string;
+	slug: string;
 	name: string;
 	avatarUrl?: string | undefined;
 	// Full URLs only - the content-config transform on people resolves
@@ -31,7 +31,7 @@ export function buildPersonItemListJsonLd(
 	const { siteUrl, listUrl, listName, people } = input;
 
 	const itemListElement = people.map((person, index) => {
-		const personUrl = joinUrl(siteUrl, `/people/${person.id}`);
+		const personUrl = joinUrl(siteUrl, `/people/${person.slug}`);
 		const sameAs = (person.sameAs ?? []).filter(
 			(s): s is string => typeof s === "string" && s.length > 0,
 		);

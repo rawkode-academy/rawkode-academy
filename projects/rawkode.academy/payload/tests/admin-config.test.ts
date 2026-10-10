@@ -148,7 +148,7 @@ test('provenance sits read-only in a developer-only Source tab, after editorial 
 		assert.equal(condition!({}, {}, { user: staffUser } as never), false, 'staff never see provenance')
 		assert.equal(condition!({}, {}, { user: developerUser } as never), true)
 		const sourceFields = allNamed(source.fields)
-		for (const name of ['legacyId', 'legacyType']) {
+		for (const name of ['legacyId']) {
 			const field = sourceFields.find(item => nameOf(item) === name)
 			assert.ok(field, `${collection.slug}.${name} not in Source`)
 			assert.equal(readOnlyOf(field), true)
@@ -226,40 +226,29 @@ test('DEVELOPER_SUBJECTS uses the strict OIDC_STAFF_SUBJECTS format and fails cl
 	assert.throws(() => parseDeveloperSubjects('["c"]', ['a']), /must also be listed in OIDC_STAFF_SUBJECTS/)
 })
 
-test('editor creates get importer identity and a slug without typing them', async () => {
+test('editor creates do not fabricate importer identity and can derive a slug', async () => {
 	for (const collection of collections) {
 		const named = allNamed(collection.fields)
-		const legacyId = named.find(field => nameOf(field) === 'legacyId') as { defaultValue?: unknown } | undefined
+		const legacyId = named.find(field => nameOf(field) === 'legacyId') as { defaultValue?: unknown; required?: unknown; admin?: { hidden?: unknown } } | undefined
 		if (!legacyId || collection.slug === 'deletion-markers') continue
-		assert.equal(typeof legacyId.defaultValue, 'function', `${collection.slug}.legacyId default must be a function (no column DEFAULT)`)
-		assert.match(String((legacyId.defaultValue as () => string)()), new RegExp(`^payload:${collection.slug}:[0-9a-f-]{36}$`))
-		const legacyType = named.find(field => nameOf(field) === 'legacyType') as { defaultValue?: unknown }
-		assert.equal(typeof legacyType.defaultValue, 'function', `${collection.slug}.legacyType default must be a function`)
+		assert.equal(legacyId.defaultValue, undefined, `${collection.slug}.legacyId is importer-owned`)
+		assert.equal(legacyId.required, undefined, `${collection.slug}.legacyId must be optional for CMS-created content`)
+		assert.equal(legacyId.admin?.hidden, true, `${collection.slug}.legacyId stays hidden in the CMS`)
 		const slug = named.find(field => nameOf(field) === 'slug') as { validate?: (value: unknown, options: unknown) => unknown }
 		assert.equal(slug.validate!('', { operation: 'create', req: { context: {} } }), true)
 		assert.notEqual(slug.validate!('', { operation: 'update', req: { context: {} } }), true)
 		assert.notEqual(slug.validate!('', { operation: 'create', req: { context: { importing: true } } }), true)
 		assert.equal(slug.validate!('ok', { operation: 'update', req: { context: {} } }), true)
 	}
-	assert.equal(
-		(allNamed(bySlug.get('people')!.fields).find(field => nameOf(field) === 'legacyType') as { defaultValue: () => string }).defaultValue(),
-		'Person',
-	)
-	assert.equal(
-		(allNamed(bySlug.get('bracket-entries')!.fields).find(field => nameOf(field) === 'legacyType') as { defaultValue: () => string }).defaultValue(),
-		'BracketEntry',
-	)
-
 	const taken = new Set(['hello-world', 'hello-world-2'])
 	const req = {
 		context: {},
 		payload: { count: async ({ where }: { where: { slug: { equals: string } } }) => ({ totalDocs: taken.has(where.slug.equals) ? 1 : 0 }) },
 	}
-	const hook = fillEditorialIdentity('videos', 'Video')
+	const hook = fillEditorialIdentity('articles')
 	const created = (await hook({ data: { title: 'Hello, World!' }, operation: 'create', req } as never)) as Record<string, string>
 	assert.equal(created.slug, 'hello-world-3')
-	assert.match(created.legacyId, /^payload:videos:/)
-	assert.equal(created.legacyType, 'Video')
+	assert.equal(created.legacyId, undefined)
 	const kept = (await hook({ data: { title: 'x', slug: 'chosen' }, operation: 'create', req } as never)) as Record<string, string>
 	assert.equal(kept.slug, 'chosen')
 	const imported = (await hook({ data: { title: 'x' }, operation: 'create', req: { ...req, context: { importing: true } } } as never)) as Record<string, string>

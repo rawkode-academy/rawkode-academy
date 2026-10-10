@@ -1,5 +1,5 @@
 ---
-import type { CollectionEntry } from "astro:content";
+import type { CollectionEntry } from "@/lib/payload-content";
 import { formatVideoRuntimeLabel } from "@/lib/video-runtime";
 import { academyWatch } from "@rawkodeacademy/design-system";
 
@@ -15,12 +15,17 @@ interface Props {
 		type?: string | undefined;
 	}>;
 	totalVideos?: number;
+	hasMoreVideos?: boolean;
 }
 
-const { show, videos, totalVideos } = Astro.props;
+const { show, videos, totalVideos, hasMoreVideos: hasMoreVideosProp } = Astro.props;
 
 const hasMoreVideos =
-	typeof totalVideos === "number" && totalVideos > videos.length;
+	hasMoreVideosProp ??
+	(typeof totalVideos === "number" && totalVideos > videos.length);
+const allEpisodesLabel = typeof totalVideos === "number"
+	? `View all ${totalVideos} episodes`
+	: hasMoreVideos ? "View all episodes" : "View show";
 const watch = academyWatch();
 ---
 
@@ -31,10 +36,10 @@ const watch = academyWatch();
 				More from {show.data.name}
 			</h2>
 			<a
-				href={`/shows/${show.id}`}
+				href={`/shows/${show.slug}`}
 				class={watch.railLink}
 			>
-				{hasMoreVideos ? `View all ${totalVideos} episodes` : "View show"}
+				{allEpisodesLabel}
 				<svg
 					class={watch.railIcon}
 					fill="none"

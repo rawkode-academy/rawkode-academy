@@ -665,7 +665,6 @@ Search engines should see this text.`;
 describe("Crawlability and Sitemaps", () => {
 	afterEach(() => {
 		vi.resetModules();
-		vi.doUnmock("astro:content");
 		vi.doUnmock("@/lib/content");
 		vi.doUnmock("@rawkodeacademy/content/utils");
 		vi.doUnmock("glob");
@@ -694,9 +693,6 @@ describe("Crawlability and Sitemaps", () => {
 	});
 
 	it("keeps all intended sitemap sections in the index, even if a section is empty", async () => {
-		vi.doMock("astro:content", () => ({
-			getCollection: vi.fn(),
-		}));
 		vi.doMock("@/lib/content", () => ({
 			getPublishedVideos: vi.fn(),
 		}));
@@ -753,6 +749,7 @@ describe("Crawlability and Sitemaps", () => {
 		const items = [
 			{
 				id: "ancient-story",
+				slug: "ancient-story",
 				data: {
 					title: "Ancient",
 					publishedAt: new Date("2026-05-01T09:00:00.000Z"),
@@ -760,6 +757,7 @@ describe("Crawlability and Sitemaps", () => {
 			},
 			{
 				id: "edge-of-window",
+				slug: "edge-of-window",
 				data: {
 					title: "Edge",
 					// Exactly 48h - 1ms before now; should be included.
@@ -768,6 +766,7 @@ describe("Crawlability and Sitemaps", () => {
 			},
 			{
 				id: "fresh-story",
+				slug: "fresh-story",
 				data: {
 					title: "Fresh",
 					publishedAt: new Date("2026-05-15T08:00:00.000Z"),
@@ -775,6 +774,7 @@ describe("Crawlability and Sitemaps", () => {
 			},
 			{
 				id: "stale-story",
+				slug: "stale-story",
 				data: {
 					title: "Stale",
 					publishedAt: new Date("2026-05-13T11:00:00.000Z"),
@@ -797,6 +797,7 @@ describe("Crawlability and Sitemaps", () => {
 		const xml = renderGoogleNewsSitemap(new URL("https://rawkode.academy"), [
 			{
 				id: "kubernetes-1-36-sneak-peek",
+				slug: "kubernetes-1-36-sneak-peek",
 				data: {
 					title: "Kubernetes 1.36 sneak peek & ampersand",
 					publishedAt: new Date("2026-05-15T08:00:00.000Z"),
@@ -821,16 +822,10 @@ describe("Crawlability and Sitemaps", () => {
 	});
 
 	it("renders video sitemap durations as bounded integer seconds", async () => {
-		const mockGetCollection = vi.fn().mockResolvedValue([
-			{
-				id: "kubernetes",
-				data: {
-					name: "Kubernetes",
-				},
-			},
-		]);
 		const mockGetPublishedVideos = vi.fn().mockResolvedValue([
 			{
+				id: "video-1",
+				slug: "seo-hardening",
 				data: {
 					id: "video-1",
 					slug: "seo-hardening",
@@ -842,6 +837,8 @@ describe("Crawlability and Sitemaps", () => {
 				},
 			},
 			{
+				id: "video-2",
+				slug: "too-long-duration",
 				data: {
 					id: "video-2",
 					slug: "too-long-duration",
@@ -854,9 +851,6 @@ describe("Crawlability and Sitemaps", () => {
 			},
 		]);
 
-		vi.doMock("astro:content", () => ({
-			getCollection: mockGetCollection,
-		}));
 		vi.doMock("@/lib/content", () => ({
 			getPublishedVideos: mockGetPublishedVideos,
 		}));
@@ -1050,7 +1044,7 @@ describe("News ItemList JSON-LD", () => {
 
 		const stories = [
 			{
-				id: "older",
+				slug: "older",
 				data: {
 					title: "Older story",
 					description: "Older",
@@ -1058,7 +1052,7 @@ describe("News ItemList JSON-LD", () => {
 				},
 			},
 			{
-				id: "newest",
+				slug: "newest",
 				data: {
 					title: "Newest story",
 					description: "Newest",
@@ -1066,7 +1060,7 @@ describe("News ItemList JSON-LD", () => {
 				},
 			},
 			{
-				id: "middle",
+				slug: "middle",
 				data: {
 					title: "Middle story",
 					description: "Middle",
@@ -1131,7 +1125,7 @@ describe("Article ItemList JSON-LD", () => {
 
 		const articles = [
 			{
-				id: "older-article",
+				slug: "older-article",
 				data: {
 					title: "Older article",
 					description: "Older",
@@ -1139,7 +1133,7 @@ describe("Article ItemList JSON-LD", () => {
 				},
 			},
 			{
-				id: "newest-article",
+				slug: "newest-article",
 				data: {
 					title: "Newest article",
 					description: "Newest",
@@ -1148,7 +1142,7 @@ describe("Article ItemList JSON-LD", () => {
 				},
 			},
 			{
-				id: "middle-article",
+				slug: "middle-article",
 				data: {
 					title: "Middle article",
 					description: "Middle",
@@ -1211,7 +1205,7 @@ describe("Article ItemList JSON-LD", () => {
 				technologyLabels: ["Kubernetes", "CNCF"],
 				publishedAt: new Date("2026-05-15T08:00:00.000Z"),
 			},
-			authors: [{ id: "rawkode", name: "David Flanagan" }],
+			authors: [{ slug: "rawkode", name: "David Flanagan" }],
 		});
 
 		expect(jsonLd["@type"]).toBe("Course");
@@ -1697,11 +1691,11 @@ describe("Structured Data Validation", () => {
 			siteUrl: "https://rawkode.academy",
 			adrUrl: "https://rawkode.academy/adrs/0042-use-cloudflare-d1",
 			source: {
-				id: "0042-use-cloudflare-d1",
+				slug: "0042-use-cloudflare-d1",
 				title: "Use Cloudflare D1 for all new services",
 				adoptedAt: new Date("2026-05-15T10:00:00.000Z"),
 			},
-			authors: [{ id: "rawkode", name: "David Flanagan" }],
+			authors: [{ slug: "rawkode", name: "David Flanagan" }],
 		});
 
 		expect(jsonLd["@type"]).toBe("TechArticle");
@@ -1735,7 +1729,7 @@ describe("Structured Data Validation", () => {
 			siteUrl: "https://rawkode.academy",
 			adrUrl: "https://rawkode.academy/adrs/some-text-only-id",
 			source: {
-				id: "some-text-only-id",
+				slug: "some-text-only-id",
 				title: "Adopt X",
 				adoptedAt: new Date("2026-05-15T10:00:00.000Z"),
 			},

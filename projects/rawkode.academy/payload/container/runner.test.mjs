@@ -1,6 +1,7 @@
 import test, { after, before } from 'node:test'
 import assert from 'node:assert/strict'
-import { createHash, randomUUID } from 'node:crypto'
+import { createHash } from 'node:crypto'
+import { createId } from '@paralleldrive/cuid2'
 import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -17,8 +18,8 @@ const exec = promisify(execFile), recipe = 'a'.repeat(64)
 let directory, audioVideo, silentVideo, longVideo, webmVideo, movVideo
 const digest = bytes => createHash('sha256').update(bytes).digest('hex')
 function job(bytes, changes = {}) {
-  const jobId = randomUUID()
-  return { jobId, videoId: 1, recipe, source: { key: `review-intake/${jobId}/source`, etag: 'source-etag', checksum: digest(bytes), bytes: bytes.length }, contentType: 'video/mp4', outputKey: `review-intake/${jobId}/deliverable.mp4`, maximumBytes: 67108864, maximumDurationMs: 7200000, audioPolicy: { model: '@cf/openai/whisper-large-v3-turbo', maximumChunks: 120, maximumChunkBytes: 2097152, maximumChunkDurationMs: 60000, maximumTranscriptCharacters: 100000 }, startedAt: 100, deadline: 86500, expectedCurrentRevisionId: null, ...changes }
+  const jobId = createId()
+  return { jobId, videoId: createId(), recipe, source: { key: `review-intake/${jobId}/source`, etag: 'source-etag', checksum: digest(bytes), bytes: bytes.length }, contentType: 'video/mp4', outputKey: `review-intake/${jobId}/deliverable.mp4`, maximumBytes: 67108864, maximumDurationMs: 7200000, audioPolicy: { model: '@cf/openai/whisper-large-v3-turbo', maximumChunks: 120, maximumChunkBytes: 2097152, maximumChunkDurationMs: 60000, maximumTranscriptCharacters: 100000 }, startedAt: 100, deadline: 86500, expectedCurrentRevisionId: null, ...changes }
 }
 async function fixture(name, duration, audio = true, format = 'mp4') {
   const path = join(directory, name)

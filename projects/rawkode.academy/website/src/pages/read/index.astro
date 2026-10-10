@@ -1,6 +1,6 @@
 ---
-import { getCollection, getEntries } from "astro:content";
-import { getImage } from "astro:assets";
+import { getAllCollection, getEntries } from "@/lib/payload-content";
+import { getContentImage } from "@/lib/content-images";
 
 import Page from "@/wrappers/page.astro";
 import ArticleItemListJsonLd from "@/components/html/article-itemlist-jsonld.astro";
@@ -23,9 +23,9 @@ Astro.response.headers.set("Cache-Tag", "articles-page, articles-list");
 
 // ─── Data ──────────────────────────────────────────────────────
 
-const allArticles = (
-	await getCollection("articles")
-).sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+const allArticles = (await getAllCollection("articles")).sort(
+	(a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf(),
+);
 
 // ─── Filters (?type=…&topic=…) ─────────────────────────────────
 
@@ -39,10 +39,17 @@ for (const article of allArticles) {
 }
 
 // Topics — derived from technologies referenced across the corpus.
+const technologies = await getAllCollection("technologies");
+const technologyById = new Map(technologies.map((technology) => [technology.id, technology] as const));
+const technologyBySlug = new Map(technologies.map((technology) => [technology.slug, technology] as const));
+const technologyKey = (reference: (typeof allArticles)[number]["data"]["technologies"][number]) =>
+	technologyById.get(reference.id)?.slug ?? reference.slug ?? reference.id;
+
 const topicCounts = new Map<string, number>();
 for (const article of allArticles) {
 	for (const tech of article.data.technologies ?? []) {
-		topicCounts.set(tech, (topicCounts.get(tech) ?? 0) + 1);
+		const key = technologyKey(tech);
+		topicCounts.set(key, (topicCounts.get(key) ?? 0) + 1);
 	}
 }
 
@@ -61,7 +68,7 @@ const isFiltered = Boolean(selectedType || selectedTopic);
 const matchesType = (article: (typeof allArticles)[number]) =>
 	!selectedType || typeKeyFor(article) === selectedType;
 const matchesTopic = (article: (typeof allArticles)[number]) =>
-	!selectedTopic || (article.data.technologies ?? []).includes(selectedTopic);
+	!selectedTopic || (article.data.technologies ?? []).some((tech) => technologyKey(tech) === selectedTopic);
 
 const visibleArticles = allArticles.filter(
 	(article) => matchesType(article) && matchesTopic(article),
@@ -119,7 +126,8 @@ const topicRailCounts = new Map<string, number>();
 for (const article of allArticles) {
 	if (!matchesType(article)) continue;
 	for (const tech of article.data.technologies ?? []) {
-		topicRailCounts.set(tech, (topicRailCounts.get(tech) ?? 0) + 1);
+		const key = technologyKey(tech);
+		topicRailCounts.set(key, (topicRailCounts.get(key) ?? 0) + 1);
 	}
 }
 
@@ -153,7 +161,7 @@ const pagedArticles = gridArticles.slice(
 const hasNextPage = page < totalPages;
 const featuredAuthors = featured ? await getEntries(featured.data.authors) : [];
 const featuredImage = featured?.data.cover
-	? await getImage({ src: featured.data.cover.image, width: 1200, format: "webp" })
+	? await getContentImage(featured.data.cover.image, 1280)
 	: undefined;
 
 // ─── Helpers ───────────────────────────────────────────────────
@@ -191,14 +199,14 @@ const restWithMeta = await Promise.all(
 		author: await articleAuthorName(article),
 		readingTime: calculateReadingTime(article.body || "").text,
 		cover: article.data.cover
-			? await getImage({ src: article.data.cover.image, width: 640, format: "webp" })
+			? await getContentImage(article.data.cover.image, 640)
 			: undefined,
 	})),
 );
 
 const activeFilterSummary = [
 	selectedType ? getTypeBadgeConfig(selectedType).label : undefined,
-	selectedTopic ? formatTopicLabel(selectedTopic) : undefined,
+	selectedTopic ? technologyBySlug.get(selectedTopic)?.data.name ?? formatTopicLabel(selectedTopic) : undefined,
 ]
 	.filter(Boolean)
 	.join(" · ");
@@ -239,9 +247,9 @@ const catalog = academyCatalog();
 						<h2 class={catalog.featuredTitle}>{featured.data.title}</h2>
 						<p class={catalog.featuredDescription}>{compactCopy(featured.data.openGraph?.subtitle || featured.data.description, 180)}</p>
 						<p class={catalog.rowMeta}>{featuredAuthors.map((author) => author.data.name).join(", ")} · {dateFormatter.format(featured.data.publishedAt)} · {calculateReadingTime(featured.body || "").text}</p>
-						<a class={styles.button} href={`/read/${featured.id}`}>Read the article →</a>
+						<a class={styles.button} href={`/read/${featured.slug}`}>Read the article →</a>
 					</div>
-					{featuredImage && <a class={catalog.featuredMedia} href={`/read/${featured.id}`} aria-label={`Read ${featured.data.title}`}>
+					{featuredImage && <a class={catalog.featuredMedia} href={`/read/${featured.slug}`} aria-label={`Read ${featured.data.title}`}>
 						<img class={catalog.featuredImage} src={featuredImage.src} alt={featured.data.cover?.alt ?? ""} width={featuredImage.attributes.width} height={featuredImage.attributes.height} fetchpriority="high" />
 					</a>}
 				</article>
@@ -266,7 +274,7 @@ const catalog = academyCatalog();
 			</form>
 			{isFiltered && <p class={styles.notice}>{visibleArticles.length} {visibleArticles.length === 1 ? "article" : "articles"}{activeFilterSummary ? ` · ${activeFilterSummary}` : ""} · <a href="/read">Clear filters</a></p>}
 			{visibleArticles.length === 0 ? <div class={styles.empty}>No articles match these filters. <a href="/read">Browse all articles →</a></div> : <div class={catalog.editorialList}>{restWithMeta.map(({ article, author, readingTime, cover }) => (
-				<a class={catalog.editorialRow} href={`/read/${article.id}`} data-media={Boolean(cover)}>
+				<a class={catalog.editorialRow} href={`/read/${article.slug}`} data-media={Boolean(cover)}>
 					<time class={catalog.editorialDate} datetime={article.data.publishedAt.toISOString()}><strong>{dayFormatter.format(article.data.publishedAt)}</strong><span>{monthFormatter.format(article.data.publishedAt)}</span></time>
 					{cover && <span class={catalog.editorialMedia}><img class={catalog.editorialImage} src={cover.src} alt="" width={cover.attributes.width} height={cover.attributes.height} loading="lazy" /></span>}
 					<div class={catalog.editorialBody} data-body>

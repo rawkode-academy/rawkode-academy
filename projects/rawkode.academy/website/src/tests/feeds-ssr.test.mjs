@@ -9,6 +9,7 @@ import ts from "typescript";
 import * as runtime from "astro/runtime/server/index.js";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import { parse } from "node-html-parser";
+import { createPayloadContentFixtures } from "./helpers/payload-content-fixtures.mjs";
 
 const source = readFileSync(
 	new URL("../pages/feeds.astro", import.meta.url),
@@ -16,27 +17,27 @@ const source = readFileSync(
 );
 const shows = [
 	{
-		id: "first/index",
+		id: "payload-first-cuid",
+		slug: "first-show",
 		data: {
-			id: "first-show",
 			name: "First Show",
 			description: "First published podcast.",
 			publish: true,
 		},
 	},
 	{
-		id: "hidden",
+		id: "payload-hidden-cuid",
+		slug: "hidden-show",
 		data: {
-			id: "hidden-show",
 			name: "Unpublished Show",
 			description: "Do not expose this show.",
 			publish: false,
 		},
 	},
 	{
-		id: "second",
+		id: "payload-second-cuid",
+		slug: "tools-and-systems",
 		data: {
-			id: "second-show",
 			name: "Tools & Systems",
 			description: "Second published podcast.",
 			publish: true,
@@ -52,18 +53,12 @@ const expectedFormatUrls = formatGroups.flatMap((group) =>
 async function renderFeeds(collection = shows) {
 	const context = vm.createContext({ console });
 	const pageProps = [];
-	const collectionsRead = [];
+	const payload = createPayloadContentFixtures({ shows: collection });
 	const mocks = {
 		// CSS is a build artifact, not executable in this semantic SSR harness.
 		"feeds.astro?astro&type=style&index=0&lang.css": {},
 		"astro/runtime/server/index.js": { ...runtime, createMetadata: () => ({}) },
-		"astro:content": {
-			getCollection: async (name, filter) => {
-				assert.equal(name, "shows", "Unexpected collection read");
-				collectionsRead.push(name);
-				return collection.filter(filter ?? (() => true));
-			},
-		},
+		"@/lib/payload-content": payload,
 		"@rawkodeacademy/design-system": {
 			academyDocument: () =>
 				new Proxy({}, { get: (_, slot) => `document-${String(slot)}` }),
@@ -93,7 +88,12 @@ async function renderFeeds(collection = shows) {
 		{ context, identifier: "feeds.astro" },
 	);
 	await module.link((specifier) => {
-		const exports = mocks[specifier];
+		const normalized = specifier
+			.replace(/[?#].*$/, "")
+			.replace(/\.(?:[cm]?[jt]sx?)$/, "");
+		const exports =
+			mocks[specifier] ??
+			(normalized.endsWith("/lib/payload-content") ? payload : undefined);
 		assert(exports, `Unexpected import ${specifier}`);
 		return new vm.SyntheticModule(
 			Object.keys(exports),
@@ -109,8 +109,11 @@ async function renderFeeds(collection = shows) {
 	const html = await container.renderToString(module.namespace.default, {
 		request: new Request("https://rawkode.academy/feeds"),
 	});
-	assert.deepEqual(collectionsRead, ["shows"]);
-	return { html, dom: parse(html), pageProps };
+	assert.deepEqual(
+		payload.calls.filter((call) => call.kind === "all").map((call) => call.collection),
+		["shows"],
+	);
+	return { html, dom: parse(html), pageProps, payloadCalls: payload.calls };
 }
 
 test("Feeds SSR preserves all twelve format destinations and only published podcasts", async () => {
@@ -124,7 +127,7 @@ test("Feeds SSR preserves all twelve format destinations and only published podc
 	const podcasts = dom.querySelector('section[aria-labelledby="show-feeds"]');
 	assert.deepEqual(
 		podcasts.querySelectorAll("a").map((link) => link.getAttribute("href")),
-		["/api/feeds/shows/first-show.xml", "/api/feeds/shows/second-show.xml"],
+		["/api/feeds/shows/first-show.xml", "/api/feeds/shows/tools-and-systems.xml"],
 	);
 	assert.deepEqual(
 		podcasts.querySelectorAll("h3").map((heading) => heading.text),

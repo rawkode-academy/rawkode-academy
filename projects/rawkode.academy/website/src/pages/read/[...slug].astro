@@ -2,15 +2,7 @@
 import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
 const styles = academyLayout({ width: "reading" });
-import { getImage } from "astro:assets";
-import { getEntry } from "astro:content";
-import {
-	type CollectionEntry,
-	getCollection,
-	getEntries,
-	render,
-} from "astro:content";
-import type { GetStaticPaths, GetStaticPathsResult } from "astro";
+import { getEntry, getEntries } from "@/lib/payload-content";
 
 import Page from "@/wrappers/page.astro";
 
@@ -32,44 +24,28 @@ import EndSlug from "@/components/read/EndSlug.astro";
 
 import { calculateReadingTime } from "@/utils/reading-time";
 import { getTypeBadgeConfig } from "@/utils/article-types";
+import CmsBody from "@/components/content/CmsBody.astro";
+import { getCmsBodyHeadings } from "@/lib/safe-cms-body";
 
-export const prerender = true;
+export const prerender = false;
 
-type Props = {
-	article: CollectionEntry<"articles">;
-};
-
-const computeImageUrl = async (
-	article: CollectionEntry<"articles">,
-): Promise<URL | undefined> => {
-	if (article.data.cover) {
-		const image = await getImage({ src: article.data.cover.image });
-		return new URL(image.src, Astro.site);
-	}
-	return undefined;
-};
-
-export const getStaticPaths: GetStaticPaths =
-	async (): Promise<GetStaticPathsResult> => {
-		const articles = await getCollection("articles");
-		return articles.map((article: CollectionEntry<"articles">) => ({
-			params: { slug: article.id },
-			props: { article },
-		}));
-	};
-
-const { article } = Astro.props;
-const { Content, headings } = await render(article);
+const slug = Astro.params.slug;
+const article = slug ? await getEntry("articles", { slug }) : undefined;
+if (!article || article.data.publishedAt > new Date()) {
+	return new Response(null, { status: 404 });
+}
+const headings = getCmsBodyHeadings(article.body ?? "");
 const authors = await getEntries(article.data.authors);
 const maybeSeries =
-	article.data.series && (await getEntry("series", article.data.series.id));
-
-const imageUrl = await computeImageUrl(article);
+	article.data.series && (await getEntry("series", article.data.series));
+const imageUrl = article.data.cover?.image?.src
+	? new URL(article.data.cover.image.src, Astro.site ?? Astro.url)
+	: undefined;
 
 const howToJsonLd = article.data.howto
 	? buildHowToJsonLd({
 			siteUrl: (Astro.site ?? Astro.url).origin,
-			articleUrl: new URL(`/read/${article.id}`, Astro.site ?? Astro.url).href,
+			articleUrl: new URL(`/read/${article.slug}`, Astro.site ?? Astro.url).href,
 			name: article.data.title,
 			description: article.data.description,
 			...(imageUrl ? { imageUrl: imageUrl.href } : {}),
@@ -85,16 +61,16 @@ const howToJsonLd = article.data.howto
 const readingTime = calculateReadingTime(article.body || "");
 
 // Technology → readable label
-const allTechnologies = await getCollection("technologies");
-const technologyNameById = new Map<string, string>();
-for (const technology of allTechnologies) {
-	const rawId = technology.id.replace(/\/index$/, "");
-	technologyNameById.set(rawId, technology.data.name);
-}
+const technologyEntries = (
+	await Promise.all(
+		article.data.technologies.map((reference) =>
+			getEntry("technologies", reference),
+		),
+	)
+).filter((entry): entry is NonNullable<typeof entry> => entry !== undefined);
+const technologyById = new Map(technologyEntries.map((entry) => [entry.id, entry] as const));
 
 function formatTechnologyLabel(value: string): string {
-	const fromCollection = technologyNameById.get(value);
-	if (fromCollection) return fromCollection;
 	return value
 		.split(/[-/]/g)
 		.filter(Boolean)
@@ -106,10 +82,15 @@ function formatTechnologyLabel(value: string): string {
 		.join(" ");
 }
 
-const tags = (article.data.technologies ?? []).map((technologyId) => ({
-	label: formatTechnologyLabel(technologyId),
-	href: `/technology/${technologyId}`,
-}));
+const tags = article.data.technologies.map((reference) => {
+	const technology = technologyById.get(reference.id);
+	const slug = technology?.slug ?? reference.slug;
+	if (!slug) return undefined;
+	return {
+		label: technology?.data.name ?? formatTechnologyLabel(slug),
+		href: `/technology/${slug}`,
+	};
+}).filter((tag) => tag !== undefined);
 
 const articleType = article.data.type || "tutorial";
 const badgeConfig = getTypeBadgeConfig(articleType);
@@ -178,7 +159,7 @@ const subtitle = article.data.openGraph?.subtitle || article.data.subtitle;
 		elements={[
 			{ title: "Home", link: "/" },
 			{ title: "Read", link: "/read" },
-			{ title: article.data.title, link: `/read/${article.id}` },
+			{ title: article.data.title, link: `/read/${article.slug}` },
 		]}
 	/>
 	<link slot="extra-head" rel="alternate" type="application/rss+xml" title="Rawkode Academy - Articles (RSS)" href="/api/feeds/articles.xml" />
@@ -212,7 +193,7 @@ const subtitle = article.data.openGraph?.subtitle || article.data.subtitle;
 
 				<article class={styles.prose}>
 					<Updates updates={article.data.updates} />
-					<Content />
+					<CmsBody entry={article} />
 				</article>
 
 				<EndSlug date={publishDate} />

@@ -2,6 +2,7 @@ import { ReviewError, type ReviewActor } from './contracts'
 import type { Payload, Where } from 'payload'
 import type { ReviewStore } from './store'
 import { currentReviewStates } from './queue'
+import { createCuid2 } from '../cuid2'
 
 const privateHeaders = { 'cache-control': 'private, no-store', 'referrer-policy': 'no-referrer' }
 type Runtime = { payload: Payload; store: ReviewStore; actor: ReviewActor; origin: string }
@@ -52,8 +53,7 @@ async function createVideoInput(request: Request) {
 
 function target(doc: Record<string, unknown>, reviewState = 'no-review') {
   return {
-    videoId: Number(doc.id),
-    legacyId: String(doc.legacyId),
+    videoId: String(doc.id),
     slug: String(doc.slug),
     title: typeof doc.title === 'string' && doc.title.trim() ? doc.title : String(doc.slug),
     description: typeof doc.description === 'string' ? doc.description : '',
@@ -74,7 +74,7 @@ export function createStaffVideoHandlers(runtime: (request: Request) => Promise<
             { or: [
               { title: { contains: search } },
               { slug: { contains: search } },
-              { legacyId: { contains: search } },
+              { id: { contains: search } },
             ] },
           ],
         } : { tombstone: { equals: false } }
@@ -86,7 +86,7 @@ export function createStaffVideoHandlers(runtime: (request: Request) => Promise<
         const reviewStates = new Map(reviewRows.map(row => [row.videoId, row.state ?? 'no-revision']))
         const videos = result.docs
           .filter(doc => !doc.tombstone && !doc.processingRun)
-          .map(doc => target(doc as Record<string, unknown>, reviewStates.get(Number(doc.id)) ?? 'no-review'))
+          .map(doc => target(doc as Record<string, unknown>, reviewStates.get(String(doc.id)) ?? 'no-review'))
         return Response.json({ videos }, { headers: privateHeaders })
       } catch (error) { return failure(error) }
     },
@@ -96,12 +96,11 @@ export function createStaffVideoHandlers(runtime: (request: Request) => Promise<
         staff(actor)
         if (request.headers.get('origin') !== origin) throw new ReviewError(403, 'Untrusted request origin')
         const input = await createVideoInput(request)
-        const id = crypto.randomUUID()
+        const id = createCuid2()
         const doc = await payload.create({
           collection: 'videos', depth: 0, draft: true, overrideAccess: false, user: actor,
           data: {
-            legacyId: `review-${id}`,
-            legacyType: 'Video',
+            id,
             slug: `review-${input.title.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 48) || 'video'}-${id.slice(0, 8)}`,
             title: input.title,
             description: input.description,
@@ -138,7 +137,7 @@ export function createStaffReviewerHandlers(runtime: (request: Request) => Promi
           where, overrideAccess: false, user: actor,
         })
         const reviewers = result.docs.map(doc => ({
-          userId: Number(doc.id),
+          userId: String(doc.id),
           name: typeof doc.name === 'string' && doc.name.trim() ? doc.name : 'Academy customer',
           profileEmail: typeof doc.profileEmail === 'string' ? doc.profileEmail : '',
         }))

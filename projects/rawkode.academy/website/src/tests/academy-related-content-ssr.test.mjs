@@ -9,13 +9,14 @@ import ts from "typescript";
 import * as runtime from "astro/runtime/server/index.js";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import { parse } from "node-html-parser";
+import { createPayloadContentFixtures } from "./helpers/payload-content-fixtures.mjs";
 
 const styles = new Proxy({}, { get: (_, slot) => `related-${String(slot)}` });
 const runtimeSource = readFileSync(
 	new URL("../lib/video-runtime.ts", import.meta.url),
 	"utf8",
 );
-const context = vm.createContext({ console, URL, __NEWS_DEPLOYMENT_CUTOFF_MS__: Date.parse("2100-01-01") });
+const context = vm.createContext({ console, URL });
 const publicationModule = new vm.SourceTextModule(
 	ts.transpileModule(readFileSync(new URL("../lib/news-publication.ts", import.meta.url), "utf8"), {
 		compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
@@ -44,12 +45,10 @@ async function render(file, props, collections = {}) {
 	);
 	const compiled = await transform(input, { filename: file });
 	assert.deepEqual(compiled.diagnostics, []);
+	const payload = createPayloadContentFixtures(collections);
 	const mocks = {
 		"astro/runtime/server/index.js": { ...runtime, createMetadata: () => ({}) },
-		"astro:content": {
-			getCollection: async (name, filter) =>
-				(collections[name] ?? []).filter(filter ?? (() => true)),
-		},
+		"@/lib/payload-content": payload,
 		"@rawkodeacademy/design-system": {
 			academyRelatedContent: () => styles,
 			academyCatalog: () => styles,
@@ -101,6 +100,7 @@ async function render(file, props, collections = {}) {
 const article = {
 	data: { technologies: ["kubernetes/index", { id: "docker/index" }] },
 };
+const topicTechnologyId = "technology-kubernetes-payload-cuid";
 const video = (id, changes = {}) => ({
 	id,
 	data: {
@@ -114,16 +114,17 @@ const video = (id, changes = {}) => ({
 	},
 });
 const topic = {
-	technologyId: "kubernetes/index",
+	technologyId: topicTechnologyId,
 	technologyName: "Kubernetes",
 	videos: [],
 };
 const entry = (id, changes = {}) => ({
 	id,
+	slug: id,
 	data: {
 		title: `Title ${id}`,
 		description: `Description ${id}`,
-		technologies: ["kubernetes"],
+		technologies: [{ id: topicTechnologyId }],
 		publishedAt: new Date("2025-01-01"),
 		difficulty: "beginner",
 		estimatedDuration: 90,
@@ -172,7 +173,6 @@ const technologyAst = ts.createSourceFile(
 const guardNames = new Set([
 	"now",
 	"normalizedTechnologyId",
-	"matchesTechnology",
 	"hasTopicContent",
 ]);
 const guardStatements = technologyAst.statements.filter(
@@ -198,74 +198,81 @@ const guardCode = ts.transpileModule(
 function pageHasTopicContent(collections, technologyId = "kubernetes/index") {
 	return vm.runInNewContext(`${guardCode}\nhasTopicContent;`, {
 		isNewsPublished: publicationModule.namespace.isNewsPublished,
-		technology: { id: technologyId },
-		articles: [],
-		news: [],
-		learningPaths: [],
-		...collections,
+		technologyEntry: { id: technologyId, slug: technologyId },
+		technology: { id: technologyId, slug: technologyId },
+		topicArticles: collections.topicArticles ?? collections.articles ?? [],
+		topicNews: collections.topicNews ?? collections.news ?? [],
+		topicLearningPaths:
+			collections.topicLearningPaths ?? collections.learningPaths ?? [],
 	});
 }
 
-test("technology page guard admits object-reference-only articles and agrees with TopicHub", async () => {
-	for (const technologyId of ["kubernetes", "kubernetes/index"]) {
-		for (const reference of [
-			"kubernetes",
-			"kubernetes/index",
-			{ id: "kubernetes" },
-			{ id: "kubernetes/index", collection: "technologies" },
-		]) {
-			const collections = {
-				articles: [
-					entry("object-reference-only", { technologies: [reference] }),
-				],
-			};
-			assert.equal(pageHasTopicContent(collections, technologyId), true);
-			const { dom } = await render(
-				"technology/TopicHub.astro",
-				{ ...topic, technologyId },
-				collections,
-			);
-			assert.equal(
-				dom.querySelector("[data-article-id]")?.getAttribute("data-article-id"),
-				"object-reference-only",
-			);
-		}
-	}
+test("technology guard counts Payload-filtered rows and TopicHub queries by Payload technology ID", async () => {
+	const relatedArticle = entry("object-reference-only", {
+		technologies: [{ id: topicTechnologyId }],
+	});
+	assert.equal(pageHasTopicContent({ articles: [relatedArticle] }), true);
+	const { dom } = await render(
+		"technology/TopicHub.astro",
+		topic,
+		{
+			articles: [relatedArticle],
+		},
+	);
+	assert.equal(
+		dom.querySelector("[data-article-id]")?.getAttribute("data-article-id"),
+		"object-reference-only",
+	);
 });
 
-test("technology page ignores legacy article draft flags and retains news/path matches", () => {
+test("technology guard trusts Payload relation filtering, excludes empty windows and ignores legacy draft flags", async () => {
 	for (const collection of ["articles", "news", "learningPaths"]) {
-		for (const reference of ["kubernetes", { id: "kubernetes/index" }]) {
-			assert.equal(
-				pageHasTopicContent({
-					[collection]: [entry("match", { technologies: [reference] })],
-				}),
-				true,
-			);
-		}
+		const related = entry("match", {
+			technologies: [{ id: topicTechnologyId }],
+		});
+		const relatedFixture = createPayloadContentFixtures({ [collection]: [related] });
+		const relatedRows = await relatedFixture.listPayloadContent(collection, {
+			technologyId: topicTechnologyId,
+		});
+		assert.equal(relatedRows.length, 1);
+		assert.equal(pageHasTopicContent({ [collection]: relatedRows }), true);
+
 		for (const technologies of [
 			undefined,
 			[],
-			["kubernetes-other"],
-			[{ id: "docker/index" }],
+			["technology-other-payload-cuid"],
+			[{ id: "technology-other-payload-cuid" }],
 		]) {
+			const unrelated = entry("unmatched", { technologies });
+			const unrelatedFixture = createPayloadContentFixtures({
+				[collection]: [unrelated],
+			});
+			const filteredRows = await unrelatedFixture.listPayloadContent(collection, {
+				technologyId: topicTechnologyId,
+			});
 			assert.equal(
-				pageHasTopicContent({
-					[collection]: [entry("unmatched", { technologies })],
-				}),
+				filteredRows.length,
+				0,
+			);
+			assert.equal(
+				pageHasTopicContent({ [collection]: filteredRows }),
 				false,
 			);
 		}
 	}
+	const legacyFlaggedFixture = createPayloadContentFixtures({
+		articles: [
+			entry("legacy-flagged", {
+				draft: true,
+				technologies: [{ id: topicTechnologyId }],
+			}),
+		],
+	});
+	const legacyFlaggedRows = await legacyFlaggedFixture.listPayloadContent("articles", {
+		technologyId: topicTechnologyId,
+	});
 	assert.equal(
-		pageHasTopicContent({
-			articles: [
-				entry("legacy-flagged", {
-					draft: true,
-					technologies: [{ id: "kubernetes/index" }],
-				}),
-			],
-		}),
+		pageHasTopicContent({ articles: legacyFlaggedRows }),
 		true,
 	);
 	assert.equal(pageHasTopicContent({}), false);
@@ -403,7 +410,7 @@ test("TopicHub preserves real path/article/video identities; titles are visible 
 			entry("unrelated", { technologies: ["other"] }),
 		],
 		articles: [
-			entry("public", { technologies: [{ id: "kubernetes/index" }] }),
+			entry("public", { technologies: [{ id: topicTechnologyId }] }),
 			entry("draft", { draft: true }),
 			entry("unrelated", { technologies: ["other"] }),
 		],
@@ -425,10 +432,7 @@ test("TopicHub preserves real path/article/video identities; titles are visible 
 		dom.querySelectorAll("a").map((a) => a.getAttribute("href")),
 		["/learning-paths/real-path", "/watch/real-video"],
 	);
-	assert.equal(
-		dom.querySelector("[data-article-id]").getAttribute("data-article-id"),
-		"public",
-	);
+	assert(dom.querySelector('[data-article-id="public"]'));
 	assert.equal(dom.querySelectorAll("[data-article-id]").length, 2);
 	assert.equal(
 		dom.querySelector('a[href="/watch/real-video"] .related-body h3').text,

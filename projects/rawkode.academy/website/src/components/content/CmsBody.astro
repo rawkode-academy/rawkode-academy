@@ -1,0 +1,79 @@
+---
+import Aside from "@/components/Aside.astro";
+import Diagram from "@/components/articles/Diagram.astro";
+import CgroupTimeline from "@/components/articles/cgroups/CgroupTimeline";
+import CgroupTreeDiagram from "@/components/articles/cgroups/CgroupTreeDiagram";
+import HierarchyExplorer from "@/components/articles/cgroups/HierarchyExplorer";
+import PodCgroupMapper from "@/components/articles/cgroups/PodCgroupMapper";
+import ResourceSimulator from "@/components/articles/cgroups/ResourceSimulator";
+import ThemeAwareImage from "@/components/common/ThemeAwareImage.astro";
+import ZoomableImage from "@/components/image/ZoomableImage.astro";
+import VideoPlayer from "@/components/video/player.vue";
+import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import { parseSafeCmsBody } from "@/lib/safe-cms-body";
+import type { PayloadEntry } from "@/lib/payload-content";
+
+interface Props {
+	entry: PayloadEntry;
+}
+
+const { entry } = Astro.props;
+const blocks = await parseSafeCmsBody(entry);
+---
+
+<div class="cms-body">
+	{blocks.map((block) => {
+		if (block.kind === "markdown") return <div set:html={block.html} />;
+		if (block.kind === "aside") {
+			return (
+				<Aside variant={block.variant}>
+					<div set:html={block.html} />
+				</Aside>
+			);
+		}
+		if (block.kind === "diagram") {
+			const src = block.sourceHash
+				? `/cms-diagrams/${block.sourceHash}.svg`
+				: undefined;
+			return (
+				<Diagram id={block.id} title={block.title} description={block.description}>
+					{src ? (
+						<img src={src} alt={block.title} width="1280" height="720" loading="lazy" />
+					) : (
+						<p role="img" aria-label={block.description} data-diagram-unavailable>
+							{block.description}
+						</p>
+					)}
+				</Diagram>
+			);
+		}
+		if (block.kind === "video") {
+			return (
+				<VideoPlayer
+					client:only="vue"
+					video={block.videoId}
+					thumbnailUrl={getVideoThumbnailUrl(block.videoId)}
+				/>
+			);
+		}
+		if (block.kind === "theme-image") {
+			return (
+				<ThemeAwareImage
+					lightSrc={block.lightSrc}
+					darkSrc={block.darkSrc}
+					alt={block.alt}
+					class={block.className ?? ""}
+				/>
+			);
+		}
+		if (block.kind === "zoom-image") {
+			return <ZoomableImage image={block.src} alt={block.alt} />;
+		}
+		if (block.name === "CgroupTimeline") return <CgroupTimeline client:visible />;
+		if (block.name === "CgroupTreeDiagram") return <CgroupTreeDiagram client:visible />;
+		if (block.name === "HierarchyExplorer") return <HierarchyExplorer client:visible />;
+		if (block.name === "ResourceSimulator") return <ResourceSimulator client:visible />;
+		if (block.name === "PodCgroupMapper") return <PodCgroupMapper client:visible />;
+		return null;
+	})}
+</div>

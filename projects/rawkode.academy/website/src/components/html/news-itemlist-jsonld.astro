@@ -1,17 +1,8 @@
 ---
-import { buildNewsItemListJsonLd } from "@/lib/news-itemlist-jsonld";
-
-interface NewsStoryInput {
-	id: string;
-	data: {
-		title: string;
-		description: string;
-		publishedAt: Date;
-	};
-}
+import { buildNewsItemListJsonLd, type NewsListEntry } from "@/lib/news-itemlist-jsonld";
 
 interface Props {
-	stories: ReadonlyArray<NewsStoryInput>;
+	stories: ReadonlyArray<NewsListEntry>;
 	listUrl: string;
 	limit?: number;
 	slot?: string;

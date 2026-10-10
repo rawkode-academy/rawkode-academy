@@ -18,7 +18,7 @@ export async function reviewBackend() {
   const auth = authConfig(cloudflare.env)
   const fixtureEnabled = (cloudflare.env as CloudflareEnv & { POC_REVIEW_FIXTURE_MEDIA?: string }).POC_REVIEW_FIXTURE_MEDIA === 'true'
   const assets = new TrustedAssets(store, cloudflare.env.R2)
-  const fixtureSource = async (mediaId: number, actor: ReviewActor) => {
+  const fixtureSource = async (mediaId: string, actor: ReviewActor) => {
     const media = await payload.findByID({ collection: 'media', id: mediaId, depth: 0, overrideAccess: false, user: actor })
     return boundedObject(cloudflare.env.R2, String(media.filename))
   }
@@ -26,7 +26,7 @@ export async function reviewBackend() {
     async video(id, actor) {
       const video = await payload.findByID({ collection: 'videos', id, depth: 0, draft: true, overrideAccess: false, user: actor })
       if (video.tombstone || video.processingRun) throw new ReviewError(409, 'Choose a video outside the legacy pipeline')
-      return video as { id: number; legacyId: string }
+      return video as { id: string }
     },
     thumbnail: async (videoId, thumbnailId) => { await assertThumbnail(store, videoId, thumbnailId) },
     assertPair: (videoId, sourceId, deliverableId) => assets.pair(videoId, sourceId, deliverableId),
@@ -55,7 +55,7 @@ export async function reviewBackend() {
     now: () => new Date(),
   })
   const intake = new ReviewIntake(store, cloudflare.env.R2, service, configuredMediaAdapter(cloudflare.env, store))
-  const publicationAvailable = async (videoId: number) => (auth.local && fixtureEnabled) || Boolean(await store.one('SELECT a.media_id FROM video_review_state s JOIN video_revisions r ON r.id=s.current_revision JOIN review_intake_assets a ON a.media_id=r.deliverable_media_id AND a.video_id=s.video_id AND a.kind=? WHERE s.video_id=?', 'deliverable', videoId))
+  const publicationAvailable = async (videoId: string) => (auth.local && fixtureEnabled) || Boolean(await store.one('SELECT a.media_id FROM video_review_state s JOIN video_revisions r ON r.id=s.current_revision JOIN review_intake_assets a ON a.media_id=r.deliverable_media_id AND a.video_id=s.video_id AND a.kind=? WHERE s.video_id=?', 'deliverable', videoId))
   return { payload, store, service, intake, assets, auth, publicationAvailable, bucket: cloudflare.env.R2 }
 }
 export async function reviewRuntime(request: Request) {
@@ -65,7 +65,7 @@ export async function reviewRuntime(request: Request) {
 }
 // Call only after a revision grant has been checked. Public delivery uses a
 // committed release object key and never resolves an upload filename.
-export async function deliveryKey(payload: Awaited<ReturnType<typeof getPayload>>, mediaId: number) {
+export async function deliveryKey(payload: Awaited<ReturnType<typeof getPayload>>, mediaId: string) {
   const media = await payload.findByID({ collection: 'media', id: mediaId, depth: 0, overrideAccess: true })
   return String(media.filename)
 }

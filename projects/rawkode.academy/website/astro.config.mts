@@ -58,7 +58,6 @@ function searchForWorkspaceRoot(current: string): string {
 	return current;
 }
 import { vite as vidstackPlugin } from "vidstack/plugins";
-import { webcontainerDemosPlugin } from "./src/utils/vite-plugin-webcontainer-demos";
 
 type AstroUserConfig = Parameters<typeof defineConfig>[0];
 type AstroVitePlugins = NonNullable<
@@ -188,13 +187,7 @@ export default defineConfig({
 		}),
 	],
 	vite: {
-		// One literal shared by prerendering and every deployed worker isolate.
-		// Scheduled News requires a new build because its detail pages are static.
-		define: {
-			__NEWS_DEPLOYMENT_CUTOFF_MS__: JSON.stringify(Date.now()),
-		},
 		plugins: asAstroVitePlugins([
-			webcontainerDemosPlugin(),
 			vidstackPlugin({ include: /components\/video\// }),
 			...(process.env.NODE_ENV === "production" &&
 			process.env.GRAFANA_SOURCEMAP_API_KEY

@@ -1,5 +1,5 @@
 ---
-import { getCollection } from "astro:content";
+import { listPayloadContent } from "@/lib/payload-content";
 import ArticleCard from "@/components/articles/ArticleCard.astro";
 import { academyRelatedContent } from "@rawkodeacademy/design-system";
 import { isNewsPublished } from "@/lib/news-publication";
@@ -34,49 +34,30 @@ const {
 } = Astro.props;
 const s = academyRelatedContent();
 
-// Technology IDs from the collection look like "kubernetes/index"; raw IDs
-// (as used in news/article frontmatter) drop the suffix. Match both forms.
-const normalizedTechnologyId = technologyId.replace(/\/index$/, "");
-const matchesTechnology = (technologies: ReadonlyArray<string | { id: string }> | undefined) =>
-	Array.isArray(technologies) && technologies.some(reference => {
-		const id = typeof reference === "string" ? reference : reference.id;
-		return id.replace(/\/index$/, "") === normalizedTechnologyId;
-	});
-
-// Get all articles that mention this technology
 const now = new Date();
-const allArticles = await getCollection("articles", ({ data }) => {
-	return data.publishedAt <= now && matchesTechnology(data.technologies);
-});
-
-// Sort articles by date
-const articles = allArticles.sort(
-	(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
-);
-
-// Get news matching this technology
-const allNews = showNews
-	? (await getCollection("news"))
-			.filter((story) => isNewsPublished(story.data.publishedAt, now) && matchesTechnology(story.data.technologies))
-			.sort(
-				(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
-			)
-			.slice(0, newsLimit)
-	: [];
-
-const learningPaths = showLearningPaths
-	? (await getCollection("learningPaths"))
-			.filter((path) => path.data.publishedAt <= now && matchesTechnology(path.data.technologies))
-			.sort(
-				(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
-			)
-			.slice(0, learningPathLimit)
-	: [];
+const [articleCandidates, allNews, learningPaths] = await Promise.all([
+	showArticles
+		? listPayloadContent("articles", { technologyId, limit: 6 })
+		: Promise.resolve([]),
+	showNews
+		? listPayloadContent("news", { technologyId, limit: newsLimit })
+		: Promise.resolve([]),
+	showLearningPaths
+		? listPayloadContent("learningPaths", { technologyId, limit: learningPathLimit })
+		: Promise.resolve([]),
+]);
+const articles = articleCandidates.filter((article) => article.data.publishedAt <= now);
+const visibleNews = allNews
+	.filter((story) => isNewsPublished(story.data.publishedAt, now))
+	.slice(0, newsLimit);
+const visibleLearningPaths = learningPaths
+	.filter((path) => path.data.publishedAt <= now)
+	.slice(0, learningPathLimit);
 
 const hasArticles = showArticles && articles.length > 0;
 const hasVideos = showVideos && videos.length > 0;
-const hasNews = showNews && allNews.length > 0;
-const hasLearningPaths = showLearningPaths && learningPaths.length > 0;
+const hasNews = showNews && visibleNews.length > 0;
+const hasLearningPaths = showLearningPaths && visibleLearningPaths.length > 0;
 const isEmpty = !hasArticles && !hasVideos && !hasNews && !hasLearningPaths;
 
 const newsDateFormatter = new Intl.DateTimeFormat("en-US", {
@@ -105,8 +86,8 @@ function formatLearningPathDuration(minutes: number): string {
 		<section class={s.section}>
 			<h2 class={s.heading}>{technologyName} learning paths</h2>
 			<div class={s.pathGrid}>
-				{learningPaths.map((path) => (
-					<a href={`/learning-paths/${path.id}`} class:list={[s.card, s.path]}>
+				{visibleLearningPaths.map((path) => (
+					<a href={`/learning-paths/${path.slug}`} class:list={[s.card, s.path]}>
 						<div class={s.metadata}>
 							<span>{difficultyLabel[path.data.difficulty] ?? path.data.difficulty}</span>
 							{formatLearningPathDuration(path.data.estimatedDuration) && (
@@ -124,14 +105,14 @@ function formatLearningPathDuration(minutes: number): string {
 		<section class={s.section}>
 			<h2 class={s.heading}>Recent {technologyName} news</h2>
 			<ul class={s.newsList}>
-				{allNews.map((story) => (
+				{visibleNews.map((story) => (
 					<li class={s.newsItem}>
 						<article>
 							<time class={s.metadata} datetime={story.data.publishedAt.toISOString()}>
 								{newsDateFormatter.format(story.data.publishedAt)}
 							</time>
 							<h3 class={s.title}>
-								<a href={`/news/${story.id}`} class={s.link}>{story.data.title}</a>
+								<a href={`/news/${story.slug}`} class={s.link}>{story.data.title}</a>
 							</h3>
 							<p class={s.copy}>{story.data.description}</p>
 						</article>

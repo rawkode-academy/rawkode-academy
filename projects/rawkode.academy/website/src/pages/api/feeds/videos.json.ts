@@ -1,4 +1,4 @@
-import { getCollection } from "astro:content";
+import { getAllCollection } from "@/lib/payload-content";
 import type { APIRoute } from "astro";
 import { buildJsonFeed, type JsonFeedItem } from "@/lib/json-feed";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
@@ -10,8 +10,8 @@ export const GET: APIRoute = async ({ site }) => {
 	const u = (path: string) => `${baseUrl}${path}`;
 
 	const [videos, technologies] = await Promise.all([
-		getCollection("videos"),
-		getCollection("technologies"),
+		getAllCollection("videos"),
+		getAllCollection("technologies"),
 	]);
 
 	const techName = new Map(
@@ -20,17 +20,10 @@ export const GET: APIRoute = async ({ site }) => {
 
 	const items: JsonFeedItem[] = videos
 		.map((video) => {
-			const url = u(`/watch/${video.data.slug}/`);
-			const techIds = video.data.technologies as ReadonlyArray<unknown>;
-			const tagNames = (Array.isArray(techIds) ? techIds : [])
-				.map((id) => {
-					const techId =
-						typeof id === "string"
-							? id
-							: id && typeof id === "object" && "id" in id
-								? ((id as { id: string }).id as string)
-								: undefined;
-					if (!techId) return undefined;
+			const url = u(`/watch/${video.slug}/`);
+			const tagNames = video.data.technologies
+				.map((technology) => {
+					const techId = technology.id;
 					const normalised = techId.endsWith("/index")
 						? techId.slice(0, -"/index".length)
 						: techId;
@@ -71,9 +64,9 @@ export const GET: APIRoute = async ({ site }) => {
 	return new Response(JSON.stringify(feed), {
 		headers: {
 			"Content-Type": "application/feed+json; charset=utf-8",
-			"Cache-Control": "public, max-age=3600",
+			"Cache-Control": "public, max-age=3600, s-maxage=3600",
 		},
 	});
 };
 
-export const prerender = true;
+export const prerender = false;

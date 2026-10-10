@@ -12,6 +12,7 @@ import * as runtime from "astro/runtime/server/index.js";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import { parse } from "node-html-parser";
 import * as feedsmith from "feedsmith";
+import { createPayloadContentFixtures } from "./helpers/payload-content-fixtures.mjs";
 
 const now = Date.parse("2026-09-20T12:00:00Z");
 class FixedDate extends Date {
@@ -23,9 +24,9 @@ class FixedDate extends Date {
 	}
 }
 const show = (id = "klustered", publish = true) => ({
-	id,
+	id: `show-${id}-payload-cuid`,
+	slug: id,
 	data: {
-		id,
 		name: `${id} show`,
 		publish,
 		hosts: [],
@@ -34,13 +35,14 @@ const show = (id = "klustered", publish = true) => ({
 });
 const video = (id, data = {}) => ({
 	id,
+	slug: id,
 	data: {
 		id,
 		slug: id,
 		title: id,
 		description: "Authored episode",
 		publishedAt: new Date("2020-01-01"),
-		show: "klustered",
+		show: { id: "show-klustered-payload-cuid" },
 		duration: 90,
 		chapters: [{ startTime: 0, title: "Start" }],
 		...data,
@@ -66,12 +68,12 @@ const card = (data = {}) => ({
 const fixtureVideos = () => [
 	video("old"),
 	video("future-recorded", {
-		publishedAt: new Date(now + 1),
+		publishedAt: new Date("2999-01-01"),
 		type: "recorded",
 	}),
-	video("recent", { publishedAt: new Date(now), show: { id: "klustered" } }),
-	video("future-live", { publishedAt: new Date(now + 1), type: "live" }),
-	video("other", { show: "other" }),
+	video("recent", { publishedAt: new Date(now), show: { id: "show-klustered-payload-cuid" } }),
+	video("future-live", { publishedAt: new Date("2999-01-01"), type: "live", chapters: [] }),
+	video("other", { show: { id: "show-other-payload-cuid" } }),
 ];
 const plugin = "lib/shows/plugins/bracket/";
 const extras = "pages/shows/[showId]/[...slug].astro";
@@ -86,6 +88,7 @@ function harness({
 } = {}) {
 	const reads = [],
 		writes = [];
+	const payload = createPayloadContentFixtures(collections, { now: new Date(now) });
 	const env = {
 		BRACKETS_READ: {
 			fetch: async (_url, init) => {
@@ -110,7 +113,6 @@ function harness({
 	};
 	const context = vm.createContext({
 		console,
-		__NEWS_DEPLOYMENT_CUTOFF_MS__: now,
 		URL,
 		Date: FixedDate,
 		Response,
@@ -125,14 +127,7 @@ function harness({
 		new Proxy({}, { get: (_, key) => `academy-${String(key)}` });
 	const mocks = {
 		"astro/runtime/server/index.js": { ...runtime, createMetadata: () => ({}) },
-		"astro:content": {
-			getCollection: async (name, filter) =>
-				(collections[name] ?? []).filter(filter ?? (() => true)),
-			getEntries: async (refs) =>
-				refs.map((ref) =>
-					(collections.people ?? []).find((p) => p.id === (ref.id ?? ref)),
-				),
-		},
+		"@/lib/payload-content": payload,
 		"cloudflare:workers": { env },
 		// Feedsmith checks object.constructor === Object; bridge VM realms while
 		// preserving Dates and running the real serializer on the unchanged values.
@@ -176,6 +171,11 @@ function harness({
 		);
 		await module.link(async (specifier) => {
 			let exports = mocks[specifier];
+			const normalized = specifier
+				.replace(/[?#].*$/, "")
+				.replace(/\.(?:[cm]?[jt]sx?)$/, "");
+			if (!exports && normalized.endsWith("/lib/payload-content"))
+				exports = payload;
 			if (specifier.includes("?astro&type=style")) exports = {};
 			if (specifier.endsWith("BracketBoard.vue")) exports = { default: empty };
 			if (exports)
@@ -242,16 +242,18 @@ function harness({
 			}),
 		};
 	};
-	return { render, module, reads, writes, routeContext };
+	return { render, module, reads, writes, routeContext, payloadCalls: payload.calls };
 }
 
 test("archive filters future/draft data, sorts preview, preserves authored cover, and has H1/H2 outline", async () => {
 	for (const videos of [fixtureVideos(), fixtureVideos().reverse()]) {
 		const entry = show();
+		assert.equal(entry.data.id, undefined, "non-video frontmatter IDs are omitted from Payload projections");
 		entry.data.cover = { image: { src: "/real-cover.png" } };
-		const { dom } = await harness({
+		const h = harness({
 			collections: { shows: [entry, show("hidden", false)], videos },
-		}).render("pages/shows/index.astro");
+		});
+		const { dom } = await h.render("pages/shows/index.astro");
 		assert.deepEqual(
 			dom.querySelectorAll("h1,h2,h3").map((n) => [n.tagName, n.text]),
 			[
@@ -275,6 +277,12 @@ test("archive filters future/draft data, sorts preview, preserves authored cover
 		);
 		assert.equal(metadata.itemListElement[0].item.numberOfEpisodes, 2);
 		assert.equal(metadata.numberOfItems, 1);
+		assert(
+			h.payloadCalls.some(
+				(call) => call.kind === "all" && call.collection === "videos",
+			),
+			"show directory reads the complete video corpus for accurate counts/latest episodes",
+		);
 	}
 });
 
@@ -306,6 +314,7 @@ test("detail/episode list/PodcastSeries agree with archive eligibility and newes
 	const metadata = JSON.parse(
 		dom.querySelector('script[type="application/ld+json"]').text,
 	);
+	assert(h.payloadCalls.some((call) => call.kind === "all" && call.collection === "videos" && call.options.showId === "show-klustered-payload-cuid"));
 	assert.equal(metadata.numberOfEpisodes, 2);
 	assert.deepEqual(
 		[
@@ -622,10 +631,10 @@ test("real RSS and chapter handlers share publication cutoff/membership and pres
 	});
 	const rss = await h.module(feed),
 		chapter = await h.module(chapters);
-	const paths = await rss.getStaticPaths();
-	assert.deepEqual(JSON.parse(JSON.stringify(paths)), [
-		{ params: { showId: "klustered" } },
-	]);
+	assert.equal(rss.prerender, false, "show RSS is resolved at request time from Payload");
+	assert.equal(chapter.prerender, false, "chapter JSON is resolved at request time from Payload");
+	assert.equal(rss.getStaticPaths, undefined, "the CMS route does not build a static slug list");
+	assert.equal(chapter.getStaticPaths, undefined, "chapter routes do not depend on build-time slugs");
 	const response = await rss.GET({
 		params: { showId: "klustered" },
 		site: new URL("https://academy.test"),
@@ -640,13 +649,6 @@ test("real RSS and chapter handlers share publication cutoff/membership and pres
 	assert.match(
 		xml.querySelector("enclosure").getAttribute("url"),
 		/\/recent\/original\.mp3$/,
-	);
-	const chapterPaths = JSON.parse(
-		JSON.stringify(await chapter.getStaticPaths()),
-	);
-	assert.deepEqual(
-		chapterPaths.map((p) => p.params.episodeId),
-		["recent", "old"],
 	);
 	const good = await chapter.GET({
 		params: { showId: "klustered", episodeId: "recent" },
@@ -675,6 +677,8 @@ test("real RSS and chapter handlers share publication cutoff/membership and pres
 			404,
 		);
 	}
+	assert(h.payloadCalls.some((call) => call.kind === "all" && call.collection === "videos" && call.options.showId === "show-klustered-payload-cuid"));
+	assert(h.payloadCalls.some((call) => call.kind === "page" && call.collection === "videos" && call.options.showId === "show-klustered-payload-cuid" && call.options.limit === 100));
 	assert.equal(h.reads.length, 0);
 	assert.equal(h.writes.length, 0);
 });

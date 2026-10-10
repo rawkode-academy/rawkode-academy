@@ -15,9 +15,11 @@
 	const isLocalhost = () =>
 		window.location.hostname === "localhost" ||
 		window.location.hostname === "127.0.0.1";
+	const telemetryDisabled =
+		document.querySelector('meta[name="rawkode-telemetry-disabled"]')?.content === "true";
 
 	const shouldEnableFaro = () =>
-		!isLocalhost() && Boolean(FARO_URL);
+		!telemetryDisabled && !isLocalhost() && Boolean(FARO_URL);
 
 	const getUtmParams = () => {
 		try {

@@ -16,6 +16,11 @@ on:
     - projects/rawkode.academy/games/secrets-of-kubernetes/player-learned-phrases/**
     - projects/rawkode.academy/games/secrets-of-kubernetes/player-stats/**
     - projects/rawkode.academy/games/secrets-of-kubernetes/share-cards/**
+    - projects/rawkode.academy/payload/**
+    - projects/rawkode.academy/payload/scripts/pr-preview-resources.mjs
+    - projects/rawkode.academy/payload/scripts/pr-preview-resources.mjs/**
+    - projects/rawkode.academy/payload/wrangler.jsonc
+    - projects/rawkode.academy/payload/wrangler.jsonc/**
     - projects/rawkode.academy/platform/email-preferences/**
     - projects/rawkode.academy/platform/notifications/**
     - projects/rawkode.academy/website/astro.config.mts
@@ -29,8 +34,12 @@ on:
     - projects/rawkode.academy/website/package.json/**
     - projects/rawkode.academy/website/public/**
     - projects/rawkode.academy/website/review/**
+    - projects/rawkode.academy/website/review/deploy/deploy-cms-preview.mjs
+    - projects/rawkode.academy/website/review/deploy/deploy-cms-preview.mjs/**
     - projects/rawkode.academy/website/schema/**
     - projects/rawkode.academy/website/scripts/**
+    - projects/rawkode.academy/website/scripts/preview-isolation-worker.mjs
+    - projects/rawkode.academy/website/scripts/preview-isolation-worker.mjs/**
     - projects/rawkode.academy/website/src/**
     - projects/rawkode.academy/website/src/styles/**
     - projects/rawkode.academy/website/tsconfig.review.json
@@ -97,7 +106,7 @@ jobs:
           aarch64|arm64) cuenv_asset="cuenv-linux-arm64" ;;
           *) echo "Unsupported Linux architecture: $arch" >&2; exit 1 ;;
         esac
-        cuenv_version="0.55.1"
+        cuenv_version="0.56.1"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi
@@ -116,6 +125,7 @@ jobs:
       env:
         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
     - name: 'Run pipeline: pullRequest'
+      id: run_pipeline
       run: cuenv ci --pipeline pullRequest --path projects/rawkode.academy/website
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -124,3 +134,22 @@ jobs:
         GITHUB_REF_NAME: ${{ github.ref_name }}
         CUENV_ENVIRONMENT: production
         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+    - name: Verify cuenv ran projects/rawkode.academy/website
+      if: success()
+      run: |-
+        suffix=$(printf '%s' 'projects/rawkode.academy/website' | tr '/' '-')
+        if ! ls ".cuenv/reports/${GITHUB_SHA}/"*"-${suffix}.json" >/dev/null 2>&1; then
+          echo "::error::cuenv ci wrote no pipeline report for projects/rawkode.academy/website. It skipped the project (evaluation failed or timed out) or found no affected tasks."
+          exit 1
+        fi
+    - name: Verify hosted Astro SSR preview URL
+      if: success()
+      env:
+        WEBSITE_PREVIEW_URL: ${{ steps.run_pipeline.outputs.website_preview_url }}
+      run: |-
+        case "$WEBSITE_PREVIEW_URL" in
+          https://*.workers.dev) ;;
+          *) echo "::error::Astro preview deployment produced no workers.dev URL"; exit 1 ;;
+        esac
+        echo "## Astro SSR preview" >> "$GITHUB_STEP_SUMMARY"
+        echo "[Open the hosted preview]($WEBSITE_PREVIEW_URL)" >> "$GITHUB_STEP_SUMMARY"

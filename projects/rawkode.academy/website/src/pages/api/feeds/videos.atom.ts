@@ -1,4 +1,4 @@
-import { getCollection } from "astro:content";
+import { getAllCollection } from "@/lib/payload-content";
 import { getPublishedVideos } from "@/lib/content";
 import type { APIContext } from "astro";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
@@ -6,7 +6,7 @@ import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 export async function GET(context: APIContext) {
 	// Get published videos only (filters out future-dated for scheduled publishing)
 	const sortedVideos = await getPublishedVideos();
-	const technologies = await getCollection("technologies");
+	const technologies = await getAllCollection("technologies");
 	const techName = new Map(
 		technologies.map((t) => [t.id, t.data.name] as const),
 	);
@@ -41,9 +41,9 @@ ${sortedVideos
 			.toString()
 			.padStart(2, "0")}`;
 
-		const categories = ((video.data.technologies as string[]) || [])
-			.map((id) => {
-				const name = techName.get(id) || id;
+		const categories = video.data.technologies
+			.map((technology) => {
+				const name = techName.get(technology.id) || technology.slug || technology.id;
 				return `<category term=\"${name}\" label=\"${name}\"/>`;
 			})
 			.join("\\n\\t\\t");

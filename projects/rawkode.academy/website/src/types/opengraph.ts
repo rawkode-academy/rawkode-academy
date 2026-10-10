@@ -1,4 +1,4 @@
-import type { CollectionEntry } from "astro:content";
+import type { CollectionEntry } from "@/lib/payload-content";
 import type { ImageServicePayload } from "./image-service";
 
 type OpenGraphImagePayload = Omit<Partial<ImageServicePayload>, "image"> & {

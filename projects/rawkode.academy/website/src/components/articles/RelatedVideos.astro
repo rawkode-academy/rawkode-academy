@@ -1,5 +1,5 @@
 ---
-import { type CollectionEntry, getCollection } from "astro:content";
+import { type CollectionEntry, getAllCollection } from "@/lib/payload-content";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { formatVideoRuntimeLabel, isUpcomingLiveVideo } from "@/lib/video-runtime";
 import { academyRelatedContent } from "@rawkodeacademy/design-system";
@@ -29,11 +29,10 @@ const normalizeTechnologyId = (value: unknown): string | null => {
 	return raw.replace(/\/index$/, "");
 };
 
-const articleTechnologyIds = Array.isArray(currentArticle.data.technologies)
-	? currentArticle.data.technologies
-			.map(normalizeTechnologyId)
-			.filter((technologyId): technologyId is string => Boolean(technologyId))
-	: [];
+const articleTechnologies = currentArticle.data.technologies ?? [];
+const articleTechnologyIds = articleTechnologies
+	.map(normalizeTechnologyId)
+	.filter((technologyId): technologyId is string => Boolean(technologyId));
 const articleTechnologySet = new Set(articleTechnologyIds);
 
 let relatedVideos: {
@@ -46,7 +45,14 @@ let relatedVideos: {
 }[] = [];
 
 if (articleTechnologySet.size > 0) {
-	const videos = await getCollection("videos");
+	const videoGroups = await Promise.all(
+		[...articleTechnologySet].map((technologyId) =>
+			getAllCollection("videos", undefined, { technologyId }),
+		),
+	);
+	const videos = [
+		...new Map(videoGroups.flat().map((video) => [video.id, video] as const)).values(),
+	];
 	relatedVideos = videos
 		.map((video) => {
 			const technologyIds = (video.data.technologies ?? [])

@@ -4,18 +4,19 @@ import {usersCollection} from './auth/payload'
 import type {AuthConfig} from './auth/config'
 import {pipelineCollection,pipelineVideoFields} from './pipeline'
 import {filterExternalFileHeaders} from './media-security'
-import type { Access, CollectionConfig, Field, RelationshipField, Where } from 'payload'
+import type { Access, CollectionBeforeValidateHook, CollectionConfig, Field, RelationshipField } from 'payload'
 import {type AdminAccess,noDevelopers} from './admin/access'
 import {applyPreset} from './admin/collection-admin'
 import {computedLabel,fillEditorialIdentity,provenanceDefaults,relationTitle} from './admin/fields'
 import {arrange,type LayoutOptions} from './admin/layout'
 import {fieldComponents} from './admin/config'
+import {createCuid2,isCuid2} from './cuid2'
+import {ensureD2ArtifactsForBody} from './diagrams'
 
 const staff: Access = ({ req }) => isStaff(req.user) || req.context.pipelineMachine === true
-const readable: Access = ({ req }) => {
-  if(isStaff(req.user) || req.context.pipelineMachine === true) return true
-  return { and: [{ _status: { equals: 'published' } }, { tombstone: { equals: false } }] } as Where
-}
+// Anonymous website reads go through PublicContentBridge's allowlisted
+// projection; Payload REST must not expose importer provenance.
+const readable: Access = ({ req }) => isStaff(req.user) || req.context.pipelineMachine === true
 const text = (name: string, dbName?: string): Field => ({ name, type: 'text', ...(dbName ? { dbName } : {}) })
 const relation = (name: string, relationTo: string, hasMany = false, dbName?: string): RelationshipField => (hasMany ? { name, type: 'relationship', relationTo, hasMany:true, ...(dbName ? { dbName } : {}) } : { name, type: 'relationship', relationTo, hasMany:false, ...(dbName ? { dbName } : {}) })
 const sourceFieldName = (name: string): string => `source${name[0].toUpperCase()}${name.slice(1)}`
@@ -23,6 +24,7 @@ const sourceText = (name: string): Field => text(sourceFieldName(name))
 const strings = (name: string): Field => ({ name, type: 'array', fields: [text('value')] })
 const refs = (name: string): Field => ({ name, type: 'array', fields: [text('url')] })
 const date = (name: string): Field => ({ name, type: 'date' })
+const publishDate: Field = { name: 'publishedAt', type: 'date', admin: { date: { pickerAppearance: 'dayAndTime' }, description: 'Publish the document now with a future date to schedule website visibility. The site releases it automatically at this time.' } }
 const json = (name: string): Field => ({ name, type: 'json' })
 const authors = (name = 'authors'): RelationshipField => relation(name, 'people', true)
 const technologies = relation('technologies', 'technologies', true)
@@ -36,17 +38,13 @@ const domainRelationshipIndexes: Record<string, NonNullable<CollectionConfig['in
   'bracket-entries': [{ unique: true, fields: ['bracket', 'seed'] }, { unique: true, fields: ['bracket', 'competitor'] }, { unique: true, fields: ['bracket', 'team'] }],
   'match-results': [{ unique: true, fields: ['match'] }],
 }
-const protectedFields = ['legacyId','legacyType','sourceSystem','sourceRevision','sourceHash','mappingVersion','importedAt','importState','locallyEdited','sourceSequence','sourceFields','sourcePath','sourceFormat','sourceData','sourceRaw','sourceBody','sourceAssets']
-// legacyType for editor-created records, matching the importer's spelling.
-const legacyTypeOverrides: Record<string, string> = { people: 'Person', technologies: 'Technology', series: 'Series', news: 'News', adrs: 'ADR', changelog: 'Changelog', matches: 'Match', 'learning-resources': 'LearningResources' }
-const singularOf = (slug: string) => legacyTypeOverrides[slug] ?? slug.split('-').map(part => part[0].toUpperCase() + part.slice(1)).join('').replace(/ies$/, 'y').replace(/s$/, '')
-// Stored shape is unchanged; provenanceDefaults only adds function defaults and
-// an editorial-create slug validator (no DDL). See src/admin/fields.ts.
+const protectedFields = ['legacyId','sourceSystem','sourceRevision','sourceHash','mappingVersion','importedAt','importState','locallyEdited','sourceSequence','sourceFields','sourcePath','sourceAssets']
+// legacyId is an optional import key for repeatable static reimports. The
+// importer owns it; CMS-created content has a CUID2 primary ID and no legacy key.
 const provenanceFor = (slug: string): Field[] => {
-  const defaults = provenanceDefaults(slug, singularOf(slug))
+  const defaults = provenanceDefaults(slug)
   return [
-  { name: 'legacyId', type: 'text', required: true, unique: true, index: true, ...defaults.legacyId },
-  { name: 'legacyType', type: 'text', required: true, ...defaults.legacyType },
+  ...(slug === 'videos' ? [] : [{ name: 'legacyId', type: 'text', unique: true, index: true, admin: { hidden: true } } as Field]),
   { name: 'slug', type: 'text', required: true, index: true, ...defaults.slug } as Field,
   ...['sourceSystem','sourceRevision','sourceHash','mappingVersion'].map(name => text(name)),
   { name: 'importedAt', type: 'date' },
@@ -56,17 +54,13 @@ const provenanceFor = (slug: string): Field[] => {
   { name:'sourceSequence', type:'number' },
   { name: 'sourceOrder', type: 'number', defaultValue: 0 },
   text('sourcePath'),
-  { name: 'sourceFormat', type: 'select', options: ['md','mdx','yaml','yml','json'] },
-  json('sourceData'),
-  { name: 'sourceRaw', type: 'textarea' },
-  { name: 'sourceBody', type: 'textarea' },
   json('sourceAssets'),
   { name: 'tombstone', type: 'checkbox', defaultValue: false },
 ]
 }
-const editorialHooks = (slug: string) => ({
-  beforeValidate: [fillEditorialIdentity(slug, singularOf(slug))],
-  beforeChange: [({ data, originalDoc, req, operation }: { data: Record<string, any>; originalDoc?: Record<string, any>; req: any; operation: string }) => {
+const editorialHooks = (slug: string, runtime: CollectionRuntime = {}) => ({
+  beforeValidate: [fillEditorialIdentity(slug)],
+  beforeChange: [async ({ data, originalDoc, req, operation }: { data: Record<string, any>; originalDoc?: Record<string, any>; req: any; operation: string }) => {
     if(slug === 'videos') {
       const linked = data.processingRun || originalDoc?.processingRun
       if((data._status ?? originalDoc?._status) === 'published' && linked && !req.context.pipelineApproval) throw new Error('Use explicit pipeline approval')
@@ -88,35 +82,42 @@ const editorialHooks = (slug: string) => ({
       throw new Error('Editorial creates cannot claim import provenance')
     }
     data.locallyEdited = true
+    const body = typeof data.body === 'string' ? data.body : typeof originalDoc?.body === 'string' ? originalDoc.body : undefined
+    // Precompute every diagram while saving, including scheduled documents, so
+    // its immutable asset exists before a future publication time.
+    await ensureD2ArtifactsForBody(body, runtime.d2Renderer)
     return data
   }],
   beforeDelete: [async ({ id, req }: { id: string | number; req: any }) => {
     // Keep a durable deletion marker so re-import cannot resurrect an editor-deleted record.
     const doc = await req.payload.findByID({ collection: slug, id, draft: true, req, overrideAccess: false })
+    const legacyId = slug === 'videos' ? String(doc.id) : typeof doc.legacyId === 'string' ? doc.legacyId : null
+    if (!legacyId) return
     await req.payload.create({ collection: 'deletion-markers', req, overrideAccess: false,
-      data: { key: `${slug}:${doc.legacyId}`, collectionSlug: slug, legacyId: doc.legacyId, sourceHash: doc.sourceHash ?? '' } })
+      data: { key: `${slug}:${legacyId}`, collectionSlug: slug, legacyId, sourceHash: doc.sourceHash ?? '' } })
   }],
 })
-type Builder = (access: AdminAccess) => CollectionConfig
+type CollectionRuntime = { d2Renderer?: DurableObjectNamespace }
+type Builder = (access: AdminAccess, runtime: CollectionRuntime) => CollectionConfig
 function content(slug: string, fields: Field[], layout: LayoutOptions = {}): Builder {
-  return access => applyPreset({
+  return (access, runtime) => applyPreset({
     slug,
     access: { read: readable, create: staff, update: staff, delete: staff, readVersions: staff },
     versions: { drafts: true, maxPerDoc: 30 },
-    fields: arrange([...provenanceFor(slug), ...fields, { name: 'body', type: 'textarea' }, json('cover'), json('contentResources'), json('editorialData')], access, layout),
-    hooks: editorialHooks(slug),
+    fields: arrange([...provenanceFor(slug), ...fields, { name: 'body', type: 'textarea' }, json('cover'), json('contentResources')], access, layout),
+    hooks: editorialHooks(slug, runtime),
   }, access)
 }
 const terms = strings('terms')
 const title = text('title')
 const description: Field = { name: 'description', type: 'textarea' }
-const domain = (slug: string, fields: Field[], indexes: CollectionConfig['indexes'] = [], layout: LayoutOptions = {}): Builder => access => applyPreset({
+const domain = (slug: string, fields: Field[], indexes: CollectionConfig['indexes'] = [], layout: LayoutOptions = {}): Builder => (access, runtime) => applyPreset({
   slug,
   access: { read: staff, create: staff, update: staff, delete: staff, readVersions: staff },
   versions: { drafts: true, maxPerDoc: 30 },
   fields: arrange([...provenanceFor(slug), ...fields], access, layout),
   indexes: [...(domainRelationshipIndexes[slug] ?? []), ...indexes],
-  hooks: editorialHooks(slug),
+  hooks: editorialHooks(slug, runtime),
 }, access)
 const competitorTitle: LayoutOptions = { top: [relationTitle('competitorName', 'competitor.displayName', 'Competitor')] }
 const ordinal = (value: unknown) => typeof value === 'number' ? String(value) : '?'
@@ -130,7 +131,7 @@ const people: LayoutOptions = {
 }
 const builders: Record<string, Builder> = {
   // Publishing
-  videos: access => withEditComponents(content('videos', [title,text('tagline'),text('subtitle'),description,strings('whatYouWillLearn'),terms,{name:'publishedAt',type:'date',admin:{date:{pickerAppearance:'dayAndTime'}}}, {name:'duration',type:'number'}, {name:'audioFileSize',type:'number'},
+  videos: (access, runtime) => withEditComponents(content('videos', [title,text('tagline'),text('subtitle'),description,strings('whatYouWillLearn'),terms,publishDate, {name:'duration',type:'number'}, {name:'audioFileSize',type:'number'},
     {name:'type',type:'select',options:['live','recorded']}, {name:'category',type:'select',options:['announcement','editorial','interview','review','tutorial']},
     text('streamUrl'),text('thumbnailUrl'),text('mediaReference'),text('youtubeId'),json('realtimeKit'),json('podcast'),json('subscribeLinks'),relation('show','shows'),technologies,relation('guests','people',true),relation('episode','episodes'),relation('chapters','chapters',true)], {
     processing: { fields: pipelineVideoFields, condition: data => Boolean(data?.processingRun || data?.processingState) },
@@ -140,20 +141,20 @@ const builders: Record<string, Builder> = {
     // Videos in client review are frozen by database triggers; say so and
     // swap the save buttons rather than fail with a generic toast.
     top: [{ name: 'reviewFreeze', type: 'ui', admin: { components: { Field: fieldComponents.reviewFreezeNotice }, condition: data => Boolean(data?.id) } }],
-  })(access), {
+  })(access, runtime), {
     PublishButton: fieldComponents.videoPublishControl,
     SaveDraftButton: fieldComponents.videoSaveDraftControl,
     UnpublishButton: fieldComponents.videoUnpublishControl,
   }),
   shows: content('shows', [text('name'),{name:'status',type:'select',options:['coming-soon','active','archived']},text('tagline'),text('gameFormatUrl'),description,json('podcast'),json('subscribeLinks'),terms,relation('hosts','people',true),{...relation('episodes','episodes',true),admin:{readOnly:true,description:'Imported source list. Public show episodes are derived from Episode.show; edit that relationship on the episode.'}}]),
   episodes: content('episodes', [text('code'),terms,relation('video','videos'),relation('show','shows')]),
-  articles: content('articles', [title,description,date('publishedAt'),date('updatedAt'),text('subtitle'),{name:'type',type:'select',options:['tutorial','article','guide','news']},{name:'howto',type:'checkbox'},authors(),technologies,relation('series','series'),relation('resources','learning-resources',true)], { sidebarDescriptions: { updatedAt: updatedAtDescription } }),
-  news: content('news', [title, description, date('publishedAt'), authors(), technologies]),
+  articles: content('articles', [title,description,publishDate,date('updatedAt'),text('subtitle'),{name:'type',type:'select',options:['tutorial','article','guide','news']},{name:'howto',type:'checkbox'},authors(),technologies,relation('series','series'),relation('resources','learning-resources',true)], { sidebarDescriptions: { updatedAt: updatedAtDescription } }),
+  news: content('news', [title, description, publishDate, authors(), technologies]),
   series: content('series', [title]),
   // Learning
-  courses: content('courses', [title,description,date('publishedAt'),date('updatedAt'),authors(),text('difficulty'),strings('learningPath'),technologies,relation('modules','course-modules',true)], { sidebarDescriptions: { updatedAt: updatedAtDescription } }),
-  'course-modules': content('course-modules', [title,description,date('publishedAt'),text('difficulty'),strings('learningPath'),{name:'order',type:'number'},text('section'),relation('course','courses'),relation('video','videos'),authors(),relation('resources','learning-resources',true)]),
-  'learning-paths': content('learning-paths', [title,description,date('publishedAt'),text('difficulty'),{name:'estimatedDuration',type:'number'},strings('prerequisites'),authors(),relation('courses','courses',true),relation('videos','videos',true),technologies]),
+  courses: content('courses', [title,description,publishDate,date('updatedAt'),authors(),text('difficulty'),strings('learningPath'),technologies,relation('modules','course-modules',true)], { sidebarDescriptions: { updatedAt: updatedAtDescription } }),
+  'course-modules': content('course-modules', [title,description,publishDate,text('difficulty'),strings('learningPath'),{name:'order',type:'number'},text('section'),relation('course','courses'),relation('video','videos'),authors(),relation('resources','learning-resources',true)]),
+  'learning-paths': content('learning-paths', [title,description,publishDate,text('difficulty'),{name:'estimatedDuration',type:'number'},strings('prerequisites'),authors(),relation('courses','courses',true),relation('videos','videos',true),technologies]),
   technologies: content('technologies', [text('name'),json('seo'),json('logos'),text('category'),text('subcategory'),text('documentation'),text('icon'),text('logo'),text('source'),text('license'),text('status'),text('website'),json('cncf'),json('community'),json('matrix'),terms,strings('aliases'),strings('features'),strings('relatedTechnologies'),strings('useCases'),relation('learningResources','learning-resources')]),
   // People
   people: content('people', [text('name'),text('forename'),text('surname'),text('github'),text('twitter'),text('bluesky'),text('mastodon'),text('linkedin'),text('website'),text('youtube'),text('githubHandle'),text('githubUrl'),text('avatarUrl'),{name:'biography',type:'textarea'},terms,{name:'links',type:'array',fields:[text('name'),text('url')]}], people),
@@ -190,6 +191,14 @@ const builders: Record<string, Builder> = {
     { top: [computedLabel('label', doc => `${ordinal(doc.scoreA)} to ${ordinal(doc.scoreB)}`)] }),
 }
 
+const assignCuid2DocumentID: CollectionBeforeValidateHook = ({ data, operation, collection }) => {
+  if (operation !== 'create' || !data) return data
+  // Static video content IDs are already CUID2 and are also their R2 object
+  // IDs, so the source ID is the Payload primary key without a duplicate field.
+  if (!isCuid2(data.id)) data.id = createCuid2()
+  return data
+}
+
 // Nav order is first appearance in this list (see NAV_ORDER), followed by the
 // group:false collections. Order does not affect the stored schema.
 export const collectionOrder = [
@@ -208,7 +217,7 @@ export const collectionOrder = [
 // or migrate:create emits index renames.
 export const compoundIndexOrder = ['bracket-applications','team-members','bracket-entries'] as const
 
-export const createCollections = (config:AuthConfig,db:D1Database,access:AdminAccess=noDevelopers): CollectionConfig[] => {
+export const createCollections = (config:AuthConfig,db:D1Database,access:AdminAccess=noDevelopers,runtime:CollectionRuntime={}): CollectionConfig[] => {
   const all: CollectionConfig[] = [
     ...reviewCollections(access),
     pipelineCollection(access),
@@ -225,9 +234,18 @@ export const createCollections = (config:AuthConfig,db:D1Database,access:AdminAc
       upload:{disableLocalStorage:true,crop:false,focalPoint:false,externalFileHeaderFilter:filterExternalFileHeaders},
       fields:[text('alt')],
     },access),
-    ...Object.values(builders).map(build => build(access)),
+    ...Object.values(builders).map(build => build(access, runtime)),
   ]
   const bySlug = new Map(all.map(collection => [collection.slug, collection]))
   if (bySlug.size !== collectionOrder.length || all.some(collection => !(collectionOrder as readonly string[]).includes(collection.slug))) throw new Error('Every collection must appear exactly once in collectionOrder')
-  return collectionOrder.map(slug => bySlug.get(slug)!)
+  return collectionOrder.map(slug => {
+    const collection = bySlug.get(slug)!
+    return {
+      ...collection,
+      hooks: {
+        ...collection.hooks,
+        beforeValidate: [assignCuid2DocumentID, ...(collection.hooks?.beforeValidate ?? [])],
+      },
+    }
+  })
 }

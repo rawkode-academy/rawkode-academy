@@ -1,5 +1,5 @@
 ---
-import { type CollectionEntry, getCollection } from "astro:content";
+import { type CollectionEntry, getCollection } from "@/lib/payload-content";
 import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 import NewsStoryRow from "@/components/news/NewsStoryRow.astro";
 import { selectRelatedNews } from "@/lib/related-news";
@@ -11,7 +11,13 @@ interface Props {
 
 const { currentStory, limit = 3 } = Astro.props;
 const layout = academyLayout({ width: "wide" });
-const related = selectRelatedNews(currentStory.id, currentStory.data.technologies ?? [], await getCollection("news"), limit);
+const candidates = await getCollection("news");
+const related = selectRelatedNews<CollectionEntry<"news">>(
+	currentStory.id,
+	currentStory.data.technologies,
+	candidates,
+	limit,
+);
 const catalog = academyCatalog();
 ---
 

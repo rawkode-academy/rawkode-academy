@@ -10,6 +10,7 @@ import { transform } from "@astrojs/compiler";
 import * as runtime from "astro/runtime/server/index.js";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import { parse } from "node-html-parser";
+import { createPayloadContentFixtures } from "./helpers/payload-content-fixtures.mjs";
 
 const source = readFileSync(
 	new URL("../pages/watch/[...slug].astro", import.meta.url),
@@ -38,26 +39,48 @@ await normalizer.link(() => {
 await normalizer.evaluate();
 
 const makeVideo = (slug, changes = {}) => ({
-	id: slug,
+	id: `video-${slug}-payload-cuid`,
+	slug,
 	data: {
 		id: `asset-${slug}`,
 		slug,
 		title: `Title ${slug}`,
 		duration: 65,
 		publishedAt: new Date("2025-01-01"),
-		technologies: ["first"],
-		show: "show",
+		technologies: [{ id: "technology-first-payload-cuid" }],
+		show: { id: "show-payload-cuid" },
 		...changes,
 	},
 });
 const current = makeVideo("current", {
-	technologies: ["first", { id: "second/index" }, "third", "fourth", "fifth"],
+	technologies: [
+		{ id: "technology-first-payload-cuid" },
+		{ id: "technology-second-payload-cuid" },
+		{ id: "technology-third-payload-cuid" },
+		{ id: "technology-fourth-payload-cuid" },
+		{ id: "technology-fifth-payload-cuid" },
+	],
 });
-const show = { id: "show", data: { name: "Fixture show" } };
+const show = { id: "show-payload-cuid", slug: "show", data: { name: "Fixture show" } };
 async function select(videos, showEntry = show, video = current) {
 	const lookups = [];
+	const technologyEntries = ["first", "second", "third", "fourth", "fifth"].map(
+		(slug) => ({
+			id: `technology-${slug}-payload-cuid`,
+			slug,
+			data: { name: slug },
+		}),
+	);
+	const fixtures = createPayloadContentFixtures(
+		{
+			videos,
+			shows: showEntry ? [showEntry] : [],
+			technologies: technologyEntries,
+		},
+		{ now: new Date("2026-09-20T12:00:00Z") },
+	);
 	const selected = await vm.runInNewContext(
-		`(async () => { ${transpile(selection)}; return { showEntry, showRelatedAll, showRelatedVideos, technologyRecommendation, techEntries }; })()`,
+		`(async () => { ${transpile(selection)}; return { showEntry, showRelatedAll, showRelatedVideos, showHasMoreVideos, technologyRecommendation, techEntries }; })()`,
 		{
 			videos,
 			video,
@@ -67,14 +90,15 @@ async function select(videos, showEntry = show, video = current) {
 				normalizer.namespace.normalizeTechnologyReferences,
 			getVideoThumbnailUrl: (id) => `https://example.test/${id}.webp`,
 			getEntry: async (collection, id) => {
-				assert.equal(collection, "technologies");
-				lookups.push(id);
-				if (id === "missing") throw new Error("No matching technology");
-				return { id: `${id}/index`, data: { name: id } };
+				lookups.push({ collection, id });
+				return fixtures.getEntry(collection, id);
+			},
+			getPayloadCollectionPage: async (collection, options) => {
+				return fixtures.getPayloadCollectionPage(collection, options);
 			},
 		},
 	);
-	return { ...selected, lookups };
+	return { ...selected, lookups, payloadCalls: fixtures.calls };
 }
 
 async function renderRecommendations(props) {
@@ -84,7 +108,7 @@ async function renderRecommendations(props) {
 		source.indexOf("<NewsletterCTA />"),
 	);
 	assert(markup.includes("TechnologyVideoSection"));
-	const input = `---\nimport ShowVideoSection from "show";\nimport TechnologyVideoSection from "technology";\nconst { showEntry, showRelatedAll, showRelatedVideos, technologyRecommendation } = Astro.props;\n---\n${markup}`;
+	const input = `---\nimport ShowVideoSection from "show";\nimport TechnologyVideoSection from "technology";\nconst { showEntry, showRelatedAll, showRelatedVideos, showHasMoreVideos, technologyRecommendation } = Astro.props;\n---\n${markup}`;
 	const compiled = await transform(input, {
 		filename: "recommendations.astro",
 	});
@@ -134,7 +158,7 @@ async function renderRecommendations(props) {
 test("one show section wins, capped at six newest, without reading technology recommendations", async () => {
 	const alternatives = Array.from({ length: 9 }, (_, i) =>
 		makeVideo(`show-${i}`, {
-			show: { id: "show/index" },
+			show: { id: "show-payload-cuid" },
 			publishedAt: new Date(`2025-01-${String(i + 1).padStart(2, "0")}`),
 		}),
 	);
@@ -145,7 +169,10 @@ test("one show section wins, capped at six newest, without reading technology re
 			},
 		});
 	const selected = await select([current, ...alternatives]);
-	assert.equal(selected.showRelatedAll.length, 9);
+	assert(
+		selected.showRelatedAll.length <= 7,
+		"the public rail stays within its bounded seven-document Payload window",
+	);
 	assert.equal(selected.technologyRecommendation, null);
 	assert.deepEqual(
 		Array.from(selected.showRelatedVideos, (video) => video.slug),
@@ -160,14 +187,20 @@ test("one show section wins, capped at six newest, without reading technology re
 	assert.equal(dom.querySelectorAll("section").length, 1);
 	assert.equal(dom.querySelectorAll("a").length, 6);
 	assert.equal(calls[0].kind, "show");
-	assert.equal(calls[0].props.totalVideos, 9);
+	assert.equal(calls[0].props.hasMoreVideos, true);
+	assert(selected.payloadCalls.some((call) =>
+		call.kind === "page" &&
+		call.collection === "videos" &&
+		call.options.showId === "show-payload-cuid" &&
+		call.options.limit === 7,
+	));
 });
 
 test("fallback chooses only the first declared technology with published alternatives", async () => {
 	const alternatives = Array.from({ length: 8 }, (_, i) =>
 		makeVideo(`second-${i}`, {
 			show: undefined,
-			technologies: [{ id: "second/index" }],
+			technologies: [{ id: "technology-second-payload-cuid" }],
 			publishedAt: new Date(`2025-01-${String(i + 1).padStart(2, "0")}`),
 		}),
 	);
@@ -177,8 +210,14 @@ test("fallback chooses only the first declared technology with published alterna
 		...alternatives,
 	]);
 	assert.equal(selected.showRelatedVideos.length, 0);
-	assert.equal(selected.technologyRecommendation.technology.id, "second/index");
-	assert.equal(selected.technologyRecommendation.totalVideos, 8);
+	assert.equal(selected.technologyRecommendation.technology.id, "technology-second-payload-cuid");
+	assert.equal(selected.technologyRecommendation.technology.slug, "second");
+	assert.equal(selected.technologyRecommendation.hasMoreVideos, true);
+	assert(selected.payloadCalls.some((call) =>
+		call.kind === "page" &&
+		call.options.technologyId === "technology-second-payload-cuid" &&
+		call.options.limit === 7,
+	));
 	assert.equal(selected.technologyRecommendation.videos.length, 6);
 	assert.equal(selected.technologyRecommendation.videos[0].slug, "second-7");
 	const { dom, calls } = await renderRecommendations(selected);
@@ -194,7 +233,7 @@ test("current and future videos cannot become recommendations or inflate totals"
 	const eligible = makeVideo("published", { show: undefined });
 	const selected = await select([current, ...future, eligible]);
 	assert.equal(selected.showRelatedAll.length, 0);
-	assert.equal(selected.technologyRecommendation.totalVideos, 1);
+	assert.equal(selected.technologyRecommendation.hasMoreVideos, false);
 	assert.equal(selected.technologyRecommendation.videos[0].slug, "published");
 	const none = await select([current, ...future]);
 	assert.equal(none.technologyRecommendation, null);
@@ -205,14 +244,23 @@ test("current and future videos cannot become recommendations or inflate totals"
 });
 
 test("missing show/technology and empty catalogs stay safe without changing caller data", async () => {
-	const video = makeVideo("current", { technologies: ["missing", "second"] });
+	const video = makeVideo("current", {
+		show: undefined,
+		technologies: [
+			{ id: "missing-technology-payload-cuid" },
+			{ id: "technology-second-payload-cuid" },
+		],
+	});
 	const alternatives = [
 		video,
-		makeVideo("published", { technologies: ["second"], show: undefined }),
+		makeVideo("published", {
+			technologies: [{ id: "technology-second-payload-cuid" }],
+			show: undefined,
+		}),
 	];
 	Object.freeze(alternatives);
 	const selected = await select(alternatives, null, video);
-	assert.equal(selected.technologyRecommendation.technology.id, "second/index");
+	assert.equal(selected.technologyRecommendation.technology.id, "technology-second-payload-cuid");
 	assert.equal(alternatives[0], video);
 	assert.equal(selected.techEntries.length, 1);
 	const empty = await select(

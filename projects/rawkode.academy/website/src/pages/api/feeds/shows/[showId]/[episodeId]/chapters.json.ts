@@ -1,50 +1,23 @@
-import { getCollection } from "astro:content";
+import { getEntry, listPayloadContent } from "@/lib/payload-content";
 import type { APIContext } from "astro";
-import { getPublishedVideos } from "@/lib/content";
 
-export async function getStaticPaths() {
-	const shows = await getCollection("shows");
-	const videos = await getPublishedVideos();
-
-	const paths: { params: { showId: string; episodeId: string } }[] = [];
-
-	for (const show of shows.filter((s) => s.data.publish && s.data.status !== "coming-soon")) {
-		const showVideos = videos.filter((video) => {
-			const videoShow = video.data.show;
-			if (!videoShow) return false;
-			const showRef = typeof videoShow === "string" ? videoShow : videoShow.id;
-			return showRef === show.data.id;
-		});
-
-		for (const video of showVideos) {
-			if (video.data.chapters && video.data.chapters.length > 0) {
-				paths.push({
-					params: {
-						showId: show.data.id,
-						episodeId: video.data.slug,
-					},
-				});
-			}
-		}
-	}
-
-	return paths;
-}
+export const prerender = false;
 
 export async function GET(context: APIContext) {
-	const { showId, episodeId } = context.params;
-
-	const shows = await getCollection("shows");
-	if (!shows.some((show) => show.data.id === showId && show.data.publish && show.data.status !== "coming-soon")) {
+	const show = context.params.showId
+		? await getEntry("shows", { slug: context.params.showId })
+		: undefined;
+	if (!show || !show.data.publish || show.data.status === "coming-soon") {
 		return new Response("Show not found or not published", { status: 404 });
 	}
-	const videos = await getPublishedVideos();
-	const video = videos.find((v) => {
-		const videoShow = v.data.show;
-		if (!videoShow) return false;
-		const showRef = typeof videoShow === "string" ? videoShow : videoShow.id;
-		return showRef === showId && v.data.slug === episodeId;
+	const videos = await listPayloadContent("videos", {
+		showId: show.id,
+		limit: 100,
 	});
+	const videoSummary = videos.find((entry) => entry.slug === context.params.episodeId);
+	const video = videoSummary
+		? await getEntry("videos", { id: videoSummary.id })
+		: undefined;
 
 	if (!video || !video.data.chapters || video.data.chapters.length === 0) {
 		return new Response("Chapters not found", { status: 404 });
@@ -63,7 +36,7 @@ export async function GET(context: APIContext) {
 	return new Response(JSON.stringify(chaptersJson, null, 2), {
 		headers: {
 			"Content-Type": "application/json+chapters",
-			"Cache-Control": "max-age=86400",
+			"Cache-Control": "public, max-age=86400, s-maxage=86400",
 		},
 	});
 }

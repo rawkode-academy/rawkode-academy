@@ -1,6 +1,6 @@
 ---
-import { getCollection, getEntries } from "astro:content";
-import { getImage } from "astro:assets";
+import { getAllCollection, getEntries } from "@/lib/payload-content";
+import { getContentImage } from "@/lib/content-images";
 import AcademyCatalogCard from "@/components/academy/AcademyCatalogCard.astro";
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
 import CourseItemListJsonLd from "@/components/html/course-itemlist-jsonld.astro";
@@ -8,16 +8,16 @@ import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 import { getCourseModuleSlug } from "@/utils/course-path";
 import Page from "@/wrappers/page.astro";
 
-export const prerender = true;
+export const prerender = false;
 
 // Get all courses and sort by published date
-const allCourses = (await getCollection("courses")).sort(
+const allCourses = (await getAllCollection("courses")).sort(
 	(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
 );
 
 const featuredCourse = allCourses[0];
 const libraryCourses = allCourses.slice(1);
-const allModules = await getCollection("courseModules");
+const allModules = await getAllCollection("courseModules");
 function availabilityLabel(courseId: string) {
 	const count = allModules.filter(
 		(module) => module.data.course.id === courseId && !module.data.draft,
@@ -33,13 +33,9 @@ const courseImages = new Map(
 				[
 					course.id,
 					course.data.cover
-						? (
-								await getImage({
-									src: course.data.cover.image,
-									width: 960,
-									format: "webp",
-								})
-							).src
+							? (
+								await getContentImage(course.data.cover.image, 960)
+							)?.src
 						: undefined,
 				] as const,
 		),
@@ -65,7 +61,7 @@ if (featuredCourse) {
 
 	const publishedModules = courseModules.filter((module) => !module.data.draft);
 	firstModuleSlug = publishedModules[0]
-		? getCourseModuleSlug(featuredCourse.id, publishedModules[0].id)
+		? getCourseModuleSlug(featuredCourse.slug, publishedModules[0].slug)
 		: undefined;
 
 	const authors = await getEntries(featuredCourse.data.authors);
@@ -108,9 +104,9 @@ const catalog = academyCatalog();
 						<h2 class={catalog.featuredTitle}>{featuredCourse.data.title}</h2>
 						<p class={catalog.featuredDescription}>{featuredCourse.data.description}</p>
 						<p class={catalog.rowMeta}>{featuredCourse.data.difficulty} · {featuredPublishedLabel}{featuredAuthors.length > 0 && ` · ${featuredAuthors.map((author) => author.name).join(", ")}`}</p>
-						<a class={styles.button} href={firstModuleSlug ? `/courses/${featuredCourse.id}/${firstModuleSlug}` : `/courses/${featuredCourse.id}`}>{firstModuleSlug ? "Start the course →" : "View course plan →"}</a>
+						<a class={styles.button} href={firstModuleSlug ? `/courses/${featuredCourse.slug}/${firstModuleSlug}` : `/courses/${featuredCourse.slug}`}>{firstModuleSlug ? "Start the course →" : "View course plan →"}</a>
 					</div>
-					{courseImages.get(featuredCourse.id) && <a class={catalog.featuredMedia} href={`/courses/${featuredCourse.id}`} aria-label={`Explore ${featuredCourse.data.title}`}>
+					{courseImages.get(featuredCourse.id) && <a class={catalog.featuredMedia} href={`/courses/${featuredCourse.slug}`} aria-label={`Explore ${featuredCourse.data.title}`}>
 						<img class={catalog.featuredImage} src={courseImages.get(featuredCourse.id)} alt={featuredCourse.data.cover?.alt ?? ""} width="960" height="540" fetchpriority="high" />
 					</a>}
 				</article>
@@ -128,7 +124,7 @@ const catalog = academyCatalog();
 
 				<div class={styles.grid}>
 					{libraryCourses.map((course) => (
-						<AcademyCatalogCard href={`/courses/${course.id}`} title={course.data.title} description={course.data.description} meta={[course.data.difficulty, availabilityLabel(course.id)]} image={courseImages.get(course.id)} imageAlt={course.data.cover?.alt ?? ""} />
+						<AcademyCatalogCard href={`/courses/${course.slug}`} title={course.data.title} description={course.data.description} meta={[course.data.difficulty, availabilityLabel(course.id)]} image={courseImages.get(course.id)} imageAlt={course.data.cover?.alt ?? ""} />
 					))}
 				</div>
 			</div>

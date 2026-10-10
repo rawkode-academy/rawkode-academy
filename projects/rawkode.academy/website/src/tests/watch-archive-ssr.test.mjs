@@ -9,6 +9,7 @@ import ts from "typescript";
 import * as runtime from "astro/runtime/server/index.js";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import { parse } from "node-html-parser";
+import { createPayloadContentFixtures } from "./helpers/payload-content-fixtures.mjs";
 
 const readSource = (path) =>
 	readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
@@ -59,18 +60,15 @@ async function renderArchive(search = "", data = collections) {
 		console,
 		URL,
 		URLSearchParams,
-		__NEWS_DEPLOYMENT_CUTOFF_MS__: Date.parse("2100-01-01"),
 	});
 	const pageProps = [];
+	const payload = createPayloadContentFixtures(data);
 	const newsletterCta = runtime.createComponent(
 		() => runtime.render`<section data-newsletter-cta></section>`,
 	);
 	const mocks = {
 		"astro/runtime/server/index.js": { ...runtime, createMetadata: () => ({}) },
-		"astro:content": {
-			getCollection: async (name, filter) =>
-				(data[name] ?? []).filter(filter ?? (() => true)),
-		},
+		"@/lib/payload-content": payload,
 		"@rawkodeacademy/design-system": {
 			academyPage: () =>
 				new Proxy({}, { get: (_, slot) => `archive-${String(slot)}` }),
@@ -112,7 +110,12 @@ async function renderArchive(search = "", data = collections) {
 		);
 		await module.link(async (specifier) => {
 			if (modules.has(specifier)) return modules.get(specifier);
-			const exports = mocks[specifier];
+			const normalized = specifier
+				.replace(/[?#].*$/, "")
+				.replace(/\.(?:[cm]?[jt]sx?)$/, "");
+			const exports =
+				mocks[specifier] ??
+				(normalized.endsWith("/lib/payload-content") ? payload : undefined);
 			assert(exports, `Unexpected import ${specifier}`);
 			const synthetic = new vm.SyntheticModule(
 				Object.keys(exports),
@@ -165,11 +168,11 @@ async function renderArchive(search = "", data = collections) {
 	const jsonLd = JSON.parse(
 		dom.querySelector('script[type="application/ld+json"]').textContent,
 	);
-	return { html, dom, jsonLd, pageProps };
+	return { html, dom, jsonLd, pageProps, payloadCalls: payload.calls };
 }
 
 test("Watch is a static server-rendered archive with labeled GET search, existing SEO title and feeds", async () => {
-	const { dom, html, pageProps } = await renderArchive();
+	const { dom, html, pageProps, payloadCalls } = await renderArchive();
 	assert.equal(dom.querySelector("h1").text, "Videos");
 	assert.equal(dom.querySelectorAll(".archive-feedGrid > a").length, 23);
 	assert.equal(dom.querySelectorAll('a[href="/watch/session-0"]').length, 1);
@@ -178,6 +181,16 @@ test("Watch is a static server-rendered archive with labeled GET search, existin
 		1,
 	);
 	assert.match(dom.text, /Showing 1–24 of 329 videos/);
+	assert.deepEqual(
+		payloadCalls.filter((call) => call.kind === "all").map((call) => call.collection),
+		["videos"],
+		"the browse archive explicitly reads the full Payload video collection",
+	);
+	assert.deepEqual(
+		payloadCalls.filter((call) => call.kind === "page" && call.collection === "videos").map((call) => call.options.page),
+		[1, 2, 3, 4],
+		"all video pages are read so later slugs do not disappear past the first 100",
+	);
 	assert.equal(
 		dom.querySelector('nav[aria-label="Video library pages"] p').text,
 		"Page 1 of 14",

@@ -1,10 +1,10 @@
-import { getCollection } from "astro:content";
+import { getAllCollection } from "@/lib/payload-content";
 import type { APIContext } from "astro";
 import { articleMarkdownUrl } from "@/lib/article-markdown";
 import { getPublishedVideos } from "@/lib/content";
 import { SITE_DESCRIPTION } from "@/lib/site";
 
-export const prerender = true;
+export const prerender = false;
 
 const DEFAULT_SITE_URL = "https://rawkode.academy";
 const SUMMARY_MAX_LENGTH = 160;
@@ -26,11 +26,11 @@ export async function GET({ site }: APIContext) {
 	const absolute = (path: string) => new URL(path, base).href;
 
 	const articles = (
-		await getCollection("articles")
+		await getAllCollection("articles")
 	).sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
 	const videos = await getPublishedVideos();
-	const courses = await getCollection("courses");
-	const learningPaths = await getCollection("learningPaths");
+	const courses = await getAllCollection("courses");
+	const learningPaths = await getAllCollection("learningPaths");
 
 	const lines: string[] = [
 		"# Rawkode Academy",
@@ -53,14 +53,14 @@ export async function GET({ site }: APIContext) {
 		"",
 		...courses.map(
 			(course) =>
-				`- [${course.data.title}](${absolute(`/courses/${course.id}`)}): ${summarize(course.data.description)}`,
+				`- [${course.data.title}](${absolute(`/courses/${course.slug}`)}): ${summarize(course.data.description)}`,
 		),
 		"",
 		"## Learning Paths",
 		"",
 		...learningPaths.map(
 			(path) =>
-				`- [${path.data.title}](${absolute(`/learning-paths/${path.id}`)}): ${summarize(path.data.description)}`,
+				`- [${path.data.title}](${absolute(`/learning-paths/${path.slug}`)}): ${summarize(path.data.description)}`,
 		),
 		"",
 		"## Videos",

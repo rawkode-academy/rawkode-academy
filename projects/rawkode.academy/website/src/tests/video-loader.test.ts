@@ -1,4 +1,5 @@
-import { getCollection } from "astro:content";
+const { getAllCollection } = vi.hoisted(() => ({ getAllCollection: vi.fn() }));
+vi.mock("@/lib/payload-content", () => ({ getAllCollection }));
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -10,7 +11,7 @@ import {
 	resetVideoLoaderCacheForTests,
 } from "../subgraph/loaders/videos";
 
-const mockedGetCollection = vi.mocked(getCollection);
+const mockedGetAllCollection = vi.mocked(getAllCollection);
 
 function videoEntry(input: {
 	id: string;
@@ -43,7 +44,7 @@ function videoEntry(input: {
 
 describe("video subgraph loader", () => {
 	beforeEach(() => {
-		mockedGetCollection.mockReset();
+		mockedGetAllCollection.mockReset();
 		resetVideoLoaderCacheForTests();
 	});
 
@@ -55,7 +56,7 @@ describe("video subgraph loader", () => {
 	it("keeps future live sessions visible to Studio while preserving published-only helpers", async () => {
 		vi.useFakeTimers();
 		vi.setSystemTime(new Date("2026-06-06T12:00:00.000Z"));
-		mockedGetCollection.mockResolvedValue([
+		mockedGetAllCollection.mockResolvedValue([
 			videoEntry({
 				id: "published-yoke",
 				title: "Hands-on Introduction to Yoke",
@@ -102,7 +103,7 @@ describe("video subgraph loader", () => {
 				show: "other-show",
 			}),
 		];
-		mockedGetCollection.mockResolvedValue(videos as never);
+		mockedGetAllCollection.mockResolvedValue(videos as never);
 
 		await expect(listVideos()).resolves.toHaveLength(2);
 		await expect(getVideoById("cached-video")).resolves.toMatchObject({
@@ -113,6 +114,6 @@ describe("video subgraph loader", () => {
 		});
 		await expect(getPublishedVideos()).resolves.toHaveLength(2);
 
-		expect(mockedGetCollection).toHaveBeenCalledTimes(1);
+		expect(mockedGetAllCollection).toHaveBeenCalledWith("videos");
 	});
 });

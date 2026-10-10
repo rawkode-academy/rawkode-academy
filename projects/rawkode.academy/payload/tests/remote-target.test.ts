@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
 import { assertProductionImportAllowed, assertSequenceAdvances, KLUSTERED_PRODUCTION_CONFIRMATION, parseImportTarget, positionalArguments, PRODUCTION_CONFIRMATION, type ProductionGateInput } from '../scripts/lib/import-target'
-import { assertRemoteTargetConfig, buildRemoteTargetConfig, CONTENT_CDN_BUCKET, PREVIEW_RESOURCES, prepareTarget, PRODUCTION_RESOURCES, TargetError, type SourceWranglerConfig } from '../scripts/lib/remote-target'
+import { assertRemoteTargetConfig, buildRemoteTargetConfig, CONTENT_CDN_BUCKET, migrationChainForTarget, PREVIEW_RESOURCES, prepareTarget, PRODUCTION_RESOURCES, TargetError, type SourceWranglerConfig } from '../scripts/lib/remote-target'
 import { isLoopbackRequest } from '../src/local-request'
 
 const projectDir = process.cwd()
@@ -47,6 +47,14 @@ test('preview stays a migration-only target resolved from the previews block', (
   assert.equal(config.d1_databases[0]?.database_id, PREVIEW_RESOURCES.databaseId)
   assert.equal(config.d1_databases[0]?.remote, true)
   assert.equal(serialised(config).includes(PRODUCTION_RESOURCES.databaseId), false)
+})
+
+test('production selects CUID2 but only after the target guard; shared Preview stays legacy', () => {
+  assert.equal(migrationChainForTarget('production'), 'cuid2')
+  assert.equal(migrationChainForTarget('preview'), 'legacy')
+  assert.equal(migrationChainForTarget('local'), 'cuid2')
+  assert.equal(migrationChainForTarget('rehearsal'), 'cuid2')
+  assert.equal(migrationChainForTarget('pr-preview'), 'cuid2')
 })
 
 test('rehearsal requires explicit disposable resources and refuses shared ones', () => {
@@ -106,6 +114,8 @@ test('prepareTarget never leaves rehearsal or production on local bindings, and 
   for (const target of ['production', 'rehearsal'] as const) {
     const env: Record<string, string | undefined> = { ...rehearsalEnv }
     const prepared = prepareTarget(target, { projectDir: dir, env, log })
+    assert.equal(prepared.migrationChain, 'cuid2')
+    assert.equal(env.POC_MIGRATION_CHAIN, prepared.migrationChain)
     assert.equal(env.POC_CLI, '1')
     assert.equal(env.POC_REMOTE_BINDINGS, '1')
     assert.equal(env.POC_CLOUDFLARE_CONFIG_PATH, prepared.configPath)
@@ -116,14 +126,19 @@ test('prepareTarget never leaves rehearsal or production on local bindings, and 
     else assert.equal(written.d1_databases[0].database_id, rehearsalEnv.REHEARSAL_D1_ID)
     prepared.cleanup()
     assert.equal(existsSync(prepared.configPath!), false)
+    assert.equal(env.POC_MIGRATION_CHAIN, undefined)
   }
 
   const env: Record<string, string | undefined> = { POC_REMOTE_BINDINGS: '1', POC_CLOUDFLARE_CONFIG_PATH: '/tmp/stale.json' }
   const local = prepareTarget('local', { projectDir: dir, env, log })
+  assert.equal(local.migrationChain, 'cuid2')
+  assert.equal(env.POC_MIGRATION_CHAIN, 'cuid2')
   assert.equal(local.configPath, undefined)
   assert.equal(env.POC_REMOTE_BINDINGS, undefined)
   assert.equal(env.POC_CLOUDFLARE_CONFIG_PATH, undefined)
   assert.equal(env.POC_CLI, '1')
+  local.cleanup()
+  assert.equal(env.POC_MIGRATION_CHAIN, undefined)
 
   assert.throws(() => prepareTarget('rehearsal', { projectDir: dir, env: {}, log }), TargetError)
 })

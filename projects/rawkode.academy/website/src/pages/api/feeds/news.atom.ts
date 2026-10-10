@@ -1,4 +1,4 @@
-import { getCollection, getEntries } from "astro:content";
+import { getAllCollection, getEntries } from "@/lib/payload-content";
 import type { APIContext } from "astro";
 import { isNewsPublished } from "@/lib/news-publication";
 
@@ -23,9 +23,11 @@ function escapeXml(value: string): string {
 
 export async function GET(context: APIContext) {
 	const now = new Date();
-	const news = await getCollection("news", ({ data }) =>
+	const news = await getAllCollection("news", ({ data }) =>
 		isNewsPublished(data.publishedAt, now),
 	);
+	const technologies = await getAllCollection("technologies");
+	const technologyNames = new Map(technologies.map((technology) => [technology.id, technology.data.name] as const));
 
 	const sortedNews = [...news].sort(
 		(a, b) =>
@@ -46,7 +48,7 @@ export async function GET(context: APIContext) {
 
 	const entries = await Promise.all(
 		sortedNews.map(async (story) => {
-			const storyUrl = `${site}/news/${story.id}/`;
+			const storyUrl = `${site}/news/${story.slug}/`;
 			const published = new Date(story.data.publishedAt).toISOString();
 			const authors = await getEntries(story.data.authors);
 
@@ -58,7 +60,7 @@ export async function GET(context: APIContext) {
 				.join("\n\t\t");
 
 			const categoryTags = (story.data.technologies ?? [])
-				.map((technology) => `<category term="${escapeXml(technology)}"/>`)
+				.map((technology) => `<category term="${escapeXml(technologyNames.get(technology.id) ?? technology.slug ?? technology.id)}"/>`)
 				.join("\n\t\t");
 
 			return `	<entry>

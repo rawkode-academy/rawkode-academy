@@ -36,12 +36,6 @@ export async function serveDirect(request:Request,config:AuthConfig,next:Downstr
   const {headers}=stamp(request,config.directOrigins)
   if(rejectOidcMutationFor(request,requestOrigin(headers,config)))return untrusted()
   const stamped=new Request(request,{headers})
-  const url=new URL(stamped.url)
-  // Preserve the current gateway root URL for GraphQL clients; plain GET shows the POC page.
-  if(url.pathname==='/'&&(stamped.method==='POST'||url.searchParams.has('query'))) {
-    url.pathname='/graphql'
-    return next(new Request(url,stamped))
-  }
   return next(stamped)
 }
 // ReviewBridge entrypoint: reachable only through a service binding. Hard gate on the

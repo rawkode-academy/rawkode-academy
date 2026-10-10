@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { createCuid2, isCuid2 } from '../cuid2'
 import { ProcessingJobs } from './processing-jobs'
 import { ReviewError, validateMetadata, type ReviewActor } from './contracts'
 import { intakeCommand, maximumIntakeBytes, probeResult, type ContainerMediaAdapter, type ProbeResult } from './intake-contracts'
@@ -6,7 +7,7 @@ import { uploadSource, verifyStored, type LengthStream } from './intake-storage'
 import { ReviewStore, type Statement } from './store'
 import type { ReviewService } from './service'
 
-type Session = { id: string; begin_command: string; begin_input: string; owner_id: number; video_id: number; object_key: string; output_key: string; expected_bytes: number; expected_checksum: string; claimed_type: string; metadata: string; revision_command: string; state: 'pending' | 'uploaded' | 'processing' | 'ready' | 'cancelled'; source_etag: string | null; attestation: string | null; expires_at: number }
+type Session = { id: string; begin_command: string; begin_input: string; owner_id: string; video_id: string; object_key: string; output_key: string; expected_bytes: number; expected_checksum: string; claimed_type: string; metadata: string; revision_command: string; state: 'pending' | 'uploaded' | 'processing' | 'ready' | 'cancelled'; source_etag: string | null; attestation: string | null; expires_at: number }
 const statement = (sql: string, ...values: Statement['values']): Statement => ({ sql, values })
 export class ReviewIntake {
   constructor(readonly store: ReviewStore, readonly bucket: R2Bucket, readonly review: ReviewService, readonly adapter?: ContainerMediaAdapter, readonly lengthStream?: LengthStream, readonly now = () => Math.floor(Date.now() / 1000)) {}
@@ -14,7 +15,7 @@ export class ReviewIntake {
   private staff(actor: ReviewActor) { if (actor.role !== 'staff') throw new ReviewError(403, 'Staff access required') }
   private async session(actor: ReviewActor, id: string) {
     this.staff(actor)
-    if (!z.string().uuid().safeParse(id).success) throw new ReviewError(400, 'Invalid upload session')
+    if (!isCuid2(id)) throw new ReviewError(400, 'Invalid upload session')
     const row = await this.store.one<Session>('SELECT * FROM review_upload_sessions WHERE id=? AND owner_id=?', id, actor.id)
     if (!row) throw new ReviewError(404, 'Upload session not found')
     await this.review.dependencies.video(row.video_id, actor)
@@ -26,7 +27,7 @@ export class ReviewIntake {
   }
   private async batch(statements: Statement[]) { await this.store.db.batch(statements.map(s => this.store.db.prepare(s.sql).bind(...s.values))) }
   private async change(row: Session, states: Session['state'][], statements: Statement[], expiry: 'upload' | 'completed' | 'ignore' = 'upload') {
-    const token = crypto.randomUUID()
+    const token = createCuid2()
     const permitted = expiry === 'upload' ? `expires_at>${this.now()}` : expiry === 'completed' ? 'EXISTS(SELECT 1 FROM review_processing_jobs j WHERE j.session_id=review_upload_sessions.id AND j.result IS NOT NULL)' : '1=1'
     try {
       await this.batch([
@@ -55,9 +56,9 @@ export class ReviewIntake {
       }
       const saved = await prior()
       if (saved) return replay(saved)
-      const id = crypto.randomUUID(), at = this.now()
+      const id = createCuid2(), at = this.now()
       try {
-        await this.batch([statement('INSERT INTO review_upload_sessions(id,begin_command,begin_input,owner_id,video_id,object_key,output_key,expected_bytes,expected_checksum,claimed_type,metadata,revision_command,state,created_at,expires_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', id, input.commandId, JSON.stringify(input), actor.id, input.videoId, `review-intake/${id}/source`, `review-intake/${id}/deliverable.mp4`, input.bytes, input.checksum, input.contentType, JSON.stringify(input.metadata), crypto.randomUUID(), 'pending', at, at + 3600)])
+        await this.batch([statement('INSERT INTO review_upload_sessions(id,begin_command,begin_input,owner_id,video_id,object_key,output_key,expected_bytes,expected_checksum,claimed_type,metadata,revision_command,state,created_at,expires_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', id, input.commandId, JSON.stringify(input), actor.id, input.videoId, `review-intake/${id}/source`, `review-intake/${id}/deliverable.mp4`, input.bytes, input.checksum, input.contentType, JSON.stringify(input.metadata), createCuid2(), 'pending', at, at + 3600)])
       } catch (error) {
         const winner = await prior()
         if (winner) return replay(winner)
@@ -85,7 +86,7 @@ export class ReviewIntake {
     return this.read(actor, id)
   }
   private async attach(actor: ReviewActor, row: Session) {
-    const assets = await this.store.all<{ kind: string; media_id: number }>('SELECT kind,media_id FROM review_intake_assets WHERE session_id=?', row.id)
+    const assets = await this.store.all<{ kind: string; media_id: string }>('SELECT kind,media_id FROM review_intake_assets WHERE session_id=?', row.id)
     const savedJob = await this.jobs.row(row.id)
     const expectation = savedJob ? (await this.jobs.load(row.id)).job.expectedCurrentRevisionId : null
     const metadata = JSON.parse(row.metadata)
@@ -117,9 +118,10 @@ export class ReviewIntake {
   private register(row: Session, evidence: ProbeResult): Statement[] {
     return (['source', 'deliverable'] as const).flatMap(kind => {
       const object = evidence[kind], duration = kind === 'deliverable' ? evidence.deliverable.durationMs : null
+      const mediaId = createCuid2()
       return [
-        statement('INSERT INTO media(filename,mime_type,filesize) VALUES(?,?,?)', object.key, object.contentType, object.bytes),
-        statement('INSERT INTO review_intake_assets(media_id,session_id,video_id,kind,object_key,object_etag,checksum,bytes,content_type,duration_ms) SELECT id,?,?,?,?,?,?,?,?,? FROM media WHERE filename=?', row.id, row.video_id, kind, object.key, object.etag, object.checksum, object.bytes, object.contentType, duration, object.key),
+        statement('INSERT INTO media(id,filename,mime_type,filesize) VALUES(?,?,?,?)', mediaId, object.key, object.contentType, object.bytes),
+        statement('INSERT INTO review_intake_assets(media_id,session_id,video_id,kind,object_key,object_etag,checksum,bytes,content_type,duration_ms) VALUES(?,?,?,?,?,?,?,?,?,?)', mediaId, row.id, row.video_id, kind, object.key, object.etag, object.checksum, object.bytes, object.contentType, duration),
       ]
     })
   }

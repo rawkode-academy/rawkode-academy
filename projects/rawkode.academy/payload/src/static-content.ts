@@ -1,12 +1,12 @@
 import { createHash } from 'node:crypto'
-import { readdir, readFile, stat } from 'node:fs/promises'
+import { lstat, readdir, readFile, stat } from 'node:fs/promises'
 import path from 'node:path'
 import matter from 'gray-matter'
 import { parse as parseYaml } from 'yaml'
-import type { CatalogueRecord, CatalogueSnapshot, Reference, SourceAsset } from './importer'
+import type { ContentReference, ImportRecord, ImportSnapshot, SourceAsset } from './import-types'
 
 export type StaticAssetFile = SourceAsset & { absolutePath: string; alt?: string }
-export type StaticContentSnapshot = CatalogueSnapshot & { assetFiles: StaticAssetFile[] }
+export type StaticContentSnapshot = ImportSnapshot & { assetFiles: StaticAssetFile[] }
 
 type Format = 'md' | 'mdx' | 'yaml' | 'yml'
 type SourceFile = {
@@ -35,11 +35,6 @@ const specs = [
   { collection: 'news', directory: 'news', formats: ['md', 'mdx'] as Format[] },
 ] as const
 
-const legacyTypes: Record<string, string> = {
-  videos: 'Video', shows: 'Show', people: 'Person', articles: 'Article', technologies: 'Technology', series: 'Series',
-  adrs: 'ADR', testimonials: 'Testimonial', courses: 'Course', 'course-modules': 'CourseModule', changelog: 'Changelog',
-  'learning-paths': 'LearningPath', news: 'News', chapters: 'Chapter', 'learning-resources': 'LearningResources', 'static-assets': 'StaticAsset',
-}
 const assetMimeTypes: Record<string, string> = {
   '.avif': 'image/avif', '.gif': 'image/gif', '.jpeg': 'image/jpeg', '.jpg': 'image/jpeg', '.png': 'image/png',
   '.svg': 'image/svg+xml', '.webp': 'image/webp', '.ico': 'image/x-icon', '.mp4': 'video/mp4', '.webm': 'video/webm', '.woff': 'font/woff', '.woff2': 'font/woff2',
@@ -49,12 +44,18 @@ const staticFileMimeTypes: Record<string, string> = {
   '.css': 'text/css', '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json', '.py': 'text/x-python', '.sh': 'text/x-shellscript',
   '.ts': 'text/typescript', '.tsx': 'text/typescript', '.toml': 'application/toml', '.yaml': 'application/yaml', '.yml': 'application/yaml', '.txt': 'text/plain',
 }
+const inlineDemoExtensions = new Set(['.astro','.c','.cc','.cpp','.cs','.cjs','.css','.go','.graphql','.h','.hpp','.html','.java','.js','.json','.jsonc','.jsx','.md','.mdx','.mjs','.php','.py','.rb','.rs','.sh','.sql','.svg','.toml','.ts','.tsx','.txt','.vue','.xml','.yaml','.yml'])
+const inlineDemoNames = new Set(['dockerfile','license','makefile'])
+const maxInlineDemoFiles = 100
+const maxInlineDemoFileBytes = 256 * 1024
+const maxInlineDemoBytes = 1024 * 1024
+const maxInlineDemoPathLength = 240
 const directKeys = new Set([
   'title', 'name', 'description', 'subtitle', 'tagline', 'forename', 'surname', 'github', 'twitter', 'bluesky', 'mastodon', 'linkedin', 'website', 'youtube',
   'githubHandle', 'githubUrl', 'avatarUrl', 'biography', 'quote', 'category', 'subcategory', 'documentation', 'icon', 'logo', 'source', 'license', 'status', 'terms',
   'aliases', 'features', 'relatedTechnologies', 'useCases', 'publishedAt', 'date', 'adoptedAt', 'duration', 'audioFileSize', 'type', 'howto',
   'youtubeId', 'streamUrl', 'thumbnailUrl', 'mediaReference', 'realtimeKit', 'podcast', 'subscribeLinks', 'gameFormatUrl', 'code', 'order', 'section',
-  'difficulty', 'estimatedDuration', 'prerequisites', 'learningPath', 'pullRequest', 'publish', 'draft', 'links', 'cncf', 'community', 'matrix', 'seo', 'logos',
+  'difficulty', 'estimatedDuration', 'prerequisites', 'learningPath', 'pullRequest', 'links', 'cncf', 'community', 'matrix', 'seo', 'logos',
 ])
 
 function normalise(value: unknown): unknown {
@@ -85,14 +86,14 @@ function cleanReference(value: unknown): string | null {
   return null
 }
 
-function reference(collection: Reference['collection'], value: unknown): Reference | null {
+function reference(collection: ContentReference['collection'], value: unknown): ContentReference | null {
   const legacyId = cleanReference(value)
   return legacyId ? { collection, legacyId } : null
 }
 
-function references(collection: Reference['collection'], value: unknown, defaultValue: unknown[] = []): Reference[] {
+function references(collection: ContentReference['collection'], value: unknown, defaultValue: unknown[] = []): ContentReference[] {
   const input = Array.isArray(value) ? value : value == null ? defaultValue : [value]
-  return input.map(item => reference(collection, item)).filter((item): item is Reference => Boolean(item))
+  return input.map(item => reference(collection, item)).filter((item): item is ContentReference => Boolean(item))
 }
 
 function rows(value: unknown): { value: string }[] {
@@ -127,7 +128,7 @@ function isAsset(file: string): boolean {
 }
 
 function isStaticResource(file: string): boolean {
-  return Boolean(staticFileMimeTypes[path.extname(file).toLowerCase()]) || file.split(path.sep).includes('examples')
+  return !file.split(path.sep).includes('examples') && Boolean(staticFileMimeTypes[path.extname(file).toLowerCase()])
 }
 
 function localAssetReferences(data: unknown, output = new Set<string>()): Set<string> {
@@ -146,7 +147,7 @@ async function assetsFor(source: SourceFile, contentRoot: string, collection: st
   const paths = includeDirectory
     ? (await walk(sourceDirectory)).filter(file => isAsset(file))
     : [...candidates].map(candidate => path.resolve(sourceDirectory, candidate)).filter(file => file.startsWith(`${contentRoot}${path.sep}`))
-  const unique = [...new Set(paths)].sort()
+  const unique = [...new Set(paths)].filter(file => !path.relative(contentRoot, file).split(path.sep).includes('examples')).sort()
   const result: StaticAssetFile[] = []
   for (const absolutePath of unique) {
     const asset = await staticFileFor(absolutePath, contentRoot)
@@ -185,7 +186,7 @@ function statusFor(collection: string, data: Record<string, unknown>): 'draft' |
 
 function directData(collection: string, source: SourceFile): Record<string, unknown> {
   const input = source.data
-  const data: Record<string, unknown> = { body: source.body, editorialData: input }
+  const data: Record<string, unknown> = { body: source.body }
   for (const key of directKeys) if (key in input) data[key] = input[key]
   for (const key of ['terms', 'whatYouWillLearn', 'aliases', 'features', 'relatedTechnologies', 'useCases', 'prerequisites', 'learningPath']) if (key in input) data[key] = rows(input[key])
   if (Array.isArray(input.links)) data.links = input.links
@@ -199,14 +200,14 @@ function directData(collection: string, source: SourceFile): Record<string, unkn
   return data
 }
 
-function relationsFor(collection: string, source: SourceFile): Record<string, Reference | Reference[] | null> {
+function relationsFor(collection: string, source: SourceFile): Record<string, ContentReference | ContentReference[] | null> {
   const input = source.data
-  const relationships: Record<string, Reference | Reference[] | null> = {}
-  const addMany = (field: string, target: Reference['collection'], value: unknown, defaults?: unknown[]) => {
+  const relationships: Record<string, ContentReference | ContentReference[] | null> = {}
+  const addMany = (field: string, target: ContentReference['collection'], value: unknown, defaults?: unknown[]) => {
     const valueReferences = references(target, value, defaults)
     if (valueReferences.length || value !== undefined || defaults) relationships[field] = valueReferences
   }
-  const addOne = (field: string, target: Reference['collection'], value: unknown) => {
+  const addOne = (field: string, target: ContentReference['collection'], value: unknown) => {
     if (value !== undefined) relationships[field] = reference(target, value)
   }
   if (['articles', 'courses', 'course-modules', 'learning-paths', 'adrs', 'news'].includes(collection)) addMany('authors', 'people', input.authors, ['rawkode'])
@@ -236,26 +237,127 @@ function relationsFor(collection: string, source: SourceFile): Record<string, Re
   return relationships
 }
 
-function contentRecord(collection: string, source: SourceFile): CatalogueRecord {
+function validDemoPath(value: string): boolean {
+  if (!value || value.length > maxInlineDemoPathLength || value.startsWith('/') || value.includes('\\') || /[\u0000-\u001f\u007f]/.test(value)) return false
+  const segments = value.split('/')
+  return segments.every(segment => segment && segment !== '.' && segment !== '..' && !segment.startsWith('.'))
+}
+
+function isInlineDemoFile(value: string): boolean {
+  return inlineDemoExtensions.has(path.extname(value).toLowerCase()) || inlineDemoNames.has(path.basename(value).toLowerCase())
+}
+
+async function inlineDemoForResource(source: SourceFile, contentRoot: string, resource: Record<string, unknown>): Promise<{ files: Record<string, string>; startCommand?: string }> {
+  const embedConfig = resource.embedConfig as Record<string, unknown> | undefined
+  const resourceSlug = typeof embedConfig?.src === 'string' ? embedConfig.src : ''
+  const importConfig = embedConfig?.import as Record<string, unknown> | undefined
+  const localDir = typeof importConfig?.localDir === 'string' ? importConfig.localDir : ''
+  if (!resourceSlug || !/^[A-Za-z0-9][A-Za-z0-9._-]{0,159}$/.test(resourceSlug) || resourceSlug === '.' || resourceSlug === '..') {
+    throw new Error(`Invalid WebContainer resource slug in ${source.relativePath}`)
+  }
+  if (!localDir || localDir.length > maxInlineDemoPathLength || localDir.includes('\\') || /[\u0000-\u001f\u007f]/.test(localDir) || path.isAbsolute(localDir)) {
+    throw new Error(`WebContainer resource ${resourceSlug} in ${source.relativePath} must provide a safe import.localDir`)
+  }
+  const sourceParts = source.relativePath.split('/')
+  if (sourceParts[0] !== 'courses' || !sourceParts[1]) throw new Error(`WebContainer module is outside courses/: ${source.relativePath}`)
+  const courseSlug = sourceParts[1]
+  const examplesRoot = path.resolve(contentRoot, 'courses', courseSlug, 'examples')
+  const demoDirectory = path.resolve(path.dirname(source.absolutePath), localDir)
+  const relativeDirectory = path.relative(examplesRoot, demoDirectory)
+  const exampleSegments = relativeDirectory.split(path.sep)
+  const [courseStat, examplesStat, demoStat] = await Promise.all([
+    lstat(path.resolve(contentRoot, 'courses', courseSlug)).catch(() => null),
+    lstat(examplesRoot).catch(() => null),
+    lstat(demoDirectory).catch(() => null),
+  ])
+  if (!relativeDirectory || relativeDirectory === '..' || relativeDirectory.startsWith(`..${path.sep}`) || path.isAbsolute(relativeDirectory) || exampleSegments.length !== 1 || exampleSegments.some(part => !part || part === '.' || part === '..' || part.startsWith('.')) || path.basename(demoDirectory) !== resourceSlug || !courseStat || !courseStat.isDirectory() || courseStat.isSymbolicLink() || !examplesStat || !examplesStat.isDirectory() || examplesStat.isSymbolicLink() || !demoStat || !demoStat.isDirectory() || demoStat.isSymbolicLink()) {
+    throw new Error(`WebContainer resource ${resourceSlug} in ${source.relativePath} must resolve to its course examples/${resourceSlug} directory`)
+  }
+
+  const files: Record<string, string> = {}
+  let totalBytes = 0
+  let webContainerConfig: Record<string, unknown> = {}
+  const absoluteFiles = await walk(demoDirectory)
+  if (!absoluteFiles.length) throw new Error(`WebContainer example directory is empty: ${path.relative(contentRoot, demoDirectory)}`)
+  for (const absolutePath of absoluteFiles) {
+    const relative = path.relative(demoDirectory, absolutePath).split(path.sep).join('/')
+    if (relative === '.webcontainer.json') {
+      const bytes = await readFile(absolutePath)
+      if (bytes.byteLength > 16 * 1024) throw new Error(`WebContainer config exceeds 16 KiB: ${relative}`)
+      try {
+        const parsed = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes)) as unknown
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) webContainerConfig = parsed as Record<string, unknown>
+      } catch (error) {
+        throw new Error(`Invalid WebContainer config in ${path.relative(contentRoot, absolutePath)}: ${String(error)}`)
+      }
+      continue
+    }
+    if (!validDemoPath(relative) || !isInlineDemoFile(relative)) {
+      throw new Error(`Unsupported WebContainer example file: ${path.relative(contentRoot, absolutePath)}`)
+    }
+    if (Object.keys(files).length >= maxInlineDemoFiles) throw new Error(`WebContainer example exceeds ${maxInlineDemoFiles} files: ${path.relative(contentRoot, demoDirectory)}`)
+    const bytes = await readFile(absolutePath)
+    if (bytes.byteLength > maxInlineDemoFileBytes) throw new Error(`WebContainer example file exceeds ${maxInlineDemoFileBytes} bytes: ${path.relative(contentRoot, absolutePath)}`)
+    totalBytes += bytes.byteLength
+    if (totalBytes > maxInlineDemoBytes) throw new Error(`WebContainer example exceeds ${maxInlineDemoBytes} total bytes: ${path.relative(contentRoot, demoDirectory)}`)
+    files[relative] = new TextDecoder('utf-8', { fatal: true }).decode(bytes)
+  }
+  if (!Object.keys(files).length) throw new Error(`WebContainer example has no inline text files: ${path.relative(contentRoot, demoDirectory)}`)
+  const configuredCommand = webContainerConfig.startCommand
+  const authoredCommand = embedConfig?.startCommand
+  const startCommand = typeof configuredCommand === 'string' && configuredCommand.trim() && configuredCommand.length <= 200 && !/[\u0000-\u001f\u007f]/.test(configuredCommand)
+    ? configuredCommand
+    : typeof authoredCommand === 'string' && authoredCommand.trim() && authoredCommand.length <= 200 && !/[\u0000-\u001f\u007f]/.test(authoredCommand)
+      ? authoredCommand
+      : undefined
+  return { files, ...(startCommand ? { startCommand } : {}) }
+}
+
+async function inlineWebContainerResources(source: SourceFile, contentRoot: string): Promise<unknown> {
+  if (!Array.isArray(source.data.resources)) return source.data.resources
+  const resources: unknown[] = []
+  for (const value of source.data.resources) {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+      resources.push(value)
+      continue
+    }
+    const resource = value as Record<string, unknown>
+    const embedConfig = resource.embedConfig && typeof resource.embedConfig === 'object' && !Array.isArray(resource.embedConfig)
+      ? resource.embedConfig as Record<string, unknown>
+      : undefined
+    if (embedConfig?.container !== 'webcontainer') {
+      resources.push(value)
+      continue
+    }
+    const demo = await inlineDemoForResource(source, contentRoot, resource)
+    const { import: _import, files: _oldFiles, startCommand: _oldCommand, ...publicConfig } = embedConfig
+    resources.push({ ...resource, embedConfig: { ...publicConfig, files: demo.files, ...(demo.startCommand ? { startCommand: demo.startCommand } : {}) } })
+  }
+  return resources
+}
+
+async function contentRecord(collection: string, source: SourceFile, contentRoot: string): Promise<ImportRecord> {
   const input = source.data
   const legacyId = typeof input.id === 'string' && input.id.trim() ? input.id : sourceId(source.relativePath.replace(new RegExp(`^${collection === 'course-modules' ? 'courses' : collection}/`), ''))
   const slug = typeof input.slug === 'string' && input.slug.trim() ? input.slug : legacyId
+  const data = directData(collection, source)
+  if (collection === 'course-modules' && 'resources' in input) data.contentResources = await inlineWebContainerResources(source, contentRoot)
   return {
-    collection: collection as CatalogueRecord['collection'], legacyId, legacyType: legacyTypes[collection] ?? collection, slug,
-    sourceRevision: source.checksum, status: statusFor(collection, input), data: directData(collection, source), relationships: relationsFor(collection, source),
-    source: { path: source.relativePath, format: source.format, data: input, raw: source.raw, body: source.body, assets: source.assets.map(({ absolutePath: _absolutePath, ...asset }) => asset) },
+    collection: collection as ImportRecord['collection'], legacyId, slug,
+    sourceRevision: source.checksum, status: statusFor(collection, input), data, relationships: relationsFor(collection, source),
+    source: { path: source.relativePath, assets: source.assets.map(({ absolutePath: _absolutePath, ...asset }) => asset) },
   }
 }
 
-function derivedChapterRecords(source: SourceFile, video: CatalogueRecord): CatalogueRecord[] {
+function derivedChapterRecords(source: SourceFile, video: ImportRecord): ImportRecord[] {
   const chapters = Array.isArray(source.data.chapters) ? source.data.chapters : []
   return chapters.map((chapter, index) => {
     const value = chapter as Record<string, unknown>
     const legacyId = `${video.legacyId}-chapter-${index}`
     return {
-      collection: 'chapters', legacyId, legacyType: 'Chapter', slug: legacyId, sourceRevision: source.checksum, status: video.status,
+      collection: 'chapters', legacyId, slug: legacyId, sourceRevision: source.checksum, status: video.status,
       data: { title: String(value.title ?? `Chapter ${index + 1}`), startTime: Number(value.startTime ?? 0) },
-      source: { path: `${source.relativePath}#chapters/${index}`, format: source.format, data: value },
+      source: { path: `${source.relativePath}#chapters/${index}` },
     }
   })
 }
@@ -267,37 +369,36 @@ function episodeCode(slug: string): string {
   return match[1] ? `S${match[1].padStart(2, '0')}${episode}` : episode
 }
 
-function derivedEpisodeRecord(source: SourceFile, video: CatalogueRecord): CatalogueRecord | null {
+function derivedEpisodeRecord(source: SourceFile, video: ImportRecord): ImportRecord | null {
   const show = video.relationships?.show
   if (!show || Array.isArray(show)) return null
   const legacyId = `${show.legacyId}-${video.legacyId}`
   return {
-    collection: 'episodes', legacyId, legacyType: 'Episode', slug: legacyId, sourceRevision: video.sourceRevision, status: video.status,
+    collection: 'episodes', legacyId, slug: legacyId, sourceRevision: video.sourceRevision, status: video.status,
     data: { code: episodeCode(video.slug), terms: rows(source.data.terms) },
     relationships: { video: { collection: 'videos', legacyId: video.legacyId }, show },
-    source: { path: `${source.relativePath}#episode`, format: source.format, data: { show: show.legacyId, video: video.legacyId, code: episodeCode(video.slug) } },
+    source: { path: `${source.relativePath}#episode` },
   }
 }
 
-function derivedResourceRecord(source: SourceFile, technology: CatalogueRecord): CatalogueRecord | null {
+function derivedResourceRecord(source: SourceFile, technology: ImportRecord): ImportRecord | null {
   const value = source.data.learningResources
   if (!value || typeof value !== 'object') return null
   const input = value as Record<string, unknown>
   if (!Object.values(input).some(item => Array.isArray(item) && item.length)) return null
   const legacyId = `${technology.legacyId}:learning-resources`
   return {
-    collection: 'learning-resources', legacyId, legacyType: 'LearningResources', slug: legacyId, sourceRevision: source.checksum, status: technology.status,
+    collection: 'learning-resources', legacyId, slug: legacyId, sourceRevision: source.checksum, status: technology.status,
     data: { title: `${String(source.data.name ?? technology.legacyId)} learning resources`, official: urls(input.official), community: urls(input.community), tutorials: urls(input.tutorials) },
-    source: { path: `${source.relativePath}#learning-resources`, format: source.format, data: input },
+    source: { path: `${source.relativePath}#learning-resources` },
   }
 }
 
-function assetRecord(asset: StaticAssetFile): CatalogueRecord {
-  const sourceData = { relativePath: asset.relativePath, r2Key: asset.r2Key, mimeType: asset.mimeType, bytes: asset.bytes, checksum: asset.checksum }
+function assetRecord(asset: StaticAssetFile): ImportRecord {
   return {
-    collection: 'static-assets', legacyId: asset.relativePath, legacyType: 'StaticAsset', slug: asset.relativePath, sourceRevision: asset.checksum, status: 'published',
+    collection: 'static-assets', legacyId: asset.relativePath, slug: asset.relativePath, sourceRevision: asset.checksum, status: 'published',
     data: { r2Key: asset.r2Key, mimeType: asset.mimeType, bytes: asset.bytes, checksum: asset.checksum },
-    source: { path: asset.relativePath, format: 'json', data: sourceData, raw: JSON.stringify(sourceData) },
+    source: { path: asset.relativePath },
   }
 }
 
@@ -316,15 +417,15 @@ export async function buildStaticSnapshot(options: { root: string; sequence?: nu
       files.push({ collection, source: await readSource(absolutePath, contentRoot, collection) })
     }
   }
-  const records: CatalogueRecord[] = []
+  const records: ImportRecord[] = []
   const assetFiles = new Map<string, StaticAssetFile>()
   for (const { collection, source } of files) {
-    const record = contentRecord(collection, source)
+    const record = await contentRecord(collection, source, contentRoot)
     records.push(record)
-    for (const asset of source.assets) assetFiles.set(asset.relativePath, asset)
+    for (const asset of source.assets) if (!asset.relativePath.split('/').includes('examples')) assetFiles.set(asset.relativePath, asset)
     if (collection === 'videos') {
       for (const chapter of derivedChapterRecords(source, record)) {
-        record.relationships = { ...(record.relationships ?? {}), chapters: [...((record.relationships?.chapters as Reference[] | undefined) ?? []), { collection: 'chapters', legacyId: chapter.legacyId }] }
+        record.relationships = { ...(record.relationships ?? {}), chapters: [...((record.relationships?.chapters as ContentReference[] | undefined) ?? []), { collection: 'chapters', legacyId: chapter.legacyId }] }
         records.push(chapter)
       }
       const episode = derivedEpisodeRecord(source, record)

@@ -32,6 +32,7 @@ on:
     - projects/rawkode.academy/payload/scripts/**
     - projects/rawkode.academy/payload/scripts/check-review-container-recipe.mjs
     - projects/rawkode.academy/payload/scripts/check-review-container-recipe.mjs/**
+    - projects/rawkode.academy/payload/scripts/lib/**
     - projects/rawkode.academy/payload/scripts/migrate-production.ts
     - projects/rawkode.academy/payload/scripts/migrate-production.ts/**
     - projects/rawkode.academy/payload/scripts/setup.mjs

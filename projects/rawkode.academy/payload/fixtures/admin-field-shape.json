@@ -31,10 +31,6 @@
 				"type": "json"
 			},
 			{
-				"name": "editorialData",
-				"type": "json"
-			},
-			{
 				"name": "importedAt",
 				"type": "date"
 			},
@@ -49,14 +45,8 @@
 			{
 				"name": "legacyId",
 				"type": "text",
-				"required": true,
 				"unique": true,
 				"index": true
-			},
-			{
-				"name": "legacyType",
-				"type": "text",
-				"required": true
 			},
 			{
 				"name": "locallyEdited",
@@ -78,27 +68,8 @@
 				"type": "json"
 			},
 			{
-				"name": "sourceBody",
-				"type": "textarea"
-			},
-			{
-				"name": "sourceData",
-				"type": "json"
-			},
-			{
 				"name": "sourceFields",
 				"type": "json"
-			},
-			{
-				"name": "sourceFormat",
-				"type": "select",
-				"options": [
-					"md",
-					"mdx",
-					"yaml",
-					"yml",
-					"json"
-				]
 			},
 			{
 				"name": "sourceHash",
@@ -112,10 +83,6 @@
 			{
 				"name": "sourcePath",
 				"type": "text"
-			},
-			{
-				"name": "sourceRaw",
-				"type": "textarea"
 			},
 			{
 				"name": "sourceRevision",
@@ -172,10 +139,6 @@
 				"type": "textarea"
 			},
 			{
-				"name": "editorialData",
-				"type": "json"
-			},
-			{
 				"name": "howto",
 				"type": "checkbox"
 			},
@@ -194,14 +157,8 @@
 			{
 				"name": "legacyId",
 				"type": "text",
-				"required": true,
 				"unique": true,
 				"index": true
-			},
-			{
-				"name": "legacyType",
-				"type": "text",
-				"required": true
 			},
 			{
 				"name": "locallyEdited",
@@ -238,27 +195,8 @@
 				"type": "json"
 			},
 			{
-				"name": "sourceBody",
-				"type": "textarea"
-			},
-			{
-				"name": "sourceData",
-				"type": "json"
-			},
-			{
 				"name": "sourceFields",
 				"type": "json"
-			},
-			{
-				"name": "sourceFormat",
-				"type": "select",
-				"options": [
-					"md",
-					"mdx",
-					"yaml",
-					"yml",
-					"json"
-				]
 			},
 			{
 				"name": "sourceHash",
@@ -272,10 +210,6 @@
 			{
 				"name": "sourcePath",
 				"type": "text"
-			},
-			{
-				"name": "sourceRaw",
-				"type": "textarea"
 			},
 			{
 				"name": "sourceRevision",
@@ -373,14 +307,8 @@
 			{
 				"name": "legacyId",
 				"type": "text",
-				"required": true,
 				"unique": true,
 				"index": true
-			},
-			{
-				"name": "legacyType",
-				"type": "text",
-				"required": true
 			},
 			{
 				"name": "locallyEdited",
@@ -410,10 +338,6 @@
 				"type": "json"
 			},
 			{
-				"name": "sourceBody",
-				"type": "textarea"
-			},
-			{
 				"name": "sourceBracketId",
 				"type": "text"
 			},
@@ -426,23 +350,8 @@
 				"type": "date"
 			},
 			{
-				"name": "sourceData",
-				"type": "json"
-			},
-			{
 				"name": "sourceFields",
 				"type": "json"
-			},
-			{
-				"name": "sourceFormat",
-				"type": "select",
-				"options": [
-					"md",
-					"mdx",
-					"yaml",
-					"yml",
-					"json"
-				]
 			},
 			{
 				"name": "sourceHash",
@@ -456,10 +365,6 @@
 			{
 				"name": "sourcePath",
 				"type": "text"
-			},
-			{
-				"name": "sourceRaw",
-				"type": "textarea"
 			},
 			{
 				"name": "sourceRevision",
@@ -526,14 +431,8 @@
 			{
 				"name": "legacyId",
 				"type": "text",
-				"required": true,
 				"unique": true,
 				"index": true
-			},
-			{
-				"name": "legacyType",
-				"type": "text",
-				"required": true
 			},
 			{
 				"name": "locallyEdited",
@@ -555,10 +454,6 @@
 				"type": "json"
 			},
 			{
-				"name": "sourceBody",
-				"type": "textarea"
-			},
-			{
 				"name": "sourceBracketId",
 				"type": "text"
 			},
@@ -567,23 +462,8 @@
 				"type": "date"
 			},
 			{
-				"name": "sourceData",
-				"type": "json"
-			},
-			{
 				"name": "sourceFields",
 				"type": "json"
-			},
-			{
-				"name": "sourceFormat",
-				"type": "select",
-				"options": [
-					"md",
-					"mdx",
-					"yaml",
-					"yml",
-					"json"
-				]
 			},
 			{
 				"name": "sourceHash",
@@ -597,10 +477,6 @@
 			{
 				"name": "sourcePath",
 				"type": "text"
-			},
-			{
-				"name": "sourceRaw",
-				"type": "textarea"
 			},
 			{
 				"name": "sourceRevision",
@@ -706,14 +582,8 @@
 			{
 				"name": "legacyId",
 				"type": "text",
-				"required": true,
 				"unique": true,
 				"index": true
-			},
-			{
-				"name": "legacyType",
-				"type": "text",
-				"required": true
 			},
 			{
 				"name": "locallyEdited",
@@ -739,10 +609,6 @@
 				"type": "json"
 			},
 			{
-				"name": "sourceBody",
-				"type": "textarea"
-			},
-			{
 				"name": "sourceBracketId",
 				"type": "text"
 			},
@@ -755,23 +621,8 @@
 				"type": "date"
 			},
 			{
-				"name": "sourceData",
-				"type": "json"
-			},
-			{
 				"name": "sourceFields",
 				"type": "json"
-			},
-			{
-				"name": "sourceFormat",
-				"type": "select",
-				"options": [
-					"md",
-					"mdx",
-					"yaml",
-					"yml",
-					"json"
-				]
 			},
 			{
 				"name": "sourceHash",
@@ -785,10 +636,6 @@
 			{
 				"name": "sourcePath",
 				"type": "text"
-			},
-			{
-				"name": "sourceRaw",
-				"type": "textarea"
 			},
 			{
 				"name": "sourceRevision",
@@ -889,14 +736,8 @@
 			{
 				"name": "legacyId",
 				"type": "text",
-				"required": true,
 				"unique": true,
 				"index": true
-			},
-			{
-				"name": "legacyType",
-				"type": "text",
-				"required": true
 			},
 			{
 				"name": "locallyEdited",
@@ -935,31 +776,12 @@
 				"type": "json"
 			},
 			{
-				"name": "sourceBody",
-				"type": "textarea"
-			},
-			{
 				"name": "sourceCreatedAt",
 				"type": "date"
 			},
 			{
-				"name": "sourceData",
-				"type": "json"
-			},
-			{
 				"name": "sourceFields",
 				"type": "json"
-			},
-			{
-				"name": "sourceFormat",
-				"type": "select",
-				"options": [
-					"md",
-					"mdx",
-					"yaml",
-					"yml",
-					"json"
-				]
 			},
 			{
 				"name": "sourceHash",
@@ -973,10 +795,6 @@
 			{
 				"name": "sourcePath",
 				"type": "text"
-			},
-			{
-				"name": "sourceRaw",
-				"type": "textarea"
 			},
 			{
 				"name": "sourceRevision",
@@ -1057,10 +875,6 @@
 				"type": "textarea"
 			},
 			{
-				"name": "editorialData",
-				"type": "json"
-			},
-			{
 				"name": "importedAt",
 				"type": "date"
 			},
@@ -1075,14 +889,8 @@
 			{
 				"name": "legacyId",
 				"type": "text",
-				"required": true,
 				"unique": true,
 				"index": true
-			},
-			{
-				"name": "legacyType",
-				"type": "text",
-				"required": true
 			},
 			{
 				"name": "locallyEdited",
@@ -1108,27 +916,8 @@
 				"type": "json"
 			},
 			{
-				"name": "sourceBody",
-				"type": "textarea"
-			},
-			{
-				"name": "sourceData",
-				"type": "json"
-			},
-			{
 				"name": "sourceFields",
 				"type": "json"
-			},
-			{
-				"name": "sourceFormat",
-				"type": "select",
-				"options": [
-					"md",
-					"mdx",
-					"yaml",
-					"yml",
-					"json"
-				]
 			},
 			{
 				"name": "sourceHash",
@@ -1142,10 +931,6 @@
 			{
 				"name": "sourcePath",
 				"type": "text"
-			},
-			{
-				"name": "sourceRaw",
-				"type": "textarea"
 			},
 			{
 				"name": "sourceRevision",
@@ -1202,10 +987,6 @@
 				"type": "json"
 			},
 			{
-				"name": "editorialData",
-				"type": "json"
-			},
-			{
 				"name": "importedAt",
 				"type": "date"
 			},
@@ -1220,14 +1001,8 @@
 			{
 				"name": "legacyId",
 				"type": "text",
-				"required": true,
 				"unique": true,
 				"index": true
-			},
-			{
-				"name": "legacyType",
-				"type": "text",
-				"required": true
 			},
 			{
 				"name": "locallyEdited",
@@ -1249,27 +1024,8 @@
 				"type": "json"
 			},
 			{
-				"name": "sourceBody",
-				"type": "textarea"
-			},
-			{
-				"name": "sourceData",
-				"type": "json"
-			},
-			{
 				"name": "sourceFields",
 				"type": "json"
-			},
-			{
-				"name": "sourceFormat",
-				"type": "select",
-				"options": [
-					"md",
-					"mdx",
-					"yaml",
-					"yml",
-					"json"
-				]
 			},
 			{
 				"name": "sourceHash",
@@ -1283,10 +1039,6 @@
 			{
 				"name": "sourcePath",
 				"type": "text"
-			},
-			{
-				"name": "sourceRaw",
-				"type": "textarea"
 			},
 			{
 				"name": "sourceRevision",
@@ -1377,14 +1129,8 @@
 			{
 				"name": "legacyId",
 				"type": "text",
-				"required": true,
 				"unique": true,
 				"index": true
-			},
-			{
-				"name": "legacyType",
-				"type": "text",
-				"required": true
 			},
 			{
 				"name": "locallyEdited",
@@ -1415,31 +1161,12 @@
 				"type": "json"
 			},
 			{
-				"name": "sourceBody",
-				"type": "textarea"
-			},
-			{
 				"name": "sourceCreatedAt",
 				"type": "date"
 			},
 			{
-				"name": "sourceData",
-				"type": "json"
-			},
-			{
 				"name": "sourceFields",
 				"type": "json"
-			},
-			{
-				"name": "sourceFormat",
-				"type": "select",
-				"options": [
-					"md",
-					"mdx",
-					"yaml",
-					"yml",
-					"json"
-				]
 			},
 			{
 				"name": "sourceHash",
@@ -1453,10 +1180,6 @@
 			{
 				"name": "sourcePath",
 				"type": "text"
-			},
-			{
-				"name": "sourceRaw",
-				"type": "textarea"
 			},
 			{
 				"name": "sourceRevision",
@@ -1530,10 +1253,6 @@
 				"type": "text"
 			},
 			{
-				"name": "editorialData",
-				"type": "json"
-			},
-			{
 				"name": "importedAt",
 				"type": "date"
 			},
@@ -1558,14 +1277,8 @@
 			{
 				"name": "legacyId",
 				"type": "text",
-				"required": true,
 				"unique": true,
 				"index": true
-			},
-			{
-				"name": "legacyType",
-				"type": "text",
-				"required": true
 			},
 			{
 				"name": "locallyEdited",
@@ -1605,27 +1318,8 @@
 				"type": "json"
 			},
 			{
-				"name": "sourceBody",
-				"type": "textarea"
-			},
-			{
-				"name": "sourceData",
-				"type": "json"
-			},
-			{
 				"name": "sourceFields",
 				"type": "json"
-			},
-			{
-				"name": "sourceFormat",
-				"type": "select",
-				"options": [
-					"md",
-					"mdx",
-					"yaml",
-					"yml",
-					"json"
-				]
 			},
 			{
 				"name": "sourceHash",
@@ -1639,10 +1333,6 @@
 			{
 				"name": "sourcePath",
 				"type": "text"
-			},
-			{
-				"name": "sourceRaw",
-				"type": "textarea"
 			},
 			{
 				"name": "sourceRevision",
@@ -1708,10 +1398,6 @@
 				"type": "text"
 			},
 			{
-				"name": "editorialData",
-				"type": "json"
-			},
-			{
 				"name": "importedAt",
 				"type": "date"
 			},
@@ -1736,14 +1422,8 @@
 			{
 				"name": "legacyId",
 				"type": "text",
-				"required": true,
 				"unique": true,
 				"index": true
-			},
-			{
-				"name": "legacyType",
-				"type": "text",
-				"required": true
 			},
 			{
 				"name": "locallyEdited",
@@ -1775,27 +1455,8 @@
 				"type": "json"
 			},
 			{
-				"name": "sourceBody",
-				"type": "textarea"
-			},
-			{
-				"name": "sourceData",
-				"type": "json"
-			},
-			{
 				"name": "sourceFields",
 				"type": "json"
-			},
-			{
-				"name": "sourceFormat",
-				"type": "select",
-				"options": [
-					"md",
-					"mdx",
-					"yaml",
-					"yml",
-					"json"
-				]
 			},
 			{
 				"name": "sourceHash",
@@ -1809,10 +1470,6 @@
 			{
 				"name": "sourcePath",
 				"type": "text"
-			},
-			{
-				"name": "sourceRaw",
-				"type": "textarea"
 			},
 			{
 				"name": "sourceRevision",
@@ -1901,10 +1558,6 @@
 				"type": "json"
 			},
 			{
-				"name": "editorialData",
-				"type": "json"
-			},
-			{
 				"name": "importedAt",
 				"type": "date"
 			},
@@ -1919,14 +1572,8 @@
 			{
 				"name": "legacyId",
 				"type": "text",
-				"required": true,
 				"unique": true,
 				"index": true
-			},
-			{
-				"name": "legacyType",
-				"type": "text",
-				"required": true
 			},
 			{
 				"name": "locallyEdited",
@@ -1953,27 +1600,8 @@
 				"type": "json"
 			},
 			{
-				"name": "sourceBody",
-				"type": "textarea"
-			},
-			{
-				"name": "sourceData",
-				"type": "json"
-			},
-			{
 				"name": "sourceFields",
 				"type": "json"
-			},
-			{
-				"name": "sourceFormat",
-				"type": "select",
-				"options": [
-					"md",
-					"mdx",
-					"yaml",
-					"yml",
-					"json"
-				]
 			},
 			{
 				"name": "sourceHash",
@@ -1987,10 +1615,6 @@
 			{
 				"name": "sourcePath",
 				"type": "text"
-			},
-			{
-				"name": "sourceRaw",
-				"type": "textarea"
 			},
 			{
 				"name": "sourceRevision",
@@ -2068,10 +1692,6 @@
 				"type": "text"
 			},
 			{
-				"name": "editorialData",
-				"type": "json"
-			},
-			{
 				"name": "estimatedDuration",
 				"type": "number"
 			},
@@ -2090,14 +1710,8 @@
 			{
 				"name": "legacyId",
 				"type": "text",
-				"required": true,
 				"unique": true,
 				"index": true
-			},
-			{
-				"name": "legacyType",
-				"type": "text",
-				"required": true
 			},
 			{
 				"name": "locallyEdited",
@@ -2133,27 +1747,8 @@
 				"type": "json"
 			},
 			{
-				"name": "sourceBody",
-				"type": "textarea"
-			},
-			{
-				"name": "sourceData",
-				"type": "json"
-			},
-			{
 				"name": "sourceFields",
 				"type": "json"
-			},
-			{
-				"name": "sourceFormat",
-				"type": "select",
-				"options": [
-					"md",
-					"mdx",
-					"yaml",
-					"yml",
-					"json"
-				]
 			},
 			{
 				"name": "sourceHash",
@@ -2167,10 +1762,6 @@
 			{
 				"name": "sourcePath",
 				"type": "text"
-			},
-			{
-				"name": "sourceRaw",
-				"type": "textarea"
 			},
 			{
 				"name": "sourceRevision",
@@ -2239,10 +1830,6 @@
 				"type": "json"
 			},
 			{
-				"name": "editorialData",
-				"type": "json"
-			},
-			{
 				"name": "importedAt",
 				"type": "date"
 			},
@@ -2257,14 +1844,8 @@
 			{
 				"name": "legacyId",
 				"type": "text",
-				"required": true,
 				"unique": true,
 				"index": true
-			},
-			{
-				"name": "legacyType",
-				"type": "text",
-				"required": true
 			},
 			{
 				"name": "locallyEdited",
@@ -2296,27 +1877,8 @@
 				"type": "json"
 			},
 			{
-				"name": "sourceBody",
-				"type": "textarea"
-			},
-			{
-				"name": "sourceData",
-				"type": "json"
-			},
-			{
 				"name": "sourceFields",
 				"type": "json"
-			},
-			{
-				"name": "sourceFormat",
-				"type": "select",
-				"options": [
-					"md",
-					"mdx",
-					"yaml",
-					"yml",
-					"json"
-				]
 			},
 			{
 				"name": "sourceHash",
@@ -2330,10 +1892,6 @@
 			{
 				"name": "sourcePath",
 				"type": "text"
-			},
-			{
-				"name": "sourceRaw",
-				"type": "textarea"
 			},
 			{
 				"name": "sourceRevision",
@@ -2405,14 +1963,8 @@
 			{
 				"name": "legacyId",
 				"type": "text",
-				"required": true,
 				"unique": true,
 				"index": true
-			},
-			{
-				"name": "legacyType",
-				"type": "text",
-				"required": true
 			},
 			{
 				"name": "locallyEdited",
@@ -2459,27 +2011,8 @@
 				"type": "json"
 			},
 			{
-				"name": "sourceBody",
-				"type": "textarea"
-			},
-			{
-				"name": "sourceData",
-				"type": "json"
-			},
-			{
 				"name": "sourceFields",
 				"type": "json"
-			},
-			{
-				"name": "sourceFormat",
-				"type": "select",
-				"options": [
-					"md",
-					"mdx",
-					"yaml",
-					"yml",
-					"json"
-				]
 			},
 			{
 				"name": "sourceHash",
@@ -2497,10 +2030,6 @@
 			{
 				"name": "sourcePath",
 				"type": "text"
-			},
-			{
-				"name": "sourceRaw",
-				"type": "textarea"
 			},
 			{
 				"name": "sourceRevision",
@@ -2590,14 +2119,8 @@
 			{
 				"name": "legacyId",
 				"type": "text",
-				"required": true,
 				"unique": true,
 				"index": true
-			},
-			{
-				"name": "legacyType",
-				"type": "text",
-				"required": true
 			},
 			{
 				"name": "locallyEdited",
@@ -2631,20 +2154,12 @@
 				"type": "json"
 			},
 			{
-				"name": "sourceBody",
-				"type": "textarea"
-			},
-			{
 				"name": "sourceBracketId",
 				"type": "text"
 			},
 			{
 				"name": "sourceCreatedAt",
 				"type": "date"
-			},
-			{
-				"name": "sourceData",
-				"type": "json"
 			},
 			{
 				"name": "sourceEntryAId",
@@ -2659,17 +2174,6 @@
 				"type": "json"
 			},
 			{
-				"name": "sourceFormat",
-				"type": "select",
-				"options": [
-					"md",
-					"mdx",
-					"yaml",
-					"yml",
-					"json"
-				]
-			},
-			{
 				"name": "sourceHash",
 				"type": "text"
 			},
@@ -2681,10 +2185,6 @@
 			{
 				"name": "sourcePath",
 				"type": "text"
-			},
-			{
-				"name": "sourceRaw",
-				"type": "textarea"
 			},
 			{
 				"name": "sourceRevision",
@@ -2805,10 +2305,6 @@
 				"type": "textarea"
 			},
 			{
-				"name": "editorialData",
-				"type": "json"
-			},
-			{
 				"name": "importedAt",
 				"type": "date"
 			},
@@ -2823,14 +2319,8 @@
 			{
 				"name": "legacyId",
 				"type": "text",
-				"required": true,
 				"unique": true,
 				"index": true
-			},
-			{
-				"name": "legacyType",
-				"type": "text",
-				"required": true
 			},
 			{
 				"name": "locallyEdited",
@@ -2856,27 +2346,8 @@
 				"type": "json"
 			},
 			{
-				"name": "sourceBody",
-				"type": "textarea"
-			},
-			{
-				"name": "sourceData",
-				"type": "json"
-			},
-			{
 				"name": "sourceFields",
 				"type": "json"
-			},
-			{
-				"name": "sourceFormat",
-				"type": "select",
-				"options": [
-					"md",
-					"mdx",
-					"yaml",
-					"yml",
-					"json"
-				]
 			},
 			{
 				"name": "sourceHash",
@@ -2890,10 +2361,6 @@
 			{
 				"name": "sourcePath",
 				"type": "text"
-			},
-			{
-				"name": "sourceRaw",
-				"type": "textarea"
 			},
 			{
 				"name": "sourceRevision",
@@ -2958,10 +2425,6 @@
 				"type": "json"
 			},
 			{
-				"name": "editorialData",
-				"type": "json"
-			},
-			{
 				"name": "forename",
 				"type": "text"
 			},
@@ -2992,14 +2455,8 @@
 			{
 				"name": "legacyId",
 				"type": "text",
-				"required": true,
 				"unique": true,
 				"index": true
-			},
-			{
-				"name": "legacyType",
-				"type": "text",
-				"required": true
 			},
 			{
 				"name": "linkedin",
@@ -3047,27 +2504,8 @@
 				"type": "json"
 			},
 			{
-				"name": "sourceBody",
-				"type": "textarea"
-			},
-			{
-				"name": "sourceData",
-				"type": "json"
-			},
-			{
 				"name": "sourceFields",
 				"type": "json"
-			},
-			{
-				"name": "sourceFormat",
-				"type": "select",
-				"options": [
-					"md",
-					"mdx",
-					"yaml",
-					"yml",
-					"json"
-				]
 			},
 			{
 				"name": "sourceHash",
@@ -3081,10 +2519,6 @@
 			{
 				"name": "sourcePath",
 				"type": "text"
-			},
-			{
-				"name": "sourceRaw",
-				"type": "textarea"
 			},
 			{
 				"name": "sourceRevision",
@@ -3267,14 +2701,8 @@
 			{
 				"name": "legacyId",
 				"type": "text",
-				"required": true,
 				"unique": true,
 				"index": true
-			},
-			{
-				"name": "legacyType",
-				"type": "text",
-				"required": true
 			},
 			{
 				"name": "locallyEdited",
@@ -3317,31 +2745,12 @@
 				"type": "json"
 			},
 			{
-				"name": "sourceBody",
-				"type": "textarea"
-			},
-			{
 				"name": "sourceBracketId",
 				"type": "text"
 			},
 			{
-				"name": "sourceData",
-				"type": "json"
-			},
-			{
 				"name": "sourceFields",
 				"type": "json"
-			},
-			{
-				"name": "sourceFormat",
-				"type": "select",
-				"options": [
-					"md",
-					"mdx",
-					"yaml",
-					"yml",
-					"json"
-				]
 			},
 			{
 				"name": "sourceHash",
@@ -3355,10 +2764,6 @@
 			{
 				"name": "sourcePath",
 				"type": "text"
-			},
-			{
-				"name": "sourceRaw",
-				"type": "textarea"
 			},
 			{
 				"name": "sourceRevision",
@@ -3648,14 +3053,8 @@
 			{
 				"name": "legacyId",
 				"type": "text",
-				"required": true,
 				"unique": true,
 				"index": true
-			},
-			{
-				"name": "legacyType",
-				"type": "text",
-				"required": true
 			},
 			{
 				"name": "locallyEdited",
@@ -3686,31 +3085,12 @@
 				"type": "json"
 			},
 			{
-				"name": "sourceBody",
-				"type": "textarea"
-			},
-			{
 				"name": "sourceCreatedAt",
 				"type": "date"
 			},
 			{
-				"name": "sourceData",
-				"type": "json"
-			},
-			{
 				"name": "sourceFields",
 				"type": "json"
-			},
-			{
-				"name": "sourceFormat",
-				"type": "select",
-				"options": [
-					"md",
-					"mdx",
-					"yaml",
-					"yml",
-					"json"
-				]
 			},
 			{
 				"name": "sourceHash",
@@ -3724,10 +3104,6 @@
 			{
 				"name": "sourcePath",
 				"type": "text"
-			},
-			{
-				"name": "sourceRaw",
-				"type": "textarea"
 			},
 			{
 				"name": "sourceRevision",
@@ -3791,10 +3167,6 @@
 				"type": "json"
 			},
 			{
-				"name": "editorialData",
-				"type": "json"
-			},
-			{
 				"name": "importedAt",
 				"type": "date"
 			},
@@ -3809,14 +3181,8 @@
 			{
 				"name": "legacyId",
 				"type": "text",
-				"required": true,
 				"unique": true,
 				"index": true
-			},
-			{
-				"name": "legacyType",
-				"type": "text",
-				"required": true
 			},
 			{
 				"name": "locallyEdited",
@@ -3838,27 +3204,8 @@
 				"type": "json"
 			},
 			{
-				"name": "sourceBody",
-				"type": "textarea"
-			},
-			{
-				"name": "sourceData",
-				"type": "json"
-			},
-			{
 				"name": "sourceFields",
 				"type": "json"
-			},
-			{
-				"name": "sourceFormat",
-				"type": "select",
-				"options": [
-					"md",
-					"mdx",
-					"yaml",
-					"yml",
-					"json"
-				]
 			},
 			{
 				"name": "sourceHash",
@@ -3872,10 +3219,6 @@
 			{
 				"name": "sourcePath",
 				"type": "text"
-			},
-			{
-				"name": "sourceRaw",
-				"type": "textarea"
 			},
 			{
 				"name": "sourceRevision",
@@ -3926,10 +3269,6 @@
 				"type": "textarea"
 			},
 			{
-				"name": "editorialData",
-				"type": "json"
-			},
-			{
 				"name": "episodes",
 				"type": "relationship",
 				"hasMany": true,
@@ -3960,14 +3299,8 @@
 			{
 				"name": "legacyId",
 				"type": "text",
-				"required": true,
 				"unique": true,
 				"index": true
-			},
-			{
-				"name": "legacyType",
-				"type": "text",
-				"required": true
 			},
 			{
 				"name": "locallyEdited",
@@ -3997,27 +3330,8 @@
 				"type": "json"
 			},
 			{
-				"name": "sourceBody",
-				"type": "textarea"
-			},
-			{
-				"name": "sourceData",
-				"type": "json"
-			},
-			{
 				"name": "sourceFields",
 				"type": "json"
-			},
-			{
-				"name": "sourceFormat",
-				"type": "select",
-				"options": [
-					"md",
-					"mdx",
-					"yaml",
-					"yml",
-					"json"
-				]
 			},
 			{
 				"name": "sourceHash",
@@ -4031,10 +3345,6 @@
 			{
 				"name": "sourcePath",
 				"type": "text"
-			},
-			{
-				"name": "sourceRaw",
-				"type": "textarea"
 			},
 			{
 				"name": "sourceRevision",
@@ -4117,14 +3427,8 @@
 			{
 				"name": "legacyId",
 				"type": "text",
-				"required": true,
 				"unique": true,
 				"index": true
-			},
-			{
-				"name": "legacyType",
-				"type": "text",
-				"required": true
 			},
 			{
 				"name": "locallyEdited",
@@ -4154,27 +3458,8 @@
 				"type": "json"
 			},
 			{
-				"name": "sourceBody",
-				"type": "textarea"
-			},
-			{
-				"name": "sourceData",
-				"type": "json"
-			},
-			{
 				"name": "sourceFields",
 				"type": "json"
-			},
-			{
-				"name": "sourceFormat",
-				"type": "select",
-				"options": [
-					"md",
-					"mdx",
-					"yaml",
-					"yml",
-					"json"
-				]
 			},
 			{
 				"name": "sourceHash",
@@ -4188,10 +3473,6 @@
 			{
 				"name": "sourcePath",
 				"type": "text"
-			},
-			{
-				"name": "sourceRaw",
-				"type": "textarea"
 			},
 			{
 				"name": "sourceRevision",
@@ -4245,14 +3526,8 @@
 			{
 				"name": "legacyId",
 				"type": "text",
-				"required": true,
 				"unique": true,
 				"index": true
-			},
-			{
-				"name": "legacyType",
-				"type": "text",
-				"required": true
 			},
 			{
 				"name": "locallyEdited",
@@ -4278,10 +3553,6 @@
 				"type": "json"
 			},
 			{
-				"name": "sourceBody",
-				"type": "textarea"
-			},
-			{
 				"name": "sourceBracketId",
 				"type": "text"
 			},
@@ -4290,23 +3561,8 @@
 				"type": "date"
 			},
 			{
-				"name": "sourceData",
-				"type": "json"
-			},
-			{
 				"name": "sourceFields",
 				"type": "json"
-			},
-			{
-				"name": "sourceFormat",
-				"type": "select",
-				"options": [
-					"md",
-					"mdx",
-					"yaml",
-					"yml",
-					"json"
-				]
 			},
 			{
 				"name": "sourceHash",
@@ -4320,10 +3576,6 @@
 			{
 				"name": "sourcePath",
 				"type": "text"
-			},
-			{
-				"name": "sourceRaw",
-				"type": "textarea"
 			},
 			{
 				"name": "sourceRevision",
@@ -4420,14 +3672,8 @@
 			{
 				"name": "legacyId",
 				"type": "text",
-				"required": true,
 				"unique": true,
 				"index": true
-			},
-			{
-				"name": "legacyType",
-				"type": "text",
-				"required": true
 			},
 			{
 				"name": "locallyEdited",
@@ -4453,10 +3699,6 @@
 				"type": "json"
 			},
 			{
-				"name": "sourceBody",
-				"type": "textarea"
-			},
-			{
 				"name": "sourceBracketId",
 				"type": "text"
 			},
@@ -4469,23 +3711,8 @@
 				"type": "date"
 			},
 			{
-				"name": "sourceData",
-				"type": "json"
-			},
-			{
 				"name": "sourceFields",
 				"type": "json"
-			},
-			{
-				"name": "sourceFormat",
-				"type": "select",
-				"options": [
-					"md",
-					"mdx",
-					"yaml",
-					"yml",
-					"json"
-				]
 			},
 			{
 				"name": "sourceHash",
@@ -4499,10 +3726,6 @@
 			{
 				"name": "sourcePath",
 				"type": "text"
-			},
-			{
-				"name": "sourceRaw",
-				"type": "textarea"
 			},
 			{
 				"name": "sourceRevision",
@@ -4576,14 +3799,8 @@
 			{
 				"name": "legacyId",
 				"type": "text",
-				"required": true,
 				"unique": true,
 				"index": true
-			},
-			{
-				"name": "legacyType",
-				"type": "text",
-				"required": true
 			},
 			{
 				"name": "locallyEdited",
@@ -4614,10 +3831,6 @@
 				"type": "json"
 			},
 			{
-				"name": "sourceBody",
-				"type": "textarea"
-			},
-			{
 				"name": "sourceBracketId",
 				"type": "text"
 			},
@@ -4626,23 +3839,8 @@
 				"type": "date"
 			},
 			{
-				"name": "sourceData",
-				"type": "json"
-			},
-			{
 				"name": "sourceFields",
 				"type": "json"
-			},
-			{
-				"name": "sourceFormat",
-				"type": "select",
-				"options": [
-					"md",
-					"mdx",
-					"yaml",
-					"yml",
-					"json"
-				]
 			},
 			{
 				"name": "sourceHash",
@@ -4656,10 +3854,6 @@
 			{
 				"name": "sourcePath",
 				"type": "text"
-			},
-			{
-				"name": "sourceRaw",
-				"type": "textarea"
 			},
 			{
 				"name": "sourceRevision",
@@ -4736,10 +3930,6 @@
 				"type": "text"
 			},
 			{
-				"name": "editorialData",
-				"type": "json"
-			},
-			{
 				"name": "features",
 				"type": "array",
 				"fields": [
@@ -4773,14 +3963,8 @@
 			{
 				"name": "legacyId",
 				"type": "text",
-				"required": true,
 				"unique": true,
 				"index": true
-			},
-			{
-				"name": "legacyType",
-				"type": "text",
-				"required": true
 			},
 			{
 				"name": "license",
@@ -4840,27 +4024,8 @@
 				"type": "json"
 			},
 			{
-				"name": "sourceBody",
-				"type": "textarea"
-			},
-			{
-				"name": "sourceData",
-				"type": "json"
-			},
-			{
 				"name": "sourceFields",
 				"type": "json"
-			},
-			{
-				"name": "sourceFormat",
-				"type": "select",
-				"options": [
-					"md",
-					"mdx",
-					"yaml",
-					"yml",
-					"json"
-				]
 			},
 			{
 				"name": "sourceHash",
@@ -4874,10 +4039,6 @@
 			{
 				"name": "sourcePath",
 				"type": "text"
-			},
-			{
-				"name": "sourceRaw",
-				"type": "textarea"
 			},
 			{
 				"name": "sourceRevision",
@@ -4956,10 +4117,6 @@
 				"type": "json"
 			},
 			{
-				"name": "editorialData",
-				"type": "json"
-			},
-			{
 				"name": "importedAt",
 				"type": "date"
 			},
@@ -4974,14 +4131,8 @@
 			{
 				"name": "legacyId",
 				"type": "text",
-				"required": true,
 				"unique": true,
 				"index": true
-			},
-			{
-				"name": "legacyType",
-				"type": "text",
-				"required": true
 			},
 			{
 				"name": "locallyEdited",
@@ -5007,27 +4158,8 @@
 				"type": "json"
 			},
 			{
-				"name": "sourceBody",
-				"type": "textarea"
-			},
-			{
-				"name": "sourceData",
-				"type": "json"
-			},
-			{
 				"name": "sourceFields",
 				"type": "json"
-			},
-			{
-				"name": "sourceFormat",
-				"type": "select",
-				"options": [
-					"md",
-					"mdx",
-					"yaml",
-					"yml",
-					"json"
-				]
 			},
 			{
 				"name": "sourceHash",
@@ -5041,10 +4173,6 @@
 			{
 				"name": "sourcePath",
 				"type": "text"
-			},
-			{
-				"name": "sourceRaw",
-				"type": "textarea"
 			},
 			{
 				"name": "sourceRevision",
@@ -5131,7 +4259,7 @@
 			},
 			{
 				"name": "id",
-				"type": "number",
+				"type": "text",
 				"required": true
 			}
 		]
@@ -5305,10 +4433,6 @@
 				"type": "number"
 			},
 			{
-				"name": "editorialData",
-				"type": "json"
-			},
-			{
 				"name": "episode",
 				"type": "relationship",
 				"relationTo": "episodes"
@@ -5330,18 +4454,6 @@
 					"pending",
 					"complete"
 				]
-			},
-			{
-				"name": "legacyId",
-				"type": "text",
-				"required": true,
-				"unique": true,
-				"index": true
-			},
-			{
-				"name": "legacyType",
-				"type": "text",
-				"required": true
 			},
 			{
 				"name": "locallyEdited",
@@ -5405,27 +4517,8 @@
 				"type": "json"
 			},
 			{
-				"name": "sourceBody",
-				"type": "textarea"
-			},
-			{
-				"name": "sourceData",
-				"type": "json"
-			},
-			{
 				"name": "sourceFields",
 				"type": "json"
-			},
-			{
-				"name": "sourceFormat",
-				"type": "select",
-				"options": [
-					"md",
-					"mdx",
-					"yaml",
-					"yml",
-					"json"
-				]
 			},
 			{
 				"name": "sourceHash",
@@ -5439,10 +4532,6 @@
 			{
 				"name": "sourcePath",
 				"type": "text"
-			},
-			{
-				"name": "sourceRaw",
-				"type": "textarea"
 			},
 			{
 				"name": "sourceRevision",

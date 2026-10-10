@@ -1,11 +1,11 @@
 {
-  "recipe": "ab74d9377bb060d7c2ceb17990b99a60ba0b3f0cb86cb0a60f4dba977a394fbe",
+  "recipe": "8a93818133f7c9f7959ac624197b008b6146aaedde3d0a499149d7c380378fcf",
   "inputs": {
     "protocol": 1,
     "platform": "linux/amd64",
     "files": {
       "Dockerfile": "a4956a982c8e46daa5beb8eca49cf0a2b295a76b65bd07f76aaaea41183aae78",
-      "contract.mjs": "c14620505b29baa7698de9ae57d393727ec81adff3f1adfda11930bf23f67baf",
+      "contract.mjs": "83c4e402ef6b8a4d4333d3a0a9c49b2d8c56a2611e6b5ef99b800af6f98e68b9",
       "formats.mjs": "2c4a85817f9dddae1b869db9d99f5d31deae02083ae323668c5b105767ec2ffb",
       "media.mjs": "e7d51ed4b92f07934854365bb5a48d7b326fe653a6d8a2c0deedacd3871957b8",
       "runner.mjs": "3b512390b1fbd3d3201e3f336de8f0270d0f6c5e5cb7981c6ea13732501df966"

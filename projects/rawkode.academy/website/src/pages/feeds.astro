@@ -1,17 +1,15 @@
 ---
-import { getCollection } from "astro:content";
+import { getAllCollection } from "@/lib/payload-content";
 import EditorialShell from "@/components/ui/EditorialShell.astro";
 import Page from "@/wrappers/page.astro";
 import { academyDocument } from "@rawkodeacademy/design-system";
 
 const doc = academyDocument();
 
-export const prerender = true;
+export const prerender = false;
 
-const shows = await getCollection("shows");
-const publishedShows = shows.filter(
-	(show) => show.data.publish && show.data.status !== "coming-soon",
-);
+const shows = await getAllCollection("shows");
+const publishedShows = shows.filter((show) => show.data.status !== "coming-soon");
 
 const feedGroups = [
 	{
@@ -91,7 +89,7 @@ const formatNotes = [
 							<p class={doc.copy}>{show.data.description}</p>
 						</div>
 						<div class="feed-links">
-							<a class="feed-link" href={`/api/feeds/shows/${show.data.id}.xml`} aria-label={`${show.data.name} podcast RSS feed`}>RSS ↗</a>
+							<a class="feed-link" href={`/api/feeds/shows/${show.slug}.xml`} aria-label={`${show.data.name} podcast RSS feed`}>RSS ↗</a>
 						</div>
 					</article>
 				)) : <p class={doc.copy}>No podcast feeds are published yet.</p>}

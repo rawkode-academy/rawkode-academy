@@ -1,37 +1,106 @@
 ---
 import MinimalLayout from "@/layouts/minimal.astro";
 import WebContainerEmbed from "@/components/courses/WebContainerEmbed.vue";
+import { getWebContainerDemo } from "@/lib/payload-content";
+import type { PayloadWebContainerDemo } from "@/lib/payload-content";
 import { academyMedia } from "@rawkodeacademy/design-system";
 import "@rawkodeacademy/design-system/styles.css";
-// @ts-expect-error Virtual module provided by Vite plugin
-import { loadDemoFiles } from "virtual:webcontainer-demos";
 
-// Get parameters from URL
 const url = new URL(Astro.request.url);
-const courseId = url.searchParams.get("course");
-const demoId = url.searchParams.get("demo") || url.searchParams.get("resource"); // Support both param names
+const courseSlug = url.searchParams.get("course");
+const moduleSlug = url.searchParams.get("module");
+const resourceKey = url.searchParams.get("resource");
 
 let title = "WebContainer Demo";
-let files = {};
+let files: Record<string, string> = {};
 let startCommand = "npm run dev";
-let error = null;
+let error: string | null = null;
 const media = academyMedia();
 
-if (!courseId || !demoId) {
-	error = "Missing course or demo parameter";
+function readDemoFiles(value: unknown): Record<string, string> | undefined {
+	if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+
+	const entries = Object.entries(value as Record<string, unknown>);
+	if (entries.length === 0 || entries.length > 256) return undefined;
+
+	const result: Record<string, string> = {};
+	let totalBytes = 0;
+	for (const [path, contents] of entries) {
+		const parts = path.split("/");
+		if (
+			!path ||
+			path.length > 512 ||
+			path.startsWith("/") ||
+			/[\\\u0000-\u001f\u007f]/.test(path) ||
+			parts.some(
+				(part) =>
+					!part ||
+					part === "." ||
+					part === ".." ||
+					part === "__proto__" ||
+					part === "prototype" ||
+					part === "constructor",
+			) ||
+			typeof contents !== "string"
+		) {
+			return undefined;
+		}
+
+		totalBytes += new TextEncoder().encode(contents).byteLength;
+		if (totalBytes > 1_000_000) return undefined;
+		result[path] = contents;
+	}
+
+	return result;
+}
+
+if (!courseSlug || !moduleSlug || !resourceKey) {
+	Astro.response.status = 400;
+	error = "Missing course, module, or resource parameter.";
 } else {
-	try {
-		const demo = loadDemoFiles(courseId, demoId);
-		files = demo.files;
-		title = demo.config.title || title;
-		startCommand = demo.config.startCommand || startCommand;
-	} catch (e) {
-		console.error("Error loading WebContainer files:", e);
-		error = `Failed to load demo files: ${e instanceof Error ? e.message : String(e)}`;
+	const fullModuleSlug = `${courseSlug}/${moduleSlug}`;
+	const slugPartPattern = /^[A-Za-z0-9][A-Za-z0-9._-]{0,159}$/;
+	const moduleParts = fullModuleSlug.split("/");
+	const validLookup =
+		slugPartPattern.test(courseSlug) &&
+		slugPartPattern.test(resourceKey) &&
+		fullModuleSlug.length <= 240 &&
+		moduleParts.length >= 2 &&
+		moduleParts[0] === courseSlug &&
+		moduleParts.every((part) => slugPartPattern.test(part));
+
+	if (!validLookup) {
+		Astro.response.status = 404;
+		error = "This WebContainer demo could not be found.";
+	} else {
+		let demo: PayloadWebContainerDemo | undefined;
+		try {
+			demo = await getWebContainerDemo(courseSlug, fullModuleSlug, resourceKey);
+		} catch (cause) {
+			console.error("Failed to read WebContainer demo from Payload:", cause);
+			Astro.response.status = 503;
+			Astro.response.headers.set("Cache-Control", "no-store");
+			error = "This WebContainer demo is temporarily unavailable.";
+		}
+
+		if (!error && !demo) {
+			Astro.response.status = 404;
+			error = "This WebContainer demo could not be found.";
+		} else if (!error && demo) {
+			const demoFiles = readDemoFiles(demo.files);
+			if (!demoFiles) {
+				Astro.response.status = 404;
+				error = "This WebContainer demo could not be found.";
+			} else {
+				files = demoFiles;
+				title = demo.title || title;
+				startCommand = demo.startCommand || startCommand;
+			}
+		}
 	}
 }
 
-// This page needs server-side rendering
+// This page resolves its selected demo during each server-side request.
 export const prerender = false;
 ---
 
@@ -61,7 +130,7 @@ export const prerender = false;
  text-decoration: underline;
  }
  </style>
- 
+
  {error ? (
  <div class:list={[media.root, media.canvas, "error"]}>
  <div>

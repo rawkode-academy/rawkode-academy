@@ -17,5 +17,5 @@ export function reviewRequestActor(headers: Headers, auth: AuthConfig, user: unk
 // Canonical and host independent: persisted publication documents never depend on
 // which host (admin or preview) ran the publish command.
 export function publishedMediaUrl(auth: Pick<AuthConfig, 'publicMediaOrigin'>) {
-  return (videoId: number, publicationId: string) => `${auth.publicMediaOrigin}/api/review/published-media?videoId=${videoId}&publicationId=${publicationId}`
+  return (videoId: string, publicationId: string) => `${auth.publicMediaOrigin}/api/review/published-media?videoId=${encodeURIComponent(videoId)}&publicationId=${encodeURIComponent(publicationId)}`
 }

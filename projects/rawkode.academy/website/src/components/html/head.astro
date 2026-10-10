@@ -14,6 +14,10 @@ interface Props extends OpenGraphProps {
 }
 
 const { userId } = Astro.props;
+const disableTelemetry = Boolean(
+	(Astro.locals as typeof Astro.locals & { runtime?: { env?: { PAYLOAD_PREVIEW_PR?: string } } })
+		.runtime?.env?.PAYLOAD_PREVIEW_PR,
+);
 const BRAND_NAME = "Rawkode Academy";
 const TITLE_SUFFIX = ` | ${BRAND_NAME}`;
 // Google truncates SERP titles around 60 characters. Skip the brand
@@ -83,6 +87,7 @@ const normalizedTitle =
 		name="description"
 		content={Astro.props.description || SITE_DESCRIPTION}
 	/>
+	<meta name="rawkode-telemetry-disabled" content={disableTelemetry ? "true" : "false"} />
 
 	<title>{normalizedTitle}</title>
 

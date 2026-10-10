@@ -63,7 +63,7 @@
     "DEVELOPER_SUBJECTS": "[\"HmYDQjc3JVFo7visJIL5FneGFzNAJjDT\"]",
     "OIDC_SESSION_TTL_SECONDS": "3600",
     "POC_DEV_LOCAL_AUTH": "false",
-    "REVIEW_MEDIA_RECIPE": "ab74d9377bb060d7c2ceb17990b99a60ba0b3f0cb86cb0a60f4dba977a394fbe"
+    "REVIEW_MEDIA_RECIPE": "8a93818133f7c9f7959ac624197b008b6146aaedde3d0a499149d7c380378fcf"
   },
   "previews": {
     "workflows": [
@@ -108,7 +108,7 @@
       "DEVELOPER_SUBJECTS": "[\"HmYDQjc3JVFo7visJIL5FneGFzNAJjDT\"]",
       "OIDC_SESSION_TTL_SECONDS": "3600",
       "POC_DEV_LOCAL_AUTH": "false",
-      "REVIEW_MEDIA_RECIPE": "ab74d9377bb060d7c2ceb17990b99a60ba0b3f0cb86cb0a60f4dba977a394fbe"
+      "REVIEW_MEDIA_RECIPE": "8a93818133f7c9f7959ac624197b008b6146aaedde3d0a499149d7c380378fcf"
     },
     "ai": {
       "binding": "AI",
@@ -122,6 +122,14 @@
         "scheduling_policy": "default",
         "instance_type": "standard-1",
         "max_instances": 4
+      },
+      {
+        "class_name": "D2RenderContainer",
+        "image": "./container/d2/Dockerfile",
+        "image_build_context": "./container/d2",
+        "scheduling_policy": "default",
+        "instance_type": "standard-1",
+        "max_instances": 1
       }
     ],
     "durable_objects": {
@@ -129,6 +137,10 @@
         {
           "name": "REVIEW_FFMPEG",
           "class_name": "ReviewFFmpegContainer"
+        },
+        {
+          "name": "D2_RENDERER",
+          "class_name": "D2RenderContainer"
         }
       ]
     }
@@ -145,6 +157,14 @@
       "scheduling_policy": "default",
       "instance_type": "standard-1",
       "max_instances": 4
+    },
+    {
+      "class_name": "D2RenderContainer",
+      "image": "./container/d2/Dockerfile",
+      "image_build_context": "./container/d2",
+      "scheduling_policy": "default",
+      "instance_type": "standard-1",
+      "max_instances": 1
     }
   ],
   "durable_objects": {
@@ -152,11 +172,19 @@
       {
         "name": "REVIEW_FFMPEG",
         "class_name": "ReviewFFmpegContainer"
+      },
+      {
+        "name": "D2_RENDERER",
+        "class_name": "D2RenderContainer"
       }
     ]
   },
   "exports": {
     "ReviewFFmpegContainer": {
+      "type": "durable-object",
+      "storage": "sqlite"
+    },
+    "D2RenderContainer": {
       "type": "durable-object",
       "storage": "sqlite"
     }

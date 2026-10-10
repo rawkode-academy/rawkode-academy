@@ -1,14 +1,13 @@
 ---
 export const prerender = false;
 
-import { getCollection, getEntries } from "astro:content";
+import { getAllCollection, getEntries } from "@/lib/payload-content";
 import ShowItemListJsonLd from "@/components/html/show-itemlist-jsonld.astro";
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
 import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 import Page from "@/wrappers/page.astro";
 import type { ShowSummary } from "@/types/show";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
-import { getPublishedVideos } from "@/lib/content";
 
 Astro.response.headers.set(
 	"Cache-Control",
@@ -18,12 +17,15 @@ Astro.response.headers.set("CDN-Cache-Control", "public, max-age=3600");
 Astro.response.headers.set("Cache-Tag", "shows-page, shows-list");
 Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 
-// Build shows from local content + videos. `publish: false` shows are
-// drafts - they don't belong in the public directory.
-const showEntries = (await getCollection("shows")).filter(
-	(s) => s.data.publish,
-);
-const videos = await getPublishedVideos();
+// The public bridge returns published shows only. Fetch the complete episode
+// corpus because this directory reports counts and latest episodes per show.
+const [showEntries, videos] = await Promise.all([
+	getAllCollection("shows"),
+	getAllCollection("videos").then((items) => {
+		const now = new Date();
+		return items.filter(({ data }) => data.publishedAt <= now);
+	}),
+]);
 
 const getShowId = (value: unknown): string | null => {
 	if (!value) return null;
@@ -47,7 +49,7 @@ const showsToRender: ShowSummary[] = await (async () => {
 			};
 		});
 		const eps = videos
-			.filter((v) => s.data.status !== "coming-soon" && getShowId(v.data.show) === s.data.id)
+			.filter((v) => s.data.status !== "coming-soon" && getShowId(v.data.show) === s.id)
 			.map((v) => ({
 				video: {
 					title: v.data.title,
@@ -59,7 +61,8 @@ const showsToRender: ShowSummary[] = await (async () => {
 				},
 			}));
 		list.push({
-			id: s.data.id,
+			id: s.id,
+			slug: s.slug,
 			name: s.data.name,
 			status: s.data.status,
 			tagline: s.data.tagline,
@@ -76,10 +79,10 @@ const hasShows = showsToRender.length > 0;
 
 const showsJsonLd = showEntries.map((s) => {
 	const episodeCount = videos.filter(
-		(v) => s.data.status !== "coming-soon" && getShowId(v.data.show) === s.data.id,
+		(v) => s.data.status !== "coming-soon" && getShowId(v.data.show) === s.id,
 	).length;
 	return {
-		id: s.data.id,
+		slug: s.slug,
 		name: s.data.name,
 		...(s.data.description ? { description: s.data.description } : {}),
 		...(episodeCount > 0 ? { episodeCount } : {}),
@@ -108,7 +111,7 @@ const catalog = academyCatalog();
 			{hasShows ? (
 				<div class={styles.grid}>
 					{showsToRender.map((show) => (
-						<a class={styles.card} href={`/shows/${show.id}`} data-show-status={show.status}>
+						<a class={styles.card} href={`/shows/${show.slug}`} data-show-status={show.status}>
 							{(show.cover?.image.src ?? show.episodes?.[0]?.video?.thumbnailUrl) && (
 								<span class={catalog.featuredMedia}>
 									<img class={catalog.featuredImage} src={show.cover?.image.src ?? show.episodes?.[0]?.video?.thumbnailUrl} alt="" loading="lazy" />

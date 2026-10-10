@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { createCuid2, isCuid2 } from '../cuid2'
 import { ReviewError } from './contracts'
 import { maximumIntakeBytes, probeResult, storedObject, sourceTypes, type ProbeResult, whisperModel } from './intake-contracts'
 import { verifyStored } from './intake-storage'
@@ -6,14 +7,14 @@ import { ReviewStore, type Statement } from './store'
 
 export const audioPolicy = { model: whisperModel, maximumChunks: 120, maximumChunkBytes: 2097152, maximumChunkDurationMs: 60000, maximumTranscriptCharacters: 100000 } as const
 export const jobManifest = z.object({
-  jobId: z.string().uuid(), videoId: z.number().int().positive(), recipe: z.string().regex(/^[a-f0-9]{64}$/),
+  jobId: z.string().refine(isCuid2), videoId: z.string().refine(isCuid2), recipe: z.string().regex(/^[a-f0-9]{64}$/),
   source: storedObject, contentType: z.enum(sourceTypes), outputKey: z.string(),
   maximumBytes: z.literal(maximumIntakeBytes), maximumDurationMs: z.literal(7200000),
   audioPolicy: z.object({ model: z.literal(whisperModel), maximumChunks: z.literal(120), maximumChunkBytes: z.literal(2097152), maximumChunkDurationMs: z.literal(60000), maximumTranscriptCharacters: z.literal(100000) }).strict(),
-  startedAt: z.number().int(), deadline: z.number().int(), expectedCurrentRevisionId: z.string().uuid().nullable(),
+  startedAt: z.number().int(), deadline: z.number().int(), expectedCurrentRevisionId: z.string().refine(isCuid2).nullable(),
 }).strict()
 export type ProcessingJob = z.infer<typeof jobManifest>
-export type UploadSession = { id: string; video_id: number; owner_id: number; state: string; object_key: string; output_key: string; source_etag: string | null; expected_bytes: number; expected_checksum: string; claimed_type: string; expires_at: number }
+export type UploadSession = { id: string; video_id: string; owner_id: string; state: string; object_key: string; output_key: string; source_etag: string | null; expected_bytes: number; expected_checksum: string; claimed_type: string; expires_at: number }
 type JobRow = { manifest: string; result: string | null; completed_at: number | null }
 const statement = (sql: string, ...values: Statement['values']): Statement => ({ sql, values })
 export async function validateEvidence(bucket: R2Bucket, job: ProcessingJob, value: unknown): Promise<ProbeResult> {
@@ -49,7 +50,7 @@ export class ProcessingJobs {
     if (session.state !== 'uploaded' || session.expires_at <= this.now() || !session.source_etag) throw new ReviewError(410, 'Upload admission expired or source is incomplete')
     const state = await this.store.one<{ current_revision: string | null }>('SELECT current_revision FROM video_review_state WHERE video_id=?', session.video_id)
     const job = jobManifest.parse({ jobId: session.id, videoId: session.video_id, recipe, source: { key: session.object_key, etag: session.source_etag, checksum: session.expected_checksum, bytes: session.expected_bytes }, contentType: session.claimed_type, outputKey: session.output_key, maximumBytes: maximumIntakeBytes, maximumDurationMs: 7200000, audioPolicy, startedAt: this.now(), deadline: this.now() + 86400, expectedCurrentRevisionId: state?.current_revision ?? null })
-    const token = crypto.randomUUID()
+    const token = createCuid2()
     try {
       await this.batch([
         statement("INSERT INTO review_command_guards(id,valid) SELECT ?,CASE WHEN EXISTS(SELECT 1 FROM review_upload_sessions WHERE id=? AND state='uploaded' AND expires_at>? AND source_etag=?) AND (SELECT current_revision FROM video_review_state WHERE video_id=?) IS ? THEN 1 ELSE 0 END", token, session.id, this.now(), session.source_etag, session.video_id, job.expectedCurrentRevisionId),
@@ -72,7 +73,7 @@ export class ProcessingJobs {
       if (JSON.stringify(loaded.result) !== result) throw new ReviewError(409, 'Completed evidence conflicts with this result')
       return evidence
     }
-    const token = crypto.randomUUID()
+    const token = createCuid2()
     try {
       await this.batch([
         statement("INSERT INTO review_command_guards(id,valid) SELECT ?,CASE WHEN EXISTS(SELECT 1 FROM review_upload_sessions WHERE id=? AND state='processing') AND ?>? THEN 1 ELSE 0 END", token, job.jobId, job.deadline, this.now()),

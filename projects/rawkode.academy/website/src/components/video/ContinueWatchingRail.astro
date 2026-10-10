@@ -1,5 +1,5 @@
 ---
-import { getCollection } from "astro:content";
+import { getEntry } from "@/lib/payload-content";
 import MLabel from "@/components/ui/MLabel.vue";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 
@@ -59,8 +59,14 @@ if (user) {
 	}
 
 	if (positions.length > 0) {
-		const allVideos = await getCollection("videos");
-		const videoById = new Map(allVideos.map((v) => [v.data.id, v]));
+		const videoIds = [...new Set(positions.map(({ videoId }) => videoId))];
+		const videos = await Promise.all(
+			videoIds.map(async (videoId) => [
+				videoId,
+				await getEntry("videos", { id: videoId }, { view: "summary" }).catch(() => undefined),
+			] as const),
+		);
+		const videoById = new Map(videos);
 
 		items = positions
 			.map((position): RailItem | undefined => {

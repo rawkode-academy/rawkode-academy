@@ -1,7 +1,7 @@
 ---
-export const prerender = true;
+export const prerender = false;
 
-import { getCollection, getEntries } from "astro:content";
+import { getAllCollection, getEntries } from "@/lib/payload-content";
 import AcademyPage from "@/components/academy/AcademyPage.vue";
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
 import { getTechnologyLogos, logosFor } from "@/lib/technology-logos";
@@ -10,8 +10,8 @@ import LearningPathItemListJsonLd from "@/components/html/learning-path-itemlist
 
 const now = new Date();
 const [learningPaths, technologies] = await Promise.all([
-	getCollection("learningPaths", ({ data }) => data.publishedAt <= now),
-	getCollection("technologies"),
+	getAllCollection("learningPaths", ({ data }) => data.publishedAt <= now),
+	getAllCollection("technologies"),
 ]);
 
 learningPaths.sort(
@@ -37,11 +37,11 @@ const itemListPaths = await Promise.all(
 		return {
 			path,
 			authors: authorEntries.map((author) => ({
-				id: author.data.id,
+				slug: author.slug,
 				name: author.data.name,
 			})),
 			technologyLabels: (path.data.technologies ?? []).map(
-				(technologyId) => technologyNameById.get(technologyId) ?? technologyId,
+				(technology) => technologyNameById.get(technology.id) ?? technology.slug ?? technology.id,
 			),
 		};
 	}),
@@ -65,7 +65,7 @@ const formatPathDuration = (minutes?: number | null) => {
 };
 
 const paths = learningPaths.map((path) => ({
-	href: `/learning-paths/${path.id}`,
+	href: `/learning-paths/${path.slug}`,
 	title: path.data.title,
 	description: compactCopy(path.data.description),
 	meta: [

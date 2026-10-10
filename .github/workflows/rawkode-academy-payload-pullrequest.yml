@@ -8,6 +8,7 @@ on:
     - .github/workflows/rawkode-academy-payload-pullrequest.yml
     - bun.lock
     - bun.lock/**
+    - content/**
     - cue.mod/**
     - projects/rawkode.academy/payload/app/**
     - projects/rawkode.academy/payload/cloudflare-env.d.ts
@@ -28,10 +29,22 @@ on:
     - projects/rawkode.academy/payload/payload.config.ts/**
     - projects/rawkode.academy/payload/schema/**
     - projects/rawkode.academy/payload/scripts/**
+    - projects/rawkode.academy/payload/scripts/import-static.ts
+    - projects/rawkode.academy/payload/scripts/import-static.ts/**
+    - projects/rawkode.academy/payload/scripts/lib/import-target.ts
+    - projects/rawkode.academy/payload/scripts/lib/import-target.ts/**
+    - projects/rawkode.academy/payload/scripts/lib/remote-target.ts
+    - projects/rawkode.academy/payload/scripts/lib/remote-target.ts/**
+    - projects/rawkode.academy/payload/scripts/migrate-preview.ts
+    - projects/rawkode.academy/payload/scripts/migrate-preview.ts/**
+    - projects/rawkode.academy/payload/scripts/pr-preview-resources.mjs
+    - projects/rawkode.academy/payload/scripts/pr-preview-resources.mjs/**
     - projects/rawkode.academy/payload/scripts/setup.mjs
     - projects/rawkode.academy/payload/scripts/setup.mjs/**
     - projects/rawkode.academy/payload/src/**
     - projects/rawkode.academy/payload/src/migrations/**
+    - projects/rawkode.academy/payload/src/static-content.ts
+    - projects/rawkode.academy/payload/src/static-content.ts/**
     - projects/rawkode.academy/payload/tests/**
     - projects/rawkode.academy/payload/tsconfig.json
     - projects/rawkode.academy/payload/tsconfig.json/**
@@ -39,6 +52,7 @@ on:
     - projects/rawkode.academy/payload/worker.ts/**
     - projects/rawkode.academy/payload/wrangler.jsonc
     - projects/rawkode.academy/payload/wrangler.jsonc/**
+    - projects/rawkode.academy/website/**
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true

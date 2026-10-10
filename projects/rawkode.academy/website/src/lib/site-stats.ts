@@ -1,4 +1,4 @@
-import { getCollection } from "astro:content";
+import { getAllCollection } from "@/lib/payload-content";
 import { getPublishedVideos } from "@/lib/content";
 
 export interface SiteStats {
@@ -24,7 +24,7 @@ export async function getSiteStats(): Promise<SiteStats> {
 				: 0),
 		0,
 	);
-	const courses = await getCollection("courses");
+	const courses = await getAllCollection("courses");
 
 	return {
 		videoCount: publishedVideos.length,

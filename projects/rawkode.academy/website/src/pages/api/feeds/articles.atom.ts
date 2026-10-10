@@ -1,9 +1,9 @@
-import { getCollection, getEntries, getEntry } from "astro:content";
+import { getAllCollection, getEntries, getEntry } from "@/lib/payload-content";
 import type { APIContext } from "astro";
 import { renderAndSanitizeArticles } from "../../../lib/feed-utils";
 
 export async function GET(context: APIContext) {
-	const articles = await getCollection("articles");
+	const articles = await getAllCollection("articles");
 
 	// Sort by publishedAt desc
 	const sortedArticles = articles.sort(
@@ -31,7 +31,7 @@ export async function GET(context: APIContext) {
 	// Process each article to include full content
 	const entries = await Promise.all(
 		sortedArticles.map(async (article) => {
-			const articleUrl = `${site}/read/${article.id}/`;
+			const articleUrl = `${site}/read/${article.slug}/`;
 			const published = new Date(article.data.publishedAt).toISOString();
 			const updated = article.data.updatedAt
 				? new Date(article.data.updatedAt).toISOString()
@@ -43,7 +43,7 @@ export async function GET(context: APIContext) {
 			// Resolve author and series references
 			const authors = await getEntries(article.data.authors);
 			const series = article.data.series
-				? await getEntry(article.data.series)
+				? await getEntry("series", article.data.series)
 				: null;
 
 			return `	<entry>
@@ -59,7 +59,7 @@ export async function GET(context: APIContext) {
 			.join("\n\t\t")}
 		${
 			series
-				? `<category term="${series.id}" label="${series.data.title}"/>`
+				? `<category term="${series.slug}" label="${series.data.title}"/>`
 				: ""
 		}
 	</entry>`;

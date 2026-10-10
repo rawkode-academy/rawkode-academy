@@ -1,19 +1,27 @@
-import { getCollection } from "astro:content";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { getAllCollection, listPayloadContent } from "@/lib/payload-content";
 
 import { getLatestContent } from "@/lib/content";
 
-const mockedGetCollection = vi.mocked(getCollection);
+vi.mock("@/lib/payload-content", () => ({
+	getAllCollection: vi.fn(),
+	listPayloadContent: vi.fn(),
+}));
+const mockedGetCollection = vi.mocked(listPayloadContent);
 
 const entry = (id: string, data: Record<string, unknown>) => ({
 	id,
+	slug: String(data.slug ?? id),
+	collection: "articles",
 	body: "",
+	mediaAssets: [],
 	data,
 });
 
 describe("Academy latest content", () => {
 	beforeEach(() => {
 		mockedGetCollection.mockReset();
+		vi.mocked(getAllCollection).mockReset();
 	});
 
 	it("merges every public content format into one date-sorted feed", async () => {
@@ -60,14 +68,9 @@ describe("Academy latest content", () => {
 			],
 		};
 
-		mockedGetCollection.mockImplementation(async (name, predicate) => {
+		mockedGetCollection.mockImplementation(async (name) => {
 			const values = collections[name as keyof typeof collections] ?? [];
-			const collectionPredicate = predicate as
-				| ((value: ReturnType<typeof entry>) => boolean)
-				| undefined;
-			return (collectionPredicate
-				? values.filter(collectionPredicate)
-				: values) as never;
+			return values as never;
 		});
 
 		const latest = await getLatestContent(

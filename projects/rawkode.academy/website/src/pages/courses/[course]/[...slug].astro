@@ -2,57 +2,27 @@
 import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
 const styles = academyLayout({ width: "reading" });
-import { getImage } from "astro:assets";
-import { type CollectionEntry, getCollection, render } from "astro:content";
+import { getEntry, getAllCollection } from "@/lib/payload-content";
+import type { CollectionEntry } from "@/lib/payload-content";
+import CmsBody from "@/components/content/CmsBody.astro";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import CourseSignupForm from "@/components/courses/CourseSignupForm.astro";
 import ResourceList from "@/components/courses/ResourceList.vue";
 import VideoPlayer from "@/components/video/player.vue";
 import Page from "@/wrappers/page.astro";
 import { getCourseModuleSlug } from "@/utils/course-path";
-import type { GetStaticPaths } from "astro";
+export const prerender = false;
 
-export const prerender = true;
-
-type Props = {
-	module: CollectionEntry<"courseModules">;
-	course: CollectionEntry<"courses">;
-};
-
-export const getStaticPaths: GetStaticPaths = async () => {
-	const courses = await getCollection("courses");
-	const modules = await getCollection("courseModules");
-
-	return modules.map((module) => {
-		const course = courses.find((entry) => entry.id === module.data.course.id);
-		if (!course) {
-			throw new Error(`Course not found for module: ${module.id}`);
-		}
-
-		return {
-			params: {
-				course: course.id,
-				slug: getCourseModuleSlug(course.id, module.id),
-			},
-			props: {
-				module,
-				course,
-			},
-		};
-	});
-};
-
-const computeImageUrl = async (module: CollectionEntry<"courseModules">) => {
-	if (!module.data.cover) return null;
-	return (
-		await getImage({
-			src: module.data.cover.image,
-			format: "jpeg",
-		})
-	).src;
-};
-
-const { module, course } = Astro.props;
+const courseSlug = Astro.params.course;
+const moduleSlug = Astro.params.slug;
+const fullModuleSlug = [courseSlug, moduleSlug].filter(Boolean).join("/");
+const [course, module] = await Promise.all([
+	courseSlug ? getEntry("courses", { slug: courseSlug }) : undefined,
+	fullModuleSlug ? getEntry("courseModules", { slug: fullModuleSlug }) : undefined,
+]);
+if (!course || !module || module.data.course?.id !== course.id) {
+	return new Response(null, { status: 404 });
+}
 
 if (module.data.draft) {
 	return new Response(null, { status: 404 });
@@ -72,8 +42,6 @@ if (module.data.draft) {
 // suffix is never in play.
 const composite = `${module.data.title} - ${course.data.title}`;
 const pageTitle = composite.length <= 58 ? composite : module.data.title;
-
-const { Content } = await render(module);
 
 const allResources = [
 	...(course.data.resources || []),
@@ -96,21 +64,47 @@ const dedupedResources = Array.from(
 	).values(),
 );
 
-const imageUrl = await computeImageUrl(module);
-const moduleSlug = getCourseModuleSlug(course.id, module.id);
+// WebContainer file contents are fetched on the dedicated SSR route. Keep
+// only display and lookup fields in the hydrated ResourceList island.
+const resourceListResources = dedupedResources.map((resource) => ({
+	...(resource.id ? { id: resource.id } : {}),
+	title: resource.title,
+	type: resource.type,
+	...(resource.description ? { description: resource.description } : {}),
+	...(resource.url ? { url: resource.url } : {}),
+	...(resource.filePath ? { filePath: resource.filePath } : {}),
+	...(resource.category ? { category: resource.category } : {}),
+	...(resource.embedConfig
+		? {
+			embedConfig: {
+				container: resource.embedConfig.container,
+				src: resource.embedConfig.src,
+				...(resource.embedConfig.height ? { height: resource.embedConfig.height } : {}),
+				...(resource.embedConfig.width ? { width: resource.embedConfig.width } : {}),
+				...(resource.embedConfig.startCommand
+					? { startCommand: resource.embedConfig.startCommand }
+					: {}),
+			},
+		}
+		: {}),
+}));
+
+const imageUrl = module.data.cover?.image?.src ?? null;
+const relativeModuleSlug = getCourseModuleSlug(course.slug, module.slug);
 
 const breadcrumbElements = [
 	{ title: "Home", link: "/" },
 	{ title: "Courses", link: "/courses" },
-	{ title: course.data.title, link: `/courses/${course.id}` },
+	{ title: course.data.title, link: `/courses/${course.slug}` },
 	{
 		title: module.data.title,
-		link: `/courses/${course.id}/${moduleSlug}`,
+		link: `/courses/${course.slug}/${relativeModuleSlug}`,
 	},
 ];
 
-const allCourseModules = (await getCollection("courseModules"))
-	.filter((entry) => entry.data.course.id === course.id)
+const allCourseModules = (await getAllCollection("courseModules", undefined, {
+	courseId: course.id,
+}))
 	.filter((entry) => !entry.data.draft)
 	.sort((a, b) => a.data.order - b.data.order);
 
@@ -124,8 +118,8 @@ const nextModule =
 		? allCourseModules[currentIndex + 1]
 		: null;
 
-function moduleHref(entry: CollectionEntry<"courseModules">) {
-	return `/courses/${course.id}/${getCourseModuleSlug(course.id, entry.id)}`;
+function moduleHref(courseSlug: string, entry: CollectionEntry<"courseModules">) {
+	return `/courses/${courseSlug}/${getCourseModuleSlug(courseSlug, entry.slug)}`;
 }
 
 function formatDuration(minutes?: number) {
@@ -205,13 +199,13 @@ function formatDuration(minutes?: number) {
 
 				<article class={doc.moduleMain}>
 					<div class={styles.prose}>
-						<Content />
+						<CmsBody entry={module} />
 					</div>
 				</article>
 
 				{dedupedResources.length > 0 && (
 					<aside class={doc.moduleRail}>
-						<ResourceList resources={dedupedResources} courseId={course.id} client:load />
+					<ResourceList resources={resourceListResources} courseSlug={course.slug} moduleSlug={relativeModuleSlug} client:load />
 					</aside>
 				)}
 
@@ -220,7 +214,7 @@ function formatDuration(minutes?: number) {
 						<div class={doc.gridTwo}>
 							{previousModule && (
 								<a
-									href={moduleHref(previousModule)}
+									href={moduleHref(course.slug, previousModule)}
 									class={doc.link}
 								>
 									<p class={doc.kicker}>Previous</p>
@@ -235,7 +229,7 @@ function formatDuration(minutes?: number) {
 
 							{nextModule && (
 								<a
-									href={moduleHref(nextModule)}
+									href={moduleHref(course.slug, nextModule)}
 									class={doc.link}
 								>
 									<p class={doc.kicker}>Next</p>

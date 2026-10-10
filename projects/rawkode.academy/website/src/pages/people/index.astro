@@ -1,21 +1,21 @@
 ---
-export const prerender = true;
+export const prerender = false;
 
 import PersonItemListJsonLd from "@/components/html/person-itemlist-jsonld.astro";
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
 import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 import Page from "@/wrappers/page.astro";
-import { getCollection } from "astro:content";
+import { getAllCollection } from "@/lib/payload-content";
 import { getPublishedVideos } from "@/lib/content";
 import { getPersonIdentityUrls } from "@/lib/person-identity-links";
 
-const people = await getCollection("people");
+const people = await getAllCollection("people");
 const sortedPeople = people.sort((a, b) =>
 	a.data.name.localeCompare(b.data.name),
 );
 
 const peopleJsonLd = sortedPeople.map((person) => ({
-	id: person.data.id,
+	slug: person.slug,
 	name: person.data.name,
 	avatarUrl: person.data.avatarUrl,
 	sameAs: getPersonIdentityUrls(person.data),
@@ -87,7 +87,7 @@ const catalog = academyCatalog({ identityLayout: "portrait" });
 
 							return (
 								<a
-									href={`/people/${person.data.id}`}
+								href={`/people/${person.slug}`}
 									class={catalog.identity}
 									data-keywords={searchKeywords}
 									aria-labelledby={`person-${person.data.id}`}

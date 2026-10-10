@@ -1,4 +1,4 @@
-import { getCollection } from "astro:content";
+import { getAllCollection } from "@/lib/payload-content";
 import type { APIRoute } from "astro";
 import { selectFreshNewsItems, toAbsoluteUrl } from "@/lib/sitemaps";
 
@@ -31,13 +31,14 @@ export function renderGoogleNewsSitemap(
 	site: URL | string | undefined,
 	items: ReadonlyArray<{
 		id: string;
+		slug: string;
 		data: { title: string; publishedAt: Date };
 	}>,
 ): string {
 	const siteUrl = site ?? new URL(DEFAULT_SITE_URL);
 	const body = items
 		.map((item) => {
-			const url = toAbsoluteUrl(siteUrl, `/news/${item.id}`);
+			const url = toAbsoluteUrl(siteUrl, `/news/${item.slug}`);
 			const publishedDate = new Date(item.data.publishedAt).toISOString();
 			return `  <url>
     <loc>${escapeXml(url)}</loc>
@@ -62,7 +63,7 @@ ${body}
 
 export const GET: APIRoute = async ({ site }) => {
 	const now = new Date();
-	const allNews = await getCollection("news");
+	const allNews = await getAllCollection("news");
 	const fresh = selectFreshNewsItems(allNews, now);
 	const xml = renderGoogleNewsSitemap(site, fresh);
 
@@ -77,4 +78,4 @@ export const GET: APIRoute = async ({ site }) => {
 	});
 };
 
-export const prerender = true;
+export const prerender = false;

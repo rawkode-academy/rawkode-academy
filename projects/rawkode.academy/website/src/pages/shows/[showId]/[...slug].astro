@@ -2,7 +2,7 @@
 export const prerender = false;
 
 import { env } from "cloudflare:workers";
-import { getCollection } from "astro:content";
+import { getEntry } from "@/lib/payload-content";
 import ShowLayout from "@/layouts/ShowLayout.astro";
 import { getShowExtension, getShowNav } from "@/lib/shows/registry";
 import type { ShowEnv } from "@/lib/shows/types";
@@ -12,11 +12,10 @@ const { showId, slug } = Astro.params;
 
 if (!showId) return new Response(null, { status: 404 });
 
-const shows = await getCollection("shows");
-const show = shows.find((s) => s.data.id === showId);
-if (!show || !show.data.publish) return new Response(null, { status: 404 });
+const show = await getEntry("shows", { slug: showId });
+if (!show) return new Response(null, { status: 404 });
 
-const ext = getShowExtension(showId);
+const ext = getShowExtension(show.slug);
 const page = ext?.pages.find((p) => p.slug === (slug ?? ""));
 if (!ext || !page) return new Response(null, { status: 404 });
 
@@ -50,7 +49,7 @@ if (page.cache && !loadError) {
 	Astro.response.headers.set("Cache-Control", page.cache);
 }
 
-const nav = getShowNav(showId);
+const nav = getShowNav(show.slug);
 const Component = page.Component;
 const layout = academyLayout();
 ---

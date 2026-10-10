@@ -1,5 +1,5 @@
 import type { APIContext } from "astro";
-import { getPublishedVideos } from "@/lib/content";
+import { getEntry } from "@/lib/payload-content";
 import { buildWatchVideoSeoText } from "@/utils/watch-video-seo";
 
 export const prerender = false;
@@ -16,10 +16,11 @@ function formatTimestamp(seconds: number): string {
 }
 
 export async function GET({ params, site }: APIContext) {
-	const videos = await getPublishedVideos();
-	const video = videos.find((v) => v.data.slug === params.slug);
+	const video = params.slug
+		? await getEntry("videos", { slug: params.slug })
+		: undefined;
 
-	if (!video) {
+	if (!video || video.data.publishedAt > new Date()) {
 		return new Response(null, { status: 404 });
 	}
 

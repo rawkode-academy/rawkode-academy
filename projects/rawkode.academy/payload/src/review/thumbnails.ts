@@ -5,10 +5,11 @@ import { reviewFailure, videoIdFrom } from './http'
 import { mediaResponse } from './media'
 import type { ReviewService } from './service'
 import type { ReviewStore } from './store'
+import { createCuid2 } from '../cuid2'
 
 export const maximumThumbnailBytes = 5 * 1024 * 1024
 type ImageType = 'image/png' | 'image/jpeg' | 'image/webp'
-export type ThumbnailAsset = { media_id: number; video_id: number; checksum: string; object_key: string; object_etag: string; bytes: number; content_type: ImageType }
+export type ThumbnailAsset = { media_id: string; video_id: string; checksum: string; object_key: string; object_etag: string; bytes: number; content_type: ImageType }
 type Runtime = { payload: Payload; store: ReviewStore; service: ReviewService; actor: ReviewActor; origin: string; bucket: R2Bucket }
 const headers = { 'cache-control': 'private, no-store', 'referrer-policy': 'no-referrer', 'x-content-type-options': 'nosniff' }
 const digest = async (bytes: Uint8Array) => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes as BufferSource)), byte => byte.toString(16).padStart(2, '0')).join('')
@@ -123,8 +124,8 @@ function imageType(bytes: Buffer): ImageType {
   }
   invalid()
 }
-export async function assertThumbnail(store: ReviewStore, videoId: number, thumbnailId: number): Promise<ThumbnailAsset> {
-  if (!Number.isSafeInteger(thumbnailId) || thumbnailId < 1) throw new ReviewError(400, 'Invalid thumbnail identifier')
+export async function assertThumbnail(store: ReviewStore, videoId: string, thumbnailId: string): Promise<ThumbnailAsset> {
+  if (!/^[a-z][a-z0-9]{23}$/.test(thumbnailId)) throw new ReviewError(400, 'Invalid thumbnail identifier')
   const asset = await store.one<ThumbnailAsset>('SELECT * FROM review_thumbnail_assets WHERE media_id=? AND video_id=?', thumbnailId, videoId)
   if (!asset) throw new ReviewError(404, 'Thumbnail not found for this video')
   return asset
@@ -141,7 +142,7 @@ export function createThumbnailHandlers(runtime: (request: Request) => Promise<R
       const videoId = videoIdFrom(request)
       const revision = await service.revision(videoId, new URL(request.url).searchParams.get('revisionId') ?? '', actor)
       const thumbnailId: unknown = JSON.parse(revision.metadata).thumbnailId
-      if (typeof thumbnailId !== 'number') throw new ReviewError(404, 'This revision has no thumbnail')
+      if (typeof thumbnailId !== 'string') throw new ReviewError(404, 'This revision has no thumbnail')
       const asset = await assertThumbnail(store, videoId, thumbnailId)
       await verifyAsset(bucket, asset)
       return await mediaResponse(request, bucket, asset.object_key, false, { etag: asset.object_etag, bytes: asset.bytes, contentType: asset.content_type })
@@ -172,7 +173,7 @@ export function createThumbnailHandlers(runtime: (request: Request) => Promise<R
         const media = await payload.create({
           collection: 'media', depth: 0, overrideAccess: false, user: actor,
           data: { alt: 'Private review thumbnail' },
-          file: { data: bytes, size: bytes.length, mimetype: type, name: `review-thumbnail-${crypto.randomUUID()}.${extension}` },
+          file: { data: bytes, size: bytes.length, mimetype: type, name: `review-thumbnail-${createCuid2()}.${extension}` },
         })
         if (typeof media.filename !== 'string' || !media.filename) throw new ReviewError(500, 'Thumbnail storage did not return an object')
         const head = await bucket.head(media.filename)
@@ -180,7 +181,7 @@ export function createThumbnailHandlers(runtime: (request: Request) => Promise<R
         const object = await bucket.get(media.filename, { onlyIf: { etagMatches: head.etag } })
         if (!object || !('body' in object) || await digest(await boundedBytes(object.body)) !== checksum) throw new ReviewError(409, 'Stored thumbnail checksum does not match the upload')
         await store.db.prepare('INSERT INTO review_thumbnail_assets(media_id,video_id,checksum,object_key,object_etag,bytes,content_type) VALUES(?,?,?,?,?,?,?) ON CONFLICT(video_id,checksum) DO NOTHING')
-          .bind(Number(media.id), videoId, checksum, media.filename, head.etag, bytes.length, type).run()
+          .bind(String(media.id), videoId, checksum, media.filename, head.etag, bytes.length, type).run()
         const saved = await prior()
         if (!saved) throw new ReviewError(500, 'Thumbnail association was not saved')
         await verifyAsset(bucket, saved)

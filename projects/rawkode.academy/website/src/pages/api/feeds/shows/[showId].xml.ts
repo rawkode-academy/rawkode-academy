@@ -1,8 +1,7 @@
-import { getCollection, getEntries } from "astro:content";
+import { getEntry, getEntries, getAllCollection } from "@/lib/payload-content";
 import type { APIContext } from "astro";
 import { generateRssFeed } from "feedsmith";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
-import { getPublishedVideos } from "@/lib/content";
 
 /**
  * Generate a squared podcast artwork URL using Cloudflare Image Resizing.
@@ -15,35 +14,26 @@ function getSquaredArtworkUrl(site: string, originalUrl: string): string {
 	return `${site}/cdn-cgi/image/${params}/${originalUrl}`;
 }
 
-export async function getStaticPaths() {
-	const shows = await getCollection("shows");
-	return shows
-		.filter((show) => show.data.publish && show.data.status !== "coming-soon")
-		.map((show) => ({ params: { showId: show.data.id } }));
-}
+export const prerender = false;
 
 export async function GET(context: APIContext) {
-	const { showId } = context.params;
+	const showSlug = context.params.showId ?? "";
 	const site = (context.site?.toString() || "https://rawkode.academy").replace(
 		/\/$/,
 		"",
 	);
 
-	const shows = await getCollection("shows");
-	const show = shows.find((s) => s.data.id === showId);
+	const show = showSlug ? await getEntry("shows", { slug: showSlug }) : undefined;
 
-	if (!show || !show.data.publish || show.data.status === "coming-soon") {
+	if (!show || show.data.status === "coming-soon") {
 		return new Response("Show feed not found", { status: 404 });
 	}
 
-	const videos = await getPublishedVideos();
-	const showVideos = videos
-		.filter((video) => {
-			const videoShow = video.data.show;
-			if (!videoShow) return false;
-			const showRef = typeof videoShow === "string" ? videoShow : videoShow.id;
-			return showRef === showId;
-		})
+	const showVideos = (await getAllCollection(
+		"videos",
+		({ data }) => data.publishedAt <= new Date(),
+		{ showId: show.id },
+	))
 		.sort(
 			(a, b) =>
 				new Date(b.data.publishedAt).getTime() -
@@ -55,8 +45,8 @@ export async function GET(context: APIContext) {
 	const podcastConfig = show.data.podcast;
 	const showDescription =
 		show.data.description || `Episodes from ${show.data.name}`;
-	const feedUrl = `${site}/api/feeds/shows/${showId}.xml`;
-	const showLink = `${site}/shows/${showId}`;
+	const feedUrl = `${site}/api/feeds/shows/${show.slug}.xml`;
+	const showLink = `${site}/shows/${show.slug}`;
 
 	const firstVideo = showVideos[0];
 	const lastBuildDate = firstVideo
@@ -82,9 +72,9 @@ export async function GET(context: APIContext) {
 				typeof video.data.duration === "number" ? video.data.duration : 0;
 			const audioUrl = `https://content.rawkode.academy/videos/${video.data.id}/original.mp3`;
 			const originalThumbnailUrl = getVideoThumbnailUrl(video.data.id);
-			const episodeUrl = `${site}/watch/${video.data.slug}/`;
+		const episodeUrl = `${site}/watch/${video.slug}/`;
 			const audioFileSize = video.data.audioFileSize || 0;
-			const chaptersUrl = `${site}/api/feeds/shows/${showId}/${video.data.slug}/chapters.json`;
+			const chaptersUrl = `${site}/api/feeds/shows/${show.slug}/${video.slug}/chapters.json`;
 
 			// Generate squared thumbnail URL using Cloudflare Image Resizing
 			const thumbnailUrl = getSquaredArtworkUrl(site, originalThumbnailUrl);
@@ -101,7 +91,7 @@ export async function GET(context: APIContext) {
 				href:
 					guest.data.website ||
 					guest.data.twitter ||
-					`https://rawkode.academy/people/${guest.data.id}`,
+					`https://rawkode.academy/people/${guest.slug}`,
 			}));
 
 			const hostPersons = hostEntries.map((host) => ({
@@ -111,7 +101,7 @@ export async function GET(context: APIContext) {
 				href:
 					host.data.website ||
 					host.data.twitter ||
-					`https://rawkode.academy/people/${host.data.id}`,
+					`https://rawkode.academy/people/${host.slug}`,
 			}));
 
 			const hasChapters = video.data.chapters && video.data.chapters.length > 0;
@@ -230,7 +220,7 @@ export async function GET(context: APIContext) {
 	return new Response(rss, {
 		headers: {
 			"Content-Type": "application/rss+xml; charset=utf-8",
-			"Cache-Control": "max-age=3600",
+			"Cache-Control": "public, max-age=3600, s-maxage=3600",
 		},
 	});
 }

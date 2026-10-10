@@ -37,7 +37,7 @@ export const adminPresets: Record<string, AdminPreset> = {
 		description: 'Recorded and live videos. Videos in client review are read-only here and publish through Preview review.',
 		useAsTitle: 'title',
 		defaultColumns: ['title', '_status', 'type', 'show', 'publishedAt', 'processingState', 'updatedAt'],
-		listSearchableFields: ['title', 'slug', 'youtubeId', 'legacyId'],
+		listSearchableFields: ['title', 'slug', 'youtubeId'],
 		defaultSort: '-publishedAt',
 	},
 	shows: {

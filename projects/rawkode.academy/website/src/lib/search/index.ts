@@ -1,4 +1,4 @@
-import { getCollection } from "astro:content";
+import { getAllCollection } from "@/lib/payload-content";
 import { isNewsPublished } from "@/lib/news-publication";
 
 /**
@@ -98,13 +98,13 @@ export async function buildSearchIndex(): Promise<SearchEntry[]> {
 	const now = new Date();
 	const [videos, articles, news, courses, learningPaths, shows, technologies] =
 		await Promise.all([
-			getCollection("videos"),
-			getCollection("articles"),
-			getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
-			getCollection("courses"),
-			getCollection("learningPaths"),
-			getCollection("shows", ({ data }) => data.publish),
-			getCollection("technologies"),
+			getAllCollection("videos"),
+			getAllCollection("articles"),
+			getAllCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
+			getAllCollection("courses"),
+			getAllCollection("learningPaths"),
+			getAllCollection("shows"),
+			getAllCollection("technologies"),
 		]);
 
 	const entries: SearchEntry[] = [];
@@ -130,7 +130,7 @@ export async function buildSearchIndex(): Promise<SearchEntry[]> {
 			id: `article:${article.id}`,
 			title: article.data.title,
 			description: article.data.description,
-			href: `/read/${article.id}`,
+			href: `/read/${article.slug}`,
 			type: "article",
 			date: toIsoDate(article.data.publishedAt),
 			keywords: compactKeywords([
@@ -146,7 +146,7 @@ export async function buildSearchIndex(): Promise<SearchEntry[]> {
 			id: `news:${item.id}`,
 			title: item.data.title,
 			description: item.data.description,
-			href: `/news/${item.id}`,
+			href: `/news/${item.slug}`,
 			type: "news",
 			date: toIsoDate(item.data.publishedAt),
 			keywords: compactKeywords(referenceIds(item.data.technologies)),
@@ -158,7 +158,7 @@ export async function buildSearchIndex(): Promise<SearchEntry[]> {
 			id: `course:${course.id}`,
 			title: course.data.title,
 			description: course.data.description,
-			href: `/courses/${course.id}`,
+			href: `/courses/${course.slug}`,
 			type: "course",
 			date: toIsoDate(course.data.publishedAt),
 			keywords: compactKeywords([
@@ -174,7 +174,7 @@ export async function buildSearchIndex(): Promise<SearchEntry[]> {
 			id: `learning-path:${path.id}`,
 			title: path.data.title,
 			description: path.data.description,
-			href: `/learning-paths/${path.id}`,
+			href: `/learning-paths/${path.slug}`,
 			type: "learning-path",
 			date: toIsoDate(path.data.publishedAt),
 			keywords: compactKeywords([
@@ -189,7 +189,7 @@ export async function buildSearchIndex(): Promise<SearchEntry[]> {
 			id: `show:${show.data.id}`,
 			title: show.data.name,
 			description: show.data.description,
-			href: `/shows/${show.data.id}`,
+			href: `/shows/${show.slug}`,
 			type: "show",
 			keywords: compactKeywords(show.data.terms ?? []),
 		});
@@ -201,7 +201,7 @@ export async function buildSearchIndex(): Promise<SearchEntry[]> {
 			id: `technology:${id}`,
 			title: technology.data.name,
 			description: technology.data.seo?.description,
-			href: `/technology/${id}`,
+			href: `/technology/${technology.slug}`,
 			type: "technology",
 			keywords: compactKeywords([
 				...(technology.data.aliases ?? []),

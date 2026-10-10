@@ -1,4 +1,4 @@
-import type { CollectionEntry } from "astro:content";
+import type { CollectionEntry } from "@/lib/payload-content";
 
 const DEFAULT_SITE_URL = "https://rawkode.academy";
 
@@ -22,14 +22,14 @@ export function articleCanonicalUrl(
 	article: CollectionEntry<"articles">,
 	site: URL | undefined,
 ): string {
-	return new URL(`/read/${article.id}`, site ?? DEFAULT_SITE_URL).href;
+	return new URL(`/read/${article.slug}`, site ?? DEFAULT_SITE_URL).href;
 }
 
 export function articleMarkdownUrl(
 	article: CollectionEntry<"articles">,
 	site: URL | undefined,
 ): string {
-	return new URL(`/read/${article.id}.md`, site ?? DEFAULT_SITE_URL).href;
+	return new URL(`/read/${article.slug}.md`, site ?? DEFAULT_SITE_URL).href;
 }
 
 export function articleToMarkdown(
@@ -59,7 +59,11 @@ export function articleToMarkdown(
 	}
 
 	if ((article.data.technologies ?? []).length > 0) {
-		lines.push(`- Technologies: ${article.data.technologies.join(", ")}`);
+		lines.push(
+			`- Technologies: ${article.data.technologies
+				.map((technology) => technology.slug ?? technology.id)
+				.join(", ")}`,
+		);
 	}
 
 	lines.push("", stripLeadingMdxImports(article.body ?? ""), "");

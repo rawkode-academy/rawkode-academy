@@ -14,6 +14,7 @@ process.exitCode = await run({
 			env: process.env,
 		}),
 	env: process.env,
+	mode: process.env.PAYLOAD_GATE_MODE === "production" ? "production" : "review",
 	sleep: async (ms) => {
 		await setTimeout(ms);
 	},

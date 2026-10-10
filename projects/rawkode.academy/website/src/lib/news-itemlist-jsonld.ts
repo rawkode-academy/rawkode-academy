@@ -1,7 +1,7 @@
 import { isNewsPublished } from "./news-publication";
 
 export interface NewsListEntry {
-	id: string;
+	slug: string;
 	data: {
 		title: string;
 		description: string;
@@ -40,7 +40,7 @@ export function buildNewsItemListJsonLd(
 		.slice(0, Math.max(0, limit));
 
 	const itemListElement = ordered.map((story, index) => {
-		const storyUrl = joinUrl(siteUrl, `/news/${story.id}`);
+		const storyUrl = joinUrl(siteUrl, `/news/${story.slug}`);
 		return {
 			"@type": "ListItem",
 			position: index + 1,

@@ -1,5 +1,5 @@
-import type { CollectionEntry } from "astro:content";
-import { render } from "astro:content";
+import type { CollectionEntry } from "@/lib/payload-content";
+import { Marked } from "marked";
 import sanitizeHtml from "sanitize-html";
 
 interface RenderResult {
@@ -35,31 +35,13 @@ export async function renderAndSanitizeArticle(
 	article: CollectionEntry<"articles">,
 ): Promise<RenderResult> {
 	try {
-		// Try to render the article content
-		await render(article);
-
-		// Convert the rendered content to HTML string
-		// Note: This is a simplified approach. In production, you might need
-		// to use Astro's container API or a custom MDX renderer
-		let htmlContent = "";
-
-		// For now, we'll use a workaround by rendering to a string
-		// This may not work perfectly with all MDX components
-		try {
-			// Attempt to get HTML from the Content component
-			// This is a placeholder - actual implementation would need
-			// proper MDX to HTML conversion
-			htmlContent = article.data.description;
-
-			// Add a note about full content
-			htmlContent += `<hr/><p><em>Note: Full article content with interactive elements is available on our website.</em></p>`;
-			htmlContent += `<p><a href="/read/${article.id}/">Read the full article with all features on our website</a></p>`;
-		} catch (renderError) {
-			console.warn(
-				`Could not render MDX content for ${article.id}, using description`,
-			);
-			htmlContent = article.data.description;
-		}
+		// Collection feeds use summary projections, so render their CMS-owned
+		// description as Markdown instead of evaluating MDX imports.
+		const marked = new Marked({ breaks: true, gfm: true });
+		const htmlContent =
+			(await marked.parse(article.data.description ?? "")) +
+			'<hr/><p><em>Interactive components are available on the website.</em></p>' +
+			'<p><a href="/read/' + article.slug + '/">Read the full article on Rawkode Academy</a></p>';
 
 		// Sanitize the HTML content for RSS
 		const sanitizedContent = sanitizeHtml(htmlContent, {
@@ -87,7 +69,7 @@ export async function renderAndSanitizeArticle(
 	} catch (error) {
 		console.error(`Failed to render content for article ${article.id}:`, error);
 		return {
-			content: `<div>${article.data.description}</div><p><a href="/read/${article.id}/">Read the full article on our website</a></p>`,
+			content: '<p>' + sanitizeHtml(article.data.description ?? "") + '</p><p><a href="/read/' + article.slug + '/">Read the full article on Rawkode Academy</a></p>',
 		};
 	}
 }

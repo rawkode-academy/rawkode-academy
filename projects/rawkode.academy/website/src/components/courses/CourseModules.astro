@@ -1,6 +1,6 @@
 ---
 import { academyCourse } from "@rawkodeacademy/design-system";
-import { type CollectionEntry, getCollection } from "astro:content";
+import { type CollectionEntry, listPayloadContent } from "@/lib/payload-content";
 import { getCourseModuleSlug } from "@/utils/course-path";
 
 type Props = {
@@ -11,7 +11,10 @@ type Props = {
 const { course, modules } = Astro.props;
 const s = academyCourse();
 
-const courseModules = (modules ?? (await getCollection("courseModules")))
+const courseModules = (modules ?? (await listPayloadContent("courseModules", {
+	courseId: course.id,
+	limit: 100,
+})))
 	.filter((module) => module.data.course.id === course.id)
 	.sort((a, b) => a.data.order - b.data.order);
 
@@ -54,12 +57,12 @@ function formatDuration(minutes: number): string {
 					{sectionModules.map((module) => {
 						const isDraft = module.data.draft;
 						const displayOrder = publishedOrderById.get(module.id);
-						const moduleSlug = getCourseModuleSlug(course.id, module.id);
+						const moduleSlug = getCourseModuleSlug(course.slug, module.slug);
 						const Element = isDraft ? "div" : "a";
 						const elementProps = isDraft
 							? { class: [s.lessonRow, s.unpublished].join(" ") }
 							: {
-								href: `/courses/${course.id}/${moduleSlug}`,
+								href: `/courses/${course.slug}/${moduleSlug}`,
 								class: [s.lessonRow, s.lessonLink].join(" "),
 							};
 

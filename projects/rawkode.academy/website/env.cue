@@ -5,6 +5,10 @@ import "github.com/cuenv/cuenv/schema"
 schema.#Project
 
 name: "rawkode-academy-website"
+_cuenvBinary: "0.56.1"
+// cuenv can exit successfully when a project's environment evaluation is
+// skipped. The generated PR workflow requires this project's pipeline report.
+_ciRequireReport: "projects/rawkode.academy/website"
 
 runtime: schema.#DevenvRuntime
 hooks: onEnter: devenv: schema.#Devenv
@@ -28,6 +32,20 @@ let _reviewInputs = [
 	"tsconfig.review.json",
 	"src/styles/**",
 ]
+let _siteDeployInputs = [
+	"content/**",
+	"../../../content/**",
+	"astro.config.mts",
+	"env.cue",
+	"../../../packages/design-system/**",
+	"package.json",
+	"../../../bun.lock",
+	"scripts/**",
+	"vitest.config.ts",
+	"public/**",
+	"src/**",
+	"wrangler.jsonc",
+]
 env: {
 	GRAPHQL_ENDPOINT: "https://api.rawkode.academy/"
 	// Bypass the game login gate in local dev only. Production MUST require
@@ -35,6 +53,9 @@ env: {
 	DISABLE_GAME_AUTH: true
 	environment: production: {
 		DISABLE_GAME_AUTH: false
+		CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {
+			ref: "op://sa.rawkode.academy/cloudflare/api-tokens/workers"
+		}
 	}
 }
 
@@ -44,18 +65,17 @@ ci: pipelines: {
 		when: {
 			branch: ["main"]
 			defaultBranch: true
-			// deploy.awaitPayload reads this input from the dispatch event, so an
-			// operator can redeploy the review frontend once Payload is confirmed
-			// live without waiting for a tag that will never appear.
+			// The review frontend can be redeployed without the Payload wait once
+			// an operator confirms Payload is already live. The public site gate
+			// remains strict in production mode.
 			manual: skip_payload_wait: {
 				description: "Deploy the review frontend without waiting for the Payload deploy of this commit"
 				type:        "boolean"
 				default:     "false"
 			}
 		}
-		// cuenv runs pipeline entries in order and does not stop at a failed
-		// entry, so the public site deploys first and a review frontend failure
-		// only marks the run as failed.
+		// The public site and review frontend deploy only after the compatible
+		// Payload Worker is live for commits that deploy Payload.
 		tasks: [_t.deploy.main, _t.deploy.review]
 	}
 
@@ -156,22 +176,8 @@ tasks: {
 			env: PATH: _taskPath
 			// env.cue drives build-time vars (e.g. DISABLE_GAME_AUTH); include it so
 			// an env-only change marks this deploy affected (else CI skips it).
-			inputs: [
-				// CI change detection compares repo-relative paths; retain the
-				// definition-relative glob below for local/task input resolution.
-				"content/**",
-				"../../../content/**",
-				"astro.config.mts",
-				"env.cue",
-				"../../../packages/design-system/**",
-				"package.json",
-				"../../../bun.lock",
-				"scripts/**",
-				"vitest.config.ts",
-				"public/**",
-				"src/**",
-				"wrangler.jsonc",
-			]
+			inputs: _siteDeployInputs
+			dependsOn: [_t.deploy.awaitPayloadForSite]
 		}
 		// Waits until rawkode-academy-payload serves this commit (by tag) or a
 		// newer commit that contains it, but only when the push matches the push
@@ -190,8 +196,48 @@ tasks: {
 				GITHUB_EVENT_PATH:           schema.#EnvPassthrough
 				REVIEW_SKIP_PAYLOAD_WAIT:    schema.#EnvPassthrough
 				REVIEW_PAYLOAD_WAIT_SECONDS: schema.#EnvPassthrough
+				PAYLOAD_GATE_MODE:           "review"
 			}
-			inputs: _reviewInputs
+			inputs: [
+				"review/**",
+				"astro.review.config.mts",
+				"env.cue",
+				"../../../packages/design-system/**",
+				"package.json",
+				"../../../bun.lock",
+				"wrangler.review.jsonc",
+				"tsconfig.review.json",
+				"src/styles/**",
+				"../../../.github/workflows/rawkode-academy-payload-default.yml",
+			]
+		}
+		awaitPayloadForSite: schema.#Task & {
+			hermetic: false
+			command:  "sh"
+			args: ["-lc", "\(_toolchain) bun review/deploy/await-payload-cli.ts"]
+			env: {
+				PATH:                        _taskPath
+				GITHUB_EVENT_PATH:           schema.#EnvPassthrough
+				REVIEW_PAYLOAD_WAIT_SECONDS: schema.#EnvPassthrough
+				PAYLOAD_GATE_MODE:           "production"
+			}
+			// Use the same path set as the public site deploy so this prerequisite
+			// runs whenever Astro is changed, even if review-only files are untouched.
+			inputs: [
+				"content/**",
+				"../../../content/**",
+				"astro.config.mts",
+				"env.cue",
+				"../../../packages/design-system/**",
+				"package.json",
+				"../../../bun.lock",
+				"scripts/**",
+				"vitest.config.ts",
+				"public/**",
+				"src/**",
+				"wrangler.jsonc",
+				"../../../.github/workflows/rawkode-academy-payload-default.yml",
+			]
 		}
 		review: schema.#Task & {
 			hermetic: false
@@ -204,14 +250,49 @@ tasks: {
 		preview: schema.#Task & {
 			hermetic: false
 			command:  "sh"
-			args: ["-lc", "\(_toolchain) bun x wrangler versions upload"]
-			env: PATH: _taskPath
-			dependsOn: [_t.build]
-			// A pull-request preview is the pipeline's deliverable, so it must run
-			// whenever this pipeline is invoked. The build remains its dependency.
+			args: ["-lc", "\(_toolchain) bun review/deploy/deploy-cms-preview.mjs"]
+			env: {
+				PATH:                  _taskPath
+				CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {
+					ref: "op://sa.rawkode.academy/cloudflare/api-tokens/workers"
+				}
+				GITHUB_API_URL:        schema.#EnvPassthrough
+				GITHUB_EVENT_NAME:     schema.#EnvPassthrough
+				GITHUB_EVENT_PATH:     schema.#EnvPassthrough
+				GITHUB_OUTPUT:         schema.#EnvPassthrough
+				GITHUB_REPOSITORY:     schema.#EnvPassthrough
+				GITHUB_SHA:            schema.#EnvPassthrough
+				GITHUB_STEP_SUMMARY:   schema.#EnvPassthrough
+				GITHUB_TOKEN:          schema.#EnvPassthrough
+			}
+			dependsOn: [_t.build, _t.review.test, _t.review.build]
+			// A pull-request preview is the pipeline's deliverable. Deploy it only
+			// after the site build and review UI checks/build have completed.
 			captures: previewUrl: {
 				pattern: "Version Preview URL: (.+)"
 			}
+			inputs: [
+				"content/**",
+				"../../../content/**",
+				"astro.config.mts",
+				"env.cue",
+				"../../../packages/design-system/**",
+				"package.json",
+				"../../../bun.lock",
+				"scripts/**",
+				"vitest.config.ts",
+				"public/**",
+				"src/**",
+				"wrangler.jsonc",
+				// Source and content changes must make the hosted Astro preview an
+				// affected task; otherwise the PR pipeline can be a no-op.
+				"review/deploy/deploy-cms-preview.mjs",
+				"scripts/preview-isolation-worker.mjs",
+				"../../../projects/rawkode.academy/payload/scripts/pr-preview-resources.mjs",
+				"../../../projects/rawkode.academy/payload/wrangler.jsonc",
+				"../../../projects/rawkode.academy/payload/**",
+				"../../../bun.lock",
+			]
 		}
 	}
 }

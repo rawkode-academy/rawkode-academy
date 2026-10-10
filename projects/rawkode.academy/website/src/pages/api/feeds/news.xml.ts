@@ -1,4 +1,4 @@
-import { getCollection, getEntries } from "astro:content";
+import { getAllCollection, getEntries } from "@/lib/payload-content";
 import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
 import { withRssMimeType } from "../../../lib/feed-utils";
@@ -6,9 +6,11 @@ import { isNewsPublished } from "@/lib/news-publication";
 
 export async function GET(context: APIContext) {
 	const now = new Date();
-	const news = await getCollection("news", ({ data }) =>
+	const news = await getAllCollection("news", ({ data }) =>
 		isNewsPublished(data.publishedAt, now),
 	);
+	const technologies = await getAllCollection("technologies");
+	const technologyNames = new Map(technologies.map((technology) => [technology.id, technology.data.name] as const));
 
 	const sortedNews = [...news].sort(
 		(a, b) =>
@@ -23,9 +25,11 @@ export async function GET(context: APIContext) {
 				title: story.data.title,
 				description: story.data.description,
 				pubDate: new Date(story.data.publishedAt),
-				link: `/news/${story.id}/`,
+				link: `/news/${story.slug}/`,
 				author: authors.map((author) => author.data.name).join(", "),
-				categories: [...(story.data.technologies ?? [])],
+				categories: story.data.technologies.map(
+					(technology) => technologyNames.get(technology.id) ?? technology.slug ?? technology.id,
+				),
 			};
 		}),
 	);

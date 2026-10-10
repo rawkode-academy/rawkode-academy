@@ -1,23 +1,30 @@
-import { getCollection } from "astro:content";
 import { describe, expect, it, vi } from "vitest";
+import { getAllCollection, listPayloadContent } from "@/lib/payload-content";
 import { getLatestContent } from "./content";
+
+vi.mock("@/lib/payload-content", () => ({
+	getAllCollection: vi.fn(),
+	listPayloadContent: vi.fn(),
+}));
 
 const publishedAt = new Date("2026-06-20T00:00:00.000Z");
 
 async function excerpt(description: string | undefined) {
 	const story = {
-		id: "2026-06-20-runc-1-5-prometheus-3-13-talos",
+		id: "news-cuid2-id",
+		slug: "2026-06-20-runc-1-5-prometheus-3-13-talos",
+		collection: "news",
+		mediaAssets: [],
 		data: { title: "Release updates", description, publishedAt },
 	};
-	vi.mocked(getCollection).mockImplementation(async (name, predicate) => {
-		const values = name === "news" ? [story] : [];
-		const filter = predicate as ((entry: typeof story) => boolean) | undefined;
-		return (filter ? values.filter(filter) : values) as never;
-	});
+	vi.mocked(getAllCollection).mockResolvedValue([] as never);
+	vi.mocked(listPayloadContent).mockImplementation(async (name) =>
+		(name === "news" ? [story] : []) as never,
+	);
 	const items = await getLatestContent(12, publishedAt);
 	expect(items).toHaveLength(1);
 	expect(items[0]).toMatchObject({
-		href: `/news/${story.id}`,
+		href: `/news/${story.slug}`,
 		title: story.data.title,
 		kind: "News",
 		publishedAt: publishedAt.toISOString(),

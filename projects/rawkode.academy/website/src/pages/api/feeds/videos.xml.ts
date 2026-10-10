@@ -1,4 +1,4 @@
-import { getCollection } from "astro:content";
+import { getAllCollection } from "@/lib/payload-content";
 import { getPublishedVideos } from "@/lib/content";
 import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
@@ -8,7 +8,7 @@ import { getVideoThumbnailJpegUrl } from "@/lib/video-thumbnail";
 export async function GET(context: APIContext) {
 	// Get published videos only (filters out future-dated for scheduled publishing)
 	const sortedVideos = await getPublishedVideos();
-	const technologies = await getCollection("technologies");
+	const technologies = await getAllCollection("technologies");
 	const techName = new Map(
 		technologies.map((t) => [t.id, t.data.name] as const),
 	);
@@ -40,10 +40,9 @@ export async function GET(context: APIContext) {
 							.padStart(2, "0")}</itunes:duration>
 						<itunes:image href="${itunesImageUrl}" />
 					`,
-					categories: (video.data.technologies as string[])
-						.map((id) => {
-							// Handle both string IDs and reference objects
-							const techId = typeof id === "string" ? id : (id as any).id || id;
+					categories: video.data.technologies
+						.map((technology) => {
+							const techId = technology.id;
 							const normalizedId = techId.endsWith?.("/index")
 								? techId.slice(0, -6)
 								: techId;

@@ -1,177 +1,73 @@
-# Course Module Resources Documentation
+# Course module resources
 
-This document explains how to add resource attachments to course modules.
+Course resources live in Payload. After the initial content import, edit the
+course module and its `contentResources` field in Payload; the repository's MDX
+files are import input, not the day-to-day publishing workflow. Keep the
+existing website slug when editing a record so its URL remains stable.
 
-## Adding Resources to a Course Module
+`contentResources` is an array of resource objects:
 
-In your course module frontmatter (e.g.,
-`content/courses/your-course/01-introduction.mdx`), add a `resources` array:
+| Field | Purpose |
+| --- | --- |
+| `title` | Label shown to learners |
+| `description` | Optional short explanation |
+| `type` | `url`, `file`, or `embed` |
+| `url` | Destination for a `url` resource |
+| `filePath` | Existing resource path for a downloadable `file` |
+| `embedConfig` | Embed settings for an `embed` resource |
+| `category` | `slides`, `code`, `documentation`, `demos`, or `other` |
 
-```yaml
----
-title: "Module Title"
-# ... other fields ...
-resources:
-  - title: "Module Slides"
-    type: "file"
-    filePath: "courses/your-course/module-01-slides.pdf"
-    category: "slides"
-  - title: "Code Examples"
-    description: "Examples for this module"
-    type: "url"
-    url: "https://github.com/your-org/examples/module-01"
-    category: "code"
----
+## WebContainer demos
+
+A WebContainer resource stores its source files with that resource in Payload.
+The public course page receives only the resource's display details. When a
+learner opens the demo, Astro requests that one demo from Payload and renders
+the interactive page on the server. Ordinary content reads do not include demo
+file contents.
+
+Example `contentResources` item:
+
+```json
+{
+  "title": "OAuth PKCE Demo",
+  "description": "Try the OAuth PKCE flow in your browser.",
+  "type": "embed",
+  "category": "code",
+  "embedConfig": {
+    "container": "webcontainer",
+    "src": "oauth-pkce-app",
+    "height": "800px",
+    "startCommand": "bun run dev",
+    "files": {
+      "package.json": "{\"scripts\":{\"dev\":\"node server.js\"}}",
+      "server.js": "console.log('Demo ready')"
+    }
+  }
+}
 ```
 
-## Resource Properties
+File paths inside `embedConfig.files` must be relative and stay within the
+demo. Store text files only. The importer and public bridge enforce limits on
+path length, file count, and total size. Do not add local filesystem paths to
+Payload.
 
-- **title** (required): Display name of the resource
-- **description** (optional): Brief description of the resource
-- **type** (required): One of `"url"` for external links, `"file"` for
-  downloadable files, or `"embed"` for interactive demos
-- **url** (optional): Required for `type: "url"`, the external URL
-- **filePath** (optional): Required for `type: "file"`, relative path from
-  `/public/resources/`
-- **embedConfig** (optional): Required for `type: "embed"`, configuration for
-  embedded applications
-  - **container**: Either `"webcontainer"` for interactive Node.js environments
-    or `"iframe"` for generic embeds
-  - **src**: The source URL or project ID
-  - **height** (optional): Height of the embed (default: "600px")
-  - **width** (optional): Width of the embed (default: "100%")
-- **category** (required): One of `"slides"`, `"code"`, `"documentation"`, or
-  `"other"`
+For the initial import and later repository reimports, the importer can read
+legacy `embedConfig.import.localDir` from an existing course module. It only
+reads the matching `content/courses/<course>/examples/<resource>` directory,
+copies bounded text files into Payload's `embedConfig.files`, and removes the
+local path. `.webcontainer.json` can provide `startCommand`; the resource's
+`startCommand` is used when that file does not provide one. This is a migration
+helper, not a Payload field editors should use.
 
-## File Resources
+The CMS and website both check publication status. A scheduled or draft course
+module cannot expose its demo before it becomes public.
 
-For file resources:
+## Other resources
 
-1. Place your files in `/public/resources/courses/your-course/`
-2. Reference them with `filePath: "courses/your-course/filename.pdf"`
-3. Files will be served from `/resources/courses/your-course/filename.pdf`
+- For an external destination, set `type` to `url` and provide `url`.
+- For a download, set `type` to `file` and provide its existing `filePath`.
+- For an iframe embed, set `type` to `embed` and use
+  `embedConfig.container: "iframe"` with the destination in `embedConfig.src`.
 
-## Embedded Application Resources
-
-For embedded applications, you can use:
-
-### Generic iframe Example
-
-```yaml
-resources:
-  - title: "Custom Web App"
-    description: "Embedded custom application"
-    type: "embed"
-    embedConfig:
-      container: "iframe"
-      src: "https://your-app.com/embed"
-      height: "800px"
-    category: "other"
-```
-
-### WebContainer Example (Full Node.js Environment)
-
-WebContainers provide a full Node.js environment running in the browser. You can
-either:
-
-1. **Import from local directory** (recommended for larger projects):
-
-```yaml
-resources:
-  - title: "OAuth PKCE Demo"
-    description: "Interactive OAuth PKCE flow demonstration"
-    type: "embed"
-    embedConfig:
-      container: "webcontainer"
-      src: "oauth-pkce-demo"
-      height: "800px"
-      startCommand: "bun run dev"
-      import:
-        localDir: "./examples/oauth-pkce-app" # Path relative to the module file
-    category: "code"
-```
-
-Place your app files in `content/courses/your-course/examples/oauth-pkce-app/`.
-
-2. **Inline files** (for simple examples):
-
-```yaml
-resources:
-  - title: "Simple Node.js Demo"
-    description: "Basic Node.js server example"
-    type: "embed"
-    embedConfig:
-      container: "webcontainer"
-      src: "node-demo"
-      height: "600px"
-      startCommand: "node server.js"
-      files:
-        "package.json": |
-          {
-            "name": "node-demo",
-            "type": "module",
-            "scripts": {
-              "start": "node server.js"
-            }
-          }
-        "server.js": |
-          import { createServer } from 'http';
-
-          const server = createServer((req, res) => {
-            res.writeHead(200, { 'Content-Type': 'text/html' });
-            res.end('<h1>Hello from WebContainer!</h1>');
-          });
-
-          server.listen(3000, () => {
-            console.log('Server running at http://localhost:3000');
-          });
-    category: "code"
-```
-
-## Complete Example
-
-Here's a complete example for a Zitadel course module with various resource
-types:
-
-```yaml
----
-title: "Introduction to Zitadel"
-description: "Getting started with Zitadel identity management"
-course: "complete-guide-zitadel"
-order: 1
-publishedAt: "2025-07-02"
-isDraft: false
-resources:
-  - title: "Module Slides"
-    description: "Introduction presentation slides"
-    type: "file"
-    filePath: "courses/complete-guide-zitadel/01-introduction-slides.pdf"
-    category: "slides"
-  - title: "Zitadel Documentation"
-    description: "Official getting started guide"
-    type: "url"
-    url: "https://zitadel.com/docs/guides/start/quickstart"
-    category: "documentation"
-  - title: "Hello World Example"
-    description: "Simple example application"
-    type: "url"
-    url: "https://github.com/zitadel/examples/tree/main/hello-world"
-    category: "code"
-  - title: "Setup Checklist"
-    description: "PDF checklist for initial setup"
-    type: "file"
-    filePath: "courses/complete-guide-zitadel/setup-checklist.pdf"
-    category: "other"
-  - title: "Zitadel Playground"
-    description: "Interactive Zitadel configuration demo"
-    type: "embed"
-    embedConfig:
-      container: "webcontainer"
-      src: "zitadel-demo"
-      height: "700px"
-      startCommand: "npm run dev"
-      import:
-        localDir: "./examples/zitadel-demo"
-    category: "code"
----
-```
+The imported course and module slugs remain the website URL slugs. Change a
+slug only when a URL change is intended.

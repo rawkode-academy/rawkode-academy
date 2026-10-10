@@ -7,6 +7,8 @@ import { identityMapping } from '../src/auth/payload'
 import { hasOidcCookie, rejectOidcMutation, rejectOidcMutationFor } from '../src/auth/csrf'
 import { digest, OidcService, readCookie, type AuthUser, type Identity } from '../src/auth/oidc'
 import type { AuthStore, Session, Transaction } from '../src/auth/store'
+import { createCuid2 } from '../src/cuid2'
+import { STRANGER_ID } from './helpers/ids'
 
 // Generated test-only signing material; no external issuer, credentials or network.
 const signingKeys = crypto.subtle.generateKey({ name: 'RSASSA-PKCS1-v1_5', modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' }, true, ['sign', 'verify'])
@@ -66,8 +68,8 @@ async function fixture(options: Options = {}) {
   let now = Math.floor(Date.now() / 1000)
   let nonce = ''
   const identities: Identity[] = []
-  const ids = new Map<string, number>()
-  const users = new Map<number, AuthUser>()
+  const ids = new Map<string, string>()
+  const users = new Map<string, AuthUser>()
   const requests: { url: string; headers: Headers; body: URLSearchParams }[] = []
   const jwk = await crypto.subtle.exportKey('jwk', (await signingKeys).publicKey)
   const fetcher = (async (input: URL | RequestInfo, init?: RequestInit) => {
@@ -96,11 +98,11 @@ async function fixture(options: Options = {}) {
       identities.push({ ...identity })
       const key = `${identity.issuer}\0${identity.subject}`
       let id = ids.get(key)
-      if (!id) { id = ids.size + 1; ids.set(key, id) }
+      if (!id) { id = `u${String(ids.size + 1).padStart(23, '0')}`; ids.set(key, id) }
       users.set(id, { id, collection: 'users', role: 'customer', name: identity.name, oidcIssuer: identity.issuer, oidcSubject: identity.subject })
       return id
     },
-    async user(id: number) { return users.has(id) ? { ...users.get(id)! } : null },
+    async user(id: string) { return users.has(id) ? { ...users.get(id)! } : null },
   }
   const service = new OidcService(config, store, mapping, fetcher, () => now)
   async function begin(request = site(`${origin}/api/auth/login`)) {
@@ -249,11 +251,12 @@ test('unverified email is not forwarded to the identity mapper', async () => {
 })
 test('production identity mapper keys by issuer+subject, never links by email, and updates profile metadata', async () => {
   const config = authConfig({ OIDC_STAFF_SUBJECTS: '["one"]' })
-  const records: Record<string, any>[] = [{ id: 10, email: 'same@example.invalid', role: 'staff' }]
+  const localAccountID = STRANGER_ID
+  const records: Record<string, any>[] = [{ id: localAccountID, email: 'same@example.invalid', role: 'staff' }]
   const queries: any[] = []
   const payload = {
     async find(args: any) { queries.push(args); return { docs: records.filter(record => record.identityKey === args.where.identityKey.equals) } },
-    async create(args: any) { assert.equal(args.context.identityProvisioning, true); const doc = { ...args.data, id: records.length + 10 }; records.push(doc); return doc },
+    async create(args: any) { assert.equal(args.context.identityProvisioning, true); const doc = { ...args.data, id: createCuid2() }; records.push(doc); return doc },
     async update(args: any) { assert.equal(args.context.identityProvisioning, true); Object.assign(records.find(record => record.id === args.id)!, args.data) },
     async findByID(args: any) { return records.find(record => record.id === args.id) },
   }
@@ -261,38 +264,39 @@ test('production identity mapper keys by issuer+subject, never links by email, a
   const first = await mapping.map({ issuer: config.issuer, subject: 'one', email: 'same@example.invalid' })
   const second = await mapping.map({ issuer: config.issuer, subject: 'two', email: 'same@example.invalid' })
   assert.notEqual(first, second)
-  assert.notEqual(first, 10, 'Must not attach an existing local account by matching email')
-  assert.notEqual(second, 10)
+  assert.notEqual(first, localAccountID, 'Must not attach an existing local account by matching email')
+  assert.notEqual(second, localAccountID)
   assert.equal(await mapping.map({ issuer: config.issuer, subject: 'one', email: 'changed@example.invalid', name: 'Changed name' }), first)
   assert.equal(records.find(record => record.id === first)?.profileEmail, 'changed@example.invalid')
   assert.equal(records.find(record => record.id === first)?.role, 'staff')
   assert.equal(records.find(record => record.id === second)?.role, 'customer')
   assert(queries.every(query => Object.keys(query.where).join() === 'identityKey'))
-  assert(records.filter(record => record.id !== 10).every(record => record.email.endsWith('@oidc.invalid')))
+  assert(records.filter(record => record.id !== localAccountID).every(record => record.email.endsWith('@oidc.invalid')))
   assert.equal((await mapping.user(first))?.oidcSubject, 'one')
-  assert.equal(await mapping.user(9999), null)
+  assert.equal(await mapping.user(createCuid2()), null)
 })
 test('identity mapper recovers a concurrent unique identity insertion without email fallback', async () => {
   const config = authConfig({})
   let winner: Record<string, unknown> | null = null
   const mapping = identityMapping({
     async find(args: any) { assert(args.where.identityKey); return { docs: winner ? [winner] : [] } },
-    async create(args: any) { winner = { ...args.data, id: 42 }; throw new Error('Simulated unique constraint race') },
+    async create(args: any) { winner = { ...args.data, id: STRANGER_ID }; throw new Error('Simulated unique constraint race') },
   } as never, config)
-  assert.equal(await mapping.map({ issuer: config.issuer, subject: 'raced-subject', email: 'same@example.invalid' }), 42)
+  assert.equal(await mapping.map({ issuer: config.issuer, subject: 'raced-subject', email: 'same@example.invalid' }), STRANGER_ID)
 })
 test('opaque session expires, respects account deletion, and revokes immediately', async () => {
   const f = await fixture()
   const headers = sessionHeaders(await f.service.callback(f.request()), f.config.sessionCookie)
   assert(await f.service.session(headers))
-  const user = f.users.get(1)!
-  f.users.delete(1)
+  const userId = [...f.users.keys()][0]!
+  const user = f.users.get(userId)!
+  f.users.delete(userId)
   assert.equal(await f.service.session(headers), null)
-  f.users.set(1, user)
+  f.users.set(userId, user)
   const hash = await digest(readCookie(headers, f.config.sessionCookie)!)
   await f.store.deleteSession(hash)
   assert.equal(await f.service.session(headers), null)
-  await f.store.putSession({ tokenHash: hash, userId: 1, expiresAt: Math.floor(Date.now() / 1000) + 60 })
+  await f.store.putSession({ tokenHash: hash, userId, expiresAt: Math.floor(Date.now() / 1000) + 60 })
   f.advance(61)
   assert.equal(await f.service.session(headers), null)
 })

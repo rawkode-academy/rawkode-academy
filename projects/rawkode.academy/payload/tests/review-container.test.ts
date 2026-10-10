@@ -9,6 +9,8 @@ import { audioPolicy, type ProcessingJob } from '../src/review/processing-jobs'
 import { configuredMediaAdapter, mediaRecipe, type MediaRuntime } from '../src/review/processing-runtime'
 import { ReviewStore } from '../src/review/store'
 import { WorkflowMediaAdapter } from '../src/review/workflow-adapter'
+import { createCuid2 } from '../src/cuid2'
+import { VIDEO_ID } from './helpers/ids'
 
 // Protocol fixtures are deliberately not playable media. The separate runner
 // suite invokes real FFmpeg; these tests exercise storage, framing and fencing.
@@ -66,9 +68,9 @@ function fragmented(value: Uint8Array, partSize = 7) {
   } })
 }
 function harness(operation: Operation = 'encode') {
-  const r2 = fakeBucket(), saved = storage(), jobId = crypto.randomUUID(), source = bytes('private source fixture')
+  const r2 = fakeBucket(), saved = storage(), jobId = createCuid2(), source = bytes('private source fixture')
   const sourceKey = `review-intake/${jobId}/source`, head = r2.seed(sourceKey, source, 'application/octet-stream')
-  const job: ProcessingJob = { jobId, videoId: 1, recipe: mediaRecipe, source: { key: sourceKey, etag: head.etag, checksum: checksum(source), bytes: source.length }, contentType: 'video/mp4', outputKey: `review-intake/${jobId}/deliverable.mp4`, maximumBytes: 67108864, maximumDurationMs: 7200000, audioPolicy, startedAt: 1000, deadline: 87400, expectedCurrentRevisionId: null }
+  const job: ProcessingJob = { jobId, videoId: VIDEO_ID, recipe: mediaRecipe, source: { key: sourceKey, etag: head.etag, checksum: checksum(source), bytes: source.length }, contentType: 'video/mp4', outputKey: `review-intake/${jobId}/deliverable.mp4`, maximumBytes: 67108864, maximumDurationMs: 7200000, audioPolicy, startedAt: 1000, deadline: 87400, expectedCurrentRevisionId: null }
   const files = operation === 'encode' ? [bytes('encoded fixture')] : [bytes('audio zero'), bytes('audio one'), bytes('audio two')]
   const common = { protocol: 1 as const, jobId, recipe: job.recipe, source: { contentType: job.contentType } }
   let report: ContainerReport = operation === 'encode' ? {

@@ -1,50 +1,30 @@
 import type { CollectionSlug, Payload } from 'payload'
-import type { CatalogueCollection } from './catalogue'
-
-export type Reference = { collection: CatalogueCollection; legacyId: string }
-export type SourceAsset = { relativePath: string; r2Key: string; mimeType: string; bytes: number; checksum: string }
-export type SourceMetadata = {
-  path: string
-  format: 'md' | 'mdx' | 'yaml' | 'yml' | 'json'
-  data?: Record<string, unknown>
-  raw?: string
-  body?: string
-  assets?: SourceAsset[]
-}
-export type CatalogueRecord = {
-  collection: CatalogueCollection
-  legacyId: string
-  legacyType: string
-  slug: string
-  sourceRevision: string
-  status?: 'draft' | 'published'
-  tombstone?: boolean
-  data: Record<string, unknown>
-  relationships?: Record<string, Reference | Reference[] | null>
-  source?: SourceMetadata
-}
-export type CatalogueSnapshot = {
-  sourceSystem: string
-  mappingVersion: string
-  sequence: number
-  records: CatalogueRecord[]
-}
-type Document = Record<string, unknown> & { id: string | number; legacyId: string }
-type Action = { collection: CatalogueCollection; legacyId: string; action: 'create' | 'update' | 'unchanged' | 'tombstone' | 'conflict' | 'pending' }
+import { createCuid2, isCuid2 } from './cuid2'
+import type { ContentCollection, ContentReference, ImportRecord, ImportSnapshot, SourceAsset } from './import-types'
+export type { ContentCollection, ContentReference, ImportRecord, ImportSnapshot, SourceAsset } from './import-types'
+type Document = Record<string, unknown> & { id: string; legacyId?: string }
+type Action = { collection: ContentCollection; legacyId: string; action: 'create' | 'update' | 'unchanged' | 'tombstone' | 'conflict' | 'pending' }
 export type ImportResult = {
   dryRun: boolean
   counts: { created: number; updated: number; unchanged: number; tombstoned: number; conflicts: number; pending: number }
   actions: Action[]
-  conflicts: { collection: CatalogueCollection; legacyId: string; reason: string }[]
-  unresolved: { collection: CatalogueCollection; legacyId: string; field: string; reference: Reference }[]
+  conflicts: { collection: ContentCollection; legacyId: string; reason: string }[]
+  unresolved: { collection: ContentCollection; legacyId: string; field: string; reference: ContentReference }[]
 }
 
-const collections = new Set<CatalogueCollection>([
+export function sourceIdentityField(collection: ContentCollection): 'id' | 'legacyId' {
+  return collection === 'videos' ? 'id' : 'legacyId'
+}
+export function sourceIdentityData(collection: ContentCollection, legacyId: string): Record<string, string> {
+  return collection === 'videos' ? {} : { legacyId }
+}
+
+const collections = new Set<ContentCollection>([
   'videos', 'articles', 'courses', 'course-modules', 'learning-paths', 'shows', 'episodes', 'technologies', 'people', 'chapters', 'learning-resources',
   'series', 'adrs', 'testimonials', 'news', 'changelog', 'static-assets',
   'seasons', 'competitors', 'brackets', 'bracket-applications', 'teams', 'team-members', 'team-invites', 'bracket-breaks', 'bracket-entries', 'matches', 'match-results', 'registrations',
 ])
-export const relations: Partial<Record<CatalogueCollection, Record<string, { collection: CatalogueCollection; many: boolean }>>> = {
+export const relations: Partial<Record<ContentCollection, Record<string, { collection: ContentCollection; many: boolean }>>> = {
   videos: { technologies: { collection: 'technologies', many: true }, guests: { collection: 'people', many: true }, show: { collection: 'shows', many: false }, episode: { collection: 'episodes', many: false }, chapters: { collection: 'chapters', many: true } },
   shows: { hosts: { collection: 'people', many: true }, episodes: { collection: 'episodes', many: true } },
   episodes: { video: { collection: 'videos', many: false }, show: { collection: 'shows', many: false } },
@@ -69,37 +49,46 @@ export const relations: Partial<Record<CatalogueCollection, Record<string, { col
   'match-results': { match: { collection: 'matches', many: false }, winnerTeam: { collection: 'teams', many: false }, winnerEntry: { collection: 'bracket-entries', many: false } },
   registrations: { season: { collection: 'seasons', many: false }, bracket: { collection: 'brackets', many: false } },
 }
-const reserved = new Set(['id', 'legacyId', 'legacyType', 'slug', 'sourceSystem', 'sourceRevision', 'sourceHash', 'sourceSequence', 'sourceFields', 'mappingVersion', 'importedAt', 'locallyEdited', 'importState', 'sourcePath', 'sourceFormat', 'sourceData', 'sourceRaw', 'sourceAssets', 'tombstone', '_status', 'createdAt', 'updatedAt'])
+const reserved = new Set(['id', 'legacyId', 'slug', 'sourceSystem', 'sourceRevision', 'sourceHash', 'sourceSequence', 'sourceFields', 'mappingVersion', 'importedAt', 'locallyEdited', 'importState', 'sourcePath', 'sourceAssets', 'tombstone', '_status', 'createdAt', 'updatedAt'])
 
-function key(reference: Reference): string { return `${reference.collection}:${reference.legacyId}` }
+function key(reference: ContentReference): string { return `${reference.collection}:${reference.legacyId}` }
 function canonical(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`
   if (value !== null && typeof value === 'object') return `{${Object.entries(value).sort(([a], [b]) => a.localeCompare(b)).map(([name, child]) => `${JSON.stringify(name)}:${canonical(child)}`).join(',')}}`
   return JSON.stringify(value) ?? 'null'
 }
-function sourceData(record: CatalogueRecord): Record<string, unknown> {
+function sourceMetadata(record: ImportRecord): Record<string, unknown> {
   if (!record.source) return {}
   return {
     sourcePath: record.source.path,
-    sourceFormat: record.source.format,
-    sourceData: record.source.data ?? null,
-    sourceRaw: record.source.raw ?? null,
-    sourceBody: record.source.body ?? null,
     sourceAssets: record.source.assets ?? [],
   }
 }
-export async function sourceHash(record: CatalogueRecord, mappingVersion: string): Promise<string> {
+export function importedDocumentID(collection: ContentCollection, legacyId: string, existingID?: string | number): string {
+  if (collection === 'videos') {
+    if (!isCuid2(legacyId)) throw new Error(`Video content ID must be a CUID2 to preserve the R2 key: ${legacyId}`)
+    if (existingID !== undefined && existingID !== legacyId) throw new Error(`Video ${legacyId} has a different Payload ID; an explicit ID rekey is required`)
+    return legacyId
+  }
+  if (existingID !== undefined) {
+    if (!isCuid2(existingID)) throw new Error('Existing Payload document ID is not CUID2; an explicit ID rekey is required')
+    return existingID
+  }
+  return createCuid2()
+}
+export async function sourceHash(record: ImportRecord, mappingVersion: string): Promise<string> {
   const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(canonical({ mappingVersion, record })))
   return Array.from(new Uint8Array(bytes), byte => byte.toString(16).padStart(2, '0')).join('')
 }
 
 /** Validate the whole input before writing a node. IDs and relationship order are source-owned. */
-function validate(snapshot: CatalogueSnapshot): void {
+function validate(snapshot: ImportSnapshot): void {
   if (!snapshot?.sourceSystem || !snapshot.mappingVersion || !Array.isArray(snapshot.records)) throw new Error('Expected sourceSystem, mappingVersion and records')
   if (!Number.isSafeInteger(snapshot.sequence) || snapshot.sequence < 1) throw new Error('Snapshot sequence must be a positive safe integer')
   const seen = new Set<string>()
   for (const record of snapshot.records) {
-    if (!collections.has(record.collection) || !record.legacyId || !record.legacyType || !record.slug || !record.sourceRevision || !record.data || typeof record.data !== 'object') throw new Error('Invalid catalogue record')
+    if (!collections.has(record.collection) || !record.legacyId || !record.slug || !record.sourceRevision || !record.data || typeof record.data !== 'object') throw new Error('Invalid content record')
+    if (record.collection === 'videos' && !isCuid2(record.legacyId)) throw new Error(`Video content ID must be a CUID2 to preserve the R2 key: ${record.legacyId}`)
     if (record.status && !['draft', 'published'].includes(record.status)) throw new Error(`Invalid status for ${key(record)}`)
     if (seen.has(key(record))) throw new Error(`Duplicate source ID: ${key(record)}`)
     seen.add(key(record))
@@ -120,18 +109,19 @@ function validate(snapshot: CatalogueSnapshot): void {
  * D1 does not give this importer an atomic compare-and-swap across editorial writes:
  * use an exclusive import window, and never run multiple imports concurrently.
  */
-export async function importCatalogue(payload: Payload, user: NonNullable<Parameters<Payload['find']>[0]['user']>, snapshot: CatalogueSnapshot, options: { dryRun?: boolean } = {}): Promise<ImportResult> {
+export async function importCatalogue(payload: Payload, user: NonNullable<Parameters<Payload['find']>[0]['user']>, snapshot: ImportSnapshot, options: { dryRun?: boolean } = {}): Promise<ImportResult> {
   validate(snapshot)
   const result: ImportResult = { dryRun: options.dryRun ?? false, counts: { created: 0, updated: 0, unchanged: 0, tombstoned: 0, conflicts: 0, pending: 0 }, actions: [], conflicts: [], unresolved: [] }
   const documents = new Map<string, Document>()
-  const pending: { record: CatalogueRecord; hash: string; created: boolean }[] = []
+  const pending: { record: ImportRecord; hash: string; created: boolean }[] = []
   const eligibleSourceNodes = new Set<string>()
   const sourceRecords = new Map(snapshot.records.map(record => [key(record), record]))
-  const lookup = async (ref: Reference): Promise<Document | undefined> => {
-    const found = await payload.find({ collection: ref.collection as CollectionSlug, where: { legacyId: { equals: ref.legacyId } }, limit: 1, depth: 0, draft: true, overrideAccess: false, user })
+  const lookup = async (ref: ContentReference): Promise<Document | undefined> => {
+    const field = sourceIdentityField(ref.collection)
+    const found = await payload.find({ collection: ref.collection as CollectionSlug, where: { [field]: { equals: ref.legacyId } }, limit: 1, depth: 0, draft: true, overrideAccess: false, user })
     return found.docs[0] as unknown as Document | undefined
   }
-  const conflict = (record: CatalogueRecord, reason: string): void => {
+  const conflict = (record: ImportRecord, reason: string): void => {
     result.counts.conflicts += 1
     result.conflicts.push({ collection: record.collection, legacyId: record.legacyId, reason })
     result.actions.push({ collection: record.collection, legacyId: record.legacyId, action: 'conflict' })
@@ -171,7 +161,7 @@ export async function importCatalogue(payload: Payload, user: NonNullable<Parame
     pending.push({ record, hash, created: !existing })
     eligibleSourceNodes.add(key(record))
     if (result.dryRun) continue
-    const data = { ...record.data, ...sourceData(record), legacyId: record.legacyId, legacyType: record.legacyType, slug: record.slug, sourceSystem: snapshot.sourceSystem, sourceRevision: record.sourceRevision, sourceHash: hash, sourceSequence: snapshot.sequence, sourceFields, mappingVersion: snapshot.mappingVersion, importedAt: new Date().toISOString(), locallyEdited: false, importState: 'pending', tombstone: record.tombstone ?? false, _status: 'draft' as const }
+    const data = { ...record.data, ...sourceMetadata(record), id: importedDocumentID(record.collection, record.legacyId, existing?.id), ...sourceIdentityData(record.collection, record.legacyId), slug: record.slug, sourceSystem: snapshot.sourceSystem, sourceRevision: record.sourceRevision, sourceHash: hash, sourceSequence: snapshot.sequence, sourceFields, mappingVersion: snapshot.mappingVersion, importedAt: new Date().toISOString(), locallyEdited: false, importState: 'pending', tombstone: record.tombstone ?? false, _status: 'draft' as const }
     const shared = { collection: record.collection as CollectionSlug, data, draft: true, depth: 0, overrideAccess: false, user, context: { importing: true, pipelineMachine: true } }
     const saved = existing ? await payload.update({ ...shared, id: existing.id }) : await payload.create(shared)
     documents.set(key(record), saved as unknown as Document)
@@ -227,7 +217,7 @@ export async function importCatalogue(payload: Payload, user: NonNullable<Parame
       }
       // Explicitly materialize the staged fields: publishing a relationship-only
       // patch must not depend on Payload merging the latest draft into the row.
-      await payload.update({ collection: record.collection as CollectionSlug, id: latest.id, data: { ...record.data, ...sourceData(record), ...relationshipData, legacyId: record.legacyId, legacyType: record.legacyType, slug: record.slug, sourceSystem: snapshot.sourceSystem, sourceRevision: record.sourceRevision, sourceHash: hash, sourceSequence: snapshot.sequence, sourceFields: [...Object.keys(record.data), ...Object.keys(record.relationships ?? {})].sort(), mappingVersion: snapshot.mappingVersion, importedAt: latest.importedAt, locallyEdited: false, tombstone: record.tombstone ?? false, importState: 'complete', _status: record.tombstone ? 'draft' : record.status ?? 'draft' }, draft: false, depth: 0, overrideAccess: false, user, context: { importing: true, pipelineMachine: true } })
+      await payload.update({ collection: record.collection as CollectionSlug, id: latest.id, data: { ...record.data, ...sourceMetadata(record), ...relationshipData, ...sourceIdentityData(record.collection, record.legacyId), slug: record.slug, sourceSystem: snapshot.sourceSystem, sourceRevision: record.sourceRevision, sourceHash: hash, sourceSequence: snapshot.sequence, sourceFields: [...Object.keys(record.data), ...Object.keys(record.relationships ?? {})].sort(), mappingVersion: snapshot.mappingVersion, importedAt: latest.importedAt, locallyEdited: false, tombstone: record.tombstone ?? false, importState: 'complete', _status: record.tombstone ? 'draft' : record.status ?? 'draft' }, draft: false, depth: 0, overrideAccess: false, user, context: { importing: true, pipelineMachine: true } })
     }
     const action = record.tombstone ? 'tombstone' : created ? 'create' : 'update'
     if (record.tombstone) result.counts.tombstoned += 1

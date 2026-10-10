@@ -1,5 +1,4 @@
 ---
-import { Image } from "astro:assets";
 import { getTypeBadgeConfig } from "@/utils/article-types";
 
 interface Props {
@@ -94,19 +93,11 @@ const truncatedDescription = truncateDescription(
 		<div class="paper-card overflow-hidden rounded-sm bleed-x-mobile">
 			<!-- Image section -->
 			<div class="relative aspect-[16/9] overflow-hidden">
-				{typeof thumbnailUrl === "string" ? (
-					<img 
-						src={thumbnailUrl} 
-						alt={thumbnailAlt} 
-						class="w-full h-full object-cover group-active:scale-105" 
-					/>
-				) : (
-					<Image 
-						src={thumbnailUrl} 
-						alt={thumbnailAlt} 
-						class="w-full h-full object-cover group-active:scale-105" 
-					/>
-				)}
+				<img
+					src={thumbnailUrl}
+					alt={thumbnailAlt}
+					class="w-full h-full object-cover group-active:scale-105"
+				/>
 				
 				<!-- Gradient overlay -->
 				<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent dark:from-black/80"></div>
@@ -290,19 +281,11 @@ const truncatedDescription = truncateDescription(
 
 			<!-- Right: Image Panel - takes remaining space -->
 			<div class="relative flex-1 overflow-hidden">
-				{typeof thumbnailUrl === "string" ? (
-					<img 
-						src={thumbnailUrl} 
-						alt={thumbnailAlt} 
-						class="absolute inset-0 w-full h-full object-cover ease-out group-hover:scale-105" 
-					/>
-				) : (
-					<Image 
-						src={thumbnailUrl} 
-						alt={thumbnailAlt} 
-						class="absolute inset-0 w-full h-full object-cover ease-out group-hover:scale-105" 
-					/>
-				)}
+				<img
+					src={thumbnailUrl}
+					alt={thumbnailAlt}
+					class="absolute inset-0 w-full h-full object-cover ease-out group-hover:scale-105"
+				/>
 				
 				<!-- Subtle overlay on hover -->
 				<div class="absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-colors duration-500"></div>

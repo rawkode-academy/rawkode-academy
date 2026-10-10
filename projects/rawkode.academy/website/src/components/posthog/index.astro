@@ -9,6 +9,8 @@ const { userId } = Astro.props;
 <script define:vars={{ userId }}>
 	const PH_KEY = "phc_8BUP734dzskih8urQFkFL1qxT5veRDm6zzXwROZND4M";
 	const PH_HOST = "https://eu.i.posthog.com";
+	const telemetryDisabled =
+		document.querySelector('meta[name="rawkode-telemetry-disabled"]')?.content === "true";
 	let posthogInitialized = false;
 	let initInFlight = false;
 
@@ -181,6 +183,7 @@ const { userId } = Astro.props;
 	};
 
 	const initializePostHog = () => {
+		if (telemetryDisabled) return;
 		if (posthogInitialized || initInFlight) {
 			return;
 		}
@@ -276,9 +279,9 @@ const { userId } = Astro.props;
 	};
 
 	// Initialize PostHog lazily after page load.
-	if (document.readyState === "complete") {
+	if (!telemetryDisabled && document.readyState === "complete") {
 		schedulePostHogEnable();
-	} else {
+	} else if (!telemetryDisabled) {
 		window.addEventListener("load", schedulePostHogEnable, { once: true });
 	}
 </script>

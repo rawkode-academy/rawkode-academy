@@ -1,6 +1,6 @@
-// Gate for the review frontend deploy. preview.rawkode.academy forwards its
-// API traffic to the rawkode-academy-payload Worker, so when a commit changes
-// Payload the review frontend must not go live before that Payload deploy.
+// Gate CMS-dependent website deploys. The production site and
+// preview.rawkode.academy both call the rawkode-academy-payload Worker, so a
+// site deploy must wait when its commit also changes Payload.
 // Payload's deploy.main tags each version with the first 12 characters of the
 // commit SHA and sets the version message to the full SHA; this gate polls
 // Cloudflare until the active deployment carries this commit or a descendant.
@@ -36,6 +36,7 @@ export type GateDeps = {
 	now(): number;
 	log(message: string): void;
 	readFile(path: string): string;
+	mode?: "review" | "production";
 };
 
 // Reads `on.push.paths` from the generated workflow. cuenv emits a fixed
@@ -172,8 +173,8 @@ function readEvent(deps: GateDeps): Record<string, unknown> | undefined {
 	}
 }
 
-// The website workflow's dispatch form exposes `skip_payload_wait`. Boolean
-// inputs reach the event payload as either a boolean or the string "true".
+// The review deploy may be manually skipped. Production mode ignores both the
+// dispatch option and environment flag so the public site always waits.
 function skipRequested(
 	deps: GateDeps,
 	event: Record<string, unknown> | undefined,
@@ -284,7 +285,7 @@ function contains(
 
 export async function run(deps: GateDeps): Promise<0 | 1> {
 	const event = readEvent(deps);
-	if (skipRequested(deps, event)) {
+	if (deps.mode !== "production" && skipRequested(deps, event)) {
 		deps.log("Payload wait skipped on request; not waiting for Payload");
 		return 0;
 	}
@@ -356,8 +357,10 @@ export async function run(deps: GateDeps): Promise<0 | 1> {
 		await deps.sleep(POLL_INTERVAL_MS);
 	}
 
-	deps.log(
-		`${PAYLOAD_WORKER} has not deployed ${tag} or a newer commit. Check the rawkode-academy-payload-default run for this commit; an out-of-band 'wrangler secret put' or rollback also creates an untagged newest deployment. Once Payload is confirmed deployed, run the rawkode-academy-website-default workflow manually with "skip_payload_wait" checked (this redeploys the review frontend only when the commit at the head of main changes review inputs), or deploy it locally from projects/rawkode.academy/website with REVIEW_SKIP_PAYLOAD_WAIT=1 cuenv -e production task deploy.review.`,
-	);
+	const recovery =
+		deps.mode === "production"
+			? `Resolve the Payload migration/deploy for ${tag}, then rerun the website deployment. Production mode does not allow skipping this gate.`
+			: `Check the rawkode-academy-payload-default run for this commit; an out-of-band 'wrangler secret put' or rollback also creates an untagged newest deployment. Once Payload is confirmed deployed, run the website workflow with "skip_payload_wait" checked to deploy the review frontend only, or deploy it locally with REVIEW_SKIP_PAYLOAD_WAIT=1 cuenv -e production task deploy.review.`;
+	deps.log(`${PAYLOAD_WORKER} has not deployed ${tag} or a newer commit. ${recovery}`);
 	return 1;
 }

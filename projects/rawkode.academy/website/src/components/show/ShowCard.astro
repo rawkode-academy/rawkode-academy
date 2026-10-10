@@ -1,6 +1,6 @@
 ---
 import type { ShowSummary } from "@/types/show";
-import { Image } from "astro:assets";
+import { getPayloadImageVariant } from "@/lib/payload-content";
 import MLabel from "@/components/ui/MLabel.vue";
 import { academyDocument } from "@rawkodeacademy/design-system";
 
@@ -37,6 +37,9 @@ const latestEpisode = visibleEpisodes
 	})[0];
 
 const thumbnailUrl = latestEpisode?.video?.thumbnailUrl;
+const cmsCoverUrl = show.cover
+	? getPayloadImageVariant(show.cover.image, 960)
+	: undefined;
 const latestEpisodeTitle = latestEpisode?.video?.title;
 const latestEpisodePublishedAt = latestEpisode?.video?.publishedAt;
 const latestEpisodeDate = latestEpisodePublishedAt
@@ -46,25 +49,30 @@ const latestEpisodeDate = latestEpisodePublishedAt
 	: null;
 ---
 
-<a href={`/shows/${show.id}`} class="show-card" data-show-status={show.status}>
+<a href={`/shows/${show.slug}`} class="show-card" data-show-status={show.status}>
 	{(show.cover || thumbnailUrl) && <div class="show-card__frame">
-		{show.cover ? (
-			<Image
-				src={show.cover.image}
-				alt={show.cover.alt}
+		{cmsCoverUrl ? (
+			<img
+				src={cmsCoverUrl}
+				alt={show.cover?.alt ?? ""}
 				class="show-card__img"
+				width="960"
+				height="540"
 				loading="lazy"
+				decoding="async"
 			/>
-		) : (
+		) : thumbnailUrl ? (
 			<img
 				src={thumbnailUrl}
-				alt={`Latest episode from ${show.name}`}
+			alt={`Latest episode from ${show.name}`}
 				class="show-card__img"
 				width="1280"
 				height="720"
 				loading="lazy"
 				decoding="async"
 			/>
+		) : (
+			<div class="show-card__img" role="img" aria-label={show.cover?.alt ?? show.name} />
 		)}
 		{statusLabel && (
 			<span class:list={["show-card__status", { "show-card__status--archived": isArchived }]}>

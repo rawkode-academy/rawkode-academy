@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import type { CollectionEntry } from "astro:content";
+import type { CollectionEntry } from "@/lib/payload-content";
 import { computed, reactive } from "vue";
 import { academyAuthorGroup } from "@rawkodeacademy/design-system";
 

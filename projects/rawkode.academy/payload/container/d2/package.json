@@ -1,0 +1,8 @@
+{
+  "name": "rawkode-academy-d2-renderer",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@terrastruct/d2": "0.1.33"
+  }
+}

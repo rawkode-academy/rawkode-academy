@@ -10,4 +10,4 @@ export const GET: APIRoute = async ({ site }) => {
 	return xmlResponse(renderUrlSet(site, entries));
 };
 
-export const prerender = true;
+export const prerender = false;

@@ -11,7 +11,7 @@ export async function POST(request: Request) {
   const { user } = await payload.auth({ headers: request.headers })
   if (!isStaff(user)) return Response.json({ error: 'Unauthorized' }, { status: 401 })
   try {
-    const input = await request.json() as { action: string; videoId: number; mediaId: number; checksum: string; videoVersion: string; runId: number; generatedRevision: string; summary: string; injectFailure?: boolean }
+    const input = await request.json() as { action: string; videoId: string; mediaId: string; checksum: string; videoVersion: string; runId: string; generatedRevision: string; summary: string; injectFailure?: boolean }
     if (input.action === 'register') {
       const run = await registerPipeline(payload, user, input)
       const { env } = await getCloudflareContext({ async: true })

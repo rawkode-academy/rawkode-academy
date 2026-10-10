@@ -1,4 +1,4 @@
-import { getCollection } from "astro:content";
+import { getAllCollection } from "@/lib/payload-content";
 import type { APIRoute } from "astro";
 import { buildOpmlDocument, type OpmlFeed, type OpmlOutline } from "@/lib/opml";
 import { isNewsPublished } from "@/lib/news-publication";
@@ -58,12 +58,12 @@ export const GET: APIRoute = async ({ site }) => {
 
 	const [articles, news, videos, technologies, people, shows] =
 		await Promise.all([
-			getCollection("articles"),
-			getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
-			getCollection("videos"),
-			getCollection("technologies"),
-			getCollection("people"),
-			getCollection("shows"),
+			getAllCollection("articles"),
+			getAllCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
+			getAllCollection("videos"),
+			getAllCollection("technologies"),
+			getAllCollection("people"),
+			getAllCollection("shows"),
 		]);
 
 	const topLevelFeeds: OpmlFeed[] = [
@@ -92,43 +92,41 @@ export const GET: APIRoute = async ({ site }) => {
 
 	const technologyOutlines: OpmlFeed[] = [...technologies]
 		.map((technology) => ({
-			rawId: technology.id.replace(/\/index$/, ""),
+			slug: technology.slug,
 			name: technology.data.name,
 		}))
 		.sort((a, b) => a.name.localeCompare(b.name))
-		.map(({ rawId, name }) => ({
+		.map(({ slug, name }) => ({
 			text: `Rawkode Academy: ${name}`,
-			xmlUrl: u(`/api/feeds/technology/${rawId}.xml`),
-			htmlUrl: u(`/technology/${rawId}`),
+			xmlUrl: u(`/api/feeds/technology/${slug}.xml`),
+			htmlUrl: u(`/technology/${slug}`),
 		}));
 
 	const peopleOutlines: OpmlFeed[] = people
 		.filter((person) =>
 			personHasContribution(
-				person.data.id,
+				person.id,
 				articles as never,
 				news as never,
 				videos as never,
 			),
 		)
-		.map((person) => ({ id: person.data.id, name: person.data.name }))
+		.map((person) => ({ id: person.id, slug: person.slug, name: person.data.name }))
 		.sort((a, b) => a.name.localeCompare(b.name))
-		.map(({ id, name }) => ({
+		.map(({ slug, name }) => ({
 			text: `Rawkode Academy: ${name}`,
-			xmlUrl: u(`/api/feeds/people/${id}.xml`),
-			htmlUrl: u(`/people/${id}`),
+			xmlUrl: u(`/api/feeds/people/${slug}.xml`),
+			htmlUrl: u(`/people/${slug}`),
 		}));
 
-	const publishedShows = shows.filter(
-		(show) => show.data.publish && show.data.status !== "coming-soon",
-	);
+	const publishedShows = shows.filter((show) => show.data.status !== "coming-soon");
 	const showOutlines: OpmlFeed[] = publishedShows
-		.map((show) => ({ id: show.data.id, name: show.data.name }))
+		.map((show) => ({ slug: show.slug, name: show.data.name }))
 		.sort((a, b) => a.name.localeCompare(b.name))
-		.map(({ id, name }) => ({
+		.map(({ slug, name }) => ({
 			text: `Rawkode Academy: ${name} (podcast)`,
-			xmlUrl: u(`/api/feeds/shows/${id}.xml`),
-			htmlUrl: u(`/shows/${id}`),
+			xmlUrl: u(`/api/feeds/shows/${slug}.xml`),
+			htmlUrl: u(`/shows/${slug}`),
 		}));
 
 	const groups: OpmlOutline[] = [
@@ -152,4 +150,4 @@ export const GET: APIRoute = async ({ site }) => {
 	});
 };
 
-export const prerender = true;
+export const prerender = false;

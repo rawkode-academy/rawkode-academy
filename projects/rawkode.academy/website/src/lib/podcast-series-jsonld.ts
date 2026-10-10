@@ -1,5 +1,5 @@
 export interface PodcastSeriesHost {
-	id: string;
+	slug: string;
 	name: string;
 }
 
@@ -86,7 +86,7 @@ export function buildPodcastSeriesJsonLd(
 		jsonLd.author = hosts.map((host) => ({
 			"@type": "Person",
 			name: host.name,
-			url: joinUrl(siteUrl, `/people/${host.id}`),
+			url: joinUrl(siteUrl, `/people/${host.slug}`),
 		}));
 	}
 

@@ -1,19 +1,21 @@
-import { getCollection } from "astro:content";
+const { getAllCollection } = vi.hoisted(() => ({ getAllCollection: vi.fn() }));
+vi.mock("@/lib/payload-content", () => ({ getAllCollection }));
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getPersonByGithub, listPeople } from "../subgraph/loaders/people";
 
-const mockedGetCollection = vi.mocked(getCollection);
+const mockedGetAllCollection = vi.mocked(getAllCollection);
 
 describe("people subgraph loader", () => {
 	beforeEach(() => {
-		mockedGetCollection.mockReset();
+		mockedGetAllCollection.mockReset();
 	});
 
 	it("maps GitHub handles, profile URLs, and avatar URLs from content data", async () => {
-		mockedGetCollection.mockResolvedValue([
+		mockedGetAllCollection.mockResolvedValue([
 			{
-				id: "rawkode",
+				id: "person-rawkode-payload-cuid",
+				slug: "rawkode",
 				body: "Rawkode biography",
 				data: {
 					name: "Rawkode",
@@ -35,7 +37,7 @@ describe("people subgraph loader", () => {
 		const [person] = await listPeople();
 
 		expect(person).toMatchObject({
-			id: "rawkode",
+			id: "person-rawkode-payload-cuid",
 			name: "Rawkode",
 			forename: "Rawkode",
 			surname: "",
@@ -53,9 +55,10 @@ describe("people subgraph loader", () => {
 	});
 
 	it("looks up people by normalized GitHub username", async () => {
-		mockedGetCollection.mockResolvedValue([
+		mockedGetAllCollection.mockResolvedValue([
 			{
-				id: "rawkode",
+				id: "person-rawkode-payload-cuid",
+				slug: "rawkode",
 				body: "",
 				data: {
 					name: "Rawkode",
@@ -68,7 +71,7 @@ describe("people subgraph loader", () => {
 		] as never);
 
 		await expect(getPersonByGithub("@Rawkode")).resolves.toMatchObject({
-			id: "rawkode",
+			id: "person-rawkode-payload-cuid",
 			githubHandle: "Rawkode",
 			githubUrl: "https://github.com/Rawkode",
 		});

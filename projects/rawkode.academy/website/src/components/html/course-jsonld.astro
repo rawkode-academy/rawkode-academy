@@ -1,5 +1,5 @@
 ---
-import type { CollectionEntry } from "astro:content";
+import type { CollectionEntry } from "@/lib/payload-content";
 
 interface Props {
 	course: CollectionEntry<"courses">;
@@ -47,7 +47,7 @@ const courseInstances = publishedModules.map((module) => ({
 		: {}),
 }));
 
-const courseUrl = new URL(`/courses/${course.id}`, Astro.site).href;
+const courseUrl = new URL(`/courses/${course.slug}`, Astro.site).href;
 
 // Create structured data for the course
 const courseJsonLd = {

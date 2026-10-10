@@ -1,23 +1,13 @@
 ---
-export const prerender = true;
-
 import TopicHub from "@/components/technology/TopicHub.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
 import Page from "@/wrappers/page.astro";
 import TechnologyJsonLd from "@/components/html/technology-jsonld.astro";
 import TechnologyArticleJsonLd from "@/components/html/technology-article-jsonld.astro";
-import type { GetStaticPaths } from "astro";
-import { getCollection, render } from "astro:content";
-import matter from "gray-matter";
-import { readdir, readFile } from "node:fs/promises";
-import { join } from "node:path";
-import {
-	type TechnologyData,
-	DEFAULT_TECHNOLOGY_STATUS,
-	DEFAULT_TECHNOLOGY_LICENSE,
-} from "@rawkodeacademy/content";
-import { resolveContentDirSync } from "@rawkodeacademy/content/utils";
+import { getEntry, listPayloadContent } from "@/lib/payload-content";
+import CmsBody from "@/components/content/CmsBody.astro";
+import type { TechnologyData } from "@rawkodeacademy/content";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { getVideosForTechnology } from "@/utils/get-videos-for-technology";
 import { isNewsPublished } from "@/lib/news-publication";
@@ -40,203 +30,36 @@ export interface Technology extends Omit<TechnologyData, "logos"> {
 	articleCount?: number;
 }
 
-export const getStaticPaths = (async () => {
-	try {
-		const items = await getCollection("technologies");
-		if (items.length > 0) {
-			return Promise.all(
-				items.map(async (e) => {
-					const logo =
-						resolveTechnologyIconUrl(e.id, e.data.logos) ?? undefined;
-					const videos = await getVideosForTechnology(e.id);
-					return {
-						params: { id: e.id },
-						props: {
-							technology: {
-								id: e.id,
-								name: e.data.name,
-								seo: e.data.seo,
-								documentation: e.data.documentation,
-								website: e.data.website,
-								source: e.data.source,
-								aliases: e.data.aliases,
-								terms: e.data.terms,
-								relatedTechnologies: e.data.relatedTechnologies,
-								license: e.data.license,
-								category: e.data.category,
-								subcategory: e.data.subcategory,
-								status: e.data.status,
-								logo,
-								videos,
-								matrix: e.data.matrix,
-								cncf: e.data.cncf,
-								community: e.data.community,
-							} as Technology,
-						},
-					};
-				}),
-			);
-		}
-	} catch (error) {
-		console.warn(
-			"getCollection('technologies') failed; falling back to FS glob:",
-			error,
-		);
-	}
+export const prerender = false;
 
-	try {
-		const base = resolveContentDirSync("technologies");
-		async function walk(dir: string, rel = ""): Promise<string[]> {
-			const out: string[] = [];
-			const entries = await readdir(dir, { withFileTypes: true });
-			for (const e of entries) {
-				const p = join(dir, e.name);
-				const r = rel ? join(rel, e.name) : e.name;
-				if (e.isDirectory()) out.push(...(await walk(p, r)));
-				else if (e.isFile() && /\.mdx$/i.test(e.name)) out.push(r);
-			}
-			return out;
-		}
-		const files = await walk(base);
-
-		return await Promise.all(
-			files.map(async (rel) => {
-				const id = rel.replace(/\.mdx$/i, "");
-				try {
-					const raw = await readFile(join(base, rel), "utf8");
-					const fm = matter(raw).data as any;
-					const logo = resolveTechnologyIconUrl(id, fm.logos) ?? undefined;
-					const videos = await getVideosForTechnology(id);
-					return {
-						params: { id },
-						props: {
-							technology: {
-								id,
-								name: fm.name ?? id,
-								seo: fm.seo,
-								documentation: fm.documentation,
-								website: fm.website,
-								source: fm.source,
-								aliases: fm.aliases,
-								terms: fm.terms,
-								relatedTechnologies: fm.relatedTechnologies,
-								license: fm.license,
-								category: fm.category,
-								subcategory: fm.subcategory,
-								status: fm.status,
-								logo,
-								videos,
-								matrix: fm.matrix,
-								cncf: fm.cncf,
-								community: fm.community,
-							} as Technology,
-						},
-					};
-				} catch {
-					const videos = await getVideosForTechnology(id);
-					return {
-						params: { id },
-						props: {
-							technology: {
-								id,
-								name: id,
-								videos,
-								status: DEFAULT_TECHNOLOGY_STATUS,
-								website: "",
-								license: DEFAULT_TECHNOLOGY_LICENSE,
-							} as Technology,
-						},
-					};
-				}
-			}),
-		);
-	} catch (error) {
-		console.error("FS fallback for technologies failed:", error);
-		return [];
-	}
-}) satisfies GetStaticPaths;
-
-let { technology } = Astro.props as { technology?: Technology };
-
-const id = Astro.params.id as string;
-const items = await getCollection("technologies");
-const technologyEntry = items.find((x) => x.id === id);
-let Content: any = null;
-let hasContent = false;
-
-if (technologyEntry) {
-	try {
-		const rendered = await render(technologyEntry);
-		Content = rendered.Content;
-		hasContent = Boolean(
-			technologyEntry.body && technologyEntry.body.trim().length > 0,
-		);
-	} catch (err) {
-		console.warn("Failed to render technology content:", err);
-	}
-}
-
-if (!technology) {
-	try {
-		const e = technologyEntry;
-		if (e) {
-			const logo = resolveTechnologyIconUrl(e.id, e.data.logos) ?? undefined;
-			const videos = await getVideosForTechnology(e.id);
-			technology = {
-				id: e.id,
-				name: e.data.name,
-				seo: e.data.seo,
-				documentation: e.data.documentation,
-				website: e.data.website,
-				source: e.data.source,
-				aliases: e.data.aliases,
-				terms: e.data.terms,
-				relatedTechnologies: e.data.relatedTechnologies,
-				license: e.data.license,
-				category: e.data.category,
-				subcategory: e.data.subcategory,
-				status: e.data.status,
-				logo,
-				videos,
-				matrix: e.data.matrix,
-				cncf: e.data.cncf,
-				community: e.data.community,
-			};
-		} else {
-			const base = resolveContentDirSync("technologies");
-			const raw = await readFile(join(base, `${id}.mdx`), "utf8");
-			const fm = matter(raw).data as any;
-			const logo = resolveTechnologyIconUrl(id, fm.logos) ?? undefined;
-			const videos = await getVideosForTechnology(id);
-			technology = {
-				id,
-				name: fm.name ?? id,
-				seo: fm.seo,
-				documentation: fm.documentation,
-				website: fm.website,
-				source: fm.source,
-				aliases: fm.aliases,
-				terms: fm.terms,
-				relatedTechnologies: fm.relatedTechnologies,
-				license: fm.license,
-				category: fm.category,
-				subcategory: fm.subcategory,
-				status: fm.status,
-				logo,
-				videos,
-				matrix: fm.matrix,
-				cncf: fm.cncf,
-				community: fm.community,
-			};
-		}
-	} catch (err) {
-		console.error("Failed to load technology at runtime:", err);
-	}
-}
-
-if (!technology) {
-	return Astro.redirect("/technology");
-}
+const id = Astro.params.id ?? "";
+const technologyEntry = id
+	? await getEntry("technologies", { slug: id })
+	: undefined;
+if (!technologyEntry) return Astro.redirect("/technology");
+const videos = await getVideosForTechnology(technologyEntry.id);
+const technology: Technology = {
+	id: technologyEntry.slug,
+	name: technologyEntry.data.name,
+	seo: technologyEntry.data.seo,
+	documentation: technologyEntry.data.documentation,
+	website: technologyEntry.data.website,
+	source: technologyEntry.data.source,
+	aliases: technologyEntry.data.aliases,
+	terms: technologyEntry.data.terms,
+	relatedTechnologies: technologyEntry.data.relatedTechnologies,
+	license: technologyEntry.data.license,
+	category: technologyEntry.data.category,
+	subcategory: technologyEntry.data.subcategory,
+	status: technologyEntry.data.status,
+	logo: resolveTechnologyIconUrl(technologyEntry.slug, technologyEntry.data.logos, technologyEntry.mediaAssets),
+	videos,
+	matrix: technologyEntry.data.matrix,
+	cncf: technologyEntry.data.cncf,
+	community: technologyEntry.data.community,
+};
+const hasContent = Boolean(technologyEntry.body?.trim());
+const normalizedTechnologyId = technologyEntry.slug;
 
 const videoCount = technology.videos?.length ?? 0;
 const featuredVideos = (technology.videos ?? []).slice(0, 4);
@@ -247,32 +70,30 @@ const categoryLabel =
 // from frontmatter, then fall back to siblings in the same subcategory.
 const RELATED_TECH_LIMIT = 6;
 const explicitRelated = technology.relatedTechnologies ?? [];
+const explicitMatches = (await Promise.all(
+	explicitRelated.map((reference) => getEntry("technologies", reference)),
+)).filter((entry): entry is NonNullable<typeof entry> => Boolean(entry));
 
-const allTechItems = items;
-const techById = new Map(allTechItems.map((t) => [t.id, t]));
-
-const explicitMatches = explicitRelated
-	.map((relId) => techById.get(relId) ?? techById.get(`${relId}/index`))
-	.filter((t): t is (typeof allTechItems)[number] => Boolean(t));
-
-let siblingMatches: typeof allTechItems = [];
-if (technology.category && technology.subcategory) {
-	siblingMatches = allTechItems.filter(
-		(t) =>
-			t.id !== id &&
-			!explicitMatches.some((e) => e.id === t.id) &&
-			t.data.category === technology.category &&
-			t.data.subcategory === technology.subcategory,
-	);
-}
+const siblingMatches = technology.category && technology.subcategory
+	? (await listPayloadContent("technologies", {
+			category: technology.category,
+			limit: 100,
+		}))
+			.filter(
+				(entry) =>
+					entry.id !== technologyEntry.id &&
+					!explicitMatches.some((related) => related.id === entry.id) &&
+					entry.data.subcategory === technology.subcategory,
+			)
+	: [];
 
 const relatedTechSeed = [...explicitMatches, ...siblingMatches];
 const relatedTechnologies = relatedTechSeed
 	.slice(0, RELATED_TECH_LIMIT)
 	.map((entry) => ({
-		id: entry.id,
+		id: entry.slug,
 		name: entry.data.name,
-		logoUrl: resolveTechnologyIconUrl(entry.id, entry.data.logos) ?? undefined,
+		logoUrl: resolveTechnologyIconUrl(entry.slug, entry.data.logos, entry.mediaAssets) ?? undefined,
 		subcategory: entry.data.subcategory,
 		status: entry.data.status,
 	}));
@@ -330,14 +151,11 @@ const seoDescription = (() => {
 const noindex = !hasContent && videoCount === 0;
 const styles = academyTechnology();
 
-const technologyUrl = new URL(
-	`/technology/${technology.id.replace(/\/index$/, "")}`,
-	Astro.site,
-).href;
+const technologyUrl = new URL(`/technology/${technologyEntry.slug}`, Astro.site ?? Astro.url).href;
 const absoluteLogo = technology.logo
 	? technology.logo.startsWith("http")
 		? technology.logo
-		: new URL(technology.logo, Astro.site).href
+		: new URL(technology.logo, Astro.site ?? Astro.url).href
 	: undefined;
 const technologyKeywords = [
 	technology.name,
@@ -429,24 +247,16 @@ const hasMatrixDetails = Boolean(
 	technology.matrix?.makesMeFeel,
 );
 
-// Mirror TopicHub's matching rules so its generic empty state cannot contradict
-// the profile or videos already displayed here.
-const normalizedTechnologyId = technology.id.replace(/\/index$/, "");
-const matchesTechnology = (
-	references: ReadonlyArray<string | { id: string }> | undefined,
-) =>
-	Array.isArray(references) && references.some((reference) => {
-		const id = typeof reference === "string" ? reference : reference.id;
-		return id.replace(/\/index$/, "") === normalizedTechnologyId;
-	});
-const [articles, news, learningPaths] = await Promise.all([
-	getCollection("articles"), getCollection("news"), getCollection("learningPaths"),
-]);
 const now = new Date();
+const [topicArticles, topicNews, topicLearningPaths] = await Promise.all([
+	listPayloadContent("articles", { technologyId: technologyEntry.id, limit: 1 }),
+	listPayloadContent("news", { technologyId: technologyEntry.id, limit: 1 }),
+	listPayloadContent("learningPaths", { technologyId: technologyEntry.id, limit: 1 }),
+]);
 const hasTopicContent =
-	articles.some(({ data }) => data.publishedAt <= now && matchesTechnology(data.technologies)) ||
-	news.some(({ data }) => isNewsPublished(data.publishedAt, now) && matchesTechnology(data.technologies)) ||
-	learningPaths.some(({ data }) => data.publishedAt <= now && matchesTechnology(data.technologies));
+	topicArticles.some(({ data }) => data.publishedAt <= now) ||
+	topicNews.some(({ data }) => isNewsPublished(data.publishedAt, now)) ||
+	topicLearningPaths.some(({ data }) => data.publishedAt <= now);
 const hasAside = videoCount > 0 || hasMatrixDetails ||
 	Boolean(technology.cncf?.status) || cncfDates.length > 0 || cncfLinks.length > 0 || communityLinks.length > 0;
 ---
@@ -540,9 +350,9 @@ const hasAside = videoCount > 0 || hasMatrixDetails ||
 		</header>
 
 		<div class={hasAside ? styles.columns : styles.reading}>
-			{hasContent && Content ? (
+			{hasContent ? (
 				<article id="complete-guide" class={styles.prose} aria-label={technology.name + " profile"}>
-					<Content />
+					<CmsBody entry={technologyEntry} />
 				</article>
 			) : (
 				<section class={styles.section} aria-labelledby="overview-heading">
@@ -639,7 +449,7 @@ const hasAside = videoCount > 0 || hasMatrixDetails ||
 		)}
 		{hasTopicContent && (
 			<section id="more-content" class={styles.ruledSection} aria-label={technology.name + " learning resources"}>
-				<TopicHub technologyId={technology.id} technologyName={technology.name}
+				<TopicHub technologyId={technologyEntry.id} technologyName={technology.name}
 					videos={technology.videos ?? []} showVideos={false} />
 			</section>
 		)}

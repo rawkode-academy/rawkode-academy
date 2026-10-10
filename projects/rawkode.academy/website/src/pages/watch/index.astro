@@ -1,25 +1,31 @@
 ---
 export const prerender = false;
 
-import { getCollection } from "astro:content";
+import { getAllCollection } from "@/lib/payload-content";
+import { getPublishedVideos } from "@/lib/content";
 import { academyPage } from "@rawkodeacademy/design-system";
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Page from "@/wrappers/page.astro";
 import VideoItemListJsonLd from "@/components/html/video-itemlist-jsonld.astro";
-import { getPublishedVideos } from "@/lib/content";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { selectWatchArchive, watchArchiveHref, WATCH_PAGE_SIZE } from "@/lib/watch-archive";
 
 const styles = academyPage();
+// This archive needs complete counts and stable pagination. The bridge pages
+// are cached individually, so the full corpus is fetched only on a cold cache.
+const requestedQuery = Astro.url.searchParams.get("q");
 const [publishedVideos, technologies, people, shows] = await Promise.all([
-	getPublishedVideos(),
-	getCollection("technologies"),
-	getCollection("people"),
-	getCollection("shows"),
+	getPublishedVideos().then((videos) =>
+		videos
+			.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime()),
+	),
+	requestedQuery ? getAllCollection("technologies") : Promise.resolve([]),
+	requestedQuery ? getAllCollection("people") : Promise.resolve([]),
+	requestedQuery ? getAllCollection("shows") : Promise.resolve([]),
 ]);
 const archive = selectWatchArchive(publishedVideos, {
-	query: Astro.url.searchParams.get("q"),
+	query: requestedQuery,
 	page: Astro.url.searchParams.get("page"),
 	technologies, people, shows,
 });

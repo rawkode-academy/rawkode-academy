@@ -3,9 +3,7 @@ import { academyDocument } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
 export const prerender = false;
 
-import { getCollection, getEntries } from "astro:content";
-import { getImage } from "astro:assets";
-import { getPublishedVideos } from "@/lib/content";
+import { getEntry, getAllCollection, getEntries } from "@/lib/payload-content";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import VideoMetadata from "@/components/html/video-metadata.astro";
 import PodcastSeriesJsonLd from "@/components/html/podcast-series-jsonld.astro";
@@ -13,11 +11,11 @@ import VideoFeed from "@/components/video/video-feed.astro";
 import SubscribeLinks from "@/components/show/SubscribeLinks.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Page from "@/wrappers/page.astro";
-import { Image } from "astro:assets";
 import { createLogger } from "@/lib/logger";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import ShowNav from "@/components/show/ShowNav.astro";
 import { getShowNav, hasExtension } from "@/lib/shows/registry";
+import { getPayloadImageVariant } from "@/lib/payload-content";
 
 const logger = createLogger("shows");
 const { showId } = Astro.params;
@@ -27,10 +25,9 @@ if (!showId) {
 	return new Response(null, { status: 404 });
 }
 
-const shows = await getCollection("shows");
-const showEntry = shows.find((s) => s.data.id === showId);
+const showEntry = await getEntry("shows", { slug: showId });
 
-if (!showEntry || !showEntry.data.publish) {
+if (!showEntry) {
 	return new Response(null, { status: 404 });
 }
 
@@ -39,7 +36,11 @@ const isArchived = showEntry.data.status === "archived";
 const statusLabel = isComingSoon ? "Coming soon" : isArchived ? "Archived" : "Show";
 
 // Get published videos only (filters out future-dated for scheduled publishing)
-const videos = await getPublishedVideos();
+const videos = await getAllCollection(
+	"videos",
+	({ data }) => data.publishedAt <= new Date(),
+	{ showId: showEntry.id },
+);
 
 const getShowId = (value: unknown): string | null => {
 	if (!value) return null;
@@ -52,7 +53,7 @@ const getShowId = (value: unknown): string | null => {
 };
 
 const videosForShow = videos.filter(
-	(video) => getShowId(video.data.show) === showEntry.data.id,
+	(video) => getShowId(video.data.show) === showEntry.id,
 );
 
 const hostEntries = await getEntries(showEntry.data.hosts);
@@ -87,7 +88,7 @@ Astro.response.headers.set(
 Astro.response.headers.set("CDN-Cache-Control", "public, max-age=7200");
 Astro.response.headers.set(
 	"Cache-Tag",
-	`show-${showEntry.data.id}, shows-page, show-detail`,
+	`show-${showEntry.id}, shows-page, show-detail`,
 );
 Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 
@@ -100,7 +101,7 @@ const showDescription =
 const breadcrumbElements = [
 	{ title: "Home", link: "/" },
 	{ title: "Shows", link: "/shows" },
-	{ title: showEntry.data.name, link: `/shows/${showEntry.data.id}` },
+	{ title: showEntry.data.name, link: `/shows/${showEntry.slug}` },
 ];
 
 const pageTitle = isComingSoon
@@ -109,8 +110,8 @@ const pageTitle = isComingSoon
 		? `${showEntry.data.name}: Archive`
 		: `${showEntry.data.name} Episodes`;
 
-const showNav = hasExtension(showEntry.data.id)
-	? getShowNav(showEntry.data.id)
+const showNav = hasExtension(showEntry.slug)
+	? getShowNav(showEntry.slug)
 	: [];
 
 const latestEpisode = hasEpisodeFeed ? feedVideos[0] : undefined;
@@ -121,13 +122,14 @@ let podcastImageUrl: string | undefined;
 if (hasEpisodeFeed && showEntry.data.podcast?.artworkUrl) {
 	podcastImageUrl = showEntry.data.podcast.artworkUrl;
 } else if (hasEpisodeFeed && showEntry.data.cover) {
-	try {
-		const resolved = await getImage({ src: showEntry.data.cover.image });
-		podcastImageUrl = new URL(resolved.src, Astro.site ?? Astro.url).href;
-	} catch {
-		// Fall through with no image - JSON-LD `image` is optional.
+	const cmsVariant = getPayloadImageVariant(showEntry.data.cover.image, 1280);
+	if (cmsVariant) {
+		podcastImageUrl = new URL(cmsVariant, Astro.site ?? Astro.url).href;
 	}
 }
+const cmsCoverUrl = showEntry.data.cover
+	? getPayloadImageVariant(showEntry.data.cover.image, 1280)
+	: undefined;
 
 function formatDate(dateString: string) {
 	return new Date(dateString).toLocaleDateString("en-US", {
@@ -156,7 +158,7 @@ function formatDuration(seconds: number) {
 		rel="alternate"
 		type="application/rss+xml"
 		title={`${showEntry.data.name} (Podcast RSS)`}
-		href={`/api/feeds/shows/${showEntry.data.id}.xml`}
+		href={`/api/feeds/shows/${showEntry.slug}.xml`}
 	/>
  )}
  {hasEpisodeFeed && (
@@ -201,7 +203,7 @@ function formatDuration(seconds: number) {
  <div class={doc.actions}>
  <span class={doc.meta}>Hosted by</span>
  {hostEntries.map((host) => (
- <a class={doc.link} href={`/people/${host.data.id}`}>{host.data.name}</a>
+ <a class={doc.link} href={`/people/${host.slug}`}>{host.data.name}</a>
  ))}
  </div>
  )}
@@ -242,11 +244,11 @@ function formatDuration(seconds: number) {
  {showEntry.data.cover ? (
  <div class={doc.mediaColumn}>
  <div class={doc.media}>
- <Image
- src={showEntry.data.cover.image}
- alt={showEntry.data.cover.alt}
- class={doc.image}
- />
+ {cmsCoverUrl ? (
+  <img src={cmsCoverUrl} alt={showEntry.data.cover.alt ?? ""} class={doc.image} width="1280" height="720" loading="eager" />
+ ) : (
+  <div class={doc.image} role="img" aria-label={showEntry.data.cover.alt ?? showEntry.data.name} />
+ )}
  </div>
  </div>
  ) : latestEpisode ? (
@@ -287,7 +289,7 @@ function formatDuration(seconds: number) {
  </section>
 
  {showNav.length > 0 && (
- <ShowNav showId={showEntry.data.id} nav={showNav} active={null} />
+ <ShowNav showId={showEntry.slug} nav={showNav} active={null} />
  )}
 
  <!-- Episodes -->
@@ -333,7 +335,7 @@ function formatDuration(seconds: number) {
  </section>
  <section class={doc.section}>
  <NewsletterCTA
- audience={`show:${showEntry.data.id}`}
+ audience={`show:${showEntry.id}`}
  badge={isComingSoon ? "Coming soon" : isArchived ? "Show updates" : "New episodes by email"}
  headline={`Follow ${showEntry.data.name}`}
  subtitle={isComingSoon ? "Be the first to know when this show is ready." : isArchived ? "Get an email if there is news about this show." : "Get an email when a new episode is published."}

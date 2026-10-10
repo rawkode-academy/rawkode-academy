@@ -30,8 +30,8 @@ export const reviewSnapshot = cache(async (limit = 50): Promise<ReviewSnapshot> 
 // Shared by the edit-view notice and the Save/Publish slots in one request.
 // Fails open: on error the normal buttons render and the database triggers
 // still refuse the write.
-export const videoInReview = cache(async (videoId: number): Promise<boolean> => {
-	if (!Number.isFinite(videoId)) return false
+export const videoInReview = cache(async (videoId: string): Promise<boolean> => {
+	if (!/^[a-z][a-z0-9]{23}$/.test(videoId)) return false
 	try {
 		return await isReviewManaged(new ReviewStore(cloudflare.env.D1), videoId)
 	} catch (error) {

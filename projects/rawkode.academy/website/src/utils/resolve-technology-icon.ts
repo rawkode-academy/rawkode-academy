@@ -1,20 +1,7 @@
-// Eagerly import all technology logos
-// Path is relative to this file, goes up to monorepo root then into content
-const iconModules = import.meta.glob<{ default: ImageMetadata }>(
-	"../../../../../content/technologies/*/icon.svg",
-	{ eager: true },
-);
-const horizontalModules = import.meta.glob<string>(
-	"../../../../../content/technologies/*/horizontal.svg",
-	{ eager: true, import: "default", query: "?url" },
-);
-
-interface ImageMetadata {
-	src: string;
-	width: number;
-	height: number;
-	format: string;
-}
+import {
+	resolveMediaAsset,
+	type PayloadMediaAsset,
+} from "@/lib/payload-content";
 
 interface LogosConfig {
 	icon?: boolean | undefined;
@@ -22,41 +9,35 @@ interface LogosConfig {
 	stacked?: boolean | undefined;
 }
 
-// Build maps of technology ID -> logo URL
-const iconUrlMap: Record<string, string> = {};
-for (const [path, module] of Object.entries(iconModules)) {
-	// Path is like "../../../content/technologies/kubernetes/icon.svg"
-	const match = path.match(/\/technologies\/([^/]+)\/icon\.svg$/);
-	if (match?.[1] && module.default?.src) {
-		iconUrlMap[match[1]] = module.default.src;
-	}
+function resolveLogo(
+	entrySlug: string,
+	kind: "icon" | "horizontal",
+	assets: PayloadMediaAsset[] = [],
+): string | undefined {
+	const suffix = `${entrySlug.replace(/^\/+|\/+$/g, "")}/${kind}.svg`;
+	const asset = assets.find((candidate) => {
+		const path = candidate.relativePath.replace(/^\/+/, "").replace(/\\/g, "/");
+		return path === suffix || path.endsWith(`/technologies/${suffix}`);
+	});
+	return asset ? resolveMediaAsset(asset.relativePath, assets)?.url : undefined;
 }
 
-const horizontalUrlMap: Record<string, string> = {};
-for (const [path, module] of Object.entries(horizontalModules)) {
-	const match = path.match(/\/technologies\/([^/]+)\/horizontal\.svg$/);
-	if (match?.[1] && module) {
-		horizontalUrlMap[match[1]] = module;
-	}
-}
-
+/** Resolve a Payload managed technology icon through the site media endpoint. */
 export function resolveTechnologyIconUrl(
-	entryId: string,
+	entrySlug: string,
 	logos?: LogosConfig | null,
+	assets?: PayloadMediaAsset[],
 ): string | undefined {
 	if (!logos?.icon) return undefined;
-
-	// Entry ID is like "kubernetes/index", extract just the technology name
-	const techId = entryId.replace(/\/index$/, "");
-	return iconUrlMap[techId];
+	return resolveLogo(entrySlug, "icon", assets);
 }
 
+/** Resolve a Payload managed horizontal logo through the site media endpoint. */
 export function resolveTechnologyHorizontalLogoUrl(
-	entryId: string,
+	entrySlug: string,
 	logos?: LogosConfig | null,
+	assets?: PayloadMediaAsset[],
 ): string | undefined {
 	if (!logos?.horizontal) return undefined;
-
-	const techId = entryId.replace(/\/index$/, "");
-	return horizontalUrlMap[techId];
+	return resolveLogo(entrySlug, "horizontal", assets);
 }

@@ -10,7 +10,7 @@ const b:any=await fetch(base+'/api/auth/session',{headers:auth(fixture.tokens.b)
 assert.equal(b.user.role,'customer')
 assert.equal((await fetch(base+`/api/videos/${fixture.privateVideoId}?draft=true`,{headers:auth(fixture.tokens.a)})).status,200)
 const id='oidc-staff-'+Date.now()
-const created=await fetch(base+'/api/articles',{method:'POST',headers:auth(fixture.tokens.a),body:JSON.stringify({legacyId:id,legacyType:'Article',slug:id,title:'Created by synthetic OIDC staff',_status:'draft'})})
+const created=await fetch(base+'/api/articles',{method:'POST',headers:auth(fixture.tokens.a),body:JSON.stringify({slug:id,title:'Created by synthetic OIDC staff',_status:'draft'})})
 assert.equal(created.status,201)
 const browser=await chromium.launch({executablePath:process.env.CHROME_PATH??'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:true})
 try {

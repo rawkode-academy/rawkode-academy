@@ -89,18 +89,27 @@ describe("Academy document migration", () => {
 		const curriculum = source("components/courses/CourseModules.astro");
 		const lesson = source("pages/courses/[course]/[...slug].astro");
 		expect(curriculum).toContain('const Element = isDraft ? "div" : "a"');
-		expect(curriculum).toContain("getCourseModuleSlug(course.id, module.id)");
+		expect(curriculum).toContain("getCourseModuleSlug(course.slug, module.slug)");
 		expect(lesson).toContain('client:only="vue"');
 		expect(lesson).not.toContain("loadWebContainerFiles");
 		const resources = source("components/courses/ResourceList.vue");
-		expect(resources).toContain("const resourceId = resource.embedConfig.src");
-		expect(resources).toContain("/embed/webcontainer?course=");
-		expect(source("pages/embed/webcontainer.astro")).toContain(
-			"loadDemoFiles(courseId, demoId)",
-		);
+		expect(resources).toContain("const resourceId = resource.id || resource.embedConfig.src");
+		expect(resources).toContain("new URLSearchParams({");
+		expect(resources).toContain("module: moduleSlug");
+		expect(resources).toContain("resource: resourceId");
+		expect(resources).toContain("/embed/webcontainer?${params.toString()}");
+		const embedRoute = source("pages/embed/webcontainer.astro");
+		expect(embedRoute).toContain("getWebContainerDemo(courseSlug, fullModuleSlug, resourceKey)");
+		expect(embedRoute).toContain("readDemoFiles(demo.files)");
+		expect(embedRoute).toContain("export const prerender = false;");
+		expect(embedRoute).not.toContain("virtual:webcontainer-demos");
+		const payloadContent = source("lib/payload-content.ts");
+		expect(payloadContent).toContain('`/v1/demos?${params.toString()}`');
 		expect(lesson).toContain(
 			"dedupedResources.length > 0 && doc.moduleFlowRail",
 		);
-		expect(lesson).toContain("<ResourceList resources={dedupedResources}");
+		expect(lesson).toContain("const resourceListResources = dedupedResources.map");
+		expect(lesson).toContain("<ResourceList resources={resourceListResources}");
+		expect(lesson).not.toContain("resource.embedConfig.files");
 	});
 });

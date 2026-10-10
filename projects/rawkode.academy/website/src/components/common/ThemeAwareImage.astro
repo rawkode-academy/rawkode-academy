@@ -1,13 +1,11 @@
 ---
 export interface Props {
-	lightSrc: ImageMetadata;
-	darkSrc: ImageMetadata;
+	lightSrc: ImageMetadata | string;
+	darkSrc: ImageMetadata | string;
 	alt: string;
-	class?: string;
+	class?: string | undefined;
 	loading?: "eager" | "lazy";
 }
-
-import { Image } from "astro:assets";
 
 const {
 	lightSrc,
@@ -16,20 +14,33 @@ const {
 	class: className = "",
 	loading = "lazy",
 } = Astro.props;
+
+const lightUrl = typeof lightSrc === "string" ? lightSrc : lightSrc.src;
+const darkUrl = typeof darkSrc === "string" ? darkSrc : darkSrc.src;
+const lightWidth = typeof lightSrc === "string" ? undefined : lightSrc.width;
+const lightHeight = typeof lightSrc === "string" ? undefined : lightSrc.height;
+const darkWidth = typeof darkSrc === "string" ? undefined : darkSrc.width;
+const darkHeight = typeof darkSrc === "string" ? undefined : darkSrc.height;
 ---
 
 <div class={`theme-aware-image ${className}`}>
-	<Image
-		src={lightSrc}
+	<img
+		src={lightUrl}
 		alt={alt}
 		class="theme-light-only"
 		loading={loading}
+		width={lightWidth}
+		height={lightHeight}
+		decoding="async"
 	/>
-	<Image
-		src={darkSrc}
+	<img
+		src={darkUrl}
 		alt={alt}
 		class="theme-dark-only"
 		loading={loading}
+		width={darkWidth}
+		height={darkHeight}
+		decoding="async"
 	/>
 </div>
 

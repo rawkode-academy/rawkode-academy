@@ -1,17 +1,25 @@
 import type { APIContext } from "astro";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { getEntry } from "@/lib/payload-content";
 
-const { collections, getCollection } = vi.hoisted(() => ({
+const { collections, getAllCollectionMock, getEntryMock } = vi.hoisted(() => ({
 	collections: {} as Record<string, any[]>,
-	getCollection: vi.fn(),
+	getAllCollectionMock: vi.fn(),
+	getEntryMock: vi.fn(),
 }));
-vi.mock("astro:content", () => ({ getCollection, render: vi.fn() }));
+vi.mock("@/lib/payload-content", () => ({
+	getAllCollection: getAllCollectionMock,
+	getEntry: getEntryMock,
+}));
 import { GET, prerender } from "../pages/api/feeds/people/[id].xml";
 
 const entry = (id: string, data = {}) => ({
 	id,
-	data: { id, name: id, title: id, description: "A & B", slug: id,
-		publishedAt: new Date("2026-01-01"), authors: ["person"], guests: ["person"], ...data },
+	slug: id,
+	collection: "articles",
+	mediaAssets: [],
+	data: { name: id, title: id, description: "A & B",
+		publishedAt: new Date("2026-01-01"), authors: [], guests: [], ...data },
 });
 const context = (id: string | undefined) => ({
 	params: { id }, props: {}, site: new URL("https://academy.test"),
@@ -22,14 +30,23 @@ beforeEach(() => {
 	vi.setSystemTime(new Date("2026-09-20T12:00:00Z"));
 	for (const key of Object.keys(collections)) delete collections[key];
 	collections.people = [entry("person", { name: "Person & Friends" })];
-	getCollection.mockImplementation(async (name, filter) =>
-		(collections[name] ?? []).filter(filter ?? (() => true)));
+	getEntryMock.mockImplementation(async (name: string, lookup: { slug?: string }) =>
+		(collections[name] ?? []).find((record) => record.slug === lookup.slug),
+	);
+	getAllCollectionMock.mockImplementation(async (name: string, filter?: (value: any) => boolean, options?: Record<string, string>) => {
+		const relation = options?.authorId ?? options?.personId;
+		const relationField = name === "videos" ? "guests" : "authors";
+		return (collections[name] ?? []).filter((record) =>
+			(!relation || record.data[relationField]?.some((ref: any) => (typeof ref === "string" ? ref : ref.id) === relation)) &&
+			(!filter || filter(record)),
+		);
+	});
 });
 afterEach(() => vi.useRealTimers());
 
 describe("person RSS request-time contracts", () => {
 	it("resolves params without static props and emits real RSS with escaped identity", async () => {
-		collections.videos = [entry("talk")];
+		collections.videos = [entry("talk", { guests: ["person"] })];
 		const response = await GET(context("person"));
 		const xml = await response.text();
 		expect(prerender).toBe(false);
@@ -43,7 +60,7 @@ describe("person RSS request-time contracts", () => {
 	it.each(["unknown", undefined])("returns 404 for unknown/missing ID %s", async (id) => {
 		const response = await GET(context(id));
 		expect(response.status).toBe(404);
-		expect(getCollection).toHaveBeenCalledTimes(1);
+		expect(getEntry).toHaveBeenCalledTimes(1);
 	});
 
 	it("returns a valid named empty feed for a known host-only profile", async () => {
@@ -57,8 +74,8 @@ describe("person RSS request-time contracts", () => {
 
 	it("filters future content while including legacy-flagged articles and excluding unrelated people", async () => {
 		const future = new Date("2026-09-20T12:00:00.001Z");
-		collections.articles = [entry("article"), entry("formerly-hidden", { draft: true }), entry("future-article", { publishedAt: future })];
-		collections.news = [entry("news", { authors: [{ id: "person" }] }), entry("future-news", { publishedAt: future })];
+		collections.articles = [entry("article", { authors: ["person"] }), entry("formerly-hidden", { draft: true, authors: ["person"] }), entry("future-article", { publishedAt: future, authors: ["person"] })];
+		collections.news = [entry("news", { authors: [{ id: "person" }] }), entry("future-news", { publishedAt: future, authors: ["person"] })];
 		collections.videos = [entry("video", { guests: [{ id: "person" }], publishedAt: new Date() }),
 			entry("future-recorded", { publishedAt: future, type: "recorded" }),
 			entry("future-live", { publishedAt: future, type: "live" }),

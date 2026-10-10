@@ -1,4 +1,4 @@
-import type { ImageMetadata } from "astro";
+import type { CmsCover } from "@/lib/payload-content";
 
 export type ShowStatus = "coming-soon" | "active" | "archived";
 
@@ -17,17 +17,12 @@ export interface ShowEpisode {
 
 export interface ShowSummary {
 	id: string;
+	slug: string;
 	name: string;
 	status: ShowStatus;
 	tagline?: string | null | undefined;
 	gameFormatUrl?: string | null | undefined;
 	hosts?: ShowHost[] | null;
 	episodes?: (ShowEpisode | null)[] | null;
-	cover?:
-		| {
-				image: ImageMetadata;
-				alt: string;
-		  }
-		| null
-		| undefined;
+	cover?: CmsCover | null | undefined;
 }

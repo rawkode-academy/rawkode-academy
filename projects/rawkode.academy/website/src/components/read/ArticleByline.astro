@@ -1,7 +1,7 @@
 ---
 import { academyDocument } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
-import type { CollectionEntry } from "astro:content";
+import type { CollectionEntry } from "@/lib/payload-content";
 
 interface Tag {
 	label: string;
@@ -27,7 +27,7 @@ const {
 
 <div class={doc.byline}>
 	{authors.map((author) => (
-		<a class={doc.author} href={`/people/${author.data.id}`}>
+		<a class={doc.author} href={`/people/${author.slug}`}>
 			{author.data.avatarUrl && <img class={doc.avatar} src={author.data.avatarUrl} alt="" width="40" height="40" loading="lazy" />}
 			<span class={doc.authorMeta}>{author.data.name}</span>
 		</a>

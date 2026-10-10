@@ -1,5 +1,5 @@
 export type Transaction = {stateHash:string;bindingHash:string;verifier:string;nonce:string;redirectUri:string;expiresAt:number}
-export type Session = {tokenHash:string;userId:number;expiresAt:number}
+export type Session = {tokenHash:string;userId:string;expiresAt:number}
 export interface AuthStore {
   putTransaction(value:Transaction):Promise<void>
   consumeTransaction(stateHash:string,bindingHash:string,now:number):Promise<Transaction|null>

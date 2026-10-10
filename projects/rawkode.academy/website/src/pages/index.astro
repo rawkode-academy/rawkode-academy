@@ -1,5 +1,5 @@
 ---
-import { getCollection } from "astro:content";
+import { getCollection } from "@/lib/payload-content";
 import { academyPage } from "@rawkodeacademy/design-system";
 import AcademyPage from "@/components/academy/AcademyPage.vue";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
@@ -65,7 +65,7 @@ const videos = publishedVideos.slice(0, 1).map((video) => ({
 }));
 
 const paths = learningPaths.slice(0, 8).map((path) => ({
-	href: `/learning-paths/${path.id}`,
+		href: `/learning-paths/${path.slug}`,
 	title: path.data.title,
 	description: compactCopy(path.data.description),
 	meta: [

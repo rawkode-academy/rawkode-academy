@@ -1,5 +1,5 @@
 ---
-import type { CollectionEntry } from "astro:content";
+import type { CollectionEntry } from "@/lib/payload-content";
 import { formatVideoRuntimeLabel } from "@/lib/video-runtime";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { academyWatch } from "@rawkodeacademy/design-system";
@@ -16,15 +16,21 @@ interface Props {
 		type?: string | undefined;
 	}>;
 	totalVideos?: number;
+	hasMoreVideos?: boolean;
 }
 
-const { technology, videos, totalVideos } = Astro.props;
+const { technology, videos, totalVideos, hasMoreVideos: hasMoreVideosProp } = Astro.props;
 
-const techId = technology.id.replace(/\/index$/, "");
+const techSlug = technology.slug;
 const techName = technology.data.name;
-const iconUrl = resolveTechnologyIconUrl(technology.id, technology.data.logos);
+const iconUrl = resolveTechnologyIconUrl(technology.slug, technology.data.logos, technology.mediaAssets);
 
-const hasMoreVideos = totalVideos && totalVideos > videos.length;
+const hasMoreVideos =
+	hasMoreVideosProp ??
+	(typeof totalVideos === "number" && totalVideos > videos.length);
+const allVideosLabel = typeof totalVideos === "number"
+	? `View all ${totalVideos} videos`
+	: hasMoreVideos ? "View all videos" : "View technology";
 const watch = academyWatch();
 ---
 
@@ -50,10 +56,10 @@ const watch = academyWatch();
 				</h2>
 			</div>
 			<a
-				href={`/technology/${techId}`}
+				href={`/technology/${techSlug}`}
 				class={watch.railLink}
 			>
-				{hasMoreVideos ? `View all ${totalVideos} videos` : "View technology"}
+				{allVideosLabel}
 				<svg class={watch.railIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
 				</svg>

@@ -10,20 +10,27 @@ import ts from "typescript";
 import * as runtime from "astro/runtime/server/index.js";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import { parse } from "node-html-parser";
+import { createPayloadContentFixtures } from "./helpers/payload-content-fixtures.mjs";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
-const person = (data = {}) => ({ id: "person", body: "", data: { id: "person", name: "Real Person", handles: {}, ...data } });
+const person = (data = {}) => {
+	const { id: slugHint, ...fields } = data;
+	const slug = slugHint && slugHint !== "person" ? slugHint : "person";
+	const id = `${slug}-payload-cuid`;
+	return { id, slug, body: "", data: { name: "Real Person", handles: {}, ...fields, id } };
+};
 const video = (id, data = {}) => ({ id, data: {
 	id, slug: id, title: id, publishedAt: new Date("2020-01-01"), duration: 65,
-	guests: [{ id: "person" }], technologies: [], ...data,
+	guests: [{ id: "person-payload-cuid" }], technologies: [], ...data,
 } });
 const story = (id, data = {}) => ({ id, data: {
-	title: id, description: "Real description", publishedAt: new Date("2020-01-01"), authors: [{ id: "person" }], ...data,
+	title: id, description: "Real description", publishedAt: new Date("2020-01-01"), authors: [{ id: "person-payload-cuid" }], ...data,
 } });
 
 async function render(path, props, collections = {}) {
-	const context = vm.createContext({ console, URL, __NEWS_DEPLOYMENT_CUTOFF_MS__: Date.parse("2100-01-01") });
+	const context = vm.createContext({ console, URL, Request, Response });
 	const pageProps = [], showProps = [], jsonLdProps = [];
+	const payload = createPayloadContentFixtures(collections);
 	const empty = runtime.createComponent(() => runtime.render``);
 	const styles = () => new Proxy({}, { get: (_, slot) => `academy-${String(slot)}` });
 	const mocks = {
@@ -44,11 +51,7 @@ async function render(path, props, collections = {}) {
 			}, ...options),
 		},
 		"@rawkodeacademy/design-system": { academyDocument: styles, academyLayout: styles, academyWatch: styles, academyCatalog: styles },
-		"astro:content": {
-			getCollection: async (name, filter) => (collections[name] ?? []).filter(filter ?? (() => true)),
-			getEntries: async (refs) => refs.map((ref) => (collections.people ?? []).find(p => p.id === (ref.id ?? ref))),
-			render: async () => ({ Content: empty }),
-		},
+		"@/lib/payload-content": payload,
 		"@/wrappers/page.astro": { default: runtime.createComponent((result, props, slots) => {
 			pageProps.push(props);
 			return runtime.render`<main>${runtime.renderSlot(result, slots["extra-head"])}${runtime.renderSlot(result, slots.default)}</main>`;
@@ -56,6 +59,9 @@ async function render(path, props, collections = {}) {
 		"@/components/html/person-jsonld.astro": { default: runtime.createComponent((_result, props) => {
 			jsonLdProps.push(props); return runtime.render``;
 		}) },
+		// CMS body rendering has its own safety/renderer contracts. Keep these
+		// people identity and publication tests independent of the body registry.
+		"@/components/content/CmsBody.astro": { default: empty },
 		"@/components/show/ShowCard.astro": { default: runtime.createComponent((_result, props) => {
 			showProps.push(props.show); return runtime.render`<h3>${props.show.name}</h3>`;
 		}) },
@@ -71,6 +77,11 @@ async function render(path, props, collections = {}) {
 		}).outputText, { context, identifier: path });
 		await module.link(async (specifier) => {
 			let exports = mocks[specifier];
+			const normalized = specifier
+				.replace(/[?#].*$/, "")
+				.replace(/\.(?:[cm]?[jt]sx?)$/, "");
+			if (!exports && normalized.endsWith("/lib/payload-content"))
+				exports = payload;
 			if (specifier.includes("?astro&type=style")) exports = {};
 			if (!exports && specifier.startsWith("@/")) {
 				const local = specifier.slice(2);
@@ -86,8 +97,12 @@ async function render(path, props, collections = {}) {
 	const module = await load(path);
 	await module.evaluate();
 	const container = await AstroContainer.create();
-	const html = await container.renderToString(module.namespace.default, { props, request: new Request("https://academy.test/people/person") });
-	return { dom: parse(html), html, pageProps, showProps, jsonLdProps };
+	const html = await container.renderToString(module.namespace.default, {
+		props,
+		params: path === "pages/people/[id].astro" ? { id: props.person?.slug } : {},
+		request: new Request("https://academy.test/people/person"),
+	});
+	return { dom: parse(html), html, pageProps, showProps, jsonLdProps, payloadCalls: payload.calls };
 }
 const renderPerson = (entry, collections = {}) => render("pages/people/[id].astro", { person: entry }, { people: [entry], ...collections });
 
@@ -119,20 +134,21 @@ test("generic organization/content links stay visible without person identity cl
 
 test("directory and detail share conservative identity metadata without losing native profile links", async () => {
 	const entry = person({ github: "https://github.com/person", mastodon: "https://social.test/@person", website: "https://company.test/", youtube: "https://youtube.test/company" });
-	const { dom } = await render("pages/people/index.astro", {}, { people: [entry] });
+	const { dom, payloadCalls } = await render("pages/people/index.astro", {}, { people: [entry] });
 	const metadata = JSON.parse(dom.querySelector('script[type="application/ld+json"]').text);
 	const detail = await renderPerson(entry);
 	assert.deepEqual(metadata.itemListElement[0].item.sameAs, Array.from(detail.jsonLdProps[0].sameAs));
 	assert.deepEqual(metadata.itemListElement[0].item.sameAs, [entry.data.github, entry.data.mastodon]);
-	assert.equal(dom.querySelector('a[href="/people/person"]').getAttribute("aria-labelledby"), "person-person");
+	assert.equal(dom.querySelector(`a[href="/people/${entry.slug}"]`).getAttribute("aria-labelledby"), `person-${entry.data.id}`);
+	assert(payloadCalls.some((call) => call.kind === "all" && call.collection === "people"));
 });
 
 test("publication filters run before all profile counts, lists, show episodes and SEO", async () => {
 	const future = new Date("2999-01-01"), entry = person();
-	const { dom, pageProps, showProps } = await renderPerson(entry, {
-		shows: [{ id: "show", data: { id: "show", name: "Published show", publish: true, hosts: [{ id: "person" }] } },
-			{ id: "hidden", data: { id: "hidden", name: "Hidden show", publish: false, hosts: [{ id: "person" }] } }],
-		videos: [video("published", { show: { id: "show" } }), video("future-recorded", { show: { id: "show" }, publishedAt: future }), video("future-live", { publishedAt: future, type: "live" })],
+	const { dom, pageProps, showProps, payloadCalls } = await renderPerson(entry, {
+		shows: [{ id: "show-payload-cuid", slug: "show", data: { name: "Published show", publish: true, hosts: [{ id: "person-payload-cuid" }] } },
+			{ id: "hidden-payload-cuid", slug: "hidden", data: { name: "Hidden show", publish: false, hosts: [{ id: "person-payload-cuid" }] } }],
+		videos: [video("published", { show: { id: "show-payload-cuid" } }), video("future-recorded", { show: { id: "show-payload-cuid" }, publishedAt: future }), video("future-live", { publishedAt: future, type: "live" })],
 		articles: [story("article"), story("draft", { draft: true }), story("future-article", { publishedAt: future })],
 		news: [story("news"), story("future-news", { publishedAt: future })],
 	});
@@ -143,6 +159,8 @@ test("publication filters run before all profile counts, lists, show episodes an
 	for (const absent of ["future-", "Hidden show"]) assert(!dom.text.includes(absent));
 	assert(dom.text.includes("draft"));
 	assert.equal(pageProps[0].noindex, false);
+	assert(payloadCalls.some((call) => call.kind === "entry" && call.collection === "people" && call.lookup?.slug === entry.slug));
+	assert(payloadCalls.some((call) => call.kind === "all" && call.collection === "videos" && call.options.personId === entry.id));
 	assert.match(pageProps[0].description, /3 published stories/);
 	assert.equal(dom.querySelectorAll('h2').filter(h => !h.text.trim()).length, 0);
 	assert.equal(dom.querySelectorAll('a[href="/watch/published"]').length, 1);
@@ -157,7 +175,7 @@ test("future-only profile stays honestly empty, noindex, with no empty section h
 });
 
 test("host-only profile keeps truthful hosting and the now-supported named RSS destination", async () => {
-	const { dom, pageProps } = await renderPerson(person(), { shows: [{ id: "show", data: { id: "show", name: "Show", hosts: ["person"], publish: true } }] });
+	const { dom, pageProps } = await renderPerson(person(), { shows: [{ id: "show-payload-cuid", slug: "show", data: { name: "Show", hosts: [{ id: "person-payload-cuid" }], publish: true } }] });
 	assert.equal(pageProps[0].noindex, false);
 	assert.match(dom.text, /Host of 1 show/);
 	assert(!dom.text.includes("guest appearance"));

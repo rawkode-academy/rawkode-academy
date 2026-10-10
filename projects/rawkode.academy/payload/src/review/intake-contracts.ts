@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { metadataSchema } from './contracts'
+import { isCuid2 } from '../cuid2'
 
 export const maximumIntakeBytes = 64 * 1024 * 1024
 export const sourceTypes = ['video/mp4', 'video/quicktime', 'video/webm'] as const
@@ -7,15 +8,15 @@ export const whisperModel = '@cf/openai/whisper-large-v3-turbo' as const
 const sha = z.string().regex(/^[a-f0-9]{64}$/)
 const bytes = z.number().int().positive().max(maximumIntakeBytes)
 export const intakeCommand = z.discriminatedUnion('action', [
-  z.object({ action: z.literal('begin'), commandId: z.string().uuid(), videoId: z.number().int().positive(), bytes, checksum: sha, contentType: z.enum(sourceTypes), metadata: metadataSchema }).strict(),
-  z.object({ action: z.enum(['process', 'cancel']), sessionId: z.string().uuid() }).strict(),
+  z.object({ action: z.literal('begin'), commandId: z.string().refine(isCuid2), videoId: z.string().refine(isCuid2), bytes, checksum: sha, contentType: z.enum(sourceTypes), metadata: metadataSchema }).strict(),
+  z.object({ action: z.enum(['process', 'cancel']), sessionId: z.string().refine(isCuid2) }).strict(),
 ])
 export const storedObject = z.object({ key: z.string().min(1).max(300), etag: z.string().min(1).max(200), checksum: sha, bytes }).strict()
 export type StoredObject = z.infer<typeof storedObject>
 export const transcriptionResult = z.object({ model: z.literal(whisperModel), sourceChecksum: sha, transcript: z.string().max(100000) }).strict()
 export const probeResult = z.object({
   transcription: transcriptionResult.optional(),
-  jobId: z.string().uuid(), recipe: sha,
+  jobId: z.string().refine(isCuid2), recipe: sha,
   source: storedObject.extend({ contentType: z.enum(sourceTypes) }).strict(),
   deliverable: storedObject.extend({
     contentType: z.literal('video/mp4'), durationMs: z.number().int().positive().max(86400000),

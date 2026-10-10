@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { DatabaseSync } from 'node:sqlite'
 import test, { type TestContext } from 'node:test'
 import { sql, type MigrateUpArgs } from '@payloadcms/db-d1-sqlite'
-import { migrations } from '../src/migrations'
+import { migrations } from '../src/migrations-cuid2'
 import { ReviewStore } from '../src/review/store'
 import { ReviewService } from '../src/review/service'
 import { ReviewIntake } from '../src/review/intake'
@@ -16,10 +16,12 @@ import { WorkflowMediaAdapter } from '../src/review/workflow-adapter'
 import { WorkersWhisper, ContainerFFmpegClient, validateAudio, joinTranscript } from '../src/review/processing-providers'
 import { runReviewProcessing, type DurableSteps } from '../src/review/processing-workflow'
 import type { ReviewActor } from '../src/review/contracts'
+import { createCuid2 } from '../src/cuid2'
+import { CLIENT_ID, OTHER_THUMBNAIL_ID, OTHER_VIDEO_ID, SOURCE_MEDIA_ID, STAFF_ID, STRANGER_ID, THUMBNAIL_ID, VIDEO_ID } from './helpers/ids'
 
-const staff: ReviewActor = { id: 1, collection: 'users', role: 'staff' }
-const customer: ReviewActor = { id: 2, collection: 'users', role: 'customer' }
-const otherStaff: ReviewActor = { id: 3, collection: 'users', role: 'staff' }
+const staff: ReviewActor = { id: STAFF_ID, collection: 'users', role: 'staff' }
+const customer: ReviewActor = { id: CLIENT_ID, collection: 'users', role: 'customer' }
+const otherStaff: ReviewActor = { id: STRANGER_ID, collection: 'users', role: 'staff' }
 const origin = 'https://preview.rawkode.academy'
 // Deliberately NOT real media. Only the injected adapter asserts playability.
 const sourceBytes = new TextEncoder().encode('source fixture'), outputBytes = new TextEncoder().encode('encoded fixture')
@@ -56,12 +58,19 @@ function fakeBucket() {
 }
 async function harness(t: TestContext, provider = true) {
   const sqlite = new DatabaseSync(':memory:'); t.after(() => sqlite.close()); sqlite.exec('PRAGMA foreign_keys=ON')
-  const args = { db: { run(statement: ReturnType<typeof sql>) {
-    const query = statement.toQuery({ casing: undefined as never, escapeName: v => `"${v}"`, escapeParam: () => '?', escapeString: v => `'${v.replaceAll("'", "''")}'` })
-    assert.equal(query.params.length, 0); sqlite.exec(query.sql)
-  } } } as unknown as MigrateUpArgs
+  const args = { db: {
+    async run(statement: ReturnType<typeof sql>) {
+      const query = statement.toQuery({ casing: undefined as never, escapeName: v => `"${v}"`, escapeParam: () => '?', escapeString: v => `'${v.replaceAll("'", "''")}'` })
+      if (query.params.length) sqlite.prepare(query.sql).run(...query.params as (string | number | null)[])
+      else sqlite.exec(query.sql)
+    },
+    async all(statement: ReturnType<typeof sql>) {
+      const query = statement.toQuery({ casing: undefined as never, escapeName: v => `"${v}"`, escapeParam: () => '?', escapeString: v => `'${v.replaceAll("'", "''")}'` })
+      return sqlite.prepare(query.sql).all(...query.params as (string | number | null)[])
+    },
+  } } as unknown as MigrateUpArgs
   for (const migration of migrations) { sqlite.exec('BEGIN; PRAGMA defer_foreign_keys=ON'); await migration.up(args); sqlite.exec('COMMIT') }
-  sqlite.exec("INSERT INTO users(id,email,role) VALUES(1,'staff@example.invalid','staff'),(2,'customer@example.invalid','customer'),(3,'staff2@example.invalid','staff'); INSERT INTO videos(id,legacy_id,legacy_type,slug,title) VALUES(10,'one','Video','one','One'),(11,'two','Video','two','Two')")
+  sqlite.exec(`INSERT INTO users(id,email,role) VALUES('${STAFF_ID}','staff@example.invalid','staff'),('${CLIENT_ID}','customer@example.invalid','customer'),('${STRANGER_ID}','staff2@example.invalid','staff'); INSERT INTO videos(id,slug,title) VALUES('${VIDEO_ID}','one','One'),('${OTHER_VIDEO_ID}','two','Two')`)
   let failSQL: RegExp | undefined, clock = 1000
   class Prepared {
     values: (string | number | null)[] = []
@@ -77,7 +86,7 @@ async function harness(t: TestContext, provider = true) {
   } } as unknown as D1Database
   const store = new ReviewStore(db), r2 = fakeBucket(), assets = new TrustedAssets(store, r2.bucket)
   const review = new ReviewService(store, {
-    async video(id) { const row = sqlite.prepare('SELECT * FROM videos WHERE id=?').get(id); if (!row) throw Error('missing video'); return { id, legacyId: String(row.legacy_id) } },
+    async video(id) { const row = sqlite.prepare('SELECT * FROM videos WHERE id=?').get(id); if (!row) throw Error('missing video'); return { id } },
     assertPair: (videoId, source, output) => assets.pair(videoId, source, output),
     async source(id, _actor, videoId) { const a = await assets.resolve(id, videoId, 'source'); assert.ok(a); return { checksum: a.checksum } },
     async deliverable(id, _actor, videoId) { const a = await assets.resolve(id, videoId, 'deliverable'); assert.ok(a); return { checksum: a.checksum, durationMs: a.duration_ms!, contentType: a.content_type } },
@@ -94,7 +103,7 @@ async function harness(t: TestContext, provider = true) {
   } }
   const intake = new ReviewIntake(store, r2.bucket, review, provider ? adapter : undefined, lengthStream, () => clock)
   const handlers = (actor = staff) => createIntakeHandlers(async () => ({ intake, actor, origin }))
-  async function begin(extra = {}) { return await intake.execute(staff, { action: 'begin', commandId: crypto.randomUUID(), videoId: 10, bytes: sourceBytes.length, checksum: await digest(sourceBytes), contentType: 'video/mp4', metadata: { title: 'New cut', description: 'Reviewed media', chapters: [] }, ...extra }) as { sessionId: string; state: string; uploadUrl: string } }
+  async function begin(extra = {}) { return await intake.execute(staff, { action: 'begin', commandId: createCuid2(), videoId: VIDEO_ID, bytes: sourceBytes.length, checksum: await digest(sourceBytes), contentType: 'video/mp4', metadata: { title: 'New cut', description: 'Reviewed media', chapters: [] }, ...extra }) as { sessionId: string; state: string; uploadUrl: string } }
   function request(id: string, body = sourceBytes, headers = {}) { return new Request(`${origin}/api/review/uploads?sessionId=${id}`, { method: 'PUT', headers: { origin, 'content-type': 'video/mp4', 'content-length': String(sourceBytes.length), ...headers }, body: body as BodyInit }) }
   async function uploaded() { const s = await begin(); await intake.upload(staff, s.sessionId, request(s.sessionId)); return s }
   const process = (id: string) => intake.execute(staff, { action: 'process', sessionId: id }) as unknown as Promise<{ revision: { revisionId: string; reviewVersion: number } }>
@@ -106,18 +115,18 @@ test('staff intake binds immutable assets, creates one revision and publishes on
   assert.deepEqual(await h.process(s.sessionId), result)
   assert.equal(h.sqlite.prepare('SELECT count(*) n FROM video_revisions').get()?.n, 1)
   assert.equal(h.sqlite.prepare('SELECT count(*) n FROM video_publications').get()?.n, 0)
-  const row = await h.review.revision(10, result.revision.revisionId, staff)
+  const row = await h.review.revision(VIDEO_ID, result.revision.revisionId, staff)
   assert.equal(row.duration_ms, 10000)
-  const asset = await h.assets.resolve(row.deliverable_media_id, 10, 'deliverable'); assert.ok(asset)
+  const asset = await h.assets.resolve(row.deliverable_media_id, VIDEO_ID, 'deliverable'); assert.ok(asset)
   const response = await mediaResponse(new Request(origin, { headers: { range: 'bytes=2-5' } }), h.r2.bucket, asset.object_key, false, { etag: asset.object_etag, bytes: asset.bytes, contentType: asset.content_type })
   assert.equal(response.status, 206); assert.equal(await response.text(), 'code')
-  const cmd = (action: string, extra: object) => ({ action, videoId: 10, commandId: crypto.randomUUID(), ...extra })
-  await h.review.execute(staff, cmd('share', { revisionId: result.revision.revisionId, userId: 2, canApprove: true, expiresAt: new Date(Date.now() + 86400000).toISOString() }))
+  const cmd = (action: string, extra: object) => ({ action, videoId: VIDEO_ID, commandId: createCuid2(), ...extra })
+  await h.review.execute(staff, cmd('share', { revisionId: result.revision.revisionId, userId: CLIENT_ID, canApprove: true, expiresAt: new Date(Date.now() + 86400000).toISOString() }))
   const decision = await h.review.execute(customer, cmd('decide', { revisionId: row.id, expectedReviewVersion: 1, decision: 'approved' }))
   await h.review.execute(staff, cmd('publish', { revisionId: row.id, expectedReviewVersion: 1, decisionId: decision.decisionId }))
   assert.equal(h.sqlite.prepare('SELECT object_key FROM review_publication_events').get()?.object_key, asset.object_key)
   assert.throws(() => h.sqlite.exec('UPDATE review_intake_assets SET bytes=1'), /immutable/)
-  assert.throws(() => h.sqlite.exec(`UPDATE media SET filename='changed' WHERE id=${asset.media_id}`), /immutable/)
+  assert.throws(() => h.sqlite.prepare("UPDATE media SET filename='changed' WHERE id=?").run(asset.media_id), /immutable/)
   assert.throws(() => h.sqlite.exec('DELETE FROM review_intake_assets'), /retained/)
   assert.deepEqual(h.sqlite.prepare('PRAGMA foreign_key_check').all(), [])
   assert.equal(JSON.stringify(await h.intake.read(staff, s.sessionId)).includes('review-intake/'), false)
@@ -170,7 +179,7 @@ test('R2 success followed by D1 failure recovers without overwriting the source'
 })
 
 test('forged or mismatched trusted-provider evidence never becomes a deliverable', async t => {
-  const mutations: ((e: ProbeResult) => void)[] = [e => { e.jobId = crypto.randomUUID() }, e => { e.recipe = 'b'.repeat(64) }, e => { e.source.key = 'other/source' }, e => { e.source.etag = 'other' }, e => { e.source.checksum = 'b'.repeat(64) }, e => { e.source.bytes++ }, e => { e.source.contentType = 'video/webm' }, e => { e.deliverable.key = 'other/output' }, e => { e.deliverable.bytes++ }, e => { e.deliverable.checksum = 'b'.repeat(64) }, e => { e.deliverable.durationMs = 0 }, e => { (e.deliverable as any).fullDecode = false }]
+  const mutations: ((e: ProbeResult) => void)[] = [e => { e.jobId = createCuid2() }, e => { e.recipe = 'b'.repeat(64) }, e => { e.source.key = 'other/source' }, e => { e.source.etag = 'other' }, e => { e.source.checksum = 'b'.repeat(64) }, e => { e.source.bytes++ }, e => { e.source.contentType = 'video/webm' }, e => { e.deliverable.key = 'other/output' }, e => { e.deliverable.bytes++ }, e => { e.deliverable.checksum = 'b'.repeat(64) }, e => { e.deliverable.durationMs = 0 }, e => { (e.deliverable as any).fullDecode = false }]
   for (const mutate of mutations) {
     const h = await harness(t), s = await h.uploaded(); h.alter(mutate)
     await assert.rejects(h.process(s.sessionId), { status: 409 })
@@ -224,30 +233,30 @@ test('concurrent processing retries converge on one asset pair and revision', as
 test('cross-video/source pairing and replacement before playback or publication fail closed', async t => {
   const h = await harness(t), first = await h.uploaded(), second = await h.uploaded()
   const a = await h.process(first.sessionId), b = await h.process(second.sessionId)
-  const ra = await h.review.revision(10, a.revision.revisionId, staff), rb = await h.review.revision(10, b.revision.revisionId, staff)
-  await assert.rejects(h.assets.pair(10, ra.media_id, rb.deliverable_media_id), { status: 409 })
-  await assert.rejects(h.assets.resolve(ra.deliverable_media_id, 11, 'deliverable'), { status: 409 })
-  await assert.rejects(h.assets.resolve(ra.media_id, 10, 'deliverable'), { status: 409 })
+  const ra = await h.review.revision(VIDEO_ID, a.revision.revisionId, staff), rb = await h.review.revision(VIDEO_ID, b.revision.revisionId, staff)
+  await assert.rejects(h.assets.pair(VIDEO_ID, ra.media_id, rb.deliverable_media_id), { status: 409 })
+  await assert.rejects(h.assets.resolve(ra.deliverable_media_id, OTHER_VIDEO_ID, 'deliverable'), { status: 409 })
+  await assert.rejects(h.assets.resolve(ra.media_id, VIDEO_ID, 'deliverable'), { status: 409 })
   const asset = await h.assets.find(ra.deliverable_media_id); assert.ok(asset)
   Object.assign(h.r2.objects.get(asset.object_key)!.head, { etag: 'replacement' })
-  await assert.rejects(h.assets.resolve(ra.deliverable_media_id, 10, 'deliverable'), { status: 409 })
+  await assert.rejects(h.assets.resolve(ra.deliverable_media_id, VIDEO_ID, 'deliverable'), { status: 409 })
   await assert.rejects(mediaResponse(new Request(origin), h.r2.bucket, asset.object_key, false, { ...assetObject(asset), contentType: 'video/mp4' }), { status: 409 })
 })
 
 test('empty migration rollback succeeds and any intake record blocks destructive downgrade', async t => {
   const empty = await harness(t), populated = await harness(t)
-  await migrations.find(m => m.name === '20261005_180000_review_intake')!.down(empty.args)
+  await migrations.find(m => m.name === 'cuid2_20261005_180000_review_intake')!.down(empty.args)
   await populated.begin()
-  await assert.rejects(migrations.find(m => m.name === '20261005_180000_review_intake')!.down(populated.args), /CHECK constraint/)
+  await assert.rejects(migrations.find(m => m.name === 'cuid2_20261005_180000_review_intake')!.down(populated.args), /CHECK constraint/)
   assert.equal(populated.sqlite.prepare('SELECT count(*) n FROM review_upload_sessions').get()?.n, 1)
 })
 
 
 test('begin retries recover the server-selected session; command IDs cannot cross owner or input', async t => {
-  const h = await harness(t), commandId = crypto.randomUUID()
+  const h = await harness(t), commandId = createCuid2()
   const [a, b] = await Promise.all([h.begin({ commandId }), h.begin({ commandId })])
   assert.deepEqual(a, b)
-  await assert.rejects(h.begin({ commandId, videoId: 11 }), { status: 409 })
+  await assert.rejects(h.begin({ commandId, videoId: OTHER_VIDEO_ID }), { status: 409 })
   const saved = h.sqlite.prepare('SELECT begin_input FROM review_upload_sessions').get()!
   await assert.rejects(h.intake.execute(otherStaff, JSON.parse(String(saved.begin_input))), { status: 409 })
   assert.equal(h.sqlite.prepare('SELECT count(*) n FROM review_upload_sessions').get()?.n, 1)
@@ -347,7 +356,7 @@ test('late completion retains assets and cannot supersede newer revisions, inclu
     await assert.rejects(h.process(a.sessionId), { status: 409 })
     await assert.rejects(h.process(a.sessionId), { status: 409 })
     assert.equal((await h.intake.read(staff, a.sessionId)).state, 'ready')
-    assert.equal((await h.review.read(10, staff)).currentRevisionId, latest.revision.revisionId)
+    assert.equal((await h.review.read(VIDEO_ID, staff)).currentRevisionId, latest.revision.revisionId)
     assert.equal(h.sqlite.prepare('SELECT count(*) n FROM review_intake_assets WHERE session_id=?').get(a.sessionId)?.n, 2)
   }
 })
@@ -379,7 +388,7 @@ test('Workflow forks encoding and bounded Whisper audio, persists trusted comple
   await runReviewProcessing(s.sessionId, jobs, container, whisper, steps)
   assert.equal(aiCalls, 1, 'completed jobs do not re-run paid providers')
   const revision = (await h.process(s.sessionId)).revision
-  assert.equal((await h.review.read(10, staff)).revisions.find(r => r.id === revision.revisionId)?.metadata.transcript, 'Actual adapter-shaped transcription fixture')
+  assert.equal((await h.review.read(VIDEO_ID, staff)).revisions.find(r => r.id === revision.revisionId)?.metadata.transcript, 'Actual adapter-shaped transcription fixture')
   const persisted = (await jobs.load(s.sessionId)).result!
   await assert.rejects(jobs.complete(job, { ...persisted, transcription: { ...persisted.transcription!, transcript: 'conflict' } }), { status: 409 })
 })
@@ -416,7 +425,7 @@ test('Container protocol uses only the machine binding and bounds provider JSON'
 })
 
 test('legacy processing sessions without admission fail closed and processing migration preserves session data', async t => {
-  const h = await harness(t), s = await h.uploaded(), migration = migrations.find(m => m.name === '20261005_200000_review_jobs')!
+  const h = await harness(t), s = await h.uploaded(), migration = migrations.find(m => m.name === 'cuid2_20261005_200000_review_jobs')!
   await migration.down(h.args)
   h.sqlite.prepare("UPDATE review_upload_sessions SET state='processing' WHERE id=?").run(s.sessionId)
   await migration.up(h.args)
@@ -430,19 +439,19 @@ test('legacy processing sessions without admission fail closed and processing mi
 
 test('intake validates thumbnail ownership before admission and carries its snapshot into the revision', async t => {
   const h = await harness(t)
-  const checked: number[][] = []
+  const checked: string[][] = []
   h.review.dependencies.thumbnail = async (videoId, thumbnailId) => {
     checked.push([videoId, thumbnailId])
-    assert.equal(videoId, 10)
-    if (thumbnailId !== 30) throw new Error('Thumbnail belongs to another video')
+    assert.equal(videoId, VIDEO_ID)
+    if (thumbnailId !== THUMBNAIL_ID) throw new Error('Thumbnail belongs to another video')
   }
-  const metadata = { title: 'Cut with thumbnail', description: 'Private thumbnail snapshot', chapters: [], thumbnailId: 30 }
-  await assert.rejects(h.begin({ metadata: { ...metadata, thumbnailId: 31 } }), /another video/)
+  const metadata = { title: 'Cut with thumbnail', description: 'Private thumbnail snapshot', chapters: [], thumbnailId: THUMBNAIL_ID }
+  await assert.rejects(h.begin({ metadata: { ...metadata, thumbnailId: OTHER_THUMBNAIL_ID } }), /another video/)
   assert.equal(h.sqlite.prepare('SELECT count(*) n FROM review_upload_sessions').get()?.n, 0)
   const session = await h.begin({ metadata })
   await h.intake.upload(staff, session.sessionId, h.request(session.sessionId))
   const processed = await h.process(session.sessionId)
-  const revision = await h.review.revision(10, processed.revision.revisionId, staff)
-  assert.equal(JSON.parse(revision.metadata).thumbnailId, 30)
-  assert.deepEqual(checked, [[10,31], [10,30], [10,30]])
+  const revision = await h.review.revision(VIDEO_ID, processed.revision.revisionId, staff)
+  assert.equal(JSON.parse(revision.metadata).thumbnailId, THUMBNAIL_ID)
+  assert.deepEqual(checked, [[VIDEO_ID,OTHER_THUMBNAIL_ID], [VIDEO_ID,THUMBNAIL_ID], [VIDEO_ID,THUMBNAIL_ID]])
 })

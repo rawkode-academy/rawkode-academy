@@ -57,30 +57,43 @@ const code = ts.transpileModule(
 	statements.map((s) => s.getText(frontmatter)).join("\n"),
 	{ compilerOptions: { target: ts.ScriptTarget.ES2022 } },
 ).outputText;
-function contracts(
+async function contracts(
 	technology,
 	items = [],
 	resolveTechnologyIconUrl = () => undefined,
 ) {
 	return vm.runInNewContext(
-		`${code}\n({ relatedTechnologies, sharedRelatedSubcategory, relatedInitials, officialLinks, description, hasMatrixDetails, historicalStatuses, videoDateFormatter });`,
+		`(async () => { ${code}\n return { relatedTechnologies, sharedRelatedSubcategory, relatedInitials, officialLinks, description, hasMatrixDetails, historicalStatuses, videoDateFormatter }; })()`,
 		{
 			technology,
 			id: technology.id,
+			technologyEntry: { id: technology.payloadId ?? "lambda-payload-cuid" },
 			items,
 			resolveTechnologyIconUrl,
+			getEntry: async (collection, reference) => {
+				assert.equal(collection, "technologies");
+				const lookup = typeof reference === "string" ? { slug: reference } : reference;
+				return items.find((item) => lookup.id ? item.id === lookup.id : item.slug === lookup.slug);
+			},
+			listPayloadContent: async (collection, options) => {
+				assert.equal(collection, "technologies");
+				assert.equal(options.limit, 100, "related sibling reads remain bounded");
+				return items.filter((item) => item.data.category === options.category);
+			},
 		},
 	);
 }
 const technology = {
 	id: "lambda",
+	payloadId: "lambda-payload-cuid",
 	name: "AWS Lambda",
 	category: "Serverless",
 	subcategory: "Tools",
 	website: "https://example.test/",
 };
 const entry = (id, data = {}) => ({
-	id,
+	id: `${id}-payload-cuid`,
+	slug: id,
 	data: {
 		name: id,
 		category: "Serverless",
@@ -93,7 +106,7 @@ const entry = (id, data = {}) => ({
 // Compile the production related-section markup and execute its real declarations.
 // Shared page/services are outside this fragment; no network or Browser is used.
 async function renderRelated(items, resolveLogo, profile = technology) {
-	const props = contracts(profile, items, resolveLogo);
+	const props = await contracts(profile, items, resolveLogo);
 	const start = page.indexOf("\n\t\t{relatedTechnologies.length > 0 && (");
 	const end = page.indexOf("\n\t\t<div class={styles.newsletter}>", start);
 	assert(start > 0 && end > start);
@@ -141,10 +154,10 @@ test("related initials match directory conventions for single, multiple and hyph
 test("related rows always reserve a decorative mark, using genuine logos or name initials", async () => {
 	const dom = await renderRelated(
 		[
-			entry("logo/index", { name: "Logo Project" }),
+			entry("logo", { name: "Logo Project" }),
 			entry("missing", { name: "Éclair Cloud", status: "abandoned" }),
 		],
-		(id) => (id === "logo/index" ? "/real-logo.svg" : undefined),
+		(slug) => (slug === "logo" ? "/real-logo.svg" : undefined),
 	);
 	const links = dom.querySelectorAll("a");
 	assert.deepEqual(
@@ -194,7 +207,7 @@ for (const subcategory of ["Other", "", undefined, "   "]) {
 		const dom = await renderRelated(
 			[entry("one"), entry("two", { subcategory })],
 			undefined,
-			{ ...technology, relatedTechnologies: ["one", "two"] },
+			{ ...technology, relatedTechnologies: [{ id: "one-payload-cuid" }, { id: "two-payload-cuid" }] },
 		);
 		assert.equal(dom.querySelector(".tech-relatedContext"), null);
 		const rows = dom.querySelectorAll("li");
@@ -272,14 +285,14 @@ test("detail template compiles with every new branch and date slot", async () =>
 	assert(!page.includes('badge={technology.name + " updates"}'));
 });
 
-test("taxonomy fallback requires both parent category and subcategory and preserves explicit relationships", () => {
+test("taxonomy fallback requires both parent category and subcategory and preserves explicit relationships", async () => {
 	const items = [
 		entry("lambda"),
 		entry("xdebug", { category: "App Definition and Development" }),
 		entry("lumigo"),
 		entry("archived", { status: "abandoned" }),
 	];
-	const result = contracts(technology, items);
+	const result = await contracts(technology, items);
 	assert.deepEqual(
 		Array.from(result.relatedTechnologies, (t) => t.id),
 		["lumigo", "archived"],
@@ -290,13 +303,13 @@ test("taxonomy fallback requires both parent category and subcategory and preser
 	assert(result.historicalStatuses.has("superseded"));
 	assert(!result.historicalStatuses.has("stable"));
 	assert.equal(
-		contracts({ ...technology, category: undefined }, items).relatedTechnologies
+		(await contracts({ ...technology, category: undefined }, items)).relatedTechnologies
 			.length,
 		0,
 	);
 	assert.deepEqual(
 		Array.from(
-			contracts({ ...technology, relatedTechnologies: ["xdebug"] }, items)
+			(await contracts({ ...technology, relatedTechnologies: [{ id: "xdebug-payload-cuid" }] }, items))
 				.relatedTechnologies,
 			(t) => t.id,
 		),
@@ -304,38 +317,38 @@ test("taxonomy fallback requires both parent category and subcategory and preser
 	);
 });
 
-test("exact project URLs combine labels without dropping a distinct README fragment", () => {
-	const links = contracts({
+test("exact project URLs combine labels without dropping a distinct README fragment", async () => {
+	const links = (await contracts({
 		...technology,
 		source: technology.website,
 		documentation: technology.website + "#readme",
-	}).officialLinks;
+	})).officialLinks;
 	assert.deepEqual(JSON.parse(JSON.stringify(links)), [
 		["Official website / Source code", technology.website],
 		["Documentation", technology.website + "#readme"],
 	]);
 });
 
-test("only editorial SEO description is promoted, while personal opinions are retained without invented details", () => {
+test("only editorial SEO description is promoted, while personal opinions are retained without invented details", async () => {
 	assert(
 		!page.includes(".useCase"),
 		"Raw imported useCase is not promoted into visible or SEO prose",
 	);
 	assert.equal(
-		contracts({ ...technology, cncf: { useCase: "raw\\_import,tag" } })
+		(await contracts({ ...technology, cncf: { useCase: "raw\\_import,tag" } }))
 			.description,
 		undefined,
 	);
 	assert.equal(
-		contracts({
+		(await contracts({
 			...technology,
 			seo: { description: " Editorial description " },
 			cncf: { useCase: "raw" },
-		}).description,
+		})).description,
 		"Editorial description",
 	);
 	assert.equal(
-		contracts({ ...technology, matrix: { status: "graveyard" } })
+		(await contracts({ ...technology, matrix: { status: "graveyard" } }))
 			.hasMatrixDetails,
 		false,
 	);
@@ -345,7 +358,7 @@ test("only editorial SEO description is promoted, while personal opinions are re
 		{ makesMeFeel: "🙂" },
 	]) {
 		assert.equal(
-			contracts({ ...technology, matrix: { status: "watch", ...details } })
+			(await contracts({ ...technology, matrix: { status: "watch", ...details } }))
 				.hasMatrixDetails,
 			true,
 		);
@@ -356,7 +369,7 @@ test("only editorial SEO description is promoted, while personal opinions are re
 		{ firstUsed: "2020" },
 	]) {
 		assert.equal(
-			contracts({ ...technology, matrix: { status: "watch", ...details } })
+			(await contracts({ ...technology, matrix: { status: "watch", ...details } }))
 				.hasMatrixDetails,
 			false,
 		);
@@ -364,9 +377,9 @@ test("only editorial SEO description is promoted, while personal opinions are re
 	assert.match(page, /matrixMetadata.map\(\(\[label, value\]\) => <span/);
 });
 
-test("historic recording date formatting is stable and not a live-now claim", () => {
+test("historic recording date formatting is stable and not a live-now claim", async () => {
 	assert.equal(
-		contracts(technology).videoDateFormatter.format(
+		(await contracts(technology)).videoDateFormatter.format(
 			new Date("2020-09-30T17:00:00Z"),
 		),
 		"30 Sept 2020",

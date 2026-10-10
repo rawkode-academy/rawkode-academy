@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { parse as parseYaml } from "yaml";
@@ -6,7 +6,6 @@ import { parse, transform } from "@astrojs/compiler";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import * as runtime from "astro/runtime/server/index.js";
 import ts from "typescript";
-import { webcontainerDemosPlugin } from "../utils/vite-plugin-webcontainer-demos";
 import { getCourseModuleSlug } from "../utils/course-path";
 
 const contentDir = resolve("../../../content/courses");
@@ -178,7 +177,6 @@ describe("catalog availability and curriculum", () => {
 				...runtime,
 				createMetadata: () => ({}),
 			},
-			"astro:content": {},
 			"@/utils/course-path": { getCourseModuleSlug },
 			"@rawkodeacademy/design-system": {
 				academyCourse: () => new Proxy({}, { get: (_, slot) => String(slot) }),
@@ -274,31 +272,6 @@ describe("authored course contracts", () => {
 		expect(
 			result.diagnostics.filter((diagnostic) => diagnostic.severity === 1),
 		).toEqual([]);
-	});
-	it("resolves every published WebContainer reference through the actual demo registry", async () => {
-		const plugin = webcontainerDemosPlugin();
-		await plugin.configResolved!({});
-		const registry = await plugin.load!("\0virtual:webcontainer-demos");
-		expect(registry).toBeTruthy();
-		let demos = 0;
-		for (const directory of readdirSync(contentDir, {
-			withFileTypes: true,
-		}).filter((item) => item.isDirectory())) {
-			for (const file of readdirSync(
-				resolve(contentDir, directory.name),
-			).filter((name) => /\.mdx?$/.test(name))) {
-				const data = entry(resolve(contentDir, directory.name, file));
-				if (data.draft !== false) continue;
-				for (const resource of data.resources ?? []) {
-					if (resource.embedConfig?.container !== "webcontainer") continue;
-					demos++;
-					expect(registry).toContain(
-						`'${data.course}/${resource.embedConfig.src}':`,
-					);
-				}
-			}
-		}
-		expect(demos).toBe(2);
 	});
 	it.each([
 		["02-prerequisites", "a5uhh9oosvj8ytch0tf84uja"],

@@ -1,13 +1,13 @@
-import { getCollection, getEntries } from "astro:content";
+import { getAllCollection, getEntries } from "@/lib/payload-content";
 import type { APIContext } from "astro";
 import { articleToMarkdown } from "@/lib/article-markdown";
 import { SITE_DESCRIPTION } from "@/lib/site";
 
-export const prerender = true;
+export const prerender = false;
 
 export async function GET({ site }: APIContext) {
 	const articles = (
-		await getCollection("articles")
+		await getAllCollection("articles")
 	).sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
 
 	const documents = await Promise.all(

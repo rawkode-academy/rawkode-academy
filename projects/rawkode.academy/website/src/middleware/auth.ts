@@ -4,6 +4,7 @@ import {
 	getSession,
 	getLocalSession,
 	SESSION_COOKIE_NAME,
+	isIdentityDisabled,
 	type User,
 } from "@/lib/auth/server";
 import { createLogger } from "@/lib/logger";
@@ -12,6 +13,9 @@ const logger = createLogger("auth");
 
 export const authMiddleware = defineMiddleware(async (context, next) => {
 	if (context.isPrerendered) {
+		return next();
+	}
+	if (isIdentityDisabled(env as { PAYLOAD_PREVIEW_PR?: string })) {
 		return next();
 	}
 

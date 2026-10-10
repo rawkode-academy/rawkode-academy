@@ -1,16 +1,23 @@
 {
 	"$schema": "./node_modules/wrangler/config-schema.json",
 	"name": "rawkode-academy-website",
-	"main": "@astrojs/cloudflare/entrypoints/server",
+	"main": "./src/worker.ts",
 	"compatibility_date": "2026-03-12",
-	"compatibility_flags": ["nodejs_compat"],
+	"compatibility_flags": ["nodejs_compat", "enable_ctx_exports"],
 	"assets": {
 		"binding": "ASSETS",
 		"directory": "./dist",
 		"html_handling": "drop-trailing-slash"
 	},
+	"images": {
+		"binding": "IMAGES"
+	},
 	"workers_dev": true,
 	"preview_urls": true,
+	"exports": {
+		"default": { "type": "worker", "cache": { "enabled": false } },
+		"CachedAstro": { "type": "worker", "cache": { "enabled": false } }
+	},
 	"observability": {
 		"traces": {
 			"enabled": true,
@@ -44,6 +51,11 @@
 		"NOTIFICATIONS_VAPID_PUBLIC_KEY": "BDgtSVztEoFZDmO0Iz-MpBNaYv8ukGIQQYS8SwUBt7vMLXQT60-zjsyMTY8opukUBHoptdgm2u-uonWthz6e1SE"
 	},
 	"services": [
+		{
+			"binding": "PAYLOAD_CONTENT",
+			"service": "rawkode-academy-payload",
+			"entrypoint": "PublicContentBridge"
+		},
 		{
 			"binding": "EMOJI_REACTIONS",
 			"service": "platform-emoji-reactions-write-model"

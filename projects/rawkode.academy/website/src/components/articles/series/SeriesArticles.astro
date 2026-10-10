@@ -1,8 +1,8 @@
 ---
 import { academyDocument } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
-import type { CollectionEntry } from "astro:content";
-import { getCollection } from "astro:content";
+import type { CollectionEntry } from "@/lib/payload-content";
+import { getCollection } from "@/lib/payload-content";
 import ArticleCard from "../ArticleCard.astro";
 
 type Props = {

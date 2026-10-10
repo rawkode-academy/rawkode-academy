@@ -14,7 +14,7 @@ import { ReviewStatePill } from '../views/ReviewStatePill'
 // mount below the history as a small client child.
 export async function ReviewPanel({ id, req }: UIFieldServerProps) {
 	if (!isStaff(req.user) || id === undefined) return null
-	const videoId = Number(id)
+	const videoId = String(id)
 	let history: Awaited<ReturnType<typeof reviewHistory>> = null
 	let failed = false
 	try {

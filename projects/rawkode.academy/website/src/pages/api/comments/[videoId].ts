@@ -1,4 +1,4 @@
-import { getCollection } from "astro:content";
+import { getEntry } from "@/lib/payload-content";
 import type { APIRoute } from "astro";
 import { DISCORD_INVITE_URL } from "astro:env/server";
 import { createLogger } from "@/lib/logger";
@@ -18,8 +18,7 @@ export const GET: APIRoute = async ({ params }) => {
 			});
 		}
 
-		const videos = await getCollection("videos");
-		const video = videos.find((v) => v.data.id === videoId);
+		const video = await getEntry("videos", { id: videoId });
 
 		if (!video) {
 			return new Response(

@@ -1,10 +1,10 @@
 ---
-import type { CollectionEntry } from "astro:content";
+import type { CollectionEntry } from "@/lib/payload-content";
 import { buildLearningPathItemListJsonLd } from "@/lib/learning-path-itemlist-jsonld";
 
 interface PathInput {
 	path: CollectionEntry<"learningPaths">;
-	authors: ReadonlyArray<{ id: string; name: string }>;
+	authors: ReadonlyArray<{ slug: string; name: string }>;
 	technologyLabels: ReadonlyArray<string>;
 }
 
@@ -23,7 +23,7 @@ const jsonLd = buildLearningPathItemListJsonLd({
 	listUrl,
 	listName: listName ?? "Learning Paths",
 	paths: paths.map(({ path, authors, technologyLabels }) => ({
-		id: path.id,
+		slug: path.slug,
 		source: {
 			title: path.data.title,
 			description: path.data.description,

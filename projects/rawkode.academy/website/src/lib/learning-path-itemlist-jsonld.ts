@@ -5,7 +5,7 @@ import {
 } from "@/lib/learning-path-jsonld";
 
 export interface LearningPathListEntry {
-	id: string;
+	slug: string;
 	source: LearningPathSource;
 	authors: ReadonlyArray<LearningPathAuthor>;
 }
@@ -43,7 +43,7 @@ export function buildLearningPathItemListJsonLd(
 		.slice(0, Math.max(0, limit));
 
 	const itemListElement = ordered.map((entry, index) => {
-		const pathUrl = joinUrl(siteUrl, `/learning-paths/${entry.id}`);
+		const pathUrl = joinUrl(siteUrl, `/learning-paths/${entry.slug}`);
 		const item = buildLearningPathJsonLd({
 			siteUrl,
 			pathUrl,

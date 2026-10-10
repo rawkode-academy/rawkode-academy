@@ -43,7 +43,7 @@ export function registerTechnologies(
 				resolve: (r: TechnologyItem) =>
 					r.logo ??
 					r.icon ??
-					`https://content.rawkode.academy/logos/technologies/${r.id}.svg`,
+					`https://content.rawkode.academy/logos/technologies/${r.slug}.svg`,
 			}),
 			website: t.exposeString("website"),
 			source: t.field({

@@ -6,6 +6,7 @@
     "content",
     "packages/**",
     "projects/**",
+    "!projects/rawkode.academy/payload/container/d2",
     "!projects/**/generators/**"
   ],
   "devDependencies": {

@@ -12,6 +12,9 @@
     "binding": "ASSETS",
     "directory": "./dist-review"
   },
+  "images": {
+    "binding": "IMAGES"
+  },
   "routes": [
     {
       "pattern": "preview.rawkode.academy",
@@ -22,6 +25,11 @@
     "REVIEW_ORIGIN": "https://preview.rawkode.academy"
   },
   "services": [
+    {
+      "binding": "PAYLOAD_CONTENT",
+      "service": "rawkode-academy-payload",
+      "entrypoint": "PublicContentBridge"
+    },
     {
       "binding": "REVIEW_BACKEND",
       "service": "rawkode-academy-payload",

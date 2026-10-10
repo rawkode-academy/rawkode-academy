@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { mount, type VueWrapper } from "@vue/test-utils";
-import type { CollectionEntry } from "astro:content";
+import type { CollectionEntry } from "@/lib/payload-content";
 import AuthorAvatarGroup from "../components/common/AuthorAvatarGroup.vue";
 import Container from "../components/ui/Container.vue";
 import {
@@ -13,14 +13,24 @@ const wrappers: VueWrapper[] = [];
 afterEach(() => {
 	for (const wrapper of wrappers.splice(0)) wrapper.unmount();
 });
-const authors = Array.from({ length: 5 }, (_, i) => ({
-	id: `author-${i}`,
-	collection: "people",
-	data: {
-		name: `Author ${i}`,
-		avatarUrl: `https://example.test/author-${i}.jpg`,
-	},
-})) as CollectionEntry<"people">[];
+const authors: CollectionEntry<"people">[] = Array.from({ length: 5 }, (_, i) => {
+	const id = `author-${i}`;
+	return {
+		id,
+		slug: id,
+		collection: "people",
+		body: undefined,
+		mediaAssets: [],
+		data: {
+			id,
+			slug: id,
+			name: `Author ${i}`,
+			avatarUrl: `https://example.test/author-${i}.jpg`,
+			links: [],
+			handles: {},
+		},
+	};
+});
 const group = (
 	props: {
 		authors?: CollectionEntry<"people">[];

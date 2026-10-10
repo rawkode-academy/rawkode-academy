@@ -14,22 +14,22 @@ export function identityMapping(payload:Payload,config:AuthConfig):IdentityMappi
       const data={identityKey,oidcIssuer:identity.issuer,oidcSubject:identity.subject,name:identity.name??'',profileEmail:identity.email??null,role:config.staffSubjects.includes(identity.subject)?'staff':'customer'}
       if(existing) {
         await payload.update({collection:'users',id:existing.id,data,overrideAccess:true,context:{identityProvisioning:true}})
-        return Number(existing.id)
+        return String(existing.id)
       }
       try {
         const created=await payload.create({collection:'users',overrideAccess:true,context:{identityProvisioning:true},data:{...data,email:`${identityKey}@oidc.invalid`,password:crypto.randomUUID()+crypto.randomUUID()}})
-        return Number(created.id)
+        return String(created.id)
       } catch(error) {
         // Unique identityKey serializes simultaneous first sign-ins. Never merge by email.
         const raced=await find()
-        if(raced)return Number(raced.id)
+        if(raced)return String(raced.id)
         throw error
       }
     },
     async user(id) {
       try {
         const u=await payload.findByID({collection:'users',id,depth:0,overrideAccess:true})
-        return {id:Number(u.id),collection:'users',role:u.role==='staff'?'staff':'customer',name:u.name,oidcIssuer:u.oidcIssuer,oidcSubject:u.oidcSubject} as AuthUser
+        return {id:String(u.id),collection:'users',role:u.role==='staff'?'staff':'customer',name:u.name,oidcIssuer:u.oidcIssuer,oidcSubject:u.oidcSubject} as AuthUser
       } catch {return null}
     },
   }

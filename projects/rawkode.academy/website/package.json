@@ -4,7 +4,6 @@
 	"scripts": {
 		"build-storybook": "storybook build",
 		"build": "bun run check:academy-shell && cd ../../../packages/design-system && bun run build && cd ../../projects/rawkode.academy/website && bun run check:academy-interactions && bun run check:academy-ssr && astro check && astro build",
-		"sync:content": "tsx scripts/sync-graphql-content.ts",
 		"codegen": "graphql-codegen --config graphql-codegen.ts",
 		"dev": "astro dev",
 		"format": "biome format --write",
@@ -31,6 +30,7 @@
 	},
 	"dependencies": {
 		"@ark-ui/vue": "5.39.2",
+		"@paralleldrive/cuid2": "^2.2.2",
 		"@astrojs/check": "0.9.8",
 		"@astrojs/cloudflare": "13.1.10",
 		"@astrojs/mdx": "5.0.3",

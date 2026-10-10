@@ -59,7 +59,7 @@ beforeAll(async () => {
 	});
 	related = await compile("articles/RelatedArticles.astro", {
 		"@rawkodeacademy/design-system": { academyRelatedContent },
-		"astro:content": {
+		"@/lib/payload-content": {
 			getCollection: async (
 				_name: string,
 				filter: (entry: ReturnType<typeof article>) => boolean,

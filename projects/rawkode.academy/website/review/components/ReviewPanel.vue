@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { ApiError, requestJSON, timestamp } from "../api";
+import { createReviewId } from "../id";
 import type { Review, ReviewCustomer, Reviewer } from "../types";
 
 let active = true;
@@ -56,7 +57,7 @@ async function refresh() {
 }
 async function execute(fields: Record<string, unknown>, replay = false) {
   if (busy.value) return;
-  const command = replay ? fields : { ...fields, videoId: props.review.videoId, commandId: crypto.randomUUID() };
+  const command = replay ? fields : { ...fields, videoId: props.review.videoId, commandId: createReviewId() };
   busy.value = true; error.value = ""; notice.value = ""; confirmation.value = null;
   try {
     await requestJSON("/api/review", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(command) });
@@ -73,7 +74,7 @@ async function execute(fields: Record<string, unknown>, replay = false) {
       try { await refresh(); } catch (refreshError) { emit("denied", refreshError); }
       error.value = "This review changed. The latest version is loaded; check it before acting again.";
     } else {
-      // A lost response may follow a committed command. Retry the exact UUID/body.
+      // A lost response may follow a committed command. Retry the exact command/body.
       if (!(reason instanceof ApiError) || reason.status >= 500) retry.value = command;
       error.value = reason instanceof Error ? reason.message : "The request failed.";
     }

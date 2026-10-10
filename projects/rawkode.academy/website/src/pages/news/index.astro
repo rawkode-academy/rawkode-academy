@@ -1,5 +1,5 @@
 ---
-import { getCollection } from "astro:content";
+import { getAllCollection } from "@/lib/payload-content";
 import { isNewsPublished } from "@/lib/news-publication";
 import NewsItemListJsonLd from "@/components/html/news-itemlist-jsonld.astro";
 import Page from "@/wrappers/page.astro";
@@ -9,14 +9,12 @@ import NewsStoryRow from "@/components/news/NewsStoryRow.astro";
 import { getTechnologyLogos, logosFor } from "@/lib/technology-logos";
 import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 
-export const prerender = true;
+export const prerender = false;
 
 const now = new Date();
-const allNews = (
-	await getCollection("news", ({ data }) =>
-		isNewsPublished(data.publishedAt, now),
-	)
-).sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+const allNews = (await getAllCollection("news", ({ data }) =>
+	isNewsPublished(data.publishedAt, now),
+)).sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
 const [leadStory, ...archive] = allNews;
 // News has no artwork of its own, so the masthead schedules the projects the
 // stories cover, newest story first.
@@ -58,7 +56,7 @@ const catalog = academyCatalog();
 					<p class={catalog.leadKicker}>Latest story</p>
 					<h2 class={catalog.leadTitle}>{leadStory.data.title}</h2>
 					<p class={catalog.leadDescription}>{leadStory.data.description}</p>
-					<a class={styles.button} href={`/news/${leadStory.id}`}>Read the story →</a>
+					<a class={styles.button} href={`/news/${leadStory.slug}`}>Read the story →</a>
 				</div>
 			</article>
 		</section>}

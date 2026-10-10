@@ -1,17 +1,26 @@
 ---
-import { Image } from "astro:assets";
 import type { ImageMetadata } from "astro";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 
 interface Props {
-	image: ImageMetadata;
+	image: ImageMetadata | string;
 	alt: string;
 }
 
 const { image, alt } = Astro.props;
+const imageSrc = typeof image === "string" ? image : image.src;
+const imageWidth = typeof image === "string" ? undefined : image.width;
+const imageHeight = typeof image === "string" ? undefined : image.height;
 ---
 
 <Zoom client:only="react">
-	<Image src={image} alt={alt} />
+	<img
+		src={imageSrc}
+		alt={alt}
+		width={imageWidth}
+		height={imageHeight}
+		loading="lazy"
+		decoding="async"
+	/>
 </Zoom>

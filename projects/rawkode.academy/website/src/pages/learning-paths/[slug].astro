@@ -2,58 +2,57 @@
 import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
 const styles = academyLayout({ width: "reading" });
-import {
-	type CollectionEntry,
-	getCollection,
-	getEntries,
-	render,
-} from "astro:content";
-import type { GetStaticPaths, GetStaticPathsResult } from "astro";
+import { getEntry, getEntries, getAllCollection } from "@/lib/payload-content";
+import CmsBody from "@/components/content/CmsBody.astro";
+import { getCmsBodyHeadings } from "@/lib/safe-cms-body";
 import Page from "@/wrappers/page.astro";
 import ArticleTOC from "@/components/read/ArticleTOC.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import LearningPathJsonLd from "@/components/html/learning-path-jsonld.astro";
 import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
 
-export const prerender = true;
+export const prerender = false;
 
-type Props = {
-	learningPath: CollectionEntry<"learningPaths">;
-};
-
-export const getStaticPaths: GetStaticPaths =
-	async (): Promise<GetStaticPathsResult> => {
-		const learningPaths = await getCollection("learningPaths");
-
-		return learningPaths.map((learningPath) => ({
-			params: {
-				slug: learningPath.id,
-			},
-			props: {
-				learningPath,
-			},
-		}));
-	};
-
-const { learningPath } = Astro.props;
-const { Content, headings } = await render(learningPath);
+const slug = Astro.params.slug;
+const learningPath = slug
+	? await getEntry("learningPaths", { slug })
+	: undefined;
+if (!learningPath || learningPath.data.publishedAt > new Date()) {
+	return new Response(null, { status: 404 });
+}
+const headings = getCmsBodyHeadings(learningPath.body ?? "");
 const authors = await getEntries(learningPath.data.authors);
 
-const allTechnologies = await getCollection("technologies");
+const allTechnologies = await getAllCollection("technologies");
 const technologyNameById = new Map<string, string>();
+const technologySlugById = new Map<string, string>();
 for (const technology of allTechnologies) {
 	const rawId = technology.id.replace(/\/index$/, "");
 	technologyNameById.set(rawId, technology.data.name);
+	technologyNameById.set(technology.slug, technology.data.name);
+	technologySlugById.set(rawId, technology.slug);
+	technologySlugById.set(technology.slug, technology.slug);
 }
-const technologyLabels = (learningPath.data.technologies ?? []).map(
-	(technologyId) => technologyNameById.get(technologyId) ?? technologyId,
-);
-const technologyTags = (learningPath.data.technologies ?? []).map(
-	(technologyId) => ({
-		id: technologyId,
-		label: technologyNameById.get(technologyId) ?? technologyId,
-	}),
-);
+const technologyReference = (value: unknown) =>
+	typeof value === "string"
+		? value
+		: value && typeof value === "object" && "id" in value && typeof value.id === "string"
+			? value.id
+			: value && typeof value === "object" && "slug" in value && typeof value.slug === "string"
+				? value.slug
+				: "";
+const technologyLabels = (learningPath.data.technologies ?? []).map((technology) => {
+	const id = technologyReference(technology);
+	return technologyNameById.get(id) ?? id;
+});
+const technologyTags = (learningPath.data.technologies ?? []).map((technology) => {
+	const id = technologyReference(technology);
+	return {
+		id,
+		slug: technologySlugById.get(id) ?? id,
+		label: technologyNameById.get(id) ?? id,
+	};
+});
 
 function formatDuration(minutes: number): string {
 	const hours = Math.floor(minutes / 60);
@@ -103,7 +102,7 @@ const pageDescription = learningPath.data.description;
 		elements={[
 			{ title: "Home", link: "/" },
 			{ title: "Learning Paths", link: "/learning-paths" },
-			{ title: learningPath.data.title, link: `/learning-paths/${learningPath.id}` },
+			{ title: learningPath.data.title, link: `/learning-paths/${learningPath.slug}` },
 		]}
 	/>
 
@@ -121,7 +120,7 @@ const pageDescription = learningPath.data.description;
 				{durationLabel && <p class={doc.meta}>Exercises and bonus material take extra time.</p>}
 				<div class={doc.actions}>
 					{authors.map((author) => (
-						<a class={doc.author} href={`/people/${author.data.id}`}>
+						<a class={doc.author} href={`/people/${author.slug}`}>
 							{author.data.avatarUrl && <img class={doc.avatar} src={author.data.avatarUrl} alt="" width="44" height="44" loading="lazy" />}
 							<span class={doc.authorMeta}>{author.data.name}</span>
 						</a>
@@ -151,7 +150,7 @@ const pageDescription = learningPath.data.description;
 
 				{/* The content supplies the introduction, objectives, and ordered resources once. */}
 				<article id="path-content" class={[styles.prose, doc.pathProse].join(" ")}>
-					<Content />
+					<CmsBody entry={learningPath} />
 				</article>
 
 				{technologyTags.length > 0 && (
@@ -159,7 +158,7 @@ const pageDescription = learningPath.data.description;
 						Technologies: {technologyTags.map((technology, index) => (
 							<Fragment>
 								{index > 0 && ", "}
-								<a class={doc.link} href={`/technology/${technology.id}`} rel="tag">{technology.label}</a>
+								<a class={doc.link} href={`/technology/${technology.slug}`} rel="tag">{technology.label}</a>
 							</Fragment>
 						))}
 					</p>

@@ -12,6 +12,7 @@ import { DIMENSIONS } from "./dimensions";
  */
 export interface RawTechnology {
 	id: string;
+	slug?: string;
 	data: TechnologyData;
 }
 
@@ -20,6 +21,7 @@ export interface RawTechnology {
  */
 export interface NormalizedTechnology {
 	id: string;
+	slug: string;
 	name: string;
 	icon: string | null;
 
@@ -102,6 +104,7 @@ export function normalizeTechnology(
 
 	return {
 		id,
+		slug: raw.slug ?? id,
 		name: data.name,
 		icon: iconUrl,
 
