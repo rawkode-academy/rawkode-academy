@@ -6,6 +6,9 @@ schema.#Project
 
 name: "rawkode-academy-website"
 _cuenvBinary: "0.56.1"
+// cuenv can exit successfully when a project's environment evaluation is
+// skipped. The generated PR workflow requires this project's pipeline report.
+_ciRequireReport: "projects/rawkode.academy/website"
 
 runtime: schema.#DevenvRuntime
 hooks: onEnter: devenv: schema.#Devenv
@@ -243,7 +246,9 @@ tasks: {
 			captures: previewUrl: {
 				pattern: "Version Preview URL: (.+)"
 			}
-			inputs: [
+			inputs: _siteDeployInputs + [
+				// Source and content changes must make the hosted Astro preview an
+				// affected task; otherwise the PR pipeline can be a no-op.
 				"review/deploy/deploy-cms-preview.mjs",
 				"scripts/preview-isolation-worker.mjs",
 				"../../../projects/rawkode.academy/payload/scripts/pr-preview-resources.mjs",
