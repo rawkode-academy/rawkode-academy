@@ -10,7 +10,6 @@ bun run test:watch    # Watch mode
 bun run format        # Biome format
 bun run storybook     # Component development
 bun run codegen       # GraphQL codegen
-bun run sync:content  # Sync GraphQL content
 ```
 
 ## Component Library & Design System

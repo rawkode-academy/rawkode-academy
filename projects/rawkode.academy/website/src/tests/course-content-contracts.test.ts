@@ -178,7 +178,6 @@ describe("catalog availability and curriculum", () => {
 				...runtime,
 				createMetadata: () => ({}),
 			},
-			"astro:content": {},
 			"@/utils/course-path": { getCourseModuleSlug },
 			"@rawkodeacademy/design-system": {
 				academyCourse: () => new Proxy({}, { get: (_, slot) => String(slot) }),

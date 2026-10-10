@@ -15,7 +15,7 @@ const runtimeSource = readFileSync(
 	new URL("../lib/video-runtime.ts", import.meta.url),
 	"utf8",
 );
-const context = vm.createContext({ console, URL, __NEWS_DEPLOYMENT_CUTOFF_MS__: Date.parse("2100-01-01") });
+const context = vm.createContext({ console, URL });
 const publicationModule = new vm.SourceTextModule(
 	ts.transpileModule(readFileSync(new URL("../lib/news-publication.ts", import.meta.url), "utf8"), {
 		compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
@@ -46,7 +46,7 @@ async function render(file, props, collections = {}) {
 	assert.deepEqual(compiled.diagnostics, []);
 	const mocks = {
 		"astro/runtime/server/index.js": { ...runtime, createMetadata: () => ({}) },
-		"astro:content": {
+		"@/lib/payload-content": {
 			getCollection: async (name, filter) =>
 				(collections[name] ?? []).filter(filter ?? (() => true)),
 		},
@@ -120,6 +120,7 @@ const topic = {
 };
 const entry = (id, changes = {}) => ({
 	id,
+	slug: id,
 	data: {
 		title: `Title ${id}`,
 		description: `Description ${id}`,
@@ -172,7 +173,6 @@ const technologyAst = ts.createSourceFile(
 const guardNames = new Set([
 	"now",
 	"normalizedTechnologyId",
-	"matchesTechnology",
 	"hasTopicContent",
 ]);
 const guardStatements = technologyAst.statements.filter(

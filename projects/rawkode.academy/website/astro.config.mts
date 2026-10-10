@@ -188,11 +188,6 @@ export default defineConfig({
 		}),
 	],
 	vite: {
-		// One literal shared by prerendering and every deployed worker isolate.
-		// Scheduled News requires a new build because its detail pages are static.
-		define: {
-			__NEWS_DEPLOYMENT_CUTOFF_MS__: JSON.stringify(Date.now()),
-		},
 		plugins: asAstroVitePlugins([
 			webcontainerDemosPlugin(),
 			vidstackPlugin({ include: /components\/video\// }),

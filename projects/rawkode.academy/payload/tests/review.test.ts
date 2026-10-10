@@ -201,10 +201,10 @@ test('unresolved comments block publication, and a failed publication batch leav
   assert.throws(() => h.sqlite.exec("UPDATE review_comment_resolutions SET actor_id=3"), /immutable/)
 })
 
-test('Payload review collections deny generic mutations and customer raw reads', async () => {
+test('review collection REST reads and generic mutations stay staff-only', async () => {
   for (const collection of reviewCollections(noDevelopers)) {
     for (const action of ['create','update','delete'] as const) assert.equal(await collection.access![action]!({ req: { user: staff } } as never), false)
-    assert.equal(await collection.access!.read!({ req: { user: client } } as never), collection.slug === 'video-publications')
+    assert.equal(await collection.access!.read!({ req: { user: client } } as never), false, `${collection.slug} is only read internally by the bridge`)
   }
 })
 
@@ -348,7 +348,7 @@ test('review list paginates by stable video ID without skipping customer grants'
   const h = await harness(t)
   const ids = Array.from({ length: 51 }, () => createCuid2())
   for (const [index, id] of ids.entries()) {
-    h.sqlite.prepare('INSERT INTO videos(id,legacy_id,legacy_type,slug,title,_status) VALUES(?,?,?,?,?,?)').run(id, `video-${index}`, 'Video', `video-${index}`, 'Review', 'draft')
+    h.sqlite.prepare('INSERT INTO videos(id,slug,title,_status) VALUES(?,?,?,?)').run(id, `video-${index}`, 'Review', 'draft')
     const revision = await h.service.execute(staff, command('create-revision', { videoId: id, mediaId: SOURCE_MEDIA_ID, deliverableMediaId: DELIVERABLE_MEDIA_ID, metadata }))
     await h.share(revision.revisionId, CLIENT_ID, false, 1, id)
   }

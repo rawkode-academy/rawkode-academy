@@ -4259,7 +4259,7 @@
 			},
 			{
 				"name": "id",
-				"type": "number",
+				"type": "text",
 				"required": true
 			}
 		]

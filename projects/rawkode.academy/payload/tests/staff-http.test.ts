@@ -3,6 +3,7 @@ import test from 'node:test'
 import { createStaffReviewerHandlers, createStaffVideoHandlers } from '../src/review/staff-http'
 import { ReviewError } from '../src/review/contracts'
 import { createCollections } from '../src/collections'
+import { isCuid2 } from '../src/cuid2'
 import type { ReviewActor } from '../src/review/contracts'
 import { CLIENT_ID, STAFF_ID, VIDEO_ID, OTHER_VIDEO_ID, SECOND_CLIENT_ID } from './helpers/ids'
 
@@ -68,7 +69,7 @@ test('staff can create a private review video target without claiming import pro
   assert.equal(data.locallyEdited, true)
   const body = await response.json() as { video: Record<string, unknown> }
   assert.equal(body.video.processingRun, undefined)
-  assert.equal(body.video.videoId, VIDEO_ID)
+  assert.ok(isCuid2(String(body.video.videoId)), 'new editorial video targets receive a CUID2 Payload ID')
   assert.equal(body.video.title, 'Datum review cut')
   assert.equal(body.video.description, 'Private review for Datum')
   assert.equal(body.video.reviewState, 'no-review')

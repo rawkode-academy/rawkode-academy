@@ -665,7 +665,6 @@ Search engines should see this text.`;
 describe("Crawlability and Sitemaps", () => {
 	afterEach(() => {
 		vi.resetModules();
-		vi.doUnmock("astro:content");
 		vi.doUnmock("@/lib/content");
 		vi.doUnmock("@rawkodeacademy/content/utils");
 		vi.doUnmock("glob");
@@ -694,9 +693,6 @@ describe("Crawlability and Sitemaps", () => {
 	});
 
 	it("keeps all intended sitemap sections in the index, even if a section is empty", async () => {
-		vi.doMock("astro:content", () => ({
-			getCollection: vi.fn(),
-		}));
 		vi.doMock("@/lib/content", () => ({
 			getPublishedVideos: vi.fn(),
 		}));
@@ -821,16 +817,10 @@ describe("Crawlability and Sitemaps", () => {
 	});
 
 	it("renders video sitemap durations as bounded integer seconds", async () => {
-		const mockGetCollection = vi.fn().mockResolvedValue([
-			{
-				id: "kubernetes",
-				data: {
-					name: "Kubernetes",
-				},
-			},
-		]);
 		const mockGetPublishedVideos = vi.fn().mockResolvedValue([
 			{
+				id: "video-1",
+				slug: "seo-hardening",
 				data: {
 					id: "video-1",
 					slug: "seo-hardening",
@@ -842,6 +832,8 @@ describe("Crawlability and Sitemaps", () => {
 				},
 			},
 			{
+				id: "video-2",
+				slug: "too-long-duration",
 				data: {
 					id: "video-2",
 					slug: "too-long-duration",
@@ -854,9 +846,6 @@ describe("Crawlability and Sitemaps", () => {
 			},
 		]);
 
-		vi.doMock("astro:content", () => ({
-			getCollection: mockGetCollection,
-		}));
 		vi.doMock("@/lib/content", () => ({
 			getPublishedVideos: mockGetPublishedVideos,
 		}));

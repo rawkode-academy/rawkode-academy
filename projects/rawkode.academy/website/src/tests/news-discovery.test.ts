@@ -5,13 +5,17 @@ import matter from "gray-matter";
 import { parseAtomFeed, parseRssFeed } from "feedsmith";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const { collections, getCollection, getEntries, render } = vi.hoisted(() => ({
+const { collections, getAllCollectionMock, getEntriesMock, getEntryMock } = vi.hoisted(() => ({
 	collections: {} as Record<string, any[]>,
-	getCollection: vi.fn(),
-	getEntries: vi.fn(),
-	render: vi.fn(),
+	getAllCollectionMock: vi.fn(),
+	getEntriesMock: vi.fn(),
+	getEntryMock: vi.fn(),
 }));
-vi.mock("astro:content", () => ({ getCollection, getEntries, render }));
+vi.mock("@/lib/payload-content", () => ({
+	getAllCollection: getAllCollectionMock,
+	getEntries: getEntriesMock,
+	getEntry: getEntryMock,
+}));
 
 import { GET as newsRss } from "../pages/api/feeds/news.xml";
 import { GET as newsAtom } from "../pages/api/feeds/news.atom";
@@ -34,6 +38,9 @@ import { buildSearchIndex, searchEntries } from "../lib/search";
 const now = new Date("2026-09-20T18:00:00Z");
 const entry = (id: string, publishedAt: Date, data = {}) => ({
 	id,
+	slug: id,
+	collection: "news",
+	mediaAssets: [],
 	data: {
 		id,
 		slug: id,
@@ -106,15 +113,28 @@ beforeEach(() => {
 	for (const key of Object.keys(collections)) delete collections[key];
 	collections.news = [future, invalid, past, boundary];
 	collections.people = [entry("reporter", now)];
-	getCollection.mockImplementation(async (name, filter) =>
-		(collections[name] ?? []).filter(filter ?? (() => true)),
+	collections.technologies = [{
+		...entry("reporter", now, { name: "Kubernetes" }),
+		id: "kubernetes",
+	}];
+	getAllCollectionMock.mockImplementation(async (name: string, filter?: (record: any) => boolean, options?: Record<string, string>) => {
+		const relation = options?.authorId ?? options?.technologyId ?? options?.personId;
+		const field = options?.technologyId ? "technologies" : name === "videos" ? "guests" : "authors";
+		return (collections[name] ?? []).filter((record) => {
+			const refs = record.data[field] ?? [];
+			const matchesRelation = !relation || refs.some((ref: any) => (typeof ref === "string" ? ref : ref.id) === relation);
+			return matchesRelation && (!filter || filter(record));
+		});
+	});
+	getEntryMock.mockImplementation(async (name: string, lookup: { slug?: string }) =>
+		(collections[name] ?? []).find((record) => record.slug === lookup.slug),
 	);
-	getEntries.mockImplementation(async (refs) =>
+	getEntriesMock.mockImplementation(async (refs) =>
 		refs.map((ref: string | { id: string }) =>
+			(collections.people ?? []).find((person) => person.id === (typeof ref === "string" ? ref : ref.id)) ??
 			entry(typeof ref === "string" ? ref : ref.id, now),
 		),
 	);
-	render.mockResolvedValue({});
 });
 afterEach(() => {
 	vi.useRealTimers();

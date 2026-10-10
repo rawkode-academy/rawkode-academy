@@ -70,7 +70,7 @@ async function harness(t: TestContext, provider = true) {
     },
   } } as unknown as MigrateUpArgs
   for (const migration of migrations) { sqlite.exec('BEGIN; PRAGMA defer_foreign_keys=ON'); await migration.up(args); sqlite.exec('COMMIT') }
-  sqlite.exec(`INSERT INTO users(id,email,role) VALUES('${STAFF_ID}','staff@example.invalid','staff'),('${CLIENT_ID}','customer@example.invalid','customer'),('${STRANGER_ID}','staff2@example.invalid','staff'); INSERT INTO videos(id,legacy_id,legacy_type,slug,title) VALUES('${VIDEO_ID}','one','Video','one','One'),('${OTHER_VIDEO_ID}','two','Video','two','Two')`)
+  sqlite.exec(`INSERT INTO users(id,email,role) VALUES('${STAFF_ID}','staff@example.invalid','staff'),('${CLIENT_ID}','customer@example.invalid','customer'),('${STRANGER_ID}','staff2@example.invalid','staff'); INSERT INTO videos(id,slug,title) VALUES('${VIDEO_ID}','one','One'),('${OTHER_VIDEO_ID}','two','Two')`)
   let failSQL: RegExp | undefined, clock = 1000
   class Prepared {
     values: (string | number | null)[] = []
@@ -86,7 +86,7 @@ async function harness(t: TestContext, provider = true) {
   } } as unknown as D1Database
   const store = new ReviewStore(db), r2 = fakeBucket(), assets = new TrustedAssets(store, r2.bucket)
   const review = new ReviewService(store, {
-    async video(id) { const row = sqlite.prepare('SELECT * FROM videos WHERE id=?').get(id); if (!row) throw Error('missing video'); return { id, legacyId: String(row.legacy_id) } },
+    async video(id) { const row = sqlite.prepare('SELECT * FROM videos WHERE id=?').get(id); if (!row) throw Error('missing video'); return { id } },
     assertPair: (videoId, source, output) => assets.pair(videoId, source, output),
     async source(id, _actor, videoId) { const a = await assets.resolve(id, videoId, 'source'); assert.ok(a); return { checksum: a.checksum } },
     async deliverable(id, _actor, videoId) { const a = await assets.resolve(id, videoId, 'deliverable'); assert.ok(a); return { checksum: a.checksum, durationMs: a.duration_ms!, contentType: a.content_type } },

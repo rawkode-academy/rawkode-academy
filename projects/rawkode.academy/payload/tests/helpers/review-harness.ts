@@ -42,9 +42,9 @@ export async function harness(t: TestContext, options: Options = {}) {
     sqlite.exec('COMMIT')
   }
   sqlite.exec(`INSERT INTO users(id,email,role,name) VALUES('${STAFF_ID}','staff@example.invalid','staff','Staff Editor'),('${CLIENT_ID}','client@example.invalid','customer','First Client'),('${STRANGER_ID}','stranger@example.invalid','customer','Stranger'),('${SECOND_CLIENT_ID}','second-client@example.invalid','customer','Second Client');
-    INSERT INTO videos(id,legacy_id,legacy_type,slug,title,_status) VALUES('${VIDEO_ID}','stable-video','Video','stable-video','Old title','draft'),('${OTHER_VIDEO_ID}','other-video','Video','other-video','Other','draft');
+    INSERT INTO videos(id,slug,title,_status) VALUES('${VIDEO_ID}','stable-video','Old title','draft'),('${OTHER_VIDEO_ID}','other-video','Other','draft');
     INSERT INTO media(id,filename) VALUES('${SOURCE_MEDIA_ID}','original.mp4'),('${DELIVERABLE_MEDIA_ID}','deliverable.mp4'),('${SECOND_DELIVERABLE_MEDIA_ID}','second-cut.mp4');
-    INSERT INTO _videos_v(id,parent_id,version_legacy_id,version__status,latest) VALUES(30,'${VIDEO_ID}','stable-video','draft',1);
+    INSERT INTO _videos_v(id,parent_id,version__status,latest) VALUES(30,'${VIDEO_ID}','draft',1);
     INSERT INTO videos_terms(id,_order,_parent_id,value) VALUES('term',1,'${VIDEO_ID}','old');
     INSERT INTO _videos_v_version_terms(id,_order,_parent_id,value) VALUES(31,1,30,'old');
     INSERT INTO videos_rels(id,parent_id,path) VALUES(32,'${VIDEO_ID}','guests');
@@ -85,7 +85,7 @@ export async function harness(t: TestContext, options: Options = {}) {
     async video(id) {
       const row = sqlite.prepare('SELECT * FROM videos WHERE id=?').get(id)
       if (!row) throw new Error('missing video')
-      return { id, legacyId: String(row.legacy_id), slug: 'stable-video', type: 'recorded', title: 'Old title', streamUrl: 'https://wrong.invalid/old.m3u8', sourceOrder: 0 }
+      return { id, slug: 'stable-video', type: 'recorded', title: 'Old title', streamUrl: 'https://wrong.invalid/old.m3u8', sourceOrder: 0 }
     },
     async source(id) { await sourceWait?.(); return { checksum: sources.get(id)! } },
     async deliverable(id) { return { checksum: sources.get(id)!, durationMs: 60000, contentType: 'video/mp4' } },

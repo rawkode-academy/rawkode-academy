@@ -9,15 +9,12 @@ export default defineConfig({
 		{
 			name: "vitest-astro-virtual-modules",
 			resolveId(id) {
-				if (id === "astro:content" || id === "astro:middleware") {
+				if (id === "astro:middleware") {
 					return `\0${id}`;
 				}
 				return undefined;
 			},
 			load(id) {
-				if (id === "\0astro:content") {
-					return "export const getCollection = async () => []; export const getEntry = async () => undefined;";
-				}
 				if (id === "\0astro:middleware") {
 					return "export const defineMiddleware = (handler) => handler;";
 				}

@@ -19,7 +19,7 @@ test('bridge accepts only the bounded fixed collection query contract', () => {
   assert.throws(() => parseCollectionRequest(new URL('https://payload.internal/v1/collections/videos?where[title][like]=x')))
   assert.throws(() => parseCollectionRequest(new URL('https://payload.internal/v1/collections/videos?q=x&limit=51')))
   assert.throws(() => parseCollectionRequest(new URL('https://payload.internal/v1/collections/articles?showId=show')))
-  assert.throws(() => parseCollectionRequest(new URL('https://payload.internal/v1/collections/users')))
+  assert.equal(parseCollectionRequest(new URL('https://payload.internal/v1/collections/users')), null, 'collections outside the public route allowlist are not routed')
 })
 
 test('central visibility hides drafts, tombstones and future recorded videos but exposes metadata-only live videos', () => {
@@ -87,9 +87,9 @@ test('scheduled release cache lifetime ends at the publishedAt boundary', async 
   const releaseAt = new Date(now + 1500).toISOString()
   const payload = {
     async find(args: Record<string, unknown>) {
+      if (args.collection === 'videos' && args.sort === 'publishedAt') return { docs: [{ id: videoID, publishedAt: releaseAt, type: 'recorded' }], hasNextPage: false }
       if (args.collection === 'videos') return { docs: [], hasNextPage: false }
       if (args.collection === 'video-publications') return { docs: [], hasNextPage: false }
-      if (args.sort === 'publishedAt') return { docs: [{ id: videoID, publishedAt: releaseAt, type: 'recorded' }], hasNextPage: false }
       return { docs: [], hasNextPage: false }
     },
   }
@@ -101,8 +101,10 @@ test('scheduled release cache lifetime ends at the publishedAt boundary', async 
 })
 
 test('published video overlay is applied after base visibility and remains explicitly projected', async () => {
+  const queries: Record<string, unknown>[] = []
   const payload = {
     async find(args: Record<string, unknown>) {
+      queries.push(args)
       if (args.collection === 'videos') return { docs: [{ id: videoID, slug: 'video', title: 'Draft title', publishedAt: '2026-10-01T00:00:00.000Z', type: 'recorded', _status: 'published', tombstone: false }], hasNextPage: false }
       if (args.collection === 'video-publications') return { docs: [{ id: videoID, document: { id: videoID, slug: 'video', title: 'Approved release', streamUrl: 'https://cdn.invalid/release.m3u8', _status: 'published', tombstone: false, publishedAt: '2026-10-09T00:00:00.000Z', r2Key: 'private-key' } }], hasNextPage: false }
       return { docs: [], hasNextPage: false }
@@ -115,6 +117,9 @@ test('published video overlay is applied after base visibility and remains expli
   assert.equal('contentId' in body.doc, false)
   assert.equal(body.doc.streamUrl, 'https://cdn.invalid/release.m3u8')
   assert.equal('r2Key' in body.doc, false)
+  const publicationRead = queries.find(query => query.collection === 'video-publications')!
+  assert.equal(publicationRead.overrideAccess, true, 'only the bounded bridge bypasses staff-only collection REST access')
+  assert.equal(publicationRead.user, null)
 })
 
 test('full course and course-module projections include authored contentResources', async () => {

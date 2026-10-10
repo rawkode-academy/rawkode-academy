@@ -25,6 +25,8 @@ export const reviewCollections = (access: AdminAccess): CollectionConfig[] => [
   privateCollection('review-decisions', [relation('video', 'videos'), relation('revision', 'video-revisions'), relation('author', 'users'), number('reviewVersion'), number('grantVersion'), text('decision'), { name: 'note', type: 'textarea' }, { name: 'createdAt', type: 'date', required: true }, { name: 'deliverableChecksum', type: 'text' }, { name: 'sourceChecksum', type: 'text' }, { name: 'grant', type: 'relationship', relationTo: 'review-revision-grants' }], access),
   applyPreset({
     slug: 'video-publications', timestamps: false, lockDocuments: false,
+    // The public bridge reads this projection with overrideAccess after it
+    // applies current visibility. Direct Payload REST reads stay staff-only.
     access: { read: ({ req }) => isStaff(req.user), create: () => false, update: () => false, delete: () => false },
     // Only the approved public projection lives here. No source keys, grants, comments or decisions.
     // This document ID is the video's stable R2/content ID; it is not a second

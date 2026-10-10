@@ -170,67 +170,72 @@ test('revision grant expand preserves reviewers with canonical CUID2 IDs and enf
   const expand = migrations[thumbnails + 1]!
   assert.equal(expand.name, 'cuid2_20261009_130000_review_revision_grants')
   const checksum = (letter: string) => letter.repeat(64)
-  sqlite.exec(`INSERT INTO users(id,email,role) VALUES(1,'staff@example.invalid','staff'),(2,'approver@example.invalid','customer'),(3,'commenter@example.invalid','customer'),(4,'inactive@example.invalid','customer');
-    INSERT INTO videos(id,legacy_id,title,_status) VALUES(10,'video','Video','draft');
-    INSERT INTO media(id,filename) VALUES(20,'source.mp4'),(21,'old.mp4'),(22,'current.mp4');
-    INSERT INTO video_review_state(video_id,generation,current_revision) VALUES(10,3,'current');
+  const ids = {
+    staff: cuid('s'), approver: cuid('a'), commenter: cuid('c'), inactive: cuid('i'),
+    video: cuid('v'), otherVideo: cuid('w'), source: cuid('m'), oldMedia: cuid('n'), currentMedia: cuid('o'),
+    oldRevision: cuid('r'), currentRevision: cuid('q'),
+  }
+  sqlite.exec(`INSERT INTO users(id,email,role) VALUES('${ids.staff}','staff@example.invalid','staff'),('${ids.approver}','approver@example.invalid','customer'),('${ids.commenter}','commenter@example.invalid','customer'),('${ids.inactive}','inactive@example.invalid','customer');
+    INSERT INTO videos(id,title,_status) VALUES('${ids.video}','Video','draft');
+    INSERT INTO media(id,filename) VALUES('${ids.source}','source.mp4'),('${ids.oldMedia}','old.mp4'),('${ids.currentMedia}','current.mp4');
+    INSERT INTO video_review_state(video_id,generation,current_revision) VALUES('${ids.video}',3,'${ids.currentRevision}');
     INSERT INTO video_revisions(id,video_id,media_id,checksum,deliverable_media_id,deliverable_checksum,duration_ms,review_version,state,metadata,created_by_id,created_at) VALUES
-      ('old',10,20,'${checksum('a')}',21,'${checksum('b')}',1000,1,'changes-requested','{}',1,'2026-10-01T00:00:00.000Z'),
-      ('current',10,20,'${checksum('a')}',22,'${checksum('c')}',1000,1,'ready','{}',1,'2026-10-02T00:00:00.000Z');
-    INSERT INTO video_review_grants(id,video_id,user_id,version,can_approve,active) VALUES('approver',10,2,3,1,1),('commenter',10,3,1,0,1),('inactive',10,4,1,1,0);
-    INSERT INTO review_comments(id,video_id,revision_id,author_id,start_ms,body,created_at) VALUES('comment',10,'old',3,0,'Fix this','2026-10-01T01:00:00.000Z');
-    INSERT INTO review_decisions(id,video_id,revision_id,author_id,review_version,grant_version,decision,note,created_at) VALUES('decision',10,'old',2,1,3,'changes-requested','','2026-10-01T02:00:00.000Z');`)
+      ('${ids.oldRevision}','${ids.video}','${ids.source}','${checksum('a')}','${ids.oldMedia}','${checksum('b')}',1000,1,'changes-requested','{}','${ids.staff}','2026-10-01T00:00:00.000Z'),
+      ('${ids.currentRevision}','${ids.video}','${ids.source}','${checksum('a')}','${ids.currentMedia}','${checksum('c')}',1000,1,'ready','{}','${ids.staff}','2026-10-02T00:00:00.000Z');
+    INSERT INTO video_review_grants(id,video_id,user_id,version,can_approve,active) VALUES('${cuid('h')}','${ids.video}','${ids.approver}',3,1,1),('${cuid('j')}','${ids.video}','${ids.commenter}',1,0,1),('${cuid('k')}','${ids.video}','${ids.inactive}',1,1,0);
+    INSERT INTO review_comments(id,video_id,revision_id,author_id,start_ms,body,created_at) VALUES('${cuid('d')}','${ids.video}','${ids.oldRevision}','${ids.commenter}',0,'Fix this','2026-10-01T01:00:00.000Z');
+    INSERT INTO review_decisions(id,video_id,revision_id,author_id,review_version,grant_version,decision,note,created_at) VALUES('${cuid('e')}','${ids.video}','${ids.oldRevision}','${ids.approver}',1,3,'changes-requested','','2026-10-01T02:00:00.000Z');`)
   const before = Date.now()
   await apply(expand.up)
-  const grant = (revision: string, user: number) => sqlite.prepare('SELECT * FROM review_revision_grants WHERE revision_id=? AND user_id=?').get(revision, user)
-  const approver = grant('current', 2)!
+  const grant = (revision: string, user: string) => sqlite.prepare('SELECT * FROM review_revision_grants WHERE revision_id=? AND user_id=?').get(revision, user)
+  const approver = grant(ids.currentRevision, ids.approver)!
   assert.equal(approver.can_approve, 1); assert.equal(approver.version, 3)
   const migratedIds = sqlite.prepare('SELECT id FROM review_revision_grants').all().map(row => String(row.id))
   assert.equal(migratedIds.length, 4, 'current grants and prior-review history are retained')
   assert.ok(migratedIds.every(isCuid2), 'migration allocates every row ID through the CUID2 generator')
-  assert.equal(grant('current', 3)?.can_approve, 0)
-  assert.equal(grant('old', 3)?.can_approve, 0, 'the commenter keeps the cut they commented on'); assert.equal(grant('old', 3)?.version, 1)
-  assert.equal(grant('old', 2)?.can_approve, 0, 'the decider keeps the cut they decided on')
-  assert.equal(sqlite.prepare('SELECT count(*) AS n FROM review_revision_grants WHERE user_id=4').get()?.n, 0, 'inactive grants are not migrated')
+  assert.equal(grant(ids.currentRevision, ids.commenter)?.can_approve, 0)
+  assert.equal(grant(ids.oldRevision, ids.commenter)?.can_approve, 0, 'the commenter keeps the cut they commented on'); assert.equal(grant(ids.oldRevision, ids.commenter)?.version, 1)
+  assert.equal(grant(ids.oldRevision, ids.approver)?.can_approve, 0, 'the decider keeps the cut they decided on')
+  assert.equal(sqlite.prepare('SELECT count(*) AS n FROM review_revision_grants WHERE user_id=?').get(ids.inactive)?.n, 0, 'inactive grants are not migrated')
   const expires = Date.parse(String(approver.expires_at))
   assert.match(String(approver.expires_at), /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/)
   assert.ok(Math.abs(expires - before - 30 * 86400000) < 60000, 'backfilled grants expire after 30 days')
-  assert.deepEqual({ ...sqlite.prepare('SELECT deliverable_checksum,source_checksum,grant_id FROM review_decisions').get() }, { deliverable_checksum: checksum('b'), source_checksum: checksum('a'), grant_id: grant('old', 2)!.id })
+  assert.deepEqual({ ...sqlite.prepare('SELECT deliverable_checksum,source_checksum,grant_id FROM review_decisions').get() }, { deliverable_checksum: checksum('b'), source_checksum: checksum('a'), grant_id: grant(ids.oldRevision, ids.approver)!.id })
   assert.throws(() => sqlite.exec("UPDATE review_decisions SET note='x'"), /immutable/)
   assert.deepEqual(sqlite.prepare('PRAGMA foreign_key_check').all(), [])
   for (const [grantedAt, expiresAt] of [['2026-10-09 00:00:00', '2026-11-09T00:00:00.000Z'], ['2026-10-09T00:00:00.000Z', '2026-11-09T00:00:00+00:00'], ['2026-10-09T00:00:00.000Z', '2026-10-08T00:00:00.000Z']]) {
-    assert.throws(() => sqlite.prepare("INSERT INTO review_revision_grants(id,video_id,revision_id,user_id,can_approve,version,granted_at,expires_at) VALUES('bad',10,'current',4,0,1,?,?)").run(grantedAt, expiresAt), /CHECK constraint/, `${grantedAt} ${expiresAt}`)
+    assert.throws(() => sqlite.prepare('INSERT INTO review_revision_grants(id,video_id,revision_id,user_id,can_approve,version,granted_at,expires_at) VALUES(?,?,?,?,0,1,?,?)').run(createCuid2(), ids.video, ids.currentRevision, ids.inactive, grantedAt, expiresAt), /CHECK constraint/, `${grantedAt} ${expiresAt}`)
   }
-  sqlite.exec("INSERT INTO videos(id,legacy_id,title,_status) VALUES(11,'other','Other','draft')")
-  assert.throws(() => sqlite.exec("INSERT INTO review_revision_grants(id,video_id,revision_id,user_id,can_approve,version,granted_at,expires_at) VALUES('wrong-video',11,'current',4,0,1,'2026-10-09T00:00:00.000Z','2026-11-09T00:00:00.000Z')"), /Grant must belong to the revision video/)
-  assert.throws(() => sqlite.exec("UPDATE review_revision_grants SET user_id=4"), /Grant identity is immutable/)
+  sqlite.exec(`INSERT INTO videos(id,title,_status) VALUES('${ids.otherVideo}','Other','draft')`)
+  assert.throws(() => sqlite.prepare("INSERT INTO review_revision_grants(id,video_id,revision_id,user_id,can_approve,version,granted_at,expires_at) VALUES(?,?,?, ?,0,1,'2026-10-09T00:00:00.000Z','2026-11-09T00:00:00.000Z')").run(createCuid2(), ids.otherVideo, ids.currentRevision, ids.inactive), /Grant must belong to the revision video/)
+  assert.throws(() => sqlite.prepare('UPDATE review_revision_grants SET user_id=?').run(ids.inactive), /Grant identity is immutable/)
   assert.throws(() => sqlite.exec('DELETE FROM review_revision_grants'), /Grant history is retained/)
 
   const currentGrantId = String(approver.id)
   assert.ok(isCuid2(currentGrantId))
   const windowDecisionId = createCuid2()
   sqlite.prepare('INSERT INTO review_decisions(id,video_id,revision_id,author_id,review_version,grant_version,decision,note,created_at) VALUES(?,?,?,?,?,?,?, ?,?)')
-    .run(windowDecisionId, 10, 'current', 2, 1, 3, 'approved', '', '2026-10-09T00:00:00.000Z')
+    .run(windowDecisionId, ids.video, ids.currentRevision, ids.approver, 1, 3, 'approved', '', '2026-10-09T00:00:00.000Z')
   assert.equal(sqlite.prepare('SELECT grant_id FROM review_decisions WHERE id=?').get(windowDecisionId)?.grant_id, null)
   const triggersBeforeEnforce = sqlite.prepare("SELECT name FROM sqlite_master WHERE type='trigger' AND name LIKE '%mirror%'").all()
   assert.deepEqual(triggersBeforeEnforce, [], 'no SQL trigger generates or mirrors revision grant document IDs')
 
   await apply(enforce.up)
   assert.deepEqual({ ...sqlite.prepare('SELECT deliverable_checksum,source_checksum,grant_id FROM review_decisions WHERE id=?').get(windowDecisionId) }, { deliverable_checksum: checksum('c'), source_checksum: checksum('a'), grant_id: currentGrantId })
-  assert.throws(() => sqlite.exec("INSERT INTO video_review_grants(id,video_id,user_id) VALUES('late',10,3)"), /Use revision grants/)
+  assert.throws(() => sqlite.prepare('INSERT INTO video_review_grants(id,video_id,user_id) VALUES(?,?,?)').run(cuid('l'), ids.video, ids.commenter), /Use revision grants/)
   assert.throws(() => sqlite.exec("UPDATE video_review_grants SET active=0"), /Use revision grants/)
   const triggers = () => sqlite.prepare("SELECT name FROM sqlite_master WHERE type='trigger' AND (name LIKE 'video_review_grants_%' OR name LIKE 'review_decision_%') ORDER BY name").all().map(row => String(row.name))
   assert.deepEqual(triggers(), ['review_decision_delete', 'review_decision_pin', 'review_decision_update', 'video_review_grants_retired_delete', 'video_review_grants_retired_insert', 'video_review_grants_retired_update'])
   for (const values of [`'${checksum('x')}','${checksum('a')}','${currentGrantId}'`, `NULL,'${checksum('a')}','${currentGrantId}'`, `'${checksum('c')}','${checksum('a')}',NULL`]) {
-    assert.throws(() => sqlite.exec(`INSERT INTO review_decisions(id,video_id,revision_id,author_id,review_version,grant_version,decision,note,created_at,deliverable_checksum,source_checksum,grant_id) VALUES('pinned',10,'current',5,1,1,'approved','','2026-10-09T00:00:00.000Z',${values})`), /Decision must pin/)
+    assert.throws(() => sqlite.exec(`INSERT INTO review_decisions(id,video_id,revision_id,author_id,review_version,grant_version,decision,note,created_at,deliverable_checksum,source_checksum,grant_id) VALUES('${cuid('p')}','${ids.video}','${ids.currentRevision}','${ids.inactive}',1,1,'approved','','2026-10-09T00:00:00.000Z',${values})`), /Decision must pin/)
   }
 
   // A staff-created grant makes the expand rollback refuse.
   await apply(enforce.down)
   assert.deepEqual(triggers().filter(name => name.includes('mirror')), [], 'rollback does not restore SQL-generated legacy mirror triggers')
-  sqlite.prepare('UPDATE review_revision_grants SET granted_by_id=1 WHERE id=?').run(currentGrantId)
+  sqlite.prepare('UPDATE review_revision_grants SET granted_by_id=? WHERE id=?').run(ids.staff, currentGrantId)
   await assert.rejects(apply(expand.down), /CHECK constraint/)
-  assert.ok(grant('current', 2), 'refused rollback keeps every grant')
+  assert.ok(grant(ids.currentRevision, ids.approver), 'refused rollback keeps every grant')
 })
 
 test('revision grant migrations go up, down and up again on an empty review schema', async t => {

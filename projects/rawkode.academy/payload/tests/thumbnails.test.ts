@@ -10,7 +10,7 @@ import { ReviewStore } from '../src/review/store'
 import { ReviewService } from '../src/review/service'
 import { ReviewError, type ReviewActor } from '../src/review/contracts'
 import { createCuid2 } from '../src/cuid2'
-import { CLIENT_ID, OTHER_VIDEO_ID, STAFF_ID, THUMBNAIL_ID, VIDEO_ID } from './helpers/ids'
+import { CLIENT_ID, OTHER_THUMBNAIL_ID, OTHER_VIDEO_ID, STAFF_ID, THUMBNAIL_ID, VIDEO_ID } from './helpers/ids'
 
 const origin = 'https://preview.rawkode.academy'
 const staff: ReviewActor = { id: STAFF_ID, collection: 'users', role: 'staff' }
@@ -73,7 +73,7 @@ function harness(t: TestContext) {
   const payload = {
     async create(options: any) {
       creates.push(options)
-      const id = THUMBNAIL_ID, filename = options.file.name
+      const id = creates.length === 1 ? THUMBNAIL_ID : OTHER_THUMBNAIL_ID, filename = options.file.name
       const body = Buffer.from(options.file.data)
       if (corruptStorage) body[body.length - 1] ^= 1
       objects.set(filename, { bytes: body, type: options.file.mimetype, etag: await hash(body) })
@@ -88,7 +88,7 @@ function harness(t: TestContext) {
   const service = new ReviewService(store, {
     async video(id: string) {
       if (!eligible || ![VIDEO_ID,OTHER_VIDEO_ID].includes(id)) throw new ReviewError(409, 'Ineligible video')
-      return { id, legacyId: String(id) }
+      return { id }
     },
     now: () => fixed,
   } as never)

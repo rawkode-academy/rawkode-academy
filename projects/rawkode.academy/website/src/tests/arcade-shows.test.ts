@@ -4,9 +4,8 @@ import { fileURLToPath } from "node:url";
 import matter from "gray-matter";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("astro:content", () => ({ getCollection: vi.fn() }));
-
-import { getCollection } from "astro:content";
+const { getAllCollection } = vi.hoisted(() => ({ getAllCollection: vi.fn() }));
+vi.mock("@/lib/payload-content", () => ({ getAllCollection }));
 import { getShowSitemapEntries } from "@/lib/sitemaps";
 
 const testDirectory = dirname(fileURLToPath(import.meta.url));
@@ -43,10 +42,11 @@ const arcadeShows = {
 describe("Arcade show publishing", () => {
 	afterEach(() => vi.clearAllMocks());
 
-	it("defines the explicit show lifecycle schema with an active default", () => {
-		const schema = readFileSync(resolve(websiteDirectory, "src/content.config.ts"), "utf8");
-		expect(schema).toContain('z.enum(["coming-soon", "active", "archived"]).default("active")');
-		expect(schema).toContain('url.startsWith("https://")');
+	it("resolves show pages by preserved slug at request time", () => {
+		const detail = readFileSync(resolve(websiteDirectory, "src/pages/shows/[showId].astro"), "utf8");
+		expect(detail).toContain("export const prerender = false");
+		expect(detail).toContain('getEntry("shows", { slug: showId })');
+		expect(detail).not.toContain("getStaticPaths");
 	});
 
 	it("publishes all six arcade shows as coming soon without invented programming metadata", () => {
@@ -84,10 +84,12 @@ describe("Arcade show publishing", () => {
 	});
 
 	it("includes every coming-soon show in the public show sitemap", async () => {
-		const content = Object.keys(arcadeShows).map((id) => ({
-			data: { id, publish: true, status: "coming-soon" },
+		const content = Object.keys(arcadeShows).map((slug) => ({
+			id: `payload-${slug}`,
+			slug,
+			data: { name: slug, status: "coming-soon" },
 		}));
-		vi.mocked(getCollection).mockResolvedValue(content as never);
+		vi.mocked(getAllCollection).mockResolvedValue(content as never);
 		const entries = await getShowSitemapEntries();
 		expect(entries.map((entry) => entry.path)).toEqual(
 			Object.keys(arcadeShows).sort().map((id) => `/shows/${id}`),

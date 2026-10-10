@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { mount, type VueWrapper } from "@vue/test-utils";
-import type { CollectionEntry } from "astro:content";
+import type { CollectionEntry } from "@/lib/payload-content";
 import AuthorAvatarGroup from "../components/common/AuthorAvatarGroup.vue";
 import Container from "../components/ui/Container.vue";
 import {
