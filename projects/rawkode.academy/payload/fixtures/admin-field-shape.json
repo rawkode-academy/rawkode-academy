@@ -1,4660 +1,4625 @@
 [
-  {
-    "slug": "adrs",
-    "timestamps": true,
-    "drafts": true,
-    "maxPerDoc": 30,
-    "auth": false,
-    "upload": false,
-    "indexes": [],
-    "fields": [
-      {
-        "name": "adoptedAt",
-        "type": "date"
-      },
-      {
-        "name": "authors",
-        "type": "relationship",
-        "hasMany": true,
-        "relationTo": "people"
-      },
-      {
-        "name": "body",
-        "type": "textarea"
-      },
-      {
-        "name": "contentResources",
-        "type": "json"
-      },
-      {
-        "name": "cover",
-        "type": "json"
-      },
-      {
-        "name": "importedAt",
-        "type": "date"
-      },
-      {
-        "name": "importState",
-        "type": "select",
-        "options": [
-          "pending",
-          "complete"
-        ]
-      },
-      {
-        "name": "legacyId",
-        "type": "text",
-        "required": true,
-        "unique": true,
-        "index": true
-      },
-      {
-        "name": "locallyEdited",
-        "type": "checkbox",
-        "defaultValue": true
-      },
-      {
-        "name": "mappingVersion",
-        "type": "text"
-      },
-      {
-        "name": "slug",
-        "type": "text",
-        "required": true,
-        "index": true
-      },
-      {
-        "name": "sourceAssets",
-        "type": "json"
-      },
-      {
-        "name": "sourceFields",
-        "type": "json"
-      },
-      {
-        "name": "sourceHash",
-        "type": "text"
-      },
-      {
-        "name": "sourceOrder",
-        "type": "number",
-        "defaultValue": 0
-      },
-      {
-        "name": "sourcePath",
-        "type": "text"
-      },
-      {
-        "name": "sourceRevision",
-        "type": "text"
-      },
-      {
-        "name": "sourceSequence",
-        "type": "number"
-      },
-      {
-        "name": "sourceSystem",
-        "type": "text"
-      },
-      {
-        "name": "title",
-        "type": "text"
-      },
-      {
-        "name": "tombstone",
-        "type": "checkbox",
-        "defaultValue": false
-      }
-    ]
-  },
-  {
-    "slug": "articles",
-    "timestamps": true,
-    "drafts": true,
-    "maxPerDoc": 30,
-    "auth": false,
-    "upload": false,
-    "indexes": [],
-    "fields": [
-      {
-        "name": "authors",
-        "type": "relationship",
-        "hasMany": true,
-        "relationTo": "people"
-      },
-      {
-        "name": "body",
-        "type": "textarea"
-      },
-      {
-        "name": "contentResources",
-        "type": "json"
-      },
-      {
-        "name": "cover",
-        "type": "json"
-      },
-      {
-        "name": "description",
-        "type": "textarea"
-      },
-      {
-        "name": "howto",
-        "type": "checkbox"
-      },
-      {
-        "name": "importedAt",
-        "type": "date"
-      },
-      {
-        "name": "importState",
-        "type": "select",
-        "options": [
-          "pending",
-          "complete"
-        ]
-      },
-      {
-        "name": "legacyId",
-        "type": "text",
-        "required": true,
-        "unique": true,
-        "index": true
-      },
-      {
-        "name": "locallyEdited",
-        "type": "checkbox",
-        "defaultValue": true
-      },
-      {
-        "name": "mappingVersion",
-        "type": "text"
-      },
-      {
-        "name": "publishedAt",
-        "type": "date"
-      },
-      {
-        "name": "resources",
-        "type": "relationship",
-        "hasMany": true,
-        "relationTo": "learning-resources"
-      },
-      {
-        "name": "series",
-        "type": "relationship",
-        "relationTo": "series"
-      },
-      {
-        "name": "slug",
-        "type": "text",
-        "required": true,
-        "index": true
-      },
-      {
-        "name": "sourceAssets",
-        "type": "json"
-      },
-      {
-        "name": "sourceFields",
-        "type": "json"
-      },
-      {
-        "name": "sourceHash",
-        "type": "text"
-      },
-      {
-        "name": "sourceOrder",
-        "type": "number",
-        "defaultValue": 0
-      },
-      {
-        "name": "sourcePath",
-        "type": "text"
-      },
-      {
-        "name": "sourceRevision",
-        "type": "text"
-      },
-      {
-        "name": "sourceSequence",
-        "type": "number"
-      },
-      {
-        "name": "sourceSystem",
-        "type": "text"
-      },
-      {
-        "name": "subtitle",
-        "type": "text"
-      },
-      {
-        "name": "technologies",
-        "type": "relationship",
-        "hasMany": true,
-        "relationTo": "technologies"
-      },
-      {
-        "name": "title",
-        "type": "text"
-      },
-      {
-        "name": "tombstone",
-        "type": "checkbox",
-        "defaultValue": false
-      },
-      {
-        "name": "type",
-        "type": "select",
-        "options": [
-          "tutorial",
-          "article",
-          "guide",
-          "news"
-        ]
-      },
-      {
-        "name": "updatedAt",
-        "type": "date"
-      }
-    ]
-  },
-  {
-    "slug": "bracket-applications",
-    "timestamps": true,
-    "drafts": true,
-    "maxPerDoc": 30,
-    "auth": false,
-    "upload": false,
-    "indexes": [
-      {
-        "unique": true,
-        "fields": [
-          "bracket",
-          "competitor"
-        ]
-      },
-      {
-        "unique": true,
-        "fields": [
-          "sourceBracketId",
-          "sourceCompetitorId"
-        ]
-      }
-    ],
-    "fields": [
-      {
-        "name": "bracket",
-        "type": "relationship",
-        "relationTo": "brackets"
-      },
-      {
-        "name": "competitor",
-        "type": "relationship",
-        "relationTo": "competitors"
-      },
-      {
-        "name": "importedAt",
-        "type": "date"
-      },
-      {
-        "name": "importState",
-        "type": "select",
-        "options": [
-          "pending",
-          "complete"
-        ]
-      },
-      {
-        "name": "legacyId",
-        "type": "text",
-        "required": true,
-        "unique": true,
-        "index": true
-      },
-      {
-        "name": "locallyEdited",
-        "type": "checkbox",
-        "defaultValue": true
-      },
-      {
-        "name": "mappingVersion",
-        "type": "text"
-      },
-      {
-        "name": "reviewedAt",
-        "type": "date"
-      },
-      {
-        "name": "reviewedByUserId",
-        "type": "text"
-      },
-      {
-        "name": "slug",
-        "type": "text",
-        "required": true,
-        "index": true
-      },
-      {
-        "name": "sourceAssets",
-        "type": "json"
-      },
-      {
-        "name": "sourceBracketId",
-        "type": "text"
-      },
-      {
-        "name": "sourceCompetitorId",
-        "type": "text"
-      },
-      {
-        "name": "sourceCreatedAt",
-        "type": "date"
-      },
-      {
-        "name": "sourceFields",
-        "type": "json"
-      },
-      {
-        "name": "sourceHash",
-        "type": "text"
-      },
-      {
-        "name": "sourceOrder",
-        "type": "number",
-        "defaultValue": 0
-      },
-      {
-        "name": "sourcePath",
-        "type": "text"
-      },
-      {
-        "name": "sourceRevision",
-        "type": "text"
-      },
-      {
-        "name": "sourceSequence",
-        "type": "number"
-      },
-      {
-        "name": "sourceSystem",
-        "type": "text"
-      },
-      {
-        "name": "status",
-        "type": "select",
-        "options": [
-          "pending",
-          "approved",
-          "rejected"
-        ]
-      },
-      {
-        "name": "tombstone",
-        "type": "checkbox",
-        "defaultValue": false
-      }
-    ]
-  },
-  {
-    "slug": "bracket-breaks",
-    "timestamps": true,
-    "drafts": true,
-    "maxPerDoc": 30,
-    "auth": false,
-    "upload": false,
-    "indexes": [],
-    "fields": [
-      {
-        "name": "bracket",
-        "type": "relationship",
-        "relationTo": "brackets"
-      },
-      {
-        "name": "endsAt",
-        "type": "date"
-      },
-      {
-        "name": "importedAt",
-        "type": "date"
-      },
-      {
-        "name": "importState",
-        "type": "select",
-        "options": [
-          "pending",
-          "complete"
-        ]
-      },
-      {
-        "name": "label",
-        "type": "text"
-      },
-      {
-        "name": "legacyId",
-        "type": "text",
-        "required": true,
-        "unique": true,
-        "index": true
-      },
-      {
-        "name": "locallyEdited",
-        "type": "checkbox",
-        "defaultValue": true
-      },
-      {
-        "name": "mappingVersion",
-        "type": "text"
-      },
-      {
-        "name": "slug",
-        "type": "text",
-        "required": true,
-        "index": true
-      },
-      {
-        "name": "sourceAssets",
-        "type": "json"
-      },
-      {
-        "name": "sourceBracketId",
-        "type": "text"
-      },
-      {
-        "name": "sourceCreatedAt",
-        "type": "date"
-      },
-      {
-        "name": "sourceFields",
-        "type": "json"
-      },
-      {
-        "name": "sourceHash",
-        "type": "text"
-      },
-      {
-        "name": "sourceOrder",
-        "type": "number",
-        "defaultValue": 0
-      },
-      {
-        "name": "sourcePath",
-        "type": "text"
-      },
-      {
-        "name": "sourceRevision",
-        "type": "text"
-      },
-      {
-        "name": "sourceSequence",
-        "type": "number"
-      },
-      {
-        "name": "sourceSystem",
-        "type": "text"
-      },
-      {
-        "name": "startsAt",
-        "type": "date"
-      },
-      {
-        "name": "tombstone",
-        "type": "checkbox",
-        "defaultValue": false
-      }
-    ]
-  },
-  {
-    "slug": "bracket-entries",
-    "timestamps": true,
-    "drafts": true,
-    "maxPerDoc": 30,
-    "auth": false,
-    "upload": false,
-    "indexes": [
-      {
-        "unique": true,
-        "fields": [
-          "bracket",
-          "seed"
-        ]
-      },
-      {
-        "unique": true,
-        "fields": [
-          "bracket",
-          "competitor"
-        ]
-      },
-      {
-        "unique": true,
-        "fields": [
-          "bracket",
-          "team"
-        ]
-      },
-      {
-        "unique": true,
-        "fields": [
-          "sourceBracketId",
-          "seed"
-        ]
-      },
-      {
-        "unique": true,
-        "fields": [
-          "sourceBracketId",
-          "sourceCompetitorId"
-        ]
-      },
-      {
-        "unique": true,
-        "fields": [
-          "sourceBracketId",
-          "sourceTeamId"
-        ]
-      }
-    ],
-    "fields": [
-      {
-        "name": "bracket",
-        "type": "relationship",
-        "relationTo": "brackets"
-      },
-      {
-        "name": "competitor",
-        "type": "relationship",
-        "relationTo": "competitors"
-      },
-      {
-        "name": "displayName",
-        "type": "text"
-      },
-      {
-        "name": "importedAt",
-        "type": "date"
-      },
-      {
-        "name": "importState",
-        "type": "select",
-        "options": [
-          "pending",
-          "complete"
-        ]
-      },
-      {
-        "name": "legacyId",
-        "type": "text",
-        "required": true,
-        "unique": true,
-        "index": true
-      },
-      {
-        "name": "locallyEdited",
-        "type": "checkbox",
-        "defaultValue": true
-      },
-      {
-        "name": "mappingVersion",
-        "type": "text"
-      },
-      {
-        "name": "seed",
-        "type": "number"
-      },
-      {
-        "name": "slug",
-        "type": "text",
-        "required": true,
-        "index": true
-      },
-      {
-        "name": "sourceAssets",
-        "type": "json"
-      },
-      {
-        "name": "sourceBracketId",
-        "type": "text"
-      },
-      {
-        "name": "sourceCompetitorId",
-        "type": "text"
-      },
-      {
-        "name": "sourceCreatedAt",
-        "type": "date"
-      },
-      {
-        "name": "sourceFields",
-        "type": "json"
-      },
-      {
-        "name": "sourceHash",
-        "type": "text"
-      },
-      {
-        "name": "sourceOrder",
-        "type": "number",
-        "defaultValue": 0
-      },
-      {
-        "name": "sourcePath",
-        "type": "text"
-      },
-      {
-        "name": "sourceRevision",
-        "type": "text"
-      },
-      {
-        "name": "sourceSequence",
-        "type": "number"
-      },
-      {
-        "name": "sourceSystem",
-        "type": "text"
-      },
-      {
-        "name": "sourceTeamId",
-        "type": "text"
-      },
-      {
-        "name": "sourceUpdatedAt",
-        "type": "date"
-      },
-      {
-        "name": "status",
-        "type": "select",
-        "options": [
-          "pending",
-          "confirmed",
-          "withdrawn"
-        ]
-      },
-      {
-        "name": "team",
-        "type": "relationship",
-        "relationTo": "teams"
-      },
-      {
-        "name": "tombstone",
-        "type": "checkbox",
-        "defaultValue": false
-      }
-    ]
-  },
-  {
-    "slug": "brackets",
-    "timestamps": true,
-    "drafts": true,
-    "maxPerDoc": 30,
-    "auth": false,
-    "upload": false,
-    "indexes": [
-      {
-        "unique": true,
-        "fields": [
-          "season",
-          "slug"
-        ]
-      },
-      {
-        "unique": true,
-        "fields": [
-          "sourceSeasonId",
-          "slug"
-        ]
-      }
-    ],
-    "fields": [
-      {
-        "name": "cadenceDays",
-        "type": "number"
-      },
-      {
-        "name": "format",
-        "type": "select",
-        "options": [
-          "single_elimination"
-        ]
-      },
-      {
-        "name": "importedAt",
-        "type": "date"
-      },
-      {
-        "name": "importState",
-        "type": "select",
-        "options": [
-          "pending",
-          "complete"
-        ]
-      },
-      {
-        "name": "kind",
-        "type": "select",
-        "options": [
-          "solo",
-          "team"
-        ]
-      },
-      {
-        "name": "legacyId",
-        "type": "text",
-        "required": true,
-        "unique": true,
-        "index": true
-      },
-      {
-        "name": "locallyEdited",
-        "type": "checkbox",
-        "defaultValue": true
-      },
-      {
-        "name": "mappingVersion",
-        "type": "text"
-      },
-      {
-        "name": "maxEntries",
-        "type": "number"
-      },
-      {
-        "name": "name",
-        "type": "text"
-      },
-      {
-        "name": "registrationClosesAt",
-        "type": "date"
-      },
-      {
-        "name": "season",
-        "type": "relationship",
-        "relationTo": "seasons"
-      },
-      {
-        "name": "slug",
-        "type": "text",
-        "required": true,
-        "index": true
-      },
-      {
-        "name": "sourceAssets",
-        "type": "json"
-      },
-      {
-        "name": "sourceCreatedAt",
-        "type": "date"
-      },
-      {
-        "name": "sourceFields",
-        "type": "json"
-      },
-      {
-        "name": "sourceHash",
-        "type": "text"
-      },
-      {
-        "name": "sourceOrder",
-        "type": "number",
-        "defaultValue": 0
-      },
-      {
-        "name": "sourcePath",
-        "type": "text"
-      },
-      {
-        "name": "sourceRevision",
-        "type": "text"
-      },
-      {
-        "name": "sourceSeasonId",
-        "type": "text"
-      },
-      {
-        "name": "sourceSequence",
-        "type": "number"
-      },
-      {
-        "name": "sourceSystem",
-        "type": "text"
-      },
-      {
-        "name": "sourceUpdatedAt",
-        "type": "date"
-      },
-      {
-        "name": "startsAt",
-        "type": "date"
-      },
-      {
-        "name": "status",
-        "type": "select",
-        "options": [
-          "draft",
-          "active",
-          "finished"
-        ]
-      },
-      {
-        "name": "teamSize",
-        "type": "number"
-      },
-      {
-        "name": "tombstone",
-        "type": "checkbox",
-        "defaultValue": false
-      }
-    ]
-  },
-  {
-    "slug": "changelog",
-    "timestamps": true,
-    "drafts": true,
-    "maxPerDoc": 30,
-    "auth": false,
-    "upload": false,
-    "indexes": [],
-    "fields": [
-      {
-        "name": "author",
-        "type": "relationship",
-        "relationTo": "people"
-      },
-      {
-        "name": "body",
-        "type": "textarea"
-      },
-      {
-        "name": "contentResources",
-        "type": "json"
-      },
-      {
-        "name": "cover",
-        "type": "json"
-      },
-      {
-        "name": "date",
-        "type": "date"
-      },
-      {
-        "name": "description",
-        "type": "textarea"
-      },
-      {
-        "name": "importedAt",
-        "type": "date"
-      },
-      {
-        "name": "importState",
-        "type": "select",
-        "options": [
-          "pending",
-          "complete"
-        ]
-      },
-      {
-        "name": "legacyId",
-        "type": "text",
-        "required": true,
-        "unique": true,
-        "index": true
-      },
-      {
-        "name": "locallyEdited",
-        "type": "checkbox",
-        "defaultValue": true
-      },
-      {
-        "name": "mappingVersion",
-        "type": "text"
-      },
-      {
-        "name": "pullRequest",
-        "type": "number"
-      },
-      {
-        "name": "slug",
-        "type": "text",
-        "required": true,
-        "index": true
-      },
-      {
-        "name": "sourceAssets",
-        "type": "json"
-      },
-      {
-        "name": "sourceFields",
-        "type": "json"
-      },
-      {
-        "name": "sourceHash",
-        "type": "text"
-      },
-      {
-        "name": "sourceOrder",
-        "type": "number",
-        "defaultValue": 0
-      },
-      {
-        "name": "sourcePath",
-        "type": "text"
-      },
-      {
-        "name": "sourceRevision",
-        "type": "text"
-      },
-      {
-        "name": "sourceSequence",
-        "type": "number"
-      },
-      {
-        "name": "sourceSystem",
-        "type": "text"
-      },
-      {
-        "name": "title",
-        "type": "text"
-      },
-      {
-        "name": "tombstone",
-        "type": "checkbox",
-        "defaultValue": false
-      },
-      {
-        "name": "type",
-        "type": "select",
-        "options": [
-          "feature",
-          "fix",
-          "improvement",
-          "breaking"
-        ]
-      }
-    ]
-  },
-  {
-    "slug": "chapters",
-    "timestamps": true,
-    "drafts": true,
-    "maxPerDoc": 30,
-    "auth": false,
-    "upload": false,
-    "indexes": [],
-    "fields": [
-      {
-        "name": "body",
-        "type": "textarea"
-      },
-      {
-        "name": "contentResources",
-        "type": "json"
-      },
-      {
-        "name": "cover",
-        "type": "json"
-      },
-      {
-        "name": "importedAt",
-        "type": "date"
-      },
-      {
-        "name": "importState",
-        "type": "select",
-        "options": [
-          "pending",
-          "complete"
-        ]
-      },
-      {
-        "name": "legacyId",
-        "type": "text",
-        "required": true,
-        "unique": true,
-        "index": true
-      },
-      {
-        "name": "locallyEdited",
-        "type": "checkbox",
-        "defaultValue": true
-      },
-      {
-        "name": "mappingVersion",
-        "type": "text"
-      },
-      {
-        "name": "slug",
-        "type": "text",
-        "required": true,
-        "index": true
-      },
-      {
-        "name": "sourceAssets",
-        "type": "json"
-      },
-      {
-        "name": "sourceFields",
-        "type": "json"
-      },
-      {
-        "name": "sourceHash",
-        "type": "text"
-      },
-      {
-        "name": "sourceOrder",
-        "type": "number",
-        "defaultValue": 0
-      },
-      {
-        "name": "sourcePath",
-        "type": "text"
-      },
-      {
-        "name": "sourceRevision",
-        "type": "text"
-      },
-      {
-        "name": "sourceSequence",
-        "type": "number"
-      },
-      {
-        "name": "sourceSystem",
-        "type": "text"
-      },
-      {
-        "name": "startTime",
-        "type": "number",
-        "min": 0
-      },
-      {
-        "name": "title",
-        "type": "text"
-      },
-      {
-        "name": "tombstone",
-        "type": "checkbox",
-        "defaultValue": false
-      }
-    ]
-  },
-  {
-    "slug": "competitors",
-    "timestamps": true,
-    "drafts": true,
-    "maxPerDoc": 30,
-    "auth": false,
-    "upload": false,
-    "indexes": [
-      {
-        "unique": true,
-        "fields": [
-          "season",
-          "personSlug"
-        ]
-      },
-      {
-        "unique": true,
-        "fields": [
-          "season",
-          "userId"
-        ]
-      },
-      {
-        "unique": true,
-        "fields": [
-          "sourceSeasonId",
-          "personSlug"
-        ]
-      },
-      {
-        "unique": true,
-        "fields": [
-          "sourceSeasonId",
-          "userId"
-        ]
-      }
-    ],
-    "fields": [
-      {
-        "name": "bio",
-        "type": "text"
-      },
-      {
-        "name": "displayName",
-        "type": "text"
-      },
-      {
-        "name": "importedAt",
-        "type": "date"
-      },
-      {
-        "name": "importState",
-        "type": "select",
-        "options": [
-          "pending",
-          "complete"
-        ]
-      },
-      {
-        "name": "legacyId",
-        "type": "text",
-        "required": true,
-        "unique": true,
-        "index": true
-      },
-      {
-        "name": "locallyEdited",
-        "type": "checkbox",
-        "defaultValue": true
-      },
-      {
-        "name": "mappingVersion",
-        "type": "text"
-      },
-      {
-        "name": "personSlug",
-        "type": "text"
-      },
-      {
-        "name": "season",
-        "type": "relationship",
-        "relationTo": "seasons"
-      },
-      {
-        "name": "slug",
-        "type": "text",
-        "required": true,
-        "index": true
-      },
-      {
-        "name": "sourceAssets",
-        "type": "json"
-      },
-      {
-        "name": "sourceCreatedAt",
-        "type": "date"
-      },
-      {
-        "name": "sourceFields",
-        "type": "json"
-      },
-      {
-        "name": "sourceHash",
-        "type": "text"
-      },
-      {
-        "name": "sourceOrder",
-        "type": "number",
-        "defaultValue": 0
-      },
-      {
-        "name": "sourcePath",
-        "type": "text"
-      },
-      {
-        "name": "sourceRevision",
-        "type": "text"
-      },
-      {
-        "name": "sourceSeasonId",
-        "type": "text"
-      },
-      {
-        "name": "sourceSequence",
-        "type": "number"
-      },
-      {
-        "name": "sourceSystem",
-        "type": "text"
-      },
-      {
-        "name": "sourceUpdatedAt",
-        "type": "date"
-      },
-      {
-        "name": "tombstone",
-        "type": "checkbox",
-        "defaultValue": false
-      },
-      {
-        "name": "userId",
-        "type": "text"
-      }
-    ]
-  },
-  {
-    "slug": "course-modules",
-    "timestamps": true,
-    "drafts": true,
-    "maxPerDoc": 30,
-    "auth": false,
-    "upload": false,
-    "indexes": [],
-    "fields": [
-      {
-        "name": "authors",
-        "type": "relationship",
-        "hasMany": true,
-        "relationTo": "people"
-      },
-      {
-        "name": "body",
-        "type": "textarea"
-      },
-      {
-        "name": "contentResources",
-        "type": "json"
-      },
-      {
-        "name": "course",
-        "type": "relationship",
-        "relationTo": "courses"
-      },
-      {
-        "name": "cover",
-        "type": "json"
-      },
-      {
-        "name": "description",
-        "type": "textarea"
-      },
-      {
-        "name": "difficulty",
-        "type": "text"
-      },
-      {
-        "name": "importedAt",
-        "type": "date"
-      },
-      {
-        "name": "importState",
-        "type": "select",
-        "options": [
-          "pending",
-          "complete"
-        ]
-      },
-      {
-        "name": "learningPath",
-        "type": "array",
-        "fields": [
-          {
-            "name": "value",
-            "type": "text"
-          }
-        ]
-      },
-      {
-        "name": "legacyId",
-        "type": "text",
-        "required": true,
-        "unique": true,
-        "index": true
-      },
-      {
-        "name": "locallyEdited",
-        "type": "checkbox",
-        "defaultValue": true
-      },
-      {
-        "name": "mappingVersion",
-        "type": "text"
-      },
-      {
-        "name": "order",
-        "type": "number"
-      },
-      {
-        "name": "publishedAt",
-        "type": "date"
-      },
-      {
-        "name": "resources",
-        "type": "relationship",
-        "hasMany": true,
-        "relationTo": "learning-resources"
-      },
-      {
-        "name": "section",
-        "type": "text"
-      },
-      {
-        "name": "slug",
-        "type": "text",
-        "required": true,
-        "index": true
-      },
-      {
-        "name": "sourceAssets",
-        "type": "json"
-      },
-      {
-        "name": "sourceFields",
-        "type": "json"
-      },
-      {
-        "name": "sourceHash",
-        "type": "text"
-      },
-      {
-        "name": "sourceOrder",
-        "type": "number",
-        "defaultValue": 0
-      },
-      {
-        "name": "sourcePath",
-        "type": "text"
-      },
-      {
-        "name": "sourceRevision",
-        "type": "text"
-      },
-      {
-        "name": "sourceSequence",
-        "type": "number"
-      },
-      {
-        "name": "sourceSystem",
-        "type": "text"
-      },
-      {
-        "name": "title",
-        "type": "text"
-      },
-      {
-        "name": "tombstone",
-        "type": "checkbox",
-        "defaultValue": false
-      },
-      {
-        "name": "video",
-        "type": "relationship",
-        "relationTo": "videos"
-      }
-    ]
-  },
-  {
-    "slug": "courses",
-    "timestamps": true,
-    "drafts": true,
-    "maxPerDoc": 30,
-    "auth": false,
-    "upload": false,
-    "indexes": [],
-    "fields": [
-      {
-        "name": "authors",
-        "type": "relationship",
-        "hasMany": true,
-        "relationTo": "people"
-      },
-      {
-        "name": "body",
-        "type": "textarea"
-      },
-      {
-        "name": "contentResources",
-        "type": "json"
-      },
-      {
-        "name": "cover",
-        "type": "json"
-      },
-      {
-        "name": "description",
-        "type": "textarea"
-      },
-      {
-        "name": "difficulty",
-        "type": "text"
-      },
-      {
-        "name": "importedAt",
-        "type": "date"
-      },
-      {
-        "name": "importState",
-        "type": "select",
-        "options": [
-          "pending",
-          "complete"
-        ]
-      },
-      {
-        "name": "learningPath",
-        "type": "array",
-        "fields": [
-          {
-            "name": "value",
-            "type": "text"
-          }
-        ]
-      },
-      {
-        "name": "legacyId",
-        "type": "text",
-        "required": true,
-        "unique": true,
-        "index": true
-      },
-      {
-        "name": "locallyEdited",
-        "type": "checkbox",
-        "defaultValue": true
-      },
-      {
-        "name": "mappingVersion",
-        "type": "text"
-      },
-      {
-        "name": "modules",
-        "type": "relationship",
-        "hasMany": true,
-        "relationTo": "course-modules"
-      },
-      {
-        "name": "publishedAt",
-        "type": "date"
-      },
-      {
-        "name": "slug",
-        "type": "text",
-        "required": true,
-        "index": true
-      },
-      {
-        "name": "sourceAssets",
-        "type": "json"
-      },
-      {
-        "name": "sourceFields",
-        "type": "json"
-      },
-      {
-        "name": "sourceHash",
-        "type": "text"
-      },
-      {
-        "name": "sourceOrder",
-        "type": "number",
-        "defaultValue": 0
-      },
-      {
-        "name": "sourcePath",
-        "type": "text"
-      },
-      {
-        "name": "sourceRevision",
-        "type": "text"
-      },
-      {
-        "name": "sourceSequence",
-        "type": "number"
-      },
-      {
-        "name": "sourceSystem",
-        "type": "text"
-      },
-      {
-        "name": "technologies",
-        "type": "relationship",
-        "hasMany": true,
-        "relationTo": "technologies"
-      },
-      {
-        "name": "title",
-        "type": "text"
-      },
-      {
-        "name": "tombstone",
-        "type": "checkbox",
-        "defaultValue": false
-      },
-      {
-        "name": "updatedAt",
-        "type": "date"
-      }
-    ]
-  },
-  {
-    "slug": "deletion-markers",
-    "timestamps": true,
-    "drafts": false,
-    "auth": false,
-    "upload": false,
-    "indexes": [],
-    "fields": [
-      {
-        "name": "collectionSlug",
-        "type": "text"
-      },
-      {
-        "name": "key",
-        "type": "text",
-        "required": true,
-        "unique": true
-      },
-      {
-        "name": "legacyId",
-        "type": "text"
-      },
-      {
-        "name": "sourceHash",
-        "type": "text"
-      }
-    ]
-  },
-  {
-    "slug": "episodes",
-    "timestamps": true,
-    "drafts": true,
-    "maxPerDoc": 30,
-    "auth": false,
-    "upload": false,
-    "indexes": [],
-    "fields": [
-      {
-        "name": "body",
-        "type": "textarea"
-      },
-      {
-        "name": "code",
-        "type": "text"
-      },
-      {
-        "name": "contentResources",
-        "type": "json"
-      },
-      {
-        "name": "cover",
-        "type": "json"
-      },
-      {
-        "name": "importedAt",
-        "type": "date"
-      },
-      {
-        "name": "importState",
-        "type": "select",
-        "options": [
-          "pending",
-          "complete"
-        ]
-      },
-      {
-        "name": "legacyId",
-        "type": "text",
-        "required": true,
-        "unique": true,
-        "index": true
-      },
-      {
-        "name": "locallyEdited",
-        "type": "checkbox",
-        "defaultValue": true
-      },
-      {
-        "name": "mappingVersion",
-        "type": "text"
-      },
-      {
-        "name": "show",
-        "type": "relationship",
-        "relationTo": "shows"
-      },
-      {
-        "name": "slug",
-        "type": "text",
-        "required": true,
-        "index": true
-      },
-      {
-        "name": "sourceAssets",
-        "type": "json"
-      },
-      {
-        "name": "sourceFields",
-        "type": "json"
-      },
-      {
-        "name": "sourceHash",
-        "type": "text"
-      },
-      {
-        "name": "sourceOrder",
-        "type": "number",
-        "defaultValue": 0
-      },
-      {
-        "name": "sourcePath",
-        "type": "text"
-      },
-      {
-        "name": "sourceRevision",
-        "type": "text"
-      },
-      {
-        "name": "sourceSequence",
-        "type": "number"
-      },
-      {
-        "name": "sourceSystem",
-        "type": "text"
-      },
-      {
-        "name": "terms",
-        "type": "array",
-        "fields": [
-          {
-            "name": "value",
-            "type": "text"
-          }
-        ]
-      },
-      {
-        "name": "tombstone",
-        "type": "checkbox",
-        "defaultValue": false
-      },
-      {
-        "name": "video",
-        "type": "relationship",
-        "relationTo": "videos"
-      }
-    ]
-  },
-  {
-    "slug": "learning-paths",
-    "timestamps": true,
-    "drafts": true,
-    "maxPerDoc": 30,
-    "auth": false,
-    "upload": false,
-    "indexes": [],
-    "fields": [
-      {
-        "name": "authors",
-        "type": "relationship",
-        "hasMany": true,
-        "relationTo": "people"
-      },
-      {
-        "name": "body",
-        "type": "textarea"
-      },
-      {
-        "name": "contentResources",
-        "type": "json"
-      },
-      {
-        "name": "courses",
-        "type": "relationship",
-        "hasMany": true,
-        "relationTo": "courses"
-      },
-      {
-        "name": "cover",
-        "type": "json"
-      },
-      {
-        "name": "description",
-        "type": "textarea"
-      },
-      {
-        "name": "difficulty",
-        "type": "text"
-      },
-      {
-        "name": "estimatedDuration",
-        "type": "number"
-      },
-      {
-        "name": "importedAt",
-        "type": "date"
-      },
-      {
-        "name": "importState",
-        "type": "select",
-        "options": [
-          "pending",
-          "complete"
-        ]
-      },
-      {
-        "name": "legacyId",
-        "type": "text",
-        "required": true,
-        "unique": true,
-        "index": true
-      },
-      {
-        "name": "locallyEdited",
-        "type": "checkbox",
-        "defaultValue": true
-      },
-      {
-        "name": "mappingVersion",
-        "type": "text"
-      },
-      {
-        "name": "prerequisites",
-        "type": "array",
-        "fields": [
-          {
-            "name": "value",
-            "type": "text"
-          }
-        ]
-      },
-      {
-        "name": "publishedAt",
-        "type": "date"
-      },
-      {
-        "name": "slug",
-        "type": "text",
-        "required": true,
-        "index": true
-      },
-      {
-        "name": "sourceAssets",
-        "type": "json"
-      },
-      {
-        "name": "sourceFields",
-        "type": "json"
-      },
-      {
-        "name": "sourceHash",
-        "type": "text"
-      },
-      {
-        "name": "sourceOrder",
-        "type": "number",
-        "defaultValue": 0
-      },
-      {
-        "name": "sourcePath",
-        "type": "text"
-      },
-      {
-        "name": "sourceRevision",
-        "type": "text"
-      },
-      {
-        "name": "sourceSequence",
-        "type": "number"
-      },
-      {
-        "name": "sourceSystem",
-        "type": "text"
-      },
-      {
-        "name": "technologies",
-        "type": "relationship",
-        "hasMany": true,
-        "relationTo": "technologies"
-      },
-      {
-        "name": "title",
-        "type": "text"
-      },
-      {
-        "name": "tombstone",
-        "type": "checkbox",
-        "defaultValue": false
-      },
-      {
-        "name": "videos",
-        "type": "relationship",
-        "hasMany": true,
-        "relationTo": "videos"
-      }
-    ]
-  },
-  {
-    "slug": "learning-resources",
-    "timestamps": true,
-    "drafts": true,
-    "maxPerDoc": 30,
-    "auth": false,
-    "upload": false,
-    "indexes": [],
-    "fields": [
-      {
-        "name": "body",
-        "type": "textarea"
-      },
-      {
-        "name": "community",
-        "type": "array",
-        "fields": [
-          {
-            "name": "url",
-            "type": "text"
-          }
-        ]
-      },
-      {
-        "name": "contentResources",
-        "type": "json"
-      },
-      {
-        "name": "cover",
-        "type": "json"
-      },
-      {
-        "name": "importedAt",
-        "type": "date"
-      },
-      {
-        "name": "importState",
-        "type": "select",
-        "options": [
-          "pending",
-          "complete"
-        ]
-      },
-      {
-        "name": "legacyId",
-        "type": "text",
-        "required": true,
-        "unique": true,
-        "index": true
-      },
-      {
-        "name": "locallyEdited",
-        "type": "checkbox",
-        "defaultValue": true
-      },
-      {
-        "name": "mappingVersion",
-        "type": "text"
-      },
-      {
-        "name": "official",
-        "type": "array",
-        "fields": [
-          {
-            "name": "url",
-            "type": "text"
-          }
-        ]
-      },
-      {
-        "name": "slug",
-        "type": "text",
-        "required": true,
-        "index": true
-      },
-      {
-        "name": "sourceAssets",
-        "type": "json"
-      },
-      {
-        "name": "sourceFields",
-        "type": "json"
-      },
-      {
-        "name": "sourceHash",
-        "type": "text"
-      },
-      {
-        "name": "sourceOrder",
-        "type": "number",
-        "defaultValue": 0
-      },
-      {
-        "name": "sourcePath",
-        "type": "text"
-      },
-      {
-        "name": "sourceRevision",
-        "type": "text"
-      },
-      {
-        "name": "sourceSequence",
-        "type": "number"
-      },
-      {
-        "name": "sourceSystem",
-        "type": "text"
-      },
-      {
-        "name": "title",
-        "type": "text"
-      },
-      {
-        "name": "tombstone",
-        "type": "checkbox",
-        "defaultValue": false
-      },
-      {
-        "name": "tutorials",
-        "type": "array",
-        "fields": [
-          {
-            "name": "url",
-            "type": "text"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "slug": "match-results",
-    "timestamps": true,
-    "drafts": true,
-    "maxPerDoc": 30,
-    "auth": false,
-    "upload": false,
-    "indexes": [
-      {
-        "unique": true,
-        "fields": [
-          "match"
-        ]
-      },
-      {
-        "unique": true,
-        "fields": [
-          "sourceMatchId"
-        ]
-      }
-    ],
-    "fields": [
-      {
-        "name": "importedAt",
-        "type": "date"
-      },
-      {
-        "name": "importState",
-        "type": "select",
-        "options": [
-          "pending",
-          "complete"
-        ]
-      },
-      {
-        "name": "legacyId",
-        "type": "text",
-        "required": true,
-        "unique": true,
-        "index": true
-      },
-      {
-        "name": "locallyEdited",
-        "type": "checkbox",
-        "defaultValue": true
-      },
-      {
-        "name": "mappingVersion",
-        "type": "text"
-      },
-      {
-        "name": "match",
-        "type": "relationship",
-        "relationTo": "matches"
-      },
-      {
-        "name": "notes",
-        "type": "text"
-      },
-      {
-        "name": "recordedAt",
-        "type": "date"
-      },
-      {
-        "name": "recordedByUserId",
-        "type": "text"
-      },
-      {
-        "name": "scoreA",
-        "type": "number"
-      },
-      {
-        "name": "scoreB",
-        "type": "number"
-      },
-      {
-        "name": "slug",
-        "type": "text",
-        "required": true,
-        "index": true
-      },
-      {
-        "name": "sourceAssets",
-        "type": "json"
-      },
-      {
-        "name": "sourceFields",
-        "type": "json"
-      },
-      {
-        "name": "sourceHash",
-        "type": "text"
-      },
-      {
-        "name": "sourceMatchId",
-        "type": "text"
-      },
-      {
-        "name": "sourceOrder",
-        "type": "number",
-        "defaultValue": 0
-      },
-      {
-        "name": "sourcePath",
-        "type": "text"
-      },
-      {
-        "name": "sourceRevision",
-        "type": "text"
-      },
-      {
-        "name": "sourceSequence",
-        "type": "number"
-      },
-      {
-        "name": "sourceSystem",
-        "type": "text"
-      },
-      {
-        "name": "sourceWinnerEntryId",
-        "type": "text"
-      },
-      {
-        "name": "sourceWinnerTeamId",
-        "type": "text"
-      },
-      {
-        "name": "timeToResolveSeconds",
-        "type": "number"
-      },
-      {
-        "name": "tombstone",
-        "type": "checkbox",
-        "defaultValue": false
-      },
-      {
-        "name": "winnerEntry",
-        "type": "relationship",
-        "relationTo": "bracket-entries"
-      },
-      {
-        "name": "winnerTeam",
-        "type": "relationship",
-        "relationTo": "teams"
-      }
-    ]
-  },
-  {
-    "slug": "matches",
-    "timestamps": true,
-    "drafts": true,
-    "maxPerDoc": 30,
-    "auth": false,
-    "upload": false,
-    "indexes": [],
-    "fields": [
-      {
-        "name": "bracket",
-        "type": "relationship",
-        "relationTo": "brackets"
-      },
-      {
-        "name": "endedAt",
-        "type": "date"
-      },
-      {
-        "name": "entryA",
-        "type": "relationship",
-        "relationTo": "bracket-entries"
-      },
-      {
-        "name": "entryB",
-        "type": "relationship",
-        "relationTo": "bracket-entries"
-      },
-      {
-        "name": "importedAt",
-        "type": "date"
-      },
-      {
-        "name": "importState",
-        "type": "select",
-        "options": [
-          "pending",
-          "complete"
-        ]
-      },
-      {
-        "name": "judgeUserId",
-        "type": "text"
-      },
-      {
-        "name": "legacyId",
-        "type": "text",
-        "required": true,
-        "unique": true,
-        "index": true
-      },
-      {
-        "name": "locallyEdited",
-        "type": "checkbox",
-        "defaultValue": true
-      },
-      {
-        "name": "mappingVersion",
-        "type": "text"
-      },
-      {
-        "name": "positionInRound",
-        "type": "number"
-      },
-      {
-        "name": "roundNumber",
-        "type": "number"
-      },
-      {
-        "name": "scheduledAt",
-        "type": "date"
-      },
-      {
-        "name": "slug",
-        "type": "text",
-        "required": true,
-        "index": true
-      },
-      {
-        "name": "sourceAssets",
-        "type": "json"
-      },
-      {
-        "name": "sourceBracketId",
-        "type": "text"
-      },
-      {
-        "name": "sourceCreatedAt",
-        "type": "date"
-      },
-      {
-        "name": "sourceEntryAId",
-        "type": "text"
-      },
-      {
-        "name": "sourceEntryBId",
-        "type": "text"
-      },
-      {
-        "name": "sourceFields",
-        "type": "json"
-      },
-      {
-        "name": "sourceHash",
-        "type": "text"
-      },
-      {
-        "name": "sourceOrder",
-        "type": "number",
-        "defaultValue": 0
-      },
-      {
-        "name": "sourcePath",
-        "type": "text"
-      },
-      {
-        "name": "sourceRevision",
-        "type": "text"
-      },
-      {
-        "name": "sourceSequence",
-        "type": "number"
-      },
-      {
-        "name": "sourceSystem",
-        "type": "text"
-      },
-      {
-        "name": "sourceTeamAId",
-        "type": "text"
-      },
-      {
-        "name": "sourceTeamBId",
-        "type": "text"
-      },
-      {
-        "name": "sourceUpdatedAt",
-        "type": "date"
-      },
-      {
-        "name": "sourceWinnerEntryId",
-        "type": "text"
-      },
-      {
-        "name": "sourceWinnerTeamId",
-        "type": "text"
-      },
-      {
-        "name": "startedAt",
-        "type": "date"
-      },
-      {
-        "name": "status",
-        "type": "select",
-        "options": [
-          "scheduled",
-          "live",
-          "completed",
-          "cancelled"
-        ]
-      },
-      {
-        "name": "teamA",
-        "type": "relationship",
-        "relationTo": "teams"
-      },
-      {
-        "name": "teamB",
-        "type": "relationship",
-        "relationTo": "teams"
-      },
-      {
-        "name": "tombstone",
-        "type": "checkbox",
-        "defaultValue": false
-      },
-      {
-        "name": "winnerEntry",
-        "type": "relationship",
-        "relationTo": "bracket-entries"
-      },
-      {
-        "name": "winnerTeam",
-        "type": "relationship",
-        "relationTo": "teams"
-      }
-    ]
-  },
-  {
-    "slug": "media",
-    "timestamps": true,
-    "drafts": false,
-    "auth": false,
-    "upload": true,
-    "indexes": [],
-    "fields": [
-      {
-        "name": "alt",
-        "type": "text"
-      }
-    ]
-  },
-  {
-    "slug": "news",
-    "timestamps": true,
-    "drafts": true,
-    "maxPerDoc": 30,
-    "auth": false,
-    "upload": false,
-    "indexes": [],
-    "fields": [
-      {
-        "name": "authors",
-        "type": "relationship",
-        "hasMany": true,
-        "relationTo": "people"
-      },
-      {
-        "name": "body",
-        "type": "textarea"
-      },
-      {
-        "name": "contentResources",
-        "type": "json"
-      },
-      {
-        "name": "cover",
-        "type": "json"
-      },
-      {
-        "name": "description",
-        "type": "textarea"
-      },
-      {
-        "name": "importedAt",
-        "type": "date"
-      },
-      {
-        "name": "importState",
-        "type": "select",
-        "options": [
-          "pending",
-          "complete"
-        ]
-      },
-      {
-        "name": "legacyId",
-        "type": "text",
-        "required": true,
-        "unique": true,
-        "index": true
-      },
-      {
-        "name": "locallyEdited",
-        "type": "checkbox",
-        "defaultValue": true
-      },
-      {
-        "name": "mappingVersion",
-        "type": "text"
-      },
-      {
-        "name": "publishedAt",
-        "type": "date"
-      },
-      {
-        "name": "slug",
-        "type": "text",
-        "required": true,
-        "index": true
-      },
-      {
-        "name": "sourceAssets",
-        "type": "json"
-      },
-      {
-        "name": "sourceFields",
-        "type": "json"
-      },
-      {
-        "name": "sourceHash",
-        "type": "text"
-      },
-      {
-        "name": "sourceOrder",
-        "type": "number",
-        "defaultValue": 0
-      },
-      {
-        "name": "sourcePath",
-        "type": "text"
-      },
-      {
-        "name": "sourceRevision",
-        "type": "text"
-      },
-      {
-        "name": "sourceSequence",
-        "type": "number"
-      },
-      {
-        "name": "sourceSystem",
-        "type": "text"
-      },
-      {
-        "name": "technologies",
-        "type": "relationship",
-        "hasMany": true,
-        "relationTo": "technologies"
-      },
-      {
-        "name": "title",
-        "type": "text"
-      },
-      {
-        "name": "tombstone",
-        "type": "checkbox",
-        "defaultValue": false
-      }
-    ]
-  },
-  {
-    "slug": "people",
-    "timestamps": true,
-    "drafts": true,
-    "maxPerDoc": 30,
-    "auth": false,
-    "upload": false,
-    "indexes": [],
-    "fields": [
-      {
-        "name": "avatarUrl",
-        "type": "text"
-      },
-      {
-        "name": "biography",
-        "type": "textarea"
-      },
-      {
-        "name": "bluesky",
-        "type": "text"
-      },
-      {
-        "name": "body",
-        "type": "textarea"
-      },
-      {
-        "name": "contentResources",
-        "type": "json"
-      },
-      {
-        "name": "cover",
-        "type": "json"
-      },
-      {
-        "name": "forename",
-        "type": "text"
-      },
-      {
-        "name": "github",
-        "type": "text"
-      },
-      {
-        "name": "githubHandle",
-        "type": "text"
-      },
-      {
-        "name": "githubUrl",
-        "type": "text"
-      },
-      {
-        "name": "importedAt",
-        "type": "date"
-      },
-      {
-        "name": "importState",
-        "type": "select",
-        "options": [
-          "pending",
-          "complete"
-        ]
-      },
-      {
-        "name": "legacyId",
-        "type": "text",
-        "required": true,
-        "unique": true,
-        "index": true
-      },
-      {
-        "name": "linkedin",
-        "type": "text"
-      },
-      {
-        "name": "links",
-        "type": "array",
-        "fields": [
-          {
-            "name": "name",
-            "type": "text"
-          },
-          {
-            "name": "url",
-            "type": "text"
-          }
-        ]
-      },
-      {
-        "name": "locallyEdited",
-        "type": "checkbox",
-        "defaultValue": true
-      },
-      {
-        "name": "mappingVersion",
-        "type": "text"
-      },
-      {
-        "name": "mastodon",
-        "type": "text"
-      },
-      {
-        "name": "name",
-        "type": "text"
-      },
-      {
-        "name": "slug",
-        "type": "text",
-        "required": true,
-        "index": true
-      },
-      {
-        "name": "sourceAssets",
-        "type": "json"
-      },
-      {
-        "name": "sourceFields",
-        "type": "json"
-      },
-      {
-        "name": "sourceHash",
-        "type": "text"
-      },
-      {
-        "name": "sourceOrder",
-        "type": "number",
-        "defaultValue": 0
-      },
-      {
-        "name": "sourcePath",
-        "type": "text"
-      },
-      {
-        "name": "sourceRevision",
-        "type": "text"
-      },
-      {
-        "name": "sourceSequence",
-        "type": "number"
-      },
-      {
-        "name": "sourceSystem",
-        "type": "text"
-      },
-      {
-        "name": "surname",
-        "type": "text"
-      },
-      {
-        "name": "terms",
-        "type": "array",
-        "fields": [
-          {
-            "name": "value",
-            "type": "text"
-          }
-        ]
-      },
-      {
-        "name": "tombstone",
-        "type": "checkbox",
-        "defaultValue": false
-      },
-      {
-        "name": "twitter",
-        "type": "text"
-      },
-      {
-        "name": "website",
-        "type": "text"
-      },
-      {
-        "name": "youtube",
-        "type": "text"
-      }
-    ]
-  },
-  {
-    "slug": "pipeline-runs",
-    "timestamps": true,
-    "drafts": false,
-    "auth": false,
-    "upload": false,
-    "indexes": [],
-    "fields": [
-      {
-        "name": "approvedRevision",
-        "type": "text"
-      },
-      {
-        "name": "chapters",
-        "type": "json"
-      },
-      {
-        "name": "checksum",
-        "type": "text"
-      },
-      {
-        "name": "generatedRevision",
-        "type": "text"
-      },
-      {
-        "name": "humanEdited",
-        "type": "checkbox",
-        "defaultValue": false
-      },
-      {
-        "name": "key",
-        "type": "text",
-        "required": true,
-        "unique": true
-      },
-      {
-        "name": "manifestKey",
-        "type": "text"
-      },
-      {
-        "name": "media",
-        "type": "relationship",
-        "relationTo": "media",
-        "required": true
-      },
-      {
-        "name": "provider",
-        "type": "select",
-        "options": [
-          "deterministic-fixture"
-        ]
-      },
-      {
-        "name": "state",
-        "type": "select",
-        "required": true,
-        "options": [
-          "registered",
-          "processing",
-          "awaiting-review",
-          "approved"
-        ]
-      },
-      {
-        "name": "summary",
-        "type": "textarea"
-      },
-      {
-        "name": "transcript",
-        "type": "textarea"
-      },
-      {
-        "name": "transcriptionAttempts",
-        "type": "number"
-      },
-      {
-        "name": "video",
-        "type": "relationship",
-        "relationTo": "videos",
-        "required": true
-      },
-      {
-        "name": "videoVersion",
-        "type": "text"
-      },
-      {
-        "name": "workflowId",
-        "type": "text"
-      }
-    ]
-  },
-  {
-    "slug": "registrations",
-    "timestamps": true,
-    "drafts": true,
-    "maxPerDoc": 30,
-    "auth": false,
-    "upload": false,
-    "indexes": [],
-    "fields": [
-      {
-        "name": "bracket",
-        "type": "relationship",
-        "relationTo": "brackets"
-      },
-      {
-        "name": "displayName",
-        "type": "text"
-      },
-      {
-        "name": "email",
-        "type": "text"
-      },
-      {
-        "name": "entryType",
-        "type": "select",
-        "options": [
-          "solo",
-          "team"
-        ]
-      },
-      {
-        "name": "importedAt",
-        "type": "date"
-      },
-      {
-        "name": "importState",
-        "type": "select",
-        "options": [
-          "pending",
-          "complete"
-        ]
-      },
-      {
-        "name": "legacyId",
-        "type": "text",
-        "required": true,
-        "unique": true,
-        "index": true
-      },
-      {
-        "name": "locallyEdited",
-        "type": "checkbox",
-        "defaultValue": true
-      },
-      {
-        "name": "mappingVersion",
-        "type": "text"
-      },
-      {
-        "name": "message",
-        "type": "text"
-      },
-      {
-        "name": "preferredSlot",
-        "type": "number"
-      },
-      {
-        "name": "reviewedAt",
-        "type": "date"
-      },
-      {
-        "name": "reviewedByUserId",
-        "type": "text"
-      },
-      {
-        "name": "season",
-        "type": "relationship",
-        "relationTo": "seasons"
-      },
-      {
-        "name": "slug",
-        "type": "text",
-        "required": true,
-        "index": true
-      },
-      {
-        "name": "sourceAssets",
-        "type": "json"
-      },
-      {
-        "name": "sourceBracketId",
-        "type": "text"
-      },
-      {
-        "name": "sourceFields",
-        "type": "json"
-      },
-      {
-        "name": "sourceHash",
-        "type": "text"
-      },
-      {
-        "name": "sourceOrder",
-        "type": "number",
-        "defaultValue": 0
-      },
-      {
-        "name": "sourcePath",
-        "type": "text"
-      },
-      {
-        "name": "sourceRevision",
-        "type": "text"
-      },
-      {
-        "name": "sourceSeasonId",
-        "type": "text"
-      },
-      {
-        "name": "sourceSequence",
-        "type": "number"
-      },
-      {
-        "name": "sourceSystem",
-        "type": "text"
-      },
-      {
-        "name": "status",
-        "type": "select",
-        "options": [
-          "pending",
-          "approved",
-          "rejected"
-        ]
-      },
-      {
-        "name": "submittedAt",
-        "type": "date"
-      },
-      {
-        "name": "teamName",
-        "type": "text"
-      },
-      {
-        "name": "tombstone",
-        "type": "checkbox",
-        "defaultValue": false
-      },
-      {
-        "name": "userId",
-        "type": "text"
-      }
-    ]
-  },
-  {
-    "slug": "review-comments",
-    "timestamps": false,
-    "drafts": false,
-    "auth": false,
-    "upload": false,
-    "indexes": [],
-    "fields": [
-      {
-        "name": "author",
-        "type": "relationship",
-        "relationTo": "users",
-        "required": true
-      },
-      {
-        "name": "body",
-        "type": "text",
-        "required": true
-      },
-      {
-        "name": "createdAt",
-        "type": "date",
-        "required": true
-      },
-      {
-        "name": "endMs",
-        "type": "number"
-      },
-      {
-        "name": "id",
-        "type": "text",
-        "required": true
-      },
-      {
-        "name": "resolved",
-        "type": "checkbox"
-      },
-      {
-        "name": "resolvedAt",
-        "type": "date"
-      },
-      {
-        "name": "resolvedBy",
-        "type": "relationship",
-        "relationTo": "users"
-      },
-      {
-        "name": "revision",
-        "type": "relationship",
-        "relationTo": "video-revisions",
-        "required": true
-      },
-      {
-        "name": "startMs",
-        "type": "number",
-        "required": true
-      },
-      {
-        "name": "video",
-        "type": "relationship",
-        "relationTo": "videos",
-        "required": true
-      }
-    ]
-  },
-  {
-    "slug": "review-decisions",
-    "timestamps": false,
-    "drafts": false,
-    "auth": false,
-    "upload": false,
-    "indexes": [],
-    "fields": [
-      {
-        "name": "author",
-        "type": "relationship",
-        "relationTo": "users",
-        "required": true
-      },
-      {
-        "name": "createdAt",
-        "type": "date",
-        "required": true
-      },
-      {
-        "name": "decision",
-        "type": "text",
-        "required": true
-      },
-      {
-        "name": "deliverableChecksum",
-        "type": "text"
-      },
-      {
-        "name": "grant",
-        "type": "relationship",
-        "relationTo": "review-revision-grants"
-      },
-      {
-        "name": "grantVersion",
-        "type": "number",
-        "required": true
-      },
-      {
-        "name": "id",
-        "type": "text",
-        "required": true
-      },
-      {
-        "name": "note",
-        "type": "textarea"
-      },
-      {
-        "name": "reviewVersion",
-        "type": "number",
-        "required": true
-      },
-      {
-        "name": "revision",
-        "type": "relationship",
-        "relationTo": "video-revisions",
-        "required": true
-      },
-      {
-        "name": "sourceChecksum",
-        "type": "text"
-      },
-      {
-        "name": "video",
-        "type": "relationship",
-        "relationTo": "videos",
-        "required": true
-      }
-    ]
-  },
-  {
-    "slug": "review-revision-grants",
-    "timestamps": false,
-    "drafts": false,
-    "auth": false,
-    "upload": false,
-    "indexes": [],
-    "fields": [
-      {
-        "name": "canApprove",
-        "type": "checkbox"
-      },
-      {
-        "name": "expiresAt",
-        "type": "date",
-        "required": true
-      },
-      {
-        "name": "grantedAt",
-        "type": "date",
-        "required": true
-      },
-      {
-        "name": "grantedBy",
-        "type": "relationship",
-        "relationTo": "users"
-      },
-      {
-        "name": "id",
-        "type": "text",
-        "required": true
-      },
-      {
-        "name": "revision",
-        "type": "relationship",
-        "relationTo": "video-revisions",
-        "required": true
-      },
-      {
-        "name": "revokedAt",
-        "type": "date"
-      },
-      {
-        "name": "revokedBy",
-        "type": "relationship",
-        "relationTo": "users"
-      },
-      {
-        "name": "user",
-        "type": "relationship",
-        "relationTo": "users",
-        "required": true
-      },
-      {
-        "name": "version",
-        "type": "number",
-        "required": true
-      },
-      {
-        "name": "video",
-        "type": "relationship",
-        "relationTo": "videos",
-        "required": true
-      }
-    ]
-  },
-  {
-    "slug": "seasons",
-    "timestamps": true,
-    "drafts": true,
-    "maxPerDoc": 30,
-    "auth": false,
-    "upload": false,
-    "indexes": [
-      {
-        "unique": true,
-        "fields": [
-          "show",
-          "slug"
-        ]
-      },
-      {
-        "unique": true,
-        "fields": [
-          "sourceShowId",
-          "slug"
-        ]
-      }
-    ],
-    "fields": [
-      {
-        "name": "endDate",
-        "type": "date"
-      },
-      {
-        "name": "importedAt",
-        "type": "date"
-      },
-      {
-        "name": "importState",
-        "type": "select",
-        "options": [
-          "pending",
-          "complete"
-        ]
-      },
-      {
-        "name": "legacyId",
-        "type": "text",
-        "required": true,
-        "unique": true,
-        "index": true
-      },
-      {
-        "name": "locallyEdited",
-        "type": "checkbox",
-        "defaultValue": true
-      },
-      {
-        "name": "mappingVersion",
-        "type": "text"
-      },
-      {
-        "name": "name",
-        "type": "text"
-      },
-      {
-        "name": "show",
-        "type": "relationship",
-        "relationTo": "shows"
-      },
-      {
-        "name": "slug",
-        "type": "text",
-        "required": true,
-        "index": true
-      },
-      {
-        "name": "sourceAssets",
-        "type": "json"
-      },
-      {
-        "name": "sourceCreatedAt",
-        "type": "date"
-      },
-      {
-        "name": "sourceFields",
-        "type": "json"
-      },
-      {
-        "name": "sourceHash",
-        "type": "text"
-      },
-      {
-        "name": "sourceOrder",
-        "type": "number",
-        "defaultValue": 0
-      },
-      {
-        "name": "sourcePath",
-        "type": "text"
-      },
-      {
-        "name": "sourceRevision",
-        "type": "text"
-      },
-      {
-        "name": "sourceSequence",
-        "type": "number"
-      },
-      {
-        "name": "sourceShowId",
-        "type": "text"
-      },
-      {
-        "name": "sourceSystem",
-        "type": "text"
-      },
-      {
-        "name": "sourceUpdatedAt",
-        "type": "date"
-      },
-      {
-        "name": "startDate",
-        "type": "date"
-      },
-      {
-        "name": "status",
-        "type": "select",
-        "options": [
-          "interest",
-          "active",
-          "finished"
-        ]
-      },
-      {
-        "name": "tombstone",
-        "type": "checkbox",
-        "defaultValue": false
-      }
-    ]
-  },
-  {
-    "slug": "series",
-    "timestamps": true,
-    "drafts": true,
-    "maxPerDoc": 30,
-    "auth": false,
-    "upload": false,
-    "indexes": [],
-    "fields": [
-      {
-        "name": "body",
-        "type": "textarea"
-      },
-      {
-        "name": "contentResources",
-        "type": "json"
-      },
-      {
-        "name": "cover",
-        "type": "json"
-      },
-      {
-        "name": "importedAt",
-        "type": "date"
-      },
-      {
-        "name": "importState",
-        "type": "select",
-        "options": [
-          "pending",
-          "complete"
-        ]
-      },
-      {
-        "name": "legacyId",
-        "type": "text",
-        "required": true,
-        "unique": true,
-        "index": true
-      },
-      {
-        "name": "locallyEdited",
-        "type": "checkbox",
-        "defaultValue": true
-      },
-      {
-        "name": "mappingVersion",
-        "type": "text"
-      },
-      {
-        "name": "slug",
-        "type": "text",
-        "required": true,
-        "index": true
-      },
-      {
-        "name": "sourceAssets",
-        "type": "json"
-      },
-      {
-        "name": "sourceFields",
-        "type": "json"
-      },
-      {
-        "name": "sourceHash",
-        "type": "text"
-      },
-      {
-        "name": "sourceOrder",
-        "type": "number",
-        "defaultValue": 0
-      },
-      {
-        "name": "sourcePath",
-        "type": "text"
-      },
-      {
-        "name": "sourceRevision",
-        "type": "text"
-      },
-      {
-        "name": "sourceSequence",
-        "type": "number"
-      },
-      {
-        "name": "sourceSystem",
-        "type": "text"
-      },
-      {
-        "name": "title",
-        "type": "text"
-      },
-      {
-        "name": "tombstone",
-        "type": "checkbox",
-        "defaultValue": false
-      }
-    ]
-  },
-  {
-    "slug": "shows",
-    "timestamps": true,
-    "drafts": true,
-    "maxPerDoc": 30,
-    "auth": false,
-    "upload": false,
-    "indexes": [],
-    "fields": [
-      {
-        "name": "body",
-        "type": "textarea"
-      },
-      {
-        "name": "contentResources",
-        "type": "json"
-      },
-      {
-        "name": "cover",
-        "type": "json"
-      },
-      {
-        "name": "description",
-        "type": "textarea"
-      },
-      {
-        "name": "episodes",
-        "type": "relationship",
-        "hasMany": true,
-        "relationTo": "episodes"
-      },
-      {
-        "name": "gameFormatUrl",
-        "type": "text"
-      },
-      {
-        "name": "hosts",
-        "type": "relationship",
-        "hasMany": true,
-        "relationTo": "people"
-      },
-      {
-        "name": "importedAt",
-        "type": "date"
-      },
-      {
-        "name": "importState",
-        "type": "select",
-        "options": [
-          "pending",
-          "complete"
-        ]
-      },
-      {
-        "name": "legacyId",
-        "type": "text",
-        "required": true,
-        "unique": true,
-        "index": true
-      },
-      {
-        "name": "locallyEdited",
-        "type": "checkbox",
-        "defaultValue": true
-      },
-      {
-        "name": "mappingVersion",
-        "type": "text"
-      },
-      {
-        "name": "name",
-        "type": "text"
-      },
-      {
-        "name": "podcast",
-        "type": "json"
-      },
-      {
-        "name": "slug",
-        "type": "text",
-        "required": true,
-        "index": true
-      },
-      {
-        "name": "sourceAssets",
-        "type": "json"
-      },
-      {
-        "name": "sourceFields",
-        "type": "json"
-      },
-      {
-        "name": "sourceHash",
-        "type": "text"
-      },
-      {
-        "name": "sourceOrder",
-        "type": "number",
-        "defaultValue": 0
-      },
-      {
-        "name": "sourcePath",
-        "type": "text"
-      },
-      {
-        "name": "sourceRevision",
-        "type": "text"
-      },
-      {
-        "name": "sourceSequence",
-        "type": "number"
-      },
-      {
-        "name": "sourceSystem",
-        "type": "text"
-      },
-      {
-        "name": "status",
-        "type": "select",
-        "options": [
-          "coming-soon",
-          "active",
-          "archived"
-        ]
-      },
-      {
-        "name": "subscribeLinks",
-        "type": "json"
-      },
-      {
-        "name": "tagline",
-        "type": "text"
-      },
-      {
-        "name": "terms",
-        "type": "array",
-        "fields": [
-          {
-            "name": "value",
-            "type": "text"
-          }
-        ]
-      },
-      {
-        "name": "tombstone",
-        "type": "checkbox",
-        "defaultValue": false
-      }
-    ]
-  },
-  {
-    "slug": "static-assets",
-    "timestamps": true,
-    "drafts": false,
-    "auth": false,
-    "upload": false,
-    "indexes": [],
-    "fields": [
-      {
-        "name": "alt",
-        "type": "text"
-      },
-      {
-        "name": "bytes",
-        "type": "number"
-      },
-      {
-        "name": "checksum",
-        "type": "text"
-      },
-      {
-        "name": "importedAt",
-        "type": "date"
-      },
-      {
-        "name": "importState",
-        "type": "select",
-        "options": [
-          "pending",
-          "complete"
-        ]
-      },
-      {
-        "name": "legacyId",
-        "type": "text",
-        "required": true,
-        "unique": true,
-        "index": true
-      },
-      {
-        "name": "locallyEdited",
-        "type": "checkbox",
-        "defaultValue": true
-      },
-      {
-        "name": "mappingVersion",
-        "type": "text"
-      },
-      {
-        "name": "mimeType",
-        "type": "text"
-      },
-      {
-        "name": "r2Key",
-        "type": "text"
-      },
-      {
-        "name": "slug",
-        "type": "text",
-        "required": true,
-        "index": true
-      },
-      {
-        "name": "sourceAssets",
-        "type": "json"
-      },
-      {
-        "name": "sourceFields",
-        "type": "json"
-      },
-      {
-        "name": "sourceHash",
-        "type": "text"
-      },
-      {
-        "name": "sourceOrder",
-        "type": "number",
-        "defaultValue": 0
-      },
-      {
-        "name": "sourcePath",
-        "type": "text"
-      },
-      {
-        "name": "sourceRevision",
-        "type": "text"
-      },
-      {
-        "name": "sourceSequence",
-        "type": "number"
-      },
-      {
-        "name": "sourceSystem",
-        "type": "text"
-      },
-      {
-        "name": "tombstone",
-        "type": "checkbox",
-        "defaultValue": false
-      }
-    ]
-  },
-  {
-    "slug": "team-invites",
-    "timestamps": true,
-    "drafts": true,
-    "maxPerDoc": 30,
-    "auth": false,
-    "upload": false,
-    "indexes": [],
-    "fields": [
-      {
-        "name": "bracket",
-        "type": "relationship",
-        "relationTo": "brackets"
-      },
-      {
-        "name": "createdByUserId",
-        "type": "text"
-      },
-      {
-        "name": "importedAt",
-        "type": "date"
-      },
-      {
-        "name": "importState",
-        "type": "select",
-        "options": [
-          "pending",
-          "complete"
-        ]
-      },
-      {
-        "name": "legacyId",
-        "type": "text",
-        "required": true,
-        "unique": true,
-        "index": true
-      },
-      {
-        "name": "locallyEdited",
-        "type": "checkbox",
-        "defaultValue": true
-      },
-      {
-        "name": "mappingVersion",
-        "type": "text"
-      },
-      {
-        "name": "revokedAt",
-        "type": "date"
-      },
-      {
-        "name": "slug",
-        "type": "text",
-        "required": true,
-        "index": true
-      },
-      {
-        "name": "sourceAssets",
-        "type": "json"
-      },
-      {
-        "name": "sourceBracketId",
-        "type": "text"
-      },
-      {
-        "name": "sourceCreatedAt",
-        "type": "date"
-      },
-      {
-        "name": "sourceFields",
-        "type": "json"
-      },
-      {
-        "name": "sourceHash",
-        "type": "text"
-      },
-      {
-        "name": "sourceOrder",
-        "type": "number",
-        "defaultValue": 0
-      },
-      {
-        "name": "sourcePath",
-        "type": "text"
-      },
-      {
-        "name": "sourceRevision",
-        "type": "text"
-      },
-      {
-        "name": "sourceSequence",
-        "type": "number"
-      },
-      {
-        "name": "sourceSystem",
-        "type": "text"
-      },
-      {
-        "name": "sourceTeamId",
-        "type": "text"
-      },
-      {
-        "name": "team",
-        "type": "relationship",
-        "relationTo": "teams"
-      },
-      {
-        "name": "token",
-        "type": "text"
-      },
-      {
-        "name": "tombstone",
-        "type": "checkbox",
-        "defaultValue": false
-      }
-    ]
-  },
-  {
-    "slug": "team-members",
-    "timestamps": true,
-    "drafts": true,
-    "maxPerDoc": 30,
-    "auth": false,
-    "upload": false,
-    "indexes": [
-      {
-        "unique": true,
-        "fields": [
-          "team",
-          "competitor"
-        ]
-      },
-      {
-        "unique": true,
-        "fields": [
-          "bracket",
-          "competitor"
-        ]
-      },
-      {
-        "unique": true,
-        "fields": [
-          "sourceTeamId",
-          "sourceCompetitorId"
-        ]
-      },
-      {
-        "unique": true,
-        "fields": [
-          "sourceBracketId",
-          "sourceCompetitorId"
-        ]
-      }
-    ],
-    "fields": [
-      {
-        "name": "bracket",
-        "type": "relationship",
-        "relationTo": "brackets"
-      },
-      {
-        "name": "competitor",
-        "type": "relationship",
-        "relationTo": "competitors"
-      },
-      {
-        "name": "importedAt",
-        "type": "date"
-      },
-      {
-        "name": "importState",
-        "type": "select",
-        "options": [
-          "pending",
-          "complete"
-        ]
-      },
-      {
-        "name": "legacyId",
-        "type": "text",
-        "required": true,
-        "unique": true,
-        "index": true
-      },
-      {
-        "name": "locallyEdited",
-        "type": "checkbox",
-        "defaultValue": true
-      },
-      {
-        "name": "mappingVersion",
-        "type": "text"
-      },
-      {
-        "name": "role",
-        "type": "text"
-      },
-      {
-        "name": "slug",
-        "type": "text",
-        "required": true,
-        "index": true
-      },
-      {
-        "name": "sourceAssets",
-        "type": "json"
-      },
-      {
-        "name": "sourceBracketId",
-        "type": "text"
-      },
-      {
-        "name": "sourceCompetitorId",
-        "type": "text"
-      },
-      {
-        "name": "sourceCreatedAt",
-        "type": "date"
-      },
-      {
-        "name": "sourceFields",
-        "type": "json"
-      },
-      {
-        "name": "sourceHash",
-        "type": "text"
-      },
-      {
-        "name": "sourceOrder",
-        "type": "number",
-        "defaultValue": 0
-      },
-      {
-        "name": "sourcePath",
-        "type": "text"
-      },
-      {
-        "name": "sourceRevision",
-        "type": "text"
-      },
-      {
-        "name": "sourceSequence",
-        "type": "number"
-      },
-      {
-        "name": "sourceSystem",
-        "type": "text"
-      },
-      {
-        "name": "sourceTeamId",
-        "type": "text"
-      },
-      {
-        "name": "team",
-        "type": "relationship",
-        "relationTo": "teams"
-      },
-      {
-        "name": "tombstone",
-        "type": "checkbox",
-        "defaultValue": false
-      }
-    ]
-  },
-  {
-    "slug": "teams",
-    "timestamps": true,
-    "drafts": true,
-    "maxPerDoc": 30,
-    "auth": false,
-    "upload": false,
-    "indexes": [
-      {
-        "unique": true,
-        "fields": [
-          "bracket",
-          "slug"
-        ]
-      },
-      {
-        "unique": true,
-        "fields": [
-          "sourceBracketId",
-          "slug"
-        ]
-      }
-    ],
-    "fields": [
-      {
-        "name": "bracket",
-        "type": "relationship",
-        "relationTo": "brackets"
-      },
-      {
-        "name": "importedAt",
-        "type": "date"
-      },
-      {
-        "name": "importState",
-        "type": "select",
-        "options": [
-          "pending",
-          "complete"
-        ]
-      },
-      {
-        "name": "legacyId",
-        "type": "text",
-        "required": true,
-        "unique": true,
-        "index": true
-      },
-      {
-        "name": "locallyEdited",
-        "type": "checkbox",
-        "defaultValue": true
-      },
-      {
-        "name": "mappingVersion",
-        "type": "text"
-      },
-      {
-        "name": "name",
-        "type": "text"
-      },
-      {
-        "name": "season",
-        "type": "relationship",
-        "relationTo": "seasons"
-      },
-      {
-        "name": "slug",
-        "type": "text",
-        "required": true,
-        "index": true
-      },
-      {
-        "name": "sourceAssets",
-        "type": "json"
-      },
-      {
-        "name": "sourceBracketId",
-        "type": "text"
-      },
-      {
-        "name": "sourceCreatedAt",
-        "type": "date"
-      },
-      {
-        "name": "sourceFields",
-        "type": "json"
-      },
-      {
-        "name": "sourceHash",
-        "type": "text"
-      },
-      {
-        "name": "sourceOrder",
-        "type": "number",
-        "defaultValue": 0
-      },
-      {
-        "name": "sourcePath",
-        "type": "text"
-      },
-      {
-        "name": "sourceRevision",
-        "type": "text"
-      },
-      {
-        "name": "sourceSeasonId",
-        "type": "text"
-      },
-      {
-        "name": "sourceSequence",
-        "type": "number"
-      },
-      {
-        "name": "sourceSystem",
-        "type": "text"
-      },
-      {
-        "name": "sourceUpdatedAt",
-        "type": "date"
-      },
-      {
-        "name": "tombstone",
-        "type": "checkbox",
-        "defaultValue": false
-      }
-    ]
-  },
-  {
-    "slug": "technologies",
-    "timestamps": true,
-    "drafts": true,
-    "maxPerDoc": 30,
-    "auth": false,
-    "upload": false,
-    "indexes": [],
-    "fields": [
-      {
-        "name": "aliases",
-        "type": "array",
-        "fields": [
-          {
-            "name": "value",
-            "type": "text"
-          }
-        ]
-      },
-      {
-        "name": "body",
-        "type": "textarea"
-      },
-      {
-        "name": "category",
-        "type": "text"
-      },
-      {
-        "name": "cncf",
-        "type": "json"
-      },
-      {
-        "name": "community",
-        "type": "json"
-      },
-      {
-        "name": "contentResources",
-        "type": "json"
-      },
-      {
-        "name": "cover",
-        "type": "json"
-      },
-      {
-        "name": "documentation",
-        "type": "text"
-      },
-      {
-        "name": "features",
-        "type": "array",
-        "fields": [
-          {
-            "name": "value",
-            "type": "text"
-          }
-        ]
-      },
-      {
-        "name": "icon",
-        "type": "text"
-      },
-      {
-        "name": "importedAt",
-        "type": "date"
-      },
-      {
-        "name": "importState",
-        "type": "select",
-        "options": [
-          "pending",
-          "complete"
-        ]
-      },
-      {
-        "name": "learningResources",
-        "type": "relationship",
-        "relationTo": "learning-resources"
-      },
-      {
-        "name": "legacyId",
-        "type": "text",
-        "required": true,
-        "unique": true,
-        "index": true
-      },
-      {
-        "name": "license",
-        "type": "text"
-      },
-      {
-        "name": "locallyEdited",
-        "type": "checkbox",
-        "defaultValue": true
-      },
-      {
-        "name": "logo",
-        "type": "text"
-      },
-      {
-        "name": "logos",
-        "type": "json"
-      },
-      {
-        "name": "mappingVersion",
-        "type": "text"
-      },
-      {
-        "name": "matrix",
-        "type": "json"
-      },
-      {
-        "name": "name",
-        "type": "text"
-      },
-      {
-        "name": "relatedTechnologies",
-        "type": "array",
-        "fields": [
-          {
-            "name": "value",
-            "type": "text"
-          }
-        ]
-      },
-      {
-        "name": "seo",
-        "type": "json"
-      },
-      {
-        "name": "slug",
-        "type": "text",
-        "required": true,
-        "index": true
-      },
-      {
-        "name": "source",
-        "type": "text"
-      },
-      {
-        "name": "sourceAssets",
-        "type": "json"
-      },
-      {
-        "name": "sourceFields",
-        "type": "json"
-      },
-      {
-        "name": "sourceHash",
-        "type": "text"
-      },
-      {
-        "name": "sourceOrder",
-        "type": "number",
-        "defaultValue": 0
-      },
-      {
-        "name": "sourcePath",
-        "type": "text"
-      },
-      {
-        "name": "sourceRevision",
-        "type": "text"
-      },
-      {
-        "name": "sourceSequence",
-        "type": "number"
-      },
-      {
-        "name": "sourceSystem",
-        "type": "text"
-      },
-      {
-        "name": "status",
-        "type": "text"
-      },
-      {
-        "name": "subcategory",
-        "type": "text"
-      },
-      {
-        "name": "terms",
-        "type": "array",
-        "fields": [
-          {
-            "name": "value",
-            "type": "text"
-          }
-        ]
-      },
-      {
-        "name": "tombstone",
-        "type": "checkbox",
-        "defaultValue": false
-      },
-      {
-        "name": "useCases",
-        "type": "array",
-        "fields": [
-          {
-            "name": "value",
-            "type": "text"
-          }
-        ]
-      },
-      {
-        "name": "website",
-        "type": "text"
-      }
-    ]
-  },
-  {
-    "slug": "testimonials",
-    "timestamps": true,
-    "drafts": true,
-    "maxPerDoc": 30,
-    "auth": false,
-    "upload": false,
-    "indexes": [],
-    "fields": [
-      {
-        "name": "author",
-        "type": "json"
-      },
-      {
-        "name": "body",
-        "type": "textarea"
-      },
-      {
-        "name": "contentResources",
-        "type": "json"
-      },
-      {
-        "name": "cover",
-        "type": "json"
-      },
-      {
-        "name": "importedAt",
-        "type": "date"
-      },
-      {
-        "name": "importState",
-        "type": "select",
-        "options": [
-          "pending",
-          "complete"
-        ]
-      },
-      {
-        "name": "legacyId",
-        "type": "text",
-        "required": true,
-        "unique": true,
-        "index": true
-      },
-      {
-        "name": "locallyEdited",
-        "type": "checkbox",
-        "defaultValue": true
-      },
-      {
-        "name": "mappingVersion",
-        "type": "text"
-      },
-      {
-        "name": "quote",
-        "type": "text"
-      },
-      {
-        "name": "slug",
-        "type": "text",
-        "required": true,
-        "index": true
-      },
-      {
-        "name": "sourceAssets",
-        "type": "json"
-      },
-      {
-        "name": "sourceFields",
-        "type": "json"
-      },
-      {
-        "name": "sourceHash",
-        "type": "text"
-      },
-      {
-        "name": "sourceOrder",
-        "type": "number",
-        "defaultValue": 0
-      },
-      {
-        "name": "sourcePath",
-        "type": "text"
-      },
-      {
-        "name": "sourceRevision",
-        "type": "text"
-      },
-      {
-        "name": "sourceSequence",
-        "type": "number"
-      },
-      {
-        "name": "sourceSystem",
-        "type": "text"
-      },
-      {
-        "name": "tombstone",
-        "type": "checkbox",
-        "defaultValue": false
-      },
-      {
-        "name": "type",
-        "type": "select",
-        "options": [
-          "maintainer",
-          "partner",
-          "viewer"
-        ]
-      }
-    ]
-  },
-  {
-    "slug": "users",
-    "timestamps": true,
-    "drafts": false,
-    "auth": true,
-    "upload": false,
-    "indexes": [],
-    "fields": [
-      {
-        "name": "identityKey",
-        "type": "text",
-        "unique": true,
-        "index": true
-      },
-      {
-        "name": "name",
-        "type": "text"
-      },
-      {
-        "name": "oidcIssuer",
-        "type": "text"
-      },
-      {
-        "name": "oidcSubject",
-        "type": "text"
-      },
-      {
-        "name": "profileEmail",
-        "type": "email"
-      },
-      {
-        "name": "role",
-        "type": "select",
-        "required": true,
-        "defaultValue": "customer",
-        "options": [
-          "customer",
-          "staff"
-        ]
-      }
-    ]
-  },
-  {
-    "slug": "video-publications",
-    "timestamps": false,
-    "drafts": false,
-    "auth": false,
-    "upload": false,
-    "indexes": [],
-    "fields": [
-      {
-        "name": "document",
-        "type": "json",
-        "required": true
-      },
-      {
-        "name": "id",
-        "type": "number",
-        "required": true
-      }
-    ]
-  },
-  {
-    "slug": "video-review-grants",
-    "timestamps": false,
-    "drafts": false,
-    "auth": false,
-    "upload": false,
-    "indexes": [],
-    "fields": [
-      {
-        "name": "active",
-        "type": "checkbox"
-      },
-      {
-        "name": "canApprove",
-        "type": "checkbox"
-      },
-      {
-        "name": "id",
-        "type": "text",
-        "required": true
-      },
-      {
-        "name": "user",
-        "type": "relationship",
-        "relationTo": "users",
-        "required": true
-      },
-      {
-        "name": "version",
-        "type": "number",
-        "required": true
-      },
-      {
-        "name": "video",
-        "type": "relationship",
-        "relationTo": "videos",
-        "required": true
-      }
-    ]
-  },
-  {
-    "slug": "video-revisions",
-    "timestamps": false,
-    "drafts": false,
-    "auth": false,
-    "upload": false,
-    "indexes": [],
-    "fields": [
-      {
-        "name": "checksum",
-        "type": "text",
-        "required": true
-      },
-      {
-        "name": "createdAt",
-        "type": "date",
-        "required": true
-      },
-      {
-        "name": "createdBy",
-        "type": "relationship",
-        "relationTo": "users",
-        "required": true
-      },
-      {
-        "name": "deliverableChecksum",
-        "type": "text",
-        "required": true
-      },
-      {
-        "name": "deliverableMedia",
-        "type": "relationship",
-        "relationTo": "media",
-        "required": true
-      },
-      {
-        "name": "durationMs",
-        "type": "number",
-        "required": true
-      },
-      {
-        "name": "id",
-        "type": "text",
-        "required": true
-      },
-      {
-        "name": "media",
-        "type": "relationship",
-        "relationTo": "media",
-        "required": true
-      },
-      {
-        "name": "metadata",
-        "type": "json",
-        "required": true
-      },
-      {
-        "name": "reviewVersion",
-        "type": "number",
-        "required": true
-      },
-      {
-        "name": "state",
-        "type": "text",
-        "required": true
-      },
-      {
-        "name": "video",
-        "type": "relationship",
-        "relationTo": "videos",
-        "required": true
-      }
-    ]
-  },
-  {
-    "slug": "videos",
-    "timestamps": true,
-    "drafts": true,
-    "maxPerDoc": 30,
-    "auth": false,
-    "upload": false,
-    "indexes": [],
-    "fields": [
-      {
-        "name": "approvalRevision",
-        "type": "text"
-      },
-      {
-        "name": "audioFileSize",
-        "type": "number"
-      },
-      {
-        "name": "body",
-        "type": "textarea"
-      },
-      {
-        "name": "category",
-        "type": "select",
-        "options": [
-          "announcement",
-          "editorial",
-          "interview",
-          "review",
-          "tutorial"
-        ]
-      },
-      {
-        "name": "chapters",
-        "type": "relationship",
-        "hasMany": true,
-        "relationTo": "chapters"
-      },
-      {
-        "name": "contentResources",
-        "type": "json"
-      },
-      {
-        "name": "cover",
-        "type": "json"
-      },
-      {
-        "name": "description",
-        "type": "textarea"
-      },
-      {
-        "name": "duration",
-        "type": "number"
-      },
-      {
-        "name": "episode",
-        "type": "relationship",
-        "relationTo": "episodes"
-      },
-      {
-        "name": "guests",
-        "type": "relationship",
-        "hasMany": true,
-        "relationTo": "people"
-      },
-      {
-        "name": "importedAt",
-        "type": "date"
-      },
-      {
-        "name": "importState",
-        "type": "select",
-        "options": [
-          "pending",
-          "complete"
-        ]
-      },
-      {
-        "name": "legacyId",
-        "type": "text",
-        "required": true,
-        "unique": true,
-        "index": true
-      },
-      {
-        "name": "locallyEdited",
-        "type": "checkbox",
-        "defaultValue": true
-      },
-      {
-        "name": "mappingVersion",
-        "type": "text"
-      },
-      {
-        "name": "mediaChecksum",
-        "type": "text"
-      },
-      {
-        "name": "mediaReference",
-        "type": "text"
-      },
-      {
-        "name": "mediaVersion",
-        "type": "text"
-      },
-      {
-        "name": "podcast",
-        "type": "json"
-      },
-      {
-        "name": "processingRun",
-        "type": "text"
-      },
-      {
-        "name": "processingState",
-        "type": "select",
-        "options": [
-          "processing",
-          "awaiting-review",
-          "published"
-        ]
-      },
-      {
-        "name": "publishedAt",
-        "type": "date"
-      },
-      {
-        "name": "realtimeKit",
-        "type": "json"
-      },
-      {
-        "name": "show",
-        "type": "relationship",
-        "relationTo": "shows"
-      },
-      {
-        "name": "slug",
-        "type": "text",
-        "required": true,
-        "index": true
-      },
-      {
-        "name": "sourceAssets",
-        "type": "json"
-      },
-      {
-        "name": "sourceFields",
-        "type": "json"
-      },
-      {
-        "name": "sourceHash",
-        "type": "text"
-      },
-      {
-        "name": "sourceOrder",
-        "type": "number",
-        "defaultValue": 0
-      },
-      {
-        "name": "sourcePath",
-        "type": "text"
-      },
-      {
-        "name": "sourceRevision",
-        "type": "text"
-      },
-      {
-        "name": "sourceSequence",
-        "type": "number"
-      },
-      {
-        "name": "sourceSystem",
-        "type": "text"
-      },
-      {
-        "name": "streamUrl",
-        "type": "text"
-      },
-      {
-        "name": "subscribeLinks",
-        "type": "json"
-      },
-      {
-        "name": "subtitle",
-        "type": "text"
-      },
-      {
-        "name": "summary",
-        "type": "textarea"
-      },
-      {
-        "name": "tagline",
-        "type": "text"
-      },
-      {
-        "name": "technologies",
-        "type": "relationship",
-        "hasMany": true,
-        "relationTo": "technologies"
-      },
-      {
-        "name": "terms",
-        "type": "array",
-        "fields": [
-          {
-            "name": "value",
-            "type": "text"
-          }
-        ]
-      },
-      {
-        "name": "thumbnailUrl",
-        "type": "text"
-      },
-      {
-        "name": "title",
-        "type": "text"
-      },
-      {
-        "name": "tombstone",
-        "type": "checkbox",
-        "defaultValue": false
-      },
-      {
-        "name": "transcript",
-        "type": "textarea"
-      },
-      {
-        "name": "type",
-        "type": "select",
-        "options": [
-          "live",
-          "recorded"
-        ]
-      },
-      {
-        "name": "whatYouWillLearn",
-        "type": "array",
-        "fields": [
-          {
-            "name": "value",
-            "type": "text"
-          }
-        ]
-      },
-      {
-        "name": "youtubeId",
-        "type": "text"
-      }
-    ]
-  }
+	{
+		"slug": "adrs",
+		"timestamps": true,
+		"drafts": true,
+		"maxPerDoc": 30,
+		"auth": false,
+		"upload": false,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "adoptedAt",
+				"type": "date"
+			},
+			{
+				"name": "authors",
+				"type": "relationship",
+				"hasMany": true,
+				"relationTo": "people"
+			},
+			{
+				"name": "body",
+				"type": "textarea"
+			},
+			{
+				"name": "contentResources",
+				"type": "json"
+			},
+			{
+				"name": "cover",
+				"type": "json"
+			},
+			{
+				"name": "importedAt",
+				"type": "date"
+			},
+			{
+				"name": "importState",
+				"type": "select",
+				"options": [
+					"pending",
+					"complete"
+				]
+			},
+			{
+				"name": "legacyId",
+				"type": "text",
+				"unique": true,
+				"index": true
+			},
+			{
+				"name": "locallyEdited",
+				"type": "checkbox",
+				"defaultValue": true
+			},
+			{
+				"name": "mappingVersion",
+				"type": "text"
+			},
+			{
+				"name": "slug",
+				"type": "text",
+				"required": true,
+				"index": true
+			},
+			{
+				"name": "sourceAssets",
+				"type": "json"
+			},
+			{
+				"name": "sourceFields",
+				"type": "json"
+			},
+			{
+				"name": "sourceHash",
+				"type": "text"
+			},
+			{
+				"name": "sourceOrder",
+				"type": "number",
+				"defaultValue": 0
+			},
+			{
+				"name": "sourcePath",
+				"type": "text"
+			},
+			{
+				"name": "sourceRevision",
+				"type": "text"
+			},
+			{
+				"name": "sourceSequence",
+				"type": "number"
+			},
+			{
+				"name": "sourceSystem",
+				"type": "text"
+			},
+			{
+				"name": "title",
+				"type": "text"
+			},
+			{
+				"name": "tombstone",
+				"type": "checkbox",
+				"defaultValue": false
+			}
+		]
+	},
+	{
+		"slug": "articles",
+		"timestamps": true,
+		"drafts": true,
+		"maxPerDoc": 30,
+		"auth": false,
+		"upload": false,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "authors",
+				"type": "relationship",
+				"hasMany": true,
+				"relationTo": "people"
+			},
+			{
+				"name": "body",
+				"type": "textarea"
+			},
+			{
+				"name": "contentResources",
+				"type": "json"
+			},
+			{
+				"name": "cover",
+				"type": "json"
+			},
+			{
+				"name": "description",
+				"type": "textarea"
+			},
+			{
+				"name": "howto",
+				"type": "checkbox"
+			},
+			{
+				"name": "importedAt",
+				"type": "date"
+			},
+			{
+				"name": "importState",
+				"type": "select",
+				"options": [
+					"pending",
+					"complete"
+				]
+			},
+			{
+				"name": "legacyId",
+				"type": "text",
+				"unique": true,
+				"index": true
+			},
+			{
+				"name": "locallyEdited",
+				"type": "checkbox",
+				"defaultValue": true
+			},
+			{
+				"name": "mappingVersion",
+				"type": "text"
+			},
+			{
+				"name": "publishedAt",
+				"type": "date"
+			},
+			{
+				"name": "resources",
+				"type": "relationship",
+				"hasMany": true,
+				"relationTo": "learning-resources"
+			},
+			{
+				"name": "series",
+				"type": "relationship",
+				"relationTo": "series"
+			},
+			{
+				"name": "slug",
+				"type": "text",
+				"required": true,
+				"index": true
+			},
+			{
+				"name": "sourceAssets",
+				"type": "json"
+			},
+			{
+				"name": "sourceFields",
+				"type": "json"
+			},
+			{
+				"name": "sourceHash",
+				"type": "text"
+			},
+			{
+				"name": "sourceOrder",
+				"type": "number",
+				"defaultValue": 0
+			},
+			{
+				"name": "sourcePath",
+				"type": "text"
+			},
+			{
+				"name": "sourceRevision",
+				"type": "text"
+			},
+			{
+				"name": "sourceSequence",
+				"type": "number"
+			},
+			{
+				"name": "sourceSystem",
+				"type": "text"
+			},
+			{
+				"name": "subtitle",
+				"type": "text"
+			},
+			{
+				"name": "technologies",
+				"type": "relationship",
+				"hasMany": true,
+				"relationTo": "technologies"
+			},
+			{
+				"name": "title",
+				"type": "text"
+			},
+			{
+				"name": "tombstone",
+				"type": "checkbox",
+				"defaultValue": false
+			},
+			{
+				"name": "type",
+				"type": "select",
+				"options": [
+					"tutorial",
+					"article",
+					"guide",
+					"news"
+				]
+			},
+			{
+				"name": "updatedAt",
+				"type": "date"
+			}
+		]
+	},
+	{
+		"slug": "bracket-applications",
+		"timestamps": true,
+		"drafts": true,
+		"maxPerDoc": 30,
+		"auth": false,
+		"upload": false,
+		"indexes": [
+			{
+				"unique": true,
+				"fields": [
+					"bracket",
+					"competitor"
+				]
+			},
+			{
+				"unique": true,
+				"fields": [
+					"sourceBracketId",
+					"sourceCompetitorId"
+				]
+			}
+		],
+		"fields": [
+			{
+				"name": "bracket",
+				"type": "relationship",
+				"relationTo": "brackets"
+			},
+			{
+				"name": "competitor",
+				"type": "relationship",
+				"relationTo": "competitors"
+			},
+			{
+				"name": "importedAt",
+				"type": "date"
+			},
+			{
+				"name": "importState",
+				"type": "select",
+				"options": [
+					"pending",
+					"complete"
+				]
+			},
+			{
+				"name": "legacyId",
+				"type": "text",
+				"unique": true,
+				"index": true
+			},
+			{
+				"name": "locallyEdited",
+				"type": "checkbox",
+				"defaultValue": true
+			},
+			{
+				"name": "mappingVersion",
+				"type": "text"
+			},
+			{
+				"name": "reviewedAt",
+				"type": "date"
+			},
+			{
+				"name": "reviewedByUserId",
+				"type": "text"
+			},
+			{
+				"name": "slug",
+				"type": "text",
+				"required": true,
+				"index": true
+			},
+			{
+				"name": "sourceAssets",
+				"type": "json"
+			},
+			{
+				"name": "sourceBracketId",
+				"type": "text"
+			},
+			{
+				"name": "sourceCompetitorId",
+				"type": "text"
+			},
+			{
+				"name": "sourceCreatedAt",
+				"type": "date"
+			},
+			{
+				"name": "sourceFields",
+				"type": "json"
+			},
+			{
+				"name": "sourceHash",
+				"type": "text"
+			},
+			{
+				"name": "sourceOrder",
+				"type": "number",
+				"defaultValue": 0
+			},
+			{
+				"name": "sourcePath",
+				"type": "text"
+			},
+			{
+				"name": "sourceRevision",
+				"type": "text"
+			},
+			{
+				"name": "sourceSequence",
+				"type": "number"
+			},
+			{
+				"name": "sourceSystem",
+				"type": "text"
+			},
+			{
+				"name": "status",
+				"type": "select",
+				"options": [
+					"pending",
+					"approved",
+					"rejected"
+				]
+			},
+			{
+				"name": "tombstone",
+				"type": "checkbox",
+				"defaultValue": false
+			}
+		]
+	},
+	{
+		"slug": "bracket-breaks",
+		"timestamps": true,
+		"drafts": true,
+		"maxPerDoc": 30,
+		"auth": false,
+		"upload": false,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "bracket",
+				"type": "relationship",
+				"relationTo": "brackets"
+			},
+			{
+				"name": "endsAt",
+				"type": "date"
+			},
+			{
+				"name": "importedAt",
+				"type": "date"
+			},
+			{
+				"name": "importState",
+				"type": "select",
+				"options": [
+					"pending",
+					"complete"
+				]
+			},
+			{
+				"name": "label",
+				"type": "text"
+			},
+			{
+				"name": "legacyId",
+				"type": "text",
+				"unique": true,
+				"index": true
+			},
+			{
+				"name": "locallyEdited",
+				"type": "checkbox",
+				"defaultValue": true
+			},
+			{
+				"name": "mappingVersion",
+				"type": "text"
+			},
+			{
+				"name": "slug",
+				"type": "text",
+				"required": true,
+				"index": true
+			},
+			{
+				"name": "sourceAssets",
+				"type": "json"
+			},
+			{
+				"name": "sourceBracketId",
+				"type": "text"
+			},
+			{
+				"name": "sourceCreatedAt",
+				"type": "date"
+			},
+			{
+				"name": "sourceFields",
+				"type": "json"
+			},
+			{
+				"name": "sourceHash",
+				"type": "text"
+			},
+			{
+				"name": "sourceOrder",
+				"type": "number",
+				"defaultValue": 0
+			},
+			{
+				"name": "sourcePath",
+				"type": "text"
+			},
+			{
+				"name": "sourceRevision",
+				"type": "text"
+			},
+			{
+				"name": "sourceSequence",
+				"type": "number"
+			},
+			{
+				"name": "sourceSystem",
+				"type": "text"
+			},
+			{
+				"name": "startsAt",
+				"type": "date"
+			},
+			{
+				"name": "tombstone",
+				"type": "checkbox",
+				"defaultValue": false
+			}
+		]
+	},
+	{
+		"slug": "bracket-entries",
+		"timestamps": true,
+		"drafts": true,
+		"maxPerDoc": 30,
+		"auth": false,
+		"upload": false,
+		"indexes": [
+			{
+				"unique": true,
+				"fields": [
+					"bracket",
+					"seed"
+				]
+			},
+			{
+				"unique": true,
+				"fields": [
+					"bracket",
+					"competitor"
+				]
+			},
+			{
+				"unique": true,
+				"fields": [
+					"bracket",
+					"team"
+				]
+			},
+			{
+				"unique": true,
+				"fields": [
+					"sourceBracketId",
+					"seed"
+				]
+			},
+			{
+				"unique": true,
+				"fields": [
+					"sourceBracketId",
+					"sourceCompetitorId"
+				]
+			},
+			{
+				"unique": true,
+				"fields": [
+					"sourceBracketId",
+					"sourceTeamId"
+				]
+			}
+		],
+		"fields": [
+			{
+				"name": "bracket",
+				"type": "relationship",
+				"relationTo": "brackets"
+			},
+			{
+				"name": "competitor",
+				"type": "relationship",
+				"relationTo": "competitors"
+			},
+			{
+				"name": "displayName",
+				"type": "text"
+			},
+			{
+				"name": "importedAt",
+				"type": "date"
+			},
+			{
+				"name": "importState",
+				"type": "select",
+				"options": [
+					"pending",
+					"complete"
+				]
+			},
+			{
+				"name": "legacyId",
+				"type": "text",
+				"unique": true,
+				"index": true
+			},
+			{
+				"name": "locallyEdited",
+				"type": "checkbox",
+				"defaultValue": true
+			},
+			{
+				"name": "mappingVersion",
+				"type": "text"
+			},
+			{
+				"name": "seed",
+				"type": "number"
+			},
+			{
+				"name": "slug",
+				"type": "text",
+				"required": true,
+				"index": true
+			},
+			{
+				"name": "sourceAssets",
+				"type": "json"
+			},
+			{
+				"name": "sourceBracketId",
+				"type": "text"
+			},
+			{
+				"name": "sourceCompetitorId",
+				"type": "text"
+			},
+			{
+				"name": "sourceCreatedAt",
+				"type": "date"
+			},
+			{
+				"name": "sourceFields",
+				"type": "json"
+			},
+			{
+				"name": "sourceHash",
+				"type": "text"
+			},
+			{
+				"name": "sourceOrder",
+				"type": "number",
+				"defaultValue": 0
+			},
+			{
+				"name": "sourcePath",
+				"type": "text"
+			},
+			{
+				"name": "sourceRevision",
+				"type": "text"
+			},
+			{
+				"name": "sourceSequence",
+				"type": "number"
+			},
+			{
+				"name": "sourceSystem",
+				"type": "text"
+			},
+			{
+				"name": "sourceTeamId",
+				"type": "text"
+			},
+			{
+				"name": "sourceUpdatedAt",
+				"type": "date"
+			},
+			{
+				"name": "status",
+				"type": "select",
+				"options": [
+					"pending",
+					"confirmed",
+					"withdrawn"
+				]
+			},
+			{
+				"name": "team",
+				"type": "relationship",
+				"relationTo": "teams"
+			},
+			{
+				"name": "tombstone",
+				"type": "checkbox",
+				"defaultValue": false
+			}
+		]
+	},
+	{
+		"slug": "brackets",
+		"timestamps": true,
+		"drafts": true,
+		"maxPerDoc": 30,
+		"auth": false,
+		"upload": false,
+		"indexes": [
+			{
+				"unique": true,
+				"fields": [
+					"season",
+					"slug"
+				]
+			},
+			{
+				"unique": true,
+				"fields": [
+					"sourceSeasonId",
+					"slug"
+				]
+			}
+		],
+		"fields": [
+			{
+				"name": "cadenceDays",
+				"type": "number"
+			},
+			{
+				"name": "format",
+				"type": "select",
+				"options": [
+					"single_elimination"
+				]
+			},
+			{
+				"name": "importedAt",
+				"type": "date"
+			},
+			{
+				"name": "importState",
+				"type": "select",
+				"options": [
+					"pending",
+					"complete"
+				]
+			},
+			{
+				"name": "kind",
+				"type": "select",
+				"options": [
+					"solo",
+					"team"
+				]
+			},
+			{
+				"name": "legacyId",
+				"type": "text",
+				"unique": true,
+				"index": true
+			},
+			{
+				"name": "locallyEdited",
+				"type": "checkbox",
+				"defaultValue": true
+			},
+			{
+				"name": "mappingVersion",
+				"type": "text"
+			},
+			{
+				"name": "maxEntries",
+				"type": "number"
+			},
+			{
+				"name": "name",
+				"type": "text"
+			},
+			{
+				"name": "registrationClosesAt",
+				"type": "date"
+			},
+			{
+				"name": "season",
+				"type": "relationship",
+				"relationTo": "seasons"
+			},
+			{
+				"name": "slug",
+				"type": "text",
+				"required": true,
+				"index": true
+			},
+			{
+				"name": "sourceAssets",
+				"type": "json"
+			},
+			{
+				"name": "sourceCreatedAt",
+				"type": "date"
+			},
+			{
+				"name": "sourceFields",
+				"type": "json"
+			},
+			{
+				"name": "sourceHash",
+				"type": "text"
+			},
+			{
+				"name": "sourceOrder",
+				"type": "number",
+				"defaultValue": 0
+			},
+			{
+				"name": "sourcePath",
+				"type": "text"
+			},
+			{
+				"name": "sourceRevision",
+				"type": "text"
+			},
+			{
+				"name": "sourceSeasonId",
+				"type": "text"
+			},
+			{
+				"name": "sourceSequence",
+				"type": "number"
+			},
+			{
+				"name": "sourceSystem",
+				"type": "text"
+			},
+			{
+				"name": "sourceUpdatedAt",
+				"type": "date"
+			},
+			{
+				"name": "startsAt",
+				"type": "date"
+			},
+			{
+				"name": "status",
+				"type": "select",
+				"options": [
+					"draft",
+					"active",
+					"finished"
+				]
+			},
+			{
+				"name": "teamSize",
+				"type": "number"
+			},
+			{
+				"name": "tombstone",
+				"type": "checkbox",
+				"defaultValue": false
+			}
+		]
+	},
+	{
+		"slug": "changelog",
+		"timestamps": true,
+		"drafts": true,
+		"maxPerDoc": 30,
+		"auth": false,
+		"upload": false,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "author",
+				"type": "relationship",
+				"relationTo": "people"
+			},
+			{
+				"name": "body",
+				"type": "textarea"
+			},
+			{
+				"name": "contentResources",
+				"type": "json"
+			},
+			{
+				"name": "cover",
+				"type": "json"
+			},
+			{
+				"name": "date",
+				"type": "date"
+			},
+			{
+				"name": "description",
+				"type": "textarea"
+			},
+			{
+				"name": "importedAt",
+				"type": "date"
+			},
+			{
+				"name": "importState",
+				"type": "select",
+				"options": [
+					"pending",
+					"complete"
+				]
+			},
+			{
+				"name": "legacyId",
+				"type": "text",
+				"unique": true,
+				"index": true
+			},
+			{
+				"name": "locallyEdited",
+				"type": "checkbox",
+				"defaultValue": true
+			},
+			{
+				"name": "mappingVersion",
+				"type": "text"
+			},
+			{
+				"name": "pullRequest",
+				"type": "number"
+			},
+			{
+				"name": "slug",
+				"type": "text",
+				"required": true,
+				"index": true
+			},
+			{
+				"name": "sourceAssets",
+				"type": "json"
+			},
+			{
+				"name": "sourceFields",
+				"type": "json"
+			},
+			{
+				"name": "sourceHash",
+				"type": "text"
+			},
+			{
+				"name": "sourceOrder",
+				"type": "number",
+				"defaultValue": 0
+			},
+			{
+				"name": "sourcePath",
+				"type": "text"
+			},
+			{
+				"name": "sourceRevision",
+				"type": "text"
+			},
+			{
+				"name": "sourceSequence",
+				"type": "number"
+			},
+			{
+				"name": "sourceSystem",
+				"type": "text"
+			},
+			{
+				"name": "title",
+				"type": "text"
+			},
+			{
+				"name": "tombstone",
+				"type": "checkbox",
+				"defaultValue": false
+			},
+			{
+				"name": "type",
+				"type": "select",
+				"options": [
+					"feature",
+					"fix",
+					"improvement",
+					"breaking"
+				]
+			}
+		]
+	},
+	{
+		"slug": "chapters",
+		"timestamps": true,
+		"drafts": true,
+		"maxPerDoc": 30,
+		"auth": false,
+		"upload": false,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "body",
+				"type": "textarea"
+			},
+			{
+				"name": "contentResources",
+				"type": "json"
+			},
+			{
+				"name": "cover",
+				"type": "json"
+			},
+			{
+				"name": "importedAt",
+				"type": "date"
+			},
+			{
+				"name": "importState",
+				"type": "select",
+				"options": [
+					"pending",
+					"complete"
+				]
+			},
+			{
+				"name": "legacyId",
+				"type": "text",
+				"unique": true,
+				"index": true
+			},
+			{
+				"name": "locallyEdited",
+				"type": "checkbox",
+				"defaultValue": true
+			},
+			{
+				"name": "mappingVersion",
+				"type": "text"
+			},
+			{
+				"name": "slug",
+				"type": "text",
+				"required": true,
+				"index": true
+			},
+			{
+				"name": "sourceAssets",
+				"type": "json"
+			},
+			{
+				"name": "sourceFields",
+				"type": "json"
+			},
+			{
+				"name": "sourceHash",
+				"type": "text"
+			},
+			{
+				"name": "sourceOrder",
+				"type": "number",
+				"defaultValue": 0
+			},
+			{
+				"name": "sourcePath",
+				"type": "text"
+			},
+			{
+				"name": "sourceRevision",
+				"type": "text"
+			},
+			{
+				"name": "sourceSequence",
+				"type": "number"
+			},
+			{
+				"name": "sourceSystem",
+				"type": "text"
+			},
+			{
+				"name": "startTime",
+				"type": "number",
+				"min": 0
+			},
+			{
+				"name": "title",
+				"type": "text"
+			},
+			{
+				"name": "tombstone",
+				"type": "checkbox",
+				"defaultValue": false
+			}
+		]
+	},
+	{
+		"slug": "competitors",
+		"timestamps": true,
+		"drafts": true,
+		"maxPerDoc": 30,
+		"auth": false,
+		"upload": false,
+		"indexes": [
+			{
+				"unique": true,
+				"fields": [
+					"season",
+					"personSlug"
+				]
+			},
+			{
+				"unique": true,
+				"fields": [
+					"season",
+					"userId"
+				]
+			},
+			{
+				"unique": true,
+				"fields": [
+					"sourceSeasonId",
+					"personSlug"
+				]
+			},
+			{
+				"unique": true,
+				"fields": [
+					"sourceSeasonId",
+					"userId"
+				]
+			}
+		],
+		"fields": [
+			{
+				"name": "bio",
+				"type": "text"
+			},
+			{
+				"name": "displayName",
+				"type": "text"
+			},
+			{
+				"name": "importedAt",
+				"type": "date"
+			},
+			{
+				"name": "importState",
+				"type": "select",
+				"options": [
+					"pending",
+					"complete"
+				]
+			},
+			{
+				"name": "legacyId",
+				"type": "text",
+				"unique": true,
+				"index": true
+			},
+			{
+				"name": "locallyEdited",
+				"type": "checkbox",
+				"defaultValue": true
+			},
+			{
+				"name": "mappingVersion",
+				"type": "text"
+			},
+			{
+				"name": "personSlug",
+				"type": "text"
+			},
+			{
+				"name": "season",
+				"type": "relationship",
+				"relationTo": "seasons"
+			},
+			{
+				"name": "slug",
+				"type": "text",
+				"required": true,
+				"index": true
+			},
+			{
+				"name": "sourceAssets",
+				"type": "json"
+			},
+			{
+				"name": "sourceCreatedAt",
+				"type": "date"
+			},
+			{
+				"name": "sourceFields",
+				"type": "json"
+			},
+			{
+				"name": "sourceHash",
+				"type": "text"
+			},
+			{
+				"name": "sourceOrder",
+				"type": "number",
+				"defaultValue": 0
+			},
+			{
+				"name": "sourcePath",
+				"type": "text"
+			},
+			{
+				"name": "sourceRevision",
+				"type": "text"
+			},
+			{
+				"name": "sourceSeasonId",
+				"type": "text"
+			},
+			{
+				"name": "sourceSequence",
+				"type": "number"
+			},
+			{
+				"name": "sourceSystem",
+				"type": "text"
+			},
+			{
+				"name": "sourceUpdatedAt",
+				"type": "date"
+			},
+			{
+				"name": "tombstone",
+				"type": "checkbox",
+				"defaultValue": false
+			},
+			{
+				"name": "userId",
+				"type": "text"
+			}
+		]
+	},
+	{
+		"slug": "course-modules",
+		"timestamps": true,
+		"drafts": true,
+		"maxPerDoc": 30,
+		"auth": false,
+		"upload": false,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "authors",
+				"type": "relationship",
+				"hasMany": true,
+				"relationTo": "people"
+			},
+			{
+				"name": "body",
+				"type": "textarea"
+			},
+			{
+				"name": "contentResources",
+				"type": "json"
+			},
+			{
+				"name": "course",
+				"type": "relationship",
+				"relationTo": "courses"
+			},
+			{
+				"name": "cover",
+				"type": "json"
+			},
+			{
+				"name": "description",
+				"type": "textarea"
+			},
+			{
+				"name": "difficulty",
+				"type": "text"
+			},
+			{
+				"name": "importedAt",
+				"type": "date"
+			},
+			{
+				"name": "importState",
+				"type": "select",
+				"options": [
+					"pending",
+					"complete"
+				]
+			},
+			{
+				"name": "learningPath",
+				"type": "array",
+				"fields": [
+					{
+						"name": "value",
+						"type": "text"
+					}
+				]
+			},
+			{
+				"name": "legacyId",
+				"type": "text",
+				"unique": true,
+				"index": true
+			},
+			{
+				"name": "locallyEdited",
+				"type": "checkbox",
+				"defaultValue": true
+			},
+			{
+				"name": "mappingVersion",
+				"type": "text"
+			},
+			{
+				"name": "order",
+				"type": "number"
+			},
+			{
+				"name": "publishedAt",
+				"type": "date"
+			},
+			{
+				"name": "resources",
+				"type": "relationship",
+				"hasMany": true,
+				"relationTo": "learning-resources"
+			},
+			{
+				"name": "section",
+				"type": "text"
+			},
+			{
+				"name": "slug",
+				"type": "text",
+				"required": true,
+				"index": true
+			},
+			{
+				"name": "sourceAssets",
+				"type": "json"
+			},
+			{
+				"name": "sourceFields",
+				"type": "json"
+			},
+			{
+				"name": "sourceHash",
+				"type": "text"
+			},
+			{
+				"name": "sourceOrder",
+				"type": "number",
+				"defaultValue": 0
+			},
+			{
+				"name": "sourcePath",
+				"type": "text"
+			},
+			{
+				"name": "sourceRevision",
+				"type": "text"
+			},
+			{
+				"name": "sourceSequence",
+				"type": "number"
+			},
+			{
+				"name": "sourceSystem",
+				"type": "text"
+			},
+			{
+				"name": "title",
+				"type": "text"
+			},
+			{
+				"name": "tombstone",
+				"type": "checkbox",
+				"defaultValue": false
+			},
+			{
+				"name": "video",
+				"type": "relationship",
+				"relationTo": "videos"
+			}
+		]
+	},
+	{
+		"slug": "courses",
+		"timestamps": true,
+		"drafts": true,
+		"maxPerDoc": 30,
+		"auth": false,
+		"upload": false,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "authors",
+				"type": "relationship",
+				"hasMany": true,
+				"relationTo": "people"
+			},
+			{
+				"name": "body",
+				"type": "textarea"
+			},
+			{
+				"name": "contentResources",
+				"type": "json"
+			},
+			{
+				"name": "cover",
+				"type": "json"
+			},
+			{
+				"name": "description",
+				"type": "textarea"
+			},
+			{
+				"name": "difficulty",
+				"type": "text"
+			},
+			{
+				"name": "importedAt",
+				"type": "date"
+			},
+			{
+				"name": "importState",
+				"type": "select",
+				"options": [
+					"pending",
+					"complete"
+				]
+			},
+			{
+				"name": "learningPath",
+				"type": "array",
+				"fields": [
+					{
+						"name": "value",
+						"type": "text"
+					}
+				]
+			},
+			{
+				"name": "legacyId",
+				"type": "text",
+				"unique": true,
+				"index": true
+			},
+			{
+				"name": "locallyEdited",
+				"type": "checkbox",
+				"defaultValue": true
+			},
+			{
+				"name": "mappingVersion",
+				"type": "text"
+			},
+			{
+				"name": "modules",
+				"type": "relationship",
+				"hasMany": true,
+				"relationTo": "course-modules"
+			},
+			{
+				"name": "publishedAt",
+				"type": "date"
+			},
+			{
+				"name": "slug",
+				"type": "text",
+				"required": true,
+				"index": true
+			},
+			{
+				"name": "sourceAssets",
+				"type": "json"
+			},
+			{
+				"name": "sourceFields",
+				"type": "json"
+			},
+			{
+				"name": "sourceHash",
+				"type": "text"
+			},
+			{
+				"name": "sourceOrder",
+				"type": "number",
+				"defaultValue": 0
+			},
+			{
+				"name": "sourcePath",
+				"type": "text"
+			},
+			{
+				"name": "sourceRevision",
+				"type": "text"
+			},
+			{
+				"name": "sourceSequence",
+				"type": "number"
+			},
+			{
+				"name": "sourceSystem",
+				"type": "text"
+			},
+			{
+				"name": "technologies",
+				"type": "relationship",
+				"hasMany": true,
+				"relationTo": "technologies"
+			},
+			{
+				"name": "title",
+				"type": "text"
+			},
+			{
+				"name": "tombstone",
+				"type": "checkbox",
+				"defaultValue": false
+			},
+			{
+				"name": "updatedAt",
+				"type": "date"
+			}
+		]
+	},
+	{
+		"slug": "deletion-markers",
+		"timestamps": true,
+		"drafts": false,
+		"auth": false,
+		"upload": false,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "collectionSlug",
+				"type": "text"
+			},
+			{
+				"name": "key",
+				"type": "text",
+				"required": true,
+				"unique": true
+			},
+			{
+				"name": "legacyId",
+				"type": "text"
+			},
+			{
+				"name": "sourceHash",
+				"type": "text"
+			}
+		]
+	},
+	{
+		"slug": "episodes",
+		"timestamps": true,
+		"drafts": true,
+		"maxPerDoc": 30,
+		"auth": false,
+		"upload": false,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "body",
+				"type": "textarea"
+			},
+			{
+				"name": "code",
+				"type": "text"
+			},
+			{
+				"name": "contentResources",
+				"type": "json"
+			},
+			{
+				"name": "cover",
+				"type": "json"
+			},
+			{
+				"name": "importedAt",
+				"type": "date"
+			},
+			{
+				"name": "importState",
+				"type": "select",
+				"options": [
+					"pending",
+					"complete"
+				]
+			},
+			{
+				"name": "legacyId",
+				"type": "text",
+				"unique": true,
+				"index": true
+			},
+			{
+				"name": "locallyEdited",
+				"type": "checkbox",
+				"defaultValue": true
+			},
+			{
+				"name": "mappingVersion",
+				"type": "text"
+			},
+			{
+				"name": "show",
+				"type": "relationship",
+				"relationTo": "shows"
+			},
+			{
+				"name": "slug",
+				"type": "text",
+				"required": true,
+				"index": true
+			},
+			{
+				"name": "sourceAssets",
+				"type": "json"
+			},
+			{
+				"name": "sourceFields",
+				"type": "json"
+			},
+			{
+				"name": "sourceHash",
+				"type": "text"
+			},
+			{
+				"name": "sourceOrder",
+				"type": "number",
+				"defaultValue": 0
+			},
+			{
+				"name": "sourcePath",
+				"type": "text"
+			},
+			{
+				"name": "sourceRevision",
+				"type": "text"
+			},
+			{
+				"name": "sourceSequence",
+				"type": "number"
+			},
+			{
+				"name": "sourceSystem",
+				"type": "text"
+			},
+			{
+				"name": "terms",
+				"type": "array",
+				"fields": [
+					{
+						"name": "value",
+						"type": "text"
+					}
+				]
+			},
+			{
+				"name": "tombstone",
+				"type": "checkbox",
+				"defaultValue": false
+			},
+			{
+				"name": "video",
+				"type": "relationship",
+				"relationTo": "videos"
+			}
+		]
+	},
+	{
+		"slug": "learning-paths",
+		"timestamps": true,
+		"drafts": true,
+		"maxPerDoc": 30,
+		"auth": false,
+		"upload": false,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "authors",
+				"type": "relationship",
+				"hasMany": true,
+				"relationTo": "people"
+			},
+			{
+				"name": "body",
+				"type": "textarea"
+			},
+			{
+				"name": "contentResources",
+				"type": "json"
+			},
+			{
+				"name": "courses",
+				"type": "relationship",
+				"hasMany": true,
+				"relationTo": "courses"
+			},
+			{
+				"name": "cover",
+				"type": "json"
+			},
+			{
+				"name": "description",
+				"type": "textarea"
+			},
+			{
+				"name": "difficulty",
+				"type": "text"
+			},
+			{
+				"name": "estimatedDuration",
+				"type": "number"
+			},
+			{
+				"name": "importedAt",
+				"type": "date"
+			},
+			{
+				"name": "importState",
+				"type": "select",
+				"options": [
+					"pending",
+					"complete"
+				]
+			},
+			{
+				"name": "legacyId",
+				"type": "text",
+				"unique": true,
+				"index": true
+			},
+			{
+				"name": "locallyEdited",
+				"type": "checkbox",
+				"defaultValue": true
+			},
+			{
+				"name": "mappingVersion",
+				"type": "text"
+			},
+			{
+				"name": "prerequisites",
+				"type": "array",
+				"fields": [
+					{
+						"name": "value",
+						"type": "text"
+					}
+				]
+			},
+			{
+				"name": "publishedAt",
+				"type": "date"
+			},
+			{
+				"name": "slug",
+				"type": "text",
+				"required": true,
+				"index": true
+			},
+			{
+				"name": "sourceAssets",
+				"type": "json"
+			},
+			{
+				"name": "sourceFields",
+				"type": "json"
+			},
+			{
+				"name": "sourceHash",
+				"type": "text"
+			},
+			{
+				"name": "sourceOrder",
+				"type": "number",
+				"defaultValue": 0
+			},
+			{
+				"name": "sourcePath",
+				"type": "text"
+			},
+			{
+				"name": "sourceRevision",
+				"type": "text"
+			},
+			{
+				"name": "sourceSequence",
+				"type": "number"
+			},
+			{
+				"name": "sourceSystem",
+				"type": "text"
+			},
+			{
+				"name": "technologies",
+				"type": "relationship",
+				"hasMany": true,
+				"relationTo": "technologies"
+			},
+			{
+				"name": "title",
+				"type": "text"
+			},
+			{
+				"name": "tombstone",
+				"type": "checkbox",
+				"defaultValue": false
+			},
+			{
+				"name": "videos",
+				"type": "relationship",
+				"hasMany": true,
+				"relationTo": "videos"
+			}
+		]
+	},
+	{
+		"slug": "learning-resources",
+		"timestamps": true,
+		"drafts": true,
+		"maxPerDoc": 30,
+		"auth": false,
+		"upload": false,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "body",
+				"type": "textarea"
+			},
+			{
+				"name": "community",
+				"type": "array",
+				"fields": [
+					{
+						"name": "url",
+						"type": "text"
+					}
+				]
+			},
+			{
+				"name": "contentResources",
+				"type": "json"
+			},
+			{
+				"name": "cover",
+				"type": "json"
+			},
+			{
+				"name": "importedAt",
+				"type": "date"
+			},
+			{
+				"name": "importState",
+				"type": "select",
+				"options": [
+					"pending",
+					"complete"
+				]
+			},
+			{
+				"name": "legacyId",
+				"type": "text",
+				"unique": true,
+				"index": true
+			},
+			{
+				"name": "locallyEdited",
+				"type": "checkbox",
+				"defaultValue": true
+			},
+			{
+				"name": "mappingVersion",
+				"type": "text"
+			},
+			{
+				"name": "official",
+				"type": "array",
+				"fields": [
+					{
+						"name": "url",
+						"type": "text"
+					}
+				]
+			},
+			{
+				"name": "slug",
+				"type": "text",
+				"required": true,
+				"index": true
+			},
+			{
+				"name": "sourceAssets",
+				"type": "json"
+			},
+			{
+				"name": "sourceFields",
+				"type": "json"
+			},
+			{
+				"name": "sourceHash",
+				"type": "text"
+			},
+			{
+				"name": "sourceOrder",
+				"type": "number",
+				"defaultValue": 0
+			},
+			{
+				"name": "sourcePath",
+				"type": "text"
+			},
+			{
+				"name": "sourceRevision",
+				"type": "text"
+			},
+			{
+				"name": "sourceSequence",
+				"type": "number"
+			},
+			{
+				"name": "sourceSystem",
+				"type": "text"
+			},
+			{
+				"name": "title",
+				"type": "text"
+			},
+			{
+				"name": "tombstone",
+				"type": "checkbox",
+				"defaultValue": false
+			},
+			{
+				"name": "tutorials",
+				"type": "array",
+				"fields": [
+					{
+						"name": "url",
+						"type": "text"
+					}
+				]
+			}
+		]
+	},
+	{
+		"slug": "match-results",
+		"timestamps": true,
+		"drafts": true,
+		"maxPerDoc": 30,
+		"auth": false,
+		"upload": false,
+		"indexes": [
+			{
+				"unique": true,
+				"fields": [
+					"match"
+				]
+			},
+			{
+				"unique": true,
+				"fields": [
+					"sourceMatchId"
+				]
+			}
+		],
+		"fields": [
+			{
+				"name": "importedAt",
+				"type": "date"
+			},
+			{
+				"name": "importState",
+				"type": "select",
+				"options": [
+					"pending",
+					"complete"
+				]
+			},
+			{
+				"name": "legacyId",
+				"type": "text",
+				"unique": true,
+				"index": true
+			},
+			{
+				"name": "locallyEdited",
+				"type": "checkbox",
+				"defaultValue": true
+			},
+			{
+				"name": "mappingVersion",
+				"type": "text"
+			},
+			{
+				"name": "match",
+				"type": "relationship",
+				"relationTo": "matches"
+			},
+			{
+				"name": "notes",
+				"type": "text"
+			},
+			{
+				"name": "recordedAt",
+				"type": "date"
+			},
+			{
+				"name": "recordedByUserId",
+				"type": "text"
+			},
+			{
+				"name": "scoreA",
+				"type": "number"
+			},
+			{
+				"name": "scoreB",
+				"type": "number"
+			},
+			{
+				"name": "slug",
+				"type": "text",
+				"required": true,
+				"index": true
+			},
+			{
+				"name": "sourceAssets",
+				"type": "json"
+			},
+			{
+				"name": "sourceFields",
+				"type": "json"
+			},
+			{
+				"name": "sourceHash",
+				"type": "text"
+			},
+			{
+				"name": "sourceMatchId",
+				"type": "text"
+			},
+			{
+				"name": "sourceOrder",
+				"type": "number",
+				"defaultValue": 0
+			},
+			{
+				"name": "sourcePath",
+				"type": "text"
+			},
+			{
+				"name": "sourceRevision",
+				"type": "text"
+			},
+			{
+				"name": "sourceSequence",
+				"type": "number"
+			},
+			{
+				"name": "sourceSystem",
+				"type": "text"
+			},
+			{
+				"name": "sourceWinnerEntryId",
+				"type": "text"
+			},
+			{
+				"name": "sourceWinnerTeamId",
+				"type": "text"
+			},
+			{
+				"name": "timeToResolveSeconds",
+				"type": "number"
+			},
+			{
+				"name": "tombstone",
+				"type": "checkbox",
+				"defaultValue": false
+			},
+			{
+				"name": "winnerEntry",
+				"type": "relationship",
+				"relationTo": "bracket-entries"
+			},
+			{
+				"name": "winnerTeam",
+				"type": "relationship",
+				"relationTo": "teams"
+			}
+		]
+	},
+	{
+		"slug": "matches",
+		"timestamps": true,
+		"drafts": true,
+		"maxPerDoc": 30,
+		"auth": false,
+		"upload": false,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "bracket",
+				"type": "relationship",
+				"relationTo": "brackets"
+			},
+			{
+				"name": "endedAt",
+				"type": "date"
+			},
+			{
+				"name": "entryA",
+				"type": "relationship",
+				"relationTo": "bracket-entries"
+			},
+			{
+				"name": "entryB",
+				"type": "relationship",
+				"relationTo": "bracket-entries"
+			},
+			{
+				"name": "importedAt",
+				"type": "date"
+			},
+			{
+				"name": "importState",
+				"type": "select",
+				"options": [
+					"pending",
+					"complete"
+				]
+			},
+			{
+				"name": "judgeUserId",
+				"type": "text"
+			},
+			{
+				"name": "legacyId",
+				"type": "text",
+				"unique": true,
+				"index": true
+			},
+			{
+				"name": "locallyEdited",
+				"type": "checkbox",
+				"defaultValue": true
+			},
+			{
+				"name": "mappingVersion",
+				"type": "text"
+			},
+			{
+				"name": "positionInRound",
+				"type": "number"
+			},
+			{
+				"name": "roundNumber",
+				"type": "number"
+			},
+			{
+				"name": "scheduledAt",
+				"type": "date"
+			},
+			{
+				"name": "slug",
+				"type": "text",
+				"required": true,
+				"index": true
+			},
+			{
+				"name": "sourceAssets",
+				"type": "json"
+			},
+			{
+				"name": "sourceBracketId",
+				"type": "text"
+			},
+			{
+				"name": "sourceCreatedAt",
+				"type": "date"
+			},
+			{
+				"name": "sourceEntryAId",
+				"type": "text"
+			},
+			{
+				"name": "sourceEntryBId",
+				"type": "text"
+			},
+			{
+				"name": "sourceFields",
+				"type": "json"
+			},
+			{
+				"name": "sourceHash",
+				"type": "text"
+			},
+			{
+				"name": "sourceOrder",
+				"type": "number",
+				"defaultValue": 0
+			},
+			{
+				"name": "sourcePath",
+				"type": "text"
+			},
+			{
+				"name": "sourceRevision",
+				"type": "text"
+			},
+			{
+				"name": "sourceSequence",
+				"type": "number"
+			},
+			{
+				"name": "sourceSystem",
+				"type": "text"
+			},
+			{
+				"name": "sourceTeamAId",
+				"type": "text"
+			},
+			{
+				"name": "sourceTeamBId",
+				"type": "text"
+			},
+			{
+				"name": "sourceUpdatedAt",
+				"type": "date"
+			},
+			{
+				"name": "sourceWinnerEntryId",
+				"type": "text"
+			},
+			{
+				"name": "sourceWinnerTeamId",
+				"type": "text"
+			},
+			{
+				"name": "startedAt",
+				"type": "date"
+			},
+			{
+				"name": "status",
+				"type": "select",
+				"options": [
+					"scheduled",
+					"live",
+					"completed",
+					"cancelled"
+				]
+			},
+			{
+				"name": "teamA",
+				"type": "relationship",
+				"relationTo": "teams"
+			},
+			{
+				"name": "teamB",
+				"type": "relationship",
+				"relationTo": "teams"
+			},
+			{
+				"name": "tombstone",
+				"type": "checkbox",
+				"defaultValue": false
+			},
+			{
+				"name": "winnerEntry",
+				"type": "relationship",
+				"relationTo": "bracket-entries"
+			},
+			{
+				"name": "winnerTeam",
+				"type": "relationship",
+				"relationTo": "teams"
+			}
+		]
+	},
+	{
+		"slug": "media",
+		"timestamps": true,
+		"drafts": false,
+		"auth": false,
+		"upload": true,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "alt",
+				"type": "text"
+			}
+		]
+	},
+	{
+		"slug": "news",
+		"timestamps": true,
+		"drafts": true,
+		"maxPerDoc": 30,
+		"auth": false,
+		"upload": false,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "authors",
+				"type": "relationship",
+				"hasMany": true,
+				"relationTo": "people"
+			},
+			{
+				"name": "body",
+				"type": "textarea"
+			},
+			{
+				"name": "contentResources",
+				"type": "json"
+			},
+			{
+				"name": "cover",
+				"type": "json"
+			},
+			{
+				"name": "description",
+				"type": "textarea"
+			},
+			{
+				"name": "importedAt",
+				"type": "date"
+			},
+			{
+				"name": "importState",
+				"type": "select",
+				"options": [
+					"pending",
+					"complete"
+				]
+			},
+			{
+				"name": "legacyId",
+				"type": "text",
+				"unique": true,
+				"index": true
+			},
+			{
+				"name": "locallyEdited",
+				"type": "checkbox",
+				"defaultValue": true
+			},
+			{
+				"name": "mappingVersion",
+				"type": "text"
+			},
+			{
+				"name": "publishedAt",
+				"type": "date"
+			},
+			{
+				"name": "slug",
+				"type": "text",
+				"required": true,
+				"index": true
+			},
+			{
+				"name": "sourceAssets",
+				"type": "json"
+			},
+			{
+				"name": "sourceFields",
+				"type": "json"
+			},
+			{
+				"name": "sourceHash",
+				"type": "text"
+			},
+			{
+				"name": "sourceOrder",
+				"type": "number",
+				"defaultValue": 0
+			},
+			{
+				"name": "sourcePath",
+				"type": "text"
+			},
+			{
+				"name": "sourceRevision",
+				"type": "text"
+			},
+			{
+				"name": "sourceSequence",
+				"type": "number"
+			},
+			{
+				"name": "sourceSystem",
+				"type": "text"
+			},
+			{
+				"name": "technologies",
+				"type": "relationship",
+				"hasMany": true,
+				"relationTo": "technologies"
+			},
+			{
+				"name": "title",
+				"type": "text"
+			},
+			{
+				"name": "tombstone",
+				"type": "checkbox",
+				"defaultValue": false
+			}
+		]
+	},
+	{
+		"slug": "people",
+		"timestamps": true,
+		"drafts": true,
+		"maxPerDoc": 30,
+		"auth": false,
+		"upload": false,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "avatarUrl",
+				"type": "text"
+			},
+			{
+				"name": "biography",
+				"type": "textarea"
+			},
+			{
+				"name": "bluesky",
+				"type": "text"
+			},
+			{
+				"name": "body",
+				"type": "textarea"
+			},
+			{
+				"name": "contentResources",
+				"type": "json"
+			},
+			{
+				"name": "cover",
+				"type": "json"
+			},
+			{
+				"name": "forename",
+				"type": "text"
+			},
+			{
+				"name": "github",
+				"type": "text"
+			},
+			{
+				"name": "githubHandle",
+				"type": "text"
+			},
+			{
+				"name": "githubUrl",
+				"type": "text"
+			},
+			{
+				"name": "importedAt",
+				"type": "date"
+			},
+			{
+				"name": "importState",
+				"type": "select",
+				"options": [
+					"pending",
+					"complete"
+				]
+			},
+			{
+				"name": "legacyId",
+				"type": "text",
+				"unique": true,
+				"index": true
+			},
+			{
+				"name": "linkedin",
+				"type": "text"
+			},
+			{
+				"name": "links",
+				"type": "array",
+				"fields": [
+					{
+						"name": "name",
+						"type": "text"
+					},
+					{
+						"name": "url",
+						"type": "text"
+					}
+				]
+			},
+			{
+				"name": "locallyEdited",
+				"type": "checkbox",
+				"defaultValue": true
+			},
+			{
+				"name": "mappingVersion",
+				"type": "text"
+			},
+			{
+				"name": "mastodon",
+				"type": "text"
+			},
+			{
+				"name": "name",
+				"type": "text"
+			},
+			{
+				"name": "slug",
+				"type": "text",
+				"required": true,
+				"index": true
+			},
+			{
+				"name": "sourceAssets",
+				"type": "json"
+			},
+			{
+				"name": "sourceFields",
+				"type": "json"
+			},
+			{
+				"name": "sourceHash",
+				"type": "text"
+			},
+			{
+				"name": "sourceOrder",
+				"type": "number",
+				"defaultValue": 0
+			},
+			{
+				"name": "sourcePath",
+				"type": "text"
+			},
+			{
+				"name": "sourceRevision",
+				"type": "text"
+			},
+			{
+				"name": "sourceSequence",
+				"type": "number"
+			},
+			{
+				"name": "sourceSystem",
+				"type": "text"
+			},
+			{
+				"name": "surname",
+				"type": "text"
+			},
+			{
+				"name": "terms",
+				"type": "array",
+				"fields": [
+					{
+						"name": "value",
+						"type": "text"
+					}
+				]
+			},
+			{
+				"name": "tombstone",
+				"type": "checkbox",
+				"defaultValue": false
+			},
+			{
+				"name": "twitter",
+				"type": "text"
+			},
+			{
+				"name": "website",
+				"type": "text"
+			},
+			{
+				"name": "youtube",
+				"type": "text"
+			}
+		]
+	},
+	{
+		"slug": "pipeline-runs",
+		"timestamps": true,
+		"drafts": false,
+		"auth": false,
+		"upload": false,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "approvedRevision",
+				"type": "text"
+			},
+			{
+				"name": "chapters",
+				"type": "json"
+			},
+			{
+				"name": "checksum",
+				"type": "text"
+			},
+			{
+				"name": "generatedRevision",
+				"type": "text"
+			},
+			{
+				"name": "humanEdited",
+				"type": "checkbox",
+				"defaultValue": false
+			},
+			{
+				"name": "key",
+				"type": "text",
+				"required": true,
+				"unique": true
+			},
+			{
+				"name": "manifestKey",
+				"type": "text"
+			},
+			{
+				"name": "media",
+				"type": "relationship",
+				"relationTo": "media",
+				"required": true
+			},
+			{
+				"name": "provider",
+				"type": "select",
+				"options": [
+					"deterministic-fixture"
+				]
+			},
+			{
+				"name": "state",
+				"type": "select",
+				"required": true,
+				"options": [
+					"registered",
+					"processing",
+					"awaiting-review",
+					"approved"
+				]
+			},
+			{
+				"name": "summary",
+				"type": "textarea"
+			},
+			{
+				"name": "transcript",
+				"type": "textarea"
+			},
+			{
+				"name": "transcriptionAttempts",
+				"type": "number"
+			},
+			{
+				"name": "video",
+				"type": "relationship",
+				"relationTo": "videos",
+				"required": true
+			},
+			{
+				"name": "videoVersion",
+				"type": "text"
+			},
+			{
+				"name": "workflowId",
+				"type": "text"
+			}
+		]
+	},
+	{
+		"slug": "registrations",
+		"timestamps": true,
+		"drafts": true,
+		"maxPerDoc": 30,
+		"auth": false,
+		"upload": false,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "bracket",
+				"type": "relationship",
+				"relationTo": "brackets"
+			},
+			{
+				"name": "displayName",
+				"type": "text"
+			},
+			{
+				"name": "email",
+				"type": "text"
+			},
+			{
+				"name": "entryType",
+				"type": "select",
+				"options": [
+					"solo",
+					"team"
+				]
+			},
+			{
+				"name": "importedAt",
+				"type": "date"
+			},
+			{
+				"name": "importState",
+				"type": "select",
+				"options": [
+					"pending",
+					"complete"
+				]
+			},
+			{
+				"name": "legacyId",
+				"type": "text",
+				"unique": true,
+				"index": true
+			},
+			{
+				"name": "locallyEdited",
+				"type": "checkbox",
+				"defaultValue": true
+			},
+			{
+				"name": "mappingVersion",
+				"type": "text"
+			},
+			{
+				"name": "message",
+				"type": "text"
+			},
+			{
+				"name": "preferredSlot",
+				"type": "number"
+			},
+			{
+				"name": "reviewedAt",
+				"type": "date"
+			},
+			{
+				"name": "reviewedByUserId",
+				"type": "text"
+			},
+			{
+				"name": "season",
+				"type": "relationship",
+				"relationTo": "seasons"
+			},
+			{
+				"name": "slug",
+				"type": "text",
+				"required": true,
+				"index": true
+			},
+			{
+				"name": "sourceAssets",
+				"type": "json"
+			},
+			{
+				"name": "sourceBracketId",
+				"type": "text"
+			},
+			{
+				"name": "sourceFields",
+				"type": "json"
+			},
+			{
+				"name": "sourceHash",
+				"type": "text"
+			},
+			{
+				"name": "sourceOrder",
+				"type": "number",
+				"defaultValue": 0
+			},
+			{
+				"name": "sourcePath",
+				"type": "text"
+			},
+			{
+				"name": "sourceRevision",
+				"type": "text"
+			},
+			{
+				"name": "sourceSeasonId",
+				"type": "text"
+			},
+			{
+				"name": "sourceSequence",
+				"type": "number"
+			},
+			{
+				"name": "sourceSystem",
+				"type": "text"
+			},
+			{
+				"name": "status",
+				"type": "select",
+				"options": [
+					"pending",
+					"approved",
+					"rejected"
+				]
+			},
+			{
+				"name": "submittedAt",
+				"type": "date"
+			},
+			{
+				"name": "teamName",
+				"type": "text"
+			},
+			{
+				"name": "tombstone",
+				"type": "checkbox",
+				"defaultValue": false
+			},
+			{
+				"name": "userId",
+				"type": "text"
+			}
+		]
+	},
+	{
+		"slug": "review-comments",
+		"timestamps": false,
+		"drafts": false,
+		"auth": false,
+		"upload": false,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "author",
+				"type": "relationship",
+				"relationTo": "users",
+				"required": true
+			},
+			{
+				"name": "body",
+				"type": "text",
+				"required": true
+			},
+			{
+				"name": "createdAt",
+				"type": "date",
+				"required": true
+			},
+			{
+				"name": "endMs",
+				"type": "number"
+			},
+			{
+				"name": "id",
+				"type": "text",
+				"required": true
+			},
+			{
+				"name": "resolved",
+				"type": "checkbox"
+			},
+			{
+				"name": "resolvedAt",
+				"type": "date"
+			},
+			{
+				"name": "resolvedBy",
+				"type": "relationship",
+				"relationTo": "users"
+			},
+			{
+				"name": "revision",
+				"type": "relationship",
+				"relationTo": "video-revisions",
+				"required": true
+			},
+			{
+				"name": "startMs",
+				"type": "number",
+				"required": true
+			},
+			{
+				"name": "video",
+				"type": "relationship",
+				"relationTo": "videos",
+				"required": true
+			}
+		]
+	},
+	{
+		"slug": "review-decisions",
+		"timestamps": false,
+		"drafts": false,
+		"auth": false,
+		"upload": false,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "author",
+				"type": "relationship",
+				"relationTo": "users",
+				"required": true
+			},
+			{
+				"name": "createdAt",
+				"type": "date",
+				"required": true
+			},
+			{
+				"name": "decision",
+				"type": "text",
+				"required": true
+			},
+			{
+				"name": "deliverableChecksum",
+				"type": "text"
+			},
+			{
+				"name": "grant",
+				"type": "relationship",
+				"relationTo": "review-revision-grants"
+			},
+			{
+				"name": "grantVersion",
+				"type": "number",
+				"required": true
+			},
+			{
+				"name": "id",
+				"type": "text",
+				"required": true
+			},
+			{
+				"name": "note",
+				"type": "textarea"
+			},
+			{
+				"name": "reviewVersion",
+				"type": "number",
+				"required": true
+			},
+			{
+				"name": "revision",
+				"type": "relationship",
+				"relationTo": "video-revisions",
+				"required": true
+			},
+			{
+				"name": "sourceChecksum",
+				"type": "text"
+			},
+			{
+				"name": "video",
+				"type": "relationship",
+				"relationTo": "videos",
+				"required": true
+			}
+		]
+	},
+	{
+		"slug": "review-revision-grants",
+		"timestamps": false,
+		"drafts": false,
+		"auth": false,
+		"upload": false,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "canApprove",
+				"type": "checkbox"
+			},
+			{
+				"name": "expiresAt",
+				"type": "date",
+				"required": true
+			},
+			{
+				"name": "grantedAt",
+				"type": "date",
+				"required": true
+			},
+			{
+				"name": "grantedBy",
+				"type": "relationship",
+				"relationTo": "users"
+			},
+			{
+				"name": "id",
+				"type": "text",
+				"required": true
+			},
+			{
+				"name": "revision",
+				"type": "relationship",
+				"relationTo": "video-revisions",
+				"required": true
+			},
+			{
+				"name": "revokedAt",
+				"type": "date"
+			},
+			{
+				"name": "revokedBy",
+				"type": "relationship",
+				"relationTo": "users"
+			},
+			{
+				"name": "user",
+				"type": "relationship",
+				"relationTo": "users",
+				"required": true
+			},
+			{
+				"name": "version",
+				"type": "number",
+				"required": true
+			},
+			{
+				"name": "video",
+				"type": "relationship",
+				"relationTo": "videos",
+				"required": true
+			}
+		]
+	},
+	{
+		"slug": "seasons",
+		"timestamps": true,
+		"drafts": true,
+		"maxPerDoc": 30,
+		"auth": false,
+		"upload": false,
+		"indexes": [
+			{
+				"unique": true,
+				"fields": [
+					"show",
+					"slug"
+				]
+			},
+			{
+				"unique": true,
+				"fields": [
+					"sourceShowId",
+					"slug"
+				]
+			}
+		],
+		"fields": [
+			{
+				"name": "endDate",
+				"type": "date"
+			},
+			{
+				"name": "importedAt",
+				"type": "date"
+			},
+			{
+				"name": "importState",
+				"type": "select",
+				"options": [
+					"pending",
+					"complete"
+				]
+			},
+			{
+				"name": "legacyId",
+				"type": "text",
+				"unique": true,
+				"index": true
+			},
+			{
+				"name": "locallyEdited",
+				"type": "checkbox",
+				"defaultValue": true
+			},
+			{
+				"name": "mappingVersion",
+				"type": "text"
+			},
+			{
+				"name": "name",
+				"type": "text"
+			},
+			{
+				"name": "show",
+				"type": "relationship",
+				"relationTo": "shows"
+			},
+			{
+				"name": "slug",
+				"type": "text",
+				"required": true,
+				"index": true
+			},
+			{
+				"name": "sourceAssets",
+				"type": "json"
+			},
+			{
+				"name": "sourceCreatedAt",
+				"type": "date"
+			},
+			{
+				"name": "sourceFields",
+				"type": "json"
+			},
+			{
+				"name": "sourceHash",
+				"type": "text"
+			},
+			{
+				"name": "sourceOrder",
+				"type": "number",
+				"defaultValue": 0
+			},
+			{
+				"name": "sourcePath",
+				"type": "text"
+			},
+			{
+				"name": "sourceRevision",
+				"type": "text"
+			},
+			{
+				"name": "sourceSequence",
+				"type": "number"
+			},
+			{
+				"name": "sourceShowId",
+				"type": "text"
+			},
+			{
+				"name": "sourceSystem",
+				"type": "text"
+			},
+			{
+				"name": "sourceUpdatedAt",
+				"type": "date"
+			},
+			{
+				"name": "startDate",
+				"type": "date"
+			},
+			{
+				"name": "status",
+				"type": "select",
+				"options": [
+					"interest",
+					"active",
+					"finished"
+				]
+			},
+			{
+				"name": "tombstone",
+				"type": "checkbox",
+				"defaultValue": false
+			}
+		]
+	},
+	{
+		"slug": "series",
+		"timestamps": true,
+		"drafts": true,
+		"maxPerDoc": 30,
+		"auth": false,
+		"upload": false,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "body",
+				"type": "textarea"
+			},
+			{
+				"name": "contentResources",
+				"type": "json"
+			},
+			{
+				"name": "cover",
+				"type": "json"
+			},
+			{
+				"name": "importedAt",
+				"type": "date"
+			},
+			{
+				"name": "importState",
+				"type": "select",
+				"options": [
+					"pending",
+					"complete"
+				]
+			},
+			{
+				"name": "legacyId",
+				"type": "text",
+				"unique": true,
+				"index": true
+			},
+			{
+				"name": "locallyEdited",
+				"type": "checkbox",
+				"defaultValue": true
+			},
+			{
+				"name": "mappingVersion",
+				"type": "text"
+			},
+			{
+				"name": "slug",
+				"type": "text",
+				"required": true,
+				"index": true
+			},
+			{
+				"name": "sourceAssets",
+				"type": "json"
+			},
+			{
+				"name": "sourceFields",
+				"type": "json"
+			},
+			{
+				"name": "sourceHash",
+				"type": "text"
+			},
+			{
+				"name": "sourceOrder",
+				"type": "number",
+				"defaultValue": 0
+			},
+			{
+				"name": "sourcePath",
+				"type": "text"
+			},
+			{
+				"name": "sourceRevision",
+				"type": "text"
+			},
+			{
+				"name": "sourceSequence",
+				"type": "number"
+			},
+			{
+				"name": "sourceSystem",
+				"type": "text"
+			},
+			{
+				"name": "title",
+				"type": "text"
+			},
+			{
+				"name": "tombstone",
+				"type": "checkbox",
+				"defaultValue": false
+			}
+		]
+	},
+	{
+		"slug": "shows",
+		"timestamps": true,
+		"drafts": true,
+		"maxPerDoc": 30,
+		"auth": false,
+		"upload": false,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "body",
+				"type": "textarea"
+			},
+			{
+				"name": "contentResources",
+				"type": "json"
+			},
+			{
+				"name": "cover",
+				"type": "json"
+			},
+			{
+				"name": "description",
+				"type": "textarea"
+			},
+			{
+				"name": "episodes",
+				"type": "relationship",
+				"hasMany": true,
+				"relationTo": "episodes"
+			},
+			{
+				"name": "gameFormatUrl",
+				"type": "text"
+			},
+			{
+				"name": "hosts",
+				"type": "relationship",
+				"hasMany": true,
+				"relationTo": "people"
+			},
+			{
+				"name": "importedAt",
+				"type": "date"
+			},
+			{
+				"name": "importState",
+				"type": "select",
+				"options": [
+					"pending",
+					"complete"
+				]
+			},
+			{
+				"name": "legacyId",
+				"type": "text",
+				"unique": true,
+				"index": true
+			},
+			{
+				"name": "locallyEdited",
+				"type": "checkbox",
+				"defaultValue": true
+			},
+			{
+				"name": "mappingVersion",
+				"type": "text"
+			},
+			{
+				"name": "name",
+				"type": "text"
+			},
+			{
+				"name": "podcast",
+				"type": "json"
+			},
+			{
+				"name": "slug",
+				"type": "text",
+				"required": true,
+				"index": true
+			},
+			{
+				"name": "sourceAssets",
+				"type": "json"
+			},
+			{
+				"name": "sourceFields",
+				"type": "json"
+			},
+			{
+				"name": "sourceHash",
+				"type": "text"
+			},
+			{
+				"name": "sourceOrder",
+				"type": "number",
+				"defaultValue": 0
+			},
+			{
+				"name": "sourcePath",
+				"type": "text"
+			},
+			{
+				"name": "sourceRevision",
+				"type": "text"
+			},
+			{
+				"name": "sourceSequence",
+				"type": "number"
+			},
+			{
+				"name": "sourceSystem",
+				"type": "text"
+			},
+			{
+				"name": "status",
+				"type": "select",
+				"options": [
+					"coming-soon",
+					"active",
+					"archived"
+				]
+			},
+			{
+				"name": "subscribeLinks",
+				"type": "json"
+			},
+			{
+				"name": "tagline",
+				"type": "text"
+			},
+			{
+				"name": "terms",
+				"type": "array",
+				"fields": [
+					{
+						"name": "value",
+						"type": "text"
+					}
+				]
+			},
+			{
+				"name": "tombstone",
+				"type": "checkbox",
+				"defaultValue": false
+			}
+		]
+	},
+	{
+		"slug": "static-assets",
+		"timestamps": true,
+		"drafts": false,
+		"auth": false,
+		"upload": false,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "alt",
+				"type": "text"
+			},
+			{
+				"name": "bytes",
+				"type": "number"
+			},
+			{
+				"name": "checksum",
+				"type": "text"
+			},
+			{
+				"name": "importedAt",
+				"type": "date"
+			},
+			{
+				"name": "importState",
+				"type": "select",
+				"options": [
+					"pending",
+					"complete"
+				]
+			},
+			{
+				"name": "legacyId",
+				"type": "text",
+				"unique": true,
+				"index": true
+			},
+			{
+				"name": "locallyEdited",
+				"type": "checkbox",
+				"defaultValue": true
+			},
+			{
+				"name": "mappingVersion",
+				"type": "text"
+			},
+			{
+				"name": "mimeType",
+				"type": "text"
+			},
+			{
+				"name": "r2Key",
+				"type": "text"
+			},
+			{
+				"name": "slug",
+				"type": "text",
+				"required": true,
+				"index": true
+			},
+			{
+				"name": "sourceAssets",
+				"type": "json"
+			},
+			{
+				"name": "sourceFields",
+				"type": "json"
+			},
+			{
+				"name": "sourceHash",
+				"type": "text"
+			},
+			{
+				"name": "sourceOrder",
+				"type": "number",
+				"defaultValue": 0
+			},
+			{
+				"name": "sourcePath",
+				"type": "text"
+			},
+			{
+				"name": "sourceRevision",
+				"type": "text"
+			},
+			{
+				"name": "sourceSequence",
+				"type": "number"
+			},
+			{
+				"name": "sourceSystem",
+				"type": "text"
+			},
+			{
+				"name": "tombstone",
+				"type": "checkbox",
+				"defaultValue": false
+			}
+		]
+	},
+	{
+		"slug": "team-invites",
+		"timestamps": true,
+		"drafts": true,
+		"maxPerDoc": 30,
+		"auth": false,
+		"upload": false,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "bracket",
+				"type": "relationship",
+				"relationTo": "brackets"
+			},
+			{
+				"name": "createdByUserId",
+				"type": "text"
+			},
+			{
+				"name": "importedAt",
+				"type": "date"
+			},
+			{
+				"name": "importState",
+				"type": "select",
+				"options": [
+					"pending",
+					"complete"
+				]
+			},
+			{
+				"name": "legacyId",
+				"type": "text",
+				"unique": true,
+				"index": true
+			},
+			{
+				"name": "locallyEdited",
+				"type": "checkbox",
+				"defaultValue": true
+			},
+			{
+				"name": "mappingVersion",
+				"type": "text"
+			},
+			{
+				"name": "revokedAt",
+				"type": "date"
+			},
+			{
+				"name": "slug",
+				"type": "text",
+				"required": true,
+				"index": true
+			},
+			{
+				"name": "sourceAssets",
+				"type": "json"
+			},
+			{
+				"name": "sourceBracketId",
+				"type": "text"
+			},
+			{
+				"name": "sourceCreatedAt",
+				"type": "date"
+			},
+			{
+				"name": "sourceFields",
+				"type": "json"
+			},
+			{
+				"name": "sourceHash",
+				"type": "text"
+			},
+			{
+				"name": "sourceOrder",
+				"type": "number",
+				"defaultValue": 0
+			},
+			{
+				"name": "sourcePath",
+				"type": "text"
+			},
+			{
+				"name": "sourceRevision",
+				"type": "text"
+			},
+			{
+				"name": "sourceSequence",
+				"type": "number"
+			},
+			{
+				"name": "sourceSystem",
+				"type": "text"
+			},
+			{
+				"name": "sourceTeamId",
+				"type": "text"
+			},
+			{
+				"name": "team",
+				"type": "relationship",
+				"relationTo": "teams"
+			},
+			{
+				"name": "token",
+				"type": "text"
+			},
+			{
+				"name": "tombstone",
+				"type": "checkbox",
+				"defaultValue": false
+			}
+		]
+	},
+	{
+		"slug": "team-members",
+		"timestamps": true,
+		"drafts": true,
+		"maxPerDoc": 30,
+		"auth": false,
+		"upload": false,
+		"indexes": [
+			{
+				"unique": true,
+				"fields": [
+					"team",
+					"competitor"
+				]
+			},
+			{
+				"unique": true,
+				"fields": [
+					"bracket",
+					"competitor"
+				]
+			},
+			{
+				"unique": true,
+				"fields": [
+					"sourceTeamId",
+					"sourceCompetitorId"
+				]
+			},
+			{
+				"unique": true,
+				"fields": [
+					"sourceBracketId",
+					"sourceCompetitorId"
+				]
+			}
+		],
+		"fields": [
+			{
+				"name": "bracket",
+				"type": "relationship",
+				"relationTo": "brackets"
+			},
+			{
+				"name": "competitor",
+				"type": "relationship",
+				"relationTo": "competitors"
+			},
+			{
+				"name": "importedAt",
+				"type": "date"
+			},
+			{
+				"name": "importState",
+				"type": "select",
+				"options": [
+					"pending",
+					"complete"
+				]
+			},
+			{
+				"name": "legacyId",
+				"type": "text",
+				"unique": true,
+				"index": true
+			},
+			{
+				"name": "locallyEdited",
+				"type": "checkbox",
+				"defaultValue": true
+			},
+			{
+				"name": "mappingVersion",
+				"type": "text"
+			},
+			{
+				"name": "role",
+				"type": "text"
+			},
+			{
+				"name": "slug",
+				"type": "text",
+				"required": true,
+				"index": true
+			},
+			{
+				"name": "sourceAssets",
+				"type": "json"
+			},
+			{
+				"name": "sourceBracketId",
+				"type": "text"
+			},
+			{
+				"name": "sourceCompetitorId",
+				"type": "text"
+			},
+			{
+				"name": "sourceCreatedAt",
+				"type": "date"
+			},
+			{
+				"name": "sourceFields",
+				"type": "json"
+			},
+			{
+				"name": "sourceHash",
+				"type": "text"
+			},
+			{
+				"name": "sourceOrder",
+				"type": "number",
+				"defaultValue": 0
+			},
+			{
+				"name": "sourcePath",
+				"type": "text"
+			},
+			{
+				"name": "sourceRevision",
+				"type": "text"
+			},
+			{
+				"name": "sourceSequence",
+				"type": "number"
+			},
+			{
+				"name": "sourceSystem",
+				"type": "text"
+			},
+			{
+				"name": "sourceTeamId",
+				"type": "text"
+			},
+			{
+				"name": "team",
+				"type": "relationship",
+				"relationTo": "teams"
+			},
+			{
+				"name": "tombstone",
+				"type": "checkbox",
+				"defaultValue": false
+			}
+		]
+	},
+	{
+		"slug": "teams",
+		"timestamps": true,
+		"drafts": true,
+		"maxPerDoc": 30,
+		"auth": false,
+		"upload": false,
+		"indexes": [
+			{
+				"unique": true,
+				"fields": [
+					"bracket",
+					"slug"
+				]
+			},
+			{
+				"unique": true,
+				"fields": [
+					"sourceBracketId",
+					"slug"
+				]
+			}
+		],
+		"fields": [
+			{
+				"name": "bracket",
+				"type": "relationship",
+				"relationTo": "brackets"
+			},
+			{
+				"name": "importedAt",
+				"type": "date"
+			},
+			{
+				"name": "importState",
+				"type": "select",
+				"options": [
+					"pending",
+					"complete"
+				]
+			},
+			{
+				"name": "legacyId",
+				"type": "text",
+				"unique": true,
+				"index": true
+			},
+			{
+				"name": "locallyEdited",
+				"type": "checkbox",
+				"defaultValue": true
+			},
+			{
+				"name": "mappingVersion",
+				"type": "text"
+			},
+			{
+				"name": "name",
+				"type": "text"
+			},
+			{
+				"name": "season",
+				"type": "relationship",
+				"relationTo": "seasons"
+			},
+			{
+				"name": "slug",
+				"type": "text",
+				"required": true,
+				"index": true
+			},
+			{
+				"name": "sourceAssets",
+				"type": "json"
+			},
+			{
+				"name": "sourceBracketId",
+				"type": "text"
+			},
+			{
+				"name": "sourceCreatedAt",
+				"type": "date"
+			},
+			{
+				"name": "sourceFields",
+				"type": "json"
+			},
+			{
+				"name": "sourceHash",
+				"type": "text"
+			},
+			{
+				"name": "sourceOrder",
+				"type": "number",
+				"defaultValue": 0
+			},
+			{
+				"name": "sourcePath",
+				"type": "text"
+			},
+			{
+				"name": "sourceRevision",
+				"type": "text"
+			},
+			{
+				"name": "sourceSeasonId",
+				"type": "text"
+			},
+			{
+				"name": "sourceSequence",
+				"type": "number"
+			},
+			{
+				"name": "sourceSystem",
+				"type": "text"
+			},
+			{
+				"name": "sourceUpdatedAt",
+				"type": "date"
+			},
+			{
+				"name": "tombstone",
+				"type": "checkbox",
+				"defaultValue": false
+			}
+		]
+	},
+	{
+		"slug": "technologies",
+		"timestamps": true,
+		"drafts": true,
+		"maxPerDoc": 30,
+		"auth": false,
+		"upload": false,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "aliases",
+				"type": "array",
+				"fields": [
+					{
+						"name": "value",
+						"type": "text"
+					}
+				]
+			},
+			{
+				"name": "body",
+				"type": "textarea"
+			},
+			{
+				"name": "category",
+				"type": "text"
+			},
+			{
+				"name": "cncf",
+				"type": "json"
+			},
+			{
+				"name": "community",
+				"type": "json"
+			},
+			{
+				"name": "contentResources",
+				"type": "json"
+			},
+			{
+				"name": "cover",
+				"type": "json"
+			},
+			{
+				"name": "documentation",
+				"type": "text"
+			},
+			{
+				"name": "features",
+				"type": "array",
+				"fields": [
+					{
+						"name": "value",
+						"type": "text"
+					}
+				]
+			},
+			{
+				"name": "icon",
+				"type": "text"
+			},
+			{
+				"name": "importedAt",
+				"type": "date"
+			},
+			{
+				"name": "importState",
+				"type": "select",
+				"options": [
+					"pending",
+					"complete"
+				]
+			},
+			{
+				"name": "learningResources",
+				"type": "relationship",
+				"relationTo": "learning-resources"
+			},
+			{
+				"name": "legacyId",
+				"type": "text",
+				"unique": true,
+				"index": true
+			},
+			{
+				"name": "license",
+				"type": "text"
+			},
+			{
+				"name": "locallyEdited",
+				"type": "checkbox",
+				"defaultValue": true
+			},
+			{
+				"name": "logo",
+				"type": "text"
+			},
+			{
+				"name": "logos",
+				"type": "json"
+			},
+			{
+				"name": "mappingVersion",
+				"type": "text"
+			},
+			{
+				"name": "matrix",
+				"type": "json"
+			},
+			{
+				"name": "name",
+				"type": "text"
+			},
+			{
+				"name": "relatedTechnologies",
+				"type": "array",
+				"fields": [
+					{
+						"name": "value",
+						"type": "text"
+					}
+				]
+			},
+			{
+				"name": "seo",
+				"type": "json"
+			},
+			{
+				"name": "slug",
+				"type": "text",
+				"required": true,
+				"index": true
+			},
+			{
+				"name": "source",
+				"type": "text"
+			},
+			{
+				"name": "sourceAssets",
+				"type": "json"
+			},
+			{
+				"name": "sourceFields",
+				"type": "json"
+			},
+			{
+				"name": "sourceHash",
+				"type": "text"
+			},
+			{
+				"name": "sourceOrder",
+				"type": "number",
+				"defaultValue": 0
+			},
+			{
+				"name": "sourcePath",
+				"type": "text"
+			},
+			{
+				"name": "sourceRevision",
+				"type": "text"
+			},
+			{
+				"name": "sourceSequence",
+				"type": "number"
+			},
+			{
+				"name": "sourceSystem",
+				"type": "text"
+			},
+			{
+				"name": "status",
+				"type": "text"
+			},
+			{
+				"name": "subcategory",
+				"type": "text"
+			},
+			{
+				"name": "terms",
+				"type": "array",
+				"fields": [
+					{
+						"name": "value",
+						"type": "text"
+					}
+				]
+			},
+			{
+				"name": "tombstone",
+				"type": "checkbox",
+				"defaultValue": false
+			},
+			{
+				"name": "useCases",
+				"type": "array",
+				"fields": [
+					{
+						"name": "value",
+						"type": "text"
+					}
+				]
+			},
+			{
+				"name": "website",
+				"type": "text"
+			}
+		]
+	},
+	{
+		"slug": "testimonials",
+		"timestamps": true,
+		"drafts": true,
+		"maxPerDoc": 30,
+		"auth": false,
+		"upload": false,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "author",
+				"type": "json"
+			},
+			{
+				"name": "body",
+				"type": "textarea"
+			},
+			{
+				"name": "contentResources",
+				"type": "json"
+			},
+			{
+				"name": "cover",
+				"type": "json"
+			},
+			{
+				"name": "importedAt",
+				"type": "date"
+			},
+			{
+				"name": "importState",
+				"type": "select",
+				"options": [
+					"pending",
+					"complete"
+				]
+			},
+			{
+				"name": "legacyId",
+				"type": "text",
+				"unique": true,
+				"index": true
+			},
+			{
+				"name": "locallyEdited",
+				"type": "checkbox",
+				"defaultValue": true
+			},
+			{
+				"name": "mappingVersion",
+				"type": "text"
+			},
+			{
+				"name": "quote",
+				"type": "text"
+			},
+			{
+				"name": "slug",
+				"type": "text",
+				"required": true,
+				"index": true
+			},
+			{
+				"name": "sourceAssets",
+				"type": "json"
+			},
+			{
+				"name": "sourceFields",
+				"type": "json"
+			},
+			{
+				"name": "sourceHash",
+				"type": "text"
+			},
+			{
+				"name": "sourceOrder",
+				"type": "number",
+				"defaultValue": 0
+			},
+			{
+				"name": "sourcePath",
+				"type": "text"
+			},
+			{
+				"name": "sourceRevision",
+				"type": "text"
+			},
+			{
+				"name": "sourceSequence",
+				"type": "number"
+			},
+			{
+				"name": "sourceSystem",
+				"type": "text"
+			},
+			{
+				"name": "tombstone",
+				"type": "checkbox",
+				"defaultValue": false
+			},
+			{
+				"name": "type",
+				"type": "select",
+				"options": [
+					"maintainer",
+					"partner",
+					"viewer"
+				]
+			}
+		]
+	},
+	{
+		"slug": "users",
+		"timestamps": true,
+		"drafts": false,
+		"auth": true,
+		"upload": false,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "identityKey",
+				"type": "text",
+				"unique": true,
+				"index": true
+			},
+			{
+				"name": "name",
+				"type": "text"
+			},
+			{
+				"name": "oidcIssuer",
+				"type": "text"
+			},
+			{
+				"name": "oidcSubject",
+				"type": "text"
+			},
+			{
+				"name": "profileEmail",
+				"type": "email"
+			},
+			{
+				"name": "role",
+				"type": "select",
+				"required": true,
+				"defaultValue": "customer",
+				"options": [
+					"customer",
+					"staff"
+				]
+			}
+		]
+	},
+	{
+		"slug": "video-publications",
+		"timestamps": false,
+		"drafts": false,
+		"auth": false,
+		"upload": false,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "document",
+				"type": "json",
+				"required": true
+			},
+			{
+				"name": "id",
+				"type": "number",
+				"required": true
+			}
+		]
+	},
+	{
+		"slug": "video-review-grants",
+		"timestamps": false,
+		"drafts": false,
+		"auth": false,
+		"upload": false,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "active",
+				"type": "checkbox"
+			},
+			{
+				"name": "canApprove",
+				"type": "checkbox"
+			},
+			{
+				"name": "id",
+				"type": "text",
+				"required": true
+			},
+			{
+				"name": "user",
+				"type": "relationship",
+				"relationTo": "users",
+				"required": true
+			},
+			{
+				"name": "version",
+				"type": "number",
+				"required": true
+			},
+			{
+				"name": "video",
+				"type": "relationship",
+				"relationTo": "videos",
+				"required": true
+			}
+		]
+	},
+	{
+		"slug": "video-revisions",
+		"timestamps": false,
+		"drafts": false,
+		"auth": false,
+		"upload": false,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "checksum",
+				"type": "text",
+				"required": true
+			},
+			{
+				"name": "createdAt",
+				"type": "date",
+				"required": true
+			},
+			{
+				"name": "createdBy",
+				"type": "relationship",
+				"relationTo": "users",
+				"required": true
+			},
+			{
+				"name": "deliverableChecksum",
+				"type": "text",
+				"required": true
+			},
+			{
+				"name": "deliverableMedia",
+				"type": "relationship",
+				"relationTo": "media",
+				"required": true
+			},
+			{
+				"name": "durationMs",
+				"type": "number",
+				"required": true
+			},
+			{
+				"name": "id",
+				"type": "text",
+				"required": true
+			},
+			{
+				"name": "media",
+				"type": "relationship",
+				"relationTo": "media",
+				"required": true
+			},
+			{
+				"name": "metadata",
+				"type": "json",
+				"required": true
+			},
+			{
+				"name": "reviewVersion",
+				"type": "number",
+				"required": true
+			},
+			{
+				"name": "state",
+				"type": "text",
+				"required": true
+			},
+			{
+				"name": "video",
+				"type": "relationship",
+				"relationTo": "videos",
+				"required": true
+			}
+		]
+	},
+	{
+		"slug": "videos",
+		"timestamps": true,
+		"drafts": true,
+		"maxPerDoc": 30,
+		"auth": false,
+		"upload": false,
+		"indexes": [],
+		"fields": [
+			{
+				"name": "approvalRevision",
+				"type": "text"
+			},
+			{
+				"name": "audioFileSize",
+				"type": "number"
+			},
+			{
+				"name": "body",
+				"type": "textarea"
+			},
+			{
+				"name": "category",
+				"type": "select",
+				"options": [
+					"announcement",
+					"editorial",
+					"interview",
+					"review",
+					"tutorial"
+				]
+			},
+			{
+				"name": "chapters",
+				"type": "relationship",
+				"hasMany": true,
+				"relationTo": "chapters"
+			},
+			{
+				"name": "contentResources",
+				"type": "json"
+			},
+			{
+				"name": "cover",
+				"type": "json"
+			},
+			{
+				"name": "description",
+				"type": "textarea"
+			},
+			{
+				"name": "duration",
+				"type": "number"
+			},
+			{
+				"name": "episode",
+				"type": "relationship",
+				"relationTo": "episodes"
+			},
+			{
+				"name": "guests",
+				"type": "relationship",
+				"hasMany": true,
+				"relationTo": "people"
+			},
+			{
+				"name": "importedAt",
+				"type": "date"
+			},
+			{
+				"name": "importState",
+				"type": "select",
+				"options": [
+					"pending",
+					"complete"
+				]
+			},
+			{
+				"name": "locallyEdited",
+				"type": "checkbox",
+				"defaultValue": true
+			},
+			{
+				"name": "mappingVersion",
+				"type": "text"
+			},
+			{
+				"name": "mediaChecksum",
+				"type": "text"
+			},
+			{
+				"name": "mediaReference",
+				"type": "text"
+			},
+			{
+				"name": "mediaVersion",
+				"type": "text"
+			},
+			{
+				"name": "podcast",
+				"type": "json"
+			},
+			{
+				"name": "processingRun",
+				"type": "text"
+			},
+			{
+				"name": "processingState",
+				"type": "select",
+				"options": [
+					"processing",
+					"awaiting-review",
+					"published"
+				]
+			},
+			{
+				"name": "publishedAt",
+				"type": "date"
+			},
+			{
+				"name": "realtimeKit",
+				"type": "json"
+			},
+			{
+				"name": "show",
+				"type": "relationship",
+				"relationTo": "shows"
+			},
+			{
+				"name": "slug",
+				"type": "text",
+				"required": true,
+				"index": true
+			},
+			{
+				"name": "sourceAssets",
+				"type": "json"
+			},
+			{
+				"name": "sourceFields",
+				"type": "json"
+			},
+			{
+				"name": "sourceHash",
+				"type": "text"
+			},
+			{
+				"name": "sourceOrder",
+				"type": "number",
+				"defaultValue": 0
+			},
+			{
+				"name": "sourcePath",
+				"type": "text"
+			},
+			{
+				"name": "sourceRevision",
+				"type": "text"
+			},
+			{
+				"name": "sourceSequence",
+				"type": "number"
+			},
+			{
+				"name": "sourceSystem",
+				"type": "text"
+			},
+			{
+				"name": "streamUrl",
+				"type": "text"
+			},
+			{
+				"name": "subscribeLinks",
+				"type": "json"
+			},
+			{
+				"name": "subtitle",
+				"type": "text"
+			},
+			{
+				"name": "summary",
+				"type": "textarea"
+			},
+			{
+				"name": "tagline",
+				"type": "text"
+			},
+			{
+				"name": "technologies",
+				"type": "relationship",
+				"hasMany": true,
+				"relationTo": "technologies"
+			},
+			{
+				"name": "terms",
+				"type": "array",
+				"fields": [
+					{
+						"name": "value",
+						"type": "text"
+					}
+				]
+			},
+			{
+				"name": "thumbnailUrl",
+				"type": "text"
+			},
+			{
+				"name": "title",
+				"type": "text"
+			},
+			{
+				"name": "tombstone",
+				"type": "checkbox",
+				"defaultValue": false
+			},
+			{
+				"name": "transcript",
+				"type": "textarea"
+			},
+			{
+				"name": "type",
+				"type": "select",
+				"options": [
+					"live",
+					"recorded"
+				]
+			},
+			{
+				"name": "whatYouWillLearn",
+				"type": "array",
+				"fields": [
+					{
+						"name": "value",
+						"type": "text"
+					}
+				]
+			},
+			{
+				"name": "youtubeId",
+				"type": "text"
+			}
+		]
+	}
 ]

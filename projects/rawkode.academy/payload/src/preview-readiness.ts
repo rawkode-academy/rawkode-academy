@@ -130,7 +130,7 @@ export async function cmsPreviewReadiness(
 		}
 		d2Save = {
 			articleSlug: d2Slug,
-			articleId: String(savedArticle.id),
+			articleId: String((savedArticle as Record<string, unknown>).id),
 			articleStatus: String((savedArticle as Record<string, unknown>)._status ?? 'draft'),
 			sourceHash,
 			svgChecksum: d2Checksum,
@@ -142,7 +142,7 @@ export async function cmsPreviewReadiness(
 			d2SaveCapability: d2RendererAvailable ? 'available' : 'unavailable',
 			...(d2Save ? { d2Save } : {}),
 			scheduledVideo: {
-				id: String(savedVideo.id),
+				id: String((savedVideo as Record<string, unknown>).id),
 				slug: videoSlug,
 				title: videoData.title,
 				publishedAt,
