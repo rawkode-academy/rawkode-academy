@@ -127,7 +127,7 @@ test("Feeds SSR preserves all twelve format destinations and only published podc
 	const podcasts = dom.querySelector('section[aria-labelledby="show-feeds"]');
 	assert.deepEqual(
 		podcasts.querySelectorAll("a").map((link) => link.getAttribute("href")),
-		["/api/feeds/shows/first-show.xml", "/api/feeds/shows/second-show.xml"],
+		["/api/feeds/shows/first-show.xml", "/api/feeds/shows/tools-and-systems.xml"],
 	);
 	assert.deepEqual(
 		podcasts.querySelectorAll("h3").map((heading) => heading.text),

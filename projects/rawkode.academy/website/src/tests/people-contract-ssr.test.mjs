@@ -59,6 +59,9 @@ async function render(path, props, collections = {}) {
 		"@/components/html/person-jsonld.astro": { default: runtime.createComponent((_result, props) => {
 			jsonLdProps.push(props); return runtime.render``;
 		}) },
+		// CMS body rendering has its own safety/renderer contracts. Keep these
+		// people identity and publication tests independent of the body registry.
+		"@/components/content/CmsBody.astro": { default: empty },
 		"@/components/show/ShowCard.astro": { default: runtime.createComponent((_result, props) => {
 			showProps.push(props.show); return runtime.render`<h3>${props.show.name}</h3>`;
 		}) },

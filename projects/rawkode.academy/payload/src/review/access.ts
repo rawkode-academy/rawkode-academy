@@ -76,7 +76,7 @@ export class ReviewAccess {
     if (actor.role === 'staff') return this.store.all<ReviewListRow>(
       `SELECT s.video_id AS videoId,r.id AS revisionId,r.metadata,${teamState('r')} AS state,r.review_version AS reviewVersion
        FROM video_review_state s JOIN video_revisions r ON r.id=s.current_revision
-       WHERE s.video_id>? ORDER BY s.video_id LIMIT 51`, after)
+       WHERE s.video_id>? ORDER BY s.video_id LIMIT 51`, after ?? '')
     const at = this.at()
     // One row per video: the caller's newest shared revision, with a deterministic tie-break.
     return this.store.all<ReviewListRow>(
@@ -84,7 +84,7 @@ export class ReviewAccess {
        FROM (SELECT DISTINCT video_id FROM review_revision_grants WHERE user_id=? AND revoked_at IS NULL AND expires_at>? AND video_id>?) g
        JOIN video_revisions r ON r.id=(SELECT g2.revision_id FROM review_revision_grants g2 JOIN video_revisions r2 ON r2.id=g2.revision_id
          WHERE g2.video_id=g.video_id AND g2.user_id=? AND ${active('g2')} ORDER BY r2.created_at DESC,r2.id DESC LIMIT 1)
-       ORDER BY g.video_id LIMIT 51`, actor.id, actor.id, at, after, actor.id, at)
+       ORDER BY g.video_id LIMIT 51`, actor.id, actor.id, at, after ?? '', actor.id, at)
   }
   // Distinct customers holding an unrevoked, unexpired grant on any revision of
   // the video. The fragment binds one parameter: the current timestamp.

@@ -94,13 +94,7 @@ async function select(videos, showEntry = show, video = current) {
 				return fixtures.getEntry(collection, id);
 			},
 			getPayloadCollectionPage: async (collection, options) => {
-				const result = await fixtures.getPayloadCollectionPage(collection, options);
-				result.docs.sort(
-					(a, b) =>
-						new Date(b.data.publishedAt).getTime() -
-						new Date(a.data.publishedAt).getTime(),
-				);
-				return result;
+				return fixtures.getPayloadCollectionPage(collection, options);
 			},
 		},
 	);

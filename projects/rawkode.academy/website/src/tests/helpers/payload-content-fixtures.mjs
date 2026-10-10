@@ -52,6 +52,30 @@ export function createPayloadContentFixtures(collections = {}, { now = new Date(
 		}
 		return true;
 	};
+	const compareStableOrder = (collection, left, right) => {
+		const dateField = {
+			videos: "publishedAt",
+			articles: "publishedAt",
+			news: "publishedAt",
+			courses: "publishedAt",
+			"learning-paths": "publishedAt",
+			adrs: "adoptedAt",
+			changelog: "date",
+		}[collection];
+		if (dateField) {
+			const leftDate = Date.parse(left.data?.[dateField] ?? "") || 0;
+			const rightDate = Date.parse(right.data?.[dateField] ?? "") || 0;
+			if (leftDate !== rightDate) return rightDate - leftDate;
+		}
+
+		const leftOrder = Number(left.sourceOrder ?? left.data?.sourceOrder);
+		const rightOrder = Number(right.sourceOrder ?? right.data?.sourceOrder);
+		if (Number.isFinite(leftOrder) && Number.isFinite(rightOrder) && leftOrder !== rightOrder) {
+			return leftOrder - rightOrder;
+		}
+		return String(left.slug ?? "").localeCompare(String(right.slug ?? "")) ||
+			String(left.id ?? "").localeCompare(String(right.id ?? ""));
+	};
 	const resolve = (collection, lookup) => {
 		if (typeof lookup === "string") {
 			// Plain strings are preserved slugs; relationship CUIDs are explicit
@@ -76,7 +100,9 @@ export function createPayloadContentFixtures(collections = {}, { now = new Date(
 		const page = Math.max(1, Math.floor(options.page ?? 1));
 		const limit = Math.max(1, Math.min(100, Math.floor(options.limit ?? 50)));
 		calls.push({ kind: "page", collection, options: { ...options, page, limit } });
-		const matching = records(collection).filter((entry) => matchesOptions(collection, entry, options));
+		const matching = records(collection)
+			.filter((entry) => matchesOptions(collection, entry, options))
+			.sort((left, right) => compareStableOrder(collection, left, right));
 		const start = (page - 1) * limit;
 		return {
 			docs: matching.slice(start, start + limit),

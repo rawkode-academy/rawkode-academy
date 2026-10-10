@@ -9,6 +9,7 @@ import ts from "typescript";
 import * as runtime from "astro/runtime/server/index.js";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import { parse } from "node-html-parser";
+import { createPayloadContentFixtures } from "./helpers/payload-content-fixtures.mjs";
 
 const styles = new Proxy({}, { get: (_, slot) => `related-${String(slot)}` });
 const runtimeSource = readFileSync(
@@ -44,12 +45,10 @@ async function render(file, props, collections = {}) {
 	);
 	const compiled = await transform(input, { filename: file });
 	assert.deepEqual(compiled.diagnostics, []);
+	const payload = createPayloadContentFixtures(collections);
 	const mocks = {
 		"astro/runtime/server/index.js": { ...runtime, createMetadata: () => ({}) },
-		"@/lib/payload-content": {
-			getCollection: async (name, filter) =>
-				(collections[name] ?? []).filter(filter ?? (() => true)),
-		},
+		"@/lib/payload-content": payload,
 		"@rawkodeacademy/design-system": {
 			academyRelatedContent: () => styles,
 			academyCatalog: () => styles,
@@ -198,7 +197,8 @@ const guardCode = ts.transpileModule(
 function pageHasTopicContent(collections, technologyId = "kubernetes/index") {
 	return vm.runInNewContext(`${guardCode}\nhasTopicContent;`, {
 		isNewsPublished: publicationModule.namespace.isNewsPublished,
-		technology: { id: technologyId },
+		technologyEntry: { id: technologyId, slug: technologyId },
+		technology: { id: technologyId, slug: technologyId },
 		articles: [],
 		news: [],
 		learningPaths: [],

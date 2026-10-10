@@ -126,7 +126,7 @@ test('staff intake binds immutable assets, creates one revision and publishes on
   await h.review.execute(staff, cmd('publish', { revisionId: row.id, expectedReviewVersion: 1, decisionId: decision.decisionId }))
   assert.equal(h.sqlite.prepare('SELECT object_key FROM review_publication_events').get()?.object_key, asset.object_key)
   assert.throws(() => h.sqlite.exec('UPDATE review_intake_assets SET bytes=1'), /immutable/)
-  assert.throws(() => h.sqlite.exec(`UPDATE media SET filename='changed' WHERE id=${asset.media_id}`), /immutable/)
+  assert.throws(() => h.sqlite.prepare("UPDATE media SET filename='changed' WHERE id=?").run(asset.media_id), /immutable/)
   assert.throws(() => h.sqlite.exec('DELETE FROM review_intake_assets'), /retained/)
   assert.deepEqual(h.sqlite.prepare('PRAGMA foreign_key_check').all(), [])
   assert.equal(JSON.stringify(await h.intake.read(staff, s.sessionId)).includes('review-intake/'), false)
@@ -245,9 +245,9 @@ test('cross-video/source pairing and replacement before playback or publication 
 
 test('empty migration rollback succeeds and any intake record blocks destructive downgrade', async t => {
   const empty = await harness(t), populated = await harness(t)
-  await migrations.find(m => m.name === '20261005_180000_review_intake')!.down(empty.args)
+  await migrations.find(m => m.name === 'cuid2_20261005_180000_review_intake')!.down(empty.args)
   await populated.begin()
-  await assert.rejects(migrations.find(m => m.name === '20261005_180000_review_intake')!.down(populated.args), /CHECK constraint/)
+  await assert.rejects(migrations.find(m => m.name === 'cuid2_20261005_180000_review_intake')!.down(populated.args), /CHECK constraint/)
   assert.equal(populated.sqlite.prepare('SELECT count(*) n FROM review_upload_sessions').get()?.n, 1)
 })
 
@@ -425,7 +425,7 @@ test('Container protocol uses only the machine binding and bounds provider JSON'
 })
 
 test('legacy processing sessions without admission fail closed and processing migration preserves session data', async t => {
-  const h = await harness(t), s = await h.uploaded(), migration = migrations.find(m => m.name === '20261005_200000_review_jobs')!
+  const h = await harness(t), s = await h.uploaded(), migration = migrations.find(m => m.name === 'cuid2_20261005_200000_review_jobs')!
   await migration.down(h.args)
   h.sqlite.prepare("UPDATE review_upload_sessions SET state='processing' WHERE id=?").run(s.sessionId)
   await migration.up(h.args)
