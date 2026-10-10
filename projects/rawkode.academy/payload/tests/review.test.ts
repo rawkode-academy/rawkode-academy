@@ -346,7 +346,7 @@ test('review list exposes only active customer grants and safe summary fields', 
 
 test('review list paginates by stable video ID without skipping customer grants', async t => {
   const h = await harness(t)
-  const ids = Array.from({ length: 51 }, () => createCuid2())
+  const ids = Array.from({ length: 51 }, () => createCuid2()).sort()
   for (const [index, id] of ids.entries()) {
     h.sqlite.prepare('INSERT INTO videos(id,slug,title,_status) VALUES(?,?,?,?)').run(id, `video-${index}`, 'Review', 'draft')
     const revision = await h.service.execute(staff, command('create-revision', { videoId: id, mediaId: SOURCE_MEDIA_ID, deliverableMediaId: DELIVERABLE_MEDIA_ID, metadata }))

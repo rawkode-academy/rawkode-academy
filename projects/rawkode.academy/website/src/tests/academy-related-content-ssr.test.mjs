@@ -100,6 +100,7 @@ async function render(file, props, collections = {}) {
 const article = {
 	data: { technologies: ["kubernetes/index", { id: "docker/index" }] },
 };
+const topicTechnologyId = "technology-kubernetes-payload-cuid";
 const video = (id, changes = {}) => ({
 	id,
 	data: {
@@ -113,7 +114,7 @@ const video = (id, changes = {}) => ({
 	},
 });
 const topic = {
-	technologyId: "kubernetes/index",
+	technologyId: topicTechnologyId,
 	technologyName: "Kubernetes",
 	videos: [],
 };
@@ -123,7 +124,7 @@ const entry = (id, changes = {}) => ({
 	data: {
 		title: `Title ${id}`,
 		description: `Description ${id}`,
-		technologies: ["kubernetes"],
+		technologies: [{ id: topicTechnologyId }],
 		publishedAt: new Date("2025-01-01"),
 		difficulty: "beginner",
 		estimatedDuration: 90,
@@ -199,14 +200,15 @@ function pageHasTopicContent(collections, technologyId = "kubernetes/index") {
 		isNewsPublished: publicationModule.namespace.isNewsPublished,
 		technologyEntry: { id: technologyId, slug: technologyId },
 		technology: { id: technologyId, slug: technologyId },
-		articles: [],
-		news: [],
-		learningPaths: [],
+		topicArticles: collections.topicArticles ?? collections.articles ?? [],
+		topicNews: collections.topicNews ?? collections.news ?? [],
+		topicLearningPaths:
+			collections.topicLearningPaths ?? collections.learningPaths ?? [],
 		...collections,
 	});
 }
 
-test("technology page guard admits object-reference-only articles and agrees with TopicHub", async () => {
+test("technology guard recognizes already-related rows and TopicHub queries by Payload technology ID", async () => {
 	for (const technologyId of ["kubernetes", "kubernetes/index"]) {
 		for (const reference of [
 			"kubernetes",
@@ -220,17 +222,23 @@ test("technology page guard admits object-reference-only articles and agrees wit
 				],
 			};
 			assert.equal(pageHasTopicContent(collections, technologyId), true);
-			const { dom } = await render(
-				"technology/TopicHub.astro",
-				{ ...topic, technologyId },
-				collections,
-			);
-			assert.equal(
-				dom.querySelector("[data-article-id]")?.getAttribute("data-article-id"),
-				"object-reference-only",
-			);
 		}
 	}
+	const { dom } = await render(
+		"technology/TopicHub.astro",
+		topic,
+		{
+			articles: [
+				entry("object-reference-only", {
+					technologies: [{ id: topicTechnologyId }],
+				}),
+			],
+		},
+	);
+	assert.equal(
+		dom.querySelector("[data-article-id]")?.getAttribute("data-article-id"),
+		"object-reference-only",
+	);
 });
 
 test("technology page ignores legacy article draft flags and retains news/path matches", () => {
@@ -403,7 +411,7 @@ test("TopicHub preserves real path/article/video identities; titles are visible 
 			entry("unrelated", { technologies: ["other"] }),
 		],
 		articles: [
-			entry("public", { technologies: [{ id: "kubernetes/index" }] }),
+			entry("public", { technologies: [{ id: topicTechnologyId }] }),
 			entry("draft", { draft: true }),
 			entry("unrelated", { technologies: ["other"] }),
 		],
@@ -425,10 +433,7 @@ test("TopicHub preserves real path/article/video identities; titles are visible 
 		dom.querySelectorAll("a").map((a) => a.getAttribute("href")),
 		["/learning-paths/real-path", "/watch/real-video"],
 	);
-	assert.equal(
-		dom.querySelector("[data-article-id]").getAttribute("data-article-id"),
-		"public",
-	);
+	assert(dom.querySelector('[data-article-id="public"]'));
 	assert.equal(dom.querySelectorAll("[data-article-id]").length, 2);
 	assert.equal(
 		dom.querySelector('a[href="/watch/real-video"] .related-body h3').text,

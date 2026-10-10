@@ -277,7 +277,12 @@ test("archive filters future/draft data, sorts preview, preserves authored cover
 		);
 		assert.equal(metadata.itemListElement[0].item.numberOfEpisodes, 2);
 		assert.equal(metadata.numberOfItems, 1);
-		assert(h.payloadCalls.some((call) => call.kind === "all" && call.collection === "videos" && call.options.showId === entry.id));
+		assert(
+			h.payloadCalls.some(
+				(call) => call.kind === "all" && call.collection === "videos",
+			),
+			"show directory reads the complete video corpus for accurate counts/latest episodes",
+		);
 	}
 });
 

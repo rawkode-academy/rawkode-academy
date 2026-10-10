@@ -28,7 +28,7 @@ const story = (id, data = {}) => ({ id, data: {
 } });
 
 async function render(path, props, collections = {}) {
-	const context = vm.createContext({ console, URL });
+	const context = vm.createContext({ console, URL, Request, Response });
 	const pageProps = [], showProps = [], jsonLdProps = [];
 	const payload = createPayloadContentFixtures(collections);
 	const empty = runtime.createComponent(() => runtime.render``);
@@ -97,7 +97,11 @@ async function render(path, props, collections = {}) {
 	const module = await load(path);
 	await module.evaluate();
 	const container = await AstroContainer.create();
-	const html = await container.renderToString(module.namespace.default, { props, request: new Request("https://academy.test/people/person") });
+	const html = await container.renderToString(module.namespace.default, {
+		props,
+		params: path === "pages/people/[id].astro" ? { id: props.person?.slug } : {},
+		request: new Request("https://academy.test/people/person"),
+	});
 	return { dom: parse(html), html, pageProps, showProps, jsonLdProps, payloadCalls: payload.calls };
 }
 const renderPerson = (entry, collections = {}) => render("pages/people/[id].astro", { person: entry }, { people: [entry], ...collections });
