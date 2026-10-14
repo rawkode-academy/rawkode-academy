@@ -138,6 +138,26 @@ const expectNoUpsert = () => {
 		expect(callMethod(call)).not.toBe("PUT");
 	}
 };
+const providerRejection = (code: string, message: string, status: number) =>
+	jsonResponse({ code, message }, status);
+const expectSanitizedFallback = (
+	result: Record<string, unknown>,
+	code: string,
+	logged: { mock: { calls: unknown[][] } },
+	secrets: readonly string[],
+	loggedMarkers: readonly string[] = [],
+) => {
+	expect(result).toEqual({ success: false, fallback: "mailto", code });
+	const loggedText = JSON.stringify(logged.mock.calls);
+	expect(loggedText).toContain(code);
+	for (const marker of loggedMarkers) {
+		expect(loggedText).toContain(marker);
+	}
+	const visible = `${JSON.stringify(result)}\n${loggedText}`;
+	for (const secret of secrets) {
+		expect(visible).not.toContain(secret);
+	}
+};
 
 beforeEach(() => {
 	attioApiKey = "attio-test-key";
@@ -497,6 +517,75 @@ describe("partnership Attio action", () => {
 		expect(loggedText).toContain("400");
 		expect(loggedText).not.toContain("ada@analytical.engine");
 		expect(loggedText).not.toContain("domains filter rejected");
+		expect(fetch).toHaveBeenCalledOnce();
+	});
+
+	it.each([
+		["company", 1],
+		["person", 3],
+	] as const)("returns crm_write_failed when the %s record write is rejected", async (_record, failingCall) => {
+		const logged = vi.spyOn(console, "error").mockImplementation(() => {});
+		const responses = [
+			emptyQuery(),
+			recordResponse("company-id"),
+			emptyQuery(),
+			recordResponse("person-id"),
+		];
+		responses[failingCall] = providerRejection(
+			"validation_type",
+			`rejected ${input.email}`,
+			422,
+		);
+		for (const response of responses.slice(0, failingCall + 1)) {
+			vi.mocked(fetch).mockResolvedValueOnce(response);
+		}
+
+		const result = await apply.handler(input, context);
+
+		expectSanitizedFallback(
+			result,
+			"crm_write_failed",
+			logged,
+			[input.email, "rejected"],
+			["validation_type", "422"],
+		);
+		expect(fetch).toHaveBeenCalledTimes(failingCall + 1);
+	});
+
+	it("returns crm_note_failed when the enquiry note is rejected", async () => {
+		const logged = vi.spyOn(console, "error").mockImplementation(() => {});
+		mockCreatedPath({
+			note: providerRejection(
+				"unauthorized",
+				`note included ${input.message}`,
+				403,
+			),
+		});
+
+		const result = await apply.handler(input, context);
+
+		expectSanitizedFallback(
+			result,
+			"crm_note_failed",
+			logged,
+			[input.message, "note included"],
+			["unauthorized", "403"],
+		);
+		expect(callUrl(vi.mocked(fetch).mock.calls.at(-1)!)).toBe(NOTES);
+	});
+
+	it("returns crm_unavailable when Attio cannot be reached", async () => {
+		const logged = vi.spyOn(console, "error").mockImplementation(() => {});
+		vi.mocked(fetch).mockRejectedValueOnce(
+			new Error(`socket hang up for ${input.email}`),
+		);
+
+		const result = await apply.handler(input, context);
+
+		expectSanitizedFallback(result, "crm_unavailable", logged, [
+			input.email,
+			"socket hang up",
+		]);
 		expect(fetch).toHaveBeenCalledOnce();
 	});
 
