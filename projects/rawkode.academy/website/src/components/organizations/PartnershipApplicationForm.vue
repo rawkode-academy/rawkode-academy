@@ -1,7 +1,7 @@
 <template>
 	<div :class="s.root">
 		<p role="status" aria-live="polite" aria-atomic="true" :class="ready ? s.hidden : s.copy">{{ statusMessage }}</p>
-		<p :id="errorId" role="alert" aria-atomic="true" :class="error ? s.error : s.hidden">{{ error }}</p>
+		<p :id="errorId" role="alert" aria-atomic="true" :class="error ? s.error : s.hidden" :data-error-code="errorCode || undefined">{{ error }}</p>
 		<p v-if="fallback" :class="s.copy">
 			<a :href="fallbackMailto">Email David directly</a> with the details you entered.
 		</p>
@@ -190,6 +190,7 @@ const submitted = ref(false);
 const formStarted = ref(false);
 const fallback = ref(false);
 const error = ref("");
+const errorCode = ref("");
 const fieldErrors = ref<Record<string, string>>({
 	...props.serverFieldErrors,
 });
@@ -280,6 +281,7 @@ const onSubmit = (event: Event) => {
 async function submit() {
 	if (!ready.value || loading.value) return;
 	error.value = "";
+	errorCode.value = "";
 	fieldErrors.value = {};
 	fallback.value = false;
 	loading.value = true;
@@ -316,6 +318,12 @@ async function submit() {
 				"Too many enquiries were sent recently. Please wait a minute and try again.";
 		} else {
 			fallback.value = true;
+			errorCode.value =
+				result.data &&
+				"code" in result.data &&
+				typeof result.data.code === "string"
+					? result.data.code
+					: "";
 			error.value =
 				"Something went wrong, so your enquiry wasn't sent. Please email David directly.";
 		}

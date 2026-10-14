@@ -54,6 +54,13 @@ const enquiryFallback =
 	submittedData != null &&
 	"fallback" in submittedData &&
 	submittedData.fallback === "mailto";
+const enquiryErrorCode =
+	enquiryFallback &&
+	submittedData != null &&
+	"code" in submittedData &&
+	typeof submittedData.code === "string"
+		? submittedData.code
+		: undefined;
 const enquiryError = submittedEnquiry?.error;
 const enquiryFields = ["name", "email", "company", "path", "message"] as const;
 const serverFieldErrors =
@@ -477,7 +484,7 @@ const partnerQuotes = (
 				) : (
 					<>
 						{enquiryRateLimited && <p role="alert">Too many enquiries were sent recently. Please wait a minute and try again.</p>}
-						{enquiryFallback && <p role="alert">Something went wrong, so your enquiry wasn't sent. Please <a href={`mailto:${PARTNERSHIP_EMAIL}`}>email me directly</a>.</p>}
+						{enquiryFallback && <p role="alert" data-error-code={enquiryErrorCode}>Something went wrong, so your enquiry wasn't sent. Please <a href={`mailto:${PARTNERSHIP_EMAIL}`}>email me directly</a>.</p>}
 						{submittedEnquiry?.error && <p role="alert">Please check the highlighted fields.</p>}
 						<PartnershipApplicationForm client:visible initialPath={initialPath} submittedValues={submittedValues} serverFieldErrors={serverFieldErrors} />
 					</>
