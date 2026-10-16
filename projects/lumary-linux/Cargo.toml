@@ -1,0 +1,14 @@
+[package]
+name = "lumary-linux"
+version = "0.1.0"
+edition = "2024"
+description = "A native GPUI feature explorer inspired by Lumary"
+license = "Apache-2.0"
+
+[dependencies]
+gpui = { git = "https://github.com/zed-industries/zed", rev = "28d0a3547f16b9609b301b48ab363bfca649c864", default-features = false }
+gpui_platform = { git = "https://github.com/zed-industries/zed", rev = "28d0a3547f16b9609b301b48ab363bfca649c864", default-features = false, features = ["wayland", "x11"] }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
