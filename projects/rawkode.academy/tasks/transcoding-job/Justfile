@@ -6,6 +6,13 @@ project := "rawkode-academy-production"
 repository := "rawkode-academy"
 image_name := "platform/transcoding-job"
 image_url := registry + "/" + project + "/" + repository + "/" + image_name
+region := "europe-west2"
+job := "transcoding-job"
+# Sized for a two hour 720p Studio recording; see README.md. Cloud Run's
+# filesystem is memory-backed, so memory covers the files on disk too.
+task_timeout := "10800s"
+cpu := "8"
+memory := "32Gi"
 
 # Default recipe
 default:
@@ -23,6 +30,16 @@ push tag="latest":
 deploy tag="latest":
     @just build {{tag}}
     @just push {{tag}}
+
+# Apply the job's explicit resources and task timeout (studio-recording-ingest
+# also sends the same timeout as a per-execution override). The retry count is
+# left as configured: every output mode is safe to retry.
+configure-job:
+    gcloud run jobs update {{job}} --project={{project}} --region={{region}} --cpu={{cpu}} --memory={{memory}} --task-timeout={{task_timeout}}
+
+# Show the job's current resources and timeout
+describe-job:
+    gcloud run jobs describe {{job}} --project={{project}} --region={{region}} --format="yaml(spec.template.spec.template.spec)"
 
 # Configure Docker to use gcloud for authentication
 auth:

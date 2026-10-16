@@ -91,6 +91,8 @@ tasks: {
 			"package.json",
 			"src/**",
 			"wrangler.jsonc",
+			// machine-auth.test.ts checks Studio's signing vector against Payload's verifier.
+			"../rawkode.academy/payload/src/machine-auth.ts",
 		]
 	}
 

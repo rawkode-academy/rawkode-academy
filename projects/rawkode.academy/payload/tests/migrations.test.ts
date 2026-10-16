@@ -5,6 +5,8 @@ import test from 'node:test'
 import { sql, type MigrateUpArgs } from '@payloadcms/db-d1-sqlite'
 import { migrations } from '../src/migrations'
 import * as enforce from '../src/pending-migrations/20261009_160000_review_revision_grants_enforce'
+import * as studioAdoptions from '../src/migrations/20261009_140000_studio_adoptions'
+import { harness } from './helpers/review-harness'
 
 // Run real migrations with FK enforcement held on, as in D1. SQLite ignores
 // foreign_keys changes inside a transaction. Deferred checks do not defer
@@ -196,10 +198,13 @@ test('revision grant migrations go up, down and up again on an empty review sche
   await enforce.up(args)
   await enforce.down(args)
   assert.deepEqual(schema(), expanded)
-  await migrations.at(-1)!.down(args)
+  // Later migrations are rolled back first, as payload migrate:down would.
+  const grants = migrations.findIndex(migration => migration.name === '20261009_130000_review_revision_grants')
+  for (const migration of migrations.slice(grants + 1).reverse()) await migration.down(args)
+  await migrations[grants]!.down(args)
   assert.equal(sqlite.prepare("SELECT count(*) AS n FROM pragma_table_info('review_decisions') WHERE name IN ('grant_id','source_checksum','deliverable_checksum')").get()?.n, 0, 'DROP COLUMN removes the pin columns')
   assert.equal(sqlite.prepare("SELECT count(*) AS n FROM sqlite_master WHERE name='review_decision_update'").get()?.n, 1)
-  await migrations.at(-1)!.up(args)
+  for (const migration of migrations.slice(grants)) await migration.up(args)
   await enforce.up(args)
   assert.deepEqual(sqlite.prepare('PRAGMA foreign_key_check').all(), [])
 })
@@ -253,6 +258,46 @@ test('revision grant expand keeps old-Worker window decisions publishable and mi
   assert.equal(legacy(3)?.active, 0)
   assert.deepEqual({ ...grant('r1', 3) }, expired, 'the expired grant is neither revoked nor re-versioned')
   assert.deepEqual(sqlite.prepare('PRAGMA foreign_key_check').all(), [])
+})
+
+test('studio adoption tables are immutable, append-only and roll back only when empty', async t => {
+  const h = await harness(t)
+  const { sqlite } = h
+  const names = (type: string) => sqlite.prepare("SELECT name FROM sqlite_master WHERE type=? AND (name LIKE 'review_studio_%') ORDER BY name").all(type).map(row => String(row.name))
+  assert.deepEqual(names('table'), ['review_studio_adoptions', 'review_studio_assets'])
+  assert.deepEqual(names('index').filter(name => name.endsWith('_idx')), ['review_studio_adoptions_state_idx', 'review_studio_adoptions_video_idx', 'review_studio_assets_video_idx'])
+  assert.deepEqual(names('trigger'), [...studioAdoptions.studioAdoptionTriggers].sort())
+  const migrationArgs = h.migrationArgs
+  // Empty: down and up again leave the same schema.
+  const schema = () => sqlite.prepare("SELECT type,name,sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY type,name").all()
+  const before = schema()
+  await studioAdoptions.down(migrationArgs)
+  assert.equal(names('table').length, 0)
+  await studioAdoptions.up(migrationArgs)
+  assert.deepEqual(schema(), before)
+  const adoption = (id: string, extra = '') => `INSERT INTO review_studio_adoptions(id,idempotency_key,input_hash,video_id,legacy_video_id,studio_session_id,recording_id,source_bucket,source_key,source_etag,source_bytes,source_format,review_prefix,metadata,actor_id,revision_command,state,created_at,updated_at) VALUES('${id}','key-${id}','hash',10,'stable-video','s','${id}','rawkode-academy-content','studio/recordings/s/${id}/source.webm','etag',10,'webm','studio/recordings/s/${id}/review/','{}',1,'command-${id}','awaiting-transcode',1,1)${extra}`
+  sqlite.exec(adoption('a1'))
+  const fails = (statement: string, pattern: RegExp) => assert.throws(() => sqlite.exec(statement), pattern)
+  for (const column of ["idempotency_key='x'", "source_etag='other'", 'video_id=11', "review_prefix='x/'", "metadata='[]'", 'actor_id=2', "revision_command='x'", 'created_at=2']) fails(`UPDATE review_studio_adoptions SET ${column} WHERE id='a1'`, /identity is immutable/)
+  sqlite.exec("UPDATE review_studio_adoptions SET state='failed',error='boom',status_etag='s1' WHERE id='a1'")
+  sqlite.exec("UPDATE review_studio_adoptions SET state='awaiting-transcode',error=NULL,expected_current_revision='r0' WHERE id='a1'")
+  fails("UPDATE review_studio_adoptions SET state='attached' WHERE id='a1'", /CHECK constraint failed/)
+  fails("UPDATE review_studio_adoptions SET state='superseded' WHERE id='a1'", /CHECK constraint failed/)
+  fails("UPDATE review_studio_adoptions SET revision_id='r1' WHERE id='a1'", /transition is not allowed|CHECK constraint failed/)
+  sqlite.exec(`INSERT INTO video_revisions(id,video_id,media_id,checksum,deliverable_media_id,deliverable_checksum,duration_ms,review_version,state,metadata,created_by_id,created_at) VALUES('r1',10,20,'a',21,'b',1000,1,'ready','{}',1,'2026-10-09T00:00:00.000Z')`)
+  sqlite.exec("UPDATE review_studio_adoptions SET state='attached',revision_id='r1' WHERE id='a1'")
+  fails("UPDATE review_studio_adoptions SET state='failed',revision_id=NULL WHERE id='a1'", /transition is not allowed/)
+  fails("UPDATE review_studio_adoptions SET updated_at=99 WHERE id='a1'", /transition is not allowed/)
+  fails("DELETE FROM review_studio_adoptions WHERE id='a1'", /retained/)
+  fails(`INSERT INTO review_studio_assets(media_id,adoption_id,video_id,kind,bucket,object_key,object_etag,checksum,bytes,content_type) VALUES(22,'a1',10,NULL,'b','k','e','c',1,'video/mp4')`, /NOT NULL constraint failed/)
+  sqlite.exec(`INSERT INTO review_studio_assets(media_id,adoption_id,video_id,kind,bucket,object_key,object_etag,checksum,bytes,content_type) VALUES(22,'a1',10,'source','b','k','e','c',1,'video/webm')`)
+  fails("UPDATE review_studio_assets SET checksum='x' WHERE media_id=22", /immutable/)
+  fails('DELETE FROM review_studio_assets WHERE media_id=22', /retained/)
+  fails("UPDATE media SET filename='other' WHERE id=22", /Studio media are immutable/)
+  fails('DELETE FROM media WHERE id=22', /Studio media are retained/)
+  sqlite.exec("UPDATE media SET filename='still-mutable.mp4' WHERE id=20")
+  await assert.rejects(studioAdoptions.down(migrationArgs), /CHECK constraint failed/)
+  assert.equal(names('table').length, 2, 'a refused rollback keeps every adoption')
 })
 
 // payload migrate (deploy.migrate and migratePreview) applies every .ts file in

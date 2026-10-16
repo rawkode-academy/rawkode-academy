@@ -33,6 +33,18 @@
       "binding": "R2",
       "bucket_name": "rawkode-academy-payload",
       "remote": false
+    },
+    {
+      "binding": "STUDIO_CONTENT",
+      "bucket_name": "rawkode-academy-content",
+      "remote": false
+    }
+  ],
+  "secrets_store_secrets": [
+    {
+      "binding": "STUDIO_MACHINE_SECRET",
+      "store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
+      "secret_name": "STUDIO_MACHINE_SECRET"
     }
   ],
   "workflows": [
@@ -63,7 +75,8 @@
     "DEVELOPER_SUBJECTS": "[\"HmYDQjc3JVFo7visJIL5FneGFzNAJjDT\"]",
     "OIDC_SESSION_TTL_SECONDS": "3600",
     "POC_DEV_LOCAL_AUTH": "false",
-    "REVIEW_MEDIA_RECIPE": "ab74d9377bb060d7c2ceb17990b99a60ba0b3f0cb86cb0a60f4dba977a394fbe"
+    "REVIEW_MEDIA_RECIPE": "ab74d9377bb060d7c2ceb17990b99a60ba0b3f0cb86cb0a60f4dba977a394fbe",
+    "STUDIO_CONTENT_BUCKET_NAME": "rawkode-academy-content"
   },
   "previews": {
     "workflows": [

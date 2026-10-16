@@ -5,8 +5,14 @@ import { reviewFailure, videoIdFrom } from '../../../../../src/review/http'
 import { mediaResponse } from '../../../../../src/review/media'
 export async function GET(request: Request) {
   try {
-    const { service, actor, payload, bucket, assets } = await reviewRuntime(request)
+    const { service, actor, payload, bucket, assets, studioAssets, studioContent } = await reviewRuntime(request)
     const revision = await service.revision(videoIdFrom(request), new URL(request.url).searchParams.get('revisionId') ?? '', actor)
+    // Studio deliverables are read in place from the private Studio prefix of the content bucket.
+    const studio = await studioAssets?.resolve(revision.deliverable_media_id, revision.video_id, 'deliverable')
+    if (studio && studioContent) {
+      if (studio.checksum !== revision.deliverable_checksum) throw new ReviewError(409, 'Review deliverable changed')
+      return await mediaResponse(request, studioContent, studio.object_key, false, { etag: studio.object_etag, bytes: studio.bytes, contentType: studio.content_type })
+    }
     const asset = await assets.resolve(revision.deliverable_media_id, revision.video_id, 'deliverable')
     if (asset) {
       if (asset.checksum !== revision.deliverable_checksum) throw new ReviewError(409, 'Review deliverable changed')

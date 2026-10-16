@@ -1,9 +1,10 @@
 /// <reference types="node" />
 import { readFileSync } from "node:fs";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
 	assertReadyMarker,
 	assertReadyMarkerPathContract,
+	assertSourceBucket,
 	createEventId,
 	createReadyMarkerKey,
 	createRecordingPrefix,
@@ -20,6 +21,8 @@ import {
 } from "../src/main.js";
 import {
 	requireCloudRunOperationName,
+	runTranscodingJob,
+	transcodingTaskTimeout,
 	type CloudRunConfig,
 } from "../src/google.js";
 
@@ -699,3 +702,183 @@ function createRecordingsMock(marker: StudioRecordingReadyMarker) {
 	} as unknown as R2Bucket;
 	return { bucket, writes };
 }
+
+// Byte-identical with STUDIO_REVIEW_STATUS_FIXTURE in
+// projects/rawkode.academy/payload/src/review/studio-contracts.ts and the transcoder's
+// utilities/status_test.ts.
+const STUDIO_REVIEW_STATUS_FIXTURE = `{
+  "status": "complete",
+  "videoId": "video-1",
+  "studioSessionId": "session-1",
+  "recordingId": "recording-1",
+  "sourceBucket": "rawkode-academy-content",
+  "sourceKey": "studio/recordings/session-1/recording-1/source.webm",
+  "sourceEtag": "source-etag-1",
+  "sourceFormat": "webm",
+  "outputPrefix": "studio/recordings/session-1/recording-1/review/",
+  "completedAt": "2026-10-09T12:00:00.000Z",
+  "outputMode": "review-proxy",
+  "review": {
+    "key": "studio/recordings/session-1/recording-1/review/transcoding-job-x7k2p-a0/review.mp4",
+    "etag": "review-etag-1",
+    "bytes": 1048576,
+    "sha256": "4f8b42c22dd3729b519ba6f68d2da7cc5b2d606d05daed5ad5128cc03e6c6358",
+    "durationMs": 61000,
+    "contentType": "video/mp4"
+  }
+}`;
+
+const readyKey = "studio/recordings/session-1/recording-1/ready.json";
+
+function createReviewMarker(
+	overrides: Record<string, unknown> = {},
+): StudioRecordingReadyMarker {
+	return {
+		...createReadyMarker(),
+		contractVersion: 2,
+		visibility: "review",
+		outputMode: "review-proxy",
+		transcodeAttempt: 0,
+		outputPrefix: "studio/recordings/session-1/recording-1/review/",
+		...overrides,
+	} as StudioRecordingReadyMarker;
+}
+
+function createApprovedMarker(): StudioRecordingReadyMarker {
+	return {
+		...createReadyMarker(),
+		contractVersion: 2,
+		visibility: "public",
+		outputMode: "hls-approved",
+		transcodeAttempt: 0,
+	};
+}
+
+describe("studio recording ready marker contract v2", () => {
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
+	it("accepts a review marker only under the recording's private review prefix", () => {
+		const marker = createReviewMarker();
+		expect(() => assertReadyMarker(marker)).not.toThrow();
+		expect(() => assertReadyMarkerPathContract(marker, readyKey)).not.toThrow();
+		expect(() =>
+			assertReadyMarkerPathContract(
+				createReviewMarker({ outputPrefix: "videos/video-1/" }),
+				readyKey,
+			)
+		).toThrow("outputPrefix must be studio/recordings/session-1/recording-1/review/");
+		const fixture = JSON.parse(STUDIO_REVIEW_STATUS_FIXTURE) as {
+			outputMode: string;
+			outputPrefix: string;
+			review: { key: string };
+		};
+		expect(fixture.outputPrefix).toBe(createReviewMarker().outputPrefix);
+		expect(fixture.outputMode).toBe("review-proxy");
+		expect(fixture.review.key.startsWith(fixture.outputPrefix)).toBe(true);
+	});
+
+	it("rejects v2 markers without a valid mode or attempt", () => {
+		const rejects = (overrides: Record<string, unknown>) =>
+			expect(() => assertReadyMarker(createReviewMarker(overrides))).toThrow();
+		rejects({ outputMode: undefined });
+		rejects({ visibility: "public" });
+		rejects({ outputMode: "hls" });
+		rejects({ transcodeAttempt: -1 });
+		rejects({ transcodeAttempt: 11 });
+		rejects({ transcodeAttempt: 1.5 });
+		rejects({ transcodeAttempt: "1" });
+		rejects({ contractVersion: 3 });
+	});
+
+	it("keeps v1 unchanged and sends approved promotions to the public prefix", () => {
+		const v1 = createReadyMarker();
+		expect(() => assertReadyMarker(v1)).not.toThrow();
+		expect(() => assertReadyMarkerPathContract(v1, readyKey)).not.toThrow();
+		expect(createTranscodeStatus(v1, { status: "queued" })).not.toHaveProperty("outputMode");
+		const approved = createApprovedMarker();
+		expect(() => assertReadyMarker(approved)).not.toThrow();
+		expect(() => assertReadyMarkerPathContract(approved, readyKey)).not.toThrow();
+		expect(() =>
+			assertReadyMarkerPathContract(
+				{ ...approved, outputPrefix: "studio/recordings/session-1/recording-1/review/" },
+				readyKey,
+			)
+		).toThrow("outputPrefix must be videos/video-1/");
+		expect(createTranscodeStatus(approved, { status: "queued" }).outputMode).toBe("hls-approved");
+		expect(createTranscodeStatus(createReviewMarker(), { status: "queued" }).outputMode).toBe("review-proxy");
+	});
+
+	it("rejects markers that name another source bucket", () => {
+		expect(() => assertSourceBucket(createReadyMarker(), "content")).not.toThrow();
+		expect(() => assertSourceBucket(createReadyMarker(), "rawkode-academy-content")).toThrow(
+			"sourceBucket must be rawkode-academy-content",
+		);
+		expect(() => assertSourceBucket(createReadyMarker(), undefined)).not.toThrow();
+	});
+
+	it("refuses a foreign source bucket before writing status or triggering Cloud Run", async () => {
+		const db = createDbMock();
+		const recordings = createRecordingsMock(createReviewMarker());
+		let runs = 0;
+		await expect(
+			handleR2Event(
+				{ ...createEnv(db.db, recordings.bucket), RECORDINGS_BUCKET_NAME: "rawkode-academy-content" },
+				createReadyEvent(),
+				{ runTranscodingJob: async () => { runs += 1; return "operations/x"; } },
+			),
+		).rejects.toThrow("sourceBucket must be rawkode-academy-content");
+		expect(runs).toBe(0);
+		expect(recordings.writes).toHaveLength(0);
+	});
+
+	it("writes the review status under the private prefix and triggers review-proxy", async () => {
+		const db = createDbMock();
+		const marker = createReviewMarker();
+		const recordings = createRecordingsMock(marker);
+		await handleR2Event(createEnv(db.db, recordings.bucket), createReadyEvent(), {
+			runTranscodingJob: async () => "operations/transcode-2",
+		});
+		expect(recordings.writes[0]?.key).toBe(
+			"studio/recordings/session-1/recording-1/review/transcode-status.json",
+		);
+		expect(JSON.parse(recordings.writes[0]?.value ?? "{}")).toMatchObject({
+			status: "queued",
+			outputMode: "review-proxy",
+			outputPrefix: "studio/recordings/session-1/recording-1/review/",
+			sourceEtag: "abc123",
+		});
+	});
+
+	it("passes OUTPUT_MODE and an explicit task timeout to Cloud Run", async () => {
+		const keys = (await crypto.subtle.generateKey(
+			{ name: "RSASSA-PKCS1-v1_5", modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: "SHA-256" },
+			true,
+			["sign", "verify"],
+		)) as CryptoKeyPair;
+		const pkcs8 = new Uint8Array((await crypto.subtle.exportKey("pkcs8", keys.privateKey)) as ArrayBuffer);
+		const pem = `-----BEGIN PRIVATE KEY-----\n${btoa(String.fromCharCode(...pkcs8))}\n-----END PRIVATE KEY-----`;
+		const bodies: Array<{ overrides: { timeout: string; containerOverrides: Array<{ env: Array<{ name: string; value: string }> }> } }> = [];
+		vi.stubGlobal("fetch", async (url: string, init: RequestInit) => {
+			if (url.includes("oauth2")) return Response.json({ access_token: "token" });
+			bodies.push(JSON.parse(String(init.body)));
+			return Response.json({ name: `operations/${bodies.length}` });
+		});
+		const config: CloudRunConfig = { jobName: "transcoding-job", location: "europe-west2", projectId: "p", serviceAccount: { client_email: "a@b", private_key: pem } };
+		for (const marker of [createReadyMarker(), createReviewMarker(), createApprovedMarker()]) {
+			await runTranscodingJob(config, marker);
+		}
+		const modes = bodies.map((body) =>
+			body.overrides.containerOverrides[0]?.env.find((entry) => entry.name === "OUTPUT_MODE")?.value
+		);
+		expect(modes).toEqual(["hls", "review-proxy", "hls-approved"]);
+		expect(bodies.every((body) => body.overrides.timeout === transcodingTaskTimeout)).toBe(true);
+		expect(transcodingTaskTimeout).toBe("10800s");
+	});
+
+	it("ships the content bucket name for the source bucket check", () => {
+		const wrangler = JSON.parse(readFileSync("wrangler.jsonc", "utf8")) as { vars: Record<string, string> };
+		expect(wrangler.vars.RECORDINGS_BUCKET_NAME).toBe("rawkode-academy-content");
+	});
+});

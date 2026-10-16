@@ -1,7 +1,7 @@
 {
 	"$schema": "./node_modules/wrangler/config-schema.json",
 	"name": "rawkode-academy-studio",
-	"main": "@astrojs/cloudflare/entrypoints/server",
+	"main": "./src/worker.ts",
 	"compatibility_date": "2026-06-05",
 	"compatibility_flags": ["nodejs_compat"],
 	"assets": {
@@ -21,6 +21,15 @@
 			"destinations": ["grafana-logs"]
 		}
 	},
+	"triggers": {
+		"crons": ["*/5 * * * *"]
+	},
+	"services": [
+		{
+			"binding": "PAYLOAD",
+			"service": "rawkode-academy-payload"
+		}
+	],
 	"routes": [
 		{
 			"pattern": "rawkode.studio",
@@ -59,6 +68,7 @@
 		"CLOUDFLARE_ACCOUNT_ID": "0aeb879de8e3cdde5fb3d413025222ce",
 		"RAWKODE_GRAPHQL_URL": "https://api.rawkode.academy/",
 		"RECORDINGS_BUCKET_NAME": "rawkode-academy-content",
+		"PAYLOAD_HANDOFF_URL": "https://admin.rawkode.academy/api/studio-handoff/adoptions",
 		"STUDIO_OPERATOR_GITHUB_HANDLES": "rawkode",
 		"REALTIMEKIT_HOST_PRESET": "rawkode-studio-host",
 		"REALTIMEKIT_PRODUCER_PRESET": "rawkode-studio-producer",
@@ -80,6 +90,11 @@
 			"binding": "CLOUDFLARE_STREAM_API_TOKEN",
 			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
 			"secret_name": "CLOUDFLARE_STREAM_API_TOKEN"
+		},
+		{
+			"binding": "STUDIO_MACHINE_SECRET",
+			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
+			"secret_name": "STUDIO_MACHINE_SECRET"
 		}
 	]
 }

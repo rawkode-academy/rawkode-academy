@@ -156,6 +156,21 @@ The official `@payloadcms/plugin-mcp` configuration was built and exercised in w
 
 The installed package remains pinned for reproduction, but `src/optional-mcp.ts` has no runtime import of it. To reproduce only in this disposable local environment, stop preview, run `node scripts/enable-mcp.mjs --enable`, build/preview, then `npm run test:mcp`. Disable again with `node scripts/enable-mcp.mjs` and rebuild. The schema includes unused MCP evaluation tables. Never infer MCP support from installation or a successful build.
 
+## Studio handoff and machine authentication
+
+Rawkode Studio hands a `reviewRequired` recording to review without a browser. Studio calls `POST /api/studio-handoff/adoptions` (adopt) and `GET /api/studio-handoff/adoptions?adoptionId=` (status) over its `PAYLOAD` service binding to this Worker's default entrypoint. Payload adopts the private `studio/recordings/{session}/{recording}/` source and the transcoder's `review/{execution}/review.mp4` in place through a read-only `STUDIO_CONTENT` facade (head and get only), records an adoption row, and creates the revision as the system principal `system:rawkode-studio` once the deliverable is verified. Adopted revisions are never auto-granted; staff share them as usual. Staff see stuck or unpublished adoptions at `GET /api/review/studio-adoptions`. Every status call re-reads the transcoder's `review/transcode-status.json`; a `queued` or `running` status more than 4 hours old (the task timeout is 3 hours) is reported as `failed`, so Studio re-triggers a transcode that was killed without writing a terminal status. Neither route is in the preview bridge table.
+
+A Studio revision publishes to `https://content.rawkode.academy/videos/{legacyId}/stream.m3u8`. Its review.mp4 stays private and `published-media` refuses to serve it; Studio's cron sees the publication and promotes the approved source to public HLS, without the raw source or `original.mkv`.
+
+Every Studio-to-Payload call, including the broadcast-time calls planned for workstream F, uses one scheme implemented in `src/machine-auth.ts`:
+
+- HMAC-SHA256 with `STUDIO_MACHINE_SECRET`, one Cloudflare Secrets Store secret (store `492e5e40b9d64ebeac7e7a77db91ff6e`) bound by both Workers.
+- The canonical string is the scheme name, method, a route path constant fixed by the receiving route (never `request.url`, so OpenNext rewrites cannot change it), the sorted query, the principal, the unix timestamp, the `Idempotency-Key` header and the body's sha256, joined by newlines. The signature is sent as `x-rawkode-signature: v1=<hex>` with `x-rawkode-principal` and `x-rawkode-timestamp`.
+- A request older or newer than 300 seconds is refused. Every non-GET request needs an `Idempotency-Key`, which is signed, and the endpoint must make a repeated key return the original result, so a replay inside the window changes nothing.
+- The endpoints answer 503 when the secret or bindings are absent (PR previews), 401 for a bad, expired or cookie-bearing request, and 413 above 16 KiB.
+
+To add an endpoint, pick a path constant, call `verifyMachineRequest` with it and the principal before doing any work, and make the operation idempotent on the key. `MACHINE_AUTH_TEST_VECTOR` must stay byte-identical with Studio's client in `projects/rawkode.studio/src/server/machine-auth.ts`.
+
 ## Verification and migration gates
 
 `evidence/verification.json` records the original catalogue run; [OIDC verification](evidence/oidc-verification.json) records the current auth changes and fresh regression results. `npm test` covers semantic GraphQL and OIDC protocol tests. `npm run test:worker` covers actual Worker/D1/R2 catalogue integration and requires the explicit local staff fallback. `test:oidc:worker` exercises the OIDC-only default with locally seeded sessions. `test:worker` is the integration-only subset; `demo:mutations` is its alias and creates disposable synthetic data. `test:pipeline` covers native Workflow retry, review and approval. `test:admin` logs in, creates/edits a draft and confirms reload persistence in Chrome; its screenshot is `evidence/admin-edit-view.png`. Repeated tests add uniquely named fixture records to local state.

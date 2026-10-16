@@ -1,6 +1,6 @@
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro/zod";
-import { env } from "cloudflare:workers";
+import { env, waitUntil } from "cloudflare:workers";
 import type { StudioEnv } from "../env";
 import {
 	confirmStudioStream,
@@ -12,6 +12,7 @@ import {
 	startStudioStream,
 	StudioOperationError,
 	stopStudioStream,
+	withdrawStudioReviewRecording,
 } from "../server/operations";
 
 const isoDateTime = z.string().refine((value) => !Number.isNaN(Date.parse(value)), {
@@ -78,6 +79,10 @@ export const server = {
 				show: optionalText,
 				startsAt: optionalIsoDateTime,
 				streamEnvironment: z.enum(["test", "prod"]).default("test"),
+				reviewRequired: z.preprocess(
+					(value) => value === "on" || value === "true" || value === true,
+					z.boolean(),
+				).optional(),
 				title: optionalText,
 				videoId: optionalText,
 			})
@@ -199,7 +204,26 @@ export const server = {
 			const user = requireUser(context);
 			const studioEnv = env as StudioEnv;
 			try {
-				return await markStudioRecordingReady(studioEnv, user, input);
+				return await markStudioRecordingReady(studioEnv, user, input, {
+					defer: (promise) => waitUntil(promise),
+				});
+			} catch (error) {
+				toActionError(error);
+			}
+		},
+	}),
+
+	withdrawReviewRecording: defineAction({
+		accept: "form",
+		input: z.object({
+			recordingId: z.string().min(1),
+			sessionId: z.string().min(1),
+		}),
+		handler: async (input, context) => {
+			const user = requireUser(context);
+			const studioEnv = env as StudioEnv;
+			try {
+				return await withdrawStudioReviewRecording(studioEnv, user, input);
 			} catch (error) {
 				toActionError(error);
 			}

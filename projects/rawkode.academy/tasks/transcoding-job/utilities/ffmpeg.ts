@@ -55,6 +55,21 @@ export const getResolution = (localFile: string): Promise<Resolution> => {
   });
 };
 
+export const getDurationMs = (localFile: string): Promise<number> => {
+  return new Promise((resolve, reject) => {
+    ffmpeg.ffprobe(localFile, (err: Error | null, metadata: FfprobeData) => {
+      if (err) {
+        return reject(err);
+      }
+      const seconds = Number(metadata.format?.duration);
+      if (!Number.isFinite(seconds) || seconds <= 0) {
+        return reject(new Error(`Could not read the duration of ${localFile}`));
+      }
+      resolve(Math.round(seconds * 1000));
+    });
+  });
+};
+
 export const generateMasterPlaylist = (transcodeResults: TranscodeResult[]) => {
   const playlist = [
     "#EXTM3U",

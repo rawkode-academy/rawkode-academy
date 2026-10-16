@@ -1,5 +1,6 @@
 import * as reviewThumbnails from './20261007_140000_review_thumbnails';
 import * as reviewRevisionGrants from './20261009_130000_review_revision_grants';
+import * as studioAdoptions from './20261009_140000_studio_adoptions';
 import * as reviewJobs from './20261005_200000_review_jobs';
 import * as reviewIntake from './20261005_180000_review_intake';
 import * as migration_20261005_120000_video_review from './20261005_120000_video_review';
@@ -70,4 +71,5 @@ export const migrations = [
   { up: reviewJobs.up, down: reviewJobs.down, name: '20261005_200000_review_jobs' },
   { up: reviewThumbnails.up, down: reviewThumbnails.down, name: '20261007_140000_review_thumbnails' },
   { up: reviewRevisionGrants.up, down: reviewRevisionGrants.down, name: '20261009_130000_review_revision_grants' },
+  { up: studioAdoptions.up, down: studioAdoptions.down, name: '20261009_140000_studio_adoptions' },
 ];

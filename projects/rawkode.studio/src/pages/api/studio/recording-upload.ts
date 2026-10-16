@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { env } from "cloudflare:workers";
+import { env, waitUntil } from "cloudflare:workers";
 import type { StudioEnv } from "../../../env";
 import {
 	json,
@@ -71,6 +71,7 @@ export const POST: APIRoute = async ({ locals, request }) => {
 					sourceFormat,
 					uploadId: body.uploadId,
 				},
+				{ defer: (promise) => waitUntil(promise) },
 			);
 			return json(result);
 		}
