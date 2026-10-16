@@ -497,14 +497,18 @@ test("partnership CRM fallback keeps the form and offers a prefilled email", asy
 			.querySelector("[name=name]")
 			.dispatchEvent(new window.Event("focusin", { bubbles: true }));
 		view.host.querySelector("form").requestSubmit();
-		respond({ data: { success: false, fallback: "mailto" } });
+		respond({
+			data: { success: false, fallback: "mailto", code: "crm_lookup_failed" },
+		});
 		await flush();
 
 		assert(view.host.querySelector("form"));
+		const alert = view.host.querySelector("[role=alert]");
 		assert.match(
-			view.host.querySelector("[role=alert]").textContent,
+			alert.textContent,
 			/Something went wrong, so your enquiry wasn't sent\. Please email David directly\./,
 		);
+		assert.equal(alert.getAttribute("data-error-code"), "crm_lookup_failed");
 		const fallback = view.host.querySelector(
 			'a[href^="mailto:david@rawkode.academy"]',
 		);
