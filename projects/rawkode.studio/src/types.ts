@@ -99,6 +99,7 @@ export interface StudioLayer {
 
 export interface ScenePreset {
   id: string;
+  isCustom?: boolean;
   name: string;
   layerIds: string[];
   layout?: SceneLayout;
@@ -119,13 +120,20 @@ export interface LowerThirdDraft {
   comment: string;
 }
 
+export interface StudioAudioMixControl {
+  gain: number;
+  muted: boolean;
+}
+
 export interface ActiveSceneStinger {
   effect: SceneSwitchEffect;
   fromSceneId: string;
+  generation?: number;
   toSceneId: string;
 }
 
 export interface ActiveOverlay {
+  generation?: number;
   layerId: string;
   lifecycle: OverlayLifecycle;
   phase: "entering" | "visible" | "exiting";
@@ -134,6 +142,8 @@ export interface ActiveOverlay {
 export interface StudioState {
   resolution: CanvasResolution;
   activeScreenShareSourceId: string;
+  audioMix: Record<string, StudioAudioMixControl>;
+  onStageSourceIds: string[];
   phase: StudioPhase;
   sources: StudioSource[];
   scenes: StudioScene[];
@@ -145,6 +155,7 @@ export interface StudioState {
   lowerThird: LowerThirdDraft;
   activeOverlays: Record<string, ActiveOverlay>;
   activeStinger?: ActiveSceneStinger;
+  lifecycleGeneration?: number;
   lastHookId?: string;
   isPlaying: boolean;
   isRecording: boolean;

@@ -16,6 +16,9 @@ devenv.local.nix
 node_modules
 dist
 
+# Astro generated types and content cache
+.astro/
+
 # Rust
 target
 

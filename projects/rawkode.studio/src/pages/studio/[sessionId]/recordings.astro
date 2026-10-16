@@ -27,16 +27,30 @@ const recordings = await listStudioRecordings(env, session.id);
 const publicVodUrl = getStudioSessionWatchUrl(session);
 ---
 
-<StudioLayout title={`Recordings ${session.title} | Rawkode Studio`} active="recordings">
+<StudioLayout title={`Canonical recording ${session.title} | Rawkode Studio`} active="recordings">
 	<section class="role-panel">
-		<p class="eyebrow">Recording handoff</p>
+		<p class="eyebrow">Canonical VOD recording</p>
 		<h1>{session.title}</h1>
-		<p>
-			Recordings publish a ready marker at <code>{readyMarkerKey}</code> before
-			the R2 event notification enqueues transcoding.
-		</p>
+		{
+			session.streamEnvironment === "test" ? (
+				<p>
+					Test-mode recordings stay in the browser and download as a local WebM.
+					This session cannot create an R2 upload, ready marker, or canonical VOD claim.
+				</p>
+			) : (
+				<p>
+					The first prod recording permanently claims this content video. Its ready
+					marker is <code>{readyMarkerKey}</code>; only an exact immutable retry of
+					the same recording and source is accepted.
+				</p>
+			)
+		}
 		<div class="recording-contract">
 			<dl>
+				<div>
+					<dt>MODE</dt>
+					<dd>{session.streamEnvironment === "test" ? "local-only test" : "one canonical prod VOD"}</dd>
+				</div>
 				<div>
 					<dt>SESSION_ID</dt>
 					<dd>{session.id}</dd>
@@ -69,10 +83,14 @@ const publicVodUrl = getStudioSessionWatchUrl(session);
 		</div>
 	</section>
 
-	<section class="recording-list" aria-label="Studio recordings">
+	<section class="recording-list" aria-label="Canonical Studio recording">
 		{
 			recordings.length === 0 ? (
-				<p class="recording-empty">No recordings have been handed off yet.</p>
+				<p class="recording-empty">
+					{session.streamEnvironment === "test"
+						? "Test-mode recordings are local-only and never appear here."
+						: "This content video has not claimed its canonical Studio recording yet."}
+				</p>
 			) : (
 				recordings.map((recording) => (
 					<article class="recording-row">

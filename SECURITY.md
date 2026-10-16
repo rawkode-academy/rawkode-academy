@@ -5,4 +5,4 @@
 If you have found any issues that might have security implications,
 please send a report privately to team@rawkode.academy.
 
-Please do not report security reports publicly.
+Please do not report security issues publicly.

@@ -1,18 +1,28 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import type { ProgrammeAudioSourceState } from "../audio/programmeAudioMixer";
 import type { StudioSource } from "../types";
 
 const props = defineProps<{
+  audioControls?: Record<string, Pick<ProgrammeAudioSourceState, "gain" | "muted">>;
+  /** Sources explicitly admitted by the producer. Omission is deliberately backstage. */
+  onStageSourceIds?: string[];
   sources: StudioSource[];
 }>();
 
 const emit = defineEmits<{
+  "audio-gain-change": [sourceId: string, gain: number];
+  "audio-mute-change": [sourceId: string, muted: boolean];
   "connect-source": [sourceId: string];
+  "source-admission-change": [sourceId: string, admitted: boolean];
 }>();
 
 const peopleSources = computed(() =>
   props.sources
-    .filter((source) => source.type === "camera" && source.roles?.some((role) => role === "hosts" || role === "guests"))
+    .filter((source) =>
+      source.type === "camera" &&
+      source.roles?.some((role) => role === "hosts" || role === "guests" || role === "producer"),
+    )
     .sort((left, right) => getPeopleSort(left) - getPeopleSort(right)),
 );
 
@@ -25,7 +35,7 @@ function getPeopleSort(source: StudioSource): number {
 }
 
 function getPersonLabel(source: StudioSource): string {
-  return source.roles?.includes("hosts") ? "Me" : source.name;
+  return source.name;
 }
 
 function getInitials(source: StudioSource): string {
@@ -39,7 +49,7 @@ function getInitials(source: StudioSource): string {
 
 function getConnectionLabel(source: StudioSource): string {
   const captureStatus = source.settings?.captureStatus;
-  if (source.roles?.includes("hosts") && typeof captureStatus === "string") {
+  if (source.settings?.runtimeSource === "local" && typeof captureStatus === "string") {
     if (captureStatus === "ready") {
       return "Camera + mic ready";
     }
@@ -60,7 +70,19 @@ function getConnectionLabel(source: StudioSource): string {
 
 function canConnect(source: StudioSource): boolean {
   const captureStatus = source.settings?.captureStatus;
-  return source.roles?.includes("hosts") && captureStatus !== "ready" && captureStatus !== "requesting";
+  return source.settings?.runtimeSource === "local" && captureStatus !== "ready" && captureStatus !== "requesting";
+}
+
+function getAudioControl(sourceId: string): Pick<ProgrammeAudioSourceState, "gain" | "muted"> | undefined {
+  return props.audioControls?.[sourceId];
+}
+
+function isOnStage(sourceId: string): boolean {
+  return props.onStageSourceIds?.includes(sourceId) === true;
+}
+
+function setAudioGain(sourceId: string, event: Event): void {
+  emit("audio-gain-change", sourceId, Number((event.target as HTMLInputElement).value));
 }
 </script>
 
@@ -79,6 +101,23 @@ function canConnect(source: StudioSource): boolean {
             <strong>{{ getPersonLabel(source) }}</strong>
             <small>{{ getConnectionLabel(source) }}</small>
           </span>
+          <div class="source-admission-control">
+            <span
+              class="source-stage-status"
+              :class="{ 'is-on-stage': isOnStage(source.id) }"
+              :aria-label="`${getPersonLabel(source)} is ${isOnStage(source.id) ? 'on air' : 'backstage'}`"
+            >
+              {{ isOnStage(source.id) ? "On air" : "Backstage" }}
+            </span>
+            <button
+              class="ghost-button mini"
+              type="button"
+              :aria-label="`${isOnStage(source.id) ? 'Remove' : 'Add'} ${getPersonLabel(source)} ${isOnStage(source.id) ? 'from' : 'to'} stage`"
+              @click="emit('source-admission-change', source.id, !isOnStage(source.id))"
+            >
+              {{ isOnStage(source.id) ? "Remove from stage" : "Add to stage" }}
+            </button>
+          </div>
           <button
             v-if="canConnect(source)"
             class="ghost-button mini"
@@ -87,6 +126,36 @@ function canConnect(source: StudioSource): boolean {
           >
             Connect
           </button>
+          <div
+            v-if="getAudioControl(source.id)"
+            class="person-audio-controls"
+            :aria-label="`${getPersonLabel(source)} programme audio`"
+          >
+            <button
+              class="ghost-button mini"
+              type="button"
+              :aria-label="`${getAudioControl(source.id)?.muted ? 'Unmute' : 'Mute'} ${getPersonLabel(source)} in programme mix`"
+              :aria-pressed="getAudioControl(source.id)?.muted"
+              @click="emit('audio-mute-change', source.id, !getAudioControl(source.id)?.muted)"
+            >
+              {{ getAudioControl(source.id)?.muted ? "Unmute mix" : "Mute mix" }}
+            </button>
+            <label class="person-audio-gain">
+              <span>Mix</span>
+              <input
+                type="range"
+                min="0"
+                max="2"
+                step="0.05"
+                :aria-label="`${getPersonLabel(source)} programme volume`"
+                :aria-valuetext="`${Math.round((getAudioControl(source.id)?.gain ?? 1) * 100)} percent`"
+                :value="getAudioControl(source.id)?.gain ?? 1"
+                @input="setAudioGain(source.id, $event)"
+              />
+              <output>{{ Math.round((getAudioControl(source.id)?.gain ?? 1) * 100) }}%</output>
+            </label>
+            <small class="mix-scope-note">Programme audio only. Stage status is unchanged.</small>
+          </div>
         </article>
       </div>
     </section>
