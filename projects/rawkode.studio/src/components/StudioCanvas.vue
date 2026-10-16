@@ -29,6 +29,7 @@ import {
   startWhipPublishing,
   type WhipPublishSession,
 } from "../live/whipClient";
+import { createProgrammeAudioMix, type ProgrammeAudioMix } from "../live/programmeAudio";
 import { useCanvasRenderLoop } from "../canvas/useCanvasRenderLoop";
 import { getHitTestLayerStack } from "../studio/layerStack";
 import type { ActiveOverlay, ActiveSceneStinger, CanvasResolution, StudioLayer } from "../types";
@@ -122,9 +123,11 @@ let recordingChunkIndex = 0;
 let recordingFinishPromise: Promise<void> | undefined;
 let recordingUpload: RecordingUpload | undefined;
 let recordingOwnedTracks: MediaStreamTrack[] = [];
+let recordingAudioMix: ProgrammeAudioMix | undefined;
 let livePublishSession: WhipPublishSession | undefined;
 let livePublishAbortController: AbortController | undefined;
 let liveOwnedTracks: MediaStreamTrack[] = [];
+let liveAudioMix: ProgrammeAudioMix | undefined;
 let liveServerStreamStarted = false;
 let ownsLivePublish = false;
 let livePublishGeneration = 0;
@@ -294,7 +297,7 @@ async function startLocalRecording(): Promise<void> {
       return;
     }
 
-    const recordingStream = createRecordingStream();
+    const recordingStream = await createRecordingStream();
     if (!recordingStream) {
       return;
     }
@@ -466,6 +469,8 @@ async function readRecordingFallbackBlob(mimeType: string): Promise<Blob | null>
 }
 
 function finishLocalRecording(): void {
+  recordingAudioMix?.close();
+  recordingAudioMix = undefined;
   for (const track of recordingOwnedTracks) {
     track.stop();
   }
@@ -673,9 +678,13 @@ async function startLivePublishing(): Promise<void> {
       }
       return;
     }
-    const programmeStream = createProgrammeOutputStream((tracks) => {
-      liveOwnedTracks = tracks;
-    });
+    const programmeStream = await createProgrammeOutputStream(
+      (tracks) => { liveOwnedTracks = tracks; },
+      (mix) => { liveAudioMix = mix; },
+    );
+    if (publishGeneration !== livePublishGeneration) {
+      throw new Error("Live publishing stopped.");
+    }
     if (!programmeStream) {
       throw new Error("Programme canvas stream is not available.");
     }
@@ -775,6 +784,8 @@ async function cleanupLivePublishing(): Promise<void> {
   livePublishSession = undefined;
   ownsLivePublish = false;
   await publishSession?.close().catch(() => undefined);
+  liveAudioMix?.close();
+  liveAudioMix = undefined;
   for (const track of liveOwnedTracks) {
     track.stop();
   }
@@ -836,27 +847,28 @@ function isStreamNotConnectedYet(error: unknown): boolean {
     error.message.includes("not connected yet");
 }
 
-function createRecordingStream(): MediaStream | undefined {
-  return createProgrammeOutputStream((tracks) => {
-    recordingOwnedTracks = tracks;
-  });
+function createRecordingStream(): Promise<MediaStream | undefined> {
+  return createProgrammeOutputStream(
+    (tracks) => { recordingOwnedTracks = tracks; },
+    (mix) => { recordingAudioMix = mix; },
+  );
 }
 
-function createProgrammeOutputStream(
+async function createProgrammeOutputStream(
   setOwnedTracks: (tracks: MediaStreamTrack[]) => void,
-): MediaStream | undefined {
+  setAudioMix: (mix: ProgrammeAudioMix) => void,
+): Promise<MediaStream | undefined> {
   const canvasStream = captureCanvasStream();
   if (!canvasStream) {
     return undefined;
   }
 
-  const audioTracks = [...(props.mediaStreams?.values() ?? [])]
-    .flatMap((stream) => stream.getAudioTracks())
-    .filter((track) => track.readyState === "live")
-    .map((track) => track.clone());
-  setOwnedTracks([...canvasStream.getTracks(), ...audioTracks]);
+  setOwnedTracks(canvasStream.getTracks());
+  const mix = createProgrammeAudioMix(props.mediaStreams?.values() ?? []);
+  setAudioMix(mix);
+  await mix.resume();
 
-  return new MediaStream([...canvasStream.getVideoTracks(), ...audioTracks]);
+  return new MediaStream([...canvasStream.getVideoTracks(), ...mix.stream.getAudioTracks()]);
 }
 
 function getRecordingSourceFormat(_mimeType: string): "webm" {
@@ -1011,6 +1023,8 @@ watch(
 watch(
   () => props.mediaStreams,
   (streams) => {
+    recordingAudioMix?.update(streams?.values() ?? []);
+    liveAudioMix?.update(streams?.values() ?? []);
     syncMediaVideoElements(streams ?? new Map());
     renderLoop.queuePaint();
   },
