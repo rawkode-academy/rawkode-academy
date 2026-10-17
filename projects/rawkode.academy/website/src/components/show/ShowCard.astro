@@ -3,6 +3,7 @@ import type { ShowSummary } from "@/types/show";
 import { Image } from "astro:assets";
 import MLabel from "@/components/ui/MLabel.vue";
 import { academyDocument } from "@rawkodeacademy/design-system";
+import { localTime } from "@/lib/local-time";
 
 interface Props {
 	show: ShowSummary;
@@ -40,9 +41,7 @@ const thumbnailUrl = latestEpisode?.video?.thumbnailUrl;
 const latestEpisodeTitle = latestEpisode?.video?.title;
 const latestEpisodePublishedAt = latestEpisode?.video?.publishedAt;
 const latestEpisodeDate = latestEpisodePublishedAt
-	? new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(
-			new Date(latestEpisodePublishedAt),
-		)
+	? localTime(latestEpisodePublishedAt, { dateStyle: "medium" })
 	: null;
 ---
 
@@ -96,7 +95,7 @@ const latestEpisodeDate = latestEpisodePublishedAt
 				<MLabel tone="muted">Latest</MLabel>
 				<span class="show-card__latest-title">{latestEpisodeTitle}</span>
 				{latestEpisodeDate && (
-					<MLabel tone="muted">{latestEpisodeDate}</MLabel>
+					<MLabel tone="muted"><time {...latestEpisodeDate.attrs}>{latestEpisodeDate.text}</time></MLabel>
 				)}
 			</p>
 		)}

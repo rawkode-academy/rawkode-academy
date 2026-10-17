@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import ArticleCard from "@/components/articles/ArticleCard.astro";
 import { academyRelatedContent } from "@rawkodeacademy/design-system";
 import { isNewsPublished } from "@/lib/news-publication";
+import { localTime } from "@/lib/local-time";
 
 export interface Props {
 	technologyId: string;
@@ -79,11 +80,8 @@ const hasNews = showNews && allNews.length > 0;
 const hasLearningPaths = showLearningPaths && learningPaths.length > 0;
 const isEmpty = !hasArticles && !hasVideos && !hasNews && !hasLearningPaths;
 
-const newsDateFormatter = new Intl.DateTimeFormat("en-US", {
-	month: "short",
-	day: "numeric",
-	year: "numeric",
-});
+const newsDate = (date: Date) =>
+	localTime(date, { month: "short", day: "numeric", year: "numeric" });
 
 const difficultyLabel: Record<string, string> = {
 	beginner: "Beginner",
@@ -127,8 +125,8 @@ function formatLearningPathDuration(minutes: number): string {
 				{allNews.map((story) => (
 					<li class={s.newsItem}>
 						<article>
-							<time class={s.metadata} datetime={story.data.publishedAt.toISOString()}>
-								{newsDateFormatter.format(story.data.publishedAt)}
+							<time class={s.metadata} {...newsDate(story.data.publishedAt).attrs}>
+								{newsDate(story.data.publishedAt).text}
 							</time>
 							<h3 class={s.title}>
 								<a href={`/news/${story.id}`} class={s.link}>{story.data.title}</a>

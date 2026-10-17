@@ -10,6 +10,7 @@ import VideoItemListJsonLd from "@/components/html/video-itemlist-jsonld.astro";
 import { getPublishedVideos, getUpcomingVideos } from "@/lib/content";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { selectWatchArchive, watchArchiveHref, WATCH_PAGE_SIZE } from "@/lib/watch-archive";
+import { localTime } from "@/lib/local-time";
 
 const styles = academyPage();
 const [publishedVideos, upcomingVideos, technologies, people, shows] = await Promise.all([
@@ -64,7 +65,7 @@ const upcomingStreams = upcomingVideos.map((video) => ({
 	href: `/watch/${video.data.slug}`,
 	title: video.data.title,
 	description: compactCopy(video.data.subtitle || video.data.description),
-	scheduledAt: new Intl.DateTimeFormat("en-US", {
+	scheduledAt: localTime(video.data.publishedAt, {
 		weekday: "long",
 		year: "numeric",
 		month: "long",
@@ -72,8 +73,7 @@ const upcomingStreams = upcomingVideos.map((video) => ({
 		hour: "numeric",
 		minute: "2-digit",
 		timeZoneName: "short",
-		timeZone: "UTC",
-	}).format(video.data.publishedAt),
+	}),
 	mediaSrc: video.data.youtubeId
 		? `https://i.ytimg.com/vi/${video.data.youtubeId}/hqdefault.jpg`
 		: getVideoThumbnailUrl(video.data.id),
@@ -135,7 +135,7 @@ const pageDescription =
 								<img src={item.mediaSrc} alt="" class={styles.cardImage} width="640" height="360" loading="lazy" />
 							</div>
 							<div class={styles.cardBody}>
-								<p class={styles.cardMeta}>Upcoming · {item.scheduledAt}</p>
+								<p class={styles.cardMeta}>Upcoming · <time {...item.scheduledAt.attrs}>{item.scheduledAt.text}</time></p>
 								<h3 class={styles.cardTitle}>{item.title}</h3>
 								<p class={styles.lede}>{item.description}</p>
 							</div>

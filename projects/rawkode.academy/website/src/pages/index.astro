@@ -4,7 +4,12 @@ import { academyPage } from "@rawkodeacademy/design-system";
 import AcademyPage from "@/components/academy/AcademyPage.vue";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Page from "@/wrappers/page.astro";
-import { getLatestContent, getPublishedVideos } from "@/lib/content";
+import {
+	getLatestContent,
+	getPublishedVideos,
+	getUpcomingVideos,
+} from "@/lib/content";
+import { localTime } from "@/lib/local-time";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 
 const styles = academyPage();
@@ -13,14 +18,21 @@ const styles = academyPage();
 // /read remain focused, but Latest is one chronological stream of everything
 // the Academy publishes.
 const now = new Date();
-const [latest, publishedVideos, learningPaths, courses, articles] =
-	await Promise.all([
-		getLatestContent(12, now),
-		getPublishedVideos(),
-		getCollection("learningPaths", ({ data }) => data.publishedAt <= now),
-		getCollection("courses", ({ data }) => data.publishedAt <= now),
-		getCollection("articles", ({ data }) => data.publishedAt <= now),
-	]);
+const [
+	latest,
+	publishedVideos,
+	upcomingVideos,
+	learningPaths,
+	courses,
+	articles,
+] = await Promise.all([
+	getLatestContent(12, now),
+	getPublishedVideos(),
+	getUpcomingVideos(),
+	getCollection("learningPaths", ({ data }) => data.publishedAt <= now),
+	getCollection("courses", ({ data }) => data.publishedAt <= now),
+	getCollection("articles", ({ data }) => data.publishedAt <= now),
+]);
 
 learningPaths.sort(
 	(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
@@ -50,7 +62,9 @@ const formatPathDuration = (minutes?: number | null) => {
 	if (minutes < 60) return `${minutes} min core video`;
 	const hours = Math.floor(minutes / 60);
 	const remainder = minutes % 60;
-	return remainder > 0 ? `${hours}h ${remainder}m core video` : `${hours}h core video`;
+	return remainder > 0
+		? `${hours}h ${remainder}m core video`
+		: `${hours}h core video`;
 };
 
 const videos = publishedVideos.slice(0, 1).map((video) => {
@@ -64,6 +78,31 @@ const videos = publishedVideos.slice(0, 1).map((video) => {
 			...(duration ? [duration] : []),
 		],
 		mediaSrc: getVideoThumbnailUrl(video.data.id),
+	};
+});
+
+// Scheduled live streams lead the page: they are the only time-sensitive
+// thing on it. Times render in UTC and follow the reader's time zone in the
+// browser.
+const upcoming = upcomingVideos.slice(0, 3).map((video) => {
+	const scheduled = localTime(video.data.publishedAt, {
+		weekday: "short",
+		day: "numeric",
+		month: "short",
+		hour: "numeric",
+		minute: "2-digit",
+		timeZoneName: "short",
+	});
+	return {
+		href: `/watch/${video.data.slug}`,
+		title: video.data.title,
+		description: compactCopy(video.data.subtitle || video.data.description),
+		meta: ["Upcoming live stream", scheduled.text],
+		publishedAt: scheduled.iso,
+		localTime: scheduled.attrs["data-local-time"],
+		mediaSrc: video.data.youtubeId
+			? `https://i.ytimg.com/vi/${video.data.youtubeId}/hqdefault.jpg`
+			: getVideoThumbnailUrl(video.data.id),
 	};
 });
 
@@ -89,8 +128,11 @@ const featuredMedia = "mediaSrc" in featured ? featured.mediaSrc : undefined;
 
 // The archive strip links to each collection by name, with its real count
 // set beside it exactly as the collection's own masthead sets it.
-const plural = (count: number, singular: string, pluralForm = `${singular}s`) =>
-	count === 1 ? singular : pluralForm;
+const plural = (
+	count: number,
+	singular: string,
+	pluralForm = `${singular}s`,
+) => (count === 1 ? singular : pluralForm);
 const archive = [
 	{
 		href: "/watch",
@@ -140,6 +182,7 @@ Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 		<AcademyPage
 			page="home"
 			featured={featured}
+			upcoming={upcoming}
 			latest={latest}
 			learningPaths={paths}
 			archive={archive}

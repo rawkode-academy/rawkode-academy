@@ -23,6 +23,7 @@ import { getVideosForTechnology } from "@/utils/get-videos-for-technology";
 import { isNewsPublished } from "@/lib/news-publication";
 import { academyTechnology } from "@rawkodeacademy/design-system";
 import "@rawkodeacademy/design-system/styles.css";
+import { localTime } from "@/lib/local-time";
 
 export interface Technology extends Omit<TechnologyData, "logos"> {
 	id: string;
@@ -370,9 +371,8 @@ const statusLabel = technology.matrix?.status
 	? statusLabels[technology.matrix.status] ?? technology.matrix.status
 	: undefined;
 const description = technology.seo?.description?.trim();
-const videoDateFormatter = new Intl.DateTimeFormat("en-GB", {
-	day: "numeric", month: "short", year: "numeric", timeZone: "UTC",
-});
+const videoDate = (value: string | Date) =>
+	localTime(value, { day: "numeric", month: "short", year: "numeric" }, "en-GB");
 const historicalStatuses = new Set(["abandoned", "deprecated", "superseded"]);
 const remainingVideos = (technology.videos ?? []).slice(featuredVideos.length);
 const breadcrumbs = [
@@ -565,7 +565,7 @@ const hasAside = videoCount > 0 || hasMatrixDetails ||
 										<a href={"/watch/" + video.slug} class={styles.video}>
 											<img src={video.thumbnailUrl} alt="" loading="lazy" width="480" height="270" />
 											<span>{video.title}</span>
-											<time class={styles.videoDate} datetime={new Date(video.publishedAt).toISOString()}>{videoDateFormatter.format(new Date(video.publishedAt))}</time>
+											<time class={styles.videoDate} {...videoDate(video.publishedAt).attrs}>{videoDate(video.publishedAt).text}</time>
 										</a>
 									</li>
 								))}
@@ -630,7 +630,7 @@ const hasAside = videoCount > 0 || hasMatrixDetails ||
 							<a href={"/watch/" + video.slug} class={styles.video}>
 								<img src={video.thumbnailUrl} alt="" loading="lazy" width="480" height="270" />
 								<span>{video.title}</span>
-								<time class={styles.videoDate} datetime={new Date(video.publishedAt).toISOString()}>{videoDateFormatter.format(new Date(video.publishedAt))}</time>
+								<time class={styles.videoDate} {...videoDate(video.publishedAt).attrs}>{videoDate(video.publishedAt).text}</time>
 							</a>
 						</li>
 					))}

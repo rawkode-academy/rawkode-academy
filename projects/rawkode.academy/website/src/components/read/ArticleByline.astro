@@ -2,6 +2,7 @@
 import { academyDocument } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
 import type { CollectionEntry } from "astro:content";
+import type { LocalTimeValue } from "@/lib/local-time";
 
 interface Tag {
 	label: string;
@@ -10,8 +11,9 @@ interface Tag {
 
 interface Props {
 	authors: CollectionEntry<"people">[];
-	date: string;
-	updatedDate?: string | undefined;
+	// Pass a `localTime(...)` value so the date follows the reader's zone.
+	date: string | LocalTimeValue;
+	updatedDate?: string | LocalTimeValue | undefined;
 	readingTime?: string | undefined;
 	tags?: Tag[];
 }
@@ -32,8 +34,12 @@ const {
 			<span class={doc.authorMeta}>{author.data.name}</span>
 		</a>
 	))}
-	<span class={doc.meta}>{date}</span>
-	{updatedDate && <span class={doc.meta}>Updated {updatedDate}</span>}
+	{typeof date === "string"
+		? <span class={doc.meta}>{date}</span>
+		: <time class={doc.meta} {...date.attrs}>{date.text}</time>}
+	{updatedDate && (typeof updatedDate === "string"
+		? <span class={doc.meta}>Updated {updatedDate}</span>
+		: <span class={doc.meta}>Updated <time {...updatedDate.attrs}>{updatedDate.text}</time></span>)}
 	{readingTime && <span class={doc.meta}>{readingTime}</span>}
 
 	<span class={doc.spacer}></span>

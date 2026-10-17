@@ -14,6 +14,7 @@ import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { getPersonIdentityUrls } from "@/lib/person-identity-links";
 import { isNewsPublished } from "@/lib/news-publication";
+import { localTime } from "@/lib/local-time";
 
 export async function getStaticPaths() {
 	const people = await getCollection("people");
@@ -65,11 +66,7 @@ const authoredArticles = articles
 	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
 
 const formatPublishDate = (date: Date) =>
-	new Intl.DateTimeFormat("en-US", {
-		month: "short",
-		day: "numeric",
-		year: "numeric",
-	}).format(date);
+	localTime(date, { month: "short", day: "numeric", year: "numeric" });
 
 // Prepare Show Summaries
 const showSummaries: ShowSummary[] = await Promise.all(
@@ -329,7 +326,7 @@ const identityUrls = new Set(relMeUrls);
 			<ul class={doc.list}>
 				{entries.map((entry) => <li class={doc.listItem}>
 					<article class={doc.stackSmall}>
-						<time class={doc.meta} datetime={entry.data.publishedAt.toISOString()}>{formatPublishDate(entry.data.publishedAt)}</time>
+						<time class={doc.meta} {...formatPublishDate(entry.data.publishedAt).attrs}>{formatPublishDate(entry.data.publishedAt).text}</time>
 						<h3 class={doc.cardTitle}><a href={`${prefix}/${entry.id}`} class={doc.link}>{entry.data.title}</a></h3>
 						<p class={doc.copy}>{entry.data.description}</p>
 					</article>

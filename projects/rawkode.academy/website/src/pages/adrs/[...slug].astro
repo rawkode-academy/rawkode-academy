@@ -10,6 +10,7 @@ import { createLogger } from "@/lib/logger";
 import ArticleHeader from "@/components/read/ArticleHeader.astro";
 import ArticleByline from "@/components/read/ArticleByline.astro";
 import Page from "@/wrappers/page.astro";
+import { localTime } from "@/lib/local-time";
 
 export const prerender = true;
 
@@ -43,13 +44,8 @@ try {
 	logger.error(`Error fetching authors for ADR ${adr.id}`, error);
 }
 
-const formatDate = (date: Date): string => {
-	return new Intl.DateTimeFormat("en-US", {
-		year: "numeric",
-		month: "long",
-		day: "numeric",
-	}).format(date);
-};
+const formatDate = (date: Date) =>
+	localTime(date, { year: "numeric", month: "long", day: "numeric" });
 
 const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
 const adoptedLabel = adr.data.adoptedAt

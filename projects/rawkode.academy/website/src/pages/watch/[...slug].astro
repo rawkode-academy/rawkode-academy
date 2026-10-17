@@ -34,6 +34,7 @@ import {
 	type StudioBindingEnv,
 } from "@/lib/studio-live";
 import { env } from "cloudflare:workers";
+import { localTime } from "@/lib/local-time";
 
 export const prerender = false;
 const layout = academyLayout({ width: "wide" });
@@ -96,14 +97,8 @@ const formatTimestamp = (seconds: number) => {
 		: `${m}:${String(s).padStart(2, "0")}`;
 };
 
-const formatDate = (date: Date | string) => {
-	const d = typeof date === "string" ? new Date(date) : date;
-	return d.toLocaleDateString("en-US", {
-		year: "numeric",
-		month: "long",
-		day: "numeric",
-	});
-};
+const formatDate = (date: Date | string) =>
+	localTime(date, { year: "numeric", month: "long", day: "numeric" });
 
 const formatLabel = (value?: string | null) => {
 	if (!value) return null;
@@ -322,7 +317,7 @@ const runtimeLabel = formatVideoRuntimeLabel(
 	now,
 );
 const publishedLabel = formatDate(video.data.publishedAt);
-const scheduledLabel = new Intl.DateTimeFormat("en-US", {
+const scheduled = localTime(video.data.publishedAt, {
 	weekday: "long",
 	year: "numeric",
 	month: "long",
@@ -330,8 +325,7 @@ const scheduledLabel = new Intl.DateTimeFormat("en-US", {
 	hour: "numeric",
 	minute: "2-digit",
 	timeZoneName: "short",
-	timeZone: "UTC",
-}).format(video.data.publishedAt);
+});
 const notificationsPublicKey = env.NOTIFICATIONS_VAPID_PUBLIC_KEY ?? "";
 const publishedIso =
 	video.data.publishedAt instanceof Date
@@ -425,7 +419,7 @@ const watchStatusLabel = isLiveNow
 				<dl class={watch.facts}>
 					<div class={watch.fact}>
 						<dt class={watch.factLabel}>Date</dt>
-						<dd class={watch.factValue}><time datetime={publishedIso}>{publishedLabel}</time></dd>
+						<dd class={watch.factValue}><time {...publishedLabel.attrs}>{publishedLabel.text}</time></dd>
 					</div>
 					<div class={watch.fact}>
 						<dt class={watch.factLabel}>Runtime</dt>
@@ -452,7 +446,7 @@ const watchStatusLabel = isLiveNow
 					<div class={watch.upcoming} aria-label="Upcoming stream details">
 						<h2 class={watch.noticeTitle}>This session has not started yet.</h2>
 						<p class={watch.noticeCopy}>
-							Join us on <time datetime={publishedIso}>{scheduledLabel}</time>.
+							Join us on <time {...scheduled.attrs}>{scheduled.text}</time>.
 							The player will activate when the stream is available.
 						</p>
 						{video.data.youtubeId && (

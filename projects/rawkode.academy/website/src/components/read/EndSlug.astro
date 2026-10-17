@@ -2,14 +2,15 @@
 import { academyDocument } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
 import MLabel from "@/components/ui/MLabel.vue";
+import type { LocalTimeValue } from "@/lib/local-time";
 
 interface Props {
-	date: string;
+	date: string | LocalTimeValue;
 }
 
 const { date } = Astro.props as Props;
 ---
 
 <div class={doc.end}>
-	<MLabel>Published {date}</MLabel>
+	<MLabel>Published {typeof date === "string" ? date : <time {...date.attrs}>{date.text}</time>}</MLabel>
 </div>

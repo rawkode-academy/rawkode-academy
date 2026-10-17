@@ -5,6 +5,7 @@ import BaseCard from "../common/BaseCard.vue";
 import { calculateReadingTime } from "@/utils/reading-time";
 import { getTypeBadgeConfig } from "@/utils/article-types";
 import { academyDocument } from "@rawkodeacademy/design-system";
+import { localTime } from "@/lib/local-time";
 
 type Props = {
 	article: CollectionEntry<"articles">;
@@ -20,11 +21,11 @@ const readingTime = calculateReadingTime(article.body || "");
 const articleType = article.data.type || "tutorial";
 const badgeConfig = getTypeBadgeConfig(articleType);
 
-const formattedDate = new Intl.DateTimeFormat("en-US", {
+const published = localTime(article.data.publishedAt, {
 	year: "numeric",
 	month: "short",
 	day: "numeric",
-}).format(article.data.publishedAt);
+});
 ---
 
 <BaseCard
@@ -47,7 +48,7 @@ const formattedDate = new Intl.DateTimeFormat("en-US", {
 		<div class:list={[doc.meta, "article-card__meta"]}>
 			<span class="article-card__type">{badgeConfig.label}</span>
 			<span aria-hidden="true">·</span>
-			<time datetime={article.data.publishedAt.toISOString()}>{formattedDate}</time>
+			<time {...published.attrs}>{published.text}</time>
 			{article.body?.trim() && <><span aria-hidden="true">·</span><span>{readingTime.text}</span></>}
 		</div>
 

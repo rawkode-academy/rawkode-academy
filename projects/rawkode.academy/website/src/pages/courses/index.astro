@@ -7,6 +7,7 @@ import CourseItemListJsonLd from "@/components/html/course-itemlist-jsonld.astro
 import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 import { getCourseModuleSlug } from "@/utils/course-path";
 import Page from "@/wrappers/page.astro";
+import { type LocalTimeValue, localTime } from "@/lib/local-time";
 
 export const prerender = true;
 
@@ -51,7 +52,7 @@ let featuredModuleCount = 0;
 let featuredAvailableModuleCount = 0;
 let firstModuleSlug: string | undefined;
 let featuredAuthors: { name: string; avatarUrl?: string | undefined }[] = [];
-let featuredPublishedLabel: string | undefined;
+let featuredPublished: LocalTimeValue | undefined;
 
 if (featuredCourse) {
 	const courseModules = allModules
@@ -73,14 +74,11 @@ if (featuredCourse) {
 		name: author.data.name,
 		avatarUrl: author.data.avatarUrl,
 	}));
-	featuredPublishedLabel = featuredCourse.data.publishedAt.toLocaleDateString(
-		"en-US",
-		{
-			month: "short",
-			day: "numeric",
-			year: "numeric",
-		},
-	);
+	featuredPublished = localTime(featuredCourse.data.publishedAt, {
+		month: "short",
+		day: "numeric",
+		year: "numeric",
+	});
 }
 
 const pageTitle = "Cloud Native Courses";
@@ -107,7 +105,7 @@ const catalog = academyCatalog();
 						<p class={catalog.featuredKicker}>Featured course · {featuredAvailableModuleCount > 0 ? `${featuredAvailableModuleCount}/${featuredModuleCount} lessons available` : availabilityLabel(featuredCourse.id)}</p>
 						<h2 class={catalog.featuredTitle}>{featuredCourse.data.title}</h2>
 						<p class={catalog.featuredDescription}>{featuredCourse.data.description}</p>
-						<p class={catalog.rowMeta}>{featuredCourse.data.difficulty} · {featuredPublishedLabel}{featuredAuthors.length > 0 && ` · ${featuredAuthors.map((author) => author.name).join(", ")}`}</p>
+						<p class={catalog.rowMeta}>{featuredCourse.data.difficulty} · {featuredPublished && <time {...featuredPublished.attrs}>{featuredPublished.text}</time>}{featuredAuthors.length > 0 && ` · ${featuredAuthors.map((author) => author.name).join(", ")}`}</p>
 						<a class={styles.button} href={firstModuleSlug ? `/courses/${featuredCourse.id}/${firstModuleSlug}` : `/courses/${featuredCourse.id}`}>{firstModuleSlug ? "Start the course →" : "View course plan →"}</a>
 					</div>
 					{courseImages.get(featuredCourse.id) && <a class={catalog.featuredMedia} href={`/courses/${featuredCourse.id}`} aria-label={`Explore ${featuredCourse.data.title}`}>

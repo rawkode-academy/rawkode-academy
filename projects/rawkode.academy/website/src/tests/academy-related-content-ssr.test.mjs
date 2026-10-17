@@ -15,14 +15,46 @@ const runtimeSource = readFileSync(
 	new URL("../lib/video-runtime.ts", import.meta.url),
 	"utf8",
 );
-const context = vm.createContext({ console, URL, __NEWS_DEPLOYMENT_CUTOFF_MS__: Date.parse("2100-01-01") });
+const context = vm.createContext({
+	console,
+	URL,
+	__NEWS_DEPLOYMENT_CUTOFF_MS__: Date.parse("2100-01-01"),
+});
 const publicationModule = new vm.SourceTextModule(
-	ts.transpileModule(readFileSync(new URL("../lib/news-publication.ts", import.meta.url), "utf8"), {
-		compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
-	}).outputText, { context },
+	ts.transpileModule(
+		readFileSync(
+			new URL("../lib/news-publication.ts", import.meta.url),
+			"utf8",
+		),
+		{
+			compilerOptions: {
+				module: ts.ModuleKind.ESNext,
+				target: ts.ScriptTarget.ES2022,
+			},
+		},
+	).outputText,
+	{ context },
 );
-await publicationModule.link(() => { throw new Error("Unexpected publication helper import"); });
+await publicationModule.link(() => {
+	throw new Error("Unexpected publication helper import");
+});
 await publicationModule.evaluate();
+const localTimeModule = new vm.SourceTextModule(
+	ts.transpileModule(
+		readFileSync(new URL("../lib/local-time.ts", import.meta.url), "utf8"),
+		{
+			compilerOptions: {
+				module: ts.ModuleKind.ESNext,
+				target: ts.ScriptTarget.ES2022,
+			},
+		},
+	).outputText,
+	{ context },
+);
+await localTimeModule.link(() => {
+	throw new Error("Unexpected local-time helper import");
+});
+await localTimeModule.evaluate();
 const runtimeModule = new vm.SourceTextModule(
 	ts.transpileModule(runtimeSource, {
 		compilerOptions: {
@@ -78,6 +110,7 @@ async function render(file, props, collections = {}) {
 	);
 	await module.link((specifier) => {
 		if (specifier === "@/lib/news-publication") return publicationModule;
+		if (specifier === "@/lib/local-time") return localTimeModule;
 		if (specifier === "@/lib/video-runtime") return runtimeModule;
 		const exports = mocks[specifier];
 		assert(exports, `Unexpected import: ${specifier}`);

@@ -38,7 +38,7 @@ const declarationNames = new Set([
 	"matrixMetadata",
 	"hasMatrixDetails",
 	"historicalStatuses",
-	"videoDateFormatter",
+	"videoDate",
 ]);
 const statements = frontmatter.statements.filter(
 	(statement) =>
@@ -53,6 +53,18 @@ const statements = frontmatter.statements.filter(
 		(ts.isForOfStatement(statement) &&
 			statement.getText(frontmatter).includes("of projectLinks")),
 );
+// Dates go through the real shared helper so the contract covers the UTC
+// fallback and the browser-local spec the page actually ships.
+const localTimeExports = {};
+vm.runInNewContext(
+	ts.transpileModule(read("lib/local-time.ts"), {
+		compilerOptions: {
+			module: ts.ModuleKind.CommonJS,
+			target: ts.ScriptTarget.ES2022,
+		},
+	}).outputText,
+	{ exports: localTimeExports },
+);
 const code = ts.transpileModule(
 	statements.map((s) => s.getText(frontmatter)).join("\n"),
 	{ compilerOptions: { target: ts.ScriptTarget.ES2022 } },
@@ -63,12 +75,13 @@ function contracts(
 	resolveTechnologyIconUrl = () => undefined,
 ) {
 	return vm.runInNewContext(
-		`${code}\n({ relatedTechnologies, sharedRelatedSubcategory, relatedInitials, officialLinks, description, hasMatrixDetails, historicalStatuses, videoDateFormatter });`,
+		`${code}\n({ relatedTechnologies, sharedRelatedSubcategory, relatedInitials, officialLinks, description, hasMatrixDetails, historicalStatuses, videoDate });`,
 		{
 			technology,
 			id: technology.id,
 			items,
 			resolveTechnologyIconUrl,
+			localTime: localTimeExports.localTime,
 		},
 	);
 }
@@ -133,9 +146,21 @@ async function renderRelated(items, resolveLogo, profile = technology) {
 }
 
 test("related initials match directory conventions for single, multiple and hyphenated names", async () => {
-	const names = ["Acorn", "BuildKit", "Cloud Native", "cert-manager", "Éclair", "𐐀bc"];
-	const dom = await renderRelated(names.map((name, index) => entry(`mark-${index}`, { name })));
-	assert.deepEqual(dom.querySelectorAll(".tech-relatedInitials").map((mark) => mark.text), ["AC", "BU", "CN", "CM", "ÉC", "𐐀B"]);
+	const names = [
+		"Acorn",
+		"BuildKit",
+		"Cloud Native",
+		"cert-manager",
+		"Éclair",
+		"𐐀bc",
+	];
+	const dom = await renderRelated(
+		names.map((name, index) => entry(`mark-${index}`, { name })),
+	);
+	assert.deepEqual(
+		dom.querySelectorAll(".tech-relatedInitials").map((mark) => mark.text),
+		["AC", "BU", "CN", "CM", "ÉC", "𐐀B"],
+	);
 });
 
 test("related rows always reserve a decorative mark, using genuine logos or name initials", async () => {
@@ -365,12 +390,12 @@ test("only editorial SEO description is promoted, while personal opinions are re
 });
 
 test("historic recording date formatting is stable and not a live-now claim", () => {
-	assert.equal(
-		contracts(technology).videoDateFormatter.format(
-			new Date("2020-09-30T17:00:00Z"),
-		),
-		"30 Sept 2020",
+	const recorded = contracts(technology).videoDate(
+		new Date("2020-09-30T17:00:00Z"),
 	);
+	assert.equal(recorded.text, "30 Sept 2020");
+	assert.equal(recorded.attrs.datetime, "2020-09-30T17:00:00.000Z");
+	assert.ok(recorded.attrs["data-local-time"]);
 	assert.match(page, /Related recordings/);
 });
 

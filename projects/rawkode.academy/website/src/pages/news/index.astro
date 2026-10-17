@@ -8,6 +8,7 @@ import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.
 import NewsStoryRow from "@/components/news/NewsStoryRow.astro";
 import { getTechnologyLogos, logosFor } from "@/lib/technology-logos";
 import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
+import { localTime } from "@/lib/local-time";
 
 export const prerender = true;
 
@@ -26,15 +27,9 @@ const mosaic = logosFor(
 );
 // The lead story shows its publication day as a numeral with the month and
 // year beneath it. Dates are calendar days in UTC.
-const dayFormatter = new Intl.DateTimeFormat("en-GB", {
-	day: "2-digit",
-	timeZone: "UTC",
-});
-const monthFormatter = new Intl.DateTimeFormat("en-GB", {
-	month: "short",
-	year: "numeric",
-	timeZone: "UTC",
-});
+const leadDay = (date: Date) => localTime(date, { day: "2-digit" }, "en-GB");
+const leadMonth = (date: Date) =>
+	localTime(date, { month: "short", year: "numeric" }, "en-GB");
 const styles = academyLayout({ width: "wide" });
 const catalog = academyCatalog();
 ---
@@ -53,7 +48,7 @@ const catalog = academyCatalog();
 
 		{leadStory && <section class={styles.section} aria-label="Latest story">
 			<article class={catalog.lead}>
-				<p class={catalog.leadDate}><time datetime={leadStory.data.publishedAt.toISOString()}><strong>{dayFormatter.format(leadStory.data.publishedAt)}</strong>{monthFormatter.format(leadStory.data.publishedAt)}</time></p>
+				<p class={catalog.leadDate}><time datetime={leadStory.data.publishedAt.toISOString()}><strong data-datetime={leadDay(leadStory.data.publishedAt).iso} data-local-time={leadDay(leadStory.data.publishedAt).attrs["data-local-time"]}>{leadDay(leadStory.data.publishedAt).text}</strong><span data-datetime={leadMonth(leadStory.data.publishedAt).iso} data-local-time={leadMonth(leadStory.data.publishedAt).attrs["data-local-time"]}>{leadMonth(leadStory.data.publishedAt).text}</span></time></p>
 				<div class={catalog.leadBody}>
 					<p class={catalog.leadKicker}>Latest story</p>
 					<h2 class={catalog.leadTitle}>{leadStory.data.title}</h2>

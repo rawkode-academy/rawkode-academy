@@ -35,5 +35,10 @@ const headProps = { ...(frontmatter ?? {}), ...directProps };
 			</DefaultLayout>
 		</slot>
 
+		<script>
+			import { localiseTimes } from "@/lib/local-time-client";
+
+			localiseTimes();
+		</script>
 	</body>
 </html>

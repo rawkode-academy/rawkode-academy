@@ -14,6 +14,7 @@ import {
 } from "@/lib/search";
 import { academySearch } from "@rawkodeacademy/design-system";
 import "@rawkodeacademy/design-system/styles.css";
+import { localTime } from "@/lib/local-time";
 
 const searchQuery = (Astro.url.searchParams.get("q") || "").trim();
 const typeParam = (Astro.url.searchParams.get("type") || "").trim();
@@ -96,11 +97,8 @@ const typeFilters = [
 	),
 ];
 
-const dateFormatter = new Intl.DateTimeFormat("en-GB", {
-	day: "2-digit",
-	month: "short",
-	year: "numeric",
-});
+const resultDate = (iso: string) =>
+	localTime(iso, { day: "2-digit", month: "short", year: "numeric" }, "en-GB");
 
 const truncate = (text: string, maxLength: number): string => {
 	const normalized = text.replace(/\s+/g, " ").trim();
@@ -146,7 +144,7 @@ const s = academySearch();
 				<a class={s.result} href={result.href}>
 					<h3 class={s.resultTitle}>{result.title}</h3>
 					{result.description && <p class={s.description}>{truncate(result.description, 180)}</p>}
-					{result.date && <time class={s.date} datetime={result.date}>{dateFormatter.format(new Date(result.date))}</time>}
+					{result.date && <time class={s.date} {...resultDate(result.date).attrs}>{resultDate(result.date).text}</time>}
 				</a>
 			</li>)}</ul>
 			{!activeType && group.total > group.results.length && <a class={s.more} href={searchHref(group.type)}>All {group.total} {SEARCH_TYPE_LABELS[group.type].toLowerCase()} →</a>}

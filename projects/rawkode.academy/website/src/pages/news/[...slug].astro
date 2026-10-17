@@ -18,6 +18,7 @@ import Page from "@/wrappers/page.astro";
 import { calculateReadingTime } from "@/utils/reading-time";
 import { isNewsPublished } from "@/lib/news-publication";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
+import { localTime } from "@/lib/local-time";
 
 export const prerender = true;
 
@@ -68,12 +69,11 @@ const tags = (article.data.technologies ?? []).map((technologyId) => ({
 	href: `/technology/${technologyId}`,
 }));
 
-const publishDate = new Intl.DateTimeFormat("en-US", {
+const publishDate = localTime(article.data.publishedAt, {
 	month: "short",
 	day: "numeric",
 	year: "numeric",
-	timeZone: "UTC",
-}).format(article.data.publishedAt);
+});
 
 const readingTime = calculateReadingTime(article.body || "");
 

@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import { academyCatalog } from "@rawkodeacademy/design-system";
+import { localTime } from "@/lib/local-time";
 
 interface Props {
 	story: CollectionEntry<"news">;
@@ -8,21 +9,18 @@ interface Props {
 
 const { story } = Astro.props;
 const styles = academyCatalog();
-// News dates are calendar days in UTC; pin the display so the day never
-// shifts for visitors west of UTC.
-const day = new Intl.DateTimeFormat("en-GB", {
-	day: "2-digit",
-	timeZone: "UTC",
-});
-const month = new Intl.DateTimeFormat("en-GB", {
-	month: "short",
-	year: "numeric",
-	timeZone: "UTC",
-});
+// Calendar-day stories stay on their UTC day; timed stories follow the
+// reader's time zone (see src/lib/local-time.ts).
+const day = localTime(story.data.publishedAt, { day: "2-digit" }, "en-GB");
+const month = localTime(
+	story.data.publishedAt,
+	{ month: "short", year: "numeric" },
+	"en-GB",
+);
 ---
 
 <a class={styles.editorialRow} href={`/news/${story.id}`} data-media="false">
-	<time class={styles.editorialDate} datetime={story.data.publishedAt.toISOString()}><strong>{day.format(story.data.publishedAt)}</strong><span>{month.format(story.data.publishedAt)}</span></time>
+	<time class={styles.editorialDate} datetime={story.data.publishedAt.toISOString()}><strong data-datetime={day.iso} data-local-time={day.attrs["data-local-time"]}>{day.text}</strong><span data-datetime={month.iso} data-local-time={month.attrs["data-local-time"]}>{month.text}</span></time>
 	<div class={styles.editorialBody} data-body>
 		<h3 class={styles.editorialTitle}>{story.data.title}</h3>
 		<p class={styles.editorialDescription}>{story.data.description}</p>

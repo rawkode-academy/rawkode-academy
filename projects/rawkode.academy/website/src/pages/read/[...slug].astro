@@ -32,6 +32,7 @@ import EndSlug from "@/components/read/EndSlug.astro";
 
 import { calculateReadingTime } from "@/utils/reading-time";
 import { getTypeBadgeConfig } from "@/utils/article-types";
+import { localTime } from "@/lib/local-time";
 
 export const prerender = true;
 
@@ -114,12 +115,12 @@ const tags = (article.data.technologies ?? []).map((technologyId) => ({
 const articleType = article.data.type || "tutorial";
 const badgeConfig = getTypeBadgeConfig(articleType);
 
-const dateFormatter = new Intl.DateTimeFormat("en-US", {
+const dateOptions: Intl.DateTimeFormatOptions = {
 	month: "short",
 	day: "2-digit",
 	year: "numeric",
-});
-const publishDate = dateFormatter.format(article.data.publishedAt);
+};
+const publishDate = localTime(article.data.publishedAt, dateOptions);
 
 const sameCalendarDayUtc = (a: Date, b: Date): boolean =>
 	a.getUTCFullYear() === b.getUTCFullYear() &&
@@ -132,7 +133,7 @@ const wasUpdated =
 	!sameCalendarDayUtc(article.data.updatedAt, article.data.publishedAt);
 
 const updateDate = wasUpdated
-	? dateFormatter.format(article.data.updatedAt as Date)
+	? localTime(article.data.updatedAt as Date, dateOptions)
 	: undefined;
 
 // Breadcrumb trail.

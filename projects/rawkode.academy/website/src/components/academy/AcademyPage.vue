@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { academyPage } from "@rawkodeacademy/design-system";
+import { localTime } from "@/lib/local-time";
 
 interface AcademyCard {
 	href: string;
@@ -9,6 +10,8 @@ interface AcademyCard {
 	publishedAt?: string;
 	kind?: string;
 	mediaSrc?: string;
+	// Serialised local-time spec; the date in meta[1] follows the reader's zone.
+	localTime?: string;
 }
 interface ArchiveLink {
 	href: string;
@@ -18,6 +21,7 @@ interface ArchiveLink {
 interface HomeProps {
 	page?: "home";
 	featured: AcademyCard;
+	upcoming?: AcademyCard[];
 	latest: AcademyCard[];
 	learningPaths: AcademyCard[];
 	archive: ArchiveLink[];
@@ -27,6 +31,7 @@ interface LearnProps {
 	learningPaths: AcademyCard[];
 	// Exclude Home data while keeping Vue's generated runtime props optional.
 	featured?: never;
+	upcoming?: never;
 	latest?: never;
 	archive?: never;
 }
@@ -44,21 +49,19 @@ const levelOf = (label: string) => {
 };
 const pad = (index: number) => String(index + 1).padStart(2, "0");
 
-// Ledger dates are calendar days in UTC. The day is the numeral; the month
-// and year sit beneath it.
-const dayOf = new Intl.DateTimeFormat("en-GB", {
-	day: "2-digit",
-	timeZone: "UTC",
-});
-const monthOf = new Intl.DateTimeFormat("en-GB", {
-	month: "short",
-	year: "numeric",
-	timeZone: "UTC",
-});
+// Ledger dates: the day is the numeral; the month and year sit beneath it.
+// Both render in UTC and follow the reader's time zone in the browser.
 const dateParts = (iso: string) => {
 	const date = new Date(iso);
 	if (Number.isNaN(date.getTime())) return undefined;
-	return { day: dayOf.format(date), month: monthOf.format(date) };
+	const day = localTime(date, { day: "2-digit" }, "en-GB");
+	const month = localTime(date, { month: "short", year: "numeric" }, "en-GB");
+	return {
+		day: day.text,
+		dayAttrs: { "data-datetime": day.iso, "data-local-time": day.attrs["data-local-time"] },
+		month: month.text,
+		monthAttrs: { "data-datetime": month.iso, "data-local-time": month.attrs["data-local-time"] },
+	};
 };
 </script>
 
@@ -95,6 +98,24 @@ const dateParts = (iso: string) => {
 					</nav>
 				</div>
 			</section>
+			<section v-if="props.upcoming?.length" :class="styles.section" aria-labelledby="upcoming-title">
+				<div :class="styles.sectionHead">
+					<div><h2 id="upcoming-title" :class="styles.sectionTitle">Upcoming live streams</h2><p :class="styles.sectionLede">Scheduled builds, shown in your time zone. Join live and ask questions as we go.</p></div>
+					<a href="/watch" :class="styles.textLink">All videos <span aria-hidden="true">→</span></a>
+				</div>
+				<div :class="styles.feedGrid">
+					<a v-for="item in props.upcoming" :key="item.href" :href="item.href" :class="styles.card">
+						<div :class="styles.cardArt">
+							<img v-if="item.mediaSrc" :src="item.mediaSrc" alt="" :class="styles.cardImage" width="640" height="360" loading="lazy" />
+						</div>
+						<div :class="styles.cardBody">
+							<p :class="styles.cardMeta">{{ item.meta[0] }} · <time :datetime="item.publishedAt" :data-local-time="item.localTime">{{ item.meta[1] }}</time></p>
+							<h3 :class="styles.cardTitle">{{ item.title }}</h3>
+							<p :class="styles.lede">{{ item.description }}</p>
+						</div>
+					</a>
+				</div>
+			</section>
 			<section :class="styles.section" aria-labelledby="latest-title">
 				<div :class="styles.sectionHead">
 					<div><h2 id="latest-title" :class="styles.sectionTitle">Recently published</h2><p :class="styles.sectionLede">One stream, in order: sessions, articles, news, and courses as they land.</p></div>
@@ -102,7 +123,7 @@ const dateParts = (iso: string) => {
 				</div>
 				<div :class="styles.ledger">
 					<a v-for="item in props.latest.slice(0, 6)" :key="item.href" :href="item.href" :class="styles.ledgerRow" :data-media="Boolean(item.mediaSrc)">
-						<time v-if="item.publishedAt" :datetime="item.publishedAt" :class="styles.ledgerDate"><template v-if="dateParts(item.publishedAt)"><strong>{{ dateParts(item.publishedAt)?.day }}</strong><span>{{ dateParts(item.publishedAt)?.month }}</span></template><template v-else>{{ item.meta[1] }}</template></time>
+						<time v-if="item.publishedAt" :datetime="item.publishedAt" :class="styles.ledgerDate"><template v-if="dateParts(item.publishedAt)"><strong v-bind="dateParts(item.publishedAt)?.dayAttrs">{{ dateParts(item.publishedAt)?.day }}</strong><span v-bind="dateParts(item.publishedAt)?.monthAttrs">{{ dateParts(item.publishedAt)?.month }}</span></template><template v-else>{{ item.meta[1] }}</template></time>
 						<span v-if="item.mediaSrc" :class="styles.ledgerMedia"><img :src="item.mediaSrc" alt="" :class="styles.ledgerImage" width="640" height="360" loading="lazy" /></span>
 						<span :class="styles.ledgerBody" data-body>
 							<span :class="styles.ledgerKind" :data-kind="item.kind || item.meta[0]">{{ item.kind || item.meta[0] }}<template v-if="item.meta[2]"> · {{ item.meta[2] }}</template></span>

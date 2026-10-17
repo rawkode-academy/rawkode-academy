@@ -5,6 +5,7 @@ import { getCollection } from "astro:content";
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
 import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 import Page from "@/wrappers/page.astro";
+import { localTime } from "@/lib/local-time";
 
 const seriesEntries = await getCollection("series");
 const articles = await getCollection("articles");
@@ -14,11 +15,8 @@ const publishedSeriesIds = new Set(
 		.filter((id): id is string => Boolean(id)),
 );
 
-const dateFormatter = new Intl.DateTimeFormat("en-GB", {
-	day: "2-digit",
-	month: "short",
-	year: "numeric",
-});
+const latestDate = (date: Date) =>
+	localTime(date, { day: "2-digit", month: "short", year: "numeric" }, "en-GB");
 
 const seriesList = seriesEntries
 	.filter((series) => publishedSeriesIds.has(series.id))
@@ -72,8 +70,8 @@ const catalog = academyCatalog();
 									{series.latest && (
 										<>
 											<span aria-hidden="true">·</span>
-											<time datetime={series.latest.toISOString()}>
-												{dateFormatter.format(series.latest)}
+											<time {...latestDate(series.latest).attrs}>
+												{latestDate(series.latest).text}
 											</time>
 										</>
 									)}

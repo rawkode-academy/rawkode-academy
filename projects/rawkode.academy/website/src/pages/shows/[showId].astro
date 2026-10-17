@@ -18,6 +18,7 @@ import { createLogger } from "@/lib/logger";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import ShowNav from "@/components/show/ShowNav.astro";
 import { getShowNav, hasExtension } from "@/lib/shows/registry";
+import { localTime } from "@/lib/local-time";
 
 const logger = createLogger("shows");
 const { showId } = Astro.params;
@@ -130,7 +131,7 @@ if (hasEpisodeFeed && showEntry.data.podcast?.artworkUrl) {
 }
 
 function formatDate(dateString: string) {
-	return new Date(dateString).toLocaleDateString("en-US", {
+	return localTime(dateString, {
 		year: "numeric",
 		month: "short",
 		day: "numeric",
@@ -271,7 +272,7 @@ function formatDuration(seconds: number) {
  <p class={doc.mediaMeta}>Latest Episode</p>
  <p class={doc.mediaTitle}>{latestEpisode.title}</p>
  <div class={doc.mediaMeta}>
- <span>{formatDate(latestEpisode.publishedAt)}</span>
+ <time {...formatDate(latestEpisode.publishedAt).attrs}>{formatDate(latestEpisode.publishedAt).text}</time>
  {latestEpisode.duration > 0 && (
  <span>{formatDuration(latestEpisode.duration)}</span>
  )}

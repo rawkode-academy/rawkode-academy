@@ -14,6 +14,7 @@ import ArticleTOC from "@/components/read/ArticleTOC.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import LearningPathJsonLd from "@/components/html/learning-path-jsonld.astro";
 import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
+import { localTime } from "@/lib/local-time";
 
 export const prerender = true;
 
@@ -76,11 +77,11 @@ const difficultyLabel =
 	learningPath.data.difficulty.charAt(0).toUpperCase() +
 	learningPath.data.difficulty.slice(1);
 
-const publishDate = new Intl.DateTimeFormat("en-US", {
+const publishDate = localTime(learningPath.data.publishedAt, {
 	month: "short",
 	day: "numeric",
 	year: "numeric",
-}).format(learningPath.data.publishedAt);
+});
 
 const pageTitle = `${learningPath.data.title} | Learning Path`;
 const pageDescription = learningPath.data.description;
@@ -116,7 +117,7 @@ const pageDescription = learningPath.data.description;
 				<div class={styles.meta}>
 					<span>{difficultyLabel}</span>
 					{durationLabel && <span>{durationLabel} core video</span>}
-					<time datetime={learningPath.data.publishedAt.toISOString()}>{publishDate}</time>
+					<time {...publishDate.attrs}>{publishDate.text}</time>
 				</div>
 				{durationLabel && <p class={doc.meta}>Exercises and bonus material take extra time.</p>}
 				<div class={doc.actions}>

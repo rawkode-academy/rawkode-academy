@@ -4,6 +4,7 @@ const doc = academyDocument();
 import type { CollectionEntry } from "astro:content";
 import MLabel from "@/components/ui/MLabel.vue";
 import { getTypeBadgeConfig } from "@/utils/article-types";
+import { localTime } from "@/lib/local-time";
 
 interface Props {
 	articles: CollectionEntry<"articles">[];
@@ -12,17 +13,16 @@ interface Props {
 
 const { articles, totalCount } = Astro.props as Props;
 
-const dateFormatter = new Intl.DateTimeFormat("en-US", {
-	month: "short",
-	day: "2-digit",
-	year: "numeric",
-});
 
 const items = articles.slice(0, 3).map((a) => ({
 	href: `/read/${a.id}`,
 	kicker: getTypeBadgeConfig(a.data.type || "tutorial").label,
 	title: a.data.title,
-	date: dateFormatter.format(a.data.publishedAt),
+	date: localTime(a.data.publishedAt, {
+		month: "short",
+		day: "2-digit",
+		year: "numeric",
+	}),
 	readingTime: a.body
 		? `${Math.max(1, Math.round(a.body.split(/\s+/).length / 220))} min`
 		: undefined,
@@ -47,7 +47,7 @@ const items = articles.slice(0, 3).map((a) => ({
 				>
 					<MLabel tone="spruce">{item.kicker}</MLabel>
 					<h3 class={doc.cardTitle}>{item.title}</h3>
-					<MLabel>{item.date}{item.readingTime ? ` · ${item.readingTime}` : ""}</MLabel>
+					<MLabel><time {...item.date.attrs}>{item.date.text}</time>{item.readingTime ? ` · ${item.readingTime}` : ""}</MLabel>
 				</a>
 			))}
 		</div>

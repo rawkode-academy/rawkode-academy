@@ -3,6 +3,7 @@ import { getCollection, getEntry } from "astro:content";
 import EditorialShell from "@/components/ui/EditorialShell.astro";
 import Page from "@/wrappers/page.astro";
 import { academyDocument } from "@rawkodeacademy/design-system";
+import { localTime } from "@/lib/local-time";
 
 const doc = academyDocument();
 
@@ -68,12 +69,8 @@ const processedChangelog = await Promise.all(
 						<article class="changelog-entry">
 							<div class="changelog-entry__meta">
 								<span class="editorial-pill">{entry.type}</span>
-								<time datetime={entry.date.toISOString()}>
-									{entry.date.toLocaleDateString("en-US", {
-										year: "numeric",
-										month: "long",
-										day: "numeric",
-									})}
+								<time {...localTime(entry.date, { year: "numeric", month: "long", day: "numeric" }).attrs}>
+									{localTime(entry.date, { year: "numeric", month: "long", day: "numeric" }).text}
 								</time>
 								<span>by {entry.author.name}</span>
 							</div>

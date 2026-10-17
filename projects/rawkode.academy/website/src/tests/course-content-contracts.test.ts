@@ -8,6 +8,7 @@ import * as runtime from "astro/runtime/server/index.js";
 import ts from "typescript";
 import { webcontainerDemosPlugin } from "../utils/vite-plugin-webcontainer-demos";
 import { getCourseModuleSlug } from "../utils/course-path";
+import { localTime } from "../lib/local-time";
 
 const contentDir = resolve("../../../content/courses");
 const read = (path: string) => readFileSync(path, "utf8");
@@ -137,6 +138,7 @@ describe("catalog availability and curriculum", () => {
 					name === "courses" ? [course] : modules,
 				getEntries: async () => [],
 				getCourseModuleSlug,
+				localTime,
 				academyLayout: () => ({}),
 				academyCatalog: () => ({}),
 			},
@@ -222,7 +224,12 @@ describe("catalog availability and curriculum", () => {
 
 describe("authored course contracts", () => {
 	it.each([
-		["[course]/[...slug].astro", "CourseSignupForm", "/courses/course/lesson", "lesson"],
+		[
+			"[course]/[...slug].astro",
+			"CourseSignupForm",
+			"/courses/course/lesson",
+			"lesson",
+		],
 		["[...slug].astro", "CourseSignupFormCompact", "/courses/course", "course"],
 	])("server-renders %s actual deferred fallback with a local retry and no-JS explanation", async (route, component, path, content) => {
 		const source = read(`src/pages/courses/${route}`);
@@ -233,15 +240,31 @@ describe("authored course contracts", () => {
 			for (const child of node.children ?? []) walk(child);
 		};
 		walk(ast);
-		expect(signup.attributes.some((attribute: any) => attribute.name === "server:defer")).toBe(true);
-		expect(signup.children.some((node: any) => node.attributes?.some((attribute: any) => attribute.name === "slot" && attribute.value === "fallback"))).toBe(true);
+		expect(
+			signup.attributes.some(
+				(attribute: any) => attribute.name === "server:defer",
+			),
+		).toBe(true);
+		expect(
+			signup.children.some((node: any) =>
+				node.attributes?.some(
+					(attribute: any) =>
+						attribute.name === "slot" && attribute.value === "fallback",
+				),
+			),
+		).toBe(true);
 		// Render the actual slot markup, not copied fallback prose. This isolates
 		// its SSR contract from the island endpoint and provider dependencies.
 		const fallback = source.match(/<p slot="fallback"[\s\S]*?<\/p>/)?.[0];
 		expect(fallback).toBeDefined();
-		const compiled = await transform(`---\nconst doc = { copy: "copy" }; const s = doc;\n---\n${fallback!.replace(' slot="fallback"', '')}`);
+		const compiled = await transform(
+			`---\nconst doc = { copy: "copy" }; const s = doc;\n---\n${fallback!.replace(' slot="fallback"', "")}`,
+		);
 		const code = ts.transpileModule(compiled.code, {
-			compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+			compilerOptions: {
+				module: ts.ModuleKind.CommonJS,
+				target: ts.ScriptTarget.ES2022,
+			},
 		}).outputText;
 		const exports: Record<string, any> = {};
 		new Function("require", "exports", code)((id: string) => {
@@ -257,7 +280,9 @@ describe("authored course contracts", () => {
 		expect(dom.textContent).toContain("Loading optional course email signup");
 		expect(dom.textContent).toContain("If it does not load");
 		expect(dom.textContent).toContain("Signup requires JavaScript");
-		expect(dom.textContent).toContain(`all ${content} content remains available without signing up`);
+		expect(dom.textContent).toContain(
+			`all ${content} content remains available without signing up`,
+		);
 		expect(dom.querySelector("a")?.getAttribute("href")).toBe(path);
 		expect(dom.querySelector("script, form, input")).toBeNull();
 	});

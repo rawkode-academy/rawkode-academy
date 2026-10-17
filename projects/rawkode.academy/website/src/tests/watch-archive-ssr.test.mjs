@@ -129,6 +129,7 @@ async function renderArchive(search = "", data = collections) {
 		return module;
 	}
 	for (const name of [
+		"local-time",
 		"masthead-mosaic",
 		"news-publication",
 		"watch-archive",
