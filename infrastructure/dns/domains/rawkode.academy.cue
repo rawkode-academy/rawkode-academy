@@ -32,5 +32,8 @@ zones: "rawkode.academy": zone.#CloudflareRegistrar & zone.#Gmail & {
 		"_gh-rawkodeacademy-o": github: value:          "0dcb5aad05"
 		"default._bimi": bimi: value:                   "v=BIMI1; l=https://rawkode.academy/icon-gradient-bimi.svg; a=;"
 		"20250224144620pm._domainkey": savvycal: value: "k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCIAjV3SWToVrZLC0ZqlPE58BLitE11e7+GBBZbZNyRBjeZObIo+PX7UbllD2MTiAKWEfO2DCvZYW5eavJUP+xvHH+nnDywsgW184Z7+lA/Oand3P9IaSGP/YhZ2NzJgoOMqK+TbrdP9+gIDXhFzLhxVn6T9+AI4jnp9dYbod9DLQIDAQAB"
+
+		// Sample record to check the plan comment on the infrastructure PR.
+		"_cuenv-plan-check": cuenv: value: "cuenv infrastructure plan comment check"
 	}
 }
