@@ -36,6 +36,61 @@ const attioHeaders = (apiKey: string) => ({
 	"Content-Type": "application/json",
 });
 
+const ENQUIRY_ERROR_CODES = [
+	"crm_unconfigured",
+	"invalid_email",
+	"crm_lookup_failed",
+	"crm_write_failed",
+	"crm_note_failed",
+	"crm_unavailable",
+] as const;
+type EnquiryErrorCode = (typeof ENQUIRY_ERROR_CODES)[number];
+
+const enquiryFallback = (code: EnquiryErrorCode) =>
+	({
+		success: false,
+		fallback: "mailto",
+		code,
+	}) as const;
+
+const isEnquiryErrorCode = (value: unknown): value is EnquiryErrorCode =>
+	typeof value === "string" &&
+	(ENQUIRY_ERROR_CODES as readonly string[]).includes(value);
+
+const attioCallFailure = async (response: Response, code: EnquiryErrorCode) => {
+	let attioCode: string | undefined;
+	try {
+		const body = (await response.json()) as { code?: unknown };
+		if (typeof body.code === "string" && /^[a-z0-9_:-]+$/i.test(body.code)) {
+			attioCode = body.code;
+		}
+	} catch {
+		attioCode = undefined;
+	}
+	return Object.assign(new Error(code), {
+		code,
+		status: response.status,
+		attioCode,
+	});
+};
+
+const codedFailure = (code: EnquiryErrorCode) =>
+	Object.assign(new Error(code), { code });
+
+const failureDetails = (error: unknown) => {
+	const details =
+		error && typeof error === "object"
+			? (error as { code?: unknown; status?: unknown; attioCode?: unknown })
+			: undefined;
+	const code = details?.code;
+	return {
+		code: isEnquiryErrorCode(code) ? code : "crm_unavailable",
+		status: typeof details?.status === "number" ? details.status : undefined,
+		attioCode:
+			typeof details?.attioCode === "string" ? details.attioCode : undefined,
+	};
+};
+
 const attioRequest = async <Response>(
 	apiKey: string,
 	path: string,
@@ -48,7 +103,7 @@ const attioRequest = async <Response>(
 	});
 
 	if (!response.ok) {
-		throw new Error(`Attio request failed with status ${response.status}`);
+		throw await attioCallFailure(response, "crm_write_failed");
 	}
 
 	return response.json() as Promise<Response>;
@@ -57,7 +112,7 @@ const attioRequest = async <Response>(
 const attioRecordId = (response: AttioRecordResponse): string => {
 	const recordId = response.data?.id?.record_id;
 	if (!recordId) {
-		throw new Error("Attio response did not include a record ID");
+		throw codedFailure("crm_write_failed");
 	}
 	return recordId;
 };
@@ -65,7 +120,7 @@ const attioRecordId = (response: AttioRecordResponse): string => {
 const findRecordId = async (
 	apiKey: string,
 	object: "companies" | "people",
-	filter: Record<string, string>,
+	filter: Record<string, Record<string, { $eq: string }>>,
 ): Promise<string | undefined> => {
 	const response = await fetch(
 		`${ATTIO_API_URL}/objects/${object}/records/query`,
@@ -76,17 +131,17 @@ const findRecordId = async (
 		},
 	);
 	if (!response.ok) {
-		throw new Error(`Attio query failed with status ${response.status}`);
+		throw await attioCallFailure(response, "crm_lookup_failed");
 	}
 	const body = (await response.json()) as AttioQueryResponse;
 	if (!Array.isArray(body.data)) {
-		throw new Error("Attio query did not include records");
+		throw codedFailure("crm_lookup_failed");
 	}
 	const [match] = body.data;
 	if (!match) return undefined;
 	const recordId = match.id?.record_id;
 	if (!recordId) {
-		throw new Error("Attio query did not include a record ID");
+		throw codedFailure("crm_lookup_failed");
 	}
 	return recordId;
 };
@@ -112,7 +167,7 @@ const createNote = async (
 		}),
 	});
 	if (!response.ok) {
-		throw new Error(`Attio note request failed with status ${response.status}`);
+		throw await attioCallFailure(response, "crm_note_failed");
 	}
 };
 
@@ -146,11 +201,6 @@ const rateLimitKey = async (request: Request): Promise<string> => {
 		byte.toString(16).padStart(2, "0"),
 	).join("");
 };
-
-const fallbackResponse = {
-	success: false,
-	fallback: "mailto",
-} as const;
 
 const companyReviewContent = (
 	domain: string,
@@ -197,8 +247,10 @@ const saveEnquiry = async (
 
 	const apiKey = getSecret("ATTIO_API_KEY");
 	if (!apiKey) {
-		console.error("ATTIO_API_KEY is not configured");
-		return fallbackResponse;
+		console.error("Failed to save partnership enquiry in Attio", {
+			code: "crm_unconfigured",
+		});
+		return enquiryFallback("crm_unconfigured");
 	}
 
 	const rateLimit = await env.PARTNERSHIP_FORM_RATE_LIMITER.limit({
@@ -210,13 +262,16 @@ const saveEnquiry = async (
 
 	const emailDomain = input.email.split("@")[1]?.toLowerCase();
 	if (!emailDomain) {
-		return fallbackResponse;
+		console.error("Failed to save partnership enquiry in Attio", {
+			code: "invalid_email",
+		});
+		return enquiryFallback("invalid_email");
 	}
 
 	try {
 		const emailAddress = input.email.toLowerCase();
 		const existingCompanyId = await findRecordId(apiKey, "companies", {
-			domains: emailDomain,
+			domains: { domain: { $eq: emailDomain } },
 		});
 		const companyId =
 			existingCompanyId ??
@@ -232,7 +287,7 @@ const saveEnquiry = async (
 			);
 
 		const existingPersonId = await findRecordId(apiKey, "people", {
-			email_addresses: emailAddress,
+			email_addresses: { email_address: { $eq: emailAddress } },
 		});
 		const personId =
 			existingPersonId ??
@@ -316,11 +371,12 @@ const saveEnquiry = async (
 				},
 			});
 		} catch (error) {
-			console.error("Failed to create Attio deal:", error);
+			console.error("Failed to create Attio deal", failureDetails(error));
 		}
 	} catch (error) {
-		console.error("Failed to save partnership enquiry in Attio:", error);
-		return fallbackResponse;
+		const details = failureDetails(error);
+		console.error("Failed to save partnership enquiry in Attio", details);
+		return enquiryFallback(details.code);
 	}
 
 	return { success: true, accepted: true } as const;
