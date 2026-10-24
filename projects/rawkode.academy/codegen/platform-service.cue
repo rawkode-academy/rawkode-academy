@@ -312,7 +312,7 @@ import (
 		devDependencies: {
 			"@biomejs/biome":            "^1.9.4"
 			"@cloudflare/workers-types": "^4.20250426.0"
-			"@types/bun":                "latest"
+			"@types/bun":                "^1.4.4"
 			"@types/node":               "^22.15.2"
 			"vitest":                    "^4.1.8"
 			"wrangler":                  "^4.13.2"

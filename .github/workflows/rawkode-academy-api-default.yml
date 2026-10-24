@@ -29,13 +29,12 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
-permissions:
-  contents: read
-  checks: write
-  pull-requests: write
-  packages: write
 jobs:
   rawkode-academy-api-default:
+    permissions:
+      contents: read
+      checks: write
+      packages: write
     name: rawkode-academy-api-default
     runs-on: namespace-profile-linux-x86
     environment: production
@@ -80,7 +79,7 @@ jobs:
           aarch64|arm64) cuenv_asset="cuenv-linux-arm64" ;;
           *) echo "Unsupported Linux architecture: $arch" >&2; exit 1 ;;
         esac
-        cuenv_version="0.55.1"
+        cuenv_version="0.60.1"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi
@@ -95,15 +94,11 @@ jobs:
     - name: Install Bun dependencies
       run: cuenv exec -- bun install --frozen-lockfile
     - name: Setup 1Password
-      run: cuenv exec -- cuenv secrets setup onepassword
+      run: cuenv secrets setup onepassword
       env:
         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-    # The workflow already filters pushes to the api project. Running the task
-    # directly avoids cuenv's affected-task false negatives, which skipped
-    # every gateway deploy after 2026-06-03. Wrangler 4 needs Node 22+.
-    - name: Deploy API gateway
-      working-directory: projects/rawkode.academy/api
-      run: cuenv -e production exec -- nix shell nixpkgs#nodejs_24 -c cuenv -e production task deploy
+    - name: 'Run pipeline: default'
+      run: cuenv ci --pipeline default --path projects/rawkode.academy/api
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_ACTOR: ${{ github.actor }}

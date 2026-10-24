@@ -24,12 +24,12 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
-permissions:
-  contents: read
-  checks: write
-  pull-requests: write
 jobs:
   rawkode-academy-design-system-pullRequest:
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
     name: rawkode-academy-design-system-pullRequest
     runs-on: namespace-profile-linux-x86
     environment: production
@@ -74,7 +74,7 @@ jobs:
           aarch64|arm64) cuenv_asset="cuenv-linux-arm64" ;;
           *) echo "Unsupported Linux architecture: $arch" >&2; exit 1 ;;
         esac
-        cuenv_version="0.55.1"
+        cuenv_version="0.60.1"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi

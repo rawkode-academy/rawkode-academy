@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260602.1",
-    "@types/bun": "latest",
+    "@types/bun": "^1.4.4",
     "@types/node": "^24.10.1",
     "typescript": "^5.9.3",
     "vitest": "^4.1.8",

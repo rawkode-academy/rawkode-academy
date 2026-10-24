@@ -62,6 +62,9 @@ const code = ts.transpileModule(
 	},
 ).outputText;
 type Action = {
+	input: {
+		parse: (value: unknown) => Record<string, unknown>;
+	};
 	handler: (
 		input: Record<string, unknown>,
 		context: { request: Request },
@@ -135,6 +138,26 @@ const expectNoUpsert = () => {
 		expect(callMethod(call)).not.toBe("PUT");
 	}
 };
+const providerRejection = (code: string, message: string, status: number) =>
+	jsonResponse({ code, message }, status);
+const expectSanitizedFallback = (
+	result: Record<string, unknown>,
+	code: string,
+	logged: { mock: { calls: unknown[][] } },
+	secrets: readonly string[],
+	loggedMarkers: readonly string[] = [],
+) => {
+	expect(result).toEqual({ success: false, fallback: "mailto", code });
+	const loggedText = JSON.stringify(logged.mock.calls);
+	expect(loggedText).toContain(code);
+	for (const marker of loggedMarkers) {
+		expect(loggedText).toContain(marker);
+	}
+	const visible = `${JSON.stringify(result)}\n${loggedText}`;
+	for (const secret of secrets) {
+		expect(visible).not.toContain(secret);
+	}
+};
 
 beforeEach(() => {
 	attioApiKey = "attio-test-key";
@@ -166,6 +189,7 @@ describe("partnership Attio action", () => {
 		await expect(apply.handler(input, context)).resolves.toEqual({
 			success: false,
 			fallback: "mailto",
+			code: "crm_unconfigured",
 		});
 		expect(limit).not.toHaveBeenCalled();
 		expect(fetch).not.toHaveBeenCalled();
@@ -210,7 +234,9 @@ describe("partnership Attio action", () => {
 		expect(callUrl(companyQuery)).toBe(`${COMPANY_RECORDS}/query`);
 		expect(callMethod(companyQuery)).toBe("POST");
 		expect(requestBody(companyQuery)).toEqual({
-			filter: { domains: "analytical.engine" },
+			filter: {
+				domains: { domain: { $eq: "analytical.engine" } },
+			},
 			limit: 1,
 		});
 		expect(callUrl(company)).toBe(COMPANY_RECORDS);
@@ -225,7 +251,11 @@ describe("partnership Attio action", () => {
 		});
 		expect(callUrl(personQuery)).toBe(`${PERSON_RECORDS}/query`);
 		expect(requestBody(personQuery)).toEqual({
-			filter: { email_addresses: input.email },
+			filter: {
+				email_addresses: {
+					email_address: { $eq: input.email },
+				},
+			},
 			limit: 1,
 		});
 		expect(callUrl(person)).toBe(PERSON_RECORDS);
@@ -388,6 +418,7 @@ describe("partnership Attio action", () => {
 		await expect(apply.handler(input, context)).resolves.toEqual({
 			success: false,
 			fallback: "mailto",
+			code: "crm_lookup_failed",
 		});
 		expect(fetch).toHaveBeenCalledOnce();
 		expect(callUrl(vi.mocked(fetch).mock.calls[0]!)).toBe(
@@ -403,11 +434,159 @@ describe("partnership Attio action", () => {
 		await expect(apply.handler(input, context)).resolves.toEqual({
 			success: false,
 			fallback: "mailto",
+			code: "crm_lookup_failed",
 		});
 		expect(fetch).toHaveBeenCalledOnce();
 		expect(callUrl(vi.mocked(fetch).mock.calls[0]!)).toBe(
 			`${COMPANY_RECORDS}/query`,
 		);
+	});
+
+	it("submits a full enquiry and queries Attio with verbose equality filters", async () => {
+		mockCreatedPath();
+		const submitted = apply.input.parse({
+			name: " Ada Lovelace ",
+			email: "ada@analytical.engine",
+			company: " Analytical Engine ",
+			path: "Product review",
+			message: " Please review our Kubernetes quick start. ",
+			website: "",
+		});
+
+		await expect(apply.handler(submitted, context)).resolves.toEqual({
+			success: true,
+			accepted: true,
+		});
+
+		const calls = vi.mocked(fetch).mock.calls;
+		expect(requestBody(calls[0]!)).toEqual({
+			filter: { domains: { domain: { $eq: "analytical.engine" } } },
+			limit: 1,
+		});
+		expect(requestBody(calls[1]!).data.values).toEqual({
+			name: "Analytical Engine",
+			domains: ["analytical.engine"],
+		});
+		expect(requestBody(calls[2]!)).toEqual({
+			filter: {
+				email_addresses: {
+					email_address: { $eq: "ada@analytical.engine" },
+				},
+			},
+			limit: 1,
+		});
+		expect(requestBody(calls[3]!).data.values.email_addresses).toEqual([
+			"ada@analytical.engine",
+		]);
+		expect(requestBody(calls[5]!).data).toMatchObject({
+			parent_object: "people",
+			parent_record_id: "person-id",
+			content: "Please review our Kubernetes quick start.",
+		});
+		expect(requestBody(calls[6]!).data.values).toMatchObject({
+			name: "Analytical Engine: Product review",
+			value: 5000,
+			offer: "Review",
+		});
+		expect(fetch).toHaveBeenCalledTimes(7);
+	});
+
+	it("logs an Attio lookup failure code without sending the provider message to the client", async () => {
+		const logged = vi.spyOn(console, "error").mockImplementation(() => {});
+		vi.mocked(fetch).mockResolvedValueOnce(
+			jsonResponse(
+				{
+					code: "filter_error",
+					message: "domains filter rejected ada@analytical.engine",
+				},
+				400,
+			),
+		);
+
+		const result = await apply.handler(apply.input.parse(input), context);
+
+		expect(result).toEqual({
+			success: false,
+			fallback: "mailto",
+			code: "crm_lookup_failed",
+		});
+		expect(result).not.toHaveProperty("message");
+		const loggedText = JSON.stringify(logged.mock.calls);
+		expect(loggedText).toContain("crm_lookup_failed");
+		expect(loggedText).toContain("filter_error");
+		expect(loggedText).toContain("400");
+		expect(loggedText).not.toContain("ada@analytical.engine");
+		expect(loggedText).not.toContain("domains filter rejected");
+		expect(fetch).toHaveBeenCalledOnce();
+	});
+
+	it.each([
+		["company", 1],
+		["person", 3],
+	] as const)("returns crm_write_failed when the %s record write is rejected", async (_record, failingCall) => {
+		const logged = vi.spyOn(console, "error").mockImplementation(() => {});
+		const responses = [
+			emptyQuery(),
+			recordResponse("company-id"),
+			emptyQuery(),
+			recordResponse("person-id"),
+		];
+		responses[failingCall] = providerRejection(
+			"validation_type",
+			`rejected ${input.email}`,
+			422,
+		);
+		for (const response of responses.slice(0, failingCall + 1)) {
+			vi.mocked(fetch).mockResolvedValueOnce(response);
+		}
+
+		const result = await apply.handler(input, context);
+
+		expectSanitizedFallback(
+			result,
+			"crm_write_failed",
+			logged,
+			[input.email, "rejected"],
+			["validation_type", "422"],
+		);
+		expect(fetch).toHaveBeenCalledTimes(failingCall + 1);
+	});
+
+	it("returns crm_note_failed when the enquiry note is rejected", async () => {
+		const logged = vi.spyOn(console, "error").mockImplementation(() => {});
+		mockCreatedPath({
+			note: providerRejection(
+				"unauthorized",
+				`note included ${input.message}`,
+				403,
+			),
+		});
+
+		const result = await apply.handler(input, context);
+
+		expectSanitizedFallback(
+			result,
+			"crm_note_failed",
+			logged,
+			[input.message, "note included"],
+			["unauthorized", "403"],
+		);
+		expect(callUrl(vi.mocked(fetch).mock.calls.at(-1)!)).toBe(NOTES);
+	});
+
+	it("returns crm_unavailable when Attio cannot be reached", async () => {
+		const logged = vi.spyOn(console, "error").mockImplementation(() => {});
+		vi.mocked(fetch).mockRejectedValueOnce(
+			new Error(`socket hang up for ${input.email}`),
+		);
+
+		const result = await apply.handler(input, context);
+
+		expectSanitizedFallback(result, "crm_unavailable", logged, [
+			input.email,
+			"socket hang up",
+		]);
+		expect(fetch).toHaveBeenCalledOnce();
 	});
 
 	it("leaves an existing company and person untouched and asks for a review", async () => {
@@ -433,11 +612,13 @@ describe("partnership Attio action", () => {
 
 		const calls = vi.mocked(fetch).mock.calls;
 		expect(requestBody(calls[0]!)).toEqual({
-			filter: { domains: "gmail.com" },
+			filter: { domains: { domain: { $eq: "gmail.com" } } },
 			limit: 1,
 		});
 		expect(requestBody(calls[1]!)).toEqual({
-			filter: { email_addresses: "ada@gmail.com" },
+			filter: {
+				email_addresses: { email_address: { $eq: "ada@gmail.com" } },
+			},
 			limit: 1,
 		});
 		expect(calls.filter((call) => callUrl(call) === COMPANY_RECORDS)).toEqual(

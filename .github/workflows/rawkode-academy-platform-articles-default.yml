@@ -9,7 +9,6 @@ on:
     paths:
     - .github/workflows/rawkode-academy-platform-articles-default.yml
     - cue.mod/**
-    - projects/rawkode.academy/codegen/platform-service.cue
     - projects/rawkode.academy/platform/articles/**
     - projects/rawkode.academy/platform/articles/env.cue
     - projects/rawkode.academy/platform/articles/schema/**
@@ -17,12 +16,11 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
-permissions:
-  contents: read
-  checks: write
-  pull-requests: write
 jobs:
   rawkode-academy-platform-articles-default:
+    permissions:
+      contents: read
+      checks: write
     name: rawkode-academy-platform-articles-default
     runs-on: namespace-profile-linux-x86
     environment: production
@@ -67,7 +65,7 @@ jobs:
           aarch64|arm64) cuenv_asset="cuenv-linux-arm64" ;;
           *) echo "Unsupported Linux architecture: $arch" >&2; exit 1 ;;
         esac
-        cuenv_version="0.55.1"
+        cuenv_version="0.60.1"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi
@@ -82,14 +80,11 @@ jobs:
     - name: Install Bun dependencies
       run: cuenv exec -- bun install --frozen-lockfile
     - name: Setup 1Password
-      run: cuenv exec -- cuenv secrets setup onepassword
+      run: cuenv secrets setup onepassword
       env:
         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-    # The workflow already filters pushes to the articles project. Running the
-    # task directly avoids cuenv's affected-task false negatives after merges.
-    - name: Deploy articles services
-      working-directory: projects/rawkode.academy/platform/articles
-      run: cuenv -e production exec -- cuenv -e production task ciDeploy
+    - name: 'Run pipeline: default'
+      run: cuenv ci --pipeline default --path projects/rawkode.academy/platform/articles
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_ACTOR: ${{ github.actor }}

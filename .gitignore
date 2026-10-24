@@ -46,8 +46,15 @@ devenv.local.nix
 # Local Claude Code agent state
 **/.claude/scheduled_tasks.lock
 
+
+
 # BEGIN cuenv vcs
 .agents/skills/cuenv/
 .cuenv/vcs/cache/
 .cuenv/vcs/tmp/
 # END cuenv vcs
+
+# BEGIN cuenv infrastructure
+/cue.mod/gen/registry.terraform.io/cloudflare/cloudflare/
+/cue.mod/gen/registry.terraform.io/dnsimple/dnsimple/
+# END cuenv infrastructure

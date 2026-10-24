@@ -19,7 +19,6 @@ updates:
       - "/dagger/wundergraph"
       - "/infrastructure/cloud.rawkode.tfstate/cloudflare-worker"
       - "/infrastructure/cloud.rawkode.tfstate/infrastructure"
-      - "/infrastructure/dns"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
