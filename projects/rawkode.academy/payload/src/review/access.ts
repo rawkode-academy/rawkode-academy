@@ -1,5 +1,6 @@
 import { ReviewError, type ReviewActor } from './contracts'
 import type { ReviewStore, Statement } from './store'
+import { humanUserSql } from '../machine-auth'
 
 // The single enforcement point for revision grants. Every review read, mutation,
 // media byte, thumbnail and export goes through ReviewAccess, and no other review
@@ -49,14 +50,15 @@ export class ReviewAccess {
     return this.store.all<RevisionGrant>(`SELECT * FROM review_revision_grants g WHERE g.video_id=? AND g.user_id=? AND ${active('g')} ORDER BY g.revision_id`, videoId, actor.id, this.at())
   }
   // Customers see their own comments and staff comments, never another customer's.
+  // System principals (isSystemIdentity, such as the Studio handoff) are not staff authors.
   commentFilter(actor: ReviewActor, alias = 'c'): Statement {
     if (actor.role === 'staff') return { sql: '', values: [] }
-    return { sql: ` AND (${alias}.author_id=? OR ${alias}.author_id IN (SELECT id FROM users WHERE role='staff'))`, values: [actor.id] }
+    return { sql: ` AND (${alias}.author_id=? OR ${alias}.author_id IN (SELECT id FROM users WHERE role='staff' AND ${humanUserSql()}))`, values: [actor.id] }
   }
   async canSeeComment(actor: ReviewActor, comment: { author_id: number; revision_id: string }) {
     if (actor.role === 'staff') return true
     if (!await this.activeGrant(comment.revision_id, actor.id)) return false
-    return comment.author_id === actor.id || Boolean(await this.store.one("SELECT id FROM users WHERE id=? AND role='staff'", comment.author_id))
+    return comment.author_id === actor.id || Boolean(await this.store.one(`SELECT id FROM users WHERE id=? AND role='staff' AND ${humanUserSql()}`, comment.author_id))
   }
   // The revision state this viewer may see, as a column over a video_revisions alias.
   stateColumn(actor: ReviewActor, alias = 'r'): Statement {

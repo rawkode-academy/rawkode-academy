@@ -128,6 +128,25 @@ describe("content request handler cache behavior", () => {
 		expect(fakeCache.matches).toHaveLength(2);
 	});
 
+	it("never serves private Studio review objects", async () => {
+		const reviewKeys = [
+			"studio/recordings/session-1/recording-1/review/transcoding-job-x7k2p-a0/review.mp4",
+			"studio/recordings/session-1/recording-1/review/transcode-status.json",
+		];
+		const bucket = new FakeR2Bucket(reviewKeys.map((key) => [key, "private"]));
+		const env = { CONTENT_BUCKET: bucket as unknown as R2Bucket };
+
+		for (const key of reviewKeys) {
+			expect(isPublicContentKey(key)).toBe(false);
+			const response = await handleContentRequest(
+				env,
+				new Request(`https://content.rawkode.academy/${key}`),
+			);
+			expect(response.status).toBe(404);
+		}
+		expect(bucket.getCalls).toHaveLength(0);
+	});
+
 	it("does not cache transcode status documents", async () => {
 		const bucket = new FakeR2Bucket([
 			["videos/video-123/transcode-status.json", "{}"],

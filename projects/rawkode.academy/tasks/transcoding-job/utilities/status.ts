@@ -11,12 +11,24 @@ export interface TranscodeStatusContext {
   sourceEtag?: string | null;
   sourceFormat: string;
   outputPrefix: string;
+  // Present only for Studio contract v2 runs, so the HLS document is unchanged.
+  outputMode?: "review-proxy" | "hls-approved";
+}
+
+export interface ReviewDeliverable {
+  key: string;
+  etag: string;
+  bytes: number;
+  sha256: string;
+  durationMs: number;
+  contentType: "video/mp4";
 }
 
 export interface TranscodeStatusInput extends TranscodeStatusContext {
   status: TranscodeStatus;
   timestamp: string;
   error?: unknown;
+  review?: ReviewDeliverable;
 }
 
 export interface TranscodeStatusDocument extends TranscodeStatusContext {
@@ -25,6 +37,7 @@ export interface TranscodeStatusDocument extends TranscodeStatusContext {
   failedAt?: string;
   startedAt?: string;
   error?: string;
+  review?: ReviewDeliverable;
 }
 
 export function getTranscodeStatusKey(outputPrefix: string): string {
@@ -71,6 +84,13 @@ export function buildTranscodeStatusDocument(
     document.startedAt = input.timestamp;
   }
 
+  if (input.outputMode) {
+    document.outputMode = input.outputMode;
+  }
+  if (input.review) {
+    document.review = input.review;
+  }
+
   return document;
 }
 
@@ -81,7 +101,8 @@ export async function uploadTranscodeStatus(
 ): Promise<void> {
   await s3.send(
     new PutObjectCommand({
-      ACL: "public-read",
+      // Review status documents live under the private Studio prefix.
+      ...(input.outputMode === "review-proxy" ? {} : { ACL: "public-read" }),
       Body: JSON.stringify(buildTranscodeStatusDocument(input), null, 2),
       Bucket: bucketName,
       ContentType: "application/json",

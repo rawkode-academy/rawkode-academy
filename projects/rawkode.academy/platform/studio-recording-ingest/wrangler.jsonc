@@ -53,7 +53,8 @@
 	"vars": {
 		"GCP_PROJECT_ID": "rawkode-academy-production",
 		"GCP_REGION": "europe-west2",
-		"GCP_TRANSCODING_JOB": "transcoding-job"
+		"GCP_TRANSCODING_JOB": "transcoding-job",
+		"RECORDINGS_BUCKET_NAME": "rawkode-academy-content"
 	},
 	"secrets_store_secrets": [
 		{
