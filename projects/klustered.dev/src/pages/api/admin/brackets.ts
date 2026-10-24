@@ -16,7 +16,7 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
 	const kind = kindRaw === "solo" ? "solo" : "team";
 	const startsAtRaw = String(form.get("startsAt") ?? "").trim();
 	const startsAtDate = String(form.get("startsAtDate") ?? "").trim();
-	const startsAtTime = String(form.get("startsAtTime") ?? "19:00").trim();
+	const startsAtTime = String(form.get("startsAtTime") ?? "17:30").trim();
 	const closeDate = String(form.get("registrationClosesAtDate") ?? "").trim();
 	const closeTime = String(form.get("registrationClosesAtTime") ?? "").trim();
 
