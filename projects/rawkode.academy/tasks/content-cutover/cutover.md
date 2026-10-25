@@ -163,9 +163,9 @@ raw copy:
 - "a system d unit" → "a systemd unit"
 - "post hoc swamp extension" → "PostHog Swamp extension"
 - "Opus five five" → "Opus 5.5"
+- "web ramp has a GitHub extension" → "webframp has a GitHub extension" (a GitHub handle)
 
-Left for a human: "known on the Internet as forever" (00:02:49, Nick's handle)
-and "web ramp has a GitHub extension" (00:15:28, the extension's author).
+Left for a human: "known on the Internet as forever" (00:02:49, Nick's handle).
 
 ## 4. Verify before merging
 
