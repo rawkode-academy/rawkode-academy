@@ -92,19 +92,24 @@ export async function harness(bindings: Binding[]): Promise<Harness> {
 			models: ServiceModels;
 		};
 		const store = new ContentStore(models, { DB, CONTENT_CHANGES: queue });
+		const methods = [
+			"get",
+			"list",
+			"revisions",
+			"getList",
+			"findReferences",
+			"create",
+			"update",
+			"delete",
+			"restore",
+			"setList",
+		] as const;
 		services[binding] = {
 			describe: async () => describeModels(models),
 			models: async () => store.models(),
-			get: (...a) => store.get(...a),
-			list: (...a) => store.list(...a),
-			revisions: (...a) => store.revisions(...a),
-			getList: (...a) => store.getList(...a),
-			findReferences: (...a) => store.findReferences(...a),
-			create: (...a) => store.create(...a),
-			update: (...a) => store.update(...a),
-			delete: (...a) => store.delete(...a),
-			restore: (...a) => store.restore(...a),
-			setList: (...a) => store.setList(...a),
+			...Object.fromEntries(
+				methods.map((m) => [m, (store[m] as (...args: unknown[]) => unknown).bind(store)]),
+			),
 		} as unknown as ContentWriteRpc;
 	}
 	const DB = (await mf.getD1Database("CMS")) as unknown as D1Database;

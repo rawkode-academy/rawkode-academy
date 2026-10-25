@@ -1,0 +1,21 @@
+---
+import { CollectionList } from "@/components/CollectionList";
+import Layout from "@/layouts/Layout.astro";
+import { findCollection } from "@/lib/collections";
+
+export const prerender = false;
+const name = Astro.params.collection ?? "";
+const collection = findCollection(name);
+if (!collection) return new Response("Not found", { status: 404 });
+const search = Astro.url.searchParams.get("search") ?? "";
+const page = Math.max(0, Math.floor(Number(Astro.url.searchParams.get("page") ?? 1)) - 1) || 0;
+---
+
+<Layout title={collection.label} current={`c/${collection.name}`}>
+	<CollectionList
+		client:load
+		collection={collection.name}
+		initialSearch={search}
+		initialPage={page}
+	/>
+</Layout>

@@ -1,0 +1,17 @@
+---
+// An entity. Ids may contain "/" (course modules: "<course>/<module>"), so the
+// id is a rest parameter; each segment is decoded by Astro.
+import { EntityEditor } from "@/components/EntityEditor";
+import Layout from "@/layouts/Layout.astro";
+import { findCollection } from "@/lib/collections";
+
+export const prerender = false;
+const collection = findCollection(Astro.params.collection ?? "");
+const id = Astro.params.id;
+if (!collection || !id) return new Response("Not found", { status: 404 });
+const isAdmin = !!Astro.locals.principal?.roles.includes("content_admin");
+---
+
+<Layout title={`${collection.singular} ${id}`} current={`c/${collection.name}`} wide>
+	<EntityEditor client:load collection={collection.name} id={id} isAdmin={isAdmin} />
+</Layout>

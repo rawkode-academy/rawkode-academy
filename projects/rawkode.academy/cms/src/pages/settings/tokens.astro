@@ -1,0 +1,20 @@
+---
+import { Tokens } from "@/components/Tokens";
+import Layout from "@/layouts/Layout.astro";
+import { isAdmin } from "@/lib/permissions";
+
+export const prerender = false;
+if (!isAdmin(Astro.locals.principal)) {
+	Astro.response.status = 403;
+}
+---
+
+<Layout title="API tokens" current="settings/tokens">
+	{
+		isAdmin(Astro.locals.principal) ? (
+			<Tokens client:load />
+		) : (
+			<p class="notice notice--error">Only admins can manage API tokens.</p>
+		)
+	}
+</Layout>

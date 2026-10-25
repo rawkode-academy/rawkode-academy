@@ -1,0 +1,36 @@
+---
+// Sign-in: one button through id.rawkode.academy; errors from the callback.
+import Layout from "@/layouts/Layout.astro";
+import { safeReturnTo } from "@/lib/auth";
+
+export const prerender = false;
+
+const returnTo = safeReturnTo(Astro.url.searchParams.get("returnTo"));
+const error = Astro.url.searchParams.get("error");
+const ERRORS: Record<string, string> = {
+	state: "The sign-in link expired or was opened in another browser. Try again.",
+	token: "Rawkode Academy ID did not accept the sign-in. Try again.",
+	userinfo: "Could not read your account from Rawkode Academy ID. Try again.",
+};
+const message = error ? (ERRORS[error] ?? "Sign-in failed. Try again.") : null;
+const href = `/api/auth/login?returnTo=${encodeURIComponent(returnTo)}`;
+---
+
+<Layout title="Sign in" bare>
+	<section class="gate" aria-labelledby="gate-title">
+		<p class="mono-label">cms.rawkode.academy</p>
+		<h1 id="gate-title" class="page-title">Content, edited in one place.</h1>
+		<p class="lede">
+			Sign in with your Rawkode Academy account. Editing needs a CMS role on the
+			<span class="mono">rawkode-academy-cms</span> application.
+		</p>
+		{
+			message && (
+				<p class="notice notice--error" role="alert">
+					{message}
+				</p>
+			)
+		}
+		<a class="button button--solid button--lg" href={href}>Sign in with Rawkode Academy →</a>
+	</section>
+</Layout>

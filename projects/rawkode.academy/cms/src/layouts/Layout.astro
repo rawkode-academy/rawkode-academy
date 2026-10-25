@@ -1,0 +1,133 @@
+---
+// The CMS shell: top bar with the wordmark, collection nav, proposals,
+// settings (admins), the signed-in actor and sign-out. Pages for signed-out
+// visitors (login, forbidden) pass `bare` to drop the navigation.
+import { COLLECTIONS } from "@/lib/collections";
+import { cmsBindings } from "@/lib/server";
+import "@/styles/cms.css";
+
+interface Props {
+	title: string;
+	bare?: boolean;
+	/** The nav entry to mark current, e.g. "c/videos", "proposals". */
+	current?: string;
+	wide?: boolean;
+}
+
+const { title, bare = false, current, wide = false } = Astro.props;
+const principal = Astro.locals.principal;
+const isAdmin = !!principal?.roles.includes("content_admin");
+
+// Mirrors the API's read access: admins and agents see every collection;
+// guests and partners only people/technologies they are linked to.
+let visible = COLLECTIONS;
+if (!bare && principal && !isAdmin && !principal.roles.includes("content_agent")) {
+	let kinds = new Set<string>();
+	try {
+		const { DB } = await cmsBindings();
+		const { results } = await DB.prepare("SELECT DISTINCT kind FROM access_links WHERE user_id = ?")
+			.bind(principal.actor.id)
+			.all<{ kind: string }>();
+		kinds = new Set(results.map((r) => r.kind));
+	} catch {
+		kinds = new Set();
+	}
+	visible = COLLECTIONS.filter(
+		(c) =>
+			(c.name === "people" && kinds.has("person")) ||
+			(c.name === "technologies" && kinds.has("technology")),
+	);
+}
+const actorName = principal?.actor.name ?? principal?.actor.id;
+const roleLabel = principal?.roles.map((r) => r.replace("content_", "")).join(", ");
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="robots" content="noindex, nofollow" />
+		<meta name="color-scheme" content="light dark" />
+		<title>{title} · Rawkode Academy CMS</title>
+		<link
+			rel="icon"
+			href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='2' fill='%2322201c'/%3E%3Cpath d='M5 4h4.5a2.5 2.5 0 0 1 0 5H5zm0 5 5 3' stroke='%23f5f1ea' stroke-width='1.6' fill='none'/%3E%3C/svg%3E"
+		/>
+	</head>
+	<body>
+		<a class="skip-link" href="#main">Skip to content</a>
+		<header class="topbar">
+			<div class="topbar__inner">
+				<a class="wordmark" href="/" aria-label="Rawkode Academy CMS home">
+					<span class="wordmark__sigil" aria-hidden="true">R</span>
+					<span class="wordmark__name">Rawkode Academy</span>
+					<span class="wordmark__product">CMS</span>
+				</a>
+				{
+					!bare && principal && (
+						<div class="topbar__account">
+							<span class="topbar__actor" title={roleLabel}>
+								<span class="visually-hidden">Signed in as </span>
+								{actorName}
+								<span class="mono-label">{roleLabel}</span>
+							</span>
+							<form method="post" action="/api/auth/logout">
+								<button type="submit" class="button button--ghost button--sm">
+									Sign out
+								</button>
+							</form>
+						</div>
+					)
+				}
+			</div>
+			{
+				!bare && principal && (
+					<nav class="topnav" aria-label="Main">
+						<ul class="topnav__list">
+							{visible.map((c) => (
+								<li>
+									<a
+										href={`/c/${c.name}`}
+										aria-current={current === `c/${c.name}` ? "page" : undefined}
+									>
+										{c.label}
+									</a>
+								</li>
+							))}
+							<li class="topnav__divider" aria-hidden="true" />
+							<li>
+								<a href="/proposals" aria-current={current === "proposals" ? "page" : undefined}>
+									Proposals
+								</a>
+							</li>
+							{isAdmin && (
+								<>
+									<li>
+										<a
+											href="/settings/tokens"
+											aria-current={current === "settings/tokens" ? "page" : undefined}
+										>
+											Tokens
+										</a>
+									</li>
+									<li>
+										<a
+											href="/settings/access"
+											aria-current={current === "settings/access" ? "page" : undefined}
+										>
+											Access
+										</a>
+									</li>
+								</>
+							)}
+						</ul>
+					</nav>
+				)
+			}
+		</header>
+		<main id="main" class:list={["main", { "main--wide": wide, "main--bare": bare }]}>
+			<slot />
+		</main>
+	</body>
+</html>

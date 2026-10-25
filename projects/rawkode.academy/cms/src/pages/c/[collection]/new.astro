@@ -1,0 +1,14 @@
+---
+import { EntityEditor } from "@/components/EntityEditor";
+import Layout from "@/layouts/Layout.astro";
+import { findCollection } from "@/lib/collections";
+
+export const prerender = false;
+const collection = findCollection(Astro.params.collection ?? "");
+if (!collection) return new Response("Not found", { status: 404 });
+const isAdmin = !!Astro.locals.principal?.roles.includes("content_admin");
+---
+
+<Layout title={`New ${collection.singular.toLowerCase()}`} current={`c/${collection.name}`}>
+	<EntityEditor client:load collection={collection.name} isAdmin={isAdmin} />
+</Layout>

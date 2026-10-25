@@ -1,0 +1,25 @@
+---
+// Signed in to Rawkode Academy ID, but without a content role for the CMS.
+import Layout from "@/layouts/Layout.astro";
+
+export const prerender = false;
+Astro.response.status = 403;
+---
+
+<Layout title="No access" bare>
+	<section class="gate" aria-labelledby="gate-title">
+		<p class="mono-label">403 · No CMS role</p>
+		<h1 id="gate-title" class="page-title">Your account has no CMS role.</h1>
+		<p class="lede">
+			You are signed in to Rawkode Academy, but your account has not been given a role on the
+			CMS (admin, agent, guest or partner). Ask an admin to grant one in the identity admin under the
+			<span class="mono">rawkode-academy-cms</span> application, then sign in again.
+		</p>
+		<div class="row-actions">
+			<form method="post" action="/api/auth/logout">
+				<button type="submit" class="button button--outline">Sign out</button>
+			</form>
+			<a class="button button--solid" href="/api/auth/login?returnTo=%2F">Sign in again</a>
+		</div>
+	</section>
+</Layout>

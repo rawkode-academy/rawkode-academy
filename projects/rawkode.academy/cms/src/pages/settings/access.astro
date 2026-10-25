@@ -1,0 +1,20 @@
+---
+import { AccessLinks } from "@/components/AccessLinks";
+import Layout from "@/layouts/Layout.astro";
+import { isAdmin } from "@/lib/permissions";
+
+export const prerender = false;
+if (!isAdmin(Astro.locals.principal)) {
+	Astro.response.status = 403;
+}
+---
+
+<Layout title="Access links" current="settings/access">
+	{
+		isAdmin(Astro.locals.principal) ? (
+			<AccessLinks client:load />
+		) : (
+			<p class="notice notice--error">Only admins can manage access links.</p>
+		)
+	}
+</Layout>

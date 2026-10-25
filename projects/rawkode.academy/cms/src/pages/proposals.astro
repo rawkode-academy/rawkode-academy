@@ -1,0 +1,11 @@
+---
+import { Proposals } from "@/components/Proposals";
+import Layout from "@/layouts/Layout.astro";
+
+export const prerender = false;
+const isAdmin = !!Astro.locals.principal?.roles.includes("content_admin");
+---
+
+<Layout title="Proposals" current="proposals">
+	<Proposals client:load isAdmin={isAdmin} />
+</Layout>

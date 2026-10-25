@@ -1,0 +1,11 @@
+---
+import { Dashboard } from "@/components/Dashboard";
+import Layout from "@/layouts/Layout.astro";
+
+export const prerender = false;
+const isAdmin = !!Astro.locals.principal?.roles.includes("content_admin");
+---
+
+<Layout title="Dashboard">
+	<Dashboard client:load isAdmin={isAdmin} />
+</Layout>
