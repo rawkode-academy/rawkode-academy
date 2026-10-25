@@ -57,7 +57,7 @@ const signOut = async () => {
 	<NavigationDrawer :primary="primary" :groups="groups" :current-path="currentPath" @open-change="loadAccount">
 		<template #account>
 			<div v-if="account.state !== 'unknown'" :class="styles.menuAccount">
-				<a v-if="account.state === 'signed-out'" href="/api/auth/sign-in" :class="styles.menuSignIn">Sign in</a>
+				<a v-if="account.state === 'signed-out'" href="/api/auth/sign-in" data-astro-prefetch="false" :class="styles.menuSignIn">Sign in</a>
 				<div v-else :class="styles.menuIdentity">
 					<span :class="styles.menuIdentityText">
 						<span :class="styles.menuIdentityName">{{ account.name }}</span>
