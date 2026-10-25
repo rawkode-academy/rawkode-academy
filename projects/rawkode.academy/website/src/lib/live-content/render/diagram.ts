@@ -76,15 +76,22 @@ export function themeSvgForToggle(svg: string): string {
 	return out + svg.slice(cursor);
 }
 
+// d2 emits none of these. An SVG that carries any of them is not inlined, so
+// the caller falls back to <img>, where SVG cannot run script. Rejecting is
+// safer than stripping: a regex cannot fully sanitise markup.
+const ACTIVE_CONTENT = [
+	/<(?:script|foreignObject|iframe|object|embed)\b/i,
+	/\son[a-z]+\s*=/i,
+	/attributeName\s*=\s*["']?\s*(?:xlink:)?href/i,
+	/[\s:]href\s*=\s*(?:["']\s*)?(?![\s"'#]|https?:\/\/|\/|data:image\/)/i,
+];
+
 /** Prepare a fetched SVG document for inlining in HTML. */
 export function prepareInlineSvg(svg: string): string | undefined {
 	const start = svg.indexOf("<svg");
 	if (start === -1) return undefined;
-	const body = svg
-		.slice(start)
-		.replace(/<script[\s\S]*?<\/script>/gi, "")
-		.replace(/\son[a-z]+\s*=\s*("[^"]*"|'[^']*')/gi, "")
-		.trim();
+	const body = svg.slice(start).trim();
+	if (ACTIVE_CONTENT.some((pattern) => pattern.test(body))) return undefined;
 	return themeSvgForToggle(body);
 }
 

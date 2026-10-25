@@ -207,7 +207,7 @@ describe("renderDocument hooks", () => {
 	});
 
 	it("inlines diagram SVGs with the Diagram markup and caches them in KV", async () => {
-		const svg = `<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><style>.a{fill:#fff}@media screen and (prefers-color-scheme:dark){.d2-1 .fill-N1{fill:#000;}.b,.c{stroke:red}}</style><script>alert(1)</script><rect onclick="x()"/></svg>`;
+		const svg = `<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><style>.a{fill:#fff}@media screen and (prefers-color-scheme:dark){.d2-1 .fill-N1{fill:#000;}.b,.c{stroke:red}}</style><rect/></svg>`;
 		const fetchMock = vi.fn(async () => new Response(svg, { status: 200 }));
 		const kv = memoryKv();
 		const diagram: BlockNode = {
@@ -230,8 +230,6 @@ describe("renderDocument hooks", () => {
 		expect(html).toContain(":root.dark .b,:root.dark .c{stroke:red}");
 		expect(html).not.toContain("prefers-color-scheme");
 		expect(html).not.toContain("<?xml");
-		expect(html).not.toContain("<script");
-		expect(html).not.toContain("onclick");
 		expect([...kv.store.keys()].some((k) => k.startsWith("diagram:v1:"))).toBe(
 			true,
 		);
@@ -475,9 +473,29 @@ describe("helpers", () => {
 	it("prepares SVG for inlining", () => {
 		expect(prepareInlineSvg("not svg")).toBeUndefined();
 		expect(
+			prepareInlineSvg(
+				'<svg><image href="data:image/png;base64,AA"/><a href="#n"/></svg>',
+			),
+		).toBe('<svg><image href="data:image/png;base64,AA"/><a href="#n"/></svg>');
+		expect(
 			themeSvgForToggle(
 				"<style>@media (prefers-color-scheme: dark){.x{a:b}}</style>",
 			),
 		).toBe("<style>:root.dark .x{a:b}</style>");
+	});
+
+	it.each([
+		"<svg><script>alert(1)</script></svg>",
+		"<svg><script >alert(1)</script ></svg>",
+		"<svg><scr<script>ipt>alert(1)</script></svg>",
+		"<svg><rect onclick=alert(1) /></svg>",
+		'<svg><rect\nonload="alert(1)"/></svg>',
+		"<svg><foreignObject><div/></foreignObject></svg>",
+		'<svg><a href="javascript:alert(1)"/></svg>',
+		'<svg><a xlink:href=" javascript:alert(1)"/></svg>',
+		'<svg><a href="java&#x73;cript:alert(1)"/></svg>',
+		'<svg><set attributeName="href" to="javascript:alert(1)"/></svg>',
+	])("refuses to inline SVG with active content: %s", (svg) => {
+		expect(prepareInlineSvg(svg)).toBeUndefined();
 	});
 });
