@@ -15,7 +15,7 @@ export const ACCESS_APPLICATIONS: AccessApplication[] = [
 	{
 		clientId: "comtrya",
 		name: "Rawkode Academy Code",
-		description: "code.rawkode.academy Comtrya instance",
+		description: "Comtrya instance",
 		roles: [
 			{
 				key: "admin",
@@ -25,7 +25,7 @@ export const ACCESS_APPLICATIONS: AccessApplication[] = [
 			{
 				key: "maintainer",
 				label: "Maintainer",
-				description: "Can maintain code.rawkode.academy content and repositories.",
+				description: "Can maintain Comtrya content and repositories.",
 			},
 		],
 	},
