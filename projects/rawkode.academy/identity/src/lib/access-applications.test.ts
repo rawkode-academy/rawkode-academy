@@ -30,3 +30,11 @@ describe("access applications", () => {
 		}
 	});
 });
+
+describe("CMS access", () => {
+	test("the CMS client exposes the content roles the CMS reads", () => {
+		for (const role of ["content_admin", "content_guest", "content_partner"]) {
+			expect(findAccessRole("rawkode-academy-cms", role)).toBeDefined();
+		}
+	});
+});

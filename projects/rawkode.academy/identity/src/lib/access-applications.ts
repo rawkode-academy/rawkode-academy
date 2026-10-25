@@ -30,6 +30,31 @@ export const ACCESS_APPLICATIONS: AccessApplication[] = [
 		],
 	},
 	{
+		clientId: "rawkode-academy-cms",
+		name: "Rawkode Academy CMS",
+		description: "cms.rawkode.academy content editing",
+		roles: [
+			{
+				key: "content_admin",
+				label: "Content admin",
+				description:
+					"Edits, publishes and deletes all content; approves proposals; manages API tokens and access.",
+			},
+			{
+				key: "content_guest",
+				label: "Guest",
+				description:
+					"Proposes changes to their own person profile (linked by a CMS admin).",
+			},
+			{
+				key: "content_partner",
+				label: "Partner",
+				description:
+					"Proposes factual changes to their own technology profile (linked by a CMS admin); never editorial fields.",
+			},
+		],
+	},
+	{
 		clientId: "rawkode-studio",
 		name: "Rawkode Studio",
 		description: "rawkode.studio live production",
