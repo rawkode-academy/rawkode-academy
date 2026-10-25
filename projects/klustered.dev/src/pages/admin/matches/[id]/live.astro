@@ -3,6 +3,7 @@ import { env } from "cloudflare:workers";
 import { asc, eq } from "drizzle-orm";
 import PortalLayout from "@/layouts/PortalLayout.astro";
 import { getBracketsDb, schema } from "@/db/client";
+import { winnerSelect } from "@/lib/match-admin";
 import { ADMIN_NAV } from "@/lib/nav";
 
 const matchId = Astro.params.id!;
@@ -22,6 +23,29 @@ const teams = await db
 	.orderBy(asc(schema.teams.name))
 	.all();
 const teamName = Object.fromEntries(teams.map((t) => [t.id, t.name]));
+
+const bracket = await db
+	.select({ kind: schema.brackets.kind })
+	.from(schema.brackets)
+	.where(eq(schema.brackets.id, match.bracketId))
+	.get();
+const entries = await db
+	.select({
+		id: schema.bracketEntries.id,
+		displayName: schema.bracketEntries.displayName,
+	})
+	.from(schema.bracketEntries)
+	.where(eq(schema.bracketEntries.bracketId, match.bracketId))
+	.all();
+const entryNames = Object.fromEntries(
+	entries.map((entry) => [entry.id, entry.displayName]),
+);
+const winners = winnerSelect({
+	kind: bracket?.kind ?? "team",
+	match,
+	teamNames: teamName,
+	entryNames,
+});
 
 const startedAt = match.startedAt;
 const endedAt = match.endedAt;
@@ -98,16 +122,17 @@ function formatElapsed(ms: number): string {
 						<label class="flex flex-col gap-1">
 							<span class="text-xs text-slate-400">Winner</span>
 							<select
-								name="winnerTeamId"
+								name={winners.name}
 								required
 								class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100"
 							>
-								{match.teamAId && (
-									<option value={match.teamAId}>{teamName[match.teamAId]}</option>
-								)}
-								{match.teamBId && (
-									<option value={match.teamBId}>{teamName[match.teamBId]}</option>
-								)}
+								{
+									winners.options.map((option) => (
+										<option value={option.value} selected={option.selected}>
+											{option.label}
+										</option>
+									))
+								}
 							</select>
 						</label>
 						<label class="flex flex-col gap-1">

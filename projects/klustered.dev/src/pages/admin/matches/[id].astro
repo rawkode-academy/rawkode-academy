@@ -3,6 +3,7 @@ import { env } from "cloudflare:workers";
 import { asc, eq } from "drizzle-orm";
 import PortalLayout from "@/layouts/PortalLayout.astro";
 import { getBracketsDb, schema } from "@/db/client";
+import { recordedWinnerName, winnerSelect } from "@/lib/match-admin";
 import { ADMIN_NAV } from "@/lib/nav";
 
 const matchId = Astro.params.id!;
@@ -40,6 +41,34 @@ const result = await db
 	.get();
 
 const teamMap = Object.fromEntries(teams.map((t) => [t.id, t.name]));
+
+const entries = await db
+	.select({
+		id: schema.bracketEntries.id,
+		displayName: schema.bracketEntries.displayName,
+	})
+	.from(schema.bracketEntries)
+	.where(eq(schema.bracketEntries.bracketId, match.bracketId))
+	.all();
+const entryNames = Object.fromEntries(
+	entries.map((entry) => [entry.id, entry.displayName]),
+);
+const winners = winnerSelect({
+	kind: bracket?.kind ?? "team",
+	match,
+	teamNames: teamMap,
+	entryNames,
+	selectedWinnerTeamId: result?.winnerTeamId ?? null,
+	selectedWinnerEntryId: result?.winnerEntryId ?? null,
+});
+const winnerName = result
+	? recordedWinnerName({
+			winnerTeamId: result.winnerTeamId,
+			winnerEntryId: result.winnerEntryId,
+			teamNames: teamMap,
+			entryNames,
+		})
+	: null;
 
 function toDatetimeLocal(value: Date | null): string {
 	if (!value) return "";
@@ -161,7 +190,7 @@ function toDatetimeLocal(value: Date | null): string {
 			result ? (
 				<div class="mt-3 text-sm text-slate-300">
 					<p>
-						Winner: <strong>{result.winnerTeamId ? teamMap[result.winnerTeamId] ?? result.winnerTeamId : "—"}</strong>
+						Winner: <strong>{winnerName}</strong>
 					</p>
 					<p>Score: {result.scoreA ?? "—"} – {result.scoreB ?? "—"}</p>
 					<p>Time to resolve: {result.timeToResolveSeconds ?? "—"} s</p>
@@ -178,20 +207,17 @@ function toDatetimeLocal(value: Date | null): string {
 			<label class="flex flex-col gap-1">
 				<span class="text-xs text-slate-400">Winner</span>
 				<select
-					name="winnerTeamId"
+					name={winners.name}
 					required
 					class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100 focus:border-fuchsia-500 focus:outline-none"
 				>
-					{match.teamAId && (
-						<option value={match.teamAId} selected={result?.winnerTeamId === match.teamAId}>
-							{teamMap[match.teamAId] ?? match.teamAId}
-						</option>
-					)}
-					{match.teamBId && (
-						<option value={match.teamBId} selected={result?.winnerTeamId === match.teamBId}>
-							{teamMap[match.teamBId] ?? match.teamBId}
-						</option>
-					)}
+					{
+						winners.options.map((option) => (
+							<option value={option.value} selected={option.selected}>
+								{option.label}
+							</option>
+						))
+					}
 				</select>
 			</label>
 
