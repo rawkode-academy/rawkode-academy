@@ -73,6 +73,8 @@ const logAnalytics = async (
 			referrer: request.headers.get("Referer") || "",
 			country: (request.cf?.country as string) || "",
 			continent: (request.cf?.continent as string) || "",
+			// The collector classifies bots and devices from this, then drops it.
+			user_agent: request.headers.get("User-Agent") || "",
 		},
 	};
 
