@@ -130,23 +130,70 @@ function imageName(src: string): string {
 	const href = decoded.match(/[?&]href=([^&]+)/)?.[1];
 	const path = href ? decodeURIComponent(href) : decoded;
 	const file = path.split("?")[0]?.split("/").pop() ?? path;
-	return file.replace(/\.[A-Za-z0-9_-]{8}(\.[a-z0-9]+)$/i, "$1").replace(/\.(png|jpe?g|webp|avif|gif)$/i, "");
+	// Astro: <name>.<content hash>_<transform hash>.<ext>
+	return file.replace(/\.(png|jpe?g|webp|avif|gif|svg)$/i, "").replace(/\.[A-Za-z0-9_-]{8}(?:_[A-Za-z0-9_-]{4,8})?$/, "");
 }
 
-function structure(html: string): string[] {
-	const main = html.match(/<main\b[\s\S]*<\/main>/i)?.[0] ?? html;
+// <main> as headings, links, images, diagrams and normalised text, read with
+// HTMLRewriter (attribute values such as `[&_>_*]` defeat regexes).
+async function structure(html: string): Promise<string[]> {
 	const out: string[] = [];
-	const cleaned = main
-		.replace(/<script\b[\s\S]*?<\/script>/gi, "")
-		.replace(/<style\b[\s\S]*?<\/style>/gi, "")
-		.replace(/<!--[\s\S]*?-->/g, "");
-	for (const m of cleaned.matchAll(/<(h[1-6])\b[^>]*>([\s\S]*?)<\/\1>/gi))
-		out.push(`${m[1]}: ${text(m[2] ?? "")}`);
-	for (const m of cleaned.matchAll(/<a\b[^>]*\bhref="([^"]*)"/gi)) out.push(`link: ${m[1]}`);
-	for (const m of cleaned.matchAll(/<img\b[^>]*\bsrc="([^"]*)"/gi)) out.push(`img: ${imageName(m[1] ?? "")}`);
-	out.push(`text: ${text(cleaned)}`);
+	let inMain = 0;
+	let skip = 0;
+	let heading: { tag: string; text: string } | undefined;
+	let text = "";
+	const rewriter = new HTMLRewriter()
+		.on("main", {
+			element(el) {
+				inMain++;
+				el.onEndTag(() => {
+					inMain--;
+				});
+			},
+		})
+		.on("script, style, template, svg", {
+			element(el) {
+				if (!inMain) return;
+				if (el.tagName === "svg") out.push("svg");
+				skip++;
+				el.onEndTag(() => {
+					skip--;
+				});
+			},
+		})
+		.on("h1, h2, h3, h4, h5, h6", {
+			element(el) {
+				if (!inMain || skip) return;
+				heading = { tag: el.tagName, text: "" };
+				el.onEndTag(() => {
+					if (heading) out.push(`${heading.tag}: ${squash(heading.text)}`);
+					heading = undefined;
+				});
+			},
+		})
+		.on("a[href]", {
+			element(el) {
+				if (inMain && !skip) out.push(`link: ${decode(el.getAttribute("href") ?? "")}`);
+			},
+		})
+		.on("img[src]", {
+			element(el) {
+				if (inMain && !skip) out.push(`img: ${imageName(el.getAttribute("src") ?? "")}`);
+			},
+		})
+		.on("*", {
+			text(chunk) {
+				if (!inMain || skip) return;
+				text += chunk.text;
+				if (heading) heading.text += chunk.text;
+			},
+		});
+	await rewriter.transform(new Response(html)).text();
+	// Whitespace between elements differs between static and on-demand renders.
+	out.push(`text: ${decode(text).replace(/\s+/g, "")}`);
 	return out;
 }
+const squash = (s: string) => s.replace(/\s+/g, " ").trim();
 const decode = (s: string) =>
 	s
 		.replace(/&nbsp;/g, " ")
@@ -157,10 +204,6 @@ const decode = (s: string) =>
 		.replace(/&gt;/g, ">")
 		.replace(/&quot;/g, '"')
 		.replace(/&#39;|&#x27;/g, "'");
-const text = (html: string) =>
-	decode(html.replace(/<[^>]+>/g, " "))
-		.replace(/\s+/g, " ")
-		.trim();
 
 function lineDiff(a: string, b: string, limit = 12): string[] {
 	const al = a.split("\n");
@@ -192,10 +235,19 @@ async function compare(path: string, mode: "bytes" | "structure") {
 		same = a === b;
 		if (!same) detail = lineDiff(a, b);
 	} else {
-		const sa = structure(a);
-		const sb = structure(b);
+		const sa = await structure(a);
+		const sb = await structure(b);
 		same = JSON.stringify(sa) === JSON.stringify(sb);
-		if (!same) detail = lineDiff(sa.join("\n"), sb.join("\n"));
+		if (!same) {
+			detail = lineDiff(sa.filter((l) => !l.startsWith("text: ")).join("\n"), sb.filter((l) => !l.startsWith("text: ")).join("\n"));
+			const ta = sa.at(-1) ?? "";
+			const tb = sb.at(-1) ?? "";
+			if (ta !== tb) {
+				let i = 0;
+				while (i < ta.length && ta[i] === tb[i]) i++;
+				detail.push(`text @${i}: - ${ta.slice(Math.max(0, i - 40), i + 100)}`, `          + ${tb.slice(Math.max(0, i - 40), i + 100)}`);
+			}
+		}
 	}
 	if (same) identical++;
 	else differences.push(path);
