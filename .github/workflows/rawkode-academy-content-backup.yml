@@ -1,0 +1,53 @@
+# Nightly export of every content D1 database to the private
+# rawkode-academy-backups R2 bucket (projects/rawkode.academy/tasks/backup-content).
+# Hand-written, like the CWV monitor: cuenv has no scheduled pipelines.
+name: rawkode-academy-content-backup
+
+on:
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch: {}
+
+concurrency:
+  group: rawkode-academy-content-backup
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    name: backup
+    runs-on: namespace-profile-linux-x86
+    environment: production
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Determinate Nix
+        uses: DeterminateSystems/determinate-nix-action@v3
+        with:
+          extra-conf: accept-flake-config = true
+
+      - name: Setup cuenv (release)
+        run: |-
+          curl -fsSL -o /usr/local/bin/cuenv https://github.com/cuenv/cuenv/releases/download/0.60.1/cuenv-linux-x64
+          chmod +x /usr/local/bin/cuenv
+          /usr/local/bin/cuenv sync -A
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Bun dependencies
+        run: cuenv exec -- bun install --frozen-lockfile
+
+      - name: Setup 1Password
+        run: cuenv secrets setup onepassword
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+
+      - name: Export content databases to R2
+        working-directory: projects/rawkode.academy/tasks/backup-content
+        run: cuenv exec -e production -- nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run backup.ts
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}

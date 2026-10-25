@@ -1,0 +1,13 @@
+{
+	"name": "backup-content",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"backup": "bun run backup.ts",
+		"test": "bun test"
+	},
+	"devDependencies": {
+		"@types/bun": "latest",
+		"wrangler": "^4.13.2"
+	}
+}
