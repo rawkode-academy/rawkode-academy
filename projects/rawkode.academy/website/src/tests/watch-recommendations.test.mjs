@@ -265,7 +265,14 @@ test("breadcrumb status exists only for actual live/upcoming states; page remain
 	);
 	assert(source.includes("techEntries.map((tech) =>"));
 	// Live content layer: no build-time collections, no hand-written CDN
-	// headers; live sessions opt out, everything else is tagged and cached.
+	// headers; only a mounted live gate opts out (a past live session renders
+	// like a recording), everything else is tagged and cached.
+	assert(
+		/if \(shouldMountLiveGate\) \{[\s\S]*?disableContentCache\(Astro\);[\s\S]*?\} else \{[\s\S]*?setContentCache\(Astro,/.test(
+			source,
+		),
+	);
+	assert(!source.includes('video.data.type === "live") {\n\tdisableContentCache'));
 	assert(!source.includes("astro:content"));
 	assert(source.includes('from "@/lib/live-content"'));
 	// The only hand-written header is the browser no-store on live sessions

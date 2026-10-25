@@ -61,11 +61,6 @@ if (!video) {
 	return new Response(null, { status: 404 });
 }
 
-// Live sessions render the studio's live state: never cache them.
-if (video.data.type === "live") {
-	disableContentCache(Astro);
-	Astro.response.headers.set("Cache-Control", "no-store");
-}
 Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 
 // Plain-text Markdown source for meta descriptions and SEO text; the page
@@ -179,16 +174,6 @@ const hostEntries = showEntry
 	: [];
 const guestEntries = await optionalContent(getEntries(video.data.guests), []);
 
-if (video.data.type !== "live") {
-	// Everything shown on the page, plus the video listing behind the
-	// recommendations (a scheduled video caps the cache lifetime). Signed-in
-	// renders (watch position) are skipped by setContentCache.
-	await setContentCache(Astro, {
-		entries: [video, showEntry, ...techEntries, ...hostEntries, ...guestEntries],
-		collections: ["videos"],
-	});
-}
-
 const thumbnailUrl = video.data.youtubeId
 	? `https://i.ytimg.com/vi/${video.data.youtubeId}/hqdefault.jpg`
 	: getVideoThumbnailUrl(video.data.id);
@@ -212,6 +197,22 @@ const shouldMountLiveGate = shouldMountStudioLiveGate({
 });
 const shouldRenderVodFallback =
 	shouldMountLiveGate && !isUpcomingLive && !studioLiveState.live;
+
+if (shouldMountLiveGate) {
+	// The live gate renders the studio's live state (upcoming, on air, or
+	// within the polling window after the start): never cache it. A past live
+	// session outside that window renders like a recording and is cached.
+	disableContentCache(Astro);
+	Astro.response.headers.set("Cache-Control", "no-store");
+} else {
+	// Everything shown on the page, plus the video listing behind the
+	// recommendations (a scheduled video caps the cache lifetime). Signed-in
+	// renders (watch position) are skipped by setContentCache.
+	await setContentCache(Astro, {
+		entries: [video, showEntry, ...techEntries, ...hostEntries, ...guestEntries],
+		collections: ["videos"],
+	});
+}
 
 const META_DESCRIPTION_LIMIT = 160;
 const metaDescription = (() => {
