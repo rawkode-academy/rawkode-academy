@@ -9,9 +9,16 @@ on:
     paths:
     - .github/workflows/rawkode-tools-observability-collector-default.yml
     - cue.mod/**
-    - projects/rawkode.tools/observability-collector/**
+    - projects/rawkode.tools/observability-collector/basin/**
     - projects/rawkode.tools/observability-collector/env.cue
+    - projects/rawkode.tools/observability-collector/env.cue/**
+    - projects/rawkode.tools/observability-collector/package.json
+    - projects/rawkode.tools/observability-collector/package.json/**
     - projects/rawkode.tools/observability-collector/schema/**
+    - projects/rawkode.tools/observability-collector/src/**
+    - projects/rawkode.tools/observability-collector/test/**
+    - projects/rawkode.tools/observability-collector/wrangler.jsonc
+    - projects/rawkode.tools/observability-collector/wrangler.jsonc/**
   workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
