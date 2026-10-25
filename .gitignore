@@ -40,8 +40,6 @@ devenv.local.nix
 .terraform/
 *.tfstate
 *.tfstate.*
-# This directory contains the state-backend source.
-!/infrastructure/cloud.rawkode.tfstate/
 
 # Local Claude Code agent state
 **/.claude/scheduled_tasks.lock

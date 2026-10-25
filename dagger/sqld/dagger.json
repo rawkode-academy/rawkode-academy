@@ -1,6 +1,0 @@
-{
-  "name": "sqld",
-  "sdk": "typescript",
-  "source": ".",
-  "engineVersion": "v0.13.0"
-}
