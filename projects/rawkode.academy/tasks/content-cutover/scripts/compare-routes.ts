@@ -194,16 +194,16 @@ async function structure(html: string): Promise<string[]> {
 	return out;
 }
 const squash = (s: string) => s.replace(/\s+/g, " ").trim();
+// One pass, so a decoded "&" never starts another entity (&amp;lt; is "&lt;").
+const NAMED: Record<string, string> = { nbsp: " ", amp: "&", lt: "<", gt: ">", quot: '"', apos: "'" };
 const decode = (s: string) =>
-	s
-		.replace(/&nbsp;/g, " ")
-		.replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
-		.replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCodePoint(Number.parseInt(n, 16)))
-		.replace(/&amp;/g, "&")
-		.replace(/&lt;/g, "<")
-		.replace(/&gt;/g, ">")
-		.replace(/&quot;/g, '"')
-		.replace(/&#39;|&#x27;/g, "'");
+	s.replace(/&(?:#(\d+)|#x([0-9a-f]+)|(nbsp|amp|lt|gt|quot|apos));/gi, (entity, dec, hex, name) =>
+		dec
+			? String.fromCodePoint(Number(dec))
+			: hex
+				? String.fromCodePoint(Number.parseInt(hex, 16))
+				: (NAMED[name.toLowerCase()] ?? entity),
+	);
 
 function lineDiff(a: string, b: string, limit = 12): string[] {
 	const al = a.split("\n");
