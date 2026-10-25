@@ -14,6 +14,7 @@ export const ROBOTS_DISALLOWS = [
 	"/unsubscribe",
 	"/_server-islands/",
 	"/api/",
+	"/internal/",
 	"/graphql",
 	"/home",
 	"/sign-in",

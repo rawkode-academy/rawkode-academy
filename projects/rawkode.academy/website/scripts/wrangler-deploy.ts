@@ -21,7 +21,12 @@ const wranglerArgs = args.filter((arg) => arg !== "--purge");
 
 const token = process.env.CACHE_INVALIDATION_TOKEN;
 if (!token) throw new Error("CACHE_INVALIDATION_TOKEN is not set");
-const secrets = { CACHE_INVALIDATION_TOKEN: token };
+const secrets: Record<string, string> = { CACHE_INVALIDATION_TOKEN: token };
+// Optional until the Basin read token is in 1Password: the internal analytics
+// dashboard reports "not configured" without it.
+if (process.env.BASIN_SQL_TOKEN) {
+	secrets.BASIN_SQL_TOKEN = process.env.BASIN_SQL_TOKEN;
+}
 
 const dir = mkdtempSync(join(tmpdir(), "wrangler-secrets-"));
 const file = join(dir, "secrets.json");

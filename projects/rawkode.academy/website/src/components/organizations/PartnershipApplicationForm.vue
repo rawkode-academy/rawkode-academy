@@ -136,6 +136,7 @@ import {
 	ref,
 	useId,
 } from "vue";
+import { capture } from "@/lib/analytics/track";
 import {
 	type ApplicationPath,
 	applicationPathLabels,
@@ -267,7 +268,7 @@ onBeforeUnmount(() => {
 const capturePartnershipEvent = (
 	event: "enquiry_form_started" | "enquiry_form_submitted",
 ) => {
-	window.posthog?.capture(event, {
+	capture(event, {
 		form: "partnership_enquiry",
 		path: window.location.pathname,
 		route: path.value,

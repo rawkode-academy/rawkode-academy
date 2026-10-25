@@ -4,6 +4,7 @@ import { Dialog } from "@ark-ui/vue/dialog";
 import { academyCommand, academyLayout, dialog } from "@rawkodeacademy/design-system";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { getColorSchemePreference, setColorScheme, type ColorSchemePreference } from "@/lib/theme";
+import { capture } from "@/lib/analytics/track";
 
 interface Item {
 	id: string;
@@ -17,7 +18,7 @@ interface Item {
 interface SearchResult extends Omit<Item, "category"> { type: string }
 const props = defineProps<{ returnFocus: () => HTMLElement | null }>();
 function trackEvent(event: string, properties?: Record<string, unknown>) {
-	try { window.posthog?.capture(event, properties); } catch { /* Analytics must not interrupt navigation. */ }
+	capture(event, properties);
 }
 const s = academyCommand();
 const layout = academyLayout();

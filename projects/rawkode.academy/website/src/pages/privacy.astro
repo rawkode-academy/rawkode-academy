@@ -33,7 +33,7 @@ import Page from "@/wrappers/page.astro";
 			<div class="editorial-prose privacy-prose">
 				<h2>Information We Collect</h2>
 				<h3>Analytics Data</h3>
-				<p>We collect usage data including pages visited, time spent on site, browser and device metadata, and general geographic region. This data is collected via PostHog and Grafana Faro and helps us understand how visitors use the site and where the site needs reliability or performance improvements.</p>
+				<p>We collect usage data including pages visited, time spent on site, browser and device metadata, and general geographic region. This data is collected via PostHog, Grafana Faro, and our own first-party analytics stored on Cloudflare, and helps us understand how visitors use the site and where the site needs reliability or performance improvements.</p>
 
 				<h3>Newsletter Subscriptions</h3>
 				<p>If you subscribe to our newsletter, we collect your email address. We use it to send updates about new content, courses, and community events.</p>
@@ -52,7 +52,7 @@ import Page from "@/wrappers/page.astro";
 
 				<h2>Third-Party Services</h2>
 				<h3>Analytics</h3>
-				<p>We use PostHog for product analytics and Grafana Faro for browser observability. PostHog is configured to respect browser Do Not Track signals, and session recording is disabled.</p>
+				<p>We use PostHog for product analytics and Grafana Faro for browser observability. We are moving product analytics to our own first-party pipeline, which runs on Cloudflare and stores events in our own storage rather than with an analytics vendor. Both PostHog and our first-party analytics respect browser Do Not Track signals, and session recording is disabled.</p>
 
 				<h3>Video Content</h3>
 				<p>We host our own video content. When you watch videos, we collect playback analytics such as play, pause, seek, and completion events to understand viewing patterns and improve content.</p>
