@@ -2,7 +2,7 @@
 // Markdown copies some tables keep next to the document.
 import { fromMarkdown, toMarkdown } from "@rawkodeacademy/rich-text/markdown";
 import { validateDoc } from "@rawkodeacademy/rich-text/schema";
-import type { DocNode } from "@rawkodeacademy/rich-text";
+import { type DocNode, toText } from "@rawkodeacademy/rich-text";
 import { z } from "zod";
 
 /** A TipTap document that the website can render; rejects unknown nodes and attributes. */
@@ -47,3 +47,7 @@ export const isEmptyDocument = (doc: unknown): boolean => {
 			!(node as { content?: unknown[] }).content?.length,
 	);
 };
+
+/** The plain-text copy of a document (video and show descriptions keep one). */
+export const textOf = (doc: unknown): string =>
+	toText(doc as DocNode).trim();
