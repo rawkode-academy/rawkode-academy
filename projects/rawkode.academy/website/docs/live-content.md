@@ -97,16 +97,16 @@ render the old content and store it after the first purge. Pass
 failure answers 502 (the generation is already bumped; retrying is safe).
 `just invalidate-content` wraps it.
 
-After deploying website code changes, run `just invalidate-content
-'{"all":true}'`: cached pages were rendered by the previous version.
+Cached pages were rendered by the previous version, so a code deploy must
+purge everything. The production deploy does it (`scripts/wrangler-deploy.ts
+--purge`, once the new version answers); after a deploy by hand, run
+`just invalidate-content '{"all":true}'`.
 
-`CACHE_INVALIDATION_TOKEN` is a Worker secret:
-
-```bash
-bunx wrangler secret put CACHE_INVALIDATION_TOKEN
-```
-
-Locally, put it in `.dev.vars`. Without it the endpoint answers 503.
+`CACHE_INVALIDATION_TOKEN` is a Worker secret. Its value lives in 1Password
+(`op://sa.rawkode.academy/website-cache-invalidation/password`); cuenv resolves
+it for the production environment and `scripts/wrangler-deploy.ts` uploads it
+with every deploy and preview (`wrangler --secrets-file`). Locally, put it in
+`.dev.vars`. Without it the endpoint answers 503.
 
 ## Hourly change detection
 
