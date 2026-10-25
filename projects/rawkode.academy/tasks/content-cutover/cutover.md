@@ -118,6 +118,7 @@ for db in articles news changelog adrs testimonials courses; do run $db "$S/seed
 for db in videos shows technologies; do run $db "$S/seeds/backfill-$db.sql"; done
 run articles "$S/post-seed/0001-klustered-winter-2026.sql"
 run videos "$S/post-seed/0002-swamp-club-video-description.sql"
+run articles "$S/post-seed/0003-sketch-diagrams.sql"
 ```
 
 Rehearse first on copies of the step 2 exports (apply pending migrations, then

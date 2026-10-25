@@ -183,11 +183,13 @@ function cover(data: Data, path: string, entry: string): Row {
 // astro-d2's defaults, as the site rendered diagrams before (`d2({ inline: true })`).
 const D2_DEFAULTS = { theme: "0", darkTheme: "200", layout: "dagre", pad: "100", sketch: "false" };
 
+// Fence meta as astro-d2 reads it: `name=value` pairs, and a bare name (the
+// ```d2 sketch``` every article diagram uses) is `true`.
 function d2Options(meta: string | null): Record<string, string> {
 	const options: Record<string, string> = { ...D2_DEFAULTS };
-	for (const match of (meta ?? "").matchAll(/(\w+)=(?:"([^"]*)"|'([^']*)'|(\S+))/g)) {
+	for (const match of (meta ?? "").matchAll(/(\w+)(?:=(?:"([^"]*)"|'([^']*)'|(\S+)))?/g)) {
 		const [, name, a, b, c] = match;
-		if (name) options[name] = a ?? b ?? c ?? "";
+		if (name) options[name] = a ?? b ?? c ?? "true";
 	}
 	return options;
 }

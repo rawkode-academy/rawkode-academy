@@ -16,3 +16,4 @@ cuenv -e production exec -- bun x wrangler d1 execute platform-articles --remote
 | --- | --- | --- |
 | `0001-klustered-winter-2026.sql` | `platform-articles` | #1481 |
 | `0002-swamp-club-video-description.sql` | `platform-videos` | live description rewritten on 2026-10-23 |
+| `0003-sketch-diagrams.sql` | `platform-articles` | first seed rendered the `d2 sketch` diagrams unsketched |
