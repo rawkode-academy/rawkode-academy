@@ -11,6 +11,7 @@ from unittest import mock
 
 import content_api
 from content_api import (
+    CmsClient,
     D1Client,
     insert_video_sql,
     insert_video_statement,
@@ -164,6 +165,60 @@ class D1ClientTest(unittest.TestCase):
         with mock.patch("content_api._urlopen", return_value=respond({"success": False, "errors": ["x"]})):
             with self.assertRaises(content_api.D1Error):
                 client.query("SELECT 1")
+
+
+def cms_response(status, payload):
+    response = FakeResponse(json.dumps(payload).encode())
+    response.status = status
+    return response
+
+
+def cms_error(status, payload):
+    return urllib.error.HTTPError(
+        "https://cms.rawkode.academy/api/v1/collections/videos", status, "error", {},
+        io.BytesIO(json.dumps(payload).encode()),
+    )
+
+
+class CmsClientTest(unittest.TestCase):
+    def row(self):
+        return video_row("abc", "Hello World", "First line\nhttps://example.com", 90, 1760000000, youtube_id="yt1", now=0)
+
+    def test_from_env(self):
+        with mock.patch.dict("os.environ", {}, clear=True):
+            self.assertIsNone(CmsClient.from_env())
+        with mock.patch.dict("os.environ", {"CMS_API_TOKEN": "cms_x"}, clear=True):
+            self.assertEqual(CmsClient.from_env().url, content_api.CMS_API_URL)
+
+    def test_refuses_plain_http(self):
+        with self.assertRaises(content_api.CmsError):
+            CmsClient("cms_x", "http://cms.example.com/api/v1")
+
+    def test_creates_with_model_property_names(self):
+        client = CmsClient("cms_x")
+        with mock.patch("content_api._urlopen", return_value=cms_response(201, {"version": 1})) as urlopen:
+            self.assertTrue(write_video(client, self.row()))
+        request = urlopen.call_args[0][0]
+        self.assertEqual(request.full_url, "https://cms.rawkode.academy/api/v1/collections/videos")
+        self.assertEqual(request.get_header("Authorization"), "Bearer cms_x")
+        data = json.loads(request.data)["data"]
+        self.assertEqual(data["youtubeId"], "yt1")
+        self.assertEqual(data["publishedAt"], "2025-10-09T08:53:20.000Z")
+        self.assertEqual(data["descriptionDoc"]["type"], "doc")
+        self.assertNotIn("description_doc", data)
+        self.assertNotIn("updated_at", data)
+
+    def test_existing_video(self):
+        client = CmsClient("cms_x")
+        with mock.patch("content_api._urlopen", side_effect=cms_error(409, {"error": {"code": "exists", "message": "exists"}})):
+            self.assertFalse(write_video(client, self.row()))
+
+    def test_validation_errors_are_raised_with_fields(self):
+        client = CmsClient("cms_x")
+        payload = {"error": {"code": "validation", "message": "Invalid video", "issues": [{"path": "slug", "message": "bad"}]}}
+        with mock.patch("content_api._urlopen", side_effect=cms_error(422, payload)):
+            with self.assertRaisesRegex(content_api.CmsError, "slug: bad"):
+                write_video(client, self.row())
 
 
 class InvalidateCacheTest(unittest.TestCase):

@@ -19,7 +19,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from datetime import datetime
+from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +27,7 @@ CLOUDFLARE_API = "https://api.cloudflare.com/client/v4"
 # platform-videos (projects/rawkode.academy/platform/videos/service.cue)
 VIDEOS_DATABASE_ID = "0e96020b-eb03-456c-a593-fa73f2e845d4"
 CACHE_INVALIDATION_URL = "https://rawkode.academy/api/cache/invalidate"
+CMS_API_URL = "https://cms.rawkode.academy/api/v1"
 
 class _NoRedirect(urllib.request.HTTPRedirectHandler):
     """
@@ -226,8 +227,99 @@ class D1Client:
         return payload["result"]
 
 
+class CmsError(RuntimeError):
+    pass
+
+
+def video_data(row):
+    """
+    The row as the CMS videos collection takes it: the write model's property
+    names, publishedAt as an ISO timestamp, the description as a document.
+    """
+    doc = json.loads(row["description_doc"]) if row.get("description_doc") else None
+    data = {
+        "id": row["id"],
+        "title": row["title"],
+        "subtitle": row["subtitle"],
+        "slug": row["slug"],
+        "description": row["description"],
+        "descriptionDoc": doc,
+        "duration": row["duration"],
+        "publishedAt": datetime.fromtimestamp(row["publishedAt"], timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z"),
+        "youtubeId": row["youtube_id"],
+    }
+    return {k: v for k, v in data.items() if v is not None}
+
+
+class CmsClient:
+    """
+    Writes through the CMS API (cms.rawkode.academy), which validates the row,
+    records a revision and purges the website cache itself. Preferred over
+    D1Client when CMS_API_TOKEN is set.
+    """
+
+    def __init__(self, token, url=CMS_API_URL, timeout=60):
+        parsed = urllib.parse.urlsplit(url)
+        if parsed.scheme != "https" and parsed.hostname not in ("localhost", "127.0.0.1"):
+            raise CmsError(f"Refusing to send the CMS token to a non-https URL: {url}")
+        self.token = token
+        self.url = url.rstrip("/")
+        self.timeout = timeout
+
+    @classmethod
+    def from_env(cls):
+        """Build from CMS_API_TOKEN (and optional CMS_API_URL), or None if unset."""
+        token = os.environ.get("CMS_API_TOKEN")
+        if not token:
+            return None
+        return cls(token, os.environ.get("CMS_API_URL") or CMS_API_URL)
+
+    def request(self, method, path, body=None):
+        """Returns (status, parsed JSON body); HTTP errors are returned, not raised."""
+        data = json.dumps(body).encode() if body is not None else None
+        request = urllib.request.Request(f"{self.url}{path}", data=data, method=method, headers={
+            "Authorization": f"Bearer {self.token}",
+            "Content-Type": "application/json",
+        })
+        try:
+            with _urlopen(request, self.timeout) as response:
+                raw = response.read()
+                return response.status, (json.loads(raw) if raw else {})
+        except urllib.error.HTTPError as e:
+            raw = e.read()
+            try:
+                return e.code, json.loads(raw) if raw else {}
+            except ValueError:
+                return e.code, {"error": {"message": raw.decode(errors="replace")}}
+
+
+def _write_video_cms(client, row):
+    status, body = client.request("POST", "/collections/videos", {"data": video_data(row)})
+    if status == 201:
+        logger.info(f"Created video {row['id']} through the CMS (version {body.get('version')})")
+        return True
+    if status == 202:
+        logger.warning(
+            f"The CMS stored video {row['id']} as proposal {body.get('proposal', {}).get('id')}; "
+            "it appears once an admin approves it"
+        )
+        return True
+    error = body.get("error", {})
+    if status == 409 and error.get("code") == "exists":
+        logger.warning(f"Video {row['id']} already exists; left unchanged")
+        return False
+    issues = "; ".join(f"{i.get('path')}: {i.get('message')}" for i in error.get("issues", []))
+    if "videos.slug" in issues or "unique" in str(error.get("message", "")):
+        raise CmsError(
+            f"Slug '{row['slug']}' is already used by another video ({issues or error.get('message')})."
+        )
+    raise CmsError(f"CMS write failed ({status}): {error.get('message', body)} {issues}".strip())
+
+
 def write_video(client, row):
     """Insert the row; returns True if a row was created, False if it existed."""
+    if isinstance(client, CmsClient):
+        return _write_video_cms(client, row)
     sql, params = insert_video_statement(row)
     try:
         result = client.query(sql, params)

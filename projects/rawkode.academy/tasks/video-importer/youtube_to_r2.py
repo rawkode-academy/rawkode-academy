@@ -21,6 +21,7 @@ from cuid2 import Cuid
 import json
 import time
 from content_api import (
+    CmsClient,
     D1Client,
     insert_video_sql,
     invalidate_cache,
@@ -827,7 +828,9 @@ class YouTubeToR2:
                     logger.info("Skipping D1 write - already completed")
 
                 if d1_client is not None and state.is_step_completed('d1_written') and not state.is_step_completed('cache_invalidated'):
-                    if invalidate_cache([f"videos:{video_cuid}"]):
+                    # CMS writes purge the website cache through the
+                    # content-changes queue; direct D1 writes must ask.
+                    if isinstance(d1_client, CmsClient) or invalidate_cache([f"videos:{video_cuid}"]):
                         state.mark_step_completed('cache_invalidated')
 
                 # Mark as completed
@@ -942,10 +945,12 @@ def main():
     # D1 (platform-videos) credentials, unless only printing the SQL
     d1_client = None
     if not args.skip_d1:
-        d1_client = D1Client.from_env()
+        # Prefer the CMS (validated, versioned, purges the cache itself);
+        # fall back to the D1 HTTP API until a CMS token is configured.
+        d1_client = CmsClient.from_env() or D1Client.from_env()
         if d1_client is None:
             missing_vars.extend(v for v in ('CLOUDFLARE_ACCOUNT_ID', 'CLOUDFLARE_API_TOKEN') if not os.environ.get(v))
-        if not os.environ.get('CACHE_INVALIDATION_TOKEN'):
+        if not isinstance(d1_client, CmsClient) and not os.environ.get('CACHE_INVALIDATION_TOKEN'):
             logger.warning("CACHE_INVALIDATION_TOKEN is not set; the website cache will not be invalidated after the D1 write")
 
     if missing_vars:
