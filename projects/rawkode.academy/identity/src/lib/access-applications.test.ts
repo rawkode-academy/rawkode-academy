@@ -12,12 +12,6 @@ const trustedClientIds = new Set(
 );
 
 describe("access applications", () => {
-	test("Payload exposes the staff role", () => {
-		expect(
-			findAccessRole("rawkode-academy-payload", ROLE_KEYS.staff),
-		).toBeDefined();
-	});
-
 	test("Studio exposes the studio_operator role", () => {
 		expect(
 			findAccessRole("rawkode-studio", ROLE_KEYS.studioOperator),
@@ -26,7 +20,7 @@ describe("access applications", () => {
 
 	test("client_approver is not an identity role", () => {
 		expect(
-			findAccessRole("rawkode-academy-payload", "client_approver"),
+			findAccessRole("rawkode-studio", "client_approver"),
 		).toBeUndefined();
 	});
 

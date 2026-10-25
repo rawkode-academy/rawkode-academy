@@ -31,6 +31,3 @@ worker-configuration.d.ts
 
 # Website subgraph SDL (generated)
 subgraph/schema.gql
-
-# Isolated review build
-dist-review/
