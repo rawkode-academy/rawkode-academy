@@ -15,7 +15,7 @@ export const getStateHandler = async (request: RequestWithIdentity & RouteParams
 	const username = request.identity?.userInfo?.username || '';
 	if (!projectName || projectName === '') return new Response('No project name specified.', { status: 400 });
 	if (!username || username === '') return new Response('Unable to determine username', { status: 500 });
-	const state: R2ObjectBody = await env.TFSTATE_BUCKET.get(`${projectName}.tfstate`);
+	const state = await env.TFSTATE_BUCKET.get(`${projectName}.tfstate`);
 	if (state === null) return new Response(null, { status: 204 });
 	return new Response(await state?.arrayBuffer(), { headers: { 'content-type': 'application/json' } });
 };
