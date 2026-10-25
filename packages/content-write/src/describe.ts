@@ -82,7 +82,10 @@ function inspect(schema: z.ZodTypeAny): {
 	return { base: current, hint, optional, nullable, default: fallback };
 }
 
-function typeOf(base: z.ZodTypeAny, hint: string | undefined): {
+function typeOf(
+	base: z.ZodTypeAny,
+	hint: string | undefined,
+): {
 	type: FieldType;
 	options?: string[];
 } {
@@ -93,7 +96,8 @@ function typeOf(base: z.ZodTypeAny, hint: string | undefined): {
 	if (base instanceof z.ZodNumber) return { type: "number" };
 	if (base instanceof z.ZodBoolean) return { type: "boolean" };
 	if (base instanceof z.ZodDate) return { type: "date" };
-	if (base instanceof z.ZodEnum) return { type: "enum", options: [...base.options] };
+	if (base instanceof z.ZodEnum)
+		return { type: "enum", options: [...base.options] };
 	if (base instanceof z.ZodNativeEnum) {
 		return { type: "enum", options: Object.values(base.enum).map(String) };
 	}
@@ -110,7 +114,9 @@ function typeOf(base: z.ZodTypeAny, hint: string | undefined): {
 /** The object shape behind a schema (unwrapping refinements), when it has one. */
 function shapeOf(schema: z.ZodTypeAny): z.ZodRawShape | undefined {
 	const { base } = inspect(schema);
-	return base instanceof z.ZodObject ? (base.shape as z.ZodRawShape) : undefined;
+	return base instanceof z.ZodObject
+		? (base.shape as z.ZodRawShape)
+		: undefined;
 }
 
 export function describeFields(schema: z.ZodTypeAny): FieldDescriptor[] {

@@ -113,11 +113,36 @@ export const COLLECTIONS: Collection[] = [
 			},
 		],
 		references: [
-			{ label: "video guest", binding: "WRITE_VIDEO_GUESTS", model: "video-guests", column: "guestId" },
-			{ label: "show host", binding: "WRITE_SHOW_HOSTS", model: "show-hosts", column: "hostId" },
-			{ label: "article author", binding: "WRITE_ARTICLES", model: "article-authors", column: "personId" },
-			{ label: "news author", binding: "WRITE_NEWS", model: "news-authors", column: "personId" },
-			{ label: "ADR author", binding: "WRITE_ADRS", model: "adr-authors", column: "personId" },
+			{
+				label: "video guest",
+				binding: "WRITE_VIDEO_GUESTS",
+				model: "video-guests",
+				column: "guestId",
+			},
+			{
+				label: "show host",
+				binding: "WRITE_SHOW_HOSTS",
+				model: "show-hosts",
+				column: "hostId",
+			},
+			{
+				label: "article author",
+				binding: "WRITE_ARTICLES",
+				model: "article-authors",
+				column: "personId",
+			},
+			{
+				label: "news author",
+				binding: "WRITE_NEWS",
+				model: "news-authors",
+				column: "personId",
+			},
+			{
+				label: "ADR author",
+				binding: "WRITE_ADRS",
+				model: "adr-authors",
+				column: "personId",
+			},
 		],
 		websitePath: (row) => `/people/${row.id}`,
 	},
@@ -140,9 +165,24 @@ export const COLLECTIONS: Collection[] = [
 			},
 		],
 		references: [
-			{ label: "video", binding: "WRITE_VIDEO_TECHNOLOGIES", model: "video-technologies", column: "technologyId" },
-			{ label: "article", binding: "WRITE_ARTICLES", model: "article-technologies", column: "technologyId" },
-			{ label: "news story", binding: "WRITE_NEWS", model: "news-technologies", column: "technologyId" },
+			{
+				label: "video",
+				binding: "WRITE_VIDEO_TECHNOLOGIES",
+				model: "video-technologies",
+				column: "technologyId",
+			},
+			{
+				label: "article",
+				binding: "WRITE_ARTICLES",
+				model: "article-technologies",
+				column: "technologyId",
+			},
+			{
+				label: "news story",
+				binding: "WRITE_NEWS",
+				model: "news-technologies",
+				column: "technologyId",
+			},
 		],
 		websitePath: (row) => `/technology/${row.id}`,
 	},
@@ -166,7 +206,12 @@ export const COLLECTIONS: Collection[] = [
 			},
 		],
 		references: [
-			{ label: "episode", binding: "WRITE_EPISODES", model: "episode", column: "showId" },
+			{
+				label: "episode",
+				binding: "WRITE_EPISODES",
+				model: "episode",
+				column: "showId",
+			},
 		],
 		websitePath: (row) => `/shows/${row.id}`,
 	},
@@ -335,7 +380,12 @@ export const COLLECTIONS: Collection[] = [
 		hidden: derived,
 		panels: [],
 		references: [
-			{ label: "course module", binding: "WRITE_COURSES", model: "course-module", column: "courseId" },
+			{
+				label: "course module",
+				binding: "WRITE_COURSES",
+				model: "course-module",
+				column: "courseId",
+			},
 		],
 		websitePath: (row) => `/courses/${row.id}`,
 	},
@@ -367,6 +417,9 @@ export function findCollection(name: string): Collection | undefined {
 	return COLLECTIONS.find((c) => c.name === name);
 }
 
-export function findPanel(collection: Collection, name: string): Panel | undefined {
+export function findPanel(
+	collection: Collection,
+	name: string,
+): Panel | undefined {
 	return collection.panels.find((p) => p.name === name);
 }

@@ -57,7 +57,10 @@ export interface ServiceModels {
 	models: Model[];
 }
 
-export const defineModels = (service: string, models: Model[]): ServiceModels => {
+export const defineModels = (
+	service: string,
+	models: Model[],
+): ServiceModels => {
 	const names = new Set<string>();
 	for (const model of models) {
 		if (names.has(model.name)) {
@@ -118,11 +121,11 @@ export const httpUrl = () =>
 	z
 		.string()
 		.refine((value) => {
-		try {
-			const { protocol } = new URL(value);
-			return protocol === "http:" || protocol === "https:";
-		} catch {
-			return false;
-		}
-	}, "Use an http(s) URL")
+			try {
+				const { protocol } = new URL(value);
+				return protocol === "http:" || protocol === "https:";
+			} catch {
+				return false;
+			}
+		}, "Use an http(s) URL")
 		.describe("url");

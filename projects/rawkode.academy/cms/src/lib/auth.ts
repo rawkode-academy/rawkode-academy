@@ -30,7 +30,10 @@ const encoder = new TextEncoder();
 export function base64Url(bytes: Uint8Array): string {
 	let binary = "";
 	for (const byte of bytes) binary += String.fromCharCode(byte);
-	return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+	return btoa(binary)
+		.replace(/\+/g, "-")
+		.replace(/\//g, "_")
+		.replace(/=+$/, "");
 }
 
 export function randomToken(bytes = 32): string {
@@ -96,8 +99,14 @@ export async function createSession(
 	return token;
 }
 
-export async function deleteSession(db: D1Database, token: string): Promise<void> {
-	await db.prepare("DELETE FROM sessions WHERE id_hash = ?").bind(await sha256(token)).run();
+export async function deleteSession(
+	db: D1Database,
+	token: string,
+): Promise<void> {
+	await db
+		.prepare("DELETE FROM sessions WHERE id_hash = ?")
+		.bind(await sha256(token))
+		.run();
 }
 
 // ---------------------------------------------------------------- tokens
@@ -124,7 +133,14 @@ export async function createApiToken(
 		.prepare(
 			"INSERT INTO api_tokens (id, name, role, secret_hash, created_by, created_at) VALUES (?, ?, ?, ?, ?, ?)",
 		)
-		.bind(id, input.name, input.role, await sha256(secret), input.createdBy, now)
+		.bind(
+			id,
+			input.name,
+			input.role,
+			await sha256(secret),
+			input.createdBy,
+			now,
+		)
 		.run();
 	return { id, secret };
 }
@@ -146,9 +162,15 @@ export async function listApiTokens(db: D1Database): Promise<ApiTokenRecord[]> {
 	}));
 }
 
-export async function revokeApiToken(db: D1Database, id: string, now = Date.now()) {
+export async function revokeApiToken(
+	db: D1Database,
+	id: string,
+	now = Date.now(),
+) {
 	await db
-		.prepare("UPDATE api_tokens SET revoked_at = ? WHERE id = ? AND revoked_at IS NULL")
+		.prepare(
+			"UPDATE api_tokens SET revoked_at = ? WHERE id = ? AND revoked_at IS NULL",
+		)
 		.bind(now, id)
 		.run();
 }
@@ -189,7 +211,12 @@ export async function authenticate(
 			"SELECT user_id, name, roles, expires_at FROM sessions WHERE id_hash = ?",
 		)
 		.bind(await sha256(cookie))
-		.first<{ user_id: string; name: string; roles: string; expires_at: number }>();
+		.first<{
+			user_id: string;
+			name: string;
+			roles: string;
+			expires_at: number;
+		}>();
 	if (!session || session.expires_at < now) return null;
 	const roles = (JSON.parse(session.roles) as string[]).filter((r): r is Role =>
 		(ROLES as readonly string[]).includes(r),
@@ -273,7 +300,11 @@ export async function exchangeCode(
 		}),
 	});
 	if (!response.ok) {
-		console.error("[cms] token exchange failed", response.status, await response.text());
+		console.error(
+			"[cms] token exchange failed",
+			response.status,
+			await response.text(),
+		);
 		return null;
 	}
 	return (await response.json()) as { access_token: string };

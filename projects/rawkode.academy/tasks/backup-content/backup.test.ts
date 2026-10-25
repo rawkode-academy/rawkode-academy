@@ -15,7 +15,9 @@ describe("content backups", () => {
 	}
 }`;
 		expect(contentDatabaseOf(cue)).toBe("platform-technologies");
-		expect(contentDatabaseOf(cue.replace("contentWriteModel: true", ""))).toBeUndefined();
+		expect(
+			contentDatabaseOf(cue.replace("contentWriteModel: true", "")),
+		).toBeUndefined();
 	});
 
 	test("finds every content service in the repository", async () => {

@@ -7,27 +7,29 @@ import { z } from "zod";
 
 /** A TipTap document that the website can render; rejects unknown nodes and attributes. */
 export const richTextDocument = () =>
-	z.custom<DocNode>().superRefine((value, ctx) => {
-		if (
-			typeof value !== "object" ||
-			value === null ||
-			(value as { type?: unknown }).type !== "doc"
-		) {
-			ctx.addIssue({
-				code: z.ZodIssueCode.custom,
-				message: 'Expected a rich-text document ({"type":"doc",...})',
-			});
-			return;
-		}
-		try {
-			validateDoc(value);
-		} catch (error) {
-			ctx.addIssue({
-				code: z.ZodIssueCode.custom,
-				message: `Invalid rich-text document: ${error instanceof Error ? error.message : String(error)}`,
-			});
-		}
-	})
+	z
+		.custom<DocNode>()
+		.superRefine((value, ctx) => {
+			if (
+				typeof value !== "object" ||
+				value === null ||
+				(value as { type?: unknown }).type !== "doc"
+			) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: 'Expected a rich-text document ({"type":"doc",...})',
+				});
+				return;
+			}
+			try {
+				validateDoc(value);
+			} catch (error) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: `Invalid rich-text document: ${error instanceof Error ? error.message : String(error)}`,
+				});
+			}
+		})
 		// Editors (the CMS) render this field with the rich-text editor.
 		.describe("rich-text");
 
@@ -51,5 +53,4 @@ export const isEmptyDocument = (doc: unknown): boolean => {
 };
 
 /** The plain-text copy of a document (video and show descriptions keep one). */
-export const textOf = (doc: unknown): string =>
-	toText(doc as DocNode).trim();
+export const textOf = (doc: unknown): string => toText(doc as DocNode).trim();

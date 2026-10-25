@@ -43,7 +43,9 @@ export default {
 	async queue(batch, env) {
 		const contentEnv = env as unknown as ContentEnv;
 		if (!contentEnv.CONTENT_CACHE) {
-			console.error("[content] content-changes skipped: CONTENT_CACHE is not bound");
+			console.error(
+				"[content] content-changes skipped: CONTENT_CACHE is not bound",
+			);
 			batch.retryAll({ delaySeconds: 60 });
 			return;
 		}

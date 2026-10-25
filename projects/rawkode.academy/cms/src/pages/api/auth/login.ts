@@ -6,7 +6,11 @@ export const prerender = false;
 const PKCE_COOKIE = "cms-pkce";
 
 export const GET: APIRoute = async ({ url, redirect, cookies }) => {
-	const { url: authorize, verifier, state } = await authorizationRequest(
+	const {
+		url: authorize,
+		verifier,
+		state,
+	} = await authorizationRequest(
 		url.origin,
 		url.searchParams.get("returnTo") ?? "/",
 	);

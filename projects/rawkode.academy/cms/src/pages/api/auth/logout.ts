@@ -1,5 +1,10 @@
 import type { APIRoute } from "astro";
-import { deleteSession, readCookie, SESSION_COOKIE, sessionCookie } from "@/lib/auth";
+import {
+	deleteSession,
+	readCookie,
+	SESSION_COOKIE,
+	sessionCookie,
+} from "@/lib/auth";
 import { cmsBindings } from "@/lib/server";
 
 export const prerender = false;

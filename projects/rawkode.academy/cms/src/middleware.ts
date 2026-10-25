@@ -14,7 +14,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
 		return next();
 	}
 	if (!context.locals.principal) {
-		return context.redirect(`/login?returnTo=${encodeURIComponent(path + context.url.search)}`);
+		return context.redirect(
+			`/login?returnTo=${encodeURIComponent(path + context.url.search)}`,
+		);
 	}
 	const response = await next();
 	response.headers.set("cache-control", "no-store");

@@ -20,7 +20,9 @@ export interface ContentDatabase {
 /** The DB binding's database name from a content service's service.cue, or undefined. */
 export function contentDatabaseOf(serviceCue: string): string | undefined {
 	if (!/\bcontentWriteModel:\s*true\b/.test(serviceCue)) return undefined;
-	const block = /binding:\s*"DB"[\s\S]*?databaseName:\s*"([^"]+)"/.exec(serviceCue);
+	const block = /binding:\s*"DB"[\s\S]*?databaseName:\s*"([^"]+)"/.exec(
+		serviceCue,
+	);
 	return block?.[1];
 }
 
@@ -56,7 +58,8 @@ async function run(args: string[]): Promise<void> {
 		env: process.env,
 	});
 	const code = await proc.exited;
-	if (code !== 0) throw new Error(`wrangler ${args.slice(0, 3).join(" ")} exited ${code}`);
+	if (code !== 0)
+		throw new Error(`wrangler ${args.slice(0, 3).join(" ")} exited ${code}`);
 }
 
 async function main() {
@@ -65,7 +68,9 @@ async function main() {
 	const day = new Date().toISOString().slice(0, 10);
 	const databases = await contentDatabases();
 	if (databases.length === 0) throw new Error("No content databases found");
-	console.log(`Backing up ${databases.length} databases to r2://${bucket}/d1/${day}/`);
+	console.log(
+		`Backing up ${databases.length} databases to r2://${bucket}/d1/${day}/`,
+	);
 	if (dryRun) {
 		for (const d of databases) console.log(`  ${d.service}: ${d.database}`);
 		return;
@@ -98,10 +103,15 @@ async function main() {
 					bytes: (await stat(file)).size,
 					...counts,
 				});
-				console.log(`ok ${database}: ${counts.tables} tables, ${counts.inserts} rows`);
+				console.log(
+					`ok ${database}: ${counts.tables} tables, ${counts.inserts} rows`,
+				);
 			} catch (error) {
 				failures.push(database);
-				console.error(`FAILED ${database}:`, error instanceof Error ? error.message : error);
+				console.error(
+					`FAILED ${database}:`,
+					error instanceof Error ? error.message : error,
+				);
 			}
 		}
 		const manifestFile = join(dir, "manifest.json");
@@ -124,7 +134,9 @@ async function main() {
 		await rm(dir, { recursive: true, force: true });
 	}
 	if (failures.length) {
-		throw new Error(`${failures.length} databases failed: ${failures.join(", ")}`);
+		throw new Error(
+			`${failures.length} databases failed: ${failures.join(", ")}`,
+		);
 	}
 }
 

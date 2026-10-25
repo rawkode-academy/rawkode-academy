@@ -48,7 +48,9 @@ async function exec(DB: D1Database, sql: string) {
 }
 
 async function migrate(DB: D1Database, dir: string) {
-	for (const file of (await readdir(dir)).filter((f) => f.endsWith(".sql")).sort()) {
+	for (const file of (await readdir(dir))
+		.filter((f) => f.endsWith(".sql"))
+		.sort()) {
 		await exec(DB, await readFile(join(dir, file), "utf8"));
 	}
 }
@@ -109,8 +111,15 @@ export async function harness(bindings: Binding[]): Promise<Harness> {
 	await migrate(DB, join(import.meta.dir, "../migrations"));
 	const media = new Map<string, { bytes: Uint8Array; contentType?: string }>();
 	const MEDIA = {
-		put: async (key: string, value: Uint8Array, options?: { httpMetadata?: { contentType?: string } }) => {
-			media.set(key, { bytes: value, contentType: options?.httpMetadata?.contentType });
+		put: async (
+			key: string,
+			value: Uint8Array,
+			options?: { httpMetadata?: { contentType?: string } },
+		) => {
+			media.set(key, {
+				bytes: value,
+				contentType: options?.httpMetadata?.contentType,
+			});
 		},
 	} as unknown as R2Bucket;
 	let clock = Date.parse("2026-10-25T12:00:00Z");
@@ -128,7 +137,11 @@ export async function harness(bindings: Binding[]): Promise<Harness> {
 			const request = new Request(`${origin}/api/v1${path}`, {
 				method,
 				headers,
-				...(init.form ? { body: init.form } : body !== undefined ? { body: JSON.stringify(body) } : {}),
+				...(init.form
+					? { body: init.form }
+					: body !== undefined
+						? { body: JSON.stringify(body) }
+						: {}),
 			});
 			const response = await handleApi(env, {
 				request,
@@ -142,7 +155,11 @@ export async function harness(bindings: Binding[]): Promise<Harness> {
 	};
 }
 
-const person = (id: string, roles: Principal["roles"], via: Principal["via"] = "session"): Principal => ({
+const person = (
+	id: string,
+	roles: Principal["roles"],
+	via: Principal["via"] = "session",
+): Principal => ({
 	actor: { id, kind: via === "token" ? "agent" : "user", name: id },
 	roles,
 	via,

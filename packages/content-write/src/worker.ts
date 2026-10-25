@@ -23,7 +23,9 @@ export function contentWriteModel(service: ServiceModels) {
 
 		async fetch(request: Request): Promise<Response> {
 			if (new URL(request.url).pathname === "/health") {
-				return new Response("ok", { headers: { "content-type": "text/plain" } });
+				return new Response("ok", {
+					headers: { "content-type": "text/plain" },
+				});
 			}
 			return new Response("Not Found", { status: 404 });
 		}
@@ -71,7 +73,12 @@ export function contentWriteModel(service: ServiceModels) {
 			return this.store.update(model, id, patch, options, actor);
 		}
 
-		delete(model: string, id: string, options: { ifVersion: number }, actor: Actor) {
+		delete(
+			model: string,
+			id: string,
+			options: { ifVersion: number },
+			actor: Actor,
+		) {
 			return this.store.delete(model, id, options, actor);
 		}
 

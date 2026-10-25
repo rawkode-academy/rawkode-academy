@@ -22,7 +22,9 @@ export interface Dimensions {
 }
 
 export function extensionFor(contentType: string): string | undefined {
-	return ALLOWED_TYPES.get(contentType.split(";")[0]?.trim().toLowerCase() ?? "");
+	return ALLOWED_TYPES.get(
+		contentType.split(";")[0]?.trim().toLowerCase() ?? "",
+	);
 }
 
 /** A safe object key: kebab-case base name, the type's extension, under the entity. */
@@ -35,7 +37,10 @@ export function mediaKey(
 ): string | undefined {
 	const extension = extensionFor(contentType);
 	if (!extension) return undefined;
-	if (!/^[a-z0-9][a-z0-9-]*$/.test(collection) || !/^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(id)) {
+	if (
+		!/^[a-z0-9][a-z0-9-]*$/.test(collection) ||
+		!/^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(id)
+	) {
 		return undefined;
 	}
 	const base =
@@ -48,11 +53,17 @@ export function mediaKey(
 	return `${collection}/${id}/${base}-${unique}.${extension}`;
 }
 
-const u16be = (b: Uint8Array, i: number) => ((b[i] ?? 0) << 8) | (b[i + 1] ?? 0);
-const u16le = (b: Uint8Array, i: number) => (b[i] ?? 0) | ((b[i + 1] ?? 0) << 8);
-const u24le = (b: Uint8Array, i: number) => u16le(b, i) | ((b[i + 2] ?? 0) << 16);
+const u16be = (b: Uint8Array, i: number) =>
+	((b[i] ?? 0) << 8) | (b[i + 1] ?? 0);
+const u16le = (b: Uint8Array, i: number) =>
+	(b[i] ?? 0) | ((b[i + 1] ?? 0) << 8);
+const u24le = (b: Uint8Array, i: number) =>
+	u16le(b, i) | ((b[i + 2] ?? 0) << 16);
 const u32be = (b: Uint8Array, i: number) =>
-	(((b[i] ?? 0) << 24) >>> 0) + ((b[i + 1] ?? 0) << 16) + ((b[i + 2] ?? 0) << 8) + (b[i + 3] ?? 0);
+	(((b[i] ?? 0) << 24) >>> 0) +
+	((b[i + 1] ?? 0) << 16) +
+	((b[i + 2] ?? 0) << 8) +
+	(b[i + 3] ?? 0);
 const ascii = (b: Uint8Array, i: number, n: number) =>
 	String.fromCharCode(...b.subarray(i, i + n));
 
@@ -70,7 +81,10 @@ export function imageDimensions(bytes: Uint8Array): Dimensions | undefined {
 	if (ascii(bytes, 0, 4) === "RIFF" && ascii(bytes, 8, 4) === "WEBP") {
 		const chunk = ascii(bytes, 12, 4);
 		if (chunk === "VP8 ") {
-			return { width: u16le(bytes, 26) & 0x3fff, height: u16le(bytes, 28) & 0x3fff };
+			return {
+				width: u16le(bytes, 26) & 0x3fff,
+				height: u16le(bytes, 28) & 0x3fff,
+			};
 		}
 		if (chunk === "VP8L") {
 			const b0 = bytes[21] ?? 0;
@@ -95,8 +109,11 @@ export function imageDimensions(bytes: Uint8Array): Dimensions | undefined {
 			const marker = bytes[i + 1] ?? 0;
 			const length = u16be(bytes, i + 2);
 			const isFrame =
-				marker >= 0xc0 && marker <= 0xcf && ![0xc4, 0xc8, 0xcc].includes(marker);
-			if (isFrame) return { height: u16be(bytes, i + 5), width: u16be(bytes, i + 7) };
+				marker >= 0xc0 &&
+				marker <= 0xcf &&
+				![0xc4, 0xc8, 0xcc].includes(marker);
+			if (isFrame)
+				return { height: u16be(bytes, i + 5), width: u16be(bytes, i + 7) };
 			i += 2 + length;
 		}
 		return undefined;
@@ -106,11 +123,16 @@ export function imageDimensions(bytes: Uint8Array): Dimensions | undefined {
 	const svg = /<svg\b[^>]*>/i.exec(head)?.[0];
 	if (svg) {
 		const attr = (name: string) =>
-			Number.parseFloat(new RegExp(`\\b${name}="([\\d.]+)(?:px)?"`).exec(svg)?.[1] ?? "");
+			Number.parseFloat(
+				new RegExp(`\\b${name}="([\\d.]+)(?:px)?"`).exec(svg)?.[1] ?? "",
+			);
 		const width = attr("width");
 		const height = attr("height");
-		if (width > 0 && height > 0) return { width: Math.round(width), height: Math.round(height) };
-		const box = /viewBox="[\d.-]+[ ,]+[\d.-]+[ ,]+([\d.]+)[ ,]+([\d.]+)"/.exec(svg);
+		if (width > 0 && height > 0)
+			return { width: Math.round(width), height: Math.round(height) };
+		const box = /viewBox="[\d.-]+[ ,]+[\d.-]+[ ,]+([\d.]+)[ ,]+([\d.]+)"/.exec(
+			svg,
+		);
 		if (box) {
 			return {
 				width: Math.round(Number(box[1])),

@@ -28,8 +28,19 @@ import {
 	findPanel,
 	type ListPanel,
 } from "./collections";
-import { imageDimensions, MAX_UPLOAD_BYTES, MEDIA_BASE_URL, mediaKey } from "./media";
-import { type Access, accessFor, canRead, isAdmin, type Scope } from "./permissions";
+import {
+	imageDimensions,
+	MAX_UPLOAD_BYTES,
+	MEDIA_BASE_URL,
+	mediaKey,
+} from "./media";
+import {
+	type Access,
+	accessFor,
+	canRead,
+	isAdmin,
+	type Scope,
+} from "./permissions";
 
 export interface ApiEnv {
 	DB: D1Database;
@@ -66,7 +77,8 @@ const STATUS: Record<WriteError["code"], number> = {
 	invalid_request: 400,
 };
 
-const failure = (error: WriteError) => json(STATUS[error.code] ?? 400, { error });
+const failure = (error: WriteError) =>
+	json(STATUS[error.code] ?? 400, { error });
 const problem = (status: number, code: string, message: string) =>
 	json(status, { error: { code, message } });
 
@@ -79,10 +91,13 @@ class HttpError extends Error {
 async function body<T = Record<string, unknown>>(request: Request): Promise<T> {
 	try {
 		const value = await request.json();
-		if (typeof value !== "object" || value === null || Array.isArray(value)) throw new Error();
+		if (typeof value !== "object" || value === null || Array.isArray(value))
+			throw new Error();
 		return value as T;
 	} catch {
-		throw new HttpError(problem(400, "invalid_request", "Send a JSON object body"));
+		throw new HttpError(
+			problem(400, "invalid_request", "Send a JSON object body"),
+		);
 	}
 }
 
@@ -101,11 +116,15 @@ function service(env: ApiEnv, binding: Binding): ContentWriteRpc {
 
 function collectionOr404(name: string): Collection {
 	const found = findCollection(name);
-	if (!found) throw new HttpError(problem(404, "not_found", `No collection "${name}"`));
+	if (!found)
+		throw new HttpError(problem(404, "not_found", `No collection "${name}"`));
 	return found;
 }
 
-async function scopeOf(env: ApiEnv, principal: Principal | null): Promise<Scope> {
+async function scopeOf(
+	env: ApiEnv,
+	principal: Principal | null,
+): Promise<Scope> {
 	if (!principal || principal.via !== "session" || isAdmin(principal)) {
 		return { people: [], technologies: [] };
 	}
@@ -116,7 +135,9 @@ async function scopeOf(env: ApiEnv, principal: Principal | null): Promise<Scope>
 		.all<{ kind: string; target_id: string }>();
 	return {
 		people: results.filter((r) => r.kind === "person").map((r) => r.target_id),
-		technologies: results.filter((r) => r.kind === "technology").map((r) => r.target_id),
+		technologies: results
+			.filter((r) => r.kind === "technology")
+			.map((r) => r.target_id),
 	};
 }
 
@@ -128,7 +149,8 @@ function readAccess(
 	id?: string,
 ): boolean {
 	if (!canRead(principal)) return false;
-	if (isAdmin(principal) || principal?.roles.includes("content_agent")) return true;
+	if (isAdmin(principal) || principal?.roles.includes("content_agent"))
+		return true;
 	if (!id) return false;
 	return (
 		(collection === "people" && scope.people.includes(id)) ||
@@ -149,7 +171,15 @@ async function logActivity(
 	await env.DB.prepare(
 		"INSERT INTO activity (actor_id, actor_name, collection, entity_id, operation, version, at) VALUES (?, ?, ?, ?, ?, ?, ?)",
 	)
-		.bind(actor.id, actor.name ?? null, collection, entityId, operation, version ?? null, now(env))
+		.bind(
+			actor.id,
+			actor.name ?? null,
+			collection,
+			entityId,
+			operation,
+			version ?? null,
+			now(env),
+		)
 		.run();
 }
 
@@ -157,7 +187,10 @@ async function logActivity(
 
 const describeCache = new Map<Binding, ModelDescriptor[]>();
 
-async function describe(env: ApiEnv, binding: Binding): Promise<ModelDescriptor[]> {
+async function describe(
+	env: ApiEnv,
+	binding: Binding,
+): Promise<ModelDescriptor[]> {
 	const cached = describeCache.get(binding);
 	if (cached) return cached;
 	const described = await service(env, binding).describe();
@@ -174,7 +207,11 @@ async function fieldsOf(env: ApiEnv, binding: Binding, model: string) {
 	return found?.fields ?? [];
 }
 
-async function collectionSummary(env: ApiEnv, c: Collection, principal: Principal | null) {
+async function collectionSummary(
+	env: ApiEnv,
+	c: Collection,
+	principal: Principal | null,
+) {
 	const panels = await Promise.all(
 		c.panels.map(async (p) => ({
 			kind: p.kind,
@@ -187,7 +224,9 @@ async function collectionSummary(env: ApiEnv, c: Collection, principal: Principa
 		})),
 	);
 	const fields = await fieldsOf(env, c.binding, c.model);
-	const entity = (await describe(env, c.binding)).find((m) => m.name === c.model);
+	const entity = (await describe(env, c.binding)).find(
+		(m) => m.name === c.model,
+	);
 	return {
 		name: c.name,
 		label: c.label,
@@ -197,7 +236,10 @@ async function collectionSummary(env: ApiEnv, c: Collection, principal: Principa
 		hidden: c.hidden,
 		fields,
 		panels,
-		create: accessFor(principal, c.name, undefined, { people: [], technologies: [] }),
+		create: accessFor(principal, c.name, undefined, {
+			people: [],
+			technologies: [],
+		}),
 	};
 }
 
@@ -242,7 +284,16 @@ const proposalFromRow = (r: Record<string, unknown>): Proposal => ({
 async function propose(
 	env: ApiEnv,
 	principal: Principal,
-	input: Omit<Proposal, "id" | "author" | "status" | "note" | "createdAt" | "decidedBy" | "decidedAt">,
+	input: Omit<
+		Proposal,
+		| "id"
+		| "author"
+		| "status"
+		| "note"
+		| "createdAt"
+		| "decidedBy"
+		| "decidedAt"
+	>,
 ): Promise<Response> {
 	const id = randomToken(12);
 	await env.DB.prepare(
@@ -314,11 +365,21 @@ async function applyProposal(
 	if (!current.ok) return current;
 	if (proposal.kind === "update") {
 		const ifVersion = force ? current.value.version : proposal.baseVersion;
-		const r = await svc.update(c.model, id, proposal.payload.patch as Row, { ifVersion }, actor);
+		const r = await svc.update(
+			c.model,
+			id,
+			proposal.payload.patch as Row,
+			{ ifVersion },
+			actor,
+		);
 		return r.ok ? { ok: true, value: { version: r.value.version } } : r;
 	}
 	const panel = findPanel(c, String(proposal.list));
-	if (!panel) return { ok: false, error: { code: "invalid_request", message: "Unknown panel" } };
+	if (!panel)
+		return {
+			ok: false,
+			error: { code: "invalid_request", message: "Unknown panel" },
+		};
 	if (panel.kind === "list") {
 		const parent = panel.parent(current.value.value);
 		const psvc = service(env, panel.binding);
@@ -328,7 +389,13 @@ async function applyProposal(
 			if (!list.ok) return list;
 			ifVersion = list.value.version;
 		}
-		const r = await psvc.setList(panel.model, parent, proposal.payload.items as Row[], { ifVersion }, actor);
+		const r = await psvc.setList(
+			panel.model,
+			parent,
+			proposal.payload.items as Row[],
+			{ ifVersion },
+			actor,
+		);
 		return r.ok ? { ok: true, value: { version: r.value.version } } : r;
 	}
 	const key = panel.key(current.value.value);
@@ -337,7 +404,14 @@ async function applyProposal(
 		const attached = await service(env, panel.binding).get(panel.model, key);
 		ifVersion = attached.ok ? attached.value.version : 0;
 	}
-	const r = await writeAttached(env, panel, key, proposal.payload.data as Row, ifVersion, actor);
+	const r = await writeAttached(
+		env,
+		panel,
+		key,
+		proposal.payload.data as Row,
+		ifVersion,
+		actor,
+	);
 	return r.ok ? { ok: true, value: { version: r.value.version } } : r;
 }
 
@@ -351,25 +425,28 @@ type Handler = (
 
 const routes: [string, RegExp, Handler][] = [];
 const route = (method: string, pattern: string, handler: Handler) => {
-	const regex = new RegExp(
-		`^${pattern.replace(/:[a-z]+/g, "([^/]+)")}/?$`,
-	);
+	const regex = new RegExp(`^${pattern.replace(/:[a-z]+/g, "([^/]+)")}/?$`);
 	routes.push([method, regex, handler]);
 };
 
 function requirePrincipal(req: ApiRequest): Principal {
-	if (!req.principal) throw new HttpError(problem(401, "unauthenticated", "Sign in or send an API token"));
+	if (!req.principal)
+		throw new HttpError(
+			problem(401, "unauthenticated", "Sign in or send an API token"),
+		);
 	return req.principal;
 }
 
 function requireAdmin(req: ApiRequest): Principal {
 	const p = requirePrincipal(req);
-	if (!isAdmin(p)) throw new HttpError(problem(403, "forbidden", "Admins only"));
+	if (!isAdmin(p))
+		throw new HttpError(problem(403, "forbidden", "Admins only"));
 	return p;
 }
 
 function deny(access: Access) {
-	if (access === "deny") throw new HttpError(problem(403, "forbidden", "Not allowed"));
+	if (access === "deny")
+		throw new HttpError(problem(403, "forbidden", "Not allowed"));
 }
 
 route("GET", "/me", async (_env, req) => {
@@ -387,7 +464,9 @@ route("GET", "/collections", async (env, req) => {
 			(c.name === "technologies" && scope.technologies.length > 0),
 	);
 	return json(200, {
-		collections: await Promise.all(visible.map((c) => collectionSummary(env, c, p))),
+		collections: await Promise.all(
+			visible.map((c) => collectionSummary(env, c, p)),
+		),
 		scope,
 	});
 });
@@ -403,11 +482,20 @@ route("GET", "/collections/:c", async (env, req, [name]) => {
 		offset: Number(url.searchParams.get("offset") ?? 0),
 	};
 	if (readAccess(p, scope, c.name)) {
-		return json(200, unwrap(await service(env, c.binding).list(c.model, query)));
+		return json(
+			200,
+			unwrap(await service(env, c.binding).list(c.model, query)),
+		);
 	}
 	// Guests and partners list only their linked rows.
-	const ids = c.name === "people" ? scope.people : c.name === "technologies" ? scope.technologies : [];
-	if (ids.length === 0) throw new HttpError(problem(403, "forbidden", "Not allowed"));
+	const ids =
+		c.name === "people"
+			? scope.people
+			: c.name === "technologies"
+				? scope.technologies
+				: [];
+	if (ids.length === 0)
+		throw new HttpError(problem(403, "forbidden", "Not allowed"));
 	const rows: Row[] = [];
 	for (const id of ids) {
 		const got = await service(env, c.binding).get(c.model, id);
@@ -435,9 +523,20 @@ route("POST", "/collections/:c", async (env, req, [name]) => {
 			baseVersion: 0,
 		});
 	}
-	const created = unwrap(await service(env, c.binding).create(c.model, data, p.actor));
-	const key = (await describe(env, c.binding)).find((m) => m.name === c.model)?.key ?? "id";
-	await logActivity(env, p.actor, c.name, String(created.value[key]), "create", created.version);
+	const created = unwrap(
+		await service(env, c.binding).create(c.model, data, p.actor),
+	);
+	const key =
+		(await describe(env, c.binding)).find((m) => m.name === c.model)?.key ??
+		"id";
+	await logActivity(
+		env,
+		p.actor,
+		c.name,
+		String(created.value[key]),
+		"create",
+		created.version,
+	);
 	return json(201, created);
 });
 
@@ -453,7 +552,9 @@ route("GET", "/collections/:c/:id", async (env, req, [name, rawId]) => {
 	for (const panel of c.panels) {
 		const svc = service(env, panel.binding);
 		if (panel.kind === "list") {
-			panels[panel.name] = unwrap(await svc.getList(panel.model, panel.parent(entity.value)));
+			panels[panel.name] = unwrap(
+				await svc.getList(panel.model, panel.parent(entity.value)),
+			);
 		} else {
 			const got = await svc.get(panel.model, panel.key(entity.value));
 			panels[panel.name] = got.ok
@@ -474,11 +575,23 @@ route("PATCH", "/collections/:c/:id", async (env, req, [name, rawId]) => {
 	const p = requirePrincipal(req);
 	const c = collectionOr404(String(name));
 	const id = decodeURIComponent(String(rawId));
-	const { patch, ifVersion } = await body<{ patch?: Row; ifVersion?: number }>(req.request);
+	const { patch, ifVersion } = await body<{ patch?: Row; ifVersion?: number }>(
+		req.request,
+	);
 	if (!patch || typeof ifVersion !== "number") {
-		return problem(400, "invalid_request", "Send { patch: {...}, ifVersion: n }");
+		return problem(
+			400,
+			"invalid_request",
+			"Send { patch: {...}, ifVersion: n }",
+		);
 	}
-	const access = accessFor(p, c.name, id, await scopeOf(env, p), Object.keys(patch));
+	const access = accessFor(
+		p,
+		c.name,
+		id,
+		await scopeOf(env, p),
+		Object.keys(patch),
+	);
 	deny(access);
 	if (access === "propose") {
 		return propose(env, p, {
@@ -491,7 +604,13 @@ route("PATCH", "/collections/:c/:id", async (env, req, [name, rawId]) => {
 		});
 	}
 	const updated = unwrap(
-		await service(env, c.binding).update(c.model, id, patch, { ifVersion }, p.actor),
+		await service(env, c.binding).update(
+			c.model,
+			id,
+			patch,
+			{ ifVersion },
+			p.actor,
+		),
 	);
 	await logActivity(env, p.actor, c.name, id, "update", updated.version);
 	return json(200, updated);
@@ -501,13 +620,17 @@ route("DELETE", "/collections/:c/:id", async (env, req, [name, rawId]) => {
 	const p = requireAdmin(req);
 	const c = collectionOr404(String(name));
 	const id = decodeURIComponent(String(rawId));
-	const ifVersion = Number(new URL(req.request.url).searchParams.get("ifVersion"));
+	const ifVersion = Number(
+		new URL(req.request.url).searchParams.get("ifVersion"),
+	);
 	if (!Number.isInteger(ifVersion)) {
 		return problem(400, "invalid_request", "Pass ?ifVersion=n");
 	}
 	const blocking: { label: string; rows: Row[] }[] = [];
 	for (const ref of c.references) {
-		const rows = unwrap(await service(env, ref.binding).findReferences(ref.model, ref.column, id));
+		const rows = unwrap(
+			await service(env, ref.binding).findReferences(ref.model, ref.column, id),
+		);
 		if (rows.length) blocking.push({ label: ref.label, rows });
 	}
 	if (blocking.length) {
@@ -519,97 +642,143 @@ route("DELETE", "/collections/:c/:id", async (env, req, [name, rawId]) => {
 			},
 		});
 	}
-	const deleted = unwrap(await service(env, c.binding).delete(c.model, id, { ifVersion }, p.actor));
+	const deleted = unwrap(
+		await service(env, c.binding).delete(c.model, id, { ifVersion }, p.actor),
+	);
 	await logActivity(env, p.actor, c.name, id, "delete", deleted.version);
 	return json(200, deleted);
 });
 
-route("GET", "/collections/:c/:id/revisions", async (env, req, [name, rawId]) => {
-	const p = requirePrincipal(req);
-	const c = collectionOr404(String(name));
-	const id = decodeURIComponent(String(rawId));
-	if (!readAccess(p, await scopeOf(env, p), c.name, id)) {
-		throw new HttpError(problem(403, "forbidden", "Not allowed"));
-	}
-	return json(200, { revisions: unwrap(await service(env, c.binding).revisions(c.model, id)) });
-});
+route(
+	"GET",
+	"/collections/:c/:id/revisions",
+	async (env, req, [name, rawId]) => {
+		const p = requirePrincipal(req);
+		const c = collectionOr404(String(name));
+		const id = decodeURIComponent(String(rawId));
+		if (!readAccess(p, await scopeOf(env, p), c.name, id)) {
+			throw new HttpError(problem(403, "forbidden", "Not allowed"));
+		}
+		return json(200, {
+			revisions: unwrap(await service(env, c.binding).revisions(c.model, id)),
+		});
+	},
+);
 
-route("POST", "/collections/:c/:id/restore", async (env, req, [name, rawId]) => {
-	const p = requireAdmin(req);
-	const c = collectionOr404(String(name));
-	const id = decodeURIComponent(String(rawId));
-	const { version } = await body<{ version?: number }>(req.request);
-	if (typeof version !== "number") return problem(400, "invalid_request", "Send { version: n }");
-	const restored = unwrap(await service(env, c.binding).restore(c.model, id, version, p.actor));
-	await logActivity(env, p.actor, c.name, id, "restore", restored.version);
-	return json(200, restored);
-});
+route(
+	"POST",
+	"/collections/:c/:id/restore",
+	async (env, req, [name, rawId]) => {
+		const p = requireAdmin(req);
+		const c = collectionOr404(String(name));
+		const id = decodeURIComponent(String(rawId));
+		const { version } = await body<{ version?: number }>(req.request);
+		if (typeof version !== "number")
+			return problem(400, "invalid_request", "Send { version: n }");
+		const restored = unwrap(
+			await service(env, c.binding).restore(c.model, id, version, p.actor),
+		);
+		await logActivity(env, p.actor, c.name, id, "restore", restored.version);
+		return json(200, restored);
+	},
+);
 
-route("PUT", "/collections/:c/:id/panels/:panel", async (env, req, [name, rawId, panelName]) => {
-	const p = requirePrincipal(req);
-	const c = collectionOr404(String(name));
-	const id = decodeURIComponent(String(rawId));
-	const panel = findPanel(c, String(panelName));
-	if (!panel) return problem(404, "not_found", `No panel "${panelName}"`);
-	const input = await body<{ items?: Row[]; data?: Row; ifVersion?: number }>(req.request);
-	if (typeof input.ifVersion !== "number") {
-		return problem(400, "invalid_request", "Send ifVersion");
-	}
-	// Panels belong to the entity: whoever may change the entity may change them.
-	const access = accessFor(p, c.name, id, await scopeOf(env, p));
-	deny(access);
-	const entity = unwrap(await service(env, c.binding).get(c.model, id));
-	if (panel.kind === "list") {
-		if (!Array.isArray(input.items)) return problem(400, "invalid_request", "Send { items: [...] }");
+route(
+	"PUT",
+	"/collections/:c/:id/panels/:panel",
+	async (env, req, [name, rawId, panelName]) => {
+		const p = requirePrincipal(req);
+		const c = collectionOr404(String(name));
+		const id = decodeURIComponent(String(rawId));
+		const panel = findPanel(c, String(panelName));
+		if (!panel) return problem(404, "not_found", `No panel "${panelName}"`);
+		const input = await body<{ items?: Row[]; data?: Row; ifVersion?: number }>(
+			req.request,
+		);
+		if (typeof input.ifVersion !== "number") {
+			return problem(400, "invalid_request", "Send ifVersion");
+		}
+		// Panels belong to the entity: whoever may change the entity may change them.
+		const access = accessFor(p, c.name, id, await scopeOf(env, p));
+		deny(access);
+		const entity = unwrap(await service(env, c.binding).get(c.model, id));
+		if (panel.kind === "list") {
+			if (!Array.isArray(input.items))
+				return problem(400, "invalid_request", "Send { items: [...] }");
+			if (access === "propose") {
+				return propose(env, p, {
+					collection: c.name,
+					entityId: id,
+					kind: "list",
+					list: panel.name,
+					payload: { items: input.items },
+					baseVersion: input.ifVersion,
+				});
+			}
+			const saved = unwrap(
+				await service(env, panel.binding).setList(
+					panel.model,
+					(panel as ListPanel).parent(entity.value),
+					input.items,
+					{ ifVersion: input.ifVersion },
+					p.actor,
+				),
+			);
+			await logActivity(
+				env,
+				p.actor,
+				c.name,
+				id,
+				`set ${panel.name}`,
+				saved.version,
+			);
+			return json(200, saved);
+		}
+		if (!input.data || typeof input.data !== "object") {
+			return problem(400, "invalid_request", "Send { data: {...} }");
+		}
 		if (access === "propose") {
 			return propose(env, p, {
 				collection: c.name,
 				entityId: id,
-				kind: "list",
+				kind: "attached",
 				list: panel.name,
-				payload: { items: input.items },
+				payload: { data: input.data },
 				baseVersion: input.ifVersion,
 			});
 		}
 		const saved = unwrap(
-			await service(env, panel.binding).setList(
-				panel.model,
-				(panel as ListPanel).parent(entity.value),
-				input.items,
-				{ ifVersion: input.ifVersion },
+			await writeAttached(
+				env,
+				panel,
+				panel.key(entity.value),
+				input.data,
+				input.ifVersion,
 				p.actor,
 			),
 		);
-		await logActivity(env, p.actor, c.name, id, `set ${panel.name}`, saved.version);
+		await logActivity(
+			env,
+			p.actor,
+			c.name,
+			id,
+			`save ${panel.name}`,
+			saved.version,
+		);
 		return json(200, saved);
-	}
-	if (!input.data || typeof input.data !== "object") {
-		return problem(400, "invalid_request", "Send { data: {...} }");
-	}
-	if (access === "propose") {
-		return propose(env, p, {
-			collection: c.name,
-			entityId: id,
-			kind: "attached",
-			list: panel.name,
-			payload: { data: input.data },
-			baseVersion: input.ifVersion,
-		});
-	}
-	const saved = unwrap(
-		await writeAttached(env, panel, panel.key(entity.value), input.data, input.ifVersion, p.actor),
-	);
-	await logActivity(env, p.actor, c.name, id, `save ${panel.name}`, saved.version);
-	return json(200, saved);
-});
+	},
+);
 
 // Proposals ------------------------------------------------------------
 
 route("GET", "/proposals", async (env, req) => {
 	const p = requirePrincipal(req);
-	const status = new URL(req.request.url).searchParams.get("status") ?? "pending";
+	const status =
+		new URL(req.request.url).searchParams.get("status") ?? "pending";
 	const statement = isAdmin(p)
-		? env.DB.prepare("SELECT * FROM proposals WHERE status = ? ORDER BY created_at DESC LIMIT 200").bind(status)
+		? env.DB.prepare(
+				"SELECT * FROM proposals WHERE status = ? ORDER BY created_at DESC LIMIT 200",
+			).bind(status)
 		: env.DB.prepare(
 				"SELECT * FROM proposals WHERE status = ? AND author_id = ? ORDER BY created_at DESC LIMIT 200",
 			).bind(status, p.actor.id);
@@ -634,7 +803,9 @@ route("GET", "/proposals/:id", async (env, req, [id]) => {
 
 route("POST", "/proposals/:id/approve", async (env, req, [id]) => {
 	const p = requireAdmin(req);
-	const { force } = await body<{ force?: boolean }>(req.request).catch(() => ({ force: false }));
+	const { force } = await body<{ force?: boolean }>(req.request).catch(() => ({
+		force: false,
+	}));
 	const proposal = await getProposal(env, String(id));
 	if (proposal.status !== "pending") {
 		return problem(409, "decided", `Proposal is already ${proposal.status}`);
@@ -654,12 +825,17 @@ route("POST", "/proposals/:id/approve", async (env, req, [id]) => {
 		`approve ${proposal.kind}`,
 		applied.value.version,
 	);
-	return json(200, { proposal: { id: proposal.id, status: "approved" }, version: applied.value.version });
+	return json(200, {
+		proposal: { id: proposal.id, status: "approved" },
+		version: applied.value.version,
+	});
 });
 
 route("POST", "/proposals/:id/reject", async (env, req, [id]) => {
 	const p = requireAdmin(req);
-	const { note } = await body<{ note?: string }>(req.request).catch(() => ({ note: undefined }));
+	const { note } = await body<{ note?: string }>(req.request).catch(() => ({
+		note: undefined,
+	}));
 	const proposal = await getProposal(env, String(id));
 	if (proposal.status !== "pending") {
 		return problem(409, "decided", `Proposal is already ${proposal.status}`);
@@ -689,11 +865,21 @@ route("GET", "/tokens", async (env, req) => {
 
 route("POST", "/tokens", async (env, req) => {
 	const p = requireAdmin(req);
-	const { name, role } = await body<{ name?: string; role?: string }>(req.request);
+	const { name, role } = await body<{ name?: string; role?: string }>(
+		req.request,
+	);
 	if (!name?.trim() || !ROLES.includes(role as Role)) {
-		return problem(422, "validation", `Send { name, role } with role one of ${ROLES.join(", ")}`);
+		return problem(
+			422,
+			"validation",
+			`Send { name, role } with role one of ${ROLES.join(", ")}`,
+		);
 	}
-	const created = await createApiToken(env.DB, { name: name.trim(), role: role as Role, createdBy: p.actor.id }, now(env));
+	const created = await createApiToken(
+		env.DB,
+		{ name: name.trim(), role: role as Role, createdBy: p.actor.id },
+		now(env),
+	);
 	return json(201, created);
 });
 
@@ -713,9 +899,17 @@ route("GET", "/access", async (env, req) => {
 
 route("POST", "/access", async (env, req) => {
 	const p = requireAdmin(req);
-	const { userId, kind, targetId } = await body<{ userId?: string; kind?: string; targetId?: string }>(req.request);
+	const { userId, kind, targetId } = await body<{
+		userId?: string;
+		kind?: string;
+		targetId?: string;
+	}>(req.request);
 	if (!userId || !targetId || (kind !== "person" && kind !== "technology")) {
-		return problem(422, "validation", "Send { userId, kind: person|technology, targetId }");
+		return problem(
+			422,
+			"validation",
+			"Send { userId, kind: person|technology, targetId }",
+		);
 	}
 	await env.DB.prepare(
 		"INSERT OR IGNORE INTO access_links (user_id, kind, target_id, created_by, created_at) VALUES (?, ?, ?, ?, ?)",
@@ -725,13 +919,23 @@ route("POST", "/access", async (env, req) => {
 	return json(201, { userId, kind, targetId });
 });
 
-route("DELETE", "/access/:user/:kind/:target", async (env, req, [user, kind, target]) => {
-	requireAdmin(req);
-	await env.DB.prepare("DELETE FROM access_links WHERE user_id = ? AND kind = ? AND target_id = ?")
-		.bind(decodeURIComponent(String(user)), kind, decodeURIComponent(String(target)))
-		.run();
-	return json(200, { removed: true });
-});
+route(
+	"DELETE",
+	"/access/:user/:kind/:target",
+	async (env, req, [user, kind, target]) => {
+		requireAdmin(req);
+		await env.DB.prepare(
+			"DELETE FROM access_links WHERE user_id = ? AND kind = ? AND target_id = ?",
+		)
+			.bind(
+				decodeURIComponent(String(user)),
+				kind,
+				decodeURIComponent(String(target)),
+			)
+			.run();
+		return json(200, { removed: true });
+	},
+);
 
 // Media ------------------------------------------------------------------
 
@@ -742,23 +946,45 @@ route("POST", "/media", async (env, req) => {
 	try {
 		form = await req.request.formData();
 	} catch {
-		return problem(400, "invalid_request", "Send multipart/form-data with file, collection and id");
+		return problem(
+			400,
+			"invalid_request",
+			"Send multipart/form-data with file, collection and id",
+		);
 	}
 	const file = form.get("file");
 	const collection = String(form.get("collection") ?? "");
 	const id = String(form.get("id") ?? "");
-	if (!(file instanceof File)) return problem(400, "invalid_request", "file is required");
+	if (!(file instanceof File))
+		return problem(400, "invalid_request", "file is required");
 	const c = findCollection(collection);
 	if (!c) return problem(404, "not_found", `No collection "${collection}"`);
 	if (accessFor(p, c.name, id, await scopeOf(env, p)) === "deny") {
 		throw new HttpError(problem(403, "forbidden", "Not allowed"));
 	}
-	if (file.size > MAX_UPLOAD_BYTES) return problem(413, "too_large", "Files are limited to 25 MB");
-	const key = mediaKey(collection, id, file.name, file.type, randomToken(6).toLowerCase().replace(/[^a-z0-9]/g, "x"));
-	if (!key) return problem(415, "unsupported", "Upload PNG, JPEG, WebP, GIF, AVIF, SVG or PDF");
+	if (file.size > MAX_UPLOAD_BYTES)
+		return problem(413, "too_large", "Files are limited to 25 MB");
+	const key = mediaKey(
+		collection,
+		id,
+		file.name,
+		file.type,
+		randomToken(6)
+			.toLowerCase()
+			.replace(/[^a-z0-9]/g, "x"),
+	);
+	if (!key)
+		return problem(
+			415,
+			"unsupported",
+			"Upload PNG, JPEG, WebP, GIF, AVIF, SVG or PDF",
+		);
 	const bytes = new Uint8Array(await file.arrayBuffer());
 	await env.MEDIA.put(key, bytes, {
-		httpMetadata: { contentType: file.type, cacheControl: "public, max-age=31536000, immutable" },
+		httpMetadata: {
+			contentType: file.type,
+			cacheControl: "public, max-age=31536000, immutable",
+		},
 		customMetadata: { uploadedBy: p.actor.id },
 	});
 	const dimensions = imageDimensions(bytes);
@@ -782,7 +1008,10 @@ export function openApi() {
 		"401": { description: "No session or API token" },
 		"403": { description: "The role may not do this" },
 		"404": { description: "Not found" },
-		"409": { description: "Version conflict (send the current ifVersion), id taken, or still referenced" },
+		"409": {
+			description:
+				"Version conflict (send the current ifVersion), id taken, or still referenced",
+		},
 		"422": { description: "Validation failed; error.issues lists the fields" },
 	};
 	const collectionParam = {
@@ -791,7 +1020,12 @@ export function openApi() {
 		required: true,
 		schema: { type: "string", enum: collections },
 	};
-	const idParam = { name: "id", in: "path", required: true, schema: { type: "string" } };
+	const idParam = {
+		name: "id",
+		in: "path",
+		required: true,
+		schema: { type: "string" },
+	};
 	return {
 		openapi: "3.1.0",
 		info: {
@@ -806,29 +1040,49 @@ export function openApi() {
 		},
 		security: [{ bearer: [] }],
 		paths: {
-			"/collections": { get: { summary: "Collections, their fields and panels", responses: { "200": ok, ...errors } } },
+			"/collections": {
+				get: {
+					summary: "Collections, their fields and panels",
+					responses: { "200": ok, ...errors },
+				},
+			},
 			"/collections/{collection}": {
 				parameters: [collectionParam],
 				get: {
 					summary: "List rows",
 					parameters: [
 						{ name: "search", in: "query", schema: { type: "string" } },
-						{ name: "limit", in: "query", schema: { type: "integer", maximum: 200 } },
+						{
+							name: "limit",
+							in: "query",
+							schema: { type: "integer", maximum: 200 },
+						},
 						{ name: "offset", in: "query", schema: { type: "integer" } },
 					],
 					responses: { "200": ok, ...errors },
 				},
 				post: {
 					summary: "Create a row: { data }",
-					responses: { "201": ok, "202": { description: "Stored as a proposal" }, ...errors },
+					responses: {
+						"201": ok,
+						"202": { description: "Stored as a proposal" },
+						...errors,
+					},
 				},
 			},
 			"/collections/{collection}/{id}": {
 				parameters: [collectionParam, idParam],
-				get: { summary: "A row with its version and panels", responses: { "200": ok, ...errors } },
+				get: {
+					summary: "A row with its version and panels",
+					responses: { "200": ok, ...errors },
+				},
 				patch: {
 					summary: "Update a row: { patch, ifVersion }",
-					responses: { "200": ok, "202": { description: "Stored as a proposal" }, ...errors },
+					responses: {
+						"200": ok,
+						"202": { description: "Stored as a proposal" },
+						...errors,
+					},
 				},
 				delete: {
 					summary: "Delete a row (admins): ?ifVersion=n",
@@ -837,34 +1091,76 @@ export function openApi() {
 			},
 			"/collections/{collection}/{id}/revisions": {
 				parameters: [collectionParam, idParam],
-				get: { summary: "Revision history", responses: { "200": ok, ...errors } },
+				get: {
+					summary: "Revision history",
+					responses: { "200": ok, ...errors },
+				},
 			},
 			"/collections/{collection}/{id}/restore": {
 				parameters: [collectionParam, idParam],
-				post: { summary: "Restore a revision (admins): { version }", responses: { "200": ok, ...errors } },
+				post: {
+					summary: "Restore a revision (admins): { version }",
+					responses: { "200": ok, ...errors },
+				},
 			},
 			"/collections/{collection}/{id}/panels/{panel}": {
-				parameters: [collectionParam, idParam, { name: "panel", in: "path", required: true, schema: { type: "string" } }],
+				parameters: [
+					collectionParam,
+					idParam,
+					{
+						name: "panel",
+						in: "path",
+						required: true,
+						schema: { type: "string" },
+					},
+				],
 				put: {
-					summary: "Replace a list panel { items, ifVersion } or save an attached row { data, ifVersion }",
-					responses: { "200": ok, "202": { description: "Stored as a proposal" }, ...errors },
+					summary:
+						"Replace a list panel { items, ifVersion } or save an attached row { data, ifVersion }",
+					responses: {
+						"200": ok,
+						"202": { description: "Stored as a proposal" },
+						...errors,
+					},
 				},
 			},
 			"/media": {
 				post: {
-					summary: "Upload a file (multipart: file, collection, id); returns url, width, height",
+					summary:
+						"Upload a file (multipart: file, collection, id); returns url, width, height",
 					responses: { "201": ok, ...errors },
 				},
 			},
-			"/proposals": { get: { summary: "Pending proposals (admins: all; others: their own)", responses: { "200": ok, ...errors } } },
-			"/proposals/{id}/approve": { post: { summary: "Apply a proposal (admins): { force? }", responses: { "200": ok, ...errors } } },
-			"/proposals/{id}/reject": { post: { summary: "Reject a proposal (admins): { note? }", responses: { "200": ok, ...errors } } },
+			"/proposals": {
+				get: {
+					summary: "Pending proposals (admins: all; others: their own)",
+					responses: { "200": ok, ...errors },
+				},
+			},
+			"/proposals/{id}/approve": {
+				post: {
+					summary: "Apply a proposal (admins): { force? }",
+					responses: { "200": ok, ...errors },
+				},
+			},
+			"/proposals/{id}/reject": {
+				post: {
+					summary: "Reject a proposal (admins): { note? }",
+					responses: { "200": ok, ...errors },
+				},
+			},
 		},
 	};
 }
 
-export async function handleApi(env: ApiEnv, req: ApiRequest): Promise<Response> {
-	if (req.principal?.via === "session" && !sameOriginWrite(req.request, req.origin)) {
+export async function handleApi(
+	env: ApiEnv,
+	req: ApiRequest,
+): Promise<Response> {
+	if (
+		req.principal?.via === "session" &&
+		!sameOriginWrite(req.request, req.origin)
+	) {
 		return problem(403, "forbidden", "Cross-origin write refused");
 	}
 	const method = req.request.method === "HEAD" ? "GET" : req.request.method;
@@ -878,7 +1174,12 @@ export async function handleApi(env: ApiEnv, req: ApiRequest): Promise<Response>
 			return await handler(env, req, match.slice(1));
 		} catch (error) {
 			if (error instanceof HttpError) return error.response;
-			console.error("[cms] request failed", req.request.method, req.path, error);
+			console.error(
+				"[cms] request failed",
+				req.request.method,
+				req.path,
+				error,
+			);
 			return problem(500, "internal", "Something went wrong");
 		}
 	}

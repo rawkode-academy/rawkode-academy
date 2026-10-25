@@ -80,7 +80,9 @@ function complete(columns: Record<string, Column>, row: Row): Row {
 /** The primary-key properties of a list's items (the key minus the parent). */
 function listItemKey(def: ListModel): string[] {
 	const columns = columnsOf(def.table);
-	const byColumn = new Map(Object.entries(columns).map(([prop, c]) => [c, prop]));
+	const byColumn = new Map(
+		Object.entries(columns).map(([prop, c]) => [c, prop]),
+	);
 	const config = getTableConfig(def.table);
 	const keyColumns =
 		config.primaryKeys[0]?.columns ??
@@ -121,7 +123,12 @@ export class ContentStore {
 	}
 
 	/** Names and kinds of the models this service writes. */
-	models(): { name: string; kind: Model["kind"]; key?: string; parent?: string[] }[] {
+	models(): {
+		name: string;
+		kind: Model["kind"];
+		key?: string;
+		parent?: string[];
+	}[] {
 		return [...this.#models.values()].map((m) =>
 			m.kind === "entity"
 				? { name: m.name, kind: m.kind, key: m.key }
@@ -212,7 +219,10 @@ export class ContentStore {
 		const parentKey = this.#parentKey(m.value, parent);
 		if (!parentKey.ok) return parentKey;
 		const items = await this.#items(m.value, parent);
-		return ok({ value: items, version: await this.#version(model, parentKey.value) });
+		return ok({
+			value: items,
+			version: await this.#version(model, parentKey.value),
+		});
 	}
 
 	/** Rows of a list table where `column` equals `value`: what references an entity. */
@@ -263,11 +273,25 @@ export class ContentStore {
 			return fail("exists", `${model} "${id}" already exists`);
 		}
 		const version = (await this.#version(model, id)) + 1;
-		const committed = await this.#commit(def.table, model, id, version, "create", actor, row.value, [
-			(this.#db as AnyQuery).insert(def.table).values(row.value),
-		]);
+		const committed = await this.#commit(
+			def.table,
+			model,
+			id,
+			version,
+			"create",
+			actor,
+			row.value,
+			[(this.#db as AnyQuery).insert(def.table).values(row.value)],
+		);
 		if (!committed.ok) return committed;
-		await this.#announce(model, id, "create", version, def.tags(row.value), actor);
+		await this.#announce(
+			model,
+			id,
+			"create",
+			version,
+			def.tags(row.value),
+			actor,
+		);
 		return ok({ value: row.value, version });
 	}
 
@@ -291,19 +315,36 @@ export class ContentStore {
 		if (!current) return fail("not_found", `${model} "${id}" does not exist`);
 		const versionNow = await this.#version(model, id);
 		if (versionNow !== options?.ifVersion) {
-			return fail("conflict", `${model} "${id}" changed since version ${options?.ifVersion}`, {
-				currentVersion: versionNow,
-			});
+			return fail(
+				"conflict",
+				`${model} "${id}" changed since version ${options?.ifVersion}`,
+				{
+					currentVersion: versionNow,
+				},
+			);
 		}
-		const row = this.#validate(def, { ...current, ...patch, [def.key]: current[def.key] });
+		const row = this.#validate(def, {
+			...current,
+			...patch,
+			[def.key]: current[def.key],
+		});
 		if (!row.ok) return row;
 		const version = versionNow + 1;
-		const committed = await this.#commit(def.table, model, id, version, "update", actor, row.value, [
-			(this.#db as AnyQuery)
-				.update(def.table)
-				.set(row.value)
-				.where(this.#keyEq(def, id)),
-		]);
+		const committed = await this.#commit(
+			def.table,
+			model,
+			id,
+			version,
+			"update",
+			actor,
+			row.value,
+			[
+				(this.#db as AnyQuery)
+					.update(def.table)
+					.set(row.value)
+					.where(this.#keyEq(def, id)),
+			],
+		);
 		if (!committed.ok) return committed;
 		await this.#announce(
 			model,
@@ -330,17 +371,35 @@ export class ContentStore {
 		if (!current) return fail("not_found", `${model} "${id}" does not exist`);
 		const versionNow = await this.#version(model, id);
 		if (versionNow !== options?.ifVersion) {
-			return fail("conflict", `${model} "${id}" changed since version ${options?.ifVersion}`, {
-				currentVersion: versionNow,
-			});
+			return fail(
+				"conflict",
+				`${model} "${id}" changed since version ${options?.ifVersion}`,
+				{
+					currentVersion: versionNow,
+				},
+			);
 		}
 		const version = versionNow + 1;
 		// The snapshot keeps the deleted row, so restore() can bring it back.
-		const committed = await this.#commit(def.table, model, id, version, "delete", actor, current, [
-			(this.#db as AnyQuery).delete(def.table).where(this.#keyEq(def, id)),
-		]);
+		const committed = await this.#commit(
+			def.table,
+			model,
+			id,
+			version,
+			"delete",
+			actor,
+			current,
+			[(this.#db as AnyQuery).delete(def.table).where(this.#keyEq(def, id))],
+		);
 		if (!committed.ok) return committed;
-		await this.#announce(model, id, "delete", version, def.tags(current), actor);
+		await this.#announce(
+			model,
+			id,
+			"delete",
+			version,
+			def.tags(current),
+			actor,
+		);
 		return ok({ version });
 	}
 
@@ -366,16 +425,34 @@ export class ContentStore {
 				),
 			);
 		if (!revision?.snapshot) {
-			return fail("not_found", `${model} "${id}" has no version ${fromVersion}`);
+			return fail(
+				"not_found",
+				`${model} "${id}" has no version ${fromVersion}`,
+			);
 		}
-		const row = this.#validate(def, { ...(revision.snapshot as Row), [def.key]: id });
+		const row = this.#validate(def, {
+			...(revision.snapshot as Row),
+			[def.key]: id,
+		});
 		if (!row.ok) return row;
 		const current = await this.#find(def, id);
 		const version = (await this.#version(model, id)) + 1;
 		const write = current
-			? (this.#db as AnyQuery).update(def.table).set(row.value).where(this.#keyEq(def, id))
+			? (this.#db as AnyQuery)
+					.update(def.table)
+					.set(row.value)
+					.where(this.#keyEq(def, id))
 			: (this.#db as AnyQuery).insert(def.table).values(row.value);
-		const committed = await this.#commit(def.table, model, id, version, "restore", actor, row.value, [write]);
+		const committed = await this.#commit(
+			def.table,
+			model,
+			id,
+			version,
+			"restore",
+			actor,
+			row.value,
+			[write],
+		);
 		if (!committed.ok) return committed;
 		await this.#announce(
 			model,
@@ -399,18 +476,24 @@ export class ContentStore {
 		const m = this.#list(model);
 		if (!m.ok) return m;
 		if (!actorOk(actor)) return fail("invalid_request", "An actor is required");
-		if (!Array.isArray(items)) return fail("invalid_request", "items must be an array");
+		if (!Array.isArray(items))
+			return fail("invalid_request", "items must be an array");
 		const def = m.value;
 		const parentKey = this.#parentKey(def, parent);
 		if (!parentKey.ok) return parentKey;
-		const parentValues = Object.fromEntries(def.parent.map((p) => [p, parent[p]]));
+		const parentValues = Object.fromEntries(
+			def.parent.map((p) => [p, parent[p]]),
+		);
 		const rows: Row[] = [];
 		const issues: { path: string; message: string }[] = [];
 		items.forEach((item, index) => {
 			const parsed = def.item.safeParse(item);
 			if (!parsed.success) {
 				for (const issue of issuesOf(parsed.error)) {
-					issues.push({ path: `${index}.${issue.path}`, message: issue.message });
+					issues.push({
+						path: `${index}.${issue.path}`,
+						message: issue.message,
+					});
 				}
 				return;
 			}
@@ -438,7 +521,8 @@ export class ContentStore {
 				});
 			});
 		}
-		if (issues.length) return fail("validation", "Some items are invalid", { issues });
+		if (issues.length)
+			return fail("validation", "Some items are invalid", { issues });
 		const versionNow = await this.#version(model, parentKey.value);
 		if (versionNow !== options?.ifVersion) {
 			return fail(
@@ -449,13 +533,17 @@ export class ContentStore {
 		}
 		const before = await this.#items(def, parent);
 		const statements: AnyQuery[] = [
-			(this.#db as AnyQuery).delete(def.table).where(this.#parentEq(def, parent)),
+			(this.#db as AnyQuery)
+				.delete(def.table)
+				.where(this.#parentEq(def, parent)),
 		];
 		const width = Object.keys(columnsOf(def.table)).length;
 		const chunk = Math.max(1, Math.floor(MAX_PARAMS / width));
 		for (let i = 0; i < rows.length; i += chunk) {
 			statements.push(
-				(this.#db as AnyQuery).insert(def.table).values(rows.slice(i, i + chunk)),
+				(this.#db as AnyQuery)
+					.insert(def.table)
+					.values(rows.slice(i, i + chunk)),
 			);
 		}
 		const version = versionNow + 1;
@@ -487,7 +575,10 @@ export class ContentStore {
 		const found = this.#models.get(model);
 		if (!found) return fail("unknown_model", `Unknown model "${model}"`);
 		if (found.kind !== "entity") {
-			return fail("invalid_request", `"${model}" is a list; use getList/setList`);
+			return fail(
+				"invalid_request",
+				`"${model}" is a list; use getList/setList`,
+			);
 		}
 		return ok(found);
 	}
@@ -538,7 +629,10 @@ export class ContentStore {
 	#order(model: Model): SQL[] {
 		const columns = columnsOf(model.table);
 		if (model.kind === "entity") {
-			const by = model.orderBy ?? { column: model.key, direction: "asc" as const };
+			const by = model.orderBy ?? {
+				column: model.key,
+				direction: "asc" as const,
+			};
 			const column = columns[by.column] as Column;
 			return [by.direction === "desc" ? desc(column) : asc(column)];
 		}
@@ -570,7 +664,10 @@ export class ContentStore {
 			.select({ version: max(contentRevisions.version) })
 			.from(contentRevisions)
 			.where(
-				and(eq(contentRevisions.model, model), eq(contentRevisions.entityId, id)),
+				and(
+					eq(contentRevisions.model, model),
+					eq(contentRevisions.entityId, id),
+				),
 			);
 		return Number(row?.version ?? 0);
 	}
@@ -599,12 +696,19 @@ export class ContentStore {
 			createdAt: this.#now(),
 		});
 		try {
-			await this.#db.batch([revision, ...statements] as [AnyQuery, ...AnyQuery[]]);
+			await this.#db.batch([revision, ...statements] as [
+				AnyQuery,
+				...AnyQuery[],
+			]);
 		} catch (error) {
 			if (isUniqueViolation(error, "content_revisions")) {
-				return fail("conflict", `${model} "${id}" was changed by another writer`, {
-					currentVersion: await this.#version(model, id),
-				});
+				return fail(
+					"conflict",
+					`${model} "${id}" was changed by another writer`,
+					{
+						currentVersion: await this.#version(model, id),
+					},
+				);
 			}
 			const tableName = (table as unknown as Record<symbol, string>)[
 				Symbol.for("drizzle:Name")

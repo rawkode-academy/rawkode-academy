@@ -25,6 +25,8 @@ export async function apiEnv(): Promise<ApiEnv> {
 		DB: bindings.DB,
 		services,
 		...(bindings.MEDIA ? { MEDIA: bindings.MEDIA } : {}),
-		...(bindings.MEDIA_BASE_URL ? { mediaBaseUrl: bindings.MEDIA_BASE_URL } : {}),
+		...(bindings.MEDIA_BASE_URL
+			? { mediaBaseUrl: bindings.MEDIA_BASE_URL }
+			: {}),
 	};
 }

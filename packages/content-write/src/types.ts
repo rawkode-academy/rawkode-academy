@@ -29,7 +29,9 @@ export interface WriteError {
  * Results are returned, never thrown: an Error thrown across RPC keeps only its
  * message, and callers need the code to answer 400, 404 or 409.
  */
-export type Result<T> = { ok: true; value: T } | { ok: false; error: WriteError };
+export type Result<T> =
+	| { ok: true; value: T }
+	| { ok: false; error: WriteError };
 
 export type Operation = "create" | "update" | "delete" | "restore" | "set";
 

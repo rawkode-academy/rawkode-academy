@@ -65,7 +65,12 @@ describe("content-changes consumer", () => {
 	it("drops malformed messages and tags without blocking the queue", async () => {
 		const kv = memoryKv();
 		const purge = vi.fn(async () => {});
-		const { value, state } = batch([null, "nope", event("videos:v1"), event(["bad tag"])]);
+		const { value, state } = batch([
+			null,
+			"nope",
+			event("videos:v1"),
+			event(["bad tag"]),
+		]);
 		await consumeContentChanges(value, { kv, purge, settleMs: 0 });
 		expect(state).toEqual({ acked: true, retried: false });
 		expect(purge).not.toHaveBeenCalled();

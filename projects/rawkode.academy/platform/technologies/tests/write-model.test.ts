@@ -8,7 +8,10 @@ const agent = { id: "tech-skill", kind: "agent" as const };
 const doc = {
 	type: "doc",
 	content: [
-		{ type: "paragraph", content: [{ type: "text", text: "A fast JavaScript runtime." }] },
+		{
+			type: "paragraph",
+			content: [{ type: "text", text: "A fast JavaScript runtime." }],
+		},
 	],
 };
 

@@ -109,7 +109,10 @@ const technology = rowSchema(technologiesTable, {
 		.nullable()
 		.optional(),
 	seo: z
-		.object({ title: z.string().optional(), description: z.string().optional() })
+		.object({
+			title: z.string().optional(),
+			description: z.string().optional(),
+		})
 		.strict()
 		.nullable()
 		.optional(),

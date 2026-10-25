@@ -13,7 +13,12 @@ export interface Scope {
 }
 
 /** Collections agents may write directly; their other writes are proposals. */
-export const AGENT_DIRECT = new Set(["technologies", "videos", "people", "shows"]);
+export const AGENT_DIRECT = new Set([
+	"technologies",
+	"videos",
+	"people",
+	"shows",
+]);
 
 /** Technology fields a partner may propose changes to. */
 export const PARTNER_FIELDS = new Set([
@@ -32,7 +37,8 @@ export const PARTNER_FIELDS = new Set([
 	"useCases",
 ]);
 
-export const isAdmin = (p: Principal | null) => !!p?.roles.includes("content_admin");
+export const isAdmin = (p: Principal | null) =>
+	!!p?.roles.includes("content_admin");
 
 /** Whether the principal may read the CMS at all (every content role may). */
 export const canRead = (p: Principal | null) => !!p && p.roles.length > 0;

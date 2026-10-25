@@ -86,7 +86,9 @@ beforeEach(async () => {
 		d1Databases: { DB: crypto.randomUUID() },
 	});
 	const DB = (await mf.getD1Database("DB")) as unknown as D1Database;
-	for (const statement of SQL.split(";").map((s) => s.trim()).filter(Boolean)) {
+	for (const statement of SQL.split(";")
+		.map((s) => s.trim())
+		.filter(Boolean)) {
 		await DB.prepare(statement).run();
 	}
 	sent = [];
@@ -181,7 +183,13 @@ describe("entities", () => {
 
 	test("update with a stale version is a conflict and changes nothing", async () => {
 		await store.create("technology", bun, david);
-		await store.update("technology", "bun", { status: "beta" }, { ifVersion: 1 }, david);
+		await store.update(
+			"technology",
+			"bun",
+			{ status: "beta" },
+			{ ifVersion: 1 },
+			david,
+		);
 		const stale = await store.update(
 			"technology",
 			"bun",
@@ -212,8 +220,19 @@ describe("entities", () => {
 
 	test("delete keeps the row in the last revision and restore brings it back", async () => {
 		await store.create("technology", bun, david);
-		await store.update("technology", "bun", { status: "beta" }, { ifVersion: 1 }, david);
-		const deleted = await store.delete("technology", "bun", { ifVersion: 2 }, david);
+		await store.update(
+			"technology",
+			"bun",
+			{ status: "beta" },
+			{ ifVersion: 1 },
+			david,
+		);
+		const deleted = await store.delete(
+			"technology",
+			"bun",
+			{ ifVersion: 2 },
+			david,
+		);
 		expect(deleted.ok && deleted.value.version).toBe(3);
 		expect((await store.get("technology", "bun")).ok).toBe(false);
 
@@ -244,7 +263,11 @@ describe("entities", () => {
 
 	test("list searches, filters and pages", async () => {
 		await store.create("technology", bun, david);
-		await store.create("technology", { ...bun, id: "deno", name: "Deno" }, david);
+		await store.create(
+			"technology",
+			{ ...bun, id: "deno", name: "Deno" },
+			david,
+		);
 		await store.create(
 			"technology",
 			{ ...bun, id: "node", name: "Node.js", status: "beta" },
@@ -318,7 +341,13 @@ describe("lists", () => {
 			"0.guestId",
 			"1.",
 		]);
-		await store.setList("video-guests", { videoId: "v1" }, [], { ifVersion: 0 }, david);
+		await store.setList(
+			"video-guests",
+			{ videoId: "v1" },
+			[],
+			{ ifVersion: 0 },
+			david,
+		);
 		const stale = await store.setList(
 			"video-guests",
 			{ videoId: "v1" },
@@ -341,7 +370,10 @@ describe("lists", () => {
 		expect(result.ok).toBe(true);
 		const got = await store.getList("video-guests", { videoId: "v2" });
 		expect(got.ok && got.value.value).toHaveLength(90);
-		expect(got.ok && got.value.value[89]).toMatchObject({ guestId: "g89", position: 89 });
+		expect(got.ok && got.value.value[89]).toMatchObject({
+			guestId: "g89",
+			position: 89,
+		});
 	});
 
 	test("findReferences finds parents that point at an entity", async () => {
@@ -360,7 +392,10 @@ describe("lists", () => {
 			david,
 		);
 		const refs = await store.findReferences("video-guests", "guestId", "alice");
-		expect(refs.ok && refs.value.map((r) => r.videoId).sort()).toEqual(["v1", "v2"]);
+		expect(refs.ok && refs.value.map((r) => r.videoId).sort()).toEqual([
+			"v1",
+			"v2",
+		]);
 	});
 });
 
@@ -388,7 +423,9 @@ test("describeModels derives editor fields from the zod schemas", async () => {
 	const { describeModels } = await import("../src/index");
 	const [technology, guestList] = describeModels(models);
 	expect(technology?.key).toBe("id");
-	const fields = Object.fromEntries((technology?.fields ?? []).map((f) => [f.name, f]));
+	const fields = Object.fromEntries(
+		(technology?.fields ?? []).map((f) => [f.name, f]),
+	);
 	expect(fields.id).toMatchObject({ type: "slug", required: true });
 	expect(fields.name).toMatchObject({ type: "text", required: true });
 	expect(fields.status).toMatchObject({
@@ -416,5 +453,7 @@ test("setList reports items that repeat the primary key, by index", async () => 
 	);
 	expect(result.ok).toBe(false);
 	if (result.ok) return;
-	expect(result.error.issues).toEqual([{ path: "2.guestId", message: "Duplicates item 0" }]);
+	expect(result.error.issues).toEqual([
+		{ path: "2.guestId", message: "Duplicates item 0" },
+	]);
 });
