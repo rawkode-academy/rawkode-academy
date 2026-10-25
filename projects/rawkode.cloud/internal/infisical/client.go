@@ -25,7 +25,7 @@ func NewClient(ctx context.Context, siteURL, clientID, clientSecret string) (*Cl
 	siteURL = normalizeSiteURL(siteURL)
 	sdk := infisicalsdk.NewInfisicalClient(ctx, infisicalsdk.Config{
 		SiteUrl:          siteURL,
-		AutoTokenRefresh: true,
+		AutoTokenRefresh: infisicalsdk.BoolPtr(true),
 	})
 
 	_, err := sdk.Auth().UniversalAuthLogin(clientID, clientSecret)
