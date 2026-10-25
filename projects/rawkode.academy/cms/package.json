@@ -1,0 +1,35 @@
+{
+	"name": "@rawkodeacademy/cms",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "astro dev --port 4325",
+		"build": "astro build",
+		"preview": "astro preview",
+		"check": "astro check",
+		"test": "bun test"
+	},
+	"dependencies": {
+		"@astrojs/cloudflare": "14.4.2",
+		"@astrojs/react": "7.1.1",
+		"@rawkodeacademy/content-model": "workspace:*",
+		"@rawkodeacademy/content-write": "workspace:*",
+		"@rawkodeacademy/rich-text": "workspace:*",
+		"@tiptap/core": "3.32.0",
+		"@tiptap/pm": "3.32.0",
+		"@tiptap/react": "3.32.0",
+		"astro": "7.4.2",
+		"react": "^19.2.4",
+		"react-dom": "^19.2.4"
+	},
+	"devDependencies": {
+		"@astrojs/check": "0.9.12",
+		"@cloudflare/workers-types": "^4.20250426.0",
+		"@types/bun": "latest",
+		"@types/react": "^19.2.14",
+		"@types/react-dom": "^19.2.3",
+		"miniflare": "4.20260529.0",
+		"typescript": "^6.0.2",
+		"wrangler": "^4.152.0"
+	}
+}

@@ -1,0 +1,53 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "rawkode-academy-cms",
+	"main": "@astrojs/cloudflare/entrypoints/server",
+	"compatibility_date": "2026-03-12",
+	"compatibility_flags": ["nodejs_compat"],
+	"assets": {
+		"binding": "ASSETS",
+		"directory": "./dist"
+	},
+	"workers_dev": false,
+	"routes": [{ "pattern": "cms.rawkode.academy", "custom_domain": true }],
+	"observability": {
+		"traces": { "enabled": true, "destinations": ["grafana-traces"] },
+		"logs": { "enabled": true, "destinations": ["grafana-logs"] }
+	},
+	// The CMS's own state: sessions, API tokens, access links, proposals,
+	// activity. Create it once with `wrangler d1 create platform-cms` and put
+	// its id here (see README.md).
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "platform-cms",
+			"database_id": "00000000-0000-0000-0000-000000000000",
+			"migrations_dir": "./migrations"
+		}
+	],
+	// Uploads, served publicly by the content service at content.rawkode.academy.
+	"r2_buckets": [{ "binding": "MEDIA", "bucket_name": "rawkode-academy-content" }],
+	"kv_namespaces": [],
+	// Every content write model, called over RPC.
+	"services": [
+		{ "binding": "WRITE_PEOPLE", "service": "platform-people-write-model" },
+		{ "binding": "WRITE_PEOPLE_LINKS", "service": "platform-people-links-write-model" },
+		{ "binding": "WRITE_PEOPLE_BIOGRAPHIES", "service": "platform-people-biographies-write-model" },
+		{ "binding": "WRITE_TECHNOLOGIES", "service": "platform-technologies-write-model" },
+		{ "binding": "WRITE_TRANSCRIPTION_TERMS", "service": "platform-transcription-terms-write-model" },
+		{ "binding": "WRITE_SHOWS", "service": "platform-shows-write-model" },
+		{ "binding": "WRITE_SHOW_HOSTS", "service": "platform-show-hosts-write-model" },
+		{ "binding": "WRITE_VIDEOS", "service": "platform-videos-write-model" },
+		{ "binding": "WRITE_VIDEO_GUESTS", "service": "platform-video-guests-write-model" },
+		{ "binding": "WRITE_VIDEO_TECHNOLOGIES", "service": "platform-video-technologies-write-model" },
+		{ "binding": "WRITE_CHAPTERS", "service": "platform-chapters-write-model" },
+		{ "binding": "WRITE_EPISODES", "service": "platform-episodes-write-model" },
+		{ "binding": "WRITE_ARTICLES", "service": "platform-articles-write-model" },
+		{ "binding": "WRITE_NEWS", "service": "platform-news-write-model" },
+		{ "binding": "WRITE_CHANGELOG", "service": "platform-changelog-write-model" },
+		{ "binding": "WRITE_ADRS", "service": "platform-adrs-write-model" },
+		{ "binding": "WRITE_TESTIMONIALS", "service": "platform-testimonials-write-model" },
+		{ "binding": "WRITE_COURSES", "service": "platform-courses-write-model" },
+		{ "binding": "ANALYTICS", "service": "rawkode-tools-observability-collector" }
+	]
+}
