@@ -1,17 +1,25 @@
 ---
+import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
+import AcademyCatalogCard from "@/components/academy/AcademyCatalogCard.astro";
+import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
+import CourseItemListJsonLd from "@/components/html/course-itemlist-jsonld.astro";
+import {
+	COHORT_PATH,
+	abstract as cohortAbstract,
+	offer as cohortOffer,
+	schedule as cohortSchedule,
+	formatUsd,
+	startsLabel,
+} from "@/lib/cohorts/operations-for-ai";
 import {
 	type ContentEntry,
 	getCollection,
 	getEntries,
 	setContentCache,
 } from "@/lib/live-content";
-import AcademyCatalogCard from "@/components/academy/AcademyCatalogCard.astro";
-import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
-import CourseItemListJsonLd from "@/components/html/course-itemlist-jsonld.astro";
-import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
+import { type LocalTimeValue, localTime } from "@/lib/local-time";
 import { getCourseModuleSlug } from "@/utils/course-path";
 import Page from "@/wrappers/page.astro";
-import { type LocalTimeValue, localTime } from "@/lib/local-time";
 
 export const prerender = false;
 
@@ -98,6 +106,19 @@ const catalog = academyCatalog();
 	/>
 	<div class={styles.root}>
 		<AcademyCatalogMasthead title="Courses" description="Structured courses and labs, taken lesson by lesson." figure={allCourses.length} figureLabel={allCourses.length === 1 ? "course" : "courses"} mosaic={allCourses.map((course) => courseImages.get(course.id)).filter((src): src is string => Boolean(src))} mosaicShape="video" />
+		<section class={styles.section} aria-label="Live cohort">
+			<div class={styles.container}>
+				<article class={catalog.featured}>
+					<div class={catalog.featuredBody}>
+						<p class={catalog.featuredKicker}>Live cohort · {startsLabel()} · {cohortOffer.seats} seats</p>
+						<h2 class={catalog.featuredTitle}>{cohortOffer.title}</h2>
+						<p class={catalog.featuredDescription}>{cohortAbstract}</p>
+						<p class={catalog.rowMeta}>{cohortSchedule.weeks} weeks live · GPU labs included · {formatUsd(cohortOffer.priceUsd)} per seat</p>
+						<a class={styles.button} href={COHORT_PATH}>{cohortOffer.status === "open" ? "See the curriculum and enrol →" : "Join the waitlist →"}</a>
+					</div>
+				</article>
+			</div>
+		</section>
 		<section class={styles.section}>
 			<div class={styles.container}>
 			{featuredCourse ? (

@@ -212,6 +212,9 @@ export async function captureServerEvent(
 		reaction_remove: "reaction.removed",
 		// Course/signup events
 		course_signup: "course.signup",
+		cohort_checkout_started: "cohort.checkout_started",
+		cohort_enrolled: "cohort.enrolled",
+		cohort_invoice_requested: "cohort.invoice_requested",
 		lead_magnet_viewed: "lead_magnet.viewed",
 		lead_magnet_clicked: "lead_magnet.clicked",
 		lead_magnet_submission_attempted: "lead_magnet.submission_attempted",
@@ -267,6 +270,7 @@ export async function captureServerEvent(
 		"content_id",
 		"audience",
 		"audience_id",
+		"seats",
 		"channel",
 		"status",
 		"subscriber_type",

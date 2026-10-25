@@ -1,0 +1,935 @@
+---
+import { actions, isInputError } from "astro:actions";
+import { AGENTIC_OPERATIONS_WAITLIST_AUDIENCE_ID } from "astro:env/server";
+import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
+import CourseSignupFormCompact from "@/components/courses/CourseSignupFormCompact.astro";
+import EditorialShell from "@/components/ui/EditorialShell.astro";
+import {
+	abstract,
+	approvalMailto,
+	audience,
+	COHORT_EMAIL,
+	COHORT_PATH,
+	curriculum,
+	disclosure,
+	faqs,
+	format,
+	formatUsd,
+	nextCourse,
+	notFor,
+	offer,
+	outcome,
+	prerequisites,
+	refundPolicy,
+	SCHEDULE_CONFIRMED_BY,
+	SESSION_LENGTH_MINUTES,
+	SESSION_START_UTC,
+	schedule,
+	scheduleConfirmed,
+	sessionDates,
+	startsLabel,
+} from "@/lib/cohorts/operations-for-ai";
+import { disableContentCache, getEntry } from "@/lib/live-content";
+import { localTime } from "@/lib/local-time";
+import Page from "@/wrappers/page.astro";
+
+export const prerender = false;
+
+// The page renders form results and checkout outcomes, so it is never stored
+// by the CDN or the browser.
+disableContentCache(Astro);
+Astro.response.headers.set("Cache-Control", "private, no-cache");
+
+// Content is optional here: the sales page and its forms must keep working
+// when the content gateway is unavailable.
+const owner = await getEntry("people", "rawkode").catch(() => undefined);
+const ownerAvatar = owner?.data.avatarUrl
+	? `${owner.data.avatarUrl}?s=96`
+	: undefined;
+
+const isOpen = offer.status === "open";
+const confirmed = scheduleConfirmed();
+const price = formatUsd(offer.priceUsd);
+
+const checkoutState = Astro.url.searchParams.get("checkout");
+const checkoutMessages: Record<string, string> = {
+	cancelled: "Checkout was cancelled. Your seat isn't reserved yet.",
+	error:
+		"Checkout couldn't start. Please try again, or request an invoice below.",
+	unavailable:
+		"Card checkout isn't available right now. Request an invoice below and David will send one today.",
+	"sold-out": "This cohort is full. Join the waitlist below for the next one.",
+};
+const checkoutMessage = checkoutState
+	? checkoutMessages[checkoutState]
+	: undefined;
+
+const invoiceResult = Astro.getActionResult(actions.cohort.requestInvoice);
+const invoiceData = invoiceResult?.data;
+const invoiceReceived =
+	invoiceData != null &&
+	"success" in invoiceData &&
+	invoiceData.success === true;
+const invoiceRateLimited =
+	invoiceData != null &&
+	"rateLimited" in invoiceData &&
+	invoiceData.rateLimited === true;
+const invoiceFallback =
+	invoiceData != null &&
+	"fallback" in invoiceData &&
+	invoiceData.fallback === "mailto";
+const invoiceFieldErrors =
+	invoiceResult?.error && isInputError(invoiceResult.error)
+		? invoiceResult.error.fields
+		: {};
+const fieldError = (name: string) =>
+	(invoiceFieldErrors as Record<string, string[] | undefined>)[name]?.[0];
+
+// Keep what the buyer typed when the request is rejected or can't be sent.
+const invoiceFields = [
+	"name",
+	"email",
+	"company",
+	"seats",
+	"purchaseOrder",
+	"message",
+	"option",
+] as const;
+let submitted: Partial<Record<(typeof invoiceFields)[number], string>> = {};
+if (Astro.request.method === "POST" && !invoiceReceived) {
+	try {
+		const formData = await Astro.request.formData();
+		submitted = Object.fromEntries(
+			invoiceFields.flatMap((key) => {
+				const value = formData.get(key);
+				return typeof value === "string" ? [[key, value]] : [];
+			}),
+		);
+	} catch {
+		submitted = {};
+	}
+}
+
+const sessions = sessionDates.map((date) =>
+	localTime(`${date}T${SESSION_START_UTC}:00Z`, {
+		weekday: "short",
+		day: "numeric",
+		month: "short",
+		hour: "numeric",
+		minute: "2-digit",
+		timeZoneName: "short",
+	}),
+);
+
+const facts = [
+	{ label: "Price", value: `${price} per seat` },
+	{ label: "Starts", value: startsLabel().replace(/^Starts /, "") },
+	{ label: "Format", value: `${schedule.weeks} weeks, live` },
+	{ label: "Seats", value: `${offer.seats} per cohort` },
+];
+
+const included = [
+	`${schedule.weeks} live sessions with David, recorded`,
+	"GPU lab access for the whole cohort",
+	"A capstone reviewed against a production rubric",
+	"A certificate when you pass the capstone",
+	"A private cohort channel for questions between sessions",
+	"Receipt and invoice for your expenses",
+];
+
+const pageTitle = `${offer.title}: live cohort`;
+const pageDescription = `${abstract} ${audience}`;
+const pageUrl = new URL(COHORT_PATH, Astro.site ?? Astro.url).href;
+
+const courseJsonLd = {
+	"@context": "https://schema.org",
+	"@type": "Course",
+	name: offer.title,
+	description: pageDescription,
+	url: pageUrl,
+	provider: {
+		"@type": "Organization",
+		name: "Rawkode Academy",
+		url: "https://rawkode.academy",
+	},
+	offers: {
+		"@type": "Offer",
+		price: offer.priceUsd,
+		priceCurrency: "USD",
+		category: "Paid",
+		availability: isOpen
+			? "https://schema.org/InStock"
+			: "https://schema.org/SoldOut",
+		url: pageUrl,
+	},
+	hasCourseInstance: {
+		"@type": "CourseInstance",
+		courseMode: "Online",
+		courseSchedule: {
+			"@type": "Schedule",
+			repeatFrequency: "P1W",
+			repeatCount: schedule.weeks,
+			...(schedule.startDate ? { startDate: schedule.startDate } : {}),
+			endDate: sessionDates.at(-1),
+		},
+		instructor: { "@type": "Person", name: "David Flanagan" },
+	},
+};
+---
+
+<Page title={pageTitle} description={pageDescription} jsonLd={courseJsonLd}>
+	<BreadcrumbJsonLd
+		slot="extra-head"
+		elements={[
+			{ title: "Home", link: "/" },
+			{ title: "Courses", link: "/courses" },
+			{ title: offer.title, link: COHORT_PATH },
+		]}
+	/>
+
+	<EditorialShell
+		eyebrow={`Live cohort · ${startsLabel()}`}
+		title={offer.title}
+		lede={`${abstract} ${audience}`}
+	>
+		<dl class="cohort-facts" slot="intro">
+			{facts.map((fact) => (
+				<div>
+					<dt>{fact.label}</dt>
+					<dd>{fact.value}</dd>
+				</div>
+			))}
+		</dl>
+		<div class="cohort-hero-actions" slot="actions">
+			<a class="editorial-button" href="#enrol" data-cohort-cta="hero">{isOpen ? `Enrol for ${price}` : "Join the waitlist"}</a>
+			<a class="editorial-button editorial-button--secondary" href={approvalMailto} data-cohort-cta="approval-hero">Ask your manager to pay</a>
+		</div>
+		<div class="cohort-byline" slot="actions">
+			{ownerAvatar && <img src={ownerAvatar} alt="" width="48" height="48" loading="eager" decoding="async" />}
+			<p>
+				<strong>Taught by David Flanagan</strong>
+				<span>Founder of Rawkode Academy · 20 years in developer tools</span>
+			</p>
+		</div>
+
+		<aside class="cohort-schedule" slot="aside" aria-labelledby="schedule-title">
+			<p id="schedule-title" class="cohort-schedule__title">{schedule.weeks} live sessions</p>
+			<ol>
+				{curriculum.map((week, index) => {
+					const session = sessions[index];
+					return (
+						<li>
+							{session && <time {...session.attrs}>{session.text}</time>}
+							<span>{week.title}</span>
+						</li>
+					);
+				})}
+			</ol>
+			<p class="cohort-schedule__note">Shown in your time zone. Every session is recorded.</p>
+		</aside>
+
+		{checkoutMessage && (
+			<p class="cohort-notice" role="status">{checkoutMessage}</p>
+		)}
+
+		<section id="outcome" class="editorial-section editorial-section--split" aria-labelledby="outcome-title">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">§01 · Outcome</p>
+				<h2 id="outcome-title" class="editorial-section__title">What you'll be able to do</h2>
+			</div>
+			<div class="cohort-stack">
+				<p class="cohort-outcome">{outcome}</p>
+				<div class="cohort-fit">
+					<div class="cohort-fit__card">
+						<h3>You'll need</h3>
+						<ul>{prerequisites.map((item) => <li>{item}</li>)}</ul>
+					</div>
+					<div class="cohort-fit__card cohort-fit__card--no">
+						<h3>Not for you if</h3>
+						<ul>{notFor.map((item) => <li>{item}</li>)}</ul>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<section id="curriculum" class="editorial-section" aria-labelledby="curriculum-title">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">§02 · Curriculum</p>
+				<h2 id="curriculum-title" class="editorial-section__title">Six weeks, one platform</h2>
+				<p class="editorial-section__lede">Each week adds one layer to the same platform, so by the capstone you've built the whole thing yourself.</p>
+			</div>
+			<ol class="cohort-weeks">
+				{curriculum.map((week, index) => {
+					const session = sessions[index];
+					return (
+						<li class="cohort-week">
+							<div class="cohort-week__meta">
+								<span class="cohort-week__number">Week {String(week.week).padStart(2, "0")}</span>
+								{session && <time class="cohort-week__date" {...session.attrs}>{session.text}</time>}
+							</div>
+							<div class="cohort-week__body">
+								<h3>{week.title}</h3>
+								<p>{week.summary}</p>
+								<ul>{week.topics.map((topic) => <li>{topic}</li>)}</ul>
+								<p class="cohort-week__lab"><span>Lab</span> {week.lab}</p>
+							</div>
+						</li>
+					);
+				})}
+			</ol>
+			<p class="cohort-footnote">
+				{confirmed
+					? `Live sessions run ${schedule.sessionSlot} (${SESSION_LENGTH_MINUTES / 60} hours), shown above in your time zone. Every session is recorded.`
+					: `Session times will be confirmed by ${SCHEDULE_CONFIRMED_BY}.`}
+			</p>
+		</section>
+
+		<section id="format" class="editorial-section editorial-section--split" aria-labelledby="format-title">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">§03 · Format</p>
+				<h2 id="format-title" class="editorial-section__title">How the cohort works</h2>
+				<p class="editorial-section__lede">Plan for about five hours a week: the live session plus the lab.</p>
+			</div>
+			<dl class="cohort-format">
+				{format.map((item) => (
+					<div>
+						<dt>{item.label}</dt>
+						<dd>{item.detail}</dd>
+					</div>
+				))}
+			</dl>
+		</section>
+
+		<section id="independence" class="editorial-section editorial-section--split" aria-labelledby="independence-title">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">§04 · Independence</p>
+				<h2 id="independence-title" class="editorial-section__title">No vendor on the critical path</h2>
+			</div>
+			<div class="cohort-stack">
+				<p class="editorial-section__lede">Everything you build uses open source tooling and runs on any Kubernetes cluster with NVIDIA GPUs: your cloud, your data centre or your homelab. Nothing you learn stops working when you change provider.</p>
+				<p class="cohort-disclosure"><strong>Disclosure.</strong> {disclosure}</p>
+			</div>
+		</section>
+
+		<section id="enrol" class="editorial-section" aria-labelledby="enrol-title">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">§05 · Enrol</p>
+				<h2 id="enrol-title" class="editorial-section__title">{isOpen ? "Reserve your seat" : "This cohort is full"}</h2>
+				<p class="editorial-section__lede">{offer.seats} seats. {startsLabel()}.</p>
+			</div>
+			<div class="cohort-enrol">
+				<article class="cohort-plan" aria-labelledby="plan-title">
+					<h3 id="plan-title">{offer.title}</h3>
+					<p class="cohort-plan__price"><span>{price}</span> per seat</p>
+					<ul class="cohort-plan__list">{included.map((item) => <li>{item}</li>)}</ul>
+					{isOpen ? (
+						<form class="cohort-checkout" method="POST" action="/api/cohorts/operations-for-ai/checkout">
+							<label for="checkout-seats">Seats</label>
+							<select id="checkout-seats" name="seats">
+								{Array.from({ length: offer.maxSeatsPerOrder }, (_, index) => index + 1).map((count) => (
+									<option value={count}>{count} · {formatUsd(count * offer.priceUsd)}</option>
+								))}
+							</select>
+							<button class="editorial-button" type="submit" data-cohort-cta="checkout">Pay by card</button>
+						</form>
+					) : (
+						<a class="editorial-button" href="#next">Join the waitlist</a>
+					)}
+					<p class="cohort-plan__note">Card payment through Stripe. You'll get a receipt and an invoice with your company details and tax ID.</p>
+					<p class="cohort-plan__note">{refundPolicy}</p>
+				</article>
+				<div class="cohort-employer">
+					<h3>Your employer can pay</h3>
+					<p>Most engineers expense this. Send your manager the approval email, then pay by card or have your company pay an invoice.</p>
+					<div class="editorial-actions">
+						<a class="editorial-button editorial-button--secondary" href={approvalMailto} data-cohort-cta="approval">Draft the approval email</a>
+						<a class="cohort-text-link" href="#invoice">Request an invoice</a>
+					</div>
+					<p class="cohort-plan__note">More than {offer.maxSeatsPerOrder} engineers, or want a private cohort on your own clusters? <a class="cohort-text-link" href="#invoice">Tell us about your team</a>.</p>
+				</div>
+			</div>
+		</section>
+
+		<section id="invoice" class="editorial-section editorial-section--split" aria-labelledby="invoice-title">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">§06 · Invoice</p>
+				<h2 id="invoice-title" class="editorial-section__title">Pay by invoice</h2>
+				<p class="editorial-section__lede">For companies that pay by bank transfer or need a purchase order. David replies within one business day with an invoice or a quote.</p>
+			</div>
+			<div class="cohort-form-wrap">
+				{invoiceReceived ? (
+					<div role="status">
+						<h3>Request received</h3>
+						<p>David will email you within one business day. Your seats are held while the invoice is open.</p>
+					</div>
+				) : (
+					<form class="cohort-form" method="POST" action={actions.cohort.requestInvoice} novalidate>
+						{invoiceRateLimited && <p role="alert">Too many requests were sent recently. Please wait a minute and try again.</p>}
+						{invoiceFallback && <p role="alert">Something went wrong and your request wasn't sent. Please <a href={`mailto:${COHORT_EMAIL}?subject=${encodeURIComponent(`${offer.title} invoice`)}`}>email David directly</a>.</p>}
+						{invoiceResult?.error && <p role="alert">Please check the highlighted fields.</p>}
+						<fieldset class="cohort-form__options">
+							<legend>What do you need?</legend>
+							<label><input type="radio" name="option" value="public" checked={submitted.option !== "private"} /> Seats on the January cohort</label>
+							<label><input type="radio" name="option" value="private" checked={submitted.option === "private"} /> A private cohort for my team</label>
+						</fieldset>
+						<div class="cohort-form__grid">
+							<label>
+								<span>Your name</span>
+								<input name="name" autocomplete="name" maxlength="200" value={submitted.name} required aria-invalid={fieldError("name") ? "true" : undefined} />
+								{fieldError("name") && <small>{fieldError("name")}</small>}
+							</label>
+							<label>
+								<span>Work email</span>
+								<input name="email" type="email" autocomplete="email" value={submitted.email} required aria-invalid={fieldError("email") ? "true" : undefined} />
+								{fieldError("email") && <small>{fieldError("email")}</small>}
+							</label>
+							<label>
+								<span>Company</span>
+								<input name="company" autocomplete="organization" maxlength="1000" value={submitted.company} required aria-invalid={fieldError("company") ? "true" : undefined} />
+								{fieldError("company") && <small>{fieldError("company")}</small>}
+							</label>
+							<label>
+								<span>Seats or team size</span>
+								<input name="seats" type="number" min="1" max={offer.seats} value={submitted.seats ?? "1"} inputmode="numeric" required aria-invalid={fieldError("seats") ? "true" : undefined} />
+								{fieldError("seats") && <small>{fieldError("seats")}</small>}
+							</label>
+							<label>
+								<span>PO number (optional)</span>
+								<input name="purchaseOrder" maxlength="200" value={submitted.purchaseOrder} />
+							</label>
+						</div>
+						<label class="cohort-form__message">
+							<span>Anything else (optional)</span>
+							<textarea name="message" rows="4" maxlength="5000">{submitted.message}</textarea>
+						</label>
+						<label class="cohort-form__honeypot" aria-hidden="true">
+							Website <input name="website" tabindex="-1" autocomplete="off" />
+						</label>
+						<button class="editorial-button" type="submit" data-cohort-cta="invoice">Request an invoice</button>
+					</form>
+				)}
+			</div>
+		</section>
+
+		<section id="questions" class="editorial-section editorial-section--split" aria-labelledby="questions-title">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">§07 · Questions</p>
+				<h2 id="questions-title" class="editorial-section__title">Questions</h2>
+				<p class="editorial-section__lede">Something else? Email <a class="cohort-text-link" href={`mailto:${COHORT_EMAIL}`}>{COHORT_EMAIL}</a></p>
+			</div>
+			<div class="editorial-faq">
+				{faqs.map((faq) => (
+					<details>
+						<summary>{faq.question}</summary>
+						<p>{faq.answer}</p>
+					</details>
+				))}
+			</div>
+		</section>
+
+		<section id="next" class="editorial-section editorial-section--split" aria-labelledby="next-title">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">§08 · Next cohort</p>
+				<h2 id="next-title" class="editorial-section__title">{nextCourse.title}</h2>
+				<p class="editorial-section__lede">Waitlist only. It's scheduled once enough engineers ask for it.</p>
+			</div>
+			<div class="cohort-stack">
+				<p class="cohort-outcome">{nextCourse.abstract}</p>
+				{AGENTIC_OPERATIONS_WAITLIST_AUDIENCE_ID ? (
+					<CourseSignupFormCompact
+						courseId="agentic-operations"
+						courseTitle={nextCourse.title}
+						pagePath={COHORT_PATH}
+						signupConfig={{ audienceId: AGENTIC_OPERATIONS_WAITLIST_AUDIENCE_ID, allowSponsorContact: false }}
+						deferSubscriptionCheck
+					/>
+				) : (
+					<a class="editorial-button editorial-button--secondary" href={`mailto:${COHORT_EMAIL}?subject=${encodeURIComponent(`${nextCourse.title} waitlist`)}`}>Join the waitlist by email</a>
+				)}
+			</div>
+		</section>
+	</EditorialShell>
+</Page>
+
+<style>
+	.cohort-schedule {
+		display: grid;
+		gap: 0.75rem;
+		width: 100%;
+		max-width: 26rem;
+		justify-self: end;
+		padding: 1.25rem;
+		border: 2px solid var(--colors-academy-text);
+		border-radius: var(--radii-academy-m);
+		background: var(--colors-academy-panel);
+	}
+
+	/* Small screens get the dates in the curriculum instead. */
+	@media (max-width: 63.99rem) {
+		.cohort-schedule {
+			display: none;
+		}
+	}
+
+	.cohort-schedule__title {
+		margin: 0;
+		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
+		font-size: 0.8rem;
+		color: var(--colors-academy-text-muted);
+	}
+
+	.cohort-schedule ol {
+		display: grid;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.cohort-schedule li {
+		display: grid;
+		gap: 0.125rem;
+		padding-block: 0.625rem;
+		border-top: 1px solid var(--colors-academy-border);
+	}
+
+	.cohort-schedule time {
+		font-size: 0.8rem;
+		color: var(--colors-academy-text-muted);
+	}
+
+	.cohort-schedule span {
+		font-weight: 600;
+		color: var(--colors-academy-text);
+	}
+
+	.cohort-schedule__note {
+		margin: 0;
+		font-size: 0.8rem;
+		color: var(--colors-academy-text-muted);
+	}
+
+	.cohort-byline {
+		margin-top: 0.5rem;
+	}
+
+	.cohort-text-link {
+		color: var(--colors-academy-text);
+		font-weight: 600;
+		text-decoration: underline;
+		text-underline-offset: 0.2em;
+	}
+
+	.cohort-facts {
+		display: grid;
+		max-width: 32rem;
+		margin: 0.25rem 0 0;
+		border: 1px solid var(--colors-academy-border);
+		border-radius: var(--radii-academy-l);
+		background: var(--colors-academy-panel);
+	}
+
+	.cohort-facts div {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: 1rem;
+		padding: 0.75rem 1rem;
+	}
+
+	.cohort-facts div + div {
+		border-top: 1px solid var(--colors-academy-border);
+	}
+
+	.cohort-facts dt,
+	.cohort-week__number,
+	.cohort-format dt,
+	.cohort-week__lab span {
+		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
+		font-size: 0.8rem;
+		color: var(--colors-academy-text-muted);
+	}
+
+	.cohort-facts dd {
+		margin: 0;
+		font-weight: 700;
+		color: var(--colors-academy-text);
+		text-align: right;
+	}
+
+	@media (min-width: 40rem) {
+		.cohort-facts {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
+		.cohort-facts div:nth-child(2) {
+			border-top: 0;
+			border-left: 1px solid var(--colors-academy-border);
+		}
+
+		.cohort-facts div:nth-child(4) {
+			border-left: 1px solid var(--colors-academy-border);
+		}
+	}
+
+	.cohort-hero-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem;
+	}
+
+	.cohort-byline {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		width: 100%;
+	}
+
+	.cohort-byline img {
+		border-radius: 999px;
+	}
+
+	.cohort-byline p {
+		display: grid;
+		margin: 0;
+		font-size: 0.9rem;
+		color: var(--colors-academy-text-soft);
+	}
+
+	.cohort-byline strong {
+		color: var(--colors-academy-text);
+	}
+
+	.cohort-notice {
+		margin: 1.5rem 0 0;
+		padding: 0.875rem 1rem;
+		border: 1px solid var(--colors-academy-border);
+		border-left: 3px solid var(--colors-academy-accent);
+		background: var(--colors-academy-panel);
+		color: var(--colors-academy-text);
+	}
+
+	.cohort-stack {
+		display: grid;
+		gap: 1.5rem;
+		align-content: start;
+	}
+
+	.cohort-outcome {
+		margin: 0;
+		font-family: var(--fonts-academy-display), serif;
+		font-size: clamp(1.25rem, 2.5vw, 1.6rem);
+		line-height: 1.35;
+		color: var(--colors-academy-text);
+	}
+
+	.cohort-fit {
+		display: grid;
+		gap: 1rem;
+	}
+
+	@media (min-width: 48rem) {
+		.cohort-fit {
+			grid-template-columns: 3fr 2fr;
+		}
+	}
+
+	.cohort-fit__card,
+	.cohort-employer,
+	.cohort-plan {
+		padding: 1.25rem;
+		border: 1px solid var(--colors-academy-border);
+		border-radius: var(--radii-academy-m);
+		background: var(--colors-academy-panel);
+	}
+
+	.cohort-fit__card--no {
+		background: transparent;
+	}
+
+	.cohort-fit__card h3,
+	.cohort-employer h3 {
+		margin: 0 0 0.75rem;
+		font-size: 1rem;
+		color: var(--colors-academy-text);
+	}
+
+	.cohort-fit__card ul,
+	.cohort-plan__list,
+	.cohort-week__body ul {
+		display: grid;
+		gap: 0.5rem;
+		margin: 0;
+		padding-inline-start: 1.1rem;
+		list-style: disc;
+		color: var(--colors-academy-text-soft);
+		line-height: 1.55;
+	}
+
+	.cohort-weeks {
+		display: grid;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		border-top: 1px solid var(--colors-academy-border);
+	}
+
+	.cohort-week {
+		display: grid;
+		gap: 0.75rem;
+		padding-block: 1.5rem;
+		border-bottom: 1px solid var(--colors-academy-border);
+	}
+
+	@media (min-width: 48rem) {
+		.cohort-week {
+			grid-template-columns: 12rem minmax(0, 1fr);
+			gap: 2rem;
+		}
+	}
+
+	.cohort-week__meta {
+		display: grid;
+		gap: 0.25rem;
+		align-content: start;
+	}
+
+	.cohort-week__date {
+		font-size: 0.9rem;
+		color: var(--colors-academy-text-soft);
+	}
+
+	.cohort-week__body {
+		display: grid;
+		gap: 0.75rem;
+	}
+
+	.cohort-week__body h3 {
+		margin: 0;
+		font-size: 1.25rem;
+		color: var(--colors-academy-text);
+	}
+
+	.cohort-week__body p {
+		margin: 0;
+		color: var(--colors-academy-text-soft);
+		line-height: 1.55;
+	}
+
+	.cohort-week__lab {
+		padding-top: 0.5rem;
+		border-top: 1px dashed var(--colors-academy-border);
+	}
+
+	.cohort-week__lab span {
+		margin-right: 0.5rem;
+		color: var(--colors-academy-accent);
+	}
+
+	.cohort-footnote,
+	.cohort-plan__note {
+		margin: 1rem 0 0;
+		font-size: 0.9rem;
+		color: var(--colors-academy-text-muted);
+		line-height: 1.5;
+	}
+
+	.cohort-format {
+		display: grid;
+		gap: 1rem;
+		margin: 0;
+	}
+
+	@media (min-width: 40rem) {
+		.cohort-format {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+
+	.cohort-format div {
+		padding-top: 0.75rem;
+		border-top: 2px solid var(--colors-academy-text);
+	}
+
+	.cohort-format dd {
+		margin: 0.5rem 0 0;
+		color: var(--colors-academy-text-soft);
+		line-height: 1.55;
+	}
+
+	.cohort-disclosure {
+		margin: 0;
+		padding: 1rem;
+		border: 1px solid var(--colors-academy-border);
+		border-radius: var(--radii-academy-m);
+		font-size: 0.95rem;
+		color: var(--colors-academy-text-soft);
+		line-height: 1.55;
+	}
+
+	.cohort-disclosure strong {
+		color: var(--colors-academy-text);
+	}
+
+	.cohort-enrol {
+		display: grid;
+		gap: 1.5rem;
+	}
+
+	@media (min-width: 56rem) {
+		.cohort-enrol {
+			grid-template-columns: 3fr 2fr;
+			align-items: start;
+		}
+	}
+
+	.cohort-plan {
+		border: 2px solid var(--colors-academy-text);
+	}
+
+	.cohort-plan h3 {
+		margin: 0;
+		font-size: 1.1rem;
+		color: var(--colors-academy-text);
+	}
+
+	.cohort-plan__price {
+		margin: 0.5rem 0 1.25rem;
+		color: var(--colors-academy-text-muted);
+	}
+
+	.cohort-plan__price span {
+		font-family: var(--fonts-academy-display), serif;
+		font-size: 2.75rem;
+		color: var(--colors-academy-text);
+	}
+
+	.cohort-checkout {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: end;
+		gap: 0.75rem;
+		margin-top: 1.5rem;
+	}
+
+	.cohort-checkout label {
+		width: 100%;
+		font-size: 0.85rem;
+		font-weight: 600;
+		color: var(--colors-academy-text);
+	}
+
+	.cohort-checkout select,
+	.cohort-form input,
+	.cohort-form textarea {
+		min-height: 2.75rem;
+		padding: 0.5rem 0.75rem;
+		border: 1px solid var(--colors-academy-border);
+		border-radius: var(--radii-academy-s);
+		background: var(--colors-academy-ground);
+		color: var(--colors-academy-text);
+		font: inherit;
+	}
+
+	.cohort-checkout select {
+		flex: 1 1 10rem;
+	}
+
+	.cohort-employer p {
+		margin: 0 0 1rem;
+		color: var(--colors-academy-text-soft);
+		line-height: 1.55;
+	}
+
+	.cohort-form-wrap h3 {
+		margin: 0 0 0.5rem;
+		color: var(--colors-academy-text);
+	}
+
+	.cohort-form {
+		display: grid;
+		gap: 1.25rem;
+	}
+
+	.cohort-form [role="alert"] {
+		margin: 0;
+		color: var(--colors-academy-text);
+	}
+
+	.cohort-form__options {
+		display: grid;
+		gap: 0.5rem;
+		margin: 0;
+		padding: 0;
+		border: 0;
+		color: var(--colors-academy-text-soft);
+	}
+
+	.cohort-form__options legend {
+		margin-bottom: 0.5rem;
+		font-weight: 600;
+		color: var(--colors-academy-text);
+	}
+
+	.cohort-form__grid {
+		display: grid;
+		gap: 1rem;
+	}
+
+	@media (min-width: 40rem) {
+		.cohort-form__grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+
+	.cohort-form__options label {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		cursor: pointer;
+	}
+
+	.cohort-form__grid label,
+	.cohort-form__message {
+		display: grid;
+		gap: 0.375rem;
+		font-size: 0.9rem;
+		font-weight: 600;
+		color: var(--colors-academy-text);
+	}
+
+	.cohort-form small {
+		font-weight: 400;
+		color: var(--colors-academy-accent);
+	}
+
+	.cohort-form [aria-invalid="true"] {
+		border-color: var(--colors-academy-accent);
+	}
+
+	.cohort-form__honeypot {
+		position: absolute;
+		left: -10000px;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+	}
+
+	.cohort-form .editorial-button {
+		justify-self: start;
+	}
+</style>
+
+<script>
+	import { captureGrowthClientEvent, GROWTH_EVENTS } from "@/lib/analytics/growth";
+
+	// Client-side CTA clicks; the checkout endpoint and invoice action record
+	// the server-side conversions.
+	document.querySelectorAll<HTMLElement>("[data-cohort-cta]").forEach((cta) => {
+		cta.addEventListener("click", () => {
+			captureGrowthClientEvent(GROWTH_EVENTS.COHORT_CTA_CLICKED, {
+				cta_location: cta.dataset.cohortCta,
+				content_id: "operations-for-ai",
+			});
+		});
+	});
+</script>

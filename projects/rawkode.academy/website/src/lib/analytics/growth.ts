@@ -3,6 +3,10 @@ import { getSessionCampaignAttribution } from "@/lib/analytics/attribution";
 export const GROWTH_EVENTS = {
 	ACTIVATED_USER: "activated_user",
 	COURSE_SIGNUP: "course_signup",
+	COHORT_CTA_CLICKED: "cohort_cta_clicked",
+	COHORT_CHECKOUT_STARTED: "cohort_checkout_started",
+	COHORT_ENROLLED: "cohort_enrolled",
+	COHORT_INVOICE_REQUESTED: "cohort_invoice_requested",
 	LEAD_MAGNET_VIEWED: "lead_magnet_viewed",
 	LEAD_MAGNET_CLICKED: "lead_magnet_clicked",
 	LEAD_MAGNET_SUBMISSION_ATTEMPTED: "lead_magnet_submission_attempted",

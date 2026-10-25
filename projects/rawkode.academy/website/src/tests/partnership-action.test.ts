@@ -51,6 +51,7 @@ const imports: Record<string, unknown> = {
 	"astro/zod": { z },
 	"cloudflare:workers": { env: workerEnv },
 	"@/lib/partnerships": partnerships,
+	"@/server/attio": loadModule("src/server/attio.ts"),
 };
 const code = ts.transpileModule(
 	readFileSync("src/actions/partnership.ts", "utf8"),

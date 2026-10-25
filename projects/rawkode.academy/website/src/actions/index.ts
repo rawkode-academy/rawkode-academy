@@ -1,4 +1,5 @@
 import { auth } from "./auth";
+import { cohort } from "./cohort";
 import { signupForCourseUpdates } from "./courses";
 import { newsletter } from "./newsletter";
 import { partnership } from "./partnership";
@@ -12,6 +13,7 @@ export const server = {
 	auth,
 	trackVideoEvent,
 	signupForCourseUpdates,
+	cohort,
 	newsletter,
 	partnership,
 	trackShareEvent,
