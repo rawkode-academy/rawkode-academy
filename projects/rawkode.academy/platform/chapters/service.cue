@@ -4,7 +4,8 @@ import gen "github.com/rawkode-academy/rawkode-academy/projects/rawkode.academy/
 
 // Chapters: timestamped sections of a video.
 _service: gen.#PlatformService & {
-	serviceName: "chapters"
+	serviceName:       "chapters"
+	contentWriteModel: true
 	additionalDevDependencies: {
 		miniflare: "4.20260529.0"
 	}

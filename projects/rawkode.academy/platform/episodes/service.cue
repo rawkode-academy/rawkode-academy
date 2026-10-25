@@ -4,7 +4,8 @@ import gen "github.com/rawkode-academy/rawkode-academy/projects/rawkode.academy/
 
 // Episodes: a video's place in a show, with its episode code.
 _service: gen.#PlatformService & {
-	serviceName: "episodes"
+	serviceName:       "episodes"
+	contentWriteModel: true
 	additionalDevDependencies: {
 		miniflare: "4.20260529.0"
 	}

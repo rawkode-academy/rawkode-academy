@@ -56,3 +56,6 @@ export const videosTable = sqliteTable("videos", {
 });
 
 export type Video = typeof videosTable.$inferSelect;
+
+// Revision log for the write model (see packages/content-write).
+export { contentRevisions } from "@rawkodeacademy/content-write/revisions";

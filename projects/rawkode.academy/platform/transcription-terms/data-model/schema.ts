@@ -14,3 +14,6 @@ export const transcriptionTerms = sqliteTable(
 	},
 	(table) => [primaryKey({ columns: [table.kind, table.foreignId, table.term] })],
 );
+
+// Revision log for the write model (see packages/content-write).
+export { contentRevisions } from "@rawkodeacademy/content-write/revisions";

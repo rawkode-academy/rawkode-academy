@@ -10,3 +10,6 @@ export const videoTechnologiesTable = sqliteTable(
 	},
 	(table) => [primaryKey({ columns: [table.videoId, table.technologyId] })],
 );
+
+// Revision log for the write model (see packages/content-write).
+export { contentRevisions } from "@rawkodeacademy/content-write/revisions";

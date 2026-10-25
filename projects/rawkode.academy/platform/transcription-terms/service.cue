@@ -4,7 +4,8 @@ import gen "github.com/rawkode-academy/rawkode-academy/projects/rawkode.academy/
 
 // Transcription terms: spellings that help transcribe videos, for videos, shows, people and technologies.
 _service: gen.#PlatformService & {
-	serviceName: "transcription-terms"
+	serviceName:       "transcription-terms"
+	contentWriteModel: true
 	additionalDevDependencies: {
 		miniflare: "4.20260529.0"
 	}

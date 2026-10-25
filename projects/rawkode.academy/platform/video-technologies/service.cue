@@ -4,7 +4,8 @@ import gen "github.com/rawkode-academy/rawkode-academy/projects/rawkode.academy/
 
 // Video technologies: which technologies each video covers.
 _service: gen.#PlatformService & {
-	serviceName: "video-technologies"
+	serviceName:       "video-technologies"
+	contentWriteModel: true
 	additionalDevDependencies: {
 		miniflare: "4.20260529.0"
 	}

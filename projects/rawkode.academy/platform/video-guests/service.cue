@@ -4,7 +4,8 @@ import gen "github.com/rawkode-academy/rawkode-academy/projects/rawkode.academy/
 
 // Video guests: which people appear on which videos.
 _service: gen.#PlatformService & {
-	serviceName: "video-guests"
+	serviceName:       "video-guests"
+	contentWriteModel: true
 	additionalDevDependencies: {
 		miniflare: "4.20260529.0"
 	}

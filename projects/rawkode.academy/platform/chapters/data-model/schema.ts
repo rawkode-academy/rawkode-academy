@@ -10,3 +10,6 @@ export const chaptersTable = sqliteTable(
 	},
 	(table) => [primaryKey({ columns: [table.videoId, table.startTime] })],
 );
+
+// Revision log for the write model (see packages/content-write).
+export { contentRevisions } from "@rawkodeacademy/content-write/revisions";
