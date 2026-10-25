@@ -58,6 +58,8 @@ cuenv exec -e production uv run python youtube_to_r2.py <youtube-id> --local-vid
 
 The importer downloads or prepares the video, extracts MP3 audio, uploads `original.mkv`, `original.mp3`, and `thumbnail.webp` to `rawkode-academy-content`, triggers Cloud Run `transcoding-job` (unless `--skip-cloud-run`), inserts the video row into the `platform-videos` D1 database, calls the website's cache invalidation endpoint for `videos:<cuid>`, and prints the CUID plus the SQL it wrote. The row holds `title`, `subtitle` (first description line), `slug` (from the title), `description` (plain text), `description_doc` (the same text as a TipTap document), `duration`, `publishedAt` (YouTube upload date, Unix seconds), `youtube_id` and `updated_at`. An existing row is never overwritten.
 
+With `CMS_API_TOKEN` set (a CMS token with the `content_agent` role), the importer creates the video through the CMS API instead: the videos write model validates it, records a revision and purges the website cache itself, so `cache_invalidated` completes without `CACHE_INVALIDATION_TOKEN`. Without it the importer falls back to the D1 HTTP API below.
+
 D1 needs `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` (provided by `cuenv exec -e production`). `CACHE_INVALIDATION_TOKEN` is optional: without it the importer warns, leaves `cache_invalidated` incomplete, and the website shows the video after its hourly change detection.
 
 The row makes the video public at `publishedAt` (usually already past), before transcoding finishes. To hold it back, run with `--skip-d1` (uploads only, SQL printed), then re-run the same command without it once transcoding completed: completed steps are skipped, so the re-run only writes D1 and invalidates the cache. The downloaded JPEG thumbnail is only a temporary conversion source; `thumbnail.webp` is the canonical runtime asset. It keeps state in `~/.youtube_to_r2_state/<youtube-id>.json`.
@@ -85,6 +87,21 @@ curl -fsS -I https://content.rawkode.academy/videos/<cuid>/thumbnail.jpg # shoul
 
 ## Content (D1 rows)
 
+
+Prefer the CMS API (`https://cms.rawkode.academy/api/v1`, `Authorization: Bearer $CMS_API_TOKEN`; `GET /openapi.json` documents it) for these rows: it validates them, keeps revisions and purges the cache. Episodes, guests, technologies and chapters are panels of the video:
+
+```bash
+CMS=https://cms.rawkode.academy/api/v1
+curl -fsS "$CMS/collections/videos/<cuid>" -H "Authorization: Bearer $CMS_API_TOKEN"   # panels.<name>.version = the ifVersion to send
+curl -fsS -X PUT "$CMS/collections/videos/<cuid>/panels/episode" -H "Authorization: Bearer $CMS_API_TOKEN" -H 'content-type: application/json' \
+  -d '{"data": {"showId": "rawkode-live", "code": "<slug>"}, "ifVersion": 0}'
+curl -fsS -X PUT "$CMS/collections/videos/<cuid>/panels/guests" -H "Authorization: Bearer $CMS_API_TOKEN" -H 'content-type: application/json' \
+  -d '{"items": [{"guestId": "<person-id>"}], "ifVersion": 0}'
+curl -fsS -X PUT "$CMS/collections/videos/<cuid>/panels/technologies" -H "Authorization: Bearer $CMS_API_TOKEN" -H 'content-type: application/json' \
+  -d '{"items": [{"technologyId": "kubernetes"}, {"technologyId": "helm"}], "ifVersion": 0}'
+```
+
+A list panel PUT replaces the whole list in the order given. `422` names the invalid fields (`error.issues`); `409` means the panel changed since you read its version. The SQL below is the fallback when the CMS is unavailable; it skips validation and revisions.
 The repository has no content files any more (the `content/` tree is gone); never create Markdown/MDX/YAML for videos, people or technologies. The importer creates the `videos` row; everything else is rows in the platform services under `projects/rawkode.academy/platform/<service>` (exact columns in each `data-model/schema.ts`). Apply SQL with wrangler from the service directory:
 
 ```bash

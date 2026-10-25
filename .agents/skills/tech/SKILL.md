@@ -89,30 +89,51 @@ cd packages/rich-text
 bun -e 'import { fromMarkdown } from "./src/markdown/index.ts"; import { validateDoc } from "./src/schema.ts"; const file = process.argv[1]; const doc = fromMarkdown(await Bun.file(file).text(), { mdx: false, file }); validateDoc(doc); console.log(JSON.stringify(doc));' /absolute/path/to/body.md > /absolute/path/to/body.json
 ```
 
-Store the Markdown in `description` and the JSON in `body`. Never hand-write
-the JSON; a document `validateDoc` rejects must not be stored.
+Send the JSON as `body`; the write model derives `description` (its Markdown
+copy). Never hand-write the JSON; a document `validateDoc` rejects must not be
+stored (the CMS rejects it with a `body` issue).
 
 ## 5. Write
 
-Write the SQL to a file outside the repo (single quotes doubled inside string
-literals, JSON as text), review it, then apply it:
+Write through the CMS API (cms.rawkode.academy). The technologies write model
+validates the row (statuses and matrix values the explorer can render, URLs,
+the body document), keeps `description` as the Markdown copy of `body`,
+records a revision and purges the website cache. Use a CMS API token with the
+`content_agent` role in `CMS_API_TOKEN` (an admin creates one under
+Settings → Tokens). Field rules: `GET /api/v1/collections`; full API:
+`GET /api/v1/openapi.json`.
 
-```sql
-INSERT INTO technologies (id, name, description, body, website, documentation, source, license, status, category, subcategory, logos, updated_at)
-VALUES ('bun', 'Bun', '<markdown>', '<body json>', 'https://bun.sh', 'https://bun.sh/docs', 'https://github.com/oven-sh/bun', 'MIT', 'stable', '<category>', '<subcategory>', '{"icon":true}', CAST(strftime('%s','now') AS INTEGER) * 1000);
+```bash
+CMS=https://cms.rawkode.academy/api/v1
+# Create (send body as the document from step 4; description is derived from it)
+curl -fsS -X POST "$CMS/collections/technologies" -H "Authorization: Bearer $CMS_API_TOKEN" \
+  -H 'content-type: application/json' --data @/absolute/path/to/technology.json
+#   technology.json: {"data": {"id": "bun", "name": "Bun", "body": {...}, "website": "https://bun.sh", ...}}
+
+# Update: read the current version, then send only the changed fields
+curl -fsS "$CMS/collections/technologies/bun" -H "Authorization: Bearer $CMS_API_TOKEN"   # -> {"value":..., "version": n}
+curl -fsS -X PATCH "$CMS/collections/technologies/bun" -H "Authorization: Bearer $CMS_API_TOKEN" \
+  -H 'content-type: application/json' -d '{"patch": {"license": "MIT"}, "ifVersion": <n>}'
+
+# Transcription terms (the whole list for the technology, in order)
+curl -fsS -X PUT "$CMS/collections/technologies/bun/panels/terms" -H "Authorization: Bearer $CMS_API_TOKEN" \
+  -H 'content-type: application/json' -d '{"items": [{"term": "Bun"}, {"term": "bunx"}], "ifVersion": <terms version>}'
 ```
 
-For an update, `UPDATE technologies SET <only the corrected columns>, updated_at = CAST(strftime('%s','now') AS INTEGER) * 1000 WHERE id = '<id>';`
-(for one JSON key: `logos = json_set(coalesce(logos, '{}'), '$.stacked', json('true'))`).
+Responses: `201`/`200` written; `422` with `error.issues` naming each invalid
+field (fix and resend); `409` with `error.currentVersion` when someone else
+changed the row since you read it (re-read, re-apply, resend). Do not retry a
+`422` unchanged.
+
+Fallback, only if the CMS is unavailable: write SQL to a file outside the repo
+and apply it with wrangler, then invalidate the cache (step 7):
 
 ```bash
 cd projects/rawkode.academy/platform/technologies
 cuenv exec -e production -- bunx wrangler d1 execute platform-technologies --remote --config read-model/wrangler.jsonc --file=/absolute/path/to/technology.sql
-
-cd ../transcription-terms
-cuenv exec -e production -- bunx wrangler d1 execute platform-transcription-terms --remote --config read-model/wrangler.jsonc \
-  --command "INSERT OR IGNORE INTO transcription_terms (kind, foreignId, term) VALUES ('technology', '<id>', 'Bun'), ('technology', '<id>', 'bunx')"
 ```
+
+Raw SQL bypasses validation and leaves no revision; say so when you use it.
 
 ## 6. Logos
 
@@ -132,7 +153,8 @@ variants are missing.
 
 ## 7. Invalidate the Website Cache
 
-After every D1 write or logo upload:
+CMS writes purge the cache themselves (through the content-changes queue).
+After a logo upload or a fallback SQL write, purge it yourself:
 
 ```bash
 curl -fsS -X POST https://rawkode.academy/api/cache/invalidate \
@@ -150,7 +172,7 @@ after the website's hourly change detection; say so.
 
 1. Read the row (step 2) and the rendered page `https://rawkode.academy/technology/<id>`.
 2. Compare `website`, `documentation`, `source` and `license` with your research; check the profile for outdated versions, years or claims.
-3. Make the narrowest correction that resolves the request: `UPDATE` only the columns that change. When changing the profile text, update `description` and regenerate `body` from it together.
+3. Make the narrowest correction that resolves the request: `PATCH` only the fields that change. When changing the profile text, update `description` and regenerate `body` from it together.
 4. Invalidate the cache and re-read the API to confirm the change.
 
 ## Guardrails
