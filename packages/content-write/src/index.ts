@@ -1,4 +1,11 @@
 export {
+	describeFields,
+	describeModels,
+	type FieldDescriptor,
+	type FieldType,
+	type ModelDescriptor,
+} from "./describe";
+export {
 	defineModels,
 	type EntityModel,
 	httpUrl,

@@ -7,6 +7,7 @@
 //
 // Callers (the CMS) bind the worker as a Service and call these methods.
 import { WorkerEntrypoint } from "cloudflare:workers";
+import { describeModels } from "./describe";
 import type { ServiceModels } from "./model";
 import { type ContentWriteEnv, ContentStore } from "./store";
 import type { Actor, ListQuery, Row } from "./types";
@@ -29,6 +30,11 @@ export function contentWriteModel(service: ServiceModels) {
 
 		models() {
 			return this.store.models();
+		}
+
+		/** Field descriptions for editors, derived from the zod schemas. */
+		describe() {
+			return describeModels(service);
 		}
 
 		get(model: string, id: string) {
@@ -86,7 +92,9 @@ export function contentWriteModel(service: ServiceModels) {
 }
 
 /** The RPC methods a content write model exposes, for typing Service bindings. */
-export type ContentWriteRpc = Pick<
+export type ContentWriteRpc = {
+	describe(): ReturnType<typeof describeModels>;
+} & Pick<
 	ContentStore,
 	| "models"
 	| "get"

@@ -383,3 +383,25 @@ test("a failing queue does not fail a committed write", async () => {
 		console.error = original;
 	}
 });
+
+test("describeModels derives editor fields from the zod schemas", async () => {
+	const { describeModels } = await import("../src/index");
+	const [technology, guestList] = describeModels(models);
+	expect(technology?.key).toBe("id");
+	const fields = Object.fromEntries((technology?.fields ?? []).map((f) => [f.name, f]));
+	expect(fields.id).toMatchObject({ type: "slug", required: true });
+	expect(fields.name).toMatchObject({ type: "text", required: true });
+	expect(fields.status).toMatchObject({
+		type: "enum",
+		options: ["stable", "beta"],
+		required: false,
+	});
+	expect(fields.aliases).toMatchObject({ type: "strings", required: false });
+	expect(fields.publishedAt).toMatchObject({ type: "date", nullable: true });
+	expect(guestList).toMatchObject({
+		kind: "list",
+		parent: ["videoId"],
+		position: "position",
+		fields: [{ name: "guestId", type: "text", required: true }],
+	});
+});

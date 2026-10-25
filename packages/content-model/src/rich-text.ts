@@ -27,7 +27,9 @@ export const richTextDocument = () =>
 				message: `Invalid rich-text document: ${error instanceof Error ? error.message : String(error)}`,
 			});
 		}
-	});
+	})
+		// Editors (the CMS) render this field with the rich-text editor.
+		.describe("rich-text");
 
 /** The Markdown copy of a document, for columns kept until every reader uses the JSON. */
 export const markdownOf = (doc: unknown): string =>

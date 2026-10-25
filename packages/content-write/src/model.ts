@@ -110,15 +110,19 @@ export const requiredText = () => z.string().trim().min(1);
 export const slug = () =>
 	z
 		.string()
-		.regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use a kebab-case slug, e.g. my-entry");
+		.regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use a kebab-case slug, e.g. my-entry")
+		.describe("slug");
 
 /** An absolute http(s) URL. */
 export const httpUrl = () =>
-	z.string().refine((value) => {
+	z
+		.string()
+		.refine((value) => {
 		try {
 			const { protocol } = new URL(value);
 			return protocol === "http:" || protocol === "https:";
 		} catch {
 			return false;
 		}
-	}, "Use an http(s) URL");
+	}, "Use an http(s) URL")
+		.describe("url");
