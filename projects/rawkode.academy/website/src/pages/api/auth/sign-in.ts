@@ -1,9 +1,14 @@
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
+import { isPrefetch } from "@/lib/auth/prefetch";
 import { buildAuthorizationUrl, PKCE_COOKIE_NAME } from "@/lib/auth/server";
 import { captureServerEvent, getDistinctId } from "@/server/analytics";
 
 export const GET: APIRoute = async (context) => {
+	if (isPrefetch(context.request)) {
+		return new Response(null, { status: 204 });
+	}
+
 	let returnTo = context.url.searchParams.get("returnTo") || "/";
 
 	// Fallback to Referer header if returnTo is a server island path
@@ -33,6 +38,7 @@ export const GET: APIRoute = async (context) => {
 			properties: {
 				auth_method: "github",
 				from_page: returnTo,
+				user_agent: context.request.headers.get("user-agent") ?? "",
 			},
 			distinctId: getDistinctId(context),
 		},
