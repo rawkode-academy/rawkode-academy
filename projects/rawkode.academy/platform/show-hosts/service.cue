@@ -4,7 +4,8 @@ import gen "github.com/rawkode-academy/rawkode-academy/projects/rawkode.academy/
 
 // Show hosts: which people host which shows.
 _service: gen.#PlatformService & {
-	serviceName: "show-hosts"
+	serviceName:       "show-hosts"
+	contentWriteModel: true
 	additionalDevDependencies: {
 		miniflare: "4.20260529.0"
 	}

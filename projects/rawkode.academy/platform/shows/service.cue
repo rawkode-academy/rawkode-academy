@@ -4,7 +4,8 @@ import gen "github.com/rawkode-academy/rawkode-academy/projects/rawkode.academy/
 
 // Shows: the Show entity. Hosts, episodes and terms live in join services.
 _service: gen.#PlatformService & {
-	serviceName: "shows"
+	serviceName:       "shows"
+	contentWriteModel: true
 	additionalDevDependencies: {
 		miniflare: "4.20260529.0"
 	}

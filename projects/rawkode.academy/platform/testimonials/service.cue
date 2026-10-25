@@ -4,7 +4,8 @@ import gen "github.com/rawkode-academy/rawkode-academy/projects/rawkode.academy/
 
 // Testimonials: quotes from maintainers, partners and viewers, with an embedded author.
 _service: gen.#PlatformService & {
-	serviceName: "testimonials"
+	serviceName:       "testimonials"
+	contentWriteModel: true
 	additionalDevDependencies: {
 		miniflare: "4.20260529.0"
 	}

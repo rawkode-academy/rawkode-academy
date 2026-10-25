@@ -47,3 +47,6 @@ export const showsTable = sqliteTable("shows", {
 });
 
 export type Show = typeof showsTable.$inferSelect;
+
+// Revision log for the write model (see packages/content-write).
+export { contentRevisions } from "@rawkodeacademy/content-write/revisions";

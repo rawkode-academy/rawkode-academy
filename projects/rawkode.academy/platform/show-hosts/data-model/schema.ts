@@ -10,3 +10,6 @@ export const showHostsTable = sqliteTable(
 	},
 	(table) => [primaryKey({ columns: [table.hostId, table.showId] })],
 );
+
+// Revision log for the write model (see packages/content-write).
+export { contentRevisions } from "@rawkodeacademy/content-write/revisions";

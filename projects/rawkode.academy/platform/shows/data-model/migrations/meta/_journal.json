@@ -29,6 +29,13 @@
       "when": 1792783801204,
       "tag": "0003_description_doc",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1792969033128,
+      "tag": "0004_content_revisions",
+      "breakpoints": true
     }
   ]
 }

@@ -16,3 +16,6 @@ export const testimonialsTable = sqliteTable("testimonials", {
 });
 
 export type Testimonial = typeof testimonialsTable.$inferSelect;
+
+// Revision log for the write model (see packages/content-write).
+export { contentRevisions } from "@rawkodeacademy/content-write/revisions";
