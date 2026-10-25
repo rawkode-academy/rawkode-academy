@@ -8,7 +8,6 @@ This is a Bun workspace monorepo containing the Rawkode Academy platform. Key do
 
 - **`projects/rawkode.academy/`** - Main website and platform services
 - **`content/`** - Content management (technologies, articles, courses)
-- **`dagger/`** - CI/CD pipeline modules
 - **`infrastructure/`** - Terraform and DNS configurations
 
 ## Environment & Runtime
@@ -42,7 +41,7 @@ bun run knip         # Detect unused dependencies
 - **Database:** Cloudflare D1 with Drizzle ORM
 - **Testing:** Vitest
 - **Linting:** Biome
-- **CI/CD:** Dagger (TypeScript SDK) + GitHub Actions
+- **CI/CD:** GitHub Actions
 
 ## Commit Convention
 
@@ -72,5 +71,4 @@ Follow `.editorconfig`:
 | `projects/rawkode.academy/platform/CLAUDE.md` | GraphQL microservices guide |
 | `projects/rawkode.academy/website/CLAUDE.md` | Design system & components |
 | `content/CLAUDE.md` | Content management |
-| `dagger/CLAUDE.md` | CI/CD modules |
 | `infrastructure/CLAUDE.md` | Infrastructure configuration |
