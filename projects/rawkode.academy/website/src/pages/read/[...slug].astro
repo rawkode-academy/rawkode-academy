@@ -2,15 +2,17 @@
 import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
 const styles = academyLayout({ width: "reading" });
-import { getImage } from "astro:assets";
-import { getEntry } from "astro:content";
 import {
-	type CollectionEntry,
+	type ContentEntry,
+	documentToMarkdown,
 	getCollection,
 	getEntries,
-	render,
-} from "astro:content";
-import type { GetStaticPaths, GetStaticPathsResult } from "astro";
+	getEntry,
+	optionalContent,
+	renderEntry,
+	setContentCache,
+} from "@/lib/live-content";
+import RichText from "@/components/content/RichText.astro";
 
 import Page from "@/wrappers/page.astro";
 
@@ -22,7 +24,6 @@ import RelatedArticles from "@/components/articles/RelatedArticles.astro";
 import Resources from "@/components/articles/Resources.astro";
 import Updates from "@/components/articles/Updates.astro";
 import RelatedVideos from "@/components/articles/RelatedVideos.astro";
-import SeriesLink from "@/components/series/SeriesLink.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 
 import ArticleHeader from "@/components/read/ArticleHeader.astro";
@@ -34,38 +35,49 @@ import { calculateReadingTime } from "@/utils/reading-time";
 import { getTypeBadgeConfig } from "@/utils/article-types";
 import { localTime } from "@/lib/local-time";
 
-export const prerender = true;
+export const prerender = false;
 
-type Props = {
-	article: CollectionEntry<"articles">;
-};
+const RELATED_ARTICLE_LIMIT = 3;
 
-const computeImageUrl = async (
-	article: CollectionEntry<"articles">,
-): Promise<URL | undefined> => {
-	if (article.data.cover) {
-		const image = await getImage({ src: article.data.cover.image });
-		return new URL(image.src, Astro.site);
-	}
-	return undefined;
-};
+// Every article id resolves (drafts included, as before); scheduled
+// (future-dated) articles stay hidden until their publication time.
+const article = Astro.params.slug
+	? await getEntry("articles", Astro.params.slug)
+	: undefined;
+if (!article) return new Response(null, { status: 404 });
 
-export const getStaticPaths: GetStaticPaths =
-	async (): Promise<GetStaticPathsResult> => {
-		const articles = await getCollection("articles");
-		return articles.map((article: CollectionEntry<"articles">) => ({
-			params: { slug: article.id },
-			props: { article },
-		}));
-	};
+const [{ html, headings }, authors, allArticles, allTechnologies] =
+	await Promise.all([
+		renderEntry(article),
+		getEntries(article.data.authors),
+		// Related reading and tag labels are optional: a content failure
+		// leaves them out instead of failing the article.
+		optionalContent(getCollection("articles"), []),
+		optionalContent(getCollection("technologies"), []),
+	]);
 
-const { article } = Astro.props;
-const { Content, headings } = await render(article);
-const authors = await getEntries(article.data.authors);
-const maybeSeries =
-	article.data.series && (await getEntry("series", article.data.series.id));
+// Same pool and ranking RelatedArticles applies, resolved here so the cache
+// tags cover the related cards (and their authors).
+const relatedArticles = allArticles
+	.filter((candidate) => candidate.id !== article.id)
+	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
+	.slice(0, RELATED_ARTICLE_LIMIT);
 
-const imageUrl = await computeImageUrl(article);
+await setContentCache(Astro, {
+	entries: [article, ...authors, ...relatedArticles],
+	// Related articles and videos are listed; the body autolinks and the tags
+	// are labelled from technologies.
+	collections: ["articles", "videos", "technologies"],
+});
+
+const computeImageUrl = (
+	entry: ContentEntry<"articles">,
+): URL | undefined =>
+	entry.data.cover
+		? new URL(entry.data.cover.image.src, Astro.site ?? Astro.url)
+		: undefined;
+
+const imageUrl = computeImageUrl(article);
 
 const howToJsonLd = article.data.howto
 	? buildHowToJsonLd({
@@ -79,18 +91,16 @@ const howToJsonLd = article.data.howto
 				? { updatedAt: new Date(article.data.updatedAt) }
 				: {}),
 			headings,
-			body: article.body ?? "",
+			body: await documentToMarkdown(article.data.body),
 		})
 	: undefined;
 
 const readingTime = calculateReadingTime(article.body || "");
 
-// Technology → readable label
-const allTechnologies = await getCollection("technologies");
+// Technology → readable label (technology ids carry no "/index").
 const technologyNameById = new Map<string, string>();
 for (const technology of allTechnologies) {
-	const rawId = technology.id.replace(/\/index$/, "");
-	technologyNameById.set(rawId, technology.data.name);
+	technologyNameById.set(technology.id, technology.data.name);
 }
 
 function formatTechnologyLabel(value: string): string {
@@ -205,15 +215,9 @@ const subtitle = article.data.openGraph?.subtitle || article.data.subtitle;
 
 		<div class={doc.body}>
 			<div class={doc.main}>
-				{maybeSeries && (
-					<div class={doc.notice}>
-						<SeriesLink series={maybeSeries} />
-					</div>
-				)}
-
 				<article class={styles.prose}>
 					<Updates updates={article.data.updates} />
-					<Content />
+					<RichText html={html} />
 				</article>
 
 				<EndSlug date={publishDate} />
@@ -225,7 +229,11 @@ const subtitle = article.data.openGraph?.subtitle || article.data.subtitle;
 		</div>
 
 		<div class={doc.section}>
-			<RelatedArticles currentArticle={article} limit={3} />
+			<RelatedArticles
+				currentArticle={article}
+				articles={relatedArticles}
+				limit={RELATED_ARTICLE_LIMIT}
+			/>
 			<RelatedVideos currentArticle={article} limit={3} />
 			<NewsletterCTA />
 		</div>

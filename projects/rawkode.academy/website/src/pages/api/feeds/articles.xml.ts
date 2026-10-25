@@ -1,10 +1,17 @@
-import { getCollection, getEntries } from "astro:content";
 import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
+import {
+	type ContentEntry,
+	getCollection,
+	getEntries,
+	setContentCache,
+} from "@/lib/live-content";
 import {
 	renderAndSanitizeArticles,
 	withRssMimeType,
 } from "../../../lib/feed-utils";
+
+export const prerender = false;
 
 export async function GET(context: APIContext) {
 	const articles = await getCollection("articles");
@@ -19,11 +26,14 @@ export async function GET(context: APIContext) {
 	// Render all articles in parallel for better performance
 	const renderedContent = await renderAndSanitizeArticles(sortedArticles);
 
+	const authorEntries: ContentEntry<"people">[] = [];
+
 	// Process each article to include full content
 	const items = await Promise.all(
 		sortedArticles.map(async (article) => {
 			const renderResult = renderedContent.get(article.id);
 			const authors = await getEntries(article.data.authors);
+			authorEntries.push(...authors);
 
 			return {
 				title: article.data.title,
@@ -31,11 +41,17 @@ export async function GET(context: APIContext) {
 				pubDate: new Date(article.data.publishedAt),
 				link: `/read/${article.id}/`,
 				author: authors.map((author) => author.data.name).join(", "),
-				categories: article.data.series?.id ? [article.data.series.id] : [],
+				// Categories carried the series id; articles have no series any more.
+				categories: [],
 				...(renderResult?.content && { content: renderResult.content }),
 			};
 		}),
 	);
+
+	await setContentCache(context, {
+		entries: [...sortedArticles, ...authorEntries],
+		collections: ["articles"],
+	});
 
 	return withRssMimeType(
 		await rss({

@@ -3,10 +3,10 @@
   "private": true,
   "type": "module",
   "workspaces": [
-    "content",
     "packages/**",
     "projects/**",
-    "!projects/**/generators/**"
+    "!projects/**/generators/**",
+    "!projects/**/webcontainer-demos/**"
   ],
   "devDependencies": {
     "@types/node": "^24.10.1",

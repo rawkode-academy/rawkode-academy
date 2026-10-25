@@ -1,10 +1,10 @@
 ---
-import type { CollectionEntry } from "astro:content";
+import type { ContentEntry } from "@/lib/live-content";
 import { formatVideoRuntimeLabel } from "@/lib/video-runtime";
 import { academyWatch } from "@rawkodeacademy/design-system";
 
 interface Props {
-	show: CollectionEntry<"shows">;
+	show: ContentEntry<"shows">;
 	videos: Array<{
 		id: string;
 		title: string;

@@ -1,6 +1,11 @@
 ---
 import { actions, isInputError } from "astro:actions";
-import { getCollection, getEntry } from "astro:content";
+import {
+	type ContentEntry,
+	disableContentCache,
+	getCollection,
+	getEntry,
+} from "@/lib/live-content";
 import PartnerLogos from "@/components/organizations/PartnerLogos.astro";
 import PartnershipApplicationForm from "@/components/organizations/PartnershipApplicationForm.vue";
 import ReviewPreview from "@/components/organizations/ReviewPreview.astro";
@@ -33,6 +38,9 @@ import Page from "@/wrappers/page.astro";
 
 export const prerender = false;
 
+// The page renders enquiry results and rejected submissions from Astro
+// actions, so it is never stored by the CDN or the browser.
+disableContentCache(Astro);
 Astro.response.headers.set("Cache-Control", "private, no-cache");
 
 const applyHref = (path: ApplicationPath) =>
@@ -108,7 +116,9 @@ const submittedValues =
 const partnershipReviewHeroTitle =
 	"See exactly where engineers get stuck with your product.";
 
-const owner = await getEntry("people", "rawkode");
+// Content is optional on this page: the enquiry form must keep working when
+// the content gateway is unavailable.
+const owner = await getEntry("people", "rawkode").catch(() => undefined);
 const ownerAvatar = owner?.data.avatarUrl
 	? `${owner.data.avatarUrl}?s=96`
 	: undefined;
@@ -252,7 +262,9 @@ const faqs = [
 // Excerpts are checked against their testimonials in CI
 // (src/tests/partnership-quotes.test.ts). A quote that no longer matches is
 // left out here rather than failing the request.
-const testimonials = await getCollection("testimonials");
+const testimonials: ContentEntry<"testimonials">[] = await getCollection(
+	"testimonials",
+).catch(() => []);
 const quoteFor = (id: PartnershipQuoteId) => {
 	const entry = testimonials.find((item) => item.id === id);
 	const excerpt = partnershipQuoteExcerpts[id];

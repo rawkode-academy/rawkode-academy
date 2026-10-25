@@ -1,5 +1,5 @@
 // Run from the website: node --experimental-vm-modules --test src/tests/academy-related-content-ssr.test.mjs
-// Real Astro compilation/rendering; collection data and the child ArticleCard boundary are fixtures.
+// Real Astro compilation/rendering; content-layer data and the child ArticleCard boundary are fixtures.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
@@ -15,11 +15,7 @@ const runtimeSource = readFileSync(
 	new URL("../lib/video-runtime.ts", import.meta.url),
 	"utf8",
 );
-const context = vm.createContext({
-	console,
-	URL,
-	__NEWS_DEPLOYMENT_CUTOFF_MS__: Date.parse("2100-01-01"),
-});
+const context = vm.createContext({ console, URL });
 const publicationModule = new vm.SourceTextModule(
 	ts.transpileModule(
 		readFileSync(
@@ -78,9 +74,14 @@ async function render(file, props, collections = {}) {
 	assert.deepEqual(compiled.diagnostics, []);
 	const mocks = {
 		"astro/runtime/server/index.js": { ...runtime, createMetadata: () => ({}) },
-		"astro:content": {
+		// The live content layer is the collection boundary. Like the real
+		// wrappers' callers, components must apply their own publication
+		// filters: this fixture deliberately returns scheduled entries too.
+		"@/lib/live-content": {
 			getCollection: async (name, filter) =>
 				(collections[name] ?? []).filter(filter ?? (() => true)),
+			// Pass-through: these fixtures never fail.
+			optionalContent: async (load) => load,
 		},
 		"@rawkodeacademy/design-system": {
 			academyRelatedContent: () => styles,

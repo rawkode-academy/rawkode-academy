@@ -9,10 +9,9 @@ const detailRoutes = [
 	"read/[...slug].astro",
 	"news/[...slug].astro",
 	"learning-paths/[slug].astro",
-	"series/[...slug].astro",
 	"adrs/[...slug].astro",
 	"courses/[...slug].astro",
-	"courses/[course]/[...slug].astro",
+	"courses/[course]/[slug].astro",
 	"shows/[showId].astro",
 	"people/[id].astro",
 ];
@@ -28,18 +27,16 @@ const documentComponents = [
 	"articles/Resources.astro",
 	"articles/Updates.astro",
 	"articles/Diagram.astro",
-	"articles/series/SeriesArticles.astro",
 	"show/SubscribeLinks.astro",
-	"series/SeriesLink.astro",
 ];
 
 describe("Academy document migration", () => {
-	it("requires inline diagram rendering instead of silently omitting the integration", () => {
-		const config = readFileSync("astro.config.mts", "utf8");
-		expect(config).toContain("d2({ inline: true })");
-		expect(config).not.toContain("d2Available");
-		expect(config).not.toContain("skipping diagram support");
-		expect(readFileSync("devenv.nix", "utf8")).toMatch(/\n\s+d2\n/);
+	it("inlines pre-rendered diagram SVGs at render time instead of an OS-themed <img>", () => {
+		const render = source("lib/live-content/render/render.ts");
+		expect(render).toContain("loadDiagramSvg");
+		expect(source("lib/live-content/render/diagram.ts")).toContain(
+			":root.dark",
+		);
 	});
 
 	it("navigates without a decorative cross-document text crossfade", () => {
@@ -87,7 +84,7 @@ describe("Academy document migration", () => {
 
 	it("retains course availability, resource, and media integration", () => {
 		const curriculum = source("components/courses/CourseModules.astro");
-		const lesson = source("pages/courses/[course]/[...slug].astro");
+		const lesson = source("pages/courses/[course]/[slug].astro");
 		expect(curriculum).toContain('const Element = isDraft ? "div" : "a"');
 		expect(curriculum).toContain("getCourseModuleSlug(course.id, module.id)");
 		expect(lesson).toContain('client:only="vue"');

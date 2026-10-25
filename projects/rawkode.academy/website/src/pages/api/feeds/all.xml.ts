@@ -1,4 +1,3 @@
-import { getCollection, getEntries } from "astro:content";
 import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
 import {
@@ -8,6 +7,12 @@ import {
 import { createLogger } from "@/lib/logger";
 import { getVideoThumbnailJpegUrl } from "@/lib/video-thumbnail";
 import { isNewsPublished } from "@/lib/news-publication";
+import {
+	type ContentEntry,
+	getCollection,
+	getEntries,
+	setContentCache,
+} from "@/lib/live-content";
 
 import type { RSSFeedItem } from "@astrojs/rss";
 
@@ -22,10 +27,13 @@ export async function GET(context: APIContext) {
 
 	const [articles, videos, technologies, news] = await Promise.all([
 		getCollection("articles"),
+		// Videos include upcoming streams (they have pages), as before.
 		getCollection("videos"),
 		getCollection("technologies"),
 		getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
 	]);
+
+	const authorEntries: ContentEntry<"people">[] = [];
 
 	const techName = new Map(
 		technologies.map((t) => [t.id, t.data.name] as const),
@@ -50,13 +58,14 @@ export async function GET(context: APIContext) {
 
 				const renderResult = renderedContent.get(article.id);
 				const authors = await getEntries(article.data.authors);
+				authorEntries.push(...authors);
 
 				const item: RSSFeedItem = {
 					title,
 					description,
 					pubDate: new Date(article.data.publishedAt),
 					link: `/read/${article.id}/`,
-					categories: article.data.series?.id ? [article.data.series.id] : [],
+					categories: [],
 				};
 				if (authors.length > 0) {
 					item.author = authors.map((author) => author.data.name).join(", ");
@@ -85,22 +94,10 @@ export async function GET(context: APIContext) {
 			const duration =
 				typeof video.data.duration === "number" ? video.data.duration : null;
 
-			const categories = (video.data.technologies as string[])
-				.map((id) => {
-					// Handle both string IDs and reference objects
-					const techId = typeof id === "string" ? id : (id as any).id || id;
-					const normalizedId = techId.endsWith?.("/index")
-						? techId.slice(0, -6)
-						: techId;
-					return (
-						techName.get(normalizedId + "/index") ||
-						techName.get(normalizedId) ||
-						normalizedId
-					);
-				})
-				.filter(
-					(cat) => cat !== null && cat !== undefined && typeof cat === "string",
-				);
+			// Technology references carry ids without "/index".
+			const categories = video.data.technologies
+				.map((technology) => techName.get(technology.id) || technology.id)
+				.filter((cat) => typeof cat === "string" && cat.length > 0);
 
 			const item: RSSFeedItem = {
 				title,
@@ -136,6 +133,7 @@ export async function GET(context: APIContext) {
 					return null;
 				}
 				const authors = await getEntries(story.data.authors);
+				authorEntries.push(...authors);
 				const item: RSSFeedItem = {
 					title,
 					description,
@@ -159,6 +157,11 @@ export async function GET(context: APIContext) {
 		const aTime = a.pubDate instanceof Date ? a.pubDate.getTime() : 0;
 		const bTime = b.pubDate instanceof Date ? b.pubDate.getTime() : 0;
 		return bTime - aTime;
+	});
+
+	await setContentCache(context, {
+		entries: authorEntries,
+		collections: ["articles", "videos", "news", "technologies"],
 	});
 
 	return withRssMimeType(

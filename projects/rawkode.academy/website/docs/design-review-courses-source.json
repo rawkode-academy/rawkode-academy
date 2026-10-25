@@ -150,7 +150,7 @@
       "affected_scope": "All nine published Zitadel lessons and all six Teleport lessons.",
       "evidence": [
         {
-          "file": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+          "file": "projects/rawkode.academy/website/src/pages/courses/[course]/[slug].astro",
           "lines": "18,295-301",
           "fact": "The route is prerendered and calls CourseSignupForm without server:defer or deferSubscriptionCheck."
         },
@@ -224,7 +224,7 @@
           "fact": "Authored H1 duplicates the route H1; Overview repeats the description verbatim; the actual video follows the entire outcome outline."
         },
         {
-          "file": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+          "file": "projects/rawkode.academy/website/src/pages/courses/[course]/[slug].astro",
           "lines": "219-225,246-248",
           "fact": "The wrapper already supplies the module title and description before rendering authored content."
         }
@@ -319,7 +319,7 @@
           "fact": "Curriculum display indices count every module, including draft Remix at position eight."
         },
         {
-          "file": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+          "file": "projects/rawkode.academy/website/src/pages/courses/[course]/[slug].astro",
           "lines": "152-164,204",
           "fact": "Lesson headers count only published modules."
         }
@@ -362,7 +362,7 @@
           "fact": "Same duplicate video composition."
         },
         {
-          "file": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+          "file": "projects/rawkode.academy/website/src/pages/courses/[course]/[slug].astro",
           "lines": "95-116",
           "fact": "The route reads imports from process.cwd()/content/courses, a directory absent under the website cwd; errors return the original resource."
         },
@@ -420,7 +420,7 @@
       "reason": "Opt-in consent, labeled email, disabled pre-hydration form and status/error regions are justified; repeated long promotional framing and stale lesson subscription state are not."
     },
     {
-      "component": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "component": "projects/rawkode.academy/website/src/pages/courses/[course]/[slug].astro",
       "decision": "keep with state/content corrections",
       "reason": "Breadcrumbs, lesson context, draft-skipping previous/next, article and resources each support learning. Resources follow the article in DOM order. Desktop rail positioning and mobile reading order require rendered verification."
     }
@@ -525,7 +525,7 @@
     },
     {
       "route": "/courses/complete-guide-zitadel/01-introduction",
-      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[slug].astro",
       "content": "content/courses/complete-guide-zitadel/01-introduction.mdx",
       "covered_sections": [
         "Welcome/course positioning",
@@ -546,7 +546,7 @@
     },
     {
       "route": "/courses/complete-guide-zitadel/02-prerequisites",
-      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[slug].astro",
       "content": "content/courses/complete-guide-zitadel/02-prerequisites.mdx",
       "covered_sections": [
         "Prerequisites prose",
@@ -565,7 +565,7 @@
     },
     {
       "route": "/courses/complete-guide-zitadel/03-install-docker-compose",
-      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[slug].astro",
       "content": "content/courses/complete-guide-zitadel/03-install-docker-compose.mdx",
       "covered_sections": [
         "Installation summary",
@@ -584,7 +584,7 @@
     },
     {
       "route": "/courses/complete-guide-zitadel/04-install-kubernetes",
-      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[slug].astro",
       "content": "content/courses/complete-guide-zitadel/04-install-kubernetes.mdx",
       "covered_sections": [
         "Authored H1",
@@ -607,7 +607,7 @@
     },
     {
       "route": "/courses/complete-guide-zitadel/05-zitadel-cloud",
-      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[slug].astro",
       "content": "content/courses/complete-guide-zitadel/05-zitadel-cloud.mdx",
       "covered_sections": [
         "Managed-service introduction",
@@ -627,7 +627,7 @@
     },
     {
       "route": "/courses/complete-guide-zitadel/06-first-application",
-      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[slug].astro",
       "content": "content/courses/complete-guide-zitadel/06-first-application.mdx",
       "covered_sections": [
         "Application setup",
@@ -648,7 +648,7 @@
     },
     {
       "route": "/courses/complete-guide-zitadel/07-astro-integration",
-      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[slug].astro",
       "content": "content/courses/complete-guide-zitadel/07-astro-integration.mdx",
       "covered_sections": [
         "Prerequisites",
@@ -673,7 +673,7 @@
     },
     {
       "route": "/courses/complete-guide-zitadel/09-authentication-methods",
-      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[slug].astro",
       "content": "content/courses/complete-guide-zitadel/09-authentication-methods.mdx",
       "covered_sections": [
         "Authentication methods",
@@ -695,7 +695,7 @@
     },
     {
       "route": "/courses/complete-guide-zitadel/10-social-login-providers",
-      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[slug].astro",
       "content": "content/courses/complete-guide-zitadel/10-social-login-providers.mdx",
       "covered_sections": [
         "Provider setup",
@@ -720,7 +720,7 @@
     },
     {
       "route": "/courses/rust-for-the-rusty/01-introduction",
-      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[slug].astro",
       "content": "content/courses/rust-for-the-rusty/01-introduction.mdx",
       "covered_sections": [
         "Welcome/history",
@@ -736,7 +736,7 @@
     },
     {
       "route": "/courses/teleport-for-kubernetes/01-introduction",
-      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[slug].astro",
       "content": "content/courses/teleport-for-kubernetes/01-introduction.mdx",
       "covered_sections": [
         "Problem",
@@ -757,7 +757,7 @@
     },
     {
       "route": "/courses/teleport-for-kubernetes/02-deploying-teleport-cluster",
-      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[slug].astro",
       "content": "content/courses/teleport-for-kubernetes/02-deploying-teleport-cluster.mdx",
       "covered_sections": [
         "Prerequisites",
@@ -777,7 +777,7 @@
     },
     {
       "route": "/courses/teleport-for-kubernetes/03-identity-based-access-rbac",
-      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[slug].astro",
       "content": "content/courses/teleport-for-kubernetes/03-identity-based-access-rbac.mdx",
       "covered_sections": [
         "Manual versus identity access",
@@ -798,7 +798,7 @@
     },
     {
       "route": "/courses/teleport-for-kubernetes/04-two-layer-rbac-boundaries",
-      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[slug].astro",
       "content": "content/courses/teleport-for-kubernetes/04-two-layer-rbac-boundaries.mdx",
       "covered_sections": [
         "Least privilege",
@@ -820,7 +820,7 @@
     },
     {
       "route": "/courses/teleport-for-kubernetes/05-just-in-time-access",
-      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[slug].astro",
       "content": "content/courses/teleport-for-kubernetes/05-just-in-time-access.mdx",
       "covered_sections": [
         "Standing privileges",
@@ -841,7 +841,7 @@
     },
     {
       "route": "/courses/teleport-for-kubernetes/06-auditing-and-session-recording",
-      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[slug].astro",
       "content": "content/courses/teleport-for-kubernetes/06-auditing-and-session-recording.mdx",
       "covered_sections": [
         "Audit events",
@@ -867,15 +867,15 @@
       "note": "Success/subscribed headings use h4 beneath the wrapper h2. Consider consistent heading hierarchy or non-heading status text; not a blocking functional defect."
     },
     {
-      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro:238",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[slug].astro:238",
       "note": "Astro integration lesson provides only video.id, so thumbnailUrl falls back to an empty string. No rendered poster behavior was inspected."
     },
     {
-      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro:239",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[slug].astro:239",
       "note": "Video islands are client-only without an authored SSR fallback. Captions are requested by the player, but media/caption availability and keyboard playback were not verified."
     },
     {
-      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro:240",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[slug].astro:240",
       "note": "Shared lesson video explicitly receives isAuthenticated=false, and authored players omit it. Saving course watch position is consequently disabled; confirm product intent before treating this as a regression."
     },
     {

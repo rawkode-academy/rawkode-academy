@@ -1,5 +1,7 @@
 # Legacy UI component dispositions
 
+> **Historical note:** content now lives in D1 platform services behind the API gateway and the website reads it through `src/lib/live-content` (see `docs/live-content.md`). References below to `content/**` files and `src/content.config.ts` describe the file-based sources at the time of this audit.
+
 Status: **approved exact set removed; verification complete with unrelated guard/test limitations below.**
 
 Snapshot: 2026-09-20, working tree based on `e5280286`. Other agents are editing active UI concurrently. This inventory describes the inspected working tree, not an immutable build artifact.
@@ -190,13 +192,13 @@ All 143 components below remain outside the deletion scope. The right column giv
 | `common/ThemeAwareImage.astro` | `content/articles/discover-lazyjournal/index.mdx` |
 | `courses/CourseDetailHero.vue` | `src/pages/courses/[...slug].astro` |
 | `courses/CourseModules.astro` | `src/pages/courses/[...slug].astro` |
-| `courses/CourseSignupForm.astro` | `src/pages/courses/[course]/[...slug].astro` |
-| `courses/CourseSignupFormClient.vue` | `src/pages/courses/[course]/[...slug].astro` |
+| `courses/CourseSignupForm.astro` | `src/pages/courses/[course]/[slug].astro` |
+| `courses/CourseSignupFormClient.vue` | `src/pages/courses/[course]/[slug].astro` |
 | `courses/CourseSignupFormCompact.astro` | `src/pages/courses/[...slug].astro` |
 | `courses/CourseSignupFormCompact.vue` | `src/pages/courses/[...slug].astro` |
-| `courses/EmbeddedAppModal.vue` | `src/pages/courses/[course]/[...slug].astro` |
-| `courses/ResourceList.vue` | `src/pages/courses/[course]/[...slug].astro` |
-| `courses/WebContainerEmbed.vue` | `src/pages/courses/[course]/[...slug].astro` |
+| `courses/EmbeddedAppModal.vue` | `src/pages/courses/[course]/[slug].astro` |
+| `courses/ResourceList.vue` | `src/pages/courses/[course]/[slug].astro` |
+| `courses/WebContainerEmbed.vue` | `src/pages/courses/[course]/[slug].astro` |
 | `explorer/ExplorerHeader.vue` | `src/pages/technology/matrix/advanced.astro` |
 | `explorer/TechnologyExplorer.vue` | `src/pages/technology/matrix/advanced.astro` |
 | `explorer/cards/TechCardPopover.vue` | `src/pages/technology/matrix/advanced.astro` |

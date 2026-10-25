@@ -1,7 +1,7 @@
 ---
 import { academyDocument } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
-import type { CollectionEntry } from "astro:content";
+import type { ContentEntry } from "@/lib/live-content";
 import type { LocalTimeValue } from "@/lib/local-time";
 
 interface Tag {
@@ -10,7 +10,7 @@ interface Tag {
 }
 
 interface Props {
-	authors: CollectionEntry<"people">[];
+	authors: ContentEntry<"people">[];
 	// Pass a `localTime(...)` value so the date follows the reader's zone.
 	date: string | LocalTimeValue;
 	updatedDate?: string | LocalTimeValue | undefined;

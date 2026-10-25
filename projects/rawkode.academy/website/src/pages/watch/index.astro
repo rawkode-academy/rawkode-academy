@@ -1,7 +1,7 @@
 ---
 export const prerender = false;
 
-import { getCollection } from "astro:content";
+import { getCollection, setContentCache } from "@/lib/live-content";
 import { academyPage } from "@rawkodeacademy/design-system";
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
@@ -86,15 +86,13 @@ const mosaic = publishedVideos.slice(1, 10).map((video) => getVideoThumbnailUrl(
 const libraryVideos = featured ? videos.slice(1) : videos;
 const listUrl = new URL(watchArchiveHref(archive.query, archive.page), Astro.site ?? Astro.url).href;
 
-Astro.response.headers.set(
-	"Cache-Control",
-	"public, max-age=300, s-maxage=3600, stale-while-revalidate=86400",
-);
-Astro.response.headers.set("CDN-Cache-Control", "public, max-age=3600");
-Astro.response.headers.set(
-	"Cache-Tag",
-	"videos-page, videos-list, videos-latest",
-);
+// The archive lists videos (published and upcoming streams) and searches
+// technology, people and show names. Listing "videos" caps the cache
+// lifetime at the next scheduled video, so a stream moves from "upcoming"
+// into the archive on time.
+await setContentCache(Astro, {
+	collections: ["videos", "technologies", "people", "shows"],
+});
 Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 
 const pageTitle = "Watch Cloud Native Sessions";

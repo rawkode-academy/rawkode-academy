@@ -1,13 +1,26 @@
-import { getCollection } from "astro:content";
+import { type CollectionName, getCollection } from "@/lib/live-content";
 import { isNewsPublished } from "@/lib/news-publication";
 
 /**
  * Unified search index across every public content type on the site.
  * Shared by /search (server-rendered) and /api/search.json (command palette).
  *
- * Content collections only change at deploy time, so the index is built once
- * per isolate and memoized at module level.
+ * Content is live: the collections are memoised by the content layer (per
+ * isolate, then KV), so the index is rebuilt from them on every call and
+ * follows publications and invalidations. Building it is a cheap pass over
+ * already-mapped entries.
  */
+
+/** Collections the index lists; callers pass them to setContentCache(). */
+export const SEARCH_COLLECTIONS = [
+	"videos",
+	"articles",
+	"news",
+	"courses",
+	"learningPaths",
+	"shows",
+	"technologies",
+] as const satisfies readonly CollectionName[];
 
 export const SEARCH_TYPES = [
 	"video",
@@ -100,7 +113,9 @@ export async function buildSearchIndex(): Promise<SearchEntry[]> {
 		await Promise.all([
 			getCollection("videos"),
 			getCollection("articles"),
-			getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
+			getCollection("news", ({ data }) =>
+				isNewsPublished(data.publishedAt, now),
+			),
 			getCollection("courses"),
 			getCollection("learningPaths"),
 			getCollection("shows", ({ data }) => data.publish),
@@ -196,7 +211,7 @@ export async function buildSearchIndex(): Promise<SearchEntry[]> {
 	}
 
 	for (const technology of technologies) {
-		const id = stripIndexSuffix(technology.id);
+		const id = technology.id;
 		entries.push({
 			id: `technology:${id}`,
 			title: technology.data.name,
@@ -215,18 +230,13 @@ export async function buildSearchIndex(): Promise<SearchEntry[]> {
 	return entries;
 }
 
-let indexPromise: Promise<SearchEntry[]> | undefined;
-
-/** Memoized accessor: builds the index once per isolate. */
+/**
+ * The current search index. Kept as the historical accessor name; it no
+ * longer memoises at module level (that pinned the first build for the life
+ * of the isolate), the content layer memoises the collections instead.
+ */
 export function getSearchIndex(): Promise<SearchEntry[]> {
-	if (!indexPromise) {
-		indexPromise = buildSearchIndex().catch((error) => {
-			// Don't memoize a failed build.
-			indexPromise = undefined;
-			throw error;
-		});
-	}
-	return indexPromise;
+	return buildSearchIndex();
 }
 
 /**

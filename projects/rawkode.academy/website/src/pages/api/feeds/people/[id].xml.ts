@@ -1,26 +1,21 @@
-import { getCollection } from "astro:content";
 import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
 import { withRssMimeType } from "../../../../lib/feed-utils";
+import {
+	type AnyEntry,
+	getCollection,
+	getEntry,
+	sameId,
+	setContentCache,
+} from "@/lib/live-content";
 import { isNewsPublished } from "@/lib/news-publication";
 
 import type { RSSFeedItem } from "@astrojs/rss";
 
 export const prerender = false;
 
-const matchRef = (
-	ref: { collection?: string; id?: string } | string | undefined,
-	id: string,
-): boolean => {
-	if (!ref) return false;
-	if (typeof ref === "string") return ref === id;
-	return ref.id === id;
-};
-
 export async function GET(context: APIContext) {
-	const person = (await getCollection("people")).find(
-		(entry) => entry.data.id === context.params.id,
-	);
+	const person = await getEntry("people", context.params.id);
 	if (!person) return new Response("Person not found", { status: 404 });
 	const { id: personId, name: personName } = person.data;
 	const now = new Date();
@@ -34,11 +29,13 @@ export async function GET(context: APIContext) {
 	]);
 
 	const items: RSSFeedItem[] = [];
+	const shown: AnyEntry[] = [person];
 
 	for (const article of articles) {
-		if (!article.data.authors.some((author) => matchRef(author, personId))) {
+		if (!article.data.authors.some((author) => sameId(author, personId))) {
 			continue;
 		}
+		shown.push(article);
 		items.push({
 			title: article.data.title,
 			description: article.data.description ?? "",
@@ -49,9 +46,10 @@ export async function GET(context: APIContext) {
 	}
 
 	for (const story of news) {
-		if (!story.data.authors.some((author) => matchRef(author, personId))) {
+		if (!story.data.authors.some((author) => sameId(author, personId))) {
 			continue;
 		}
+		shown.push(story);
 		items.push({
 			title: story.data.title,
 			description: story.data.description ?? "",
@@ -62,9 +60,10 @@ export async function GET(context: APIContext) {
 	}
 
 	for (const video of videos) {
-		if (!video.data.guests.some((guest) => matchRef(guest, personId))) {
+		if (!video.data.guests.some((guest) => sameId(guest, personId))) {
 			continue;
 		}
+		shown.push(video);
 		items.push({
 			title: video.data.title,
 			description: video.data.description ?? "",
@@ -78,6 +77,13 @@ export async function GET(context: APIContext) {
 		const aTime = a.pubDate instanceof Date ? a.pubDate.getTime() : 0;
 		const bTime = b.pubDate instanceof Date ? b.pubDate.getTime() : 0;
 		return bTime - aTime;
+	});
+
+	// Every listed collection caps maxAge at its next scheduled item, so a
+	// newly published article, story or appearance joins the feed on time.
+	await setContentCache(context, {
+		entries: shown,
+		collections: ["articles", "news", "videos"],
 	});
 
 	return withRssMimeType(

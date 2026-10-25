@@ -39,7 +39,7 @@ See `platform/CLAUDE.md` for the comprehensive microservices guide including:
 
 ## Website
 
-The website uses Astro 5 with React/Vue islands.
+The website uses Astro 7 with React/Vue islands, rendered on demand (SSR) on Cloudflare Workers. Content comes from the API gateway through Astro live collections (`src/lib/live-content`), cached in KV and at the CDN; writers purge it with `POST /api/cache/invalidate` (bearer `CACHE_INVALIDATION_TOKEN`) using entity tags such as `videos:<id>`. See `website/docs/live-content.md`.
 
 See `website/CLAUDE.md` for:
 - Theme system and design tokens

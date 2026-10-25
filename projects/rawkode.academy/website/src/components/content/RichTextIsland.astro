@@ -1,0 +1,69 @@
+---
+import Zoom from "react-medium-image-zoom";
+// One island from a rendered document. Client directives must be written
+// statically, hence the explicit branches per component and directive.
+import CgroupTimeline from "@/components/articles/cgroups/CgroupTimeline";
+import CgroupTreeDiagram from "@/components/articles/cgroups/CgroupTreeDiagram";
+import HierarchyExplorer from "@/components/articles/cgroups/HierarchyExplorer";
+import PodCgroupMapper from "@/components/articles/cgroups/PodCgroupMapper";
+import ResourceSimulator from "@/components/articles/cgroups/ResourceSimulator";
+import VideoPlayer from "@/components/video/player.vue";
+import "react-medium-image-zoom/dist/styles.css";
+import type { IslandName } from "@/lib/live-content/render/islands";
+
+interface Props {
+	component: IslandName;
+	hydrate: string;
+	props: Record<string, unknown>;
+	fallback: string;
+}
+
+const { component, hydrate, props, fallback } = Astro.props;
+const when = hydrate === "load" || hydrate === "idle" ? hydrate : "visible";
+const str = (value: unknown) => (typeof value === "string" ? value : "");
+const interactive = {
+	CgroupTimeline,
+	CgroupTreeDiagram,
+	HierarchyExplorer,
+	PodCgroupMapper,
+	ResourceSimulator,
+};
+const isInteractive = component in interactive;
+---
+
+{component === "VideoPlayer" && (
+	<VideoPlayer client:only="vue" video={str(props.video)} thumbnailUrl={str(props.thumbnailUrl)}>
+		<Fragment slot="fallback" set:html={fallback} />
+	</VideoPlayer>
+)}
+{component === "ZoomableImage" && (
+	<Zoom client:only="react">
+		<img
+			src={str(props.src)}
+			alt={str(props.alt)}
+			width={typeof props.width === "number" ? props.width : undefined}
+			height={typeof props.height === "number" ? props.height : undefined}
+			loading="lazy"
+			decoding="async"
+		/>
+		<Fragment slot="fallback" set:html={fallback} />
+	</Zoom>
+)}
+{component === "CgroupTimeline" && when === "visible" && <CgroupTimeline client:visible {...props} />}
+{component === "CgroupTimeline" && when === "load" && <CgroupTimeline client:load {...props} />}
+{component === "CgroupTimeline" && when === "idle" && <CgroupTimeline client:idle {...props} />}
+{component === "CgroupTreeDiagram" && when === "visible" && <CgroupTreeDiagram client:visible {...props} />}
+{component === "CgroupTreeDiagram" && when === "load" && <CgroupTreeDiagram client:load {...props} />}
+{component === "CgroupTreeDiagram" && when === "idle" && <CgroupTreeDiagram client:idle {...props} />}
+{component === "HierarchyExplorer" && when === "visible" && <HierarchyExplorer client:visible {...props} />}
+{component === "HierarchyExplorer" && when === "load" && <HierarchyExplorer client:load {...props} />}
+{component === "HierarchyExplorer" && when === "idle" && <HierarchyExplorer client:idle {...props} />}
+{component === "PodCgroupMapper" && when === "visible" && <PodCgroupMapper client:visible {...props} />}
+{component === "PodCgroupMapper" && when === "load" && <PodCgroupMapper client:load {...props} />}
+{component === "PodCgroupMapper" && when === "idle" && <PodCgroupMapper client:idle {...props} />}
+{component === "ResourceSimulator" && when === "visible" && <ResourceSimulator client:visible {...props} />}
+{component === "ResourceSimulator" && when === "load" && <ResourceSimulator client:load {...props} />}
+{component === "ResourceSimulator" && when === "idle" && <ResourceSimulator client:idle {...props} />}
+{component !== "VideoPlayer" && component !== "ZoomableImage" && !isInteractive && (
+	<Fragment set:html={fallback} />
+)}

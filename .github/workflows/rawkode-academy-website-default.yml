@@ -10,9 +10,9 @@ on:
     - .github/workflows/rawkode-academy-website-default.yml
     - bun.lock
     - bun.lock/**
-    - content/**
     - cue.mod/**
     - packages/design-system/**
+    - packages/rich-text/**
     - projects/rawkode.academy/games/secrets-of-kubernetes/achievements/**
     - projects/rawkode.academy/games/secrets-of-kubernetes/leaderboard/**
     - projects/rawkode.academy/games/secrets-of-kubernetes/player-learned-phrases/**
@@ -22,7 +22,6 @@ on:
     - projects/rawkode.academy/platform/notifications/**
     - projects/rawkode.academy/website/astro.config.mts
     - projects/rawkode.academy/website/astro.config.mts/**
-    - projects/rawkode.academy/website/content/**
     - projects/rawkode.academy/website/env.cue
     - projects/rawkode.academy/website/env.cue/**
     - projects/rawkode.academy/website/package.json

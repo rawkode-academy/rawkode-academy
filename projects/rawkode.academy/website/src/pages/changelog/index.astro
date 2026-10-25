@@ -1,5 +1,10 @@
 ---
-import { getCollection, getEntry } from "astro:content";
+import {
+	type ContentEntry,
+	getCollection,
+	getEntry,
+	setContentCache,
+} from "@/lib/live-content";
 import EditorialShell from "@/components/ui/EditorialShell.astro";
 import Page from "@/wrappers/page.astro";
 import { academyDocument } from "@rawkodeacademy/design-system";
@@ -20,17 +25,20 @@ const cleanTitle = (title: string) =>
 		.replace(/^(New Feature|Feature|Improvement|Fix|Breaking):\s*/i, "")
 		.trim();
 
+// The description is the plain text of its document, one block per
+// paragraph: the summary is the first paragraph before any section label.
 const cleanSummary = (description: string) =>
 	(description.split("\n\n")[0] ?? "")
 		.replace(/\s*(What's New|Why This Matters):.*$/is, "")
 		.replace(/\p{Extended_Pictographic}/gu, "")
-		.replace(/\*\*/g, "")
 		.replace(/\s+/g, " ")
 		.trim();
 
+const authorEntries: ContentEntry<"people">[] = [];
 const processedChangelog = await Promise.all(
 	sortedChangelog.map(async (entry) => {
 		const authorEntry = await getEntry(entry.data.author);
+		if (authorEntry) authorEntries.push(authorEntry);
 
 		return {
 			...entry.data,
@@ -43,6 +51,11 @@ const processedChangelog = await Promise.all(
 		};
 	}),
 );
+
+await setContentCache(Astro, {
+	entries: [...sortedChangelog, ...authorEntries],
+	collections: ["changelog"],
+});
 ---
 
 <Page

@@ -11,7 +11,8 @@ import tempfile
 from pathlib import Path
 import subprocess
 import re
-from datetime import datetime
+from datetime import datetime, timezone
+from html import unescape
 import requests
 import boto3
 from botocore.exceptions import NoCredentialsError, ClientError
@@ -20,6 +21,13 @@ import json
 import time
 from urllib.parse import urlparse
 import shutil
+from content_api import (
+    D1Client,
+    insert_video_sql,
+    invalidate_cache,
+    video_row,
+    write_video,
+)
 
 # Create a cuid generator instance
 cuid_generator = Cuid()
@@ -46,6 +54,8 @@ class ProcessingState:
         'subtitles_uploaded_content',
         'thumbnail_uploaded_content',
         'cloud_run_triggered',
+        'd1_written',
+        'cache_invalidated',
         'completed'
     ]
     
@@ -478,20 +488,6 @@ class DescriptDownloader:
             logger.error(f"Error triggering Cloud Run job: {str(e)}")
             raise
 
-    def generate_slug(self, title):
-        """Generate a URL-friendly slug from the video title."""
-        # Convert to lowercase
-        slug = title.lower()
-        # Replace special characters with spaces
-        slug = re.sub(r'[^\w\s-]', ' ', slug)
-        # Replace multiple spaces with single space
-        slug = re.sub(r'\s+', ' ', slug)
-        # Replace spaces with hyphens
-        slug = slug.strip().replace(' ', '-')
-        # Remove multiple hyphens
-        slug = re.sub(r'-+', '-', slug)
-        return slug
-
     def parse_transcript_duration(self, transcript_data):
         """Parse duration from transcript JSON."""
         try:
@@ -517,53 +513,26 @@ class DescriptDownloader:
             logger.warning(f"Failed to parse duration from transcript: {e}")
             return 0
 
-    def generate_sql_insert(self, cuid, metadata, transcript_data=None):
-        """Generate SQL insert statement for the videos table."""
-        # Escape function for SQL strings
-        def escape_sql(text):
-            if not text:
-                return ''
-            # Replace single quotes with double single quotes
-            text = text.replace("'", "''")
-            # Replace newlines with escaped newlines
-            text = text.replace('\n', '\\n')
-            # Replace carriage returns
-            text = text.replace('\r', '\\r')
-            # Replace tabs
-            text = text.replace('\t', '\\t')
-            return text
-        
-        title = escape_sql(metadata.get('title', ''))
-        description = escape_sql(metadata.get('description', ''))
-        
-        # Try to get duration from transcript
-        duration = 0
-        if transcript_data:
-            duration = self.parse_transcript_duration(transcript_data)
-        
-        slug = self.generate_slug(metadata.get('title', ''))
+    def build_video_row(self, cuid, metadata, transcript_data=None):
+        """The platform-videos row; description_doc is the TipTap document."""
+        duration = self.parse_transcript_duration(transcript_data) if transcript_data else 0
 
-        # Parse created date to Unix timestamp
-        created_at = metadata.get('created_at', '')
-        if created_at:
-            try:
-                dt = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
-                published_at = int(dt.timestamp())
-            except:
-                published_at = int(datetime.now().timestamp())
-        else:
-            published_at = int(datetime.now().timestamp())
+        # created_at is ISO 8601; publishedAt is Unix seconds
+        try:
+            published_at = datetime.fromisoformat(metadata.get('created_at', '').replace('Z', '+00:00'))
+        except (AttributeError, ValueError):
+            published_at = datetime.now(timezone.utc)
 
-        # For subtitle, use the first line of description or a truncated version
-        subtitle_raw = metadata.get('description', '').split('\n')[0][:200] if metadata.get('description') else ''
-        subtitle = escape_sql(subtitle_raw)
+        # og: meta tag values are HTML-escaped
+        return video_row(
+            cuid,
+            unescape(metadata.get('title', '')),
+            unescape(metadata.get('description', '')),
+            duration,
+            published_at,
+        )
 
-        sql = f"""INSERT INTO videos (id, title, subtitle, slug, description, duration, publishedAt)
-VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}, {published_at});"""
-
-        return sql
-
-    def process_descript_url(self, descript_url_or_id, thumbnail_path, state, local_video_path=None, update_mode=False):
+    def process_descript_url(self, descript_url_or_id, thumbnail_path, state, local_video_path=None, update_mode=False, d1_client=None):
         """Process a single Descript URL or ID."""
         # Generate or retrieve CUID
         if state.state['cuid']:
@@ -754,10 +723,22 @@ VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}
                         logger.info("")
                         logger.info("Or wait for the --purge-cache flag (coming soon)")
 
-                # Generate SQL
-                sql = self.generate_sql_insert(cuid, metadata, transcript_data)
+                # Create the platform-videos row, then tell the website
+                row = self.build_video_row(cuid, metadata, transcript_data)
+                sql = insert_video_sql(row)
+                if d1_client is None:
+                    logger.info("Skipping D1 write as requested; apply the SQL below yourself")
+                elif not state.is_step_completed('d1_written'):
+                    write_video(d1_client, row)
+                    state.mark_step_completed('d1_written')
+                if d1_client is not None and (update_mode or not state.is_step_completed('cache_invalidated')):
+                    if invalidate_cache([f"videos:{cuid}"]):
+                        state.mark_step_completed('cache_invalidated')
+                    else:
+                        logger.warning(f"Website cache not invalidated; run: just invalidate-content '{{\"tags\":[\"videos:{cuid}\"]}}'")
+
                 print("\n" + "="*80)
-                print("SQL INSERT STATEMENT:")
+                print("SQL INSERT STATEMENT (platform-videos):")
                 print("="*80)
                 print(sql)
                 print("="*80 + "\n")
@@ -786,6 +767,8 @@ def main():
                         default=None)
     parser.add_argument('--update', action='store_true',
                         help='Update mode: Re-download from Descript and re-encode existing video')
+    parser.add_argument('--skip-d1', action='store_true',
+                        help='Do not create the platform-videos row (or invalidate the website cache); only print the SQL')
     parser.add_argument('--purge-cache', help='Purge CDN cache for a video by CUID (use after transcoding completes)',
                         metavar='CUID')
     
@@ -809,6 +792,16 @@ def main():
         if not args.descript or not args.thumbnail:
             parser.error("descript and thumbnail arguments are required unless using --purge-cache")
         
+        # D1 (platform-videos) credentials, unless only printing the SQL
+        d1_client = None
+        if not args.skip_d1:
+            d1_client = D1Client.from_env()
+            if d1_client is None:
+                logger.error("CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN are required to write platform-videos (or pass --skip-d1)")
+                sys.exit(1)
+            if not os.environ.get('CACHE_INVALIDATION_TOKEN'):
+                logger.warning("CACHE_INVALIDATION_TOKEN is not set; the website cache will not be invalidated after the D1 write")
+
         # Validate thumbnail exists
         if not os.path.exists(args.thumbnail):
             logger.error(f"Thumbnail file not found: {args.thumbnail}")
@@ -830,7 +823,7 @@ def main():
             state.reset_for_update()
         
         # Process the video
-        downloader.process_descript_url(args.descript, args.thumbnail, state, args.local_video, update_mode=args.update)
+        downloader.process_descript_url(args.descript, args.thumbnail, state, args.local_video, update_mode=args.update, d1_client=d1_client)
         
     except KeyboardInterrupt:
         logger.info("\nProcess interrupted by user")

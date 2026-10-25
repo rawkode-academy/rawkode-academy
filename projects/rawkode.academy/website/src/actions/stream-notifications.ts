@@ -1,13 +1,13 @@
 import { ActionError, defineAction } from "astro:actions";
-import { getCollection } from "astro:content";
-import { z } from "astro/zod";
 import { env } from "cloudflare:workers";
+import { z } from "astro/zod";
+import type { RegisterNotificationInput } from "notifications/src/contracts.js";
+import { getCollection } from "@/lib/live-content";
 import {
 	buildStreamNotification,
 	isUpcomingLiveVideo,
 	streamNotificationDedupeKey,
 } from "@/lib/stream-notifications";
-import type { RegisterNotificationInput } from "notifications/src/contracts.js";
 
 const PushSubscriptionSchema = z.object({
 	endpoint: z.url(),
@@ -19,6 +19,7 @@ const PushSubscriptionSchema = z.object({
 });
 
 async function getUpcomingLiveVideo(slug: string) {
+	// Videos include scheduled (future-dated) entries by default.
 	const videos = await getCollection("videos");
 	const video = videos.find((entry) => entry.data.slug === slug);
 	if (!video) {

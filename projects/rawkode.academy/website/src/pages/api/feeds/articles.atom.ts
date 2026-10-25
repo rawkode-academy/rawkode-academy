@@ -1,6 +1,13 @@
-import { getCollection, getEntries, getEntry } from "astro:content";
 import type { APIContext } from "astro";
+import {
+	type ContentEntry,
+	getCollection,
+	getEntries,
+	setContentCache,
+} from "@/lib/live-content";
 import { renderAndSanitizeArticles } from "../../../lib/feed-utils";
+
+export const prerender = false;
 
 export async function GET(context: APIContext) {
 	const articles = await getCollection("articles");
@@ -28,6 +35,8 @@ export async function GET(context: APIContext) {
 	// Render all articles in parallel for better performance
 	const renderedContent = await renderAndSanitizeArticles(sortedArticles);
 
+	const authorsByArticle = new Map<string, ContentEntry<"people">[]>();
+
 	// Process each article to include full content
 	const entries = await Promise.all(
 		sortedArticles.map(async (article) => {
@@ -40,11 +49,10 @@ export async function GET(context: APIContext) {
 			const renderResult = renderedContent.get(article.id);
 			const contentHtml = renderResult?.content || article.data.description;
 
-			// Resolve author and series references
+			// Resolve author references (articles have no series any more,
+			// so no <category> is emitted).
 			const authors = await getEntries(article.data.authors);
-			const series = article.data.series
-				? await getEntry(article.data.series)
-				: null;
+			authorsByArticle.set(article.id, authors);
 
 			return `	<entry>
 		<title><![CDATA[${article.data.title}]]></title>
@@ -57,11 +65,7 @@ export async function GET(context: APIContext) {
 		${authors
 			.map((author) => `<author><name>${author.data.name}</name></author>`)
 			.join("\n\t\t")}
-		${
-			series
-				? `<category term="${series.id}" label="${series.data.title}"/>`
-				: ""
-		}
+		
 	</entry>`;
 		}),
 	);
@@ -78,10 +82,14 @@ export async function GET(context: APIContext) {
 ${entries.join("\n")}
 </feed>`;
 
+	await setContentCache(context, {
+		entries: [...sortedArticles, ...[...authorsByArticle.values()].flat()],
+		collections: ["articles"],
+	});
+
 	return new Response(atomFeed, {
 		headers: {
 			"Content-Type": "application/atom+xml; charset=utf-8",
-			"Cache-Control": "max-age=3600",
 		},
 	});
 }

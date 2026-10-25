@@ -2,6 +2,7 @@
 import PartnershipExperience from "@/components/organizations/PartnershipExperience.astro";
 import PartnershipProof from "@/components/organizations/PartnershipProof.astro";
 import EditorialShell from "@/components/ui/EditorialShell.astro";
+import { setContentCache } from "@/lib/live-content";
 import {
 	fitProofReview,
 	organizationsStartingPoint,
@@ -15,7 +16,11 @@ import {
 } from "@/lib/partnerships";
 import Page from "@/wrappers/page.astro";
 
-export const prerender = true;
+// PartnershipProof counts published videos and courses and quotes
+// testimonials; a component cannot set cache tags, so the page does.
+await setContentCache(Astro, {
+	collections: ["videos", "courses", "testimonials"],
+});
 ---
 
 <Page title="For teams building developer products | Rawkode Academy" description={partnershipDescription}>

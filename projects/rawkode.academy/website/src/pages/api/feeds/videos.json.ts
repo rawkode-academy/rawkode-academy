@@ -1,18 +1,30 @@
-import { getCollection } from "astro:content";
 import type { APIRoute } from "astro";
+import { getPublishedVideos } from "@/lib/content";
 import { buildJsonFeed, type JsonFeedItem } from "@/lib/json-feed";
+import { getCollection, setContentCache } from "@/lib/live-content";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
 
 const SITE_FALLBACK = "https://rawkode.academy";
 
-export const GET: APIRoute = async ({ site }) => {
-	const baseUrl = (site?.toString() ?? SITE_FALLBACK).replace(/\/$/, "");
+export const prerender = false;
+
+export const GET: APIRoute = async (context) => {
+	const baseUrl = (context.site?.toString() ?? SITE_FALLBACK).replace(
+		/\/$/,
+		"",
+	);
 	const u = (path: string) => `${baseUrl}${path}`;
 
+	// Published videos only, like the RSS and Atom feeds: scheduled videos
+	// join the feed when their publication time passes.
 	const [videos, technologies] = await Promise.all([
-		getCollection("videos"),
+		getPublishedVideos(),
 		getCollection("technologies"),
 	]);
+	await setContentCache(context, {
+		collections: ["videos", "technologies"],
+	});
 
 	const techName = new Map(
 		technologies.map((t) => [t.id, t.data.name] as const),
@@ -21,26 +33,9 @@ export const GET: APIRoute = async ({ site }) => {
 	const items: JsonFeedItem[] = videos
 		.map((video) => {
 			const url = u(`/watch/${video.data.slug}/`);
-			const techIds = video.data.technologies as ReadonlyArray<unknown>;
-			const tagNames = (Array.isArray(techIds) ? techIds : [])
-				.map((id) => {
-					const techId =
-						typeof id === "string"
-							? id
-							: id && typeof id === "object" && "id" in id
-								? ((id as { id: string }).id as string)
-								: undefined;
-					if (!techId) return undefined;
-					const normalised = techId.endsWith("/index")
-						? techId.slice(0, -"/index".length)
-						: techId;
-					return (
-						techName.get(`${normalised}/index`) ??
-						techName.get(normalised) ??
-						normalised
-					);
-				})
-				.filter((tag): tag is string => Boolean(tag));
+			const tagNames = normalizeTechnologyReferences(
+				video.data.technologies,
+			).map((id) => techName.get(id) ?? id);
 			return {
 				id: url,
 				url,
@@ -71,9 +66,6 @@ export const GET: APIRoute = async ({ site }) => {
 	return new Response(JSON.stringify(feed), {
 		headers: {
 			"Content-Type": "application/feed+json; charset=utf-8",
-			"Cache-Control": "public, max-age=3600",
 		},
 	});
 };
-
-export const prerender = true;

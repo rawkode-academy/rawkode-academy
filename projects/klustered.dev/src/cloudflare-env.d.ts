@@ -5,6 +5,7 @@ interface __BaseEnv_Env {
 	BRACKETS: D1Database;
 	ASSETS: Fetcher;
 	KLUSTERED_ADMIN_IDS: "HmYDQjc3JVFo7visJIL5FneGFzNAJjDT";
+	API: Fetcher /* platform-api-gateway */;
 	BRACKETS_WRITE: Fetcher /* platform-brackets-write-model */;
 }
 declare namespace Cloudflare {

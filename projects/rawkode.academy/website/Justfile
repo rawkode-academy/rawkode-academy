@@ -24,24 +24,12 @@ deploy:
 preview:
 	bun run preview
 
-codegen:
-	bun run graphql-codegen --config graphql-codegen.ts
-
-# Invalidate the videos-latest cache tag on Cloudflare
-invalidate-videos-cache:
-	#!/usr/bin/env bash
-	set -xe
-	curl -s -XPOST \
-		"https://api.cloudflare.com/client/v4/zones/789be9a4588576db675cc2053ea3a89d/purge_cache" \
-		-H "Authorization: Bearer $CLOUDFLARE_CACHE_BUSTER_TOKEN" \
-		-H "Content-Type: application/json" \
-		-d '{"tags": ["videos-latest"]}'
-
-# Generate SDL for the federated subgraph
-# Note: Supergraph composition is now handled by the API gateway workflow
-# See: .github/workflows/platform-api-gateway.yaml
-generate-subgraph-sdl:
+# Invalidate content caches (KV generation + CDN tags) through the website.
+# Usage: just invalidate-content '{"tags":["videos:<id>"]}'  or  just invalidate-content '{"all":true}'
+invalidate-content body='{"all":true}':
 	#!/usr/bin/env bash
 	set -euo pipefail
-	bun run subgraph:sdl
-	echo "SDL generated at subgraph/schema.gql"
+	curl -sS --fail-with-body -XPOST "https://rawkode.academy/api/cache/invalidate" \
+		-H "Authorization: Bearer $CACHE_INVALIDATION_TOKEN" \
+		-H "Content-Type: application/json" \
+		-d '{{body}}'

@@ -1,0 +1,48 @@
+{
+	"name": "@rawkodeacademy/rich-text",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./markdown": "./src/markdown/index.ts",
+		"./schema": "./src/schema.ts"
+	},
+	"scripts": {
+		"test": "bun test",
+		"check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@tiptap/core": "3.32.0",
+		"@tiptap/extension-blockquote": "3.32.0",
+		"@tiptap/extension-bold": "3.32.0",
+		"@tiptap/extension-code": "3.32.0",
+		"@tiptap/extension-code-block": "3.32.0",
+		"@tiptap/extension-document": "3.32.0",
+		"@tiptap/extension-hard-break": "3.32.0",
+		"@tiptap/extension-heading": "3.32.0",
+		"@tiptap/extension-horizontal-rule": "3.32.0",
+		"@tiptap/extension-image": "3.32.0",
+		"@tiptap/extension-italic": "3.32.0",
+		"@tiptap/extension-link": "3.32.0",
+		"@tiptap/extension-list": "3.32.0",
+		"@tiptap/extension-paragraph": "3.32.0",
+		"@tiptap/extension-strike": "3.32.0",
+		"@tiptap/extension-table": "3.32.0",
+		"@tiptap/extension-text": "3.32.0",
+		"@tiptap/pm": "3.32.0",
+		"github-slugger": "2.0.0",
+		"remark-gfm": "4.0.1",
+		"remark-mdx": "3.1.1",
+		"remark-parse": "11.0.0",
+		"remark-stringify": "11.0.0",
+		"unified": "11.0.5"
+	},
+	"devDependencies": {
+		"@types/bun": "latest",
+		"@types/js-yaml": "4.0.9",
+		"@types/mdast": "4.0.4",
+		"js-yaml": "4.2.0",
+		"typescript": "^5.9.3"
+	}
+}

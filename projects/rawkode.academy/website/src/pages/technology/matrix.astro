@@ -1,7 +1,7 @@
 ---
-export const prerender = true;
+export const prerender = false;
 
-import { getCollection } from "astro:content";
+import { getCollection, setContentCache } from "@/lib/live-content";
 import Page from "@/wrappers/page.astro";
 import { Container } from "@/components/ui";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
@@ -91,6 +91,8 @@ const trajectoryEmoji: Record<Trajectory, string> = {
 
 // Get all technologies with matrix data
 const allTechnologies = await getCollection("technologies");
+// Counts cover every video (scheduled ones included), as the static page did.
+await setContentCache(Astro, { collections: ["technologies", "videos"] });
 const matrixTechnologies = allTechnologies
 	.filter((tech) => tech.data.matrix?.status)
 	.map((tech) => ({

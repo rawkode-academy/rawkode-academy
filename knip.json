@@ -15,10 +15,12 @@
       "entry": [
         "astro.config.mts",
         "scripts/*.ts",
-        ".storybook/main.ts"
+        ".storybook/main.ts",
+        "src/live.config.ts",
+        "src/lib/live-content/render/shiki-*.ts"
       ],
       "ignore": [
-        "content/**/examples/**"
+        "src/webcontainer-demos/**"
       ]
     },
     "projects/rawkode.academy/platform/*": {

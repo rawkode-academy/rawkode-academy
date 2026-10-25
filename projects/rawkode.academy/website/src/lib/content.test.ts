@@ -1,6 +1,9 @@
-import { getCollection } from "astro:content";
 import { describe, expect, it, vi } from "vitest";
+import { getCollection } from "@/lib/live-content";
 import { getLatestContent } from "./content";
+
+// The content layer is the collection boundary; the fixtures stand in for it.
+vi.mock("@/lib/live-content", () => ({ getCollection: vi.fn() }));
 
 const publishedAt = new Date("2026-06-20T00:00:00.000Z");
 

@@ -14,6 +14,12 @@ interface __BaseEnv_Env {
 	PEOPLE_LINKS: Fetcher /* platform-people-links-read-model */;
 	PEOPLE_BIOGRAPHIES: Fetcher /* platform-people-biographies-read-model */;
 	TRANSCRIPTION_TERMS: Fetcher /* platform-transcription-terms-read-model */;
+	ARTICLES: Fetcher /* platform-articles-read-model */;
+	NEWS: Fetcher /* platform-news-read-model */;
+	CHANGELOG: Fetcher /* platform-changelog-read-model */;
+	ADRS: Fetcher /* platform-adrs-read-model */;
+	TESTIMONIALS: Fetcher /* platform-testimonials-read-model */;
+	COURSES: Fetcher /* platform-courses-read-model */;
 	EMOJI_REACTIONS: Fetcher /* platform-emoji-reactions-read-model */;
 	EMAIL_PREFERENCES: Fetcher /* platform-email-preferences-read-model */;
 	WATCH_HISTORY: Fetcher /* platform-watch-history-read-model */;

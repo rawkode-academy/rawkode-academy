@@ -3,8 +3,12 @@ import { academyDocument } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
 export const prerender = false;
 
-import { getCollection, getEntries } from "astro:content";
-import { getImage } from "astro:assets";
+import {
+	getEntries,
+	getEntry,
+	sameId,
+	setContentCache,
+} from "@/lib/live-content";
 import { getPublishedVideos } from "@/lib/content";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import VideoMetadata from "@/components/html/video-metadata.astro";
@@ -28,8 +32,7 @@ if (!showId) {
 	return new Response(null, { status: 404 });
 }
 
-const shows = await getCollection("shows");
-const showEntry = shows.find((s) => s.data.id === showId);
+const showEntry = await getEntry("shows", showId);
 
 if (!showEntry || !showEntry.data.publish) {
 	return new Response(null, { status: 404 });
@@ -42,18 +45,8 @@ const statusLabel = isComingSoon ? "Coming soon" : isArchived ? "Archived" : "Sh
 // Get published videos only (filters out future-dated for scheduled publishing)
 const videos = await getPublishedVideos();
 
-const getShowId = (value: unknown): string | null => {
-	if (!value) return null;
-	if (typeof value === "string") return value;
-	if (typeof value === "object" && value !== null && "id" in value) {
-		const id = (value as { id?: unknown }).id;
-		return typeof id === "string" ? id : null;
-	}
-	return null;
-};
-
-const videosForShow = videos.filter(
-	(video) => getShowId(video.data.show) === showEntry.data.id,
+const videosForShow = videos.filter((video) =>
+	sameId(video.data.show, showEntry.data.id),
 );
 
 const hostEntries = await getEntries(showEntry.data.hosts);
@@ -81,16 +74,17 @@ const feedVideos = videosForShow
 	);
 const hasEpisodeFeed = !isComingSoon && feedVideos.length > 0;
 
-Astro.response.headers.set(
-	"Cache-Control",
-	"public, max-age=600, s-maxage=7200, stale-while-revalidate=172800",
-);
-Astro.response.headers.set("CDN-Cache-Control", "public, max-age=7200");
-Astro.response.headers.set(
-	"Cache-Tag",
-	`show-${showEntry.data.id}, shows-page, show-detail`,
-);
-Astro.response.headers.set("X-Build-Time", new Date().toISOString());
+// The episode list comes from the videos collection: listing it caps maxAge
+// at the next scheduled video so new episodes appear on time.
+await setContentCache(Astro, {
+	entries: [showEntry, ...hostEntries],
+	collections: ["videos"],
+});
+
+// Only https links leave the site from the game-format button.
+const gameFormatUrl = showEntry.data.gameFormatUrl?.startsWith("https://")
+	? showEntry.data.gameFormatUrl
+	: undefined;
 
 const showDescription =
 	showEntry.data.description?.trim() ||
@@ -118,13 +112,13 @@ const latestEpisode = hasEpisodeFeed ? feedVideos[0] : undefined;
 const totalDurationSeconds = hasEpisodeFeed ? feedVideos.reduce((sum, v) => sum + v.duration, 0) : 0;
 const totalHours = Math.floor(totalDurationSeconds / 3600);
 
+const cover = showEntry.data.cover;
 let podcastImageUrl: string | undefined;
 if (hasEpisodeFeed && showEntry.data.podcast?.artworkUrl) {
 	podcastImageUrl = showEntry.data.podcast.artworkUrl;
-} else if (hasEpisodeFeed && showEntry.data.cover) {
+} else if (hasEpisodeFeed && cover) {
 	try {
-		const resolved = await getImage({ src: showEntry.data.cover.image });
-		podcastImageUrl = new URL(resolved.src, Astro.site ?? Astro.url).href;
+		podcastImageUrl = new URL(cover.image.src, Astro.site ?? Astro.url).href;
 	} catch {
 		// Fall through with no image - JSON-LD `image` is optional.
 	}
@@ -211,9 +205,9 @@ function formatDuration(seconds: number) {
  {showDescription}
  </p>
 
- {showEntry.data.gameFormatUrl && (
+ {gameFormatUrl && (
  <div class={doc.actions}>
- <a href={showEntry.data.gameFormatUrl} class={doc.buttonSecondary} rel="noopener noreferrer">Explore the game format ↗</a>
+ <a href={gameFormatUrl} class={doc.buttonSecondary} rel="noopener noreferrer">Explore the game format ↗</a>
  </div>
  )}
 
@@ -240,12 +234,14 @@ function formatDuration(seconds: number) {
  </div>
 
  <!-- Cover image or latest episode thumbnail -->
- {showEntry.data.cover ? (
+ {cover ? (
  <div class={doc.mediaColumn}>
  <div class={doc.media}>
  <Image
- src={showEntry.data.cover.image}
- alt={showEntry.data.cover.alt}
+ src={cover.image.src}
+ width={cover.image.width}
+ height={cover.image.height}
+ alt={cover.alt}
  class={doc.image}
  />
  </div>

@@ -3,12 +3,14 @@ import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
 const styles = academyLayout({ width: "reading" });
 import {
-	type CollectionEntry,
 	getCollection,
 	getEntries,
-	render,
-} from "astro:content";
-import type { GetStaticPaths, GetStaticPathsResult } from "astro";
+	getEntry,
+	optionalContent,
+	renderEntry,
+	setContentCache,
+} from "@/lib/live-content";
+import RichText from "@/components/content/RichText.astro";
 import Page from "@/wrappers/page.astro";
 import ArticleTOC from "@/components/read/ArticleTOC.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
@@ -16,35 +18,29 @@ import LearningPathJsonLd from "@/components/html/learning-path-jsonld.astro";
 import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
 import { localTime } from "@/lib/local-time";
 
-export const prerender = true;
+export const prerender = false;
 
-type Props = {
-	learningPath: CollectionEntry<"learningPaths">;
-};
+const learningPath = await getEntry("learningPaths", Astro.params.slug);
+if (!learningPath) {
+	return new Response(null, { status: 404 });
+}
 
-export const getStaticPaths: GetStaticPaths =
-	async (): Promise<GetStaticPathsResult> => {
-		const learningPaths = await getCollection("learningPaths");
+const [{ html, headings }, authors, allTechnologies] = await Promise.all([
+	renderEntry(learningPath),
+	getEntries(learningPath.data.authors),
+	// Labels fall back to the technology id when the listing is unavailable.
+	optionalContent(getCollection("technologies"), []),
+]);
 
-		return learningPaths.map((learningPath) => ({
-			params: {
-				slug: learningPath.id,
-			},
-			props: {
-				learningPath,
-			},
-		}));
-	};
+await setContentCache(Astro, {
+	entries: [learningPath, ...authors],
+	// Technology labels come from the technologies listing; the body is autolinked.
+	collections: ["technologies"],
+});
 
-const { learningPath } = Astro.props;
-const { Content, headings } = await render(learningPath);
-const authors = await getEntries(learningPath.data.authors);
-
-const allTechnologies = await getCollection("technologies");
 const technologyNameById = new Map<string, string>();
 for (const technology of allTechnologies) {
-	const rawId = technology.id.replace(/\/index$/, "");
-	technologyNameById.set(rawId, technology.data.name);
+	technologyNameById.set(technology.id, technology.data.name);
 }
 const technologyLabels = (learningPath.data.technologies ?? []).map(
 	(technologyId) => technologyNameById.get(technologyId) ?? technologyId,
@@ -152,7 +148,7 @@ const pageDescription = learningPath.data.description;
 
 				{/* The content supplies the introduction, objectives, and ordered resources once. */}
 				<article id="path-content" class={[styles.prose, doc.pathProse].join(" ")}>
-					<Content />
+					<RichText html={html} />
 				</article>
 
 				{technologyTags.length > 0 && (

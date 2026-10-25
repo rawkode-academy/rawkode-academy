@@ -1,15 +1,11 @@
 ---
-export const prerender = true;
+export const prerender = false;
 
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
 import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 import Page from "@/wrappers/page.astro";
-import { getCollection } from "astro:content";
-import { getPublishedVideos } from "@/lib/content";
+import { getCollection, setContentCache } from "@/lib/live-content";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
-import { createLogger } from "@/lib/logger";
-
-const logger = createLogger("technology");
 
 type Technology = {
 	id: string;
@@ -21,35 +17,35 @@ type Technology = {
 	terms: string[];
 };
 
-let technologies: Technology[] = [];
-try {
-	const items = await getCollection("technologies");
+// A gateway failure with no last-good copy fails the request (500) rather
+// than caching an empty catalogue.
+const items = await getCollection("technologies");
+const technologies: Technology[] = items
+	.map((e) => {
+		const logo = resolveTechnologyIconUrl(e.id, e.data.logos);
 
-	technologies = items
-		.map((e) => {
-			const logo = resolveTechnologyIconUrl(e.id, e.data.logos);
-
-			const tech: Technology = {
-				id: e.id,
-				name: e.data.name,
-				...(logo && { logo }),
-				category: e.data.category,
-				subcategory: e.data.subcategory,
-				description: e.data.seo?.description,
-				terms: [...(e.data.aliases ?? []), ...(e.data.terms ?? [])],
-			};
-			return tech;
-		})
-		.sort((a, b) => a.name.localeCompare(b.name));
-} catch (error) {
-	logger.error("Failed to load technologies from content collection", error);
-}
+		const tech: Technology = {
+			id: e.id,
+			name: e.data.name,
+			...(logo && { logo }),
+			category: e.data.category,
+			subcategory: e.data.subcategory,
+			description: e.data.seo?.description,
+			terms: [...(e.data.aliases ?? []), ...(e.data.terms ?? [])],
+		};
+		return tech;
+	})
+	.sort((a, b) => a.name.localeCompare(b.name));
 // The masthead schedules the tools the latest sessions covered, newest first,
 // then any other technology with a real logo.
 const logoOf = new Map(
 	technologies.filter((tech) => tech.logo).map((tech) => [tech.id, tech.logo as string]),
 );
-const recentTechnologyIds = (await getPublishedVideos().catch(() => []))
+const now = new Date();
+const publishedVideos = (
+	await getCollection("videos", ({ data }) => data.publishedAt <= now).catch(() => [])
+).sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
+const recentTechnologyIds = publishedVideos
 	.slice(0, 40)
 	.flatMap((video) => (video.data.technologies ?? []).map((tech) => tech.id));
 const mosaic = [...new Set([...recentTechnologyIds, ...logoOf.keys()])]
@@ -69,6 +65,7 @@ for (const tech of technologies) {
 const indexGroups = [...groups.entries()].sort(([a], [b]) =>
 	a === "#" ? -1 : b === "#" ? 1 : a.localeCompare(b),
 );
+await setContentCache(Astro, { collections: ["technologies", "videos"] });
 const styles = academyLayout({ width: "wide" });
 const catalog = academyCatalog();
 ---

@@ -49,7 +49,9 @@ const latestEpisodeDate = latestEpisodePublishedAt
 	{(show.cover || thumbnailUrl) && <div class="show-card__frame">
 		{show.cover ? (
 			<Image
-				src={show.cover.image}
+				src={show.cover.image.src}
+				width={show.cover.image.width}
+				height={show.cover.image.height}
 				alt={show.cover.alt}
 				class="show-card__img"
 				loading="lazy"

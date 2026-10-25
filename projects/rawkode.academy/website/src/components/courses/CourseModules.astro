@@ -1,17 +1,24 @@
 ---
 import { academyCourse } from "@rawkodeacademy/design-system";
-import { type CollectionEntry, getCollection } from "astro:content";
+import { type ContentEntry, getCollection } from "@/lib/live-content";
 import { getCourseModuleSlug } from "@/utils/course-path";
 
 type Props = {
-	course: CollectionEntry<"courses">;
-	modules?: CollectionEntry<"courseModules">[];
+	course: ContentEntry<"courses">;
+	/** Pass the modules from the page (it fetches them for its cache tags). */
+	modules?: ContentEntry<"courseModules">[];
 };
 
 const { course, modules } = Astro.props;
 const s = academyCourse();
 
-const courseModules = (modules ?? (await getCollection("courseModules")))
+const courseModules = (
+	modules ??
+	(await getCollection(
+		"courseModules",
+		({ data }) => data.course.id === course.id,
+	))
+)
 	.filter((module) => module.data.course.id === course.id)
 	.sort((a, b) => a.data.order - b.data.order);
 

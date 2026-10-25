@@ -59,9 +59,6 @@ tasks: {
 			"tests/**",
 			"tsconfig.json",
 			"wrangler.jsonc",
-			"../../../../content/people/**",
-			"../../../../content/technologies/**",
-			"../../../../content/videos/**",
 		]
 	}
 
@@ -76,9 +73,6 @@ tasks: {
 			"src/**",
 			"tests/**",
 			"tsconfig.json",
-			"../../../../content/people/**",
-			"../../../../content/technologies/**",
-			"../../../../content/videos/**",
 		]
 	}
 
@@ -122,16 +116,13 @@ tasks: {
 			"scripts/**",
 			"src/**",
 			"wrangler.jsonc",
-			"../../../../content/people/**",
-			"../../../../content/technologies/**",
-			"../../../../content/videos/**",
 		]
 	}
 
 	"schedule-missing": schema.#Task & {
 		hermetic: false
 		command: "sh"
-		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun scripts/trigger_missing.ts --force-changed-content"]
+		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run trigger:missing"]
 		env: PATH: _taskPath
 		inputs: [
 			"env.cue",
@@ -139,9 +130,6 @@ tasks: {
 			"scripts/**",
 			"src/**",
 			"wrangler.jsonc",
-			"../../../../content/people/**",
-			"../../../../content/technologies/**",
-			"../../../../content/videos/**",
 		]
 	}
 

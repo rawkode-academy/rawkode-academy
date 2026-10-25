@@ -2,7 +2,11 @@
 export const prerender = false;
 
 import { env } from "cloudflare:workers";
-import { getCollection } from "astro:content";
+import {
+	disableContentCache,
+	getEntry,
+	setContentCache,
+} from "@/lib/live-content";
 import ShowLayout from "@/layouts/ShowLayout.astro";
 import { getShowExtension, getShowNav } from "@/lib/shows/registry";
 import type { ShowEnv } from "@/lib/shows/types";
@@ -12,8 +16,7 @@ const { showId, slug } = Astro.params;
 
 if (!showId) return new Response(null, { status: 404 });
 
-const shows = await getCollection("shows");
-const show = shows.find((s) => s.data.id === showId);
+const show = await getEntry("shows", showId);
 if (!show || !show.data.publish) return new Response(null, { status: 404 });
 
 const ext = getShowExtension(showId);
@@ -39,15 +42,29 @@ try {
 } catch (error) {
 	loadError = error instanceof Error ? error.message : String(error);
 	Astro.response.status = 503;
-	Astro.response.headers.set("Cache-Control", "no-store");
 }
 
 const meta = (!loadError && page.meta?.(data)) || {
 	title: `${show.data.name} — ${page.label}`,
 };
 
+// Plugin pages that declare `cache` are public reads (the same for every
+// visitor) whose data lives outside the content layer, so the plugin's
+// s-maxage / stale-while-revalidate stay the CDN TTL; the show entry's tags
+// purge them when the show changes. Pages without `cache` (apply) render per
+// visitor, and a failed load must not be stored.
 if (page.cache && !loadError) {
-	Astro.response.headers.set("Cache-Control", page.cache);
+	const directive = (name: string) => {
+		const match = page.cache?.match(new RegExp(`(?:^|[,\\s])${name}=(\\d+)`));
+		return match ? Number(match[1]) : undefined;
+	};
+	await setContentCache(Astro, {
+		entries: [show],
+		maxAge: directive("s-maxage") ?? directive("max-age"),
+		swr: directive("stale-while-revalidate") ?? 0,
+	});
+} else {
+	disableContentCache(Astro);
 }
 
 const nav = getShowNav(showId);

@@ -24,12 +24,12 @@
 </template>
 
 <script setup lang="ts">
-import type { CollectionEntry } from "astro:content";
+import type { ContentEntry } from "@/lib/live-content/types";
 import { computed, reactive } from "vue";
 import { academyAuthorGroup } from "@rawkodeacademy/design-system";
 
 interface Props {
-	authors: CollectionEntry<"people">[];
+	authors: ContentEntry<"people">[];
 	maxDisplay?: number;
 	showNames?: boolean;
 	/** Opt in only when the caller has actual activity data for the first author. */

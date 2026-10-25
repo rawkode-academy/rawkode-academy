@@ -1,12 +1,10 @@
 ---
-import { getCollection, getEntries } from "astro:content";
+import { getCollection, getEntries, setContentCache } from "@/lib/live-content";
 import { createLogger } from "@/lib/logger";
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
 import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 import Page from "@/wrappers/page.astro";
 import { localTime } from "@/lib/local-time";
-
-export const prerender = true;
 
 const logger = createLogger("adrs");
 const allAdrs = await getCollection("adrs");
@@ -33,6 +31,11 @@ const adrAuthors = await Promise.all(
 		}
 	}),
 );
+
+await setContentCache(Astro, {
+	entries: [...allAdrs, ...adrAuthors.flatMap((entry) => entry.authors)],
+	collections: ["adrs"],
+});
 
 const formatDate = (date: Date) =>
 	localTime(date, { year: "numeric", month: "long", day: "numeric" });

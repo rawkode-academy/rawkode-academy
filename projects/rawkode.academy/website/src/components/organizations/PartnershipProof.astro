@@ -1,5 +1,5 @@
 ---
-import { getCollection } from "astro:content";
+import { getCollection, optionalContent } from "@/lib/live-content";
 import { getPublishedVideos } from "@/lib/content";
 import PartnerLogos from "@/components/organizations/PartnerLogos.astro";
 import { partnershipMethodNote } from "@/lib/partnerships";
@@ -11,8 +11,14 @@ interface Props {
 
 const { compact = false } = Astro.props;
 
-const academyStats = await getSiteStats();
-const videos = await getPublishedVideos();
+// Supporting proof on marketing pages: a content outage leaves the counts and
+// quotes out rather than failing the page.
+const [academyStats, publishedVideos, allTestimonials] = await Promise.all([
+	optionalContent(getSiteStats(), undefined),
+	optionalContent(getPublishedVideos(), undefined),
+	optionalContent(getCollection("testimonials"), []),
+]);
+const videos = publishedVideos ?? [];
 
 const showId = (value: unknown): string | null => {
 	if (!value) return null;
@@ -47,7 +53,7 @@ const context: Record<string, string> = {
 	"solomon-hykes": "On having his product used live",
 	"jens-neuse": "On David's public walkthrough of WunderGraph on Rawkode Live",
 };
-const testimonials = (await getCollection("testimonials"))
+const testimonials = allTestimonials
 	.filter((entry) => featuredIds.includes(entry.id))
 	.sort((a, b) => featuredIds.indexOf(a.id) - featuredIds.indexOf(b.id));
 
@@ -110,13 +116,17 @@ const examples = [
 		<p class="editorial-section__lede">Datum Cloud is the current partner. The other teams listed below are past partners.</p>
 	</div>
 	<div class="partnership-proof">
-		<dl class="partnership-proof__stats">
-			<div><dt>Years in developer tools</dt><dd>20</dd></div>
-			<div><dt><a href="/shows/rawkode-live">Rawkode Live</a> episodes</dt><dd>{rawkodeLiveEpisodes}</dd></div>
-			<div><dt><a href="/shows/klustered">Klustered</a> episodes</dt><dd>{klusteredEpisodes}</dd></div>
-			<div><dt>Public product walkthroughs</dt><dd>{firstRunEpisodes}</dd></div>
-		</dl>
-		<p class="partnership-proof__meta">{academyStats.videoCount} videos in the <a href="/watch">Academy catalogue</a>, counted when this page was built.</p>
+		{publishedVideos && (
+			<dl class="partnership-proof__stats">
+				<div><dt>Years in developer tools</dt><dd>20</dd></div>
+				<div><dt><a href="/shows/rawkode-live">Rawkode Live</a> episodes</dt><dd>{rawkodeLiveEpisodes}</dd></div>
+				<div><dt><a href="/shows/klustered">Klustered</a> episodes</dt><dd>{klusteredEpisodes}</dd></div>
+				<div><dt>Public product walkthroughs</dt><dd>{firstRunEpisodes}</dd></div>
+			</dl>
+		)}
+		{academyStats && (
+			<p class="partnership-proof__meta">{academyStats.videoCount} videos in the <a href="/watch">Academy catalogue</a>, counted when this page was generated.</p>
+		)}
 
 		<PartnerLogos />
 

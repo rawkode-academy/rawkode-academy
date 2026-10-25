@@ -1,15 +1,15 @@
 ---
-import type { CollectionEntry } from "astro:content";
 import {
 	encodeImageServicePayload,
 	IMAGE_SERVICE_TEMPLATE_VERSION,
 } from "@/lib/image-service-payload";
+import type { ContentEntry } from "@/lib/live-content";
 import { buildNewsArticleJsonLd } from "@/lib/news-jsonld";
 import { calculateReadingTime } from "@/utils/reading-time";
 
 interface Props {
-	article: CollectionEntry<"news">;
-	authors: CollectionEntry<"people">[];
+	article: ContentEntry<"news">;
+	authors: ContentEntry<"people">[];
 	// Allow placement into a named slot in parents (for TS exactOptionalPropertyTypes)
 	slot?: string;
 }

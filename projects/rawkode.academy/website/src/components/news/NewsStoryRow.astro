@@ -1,10 +1,10 @@
 ---
-import type { CollectionEntry } from "astro:content";
 import { academyCatalog } from "@rawkodeacademy/design-system";
+import type { ContentEntry } from "@/lib/live-content";
 import { localTime } from "@/lib/local-time";
 
 interface Props {
-	story: CollectionEntry<"news">;
+	story: ContentEntry<"news">;
 }
 
 const { story } = Astro.props;

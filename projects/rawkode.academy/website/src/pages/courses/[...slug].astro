@@ -2,52 +2,44 @@
 import { academyCourse, academyLayout } from "@rawkodeacademy/design-system";
 const s = academyCourse();
 const styles = academyLayout({ width: "reading" });
-import { getImage } from "astro:assets";
 import {
-	type CollectionEntry,
 	getCollection,
 	getEntries,
-	render,
-} from "astro:content";
+	getEntry,
+	renderEntry,
+	type Resource,
+	setContentCache,
+} from "@/lib/live-content";
+import RichText from "@/components/content/RichText.astro";
 import CourseModules from "@/components/courses/CourseModules.astro";
 import CourseSignupFormCompact from "@/components/courses/CourseSignupFormCompact.astro";
 import CourseDetailHero from "@/components/courses/CourseDetailHero.vue";
 import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
 import CourseJsonLd from "@/components/html/course-jsonld.astro";
 import Page from "@/wrappers/page.astro";
-import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 
-export const prerender = true;
+export const prerender = false;
 
-type Props = {
-	course: CollectionEntry<"courses">;
-};
+const course = await getEntry("courses", Astro.params.slug);
+if (!course) {
+	return new Response(null, { status: 404 });
+}
 
-export const getStaticPaths: GetStaticPaths =
-	async (): Promise<GetStaticPathsResult> => {
-		const courses = await getCollection("courses");
+const [{ html }, authors, allCourseModules] = await Promise.all([
+	renderEntry(course),
+	getEntries(course.data.authors),
+	// Get all modules for this course
+	getCollection(
+		"courseModules",
+		({ data }) => data.course.id === course.id,
+	).then((modules) => modules.sort((a, b) => a.data.order - b.data.order)),
+]);
 
-		return courses.map((course: CollectionEntry<"courses">) => {
-			return {
-				params: {
-					slug: course.id,
-				},
-				props: {
-					course,
-				},
-			};
-		});
-	};
-
-const { course } = Astro.props;
-
-const { Content } = await render(course);
-const authors = await getEntries(course.data.authors);
-
-// Get all modules for this course
-const allCourseModules = (await getCollection("courseModules"))
-	.filter((module) => module.data.course.id === course.id)
-	.sort((a, b) => a.data.order - b.data.order);
+await setContentCache(Astro, {
+	entries: [course, ...authors, ...allCourseModules],
+	// The curriculum lists this course's modules; the body is autolinked.
+	collections: ["courseModules", "technologies"],
+});
 
 const totalModules = allCourseModules.length;
 const availableModules = allCourseModules.filter(
@@ -75,17 +67,16 @@ function formatDuration(minutes: number): string {
 	return `${hours}h ${mins}m`;
 }
 
-const coverImage = course.data.cover
-	? await getImage({ src: course.data.cover.image })
-	: undefined;
+// Covers are remote images; the runtime image service is a passthrough.
+const coverImage = course.data.cover?.image;
 const imageUrl = coverImage ? new URL(coverImage.src, Astro.site) : undefined;
 const cover =
 	coverImage && course.data.cover
 		? {
 				src: coverImage.src,
 				alt: course.data.cover.alt,
-				width: course.data.cover.image.width,
-				height: course.data.cover.image.height,
+				width: coverImage.width,
+				height: coverImage.height,
 			}
 		: undefined;
 const hasCourseResources = Boolean(course.data.resources?.length);
@@ -100,9 +91,7 @@ const formattedAuthors = authors.map((author) => ({
 	avatarUrl: author.data.avatarUrl,
 }));
 
-function getResourceHref(
-	resource: NonNullable<typeof course.data.resources>[number],
-) {
+function getResourceHref(resource: Resource) {
 	if (resource.type === "url") return resource.url;
 	if (resource.type === "file" && resource.filePath)
 		return `/resources/${resource.filePath}`;
@@ -170,7 +159,7 @@ function getResourceHref(
 					</section>
 				)}
 				<article class={styles.prose}>
-					<Content />
+					<RichText html={html} />
 				</article>
 			</div>
 

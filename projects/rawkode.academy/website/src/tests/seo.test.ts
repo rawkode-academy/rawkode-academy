@@ -1,9 +1,15 @@
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { globSync } from "glob";
-import matter from "gray-matter";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import type { VideoData } from "@/lib/live-content";
+import {
+	mapArticle,
+	mapLearningPath,
+	mapNews,
+	mapTechnology,
+	mapVideo,
+} from "@/lib/live-content/mappers";
 import {
 	buildTranscriptExcerpt,
 	groupTranscriptParagraphs,
@@ -19,58 +25,210 @@ import { shouldCaptureSearchAnalytics } from "@/lib/search-analytics";
 import { buildVideoClips } from "@/lib/video-clips";
 
 const TESTS_DIR = dirname(fileURLToPath(import.meta.url));
-const VIDEO_CONTENT_DIR = resolve(TESTS_DIR, "../../../../../content/videos");
-const ARTICLE_CONTENT_DIR = resolve(
-	TESTS_DIR,
-	"../../../../../content/articles",
-);
-const NEWS_CONTENT_DIR = resolve(TESTS_DIR, "../../../../../content/news");
-const LEARNING_PATH_CONTENT_DIR = resolve(
-	TESTS_DIR,
-	"../../../../../content/learning-paths",
-);
-const TECHNOLOGY_CONTENT_DIR = resolve(
-	TESTS_DIR,
-	"../../../../../content/technologies",
-);
 
-function readFrontmatterFiles(contentDir: string) {
-	return globSync("**/*.{md,mdx}", {
-		cwd: contentDir,
-		absolute: true,
-	}).map((filePath) => ({
-		filePath,
-		data: matter(readFileSync(filePath, "utf-8")).data as Record<
-			string,
-			unknown
-		>,
+// Content guards. Content used to be Markdown files under content/, and these
+// guards read every file from disk. It now lives in D1 behind the API gateway
+// (validated by the platform services' tests and seeds), and the website is
+// built without content/. The guards keep their rules and run them over
+// entries mapped by the website's content layer (src/lib/live-content) from
+// gateway-shaped rows, and prove each rule rejects the data it exists to catch.
+type GatewayRow = Record<string, unknown>;
+
+const TECHNOLOGY_ROWS: GatewayRow[] = [
+	{ id: "kubernetes", name: "Kubernetes", website: "https://kubernetes.io" },
+	{ id: "docker", name: "Docker", website: "https://www.docker.com" },
+	{ id: "cilium", name: "Cilium", website: "https://cilium.io" },
+	{
+		id: "kube-vip",
+		name: "kube-vip",
+		website: "https://kube-vip.io",
+		aliases: ["kubevip", "kube vip"],
+		terms: ["kubevip", "kube vip"],
+	},
+];
+
+const ARTICLE_ROWS: GatewayRow[] = [
+	{
+		id: "kubernetes-networking-with-cilium",
+		title: "Kubernetes networking with Cilium",
+		description: "How Cilium replaces kube-proxy.",
+		publishedAt: "2026-01-02T00:00:00Z",
+		technologies: ["kubernetes", "cilium"],
+	},
+	{
+		id: "containers-from-scratch",
+		title: "Containers from scratch",
+		description: "Building a container runtime by hand.",
+		publishedAt: "2026-02-03T00:00:00Z",
+		// References arrive as ids or { id } objects, sometimes with "/index".
+		technologies: [{ id: "docker/index" }],
+	},
+];
+
+const NEWS_ROWS: GatewayRow[] = [
+	{
+		id: "2026-03-01-kubernetes-release",
+		title: "Kubernetes release",
+		description: "A new Kubernetes minor release.",
+		publishedAt: "2026-03-01T00:00:00Z",
+		technologies: ["kubernetes/index"],
+	},
+];
+
+const LEARNING_PATH_ROWS: GatewayRow[] = [
+	{
+		id: "kubernetes-fundamentals",
+		title: "Kubernetes fundamentals",
+		description: "From pods to production.",
+		difficulty: "beginner",
+		estimatedDuration: 90,
+		publishedAt: "2026-01-01T00:00:00Z",
+		technologies: ["kubernetes", "kube-vip"],
+	},
+];
+
+const VIDEO_NOW = Date.parse("2026-06-01T00:00:00Z");
+
+const VIDEO_ROWS: GatewayRow[] = [
+	{
+		id: "video-recorded",
+		slug: "kube-vip-load-balancing",
+		title: "Load balancing with kube-vip",
+		description: "A hands-on session configuring kube-vip for control planes.",
+		publishedAt: "2026-01-05T00:00:00Z",
+		duration: 3600,
+		type: "recorded",
+		technologies: [{ id: "kube-vip/index" }, { id: "kubernetes" }],
+	},
+	{
+		// Scheduled streams have no duration until they have aired.
+		id: "video-upcoming",
+		slug: "upcoming-cilium-stream",
+		title: "Upcoming Cilium stream",
+		description: "A scheduled live stream about Cilium network policies.",
+		publishedAt: "2026-07-01T00:00:00Z",
+		type: "live",
+		technologies: [{ id: "cilium" }],
+	},
+];
+
+const technologyIdsOf = (rows: GatewayRow[]) =>
+	new Set(rows.map((row) => String(row.id)));
+
+interface TaxonomySource {
+	source: string;
+	technologies: readonly unknown[] | undefined;
+}
+
+/** The taxonomy rules: known, unique string ids (optionally non-empty). */
+function technologyTaxonomyViolations(
+	entries: readonly TaxonomySource[],
+	technologyIds: ReadonlySet<string>,
+	{ requireTechnologies = false } = {},
+): string[] {
+	const violations: string[] = [];
+	for (const { source, technologies } of entries) {
+		if (!Array.isArray(technologies)) {
+			if (requireTechnologies)
+				violations.push(`${source} is missing technologies taxonomy`);
+			continue;
+		}
+		if (requireTechnologies && technologies.length === 0) {
+			violations.push(`${source} must contain at least one technology`);
+		}
+		const seen = new Set<string>();
+		for (const technologyId of technologies) {
+			if (typeof technologyId !== "string") {
+				violations.push(`${source} has a non-string technology value`);
+				continue;
+			}
+			const normalizedTechnologyId = technologyId.replace(/\/index$/, "");
+			if (!technologyIds.has(normalizedTechnologyId)) {
+				violations.push(
+					`${source} references unknown technology '${technologyId}'`,
+				);
+			}
+			if (seen.has(normalizedTechnologyId)) {
+				violations.push(`${source} repeats technology '${technologyId}'`);
+			}
+			seen.add(normalizedTechnologyId);
+		}
+	}
+	return violations;
+}
+
+function articleTaxonomySources(rows: GatewayRow[]): TaxonomySource[] {
+	return rows.map((row) => ({
+		source: `articles/${row.id}`,
+		technologies: mapArticle(row).technologies,
 	}));
 }
 
-function readVideoFrontmatterFiles() {
-	return readFrontmatterFiles(VIDEO_CONTENT_DIR);
-}
-
-function readArticleFrontmatterFiles() {
-	return readFrontmatterFiles(ARTICLE_CONTENT_DIR);
-}
-
-function readTechnologyTaxonomyFiles() {
+function linkedTaxonomySources({
+	articles = [] as GatewayRow[],
+	news = [] as GatewayRow[],
+	videos = [] as GatewayRow[],
+	learningPaths = [] as GatewayRow[],
+}): TaxonomySource[] {
 	return [
-		...readFrontmatterFiles(ARTICLE_CONTENT_DIR),
-		...readFrontmatterFiles(NEWS_CONTENT_DIR),
-		...readFrontmatterFiles(VIDEO_CONTENT_DIR),
-		...readFrontmatterFiles(LEARNING_PATH_CONTENT_DIR),
+		...articleTaxonomySources(articles),
+		...news.map((row) => ({
+			source: `news/${row.id}`,
+			technologies: mapNews(row).technologies,
+		})),
+		...videos.map((row) => ({
+			source: `videos/${row.id}`,
+			technologies: mapVideo(row).technologies.map((ref) => ref.id),
+		})),
+		...learningPaths.map((row) => ({
+			source: `learningPaths/${row.id}`,
+			technologies: mapLearningPath(row).technologies,
+		})),
 	];
 }
 
-function readTechnologyIds() {
-	return new Set(
-		globSync("*/index.{md,mdx}", {
-			cwd: TECHNOLOGY_CONTENT_DIR,
-		}).map((path) => path.split("/")[0]),
-	);
+/** Metadata the watch pages and VideoObject structured data rely on. */
+function videoSeoViolations(
+	videos: ReadonlyArray<{ source: string; data: VideoData }>,
+	now: number,
+): string[] {
+	const violations: string[] = [];
+	for (const { source, data } of videos) {
+		if (typeof data.id !== "string" || data.id.trim().length === 0)
+			violations.push(`${source} has an empty id`);
+		if (typeof data.slug !== "string" || data.slug.trim().length === 0)
+			violations.push(`${source} has an empty slug`);
+		if (typeof data.title !== "string" || data.title.trim().length < 5)
+			violations.push(`${source} has a too-short title`);
+		if (
+			typeof data.description !== "string" ||
+			data.description.trim().length < 20
+		)
+			violations.push(`${source} has a too-short description`);
+		if (
+			!(data.publishedAt instanceof Date) ||
+			Number.isNaN(data.publishedAt.getTime())
+		) {
+			violations.push(`${source} is missing publishedAt`);
+			continue;
+		}
+		if (data.duration === undefined) {
+			if (data.type !== "live")
+				violations.push(`${source} can omit duration only when live`);
+			else if (data.publishedAt.getTime() <= now)
+				violations.push(
+					`${source} can omit duration only while scheduled in the future`,
+				);
+			continue;
+		}
+		if (!(data.duration > 0))
+			violations.push(`${source} has a non-positive duration`);
+	}
+	return violations;
 }
+
+const mappedVideos = (rows: GatewayRow[]) =>
+	rows.map((row) => ({ source: `videos/${row.id}`, data: mapVideo(row) }));
 
 // Minimal mock types for content collections used in SEO tests
 interface MockArticleData {
@@ -205,85 +363,97 @@ describe("SEO Validation", () => {
 	});
 
 	describe("Article Taxonomy Guard", () => {
-		it("all article frontmatter files include valid non-empty technologies taxonomy", () => {
-			const articles = readArticleFrontmatterFiles();
-			const technologyIds = readTechnologyIds();
+		it("all articles include valid non-empty technologies taxonomy", () => {
+			const technologyIds = technologyIdsOf(TECHNOLOGY_ROWS);
+			const articles = articleTaxonomySources(ARTICLE_ROWS);
 
 			expect(articles.length).toBeGreaterThan(0);
 			expect(technologyIds.size).toBeGreaterThan(0);
+			expect(
+				technologyTaxonomyViolations(articles, technologyIds, {
+					requireTechnologies: true,
+				}),
+			).toEqual([]);
+			// References are normalised to bare technology ids.
+			expect(articles.map((article) => article.technologies)).toEqual([
+				["kubernetes", "cilium"],
+				["docker"],
+			]);
+		});
 
-			for (const { filePath, data } of articles) {
-				expect(
-					Array.isArray(data.technologies),
-					`${filePath} is missing technologies taxonomy`,
-				).toBe(true);
+		it("rejects articles with unknown, repeated or missing technologies", () => {
+			const technologyIds = technologyIdsOf(TECHNOLOGY_ROWS);
+			const base = ARTICLE_ROWS[0] as GatewayRow;
+			const articles = articleTaxonomySources([
+				{ ...base, id: "unknown", technologies: ["kubernetes", "linux"] },
+				{ ...base, id: "repeated", technologies: ["docker", "docker/index"] },
+				{ ...base, id: "empty", technologies: [] },
+			]);
 
-				const technologies = Array.isArray(data.technologies)
-					? data.technologies
-					: [];
-
-				expect(
-					technologies.length,
-					`${filePath} must contain at least one technology`,
-				).toBeGreaterThan(0);
-
-				const seen = new Set<string>();
-				for (const technologyId of technologies) {
-					expect(
-						typeof technologyId,
-						`${filePath} has a non-string technology value`,
-					).toBe("string");
-
-					if (typeof technologyId === "string") {
-						expect(
-							technologyIds.has(technologyId),
-							`${filePath} references unknown technology '${technologyId}'`,
-						).toBe(true);
-						expect(
-							seen.has(technologyId),
-							`${filePath} repeats technology '${technologyId}'`,
-						).toBe(false);
-						seen.add(technologyId);
-					}
-				}
-			}
+			expect(
+				technologyTaxonomyViolations(articles, technologyIds, {
+					requireTechnologies: true,
+				}),
+			).toEqual([
+				"articles/unknown references unknown technology 'linux'",
+				"articles/repeated repeats technology 'docker'",
+				"articles/empty must contain at least one technology",
+			]);
+			expect(
+				technologyTaxonomyViolations(
+					[
+						{ source: "articles/missing", technologies: undefined },
+						{ source: "articles/object", technologies: [{ id: "docker" }] },
+					],
+					technologyIds,
+					{ requireTechnologies: true },
+				),
+			).toEqual([
+				"articles/missing is missing technologies taxonomy",
+				"articles/object has a non-string technology value",
+			]);
 		});
 	});
 
 	describe("Linked Technology Taxonomy Guard", () => {
 		it("all content technology references resolve to technology pages", () => {
-			const contentEntries = readTechnologyTaxonomyFiles();
-			const technologyIds = readTechnologyIds();
+			const technologyIds = technologyIdsOf(TECHNOLOGY_ROWS);
+			const contentEntries = linkedTaxonomySources({
+				articles: ARTICLE_ROWS,
+				news: NEWS_ROWS,
+				videos: VIDEO_ROWS,
+				learningPaths: LEARNING_PATH_ROWS,
+			});
 
 			expect(contentEntries.length).toBeGreaterThan(0);
 			expect(technologyIds.size).toBeGreaterThan(0);
+			expect(
+				technologyTaxonomyViolations(contentEntries, technologyIds),
+			).toEqual([]);
+		});
 
-			for (const { filePath, data } of contentEntries) {
-				const technologies = Array.isArray(data.technologies)
-					? data.technologies
-					: [];
-				const seen = new Set<string>();
+		it("rejects unknown and repeated references in every collection", () => {
+			const technologyIds = technologyIdsOf(TECHNOLOGY_ROWS);
+			const contentEntries = linkedTaxonomySources({
+				news: [{ ...NEWS_ROWS[0], technologies: ["linux"] }],
+				videos: [
+					{
+						...VIDEO_ROWS[0],
+						technologies: [{ id: "kubernetes" }, { id: "kubernetes/index" }],
+					},
+				],
+				learningPaths: [
+					{ ...LEARNING_PATH_ROWS[0], technologies: ["not-a-technology"] },
+				],
+			});
 
-				for (const technologyId of technologies) {
-					expect(
-						typeof technologyId,
-						`${filePath} has a non-string technology value`,
-					).toBe("string");
-
-					if (typeof technologyId === "string") {
-						const normalizedTechnologyId = technologyId.replace(/\/index$/, "");
-						expect(
-							technologyIds.has(normalizedTechnologyId),
-							`${filePath} references unknown technology '${technologyId}'`,
-						).toBe(true);
-						expect(
-							seen.has(normalizedTechnologyId),
-							`${filePath} repeats technology '${technologyId}'`,
-						).toBe(false);
-						seen.add(normalizedTechnologyId);
-					}
-				}
-			}
+			expect(
+				technologyTaxonomyViolations(contentEntries, technologyIds),
+			).toEqual([
+				"news/2026-03-01-kubernetes-release references unknown technology 'linux'",
+				"videos/video-recorded repeats technology 'kubernetes'",
+				"learningPaths/kubernetes-fundamentals references unknown technology 'not-a-technology'",
+			]);
 		});
 	});
 
@@ -297,12 +467,9 @@ describe("SEO Validation", () => {
 				resolve(TESTS_DIR, "../components/html/technology-jsonld.astro"),
 				"utf-8",
 			);
-			const kubeVipFrontmatter = matter(
-				readFileSync(
-					resolve(TECHNOLOGY_CONTENT_DIR, "kube-vip/index.mdx"),
-					"utf-8",
-				),
-			).data as Record<string, unknown>;
+			const kubeVip = mapTechnology(
+				TECHNOLOGY_ROWS.find((row) => row.id === "kube-vip") as GatewayRow,
+			);
 
 			expect(pageSource).toContain("...(technology.aliases ?? [])");
 			expect(pageSource).toContain("...(technology.terms ?? [])");
@@ -310,8 +477,9 @@ describe("SEO Validation", () => {
 			expect(pageSource).toContain("terms={technology.terms}");
 			expect(jsonLdSource).toContain("...aliases");
 			expect(jsonLdSource).toContain("...terms");
-			expect(kubeVipFrontmatter.aliases).toEqual(["kubevip", "kube vip"]);
-			expect(kubeVipFrontmatter.terms).toEqual(["kubevip", "kube vip"]);
+			// The content layer keeps the technology's aliases and terms.
+			expect(kubeVip.aliases).toEqual(["kubevip", "kube vip"]);
+			expect(kubeVip.terms).toEqual(["kubevip", "kube vip"]);
 		});
 	});
 
@@ -425,60 +593,47 @@ describe("SEO Validation", () => {
 
 describe("Video SEO", () => {
 	it("all videos expose the metadata required by watch pages and video structured data", () => {
-		const videos = readVideoFrontmatterFiles();
+		const videos = mappedVideos(VIDEO_ROWS);
 
 		expect(videos.length).toBeGreaterThan(0);
+		expect(videoSeoViolations(videos, VIDEO_NOW)).toEqual([]);
+	});
 
-		for (const { filePath, data } of videos) {
-			expect(typeof data.id, `${filePath} is missing id`).toBe("string");
-			expect(
-				String(data.id).trim().length,
-				`${filePath} has an empty id`,
-			).toBeGreaterThan(0);
+	it("rejects videos missing the metadata watch pages and video structured data need", () => {
+		const recorded = VIDEO_ROWS[0] as GatewayRow;
+		const upcoming = VIDEO_ROWS[1] as GatewayRow;
+		const videos = mappedVideos([
+			{ ...recorded, id: "no-slug", slug: " " },
+			{ ...recorded, id: "short-title", title: "Hi" },
+			{ ...recorded, id: "short-description", description: "Too short." },
+			{ ...recorded, id: "no-duration", duration: undefined },
+			{ ...recorded, id: "zero-duration", duration: 0 },
+			// A live stream that has aired must have its recording's duration.
+			{ ...upcoming, id: "aired", publishedAt: "2026-05-01T00:00:00Z" },
+		]);
 
-			expect(typeof data.slug, `${filePath} is missing slug`).toBe("string");
-			expect(
-				String(data.slug).trim().length,
-				`${filePath} has an empty slug`,
-			).toBeGreaterThan(0);
-
-			expect(typeof data.title, `${filePath} is missing title`).toBe("string");
-			expect(
-				String(data.title).trim().length,
-				`${filePath} has a too-short title`,
-			).toBeGreaterThanOrEqual(5);
-
-			expect(
-				typeof data.description,
-				`${filePath} is missing description`,
-			).toBe("string");
-			expect(
-				String(data.description).trim().length,
-				`${filePath} has a too-short description`,
-			).toBeGreaterThanOrEqual(20);
-
-			expect(
-				Boolean(data.publishedAt),
-				`${filePath} is missing publishedAt`,
-			).toBe(true);
-			if (!Object.hasOwn(data, "duration")) {
-				expect(data.type, `${filePath} can omit duration only when live`).toBe(
-					"live",
-				);
-				expect(
-					new Date(String(data.publishedAt)).getTime(),
-					`${filePath} can omit duration only while scheduled in the future`,
-				).toBeGreaterThan(Date.now());
-				continue;
-			}
-			expect(typeof data.duration, `${filePath} is missing duration`).toBe(
-				"number",
-			);
-			expect(
-				Number(data.duration),
-				`${filePath} has a non-positive duration`,
-			).toBeGreaterThan(0);
-		}
+		expect(videoSeoViolations(videos, VIDEO_NOW)).toEqual([
+			"videos/no-slug has an empty slug",
+			"videos/short-title has a too-short title",
+			"videos/short-description has a too-short description",
+			"videos/no-duration can omit duration only when live",
+			"videos/zero-duration can omit duration only when live",
+			"videos/aired can omit duration only while scheduled in the future",
+		]);
+		expect(
+			videoSeoViolations(
+				[
+					{
+						source: "videos/no-date",
+						data: {
+							...mapVideo(recorded),
+							publishedAt: new Date(Number.NaN),
+						},
+					},
+				],
+				VIDEO_NOW,
+			),
+		).toEqual(["videos/no-date is missing publishedAt"]);
 	});
 
 	it("parses WebVTT into crawlable transcript paragraphs and excerpts", () => {
@@ -675,11 +830,8 @@ Search engines should see this text.`;
 describe("Crawlability and Sitemaps", () => {
 	afterEach(() => {
 		vi.resetModules();
-		vi.doUnmock("astro:content");
+		vi.doUnmock("@/lib/live-content");
 		vi.doUnmock("@/lib/content");
-		vi.doUnmock("@rawkodeacademy/content/utils");
-		vi.doUnmock("glob");
-		vi.doUnmock("node:fs/promises");
 	});
 
 	it("renders robots.txt with private routes blocked and the sitemap index declared", async () => {
@@ -704,7 +856,7 @@ describe("Crawlability and Sitemaps", () => {
 	});
 
 	it("keeps all intended sitemap sections in the index, even if a section is empty", async () => {
-		vi.doMock("astro:content", () => ({
+		vi.doMock("@/lib/live-content", () => ({
 			getCollection: vi.fn(),
 		}));
 		vi.doMock("@/lib/content", () => ({
@@ -864,8 +1016,10 @@ describe("Crawlability and Sitemaps", () => {
 			},
 		]);
 
-		vi.doMock("astro:content", () => ({
+		const mockSetContentCache = vi.fn().mockResolvedValue({});
+		vi.doMock("@/lib/live-content", () => ({
 			getCollection: mockGetCollection,
+			setContentCache: mockSetContentCache,
 		}));
 		vi.doMock("@/lib/content", () => ({
 			getPublishedVideos: mockGetPublishedVideos,

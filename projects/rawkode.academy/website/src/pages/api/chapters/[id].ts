@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { getCollection } from "astro:content";
+import { getEntry, setContentCache } from "@/lib/live-content";
 import { createLogger } from "@/lib/logger";
 
 const logger = createLogger("chapters");
@@ -69,31 +69,32 @@ function generateVttContent(videoTitle: string, chapters: Chapter[]): string {
 	return vttContent;
 }
 
-export const GET: APIRoute = async ({ params }): Promise<Response> => {
+export const GET: APIRoute = async (context): Promise<Response> => {
 	try {
-		const videoId = params.id;
+		const videoId = context.params.id;
 
 		if (!videoId) {
 			return new Response("Video ID is required", { status: 400 });
 		}
 
-		const videos = await getCollection("videos");
-		const localVideo = videos.find((entry) => entry.data.id === videoId);
+		// Video entry ids are the video (asset) ids.
+		const localVideo = await getEntry("videos", videoId);
 		if (!localVideo) {
 			return new Response("Video not found", { status: 404 });
 		}
 
 		const title = localVideo.data.title ?? videoId;
-		const chapters = normalizeChapters(localVideo.data.chapters as Chapter[]);
+		const chapters = normalizeChapters(localVideo.data.chapters);
 
 		const vttContent = generateVttContent(title, chapters);
+
+		await setContentCache(context, { entries: [localVideo] });
 
 		// Return VTT file with appropriate headers
 		return new Response(vttContent, {
 			headers: {
 				"Content-Type": "text/vtt",
 				"Content-Disposition": `attachment; filename="${videoId}-chapters.vtt"`,
-				"Cache-Control": "public, max-age=3600",
 			},
 		});
 	} catch (error) {

@@ -1,6 +1,10 @@
 ---
-import { getCollection, getEntries } from "astro:content";
-import { getImage } from "astro:assets";
+import {
+	type Cover,
+	getCollection,
+	getEntries,
+	setContentCache,
+} from "@/lib/live-content";
 
 import Page from "@/wrappers/page.astro";
 import ArticleItemListJsonLd from "@/components/html/article-itemlist-jsonld.astro";
@@ -13,16 +17,9 @@ import { localTime } from "@/lib/local-time";
 
 export const prerender = false;
 
-// Cache headers — content only changes at deploy time, and nothing here is
-// personalised, so filtered variants are publicly cacheable per-URL.
-Astro.response.headers.set(
-	"Cache-Control",
-	"public, max-age=300, s-maxage=3600, stale-while-revalidate=86400",
-);
-Astro.response.headers.set("CDN-Cache-Control", "public, max-age=3600");
-Astro.response.headers.set("Cache-Tag", "articles-page, articles-list");
-
 // ─── Data ──────────────────────────────────────────────────────
+// Scheduled (future-dated) articles are hidden by the content layer until
+// their publication time; the cache below expires at that instant.
 
 const allArticles = (
 	await getCollection("articles")
@@ -153,9 +150,20 @@ const pagedArticles = gridArticles.slice(
 );
 const hasNextPage = page < totalPages;
 const featuredAuthors = featured ? await getEntries(featured.data.authors) : [];
-const featuredImage = featured?.data.cover
-	? await getImage({ src: featured.data.cover.image, width: 1200, format: "webp" })
-	: undefined;
+
+// Covers are remote (content.rawkode.academy) and runtime image transforms do
+// not exist on SSR routes, so the original is used at the requested display
+// width with its aspect ratio preserved.
+const coverImage = (cover: Cover | undefined, width: number) => {
+	if (!cover) return undefined;
+	const { src, width: intrinsicWidth, height: intrinsicHeight } = cover.image;
+	const height =
+		intrinsicWidth > 0
+			? Math.round((width * intrinsicHeight) / intrinsicWidth)
+			: intrinsicHeight;
+	return { src, attributes: { width, height } };
+};
+const featuredImage = coverImage(featured?.data.cover, 1200);
 
 // ─── Helpers ───────────────────────────────────────────────────
 
@@ -189,11 +197,20 @@ const restWithMeta = await Promise.all(
 		article,
 		author: await articleAuthorName(article),
 		readingTime: calculateReadingTime(article.body || "").text,
-		cover: article.data.cover
-			? await getImage({ src: article.data.cover.image, width: 640, format: "webp" })
-			: undefined,
+		cover: coverImage(article.data.cover, 640),
 	})),
 );
+
+await setContentCache(Astro, {
+	entries: [
+		...(featured ? [featured] : []),
+		...featuredAuthors,
+		// Article cache hints carry their authors' people:<id> tags.
+		...pagedArticles,
+	],
+	// The whole archive feeds the counts, rails and ItemList JSON-LD.
+	collections: ["articles"],
+});
 
 const activeFilterSummary = [
 	selectedType ? getTypeBadgeConfig(selectedType).label : undefined,

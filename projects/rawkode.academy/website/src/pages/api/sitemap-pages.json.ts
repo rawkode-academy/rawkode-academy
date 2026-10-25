@@ -1,7 +1,10 @@
-import { getCollection } from "astro:content";
 import type { APIRoute } from "astro";
-import { GRAPHQL_ENDPOINT } from "astro:env/server";
-import { request } from "graphql-request";
+import { getPublishedVideos } from "@/lib/content";
+import {
+	type CollectionName,
+	getCollection,
+	setContentCache,
+} from "@/lib/live-content";
 import { createLogger } from "@/lib/logger";
 
 const logger = createLogger("sitemap");
@@ -15,35 +18,8 @@ interface NavigationItem {
 	keywords?: string[];
 }
 
-interface Technology {
-	id: string;
-	name: string;
-	logo?: string;
-}
-
-interface GetTechnologiesResponse {
-	getTechnologies: Technology[];
-}
-
-interface Show {
-	id: string;
-	name: string;
-}
-
-interface GetShowsResponse {
-	allShows?: (Show | null)[] | null;
-}
-
-interface Video {
-	id: string;
-	slug: string;
-	title: string;
-	description?: string;
-}
-
-interface GetVideosResponse {
-	getLatestVideos: Video[];
-}
+const TECHNOLOGY_LIMIT = 100;
+const VIDEO_LIMIT = 50;
 
 // External links that aren't in the sitemap
 const externalNavigationItems: NavigationItem[] = [
@@ -65,7 +41,7 @@ const externalNavigationItems: NavigationItem[] = [
 
 async function generateNavigationItems(
 	includeArticles = false,
-): Promise<NavigationItem[]> {
+): Promise<{ items: NavigationItem[]; complete: boolean }> {
 	const navigationItems: NavigationItem[] = [];
 
 	// Add static pages
@@ -99,12 +75,6 @@ async function generateNavigationItems(
 			title: "All Articles",
 			category: "Articles",
 			description: "Browse all articles",
-		},
-		{
-			href: "/series",
-			title: "All Series",
-			category: "Series",
-			description: "Browse article series",
 		},
 		{
 			href: "/technology",
@@ -241,26 +211,6 @@ async function generateNavigationItems(
 			});
 		}
 
-		// Add series
-		const series = await getCollection("series");
-		const publishedSeriesIds = new Set(
-			publishedArticles
-				.map((article) => article.data.series?.id)
-				.filter((id): id is string => Boolean(id)),
-		);
-		series
-			.filter((s) => publishedSeriesIds.has(s.id))
-			.forEach((s) => {
-				navigationItems.push({
-					id: `/series/${s.id}`,
-					title: s.data.title,
-					description: "Read this series",
-					href: `/series/${s.id}`,
-					category: "Series",
-					keywords: [s.data.title.toLowerCase(), "series", "read", "articles"],
-				});
-			});
-
 		// Add courses
 		const courses = await getCollection("courses");
 		courses.forEach((course) => {
@@ -274,105 +224,71 @@ async function generateNavigationItems(
 			});
 		});
 
-		const endpoint = GRAPHQL_ENDPOINT;
+		const [shows, technologies, videos] = await Promise.all([
+			getCollection("shows"),
+			getCollection("technologies"),
+			getPublishedVideos(),
+		]);
 
-		// Add shows
-		const getShowsQuery = /* GraphQL */ `
-      query GetShows {
-        allShows {
-          id
-          name
-        }
-      }
-    `;
+		// Add shows (every show, ordered by id, as the API's allShows was)
+		shows
+			.sort((a, b) => a.data.id.localeCompare(b.data.id))
+			.forEach((show) => {
+				if (!show.data.id || !show.data.name) {
+					return;
+				}
 
-		const showData = await request<GetShowsResponse>(endpoint, getShowsQuery);
-
-		showData.allShows?.forEach((show) => {
-			if (!show?.id || !show?.name) {
-				return;
-			}
-
-			navigationItems.push({
-				id: `/shows/${show.id}`,
-				title: show.name,
-				description: "Browse episodes from this show",
-				href: `/shows/${show.id}`,
-				category: "Shows",
-				keywords: [show.name.toLowerCase(), "show", "shows"],
+				navigationItems.push({
+					id: `/shows/${show.data.id}`,
+					title: show.data.name,
+					description: "Browse episodes from this show",
+					href: `/shows/${show.data.id}`,
+					category: "Shows",
+					keywords: [show.data.name.toLowerCase(), "show", "shows"],
+				});
 			});
-		});
 
-		// Add technologies
-		const getTechnologiesQuery = /* GraphQL */ `
-      query GetTechnologies($limit: Int) {
-        getTechnologies(limit: $limit) {
-          id
-          name
-        }
-      }
-    `;
-
-		const techData = await request<GetTechnologiesResponse>(
-			endpoint,
-			getTechnologiesQuery,
-			{ limit: 100 }, // Fetch up to 100 technologies for command palette
-		);
-
-		techData.getTechnologies.forEach((tech) => {
-			navigationItems.push({
-				id: `/technology/${tech.id}`,
-				title: tech.name,
-				description: "Explore this technology",
-				href: `/technology/${tech.id}`,
-				category: "Technology",
-				keywords: [tech.name.toLowerCase(), "technology", "tech"],
+		// Add technologies (up to 100 for the command palette, ordered by id)
+		technologies
+			.sort((a, b) => a.id.localeCompare(b.id))
+			.slice(0, TECHNOLOGY_LIMIT)
+			.forEach((tech) => {
+				navigationItems.push({
+					id: `/technology/${tech.id}`,
+					title: tech.data.name,
+					description: "Explore this technology",
+					href: `/technology/${tech.id}`,
+					category: "Technology",
+					keywords: [tech.data.name.toLowerCase(), "technology", "tech"],
+				});
 			});
-		});
 
-		// Add videos
-		const getVideosQuery = /* GraphQL */ `
-      query GetVideos($limit: Int) {
-        getLatestVideos(limit: $limit) {
-          id
-          slug
-          title
-          description
-        }
-      }
-    `;
-
-		const videoData = await request<GetVideosResponse>(
-			endpoint,
-			getVideosQuery,
-			{ limit: 50 }, // Fetch up to 50 videos for command palette
-		);
-
-		videoData.getLatestVideos.forEach((video) => {
+		// Add videos (the 50 most recently published)
+		videos.slice(0, VIDEO_LIMIT).forEach((video) => {
 			navigationItems.push({
-				id: `/watch/${video.slug}`,
-				title: video.title,
-				description: video.description || "Watch this video",
-				href: `/watch/${video.slug}`,
+				id: `/watch/${video.data.slug}`,
+				title: video.data.title,
+				description: video.data.description || "Watch this video",
+				href: `/watch/${video.data.slug}`,
 				category: "Videos",
-				keywords: [video.title.toLowerCase(), "video", "watch"],
+				keywords: [video.data.title.toLowerCase(), "video", "watch"],
 			});
 		});
 	} catch (error) {
 		logger.error("Error loading collections or technologies", error);
+		return { items: navigationItems, complete: false };
 	}
 
-	return navigationItems;
+	return { items: navigationItems, complete: true };
 }
 
-// Prerender this endpoint at build time
-export const prerender = true;
-
-export const GET: APIRoute = async ({ url }) => {
+export const GET: APIRoute = async (context) => {
+	const { url } = context;
 	try {
 		// Check if we should include articles (for dynamic fetching)
 		const includeArticles = url.searchParams.get("includeArticles") === "true";
-		const navigationItems = await generateNavigationItems(includeArticles);
+		const { items: navigationItems, complete } =
+			await generateNavigationItems(includeArticles);
 
 		// Add external navigation items
 		const allItems = [...navigationItems, ...externalNavigationItems].sort(
@@ -385,11 +301,23 @@ export const GET: APIRoute = async ({ url }) => {
 			},
 		);
 
+		const collections: CollectionName[] = [
+			"courses",
+			"shows",
+			"technologies",
+			"videos",
+			...(includeArticles ? (["articles"] as const) : []),
+		];
+		// A partial list (content unavailable) is only cached briefly.
+		await setContentCache(context, {
+			collections,
+			...(complete ? {} : { maxAge: 60, swr: 0 }),
+		});
+
 		return new Response(JSON.stringify(allItems), {
 			status: 200,
 			headers: {
 				"Content-Type": "application/json",
-				"Cache-Control": "public, max-age=3600", // Cache for 1 hour
 			},
 		});
 	} catch (error) {

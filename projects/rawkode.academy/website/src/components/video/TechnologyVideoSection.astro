@@ -1,11 +1,11 @@
 ---
-import type { CollectionEntry } from "astro:content";
+import type { ContentEntry } from "@/lib/live-content";
 import { formatVideoRuntimeLabel } from "@/lib/video-runtime";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { academyWatch } from "@rawkodeacademy/design-system";
 
 interface Props {
-	technology: CollectionEntry<"technologies">;
+	technology: ContentEntry<"technologies">;
 	videos: Array<{
 		id: string;
 		title: string;
@@ -20,7 +20,8 @@ interface Props {
 
 const { technology, videos, totalVideos } = Astro.props;
 
-const techId = technology.id.replace(/\/index$/, "");
+// Technology ids carry no "/index" in the live content layer.
+const techId = technology.id;
 const techName = technology.data.name;
 const iconUrl = resolveTechnologyIconUrl(technology.id, technology.data.logos);
 

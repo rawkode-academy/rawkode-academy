@@ -10,7 +10,8 @@ This directory contains tools for migrating YouTube videos to Cloudflare R2 stor
 - Generates unique CUID2 for each video
 - Uploads to multiple R2 buckets with specific paths
 - Triggers Google Cloud Run transcoding job
-- Generates SQL insert statement for video metadata
+- Creates the video row in the `platform-videos` D1 database (description as plain text plus a TipTap `description_doc`)
+- Invalidates the website cache for the video (`POST https://rawkode.academy/api/cache/invalidate`)
 - Comprehensive error handling and logging
 
 ## Requirements
@@ -66,6 +67,15 @@ cp .envrc.example .envrc
 - `CONTENT_SECRET_KEY`: Secret key for content bucket
 - `CONTENT_BUCKET`: Bucket name for video/audio content
 
+**Cloudflare D1 and the website cache:**
+- `CLOUDFLARE_ACCOUNT_ID`: Cloudflare account (set in `env.cue`)
+- `CLOUDFLARE_API_TOKEN`: API token with D1 edit on `platform-videos` (1Password, `production` environment)
+- `VIDEOS_D1_DATABASE_ID` (optional): overrides the `platform-videos` database id
+- `CACHE_INVALIDATION_TOKEN` (optional): the website's invalidation token. Without it the importer warns and skips invalidation; the website's hourly change detection picks the row up, or run `just invalidate-content '{"tags":["videos:<cuid>"]}'` in `projects/rawkode.academy/website`.
+- `CACHE_INVALIDATION_URL` (optional): defaults to `https://rawkode.academy/api/cache/invalidate`
+
+Pass `--skip-d1` to leave D1 (and the cache) alone and only print the SQL.
+
 **Google Cloud (optional overrides):**
 - `GCP_PROJECT`: Google Cloud project ID (default: `rawkode-academy-production`)
 - `GCP_LOCATION`: Cloud Run job location (default: `europe-west2`)
@@ -86,11 +96,14 @@ direnv allow
 ## Usage
 
 ```bash
-# With 1Password for secrets
-op run -- python youtube_to_r2.py YOUTUBE_VIDEO_ID
+# Secrets from 1Password via env.cue
+cuenv exec -e production -- uv run python youtube_to_r2.py YOUTUBE_VIDEO_ID
 
-# Without 1Password (secrets directly in .envrc)
-python youtube_to_r2.py YOUTUBE_VIDEO_ID
+# Upload only; print the SQL instead of writing D1
+cuenv exec -e production -- uv run python youtube_to_r2.py YOUTUBE_VIDEO_ID --skip-d1
+
+# Unit tests (standard library only)
+python -I -m unittest discover -s . -p 'test_*.py'
 ```
 
 ## Example
@@ -116,7 +129,9 @@ This will:
    - **VIDEOS bucket:**
      - Thumbnail: `{cuid}/thumbnail.jpg`
 6. Trigger Google Cloud Run transcoding job with `VIDEO_ID={cuid}`
-7. Generate SQL insert statement with all video metadata
+7. Insert the video into `platform-videos` (an existing row is left unchanged)
+8. Invalidate the website cache tag `videos:{cuid}`
+9. Print the SQL insert statement
 
 ## Output Structure
 
@@ -125,16 +140,21 @@ The script organizes files using CUID2 identifiers:
 - All related files (video, audio, thumbnail) are grouped by this CUID
 - Thumbnails are duplicated to the VIDEOS bucket for quick access
 
-## SQL Output
+## D1 Row
 
-The script generates a SQL INSERT statement for the `videos` table with:
+The script inserts (and prints) a row in the `platform-videos` `videos` table with:
 - `id`: The generated CUID
 - `title`: Video title from YouTube
 - `subtitle`: First 200 characters of the description
 - `slug`: URL-friendly version of the title
-- `description`: Full video description
+- `description`: Full video description (plain text)
+- `description_doc`: The description as a TipTap document (`content_api.text_to_doc`: one paragraph per blank-line block, hard breaks for single newlines, bare URLs as links)
 - `duration`: Video length in seconds
-- `publishedAt`: Unix timestamp of the upload date
+- `publishedAt`: Unix timestamp of the upload date (UTC)
+- `youtube_id`: The YouTube video ID
+- `updated_at`: Write time in milliseconds
+
+Shows/episodes, guests, technologies, chapters and transcription terms are rows in their own services (`platform-episodes`, `platform-video-guests`, `platform-video-technologies`, `platform-chapters`, `platform-transcription-terms`); see `.agents/skills/rawkode-academy-video-importer/SKILL.md`.
 
 ## Scripts
 
@@ -143,6 +163,8 @@ Downloads YouTube videos, extracts audio, and uploads to Cloudflare R2 buckets.
 
 ### descript_to_r2.py
 Downloads Descript videos, extracts audio, subtitles, and uploads to Cloudflare R2 buckets.
+
+Like `youtube_to_r2.py`, it then inserts the `platform-videos` row and invalidates the website cache (`--skip-d1` only prints the SQL). Update mode never overwrites the row; it invalidates the cache again.
 
 Usage:
 ```bash

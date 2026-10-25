@@ -1,42 +1,34 @@
-import type { CollectionEntry } from "astro:content";
+import { type ContentEntry, documentToMarkdown } from "@/lib/live-content";
 
 const DEFAULT_SITE_URL = "https://rawkode.academy";
 
-// MDX bodies open with ESM import lines for embedded islands; they're
-// noise in a plain-markdown rendition, so drop the leading import block.
-function stripLeadingMdxImports(body: string): string {
-	const lines = body.split("\n");
-	let index = 0;
-	while (index < lines.length) {
-		const line = (lines[index] ?? "").trim();
-		if (line === "" || /^import\s.+from\s+["'][^"']+["'];?$/.test(line)) {
-			index++;
-			continue;
-		}
-		break;
-	}
-	return lines.slice(index).join("\n").trim();
-}
+type ArticleRef = Pick<ContentEntry<"articles">, "id">;
 
 export function articleCanonicalUrl(
-	article: CollectionEntry<"articles">,
+	article: ArticleRef,
 	site: URL | undefined,
 ): string {
 	return new URL(`/read/${article.id}`, site ?? DEFAULT_SITE_URL).href;
 }
 
 export function articleMarkdownUrl(
-	article: CollectionEntry<"articles">,
+	article: ArticleRef,
 	site: URL | undefined,
 ): string {
 	return new URL(`/read/${article.id}.md`, site ?? DEFAULT_SITE_URL).href;
 }
 
-export function articleToMarkdown(
-	article: CollectionEntry<"articles">,
-	authors: CollectionEntry<"people">[],
+/**
+ * Plain-Markdown rendition of an article (`/read/<slug>.md`, llms-full.txt).
+ * The body is serialised from the stored rich-text document as portable
+ * Markdown (no MDX imports or components), so it no longer needs the old
+ * leading-import stripping.
+ */
+export async function articleToMarkdown(
+	article: ContentEntry<"articles">,
+	authors: ReadonlyArray<Pick<ContentEntry<"people">, "data">>,
 	site: URL | undefined,
-): string {
+): Promise<string> {
 	const lines: string[] = [
 		`# ${article.data.title}`,
 		"",
@@ -62,7 +54,8 @@ export function articleToMarkdown(
 		lines.push(`- Technologies: ${article.data.technologies.join(", ")}`);
 	}
 
-	lines.push("", stripLeadingMdxImports(article.body ?? ""), "");
+	const body = (await documentToMarkdown(article.data.body)).trim();
+	lines.push("", body, "");
 
 	return lines.join("\n");
 }

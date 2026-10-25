@@ -101,7 +101,9 @@ const data = await handleApiResponse(response);
 
 ### Caching Strategy
 
-- Static pages use `export const prerender = true`
+- Pages without content use `export const prerender = true`
+- Content pages render on demand and call `setContentCache` (route caching with
+  Cloudflare cache tags); see `docs/live-content.md`
 - API responses include appropriate cache headers
 - Use resource hints for external domains
 

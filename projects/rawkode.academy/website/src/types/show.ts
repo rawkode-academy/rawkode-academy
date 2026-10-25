@@ -1,4 +1,4 @@
-import type { ImageMetadata } from "astro";
+import type { RemoteImage } from "@/lib/live-content/types";
 
 export type ShowStatus = "coming-soon" | "active" | "archived";
 
@@ -25,7 +25,7 @@ export interface ShowSummary {
 	episodes?: (ShowEpisode | null)[] | null;
 	cover?:
 		| {
-				image: ImageMetadata;
+				image: RemoteImage;
 				alt: string;
 		  }
 		| null

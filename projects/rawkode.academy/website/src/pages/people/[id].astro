@@ -2,10 +2,18 @@
 import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
 const styles = academyLayout({ width: "reading" });
-export const prerender = true;
+export const prerender = false;
 
 import Page from "@/wrappers/page.astro";
-import { getCollection, getEntries, render } from "astro:content";
+import {
+	getCollection,
+	getEntries,
+	getEntry,
+	renderEntry,
+	sameId,
+	setContentCache,
+} from "@/lib/live-content";
+import RichText from "@/components/content/RichText.astro";
 import VideoFeed from "@/components/video/video-feed.astro";
 import ShowCard from "@/components/show/ShowCard.astro";
 import PersonJsonLd from "@/components/html/person-jsonld.astro";
@@ -16,52 +24,36 @@ import { getPersonIdentityUrls } from "@/lib/person-identity-links";
 import { isNewsPublished } from "@/lib/news-publication";
 import { localTime } from "@/lib/local-time";
 
-export async function getStaticPaths() {
-	const people = await getCollection("people");
-	return people.map((person) => ({
-		params: { id: person.data.id },
-		props: { person },
-	}));
-}
-
-const { person } = Astro.props;
+const person = await getEntry("people", Astro.params.id);
+if (!person) return new Response(null, { status: 404 });
 
 const now = new Date();
-const videos = await getCollection("videos", ({ data }) => data.publishedAt <= now);
-const shows = await getCollection("shows", ({ data }) => data.publish);
-const technologies = await getCollection("technologies");
-const news = await getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now));
-const articles = await getCollection("articles", ({ data }) => data.publishedAt <= now);
-const techNameById = new Map(
-	technologies.map((t) => [t.id.replace(/\/index$/, ""), t.data.name] as const),
-);
-
-// Helper to match references
-const matchRef = (
-	ref: { collection: string; id: string } | string,
-	id: string,
-) => {
-	if (typeof ref === "string") return ref === id;
-	return ref.id === id;
-};
+const [videos, shows, technologies, news, articles] = await Promise.all([
+	getCollection("videos", ({ data }) => data.publishedAt <= now),
+	getCollection("shows", ({ data }) => data.publish),
+	getCollection("technologies"),
+	getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
+	getCollection("articles", ({ data }) => data.publishedAt <= now),
+]);
+const technologyById = new Map(technologies.map((t) => [t.id, t] as const));
 
 const hostedShows = shows.filter((show) =>
-	show.data.hosts.some((h) => matchRef(h, person.data.id)),
+	show.data.hosts.some((h) => sameId(h, person.data.id)),
 );
 
 const guestVideos = videos.filter((video) =>
-	video.data.guests.some((g) => matchRef(g, person.data.id)),
+	video.data.guests.some((g) => sameId(g, person.data.id)),
 );
 
 const authoredNews = news
 	.filter((story) =>
-		story.data.authors.some((author) => matchRef(author, person.data.id)),
+		story.data.authors.some((author) => sameId(author, person.data.id)),
 	)
 	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
 
 const authoredArticles = articles
 	.filter((article) =>
-		article.data.authors.some((author) => matchRef(author, person.data.id)),
+		article.data.authors.some((author) => sameId(author, person.data.id)),
 	)
 	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
 
@@ -69,32 +61,33 @@ const formatPublishDate = (date: Date) =>
 	localTime(date, { month: "short", day: "numeric", year: "numeric" });
 
 // Prepare Show Summaries
-const showSummaries: ShowSummary[] = await Promise.all(
-	hostedShows.map(async (show) => {
-		const showVideos = videos.filter((v) => v.data.show?.id === show.data.id);
-		const hosts = await getEntries(show.data.hosts);
-
-		return {
-			id: show.data.id,
-			name: show.data.name,
-			status: show.data.status,
-			tagline: show.data.tagline,
-			gameFormatUrl: show.data.gameFormatUrl,
-			hosts: hosts.map((h) => ({
-				forename: h.data.forename ?? null,
-				surname: h.data.surname ?? null,
-			})),
-			cover: show.data.cover,
-			episodes: showVideos.map((v) => ({
-				video: {
-					title: v.data.title,
-					thumbnailUrl: getVideoThumbnailUrl(v.data.id),
-					publishedAt: v.data.publishedAt.toISOString(),
-				},
-			})),
-		};
-	}),
+const showHosts = await Promise.all(
+	hostedShows.map((show) => getEntries(show.data.hosts)),
 );
+const showSummaries: ShowSummary[] = hostedShows.map((show, index) => {
+	const showVideos = videos.filter((v) => sameId(v.data.show, show.data.id));
+	const hosts = showHosts[index] ?? [];
+
+	return {
+		id: show.data.id,
+		name: show.data.name,
+		status: show.data.status,
+		tagline: show.data.tagline,
+		gameFormatUrl: show.data.gameFormatUrl,
+		hosts: hosts.map((h) => ({
+			forename: h.data.forename ?? null,
+			surname: h.data.surname ?? null,
+		})),
+		cover: show.data.cover,
+		episodes: showVideos.map((v) => ({
+			video: {
+				title: v.data.title,
+				thumbnailUrl: getVideoThumbnailUrl(v.data.id),
+				publishedAt: v.data.publishedAt.toISOString(),
+			},
+		})),
+	};
+});
 
 // Prepare Guest Videos for Feed
 const guestVideoFeed = guestVideos
@@ -116,9 +109,9 @@ const guestVideoFeed = guestVideos
 			new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
 	);
 
-// Render any biography MDX body content (most people have empty bodies)
-const { Content: BiographyContent } = await render(person);
+// Render the biography document, if any (most people have none)
 const hasBiography = Boolean(person.body && person.body.trim().length > 0);
+const biographyHtml = hasBiography ? (await renderEntry(person)).html : "";
 
 // Build a data-driven description so each profile is unique to Google
 const videoCount = guestVideos.length;
@@ -127,15 +120,17 @@ const showCount = hostedShows.length;
 // Top technologies this person has talked about, sorted by frequency
 const techCounts = new Map<string, number>();
 for (const v of guestVideos) {
-	for (const techId of normalizeTechnologyReferences(v.data.technologies)) {
-		const id = techId.replace(/\/index$/, "");
+	for (const id of normalizeTechnologyReferences(v.data.technologies)) {
 		techCounts.set(id, (techCounts.get(id) ?? 0) + 1);
 	}
 }
-const topTechNames = [...techCounts.entries()]
+const topTechIds = [...techCounts.entries()]
 	.sort((a, b) => b[1] - a[1])
 	.slice(0, 5)
-	.map(([id]) => techNameById.get(id) ?? id);
+	.map(([id]) => id);
+const topTechNames = topTechIds.map(
+	(id) => technologyById.get(id)?.data.name ?? id,
+);
 
 const showNames = hostedShows.map((s) => s.data.name);
 
@@ -244,6 +239,28 @@ const socialLinks = [...linksByUrl.values()];
 // Website/YouTube links remain visible without claiming they identify a Person.
 const relMeUrls = getPersonIdentityUrls(person.data);
 const identityUrls = new Set(relMeUrls);
+
+await setContentCache(Astro, {
+	entries: [
+		person,
+		...hostedShows,
+		...showHosts.flat(),
+		...guestVideos,
+		...authoredArticles,
+		...authoredNews,
+		...topTechIds.map((id) => technologyById.get(id)),
+	],
+	// Each listing on the profile is a filtered collection: a newly published
+	// (or scheduled) item for this person must appear without waiting an hour.
+	// The biography is autolinked against the technologies collection.
+	collections: [
+		"videos",
+		"shows",
+		"articles",
+		"news",
+		...(hasBiography ? (["technologies"] as const) : []),
+	],
+});
 ---
 
 <Page
@@ -305,7 +322,7 @@ const identityUrls = new Set(relMeUrls);
 			</div>
 		</header>
 
-		{hasBiography && <section class={styles.prose} aria-label="Biography"><BiographyContent /></section>}
+		{hasBiography && <section class={styles.prose} aria-label="Biography"><RichText html={biographyHtml} /></section>}
 		{noindex && <p class={doc.copy}>No published contributions yet.</p>}
 
 		{showSummaries.length > 0 && <section class={doc.stack} aria-labelledby="hosted-shows">

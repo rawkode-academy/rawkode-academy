@@ -3,25 +3,13 @@ import { z } from "astro/zod";
 import { env } from "cloudflare:workers";
 import { parseCampaignAttribution } from "@/lib/analytics/attribution";
 import { GROWTH_EVENTS } from "@/lib/analytics/growth";
+import { createEmailId, createLearnerId } from "@/lib/newsletter-ids";
 import {
 	captureServerEvent,
 	getAttributionFromSource,
 	getDistinctId,
 	getEventAttribution,
 } from "@/server/analytics";
-
-/**
- * Helper to create a prefixed user ID for email preferences.
- * - For registered learners: `learner:{userId}`
- * - For email-only subscribers: `email:{email}`
- */
-export function createLearnerId(userId: string): string {
-	return `learner:${userId}`;
-}
-
-export function createEmailId(email: string): string {
-	return `email:${email.toLowerCase().trim()}`;
-}
 
 const NEWSLETTER_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year in seconds
 

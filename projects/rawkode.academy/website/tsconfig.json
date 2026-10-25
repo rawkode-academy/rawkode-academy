@@ -5,7 +5,7 @@
 		"dist",
 		"node_modules",
 		"**/examples/**",
-		"content/courses/*/examples/**",
+		"src/webcontainer-demos/**",
 		"scripts/publish-subgraph.ts"
 	],
 

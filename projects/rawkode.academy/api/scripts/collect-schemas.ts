@@ -22,6 +22,13 @@ const PLATFORM_SERVICES = [
 	"people-links",
 	"people-biographies",
 	"transcription-terms",
+	// Editorial content
+	"articles",
+	"news",
+	"changelog",
+	"adrs",
+	"testimonials",
+	"courses",
 	// User interaction services
 	"emoji-reactions",
 	"email-preferences",

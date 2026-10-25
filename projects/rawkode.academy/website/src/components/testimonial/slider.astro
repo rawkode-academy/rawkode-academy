@@ -1,5 +1,5 @@
 ---
-import { getCollection } from "astro:content";
+import { getCollection, optionalContent } from "@/lib/live-content";
 import SliderClient from "./slider.vue";
 import type { Testimonial } from "@/types/testimonial";
 
@@ -37,8 +37,8 @@ const getEyebrow = (type: string | undefined) => {
 
 const { type, blurb, limit = 10 } = Astro.props;
 
-// Get testimonials from the collection
-const allTestimonials = await getCollection("testimonials");
+// Optional section: a content failure renders nothing.
+const allTestimonials = await optionalContent(getCollection("testimonials"), []);
 
 // Filter by type if specified
 const filteredTestimonials = type
@@ -62,19 +62,21 @@ const testimonials: Testimonial[] = filteredTestimonials
 	});
 ---
 
-<div class="relative w-full">
-	<div class="mx-auto w-full max-w-4xl px-4 sm:px-6">
-		<div class="mx-auto max-w-3xl text-center">
-			<div class="hairline-chip text-primary/85">
-				{getEyebrow(type)}
+{testimonials.length > 0 && (
+	<div class="relative w-full">
+		<div class="mx-auto w-full max-w-4xl px-4 sm:px-6">
+			<div class="mx-auto max-w-3xl text-center">
+				<div class="hairline-chip text-primary/85">
+					{getEyebrow(type)}
+				</div>
+				<h2 class="mt-4 text-3xl font-bold tracking-tight text-primary-content sm:text-4xl">
+					What {type == "maintainer" ? "Project" : "Our"} <span class="text-primary">{getAudience(type)}</span> Say
+				</h2>
+				<p class="mx-auto mt-4 max-w-[54ch] text-base leading-7 text-secondary-content sm:text-lg sm:leading-8">
+					{blurb}
+				</p>
 			</div>
-			<h2 class="mt-4 text-3xl font-bold tracking-tight text-primary-content sm:text-4xl">
-				What {type == "maintainer" ? "Project" : "Our"} <span class="text-primary">{getAudience(type)}</span> Say
-			</h2>
-			<p class="mx-auto mt-4 max-w-[54ch] text-base leading-7 text-secondary-content sm:text-lg sm:leading-8">
-				{blurb}
-			</p>
+			<SliderClient testimonials={testimonials} client:visible />
 		</div>
-		<SliderClient testimonials={testimonials} client:visible />
 	</div>
-</div>
+)}

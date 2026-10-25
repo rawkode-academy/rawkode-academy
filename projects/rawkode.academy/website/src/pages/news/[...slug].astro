@@ -3,11 +3,13 @@ import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
 const styles = academyLayout({ width: "reading" });
 import {
-	type CollectionEntry,
 	getCollection,
 	getEntries,
-	render,
-} from "astro:content";
+	getEntry,
+	renderEntry,
+	setContentCache,
+} from "@/lib/live-content";
+import RichText from "@/components/content/RichText.astro";
 import ArticleHeader from "@/components/read/ArticleHeader.astro";
 import ArticleByline from "@/components/read/ArticleByline.astro";
 import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
@@ -17,36 +19,49 @@ import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Page from "@/wrappers/page.astro";
 import { calculateReadingTime } from "@/utils/reading-time";
 import { isNewsPublished } from "@/lib/news-publication";
-import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 import { localTime } from "@/lib/local-time";
 
-export const prerender = true;
+export const prerender = false;
 
-type Props = {
-	article: CollectionEntry<"news">;
-};
+const now = new Date();
+const entry = await getEntry("news", Astro.params.slug ?? "");
+// getEntry already hides scheduled stories; the explicit check also rejects
+// invalid dates, matching the publication rule used by every listing.
+const article =
+	entry && isNewsPublished(entry.data.publishedAt, now) ? entry : undefined;
+if (!article) return new Response(null, { status: 404 });
 
-export const getStaticPaths: GetStaticPaths =
-	async (): Promise<GetStaticPathsResult> => {
-		const now = new Date();
-		const articles = await getCollection("news", ({ data }) =>
-			isNewsPublished(data.publishedAt, now),
-		);
-		return articles.map((article: CollectionEntry<"news">) => ({
-			params: { slug: article.id },
-			props: { article },
-		}));
-	};
+// Tag labels have a fallback and related stories are optional, so a failing
+// collection degrades the page (cached briefly) instead of taking it down.
+let degraded = false;
+async function optional<T>(promise: Promise<T[]>): Promise<T[]> {
+	try {
+		return await promise;
+	} catch {
+		degraded = true;
+		return [];
+	}
+}
+const [{ html }, authors, allTechnologies, publishedNews] = await Promise.all([
+	renderEntry(article),
+	getEntries(article.data.authors),
+	optional(getCollection("technologies")),
+	optional(
+		getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
+	),
+]);
 
-const { article } = Astro.props;
-const { Content } = await render(article);
-const authors = await getEntries(article.data.authors);
+// Related stories list the news collection; tag labels and body autolinks
+// come from the technologies collection.
+await setContentCache(Astro, {
+	entries: [article, ...authors],
+	collections: ["news", "technologies"],
+	...(degraded ? { maxAge: 60, swr: 0 } : {}),
+});
 
-const allTechnologies = await getCollection("technologies");
 const technologyNameById = new Map<string, string>();
 for (const technology of allTechnologies) {
-	const rawId = technology.id.replace(/\/index$/, "");
-	technologyNameById.set(rawId, technology.data.name);
+	technologyNameById.set(technology.id, technology.data.name);
 }
 
 function formatTechnologyLabel(value: string): string {
@@ -136,13 +151,13 @@ const breadcrumbItems = [{ label: "News", href: "/news" }];
 
 		<div class={doc.reading}>
 			<article class={styles.prose}>
-				<Content />
+				<RichText html={html} />
 			</article>
 
 		</div>
 
 		<div class={doc.section}>
-			<RelatedNews currentStory={article} limit={3} />
+			<RelatedNews currentStory={article} stories={publishedNews} limit={3} />
 			<NewsletterCTA audience="news" badge="Cloud native news" headline="Stay on top of cloud-native releases" subtitle="Kubernetes, AI infrastructure, and CNCF news by email." />
 		</div>
 	</div>

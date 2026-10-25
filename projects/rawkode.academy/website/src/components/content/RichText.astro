@@ -1,0 +1,84 @@
+---
+// Renders a rich-text document (or HTML from renderEntry/renderDocument),
+// swapping island placeholders for the real components.
+//
+//   const { html, headings } = await renderEntry(article);
+//   <RichText html={html} />
+//   <RichText entry={technology} />      // renders the entry's main document
+//   <RichText doc={video.data.descriptionDoc} options={{ profile: "description" }} />
+import type { DocNode } from "@rawkodeacademy/rich-text";
+import { splitIslands } from "@/lib/live-content/render/islands";
+import {
+	type RenderOptions,
+	renderDocument,
+	renderEntry,
+} from "@/lib/live-content/render/render";
+import type { CollectionName, ContentEntry } from "@/lib/live-content/types";
+import RichTextIsland from "./RichTextIsland.astro";
+
+interface Props {
+	html?: string;
+	doc?: DocNode | null;
+	entry?: ContentEntry<CollectionName> | null;
+	options?: RenderOptions;
+}
+
+const { html: given, doc, entry, options } = Astro.props;
+const html =
+	given ??
+	(entry
+		? (await renderEntry(entry, options)).html
+		: (await renderDocument(doc ?? undefined, options)).html);
+const segments = splitIslands(html);
+---
+
+{segments.map((segment) =>
+	segment.kind === "html" ? (
+		<Fragment set:html={segment.html} />
+	) : (
+		<RichTextIsland
+			component={segment.component}
+			hydrate={segment.hydrate}
+			props={segment.props}
+			fallback={segment.fallback}
+		/>
+	),
+)}
+
+<script>
+	// Diagram "Enlarge" toggles (same behaviour as articles/Diagram.astro).
+	for (const toggle of document.querySelectorAll<HTMLInputElement>("[data-diagram-toggle]")) {
+		toggle.addEventListener("change", () => {
+			const viewport = document.getElementById(toggle.getAttribute("aria-controls") ?? "");
+			if (!viewport) return;
+			viewport.scrollTo({
+				left: toggle.checked ? Math.max(0, (viewport.scrollWidth - viewport.clientWidth) / 2) : 0,
+				top: 0,
+				behavior: "instant",
+			});
+		});
+	}
+</script>
+
+<style is:global>
+	/* ThemeAwareImage, following the site's colour-scheme toggle. */
+	.theme-aware-image {
+		position: relative;
+		width: 100%;
+		height: auto;
+	}
+	.theme-aware-image .theme-light-only,
+	.theme-aware-image .theme-dark-only {
+		width: 100%;
+		height: auto;
+	}
+	.theme-aware-image .theme-light-only { display: block; }
+	.theme-aware-image .theme-dark-only { display: none; }
+	:root.dark .theme-aware-image .theme-light-only { display: none; }
+	:root.dark .theme-aware-image .theme-dark-only { display: block; }
+	.rt-diagram svg,
+	[data-diagram-image] svg {
+		max-width: 100%;
+		height: auto;
+	}
+</style>

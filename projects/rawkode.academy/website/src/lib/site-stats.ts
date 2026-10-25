@@ -1,12 +1,18 @@
-import { getCollection } from "astro:content";
 import { getPublishedVideos } from "@/lib/content";
+import { type CollectionName, getCollection } from "@/lib/live-content";
+
+/** Collections behind the stats; pages quoting them pass these to setContentCache(). */
+export const SITE_STATS_COLLECTIONS = [
+	"videos",
+	"courses",
+] as const satisfies readonly CollectionName[];
 
 export interface SiteStats {
 	/** Count of published videos. */
 	videoCount: number;
 	/** Total published video runtime, floored to whole hours. */
 	totalHours: number;
-	/** Count of courses. */
+	/** Count of published courses. */
 	courseCount: number;
 }
 

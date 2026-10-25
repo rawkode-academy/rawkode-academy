@@ -1,17 +1,16 @@
 ---
-import { getCollection } from "astro:content";
 import EditorialShell from "@/components/ui/EditorialShell.astro";
 import Page from "@/wrappers/page.astro";
 import { academyDocument } from "@rawkodeacademy/design-system";
+import { getCollection, setContentCache } from "@/lib/live-content";
 
 const doc = academyDocument();
-
-export const prerender = true;
 
 const shows = await getCollection("shows");
 const publishedShows = shows.filter(
 	(show) => show.data.publish && show.data.status !== "coming-soon",
 );
+await setContentCache(Astro, { collections: ["shows"] });
 
 const feedGroups = [
 	{

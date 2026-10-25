@@ -16,7 +16,10 @@ import EmptyState from "../ui/EmptyState.vue";
 import ErrorState from "../common/ErrorState.vue";
 import SkeletonTranscript from "../common/SkeletonTranscript.vue";
 import ResourceSimulator from "../articles/cgroups/ResourceSimulator";
-import teleportCover from "../../../../../../content/courses/teleport-for-kubernetes.png?url";
+
+// Course covers are served from the content CDN (platform-courses).
+const teleportCover =
+	"https://content.rawkode.academy/courses/teleport-for-kubernetes/teleport-for-kubernetes.png";
 
 const doc = academyDocument();
 const form = academyForms();
@@ -128,6 +131,7 @@ export const Loading: Story = {
 	),
 };
 
+// biome-ignore lint/suspicious/noShadowRestrictedNames: Storybook story name
 export const Error: Story = {
 	render: () => (
 		<VueInReact

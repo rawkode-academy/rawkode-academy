@@ -27,6 +27,13 @@ const SUBGRAPHS = [
 	"people-links",
 	"people-biographies",
 	"transcription-terms",
+	// Editorial content
+	"articles",
+	"news",
+	"changelog",
+	"adrs",
+	"testimonials",
+	"courses",
 	// User interaction services (dynamic data requiring D1)
 	"emoji-reactions",
 	"email-preferences",

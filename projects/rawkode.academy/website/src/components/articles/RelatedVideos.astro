@@ -1,11 +1,15 @@
 ---
-import { type CollectionEntry, getCollection } from "astro:content";
+import {
+	type ContentEntry,
+	getCollection,
+	optionalContent,
+} from "@/lib/live-content";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { formatVideoRuntimeLabel, isUpcomingLiveVideo } from "@/lib/video-runtime";
 import { academyRelatedContent } from "@rawkodeacademy/design-system";
 
 interface Props {
-	currentArticle: CollectionEntry<"articles">;
+	currentArticle: ContentEntry<"articles">;
 	limit?: number;
 }
 
@@ -46,7 +50,18 @@ let relatedVideos: {
 }[] = [];
 
 if (articleTechnologySet.size > 0) {
-	const videos = await getCollection("videos");
+	// Videos include scheduled entries: keep upcoming live streams (labelled
+	// "Upcoming"), never unreleased recordings. Pages rendering this component
+	// list "videos" in setContentCache's collections, so a scheduled video
+	// appears on time. Optional section: a content failure renders nothing.
+	const now = new Date();
+	const videos = await optionalContent(
+		getCollection(
+			"videos",
+			({ data }) => data.publishedAt <= now || isUpcomingLiveVideo(data, now),
+		),
+		[],
+	);
 	relatedVideos = videos
 		.map((video) => {
 			const technologyIds = (video.data.technologies ?? [])

@@ -13,6 +13,7 @@ import { parse } from "node-html-parser";
 import ts from "typescript";
 
 const require = createRequire(import.meta.url);
+class ContentError extends Error {}
 function evaluate(source, imports = {}) {
 	const code = ts.transpileModule(source, {
 		compilerOptions: {
@@ -57,11 +58,26 @@ const styles = new Proxy({}, { get: (_, slot) => `card-${String(slot)}` });
 const card = evaluate(compiled.code, {
 	"<stdin>?astro&type=style&index=0&lang.css": {}, // CSS is verified in Browser.
 	"astro/runtime/server/index.js": { ...runtime, createMetadata: () => ({}) },
-	"astro:content": { getEntries: async (entries) => entries },
+	// Live-content boundary: references resolve to people fixtures, and a
+	// failing lookup throws a ContentError that optionalContent absorbs.
+	"@/lib/live-content": {
+		getEntries: async (refs) => {
+			if (refs === "unavailable") throw new ContentError("gateway down");
+			return refs.map((ref) => people[ref.id]).filter(Boolean);
+		},
+		optionalContent: async (load, fallback) => {
+			try {
+				return await load;
+			} catch (error) {
+				if (!(error instanceof ContentError)) throw error;
+				return fallback;
+			}
+		},
+	},
 	"astro:assets": {
 		Image: runtime.createComponent(
 			(_, props) =>
-				runtime.render`<img src="${props.src}" alt="${props.alt}" loading="${props.loading}">`,
+				runtime.render`<img src="${props.src}" alt="${props.alt}" width="${props.width}" height="${props.height}" loading="${props.loading}">`,
 		),
 	},
 	"../common/BaseCard.vue": baseCard,
@@ -71,14 +87,25 @@ const card = evaluate(compiled.code, {
 }).default;
 const container = await AstroContainer.create();
 container.addServerRenderer({ name: "@astrojs/vue", renderer });
+const people = {
+	rawkode: {
+		id: "rawkode",
+		collection: "people",
+		data: { id: "rawkode", name: "David Flanagan" },
+	},
+};
 const article = (data = {}) => ({
 	id: "no-cover",
+	collection: "articles",
 	body: "A useful technical explanation.",
 	data: {
 		title: "Containers <without> decoration & noise",
 		type: "tutorial",
 		publishedAt: new Date("2026-05-19"),
-		authors: [{ data: { name: "David Flanagan" } }],
+		authors: [
+			{ collection: "people", id: "rawkode" },
+			{ collection: "people", id: "missing-person" },
+		],
 		openGraph: { subtitle: "A practical guide." },
 		...data,
 	},
@@ -107,12 +134,20 @@ test("coverless article has no empty media frame across the Astro/Vue slot bound
 	assert.equal(dom.querySelectorAll("astro-island").length, 0);
 });
 
-test("authored cover and its alternative remain, with default level-two title", async () => {
+test("authored remote cover and its alternative remain, with default level-two title", async () => {
+	const src = "https://content.rawkode.academy/articles/no-cover/cover.webp";
 	const dom = await render(
-		article({ cover: { image: "/cover.webp", alt: "Container architecture" } }),
+		article({
+			cover: {
+				image: { src, width: 1600, height: 900, format: "webp" },
+				alt: "Container architecture",
+			},
+		}),
 	);
 	const image = dom.querySelector(".base-card__cover img");
-	assert.equal(image.getAttribute("src"), "/cover.webp");
+	assert.equal(image.getAttribute("src"), src);
+	assert.equal(image.getAttribute("width"), "1600");
+	assert.equal(image.getAttribute("height"), "900");
 	assert.equal(image.getAttribute("alt"), "Container architecture");
 	assert.equal(image.getAttribute("loading"), "lazy");
 	assert.ok(dom.querySelector("h2"));
@@ -121,4 +156,21 @@ test("authored cover and its alternative remain, with default level-two title", 
 test("missing authors do not leave an empty footer rule", async () => {
 	const dom = await render(article({ authors: [] }));
 	assert.equal(dom.querySelector(".base-card__footer"), null);
+});
+
+test("unresolved author references are dropped from the byline", async () => {
+	const dom = await render(article());
+	assert.equal(
+		dom.querySelector(".base-card__footer").text.trim(),
+		"David Flanagan",
+	);
+});
+
+test("a failing people lookup drops the footer instead of failing the card", async () => {
+	const dom = await render(article({ authors: "unavailable" }));
+	assert.equal(dom.querySelector(".base-card__footer"), null);
+	assert.equal(
+		dom.querySelector("h2").text,
+		"Containers <without> decoration & noise",
+	);
 });

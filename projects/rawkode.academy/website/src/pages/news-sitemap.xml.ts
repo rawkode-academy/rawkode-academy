@@ -1,5 +1,5 @@
-import { getCollection } from "astro:content";
 import type { APIRoute } from "astro";
+import { getCollection, setContentCache } from "@/lib/live-content";
 import { selectFreshNewsItems, toAbsoluteUrl } from "@/lib/sitemaps";
 
 const DEFAULT_SITE_URL = "https://rawkode.academy";
@@ -60,21 +60,27 @@ ${body}
 </urlset>`;
 }
 
-export const GET: APIRoute = async ({ site }) => {
+export const GET: APIRoute = async (context) => {
 	const now = new Date();
 	const allNews = await getCollection("news");
 	const fresh = selectFreshNewsItems(allNews, now);
-	const xml = renderGoogleNewsSitemap(site, fresh);
+	const xml = renderGoogleNewsSitemap(context.site, fresh);
+
+	// News-eligible window is 48h; revalidate aggressively so items age out
+	// (and newly published ones appear in Top Stories) without waiting on the
+	// default 1h content TTL. "news" also caps it at the next scheduled story.
+	await setContentCache(context, {
+		entries: fresh,
+		collections: ["news"],
+		maxAge: 900,
+		swr: 900,
+	});
 
 	return new Response(xml, {
 		headers: {
 			"Content-Type": "application/xml; charset=utf-8",
-			// News-eligible window is 48h; revalidate aggressively so newly
-			// published items appear in Top Stories without waiting on the
-			// default 1h sitemap TTL.
-			"Cache-Control": "public, max-age=900",
 		},
 	});
 };
 
-export const prerender = true;
+export const prerender = false;

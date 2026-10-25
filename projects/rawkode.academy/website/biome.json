@@ -11,7 +11,7 @@
 			"**",
 			"!**/worker-configuration.d.ts",
 			"!**/examples/**/*",
-			"!**/content/courses/**/*/examples/**"
+			"!**/src/webcontainer-demos/**"
 		]
 	},
 	"formatter": {

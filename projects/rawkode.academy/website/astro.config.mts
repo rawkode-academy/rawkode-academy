@@ -1,31 +1,12 @@
 import cloudflare from "@astrojs/cloudflare";
-import mdx from "@astrojs/mdx";
+import { cacheCloudflare } from "@astrojs/cloudflare/cache";
 import react from "@astrojs/react";
 import vue from "@astrojs/vue";
 import faroUploader from "@grafana/faro-rollup-plugin";
-import d2 from "astro-d2";
-import expressiveCode from "astro-expressive-code";
 import { defineConfig, envField, fontProviders } from "astro/config";
-import { statSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, parse } from "node:path";
-import { createRequire } from "node:module";
-import { existsSync } from "node:fs";
-import rehypeExternalLinks from "rehype-external-links";
-import { loadTechLookup } from "./src/lib/load-tech-lookup";
-import { remarkTechAutolink } from "./src/lib/remark-tech-autolink";
-
-// Load CUE language grammar for syntax highlighting
-let cueLanguageGrammar: import("shiki").LanguageRegistration | undefined;
-try {
-	const grammarPath = join(process.cwd(), "src/grammars/cue.tmLanguage.json");
-	if (existsSync(grammarPath)) {
-		cueLanguageGrammar = JSON.parse(
-			readFileSync(grammarPath, "utf-8"),
-		) as import("shiki").LanguageRegistration;
-	}
-} catch (e) {
-	console.warn("Failed to load CUE grammar:", e);
-}
+import { fileURLToPath } from "node:url";
 
 // Local implementation of searchForWorkspaceRoot to avoid direct vite import
 function searchForWorkspaceRoot(current: string): string {
@@ -58,7 +39,11 @@ function searchForWorkspaceRoot(current: string): string {
 	return current;
 }
 import { vite as vidstackPlugin } from "vidstack/plugins";
+import { renderOnlyActionsPlugin } from "./src/utils/vite-plugin-render-only-actions";
 import { webcontainerDemosPlugin } from "./src/utils/vite-plugin-webcontainer-demos";
+
+const localPath = (path: string) =>
+	fileURLToPath(new URL(path, import.meta.url));
 
 type AstroUserConfig = Parameters<typeof defineConfig>[0];
 type AstroVitePlugins = NonNullable<
@@ -80,21 +65,6 @@ const getSiteUrl = () => {
 	return "https://rawkode.academy";
 };
 
-// Resolve external content package directory for Vite FS allow (dev + build asset import)
-let CONTENT_TECH_DIR: string | undefined;
-try {
-	const require = createRequire(import.meta.url);
-	const pkgPath = require.resolve("@rawkodeacademy/content/package.json");
-	const root = dirname(pkgPath);
-	const data = join(root, "technologies");
-	try {
-		const s = statSync(data);
-		CONTENT_TECH_DIR = s.isDirectory() ? data : root;
-	} catch {
-		CONTENT_TECH_DIR = root;
-	}
-} catch {}
-
 export default defineConfig({
 	output: "server",
 	adapter: cloudflare({
@@ -106,7 +76,20 @@ export default defineConfig({
 		// Use an ephemeral inspector in local dev where network-interface discovery is unavailable.
 		inspectorPort: 0,
 	}),
+	// Content pages are rendered on demand from the API gateway and cached
+	// at the edge. Pages call Astro.cache.set() (see src/lib/live-content/cache-control.ts)
+	// with tags that POST /api/cache/invalidate and the hourly cron purge.
+	cache: {
+		provider: cacheCloudflare(),
+	},
+	// Astro 7 defaults to JSX whitespace rules; keep v6's HTML-aware
+	// compression so inline elements keep their separating spaces.
+	compressHTML: true,
 	trailingSlash: "never",
+	image: {
+		// Content images (covers, logos, avatars) come from the content CDN.
+		domains: ["content.rawkode.academy"],
+	},
 	// Speculatively fetch internal links as they enter the viewport so
 	// MPA navigation feels instant on the homepage → watch/read paths.
 	prefetch: {
@@ -121,63 +104,6 @@ export default defineConfig({
 		inlineStylesheets: "always",
 	},
 	integrations: [
-		// Inline the SVG output so we don't depend on the generated file's
-		// on-disk path. Our article MDX lives outside the website project (in
-		// the sibling @rawkodeacademy/content package), and astro-d2 computes
-		// its output path relative to file.cwd — that traversal escapes both
-		// public/ and the URL base, leaving the <img src> pointing at a path
-		// that never ships in dist. Inlining avoids the broken file reference.
-		// The integration checks D2 for build/dev, but not preview. Missing D2
-		// must fail a build rather than publish raw diagram source as prose.
-		d2({ inline: true }),
-		expressiveCode({
-			plugins: [
-				{
-					name: "academy-code-controls",
-					// The renderer otherwise shrinks copy targets to 32px for a mouse.
-					// Keep the Academy's 44px target for pointer and touch alike.
-					baseStyles: `
-					.frame .copy button { min-width: 2.75rem; min-height: 2.75rem; }
-					.frame .copy button::after { mask-position: center; mask-size: 1.25rem; }
-				`,
-				},
-			],
-			// Code blocks are "screen within the page" surfaces: like the
-			// --terminal-* tokens they stay dark in both colour schemes, so
-			// shell frames, output blocks, and editor frames all read as the
-			// same material instead of flipping between light and dark chrome.
-			themes: ["catppuccin-mocha"],
-			styleOverrides: {
-				borderRadius: "var(--radius-sm)",
-				borderColor: "var(--terminal-border)",
-				borderWidth: "1px",
-				codeBackground: "var(--terminal-bg)",
-				codeFontFamily:
-					"var(--font-red-hat-mono), ui-monospace, SFMono-Regular, Menlo, monospace",
-				codeFontSize: "13px",
-				codeLineHeight: "1.7",
-				frames: {
-					editorActiveTabBackground: "transparent",
-					editorActiveTabBorderColor: "transparent",
-					editorActiveTabIndicatorBottomColor: "transparent",
-					editorActiveTabIndicatorTopColor: "var(--editorial-spruce)",
-					editorBackground: "var(--terminal-bg)",
-					editorTabBarBackground: "var(--terminal-surface)",
-					editorTabBarBorderBottomColor: "var(--terminal-border)",
-					frameBoxShadowCssValue: "none",
-					terminalBackground: "var(--terminal-bg)",
-					terminalTitlebarBackground: "var(--terminal-surface)",
-					terminalTitlebarBorderBottomColor: "var(--terminal-border)",
-					terminalTitlebarDotsForeground: "oklch(1 0 0 / 0.18)",
-				},
-			},
-			...(cueLanguageGrammar && {
-				shiki: {
-					langs: [cueLanguageGrammar],
-				},
-			}),
-		}),
-		mdx(),
 		react({ experimentalReactChildren: true }),
 		vue({
 			template: {
@@ -188,12 +114,8 @@ export default defineConfig({
 		}),
 	],
 	vite: {
-		// One literal shared by prerendering and every deployed worker isolate.
-		// Scheduled News requires a new build because its detail pages are static.
-		define: {
-			__NEWS_DEPLOYMENT_CUTOFF_MS__: JSON.stringify(Date.now()),
-		},
 		plugins: asAstroVitePlugins([
+			renderOnlyActionsPlugin(),
 			webcontainerDemosPlugin(),
 			vidstackPlugin({ include: /components\/video\// }),
 			...(process.env.NODE_ENV === "production" &&
@@ -213,19 +135,13 @@ export default defineConfig({
 					]
 				: []),
 		]),
-		optimizeDeps: {
-			// Cloudflare's SSR module runner can lose the optimized `marked` bundle in
-			// `.vite/deps_ssr`, so load it directly from node_modules in dev.
-			exclude: ["marked"],
-		},
 		server: {
 			fs: {
-				// Keep Vite's default workspace root allow-list and add our external content dir.
+				// Keep Vite's default workspace root allow-list.
 				// Also allow the root node_modules for bun's .bun symlink structure.
 				allow: [
 					searchForWorkspaceRoot(process.cwd()),
 					join(searchForWorkspaceRoot(process.cwd()), "node_modules"),
-					...(CONTENT_TECH_DIR ? [CONTENT_TECH_DIR] : []),
 				],
 			},
 		},
@@ -244,11 +160,37 @@ export default defineConfig({
 			// Use react-dom/server.edge instead of react-dom/server.browser for React 19.
 			// Without this, MessageChannel from node:worker_threads needs to be polyfilled.
 			// https://github.com/withastro/adapters/pull/436
-			alias: import.meta.env.PROD
-				? {
-						"react-dom/server": "react-dom/server.edge",
-					}
-				: {},
+			alias: [
+				...(import.meta.env.PROD
+					? [
+							{
+								find: /^react-dom\/server$/,
+								replacement: "react-dom/server.edge",
+							},
+						]
+					: []),
+				// Expressive Code's Shiki plugin imports every grammar and theme
+				// and the Oniguruma WebAssembly blob; the Worker only needs the
+				// site's languages, one theme and the JavaScript regex engine.
+				{
+					find: /^shiki\/langs$/,
+					replacement: localPath(
+						"./src/lib/live-content/render/shiki-langs.ts",
+					),
+				},
+				{
+					find: /^shiki\/themes$/,
+					replacement: localPath(
+						"./src/lib/live-content/render/shiki-themes.ts",
+					),
+				},
+				{
+					find: /^shiki\/wasm$/,
+					replacement: localPath(
+						"./src/lib/live-content/render/shiki-wasm-stub.ts",
+					),
+				},
+			],
 		},
 		ssr: {
 			external: [
@@ -314,23 +256,6 @@ export default defineConfig({
 	},
 	security: {
 		checkOrigin: true,
-	},
-	markdown: {
-		// Cast: the plugin returns a unified Plugin shape that's correct at
-		// runtime, but our local mdast `Root` type doesn't structurally
-		// match Astro's `RemarkPlugin` parameter constraint.
-		remarkPlugins: [
-			// biome-ignore lint/suspicious/noExplicitAny: see comment above
-			remarkTechAutolink({ lookup: loadTechLookup() }) as any,
-		],
-		rehypePlugins: [
-			[
-				rehypeExternalLinks,
-				{
-					target: "_blank",
-				},
-			],
-		],
 	},
 	fonts: [
 		// One type system across every route. Display and text are preloaded

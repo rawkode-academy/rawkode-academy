@@ -8,9 +8,6 @@ on:
     - main
     paths:
     - .github/workflows/rawkode-academy-platform-video-thumbnails-default.yml
-    - content/people/**
-    - content/technologies/**
-    - content/videos/**
     - cue.mod/**
     - projects/rawkode.academy/platform/video-thumbnails/env.cue
     - projects/rawkode.academy/platform/video-thumbnails/env.cue/**

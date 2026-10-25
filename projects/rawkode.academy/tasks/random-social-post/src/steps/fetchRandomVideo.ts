@@ -56,7 +56,7 @@ export async function fetchRandomVideos(): Promise<RandomVideo[]> {
 			}
 		}`;
 
-		const resp = await fetch("https://api.rawkode.academy/graphql", {
+		const resp = await fetch("https://api.rawkode.academy/", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",

@@ -1,4 +1,4 @@
-import { getCollection } from "astro:content";
+import { type CollectionName, getCollection } from "@/lib/live-content";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { isNewsPublished } from "@/lib/news-publication";
 
@@ -77,6 +77,15 @@ export async function getUpcomingVideos() {
 	);
 }
 
+/** Collections getLatestContent() lists; pass them to setContentCache(). */
+export const LATEST_CONTENT_COLLECTIONS = [
+	"videos",
+	"articles",
+	"news",
+	"courses",
+	"learningPaths",
+] as const satisfies readonly CollectionName[];
+
 /**
  * Build the Academy-wide latest feed.
  *
@@ -90,10 +99,16 @@ export async function getLatestContent(
 ): Promise<AcademyContentItem[]> {
 	const [videos, articles, news, courses, learningPaths] = await Promise.all([
 		getPublishedVideos(),
-		getCollection("articles", ({ data }) => data.publishedAt <= now),
-		getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
-		getCollection("courses", ({ data }) => data.publishedAt <= now),
-		getCollection("learningPaths", ({ data }) => data.publishedAt <= now),
+		getCollection("articles", ({ data }) => data.publishedAt <= now, { now }),
+		getCollection(
+			"news",
+			({ data }) => isNewsPublished(data.publishedAt, now),
+			{ now },
+		),
+		getCollection("courses", ({ data }) => data.publishedAt <= now, { now }),
+		getCollection("learningPaths", ({ data }) => data.publishedAt <= now, {
+			now,
+		}),
 	]);
 
 	const items: AcademyContentItem[] = [

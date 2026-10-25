@@ -7,8 +7,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is a Bun workspace monorepo containing the Rawkode Academy platform. Key domains:
 
 - **`projects/rawkode.academy/`** - Main website and platform services
-- **`content/`** - Content management (technologies, articles, courses)
+- **`packages/`** - Shared packages (design system, `@rawkodeacademy/rich-text`)
 - **`infrastructure/`** - Terraform and DNS configurations
+
+## Content
+
+There is no file-based content in the repo. Articles, videos, shows, people, technologies, courses, learning paths, news, changelog, ADRs and testimonials are rows in D1-backed platform services (`projects/rawkode.academy/platform/<service>`), served through the GraphQL gateway (`projects/rawkode.academy/api`, `https://api.rawkode.academy/`). Rich text is stored as TipTap/ProseMirror JSON (GraphQL scalar `RichTextDocument`); use `@rawkodeacademy/rich-text` (`packages/rich-text`) to convert from/to Markdown (`/markdown`), validate (`/schema`) and render (`toHtml`, `toText`).
 
 ## Environment & Runtime
 
@@ -35,7 +39,7 @@ bun run knip         # Detect unused dependencies
 ## Tech Stack
 
 - **Runtime:** Bun
-- **Framework:** Astro 5 with React/Vue islands
+- **Framework:** Astro 7 (SSR on Cloudflare Workers) with React/Vue islands
 - **Styling:** Tailwind CSS v4
 - **API:** GraphQL federation (Hive Gateway) on Cloudflare Workers
 - **Database:** Cloudflare D1 with Drizzle ORM
@@ -70,5 +74,4 @@ Follow `.editorconfig`:
 | `projects/rawkode.academy/CLAUDE.md` | Academy project overview |
 | `projects/rawkode.academy/platform/CLAUDE.md` | GraphQL microservices guide |
 | `projects/rawkode.academy/website/CLAUDE.md` | Design system & components |
-| `content/CLAUDE.md` | Content management |
 | `infrastructure/CLAUDE.md` | Infrastructure configuration |

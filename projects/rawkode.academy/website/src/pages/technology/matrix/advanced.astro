@@ -1,7 +1,7 @@
 ---
-export const prerender = true;
+export const prerender = false;
 
-import { getCollection } from "astro:content";
+import { getCollection, setContentCache } from "@/lib/live-content";
 import Page from "@/wrappers/page.astro";
 import { Container } from "@/components/ui";
 import {
@@ -43,6 +43,8 @@ for (const video of allVideos) {
 
 // Get all technologies
 const allTechnologies = await getCollection("technologies");
+// Counts cover every video (scheduled ones included), as the static page did.
+await setContentCache(Astro, { collections: ["technologies", "videos"] });
 
 // Normalize technologies for the explorer
 const normalizedTechnologies = allTechnologies.map((tech) => {

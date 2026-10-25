@@ -3,6 +3,11 @@
 // Runtime types generated with workerd@1.20260529.1 2026-03-12 nodejs_compat
 interface __BaseEnv_Env {
 	SESSION: KVNamespace;
+	CONTENT_CACHE: KVNamespace;
+	CF_VERSION_METADATA: WorkerVersionMetadata;
+	API: Fetcher /* platform-api-gateway */;
+	/** Secret: bearer token for POST /api/cache/invalidate. */
+	CACHE_INVALIDATION_TOKEN?: string;
 	PARTNERSHIP_FORM_RATE_LIMITER: RateLimit;
 	ASSETS: Fetcher;
 	CLOUDFLARE_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce";

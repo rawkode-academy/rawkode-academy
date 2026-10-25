@@ -1,7 +1,7 @@
 ---
 import PageWrapper from "@/wrappers/page.astro";
 import { DISABLE_GAME_AUTH } from "astro:env/server";
-import { getCollection } from "astro:content";
+import { disableContentCache, getCollection } from "@/lib/live-content";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { weekKey, buildWeeklyRounds, type CncfStatus } from "@/lib/games/guess-the-logo";
 import { academyLayout, academyMedia } from "@rawkodeacademy/design-system";
@@ -10,6 +10,9 @@ import "@rawkodeacademy/design-system/styles.css";
 const disableAuth = DISABLE_GAME_AUTH === "true";
 const user = Astro.locals.user;
 const canPlay = Boolean(user) || disableAuth;
+// The response depends on the visitor (sign-in CTA vs. the player's game), and
+// the CDN key ignores cookies, so it must never be stored.
+disableContentCache(Astro);
 const layout = academyLayout({ width: "wide" });
 const media = academyMedia();
 

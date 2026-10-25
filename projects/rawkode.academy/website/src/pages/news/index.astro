@@ -1,5 +1,5 @@
 ---
-import { getCollection } from "astro:content";
+import { getCollection, setContentCache } from "@/lib/live-content";
 import { isNewsPublished } from "@/lib/news-publication";
 import NewsItemListJsonLd from "@/components/html/news-itemlist-jsonld.astro";
 import Page from "@/wrappers/page.astro";
@@ -10,7 +10,7 @@ import { getTechnologyLogos, logosFor } from "@/lib/technology-logos";
 import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 import { localTime } from "@/lib/local-time";
 
-export const prerender = true;
+export const prerender = false;
 
 const now = new Date();
 const allNews = (
@@ -25,6 +25,12 @@ const mosaic = logosFor(
 	allNews.flatMap((story) => story.data.technologies),
 	await getTechnologyLogos(),
 );
+// The archive lists every published story; the masthead mosaic reads the
+// technologies collection. "news" also caps maxAge at the next scheduled story.
+await setContentCache(Astro, {
+	entries: allNews,
+	collections: ["news", "technologies"],
+});
 // The lead story shows its publication day as a numeral with the month and
 // year beneath it. Dates are calendar days in UTC.
 const leadDay = (date: Date) => localTime(date, { day: "2-digit" }, "en-GB");

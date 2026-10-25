@@ -25,13 +25,20 @@ describe("legacy route resolver", () => {
 			location: "https://rawkode.academy/technology/equinix-metal",
 		});
 		expect(
+			resolveLegacyRoute(new URL("https://rawkode.academy/series/")),
+		).toEqual({
+			kind: "redirect",
+			status: 301,
+			location: "https://rawkode.academy/read",
+		});
+		expect(
 			resolveLegacyRoute(
 				new URL("https://rawkode.academy/series/talos-on-hetzner"),
 			),
 		).toEqual({
 			kind: "redirect",
 			status: 301,
-			location: "https://rawkode.academy/series",
+			location: "https://rawkode.academy/read",
 		});
 		expect(
 			resolveLegacyRoute(

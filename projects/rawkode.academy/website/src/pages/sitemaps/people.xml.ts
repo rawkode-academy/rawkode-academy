@@ -1,13 +1,18 @@
 import type { APIRoute } from "astro";
+import { setContentCache } from "@/lib/live-content";
 import {
 	getPeopleSitemapEntries,
 	renderUrlSet,
+	sitemapCollections,
 	xmlResponse,
 } from "@/lib/sitemaps";
 
-export const GET: APIRoute = async ({ site }) => {
-	const entries = await getPeopleSitemapEntries();
-	return xmlResponse(renderUrlSet(site, entries));
-};
+export const prerender = false;
 
-export const prerender = true;
+export const GET: APIRoute = async (context) => {
+	const entries = await getPeopleSitemapEntries();
+	await setContentCache(context, {
+		collections: sitemapCollections("/sitemaps/people.xml"),
+	});
+	return xmlResponse(renderUrlSet(context.site, entries));
+};

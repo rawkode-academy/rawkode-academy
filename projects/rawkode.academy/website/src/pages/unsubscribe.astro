@@ -2,7 +2,7 @@
 import { env } from "cloudflare:workers";
 import { z } from "astro/zod";
 import Page from "@/wrappers/page.astro";
-import { createEmailId, createLearnerId } from "@/actions/newsletter";
+import { createEmailId, createLearnerId } from "@/lib/newsletter-ids";
 import { createLogger } from "@/lib/logger";
 import { academyForms, academyDocument } from "@rawkodeacademy/design-system";
 import "@rawkodeacademy/design-system/styles.css";

@@ -3,7 +3,7 @@
  * Normalizes technology data and builds indices for fast filtering/grouping
  */
 
-import type { TechnologyData } from "@rawkodeacademy/content";
+import type { TechnologyData } from "@/lib/live-content/types";
 import type { DimensionKey } from "./dimensions";
 import { DIMENSIONS } from "./dimensions";
 

@@ -1,14 +1,15 @@
 // Run from website: node --experimental-vm-modules --test src/tests/watch-archive-ssr.test.mjs
-// Actual archive/content/ItemList code with local collections; shared page chrome is a stub.
+// Actual archive/content/ItemList code with local collections served through a
+// mocked live content layer (@/lib/live-content); shared page chrome is a stub.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import vm from "node:vm";
 import { transform } from "@astrojs/compiler";
-import ts from "typescript";
-import * as runtime from "astro/runtime/server/index.js";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
+import * as runtime from "astro/runtime/server/index.js";
 import { parse } from "node-html-parser";
+import ts from "typescript";
 
 const readSource = (path) =>
 	readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
@@ -27,9 +28,9 @@ const fixtures = Array.from({ length: 329 }, (_, i) => ({
 		publishedAt: new Date(Date.UTC(2025, 0, 1) - i * 86400000),
 		duration: 3660,
 		type: i % 2 ? "live" : "recorded",
-		technologies: i === 2 ? [{ id: "tool/index" }] : [],
-		guests: i === 4 ? [{ id: "guest" }] : [],
-		show: i === 5 ? { id: "show" } : undefined,
+		technologies: i === 2 ? [{ collection: "technologies", id: "tool" }] : [],
+		guests: i === 4 ? [{ collection: "people", id: "guest" }] : [],
+		show: i === 5 ? { collection: "shows", id: "show" } : undefined,
 	},
 }));
 const upcoming = {
@@ -45,13 +46,18 @@ const upcoming = {
 const collections = {
 	videos: [...fixtures, upcoming],
 	technologies: [
-		{ id: "tool/index", data: { name: "Extended Berkeley Packet Filter" } },
+		{ id: "tool", data: { name: "Extended Berkeley Packet Filter" } },
 	],
 	people: [
 		{ id: "guest", data: { name: "Ada Lovelace" } },
 		{ id: "host", data: { name: "Liz Rice" } },
 	],
-	shows: [{ id: "show", data: { hosts: [{ id: "host" }] } }],
+	shows: [
+		{
+			id: "show",
+			data: { hosts: [{ collection: "people", id: "host" }] },
+		},
+	],
 };
 
 async function renderArchive(search = "", data = collections) {
@@ -59,17 +65,22 @@ async function renderArchive(search = "", data = collections) {
 		console,
 		URL,
 		URLSearchParams,
-		__NEWS_DEPLOYMENT_CUTOFF_MS__: Date.parse("2100-01-01"),
 	});
 	const pageProps = [];
+	const cacheCalls = [];
 	const newsletterCta = runtime.createComponent(
 		() => runtime.render`<section data-newsletter-cta></section>`,
 	);
 	const mocks = {
 		"astro/runtime/server/index.js": { ...runtime, createMetadata: () => ({}) },
-		"astro:content": {
+		// No astro:content mock: importing it would fail the link step.
+		"@/lib/live-content": {
 			getCollection: async (name, filter) =>
 				(data[name] ?? []).filter(filter ?? (() => true)),
+			setContentCache: async (astro, input) => {
+				cacheCalls.push({ url: astro.url?.href, input });
+				return { maxAge: 3600, swr: 86400, tags: [] };
+			},
 		},
 		"@rawkodeacademy/design-system": {
 			academyPage: () =>
@@ -166,11 +177,22 @@ async function renderArchive(search = "", data = collections) {
 	const jsonLd = JSON.parse(
 		dom.querySelector('script[type="application/ld+json"]').textContent,
 	);
-	return { html, dom, jsonLd, pageProps };
+	return { html, dom, jsonLd, pageProps, cacheCalls };
 }
 
 test("Watch is a static server-rendered archive with labeled GET search, existing SEO title and feeds", async () => {
-	const { dom, html, pageProps } = await renderArchive();
+	const { dom, html, pageProps, cacheCalls } = await renderArchive();
+	assert.equal(cacheCalls.length, 1, "The page sets route caching once");
+	assert.deepEqual(
+		[...cacheCalls[0].input.collections],
+		["videos", "technologies", "people", "shows"],
+	);
+	assert(
+		!/export const prerender = true|Cache-Control|CDN-Cache-Control|Cache-Tag/.test(
+			source,
+		),
+		"Server-rendered with cache headers left to the cache provider",
+	);
 	assert.equal(dom.querySelector("h1").text, "Videos");
 	assert.equal(dom.querySelectorAll(".archive-feedGrid > a").length, 23);
 	assert.equal(dom.querySelectorAll('a[href="/watch/session-0"]').length, 1);

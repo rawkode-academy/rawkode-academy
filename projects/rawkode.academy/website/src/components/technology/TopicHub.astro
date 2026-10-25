@@ -1,5 +1,5 @@
 ---
-import { getCollection } from "astro:content";
+import { getCollection, optionalContent } from "@/lib/live-content";
 import ArticleCard from "@/components/articles/ArticleCard.astro";
 import { academyRelatedContent } from "@rawkodeacademy/design-system";
 import { isNewsPublished } from "@/lib/news-publication";
@@ -35,8 +35,10 @@ const {
 } = Astro.props;
 const s = academyRelatedContent();
 
-// Technology IDs from the collection look like "kubernetes/index"; raw IDs
-// (as used in news/article frontmatter) drop the suffix. Match both forms.
+// Technology ids no longer carry "/index", but tolerate the legacy suffix on
+// either side so older references still match.
+// The page lists articles, news and learning paths in setContentCache, since
+// a component cannot set cache tags itself.
 const normalizedTechnologyId = technologyId.replace(/\/index$/, "");
 const matchesTechnology = (technologies: ReadonlyArray<string | { id: string }> | undefined) =>
 	Array.isArray(technologies) && technologies.some(reference => {
@@ -46,9 +48,13 @@ const matchesTechnology = (technologies: ReadonlyArray<string | { id: string }> 
 
 // Get all articles that mention this technology
 const now = new Date();
-const allArticles = await getCollection("articles", ({ data }) => {
-	return data.publishedAt <= now && matchesTechnology(data.technologies);
-});
+// Related content is optional: a content failure leaves that list out.
+const allArticles = await optionalContent(
+	getCollection("articles", ({ data }) => {
+		return data.publishedAt <= now && matchesTechnology(data.technologies);
+	}),
+	[],
+);
 
 // Sort articles by date
 const articles = allArticles.sort(
@@ -57,7 +63,7 @@ const articles = allArticles.sort(
 
 // Get news matching this technology
 const allNews = showNews
-	? (await getCollection("news"))
+	? (await optionalContent(getCollection("news"), []))
 			.filter((story) => isNewsPublished(story.data.publishedAt, now) && matchesTechnology(story.data.technologies))
 			.sort(
 				(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
@@ -66,7 +72,7 @@ const allNews = showNews
 	: [];
 
 const learningPaths = showLearningPaths
-	? (await getCollection("learningPaths"))
+	? (await optionalContent(getCollection("learningPaths"), []))
 			.filter((path) => path.data.publishedAt <= now && matchesTechnology(path.data.technologies))
 			.sort(
 				(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),

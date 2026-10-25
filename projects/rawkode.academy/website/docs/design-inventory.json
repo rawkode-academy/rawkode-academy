@@ -55,8 +55,8 @@
       ]
     },
     {
-      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
-      "template": "/courses/[course]/[...slug]",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[slug].astro",
+      "template": "/courses/[course]/[slug]",
       "paths": [
         "/courses/complete-guide-zitadel/01-introduction",
         "/courses/complete-guide-zitadel/02-prerequisites",

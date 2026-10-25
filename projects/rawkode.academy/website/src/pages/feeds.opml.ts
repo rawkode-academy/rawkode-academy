@@ -1,5 +1,5 @@
-import { getCollection } from "astro:content";
 import type { APIRoute } from "astro";
+import { getCollection, setContentCache } from "@/lib/live-content";
 import { buildOpmlDocument, type OpmlFeed, type OpmlOutline } from "@/lib/opml";
 import { isNewsPublished } from "@/lib/news-publication";
 
@@ -51,7 +51,8 @@ const personHasContribution = (
 	);
 };
 
-export const GET: APIRoute = async ({ site }) => {
+export const GET: APIRoute = async (context) => {
+	const { site } = context;
 	const now = new Date();
 	const baseUrl = (site?.toString() ?? SITE_FALLBACK).replace(/\/$/, "");
 	const u = (path: string) => `${baseUrl}${path}`;
@@ -59,7 +60,10 @@ export const GET: APIRoute = async ({ site }) => {
 	const [articles, news, videos, technologies, people, shows] =
 		await Promise.all([
 			getCollection("articles"),
-			getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
+			getCollection("news", ({ data }) =>
+				isNewsPublished(data.publishedAt, now),
+			),
+			// Videos include upcoming streams (they have pages), as before.
 			getCollection("videos"),
 			getCollection("technologies"),
 			getCollection("people"),
@@ -92,7 +96,7 @@ export const GET: APIRoute = async ({ site }) => {
 
 	const technologyOutlines: OpmlFeed[] = [...technologies]
 		.map((technology) => ({
-			rawId: technology.id.replace(/\/index$/, ""),
+			rawId: technology.id,
 			name: technology.data.name,
 		}))
 		.sort((a, b) => a.name.localeCompare(b.name))
@@ -144,12 +148,20 @@ export const GET: APIRoute = async ({ site }) => {
 		groups,
 	});
 
+	await setContentCache(context, {
+		collections: [
+			"articles",
+			"news",
+			"videos",
+			"technologies",
+			"people",
+			"shows",
+		],
+	});
+
 	return new Response(opml, {
 		headers: {
 			"Content-Type": "text/x-opml; charset=utf-8",
-			"Cache-Control": "public, max-age=3600",
 		},
 	});
 };
-
-export const prerender = true;

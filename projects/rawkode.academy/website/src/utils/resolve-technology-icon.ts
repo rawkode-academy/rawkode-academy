@@ -1,20 +1,7 @@
-// Eagerly import all technology logos
-// Path is relative to this file, goes up to monorepo root then into content
-const iconModules = import.meta.glob<{ default: ImageMetadata }>(
-	"../../../../../content/technologies/*/icon.svg",
-	{ eager: true },
-);
-const horizontalModules = import.meta.glob<string>(
-	"../../../../../content/technologies/*/horizontal.svg",
-	{ eager: true, import: "default", query: "?url" },
-);
-
-interface ImageMetadata {
-	src: string;
-	width: number;
-	height: number;
-	format: string;
-}
+// Technology logo URLs. Logos are served from the content CDN by
+// platform-technologies (the same URLs it returns as Technology.icon and
+// Technology.horizontalLogo); the `logos` flags say which files exist.
+const CONTENT_CDN = "https://content.rawkode.academy";
 
 interface LogosConfig {
 	icon?: boolean | undefined;
@@ -22,41 +9,20 @@ interface LogosConfig {
 	stacked?: boolean | undefined;
 }
 
-// Build maps of technology ID -> logo URL
-const iconUrlMap: Record<string, string> = {};
-for (const [path, module] of Object.entries(iconModules)) {
-	// Path is like "../../../content/technologies/kubernetes/icon.svg"
-	const match = path.match(/\/technologies\/([^/]+)\/icon\.svg$/);
-	if (match?.[1] && module.default?.src) {
-		iconUrlMap[match[1]] = module.default.src;
-	}
-}
-
-const horizontalUrlMap: Record<string, string> = {};
-for (const [path, module] of Object.entries(horizontalModules)) {
-	const match = path.match(/\/technologies\/([^/]+)\/horizontal\.svg$/);
-	if (match?.[1] && module) {
-		horizontalUrlMap[match[1]] = module;
-	}
-}
+// Legacy ids look like "kubernetes/index".
+const logoUrl = (entryId: string, file: string) =>
+	`${CONTENT_CDN}/technologies/${encodeURIComponent(entryId.replace(/\/index$/, ""))}/${file}`;
 
 export function resolveTechnologyIconUrl(
 	entryId: string,
 	logos?: LogosConfig | null,
 ): string | undefined {
-	if (!logos?.icon) return undefined;
-
-	// Entry ID is like "kubernetes/index", extract just the technology name
-	const techId = entryId.replace(/\/index$/, "");
-	return iconUrlMap[techId];
+	return logos?.icon ? logoUrl(entryId, "icon.svg") : undefined;
 }
 
 export function resolveTechnologyHorizontalLogoUrl(
 	entryId: string,
 	logos?: LogosConfig | null,
 ): string | undefined {
-	if (!logos?.horizontal) return undefined;
-
-	const techId = entryId.replace(/\/index$/, "");
-	return horizontalUrlMap[techId];
+	return logos?.horizontal ? logoUrl(entryId, "horizontal.svg") : undefined;
 }

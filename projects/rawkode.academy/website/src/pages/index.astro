@@ -1,5 +1,4 @@
 ---
-import { getCollection } from "astro:content";
 import { academyPage } from "@rawkodeacademy/design-system";
 import AcademyPage from "@/components/academy/AcademyPage.vue";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
@@ -8,7 +7,9 @@ import {
 	getLatestContent,
 	getPublishedVideos,
 	getUpcomingVideos,
+	LATEST_CONTENT_COLLECTIONS,
 } from "@/lib/content";
+import { getCollection, setContentCache } from "@/lib/live-content";
 import { localTime } from "@/lib/local-time";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 
@@ -160,12 +161,17 @@ const pageTitle = "Cloud Native & Kubernetes Education";
 const pageDescription =
 	"Hands-on cloud native education and partnerships from Rawkode Academy for engineers and teams shipping production systems.";
 
-Astro.response.headers.set(
-	"Cache-Control",
-	"public, max-age=60, s-maxage=300, stale-while-revalidate=3600",
-);
-Astro.response.headers.set("CDN-Cache-Control", "public, max-age=300");
-Astro.response.headers.set("Cache-Tag", "homepage");
+// Every collection the page lists: any change purges it, and the next
+// scheduled item (an upcoming stream going live, a dated article) caps maxAge.
+await setContentCache(Astro, {
+	entries: [
+		...publishedVideos.slice(0, 1),
+		...upcomingVideos.slice(0, 3),
+		...learningPaths.slice(0, 8),
+	],
+	collections: [...LATEST_CONTENT_COLLECTIONS],
+	tags: ["page:home"],
+});
 Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 ---
 

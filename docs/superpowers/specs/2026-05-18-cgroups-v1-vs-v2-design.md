@@ -1,5 +1,7 @@
 # Design: cgroups v1 vs v2 Deep Dive Article
 
+> **Historical note:** content now lives in D1 platform services behind the API gateway (`projects/rawkode.academy/platform/<service>`), and the repository `content/` tree has been removed. Paths below under `content/` describe the file-based layout at the time this was written.
+
 ## Overview
 
 A single long-form interactive article (~4,500 words + 4 React interactive components) covering the history, architecture, and practical implications of Linux cgroups v1 and v2, from kernel fundamentals through Kubernetes operations.

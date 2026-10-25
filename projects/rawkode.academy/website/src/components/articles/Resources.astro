@@ -1,14 +1,10 @@
 ---
 import { academyDocument } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
-import type { CollectionEntry } from "astro:content";
+import type { ArticleData, VideoData } from "@/lib/live-content";
 
-type ArticleResource = NonNullable<
-	CollectionEntry<"articles">["data"]["resources"]
->[number];
-type VideoResource = NonNullable<
-	CollectionEntry<"videos">["data"]["resources"]
->[number];
+type ArticleResource = NonNullable<ArticleData["resources"]>[number];
+type VideoResource = NonNullable<VideoData["resources"]>[number];
 type Resource = ArticleResource | VideoResource;
 
 interface Props {

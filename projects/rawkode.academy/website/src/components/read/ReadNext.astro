@@ -1,13 +1,13 @@
 ---
 import { academyDocument } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
-import type { CollectionEntry } from "astro:content";
+import type { ContentEntry } from "@/lib/live-content";
 import MLabel from "@/components/ui/MLabel.vue";
 import { getTypeBadgeConfig } from "@/utils/article-types";
 import { localTime } from "@/lib/local-time";
 
 interface Props {
-	articles: CollectionEntry<"articles">[];
+	articles: ContentEntry<"articles">[];
 	totalCount?: number | undefined;
 }
 
