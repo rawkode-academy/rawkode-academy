@@ -1,0 +1,366 @@
+---
+import { env } from "cloudflare:workers";
+import EditorialShell from "@/components/ui/EditorialShell.astro";
+import {
+	type DashboardQuery,
+	dashboardQueries,
+	NEWSLETTER_EVENTS,
+	parseRange,
+	RANGES,
+	SIGN_IN_EVENTS,
+} from "@/lib/analytics/queries";
+import { basinQuery, type Row } from "@/server/basin";
+import Page from "@/wrappers/page.astro";
+
+export const prerender = false;
+
+// BASIN_SQL_TOKEN is a secret uploaded by scripts/wrangler-deploy.ts.
+const vars = env as unknown as {
+	ANALYTICS_ADMIN_EMAILS?: string;
+	BASIN_BUCKET?: string;
+	BASIN_SQL_TOKEN?: string;
+	CLOUDFLARE_ACCOUNT_ID?: string;
+};
+
+const admins = (vars.ANALYTICS_ADMIN_EMAILS ?? "")
+	.split(",")
+	.map((email) => email.trim().toLowerCase())
+	.filter(Boolean);
+const email = Astro.locals.user?.email?.toLowerCase();
+if (!import.meta.env.DEV && (!email || !admins.includes(email))) {
+	return new Response("Not found", { status: 404 });
+}
+
+const range = parseRange(Astro.url.searchParams.get("range"));
+const config = {
+	accountId: vars.CLOUDFLARE_ACCOUNT_ID ?? "",
+	bucket: vars.BASIN_BUCKET ?? "rawkode-analytics",
+	token: vars.BASIN_SQL_TOKEN ?? "",
+};
+const configured = Boolean(config.accountId && config.token);
+
+type Panel = { rows: Row[]; error?: string };
+const queries = dashboardQueries(range);
+const results = Object.fromEntries(
+	await Promise.all(
+		(Object.keys(queries) as DashboardQuery[]).map(async (name) => {
+			if (!configured) return [name, { rows: [], error: "not configured" }];
+			try {
+				return [name, { rows: await basinQuery(config, queries[name]) }];
+			} catch (error) {
+				return [
+					name,
+					{ rows: [], error: error instanceof Error ? error.message : String(error) },
+				];
+			}
+		}),
+	),
+) as Record<DashboardQuery, Panel>;
+
+const num = (value: unknown) => Number(value ?? 0);
+const fmt = new Intl.NumberFormat("en-GB");
+const pct = (part: number, whole: number) =>
+	whole > 0 ? `${((part / whole) * 100).toFixed(1)}%` : "–";
+
+const traffic = results.traffic.rows;
+const totalViews = traffic.reduce((sum, row) => sum + num(row.views), 0);
+const peakViews = Math.max(1, ...traffic.map((row) => num(row.views)));
+
+const signInCount = (event: string, isBot?: boolean) =>
+	results.signIn.rows
+		.filter(
+			(row) =>
+				row.event === event &&
+				(isBot === undefined || Boolean(row.is_bot) === isBot),
+		)
+		.reduce((sum, row) => sum + num(row.events), 0);
+const initiatedHuman = signInCount(SIGN_IN_EVENTS.initiated, false);
+const initiatedBot = signInCount(SIGN_IN_EVENTS.initiated, true);
+const completed = signInCount(SIGN_IN_EVENTS.completed);
+const registered = signInCount(SIGN_IN_EVENTS.registered);
+const failed = signInCount(SIGN_IN_EVENTS.failed);
+
+const newsletter = new Map(
+	results.newsletter.rows.map((row) => [String(row.event), num(row.events)]),
+);
+const [impressionsEvent, clicksEvent, attemptsEvent, subscribedEvent] =
+	NEWSLETTER_EVENTS;
+const impressions = newsletter.get(impressionsEvent) ?? 0;
+const clicks = newsletter.get(clicksEvent) ?? 0;
+const attempts = newsletter.get(attemptsEvent) ?? 0;
+const subscribed = newsletter.get(subscribedEvent) ?? 0;
+
+const linkClicks = results.links.rows.reduce((s, r) => s + num(r.clicks), 0);
+const linkBots = results.links.rows.reduce((s, r) => s + num(r.bot_clicks), 0);
+---
+
+<Page title="Analytics" description="First-party analytics from the Basin lake.">
+	<EditorialShell
+		eyebrow="Internal"
+		title="Analytics"
+		lede={`First-party events from analytics.events, last ${RANGES[range]} days. Bots excluded unless noted. Results cached for 10 minutes.`}
+	>
+		<nav class="ranges" aria-label="Date range">
+			{
+				Object.keys(RANGES).map((key) => (
+					<a href={`?range=${key}`} aria-current={key === range ? "page" : undefined}>
+						{key}
+					</a>
+				))
+			}
+		</nav>
+
+		{
+			!configured && (
+				<p class="notice">
+					Basin SQL isn't configured: set the <code>BASIN_SQL_TOKEN</code> secret
+					(see projects/rawkode.tools/observability-collector/basin/README.md).
+				</p>
+			)
+		}
+
+		<section class="panel">
+			<h2>Traffic</h2>
+			{results.traffic.error && <p class="error">{results.traffic.error}</p>}
+			<p class="stat"><strong>{fmt.format(totalViews)}</strong> page views</p>
+			<svg
+				class="bars"
+				viewBox={`0 0 ${Math.max(traffic.length, 1) * 10} 100`}
+				preserveAspectRatio="none"
+				role="img"
+				aria-label="Daily page views"
+			>
+				{
+					traffic.map((row, i) => {
+						const h = (num(row.views) / peakViews) * 100;
+						return (
+							<rect x={i * 10 + 1} y={100 - h} width="8" height={h}>
+								<title>{`${row.day}: ${fmt.format(num(row.views))} views, ~${fmt.format(num(row.visitors))} visitors`}</title>
+							</rect>
+						);
+					})
+				}
+			</svg>
+		</section>
+
+		<div class="grid">
+			<section class="panel">
+				<h2>Top content</h2>
+				{results.topContent.error && <p class="error">{results.topContent.error}</p>}
+				<table>
+					<thead><tr><th>Path</th><th>Views</th><th>Visitors</th></tr></thead>
+					<tbody>
+						{results.topContent.rows.map((row) => (
+							<tr><td>{row.url_path}</td><td>{fmt.format(num(row.views))}</td><td>~{fmt.format(num(row.visitors))}</td></tr>
+						))}
+					</tbody>
+				</table>
+			</section>
+
+			<section class="panel">
+				<h2>Referrers</h2>
+				{results.referrers.error && <p class="error">{results.referrers.error}</p>}
+				<table>
+					<thead><tr><th>Host</th><th>Views</th></tr></thead>
+					<tbody>
+						{results.referrers.rows.map((row) => (
+							<tr><td>{row.referrer_host}</td><td>{fmt.format(num(row.views))}</td></tr>
+						))}
+					</tbody>
+				</table>
+				<h3>Campaigns</h3>
+				<table>
+					<thead><tr><th>Source / medium / campaign</th><th>Views</th></tr></thead>
+					<tbody>
+						{results.campaigns.rows.map((row) => (
+							<tr>
+								<td>{[row.utm_source, row.utm_medium, row.utm_campaign].filter(Boolean).join(" / ")}</td>
+								<td>{fmt.format(num(row.views))}</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</section>
+
+			<section class="panel">
+				<h2>Sign-in funnel</h2>
+				{results.signIn.error && <p class="error">{results.signIn.error}</p>}
+				<dl class="funnel">
+					<dt>Started (people)</dt><dd>{fmt.format(initiatedHuman)}</dd>
+					<dt>Started (bots, excluded)</dt><dd>{fmt.format(initiatedBot)}</dd>
+					<dt>Completed</dt><dd>{fmt.format(completed)} <span>{pct(completed, initiatedHuman)}</span></dd>
+					<dt>New accounts</dt><dd>{fmt.format(registered)}</dd>
+					<dt>Failed</dt><dd>{fmt.format(failed)}</dd>
+				</dl>
+			</section>
+
+			<section class="panel">
+				<h2>Newsletter CTA</h2>
+				{results.newsletter.error && <p class="error">{results.newsletter.error}</p>}
+				<dl class="funnel">
+					<dt>Impressions</dt><dd>{fmt.format(impressions)}</dd>
+					<dt>Clicks</dt><dd>{fmt.format(clicks)} <span>{pct(clicks, impressions)}</span></dd>
+					<dt>Submitted</dt><dd>{fmt.format(attempts)}</dd>
+					<dt>Subscribed</dt><dd>{fmt.format(subscribed)} <span>{pct(subscribed, impressions)}</span></dd>
+				</dl>
+			</section>
+
+			<section class="panel">
+				<h2>Video engagement</h2>
+				{results.video.error && <p class="error">{results.video.error}</p>}
+				<table>
+					<thead><tr><th>Video</th><th>Plays</th><th>Completes</th><th>Viewers</th></tr></thead>
+					<tbody>
+						{results.video.rows.map((row) => (
+							<tr>
+								<td>{row.video_id ?? "unknown"}</td>
+								<td>{fmt.format(num(row.plays))}</td>
+								<td>{fmt.format(num(row.completes))} <span>{pct(num(row.completes), num(row.plays))}</span></td>
+								<td>~{fmt.format(num(row.viewers))}</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</section>
+
+			<section class="panel">
+				<h2>Link redirects</h2>
+				{results.links.error && <p class="error">{results.links.error}</p>}
+				<p class="stat">
+					<strong>{fmt.format(linkClicks - linkBots)}</strong> human clicks,
+					{fmt.format(linkBots)} bot ({pct(linkBots, linkClicks)})
+				</p>
+				<table>
+					<thead><tr><th>Link</th><th>Clicks</th><th>Bots</th></tr></thead>
+					<tbody>
+						{results.links.rows.map((row) => (
+							<tr>
+								<td>{row.url_host}/{row.url_path}</td>
+								<td>{fmt.format(num(row.clicks))}</td>
+								<td>{fmt.format(num(row.bot_clicks))}</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</section>
+		</div>
+	</EditorialShell>
+</Page>
+
+<style>
+	.ranges {
+		display: flex;
+		gap: 0.5rem;
+		margin-block-end: 1.5rem;
+		font-family: var(--font-jetbrains-mono, ui-monospace, monospace);
+		font-size: 0.75rem;
+		text-transform: uppercase;
+		letter-spacing: 0.14em;
+	}
+	.ranges a {
+		padding: 0.25rem 0.625rem;
+		border: 1px solid var(--editorial-hairline);
+		border-radius: var(--radius-sm);
+		color: var(--editorial-ink-soft);
+		text-decoration: none;
+	}
+	.ranges a[aria-current="page"] {
+		border-color: var(--editorial-ink);
+		color: var(--editorial-ink);
+	}
+	.grid {
+		display: grid;
+		gap: 1.5rem;
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr));
+	}
+	.panel {
+		border-top: 2px solid var(--editorial-ink);
+		padding-block: 1rem 1.5rem;
+		min-width: 0;
+	}
+	.panel h2 {
+		font-size: 1.5rem;
+		margin-block-end: 0.75rem;
+	}
+	.panel h3 {
+		margin-block: 1.25rem 0.5rem;
+		font-size: 1rem;
+	}
+	.stat {
+		color: var(--editorial-ink-soft);
+		margin-block-end: 0.75rem;
+	}
+	.stat strong {
+		font-family: var(--font-instrument-serif, serif);
+		font-style: italic;
+		font-size: 2rem;
+		font-weight: 400;
+		color: var(--editorial-ink);
+	}
+	.bars {
+		width: 100%;
+		height: 8rem;
+		display: block;
+	}
+	.bars rect {
+		fill: var(--editorial-spruce);
+	}
+	.bars rect:hover {
+		fill: var(--editorial-ink);
+	}
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: 0.875rem;
+		font-variant-numeric: tabular-nums;
+	}
+	th,
+	td {
+		padding: 0.375rem 0.5rem 0.375rem 0;
+		border-bottom: 1px solid var(--editorial-hairline);
+		text-align: right;
+		vertical-align: top;
+	}
+	th:first-child,
+	td:first-child {
+		text-align: left;
+		overflow-wrap: anywhere;
+	}
+	th {
+		font-family: var(--font-jetbrains-mono, ui-monospace, monospace);
+		font-size: 0.6875rem;
+		font-weight: 500;
+		text-transform: uppercase;
+		letter-spacing: 0.14em;
+		color: var(--editorial-ink-mute);
+	}
+	td span,
+	dd span {
+		color: var(--editorial-ink-mute);
+		font-size: 0.75rem;
+	}
+	.funnel {
+		display: grid;
+		grid-template-columns: 1fr auto;
+		gap: 0;
+		font-variant-numeric: tabular-nums;
+	}
+	.funnel dt,
+	.funnel dd {
+		margin: 0;
+		padding-block: 0.5rem;
+		border-bottom: 1px solid var(--editorial-hairline);
+	}
+	.funnel dd {
+		text-align: right;
+		color: var(--editorial-ink);
+	}
+	.notice,
+	.error {
+		font-size: 0.875rem;
+		padding: 0.5rem 0.75rem;
+		border-left: 2px solid var(--editorial-rust);
+		color: var(--editorial-ink-soft);
+		margin-block-end: 1rem;
+	}
+</style>

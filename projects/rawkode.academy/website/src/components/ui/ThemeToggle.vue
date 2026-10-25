@@ -78,6 +78,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { academyLayout, academyShell } from "@rawkodeacademy/design-system";
+import { capture } from "@/lib/analytics/track";
 import {
 	type ColorScheme,
 	type ColorSchemePreference,
@@ -85,15 +86,7 @@ import {
 	toggleColorScheme,
 } from "../../lib/theme";
 
-const trackEvent = (event: string, properties?: Record<string, unknown>) => {
-	try {
-		(
-			window as { posthog?: { capture: (e: string, p?: unknown) => void } }
-		).posthog?.capture(event, properties);
-	} catch {
-		// Ignore tracking errors
-	}
-};
+const trackEvent = capture;
 
 interface Props {
 	showLabel?: boolean;

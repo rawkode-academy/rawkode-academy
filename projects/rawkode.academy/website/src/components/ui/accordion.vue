@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Accordion } from "@ark-ui/vue/accordion";
 import { ref } from "vue";
+import { capture } from "@/lib/analytics/track";
 
 interface AccordionItem {
 	id: string;
@@ -16,14 +17,10 @@ const handleValueChange = (details: { value: string[] }) => {
 	value.value = details.value;
 	for (const id of new Set([...previous, ...details.value])) {
 		if (previous.has(id) === details.value.includes(id)) continue;
-		try {
-			(window as any).posthog?.capture("accordion_toggled", {
-				item_id: id,
-				action: details.value.includes(id) ? "expanded" : "collapsed",
-			});
-		} catch {
-			// Analytics must never block disclosure interaction.
-		}
+		capture("accordion_toggled", {
+			item_id: id,
+			action: details.value.includes(id) ? "expanded" : "collapsed",
+		});
 	}
 };
 </script>

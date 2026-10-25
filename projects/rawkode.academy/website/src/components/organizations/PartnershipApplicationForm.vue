@@ -127,6 +127,7 @@
 import { actions, isInputError } from "astro:actions";
 import { academyForms } from "@rawkodeacademy/design-system";
 import { computed, onBeforeUnmount, onMounted, ref, useId } from "vue";
+import { capture } from "@/lib/analytics/track";
 import {
 	type ApplicationPath,
 	applicationPathDeals,
@@ -242,7 +243,7 @@ onBeforeUnmount(() => {
 const capturePartnershipEvent = (
 	event: "enquiry_form_started" | "enquiry_form_submitted",
 ) => {
-	window.posthog?.capture(event, {
+	capture(event, {
 		form: "partnership_enquiry",
 		path: window.location.pathname,
 		route: path.value,

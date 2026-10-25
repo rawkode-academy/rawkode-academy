@@ -515,10 +515,12 @@ const partnerQuotes = (
 </Page>
 
 <script>
+	import { capture } from "@/lib/analytics/track";
+
 	document.querySelectorAll("[data-partnership-cta]").forEach((cta) => {
 		cta.addEventListener("click", () => {
 			const label = cta.textContent?.trim() ?? "";
-			window.posthog?.capture("cta_clicked", {
+			capture("cta_clicked", {
 				cta: cta.getAttribute("data-cta") ?? "book_a_product_review",
 				label,
 				location: cta.getAttribute("data-cta-location"),

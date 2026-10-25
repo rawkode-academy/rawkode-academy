@@ -59,7 +59,9 @@
 		"ATTIO_INBOUND_DEAL_STAGE": "In Progress",
 		"ATTIO_INBOUND_DEAL_OFFER_ATTRIBUTE": "offer",
 		"ATTIO_SOURCE_ATTRIBUTE": "source",
-		"ATTIO_SOURCE_VALUE": "Inbound: partnerships page"
+		"ATTIO_SOURCE_VALUE": "Inbound: partnerships page",
+		"BASIN_BUCKET": "rawkode-analytics",
+		"ANALYTICS_ADMIN_EMAILS": "david@rawkode.academy"
 	},
 	"services": [
 		{

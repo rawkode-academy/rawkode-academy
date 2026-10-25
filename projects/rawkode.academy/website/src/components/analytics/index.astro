@@ -1,0 +1,24 @@
+---
+// First-party page views and Core Web Vitals, sent to Basin via /api/e.
+---
+
+<script>
+	import { onCLS, onFCP, onINP, onLCP, onTTFB, type Metric } from "web-vitals";
+	import { track } from "@/lib/analytics/track";
+
+	track("page_view", { title: document.title });
+
+	const report = (metric: Metric) =>
+		track("web_vitals", {
+			name: metric.name,
+			value: metric.value,
+			rating: metric.rating,
+			navigation_type: metric.navigationType,
+		});
+
+	onCLS(report);
+	onFCP(report);
+	onINP(report);
+	onLCP(report);
+	onTTFB(report);
+</script>
