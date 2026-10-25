@@ -40,8 +40,6 @@ devenv.local.nix
 .terraform/
 *.tfstate
 *.tfstate.*
-# This directory contains the state-backend source.
-!/infrastructure/cloud.rawkode.tfstate/
 
 # Generated YouTube descriptions — built on demand from video frontmatter
 # (see content/scripts/build-youtube-description.ts), pasted into YouTube
