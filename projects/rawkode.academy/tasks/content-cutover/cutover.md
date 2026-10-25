@@ -41,12 +41,11 @@ Output in `seeds/`:
 | `backfill-videos.sql` | `platform-videos` | `description_doc` for 330 videos |
 | `backfill-shows.sql` | `platform-shows` | `description_doc`, Cloud Native Compass cover and size |
 | `backfill-technologies.sql` | `platform-technologies` | `body` for 355 technologies |
-| `backfill-people-biographies.sql` | `platform-people-biographies` | `biography_doc`, built from the live table (step 2) |
 | `assets.json`, `diagrams/` | R2 `rawkode-academy-content` | covers, inline images, d2 diagrams, technology logos |
 
-No person in `content/` has a biography body: biographies exist only in the
-live `people_biographies.biography` column, so their backfill is built from the
-step 2 export.
+People-biographies needs no backfill: no person in `content/` has a
+biography body, and the live `people_biographies` table was empty on
+2026-10-25. It only gets the `0001` column.
 
 ## 1. Drift since the snapshot
 
@@ -59,12 +58,21 @@ Compare live row counts and `max(updated_at)` for videos, people, technologies
 and shows with `content/`, and hold video imports until the cutover is
 verified. `content/` is frozen until #1468 merges.
 
+On 2026-10-25 the counts matched (330 videos, 264 people, 355 technologies,
+10 shows) and three rows had been written after the 2026-10-21 seed, all on
+2026-10-23 for the Swamp Club stream: video `rez4r4sbaaog76765ijmdpli`,
+technology `swamp` and person `nickstinemates`. Only the video's description
+differs from `content/`, so `post-seed/0002-swamp-club-video-description.sql`
+rebuilds its `description_doc` from the live description.
+
 ## 2. Back up the live databases
 
 ```bash
+export OP_ACCOUNT=rawkodeacademy.1password.eu  # the token's vault is in this account
 BACKUP=~/content-cutover-backups/$(date +%Y%m%dT%H%M%S)
 mkdir -p "$BACKUP"
-for db in videos shows technologies people people-biographies; do
+for db in videos shows technologies people people-biographies video-technologies video-guests show-hosts \
+	articles news changelog adrs testimonials courses; do
 	(cd projects/rawkode.academy/platform/$db && \
 		cuenv -e production exec -- bun x wrangler d1 export platform-$db --remote --output "$BACKUP/platform-$db.sql")
 done
@@ -96,9 +104,14 @@ run() { (cd projects/rawkode.academy/platform/$1 && \
 	cuenv -e production exec -- bun x wrangler d1 execute platform-$1 --remote --file "$2"); }
 S=$PWD/projects/rawkode.academy/tasks/content-cutover
 for db in articles news changelog adrs testimonials courses; do run $db "$S/seeds/$db.sql"; done
-for db in videos shows technologies people-biographies; do run $db "$S/seeds/backfill-$db.sql"; done
+for db in videos shows technologies; do run $db "$S/seeds/backfill-$db.sql"; done
 run articles "$S/post-seed/0001-klustered-winter-2026.sql"
+run videos "$S/post-seed/0002-swamp-club-video-description.sql"
 ```
+
+Rehearse first on copies of the step 2 exports (apply pending migrations, then
+these files, with `bun:sqlite`); on 2026-10-25 every file applied and the
+counts matched.
 
 ### 3.4 Deploy
 

@@ -15,3 +15,4 @@ cuenv -e production exec -- bun x wrangler d1 execute platform-articles --remote
 | Patch | Database | Source |
 | --- | --- | --- |
 | `0001-klustered-winter-2026.sql` | `platform-articles` | #1481 |
+| `0002-swamp-club-video-description.sql` | `platform-videos` | live description rewritten on 2026-10-23 |
