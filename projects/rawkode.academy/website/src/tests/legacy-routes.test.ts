@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { resolveLegacyRoute } from "../middleware/legacy-routes";
 
@@ -128,5 +130,15 @@ describe("legacy route resolver", () => {
 		expect(resolveLegacyRoute(new URL("https://rawkode.academy/shows"))).toBe(
 			undefined,
 		);
+	});
+
+	// The Cloudflare adapter serves a prerendered 404 straight from assets for
+	// unmatched paths, so middleware never runs and none of these redirects fire.
+	it("renders the 404 page on request so unmatched paths reach middleware", () => {
+		const page = readFileSync(
+			join(process.cwd(), "src", "pages", "404.astro"),
+			"utf8",
+		);
+		expect(page).toMatch(/export const prerender = false;/);
 	});
 });
