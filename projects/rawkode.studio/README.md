@@ -31,6 +31,8 @@ bun run verify:live
 - `REALTIMEKIT_HOST_PRESET`, `REALTIMEKIT_PRODUCER_PRESET`, `REALTIMEKIT_GUEST_PRESET`, `REALTIMEKIT_PROGRAM_PRESET`: optional preset names for contributor tokens.
 - `RAWKODE_GRAPHQL_URL`: Rawkode GraphQL gateway used to resolve content videos, shows, hosts, and guests. Defaults to `https://api.rawkode.academy/`.
 - `STUDIO_OPERATOR_GITHUB_HANDLES`: comma-separated GitHub handles allowed to create sessions. Defaults to `rawkode`.
+- `PAYLOAD`: service binding to `rawkode-academy-payload` (default entrypoint) for the client review handoff. `PAYLOAD_HANDOFF_URL` names the endpoint; the host only builds the URL, the binding routes it.
+- `STUDIO_MACHINE_SECRET`: Secrets Store secret shared with Payload. Every Studio-to-Payload machine call is signed with it by `src/server/machine-auth.ts` (scheme documented in `projects/rawkode.academy/payload/README.md`).
 
 ## Recording Handoff
 
@@ -39,6 +41,29 @@ Studio writes ready markers to `studio/recordings/{sessionId}/{recordingId}/read
 Only session managers can publish ready markers, and recording source keys must stay under the session recording prefix. D1 records the pending marker before the R2 ready marker is written so R2 Event Notifications cannot enqueue work before the session has a recording row.
 
 Host and producer rooms upload browser programme recordings through `/api/studio/recording-upload` using R2 multipart uploads. The server creates the source key as `studio/recordings/{sessionId}/{recordingId}/source.webm`, the browser uploads 8 MiB parts, and completion publishes the ready marker with the completed R2 object ETag and the server-derived VOD target. Local development without a `RECORDINGS` binding keeps recording available by downloading the WebM locally instead.
+
+## Client Review
+
+A session created with "Requires client review before publishing" (`review_required`, off by default) hands each take to Payload review instead of publishing it. With review off, the v1 marker and the public VOD path are unchanged, with two guards: a public marker is refused (409) for a recording ID that belongs to another session or to a review take, and for a content video that still has a review take that could become public (see below).
+
+1. The ready marker is contract v2 (`visibility: "review"`). Ingest transcodes a private 720p `review.mp4` under `studio/recordings/{sessionId}/{recordingId}/review/`; nothing reaches `videos/`.
+2. Studio calls Payload's `POST /api/studio-handoff/adoptions` through `waitUntil`. The recording response never waits for Payload. The `*/5` cron in `src/worker.ts` retries with backoff (1, 5, 15 and 60 minutes, then 6 hours), polls until the revision is attached and published, and re-triggers a transcode that keeps failing (up to 3 times) by rewriting the marker.
+3. Staff share the revision in Payload. When Payload publishes it, the cron promotes the recording: it rewrites `ready.json` as an `hls-approved` marker, so ingest publishes HLS at `videos/{videoId}/` without the raw source or `original.mkv`.
+4. After promotion the cron watches `videos/{videoId}/transcode-status.json` every 15 minutes. A failed public transcode, or one with no terminal status 4 hours after it started (the Cloud Run task timeout is 3 hours), is re-triggered by rewriting the approved marker with `transcodeAttempt + 1`, at most 3 times; after that the recording keeps the error on the recordings page.
+
+Promotions are serialized per video: while one take's public transcode is in flight, another published take of the same video waits, and a take whose publication is older than another published take of the same video is withdrawn as superseded, so `videos/{videoId}/` only ever receives the newest publication.
+
+Every marker rewrite is conditional on the marker etag recorded in D1. If a rewrite succeeded but the D1 update after it failed, the next attempt finds the identical marker in R2 and adopts its etag instead of refusing. A take whose ready marker was never written (the browser never retried) is repaired by the cron from the D1 row when the source still matches, and otherwise marked failed with an error.
+
+Attached takes that are never published are polled every 5 minutes for a day, hourly for 30 days, then daily; published, pending and promotion work runs ahead of those polls.
+
+### Withdrawing a take
+
+A take that will never be published (a rejected cut, or a transcode that used every retry) blocks public markers for its content video. A configured operator withdraws it with "Withdraw take" on the session's recordings page. A withdrawn take is never polled or promoted again and no longer blocks; publishing its revision in Payload afterwards does not make it public. A take already published in Payload cannot be withdrawn because its promotion is under way.
+
+Only a configured operator can turn review off, and only before the session has a recording. A public recording is refused for a content video that still has a review take that is not promoted or withdrawn. Each take keeps a fresh recording ID; re-marking it with another source is refused. Requests carry the operator's Academy issuer and subject plus GitHub handle as `requestedBy`.
+
+Payload outage drill: point `PAYLOAD_HANDOFF_URL` at a missing path (or rotate the Studio copy of `STUDIO_MACHINE_SECRET`) during a test session. Live streaming, recording, upload and recording-ready must all succeed; the recording shows `pending` with a `Payload 404` or `Payload 401` error on the recordings page. Restore the setting and confirm the cron delivers the adoption at the next retry (the backoff is at most 15 minutes after three failed attempts).
 
 ## Guest Access
 

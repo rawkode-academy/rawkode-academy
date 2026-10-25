@@ -13,7 +13,19 @@ export type RecordingStatus =
 	| "recording"
 	| "uploaded"
 	| "transcoding"
+	| "in-review"
+	| "awaiting-publication"
+	| "withdrawn"
 	| "vod-ready";
+export type StudioRecordingVisibility = "public" | "review";
+export type StudioReviewState =
+	| "pending"
+	| "awaiting-transcode"
+	| "attached"
+	| "published"
+	| "promoted"
+	| "failed"
+	| "withdrawn";
 export type StreamEnvironment = "prod" | "test";
 export type StudioStreamStatus = "ended" | "failed" | "idle" | "live" | "starting";
 export type StudioSessionStatus = "scheduled" | "live" | "recording" | "complete";
@@ -45,6 +57,8 @@ export interface StudioSessionSummary {
 	streamStartedAt: number | null;
 	streamEndedAt: number | null;
 	streamNotificationQueuedAt: number | null;
+	// Recordings go to Payload client review before any public VOD exists.
+	reviewRequired: boolean;
 }
 
 export interface StudioSessionRecord extends StudioSessionSummary {
@@ -79,6 +93,31 @@ export interface StudioRecordingReadyMarker {
 	outputPrefix: string;
 }
 
+// Contract v2 (studio-recording-ingest): a private review proxy under the
+// recording's own review/ prefix. Never public until promoted.
+export interface StudioRecordingReviewMarker
+	extends Omit<StudioRecordingReadyMarker, "contractVersion"> {
+	contractVersion: 2;
+	visibility: "review";
+	outputMode: "review-proxy";
+	transcodeAttempt: number;
+}
+
+// Contract v2 promotion of an approved review recording: public HLS under
+// videos/{videoId}/ without the raw source or original.mkv.
+export interface StudioRecordingApprovedMarker
+	extends Omit<StudioRecordingReadyMarker, "contractVersion"> {
+	contractVersion: 2;
+	visibility: "public";
+	outputMode: "hls-approved";
+	transcodeAttempt: number;
+}
+
+export type StudioRecordingMarker =
+	| StudioRecordingReadyMarker
+	| StudioRecordingReviewMarker
+	| StudioRecordingApprovedMarker;
+
 export interface StudioTranscodeStatus {
 	completedAt: string | null;
 	status: string;
@@ -100,6 +139,13 @@ export interface StudioRecordingSummary {
 	createdAt: number;
 	updatedAt: number;
 	transcode: StudioTranscodeStatus | null;
+	visibility: StudioRecordingVisibility;
+	reviewPrefix: string | null;
+	reviewState: StudioReviewState | null;
+	reviewRevisionId: string | null;
+	reviewPayloadVideoId: number | null;
+	reviewLastError: string | null;
+	reviewUrl: string | null;
 }
 
 export interface StudioDashboard {
@@ -150,6 +196,7 @@ type StudioSessionRow = {
 	stream_ended_at: number | null;
 	stream_notification_queued_at: number | null;
 	stream_start_token: string | null;
+	review_required?: number | null;
 	created_by_id: string;
 	created_by_github: string | null;
 	created_at: number;
@@ -220,6 +267,35 @@ type StudioRecordingRow = {
 	status: string;
 	created_at: number;
 	updated_at: number;
+	visibility?: StudioRecordingVisibility | null;
+	review_state?: StudioReviewState | null;
+	review_prefix?: string | null;
+	review_revision_id?: string | null;
+	review_payload_video_id?: number | null;
+	review_last_error?: string | null;
+};
+
+// Full review columns, as read by the Payload handoff.
+export type StudioReviewRecordingRow = StudioRecordingRow & {
+	visibility: StudioRecordingVisibility;
+	source_bytes: number | null;
+	review_prefix: string | null;
+	review_idempotency_key: string | null;
+	review_state: StudioReviewState | null;
+	review_requested_by: string | null;
+	review_adoption_id: string | null;
+	review_payload_video_id: number | null;
+	review_revision_id: string | null;
+	review_publication_id: string | null;
+	review_attempts: number;
+	review_transcode_attempt: number;
+	review_marker_etag: string | null;
+	review_next_attempt_at: number | null;
+	review_last_error: string | null;
+	review_attached_at: number | null;
+	review_promoted_at: number | null;
+	review_published_at: number | null;
+	review_promotion_attempt: number;
 };
 
 function nowSeconds(): number {
@@ -247,6 +323,72 @@ export function createReadyMarkerKey(
 	recordingId: string,
 ): string {
 	return `studio/recordings/${sessionId}/${recordingId}/ready.json`;
+}
+
+export function createReviewOutputPrefix(
+	sessionId: string,
+	recordingId: string,
+): string {
+	return `studio/recordings/${sessionId}/${recordingId}/review/`;
+}
+
+export function createReviewIdempotencyKey(
+	sessionId: string,
+	recordingId: string,
+	sourceEtag: string,
+): string {
+	return `studio:${sessionId}:${recordingId}:${normalizeEtag(sourceEtag)}`;
+}
+
+export function getReviewUrl(payloadVideoId: number | null): string | null {
+	return payloadVideoId
+		? `https://preview.rawkode.academy/review?videoId=${payloadVideoId}`
+		: null;
+}
+
+type MarkerInput = Omit<
+	StudioRecordingReadyMarker,
+	"contractVersion" | "outputPrefix"
+>;
+
+function markerFields(input: MarkerInput) {
+	return {
+		videoId: input.videoId,
+		studioSessionId: input.studioSessionId,
+		recordingId: input.recordingId,
+		sourceBucket: input.sourceBucket,
+		sourceKey: input.sourceKey,
+		sourceEtag: input.sourceEtag,
+		sourceFormat: input.sourceFormat,
+	};
+}
+
+export function createReviewReadyMarker(
+	input: MarkerInput,
+	transcodeAttempt: number,
+): StudioRecordingReviewMarker {
+	return {
+		contractVersion: 2,
+		visibility: "review",
+		outputMode: "review-proxy",
+		transcodeAttempt,
+		...markerFields(input),
+		outputPrefix: createReviewOutputPrefix(input.studioSessionId, input.recordingId),
+	};
+}
+
+export function createApprovedReadyMarker(
+	input: MarkerInput,
+	transcodeAttempt: number,
+): StudioRecordingApprovedMarker {
+	return {
+		contractVersion: 2,
+		visibility: "public",
+		outputMode: "hls-approved",
+		transcodeAttempt,
+		...markerFields(input),
+		outputPrefix: `videos/${input.videoId}/`,
+	};
 }
 
 export function createReadyMarker(
@@ -296,6 +438,7 @@ function fallbackSession(): StudioSessionRecord {
 		streamStartedAt: null,
 		streamEndedAt: null,
 		streamNotificationQueuedAt: null,
+		reviewRequired: false,
 		createdById: "seed",
 		createdByGithub: "rawkode",
 		createdAt,
@@ -333,6 +476,7 @@ function rowToSession(row: StudioSessionRow): StudioSessionRecord {
 		streamStartedAt: row.stream_started_at ?? null,
 		streamEndedAt: row.stream_ended_at ?? null,
 		streamNotificationQueuedAt: row.stream_notification_queued_at ?? null,
+		reviewRequired: row.review_required === 1,
 		createdById: row.created_by_id,
 		createdByGithub: row.created_by_github,
 		createdAt: row.created_at,
@@ -380,7 +524,7 @@ function isMissingStudioRecordingsTableError(error: unknown): boolean {
 		error.message.includes("no such table: studio_recordings");
 }
 
-function normalizeEtag(value: string): string {
+export function normalizeEtag(value: string): string {
 	return value.replace(/^"|"$/g, "");
 }
 
@@ -511,6 +655,9 @@ function rowToInvite(row: StudioInviteRow): StudioInvite {
 }
 
 function rowToRecording(row: StudioRecordingRow): StudioRecordingSummary {
+	const visibility = row.visibility ?? "public";
+	const reviewState = visibility === "review" ? row.review_state ?? null : null;
+	const reviewPayloadVideoId = row.review_payload_video_id ?? null;
 	return {
 		recordingId: row.recording_id,
 		videoId: row.video_id,
@@ -521,10 +668,17 @@ function rowToRecording(row: StudioRecordingRow): StudioRecordingSummary {
 		outputPrefix: row.output_prefix,
 		readyMarkerKey: row.ready_marker_key,
 		handoffStatus: row.status,
-		status: deriveRecordingStatus(row.status, null),
+		status: deriveRecordingStatus(row.status, null, reviewState),
 		createdAt: row.created_at,
 		updatedAt: row.updated_at,
 		transcode: null,
+		visibility,
+		reviewPrefix: row.review_prefix ?? null,
+		reviewState,
+		reviewRevisionId: row.review_revision_id ?? null,
+		reviewPayloadVideoId,
+		reviewLastError: row.review_last_error ?? null,
+		reviewUrl: visibility === "review" ? getReviewUrl(reviewPayloadVideoId) : null,
 	};
 }
 
@@ -536,7 +690,15 @@ async function getTranscodeStatus(
 		return null;
 	}
 
-	const outputPrefix = normalizeOutputPrefix(recording.outputPrefix);
+	// An unpromoted review recording reports its private proxy status and never a
+	// public stream URL. After promotion, output_prefix is videos/{id}/ as usual.
+	const privateReview = recording.visibility === "review" &&
+		recording.reviewState !== "promoted";
+	const outputPrefix = normalizeOutputPrefix(
+		privateReview && recording.reviewPrefix
+			? recording.reviewPrefix
+			: recording.outputPrefix,
+	);
 	const statusKey = `${outputPrefix}transcode-status.json`;
 	const object = await env.RECORDINGS.get(statusKey).catch(() => null);
 	if (!object) {
@@ -556,7 +718,7 @@ async function getTranscodeStatus(
 		status: status.status,
 		statusKey,
 		streamUrl:
-			status.status === "complete"
+			status.status === "complete" && !privateReview
 				? `https://content.rawkode.academy/${outputPrefix}stream.m3u8`
 				: null,
 	};
@@ -565,7 +727,16 @@ async function getTranscodeStatus(
 function deriveRecordingStatus(
 	handoffStatus: string,
 	transcode: StudioTranscodeStatus | null,
+	reviewState: StudioReviewState | null = null,
 ): RecordingStatus {
+	if (reviewState && reviewState !== "promoted") {
+		if (reviewState === "published") return "awaiting-publication";
+		if (reviewState === "withdrawn") return "withdrawn";
+		if (reviewState === "attached") return "in-review";
+		if (reviewState === "failed" || transcode?.status === "failed") return "failed";
+		if (transcode?.status) return "transcoding";
+		return handoffStatus === "failed" ? "failed" : "uploaded";
+	}
 	if (transcode?.status === "complete") {
 		return "vod-ready";
 	}
@@ -657,6 +828,7 @@ export async function listStudioSessions(
 				        stream_started_at,
 				        stream_ended_at,
 				        stream_notification_queued_at,
+				        review_required,
 				        created_by_id,
 				        created_by_github,
 				        created_at,
@@ -761,6 +933,7 @@ export async function listStudioSessionsForUser(
 				        stream_started_at,
 				        stream_ended_at,
 				        stream_notification_queued_at,
+				        review_required,
 				        created_by_id,
 				        created_by_github,
 				        created_at,
@@ -831,6 +1004,7 @@ export async function getStudioSession(
 				        stream_started_at,
 				        stream_ended_at,
 				        stream_notification_queued_at,
+				        review_required,
 				        created_by_id,
 				        created_by_github,
 				        created_at,
@@ -887,6 +1061,7 @@ export async function getPublicStudioLiveState(
 				        stream_started_at,
 				        stream_ended_at,
 				        stream_notification_queued_at,
+				        review_required,
 				        created_by_id,
 				        created_by_github,
 				        created_at,
@@ -1014,7 +1189,13 @@ export async function listStudioRecordings(
 				        ready_marker_key,
 				        status,
 				        created_at,
-				        updated_at
+				        updated_at,
+				        visibility,
+				        review_state,
+				        review_prefix,
+				        review_revision_id,
+				        review_payload_video_id,
+				        review_last_error
 				   FROM studio_recordings
 				  WHERE session_id = ?
 				  ORDER BY created_at DESC, updated_at DESC`,
@@ -1031,7 +1212,11 @@ export async function listStudioRecordings(
 		const transcode = await getTranscodeStatus(env, recording);
 		return {
 			...recording,
-			status: deriveRecordingStatus(recording.handoffStatus, transcode),
+			status: deriveRecordingStatus(
+				recording.handoffStatus,
+				transcode,
+				recording.reviewState,
+			),
 			transcode,
 		};
 	}));
@@ -1105,9 +1290,10 @@ export async function saveStudioSession(
 				created_by_id,
 				created_by_github,
 				created_at,
-				updated_at
+				updated_at,
+				review_required
 			)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 			ON CONFLICT(id) DO UPDATE SET
 				content_video_id = excluded.content_video_id,
 				content_video_slug = excluded.content_video_slug,
@@ -1138,6 +1324,7 @@ export async function saveStudioSession(
 				stream_started_at = studio_sessions.stream_started_at,
 				stream_ended_at = studio_sessions.stream_ended_at,
 				stream_notification_queued_at = studio_sessions.stream_notification_queued_at,
+				review_required = studio_sessions.review_required,
 				updated_at = excluded.updated_at`,
 		)
 		.bind(
@@ -1165,8 +1352,84 @@ export async function saveStudioSession(
 			session.createdByGithub,
 			session.createdAt,
 			session.updatedAt,
+			session.reviewRequired ? 1 : 0,
 		)
 		.run();
+}
+
+// Turning review off is only allowed while the session has no recording, so a
+// review take can never become a public one after the fact.
+export async function saveStudioSessionReviewRequired(
+	env: StudioEnv,
+	sessionId: string,
+	reviewRequired: boolean,
+): Promise<boolean> {
+	const db = getDb(env);
+	if (!db) {
+		throw new Error("STUDIO_DB binding is required to persist Studio sessions");
+	}
+	const result = await db
+		.prepare(
+			`UPDATE studio_sessions
+			    SET review_required = ?,
+			        updated_at = unixepoch()
+			  WHERE id = ?
+			    AND (? = 1 OR NOT EXISTS (
+			          SELECT 1 FROM studio_recordings WHERE studio_recordings.session_id = studio_sessions.id
+			        ))`,
+		)
+		.bind(reviewRequired ? 1 : 0, sessionId, reviewRequired ? 1 : 0)
+		.run();
+	return d1WriteChanged(result);
+}
+
+export async function countStudioRecordings(
+	env: StudioEnv,
+	sessionId: string,
+): Promise<number> {
+	const db = getDb(env);
+	if (!db) return 0;
+	const row = await db
+		.prepare("SELECT count(*) AS total FROM studio_recordings WHERE session_id = ?")
+		.bind(sessionId)
+		.first<{ total: number }>();
+	return row?.total ?? 0;
+}
+
+export async function getStudioReviewRecording(
+	env: StudioEnv,
+	recordingId: string,
+): Promise<StudioReviewRecordingRow | null> {
+	const db = getDb(env);
+	if (!db) return null;
+	return await db
+		.prepare("SELECT * FROM studio_recordings WHERE recording_id = ?")
+		.bind(recordingId)
+		.first<StudioReviewRecordingRow>();
+}
+
+// A public marker must never leak HLS for a video that is still under client review.
+// Only takes that can still become public block: a promoted take is already public,
+// a withdrawn take never will be, and a failed take that used every transcode
+// attempt is parked until an operator withdraws it (it still blocks until then).
+export async function hasUnpromotedReviewRecording(
+	env: StudioEnv,
+	videoId: string,
+): Promise<boolean> {
+	const db = getDb(env);
+	if (!db) return false;
+	const row = await db
+		.prepare(
+			`SELECT recording_id
+			   FROM studio_recordings
+			  WHERE video_id = ?
+			    AND visibility = 'review'
+			    AND (review_state IS NULL OR review_state NOT IN ('promoted', 'withdrawn'))
+			  LIMIT 1`,
+		)
+		.bind(videoId)
+		.first<{ recording_id: string }>();
+	return Boolean(row);
 }
 
 export async function saveStudioSessionRecordingStatus(
@@ -1435,6 +1698,7 @@ export function buildStudioSession(input: {
 	startsAt?: string;
 	status?: StudioSessionStatus;
 	streamEnvironment?: StreamEnvironment;
+	reviewRequired?: boolean;
 	title: string;
 }): StudioSessionRecord {
 	const createdAt = nowSeconds();
@@ -1466,6 +1730,7 @@ export function buildStudioSession(input: {
 		streamStartedAt: null,
 		streamEndedAt: null,
 		streamNotificationQueuedAt: null,
+		reviewRequired: input.reviewRequired ?? false,
 		createdById: getStudioUserId(input.createdBy),
 		createdByGithub,
 		createdAt,
@@ -1709,6 +1974,201 @@ export async function redeemStudioInvite(
 	return true;
 }
 
+// Contract v2 review handoff. The row records the pinned source size and the ready
+// marker's etag, which later retriggers and the promotion write conditionally on.
+export async function saveReviewRecordingMarker(
+	env: StudioEnv,
+	marker: StudioRecordingReviewMarker,
+	options: { requestedBy: string | null },
+): Promise<{ readyMarkerKey: string; sourceVerified: boolean }> {
+	const db = getDb(env);
+	if (!db || !env.RECORDINGS) {
+		throw new Error("STUDIO_DB and RECORDINGS are required for review recordings");
+	}
+	const readyMarkerKey = createReadyMarkerKey(
+		marker.studioSessionId,
+		marker.recordingId,
+	);
+	const source = await env.RECORDINGS.head(marker.sourceKey);
+	if (!source) {
+		throw new Error(`Recording source missing from R2: ${marker.sourceKey}`);
+	}
+	if (normalizeEtag(source.etag) !== normalizeEtag(marker.sourceEtag)) {
+		throw new Error(
+			`Recording source etag mismatch for ${marker.sourceKey}: expected ${marker.sourceEtag}, got ${source.etag}`,
+		);
+	}
+
+	// Same statement as the row write: a public handoff that already inserted its
+	// row and has not yet written ready.json cannot lose the race to this insert.
+	const inserted = await db
+		.prepare(
+			`INSERT INTO studio_recordings (
+				recording_id,
+				session_id,
+				video_id,
+				source_bucket,
+				source_key,
+				source_etag,
+				source_format,
+				output_prefix,
+				ready_marker_key,
+				status,
+				visibility,
+				source_bytes,
+				review_prefix,
+				review_idempotency_key,
+				review_state,
+				review_requested_by,
+				created_at,
+				updated_at
+			)
+			SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, 'marker-pending', 'review', ?, ?, ?, 'pending', ?, unixepoch(), unixepoch()
+			 WHERE NOT ${freshPublicHandoffExistsSql("?", "?")}
+			ON CONFLICT(recording_id) DO UPDATE SET
+				status = 'marker-pending',
+				updated_at = excluded.updated_at
+			WHERE studio_recordings.visibility = 'review'
+			  AND studio_recordings.review_state = 'pending'
+			  AND studio_recordings.source_etag = excluded.source_etag
+			  AND NOT ${freshPublicHandoffExistsSql("excluded.video_id", "excluded.recording_id")}`,
+		)
+		.bind(
+			marker.recordingId,
+			marker.studioSessionId,
+			marker.videoId,
+			marker.sourceBucket,
+			marker.sourceKey,
+			normalizeEtag(marker.sourceEtag),
+			marker.sourceFormat,
+			marker.outputPrefix,
+			readyMarkerKey,
+			source.size,
+			marker.outputPrefix,
+			createReviewIdempotencyKey(
+				marker.studioSessionId,
+				marker.recordingId,
+				marker.sourceEtag,
+			),
+			options.requestedBy,
+			marker.videoId,
+			marker.recordingId,
+		)
+		.run();
+	if (writeCount(inserted) === 0) {
+		if (await freshPublicHandoffBlocks(db, marker.videoId, marker.recordingId)) {
+			throw new StudioRecordingConflictError(
+				`Recording ${marker.recordingId} is blocked by a public handoff`,
+				"public-in-progress",
+			);
+		}
+		throw new Error(`Recording ${marker.recordingId} was already handed off`);
+	}
+	const saved = await getStudioReviewRecording(env, marker.recordingId);
+	if (
+		saved?.visibility !== "review" ||
+		saved.review_state !== "pending" ||
+		normalizeEtag(saved.source_etag) !== normalizeEtag(marker.sourceEtag)
+	) {
+		throw new Error(`Recording ${marker.recordingId} was already handed off`);
+	}
+
+	const written = await env.RECORDINGS.put(
+		readyMarkerKey,
+		JSON.stringify(marker, null, 2),
+		{ httpMetadata: { contentType: "application/json" } },
+	);
+
+	await db
+		.prepare(
+			`UPDATE studio_recordings
+			    SET status = 'ready',
+			        review_marker_etag = ?,
+			        review_last_error = NULL,
+			        updated_at = unixepoch()
+			  WHERE recording_id = ?
+			    AND visibility = 'review'
+			    AND review_state = 'pending'`,
+		)
+		.bind(written ? normalizeEtag(written.etag) : null, marker.recordingId)
+		.run();
+	await saveStudioSessionRecordingStatus(env, marker.studioSessionId, "uploaded");
+
+	return { readyMarkerKey, sourceVerified: true };
+}
+
+// How long a public handoff may sit in marker-pending before a review insert is
+// allowed to proceed. The public path refreshes this immediately before it writes
+// ready.json, so the two statements cannot both commit.
+export const publicHandoffLeaseSeconds = 120;
+
+function unpromotedReviewExistsSql(videoSql: string, recordingSql: string): string {
+	return `EXISTS (
+		    SELECT 1
+		      FROM studio_recordings AS review_block
+		     WHERE review_block.video_id = ${videoSql}
+		       AND review_block.recording_id <> ${recordingSql}
+		       AND review_block.visibility = 'review'
+		       AND (
+		         review_block.review_state IS NULL
+		         OR review_block.review_state NOT IN ('promoted', 'withdrawn')
+		       )
+		  )`;
+}
+
+function freshPublicHandoffExistsSql(videoSql: string, recordingSql: string): string {
+	return `EXISTS (
+		    SELECT 1
+		      FROM studio_recordings AS public_block
+		     WHERE public_block.video_id = ${videoSql}
+		       AND public_block.recording_id <> ${recordingSql}
+		       AND public_block.visibility = 'public'
+		       AND public_block.status = 'marker-pending'
+		       AND public_block.updated_at >= unixepoch() - ${publicHandoffLeaseSeconds}
+		  )`;
+}
+
+async function unpromotedReviewBlocks(
+	db: D1Database,
+	videoId: string,
+	recordingId: string,
+): Promise<boolean> {
+	const row = await db
+		.prepare(`SELECT 1 AS blocked WHERE ${unpromotedReviewExistsSql("?", "?")} LIMIT 1`)
+		.bind(videoId, recordingId)
+		.first();
+	return row !== null;
+}
+
+async function freshPublicHandoffBlocks(
+	db: D1Database,
+	videoId: string,
+	recordingId: string,
+): Promise<boolean> {
+	const row = await db
+		.prepare(`SELECT 1 AS blocked WHERE ${freshPublicHandoffExistsSql("?", "?")} LIMIT 1`)
+		.bind(videoId, recordingId)
+		.first();
+	return row !== null;
+}
+
+function writeCount(result: D1Result<unknown>): number {
+	return result.meta?.changes ?? result.meta?.rows_written ?? 0;
+}
+
+export class StudioRecordingConflictError extends Error {
+	readonly reason: "taken" | "review-in-progress" | "public-in-progress";
+
+	constructor(
+		message: string,
+		reason: "taken" | "review-in-progress" | "public-in-progress" = "taken",
+	) {
+		super(message);
+		this.name = "StudioRecordingConflictError";
+		this.reason = reason;
+	}
+}
+
 export async function saveRecordingReadyMarker(
 	env: StudioEnv,
 	marker: StudioRecordingReadyMarker,
@@ -1731,7 +2191,7 @@ export async function saveRecordingReadyMarker(
 
 	const db = getDb(env);
 	if (db) {
-		await db
+		const upserted = await db
 			.prepare(
 				`INSERT INTO studio_recordings (
 					recording_id,
@@ -1747,7 +2207,8 @@ export async function saveRecordingReadyMarker(
 					created_at,
 					updated_at
 				)
-				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'marker-pending', unixepoch(), unixepoch())
+				SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, 'marker-pending', unixepoch(), unixepoch()
+				 WHERE NOT ${unpromotedReviewExistsSql("?", "?")}
 				ON CONFLICT(recording_id) DO UPDATE SET
 					session_id = excluded.session_id,
 					video_id = excluded.video_id,
@@ -1758,7 +2219,10 @@ export async function saveRecordingReadyMarker(
 					output_prefix = excluded.output_prefix,
 					ready_marker_key = excluded.ready_marker_key,
 					status = 'marker-pending',
-					updated_at = excluded.updated_at`,
+					updated_at = unixepoch()
+				WHERE studio_recordings.visibility = 'public'
+				  AND studio_recordings.session_id = excluded.session_id
+				  AND NOT ${unpromotedReviewExistsSql("excluded.video_id", "excluded.recording_id")}`,
 			)
 			.bind(
 				marker.recordingId,
@@ -1770,8 +2234,55 @@ export async function saveRecordingReadyMarker(
 				marker.sourceFormat,
 				marker.outputPrefix,
 				readyMarkerKey,
+				marker.videoId,
+				marker.recordingId,
 			)
 			.run();
+		// A recording ID owned by another session, or by a review take, is never
+		// taken over by a public marker. An unpromoted review for this video fails
+		// the same statement, so it cannot land between a preflight read and this write.
+		if (writeCount(upserted) === 0) {
+			if (await unpromotedReviewBlocks(db, marker.videoId, marker.recordingId)) {
+				throw new StudioRecordingConflictError(
+					`Recording ${marker.recordingId} is blocked by client review`,
+					"review-in-progress",
+				);
+			}
+			throw new StudioRecordingConflictError(
+				`Recording ${marker.recordingId} belongs to another session or review take`,
+			);
+		}
+		// Refresh the lease and re-check in one statement immediately before the
+		// marker write. A review row that arrived after the insert wins.
+		const leased = await db
+			.prepare(
+				`UPDATE studio_recordings
+				    SET updated_at = unixepoch()
+				  WHERE recording_id = ?
+				    AND session_id = ?
+				    AND visibility = 'public'
+				    AND status = 'marker-pending'
+				    AND NOT ${unpromotedReviewExistsSql("studio_recordings.video_id", "studio_recordings.recording_id")}`,
+			)
+			.bind(marker.recordingId, marker.studioSessionId)
+			.run();
+		if (writeCount(leased) === 0) {
+			await db
+				.prepare(
+					`UPDATE studio_recordings
+					    SET status = 'ready',
+					        updated_at = 0
+					  WHERE recording_id = ?
+					    AND visibility = 'public'
+					    AND status = 'marker-pending'`,
+				)
+				.bind(marker.recordingId)
+				.run();
+			throw new StudioRecordingConflictError(
+				`Recording ${marker.recordingId} is blocked by client review`,
+				"review-in-progress",
+			);
+		}
 	}
 
 	if (env.RECORDINGS) {

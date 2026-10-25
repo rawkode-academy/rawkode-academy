@@ -8,6 +8,7 @@ import {
 } from "../../../server/http";
 import {
 	createStudioSession,
+	setStudioSessionReviewRequired,
 } from "../../../server/operations";
 
 export const POST: APIRoute = async ({ locals, request }) => {
@@ -19,6 +20,7 @@ export const POST: APIRoute = async ({ locals, request }) => {
 	}
 
 	const body = (await request.json().catch(() => null)) as {
+		reviewRequired?: boolean;
 		show?: string;
 		showId?: string;
 		startsAt?: string;
@@ -32,6 +34,7 @@ export const POST: APIRoute = async ({ locals, request }) => {
 
 	try {
 		const result = await createStudioSession(env as StudioEnv, locals.user, {
+			reviewRequired: body.reviewRequired === true,
 			show: body.show,
 			showId: body.showId,
 			startsAt: body.startsAt,
@@ -45,6 +48,36 @@ export const POST: APIRoute = async ({ locals, request }) => {
 			session: result.session,
 			status: result.status,
 		});
+	} catch (error) {
+		const response = operationErrorResponse(error);
+		if (response) return response;
+		throw error;
+	}
+};
+
+export const PATCH: APIRoute = async ({ locals, request }) => {
+	if (!locals.user) {
+		return json({ error: "Sign in with rawkode.academy identity." }, 401);
+	}
+	if (!requestHasAllowedOrigin(request)) {
+		return json({ error: "Cross-origin Studio mutations are not allowed." }, 403);
+	}
+
+	const body = (await request.json().catch(() => null)) as {
+		reviewRequired?: unknown;
+		sessionId?: unknown;
+	} | null;
+	if (typeof body?.sessionId !== "string" || typeof body.reviewRequired !== "boolean") {
+		return json({ error: "sessionId and reviewRequired are required." }, 400);
+	}
+
+	try {
+		return json(
+			await setStudioSessionReviewRequired(env as StudioEnv, locals.user, {
+				reviewRequired: body.reviewRequired,
+				sessionId: body.sessionId,
+			}),
+		);
 	} catch (error) {
 		const response = operationErrorResponse(error);
 		if (response) return response;

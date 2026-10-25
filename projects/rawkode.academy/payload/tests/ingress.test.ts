@@ -151,3 +151,16 @@ test('review API on a direct origin is staff only when a bridge exists; customer
 test('ingress route table matches the website bridge route table', () => {
   assert.deepEqual(REVIEW_BRIDGE_ROUTES, reviewRoutes)
 })
+
+test('Studio machine endpoints pass the direct entrypoint cookie-less and stay off the bridge', async () => {
+  const { seen, next } = downstream()
+  // Studio's service binding call: no cookie and no browser origin, so no OIDC CSRF gate applies.
+  const response = await serveDirect(new Request(`${ADMIN}/api/studio-handoff/adoptions`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-rawkode-signature': 'v1=00' }, body: '{}' }), prod, next)
+  assert.equal(response.status, 200)
+  assert.equal(seen.length, 1)
+  for (const path of ['/api/studio-handoff/adoptions', '/api/review/studio-adoptions']) {
+    assert.equal(path in REVIEW_BRIDGE_ROUTES, false, path)
+    assert.equal(path in reviewRoutes, false, path)
+    assert.equal((await serveBridge(new Request(PREVIEW + path, { method: 'POST', body: '{}' }), prod, next)).status, 404, path)
+  }
+})

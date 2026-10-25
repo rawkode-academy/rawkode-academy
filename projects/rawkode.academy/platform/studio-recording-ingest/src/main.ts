@@ -1,6 +1,7 @@
 import {
 	assertReadyMarker,
 	assertReadyMarkerPathContract,
+	assertSourceBucket,
 	createEventId,
 	createTranscodeStatus,
 	createTranscodeStatusKey,
@@ -17,6 +18,7 @@ export interface Env {
 	GCP_PROJECT_ID: string;
 	GCP_REGION: string;
 	GCP_TRANSCODING_JOB: string;
+	RECORDINGS_BUCKET_NAME?: string;
 	// Secrets Store binding in production; a plain string in local dev and tests.
 	GCP_SERVICE_ACCOUNT_JSON: SecretsStoreSecret | string;
 }
@@ -36,6 +38,7 @@ async function readReadyMarker(
 	const marker = await object.json();
 	assertReadyMarker(marker);
 	assertReadyMarkerPathContract(marker, key);
+	assertSourceBucket(marker, env.RECORDINGS_BUCKET_NAME);
 	return marker;
 }
 

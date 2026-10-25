@@ -1,8 +1,10 @@
 import {
+  DeleteObjectCommand,
   GetObjectCommand,
   GetObjectCommandInput,
   HeadObjectCommand,
   HeadObjectCommandInput,
+  ListObjectsV2Command,
   NoSuchKey,
   PutObjectCommand,
   PutObjectCommandInput,
@@ -10,6 +12,14 @@ import {
 } from "@aws-sdk/client-s3";
 import { existsSync, expandGlob } from "@std/fs";
 import { join, relative } from "@std/path";
+import { createReadStream } from "node:fs";
+import {
+  approvedOutputPrefix,
+  isPrivateWorkFile,
+  quoteEtag,
+  sameEtag,
+  selectPrivateDestinationKeys,
+} from "./review.ts";
 
 export const downloadFromS3 = async (
   s3: S3Client,
@@ -156,4 +166,126 @@ export const uploadToS3 = async (
   console.log(
     `Successfully uploaded ${localPath} to s3://${bucketName}/${remoteKey}.`,
   );
+};
+
+/**
+ * Streams one object to disk, pinned to an ETag with If-Match, so the bytes on
+ * disk are provably the object the caller pinned. Used by the Studio review modes;
+ * downloadFromS3 above stays the HLS path.
+ */
+export const downloadFromS3ToFile = async (
+  s3: S3Client,
+  bucketName: string,
+  remoteKey: string,
+  localPath: string,
+  options: { ifMatch: string; maxBytes?: number },
+): Promise<{ bytes: number; etag: string }> => {
+  const response = await s3.send(
+    new GetObjectCommand({
+      Bucket: bucketName,
+      Key: remoteKey,
+      IfMatch: quoteEtag(options.ifMatch),
+    }),
+  );
+  if (!sameEtag(response.ETag, options.ifMatch)) {
+    throw new Error(`Source ${remoteKey} does not match the pinned ETag`);
+  }
+  const bytes = response.ContentLength ?? 0;
+  if (options.maxBytes !== undefined && bytes > options.maxBytes) {
+    await response.Body?.transformToWebStream().cancel();
+    throw new Error(
+      `Source ${remoteKey} is ${bytes} bytes, above the ${options.maxBytes} byte limit`,
+    );
+  }
+  if (!response.Body) {
+    throw new Error("S3 GetObject response has no body.");
+  }
+  const file = await Deno.open(localPath, {
+    create: true,
+    truncate: true,
+    write: true,
+  });
+  await response.Body.transformToWebStream().pipeTo(file.writable);
+  const written = (await Deno.stat(localPath)).size;
+  if (written !== bytes) {
+    throw new Error(`Downloaded ${written} of ${bytes} bytes for ${remoteKey}`);
+  }
+  console.log(`Downloaded s3://${bucketName}/${remoteKey} (${bytes} bytes).`);
+  return { bytes, etag: response.ETag ?? "" };
+};
+
+/**
+ * Writes a private, write-once object. If-None-Match: * makes a second writer
+ * fail instead of replacing bytes that another system may already have pinned.
+ */
+export const uploadPrivateOnce = async (
+  s3: S3Client,
+  bucketName: string,
+  localPath: string,
+  remoteKey: string,
+  contentType: string,
+): Promise<{ bytes: number; etag: string }> => {
+  const bytes = (await Deno.stat(localPath)).size;
+  await s3.send(
+    new PutObjectCommand({
+      Bucket: bucketName,
+      Key: remoteKey,
+      Body: createReadStream(localPath),
+      ContentLength: bytes,
+      ContentType: contentType,
+      IfNoneMatch: "*",
+    }),
+  );
+  const head = await s3.send(
+    new HeadObjectCommand({ Bucket: bucketName, Key: remoteKey }),
+  );
+  if (!head.ETag || head.ContentLength !== bytes) {
+    throw new Error(`Uploaded ${remoteKey} does not match the local file`);
+  }
+  return { bytes, etag: head.ETag.replace(/^"|"$/g, "") };
+};
+
+// Removes raw source.* and original.mkv left under videos/{id}/ by an earlier v1
+// run. rclone copy does not delete destination-only objects, so an approved
+// promotion has to delete those keys explicitly. Nothing outside the denylist
+// is eligible, and a key that fails the denylist throws before any delete.
+export const deletePrivateDestinationObjects = async (
+  s3: S3Client,
+  bucketName: string,
+  prefix: string,
+): Promise<string[]> => {
+  const normalized = approvedOutputPrefix(prefix);
+  const listed: string[] = [];
+  let continuationToken: string | undefined;
+  do {
+    const page = await s3.send(
+      new ListObjectsV2Command({
+        Bucket: bucketName,
+        Prefix: normalized,
+        ContinuationToken: continuationToken,
+      }),
+    );
+    for (const object of page.Contents ?? []) {
+      if (object.Key) listed.push(object.Key);
+    }
+    continuationToken = page.IsTruncated
+      ? page.NextContinuationToken
+      : undefined;
+  } while (continuationToken);
+
+  const doomed = selectPrivateDestinationKeys(normalized, listed);
+  for (const key of doomed) {
+    const name = key.slice(normalized.length);
+    if (name.includes("/") || !isPrivateWorkFile(name)) {
+      throw new Error(`Refusing to delete ${key}`);
+    }
+    await s3.send(
+      new DeleteObjectCommand({
+        Bucket: bucketName,
+        Key: key,
+      }),
+    );
+    console.log(`Deleted private destination object s3://${bucketName}/${key}`);
+  }
+  return doomed;
 };

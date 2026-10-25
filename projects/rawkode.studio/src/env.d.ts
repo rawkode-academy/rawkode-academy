@@ -18,6 +18,9 @@ export interface StudioUser {
 	name: string;
 	image: string | null;
 	username: string | null;
+	// Academy identity issuer and subject; absent on sessions created before they were stored.
+	issuer?: string | null;
+	subject?: string | null;
 }
 
 export interface StudioEnv {
@@ -36,6 +39,11 @@ export interface StudioEnv {
 	RAWKODE_GRAPHQL_URL?: string;
 	STREAM_NOTIFICATIONS?: Queue<SendSubjectInput>;
 	STUDIO_OPERATOR_GITHUB_HANDLES?: string;
+	// Service binding to rawkode-academy-payload (default entrypoint) for the review
+	// handoff. Absent in local development and Worker previews.
+	PAYLOAD?: Fetcher;
+	PAYLOAD_HANDOFF_URL?: string;
+	STUDIO_MACHINE_SECRET?: string | SecretsStoreSecret;
 }
 
 declare module "cloudflare:workers" {

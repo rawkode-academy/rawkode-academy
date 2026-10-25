@@ -14,6 +14,9 @@ export interface StoredSession {
 		image: string | null;
 		username: string | null;
 	};
+	// Academy identity principal. Older sessions lack these until the user signs in again.
+	issuer?: string;
+	subject?: string;
 	expiresAt: number;
 }
 
@@ -50,6 +53,8 @@ export function createStoredSession(
 			image: userInfo.picture || null,
 			username: githubHandle,
 		},
+		issuer: ID_PROVIDER_URL,
+		subject: userInfo.sub,
 		expiresAt,
 	};
 }
