@@ -135,3 +135,6 @@ export const learningPathsTable = sqliteTable("learning_paths", {
 export type Course = typeof coursesTable.$inferSelect;
 export type CourseModule = typeof courseModulesTable.$inferSelect;
 export type LearningPath = typeof learningPathsTable.$inferSelect;
+
+// Revision log for the write model (see packages/content-write).
+export { contentRevisions } from "@rawkodeacademy/content-write/revisions";

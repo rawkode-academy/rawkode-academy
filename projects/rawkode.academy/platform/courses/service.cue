@@ -5,7 +5,8 @@ import gen "github.com/rawkode-academy/rawkode-academy/projects/rawkode.academy/
 // Courses: the Course, CourseModule and LearningPath entities. Authors and
 // technologies are references to the people and technologies services.
 _service: gen.#PlatformService & {
-	serviceName: "courses"
+	serviceName:       "courses"
+	contentWriteModel: true
 	// Rich-text bodies are TipTap documents; the read model uses its types.
 	additionalDependencies: {
 		"@rawkodeacademy/rich-text": "workspace:*"
