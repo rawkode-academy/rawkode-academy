@@ -1,6 +1,6 @@
 # Content cutover
 
-One-off steps that move production from `content/` to the D1 platform services (#1468).
+One-off steps that move production from `content/` to the D1 platform services (#1468). The ordered checklist is [`cutover.md`](cutover.md); `scripts/build-seeds.ts` builds `seeds/` and `scripts/verify-fixtures.ts` checks them against each service's `tests/fixtures.sql`.
 
 ## Post-seed patches
 
