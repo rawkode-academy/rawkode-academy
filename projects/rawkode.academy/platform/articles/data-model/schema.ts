@@ -107,3 +107,6 @@ export const articleTechnologiesTable = sqliteTable(
 );
 
 export type Article = typeof articlesTable.$inferSelect;
+
+// Revision log for the write model (see packages/content-write).
+export { contentRevisions } from "@rawkodeacademy/content-write/revisions";

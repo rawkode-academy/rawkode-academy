@@ -4,7 +4,8 @@ import gen "github.com/rawkode-academy/rawkode-academy/projects/rawkode.academy/
 
 // News: editorial news stories, with their authors and technologies.
 _service: gen.#PlatformService & {
-	serviceName: "news"
+	serviceName:       "news"
+	contentWriteModel: true
 	// Rich-text bodies are TipTap documents; the read model uses its types.
 	additionalDependencies: {
 		"@rawkodeacademy/rich-text": "workspace:*"

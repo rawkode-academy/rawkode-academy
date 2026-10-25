@@ -4,7 +4,8 @@ import gen "github.com/rawkode-academy/rawkode-academy/projects/rawkode.academy/
 
 // Changelog: the ChangelogEntry entity. Authors are Person references.
 _service: gen.#PlatformService & {
-	serviceName: "changelog"
+	serviceName:       "changelog"
+	contentWriteModel: true
 	// Rich-text bodies are TipTap documents; the read model uses its types.
 	additionalDependencies: {
 		"@rawkodeacademy/rich-text": "workspace:*"

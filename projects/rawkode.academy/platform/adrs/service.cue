@@ -4,7 +4,8 @@ import gen "github.com/rawkode-academy/rawkode-academy/projects/rawkode.academy/
 
 // ADRs: Architecture Decision Records and their authors.
 _service: gen.#PlatformService & {
-	serviceName: "adrs"
+	serviceName:       "adrs"
+	contentWriteModel: true
 	// Rich-text bodies are TipTap documents; the read model uses its types.
 	additionalDependencies: {
 		"@rawkodeacademy/rich-text": "workspace:*"

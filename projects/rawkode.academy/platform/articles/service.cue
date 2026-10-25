@@ -5,7 +5,8 @@ import gen "github.com/rawkode-academy/rawkode-academy/projects/rawkode.academy/
 // Articles: long-form articles, tutorials and guides, with their authors and
 // technologies. Bodies are TipTap documents (see packages/rich-text).
 _service: gen.#PlatformService & {
-	serviceName: "articles"
+	serviceName:       "articles"
+	contentWriteModel: true
 	additionalDevDependencies: {
 		miniflare: "4.20260529.0"
 	}

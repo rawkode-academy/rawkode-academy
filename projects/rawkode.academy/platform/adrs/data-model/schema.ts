@@ -29,3 +29,6 @@ export const adrAuthorsTable = sqliteTable(
 );
 
 export type Adr = typeof adrsTable.$inferSelect;
+
+// Revision log for the write model (see packages/content-write).
+export { contentRevisions } from "@rawkodeacademy/content-write/revisions";
