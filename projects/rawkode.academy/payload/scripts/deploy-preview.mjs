@@ -1,13 +1,11 @@
 import { spawn } from 'node:child_process'
 import { readFile, unlink, writeFile } from 'node:fs/promises'
+import { loadGitHubEvent, previewNameFromContext } from './preview-name.mjs'
 
-const sourceName = process.env.CLOUDFLARE_PREVIEW_NAME ?? process.env.GITHUB_HEAD_REF ?? process.env.GITHUB_REF_NAME ?? 'local'
-const safeName = sourceName
-  .toLowerCase()
-  .replace(/[^a-z0-9-]+/g, '-')
-  .replace(/^-+|-+$/g, '')
-  .slice(0, 48) || 'local'
-const previewName = `pr-${safeName}`
+const previewName = previewNameFromContext({
+  env: process.env,
+  event: await loadGitHubEvent(process.env, readFile),
+})
 
 console.log(`Starting Wrangler Preview ${previewName} (Cloudflare token configured: ${Boolean(process.env.CLOUDFLARE_API_TOKEN)})`)
 

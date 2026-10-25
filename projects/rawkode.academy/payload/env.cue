@@ -294,4 +294,14 @@ tasks: {
 			}
 		}
 	}
+
+	// Run by .github/workflows/cloudflare-preview-cleanup.yml, not by a
+	// pipeline. A pullRequest task would try to delete the preview while the
+	// pull request is still open.
+	cleanupPreviews: schema.#Task & {
+		hermetic: false
+		command: "sh"
+		args: ["-lc", "\(_toolchain) bun scripts/cleanup-previews.mjs"]
+		env: PATH: _taskPath
+	}
 }

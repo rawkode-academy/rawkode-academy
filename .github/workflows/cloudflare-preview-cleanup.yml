@@ -1,0 +1,92 @@
+# Hand-written. GitHub only runs a pull_request workflow that exists on the
+# default branch when a pull request closes without merging, so this file has
+# to land on main before it can clean anything up.
+#
+# Payload pull requests deploy a named Worker Preview. Each one provisions a
+# Durable Object namespace and a container application under
+# rawkode-academy-payload. This workflow deletes that preview (which removes
+# the namespace) and any container app whose name still carries the preview
+# slug. It does not delete the worker, the review-runtime worker, pr-local, or
+# the shared preview D1 database and R2 bucket.
+#
+# Website, news, and klustered previews use `wrangler versions upload`, which
+# adds a version of the existing worker and does not create those resources.
+# The image service reuses one worker, rawkode-academy-image-service-preview.
+
+name: cloudflare-preview-cleanup
+
+on:
+  pull_request:
+    types: [closed]
+  schedule:
+    - cron: "15 7 * * 1"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Log the previews and container apps that would be deleted
+        type: boolean
+        default: true
+      pull_request:
+        description: Limit cleanup to this closed pull request number
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    name: cleanup
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v16
+        with:
+          extra-conf: accept-flake-config = true
+
+      - name: Setup cuenv (release)
+        run: |-
+          arch="$(uname -m)"
+          case "$arch" in
+            x86_64|amd64) cuenv_asset="cuenv-linux-x64" ;;
+            aarch64|arm64) cuenv_asset="cuenv-linux-arm64" ;;
+            *) echo "Unsupported Linux architecture: $arch" >&2; exit 1 ;;
+          esac
+          cuenv_version="0.60.1"
+          cuenv_url="https://github.com/cuenv/cuenv/releases/download/${cuenv_version}/${cuenv_asset}"
+          curl -fsSL -o /usr/local/bin/cuenv "$cuenv_url"
+          chmod +x /usr/local/bin/cuenv
+          /usr/local/bin/cuenv sync -A
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Bun dependencies
+        run: cuenv exec -- bun install --frozen-lockfile
+
+      - name: Setup 1Password
+        run: cuenv secrets setup onepassword
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+
+      - name: Delete closed pull request previews
+        working-directory: projects/rawkode.academy/payload
+        run: cuenv task -e production cleanupPreviews
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PREVIEW_CLEANUP_MODE: ${{ github.event_name == 'pull_request' && 'pr' || (github.event_name == 'workflow_dispatch' && inputs.pull_request != '' && 'pr' || 'sweep') }}
+          PREVIEW_CLEANUP_DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && (inputs.dry_run == true || inputs.dry_run == 'true') && 'true' || 'false' }}
+          PREVIEW_CLEANUP_PR: ${{ github.event_name == 'pull_request' && format('{0}', github.event.pull_request.number) || (github.event_name == 'workflow_dispatch' && inputs.pull_request) || '' }}
+          PREVIEW_CLEANUP_BRANCH: ${{ github.event.pull_request.head.ref || '' }}
