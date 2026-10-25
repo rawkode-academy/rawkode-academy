@@ -1,0 +1,25 @@
+{
+	"name": "@rawkodeacademy/content-write",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./worker": "./src/worker.ts"
+	},
+	"scripts": {
+		"test": "bun test",
+		"check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"drizzle-orm": "^0.38.4",
+		"drizzle-zod": "^0.6.1",
+		"zod": "^3.24.3"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20250426.0",
+		"@types/bun": "latest",
+		"miniflare": "4.20260529.0",
+		"typescript": "^5.9.3"
+	}
+}
