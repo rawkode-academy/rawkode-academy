@@ -1,9 +1,11 @@
-// Worker entrypoint (wrangler.jsonc "main"): Astro's request handler plus the
-// hourly content change detection on the cron trigger "0 * * * *".
+// Worker entrypoint (wrangler.jsonc "main"): Astro's request handler, the
+// hourly content change detection on the cron trigger "0 * * * *", and the
+// consumer of the content-changes queue that content write models publish to.
 
 import { cache } from "cloudflare:workers";
 import { handle } from "@astrojs/cloudflare/handler";
 import { runChangeDetection } from "./lib/live-content/change-detection";
+import { consumeContentChanges } from "./lib/live-content/content-changes";
 import type { ContentEnv } from "./lib/live-content/env";
 import { workersCachePurge } from "./lib/live-content/invalidate";
 import { guardSharedCache } from "./lib/live-content/personalisation";
@@ -37,5 +39,17 @@ export default {
 				throw error;
 			}),
 		);
+	},
+	async queue(batch, env) {
+		const contentEnv = env as unknown as ContentEnv;
+		if (!contentEnv.CONTENT_CACHE) {
+			console.error("[content] content-changes skipped: CONTENT_CACHE is not bound");
+			batch.retryAll({ delaySeconds: 60 });
+			return;
+		}
+		await consumeContentChanges(batch, {
+			kv: contentEnv.CONTENT_CACHE,
+			purge: workersCachePurge(cache),
+		});
 	},
 } satisfies ExportedHandler<Env>;

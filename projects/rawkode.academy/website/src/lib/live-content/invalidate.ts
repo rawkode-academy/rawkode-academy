@@ -9,6 +9,10 @@ export const PURGE_BATCH = 30;
 const MAX_TAGS = 1_000;
 const TAG_PATTERN = /^[^\s,]{1,1024}$/;
 
+/** A cache tag the CDN accepts: no whitespace or commas, at most 1024 characters. */
+export const isValidTag = (tag: unknown): tag is string =>
+	typeof tag === "string" && TAG_PATTERN.test(tag);
+
 export type PurgeTags = (tags: string[]) => Promise<void>;
 
 /**
@@ -177,41 +181,74 @@ export async function handleInvalidationRequest(
 	if (!all && requested.length === 0) {
 		return json(400, { error: "Pass `tags` or `all: true`" });
 	}
+	const outcome = await invalidateTags(requested, {
+		kv: deps.kv,
+		purge: deps.purge,
+		settleMs: settle === false ? 0 : (deps.settleMs ?? SETTLE_MS),
+		wait: deps.wait,
+	});
+	if (outcome.ok) {
+		return json(200, {
+			ok: true,
+			generation: outcome.generation,
+			purged: outcome.purged,
+		});
+	}
+	if (outcome.generation === undefined) {
+		return json(500, { error: "Invalidation failed" });
+	}
+	return json(502, {
+		ok: false,
+		generation: outcome.generation,
+		purged: [],
+		error: outcome.error,
+	});
+}
+
+export type InvalidationOutcome =
+	| { ok: true; generation: number; purged: string[] }
+	| { ok: false; generation?: number; error: string };
+
+/**
+ * Bump the content generation and purge `tags` (with their collection tags)
+ * from the CDN, twice when settleMs > 0. Shared by the HTTP endpoint and the
+ * content-changes queue consumer.
+ */
+export async function invalidateTags(
+	tags: string[],
+	deps: {
+		kv: ContentKV;
+		purge: PurgeTags | undefined;
+		settleMs?: number;
+		wait?: (ms: number) => Promise<void>;
+	},
+): Promise<InvalidationOutcome> {
 	let generation: GenerationState;
 	try {
 		generation = await bumpGeneration(deps.kv);
 	} catch (error) {
 		console.error("[content] bumping the content generation failed", error);
-		return json(500, { error: "Invalidation failed" });
+		return { ok: false, error: "Bumping the content generation failed" };
 	}
-	const tagsToPurge = expandTags(requested);
+	const tagsToPurge = expandTags(tags);
 	if (!deps.purge) {
-		return json(200, {
-			ok: true,
-			generation: generation.generation,
-			purged: [],
-		});
+		return { ok: true, generation: generation.generation, purged: [] };
 	}
 	try {
 		await purgeAndSettle(
 			deps.purge,
 			tagsToPurge,
-			settle === false ? 0 : (deps.settleMs ?? SETTLE_MS),
+			deps.settleMs ?? SETTLE_MS,
 			deps.wait,
 		);
 	} catch (error) {
 		// KV already moved on; the CDN may still hold old pages. Retrying is safe.
 		console.error("[content] CDN purge failed", error);
-		return json(502, {
+		return {
 			ok: false,
 			generation: generation.generation,
-			purged: [],
 			error: `CDN purge failed: ${error instanceof Error ? error.message : String(error)}`,
-		});
+		};
 	}
-	return json(200, {
-		ok: true,
-		generation: generation.generation,
-		purged: tagsToPurge,
-	});
+	return { ok: true, generation: generation.generation, purged: tagsToPurge };
 }
