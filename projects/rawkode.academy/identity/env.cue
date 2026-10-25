@@ -54,6 +54,7 @@ tasks: {
 			hermetic: false
 			command:  "bun"
 			args: ["x", "wrangler", "d1", "migrations", "apply", "identity", "--remote"]
+			inputs: ["migrations/**", "wrangler.jsonc", "package.json"]
 		}
 	}
 
@@ -77,6 +78,7 @@ tasks: {
 		inputs: [
 			"astro.config.mjs",
 			"bun.lock",
+			"migrations/**",
 			"package.json",
 			"src/**",
 		]
