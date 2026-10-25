@@ -405,3 +405,16 @@ test("describeModels derives editor fields from the zod schemas", async () => {
 		fields: [{ name: "guestId", type: "text", required: true }],
 	});
 });
+
+test("setList reports items that repeat the primary key, by index", async () => {
+	const result = await store.setList(
+		"video-guests",
+		{ videoId: "v1" },
+		[{ guestId: "alice" }, { guestId: "bob" }, { guestId: "alice" }],
+		{ ifVersion: 0 },
+		david,
+	);
+	expect(result.ok).toBe(false);
+	if (result.ok) return;
+	expect(result.error.issues).toEqual([{ path: "2.guestId", message: "Duplicates item 0" }]);
+});

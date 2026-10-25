@@ -12,7 +12,7 @@ import {
 	sql,
 } from "drizzle-orm";
 import { type DrizzleD1Database, drizzle } from "drizzle-orm/d1";
-import type { SQLiteTable } from "drizzle-orm/sqlite-core";
+import { getTableConfig, type SQLiteTable } from "drizzle-orm/sqlite-core";
 import type { z } from "zod";
 import type { EntityModel, ListModel, Model, ServiceModels } from "./model";
 import { contentRevisions } from "./revisions";
@@ -75,6 +75,19 @@ function complete(columns: Record<string, Column>, row: Row): Row {
 		out[prop] = defaultFn ? defaultFn() : column.hasDefault ? value : null;
 	}
 	return out;
+}
+
+/** The primary-key properties of a list's items (the key minus the parent). */
+function listItemKey(def: ListModel): string[] {
+	const columns = columnsOf(def.table);
+	const byColumn = new Map(Object.entries(columns).map(([prop, c]) => [c, prop]));
+	const config = getTableConfig(def.table);
+	const keyColumns =
+		config.primaryKeys[0]?.columns ??
+		Object.values(columns).filter((c) => c.primary);
+	return keyColumns
+		.map((c) => byColumn.get(c as Column))
+		.filter((p): p is string => !!p && !def.parent.includes(p));
 }
 
 const actorOk = (actor: Actor | undefined): actor is Actor =>
@@ -407,6 +420,24 @@ export class ContentStore {
 				...(def.position ? { [def.position]: index } : {}),
 			});
 		});
+		// Items that would collide on the table's primary key, reported per item
+		// rather than as one opaque UNIQUE failure at commit.
+		const itemKey = listItemKey(def);
+		if (itemKey.length && !issues.length) {
+			const seen = new Map<string, number>();
+			rows.forEach((row, index) => {
+				const key = JSON.stringify(itemKey.map((k) => row[k]));
+				const first = seen.get(key);
+				if (first === undefined) {
+					seen.set(key, index);
+					return;
+				}
+				issues.push({
+					path: `${index}.${itemKey.join(",")}`,
+					message: `Duplicates item ${first}`,
+				});
+			});
+		}
 		if (issues.length) return fail("validation", "Some items are invalid", { issues });
 		const versionNow = await this.#version(model, parentKey.value);
 		if (versionNow !== options?.ifVersion) {
