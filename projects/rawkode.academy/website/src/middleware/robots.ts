@@ -1,6 +1,6 @@
 import type { MiddlewareHandler } from "astro";
 
-const NOINDEX_PREFIXES = ["/api/", "/_server-islands/"];
+const NOINDEX_PREFIXES = ["/api/", "/_server-islands/", "/internal/"];
 const NOINDEX_EXACT_PATHS = new Set(["/graphql", "/settings"]);
 
 // Production hostnames Google should index. Anything else (workers.dev

@@ -77,19 +77,17 @@ const iconFor = (iconType: string): IconDefinition => icons[iconType] ?? faLink;
 }
 
 <script>
+	import { capture } from "@/lib/analytics/track";
+
 	document.addEventListener("click", (e) => {
 		const link = (e.target as HTMLElement).closest(
 			"a[data-subscribe-platform]",
 		);
 		if (!link) return;
-		try {
-			window.posthog?.capture("podcast_subscribe_clicked", {
-				platform: link.getAttribute("data-subscribe-platform"),
-				icon_type: link.getAttribute("data-subscribe-icon"),
-				destination_url: link.getAttribute("href"),
-			});
-		} catch {
-			// Ignore tracking errors
-		}
+		capture("podcast_subscribe_clicked", {
+			platform: link.getAttribute("data-subscribe-platform"),
+			icon_type: link.getAttribute("data-subscribe-icon"),
+			destination_url: link.getAttribute("href"),
+		});
 	});
 </script>

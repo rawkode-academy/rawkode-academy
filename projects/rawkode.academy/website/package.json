@@ -79,7 +79,8 @@
 		"vitest": "^4.1.2",
 		"vue": "^3.5.31",
 		"vue-boring-avatars": "^1.4.0",
-		"vue-word-highlighter": "^1.2.6"
+		"vue-word-highlighter": "^1.2.6",
+		"web-vitals": "^5"
 	},
 	"devDependencies": {
 		"@astrojs/compiler": "3.0.1",
