@@ -82,14 +82,25 @@ done
 
 ### 3.1 R2
 
-Upload everything in `seeds/assets.json` to `rawkode-academy-content`.
+Upload everything in `seeds/assets.json` to `rawkode-academy-content`. Keys
+that already exist are skipped, never overwritten. Run it with the `CONTENT_*`
+variables from `tasks/video-importer/env.cue` (resolved by `op run --env-file`,
+or by `cuenv -e production exec` in that directory):
+
+```bash
+bun projects/rawkode.academy/tasks/content-cutover/scripts/upload-assets.ts --content "$SNAP/content"
+```
+
+On 2026-10-25, 233 objects (every technology `icon.svg`) already existed and
+were byte-identical to `content/`; the other 514 were uploaded, and all 747
+then returned 200 with the expected Content-Type.
 
 ### 3.2 D1 migrations
 
 ```bash
 for db in articles news changelog adrs testimonials courses videos shows technologies people-biographies; do
 	(cd projects/rawkode.academy/platform/$db && \
-		cuenv -e production exec -- bun x wrangler d1 migrations apply platform-$db --remote)
+		cuenv -e production exec -- bun x wrangler d1 migrations apply DB --remote --config ./read-model/wrangler.jsonc)
 done
 ```
 
@@ -101,7 +112,7 @@ New databases get `0000`. The live ones get only additive columns: videos
 
 ```bash
 run() { (cd projects/rawkode.academy/platform/$1 && \
-	cuenv -e production exec -- bun x wrangler d1 execute platform-$1 --remote --file "$2"); }
+	cuenv -e production exec -- bun x wrangler d1 execute DB --remote --config ./read-model/wrangler.jsonc --file "$2" -y); }
 S=$PWD/projects/rawkode.academy/tasks/content-cutover
 for db in articles news changelog adrs testimonials courses; do run $db "$S/seeds/$db.sql"; done
 for db in videos shows technologies; do run $db "$S/seeds/backfill-$db.sql"; done
@@ -118,16 +129,42 @@ counts matched.
 The 11 changed services (adrs, articles, changelog, courses, news, people,
 people-biographies, shows, technologies, testimonials, videos), then the API
 gateway (`projects/rawkode.academy/api`). The composed supergraph must have 24
-subgraphs.
+subgraphs. (`video-thumbnails` changed only in its local scripts.)
+
+```bash
+for s in articles news changelog adrs testimonials courses videos shows technologies people people-biographies; do
+	(cd projects/rawkode.academy/platform/$s && cuenv -e production task ciDeploy)
+done
+(cd projects/rawkode.academy/api && cuenv -e production task deploy)
+```
 
 ### 3.5 Cache invalidation secret
 
-Create `CACHE_INVALIDATION_TOKEN` in 1Password, set it as a secret on the
-website Worker, and point `tasks/video-importer/env.cue` at the real reference.
+Create the token in 1Password (a generated password in the `sa.rawkode.academy`
+vault) and point the `CACHE_INVALIDATION_TOKEN` reference in
+`tasks/video-importer/env.cue` at it.
+
+Setting it on the website Worker has to wait until #1468's website build is
+deployed: `wrangler secret put` refuses while the latest version is an
+undeployed PR preview upload, and deploying a preview to get past that would
+ship #1468 early. Right after the merge deploy, pipe the token from `op read`
+into `bun x wrangler secret put CACHE_INVALIDATION_TOKEN --name rawkode-academy-website`,
+with the platform's workers token as `CLOUDFLARE_API_TOKEN`.
 
 ### 3.6 Swamp Club captions
 
-Upload the caption fixes for the Swamp Club video.
+`videos/rez4r4sbaaog76765ijmdpli/captions/en.vtt` was still the raw Deepgram
+output. The original fixes were lost; on 2026-10-25 these were re-applied
+(text only, timings unchanged) and uploaded, leaving `en.deepgram.vtt` as the
+raw copy:
+
+- "start with stop swamp start" → "start with swamp start"
+- "a system d unit" → "a systemd unit"
+- "post hoc swamp extension" → "PostHog Swamp extension"
+- "Opus five five" → "Opus 5.5"
+
+Left for a human: "known on the Internet as forever" (00:02:49, Nick's handle)
+and "web ramp has a GitHub extension" (00:15:28, the extension's author).
 
 ## 4. Verify before merging
 

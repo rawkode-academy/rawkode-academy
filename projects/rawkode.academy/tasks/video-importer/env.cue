@@ -29,7 +29,7 @@ env: {
 		// The website's CACHE_INVALIDATION_TOKEN secret (POST /api/cache/invalidate).
 		// Optional: without it the importer warns and skips invalidation.
 		CACHE_INVALIDATION_TOKEN: schema.#OnePasswordRef & {
-			ref: "op://Employee/w3etxulw37bsqb2rsna5px7y4u/rawkode-academy-website/cache-invalidation-token"
+			ref: "op://sa.rawkode.academy/website-cache-invalidation/password"
 		}
 	}
 }
