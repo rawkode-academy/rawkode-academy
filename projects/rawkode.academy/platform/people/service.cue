@@ -4,7 +4,8 @@ import gen "github.com/rawkode-academy/rawkode-academy/projects/rawkode.academy/
 
 // People: the Person entity (names and social handles). Biographies, links and terms live in their own join services.
 _service: gen.#PlatformService & {
-	serviceName: "people"
+	serviceName:       "people"
+	contentWriteModel: true
 	additionalDevDependencies: {
 		miniflare: "4.20260529.0"
 	}

@@ -4,7 +4,8 @@ import gen "github.com/rawkode-academy/rawkode-academy/projects/rawkode.academy/
 
 // People links: extra links on a person's profile.
 _service: gen.#PlatformService & {
-	serviceName: "people-links"
+	serviceName:       "people-links"
+	contentWriteModel: true
 	additionalDevDependencies: {
 		miniflare: "4.20260529.0"
 	}

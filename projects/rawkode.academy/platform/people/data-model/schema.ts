@@ -21,3 +21,6 @@ export const peopleTable = sqliteTable("people", {
 });
 
 export type Person = typeof peopleTable.$inferSelect;
+
+// Revision log for the write model (see packages/content-write).
+export { contentRevisions } from "@rawkodeacademy/content-write/revisions";

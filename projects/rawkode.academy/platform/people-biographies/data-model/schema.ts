@@ -15,3 +15,6 @@ export const peopleBiographies = sqliteTable("people_biographies", {
 	biography: text("biography").notNull(),
 	biographyDoc: text("biography_doc", { mode: "json" }).$type<RichTextDocument>(),
 });
+
+// Revision log for the write model (see packages/content-write).
+export { contentRevisions } from "@rawkodeacademy/content-write/revisions";

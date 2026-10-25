@@ -11,3 +11,6 @@ export const peopleLinks = sqliteTable(
 	},
 	(table) => [primaryKey({ columns: [table.personId, table.url] })],
 );
+
+// Revision log for the write model (see packages/content-write).
+export { contentRevisions } from "@rawkodeacademy/content-write/revisions";
