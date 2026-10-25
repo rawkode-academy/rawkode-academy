@@ -34,6 +34,7 @@ on:
     - projects/rawkode.academy/website/vitest.config.ts/**
     - projects/rawkode.academy/website/wrangler.jsonc
     - projects/rawkode.academy/website/wrangler.jsonc/**
+  workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true

@@ -14,10 +14,13 @@ on:
     - projects/rawkode.academy/identity/bun.lock
     - projects/rawkode.academy/identity/bun.lock/**
     - projects/rawkode.academy/identity/env.cue
+    - projects/rawkode.academy/identity/migrations/**
     - projects/rawkode.academy/identity/package.json
     - projects/rawkode.academy/identity/package.json/**
     - projects/rawkode.academy/identity/schema/**
     - projects/rawkode.academy/identity/src/**
+    - projects/rawkode.academy/identity/wrangler.jsonc
+    - projects/rawkode.academy/identity/wrangler.jsonc/**
   workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
