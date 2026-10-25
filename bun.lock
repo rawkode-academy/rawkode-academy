@@ -10,6 +10,18 @@
         "typescript": "^5.9.3",
       },
     },
+    "packages/content-model": {
+      "name": "@rawkodeacademy/content-model",
+      "version": "0.0.0",
+      "dependencies": {
+        "@rawkodeacademy/rich-text": "workspace:*",
+        "zod": "^3.24.3",
+      },
+      "devDependencies": {
+        "@types/bun": "latest",
+        "typescript": "^5.9.3",
+      },
+    },
     "packages/content-write": {
       "name": "@rawkodeacademy/content-write",
       "version": "0.0.0",
@@ -800,6 +812,8 @@
         "@pothos/plugin-directives": "^4.2.0",
         "@pothos/plugin-drizzle": "^0.8.1",
         "@pothos/plugin-federation": "^4.3.2",
+        "@rawkodeacademy/content-model": "workspace:*",
+        "@rawkodeacademy/content-write": "workspace:*",
         "@sindresorhus/slugify": "^2.2.1",
         "drizzle-kit": "^0.30.6",
         "drizzle-orm": "^0.38.4",
@@ -807,6 +821,7 @@
         "graphql": "^16.10.0",
         "graphql-scalars": "^1.24.2",
         "graphql-yoga": "^5.13.4",
+        "hono": "^4.8.3",
         "zod": "^3.24.3",
       },
       "devDependencies": {
@@ -1094,6 +1109,7 @@
         "@headlessui/vue": "^1.7.23",
         "@heroicons/react": "^2.2.0",
         "@heroicons/vue": "^2.2.0",
+        "@rawkodeacademy/content-model": "workspace:*",
         "@rawkodeacademy/design-system": "workspace:*",
         "@rawkodeacademy/rich-text": "workspace:*",
         "@webcontainer/api": "^1.6.1",
@@ -2290,6 +2306,8 @@
     "@quansync/fs": ["@quansync/fs@1.0.0", "", { "dependencies": { "quansync": "^1.0.0" } }, "sha512-4TJ3DFtlf1L5LDMaM6CanJ/0lckGNtJcMjQ1NAV6zDmA0tEHKZtxNKin8EgPaVX1YzljbxckyT2tJrpQKAtngQ=="],
 
     "@rawkode/studio": ["@rawkode/studio@workspace:projects/rawkode.studio"],
+
+    "@rawkodeacademy/content-model": ["@rawkodeacademy/content-model@workspace:packages/content-model"],
 
     "@rawkodeacademy/content-write": ["@rawkodeacademy/content-write@workspace:packages/content-write"],
 

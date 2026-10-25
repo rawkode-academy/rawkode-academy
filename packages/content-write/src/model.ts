@@ -114,7 +114,11 @@ export const slug = () =>
 
 /** An absolute http(s) URL. */
 export const httpUrl = () =>
-	z
-		.string()
-		.url()
-		.refine((value) => /^https?:\/\//.test(value), "Use an http(s) URL");
+	z.string().refine((value) => {
+		try {
+			const { protocol } = new URL(value);
+			return protocol === "http:" || protocol === "https:";
+		} catch {
+			return false;
+		}
+	}, "Use an http(s) URL");

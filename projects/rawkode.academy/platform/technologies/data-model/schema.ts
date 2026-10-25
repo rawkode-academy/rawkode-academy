@@ -86,3 +86,6 @@ export const technologiesTable = sqliteTable("technologies", {
 });
 
 export type Technology = typeof technologiesTable.$inferSelect;
+
+// Revision log for the write model (see packages/content-write).
+export { contentRevisions } from "@rawkodeacademy/content-write/revisions";

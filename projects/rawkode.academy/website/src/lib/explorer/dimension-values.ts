@@ -1,52 +1,16 @@
 // Technology Explorer dimensions (ported from the retired @rawkodeacademy/content
 // package, content/src/dimensions.ts).
 
-export const MATRIX_GROUPING_VALUES = [
-	"plumbing",
-	"platform",
-	"observability",
-	"security",
-] as const;
-
-export const MATRIX_STATUS_VALUES = [
-	"skip",
-	"watch",
-	"explore",
-	"learn",
-	"adopt",
-	"advocate",
-	"graveyard",
-	"guilty-pleasure",
-] as const;
-
-export const MATRIX_CONFIDENCE_VALUES = [
-	"gut",
-	"some-experience",
-	"deep-experience",
-] as const;
-
-export const MATRIX_TRAJECTORY_VALUES = [
-	"rising",
-	"stable",
-	"falling",
-] as const;
-
-export const CNCF_STATUS_VALUES = [
-	"sandbox",
-	"incubating",
-	"graduated",
-	"archived",
-] as const;
-
-export const TECHNOLOGY_STATUS_VALUES = [
-	"alpha",
-	"beta",
-	"stable",
-	"preview",
-	"superseded",
-	"deprecated",
-	"abandoned",
-] as const;
+// The allowed values live in @rawkodeacademy/content-model, shared with the
+// technologies write model so it only stores what the explorer can render.
+export {
+	CNCF_STATUS_VALUES,
+	MATRIX_CONFIDENCE_VALUES,
+	MATRIX_GROUPING_VALUES,
+	MATRIX_STATUS_VALUES,
+	MATRIX_TRAJECTORY_VALUES,
+	TECHNOLOGY_STATUS_VALUES,
+} from "@rawkodeacademy/content-model/technologies";
 
 export type DimensionKey =
 	| "matrix.grouping"

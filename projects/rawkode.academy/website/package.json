@@ -46,6 +46,7 @@
 		"@headlessui/vue": "^1.7.23",
 		"@heroicons/react": "^2.2.0",
 		"@heroicons/vue": "^2.2.0",
+		"@rawkodeacademy/content-model": "workspace:*",
 		"@rawkodeacademy/design-system": "workspace:*",
 		"@rawkodeacademy/rich-text": "workspace:*",
 		"@webcontainer/api": "^1.6.1",

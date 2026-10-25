@@ -22,6 +22,14 @@ import (
 	includeWriteModel: bool | *false
 	includeHttp:       bool | *false
 
+	// A content service: its write model is the shared versioned store from
+	// packages/content-write (validated writes, revisions, change events on
+	// the content-changes queue). Turns the write model on.
+	contentWriteModel: bool | *false
+	if contentWriteModel {
+		includeWriteModel: true
+	}
+
 	// Cloudflare bindings
 	bindings: #CloudflareBindings
 
@@ -179,6 +187,7 @@ import (
 		if includeReadModel {["read-model/**"]},
 		if includeWriteModel {["write-model/**"]},
 		if includeHttp {["http/**"]},
+		if contentWriteModel {["../../../../packages/content-write/**", "../../../../packages/content-model/**"]},
 		["package.json"],
 	]
 
@@ -304,6 +313,10 @@ import (
 			}
 			if includeWriteModel {
 				"hono": "^4.8.3"
+			}
+			if contentWriteModel {
+				"@rawkodeacademy/content-model": "workspace:*"
+				"@rawkodeacademy/content-write": "workspace:*"
 			}
 			for k, v in additionalDependencies {
 				"\(k)": v
@@ -541,6 +554,14 @@ import (
 	_writeModelWrangler: _baseWrangler & {
 		name: "\(servicePrefix)-\(serviceName)-write-model"
 		main: "./main.ts"
+		// Content write models announce every committed write; the website
+		// consumes the queue and purges its cache.
+		if contentWriteModel {
+			queues: producers: [{
+				binding: "CONTENT_CHANGES"
+				queue:   "content-changes"
+			}]
+		}
 		if len(_bindings.workflows) > 0 {
 			workflows: [for wf in _bindings.workflows {
 				binding:    wf.binding

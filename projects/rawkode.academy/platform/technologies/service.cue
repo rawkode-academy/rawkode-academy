@@ -4,7 +4,8 @@ import gen "github.com/rawkode-academy/rawkode-academy/projects/rawkode.academy/
 
 // Technologies: the Technology entity and its profile. Terms and video links live in join services.
 _service: gen.#PlatformService & {
-	serviceName: "technologies"
+	serviceName:       "technologies"
+	contentWriteModel: true
 	additionalDevDependencies: {
 		miniflare: "4.20260529.0"
 	}
