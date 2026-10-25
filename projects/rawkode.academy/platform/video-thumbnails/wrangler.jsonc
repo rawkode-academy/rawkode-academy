@@ -19,6 +19,15 @@
 			"destinations": ["grafana-logs"]
 		}
 	},
+	"triggers": {
+		"crons": ["17 * * * *"]
+	},
+	"services": [
+		{
+			"binding": "API",
+			"service": "platform-api-gateway"
+		}
+	],
 	"r2_buckets": [
 		{
 			"binding": "CONTENT_BUCKET",

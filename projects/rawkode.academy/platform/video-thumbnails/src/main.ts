@@ -1,7 +1,13 @@
 import type { Env } from "./env";
+import { scheduleMissingThumbnails } from "./schedule";
 export { GenerateVideoThumbnailWorkflow } from "./workflow";
 
 export default {
+	async scheduled(_controller: ScheduledController, env: Env): Promise<void> {
+		const result = await scheduleMissingThumbnails(env);
+		console.log(JSON.stringify({ event: "thumbnails.scheduled", ...result }));
+	},
+
 	async fetch(request: Request, env: Env): Promise<Response> {
 		const url = new URL(request.url);
 
