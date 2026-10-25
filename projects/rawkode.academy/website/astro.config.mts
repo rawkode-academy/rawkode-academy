@@ -227,6 +227,20 @@ export default defineConfig({
 				access: "public",
 				default: "true",
 			}),
+			// Stripe secret key for cohort checkout. Set with
+			// `wrangler secret put STRIPE_SECRET_KEY`; checkout falls back to the
+			// invoice form while it is missing.
+			STRIPE_SECRET_KEY: envField.string({
+				context: "server",
+				access: "secret",
+				optional: true,
+			}),
+			// Resend audience for the Agentic Operations waitlist.
+			AGENTIC_OPERATIONS_WAITLIST_AUDIENCE_ID: envField.string({
+				context: "server",
+				access: "public",
+				optional: true,
+			}),
 			ATTIO_API_KEY: envField.string({
 				context: "server",
 				access: "secret",

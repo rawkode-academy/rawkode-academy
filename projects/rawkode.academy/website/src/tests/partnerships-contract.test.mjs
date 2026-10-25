@@ -13,10 +13,11 @@ const form = readFileSync(
 	),
 	"utf8",
 );
-const action = readFileSync(
-	new URL("../actions/partnership.ts", import.meta.url),
-	"utf8",
-);
+// The action plus the shared Attio client it calls.
+const action = [
+	readFileSync(new URL("../actions/partnership.ts", import.meta.url), "utf8"),
+	readFileSync(new URL("../server/attio.ts", import.meta.url), "utf8"),
+].join("\n");
 const partnershipCopy = readFileSync(
 	new URL("../lib/partnerships.ts", import.meta.url),
 	"utf8",

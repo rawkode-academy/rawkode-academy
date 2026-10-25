@@ -1,7 +1,7 @@
 import { getPublishedVideos } from "@/lib/content";
 import { type CollectionName, getCollection } from "@/lib/live-content";
-import { getCourseModuleSlug } from "@/utils/course-path";
 import { isNewsPublished } from "@/lib/news-publication";
+import { getCourseModuleSlug } from "@/utils/course-path";
 
 const DEFAULT_SITE_URL = "https://rawkode.academy";
 const MODULE_LOADED_AT = new Date();
@@ -86,6 +86,7 @@ const staticPages: StaticPageDefinition[] = [
 	{ path: "/changelog", changefreq: "daily", priority: 0.6 },
 	{ path: "/feeds", changefreq: "monthly", priority: 0.5 },
 	// Organization / commercial pages.
+	{ path: "/courses/operations-for-ai", changefreq: "weekly", priority: 0.9 },
 	{ path: "/organizations", changefreq: "monthly", priority: 0.7 },
 	{ path: "/organizations/partnerships", changefreq: "monthly", priority: 0.7 },
 	{ path: "/organizations/lets-chat", changefreq: "monthly", priority: 0.5 },

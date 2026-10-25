@@ -7,34 +7,19 @@ import {
 	applicationPathLabels,
 	applicationPaths,
 } from "@/lib/partnerships";
+import {
+	attioAttributeExists,
+	attioRequest,
+	createNote,
+	DEAL_OWNER,
+	rateLimitKey,
+	upsertCompanyAndPerson,
+} from "@/server/attio";
 
-const ATTIO_API_URL = "https://api.attio.com/v2";
 const DEFAULT_DEAL_STAGE = "In Progress";
 const DEFAULT_OFFER_ATTRIBUTE = "offer";
 const DEFAULT_SOURCE_ATTRIBUTE = "source";
 const DEFAULT_SOURCE_VALUE = "Inbound: partnerships page";
-const DEAL_OWNER = "david@rawkode.academy";
-
-interface AttioRecordResponse {
-	data?: {
-		id?: {
-			record_id?: string;
-		};
-	};
-}
-
-interface AttioQueryResponse {
-	data?: Array<{
-		id?: {
-			record_id?: string;
-		};
-	}>;
-}
-
-const attioHeaders = (apiKey: string) => ({
-	Authorization: `Bearer ${apiKey}`,
-	"Content-Type": "application/json",
-});
 
 const ENQUIRY_ERROR_CODES = [
 	"crm_unconfigured",
@@ -57,26 +42,6 @@ const isEnquiryErrorCode = (value: unknown): value is EnquiryErrorCode =>
 	typeof value === "string" &&
 	(ENQUIRY_ERROR_CODES as readonly string[]).includes(value);
 
-const attioCallFailure = async (response: Response, code: EnquiryErrorCode) => {
-	let attioCode: string | undefined;
-	try {
-		const body = (await response.json()) as { code?: unknown };
-		if (typeof body.code === "string" && /^[a-z0-9_:-]+$/i.test(body.code)) {
-			attioCode = body.code;
-		}
-	} catch {
-		attioCode = undefined;
-	}
-	return Object.assign(new Error(code), {
-		code,
-		status: response.status,
-		attioCode,
-	});
-};
-
-const codedFailure = (code: EnquiryErrorCode) =>
-	Object.assign(new Error(code), { code });
-
 const failureDetails = (error: unknown) => {
 	const details =
 		error && typeof error === "object"
@@ -89,117 +54,6 @@ const failureDetails = (error: unknown) => {
 		attioCode:
 			typeof details?.attioCode === "string" ? details.attioCode : undefined,
 	};
-};
-
-const attioRequest = async <Response>(
-	apiKey: string,
-	path: string,
-	values: Record<string, unknown>,
-): Promise<Response> => {
-	const response = await fetch(`${ATTIO_API_URL}${path}`, {
-		method: "POST",
-		headers: attioHeaders(apiKey),
-		body: JSON.stringify({ data: { values } }),
-	});
-
-	if (!response.ok) {
-		throw await attioCallFailure(response, "crm_write_failed");
-	}
-
-	return response.json() as Promise<Response>;
-};
-
-const attioRecordId = (response: AttioRecordResponse): string => {
-	const recordId = response.data?.id?.record_id;
-	if (!recordId) {
-		throw codedFailure("crm_write_failed");
-	}
-	return recordId;
-};
-
-const findRecordId = async (
-	apiKey: string,
-	object: "companies" | "people",
-	filter: Record<string, Record<string, { $eq: string }>>,
-): Promise<string | undefined> => {
-	const response = await fetch(
-		`${ATTIO_API_URL}/objects/${object}/records/query`,
-		{
-			method: "POST",
-			headers: attioHeaders(apiKey),
-			body: JSON.stringify({ filter, limit: 1 }),
-		},
-	);
-	if (!response.ok) {
-		throw await attioCallFailure(response, "crm_lookup_failed");
-	}
-	const body = (await response.json()) as AttioQueryResponse;
-	if (!Array.isArray(body.data)) {
-		throw codedFailure("crm_lookup_failed");
-	}
-	const [match] = body.data;
-	if (!match) return undefined;
-	const recordId = match.id?.record_id;
-	if (!recordId) {
-		throw codedFailure("crm_lookup_failed");
-	}
-	return recordId;
-};
-
-const createNote = async (
-	apiKey: string,
-	parentObject: "companies" | "people",
-	parentRecordId: string,
-	title: string,
-	content: string,
-) => {
-	const response = await fetch(`${ATTIO_API_URL}/notes`, {
-		method: "POST",
-		headers: attioHeaders(apiKey),
-		body: JSON.stringify({
-			data: {
-				parent_object: parentObject,
-				parent_record_id: parentRecordId,
-				title,
-				format: "plaintext",
-				content,
-			},
-		}),
-	});
-	if (!response.ok) {
-		throw await attioCallFailure(response, "crm_note_failed");
-	}
-};
-
-const attioAttributeExists = async (
-	apiKey: string,
-	attribute: string,
-): Promise<boolean> => {
-	try {
-		const response = await fetch(
-			`${ATTIO_API_URL}/objects/deals/attributes/${encodeURIComponent(attribute)}`,
-			{
-				headers: {
-					Authorization: `Bearer ${apiKey}`,
-				},
-			},
-		);
-		return response.ok;
-	} catch {
-		return false;
-	}
-};
-
-const rateLimitKey = async (request: Request): Promise<string> => {
-	const address =
-		request.headers.get("CF-Connecting-IP") ??
-		request.headers.get("x-forwarded-for") ??
-		"unknown";
-	const source = new TextEncoder().encode(`partnership-enquiry:${address}`);
-	const digest = await crypto.subtle.digest("SHA-256", source);
-	return Array.from(new Uint8Array(digest), (byte) =>
-		byte.toString(16).padStart(2, "0"),
-	).join("");
 };
 
 const companyReviewContent = (
@@ -254,7 +108,7 @@ const saveEnquiry = async (
 	}
 
 	const rateLimit = await env.PARTNERSHIP_FORM_RATE_LIMITER.limit({
-		key: await rateLimitKey(context.request),
+		key: await rateLimitKey(context.request, "partnership-enquiry"),
 	});
 	if (!rateLimit.success) {
 		return { success: false, rateLimited: true } as const;
@@ -269,44 +123,8 @@ const saveEnquiry = async (
 	}
 
 	try {
-		const emailAddress = input.email.toLowerCase();
-		const existingCompanyId = await findRecordId(apiKey, "companies", {
-			domains: { domain: { $eq: emailDomain } },
-		});
-		const companyId =
-			existingCompanyId ??
-			attioRecordId(
-				await attioRequest<AttioRecordResponse>(
-					apiKey,
-					"/objects/companies/records",
-					{
-						name: input.company,
-						domains: [emailDomain],
-					},
-				),
-			);
-
-		const existingPersonId = await findRecordId(apiKey, "people", {
-			email_addresses: { email_address: { $eq: emailAddress } },
-		});
-		const personId =
-			existingPersonId ??
-			attioRecordId(
-				await attioRequest<AttioRecordResponse>(
-					apiKey,
-					"/objects/people/records",
-					{
-						name: [{ full_name: input.name }],
-						email_addresses: [input.email],
-						company: [
-							{
-								target_object: "companies",
-								target_record_id: companyId,
-							},
-						],
-					},
-				),
-			);
+		const { companyId, existingCompanyId, personId, existingPersonId } =
+			await upsertCompanyAndPerson(apiKey, input);
 
 		const sourceAttribute =
 			env.ATTIO_SOURCE_ATTRIBUTE?.trim() || DEFAULT_SOURCE_ATTRIBUTE;

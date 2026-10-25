@@ -1,0 +1,97 @@
+---
+import { getSecret } from "astro:env/server";
+import { env } from "cloudflare:workers";
+import EditorialShell from "@/components/ui/EditorialShell.astro";
+import { GROWTH_EVENTS } from "@/lib/analytics/growth";
+import {
+	COHORT_EMAIL,
+	COHORT_PATH,
+	offer,
+	SESSION_START_UTC,
+	sessionDates,
+	startsLabel,
+} from "@/lib/cohorts/operations-for-ai";
+import { disableContentCache } from "@/lib/live-content";
+import { localTime } from "@/lib/local-time";
+import { getCheckoutSession, isCheckoutSessionId } from "@/lib/stripe";
+import { captureServerEvent, getDistinctId } from "@/server/analytics";
+import Page from "@/wrappers/page.astro";
+
+export const prerender = false;
+
+disableContentCache(Astro);
+Astro.response.headers.set("Cache-Control", "private, no-store");
+
+// Confirm the payment with Stripe rather than trusting the redirect: anyone
+// can visit this URL.
+const sessionId = Astro.url.searchParams.get("session_id");
+const secretKey = getSecret("STRIPE_SECRET_KEY");
+let paid = false;
+let email: string | null = null;
+let seats = 1;
+if (secretKey && isCheckoutSessionId(sessionId)) {
+	try {
+		const session = await getCheckoutSession(secretKey, sessionId);
+		paid = session.paymentStatus === "paid";
+		email = session.customerEmail;
+		seats = session.quantity ?? 1;
+	} catch (error) {
+		console.error("Could not confirm cohort checkout", {
+			message: error instanceof Error ? error.message : "unknown",
+		});
+	}
+}
+
+if (paid) {
+	await captureServerEvent(
+		{
+			event: GROWTH_EVENTS.COHORT_ENROLLED,
+			distinctId: getDistinctId(Astro),
+			properties: {
+				content_id: offer.intakeId,
+				seats,
+				page_path: `${COHORT_PATH}/enrolled`,
+			},
+		},
+		env.ANALYTICS as Fetcher | undefined,
+	);
+}
+
+const firstSession = sessionDates[0]
+	? localTime(`${sessionDates[0]}T${SESSION_START_UTC}:00Z`, {
+			weekday: "long",
+			day: "numeric",
+			month: "long",
+			hour: "numeric",
+			minute: "2-digit",
+			timeZoneName: "short",
+		})
+	: undefined;
+---
+
+<Page title={`You're enrolled: ${offer.title}`} description={`Enrolment confirmation for ${offer.title}.`} noindex>
+	<EditorialShell
+		compact
+		eyebrow={paid ? "Payment confirmed" : "Checking your payment"}
+		title={paid ? "You're in." : "Thanks. We're confirming your payment."}
+		lede={paid
+			? `Your ${seats === 1 ? "seat" : `${seats} seats`} on ${offer.title} ${seats === 1 ? "is" : "are"} reserved. ${startsLabel()}.`
+			: "If you completed checkout, your receipt is on its way from Stripe and David will confirm your seat by email."}
+	>
+		<section class="editorial-section" aria-labelledby="next-steps-title">
+			<div class="editorial-section__header">
+				<h2 id="next-steps-title" class="editorial-section__title">What happens next</h2>
+			</div>
+			<ol class="editorial-list">
+				<li>Stripe emails your receipt and invoice{email ? ` to ${email}` : ""}. Forward the invoice to your expenses.</li>
+				<li>Within two business days David emails the calendar invites, the cohort chat invite and how to get lab access.</li>
+				{firstSession && <li>The first live session is <time {...firstSession.attrs}>{firstSession.text}</time>.</li>}
+				{seats > 1 && <li>Reply to that email with the names and emails of the other engineers taking your seats.</li>}
+			</ol>
+			<p class="editorial-section__lede">Questions? Email <a href={`mailto:${COHORT_EMAIL}`}>{COHORT_EMAIL}</a>.</p>
+			<div class="editorial-actions">
+				<a class="editorial-button editorial-button--secondary" href={COHORT_PATH}>Back to the course</a>
+			</div>
+		</section>
+	</EditorialShell>
+</Page>
