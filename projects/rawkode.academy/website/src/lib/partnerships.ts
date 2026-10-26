@@ -81,25 +81,82 @@ export const partnershipAvailability = partnershipIsFull
 export const partnershipMethodNote =
 	"I've worked through new tools for the first time, live and unscripted, on Rawkode Live since 2020. The product review is the same work done privately, timed and written up as a ranked list.";
 
-/** David's background, shown under the hero byline. */
-export const partnershipExperience =
-	"25 years building software. I've led DevRel and engineering teams at Equinix Metal, Pulumi and InfluxData, and I'm a former CNCF Ambassador. Since 2020 I've taken hundreds of developer tools from zero to working, live and unscripted, on Rawkode Live.";
+export interface CopyPart {
+	text: string;
+	href?: string;
+}
+
+/**
+ * David's background, shown under the hero byline. Parts with an href link to
+ * public proof of the claim.
+ */
+export const partnershipExperience: CopyPart[] = [
+	{
+		text: "I started Rawkode Academy in 2020 because the best way to learn a tool is to try it with no script and nobody to rescue you. Before that I led DevRel and engineering teams at ",
+	},
+	{ text: "Equinix Metal", href: "https://blog.equinix.com/blog/author/dmckay/" },
+	{ text: ", " },
+	{ text: "Pulumi", href: "https://www.youtube.com/watch?v=MR8MOJjez2c" },
+	{ text: " and " },
+	{
+		text: "InfluxData",
+		href: "https://www.influxdata.com/blog/scaling-kubernetes-deployments-influxdb-flux/",
+	},
+	{
+		text: ", so I know what your team can change in a quarter. 25 years building software, a former CNCF Ambassador, and hundreds of developer tools taken from zero to working, live on ",
+	},
+	{ text: "Rawkode Live", href: "/shows/rawkode-live" },
+	{ text: "." },
+];
+
+/** Linux Foundation credentials, each linking to its Credly badge. */
+export const partnershipCredentials = [
+	{
+		label: "KubeCon track chair",
+		href: "https://www.credly.com/badges/5055322b-196e-4deb-a85d-3bb9f1663157",
+	},
+	{
+		label: "KubeCon program committee",
+		href: "https://www.credly.com/badges/72a586a0-cd70-48d3-bb17-e57481aa0802",
+	},
+	{
+		label: "KubeCon speaker",
+		href: "https://www.credly.com/badges/df66413d-2ce5-407d-9505-13f789b4531c",
+	},
+	{
+		label: "cdCon speaker",
+		href: "https://www.credly.com/badges/43eec0bd-a543-4e67-9c0c-3bfe081cd042",
+	},
+] as const;
+
+/** Most recent talk, shown in the hero byline until there is an events calendar. */
+export const partnershipLatestEvent = "Latest: keynote at KCD UK 2026";
+
+/** Real first-look episodes, linked from the hero so buyers can see the work. */
+export const partnershipWatchEpisodes = [
+	{ label: "Restate", href: "/watch/hands-on-introduction-to-restate" },
+	{ label: "SpiceDB", href: "/watch/hands-on-introduction-to-spicedb" },
+	{
+		label: "Fermyon",
+		href: "/watch/hands-on-introduction-to-fermyon-wasm-functions",
+	},
+] as const;
 
 /** Who the programme is for. Used in the hero eyebrow and search copy. */
 export const partnershipAudience =
 	"For developer-tool teams, seed to Series C, building for platform, cloud-native and AI-infrastructure engineers";
 
 export const partnershipDescription =
-	"Start with a $5,000 product review from David Flanagan of Rawkode Academy. You get a written list of what to fix first. If it's useful, you can go on to a $12,000 90-day partnership or a $40,000 annual partnership.";
+	"I work through your developer tool as your target user and tell you where engineers get stuck. You get a written list of what to fix first in 10 business days for $5,000, then a 90-day or annual partnership if it's useful.";
 
 export const partnershipHeroTitle =
-	"Find out where developers give up on your product.";
+	"See exactly where engineers get stuck with your product.";
 
 export const partnershipHeroLede =
 	"Then decide what to fix, what to explain and what to teach, with David Flanagan, founder of Rawkode Academy.";
 
 export const partnershipStartingPoint =
-	"Every partnership starts with a product review. I tell you plainly where engineers get stuck with your product and what to fix first. You get it within 10 business days, and we only invoice once it's delivered. If it's useful, you can go on to a quarterly or annual partnership.";
+	"Every partnership starts with a product review. I tell you plainly where engineers get stuck with your product and what to fix first. You get it within 10 business days, and I only invoice once it's delivered. If it's useful, you can go on to a 90-day or annual partnership.";
 
 export const organizationsStartingPoint = partnershipStartingPoint;
 
@@ -109,7 +166,7 @@ export const partnershipOutcomes = [
 		title: "A product review",
 		inReview: true,
 		detail:
-			"I review your product from setup or sign-up to a working result and writes down the places engineers get stuck. Delivered in the first two weeks as part of the review.",
+			"I review your product from setup or sign-up to a working result and write down the places engineers get stuck. Delivered in the first two weeks as part of the review.",
 	},
 	{
 		title: "A written report",
@@ -133,7 +190,7 @@ export const partnershipOutcomes = [
 		title: "A before-and-after re-run",
 		inReview: false,
 		detail:
-			"At day 90 I repeat the review on what you've shipped since and checks every place engineers got stuck in the original report: fixed, improved or still there.",
+			"At day 90 I repeat the review on what you've shipped since and check every place engineers got stuck in the original report: fixed, improved or still there.",
 	},
 	{
 		title: "A day-90 read-out",
@@ -223,11 +280,11 @@ export const renewalPerks: PartnershipPerk[] = [
 export const partnershipPlan: PartnershipStep[] = [
 	{
 		when: "Weeks 1–2 · product review",
-		what: "We start with a kick-off call, and you give us a trial or sandbox account. I carry out the product review and deliver the written report within 10 business days, then walk your team through it in a one-hour call.",
+		what: "We start with a kick-off call, and you give me a trial or sandbox account. I carry out the product review and deliver the written report within 10 business days, then walk your team through it in a one-hour call.",
 	},
 	{
 		when: "Decide",
-		what: "If you sign a quarterly or annual partnership within 30 days of the review being delivered, the $5,000 you paid for it counts towards the cost. You can also stop there. Either way, you keep everything from the review.",
+		what: "If you sign a 90-day or annual partnership within 30 days of the review being delivered, the $5,000 you paid for it counts towards the cost. You can also stop there. Either way, you keep everything from the review.",
 	},
 	{
 		when: "Month 2",
@@ -235,7 +292,7 @@ export const partnershipPlan: PartnershipStep[] = [
 	},
 	{
 		when: "Month 3",
-		what: "I repeat the review on what you've shipped and checks each place engineers got stuck. At the day-90 read-out, we go through what changed and decide what to work on next quarter.",
+		what: "I repeat the review on what you've shipped and check each place engineers got stuck. At the day-90 read-out, we go through what changed and decide what to work on next quarter.",
 	},
 	{
 		when: "From month 2",
@@ -296,9 +353,10 @@ export interface PartnershipAddOn {
 	price: string;
 	detail: string;
 	cta: string;
+	route: ApplicationPath;
 }
 
-/** Larger pieces of work partners can add to a quarterly or annual partnership. */
+/** Larger pieces of work partners can add to a 90-day or annual partnership. */
 export const partnershipAddOns: PartnershipAddOn[] = [
 	{
 		id: "challenge-series",
@@ -307,6 +365,7 @@ export const partnershipAddOns: PartnershipAddOn[] = [
 		detail:
 			"A hands-on challenge series built around your product, like Advent of Spin for Fermyon, that gets engineers building with it and sharing what they made.",
 		cta: "Ask about a challenge series",
+		route: "Community challenge series",
 	},
 ];
 
@@ -321,16 +380,16 @@ export const partnershipTerms = [
 	{
 		title: "Stop after the review",
 		detail:
-			"The review is the first step and is priced on its own. It is invoiced when we deliver it, not before. If you stop there you have paid $5,000 and keep the review and written report. There is nothing to cancel.",
+			"The review is the first step and is priced on its own. It is invoiced when I deliver it, not before. If you stop there you have paid $5,000 and keep the review and written report. There is nothing to cancel.",
 	},
 	{
 		title: "Renewal",
 		detail:
-			"Nothing renews automatically. A quarterly partnership ends after 90 days, and an annual partnership ends after a year, with a review each quarter. If you want to carry on, we agree it in writing.",
+			"Nothing renews automatically. A 90-day partnership ends at day 90, and an annual partnership ends after a year, with a review each quarter. If you want to carry on, we agree it in writing.",
 	},
 	{
 		title: "Invoicing",
-		detail: `The review is invoiced on delivery. ${partnershipReviewCredit} For the quarterly partnership, the remaining $7,000 is invoiced as two monthly payments of $3,500. The annual partnership is billed at $10,000 a quarter. All prices are fixed and in USD, with 30-day payment terms, and exclude VAT where it applies.`,
+		detail: `The review is invoiced on delivery. ${partnershipReviewCredit} For the 90-day partnership, the remaining $7,000 is invoiced as two monthly payments of $3,500. The annual partnership is billed at $10,000 a quarter. All prices are fixed and in USD, with 30-day payment terms, and exclude VAT where it applies.`,
 	},
 	{
 		title: "Paperwork",
@@ -340,7 +399,7 @@ export const partnershipTerms = [
 	{
 		title: "Access and data",
 		detail:
-			"We work from a trial or sandbox account and don't need production systems or customer data. Review materials are shared with you privately and we delete our copies 90 days after the work ends, or sooner if you ask. Slack Connect is a shared channel your admins control and can close at any time.",
+			"I work from a trial or sandbox account and don't need production systems or customer data. Review materials are shared with you privately and I delete my copies 90 days after the work ends, or sooner if you ask. Slack Connect is a shared channel your admins control and can close at any time.",
 	},
 	{
 		title: "If I can't make it",
@@ -350,7 +409,7 @@ export const partnershipTerms = [
 	{
 		title: "Ownership",
 		detail:
-			"You own the review, the report and the read-out. The example repository is licensed Apache 2.0, so you can use, change and ship it. You approve the session title and use case, can reuse the published session on your own channels, and can ask us to unlist it.",
+			"You own the review, the report and the read-out. The example repository is licensed Apache 2.0, so you can use, change and ship it. You approve the session title and use case, can reuse the published session on your own channels, and can ask me to unlist it.",
 	},
 ] as const;
 
@@ -392,14 +451,15 @@ export const supporterOffer: PartnershipOffer = {
 	label: "Support Rawkode Academy",
 	price: "$1,000 a month",
 	priceShort: "$1k/month",
-	cadence: "No minimum term. Or $9,000 for a year.",
+	cadence:
+		"No minimum term. Or $9,000 for the year: twelve months for the price of nine.",
 	summary:
 		"Fund free tutorials, live streams and shows for the community, and thousands of engineers see your name next to the content they learn from.",
 	included: [
 		"A supporter badge on your Rawkode Academy technology page",
 		"Your docs and resources at the top of your technology page",
 		"Your latest announcement, one at a time, on your technology page and on every video about your technology",
-		"Your logo on our supporters wall",
+		"Your logo on the community supporters wall",
 	],
 	excluded: [],
 	notes: [],
@@ -419,6 +479,7 @@ export const applicationPaths = [
 	"90-day partnership",
 	"Annual plan",
 	"Community supporter",
+	"Community challenge series",
 	"Not sure yet",
 ] as const;
 export type ApplicationPath = (typeof applicationPaths)[number];
@@ -431,6 +492,7 @@ export const applicationPathLabels: Record<ApplicationPath, string> = {
 	"90-day partnership": partnershipOffer.name,
 	"Annual plan": annualPartnershipOffer.name,
 	"Community supporter": supporterOffer.name,
+	"Community challenge series": "Community challenge series",
 	"Not sure yet": "Not sure yet",
 };
 
@@ -447,6 +509,7 @@ export const applicationPathDeals: Record<
 	},
 	"Annual plan": { offer: "Partnership (Yearly)", valueUsd: 40000 },
 	"Community supporter": { offer: "Supporter", valueUsd: 9000 },
+	"Community challenge series": { offer: "Challenge series", valueUsd: 15000 },
 };
 
 /**

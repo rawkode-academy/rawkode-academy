@@ -287,9 +287,10 @@ for (const fixture of fixtures) {
 				),
 				[
 					"Product review",
-					"90-day partnership",
-					"Annual plan",
+					"Full 90-day partnership",
+					"Annual partnership",
 					"Community supporter",
+					"Community challenge series",
 					"Not sure yet",
 				],
 			);

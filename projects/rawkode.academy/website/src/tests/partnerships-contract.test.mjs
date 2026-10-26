@@ -47,7 +47,7 @@ test("partnership page follows the approved redesign", () => {
 	);
 	assert.match(
 		page,
-		/I review how engineers get started with your product and tell you what to fix first\./,
+		/I teach engineers new tools, live and unscripted\. Then I show the teams who build them where engineers get stuck, and what to fix first\./,
 	);
 	assert.match(page, /<dt>Price<\/dt>/);
 	assert.match(page, /<dt>Delivered in<\/dt>/);
@@ -75,7 +75,7 @@ test("partnership page follows the approved redesign", () => {
 	const faqBlock = page.match(/const faqs = \[(.*?)\n\];/s)?.[1];
 	assert(faqBlock);
 	assert.doesNotMatch(faqBlock, /\bDavid\b|\bhe\b|\bhim\b|\bhimself\b/);
-	assert.match(page, /Tell me about your product/);
+	assert.match(page, /What are you building\?/);
 	assert.doesNotMatch(page, /Tell David about your product/);
 	assert.match(
 		page,
@@ -89,7 +89,7 @@ test("partnership page follows the approved redesign", () => {
 	assert.doesNotMatch(page, /Who is this a good fit for\?|How do we stop\?/);
 
 	// Fit.
-	assert.match(page, /Is this for you\?/);
+	assert.match(page, /Teams I work best with/);
 	assert.match(
 		page,
 		/You build developer tools: infrastructure tools, Kubernetes and cloud native projects, cloud platforms or AI infrastructure\./,
@@ -99,7 +99,6 @@ test("partnership page follows the approved redesign", () => {
 		page,
 		/An engineer can install or sign up for your product and try it, including open-source projects installed from GitHub or Helm\./,
 	);
-	assert.match(page, /<h3>Built for<\/h3>/);
 
 	// Partners: one alphabetical grid, current and past together.
 	assert.match(page, /Teams I've worked with/);
@@ -138,7 +137,7 @@ test("partnership page follows the approved redesign", () => {
 	assert.match(page, /data-cta-location=\{card\.ctaLocation\}/);
 	assert.deepEqual(
 		Array.from(page.matchAll(/data-cta-location="([^"]+)"/g), (m) => m[1]),
-		["hero", "pricing-addon", "pricing-supporter", "pinned"],
+		["hero", "hero-watch", "pricing-addon", "pricing-supporter", "pinned"],
 	);
 	// Every button leads to the same form anchor.
 	assert.match(page, /#enquiry-form`/);
@@ -212,7 +211,7 @@ test("partnership page follows the approved redesign", () => {
 	assert.match(partnershipCopy, /exclude VAT where it applies/);
 	assert.match(
 		partnershipCopy,
-		/We start with a kick-off call, and you give us a trial or sandbox account\./,
+		/We start with a kick-off call, and you give me a trial or sandbox account\./,
 	);
 	assert.match(
 		partnershipCopy,
@@ -229,7 +228,7 @@ test("partnership page follows the approved redesign", () => {
 	assert.match(partnershipCopy, /"A ranked list of what to fix first"/);
 	assert.match(
 		partnershipCopy,
-		/You get a written list of what to fix first\./,
+		/You get a written list of what to fix first in 10 business days for \$5,000/,
 	);
 	assert.match(partnershipCopy, /export const productReviewScope =/);
 	assert.match(partnershipCopy, /export const productReviewCompletion =/);

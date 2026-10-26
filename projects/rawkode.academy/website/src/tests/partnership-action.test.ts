@@ -360,6 +360,7 @@ describe("partnership Attio action", () => {
 			"90-day partnership",
 			"Annual plan",
 			"Community supporter",
+			"Community challenge series",
 			"Not sure yet",
 		]);
 		expect(partnerships.applicationPathDeals).toEqual({
@@ -371,6 +372,10 @@ describe("partnership Attio action", () => {
 			},
 			"Annual plan": { offer: "Partnership (Yearly)", valueUsd: 40000 },
 			"Community supporter": { offer: "Supporter", valueUsd: 9000 },
+			"Community challenge series": {
+				offer: "Challenge series",
+				valueUsd: 15000,
+			},
 		});
 		expect(partnerships.resolveApplicationPath("First-run review")).toBe(
 			"Product review",

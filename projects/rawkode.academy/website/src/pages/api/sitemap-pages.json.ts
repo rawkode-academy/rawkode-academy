@@ -6,6 +6,7 @@ import {
 	setContentCache,
 } from "@/lib/live-content";
 import { createLogger } from "@/lib/logger";
+import { partnershipDescription } from "@/lib/partnerships";
 
 const logger = createLogger("sitemap");
 
@@ -110,8 +111,7 @@ async function generateNavigationItems(
 			href: "/organizations",
 			title: "For teams building developer products",
 			category: "Organizations",
-			description:
-				"Find out where developers give up on your product. Start with a $5,000 product review, then choose a $12,000 90-day partnership or a $40,000 annual partnership only if it's useful.",
+			description: partnershipDescription,
 			keywords: [
 				"partnerships",
 				"fit check",
@@ -152,10 +152,9 @@ async function generateNavigationItems(
 		},
 		{
 			href: "/organizations/partnerships",
-			title: "Partnerships",
+			title: "Developer product reviews and partnerships",
 			category: "Organizations",
-			description:
-				"Find out where developers give up on your product. Start with a $5,000 product review, then choose a $12,000 90-day partnership or a $40,000 annual partnership only if it's useful.",
+			description: partnershipDescription,
 			keywords: [
 				"partnerships",
 				"practitioner proof",

@@ -1,18 +1,19 @@
 <template>
 	<div :class="s.root">
-		<p role="status" aria-live="polite" aria-atomic="true" :class="ready ? s.hidden : s.copy">{{ statusMessage }}</p>
+		<p role="status" aria-live="polite" aria-atomic="true" :class="s.hidden">{{ statusMessage }}</p>
 		<p :id="errorId" role="alert" aria-atomic="true" :class="error ? s.error : s.hidden" :data-error-code="errorCode || undefined">{{ error }}</p>
 		<p v-if="fallback" :class="s.copy">
 			<a :href="fallbackMailto">Email me directly</a> with the details you entered.
 		</p>
 		<div v-if="submitted" :class="[s.panel, s.status]">
-			<h3 :class="s.heading">Enquiry received</h3>
+			<h3 ref="successHeading" :class="s.heading" tabindex="-1">Enquiry received</h3>
 			<p :class="s.copy">I read every enquiry and will reply by email.</p>
 		</div>
 		<form
 			v-else
 			method="POST"
 			action="?_action=partnership.applyForm"
+			ref="formElement"
 			:class="s.form"
 			@submit="onSubmit"
 			:aria-busy="loading"
@@ -93,7 +94,7 @@
 						:aria-invalid="fieldErrors.path ? 'true' : undefined"
 						:aria-describedby="fieldErrors.path ? pathErrorId : undefined"
 					>
-						<option v-for="option in applicationPaths" :key="option" :value="option">{{ option }}</option>
+						<option v-for="option in applicationPaths" :key="option" :value="option">{{ applicationPathLabels[option] }}</option>
 					</select>
 					<p v-if="fieldErrors.path" :id="pathErrorId" :class="s.fieldError">{{ fieldErrors.path }}</p>
 				</div>
@@ -126,10 +127,18 @@
 <script setup lang="ts">
 import { actions, isInputError } from "astro:actions";
 import { academyForms } from "@rawkodeacademy/design-system";
-import { computed, onBeforeUnmount, onMounted, ref, useId } from "vue";
+import {
+	computed,
+	nextTick,
+	onBeforeUnmount,
+	onMounted,
+	ref,
+	useId,
+} from "vue";
 import {
 	type ApplicationPath,
 	applicationPathDeals,
+	applicationPathLabels,
 	applicationPaths,
 	resolveApplicationPath,
 } from "@/lib/partnerships";
@@ -168,7 +177,7 @@ const pathErrorId = `${pathId}-error`;
 const messageErrorId = `${messageId}-error`;
 
 const FALLBACK_ERROR =
-	"We could not send your enquiry. Please email david@rawkode.academy directly.";
+	"Your enquiry wasn't sent. Please email me at david@rawkode.academy.";
 
 const isApplicationPath = (value: string): value is ApplicationPath =>
 	(applicationPaths as readonly string[]).includes(value);
@@ -214,6 +223,22 @@ const statusMessage = computed(() => {
 		return "Enquiry received. I read every enquiry and will reply by email.";
 	return loading.value ? "Sending enquiry..." : "";
 });
+
+const formElement = ref<HTMLFormElement | null>(null);
+const successHeading = ref<HTMLHeadingElement | null>(null);
+
+// The form is replaced on success and the submit button keeps focus on
+// errors, so move focus to where the result is.
+const focusResult = async () => {
+	await nextTick();
+	if (submitted.value) {
+		successHeading.value?.focus();
+		return;
+	}
+	formElement.value
+		?.querySelector<HTMLElement>("[aria-invalid='true']")
+		?.focus();
+};
 
 const onDocumentClick = (event: MouseEvent) => {
 	const target = event.target as HTMLElement | null;
@@ -332,6 +357,7 @@ async function submit() {
 		error.value = FALLBACK_ERROR;
 	} finally {
 		loading.value = false;
+		void focusResult();
 	}
 }
 </script>

@@ -1,4 +1,12 @@
 ---
+import {
+	annualPartnershipOffer,
+	fitProofReview,
+	type PartnershipOffer,
+	partnershipOffer,
+	supporterOffer,
+} from "@/lib/partnerships";
+
 interface Props {
 	showInAllPages?: boolean;
 }
@@ -9,6 +17,24 @@ const { showInAllPages = false } = Astro.props;
 const shouldShow = Astro.url.pathname === "/" || showInAllPages;
 
 if (!shouldShow) return;
+
+// Offers come from the same copy module as the partnerships page, so prices
+// in search results cannot drift from what the page says.
+const PARTNERSHIPS_URL = "https://rawkode.academy/organizations/partnerships";
+const usdAmount = (price: string) =>
+	price.match(/\$([\d,]+)/)?.[1]?.replaceAll(",", "") ?? "";
+const partnerOffer = (offer: PartnershipOffer, anchor: string) => ({
+	"@type": "Offer",
+	name: offer.name,
+	price: usdAmount(offer.price),
+	priceCurrency: "USD",
+	url: `${PARTNERSHIPS_URL}${anchor}`,
+	itemOffered: {
+		"@type": "Service",
+		name: offer.name,
+		description: offer.summary,
+	},
+});
 
 const organizationSchema = {
 	"@context": "https://schema.org",
@@ -58,38 +84,17 @@ const organizationSchema = {
 		"Site Reliability Engineering",
 	],
 	offers: [
+		partnerOffer(fitProofReview, "#how-it-works"),
+		partnerOffer(partnershipOffer, "#pricing"),
+		partnerOffer(annualPartnershipOffer, "#pricing"),
 		{
-			"@type": "Offer",
-			name: "90-day partnership",
-			price: "12000",
-			priceCurrency: "GBP",
+			...partnerOffer(supporterOffer, "#supporter"),
 			priceSpecification: {
 				"@type": "UnitPriceSpecification",
-				price: "4000",
-				priceCurrency: "GBP",
+				price: usdAmount(supporterOffer.price),
+				priceCurrency: "USD",
 				unitCode: "MON",
 				unitText: "month",
-				billingDuration: 3,
-			},
-			url: "https://rawkode.academy/organizations/partnerships",
-			itemOffered: {
-				"@type": "Service",
-				name: "90-day partnership",
-				description:
-					"A product review, a written report of what to fix first, a live partner session on Rawkode Live, a runnable example repository and a day-90 read-out",
-			},
-		},
-		{
-			"@type": "Offer",
-			name: "Product review",
-			price: "5000",
-			priceCurrency: "GBP",
-			url: "https://rawkode.academy/organizations/partnerships#review",
-			itemOffered: {
-				"@type": "Service",
-				name: "Product review",
-				description:
-					"A product review and written report showing where engineers get stuck and what to fix first, with a one-hour call",
 			},
 		},
 		{

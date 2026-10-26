@@ -26,11 +26,14 @@ import {
 	type PartnershipOffer,
 	partnershipAddOns,
 	partnershipCapacity,
+	partnershipCredentials,
 	partnershipDescription,
 	partnershipExperience,
+	partnershipLatestEvent,
 	partnershipOffer,
 	partnershipPerks,
 	partnershipReviewCredit,
+	partnershipWatchEpisodes,
 	productReviewCompletion,
 	productReviewPath,
 	productReviewScope,
@@ -192,6 +195,14 @@ const pricingCards: PricingCard[] = [
 	},
 ];
 
+const pageSections = [
+	{ id: "how-it-works", label: "How it works" },
+	{ id: "pricing", label: "Pricing" },
+	{ id: "supporter", label: "Supporter" },
+	{ id: "questions", label: "FAQ" },
+	{ id: "apply", label: "Enquire" },
+];
+
 const noLockIn = [
 	{
 		title: "Stop at any stage",
@@ -248,7 +259,7 @@ const faqs = [
 	{
 		question: "Can we sponsor content as well?",
 		answer:
-			"Yes, we can talk about it alongside the partnership. The review stays my honest take either way.",
+			"Yes. As a community supporter, your docs, your latest announcement and a supporter badge appear on your technology page and on every video about your technology, from $1,000 a month.",
 	},
 	{
 		question: "Do open-source maintainers have to pay to come on Rawkode Live?",
@@ -281,13 +292,14 @@ const partnerQuotes = (
 ---
 
 <Page
-	title="Partnerships"
+	title="Developer product reviews and partnerships"
+	subtitle={partnershipReviewHeroTitle}
 	description={partnershipDescription}
 >
 	<EditorialShell
 		eyebrow="Partnerships"
 		title={partnershipReviewHeroTitle}
-		lede="I review how engineers get started with your product and tell you what to fix first."
+		lede="I teach engineers new tools, live and unscripted. Then I show the teams who build them where engineers get stuck, and what to fix first."
 	>
 		<dl class="partnership-facts" slot="intro">
 			<div>
@@ -303,19 +315,43 @@ const partnerQuotes = (
 			<a id="partnership-hero-cta" class="editorial-button" href={reviewApplyHref} data-apply-path={productReviewPath} data-partnership-cta data-cta-location="hero">Ask about a product review</a>
 			<a class="partnership-text-link" href="#pricing">See all pricing</a>
 		</div>
+		<p class="partnership-watch" slot="actions">
+			Watch me try a new tool live:
+			{partnershipWatchEpisodes.map((episode, index) => (
+				<>
+					{index > 0 && <span aria-hidden="true"> · </span>}
+					<a class="partnership-text-link" href={episode.href} data-partnership-cta data-cta={`watch_${episode.label.toLowerCase()}`} data-cta-location="hero-watch">{episode.label} →</a>
+				</>
+			))}
+		</p>
 		<div class="partnership-byline" slot="actions">
 			{ownerAvatar && <img src={ownerAvatar} alt="" width="48" height="48" loading="eager" decoding="async" />}
 			<p>
 				<strong>David Flanagan</strong>
 				<span>Runs Rawkode Academy and Rawkode Live</span>
 				<span class="partnership-byline__stats">28.2K YouTube subscribers · over 450 hours of developer education</span>
-				<span class="partnership-byline__bio">{partnershipExperience}</span>
+				<span class="partnership-byline__stats">{partnershipLatestEvent}</span>
+				<span class="partnership-byline__bio">{partnershipExperience.map((part) => part.href ? <a href={part.href} rel={part.href.startsWith("http") ? "noopener" : undefined}>{part.text}</a> : part.text)}</span>
+				<span class="partnership-byline__stats partnership-byline__credentials">
+					{partnershipCredentials.map((credential, index) => (
+						<>
+							{index > 0 && <span aria-hidden="true"> · </span>}
+							<a href={credential.href} rel="noopener">{credential.label} ↗</a>
+						</>
+					))}
+				</span>
 			</p>
 		</div>
 		<ReviewPreview slot="aside" placement="hero" />
 
+		<nav class="partnership-rail" aria-label="On this page">
+			<ul>
+				{pageSections.map((section) => <li><a href={`#${section.id}`}>{section.label}</a></li>)}
+			</ul>
+		</nav>
+
 		<section id="who-ive-worked-with" class="editorial-section" aria-labelledby="who-ive-worked-with-title">
-			<h2 id="who-ive-worked-with-title" class="partnership-label">Teams I've worked with</h2>
+			<p id="who-ive-worked-with-title" class="partnership-label">Teams I've worked with</p>
 			<PartnerLogos variant="grid" />
 		</section>
 
@@ -351,24 +387,19 @@ const partnerQuotes = (
 
 		<section id="fit" class="editorial-section editorial-section--split" aria-labelledby="fit-title">
 			<div class="editorial-section__header">
-				<h2 id="fit-title" class="editorial-section__title">Is this for you?</h2>
+				<h2 id="fit-title" class="editorial-section__title">Teams I work best with</h2>
 			</div>
-			<div class="partnership-fit">
-				<div class="partnership-fit__card">
-					<h3>Built for</h3>
-					<ul>
-						<li>You build developer tools: infrastructure tools, Kubernetes and cloud native projects, cloud platforms or AI infrastructure.</li>
-						<li>You're between seed and Series C.</li>
-						<li>An engineer can install or sign up for your product and try it, including open-source projects installed from GitHub or Helm.</li>
-					</ul>
-				</div>
-			</div>
+			<ul class="partnership-fit">
+				<li>You build developer tools: infrastructure tools, Kubernetes and cloud native projects, cloud platforms or AI infrastructure.</li>
+				<li>You're between seed and Series C.</li>
+				<li>An engineer can install or sign up for your product and try it, including open-source projects installed from GitHub or Helm.</li>
+			</ul>
 		</section>
 
 		<section id="perks" class="editorial-section editorial-section--split" aria-labelledby="perks-title">
 			<div class="editorial-section__header">
 				<h2 id="perks-title" class="editorial-section__title">What else you get</h2>
-				<p class="editorial-section__lede">Included with every quarterly and annual partnership.</p>
+				<p class="editorial-section__lede">Included with every 90-day and annual partnership.</p>
 			</div>
 			<div class="partnership-perks">
 				<h3 class="partnership-label">Every partnership</h3>
@@ -449,8 +480,8 @@ const partnerQuotes = (
 							<p>{addOn.detail}</p>
 							<a
 								class="partnership-text-link"
-								href={applyHref("Not sure yet")}
-								data-apply-path="Not sure yet"
+								href={applyHref(addOn.route)}
+								data-apply-path={addOn.route}
 								data-partnership-cta
 								data-cta={`ask_about_${addOn.id.replaceAll("-", "_")}`}
 								data-cta-location="pricing-addon"
@@ -477,7 +508,7 @@ const partnerQuotes = (
 
 		<section id="supporter" class="editorial-section editorial-section--split" aria-labelledby="supporter-title">
 			<div class="editorial-section__header">
-				<h2 id="supporter-title" class="editorial-section__title">Just want to back the content?</h2>
+				<h2 id="supporter-title" class="editorial-section__title">Fund free content for the community</h2>
 				<p class="editorial-section__lede">{supporterOffer.summary}</p>
 			</div>
 			<article class="partnership-plan partnership-supporter" aria-labelledby={`plan-${supporterOffer.id}`}>
@@ -539,7 +570,7 @@ const partnerQuotes = (
 
 		<section id="apply" class="editorial-section editorial-section--split partnerships-apply" aria-labelledby="apply-title">
 			<div class="editorial-section__header">
-				<h2 id="apply-title" class="editorial-section__title">Tell me about your product</h2>
+				<h2 id="apply-title" class="editorial-section__title">What are you building?</h2>
 				<p class="editorial-section__lede">A few lines about your product and what you're after is enough. I read every one and tell you which option fits: a review, a partnership or supporting the community.</p>
 			</div>
 			<div id="enquiry-form" class="partnerships-apply__body">
@@ -708,6 +739,70 @@ const partnerQuotes = (
 		}
 	}
 
+	.partnership-watch {
+		width: 100%;
+		margin: 0;
+		line-height: 1.6;
+		color: var(--colors-academy-text-soft);
+	}
+
+	.partnership-rail {
+		width: 100%;
+		border-block: 1px solid var(--colors-academy-border);
+		background: var(--colors-academy-ground);
+	}
+
+	.partnership-rail ul {
+		display: flex;
+		gap: 0.25rem 1.5rem;
+		margin: 0;
+		padding: 0;
+		overflow-x: auto;
+		list-style: none;
+		scrollbar-width: none;
+	}
+
+	.partnership-rail a {
+		display: inline-flex;
+		align-items: center;
+		min-height: 2.75rem;
+		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
+		font-size: 0.8rem;
+		white-space: nowrap;
+		color: var(--colors-academy-text-soft);
+		text-decoration: none;
+	}
+
+	.partnership-rail a:hover {
+		color: var(--colors-academy-text);
+		text-decoration: underline;
+		text-underline-offset: 0.2em;
+	}
+
+	.partnership-rail a:focus-visible {
+		outline: 2px solid var(--colors-academy-accent);
+		outline-offset: 2px;
+	}
+
+	/* Anchored sections clear the site header, plus the rail on desktop. */
+	.editorial-section[id],
+	#enquiry-form {
+		scroll-margin-top: 5rem;
+	}
+
+	@media (min-width: 64rem) {
+		.partnership-rail {
+			position: sticky;
+			top: 64px;
+			z-index: 10;
+		}
+
+		.editorial-section[id],
+		#enquiry-form {
+			scroll-margin-top: 8rem;
+		}
+	}
+
 	.partnership-byline {
 		display: flex;
 		align-items: center;
@@ -740,6 +835,19 @@ const partnerQuotes = (
 		max-width: 38rem;
 		margin-top: 0.5rem;
 		line-height: 1.5;
+	}
+
+	.partnership-byline__bio a,
+	.partnership-byline__credentials a {
+		color: inherit;
+		text-decoration: underline;
+		text-underline-offset: 0.2em;
+	}
+
+	.partnership-byline__bio a:focus-visible,
+	.partnership-byline__credentials a:focus-visible {
+		outline: 2px solid var(--colors-academy-accent);
+		outline-offset: 2px;
 	}
 
 	.partnership-byline__stats {
@@ -925,61 +1033,28 @@ const partnerQuotes = (
 	/* Fit */
 	.partnership-fit {
 		display: grid;
-		gap: 0.75rem;
+		gap: 0;
 		min-width: 0;
-	}
-
-	.partnership-fit__card {
-		display: grid;
-		gap: 0.65rem;
-		padding: 1.25rem;
-		border: 1px solid var(--colors-academy-border);
-		border-radius: var(--radii-academy-l);
-		background: var(--colors-academy-panel);
-	}
-
-	.partnership-fit__card h3 {
-		margin: 0;
-		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
-		font-size: 0.8rem;
-		font-weight: 600;
-		color: var(--colors-academy-status-spruce);
-	}
-
-	.partnership-fit__card--no h3 {
-		color: var(--colors-academy-text-muted);
-	}
-
-	.partnership-fit__card ul {
-		display: grid;
-		gap: 0.6rem;
 		margin: 0;
 		padding: 0;
 		list-style: none;
+		border-top: 1px solid var(--colors-academy-border);
 	}
 
-	.partnership-fit__card li {
+	.partnership-fit li {
 		position: relative;
-		padding-left: 1.6rem;
+		padding: 0.85rem 0 0.85rem 1.6rem;
+		border-bottom: 1px solid var(--colors-academy-border);
 		line-height: 1.5;
 		color: var(--colors-academy-text);
 	}
 
-	.partnership-fit__card--no li {
-		color: var(--colors-academy-text-soft);
-	}
-
-	.partnership-fit__card li::before {
+	.partnership-fit li::before {
 		content: "✓";
 		position: absolute;
 		left: 0;
 		font-weight: 700;
 		color: var(--colors-academy-status-spruce);
-	}
-
-	.partnership-fit__card--no li::before {
-		content: "✕";
-		color: var(--colors-academy-text-muted);
 	}
 
 	/* Pricing */
@@ -1158,27 +1233,10 @@ const partnerQuotes = (
 		color: var(--colors-academy-text-muted);
 	}
 
-	.partnership-plan__excluded {
-		border-top: 1px solid var(--colors-academy-border);
-	}
-
-	.partnership-plan__excluded summary {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		min-height: 2.75rem;
-		cursor: pointer;
-		font-weight: 600;
-		color: var(--colors-academy-text-soft);
-		list-style: none;
-	}
-
-	.partnership-plan__excluded summary::-webkit-details-marker,
 	#questions .partnership-faq summary::-webkit-details-marker {
 		display: none;
 	}
 
-	.partnership-plan__excluded summary::after,
 	#questions .partnership-faq summary::after {
 		content: "";
 		flex: none;
@@ -1189,25 +1247,13 @@ const partnerQuotes = (
 		transform: rotate(45deg);
 	}
 
-	.partnership-plan__excluded[open] summary::after,
 	#questions .partnership-faq details[open] summary::after {
 		transform: rotate(225deg);
 	}
 
-	.partnership-plan__excluded summary:focus-visible,
 	#questions .partnership-faq summary:focus-visible {
 		outline: 2px solid var(--colors-academy-accent);
 		outline-offset: 4px;
-	}
-
-	.partnership-plan__excluded ul {
-		display: grid;
-		gap: 0.5rem;
-		margin: 0 0 0.5rem;
-		padding-left: 1.1rem;
-		font-size: 0.9rem;
-		line-height: 1.45;
-		color: var(--colors-academy-text-soft);
 	}
 
 	.partnership-plan > .editorial-button {
