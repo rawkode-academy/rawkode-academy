@@ -282,3 +282,17 @@ describe("courses write model", () => {
 		);
 	});
 });
+
+describe("foreign keys", () => {
+	it("reports a module for a course that does not exist as a validation error", async () => {
+		const orphan = {
+			...newModule,
+			id: "no-such-course/intro",
+			courseId: "no-such-course",
+		};
+		const result = await store.create("course-module", orphan, agent);
+		expect(result.ok).toBe(false);
+		if (result.ok) return;
+		expect(result.error.code).toBe("validation");
+	});
+});

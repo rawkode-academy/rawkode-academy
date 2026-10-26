@@ -31,7 +31,9 @@ describe("show-hosts write model", () => {
 	it("accepts every stored host list as it is", async () => {
 		const page = await store.list("show-hosts", { limit: 200 });
 		if (!page.ok) throw new Error(page.error.message);
-		const shows = [...new Set(page.value.rows.map((row) => String(row.showId)))];
+		const shows = [
+			...new Set(page.value.rows.map((row) => String(row.showId))),
+		];
 		expect(shows.length).toBeGreaterThan(0);
 		for (const showId of shows) {
 			const before = await store.getList("show-hosts", { showId });
@@ -60,7 +62,9 @@ describe("show-hosts write model", () => {
 			agent,
 		);
 		if (!result.ok) throw new Error(JSON.stringify(result.error));
-		const got = await store.getList("show-hosts", { showId: "cloud-native-compass" });
+		const got = await store.getList("show-hosts", {
+			showId: "cloud-native-compass",
+		});
 		expect(got.ok && got.value.value).toEqual([
 			{ showId: "cloud-native-compass", hostId: "nimbinatus", position: 0 },
 			{ showId: "cloud-native-compass", hostId: "salaboy", position: 1 },
@@ -84,20 +88,32 @@ describe("show-hosts write model", () => {
 			agent,
 		);
 		if (!result.ok) throw new Error(JSON.stringify(result.error));
-		expect(sent.at(-1)?.tags.sort()).toEqual(["people:rawkode", "shows:klustered"]);
+		expect(sent.at(-1)?.tags.sort()).toEqual([
+			"people:rawkode",
+			"shows:klustered",
+		]);
 	});
 
 	it("rejects hosts that are not person ids", async () => {
 		const result = await store.setList(
 			"show-hosts",
 			{ showId: "alphabits" },
-			[{ hostId: "rawkode" }, { hostId: "" }, { hostId: "Brian Ketelsen" }, { hostId: "x", position: 4 }],
+			[
+				{ hostId: "rawkode" },
+				{ hostId: "" },
+				{ hostId: "Brian Ketelsen" },
+				{ hostId: "x", position: 4 },
+			],
 			{ ifVersion: 1 },
 			agent,
 		);
 		expect(result.ok).toBe(false);
 		if (result.ok) return;
-		expect(result.error.issues?.map((i) => i.path)).toEqual(["1.hostId", "2.hostId", "3."]);
+		expect(result.error.issues?.map((i) => i.path)).toEqual([
+			"1.hostId",
+			"2.hostId",
+			"3.",
+		]);
 	});
 
 	it("rejects a host listed twice", async () => {
@@ -110,6 +126,9 @@ describe("show-hosts write model", () => {
 		);
 		expect(!result.ok && result.error.code).toBe("validation");
 		const got = await store.getList("show-hosts", { showId: "alphabits" });
-		expect(got.ok && got.value.value.map((row) => row.hostId)).toEqual(["rawkode", "bketelsen"]);
+		expect(got.ok && got.value.value.map((row) => row.hostId)).toEqual([
+			"rawkode",
+			"bketelsen",
+		]);
 	});
 });

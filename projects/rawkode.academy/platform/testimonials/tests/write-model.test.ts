@@ -75,7 +75,9 @@ describe("testimonials write model", () => {
 
 	it("finds testimonials by author", async () => {
 		const page = await store.list("testimonial", { search: "Fermyon" });
-		expect(page.ok && page.value.rows.map((row) => row.id)).toEqual(["mikkel-hegnhoj"]);
+		expect(page.ok && page.value.rows.map((row) => row.id)).toEqual([
+			"mikkel-hegnhoj",
+		]);
 	});
 
 	it("rejects values the website cannot render", async () => {
@@ -95,7 +97,15 @@ describe("testimonials write model", () => {
 		expect(result.ok).toBe(false);
 		if (result.ok) return;
 		expect(result.error.issues?.map((i) => i.path).sort()).toEqual(
-			["authorImage", "authorLink", "authorName", "authorTitle", "id", "quote", "type"].sort(),
+			[
+				"authorImage",
+				"authorLink",
+				"authorName",
+				"authorTitle",
+				"id",
+				"quote",
+				"type",
+			].sort(),
 		);
 	});
 
@@ -105,8 +115,8 @@ describe("testimonials write model", () => {
 			{ id: "no-author", type: "partner", quote: "Great." },
 			agent,
 		);
-		expect(!result.ok && result.error.issues?.map((i) => i.path).sort()).toEqual(
-			["authorImage", "authorName", "authorTitle"],
-		);
+		expect(
+			!result.ok && result.error.issues?.map((i) => i.path).sort(),
+		).toEqual(["authorImage", "authorName", "authorTitle"]);
 	});
 });

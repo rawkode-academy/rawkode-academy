@@ -129,3 +129,30 @@ describe("people-biographies write model", () => {
 		expect(!result.ok && result.error.issues?.[0]?.path).toBe("biographyDoc");
 	});
 });
+
+describe("editing the biography copy", () => {
+	it("rebuilds biographyDoc from an edited biography instead of discarding the edit", async () => {
+		await store.create(
+			"person-biography",
+			{ personId: "copy-edit", biography: "Old text." },
+			agent,
+		);
+		const page = await store.list("person-biography", { limit: 1 });
+		if (!page.ok) throw new Error(page.error.message);
+		const id = String(page.value.rows[0]?.personId);
+		const before = await store.get("person-biography", id);
+		if (!before.ok) throw new Error(before.error.message);
+		const updated = await store.update(
+			"person-biography",
+			id,
+			{ biography: "Edited in the CMS." },
+			{ ifVersion: before.value.version },
+			agent,
+		);
+		if (!updated.ok) throw new Error(JSON.stringify(updated.error));
+		expect(updated.value.value.biography).toBe("Edited in the CMS.");
+		expect(JSON.stringify(updated.value.value.biographyDoc)).toContain(
+			"Edited in the CMS.",
+		);
+	});
+});

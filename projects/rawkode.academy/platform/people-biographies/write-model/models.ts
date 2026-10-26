@@ -32,13 +32,22 @@ export const models = defineModels("people-biographies", [
 		schema: biography,
 		// biographyDoc is the source of truth and biography its Markdown copy;
 		// writers that only send Markdown get a document built from it.
-		derive: (row) =>
-			row.biographyDoc
-				? { ...row, biography: markdownOf(row.biographyDoc) }
-				: {
-						...row,
-						biographyDoc: documentFromMarkdown(String(row.biography)),
-					},
+		derive: (sent, changed) => {
+			// An edited biography sent without a biographyDoc replaces the document,
+			// instead of being overwritten by the stored document's copy.
+			const row =
+				changed.has("biography") && !changed.has("biographyDoc")
+					? { ...sent, biographyDoc: null }
+					: sent;
+			const derive = (row: typeof sent) =>
+				row.biographyDoc
+					? { ...row, biography: markdownOf(row.biographyDoc) }
+					: {
+							...row,
+							biographyDoc: documentFromMarkdown(String(row.biography)),
+						};
+			return derive(row);
+		},
 		// The biography renders on the person's page (body of the people entry).
 		tags: (row) => [tag("people", row.personId)],
 		search: ["personId", "biography"],

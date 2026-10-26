@@ -100,3 +100,25 @@ describe("technologies write model", () => {
 		expect(!result.ok && result.error.issues?.[0]?.path).toBe("body");
 	});
 });
+
+describe("editing the description copy", () => {
+	it("rebuilds body from an edited description instead of discarding the edit", async () => {
+		const page = await store.list("technology", { limit: 1 });
+		if (!page.ok) throw new Error(page.error.message);
+		const id = String(page.value.rows[0]?.id);
+		const before = await store.get("technology", id);
+		if (!before.ok) throw new Error(before.error.message);
+		const updated = await store.update(
+			"technology",
+			id,
+			{ description: "Edited in the CMS." },
+			{ ifVersion: before.value.version },
+			agent,
+		);
+		if (!updated.ok) throw new Error(JSON.stringify(updated.error));
+		expect(updated.value.value.description).toBe("Edited in the CMS.");
+		expect(JSON.stringify(updated.value.value.body)).toContain(
+			"Edited in the CMS.",
+		);
+	});
+});

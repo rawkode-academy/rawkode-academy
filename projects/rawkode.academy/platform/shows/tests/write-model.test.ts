@@ -61,7 +61,9 @@ describe("shows write model", () => {
 			const { updatedAt: _c, descriptionDoc, ...after } = result.value.value;
 			expect(after).toEqual(before);
 			// Shows not backfilled yet get their document from the Markdown.
-			expect(descriptionDoc).toEqual(documentFromMarkdown(String(row.description)));
+			expect(descriptionDoc).toEqual(
+				documentFromMarkdown(String(row.description)),
+			);
 		}
 	});
 
@@ -78,7 +80,8 @@ describe("shows write model", () => {
 				{ ifVersion: current.value.version },
 				agent,
 			);
-			if (!result.ok) throw new Error(`${row.id}: ${JSON.stringify(result.error)}`);
+			if (!result.ok)
+				throw new Error(`${row.id}: ${JSON.stringify(result.error)}`);
 			expect(result.value.value.description).toBe(row.description);
 		}
 	});
@@ -98,7 +101,11 @@ describe("shows write model", () => {
 					explicit: false,
 				},
 				subscribeLinks: [
-					{ platform: "RSS", url: "https://rawkode.academy/feeds/debug-club.xml", icon: "rss" },
+					{
+						platform: "RSS",
+						url: "https://rawkode.academy/feeds/debug-club.xml",
+						icon: "rss",
+					},
 				],
 			},
 			agent,
@@ -121,7 +128,11 @@ describe("shows write model", () => {
 	it("builds descriptionDoc from Markdown when a writer sends only a description", async () => {
 		const created = await store.create(
 			"show",
-			{ id: "markdown-only", name: "Markdown only", description: "A *weekly* show." },
+			{
+				id: "markdown-only",
+				name: "Markdown only",
+				description: "A *weekly* show.",
+			},
 			agent,
 		);
 		if (!created.ok) throw new Error(JSON.stringify(created.error));
@@ -131,9 +142,16 @@ describe("shows write model", () => {
 	});
 
 	it("leaves both copies empty when there is no description", async () => {
-		const created = await store.create("show", { id: "quiet", name: "Quiet" }, agent);
+		const created = await store.create(
+			"show",
+			{ id: "quiet", name: "Quiet" },
+			agent,
+		);
 		if (!created.ok) throw new Error(JSON.stringify(created.error));
-		expect(created.value.value).toMatchObject({ description: null, descriptionDoc: null });
+		expect(created.value.value).toMatchObject({
+			description: null,
+			descriptionDoc: null,
+		});
 	});
 
 	it("clears the Markdown copy when the document is emptied", async () => {
@@ -145,7 +163,10 @@ describe("shows write model", () => {
 			agent,
 		);
 		if (!updated.ok) throw new Error(JSON.stringify(updated.error));
-		expect(updated.value.value).toMatchObject({ description: null, descriptionDoc: null });
+		expect(updated.value.value).toMatchObject({
+			description: null,
+			descriptionDoc: null,
+		});
 	});
 
 	it("rejects values the website cannot render", async () => {
@@ -159,7 +180,9 @@ describe("shows write model", () => {
 				coverUrl: "cover.png",
 				coverWidth: -1,
 				podcast: { email: "nope", category: "Technology", explicit: "no" },
-				subscribeLinks: [{ platform: "Mastodon", url: "https://x.y", icon: "mastodon" }],
+				subscribeLinks: [
+					{ platform: "Mastodon", url: "https://x.y", icon: "mastodon" },
+				],
 			},
 			agent,
 		);
@@ -191,5 +214,27 @@ describe("shows write model", () => {
 			agent,
 		);
 		expect(!result.ok && result.error.issues?.[0]?.path).toBe("descriptionDoc");
+	});
+});
+
+describe("editing the description copy", () => {
+	it("rebuilds descriptionDoc from an edited description instead of discarding the edit", async () => {
+		const page = await store.list("show", { limit: 1 });
+		if (!page.ok) throw new Error(page.error.message);
+		const id = String(page.value.rows[0]?.id);
+		const before = await store.get("show", id);
+		if (!before.ok) throw new Error(before.error.message);
+		const updated = await store.update(
+			"show",
+			id,
+			{ description: "Edited in the CMS." },
+			{ ifVersion: before.value.version },
+			agent,
+		);
+		if (!updated.ok) throw new Error(JSON.stringify(updated.error));
+		expect(updated.value.value.description).toBe("Edited in the CMS.");
+		expect(JSON.stringify(updated.value.value.descriptionDoc)).toContain(
+			"Edited in the CMS.",
+		);
 	});
 });

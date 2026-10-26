@@ -88,19 +88,30 @@ export const models = defineModels("shows", [
 		// descriptionDoc is the source of truth and description its Markdown
 		// copy (the read model serves it as "Markdown; use descriptionDoc");
 		// writers that only send Markdown get a document built from it.
-		derive: (row) => {
-			if (row.descriptionDoc) {
-				// An emptied document clears both copies.
-				return isEmptyDocument(row.descriptionDoc)
-					? { ...row, description: null, descriptionDoc: null }
-					: { ...row, description: text(markdownOf(row.descriptionDoc)) };
-			}
-			const description = text(row.description);
-			return {
-				...row,
-				description,
-				descriptionDoc: description ? documentFromMarkdown(description) : null,
+		derive: (sent, changed) => {
+			// An edited description sent without a descriptionDoc replaces the document,
+			// instead of being overwritten by the stored document's copy.
+			const row =
+				changed.has("description") && !changed.has("descriptionDoc")
+					? { ...sent, descriptionDoc: null }
+					: sent;
+			const derive = (row: typeof sent) => {
+				if (row.descriptionDoc) {
+					// An emptied document clears both copies.
+					return isEmptyDocument(row.descriptionDoc)
+						? { ...row, description: null, descriptionDoc: null }
+						: { ...row, description: text(markdownOf(row.descriptionDoc)) };
+				}
+				const description = text(row.description);
+				return {
+					...row,
+					description,
+					descriptionDoc: description
+						? documentFromMarkdown(description)
+						: null,
+				};
 			};
+			return derive(row);
 		},
 		// Pages that show a show (its page, video pages, hosts' pages) carry
 		// its entity tag; hosts live in show-hosts.

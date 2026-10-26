@@ -126,16 +126,25 @@ export const models = defineModels("videos", [
 		schema: video,
 		// descriptionDoc is the source of truth and description its plain-text
 		// copy; writers that only send plain text get a document built from it.
-		derive: (row) => {
-			if (row.descriptionDoc) {
-				return { ...row, description: textOf(row.descriptionDoc) };
-			}
-			const description = plainText(String(row.description));
-			return {
-				...row,
-				description,
-				descriptionDoc: documentFromText(description),
+		derive: (sent, changed) => {
+			// An edited description sent without a descriptionDoc replaces the document,
+			// instead of being overwritten by the stored document's copy.
+			const row =
+				changed.has("description") && !changed.has("descriptionDoc")
+					? { ...sent, descriptionDoc: null }
+					: sent;
+			const derive = (row: typeof sent) => {
+				if (row.descriptionDoc) {
+					return { ...row, description: textOf(row.descriptionDoc) };
+				}
+				const description = plainText(String(row.description));
+				return {
+					...row,
+					description,
+					descriptionDoc: documentFromText(description),
+				};
 			};
+			return derive(row);
 		},
 		tags: (row) => [tag("videos", row.id)],
 		search: ["title", "slug", "youtubeId"],

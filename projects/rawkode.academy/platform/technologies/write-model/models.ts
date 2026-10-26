@@ -29,7 +29,7 @@ const technology = rowSchema(technologiesTable, {
 	id: slug(),
 	name: requiredText(),
 	// Derived from body when body is set; the only input when it is not.
-	description: z.string(),
+	description: z.string().default(""),
 	body: richTextDocument().nullable().optional(),
 	website: httpUrl().nullable().optional(),
 	documentation: httpUrl().nullable().optional(),
@@ -135,10 +135,19 @@ export const models = defineModels("technologies", [
 		schema: technology,
 		// body is the source of truth and description its Markdown copy;
 		// writers that only send Markdown get a body built from it.
-		derive: (row) =>
-			row.body
-				? { ...row, description: markdownOf(row.body) }
-				: { ...row, body: documentFromMarkdown(String(row.description)) },
+		derive: (sent, changed) => {
+			// An edited description sent without a body replaces the document,
+			// instead of being overwritten by the stored document's copy.
+			const row =
+				changed.has("description") && !changed.has("body")
+					? { ...sent, body: null }
+					: sent;
+			const derive = (row: typeof sent) =>
+				row.body
+					? { ...row, description: markdownOf(row.body) }
+					: { ...row, body: documentFromMarkdown(String(row.description)) };
+			return derive(row);
+		},
 		tags: (row) => [tag("technologies", row.id)],
 		search: ["id", "name"],
 	},
