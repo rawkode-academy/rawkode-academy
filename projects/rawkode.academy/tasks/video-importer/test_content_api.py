@@ -180,6 +180,19 @@ def cms_error(status, payload):
     )
 
 
+class SlugTest(unittest.TestCase):
+    def test_slugs_fit_the_write_model(self):
+        cases = {
+            "Café Kubernetes": "cafe-kubernetes",
+            "k8s_operator: deep dive!": "k8s-operator-deep-dive",
+            "  Rawkode -- Live  ": "rawkode-live",
+            "🚀": "video",
+        }
+        for title, slug in cases.items():
+            self.assertEqual(content_api.generate_slug(title), slug)
+            self.assertRegex(slug, r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+
+
 class CmsClientTest(unittest.TestCase):
     def row(self):
         return video_row("abc", "Hello World", "First line\nhttps://example.com", 90, 1760000000, youtube_id="yt1", now=0)

@@ -15,6 +15,7 @@ import json
 import logging
 import os
 import re
+import unicodedata
 import time
 import urllib.error
 import urllib.parse
@@ -104,12 +105,15 @@ def text_to_doc(text):
 
 
 def generate_slug(title):
-    """URL-friendly slug from a title."""
-    slug = title.lower()
-    slug = re.sub(r"[^\w\s-]", " ", slug)
-    slug = re.sub(r"\s+", " ", slug)
-    slug = slug.strip().replace(" ", "-")
-    return re.sub(r"-+", "-", slug)
+    """
+    URL-friendly slug from a title, matching the videos write model's rule
+    (lowercase ASCII words joined by single hyphens): accents are folded
+    ("café" -> "cafe"), underscores become hyphens, other symbols separate
+    words. A title with no letters or digits gives "video".
+    """
+    folded = unicodedata.normalize("NFKD", title or "").encode("ascii", "ignore").decode()
+    words = re.findall(r"[a-z0-9]+", folded.lower())
+    return "-".join(words) or "video"
 
 
 VIDEO_COLUMNS = (
