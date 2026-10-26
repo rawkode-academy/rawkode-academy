@@ -225,12 +225,12 @@ export const partnershipPlan: PartnershipStep[] = [
 		what: "If you sign a 90-day or annual partnership within 30 days of the review being delivered, the $5,000 you paid for it counts towards the cost. You can also stop there. Either way, you keep everything from the review.",
 	},
 	{
-		when: "Month 2",
-		what: "Agree the use case to teach. I write the runnable example, your team reviews it, and I run the live session on Rawkode Live or your own webinar, solo or with someone from your team. Monthly working session on the ranked list.",
+		when: "From the start",
+		what: "Slack Connect with me for questions and second opinions on launches, docs, demos and roadmap trade-offs.",
 	},
 	{
-		when: "From month 2",
-		what: "Slack Connect with me for questions and second opinions on launches, docs, demos and roadmap trade-offs.",
+		when: "Month 2",
+		what: "Agree the use case to teach. I write the runnable example, your team reviews it, and I run the live session on Rawkode Live or your own webinar, solo or with someone from your team. Monthly working session on the ranked list.",
 	},
 	{
 		when: "Month 3",
