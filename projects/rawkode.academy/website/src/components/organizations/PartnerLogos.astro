@@ -18,21 +18,11 @@ import zitadel from "@/components/partner/logos/zitadel.svg?url";
 interface Company {
 	name: string;
 	src?: string;
-	/** Override for marks with unusual padding or proportions. */
-	height?: string;
 	/** Show the name beside marks that are an icon only. */
 	wordmark?: boolean;
 	/** Height in the grid tiles, so marks read at the same optical size. */
 	tileHeight?: string;
 }
-
-interface Props {
-	showCurrent?: boolean;
-	/** `grid` shows every team in one A–Z grid of equal tiles. */
-	variant?: "list" | "grid";
-}
-
-const { showCurrent = true, variant = "list" } = Astro.props;
 
 const currentCompanies: Company[] = [
 	{ name: "Datum Cloud", src: datum, tileHeight: "1.35rem" },
@@ -44,7 +34,7 @@ const pastCompanies: Company[] = [
 	{ name: "ControlPlane", src: controlplane },
 	{ name: "Fermyon", src: fermyon, tileHeight: "1rem" },
 	{ name: "Guidepad", src: guidepad },
-	{ name: "Heroku", src: heroku, height: "2.75rem", tileHeight: "2.25rem" },
+	{ name: "Heroku", src: heroku, tileHeight: "2.25rem" },
 	{ name: "Microsoft Azure", src: microsoft, tileHeight: "1.75rem" },
 	{ name: "ngrok", src: ngrok },
 	{ name: "WunderGraph", src: wundergraph, wordmark: true },
@@ -56,7 +46,6 @@ const allCompanies = [...currentCompanies, ...pastCompanies].sort((a, b) =>
 );
 ---
 
-{variant === "grid" ? (
 <ul class="partner-grid">
 	{allCompanies.map((company) => (
 		<li class="partner-grid__tile">
@@ -74,50 +63,6 @@ const allCompanies = [...currentCompanies, ...pastCompanies].sort((a, b) =>
 		</li>
 	))}
 </ul>
-) : (
-<figure class="partner-logos">
-	{showCurrent && (
-		<div class="partner-logos__group">
-			<ul class="partner-logos__list">
-				{currentCompanies.map((company) => (
-					<li class="partner-logos__item">
-						{company.src ? (
-							<img
-								src={company.src}
-								alt={company.name}
-								loading="lazy"
-								decoding="async"
-								height="28"
-							/>
-						) : (
-							<span class="partner-logos__wordmark">{company.name}</span>
-						)}
-					</li>
-				))}
-			</ul>
-		</div>
-	)}
-	<div class="partner-logos__group">
-		<ul class="partner-logos__list">
-			{pastCompanies.map((company) => (
-				<li class="partner-logos__item">
-					{company.src && (
-						<img
-							src={company.src}
-							alt={company.wordmark ? "" : company.name}
-							loading="lazy"
-							decoding="async"
-							height="28"
-							style={company.height ? `height: ${company.height}` : undefined}
-						/>
-					)}
-					{company.wordmark && <span class="partner-logos__wordmark">{company.name}</span>}
-				</li>
-			))}
-		</ul>
-	</div>
-</figure>
-)}
 
 <style>
 	.partner-grid {
@@ -168,40 +113,6 @@ const allCompanies = [...currentCompanies, ...pastCompanies].sort((a, b) =>
 		opacity: 0.8;
 	}
 
-	.partner-logos {
-		display: grid;
-		gap: 1rem;
-		margin: 0;
-	}
-
-	.partner-logos__group {
-		display: grid;
-		gap: 0.75rem;
-	}
-
-	.partner-logos__label {
-		margin: 0;
-		font-family: var(--fonts-academy-text), system-ui, sans-serif;
-		font-weight: 700;
-		color: var(--colors-academy-text);
-	}
-
-	.partner-logos__list {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 1.25rem 2rem;
-		margin: 0;
-		padding: 0;
-		list-style: none;
-	}
-
-	.partner-logos__item {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
-
 	.partner-logos__wordmark {
 		font-family: var(--fonts-academy-text), system-ui, sans-serif;
 		font-size: 1.05rem;
@@ -209,20 +120,5 @@ const allCompanies = [...currentCompanies, ...pastCompanies].sort((a, b) =>
 		letter-spacing: -0.01em;
 		color: var(--colors-academy-text);
 		opacity: 0.72;
-	}
-
-	.partner-logos__list img {
-		display: block;
-		width: auto;
-		max-width: 9rem;
-		height: 1.75rem;
-		object-fit: contain;
-		filter: brightness(0);
-		opacity: 0.72;
-	}
-
-	:global(html.dark) .partner-logos__list img {
-		filter: brightness(0) invert(1);
-		opacity: 0.8;
 	}
 </style>

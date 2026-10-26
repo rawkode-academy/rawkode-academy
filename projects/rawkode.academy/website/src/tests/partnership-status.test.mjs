@@ -6,14 +6,6 @@ const logos = readFileSync(
 	new URL("../components/organizations/PartnerLogos.astro", import.meta.url),
 	"utf8",
 );
-const proof = readFileSync(
-	new URL(
-		"../components/organizations/PartnershipProof.astro",
-		import.meta.url,
-	),
-	"utf8",
-);
-
 test("Datum Cloud is the only current partner", () => {
 	const currentList = logos.match(
 		/const currentCompanies: Company\[\] = \[(.*?)\];/s,
@@ -23,7 +15,6 @@ test("Datum Cloud is the only current partner", () => {
 		Array.from(currentList.matchAll(/name: "([^"]+)"/g), (match) => match[1]),
 		["Datum Cloud"],
 	);
-	assert.match(proof, /Datum Cloud is the current partner/);
 });
 
 test("the historical list contains the ten approved past partners", () => {
@@ -49,5 +40,4 @@ test("the historical list contains the ten approved past partners", () => {
 	assert.doesNotMatch(logos, /Current partner|Past partners/);
 	assert.doesNotMatch(logos, /Teams we've worked with/);
 	assert.doesNotMatch(logos, /Armo|Komodor/);
-	assert.doesNotMatch(proof, /a dozen/i);
 });
