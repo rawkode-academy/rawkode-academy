@@ -285,7 +285,13 @@ for (const fixture of fixtures) {
 					form.querySelectorAll("select[name=path] option"),
 					(option) => option.textContent,
 				),
-				["Product review", "90-day partnership", "Annual plan", "Not sure yet"],
+				[
+					"Product review",
+					"90-day partnership",
+					"Annual plan",
+					"Community supporter",
+					"Not sure yet",
+				],
 			);
 		} else {
 			assert.equal(form.getAttribute("aria-busy"), "true");
