@@ -10,6 +10,8 @@ on:
     - .github/workflows/rawkode-academy-platform-technologies-default.yml
     - cue.mod/**
     - projects/rawkode.academy/platform/technologies/**
+    - packages/content-write/**
+    - packages/content-model/**
     - projects/rawkode.academy/platform/technologies/env.cue
     - projects/rawkode.academy/platform/technologies/schema/**
   workflow_dispatch: {}

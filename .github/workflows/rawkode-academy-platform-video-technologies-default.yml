@@ -10,6 +10,8 @@ on:
     - .github/workflows/rawkode-academy-platform-video-technologies-default.yml
     - cue.mod/**
     - projects/rawkode.academy/platform/video-technologies/**
+    - packages/content-write/**
+    - packages/content-model/**
     - projects/rawkode.academy/platform/video-technologies/env.cue
     - projects/rawkode.academy/platform/video-technologies/schema/**
   workflow_dispatch: {}

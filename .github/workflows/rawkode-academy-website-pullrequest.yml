@@ -11,6 +11,7 @@ on:
     - cue.mod/**
     - packages/design-system/**
     - packages/rich-text/**
+    - packages/content-model/**
     - projects/rawkode.academy/games/secrets-of-kubernetes/achievements/**
     - projects/rawkode.academy/games/secrets-of-kubernetes/leaderboard/**
     - projects/rawkode.academy/games/secrets-of-kubernetes/player-learned-phrases/**

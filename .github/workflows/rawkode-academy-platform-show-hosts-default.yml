@@ -10,6 +10,8 @@ on:
     - .github/workflows/rawkode-academy-platform-show-hosts-default.yml
     - cue.mod/**
     - projects/rawkode.academy/platform/show-hosts/**
+    - packages/content-write/**
+    - packages/content-model/**
     - projects/rawkode.academy/platform/show-hosts/env.cue
     - projects/rawkode.academy/platform/show-hosts/schema/**
   workflow_dispatch: {}

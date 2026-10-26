@@ -10,6 +10,8 @@ on:
     - .github/workflows/rawkode-academy-platform-testimonials-default.yml
     - cue.mod/**
     - projects/rawkode.academy/platform/testimonials/**
+    - packages/content-write/**
+    - packages/content-model/**
     - projects/rawkode.academy/platform/testimonials/env.cue
     - projects/rawkode.academy/platform/testimonials/schema/**
   workflow_dispatch: {}

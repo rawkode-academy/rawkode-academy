@@ -11,6 +11,8 @@ on:
     - cue.mod/**
     - packages/rich-text/**
     - projects/rawkode.academy/platform/courses/**
+    - packages/content-write/**
+    - packages/content-model/**
     - projects/rawkode.academy/platform/courses/env.cue
     - projects/rawkode.academy/platform/courses/schema/**
   workflow_dispatch: {}

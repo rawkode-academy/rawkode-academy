@@ -10,6 +10,8 @@ on:
     - .github/workflows/rawkode-academy-platform-people-biographies-default.yml
     - cue.mod/**
     - projects/rawkode.academy/platform/people-biographies/**
+    - packages/content-write/**
+    - packages/content-model/**
     - projects/rawkode.academy/platform/people-biographies/env.cue
     - projects/rawkode.academy/platform/people-biographies/schema/**
   workflow_dispatch: {}

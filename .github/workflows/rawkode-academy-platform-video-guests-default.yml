@@ -10,6 +10,8 @@ on:
     - .github/workflows/rawkode-academy-platform-video-guests-default.yml
     - cue.mod/**
     - projects/rawkode.academy/platform/video-guests/**
+    - packages/content-write/**
+    - packages/content-model/**
     - projects/rawkode.academy/platform/video-guests/env.cue
     - projects/rawkode.academy/platform/video-guests/schema/**
   workflow_dispatch: {}

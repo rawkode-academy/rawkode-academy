@@ -10,6 +10,8 @@ on:
     - .github/workflows/rawkode-academy-platform-transcription-terms-default.yml
     - cue.mod/**
     - projects/rawkode.academy/platform/transcription-terms/**
+    - packages/content-write/**
+    - packages/content-model/**
     - projects/rawkode.academy/platform/transcription-terms/env.cue
     - projects/rawkode.academy/platform/transcription-terms/schema/**
   workflow_dispatch: {}
