@@ -17,6 +17,7 @@ const PERMANENT_REDIRECTS = new Map<string, string>([
 	["/events", "/watch"],
 	["/community-day", "/about"],
 	["/metal", "/technology/equinix-metal"],
+	["/organizations", "/organizations/partnerships"],
 	["/organizations/consulting", "/organizations/partnerships"],
 	["/organizations/training", "/organizations/partnerships"],
 	// Article series were retired; the Talos on Hetzner series never shipped.

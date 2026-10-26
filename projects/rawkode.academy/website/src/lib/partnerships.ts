@@ -64,9 +64,6 @@ export const partnershipPlacesOpen = Math.max(
 
 export const partnershipIsFull = partnershipPlacesOpen === 0;
 
-/** One-line capacity statement used in the hero. */
-export const partnershipCapacitySummary = `At most ${partnershipCapacity.places} partners at a time and ${partnershipCapacity.newStartsPerMonth} new reviews a month, because I do the work myself.${partnershipCapacity.nextStart ? ` Next review start: week of ${partnershipCapacity.nextStart}.` : ""}`;
-
 /**
  * Current availability, worded for the page. While no places are taken the
  * page states the limits and the booking order rather than a count.
@@ -76,10 +73,6 @@ export const partnershipAvailability = partnershipIsFull
 	: partnershipCapacity.active > 0
 		? `${partnershipPlacesOpen} of ${partnershipCapacity.places} places open as of ${partnershipCapacity.asOf}. Places go in the order reviews are booked.`
 		: `Reviews start in the order they're booked, ${partnershipCapacity.newStartsPerMonth} a month. Once ${partnershipCapacity.places} partners are in progress, new reviews wait for a place.`;
-
-/** Where the product-review method comes from. */
-export const partnershipMethodNote =
-	"I've worked through new tools for the first time, live and unscripted, on Rawkode Live since 2020. The product review is the same work done privately, timed and written up as a ranked list.";
 
 export interface CopyPart {
 	text: string;
@@ -91,9 +84,7 @@ export interface CopyPart {
  * public proof of the claim.
  */
 export const partnershipExperience: CopyPart[] = [
-	{
-		text: "I started Rawkode Academy in 2020 because the best way to learn a tool is to try it with no script and nobody to rescue you. Before that I led DevRel and engineering teams at ",
-	},
+	{ text: "I've led DevRel and engineering teams at " },
 	{ text: "Equinix Metal", href: "https://blog.equinix.com/blog/author/dmckay/" },
 	{ text: ", " },
 	{ text: "Pulumi", href: "https://www.youtube.com/watch?v=MR8MOJjez2c" },
@@ -102,11 +93,7 @@ export const partnershipExperience: CopyPart[] = [
 		text: "InfluxData",
 		href: "https://www.influxdata.com/blog/scaling-kubernetes-deployments-influxdb-flux/",
 	},
-	{
-		text: ", so I know what your team can change in a quarter. 25 years building software, a former CNCF Ambassador, and hundreds of developer tools taken from zero to working, live on ",
-	},
-	{ text: "Rawkode Live", href: "/shows/rawkode-live" },
-	{ text: "." },
+	{ text: ", so I know what your team can change in a quarter." },
 ];
 
 /** Linux Foundation credentials, each linking to its Credly badge. */
@@ -129,8 +116,14 @@ export const partnershipCredentials = [
 	},
 ] as const;
 
-/** Most recent talk, shown in the hero byline until there is an events calendar. */
-export const partnershipLatestEvent = "Latest: keynote at KCD UK 2026";
+/** Short facts listed in the hero byline. The last is the most recent talk, until there is an events calendar. */
+export const partnershipFacts = [
+	"25 years building software",
+	"Former CNCF Ambassador",
+	"28.2K YouTube subscribers",
+	"Over 450 hours of developer education",
+	"Keynote at KCD UK 2026",
+] as const;
 
 /** Real first-look episodes, linked from the hero so buyers can see the work. */
 export const partnershipWatchEpisodes = [
@@ -142,63 +135,8 @@ export const partnershipWatchEpisodes = [
 	},
 ] as const;
 
-/** Who the programme is for. Used in the hero eyebrow and search copy. */
-export const partnershipAudience =
-	"For developer-tool teams, seed to Series C, building for platform, cloud-native and AI-infrastructure engineers";
-
 export const partnershipDescription =
 	"I work through your developer tool as your target user and tell you where engineers get stuck. You get a written list of what to fix first in 10 business days for $5,000, then a 90-day or annual partnership if it's useful.";
-
-export const partnershipHeroTitle =
-	"See exactly where engineers get stuck with your product.";
-
-export const partnershipHeroLede =
-	"Then decide what to fix, what to explain and what to teach, with David Flanagan, founder of Rawkode Academy.";
-
-export const partnershipStartingPoint =
-	"Every partnership starts with a product review. I tell you plainly where engineers get stuck with your product and what to fix first. You get it within 10 business days, and I only invoice once it's delivered. If it's useful, you can go on to a 90-day or annual partnership.";
-
-export const organizationsStartingPoint = partnershipStartingPoint;
-
-/** What the partner has in hand at day 90. The page leads with this. */
-export const partnershipOutcomes = [
-	{
-		title: "A product review",
-		inReview: true,
-		detail:
-			"I review your product from setup or sign-up to a working result and write down the places engineers get stuck. Delivered in the first two weeks as part of the review.",
-	},
-	{
-		title: "A written report",
-		inReview: true,
-		detail:
-			"The places engineers get stuck are ranked by how much they cost developers and how hard they are to change, with what to fix first. Your product lead owns the list; I review progress with them every month.",
-	},
-	{
-		title: "A live session",
-		inReview: false,
-		detail:
-			"A live session on Rawkode Live or your own webinar, teaching one agreed use case. I can run it solo, or co-host it with someone from your team. You can reuse the recording on your own channels.",
-	},
-	{
-		title: "A runnable example, written by me",
-		inReview: false,
-		detail:
-			"I write the example repository for that use case against your product. Your team checks it is accurate. Fork it, publish it, put it in your docs.",
-	},
-	{
-		title: "A before-and-after re-run",
-		inReview: false,
-		detail:
-			"At day 90 I repeat the review on what you've shipped since and check every place engineers got stuck in the original report: fixed, improved or still there.",
-	},
-	{
-		title: "A day-90 read-out",
-		inReview: false,
-		detail:
-			"What changed, how developers now experience your product, what the re-run and the session showed, and what to work on next quarter.",
-	},
-] as const;
 
 export interface PartnershipPerk {
 	title: string;
@@ -431,11 +369,7 @@ export const fitProofReview: PartnershipOffer = {
 
 /** What the review covers. Answered in the partnerships FAQ. */
 export const productReviewScope =
-	"Before starting we agree the product areas, who I'm acting as, and where the review ends: a first working result, or something closer to production, such as a highly available setup, a backup and restore, or an upgrade, as long as it fits in the 10 business days. For products with more than one kind of user, such as a platform team and the application developers they serve, the review covers up to two. An open-source project and its paid or hosted product count as two, so one review can follow a developer from the open-source setup to the move to the paid product.";
-
-/** Delivery promise shown beside the review steps. */
-export const productReviewCompletion =
-	"If the review is missing anything the statement of work lists, I finish it.";
+	"We agree the product areas, who I'm acting as, and how far I go: a first working result, or further, like a highly available setup, a backup and restore, or an upgrade. One review can follow up to two kinds of user, such as a platform team and the application developers they serve, or your open-source project and its hosted product.";
 
 /** A lighter way to back the content, without the review work. */
 export const supporterOffer: PartnershipOffer = {

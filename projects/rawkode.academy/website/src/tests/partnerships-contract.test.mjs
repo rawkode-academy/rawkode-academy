@@ -55,15 +55,12 @@ test("partnership page follows the approved redesign", () => {
 	assert.doesNotMatch(
 		partnershipCopy
 			.match(
-				/export const (partnershipDescription|productReviewCompletion) =[^;]+;/g,
+				/export const partnershipDescription =[^;]+;/g,
 			)
 			?.join("\n") ?? "",
 		/invoic|on delivery/i,
 	);
-	assert.match(
-		page,
-		/28\.2K YouTube subscribers · over 450 hours of developer education/,
-	);
+	assert.match(partnershipCopy, /"28\.2K YouTube subscribers",\n\t"Over 450 hours of developer education",/);
 	assert.match(page, /<ReviewPreview slot="aside" placement="hero" \/>/);
 	assert.match(page, /<ReviewPreview placement="inline" \/>/);
 	assert.doesNotMatch(
@@ -81,10 +78,6 @@ test("partnership page follows the approved redesign", () => {
 		page,
 		/I note every place I get stuck against the recording, rank what to fix, explain or teach/,
 	);
-	assert.match(
-		page,
-		/if the statement of work isn't signed within seven days, the place is released\./,
-	);
 	assert.match(page, /answer: productReviewScope/);
 	assert.doesNotMatch(page, /Who is this a good fit for\?|How do we stop\?/);
 
@@ -94,7 +87,6 @@ test("partnership page follows the approved redesign", () => {
 		page,
 		/You build developer tools: infrastructure tools, Kubernetes and cloud native projects, cloud platforms or AI infrastructure\./,
 	);
-	assert.match(page, /You're between seed and Series C\./);
 	assert.match(
 		page,
 		/An engineer can install or sign up for your product and try it, including open-source projects installed from GitHub or Helm\./,
@@ -103,7 +95,7 @@ test("partnership page follows the approved redesign", () => {
 	// Partners: one alphabetical grid, current and past together.
 	assert.match(page, /Teams I've worked with/);
 	assert.doesNotMatch(page, /Who I've worked with/);
-	assert.match(page, /<PartnerLogos variant="grid" \/>/);
+	assert.match(page, /<PartnerLogos \/>/);
 	assert.doesNotMatch(page, /showCurrent=\{false\}/);
 	assert.match(logos, /localeCompare/);
 
@@ -231,7 +223,6 @@ test("partnership page follows the approved redesign", () => {
 		/You get a written list of what to fix first in 10 business days for \$5,000/,
 	);
 	assert.match(partnershipCopy, /export const productReviewScope =/);
-	assert.match(partnershipCopy, /export const productReviewCompletion =/);
 	assert.match(letsChat, /David reads every enquiry and replies by email\./);
 	assert.match(letsChat, /David replies by email with a recommendation:/);
 

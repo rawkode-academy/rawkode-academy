@@ -43,6 +43,13 @@ describe("legacy route resolver", () => {
 			location: "https://rawkode.academy/read",
 		});
 		expect(
+			resolveLegacyRoute(new URL("https://rawkode.academy/organizations")),
+		).toEqual({
+			kind: "redirect",
+			status: 301,
+			location: "https://rawkode.academy/organizations/partnerships",
+		});
+		expect(
 			resolveLegacyRoute(
 				new URL("https://rawkode.academy/organizations/consulting"),
 			),

@@ -28,7 +28,7 @@ export const navigationGroups = [
 		{ label: "Join the Academy", href: "/#join" },
 	] },
 	{ label: "For teams", items: [
-		{ label: "Product reviews and partnerships", href: "/organizations" },
+		{ label: "Product reviews and partnerships", href: "/organizations/partnerships" },
 		{ label: "Branding", href: "/organizations/branding" },
 	] },
 	{ label: "Academy", items: [

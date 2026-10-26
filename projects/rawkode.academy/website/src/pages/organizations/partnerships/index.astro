@@ -28,13 +28,12 @@ import {
 	partnershipCredentials,
 	partnershipDescription,
 	partnershipExperience,
-	partnershipLatestEvent,
+	partnershipFacts,
 	partnershipOffer,
 	partnershipPerks,
 	partnershipPlan,
 	partnershipReviewCredit,
 	partnershipWatchEpisodes,
-	productReviewCompletion,
 	productReviewPath,
 	productReviewScope,
 	supporterOffer,
@@ -223,7 +222,7 @@ const faqs = [
 	{
 		question: "How is this different from sponsoring a video?",
 		answer:
-			"A sponsorship buys airtime. Here you pay for my time and judgement on your product: the review, the ranked list and the advice. The live session is part of that work, labelled as a partner session, and it teaches a real use case. If the product isn't ready to teach yet, I tell you and the time goes on fixing that first.",
+			"Sponsorship gets you airtime. A partnership gets you my time and judgement on your product: the review, the ranked list and the advice, plus a live session that teaches engineers a real use case.",
 	},
 	{
 		question:
@@ -253,7 +252,7 @@ const faqs = [
 	{
 		question: "Why are places limited?",
 		answer:
-			"I do every review and partnership myself, alongside running Rawkode Academy. Six partners at a time is what I can do properly, and two new reviews a month is what I can start without the existing ones slipping. The limits are the same whether or not places are free. A place is booked when the statement of work is signed and a start date is set; if the statement of work isn't signed within seven days, the place is released.",
+			"I do every review and partnership myself, so I keep the number of partners small and give each one my full attention.",
 	},
 	{
 		question: "Can we sponsor content as well?",
@@ -263,7 +262,7 @@ const faqs = [
 	{
 		question: "Do open-source maintainers have to pay to come on Rawkode Live?",
 		answer:
-			"No. Maintainer sessions on Rawkode Live are still free and unpaid, and they aren't labelled as partner sessions. The partnership is for teams who want the review, the advice and the work around the session.",
+			"Maintainer sessions on Rawkode Live are free, as they always have been. The partnership is for teams who want the review, the advice and the work around the session.",
 	},
 ];
 
@@ -314,32 +313,28 @@ const partnerQuotes = (
 			<a id="partnership-hero-cta" class="editorial-button" href={reviewApplyHref} data-apply-path={productReviewPath} data-partnership-cta data-cta-location="hero">Ask about a product review</a>
 			<a class="partnership-text-link" href="#pricing">See all pricing</a>
 		</div>
-		<p class="partnership-watch" slot="actions">
-			Watch me try a new tool live:
-			{partnershipWatchEpisodes.map((episode, index) => (
-				<>
-					{index > 0 && <span aria-hidden="true"> · </span>}
-					<a class="partnership-text-link" href={episode.href} data-partnership-cta data-cta={`watch_${episode.label.toLowerCase()}`} data-cta-location="hero-watch">{episode.label} →</a>
-				</>
-			))}
-		</p>
+		<div class="partnership-watch" slot="actions">
+			<p id="partnership-watch-title">Watch me try a new tool live</p>
+			<ul aria-labelledby="partnership-watch-title">
+				{partnershipWatchEpisodes.map((episode) => (
+					<li><a href={episode.href} data-partnership-cta data-cta={`watch_${episode.label.toLowerCase()}`} data-cta-location="hero-watch"><span aria-hidden="true">▶</span> {episode.label}</a></li>
+				))}
+			</ul>
+		</div>
 		<div class="partnership-byline" slot="actions">
-			{ownerAvatar && <img src={ownerAvatar} alt="" width="48" height="48" loading="eager" decoding="async" />}
-			<p>
-				<strong>David Flanagan</strong>
-				<span>Runs Rawkode Academy and Rawkode Live</span>
-				<span class="partnership-byline__stats">28.2K YouTube subscribers · over 450 hours of developer education</span>
-				<span class="partnership-byline__stats">{partnershipLatestEvent}</span>
-				<span class="partnership-byline__bio">{partnershipExperience.map((part) => part.href ? <a href={part.href} rel={part.href.startsWith("http") ? "noopener" : undefined}>{part.text}</a> : part.text)}</span>
-				<span class="partnership-byline__stats partnership-byline__credentials">
-					{partnershipCredentials.map((credential, index) => (
-						<>
-							{index > 0 && <span aria-hidden="true"> · </span>}
-							<a href={credential.href} rel="noopener">{credential.label} ↗</a>
-						</>
-					))}
-				</span>
-			</p>
+			<div class="partnership-byline__who">
+				{ownerAvatar && <img src={ownerAvatar} alt="" width="48" height="48" loading="eager" decoding="async" />}
+				<p><strong>David Flanagan</strong><span>Runs Rawkode Academy and Rawkode Live</span></p>
+			</div>
+			<p class="partnership-byline__bio">{partnershipExperience.map((part) => part.href ? <a href={part.href} rel={part.href.startsWith("http") ? "noopener" : undefined}>{part.text}</a> : part.text)}</p>
+			<ul class="partnership-byline__facts">
+				{partnershipFacts.map((fact) => <li>{fact}</li>)}
+			</ul>
+			<ul class="partnership-byline__credentials" aria-label="Linux Foundation badges">
+				{partnershipCredentials.map((credential) => (
+					<li><a href={credential.href} rel="noopener">{credential.label} <span aria-hidden="true">↗</span></a></li>
+				))}
+			</ul>
 		</div>
 		<ReviewPreview slot="aside" placement="hero" />
 
@@ -351,7 +346,7 @@ const partnerQuotes = (
 
 		<section id="who-ive-worked-with" class="editorial-section" aria-labelledby="who-ive-worked-with-title">
 			<p id="who-ive-worked-with-title" class="partnership-label">Teams I've worked with</p>
-			<PartnerLogos variant="grid" />
+			<PartnerLogos />
 		</section>
 
 		{pullQuote && (
@@ -380,7 +375,6 @@ const partnerQuotes = (
 					))}
 				</ol>
 				<ReviewPreview placement="inline" />
-				<p class="partnership-promise">{productReviewCompletion}</p>
 			</div>
 		</section>
 
@@ -412,7 +406,6 @@ const partnerQuotes = (
 			</div>
 			<ul class="partnership-fit">
 				<li>You build developer tools: infrastructure tools, Kubernetes and cloud native projects, cloud platforms or AI infrastructure.</li>
-				<li>You're between seed and Series C.</li>
 				<li>An engineer can install or sign up for your product and try it, including open-source projects installed from GitHub or Helm.</li>
 			</ul>
 		</section>
@@ -468,7 +461,7 @@ const partnerQuotes = (
 			<div class="partnership-pricing__header">
 				<div class="editorial-section__header">
 					<h2 id="pricing-title" class="editorial-section__title">Pricing</h2>
-					<p class="editorial-section__lede">Start with the review. Continue only if it's useful.</p>
+					<p class="editorial-section__lede">Start with the review. Keep going when it's working.</p>
 					<p class="partnership-label">{partnershipCapacity.places} partner places · {partnershipCapacity.newStartsPerMonth} new reviews a month</p>
 				</div>
 				<p class="partnership-credit">{partnershipReviewCredit}</p>
@@ -804,10 +797,52 @@ const partnerQuotes = (
 	}
 
 	.partnership-watch {
+		display: grid;
+		gap: 0.6rem;
 		width: 100%;
+	}
+
+	.partnership-watch p {
 		margin: 0;
-		line-height: 1.6;
 		color: var(--colors-academy-text-soft);
+	}
+
+	.partnership-watch ul {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.partnership-watch a {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		min-height: 2.75rem;
+		padding: 0 1rem;
+		border: 1px solid var(--colors-academy-border);
+		border-radius: var(--radii-academy-pill);
+		background: var(--colors-academy-panel);
+		font-weight: 600;
+		white-space: nowrap;
+		color: var(--colors-academy-text);
+		text-decoration: none;
+	}
+
+	.partnership-watch a span {
+		font-size: 0.7em;
+		color: var(--colors-academy-accent);
+	}
+
+	.partnership-watch a:hover {
+		border-color: var(--colors-academy-accent);
+	}
+
+	.partnership-watch a:focus-visible {
+		outline: 2px solid var(--colors-academy-accent);
+		outline-offset: 2px;
 	}
 
 	.partnership-rail {
@@ -875,15 +910,21 @@ const partnerQuotes = (
 	}
 
 	.partnership-byline {
-		display: flex;
-		align-items: flex-start;
-		gap: 0.85rem;
+		display: grid;
+		gap: 1rem;
 		width: 100%;
 		padding-top: 1.25rem;
 		border-top: 1px solid var(--colors-academy-border);
+		color: var(--colors-academy-text-soft);
 	}
 
-	.partnership-byline img {
+	.partnership-byline__who {
+		display: flex;
+		align-items: center;
+		gap: 0.85rem;
+	}
+
+	.partnership-byline__who img {
 		flex: none;
 		width: 3rem;
 		height: 3rem;
@@ -891,29 +932,72 @@ const partnerQuotes = (
 		background: var(--colors-academy-ground);
 	}
 
-	.partnership-byline p {
+	.partnership-byline__who p {
 		display: grid;
 		margin: 0;
 		line-height: 1.35;
-		color: var(--colors-academy-text-soft);
 	}
 
-	.partnership-byline strong {
+	.partnership-byline__who strong {
 		color: var(--colors-academy-text);
 	}
 
 	.partnership-byline__bio {
 		max-width: 38rem;
-		margin-top: 0.5rem;
-		line-height: 1.5;
+		margin: 0;
+		line-height: 1.55;
+	}
+
+	.partnership-byline__facts {
+		display: grid;
+		gap: 0.4rem 1.5rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	@media (min-width: 40rem) {
+		.partnership-byline__facts {
+			grid-template-columns: repeat(2, max-content);
+		}
+	}
+
+	.partnership-byline__facts li {
+		display: flex;
+		gap: 0.5rem;
+		color: var(--colors-academy-text);
+	}
+
+	.partnership-byline__facts li::before {
+		content: "✓";
+		color: var(--colors-academy-accent);
+	}
+
+	.partnership-byline__credentials {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem 1.25rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		font-size: 0.875rem;
 	}
 
 	.partnership-byline__credentials a {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3rem;
+		min-height: 2rem;
 		white-space: nowrap;
+		color: var(--colors-academy-text-muted);
+		text-decoration: none;
 	}
 
-	.partnership-byline__bio a,
-	.partnership-byline__credentials a {
+	.partnership-byline__credentials a:hover {
+		color: var(--colors-academy-text);
+	}
+
+	.partnership-byline__bio a {
 		color: inherit;
 		text-decoration: underline;
 		text-underline-offset: 0.2em;
@@ -923,13 +1007,6 @@ const partnerQuotes = (
 	.partnership-byline__credentials a:focus-visible {
 		outline: 2px solid var(--colors-academy-accent);
 		outline-offset: 2px;
-	}
-
-	.partnership-byline__stats {
-		margin-top: 0.15rem;
-		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
-		font-size: 0.8rem;
-		color: var(--colors-academy-text-muted);
 	}
 
 	.partnership-addons {
@@ -1131,11 +1208,6 @@ const partnerQuotes = (
 		color: var(--colors-academy-text-soft);
 	}
 
-	.partnership-promise {
-		margin: 0;
-		font-weight: 600;
-		color: var(--colors-academy-text);
-	}
 
 	/* Fit */
 	.partnership-fit {
