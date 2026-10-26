@@ -64,7 +64,7 @@ tasks: {
 	deploy: schema.#Task & {
 		hermetic: false
 		command:  "sh"
-		args: ["-lc", "\(_wrangler) d1 migrations apply DB --remote && \(_toolchain) bun run build && \(_wrangler) deploy --config ./dist/server/wrangler.json"]
+		args: ["-lc", "if grep -q 00000000-0000-0000-0000-000000000000 wrangler.jsonc; then echo 'platform-cms has no D1 id yet: run wrangler d1 create platform-cms and set database_id in wrangler.jsonc (README.md, One-time setup)' >&2; exit 1; fi && \(_wrangler) d1 migrations apply DB --remote && \(_toolchain) bun run build && \(_wrangler) deploy --config ./dist/server/wrangler.json"]
 		env: PATH: _taskPath
 		inputs: _inputs
 	}

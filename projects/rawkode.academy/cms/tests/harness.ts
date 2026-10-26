@@ -108,7 +108,10 @@ export async function harness(bindings: Binding[]): Promise<Harness> {
 			describe: async () => describeModels(models),
 			models: async () => store.models(),
 			...Object.fromEntries(
-				methods.map((m) => [m, (store[m] as (...args: unknown[]) => unknown).bind(store)]),
+				methods.map((m) => [
+					m,
+					(store[m] as (...args: unknown[]) => unknown).bind(store),
+				]),
 			),
 		} as unknown as ContentWriteRpc;
 	}

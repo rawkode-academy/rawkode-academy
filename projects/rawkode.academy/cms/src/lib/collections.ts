@@ -53,6 +53,8 @@ export interface AttachedPanel {
 	key: (row: Row) => string;
 	/** The attached row's key property, filled in when creating it. */
 	keyField: string;
+	/** Fields the write model derives (Markdown copies), not shown in forms. */
+	hidden?: string[];
 }
 
 export type Panel = ListPanel | AttachedPanel;
@@ -110,6 +112,7 @@ export const COLLECTIONS: Collection[] = [
 				model: "person-biography",
 				key: (row) => String(row.id),
 				keyField: "personId",
+				hidden: ["biography"],
 			},
 		],
 		references: [
@@ -142,6 +145,30 @@ export const COLLECTIONS: Collection[] = [
 				binding: "WRITE_ADRS",
 				model: "adr-authors",
 				column: "personId",
+			},
+			{
+				label: "changelog author",
+				binding: "WRITE_CHANGELOG",
+				model: "changelog-entry",
+				column: "authorId",
+			},
+			{
+				label: "course author",
+				binding: "WRITE_COURSES",
+				model: "course",
+				column: "authors",
+			},
+			{
+				label: "course module author",
+				binding: "WRITE_COURSES",
+				model: "course-module",
+				column: "authors",
+			},
+			{
+				label: "learning path author",
+				binding: "WRITE_COURSES",
+				model: "learning-path",
+				column: "authors",
 			},
 		],
 		websitePath: (row) => `/people/${row.id}`,
@@ -183,6 +210,24 @@ export const COLLECTIONS: Collection[] = [
 				model: "news-technologies",
 				column: "technologyId",
 			},
+			{
+				label: "course",
+				binding: "WRITE_COURSES",
+				model: "course",
+				column: "technologies",
+			},
+			{
+				label: "learning path",
+				binding: "WRITE_COURSES",
+				model: "learning-path",
+				column: "technologies",
+			},
+			{
+				label: "related technology",
+				binding: "WRITE_TECHNOLOGIES",
+				model: "technology",
+				column: "relatedTechnologies",
+			},
 		],
 		websitePath: (row) => `/technology/${row.id}`,
 	},
@@ -193,7 +238,8 @@ export const COLLECTIONS: Collection[] = [
 		binding: "WRITE_SHOWS",
 		model: "show",
 		titleField: "name",
-		hidden: derived,
+		// description is the write model's Markdown copy of descriptionDoc.
+		hidden: [...derived, "description"],
 		panels: [
 			{
 				kind: "list",
@@ -222,7 +268,8 @@ export const COLLECTIONS: Collection[] = [
 		binding: "WRITE_VIDEOS",
 		model: "video",
 		titleField: "title",
-		hidden: derived,
+		// description is the write model's plain-text copy of descriptionDoc.
+		hidden: [...derived, "description"],
 		panels: [
 			{
 				kind: "list",

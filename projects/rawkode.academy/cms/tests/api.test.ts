@@ -527,6 +527,7 @@ describe("tokens and media", () => {
 			0x44, 0x52,
 		]);
 		png.set([0, 0, 0, 3, 0, 0, 0, 2], 16);
+		await h.call(ADMIN, "POST", "/collections/articles", { data: article });
 		const form = new FormData();
 		form.set("file", new File([png], "My Cover.PNG", { type: "image/png" }));
 		form.set("collection", "articles");
@@ -561,5 +562,271 @@ describe("tokens and media", () => {
 		expect(
 			(await h.call(GUEST, "POST", "/media", undefined, { form })).status,
 		).toBe(403);
+	});
+});
+
+describe("review fixes", () => {
+	const upload = (
+		bytes: Uint8Array<ArrayBuffer>,
+		name: string,
+		type: string,
+		collection: string,
+		id: string,
+	) => {
+		const form = new FormData();
+		form.set("file", new File([bytes], name, { type }));
+		form.set("collection", collection);
+		form.set("id", id);
+		return form;
+	};
+	const pngBytes = () => {
+		const png = new Uint8Array(32);
+		png.set([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+		return png;
+	};
+
+	test("SVG and mislabelled files are refused; uploads need a saved entry and a publishing role", async () => {
+		await h.call(ADMIN, "POST", "/collections/articles", { data: article });
+		const svg = new TextEncoder().encode(
+			"<svg xmlns='http://www.w3.org/2000/svg'><script>alert(1)</script></svg>",
+		);
+		const asSvg = upload(
+			svg,
+			"x.svg",
+			"image/svg+xml",
+			"articles",
+			"bun-from-scratch",
+		);
+		expect(
+			(await h.call(ADMIN, "POST", "/media", undefined, { form: asSvg }))
+				.status,
+		).toBe(415);
+		const lying = upload(
+			svg,
+			"x.png",
+			"image/png",
+			"articles",
+			"bun-from-scratch",
+		);
+		expect(
+			(await h.call(ADMIN, "POST", "/media", undefined, { form: lying }))
+				.status,
+		).toBe(415);
+		const missing = upload(
+			pngBytes(),
+			"x.png",
+			"image/png",
+			"articles",
+			"does-not-exist",
+		);
+		expect(
+			(await h.call(ADMIN, "POST", "/media", undefined, { form: missing }))
+				.status,
+		).toBe(404);
+		// Agents propose articles, so they cannot upload for them either.
+		const agent = upload(
+			pngBytes(),
+			"x.png",
+			"image/png",
+			"articles",
+			"bun-from-scratch",
+		);
+		expect(
+			(await h.call(AGENT, "POST", "/media", undefined, { form: agent }))
+				.status,
+		).toBe(403);
+	});
+
+	test("course modules (ids with a slash) can have uploads", async () => {
+		const course = {
+			id: "bun-course",
+			title: "Bun",
+			description: "Learn Bun",
+			publishedAt: "2026-10-01T00:00:00.000Z",
+			difficulty: "beginner",
+			body: doc("A course."),
+			learningPath: [],
+			authors: ["rawkode"],
+			technologies: [],
+		};
+		const created = await h.call(ADMIN, "POST", "/collections/courses", {
+			data: course,
+		});
+		expect(created.status).toBe(201);
+		const module = await h.call(ADMIN, "POST", "/collections/course-modules", {
+			data: {
+				id: "bun-course/intro",
+				courseId: "bun-course",
+				slug: "intro",
+				title: "Intro",
+				description: "Start here",
+				body: doc("Hi"),
+				section: "Basics",
+				sortOrder: 1,
+				publishedAt: "2026-10-01T00:00:00.000Z",
+				authors: ["rawkode"],
+			},
+		});
+		expect(module.status).toBe(201);
+		const form = upload(
+			pngBytes(),
+			"cover.png",
+			"image/png",
+			"course-modules",
+			"bun-course/intro",
+		);
+		const res = await h.call(ADMIN, "POST", "/media", undefined, { form });
+		expect(res.status).toBe(201);
+		expect(res.json.key).toMatch(/^course-modules\/bun-course\/intro\/cover-/);
+
+		// A course's JSON technologies list blocks deleting the technology.
+		await h.call(ADMIN, "POST", "/collections/technologies", {
+			data: { id: "bun", name: "Bun", description: "A runtime." },
+		});
+		await h.call(ADMIN, "PATCH", "/collections/courses/bun-course", {
+			patch: { technologies: ["bun"] },
+			ifVersion: 1,
+		});
+		const refused = await h.call(
+			ADMIN,
+			"DELETE",
+			"/collections/technologies/bun?ifVersion=1",
+		);
+		expect(refused.status).toBe(409);
+		expect(refused.json.error.references[0].label).toBe("course");
+	});
+
+	test("agents propose matrix placement but write factual technology fields", async () => {
+		await h.call(ADMIN, "POST", "/collections/technologies", {
+			data: { id: "bun", name: "Bun", description: "A runtime." },
+		});
+		const factual = await h.call(
+			AGENT,
+			"PATCH",
+			"/collections/technologies/bun",
+			{
+				patch: { license: "MIT" },
+				ifVersion: 1,
+			},
+		);
+		expect(factual.status).toBe(200);
+		const editorial = await h.call(
+			AGENT,
+			"PATCH",
+			"/collections/technologies/bun",
+			{
+				patch: { matrix: { status: "graveyard" } },
+				ifVersion: 2,
+			},
+		);
+		expect(editorial.status).toBe(202);
+		const created = await h.call(AGENT, "POST", "/collections/technologies", {
+			data: {
+				id: "deno",
+				name: "Deno",
+				description: "A runtime.",
+				matrix: { status: "adopt" },
+			},
+		});
+		expect(created.status).toBe(202);
+		const read = await h.call(ADMIN, "GET", "/collections/technologies/bun");
+		expect(read.json.value.matrix).toBeNull();
+	});
+
+	test("deleting an entity clears its own panels", async () => {
+		await h.call(ADMIN, "POST", "/collections/people", {
+			data: {
+				id: "jane-doe",
+				forename: "Jane",
+				surname: "Doe",
+				name: "Jane Doe",
+			},
+		});
+		await h.call(ADMIN, "PUT", "/collections/people/jane-doe/panels/links", {
+			items: [{ url: "https://jane.dev", name: "Site" }],
+			ifVersion: 0,
+		});
+		await h.call(
+			ADMIN,
+			"PUT",
+			"/collections/people/jane-doe/panels/biography",
+			{
+				data: { biography: "Jane builds platforms." },
+				ifVersion: 0,
+			},
+		);
+		const deleted = await h.call(
+			ADMIN,
+			"DELETE",
+			"/collections/people/jane-doe?ifVersion=1",
+		);
+		expect(deleted.status).toBe(200);
+		expect(deleted.json.leftovers).toBeUndefined();
+		const links = await h.env.services.WRITE_PEOPLE_LINKS?.getList(
+			"person-links",
+			{
+				personId: "jane-doe",
+			},
+		);
+		expect(links?.ok && links.value.value).toEqual([]);
+		const bio = await h.env.services.WRITE_PEOPLE_BIOGRAPHIES?.get(
+			"person-biography",
+			"jane-doe",
+		);
+		expect(bio?.ok).toBe(false);
+	});
+
+	test("a rejected proposal cannot then be approved, and vice versa", async () => {
+		await h.call(AGENT, "POST", "/collections/articles", { data: article });
+		const [proposal] = (await h.call(ADMIN, "GET", "/proposals")).json
+			.proposals;
+		expect(
+			(await h.call(ADMIN, "POST", `/proposals/${proposal.id}/reject`, {}))
+				.status,
+		).toBe(200);
+		expect(
+			(await h.call(ADMIN, "POST", `/proposals/${proposal.id}/approve`, {}))
+				.status,
+		).toBe(409);
+		expect(
+			(await h.call(ADMIN, "POST", `/proposals/${proposal.id}/reject`, {}))
+				.status,
+		).toBe(409);
+	});
+
+	test("an unlinked guest's proposal is not applied", async () => {
+		await h.call(ADMIN, "POST", "/collections/people", {
+			data: {
+				id: "jane-doe",
+				forename: "Jane",
+				surname: "Doe",
+				name: "Jane Doe",
+			},
+		});
+		await h.call(ADMIN, "POST", "/access", {
+			userId: "guest-user",
+			kind: "person",
+			targetId: "jane-doe",
+		});
+		await h.call(GUEST, "PATCH", "/collections/people/jane-doe", {
+			patch: { github: "jd" },
+			ifVersion: 1,
+		});
+		await h.call(ADMIN, "DELETE", "/access/guest-user/person/jane-doe");
+		const [proposal] = (await h.call(ADMIN, "GET", "/proposals")).json
+			.proposals;
+		const approve = await h.call(
+			ADMIN,
+			"POST",
+			`/proposals/${proposal.id}/approve`,
+			{},
+		);
+		expect(approve.status).toBe(409);
+		expect(approve.json.error.code).toBe("author_unlinked");
+		// Still pending, so it can be rejected.
+		expect(
+			(await h.call(ADMIN, "POST", `/proposals/${proposal.id}/reject`, {}))
+				.status,
+		).toBe(200);
 	});
 });

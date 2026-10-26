@@ -20,6 +20,11 @@ export const AGENT_DIRECT = new Set([
 	"shows",
 ]);
 
+/** Fields an agent's direct write may not touch: they become proposals. */
+export const EDITORIAL_FIELDS: Record<string, ReadonlySet<string>> = {
+	technologies: new Set(["matrix"]),
+};
+
 /** Technology fields a partner may propose changes to. */
 export const PARTNER_FIELDS = new Set([
 	"name",
@@ -57,7 +62,13 @@ export function accessFor(
 	if (!p) return "deny";
 	if (p.roles.includes("content_admin")) return "write";
 	if (p.roles.includes("content_agent")) {
-		return AGENT_DIRECT.has(collection) ? "write" : "propose";
+		if (!AGENT_DIRECT.has(collection)) return "propose";
+		// Editorial judgement (the matrix) is reviewed even when an agent's
+		// factual edits are not: an agent reads untrusted pages.
+		const editorial = EDITORIAL_FIELDS[collection];
+		return editorial && fields.some((f) => editorial.has(f))
+			? "propose"
+			: "write";
 	}
 	if (id && p.roles.includes("content_guest")) {
 		if (collection === "people" && scope.people.includes(id)) return "propose";

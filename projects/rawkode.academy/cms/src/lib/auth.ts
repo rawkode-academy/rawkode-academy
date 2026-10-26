@@ -82,6 +82,8 @@ export async function createSession(
 	now = Date.now(),
 ): Promise<string> {
 	const token = randomToken();
+	// Expired sessions are swept whenever someone signs in.
+	await db.prepare("DELETE FROM sessions WHERE expires_at < ?").bind(now).run();
 	await db
 		.prepare(
 			"INSERT INTO sessions (id_hash, user_id, name, email, roles, expires_at, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
@@ -268,8 +270,14 @@ export async function authorizationRequest(
 
 /** Only same-site paths: never redirect to another origin after sign-in. */
 export function safeReturnTo(path: string | null | undefined): string {
-	if (!path || !path.startsWith("/") || path.startsWith("//")) return "/";
-	return path;
+	if (!path || !path.startsWith("/")) return "/";
+	// Browsers treat a backslash like "/" and drop tabs and newlines, so
+	// "/<backslash>evil.com" would leave the site. Resolve it and keep it only if it stays on origin.
+	if (/[\\\u0000-\u001f\u007f]/.test(path)) return "/";
+	const base = "https://cms.invalid";
+	const resolved = new URL(path, base);
+	if (resolved.origin !== base) return "/";
+	return `${resolved.pathname}${resolved.search}${resolved.hash}`;
 }
 
 export function returnToFromState(state: string): string {

@@ -6,14 +6,14 @@
 export const MEDIA_BASE_URL = "https://content.rawkode.academy";
 export const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
 
+// Raster images only: SVG can carry script and PDF is active content, and
+// both would be served from a rawkode.academy host.
 const ALLOWED_TYPES = new Map<string, string>([
 	["image/png", "png"],
 	["image/jpeg", "jpg"],
 	["image/webp", "webp"],
 	["image/gif", "gif"],
-	["image/svg+xml", "svg"],
 	["image/avif", "avif"],
-	["application/pdf", "pdf"],
 ]);
 
 export interface Dimensions {
@@ -39,7 +39,8 @@ export function mediaKey(
 	if (!extension) return undefined;
 	if (
 		!/^[a-z0-9][a-z0-9-]*$/.test(collection) ||
-		!/^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(id)
+		// Ids are path segments; course modules have two ("<course>/<slug>").
+		!/^[A-Za-z0-9][A-Za-z0-9_-]*(?:\/[A-Za-z0-9][A-Za-z0-9_-]*)?$/.test(id)
 	) {
 		return undefined;
 	}
@@ -66,6 +67,22 @@ const u32be = (b: Uint8Array, i: number) =>
 	(b[i + 3] ?? 0);
 const ascii = (b: Uint8Array, i: number, n: number) =>
 	String.fromCharCode(...b.subarray(i, i + n));
+
+/** The image type a file's leading bytes identify, among the allowed types. */
+export function sniffImageType(bytes: Uint8Array): string | undefined {
+	const at = (i: number, ...values: number[]) =>
+		values.every((v, k) => bytes[i + k] === v);
+	if (at(0, 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a)) return "image/png";
+	if (at(0, 0xff, 0xd8, 0xff)) return "image/jpeg";
+	if (at(0, 0x47, 0x49, 0x46, 0x38)) return "image/gif";
+	if (ascii(bytes, 0, 4) === "RIFF" && ascii(bytes, 8, 4) === "WEBP") {
+		return "image/webp";
+	}
+	if (ascii(bytes, 4, 4) === "ftyp" && /^avi[fs]$/.test(ascii(bytes, 8, 4))) {
+		return "image/avif";
+	}
+	return undefined;
+}
 
 /** Width and height from a PNG, JPEG, GIF, WebP or SVG header, when present. */
 export function imageDimensions(bytes: Uint8Array): Dimensions | undefined {

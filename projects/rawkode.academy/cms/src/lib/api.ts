@@ -30,6 +30,7 @@ import {
 } from "./collections";
 import {
 	imageDimensions,
+	sniffImageType,
 	MAX_UPLOAD_BYTES,
 	MEDIA_BASE_URL,
 	mediaKey,
@@ -220,7 +221,9 @@ async function collectionSummary(
 			model: p.model,
 			...(p.kind === "list" && p.picks ? { picks: p.picks } : {}),
 			...(p.kind === "attached" ? { keyField: p.keyField } : {}),
-			fields: await fieldsOf(env, p.binding, p.model),
+			fields: (await fieldsOf(env, p.binding, p.model)).filter(
+				(f) => !(p.kind === "attached" && p.hidden?.includes(f.name)),
+			),
 		})),
 	);
 	const fields = await fieldsOf(env, c.binding, c.model);
@@ -511,7 +514,13 @@ route("POST", "/collections/:c", async (env, req, [name]) => {
 	if (!data || typeof data !== "object") {
 		return problem(400, "invalid_request", "Send { data: {...} }");
 	}
-	const access = accessFor(p, c.name, undefined, await scopeOf(env, p));
+	const access = accessFor(
+		p,
+		c.name,
+		undefined,
+		await scopeOf(env, p),
+		Object.keys(data),
+	);
 	deny(access);
 	if (access === "propose") {
 		return propose(env, p, {
@@ -642,11 +651,47 @@ route("DELETE", "/collections/:c/:id", async (env, req, [name, rawId]) => {
 			},
 		});
 	}
+	const entity = unwrap(await service(env, c.binding).get(c.model, id));
 	const deleted = unwrap(
 		await service(env, c.binding).delete(c.model, id, { ifVersion }, p.actor),
 	);
 	await logActivity(env, p.actor, c.name, id, "delete", deleted.version);
-	return json(200, deleted);
+	// The entity's own panels (a video's guests and chapters, a person's links
+	// and biography) go with it, each with its own revision so restore can
+	// bring them back. Best effort: a failure is reported, not rolled back.
+	const leftovers: string[] = [];
+	for (const panel of c.panels) {
+		const svc = service(env, panel.binding);
+		if (panel.kind === "list") {
+			const parent = panel.parent(entity.value);
+			const list = await svc.getList(panel.model, parent);
+			if (!list.ok) leftovers.push(panel.name);
+			else if (list.value.value.length > 0) {
+				const cleared = await svc.setList(
+					panel.model,
+					parent,
+					[],
+					{ ifVersion: list.value.version },
+					p.actor,
+				);
+				if (!cleared.ok) leftovers.push(panel.name);
+			}
+		} else {
+			const key = panel.key(entity.value);
+			const attached = await svc.get(panel.model, key);
+			if (attached.ok) {
+				const removed = await svc.delete(
+					panel.model,
+					key,
+					{ ifVersion: attached.value.version },
+					p.actor,
+				);
+				if (!removed.ok) leftovers.push(panel.name);
+			} else if (attached.error.code !== "not_found")
+				leftovers.push(panel.name);
+		}
+	}
+	return json(200, { ...deleted, ...(leftovers.length ? { leftovers } : {}) });
 });
 
 route(
@@ -807,13 +852,50 @@ route("POST", "/proposals/:id/approve", async (env, req, [id]) => {
 		force: false,
 	}));
 	const proposal = await getProposal(env, String(id));
-	if (proposal.status !== "pending") {
+	// Claim it first, so a concurrent approve or reject cannot also act on it.
+	const claim = await env.DB.prepare(
+		"UPDATE proposals SET status = 'applying' WHERE id = ? AND status = 'pending'",
+	)
+		.bind(proposal.id)
+		.run();
+	if (!claim.meta.changes) {
 		return problem(409, "decided", `Proposal is already ${proposal.status}`);
 	}
-	const applied = await applyProposal(env, proposal, p, force === true);
-	if (!applied.ok) return failure(applied.error);
+	const release = () =>
+		env.DB.prepare(
+			"UPDATE proposals SET status = 'pending' WHERE id = ? AND status = 'applying'",
+		)
+			.bind(proposal.id)
+			.run();
+	// A guest or partner may have lost their link since they proposed.
+	if (proposal.author.kind === "user" && proposal.entityId) {
+		const kind = proposal.collection === "people" ? "person" : "technology";
+		const link = await env.DB.prepare(
+			"SELECT 1 FROM access_links WHERE user_id = ? AND kind = ? AND target_id = ?",
+		)
+			.bind(proposal.author.id, kind, proposal.entityId)
+			.first();
+		if (!link) {
+			await release();
+			return problem(
+				409,
+				"author_unlinked",
+				"The author no longer has access to this entry",
+			);
+		}
+	}
+	const applied = await applyProposal(env, proposal, p, force === true).catch(
+		async (error) => {
+			await release();
+			throw error;
+		},
+	);
+	if (!applied.ok) {
+		await release();
+		return failure(applied.error);
+	}
 	await env.DB.prepare(
-		"UPDATE proposals SET status = 'approved', decided_by = ?, decided_at = ? WHERE id = ? AND status = 'pending'",
+		"UPDATE proposals SET status = 'approved', decided_by = ?, decided_at = ? WHERE id = ? AND status = 'applying'",
 	)
 		.bind(p.actor.id, now(env), proposal.id)
 		.run();
@@ -840,11 +922,14 @@ route("POST", "/proposals/:id/reject", async (env, req, [id]) => {
 	if (proposal.status !== "pending") {
 		return problem(409, "decided", `Proposal is already ${proposal.status}`);
 	}
-	await env.DB.prepare(
-		"UPDATE proposals SET status = 'rejected', note = ?, decided_by = ?, decided_at = ? WHERE id = ?",
+	const rejected = await env.DB.prepare(
+		"UPDATE proposals SET status = 'rejected', note = ?, decided_by = ?, decided_at = ? WHERE id = ? AND status = 'pending'",
 	)
 		.bind(note ?? null, p.actor.id, now(env), proposal.id)
 		.run();
+	if (!rejected.meta.changes) {
+		return problem(409, "decided", "Proposal is no longer pending");
+	}
 	return json(200, { proposal: { id: proposal.id, status: "rejected" } });
 });
 
@@ -959,30 +1044,46 @@ route("POST", "/media", async (env, req) => {
 		return problem(400, "invalid_request", "file is required");
 	const c = findCollection(collection);
 	if (!c) return problem(404, "not_found", `No collection "${collection}"`);
-	if (accessFor(p, c.name, id, await scopeOf(env, p)) === "deny") {
-		throw new HttpError(problem(403, "forbidden", "Not allowed"));
+	// Uploads are public the moment they land, so only roles that publish
+	// directly may upload; proposals carry text, not files.
+	if (accessFor(p, c.name, id, await scopeOf(env, p)) !== "write") {
+		throw new HttpError(
+			problem(403, "forbidden", "Only editors who publish directly can upload"),
+		);
 	}
 	if (file.size > MAX_UPLOAD_BYTES)
 		return problem(413, "too_large", "Files are limited to 25 MB");
+	const exists = await service(env, c.binding).get(c.model, id);
+	if (!exists.ok) {
+		return problem(
+			404,
+			"not_found",
+			`Save the ${c.singular.toLowerCase()} before uploading files for it`,
+		);
+	}
+	const bytes = new Uint8Array(await file.arrayBuffer());
+	// The type comes from the file's bytes, never the client's claim.
+	const contentType = sniffImageType(bytes);
+	if (!contentType) {
+		return problem(
+			415,
+			"unsupported",
+			"Upload a PNG, JPEG, WebP, GIF or AVIF image",
+		);
+	}
 	const key = mediaKey(
 		collection,
 		id,
 		file.name,
-		file.type,
+		contentType,
 		randomToken(6)
 			.toLowerCase()
 			.replace(/[^a-z0-9]/g, "x"),
 	);
-	if (!key)
-		return problem(
-			415,
-			"unsupported",
-			"Upload PNG, JPEG, WebP, GIF, AVIF, SVG or PDF",
-		);
-	const bytes = new Uint8Array(await file.arrayBuffer());
+	if (!key) return problem(400, "invalid_request", "Invalid collection or id");
 	await env.MEDIA.put(key, bytes, {
 		httpMetadata: {
-			contentType: file.type,
+			contentType,
 			cacheControl: "public, max-age=31536000, immutable",
 		},
 		customMetadata: { uploadedBy: p.actor.id },
@@ -991,7 +1092,7 @@ route("POST", "/media", async (env, req) => {
 	return json(201, {
 		key,
 		url: `${env.mediaBaseUrl ?? MEDIA_BASE_URL}/${key}`,
-		contentType: file.type,
+		contentType,
 		bytes: bytes.length,
 		...(dimensions ?? {}),
 	});
