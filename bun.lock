@@ -775,6 +775,34 @@
         "wrangler": "^4.13.2",
       },
     },
+    "projects/rawkode.academy/platform/supporters": {
+      "name": "supporters",
+      "dependencies": {
+        "@apollo/subgraph": "^2.10.2",
+        "@graphql-tools/utils": "^10.8.6",
+        "@paralleldrive/cuid2": "^2.2.2",
+        "@pothos/core": "^4.6.0",
+        "@pothos/plugin-directives": "^4.2.0",
+        "@pothos/plugin-drizzle": "^0.8.1",
+        "@pothos/plugin-federation": "^4.3.2",
+        "@sindresorhus/slugify": "^2.2.1",
+        "drizzle-kit": "^0.30.6",
+        "drizzle-orm": "^0.38.4",
+        "drizzle-zod": "^0.6.1",
+        "graphql": "^16.10.0",
+        "graphql-scalars": "^1.24.2",
+        "graphql-yoga": "^5.13.4",
+        "zod": "^3.24.3",
+      },
+      "devDependencies": {
+        "@biomejs/biome": "^1.9.4",
+        "@cloudflare/workers-types": "^4.20250426.0",
+        "@types/bun": "^1.4.4",
+        "@types/node": "^22.15.2",
+        "vitest": "^4.1.8",
+        "wrangler": "^4.13.2",
+      },
+    },
     "projects/rawkode.academy/platform/technologies": {
       "name": "technologies",
       "dependencies": {
@@ -4458,6 +4486,8 @@
 
     "studio-recording-ingest": ["studio-recording-ingest@workspace:projects/rawkode.academy/platform/studio-recording-ingest"],
 
+    "supporters": ["supporters@workspace:projects/rawkode.academy/platform/supporters"],
+
     "supports-color": ["supports-color@7.2.0", "", { "dependencies": { "has-flag": "^4.0.0" } }, "sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw=="],
 
     "supports-preserve-symlinks-flag": ["supports-preserve-symlinks-flag@1.0.0", "", {}, "sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w=="],
@@ -5423,6 +5453,8 @@
     "strip-ansi/ansi-regex": ["ansi-regex@6.2.2", "", {}, "sha512-Bq3SmSpyFHaWjPk8If9yc6svM8c56dB5BAtW4Qbw5jHTwwXXcTLoRMkpDJp6VL0XzlWaCHTXrkFURMYmD0sLqg=="],
 
     "studio-recording-ingest/@types/node": ["@types/node@22.19.19", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-dyh/xO2Fh5bYrfWaaqGrRQQGkNdmYw6AmaAUvYeUMNTWQtvb796ikLdmTchRmOlOiIJ1TDXfWgVx1QkUlQ6Hew=="],
+
+    "supporters/@types/node": ["@types/node@22.19.19", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-dyh/xO2Fh5bYrfWaaqGrRQQGkNdmYw6AmaAUvYeUMNTWQtvb796ikLdmTchRmOlOiIJ1TDXfWgVx1QkUlQ6Hew=="],
 
     "svelte/aria-query": ["aria-query@5.3.1", "", {}, "sha512-Z/ZeOgVl7bcSYZ/u/rh0fOpvEpq//LZmdbkXyc7syVzjPAhfOa9ebsdTSjEBDU4vs5nC98Kfduj1uFo0qyET3g=="],
 
@@ -6411,6 +6443,8 @@
     "storybook/oxc-parser/@oxc-project/types": ["@oxc-project/types@0.127.0", "", {}, "sha512-aIYXQBo4lCbO4z0R3FHeucQHpF46l2LbMdxRvqvuRuW2OxdnSkcng5B8+K12spgLDj93rtN3+J2Vac/TIO+ciQ=="],
 
     "studio-recording-ingest/@types/node/undici-types": ["undici-types@6.21.0", "", {}, "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="],
+
+    "supporters/@types/node/undici-types": ["undici-types@6.21.0", "", {}, "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="],
 
     "technologies/@types/node/undici-types": ["undici-types@6.21.0", "", {}, "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="],
 
