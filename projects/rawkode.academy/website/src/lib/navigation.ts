@@ -22,15 +22,17 @@ export const navigationGroups = [
 	] },
 	{ label: "Community", items: [
 		{ label: "People", href: "/people" },
-		{ label: "Partnerships", href: "/organizations/partnerships" },
 		{ label: "Share your project", href: "/maintainers/share-your-project" },
 		{ label: "CNIcon", href: "/games/cnicon" },
 		{ label: "Kubele", href: "/games/kubele" },
 		{ label: "Join the Academy", href: "/#join" },
 	] },
+	{ label: "For teams", items: [
+		{ label: "Product reviews and partnerships", href: "/organizations" },
+		{ label: "Branding", href: "/organizations/branding" },
+	] },
 	{ label: "Academy", items: [
 		{ label: "About", href: "/about" },
-		{ label: "Branding", href: "/organizations/branding" },
 		{ label: "Changelog", href: "/changelog" },
 		{ label: "ADRs", href: "/adrs" },
 		{ label: "Feeds", href: "/feeds" },

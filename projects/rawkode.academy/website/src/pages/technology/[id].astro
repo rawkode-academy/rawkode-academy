@@ -568,6 +568,11 @@ await setContentCache(Astro, {
 				<p slot="fallback" class={styles.copy}>Email signup loads here. You can also <a class={styles.link} href="/settings">manage email preferences in account settings</a>.</p>
 			</NewsletterCTA>
 		</div>
+		<p class="technology-vendor">
+			<a href="/organizations/partnerships">Build {technology.name}? I'll show you where engineers get stuck with it →</a>
+			<span aria-hidden="true"> · </span>
+			<a href="/organizations/partnerships#supporter">Back free content for the community →</a>
+		</p>
 	</div>
 </Page>
 
@@ -591,6 +596,24 @@ await setContentCache(Astro, {
 		color: var(--editorial-ink);
 		text-decoration: underline;
 		text-underline-offset: 0.2em;
+	}
+
+	.technology-vendor {
+		margin: 0;
+		padding-top: 1rem;
+		border-top: 1px solid var(--editorial-hairline);
+		font-size: 0.875rem;
+		line-height: 1.6;
+		color: var(--editorial-ink-mute);
+	}
+
+	.technology-vendor a {
+		color: var(--editorial-ink-soft);
+		text-underline-offset: 0.2em;
+	}
+
+	.technology-vendor a:hover {
+		color: var(--editorial-ink);
 	}
 
 	.technology-supporter__name {

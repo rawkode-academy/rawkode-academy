@@ -137,7 +137,7 @@ test("partnership page follows the approved redesign", () => {
 	assert.match(page, /data-cta-location=\{card\.ctaLocation\}/);
 	assert.deepEqual(
 		Array.from(page.matchAll(/data-cta-location="([^"]+)"/g), (m) => m[1]),
-		["hero", "hero-watch", "pricing-addon", "pricing-supporter", "pinned"],
+		["hero", "hero-watch", "pricing-brief", "pricing-addon", "pricing-supporter", "pinned"],
 	);
 	// Every button leads to the same form anchor.
 	assert.match(page, /#enquiry-form`/);
@@ -157,7 +157,7 @@ test("partnership page follows the approved redesign", () => {
 	// Simple terms.
 	assert.match(
 		page,
-		/You decide what each quarter covers, and you own the review, the report and the read-out\./,
+		/You own the review, the report and every read-out\./,
 	);
 	assert.equal(page.match(/Renew when it's working/g)?.length, 1);
 
@@ -252,11 +252,11 @@ test("partnership page follows the approved redesign", () => {
 	assert(heroCta < partners);
 	assert(partners < pullQuote);
 	assert(pullQuote < process);
-	assert(process < fit);
+	assert(process < quotes);
+	assert(quotes < fit);
 	assert(fit < pricing);
 	assert(pricing < control);
-	assert(control < quotes);
-	assert(quotes < questions);
+	assert(control < questions);
 	assert(questions < enquiry);
 	assert(enquiry < pinned);
 });

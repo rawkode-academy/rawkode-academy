@@ -211,6 +211,11 @@ export interface PartnershipPerk {
  */
 export const partnershipPerks: PartnershipPerk[] = [
 	{
+		title: "Community supporter, included",
+		detail:
+			"Your supporter badge, docs and latest announcement on your technology page and its videos, and your logo on the supporters wall, for as long as we work together.",
+	},
+	{
 		title: "Field insight",
 		detail:
 			"I'm at 30 events a year. Each quarter, I share what engineers in your space are asking about and getting stuck on, gathered at conferences, user groups, live chat and across social.",
@@ -269,11 +274,6 @@ export const renewalPerks: PartnershipPerk[] = [
 		detail:
 			"Developers who sign up for your live session's materials can opt in to hear from your team, so you get warm leads from engineers who've already seen your product work.",
 	},
-	{
-		title: "Partner listing",
-		detail:
-			"Your logo appears under current partners on Rawkode Academy while the partnership runs.",
-	},
 ];
 
 /** The fixed 90-day arc. The review is the first step. */
@@ -291,12 +291,12 @@ export const partnershipPlan: PartnershipStep[] = [
 		what: "Agree the use case to teach. I write the runnable example, your team reviews it, and I run the live session on Rawkode Live or your own webinar, solo or with someone from your team. Monthly working session on the ranked list.",
 	},
 	{
-		when: "Month 3",
-		what: "I repeat the review on what you've shipped and check each place engineers got stuck. At the day-90 read-out, we go through what changed and decide what to work on next quarter.",
-	},
-	{
 		when: "From month 2",
 		what: "Slack Connect with me for questions and second opinions on launches, docs, demos and roadmap trade-offs.",
+	},
+	{
+		when: "Month 3",
+		what: "I repeat the review on what you've shipped and check each place engineers got stuck. At the day-90 read-out, we go through what changed and decide what to work on next quarter.",
 	},
 ];
 
@@ -333,17 +333,16 @@ export const annualPartnershipOffer: PartnershipOffer = {
 	cadence:
 		"Billed $10,000 a quarter. A 12-month contract, and either side can choose not to continue after that.",
 	summary:
-		"A year of working together, with the review at the start and a read-out every quarter.",
+		"A year of working together: the review to start, then the full 90-day cycle every quarter.",
 	included: [
 		"The full product review to start the year",
+		"Every quarter: a live session on Rawkode Live or your own webinar, with a runnable example repository",
+		"Every quarter: a re-run compared with last time, and a read-out",
 		"Monthly 60-minute working sessions with me, all year",
 		"Slack with me for the whole year",
-		"A read-out each quarter, where you decide what the next quarter covers",
 	],
 	excluded: [],
-	notes: [
-		"You tell me your choice at the read-out or within five business days, and I confirm it in writing.",
-	],
+	notes: [],
 	mailto: buildMailto("Annual partnership", applicationBody),
 };
 
@@ -368,12 +367,6 @@ export const partnershipAddOns: PartnershipAddOn[] = [
 		route: "Community challenge series",
 	},
 ];
-
-/** What each quarter of the annual partnership can cover. */
-export const annualPartnershipDetails = [
-	"A re-run compared with last time",
-	"A live session on Rawkode Live or your own webinar, with a runnable example repository",
-] as const;
 
 /** Terms buyers, finance and procurement ask about. */
 export const partnershipTerms = [
@@ -546,3 +539,27 @@ export const partnershipFitMailto = buildMailto(
 export const decisionBriefSubject = partnershipFitSubject;
 export const decisionBriefTemplate = applicationBody;
 export const decisionBriefMailto = partnershipFitMailto;
+
+/**
+ * A short brief the buyer can send to whoever signs off the budget. The
+ * mailto has no recipient so they choose who it goes to.
+ */
+const teamBriefBody = [
+	"I found a way to see exactly where engineers get stuck with our product.",
+	"",
+	"David Flanagan of Rawkode Academy works through it as our target user and gives us a ranked list of what to fix first.",
+	"",
+	`Product review: ${fitProofReview.price}, fixed, delivered in 10 business days. ${partnershipReviewCredit}`,
+	`90-day partnership: ${partnershipOffer.price}. Annual partnership: ${annualPartnershipOffer.price}.`,
+	"",
+	"The 90 days:",
+	"- Weeks 1-2: the product review and a walkthrough call",
+	"- Month 2: a live session and a runnable example for one use case",
+	"- Month 3: a re-run of the review and a read-out on what changed",
+	"",
+	"Fixed prices in USD, nothing renews automatically, it runs on a trial or sandbox account, and we own the review, the report and the read-out.",
+	"",
+	"Details: https://rawkode.academy/organizations/partnerships",
+].join("\n");
+
+export const teamBriefMailto = `mailto:?subject=${encodeURIComponent("Developer product review with Rawkode Academy")}&body=${encodeURIComponent(teamBriefBody.replace(/\n/g, "\r\n"))}`;
