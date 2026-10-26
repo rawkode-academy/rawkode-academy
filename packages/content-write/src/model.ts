@@ -19,8 +19,13 @@ export interface EntityModel {
 	schema: z.ZodTypeAny;
 	/** Website cache tags for a row: always include its own entity tag. */
 	tags: (row: Row) => string[];
-	/** Computes derived columns (Markdown copies of rich text) before writing. */
-	derive?: (row: Row) => Row;
+	/**
+	 * Computes derived columns (Markdown copies of rich text) before writing.
+	 * `changed` holds the fields the caller sent (empty for a restore), so a
+	 * model can tell an edited copy from a stale one and rebuild the document
+	 * from it instead of overwriting the edit.
+	 */
+	derive?: (row: Row, changed: ReadonlySet<string>) => Row;
 	/** Properties matched by list search (LIKE %term%). */
 	search?: string[];
 	/** List order; defaults to the key, ascending. */

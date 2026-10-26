@@ -28,6 +28,7 @@ import {
 	type Revision,
 	type Row,
 	type Versioned,
+	type WriteError,
 } from "./types";
 
 export interface ContentWriteEnv {
@@ -75,6 +76,19 @@ function complete(columns: Record<string, Column>, row: Row): Row {
 		out[prop] = defaultFn ? defaultFn() : column.hasDefault ? value : null;
 	}
 	return out;
+}
+
+/** A validation failure naming fields the table does not have, if any. */
+function unknownFields(
+	def: EntityModel,
+	input: Row,
+): { ok: false; error: WriteError } | undefined {
+	const columns = columnsOf(def.table);
+	const unknown = Object.keys(input ?? {}).filter((k) => !(k in columns));
+	if (unknown.length === 0) return undefined;
+	return fail("validation", `Unknown fields: ${unknown.join(", ")}`, {
+		issues: unknown.map((path) => ({ path, message: "Unknown field" })),
+	});
 }
 
 /** The primary-key properties of a list's items (the key minus the parent). */
@@ -141,9 +155,9 @@ export class ContentStore {
 	async get(model: string, id: string): Promise<Result<Versioned<Row>>> {
 		const m = this.#entity(model);
 		if (!m.ok) return m;
-		const row = await this.#find(m.value, id);
+		const { row, version } = await this.#read(m.value, id);
 		if (!row) return fail("not_found", `${model} "${id}" does not exist`);
-		return ok({ value: row, version: await this.#version(model, id) });
+		return ok({ value: row, version });
 	}
 
 	async list(model: string, query: ListQuery = {}): Promise<Result<ListPage>> {
@@ -235,10 +249,16 @@ export class ContentStore {
 		if (!found) return fail("unknown_model", `Unknown model "${model}"`);
 		const col = columnsOf(found.table)[column];
 		if (!col) return fail("invalid_request", `Unknown column "${column}"`);
+		// JSON array columns (a course's authors, a technology's related
+		// technologies) reference an entity when any element equals it.
+		const where =
+			col.columnType === "SQLiteTextJson"
+				? sql`exists (select 1 from json_each(${col}) where json_each.value = ${value})`
+				: eq(col, value);
 		const rows = (await (this.#db as AnyQuery)
 			.select()
 			.from(found.table)
-			.where(eq(col, value))
+			.where(where)
 			.limit(MAX_LIMIT)) as Row[];
 		return ok(rows);
 	}
@@ -254,6 +274,8 @@ export class ContentStore {
 		if (!m.ok) return m;
 		if (!actorOk(actor)) return fail("invalid_request", "An actor is required");
 		const def = m.value;
+		const unknown = unknownFields(def, input);
+		if (unknown) return unknown;
 		const keyColumn = columnsOf(def.table)[def.key];
 		const candidate: Row = { ...input };
 		if (candidate[def.key] === undefined || candidate[def.key] === "") {
@@ -266,7 +288,7 @@ export class ContentStore {
 			}
 			candidate[def.key] = generate();
 		}
-		const row = this.#validate(def, candidate);
+		const row = this.#validate(def, candidate, new Set(Object.keys(input)));
 		if (!row.ok) return row;
 		const id = String(row.value[def.key]);
 		if (await this.#find(def, id)) {
@@ -311,9 +333,12 @@ export class ContentStore {
 				issues: [{ path: def.key, message: "Ids are immutable" }],
 			});
 		}
-		const current = await this.#find(def, id);
+		const unknown = unknownFields(def, patch);
+		if (unknown) return unknown;
+		// Row and version in one read: the patch must merge into the row the
+		// version check is about, or a concurrent write could be lost.
+		const { row: current, version: versionNow } = await this.#read(def, id);
 		if (!current) return fail("not_found", `${model} "${id}" does not exist`);
-		const versionNow = await this.#version(model, id);
 		if (versionNow !== options?.ifVersion) {
 			return fail(
 				"conflict",
@@ -323,11 +348,15 @@ export class ContentStore {
 				},
 			);
 		}
-		const row = this.#validate(def, {
-			...current,
-			...patch,
-			[def.key]: current[def.key],
-		});
+		const row = this.#validate(
+			def,
+			{
+				...current,
+				...patch,
+				[def.key]: current[def.key],
+			},
+			new Set(Object.keys(patch)),
+		);
 		if (!row.ok) return row;
 		const version = versionNow + 1;
 		const committed = await this.#commit(
@@ -592,7 +621,11 @@ export class ContentStore {
 		return ok(found);
 	}
 
-	#validate(def: EntityModel, candidate: Row): Result<Row> {
+	#validate(
+		def: EntityModel,
+		candidate: Row,
+		changed: ReadonlySet<string> = new Set(),
+	): Result<Row> {
 		const parsed = def.schema.safeParse(candidate);
 		if (!parsed.success) {
 			return fail("validation", `Invalid ${def.name}`, {
@@ -600,7 +633,7 @@ export class ContentStore {
 			});
 		}
 		let row = parsed.data as Row;
-		if (def.derive) row = def.derive(row);
+		if (def.derive) row = def.derive(row, changed);
 		const columns = columnsOf(def.table);
 		if ("updatedAt" in columns) row = { ...row, updatedAt: this.#now() };
 		return ok(complete(columns, row));
@@ -640,6 +673,30 @@ export class ContentStore {
 			(p): p is string => !!p,
 		);
 		return props.map((p) => asc(columns[p] as Column));
+	}
+
+	/** The row and its latest version, read in one batch (one snapshot). */
+	async #read(
+		def: EntityModel,
+		id: string,
+	): Promise<{ row: Row | undefined; version: number }> {
+		const [rows, versions] = (await this.#db.batch([
+			(this.#db as AnyQuery)
+				.select()
+				.from(def.table)
+				.where(this.#keyEq(def, id))
+				.limit(1),
+			this.#db
+				.select({ version: max(contentRevisions.version) })
+				.from(contentRevisions)
+				.where(
+					and(
+						eq(contentRevisions.model, def.name),
+						eq(contentRevisions.entityId, id),
+					),
+				),
+		] as [AnyQuery, AnyQuery])) as [Row[], { version: number | null }[]];
+		return { row: rows[0], version: Number(versions[0]?.version ?? 0) };
 	}
 
 	async #find(def: EntityModel, id: string): Promise<Row | undefined> {
@@ -717,6 +774,19 @@ export class ContentStore {
 				return fail("validation", `${model}: a unique value is already taken`, {
 					issues: [{ path: "", message: String((error as Error).message) }],
 				});
+			}
+			if (
+				String((error as Error)?.message ?? error).includes(
+					"FOREIGN KEY constraint failed",
+				)
+			) {
+				return fail(
+					"validation",
+					`${model}: it refers to a row that does not exist`,
+					{
+						issues: [{ path: "", message: "A referenced row does not exist" }],
+					},
+				);
 			}
 			throw error;
 		}

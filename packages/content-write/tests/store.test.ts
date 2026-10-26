@@ -457,3 +457,62 @@ test("setList reports items that repeat the primary key, by index", async () => 
 		{ path: "2.guestId", message: "Duplicates item 0" },
 	]);
 });
+
+test("unknown fields are rejected instead of silently dropped", async () => {
+	await store.create("technology", bun, david);
+	const typo = await store.update(
+		"technology",
+		"bun",
+		{ websit: "https://bun.sh" },
+		{ ifVersion: 1 },
+		david,
+	);
+	expect(!typo.ok && typo.error.issues).toEqual([
+		{ path: "websit", message: "Unknown field" },
+	]);
+	const created = await store.create(
+		"technology",
+		{ ...bun, id: "x", nme: "X" },
+		david,
+	);
+	expect(!created.ok && created.error.code).toBe("validation");
+});
+
+test("derive learns which fields the caller sent", async () => {
+	const seen: string[][] = [];
+	const watched = defineModels("watch", [
+		{
+			...(models.models[0] as Parameters<typeof defineModels>[1][number] & {
+				kind: "entity";
+			}),
+			derive: (row, changed) => {
+				seen.push([...changed].sort());
+				return row;
+			},
+		},
+	]);
+	const DB = (await mf.getD1Database("DB")) as unknown as D1Database;
+	const w = new ContentStore(watched, { DB });
+	await w.create("technology", bun, david);
+	await w.update(
+		"technology",
+		"bun",
+		{ status: "beta" },
+		{ ifVersion: 1 },
+		david,
+	);
+	await w.restore("technology", "bun", 1, david);
+	expect(seen).toEqual([Object.keys(bun).sort(), ["status"], []]);
+});
+
+test("findReferences matches elements of JSON array columns", async () => {
+	await store.create(
+		"technology",
+		{ ...bun, aliases: ["bunjs", "oven"] },
+		david,
+	);
+	const refs = await store.findReferences("technology", "aliases", "oven");
+	expect(refs.ok && refs.value.map((r) => r.id)).toEqual(["bun"]);
+	const none = await store.findReferences("technology", "aliases", "ove");
+	expect(none.ok && none.value).toEqual([]);
+});
