@@ -425,6 +425,18 @@ export const LEARNING_PATH_FIELDS = /* GraphQL */ `
 	}
 `;
 
+export const SUPPORTER_FIELDS = /* GraphQL */ `
+	fragment LiveSupporter on Supporter {
+		id
+		name
+		websiteUrl
+		logoUrl
+		technologies {
+			id
+		}
+	}
+`;
+
 /** One query per source list. courses also yields courseModules. */
 export const LIST_QUERIES = {
 	videos: {
@@ -481,6 +493,11 @@ export const LIST_QUERIES = {
 		operationName: "LiveLearningPaths",
 		query: `query LiveLearningPaths { allLearningPaths { ...LiveLearningPath } }\n${LEARNING_PATH_FIELDS}`,
 		root: "allLearningPaths",
+	},
+	supporters: {
+		operationName: "LiveSupporters",
+		query: `query LiveSupporters { supporters { ...LiveSupporter } }\n${SUPPORTER_FIELDS}`,
+		root: "supporters",
 	},
 } as const;
 

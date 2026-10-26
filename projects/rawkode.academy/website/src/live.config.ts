@@ -26,6 +26,10 @@ const learningPaths = defineLiveCollection({
 	loader: contentLoader("learningPaths"),
 });
 
+const supporters = defineLiveCollection({
+	loader: contentLoader("supporters"),
+});
+
 export const collections = {
 	videos,
 	shows,
@@ -39,4 +43,5 @@ export const collections = {
 	courses,
 	courseModules,
 	learningPaths,
+	supporters,
 };

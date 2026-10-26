@@ -506,7 +506,7 @@ test("partnership CRM fallback keeps the form and offers a prefilled email", asy
 		const alert = view.host.querySelector("[role=alert]");
 		assert.match(
 			alert.textContent,
-			/Something went wrong, so your enquiry wasn't sent\. Please email David directly\./,
+			/Something went wrong, so your enquiry wasn't sent\. Please email me directly\./,
 		);
 		assert.equal(alert.getAttribute("data-error-code"), "crm_lookup_failed");
 		const fallback = view.host.querySelector(

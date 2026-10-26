@@ -21,17 +21,21 @@ import {
 	type ApplicationPath,
 	annualPartnershipDetails,
 	annualPartnershipOffer,
-	exampleMeasures,
 	fitProofReview,
 	PARTNERSHIP_EMAIL,
 	type PartnershipOffer,
+	partnershipAddOns,
 	partnershipCapacity,
 	partnershipDescription,
+	partnershipExperience,
 	partnershipOffer,
+	partnershipPerks,
 	partnershipReviewCredit,
 	productReviewCompletion,
 	productReviewPath,
 	productReviewScope,
+	supporterOffer,
+	renewalPerks,
 	resolveApplicationPath,
 } from "@/lib/partnerships";
 import Page from "@/wrappers/page.astro";
@@ -137,7 +141,7 @@ const reviewSteps = [
 	{
 		title: "You get a ranked report",
 		detail:
-			"Where engineers get stuck and what to fix first. Then a one-hour call to walk your team through it and agree the numbers to watch.",
+			"Where engineers get stuck and what to fix first. Then a one-hour call to walk your team through it.",
 	},
 ];
 
@@ -157,7 +161,6 @@ interface PricingCard {
 	featured?: boolean;
 	lead?: string;
 	choices?: readonly string[];
-	showExcluded?: boolean;
 }
 
 const pricingCards: PricingCard[] = [
@@ -177,7 +180,6 @@ const pricingCards: PricingCard[] = [
 		ctaName: "ask_about_the_90_day_plan",
 		ctaLocation: "pricing-90-day",
 		lead: "Everything in the product review, plus:",
-		showExcluded: true,
 	},
 	{
 		offer: annualPartnershipOffer,
@@ -196,9 +198,9 @@ const noLockIn = [
 		detail: `Stop after the review and you've paid ${fitProofReview.price}. The 90-day partnership ends at day 90, with nothing more to pay.`,
 	},
 	{
-		title: "Nothing renews automatically",
+		title: "Renew when it's working",
 		detail:
-			"The annual partnership is a 12-month contract, billed at $10,000 a quarter.",
+			"The annual partnership is a 12-month contract, billed at $10,000 a quarter. Carrying on is always your choice.",
 	},
 	{
 		title: "You own the work",
@@ -217,12 +219,12 @@ const faqs = [
 		question:
 			"We could come on Rawkode Live for free. What does the review add?",
 		answer:
-			"A maintainer session is public, about an hour, and you are there steering, so I see the path you show me. In the review I work alone as your target user, with nobody to rescue me. I note every place I get stuck against the recording, rank what to fix, explain or teach, set numbers to watch and, if you continue, re-run it at day 90 to check what changed.",
+			"A maintainer session is public, about an hour, and you are there steering, so I see the path you show me. In the review I work alone as your target user, with nobody to rescue me. I note every place I get stuck against the recording, rank what to fix, explain or teach and, if you continue, re-run it at day 90 to check what changed.",
 	},
 	{
 		question: "Aren't you too experienced to get stuck where our users do?",
 		answer:
-			"Before starting we agree who I'm acting as, such as an application developer who has never run a cluster, and I work to what that person would know. The walkthrough call then checks the ranked list against your own funnel numbers, so findings that don't show up in your data get marked down.",
+			"Before starting we agree who I'm acting as, such as an application developer who has never run a cluster, and I work to what that person would know. The walkthrough call then checks the list against what your team already hears from users, so we focus on what matters most to them.",
 	},
 	{
 		question: "What exactly does the review cover?",
@@ -231,11 +233,7 @@ const faqs = [
 	{
 		question: "How much of our engineers' time does it take?",
 		answer:
-			"About half a day across the 90 days: an hour to review the runnable example, an hour to prepare the session and the live hour itself. I write the example. Your product lead joins the monthly sessions.",
-	},
-	{
-		question: "What numbers do we agree, and when?",
-		answer: `Two or three numbers you already track, agreed at kick-off. Targets for day 90 are set on the review call, once the findings exist. ${exampleMeasures} We report against them in the read-out using your data.`,
+			"About half a day across the 90 days: an hour to review the runnable example, plus an hour to prepare and the live hour itself if someone from your team co-hosts the session. I write the example. Your product lead joins the monthly sessions.",
 	},
 	{
 		question: "Who on our side should own it?",
@@ -250,7 +248,7 @@ const faqs = [
 	{
 		question: "Can we sponsor content as well?",
 		answer:
-			"Sponsorship is a separate conversation from the partnership. Neither changes what I tell you in the review.",
+			"Yes, we can talk about it alongside the partnership. The review stays my honest take either way.",
 	},
 	{
 		question: "Do open-source maintainers have to pay to come on Rawkode Live?",
@@ -310,7 +308,8 @@ const partnerQuotes = (
 			<p>
 				<strong>David Flanagan</strong>
 				<span>Runs Rawkode Academy and Rawkode Live</span>
-				<span class="partnership-byline__stats">28.2K YouTube subscribers · over 370 hours of live streams</span>
+				<span class="partnership-byline__stats">28.2K YouTube subscribers · over 450 hours of developer education</span>
+				<span class="partnership-byline__bio">{partnershipExperience}</span>
 			</p>
 		</div>
 		<ReviewPreview slot="aside" placement="hero" />
@@ -356,20 +355,40 @@ const partnerQuotes = (
 			</div>
 			<div class="partnership-fit">
 				<div class="partnership-fit__card">
-					<h3>Good fit</h3>
+					<h3>Built for</h3>
 					<ul>
 						<li>You build developer tools: infrastructure tools, Kubernetes and cloud native projects, cloud platforms or AI infrastructure.</li>
 						<li>You're between seed and Series C.</li>
 						<li>An engineer can install or sign up for your product and try it, including open-source projects installed from GitHub or Helm.</li>
 					</ul>
 				</div>
-				<div class="partnership-fit__card partnership-fit__card--no">
-					<h3>Not a fit</h3>
-					<ul>
-						<li>Engineers can't install or sign up for your product and try it.</li>
-						<li>You make a data tool.</li>
-					</ul>
-				</div>
+			</div>
+		</section>
+
+		<section id="perks" class="editorial-section editorial-section--split" aria-labelledby="perks-title">
+			<div class="editorial-section__header">
+				<h2 id="perks-title" class="editorial-section__title">What else you get</h2>
+				<p class="editorial-section__lede">Included with every quarterly and annual partnership.</p>
+			</div>
+			<div class="partnership-perks">
+				<h3 class="partnership-label">Every partnership</h3>
+				<ul>
+					{partnershipPerks.map((perk) => (
+						<li>
+							<strong>{perk.title}</strong>
+							<p>{perk.detail}</p>
+						</li>
+					))}
+				</ul>
+				<h3 class="partnership-label">When you renew</h3>
+				<ul>
+					{renewalPerks.map((perk) => (
+						<li>
+							<strong>{perk.title}</strong>
+							<p>{perk.detail}</p>
+						</li>
+					))}
+				</ul>
 			</div>
 		</section>
 
@@ -408,14 +427,6 @@ const partnerQuotes = (
 									</div>
 								)}
 								{card.offer.notes.map((note) => <p class="partnership-plan__note">{note}</p>)}
-								{card.showExcluded && (
-									<details class="partnership-plan__excluded">
-										<summary>What's not included</summary>
-										<ul>
-											{card.offer.excluded.map((item) => <li>{item}</li>)}
-										</ul>
-									</details>
-								)}
 							</div>
 							<a
 								class:list={["editorial-button", !card.featured && "editorial-button--secondary"]}
@@ -429,11 +440,30 @@ const partnerQuotes = (
 					);
 				})}
 			</div>
+			<div class="partnership-addons">
+				<h3 id="addons-title" class="partnership-label">Add-ons</h3>
+				<ul>
+					{partnershipAddOns.map((addOn) => (
+						<li>
+							<p class="partnership-addons__heading"><strong>{addOn.title}</strong> <span>{addOn.price}</span></p>
+							<p>{addOn.detail}</p>
+							<a
+								class="partnership-text-link"
+								href={applyHref("Not sure yet")}
+								data-apply-path="Not sure yet"
+								data-partnership-cta
+								data-cta={`ask_about_${addOn.id.replaceAll("-", "_")}`}
+								data-cta-location="pricing-addon"
+							>{addOn.cta}</a>
+						</li>
+					))}
+				</ul>
+			</div>
 		</section>
 
 		<section id="no-lock-in" class="editorial-section" aria-labelledby="no-lock-in-title">
 			<div class="partnership-terms">
-				<h2 id="no-lock-in-title">No lock-in</h2>
+				<h2 id="no-lock-in-title">Simple terms</h2>
 				<ul>
 					{noLockIn.map((term) => (
 						<li>
@@ -443,6 +473,31 @@ const partnerQuotes = (
 					))}
 				</ul>
 			</div>
+		</section>
+
+		<section id="supporter" class="editorial-section editorial-section--split" aria-labelledby="supporter-title">
+			<div class="editorial-section__header">
+				<h2 id="supporter-title" class="editorial-section__title">Just want to back the content?</h2>
+				<p class="editorial-section__lede">{supporterOffer.summary}</p>
+			</div>
+			<article class="partnership-plan partnership-supporter" aria-labelledby={`plan-${supporterOffer.id}`}>
+				<div class="partnership-plan__heading">
+					<h3 id={`plan-${supporterOffer.id}`}>{supporterOffer.name}</h3>
+				</div>
+				<p class="partnership-plan__price"><span>{splitPrice(supporterOffer.price).amount}</span> <span class="partnership-plan__period">{splitPrice(supporterOffer.price).period}</span></p>
+				<p class="partnership-plan__cadence">{supporterOffer.cadence}</p>
+				<ul class="partnership-plan__list">
+					{supporterOffer.included.map((item) => <li>{item}</li>)}
+				</ul>
+				<a
+					class="editorial-button editorial-button--secondary"
+					href={applyHref("Community supporter")}
+					data-apply-path="Community supporter"
+					data-partnership-cta
+					data-cta="become_a_supporter"
+					data-cta-location="pricing-supporter"
+				>Become a supporter</a>
+			</article>
 		</section>
 
 		{partnerQuotes.length > 0 && (
@@ -485,7 +540,7 @@ const partnerQuotes = (
 		<section id="apply" class="editorial-section editorial-section--split partnerships-apply" aria-labelledby="apply-title">
 			<div class="editorial-section__header">
 				<h2 id="apply-title" class="editorial-section__title">Tell me about your product</h2>
-				<p class="editorial-section__lede">A few lines about your product and where engineers get stuck is enough. I read every one and tell you honestly whether the review is worth doing.</p>
+				<p class="editorial-section__lede">A few lines about your product and what you're after is enough. I read every one and tell you which option fits: a review, a partnership or supporting the community.</p>
 			</div>
 			<div id="enquiry-form" class="partnerships-apply__body">
 				{enquiryReceived ? (
@@ -510,7 +565,7 @@ const partnerQuotes = (
 			<strong>{fitProofReview.name}</strong>
 			<span>{fitProofReview.price} · fixed price</span>
 		</p>
-		<a class="partnership-pinned__cta" href={reviewApplyHref} data-apply-path={productReviewPath} data-partnership-cta data-cta-location="pinned" tabindex="-1">Ask about it</a>
+		<a class="partnership-pinned__cta" href={reviewApplyHref} data-apply-path={productReviewPath} data-partnership-cta data-cta-location="pinned" tabindex="-1">Ask about a review</a>
 	</div>
 </Page>
 
@@ -681,11 +736,88 @@ const partnerQuotes = (
 		color: var(--colors-academy-text);
 	}
 
+	.partnership-byline__bio {
+		max-width: 38rem;
+		margin-top: 0.5rem;
+		line-height: 1.5;
+	}
+
 	.partnership-byline__stats {
 		margin-top: 0.15rem;
 		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
 		font-size: 0.8rem;
 		color: var(--colors-academy-text-muted);
+	}
+
+	.partnership-addons {
+		margin-top: 2rem;
+		padding-top: 1.25rem;
+		border-top: 1px solid var(--colors-academy-border);
+	}
+
+	.partnership-addons ul {
+		display: grid;
+		gap: 1rem;
+		margin: 0.75rem 0 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.partnership-addons p {
+		margin: 0;
+		max-width: 38rem;
+		line-height: 1.5;
+		color: var(--colors-academy-text-soft);
+	}
+
+	.partnership-addons__heading {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem 1rem;
+		align-items: baseline;
+	}
+
+	.partnership-addons__heading strong {
+		color: var(--colors-academy-text);
+	}
+
+	.partnership-addons__heading span {
+		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
+		font-size: 0.8rem;
+		color: var(--colors-academy-text-muted);
+	}
+
+	.partnership-perks ul {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+		gap: 0 2rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		border-top: 1px solid var(--colors-academy-border);
+	}
+
+	.partnership-perks li {
+		padding: 1rem 0;
+		border-bottom: 1px solid var(--colors-academy-border);
+	}
+
+	.partnership-perks strong {
+		color: var(--colors-academy-text);
+	}
+
+	.partnership-perks p {
+		margin: 0.35rem 0 0;
+		line-height: 1.5;
+		color: var(--colors-academy-text-soft);
+	}
+
+	.partnership-perks h3 {
+		margin: 2rem 0 0.75rem;
+	}
+
+	.partnership-perks h3:first-child {
+		margin-top: 0;
 	}
 
 	/* Partners */
@@ -804,10 +936,6 @@ const partnerQuotes = (
 		border: 1px solid var(--colors-academy-border);
 		border-radius: var(--radii-academy-l);
 		background: var(--colors-academy-panel);
-	}
-
-	.partnership-fit__card--no {
-		background: var(--colors-academy-ground);
 	}
 
 	.partnership-fit__card h3 {
@@ -1086,7 +1214,7 @@ const partnerQuotes = (
 		width: 100%;
 	}
 
-	/* No lock-in */
+	/* Simple terms */
 	.partnership-terms {
 		display: grid;
 		gap: 1.25rem;

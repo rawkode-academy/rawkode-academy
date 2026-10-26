@@ -62,7 +62,7 @@ test("partnership page follows the approved redesign", () => {
 	);
 	assert.match(
 		page,
-		/28\.2K YouTube subscribers · over 370 hours of live streams/,
+		/28\.2K YouTube subscribers · over 450 hours of developer education/,
 	);
 	assert.match(page, /<ReviewPreview slot="aside" placement="hero" \/>/);
 	assert.match(page, /<ReviewPreview placement="inline" \/>/);
@@ -99,11 +99,7 @@ test("partnership page follows the approved redesign", () => {
 		page,
 		/An engineer can install or sign up for your product and try it, including open-source projects installed from GitHub or Helm\./,
 	);
-	assert.match(
-		page,
-		/Engineers can't install or sign up for your product and try it\./,
-	);
-	assert.match(page, /You make a data tool\./);
+	assert.match(page, /<h3>Built for<\/h3>/);
 
 	// Partners: one alphabetical grid, current and past together.
 	assert.match(page, /Teams I've worked with/);
@@ -130,8 +126,7 @@ test("partnership page follows the approved redesign", () => {
 	assert.match(page, /partnershipCapacity\.places/);
 	assert.match(page, /partnershipCapacity\.newStartsPerMonth/);
 	assert.match(page, /card\.offer\.included\.map/);
-	assert.match(page, /card\.offer\.excluded\.map/);
-	assert.match(page, /What's not included/);
+	assert.doesNotMatch(page, /What's not included|Not a fit/);
 	for (const [label, location] of [
 		["Ask about a product review", "pricing-review"],
 		["Ask about the 90-day plan", "pricing-90-day"],
@@ -143,7 +138,7 @@ test("partnership page follows the approved redesign", () => {
 	assert.match(page, /data-cta-location=\{card\.ctaLocation\}/);
 	assert.deepEqual(
 		Array.from(page.matchAll(/data-cta-location="([^"]+)"/g), (m) => m[1]),
-		["hero", "pinned"],
+		["hero", "pricing-addon", "pricing-supporter", "pinned"],
 	);
 	// Every button leads to the same form anchor.
 	assert.match(page, /#enquiry-form`/);
@@ -160,12 +155,12 @@ test("partnership page follows the approved redesign", () => {
 	assert.match(page, /requestAnimationFrame\(update\)/);
 	assert.match(page, /prefers-reduced-motion/);
 
-	// No lock-in.
+	// Simple terms.
 	assert.match(
 		page,
 		/You decide what each quarter covers, and you own the review, the report and the read-out\./,
 	);
-	assert.equal(page.match(/Nothing renews automatically/g)?.length, 1);
+	assert.equal(page.match(/Renew when it's working/g)?.length, 1);
 
 	// Wording rules that stay in force.
 	assert.doesNotMatch(`${page}\n${partnershipCopy}`, /in order of importance/);
@@ -198,7 +193,7 @@ test("partnership page follows the approved redesign", () => {
 	// Shared copy the page reads from.
 	assert.match(
 		partnershipCopy,
-		/If he can't deliver a scheduled item, we move the date with your agreement\./,
+		/If I can't deliver a scheduled item, we move the date together\./,
 	);
 	assert.match(partnershipCopy, /export const partnershipReviewCredit =/);
 	assert.match(
@@ -221,26 +216,21 @@ test("partnership page follows the approved redesign", () => {
 	);
 	assert.match(
 		partnershipCopy,
-		/At the day-90 read-out, we compare the results with the targets and decide what to work on next quarter\./,
+		/At the day-90 read-out, we go through what changed and decide what to work on next quarter\./,
 	);
-	assert.match(partnershipCopy, /Each quarter, you get an anonymised write-up/);
+	assert.match(partnershipCopy, /title: "Partner round table"/);
 	assert.match(partnershipCopy, /"Slack Connect with me",/);
 	assert.doesNotMatch(partnershipCopy, /"Slack Connect with David"/);
 	assert.match(partnershipCopy, /roadmap trade-offs\./);
 	assert.match(
 		partnershipCopy,
-		/"A day-90 review compared with the original, and a read-out against the targets set on the review call",/,
-	);
-	assert.match(
-		partnershipCopy,
-		/The partner session is clearly labelled as a partnership, and you get straight answers\./,
+		/"A day-90 review compared with the original, and a read-out on what changed",/,
 	);
 	assert.match(partnershipCopy, /"A ranked list of what to fix first"/);
 	assert.match(
 		partnershipCopy,
 		/You get a written list of what to fix first\./,
 	);
-	assert.match(partnershipCopy, /warm introductions/);
 	assert.match(partnershipCopy, /export const productReviewScope =/);
 	assert.match(partnershipCopy, /export const productReviewCompletion =/);
 	assert.match(letsChat, /David reads every enquiry and replies by email\./);

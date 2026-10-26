@@ -65,7 +65,7 @@ export const partnershipPlacesOpen = Math.max(
 export const partnershipIsFull = partnershipPlacesOpen === 0;
 
 /** One-line capacity statement used in the hero. */
-export const partnershipCapacitySummary = `At most ${partnershipCapacity.places} partners at a time and ${partnershipCapacity.newStartsPerMonth} new reviews a month, because David does the work himself.${partnershipCapacity.nextStart ? ` Next review start: week of ${partnershipCapacity.nextStart}.` : ""}`;
+export const partnershipCapacitySummary = `At most ${partnershipCapacity.places} partners at a time and ${partnershipCapacity.newStartsPerMonth} new reviews a month, because I do the work myself.${partnershipCapacity.nextStart ? ` Next review start: week of ${partnershipCapacity.nextStart}.` : ""}`;
 
 /**
  * Current availability, worded for the page. While no places are taken the
@@ -79,7 +79,11 @@ export const partnershipAvailability = partnershipIsFull
 
 /** Where the product-review method comes from. */
 export const partnershipMethodNote =
-	"David has worked through new tools for the first time, live and unscripted, on Rawkode Live since 2020. The product review is the same work done privately, timed and written up as a ranked list.";
+	"I've worked through new tools for the first time, live and unscripted, on Rawkode Live since 2020. The product review is the same work done privately, timed and written up as a ranked list.";
+
+/** David's background, shown under the hero byline. */
+export const partnershipExperience =
+	"25 years building software. I've led DevRel and engineering teams at Equinix Metal, Pulumi and InfluxData, and I'm a former CNCF Ambassador. Since 2020 I've taken hundreds of developer tools from zero to working, live and unscripted, on Rawkode Live.";
 
 /** Who the programme is for. Used in the hero eyebrow and search copy. */
 export const partnershipAudience =
@@ -95,13 +99,9 @@ export const partnershipHeroLede =
 	"Then decide what to fix, what to explain and what to teach, with David Flanagan, founder of Rawkode Academy.";
 
 export const partnershipStartingPoint =
-	"Every partnership starts with a product review. David tells you plainly where engineers get stuck with your product and what to fix first. You get it within 10 business days, and we only invoice once it's delivered. If it's useful, you can go on to a quarterly or annual partnership.";
+	"Every partnership starts with a product review. I tell you plainly where engineers get stuck with your product and what to fix first. You get it within 10 business days, and we only invoice once it's delivered. If it's useful, you can go on to a quarterly or annual partnership.";
 
 export const organizationsStartingPoint = partnershipStartingPoint;
-
-/** Example numbers to watch, so buyers can see what "agreed numbers" means. */
-export const exampleMeasures =
-	"For example: time from sign-up or setup to a first successful deploy, quick-start completion rate, or the share of trials that are still active after a week.";
 
 /** What the partner has in hand at day 90. The page leads with this. */
 export const partnershipOutcomes = [
@@ -109,37 +109,37 @@ export const partnershipOutcomes = [
 		title: "A product review",
 		inReview: true,
 		detail:
-			"David reviews your product from setup or sign-up to a working result and writes down the places engineers get stuck. Delivered in the first two weeks as part of the review.",
+			"I review your product from setup or sign-up to a working result and writes down the places engineers get stuck. Delivered in the first two weeks as part of the review.",
 	},
 	{
 		title: "A written report",
 		inReview: true,
 		detail:
-			"The places engineers get stuck are ranked by how much they cost developers and how hard they are to change, with what to fix first. Your product lead owns the list; David reviews progress with them every month.",
+			"The places engineers get stuck are ranked by how much they cost developers and how hard they are to change, with what to fix first. Your product lead owns the list; I review progress with them every month.",
 	},
 	{
-		title: "A live session on Rawkode Academy",
+		title: "A live session",
 		inReview: false,
 		detail:
-			"David and your engineer teach one agreed use case live on Rawkode Live, labelled as a partner session. The session stays published on Rawkode Academy and you can reuse it on your own channels.",
+			"A live session on Rawkode Live or your own webinar, teaching one agreed use case. I can run it solo, or co-host it with someone from your team. You can reuse the recording on your own channels.",
 	},
 	{
-		title: "A runnable example, written by David",
+		title: "A runnable example, written by me",
 		inReview: false,
 		detail:
-			"David writes the example repository for that use case against your product. Your engineer checks it is accurate. Fork it, publish it, put it in your docs.",
+			"I write the example repository for that use case against your product. Your team checks it is accurate. Fork it, publish it, put it in your docs.",
 	},
 	{
 		title: "A before-and-after re-run",
 		inReview: false,
 		detail:
-			"At day 90 David repeats the review on what you've shipped since and checks every place engineers got stuck in the original report: fixed, improved or still there. You get the count before and after, not just an impression.",
+			"At day 90 I repeat the review on what you've shipped since and checks every place engineers got stuck in the original report: fixed, improved or still there.",
 	},
 	{
 		title: "A day-90 read-out",
 		inReview: false,
 		detail:
-			"What changed, what the re-run, the session and your own numbers show, and what to work on next quarter. We report against two or three numbers you already track and the targets set on the review call. If we miss a target, the read-out says why.",
+			"What changed, how developers now experience your product, what the re-run and the session showed, and what to work on next quarter.",
 	},
 ] as const;
 
@@ -154,83 +154,68 @@ export interface PartnershipPerk {
  */
 export const partnershipPerks: PartnershipPerk[] = [
 	{
-		title: "Fix checks",
+		title: "Field insight",
 		detail:
-			"Ship a fix for something on your ranked list and David re-tests that step himself within five business days, so you know it worked before the day-90 re-run. Up to three a quarter.",
+			"I'm at 30 events a year. Each quarter, I share what engineers in your space are asking about and getting stuck on, gathered at conferences, user groups, live chat and across social.",
 	},
 	{
-		title: "Launch pre-flight",
+		title: "Feature launch health check",
 		detail:
-			"Before one launch a quarter, David reviews the new feature or quick start and sends you the three things most likely to trip developers up. Give us 10 business days' notice. It doesn't mean David will cover the launch publicly.",
+			"Before one launch a quarter, I go through the new feature or quick start and share my take: what will land with developers, what to sharpen, and how I'd position it. Give me 10 business days' notice.",
 	},
 	{
-		title: "90-day results summary",
+		title: "Demo and talk coaching",
 		detail:
-			"At the end of the 90 days, David sends you a one-page summary of what changed, with before and after numbers, and a five-minute video walking through it. It's written so you can forward it to your CEO or board. If you publish it, it stays marked as prepared under a paid partnership.",
+			"Before your next launch or conference talk, I run through your demo the way your audience will, and give you notes from over 450 hours of developer education to make it land.",
 	},
 	{
-		title: "Cross-partner patterns",
+		title: "Results summary",
 		detail:
-			"Each quarter, you get an anonymised write-up of the places engineers got stuck across every partner's review, so you can compare your onboarding with your peers'. No product is named. It starts once three partners are active.",
+			"At the end of each quarter, I send you a one-page summary of what changed and how developers now experience your product, with a five-minute video walking through it. It's ready to forward to your CEO or board.",
 	},
 	{
-		title: "The Technology Matrix, walked through",
+		title: "Partner round table",
 		detail:
-			"The Technology Matrix is Rawkode Academy's written, opinionated radar of cloud-native, platform and AI-infrastructure tools.",
+			"Once a quarter, partners bring their questions and get answers from me and from other teams solving the same problems.",
 	},
 	{
 		title: "Your example in the Academy",
 		detail:
-			"The runnable example David writes for you is listed in the resources of the matching Rawkode Academy technology page or course, marked as a partner example.",
+			"The runnable example I write for you is featured on your product's Rawkode Academy technology page and in any matching course, so engineers find it while they're learning.",
 	},
 	{
-		title: "An accurate technology page",
+		title: "Your technology page",
 		detail:
-			"David checks your product's entry in the Rawkode Academy technology catalogue and fixes outdated facts, with a line saying you are a current partner. Corrections only, not marketing copy.",
+			"I keep your product's page in the Rawkode Academy technology catalogue accurate and current, and mark you as a partner.",
 	},
 	{
-		title: "A partner note in the newsletter",
+		title: "Newsletter feature",
 		detail:
-			"Once per 90 days, a short technical note from your team, such as the example repository or the partner session, appears in the Rawkode Academy newsletter, marked as a partner note. David checks it for accuracy.",
-	},
-	{
-		title: "A partner AMA on Discord",
-		detail:
-			"Once per 90 days, a labelled partner AMA in the Rawkode Academy Discord, hosted by David with your engineer.",
-	},
-	{
-		title: "Warm introductions",
-		detail:
-			"Up to two a quarter, to maintainers, practitioners or other partners you want to reach, made only where David thinks both sides benefit and both agree.",
+			"Every month, your team's latest technical work, such as a release, a tutorial or the live session, is featured in the Rawkode Academy newsletter.",
 	},
 ];
 
 /** Extras for partners who continue past the first 90 days. */
 export const renewalPerks: PartnershipPerk[] = [
 	{
-		title: "First refusal on your place",
+		title: "Keep your place",
 		detail:
-			"Current partners keep their place for the next 90 days and get review start dates before anyone on the waiting list.",
+			"Renewing partners keep their place, ahead of the waiting list.",
 	},
 	{
-		title: "A guest article",
+		title: "Guest article",
 		detail:
-			"Your engineer publishes one technical article on Rawkode Academy, marked as partner content and edited by David for accuracy. Product pitches get sent back.",
+			"Your team publishes a technical article on Rawkode Academy, edited by me so it reads well and lands with engineers.",
 	},
 	{
-		title: "A Klustered partner special",
+		title: "Leads from your session",
 		detail:
-			"Your team joins a Klustered episode, breaking and fixing clusters live, labelled as a partner special.",
+			"Developers who sign up for your live session's materials can opt in to hear from your team, so you get warm leads from engineers who've already seen your product work.",
 	},
 	{
-		title: "Opt-in contact from your session",
+		title: "Partner listing",
 		detail:
-			"Developers who sign up for your partner session's materials can choose to hear from your team. The box is unticked by default and covered in the statement of work.",
-	},
-	{
-		title: "Listed as a current partner",
-		detail:
-			"With your permission, your logo appears under current partners on this page while the partnership runs.",
+			"Your logo appears under current partners on Rawkode Academy while the partnership runs.",
 	},
 ];
 
@@ -238,7 +223,7 @@ export const renewalPerks: PartnershipPerk[] = [
 export const partnershipPlan: PartnershipStep[] = [
 	{
 		when: "Weeks 1–2 · product review",
-		what: "We start with a kick-off call, and you give us a trial or sandbox account. We agree the numbers to watch, and we set targets on the review call once the findings exist. David carries out the product review and delivers the written report within 10 business days, then walks your team through it in a one-hour call, checking the report against your own funnel numbers.",
+		what: "We start with a kick-off call, and you give us a trial or sandbox account. I carry out the product review and deliver the written report within 10 business days, then walk your team through it in a one-hour call.",
 	},
 	{
 		when: "Decide",
@@ -246,15 +231,15 @@ export const partnershipPlan: PartnershipStep[] = [
 	},
 	{
 		when: "Month 2",
-		what: "Agree the use case to teach. David writes the runnable example, your engineer reviews it, and we run the live session together. Monthly working session on the ranked list.",
+		what: "Agree the use case to teach. I write the runnable example, your team reviews it, and I run the live session on Rawkode Live or your own webinar, solo or with someone from your team. Monthly working session on the ranked list.",
 	},
 	{
 		when: "Month 3",
-		what: "David repeats the review on what you've shipped and checks each place engineers got stuck. At the day-90 read-out, we compare the results with the targets and decide what to work on next quarter.",
+		what: "I repeat the review on what you've shipped and checks each place engineers got stuck. At the day-90 read-out, we go through what changed and decide what to work on next quarter.",
 	},
 	{
 		when: "From month 2",
-		what: "Slack Connect with David for questions and second opinions on launches, docs, demos and roadmap trade-offs.",
+		what: "Slack Connect with me for questions and second opinions on launches, docs, demos and roadmap trade-offs.",
 	},
 ];
 
@@ -271,20 +256,13 @@ export const partnershipOffer: PartnershipOffer = {
 		"A fixed price. After a review, continuing costs $7,000 more, paid as $3,500 a month for two months.",
 	summary: "The review, then the rest of the 90 days working on what it finds.",
 	included: [
-		"One live partner session on Rawkode Live, co-taught with your engineer",
+		"A live session on Rawkode Live or your own webinar. I can run it solo, or co-host it with someone from your team",
 		"One runnable example repository, written by me",
 		"Monthly 60-minute working sessions with written recaps",
 		"Slack Connect with me",
-		"Re-tests of fixes you ship, and a review before one launch a quarter",
-		"A 90-day results summary you can share with your board",
-		"Mentions in the newsletter and on Discord, and warm introductions",
-		"A day-90 review compared with the original, and a read-out against the targets set on the review call",
+		"A day-90 review compared with the original, and a read-out on what changed",
 	],
-	excluded: [
-		"Building or fixing your product. Your team owns the changes.",
-		"We don't promise a number of viewers, leads or positive coverage. The partner session is clearly labelled as a partnership, and you get straight answers.",
-		"On-call support, extra sessions and maintaining the example after day 90, unless agreed separately.",
-	],
+	excluded: [],
 	notes: [],
 	mailto: buildMailto("90-day partnership", applicationBody),
 };
@@ -312,11 +290,30 @@ export const annualPartnershipOffer: PartnershipOffer = {
 	mailto: buildMailto("Annual partnership", applicationBody),
 };
 
+export interface PartnershipAddOn {
+	id: string;
+	title: string;
+	price: string;
+	detail: string;
+	cta: string;
+}
+
+/** Larger pieces of work partners can add to a quarterly or annual partnership. */
+export const partnershipAddOns: PartnershipAddOn[] = [
+	{
+		id: "challenge-series",
+		title: "Community challenge series",
+		price: "From $15,000",
+		detail:
+			"A hands-on challenge series built around your product, like Advent of Spin for Fermyon, that gets engineers building with it and sharing what they made.",
+		cta: "Ask about a challenge series",
+	},
+];
+
 /** What each quarter of the annual partnership can cover. */
 export const annualPartnershipDetails = [
 	"A re-run compared with last time",
-	"A review before a launch, then a re-check of your fixes",
-	"A live session on Rawkode Live with a runnable example repository",
+	"A live session on Rawkode Live or your own webinar, with a runnable example repository",
 ] as const;
 
 /** Terms buyers, finance and procurement ask about. */
@@ -338,7 +335,7 @@ export const partnershipTerms = [
 	{
 		title: "Paperwork",
 		detail:
-			"A one-page statement of work listing the deliverables, dates and targets, before you sign. It names the contracting entity and the liability cap. We can work under your MSA and sign your NDA.",
+			"A one-page statement of work listing the deliverables and dates, before you sign. It names the contracting entity and the liability cap. We can work under your MSA and sign your NDA.",
 	},
 	{
 		title: "Access and data",
@@ -346,9 +343,9 @@ export const partnershipTerms = [
 			"We work from a trial or sandbox account and don't need production systems or customer data. Review materials are shared with you privately and we delete our copies 90 days after the work ends, or sooner if you ask. Slack Connect is a shared channel your admins control and can close at any time.",
 	},
 	{
-		title: "If David can't make it",
+		title: "If I can't make it",
 		detail:
-			"David does the work himself. If he can't deliver a scheduled item, we move the date with your agreement.",
+			"I do the work myself. If I can't deliver a scheduled item, we move the date together.",
 	},
 	{
 		title: "Ownership",
@@ -371,13 +368,9 @@ export const fitProofReview: PartnershipOffer = {
 	included: [
 		"A written report showing the places engineers get stuck",
 		"A ranked list of what to fix first",
-		"Two or three numbers to watch, with a target for each",
 		"A one-hour call to go through it with your team",
 	],
-	excluded: [
-		"Ongoing Slack access, the live session and the runnable example",
-		"Public coverage, product mentions or leads",
-	],
+	excluded: [],
 	notes: [
 		"Covers up to two kinds of user, such as a platform team and the application developers they serve.",
 	],
@@ -392,6 +385,27 @@ export const productReviewScope =
 export const productReviewCompletion =
 	"If the review is missing anything the statement of work lists, I finish it.";
 
+/** A lighter way to back the content, without the review work. */
+export const supporterOffer: PartnershipOffer = {
+	id: "community-supporter",
+	name: "Community supporter",
+	label: "Support Rawkode Academy",
+	price: "$1,000 a month",
+	priceShort: "$1k/month",
+	cadence: "No minimum term. Or $9,000 for a year.",
+	summary:
+		"Fund free tutorials, live streams and shows for the community, and thousands of engineers see your name next to the content they learn from.",
+	included: [
+		"A supporter badge on your Rawkode Academy technology page",
+		"Your docs and resources at the top of your technology page",
+		"Your latest announcement, one at a time, on your technology page and on every video about your technology",
+		"Your logo on our supporters wall",
+	],
+	excluded: [],
+	notes: [],
+	mailto: buildMailto("Community supporter", applicationBody),
+};
+
 /** Compatibility shape for components that render the partnership offers. */
 export const partnershipTiers = [
 	partnershipOffer,
@@ -404,6 +418,7 @@ export const applicationPaths = [
 	"Product review",
 	"90-day partnership",
 	"Annual plan",
+	"Community supporter",
 	"Not sure yet",
 ] as const;
 export type ApplicationPath = (typeof applicationPaths)[number];
@@ -415,6 +430,7 @@ export const applicationPathLabels: Record<ApplicationPath, string> = {
 	"Product review": fitProofReview.name,
 	"90-day partnership": partnershipOffer.name,
 	"Annual plan": annualPartnershipOffer.name,
+	"Community supporter": supporterOffer.name,
 	"Not sure yet": "Not sure yet",
 };
 
@@ -430,6 +446,7 @@ export const applicationPathDeals: Record<
 		valueUsd: 12000,
 	},
 	"Annual plan": { offer: "Partnership (Yearly)", valueUsd: 40000 },
+	"Community supporter": { offer: "Supporter", valueUsd: 9000 },
 };
 
 /**
@@ -453,9 +470,6 @@ export const resolveApplicationPath = (
 	}
 	return legacyApplicationPaths[value];
 };
-
-/** Boundaries for the full partnership programme. */
-export const partnershipBoundaries = partnershipOffer.excluded;
 
 /** General partnership application mailto used as a fallback. */
 export const partnershipFitSubject = "Rawkode Academy partnership";

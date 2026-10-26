@@ -1,0 +1,218 @@
+---
+export const prerender = false;
+
+import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
+import EmptyState from "@/components/ui/EmptyState.vue";
+import MLabel from "@/components/ui/MLabel.vue";
+import { academyLayout } from "@rawkodeacademy/design-system";
+import Page from "@/wrappers/page.astro";
+import {
+	getCollection,
+	optionalContent,
+	setContentCache,
+} from "@/lib/live-content";
+import { BECOME_A_SUPPORTER_PATH } from "@/lib/supporters";
+
+// The supporters are the page; technology names are secondary, so a link
+// falls back to the technology id when they cannot be loaded.
+const [supporters, technologies] = await Promise.all([
+	getCollection("supporters"),
+	optionalContent(getCollection("technologies"), []),
+]);
+const technologyById = new Map(technologies.map((t) => [t.id, t]));
+
+// The gateway lists active supporters only, longest-standing first.
+const wall = supporters
+	.filter(({ data }) => data.name && data.websiteUrl)
+	.map(({ id, data }) => ({
+		id,
+		name: data.name,
+		websiteUrl: data.websiteUrl,
+		logoUrl: data.logoUrl,
+		technologies: data.technologies.map((technology) => ({
+			id: technology.id,
+			name: technologyById.get(technology.id)?.data.name ?? technology.id,
+		})),
+	}));
+
+const supportedIds = new Set(
+	wall.flatMap((supporter) => supporter.technologies.map(({ id }) => id)),
+);
+await setContentCache(Astro, {
+	entries: [
+		...supporters,
+		...technologies.filter((technology) => supportedIds.has(technology.id)),
+	],
+	collections: ["supporters", "technologies"],
+});
+const styles = academyLayout({ width: "wide" });
+---
+
+<Page
+	title="Community supporters"
+	description="The organisations that fund Rawkode Academy's free tutorials, live streams and shows for the cloud native community."
+	pageType="CollectionPage"
+>
+	<div class={styles.root}>
+		<AcademyCatalogMasthead
+			kicker="Community"
+			title="Community supporters"
+			description="Every Rawkode Academy tutorial, live stream and show is free to watch. These organisations fund that work, so the community can keep learning without a paywall."
+		/>
+
+		<section class={styles.section} aria-labelledby="supporter-wall-title">
+			<div class={styles.container}>
+				<h2 id="supporter-wall-title" class="sr-only">Our community supporters</h2>
+				{wall.length > 0 ? (
+					<>
+						<ul class="supporter-wall">
+							{wall.map((supporter) => (
+								<li class="supporter-wall__item" data-supporter={supporter.id}>
+									<h3 class="supporter-wall__heading">
+										<a
+											class="supporter-wall__identity focus-ring"
+											href={supporter.websiteUrl}
+											target="_blank"
+											rel="sponsored noopener"
+										>
+											{supporter.logoUrl && (
+												<img
+													class="supporter-wall__logo"
+													src={supporter.logoUrl}
+													alt={supporter.name}
+													width="160"
+													height="48"
+													loading="lazy"
+													onerror="this.hidden=true; this.nextElementSibling.hidden=false;"
+												/>
+											)}
+											<span class="supporter-wall__name" hidden={Boolean(supporter.logoUrl)}>{supporter.name}</span>
+											<span class="sr-only"> (opens in a new tab)</span>
+										</a>
+									</h3>
+									{supporter.technologies.length > 0 && (
+										<div class="supporter-wall__support">
+											<MLabel>Supports</MLabel>
+											<ul class="supporter-wall__technologies">
+												{supporter.technologies.map((technology) => (
+													<li><a class="supporter-wall__technology focus-ring" href={`/technology/${technology.id}`}>{technology.name}</a></li>
+												))}
+											</ul>
+										</div>
+									)}
+								</li>
+							))}
+						</ul>
+						<p class="supporter-wall__invite">
+							Want to fund free learning too? <a class="supporter-wall__technology focus-ring" href={BECOME_A_SUPPORTER_PATH}>Become a community supporter</a>
+						</p>
+					</>
+				) : (
+					<EmptyState
+						title="Be the first community supporter"
+						body="Help keep Rawkode Academy's tutorials, live streams and shows free for everyone."
+					>
+						<a slot="actions" class="focus-ring" href={BECOME_A_SUPPORTER_PATH}>Become a community supporter</a>
+					</EmptyState>
+				)}
+			</div>
+		</section>
+	</div>
+</Page>
+
+<style>
+	.supporter-wall {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		border-top: 1px solid var(--editorial-hairline);
+		border-left: 1px solid var(--editorial-hairline);
+	}
+
+	.supporter-wall__item {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		min-width: 0;
+		padding: 1.25rem;
+		border-right: 1px solid var(--editorial-hairline);
+		border-bottom: 1px solid var(--editorial-hairline);
+	}
+
+	.supporter-wall__heading {
+		margin: 0;
+		font: inherit;
+		letter-spacing: normal;
+	}
+
+	/* Logos are supplied for light backgrounds, so the plate stays light
+	   paper with light-mode ink and hairline in both schemes. */
+	.supporter-wall__identity {
+		--supporter-plate: oklch(0.97 0.008 85);
+		--supporter-plate-ink: oklch(0.18 0.02 60);
+		--supporter-plate-hairline: oklch(0.18 0.02 60 / 0.12);
+		--supporter-plate-hairline-strong: oklch(0.18 0.02 60 / 0.22);
+		display: flex;
+		align-items: center;
+		min-height: 5rem;
+		padding: 0.75rem;
+		border: 1px solid var(--supporter-plate-hairline);
+		background: var(--supporter-plate);
+		color: var(--supporter-plate-ink);
+		text-decoration: none;
+		transition: border-color var(--duration-fast) var(--ease-standard);
+	}
+
+	.supporter-wall__identity:hover {
+		border-color: var(--supporter-plate-hairline-strong);
+	}
+
+	.supporter-wall__logo {
+		max-width: 100%;
+		height: 3rem;
+		width: auto;
+		object-fit: contain;
+	}
+
+	.supporter-wall__name {
+		font-family: var(--font-instrument-serif), Georgia, serif;
+		font-size: var(--type-section);
+		font-style: italic;
+		line-height: 1.1;
+		overflow-wrap: anywhere;
+	}
+
+	.supporter-wall__support {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.supporter-wall__technologies {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.35rem 1rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.supporter-wall__technology {
+		color: var(--editorial-ink);
+		font-weight: 600;
+		text-decoration: underline;
+		text-decoration-color: var(--editorial-hairline-strong);
+		text-underline-offset: 0.2em;
+	}
+
+	.supporter-wall__technology:hover {
+		text-decoration-color: var(--editorial-spruce);
+	}
+
+	.supporter-wall__invite {
+		margin: 1.5rem 0 0;
+		color: var(--editorial-ink-soft);
+	}
+</style>

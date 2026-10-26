@@ -8,6 +8,7 @@ import RichText from "@/components/content/RichText.astro";
 import Page from "@/wrappers/page.astro";
 import TechnologyJsonLd from "@/components/html/technology-jsonld.astro";
 import TechnologyArticleJsonLd from "@/components/html/technology-article-jsonld.astro";
+import MLabel from "@/components/ui/MLabel.vue";
 import {
 	getCollection,
 	getEntry,
@@ -23,6 +24,7 @@ import { isNewsPublished } from "@/lib/news-publication";
 import { academyTechnology } from "@rawkodeacademy/design-system";
 import "@rawkodeacademy/design-system/styles.css";
 import { localTime } from "@/lib/local-time";
+import { SUPPORTERS_PATH, supporterForTechnology } from "@/lib/supporters";
 
 export interface Technology extends Omit<TechnologyData, "logos" | "body"> {
 	id: string;
@@ -47,12 +49,15 @@ if (!technologyEntry) {
 	return new Response(null, { status: 404 });
 }
 
-// The profile is the page; the video rails, related technologies and topic
-// hub are optional and render nothing when the content layer is down.
-const [items, allVideos] = await Promise.all([
+// The profile is the page; the video rails, related technologies, topic hub
+// and supporter badge are optional and render nothing when the content layer
+// is down.
+const [items, allVideos, supporters] = await Promise.all([
 	optionalContent(getCollection("technologies"), []),
 	optionalContent(getCollection("videos"), []),
+	optionalContent(getCollection("supporters"), []),
 ]);
+const supporter = supporterForTechnology(supporters, technologyEntry.id);
 
 const now = new Date();
 // Published recordings about this technology, most recent first.
@@ -311,10 +316,14 @@ const hasAside = videoCount > 0 || hasMatrixDetails ||
 
 // TopicHub (articles, news, learning paths), the video rails and the related
 // technologies rail all list collections, so their tags and schedules apply.
+// The supporter badge relies on entity tags instead: supporter entries carry
+// "technologies:<id>", so only the supported page is purged when a supporter
+// starts, changes or ends, and a failing supporters load keeps the full TTL.
 const relatedEntryIds = new Set(relatedTechnologies.map((related) => related.id));
 await setContentCache(Astro, {
 	entries: [
 		technologyEntry,
+		supporter,
 		...technologyVideos,
 		...items.filter((t) => relatedEntryIds.has(t.id)),
 		...(hasTopicContent
@@ -394,6 +403,14 @@ await setContentCache(Astro, {
 				)}
 				<h1 class={styles.title}>{technology.name}</h1>
 			</div>
+			{supporter && (
+				<p class="technology-supporter">
+					<a class="technology-supporter__link focus-ring" href={SUPPORTERS_PATH}>
+						<MLabel tone="spruce">Community supporter</MLabel>
+						<span class="technology-supporter__name">{supporter.data.name}</span>
+					</a>
+				</p>
+			)}
 			{description && <p class={styles.description}>{description}</p>}
 			{metadata.length > 0 && (
 				<dl class={styles.metadata}>
@@ -553,3 +570,31 @@ await setContentCache(Astro, {
 		</div>
 	</div>
 </Page>
+
+<style>
+	.technology-supporter {
+		margin: 0;
+	}
+
+	.technology-supporter__link {
+		display: inline-flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.35rem 0.75rem;
+		padding: 0.45rem 0.7rem;
+		border: 1px solid var(--editorial-hairline);
+		color: var(--editorial-ink-soft);
+		text-decoration: none;
+	}
+
+	.technology-supporter__link:hover .technology-supporter__name {
+		color: var(--editorial-ink);
+		text-decoration: underline;
+		text-underline-offset: 0.2em;
+	}
+
+	.technology-supporter__name {
+		font-weight: 600;
+		overflow-wrap: anywhere;
+	}
+</style>

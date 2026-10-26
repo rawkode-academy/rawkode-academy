@@ -18,6 +18,7 @@ export const COLLECTIONS = [
 	"courses",
 	"courseModules",
 	"learningPaths",
+	"supporters",
 ] as const;
 
 export type CollectionName = (typeof COLLECTIONS)[number];
@@ -393,6 +394,17 @@ export interface LearningPathData {
 	recordUpdatedAt?: Date | undefined;
 }
 
+/**
+ * An active community supporter. The gateway only lists active supporters
+ * (started, not yet ended), longest-standing first.
+ */
+export interface SupporterData {
+	name: string;
+	websiteUrl: string;
+	logoUrl?: string | undefined;
+	technologies: Reference<"technologies">[];
+}
+
 export interface CollectionDataMap {
 	videos: VideoData;
 	shows: ShowData;
@@ -406,6 +418,7 @@ export interface CollectionDataMap {
 	courses: CourseData;
 	courseModules: CourseModuleData;
 	learningPaths: LearningPathData;
+	supporters: SupporterData;
 }
 
 export interface CacheHint {

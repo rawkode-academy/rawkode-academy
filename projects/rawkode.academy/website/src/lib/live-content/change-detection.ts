@@ -23,6 +23,7 @@ import {
 	mapNews,
 	mapPerson,
 	mapShow,
+	mapSupporter,
 	mapTechnology,
 	mapTestimonial,
 	mapVideo,
@@ -111,6 +112,8 @@ export function buildManifest(
 		put("testimonials", r.id, r, mapTestimonial(r));
 	for (const r of rows("learningPaths"))
 		put("learningPaths", r.id, r, mapLearningPath(r));
+	for (const r of rows("supporters"))
+		put("supporters", r.id, r, mapSupporter(r));
 	for (const course of rows("courses")) {
 		const { modules, ...rest } = course;
 		put("courses", course.id, rest, mapCourse(course));
@@ -180,10 +183,19 @@ export function diffManifests(
 	return diff;
 }
 
+/**
+ * Sources whose failure must not stop the run. A missing optional source is
+ * left out of the result and its entities are carried over from the previous
+ * manifest, so the other collections are still checked.
+ */
+export const OPTIONAL_SOURCES: ReadonlySet<ListSource> = new Set([
+	"supporters",
+]);
+
 /** Fetch every collection fresh from the gateway (no caches). */
 export async function fetchSources(
 	env: ContentEnv,
-): Promise<Record<ListSource, Raw[]>> {
+): Promise<Partial<Record<ListSource, Raw[]>>> {
 	const sources = Object.keys(LIST_QUERIES) as ListSource[];
 	const results = await Promise.all(
 		sources.map(async (source) => {
@@ -191,22 +203,52 @@ export async function fetchSources(
 				source === "technologies"
 					? TECHNOLOGY_MANIFEST_QUERY
 					: LIST_QUERIES[source];
-			const data = await queryGateway<Record<string, Raw[] | null>>(
-				env,
-				spec.query,
-				{},
-				spec.operationName,
-				// The cron has no visitor waiting; allow the full manifests time.
-				30_000,
-			);
-			const list = data[spec.root];
-			if (!Array.isArray(list)) {
-				throw new Error(`${spec.operationName} returned no list`);
+			try {
+				const data = await queryGateway<Record<string, Raw[] | null>>(
+					env,
+					spec.query,
+					{},
+					spec.operationName,
+					// The cron has no visitor waiting; allow the full manifests time.
+					30_000,
+				);
+				const list = data[spec.root];
+				if (!Array.isArray(list)) {
+					throw new Error(`${spec.operationName} returned no list`);
+				}
+				return [source, list] as const;
+			} catch (error) {
+				if (!OPTIONAL_SOURCES.has(source)) throw error;
+				console.warn(
+					JSON.stringify({
+						event: "content.change-detection.source-failed",
+						source,
+						error: error instanceof Error ? error.message : String(error),
+					}),
+				);
+				return undefined;
 			}
-			return [source, list] as const;
 		}),
 	);
-	return Object.fromEntries(results) as Record<ListSource, Raw[]>;
+	return Object.fromEntries(
+		results.filter((result) => result !== undefined),
+	) as Partial<Record<ListSource, Raw[]>>;
+}
+
+/** Copy the previous entities of optional sources that failed to load. */
+function carryOverMissing(
+	next: Manifest,
+	previous: Manifest | undefined,
+	sources: Partial<Record<ListSource, Raw[]>>,
+): void {
+	if (!previous) return;
+	for (const source of OPTIONAL_SOURCES) {
+		if (source in sources) continue;
+		const prefix = `${source}:`;
+		for (const [key, entity] of Object.entries(previous.entities)) {
+			if (key.startsWith(prefix)) next.entities[key] = entity;
+		}
+	}
 }
 
 export interface ChangeDetectionResult {
@@ -232,8 +274,9 @@ export async function runChangeDetection(
 	deps: ChangeDetectionDeps,
 ): Promise<ChangeDetectionResult> {
 	const started = now();
-	// A failed source aborts the run: storing a partial manifest would report
-	// every entity of the missing collection as deleted next hour.
+	// A failed required source aborts the run: storing a partial manifest
+	// would report every entity of the missing collection as deleted next hour.
+	// A failed optional source keeps its previous entities instead.
 	const sources = await (deps.loadSources ?? (() => fetchSources(deps.env)))();
 	const t = now();
 	const next = buildManifest(sources, t);
@@ -241,6 +284,7 @@ export async function runChangeDetection(
 		.get<Manifest>(MANIFEST_KEY, { type: "json" })
 		.then((m) => (m && m.version === MANIFEST_VERSION ? m : undefined))
 		.catch(() => undefined);
+	carryOverMissing(next, previous, sources);
 	const diff = diffManifests(previous, next, t);
 	let generation: number | undefined;
 	if (diff.tags.length > 0) {

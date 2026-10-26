@@ -261,7 +261,13 @@ describe("partnership Attio action", () => {
 		expect(callUrl(person)).toBe(PERSON_RECORDS);
 		expect(callMethod(person)).toBe("POST");
 		expect(requestBody(person).data.values).toEqual({
-			name: [{ full_name: input.name }],
+			name: [
+				{
+					first_name: "Ada",
+					last_name: "Lovelace",
+					full_name: "Ada Lovelace",
+				},
+			],
 			email_addresses: [input.email],
 			company: [
 				{
@@ -353,6 +359,7 @@ describe("partnership Attio action", () => {
 			"Product review",
 			"90-day partnership",
 			"Annual plan",
+			"Community supporter",
 			"Not sure yet",
 		]);
 		expect(partnerships.applicationPathDeals).toEqual({
@@ -363,6 +370,7 @@ describe("partnership Attio action", () => {
 				valueUsd: 12000,
 			},
 			"Annual plan": { offer: "Partnership (Yearly)", valueUsd: 40000 },
+			"Community supporter": { offer: "Supporter", valueUsd: 9000 },
 		});
 		expect(partnerships.resolveApplicationPath("First-run review")).toBe(
 			"Product review",

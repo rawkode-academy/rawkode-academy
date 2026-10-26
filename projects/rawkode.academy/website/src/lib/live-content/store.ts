@@ -16,6 +16,7 @@ import {
 	mapNews,
 	mapPerson,
 	mapShow,
+	mapSupporter,
 	mapTechnology,
 	mapTestimonial,
 	mapVideo,
@@ -50,6 +51,7 @@ const SOURCE: Record<CollectionName, ListSource> = {
 	courses: "courses",
 	courseModules: "courses",
 	learningPaths: "learningPaths",
+	supporters: "supporters",
 };
 
 export interface LoadedCollection<C extends CollectionName> {
@@ -169,6 +171,10 @@ function mapRows<C extends CollectionName>(
 			return valid.map((r) =>
 				entry("learningPaths", r.id, mapLearningPath(r)),
 			) as ContentEntry<C>[];
+		case "supporters":
+			return valid.map((r) =>
+				entry("supporters", r.id, mapSupporter(r)),
+			) as ContentEntry<C>[];
 	}
 }
 
@@ -213,7 +219,11 @@ export async function loadCollection<C extends CollectionName>(
 	const existing = perPayload.get(collection);
 	if (existing) return existing as unknown as LoadedCollection<C>;
 	const t = now();
-	const entries = sortLikeContentFiles(mapRows(collection, cached.value, t));
+	// Supporters had no content files: keep the gateway's order (longest
+	// standing first).
+	const rows = mapRows(collection, cached.value, t);
+	const entries =
+		collection === "supporters" ? rows : sortLikeContentFiles(rows);
 	const publishTimes: number[] = [];
 	for (const entry of entries) {
 		const at = publicationDate(collection, entry.data)?.getTime();

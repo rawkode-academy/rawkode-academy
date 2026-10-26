@@ -20,6 +20,7 @@ import type {
 	Reference,
 	Resource,
 	ShowData,
+	SupporterData,
 	TechnologyData,
 	TestimonialData,
 	VideoData,
@@ -608,6 +609,15 @@ export function mapLearningPath(raw: Raw): LearningPathData {
 	});
 }
 
+export function mapSupporter(raw: Raw): SupporterData {
+	return compact<SupporterData>({
+		name: str(raw.name) ?? "",
+		websiteUrl: str(raw.websiteUrl) ?? "",
+		logoUrl: str(raw.logoUrl),
+		technologies: refs("technologies", raw.technologies),
+	});
+}
+
 /** The document whose text becomes `entry.body`. */
 export function mainDocument<C extends CollectionName>(
 	collection: C,
@@ -616,7 +626,8 @@ export function mainDocument<C extends CollectionName>(
 	if (collection === "videos" || collection === "shows") {
 		return (data as VideoData | ShowData).descriptionDoc;
 	}
-	if (collection === "testimonials") return undefined;
+	if (collection === "testimonials" || collection === "supporters")
+		return undefined;
 	return (data as { body?: DocNode }).body;
 }
 
@@ -668,6 +679,8 @@ export function relatedTags<C extends CollectionName>(
 		add(m.course);
 	} else if (collection === "changelog") {
 		add((data as ChangelogData).author);
+	} else if (collection === "supporters") {
+		(data as SupporterData).technologies.forEach(add);
 	} else {
 		const d = data as { authors?: Reference[]; technologies?: unknown[] };
 		d.authors?.forEach(add);

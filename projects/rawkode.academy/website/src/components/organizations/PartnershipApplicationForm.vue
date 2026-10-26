@@ -3,11 +3,11 @@
 		<p role="status" aria-live="polite" aria-atomic="true" :class="ready ? s.hidden : s.copy">{{ statusMessage }}</p>
 		<p :id="errorId" role="alert" aria-atomic="true" :class="error ? s.error : s.hidden" :data-error-code="errorCode || undefined">{{ error }}</p>
 		<p v-if="fallback" :class="s.copy">
-			<a :href="fallbackMailto">Email David directly</a> with the details you entered.
+			<a :href="fallbackMailto">Email me directly</a> with the details you entered.
 		</p>
 		<div v-if="submitted" :class="[s.panel, s.status]">
 			<h3 :class="s.heading">Enquiry received</h3>
-			<p :class="s.copy">David reads every enquiry and will reply by email.</p>
+			<p :class="s.copy">I read every enquiry and will reply by email.</p>
 		</div>
 		<form
 			v-else
@@ -18,7 +18,7 @@
 			:aria-busy="loading"
 			:aria-describedby="error ? errorId : undefined"
 		>
-			<fieldset :class="[s.form, 'form-controls']" :disabled="loading" aria-label="Product review enquiry" @input="trackStarted">
+			<fieldset :class="[s.form, 'form-controls']" :disabled="loading" aria-label="Partnership enquiry" @input="trackStarted">
 				<div class="form-honeypot" aria-hidden="true">
 					<label :for="honeypotId">Website</label>
 					<input
@@ -118,7 +118,7 @@
 					{{ loading ? "Sending enquiry..." : "Send enquiry" }}
 				</button>
 			</fieldset>
-			<p v-if="!ready" :class="s.copy">You can <a href="mailto:david@rawkode.academy">email David directly</a> instead.</p>
+			<p v-if="!ready" :class="s.copy">You can <a href="mailto:david@rawkode.academy">email me directly</a> instead.</p>
 		</form>
 	</div>
 </template>
@@ -195,7 +195,7 @@ const fieldErrors = ref<Record<string, string>>({
 	...props.serverFieldErrors,
 });
 const fallbackMailto = computed(() => {
-	const subject = encodeURIComponent("Product review enquiry");
+	const subject = encodeURIComponent("Partnership enquiry");
 	const body = encodeURIComponent(
 		[
 			`Name: ${name.value}`,
@@ -211,7 +211,7 @@ const fallbackMailto = computed(() => {
 const statusMessage = computed(() => {
 	if (!ready.value) return "Loading enquiry form...";
 	if (submitted.value)
-		return "Enquiry received. David reads every enquiry and will reply by email.";
+		return "Enquiry received. I read every enquiry and will reply by email.";
 	return loading.value ? "Sending enquiry..." : "";
 });
 
@@ -325,7 +325,7 @@ async function submit() {
 					? result.data.code
 					: "";
 			error.value =
-				"Something went wrong, so your enquiry wasn't sent. Please email David directly.";
+				"Something went wrong, so your enquiry wasn't sent. Please email me directly.";
 		}
 	} catch {
 		fallback.value = true;

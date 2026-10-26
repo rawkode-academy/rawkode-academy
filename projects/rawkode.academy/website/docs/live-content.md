@@ -1,8 +1,8 @@
 # Live content and caching
 
 All content (videos, shows, people, technologies, articles, news, changelog,
-ADRs, testimonials, courses, course modules, learning paths) lives in D1
-platform services behind the GraphQL gateway. The website has no build-time
+ADRs, testimonials, courses, course modules, learning paths, community
+supporters) lives in D1 platform services behind the GraphQL gateway. The website has no build-time
 content: every content page renders on demand and is cached at the edge.
 
 ## Request path

@@ -109,6 +109,19 @@ const attioRequest = async <Response>(
 	return response.json() as Promise<Response>;
 };
 
+/**
+ * Attio's personal-name object syntax requires all three fields. The first
+ * word is the first name and the rest is the last name, which may be empty.
+ */
+const personalName = (fullName: string) => {
+	const [firstName = "", ...rest] = fullName.trim().split(/\s+/);
+	return {
+		first_name: firstName,
+		last_name: rest.join(" "),
+		full_name: fullName.trim(),
+	};
+};
+
 const attioRecordId = (response: AttioRecordResponse): string => {
 	const recordId = response.data?.id?.record_id;
 	if (!recordId) {
@@ -296,7 +309,7 @@ const saveEnquiry = async (
 					apiKey,
 					"/objects/people/records",
 					{
-						name: [{ full_name: input.name }],
+						name: [personalName(input.name)],
 						email_addresses: [input.email],
 						company: [
 							{
