@@ -19,6 +19,7 @@ export interface PartnershipOffer {
 	priceShort: string;
 	cadence: string;
 	summary: string;
+	includedLabel?: string;
 	included: string[];
 	excluded: string[];
 	notes: string[];
@@ -29,7 +30,7 @@ const applicationBody = [
 	"Name:",
 	"Company and product:",
 	"Developers or platform teams you need to reach:",
-	"Where engineers get stuck today:",
+	"What you want to help engineers do:",
 	"Product, demo, docs or repository:",
 	"When you'd like to start:",
 ].join("\n");
@@ -91,7 +92,9 @@ export const partnershipExperience: CopyPart[] = [
 		text: "InfluxData",
 		href: "https://www.influxdata.com/blog/scaling-kubernetes-deployments-influxdb-flux/",
 	},
-	{ text: ", so I know what your team can change in a quarter." },
+	{
+		text: ", working with engineers on how they discover, adopt and run developer tools.",
+	},
 ];
 
 /** Linux Foundation credentials, each linking to its Credly badge. */
@@ -134,7 +137,7 @@ export const partnershipWatchEpisodes = [
 ] as const;
 
 export const partnershipDescription =
-	"I work with developer tool companies on awareness, adoption and support: getting engineers interested, getting them hooked and making them successful. Start with a $10,000 field report, a $5,000 adoption review or a customer workshop, then carry on quarter by quarter if it's useful.";
+	"Awareness, Adoption, and Support for developer tools. Hands-on content, adoption reviews, docs, community, talks and office hours to help engineers succeed from dev to prod and beyond.";
 
 export interface PartnershipPerk {
 	title: string;
@@ -154,22 +157,22 @@ export const partnershipPerks: PartnershipPerk[] = [
 	{
 		title: "Field insight",
 		detail:
-			"I'm at 30 events a year. Each quarter, I share what engineers in your space are asking about and getting stuck on, gathered at conferences, user groups, live chat and across social.",
+			"Each quarter, I share the questions and problems I hear from engineers at conferences, user groups, live sessions and in community discussions.",
 	},
 	{
 		title: "Feature launch health check",
 		detail:
-			"Before one launch a quarter, I go through the new feature or quick start and share my take: what will land with developers, what to sharpen and how I'd position it. Give me 10 business days' notice.",
+			"Before one launch a quarter, I try the new feature or quick start and give you feedback on the experience and how to explain it. Give me 10 business days' notice.",
 	},
 	{
 		title: "Demo and talk coaching",
 		detail:
-			"Before your next launch or conference talk, I run through your demo the way your audience will, and give you notes from over 450 hours of developer education to make it land.",
+			"I help you prepare your next demo or conference talk: what to show, what needs explaining and where the audience may lose track.",
 	},
 	{
 		title: "Results summary",
 		detail:
-			"At the end of each quarter, I send you a one-page summary of what changed and how developers now experience your product, with a five-minute video walking through it. It's ready to forward to your CEO or board.",
+			"At the end of each quarter, you get a one-page summary and a five-minute video covering what we delivered, what we learned from engineers and what to work on next.",
 	},
 	{
 		title: "Partner round table",
@@ -179,7 +182,7 @@ export const partnershipPerks: PartnershipPerk[] = [
 	{
 		title: "Your example in the Academy",
 		detail:
-			"The runnable examples I write for you are featured on your product's Rawkode Academy technology page and in any matching course, so engineers find them while they're learning.",
+			"The public examples we create are linked from your product's Rawkode Academy technology page and relevant learning material, so engineers can find and use them.",
 	},
 	{
 		title: "Your technology page",
@@ -207,7 +210,7 @@ export const renewalPerks: PartnershipPerk[] = [
 	{
 		title: "Leads from your sessions",
 		detail:
-			"Developers who sign up for your session materials can opt in to hear from your team, so you get warm leads from engineers who've already seen your product work.",
+			"Developers who sign up for your session materials can choose to hear from your team. You receive contact details only from those who opt in.",
 	},
 ];
 
@@ -223,12 +226,12 @@ export const fieldReportOffer: PartnershipOffer = {
 	priceShort: "$10k",
 	cadence: "A fixed price, over about six weeks.",
 	summary:
-		"I pick real problems from my own work and solve them with your product, in public. Engineers see a practitioner reach for your tool because it helped, not because of a script.",
+		"I use your product to tackle real problems from my own work and share the process in public. Engineers see what it does, where it helps and what its limitations are.",
 	included: [
 		"Two live sessions or recorded builds, each solving a real problem of mine with your product",
 		"A written walkthrough with a runnable example repository",
 		"Short clips cut from the sessions",
-		"A private session on your messaging and product: where the words lost me, and where I worked around the product",
+		"A private session on the product and messaging: what was clear, what was confusing and what I'd change",
 	],
 	excluded: [],
 	notes: [
@@ -237,7 +240,7 @@ export const fieldReportOffer: PartnershipOffer = {
 	mailto: buildMailto("Field report", applicationBody),
 };
 
-/** Adoption: get them hooked, from a first try to running it in production. */
+/** Adoption: help engineers move from a first try to production. */
 export const fitProofReview: PartnershipOffer = {
 	id: "product-review",
 	name: "Adoption review",
@@ -247,7 +250,7 @@ export const fitProofReview: PartnershipOffer = {
 	cadence:
 		"A fixed price, delivered within 10 business days of getting access.",
 	summary:
-		"I work through your product alone as your target user, with nobody to rescue me, as far as we agree: a first working result, or all the way to production. Then I tell you where engineers get stuck and what to fix first.",
+		"I work through the setup, docs and workflows your engineers need, without a guided demo. We agree how far the review goes, from a first working result to production tasks such as upgrades or recovery. You get the obstacles I found and what to fix first.",
 	included: [
 		"A written report showing where engineers get stuck along the journey we agree to review",
 		"A ranked list of what to fix first",
@@ -260,24 +263,30 @@ export const fitProofReview: PartnershipOffer = {
 	mailto: buildMailto("Adoption review", applicationBody),
 };
 
-/** Support: make them successful once they run it. */
-export const workshopOffer: PartnershipOffer = {
-	id: "customer-workshops",
-	name: "Customer workshops",
+/** Support: help users stay successful after adoption. */
+export const supportOffer: PartnershipOffer = {
+	id: "developer-support",
+	name: "Developer support",
 	label: "Support",
-	price: "Quoted per workshop",
+	price: "Quoted to scope",
 	priceShort: "Quoted",
-	cadence: "Scoped with you: format, length and audience.",
+	cadence:
+		"One project or ongoing work, with deliverables and dates agreed up front.",
 	summary:
-		"Hands-on workshops for your customers and community, and troubleshooting sessions where engineers fix something broken with your product.",
+		"I help your users keep learning, solve problems and build more with your product after adoption.",
+	includedLabel: "Work can include",
 	included: [
-		"A hands-on workshop for your customers or community, live or recorded",
-		"Lab material your team keeps and can run again",
-		"Troubleshooting sessions on Rawkode Live in the Klustered format",
+		"Writing and improving docs, guides and runnable examples",
+		"Community participation, technical discussions and Q&A",
+		"Regular office hours to answer questions and work through problems",
+		"Public speaking, conference workshops and customer training",
+		"Tutorials, live sessions and practical troubleshooting",
 	],
 	excluded: [],
-	notes: [],
-	mailto: buildMailto("Customer workshops", applicationBody),
+	notes: [
+		"We agree the audience, priorities and frequency together, then quote for that work.",
+	],
+	mailto: buildMailto("Developer support", applicationBody),
 };
 
 export type AdoptionStageId = "awareness" | "adoption" | "support";
@@ -300,17 +309,14 @@ export interface AdoptionStage {
 }
 
 /**
- * The three ways in: awareness, adoption and support. Each stage is a
- * different problem with a different budget holder; a buyer starts wherever
- * their engineers are stuck.
+ * Three areas of work, each with a relevant offer and enquiry route.
  */
 export const adoptionStages: AdoptionStage[] = [
 	{
 		id: "awareness",
 		stage: "Awareness",
-		tagline: "Get people interested",
-		problem:
-			"Engineers haven't heard of you, or don't see why they'd reach for you.",
+		tagline: "Get engineers interested",
+		problem: "Show engineers what your product does and why they'd choose it.",
 		owner: "Usually marketing, developer relations or demand generation.",
 		offer: fieldReportOffer,
 		route: "Field report",
@@ -321,9 +327,9 @@ export const adoptionStages: AdoptionStage[] = [
 	{
 		id: "adoption",
 		stage: "Adoption",
-		tagline: "Get them hooked",
+		tagline: "Help engineers get to production",
 		problem:
-			"Engineers try you and give up before it works, or stall before running it for real.",
+			"Find and fix what gets in the way between trying your product and relying on it.",
 		owner:
 			"Usually developer relations, developer experience or product, with product owning the fixes.",
 		offer: fitProofReview,
@@ -335,36 +341,37 @@ export const adoptionStages: AdoptionStage[] = [
 	{
 		id: "support",
 		stage: "Support",
-		tagline: "Make them successful",
-		problem: "Your users run you in production and need to get better at it.",
-		owner: "Usually customer success, education or community.",
-		offer: workshopOffer,
-		route: "Customer workshops",
-		cta: "Ask about workshops",
-		ctaName: "ask_about_workshops",
+		tagline: "Help users succeed over time",
+		problem:
+			"Keep helping as their questions, workloads and use of your product grow.",
+		owner:
+			"Usually developer relations, customer success, education or community.",
+		offer: supportOffer,
+		route: "Developer support",
+		cta: "Ask about developer support",
+		ctaName: "ask_about_developer_support",
 		ctaLocation: "stage-support",
 	},
 ];
 
 /**
- * Rules that apply to every paid piece of work, whatever the stage. They are
- * why the work is worth paying for, so the page states them plainly.
+ * Scope is agreed together; public coverage keeps its editorial independence.
  */
 export const independenceRules = [
 	{
-		title: "I pick the problem",
+		title: "We agree the scope",
 		detail:
-			"You tell me what you want engineers to be able to do. I choose the real problems and use cases I work on.",
+			"We agree the audience and the work before starting. For public content, I choose a real use case and show what happens when I build it.",
 	},
 	{
-		title: "You don't approve what I publish",
+		title: "My conclusions stay independent",
 		detail:
-			"You can correct facts before anything goes out. What I conclude stays in, including where your product wasn't the right tool.",
+			"You can correct facts before publication. My conclusions stay in, including limitations and problems I find.",
 	},
 	{
 		title: "Paid work is labelled",
 		detail:
-			"Anything an audience sees that you paid for says so, on screen and in the description. No promised viewers, leads or positive coverage.",
+			"Public work you pay for is clearly labelled. Payment doesn't guarantee viewers, leads or a recommendation.",
 	},
 ] as const;
 
@@ -375,15 +382,15 @@ export const partnershipAdvice =
 export const ongoingPartnershipOffer: PartnershipOffer = {
 	id: "partnership-ongoing",
 	name: "Ongoing partnership",
-	label: "Keep going",
+	label: "Ongoing partnership",
 	price: "$12,000 a quarter",
 	priceShort: "$12k/quarter",
 	cadence:
 		"Quarter by quarter, or $40,000 for a 12-month contract, billed $10,000 a quarter.",
 	summary:
-		"Keep working together across stages. Each quarter, you choose what I work on next.",
+		"Work with me across awareness, adoption and support. We agree each quarter's priorities, deliverables and cadence before the work starts.",
 	included: [
-		"Each quarter, one piece of stage work: a field report, a review or a customer workshop",
+		"An agreed quarterly scope: a field report, an adoption review, or a programme of docs, community work and developer education",
 		"Monthly 60-minute working sessions with written recaps",
 		"Slack Connect with me",
 		"A read-out each quarter on what changed, where we choose the next quarter's work",
@@ -422,9 +429,9 @@ export const partnershipOwnership =
 /** Terms buyers, finance and procurement ask about. */
 export const partnershipTerms = [
 	{
-		title: "Stop after the first engagement",
+		title: "Book a single project",
 		detail:
-			"A field report, a review or a workshop is priced on its own. Stop there and that's all you pay. You keep everything it produced. There is nothing to cancel.",
+			"A field report, an adoption review or a support project can be booked on its own. You pay for the agreed scope, keep the agreed deliverables and have no commitment to further work.",
 	},
 	{
 		title: "Renewal",
@@ -433,7 +440,7 @@ export const partnershipTerms = [
 	},
 	{
 		title: "Payment",
-		detail: `${partnershipReviewCredit} Ongoing partnerships are $12,000 a quarter, or $40,000 for a 12-month contract billed $10,000 a quarter. All prices are fixed and in USD, with 30-day payment terms, and exclude VAT where it applies.`,
+		detail: `${partnershipReviewCredit} Ongoing partnerships are $12,000 a quarter, or $40,000 for a 12-month contract billed $10,000 a quarter. Support projects are quoted once the scope is agreed. Prices are fixed in the statement of work, in USD, with 30-day payment terms, and exclude VAT where it applies.`,
 	},
 	{
 		title: "Paperwork",
@@ -458,9 +465,9 @@ export const partnershipTerms = [
 
 /** What the review covers. Answered in the partnerships FAQ. */
 export const productReviewScope =
-	"We agree the product areas, who I'm acting as and how far I go: a first working result, or as far as production, like a highly available setup, a backup and restore or an upgrade. One review can follow up to two kinds of user, such as a platform team and the application developers they serve, or your open-source project and its hosted product.";
+	"We agree the product areas, intended users and workflows to review: a first working result, or production tasks such as a highly available setup, backup and restore or an upgrade. One review can cover up to two user groups, such as a platform team and the application developers they serve, or users of your open-source project and hosted product.";
 
-/** A lighter way to back the content, without the stage work. */
+/** Funding for Academy content, separate from work on a partner's product. */
 export const supporterOffer: PartnershipOffer = {
 	id: "community-supporter",
 	name: "Community supporter",
@@ -470,7 +477,7 @@ export const supporterOffer: PartnershipOffer = {
 	cadence:
 		"No minimum term. Or $9,000 for the year: twelve months for the price of nine.",
 	summary:
-		"Fund free tutorials, live streams and shows for the community, and thousands of engineers see your name next to the content they learn from.",
+		"Help fund free tutorials, live streams and shows on Rawkode Academy, with your company credited alongside the content.",
 	included: [
 		"A supporter badge on your Rawkode Academy technology page",
 		"Your docs and resources at the top of your technology page",
@@ -486,7 +493,7 @@ export const supporterOffer: PartnershipOffer = {
 export const partnershipTiers = [
 	fieldReportOffer,
 	fitProofReview,
-	workshopOffer,
+	supportOffer,
 	ongoingPartnershipOffer,
 ] as const;
 export const partnershipTierNames = partnershipTiers.map((offer) => offer.name);
@@ -495,7 +502,7 @@ export const partnershipTierNames = partnershipTiers.map((offer) => offer.name);
 export const applicationPaths = [
 	"Field report",
 	"Product review",
-	"Customer workshops",
+	"Developer support",
 	"Ongoing partnership",
 	"Community supporter",
 	"Community challenge series",
@@ -510,7 +517,7 @@ export const notSurePath = "Not sure yet" satisfies ApplicationPath;
 export const applicationPathLabels: Record<ApplicationPath, string> = {
 	"Field report": fieldReportOffer.name,
 	"Product review": fitProofReview.name,
-	"Customer workshops": workshopOffer.name,
+	"Developer support": supportOffer.name,
 	"Ongoing partnership": ongoingPartnershipOffer.name,
 	"Community supporter": supporterOffer.name,
 	"Community challenge series": "Community challenge series",
@@ -519,8 +526,8 @@ export const applicationPathLabels: Record<ApplicationPath, string> = {
 
 /**
  * Attio Offer option title and USD value for each application route.
- * "Field report" and "Workshop" must exist as Offer options in Attio;
- * workshops are quoted per scope, so their inbound value is 0 until quoted.
+ * "Field report" and "Support" must exist as Offer options in Attio;
+ * support is quoted per scope, so its inbound value is 0 until quoted.
  * An undecided enquiry has no Offer selection and no quoted value yet.
  */
 export const applicationPathDeals: Record<
@@ -529,7 +536,7 @@ export const applicationPathDeals: Record<
 > = {
 	"Field report": { offer: "Field report", valueUsd: 10000 },
 	"Product review": { offer: "Review", valueUsd: 5000 },
-	"Customer workshops": { offer: "Workshop", valueUsd: 0 },
+	"Developer support": { offer: "Support", valueUsd: 0 },
 	"Ongoing partnership": {
 		offer: "Partnership (Quarterly)",
 		valueUsd: 12000,
@@ -546,6 +553,7 @@ export const applicationPathDeals: Record<
  * the 90-day and annual plans are now the ongoing partnership.
  */
 export const legacyApplicationPaths: Record<string, ApplicationPath> = {
+	"Customer workshops": "Developer support",
 	"Adoption Advisory": "Ongoing partnership",
 	"90-day partnership": "Ongoing partnership",
 	"Annual plan": "Ongoing partnership",
@@ -586,15 +594,15 @@ export const decisionBriefMailto = partnershipFitMailto;
  * mailto has no recipient so they choose who it goes to.
  */
 const teamBriefBody = [
-	"I found a way to get engineers interested in our product, hooked on it and successful with it.",
+	"Rawkode Academy can help engineers discover our product, adopt it and stay successful with it.",
 	"",
-	"David Flanagan of Rawkode Academy works with developer tool companies on three stages:",
+	"David Flanagan works with developer tool companies on Awareness, Adoption, and Support:",
 	"",
 	`- Awareness: ${fieldReportOffer.name}, ${fieldReportOffer.price}. He solves real problems of his own with our product, in public, labelled as paid, then tells us privately what he'd change.`,
-	`- Adoption: ${fitProofReview.name}, ${fitProofReview.price}, delivered in 10 business days. A ranked list of where engineers get stuck (from first try to production) and what to fix first.`,
-	`- Support: ${workshopOffer.name}, ${workshopOffer.price.toLowerCase()}. Hands-on workshops and troubleshooting sessions for our users.`,
+	`- Adoption: ${fitProofReview.name}, ${fitProofReview.price}, delivered within 10 business days of getting access. A review of an agreed journey, from first try to production tasks, with a ranked list of what to fix.`,
+	`- Support: ${supportOffer.price}. Docs, community participation, public speaking, conference workshops and office hours to help our users after adoption. We agree deliverables and frequency up front.`,
 	"",
-	`Then, if it's useful: ${ongoingPartnershipOffer.name}, ${ongoingPartnershipOffer.price}. ${partnershipReviewCredit}`,
+	`For ongoing work: ${ongoingPartnershipOffer.name}, ${ongoingPartnershipOffer.price}, or $40,000 for a 12-month contract billed $10,000 a quarter. Each quarter has an agreed scope. We can start here directly. ${partnershipReviewCredit}`,
 	"",
 	"Fixed prices in USD, nothing renews automatically and we own the reports and read-outs.",
 	"",

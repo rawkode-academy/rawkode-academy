@@ -57,10 +57,10 @@ beforeEach(() => {
 			)
 			.join("")}
 		<section id="apply"></section>
-		<div data-partnership-pinned><p><strong>Start at any stage</strong><span>From $5,000</span></p>
+		<div data-partnership-pinned><p><strong>Work with me</strong><span>One project or ongoing</span></p>
 			<a href="?route=Not%20sure%20yet#enquiry-form" data-apply-path="Not sure yet"
-				data-partnership-cta data-cta="tell_me_where_youre_stuck" data-cta-location="pinned"
-				tabindex="-1">Tell me where you're stuck</a>
+				data-partnership-cta data-cta="partnership_enquiry" data-cta-location="pinned"
+				tabindex="-1">Tell me what you need</a>
 		</div>`;
 	browser.document.getElementById(
 		"partnership-hero-cta",
@@ -108,7 +108,7 @@ describe("partnership pinned enquiry", () => {
 		positions[0] = { top: -1500, height: 1600 };
 		positions[2] = { top: 100, height: 900 };
 		scroll();
-		expect(link().dataset.applyPath).toBe("Customer workshops");
+		expect(link().dataset.applyPath).toBe("Developer support");
 		positions[0] = { top: -400, height: 1600 };
 		positions[2] = { top: 1200, height: 900 };
 		scroll();
@@ -120,12 +120,10 @@ describe("partnership pinned enquiry", () => {
 		scroll();
 		positions[1] = { top: -1200, height: 1000 };
 		scroll();
-		expect(link().textContent).toBe("Tell me where you're stuck");
+		expect(link().textContent).toBe("Tell me what you need");
 		expect(link().dataset.applyPath).toBe("Not sure yet");
-		expect(link().dataset.cta).toBe("tell_me_where_youre_stuck");
-		expect(pinned().querySelector("strong")!.textContent).toBe(
-			"Start at any stage",
-		);
+		expect(link().dataset.cta).toBe("partnership_enquiry");
+		expect(pinned().querySelector("strong")!.textContent).toBe("Work with me");
 	});
 
 	it("keeps the hidden bar out of the tab order at the hero and enquiry form", () => {

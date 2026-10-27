@@ -46,8 +46,8 @@ test("partnership page follows the approved redesign", () => {
 		page,
 		/I work hands-on with your product to show engineers what it can do, find where they get stuck and help them be successful from dev to prod\./,
 	);
-	assert.match(page, /<dt>Start at<\/dt>/);
-	assert.match(page, /<dt>From<\/dt>/);
+	assert.match(page, /<dt>Ways to work<\/dt>/);
+	assert.match(page, /<dt>Adoption review<\/dt>/);
 	assert.doesNotMatch(page, /invoic|on delivery/i);
 	assert.doesNotMatch(
 		partnershipCopy
@@ -74,7 +74,7 @@ test("partnership page follows the approved redesign", () => {
 	assert.doesNotMatch(page, /Tell David about your product/);
 	assert.match(
 		page,
-		/I note every place I get stuck against the recording, rank what to fix, explain or teach/,
+		/I record where I get stuck, rank what needs fixing or explaining/,
 	);
 	assert.match(page, /answer: productReviewScope/);
 	assert.doesNotMatch(page, /Who is this a good fit for\?|How do we stop\?/);
@@ -94,20 +94,21 @@ test("partnership page follows the approved redesign", () => {
 		/Any size of company, from a first open-source release to a public company\./,
 	);
 
-	// Stages: awareness, adoption and support, none of them a gate.
+	// The three areas are distinct, with a direct route to ongoing work.
 	assert.match(page, /adoptionStages\.map/);
 	for (const stage of ["awareness", "adoption", "support"]) {
 		assert.match(partnershipCopy, new RegExp(`id: "${stage}"`));
 		assert.match(partnershipCopy, new RegExp(`ctaLocation: "stage-${stage}"`));
 	}
 	assert.match(page, /data-cta-location=\{stage\.ctaLocation\}/);
-	assert.match(page, /The review is one way in, not a gate\./);
+	assert.match(page, />Awareness, Adoption, and Support<\/h2>/);
+	assert.match(page, /Can we start an ongoing partnership straight away\?/);
 
-	// Independence rules apply to every stage.
+	// Public coverage remains independent of the agreed delivery scope.
 	assert.match(page, /independenceRules\.map/);
 	for (const rule of [
-		"I pick the problem",
-		"You don't approve what I publish",
+		"We agree the scope",
+		"My conclusions stay independent",
 		"Paid work is labelled",
 	]) {
 		assert.match(partnershipCopy, new RegExp(`title: "${rule}"`));
@@ -211,7 +212,7 @@ test("partnership page follows the approved redesign", () => {
 	);
 	assert.match(partnershipCopy, /price: "\$10,000"/);
 	assert.match(partnershipCopy, /price: "\$5,000"/);
-	assert.match(partnershipCopy, /price: "Quoted per workshop"/);
+	assert.match(partnershipCopy, /price: "Quoted to scope"/);
 	assert.match(partnershipCopy, /price: "\$12,000 a quarter"/);
 	assert.match(
 		partnershipCopy,
@@ -225,7 +226,7 @@ test("partnership page follows the approved redesign", () => {
 	assert.match(partnershipCopy, /"A ranked list of what to fix first"/);
 	assert.match(
 		partnershipCopy,
-		/Start with a \$10,000 field report, a \$5,000 adoption review or a customer workshop/,
+		/Hands-on content, adoption reviews, docs, community, talks and office hours/,
 	);
 	assert.match(partnershipCopy, /export const productReviewScope =/);
 	assert.match(letsChat, /David reads every enquiry and replies by email\./);

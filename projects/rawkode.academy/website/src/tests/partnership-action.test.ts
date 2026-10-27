@@ -202,7 +202,7 @@ describe("partnership Attio action", () => {
 	it.each([
 		["Field report", 10000, "Field report"],
 		["Product review", 5000, "Review"],
-		["Customer workshops", 0, "Workshop"],
+		["Developer support", 0, "Support"],
 		["Ongoing partnership", 12000, "Partnership (Quarterly)"],
 	] as const)("creates a company and person, then a note and a %s deal worth $%i offered as %s", async (path, value, offer) => {
 		mockCreatedPath();
@@ -370,7 +370,7 @@ describe("partnership Attio action", () => {
 		expect([...partnerships.applicationPaths]).toEqual([
 			"Field report",
 			"Product review",
-			"Customer workshops",
+			"Developer support",
 			"Ongoing partnership",
 			"Community supporter",
 			"Community challenge series",
@@ -379,7 +379,7 @@ describe("partnership Attio action", () => {
 		expect(partnerships.applicationPathDeals).toEqual({
 			"Field report": { offer: "Field report", valueUsd: 10000 },
 			"Product review": { offer: "Review", valueUsd: 5000 },
-			"Customer workshops": { offer: "Workshop", valueUsd: 0 },
+			"Developer support": { offer: "Support", valueUsd: 0 },
 			"Not sure yet": { offer: null, valueUsd: 0 },
 			"Ongoing partnership": {
 				offer: "Partnership (Quarterly)",
@@ -391,6 +391,9 @@ describe("partnership Attio action", () => {
 				valueUsd: 15000,
 			},
 		});
+		expect(partnerships.resolveApplicationPath("Customer workshops")).toBe(
+			"Developer support",
+		);
 		expect(partnerships.resolveApplicationPath("First-run review")).toBe(
 			"Product review",
 		);

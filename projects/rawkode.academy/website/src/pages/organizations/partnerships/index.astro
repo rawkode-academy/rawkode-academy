@@ -146,8 +146,8 @@ const ongoingPath = "Ongoing partnership" satisfies ApplicationPath;
 const ongoingPrice = splitPrice(ongoingPartnershipOffer.price);
 
 const pageSections = [
-	{ id: "stages", label: "Where to start" },
-	{ id: "pricing", label: "Keep going" },
+	{ id: "stages", label: "What I do" },
+	{ id: "pricing", label: "Ongoing partnership" },
 	{ id: "independence", label: "Independence" },
 	{ id: "supporter", label: "Supporter" },
 	{ id: "questions", label: "FAQ" },
@@ -156,9 +156,9 @@ const pageSections = [
 
 const noLockIn = [
 	{
-		title: "Stop at any stage",
+		title: "One project or ongoing",
 		detail:
-			"Stop after a field report, a review or a workshop and that's all you pay. You keep everything it produced.",
+			"Book a field report, an adoption review or a support project on its own, or start an ongoing partnership. We agree the scope before work begins.",
 	},
 	{
 		title: "Renew when it's working",
@@ -173,14 +173,19 @@ const noLockIn = [
 
 const faqs = [
 	{
-		question: "Which stage should we start with?",
+		question: "Where should we start?",
 		answer:
-			"The one where your engineers are stuck today. If you're not sure, tell me what you're seeing in the form below and I'll say which fits, or that none does yet.",
+			"Tell me what you want engineers to be able to do and what's getting in their way. I'll suggest the work that would help, whether that's content, an adoption review or support for existing users.",
 	},
 	{
-		question: "We already know where engineers get stuck. Do we need the review?",
+		question: "Can we start an ongoing partnership straight away?",
 		answer:
-			"No. The review is one way in, not a gate. Teams that already have that data usually start with a field report or a workshop.",
+			"Yes. We can agree a quarterly plan using what you already know about your users. You can also book content or support work on its own. An adoption review is useful when you want me to investigate the experience first.",
+	},
+	{
+		question: "What does Support cover?",
+		answer:
+			"The work that helps engineers stay successful after adoption: docs, community participation, technical Q&A, public speaking, conference workshops, customer education and office hours. We choose the work your users need and agree its scope and frequency. That can be a single project or part of an ongoing partnership.",
 	},
 	{
 		question: "How is a field report different from sponsoring a video?",
@@ -191,12 +196,12 @@ const faqs = [
 		question:
 			"We could come on Rawkode Live for free. What does the review add?",
 		answer:
-			"A maintainer session is public, lasts about an hour and you're there steering, so I see the path you show me. In the review I work alone as your target user, with nobody to rescue me. I note every place I get stuck against the recording, rank what to fix, explain or teach and walk your team through the findings. An ongoing partnership can include a follow-up review when that's the most useful next piece of work.",
+			"A maintainer session is a public introduction, usually with you guiding the demo. For an adoption review, I independently work through the workflows we agree. I record where I get stuck, rank what needs fixing or explaining and walk your team through the findings. A later review can check whether the changes helped.",
 	},
 	{
-		question: "Aren't you too experienced to get stuck where our users do?",
+		question: "How do you account for different levels of experience?",
 		answer:
-			"Before starting we agree who I'm acting as, such as an application developer who has never run a cluster, and I work to what that person would know. The walkthrough call then checks the list against what your team already hears from users, so we focus on what matters most to them.",
+			"I bring an experienced engineer's perspective. We define the intended users and what they should need to know, then I check the assumptions your product and docs make. We compare the findings with your user feedback and support questions. That gives your team an expert review alongside the evidence from real users.",
 	},
 	{
 		question: "What exactly does the review cover?",
@@ -205,12 +210,12 @@ const faqs = [
 	{
 		question: "How much of our engineers' time does it take?",
 		answer:
-			"Not much. For a field report or a review, an hour or two to set up access, plus the walkthrough call. For a workshop, whoever presents with me. I write the examples. In an ongoing partnership, your product lead joins the monthly sessions.",
+			"For a field report or adoption review, plan for access setup and a call to discuss the findings. For support work, I need a contact who knows your users and someone to check technical accuracy. We agree preparation and review time with the scope. Ongoing partners also join a monthly 60-minute working session.",
 	},
 	{
 		question: "Who on our side should own it?",
 		answer:
-			"It depends on the stage: marketing or developer relations for awareness, developer experience or product for adoption and customer success or education for support.",
+			"Choose someone who can set priorities and get the right people involved. That's often marketing or DevRel for awareness, product or developer experience for adoption, and community, customer success or DevRel for support.",
 	},
 	{
 		question: "Why are places limited?",
@@ -220,12 +225,12 @@ const faqs = [
 	{
 		question: "Can we sponsor content as well?",
 		answer:
-			"A field report is paid content, on the terms above. For something lighter, community supporters get their docs, latest announcement and a supporter badge on their technology page and on every video about their technology, from $1,000 a month.",
+			"Yes. A field report is paid hands-on content with independent conclusions. You can also fund Rawkode Academy as a community supporter, from $1,000 a month. That includes a supporter badge and docs links on your technology page, your latest announcement on that page and its videos, and your logo on the supporters wall.",
 	},
 	{
 		question: "Do open-source maintainers have to pay to come on Rawkode Live?",
 		answer:
-			"Maintainer sessions on Rawkode Live are free, as they always have been, and aren't labelled as paid. Partnerships are for teams who want the stage work and the advice around it.",
+			"Maintainer sessions on Rawkode Live are free, as they always have been. Partnerships pay for agreed work on your product, content and community, plus the advice around it.",
 	},
 ];
 
@@ -264,17 +269,17 @@ const partnerQuotes = (
 	>
 		<dl class="partnership-facts" slot="intro">
 			<div>
-				<dt>Start at</dt>
-				<dd>Any stage</dd>
+				<dt>Ways to work</dt>
+				<dd>One project or ongoing</dd>
 			</div>
 			<div>
-				<dt>From</dt>
+				<dt>Adoption review</dt>
 				<dd>{fitProofReview.price} fixed</dd>
 			</div>
 		</dl>
 		<div class="partnership-hero-actions" slot="actions">
-			<a id="partnership-hero-cta" class="editorial-button" href={notSureApplyHref} data-apply-path={notSurePath} data-partnership-cta data-cta="tell_me_where_youre_stuck" data-cta-location="hero">Tell me where you're stuck</a>
-			<a class="partnership-text-link" href="#stages">See the three stages</a>
+			<a id="partnership-hero-cta" class="editorial-button" href={notSureApplyHref} data-apply-path={notSurePath} data-partnership-cta data-cta="partnership_enquiry" data-cta-location="hero">Tell me what you need</a>
+			<a class="partnership-text-link" href="#stages">Explore the work</a>
 		</div>
 		<div class="partnership-watch" slot="actions">
 			<p id="partnership-watch-title">Watch me try a new tool live</p>
@@ -323,8 +328,7 @@ const partnerQuotes = (
 		<section id="stages" class="editorial-section" aria-labelledby="stages-title">
 			<div class="partnership-pricing__header">
 				<div class="editorial-section__header">
-					<h2 id="stages-title" class="editorial-section__title">Start where your engineers are stuck</h2>
-					<p class="editorial-section__lede">Awareness, adoption and support, each with its own first piece of work. Pick one; you don't need the others first.</p>
+					<h2 id="stages-title" class="editorial-section__title">Awareness, Adoption, and Support</h2>
 					<p class="partnership-label">{partnershipCapacity.places} partner places · {partnershipCapacity.newStartsPerMonth} new starts a month</p>
 				</div>
 				<p class="partnership-credit">{partnershipAdvice}</p>
@@ -354,6 +358,7 @@ const partnerQuotes = (
 								<p class="partnership-plan__cadence">{stage.offer.cadence}</p>
 								<p class="partnership-plan__summary">{stage.offer.summary}</p>
 								<div class="partnership-plan__body">
+									{stage.offer.includedLabel && <p class="partnership-label">{stage.offer.includedLabel}</p>}
 									<ul class="partnership-plan__list">
 										{stage.offer.included.map((item) => <li>{item}</li>)}
 									</ul>
@@ -374,7 +379,7 @@ const partnerQuotes = (
 				})}
 			</ol>
 			<div class="partnership-review-preview">
-				<p class="partnership-label">What an adoption review hands over</p>
+				<p class="partnership-label">Inside an adoption review</p>
 				<ReviewPreview placement="always" />
 			</div>
 		</section>
@@ -415,8 +420,8 @@ const partnerQuotes = (
 		<section id="pricing" class="editorial-section" aria-labelledby="pricing-title">
 			<div class="partnership-pricing__header">
 				<div class="editorial-section__header">
-					<h2 id="pricing-title" class="editorial-section__title">Keep going</h2>
-					<p class="editorial-section__lede">When a first engagement is useful, carry on quarter by quarter and choose each quarter's work as you go.</p>
+					<h2 id="pricing-title" class="editorial-section__title">An ongoing partnership</h2>
+					<p class="editorial-section__lede">Have me work alongside your team as your product and community grow. Start here, or build on a project we've already done together.</p>
 				</div>
 				<p class="partnership-credit">{partnershipReviewCredit}</p>
 				<a class="partnership-text-link" href={teamBriefMailto} data-partnership-cta data-cta="send_to_team" data-cta-location="pricing-brief">Send this to your team</a>
@@ -473,7 +478,7 @@ const partnerQuotes = (
 		<section id="perks" class="editorial-section editorial-section--split" aria-labelledby="perks-title">
 			<div class="editorial-section__header">
 				<h2 id="perks-title" class="editorial-section__title">What else you get</h2>
-				<p class="editorial-section__lede">Ongoing partners get these, on top of the stage work.</p>
+				<p class="editorial-section__lede">Advice, preparation and visibility alongside the work we agree for each quarter.</p>
 			</div>
 			<div class="partnership-perks">
 				<h3 class="partnership-label">Every ongoing partnership</h3>
@@ -515,8 +520,8 @@ const partnerQuotes = (
 
 		<section id="independence" class="editorial-section editorial-section--split" aria-labelledby="independence-title">
 			<div class="editorial-section__header">
-				<h2 id="independence-title" class="editorial-section__title">How paid work stays honest</h2>
-				<p class="editorial-section__lede">Engineers trust what I show them because nobody scripts it. These rules apply to every stage, and they're why the work is worth paying for.</p>
+				<h2 id="independence-title" class="editorial-section__title">Independent public work</h2>
+				<p class="editorial-section__lede">Your team helps set the scope and checks technical accuracy. What I publish about the product reflects my experience of using it.</p>
 			</div>
 			<ul class="partnership-fit partnership-independence">
 				{independenceRules.map((rule) => (
@@ -577,7 +582,7 @@ const partnerQuotes = (
 		<section id="apply" class="editorial-section editorial-section--split partnerships-apply" aria-labelledby="apply-title">
 			<div class="editorial-section__header">
 				<h2 id="apply-title" class="editorial-section__title">What are you building?</h2>
-				<p class="editorial-section__lede">A few lines about your product and where engineers get stuck is enough. I read every one and tell you which stage fits, or that none does yet.</p>
+				<p class="editorial-section__lede">Tell me about your product, who uses it and what you want to help them do. I read every enquiry and reply with a recommendation for how we could work together.</p>
 			</div>
 			<div id="enquiry-form" class="partnerships-apply__body">
 				{enquiryReceived ? (
@@ -599,10 +604,10 @@ const partnerQuotes = (
 
 	<div class="partnership-pinned" data-partnership-pinned>
 		<p>
-			<strong>Start at any stage</strong>
-			<span>From {fitProofReview.price} · fixed price</span>
+			<strong>Work with me</strong>
+			<span>One project or ongoing</span>
 		</p>
-		<a class="partnership-pinned__cta" href={notSureApplyHref} data-apply-path={notSurePath} data-partnership-cta data-cta="tell_me_where_youre_stuck" data-cta-location="pinned" tabindex="-1">Tell me where you're stuck</a>
+		<a class="partnership-pinned__cta" href={notSureApplyHref} data-apply-path={notSurePath} data-partnership-cta data-cta="partnership_enquiry" data-cta-location="pinned" tabindex="-1">Tell me what you need</a>
 	</div>
 </Page>
 
@@ -637,7 +642,7 @@ const partnerQuotes = (
 		const defaultCta = pinnedCta.textContent ?? "";
 		const defaultHref = pinnedCta.href;
 		const defaultRoute = pinnedCta.dataset.applyPath ?? "Not sure yet";
-		const defaultCtaName = pinnedCta.dataset.cta ?? "tell_me_where_youre_stuck";
+		const defaultCtaName = pinnedCta.dataset.cta ?? "partnership_enquiry";
 		let currentPlan: HTMLElement | undefined;
 
 		const follow = (plan?: HTMLElement) => {

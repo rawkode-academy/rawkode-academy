@@ -288,7 +288,7 @@ for (const fixture of fixtures) {
 				[
 					"Field report",
 					"Adoption review",
-					"Customer workshops",
+					"Developer support",
 					"Ongoing partnership",
 					"Community supporter",
 					"Community challenge series",
