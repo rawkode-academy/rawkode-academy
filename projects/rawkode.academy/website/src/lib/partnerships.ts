@@ -1,7 +1,7 @@
 /**
  * Single source of truth for the Rawkode Academy partner programme.
  *
- * Every page that names the offer, quotes a price, or links a contact
+ * Every page that names the offer, quotes a price or links a contact
  * mailto consumes this module so the public funnel cannot drift.
  */
 
@@ -29,8 +29,8 @@ const applicationBody = [
 	"Name:",
 	"Company and product:",
 	"Developers or platform teams you need to reach:",
-	"Where they get stuck today (finding you, first success, production, or after that):",
-	"Product, demo, docs, or repository:",
+	"Where engineers get stuck today:",
+	"Product, demo, docs or repository:",
 	"When you'd like to start:",
 ].join("\n");
 
@@ -134,7 +134,7 @@ export const partnershipWatchEpisodes = [
 ] as const;
 
 export const partnershipDescription =
-	"I work with developer tool companies on awareness, adoption and support: getting engineers interested, getting them hooked, and making them successful. Start with a $10,000 field report, a $5,000 adoption review or a customer workshop, then carry on quarter by quarter if it's useful.";
+	"I work with developer tool companies on awareness, adoption and support: getting engineers interested, getting them hooked and making them successful. Start with a $10,000 field report, a $5,000 adoption review or a customer workshop, then carry on quarter by quarter if it's useful.";
 
 export interface PartnershipPerk {
 	title: string;
@@ -149,7 +149,7 @@ export const partnershipPerks: PartnershipPerk[] = [
 	{
 		title: "Community supporter, included",
 		detail:
-			"Your supporter badge, docs and latest announcement on your technology page and its videos, and your logo on the supporters wall, for as long as we work together.",
+			"Your supporter badge, docs and latest announcement on your technology page and its videos, plus your logo on the supporters wall, for as long as we work together.",
 	},
 	{
 		title: "Field insight",
@@ -159,7 +159,7 @@ export const partnershipPerks: PartnershipPerk[] = [
 	{
 		title: "Feature launch health check",
 		detail:
-			"Before one launch a quarter, I go through the new feature or quick start and share my take: what will land with developers, what to sharpen, and how I'd position it. Give me 10 business days' notice.",
+			"Before one launch a quarter, I go through the new feature or quick start and share my take: what will land with developers, what to sharpen and how I'd position it. Give me 10 business days' notice.",
 	},
 	{
 		title: "Demo and talk coaching",
@@ -379,7 +379,7 @@ export const ongoingPartnershipOffer: PartnershipOffer = {
 	summary:
 		"Keep working together across stages. Each quarter, you choose what I work on next.",
 	included: [
-		"Each quarter, one piece of stage work: a field report, a review, or a customer workshop",
+		"Each quarter, one piece of stage work: a field report, a review or a customer workshop",
 		"Monthly 60-minute working sessions with written recaps",
 		"Slack Connect with me",
 		"A read-out each quarter on what changed, where we choose the next quarter's work",
@@ -451,7 +451,7 @@ export const partnershipTerms = [
 
 /** What the review covers. Answered in the partnerships FAQ. */
 export const productReviewScope =
-	"We agree the product areas, who I'm acting as, and how far I go: a first working result, or as far as production, like a highly available setup, a backup and restore, or an upgrade. One review can follow up to two kinds of user, such as a platform team and the application developers they serve, or your open-source project and its hosted product.";
+	"We agree the product areas, who I'm acting as, and how far I go: a first working result, or as far as production, like a highly available setup, a backup and restore or an upgrade. One review can follow up to two kinds of user, such as a platform team and the application developers they serve, or your open-source project and its hosted product.";
 
 /** A lighter way to back the content, without the stage work. */
 export const supporterOffer: PartnershipOffer = {
@@ -576,17 +576,17 @@ export const decisionBriefMailto = partnershipFitMailto;
  * mailto has no recipient so they choose who it goes to.
  */
 const teamBriefBody = [
-	"I found a way to get engineers interested in our product, hooked on it, and successful with it.",
+	"I found a way to get engineers interested in our product, hooked on it and successful with it.",
 	"",
 	"David Flanagan of Rawkode Academy works with developer tool companies on three stages:",
 	"",
 	`- Awareness: ${fieldReportOffer.name}, ${fieldReportOffer.price}. He solves real problems of his own with our product, in public, labelled as paid, then tells us privately what he'd change.`,
-	`- Adoption: ${fitProofReview.name}, ${fitProofReview.price}, delivered in 10 business days. A ranked list of where engineers get stuck, from first try to production, and what to fix first.`,
+	`- Adoption: ${fitProofReview.name}, ${fitProofReview.price}, delivered in 10 business days. A ranked list of where engineers get stuck (from first try to production) and what to fix first.`,
 	`- Support: ${workshopOffer.name}, ${workshopOffer.price.toLowerCase()}. Hands-on workshops and troubleshooting sessions for our users.`,
 	"",
 	`Then, if it's useful: ${ongoingPartnershipOffer.name}, ${ongoingPartnershipOffer.price}. ${partnershipReviewCredit}`,
 	"",
-	"Fixed prices in USD, nothing renews automatically, and we own the reports and read-outs.",
+	"Fixed prices in USD, nothing renews automatically and we own the reports and read-outs.",
 	"",
 	"Details: https://rawkode.academy/organizations/partnerships",
 ].join("\n");

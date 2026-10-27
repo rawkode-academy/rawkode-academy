@@ -43,7 +43,7 @@ test("partnership page follows the approved redesign", () => {
 	assert.match(page, /eyebrow="Partnerships"/);
 	assert.match(
 		page,
-		/Get engineers interested in your product, hooked on it, and successful with it\./,
+		/Get engineers interested in your product, hooked on it and successful with it\./,
 	);
 	assert.match(
 		page,
