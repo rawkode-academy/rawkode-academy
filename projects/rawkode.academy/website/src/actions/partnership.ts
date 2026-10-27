@@ -370,7 +370,7 @@ const saveEnquiry = async (
 				stage: dealStage,
 				owner: DEAL_OWNER,
 				value: mappedDeal.valueUsd,
-				[offerAttribute]: mappedDeal.offer,
+				...(mappedDeal.offer ? { [offerAttribute]: mappedDeal.offer } : {}),
 				...(hasSourceAttribute ? { [sourceAttribute]: sourceValue } : {}),
 				associated_people: [
 					{

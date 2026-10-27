@@ -33,6 +33,7 @@ import {
 	partnershipDescription,
 	partnershipExperience,
 	partnershipFacts,
+	partnershipOwnership,
 	partnershipPerks,
 	partnershipReviewCredit,
 	partnershipWatchEpisodes,
@@ -137,33 +138,12 @@ const splitPrice = (price: string) => {
 	return { amount: match?.[1] ?? price, period: match?.[2] };
 };
 
-interface PricingCard {
-	offer: PartnershipOffer;
-	route: ApplicationPath;
-	period: string;
-	cta: string;
-	ctaName?: string;
-	ctaLocation: string;
-	featured?: boolean;
-	lead?: string;
-}
-
 /** Fixed-price stages show "one-off, fixed"; quoted stages show no period. */
 const stagePeriod = (offer: PartnershipOffer) =>
 	offer.price.startsWith("$") ? "one-off, fixed" : undefined;
 
-const pricingCards: PricingCard[] = [
-	{
-		offer: ongoingPartnershipOffer,
-		route: "Ongoing partnership",
-		period:
-			splitPrice(ongoingPartnershipOffer.price).period ?? "a quarter",
-		cta: "Ask about an ongoing partnership",
-		ctaName: "ask_about_an_ongoing_partnership",
-		ctaLocation: "pricing-ongoing",
-		lead: "After any first engagement:",
-	},
-];
+const ongoingPath = "Ongoing partnership" satisfies ApplicationPath;
+const ongoingPrice = splitPrice(ongoingPartnershipOffer.price);
 
 const pageSections = [
 	{ id: "stages", label: "Where to start" },
@@ -187,8 +167,7 @@ const noLockIn = [
 	},
 	{
 		title: "You own the work",
-		detail:
-			"You own the reports, the read-outs and the example repositories.",
+		detail: partnershipOwnership,
 	},
 ];
 
@@ -206,13 +185,13 @@ const faqs = [
 	{
 		question: "How is a field report different from sponsoring a video?",
 		answer:
-			"Sponsorship buys airtime and a script. A field report pays for my time and judgement: I choose real problems, solve them with your product, publish what actually happens (labelled as paid) and tell you privately what I'd change.",
+			"A field report pays for hands-on work and an honest account of it. I choose real problems, try to solve them with your product, publish what actually happens (labelled as paid) and tell you privately what I'd change. You can correct facts before publication; you don't buy a positive conclusion.",
 	},
 	{
 		question:
 			"We could come on Rawkode Live for free. What does the review add?",
 		answer:
-			"A maintainer session is public, lasts about an hour and you're there steering, so I see the path you show me. In the review I work alone as your target user, with nobody to rescue me. I note every place I get stuck against the recording, rank what to fix, explain or teach and, if you continue, re-run it at day 90 to check what changed.",
+			"A maintainer session is public, lasts about an hour and you're there steering, so I see the path you show me. In the review I work alone as your target user, with nobody to rescue me. I note every place I get stuck against the recording, rank what to fix, explain or teach and walk your team through the findings. An ongoing partnership can include a follow-up review when that's the most useful next piece of work.",
 	},
 	{
 		question: "Aren't you too experienced to get stuck where our users do?",
@@ -364,6 +343,7 @@ const partnerQuotes = (
 								data-pinned-route={stage.route}
 								data-pinned-href={applyHref(stage.route)}
 								data-pinned-cta={stage.cta}
+								data-pinned-cta-name={stage.ctaName}
 							>
 								<p class="partnership-stage__kicker"><span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span> {stage.stage}</p>
 								<p class="partnership-stage__problem"><strong>{stage.tagline}.</strong> {stage.problem}</p>
@@ -385,7 +365,7 @@ const partnerQuotes = (
 									href={applyHref(stage.route)}
 									data-apply-path={stage.route}
 									data-partnership-cta
-									data-cta={stage.cta.toLowerCase().replaceAll(/[^a-z]+/g, "_")}
+									data-cta={stage.ctaName}
 									data-cta-location={stage.ctaLocation}
 								>{stage.cta}</a>
 							</article>
@@ -441,46 +421,34 @@ const partnerQuotes = (
 				<p class="partnership-credit">{partnershipReviewCredit}</p>
 				<a class="partnership-text-link" href={teamBriefMailto} data-partnership-cta data-cta="send_to_team" data-cta-location="pricing-brief">Send this to your team</a>
 			</div>
-			<div class="partnership-pricing">
-				{pricingCards.map((card) => {
-					const { amount } = splitPrice(card.offer.price);
-					return (
-						<article
-							class:list={["partnership-plan", card.featured && "partnership-plan--featured"]}
-							aria-labelledby={`plan-${card.offer.id}`}
-							data-pinned-name={card.offer.name}
-							data-pinned-price={`${amount} · ${card.period}`}
-							data-pinned-route={card.route}
-							data-pinned-href={applyHref(card.route)}
-							data-pinned-cta={card.cta}
-							data-pinned-cta-name={card.ctaName}
-						>
-							<div class="partnership-plan__heading">
-								<h3 id={`plan-${card.offer.id}`}>{card.offer.name}</h3>
-								{card.featured && <span class="partnership-plan__badge">Start here</span>}
-							</div>
-							<p class="partnership-plan__price"><span>{amount}</span> <span class="partnership-plan__period">{card.period}</span></p>
-							<p class="partnership-plan__cadence">{card.offer.cadence}</p>
-							{card.featured && <p class="partnership-plan__summary">{card.offer.summary}</p>}
-							<div class="partnership-plan__body">
-								{card.lead && <p class="partnership-plan__lead">{card.lead}</p>}
-								<ul class="partnership-plan__list">
-									{card.offer.included.map((item) => <li>{item}</li>)}
-								</ul>
-								{card.offer.notes.map((note) => <p class="partnership-plan__note">{note}</p>)}
-							</div>
-							<a
-								class:list={["editorial-button", !card.featured && "editorial-button--secondary"]}
-								href={applyHref(card.route)}
-								data-apply-path={card.route}
-								data-partnership-cta
-								data-cta={card.ctaName}
-								data-cta-location={card.ctaLocation}
-							>{card.cta}</a>
-						</article>
-					);
-				})}
-			</div>
+			<article
+				class="partnership-plan partnership-ongoing"
+				aria-labelledby={`plan-${ongoingPartnershipOffer.id}`}
+				data-pinned-name={ongoingPartnershipOffer.name}
+				data-pinned-price={ongoingPartnershipOffer.price}
+				data-pinned-route={ongoingPath}
+				data-pinned-href={applyHref(ongoingPath)}
+				data-pinned-cta="Ask about an ongoing partnership"
+				data-pinned-cta-name="ask_about_an_ongoing_partnership"
+			>
+				<div class="partnership-plan__heading">
+					<h3 id={`plan-${ongoingPartnershipOffer.id}`}>{ongoingPartnershipOffer.name}</h3>
+				</div>
+				<p class="partnership-plan__price"><span>{ongoingPrice.amount}</span> <span class="partnership-plan__period">{ongoingPrice.period}</span></p>
+				<p class="partnership-plan__cadence">{ongoingPartnershipOffer.cadence}</p>
+				<p class="partnership-plan__summary">{ongoingPartnershipOffer.summary}</p>
+				<ul class="partnership-plan__list">
+					{ongoingPartnershipOffer.included.map((item) => <li>{item}</li>)}
+				</ul>
+				<a
+					class="editorial-button editorial-button--secondary"
+					href={applyHref(ongoingPath)}
+					data-apply-path={ongoingPath}
+					data-partnership-cta
+					data-cta="ask_about_an_ongoing_partnership"
+					data-cta-location="pricing-ongoing"
+				>Ask about an ongoing partnership</a>
+			</article>
 			<div class="partnership-addons">
 				<h3 id="addons-title" class="partnership-label">Add-ons</h3>
 				<ul>
@@ -643,7 +611,7 @@ const partnerQuotes = (
 		cta.addEventListener("click", () => {
 			const label = cta.textContent?.trim() ?? "";
 			window.posthog?.capture("cta_clicked", {
-				cta: cta.getAttribute("data-cta") ?? "book_a_product_review",
+				cta: cta.getAttribute("data-cta") ?? "partnership_enquiry",
 				label,
 				location: cta.getAttribute("data-cta-location"),
 				path: window.location.pathname,
@@ -654,22 +622,62 @@ const partnerQuotes = (
 	// The pinned bar appears once the hero button has scrolled away and
 	// leaves again when the enquiry form is reached. Positions are read on
 	// scroll (once per frame) so jumps such as anchor links are handled too.
-	const pinned = document.querySelector<HTMLElement>(
-		"[data-partnership-pinned]",
-	);
+	const pinned = document.querySelector<HTMLElement>("[data-partnership-pinned]");
 	const pinnedCta = pinned?.querySelector<HTMLAnchorElement>("a");
 	const heroCta = document.getElementById("partnership-hero-cta");
 	const enquiry = document.getElementById("apply");
 	if (pinned && pinnedCta && heroCta && enquiry) {
+		const pinnedName = pinned.querySelector("strong");
+		const pinnedPrice = pinned.querySelector("p span");
+		const plans = Array.from(
+			document.querySelectorAll<HTMLElement>("[data-pinned-name]"),
+		);
+		const defaultName = pinnedName?.textContent ?? "";
+		const defaultPrice = pinnedPrice?.textContent ?? "";
+		const defaultCta = pinnedCta.textContent ?? "";
+		const defaultHref = pinnedCta.href;
+		const defaultRoute = pinnedCta.dataset.applyPath ?? "Not sure yet";
+		const defaultCtaName = pinnedCta.dataset.cta ?? "tell_me_where_youre_stuck";
+		let currentPlan: HTMLElement | undefined;
+
+		const follow = (plan?: HTMLElement) => {
+			if (plan === currentPlan) return;
+			currentPlan = plan;
+			if (pinnedName)
+				pinnedName.textContent = plan?.dataset.pinnedName ?? defaultName;
+			if (pinnedPrice)
+				pinnedPrice.textContent = plan?.dataset.pinnedPrice ?? defaultPrice;
+			pinnedCta.textContent = plan?.dataset.pinnedCta ?? defaultCta;
+			pinnedCta.href = plan?.dataset.pinnedHref ?? defaultHref;
+			pinnedCta.dataset.applyPath = plan?.dataset.pinnedRoute ?? defaultRoute;
+			pinnedCta.dataset.cta = plan?.dataset.pinnedCtaName ?? defaultCtaName;
+		};
+
 		let frame = 0;
 		const update = () => {
 			frame = 0;
 			const pastHero = heroCta.getBoundingClientRect().bottom < 0;
-			const atEnquiry =
-				enquiry.getBoundingClientRect().top < window.innerHeight;
+			const atEnquiry = enquiry.getBoundingClientRect().top < window.innerHeight;
 			const show = pastHero && !atEnquiry;
 			pinned.toggleAttribute("data-visible", show);
 			pinnedCta.tabIndex = show ? 0 : -1;
+
+			// Follow the card with the most visible height. This also handles cards
+			// taller than two screens; a 50% intersection threshold never sees those.
+			let activePlan: HTMLElement | undefined;
+			let mostVisible = 0;
+			const viewportBottom =
+				window.innerHeight - (show ? pinned.getBoundingClientRect().height : 0);
+			for (const plan of plans) {
+				const rect = plan.getBoundingClientRect();
+				const visible =
+					Math.min(rect.bottom, viewportBottom) - Math.max(rect.top, 0);
+				if (rect.width > 0 && visible > mostVisible) {
+					activePlan = plan;
+					mostVisible = visible;
+				}
+			}
+			follow(activePlan);
 		};
 		const schedule = () => {
 			if (!frame) frame = window.requestAnimationFrame(update);
@@ -677,40 +685,6 @@ const partnerQuotes = (
 		window.addEventListener("scroll", schedule, { passive: true });
 		window.addEventListener("resize", schedule, { passive: true });
 		update();
-
-		// The bar follows the plan being read: whichever plan card is mostly
-		// on screen becomes the one it names and links to.
-		const pinnedName = pinned.querySelector("strong");
-		const pinnedPrice = pinned.querySelector("p span");
-		const follow = (plan: HTMLElement) => {
-			const {
-				pinnedName: name,
-				pinnedPrice: price,
-				pinnedRoute: route,
-				pinnedHref: href,
-				pinnedCta: cta,
-				pinnedCtaName: ctaName,
-			} = plan.dataset;
-			if (!name || !price || !route || !href || !cta) return;
-			if (pinnedName) pinnedName.textContent = name;
-			if (pinnedPrice) pinnedPrice.textContent = price;
-			pinnedCta.textContent = cta;
-			pinnedCta.href = href;
-			pinnedCta.dataset.applyPath = route;
-			if (ctaName) pinnedCta.dataset.cta = ctaName;
-			else delete pinnedCta.dataset.cta;
-		};
-		const observer = new IntersectionObserver(
-			(entries) => {
-				for (const entry of entries) {
-					if (entry.isIntersecting) follow(entry.target as HTMLElement);
-				}
-			},
-			{ threshold: 0.5 },
-		);
-		document
-			.querySelectorAll<HTMLElement>("[data-pinned-name]")
-			.forEach((plan) => observer.observe(plan));
 	}
 </script>
 
@@ -1268,15 +1242,9 @@ const partnerQuotes = (
 		color: var(--colors-academy-text-soft);
 	}
 
-	.partnership-pricing {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
-		gap: 1rem;
-		margin-top: 1.5rem;
-	}
-
-	.partnership-pricing > .partnership-plan {
+	.partnership-ongoing {
 		max-width: 40rem;
+		margin-top: 1.5rem;
 	}
 
 	/* Stages */
@@ -1333,15 +1301,12 @@ const partnerQuotes = (
 	.partnership-review-preview {
 		display: grid;
 		gap: 0.75rem;
+		max-width: 40rem;
+		margin-top: 2rem;
 	}
 
 	.partnership-stage > .editorial-button {
 		width: 100%;
-	}
-
-	.partnership-review-preview {
-		max-width: 40rem;
-		margin-top: 2rem;
 	}
 
 	.partnership-plan {
@@ -1353,10 +1318,6 @@ const partnerQuotes = (
 		border: 1px solid var(--colors-academy-border);
 		border-radius: var(--radii-academy-l);
 		background: var(--colors-academy-panel);
-	}
-
-	.partnership-plan--featured {
-		border: 2px solid var(--colors-academy-accent);
 	}
 
 	.partnership-plan p,
@@ -1376,17 +1337,6 @@ const partnerQuotes = (
 		font-size: 1.3rem;
 		font-weight: 700;
 		color: var(--colors-academy-text);
-	}
-
-	.partnership-plan__badge {
-		flex: none;
-		padding: 0.2rem 0.55rem;
-		border-radius: var(--radii-academy-pill);
-		background: var(--colors-academy-accent);
-		color: var(--colors-academy-accent-foreground);
-		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
-		font-size: 0.72rem;
-		font-weight: 600;
 	}
 
 	.partnership-plan__price {
@@ -1427,12 +1377,6 @@ const partnerQuotes = (
 		flex: 1 1 auto;
 	}
 
-	.partnership-plan__lead {
-		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
-		font-size: 0.8rem;
-		color: var(--colors-academy-text-muted);
-	}
-
 	.partnership-plan__list {
 		display: grid;
 		gap: 0.55rem;
@@ -1454,10 +1398,6 @@ const partnerQuotes = (
 		left: 0;
 		font-weight: 700;
 		color: var(--colors-academy-text-muted);
-	}
-
-	.partnership-plan--featured .partnership-plan__list li::before {
-		color: var(--colors-academy-accent);
 	}
 
 	.partnership-plan__note {

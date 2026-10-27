@@ -41,10 +41,7 @@ const letsChat = readFileSync(
 test("partnership page follows the approved redesign", () => {
 	// Hero: the offer up front, with the facts that decide whether to enquire.
 	assert.match(page, /eyebrow="Partnerships"/);
-	assert.match(
-		page,
-		/Make your product the one engineers reach for\./,
-	);
+	assert.match(page, /Make your product the one engineers reach for\./);
 	assert.match(
 		page,
 		/I make the content, docs and live sessions that get engineers interested in your product, using it and successful with it in production\. What I say about it is still my call\./,
@@ -140,17 +137,16 @@ test("partnership page follows the approved redesign", () => {
 	assert.equal(page.match(/partnershipReviewCredit\}/g)?.length, 1);
 	assert.match(page, /partnershipCapacity\.places/);
 	assert.match(page, /partnershipCapacity\.newStartsPerMonth/);
-	assert.match(page, /card\.offer\.included\.map/);
+	assert.match(page, /ongoingPartnershipOffer\.included\.map/);
 	assert.doesNotMatch(page, /What's not included|Not a fit/);
-	assert.match(page, /cta: "Ask about an ongoing partnership"/);
-	assert.match(page, /ctaLocation: "pricing-ongoing"/);
-	assert.match(page, /data-cta-location=\{card\.ctaLocation\}/);
+	assert.match(page, /data-pinned-cta="Ask about an ongoing partnership"/);
 	assert.deepEqual(
 		Array.from(page.matchAll(/data-cta-location="([^"]+)"/g), (m) => m[1]),
 		[
 			"hero",
 			"hero-watch",
 			"pricing-brief",
+			"pricing-ongoing",
 			"pricing-addon",
 			"pricing-supporter",
 			"pinned",
@@ -172,10 +168,7 @@ test("partnership page follows the approved redesign", () => {
 	assert.match(page, /prefers-reduced-motion/);
 
 	// Simple terms.
-	assert.match(
-		page,
-		/You own the reports, the read-outs and the example repositories\./,
-	);
+	assert.match(page, /detail: partnershipOwnership/);
 	assert.equal(page.match(/Renew when it's working/g)?.length, 1);
 
 	// Wording rules that stay in force.

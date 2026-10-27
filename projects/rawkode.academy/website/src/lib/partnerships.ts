@@ -249,7 +249,7 @@ export const fitProofReview: PartnershipOffer = {
 	summary:
 		"I work through your product alone as your target user, with nobody to rescue me, as far as we agree: a first working result, or all the way to production. Then I tell you where engineers get stuck and what to fix first.",
 	included: [
-		"A written report showing where engineers get stuck, from first try to production",
+		"A written report showing where engineers get stuck along the journey we agree to review",
 		"A ranked list of what to fix first",
 		"A one-hour call to go through it with your team",
 	],
@@ -295,6 +295,7 @@ export interface AdoptionStage {
 	offer: PartnershipOffer;
 	route: ApplicationPath;
 	cta: string;
+	ctaName: string;
 	ctaLocation: string;
 }
 
@@ -314,6 +315,7 @@ export const adoptionStages: AdoptionStage[] = [
 		offer: fieldReportOffer,
 		route: "Field report",
 		cta: "Ask about a field report",
+		ctaName: "ask_about_a_field_report",
 		ctaLocation: "stage-awareness",
 	},
 	{
@@ -327,6 +329,7 @@ export const adoptionStages: AdoptionStage[] = [
 		offer: fitProofReview,
 		route: "Product review",
 		cta: "Ask about an adoption review",
+		ctaName: "ask_about_an_adoption_review",
 		ctaLocation: "stage-adoption",
 	},
 	{
@@ -338,6 +341,7 @@ export const adoptionStages: AdoptionStage[] = [
 		offer: workshopOffer,
 		route: "Customer workshops",
 		cta: "Ask about workshops",
+		ctaName: "ask_about_workshops",
 		ctaLocation: "stage-support",
 	},
 ];
@@ -366,7 +370,7 @@ export const independenceRules = [
 
 /** Advice runs through every stage, not as a separate product. */
 export const partnershipAdvice =
-	"Product and messaging advice comes with every stage. You hear privately what I'd change, before and after the public work.";
+	"Product and messaging advice comes with every stage. I tell you privately where the product or its explanation got in the way and what I'd change.";
 
 export const ongoingPartnershipOffer: PartnershipOffer = {
 	id: "partnership-ongoing",
@@ -411,6 +415,10 @@ export const partnershipAddOns: PartnershipAddOn[] = [
 	},
 ];
 
+/** Shared ownership copy for the pricing summary and full terms. */
+export const partnershipOwnership =
+	"You own the reports and the read-outs. Example repositories are licensed Apache 2.0, so you can use, change and ship them.";
+
 /** Terms buyers, finance and procurement ask about. */
 export const partnershipTerms = [
 	{
@@ -444,8 +452,7 @@ export const partnershipTerms = [
 	},
 	{
 		title: "Ownership",
-		detail:
-			"You own the reports and the read-outs. Example repositories are licensed Apache 2.0, so you can use, change and ship them. You can correct facts before anything is published, and reuse published sessions on your own channels.",
+		detail: `${partnershipOwnership} You can correct facts before anything is published, and reuse published sessions on your own channels.`,
 	},
 ] as const;
 
@@ -514,10 +521,11 @@ export const applicationPathLabels: Record<ApplicationPath, string> = {
  * Attio Offer option title and USD value for each application route.
  * "Field report" and "Workshop" must exist as Offer options in Attio;
  * workshops are quoted per scope, so their inbound value is 0 until quoted.
+ * An undecided enquiry has no Offer selection and no quoted value yet.
  */
 export const applicationPathDeals: Record<
 	ApplicationPath,
-	{ offer: string; valueUsd: number }
+	{ offer: string | null; valueUsd: number }
 > = {
 	"Field report": { offer: "Field report", valueUsd: 10000 },
 	"Product review": { offer: "Review", valueUsd: 5000 },
@@ -526,7 +534,7 @@ export const applicationPathDeals: Record<
 		offer: "Partnership (Quarterly)",
 		valueUsd: 12000,
 	},
-	"Not sure yet": { offer: "Review", valueUsd: 5000 },
+	"Not sure yet": { offer: null, valueUsd: 0 },
 	"Community supporter": { offer: "Supporter", valueUsd: 9000 },
 	"Community challenge series": { offer: "Challenge series", valueUsd: 15000 },
 };
@@ -555,7 +563,9 @@ export const resolveApplicationPath = (
 	if ((applicationPaths as readonly string[]).includes(value)) {
 		return value as ApplicationPath;
 	}
-	return legacyApplicationPaths[value];
+	return Object.hasOwn(legacyApplicationPaths, value)
+		? legacyApplicationPaths[value]
+		: undefined;
 };
 
 /** General partnership application mailto used as a fallback. */

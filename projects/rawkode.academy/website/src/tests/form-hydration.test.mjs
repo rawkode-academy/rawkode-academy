@@ -468,7 +468,7 @@ for (const fixture of fixtures) {
 				);
 				assert.equal(capturedEvents[1].properties.form, "partnership_enquiry");
 				assert.equal(capturedEvents[1].properties.route, "Not sure yet");
-				assert.equal(capturedEvents[1].properties.offer, "Review");
+				assert.equal(capturedEvents[1].properties.offer, null);
 			} else {
 				assert.equal(host.querySelector("[type=checkbox]").checked, false);
 				assert.equal(host.querySelector("button[type=submit]").disabled, true);

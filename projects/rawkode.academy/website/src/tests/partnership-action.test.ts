@@ -29,20 +29,9 @@ const loadModule = (filename: string) => {
 	);
 	return module.exports;
 };
-const partnerships = loadModule("src/lib/partnerships.ts") as {
-	applicationPaths: readonly [
-		"Field report",
-		"Product review",
-		"Customer workshops",
-		"Ongoing partnership",
-		"Not sure yet",
-	];
-	applicationPathLabels: Record<string, string>;
-	applicationPathDeals: Record<string, { offer: string; valueUsd: number }>;
-	resolveApplicationPath: (
-		value: string | null | undefined,
-	) => string | undefined;
-};
+const partnerships = loadModule(
+	"src/lib/partnerships.ts",
+) as typeof import("@/lib/partnerships");
 const imports: Record<string, unknown> = {
 	"astro:actions": { defineAction: (definition: unknown) => definition },
 	"astro:env/server": {
@@ -214,7 +203,6 @@ describe("partnership Attio action", () => {
 		["Field report", 10000, "Field report"],
 		["Product review", 5000, "Review"],
 		["Customer workshops", 0, "Workshop"],
-		["Not sure yet", 5000, "Review"],
 		["Ongoing partnership", 12000, "Partnership (Quarterly)"],
 	] as const)("creates a company and person, then a note and a %s deal worth $%i offered as %s", async (path, value, offer) => {
 		mockCreatedPath();
@@ -322,6 +310,28 @@ describe("partnership Attio action", () => {
 		expect(fetch).toHaveBeenCalledTimes(7);
 	});
 
+	it.each([
+		undefined,
+		"inbound_offer",
+	])("keeps undecided enquiries unpriced and omits the %s offer attribute", async (attribute) => {
+		workerEnv.ATTIO_INBOUND_DEAL_OFFER_ATTRIBUTE = attribute;
+		mockCreatedPath();
+
+		await expect(
+			apply.handler(
+				apply.input.parse({ ...input, path: "Not sure yet" }),
+				context,
+			),
+		).resolves.toEqual({ success: true, accepted: true });
+
+		const values = requestBody(vi.mocked(fetch).mock.calls[6]!).data.values;
+		expect(values).toMatchObject({
+			name: "Analytical Engine: Not sure yet",
+			value: 0,
+		});
+		expect(values).not.toHaveProperty(attribute ?? "offer");
+	});
+
 	it("uses the configured inbound deal stage", async () => {
 		workerEnv.ATTIO_INBOUND_DEAL_STAGE = "Qualified";
 		mockCreatedPath();
@@ -370,7 +380,7 @@ describe("partnership Attio action", () => {
 			"Field report": { offer: "Field report", valueUsd: 10000 },
 			"Product review": { offer: "Review", valueUsd: 5000 },
 			"Customer workshops": { offer: "Workshop", valueUsd: 0 },
-			"Not sure yet": { offer: "Review", valueUsd: 5000 },
+			"Not sure yet": { offer: null, valueUsd: 0 },
 			"Ongoing partnership": {
 				offer: "Partnership (Quarterly)",
 				valueUsd: 12000,
@@ -405,6 +415,16 @@ describe("partnership Attio action", () => {
 		expect(partnerships.resolveApplicationPath("Adoption Advisory")).toBe(
 			"Ongoing partnership",
 		);
+	});
+
+	it.each([
+		"unknown",
+		"constructor",
+		"toString",
+		"__proto__",
+		"",
+	])("ignores an unrecognised route: %s", (route) => {
+		expect(partnerships.resolveApplicationPath(route)).toBeUndefined();
 	});
 
 	it("uses configured source attribution when the Deal attribute exists", async () => {
