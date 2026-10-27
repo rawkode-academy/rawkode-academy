@@ -16,6 +16,7 @@ import LiveStreamGate from "@/components/video/LiveStreamGate.vue";
 import VideoReactions from "@/components/video/VideoReactions.astro";
 import VideoContentTabs from "@/components/video/video-content-tabs.vue";
 import VideoTranscript from "@/components/video/VideoTranscript.astro";
+import { timestampHref } from "@/lib/video-deep-link";
 import VideoCast from "@/components/video/VideoCast.astro";
 import TechnologyVideoSection from "@/components/video/TechnologyVideoSection.astro";
 import ShowVideoSection from "@/components/video/ShowVideoSection.astro";
@@ -530,7 +531,7 @@ const watchStatusLabel = isLiveNow
 								<li>
 									<a
 										class={watch.chapterLink}
-										href={`?t=${chapter.startTime}`}
+										href={timestampHref(chapter.startTime)}
 										data-chapter-link={String(chapter.startTime)}
 									>
 										<span class={watch.chapterTime}>
@@ -615,6 +616,8 @@ const watchStatusLabel = isLiveNow
 </Page>
 
 <script>
+	import { startTimeFromUrl } from "@/lib/video-deep-link";
+
 	function getPlayerVideo(): HTMLVideoElement | null {
 		return document.querySelector<HTMLVideoElement>(
 			"#watch-detail-player video",
@@ -670,26 +673,37 @@ const watchStatusLabel = isLiveNow
 		}, 2000);
 	});
 
-	// Chapter links carry ?t=SECONDS so they work as plain navigations
-	// (the player reads ?t on load). When the player is already hydrated,
-	// seek in place instead of reloading.
+	// Chapter and transcript links are #t=SECONDS fragments: crawlers ignore
+	// them, and the player reads #t (or a shared ?t) when it mounts. When the
+	// player is already hydrated, seek in place.
+	function seekTo(seconds: number): boolean {
+		const media = getPlayerVideo();
+		if (!media) return false;
+		media.currentTime = seconds;
+		void media.play()?.catch(() => {});
+		document
+			.getElementById("watch-detail-player")
+			?.scrollIntoView({ behavior: "smooth", block: "center" });
+		return true;
+	}
+
 	for (const link of document.querySelectorAll<HTMLAnchorElement>(
 		"[data-chapter-link]",
 	)) {
 		link.addEventListener("click", (event) => {
 			const seconds = Number.parseInt(link.dataset.chapterLink ?? "", 10);
-			if (Number.isNaN(seconds)) return;
-			const media = getPlayerVideo();
-			if (!media) return;
+			if (Number.isNaN(seconds) || !seekTo(seconds)) return;
 			event.preventDefault();
-			media.currentTime = seconds;
-			void media.play()?.catch(() => {});
 			const url = new URL(window.location.href);
-			url.searchParams.set("t", String(seconds));
+			url.searchParams.delete("t");
+			url.hash = `t=${seconds}`;
 			history.replaceState(null, "", url);
-			document
-				.getElementById("watch-detail-player")
-				?.scrollIntoView({ behavior: "smooth", block: "center" });
 		});
 	}
+
+	// Back/forward or an edited #t= seeks too.
+	window.addEventListener("hashchange", () => {
+		const seconds = startTimeFromUrl(new URL(window.location.href));
+		if (seconds !== undefined) seekTo(seconds);
+	});
 </script>

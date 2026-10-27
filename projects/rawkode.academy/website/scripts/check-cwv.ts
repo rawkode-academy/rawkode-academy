@@ -1,13 +1,17 @@
 #!/usr/bin/env bun
 /*
   Core Web Vitals guardrail check using PageSpeed Insights.
+
+  Uses Chrome UX Report field data (75th percentile LCP, INP, CLS) when
+  PageSpeed has it for the URL, then for the origin. Without field data it
+  falls back to the Lighthouse lab run, which cannot measure INP: the lab
+  result reports Total Blocking Time as TBT, never as INP.
+
   Usage:
     bun scripts/check-cwv.ts --base https://rawkode.academy
     bun scripts/check-cwv.ts --base https://rawkode.academy --pages /,/watch,/read
     bun scripts/check-cwv.ts --base https://rawkode.academy --strategies mobile,desktop
 */
-
-export {};
 
 type Strategy = "mobile" | "desktop";
 
@@ -18,19 +22,36 @@ type Args = {
 	apiKey: string | undefined;
 };
 
-type CwvResult = {
-	url: string;
-	strategy: Strategy;
+/** Where the numbers came from: CrUX field data, or a Lighthouse lab run. */
+export type CwvSource = "field:url" | "field:origin" | "lab";
+
+export type CwvMeasurement = {
+	source: CwvSource;
 	lcpMs: number | null;
 	cls: number | null;
-	inpOrTbtMs: number | null;
-	inpSource: "INP" | "TBT";
+	/** INP for field data; TBT for a lab run (Lighthouse cannot measure INP). */
+	responsivenessMetric: "INP" | "TBT";
+	responsivenessMs: number | null;
 	performanceScore: number | null;
 	passed: boolean;
 	failures: string[];
 };
 
-type PageSpeedResponse = {
+type CwvResult = CwvMeasurement & {
+	url: string;
+	strategy: Strategy;
+};
+
+type CruxMetric = { percentile?: number };
+
+type LoadingExperience = {
+	origin_fallback?: boolean;
+	metrics?: Record<string, CruxMetric>;
+};
+
+export type PageSpeedResponse = {
+	loadingExperience?: LoadingExperience;
+	originLoadingExperience?: LoadingExperience;
 	lighthouseResult?: {
 		audits?: Record<string, { numericValue?: number }>;
 		categories?: {
@@ -50,7 +71,7 @@ const DEFAULT_PAGES = [
 	"/learning-paths",
 	"/courses",
 	"/about",
-	"/organizations",
+	"/organizations/partnerships",
 	"/resources/kubernetes/1.35-cheatsheet",
 ];
 
@@ -167,44 +188,90 @@ async function runPageSpeed(
 	}
 
 	const data = (await response.json()) as PageSpeedResponse;
-	const audits = (data?.lighthouseResult?.audits ?? {}) as Record<
-		string,
-		{ numericValue?: number }
-	>;
-	const performanceScoreRaw =
-		data?.lighthouseResult?.categories?.performance?.score;
-	const performanceScore =
-		typeof performanceScoreRaw === "number" ? performanceScoreRaw * 100 : null;
+	return { url, strategy, ...evaluatePageSpeed(data) };
+}
 
-	const lcpMs = getAuditNumericValue(audits, "largest-contentful-paint");
-	const cls = getAuditNumericValue(audits, "cumulative-layout-shift");
-	const inpMs =
-		getAuditNumericValue(audits, "interaction-to-next-paint") ??
-		getAuditNumericValue(audits, "experimental-interaction-to-next-paint");
-	const tbtMs = getAuditNumericValue(audits, "total-blocking-time");
-	const inpOrTbtMs = inpMs ?? tbtMs;
-	const inpSource: "INP" | "TBT" = inpMs !== null ? "INP" : "TBT";
-	const lcpDisplay = lcpMs === null ? "missing" : `${lcpMs}ms`;
-	const inpOrTbtDisplay = inpOrTbtMs === null ? "missing" : `${inpOrTbtMs}ms`;
+function cruxPercentile(
+	experience: LoadingExperience,
+	metric: string,
+): number | null {
+	const value = experience.metrics?.[metric]?.percentile;
+	return typeof value === "number" ? value : null;
+}
+
+function fieldExperience(
+	data: PageSpeedResponse,
+): { source: CwvSource; experience: LoadingExperience } | null {
+	const page = data.loadingExperience;
+	if (page?.metrics && Object.keys(page.metrics).length > 0) {
+		return {
+			source: page.origin_fallback ? "field:origin" : "field:url",
+			experience: page,
+		};
+	}
+	const origin = data.originLoadingExperience;
+	if (origin?.metrics && Object.keys(origin.metrics).length > 0) {
+		return { source: "field:origin", experience: origin };
+	}
+	return null;
+}
+
+/**
+ * Good thresholds: LCP <= 2.5s, INP <= 200ms, CLS <= 0.1 at the 75th
+ * percentile (web.dev/articles/vitals). The lab fallback checks TBT against
+ * Lighthouse's own 200ms "good" mark and labels it TBT.
+ */
+export function evaluatePageSpeed(data: PageSpeedResponse): CwvMeasurement {
+	const scoreRaw = data?.lighthouseResult?.categories?.performance?.score;
+	const performanceScore = typeof scoreRaw === "number" ? scoreRaw * 100 : null;
+
+	const field = fieldExperience(data);
+	let lcpMs: number | null;
+	let cls: number | null;
+	let responsivenessMs: number | null;
+	let responsivenessMetric: "INP" | "TBT";
+	if (field) {
+		lcpMs = cruxPercentile(field.experience, "LARGEST_CONTENTFUL_PAINT_MS");
+		const clsTimes100 = cruxPercentile(
+			field.experience,
+			"CUMULATIVE_LAYOUT_SHIFT_SCORE",
+		);
+		cls = clsTimes100 === null ? null : clsTimes100 / 100;
+		responsivenessMs = cruxPercentile(
+			field.experience,
+			"INTERACTION_TO_NEXT_PAINT",
+		);
+		responsivenessMetric = "INP";
+	} else {
+		const audits = (data?.lighthouseResult?.audits ?? {}) as Record<
+			string,
+			{ numericValue?: number }
+		>;
+		lcpMs = getAuditNumericValue(audits, "largest-contentful-paint");
+		cls = getAuditNumericValue(audits, "cumulative-layout-shift");
+		responsivenessMs = getAuditNumericValue(audits, "total-blocking-time");
+		responsivenessMetric = "TBT";
+	}
 
 	const failures: string[] = [];
 	if (lcpMs === null || lcpMs > 2500) {
-		failures.push(`LCP ${lcpDisplay} > 2500ms`);
+		failures.push(`LCP ${lcpMs === null ? "missing" : `${lcpMs}ms`} > 2500ms`);
 	}
 	if (cls === null || cls > 0.1) {
 		failures.push(`CLS ${cls ?? "missing"} > 0.1`);
 	}
-	if (inpOrTbtMs === null || inpOrTbtMs > 200) {
-		failures.push(`${inpSource} ${inpOrTbtDisplay} > 200ms`);
+	if (responsivenessMs === null || responsivenessMs > 200) {
+		failures.push(
+			`${responsivenessMetric} ${responsivenessMs === null ? "missing" : `${responsivenessMs}ms`} > 200ms`,
+		);
 	}
 
 	return {
-		url,
-		strategy,
+		source: field?.source ?? "lab",
 		lcpMs,
 		cls,
-		inpOrTbtMs,
-		inpSource,
+		responsivenessMetric,
+		responsivenessMs,
 		performanceScore,
 		passed: failures.length === 0,
 		failures,
@@ -247,7 +314,7 @@ async function run() {
 
 				const marker = result.passed ? "PASS" : "FAIL";
 				console.log(
-					`${marker} [${strategy}] ${url} | LCP ${fmtMs(result.lcpMs)} | CLS ${fmtCls(result.cls)} | ${result.inpSource} ${fmtMs(result.inpOrTbtMs)} | Score ${fmtScore(result.performanceScore)}`,
+					`${marker} [${strategy}] [${result.source}] ${url} | LCP ${fmtMs(result.lcpMs)} | CLS ${fmtCls(result.cls)} | ${result.responsivenessMetric} ${fmtMs(result.responsivenessMs)} | Lab score ${fmtScore(result.performanceScore)}`,
 				);
 				if (!result.passed) {
 					for (const failure of result.failures) {
@@ -260,10 +327,11 @@ async function run() {
 				results.push({
 					url,
 					strategy,
+					source: "lab",
 					lcpMs: null,
 					cls: null,
-					inpOrTbtMs: null,
-					inpSource: "INP",
+					responsivenessMetric: "TBT",
+					responsivenessMs: null,
 					performanceScore: null,
 					passed: false,
 					failures: [message],
@@ -284,7 +352,11 @@ async function run() {
 	}
 }
 
-run().catch((error) => {
-	console.error("CWV check failed:", error);
-	process.exit(1);
-});
+const isMainModule = process.argv[1]?.endsWith("check-cwv.ts");
+
+if (isMainModule) {
+	run().catch((error) => {
+		console.error("CWV check failed:", error);
+		process.exit(1);
+	});
+}

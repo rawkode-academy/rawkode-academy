@@ -251,6 +251,21 @@ test("Watch is a static server-rendered archive with labeled GET search, existin
 	assert(!html.includes('href="/watch/future"'));
 });
 
+test("only the unfiltered first page is indexable; later pages and searches are noindex,follow", async () => {
+	for (const [search, expected] of [
+		["", false],
+		["?page=1", false],
+		["?page=-2", false],
+		["?page=2", true],
+		["?page=999", true],
+		["?q=ebpf", true],
+		["?q=ebpf&page=2", true],
+	]) {
+		const { pageProps } = await renderArchive(search);
+		assert.equal(Boolean(pageProps[0].noindex), expected, search || "/watch");
+	}
+});
+
 test("unfiltered archive features the latest once and keeps every published URL in page order", async () => {
 	const seen = [];
 	for (let page = 1; page <= 14; page++) {

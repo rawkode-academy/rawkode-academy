@@ -92,6 +92,29 @@ describe("live loaders", () => {
 		expect(calls.map((c) => c.operationName)).toEqual(["LiveArticles"]);
 	});
 
+	it("drop draft articles from collections and entries", async () => {
+		const { API } = gateway({
+			LiveArticles: {
+				allArticles: [
+					article("live", "2026-10-01T00:00:00Z"),
+					{ ...article("unfinished", "2026-10-02T00:00:00Z"), draft: true },
+				],
+			},
+		});
+		setContentEnv({ API, CONTENT_CACHE: memoryKv() });
+		const loader = contentLoader("articles");
+		const result = await loader.loadCollection({
+			filter: { scheduled: "include" },
+		} as never);
+		if ("error" in result) throw result.error;
+		expect(result.entries.map((e) => e.id)).toEqual(["live"]);
+		expect(
+			await loader.loadEntry({ filter: { id: "unfinished" } } as never),
+		).toBeUndefined();
+		const live = await loader.loadEntry({ filter: { id: "live" } } as never);
+		expect(live && "data" in live ? live.id : undefined).toBe("live");
+	});
+
 	it("include upcoming videos by default and look entries up in the cached list", async () => {
 		const { API } = gateway({
 			LiveVideos: {

@@ -379,16 +379,23 @@ export async function getLearningPathSitemapEntries(): Promise<
 }
 
 export async function getPeopleSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const [people, allVideos, allShows, deployTime] = await Promise.all([
-		getCollection("people"),
-		getPublishedVideos(),
-		getCollection("shows"),
-		getDeployTime(),
-	]);
+	const now = new Date();
+	const [people, allVideos, allShows, allNews, allArticles, deployTime] =
+		await Promise.all([
+			getCollection("people"),
+			getPublishedVideos(),
+			getCollection("shows", ({ data }) => data.publish),
+			getCollection("news", ({ data }) =>
+				isNewsPublished(data.publishedAt, now),
+			),
+			getCollection("articles"),
+			getDeployTime(),
+		]);
 
-	// Build a Set of person IDs who appear as a guest in at least one video
-	// or host at least one show. People without any appearances are excluded
-	// from the sitemap to avoid shipping thin/empty profiles to Google.
+	// Mirror the profile page's noindex rule (pages/people/[id].astro): a
+	// profile is indexable with a biography, a guest appearance, a hosted
+	// published show, or authored news or articles. Thin profiles stay out
+	// of the sitemap, and every indexable one is listed.
 	const peopleWithAppearances = new Set<string>();
 	const collectRefId = (ref: unknown): string | undefined => {
 		if (typeof ref === "string") return ref;
@@ -413,6 +420,12 @@ export async function getPeopleSitemapEntries(): Promise<SitemapUrlEntry[]> {
 				const id = collectRefId(h);
 				if (id) peopleWithAppearances.add(id);
 			}
+		}
+	}
+	for (const item of [...allNews, ...allArticles]) {
+		for (const author of item.data.authors ?? []) {
+			const id = collectRefId(author);
+			if (id) peopleWithAppearances.add(id);
 		}
 	}
 
@@ -565,7 +578,7 @@ export const sitemapDefinitions: readonly SitemapDefinition[] = [
 	{
 		path: "/sitemaps/people.xml",
 		getEntries: getPeopleSitemapEntries,
-		collections: ["people", "videos", "shows"],
+		collections: ["people", "videos", "shows", "news", "articles"],
 	},
 	{
 		path: "/sitemaps/shows.xml",
