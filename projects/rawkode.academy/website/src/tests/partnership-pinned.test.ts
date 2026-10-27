@@ -9,8 +9,12 @@ const page = readFileSync(
 	"src/pages/organizations/partnerships/index.astro",
 	"utf8",
 );
-const script = page.match(/<script>([\s\S]*?)<\/script>/)?.[1];
-if (!script) throw new Error("Partnership page script is missing");
+const scriptStart = page.indexOf("<script>");
+const scriptEnd = page.indexOf("</script>", scriptStart);
+if (scriptStart === -1 || scriptEnd === -1) {
+	throw new Error("Partnership page script is missing");
+}
+const script = page.slice(scriptStart + "<script>".length, scriptEnd);
 const { outputText } = ts.transpileModule(script, {
 	compilerOptions: { target: ts.ScriptTarget.ES2022 },
 });
