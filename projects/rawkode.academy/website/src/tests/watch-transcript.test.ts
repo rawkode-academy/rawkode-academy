@@ -18,6 +18,7 @@ import ts from "typescript";
 import { academyWatch } from "@rawkodeacademy/design-system";
 import VideoContentTabs from "../components/video/video-content-tabs.vue";
 import * as transcriptContent from "../components/video/transcript-content";
+import * as videoDeepLink from "../lib/video-deep-link";
 import {
 	formatTranscriptTimestamp,
 	normalizeTranscriptCues,
@@ -79,6 +80,7 @@ beforeAll(async () => {
 		},
 		"@rawkodeacademy/design-system": { academyWatch },
 		"./transcript-content": transcriptContent,
+		"@/lib/video-deep-link": videoDeepLink,
 	}).default;
 	const script = compiled.scripts[0];
 	if (!script || script.type !== "inline")
@@ -139,9 +141,10 @@ describe("single-copy SSR transcript with progressive search", () => {
 		expect(html).toContain("&lt;img");
 		expect(html.match(/Kubernetes runs Kubernetes/g)).toHaveLength(1);
 		expect(html).toContain("Cluster &lt;setup&gt;");
-		expect(html).toContain('href="?t=0"');
+		expect(html).toContain('href="#t=0"');
 		expect(html).toContain('data-chapter-link="65"');
-		expect(html).toContain('href="?t=60"');
+		expect(html).toContain('href="#t=60"');
+		expect(html).not.toContain('href="?t=');
 		expect(html).toMatch(/data-transcript-controls[^>]*hidden/);
 		expect(html).not.toContain("<img");
 		expect(html).not.toContain("astro-island");
@@ -202,7 +205,7 @@ describe("single-copy SSR transcript with progressive search", () => {
 		expect(rows.map((row) => row.hidden)).toEqual([true, false]);
 		expect(sections.map((section) => section.hidden)).toEqual([true, false]);
 		expect(heading.closest("[hidden]")).toBeNull();
-		expect(chapterLink.getAttribute("href")).toBe("?t=60");
+		expect(chapterLink.getAttribute("href")).toBe("#t=60");
 		search(root, "[a+b]");
 		expect(rows.map((row) => row.hidden)).toEqual([true, false]);
 		search(root, "Welcome");
