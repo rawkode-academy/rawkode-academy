@@ -39,8 +39,9 @@ export const prerender = false;
 
 const RELATED_ARTICLE_LIMIT = 3;
 
-// Every article id resolves (drafts included, as before); scheduled
-// (future-dated) articles stay hidden until their publication time.
+// Every article id the content layer returns resolves. Drafts are removed by
+// the content layer (store.ts) so they 404; scheduled (future-dated) articles
+// stay hidden until their publication time.
 const article = Astro.params.slug
 	? await getEntry("articles", Astro.params.slug)
 	: undefined;

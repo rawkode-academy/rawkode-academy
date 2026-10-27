@@ -131,9 +131,12 @@ function mapRows<C extends CollectionName>(
 				entry("technologies", r.id, mapTechnology(r)),
 			) as ContentEntry<C>[];
 		case "articles":
-			return valid.map((r) =>
-				entry("articles", r.id, mapArticle(r)),
-			) as ContentEntry<C>[];
+			// Drafts never reach the public site: no page (404), listing, feed,
+			// search result or sitemap entry. Every article route and list reads
+			// through here, so this is the only gate.
+			return valid
+				.map((r) => entry("articles", r.id, mapArticle(r)))
+				.filter((e) => !e.data.draft) as ContentEntry<C>[];
 		case "news":
 			return valid.map((r) =>
 				entry("news", r.id, mapNews(r)),

@@ -1,8 +1,8 @@
 // Published article routes, Markdown/feeds endpoints and the article sitemap
 // share one contract: every article id the content layer serves gets a page
-// (drafts included, no draft gating), scheduled (future-dated) articles stay
-// hidden until their publication time, and every response declares the cache
-// tags of what it shows. The real route modules run against a mocked
+// (the content layer removes drafts, see loader.test.ts), scheduled
+// (future-dated) articles stay hidden until their publication time, and every
+// response declares the cache tags of what it shows. The real route modules run against a mocked
 // @/lib/live-content with live-collection-shaped fixtures.
 import { readFileSync } from "node:fs";
 import { transform } from "@astrojs/compiler";
@@ -139,8 +139,7 @@ const published = article("published", {
 const defaultPublished = article("default-published", {
 	publishedAt: new Date("2026-02-01T00:00:00Z"),
 });
-const legacyFlagged = article("legacy-flagged", {
-	draft: true,
+const olderPublished = article("older-published", {
 	publishedAt: new Date("2026-01-15T00:00:00Z"),
 });
 const scheduled = article("scheduled", {
@@ -293,9 +292,9 @@ beforeEach(() => {
 });
 
 describe("Published route and sitemap contracts", () => {
-	it("read/[...slug].astro serves every article id without draft gating and 404s otherwise", async () => {
-		collections([legacyFlagged, published, defaultPublished, scheduled]);
-		for (const entry of [legacyFlagged, published, defaultPublished]) {
+	it("read/[...slug].astro serves every article id the content layer returns and 404s otherwise", async () => {
+		collections([olderPublished, published, defaultPublished, scheduled]);
+		for (const entry of [olderPublished, published, defaultPublished]) {
 			const { status, dom } = await renderArticle(entry.id);
 			expect(status).toBe(200);
 			expect(dom.querySelector("[data-rich-text]")?.textContent).toContain(
@@ -310,8 +309,8 @@ describe("Published route and sitemap contracts", () => {
 	});
 
 	it("read/[...slug].astro caches by its article, authors, related articles and listed collections", async () => {
-		collections([legacyFlagged, published, defaultPublished, scheduled]);
-		await renderArticle("legacy-flagged");
+		collections([olderPublished, published, defaultPublished, scheduled]);
+		await renderArticle("older-published");
 		expect(state.cacheCalls).toHaveLength(1);
 		const { input } = state.cacheCalls[0]!;
 		expect(
@@ -319,7 +318,7 @@ describe("Published route and sitemap contracts", () => {
 				(entry) => `${entry.collection}:${entry.id}`,
 			),
 		).toEqual([
-			"articles:legacy-flagged",
+			"articles:older-published",
 			"people:rawkode",
 			"articles:published",
 			"articles:default-published",
@@ -429,10 +428,10 @@ describe("Published route and sitemap contracts", () => {
 		});
 	});
 
-	it("read/[slug].md.ts serves every article id without draft gating", async () => {
+	it("read/[slug].md.ts serves every article id the content layer returns", async () => {
 		state.markdown = "## Heading\n\nBody text.";
-		collections([legacyFlagged, published, defaultPublished, scheduled]);
-		for (const entry of [legacyFlagged, published, defaultPublished]) {
+		collections([olderPublished, published, defaultPublished, scheduled]);
+		for (const entry of [olderPublished, published, defaultPublished]) {
 			const response = await markdownRoute(endpointContext(entry.id));
 			expect(response.status).toBe(200);
 			expect(response.headers.get("Content-Type")).toBe(
@@ -451,7 +450,7 @@ describe("Published route and sitemap contracts", () => {
 				(input.entries as Entry[]).map((e) => e.id),
 			),
 		).toEqual([
-			["legacy-flagged", "rawkode"],
+			["older-published", "rawkode"],
 			["published", "rawkode"],
 			["default-published", "rawkode"],
 		]);
@@ -462,11 +461,11 @@ describe("Published route and sitemap contracts", () => {
 	});
 
 	it("keeps article sitemap URLs equal to served HTML routes", async () => {
-		collections([legacyFlagged, published, defaultPublished, scheduled]);
+		collections([olderPublished, published, defaultPublished, scheduled]);
 		const entries = await getArticleSitemapEntries();
 		const served: string[] = [];
 		for (const entry of [
-			legacyFlagged,
+			olderPublished,
 			published,
 			defaultPublished,
 			scheduled,
@@ -479,8 +478,8 @@ describe("Published route and sitemap contracts", () => {
 	});
 
 	it("article feeds list published articles newest first, without series terms, and cache on the articles collection", async () => {
-		collections([legacyFlagged, published, defaultPublished, scheduled]);
-		const expectedOrder = ["published", "default-published", "legacy-flagged"];
+		collections([olderPublished, published, defaultPublished, scheduled]);
+		const expectedOrder = ["published", "default-published", "older-published"];
 
 		const rss = await (await rssFeed(endpointContext())).text();
 		expect(
