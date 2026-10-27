@@ -44,7 +44,7 @@ test("partnership page follows the approved redesign", () => {
 	assert.match(page, /Make your product the one engineers reach for\./);
 	assert.match(
 		page,
-		/I work hands-on with your product to show engineers what it can do, find where they get stuck and help them use it well in production\./,
+		/I work hands-on with your product to show engineers what it can do, find where they get stuck and help them be successful from dev to prod\./,
 	);
 	assert.match(page, /<dt>Start at<\/dt>/);
 	assert.match(page, /<dt>From<\/dt>/);
