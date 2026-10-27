@@ -56,6 +56,7 @@
 							v-model="email"
 							:class="s.input"
 							type="email"
+							maxlength="254"
 							name="email"
 							autocomplete="email"
 							required
@@ -137,7 +138,6 @@ import {
 } from "vue";
 import {
 	type ApplicationPath,
-	applicationPathDeals,
 	applicationPathLabels,
 	applicationPaths,
 	resolveApplicationPath,
@@ -272,7 +272,12 @@ const capturePartnershipEvent = (
 		path: window.location.pathname,
 		route: path.value,
 		...(event === "enquiry_form_submitted"
-			? { offer: applicationPathDeals[path.value].offer }
+			? {
+					offer:
+						path.value === "Not sure yet"
+							? null
+							: applicationPathLabels[path.value],
+				}
 			: {}),
 	});
 };

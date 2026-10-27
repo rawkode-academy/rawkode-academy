@@ -484,7 +484,7 @@ for (const fixture of fixtures) {
 	});
 }
 
-test("partnership CRM fallback keeps the form and offers a prefilled email", async () => {
+test("partnership email fallback keeps the form and offers a prefilled email", async () => {
 	calls = [];
 	const capturedEvents = [];
 	window.posthog = {
@@ -506,7 +506,7 @@ test("partnership CRM fallback keeps the form and offers a prefilled email", asy
 			.dispatchEvent(new window.Event("focusin", { bubbles: true }));
 		view.host.querySelector("form").requestSubmit();
 		respond({
-			data: { success: false, fallback: "mailto", code: "crm_lookup_failed" },
+			data: { success: false, fallback: "mailto", code: "email_send_failed" },
 		});
 		await flush();
 
@@ -516,7 +516,7 @@ test("partnership CRM fallback keeps the form and offers a prefilled email", asy
 			alert.textContent,
 			/Something went wrong, so your enquiry wasn't sent\. Please email me directly\./,
 		);
-		assert.equal(alert.getAttribute("data-error-code"), "crm_lookup_failed");
+		assert.equal(alert.getAttribute("data-error-code"), "email_send_failed");
 		const fallback = view.host.querySelector(
 			'a[href^="mailto:david@rawkode.academy"]',
 		);

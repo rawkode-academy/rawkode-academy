@@ -525,28 +525,6 @@ export const applicationPathLabels: Record<ApplicationPath, string> = {
 };
 
 /**
- * Attio Offer option title and USD value for each application route.
- * "Field report" and "Support" must exist as Offer options in Attio;
- * support is quoted per scope, so its inbound value is 0 until quoted.
- * An undecided enquiry has no Offer selection and no quoted value yet.
- */
-export const applicationPathDeals: Record<
-	ApplicationPath,
-	{ offer: string | null; valueUsd: number }
-> = {
-	"Field report": { offer: "Field report", valueUsd: 10000 },
-	"Product review": { offer: "Review", valueUsd: 5000 },
-	"Developer support": { offer: "Support", valueUsd: 0 },
-	"Ongoing partnership": {
-		offer: "Partnership (Quarterly)",
-		valueUsd: 12000,
-	},
-	"Not sure yet": { offer: null, valueUsd: 0 },
-	"Community supporter": { offer: "Supporter", valueUsd: 9000 },
-	"Community challenge series": { offer: "Challenge series", valueUsd: 15000 },
-};
-
-/**
  * Route values from earlier links that still preselect the right option.
  * "First-run review", "Fit & Proof Review" and "Production review" all
  * mean the adoption review;

@@ -218,7 +218,6 @@ test("partnership page follows the approved redesign", () => {
 		partnershipCopy,
 		/or \$40,000 for a 12-month contract, billed \$10,000 a quarter\./,
 	);
-	assert.match(partnershipCopy, /offer: "Partnership \(Quarterly\)"/);
 	assert.match(partnershipCopy, /exclude VAT where it applies/);
 	assert.match(partnershipCopy, /title: "Partner round table"/);
 	assert.match(partnershipCopy, /"Slack Connect with me",/);
@@ -275,7 +274,7 @@ test("partnership enquiry is short and tracks its conversion steps", () => {
 	assert.match(form, /name="website"/);
 	assert.match(form, /class="form-honeypot"/);
 	assert.doesNotMatch(form, /api\.attio\.com/);
-	assert.match(action, /https:\/\/api\.attio\.com\/v2/);
+	assert.match(action, /env\.PARTNERSHIP_EMAIL\.send/);
 	assert.match(page, /capture\("cta_clicked"/);
 	assert.match(page, /<details>/);
 	assert.match(page, /<summary>/);
@@ -291,7 +290,7 @@ test("partnership enquiry is short and tracks its conversion steps", () => {
 	assert.doesNotMatch(partnershipCopy, /"Product review": "First-run review"/);
 	assert.match(partnershipCopy, /"Annual plan": "Ongoing partnership"/);
 	assert.match(partnershipCopy, /"90-day partnership": "Ongoing partnership"/);
-	assert.match(action, /applicationPathDeals/);
+	assert.match(action, /to: PARTNERSHIP_EMAIL/);
 	assert.match(action, /accept: "form"/);
 	assert.doesNotMatch(action, /matching_attribute/);
 	assert.doesNotMatch(action, /"PUT"/);
