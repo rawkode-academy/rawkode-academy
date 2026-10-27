@@ -910,6 +910,66 @@ describe("Crawlability and Sitemaps", () => {
 		).toBe(false);
 	});
 
+	it("lists exactly the people profiles the profile page leaves indexable", async () => {
+		const ref = (id: string) => ({ collection: "people", id });
+		const collections: Record<
+			string,
+			{ id: string; data: object; body?: string }[]
+		> = {
+			people: [
+				"author",
+				"news-writer",
+				"guest",
+				"host",
+				"retired-host",
+				"bio",
+				"thin",
+			].map((id) => ({
+				id,
+				data: { id },
+				body: id === "bio" ? "A biography." : "",
+			})),
+			shows: [
+				{ id: "live", data: { publish: true, hosts: [ref("host")] } },
+				{ id: "old", data: { publish: false, hosts: [ref("retired-host")] } },
+			],
+			news: [
+				{
+					id: "story",
+					data: { publishedAt: new Date(0), authors: [ref("news-writer")] },
+				},
+			],
+			articles: [{ id: "post", data: { authors: [ref("author")] } }],
+		};
+		vi.doMock("@/lib/live-content", () => ({
+			getCollection: vi.fn(
+				async (name: string, filter?: (entry: unknown) => unknown) =>
+					(collections[name] ?? []).filter(filter ?? (() => true)),
+			),
+		}));
+		vi.doMock("@/lib/content", () => ({
+			getPublishedVideos: vi.fn(async () => [
+				{ id: "v", data: { guests: [ref("guest")] } },
+			]),
+		}));
+
+		const { getPeopleSitemapEntries, sitemapCollections } = await import(
+			"../lib/sitemaps.ts"
+		);
+		const entries = await getPeopleSitemapEntries();
+
+		expect(entries.map((entry) => entry.path)).toEqual([
+			"/people/author",
+			"/people/bio",
+			"/people/guest",
+			"/people/host",
+			"/people/news-writer",
+		]);
+		expect(sitemapCollections("/sitemaps/people.xml")).toEqual(
+			expect.arrayContaining(["news", "articles"]),
+		);
+	});
+
 	it("filters Google News sitemap to items published within the last 48 hours, newest first", async () => {
 		const { selectFreshNewsItems } = await import("../lib/sitemaps.ts");
 
