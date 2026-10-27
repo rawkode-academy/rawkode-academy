@@ -451,7 +451,7 @@ export const partnershipTerms = [
 
 /** What the review covers. Answered in the partnerships FAQ. */
 export const productReviewScope =
-	"We agree the product areas, who I'm acting as, and how far I go: a first working result, or as far as production, like a highly available setup, a backup and restore or an upgrade. One review can follow up to two kinds of user, such as a platform team and the application developers they serve, or your open-source project and its hosted product.";
+	"We agree the product areas, who I'm acting as and how far I go: a first working result, or as far as production, like a highly available setup, a backup and restore or an upgrade. One review can follow up to two kinds of user, such as a platform team and the application developers they serve, or your open-source project and its hosted product.";
 
 /** A lighter way to back the content, without the stage work. */
 export const supporterOffer: PartnershipOffer = {
