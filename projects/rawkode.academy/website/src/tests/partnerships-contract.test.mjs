@@ -41,28 +41,26 @@ const letsChat = readFileSync(
 test("partnership page follows the approved redesign", () => {
 	// Hero: the offer up front, with the facts that decide whether to enquire.
 	assert.match(page, /eyebrow="Partnerships"/);
+	assert.match(page, /Make your product the one engineers reach for\./);
 	assert.match(
 		page,
-		/See exactly where engineers get stuck with your product\./,
+		/I work hands-on with your product to show engineers what it can do, find where they get stuck and help them be successful from dev to prod\./,
 	);
-	assert.match(
-		page,
-		/I teach engineers new tools, live and unscripted\. Then I show the teams who build them where engineers get stuck, and what to fix first\./,
-	);
-	assert.match(page, /<dt>Price<\/dt>/);
-	assert.match(page, /<dt>Delivered in<\/dt>/);
+	assert.match(page, /<dt>Ways to work<\/dt>/);
+	assert.match(page, /<dt>Adoption review<\/dt>/);
 	assert.doesNotMatch(page, /invoic|on delivery/i);
 	assert.doesNotMatch(
 		partnershipCopy
-			.match(
-				/export const partnershipDescription =[^;]+;/g,
-			)
+			.match(/export const partnershipDescription =[^;]+;/g)
 			?.join("\n") ?? "",
 		/invoic|on delivery/i,
 	);
-	assert.match(partnershipCopy, /"28\.2K YouTube subscribers",\n\t"Over 450 hours of developer education",/);
-	assert.match(page, /<ReviewPreview slot="aside" placement="hero" \/>/);
-	assert.match(page, /<ReviewPreview placement="inline" \/>/);
+	assert.match(
+		partnershipCopy,
+		/"28\.2K YouTube subscribers",\n\t"Over 450 hours of developer education",/,
+	);
+	assert.match(page, /<ReviewPreview placement="always" \/>/);
+	assert.doesNotMatch(page, /<ReviewPreview slot="aside"/);
 	assert.doesNotMatch(
 		page,
 		/I work with Datum Cloud today, and I've worked with Teleport, Heroku, Microsoft Azure and ngrok\./,
@@ -76,7 +74,7 @@ test("partnership page follows the approved redesign", () => {
 	assert.doesNotMatch(page, /Tell David about your product/);
 	assert.match(
 		page,
-		/I note every place I get stuck against the recording, rank what to fix, explain or teach/,
+		/I record where I get stuck, rank what needs fixing or explaining/,
 	);
 	assert.match(page, /answer: productReviewScope/);
 	assert.doesNotMatch(page, /Who is this a good fit for\?|How do we stop\?/);
@@ -91,6 +89,30 @@ test("partnership page follows the approved redesign", () => {
 		page,
 		/An engineer can install or sign up for your product and try it, including open-source projects installed from GitHub or Helm\./,
 	);
+	assert.match(
+		page,
+		/Any size of company, from a first open-source release to a public company\./,
+	);
+
+	// The three areas are distinct, with a direct route to ongoing work.
+	assert.match(page, /adoptionStages\.map/);
+	for (const stage of ["awareness", "adoption", "support"]) {
+		assert.match(partnershipCopy, new RegExp(`id: "${stage}"`));
+		assert.match(partnershipCopy, new RegExp(`ctaLocation: "stage-${stage}"`));
+	}
+	assert.match(page, /data-cta-location=\{stage\.ctaLocation\}/);
+	assert.match(page, />Awareness, Adoption, and Support<\/h2>/);
+	assert.match(page, /Can we start an ongoing partnership straight away\?/);
+
+	// Public coverage remains independent of the agreed delivery scope.
+	assert.match(page, /independenceRules\.map/);
+	for (const rule of [
+		"We agree the scope",
+		"My conclusions stay independent",
+		"Paid work is labelled",
+	]) {
+		assert.match(partnershipCopy, new RegExp(`title: "${rule}"`));
+	}
 
 	// Partners: one alphabetical grid, current and past together.
 	assert.match(page, /Teams I've worked with/);
@@ -116,20 +138,20 @@ test("partnership page follows the approved redesign", () => {
 	assert.equal(page.match(/partnershipReviewCredit\}/g)?.length, 1);
 	assert.match(page, /partnershipCapacity\.places/);
 	assert.match(page, /partnershipCapacity\.newStartsPerMonth/);
-	assert.match(page, /card\.offer\.included\.map/);
+	assert.match(page, /ongoingPartnershipOffer\.included\.map/);
 	assert.doesNotMatch(page, /What's not included|Not a fit/);
-	for (const [label, location] of [
-		["Ask about a product review", "pricing-review"],
-		["Ask about the 90-day plan", "pricing-90-day"],
-		["Ask about the annual plan", "pricing-annual"],
-	]) {
-		assert.match(page, new RegExp(`cta: "${label}"`));
-		assert.match(page, new RegExp(`ctaLocation: "${location}"`));
-	}
-	assert.match(page, /data-cta-location=\{card\.ctaLocation\}/);
+	assert.match(page, /data-pinned-cta="Ask about an ongoing partnership"/);
 	assert.deepEqual(
 		Array.from(page.matchAll(/data-cta-location="([^"]+)"/g), (m) => m[1]),
-		["hero", "hero-watch", "pricing-brief", "pricing-addon", "pricing-supporter", "pinned"],
+		[
+			"hero",
+			"hero-watch",
+			"pricing-brief",
+			"pricing-ongoing",
+			"pricing-addon",
+			"pricing-supporter",
+			"pinned",
+		],
 	);
 	// Every button leads to the same form anchor.
 	assert.match(page, /#enquiry-form`/);
@@ -147,10 +169,7 @@ test("partnership page follows the approved redesign", () => {
 	assert.match(page, /prefers-reduced-motion/);
 
 	// Simple terms.
-	assert.match(
-		page,
-		/You own the review, the report and every read-out\./,
-	);
+	assert.match(page, /detail: partnershipOwnership/);
 	assert.equal(page.match(/Renew when it's working/g)?.length, 1);
 
 	// Wording rules that stay in force.
@@ -189,38 +208,24 @@ test("partnership page follows the approved redesign", () => {
 	assert.match(partnershipCopy, /export const partnershipReviewCredit =/);
 	assert.match(
 		partnershipCopy,
-		/The \$5,000 review counts towards a 90-day or annual partnership when it is signed within 30 days of the review being delivered\./,
+		/What you pay for a first engagement counts towards an ongoing partnership when it is signed within 30 days of the work being delivered\./,
 	);
+	assert.match(partnershipCopy, /price: "\$10,000"/);
 	assert.match(partnershipCopy, /price: "\$5,000"/);
-	assert.match(partnershipCopy, /price: "\$12,000"/);
-	assert.match(partnershipCopy, /price: "\$40,000 a year"/);
+	assert.match(partnershipCopy, /price: "Quoted to scope"/);
+	assert.match(partnershipCopy, /price: "\$12,000 a quarter"/);
 	assert.match(
 		partnershipCopy,
-		/continuing costs \$7,000 more, paid as \$3,500 a month for two months\./,
+		/or \$40,000 for a 12-month contract, billed \$10,000 a quarter\./,
 	);
-	assert.match(partnershipCopy, /Billed \$10,000 a quarter\./);
-	assert.match(partnershipCopy, /offer: "Partnership \(Quarterly\)"/);
 	assert.match(partnershipCopy, /exclude VAT where it applies/);
-	assert.match(
-		partnershipCopy,
-		/We start with a kick-off call, and you give me a trial or sandbox account\./,
-	);
-	assert.match(
-		partnershipCopy,
-		/At the day-90 read-out, we go through what changed and decide what to work on next quarter\./,
-	);
 	assert.match(partnershipCopy, /title: "Partner round table"/);
 	assert.match(partnershipCopy, /"Slack Connect with me",/);
 	assert.doesNotMatch(partnershipCopy, /"Slack Connect with David"/);
-	assert.match(partnershipCopy, /roadmap trade-offs\./);
-	assert.match(
-		partnershipCopy,
-		/"A day-90 review compared with the original, and a read-out on what changed",/,
-	);
 	assert.match(partnershipCopy, /"A ranked list of what to fix first"/);
 	assert.match(
 		partnershipCopy,
-		/You get a written list of what to fix first in 10 business days for \$5,000/,
+		/Hands-on content, adoption reviews, docs, community, talks and office hours/,
 	);
 	assert.match(partnershipCopy, /export const productReviewScope =/);
 	assert.match(letsChat, /David reads every enquiry and replies by email\./);
@@ -230,10 +235,11 @@ test("partnership page follows the approved redesign", () => {
 	const heroCta = page.indexOf('data-cta-location="hero"');
 	const partners = page.indexOf('id="who-ive-worked-with"');
 	const pullQuote = page.indexOf('id="pull-quote"');
-	const process = page.indexOf('id="how-it-works"');
+	const process = page.indexOf('id="stages"');
 	const fit = page.indexOf('id="fit"');
 	const pricing = page.indexOf('id="pricing"');
 	const control = page.indexOf('id="no-lock-in"');
+	const independence = page.indexOf('id="independence"');
 	const quotes = page.indexOf('id="partner-quotes"');
 	const questions = page.indexOf('id="questions"');
 	const enquiry = page.indexOf('id="apply"');
@@ -247,7 +253,8 @@ test("partnership page follows the approved redesign", () => {
 	assert(quotes < fit);
 	assert(fit < pricing);
 	assert(pricing < control);
-	assert(control < questions);
+	assert(control < independence);
+	assert(independence < questions);
 	assert(questions < enquiry);
 	assert(enquiry < pinned);
 });
@@ -267,7 +274,7 @@ test("partnership enquiry is short and tracks its conversion steps", () => {
 	assert.match(form, /name="website"/);
 	assert.match(form, /class="form-honeypot"/);
 	assert.doesNotMatch(form, /api\.attio\.com/);
-	assert.match(action, /https:\/\/api\.attio\.com\/v2/);
+	assert.match(action, /env\.PARTNERSHIP_EMAIL\.send/);
 	assert.match(page, /capture\("cta_clicked"/);
 	assert.match(page, /<details>/);
 	assert.match(page, /<summary>/);
@@ -281,8 +288,9 @@ test("partnership enquiry is short and tracks its conversion steps", () => {
 	assert.match(partnershipCopy, /"First-run review": "Product review"/);
 	assert.match(partnershipCopy, /"Fit & Proof Review": "Product review"/);
 	assert.doesNotMatch(partnershipCopy, /"Product review": "First-run review"/);
-	assert.match(partnershipCopy, /"Annual plan"/);
-	assert.match(action, /applicationPathDeals/);
+	assert.match(partnershipCopy, /"Annual plan": "Ongoing partnership"/);
+	assert.match(partnershipCopy, /"90-day partnership": "Ongoing partnership"/);
+	assert.match(action, /to: PARTNERSHIP_EMAIL/);
 	assert.match(action, /accept: "form"/);
 	assert.doesNotMatch(action, /matching_attribute/);
 	assert.doesNotMatch(action, /"PUT"/);

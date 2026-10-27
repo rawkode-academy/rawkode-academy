@@ -19,22 +19,24 @@ import {
 } from "@/lib/partnership-quotes";
 import {
 	type ApplicationPath,
-	annualPartnershipOffer,
+	adoptionStages,
 	fitProofReview,
+	independenceRules,
+	notSurePath,
+	ongoingPartnershipOffer,
 	PARTNERSHIP_EMAIL,
 	type PartnershipOffer,
 	partnershipAddOns,
+	partnershipAdvice,
 	partnershipCapacity,
 	partnershipCredentials,
 	partnershipDescription,
 	partnershipExperience,
 	partnershipFacts,
-	partnershipOffer,
+	partnershipOwnership,
 	partnershipPerks,
-	partnershipPlan,
 	partnershipReviewCredit,
 	partnershipWatchEpisodes,
-	productReviewPath,
 	productReviewScope,
 	supporterOffer,
 	teamBriefMailto,
@@ -52,7 +54,7 @@ Astro.response.headers.set("Cache-Control", "private, no-cache");
 
 const applyHref = (path: ApplicationPath) =>
 	`/organizations/partnerships?route=${encodeURIComponent(path)}#enquiry-form`;
-const reviewApplyHref = applyHref(productReviewPath);
+const notSureApplyHref = applyHref(notSurePath);
 const initialPath =
 	resolveApplicationPath(Astro.url.searchParams.get("route")) ?? "Not sure yet";
 const submittedEnquiry = Astro.getActionResult(actions.partnership.applyForm);
@@ -120,8 +122,8 @@ const submittedValues =
 		? await readRejectedSubmission(Astro.request)
 		: emptySubmission;
 
-const partnershipReviewHeroTitle =
-	"See exactly where engineers get stuck with your product.";
+const partnershipHeroTitle =
+	"Make your product the one engineers reach for.";
 
 // Content is optional on this page: the enquiry form must keep working when
 // the content gateway is unavailable.
@@ -130,72 +132,23 @@ const ownerAvatar = owner?.data.avatarUrl
 	? `${owner.data.avatarUrl}?s=96`
 	: undefined;
 
-const reviewSteps = [
-	{
-		title: "You give me access",
-		detail:
-			"A trial or sandbox account. We agree who I'm acting as, and where the run starts and ends.",
-	},
-	{
-		title: "I work through it alone",
-		detail:
-			"As your target user, with nobody to rescue me. Delivered within 10 business days of getting access.",
-	},
-	{
-		title: "You get a ranked report",
-		detail:
-			"Where engineers get stuck and what to fix first. Then a one-hour call to walk your team through it.",
-	},
-];
-
-/** Split "$40,000 a year" into the amount and the period after it. */
+/** Split "$12,000 a quarter" into the amount and the period after it. */
 const splitPrice = (price: string) => {
 	const match = price.match(/^(\$[\d,]+)(?:\s+(.+))?$/);
 	return { amount: match?.[1] ?? price, period: match?.[2] };
 };
 
-interface PricingCard {
-	offer: PartnershipOffer;
-	route: ApplicationPath;
-	period: string;
-	cta: string;
-	ctaName?: string;
-	ctaLocation: string;
-	featured?: boolean;
-	lead?: string;
-}
+/** Fixed-price stages show "one-off, fixed"; quoted stages show no period. */
+const stagePeriod = (offer: PartnershipOffer) =>
+	offer.price.startsWith("$") ? "one-off, fixed" : undefined;
 
-const pricingCards: PricingCard[] = [
-	{
-		offer: fitProofReview,
-		route: productReviewPath,
-		period: "one-off, fixed",
-		cta: "Ask about a product review",
-		ctaLocation: "pricing-review",
-		featured: true,
-	},
-	{
-		offer: partnershipOffer,
-		route: "90-day partnership",
-		period: "fixed, 90 days",
-		cta: "Ask about the 90-day plan",
-		ctaName: "ask_about_the_90_day_plan",
-		ctaLocation: "pricing-90-day",
-		lead: "Everything in the product review, plus:",
-	},
-	{
-		offer: annualPartnershipOffer,
-		route: "Annual plan",
-		period: splitPrice(annualPartnershipOffer.price).period ?? "a year",
-		cta: "Ask about the annual plan",
-		ctaName: "ask_about_the_annual_plan",
-		ctaLocation: "pricing-annual",
-	},
-];
+const ongoingPath = "Ongoing partnership" satisfies ApplicationPath;
+const ongoingPrice = splitPrice(ongoingPartnershipOffer.price);
 
 const pageSections = [
-	{ id: "how-it-works", label: "How it works" },
-	{ id: "pricing", label: "Pricing" },
+	{ id: "stages", label: "What I do" },
+	{ id: "pricing", label: "Ongoing partnership" },
+	{ id: "independence", label: "Independence" },
 	{ id: "supporter", label: "Supporter" },
 	{ id: "questions", label: "FAQ" },
 	{ id: "apply", label: "Enquire" },
@@ -203,37 +156,52 @@ const pageSections = [
 
 const noLockIn = [
 	{
-		title: "Stop at any stage",
-		detail: `Stop after the review and you've paid ${fitProofReview.price}. The 90-day partnership ends at day 90, with nothing more to pay.`,
+		title: "One project or ongoing",
+		detail:
+			"Book a field report, an adoption review or a support project on its own, or start an ongoing partnership. We agree the scope before work begins.",
 	},
 	{
 		title: "Renew when it's working",
 		detail:
-			"The annual partnership is a 12-month contract, billed at $10,000 a quarter. Carrying on is always your choice.",
+			"An ongoing partnership goes quarter by quarter, or as a 12-month contract billed at $10,000 a quarter. Nothing renews automatically.",
 	},
 	{
 		title: "You own the work",
-		detail:
-			"You own the review, the report and every read-out.",
+		detail: partnershipOwnership,
 	},
 ];
 
 const faqs = [
 	{
-		question: "How is this different from sponsoring a video?",
+		question: "Where should we start?",
 		answer:
-			"Sponsorship gets you airtime. A partnership gets you my time and judgement on your product: the review, the ranked list and the advice, plus a live session that teaches engineers a real use case.",
+			"Tell me what you want engineers to be able to do and what's getting in their way. I'll suggest the work that would help, whether that's content, an adoption review or support for existing users.",
+	},
+	{
+		question: "Can we start an ongoing partnership straight away?",
+		answer:
+			"Yes. We can agree a quarterly plan using what you already know about your users. You can also book content or support work on its own. An adoption review is useful when you want me to investigate the experience first.",
+	},
+	{
+		question: "What does Support cover?",
+		answer:
+			"The work that helps engineers stay successful after adoption: docs, community participation, technical Q&A, public speaking, conference workshops, customer education and office hours. We choose the work your users need and agree its scope and frequency. That can be a single project or part of an ongoing partnership.",
+	},
+	{
+		question: "How is a field report different from sponsoring a video?",
+		answer:
+			"A field report pays for hands-on work and an honest account of it. I choose real problems, try to solve them with your product, publish what actually happens (labelled as paid) and tell you privately what I'd change. You can correct facts before publication; you don't buy a positive conclusion.",
 	},
 	{
 		question:
 			"We could come on Rawkode Live for free. What does the review add?",
 		answer:
-			"A maintainer session is public, about an hour, and you are there steering, so I see the path you show me. In the review I work alone as your target user, with nobody to rescue me. I note every place I get stuck against the recording, rank what to fix, explain or teach and, if you continue, re-run it at day 90 to check what changed.",
+			"A maintainer session is a public introduction, usually with you guiding the demo. For an adoption review, I independently work through the workflows we agree. I record where I get stuck, rank what needs fixing or explaining and walk your team through the findings. A later review can check whether the changes helped.",
 	},
 	{
-		question: "Aren't you too experienced to get stuck where our users do?",
+		question: "How do you account for different levels of experience?",
 		answer:
-			"Before starting we agree who I'm acting as, such as an application developer who has never run a cluster, and I work to what that person would know. The walkthrough call then checks the list against what your team already hears from users, so we focus on what matters most to them.",
+			"I bring an experienced engineer's perspective. We define the intended users and what they should need to know, then I check the assumptions your product and docs make. We compare the findings with your user feedback and support questions. That gives your team an expert review alongside the evidence from real users.",
 	},
 	{
 		question: "What exactly does the review cover?",
@@ -242,12 +210,12 @@ const faqs = [
 	{
 		question: "How much of our engineers' time does it take?",
 		answer:
-			"About half a day across the 90 days: an hour to review the runnable example, plus an hour to prepare and the live hour itself if someone from your team co-hosts the session. I write the example. Your product lead joins the monthly sessions.",
+			"For a field report or adoption review, plan for access setup and a call to discuss the findings. For support work, I need a contact who knows your users and someone to check technical accuracy. We agree preparation and review time with the scope. Ongoing partners also join a monthly 60-minute working session.",
 	},
 	{
 		question: "Who on our side should own it?",
 		answer:
-			"Whoever owns developer adoption. Often that is the head of DevRel or developer experience, with product owning the fixes. The ranked list says which items are for product, which for docs and which for DevRel.",
+			"Choose someone who can set priorities and get the right people involved. That's often marketing or DevRel for awareness, product or developer experience for adoption, and community, customer success or DevRel for support.",
 	},
 	{
 		question: "Why are places limited?",
@@ -257,12 +225,12 @@ const faqs = [
 	{
 		question: "Can we sponsor content as well?",
 		answer:
-			"Yes. As a community supporter, your docs, your latest announcement and a supporter badge appear on your technology page and on every video about your technology, from $1,000 a month.",
+			"Yes. A field report is paid hands-on content with independent conclusions. You can also fund Rawkode Academy as a community supporter, from $1,000 a month. That includes a supporter badge and docs links on your technology page, your latest announcement on that page and its videos, and your logo on the supporters wall.",
 	},
 	{
 		question: "Do open-source maintainers have to pay to come on Rawkode Live?",
 		answer:
-			"Maintainer sessions on Rawkode Live are free, as they always have been. The partnership is for teams who want the review, the advice and the work around the session.",
+			"Maintainer sessions on Rawkode Live are free, as they always have been. Partnerships pay for agreed work on your product, content and community, plus the advice around it.",
 	},
 ];
 
@@ -290,28 +258,28 @@ const partnerQuotes = (
 ---
 
 <Page
-	title="Developer product reviews and partnerships"
-	subtitle={partnershipReviewHeroTitle}
+	title="Partnerships for developer tool companies"
+	subtitle={partnershipHeroTitle}
 	description={partnershipDescription}
 >
 	<EditorialShell
 		eyebrow="Partnerships"
-		title={partnershipReviewHeroTitle}
-		lede="I teach engineers new tools, live and unscripted. Then I show the teams who build them where engineers get stuck, and what to fix first."
+		title={partnershipHeroTitle}
+		lede="I work hands-on with your product to show engineers what it can do, find where they get stuck and help them be successful from dev to prod."
 	>
 		<dl class="partnership-facts" slot="intro">
 			<div>
-				<dt>Price</dt>
-				<dd>{fitProofReview.price} fixed</dd>
+				<dt>Ways to work</dt>
+				<dd>One project or ongoing</dd>
 			</div>
 			<div>
-				<dt>Delivered in</dt>
-				<dd>10 business days</dd>
+				<dt>Adoption review</dt>
+				<dd>{fitProofReview.price} fixed</dd>
 			</div>
 		</dl>
 		<div class="partnership-hero-actions" slot="actions">
-			<a id="partnership-hero-cta" class="editorial-button" href={reviewApplyHref} data-apply-path={productReviewPath} data-partnership-cta data-cta-location="hero">Ask about a product review</a>
-			<a class="partnership-text-link" href="#pricing">See all pricing</a>
+			<a id="partnership-hero-cta" class="editorial-button" href={notSureApplyHref} data-apply-path={notSurePath} data-partnership-cta data-cta="partnership_enquiry" data-cta-location="hero">Tell me what you need</a>
+			<a class="partnership-text-link" href="#stages">Explore the work</a>
 		</div>
 		<div class="partnership-watch" slot="actions">
 			<p id="partnership-watch-title">Watch me try a new tool live</p>
@@ -336,7 +304,6 @@ const partnerQuotes = (
 				))}
 			</ul>
 		</div>
-		<ReviewPreview slot="aside" placement="hero" />
 
 		<nav class="partnership-rail" aria-label="On this page">
 			<ul>
@@ -358,23 +325,62 @@ const partnerQuotes = (
 		</section>
 		)}
 
-		<section id="how-it-works" class="editorial-section editorial-section--split" aria-labelledby="how-it-works-title">
-			<div class="editorial-section__header">
-				<h2 id="how-it-works-title" class="editorial-section__title">How the review works</h2>
+		<section id="stages" class="editorial-section" aria-labelledby="stages-title">
+			<div class="partnership-pricing__header">
+				<div class="editorial-section__header">
+					<h2 id="stages-title" class="editorial-section__title">Awareness, Adoption, and Support</h2>
+					<p class="partnership-label">{partnershipCapacity.places} partner places · {partnershipCapacity.newStartsPerMonth} new starts a month</p>
+				</div>
+				<p class="partnership-credit">{partnershipAdvice}</p>
 			</div>
-			<div class="partnership-steps-body">
-				<ol class="partnership-steps">
-					{reviewSteps.map((step, index) => (
+			<ol class="partnership-stages">
+				{adoptionStages.map((stage, index) => {
+					const { amount } = splitPrice(stage.offer.price);
+					const period = stagePeriod(stage.offer);
+					return (
 						<li>
-							<span class="partnership-steps__number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
-							<div>
-								<h3>{step.title}</h3>
-								<p>{step.detail}</p>
-							</div>
+							<article
+								class="partnership-plan partnership-stage"
+								aria-labelledby={`plan-${stage.offer.id}`}
+								data-pinned-name={stage.offer.name}
+								data-pinned-price={period ? `${amount} · ${period}` : stage.offer.price}
+								data-pinned-route={stage.route}
+								data-pinned-href={applyHref(stage.route)}
+								data-pinned-cta={stage.cta}
+								data-pinned-cta-name={stage.ctaName}
+							>
+								<p class="partnership-stage__kicker"><span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span> {stage.stage}</p>
+								<p class="partnership-stage__problem"><strong>{stage.tagline}.</strong> {stage.problem}</p>
+								<div class="partnership-plan__heading">
+									<h3 id={`plan-${stage.offer.id}`}>{stage.offer.name}</h3>
+								</div>
+								<p class:list={["partnership-plan__price", !period && "partnership-plan__price--quoted"]}><span>{amount}</span> {period && <span class="partnership-plan__period">{period}</span>}</p>
+								<p class="partnership-plan__cadence">{stage.offer.cadence}</p>
+								<p class="partnership-plan__summary">{stage.offer.summary}</p>
+								<div class="partnership-plan__body">
+									{stage.offer.includedLabel && <p class="partnership-label">{stage.offer.includedLabel}</p>}
+									<ul class="partnership-plan__list">
+										{stage.offer.included.map((item) => <li>{item}</li>)}
+									</ul>
+									{stage.offer.notes.map((note) => <p class="partnership-plan__note">{note}</p>)}
+									<p class="partnership-plan__note">{stage.owner}</p>
+								</div>
+								<a
+									class="editorial-button editorial-button--secondary"
+									href={applyHref(stage.route)}
+									data-apply-path={stage.route}
+									data-partnership-cta
+									data-cta={stage.ctaName}
+									data-cta-location={stage.ctaLocation}
+								>{stage.cta}</a>
+							</article>
 						</li>
-					))}
-				</ol>
-				<ReviewPreview placement="inline" />
+					);
+				})}
+			</ol>
+			<div class="partnership-review-preview">
+				<p class="partnership-label">Inside an adoption review</p>
+				<ReviewPreview placement="always" />
 			</div>
 		</section>
 
@@ -407,16 +413,75 @@ const partnerQuotes = (
 			<ul class="partnership-fit">
 				<li>You build developer tools: infrastructure tools, Kubernetes and cloud native projects, cloud platforms or AI infrastructure.</li>
 				<li>An engineer can install or sign up for your product and try it, including open-source projects installed from GitHub or Helm.</li>
+				<li>Any size of company, from a first open-source release to a public company.</li>
 			</ul>
+		</section>
+
+		<section id="pricing" class="editorial-section" aria-labelledby="pricing-title">
+			<div class="partnership-pricing__header">
+				<div class="editorial-section__header">
+					<h2 id="pricing-title" class="editorial-section__title">An ongoing partnership</h2>
+					<p class="editorial-section__lede">Have me work alongside your team as your product and community grow. Start here, or build on a project we've already done together.</p>
+				</div>
+				<p class="partnership-credit">{partnershipReviewCredit}</p>
+				<a class="partnership-text-link" href={teamBriefMailto} data-partnership-cta data-cta="send_to_team" data-cta-location="pricing-brief">Send this to your team</a>
+			</div>
+			<article
+				class="partnership-plan partnership-ongoing"
+				aria-labelledby={`plan-${ongoingPartnershipOffer.id}`}
+				data-pinned-name={ongoingPartnershipOffer.name}
+				data-pinned-price={ongoingPartnershipOffer.price}
+				data-pinned-route={ongoingPath}
+				data-pinned-href={applyHref(ongoingPath)}
+				data-pinned-cta="Ask about an ongoing partnership"
+				data-pinned-cta-name="ask_about_an_ongoing_partnership"
+			>
+				<div class="partnership-plan__heading">
+					<h3 id={`plan-${ongoingPartnershipOffer.id}`}>{ongoingPartnershipOffer.name}</h3>
+				</div>
+				<p class="partnership-plan__price"><span>{ongoingPrice.amount}</span> <span class="partnership-plan__period">{ongoingPrice.period}</span></p>
+				<p class="partnership-plan__cadence">{ongoingPartnershipOffer.cadence}</p>
+				<p class="partnership-plan__summary">{ongoingPartnershipOffer.summary}</p>
+				<ul class="partnership-plan__list">
+					{ongoingPartnershipOffer.included.map((item) => <li>{item}</li>)}
+				</ul>
+				<a
+					class="editorial-button editorial-button--secondary"
+					href={applyHref(ongoingPath)}
+					data-apply-path={ongoingPath}
+					data-partnership-cta
+					data-cta="ask_about_an_ongoing_partnership"
+					data-cta-location="pricing-ongoing"
+				>Ask about an ongoing partnership</a>
+			</article>
+			<div class="partnership-addons">
+				<h3 id="addons-title" class="partnership-label">Add-ons</h3>
+				<ul>
+					{partnershipAddOns.map((addOn) => (
+						<li>
+							<p class="partnership-addons__heading"><strong>{addOn.title}</strong> <span>{addOn.price}</span></p>
+							<p>{addOn.detail}</p>
+							<a
+								class="partnership-text-link"
+								href={applyHref(addOn.route)}
+								data-apply-path={addOn.route}
+								data-partnership-cta
+								data-cta={`ask_about_${addOn.id.replaceAll("-", "_")}`}
+								data-cta-location="pricing-addon"
+							>{addOn.cta}</a>
+						</li>
+					))}
+				</ul>
+			</div>
 		</section>
 
 		<section id="perks" class="editorial-section editorial-section--split" aria-labelledby="perks-title">
 			<div class="editorial-section__header">
 				<h2 id="perks-title" class="editorial-section__title">What else you get</h2>
-				<p class="editorial-section__lede">Every partnership comes with these, on top of the review work.</p>
+				<p class="editorial-section__lede">Advice, preparation and visibility alongside the work we agree for each quarter.</p>
 			</div>
 			<div class="partnership-perks">
-				<h3 class="partnership-label">Every partnership</h3>
+				<h3 class="partnership-label">Every ongoing partnership</h3>
 				<ul>
 					{partnershipPerks.map((perk) => (
 						<li>
@@ -439,95 +504,6 @@ const partnerQuotes = (
 			</div>
 		</section>
 
-		<section id="your-90-days" class="editorial-section editorial-section--split" aria-labelledby="your-90-days-title">
-			<div class="editorial-section__header">
-				<h2 id="your-90-days-title" class="editorial-section__title">Your 90 days</h2>
-				<p class="editorial-section__lede">From the review to the day-90 read-out.</p>
-			</div>
-			<ol class="partnership-steps">
-				{partnershipPlan.map((step, index) => (
-					<li>
-						<span class="partnership-steps__number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
-						<div>
-							<h3>{step.when}</h3>
-							<p>{step.what}</p>
-						</div>
-					</li>
-				))}
-			</ol>
-		</section>
-
-		<section id="pricing" class="editorial-section" aria-labelledby="pricing-title">
-			<div class="partnership-pricing__header">
-				<div class="editorial-section__header">
-					<h2 id="pricing-title" class="editorial-section__title">Pricing</h2>
-					<p class="editorial-section__lede">Start with the review. Keep going when it's working.</p>
-					<p class="partnership-label">{partnershipCapacity.places} partner places · {partnershipCapacity.newStartsPerMonth} new reviews a month</p>
-				</div>
-				<p class="partnership-credit">{partnershipReviewCredit}</p>
-				<a class="partnership-text-link" href={teamBriefMailto} data-partnership-cta data-cta="send_to_team" data-cta-location="pricing-brief">Send this to your team</a>
-			</div>
-			<div class="partnership-pricing">
-				{pricingCards.map((card) => {
-					const { amount } = splitPrice(card.offer.price);
-					return (
-						<article
-							class:list={["partnership-plan", card.featured && "partnership-plan--featured"]}
-							aria-labelledby={`plan-${card.offer.id}`}
-							data-pinned-name={card.offer.name}
-							data-pinned-price={`${amount} · ${card.period}`}
-							data-pinned-route={card.route}
-							data-pinned-href={applyHref(card.route)}
-							data-pinned-cta={card.cta}
-							data-pinned-cta-name={card.ctaName}
-						>
-							<div class="partnership-plan__heading">
-								<h3 id={`plan-${card.offer.id}`}>{card.offer.name}</h3>
-								{card.featured && <span class="partnership-plan__badge">Start here</span>}
-							</div>
-							<p class="partnership-plan__price"><span>{amount}</span> <span class="partnership-plan__period">{card.period}</span></p>
-							<p class="partnership-plan__cadence">{card.offer.cadence}</p>
-							{card.featured && <p class="partnership-plan__summary">{card.offer.summary}</p>}
-							<div class="partnership-plan__body">
-								{card.lead && <p class="partnership-plan__lead">{card.lead}</p>}
-								<ul class="partnership-plan__list">
-									{card.offer.included.map((item) => <li>{item}</li>)}
-								</ul>
-								{card.offer.notes.map((note) => <p class="partnership-plan__note">{note}</p>)}
-							</div>
-							<a
-								class:list={["editorial-button", !card.featured && "editorial-button--secondary"]}
-								href={applyHref(card.route)}
-								data-apply-path={card.route}
-								data-partnership-cta
-								data-cta={card.ctaName}
-								data-cta-location={card.ctaLocation}
-							>{card.cta}</a>
-						</article>
-					);
-				})}
-			</div>
-			<div class="partnership-addons">
-				<h3 id="addons-title" class="partnership-label">Add-ons</h3>
-				<ul>
-					{partnershipAddOns.map((addOn) => (
-						<li>
-							<p class="partnership-addons__heading"><strong>{addOn.title}</strong> <span>{addOn.price}</span></p>
-							<p>{addOn.detail}</p>
-							<a
-								class="partnership-text-link"
-								href={applyHref(addOn.route)}
-								data-apply-path={addOn.route}
-								data-partnership-cta
-								data-cta={`ask_about_${addOn.id.replaceAll("-", "_")}`}
-								data-cta-location="pricing-addon"
-							>{addOn.cta}</a>
-						</li>
-					))}
-				</ul>
-			</div>
-		</section>
-
 		<section id="no-lock-in" class="editorial-section" aria-labelledby="no-lock-in-title">
 			<div class="partnership-terms">
 				<h2 id="no-lock-in-title">Simple terms</h2>
@@ -540,6 +516,18 @@ const partnerQuotes = (
 					))}
 				</ul>
 			</div>
+		</section>
+
+		<section id="independence" class="editorial-section editorial-section--split" aria-labelledby="independence-title">
+			<div class="editorial-section__header">
+				<h2 id="independence-title" class="editorial-section__title">Independent public work</h2>
+				<p class="editorial-section__lede">Your team helps set the scope and checks technical accuracy. What I publish about the product reflects my experience of using it.</p>
+			</div>
+			<ul class="partnership-fit partnership-independence">
+				{independenceRules.map((rule) => (
+					<li><strong>{rule.title}.</strong> {rule.detail}</li>
+				))}
+			</ul>
 		</section>
 
 		<section id="supporter" class="editorial-section editorial-section--split" aria-labelledby="supporter-title">
@@ -594,7 +582,7 @@ const partnerQuotes = (
 		<section id="apply" class="editorial-section editorial-section--split partnerships-apply" aria-labelledby="apply-title">
 			<div class="editorial-section__header">
 				<h2 id="apply-title" class="editorial-section__title">What are you building?</h2>
-				<p class="editorial-section__lede">A few lines about your product and what you're after is enough. I read every one and tell you which option fits: a review, a partnership or supporting the community.</p>
+				<p class="editorial-section__lede">Tell me about your product, who uses it and what you want to help them do. I read every enquiry and reply with a recommendation for how we could work together.</p>
 			</div>
 			<div id="enquiry-form" class="partnerships-apply__body">
 				{enquiryReceived ? (
@@ -616,10 +604,10 @@ const partnerQuotes = (
 
 	<div class="partnership-pinned" data-partnership-pinned>
 		<p>
-			<strong>{fitProofReview.name}</strong>
-			<span>{fitProofReview.price} · fixed price</span>
+			<strong>Work with me</strong>
+			<span>One project or ongoing</span>
 		</p>
-		<a class="partnership-pinned__cta" href={reviewApplyHref} data-apply-path={productReviewPath} data-partnership-cta data-cta-location="pinned" tabindex="-1">Ask about a review</a>
+		<a class="partnership-pinned__cta" href={notSureApplyHref} data-apply-path={notSurePath} data-partnership-cta data-cta="partnership_enquiry" data-cta-location="pinned" tabindex="-1">Tell me what you need</a>
 	</div>
 </Page>
 
@@ -628,7 +616,7 @@ const partnerQuotes = (
 		cta.addEventListener("click", () => {
 			const label = cta.textContent?.trim() ?? "";
 			window.posthog?.capture("cta_clicked", {
-				cta: cta.getAttribute("data-cta") ?? "book_a_product_review",
+				cta: cta.getAttribute("data-cta") ?? "partnership_enquiry",
 				label,
 				location: cta.getAttribute("data-cta-location"),
 				path: window.location.pathname,
@@ -639,22 +627,62 @@ const partnerQuotes = (
 	// The pinned bar appears once the hero button has scrolled away and
 	// leaves again when the enquiry form is reached. Positions are read on
 	// scroll (once per frame) so jumps such as anchor links are handled too.
-	const pinned = document.querySelector<HTMLElement>(
-		"[data-partnership-pinned]",
-	);
+	const pinned = document.querySelector<HTMLElement>("[data-partnership-pinned]");
 	const pinnedCta = pinned?.querySelector<HTMLAnchorElement>("a");
 	const heroCta = document.getElementById("partnership-hero-cta");
 	const enquiry = document.getElementById("apply");
 	if (pinned && pinnedCta && heroCta && enquiry) {
+		const pinnedName = pinned.querySelector("strong");
+		const pinnedPrice = pinned.querySelector("p span");
+		const plans = Array.from(
+			document.querySelectorAll<HTMLElement>("[data-pinned-name]"),
+		);
+		const defaultName = pinnedName?.textContent ?? "";
+		const defaultPrice = pinnedPrice?.textContent ?? "";
+		const defaultCta = pinnedCta.textContent ?? "";
+		const defaultHref = pinnedCta.href;
+		const defaultRoute = pinnedCta.dataset.applyPath ?? "Not sure yet";
+		const defaultCtaName = pinnedCta.dataset.cta ?? "partnership_enquiry";
+		let currentPlan: HTMLElement | undefined;
+
+		const follow = (plan?: HTMLElement) => {
+			if (plan === currentPlan) return;
+			currentPlan = plan;
+			if (pinnedName)
+				pinnedName.textContent = plan?.dataset.pinnedName ?? defaultName;
+			if (pinnedPrice)
+				pinnedPrice.textContent = plan?.dataset.pinnedPrice ?? defaultPrice;
+			pinnedCta.textContent = plan?.dataset.pinnedCta ?? defaultCta;
+			pinnedCta.href = plan?.dataset.pinnedHref ?? defaultHref;
+			pinnedCta.dataset.applyPath = plan?.dataset.pinnedRoute ?? defaultRoute;
+			pinnedCta.dataset.cta = plan?.dataset.pinnedCtaName ?? defaultCtaName;
+		};
+
 		let frame = 0;
 		const update = () => {
 			frame = 0;
 			const pastHero = heroCta.getBoundingClientRect().bottom < 0;
-			const atEnquiry =
-				enquiry.getBoundingClientRect().top < window.innerHeight;
+			const atEnquiry = enquiry.getBoundingClientRect().top < window.innerHeight;
 			const show = pastHero && !atEnquiry;
 			pinned.toggleAttribute("data-visible", show);
 			pinnedCta.tabIndex = show ? 0 : -1;
+
+			// Follow the card with the most visible height. This also handles cards
+			// taller than two screens; a 50% intersection threshold never sees those.
+			let activePlan: HTMLElement | undefined;
+			let mostVisible = 0;
+			const viewportBottom =
+				window.innerHeight - (show ? pinned.getBoundingClientRect().height : 0);
+			for (const plan of plans) {
+				const rect = plan.getBoundingClientRect();
+				const visible =
+					Math.min(rect.bottom, viewportBottom) - Math.max(rect.top, 0);
+				if (rect.width > 0 && visible > mostVisible) {
+					activePlan = plan;
+					mostVisible = visible;
+				}
+			}
+			follow(activePlan);
 		};
 		const schedule = () => {
 			if (!frame) frame = window.requestAnimationFrame(update);
@@ -662,40 +690,6 @@ const partnerQuotes = (
 		window.addEventListener("scroll", schedule, { passive: true });
 		window.addEventListener("resize", schedule, { passive: true });
 		update();
-
-		// The bar follows the plan being read: whichever plan card is mostly
-		// on screen becomes the one it names and links to.
-		const pinnedName = pinned.querySelector("strong");
-		const pinnedPrice = pinned.querySelector("p span");
-		const follow = (plan: HTMLElement) => {
-			const {
-				pinnedName: name,
-				pinnedPrice: price,
-				pinnedRoute: route,
-				pinnedHref: href,
-				pinnedCta: cta,
-				pinnedCtaName: ctaName,
-			} = plan.dataset;
-			if (!name || !price || !route || !href || !cta) return;
-			if (pinnedName) pinnedName.textContent = name;
-			if (pinnedPrice) pinnedPrice.textContent = price;
-			pinnedCta.textContent = cta;
-			pinnedCta.href = href;
-			pinnedCta.dataset.applyPath = route;
-			if (ctaName) pinnedCta.dataset.cta = ctaName;
-			else delete pinnedCta.dataset.cta;
-		};
-		const observer = new IntersectionObserver(
-			(entries) => {
-				for (const entry of entries) {
-					if (entry.isIntersecting) follow(entry.target as HTMLElement);
-				}
-			},
-			{ threshold: 0.5 },
-		);
-		document
-			.querySelectorAll<HTMLElement>("[data-pinned-name]")
-			.forEach((plan) => observer.observe(plan));
 	}
 </script>
 
@@ -1253,11 +1247,71 @@ const partnerQuotes = (
 		color: var(--colors-academy-text-soft);
 	}
 
-	.partnership-pricing {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
-		gap: 1rem;
+	.partnership-ongoing {
+		max-width: 40rem;
 		margin-top: 1.5rem;
+	}
+
+	/* Stages */
+	.partnership-stages {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+		gap: 1rem;
+		margin: 1.5rem 0 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.partnership-stages > li {
+		display: flex;
+		min-width: 0;
+	}
+
+	.partnership-stage {
+		width: 100%;
+	}
+
+	.partnership-stage__kicker {
+		display: flex;
+		align-items: baseline;
+		gap: 0.5rem;
+		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
+		font-size: 0.8rem;
+		font-weight: 600;
+		color: var(--colors-academy-text-muted);
+	}
+
+	.partnership-stage__kicker span {
+		color: var(--colors-academy-accent);
+	}
+
+	.partnership-stage__problem {
+		padding-bottom: 0.85rem;
+		border-bottom: 1px solid var(--colors-academy-border);
+		font-family: var(--fonts-academy-display), system-ui, sans-serif;
+		font-size: 1.05rem;
+		line-height: 1.4;
+		color: var(--colors-academy-text);
+	}
+
+	.partnership-stage .partnership-plan__price span:first-child {
+		font-size: clamp(2rem, 4vw, 2.5rem);
+	}
+
+	.partnership-stage .partnership-plan__price--quoted span:first-child {
+		font-size: clamp(1.5rem, 3vw, 1.75rem);
+		line-height: 1.15;
+	}
+
+	.partnership-review-preview {
+		display: grid;
+		gap: 0.75rem;
+		max-width: 40rem;
+		margin-top: 2rem;
+	}
+
+	.partnership-stage > .editorial-button {
+		width: 100%;
 	}
 
 	.partnership-plan {
@@ -1269,10 +1323,6 @@ const partnerQuotes = (
 		border: 1px solid var(--colors-academy-border);
 		border-radius: var(--radii-academy-l);
 		background: var(--colors-academy-panel);
-	}
-
-	.partnership-plan--featured {
-		border: 2px solid var(--colors-academy-accent);
 	}
 
 	.partnership-plan p,
@@ -1292,17 +1342,6 @@ const partnerQuotes = (
 		font-size: 1.3rem;
 		font-weight: 700;
 		color: var(--colors-academy-text);
-	}
-
-	.partnership-plan__badge {
-		flex: none;
-		padding: 0.2rem 0.55rem;
-		border-radius: var(--radii-academy-pill);
-		background: var(--colors-academy-accent);
-		color: var(--colors-academy-accent-foreground);
-		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
-		font-size: 0.72rem;
-		font-weight: 600;
 	}
 
 	.partnership-plan__price {
@@ -1343,12 +1382,6 @@ const partnerQuotes = (
 		flex: 1 1 auto;
 	}
 
-	.partnership-plan__lead {
-		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
-		font-size: 0.8rem;
-		color: var(--colors-academy-text-muted);
-	}
-
 	.partnership-plan__list {
 		display: grid;
 		gap: 0.55rem;
@@ -1370,10 +1403,6 @@ const partnerQuotes = (
 		left: 0;
 		font-weight: 700;
 		color: var(--colors-academy-text-muted);
-	}
-
-	.partnership-plan--featured .partnership-plan__list li::before {
-		color: var(--colors-academy-accent);
 	}
 
 	.partnership-plan__note {

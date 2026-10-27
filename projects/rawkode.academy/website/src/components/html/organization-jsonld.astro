@@ -1,9 +1,9 @@
 ---
 import {
-	annualPartnershipOffer,
+	fieldReportOffer,
 	fitProofReview,
+	ongoingPartnershipOffer,
 	type PartnershipOffer,
-	partnershipOffer,
 	supporterOffer,
 } from "@/lib/partnerships";
 
@@ -84,9 +84,9 @@ const organizationSchema = {
 		"Site Reliability Engineering",
 	],
 	offers: [
-		partnerOffer(fitProofReview, "#how-it-works"),
-		partnerOffer(partnershipOffer, "#pricing"),
-		partnerOffer(annualPartnershipOffer, "#pricing"),
+		partnerOffer(fieldReportOffer, "#stages"),
+		partnerOffer(fitProofReview, "#stages"),
+		partnerOffer(ongoingPartnershipOffer, "#pricing"),
 		{
 			...partnerOffer(supporterOffer, "#supporter"),
 			priceSpecification: {

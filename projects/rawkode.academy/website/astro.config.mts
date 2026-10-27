@@ -227,31 +227,6 @@ export default defineConfig({
 				access: "public",
 				default: "true",
 			}),
-			ATTIO_API_KEY: envField.string({
-				context: "server",
-				access: "secret",
-				optional: true,
-			}),
-			ATTIO_INBOUND_DEAL_STAGE: envField.string({
-				context: "server",
-				access: "public",
-				default: "In Progress",
-			}),
-			ATTIO_INBOUND_DEAL_OFFER_ATTRIBUTE: envField.string({
-				context: "server",
-				access: "public",
-				default: "offer",
-			}),
-			ATTIO_SOURCE_ATTRIBUTE: envField.string({
-				context: "server",
-				access: "public",
-				default: "source",
-			}),
-			ATTIO_SOURCE_VALUE: envField.string({
-				context: "server",
-				access: "public",
-				default: "Inbound: partnerships page",
-			}),
 		},
 	},
 	security: {
