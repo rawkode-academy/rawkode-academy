@@ -111,7 +111,7 @@ async function generateNavigationItems(
 			href: "/organizations/lets-chat",
 			title: "Partner application",
 			category: "Organizations",
-			description: "Apply for a Rawkode Academy product review or partnership",
+			description: "Enquire about a Rawkode Academy partnership",
 			keywords: [
 				"fit check",
 				"adoption",
@@ -133,7 +133,7 @@ async function generateNavigationItems(
 		},
 		{
 			href: "/organizations/partnerships",
-			title: "Developer product reviews and partnerships",
+			title: "Partnerships for developer tool companies",
 			category: "Organizations",
 			description: partnershipDescription,
 			keywords: [

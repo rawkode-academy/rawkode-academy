@@ -31,9 +31,11 @@ const loadModule = (filename: string) => {
 };
 const partnerships = loadModule("src/lib/partnerships.ts") as {
 	applicationPaths: readonly [
+		"Field report",
 		"Product review",
-		"90-day partnership",
-		"Annual plan",
+		"Production review",
+		"Customer workshops",
+		"Ongoing partnership",
 		"Not sure yet",
 	];
 	applicationPathLabels: Record<string, string>;
@@ -210,10 +212,12 @@ describe("partnership Attio action", () => {
 	});
 
 	it.each([
+		["Field report", 10000, "Field report"],
 		["Product review", 5000, "Review"],
+		["Production review", 5000, "Review"],
+		["Customer workshops", 0, "Workshop"],
 		["Not sure yet", 5000, "Review"],
-		["90-day partnership", 12000, "Partnership (Quarterly)"],
-		["Annual plan", 40000, "Partnership (Yearly)"],
+		["Ongoing partnership", 12000, "Partnership (Quarterly)"],
 	] as const)("creates a company and person, then a note and a %s deal worth $%i offered as %s", async (path, value, offer) => {
 		mockCreatedPath();
 
@@ -334,12 +338,12 @@ describe("partnership Attio action", () => {
 		workerEnv.ATTIO_INBOUND_DEAL_OFFER_ATTRIBUTE = "inbound_offer";
 		mockCreatedPath();
 
-		await apply.handler({ ...input, path: "Annual plan" }, context);
+		await apply.handler({ ...input, path: "Ongoing partnership" }, context);
 
 		const deal = vi.mocked(fetch).mock.calls[6]!;
 		expect(requestBody(deal).data.values).toMatchObject({
-			value: 40000,
-			inbound_offer: "Partnership (Yearly)",
+			value: 12000,
+			inbound_offer: "Partnership (Quarterly)",
 		});
 		expect(requestBody(deal).data.values).not.toHaveProperty("offer");
 	});
@@ -356,21 +360,25 @@ describe("partnership Attio action", () => {
 
 	it("maps legacy route names onto the current options and prices", () => {
 		expect([...partnerships.applicationPaths]).toEqual([
+			"Field report",
 			"Product review",
-			"90-day partnership",
-			"Annual plan",
+			"Production review",
+			"Customer workshops",
+			"Ongoing partnership",
 			"Community supporter",
 			"Community challenge series",
 			"Not sure yet",
 		]);
 		expect(partnerships.applicationPathDeals).toEqual({
+			"Field report": { offer: "Field report", valueUsd: 10000 },
 			"Product review": { offer: "Review", valueUsd: 5000 },
+			"Production review": { offer: "Review", valueUsd: 5000 },
+			"Customer workshops": { offer: "Workshop", valueUsd: 0 },
 			"Not sure yet": { offer: "Review", valueUsd: 5000 },
-			"90-day partnership": {
+			"Ongoing partnership": {
 				offer: "Partnership (Quarterly)",
 				valueUsd: 12000,
 			},
-			"Annual plan": { offer: "Partnership (Yearly)", valueUsd: 40000 },
 			"Community supporter": { offer: "Supporter", valueUsd: 9000 },
 			"Community challenge series": {
 				offer: "Challenge series",
@@ -387,10 +395,16 @@ describe("partnership Attio action", () => {
 			"Product review",
 		);
 		expect(partnerships.resolveApplicationPath("Annual partnership")).toBe(
-			"Annual plan",
+			"Ongoing partnership",
+		);
+		expect(partnerships.resolveApplicationPath("Annual plan")).toBe(
+			"Ongoing partnership",
+		);
+		expect(partnerships.resolveApplicationPath("90-day partnership")).toBe(
+			"Ongoing partnership",
 		);
 		expect(partnerships.resolveApplicationPath("Adoption Advisory")).toBe(
-			"90-day partnership",
+			"Ongoing partnership",
 		);
 	});
 
@@ -497,7 +511,7 @@ describe("partnership Attio action", () => {
 			content: "Please review our Kubernetes quick start.",
 		});
 		expect(requestBody(calls[6]!).data.values).toMatchObject({
-			name: "Analytical Engine: Product review",
+			name: "Analytical Engine: Getting-started review",
 			value: 5000,
 			offer: "Review",
 		});

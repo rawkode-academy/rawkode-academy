@@ -19,22 +19,23 @@ import {
 } from "@/lib/partnership-quotes";
 import {
 	type ApplicationPath,
-	annualPartnershipOffer,
+	adoptionStages,
 	fitProofReview,
+	independenceRules,
+	notSurePath,
+	ongoingPartnershipOffer,
 	PARTNERSHIP_EMAIL,
 	type PartnershipOffer,
 	partnershipAddOns,
+	partnershipAdvice,
 	partnershipCapacity,
 	partnershipCredentials,
 	partnershipDescription,
 	partnershipExperience,
 	partnershipFacts,
-	partnershipOffer,
 	partnershipPerks,
-	partnershipPlan,
 	partnershipReviewCredit,
 	partnershipWatchEpisodes,
-	productReviewPath,
 	productReviewScope,
 	supporterOffer,
 	teamBriefMailto,
@@ -52,7 +53,7 @@ Astro.response.headers.set("Cache-Control", "private, no-cache");
 
 const applyHref = (path: ApplicationPath) =>
 	`/organizations/partnerships?route=${encodeURIComponent(path)}#enquiry-form`;
-const reviewApplyHref = applyHref(productReviewPath);
+const notSureApplyHref = applyHref(notSurePath);
 const initialPath =
 	resolveApplicationPath(Astro.url.searchParams.get("route")) ?? "Not sure yet";
 const submittedEnquiry = Astro.getActionResult(actions.partnership.applyForm);
@@ -120,8 +121,8 @@ const submittedValues =
 		? await readRejectedSubmission(Astro.request)
 		: emptySubmission;
 
-const partnershipReviewHeroTitle =
-	"See exactly where engineers get stuck with your product.";
+const partnershipHeroTitle =
+	"Get engineers further with your product, wherever they're stuck.";
 
 // Content is optional on this page: the enquiry form must keep working when
 // the content gateway is unavailable.
@@ -130,25 +131,7 @@ const ownerAvatar = owner?.data.avatarUrl
 	? `${owner.data.avatarUrl}?s=96`
 	: undefined;
 
-const reviewSteps = [
-	{
-		title: "You give me access",
-		detail:
-			"A trial or sandbox account. We agree who I'm acting as, and where the run starts and ends.",
-	},
-	{
-		title: "I work through it alone",
-		detail:
-			"As your target user, with nobody to rescue me. Delivered within 10 business days of getting access.",
-	},
-	{
-		title: "You get a ranked report",
-		detail:
-			"Where engineers get stuck and what to fix first. Then a one-hour call to walk your team through it.",
-	},
-];
-
-/** Split "$40,000 a year" into the amount and the period after it. */
+/** Split "$12,000 a quarter" into the amount and the period after it. */
 const splitPrice = (price: string) => {
 	const match = price.match(/^(\$[\d,]+)(?:\s+(.+))?$/);
 	return { amount: match?.[1] ?? price, period: match?.[2] };
@@ -165,37 +148,27 @@ interface PricingCard {
 	lead?: string;
 }
 
+/** Fixed-price stages show "one-off, fixed"; quoted stages show no period. */
+const stagePeriod = (offer: PartnershipOffer) =>
+	offer.price.startsWith("$") ? "one-off, fixed" : undefined;
+
 const pricingCards: PricingCard[] = [
 	{
-		offer: fitProofReview,
-		route: productReviewPath,
-		period: "one-off, fixed",
-		cta: "Ask about a product review",
-		ctaLocation: "pricing-review",
-		featured: true,
-	},
-	{
-		offer: partnershipOffer,
-		route: "90-day partnership",
-		period: "fixed, 90 days",
-		cta: "Ask about the 90-day plan",
-		ctaName: "ask_about_the_90_day_plan",
-		ctaLocation: "pricing-90-day",
-		lead: "Everything in the product review, plus:",
-	},
-	{
-		offer: annualPartnershipOffer,
-		route: "Annual plan",
-		period: splitPrice(annualPartnershipOffer.price).period ?? "a year",
-		cta: "Ask about the annual plan",
-		ctaName: "ask_about_the_annual_plan",
-		ctaLocation: "pricing-annual",
+		offer: ongoingPartnershipOffer,
+		route: "Ongoing partnership",
+		period:
+			splitPrice(ongoingPartnershipOffer.price).period ?? "a quarter",
+		cta: "Ask about an ongoing partnership",
+		ctaName: "ask_about_an_ongoing_partnership",
+		ctaLocation: "pricing-ongoing",
+		lead: "After any first engagement:",
 	},
 ];
 
 const pageSections = [
-	{ id: "how-it-works", label: "How it works" },
-	{ id: "pricing", label: "Pricing" },
+	{ id: "stages", label: "Where to start" },
+	{ id: "pricing", label: "Keep going" },
+	{ id: "independence", label: "Independence" },
 	{ id: "supporter", label: "Supporter" },
 	{ id: "questions", label: "FAQ" },
 	{ id: "apply", label: "Enquire" },
@@ -204,25 +177,36 @@ const pageSections = [
 const noLockIn = [
 	{
 		title: "Stop at any stage",
-		detail: `Stop after the review and you've paid ${fitProofReview.price}. The 90-day partnership ends at day 90, with nothing more to pay.`,
+		detail:
+			"Stop after a field report, a review or a workshop and that's all you pay. You keep everything it produced.",
 	},
 	{
 		title: "Renew when it's working",
 		detail:
-			"The annual partnership is a 12-month contract, billed at $10,000 a quarter. Carrying on is always your choice.",
+			"An ongoing partnership goes quarter by quarter, or as a 12-month contract billed at $10,000 a quarter. Nothing renews automatically.",
 	},
 	{
 		title: "You own the work",
 		detail:
-			"You own the review, the report and every read-out.",
+			"You own the reports, the read-outs and the example repositories.",
 	},
 ];
 
 const faqs = [
 	{
-		question: "How is this different from sponsoring a video?",
+		question: "Which stage should we start with?",
 		answer:
-			"Sponsorship gets you airtime. A partnership gets you my time and judgement on your product: the review, the ranked list and the advice, plus a live session that teaches engineers a real use case.",
+			"The one where your engineers are stuck today. If you're not sure, tell me what you're seeing in the form below and I'll say which fits, or that none does yet.",
+	},
+	{
+		question: "We already know where engineers get stuck. Do we need the review?",
+		answer:
+			"No. The review is one way in, not a gate. Teams that already have that data usually start with a field report or a workshop.",
+	},
+	{
+		question: "How is a field report different from sponsoring a video?",
+		answer:
+			"Sponsorship buys airtime and a script. A field report pays for my time and judgement: I choose real problems, solve them with your product, publish what actually happens, labelled as paid, and tell you privately what I'd change.",
 	},
 	{
 		question:
@@ -242,12 +226,12 @@ const faqs = [
 	{
 		question: "How much of our engineers' time does it take?",
 		answer:
-			"About half a day across the 90 days: an hour to review the runnable example, plus an hour to prepare and the live hour itself if someone from your team co-hosts the session. I write the example. Your product lead joins the monthly sessions.",
+			"Not much. For a field report or a review, an hour or two to set up access, plus the walkthrough call. For a workshop, whoever presents with me. I write the examples. In an ongoing partnership, your product lead joins the monthly sessions.",
 	},
 	{
 		question: "Who on our side should own it?",
 		answer:
-			"Whoever owns developer adoption. Often that is the head of DevRel or developer experience, with product owning the fixes. The ranked list says which items are for product, which for docs and which for DevRel.",
+			"It depends on the stage: marketing or developer relations for a field report, developer experience or product for a getting-started review, product or solutions engineering for a production review, and customer success or education for workshops.",
 	},
 	{
 		question: "Why are places limited?",
@@ -257,12 +241,12 @@ const faqs = [
 	{
 		question: "Can we sponsor content as well?",
 		answer:
-			"Yes. As a community supporter, your docs, your latest announcement and a supporter badge appear on your technology page and on every video about your technology, from $1,000 a month.",
+			"A field report is paid content, on the terms above. For something lighter, community supporters get their docs, latest announcement and a supporter badge on their technology page and on every video about their technology, from $1,000 a month.",
 	},
 	{
 		question: "Do open-source maintainers have to pay to come on Rawkode Live?",
 		answer:
-			"Maintainer sessions on Rawkode Live are free, as they always have been. The partnership is for teams who want the review, the advice and the work around the session.",
+			"Maintainer sessions on Rawkode Live are free, as they always have been, and aren't labelled as paid. Partnerships are for teams who want the stage work and the advice around it.",
 	},
 ];
 
@@ -290,28 +274,28 @@ const partnerQuotes = (
 ---
 
 <Page
-	title="Developer product reviews and partnerships"
-	subtitle={partnershipReviewHeroTitle}
+	title="Partnerships for developer tool companies"
+	subtitle={partnershipHeroTitle}
 	description={partnershipDescription}
 >
 	<EditorialShell
 		eyebrow="Partnerships"
-		title={partnershipReviewHeroTitle}
-		lede="I teach engineers new tools, live and unscripted. Then I show the teams who build them where engineers get stuck, and what to fix first."
+		title={partnershipHeroTitle}
+		lede="I teach engineers new tools, live and unscripted. Work with me at the stage your engineers are stuck: finding you, getting it working, running it in production, or getting better with it."
 	>
 		<dl class="partnership-facts" slot="intro">
 			<div>
-				<dt>Price</dt>
-				<dd>{fitProofReview.price} fixed</dd>
+				<dt>Start at</dt>
+				<dd>Any stage</dd>
 			</div>
 			<div>
-				<dt>Delivered in</dt>
-				<dd>10 business days</dd>
+				<dt>From</dt>
+				<dd>{fitProofReview.price} fixed</dd>
 			</div>
 		</dl>
 		<div class="partnership-hero-actions" slot="actions">
-			<a id="partnership-hero-cta" class="editorial-button" href={reviewApplyHref} data-apply-path={productReviewPath} data-partnership-cta data-cta-location="hero">Ask about a product review</a>
-			<a class="partnership-text-link" href="#pricing">See all pricing</a>
+			<a id="partnership-hero-cta" class="editorial-button" href={notSureApplyHref} data-apply-path={notSurePath} data-partnership-cta data-cta="tell_me_where_youre_stuck" data-cta-location="hero">Tell me where you're stuck</a>
+			<a class="partnership-text-link" href="#stages">See the four stages</a>
 		</div>
 		<div class="partnership-watch" slot="actions">
 			<p id="partnership-watch-title">Watch me try a new tool live</p>
@@ -336,7 +320,6 @@ const partnerQuotes = (
 				))}
 			</ul>
 		</div>
-		<ReviewPreview slot="aside" placement="hero" />
 
 		<nav class="partnership-rail" aria-label="On this page">
 			<ul>
@@ -358,23 +341,61 @@ const partnerQuotes = (
 		</section>
 		)}
 
-		<section id="how-it-works" class="editorial-section editorial-section--split" aria-labelledby="how-it-works-title">
-			<div class="editorial-section__header">
-				<h2 id="how-it-works-title" class="editorial-section__title">How the review works</h2>
+		<section id="stages" class="editorial-section" aria-labelledby="stages-title">
+			<div class="partnership-pricing__header">
+				<div class="editorial-section__header">
+					<h2 id="stages-title" class="editorial-section__title">Start where your engineers are stuck</h2>
+					<p class="editorial-section__lede">Four stages of adoption, each with its own first piece of work. Pick one; you don't need the others first.</p>
+					<p class="partnership-label">{partnershipCapacity.places} partner places · {partnershipCapacity.newStartsPerMonth} new starts a month</p>
+				</div>
+				<p class="partnership-credit">{partnershipAdvice}</p>
 			</div>
-			<div class="partnership-steps-body">
-				<ol class="partnership-steps">
-					{reviewSteps.map((step, index) => (
+			<ol class="partnership-stages">
+				{adoptionStages.map((stage, index) => {
+					const { amount } = splitPrice(stage.offer.price);
+					const period = stagePeriod(stage.offer);
+					return (
 						<li>
-							<span class="partnership-steps__number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
-							<div>
-								<h3>{step.title}</h3>
-								<p>{step.detail}</p>
-							</div>
+							<article
+								class="partnership-plan partnership-stage"
+								aria-labelledby={`plan-${stage.offer.id}`}
+								data-pinned-name={stage.offer.name}
+								data-pinned-price={period ? `${amount} · ${period}` : stage.offer.price}
+								data-pinned-route={stage.route}
+								data-pinned-href={applyHref(stage.route)}
+								data-pinned-cta={stage.cta}
+							>
+								<p class="partnership-stage__kicker"><span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span> {stage.stage}</p>
+								<p class="partnership-stage__problem">{stage.problem}</p>
+								<div class="partnership-plan__heading">
+									<h3 id={`plan-${stage.offer.id}`}>{stage.offer.name}</h3>
+								</div>
+								<p class:list={["partnership-plan__price", !period && "partnership-plan__price--quoted"]}><span>{amount}</span> {period && <span class="partnership-plan__period">{period}</span>}</p>
+								<p class="partnership-plan__cadence">{stage.offer.cadence}</p>
+								<p class="partnership-plan__summary">{stage.offer.summary}</p>
+								<div class="partnership-plan__body">
+									<ul class="partnership-plan__list">
+										{stage.offer.included.map((item) => <li>{item}</li>)}
+									</ul>
+									{stage.offer.notes.map((note) => <p class="partnership-plan__note">{note}</p>)}
+									<p class="partnership-plan__note">{stage.owner}</p>
+								</div>
+								<a
+									class="editorial-button editorial-button--secondary"
+									href={applyHref(stage.route)}
+									data-apply-path={stage.route}
+									data-partnership-cta
+									data-cta={stage.cta.toLowerCase().replaceAll(/[^a-z]+/g, "_")}
+									data-cta-location={stage.ctaLocation}
+								>{stage.cta}</a>
+							</article>
 						</li>
-					))}
-				</ol>
-				<ReviewPreview placement="inline" />
+					);
+				})}
+			</ol>
+			<div class="partnership-review-preview">
+				<p class="partnership-label">What a getting-started or production review hands over</p>
+				<ReviewPreview placement="always" />
 			</div>
 		</section>
 
@@ -407,62 +428,15 @@ const partnerQuotes = (
 			<ul class="partnership-fit">
 				<li>You build developer tools: infrastructure tools, Kubernetes and cloud native projects, cloud platforms or AI infrastructure.</li>
 				<li>An engineer can install or sign up for your product and try it, including open-source projects installed from GitHub or Helm.</li>
+				<li>Any size of company, from a first open-source release to a public company.</li>
 			</ul>
-		</section>
-
-		<section id="perks" class="editorial-section editorial-section--split" aria-labelledby="perks-title">
-			<div class="editorial-section__header">
-				<h2 id="perks-title" class="editorial-section__title">What else you get</h2>
-				<p class="editorial-section__lede">Every partnership comes with these, on top of the review work.</p>
-			</div>
-			<div class="partnership-perks">
-				<h3 class="partnership-label">Every partnership</h3>
-				<ul>
-					{partnershipPerks.map((perk) => (
-						<li>
-							<strong>{perk.title}</strong>
-							<p>{perk.detail}</p>
-						</li>
-					))}
-				</ul>
-				<details class="partnership-perks__renew">
-					<summary class="partnership-label">When you renew ({renewalPerks.length})</summary>
-					<ul>
-						{renewalPerks.map((perk) => (
-							<li>
-								<strong>{perk.title}</strong>
-								<p>{perk.detail}</p>
-							</li>
-						))}
-					</ul>
-				</details>
-			</div>
-		</section>
-
-		<section id="your-90-days" class="editorial-section editorial-section--split" aria-labelledby="your-90-days-title">
-			<div class="editorial-section__header">
-				<h2 id="your-90-days-title" class="editorial-section__title">Your 90 days</h2>
-				<p class="editorial-section__lede">From the review to the day-90 read-out.</p>
-			</div>
-			<ol class="partnership-steps">
-				{partnershipPlan.map((step, index) => (
-					<li>
-						<span class="partnership-steps__number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
-						<div>
-							<h3>{step.when}</h3>
-							<p>{step.what}</p>
-						</div>
-					</li>
-				))}
-			</ol>
 		</section>
 
 		<section id="pricing" class="editorial-section" aria-labelledby="pricing-title">
 			<div class="partnership-pricing__header">
 				<div class="editorial-section__header">
-					<h2 id="pricing-title" class="editorial-section__title">Pricing</h2>
-					<p class="editorial-section__lede">Start with the review. Keep going when it's working.</p>
-					<p class="partnership-label">{partnershipCapacity.places} partner places · {partnershipCapacity.newStartsPerMonth} new reviews a month</p>
+					<h2 id="pricing-title" class="editorial-section__title">Keep going</h2>
+					<p class="editorial-section__lede">When a first engagement is useful, carry on quarter by quarter and choose each quarter's work as you go.</p>
 				</div>
 				<p class="partnership-credit">{partnershipReviewCredit}</p>
 				<a class="partnership-text-link" href={teamBriefMailto} data-partnership-cta data-cta="send_to_team" data-cta-location="pricing-brief">Send this to your team</a>
@@ -528,6 +502,35 @@ const partnerQuotes = (
 			</div>
 		</section>
 
+		<section id="perks" class="editorial-section editorial-section--split" aria-labelledby="perks-title">
+			<div class="editorial-section__header">
+				<h2 id="perks-title" class="editorial-section__title">What else you get</h2>
+				<p class="editorial-section__lede">Ongoing partners get these, on top of the stage work.</p>
+			</div>
+			<div class="partnership-perks">
+				<h3 class="partnership-label">Every ongoing partnership</h3>
+				<ul>
+					{partnershipPerks.map((perk) => (
+						<li>
+							<strong>{perk.title}</strong>
+							<p>{perk.detail}</p>
+						</li>
+					))}
+				</ul>
+				<details class="partnership-perks__renew">
+					<summary class="partnership-label">When you renew ({renewalPerks.length})</summary>
+					<ul>
+						{renewalPerks.map((perk) => (
+							<li>
+								<strong>{perk.title}</strong>
+								<p>{perk.detail}</p>
+							</li>
+						))}
+					</ul>
+				</details>
+			</div>
+		</section>
+
 		<section id="no-lock-in" class="editorial-section" aria-labelledby="no-lock-in-title">
 			<div class="partnership-terms">
 				<h2 id="no-lock-in-title">Simple terms</h2>
@@ -540,6 +543,18 @@ const partnerQuotes = (
 					))}
 				</ul>
 			</div>
+		</section>
+
+		<section id="independence" class="editorial-section editorial-section--split" aria-labelledby="independence-title">
+			<div class="editorial-section__header">
+				<h2 id="independence-title" class="editorial-section__title">How paid work stays honest</h2>
+				<p class="editorial-section__lede">Engineers trust what I show them because nobody scripts it. These rules apply to every stage, and they're why the work is worth paying for.</p>
+			</div>
+			<ul class="partnership-fit partnership-independence">
+				{independenceRules.map((rule) => (
+					<li><strong>{rule.title}.</strong> {rule.detail}</li>
+				))}
+			</ul>
 		</section>
 
 		<section id="supporter" class="editorial-section editorial-section--split" aria-labelledby="supporter-title">
@@ -594,7 +609,7 @@ const partnerQuotes = (
 		<section id="apply" class="editorial-section editorial-section--split partnerships-apply" aria-labelledby="apply-title">
 			<div class="editorial-section__header">
 				<h2 id="apply-title" class="editorial-section__title">What are you building?</h2>
-				<p class="editorial-section__lede">A few lines about your product and what you're after is enough. I read every one and tell you which option fits: a review, a partnership or supporting the community.</p>
+				<p class="editorial-section__lede">A few lines about your product and where engineers get stuck is enough. I read every one and tell you which stage fits, or that none does yet.</p>
 			</div>
 			<div id="enquiry-form" class="partnerships-apply__body">
 				{enquiryReceived ? (
@@ -616,10 +631,10 @@ const partnerQuotes = (
 
 	<div class="partnership-pinned" data-partnership-pinned>
 		<p>
-			<strong>{fitProofReview.name}</strong>
-			<span>{fitProofReview.price} · fixed price</span>
+			<strong>Start at any stage</strong>
+			<span>From {fitProofReview.price} · fixed price</span>
 		</p>
-		<a class="partnership-pinned__cta" href={reviewApplyHref} data-apply-path={productReviewPath} data-partnership-cta data-cta-location="pinned" tabindex="-1">Ask about a review</a>
+		<a class="partnership-pinned__cta" href={notSureApplyHref} data-apply-path={notSurePath} data-partnership-cta data-cta="tell_me_where_youre_stuck" data-cta-location="pinned" tabindex="-1">Tell me where you're stuck</a>
 	</div>
 </Page>
 
@@ -1258,6 +1273,75 @@ const partnerQuotes = (
 		grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
 		gap: 1rem;
 		margin-top: 1.5rem;
+	}
+
+	.partnership-pricing > .partnership-plan {
+		max-width: 40rem;
+	}
+
+	/* Stages */
+	.partnership-stages {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+		gap: 1rem;
+		margin: 1.5rem 0 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.partnership-stages > li {
+		display: flex;
+		min-width: 0;
+	}
+
+	.partnership-stage {
+		width: 100%;
+	}
+
+	.partnership-stage__kicker {
+		display: flex;
+		align-items: baseline;
+		gap: 0.5rem;
+		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
+		font-size: 0.8rem;
+		font-weight: 600;
+		color: var(--colors-academy-text-muted);
+	}
+
+	.partnership-stage__kicker span {
+		color: var(--colors-academy-accent);
+	}
+
+	.partnership-stage__problem {
+		padding-bottom: 0.85rem;
+		border-bottom: 1px solid var(--colors-academy-border);
+		font-family: var(--fonts-academy-display), system-ui, sans-serif;
+		font-size: 1.05rem;
+		line-height: 1.4;
+		color: var(--colors-academy-text);
+	}
+
+	.partnership-stage .partnership-plan__price span:first-child {
+		font-size: clamp(2rem, 4vw, 2.5rem);
+	}
+
+	.partnership-stage .partnership-plan__price--quoted span:first-child {
+		font-size: clamp(1.5rem, 3vw, 1.75rem);
+		line-height: 1.15;
+	}
+
+	.partnership-review-preview {
+		display: grid;
+		gap: 0.75rem;
+	}
+
+	.partnership-stage > .editorial-button {
+		width: 100%;
+	}
+
+	.partnership-review-preview {
+		max-width: 40rem;
+		margin-top: 2rem;
 	}
 
 	.partnership-plan {

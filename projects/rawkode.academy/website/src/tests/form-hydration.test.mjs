@@ -286,9 +286,11 @@ for (const fixture of fixtures) {
 					(option) => option.textContent,
 				),
 				[
-					"Product review",
-					"Full 90-day partnership",
-					"Annual partnership",
+					"Field report",
+					"Getting-started review",
+					"Production review",
+					"Customer workshops",
+					"Ongoing partnership",
 					"Community supporter",
 					"Community challenge series",
 					"Not sure yet",
@@ -738,7 +740,7 @@ test("partnership enquiry keeps rejected values and describes each field error",
 		name: "  Ada ",
 		email: "not-an-email",
 		company: "Analytical Engine",
-		path: "Annual plan",
+		path: "Ongoing partnership",
 		message: "   ",
 	};
 	const serverFieldErrors = {
@@ -755,7 +757,10 @@ test("partnership enquiry keeps rejected values and describes each field error",
 			form.querySelector("[name=company]").value,
 			"Analytical Engine",
 		);
-		assert.equal(form.querySelector("[name=path]").value, "Annual plan");
+		assert.equal(
+			form.querySelector("[name=path]").value,
+			"Ongoing partnership",
+		);
 		assert.equal(form.querySelector("[name=message]").value, "   ");
 		assert.equal(
 			form.querySelector("[name=name]").getAttribute("maxlength"),
