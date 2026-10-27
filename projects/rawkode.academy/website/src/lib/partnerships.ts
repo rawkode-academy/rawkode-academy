@@ -134,7 +134,7 @@ export const partnershipWatchEpisodes = [
 ] as const;
 
 export const partnershipDescription =
-	"I work with developer tool companies wherever their engineers get stuck: finding the product, getting it working, running it in production, or getting better with it. Start with a $10,000 field report, a $5,000 review or a customer workshop, then carry on quarter by quarter if it's useful.";
+	"I work with developer tool companies on awareness, adoption and support: getting engineers interested, getting them hooked, and making them successful. Start with a $10,000 field report, a $5,000 adoption review or a customer workshop, then carry on quarter by quarter if it's useful.";
 
 export interface PartnershipPerk {
 	title: string;
@@ -214,11 +214,11 @@ export const renewalPerks: PartnershipPerk[] = [
 export const partnershipReviewCredit =
 	"What you pay for a first engagement counts towards an ongoing partnership when it is signed within 30 days of the work being delivered.";
 
-/** Stage 1: engineers haven't found you, or don't see why they'd need you. */
+/** Awareness: get people interested. */
 export const fieldReportOffer: PartnershipOffer = {
 	id: "field-report",
 	name: "Field report",
-	label: "Getting found",
+	label: "Awareness",
 	price: "$10,000",
 	priceShort: "$10k",
 	cadence: "A fixed price, over about six weeks.",
@@ -237,19 +237,19 @@ export const fieldReportOffer: PartnershipOffer = {
 	mailto: buildMailto("Field report", applicationBody),
 };
 
-/** Stage 2: engineers try the product and give up before it works. */
+/** Adoption: get them hooked, from a first try to running it in production. */
 export const fitProofReview: PartnershipOffer = {
 	id: "product-review",
-	name: "Getting-started review",
-	label: "First success",
+	name: "Adoption review",
+	label: "Adoption",
 	price: "$5,000",
 	priceShort: "$5k",
 	cadence:
 		"A fixed price, delivered within 10 business days of getting access.",
 	summary:
-		"I work through your product alone as your target user, with nobody to rescue me, and tell you where engineers get stuck and what to fix first.",
+		"I work through your product alone as your target user, with nobody to rescue me, as far as we agree: a first working result, or all the way to production. Then I tell you where engineers get stuck and what to fix first.",
 	included: [
-		"A written report showing the places engineers get stuck",
+		"A written report showing where engineers get stuck, from first try to production",
 		"A ranked list of what to fix first",
 		"A one-hour call to go through it with your team",
 	],
@@ -257,35 +257,14 @@ export const fitProofReview: PartnershipOffer = {
 	notes: [
 		"Covers up to two kinds of user, such as a platform team and the application developers they serve.",
 	],
-	mailto: buildMailto("Getting-started review", applicationBody),
+	mailto: buildMailto("Adoption review", applicationBody),
 };
 
-/** Stage 3: engineers get it working, then stall before running it for real. */
-export const productionReviewOffer: PartnershipOffer = {
-	id: "production-review",
-	name: "Production review",
-	label: "Production",
-	price: "$5,000",
-	priceShort: "$5k",
-	cadence:
-		"A fixed price, delivered within 10 business days of getting access.",
-	summary:
-		"The same review, aimed at the path to production: a highly available setup, an upgrade, a backup and restore, or the move from your open-source project to your paid product.",
-	included: [
-		"A written report showing where the path to production breaks down",
-		"A ranked list of what to fix, explain or teach first",
-		"A one-hour call to go through it with your team",
-	],
-	excluded: [],
-	notes: [],
-	mailto: buildMailto("Production review", applicationBody),
-};
-
-/** Stage 4: users run the product and need to get better at it. */
+/** Support: make them successful once they run it. */
 export const workshopOffer: PartnershipOffer = {
 	id: "customer-workshops",
 	name: "Customer workshops",
-	label: "Keeping users",
+	label: "Support",
 	price: "Quoted per workshop",
 	priceShort: "Quoted",
 	cadence: "Scoped with you: format, length and audience.",
@@ -301,16 +280,14 @@ export const workshopOffer: PartnershipOffer = {
 	mailto: buildMailto("Customer workshops", applicationBody),
 };
 
-export type AdoptionStageId =
-	| "discover"
-	| "first-success"
-	| "production"
-	| "keep";
+export type AdoptionStageId = "awareness" | "adoption" | "support";
 
 export interface AdoptionStage {
 	id: AdoptionStageId;
-	/** Short stage name, e.g. "Getting found". */
+	/** Stage name, e.g. "Awareness". */
 	stage: string;
+	/** What the stage is for, e.g. "Get people interested". */
+	tagline: string;
 	/** The problem the buyer recognises. */
 	problem: string;
 	/** Who usually holds the budget for this stage. */
@@ -322,51 +299,46 @@ export interface AdoptionStage {
 }
 
 /**
- * The four ways in. Each stage is a different problem with a different
- * budget holder; a buyer starts wherever their engineers are stuck.
+ * The three ways in: awareness, adoption and support. Each stage is a
+ * different problem with a different budget holder; a buyer starts wherever
+ * their engineers are stuck.
  */
 export const adoptionStages: AdoptionStage[] = [
 	{
-		id: "discover",
-		stage: "Getting found",
+		id: "awareness",
+		stage: "Awareness",
+		tagline: "Get people interested",
 		problem:
 			"Engineers haven't heard of you, or don't see why they'd reach for you.",
 		owner: "Usually marketing, developer relations or demand generation.",
 		offer: fieldReportOffer,
 		route: "Field report",
 		cta: "Ask about a field report",
-		ctaLocation: "stage-discover",
+		ctaLocation: "stage-awareness",
 	},
 	{
-		id: "first-success",
-		stage: "First success",
-		problem: "Engineers try you and give up before it works.",
+		id: "adoption",
+		stage: "Adoption",
+		tagline: "Get them hooked",
+		problem:
+			"Engineers try you and give up before it works, or stall before running it for real.",
 		owner:
-			"Usually developer relations or developer experience, with product owning the fixes.",
+			"Usually developer relations, developer experience or product, with product owning the fixes.",
 		offer: fitProofReview,
 		route: "Product review",
-		cta: "Ask about a getting-started review",
-		ctaLocation: "stage-first-success",
+		cta: "Ask about an adoption review",
+		ctaLocation: "stage-adoption",
 	},
 	{
-		id: "production",
-		stage: "Production",
-		problem: "Engineers get it working, then stall before running it for real.",
-		owner: "Usually product or solutions engineering.",
-		offer: productionReviewOffer,
-		route: "Production review",
-		cta: "Ask about a production review",
-		ctaLocation: "stage-production",
-	},
-	{
-		id: "keep",
-		stage: "Keeping users",
+		id: "support",
+		stage: "Support",
+		tagline: "Make them successful",
 		problem: "Your users run you in production and need to get better at it.",
 		owner: "Usually customer success, education or community.",
 		offer: workshopOffer,
 		route: "Customer workshops",
 		cta: "Ask about workshops",
-		ctaLocation: "stage-keep",
+		ctaLocation: "stage-support",
 	},
 ];
 
@@ -479,7 +451,7 @@ export const partnershipTerms = [
 
 /** What the review covers. Answered in the partnerships FAQ. */
 export const productReviewScope =
-	"We agree the product areas, who I'm acting as, and how far I go: a first working result for a getting-started review, or further for a production review, like a highly available setup, a backup and restore, or an upgrade. One review can follow up to two kinds of user, such as a platform team and the application developers they serve, or your open-source project and its hosted product.";
+	"We agree the product areas, who I'm acting as, and how far I go: a first working result, or as far as production, like a highly available setup, a backup and restore, or an upgrade. One review can follow up to two kinds of user, such as a platform team and the application developers they serve, or your open-source project and its hosted product.";
 
 /** A lighter way to back the content, without the stage work. */
 export const supporterOffer: PartnershipOffer = {
@@ -507,7 +479,6 @@ export const supporterOffer: PartnershipOffer = {
 export const partnershipTiers = [
 	fieldReportOffer,
 	fitProofReview,
-	productionReviewOffer,
 	workshopOffer,
 	ongoingPartnershipOffer,
 ] as const;
@@ -517,7 +488,6 @@ export const partnershipTierNames = partnershipTiers.map((offer) => offer.name);
 export const applicationPaths = [
 	"Field report",
 	"Product review",
-	"Production review",
 	"Customer workshops",
 	"Ongoing partnership",
 	"Community supporter",
@@ -533,7 +503,6 @@ export const notSurePath = "Not sure yet" satisfies ApplicationPath;
 export const applicationPathLabels: Record<ApplicationPath, string> = {
 	"Field report": fieldReportOffer.name,
 	"Product review": fitProofReview.name,
-	"Production review": productionReviewOffer.name,
 	"Customer workshops": workshopOffer.name,
 	"Ongoing partnership": ongoingPartnershipOffer.name,
 	"Community supporter": supporterOffer.name,
@@ -552,7 +521,6 @@ export const applicationPathDeals: Record<
 > = {
 	"Field report": { offer: "Field report", valueUsd: 10000 },
 	"Product review": { offer: "Review", valueUsd: 5000 },
-	"Production review": { offer: "Review", valueUsd: 5000 },
 	"Customer workshops": { offer: "Workshop", valueUsd: 0 },
 	"Ongoing partnership": {
 		offer: "Partnership (Quarterly)",
@@ -565,7 +533,8 @@ export const applicationPathDeals: Record<
 
 /**
  * Route values from earlier links that still preselect the right option.
- * "First-run review" and "Fit & Proof Review" both meant the paid review;
+ * "First-run review", "Fit & Proof Review" and "Production review" all
+ * mean the adoption review;
  * the 90-day and annual plans are now the ongoing partnership.
  */
 export const legacyApplicationPaths: Record<string, ApplicationPath> = {
@@ -573,6 +542,7 @@ export const legacyApplicationPaths: Record<string, ApplicationPath> = {
 	"90-day partnership": "Ongoing partnership",
 	"Annual plan": "Ongoing partnership",
 	"Annual partnership": "Ongoing partnership",
+	"Production review": "Product review",
 	"First-run review": "Product review",
 	"Fit & Proof Review": "Product review",
 };
@@ -606,14 +576,13 @@ export const decisionBriefMailto = partnershipFitMailto;
  * mailto has no recipient so they choose who it goes to.
  */
 const teamBriefBody = [
-	"I found a way to get engineers further with our product.",
+	"I found a way to get engineers interested in our product, hooked on it, and successful with it.",
 	"",
-	"David Flanagan of Rawkode Academy works with developer tool companies at whichever stage engineers get stuck:",
+	"David Flanagan of Rawkode Academy works with developer tool companies on three stages:",
 	"",
-	`- Getting found: ${fieldReportOffer.name}, ${fieldReportOffer.price}. He solves real problems of his own with our product, in public, labelled as paid, then tells us privately what he'd change.`,
-	`- First success: ${fitProofReview.name}, ${fitProofReview.price}, delivered in 10 business days. A ranked list of where engineers get stuck and what to fix first.`,
-	`- Production: ${productionReviewOffer.name}, ${productionReviewOffer.price}. The same review, aimed at the path to production.`,
-	`- Keeping users: ${workshopOffer.name}, ${workshopOffer.price.toLowerCase()}.`,
+	`- Awareness: ${fieldReportOffer.name}, ${fieldReportOffer.price}. He solves real problems of his own with our product, in public, labelled as paid, then tells us privately what he'd change.`,
+	`- Adoption: ${fitProofReview.name}, ${fitProofReview.price}, delivered in 10 business days. A ranked list of where engineers get stuck, from first try to production, and what to fix first.`,
+	`- Support: ${workshopOffer.name}, ${workshopOffer.price.toLowerCase()}. Hands-on workshops and troubleshooting sessions for our users.`,
 	"",
 	`Then, if it's useful: ${ongoingPartnershipOffer.name}, ${ongoingPartnershipOffer.price}. ${partnershipReviewCredit}`,
 	"",

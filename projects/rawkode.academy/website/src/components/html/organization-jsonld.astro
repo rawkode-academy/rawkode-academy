@@ -4,7 +4,6 @@ import {
 	fitProofReview,
 	ongoingPartnershipOffer,
 	type PartnershipOffer,
-	productionReviewOffer,
 	supporterOffer,
 } from "@/lib/partnerships";
 
@@ -87,7 +86,6 @@ const organizationSchema = {
 	offers: [
 		partnerOffer(fieldReportOffer, "#stages"),
 		partnerOffer(fitProofReview, "#stages"),
-		partnerOffer(productionReviewOffer, "#stages"),
 		partnerOffer(ongoingPartnershipOffer, "#pricing"),
 		{
 			...partnerOffer(supporterOffer, "#supporter"),

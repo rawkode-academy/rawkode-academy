@@ -122,7 +122,7 @@ const submittedValues =
 		: emptySubmission;
 
 const partnershipHeroTitle =
-	"Get engineers further with your product, wherever they're stuck.";
+	"Get engineers interested in your product, hooked on it, and successful with it.";
 
 // Content is optional on this page: the enquiry form must keep working when
 // the content gateway is unavailable.
@@ -231,7 +231,7 @@ const faqs = [
 	{
 		question: "Who on our side should own it?",
 		answer:
-			"It depends on the stage: marketing or developer relations for a field report, developer experience or product for a getting-started review, product or solutions engineering for a production review, and customer success or education for workshops.",
+			"It depends on the stage: marketing or developer relations for awareness, developer experience or product for adoption, and customer success or education for support.",
 	},
 	{
 		question: "Why are places limited?",
@@ -281,7 +281,7 @@ const partnerQuotes = (
 	<EditorialShell
 		eyebrow="Partnerships"
 		title={partnershipHeroTitle}
-		lede="I teach engineers new tools, live and unscripted. Work with me at the stage your engineers are stuck: finding you, getting it working, running it in production, or getting better with it."
+		lede="I teach engineers new tools, live and unscripted. Work with me on awareness, adoption or support, starting wherever your engineers are stuck."
 	>
 		<dl class="partnership-facts" slot="intro">
 			<div>
@@ -295,7 +295,7 @@ const partnerQuotes = (
 		</dl>
 		<div class="partnership-hero-actions" slot="actions">
 			<a id="partnership-hero-cta" class="editorial-button" href={notSureApplyHref} data-apply-path={notSurePath} data-partnership-cta data-cta="tell_me_where_youre_stuck" data-cta-location="hero">Tell me where you're stuck</a>
-			<a class="partnership-text-link" href="#stages">See the four stages</a>
+			<a class="partnership-text-link" href="#stages">See the three stages</a>
 		</div>
 		<div class="partnership-watch" slot="actions">
 			<p id="partnership-watch-title">Watch me try a new tool live</p>
@@ -345,7 +345,7 @@ const partnerQuotes = (
 			<div class="partnership-pricing__header">
 				<div class="editorial-section__header">
 					<h2 id="stages-title" class="editorial-section__title">Start where your engineers are stuck</h2>
-					<p class="editorial-section__lede">Four stages of adoption, each with its own first piece of work. Pick one; you don't need the others first.</p>
+					<p class="editorial-section__lede">Awareness, adoption and support, each with its own first piece of work. Pick one; you don't need the others first.</p>
 					<p class="partnership-label">{partnershipCapacity.places} partner places · {partnershipCapacity.newStartsPerMonth} new starts a month</p>
 				</div>
 				<p class="partnership-credit">{partnershipAdvice}</p>
@@ -366,7 +366,7 @@ const partnerQuotes = (
 								data-pinned-cta={stage.cta}
 							>
 								<p class="partnership-stage__kicker"><span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span> {stage.stage}</p>
-								<p class="partnership-stage__problem">{stage.problem}</p>
+								<p class="partnership-stage__problem"><strong>{stage.tagline}.</strong> {stage.problem}</p>
 								<div class="partnership-plan__heading">
 									<h3 id={`plan-${stage.offer.id}`}>{stage.offer.name}</h3>
 								</div>
@@ -394,7 +394,7 @@ const partnerQuotes = (
 				})}
 			</ol>
 			<div class="partnership-review-preview">
-				<p class="partnership-label">What a getting-started or production review hands over</p>
+				<p class="partnership-label">What an adoption review hands over</p>
 				<ReviewPreview placement="always" />
 			</div>
 		</section>

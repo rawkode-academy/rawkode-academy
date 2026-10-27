@@ -43,11 +43,11 @@ test("partnership page follows the approved redesign", () => {
 	assert.match(page, /eyebrow="Partnerships"/);
 	assert.match(
 		page,
-		/Get engineers further with your product, wherever they're stuck\./,
+		/Get engineers interested in your product, hooked on it, and successful with it\./,
 	);
 	assert.match(
 		page,
-		/I teach engineers new tools, live and unscripted\. Work with me at the stage your engineers are stuck/,
+		/I teach engineers new tools, live and unscripted\. Work with me on awareness, adoption or support/,
 	);
 	assert.match(page, /<dt>Start at<\/dt>/);
 	assert.match(page, /<dt>From<\/dt>/);
@@ -97,9 +97,9 @@ test("partnership page follows the approved redesign", () => {
 		/Any size of company, from a first open-source release to a public company\./,
 	);
 
-	// Stages: four ways in, none of them a gate.
+	// Stages: awareness, adoption and support, none of them a gate.
 	assert.match(page, /adoptionStages\.map/);
-	for (const stage of ["discover", "first-success", "production", "keep"]) {
+	for (const stage of ["awareness", "adoption", "support"]) {
 		assert.match(partnershipCopy, new RegExp(`id: "${stage}"`));
 		assert.match(partnershipCopy, new RegExp(`ctaLocation: "stage-${stage}"`));
 	}
@@ -232,7 +232,7 @@ test("partnership page follows the approved redesign", () => {
 	assert.match(partnershipCopy, /"A ranked list of what to fix first"/);
 	assert.match(
 		partnershipCopy,
-		/Start with a \$10,000 field report, a \$5,000 review or a customer workshop/,
+		/Start with a \$10,000 field report, a \$5,000 adoption review or a customer workshop/,
 	);
 	assert.match(partnershipCopy, /export const productReviewScope =/);
 	assert.match(letsChat, /David reads every enquiry and replies by email\./);

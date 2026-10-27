@@ -33,7 +33,6 @@ const partnerships = loadModule("src/lib/partnerships.ts") as {
 	applicationPaths: readonly [
 		"Field report",
 		"Product review",
-		"Production review",
 		"Customer workshops",
 		"Ongoing partnership",
 		"Not sure yet",
@@ -214,7 +213,6 @@ describe("partnership Attio action", () => {
 	it.each([
 		["Field report", 10000, "Field report"],
 		["Product review", 5000, "Review"],
-		["Production review", 5000, "Review"],
 		["Customer workshops", 0, "Workshop"],
 		["Not sure yet", 5000, "Review"],
 		["Ongoing partnership", 12000, "Partnership (Quarterly)"],
@@ -362,7 +360,6 @@ describe("partnership Attio action", () => {
 		expect([...partnerships.applicationPaths]).toEqual([
 			"Field report",
 			"Product review",
-			"Production review",
 			"Customer workshops",
 			"Ongoing partnership",
 			"Community supporter",
@@ -372,7 +369,6 @@ describe("partnership Attio action", () => {
 		expect(partnerships.applicationPathDeals).toEqual({
 			"Field report": { offer: "Field report", valueUsd: 10000 },
 			"Product review": { offer: "Review", valueUsd: 5000 },
-			"Production review": { offer: "Review", valueUsd: 5000 },
 			"Customer workshops": { offer: "Workshop", valueUsd: 0 },
 			"Not sure yet": { offer: "Review", valueUsd: 5000 },
 			"Ongoing partnership": {
@@ -396,6 +392,9 @@ describe("partnership Attio action", () => {
 		);
 		expect(partnerships.resolveApplicationPath("Annual partnership")).toBe(
 			"Ongoing partnership",
+		);
+		expect(partnerships.resolveApplicationPath("Production review")).toBe(
+			"Product review",
 		);
 		expect(partnerships.resolveApplicationPath("Annual plan")).toBe(
 			"Ongoing partnership",
@@ -511,7 +510,7 @@ describe("partnership Attio action", () => {
 			content: "Please review our Kubernetes quick start.",
 		});
 		expect(requestBody(calls[6]!).data.values).toMatchObject({
-			name: "Analytical Engine: Getting-started review",
+			name: "Analytical Engine: Adoption review",
 			value: 5000,
 			offer: "Review",
 		});
