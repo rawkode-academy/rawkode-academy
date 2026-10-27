@@ -95,12 +95,16 @@ await setContentCache(Astro, {
 });
 Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 
+// Only the unfiltered first page is a search landing page. Later pages and
+// search results stay crawlable (follow) but out of the index, matching /read.
+const noindex = archive.query.length > 0 || archive.page > 1;
+
 const pageTitle = "Watch Cloud Native Sessions";
 const pageDescription =
 	"Recorded sessions and live builds from the Rawkode Academy cloud native archive.";
 ---
 
-<Page title={pageTitle} description={pageDescription}>
+<Page title={pageTitle} description={pageDescription} noindex={noindex}>
 	<Fragment slot="extra-head">
 		<link rel="alternate" type="application/rss+xml" title="Rawkode Academy - Videos (RSS)" href="/api/feeds/videos.xml" />
 		<link rel="alternate" type="application/atom+xml" title="Rawkode Academy - Videos (Atom)" href="/api/feeds/videos.atom" />
