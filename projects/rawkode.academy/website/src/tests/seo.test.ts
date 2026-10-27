@@ -853,6 +853,8 @@ describe("Crawlability and Sitemaps", () => {
 		for (const path of ROBOTS_DISALLOWS) {
 			expect(body).toContain(`Disallow: ${path}`);
 		}
+		// Search results carry noindex; blocking the crawl would hide it.
+		expect(body).not.toMatch(/^Disallow: \/search$/m);
 	});
 
 	it("keeps all intended sitemap sections in the index, even if a section is empty", async () => {
