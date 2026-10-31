@@ -2,7 +2,33 @@ import { readFileSync } from "node:fs";
 import { DOMRect, type HTMLElement, Window } from "happy-dom";
 import ts from "typescript";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { adoptionStages } from "@/lib/partnerships";
+import {
+	bespokeProjectOffer,
+	ongoingPartnershipOffer,
+	partnershipAddOns,
+} from "@/lib/partnerships";
+
+const offers = [
+	{
+		...ongoingPartnershipOffer,
+		route: "Partnership",
+		cta: "Ask about a partnership",
+		ctaName: "ask_about_a_partnership",
+	},
+	{
+		...bespokeProjectOffer,
+		route: "Bespoke project",
+		cta: "Discuss a project",
+		ctaName: "discuss_a_project",
+	},
+	{
+		name: partnershipAddOns[0].title,
+		price: partnershipAddOns[0].price,
+		route: "Community challenge series",
+		cta: "Ask about a challenge series",
+		ctaName: "ask_about_a_challenge_series",
+	},
+];
 
 // Exercise the page's actual browser script with layout supplied by the test.
 const page = readFileSync(
@@ -45,22 +71,22 @@ beforeEach(() => {
 	capture = vi.fn();
 	heroBottom = -20;
 	enquiryTop = 5000;
-	positions = adoptionStages.map(() => ({ top: 2000, height: 1600 }));
+	positions = offers.map(() => ({ top: 2000, height: 1600 }));
 	browser.document.body.innerHTML = `
 		<a id="partnership-hero-cta">Enquire</a>
-		${adoptionStages
+		${offers
 			.map(
-				(stage) => `<article
-			data-pinned-name="${stage.offer.name}" data-pinned-price="${stage.offer.price}"
-			data-pinned-route="${stage.route}" data-pinned-href="?route=${encodeURIComponent(stage.route)}#enquiry-form"
-			data-pinned-cta="${stage.cta}" data-pinned-cta-name="${stage.ctaName}"></article>`,
+				(offer) => `<article
+			data-pinned-name="${offer.name}" data-pinned-price="${offer.price}"
+			data-pinned-route="${offer.route}" data-pinned-href="?route=${encodeURIComponent(offer.route)}#enquiry-form"
+			data-pinned-cta="${offer.cta}" data-pinned-cta-name="${offer.ctaName}"></article>`,
 			)
 			.join("")}
 		<section id="apply"></section>
-		<div data-partnership-pinned><p><strong>Work with me</strong><span>One project or ongoing</span></p>
-			<a href="?route=Not%20sure%20yet#enquiry-form" data-apply-path="Not sure yet"
-				data-partnership-cta data-cta="partnership_enquiry" data-cta-location="pinned"
-				tabindex="-1">Tell me what you need</a>
+		<div data-partnership-pinned><p><strong>Partnership</strong><span>${ongoingPartnershipOffer.price}</span></p>
+			<a href="?route=Partnership#enquiry-form" data-apply-path="Partnership"
+				data-partnership-cta data-cta="ask_about_a_partnership" data-cta-location="pinned"
+				tabindex="-1">Ask about a partnership</a>
 		</div>`;
 	browser.document.getElementById(
 		"partnership-hero-cta",
@@ -90,15 +116,15 @@ describe("partnership pinned enquiry", () => {
 		positions[0] = { top: -400, height: 1600 };
 		scroll();
 		expect(pinned().hasAttribute("data-visible")).toBe(true);
-		expect(link().textContent).toBe("Ask about hands-on content");
-		expect(link().dataset.applyPath).toBe("Hands-on content");
-		expect(link().href).toContain("route=Hands-on%20content#enquiry-form");
+		expect(link().textContent).toBe("Ask about a partnership");
+		expect(link().dataset.applyPath).toBe("Partnership");
+		expect(link().href).toContain("route=Partnership#enquiry-form");
 		link().addEventListener("click", (event) => event.preventDefault());
 		link().click();
 		expect(capture).toHaveBeenCalledWith(
 			"cta_clicked",
 			expect.objectContaining({
-				cta: "ask_about_hands_on_content",
+				cta: "ask_about_a_partnership",
 				location: "pinned",
 			}),
 		);
@@ -108,22 +134,22 @@ describe("partnership pinned enquiry", () => {
 		positions[0] = { top: -1500, height: 1600 };
 		positions[2] = { top: 100, height: 900 };
 		scroll();
-		expect(link().dataset.applyPath).toBe("Developer support");
+		expect(link().dataset.applyPath).toBe("Community challenge series");
 		positions[0] = { top: -400, height: 1600 };
 		positions[2] = { top: 1200, height: 900 };
 		scroll();
-		expect(link().dataset.applyPath).toBe("Hands-on content");
+		expect(link().dataset.applyPath).toBe("Partnership");
 	});
 
-	it("returns to the general enquiry between offers", () => {
+	it("returns to the partnership enquiry between scoped extras", () => {
 		positions[1] = { top: 0, height: 1000 };
 		scroll();
 		positions[1] = { top: -1200, height: 1000 };
 		scroll();
-		expect(link().textContent).toBe("Tell me what you need");
-		expect(link().dataset.applyPath).toBe("Not sure yet");
-		expect(link().dataset.cta).toBe("partnership_enquiry");
-		expect(pinned().querySelector("strong")!.textContent).toBe("Work with me");
+		expect(link().textContent).toBe("Ask about a partnership");
+		expect(link().dataset.applyPath).toBe("Partnership");
+		expect(link().dataset.cta).toBe("ask_about_a_partnership");
+		expect(pinned().querySelector("strong")!.textContent).toBe("Partnership");
 	});
 
 	it("keeps the hidden bar out of the tab order at the hero and enquiry form", () => {

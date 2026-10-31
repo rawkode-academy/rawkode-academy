@@ -54,7 +54,7 @@ const input = {
 	name: "Ada Lovelace",
 	email: "ada@analytical.engine",
 	company: "Analytical Engine",
-	path: "Adoption review",
+	path: "Partnership",
 	message: "Please review our Kubernetes quick start.",
 	website: "",
 };
@@ -198,7 +198,7 @@ describe("partnership email action", () => {
 		expect(message.html).not.toContain("<img");
 		expect(message.html).not.toContain("<script");
 		expect(message.html).toContain("white-space: pre-wrap");
-		expect(message.subject).toBe("Partnership enquiry: Adoption review");
+		expect(message.subject).toBe("Partnership enquiry: Partnership");
 		expect(message).not.toHaveProperty("bcc");
 		expect(message).not.toHaveProperty("cc");
 		expect(message).not.toHaveProperty("headers");
@@ -281,15 +281,21 @@ describe("partnership enquiry routes", () => {
 	});
 
 	it.each([
-		["Customer workshops", "Developer support"],
-		["Product review", "Adoption review"],
-		["First-run review", "Adoption review"],
-		["Fit & Proof Review", "Adoption review"],
-		["Production review", "Adoption review"],
-		["Annual partnership", "Ongoing partnership"],
-		["Annual plan", "Ongoing partnership"],
-		["90-day partnership", "Ongoing partnership"],
-		["Adoption Advisory", "Ongoing partnership"],
+		["Customer workshops", "Bespoke project"],
+		["Event content and hosting", "Bespoke project"],
+		["Community supporter", "Bespoke project"],
+		["Hands-on content", "Partnership"],
+		["Developer support", "Partnership"],
+		["Ongoing partnership", "Partnership"],
+		["Product review", "Partnership"],
+		["Adoption review", "Partnership"],
+		["First-run review", "Partnership"],
+		["Fit & Proof Review", "Partnership"],
+		["Production review", "Partnership"],
+		["Annual partnership", "Partnership"],
+		["Annual plan", "Partnership"],
+		["90-day partnership", "Partnership"],
+		["Adoption Advisory", "Partnership"],
 	])("maps the legacy %s link to %s", (previous, current) => {
 		expect(partnerships.resolveApplicationPath(previous)).toBe(current);
 	});

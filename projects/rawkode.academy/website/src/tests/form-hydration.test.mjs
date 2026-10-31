@@ -286,12 +286,8 @@ for (const fixture of fixtures) {
 					(option) => option.textContent,
 				),
 				[
-					"Hands-on content",
-					"Adoption review",
-					"Developer support",
-					"Event content and hosting",
-					"Ongoing partnership",
-					"Community supporter",
+					"Partnership",
+					"Bespoke project",
 					"Community challenge series",
 					"Not sure yet",
 				],
@@ -421,7 +417,7 @@ for (const fixture of fixtures) {
 					name: "Test Person",
 					email: "person@example.test",
 					company: "Test Company",
-					path: "Not sure yet",
+					path: "Partnership",
 					message: "Our quick start loses Kubernetes users.",
 					website: "",
 				});
@@ -468,8 +464,8 @@ for (const fixture of fixtures) {
 					["enquiry_form_started", "enquiry_form_submitted"],
 				);
 				assert.equal(capturedEvents[1].properties.form, "partnership_enquiry");
-				assert.equal(capturedEvents[1].properties.route, "Not sure yet");
-				assert.equal(capturedEvents[1].properties.offer, null);
+				assert.equal(capturedEvents[1].properties.route, "Partnership");
+				assert.equal(capturedEvents[1].properties.offer, "Partnership");
 			} else {
 				assert.equal(host.querySelector("[type=checkbox]").checked, false);
 				assert.equal(host.querySelector("button[type=submit]").disabled, true);
@@ -757,10 +753,7 @@ test("partnership enquiry keeps rejected values and describes each field error",
 			form.querySelector("[name=company]").value,
 			"Analytical Engine",
 		);
-		assert.equal(
-			form.querySelector("[name=path]").value,
-			"Ongoing partnership",
-		);
+		assert.equal(form.querySelector("[name=path]").value, "Partnership");
 		assert.equal(form.querySelector("[name=message]").value, "   ");
 		assert.equal(
 			form.querySelector("[name=name]").getAttribute("maxlength"),

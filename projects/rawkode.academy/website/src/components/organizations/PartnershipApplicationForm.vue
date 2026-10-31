@@ -156,7 +156,7 @@ const props = withDefaults(
 		serverFieldErrors?: Record<string, string>;
 	}>(),
 	{
-		initialPath: "Not sure yet",
+		initialPath: "Partnership",
 		submittedValues: () => ({}),
 		serverFieldErrors: () => ({}),
 	},
