@@ -283,7 +283,7 @@ describe("partnership enquiry routes", () => {
 	it.each([
 		["Customer workshops", "Bespoke project"],
 		["Event content and hosting", "Bespoke project"],
-		["Community supporter", "Bespoke project"],
+		["Community supporter", "Community Support"],
 		["Hands-on content", "Partnership"],
 		["Developer support", "Partnership"],
 		["Ongoing partnership", "Partnership"],

@@ -4,11 +4,18 @@ import ts from "typescript";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	bespokeProjectOffer,
+	communitySupportOffer,
 	ongoingPartnershipOffer,
 	partnershipAddOns,
 } from "@/lib/partnerships";
 
 const offers = [
+	{
+		...communitySupportOffer,
+		route: "Community Support",
+		cta: "Support the community",
+		ctaName: "support_the_community",
+	},
 	{
 		...ongoingPartnershipOffer,
 		route: "Partnership",
@@ -83,10 +90,10 @@ beforeEach(() => {
 			)
 			.join("")}
 		<section id="apply"></section>
-		<div data-partnership-pinned><p><strong>Partnership</strong><span>${ongoingPartnershipOffer.price}</span></p>
-			<a href="?route=Partnership#enquiry-form" data-apply-path="Partnership"
-				data-partnership-cta data-cta="ask_about_a_partnership" data-cta-location="pinned"
-				tabindex="-1">Ask about a partnership</a>
+		<div data-partnership-pinned><p><strong>Community Support</strong><span>${communitySupportOffer.price}</span></p>
+			<a href="?route=Community%20Support#enquiry-form" data-apply-path="Community Support"
+				data-partnership-cta data-cta="support_the_community" data-cta-location="pinned"
+				tabindex="-1">Support the community</a>
 		</div>`;
 	browser.document.getElementById(
 		"partnership-hero-cta",
@@ -116,15 +123,15 @@ describe("partnership pinned enquiry", () => {
 		positions[0] = { top: -400, height: 1600 };
 		scroll();
 		expect(pinned().hasAttribute("data-visible")).toBe(true);
-		expect(link().textContent).toBe("Ask about a partnership");
-		expect(link().dataset.applyPath).toBe("Partnership");
-		expect(link().href).toContain("route=Partnership#enquiry-form");
+		expect(link().textContent).toBe("Support the community");
+		expect(link().dataset.applyPath).toBe("Community Support");
+		expect(link().href).toContain("route=Community%20Support#enquiry-form");
 		link().addEventListener("click", (event) => event.preventDefault());
 		link().click();
 		expect(capture).toHaveBeenCalledWith(
 			"cta_clicked",
 			expect.objectContaining({
-				cta: "ask_about_a_partnership",
+				cta: "support_the_community",
 				location: "pinned",
 			}),
 		);
@@ -132,24 +139,26 @@ describe("partnership pinned enquiry", () => {
 
 	it("chooses the most visible card after an anchor jump in either direction", () => {
 		positions[0] = { top: -1500, height: 1600 };
-		positions[2] = { top: 100, height: 900 };
+		positions[3] = { top: 100, height: 900 };
 		scroll();
 		expect(link().dataset.applyPath).toBe("Community challenge series");
 		positions[0] = { top: -400, height: 1600 };
-		positions[2] = { top: 1200, height: 900 };
+		positions[3] = { top: 1200, height: 900 };
 		scroll();
-		expect(link().dataset.applyPath).toBe("Partnership");
+		expect(link().dataset.applyPath).toBe("Community Support");
 	});
 
-	it("returns to the partnership enquiry between scoped extras", () => {
+	it("returns to community support between scoped extras", () => {
 		positions[1] = { top: 0, height: 1000 };
 		scroll();
 		positions[1] = { top: -1200, height: 1000 };
 		scroll();
-		expect(link().textContent).toBe("Ask about a partnership");
-		expect(link().dataset.applyPath).toBe("Partnership");
-		expect(link().dataset.cta).toBe("ask_about_a_partnership");
-		expect(pinned().querySelector("strong")!.textContent).toBe("Partnership");
+		expect(link().textContent).toBe("Support the community");
+		expect(link().dataset.applyPath).toBe("Community Support");
+		expect(link().dataset.cta).toBe("support_the_community");
+		expect(pinned().querySelector("strong")!.textContent).toBe(
+			"Community Support",
+		);
 	});
 
 	it("keeps the hidden bar out of the tab order at the hero and enquiry form", () => {

@@ -3,7 +3,7 @@ import type { ContentEntry } from "@/lib/live-content/types";
 
 export const SUPPORTERS_PATH = "/supporters";
 /** Where organisations learn how to become a community supporter. */
-export const BECOME_A_SUPPORTER_PATH = "/organizations/partnerships#bespoke";
+export const BECOME_A_SUPPORTER_PATH = "/organizations/partnerships#supporter";
 
 /**
  * The active community supporter of a technology, if any. The supporters

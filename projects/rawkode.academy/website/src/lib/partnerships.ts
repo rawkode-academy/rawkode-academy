@@ -228,6 +228,27 @@ export const independenceRules = [
 export const partnershipAdvice =
 	"We choose the work your users need and agree the priorities, outputs and cadence for each quarter.";
 
+export const communitySupportOffer: PartnershipOffer = {
+	id: "community-support",
+	name: "Community Support",
+	label: "Community Support",
+	price: "$1,000 a month",
+	priceShort: "$1k/month",
+	cadence: "No minimum term. Or $9,000 for twelve months, agreed up front.",
+	summary:
+		"Help fund free tutorials, live streams and shows for cloud native engineers, with your company credited alongside the work.",
+	included: [
+		"A supporter badge and docs links on your Academy technology page",
+		"Your latest announcement, one at a time, on your technology page and its videos",
+		"Your logo on the community supporters wall",
+	],
+	excluded: [],
+	notes: [
+		"Support funds the Academy's free education. Paid placements are labelled and editorial conclusions stay independent.",
+	],
+	mailto: buildMailto("Community Support", applicationBody),
+};
+
 export const ongoingPartnershipOffer: PartnershipOffer = {
 	id: "partnership",
 	name: "Partnership",
@@ -353,6 +374,7 @@ export const productReviewScope =
 	"Within the partnership, we agree the product areas, intended users and workflows to review, from a first working result to production tasks such as backup and restore or upgrades. The plan defines the evidence, fixes and any later retest.";
 
 export const partnershipTiers = [
+	communitySupportOffer,
 	ongoingPartnershipOffer,
 	bespokeProjectOffer,
 	communityChallengeOffer,
@@ -360,6 +382,7 @@ export const partnershipTiers = [
 export const partnershipTierNames = partnershipTiers.map((offer) => offer.name);
 
 export const applicationPaths = [
+	"Community Support",
 	"Partnership",
 	"Bespoke project",
 	"Community challenge series",
@@ -370,6 +393,7 @@ export const productReviewPath = "Partnership" satisfies ApplicationPath;
 export const notSurePath = "Not sure yet" satisfies ApplicationPath;
 
 export const applicationPathLabels: Record<ApplicationPath, string> = {
+	"Community Support": communitySupportOffer.name,
 	Partnership: ongoingPartnershipOffer.name,
 	"Bespoke project": bespokeProjectOffer.name,
 	"Community challenge series": communityChallengeOffer.name,
@@ -392,7 +416,7 @@ export const legacyApplicationPaths: Record<string, ApplicationPath> = {
 	"Annual partnership": "Partnership",
 	"Event content and hosting": "Bespoke project",
 	"Customer workshops": "Bespoke project",
-	"Community supporter": "Bespoke project",
+	"Community supporter": "Community Support",
 };
 
 export const resolveApplicationPath = (
@@ -417,7 +441,9 @@ export const decisionBriefTemplate = applicationBody;
 export const decisionBriefMailto = partnershipFitMailto;
 
 const teamBriefBody = [
-	"Rawkode Academy partnership",
+	"Rawkode Academy community support and partnerships",
+	"",
+	`Community Support funds free tutorials, live streams and shows. ${communitySupportOffer.price}, or $9,000 for twelve months. Includes a supporter badge, docs links, one latest announcement and a logo on the supporters wall. Editorial conclusions stay independent.`,
 	"",
 	"David Flanagan works alongside our team across Awareness, Adoption, and Support. We agree the priorities, outputs and cadence each quarter.",
 	"",

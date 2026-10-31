@@ -2,6 +2,7 @@
 import {
 	bespokeProjectOffer,
 	communityChallengeOffer,
+	communitySupportOffer,
 	ongoingPartnershipOffer,
 	type PartnershipOffer,
 } from "@/lib/partnerships";
@@ -82,6 +83,16 @@ const organizationSchema = {
 		"Site Reliability Engineering",
 	],
 	offers: [
+		{
+			...partnerOffer(communitySupportOffer, "#supporter"),
+			priceSpecification: {
+				"@type": "UnitPriceSpecification",
+				price: usdAmount(communitySupportOffer.price),
+				priceCurrency: "USD",
+				unitText: "month",
+				unitCode: "MON",
+			},
+		},
 		{
 			...partnerOffer(ongoingPartnershipOffer, "#pricing"),
 			priceSpecification: {

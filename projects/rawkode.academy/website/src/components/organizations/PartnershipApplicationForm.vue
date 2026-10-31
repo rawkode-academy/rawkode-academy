@@ -156,7 +156,7 @@ const props = withDefaults(
 		serverFieldErrors?: Record<string, string>;
 	}>(),
 	{
-		initialPath: "Partnership",
+		initialPath: "Community Support",
 		submittedValues: () => ({}),
 		serverFieldErrors: () => ({}),
 	},
@@ -188,7 +188,7 @@ const email = ref(submittedText(props.submittedValues.email));
 const company = ref(submittedText(props.submittedValues.company));
 const submittedPath = props.submittedValues.path ?? "";
 const path = ref<ApplicationPath>(
-	isApplicationPath(submittedPath) ? submittedPath : props.initialPath,
+	resolveApplicationPath(submittedPath) ?? props.initialPath,
 );
 const message = ref(submittedText(props.submittedValues.message));
 const website = ref("");

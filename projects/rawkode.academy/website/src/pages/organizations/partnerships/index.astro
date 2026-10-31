@@ -20,6 +20,7 @@ import {
 	type ApplicationPath,
 	adoptionStages,
 	bespokeProjectOffer,
+	communitySupportOffer,
 	independenceRules,
 	ongoingPartnershipOffer,
 	ongoingQuarterExample,
@@ -46,9 +47,10 @@ Astro.response.headers.set("Cache-Control", "private, no-cache");
 const applyHref = (path: ApplicationPath) =>
 	`/organizations/partnerships?route=${encodeURIComponent(path)}#enquiry-form`;
 const partnershipPath = "Partnership" satisfies ApplicationPath;
-const partnershipApplyHref = applyHref(partnershipPath);
+const communitySupportPath = "Community Support" satisfies ApplicationPath;
+const communitySupportApplyHref = applyHref(communitySupportPath);
 const initialPath =
-	resolveApplicationPath(Astro.url.searchParams.get("route")) ?? partnershipPath;
+	resolveApplicationPath(Astro.url.searchParams.get("route")) ?? communitySupportPath;
 const submittedEnquiry = Astro.getActionResult(actions.partnership.applyForm);
 const submittedData = submittedEnquiry?.data;
 const enquiryReceived =
@@ -132,10 +134,11 @@ const splitPrice = (price: string) => {
 
 const ongoingPath = partnershipPath;
 const ongoingPrice = splitPrice(ongoingPartnershipOffer.price);
+const communitySupportPrice = splitPrice(communitySupportOffer.price);
 const challengeOffer = partnershipAddOns[0];
 
 const pageSections = [
-	{ id: "pricing", label: "Partnership" },
+	{ id: "pricing", label: "Support & partnership" },
 	{ id: "stages", label: "The work" },
 	{ id: "bespoke", label: "Bespoke projects" },
 	{ id: "challenges", label: "Community challenges" },
@@ -149,7 +152,7 @@ const noLockIn = [
 		detail: "We agree the priorities, deliverables, dates and review rounds in writing. Bespoke projects and community challenges are scoped separately.",
 	},
 	{
-		title: "Renew when it's working",
+		title: "Partnership renewal",
 		detail: "Work quarter by quarter, or as a 12-month contract billed at $10,000 a quarter. Nothing renews automatically.",
 	},
 	{
@@ -161,7 +164,7 @@ const noLockIn = [
 const faqs = [
 	{
 		question: "Where should we start?",
-		answer: "Tell me what you want engineers to be able to do and what's getting in their way. We choose the partnership priorities together. If you need a specific commissioned project or a community challenge, we scope that separately.",
+		answer: "Choose Community Support to help fund free developer education and give your team a visible place in the Academy. A Partnership adds agreed hands-on engineering, content and community work around your product. Bespoke projects and community challenges are scoped separately.",
 	},
 	{
 		question: "Does the partnership cover all three areas?",
@@ -228,8 +231,8 @@ const partnerQuotes = (
 	>
 		<dl class="partnership-facts" slot="intro">
 			<div>
-				<dt>Ways to work</dt>
-				<dd>Partnership or bespoke project</dd>
+				<dt>Community Support</dt>
+				<dd>{communitySupportOffer.price}</dd>
 			</div>
 			<div>
 				<dt>Partnership</dt>
@@ -237,8 +240,8 @@ const partnerQuotes = (
 			</div>
 		</dl>
 		<div class="partnership-hero-actions" slot="actions">
-			<a id="partnership-hero-cta" class="editorial-button" href={partnershipApplyHref} data-apply-path={partnershipPath} data-partnership-cta data-cta="partnership_enquiry" data-cta-location="hero">Ask about a partnership</a>
-			<a class="partnership-text-link" href="#stages">Explore the work</a>
+			<a id="partnership-hero-cta" class="editorial-button" href={communitySupportApplyHref} data-apply-path={communitySupportPath} data-partnership-cta data-cta="support_the_community" data-cta-location="hero">Support the community</a>
+			<a class="partnership-text-link" href="#plan-partnership">Explore a partnership</a>
 		</div>
 		<div class="partnership-watch" slot="actions">
 			<p id="partnership-watch-title">Watch me try a new tool live</p>
@@ -273,34 +276,49 @@ const partnerQuotes = (
 		<section id="pricing" class="editorial-section" aria-labelledby="pricing-title">
 			<div class="partnership-pricing__header">
 				<div class="editorial-section__header">
-					<h2 id="pricing-title" class="editorial-section__title">Work alongside your team</h2>
-					<p class="editorial-section__lede">A partnership around your product and the engineers who use it. We agree the priorities and the work for each quarter.</p>
+					<h2 id="pricing-title" class="editorial-section__title">Support the community or work together</h2>
+					<p class="editorial-section__lede">Community Support funds free education and gives your team a visible place in the Academy. A Partnership adds agreed hands-on engineering, content and community work around your product.</p>
 				</div>
 				<a class="partnership-text-link" href={teamBriefMailto} data-partnership-cta data-cta="send_to_team" data-cta-location="pricing-brief">Send this to your team</a>
 			</div>
 			<div class="partnership-main">
-				<article
-					class="partnership-plan partnership-ongoing"
-					aria-labelledby={`plan-${ongoingPartnershipOffer.id}`}
-					data-pinned-name={ongoingPartnershipOffer.name}
-					data-pinned-price={ongoingPartnershipOffer.price}
-					data-pinned-route={ongoingPath}
-					data-pinned-href={applyHref(ongoingPath)}
-					data-pinned-cta="Ask about a partnership"
-					data-pinned-cta-name="ask_about_a_partnership"
-				>
-					<div class="partnership-plan__heading"><h3 id={`plan-${ongoingPartnershipOffer.id}`}>{ongoingPartnershipOffer.name}</h3></div>
-					<p class="partnership-plan__price"><span>{ongoingPrice.amount}</span> <span class="partnership-plan__period">{ongoingPrice.period}</span></p>
-					<p class="partnership-plan__cadence">{ongoingPartnershipOffer.cadence}</p>
-					<p class="partnership-plan__summary">{ongoingPartnershipOffer.summary}</p>
-					<ul class="partnership-plan__list">{ongoingPartnershipOffer.included.map((item) => <li>{item}</li>)}</ul>
-					{ongoingPartnershipOffer.notes.map((note) => <p class="partnership-plan__note">{note}</p>)}
-					<a class="editorial-button" href={applyHref(ongoingPath)} data-apply-path={ongoingPath} data-partnership-cta data-cta="ask_about_a_partnership" data-cta-location="pricing-ongoing">Ask about a partnership</a>
+				<article id="supporter" class="partnership-plan partnership-community-support"
+					aria-labelledby={`plan-${communitySupportOffer.id}`}
+					data-pinned-name={communitySupportOffer.name} data-pinned-price={communitySupportOffer.price}
+					data-pinned-route={communitySupportPath} data-pinned-href={communitySupportApplyHref}
+					data-pinned-cta="Support the community" data-pinned-cta-name="support_the_community">
+					<div class="partnership-plan__heading"><h3 id={`plan-${communitySupportOffer.id}`}>{communitySupportOffer.name}</h3></div>
+					<p class="partnership-plan__price"><span>{communitySupportPrice.amount}</span> <span class="partnership-plan__period">{communitySupportPrice.period}</span></p>
+					<p class="partnership-plan__cadence">{communitySupportOffer.cadence}</p>
+					<p class="partnership-plan__summary">{communitySupportOffer.summary}</p>
+					<ul class="partnership-plan__list">{communitySupportOffer.included.map((item) => <li>{item}</li>)}</ul>
+					{communitySupportOffer.notes.map((note) => <p class="partnership-plan__note">{note}</p>)}
+					<a class="editorial-button" href={communitySupportApplyHref} data-apply-path={communitySupportPath} data-partnership-cta data-cta="support_the_community" data-cta-location="pricing-support">Support the community</a>
 				</article>
-				<div class="partnership-quarter-example" aria-labelledby="quarter-example-title">
-					<h3 id="quarter-example-title">An example quarter</h3>
-					<p>A review and a practical build around one agreed developer workflow. Your statement of work fixes the deliverables, dates and review rounds.</p>
-					<ul class="partnership-plan__list">{ongoingQuarterExample.map((item) => <li>{item}</li>)}</ul>
+				<div class="partnership-details">
+					<article
+						class="partnership-plan partnership-ongoing"
+						aria-labelledby={`plan-${ongoingPartnershipOffer.id}`}
+						data-pinned-name={ongoingPartnershipOffer.name}
+						data-pinned-price={ongoingPartnershipOffer.price}
+						data-pinned-route={ongoingPath}
+						data-pinned-href={applyHref(ongoingPath)}
+						data-pinned-cta="Ask about a partnership"
+						data-pinned-cta-name="ask_about_a_partnership"
+					>
+						<div class="partnership-plan__heading"><h3 id={`plan-${ongoingPartnershipOffer.id}`}>{ongoingPartnershipOffer.name}</h3></div>
+						<p class="partnership-plan__price"><span>{ongoingPrice.amount}</span> <span class="partnership-plan__period">{ongoingPrice.period}</span></p>
+						<p class="partnership-plan__cadence">{ongoingPartnershipOffer.cadence}</p>
+						<p class="partnership-plan__summary">{ongoingPartnershipOffer.summary}</p>
+						<ul class="partnership-plan__list">{ongoingPartnershipOffer.included.map((item) => <li>{item}</li>)}</ul>
+						{ongoingPartnershipOffer.notes.map((note) => <p class="partnership-plan__note">{note}</p>)}
+						<a class="editorial-button" href={applyHref(ongoingPath)} data-apply-path={ongoingPath} data-partnership-cta data-cta="ask_about_a_partnership" data-cta-location="pricing-ongoing">Ask about a partnership</a>
+					</article>
+					<div class="partnership-quarter-example" aria-labelledby="quarter-example-title">
+						<h3 id="quarter-example-title">An example quarter</h3>
+						<p>A review and a practical build around one agreed developer workflow. Your statement of work fixes the deliverables, dates and review rounds.</p>
+						<ul class="partnership-plan__list">{ongoingQuarterExample.map((item) => <li>{item}</li>)}</ul>
+					</div>
 				</div>
 			</div>
 		</section>
@@ -392,7 +410,7 @@ const partnerQuotes = (
 
 		<section id="bespoke" class="editorial-section editorial-section--split" aria-labelledby="bespoke-title">
 			<div class="editorial-section__header">
-				<h2 id="bespoke-title" class="editorial-section__title"><span id="supporter" aria-hidden="true"></span>Bespoke projects</h2>
+				<h2 id="bespoke-title" class="editorial-section__title">Bespoke projects</h2>
 				<p class="editorial-section__lede">A specific piece of work, with a clear scope and a price agreed before we start.</p>
 			</div>
 			<article class="partnership-plan" aria-labelledby={`plan-${bespokeProjectOffer.id}`}
@@ -490,10 +508,10 @@ const partnerQuotes = (
 
 	<div class="partnership-pinned" data-partnership-pinned>
 		<p>
-			<strong>{ongoingPartnershipOffer.name}</strong>
-			<span>{ongoingPartnershipOffer.price}</span>
+			<strong>{communitySupportOffer.name}</strong>
+			<span>{communitySupportOffer.price}</span>
 		</p>
-		<a class="partnership-pinned__cta" href={partnershipApplyHref} data-apply-path={partnershipPath} data-partnership-cta data-cta="ask_about_a_partnership" data-cta-location="pinned" tabindex="-1">Ask about a partnership</a>
+		<a class="partnership-pinned__cta" href={communitySupportApplyHref} data-apply-path={communitySupportPath} data-partnership-cta data-cta="support_the_community" data-cta-location="pinned" tabindex="-1">Support the community</a>
 	</div>
 </Page>
 
@@ -527,7 +545,7 @@ const partnerQuotes = (
 		const defaultPrice = pinnedPrice?.textContent ?? "";
 		const defaultCta = pinnedCta.textContent ?? "";
 		const defaultHref = pinnedCta.href;
-		const defaultRoute = pinnedCta.dataset.applyPath ?? "Partnership";
+		const defaultRoute = pinnedCta.dataset.applyPath ?? "Community Support";
 		const defaultCtaName = pinnedCta.dataset.cta ?? "partnership_enquiry";
 		let currentPlan: HTMLElement | undefined;
 
@@ -823,6 +841,8 @@ const partnerQuotes = (
 	}
 
 	.editorial-section[id],
+	#supporter,
+	#plan-partnership,
 	#enquiry-form {
 		scroll-margin-top: 5rem;
 	}
@@ -838,7 +858,15 @@ const partnerQuotes = (
 
 	.partnership-main {
 		display: grid;
+		align-items: start;
+		align-items: start;
 		gap: 2rem;
+	}
+
+	.partnership-details {
+		display: grid;
+		gap: 2rem;
+		min-width: 0;
 	}
 
 	.partnership-plan,
@@ -1263,6 +1291,8 @@ const partnerQuotes = (
 		}
 
 		.editorial-section[id],
+		#supporter,
+		#plan-partnership,
 		#enquiry-form {
 			scroll-margin-top: 9rem;
 		}

@@ -177,7 +177,7 @@ const renderWall = (wall) =>
 	render(
 		wallMarkup,
 		["wall", "BECOME_A_SUPPORTER_PATH", "MLabel", "EmptyState"],
-		{ wall, BECOME_A_SUPPORTER_PATH: "/organizations/partnerships#bespoke" },
+		{ wall, BECOME_A_SUPPORTER_PATH: "/organizations/partnerships#supporter" },
 	);
 
 test("wall shows each supporter's logo or name, its website and the technologies it supports", async () => {
@@ -248,7 +248,7 @@ test("an empty wall invites organisations to become a supporter", async () => {
 	assert(empty);
 	assert.equal(
 		empty.querySelector(".empty-actions a").getAttribute("href"),
-		"/organizations/partnerships#bespoke",
+		"/organizations/partnerships#supporter",
 	);
 });
 
@@ -269,8 +269,8 @@ test("wall is cached under the supporters tag", () => {
 test("partnerships page does not link to the wall until the service is live", () => {
 	const section = fragment(
 		partnershipsPage,
-		'<section id="bespoke"',
-		"</section>",
+		'<article id="supporter"',
+		"</article>",
 	);
 	assert.doesNotMatch(section, /href="\/supporters"/);
 });

@@ -134,7 +134,7 @@ async function renderPartnerships(
 	return { html, dom: parse(html), pageProps, formProps, disabledCache };
 }
 
-test("partnership SSR has one partnership offer and unpriced areas of work", async () => {
+test("partnership SSR leads with community support beside one partnership and unpriced work areas", async () => {
 	const { html, dom, pageProps, formProps, disabledCache } =
 		await renderPartnerships();
 	assert.equal(
@@ -158,13 +158,22 @@ test("partnership SSR has one partnership offer and unpriced areas of work", asy
 		dom.querySelectorAll('[data-pinned-route="Partnership"]').length,
 		1,
 	);
-	assert.equal(formProps[0].initialPath, "Partnership");
+	assert.equal(formProps[0].initialPath, "Community Support");
 	assert.equal(disabledCache.length, 1);
 	assert.doesNotMatch(html, rejectedOfferName);
 	assert.doesNotMatch(JSON.stringify(pageProps), rejectedOfferName);
 	assert.equal(pageProps[0].title, "Partnerships for developer tool companies");
 	assert.match(pageProps[0].description, /Awareness, Adoption, and Support/);
+	const pricing = dom.querySelector("#pricing");
+	assert.deepEqual(
+		pricing
+			.querySelectorAll("[data-pinned-route]")
+			.map((card) => card.getAttribute("data-pinned-route")),
+		["Community Support", "Partnership"],
+	);
+	assert(pricing.querySelector("#supporter"));
 	const allowedRoutes = new Set([
+		"Community Support",
 		"Partnership",
 		"Bespoke project",
 		"Community challenge series",
@@ -184,6 +193,7 @@ test("partnership SSR has one partnership offer and unpriced areas of work", asy
 		destinations.add(route);
 	}
 	for (const route of [
+		"Community Support",
 		"Partnership",
 		"Bespoke project",
 		"Community challenge series",
@@ -192,11 +202,12 @@ test("partnership SSR has one partnership offer and unpriced areas of work", asy
 	}
 	assert.equal(
 		dom.querySelector("#partnership-hero-cta").getAttribute("data-apply-path"),
-		"Partnership",
+		"Community Support",
 	);
 });
 
 for (const [route, expected] of [
+	["Community Support", "Community Support"],
 	["Partnership", "Partnership"],
 	["Bespoke project", "Bespoke project"],
 	["Community challenge series", "Community challenge series"],
@@ -205,9 +216,9 @@ for (const [route, expected] of [
 	["Hands-on content", "Partnership"],
 	["Ongoing partnership", "Partnership"],
 	["Event content and hosting", "Bespoke project"],
-	["Community supporter", "Bespoke project"],
-	["unknown", "Partnership"],
-	[["Field", "report"].join(" "), "Partnership"],
+	["Community supporter", "Community Support"],
+	["unknown", "Community Support"],
+	[["Field", "report"].join(" "), "Community Support"],
 ]) {
 	test(`partnership SSR passes canonical selection for ${expected} to the enquiry form`, async () => {
 		const { html, formProps } = await renderPartnerships(route);
@@ -226,20 +237,29 @@ test("partnership enquiry remains available when the remote content service fail
 	assert(dom.querySelector("#measurement"));
 });
 
-test("organization JSON-LD contains only the partnership and two scoped extras", async () => {
+test("organization JSON-LD contains community support, the partnership and two scoped extras", async () => {
 	const { html, dom } = await renderPartnerships(undefined, { schema: true });
 	const schema = JSON.parse(
 		dom.querySelector('script[type="application/ld+json"]').text,
 	);
 	assert.doesNotMatch(html, rejectedOfferName);
+	const offers = schema.offers.filter((offer) => offer.name);
 	assert.deepEqual(
-		schema.offers.filter((offer) => offer.name).map((offer) => offer.name),
-		["Partnership", "Bespoke project", "Community challenge series"],
+		offers.map((offer) => offer.name),
+		[
+			"Community Support",
+			"Partnership",
+			"Bespoke project",
+			"Community challenge series",
+		],
 	);
-	assert.equal(schema.offers[0].price, "12000");
-	assert.equal("price" in schema.offers[1], false);
-	assert.equal("priceCurrency" in schema.offers[1], false);
-	assert.equal(schema.offers[0].priceSpecification.unitText, "quarter");
-	assert.equal("price" in schema.offers[2], false);
-	assert.equal(schema.offers[2].priceSpecification.minPrice, "15000");
+	assert.equal(offers[0].price, "1000");
+	assert.equal(offers[0].priceSpecification.unitText, "month");
+	assert.equal(offers[0].priceSpecification.unitCode, "MON");
+	assert.equal(offers[1].price, "12000");
+	assert.equal(offers[1].priceSpecification.unitText, "quarter");
+	assert.equal("price" in offers[2], false);
+	assert.equal("priceCurrency" in offers[2], false);
+	assert.equal("price" in offers[3], false);
+	assert.equal(offers[3].priceSpecification.minPrice, "15000");
 });
