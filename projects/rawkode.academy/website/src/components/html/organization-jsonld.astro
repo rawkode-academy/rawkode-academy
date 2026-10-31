@@ -2,7 +2,7 @@
 import {
 	bespokeProjectOffer,
 	communityChallengeOffer,
-	communitySupportOffer,
+	supportAcademyOffer,
 	ongoingPartnershipOffer,
 	type PartnershipOffer,
 } from "@/lib/partnerships";
@@ -84,10 +84,10 @@ const organizationSchema = {
 	],
 	offers: [
 		{
-			...partnerOffer(communitySupportOffer, "#supporter"),
+			...partnerOffer(supportAcademyOffer, "#supporter"),
 			priceSpecification: {
 				"@type": "UnitPriceSpecification",
-				price: usdAmount(communitySupportOffer.price),
+				price: usdAmount(supportAcademyOffer.price),
 				priceCurrency: "USD",
 				unitText: "month",
 				unitCode: "MON",

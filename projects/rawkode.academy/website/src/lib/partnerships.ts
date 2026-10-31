@@ -137,7 +137,7 @@ export const partnershipWatchEpisodes = [
 ] as const;
 
 export const partnershipDescription =
-	"Awareness, Adoption, and Support for developer tools. Hands-on content, adoption reviews, docs, community, talks and office hours to help engineers succeed from dev to prod and beyond.";
+	"Support the Academy's free developer education, or work with David across Awareness, Adoption, and Support to help engineers succeed with your product from dev to prod.";
 
 export interface PartnershipPerk {
 	title: string;
@@ -228,10 +228,10 @@ export const independenceRules = [
 export const partnershipAdvice =
 	"We choose the work your users need and agree the priorities, outputs and cadence for each quarter.";
 
-export const communitySupportOffer: PartnershipOffer = {
-	id: "community-support",
-	name: "Community Support",
-	label: "Community Support",
+export const supportAcademyOffer: PartnershipOffer = {
+	id: "support-the-academy",
+	name: "Support the Academy",
+	label: "Support the Academy",
 	price: "$1,000 a month",
 	priceShort: "$1k/month",
 	cadence: "No minimum term. Or $9,000 for twelve months, agreed up front.",
@@ -246,7 +246,7 @@ export const communitySupportOffer: PartnershipOffer = {
 	notes: [
 		"Support funds the Academy's free education. Paid placements are labelled and editorial conclusions stay independent.",
 	],
-	mailto: buildMailto("Community Support", applicationBody),
+	mailto: buildMailto("Support the Academy", applicationBody),
 };
 
 export const ongoingPartnershipOffer: PartnershipOffer = {
@@ -374,7 +374,7 @@ export const productReviewScope =
 	"Within the partnership, we agree the product areas, intended users and workflows to review, from a first working result to production tasks such as backup and restore or upgrades. The plan defines the evidence, fixes and any later retest.";
 
 export const partnershipTiers = [
-	communitySupportOffer,
+	supportAcademyOffer,
 	ongoingPartnershipOffer,
 	bespokeProjectOffer,
 	communityChallengeOffer,
@@ -382,7 +382,7 @@ export const partnershipTiers = [
 export const partnershipTierNames = partnershipTiers.map((offer) => offer.name);
 
 export const applicationPaths = [
-	"Community Support",
+	"Support the Academy",
 	"Partnership",
 	"Bespoke project",
 	"Community challenge series",
@@ -393,7 +393,7 @@ export const productReviewPath = "Partnership" satisfies ApplicationPath;
 export const notSurePath = "Not sure yet" satisfies ApplicationPath;
 
 export const applicationPathLabels: Record<ApplicationPath, string> = {
-	"Community Support": communitySupportOffer.name,
+	"Support the Academy": supportAcademyOffer.name,
 	Partnership: ongoingPartnershipOffer.name,
 	"Bespoke project": bespokeProjectOffer.name,
 	"Community challenge series": communityChallengeOffer.name,
@@ -416,7 +416,8 @@ export const legacyApplicationPaths: Record<string, ApplicationPath> = {
 	"Annual partnership": "Partnership",
 	"Event content and hosting": "Bespoke project",
 	"Customer workshops": "Bespoke project",
-	"Community supporter": "Community Support",
+	"Community Support": "Support the Academy",
+	"Community supporter": "Support the Academy",
 };
 
 export const resolveApplicationPath = (
@@ -441,9 +442,9 @@ export const decisionBriefTemplate = applicationBody;
 export const decisionBriefMailto = partnershipFitMailto;
 
 const teamBriefBody = [
-	"Rawkode Academy community support and partnerships",
+	"Support the Academy and partnerships",
 	"",
-	`Community Support funds free tutorials, live streams and shows. ${communitySupportOffer.price}, or $9,000 for twelve months. Includes a supporter badge, docs links, one latest announcement and a logo on the supporters wall. Editorial conclusions stay independent.`,
+	`Support the Academy: help fund free tutorials, live streams and shows. ${supportAcademyOffer.price}, or $9,000 for twelve months. Includes a supporter badge, docs links, one latest announcement and a logo on the supporters wall. Editorial conclusions stay independent.`,
 	"",
 	"David Flanagan works alongside our team across Awareness, Adoption, and Support. We agree the priorities, outputs and cadence each quarter.",
 	"",

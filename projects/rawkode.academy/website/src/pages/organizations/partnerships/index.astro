@@ -20,7 +20,7 @@ import {
 	type ApplicationPath,
 	adoptionStages,
 	bespokeProjectOffer,
-	communitySupportOffer,
+	supportAcademyOffer,
 	independenceRules,
 	ongoingPartnershipOffer,
 	ongoingQuarterExample,
@@ -47,10 +47,10 @@ Astro.response.headers.set("Cache-Control", "private, no-cache");
 const applyHref = (path: ApplicationPath) =>
 	`/organizations/partnerships?route=${encodeURIComponent(path)}#enquiry-form`;
 const partnershipPath = "Partnership" satisfies ApplicationPath;
-const communitySupportPath = "Community Support" satisfies ApplicationPath;
-const communitySupportApplyHref = applyHref(communitySupportPath);
+const supportAcademyPath = "Support the Academy" satisfies ApplicationPath;
+const supportAcademyApplyHref = applyHref(supportAcademyPath);
 const initialPath =
-	resolveApplicationPath(Astro.url.searchParams.get("route")) ?? communitySupportPath;
+	resolveApplicationPath(Astro.url.searchParams.get("route")) ?? supportAcademyPath;
 const submittedEnquiry = Astro.getActionResult(actions.partnership.applyForm);
 const submittedData = submittedEnquiry?.data;
 const enquiryReceived =
@@ -134,7 +134,7 @@ const splitPrice = (price: string) => {
 
 const ongoingPath = partnershipPath;
 const ongoingPrice = splitPrice(ongoingPartnershipOffer.price);
-const communitySupportPrice = splitPrice(communitySupportOffer.price);
+const supportAcademyPrice = splitPrice(supportAcademyOffer.price);
 const challengeOffer = partnershipAddOns[0];
 
 const pageSections = [
@@ -164,7 +164,7 @@ const noLockIn = [
 const faqs = [
 	{
 		question: "Where should we start?",
-		answer: "Choose Community Support to help fund free developer education and give your team a visible place in the Academy. A Partnership adds agreed hands-on engineering, content and community work around your product. Bespoke projects and community challenges are scoped separately.",
+		answer: "Choose 'Support the Academy' to help fund free developer education and give your team a visible place in the Academy. A Partnership adds agreed hands-on engineering, content and community work around your product. Bespoke projects and community challenges are scoped separately.",
 	},
 	{
 		question: "Does the partnership cover all three areas?",
@@ -231,8 +231,8 @@ const partnerQuotes = (
 	>
 		<dl class="partnership-facts" slot="intro">
 			<div>
-				<dt>Community Support</dt>
-				<dd>{communitySupportOffer.price}</dd>
+				<dt>Support the Academy</dt>
+				<dd>{supportAcademyOffer.price}</dd>
 			</div>
 			<div>
 				<dt>Partnership</dt>
@@ -240,7 +240,7 @@ const partnerQuotes = (
 			</div>
 		</dl>
 		<div class="partnership-hero-actions" slot="actions">
-			<a id="partnership-hero-cta" class="editorial-button" href={communitySupportApplyHref} data-apply-path={communitySupportPath} data-partnership-cta data-cta="support_the_community" data-cta-location="hero">Support the community</a>
+			<a id="partnership-hero-cta" class="editorial-button" href={supportAcademyApplyHref} data-apply-path={supportAcademyPath} data-partnership-cta data-cta="support_the_academy" data-cta-location="hero">Support the Academy</a>
 			<a class="partnership-text-link" href="#plan-partnership">Explore a partnership</a>
 		</div>
 		<div class="partnership-watch" slot="actions">
@@ -276,24 +276,24 @@ const partnerQuotes = (
 		<section id="pricing" class="editorial-section" aria-labelledby="pricing-title">
 			<div class="partnership-pricing__header">
 				<div class="editorial-section__header">
-					<h2 id="pricing-title" class="editorial-section__title">Support the community or work together</h2>
-					<p class="editorial-section__lede">Community Support funds free education and gives your team a visible place in the Academy. A Partnership adds agreed hands-on engineering, content and community work around your product.</p>
+					<h2 id="pricing-title" class="editorial-section__title">Support the Academy or work together</h2>
+					<p class="editorial-section__lede">Help fund free developer education, with your company credited alongside the work. A Partnership adds agreed hands-on engineering, content and community work around your product.</p>
 				</div>
 				<a class="partnership-text-link" href={teamBriefMailto} data-partnership-cta data-cta="send_to_team" data-cta-location="pricing-brief">Send this to your team</a>
 			</div>
 			<div class="partnership-main">
-				<article id="supporter" class="partnership-plan partnership-community-support"
-					aria-labelledby={`plan-${communitySupportOffer.id}`}
-					data-pinned-name={communitySupportOffer.name} data-pinned-price={communitySupportOffer.price}
-					data-pinned-route={communitySupportPath} data-pinned-href={communitySupportApplyHref}
-					data-pinned-cta="Support the community" data-pinned-cta-name="support_the_community">
-					<div class="partnership-plan__heading"><h3 id={`plan-${communitySupportOffer.id}`}>{communitySupportOffer.name}</h3></div>
-					<p class="partnership-plan__price"><span>{communitySupportPrice.amount}</span> <span class="partnership-plan__period">{communitySupportPrice.period}</span></p>
-					<p class="partnership-plan__cadence">{communitySupportOffer.cadence}</p>
-					<p class="partnership-plan__summary">{communitySupportOffer.summary}</p>
-					<ul class="partnership-plan__list">{communitySupportOffer.included.map((item) => <li>{item}</li>)}</ul>
-					{communitySupportOffer.notes.map((note) => <p class="partnership-plan__note">{note}</p>)}
-					<a class="editorial-button" href={communitySupportApplyHref} data-apply-path={communitySupportPath} data-partnership-cta data-cta="support_the_community" data-cta-location="pricing-support">Support the community</a>
+				<article id="supporter" class="partnership-plan partnership-academy-support"
+					aria-labelledby={`plan-${supportAcademyOffer.id}`}
+					data-pinned-name={supportAcademyOffer.name} data-pinned-price={supportAcademyOffer.price}
+					data-pinned-route={supportAcademyPath} data-pinned-href={supportAcademyApplyHref}
+					data-pinned-cta="Support the Academy" data-pinned-cta-name="support_the_academy">
+					<div class="partnership-plan__heading"><h3 id={`plan-${supportAcademyOffer.id}`}>{supportAcademyOffer.name}</h3></div>
+					<p class="partnership-plan__price"><span>{supportAcademyPrice.amount}</span> <span class="partnership-plan__period">{supportAcademyPrice.period}</span></p>
+					<p class="partnership-plan__cadence">{supportAcademyOffer.cadence}</p>
+					<p class="partnership-plan__summary">{supportAcademyOffer.summary}</p>
+					<ul class="partnership-plan__list">{supportAcademyOffer.included.map((item) => <li>{item}</li>)}</ul>
+					{supportAcademyOffer.notes.map((note) => <p class="partnership-plan__note">{note}</p>)}
+					<a class="editorial-button" href={supportAcademyApplyHref} data-apply-path={supportAcademyPath} data-partnership-cta data-cta="support_the_academy" data-cta-location="pricing-support">Support the Academy</a>
 				</article>
 				<div class="partnership-details">
 					<article
@@ -508,10 +508,10 @@ const partnerQuotes = (
 
 	<div class="partnership-pinned" data-partnership-pinned>
 		<p>
-			<strong>{communitySupportOffer.name}</strong>
-			<span>{communitySupportOffer.price}</span>
+			<strong>{supportAcademyOffer.name}</strong>
+			<span>{supportAcademyOffer.price}</span>
 		</p>
-		<a class="partnership-pinned__cta" href={communitySupportApplyHref} data-apply-path={communitySupportPath} data-partnership-cta data-cta="support_the_community" data-cta-location="pinned" tabindex="-1">Support the community</a>
+		<a class="partnership-pinned__cta" href={supportAcademyApplyHref} data-apply-path={supportAcademyPath} data-partnership-cta data-cta="support_the_academy" data-cta-location="pinned" tabindex="-1">Support the Academy</a>
 	</div>
 </Page>
 
@@ -545,7 +545,7 @@ const partnerQuotes = (
 		const defaultPrice = pinnedPrice?.textContent ?? "";
 		const defaultCta = pinnedCta.textContent ?? "";
 		const defaultHref = pinnedCta.href;
-		const defaultRoute = pinnedCta.dataset.applyPath ?? "Community Support";
+		const defaultRoute = pinnedCta.dataset.applyPath ?? "Support the Academy";
 		const defaultCtaName = pinnedCta.dataset.cta ?? "partnership_enquiry";
 		let currentPlan: HTMLElement | undefined;
 

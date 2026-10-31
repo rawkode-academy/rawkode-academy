@@ -134,7 +134,7 @@ async function renderPartnerships(
 	return { html, dom: parse(html), pageProps, formProps, disabledCache };
 }
 
-test("partnership SSR leads with community support beside one partnership and unpriced work areas", async () => {
+test("partnership SSR leads with Support the Academy beside one partnership and unpriced work areas", async () => {
 	const { html, dom, pageProps, formProps, disabledCache } =
 		await renderPartnerships();
 	assert.equal(
@@ -158,7 +158,13 @@ test("partnership SSR leads with community support beside one partnership and un
 		dom.querySelectorAll('[data-pinned-route="Partnership"]').length,
 		1,
 	);
-	assert.equal(formProps[0].initialPath, "Community Support");
+	assert.equal(formProps[0].initialPath, "Support the Academy");
+	assert.equal(dom.querySelector("#supporter h3").text, "Support the Academy");
+	assert.equal(
+		dom.querySelector("#partnership-hero-cta").text,
+		"Support the Academy",
+	);
+	assert.doesNotMatch(dom.text, /Community Support|Support the community/);
 	assert.equal(disabledCache.length, 1);
 	assert.doesNotMatch(html, rejectedOfferName);
 	assert.doesNotMatch(JSON.stringify(pageProps), rejectedOfferName);
@@ -169,11 +175,11 @@ test("partnership SSR leads with community support beside one partnership and un
 		pricing
 			.querySelectorAll("[data-pinned-route]")
 			.map((card) => card.getAttribute("data-pinned-route")),
-		["Community Support", "Partnership"],
+		["Support the Academy", "Partnership"],
 	);
 	assert(pricing.querySelector("#supporter"));
 	const allowedRoutes = new Set([
-		"Community Support",
+		"Support the Academy",
 		"Partnership",
 		"Bespoke project",
 		"Community challenge series",
@@ -193,7 +199,7 @@ test("partnership SSR leads with community support beside one partnership and un
 		destinations.add(route);
 	}
 	for (const route of [
-		"Community Support",
+		"Support the Academy",
 		"Partnership",
 		"Bespoke project",
 		"Community challenge series",
@@ -202,12 +208,13 @@ test("partnership SSR leads with community support beside one partnership and un
 	}
 	assert.equal(
 		dom.querySelector("#partnership-hero-cta").getAttribute("data-apply-path"),
-		"Community Support",
+		"Support the Academy",
 	);
 });
 
 for (const [route, expected] of [
-	["Community Support", "Community Support"],
+	["Support the Academy", "Support the Academy"],
+	["Community Support", "Support the Academy"],
 	["Partnership", "Partnership"],
 	["Bespoke project", "Bespoke project"],
 	["Community challenge series", "Community challenge series"],
@@ -216,9 +223,9 @@ for (const [route, expected] of [
 	["Hands-on content", "Partnership"],
 	["Ongoing partnership", "Partnership"],
 	["Event content and hosting", "Bespoke project"],
-	["Community supporter", "Community Support"],
-	["unknown", "Community Support"],
-	[["Field", "report"].join(" "), "Community Support"],
+	["Community supporter", "Support the Academy"],
+	["unknown", "Support the Academy"],
+	[["Field", "report"].join(" "), "Support the Academy"],
 ]) {
 	test(`partnership SSR passes canonical selection for ${expected} to the enquiry form`, async () => {
 		const { html, formProps } = await renderPartnerships(route);
@@ -237,7 +244,7 @@ test("partnership enquiry remains available when the remote content service fail
 	assert(dom.querySelector("#measurement"));
 });
 
-test("organization JSON-LD contains community support, the partnership and two scoped extras", async () => {
+test("organization JSON-LD contains Support the Academy, the partnership and two scoped extras", async () => {
 	const { html, dom } = await renderPartnerships(undefined, { schema: true });
 	const schema = JSON.parse(
 		dom.querySelector('script[type="application/ld+json"]').text,
@@ -247,7 +254,7 @@ test("organization JSON-LD contains community support, the partnership and two s
 	assert.deepEqual(
 		offers.map((offer) => offer.name),
 		[
-			"Community Support",
+			"Support the Academy",
 			"Partnership",
 			"Bespoke project",
 			"Community challenge series",
