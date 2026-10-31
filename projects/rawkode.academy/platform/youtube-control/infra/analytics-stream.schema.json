@@ -1,0 +1,15 @@
+{
+  "fields": [
+    { "name": "event_id", "type": "string", "required": true },
+    { "name": "query_key", "type": "string", "required": true },
+    { "name": "channel_id", "type": "string", "required": true },
+    { "name": "report_type", "type": "string", "required": true },
+    { "name": "video_id", "type": "string", "required": true },
+    { "name": "start_date", "type": "string", "required": true },
+    { "name": "end_date", "type": "string", "required": true },
+    { "name": "observed_at", "type": "string", "required": true },
+    { "name": "raw_key", "type": "string", "required": true },
+    { "name": "row_count", "type": "int64", "required": true },
+    { "name": "report_json", "type": "string", "required": true }
+  ]
+}
