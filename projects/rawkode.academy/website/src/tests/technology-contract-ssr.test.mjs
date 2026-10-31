@@ -287,7 +287,7 @@ test("detail template compiles with every new branch and date slot", async () =>
 	assert.deepEqual(compiled.diagnostics, []);
 	assert.equal(
 		(page.match(/<time class=\{styles.videoDate\}/g) ?? []).length,
-		2,
+		3,
 	);
 	assert.match(page, /historicalStatuses.has\(related.status\)/);
 	assert.match(page, /Project status: \{related.status\}/);
