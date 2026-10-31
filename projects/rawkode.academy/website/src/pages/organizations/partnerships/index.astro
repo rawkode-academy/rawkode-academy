@@ -20,10 +20,11 @@ import {
 import {
 	type ApplicationPath,
 	adoptionStages,
-	fitProofReview,
+	eventContentOffer,
 	independenceRules,
 	notSurePath,
 	ongoingPartnershipOffer,
+	ongoingQuarterExample,
 	PARTNERSHIP_EMAIL,
 	type PartnershipOffer,
 	partnershipAddOns,
@@ -147,7 +148,9 @@ const ongoingPrice = splitPrice(ongoingPartnershipOffer.price);
 
 const pageSections = [
 	{ id: "stages", label: "What I do" },
+	{ id: "measurement", label: "Measurement" },
 	{ id: "pricing", label: "Ongoing partnership" },
+	{ id: "events", label: "Events" },
 	{ id: "independence", label: "Independence" },
 	{ id: "supporter", label: "Supporter" },
 	{ id: "questions", label: "FAQ" },
@@ -158,7 +161,7 @@ const noLockIn = [
 	{
 		title: "One project or ongoing",
 		detail:
-			"Book a field report, an adoption review or a support project on its own, or start an ongoing partnership. We agree the scope before work begins.",
+			"Book hands-on content, an adoption review or a support project on its own, or start an ongoing partnership. We agree the scope before work begins.",
 	},
 	{
 		title: "Renew when it's working",
@@ -185,12 +188,12 @@ const faqs = [
 	{
 		question: "What does Support cover?",
 		answer:
-			"The work that helps engineers stay successful after adoption: docs, community participation, technical Q&A, public speaking, conference workshops, customer education and office hours. We choose the work your users need and agree its scope and frequency. That can be a single project or part of an ongoing partnership.",
+			"Experienced engineering help for the work your team needs to deliver next: docs, runnable examples, community participation, technical Q&A, public speaking, conference workshops, customer education and office hours. We choose the work your users need and agree its scope and frequency. That can be a single project or part of an ongoing partnership.",
 	},
 	{
-		question: "How is a field report different from sponsoring a video?",
+		question: "What does paid hands-on content involve?",
 		answer:
-			"A field report pays for hands-on work and an honest account of it. I choose real problems, try to solve them with your product, publish what actually happens (labelled as paid) and tell you privately what I'd change. You can correct facts before publication; you don't buy a positive conclusion.",
+			"You pay for hands-on work and an honest account of it. I choose real problems, try to solve them with your product, publish what actually happens (labelled as paid) and tell you privately what I'd change. You can correct facts before publication; you don't buy a positive conclusion.",
 	},
 	{
 		question:
@@ -210,7 +213,7 @@ const faqs = [
 	{
 		question: "How much of our engineers' time does it take?",
 		answer:
-			"For a field report or adoption review, plan for access setup and a call to discuss the findings. For support work, I need a contact who knows your users and someone to check technical accuracy. We agree preparation and review time with the scope. Ongoing partners also join a monthly 60-minute working session.",
+			"For hands-on content or an adoption review, plan for access setup and a call to discuss the findings. For support work, I need a contact who knows your users and someone to check technical accuracy. We agree preparation and review time with the scope. Ongoing partners also join a monthly 60-minute working session.",
 	},
 	{
 		question: "Who on our side should own it?",
@@ -225,7 +228,7 @@ const faqs = [
 	{
 		question: "Can we sponsor content as well?",
 		answer:
-			"Yes. A field report is paid hands-on content with independent conclusions. You can also fund Rawkode Academy as a community supporter, from $1,000 a month. That includes a supporter badge and docs links on your technology page, your latest announcement on that page and its videos, and your logo on the supporters wall.",
+			"Yes. You can commission hands-on content with independent conclusions. You can also fund Rawkode Academy as a community supporter, from $1,000 a month. That includes a supporter badge and docs links on your technology page, your latest announcement on that page and its videos, and your logo on the supporters wall.",
 	},
 	{
 		question: "Do open-source maintainers have to pay to come on Rawkode Live?",
@@ -273,8 +276,8 @@ const partnerQuotes = (
 				<dd>One project or ongoing</dd>
 			</div>
 			<div>
-				<dt>Adoption review</dt>
-				<dd>{fitProofReview.price} fixed</dd>
+				<dt>Ongoing partnership</dt>
+				<dd>{ongoingPartnershipOffer.price}</dd>
 			</div>
 		</dl>
 		<div class="partnership-hero-actions" slot="actions">
@@ -384,6 +387,22 @@ const partnerQuotes = (
 			</div>
 		</section>
 
+		<section id="measurement" class="editorial-section editorial-section--split" aria-labelledby="measurement-title">
+			<div class="editorial-section__header">
+				<h2 id="measurement-title" class="editorial-section__title">Agree what success looks like</h2>
+				<p class="editorial-section__lede">Before we start, we agree what you want engineers to be able to do, the starting point and how we'll assess the work.</p>
+			</div>
+			<div class="partnership-steps-body">
+				<p>We choose useful measures and agree who provides the data. At the read-out, you get the findings, what changed and recommended next steps.</p>
+				<ul class="partnership-fit">
+					<li><strong>Awareness:</strong> relevant reach, engaged viewing, tagged referrals and use of published examples where measurable. Organic performance and paid amplification are reported separately.</li>
+					<li><strong>Adoption:</strong> reproducible obstacles and ranked fixes. If a retest is included, we check the agreed workflow again after your team makes changes.</li>
+					<li><strong>Support:</strong> questions addressed, use of learning materials, participation and recurring problems, using the evidence available for the agreed work.</li>
+				</ul>
+				<p>Activation and retention need product data from your team. We report observed changes and the limits of the evidence. An expert review does not replace research with your users, and results are not guaranteed.</p>
+			</div>
+		</section>
+
 		{partnerQuotes.length > 0 && (
 		<section id="partner-quotes" class="editorial-section" aria-labelledby="partner-quotes-title">
 			<div class="editorial-section__header">
@@ -414,6 +433,7 @@ const partnerQuotes = (
 				<li>You build developer tools: infrastructure tools, Kubernetes and cloud native projects, cloud platforms or AI infrastructure.</li>
 				<li>An engineer can install or sign up for your product and try it, including open-source projects installed from GitHub or Helm.</li>
 				<li>Any size of company, from a first open-source release to a public company.</li>
+				<li>You have a clear priority for your users and someone who can provide access, check technical accuracy and help act on the findings.</li>
 			</ul>
 		</section>
 
@@ -454,6 +474,15 @@ const partnerQuotes = (
 					data-cta-location="pricing-ongoing"
 				>Ask about an ongoing partnership</a>
 			</article>
+
+			<div class="partnership-quarter-example" aria-labelledby="quarter-example-title">
+				<h3 id="quarter-example-title">An example quarter</h3>
+				<p>A review and a practical build around one agreed developer workflow. This illustrates a possible scope; your statement of work fixes the deliverables, dates and review rounds.</p>
+				<ul class="partnership-plan__list">
+					{ongoingQuarterExample.map((item) => <li>{item}</li>)}
+				</ul>
+			</div>
+
 			<div class="partnership-addons">
 				<h3 id="addons-title" class="partnership-label">Add-ons</h3>
 				<ul>
@@ -473,6 +502,27 @@ const partnerQuotes = (
 					))}
 				</ul>
 			</div>
+		</section>
+
+		<section id="events" class="editorial-section editorial-section--split" aria-labelledby="events-title">
+			<div class="editorial-section__header">
+				<h2 id="events-title" class="editorial-section__title">Event content and technical hosting</h2>
+				<p class="editorial-section__lede">Technical conversations and practical teaching around your event, with useful material to share afterwards.</p>
+			</div>
+			<article class="partnership-plan" aria-labelledby={`plan-${eventContentOffer.id}`}>
+				<div class="partnership-plan__heading">
+					<h3 id={`plan-${eventContentOffer.id}`}>{eventContentOffer.name}</h3>
+				</div>
+				<p class="partnership-plan__price partnership-plan__price--quoted"><span>{eventContentOffer.price}</span></p>
+				<p class="partnership-plan__summary">{eventContentOffer.summary}</p>
+				<p class="partnership-plan__cadence">{eventContentOffer.cadence}</p>
+				<p class="partnership-label">{eventContentOffer.includedLabel}</p>
+				<ul class="partnership-plan__list">
+					{eventContentOffer.included.map((item) => <li>{item}</li>)}
+				</ul>
+				{eventContentOffer.notes.map((note) => <p class="partnership-plan__note">{note}</p>)}
+				<a class="editorial-button editorial-button--secondary" href={applyHref("Event content and hosting")} data-apply-path="Event content and hosting" data-partnership-cta data-cta="ask_about_event_content" data-cta-location="events">Ask about your event</a>
+			</article>
 		</section>
 
 		<section id="perks" class="editorial-section editorial-section--split" aria-labelledby="perks-title">
@@ -1202,7 +1252,6 @@ const partnerQuotes = (
 		color: var(--colors-academy-text-soft);
 	}
 
-
 	/* Fit */
 	.partnership-fit {
 		display: grid;
@@ -1244,6 +1293,26 @@ const partnerQuotes = (
 		margin: 0;
 		font-size: 0.95rem;
 		line-height: 1.5;
+		color: var(--colors-academy-text-soft);
+	}
+
+	.partnership-quarter-example {
+		display: grid;
+		gap: 0.85rem;
+		max-width: 40rem;
+		margin-top: 1.5rem;
+		padding: 1.5rem;
+		border: 1px solid var(--colors-academy-border);
+		border-radius: var(--radii-academy-l);
+	}
+
+	.partnership-quarter-example h3,
+	.partnership-quarter-example p {
+		margin: 0;
+	}
+
+	.partnership-quarter-example p {
+		line-height: 1.55;
 		color: var(--colors-academy-text-soft);
 	}
 
@@ -1298,7 +1367,7 @@ const partnerQuotes = (
 		font-size: clamp(2rem, 4vw, 2.5rem);
 	}
 
-	.partnership-stage .partnership-plan__price--quoted span:first-child {
+	.partnership-plan__price--quoted span:first-child {
 		font-size: clamp(1.5rem, 3vw, 1.75rem);
 		line-height: 1.15;
 	}

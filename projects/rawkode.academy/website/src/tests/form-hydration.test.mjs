@@ -286,9 +286,10 @@ for (const fixture of fixtures) {
 					(option) => option.textContent,
 				),
 				[
-					"Field report",
+					"Hands-on content",
 					"Adoption review",
 					"Developer support",
+					"Event content and hosting",
 					"Ongoing partnership",
 					"Community supporter",
 					"Community challenge series",

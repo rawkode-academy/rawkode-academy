@@ -54,7 +54,7 @@ const input = {
 	name: "Ada Lovelace",
 	email: "ada@analytical.engine",
 	company: "Analytical Engine",
-	path: "Product review",
+	path: "Adoption review",
 	message: "Please review our Kubernetes quick start.",
 	website: "",
 };
@@ -274,11 +274,18 @@ describe("partnership email action", () => {
 });
 
 describe("partnership enquiry routes", () => {
+	it.each(
+		partnerships.applicationPaths,
+	)("keeps the current %s route selectable", (route) => {
+		expect(partnerships.resolveApplicationPath(route)).toBe(route);
+	});
+
 	it.each([
 		["Customer workshops", "Developer support"],
-		["First-run review", "Product review"],
-		["Fit & Proof Review", "Product review"],
-		["Production review", "Product review"],
+		["Product review", "Adoption review"],
+		["First-run review", "Adoption review"],
+		["Fit & Proof Review", "Adoption review"],
+		["Production review", "Adoption review"],
 		["Annual partnership", "Ongoing partnership"],
 		["Annual plan", "Ongoing partnership"],
 		["90-day partnership", "Ongoing partnership"],

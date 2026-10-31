@@ -90,15 +90,15 @@ describe("partnership pinned enquiry", () => {
 		positions[0] = { top: -400, height: 1600 };
 		scroll();
 		expect(pinned().hasAttribute("data-visible")).toBe(true);
-		expect(link().textContent).toBe("Ask about a field report");
-		expect(link().dataset.applyPath).toBe("Field report");
-		expect(link().href).toContain("route=Field%20report#enquiry-form");
+		expect(link().textContent).toBe("Ask about hands-on content");
+		expect(link().dataset.applyPath).toBe("Hands-on content");
+		expect(link().href).toContain("route=Hands-on%20content#enquiry-form");
 		link().addEventListener("click", (event) => event.preventDefault());
 		link().click();
 		expect(capture).toHaveBeenCalledWith(
 			"cta_clicked",
 			expect.objectContaining({
-				cta: "ask_about_a_field_report",
+				cta: "ask_about_hands_on_content",
 				location: "pinned",
 			}),
 		);
@@ -112,7 +112,7 @@ describe("partnership pinned enquiry", () => {
 		positions[0] = { top: -400, height: 1600 };
 		positions[2] = { top: 1200, height: 900 };
 		scroll();
-		expect(link().dataset.applyPath).toBe("Field report");
+		expect(link().dataset.applyPath).toBe("Hands-on content");
 	});
 
 	it("returns to the general enquiry between offers", () => {

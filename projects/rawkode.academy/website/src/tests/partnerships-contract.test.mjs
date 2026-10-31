@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
+import { extname } from "node:path";
 import { test } from "node:test";
 
 const page = readFileSync(
@@ -47,7 +48,7 @@ test("partnership page follows the approved redesign", () => {
 		/I work hands-on with your product to show engineers what it can do, find where they get stuck and help them be successful from dev to prod\./,
 	);
 	assert.match(page, /<dt>Ways to work<\/dt>/);
-	assert.match(page, /<dt>Adoption review<\/dt>/);
+	assert.match(page, /<dt>Ongoing partnership<\/dt>/);
 	assert.doesNotMatch(page, /invoic|on delivery/i);
 	assert.doesNotMatch(
 		partnershipCopy
@@ -55,10 +56,9 @@ test("partnership page follows the approved redesign", () => {
 			?.join("\n") ?? "",
 		/invoic|on delivery/i,
 	);
-	assert.match(
-		partnershipCopy,
-		/"28\.2K YouTube subscribers",\n\t"Over 450 hours of developer education",/,
-	);
+	// Unverified catalogue totals must not be presented as audience proof.
+	assert.doesNotMatch(partnershipCopy, /450 hours/);
+	assert.match(partnershipCopy, /28\.2K YouTube subscribers/);
 	assert.match(page, /<ReviewPreview placement="always" \/>/);
 	assert.doesNotMatch(page, /<ReviewPreview slot="aside"/);
 	assert.doesNotMatch(
@@ -149,6 +149,7 @@ test("partnership page follows the approved redesign", () => {
 			"pricing-brief",
 			"pricing-ongoing",
 			"pricing-addon",
+			"events",
 			"pricing-supporter",
 			"pinned",
 		],
@@ -206,9 +207,9 @@ test("partnership page follows the approved redesign", () => {
 		/If I can't deliver a scheduled item, we move the date together\./,
 	);
 	assert.match(partnershipCopy, /export const partnershipReviewCredit =/);
-	assert.match(
+	assert.doesNotMatch(
 		partnershipCopy,
-		/What you pay for a first engagement counts towards an ongoing partnership when it is signed within 30 days of the work being delivered\./,
+		/What you pay for a first engagement counts towards an ongoing partnership/,
 	);
 	assert.match(partnershipCopy, /price: "\$10,000"/);
 	assert.match(partnershipCopy, /price: "\$5,000"/);
@@ -219,8 +220,10 @@ test("partnership page follows the approved redesign", () => {
 		/or \$40,000 for a 12-month contract, billed \$10,000 a quarter\./,
 	);
 	assert.match(partnershipCopy, /exclude VAT where it applies/);
-	assert.match(partnershipCopy, /title: "Partner round table"/);
-	assert.match(partnershipCopy, /"Slack Connect with me",/);
+	assert.match(
+		partnershipCopy,
+		/Questions and feedback in Slack Connect, with response times agreed in the scope/,
+	);
 	assert.doesNotMatch(partnershipCopy, /"Slack Connect with David"/);
 	assert.match(partnershipCopy, /"A ranked list of what to fix first"/);
 	assert.match(
@@ -236,8 +239,10 @@ test("partnership page follows the approved redesign", () => {
 	const partners = page.indexOf('id="who-ive-worked-with"');
 	const pullQuote = page.indexOf('id="pull-quote"');
 	const process = page.indexOf('id="stages"');
+	const measurement = page.indexOf('id="measurement"');
 	const fit = page.indexOf('id="fit"');
 	const pricing = page.indexOf('id="pricing"');
+	const events = page.indexOf('id="events"');
 	const control = page.indexOf('id="no-lock-in"');
 	const independence = page.indexOf('id="independence"');
 	const quotes = page.indexOf('id="partner-quotes"');
@@ -249,10 +254,12 @@ test("partnership page follows the approved redesign", () => {
 	assert(heroCta < partners);
 	assert(partners < pullQuote);
 	assert(pullQuote < process);
-	assert(process < quotes);
+	assert(process < measurement);
+	assert(measurement < quotes);
 	assert(quotes < fit);
 	assert(fit < pricing);
-	assert(pricing < control);
+	assert(pricing < events);
+	assert(events < control);
 	assert(control < independence);
 	assert(independence < questions);
 	assert(questions < enquiry);
@@ -285,8 +292,8 @@ test("partnership enquiry is short and tracks its conversion steps", () => {
 	assert.match(form, /action="\?_action=partnership\.applyForm"/);
 	assert.match(form, /name="path"/);
 	assert.doesNotMatch(form, /:disabled="!ready/);
-	assert.match(partnershipCopy, /"First-run review": "Product review"/);
-	assert.match(partnershipCopy, /"Fit & Proof Review": "Product review"/);
+	assert.match(partnershipCopy, /"First-run review": "Adoption review"/);
+	assert.match(partnershipCopy, /"Fit & Proof Review": "Adoption review"/);
 	assert.doesNotMatch(partnershipCopy, /"Product review": "First-run review"/);
 	assert.match(partnershipCopy, /"Annual plan": "Ongoing partnership"/);
 	assert.match(partnershipCopy, /"90-day partnership": "Ongoing partnership"/);
@@ -301,4 +308,71 @@ test("partnership enquiry is short and tracks its conversion steps", () => {
 	assert.match(form, /maxlength="200"/);
 	assert.match(form, /maxlength="1000"/);
 	assert.match(form, /maxlength="5000"/);
+});
+
+// Block the rejected offer name across website sources, including metadata,
+// mailto subjects and public files, rather than only checking the visible card.
+const disallowedOfferName = new RegExp(
+	["field", "report"].join("(?:[\\s_-]|%20)*"),
+	"i",
+);
+const websiteTextExtensions = new Set([
+	".astro",
+	".vue",
+	".ts",
+	".tsx",
+	".js",
+	".jsx",
+	".mjs",
+	".cjs",
+	".json",
+	".jsonld",
+	".html",
+	".md",
+	".mdx",
+	".txt",
+	".xml",
+	".svg",
+	".csv",
+	".yaml",
+	".yml",
+	".css",
+	".toml",
+]);
+function* websiteSources(directory) {
+	for (const entry of readdirSync(directory, { withFileTypes: true })) {
+		if (
+			["tests", "__tests__", "node_modules", "dist", ".astro"].includes(
+				entry.name,
+			)
+		)
+			continue;
+		const url = new URL(
+			entry.name + (entry.isDirectory() ? "/" : ""),
+			directory,
+		);
+		if (entry.isDirectory()) {
+			yield* websiteSources(url);
+		} else if (
+			websiteTextExtensions.has(extname(entry.name)) &&
+			!/[.](test|spec)[.]/.test(entry.name)
+		) {
+			yield url;
+		}
+	}
+}
+
+test("website production sources exclude the rejected offer name", () => {
+	for (const directory of [
+		new URL("../", import.meta.url),
+		new URL("../../public/", import.meta.url),
+	]) {
+		for (const source of websiteSources(directory)) {
+			assert.doesNotMatch(
+				readFileSync(source, "utf8"),
+				disallowedOfferName,
+				source.pathname,
+			);
+		}
+	}
 });
