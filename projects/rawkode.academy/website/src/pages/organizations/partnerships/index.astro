@@ -8,7 +8,6 @@ import {
 } from "@/lib/live-content";
 import PartnerLogos from "@/components/organizations/PartnerLogos.astro";
 import PartnershipApplicationForm from "@/components/organizations/PartnershipApplicationForm.vue";
-import ReviewPreview from "@/components/organizations/ReviewPreview.astro";
 import EditorialShell from "@/components/ui/EditorialShell.astro";
 import {
 	isVerbatimExcerpt,
@@ -19,26 +18,21 @@ import {
 } from "@/lib/partnership-quotes";
 import {
 	type ApplicationPath,
-	annualPartnershipOffer,
-	fitProofReview,
+	adoptionStages,
+	bespokeProjectOffer,
+	supportAcademyOffer,
+	independenceRules,
+	ongoingPartnershipOffer,
+	ongoingQuarterExample,
 	PARTNERSHIP_EMAIL,
-	type PartnershipOffer,
 	partnershipAddOns,
-	partnershipCapacity,
 	partnershipCredentials,
 	partnershipDescription,
 	partnershipExperience,
 	partnershipFacts,
-	partnershipOffer,
-	partnershipPerks,
-	partnershipPlan,
-	partnershipReviewCredit,
+	partnershipOwnership,
 	partnershipWatchEpisodes,
-	productReviewPath,
-	productReviewScope,
-	supporterOffer,
 	teamBriefMailto,
-	renewalPerks,
 	resolveApplicationPath,
 } from "@/lib/partnerships";
 import Page from "@/wrappers/page.astro";
@@ -52,9 +46,11 @@ Astro.response.headers.set("Cache-Control", "private, no-cache");
 
 const applyHref = (path: ApplicationPath) =>
 	`/organizations/partnerships?route=${encodeURIComponent(path)}#enquiry-form`;
-const reviewApplyHref = applyHref(productReviewPath);
+const partnershipPath = "Partnership" satisfies ApplicationPath;
+const supportAcademyPath = "Support the Academy" satisfies ApplicationPath;
+const supportAcademyApplyHref = applyHref(supportAcademyPath);
 const initialPath =
-	resolveApplicationPath(Astro.url.searchParams.get("route")) ?? "Not sure yet";
+	resolveApplicationPath(Astro.url.searchParams.get("route")) ?? supportAcademyPath;
 const submittedEnquiry = Astro.getActionResult(actions.partnership.applyForm);
 const submittedData = submittedEnquiry?.data;
 const enquiryReceived =
@@ -120,8 +116,8 @@ const submittedValues =
 		? await readRejectedSubmission(Astro.request)
 		: emptySubmission;
 
-const partnershipReviewHeroTitle =
-	"See exactly where engineers get stuck with your product.";
+const partnershipHeroTitle =
+	"Make your product the one engineers reach for.";
 
 // Content is optional on this page: the enquiry form must keep working when
 // the content gateway is unavailable.
@@ -130,139 +126,73 @@ const ownerAvatar = owner?.data.avatarUrl
 	? `${owner.data.avatarUrl}?s=96`
 	: undefined;
 
-const reviewSteps = [
-	{
-		title: "You give me access",
-		detail:
-			"A trial or sandbox account. We agree who I'm acting as, and where the run starts and ends.",
-	},
-	{
-		title: "I work through it alone",
-		detail:
-			"As your target user, with nobody to rescue me. Delivered within 10 business days of getting access.",
-	},
-	{
-		title: "You get a ranked report",
-		detail:
-			"Where engineers get stuck and what to fix first. Then a one-hour call to walk your team through it.",
-	},
-];
-
-/** Split "$40,000 a year" into the amount and the period after it. */
+/** Split "$12,000 a quarter" into the amount and the period after it. */
 const splitPrice = (price: string) => {
 	const match = price.match(/^(\$[\d,]+)(?:\s+(.+))?$/);
 	return { amount: match?.[1] ?? price, period: match?.[2] };
 };
 
-interface PricingCard {
-	offer: PartnershipOffer;
-	route: ApplicationPath;
-	period: string;
-	cta: string;
-	ctaName?: string;
-	ctaLocation: string;
-	featured?: boolean;
-	lead?: string;
-}
-
-const pricingCards: PricingCard[] = [
-	{
-		offer: fitProofReview,
-		route: productReviewPath,
-		period: "one-off, fixed",
-		cta: "Ask about a product review",
-		ctaLocation: "pricing-review",
-		featured: true,
-	},
-	{
-		offer: partnershipOffer,
-		route: "90-day partnership",
-		period: "fixed, 90 days",
-		cta: "Ask about the 90-day plan",
-		ctaName: "ask_about_the_90_day_plan",
-		ctaLocation: "pricing-90-day",
-		lead: "Everything in the product review, plus:",
-	},
-	{
-		offer: annualPartnershipOffer,
-		route: "Annual plan",
-		period: splitPrice(annualPartnershipOffer.price).period ?? "a year",
-		cta: "Ask about the annual plan",
-		ctaName: "ask_about_the_annual_plan",
-		ctaLocation: "pricing-annual",
-	},
-];
+const ongoingPath = partnershipPath;
+const ongoingPrice = splitPrice(ongoingPartnershipOffer.price);
+const supportAcademyPrice = splitPrice(supportAcademyOffer.price);
+const challengeOffer = partnershipAddOns[0];
 
 const pageSections = [
-	{ id: "how-it-works", label: "How it works" },
-	{ id: "pricing", label: "Pricing" },
-	{ id: "supporter", label: "Supporter" },
+	{ id: "pricing", label: "Support & partnership" },
+	{ id: "stages", label: "The work" },
+	{ id: "bespoke", label: "Bespoke projects" },
+	{ id: "challenges", label: "Community challenges" },
 	{ id: "questions", label: "FAQ" },
 	{ id: "apply", label: "Enquire" },
 ];
 
 const noLockIn = [
 	{
-		title: "Stop at any stage",
-		detail: `Stop after the review and you've paid ${fitProofReview.price}. The 90-day partnership ends at day 90, with nothing more to pay.`,
+		title: "Agreed before we start",
+		detail: "We agree the priorities, deliverables, dates and review rounds in writing. Bespoke projects and community challenges are scoped separately.",
 	},
 	{
-		title: "Renew when it's working",
-		detail:
-			"The annual partnership is a 12-month contract, billed at $10,000 a quarter. Carrying on is always your choice.",
+		title: "Partnership renewal",
+		detail: "Work quarter by quarter, or as a 12-month contract billed at $10,000 a quarter. Nothing renews automatically.",
 	},
 	{
-		title: "You own the work",
-		detail:
-			"You own the review, the report and every read-out.",
+		title: "You keep the work",
+		detail: partnershipOwnership,
 	},
 ];
 
 const faqs = [
 	{
-		question: "How is this different from sponsoring a video?",
-		answer:
-			"Sponsorship gets you airtime. A partnership gets you my time and judgement on your product: the review, the ranked list and the advice, plus a live session that teaches engineers a real use case.",
+		question: "Where should we start?",
+		answer: "Choose 'Support the Academy' to help fund free developer education and give your team a visible place in the Academy. A Partnership adds agreed hands-on engineering, content and community work around your product. Bespoke projects and community challenges are scoped separately.",
 	},
 	{
-		question:
-			"We could come on Rawkode Live for free. What does the review add?",
-		answer:
-			"A maintainer session is public, about an hour, and you are there steering, so I see the path you show me. In the review I work alone as your target user, with nobody to rescue me. I note every place I get stuck against the recording, rank what to fix, explain or teach and, if you continue, re-run it at day 90 to check what changed.",
+		question: "Does the partnership cover all three areas?",
+		answer: "Awareness, Adoption, and Support describe the work we can do together. Each quarter has agreed priorities and outputs, based on what your users and team need most. We review that plan together as the work progresses.",
 	},
 	{
-		question: "Aren't you too experienced to get stuck where our users do?",
-		answer:
-			"Before starting we agree who I'm acting as, such as an application developer who has never run a cluster, and I work to what that person would know. The walkthrough call then checks the list against what your team already hears from users, so we focus on what matters most to them.",
+		question: "What does Support cover?",
+		answer: "Docs, runnable examples, community participation, technical Q&A, public speaking, conference workshops, customer education and office hours. We choose the work your users need and agree its scope and frequency.",
 	},
 	{
-		question: "What exactly does the review cover?",
-		answer: productReviewScope,
+		question: "Can we commission event content or a specific project?",
+		answer: "Yes. Bespoke projects can include technical hosting, interviews, live builds, workshops or a defined piece of content. We agree preparation, production, travel, publication channels and reuse rights before quoting.",
 	},
 	{
 		question: "How much of our engineers' time does it take?",
-		answer:
-			"About half a day across the 90 days: an hour to review the runnable example, plus an hour to prepare and the live hour itself if someone from your team co-hosts the session. I write the example. Your product lead joins the monthly sessions.",
+		answer: "I need access to the product, someone who knows your users and someone to check technical accuracy. We agree preparation and review time with the scope. Partnership working sessions are monthly and last 60 minutes.",
+	},
+	{
+		question: "How do you account for different levels of experience?",
+		answer: "I bring an experienced engineer's perspective. We define the intended users and what they should need to know, then compare the findings with your user feedback and support questions. An expert review complements evidence from real users.",
 	},
 	{
 		question: "Who on our side should own it?",
-		answer:
-			"Whoever owns developer adoption. Often that is the head of DevRel or developer experience, with product owning the fixes. The ranked list says which items are for product, which for docs and which for DevRel.",
-	},
-	{
-		question: "Why are places limited?",
-		answer:
-			"I do every review and partnership myself, so I keep the number of partners small and give each one my full attention.",
-	},
-	{
-		question: "Can we sponsor content as well?",
-		answer:
-			"Yes. As a community supporter, your docs, your latest announcement and a supporter badge appear on your technology page and on every video about your technology, from $1,000 a month.",
+		answer: "Choose someone who can set priorities and get the right people involved. That's often marketing or DevRel for awareness, product or developer experience for adoption, and community, customer success or DevRel for support.",
 	},
 	{
 		question: "Do open-source maintainers have to pay to come on Rawkode Live?",
-		answer:
-			"Maintainer sessions on Rawkode Live are free, as they always have been. The partnership is for teams who want the review, the advice and the work around the session.",
+		answer: "Maintainer sessions on Rawkode Live are free, as they always have been. Partnerships pay for agreed engineering, content and community work around your product.",
 	},
 ];
 
@@ -290,28 +220,28 @@ const partnerQuotes = (
 ---
 
 <Page
-	title="Developer product reviews and partnerships"
-	subtitle={partnershipReviewHeroTitle}
+	title="Partnerships for developer tool companies"
+	subtitle={partnershipHeroTitle}
 	description={partnershipDescription}
 >
 	<EditorialShell
 		eyebrow="Partnerships"
-		title={partnershipReviewHeroTitle}
-		lede="I teach engineers new tools, live and unscripted. Then I show the teams who build them where engineers get stuck, and what to fix first."
+		title={partnershipHeroTitle}
+		lede="I work hands-on with your product to show engineers what it can do, find where they get stuck and help them be successful from dev to prod."
 	>
 		<dl class="partnership-facts" slot="intro">
 			<div>
-				<dt>Price</dt>
-				<dd>{fitProofReview.price} fixed</dd>
+				<dt>Support the Academy</dt>
+				<dd>{supportAcademyOffer.price}</dd>
 			</div>
 			<div>
-				<dt>Delivered in</dt>
-				<dd>10 business days</dd>
+				<dt>Partnership</dt>
+				<dd>{ongoingPartnershipOffer.price}</dd>
 			</div>
 		</dl>
 		<div class="partnership-hero-actions" slot="actions">
-			<a id="partnership-hero-cta" class="editorial-button" href={reviewApplyHref} data-apply-path={productReviewPath} data-partnership-cta data-cta-location="hero">Ask about a product review</a>
-			<a class="partnership-text-link" href="#pricing">See all pricing</a>
+			<a id="partnership-hero-cta" class="editorial-button" href={supportAcademyApplyHref} data-apply-path={supportAcademyPath} data-partnership-cta data-cta="support_the_academy" data-cta-location="hero">Support the Academy</a>
+			<a class="partnership-text-link" href="#plan-partnership">Explore a partnership</a>
 		</div>
 		<div class="partnership-watch" slot="actions">
 			<p id="partnership-watch-title">Watch me try a new tool live</p>
@@ -336,13 +266,99 @@ const partnerQuotes = (
 				))}
 			</ul>
 		</div>
-		<ReviewPreview slot="aside" placement="hero" />
 
 		<nav class="partnership-rail" aria-label="On this page">
 			<ul>
 				{pageSections.map((section) => <li><a href={`#${section.id}`}>{section.label}</a></li>)}
 			</ul>
 		</nav>
+
+		<section id="pricing" class="editorial-section" aria-labelledby="pricing-title">
+			<div class="partnership-pricing__header">
+				<div class="editorial-section__header">
+					<h2 id="pricing-title" class="editorial-section__title">Support the Academy or work together</h2>
+					<p class="editorial-section__lede">Help fund free developer education, with your company credited alongside the work. A Partnership adds agreed hands-on engineering, content and community work around your product.</p>
+				</div>
+				<a class="partnership-text-link" href={teamBriefMailto} data-partnership-cta data-cta="send_to_team" data-cta-location="pricing-brief">Send this to your team</a>
+			</div>
+			<div class="partnership-main">
+				<article id="supporter" class="partnership-plan partnership-academy-support"
+					aria-labelledby={`plan-${supportAcademyOffer.id}`}
+					data-pinned-name={supportAcademyOffer.name} data-pinned-price={supportAcademyOffer.price}
+					data-pinned-route={supportAcademyPath} data-pinned-href={supportAcademyApplyHref}
+					data-pinned-cta="Support the Academy" data-pinned-cta-name="support_the_academy">
+					<div class="partnership-plan__heading"><h3 id={`plan-${supportAcademyOffer.id}`}>{supportAcademyOffer.name}</h3></div>
+					<p class="partnership-plan__price"><span>{supportAcademyPrice.amount}</span> <span class="partnership-plan__period">{supportAcademyPrice.period}</span></p>
+					<p class="partnership-plan__cadence">{supportAcademyOffer.cadence}</p>
+					<p class="partnership-plan__summary">{supportAcademyOffer.summary}</p>
+					<ul class="partnership-plan__list">{supportAcademyOffer.included.map((item) => <li>{item}</li>)}</ul>
+					{supportAcademyOffer.notes.map((note) => <p class="partnership-plan__note">{note}</p>)}
+					<a class="editorial-button" href={supportAcademyApplyHref} data-apply-path={supportAcademyPath} data-partnership-cta data-cta="support_the_academy" data-cta-location="pricing-support">Support the Academy</a>
+				</article>
+				<div class="partnership-details">
+					<article
+						class="partnership-plan partnership-ongoing"
+						aria-labelledby={`plan-${ongoingPartnershipOffer.id}`}
+						data-pinned-name={ongoingPartnershipOffer.name}
+						data-pinned-price={ongoingPartnershipOffer.price}
+						data-pinned-route={ongoingPath}
+						data-pinned-href={applyHref(ongoingPath)}
+						data-pinned-cta="Ask about a partnership"
+						data-pinned-cta-name="ask_about_a_partnership"
+					>
+						<div class="partnership-plan__heading"><h3 id={`plan-${ongoingPartnershipOffer.id}`}>{ongoingPartnershipOffer.name}</h3></div>
+						<p class="partnership-plan__price"><span>{ongoingPrice.amount}</span> <span class="partnership-plan__period">{ongoingPrice.period}</span></p>
+						<p class="partnership-plan__cadence">{ongoingPartnershipOffer.cadence}</p>
+						<p class="partnership-plan__summary">{ongoingPartnershipOffer.summary}</p>
+						<ul class="partnership-plan__list">{ongoingPartnershipOffer.included.map((item) => <li>{item}</li>)}</ul>
+						{ongoingPartnershipOffer.notes.map((note) => <p class="partnership-plan__note">{note}</p>)}
+						<a class="editorial-button" href={applyHref(ongoingPath)} data-apply-path={ongoingPath} data-partnership-cta data-cta="ask_about_a_partnership" data-cta-location="pricing-ongoing">Ask about a partnership</a>
+					</article>
+					<div class="partnership-quarter-example" aria-labelledby="quarter-example-title">
+						<h3 id="quarter-example-title">An example quarter</h3>
+						<p>A review and a practical build around one agreed developer workflow. Your statement of work fixes the deliverables, dates and review rounds.</p>
+						<ul class="partnership-plan__list">{ongoingQuarterExample.map((item) => <li>{item}</li>)}</ul>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<section id="stages" class="editorial-section" aria-labelledby="stages-title">
+			<div class="editorial-section__header">
+				<h2 id="stages-title" class="editorial-section__title">Awareness, Adoption, and Support</h2>
+				<p class="editorial-section__lede">We choose the work that helps your engineers next, from discovering the product to succeeding with it in production.</p>
+			</div>
+			<ul class="partnership-work-areas">
+				{adoptionStages.map((stage) => (
+					<li aria-labelledby={`work-${stage.id}`}>
+						<div>
+							<h3 id={`work-${stage.id}`}>{stage.stage}</h3>
+							<p class="partnership-label">{stage.tagline}</p>
+						</div>
+						<div class="partnership-work-area__body">
+							<p>{stage.summary}</p>
+							<ul>{stage.activities.map((activity) => <li>{activity}</li>)}</ul>
+						</div>
+					</li>
+				))}
+			</ul>
+		</section>
+
+		<section id="measurement" class="editorial-section editorial-section--split" aria-labelledby="measurement-title">
+			<div class="editorial-section__header">
+				<h2 id="measurement-title" class="editorial-section__title">Agree what success looks like</h2>
+				<p class="editorial-section__lede">Before we start, we agree what you want engineers to be able to do, the starting point and how we'll assess the work.</p>
+			</div>
+			<div class="partnership-steps-body">
+				<p>We choose useful measures and agree who provides the data. At the read-out, you get the findings, what changed and recommended next steps.</p>
+				<ul class="partnership-fit">
+					<li><strong>Awareness:</strong> relevant reach, engaged viewing, tagged referrals and use of published examples where measurable. Organic performance and paid amplification are reported separately.</li>
+					<li><strong>Adoption:</strong> reproducible obstacles and ranked fixes. If a retest is included, we check the agreed workflow again after your team makes changes.</li>
+					<li><strong>Support:</strong> questions addressed, use of learning materials, participation and recurring problems, using the evidence available for the agreed work.</li>
+				</ul>
+				<p>Activation and retention need product data from your team. We report observed changes and the limits of the evidence. An expert review does not replace research with your users, and results are not guaranteed.</p>
+			</div>
+		</section>
 
 		<section id="who-ive-worked-with" class="editorial-section" aria-labelledby="who-ive-worked-with-title">
 			<p id="who-ive-worked-with-title" class="partnership-label">Teams I've worked with</p>
@@ -357,26 +373,6 @@ const partnerQuotes = (
 			</figure>
 		</section>
 		)}
-
-		<section id="how-it-works" class="editorial-section editorial-section--split" aria-labelledby="how-it-works-title">
-			<div class="editorial-section__header">
-				<h2 id="how-it-works-title" class="editorial-section__title">How the review works</h2>
-			</div>
-			<div class="partnership-steps-body">
-				<ol class="partnership-steps">
-					{reviewSteps.map((step, index) => (
-						<li>
-							<span class="partnership-steps__number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
-							<div>
-								<h3>{step.title}</h3>
-								<p>{step.detail}</p>
-							</div>
-						</li>
-					))}
-				</ol>
-				<ReviewPreview placement="inline" />
-			</div>
-		</section>
 
 		{partnerQuotes.length > 0 && (
 		<section id="partner-quotes" class="editorial-section" aria-labelledby="partner-quotes-title">
@@ -407,125 +403,43 @@ const partnerQuotes = (
 			<ul class="partnership-fit">
 				<li>You build developer tools: infrastructure tools, Kubernetes and cloud native projects, cloud platforms or AI infrastructure.</li>
 				<li>An engineer can install or sign up for your product and try it, including open-source projects installed from GitHub or Helm.</li>
+				<li>Any size of company, from a first open-source release to a public company.</li>
+				<li>You have a clear priority for your users and someone who can provide access, check technical accuracy and help act on the findings.</li>
 			</ul>
 		</section>
 
-		<section id="perks" class="editorial-section editorial-section--split" aria-labelledby="perks-title">
+		<section id="bespoke" class="editorial-section editorial-section--split" aria-labelledby="bespoke-title">
 			<div class="editorial-section__header">
-				<h2 id="perks-title" class="editorial-section__title">What else you get</h2>
-				<p class="editorial-section__lede">Every partnership comes with these, on top of the review work.</p>
+				<h2 id="bespoke-title" class="editorial-section__title">Bespoke projects</h2>
+				<p class="editorial-section__lede">A specific piece of work, with a clear scope and a price agreed before we start.</p>
 			</div>
-			<div class="partnership-perks">
-				<h3 class="partnership-label">Every partnership</h3>
-				<ul>
-					{partnershipPerks.map((perk) => (
-						<li>
-							<strong>{perk.title}</strong>
-							<p>{perk.detail}</p>
-						</li>
-					))}
-				</ul>
-				<details class="partnership-perks__renew">
-					<summary class="partnership-label">When you renew ({renewalPerks.length})</summary>
-					<ul>
-						{renewalPerks.map((perk) => (
-							<li>
-								<strong>{perk.title}</strong>
-								<p>{perk.detail}</p>
-							</li>
-						))}
-					</ul>
-				</details>
-			</div>
+			<article class="partnership-plan" aria-labelledby={`plan-${bespokeProjectOffer.id}`}
+				data-pinned-name={bespokeProjectOffer.name} data-pinned-price={bespokeProjectOffer.price}
+				data-pinned-route="Bespoke project" data-pinned-href={applyHref("Bespoke project")}
+				data-pinned-cta="Discuss a project" data-pinned-cta-name="discuss_a_project">
+				<div class="partnership-plan__heading"><h3 id={`plan-${bespokeProjectOffer.id}`}>{bespokeProjectOffer.name}</h3></div>
+				<p class="partnership-plan__price partnership-plan__price--quoted"><span>{bespokeProjectOffer.price}</span></p>
+				<p class="partnership-plan__summary">{bespokeProjectOffer.summary}</p>
+				<ul class="partnership-plan__list">{bespokeProjectOffer.included.map((item) => <li>{item}</li>)}</ul>
+				{bespokeProjectOffer.notes.map((note) => <p class="partnership-plan__note">{note}</p>)}
+				<a class="editorial-button editorial-button--secondary" href={applyHref("Bespoke project")} data-apply-path="Bespoke project" data-partnership-cta data-cta="discuss_a_project" data-cta-location="bespoke">Discuss a project</a>
+			</article>
 		</section>
 
-		<section id="your-90-days" class="editorial-section editorial-section--split" aria-labelledby="your-90-days-title">
+		<section id="challenges" class="editorial-section editorial-section--split" aria-labelledby="challenges-title">
 			<div class="editorial-section__header">
-				<h2 id="your-90-days-title" class="editorial-section__title">Your 90 days</h2>
-				<p class="editorial-section__lede">From the review to the day-90 read-out.</p>
+				<h2 id="challenges-title" class="editorial-section__title">Community challenges</h2>
+				<p class="editorial-section__lede">Give engineers a reason to build, experiment and share what they learn.</p>
 			</div>
-			<ol class="partnership-steps">
-				{partnershipPlan.map((step, index) => (
-					<li>
-						<span class="partnership-steps__number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
-						<div>
-							<h3>{step.when}</h3>
-							<p>{step.what}</p>
-						</div>
-					</li>
-				))}
-			</ol>
-		</section>
-
-		<section id="pricing" class="editorial-section" aria-labelledby="pricing-title">
-			<div class="partnership-pricing__header">
-				<div class="editorial-section__header">
-					<h2 id="pricing-title" class="editorial-section__title">Pricing</h2>
-					<p class="editorial-section__lede">Start with the review. Keep going when it's working.</p>
-					<p class="partnership-label">{partnershipCapacity.places} partner places · {partnershipCapacity.newStartsPerMonth} new reviews a month</p>
-				</div>
-				<p class="partnership-credit">{partnershipReviewCredit}</p>
-				<a class="partnership-text-link" href={teamBriefMailto} data-partnership-cta data-cta="send_to_team" data-cta-location="pricing-brief">Send this to your team</a>
-			</div>
-			<div class="partnership-pricing">
-				{pricingCards.map((card) => {
-					const { amount } = splitPrice(card.offer.price);
-					return (
-						<article
-							class:list={["partnership-plan", card.featured && "partnership-plan--featured"]}
-							aria-labelledby={`plan-${card.offer.id}`}
-							data-pinned-name={card.offer.name}
-							data-pinned-price={`${amount} · ${card.period}`}
-							data-pinned-route={card.route}
-							data-pinned-href={applyHref(card.route)}
-							data-pinned-cta={card.cta}
-							data-pinned-cta-name={card.ctaName}
-						>
-							<div class="partnership-plan__heading">
-								<h3 id={`plan-${card.offer.id}`}>{card.offer.name}</h3>
-								{card.featured && <span class="partnership-plan__badge">Start here</span>}
-							</div>
-							<p class="partnership-plan__price"><span>{amount}</span> <span class="partnership-plan__period">{card.period}</span></p>
-							<p class="partnership-plan__cadence">{card.offer.cadence}</p>
-							{card.featured && <p class="partnership-plan__summary">{card.offer.summary}</p>}
-							<div class="partnership-plan__body">
-								{card.lead && <p class="partnership-plan__lead">{card.lead}</p>}
-								<ul class="partnership-plan__list">
-									{card.offer.included.map((item) => <li>{item}</li>)}
-								</ul>
-								{card.offer.notes.map((note) => <p class="partnership-plan__note">{note}</p>)}
-							</div>
-							<a
-								class:list={["editorial-button", !card.featured && "editorial-button--secondary"]}
-								href={applyHref(card.route)}
-								data-apply-path={card.route}
-								data-partnership-cta
-								data-cta={card.ctaName}
-								data-cta-location={card.ctaLocation}
-							>{card.cta}</a>
-						</article>
-					);
-				})}
-			</div>
-			<div class="partnership-addons">
-				<h3 id="addons-title" class="partnership-label">Add-ons</h3>
-				<ul>
-					{partnershipAddOns.map((addOn) => (
-						<li>
-							<p class="partnership-addons__heading"><strong>{addOn.title}</strong> <span>{addOn.price}</span></p>
-							<p>{addOn.detail}</p>
-							<a
-								class="partnership-text-link"
-								href={applyHref(addOn.route)}
-								data-apply-path={addOn.route}
-								data-partnership-cta
-								data-cta={`ask_about_${addOn.id.replaceAll("-", "_")}`}
-								data-cta-location="pricing-addon"
-							>{addOn.cta}</a>
-						</li>
-					))}
-				</ul>
-			</div>
+			<article class="partnership-plan" aria-labelledby={`plan-${challengeOffer.id}`}
+				data-pinned-name={challengeOffer.title} data-pinned-price={challengeOffer.price}
+				data-pinned-route={challengeOffer.route} data-pinned-href={applyHref(challengeOffer.route)}
+				data-pinned-cta={challengeOffer.cta} data-pinned-cta-name="ask_about_a_challenge_series">
+				<div class="partnership-plan__heading"><h3 id={`plan-${challengeOffer.id}`}>{challengeOffer.title}</h3></div>
+				<p class="partnership-plan__price partnership-plan__price--quoted"><span>{challengeOffer.price}</span></p>
+				<p class="partnership-plan__summary">{challengeOffer.detail}</p>
+				<a class="editorial-button editorial-button--secondary" href={applyHref(challengeOffer.route)} data-apply-path={challengeOffer.route} data-partnership-cta data-cta="ask_about_a_challenge_series" data-cta-location="challenges">{challengeOffer.cta}</a>
+			</article>
 		</section>
 
 		<section id="no-lock-in" class="editorial-section" aria-labelledby="no-lock-in-title">
@@ -542,38 +456,16 @@ const partnerQuotes = (
 			</div>
 		</section>
 
-		<section id="supporter" class="editorial-section editorial-section--split" aria-labelledby="supporter-title">
+		<section id="independence" class="editorial-section editorial-section--split" aria-labelledby="independence-title">
 			<div class="editorial-section__header">
-				<h2 id="supporter-title" class="editorial-section__title">Fund free content for the community</h2>
-				<p class="editorial-section__lede">{supporterOffer.summary}</p>
+				<h2 id="independence-title" class="editorial-section__title">Independent public work</h2>
+				<p class="editorial-section__lede">Your team helps set the scope and checks technical accuracy. What I publish about the product reflects my experience of using it.</p>
 			</div>
-			<article
-				class="partnership-plan partnership-supporter"
-				aria-labelledby={`plan-${supporterOffer.id}`}
-				data-pinned-name={supporterOffer.name}
-				data-pinned-price={supporterOffer.price}
-				data-pinned-route="Community supporter"
-				data-pinned-href={applyHref("Community supporter")}
-				data-pinned-cta="Become a supporter"
-				data-pinned-cta-name="become_a_supporter"
-			>
-				<div class="partnership-plan__heading">
-					<h3 id={`plan-${supporterOffer.id}`}>{supporterOffer.name}</h3>
-				</div>
-				<p class="partnership-plan__price"><span>{splitPrice(supporterOffer.price).amount}</span> <span class="partnership-plan__period">{splitPrice(supporterOffer.price).period}</span></p>
-				<p class="partnership-plan__cadence">{supporterOffer.cadence}</p>
-				<ul class="partnership-plan__list">
-					{supporterOffer.included.map((item) => <li>{item}</li>)}
-				</ul>
-				<a
-					class="editorial-button editorial-button--secondary"
-					href={applyHref("Community supporter")}
-					data-apply-path="Community supporter"
-					data-partnership-cta
-					data-cta="become_a_supporter"
-					data-cta-location="pricing-supporter"
-				>Become a supporter</a>
-			</article>
+			<ul class="partnership-fit partnership-independence">
+				{independenceRules.map((rule) => (
+					<li><strong>{rule.title}.</strong> {rule.detail}</li>
+				))}
+			</ul>
 		</section>
 
 		<section id="questions" class="editorial-section editorial-section--split" aria-labelledby="questions-title">
@@ -594,7 +486,7 @@ const partnerQuotes = (
 		<section id="apply" class="editorial-section editorial-section--split partnerships-apply" aria-labelledby="apply-title">
 			<div class="editorial-section__header">
 				<h2 id="apply-title" class="editorial-section__title">What are you building?</h2>
-				<p class="editorial-section__lede">A few lines about your product and what you're after is enough. I read every one and tell you which option fits: a review, a partnership or supporting the community.</p>
+				<p class="editorial-section__lede">Tell me about your product, who uses it and what you want to help them do. I read every enquiry and reply with a recommendation for how we could work together.</p>
 			</div>
 			<div id="enquiry-form" class="partnerships-apply__body">
 				{enquiryReceived ? (
@@ -616,10 +508,10 @@ const partnerQuotes = (
 
 	<div class="partnership-pinned" data-partnership-pinned>
 		<p>
-			<strong>{fitProofReview.name}</strong>
-			<span>{fitProofReview.price} · fixed price</span>
+			<strong>{supportAcademyOffer.name}</strong>
+			<span>{supportAcademyOffer.price}</span>
 		</p>
-		<a class="partnership-pinned__cta" href={reviewApplyHref} data-apply-path={productReviewPath} data-partnership-cta data-cta-location="pinned" tabindex="-1">Ask about a review</a>
+		<a class="partnership-pinned__cta" href={supportAcademyApplyHref} data-apply-path={supportAcademyPath} data-partnership-cta data-cta="support_the_academy" data-cta-location="pinned" tabindex="-1">Support the Academy</a>
 	</div>
 </Page>
 
@@ -628,7 +520,7 @@ const partnerQuotes = (
 		cta.addEventListener("click", () => {
 			const label = cta.textContent?.trim() ?? "";
 			window.posthog?.capture("cta_clicked", {
-				cta: cta.getAttribute("data-cta") ?? "book_a_product_review",
+				cta: cta.getAttribute("data-cta") ?? "partnership_enquiry",
 				label,
 				location: cta.getAttribute("data-cta-location"),
 				path: window.location.pathname,
@@ -639,22 +531,62 @@ const partnerQuotes = (
 	// The pinned bar appears once the hero button has scrolled away and
 	// leaves again when the enquiry form is reached. Positions are read on
 	// scroll (once per frame) so jumps such as anchor links are handled too.
-	const pinned = document.querySelector<HTMLElement>(
-		"[data-partnership-pinned]",
-	);
+	const pinned = document.querySelector<HTMLElement>("[data-partnership-pinned]");
 	const pinnedCta = pinned?.querySelector<HTMLAnchorElement>("a");
 	const heroCta = document.getElementById("partnership-hero-cta");
 	const enquiry = document.getElementById("apply");
 	if (pinned && pinnedCta && heroCta && enquiry) {
+		const pinnedName = pinned.querySelector("strong");
+		const pinnedPrice = pinned.querySelector("p span");
+		const plans = Array.from(
+			document.querySelectorAll<HTMLElement>("[data-pinned-name]"),
+		);
+		const defaultName = pinnedName?.textContent ?? "";
+		const defaultPrice = pinnedPrice?.textContent ?? "";
+		const defaultCta = pinnedCta.textContent ?? "";
+		const defaultHref = pinnedCta.href;
+		const defaultRoute = pinnedCta.dataset.applyPath ?? "Support the Academy";
+		const defaultCtaName = pinnedCta.dataset.cta ?? "partnership_enquiry";
+		let currentPlan: HTMLElement | undefined;
+
+		const follow = (plan?: HTMLElement) => {
+			if (plan === currentPlan) return;
+			currentPlan = plan;
+			if (pinnedName)
+				pinnedName.textContent = plan?.dataset.pinnedName ?? defaultName;
+			if (pinnedPrice)
+				pinnedPrice.textContent = plan?.dataset.pinnedPrice ?? defaultPrice;
+			pinnedCta.textContent = plan?.dataset.pinnedCta ?? defaultCta;
+			pinnedCta.href = plan?.dataset.pinnedHref ?? defaultHref;
+			pinnedCta.dataset.applyPath = plan?.dataset.pinnedRoute ?? defaultRoute;
+			pinnedCta.dataset.cta = plan?.dataset.pinnedCtaName ?? defaultCtaName;
+		};
+
 		let frame = 0;
 		const update = () => {
 			frame = 0;
 			const pastHero = heroCta.getBoundingClientRect().bottom < 0;
-			const atEnquiry =
-				enquiry.getBoundingClientRect().top < window.innerHeight;
+			const atEnquiry = enquiry.getBoundingClientRect().top < window.innerHeight;
 			const show = pastHero && !atEnquiry;
 			pinned.toggleAttribute("data-visible", show);
 			pinnedCta.tabIndex = show ? 0 : -1;
+
+			// Follow the card with the most visible height. This also handles cards
+			// taller than two screens; a 50% intersection threshold never sees those.
+			let activePlan: HTMLElement | undefined;
+			let mostVisible = 0;
+			const viewportBottom =
+				window.innerHeight - (show ? pinned.getBoundingClientRect().height : 0);
+			for (const plan of plans) {
+				const rect = plan.getBoundingClientRect();
+				const visible =
+					Math.min(rect.bottom, viewportBottom) - Math.max(rect.top, 0);
+				if (rect.width > 0 && visible > mostVisible) {
+					activePlan = plan;
+					mostVisible = visible;
+				}
+			}
+			follow(activePlan);
 		};
 		const schedule = () => {
 			if (!frame) frame = window.requestAnimationFrame(update);
@@ -662,49 +594,25 @@ const partnerQuotes = (
 		window.addEventListener("scroll", schedule, { passive: true });
 		window.addEventListener("resize", schedule, { passive: true });
 		update();
-
-		// The bar follows the plan being read: whichever plan card is mostly
-		// on screen becomes the one it names and links to.
-		const pinnedName = pinned.querySelector("strong");
-		const pinnedPrice = pinned.querySelector("p span");
-		const follow = (plan: HTMLElement) => {
-			const {
-				pinnedName: name,
-				pinnedPrice: price,
-				pinnedRoute: route,
-				pinnedHref: href,
-				pinnedCta: cta,
-				pinnedCtaName: ctaName,
-			} = plan.dataset;
-			if (!name || !price || !route || !href || !cta) return;
-			if (pinnedName) pinnedName.textContent = name;
-			if (pinnedPrice) pinnedPrice.textContent = price;
-			pinnedCta.textContent = cta;
-			pinnedCta.href = href;
-			pinnedCta.dataset.applyPath = route;
-			if (ctaName) pinnedCta.dataset.cta = ctaName;
-			else delete pinnedCta.dataset.cta;
-		};
-		const observer = new IntersectionObserver(
-			(entries) => {
-				for (const entry of entries) {
-					if (entry.isIntersecting) follow(entry.target as HTMLElement);
-				}
-			},
-			{ threshold: 0.5 },
-		);
-		document
-			.querySelectorAll<HTMLElement>("[data-pinned-name]")
-			.forEach((plan) => observer.observe(plan));
 	}
 </script>
 
 <style>
+	.editorial-section {
+		padding-block: clamp(3.5rem, 7vw, 5.5rem);
+		row-gap: 2rem;
+	}
+
+	.editorial-section__header {
+		gap: 1.25rem;
+	}
+
 	.partnership-label {
 		margin: 0;
 		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
 		font-size: 0.8rem;
 		font-weight: 600;
+		line-height: 1.6;
 		color: var(--colors-academy-text-muted);
 	}
 
@@ -715,27 +623,31 @@ const partnerQuotes = (
 		text-underline-offset: 0.2em;
 	}
 
-	.partnership-text-link:focus-visible {
+	.partnership-text-link:focus-visible,
+	.partnership-watch a:focus-visible,
+	.partnership-rail a:focus-visible,
+	.partnership-byline a:focus-visible,
+	.partnership-quotes a:focus-visible,
+	.partnership-faq summary:focus-visible {
 		outline: 2px solid var(--colors-academy-accent);
 		outline-offset: 4px;
 	}
 
-	/* Hero */
+	/* Give each hero group its own space without changing the shared shell. */
 	.partnership-facts {
 		display: grid;
-		max-width: 26rem;
-		margin: 0.25rem 0 0;
+		width: 100%;
+		max-width: 36rem;
+		margin: 1.5rem 0;
 		border: 1px solid var(--colors-academy-border);
 		border-radius: var(--radii-academy-l);
 		background: var(--colors-academy-panel);
 	}
 
 	.partnership-facts div {
-		display: flex;
-		justify-content: space-between;
-		align-items: baseline;
-		gap: 1rem;
-		padding: 0.75rem 1rem;
+		display: grid;
+		gap: 0.65rem;
+		padding: 1.25rem 1.5rem;
 	}
 
 	.partnership-facts div + div {
@@ -756,50 +668,20 @@ const partnerQuotes = (
 		color: var(--colors-academy-text);
 	}
 
-	@media (min-width: 40rem) {
-		.partnership-facts {
-			grid-template-columns: repeat(2, minmax(0, 1fr));
-		}
-
-		.partnership-facts div {
-			flex-direction: column;
-			justify-content: flex-start;
-			gap: 0.15rem;
-		}
-
-		.partnership-facts div + div {
-			border-top: none;
-			border-left: 1px solid var(--colors-academy-border);
-		}
-	}
-
 	.partnership-hero-actions {
-		width: 100%;
 		display: flex;
+		width: 100%;
 		flex-wrap: wrap;
 		align-items: center;
-		gap: 0.75rem 1.5rem;
-	}
-
-	@media (max-width: 39.99rem) {
-		.partnership-hero-actions {
-			display: grid;
-			justify-items: stretch;
-			text-align: center;
-		}
-
-		.partnership-hero-actions .partnership-text-link {
-			display: inline-flex;
-			justify-content: center;
-			align-items: center;
-			min-height: 2.75rem;
-		}
+		gap: 1.25rem 2rem;
+		margin-block: 0.5rem 1.5rem;
 	}
 
 	.partnership-watch {
 		display: grid;
-		gap: 0.6rem;
+		gap: 1.25rem;
 		width: 100%;
+		margin-block: 0.5rem 1.5rem;
 	}
 
 	.partnership-watch p {
@@ -810,7 +692,7 @@ const partnerQuotes = (
 	.partnership-watch ul {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.5rem;
+		gap: 0.85rem;
 		margin: 0;
 		padding: 0;
 		list-style: none;
@@ -819,14 +701,13 @@ const partnerQuotes = (
 	.partnership-watch a {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.5rem;
-		min-height: 2.75rem;
-		padding: 0 1rem;
+		gap: 0.65rem;
+		min-height: 3rem;
+		padding: 0.65rem 1.25rem;
 		border: 1px solid var(--colors-academy-border);
 		border-radius: var(--radii-academy-pill);
 		background: var(--colors-academy-panel);
 		font-weight: 600;
-		white-space: nowrap;
 		color: var(--colors-academy-text);
 		text-decoration: none;
 	}
@@ -840,9 +721,88 @@ const partnerQuotes = (
 		border-color: var(--colors-academy-accent);
 	}
 
-	.partnership-watch a:focus-visible {
-		outline: 2px solid var(--colors-academy-accent);
-		outline-offset: 2px;
+	.partnership-byline {
+		display: grid;
+		gap: 1.5rem;
+		width: 100%;
+		margin-top: 1rem;
+		padding-block: 2rem 0.5rem;
+		border-top: 1px solid var(--colors-academy-border);
+		color: var(--colors-academy-text-soft);
+	}
+
+	.partnership-byline__who {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+	}
+
+	.partnership-byline__who img {
+		flex: none;
+		width: 3rem;
+		height: 3rem;
+		border-radius: var(--radii-academy-pill);
+		background: var(--colors-academy-ground);
+	}
+
+	.partnership-byline__who p {
+		display: grid;
+		gap: 0.35rem;
+		margin: 0;
+		line-height: 1.5;
+	}
+
+	.partnership-byline__who strong {
+		color: var(--colors-academy-text);
+	}
+
+	.partnership-byline__bio {
+		max-width: 40rem;
+		margin: 0;
+		line-height: 1.7;
+	}
+
+	.partnership-byline__bio a {
+		color: inherit;
+		text-underline-offset: 0.2em;
+	}
+
+	.partnership-byline__facts {
+		display: grid;
+		gap: 0.85rem 2rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.partnership-byline__facts li {
+		display: flex;
+		gap: 0.75rem;
+		color: var(--colors-academy-text);
+	}
+
+	.partnership-byline__facts li::before {
+		content: "✓";
+		color: var(--colors-academy-accent);
+	}
+
+	.partnership-byline__credentials {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.85rem 1.75rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		font-size: 0.875rem;
+	}
+
+	.partnership-byline__credentials a {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		min-height: 2.75rem;
+		color: var(--colors-academy-text-muted);
+		text-decoration: none;
 	}
 
 	.partnership-rail {
@@ -855,19 +815,18 @@ const partnerQuotes = (
 
 	.partnership-rail ul {
 		display: flex;
+		gap: 0.5rem 2rem;
 		min-width: 0;
-		gap: 0.25rem 1.5rem;
 		margin: 0;
-		padding: 0 var(--spacing-academy-gutter);
+		padding: 0.5rem 0;
 		overflow-x: auto;
 		list-style: none;
-		scrollbar-width: none;
 	}
 
 	.partnership-rail a {
 		display: inline-flex;
 		align-items: center;
-		min-height: 2.75rem;
+		min-height: 3rem;
 		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
 		font-size: 0.8rem;
 		white-space: nowrap;
@@ -881,289 +840,101 @@ const partnerQuotes = (
 		text-underline-offset: 0.2em;
 	}
 
-	.partnership-rail a:focus-visible {
-		outline: 2px solid var(--colors-academy-accent);
-		outline-offset: 2px;
-	}
-
-	/* Anchored sections clear the site header, plus the rail on desktop. */
 	.editorial-section[id],
+	#supporter,
+	#plan-partnership,
 	#enquiry-form {
 		scroll-margin-top: 5rem;
 	}
 
-	@media (min-width: 64rem) {
-		.partnership-rail ul {
-			padding-inline: 0;
-		}
-
-		.partnership-rail {
-			position: sticky;
-			top: 64px;
-			z-index: 10;
-		}
-
-		.editorial-section[id],
-		#enquiry-form {
-			scroll-margin-top: 8rem;
-		}
-	}
-
-	.partnership-byline {
-		display: grid;
-		gap: 1rem;
-		width: 100%;
-		padding-top: 1.25rem;
-		border-top: 1px solid var(--colors-academy-border);
-		color: var(--colors-academy-text-soft);
-	}
-
-	.partnership-byline__who {
-		display: flex;
-		align-items: center;
-		gap: 0.85rem;
-	}
-
-	.partnership-byline__who img {
-		flex: none;
-		width: 3rem;
-		height: 3rem;
-		border-radius: var(--radii-academy-pill);
-		background: var(--colors-academy-ground);
-	}
-
-	.partnership-byline__who p {
-		display: grid;
-		margin: 0;
-		line-height: 1.35;
-	}
-
-	.partnership-byline__who strong {
-		color: var(--colors-academy-text);
-	}
-
-	.partnership-byline__bio {
-		max-width: 38rem;
-		margin: 0;
-		line-height: 1.55;
-	}
-
-	.partnership-byline__facts {
-		display: grid;
-		gap: 0.4rem 1.5rem;
-		margin: 0;
-		padding: 0;
-		list-style: none;
-	}
-
-	@media (min-width: 40rem) {
-		.partnership-byline__facts {
-			grid-template-columns: repeat(2, max-content);
-		}
-	}
-
-	.partnership-byline__facts li {
-		display: flex;
-		gap: 0.5rem;
-		color: var(--colors-academy-text);
-	}
-
-	.partnership-byline__facts li::before {
-		content: "✓";
-		color: var(--colors-academy-accent);
-	}
-
-	.partnership-byline__credentials {
+	.partnership-pricing__header {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.25rem 1.25rem;
-		margin: 0;
-		padding: 0;
-		list-style: none;
-		font-size: 0.875rem;
+		justify-content: space-between;
+		align-items: flex-end;
+		gap: 1.5rem 3rem;
+		margin-bottom: 2rem;
 	}
 
-	.partnership-byline__credentials a {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.3rem;
-		min-height: 2rem;
-		white-space: nowrap;
-		color: var(--colors-academy-text-muted);
-		text-decoration: none;
-	}
-
-	.partnership-byline__credentials a:hover {
-		color: var(--colors-academy-text);
-	}
-
-	.partnership-byline__bio a {
-		color: inherit;
-		text-decoration: underline;
-		text-underline-offset: 0.2em;
-	}
-
-	.partnership-byline__bio a:focus-visible,
-	.partnership-byline__credentials a:focus-visible {
-		outline: 2px solid var(--colors-academy-accent);
-		outline-offset: 2px;
-	}
-
-	.partnership-addons {
-		margin-top: 2rem;
-		padding-top: 1.25rem;
-		border-top: 1px solid var(--colors-academy-border);
-	}
-
-	.partnership-addons ul {
+	.partnership-main {
 		display: grid;
-		gap: 1rem;
-		margin: 0.75rem 0 0;
-		padding: 0;
-		list-style: none;
+		align-items: start;
+		align-items: start;
+		gap: 2rem;
 	}
 
-	.partnership-addons p {
-		margin: 0;
-		max-width: 38rem;
-		line-height: 1.5;
-		color: var(--colors-academy-text-soft);
-	}
-
-	.partnership-addons__heading {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem 1rem;
-		align-items: baseline;
-	}
-
-	.partnership-addons__heading strong {
-		color: var(--colors-academy-text);
-	}
-
-	.partnership-addons__heading span {
-		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
-		font-size: 0.8rem;
-		color: var(--colors-academy-text-muted);
-	}
-
-	.partnership-perks ul {
+	.partnership-details {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
-		gap: 0 2rem;
-		margin: 0;
-		padding: 0;
-		list-style: none;
-		border-top: 1px solid var(--colors-academy-border);
-	}
-
-	.partnership-perks li {
-		padding: 1rem 0;
-		border-bottom: 1px solid var(--colors-academy-border);
-	}
-
-	.partnership-perks strong {
-		color: var(--colors-academy-text);
-	}
-
-	.partnership-perks p {
-		margin: 0.35rem 0 0;
-		line-height: 1.5;
-		color: var(--colors-academy-text-soft);
-	}
-
-	.partnership-perks h3 {
-		margin: 2rem 0 0.75rem;
-	}
-
-	.partnership-perks h3:first-child {
-		margin-top: 0;
-	}
-
-	.partnership-perks__renew {
-		margin-top: 2rem;
-	}
-
-	.partnership-perks__renew summary {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.5rem;
-		min-height: 2.75rem;
-		cursor: pointer;
-		list-style: none;
-	}
-
-	.partnership-perks__renew summary::-webkit-details-marker {
-		display: none;
-	}
-
-	.partnership-perks__renew summary::after {
-		content: "";
-		width: 0.4rem;
-		height: 0.4rem;
-		border-right: 2px solid currentColor;
-		border-bottom: 2px solid currentColor;
-		transform: rotate(45deg);
-	}
-
-	.partnership-perks__renew[open] summary::after {
-		transform: rotate(225deg);
-	}
-
-	.partnership-perks__renew summary:focus-visible {
-		outline: 2px solid var(--colors-academy-accent);
-		outline-offset: 4px;
-	}
-
-	/* Partners */
-	#who-ive-worked-with {
-		display: grid;
-		gap: 1rem;
-	}
-
-	/* Pull quote */
-	.partnership-pull-quote {
-		display: grid;
-		gap: 1rem;
-		max-width: 48rem;
-		margin: 0;
-	}
-
-	.partnership-pull-quote blockquote {
-		margin: 0;
-		font-family: var(--fonts-academy-display), system-ui, sans-serif;
-		font-size: clamp(1.5rem, 3.2vw, 2.25rem);
-		font-weight: 700;
-		line-height: 1.2;
-		letter-spacing: -0.02em;
-		color: var(--colors-academy-text);
-	}
-
-	.partnership-pull-quote blockquote::before {
-		content: "“";
-		display: block;
-		height: 0.55em;
-		font-size: 2.5em;
-		line-height: 1;
-		color: var(--colors-academy-accent);
-	}
-
-	.partnership-pull-quote figcaption {
-		color: var(--colors-academy-text-soft);
-	}
-
-	.partnership-pull-quote figcaption strong {
-		color: var(--colors-academy-text);
-	}
-
-	/* How it works */
-	.partnership-steps-body {
-		display: grid;
-		gap: 1.5rem;
+		gap: 2rem;
 		min-width: 0;
 	}
 
-	.partnership-steps {
+	.partnership-plan,
+	.partnership-quarter-example {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+		min-width: 0;
+		padding: clamp(1.5rem, 4vw, 2.5rem);
+		border: 1px solid var(--colors-academy-border);
+		border-radius: var(--radii-academy-l);
+		background: var(--colors-academy-panel);
+	}
+
+	.partnership-quarter-example {
+		background: transparent;
+	}
+
+	.partnership-plan p,
+	.partnership-plan h3,
+	.partnership-quarter-example h3,
+	.partnership-quarter-example p {
+		margin: 0;
+	}
+
+	.partnership-plan__heading h3,
+	.partnership-quarter-example h3,
+	.partnership-work-areas h3 {
+		font-family: var(--fonts-academy-display), system-ui, sans-serif;
+		font-size: 1.4rem;
+		font-weight: 700;
+		color: var(--colors-academy-text);
+	}
+
+	.partnership-plan__price {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 0.5rem 0.75rem;
+	}
+
+	.partnership-plan__price span:first-child {
+		font-family: var(--fonts-academy-display), system-ui, sans-serif;
+		font-size: clamp(2.5rem, 5vw, 3.25rem);
+		font-weight: 700;
+		line-height: 1.15;
+		letter-spacing: -0.03em;
+		color: var(--colors-academy-text);
+	}
+
+	.partnership-plan__price--quoted span:first-child {
+		font-size: clamp(1.5rem, 3vw, 1.9rem);
+		line-height: 1.3;
+	}
+
+	.partnership-plan__period,
+	.partnership-plan__cadence,
+	.partnership-quarter-example p {
+		color: var(--colors-academy-text-soft);
+		line-height: 1.7;
+	}
+
+	.partnership-plan__summary {
+		line-height: 1.7;
+		color: var(--colors-academy-text);
+	}
+
+	.partnership-plan__list {
 		display: grid;
 		gap: 1.25rem;
 		margin: 0;
@@ -1171,196 +942,10 @@ const partnerQuotes = (
 		list-style: none;
 	}
 
-	.partnership-steps li {
-		display: flex;
-		gap: 1rem;
-		align-items: flex-start;
-	}
-
-	.partnership-steps__number {
-		flex: none;
-		display: grid;
-		place-items: center;
-		width: 2.25rem;
-		height: 2.25rem;
-		border-radius: var(--radii-academy-pill);
-		background: var(--colors-academy-text);
-		color: var(--colors-academy-canvas);
-		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
-		font-size: 0.8rem;
-	}
-
-	.partnership-steps h3,
-	.partnership-steps p {
-		margin: 0;
-	}
-
-	.partnership-steps h3 {
-		font-family: var(--fonts-academy-display), system-ui, sans-serif;
-		font-size: 1.15rem;
-		font-weight: 700;
-		color: var(--colors-academy-text);
-	}
-
-	.partnership-steps p {
-		margin-top: 0.2rem;
-		line-height: 1.55;
-		color: var(--colors-academy-text-soft);
-	}
-
-
-	/* Fit */
-	.partnership-fit {
-		display: grid;
-		gap: 0;
-		min-width: 0;
-		margin: 0;
-		padding: 0;
-		list-style: none;
-		border-top: 1px solid var(--colors-academy-border);
-	}
-
-	.partnership-fit li {
-		position: relative;
-		padding: 0.85rem 0 0.85rem 1.6rem;
-		border-bottom: 1px solid var(--colors-academy-border);
-		line-height: 1.5;
-		color: var(--colors-academy-text);
-	}
-
-	.partnership-fit li::before {
-		content: "✓";
-		position: absolute;
-		left: 0;
-		font-weight: 700;
-		color: var(--colors-academy-status-spruce);
-	}
-
-	/* Pricing */
-	.partnership-pricing__header {
-		display: flex;
-		flex-wrap: wrap;
-		justify-content: space-between;
-		align-items: flex-end;
-		gap: 1rem 2.5rem;
-	}
-
-	.partnership-credit {
-		max-width: 28rem;
-		margin: 0;
-		font-size: 0.95rem;
-		line-height: 1.5;
-		color: var(--colors-academy-text-soft);
-	}
-
-	.partnership-pricing {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
-		gap: 1rem;
-		margin-top: 1.5rem;
-	}
-
-	.partnership-plan {
-		display: flex;
-		flex-direction: column;
-		gap: 0.85rem;
-		min-width: 0;
-		padding: 1.5rem;
-		border: 1px solid var(--colors-academy-border);
-		border-radius: var(--radii-academy-l);
-		background: var(--colors-academy-panel);
-	}
-
-	.partnership-plan--featured {
-		border: 2px solid var(--colors-academy-accent);
-	}
-
-	.partnership-plan p,
-	.partnership-plan h3 {
-		margin: 0;
-	}
-
-	.partnership-plan__heading {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		gap: 0.75rem;
-	}
-
-	.partnership-plan__heading h3 {
-		font-family: var(--fonts-academy-display), system-ui, sans-serif;
-		font-size: 1.3rem;
-		font-weight: 700;
-		color: var(--colors-academy-text);
-	}
-
-	.partnership-plan__badge {
-		flex: none;
-		padding: 0.2rem 0.55rem;
-		border-radius: var(--radii-academy-pill);
-		background: var(--colors-academy-accent);
-		color: var(--colors-academy-accent-foreground);
-		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
-		font-size: 0.72rem;
-		font-weight: 600;
-	}
-
-	.partnership-plan__price {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: baseline;
-		gap: 0.15rem 0.5rem;
-	}
-
-	.partnership-plan__price span:first-child {
-		font-family: var(--fonts-academy-display), system-ui, sans-serif;
-		font-size: clamp(2.5rem, 5vw, 3rem);
-		font-weight: 700;
-		line-height: 1;
-		letter-spacing: -0.03em;
-		color: var(--colors-academy-text);
-	}
-
-	.partnership-plan__period {
-		color: var(--colors-academy-text-muted);
-	}
-
-	.partnership-plan__cadence {
-		font-size: 0.92rem;
-		line-height: 1.45;
-		color: var(--colors-academy-text-soft);
-	}
-
-	.partnership-plan__summary {
-		line-height: 1.5;
-		color: var(--colors-academy-text);
-	}
-
-	.partnership-plan__body {
-		display: grid;
-		align-content: start;
-		gap: 0.75rem;
-		flex: 1 1 auto;
-	}
-
-	.partnership-plan__lead {
-		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
-		font-size: 0.8rem;
-		color: var(--colors-academy-text-muted);
-	}
-
-	.partnership-plan__list {
-		display: grid;
-		gap: 0.55rem;
-		margin: 0;
-		padding: 0;
-		list-style: none;
-	}
-
 	.partnership-plan__list li {
 		position: relative;
-		padding-left: 1.5rem;
-		line-height: 1.45;
+		padding-left: 1.6rem;
+		line-height: 1.6;
 		color: var(--colors-academy-text);
 	}
 
@@ -1372,109 +957,119 @@ const partnerQuotes = (
 		color: var(--colors-academy-text-muted);
 	}
 
-	.partnership-plan--featured .partnership-plan__list li::before {
-		color: var(--colors-academy-accent);
-	}
-
 	.partnership-plan__note {
-		font-size: 0.88rem;
-		line-height: 1.45;
+		font-size: 0.9rem;
+		line-height: 1.7;
 		color: var(--colors-academy-text-muted);
-	}
-
-	#questions .partnership-faq summary::-webkit-details-marker {
-		display: none;
-	}
-
-	#questions .partnership-faq summary::after {
-		content: "";
-		flex: none;
-		width: 0.45rem;
-		height: 0.45rem;
-		border-right: 2px solid currentColor;
-		border-bottom: 2px solid currentColor;
-		transform: rotate(45deg);
-	}
-
-	#questions .partnership-faq details[open] summary::after {
-		transform: rotate(225deg);
-	}
-
-	#questions .partnership-faq summary:focus-visible {
-		outline: 2px solid var(--colors-academy-accent);
-		outline-offset: 4px;
 	}
 
 	.partnership-plan > .editorial-button {
 		width: 100%;
+		margin-top: 0.5rem;
 	}
 
-	/* Simple terms */
-	.partnership-terms {
+	.partnership-work-areas {
 		display: grid;
-		gap: 1.25rem;
-		padding: 1.75rem 1.25rem;
-		border: 1px solid var(--colors-academy-ink-border);
-		border-radius: var(--radii-academy-l);
-		background: var(--colors-academy-ink);
-		color: var(--colors-academy-ink-text);
+		gap: 2.5rem;
+		margin: 2.5rem 0 0;
+		padding: 0;
+		list-style: none;
 	}
 
-	.partnership-terms h2 {
+	.partnership-work-areas > li {
+		display: grid;
+		gap: 1.5rem;
+		padding-top: 2.5rem;
+		border-top: 1px solid var(--colors-academy-border);
+	}
+
+	.partnership-work-areas h3 {
+		margin: 0 0 0.75rem;
+	}
+
+	.partnership-work-area__body {
+		display: grid;
+		gap: 1.5rem;
+		line-height: 1.7;
+	}
+
+	.partnership-work-area__body p {
 		margin: 0;
-		font-family: var(--fonts-academy-display), system-ui, sans-serif;
-		font-size: clamp(1.75rem, 3vw, 2.25rem);
-		font-weight: 700;
-		letter-spacing: -0.02em;
-		color: var(--colors-academy-ink-text);
 	}
 
-	.partnership-terms ul {
+	.partnership-work-area__body ul {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
-		gap: 0.75rem;
+		gap: 1rem;
+		margin: 0;
+		padding-left: 1.25rem;
+		color: var(--colors-academy-text-soft);
+	}
+
+	.partnership-steps-body {
+		display: grid;
+		gap: 1.75rem;
+		min-width: 0;
+		line-height: 1.7;
+	}
+
+	.partnership-steps-body > p {
+		margin: 0;
+	}
+
+	.partnership-fit {
+		display: grid;
+		gap: 1.5rem;
+		min-width: 0;
 		margin: 0;
 		padding: 0;
 		list-style: none;
 	}
 
-	.partnership-terms li {
+	.partnership-fit li {
+		position: relative;
+		padding-left: 1.6rem;
+		line-height: 1.7;
+		color: var(--colors-academy-text);
+	}
+
+	.partnership-fit li::before {
+		content: "✓";
+		position: absolute;
+		left: 0;
+		font-weight: 700;
+		color: var(--colors-academy-status-spruce);
+	}
+
+	#who-ive-worked-with {
 		display: grid;
-		align-content: start;
-		gap: 0.3rem;
-		padding-top: 1rem;
-		border-top: 1px solid var(--colors-academy-ink-border);
+		gap: 2rem;
 	}
 
-	.partnership-terms strong {
+	.partnership-pull-quote {
+		display: grid;
+		gap: 1.5rem;
+		max-width: 48rem;
+		margin: 0;
+	}
+
+	.partnership-pull-quote blockquote {
+		margin: 0;
 		font-family: var(--fonts-academy-display), system-ui, sans-serif;
-		font-size: 1.05rem;
-		color: var(--colors-academy-ink-text);
+		font-size: clamp(1.5rem, 3.2vw, 2.25rem);
+		font-weight: 700;
+		line-height: 1.35;
+		letter-spacing: -0.02em;
+		color: var(--colors-academy-text);
 	}
 
-	.partnership-terms span {
-		font-size: 0.92rem;
-		line-height: 1.45;
-		color: var(--colors-academy-ink-text-soft);
+	.partnership-pull-quote figcaption {
+		color: var(--colors-academy-text-soft);
 	}
 
-	@media (min-width: 64rem) {
-		.partnership-terms ul {
-			grid-template-columns: repeat(3, minmax(0, 1fr));
-		}
-
-		.partnership-terms {
-			grid-template-columns: minmax(12rem, 0.3fr) 1fr;
-			align-items: start;
-			padding: 2.5rem;
-		}
-	}
-
-	/* Partner quotes */
 	.partnership-quotes {
 		display: grid;
-		gap: 0.75rem;
-		margin: 1.5rem 0 0;
+		gap: 1.75rem;
+		margin: 2rem 0 0;
 		padding: 0;
 		list-style: none;
 	}
@@ -1483,19 +1078,13 @@ const partnerQuotes = (
 		display: flex;
 	}
 
-	@media (min-width: 64rem) {
-		.partnership-quotes {
-			grid-template-columns: repeat(3, minmax(0, 1fr));
-		}
-	}
-
 	.partnership-quotes figure {
 		display: flex;
 		flex-direction: column;
-		gap: 0.85rem;
+		gap: 1.5rem;
 		width: 100%;
 		margin: 0;
-		padding: 1.25rem;
+		padding: 1.75rem;
 		border: 1px solid var(--colors-academy-border);
 		border-radius: var(--radii-academy-l);
 		background: var(--colors-academy-panel);
@@ -1503,12 +1092,13 @@ const partnerQuotes = (
 
 	.partnership-quotes blockquote {
 		margin: 0;
-		line-height: 1.55;
+		line-height: 1.7;
 		color: var(--colors-academy-text);
 	}
 
 	.partnership-quotes figcaption {
 		display: grid;
+		gap: 0.5rem;
 		margin-top: auto;
 		font-size: 0.92rem;
 		color: var(--colors-academy-text-soft);
@@ -1521,61 +1111,112 @@ const partnerQuotes = (
 		color: var(--colors-academy-text);
 	}
 
-	.partnership-quotes figcaption a {
-		text-decoration: underline;
-		text-underline-offset: 0.2em;
+	.partnership-terms {
+		display: grid;
+		gap: 2rem;
+		padding: clamp(1.75rem, 4vw, 3rem);
+		border: 1px solid var(--colors-academy-ink-border);
+		border-radius: var(--radii-academy-l);
+		background: var(--colors-academy-ink);
+		color: var(--colors-academy-ink-text);
 	}
 
-	.partnership-quotes figcaption a:focus-visible {
-		outline: 2px solid var(--colors-academy-accent);
-		outline-offset: 4px;
+	.partnership-terms h2 {
+		margin: 0;
+		font-family: var(--fonts-academy-display), system-ui, sans-serif;
+		font-size: clamp(1.75rem, 3vw, 2.25rem);
+		font-weight: 700;
+		line-height: 1.3;
+		color: var(--colors-academy-ink-text);
 	}
 
-	/* Questions */
-	#questions .partnership-faq {
+	.partnership-terms ul {
+		display: grid;
+		gap: 1.75rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.partnership-terms li {
+		display: grid;
+		align-content: start;
+		gap: 0.85rem;
+		line-height: 1.7;
+	}
+
+	.partnership-terms strong {
+		color: var(--colors-academy-ink-text);
+	}
+
+	.partnership-terms span {
+		font-size: 0.95rem;
+		color: var(--colors-academy-ink-text-soft);
+	}
+
+	.partnership-faq {
 		display: grid;
 		min-width: 0;
 		border-top: 1px solid var(--colors-academy-border);
 	}
 
-	#questions .partnership-faq details {
+	.partnership-faq details {
 		margin: 0;
 		padding: 0;
 		border-bottom: 1px solid var(--colors-academy-border);
 	}
 
-	#questions .partnership-faq summary {
+	.partnership-faq summary {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		gap: 1rem;
+		gap: 1.25rem;
 		width: 100%;
-		min-height: 2.75rem;
-		padding: 1rem 0;
+		min-height: 3rem;
+		padding: 1.5rem 0;
 		cursor: pointer;
 		font-weight: 700;
+		line-height: 1.6;
 		color: var(--colors-academy-text);
 		list-style: none;
 	}
 
-	#questions .partnership-faq details > p {
+	.partnership-faq summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.partnership-faq summary::after {
+		content: "";
+		flex: none;
+		width: 0.45rem;
+		height: 0.45rem;
+		border-right: 2px solid currentColor;
+		border-bottom: 2px solid currentColor;
+		transform: rotate(45deg);
+	}
+
+	.partnership-faq details[open] summary::after {
+		transform: rotate(225deg);
+	}
+
+	.partnership-faq details > p {
 		margin: 0;
-		padding: 0 0 1.25rem;
-		line-height: 1.65;
+		padding: 0 0 1.75rem;
+		line-height: 1.75;
 		color: var(--colors-academy-text-soft);
 	}
 
-	/* Pinned mobile bar */
+	/* Follow the visible offer, with enough room for the default on narrow phones. */
 	.partnership-pinned {
 		position: fixed;
 		inset-inline: 0;
 		bottom: 0;
 		z-index: 40;
-		display: flex;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
 		align-items: center;
-		justify-content: space-between;
 		gap: 1rem;
-		padding: 0.75rem var(--spacing-academy-gutter) calc(0.75rem + env(safe-area-inset-bottom));
+		padding: 1rem var(--spacing-academy-gutter) calc(1rem + env(safe-area-inset-bottom));
 		border-top: 1px solid var(--colors-academy-ink-border);
 		background: var(--colors-academy-ink);
 		color: var(--colors-academy-ink-text);
@@ -1592,8 +1233,9 @@ const partnerQuotes = (
 
 	.partnership-pinned p {
 		display: grid;
+		gap: 0.4rem;
 		margin: 0;
-		line-height: 1.25;
+		line-height: 1.4;
 	}
 
 	.partnership-pinned span {
@@ -1603,15 +1245,16 @@ const partnerQuotes = (
 	}
 
 	.partnership-pinned__cta {
-		flex: none;
 		display: inline-flex;
 		align-items: center;
-		min-height: 2.75rem;
-		padding-inline: 1.15rem;
+		justify-content: center;
+		min-height: 3rem;
+		padding: 0.75rem 1.25rem;
 		border-radius: var(--radii-academy-s);
 		background: var(--colors-academy-ink-accent);
 		color: var(--colors-academy-ink);
 		font-weight: 700;
+		text-align: center;
 		text-decoration: none;
 	}
 
@@ -1620,9 +1263,79 @@ const partnerQuotes = (
 		outline-offset: 3px;
 	}
 
+	@media (min-width: 40rem) {
+		.partnership-facts {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
+		.partnership-facts div + div {
+			border-top: none;
+			border-left: 1px solid var(--colors-academy-border);
+		}
+
+		.partnership-byline__facts {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
+		.partnership-work-areas > li {
+			grid-template-columns: minmax(10rem, 0.65fr) minmax(0, 1.35fr);
+			gap: 3rem;
+		}
+	}
+
 	@media (min-width: 64rem) {
+		.partnership-rail {
+			position: sticky;
+			top: 64px;
+			z-index: 10;
+		}
+
+		.editorial-section[id],
+		#supporter,
+		#plan-partnership,
+		#enquiry-form {
+			scroll-margin-top: 9rem;
+		}
+
+		.partnership-main,
+		.partnership-quotes {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
+		.partnership-terms ul {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+
 		.partnership-pinned {
 			display: none;
+		}
+	}
+
+	@media (max-width: 39.99rem) {
+		.partnership-hero-actions {
+			display: grid;
+			justify-items: stretch;
+			text-align: center;
+		}
+
+		.partnership-hero-actions .partnership-text-link {
+			display: inline-flex;
+			justify-content: center;
+			align-items: center;
+			min-height: 3rem;
+		}
+	}
+
+	@media (max-width: 24rem) {
+		.partnership-pinned {
+			grid-template-columns: minmax(0, 1fr);
+		}
+
+		.partnership-pinned p {
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: space-between;
+			gap: 0.5rem 1rem;
 		}
 	}
 

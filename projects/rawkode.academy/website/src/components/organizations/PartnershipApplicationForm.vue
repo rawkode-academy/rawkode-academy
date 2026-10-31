@@ -56,6 +56,7 @@
 							v-model="email"
 							:class="s.input"
 							type="email"
+							maxlength="254"
 							name="email"
 							autocomplete="email"
 							required
@@ -137,7 +138,6 @@ import {
 } from "vue";
 import {
 	type ApplicationPath,
-	applicationPathDeals,
 	applicationPathLabels,
 	applicationPaths,
 	resolveApplicationPath,
@@ -156,7 +156,7 @@ const props = withDefaults(
 		serverFieldErrors?: Record<string, string>;
 	}>(),
 	{
-		initialPath: "Not sure yet",
+		initialPath: "Support the Academy",
 		submittedValues: () => ({}),
 		serverFieldErrors: () => ({}),
 	},
@@ -188,7 +188,7 @@ const email = ref(submittedText(props.submittedValues.email));
 const company = ref(submittedText(props.submittedValues.company));
 const submittedPath = props.submittedValues.path ?? "";
 const path = ref<ApplicationPath>(
-	isApplicationPath(submittedPath) ? submittedPath : props.initialPath,
+	resolveApplicationPath(submittedPath) ?? props.initialPath,
 );
 const message = ref(submittedText(props.submittedValues.message));
 const website = ref("");
@@ -272,7 +272,12 @@ const capturePartnershipEvent = (
 		path: window.location.pathname,
 		route: path.value,
 		...(event === "enquiry_form_submitted"
-			? { offer: applicationPathDeals[path.value].offer }
+			? {
+					offer:
+						path.value === "Not sure yet"
+							? null
+							: applicationPathLabels[path.value],
+				}
 			: {}),
 	});
 };

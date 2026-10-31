@@ -1,10 +1,10 @@
 ---
 import {
-	annualPartnershipOffer,
-	fitProofReview,
+	bespokeProjectOffer,
+	communityChallengeOffer,
+	supportAcademyOffer,
+	ongoingPartnershipOffer,
 	type PartnershipOffer,
-	partnershipOffer,
-	supporterOffer,
 } from "@/lib/partnerships";
 
 interface Props {
@@ -26,8 +26,7 @@ const usdAmount = (price: string) =>
 const partnerOffer = (offer: PartnershipOffer, anchor: string) => ({
 	"@type": "Offer",
 	name: offer.name,
-	price: usdAmount(offer.price),
-	priceCurrency: "USD",
+	...(offer.price.startsWith("$") ? { price: usdAmount(offer.price), priceCurrency: "USD" } : {}),
 	url: `${PARTNERSHIPS_URL}${anchor}`,
 	itemOffered: {
 		"@type": "Service",
@@ -84,17 +83,32 @@ const organizationSchema = {
 		"Site Reliability Engineering",
 	],
 	offers: [
-		partnerOffer(fitProofReview, "#how-it-works"),
-		partnerOffer(partnershipOffer, "#pricing"),
-		partnerOffer(annualPartnershipOffer, "#pricing"),
 		{
-			...partnerOffer(supporterOffer, "#supporter"),
+			...partnerOffer(supportAcademyOffer, "#supporter"),
 			priceSpecification: {
 				"@type": "UnitPriceSpecification",
-				price: usdAmount(supporterOffer.price),
+				price: usdAmount(supportAcademyOffer.price),
 				priceCurrency: "USD",
-				unitCode: "MON",
 				unitText: "month",
+				unitCode: "MON",
+			},
+		},
+		{
+			...partnerOffer(ongoingPartnershipOffer, "#pricing"),
+			priceSpecification: {
+				"@type": "UnitPriceSpecification",
+				price: usdAmount(ongoingPartnershipOffer.price),
+				priceCurrency: "USD",
+				unitText: "quarter",
+			},
+		},
+		partnerOffer(bespokeProjectOffer, "#bespoke"),
+		{
+			...partnerOffer(communityChallengeOffer, "#challenges"),
+			priceSpecification: {
+				"@type": "PriceSpecification",
+				minPrice: usdAmount(communityChallengeOffer.price),
+				priceCurrency: "USD",
 			},
 		},
 		{

@@ -127,7 +127,10 @@ test("technology badge links to the supporters wall only when the technology has
 	const link = supported.querySelector("a");
 	assert.equal(link.getAttribute("href"), "/supporters");
 	assert.equal(supported.querySelector(".m-label").text, "Community supporter");
-	assert.equal(supported.querySelector(".m-label").getAttribute("data-tone"), "spruce");
+	assert.equal(
+		supported.querySelector(".m-label").getAttribute("data-tone"),
+		"spruce",
+	);
 	assert.equal(
 		supported.querySelector(".technology-supporter__name").text,
 		"Acme <Cloud>",
@@ -148,7 +151,10 @@ test("technology badge sits directly under the identity block and its supporter 
 	assert(identityEnd > 0);
 	assert.equal(
 		technologyPage.indexOf("\t\t\t{supporter && (", identityEnd),
-		technologyPage.indexOf("\n", technologyPage.indexOf("</div>", identityEnd)) + 1,
+		technologyPage.indexOf(
+			"\n",
+			technologyPage.indexOf("</div>", identityEnd),
+		) + 1,
 	);
 	assert.match(
 		technologyPage,
@@ -252,7 +258,10 @@ test("wall is cached under the supporters tag", () => {
 	assert.match(cache.entries, /\.\.\.supporters/);
 	assert.match(wallPage, /^export const prerender = false;$/m);
 	assert.match(wallPage, /getCollection\("supporters"\)/);
-	assert.doesNotMatch(wallPage, /optionalContent\(getCollection\("supporters"\)/);
+	assert.doesNotMatch(
+		wallPage,
+		/optionalContent\(getCollection\("supporters"\)/,
+	);
 	// Held until the gateway serves Query.supporters (see the service README).
 	assert.doesNotMatch(sitemaps, /path: "\/supporters"/);
 });
@@ -260,8 +269,8 @@ test("wall is cached under the supporters tag", () => {
 test("partnerships page does not link to the wall until the service is live", () => {
 	const section = fragment(
 		partnershipsPage,
-		'<section id="supporter"',
-		"</section>",
+		'<article id="supporter"',
+		"</article>",
 	);
 	assert.doesNotMatch(section, /href="\/supporters"/);
 });
