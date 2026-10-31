@@ -1,0 +1,32 @@
+{
+  "name": "@rawkode-academy/youtube-control",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "types": "wrangler types --env-interface CloudflareEnv",
+    "check": "npm run types && tsc --noEmit",
+    "test": "npm run build && node --experimental-transform-types --test test/*.test.ts",
+    "build": "wrangler deploy --dry-run --outdir dist",
+    "deploy": "node scripts/deploy.mjs",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "dependencies": {
+    "@cloudflare/workers-oauth-provider": "1.2.4",
+    "@modelcontextprotocol/server": "2.4.0",
+    "agents": "0.32.0",
+    "jose": "6.2.14",
+    "zod": "4.3.6"
+  },
+  "overrides": {
+    "workerd": "1.20261031.1"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20261031.1",
+    "@types/node": "24.10.1",
+    "miniflare": "5.20261023.3-beta",
+    "typescript": "5.9.3",
+    "wrangler": "4.156.0"
+  }
+}

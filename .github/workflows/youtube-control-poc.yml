@@ -1,0 +1,47 @@
+# Standalone PoC checks. No deployment credentials, production environment or live API calls.
+name: YouTube control PoC
+on:
+  pull_request:
+    paths:
+      - .github/workflows/youtube-control-poc.yml
+      - projects/rawkode.academy/platform/youtube-control/**
+      - projects/rawkode.academy/tasks/youtube-scheduler/**
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: youtube-control-poc-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: projects/rawkode.academy/platform/youtube-control
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: projects/rawkode.academy/platform/youtube-control/package-lock.json
+      - name: Install repository Nix runtime
+        uses: DeterminateSystems/determinate-nix-action@v3
+        with:
+          extra-conf: accept-flake-config = true
+      - name: Synchronize repository environment
+        working-directory: .
+        run: |
+          curl -fsSL https://github.com/cuenv/cuenv/releases/download/0.60.1/cuenv-linux-x64 -o /tmp/cuenv
+          echo '87e5d975b23871acd319a9fcc2638a9a321a90d633280de8342f2d5a7772cb49  /tmp/cuenv' | sha256sum --check --status
+          chmod +x /tmp/cuenv
+          /tmp/cuenv sync -A
+      - run: npm ci --workspaces=false --no-audit --no-fund
+      - run: npm run check --workspaces=false
+      - run: npm test --workspaces=false
+      - name: Verify cost model arithmetic
+        run: python3 -m unittest discover -s test -p '*_test.py'
+      - name: Check existing scheduling CLI
+        run: |
+          node --test ../../tasks/youtube-scheduler/youtube.test.mjs
+          python3 -m py_compile ../../tasks/youtube-scheduler/authorize.py
