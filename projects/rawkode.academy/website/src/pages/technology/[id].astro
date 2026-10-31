@@ -60,6 +60,14 @@ const [items, allVideos, supporters] = await Promise.all([
 const supporter = supporterForTechnology(supporters, technologyEntry.id);
 
 const now = new Date();
+const upcomingSessions = allVideos
+	.filter(
+		({ data }) =>
+			data.type === "live" &&
+			data.publishedAt > now &&
+			normalizeTechnologyReferences(data.technologies).includes(technologyEntry.id),
+	)
+	.sort((a, b) => a.data.publishedAt.getTime() - b.data.publishedAt.getTime());
 // Published recordings about this technology, most recent first.
 const technologyVideos = allVideos
 	.filter(
@@ -325,6 +333,7 @@ await setContentCache(Astro, {
 		technologyEntry,
 		supporter,
 		...technologyVideos,
+		...upcomingSessions,
 		...items.filter((t) => relatedEntryIds.has(t.id)),
 		...(hasTopicContent
 			? [
@@ -433,6 +442,29 @@ await setContentCache(Astro, {
 				</ul>
 			)}
 		</header>
+
+		{upcomingSessions.length > 0 && (
+			<section class={styles.ruledSection} aria-labelledby="upcoming-sessions-heading">
+				<h2 id="upcoming-sessions-heading" class={styles.heading}>Upcoming sessions</h2>
+				<ul class={styles.videoGrid}>
+					{upcomingSessions.map(({ data: video }) => {
+						const startsAt = localTime(video.publishedAt, {
+							month: "short", day: "numeric", year: "numeric",
+							hour: "numeric", minute: "2-digit", timeZoneName: "short",
+						}, "en-GB");
+						return (
+							<li>
+								<a href={"/watch/" + video.slug} class={styles.video}>
+									<img src={getVideoThumbnailUrl(video.id)} alt="" loading="lazy" width="480" height="270" />
+									<span>{video.title}</span>
+									<time class={styles.videoDate} {...startsAt.attrs}>{startsAt.text}</time>
+								</a>
+							</li>
+						);
+					})}
+				</ul>
+			</section>
+		)}
 
 		<div class={hasAside ? styles.columns : styles.reading}>
 			{hasContent ? (
