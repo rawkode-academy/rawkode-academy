@@ -8,9 +8,13 @@ uploads a recording, or modifies the Academy database.
 Requires Node.js 22+ (no npm dependencies). Initial authorization uses Python
 3.11+ and Google's OAuth library through `uv`.
 
+The [Workers publishing and analytics PoC](../../platform/youtube-control/README.md)
+adds durable coordination, K2/R2/Basin storage, and OAuth MCP integration for ChatGPT.
+It shares the authorization helper below.
+
 ## Authorize once
 
-Enable YouTube Data API v3 in your Google Cloud project, configure the OAuth
+Enable YouTube Data API v3 and YouTube Analytics API in your Google Cloud project, configure the OAuth
 consent screen, and create a **Desktop app** OAuth client. Download its client
 JSON outside the repository. Use your own project, not credentials extracted
 from a browser or another connector.
@@ -26,14 +30,16 @@ export YOUTUBE_CREDENTIALS_FILE=/secure/path/academy-youtube.credentials.json
 ```
 
 Choose Rawkode Academy's channel/Brand Account during consent. The helper uses
-Google's PKCE desktop flow, checks the channel, and saves a refresh credential
-with mode `0600`. The requested `youtube.force-ssl` scope permits account writes;
+Google's PKCE desktop flow, requires exactly the selected channel, and saves a refresh credential
+with mode `0600`. The shared grant requests `youtube.force-ssl` for publishing,
+`youtube.readonly` and `yt-analytics.readonly` for analytics, and `openid` to identify
+the owner for MCP sign-in. It prints the nonsecret Google subject for the Worker configuration.
 Google's consent screen is the authorization step. Later runs refresh short-lived
 access tokens without Studio. Never put credential contents in a manifest, PR,
 chat, or log. Keep the credential and durable state files in private storage.
 
 External OAuth apps left in **Testing** normally receive refresh tokens that
-expire after seven days for this scope. Configure the appropriate production
+expire after seven days for these scopes. Configure the appropriate production
 consent setup for ongoing use. Revocation and expiry still require reauthorization.
 
 ## Preview, apply, verify

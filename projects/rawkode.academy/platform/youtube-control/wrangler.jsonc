@@ -1,0 +1,39 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "rawkode-academy-youtube-control-poc",
+  "main": "src/main.ts",
+  "compatibility_date": "2026-10-31",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  // OAuth callbacks carry one-use codes/state in the URL. Keep sanitized
+  // application logs, omit automatic invocation records, and redact queries.
+  "observability": {
+    "enabled": true,
+    "redact_query_string": true,
+    "logs": { "invocation_logs": false }
+  },
+  // This checked-in config is for type generation and offline build/tests.
+  // `npm run setup -- --apply ...` writes wrangler.deploy.jsonc with real IDs.
+  "vars": {
+    "YOUTUBE_CHANNEL_ID": "UCrber_mFvp_FEF7D9u8PDEA",
+    "CLOUDFLARE_ACCOUNT_ID": "00000000000000000000000000000000",
+    "BASIN_BUCKET_NAME": "youtube-control-not-provisioned",
+    "K2_STREAM_ID": "00000000000000000000000000000000",
+    "K2_SUBSCRIPTION_ID": "00000000000000000000000000000000",
+    "PUBLIC_ORIGIN": "https://youtube-control.invalid",
+    "MCP_OWNER_GOOGLE_SUB": "NOT_CONFIGURED"
+  },
+  "durable_objects": {
+    "bindings": [{ "name": "CHANNELS", "class_name": "YouTubeChannel" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["YouTubeChannel"] }],
+  "r2_buckets": [
+    { "binding": "ASSETS", "bucket_name": "youtube-control-assets-not-provisioned" },
+    { "binding": "ANALYTICS_RAW", "bucket_name": "youtube-control-raw-not-provisioned" }
+  ],
+  "kv_namespaces": [{ "binding": "OAUTH_KV", "id": "00000000000000000000000000000000" }],
+  "k2": [{ "binding": "ANALYTICS_EVENTS", "stream": "00000000000000000000000000000000" }],
+  "pipelines": [{ "binding": "ANALYTICS_PIPELINE", "stream": "00000000000000000000000000000000" }],
+  "triggers": { "crons": ["*/5 * * * *", "17 8 * * *"] },
+  "limits": { "cpu_ms": 30000 }
+}

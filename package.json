@@ -6,7 +6,8 @@
     "packages/**",
     "projects/**",
     "!projects/**/generators/**",
-    "!projects/**/webcontainer-demos/**"
+    "!projects/**/webcontainer-demos/**",
+    "!projects/rawkode.academy/platform/youtube-control"
   ],
   "devDependencies": {
     "@types/node": "^24.10.1",

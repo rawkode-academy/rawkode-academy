@@ -110,7 +110,7 @@ export class YouTube {
 
   async checkChannel(channelId) {
     const data = await this.request('GET', 'channels', { part: 'id', mine: true });
-    requireThat(data.items?.some(c => c.id === channelId), 'OAuth identity does not own the requested channel');
+    requireThat(data.items?.length === 1 && data.items[0].id === channelId && !data.nextPageToken, 'OAuth identity must select exactly the requested channel');
   }
 
   async broadcast(id, channelId) {
