@@ -4,6 +4,26 @@ import { describe, expect, it } from "vitest";
 import { resolveLegacyRoute } from "../middleware/legacy-routes";
 
 describe("legacy route resolver", () => {
+	it("routes old supporter enquiries to Support Our Work", () => {
+		for (const route of [
+			"Support the Academy",
+			"Community Support",
+			"Community supporter",
+		]) {
+			const source = new URL(
+				"https://rawkode.academy/organizations/partnerships",
+			);
+			source.searchParams.set("route", route);
+			source.hash = "#enquiry-form";
+			expect(resolveLegacyRoute(source)).toEqual({
+				kind: "redirect",
+				status: 302,
+				location: source
+					.toString()
+					.replace("/partnerships", "/support-our-work"),
+			});
+		}
+	});
 	it("permanently redirects retired public pages to current hubs", () => {
 		expect(
 			resolveLegacyRoute(new URL("https://rawkode.academy/events")),

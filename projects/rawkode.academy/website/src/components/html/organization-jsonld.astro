@@ -21,13 +21,14 @@ if (!shouldShow) return;
 // Offers come from the same copy module as the partnerships page, so prices
 // in search results cannot drift from what the page says.
 const PARTNERSHIPS_URL = "https://rawkode.academy/organizations/partnerships";
+const SUPPORT_URL = "https://rawkode.academy/organizations/support-our-work";
 const usdAmount = (price: string) =>
 	price.match(/\$([\d,]+)/)?.[1]?.replaceAll(",", "") ?? "";
-const partnerOffer = (offer: PartnershipOffer, anchor: string) => ({
+const partnerOffer = (offer: PartnershipOffer, anchor: string, baseUrl = PARTNERSHIPS_URL) => ({
 	"@type": "Offer",
 	name: offer.name,
 	...(offer.price.startsWith("$") ? { price: usdAmount(offer.price), priceCurrency: "USD" } : {}),
-	url: `${PARTNERSHIPS_URL}${anchor}`,
+	url: `${baseUrl}${anchor}`,
 	itemOffered: {
 		"@type": "Service",
 		name: offer.name,
@@ -84,7 +85,7 @@ const organizationSchema = {
 	],
 	offers: [
 		{
-			...partnerOffer(supportAcademyOffer, "#supporter"),
+			...partnerOffer(supportAcademyOffer, "#supporter", SUPPORT_URL),
 			priceSpecification: {
 				"@type": "UnitPriceSpecification",
 				price: usdAmount(supportAcademyOffer.price),

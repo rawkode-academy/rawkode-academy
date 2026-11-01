@@ -20,7 +20,6 @@ import {
 	type ApplicationPath,
 	adoptionStages,
 	bespokeProjectOffer,
-	supportAcademyOffer,
 	independenceRules,
 	ongoingPartnershipOffer,
 	ongoingQuarterExample,
@@ -47,10 +46,9 @@ Astro.response.headers.set("Cache-Control", "private, no-cache");
 const applyHref = (path: ApplicationPath) =>
 	`/organizations/partnerships?route=${encodeURIComponent(path)}#enquiry-form`;
 const partnershipPath = "Partnership" satisfies ApplicationPath;
-const supportAcademyPath = "Support the Academy" satisfies ApplicationPath;
-const supportAcademyApplyHref = applyHref(supportAcademyPath);
 const initialPath =
-	resolveApplicationPath(Astro.url.searchParams.get("route")) ?? supportAcademyPath;
+	resolveApplicationPath(Astro.url.searchParams.get("route")) ??
+	partnershipPath;
 const submittedEnquiry = Astro.getActionResult(actions.partnership.applyForm);
 const submittedData = submittedEnquiry?.data;
 const enquiryReceived =
@@ -116,8 +114,7 @@ const submittedValues =
 		? await readRejectedSubmission(Astro.request)
 		: emptySubmission;
 
-const partnershipHeroTitle =
-	"Make your product the one engineers reach for.";
+const partnershipHeroTitle = "Build the developer journey your product needs.";
 
 // Content is optional on this page: the enquiry form must keep working when
 // the content gateway is unavailable.
@@ -134,14 +131,14 @@ const splitPrice = (price: string) => {
 
 const ongoingPath = partnershipPath;
 const ongoingPrice = splitPrice(ongoingPartnershipOffer.price);
-const supportAcademyPrice = splitPrice(supportAcademyOffer.price);
 const challengeOffer = partnershipAddOns[0];
 
 const pageSections = [
-	{ id: "pricing", label: "Support & partnership" },
+	{ id: "pricing", label: "The partnership" },
 	{ id: "stages", label: "The work" },
 	{ id: "bespoke", label: "Bespoke projects" },
 	{ id: "challenges", label: "Community challenges" },
+	{ id: "supporter", label: "Not ready yet?" },
 	{ id: "questions", label: "FAQ" },
 	{ id: "apply", label: "Enquire" },
 ];
@@ -149,11 +146,13 @@ const pageSections = [
 const noLockIn = [
 	{
 		title: "Agreed before we start",
-		detail: "We agree the priorities, deliverables, dates and review rounds in writing. Bespoke projects and community challenges are scoped separately.",
+		detail:
+			"We agree the priorities, deliverables, dates and review rounds in writing. Bespoke projects and community challenges are scoped separately.",
 	},
 	{
 		title: "Partnership renewal",
-		detail: "Work quarter by quarter, or as a 12-month contract billed at $10,000 a quarter. Nothing renews automatically.",
+		detail:
+			"Work quarter by quarter, or as a 12-month contract billed at $10,000 a quarter. Nothing renews automatically.",
 	},
 	{
 		title: "You keep the work",
@@ -164,39 +163,43 @@ const noLockIn = [
 const faqs = [
 	{
 		question: "Where should we start?",
-		answer: "Choose 'Support the Academy' to help fund free developer education and give your team a visible place in the Academy. A Partnership adds agreed hands-on engineering, content and community work around your product. Bespoke projects and community challenges are scoped separately.",
-	},
-	{
-		question: "Which supporters get a livestream?",
-		answer: "The first 10 supporter organisations each get one livestream with me, with the topic and date agreed together. The monthly live Q&A is a shared call for all current supporters.",
+		answer:
+			"Start with the developer workflow you want to improve. We agree the work across Awareness, Adoption, and Support for one partnership. Bespoke projects and community challenges are scoped separately. If you only want to fund free education, see Support Our Work.",
 	},
 	{
 		question: "Does the partnership cover all three areas?",
-		answer: "Awareness, Adoption, and Support describe the work we can do together. Each quarter has agreed priorities and outputs, based on what your users and team need most. We review that plan together as the work progresses.",
+		answer:
+			"Awareness, Adoption, and Support describe the work we can do together. Each quarter has agreed priorities and outputs, based on what your users and team need most. We review that plan together as the work progresses.",
 	},
 	{
 		question: "What does Support cover?",
-		answer: "Docs, runnable examples, community participation, technical Q&A, public speaking, conference workshops, customer education and office hours. We choose the work your users need and agree its scope and frequency.",
+		answer:
+			"Docs, runnable examples, community participation, technical Q&A, public speaking, conference workshops, customer education and office hours. We choose the work your users need and agree its scope and frequency.",
 	},
 	{
 		question: "Can we commission event content or a specific project?",
-		answer: "Yes. Bespoke projects can include technical hosting, interviews, live builds, workshops or a defined piece of content. We agree preparation, production, travel, publication channels and reuse rights before quoting.",
+		answer:
+			"Yes. Bespoke projects can include technical hosting, interviews, live builds, workshops or a defined piece of content. We agree preparation, production, travel, publication channels and reuse rights before quoting.",
 	},
 	{
 		question: "How much of our engineers' time does it take?",
-		answer: "I need access to the product, someone who knows your users and someone to check technical accuracy. We agree preparation and review time with the scope. Partnership working sessions are monthly and last 60 minutes.",
+		answer:
+			"I need access to the product, someone who knows your users and someone to check technical accuracy. We agree preparation and review time with the scope. Partnership working sessions are monthly and last 60 minutes.",
 	},
 	{
 		question: "How do you account for different levels of experience?",
-		answer: "I bring an experienced engineer's perspective. We define the intended users and what they should need to know, then compare the findings with your user feedback and support questions. An expert review complements evidence from real users.",
+		answer:
+			"I bring an experienced engineer's perspective. We define the intended users and what they should need to know, then compare the findings with your user feedback and support questions. An expert review complements evidence from real users.",
 	},
 	{
 		question: "Who on our side should own it?",
-		answer: "Choose someone who can set priorities and get the right people involved. That's often marketing or DevRel for awareness, product or developer experience for adoption, and community, customer success or DevRel for support.",
+		answer:
+			"Choose someone who can set priorities and get the right people involved. That's often marketing or DevRel for awareness, product or developer experience for adoption, and community, customer success or DevRel for support.",
 	},
 	{
 		question: "Do open-source maintainers have to pay to come on Rawkode Live?",
-		answer: "Editorial guest sessions with open-source maintainers remain free. The livestream for the first 10 supporters is a separate supporter benefit. Partnerships pay for agreed engineering, content and community work around your product.",
+		answer:
+			"Editorial guest sessions with open-source maintainers remain free. Partnerships pay for agreed engineering, content and community work around your product.",
 	},
 ];
 
@@ -224,9 +227,10 @@ const partnerQuotes = (
 ---
 
 <Page
-	title="Partnerships for developer tool companies"
+	title="Partnerships for developer tools"
 	subtitle={partnershipHeroTitle}
 	description={partnershipDescription}
+	image={{ text: "A working partnership across Awareness, Adoption and Support. Built around your product and your users.", template: "gradient" }}
 >
 	<EditorialShell
 		eyebrow="Partnerships"
@@ -235,17 +239,13 @@ const partnerQuotes = (
 	>
 		<dl class="partnership-facts" slot="intro">
 			<div>
-				<dt>Support the Academy</dt>
-				<dd>{supportAcademyOffer.price}</dd>
-			</div>
-			<div>
 				<dt>Partnership</dt>
 				<dd>{ongoingPartnershipOffer.price}</dd>
 			</div>
 		</dl>
 		<div class="partnership-hero-actions" slot="actions">
-			<a id="partnership-hero-cta" class="editorial-button" href={supportAcademyApplyHref} data-apply-path={supportAcademyPath} data-partnership-cta data-cta="support_the_academy" data-cta-location="hero">Support the Academy</a>
-			<a class="partnership-text-link" href="#plan-partnership">Explore a partnership</a>
+			<a id="partnership-hero-cta" class="editorial-button" href={applyHref(partnershipPath)} data-apply-path={partnershipPath} data-partnership-cta data-cta="ask_about_a_partnership" data-cta-location="hero">Ask about a partnership</a>
+			<a class="partnership-text-link" href="#pricing">See the offer</a>
 		</div>
 		<div class="partnership-watch" slot="actions">
 			<p id="partnership-watch-title">Watch me try a new tool live</p>
@@ -280,25 +280,12 @@ const partnerQuotes = (
 		<section id="pricing" class="editorial-section" aria-labelledby="pricing-title">
 			<div class="partnership-pricing__header">
 				<div class="editorial-section__header">
-					<h2 id="pricing-title" class="editorial-section__title">Support the Academy or work together</h2>
-					<p class="editorial-section__lede">Help fund free developer education, with your company credited alongside the work. A Partnership adds agreed hands-on engineering, content and community work around your product.</p>
+					<h2 id="pricing-title" class="editorial-section__title">One partnership, built around your users</h2>
+					<p class="editorial-section__lede">We agree a quarterly plan for the work your product needs. Adoption reviews are part of that plan, alongside practical content and support for your users.</p>
 				</div>
-				<a class="partnership-text-link" href={teamBriefMailto} data-partnership-cta data-cta="send_to_team" data-cta-location="pricing-brief">Send this to your team</a>
+				<a class="partnership-text-link" href={teamBriefMailto} data-partnership-cta data-cta="send_to_team" data-cta-location="pricing-brief">Send the partnership brief to your team</a>
 			</div>
-			<div class="partnership-main">
-				<article id="supporter" class="partnership-plan partnership-academy-support"
-					aria-labelledby={`plan-${supportAcademyOffer.id}`}
-					data-pinned-name={supportAcademyOffer.name} data-pinned-price={supportAcademyOffer.price}
-					data-pinned-route={supportAcademyPath} data-pinned-href={supportAcademyApplyHref}
-					data-pinned-cta="Support the Academy" data-pinned-cta-name="support_the_academy">
-					<div class="partnership-plan__heading"><h3 id={`plan-${supportAcademyOffer.id}`}>{supportAcademyOffer.name}</h3></div>
-					<p class="partnership-plan__price"><span>{supportAcademyPrice.amount}</span> <span class="partnership-plan__period">{supportAcademyPrice.period}</span></p>
-					<p class="partnership-plan__cadence">{supportAcademyOffer.cadence}</p>
-					<p class="partnership-plan__summary">{supportAcademyOffer.summary}</p>
-					<ul class="partnership-plan__list">{supportAcademyOffer.included.map((item) => <li>{item}</li>)}</ul>
-					{supportAcademyOffer.notes.map((note) => <p class="partnership-plan__note">{note}</p>)}
-					<a class="editorial-button" href={supportAcademyApplyHref} data-apply-path={supportAcademyPath} data-partnership-cta data-cta="support_the_academy" data-cta-location="pricing-support">Support the Academy</a>
-				</article>
+			<div class="partnership-main partnership-main--single">
 				<div class="partnership-details">
 					<article
 						class="partnership-plan partnership-ongoing"
@@ -487,6 +474,18 @@ const partnerQuotes = (
 			</div>
 		</section>
 
+		<section id="supporter" class="editorial-section editorial-section--split partnership-off-ramp" aria-labelledby="supporter-title">
+			<span id="plan-support-the-academy" class="sr-only" aria-hidden="true"></span>
+			<div class="editorial-section__header">
+				<p class="partnership-label">Not Ready Yet?</p>
+				<h2 id="supporter-title" class="editorial-section__title">Support free learning now</h2>
+			</div>
+			<div>
+				<p>Want to back practical developer education without planning product work together? Support Our Work gives your company clear recognition while the Academy's editorial conclusions stay independent.</p>
+				<a class="editorial-button editorial-button--secondary" href="/organizations/support-our-work">Explore Support Our Work</a>
+			</div>
+		</section>
+
 		<section id="apply" class="editorial-section editorial-section--split partnerships-apply" aria-labelledby="apply-title">
 			<div class="editorial-section__header">
 				<h2 id="apply-title" class="editorial-section__title">What are you building?</h2>
@@ -512,10 +511,10 @@ const partnerQuotes = (
 
 	<div class="partnership-pinned" data-partnership-pinned>
 		<p>
-			<strong>{supportAcademyOffer.name}</strong>
-			<span>{supportAcademyOffer.price}</span>
+			<strong>{ongoingPartnershipOffer.name}</strong>
+			<span>{ongoingPartnershipOffer.price}</span>
 		</p>
-		<a class="partnership-pinned__cta" href={supportAcademyApplyHref} data-apply-path={supportAcademyPath} data-partnership-cta data-cta="support_the_academy" data-cta-location="pinned" tabindex="-1">Support the Academy</a>
+		<a class="partnership-pinned__cta" href={applyHref(partnershipPath)} data-apply-path={partnershipPath} data-partnership-cta data-cta="ask_about_a_partnership" data-cta-location="pinned" tabindex="-1">Ask about a partnership</a>
 	</div>
 </Page>
 
@@ -549,7 +548,7 @@ const partnerQuotes = (
 		const defaultPrice = pinnedPrice?.textContent ?? "";
 		const defaultCta = pinnedCta.textContent ?? "";
 		const defaultHref = pinnedCta.href;
-		const defaultRoute = pinnedCta.dataset.applyPath ?? "Support the Academy";
+		const defaultRoute = pinnedCta.dataset.applyPath ?? "Partnership";
 		const defaultCtaName = pinnedCta.dataset.cta ?? "partnership_enquiry";
 		let currentPlan: HTMLElement | undefined;
 
@@ -602,6 +601,22 @@ const partnerQuotes = (
 </script>
 
 <style>
+	.partnership-main--single {
+		grid-template-columns: minmax(0, 1fr);
+		max-width: 70rem;
+	}
+
+	.partnership-off-ramp > div:last-child {
+		display: grid;
+		justify-items: start;
+		gap: 1.5rem;
+	}
+
+	.partnership-off-ramp p {
+		margin: 0;
+		line-height: 1.75;
+	}
+
 	.editorial-section {
 		padding-block: clamp(3.5rem, 7vw, 5.5rem);
 		row-gap: 2rem;
@@ -1304,6 +1319,10 @@ const partnerQuotes = (
 		.partnership-main,
 		.partnership-quotes {
 			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
+		.partnership-main--single {
+			grid-template-columns: minmax(0, 1fr);
 		}
 
 		.partnership-terms ul {

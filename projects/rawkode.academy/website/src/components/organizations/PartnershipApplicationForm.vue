@@ -19,7 +19,7 @@
 			:aria-busy="loading"
 			:aria-describedby="error ? errorId : undefined"
 		>
-			<fieldset :class="[s.form, 'form-controls']" :disabled="loading" aria-label="Partnership enquiry" @input="trackStarted">
+			<fieldset :class="[s.form, 'form-controls']" :disabled="loading" aria-label="Academy enquiry" @input="trackStarted">
 				<div class="form-honeypot" aria-hidden="true">
 					<label :for="honeypotId">Website</label>
 					<input
@@ -156,7 +156,7 @@ const props = withDefaults(
 		serverFieldErrors?: Record<string, string>;
 	}>(),
 	{
-		initialPath: "Support the Academy",
+		initialPath: "Partnership",
 		submittedValues: () => ({}),
 		serverFieldErrors: () => ({}),
 	},
@@ -204,7 +204,7 @@ const fieldErrors = ref<Record<string, string>>({
 	...props.serverFieldErrors,
 });
 const fallbackMailto = computed(() => {
-	const subject = encodeURIComponent("Partnership enquiry");
+	const subject = encodeURIComponent(`Rawkode Academy enquiry: ${applicationPathLabels[path.value]}`);
 	const body = encodeURIComponent(
 		[
 			`Name: ${name.value}`,

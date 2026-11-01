@@ -93,7 +93,7 @@ describe("partnership email action", () => {
 			from: { email: "david@rawkode.email", name: "Rawkode Academy enquiries" },
 			to: "david@rawkode.academy",
 			replyTo: input.email,
-			subject: `Partnership enquiry: ${partnerships.applicationPathLabels[path]}`,
+			subject: `Rawkode Academy enquiry: ${partnerships.applicationPathLabels[path]}`,
 		});
 		for (const value of [
 			input.name,
@@ -198,7 +198,7 @@ describe("partnership email action", () => {
 		expect(message.html).not.toContain("<img");
 		expect(message.html).not.toContain("<script");
 		expect(message.html).toContain("white-space: pre-wrap");
-		expect(message.subject).toBe("Partnership enquiry: Partnership");
+		expect(message.subject).toBe("Rawkode Academy enquiry: Partnership");
 		expect(message).not.toHaveProperty("bcc");
 		expect(message).not.toHaveProperty("cc");
 		expect(message).not.toHaveProperty("headers");
@@ -283,8 +283,8 @@ describe("partnership enquiry routes", () => {
 	it.each([
 		["Customer workshops", "Bespoke project"],
 		["Event content and hosting", "Bespoke project"],
-		["Community Support", "Support the Academy"],
-		["Community supporter", "Support the Academy"],
+		["Community Support", "Support Our Work"],
+		["Community supporter", "Support Our Work"],
 		["Hands-on content", "Partnership"],
 		["Developer support", "Partnership"],
 		["Ongoing partnership", "Partnership"],

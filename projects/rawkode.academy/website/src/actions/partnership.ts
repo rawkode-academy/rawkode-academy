@@ -21,7 +21,7 @@ type EnquiryErrorCode =
 const enquiryFallback = (code: EnquiryErrorCode) => {
 	// Provider errors may contain the submitted address or message. Log only
 	// our own failure code; never expose submitted content or provider messages.
-	console.error("Failed to email partnership enquiry", { code });
+	console.error("Failed to email Academy enquiry", { code });
 	return { success: false, fallback: "mailto", code } as const;
 };
 
@@ -77,7 +77,7 @@ const sendEnquiry = async (
 		["Interested in", route],
 	] as const;
 	const text = [
-		"New partnership enquiry from rawkode.academy",
+		"New Academy enquiry from rawkode.academy",
 		"",
 		...details.map(([label, value]) => `${label}: ${value}`),
 		"",
@@ -85,7 +85,7 @@ const sendEnquiry = async (
 		input.message,
 	].join("\n");
 	const html = [
-		"<h1>New partnership enquiry</h1>",
+		"<h1>New Academy enquiry</h1>",
 		"<dl>",
 		...details.map(
 			([label, value]) => `<dt>${label}</dt><dd>${escapeHtml(value)}</dd>`,
@@ -101,7 +101,7 @@ const sendEnquiry = async (
 			from: ENQUIRY_SENDER,
 			to: PARTNERSHIP_EMAIL,
 			replyTo: input.email,
-			subject: `Partnership enquiry: ${route}`,
+			subject: `Rawkode Academy enquiry: ${route}`,
 			text,
 			html,
 		});
