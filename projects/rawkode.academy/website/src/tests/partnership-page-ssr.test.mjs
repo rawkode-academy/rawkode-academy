@@ -276,7 +276,7 @@ test("organization JSON-LD links both offers to their pages", async () => {
 	);
 	assert.equal(offers[0].priceSpecification.unitText, "month");
 	assert.equal(offers[0].priceSpecification.unitCode, "MON");
-	assert.equal(offers[1].price, "12000");
+	assert.equal(offers[1].price, "15000");
 	assert.equal(
 		offers[1].url,
 		"https://rawkode.academy/organizations/partnerships#pricing",
