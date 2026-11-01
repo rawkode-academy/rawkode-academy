@@ -6,7 +6,7 @@ import {
 	setContentCache,
 } from "@/lib/live-content";
 import { createLogger } from "@/lib/logger";
-import { partnershipDescription } from "@/lib/partnerships";
+import { partnershipDescription, supportOurWorkDescription } from "@/lib/partnerships";
 
 const logger = createLogger("sitemap");
 
@@ -109,9 +109,9 @@ async function generateNavigationItems(
 		},
 		{
 			href: "/organizations/lets-chat",
-			title: "Partner application",
+			title: "Academy enquiry",
 			category: "Organizations",
-			description: "Enquire about a Rawkode Academy partnership",
+			description: "Ask about a Partnership or Support Our Work",
 			keywords: [
 				"fit check",
 				"adoption",
@@ -151,6 +151,13 @@ async function generateNavigationItems(
 				"demo",
 				"launch",
 			],
+		},
+		{
+			href: "/organizations/support-our-work",
+			title: "Support Our Work",
+			category: "Organizations",
+			description: supportOurWorkDescription,
+			keywords: ["support", "developer education", "community", "livestream", "Rawkode Academy"],
 		},
 		{
 			href: "/maintainers/share-your-project",

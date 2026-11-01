@@ -35,6 +35,14 @@ const applicationBody = [
 	"When you'd like to start:",
 ].join("\n");
 
+const supportApplicationBody = [
+	"Name:",
+	"Company:",
+	"Why you want to support the Academy's free education:",
+	"Website or technology page:",
+	"When you'd like to start:",
+].join("\n");
+
 /**
  * Capacity. David does every review and partnership himself, so places are
  * capped. The page prints these numbers as written: update `active` and
@@ -137,7 +145,10 @@ export const partnershipWatchEpisodes = [
 ] as const;
 
 export const partnershipDescription =
-	"Support the Academy's free developer education, or work with David across Awareness, Adoption, and Support to help engineers succeed with your product from dev to prod.";
+	"Work with David across Awareness, Adoption, and Support to help engineers discover, adopt and succeed with your product.";
+
+export const supportOurWorkDescription =
+	"Support Rawkode Academy's free developer education. Help engineers learn through practical tutorials, live streams and shows, with clear recognition for your company.";
 
 export interface PartnershipPerk {
 	title: string;
@@ -225,21 +236,39 @@ export const independenceRules = [
 	},
 ] as const;
 
+export const supporterIndependenceRules = [
+	{
+		title: "Support funds open education",
+		detail:
+			"Support helps keep tutorials, live streams and shows free. It does not set their topics or give a company control over the work.",
+	},
+	{
+		title: "Recognition is labelled",
+		detail:
+			"Supporter badges, logos and other paid recognition are clearly labelled as support for the Academy.",
+	},
+	{
+		title: "Conclusions stay independent",
+		detail:
+			"David decides what he publishes and keeps his own conclusions, including limitations. Funding does not buy an endorsement or recommendation.",
+	},
+] as const;
+
 export const partnershipAdvice =
 	"We choose the work your users need and agree the priorities, outputs and cadence for each quarter.";
 
 export const supportAcademyOffer: PartnershipOffer = {
-	id: "support-the-academy",
-	name: "Support the Academy",
-	label: "Support the Academy",
+	id: "support-our-work",
+	name: "Support Our Work",
+	label: "Support Our Work",
 	price: "$1,000 a month",
 	priceShort: "$1k/month",
 	cadence: "No minimum term. Or $9,000 for twelve months, agreed up front.",
 	summary:
 		"Help fund free tutorials, live streams and shows for cloud native engineers, with your company credited alongside the work.",
 	included: [
-		"One livestream with David for each of the first 10 supporter organisations, with the topic and date agreed together",
-		"A shared monthly live Q&A with David for all current supporters",
+		"One livestream with David for each of the first ten companies to become supporters, with the topic and date agreed together",
+		"Access to one shared monthly live Q&A with David for all current supporters",
 		"A supporter badge and docs links on your Academy technology page",
 		"Your latest announcement, one at a time, on your technology page and its videos",
 		"Your logo on the community supporters wall",
@@ -248,7 +277,7 @@ export const supportAcademyOffer: PartnershipOffer = {
 	notes: [
 		"Support funds the Academy's free education. Paid placements are labelled and editorial conclusions stay independent.",
 	],
-	mailto: buildMailto("Support the Academy", applicationBody),
+	mailto: buildMailto("Support Our Work", supportApplicationBody),
 };
 
 export const ongoingPartnershipOffer: PartnershipOffer = {
@@ -384,7 +413,7 @@ export const partnershipTiers = [
 export const partnershipTierNames = partnershipTiers.map((offer) => offer.name);
 
 export const applicationPaths = [
-	"Support the Academy",
+	"Support Our Work",
 	"Partnership",
 	"Bespoke project",
 	"Community challenge series",
@@ -395,7 +424,7 @@ export const productReviewPath = "Partnership" satisfies ApplicationPath;
 export const notSurePath = "Not sure yet" satisfies ApplicationPath;
 
 export const applicationPathLabels: Record<ApplicationPath, string> = {
-	"Support the Academy": supportAcademyOffer.name,
+	"Support Our Work": supportAcademyOffer.name,
 	Partnership: ongoingPartnershipOffer.name,
 	"Bespoke project": bespokeProjectOffer.name,
 	"Community challenge series": communityChallengeOffer.name,
@@ -418,8 +447,9 @@ export const legacyApplicationPaths: Record<string, ApplicationPath> = {
 	"Annual partnership": "Partnership",
 	"Event content and hosting": "Bespoke project",
 	"Customer workshops": "Bespoke project",
-	"Community Support": "Support the Academy",
-	"Community supporter": "Support the Academy",
+	"Support the Academy": "Support Our Work",
+	"Community Support": "Support Our Work",
+	"Community supporter": "Support Our Work",
 };
 
 export const resolveApplicationPath = (
@@ -443,12 +473,8 @@ export const decisionBriefSubject = partnershipFitSubject;
 export const decisionBriefTemplate = applicationBody;
 export const decisionBriefMailto = partnershipFitMailto;
 
-const teamBriefBody = [
-	"Support the Academy and partnerships",
-	"",
-	`Support the Academy: help fund free tutorials, live streams and shows. ${supportAcademyOffer.price}, or $9,000 for twelve months.`,
-	...supportAcademyOffer.included.map((item) => `- ${item}`),
-	...supportAcademyOffer.notes,
+const partnershipBriefBody = [
+	"Rawkode Academy Partnership",
 	"",
 	"David Flanagan works alongside our team across Awareness, Adoption, and Support. We agree the priorities, outputs and cadence each quarter.",
 	"",
@@ -463,4 +489,16 @@ const teamBriefBody = [
 	"",
 	"Details: https://rawkode.academy/organizations/partnerships",
 ].join("\n");
-export const teamBriefMailto = `mailto:?subject=${encodeURIComponent("Working with Rawkode Academy")}&body=${encodeURIComponent(teamBriefBody.replace(/\n/g, "\r\n"))}`;
+export const teamBriefMailto = `mailto:?subject=${encodeURIComponent("Rawkode Academy Partnership")}&body=${encodeURIComponent(partnershipBriefBody.replace(/\n/g, "\r\n"))}`;
+
+const supportBriefBody = [
+	"Support Our Work at Rawkode Academy",
+	"",
+	supportAcademyOffer.summary,
+	`${supportAcademyOffer.price}, or $9,000 for twelve months, agreed up front.`,
+	...supportAcademyOffer.included.map((item) => `- ${item}`),
+	...supportAcademyOffer.notes,
+	"",
+	"Details: https://rawkode.academy/organizations/support-our-work",
+].join("\n");
+export const supportBriefMailto = `mailto:?subject=${encodeURIComponent("Support Our Work at Rawkode Academy")}&body=${encodeURIComponent(supportBriefBody.replace(/\n/g, "\r\n"))}`;

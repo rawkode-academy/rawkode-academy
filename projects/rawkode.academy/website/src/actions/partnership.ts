@@ -1,11 +1,12 @@
-import { escapeHtml } from "@rawkodeacademy/rich-text";
 import { defineAction } from "astro:actions";
-import { z } from "astro/zod";
 import { env } from "cloudflare:workers";
+import { escapeHtml } from "@rawkodeacademy/rich-text";
+import { z } from "astro/zod";
 import {
 	applicationPathLabels,
 	applicationPaths,
 	PARTNERSHIP_EMAIL,
+	resolveApplicationPath,
 } from "@/lib/partnerships";
 
 const ENQUIRY_SENDER = {
@@ -21,7 +22,7 @@ type EnquiryErrorCode =
 const enquiryFallback = (code: EnquiryErrorCode) => {
 	// Provider errors may contain the submitted address or message. Log only
 	// our own failure code; never expose submitted content or provider messages.
-	console.error("Failed to email partnership enquiry", { code });
+	console.error("Failed to email Academy enquiry", { code });
 	return { success: false, fallback: "mailto", code } as const;
 };
 
@@ -41,9 +42,13 @@ const enquiryInput = z.object({
 	name: z.string().trim().min(1, "Please tell us your name").max(200),
 	email: z.email("Please enter a valid work email").max(254),
 	company: z.string().trim().min(1, "Please tell us your company").max(1000),
-	path: z.enum(applicationPaths),
+	path: z
+		.string()
+		.transform((path) => resolveApplicationPath(path) ?? path)
+		.pipe(z.enum(applicationPaths)),
 	message: z.string().trim().min(1, "Please add a message").max(5000),
-	website: z.string().trim().max(500).optional().default(""),
+	// Astro needs the outer optional to treat an empty FormData field as absent.
+	website: z.string().trim().max(500).default("").optional(),
 });
 
 const sendEnquiry = async (
@@ -77,7 +82,7 @@ const sendEnquiry = async (
 		["Interested in", route],
 	] as const;
 	const text = [
-		"New partnership enquiry from rawkode.academy",
+		"New Academy enquiry from rawkode.academy",
 		"",
 		...details.map(([label, value]) => `${label}: ${value}`),
 		"",
@@ -85,7 +90,7 @@ const sendEnquiry = async (
 		input.message,
 	].join("\n");
 	const html = [
-		"<h1>New partnership enquiry</h1>",
+		"<h1>New Academy enquiry</h1>",
 		"<dl>",
 		...details.map(
 			([label, value]) => `<dt>${label}</dt><dd>${escapeHtml(value)}</dd>`,
@@ -101,7 +106,7 @@ const sendEnquiry = async (
 			from: ENQUIRY_SENDER,
 			to: PARTNERSHIP_EMAIL,
 			replyTo: input.email,
-			subject: `Partnership enquiry: ${route}`,
+			subject: `Rawkode Academy enquiry: ${route}`,
 			text,
 			html,
 		});

@@ -6,6 +6,7 @@ import { test } from "node:test";
 const read = (path) =>
 	readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const page = read("pages/organizations/partnerships/index.astro");
+const supportPage = read("pages/organizations/support-our-work/index.astro");
 const copy = read("lib/partnerships.ts");
 const form = read("components/organizations/PartnershipApplicationForm.vue");
 const action = read("actions/partnership.ts");
@@ -26,6 +27,16 @@ test("partnership work areas explain the service without becoming standalone pac
 	assert.match(page, /bespokeProjectOffer/);
 	assert.match(copy, /price: "\$12,000 a quarter"/);
 	assert.match(copy, /\$40,000 for a 12-month contract/);
+	assert.match(page, /Not Ready Yet\?/);
+	assert.match(page, /href="\/organizations\/support-our-work"/);
+	assert.doesNotMatch(page, /supportAcademyOffer\.included/);
+	assert.match(supportPage, /Want to Collaborate\?/);
+	assert.match(supportPage, /href="\/organizations\/partnerships"/);
+	assert.match(copy, /price: "\$1,000 a month"/);
+	assert.match(copy, /\$9,000 for twelve months/);
+	assert.match(copy, /first ten companies to become supporters/);
+	assert.match(copy, /one shared monthly live Q&A/);
+	assert.doesNotMatch(copy, /livestream.{0,80}(?:minutes|hours|days|weeks)/i);
 });
 
 test("page preserves an enquiry route and safe email delivery without CRM dependency", () => {

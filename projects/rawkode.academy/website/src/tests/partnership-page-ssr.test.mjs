@@ -12,13 +12,14 @@ import ts from "typescript";
 
 const rejectedOfferName = new RegExp(["field", "report"].join("[\\s_-]+"), "i");
 const pagePath = "pages/organizations/partnerships/index.astro";
+const supportPagePath = "pages/organizations/support-our-work/index.astro";
 const schemaPath = "components/html/organization-jsonld.astro";
 const read = (path) =>
 	readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
 async function renderPartnerships(
 	route,
-	{ contentUnavailable = false, schema = false } = {},
+	{ contentUnavailable = false, schema = false, page = pagePath } = {},
 ) {
 	const context = vm.createContext({ console, URL });
 	const pageProps = [];
@@ -122,10 +123,12 @@ async function renderPartnerships(
 		});
 		return module;
 	}
-	const module = await load(schema ? schemaPath : pagePath);
+	const module = await load(schema ? schemaPath : page);
 	await module.evaluate();
 	const container = await AstroContainer.create();
-	const url = new URL("https://rawkode.academy/organizations/partnerships");
+	const url = new URL(
+		`https://rawkode.academy/organizations/${page === supportPagePath ? "support-our-work" : "partnerships"}`,
+	);
 	if (route !== undefined) url.searchParams.set("route", route);
 	const html = await container.renderToString(module.namespace.default, {
 		request: new Request(url),
@@ -134,87 +137,93 @@ async function renderPartnerships(
 	return { html, dom: parse(html), pageProps, formProps, disabledCache };
 }
 
-test("partnership SSR leads with Support the Academy beside one partnership and unpriced work areas", async () => {
+test("partnership SSR leads with one partnership and keeps scoped work discoverable", async () => {
 	const { html, dom, pageProps, formProps, disabledCache } =
 		await renderPartnerships();
 	assert.equal(
 		dom.querySelector("h1").text,
-		"Make your product the one engineers reach for.",
+		"Build the developer journey your product needs.",
 	);
-	const workAreas = dom.querySelector("#stages");
-	assert.match(workAreas.text, /Awareness, Adoption, and Support/);
-	assert.doesNotMatch(workAreas.text, /\$[0-9]/);
+	assert.equal(pageProps[0].title, "Partnerships for developer tools");
+	assert.match(pageProps[0].description, /Awareness, Adoption, and Support/);
+	assert.match(pageProps[0].image.text, /working partnership/);
+	assert.equal(formProps[0].initialPath, "Partnership");
 	assert.equal(
-		workAreas.querySelectorAll("[data-pinned-route], a[data-apply-path]")
-			.length,
-		0,
+		dom.querySelector("#partnership-hero-cta").getAttribute("data-apply-path"),
+		"Partnership",
 	);
 	assert.match(
-		dom.querySelector("#measurement").text,
-		/Agree what success looks like/,
+		dom.querySelector("#stages").text,
+		/Awareness, Adoption, and Support/,
 	);
-	assert(dom.querySelectorAll(".partnership-quarter-example li").length > 0);
+	assert.doesNotMatch(dom.querySelector("#stages").text, /\$[0-9]/);
+	assert(dom.querySelector("#measurement"));
+	assert(dom.querySelector("#bespoke"));
+	assert(dom.querySelector("#challenges"));
+	assert.equal(
+		dom.querySelectorAll(".partnership-quarter-example li").length,
+		4,
+	);
 	assert.equal(
 		dom.querySelectorAll('[data-pinned-route="Partnership"]').length,
 		1,
 	);
-	assert.equal(formProps[0].initialPath, "Support the Academy");
-	assert.equal(dom.querySelector("#supporter h3").text, "Support the Academy");
 	assert.equal(
-		dom.querySelector("#partnership-hero-cta").text,
-		"Support the Academy",
+		dom.querySelectorAll('[data-pinned-route="Support Our Work"]').length,
+		0,
 	);
-	assert.doesNotMatch(dom.text, /Community Support|Support the community/);
+	assert.equal(
+		dom.querySelector("#supporter a").getAttribute("href"),
+		"/organizations/support-our-work",
+	);
+	assert(dom.querySelector("#plan-support-the-academy"));
 	assert.equal(disabledCache.length, 1);
 	assert.doesNotMatch(html, rejectedOfferName);
-	assert.doesNotMatch(JSON.stringify(pageProps), rejectedOfferName);
-	assert.equal(pageProps[0].title, "Partnerships for developer tool companies");
-	assert.match(pageProps[0].description, /Awareness, Adoption, and Support/);
-	const pricing = dom.querySelector("#pricing");
-	assert.deepEqual(
-		pricing
-			.querySelectorAll("[data-pinned-route]")
-			.map((card) => card.getAttribute("data-pinned-route")),
-		["Support the Academy", "Partnership"],
-	);
-	assert(pricing.querySelector("#supporter"));
-	const allowedRoutes = new Set([
-		"Support the Academy",
-		"Partnership",
-		"Bespoke project",
-		"Community challenge series",
-		"Not sure yet",
-	]);
-	const destinations = new Set();
 	for (const link of dom.querySelectorAll("a[data-apply-path]")) {
 		const route = link.getAttribute("data-apply-path");
 		const destination = new URL(
 			link.getAttribute("href"),
 			"https://rawkode.academy",
 		);
-		assert(allowedRoutes.has(route), `Unrecognised public route ${route}`);
 		assert.equal(destination.pathname, "/organizations/partnerships");
 		assert.equal(destination.hash, "#enquiry-form");
 		assert.equal(destination.searchParams.get("route"), route);
-		destinations.add(route);
+		assert(
+			["Partnership", "Bespoke project", "Community challenge series"].includes(
+				route,
+			),
+		);
 	}
-	for (const route of [
-		"Support the Academy",
-		"Partnership",
-		"Bespoke project",
-		"Community challenge series",
-	]) {
-		assert(destinations.has(route), `No enquiry CTA for ${route}`);
-	}
-	assert.equal(
-		dom.querySelector("#partnership-hero-cta").getAttribute("data-apply-path"),
-		"Support the Academy",
+});
+
+test("support SSR has its own identity, benefits, enquiry and partnership off-ramp", async () => {
+	const { html, dom, pageProps, formProps, disabledCache } =
+		await renderPartnerships(undefined, { page: supportPagePath });
+	assert.equal(pageProps[0].title, "Support Our Work");
+	assert.match(pageProps[0].description, /free developer education/);
+	assert.match(pageProps[0].image.text, /tutorials, live streams and shows/);
+	assert.equal(dom.querySelector("h1").text, "Support Our Work");
+	assert.equal(formProps[0].initialPath, "Support Our Work");
+	assert.match(dom.querySelector("#supporter").text, /\$1,000 a month/);
+	assert.match(
+		dom.querySelector("#supporter").text,
+		/\$9,000 for twelve months/,
 	);
+	assert.match(dom.querySelector("#supporter").text, /first ten companies/);
+	assert.match(dom.querySelector("#supporter").text, /same shared monthly Q&A/);
+	assert.equal(
+		dom.querySelector("#collaborate a").getAttribute("href"),
+		"/organizations/partnerships",
+	);
+	assert(dom.querySelector("#independence"));
+	assert(dom.querySelector("#enquiry-form form"));
+	assert.equal(disabledCache.length, 1);
+	assert.doesNotMatch(html, rejectedOfferName);
 });
 
 for (const [route, expected] of [
-	["Support the Academy", "Support the Academy"],
-	["Community Support", "Support the Academy"],
+	["Support Our Work", "Support Our Work"],
+	["Community Support", "Support Our Work"],
 	["Partnership", "Partnership"],
 	["Bespoke project", "Bespoke project"],
 	["Community challenge series", "Community challenge series"],
@@ -223,9 +232,9 @@ for (const [route, expected] of [
 	["Hands-on content", "Partnership"],
 	["Ongoing partnership", "Partnership"],
 	["Event content and hosting", "Bespoke project"],
-	["Community supporter", "Support the Academy"],
-	["unknown", "Support the Academy"],
-	[["Field", "report"].join(" "), "Support the Academy"],
+	["Community supporter", "Support Our Work"],
+	["unknown", "Partnership"],
+	[["Field", "report"].join(" "), "Partnership"],
 ]) {
 	test(`partnership SSR passes canonical selection for ${expected} to the enquiry form`, async () => {
 		const { html, formProps } = await renderPartnerships(route);
@@ -244,7 +253,7 @@ test("partnership enquiry remains available when the remote content service fail
 	assert(dom.querySelector("#measurement"));
 });
 
-test("organization JSON-LD contains Support the Academy, the partnership and two scoped extras", async () => {
+test("organization JSON-LD links both offers to their pages", async () => {
 	const { html, dom } = await renderPartnerships(undefined, { schema: true });
 	const schema = JSON.parse(
 		dom.querySelector('script[type="application/ld+json"]').text,
@@ -254,16 +263,24 @@ test("organization JSON-LD contains Support the Academy, the partnership and two
 	assert.deepEqual(
 		offers.map((offer) => offer.name),
 		[
-			"Support the Academy",
+			"Support Our Work",
 			"Partnership",
 			"Bespoke project",
 			"Community challenge series",
 		],
 	);
 	assert.equal(offers[0].price, "1000");
+	assert.equal(
+		offers[0].url,
+		"https://rawkode.academy/organizations/support-our-work#supporter",
+	);
 	assert.equal(offers[0].priceSpecification.unitText, "month");
 	assert.equal(offers[0].priceSpecification.unitCode, "MON");
 	assert.equal(offers[1].price, "12000");
+	assert.equal(
+		offers[1].url,
+		"https://rawkode.academy/organizations/partnerships#pricing",
+	);
 	assert.equal(offers[1].priceSpecification.unitText, "quarter");
 	assert.equal("price" in offers[2], false);
 	assert.equal("priceCurrency" in offers[2], false);

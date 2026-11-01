@@ -29,6 +29,7 @@ export const navigationGroups = [
 	] },
 	{ label: "For teams", items: [
 		{ label: "Partnerships", href: "/organizations/partnerships" },
+		{ label: "Support Our Work", href: "/organizations/support-our-work" },
 		{ label: "Branding", href: "/organizations/branding" },
 	] },
 	{ label: "Academy", items: [

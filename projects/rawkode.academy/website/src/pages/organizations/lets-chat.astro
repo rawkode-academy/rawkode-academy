@@ -5,24 +5,27 @@ import {
 	decisionBriefMailto,
 	decisionBriefSubject,
 	decisionBriefTemplate,
+	supportAcademyOffer,
 } from "@/lib/partnerships";
 import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
 ---
 
-<Page title="Partner application" description="Enquire about a Rawkode Academy partnership.">
-	<EditorialShell compact eyebrow="Work with Rawkode Academy" title="Tell us about your product."
-		lede="Tell us about your product, its users and what you want to help them do. David reads every enquiry and replies by email.">
+<Page title="Enquire about working with Rawkode Academy" description="Ask about a Partnership or supporting Rawkode Academy's free developer education.">
+	<EditorialShell compact eyebrow="Work with Rawkode Academy" title="Tell David what you're exploring."
+		lede="Ask about a Partnership or supporting free developer education. David reads every enquiry and replies by email.">
 		<div class="editorial-actions" slot="actions">
-			<a class="editorial-button" href="/organizations/partnerships#apply">Apply online</a>
-			<a class="editorial-button editorial-button--secondary" href={decisionBriefMailto}>Prefer email?</a>
+			<a class="editorial-button" href="/organizations/partnerships#apply">Partnership enquiry</a>
+			<a class="editorial-button editorial-button--secondary" href="/organizations/support-our-work#apply">Support Our Work enquiry</a>
+			<a class="editorial-button editorial-button--secondary" href={decisionBriefMailto}>Partnership by email</a>
+			<a class="editorial-button editorial-button--secondary" href={supportAcademyOffer.mailto}>Support Our Work by email</a>
 		</div>
 
 		<section class="editorial-section" aria-labelledby="application-context">
 			<div class="editorial-section__header">
-				<h2 id="application-context" class="editorial-section__title">What to include in your email</h2>
-				<p class="editorial-section__lede">Tell us what your product does, who uses it and what you'd like to work on. Add links to your product, demo, documentation or repository, who needs to be involved and any deadline. You can ask about awareness, adoption, support or an ongoing partnership.</p>
+				<h2 id="application-context" class="editorial-section__title">What to include in a partnership email</h2>
+				<p class="editorial-section__lede">For a Partnership, tell us what your product does, who uses it and what you'd like to work on. Add links to your product, demo, documentation or repository. For Support Our Work, tell us about your company and why you want to fund free developer education.</p>
 			</div>
 			<ContactFallback subject={decisionBriefSubject} template={decisionBriefTemplate} />
 		</section>

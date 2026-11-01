@@ -286,7 +286,7 @@ for (const fixture of fixtures) {
 					(option) => option.textContent,
 				),
 				[
-					"Support the Academy",
+					"Support Our Work",
 					"Partnership",
 					"Bespoke project",
 					"Community challenge series",
@@ -418,7 +418,7 @@ for (const fixture of fixtures) {
 					name: "Test Person",
 					email: "person@example.test",
 					company: "Test Company",
-					path: "Support the Academy",
+					path: "Partnership",
 					message: "Our quick start loses Kubernetes users.",
 					website: "",
 				});
@@ -465,8 +465,8 @@ for (const fixture of fixtures) {
 					["enquiry_form_started", "enquiry_form_submitted"],
 				);
 				assert.equal(capturedEvents[1].properties.form, "partnership_enquiry");
-				assert.equal(capturedEvents[1].properties.route, "Support the Academy");
-				assert.equal(capturedEvents[1].properties.offer, "Support the Academy");
+				assert.equal(capturedEvents[1].properties.route, "Partnership");
+				assert.equal(capturedEvents[1].properties.offer, "Partnership");
 			} else {
 				assert.equal(host.querySelector("[type=checkbox]").checked, false);
 				assert.equal(host.querySelector("button[type=submit]").disabled, true);

@@ -50,6 +50,13 @@ const { partnership } = loadModule("src/actions/partnership.ts", {
 	"@/lib/partnerships": partnerships,
 }) as { partnership: { apply: Action; applyForm: Action } };
 const { apply, applyForm } = partnership;
+// Exercise Astro's own FormData coercion as well as the shared schema.
+const { defineAction, ACTION_API_CONTEXT_SYMBOL } = await import(
+	new URL(
+		"./dist/actions/runtime/server.js",
+		import.meta.resolve("astro/package.json"),
+	).href
+);
 const input = {
 	name: "Ada Lovelace",
 	email: "ada@analytical.engine",
@@ -93,7 +100,7 @@ describe("partnership email action", () => {
 			from: { email: "david@rawkode.email", name: "Rawkode Academy enquiries" },
 			to: "david@rawkode.academy",
 			replyTo: input.email,
-			subject: `Partnership enquiry: ${partnerships.applicationPathLabels[path]}`,
+			subject: `Rawkode Academy enquiry: ${partnerships.applicationPathLabels[path]}`,
 		});
 		for (const value of [
 			input.name,
@@ -119,6 +126,82 @@ describe("partnership email action", () => {
 			accepted: true,
 		});
 		expect(send).toHaveBeenCalledOnce();
+	});
+
+	describe.each([
+		["JSON", apply],
+		["native form", applyForm],
+	] as const)("%s action compatibility", (_name, action) => {
+		const runtimeAction = defineAction(action);
+		const submitAction = (values: Record<string, string | undefined>) => {
+			const form = new FormData();
+			for (const [key, value] of Object.entries(values)) {
+				if (value !== undefined) form.set(key, value);
+			}
+			return runtimeAction.call(
+				{ ...context, [ACTION_API_CONTEXT_SYMBOL]: true },
+				action.accept === "form" ? form : values,
+			);
+		};
+
+		it.each(
+			Object.entries(partnerships.legacyApplicationPaths),
+		)("emails legacy %s enquiries as %s", async (previous, current) => {
+			const parsed = action.input.parse({ ...input, path: previous });
+			expect(parsed.path).toBe(current);
+			await expect(submitAction({ ...input, path: previous })).resolves.toEqual(
+				{
+					data: { success: true, accepted: true },
+					error: undefined,
+				},
+			);
+			expect(send).toHaveBeenCalledOnce();
+			expect(send.mock.calls[0]?.[0]).toMatchObject({
+				subject: `Rawkode Academy enquiry: ${partnerships.applicationPathLabels[current]}`,
+				text: expect.stringContaining(`Interested in: ${current}`),
+				html: expect.stringContaining(`<dd>${current}</dd>`),
+			});
+		});
+
+		it.each([
+			"",
+			"  ",
+			undefined,
+		])("accepts a blank or omitted honeypot: %j", async (website) => {
+			expect(action.input.parse({ ...input, website }).website).toBe("");
+			await expect(submitAction({ ...input, website })).resolves.toEqual({
+				data: { success: true, accepted: true },
+				error: undefined,
+			});
+			expect(send).toHaveBeenCalledOnce();
+		});
+
+		it("silently rejects a populated honeypot before rate limiting or delivery", async () => {
+			await expect(
+				submitAction({ ...input, website: "https://spam.test" }),
+			).resolves.toEqual({
+				data: { success: true, accepted: false },
+				error: undefined,
+			});
+			expect(limit).not.toHaveBeenCalled();
+			expect(send).not.toHaveBeenCalled();
+		});
+
+		it.each([
+			{ path: "unknown" },
+			{ path: "constructor" },
+			{ path: "__proto__" },
+			{ website: "x".repeat(501) },
+		])("rejects malformed action input: %j", async (invalid) => {
+			await expect(
+				submitAction({ ...input, ...invalid }),
+			).resolves.toMatchObject({
+				data: undefined,
+				error: { type: "AstroActionInputError" },
+			});
+			expect(limit).not.toHaveBeenCalled();
+			expect(send).not.toHaveBeenCalled();
+		});
 	});
 
 	it("awaits the email service before reporting an accepted enquiry", async () => {
@@ -198,7 +281,7 @@ describe("partnership email action", () => {
 		expect(message.html).not.toContain("<img");
 		expect(message.html).not.toContain("<script");
 		expect(message.html).toContain("white-space: pre-wrap");
-		expect(message.subject).toBe("Partnership enquiry: Partnership");
+		expect(message.subject).toBe("Rawkode Academy enquiry: Partnership");
 		expect(message).not.toHaveProperty("bcc");
 		expect(message).not.toHaveProperty("cc");
 		expect(message).not.toHaveProperty("headers");
@@ -259,6 +342,13 @@ describe("partnership email action", () => {
 		{ message: "x".repeat(5001) },
 		{ path: "unknown" },
 		{ path: "constructor" },
+		{ path: "toString" },
+		{ path: "__proto__" },
+		{ path: "" },
+		{ path: null },
+		{ path: undefined },
+		{ path: 42 },
+		{ path: ["Support the Academy"] },
 	])("rejects invalid input before any delivery: %j", (invalid) => {
 		expect(() => apply.input.parse({ ...input, ...invalid })).toThrow();
 		expect(send).not.toHaveBeenCalled();
@@ -283,8 +373,9 @@ describe("partnership enquiry routes", () => {
 	it.each([
 		["Customer workshops", "Bespoke project"],
 		["Event content and hosting", "Bespoke project"],
-		["Community Support", "Support the Academy"],
-		["Community supporter", "Support the Academy"],
+		["Community Support", "Support Our Work"],
+		["Community supporter", "Support Our Work"],
+		["Support the Academy", "Support Our Work"],
 		["Hands-on content", "Partnership"],
 		["Developer support", "Partnership"],
 		["Ongoing partnership", "Partnership"],

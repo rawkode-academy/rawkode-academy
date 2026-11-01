@@ -177,7 +177,7 @@ const renderWall = (wall) =>
 	render(
 		wallMarkup,
 		["wall", "BECOME_A_SUPPORTER_PATH", "MLabel", "EmptyState"],
-		{ wall, BECOME_A_SUPPORTER_PATH: "/organizations/partnerships#supporter" },
+		{ wall, BECOME_A_SUPPORTER_PATH: "/organizations/support-our-work#supporter" },
 	);
 
 test("wall shows each supporter's logo or name, its website and the technologies it supports", async () => {
@@ -248,7 +248,7 @@ test("an empty wall invites organisations to become a supporter", async () => {
 	assert(empty);
 	assert.equal(
 		empty.querySelector(".empty-actions a").getAttribute("href"),
-		"/organizations/partnerships#supporter",
+		"/organizations/support-our-work#supporter",
 	);
 });
 
@@ -266,11 +266,7 @@ test("wall is cached under the supporters tag", () => {
 	assert.doesNotMatch(sitemaps, /path: "\/supporters"/);
 });
 
-test("partnerships page does not link to the wall until the service is live", () => {
-	const section = fragment(
-		partnershipsPage,
-		'<article id="supporter"',
-		"</article>",
-	);
-	assert.doesNotMatch(section, /href="\/supporters"/);
+test("support page does not link to the wall until the service is live", () => {
+	const supportPage = read("pages/organizations/support-our-work/index.astro");
+	assert.doesNotMatch(supportPage, /href="\/supporters"/);
 });

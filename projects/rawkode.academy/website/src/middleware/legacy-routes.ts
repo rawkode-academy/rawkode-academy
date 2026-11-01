@@ -1,4 +1,5 @@
 import { defineMiddleware } from "astro:middleware";
+import { resolveApplicationPath } from "@/lib/partnerships";
 import { resolveLegacyPersonRedirect } from "./legacy-person-redirects";
 
 type LegacyRouteResult =
@@ -30,6 +31,18 @@ export function resolveLegacyRoute(url: URL): LegacyRouteResult | undefined {
 		url.pathname.length > 1 && url.pathname.endsWith("/")
 			? url.pathname.slice(0, -1)
 			: url.pathname;
+
+	// Older combined-offer links carried the supporter choice on the
+	// partnership URL. Keep those links pointed at the matching new page.
+	if (
+		pathname === "/organizations/partnerships" &&
+		resolveApplicationPath(url.searchParams.get("route")) === "Support Our Work"
+	) {
+		const target = new URL("/organizations/support-our-work", url);
+		target.search = url.search;
+		target.hash = url.hash;
+		return { kind: "redirect", status: 302, location: target.toString() };
+	}
 
 	const permanentTarget = PERMANENT_REDIRECTS.get(pathname);
 	if (permanentTarget) {
