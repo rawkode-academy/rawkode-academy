@@ -121,6 +121,28 @@ describe("partnership email action", () => {
 		expect(send).toHaveBeenCalledOnce();
 	});
 
+	describe.each([
+		["JSON", apply],
+		["native form", applyForm],
+	] as const)("%s action compatibility", (_name, action) => {
+		it.each(
+			Object.entries(partnerships.legacyApplicationPaths),
+		)("emails legacy %s enquiries as %s", async (previous, current) => {
+			const parsed = action.input.parse({ ...input, path: previous });
+			expect(parsed.path).toBe(current);
+			await expect(action.handler(parsed, context)).resolves.toEqual({
+				success: true,
+				accepted: true,
+			});
+			expect(send).toHaveBeenCalledOnce();
+			expect(send.mock.calls[0]?.[0]).toMatchObject({
+				subject: `Rawkode Academy enquiry: ${partnerships.applicationPathLabels[current]}`,
+				text: expect.stringContaining(`Interested in: ${current}`),
+				html: expect.stringContaining(`<dd>${current}</dd>`),
+			});
+		});
+	});
+
 	it("awaits the email service before reporting an accepted enquiry", async () => {
 		let accept!: (value: { messageId: string }) => void;
 		send.mockReturnValueOnce(
@@ -259,6 +281,13 @@ describe("partnership email action", () => {
 		{ message: "x".repeat(5001) },
 		{ path: "unknown" },
 		{ path: "constructor" },
+		{ path: "toString" },
+		{ path: "__proto__" },
+		{ path: "" },
+		{ path: null },
+		{ path: undefined },
+		{ path: 42 },
+		{ path: ["Support the Academy"] },
 	])("rejects invalid input before any delivery: %j", (invalid) => {
 		expect(() => apply.input.parse({ ...input, ...invalid })).toThrow();
 		expect(send).not.toHaveBeenCalled();
@@ -285,6 +314,7 @@ describe("partnership enquiry routes", () => {
 		["Event content and hosting", "Bespoke project"],
 		["Community Support", "Support Our Work"],
 		["Community supporter", "Support Our Work"],
+		["Support the Academy", "Support Our Work"],
 		["Hands-on content", "Partnership"],
 		["Developer support", "Partnership"],
 		["Ongoing partnership", "Partnership"],

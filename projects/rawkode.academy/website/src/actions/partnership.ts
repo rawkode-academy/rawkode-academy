@@ -1,11 +1,12 @@
-import { escapeHtml } from "@rawkodeacademy/rich-text";
 import { defineAction } from "astro:actions";
-import { z } from "astro/zod";
 import { env } from "cloudflare:workers";
+import { escapeHtml } from "@rawkodeacademy/rich-text";
+import { z } from "astro/zod";
 import {
 	applicationPathLabels,
 	applicationPaths,
 	PARTNERSHIP_EMAIL,
+	resolveApplicationPath,
 } from "@/lib/partnerships";
 
 const ENQUIRY_SENDER = {
@@ -41,7 +42,10 @@ const enquiryInput = z.object({
 	name: z.string().trim().min(1, "Please tell us your name").max(200),
 	email: z.email("Please enter a valid work email").max(254),
 	company: z.string().trim().min(1, "Please tell us your company").max(1000),
-	path: z.enum(applicationPaths),
+	path: z
+		.string()
+		.transform((path) => resolveApplicationPath(path) ?? path)
+		.pipe(z.enum(applicationPaths)),
 	message: z.string().trim().min(1, "Please add a message").max(5000),
 	website: z.string().trim().max(500).optional().default(""),
 });
