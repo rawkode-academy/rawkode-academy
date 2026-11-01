@@ -25,7 +25,9 @@ test("partnership work areas explain the service without becoming standalone pac
 	);
 	assert.match(page, /ongoingPartnershipOffer/);
 	assert.match(page, /bespokeProjectOffer/);
-	assert.match(copy, /price: "\$12,000 a quarter"/);
+	assert.match(copy, /price: "\$15,000 a quarter"/);
+	assert.match(copy, /Discounted pricing starts at six months/);
+	assert.match(copy, /\$24,000 for six months/);
 	assert.match(copy, /\$40,000 for a 12-month contract/);
 	assert.match(page, /Not Ready Yet\?/);
 	assert.match(page, /href="\/organizations\/support-our-work"/);

@@ -284,10 +284,10 @@ export const ongoingPartnershipOffer: PartnershipOffer = {
 	id: "partnership",
 	name: "Partnership",
 	label: "Partnership",
-	price: "$12,000 a quarter",
-	priceShort: "$12k/quarter",
+	price: "$15,000 a quarter",
+	priceShort: "$15k/quarter",
 	cadence:
-		"Quarter by quarter, or $40,000 for a 12-month contract, billed $10,000 a quarter.",
+		"Three months at $15,000. Discounted pricing starts at six months: $24,000 for six months, billed $12,000 a quarter, or $40,000 for a 12-month contract, billed $10,000 a quarter.",
 	summary:
 		"Work with me across Awareness, Adoption, and Support. Each quarter has a focused plan built around what your users and your team need.",
 	included: [
@@ -378,12 +378,12 @@ export const partnershipTerms = [
 	{
 		title: "Renewal",
 		detail:
-			"Nothing renews automatically. A quarterly agreement ends after its quarter and an annual agreement after its year. We agree any continuation in writing.",
+			"Nothing renews automatically. Each agreement ends after its agreed term of three, six or twelve months. We agree any continuation in writing.",
 	},
 	{
 		title: "Payment",
 		detail:
-			"Partnerships are $12,000 a quarter, or $40,000 for a 12-month contract billed $10,000 a quarter. Prices are fixed in the statement of work, in USD, with 30-day payment terms, and exclude VAT where it applies.",
+			"Partnerships are $15,000 for three months. Discounted pricing requires a commitment of six months or longer: $24,000 for six months billed $12,000 a quarter, or $40,000 for a 12-month contract billed $10,000 a quarter. Prices are fixed in the statement of work, in USD, with 30-day payment terms, and exclude VAT where it applies.",
 	},
 	{
 		title: "Paperwork",
@@ -478,7 +478,7 @@ const partnershipBriefBody = [
 	"",
 	"David Flanagan works alongside our team across Awareness, Adoption, and Support. We agree the priorities, outputs and cadence each quarter.",
 	"",
-	`${ongoingPartnershipOffer.price}, or $40,000 for a 12-month contract billed $10,000 a quarter.`,
+	`${ongoingPartnershipOffer.price}. ${ongoingPartnershipOffer.cadence}`,
 	...ongoingPartnershipOffer.included.map((item) => `- ${item}`),
 	"",
 	"An illustrative quarter combines an adoption review, one practical session with a runnable repository, monthly working sessions and a scoped retest. The actual work is agreed before signing.",
