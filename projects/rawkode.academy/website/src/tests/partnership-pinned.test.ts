@@ -84,7 +84,7 @@ beforeEach(() => {
 			.join("")}
 		<section id="apply"></section>
 		<div data-partnership-pinned><p><strong>Partnership</strong><span>${ongoingPartnershipOffer.price}</span></p>
-			<a href="?route=Support%20the%20Academy#enquiry-form" data-apply-path="Partnership"
+			<a href="?route=Partnership#enquiry-form" data-apply-path="Partnership"
 				data-partnership-cta data-cta="ask_about_a_partnership" data-cta-location="pinned"
 				tabindex="-1">Ask about a partnership</a>
 		</div>`;
@@ -142,12 +142,16 @@ describe("partnership pinned enquiry", () => {
 	});
 
 	it("returns to partnership between scoped extras", () => {
-		positions[0] = { top: 0, height: 1000 };
+		positions[1] = { top: 0, height: 1000 };
 		scroll();
-		positions[0] = { top: -1200, height: 1000 };
+		expect(link().dataset.applyPath).toBe("Bespoke project");
+		positions[1] = { top: -1200, height: 1000 };
 		scroll();
 		expect(link().textContent).toBe("Ask about a partnership");
 		expect(link().dataset.applyPath).toBe("Partnership");
+		expect(link().href).toBe(
+			"https://academy.test/organizations/partnerships?route=Partnership#enquiry-form",
+		);
 		expect(link().dataset.cta).toBe("ask_about_a_partnership");
 		expect(pinned().querySelector("strong")!.textContent).toBe("Partnership");
 	});
