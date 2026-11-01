@@ -47,7 +47,8 @@ const enquiryInput = z.object({
 		.transform((path) => resolveApplicationPath(path) ?? path)
 		.pipe(z.enum(applicationPaths)),
 	message: z.string().trim().min(1, "Please add a message").max(5000),
-	website: z.string().trim().max(500).optional().default(""),
+	// Astro needs the outer optional to treat an empty FormData field as absent.
+	website: z.string().trim().max(500).default("").optional(),
 });
 
 const sendEnquiry = async (

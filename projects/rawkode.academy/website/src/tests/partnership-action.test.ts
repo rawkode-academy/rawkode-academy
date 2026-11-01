@@ -50,6 +50,13 @@ const { partnership } = loadModule("src/actions/partnership.ts", {
 	"@/lib/partnerships": partnerships,
 }) as { partnership: { apply: Action; applyForm: Action } };
 const { apply, applyForm } = partnership;
+// Exercise Astro's own FormData coercion as well as the shared schema.
+const { defineAction, ACTION_API_CONTEXT_SYMBOL } = await import(
+	new URL(
+		"./dist/actions/runtime/server.js",
+		import.meta.resolve("astro/package.json"),
+	).href
+);
 const input = {
 	name: "Ada Lovelace",
 	email: "ada@analytical.engine",
@@ -125,21 +132,75 @@ describe("partnership email action", () => {
 		["JSON", apply],
 		["native form", applyForm],
 	] as const)("%s action compatibility", (_name, action) => {
+		const runtimeAction = defineAction(action);
+		const submitAction = (values: Record<string, string | undefined>) => {
+			const form = new FormData();
+			for (const [key, value] of Object.entries(values)) {
+				if (value !== undefined) form.set(key, value);
+			}
+			return runtimeAction.call(
+				{ ...context, [ACTION_API_CONTEXT_SYMBOL]: true },
+				action.accept === "form" ? form : values,
+			);
+		};
+
 		it.each(
 			Object.entries(partnerships.legacyApplicationPaths),
 		)("emails legacy %s enquiries as %s", async (previous, current) => {
 			const parsed = action.input.parse({ ...input, path: previous });
 			expect(parsed.path).toBe(current);
-			await expect(action.handler(parsed, context)).resolves.toEqual({
-				success: true,
-				accepted: true,
-			});
+			await expect(submitAction({ ...input, path: previous })).resolves.toEqual(
+				{
+					data: { success: true, accepted: true },
+					error: undefined,
+				},
+			);
 			expect(send).toHaveBeenCalledOnce();
 			expect(send.mock.calls[0]?.[0]).toMatchObject({
 				subject: `Rawkode Academy enquiry: ${partnerships.applicationPathLabels[current]}`,
 				text: expect.stringContaining(`Interested in: ${current}`),
 				html: expect.stringContaining(`<dd>${current}</dd>`),
 			});
+		});
+
+		it.each([
+			"",
+			"  ",
+			undefined,
+		])("accepts a blank or omitted honeypot: %j", async (website) => {
+			expect(action.input.parse({ ...input, website }).website).toBe("");
+			await expect(submitAction({ ...input, website })).resolves.toEqual({
+				data: { success: true, accepted: true },
+				error: undefined,
+			});
+			expect(send).toHaveBeenCalledOnce();
+		});
+
+		it("silently rejects a populated honeypot before rate limiting or delivery", async () => {
+			await expect(
+				submitAction({ ...input, website: "https://spam.test" }),
+			).resolves.toEqual({
+				data: { success: true, accepted: false },
+				error: undefined,
+			});
+			expect(limit).not.toHaveBeenCalled();
+			expect(send).not.toHaveBeenCalled();
+		});
+
+		it.each([
+			{ path: "unknown" },
+			{ path: "constructor" },
+			{ path: "__proto__" },
+			{ website: "x".repeat(501) },
+		])("rejects malformed action input: %j", async (invalid) => {
+			await expect(
+				submitAction({ ...input, ...invalid }),
+			).resolves.toMatchObject({
+				data: undefined,
+				error: { type: "AstroActionInputError" },
+			});
+			expect(limit).not.toHaveBeenCalled();
+			expect(send).not.toHaveBeenCalled();
 		});
 	});
 
