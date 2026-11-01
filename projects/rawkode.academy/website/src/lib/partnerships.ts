@@ -238,6 +238,8 @@ export const supportAcademyOffer: PartnershipOffer = {
 	summary:
 		"Help fund free tutorials, live streams and shows for cloud native engineers, with your company credited alongside the work.",
 	included: [
+		"One livestream with David for each of the first 10 supporter organisations, with the topic and date agreed together",
+		"A shared monthly live Q&A with David for all current supporters",
 		"A supporter badge and docs links on your Academy technology page",
 		"Your latest announcement, one at a time, on your technology page and its videos",
 		"Your logo on the community supporters wall",
@@ -444,7 +446,9 @@ export const decisionBriefMailto = partnershipFitMailto;
 const teamBriefBody = [
 	"Support the Academy and partnerships",
 	"",
-	`Support the Academy: help fund free tutorials, live streams and shows. ${supportAcademyOffer.price}, or $9,000 for twelve months. Includes a supporter badge, docs links, one latest announcement and a logo on the supporters wall. Editorial conclusions stay independent.`,
+	`Support the Academy: help fund free tutorials, live streams and shows. ${supportAcademyOffer.price}, or $9,000 for twelve months.`,
+	...supportAcademyOffer.included.map((item) => `- ${item}`),
+	...supportAcademyOffer.notes,
 	"",
 	"David Flanagan works alongside our team across Awareness, Adoption, and Support. We agree the priorities, outputs and cadence each quarter.",
 	"",
