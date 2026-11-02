@@ -29,6 +29,7 @@ const PLATFORM_SERVICES = [
 	"adrs",
 	"testimonials",
 	"courses",
+	"kubetrack",
 	// User interaction services
 	"emoji-reactions",
 	"email-preferences",

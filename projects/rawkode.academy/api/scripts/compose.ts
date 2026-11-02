@@ -34,6 +34,7 @@ const SUBGRAPHS = [
 	"adrs",
 	"testimonials",
 	"courses",
+	"kubetrack",
 	// User interaction services (dynamic data requiring D1)
 	"emoji-reactions",
 	"email-preferences",
