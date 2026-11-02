@@ -1,0 +1,14 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`toSql matches the snapshot 1`] = `
+"INSERT INTO \`releases\` (\`id\`, \`major\`, \`minor\`, \`title\`, \`codename\`, \`summary\`, \`body\`, \`released_at\`, \`published_at\`, \`release_blog_url\`, \`changelog_url\`, \`upstream_counts\`, \`updated_at\`) VALUES ('1.37', 1, 37, 'Kubernetes v1.37', 'Garhwal', 'Every Kubernetes v1.37 enhancement explained, one card each, then a quiz.', '{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Kubernetes v1.37 ships "},{"type":"text","text":"many","marks":[{"type":"bold"}]},{"type":"text","text":" enhancements."}]}]}', 1787702400, 1794787200, 'https://kubernetes.io/blog/2026/08/26/kubernetes-v1-37-release/', NULL, NULL, 1790812800000) ON CONFLICT(\`id\`) DO UPDATE SET \`major\` = excluded.\`major\`, \`minor\` = excluded.\`minor\`, \`title\` = excluded.\`title\`, \`codename\` = excluded.\`codename\`, \`summary\` = excluded.\`summary\`, \`body\` = excluded.\`body\`, \`released_at\` = excluded.\`released_at\`, \`published_at\` = excluded.\`published_at\`, \`release_blog_url\` = excluded.\`release_blog_url\`, \`changelog_url\` = excluded.\`changelog_url\`, \`upstream_counts\` = excluded.\`upstream_counts\`, \`updated_at\` = excluded.\`updated_at\`;
+--> statement-breakpoint
+DELETE FROM \`quiz_questions\` WHERE \`release_id\` = '1.37';
+--> statement-breakpoint
+DELETE FROM \`release_features\` WHERE \`release_id\` = '1.37';
+--> statement-breakpoint
+INSERT INTO \`release_features\` (\`id\`, \`release_id\`, \`slug\`, \`kep\`, \`title\`, \`stage\`, \`sig\`, \`theme\`, \`feature_gate\`, \`enabled_by_default\`, \`previous_stage\`, \`previous_stage_version\`, \`summary\`, \`body\`, \`example\`, \`docs_url\`, \`sort_order\`) VALUES ('1.37/kep-1710', '1.37', 'kep-1710', 1710, 'Speed up SELinux relabelling', 'stable', 'storage', NULL, 'Gate1710', 0, NULL, NULL, 'Feature 1710 does one useful thing.', '{"type":"doc","content":[{"type":"heading","attrs":{"level":3,"id":"why-it-matters"},"content":[{"type":"text","text":"Why it matters"}]},{"type":"paragraph","content":[{"type":"text","text":"It''s quick."}]},{"type":"heading","attrs":{"level":3,"id":"how-to-use-it"},"content":[{"type":"text","text":"How to use it"}]},{"type":"paragraph","content":[{"type":"text","text":"Turn on the gate."}]}]}', NULL, NULL, 1);
+--> statement-breakpoint
+INSERT INTO \`quiz_questions\` (\`id\`, \`release_id\`, \`feature_id\`, \`kind\`, \`prompt\`, \`choices\`, \`answer_ids\`, \`explanation\`, \`sort_order\`) VALUES ('1.37/q01', '1.37', '1.37/kep-1710', 'true_false', '{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Which one is right?"}]}]}', '[{"id":"a","text":"True"},{"id":"b","text":"False"}]', '["a"]', '{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Yes."}]}]}', 1);
+"
+`;
