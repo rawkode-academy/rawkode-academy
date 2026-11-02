@@ -8,6 +8,14 @@ export default defineConfig({
 	strictTokens: true,
 	include: ["./src/**/*.{ts,vue}"],
 	outdir: "./styled-system",
+	// Short aliases for authored CSS. They resolve through the semantic
+	// tokens, so light and dark mode come from the tokens alone.
+	globalVars: {
+		"--kubetrack-stage-stable": "var(--colors-kubetrack-stage-stable)",
+		"--kubetrack-stage-beta": "var(--colors-kubetrack-stage-beta)",
+		"--kubetrack-stage-alpha": "var(--colors-kubetrack-stage-alpha)",
+		"--kubetrack-stage-deprecated": "var(--colors-kubetrack-stage-deprecated)",
+	},
 	conditions: {
 		extend: {
 			sm: "@media (min-width: 640px)",
@@ -440,6 +448,37 @@ export default defineConfig({
 							value: {
 								base: "{colors.editorial.paper}",
 								_dark: "{colors.editorial.ink}",
+							},
+						},
+					},
+					// KubeTrack feature stages alias the existing status palette:
+					// stable is success, beta is info, alpha is warning and
+					// deprecated is neutral. Both modes follow the source tokens.
+					kubetrack: {
+						stage: {
+							stable: {
+								value: {
+									base: "{colors.academy.statusSpruce}",
+									_dark: "{colors.academy.statusSpruce}",
+								},
+							},
+							beta: {
+								value: {
+									base: "{colors.academy.statusSky}",
+									_dark: "{colors.academy.statusSky}",
+								},
+							},
+							alpha: {
+								value: {
+									base: "{colors.academy.statusAmber}",
+									_dark: "{colors.academy.statusAmber}",
+								},
+							},
+							deprecated: {
+								value: {
+									base: "{colors.academy.textMuted}",
+									_dark: "{colors.academy.textMuted}",
+								},
 							},
 						},
 					},
