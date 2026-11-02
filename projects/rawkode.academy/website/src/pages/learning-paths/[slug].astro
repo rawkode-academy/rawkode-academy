@@ -124,6 +124,26 @@ const pageDescription = learningPath.data.description;
 						</a>
 					))}
 				</div>
+				{learningPath.id === "build-your-first-kubernetes-developer-platform" && (
+					<aside class={styles.prose} aria-labelledby="waypoint-history">
+						<h2 id="waypoint-history">Waypoint lesson: historical material</h2>
+						<p>
+							This path includes the legacy Waypoint workflow.
+							HashiCorp ended active development in 2023, and the repository
+							was archived in January 2024. The Waypoint server,
+							<code>waypoint.hcl</code>, <code>waypoint up</code>, and pipeline
+							suggestions below are historical examples, not current
+							deployment recommendations. Skip this lesson when choosing
+							tooling for a new platform.
+						</p>
+						<p>
+							Read <a href="https://www.hashicorp.com/en/blog/a-new-vision-for-hcp-waypoint">HashiCorp's product announcement</a>
+							{" "}and the <a href="https://github.com/hashicorp/waypoint">archived repository</a>
+							{" "}for context. <a href="https://developer.hashicorp.com/hcp/docs/waypoint">HCP Waypoint</a>
+							{" "}uses a different architecture and workflow; this video does not teach it.
+						</p>
+					</aside>
+				)}
 				<div class={doc.actions}>
 					<a class={doc.button} href={firstResource ? `#${firstResource.slug}` : "#path-content"}>
 						Start learning
