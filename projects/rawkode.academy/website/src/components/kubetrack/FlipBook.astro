@@ -1,0 +1,480 @@
+---
+// The release flip book. The server renders every card, so the page reads in
+// full without JavaScript. The script below adds the paged "book" mode: one
+// card at a time with Prev/Next, arrow keys, a progress bar and hash sync.
+// "Show all cards" switches back to the full list and is remembered in
+// localStorage (kubetrack:v1:view).
+import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
+import "@rawkodeacademy/design-system/styles.css";
+import type { KubeTrackReleaseEntry } from "@/lib/kubetrack/types";
+import { groupByStage, stageLabel } from "@/lib/kubetrack/version";
+import FeatureCard from "./FeatureCard.astro";
+import StageBadge from "./StageBadge.astro";
+
+interface Props {
+	entry: KubeTrackReleaseEntry;
+}
+
+const { entry } = Astro.props;
+const features = entry.data.features;
+const total = features.length;
+const groups = groupByStage(features);
+
+const layout = academyLayout({ width: "reading" });
+const doc = academyDocument();
+---
+
+<section
+	id="cards"
+	class:list={[layout.section, "kubetrack-flipbook"]}
+	aria-label="Release flip book"
+	data-kubetrack-flipbook
+	data-release={entry.id}
+	data-total={total}
+>
+	<div class:list={[layout.container, "kubetrack-flipbook-inner"]}>
+		<div class={doc.rowBetween}>
+			<h2 class={doc.sectionTitle}>Flip book</h2>
+			<p class={doc.meta}>{total} {total === 1 ? "card" : "cards"}</p>
+		</div>
+
+		<nav aria-label="Release contents" class="kubetrack-toc">
+			<details>
+				<summary class={doc.tocSummary}>Contents</summary>
+				{groups.map((group) => (
+					<div class="kubetrack-toc-group">
+						<p class="kubetrack-toc-stage">
+							<StageBadge stage={group.stage} count={group.features.length} />
+						</p>
+						<ol class="kubetrack-toc-list" aria-label={`${stageLabel(group.stage)} enhancements`}>
+							{group.features.map((feature) => (
+								<li>
+									<a class={doc.tocLink} href={`#${feature.slug}`} data-kubetrack-toc-link>
+										<span class="kubetrack-toc-kep">KEP-{feature.kep}</span>
+										<span class={doc.tocText}>{feature.title}</span>
+									</a>
+								</li>
+							))}
+						</ol>
+					</div>
+				))}
+			</details>
+		</nav>
+
+		<div class="kubetrack-controls" data-kubetrack-controls hidden>
+			<div class="kubetrack-controls-paged" data-kubetrack-paged-only>
+				<button
+					type="button"
+					class={doc.buttonSecondary}
+					data-kubetrack-prev
+					aria-controls="kubetrack-cards"
+				>
+					<span aria-hidden="true">←</span> Previous
+				</button>
+				<div class="kubetrack-progress">
+					<p class={doc.meta} data-kubetrack-position aria-hidden="true">Card 1 of {total}</p>
+					<progress
+						max={total}
+						value="1"
+						aria-label="Flip book progress"
+						data-kubetrack-progress
+					></progress>
+				</div>
+				<button
+					type="button"
+					class={doc.buttonSecondary}
+					data-kubetrack-next
+					aria-controls="kubetrack-cards"
+				>
+					Next <span aria-hidden="true">→</span>
+				</button>
+			</div>
+			<button
+				type="button"
+				class:list={[doc.link, "kubetrack-view-toggle"]}
+				data-kubetrack-view-toggle
+			>
+				Show all cards
+			</button>
+		</div>
+
+		<p class="kubetrack-sr-only" aria-live="polite" aria-atomic="true" data-kubetrack-announcer></p>
+
+		<ol id="kubetrack-cards" class="kubetrack-cards" data-kubetrack-cards>
+			{features.map((feature, index) => (
+				<li
+					class="kubetrack-cards-item"
+					data-kubetrack-card
+					data-index={index}
+					data-slug={feature.slug}
+					data-kep={feature.kep}
+					data-stage={feature.stage}
+				>
+					<FeatureCard feature={feature} releaseId={entry.id} />
+				</li>
+			))}
+		</ol>
+
+		<div class="kubetrack-controls-paged" data-kubetrack-paged-only hidden>
+			<button
+				type="button"
+				class={doc.buttonSecondary}
+				data-kubetrack-prev
+				aria-controls="kubetrack-cards"
+			>
+				<span aria-hidden="true">←</span> Previous
+			</button>
+			<p class:list={[doc.meta, "kubetrack-progress"]} data-kubetrack-position aria-hidden="true">Card 1 of {total}</p>
+			<button
+				type="button"
+				class={doc.buttonSecondary}
+				data-kubetrack-next
+				aria-controls="kubetrack-cards"
+			>
+				Next <span aria-hidden="true">→</span>
+			</button>
+		</div>
+	</div>
+</section>
+
+<script>
+	import { KUBETRACK_EVENTS, track } from "@/lib/kubetrack/analytics";
+	import {
+		clampIndex,
+		indexFromHash,
+		nextIndex,
+		prevIndex,
+		readViewMode,
+		type ViewMode,
+		writeViewMode,
+	} from "@/lib/kubetrack/flipbook";
+
+	const reducedMotion = () =>
+		window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false;
+
+	const isTypingTarget = (target: EventTarget | null) =>
+		target instanceof HTMLElement &&
+		(target.isContentEditable ||
+			target.closest("input, textarea, select, [data-kubetrack-example]") !== null);
+
+	function sessionSet(key: string): Set<string> {
+		try {
+			return new Set(JSON.parse(sessionStorage.getItem(key) ?? "[]") as string[]);
+		} catch {
+			return new Set();
+		}
+	}
+
+	function saveSessionSet(key: string, value: Set<string>) {
+		try {
+			sessionStorage.setItem(key, JSON.stringify([...value]));
+		} catch {
+			// Blocked storage: events may repeat on reload, nothing else changes.
+		}
+	}
+
+	function enhance(root: HTMLElement) {
+		const release = root.dataset.release ?? "";
+		const items = [...root.querySelectorAll<HTMLLIElement>("[data-kubetrack-card]")];
+		const total = items.length;
+		if (total === 0) return;
+		const ids = items.map((item) => item.dataset.slug ?? "");
+		const controls = root.querySelector<HTMLElement>("[data-kubetrack-controls]");
+		// One pager above the cards and one below, so a long card needs no
+		// scroll back up to turn the page.
+		const pagedOnly = [...root.querySelectorAll<HTMLElement>("[data-kubetrack-paged-only]")];
+		const prevs = [...root.querySelectorAll<HTMLButtonElement>("[data-kubetrack-prev]")];
+		const nexts = [...root.querySelectorAll<HTMLButtonElement>("[data-kubetrack-next]")];
+		const positions = [...root.querySelectorAll<HTMLElement>("[data-kubetrack-position]")];
+		const progress = root.querySelector<HTMLProgressElement>("[data-kubetrack-progress]");
+		const toggle = root.querySelector<HTMLButtonElement>("[data-kubetrack-view-toggle]");
+		const announcer = root.querySelector<HTMLElement>("[data-kubetrack-announcer]");
+		if (!controls || pagedOnly.length === 0 || !toggle) return;
+		// Narrowed for the closures below.
+		const ui = { toggle };
+
+		let mode: ViewMode = readViewMode();
+		const initialHash = indexFromHash(location.hash, ids);
+		let index = initialHash ?? 0;
+
+		const article = (i: number) => items[i]?.querySelector<HTMLElement>("article") ?? null;
+		const heading = (i: number) => items[i]?.querySelector<HTMLElement>("h3") ?? null;
+
+		function render() {
+			const paged = mode === "paged";
+			root.classList.toggle("is-paged", paged);
+			for (const pager of pagedOnly) pager.hidden = !paged;
+			ui.toggle.textContent = paged ? "Show all cards" : "Show one card at a time";
+			items.forEach((item, i) => {
+				item.hidden = paged && i !== index;
+				item.toggleAttribute("data-active", paged && i === index);
+			});
+			for (const button of prevs) button.disabled = index === 0;
+			for (const button of nexts) button.disabled = index === total - 1;
+			for (const position of positions) position.textContent = `Card ${index + 1} of ${total}`;
+			if (progress) progress.value = index + 1;
+		}
+
+		function turn(to: number, { focus = true, announce = true } = {}) {
+			const target = clampIndex(to, total);
+			const direction = target >= index ? "next" : "prev";
+			index = target;
+			render();
+			history.replaceState(history.state, "", `#${ids[index]}`);
+			const item = items[index];
+			if (item && !reducedMotion()) {
+				item.dataset.turn = direction;
+				item.addEventListener("animationend", () => delete item.dataset.turn, { once: true });
+			}
+			if (announce && announcer) announcer.textContent = `Card ${index + 1} of ${total}`;
+			if (focus) heading(index)?.focus({ preventScroll: true });
+			const card = article(index);
+			const top = card?.getBoundingClientRect().top ?? 0;
+			if (card && (top < 0 || top > window.innerHeight * 0.75)) {
+				card.scrollIntoView({ block: "start", behavior: reducedMotion() ? "auto" : "smooth" });
+			}
+		}
+
+		function setMode(nextMode: ViewMode) {
+			if (nextMode === mode) return;
+			// Back to paged on the last card turned to or linked, and keep the hash
+			// on it so a link to any other card still changes the hash.
+			if (nextMode === "paged") history.replaceState(history.state, "", `#${ids[index]}`);
+			mode = nextMode;
+			writeViewMode(mode);
+			render();
+			track(KUBETRACK_EVENTS.VIEW_MODE_CHANGED, { release, mode });
+			article(index)?.scrollIntoView({ block: "start", behavior: "auto" });
+		}
+
+		// Focus stays on the pager button; the live region announces the card.
+		for (const button of prevs)
+			button.addEventListener("click", () => turn(prevIndex(index, total), { focus: false }));
+		for (const button of nexts)
+			button.addEventListener("click", () => turn(nextIndex(index, total), { focus: false }));
+		toggle.addEventListener("click", () => setMode(mode === "paged" ? "all" : "paged"));
+
+		root.addEventListener("keydown", (event) => {
+			if (mode !== "paged" || event.defaultPrevented) return;
+			if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+			if (isTypingTarget(event.target)) return;
+			if (event.key === "ArrowRight" && index < total - 1) {
+				event.preventDefault();
+				turn(nextIndex(index, total));
+			} else if (event.key === "ArrowLeft" && index > 0) {
+				event.preventDefault();
+				turn(prevIndex(index, total));
+			}
+		});
+
+		// TOC links, quiz "Review card" links and pasted #kep-N hashes.
+		function followHash() {
+			const target = indexFromHash(location.hash, ids);
+			if (target === null) return;
+			if (mode === "paged") turn(target);
+			else {
+				index = target;
+				heading(index)?.focus({ preventScroll: true });
+			}
+		}
+		window.addEventListener("hashchange", followHash);
+		// Any same-page link to a card (TOC, quiz "Review card"): a hidden card
+		// gives the browser nothing to scroll to, and an unchanged hash fires no
+		// hashchange, so turn to it directly.
+		document.addEventListener("click", (event) => {
+			const link = (event.target as HTMLElement | null)?.closest<HTMLAnchorElement>(
+				'a[href^="#"]',
+			);
+			if (!link || mode !== "paged") return;
+			const target = indexFromHash(link.hash, ids);
+			if (target === null) return;
+			event.preventDefault();
+			link.closest("details")?.removeAttribute("open");
+			turn(target);
+		});
+
+		// Analytics: card views once per card per session, measured by what is
+		// actually on screen, so paged and full-list modes count the same way.
+		const viewedKey = `kubetrack:v1:${release}:viewed`;
+		const viewed = sessionSet(viewedKey);
+		let started = false;
+		let completed = viewed.has("__completed");
+		if ("IntersectionObserver" in window) {
+			const observer = new IntersectionObserver(
+				(entries) => {
+					for (const observed of entries) {
+						if (!observed.isIntersecting) continue;
+						const item = (observed.target as HTMLElement).closest<HTMLLIElement>(
+							"[data-kubetrack-card]",
+						);
+						const slug = item?.dataset.slug;
+						if (!item || !slug) continue;
+						if (!started) {
+							started = true;
+							track(KUBETRACK_EVENTS.FLIPBOOK_STARTED, { release, mode });
+						}
+						if (viewed.has(slug)) continue;
+						viewed.add(slug);
+						track(KUBETRACK_EVENTS.CARD_VIEWED, {
+							release,
+							kep: Number(item.dataset.kep),
+							stage: item.dataset.stage,
+							index: Number(item.dataset.index),
+						});
+						if (!completed && Number(item.dataset.index) === total - 1) {
+							completed = true;
+							viewed.add("__completed");
+							track(KUBETRACK_EVENTS.FLIPBOOK_COMPLETED, {
+								release,
+								cardsViewed: [...viewed].filter((id) => id !== "__completed").length,
+							});
+						}
+						saveSessionSet(viewedKey, viewed);
+					}
+				},
+				{ threshold: 0.4 },
+			);
+			for (const item of items) {
+				const card = item.querySelector("article");
+				if (card) observer.observe(card);
+			}
+		}
+
+		controls.hidden = false;
+		render();
+		// Collapsing to one card moves the hash target; put it back on screen.
+		if (initialHash !== null) article(index)?.scrollIntoView({ block: "start" });
+	}
+
+	for (const root of document.querySelectorAll<HTMLElement>("[data-kubetrack-flipbook]")) {
+		enhance(root);
+	}
+</script>
+
+<style>
+	.kubetrack-flipbook-inner {
+		display: grid;
+		gap: var(--spacing-6);
+	}
+	.kubetrack-toc {
+		border-block: var(--borders-hairline);
+	}
+	.kubetrack-toc-group {
+		display: grid;
+		gap: var(--spacing-1);
+		padding-block: var(--spacing-3);
+	}
+	.kubetrack-toc-stage {
+		margin: 0;
+	}
+	.kubetrack-toc-list {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	.kubetrack-toc-list a {
+		display: flex;
+		gap: var(--spacing-3);
+	}
+	.kubetrack-toc-kep {
+		flex-shrink: 0;
+		min-width: 6.5rem;
+		color: var(--colors-academy-text-muted);
+		font-family: var(--fonts-academy-mono);
+		font-size: var(--font-sizes-xs);
+		line-height: 1.9;
+	}
+	.kubetrack-controls {
+		display: grid;
+		gap: var(--spacing-3);
+		justify-items: start;
+	}
+	.kubetrack-controls[hidden],
+	.kubetrack-controls-paged[hidden] {
+		display: none;
+	}
+	.kubetrack-controls-paged {
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr) auto;
+		align-items: center;
+		gap: var(--spacing-3);
+		width: 100%;
+	}
+	.kubetrack-controls-paged button {
+		min-width: var(--spacing-11);
+		min-height: var(--spacing-11);
+	}
+	.kubetrack-controls-paged button:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+	.kubetrack-progress {
+		display: grid;
+		gap: var(--spacing-1);
+		justify-items: center;
+		min-width: 0;
+	}
+	.kubetrack-progress progress {
+		width: 100%;
+		height: var(--spacing-1);
+		accent-color: var(--colors-academy-accent);
+	}
+	.kubetrack-view-toggle {
+		min-height: var(--spacing-11);
+		padding: 0;
+		border: 0;
+		background: none;
+		font: inherit;
+		font-size: var(--font-sizes-sm);
+		cursor: pointer;
+	}
+	.kubetrack-cards {
+		display: grid;
+		gap: var(--spacing-6);
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	.kubetrack-cards-item[hidden] {
+		display: none;
+	}
+	/* Leave border-inline-start alone: it carries the stage colour. */
+	.is-paged .kubetrack-cards-item[data-active] :global(article) {
+		border-block-color: var(--colors-academy-accent);
+		border-inline-end-color: var(--colors-academy-accent);
+	}
+	.kubetrack-cards-item[data-turn="next"] {
+		animation: kubetrack-turn-next 180ms var(--easings-academy-out);
+	}
+	.kubetrack-cards-item[data-turn="prev"] {
+		animation: kubetrack-turn-prev 180ms var(--easings-academy-out);
+	}
+	@keyframes kubetrack-turn-next {
+		from {
+			opacity: 0;
+			transform: translateX(var(--spacing-6));
+		}
+	}
+	@keyframes kubetrack-turn-prev {
+		from {
+			opacity: 0;
+			transform: translateX(calc(var(--spacing-6) * -1));
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.kubetrack-cards-item[data-turn] {
+			animation: none;
+		}
+	}
+	.kubetrack-sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		margin: -1px;
+		padding: 0;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+		border: 0;
+	}
+</style>

@@ -86,7 +86,14 @@ const liveContent = vi.hoisted(() => {
 vi.mock("@/lib/live-content", () => liveContent);
 vi.mock("@/lib/content", () => ({ getPublishedVideos: vi.fn() }));
 
-import { getArticleSitemapEntries } from "../lib/sitemaps";
+import {
+	getArticleSitemapEntries,
+	getKubeTrackSitemapEntries,
+	sitemapCollections,
+} from "../lib/sitemaps";
+import * as kubetrackJsonLd from "../lib/kubetrack/jsonld";
+import * as kubetrackVersion from "../lib/kubetrack/version";
+import * as kubetrackViewModel from "../lib/kubetrack/view-model";
 import { GET as markdownRoute } from "../pages/read/[slug].md";
 import { GET as atomFeed } from "../pages/api/feeds/articles.atom";
 import { GET as jsonFeed } from "../pages/api/feeds/articles.json";
@@ -525,5 +532,132 @@ describe("Published route and sitemap contracts", () => {
 			expect(ids).toContain("people:rawkode");
 			expect(ids).not.toContain("articles:scheduled");
 		}
+	});
+});
+
+// ── KubeTrack release pages ───────────────────────────────────────────────
+
+const kubetrackRelease = (
+	id: string,
+	publishedAt: Date,
+	data: Record<string, unknown> = {},
+): Entry => {
+	const [major, minor] = id.split(".").map(Number);
+	return {
+		id,
+		collection: "kubetrackReleases",
+		body: "",
+		data: {
+			major,
+			minor,
+			title: `Kubernetes v${id}`,
+			summary: `Kubernetes v${id} explained.`,
+			body: { type: "doc", content: [] },
+			releasedAt: new Date("2026-08-26T00:00:00Z"),
+			publishedAt,
+			updatedAt: new Date("2026-09-02T00:00:00Z"),
+			features: [],
+			quizQuestions: [],
+			...data,
+		},
+		cacheHint: { tags: ["kubetrackReleases", `kubetrackReleases:${id}`] },
+	};
+};
+
+const liveRelease = kubetrackRelease("1.37", new Date("2026-09-01T00:00:00Z"));
+const scheduledRelease = kubetrackRelease(
+	"1.38",
+	new Date(NOW + 60 * 60 * 1000),
+);
+
+let kubetrackPage: Component | undefined;
+
+async function loadKubeTrackPage(): Promise<Component> {
+	if (kubetrackPage) return kubetrackPage;
+	const empty = stub(() => runtime.render``);
+	const styles = () =>
+		new Proxy({}, { get: (_, key) => `academy-${String(key)}` });
+	kubetrackPage = await compileAstro("pages/kubetrack/[version].astro", {
+		"@rawkodeacademy/design-system": {
+			academyDocument: styles,
+			academyLayout: styles,
+		},
+		"@rawkodeacademy/design-system/styles.css": {},
+		"@/lib/live-content": {
+			...liveContent,
+			renderDocument: async () => ({ html: "" }),
+		},
+		"@/wrappers/page.astro": {
+			default: stub((result, props: Record<string, unknown>, slots) => {
+				pageProps.push(props);
+				return runtime.render`<main>${runtime.renderSlot(result, slots.default as never)}</main>`;
+			}),
+		},
+		"@/components/breadcrumb/BreadcrumbJsonLd.astro": { default: empty },
+		"@/components/content/RichText.astro": { default: empty },
+		"@/components/kubetrack/FlipBook.astro": {
+			default: stub(() => runtime.render`<section id="cards"></section>`),
+		},
+		"@/components/kubetrack/KubeTrackCTA.astro": { default: empty },
+		"@/components/kubetrack/KubeTrackQuiz.vue": { default: empty },
+		"@/components/kubetrack/QuizFallback.astro": { default: empty },
+		"@/components/kubetrack/ReleaseHero.astro": { default: empty },
+		"@/lib/kubetrack/jsonld": kubetrackJsonLd,
+		"@/lib/kubetrack/version": kubetrackVersion,
+		"@/lib/kubetrack/view-model": kubetrackViewModel,
+	});
+	return kubetrackPage;
+}
+
+async function renderKubeTrack(version: string) {
+	const page = await loadKubeTrackPage();
+	const container = await AstroContainer.create();
+	const response = await container.renderToResponse(page, {
+		params: { version },
+		request: new Request(`https://rawkode.academy/kubetrack/${version}`),
+	});
+	return { status: response.status, response, html: await response.text() };
+}
+
+describe("KubeTrack route and sitemap contracts", () => {
+	beforeEach(() => {
+		collections([], { kubetrackReleases: [liveRelease, scheduledRelease] });
+		// The page passes client:visible to a stubbed (Astro) quiz component.
+		vi.spyOn(console, "warn").mockImplementation(() => {});
+	});
+
+	it("kubetrack/[version].astro serves published releases and 404s scheduled or missing ones", async () => {
+		const live = await renderKubeTrack("1.37");
+		expect(live.status).toBe(200);
+		expect(live.html).toContain('data-kubetrack-release="1.37"');
+		expect(live.html).toContain('<section id="cards"');
+		expect(state.cacheCalls).toHaveLength(1);
+		expect(
+			(state.cacheCalls[0]!.input.entries as Entry[]).map(
+				(entry) => `${entry.collection}:${entry.id}`,
+			),
+		).toEqual(["kubetrackReleases:1.37"]);
+
+		// A scheduled release has no page until its publishedAt.
+		expect((await renderKubeTrack("1.38")).status).toBe(404);
+		expect((await renderKubeTrack("1.99")).status).toBe(404);
+		expect((await renderKubeTrack("not-a-version")).status).toBe(404);
+	});
+
+	it("kubetrack/[version].astro redirects non-canonical versions to the canonical URL", async () => {
+		for (const slug of ["v1.37", "1.37.0"]) {
+			const { status, response } = await renderKubeTrack(slug);
+			expect(status).toBe(301);
+			expect(response.headers.get("location")).toBe("/kubetrack/1.37");
+		}
+	});
+
+	it("lists exactly the published releases in the KubeTrack sitemap", async () => {
+		const entries = await getKubeTrackSitemapEntries();
+		expect(entries.map((entry) => entry.path)).toEqual(["/kubetrack/1.37"]);
+		expect(entries[0]?.lastmod).toEqual(liveRelease.data.updatedAt);
+		expect(sitemapCollections("/sitemaps/kubetrack.xml")).toEqual([
+			"kubetrackReleases",
+		]);
 	});
 });

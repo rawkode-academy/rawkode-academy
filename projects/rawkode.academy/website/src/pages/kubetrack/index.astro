@@ -1,0 +1,56 @@
+---
+// Every published KubeTrack release, newest Kubernetes version first.
+import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
+import "@rawkodeacademy/design-system/styles.css";
+import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
+import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
+import ReleaseRow from "@/components/kubetrack/ReleaseRow.astro";
+import { getCollection, setContentCache } from "@/lib/live-content";
+import Page from "@/wrappers/page.astro";
+
+export const prerender = false;
+
+// The collection is already ordered newest version first.
+const releases = await getCollection("kubetrackReleases");
+
+await setContentCache(Astro, { collections: ["kubetrackReleases"] });
+
+const pageTitle = "KubeTrack: Kubernetes releases explained";
+const pageDescription =
+	"A flip book of every enhancement in each Kubernetes release, with a quiz to check what you learned.";
+
+const layout = academyLayout({ width: "reading" });
+const doc = academyDocument();
+---
+
+<Page title={pageTitle} description={pageDescription} pageType="CollectionPage">
+	<BreadcrumbJsonLd
+		slot="extra-head"
+		elements={[
+			{ title: "Home", link: "/" },
+			{ title: "KubeTrack", link: "/kubetrack" },
+		]}
+	/>
+
+	<div class={doc.root}>
+		<AcademyCatalogMasthead
+			title="KubeTrack"
+			description="Flip through every enhancement in a Kubernetes release, one card at a time, then take the quiz to see what stuck."
+			figure={releases.length}
+			figureLabel={releases.length === 1 ? "release" : "releases"}
+			width="reading"
+		/>
+
+		<section class={layout.section} aria-label="Releases">
+			<div class={layout.container}>
+				{releases.length > 0 ? (
+					<ol class={doc.list}>
+						{releases.map((release) => <ReleaseRow entry={release} />)}
+					</ol>
+				) : (
+					<p class={doc.copy}>The first release is on its way.</p>
+				)}
+			</div>
+		</section>
+	</div>
+</Page>

@@ -900,6 +900,7 @@ describe("Crawlability and Sitemaps", () => {
 		expect(sitemapPaths).toContain("/sitemaps/articles.xml");
 		expect(sitemapPaths).toContain("/sitemaps/news.xml");
 		expect(sitemapPaths).toContain("/news-sitemap.xml");
+		expect(sitemapPaths).toContain("/sitemaps/kubetrack.xml");
 		expect(
 			sitemapPaths.some(
 				(path) =>
@@ -908,6 +909,30 @@ describe("Crawlability and Sitemaps", () => {
 					path.startsWith("/private"),
 			),
 		).toBe(false);
+	});
+
+	it("lists the KubeTrack hub in the pages sitemap and releases in their own sitemap", async () => {
+		vi.doMock("@/lib/live-content", () => ({
+			getCollection: vi.fn(),
+		}));
+		vi.doMock("@/lib/content", () => ({
+			getPublishedVideos: vi.fn(),
+		}));
+
+		const {
+			getPagesSitemapEntries,
+			sitemapCollections,
+			SITEMAP_INDEX_COLLECTIONS,
+		} = await import("../lib/sitemaps.ts");
+
+		const hub = (await getPagesSitemapEntries()).find(
+			(entry) => entry.path === "/kubetrack",
+		);
+		expect(hub).toMatchObject({ changefreq: "weekly", priority: 0.6 });
+		expect(sitemapCollections("/sitemaps/kubetrack.xml")).toEqual([
+			"kubetrackReleases",
+		]);
+		expect(SITEMAP_INDEX_COLLECTIONS).toContain("kubetrackReleases");
 	});
 
 	it("lists exactly the people profiles the profile page leaves indexable", async () => {

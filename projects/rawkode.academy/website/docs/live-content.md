@@ -2,7 +2,7 @@
 
 All content (videos, shows, people, technologies, articles, news, changelog,
 ADRs, testimonials, courses, course modules, learning paths, community
-supporters) lives in D1 platform services behind the GraphQL gateway. The website has no build-time
+supporters, KubeTrack releases) lives in D1 platform services behind the GraphQL gateway. The website has no build-time
 content: every content page renders on demand and is cached at the edge.
 
 ## Request path
@@ -118,6 +118,23 @@ generation and purges the entity, collection and related tags, twice (see
 above). The first run only stores a baseline. A failed source or a failed
 purge aborts the run without replacing the manifest, so the next run reports
 the same changes again; running twice only purges twice. The summary is logged as `content.change-detection`.
+
+Sources in `OPTIONAL_SOURCES` (`src/lib/live-content/change-detection.ts`:
+`supporters`, `kubetrackReleases`) are the exception: when one fails it is
+logged as `content.change-detection.source-failed`, its previous entities are
+carried over and the other collections are still checked.
+`kubetrackReleases` stays optional until the `kubetrack` subgraph is in the
+gateway.
+
+## KubeTrack releases
+
+`kubetrackReleases` is one entry per Kubernetes release (id `1.37`), loaded
+by `allKubeTrackReleases` with its `features` (the flip-book cards) and
+`quizQuestions` nested and sorted by `sortOrder`. Entries are listed newest
+version first (by `major`, then `minor`). `publishedAt` is the scheduling
+gate, so a release loaded with a future date stays hidden unless the page
+asks for `{ scheduled: "include" }`. A release references nothing, so its
+cache tags are `kubetrackReleases` and `kubetrackReleases:<id>`.
 
 ## Bindings (wrangler.jsonc)
 

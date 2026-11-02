@@ -1,0 +1,61 @@
+---
+// A feature stage as glyph + text. The stage colour only tints the glyph, so
+// the stage never depends on colour alone (and amber never sets small text).
+//
+//   <StageBadge stage="beta" />             ◐ Beta
+//   <StageBadge stage="stable" count={17} /> ● 17 stable
+import { academyLabel } from "@rawkodeacademy/design-system";
+import "@rawkodeacademy/design-system/styles.css";
+import type { KubeTrackStage } from "@/lib/kubetrack/types";
+import { stageGlyph, stageLabel } from "@/lib/kubetrack/version";
+
+interface Props {
+	stage: KubeTrackStage;
+	/** Renders "17 stable" instead of "Stable". */
+	count?: number | undefined;
+	/** "ink" for the navy masthead; "muted" elsewhere. */
+	tone?: "muted" | "ink" | undefined;
+	class?: string | undefined;
+}
+
+const { stage, count, tone = "muted", class: className } = Astro.props;
+const label = stageLabel(stage);
+const text = count === undefined ? label : `${count} ${label.toLowerCase()}`;
+const styles = academyLabel({ tone: tone === "ink" ? "ink" : "muted" });
+---
+
+<span
+	class:list={[styles.root, "kubetrack-stage", className]}
+	data-stage={stage}
+	data-tone={tone}
+>
+	<span class="kubetrack-stage-glyph" aria-hidden="true">{stageGlyph(stage)}</span>
+	<span>{text}</span>
+</span>
+
+<style>
+	.kubetrack-stage {
+		white-space: nowrap;
+		font-variant-numeric: tabular-nums;
+	}
+	.kubetrack-stage[data-tone="ink"] {
+		color: var(--colors-academy-ink-text);
+	}
+	.kubetrack-stage-glyph {
+		color: var(--kubetrack-stage);
+		font-size: var(--font-sizes-sm);
+		line-height: 1;
+	}
+	.kubetrack-stage[data-stage="stable"] {
+		--kubetrack-stage: var(--kubetrack-stage-stable);
+	}
+	.kubetrack-stage[data-stage="beta"] {
+		--kubetrack-stage: var(--kubetrack-stage-beta);
+	}
+	.kubetrack-stage[data-stage="alpha"] {
+		--kubetrack-stage: var(--kubetrack-stage-alpha);
+	}
+	.kubetrack-stage[data-stage="deprecated"] {
+		--kubetrack-stage: var(--kubetrack-stage-deprecated);
+	}
+</style>

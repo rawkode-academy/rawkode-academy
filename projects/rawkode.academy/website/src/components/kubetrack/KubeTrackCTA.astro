@@ -1,0 +1,69 @@
+---
+// End-of-page call to action: the kubernetes-release-updates newsletter, with
+// the cheat sheet as a follow-on link. NewsletterCTA personalises on the
+// visitor; setContentCache already skips storing those renders.
+import { academyDocument } from "@rawkodeacademy/design-system";
+import "@rawkodeacademy/design-system/styles.css";
+import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
+
+interface Props {
+	/** The release id, e.g. "1.37", sent with kubetrack_cta_clicked. */
+	releaseId: string;
+	class?: string | undefined;
+}
+
+const { releaseId, class: className } = Astro.props;
+const doc = academyDocument();
+---
+
+<div class:list={["kubetrack-cta", className]} data-kubetrack-cta data-release={releaseId}>
+	<NewsletterCTA
+		audience="kubernetes-release-updates"
+		badge="Kubernetes release updates"
+		headline="Every Kubernetes release, explained"
+		subtitle="Get the next KubeTrack flip book and quiz in your inbox the week each Kubernetes release ships."
+		variant="section"
+	/>
+	<p class:list={[doc.copy, "kubetrack-cta-more"]}>
+		Want the upgrade checklist too?
+		<a
+			class={doc.link}
+			href="/resources/kubernetes/1.35-cheatsheet"
+			data-kubetrack-cta-target="cheatsheet"
+		>
+			Get the Kubernetes cheat sheet
+		</a>
+	</p>
+</div>
+
+<script>
+	import { KUBETRACK_EVENTS, track } from "@/lib/kubetrack/analytics";
+
+	for (const root of document.querySelectorAll<HTMLElement>("[data-kubetrack-cta]")) {
+		const release = root.dataset.release ?? "";
+		root.addEventListener("click", (event) => {
+			const link = (event.target as HTMLElement | null)?.closest<HTMLElement>(
+				"[data-kubetrack-cta-target]",
+			);
+			if (link) {
+				track(KUBETRACK_EVENTS.CTA_CLICKED, {
+					release,
+					target: link.dataset.kubetrackCtaTarget,
+				});
+			}
+		});
+		root.addEventListener("submit", () => {
+			track(KUBETRACK_EVENTS.CTA_CLICKED, { release, target: "newsletter" });
+		});
+	}
+</script>
+
+<style>
+	.kubetrack-cta-more {
+		max-width: var(--sizes-academy-copy);
+		margin-inline: auto;
+		padding-inline: var(--spacing-academy-gutter);
+		padding-block: var(--spacing-4);
+		text-align: center;
+	}
+</style>

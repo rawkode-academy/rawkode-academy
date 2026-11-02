@@ -437,6 +437,60 @@ export const SUPPORTER_FIELDS = /* GraphQL */ `
 	}
 `;
 
+export const KUBETRACK_RELEASE_FIELDS = /* GraphQL */ `
+	fragment LiveKubeTrackRelease on KubeTrackRelease {
+		id
+		major
+		minor
+		title
+		codename
+		summary
+		body
+		releasedAt
+		publishedAt
+		updatedAt
+		releaseBlogUrl
+		changelogUrl
+		upstreamCounts {
+			stable
+			beta
+			alpha
+			deprecated
+		}
+		features {
+			id
+			slug
+			kep
+			title
+			stage
+			sig
+			theme
+			featureGate
+			enabledByDefault
+			previousStage
+			previousStageVersion
+			summary
+			body
+			example
+			docsUrl
+			sortOrder
+		}
+		quizQuestions {
+			id
+			featureId
+			kind
+			prompt
+			choices {
+				id
+				text
+			}
+			answerIds
+			explanation
+			sortOrder
+		}
+	}
+`;
+
 /** One query per source list. courses also yields courseModules. */
 export const LIST_QUERIES = {
 	videos: {
@@ -498,6 +552,11 @@ export const LIST_QUERIES = {
 		operationName: "LiveSupporters",
 		query: `query LiveSupporters { supporters { ...LiveSupporter } }\n${SUPPORTER_FIELDS}`,
 		root: "supporters",
+	},
+	kubetrackReleases: {
+		operationName: "KubeTrackReleases",
+		query: `query KubeTrackReleases { allKubeTrackReleases { ...LiveKubeTrackRelease } }\n${KUBETRACK_RELEASE_FIELDS}`,
+		root: "allKubeTrackReleases",
 	},
 } as const;
 

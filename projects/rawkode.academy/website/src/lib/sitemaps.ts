@@ -1,7 +1,11 @@
 import { getPublishedVideos } from "@/lib/content";
-import { type CollectionName, getCollection } from "@/lib/live-content";
-import { getCourseModuleSlug } from "@/utils/course-path";
+import {
+	type CollectionName,
+	getCollection,
+	optionalContent,
+} from "@/lib/live-content";
 import { isNewsPublished } from "@/lib/news-publication";
+import { getCourseModuleSlug } from "@/utils/course-path";
 
 const DEFAULT_SITE_URL = "https://rawkode.academy";
 const MODULE_LOADED_AT = new Date();
@@ -82,6 +86,7 @@ const staticPages: StaticPageDefinition[] = [
 	// Sub-listings and tooling.
 	{ path: "/technology/matrix", changefreq: "weekly", priority: 0.7 },
 	{ path: "/technology/matrix/advanced", changefreq: "weekly", priority: 0.7 },
+	{ path: "/kubetrack", changefreq: "weekly", priority: 0.6 },
 	{ path: "/adrs", changefreq: "weekly", priority: 0.6 },
 	{ path: "/changelog", changefreq: "daily", priority: 0.6 },
 	{ path: "/feeds", changefreq: "monthly", priority: 0.5 },
@@ -378,6 +383,23 @@ export async function getLearningPathSitemapEntries(): Promise<
 	return sortByPath(entries);
 }
 
+export async function getKubeTrackSitemapEntries(): Promise<SitemapUrlEntry[]> {
+	// Scheduled releases (future publishedAt) are hidden by the content layer.
+	// Optional: the sitemap index must not fail while the subgraph is absent.
+	const releases = await optionalContent(
+		getCollection("kubetrackReleases"),
+		[],
+	);
+	const entries = releases.map((release) => ({
+		path: `/kubetrack/${release.id}`,
+		lastmod: pickLastmod(release.data.publishedAt, release.data.updatedAt),
+		changefreq: "weekly" as const,
+		priority: 0.7,
+	}));
+
+	return sortByPath(entries);
+}
+
 export async function getPeopleSitemapEntries(): Promise<SitemapUrlEntry[]> {
 	const now = new Date();
 	const [people, allVideos, allShows, allNews, allArticles, deployTime] =
@@ -574,6 +596,11 @@ export const sitemapDefinitions: readonly SitemapDefinition[] = [
 		path: "/sitemaps/learning-paths.xml",
 		getEntries: getLearningPathSitemapEntries,
 		collections: ["learningPaths"],
+	},
+	{
+		path: "/sitemaps/kubetrack.xml",
+		getEntries: getKubeTrackSitemapEntries,
+		collections: ["kubetrackReleases"],
 	},
 	{
 		path: "/sitemaps/people.xml",

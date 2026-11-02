@@ -19,6 +19,7 @@ export const COLLECTIONS = [
 	"courseModules",
 	"learningPaths",
 	"supporters",
+	"kubetrackReleases",
 ] as const;
 
 export type CollectionName = (typeof COLLECTIONS)[number];
@@ -405,6 +406,69 @@ export interface SupporterData {
 	technologies: Reference<"technologies">[];
 }
 
+export type KubeTrackStage = "alpha" | "beta" | "stable" | "deprecated";
+
+export type KubeTrackQuestionKind = "single" | "multiple" | "true_false";
+
+/** One enhancement card in a release's flip book. */
+export interface KubeTrackFeatureData {
+	/** `<release>/<slug>`, e.g. "1.37/kep-1710". */
+	id: string;
+	/** Anchor id on the release page, e.g. "kep-1710". */
+	slug: string;
+	kep: number;
+	title: string;
+	stage: KubeTrackStage;
+	/** Lowercase SIG name without the "sig-" prefix. */
+	sig?: string | undefined;
+	theme?: string | undefined;
+	featureGate?: string | undefined;
+	enabledByDefault?: boolean | undefined;
+	previousStage?: KubeTrackStage | undefined;
+	previousStageVersion?: string | undefined;
+	/** "What": one sentence. */
+	summary: string;
+	/** "Why it matters" and "How to use it". */
+	body: DocNode;
+	/** A single code block. */
+	example?: DocNode | undefined;
+	docsUrl?: string | undefined;
+}
+
+export interface KubeTrackQuizQuestionData {
+	id: string;
+	featureId?: string | undefined;
+	kind: KubeTrackQuestionKind;
+	prompt: DocNode;
+	choices: { id: string; text: string }[];
+	answerIds: string[];
+	explanation: DocNode;
+}
+
+/**
+ * A Kubernetes release (entry id "1.37"). Features and quiz questions are
+ * nested and already in their authored order.
+ */
+export interface KubeTrackReleaseData {
+	major: number;
+	minor: number;
+	title: string;
+	codename?: string | undefined;
+	summary: string;
+	body: DocNode;
+	releasedAt: Date;
+	/** Visibility gate: the release is scheduled until this instant. */
+	publishedAt: Date;
+	/** Row change time; also versions saved quiz state. */
+	updatedAt: Date;
+	releaseBlogUrl?: string | undefined;
+	changelogUrl?: string | undefined;
+	/** The release blog's numbers (stage counts derive from `features`). */
+	upstreamCounts?: Record<KubeTrackStage, number> | undefined;
+	features: KubeTrackFeatureData[];
+	quizQuestions: KubeTrackQuizQuestionData[];
+}
+
 export interface CollectionDataMap {
 	videos: VideoData;
 	shows: ShowData;
@@ -419,6 +483,7 @@ export interface CollectionDataMap {
 	courseModules: CourseModuleData;
 	learningPaths: LearningPathData;
 	supporters: SupporterData;
+	kubetrackReleases: KubeTrackReleaseData;
 }
 
 export interface CacheHint {

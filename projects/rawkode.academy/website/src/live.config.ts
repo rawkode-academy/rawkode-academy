@@ -30,6 +30,10 @@ const supporters = defineLiveCollection({
 	loader: contentLoader("supporters"),
 });
 
+const kubetrackReleases = defineLiveCollection({
+	loader: contentLoader("kubetrackReleases"),
+});
+
 export const collections = {
 	videos,
 	shows,
@@ -44,4 +48,5 @@ export const collections = {
 	courseModules,
 	learningPaths,
 	supporters,
+	kubetrackReleases,
 };

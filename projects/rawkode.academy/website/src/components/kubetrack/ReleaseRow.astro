@@ -1,0 +1,93 @@
+---
+// One release on /kubetrack. Renders an <li>: place it inside an <ol>.
+import { academyDocument } from "@rawkodeacademy/design-system";
+import "@rawkodeacademy/design-system/styles.css";
+import type { KubeTrackReleaseEntry } from "@/lib/kubetrack/types";
+import { STAGE_ORDER, stageCounts } from "@/lib/kubetrack/version";
+import StageBadge from "./StageBadge.astro";
+
+interface Props {
+	entry: KubeTrackReleaseEntry;
+}
+
+const { entry } = Astro.props;
+const release = entry.data;
+const href = `/kubetrack/${entry.id}`;
+const counts = stageCounts(release.features);
+const stages = STAGE_ORDER.filter((stage) => counts[stage] > 0);
+const released = new Intl.DateTimeFormat("en-GB", {
+	day: "numeric",
+	month: "short",
+	year: "numeric",
+	timeZone: "UTC",
+}).format(release.releasedAt);
+const titleId = `kubetrack-release-${entry.id.replace(/[^a-z0-9]+/gi, "-")}`;
+
+const doc = academyDocument();
+---
+
+<li class:list={[doc.listItem, "kubetrack-row"]}>
+	<div class="kubetrack-row-copy">
+		<h2 id={titleId} class={doc.cardTitle}>
+			<a class="kubetrack-row-title" href={href}>{release.title}</a>
+		</h2>
+		<p class={doc.meta}>
+			{release.codename && (
+				<>
+					<span>{release.codename}</span>
+					<span aria-hidden="true">·</span>
+				</>
+			)}
+			<time datetime={release.releasedAt.toISOString()}>released {released}</time>
+			<span aria-hidden="true">·</span>
+			<span>{release.features.length} enhancements</span>
+		</p>
+		{stages.length > 0 && (
+			<ul class="kubetrack-row-stages" aria-label="Enhancements by stage">
+				{stages.map((stage) => (
+					<li>
+						<StageBadge stage={stage} count={counts[stage]} />
+					</li>
+				))}
+			</ul>
+		)}
+	</div>
+	<a class={doc.buttonSecondary} href={href} aria-describedby={titleId}>
+		Start <span aria-hidden="true">→</span>
+	</a>
+</li>
+
+<style>
+	.kubetrack-row {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--spacing-4);
+	}
+	.kubetrack-row-copy {
+		display: grid;
+		gap: var(--spacing-2);
+		min-width: 0;
+	}
+	.kubetrack-row-title {
+		color: inherit;
+		text-decoration: none;
+	}
+	.kubetrack-row-title:hover {
+		color: var(--colors-academy-accent);
+	}
+	.kubetrack-row-title:focus-visible {
+		outline: var(--borders-focus);
+		outline-color: var(--colors-academy-accent);
+		outline-offset: 2px;
+	}
+	.kubetrack-row-stages {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--spacing-2) var(--spacing-4);
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+</style>

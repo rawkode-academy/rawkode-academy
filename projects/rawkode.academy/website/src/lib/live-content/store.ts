@@ -12,6 +12,7 @@ import {
 	mapChangelog,
 	mapCourse,
 	mapCourseModule,
+	mapKubeTrackRelease,
 	mapLearningPath,
 	mapNews,
 	mapPerson,
@@ -32,6 +33,7 @@ import type {
 	CollectionDataMap,
 	CollectionName,
 	ContentEntry,
+	KubeTrackReleaseData,
 	VideoData,
 } from "./types";
 
@@ -52,6 +54,7 @@ const SOURCE: Record<CollectionName, ListSource> = {
 	courseModules: "courses",
 	learningPaths: "learningPaths",
 	supporters: "supporters",
+	kubetrackReleases: "kubetrackReleases",
 };
 
 export interface LoadedCollection<C extends CollectionName> {
@@ -178,6 +181,10 @@ function mapRows<C extends CollectionName>(
 			return valid.map((r) =>
 				entry("supporters", r.id, mapSupporter(r)),
 			) as ContentEntry<C>[];
+		case "kubetrackReleases":
+			return valid.map((r) =>
+				entry("kubetrackReleases", r.id, mapKubeTrackRelease(r)),
+			) as ContentEntry<C>[];
 	}
 }
 
@@ -193,6 +200,19 @@ function fileOrderKey(entry: ContentEntry<CollectionName>): string {
 		: String(video.publishedAt.getUTCFullYear());
 	const dir = video.show ? `shows/${video.show.id}` : "standalone";
 	return `${dir}/${year}/${video.slug}`;
+}
+
+/** Newest release first (1.37 before 1.9, unlike a string sort). */
+function sortByVersionDescending<C extends CollectionName>(
+	entries: ContentEntry<C>[],
+): ContentEntry<C>[] {
+	const version = (entry: ContentEntry<C>) =>
+		entry.data as unknown as KubeTrackReleaseData;
+	return [...entries].sort(
+		(a, b) =>
+			version(b).major - version(a).major ||
+			version(b).minor - version(a).minor,
+	);
 }
 
 function sortLikeContentFiles<C extends CollectionName>(
@@ -223,10 +243,14 @@ export async function loadCollection<C extends CollectionName>(
 	if (existing) return existing as unknown as LoadedCollection<C>;
 	const t = now();
 	// Supporters had no content files: keep the gateway's order (longest
-	// standing first).
+	// standing first). KubeTrack releases never had any either.
 	const rows = mapRows(collection, cached.value, t);
 	const entries =
-		collection === "supporters" ? rows : sortLikeContentFiles(rows);
+		collection === "supporters"
+			? rows
+			: collection === "kubetrackReleases"
+				? sortByVersionDescending(rows)
+				: sortLikeContentFiles(rows);
 	const publishTimes: number[] = [];
 	for (const entry of entries) {
 		const at = publicationDate(collection, entry.data)?.getTime();

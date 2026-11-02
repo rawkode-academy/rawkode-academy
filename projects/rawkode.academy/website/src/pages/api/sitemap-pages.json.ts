@@ -3,6 +3,7 @@ import { getPublishedVideos } from "@/lib/content";
 import {
 	type CollectionName,
 	getCollection,
+	optionalContent,
 	setContentCache,
 } from "@/lib/live-content";
 import { createLogger } from "@/lib/logger";
@@ -88,6 +89,13 @@ async function generateNavigationItems(
 			title: "Courses",
 			category: "Learning",
 			description: "Browse available courses",
+		},
+		{
+			href: "/kubetrack",
+			title: "KubeTrack",
+			category: "Learning",
+			description: "Kubernetes release flip books and quizzes",
+			keywords: ["kubetrack", "kubernetes", "release", "quiz", "learning"],
 		},
 		{
 			href: "/changelog",
@@ -204,6 +212,27 @@ async function generateNavigationItems(
 			});
 		});
 
+		// Releases stay out of the palette while the kubetrack subgraph is unavailable.
+		const kubetrackReleases = await optionalContent(
+			getCollection("kubetrackReleases"),
+			[],
+		);
+		for (const release of kubetrackReleases) {
+			navigationItems.push({
+				id: `/kubetrack/${release.id}`,
+				title: `KubeTrack ${release.data.title}`,
+				description: release.data.summary,
+				href: `/kubetrack/${release.id}`,
+				category: "Learning",
+				keywords: [
+					release.data.title.toLowerCase(),
+					`kubernetes ${release.id}`,
+					"kubetrack",
+					"quiz",
+				],
+			});
+		}
+
 		const [shows, technologies, videos] = await Promise.all([
 			getCollection("shows"),
 			getCollection("technologies"),
@@ -283,6 +312,7 @@ export const GET: APIRoute = async (context) => {
 
 		const collections: CollectionName[] = [
 			"courses",
+			"kubetrackReleases",
 			"shows",
 			"technologies",
 			"videos",

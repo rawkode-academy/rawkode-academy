@@ -1,7 +1,11 @@
 import type { APIContext } from "astro";
 import { articleMarkdownUrl } from "@/lib/article-markdown";
 import { getPublishedVideos } from "@/lib/content";
-import { getCollection, setContentCache } from "@/lib/live-content";
+import {
+	getCollection,
+	optionalContent,
+	setContentCache,
+} from "@/lib/live-content";
 import { SITE_DESCRIPTION } from "@/lib/site";
 
 const DEFAULT_SITE_URL = "https://rawkode.academy";
@@ -30,6 +34,11 @@ export async function GET(context: APIContext) {
 	const videos = await getPublishedVideos();
 	const courses = await getCollection("courses");
 	const learningPaths = await getCollection("learningPaths");
+	// A secondary section: left out while the kubetrack subgraph is unavailable.
+	const kubetrackReleases = await optionalContent(
+		getCollection("kubetrackReleases"),
+		[],
+	);
 
 	const lines: string[] = [
 		"# Rawkode Academy",
@@ -62,6 +71,17 @@ export async function GET(context: APIContext) {
 				`- [${path.data.title}](${absolute(`/learning-paths/${path.id}`)}): ${summarize(path.data.description)}`,
 		),
 		"",
+		...(kubetrackReleases.length > 0
+			? [
+					"## KubeTrack",
+					"",
+					...kubetrackReleases.map(
+						(release) =>
+							`- [${release.data.title}](${absolute(`/kubetrack/${release.id}`)}): ${summarize(release.data.summary)}`,
+					),
+					"",
+				]
+			: []),
 		"## Videos",
 		"",
 		...videos.map(
@@ -78,7 +98,13 @@ export async function GET(context: APIContext) {
 	];
 
 	await setContentCache(context, {
-		collections: ["articles", "courses", "learningPaths", "videos"],
+		collections: [
+			"articles",
+			"courses",
+			"learningPaths",
+			"kubetrackReleases",
+			"videos",
+		],
 	});
 
 	return new Response(lines.join("\n"), {

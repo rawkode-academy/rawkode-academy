@@ -1,0 +1,237 @@
+---
+import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
+// One enhancement in the flip book. Fully readable without JavaScript; the
+// FlipBook script only shows and hides whole cards.
+//
+// The body's headings ("Why it matters", "How to use it") are stored as h3
+// and rendered one level down, under the card's own h3. Their ids are
+// prefixed with the card slug so 65 cards never repeat an id.
+import type { BlockNode, DocNode } from "@rawkodeacademy/rich-text";
+import "@rawkodeacademy/design-system/styles.css";
+import RichText from "@/components/content/RichText.astro";
+import type { KubeTrackFeatureData } from "@/lib/kubetrack/types";
+import { stageLabel } from "@/lib/kubetrack/version";
+import StageBadge from "./StageBadge.astro";
+
+interface Props {
+	feature: KubeTrackFeatureData;
+	/** The release id, e.g. "1.37", for the lineage line. */
+	releaseId: string;
+}
+
+const { feature, releaseId } = Astro.props;
+
+const slugify = (value: string) =>
+	value
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, "-")
+		.replace(/^-+|-+$/g, "");
+
+const inlineText = (node: { content?: unknown[] }): string =>
+	(node.content ?? [])
+		.map((child) => {
+			const c = child as { text?: string; content?: unknown[] };
+			return c.text ?? inlineText(c);
+		})
+		.join("");
+
+/** Shift headings one level down and scope their ids to this card. */
+function scopeHeadings(doc: DocNode, slug: string): DocNode {
+	const visit = (node: BlockNode): BlockNode => {
+		if (node.type === "heading") {
+			const level = Math.min(
+				node.attrs.level + 1,
+				6,
+			) as typeof node.attrs.level;
+			const base = node.attrs.id ?? slugify(inlineText(node));
+			return {
+				...node,
+				attrs: { ...node.attrs, level, id: `${slug}-${base}` },
+			};
+		}
+		if ("content" in node && Array.isArray(node.content)) {
+			return {
+				...node,
+				content: (node.content as BlockNode[]).map(visit),
+			} as BlockNode;
+		}
+		return node;
+	};
+	return { ...doc, content: doc.content.map(visit) };
+}
+
+const titleId = `${feature.slug}-title`;
+const exampleId = `${feature.slug}-example`;
+const body = scopeHeadings(feature.body, feature.slug);
+const hasExample = Boolean(feature.example?.content?.length);
+const kepUrl = `https://github.com/kubernetes/enhancements/issues/${feature.kep}`;
+const lineage =
+	feature.previousStage && feature.previousStageVersion
+		? `${stageLabel(feature.previousStage)} in ${feature.previousStageVersion} → ${stageLabel(feature.stage)} in ${releaseId}`
+		: undefined;
+
+const layout = academyLayout({ width: "reading" });
+const doc = academyDocument();
+---
+
+<article
+	id={feature.slug}
+	class:list={[layout.card, "kubetrack-card"]}
+	data-stage={feature.stage}
+	data-kep={feature.kep}
+	aria-labelledby={titleId}
+>
+	<div class:list={[layout.cardBody, "kubetrack-card-body"]}>
+		<header class:list={[doc.meta, "kubetrack-card-meta"]}>
+			<StageBadge stage={feature.stage} />
+			<span aria-hidden="true">·</span>
+			<a class:list={[doc.link, "kubetrack-card-link"]} href={kepUrl} rel="noopener" target="_blank">
+				KEP-{feature.kep}<span class="kubetrack-card-external"> (opens in a new tab)</span>
+			</a>
+			{feature.sig && (
+				<>
+					<span aria-hidden="true">·</span>
+					<span>sig-{feature.sig}</span>
+				</>
+			)}
+			{feature.featureGate && (
+				<>
+					<span aria-hidden="true">·</span>
+					<span>gate <code class="kubetrack-card-gate">{feature.featureGate}</code></span>
+				</>
+			)}
+			{feature.enabledByDefault !== undefined && (
+				<>
+					<span aria-hidden="true">·</span>
+					<span>default {feature.enabledByDefault ? "on" : "off"}</span>
+				</>
+			)}
+		</header>
+
+		<h3 id={titleId} class:list={[layout.cardTitle, "kubetrack-card-title"]} tabindex="-1">
+			{feature.title}
+		</h3>
+		<p class="kubetrack-card-what">{feature.summary}</p>
+
+		<div class:list={[layout.prose, "kubetrack-card-prose"]}>
+			<RichText doc={body} />
+		</div>
+
+		{hasExample && (
+			<figure class="kubetrack-card-example">
+				<figcaption id={exampleId} class={doc.meta}>
+					Example for KEP-{feature.kep}
+				</figcaption>
+				<div
+					class="kubetrack-card-example-code"
+					role="region"
+					tabindex="0"
+					aria-labelledby={exampleId}
+					data-kubetrack-example
+				>
+					<RichText doc={feature.example ?? null} />
+				</div>
+			</figure>
+		)}
+
+		{(lineage || feature.docsUrl) && (
+			<footer class:list={[doc.meta, "kubetrack-card-footer"]}>
+				{lineage && <span>{lineage}</span>}
+				{feature.docsUrl && (
+					<a class:list={[doc.link, "kubetrack-card-link"]} href={feature.docsUrl} rel="noopener" target="_blank">
+						Read the docs<span class="kubetrack-card-external"> (opens in a new tab)</span>
+					</a>
+				)}
+			</footer>
+		)}
+	</div>
+</article>
+
+<style>
+	.kubetrack-card {
+		scroll-margin-top: var(--spacing-24);
+		border-inline-start: 3px solid var(--kubetrack-card-stage);
+	}
+	.kubetrack-card[data-stage="stable"] {
+		--kubetrack-card-stage: var(--kubetrack-stage-stable);
+	}
+	.kubetrack-card[data-stage="beta"] {
+		--kubetrack-card-stage: var(--kubetrack-stage-beta);
+	}
+	.kubetrack-card[data-stage="alpha"] {
+		--kubetrack-card-stage: var(--kubetrack-stage-alpha);
+	}
+	.kubetrack-card[data-stage="deprecated"] {
+		--kubetrack-card-stage: var(--kubetrack-stage-deprecated);
+	}
+	/* Leave border-inline-start alone: it carries the stage colour. */
+	.kubetrack-card:focus-within,
+	.kubetrack-card:target {
+		border-block-color: var(--colors-academy-accent);
+		border-inline-end-color: var(--colors-academy-accent);
+	}
+	.kubetrack-card-link {
+		display: inline-flex;
+		align-items: center;
+		min-height: var(--spacing-11);
+	}
+	.kubetrack-card-external {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+	}
+	.kubetrack-card-meta {
+		row-gap: var(--spacing-1);
+	}
+	.kubetrack-card-gate {
+		overflow-wrap: anywhere;
+		font-family: var(--fonts-academy-mono);
+		color: var(--colors-academy-text-soft);
+	}
+	.kubetrack-card-title:focus {
+		outline: none;
+	}
+	.kubetrack-card-title:focus-visible {
+		outline: var(--borders-focus);
+		outline-color: var(--colors-academy-accent);
+		outline-offset: 2px;
+	}
+	.kubetrack-card-what {
+		margin: 0;
+		color: var(--colors-academy-text);
+		font-size: var(--font-sizes-lg);
+		line-height: 1.5;
+		text-wrap: pretty;
+	}
+	.kubetrack-card-prose {
+		font-size: var(--font-sizes-md);
+	}
+	.kubetrack-card-prose :global(h4) {
+		margin-block: var(--spacing-6) 0;
+		font-size: var(--font-sizes-lg);
+	}
+	.kubetrack-card-example {
+		display: grid;
+		gap: var(--spacing-2);
+		margin: 0;
+		min-width: 0;
+	}
+	.kubetrack-card-example-code {
+		min-width: 0;
+		overflow-x: auto;
+		border-radius: var(--radii-academy-s);
+	}
+	.kubetrack-card-example-code:focus-visible {
+		outline: var(--borders-focus);
+		outline-color: var(--colors-academy-accent);
+		outline-offset: 2px;
+	}
+	.kubetrack-card-footer {
+		justify-content: space-between;
+		padding-top: var(--spacing-4);
+		border-top: var(--borders-hairline);
+	}
+</style>

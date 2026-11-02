@@ -19,6 +19,7 @@ import {
 	mapChangelog,
 	mapCourse,
 	mapCourseModule,
+	mapKubeTrackRelease,
 	mapLearningPath,
 	mapNews,
 	mapPerson,
@@ -114,6 +115,8 @@ export function buildManifest(
 		put("learningPaths", r.id, r, mapLearningPath(r));
 	for (const r of rows("supporters"))
 		put("supporters", r.id, r, mapSupporter(r));
+	for (const r of rows("kubetrackReleases"))
+		put("kubetrackReleases", r.id, r, mapKubeTrackRelease(r));
 	for (const course of rows("courses")) {
 		const { modules, ...rest } = course;
 		put("courses", course.id, rest, mapCourse(course));
@@ -190,6 +193,8 @@ export function diffManifests(
  */
 export const OPTIONAL_SOURCES: ReadonlySet<ListSource> = new Set([
 	"supporters",
+	// Until the kubetrack subgraph is in the gateway.
+	"kubetrackReleases",
 ]);
 
 /** Fetch every collection fresh from the gateway (no caches). */

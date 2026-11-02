@@ -1,0 +1,122 @@
+---
+// One Kubernetes release as a flip book (every card rendered on the server)
+// and a quiz island at #quiz. The page is the same for every visitor: quiz
+// progress lives in localStorage, so the whole render is cached under the
+// release's tag.
+import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
+import "@rawkodeacademy/design-system/styles.css";
+import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
+import RichText from "@/components/content/RichText.astro";
+import FlipBook from "@/components/kubetrack/FlipBook.astro";
+import KubeTrackCTA from "@/components/kubetrack/KubeTrackCTA.astro";
+import KubeTrackQuiz from "@/components/kubetrack/KubeTrackQuiz.vue";
+import QuizFallback from "@/components/kubetrack/QuizFallback.astro";
+import ReleaseHero from "@/components/kubetrack/ReleaseHero.astro";
+import { kubetrackJsonLd } from "@/lib/kubetrack/jsonld";
+import { canonicalVersion } from "@/lib/kubetrack/version";
+import { toQuizProps } from "@/lib/kubetrack/view-model";
+import {
+	getEntry,
+	renderDocument,
+	renderEntry,
+	setContentCache,
+} from "@/lib/live-content";
+import Page from "@/wrappers/page.astro";
+
+export const prerender = false;
+
+const slug = Astro.params.version ?? "";
+const version = canonicalVersion(slug);
+if (!version) {
+	return new Response(null, { status: 404 });
+}
+// "v1.37" and "1.37.0" are the same release: send them to the one URL.
+if (version !== slug) {
+	return Astro.redirect(`/kubetrack/${version}`, 301);
+}
+
+// Primary content: a ContentError propagates; scheduled releases are hidden.
+const release = await getEntry("kubetrackReleases", version);
+if (!release) {
+	return new Response(null, { status: 404 });
+}
+
+await setContentCache(Astro, {
+	entries: [release],
+	// Card bodies and quiz text are autolinked from the technologies listing.
+	collections: ["technologies"],
+});
+
+const [{ html: introHtml }, quizProps] = await Promise.all([
+	renderEntry(release),
+	toQuizProps(release, renderDocument),
+]);
+
+const data = release.data;
+const pagePath = `/kubetrack/${release.id}`;
+const pageUrl = new URL(pagePath, Astro.site ?? Astro.url).href;
+const versionLabel = `v${release.id}`;
+// Short enough for head.astro to add the brand suffix within 60 characters.
+const pageTitle = `${data.title} features explained`;
+
+const layout = academyLayout({ width: "reading" });
+const doc = academyDocument();
+---
+
+<Page
+	title={pageTitle}
+	description={data.summary}
+	isArticle
+	articleSection="KubeTrack"
+	articleTags={["Kubernetes", `Kubernetes ${release.id}`]}
+	publishedAt={data.releasedAt}
+	updatedAt={data.updatedAt}
+	jsonLd={kubetrackJsonLd(release, pageUrl)}
+>
+	<BreadcrumbJsonLd
+		slot="extra-head"
+		elements={[
+			{ title: "Home", link: "/" },
+			{ title: "KubeTrack", link: "/kubetrack" },
+			{ title: versionLabel, link: pagePath },
+		]}
+	/>
+
+	<div class={doc.root} data-kubetrack-release={release.id}>
+		<ReleaseHero entry={release} />
+
+		{introHtml && (
+			<section class={layout.section} aria-label="About this release">
+				<div class:list={[layout.container, layout.prose]}>
+					<RichText html={introHtml} />
+				</div>
+			</section>
+		)}
+
+		<FlipBook entry={release} />
+
+		<section id="quiz" class={layout.section} aria-label="Release quiz">
+			<div class={layout.container}>
+				<KubeTrackQuiz
+					client:visible
+					releaseId={release.id}
+					version={data.updatedAt.toISOString()}
+					questions={quizProps}
+					shareUrl={pageUrl}
+				/>
+				<QuizFallback questions={quizProps} />
+			</div>
+		</section>
+
+		<KubeTrackCTA releaseId={release.id} class={doc.section ?? ""} />
+
+		<nav class:list={[layout.container, doc.end]} aria-label="More from KubeTrack">
+			<a class={doc.link} href="/kubetrack">Every KubeTrack release</a>
+			{data.changelogUrl && (
+				<a class={doc.link} href={data.changelogUrl} rel="noopener">
+					Kubernetes {release.id} changelog
+				</a>
+			)}
+		</nav>
+	</div>
+</Page>

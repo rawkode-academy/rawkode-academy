@@ -1,7 +1,12 @@
 // Gateway payloads → entry data shaped like the old content.config.ts output.
 // GraphQL nulls become undefined, dates become Date objects, relations become
 // `{ collection, id }` references, and the old zod defaults are re-applied.
-import { type DocNode, isEmptyDoc, toText } from "@rawkodeacademy/rich-text";
+import {
+	type DocNode,
+	emptyDoc,
+	isEmptyDoc,
+	toText,
+} from "@rawkodeacademy/rich-text";
 import type {
 	AdrData,
 	ArticleData,
@@ -14,6 +19,11 @@ import type {
 	Cover,
 	Difficulty,
 	EmbedConfig,
+	KubeTrackFeatureData,
+	KubeTrackQuestionKind,
+	KubeTrackQuizQuestionData,
+	KubeTrackReleaseData,
+	KubeTrackStage,
 	LearningPathData,
 	NewsData,
 	PersonData,
@@ -618,6 +628,113 @@ export function mapSupporter(raw: Raw): SupporterData {
 	});
 }
 
+const KUBETRACK_STAGES: readonly KubeTrackStage[] = [
+	"alpha",
+	"beta",
+	"stable",
+	"deprecated",
+];
+const KUBETRACK_QUESTION_KINDS: readonly KubeTrackQuestionKind[] = [
+	"single",
+	"multiple",
+	"true_false",
+];
+
+/** GraphQL enum value (STABLE, TRUE_FALSE) → its lowercase member. */
+function lowerEnum<T extends string>(
+	values: readonly T[],
+	value: unknown,
+): T | undefined {
+	const lower = str(value)?.toLowerCase();
+	return values.find((v) => v === lower);
+}
+
+/** Children in their authored order (sortOrder, then the gateway's). */
+function bySortOrder(value: unknown): Raw[] {
+	if (!Array.isArray(value)) return [];
+	return value
+		.filter((r): r is Raw => Boolean(r) && Boolean(str(r.id)))
+		.map((r, index) => ({ r, index, order: num(r.sortOrder) ?? 0 }))
+		.sort((a, b) => a.order - b.order || a.index - b.index)
+		.map(({ r }) => r);
+}
+
+function kubetrackFeature(raw: Raw): KubeTrackFeatureData | undefined {
+	const stage = lowerEnum(KUBETRACK_STAGES, raw.stage);
+	if (!stage) return undefined;
+	const id = raw.id as string;
+	return compact<KubeTrackFeatureData>({
+		id,
+		slug: str(raw.slug) ?? id.split("/").pop() ?? id,
+		kep: num(raw.kep) ?? 0,
+		title: str(raw.title) ?? "",
+		stage,
+		sig: str(raw.sig),
+		theme: str(raw.theme),
+		featureGate: str(raw.featureGate),
+		enabledByDefault:
+			typeof raw.enabledByDefault === "boolean"
+				? raw.enabledByDefault
+				: undefined,
+		previousStage: lowerEnum(KUBETRACK_STAGES, raw.previousStage),
+		previousStageVersion: str(raw.previousStageVersion),
+		summary: str(raw.summary) ?? "",
+		body: doc(raw.body) ?? emptyDoc(),
+		example: doc(raw.example),
+		docsUrl: str(raw.docsUrl),
+	});
+}
+
+function kubetrackQuestion(raw: Raw): KubeTrackQuizQuestionData | undefined {
+	const kind = lowerEnum(KUBETRACK_QUESTION_KINDS, raw.kind);
+	if (!kind) return undefined;
+	return compact<KubeTrackQuizQuestionData>({
+		id: raw.id as string,
+		featureId: str(raw.featureId),
+		kind,
+		prompt: doc(raw.prompt) ?? emptyDoc(),
+		choices: (Array.isArray(raw.choices) ? raw.choices : [])
+			.filter((c: Raw) => c && str(c.id))
+			.map((c: Raw) => ({ id: c.id as string, text: str(c.text) ?? "" })),
+		answerIds: strings(raw.answerIds),
+		explanation: doc(raw.explanation) ?? emptyDoc(),
+	});
+}
+
+function stageCounts(raw: unknown): Record<KubeTrackStage, number> | undefined {
+	if (!raw || typeof raw !== "object") return undefined;
+	const counts = {} as Record<KubeTrackStage, number>;
+	for (const stage of KUBETRACK_STAGES) {
+		const n = num((raw as Raw)[stage]);
+		if (n === undefined) return undefined;
+		counts[stage] = n;
+	}
+	return counts;
+}
+
+export function mapKubeTrackRelease(raw: Raw): KubeTrackReleaseData {
+	return compact<KubeTrackReleaseData>({
+		major: num(raw.major) ?? 0,
+		minor: num(raw.minor) ?? 0,
+		title: str(raw.title) ?? "",
+		codename: str(raw.codename),
+		summary: str(raw.summary) ?? "",
+		body: doc(raw.body) ?? emptyDoc(),
+		releasedAt: requiredDate(raw.releasedAt),
+		publishedAt: requiredDate(raw.publishedAt),
+		updatedAt: requiredDate(raw.updatedAt),
+		releaseBlogUrl: str(raw.releaseBlogUrl),
+		changelogUrl: str(raw.changelogUrl),
+		upstreamCounts: stageCounts(raw.upstreamCounts),
+		features: bySortOrder(raw.features)
+			.map(kubetrackFeature)
+			.filter((f): f is KubeTrackFeatureData => Boolean(f)),
+		quizQuestions: bySortOrder(raw.quizQuestions)
+			.map(kubetrackQuestion)
+			.filter((q): q is KubeTrackQuizQuestionData => Boolean(q)),
+	});
+}
+
 /** The document whose text becomes `entry.body`. */
 export function mainDocument<C extends CollectionName>(
 	collection: C,
@@ -647,6 +764,7 @@ export function publicationDate<C extends CollectionName>(
 		case "courses":
 		case "courseModules":
 		case "learningPaths":
+		case "kubetrackReleases":
 			return (data as { publishedAt: Date }).publishedAt;
 		default:
 			return undefined;
@@ -681,6 +799,8 @@ export function relatedTags<C extends CollectionName>(
 		add((data as ChangelogData).author);
 	} else if (collection === "supporters") {
 		(data as SupporterData).technologies.forEach(add);
+	} else if (collection === "kubetrackReleases") {
+		// References nothing: one release, one page.
 	} else {
 		const d = data as { authors?: Reference[]; technologies?: unknown[] };
 		d.authors?.forEach(add);

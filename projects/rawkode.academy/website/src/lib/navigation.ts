@@ -12,6 +12,7 @@ export const navigationGroups = [
 		{ label: "Articles", href: "/read" },
 		{ label: "Courses", href: "/courses" },
 		{ label: "Learning paths", href: "/learning-paths" },
+		{ label: "KubeTrack", href: "/kubetrack" },
 	] },
 	{ label: "Explore", items: [
 		{ label: "Search", href: "/search" },
