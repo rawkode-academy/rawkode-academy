@@ -12,7 +12,7 @@ subtree = "93741fc7e8359b5f341c5e2a620a5e58af007857"
 
 [infrastructure_providers."registry.terraform.io/cloudflare/cloudflare"]
 version = "5.28.1"
-schema_digest = "sha256:2859af705840b0fc832c8e1ad82107d53160c95f819963c7d58a362bb80902c4"
+schema_digest = "sha256:551fd6d313094f43ff7c7409a8b1a7ecd070ab2ff166fdf51db66c42366aa6dc"
 
 [infrastructure_providers."registry.terraform.io/cloudflare/cloudflare".platforms]
 darwin_amd64 = "sha256:bef2ffbdb68569549fe432b550592e07456759a7288f84f7c37c9d933a493f54"
@@ -26,7 +26,7 @@ windows_arm64 = "sha256:7df6fe6573379c2faf2e801fdbca58ac909266dbee604feaa993439b
 
 [infrastructure_providers."registry.terraform.io/dnsimple/dnsimple"]
 version = "2.2.1"
-schema_digest = "sha256:56d82ae9dc3f29f17c0428cc4fbf9a41e2d28387c5f378b2b4526a46bd66e539"
+schema_digest = "sha256:593a1d3acea9ad1619ce5e28db67f0e75007a8106bf426ac0add995055eab689"
 
 [infrastructure_providers."registry.terraform.io/dnsimple/dnsimple".platforms]
 darwin_amd64 = "sha256:24839076472007bafb89023879a433d887a1909ce925c61c46ae37987170866d"

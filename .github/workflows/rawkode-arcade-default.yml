@@ -51,7 +51,7 @@ jobs:
     environment: production
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
       with:
         fetch-depth: 2
     - name: Cache /nix on Namespace volume
@@ -90,7 +90,7 @@ jobs:
           aarch64|arm64) cuenv_asset="cuenv-linux-arm64" ;;
           *) echo "Unsupported Linux architecture: $arch" >&2; exit 1 ;;
         esac
-        cuenv_version="0.60.1"
+        cuenv_version="0.63.1"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi

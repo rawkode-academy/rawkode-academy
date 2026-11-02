@@ -1,6 +1,7 @@
 package cuenv
 
 import (
+	"github.com/cuenv/cuenv/schema"
 	"github.com/rawkode-academy/rawkode-academy/infrastructure/dns/domains"
 	"registry.terraform.io/cloudflare/cloudflare:cloudflare_provider"
 	"registry.terraform.io/dnsimple/dnsimple:dnsimple_provider"
@@ -12,6 +13,16 @@ infrastructure: {
 		accountId:  "0aeb879de8e3cdde5fb3d413025222ce"
 		databaseId: "ceacd475-c672-4a64-8f4c-cbd454c08135"
 		token:      _cloudflareToken
+	}
+
+	// Moving to the cuenv-state R2 bucket, which holds all cuenv state keyed
+	// by module path.
+	migrateStateTo: s3: {
+		bucket:   "cuenv-state"
+		region:   "auto"
+		endpoint: "https://0aeb879de8e3cdde5fb3d413025222ce.r2.cloudflarestorage.com"
+		accessKeyId: schema.#OnePasswordRef & {ref: "op://sa.rawkode.academy/cuenv-state/username"}
+		secretAccessKey: schema.#OnePasswordRef & {ref: "op://sa.rawkode.academy/cuenv-state/password"}
 	}
 
 	providers: {
