@@ -8,16 +8,9 @@ import (
 )
 
 infrastructure: {
-	// The rawkode-academy-cuenv-infrastructure D1 database.
-	state: d1: {
-		accountId:  "0aeb879de8e3cdde5fb3d413025222ce"
-		databaseId: "ceacd475-c672-4a64-8f4c-cbd454c08135"
-		token:      _cloudflareToken
-	}
-
-	// Moving to the cuenv-state R2 bucket, which holds all cuenv state keyed
-	// by module path.
-	migrateStateTo: s3: {
+	// The cuenv-state R2 bucket, which holds all cuenv state keyed by module
+	// path.
+	state: s3: {
 		bucket:   "cuenv-state"
 		region:   "auto"
 		endpoint: "https://0aeb879de8e3cdde5fb3d413025222ce.r2.cloudflarestorage.com"
