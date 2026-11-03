@@ -43,6 +43,7 @@ import {
 } from "../recording/uploadFallbackPolicy";
 import {
   createWhipTerminalConnectionMonitor,
+  runBoundedPublisherOperation,
   startWhipPublishing,
   type WhipPublishSession,
   type WhipTerminalConnectionMonitor,
@@ -54,6 +55,7 @@ import {
 import { useCanvasRenderLoop } from "../canvas/useCanvasRenderLoop";
 import { getHitTestLayerStack } from "../studio/layerStack";
 import { createProgrammeMonitor, type ProgrammeMonitor } from "../live/programmeMonitor";
+import { hasRequiredTakeoverMedia } from "../live/takeoverReadiness";
 import { getRecordingOptions, type RecordingQuality } from "../recording/quality";
 import type {
   ActiveOverlay,
@@ -65,6 +67,7 @@ import type {
 
 type MotionAnimationControls = ReturnType<typeof animate>;
 type LivePublishStatus = "confirming" | "ended" | "failed" | "idle" | "live" | "starting" | "stopping";
+type ProviderRevocation = "pending" | "revoked" | "not-required";
 type RecordingUploadStatus = "failed" | "idle" | "local" | "ready" | "uploading";
 
 interface RecordingUploadPart {
@@ -102,10 +105,12 @@ type RecordingAbortResult =
 
 class StudioRequestError extends Error {
   readonly status: number;
+  readonly code?: string;
 
-  constructor(message: string, status: number) {
+  constructor(message: string, status: number, code?: string) {
     super(message);
     this.status = status;
+    this.code = code;
   }
 }
 
@@ -116,13 +121,16 @@ const props = defineProps<{
   layers: StudioLayer[];
   mediaStreams?: Map<string, MediaStream>;
   programmeAudioStreams?: Map<string, MediaStream>;
+  requiredProgrammeAudioSourceIds?: string[];
   resolution: CanvasResolution;
   isPlaying: boolean;
   isRecording: boolean;
+  contentBacked?: boolean;
   sessionId?: string;
   canPublishLive?: boolean;
   streamEnvironment?: "prod" | "test";
   streamStatus?: string;
+  takeoverLease?: string | null;
   title: string;
   subtitle?: string;
   interactive?: boolean;
@@ -160,6 +168,12 @@ const livePublishStatus = ref<LivePublishStatus>(
 const isLocalRecording = ref(false);
 const isStartingLivePublish = ref(false);
 const canTakeOverLivePublish = ref(hasExternalLivePublish);
+const observedTakeoverLease = ref(props.takeoverLease ?? null);
+const takeoverNeedsRefresh = ref(false);
+const pendingCancellationToken = ref<string>();
+const unconfirmedTakeover = ref(false);
+const pendingTakeoverLease = ref<string | null>(null);
+const publisherStorageUnavailable = ref(false);
 const isStartingRecording = ref(false);
 const recordingUploadError = ref("");
 const recordingUploadStatus = ref<RecordingUploadStatus>("idle");
@@ -193,12 +207,14 @@ let recordingOwnedVideoTracks: MediaStreamTrack[] = [];
 let livePublishSession: WhipPublishSession | undefined;
 let livePublishAbortController: AbortController | undefined;
 let liveOwnedVideoTracks: MediaStreamTrack[] = [];
+let liveStartRequestSent = false;
 let liveServerStreamStarted = false;
 let ownsLivePublish = false;
 let livePublishGeneration = 0;
 let livePublishConnectionMonitor: WhipTerminalConnectionMonitor | undefined;
 let liveStreamToken: string | undefined;
 let livePublisherLease: PublisherLeaseHeartbeat | undefined;
+let cancellationInFlight: { token: string; promise: Promise<void> } | undefined;
 let isComponentUnmounted = false;
 const mediaVideoElements = new Map<string, HTMLVideoElement>();
 let stingerAnimation: MotionAnimationControls | undefined;
@@ -234,7 +250,7 @@ const showRecordingRecovery = computed(() =>
   Boolean(recordingRecoveryStatus.value),
 );
 const recordingPersistencePolicy = computed(() =>
-  getRecordingPersistencePolicy(props.streamEnvironment)
+  getRecordingPersistencePolicy(props.streamEnvironment, props.contentBacked)
 );
 const recordingStatusText = computed(() => {
   if (recordingUploadStatus.value === "uploading") {
@@ -266,6 +282,9 @@ const recordingStatusHref = computed(() =>
     : "",
 );
 const liveStatusText = computed(() => {
+  if (canTakeOverLivePublish.value && !observedTakeoverLease.value) {
+    return "Publisher identity is unavailable. Refresh the page before takeover.";
+  }
   if (canTakeOverLivePublish.value && livePublishStatus.value === "idle") {
     const externalState = props.streamStatus === "starting" ? "is starting" : "is live";
     return `${props.streamEnvironment === "prod" ? "Prod" : "Test"} stream ${externalState} from another publisher`;
@@ -291,16 +310,25 @@ watch(liveStatusText, (status) => {
   immediate: true,
 });
 const liveButtonLabel = computed(() => {
+  if (pendingCancellationToken.value) return "Retry stop";
+  if (unconfirmedTakeover.value) return pendingTakeoverLease.value ? "Check takeover" : "Takeover unconfirmed";
   if (livePublishStatus.value === "starting" || livePublishStatus.value === "confirming") {
     return "Cancel live start";
   }
   if (livePublishStatus.value === "stopping") return "Stopping";
-  if (canTakeOverLivePublish.value) return "Take over live";
+  if (takeoverNeedsRefresh.value || (canTakeOverLivePublish.value && !observedTakeoverLease.value)) {
+    return "Refresh to take over";
+  }
+  if (canTakeOverLivePublish.value) return "Stop current publisher";
   if (livePublishStatus.value === "live") return "Stop live";
   return "Go live";
 });
 const liveButtonDisabled = computed(() =>
   !props.sessionId ||
+  publisherStorageUnavailable.value ||
+  (unconfirmedTakeover.value && !pendingTakeoverLease.value && !pendingCancellationToken.value) ||
+  takeoverNeedsRefresh.value ||
+  (canTakeOverLivePublish.value && !observedTakeoverLease.value) ||
   isHandlingTerminalLivePublish.value ||
   livePublishStatus.value === "stopping",
 );
@@ -903,9 +931,9 @@ function finishLocalRecording(): void {
   }
 }
 
-async function createRecordingUpload(mimeType: string): Promise<RecordingUpload | undefined> {
+async function createRecordingUpload(mimeType: string): Promise<RecordingUpload> {
   if (recordingPersistencePolicy.value !== "persistent" || !props.sessionId) {
-    return undefined;
+    throw new StudioRequestError("A content-backed production session is required for persistent recording.", 400);
   }
   const sourceFormat = getRecordingSourceFormat(mimeType);
   const response = await fetch("/api/studio/recording-upload", {
@@ -1131,8 +1159,125 @@ function applyRecoveredRecordingAbort(
   }
 }
 
+function publisherStorageKey(kind: "token" | "takeover"): string {
+  return `rawkode-studio-publisher:${props.sessionId}:${kind}`;
+}
+
+function rememberPublisherToken(token: string): void {
+  const key = publisherStorageKey("token");
+  const existing = window.sessionStorage.getItem(key);
+  if (existing && existing !== token) {
+    throw new Error("A previous publisher cancellation needs confirmation before starting again.");
+  }
+  window.sessionStorage.setItem(key, token);
+}
+
+function forgetPublisherToken(token: string): void {
+  const key = publisherStorageKey("token");
+  if (window.sessionStorage.getItem(key) === token) {
+    window.sessionStorage.removeItem(key);
+  }
+}
+
+function restorePublisherRecovery(): void {
+  if (!props.sessionId || props.previewOnly) return;
+  try {
+    const takeover = window.sessionStorage.getItem(publisherStorageKey("takeover"));
+    unconfirmedTakeover.value = Boolean(takeover);
+    if (takeover && takeover !== "pending") {
+      try {
+        const saved = JSON.parse(takeover) as { expectedTakeoverLease?: unknown };
+        if (typeof saved.expectedTakeoverLease === "string" && saved.expectedTakeoverLease.length > 0) {
+          pendingTakeoverLease.value = saved.expectedTakeoverLease;
+        }
+      } catch {
+        // Keep an unreadable or legacy marker blocked for operator reconciliation.
+      }
+    }
+    const token = window.sessionStorage.getItem(publisherStorageKey("token"));
+    if (token) {
+      pendingCancellationToken.value = token;
+      liveStreamToken = token;
+      liveStartRequestSent = true;
+      livePublishStatus.value = "failed";
+      livePublishError.value = "A recovery token was found. It may belong to another open tab; Retry stop will stop that publisher.";
+      canTakeOverLivePublish.value = false;
+    } else if (unconfirmedTakeover.value) {
+      livePublishStatus.value = "failed";
+      livePublishError.value = "Takeover status is unconfirmed. Check the active publisher before taking further action.";
+      canTakeOverLivePublish.value = false;
+    }
+  } catch {
+    publisherStorageUnavailable.value = true;
+    livePublishStatus.value = "failed";
+    livePublishError.value = "Browser session storage is required to recover an uncertain publisher.";
+  }
+}
+
+async function acknowledgePublisherCancellation(token: string, keepalive = false): Promise<void> {
+  if (cancellationInFlight?.token === token) return await cancellationInFlight.promise;
+  const promise = (async () => {
+    const result = await postStreamAction<{ cancellationRecorded?: boolean; providerRevocation?: ProviderRevocation }>("stop", {
+      keepalive,
+      streamToken: token,
+    });
+    if (result.cancellationRecorded !== true) {
+      throw new Error("The server did not acknowledge the publisher cancellation.");
+    }
+    if (result.providerRevocation !== "revoked" && result.providerRevocation !== "not-required") {
+      throw new Error("The provider has not confirmed that the publisher stopped.");
+    }
+    forgetPublisherToken(token);
+  })();
+  cancellationInFlight = { token, promise };
+  try {
+    await promise;
+  } finally {
+    if (cancellationInFlight?.promise === promise) cancellationInFlight = undefined;
+  }
+}
+
+async function endLocalPublisher(
+  token: string,
+  options: { failureMessage?: string; canTakeOver?: boolean; keepalive?: boolean } = {},
+): Promise<void> {
+  const dispatched = liveStartRequestSent || pendingCancellationToken.value === token;
+  livePublishGeneration += 1;
+  isStartingLivePublish.value = false;
+  livePublishStatus.value = "stopping";
+  livePublishError.value = "";
+  canTakeOverLivePublish.value = false;
+  if (dispatched) pendingCancellationToken.value = token;
+  await cleanupLivePublishing();
+
+  try {
+    if (dispatched) await acknowledgePublisherCancellation(token, options.keepalive);
+    if (liveStreamToken === token) liveStreamToken = undefined;
+    if (pendingCancellationToken.value === token) pendingCancellationToken.value = undefined;
+    liveStartRequestSent = false;
+    liveServerStreamStarted = false;
+    livePublishStatus.value = options.failureMessage || unconfirmedTakeover.value ? "failed" : "ended";
+    livePublishError.value = unconfirmedTakeover.value
+      ? "Takeover status is unconfirmed. Check the active publisher before taking further action."
+      : options.failureMessage ?? "";
+    canTakeOverLivePublish.value = Boolean(options.canTakeOver && !unconfirmedTakeover.value);
+  } catch {
+    pendingCancellationToken.value = token;
+    livePublishStatus.value = "failed";
+    livePublishError.value = "Publisher stop is unconfirmed. Retry stop before starting again.";
+  }
+}
+
 async function toggleLivePublishing(): Promise<void> {
   if (liveButtonDisabled.value) {
+    return;
+  }
+  if (pendingCancellationToken.value) {
+    await endLocalPublisher(pendingCancellationToken.value);
+    return;
+  }
+  if (unconfirmedTakeover.value && pendingTakeoverLease.value) {
+    await checkTakeoverRecovery(pendingTakeoverLease.value);
     return;
   }
   if (canTakeOverLivePublish.value) {
@@ -1151,26 +1296,96 @@ async function toggleLivePublishing(): Promise<void> {
   await startLivePublishing();
 }
 
+async function checkTakeoverRecovery(expectedTakeoverLease: string): Promise<void> {
+  if (!props.sessionId || livePublishStatus.value === "stopping") return;
+  livePublishStatus.value = "stopping";
+  try {
+    const params = new URLSearchParams({
+      action: "takeover-status",
+      sessionId: props.sessionId,
+      expectedTakeoverLease,
+    });
+    const result = await runBoundedPublisherOperation(async (signal) => {
+      const response = await fetch(`/api/studio/stream?${params.toString()}`, { cache: "no-store", signal });
+      if (!response.ok) throw new Error("Unable to check takeover status.");
+      return await response.json() as { takeoverState?: string };
+    }, { timeoutMs: 10_000, timeoutMessage: "Takeover status check timed out." });
+    if (isComponentUnmounted) return;
+    if (result.takeoverState === "revoked") {
+      window.sessionStorage.removeItem(publisherStorageKey("takeover"));
+      pendingTakeoverLease.value = null;
+      unconfirmedTakeover.value = false;
+      observedTakeoverLease.value = null;
+      canTakeOverLivePublish.value = false;
+      livePublishStatus.value = "ended";
+      livePublishError.value = "";
+      return;
+    }
+    livePublishStatus.value = "failed";
+    livePublishError.value = result.takeoverState === "pending"
+      ? "The previous publisher is still being disconnected. Check takeover again."
+      : result.takeoverState === "active"
+        ? "The previous publisher is still active. The takeover request may still arrive; check again."
+        : "Takeover status is unknown. Reconcile the previous publisher before starting again.";
+  } catch {
+    if (isComponentUnmounted) return;
+    livePublishStatus.value = "failed";
+    livePublishError.value = "Takeover status is unconfirmed. Check takeover again before starting.";
+  }
+}
+
 async function takeOverLivePublishing(): Promise<void> {
-  if (!props.sessionId || livePublishStatus.value === "stopping") {
+  const expectedTakeoverLease = observedTakeoverLease.value;
+  if (!props.sessionId || !expectedTakeoverLease || livePublishStatus.value === "stopping") {
     return;
   }
 
   canTakeOverLivePublish.value = false;
   livePublishStatus.value = "stopping";
   livePublishError.value = "Waiting for the previous publisher to disconnect";
+  let takeoverDispatched = false;
   try {
-    await postStreamAction("takeover");
-    await delay(6_000);
-    if (isComponentUnmounted) {
-      return;
+    try {
+      window.sessionStorage.setItem(publisherStorageKey("takeover"), JSON.stringify({ expectedTakeoverLease }));
+      pendingTakeoverLease.value = expectedTakeoverLease;
+    } catch {
+      publisherStorageUnavailable.value = true;
+      throw new Error("Browser session storage is required to recover an uncertain takeover.");
     }
+    takeoverDispatched = true;
+    const result = await postStreamAction<{ streamStatus?: string; providerRevocation?: ProviderRevocation }>("takeover", { expectedTakeoverLease });
+    if (result?.streamStatus !== "ended" ||
+        (result.providerRevocation !== "revoked" && result.providerRevocation !== "not-required")) {
+      throw new Error("The server did not acknowledge takeover.");
+    }
+    window.sessionStorage.removeItem(publisherStorageKey("takeover"));
+    pendingTakeoverLease.value = null;
+    takeoverDispatched = false;
+    observedTakeoverLease.value = null;
     livePublishStatus.value = "ended";
     livePublishError.value = "";
-    await startLivePublishing();
   } catch (error) {
     livePublishStatus.value = "failed";
-    livePublishError.value = toErrorMessage(error);
+    if (takeoverDispatched && error instanceof StudioRequestError &&
+        error.status === 409 && error.code === "takeover-precondition-failed") {
+      try {
+        window.sessionStorage.removeItem(publisherStorageKey("takeover"));
+        pendingTakeoverLease.value = null;
+        takeoverDispatched = false;
+        observedTakeoverLease.value = null;
+        takeoverNeedsRefresh.value = true;
+        livePublishError.value = "The publisher changed. Refresh the page before takeover.";
+      } catch {
+        // If recovery state cannot be cleared, retain the conservative path.
+      }
+    }
+    if (takeoverDispatched) {
+      unconfirmedTakeover.value = true;
+      livePublishError.value = "Takeover status is unconfirmed. Check the active publisher before taking further action.";
+    } else if (!takeoverNeedsRefresh.value) {
+      canTakeOverLivePublish.value = !publisherStorageUnavailable.value;
+      livePublishError.value = toErrorMessage(error);
+    }
   }
 }
 
@@ -1178,12 +1393,22 @@ async function startLivePublishing(): Promise<void> {
   if (
     !props.sessionId ||
     isStartingLivePublish.value ||
-    isHandlingTerminalLivePublish.value
+    isHandlingTerminalLivePublish.value ||
+    pendingCancellationToken.value ||
+    unconfirmedTakeover.value ||
+    publisherStorageUnavailable.value
   ) {
     return;
   }
 
+  if (!hasProgrammeMediaForPublishing()) {
+    livePublishStatus.value = "failed";
+    livePublishError.value = "Programme media is unavailable in this browser. Connect it, mute its mix, or take it backstage before going live.";
+    return;
+  }
+
   isStartingLivePublish.value = true;
+  observedTakeoverLease.value = null;
   const publishGeneration = livePublishGeneration + 1;
   livePublishGeneration = publishGeneration;
   livePublishStatus.value = "starting";
@@ -1191,40 +1416,86 @@ async function startLivePublishing(): Promise<void> {
   canTakeOverLivePublish.value = false;
   const streamToken = crypto.randomUUID();
   liveStreamToken = streamToken;
+  liveStartRequestSent = false;
+  const abortController = new AbortController();
+  livePublishAbortController = abortController;
   try {
+    // Resume before the first network await so gesture-gated browsers can
+    // start audio. Cancellation must not wait for the browser's resume promise.
+    const audioReady = await programmeAudioMixer.resume({ signal: abortController.signal });
+    if (publishGeneration !== livePublishGeneration || isComponentUnmounted) {
+      return;
+    }
+    if (!audioReady) {
+      throw new Error("Programme audio could not start. Check browser audio permissions and try again.");
+    }
+    if (!hasProgrammeMediaForPublishing() || !hasRequiredMixedProgrammeAudio()) {
+      throw new Error("Programme media changed before publishing. Check the sources and try again.");
+    }
+    try {
+      rememberPublisherToken(streamToken);
+    } catch {
+      publisherStorageUnavailable.value = true;
+      throw new Error("Browser session storage is required to recover an uncertain publisher.");
+    }
+    liveStartRequestSent = true;
     const start = await postStreamAction<{
       liveInputId: string;
       playbackUrl: string;
       publishUrl: string;
       streamStatus: "starting";
       streamToken: string;
-    }>("start", { streamToken });
-    liveStreamToken = streamToken;
+    }>("start", { signal: abortController.signal, streamToken });
+    if (publishGeneration !== livePublishGeneration || isComponentUnmounted) return;
+    if (start.streamToken !== streamToken) throw new Error("Studio returned an unexpected publisher token.");
     liveServerStreamStarted = true;
-    startLiveHeartbeat(publishGeneration, streamToken);
-    if (publishGeneration !== livePublishGeneration) {
-      await postStreamAction("stop", { keepalive: true, streamToken }).catch(() => undefined);
-      liveServerStreamStarted = false;
-      if (liveStreamToken === streamToken) {
-        liveStreamToken = undefined;
-      }
-      return;
-    }
-    const programmeStream = await createProgrammeOutputStream((tracks) => {
-      liveOwnedVideoTracks = tracks;
+    // A delayed start response is not proof the server lease is still fresh.
+    // Keep the response bound plus the 15s local watchdog below the 20s lease.
+    const renewalStartedAt = performance.now();
+    const renewal = await postStreamAction<{ leaseStatus?: string }>("heartbeat", {
+      signal: abortController.signal,
+      streamToken,
+      timeoutMs: 4_000,
     });
+    if (publishGeneration !== livePublishGeneration || isComponentUnmounted) return;
+    if (renewal.leaseStatus !== "active" || performance.now() - renewalStartedAt >= 4_000) {
+      throw new Error("A fresh publisher lease could not be confirmed.");
+    }
+    startLiveHeartbeat(publishGeneration, streamToken);
+    const programmeStream = await createProgrammeOutputStream(
+      (tracks) => {
+        if (publishGeneration === livePublishGeneration) liveOwnedVideoTracks = tracks;
+        else for (const track of tracks) track.stop();
+      },
+      false,
+      abortController.signal,
+    );
     if (!programmeStream) {
       throw new Error("Programme canvas stream is not available.");
     }
     if (publishGeneration !== livePublishGeneration || isComponentUnmounted) {
       throw new Error("Live publishing stopped before media setup completed.");
     }
-    const abortController = new AbortController();
-    livePublishAbortController = abortController;
-    const publishSession = await startWhipPublishing({
-      publishUrl: start.publishUrl,
-      signal: abortController.signal,
-      stream: programmeStream,
+    if (!hasProgrammeMediaForPublishing() || !hasRequiredMixedProgrammeAudio()) {
+      throw new Error("Programme media changed before publishing. Check the sources and try again.");
+    }
+    let provisionalSession: WhipPublishSession | undefined;
+    const publishSession = await runBoundedPublisherOperation(
+      async (signal) => {
+        const session = await startWhipPublishing({ publishUrl: start.publishUrl, signal, stream: programmeStream });
+        provisionalSession = session;
+        if (signal.aborted) {
+          void session.close().catch(() => undefined);
+          throw new Error("WHIP publishing was canceled.");
+        }
+        return session;
+      },
+      { signal: abortController.signal, timeoutMs: 15_000, timeoutMessage: "WHIP publishing timed out." },
+    ).catch((error: unknown) => {
+      // The operation can finish after its deadline before the timer callback
+      // runs. In that case it already returned a session, so close it here.
+      void provisionalSession?.close().catch(() => undefined);
+      throw error;
     });
     if (
       publishGeneration !== livePublishGeneration ||
@@ -1249,35 +1520,42 @@ async function startLivePublishing(): Promise<void> {
     livePublishConnectionMonitor = terminalConnectionMonitor;
     ownsLivePublish = true;
     livePublishStatus.value = "confirming";
-    await confirmLivePublishing(publishGeneration, streamToken);
+    if (!hasProgrammeMediaForPublishing() || !hasRequiredMixedProgrammeAudio()) {
+      throw new Error("Programme media changed during publishing. Check the sources and try again.");
+    }
+    await confirmLivePublishing(publishGeneration, streamToken, abortController.signal);
     if (publishGeneration !== livePublishGeneration) {
-      await postStreamAction("stop", { keepalive: true, streamToken }).catch(() => undefined);
-      liveServerStreamStarted = false;
-      if (liveStreamToken === streamToken) {
-        liveStreamToken = undefined;
-      }
-      await cleanupLivePublishing();
       return;
+    }
+    if (!hasProgrammeMediaForPublishing() || !hasRequiredMixedProgrammeAudio()) {
+      throw new Error("Programme media changed during confirmation. Check the sources and try again.");
     }
     livePublishStatus.value = "live";
     terminalConnectionMonitor.activate();
   } catch (error) {
     if (publishGeneration !== livePublishGeneration) {
-      await cleanupLivePublishing();
       return;
     }
-    livePublishStatus.value = "failed";
-    livePublishError.value = toErrorMessage(error);
-    canTakeOverLivePublish.value = isStreamAlreadyActive(error);
-    if (liveServerStreamStarted && liveStreamToken) {
-      await postStreamAction("stop", { streamToken: liveStreamToken }).catch(() => undefined);
-    }
-    liveServerStreamStarted = false;
-    liveStreamToken = undefined;
-    await cleanupLivePublishing();
+    await endLocalPublisher(streamToken, {
+      failureMessage: toErrorMessage(error),
+      canTakeOver: isStreamAlreadyActive(error),
+    });
   } finally {
-    isStartingLivePublish.value = false;
+    if (publishGeneration === livePublishGeneration) isStartingLivePublish.value = false;
   }
+}
+
+function hasProgrammeMediaForPublishing(): boolean {
+  return hasRequiredTakeoverMedia(
+    props.layers, props.mediaStreams, props.requiredProgrammeAudioSourceIds ?? [], mediaVideoElements,
+  );
+}
+
+function hasRequiredMixedProgrammeAudio(): boolean {
+  return (props.requiredProgrammeAudioSourceIds ?? []).every((sourceId) => {
+    const source = programmeAudioMixer.getSourceState(sourceId);
+    return source.active && !source.muted && source.gain > 0 && source.trackCount > 0;
+  });
 }
 
 async function handleTerminalWhipConnection(
@@ -1295,59 +1573,34 @@ async function handleTerminalWhipConnection(
     return;
   }
 
-  livePublishGeneration += 1;
   isHandlingTerminalLivePublish.value = true;
-  livePublishStatus.value = "failed";
-  livePublishError.value = `Live publisher connection ${connectionState}; the live stream was stopped.`;
-  canTakeOverLivePublish.value = false;
-  const stopPromise = liveServerStreamStarted
-    ? postStreamAction("stop", {
-        keepalive: true,
-        streamToken,
-      }).catch(() => undefined)
-    : Promise.resolve();
-  liveServerStreamStarted = false;
-  if (liveStreamToken === streamToken) {
-    liveStreamToken = undefined;
-  }
   try {
-    await cleanupLivePublishing();
+    await endLocalPublisher(streamToken, {
+      failureMessage: `Live publisher connection ${connectionState}.`,
+      keepalive: true,
+    });
   } finally {
     isHandlingTerminalLivePublish.value = false;
   }
-  await stopPromise;
 }
 
 async function stopLivePublishing(): Promise<void> {
-  const streamToken = liveStreamToken;
+  const streamToken = pendingCancellationToken.value ?? liveStreamToken;
   if (
     !props.sessionId ||
     !streamToken ||
     livePublishStatus.value === "stopping" ||
-    (!ownsLivePublish && !liveServerStreamStarted && !isStartingLivePublish.value)
+    (!pendingCancellationToken.value && !ownsLivePublish && !liveServerStreamStarted && !isStartingLivePublish.value)
   ) {
     return;
   }
-
-  livePublishStatus.value = "stopping";
-  livePublishError.value = "";
-  livePublishGeneration += 1;
-  try {
-    const stopPromise = postStreamAction("stop", { streamToken });
-    await cleanupLivePublishing();
-    await stopPromise;
-    liveServerStreamStarted = false;
-    liveStreamToken = undefined;
-    livePublishStatus.value = "ended";
-  } catch (error) {
-    livePublishStatus.value = "failed";
-    livePublishError.value = toErrorMessage(error);
-  }
+  await endLocalPublisher(streamToken);
 }
 
 async function confirmLivePublishing(
   publishGeneration: number,
   streamToken: string,
+  signal: AbortSignal,
 ): Promise<void> {
   let lastError: unknown;
   for (let attempt = 0; attempt < 10; attempt += 1) {
@@ -1357,7 +1610,7 @@ async function confirmLivePublishing(
     try {
       await postStreamAction<{ notified: boolean; streamStatus: "live" }>(
         "confirm",
-        { streamToken },
+        { signal, streamToken },
       );
       return;
     } catch (error) {
@@ -1384,11 +1637,10 @@ async function cleanupLivePublishing(): Promise<void> {
   const publishSession = livePublishSession;
   livePublishSession = undefined;
   ownsLivePublish = false;
-  await publishSession?.close().catch(() => undefined);
-  for (const track of liveOwnedVideoTracks) {
-    track.stop();
-  }
+  const ownedTracks = liveOwnedVideoTracks;
   liveOwnedVideoTracks = [];
+  for (const track of ownedTracks) track.stop();
+  void publishSession?.close().catch(() => undefined);
 }
 
 function startLiveHeartbeat(publishGeneration: number, streamToken: string): void {
@@ -1411,14 +1663,12 @@ function startLiveHeartbeat(publishGeneration: number, streamToken: string): voi
       if (publishGeneration !== livePublishGeneration || liveStreamToken !== streamToken) {
         return;
       }
-      livePublishGeneration += 1;
-      liveServerStreamStarted = false;
-      liveStreamToken = undefined;
-      livePublishStatus.value = "failed";
-      livePublishError.value = isPublisherLeaseLost(error)
-        ? "Another producer took over the live stream."
-        : "Publisher heartbeat failed; the live stream was stopped.";
-      await cleanupLivePublishing();
+      await endLocalPublisher(streamToken, {
+        failureMessage: isPublisherLeaseLost(error)
+          ? "Another producer took over the live stream."
+          : "Publisher heartbeat failed.",
+        keepalive: true,
+      });
     },
   });
   livePublisherLease = lease;
@@ -1436,24 +1686,30 @@ async function delay(milliseconds: number): Promise<void> {
 
 async function postStreamAction<T = unknown>(
   action: "confirm" | "heartbeat" | "start" | "stop" | "takeover",
-  options: { keepalive?: boolean; streamToken?: string } = {},
+  options: { expectedTakeoverLease?: string; keepalive?: boolean; signal?: AbortSignal; streamToken?: string; timeoutMs?: number } = {},
 ): Promise<T> {
-  const response = await fetch("/api/studio/stream", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      action,
-      sessionId: props.sessionId,
-      streamToken: options.streamToken,
-    }),
-    keepalive: options.keepalive,
+  return await runBoundedPublisherOperation(async (signal) => {
+    const response = await fetch("/api/studio/stream", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action, sessionId: props.sessionId, streamToken: options.streamToken, expectedTakeoverLease: options.expectedTakeoverLease }),
+      keepalive: options.keepalive,
+      signal,
+    });
+    if (!response.ok) {
+      const body = await response.json().catch(() => null) as { code?: unknown; error?: unknown } | null;
+      throw new StudioRequestError(
+        typeof body?.error === "string" ? body.error : `Studio ${action} request failed with ${response.status}`,
+        response.status,
+        typeof body?.code === "string" ? body.code : undefined,
+      );
+    }
+    return await response.json() as T;
+  }, {
+    signal: options.signal,
+    timeoutMs: options.timeoutMs ?? 10_000,
+    timeoutMessage: `Studio ${action} request timed out.`,
   });
-  if (!response.ok) {
-    throw new StudioRequestError(await readErrorResponse(response), response.status);
-  }
-  return await response.json() as T;
 }
 
 async function stopOwnedLivePublishingForTeardown(): Promise<void> {
@@ -1464,19 +1720,11 @@ async function stopOwnedLivePublishingForTeardown(): Promise<void> {
     return;
   }
 
-  const streamToken = liveStreamToken;
+  const streamToken = pendingCancellationToken.value ?? liveStreamToken;
   if (!streamToken) {
     return;
   }
-  livePublishGeneration += 1;
-  const stopPromise = postStreamAction("stop", {
-    keepalive: true,
-    streamToken,
-  }).catch(() => undefined);
-  liveServerStreamStarted = false;
-  liveStreamToken = undefined;
-  await cleanupLivePublishing();
-  await stopPromise;
+  await endLocalPublisher(streamToken, { keepalive: true });
 }
 
 function isStreamNotConnectedYet(error: unknown): boolean {
@@ -1506,6 +1754,7 @@ async function createRecordingStream(): Promise<MediaStream | undefined> {
 async function createProgrammeOutputStream(
   setOwnedVideoTracks: (tracks: MediaStreamTrack[]) => void,
   allowSilentMonitor = false,
+  signal?: AbortSignal,
 ): Promise<MediaStream | undefined> {
   const canvasStream = captureCanvasStream();
   if (!canvasStream) {
@@ -1515,7 +1764,7 @@ async function createProgrammeOutputStream(
   const videoTracks = canvasStream.getVideoTracks();
   setOwnedVideoTracks(videoTracks);
   try {
-    const audioReady = await programmeAudioMixer.resume();
+    const audioReady = await programmeAudioMixer.resume({ signal });
     const audioTrack = requireLiveProgrammeAudioTrack(
       audioReady,
       audioReady ? programmeAudioMixer.getOutputTrack() : undefined,
@@ -1800,6 +2049,7 @@ onMounted(() => {
   window.addEventListener("pagehide", preserveLocalRecordingForPageHide);
   document.addEventListener("visibilitychange", flushLocalRecordingForVisibilityChange);
   if (!props.previewOnly) {
+    restorePublisherRecovery();
     addProgrammeAudioUnlockListeners();
     startProgrammeAudioMeter();
     void refreshRecordingRecoveryArtifacts();
@@ -2074,6 +2324,12 @@ function updateCanvasDisplaySize(width = frameElement.value?.clientWidth ?? 0, h
             <option value="high">High</option>
           </select>
         </label>
+        <span
+          v-if="recordingPersistencePolicy === 'local-only' && !recordingStatusText"
+          class="recording-upload-state"
+        >
+          Local recording only · download when stopped
+        </span>
         <button
           v-if="!previewOnly"
           class="record-button compact"

@@ -29,6 +29,7 @@ import {
 	expireStaleStudioStreams,
 	getPublicStudioLiveState,
 	getStudioSession,
+	getStudioStreamTakeoverObservation,
 	getStudioSessionWatchUrl,
 	hasFreshStudioContentStreamConflict,
 	hashInviteToken,
@@ -41,6 +42,20 @@ import {
 	userCanManageStudioSession,
 } from "./studio";
 import { createRealtimeKitCustomParticipantId } from "./realtimekit";
+
+// The real provider lifecycle and its D1 interleavings are exercised with
+// SQLite in publisher-lease-sql.test.ts; this older mock covers operations.
+vi.mock("./whip-provider-lifecycle", () => ({
+	isProductionWhipReady: vi.fn(async () => true),
+	reserveWhipProviderAttempt: vi.fn(async () => ({ attemptId: "attempt", body: "{}", idempotencyKey: "key" })),
+	markWhipCreateDispatched: vi.fn(async () => true),
+	recordWhipProviderInput: vi.fn(async () => true),
+	markWhipCreateUncertain: vi.fn(async () => undefined),
+	requestWhipProviderRetirement: vi.fn(async () => undefined),
+	tryRetireWhipProviderAttempt: vi.fn(async () => undefined),
+	getWhipProviderRevocation: vi.fn(async () => "not-required"),
+	getWhipTakeoverState: vi.fn(async () => "unknown"),
+}));
 
 const user = {
 	id: "rawkode",
@@ -146,6 +161,7 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 	let pendingLiveReplacementToken = liveReplacementToken;
 	let pendingParticipantWriteFailures = participantWriteFailures;
 	let pendingRecordingInsertFailures = recordingInsertFailures;
+	const cancelledTokens = new Set<string>();
 	const writes: Array<{ params: unknown[]; sql: string }> = [];
 	const reads: Array<{ params: unknown[]; sql: string }> = [];
 	const sessionRow = {
@@ -281,6 +297,36 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 					run: async () => {
 						let changes = 1;
 						writes.push({ sql, params });
+						if (sql.includes("INSERT OR IGNORE INTO studio_stream_cancelled_attempts")) {
+							if (sql.includes("unixepoch() - 120") && sql.includes("unixepoch() - 20")) {
+								const now = Math.floor(Date.now() / 1000);
+								const timeout = sessionRow.stream_status === "starting" ? 120 : 20;
+								const token = sessionRow.stream_start_token;
+								const matches = (params.length === 0 || String(params[0]) === sessionRow.id) &&
+									(sessionRow.stream_status === "starting" || sessionRow.stream_status === "live") &&
+									(sessionRow.stream_heartbeat_at === null || sessionRow.stream_heartbeat_at < now - timeout) &&
+									token !== null;
+								changes = matches && !cancelledTokens.has(token) ? 1 : 0;
+								if (matches) cancelledTokens.add(token);
+							} else if (sql.includes("SELECT id, stream_start_token")) {
+								if (pendingTakeoverReplacementToken) {
+									sessionRow.stream_status = "live";
+									sessionRow.stream_start_token = pendingTakeoverReplacementToken;
+									pendingTakeoverReplacementToken = undefined;
+								}
+								const token = sessionRow.stream_start_token;
+								const matches = sessionRow.id === String(params[0]) &&
+									sessionRow.stream_status === params[1] &&
+									token !== null && token === params[2] &&
+									(sessionRow.stream_status === "starting" || sessionRow.stream_status === "live");
+								changes = matches && !cancelledTokens.has(token) ? 1 : 0;
+								if (matches) cancelledTokens.add(token);
+							} else {
+								const token = String(params[1]);
+								changes = cancelledTokens.has(token) ? 0 : 1;
+								cancelledTokens.add(token);
+							}
+						}
 						if (sql.includes("INSERT INTO studio_invite_redemptions")) {
 							const tokenHash = String(params[0]);
 							const userId = String(params[1]);
@@ -400,7 +446,8 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 								if (
 									matchesSession &&
 									(sessionRow.stream_status === "starting" || sessionRow.stream_status === "live") &&
-									leaseExpired
+									leaseExpired &&
+									(sessionRow.stream_start_token === null || cancelledTokens.has(sessionRow.stream_start_token))
 								) {
 									if (sessionRow.status === "live") {
 										sessionRow.status = "scheduled";
@@ -542,6 +589,12 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 								} else {
 									sessionRow.status =
 										params[0] as NonNullable<StudioDbMockOptions["status"]>;
+										if (params[0] === "complete") {
+											sessionRow.stream_status = "ended";
+											sessionRow.stream_start_token = null;
+											sessionRow.stream_heartbeat_at = null;
+											sessionRow.stream_ended_at ??= now;
+										}
 								}
 							}
 							if (
@@ -549,8 +602,11 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 								sql.includes("cloudflare_stream_live_input_id")
 							) {
 								if (
+									sessionRow.status !== "complete" &&
 									sessionRow.stream_status === "starting" &&
-									sessionRow.stream_start_token === String(params[3])
+									sessionRow.stream_start_token === String(params[3]) &&
+									sessionRow.stream_heartbeat_at !== null &&
+									sessionRow.stream_heartbeat_at >= now - 120
 								) {
 									sessionRow.stream_status = "starting";
 									sessionRow.cloudflare_stream_live_input_id = String(params[0]);
@@ -569,7 +625,8 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 									(
 										sessionRow.stream_start_token === null ||
 										sessionRow.stream_start_token !== String(params[2])
-									)
+									) &&
+									!cancelledTokens.has(String(params[3]))
 								) {
 									sessionRow.stream_status = "starting";
 									sessionRow.stream_start_token = String(params[0]);
@@ -587,8 +644,11 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 										pendingLiveReplacementToken = undefined;
 									}
 									if (
+									sessionRow.status !== "complete" &&
 									sessionRow.stream_status === "starting" &&
-									sessionRow.stream_start_token === String(params[3])
+										sessionRow.stream_start_token === String(params[3]) &&
+										sessionRow.stream_heartbeat_at !== null &&
+										sessionRow.stream_heartbeat_at >= now - 120
 								) {
 									sessionRow.status = params[0] === 1 ? "live" : sessionRow.status;
 									sessionRow.stream_status = "live";
@@ -605,6 +665,9 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 									sessionRow.stream_environment === "prod" &&
 									sessionRow.stream_status === "live" &&
 									sessionRow.status === "live" &&
+									sessionRow.stream_start_token === String(params[2]) &&
+									sessionRow.stream_heartbeat_at !== null &&
+									sessionRow.stream_heartbeat_at >= now - 20 &&
 									sessionRow.stream_notification_queued_at === null
 								) {
 									sessionRow.stream_notification_queued_at = Number(params[0]);
@@ -620,8 +683,12 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 								}
 							}
 							if (sql.includes("SET stream_heartbeat_at = unixepoch()")) {
+								const isFresh = sessionRow.stream_heartbeat_at !== null && (
+									(sessionRow.stream_status === "starting" && sessionRow.stream_heartbeat_at >= now - 120) ||
+									(sessionRow.stream_status === "live" && sessionRow.stream_heartbeat_at >= now - 20)
+								);
 								if (
-									(sessionRow.stream_status === "starting" || sessionRow.stream_status === "live") &&
+									sessionRow.status !== "complete" && isFresh &&
 									sessionRow.stream_start_token === String(params[1])
 								) {
 									sessionRow.stream_heartbeat_at = now;
@@ -652,24 +719,15 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 									} else {
 										changes = 0;
 									}
-								} else if (params.length === 4) {
-									const token = String(params[3]);
-									const matchesToken = sessionRow.stream_start_token === token;
-									const matchesActiveToken = matchesToken &&
+								} else if (sql.includes("stream_start_token = ?")) {
+									const matchesActiveToken = sessionRow.stream_start_token === String(params[1]) &&
 										(sessionRow.stream_status === "starting" || sessionRow.stream_status === "live");
-									const canPreCancel = sessionRow.stream_start_token === null &&
-										sessionRow.stream_status !== "starting" &&
-										sessionRow.stream_status !== "live";
-									if (matchesToken || canPreCancel) {
+									if (matchesActiveToken) {
 										if (sessionRow.status === "live") {
 											sessionRow.status = "scheduled";
 										}
 										sessionRow.stream_status = "ended";
-										sessionRow.stream_start_token = matchesActiveToken
-											? null
-											: canPreCancel
-												? token
-												: sessionRow.stream_start_token;
+										sessionRow.stream_start_token = null;
 										sessionRow.stream_heartbeat_at = null;
 										sessionRow.stream_ended_at ??= now;
 									} else {
@@ -691,6 +749,11 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 					},
 				}),
 			};
+		},
+		batch: async (statements: Array<{ run: () => Promise<unknown> }>) => {
+			const results = [];
+			for (const statement of statements) results.push(await statement.run());
+			return results;
 		},
 	} as unknown as D1Database;
 
@@ -760,6 +823,11 @@ function createMultiSessionStreamDbMock(rows: StudioSessionDbMockRow[]) {
 					},
 				}),
 			};
+		},
+		batch: async (statements: Array<{ run: () => Promise<unknown> }>) => {
+			const results = [];
+			for (const statement of statements) results.push(await statement.run());
+			return results;
 		},
 	} as unknown as D1Database;
 	return { db, queries, rows };
@@ -1705,9 +1773,10 @@ describe("Studio operations", () => {
 		});
 		expect(envCue).toContain("CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef");
 		expect(envCue).toContain("op://sa.rawkode.academy/cloudflare/api-tokens/workers");
-		expect(envCue).toContain(
-			'tasks: [_t.check, _t.test, _t.deploy."dry-run", _t.migrations.remote, _t.deploy.main]',
-		);
+		const defaultTasks = envCue.match(/default:\s*\{[\s\S]*?tasks:\s*\[([^\]]*)\]/)?.[1];
+		expect(defaultTasks).toBe('_t.check, _t.test, _t.deploy."dry-run"');
+		expect(defaultTasks).not.toContain("_t.migrations.remote");
+		expect(defaultTasks).not.toContain("_t.deploy.main");
 		expect(envCue).toContain('tasks: [_t.check, _t.test, _t.deploy."dry-run"]');
 		expect(envCue).toContain('args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run migrate"]');
 		expect(envCue).toContain('args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run deploy:dry-run"]');
@@ -1748,7 +1817,7 @@ describe("Studio operations", () => {
 		expect(participantSources).toContain("studio:(guest|host|producer|program):");
 		expect(studioApp).toContain("const roomMediaStreams = shallowRef(new Map<string, MediaStream>())");
 		expect(studioApp).toContain("const roomMediaSources = shallowRef(new Map<string, StudioSource>())");
-		expect(studioApp).toContain("const streams = new Map<string, MediaStream>(roomMediaStreams.value)");
+		expect(studioApp).toContain("selectRoomCameraStreams(roomMediaStreams.value, roomMediaSources.value)");
 		expect(studioApp).toContain('@media-streams-change="syncRoomMediaStreams"');
 	});
 
@@ -1776,6 +1845,13 @@ describe("Studio operations", () => {
 			),
 			"utf8",
 		);
+		const participantProvisioningMigration = readFileSync(
+			new URL(
+				"../../data-model/0004_participant_provisioning.sql",
+				import.meta.url,
+			),
+			"utf8",
+		);
 		const recordingLeaseMigration = readFileSync(
 			new URL("../../data-model/0007_recording_lease.sql", import.meta.url),
 			"utf8",
@@ -1798,7 +1874,7 @@ describe("Studio operations", () => {
 		expect(leaseMigration).toContain("ADD COLUMN stream_heartbeat_at INTEGER");
 		expect(leaseMigration).toContain("SET stream_heartbeat_at = unixepoch() + 120");
 		expect(leaseMigration).toContain("WHERE stream_status IN ('starting', 'live')");
-		expect(participantIdentityMigration).toContain(
+		expect(participantProvisioningMigration).toContain(
 			"ADD COLUMN realtimekit_participant_id TEXT",
 		);
 		expect(participantIdentityMigration).toContain(
@@ -2398,6 +2474,7 @@ describe("Studio operations", () => {
 
 		const start = await startStudioStream(env, user, {
 			sessionId: "rawkode-live-next",
+			streamToken: "publisher-token",
 		});
 		expect(start).toMatchObject({
 			liveInputId: "live-input-1",
@@ -2502,7 +2579,7 @@ describe("Studio operations", () => {
 		});
 	});
 
-	it("requires the owning lease token to confirm or stop a live publisher", async () => {
+	it("requires the owning token to confirm or end a live publisher", async () => {
 		const studioDb = createStudioDbMock({
 			cloudflare_stream_live_input_id: "live-input-1",
 			stream_start_token: "publisher-token",
@@ -2534,7 +2611,8 @@ describe("Studio operations", () => {
 				sessionId: "rawkode-live-next",
 				streamToken: "stale-token",
 			}),
-		).rejects.toMatchObject({ code: "stream-active", status: 409 });
+		).resolves.toMatchObject({ cancellationRecorded: true, streamStatus: "unchanged" });
+		expect(studioDb.sessionRow.stream_start_token).toBe("publisher-token");
 		await expect(
 			stopStudioStream(env, user, {
 				sessionId: "rawkode-live-next",
@@ -2633,10 +2711,12 @@ describe("Studio operations", () => {
 			stream_status: "live",
 		});
 		const env = { STUDIO_DB: studioDb.db } as StudioEnv;
+		const observation = await getStudioStreamTakeoverObservation(env, "rawkode-live-next");
 
 		await expect(
-			takeOverStudioStream(env, user, { sessionId: "rawkode-live-next" }),
+			takeOverStudioStream(env, user, { sessionId: "rawkode-live-next", expectedTakeoverLease: observation?.takeoverLease ?? undefined }),
 		).resolves.toEqual({
+			providerRevocation: "not-required",
 			sessionId: "rawkode-live-next",
 			streamStatus: "ended",
 		});
@@ -2656,10 +2736,11 @@ describe("Studio operations", () => {
 			takeoverReplacementToken: "replacement-publisher",
 		});
 		const env = { STUDIO_DB: studioDb.db } as StudioEnv;
+		const observation = await getStudioStreamTakeoverObservation(env, "rawkode-live-next");
 
 		await expect(
-			takeOverStudioStream(env, user, { sessionId: "rawkode-live-next" }),
-		).rejects.toMatchObject({ code: "stream-active", status: 409 });
+			takeOverStudioStream(env, user, { sessionId: "rawkode-live-next", expectedTakeoverLease: observation?.takeoverLease ?? undefined }),
+		).rejects.toMatchObject({ code: "takeover-precondition-failed", status: 409 });
 		await expect(
 			heartbeatStudioStream(env, user, {
 				sessionId: "rawkode-live-next",
@@ -2697,8 +2778,8 @@ describe("Studio operations", () => {
 		} as StudioEnv;
 
 		const results = await Promise.allSettled([
-			startStudioStream(env, user, { sessionId: "rawkode-live-next" }),
-			startStudioStream(env, user, { sessionId: "rawkode-live-next" }),
+			startStudioStream(env, user, { sessionId: "rawkode-live-next", streamToken: "publisher-a" }),
+			startStudioStream(env, user, { sessionId: "rawkode-live-next", streamToken: "publisher-b" }),
 		]);
 
 		expect(results.filter((result) => result.status === "fulfilled")).toHaveLength(1);
@@ -2765,6 +2846,7 @@ describe("Studio operations", () => {
 			STUDIO_DB: studioDb.db,
 		} as StudioEnv, user, {
 			sessionId: "session-b",
+			streamToken: "publisher-token",
 		})).rejects.toMatchObject({
 			code: "content-stream-active",
 			message: "Another prod Studio session is already publishing this content.",
@@ -2918,6 +3000,7 @@ describe("Studio operations", () => {
 		});
 		const currentStart = await startStudioStream(env, user, {
 			sessionId: "rawkode-live-next",
+			streamToken: "current-start-token",
 		});
 		expect(currentStart).toMatchObject({
 			liveInputId: "live-input-2",
@@ -2964,7 +3047,10 @@ describe("Studio operations", () => {
 						success: true,
 						result: {
 							uid: "live-input-1",
-							status: init?.method === "POST" ? "new_configuration_accepted" : "connected",
+							status: init?.method === "POST" ? "new_configuration_accepted" : {
+								current: { ingestProtocol: "webrtc", state: "connected" },
+								history: [],
+							},
 							webRTC: { url: "https://stream.example/webRTC/publish" },
 							webRTCPlayback: { url: "https://stream.example/webRTC/play" },
 						},
@@ -2981,6 +3067,7 @@ describe("Studio operations", () => {
 
 		const start = await startStudioStream(env, user, {
 			sessionId: "rawkode-live-next",
+			streamToken: "publisher-token",
 		});
 		await expect(
 			confirmStudioStream(env, user, {
@@ -3028,6 +3115,8 @@ describe("Studio operations", () => {
 				streamToken: start.streamToken,
 			}),
 		).resolves.toEqual({
+			cancellationRecorded: true,
+			providerRevocation: "not-required",
 			sessionId: "rawkode-live-next",
 			streamStatus: "ended",
 		});
@@ -3073,6 +3162,7 @@ describe("Studio operations", () => {
 
 		const start = await startStudioStream(env, user, {
 			sessionId: "rawkode-live-next",
+			streamToken: "publisher-token",
 		});
 		await expect(
 			confirmStudioStream(env, user, {
@@ -3129,6 +3219,7 @@ describe("Studio operations", () => {
 
 		const start = await startStudioStream(env, user, {
 			sessionId: "rawkode-live-next",
+			streamToken: "publisher-token",
 		});
 		await stopStudioStream(env, user, {
 			sessionId: "rawkode-live-next",
@@ -3183,6 +3274,7 @@ describe("Studio operations", () => {
 
 		const start = await startStudioStream(env, user, {
 			sessionId: "rawkode-live-next",
+			streamToken: "publisher-token",
 		});
 		const results = await Promise.all([
 			confirmStudioStream(env, user, {
@@ -3234,6 +3326,7 @@ describe("Studio operations", () => {
 
 		const start = await startStudioStream(env, user, {
 			sessionId: "rawkode-live-next",
+			streamToken: "publisher-token",
 		});
 		await confirmStudioStream(env, user, {
 			sessionId: "rawkode-live-next",
@@ -5540,7 +5633,7 @@ describe("Studio operations", () => {
 			studioDb.writes.find((write) =>
 				write.sql.includes("SET status = ?")
 			)?.params,
-		).toEqual(["complete", "rawkode-live-next", "complete"]);
+		).toEqual(["complete", "complete", "complete", "complete", "complete", "rawkode-live-next", "complete"]);
 		expect(studioDb.sessionRow.recording_lease_id).toBeNull();
 		expect(studioDb.sessionRow.recording_heartbeat_at).toBeNull();
 		expect(studioDb.sessionRow.recording_status).toBe("idle");

@@ -280,7 +280,7 @@ export function removeOwnedLocalStudioSources(
 	const removableSourceIds = state.sources
 		.filter((source) =>
 			requestedSourceIds.has(source.id) &&
-			source.type === "screen" &&
+			(source.type === "screen" || source.type === "camera") &&
 			source.settings?.runtimeSource === "local" &&
 			source.settings.runtimeOwnerId === ownerId
 		)
@@ -289,9 +289,16 @@ export function removeOwnedLocalStudioSources(
 		return state;
 	}
 
-	return reconcileStudioSources(state, [], STUDIO_SCENE_DEFINITIONS, {
+	const cleaned = reconcileStudioSources(state, [], STUDIO_SCENE_DEFINITIONS, {
 		removeSourceIds: removableSourceIds,
 	});
+	const removedIds = new Set(removableSourceIds);
+	return {
+		...cleaned,
+		audioMix: Object.fromEntries(
+			Object.entries(cleaned.audioMix).filter(([sourceId]) => !removedIds.has(sourceId)),
+		),
+	};
 }
 
 export function serializeStudioControlState(value: unknown): string {

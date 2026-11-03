@@ -1,3 +1,4 @@
+import { schemaFlags, schemaQuery } from "./verify-live-schema";
 import {
 	checkCloudflareApiSuccess,
 	checkCloudflareCollectionHas,
@@ -35,80 +36,6 @@ const realtimeKitPresetNames = [
 	"rawkode-studio-guest",
 	"rawkode-studio-program",
 ];
-const schemaFlags = [
-	"migration_0000",
-	"migration_0001",
-	"migration_0002",
-	"migration_0003",
-	"migration_0004",
-	"migration_0005",
-	"migration_0006",
-	"migration_0007",
-	"migration_0008",
-	"migration_0009",
-	"sessions_table",
-	"recordings_table",
-	"invites_table",
-	"control_state_table",
-	"control_state_revision",
-	"stream_environment",
-	"stream_status",
-	"stream_heartbeat",
-	"control_state_index",
-	"stream_lease_index",
-	"realtimekit_participant_identity",
-	"realtimekit_participant_identity_index",
-	"recording_lease_id",
-	"recording_heartbeat",
-	"recording_lease_grace",
-	"recording_lease_index",
-	"canonical_recording_index",
-	"canonical_recording_no_duplicates",
-	"stream_output_inputs_table",
-	"stream_output_input_mode",
-	"stream_output_provision_state",
-	"stream_output_inputs_state_index",
-];
-
-const schemaQuery = `SELECT
-  EXISTS(SELECT 1 FROM d1_migrations WHERE name = '0000_studio_sessions.sql') AS migration_0000,
-  EXISTS(SELECT 1 FROM d1_migrations WHERE name = '0001_content_video_sessions.sql') AS migration_0001,
-  EXISTS(SELECT 1 FROM d1_migrations WHERE name = '0002_content_video_slugs.sql') AS migration_0002,
-  EXISTS(SELECT 1 FROM d1_migrations WHERE name = '0003_stream_state.sql') AS migration_0003,
-  EXISTS(SELECT 1 FROM d1_migrations WHERE name = '0004_studio_control_state.sql') AS migration_0004,
-  EXISTS(SELECT 1 FROM d1_migrations WHERE name = '0005_stream_publisher_lease.sql') AS migration_0005,
-  EXISTS(SELECT 1 FROM d1_migrations WHERE name = '0006_realtimekit_participant_identity.sql') AS migration_0006,
-  EXISTS(SELECT 1 FROM d1_migrations WHERE name = '0007_recording_lease.sql') AS migration_0007,
-  EXISTS(SELECT 1 FROM d1_migrations WHERE name = '0008_canonical_vod_recording.sql') AS migration_0008,
-  EXISTS(SELECT 1 FROM d1_migrations WHERE name = '0009_stream_output_inputs.sql') AS migration_0009,
-  EXISTS(SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'studio_sessions') AS sessions_table,
-  EXISTS(SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'studio_recordings') AS recordings_table,
-  EXISTS(SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'studio_invites') AS invites_table,
-  EXISTS(SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'studio_control_state') AS control_state_table,
-  EXISTS(SELECT 1 FROM pragma_table_info('studio_control_state') WHERE name = 'revision') AS control_state_revision,
-  EXISTS(SELECT 1 FROM pragma_table_info('studio_sessions') WHERE name = 'stream_environment') AS stream_environment,
-  EXISTS(SELECT 1 FROM pragma_table_info('studio_sessions') WHERE name = 'stream_status') AS stream_status,
-  EXISTS(SELECT 1 FROM pragma_table_info('studio_sessions') WHERE name = 'stream_heartbeat_at') AS stream_heartbeat,
-  EXISTS(SELECT 1 FROM sqlite_master WHERE type = 'index' AND name = 'studio_control_state_updated_at_idx') AS control_state_index,
-  EXISTS(SELECT 1 FROM sqlite_master WHERE type = 'index' AND name = 'studio_sessions_stream_lease_idx') AS stream_lease_index,
-  EXISTS(SELECT 1 FROM pragma_table_info('studio_participants') WHERE name = 'realtimekit_participant_id') AS realtimekit_participant_identity,
-  EXISTS(SELECT 1 FROM sqlite_master WHERE type = 'index' AND name = 'studio_participants_realtimekit_participant_id_idx') AS realtimekit_participant_identity_index,
-  EXISTS(SELECT 1 FROM pragma_table_info('studio_sessions') WHERE name = 'recording_lease_id') AS recording_lease_id,
-  EXISTS(SELECT 1 FROM pragma_table_info('studio_sessions') WHERE name = 'recording_heartbeat_at') AS recording_heartbeat,
-  EXISTS(SELECT 1 FROM pragma_table_info('studio_sessions') WHERE name = 'recording_lease_grace_until') AS recording_lease_grace,
-  EXISTS(SELECT 1 FROM sqlite_master WHERE type = 'index' AND name = 'studio_sessions_recording_lease_idx') AS recording_lease_index,
-  EXISTS(SELECT 1 FROM sqlite_master WHERE type = 'index' AND name = 'studio_recordings_video_id_unique_idx') AS canonical_recording_index,
-  EXISTS(SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'studio_stream_output_inputs') AS stream_output_inputs_table,
-  EXISTS(SELECT 1 FROM pragma_table_info('studio_stream_output_inputs') WHERE name = 'input_mode') AS stream_output_input_mode,
-  EXISTS(SELECT 1 FROM pragma_table_info('studio_stream_output_inputs') WHERE name = 'provision_state') AS stream_output_provision_state,
-  EXISTS(SELECT 1 FROM sqlite_master WHERE type = 'index' AND name = 'studio_stream_output_inputs_state_idx') AS stream_output_inputs_state_index,
-  NOT EXISTS(
-    SELECT video_id
-      FROM studio_recordings
-     GROUP BY video_id
-    HAVING COUNT(*) > 1
-  ) AS canonical_recording_no_duplicates;`;
-
 class VerificationFailure extends Error {}
 
 function commandStep(

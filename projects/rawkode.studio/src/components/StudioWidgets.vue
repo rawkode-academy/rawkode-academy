@@ -6,6 +6,7 @@ import MediaStreamPreview from "./MediaStreamPreview.vue";
 const props = defineProps<{
   activeScreenShareSourceId: string;
   audioControls?: Record<string, StudioAudioMixControl>;
+  localOwnerId: string;
   mediaStreams?: Map<string, MediaStream>;
   /** Sources explicitly admitted by the producer. Omission is deliberately backstage. */
   onStageSourceIds?: string[];
@@ -25,6 +26,10 @@ const emit = defineEmits<{
 const screenSources = computed(() => props.sources.filter((source) => source.type === "screen"));
 
 function getScreenStatus(source: StudioSource): string {
+  if ((source.settings?.runtimeSource === "local" || source.settings?.runtimeSource === "unavailable-local") &&
+      source.settings.runtimeOwnerId !== props.localOwnerId) {
+    return "Shared in another producer tab";
+  }
   const status = source.settings?.captureStatus;
   if (status === "ready") {
     return source.id === props.activeScreenShareSourceId ? "Selected for editing" : "Capture ready";
@@ -54,12 +59,14 @@ function isScreenReady(source: StudioSource): boolean {
 }
 
 function canStopScreen(source: StudioSource): boolean {
-  return isScreenReady(source) && source.settings?.runtimeSource === "local";
+  return isScreenReady(source) && source.settings?.runtimeSource === "local" &&
+    source.settings.runtimeOwnerId === props.localOwnerId;
 }
 
 function canRetryScreen(source: StudioSource): boolean {
   const status = source.settings?.captureStatus;
   return source.settings?.runtimeSource === "local" &&
+    source.settings.runtimeOwnerId === props.localOwnerId &&
     status !== "ready" &&
     status !== "requesting";
 }
@@ -87,6 +94,7 @@ function getStream(source: StudioSource): MediaStream | undefined {
       <div>
         <h2 id="screen-sources-heading">Screen sources</h2>
         <p>Add, preview, and select browser screen captures for the programme.</p>
+        <p>Only screens shared in this producer tab can appear in Programme. RealtimeKit guest screens are unavailable.</p>
       </div>
       <button
         class="primary-button compact"

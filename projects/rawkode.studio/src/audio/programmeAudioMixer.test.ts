@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createProgrammeAudioMixer,
   requireLiveProgrammeAudioTrack,
@@ -150,6 +150,10 @@ function stream(...tracks: FakeTrack[]): MediaStream {
   return new FakeMediaStream(tracks) as unknown as MediaStream;
 }
 
+afterEach(() => {
+  vi.useRealTimers();
+});
+
 describe("programme audio mixer", () => {
   it("creates one stable mixed output track and resumes it on demand", async () => {
     const context = new FakeAudioContext();
@@ -160,6 +164,42 @@ describe("programme audio mixer", () => {
     expect(await mixer.resume()).toBe(true);
     expect(mixer.getOutputTrack()).toBe(firstOutput);
     expect(context.resumeCount).toBe(1);
+  });
+
+  it("starts audio synchronously and lets cancellation release a pending resume", async () => {
+    const context = new FakeAudioContext();
+    const mixer = createMixer(context);
+    const input = new FakeTrack("input");
+    mixer.reconcile(new Map([["source", stream(input)]]));
+    const resume = vi.spyOn(context, "resume")
+      .mockImplementationOnce(() => new Promise<void>(() => {}))
+      .mockImplementationOnce(async () => { context.state = "running"; });
+    const controller = new AbortController();
+
+    const pending = mixer.resume({ signal: controller.signal });
+    expect(resume).toHaveBeenCalledOnce();
+    controller.abort();
+    await expect(pending).resolves.toBe(false);
+    expect(input.stopped).toBe(false);
+
+    await expect(mixer.resume()).resolves.toBe(true);
+    await mixer.close();
+    expect(input.stopped).toBe(false);
+  });
+
+  it("times out a resume that never settles and permits a later retry", async () => {
+    vi.useFakeTimers();
+    const context = new FakeAudioContext();
+    const mixer = createMixer(context);
+    vi.spyOn(context, "resume")
+      .mockImplementationOnce(() => new Promise<void>(() => {}))
+      .mockImplementationOnce(async () => { context.state = "running"; });
+
+    const pending = mixer.resume();
+    await vi.advanceTimersByTimeAsync(5_000);
+    await expect(pending).resolves.toBe(false);
+    await expect(mixer.resume()).resolves.toBe(true);
+    await mixer.close();
   });
 
   it("deterministically assigns duplicate tracks to one source", () => {

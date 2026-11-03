@@ -278,8 +278,8 @@ describe("Studio control state", () => {
 		expect(database.getReadCount()).toBe(1);
 	});
 
-	it("removes only screen sources owned by the unloading producer tab", () => {
-		const state = reduceStudioState(createInitialStudioState(), {
+	it("removes only camera and screen sources owned by the unloading producer tab", () => {
+		let state = reduceStudioState(createInitialStudioState(), {
 			type: "sources.reconcile",
 			sources: [
 				{
@@ -296,20 +296,46 @@ describe("Studio control state", () => {
 					type: "screen",
 					settings: { runtimeOwnerId: "owner-other-tab", runtimeSource: "local" },
 				},
+				{
+					id: "camera-this-tab",
+					name: "This tab camera",
+					status: "ready",
+					type: "camera",
+					roles: ["producer"],
+					settings: { runtimeOwnerId: "owner-this-tab", runtimeSource: "local" },
+				},
+				{
+					id: "camera-other-tab",
+					name: "Other tab camera",
+					status: "ready",
+					type: "camera",
+					roles: ["producer"],
+					settings: { runtimeOwnerId: "owner-other-tab", runtimeSource: "local" },
+				},
 			],
 		});
+		state = { ...state, onStageSourceIds: ["camera-this-tab", "camera-other-tab"], audioMix: {
+			"camera-this-tab": { gain: 0.2, muted: true },
+			"camera-other-tab": { gain: 0.8, muted: false },
+		} };
 
 		const cleaned = removeOwnedLocalStudioSources(
 			state,
 			"owner-this-tab",
-			["screen-this-tab", "screen-other-tab"],
+			["screen-this-tab", "screen-other-tab", "camera-this-tab", "camera-other-tab", "source-producer-camera"],
 		);
 
 		expect(cleaned.sources.some((source) => source.id === "screen-this-tab")).toBe(false);
 		expect(cleaned.sources.some((source) => source.id === "screen-other-tab")).toBe(true);
+		expect(cleaned.sources.some((source) => source.id === "camera-this-tab")).toBe(false);
+		expect(cleaned.sources.some((source) => source.id === "camera-other-tab")).toBe(true);
+		expect(cleaned.sources.some((source) => source.id === "source-producer-camera")).toBe(true);
+		expect(cleaned.onStageSourceIds).toEqual(["camera-other-tab"]);
+		expect(cleaned.audioMix["camera-this-tab"]).toBeUndefined();
+		expect(cleaned.audioMix["camera-other-tab"]).toEqual({ gain: 0.8, muted: false });
 		expect(cleaned.layers.some((layer) => layer.sourceId === "screen-this-tab")).toBe(false);
 		expect(
-			removeOwnedLocalStudioSources(cleaned, "owner-this-tab", ["screen-other-tab"]),
+			removeOwnedLocalStudioSources(cleaned, "owner-this-tab", ["screen-other-tab", "camera-other-tab"]),
 		).toBe(cleaned);
 	});
 });

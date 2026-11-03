@@ -37,6 +37,7 @@ const providerStatus = session.realtimeKitMeetingId ? "RealtimeKit ready" : "Mee
 	>
 		<App
 			client:only="vue"
+			contentBacked={Boolean(session.contentVideoId)}
 			providerStatus={providerStatus}
 			recordingStatus={session.recordingStatus}
 			roomRole="Host"

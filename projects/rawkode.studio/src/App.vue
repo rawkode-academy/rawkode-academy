@@ -6,8 +6,18 @@ import SceneSwitcher from "./components/SceneSwitcher.vue";
 import StudioCanvas from "./components/StudioCanvas.vue";
 import StudioWidgets from "./components/StudioWidgets.vue";
 import { selectProgrammeAudioStreams } from "./audio/programmeAudioSources";
+import { getRequiredProgrammeAudioSourceIds } from "./live/takeoverReadiness";
 import { useStudioMachine } from "./studio/useStudioMachine";
-import { shouldPersistOwnedScreenCleanup } from "./studio/localSourceOwnership";
+import {
+  filterProgrammeScreenLayers,
+  isVisibleProducerScreen,
+  selectRoomCameraStreams,
+} from "./studio/programmeMediaGate";
+import {
+  createLocalSourceIdentity,
+  getOwnedLocalSourceIds,
+  shouldPersistOwnedSourceCleanup,
+} from "./studio/localSourceOwnership";
 import type { ActiveOverlay, Bounds, StudioAudioMixControl, StudioSource } from "./types";
 
 type CaptureStatus = "blocked" | "ended" | "missing" | "ready" | "requesting" | "unavailable";
@@ -19,6 +29,7 @@ type RoomMediaPayload = {
 };
 
 const props = defineProps<{
+  contentBacked?: boolean;
   inviteToken?: string;
   providerStatus?: string;
   recordingStatus?: string;
@@ -27,6 +38,7 @@ const props = defineProps<{
   sessionTitle?: string;
   streamEnvironment?: "prod" | "test";
   streamStatus?: string;
+  takeoverLease?: string | null;
 }>();
 const {
   state,
@@ -69,9 +81,10 @@ let resizeStartHeight = 0;
 let hostCaptureGeneration = 0;
 let isComponentUnmounted = false;
 const screenShareCaptureGenerations = new Map<string, number>();
-const runtimeOwnerId = crypto.randomUUID();
+const localSourceIdentity = createLocalSourceIdentity();
+const runtimeOwnerId = localSourceIdentity.ownerId;
 const pendingDepartedSourceIds = new Set<string>();
-let ownedScreenCleanupSent = false;
+let ownedSourceCleanupSent = false;
 const activeStingerKey = computed(() => {
   const stinger = state.value.activeStinger;
   return stinger
@@ -98,7 +111,7 @@ const currentRecordingStatus = ref(props.recordingStatus ?? "");
 const currentStreamStatus = ref(props.streamStatus ?? "");
 const localCameraSourceId = computed(() =>
   roomRole.value === "producer" || roomRole.value === "program"
-    ? "source-producer-camera"
+    ? localSourceIdentity.cameraSourceId
     : roomRole.value === "guest"
       ? "source-guest-camera"
       : "source-host-camera",
@@ -107,7 +120,7 @@ const studioLayoutStyle = computed(() => ({
   "--widgets-height": `${widgetHeight.value}px`,
 }));
 const mediaStreams = computed(() => {
-  const streams = new Map<string, MediaStream>(roomMediaStreams.value);
+  const streams = selectRoomCameraStreams(roomMediaStreams.value, roomMediaSources.value);
   if (hostMediaStream.value) {
     streams.set(localCameraSourceId.value, hostMediaStream.value);
   }
@@ -122,8 +135,11 @@ const sourcesForUi = computed(() =>
     .map(withRuntimeMediaState)
     .filter(isVisibleRuntimeSource),
 );
+const safeProgramLayers = computed(() =>
+  filterProgrammeScreenLayers(programLayers.value, state.value.sources)
+);
 const programmeScreenShareSourceId = computed(() =>
-  programLayers.value.find((layer) => layer.type === "screen")?.sourceId ?? ""
+  safeProgramLayers.value.find((layer) => layer.type === "screen")?.sourceId ?? ""
 );
 const programmeMediaStreams = computed(() =>
   selectProgrammeAudioStreams(
@@ -133,11 +149,15 @@ const programmeMediaStreams = computed(() =>
     state.value.onStageSourceIds,
   )
 );
+const requiredProgrammeAudioSourceIds = computed(() => getRequiredProgrammeAudioSourceIds(
+  state.value.sources, state.value.onStageSourceIds, programmeScreenShareSourceId.value, state.value.audioMix,
+));
 const programmeAudioControls = computed(() => {
   const controls: Record<string, StudioAudioMixControl> = {};
   for (const source of sourcesForUi.value) {
     const stream = mediaStreams.value.get(source.id);
-    if ((source.type !== "camera" && source.type !== "screen") || !hasLiveAudioTrack(stream)) {
+    if ((source.type !== "camera" && source.type !== "screen") ||
+        (!hasLiveAudioTrack(stream) && !state.value.onStageSourceIds.includes(source.id))) {
       continue;
     }
 
@@ -153,7 +173,7 @@ const programmeAudioControls = computed(() => {
 onMounted(() => {
   updateWidgetMaxHeight();
   window.addEventListener("resize", updateWidgetMaxHeight);
-  window.addEventListener("pagehide", persistOwnedScreenCleanup);
+  window.addEventListener("pagehide", persistOwnedSourceCleanup);
   window.addEventListener("keydown", handleProductionShortcut);
   if (hasProductionControls.value) {
     void startHostCapture();
@@ -485,6 +505,9 @@ function handleHostTrackEnded(stream: MediaStream, captureGeneration: number): v
     return;
   }
   hostCaptureGeneration += 1;
+  if (hasProductionControls.value) {
+    pendingDepartedSourceIds.add(localCameraSourceId.value);
+  }
   hostMediaStream.value = undefined;
   stopMediaStream(stream);
   hostCaptureStatus.value = "blocked";
@@ -527,6 +550,9 @@ function withRuntimeMediaState(source: StudioSource): StudioSource {
 }
 
 function isVisibleRuntimeSource(source: StudioSource): boolean {
+  if (source.type === "screen") {
+    return isVisibleProducerScreen(source, runtimeOwnerId, screenShareSources.value, state.value.onStageSourceIds);
+  }
   if (source.type !== "camera") {
     return true;
   }
@@ -535,7 +561,7 @@ function isVisibleRuntimeSource(source: StudioSource): boolean {
     return hasProductionControls.value;
   }
 
-  return roomMediaSources.value.has(source.id);
+  return roomMediaSources.value.has(source.id) || state.value.onStageSourceIds.includes(source.id);
 }
 
 function withLocalCaptureState(source: StudioSource): StudioSource {
@@ -568,6 +594,9 @@ function withRoomMediaState(source: StudioSource): StudioSource {
       settings: {
         ...source.settings,
         captureStatus: "missing",
+        ...(source.settings?.runtimeSource === "local" && source.settings.runtimeOwnerId !== runtimeOwnerId
+          ? { runtimeSource: "unavailable-local" }
+          : {}),
       },
     };
   }
@@ -609,6 +638,7 @@ function reconcileRuntimeSources(): void {
       ...existing?.settings,
       captureError: hostCaptureError.value,
       captureStatus: hostCaptureStatus.value,
+      runtimeOwnerId,
       runtimeSource: "local",
     },
   });
@@ -729,23 +759,19 @@ function handleScreenShareEnded(
   }
 }
 
-function persistOwnedScreenCleanup(event?: PageTransitionEvent): void {
+function persistOwnedSourceCleanup(event?: PageTransitionEvent): void {
   if (
-    !shouldPersistOwnedScreenCleanup(event) ||
+    !shouldPersistOwnedSourceCleanup(event) ||
+    !hasProductionControls.value ||
     !props.sessionId ||
-    ownedScreenCleanupSent
+    ownedSourceCleanupSent
   ) {
     return;
   }
 
-  const sourceIds = screenShareSources.value
-    .filter((source) => source.settings?.runtimeOwnerId === runtimeOwnerId)
-    .map((source) => source.id);
-  if (sourceIds.length === 0) {
-    return;
-  }
+  const sourceIds = getOwnedLocalSourceIds(localSourceIdentity, screenShareSources.value);
 
-  ownedScreenCleanupSent = true;
+  ownedSourceCleanupSent = true;
   void fetch("/api/studio/state", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -809,10 +835,10 @@ watch(
 );
 
 onBeforeUnmount(() => {
-  persistOwnedScreenCleanup();
+  persistOwnedSourceCleanup();
   isComponentUnmounted = true;
   window.removeEventListener("resize", updateWidgetMaxHeight);
-  window.removeEventListener("pagehide", persistOwnedScreenCleanup);
+  window.removeEventListener("pagehide", persistOwnedSourceCleanup);
   window.removeEventListener("keydown", handleProductionShortcut);
   clearOverlayTimers();
   clearStingerTimer();
@@ -891,6 +917,9 @@ function scheduleStingerTimer(): void {
     stingerTimer = undefined;
     stingerMidpointTimer = undefined;
     stingerTimerKey = "";
+    // A tab may first observe a transition after its midpoint. Complete the
+    // scene switch before clearing the stinger, even in that case.
+    send({ type: "stinger.midpoint", generation: stinger.generation });
     send({ type: "stinger.finished", generation: stinger.generation });
   }, secondsToMilliseconds(durationSeconds));
 }
@@ -1049,19 +1078,22 @@ function updateWidgetMaxHeight(): void {
           <StudioCanvas
             title="Programme"
             subtitle="Current output"
-            :layers="programLayers"
+            :layers="safeProgramLayers"
             :active-overlays="state.activeOverlays"
             :active-stinger="state.activeStinger"
             :media-streams="mediaStreams"
             :programme-audio-streams="programmeMediaStreams"
+            :required-programme-audio-source-ids="requiredProgrammeAudioSourceIds"
             :audio-mix="state.audioMix"
             :resolution="state.resolution"
             :is-playing="state.isPlaying"
             :is-recording="state.isRecording"
             :session-id="props.sessionId"
             :can-publish-live="canPublishLive"
+            :content-backed="props.contentBacked"
             :stream-environment="props.streamEnvironment"
             :stream-status="props.streamStatus"
+            :takeover-lease="props.takeoverLease"
             @recording-change="setRecording"
             @recording-status-change="setRecordingStatus"
             @stream-status-change="setStreamStatus"
@@ -1097,6 +1129,7 @@ function updateWidgetMaxHeight(): void {
         <p>
           Use RealtimeKit to check your camera and microphone, then join the other contributors.
           Programme switching, streaming, and recording are managed by the producer.
+          RealtimeKit screen sharing does not appear in Programme.
         </p>
         <RealtimeKitRoom
           v-if="props.sessionId"
@@ -1133,6 +1166,7 @@ function updateWidgetMaxHeight(): void {
       :active-screen-share-source-id="state.activeScreenShareSourceId"
       :audio-controls="programmeAudioControls"
       :on-stage-source-ids="state.onStageSourceIds"
+      :local-owner-id="runtimeOwnerId"
       @audio-gain-change="setProgrammeAudioSourceGain"
       @audio-mute-change="setProgrammeAudioSourceMuted"
       @select-screen-share="selectScreenShare"

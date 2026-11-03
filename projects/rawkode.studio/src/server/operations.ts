@@ -28,10 +28,22 @@ import {
 	type RealtimeKitRole,
 } from "./realtimekit";
 import {
+	getWhipProviderRevocation,
+	getWhipTakeoverState,
+	isProductionWhipReady,
+	markWhipCreateDispatched,
+	markWhipCreateUncertain,
+	recordWhipProviderInput,
+	requestWhipProviderRetirement,
+	tryRetireWhipProviderAttempt,
+	reserveWhipProviderAttempt,
+} from "./whip-provider-lifecycle";
+import {
 	buildStudioSession,
 	claimStudioRecordingLease,
 	claimStudioStreamStart,
 	claimStudioStreamNotification,
+	cancelStudioStreamAttempt,
 	createInviteToken,
 	createReadyMarker,
 	createRecordingId,
@@ -42,6 +54,7 @@ import {
 	getStudioParticipantProviderIdentity,
 	getStudioSession,
 	getStudioStreamLease,
+	getStudioStreamTakeoverLeaseId,
 	getStudioUserGithubHandle,
 	getStudioUserId,
 	hasCanonicalStudioVodOutput,
@@ -57,7 +70,6 @@ import {
 	saveRecordingReadyMarker,
 	saveStudioSessionStatus,
 	saveStudioSession,
-	saveStudioStreamEnded,
 	saveStudioStreamHeartbeat,
 	saveStudioStreamLive,
 	saveStudioStreamStart,
@@ -84,11 +96,13 @@ export class StudioOperationError extends Error {
 		| "not-found"
 		| "provider-failed"
 		| "provider-not-configured"
+		| "provider-reconciliation-required"
 		| "recording-active"
 		| "recording-output-claimed"
 		| "session-ended"
 		| "storage-not-configured"
 		| "stream-active"
+		| "takeover-precondition-failed"
 		| "unauthorized";
 	readonly status: number;
 
@@ -130,6 +144,7 @@ export interface EndStudioSessionInput {
 }
 
 export interface StudioStreamInput {
+	expectedTakeoverLease?: string;
 	sessionId: string;
 	streamToken?: string;
 }
@@ -485,6 +500,7 @@ async function notifyStudioStreamIfNeeded(
 		| "streamNotificationQueuedAt"
 		| "title"
 	>,
+	streamToken: string,
 ): Promise<boolean> {
 	if (
 		session.streamEnvironment !== "prod" ||
@@ -498,6 +514,7 @@ async function notifyStudioStreamIfNeeded(
 		env,
 		session.id,
 		notificationQueuedAt,
+		streamToken,
 	);
 	if (!claimed) {
 		return false;
@@ -814,9 +831,7 @@ export async function startStudioStream(
 			400,
 		);
 	}
-	const streamToken = input.streamToken === undefined
-		? crypto.randomUUID()
-		: normalizeStudioStreamToken(input.streamToken, "start Studio stream publishing");
+	const streamToken = requireStudioStreamToken(input.streamToken, "start Studio stream publishing");
 	const claimed = await claimStudioStreamStart(env, session.id, streamToken);
 	if (!claimed) {
 		if (
@@ -838,16 +853,38 @@ export async function startStudioStream(
 		);
 	}
 
+	let attemptId: string | undefined;
 	try {
 		const config = await requireConfiguredCloudflareStream(env);
-		const liveInput = session.cloudflareStreamLiveInputId
-			? await getCloudflareStreamLiveInput(config, session.cloudflareStreamLiveInputId)
-			: await createCloudflareStreamLiveInput(config, {
-					contentVideoSlug: session.contentVideoSlug,
-					name: session.title,
-					sessionId: session.id,
-					streamEnvironment: session.streamEnvironment,
-				});
+		if (session.streamEnvironment === "prod" && !(await isProductionWhipReady(env, config.accountId))) {
+			throw new StudioOperationError(
+				"provider-reconciliation-required",
+				"Production WHIP is blocked until legacy provider inputs are reconciled.",
+				503,
+			);
+		}
+		const attempt = await reserveWhipProviderAttempt(env, { accountId: config.accountId, session, startToken: streamToken });
+		if (!attempt) {
+			throw new StudioOperationError(
+				"stream-active",
+				"A previous WHIP provider input is still being retired or reconciled.",
+				409,
+			);
+		}
+		attemptId = attempt.attemptId;
+		if (!(await markWhipCreateDispatched(env, attemptId))) {
+			throw new StudioOperationError("stream-active", "Studio stream is no longer starting.", 409);
+		}
+		const liveInput = await createCloudflareStreamLiveInput(config, {
+			body: attempt.body,
+			idempotencyKey: attempt.idempotencyKey,
+		});
+		if (typeof liveInput.uid !== "string" || !liveInput.uid.trim()) {
+			throw new Error("Cloudflare Stream did not return a live input identifier.");
+		}
+		if (!(await recordWhipProviderInput(env, attemptId, liveInput.uid))) {
+			throw new StudioOperationError("stream-active", "Studio stream is no longer starting.", 409);
+		}
 		const { playbackUrl, publishUrl } = requireStreamPublishUrls(liveInput);
 		const saved = await saveStudioStreamStart(env, {
 			liveInputId: liveInput.uid,
@@ -872,7 +909,9 @@ export async function startStudioStream(
 			streamToken,
 		};
 	} catch (error) {
-		await saveStudioStreamEnded(env, session.id, streamToken).catch(() => undefined);
+		if (attemptId) await markWhipCreateUncertain(env, attemptId).catch(() => undefined);
+		await cancelStudioStreamAttempt(env, session.id, streamToken).catch(() => undefined);
+		await requestWhipProviderRetirement(env, session.id, streamToken).catch(() => undefined);
 		throw error;
 	}
 }
@@ -923,21 +962,44 @@ export async function takeOverStudioStream(
 		);
 	}
 
+	const observedLease = requireObservedTakeoverLease(input.expectedTakeoverLease);
 	const lease = await getStudioStreamLease(env, session.id);
-	if (lease && (lease.status === "starting" || lease.status === "live")) {
-		const takenOver = await takeOverStudioStreamLease(env, session.id, lease);
-		if (!takenOver) {
-			throw new StudioOperationError(
-				"stream-active",
-				"Studio stream publisher changed while takeover was in progress. Try again.",
-				409,
-			);
-		}
+	const currentId = lease ? await getStudioStreamTakeoverLeaseId(session.id, lease) : null;
+	if (!lease || !currentId || currentId !== observedLease ||
+		!(await takeOverStudioStreamLease(env, session.id, lease))) {
+		throw new StudioOperationError(
+			"takeover-precondition-failed",
+			"Studio stream publisher changed. Refresh the publisher observation before takeover.",
+			409,
+		);
 	}
+	await requestWhipProviderRetirement(env, session.id, lease.startToken ?? undefined);
+	await tryRetireWhipProviderAttempt(env, session.id, lease.startToken!);
 	return {
+		providerRevocation: await getWhipProviderRevocation(env, session.id, lease.startToken!),
 		sessionId: session.id,
 		streamStatus: "ended" as const,
 	};
+}
+
+export async function getStudioTakeoverRecovery(
+	env: StudioEnv,
+	user: StudioUser,
+	input: StudioStreamInput,
+) {
+	const session = await requireSessionManager(env, user, input.sessionId);
+	const observedLease = requireObservedTakeoverLease(input.expectedTakeoverLease);
+	return {
+		sessionId: session.id,
+		takeoverState: await getWhipTakeoverState(env, session.id, observedLease),
+	};
+}
+
+function requireObservedTakeoverLease(value: unknown): string {
+	if (typeof value !== "string" || !/^[a-f0-9]{64}$/.test(value)) {
+		throw new StudioOperationError("bad-request", "An observed publisher lease is required for takeover.", 400);
+	}
+	return value;
 }
 
 export async function confirmStudioStream(
@@ -977,7 +1039,7 @@ export async function confirmStudioStream(
 		return {
 			sessionId: session.id,
 			streamStatus: "live" as const,
-			notified: await notifyStudioStreamIfNeeded(env, session),
+			notified: await notifyStudioStreamIfNeeded(env, session, streamToken),
 		};
 	}
 	if (session.streamStatus !== "starting") {
@@ -1024,7 +1086,7 @@ export async function confirmStudioStream(
 			return {
 				sessionId: session.id,
 				streamStatus: "live" as const,
-				notified: await notifyStudioStreamIfNeeded(env, latest),
+				notified: await notifyStudioStreamIfNeeded(env, latest, streamToken),
 			};
 		}
 		throw new StudioOperationError(
@@ -1034,7 +1096,7 @@ export async function confirmStudioStream(
 		);
 	}
 
-	const notified = await notifyStudioStreamIfNeeded(env, session);
+	const notified = await notifyStudioStreamIfNeeded(env, session, streamToken);
 
 	return {
 		sessionId: session.id,
@@ -1054,18 +1116,15 @@ export async function stopStudioStream(
 		input.streamToken,
 		"stop Studio stream publishing",
 	);
-	const stopped = await saveStudioStreamEnded(env, session.id, streamToken);
-	if (!stopped) {
-		throw new StudioOperationError(
-			"stream-active",
-			"Studio stream publisher lease is no longer active.",
-			409,
-		);
-	}
+	const { ended } = await cancelStudioStreamAttempt(env, session.id, streamToken);
+	await requestWhipProviderRetirement(env, session.id, streamToken);
+	await tryRetireWhipProviderAttempt(env, session.id, streamToken);
 
 	return {
+		cancellationRecorded: true as const,
+		providerRevocation: await getWhipProviderRevocation(env, session.id, streamToken),
 		sessionId: session.id,
-		streamStatus: "ended" as const,
+		streamStatus: ended ? "ended" as const : "unchanged" as const,
 	};
 }
 
@@ -1152,7 +1211,7 @@ export async function endStudioSession(
 			409,
 		);
 	}
-	await saveStudioStreamEnded(env, session.id);
+	await requestWhipProviderRetirement(env, session.id);
 	if (meetingId) {
 		const config = await requireConfiguredRealtimeKit(env);
 		await runRealtimeKitOperation(() =>

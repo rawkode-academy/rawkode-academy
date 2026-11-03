@@ -2,6 +2,7 @@ const DEFAULT_GAIN = 1;
 const MAX_GAIN = 2;
 const METER_FLOOR_DECIBELS = -60;
 const METER_SAMPLE_COUNT = 256;
+const AUDIO_RESUME_TIMEOUT_MS = 5_000;
 
 export interface ProgrammeAudioSourceState {
   active: boolean;
@@ -19,7 +20,7 @@ export interface ProgrammeAudioMixer {
   hasAudibleSource(): boolean;
   reconcile(streams: ReadonlyMap<string, MediaStream>): void;
   reconcileControls(controls: Readonly<Record<string, Pick<ProgrammeAudioSourceState, "gain" | "muted">>>): void;
-  resume(): Promise<boolean>;
+  resume(options?: { signal?: AbortSignal }): Promise<boolean>;
   setSourceGain(sourceId: string, gain: number): void;
   setSourceMuted(sourceId: string, muted: boolean): void;
 }
@@ -142,19 +143,19 @@ class BrowserProgrammeAudioMixer implements ProgrammeAudioMixer {
     }
   }
 
-  async resume(): Promise<boolean> {
+  async resume(options: { signal?: AbortSignal } = {}): Promise<boolean> {
+    if (options.signal?.aborted) return false;
     const graph = this.ensureGraph();
     if (!graph) return false;
 
     if (graph.context.state === "suspended") {
-      try {
-        await graph.context.resume();
-      } catch {
+      const resumed = await resumeAudioContext(graph.context, options.signal);
+      if (!resumed) {
         return false;
       }
     }
 
-    return graph.context.state === "running";
+    return !this.closed && !options.signal?.aborted && graph.context.state === "running";
   }
 
   getOutputTrack(): MediaStreamTrack | undefined {
@@ -388,6 +389,38 @@ class BrowserProgrammeAudioMixer implements ProgrammeAudioMixer {
       gainNode.gain.value = control.muted ? 0 : control.gain;
     }
   }
+}
+
+function resumeAudioContext(
+  context: AudioContextLike,
+  signal?: AbortSignal,
+): Promise<boolean> {
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (resumed: boolean) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      signal?.removeEventListener("abort", onAbort);
+      resolve(resumed);
+    };
+    const onAbort = () => finish(false);
+    const timeout = setTimeout(() => finish(false), AUDIO_RESUME_TIMEOUT_MS);
+    signal?.addEventListener("abort", onAbort, { once: true });
+    if (signal?.aborted) {
+      finish(false);
+      return;
+    }
+
+    try {
+      // Call resume synchronously so the browser can associate it with the
+      // operator's click or keypress. Its promise may remain pending if audio
+      // is blocked, so callers must also be able to cancel or time out.
+      void context.resume().then(() => finish(true), () => finish(false));
+    } catch {
+      finish(false);
+    }
+  });
 }
 
 function createBrowserAudioContext(): AudioContextLike | null {

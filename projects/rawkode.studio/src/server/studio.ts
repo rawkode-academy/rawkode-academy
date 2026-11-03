@@ -1127,6 +1127,7 @@ export async function getPublicStudioShowLineup(
 				  WHERE stream_environment = 'prod'
 				    AND stream_status = 'live'
 				    AND status = 'live'
+				    AND stream_heartbeat_at >= unixepoch() - 20
 				    AND cloudflare_stream_playback_url IS NOT NULL
 				  ORDER BY stream_started_at DESC, updated_at DESC
 				  LIMIT 1`,
@@ -1356,6 +1357,11 @@ export async function saveStudioSessionStatus(
 		.prepare(
 			`UPDATE studio_sessions
 			    SET status = ?,
+			        stream_status = CASE WHEN ? = 'complete' THEN 'ended' ELSE stream_status END,
+			        stream_start_token = CASE WHEN ? = 'complete' THEN NULL ELSE stream_start_token END,
+			        stream_heartbeat_at = CASE WHEN ? = 'complete' THEN NULL ELSE stream_heartbeat_at END,
+			        stream_ended_at = CASE WHEN ? = 'complete'
+			          THEN COALESCE(stream_ended_at, unixepoch()) ELSE stream_ended_at END,
 			        updated_at = unixepoch()
 			  WHERE id = ?
 			    AND (
@@ -1377,7 +1383,7 @@ export async function saveStudioSessionStatus(
 			      )
 			    )`,
 		)
-		.bind(status, sessionId, status)
+		.bind(status, status, status, status, status, sessionId, status)
 		.run();
 	return d1WriteChanged(result);
 }
@@ -1606,8 +1612,20 @@ export async function saveStudioStreamStart(
 			        stream_ended_at = NULL,
 			        updated_at = unixepoch()
 			  WHERE id = ?
+			    AND status <> 'complete'
 			    AND stream_status = 'starting'
-			    AND stream_start_token = ?`,
+			    AND stream_start_token = ?
+			    AND stream_heartbeat_at >= unixepoch() - 120
+			    AND NOT EXISTS (SELECT 1 FROM studio_whip_provider_attempts AS p
+			      WHERE p.session_id = studio_sessions.id AND p.start_token = studio_sessions.stream_start_token
+			        AND (p.state IN ('uncertain', 'revoking', 'retired') OR (
+			          p.stream_environment = 'prod' AND NOT EXISTS (
+			            SELECT 1 FROM studio_whip_provider_readiness AS readiness
+			             WHERE readiness.id = 1 AND readiness.production_ready = 1
+			               AND readiness.provider_account_id = p.provider_account_id
+			               AND NOT EXISTS (SELECT 1 FROM studio_whip_legacy_owners WHERE state = 'pending')
+			          )
+			        )))`,
 		)
 		.bind(input.liveInputId, input.playbackUrl, input.sessionId, input.startToken)
 		.run();
@@ -1637,6 +1655,11 @@ export async function claimStudioStreamStart(
 			    AND status <> 'complete'
 			    AND stream_status NOT IN ('starting', 'live')
 			    AND (stream_start_token IS NULL OR stream_start_token <> ?)
+			    AND NOT EXISTS (
+			      SELECT 1 FROM studio_stream_cancelled_attempts AS cancelled
+			       WHERE cancelled.session_id = studio_sessions.id
+			         AND cancelled.start_token = ?
+			    )
 			    AND (
 			      stream_environment <> 'prod'
 			      OR NOT EXISTS (
@@ -1656,7 +1679,7 @@ export async function claimStudioStreamStart(
 			      )
 			    )`,
 		)
-		.bind(startToken, sessionId, startToken)
+		.bind(startToken, sessionId, startToken, startToken)
 		.run();
 	return d1WriteChanged(result);
 }
@@ -1728,8 +1751,13 @@ export async function saveStudioStreamLive(
 			        stream_ended_at = NULL,
 			        updated_at = unixepoch()
 			  WHERE id = ?
+			    AND status <> 'complete'
 			    AND stream_status = 'starting'
-			    AND stream_start_token = ?`,
+			    AND stream_start_token = ?
+			    AND stream_heartbeat_at >= unixepoch() - 120
+			    AND NOT EXISTS (SELECT 1 FROM studio_whip_provider_attempts AS p
+			      WHERE p.session_id = studio_sessions.id AND p.start_token = studio_sessions.stream_start_token
+			        AND p.state IN ('uncertain', 'revoking', 'retired'))`,
 		)
 		.bind(
 			input.publicLive ? 1 : 0,
@@ -1757,8 +1785,16 @@ export async function saveStudioStreamHeartbeat(
 			    SET stream_heartbeat_at = unixepoch(),
 			        updated_at = unixepoch()
 			  WHERE id = ?
+			    AND status <> 'complete'
 			    AND stream_status IN ('starting', 'live')
-			    AND stream_start_token = ?`,
+			    AND stream_start_token = ?
+			    AND (
+			      (stream_status = 'starting' AND stream_heartbeat_at >= unixepoch() - 120)
+			      OR (stream_status = 'live' AND stream_heartbeat_at >= unixepoch() - 20)
+			    )
+			    AND NOT EXISTS (SELECT 1 FROM studio_whip_provider_attempts AS p
+			      WHERE p.session_id = studio_sessions.id AND p.start_token = studio_sessions.stream_start_token
+			        AND p.state IN ('uncertain', 'revoking', 'retired'))`,
 		)
 		.bind(sessionId, startToken)
 		.run();
@@ -1792,6 +1828,33 @@ export async function getStudioStreamLease(
 		: null;
 }
 
+export async function getStudioStreamTakeoverLeaseId(
+	sessionId: string,
+	lease: StudioStreamLease,
+): Promise<string | null> {
+	if ((lease.status !== "starting" && lease.status !== "live") || !lease.startToken) {
+		return null;
+	}
+	return await hashInviteToken(JSON.stringify([
+		"studio-stream-takeover-v1",
+		sessionId,
+		lease.status,
+		lease.startToken,
+	]));
+}
+
+export async function getStudioStreamTakeoverObservation(
+	env: StudioEnv,
+	sessionId: string,
+): Promise<{ streamStatus: StudioStreamStatus; takeoverLease: string | null } | null> {
+	const lease = await getStudioStreamLease(env, sessionId);
+	if (!lease) return null;
+	return {
+		streamStatus: lease.status,
+		takeoverLease: await getStudioStreamTakeoverLeaseId(sessionId, lease),
+	};
+}
+
 export async function takeOverStudioStreamLease(
 	env: StudioEnv,
 	sessionId: string,
@@ -1802,8 +1865,19 @@ export async function takeOverStudioStreamLease(
 		throw new Error("STUDIO_DB binding is required to take over Studio stream lease");
 	}
 
-	const result = await db
-		.prepare(
+	// Fence the observed token only if this exact active lease still owns the
+	// session. Both statements execute in one D1 transaction.
+	const [, result] = await db.batch([
+		db.prepare(
+			`INSERT OR IGNORE INTO studio_stream_cancelled_attempts (session_id, start_token)
+			 SELECT id, stream_start_token FROM studio_sessions
+			  WHERE id = ?
+			    AND stream_status = ?
+			    AND stream_start_token IS ?
+			    AND stream_status IN ('starting', 'live')
+			    AND stream_start_token IS NOT NULL`,
+		).bind(sessionId, lease.status, lease.startToken),
+		db.prepare(
 			`UPDATE studio_sessions
 			    SET status = CASE WHEN status = 'live' THEN 'scheduled' ELSE status END,
 			        stream_status = 'ended',
@@ -1813,10 +1887,11 @@ export async function takeOverStudioStreamLease(
 			        updated_at = unixepoch()
 			  WHERE id = ?
 			    AND stream_status = ?
-			    AND stream_start_token IS ?`,
+			    AND stream_start_token IS ?
+			    AND stream_status IN ('starting', 'live')`,
 		)
-		.bind(sessionId, lease.status, lease.startToken)
-		.run();
+		.bind(sessionId, lease.status, lease.startToken),
+	]);
 	return d1WriteChanged(result);
 }
 
@@ -1828,26 +1903,41 @@ export async function expireStaleStudioStreams(
 	if (!db) return 0;
 
 	const sessionFilter = sessionId ? " AND id = ?" : "";
-	const statement = db.prepare(
-		`UPDATE studio_sessions
-		    SET status = CASE WHEN status = 'live' THEN 'scheduled' ELSE status END,
-		        stream_status = 'ended',
-		        stream_start_token = NULL,
-		        stream_heartbeat_at = NULL,
-		        stream_ended_at = COALESCE(stream_ended_at, unixepoch()),
-		        updated_at = unixepoch()
-		  WHERE (
-		      (
-		        stream_status = 'starting'
-		        AND (stream_heartbeat_at IS NULL OR stream_heartbeat_at < unixepoch() - 120)
-		      )
-		      OR (
-		        stream_status = 'live'
-		        AND (stream_heartbeat_at IS NULL OR stream_heartbeat_at < unixepoch() - 20)
-		      )
-		    )${sessionFilter}`,
-	);
-	const result = await statement.bind(...(sessionId ? [sessionId] : [])).run();
+	const staleLease = `(
+		(stream_status = 'starting'
+		 AND (stream_heartbeat_at IS NULL OR stream_heartbeat_at < unixepoch() - 120))
+		OR (stream_status = 'live'
+		    AND (stream_heartbeat_at IS NULL OR stream_heartbeat_at < unixepoch() - 20))
+	)`;
+	const parameters = sessionId ? [sessionId] : [];
+	// The clock may advance between statements. End non-null tokens only when
+	// a tombstone exists, even if another lease has just crossed the cutoff.
+	const [, result] = await db.batch([
+		db.prepare(
+			`INSERT OR IGNORE INTO studio_stream_cancelled_attempts (session_id, start_token)
+			 SELECT id, stream_start_token FROM studio_sessions
+			  WHERE ${staleLease}${sessionFilter}
+			    AND stream_start_token IS NOT NULL`,
+		).bind(...parameters),
+		db.prepare(
+			`UPDATE studio_sessions
+			    SET status = CASE WHEN status = 'live' THEN 'scheduled' ELSE status END,
+			        stream_status = 'ended',
+			        stream_start_token = NULL,
+			        stream_heartbeat_at = NULL,
+			        stream_ended_at = COALESCE(stream_ended_at, unixepoch()),
+			        updated_at = unixepoch()
+			  WHERE ${staleLease}${sessionFilter}
+			    AND (
+			      stream_start_token IS NULL
+			      OR EXISTS (
+			        SELECT 1 FROM studio_stream_cancelled_attempts AS cancelled
+			         WHERE cancelled.session_id = studio_sessions.id
+			           AND cancelled.start_token = studio_sessions.stream_start_token
+			      )
+			    )`,
+		).bind(...parameters),
+	]);
 	return result.meta?.changes ?? result.meta?.rows_written ?? 0;
 }
 
@@ -1855,6 +1945,7 @@ export async function claimStudioStreamNotification(
 	env: StudioEnv,
 	sessionId: string,
 	notificationQueuedAt: number,
+	startToken: string,
 ): Promise<boolean> {
 	const db = getDb(env);
 	if (!db) {
@@ -1870,9 +1961,11 @@ export async function claimStudioStreamNotification(
 			    AND stream_environment = 'prod'
 			    AND stream_status = 'live'
 			    AND status = 'live'
+			    AND stream_start_token = ?
+			    AND stream_heartbeat_at >= unixepoch() - 20
 			    AND stream_notification_queued_at IS NULL`,
 		)
-		.bind(notificationQueuedAt, sessionId)
+		.bind(notificationQueuedAt, sessionId, startToken)
 		.run();
 	return d1WriteChanged(result);
 }
@@ -1903,44 +1996,46 @@ function d1WriteChanged(result: D1Result<unknown>): boolean {
 	return (result.meta?.changes ?? result.meta?.rows_written ?? 0) > 0;
 }
 
+export async function cancelStudioStreamAttempt(
+	env: StudioEnv,
+	sessionId: string,
+	startToken: string,
+): Promise<{ ended: boolean }> {
+	const db = getDb(env);
+	if (!db) {
+		throw new Error("STUDIO_DB binding is required to cancel Studio stream publishing");
+	}
+
+	// D1 batches execute in a transaction: a claim either sees the tombstone or
+	// is ended by the second statement. A different active token is untouched.
+	const [, result] = await db.batch([
+		db.prepare(
+			`INSERT OR IGNORE INTO studio_stream_cancelled_attempts (session_id, start_token)
+			 VALUES (?, ?)`,
+		).bind(sessionId, startToken),
+		db.prepare(
+			`UPDATE studio_sessions
+			    SET status = CASE WHEN status = 'live' THEN 'scheduled' ELSE status END,
+			        stream_status = 'ended',
+			        stream_heartbeat_at = NULL,
+			        stream_start_token = NULL,
+			        stream_ended_at = COALESCE(stream_ended_at, unixepoch()),
+			        updated_at = unixepoch()
+			  WHERE id = ?
+			    AND stream_start_token = ?
+			    AND stream_status IN ('starting', 'live')`,
+		).bind(sessionId, startToken),
+	]);
+	return { ended: d1WriteChanged(result) };
+}
+
 export async function saveStudioStreamEnded(
 	env: StudioEnv,
 	sessionId: string,
-	startToken?: string,
 ): Promise<boolean> {
 	const db = getDb(env);
 	if (!db) {
 		throw new Error("STUDIO_DB binding is required to persist Studio stream status");
-	}
-
-	if (startToken) {
-		const result = await db
-			.prepare(
-				`UPDATE studio_sessions
-				    SET status = CASE WHEN status = 'live' THEN 'scheduled' ELSE status END,
-				        stream_status = 'ended',
-				        stream_heartbeat_at = NULL,
-				        stream_start_token = CASE
-				          WHEN stream_status IN ('starting', 'live')
-				            AND stream_start_token = ? THEN NULL
-				          WHEN stream_start_token IS NULL
-				            AND stream_status NOT IN ('starting', 'live') THEN ?
-				          ELSE stream_start_token
-				        END,
-				        stream_ended_at = COALESCE(stream_ended_at, unixepoch()),
-				        updated_at = unixepoch()
-				  WHERE id = ?
-				    AND (
-				      stream_start_token = ?
-				      OR (
-				        stream_start_token IS NULL
-				        AND stream_status NOT IN ('starting', 'live')
-				      )
-				    )`,
-			)
-				.bind(startToken, startToken, sessionId, startToken)
-				.run();
-		return d1WriteChanged(result);
 	}
 
 	const result = await db

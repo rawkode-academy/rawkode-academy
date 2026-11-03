@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import RealtimeKitClient from "@cloudflare/realtimekit";
 import { defineCustomElements } from "@cloudflare/realtimekit-ui/loader";
-import { computed, onBeforeUnmount, ref, watch } from "vue";
+import { computed, onBeforeUnmount, ref, shallowRef, watch } from "vue";
 import ContributorLocalRecording from "./ContributorLocalRecording.vue";
 import {
+  createRealtimeKitSourceAuthority,
   getRealtimeKitParticipantSourceIds,
   isRealtimeKitSnapshotAuthoritative,
   mapRealtimeKitParticipantSources,
@@ -41,7 +42,8 @@ const emit = defineEmits<{
 const meetingElement = ref<HTMLElement | null>(null);
 const state = ref<RoomState>("idle");
 const errorMessage = ref("");
-const meeting = ref<RealtimeKitMeeting | null>(null);
+// Keep the SDK client raw: callbacks compare it with the original instance.
+const meeting = shallowRef<RealtimeKitMeeting | null>(null);
 const roomJoined = ref(false);
 const selfMediaStream = ref<MediaStream | null>(null);
 const selfParticipantId = ref("");
@@ -51,9 +53,9 @@ const roomMediaEvents = [
   "participantsUpdate",
   "audioUpdate",
   "videoUpdate",
-  "screenShareUpdate",
 ] as const;
 let removeRoomMediaListeners: Array<() => void> = [];
+const roomSourceAuthority = createRealtimeKitSourceAuthority();
 
 const buttonLabel = computed(() => {
   if (state.value === "opening") return "Opening device check";
@@ -128,12 +130,15 @@ async function openRoom(): Promise<void> {
 
 async function closeRoom(resetState = true): Promise<void> {
   roomOperationGeneration += 1;
+  const closeGeneration = roomOperationGeneration;
   const currentMeeting = meeting.value;
   meeting.value = null;
   roomJoined.value = false;
   selfMediaStream.value = null;
   selfParticipantId.value = "";
   stopWatchingRoomMedia();
+  // Revoke immediately: leave() may hang or finish after another room opens.
+  emitRoomMediaLoss();
 
   const element = meetingElement.value as RealtimeKitMeetingElement | null;
   if (element) {
@@ -147,15 +152,10 @@ async function closeRoom(resetState = true): Promise<void> {
     });
   }
 
-  if (resetState) {
+  if (resetState && closeGeneration === roomOperationGeneration) {
     state.value = closeError ? "unavailable" : "idle";
     errorMessage.value = closeError;
   }
-  emit("media-streams-change", {
-    authoritative: false,
-    sources: [],
-    streams: new Map(),
-  });
 }
 
 async function disconnectMeeting(currentMeeting: RealtimeKitMeeting): Promise<void> {
@@ -193,36 +193,77 @@ async function registerRealtimeKitElements(): Promise<void> {
 function watchRoomMedia(nextMeeting: RealtimeKitMeeting): void {
   stopWatchingRoomMedia();
   let roomJoinedEventObserved = false;
+  let roomConnectionInterrupted = false;
+  let browserOffline = typeof navigator !== "undefined" && navigator.onLine === false;
+  let socketDisconnected = nextMeeting.meta.socketState?.state !== "connected";
   const syncMedia = (departedSourceIds: string[] = [], authoritative?: boolean) => {
     if (meeting.value !== nextMeeting) {
       return;
     }
     emitRoomMediaStreams(
       nextMeeting,
-      authoritative ?? isRealtimeKitSnapshotAuthoritative(nextMeeting.self, roomJoinedEventObserved),
+      !roomConnectionInterrupted && !browserOffline && !socketDisconnected &&
+        (authoritative ?? isRealtimeKitSnapshotAuthoritative(nextMeeting.self, roomJoinedEventObserved)),
       departedSourceIds,
     );
   };
   const handleRoomJoined = () => {
+    if (browserOffline || socketDisconnected || nextMeeting.self.roomJoined !== true) return;
     roomJoinedEventObserved = true;
+    roomConnectionInterrupted = false;
     if (meeting.value === nextMeeting) {
       roomJoined.value = true;
       syncSelfMedia(nextMeeting);
     }
-    syncMedia();
+    syncMedia([], true);
   };
   const handleRoomLeft = () => {
     roomJoinedEventObserved = false;
+    roomConnectionInterrupted = true;
     if (meeting.value === nextMeeting) {
       roomJoined.value = false;
       selfMediaStream.value = null;
     }
-    syncMedia();
+    syncMedia([], false);
   };
   const handleParticipantLeft = (participant: RealtimeKitParticipant) => {
-    // Revoke admission before a durable identity can reappear in a coalesced map snapshot.
-    syncMedia(getRealtimeKitParticipantSourceIds(participant), true);
+    // Revoke before a peer can reappear in a coalesced map snapshot.
+    const sourceIds = getRealtimeKitParticipantSourceIds(participant);
+    if (sourceIds.length > 0) syncMedia(sourceIds);
+    else handleConnectionLost();
   };
+  const handleConnectionLost = () => {
+    roomConnectionInterrupted = true;
+    if (meeting.value === nextMeeting) {
+      roomJoined.value = false;
+      selfMediaStream.value = null;
+    }
+    syncMedia([], false);
+  };
+  const handleScreenShareUpdate = (
+    participant: RealtimeKitParticipant,
+    update?: { screenShareEnabled?: boolean },
+  ) => {
+    const enabled = update?.screenShareEnabled ?? participant.screenShareEnabled ?? participant.screenshareEnabled;
+    if (enabled !== true) {
+      const screenSourceId = getRealtimeKitParticipantSourceIds(participant)[1];
+      if (screenSourceId) syncMedia([screenSourceId]);
+      else handleConnectionLost();
+      return;
+    }
+    syncMedia();
+  };
+  const handleSocketState = ({ state: socketState }: { state: string }) => {
+    socketDisconnected = socketState !== "connected";
+    if (socketDisconnected) handleConnectionLost();
+  };
+  const handleOffline = () => {
+    browserOffline = true;
+    // An online event alone does not prove the SDK signaling socket recovered.
+    socketDisconnected = true;
+    handleConnectionLost();
+  };
+  const handleOnline = () => { browserOffline = false; };
 
   const meetingSelf = nextMeeting.self;
   meetingSelf.on("roomJoined", handleRoomJoined);
@@ -230,20 +271,41 @@ function watchRoomMedia(nextMeeting: RealtimeKitMeeting): void {
   const syncSelf = () => syncSelfMedia(nextMeeting);
   meetingSelf.on("audioUpdate", syncSelf);
   meetingSelf.on("videoUpdate", syncSelf);
+  nextMeeting.meta.on("socketConnectionUpdate", handleSocketState);
+  window.addEventListener("offline", handleOffline);
+  window.addEventListener("online", handleOnline);
   removeRoomMediaListeners.push(() => {
     meetingSelf.off("roomJoined", handleRoomJoined);
     meetingSelf.off("roomLeft", handleRoomLeft);
     meetingSelf.off("audioUpdate", syncSelf);
     meetingSelf.off("videoUpdate", syncSelf);
+    nextMeeting.meta.off("socketConnectionUpdate", handleSocketState);
+    window.removeEventListener("offline", handleOffline);
+    window.removeEventListener("online", handleOnline);
+  });
+
+  const joinedParticipants = nextMeeting.participants.joined;
+  const activeParticipants = nextMeeting.participants.active;
+  // Leaving the subscribed/active map does not mean leaving the meeting.
+  const handleActiveRemoved = () => syncMedia();
+  joinedParticipants.on("participantLeft", handleParticipantLeft);
+  joinedParticipants.on("participantsCleared", handleConnectionLost);
+  activeParticipants.on("participantLeft", handleActiveRemoved);
+  activeParticipants.on("participantsCleared", handleActiveRemoved);
+  removeRoomMediaListeners.push(() => {
+    joinedParticipants.off("participantLeft", handleParticipantLeft);
+    joinedParticipants.off("participantsCleared", handleConnectionLost);
+    activeParticipants.off("participantLeft", handleActiveRemoved);
+    activeParticipants.off("participantsCleared", handleActiveRemoved);
   });
 
   for (const participantMap of [
-    nextMeeting.participants.joined,
-    nextMeeting.participants.active,
+    joinedParticipants,
+    activeParticipants,
   ]) {
-    participantMap.on("participantLeft", handleParticipantLeft);
+    participantMap.on("screenShareUpdate", handleScreenShareUpdate);
     removeRoomMediaListeners.push(() => {
-      participantMap.off("participantLeft", handleParticipantLeft);
+      participantMap.off("screenShareUpdate", handleScreenShareUpdate);
     });
     for (const event of roomMediaEvents) {
       const syncSnapshot = () => syncMedia();
@@ -280,14 +342,29 @@ function emitRoomMediaStreams(
   authoritative: boolean,
   departedSourceIds: string[] = [],
 ): void {
-  const mapping = mapRealtimeKitParticipantSources(getRemoteParticipants(nextMeeting));
+  const mapping = authoritative
+    ? mapRealtimeKitParticipantSources(getRemoteParticipants(nextMeeting))
+    : { sources: [], streams: [] };
   emit("media-streams-change", {
     authoritative,
-    departedSourceIds,
+    departedSourceIds: roomSourceAuthority.update(
+      authoritative,
+      mapping.sources.map((source) => source.id),
+      departedSourceIds,
+    ),
     sources: mapping.sources,
     streams: new Map(
       mapping.streams.map(({ sourceId, tracks }) => [sourceId, new MediaStream(tracks)]),
     ),
+  });
+}
+
+function emitRoomMediaLoss(): void {
+  emit("media-streams-change", {
+    authoritative: false,
+    departedSourceIds: roomSourceAuthority.update(false, []),
+    sources: [],
+    streams: new Map(),
   });
 }
 

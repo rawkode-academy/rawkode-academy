@@ -32,6 +32,24 @@ export interface RealtimeKitParticipantSourceMapping {
   }>;
 }
 
+/** Track every source seen while room membership is authoritative. */
+export function createRealtimeKitSourceAuthority() {
+  const observedSourceIds = new Set<string>();
+
+  return {
+    update(authoritative: boolean, sourceIds: readonly string[], departures: readonly string[] = []): string[] {
+      const revoked = new Set(departures);
+      if (authoritative) {
+        for (const id of sourceIds) observedSourceIds.add(id);
+      } else {
+        for (const id of observedSourceIds) revoked.add(id);
+        observedSourceIds.clear();
+      }
+      return [...revoked];
+    },
+  };
+}
+
 export function isRealtimeKitSnapshotAuthoritative(
   meetingSelf: { roomJoined?: boolean } | null | undefined,
   roomJoinedEventObserved: boolean,
@@ -43,6 +61,12 @@ export function isRealtimeKitSnapshotAuthoritative(
 }
 
 type SourceRole = "guest" | "host" | "producer";
+
+// Control-state source and layer IDs are limited to 256 characters. Leave
+// room for the scene prefix added when a camera layer is compiled.
+const MAXIMUM_SOURCE_ID_LENGTH = 240;
+const CAMERA_SOURCE_PREFIX = "source-realtimekit-camera-v2.";
+const SCREEN_SOURCE_PREFIX = "source-realtimekit-screen-v2.";
 
 export function mapRealtimeKitParticipantSources(
   participants: RealtimeKitParticipant[],
@@ -57,23 +81,26 @@ export function mapRealtimeKitParticipantSources(
 
   for (const participant of getStableParticipants(participants)) {
     const identity = getRealtimeKitParticipantIdentity(participant);
+    if (identity === undefined) continue;
+    const [cameraSourceId, screenSourceId] = getRealtimeKitParticipantSourceIds(participant);
+    if (!cameraSourceId || !screenSourceId) continue;
     const role = getRealtimeKitParticipantRole(participant);
     const sourceRole = role === "program" ? "producer" : role;
     const roleIndex = roleIndexes[sourceRole];
     roleIndexes[sourceRole] += 1;
 
     const cameraTracks = getCameraTracks(participant);
+    // Membership is shared state; track subscription is local to this tab.
+    // A standby waiting for tracks must not remove an admitted peer.
+    sources.push(createCameraSource(cameraSourceId, participant, role, roleIndex + 1));
     if (cameraTracks.length > 0) {
-      const sourceId = getCameraSourceId(identity);
-      sources.push(createCameraSource(sourceId, participant, role, roleIndex + 1));
-      streams.push({ sourceId, tracks: cameraTracks });
+      streams.push({ sourceId: cameraSourceId, tracks: cameraTracks });
     }
 
-    const screenTracks = getScreenTracks(participant);
-    if (screenTracks.length > 0) {
-      const sourceId = `source-realtimekit-screen-${toSafeSourceSegment(identity)}`;
-      sources.push(createScreenSource(sourceId, participant, role));
-      streams.push({ sourceId, tracks: screenTracks });
+    if (hasScreenShareEnabled(participant)) {
+      sources.push(createScreenSource(screenSourceId, participant, role));
+      const screenTracks = getScreenTracks(participant);
+      if (screenTracks.length > 0) streams.push({ sourceId: screenSourceId, tracks: screenTracks });
     }
   }
 
@@ -82,24 +109,26 @@ export function mapRealtimeKitParticipantSources(
 
 export function getRealtimeKitParticipantIdentity(
   participant: RealtimeKitParticipant,
-): string {
-  return participant.customParticipantId?.trim() ||
-    participant.userId?.trim() ||
-    participant.id?.trim() ||
-    participant.name?.trim() ||
-    "anonymous-participant";
+): string | undefined {
+  // RealtimeKit's peer ID is unique per connection. Its user/custom IDs can
+  // be shared by multiple peers and names are not identities.
+  return typeof participant.id === "string" && participant.id.trim()
+    ? participant.id
+    : undefined;
 }
 
 /**
- * A departure revokes both possible programme sources for this identity. Track
- * IDs are deliberately not used: switching a device is not a room departure.
+ * A departure revokes both possible programme sources for this peer. Track IDs
+ * are deliberately not used: switching a device is not a room departure.
  */
 export function getRealtimeKitParticipantSourceIds(participant: RealtimeKitParticipant): string[] {
   const identity = getRealtimeKitParticipantIdentity(participant);
-  const safeIdentity = toSafeSourceSegment(identity);
+  if (identity === undefined) return [];
+  const encoded = encodePeerIdentity(identity);
+  if (encoded === undefined) return [];
   return [
-    getCameraSourceId(identity),
-    `source-realtimekit-screen-${safeIdentity}`,
+    `${CAMERA_SOURCE_PREFIX}${encoded}`,
+    `${SCREEN_SOURCE_PREFIX}${encoded}`,
   ];
 }
 
@@ -123,15 +152,29 @@ function getStableParticipants(
   participants: RealtimeKitParticipant[],
 ): RealtimeKitParticipant[] {
   const participantsByIdentity = new Map<string, RealtimeKitParticipant>();
+  const ambiguousIdentities = new Set<string>();
   for (const participant of participants) {
-    participantsByIdentity.set(getRealtimeKitParticipantIdentity(participant), participant);
+    const identity = getRealtimeKitParticipantIdentity(participant);
+    if (identity === undefined || getRealtimeKitParticipantSourceIds(participant).length === 0) continue;
+    const existing = participantsByIdentity.get(identity);
+    if (existing && (
+      conflictingIdentityField(existing.userId, participant.userId) ||
+      conflictingIdentityField(existing.customParticipantId, participant.customParticipantId)
+    )) {
+      ambiguousIdentities.add(identity);
+      continue;
+    }
+    participantsByIdentity.set(identity, participant);
   }
 
-  return [...participantsByIdentity.values()].sort((left, right) =>
-    getRealtimeKitParticipantIdentity(left).localeCompare(
-      getRealtimeKitParticipantIdentity(right),
-    )
-  );
+  return [...participantsByIdentity.entries()]
+    .filter(([identity]) => !ambiguousIdentities.has(identity))
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([, participant]) => participant);
+}
+
+function conflictingIdentityField(left: string | null | undefined, right: string | null | undefined): boolean {
+  return Boolean(left && right && left !== right);
 }
 
 function getCameraTracks(
@@ -195,10 +238,6 @@ function isLiveTrack(
   return track?.readyState === "live";
 }
 
-function getCameraSourceId(identity: string): string {
-  return `source-realtimekit-camera-${toSafeSourceSegment(identity)}`;
-}
-
 function createCameraSource(
   sourceId: string,
   participant: RealtimeKitParticipant,
@@ -206,14 +245,11 @@ function createCameraSource(
   slotNumber: number,
 ): StudioSource {
   const name = participant.name?.trim() || getFallbackSourceName(role, slotNumber);
-  const videoTrack = participant.videoEnabled === false
-    ? undefined
-    : getLiveTrack(participant.videoTrack);
   return {
     id: sourceId,
     name,
     type: "camera",
-    status: videoTrack ? "ready" : "muted",
+    status: participant.videoEnabled === true ? "ready" : "muted",
     color: getSourceColor(role, slotNumber),
     label: name,
     roles: getSourceRoles(role),
@@ -232,12 +268,11 @@ function createScreenSource(
   role: RealtimeKitParticipantRole,
 ): StudioSource {
   const participantName = participant.name?.trim() || getFallbackSourceName(role, 1);
-  const videoTrack = getScreenShareTrack(participant, "video");
   return {
     id: sourceId,
     name: `${participantName} screen`,
     type: "screen",
-    status: videoTrack ? "ready" : "muted",
+    status: "ready",
     color: getSourceColor(role, 1),
     label: `${participantName} screen`,
     settings: {
@@ -278,9 +313,26 @@ function getFallbackSourceName(
   return role === "program" ? "Program" : "Producer";
 }
 
-function toSafeSourceSegment(value: string): string {
-  return value.replace(/[^A-Za-z0-9_-]+/g, "-").replace(/^-+|-+$/g, "") ||
-    "participant";
+function encodePeerIdentity(value: string): string | undefined {
+  try {
+    // TextEncoder replaces unpaired surrogates; reject them instead of
+    // allowing two different malformed identities to alias.
+    encodeURIComponent(value);
+    const bytes = new TextEncoder().encode(value);
+    if (bytes.length > MAXIMUM_SOURCE_ID_LENGTH) return undefined;
+    const encoded = btoa(Array.from(bytes, (byte) => String.fromCharCode(byte)).join(""))
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/, "");
+    if (Math.max(CAMERA_SOURCE_PREFIX.length, SCREEN_SOURCE_PREFIX.length) + encoded.length > MAXIMUM_SOURCE_ID_LENGTH) {
+      return undefined;
+    }
+    // The period cannot occur in the legacy sanitized suffix, so an old
+    // source's admission or mix never transfers to this namespace.
+    return encoded;
+  } catch {
+    return undefined;
+  }
 }
 
 function isRealtimeKitParticipantRole(

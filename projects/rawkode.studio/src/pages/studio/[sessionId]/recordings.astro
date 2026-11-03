@@ -25,17 +25,23 @@ if (!(await userCanManageStudioSession(env, session, Astro.locals.user))) {
 const readyMarkerKey = `studio/recordings/${sessionId}/<recording-id>/ready.json`;
 const recordings = await listStudioRecordings(env, session.id);
 const publicVodUrl = getStudioSessionWatchUrl(session);
+const localOnly = session.streamEnvironment !== "prod" || !session.contentVideoId;
 ---
 
-<StudioLayout title={`Canonical recording ${session.title} | Rawkode Studio`} active="recordings">
+<StudioLayout title={`Recordings ${session.title} | Rawkode Studio`} active="recordings">
 	<section class="role-panel">
-		<p class="eyebrow">Canonical VOD recording</p>
+		<p class="eyebrow">{localOnly ? "Local programme recording" : "Canonical VOD recording"}</p>
 		<h1>{session.title}</h1>
 		{
 			session.streamEnvironment === "test" ? (
 				<p>
 					Test-mode recordings stay in the browser and download as a local WebM.
 					This session cannot create an R2 upload, ready marker, or canonical VOD claim.
+				</p>
+			) : !session.contentVideoId ? (
+				<p>
+					Standalone production recordings stay in the browser and download as a
+					local WebM. They do not create an R2 upload, ready marker, or canonical VOD claim.
 				</p>
 			) : (
 				<p>
@@ -49,20 +55,20 @@ const publicVodUrl = getStudioSessionWatchUrl(session);
 			<dl>
 				<div>
 					<dt>MODE</dt>
-					<dd>{session.streamEnvironment === "test" ? "local-only test" : "one canonical prod VOD"}</dd>
+					<dd>{localOnly ? "local-only" : "one canonical prod VOD"}</dd>
 				</div>
 				<div>
 					<dt>SESSION_ID</dt>
 					<dd>{session.id}</dd>
 				</div>
-				<div>
-					<dt>RECORDING_PREFIX</dt>
-					<dd><code>{session.recordingPrefix}</code></dd>
-				</div>
-				<div>
-					<dt>VIDEO_ID</dt>
-					<dd>{session.contentVideoId ?? `${session.showId}/${session.id}`}</dd>
-				</div>
+				{
+					session.contentVideoId ? (
+						<div>
+							<dt>VIDEO_ID</dt>
+							<dd>{session.contentVideoId}</dd>
+						</div>
+					) : null
+				}
 				{
 					publicVodUrl ? (
 						<div>
@@ -71,24 +77,34 @@ const publicVodUrl = getStudioSessionWatchUrl(session);
 						</div>
 					) : null
 				}
-				<div>
-					<dt>SOURCE_KEY</dt>
-					<dd>private R2 recording object path</dd>
-				</div>
-				<div>
-					<dt>OUTPUT_PREFIX</dt>
-					<dd><code>videos/&lt;VIDEO_ID&gt;/</code></dd>
-				</div>
+				{
+					!localOnly ? (
+						<>
+							<div>
+								<dt>RECORDING_PREFIX</dt>
+								<dd><code>{session.recordingPrefix}</code></dd>
+							</div>
+							<div>
+								<dt>SOURCE_KEY</dt>
+								<dd>private R2 recording object path</dd>
+							</div>
+							<div>
+								<dt>OUTPUT_PREFIX</dt>
+								<dd><code>videos/&lt;VIDEO_ID&gt;/</code></dd>
+							</div>
+						</>
+					) : null
+				}
 			</dl>
 		</div>
 	</section>
 
-	<section class="recording-list" aria-label="Canonical Studio recording">
+	<section class="recording-list" aria-label="Studio recording handoffs">
 		{
 			recordings.length === 0 ? (
 				<p class="recording-empty">
-					{session.streamEnvironment === "test"
-						? "Test-mode recordings are local-only and never appear here."
+					{localOnly
+						? "Local-only recordings stay in the browser and do not appear in this handoff list."
 						: "This content video has not claimed its canonical Studio recording yet."}
 				</p>
 			) : (
