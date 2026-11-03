@@ -86,6 +86,377 @@ afterEach(async () => {
 });
 
 describe("two-producer synchronization", () => {
+  it("drops an unsent admission on a poll error while preserving another local edit", async () => {
+    let authoritative = createInitialStudioState();
+    let revision = 1;
+    let reads = 0;
+    let rejectPoll!: (error: Error) => void;
+    const pendingPoll = new Promise<Response>((_resolve, reject) => { rejectPoll = reject; });
+    const writes: Array<{ expectedRevision: number; state: StudioState }> = [];
+    const fetchMock = vi.fn((_url: string, init?: RequestInit) => {
+      if (init?.method !== "POST") {
+        reads += 1;
+        if (reads === 3) return pendingPoll;
+        return Promise.resolve(snapshot(revision, authoritative));
+      }
+      const body = JSON.parse(String(init.body)) as { expectedRevision: number; state: StudioState };
+      writes.push(body);
+      if (body.expectedRevision !== revision) return Promise.resolve(snapshot(revision, authoritative, 409));
+      authoritative = body.state;
+      revision += 1;
+      return Promise.resolve(snapshot(revision, authoritative));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const first = mountMachine();
+    const second = mountMachine();
+    await flush();
+    await vi.advanceTimersByTimeAsync(2_000);
+    first.send({ type: "source.admission.set", sourceId: "source-host-camera", admitted: true });
+    first.send({ type: "audioMix.source.gain", sourceId: "source-host-camera", gain: 1.5 });
+    rejectPoll(new Error("poll failed"));
+    await flush();
+    expect(first.isSynchronized.value).toBe(false);
+    expect(first.state.value.onStageSourceIds).not.toContain("source-host-camera");
+    expect(first.state.value.audioMix["source-host-camera"].gain).toBe(1.5);
+    first.send({ type: "source.admission.set", sourceId: "source-host-camera", admitted: true });
+    expect(first.state.value.onStageSourceIds).not.toContain("source-host-camera");
+    expect(first.syncConflictNotice.value).toContain("Pending admissions were cleared");
+    await vi.advanceTimersByTimeAsync(100);
+    expect(writes).toHaveLength(1);
+    expect(writes[0].state.onStageSourceIds).not.toContain("source-host-camera");
+    expect(writes[0].state.audioMix["source-host-camera"].gain).toBe(1.5);
+    expect(first.isSynchronized.value).toBe(true);
+    await vi.advanceTimersByTimeAsync(1_900);
+    second.send({ type: "source.admission.set", sourceId: "source-host-camera", admitted: true });
+    await vi.advanceTimersByTimeAsync(100);
+    expect(authoritative.onStageSourceIds).toContain("source-host-camera");
+    expect(writes).toHaveLength(2);
+    await vi.advanceTimersByTimeAsync(1_900);
+    expect(first.state.value.onStageSourceIds).toContain("source-host-camera");
+    expect(first.syncConflictNotice.value).toContain("Pending admissions were cleared");
+    expect(fetchMock.mock.calls.filter(([, init]) => init?.method !== "POST").every(([, init]) => init?.cache === "no-store")).toBe(true);
+  });
+
+  it("commits a CAS barrier before an uncertain delayed admission can arrive", async () => {
+    let authoritative = createInitialStudioState();
+    let revision = 1;
+    const oldResponse = deferred<Response>();
+    const writes: Array<{ expectedRevision: number; state: StudioState }> = [];
+    const commit = (body: { expectedRevision: number; state: StudioState }) => {
+      if (body.expectedRevision !== revision) return false;
+      authoritative = body.state;
+      revision += 1;
+      return true;
+    };
+    vi.stubGlobal("fetch", vi.fn((_url: string, init?: RequestInit) => {
+      if (init?.method !== "POST") return Promise.resolve(snapshot(revision, authoritative));
+      const body = JSON.parse(String(init.body)) as { expectedRevision: number; state: StudioState };
+      writes.push(body);
+      if (writes.length === 1) return oldResponse.promise;
+      const accepted = commit(body);
+      return Promise.resolve(snapshot(revision, authoritative, accepted ? 200 : 409));
+    }));
+    const first = mountMachine();
+    const second = mountMachine();
+    await flush();
+    first.send({ type: "source.admission.set", sourceId: "source-host-camera", admitted: true });
+    await vi.advanceTimersByTimeAsync(100);
+    expect(writes[0].state.onStageSourceIds).toContain("source-host-camera");
+    await vi.advanceTimersByTimeAsync(7_900);
+    expect(first.isSynchronized.value).toBe(false);
+    expect(first.state.value.onStageSourceIds).not.toContain("source-host-camera");
+    first.send({ type: "source.admission.set", sourceId: "source-guest-camera", admitted: true });
+    expect(first.state.value.onStageSourceIds).not.toContain("source-guest-camera");
+    await vi.advanceTimersByTimeAsync(2_100);
+    expect(writes).toHaveLength(2);
+    expect(writes[1].expectedRevision).toBe(1);
+    expect(writes[1].state.onStageSourceIds).not.toContain("source-host-camera");
+    expect(revision).toBe(2);
+    expect(first.isSynchronized.value).toBe(true);
+    // The delayed original request carries the old revision and must lose CAS.
+    const acceptedLate = commit(writes[0]);
+    expect(acceptedLate).toBe(false);
+    oldResponse.resolve(snapshot(revision, authoritative, acceptedLate ? 200 : 409));
+    await flush();
+    expect(authoritative.onStageSourceIds).not.toContain("source-host-camera");
+    expect(first.state.value.onStageSourceIds).not.toContain("source-host-camera");
+    await vi.advanceTimersByTimeAsync(1_900);
+    expect(second.state.value.onStageSourceIds).not.toContain("source-host-camera");
+  });
+
+  it("stays closed if the delayed admission wins after the recovery read but before the barrier", async () => {
+    let authoritative = createInitialStudioState();
+    let revision = 1;
+    const oldResponse = deferred<Response>();
+    const writes: Array<{ expectedRevision: number; state: StudioState }> = [];
+    const commit = (body: { expectedRevision: number; state: StudioState }) => {
+      if (body.expectedRevision !== revision) return false;
+      authoritative = body.state;
+      revision += 1;
+      return true;
+    };
+    vi.stubGlobal("fetch", vi.fn((_url: string, init?: RequestInit) => {
+      if (init?.method !== "POST") return Promise.resolve(snapshot(revision, authoritative));
+      const body = JSON.parse(String(init.body)) as { expectedRevision: number; state: StudioState };
+      writes.push(body);
+      if (writes.length === 1) return oldResponse.promise;
+      const accepted = commit(body);
+      return Promise.resolve(snapshot(revision, authoritative, accepted ? 200 : 409));
+    }));
+    const first = mountMachine();
+    mountMachine();
+    await flush();
+    first.send({ type: "source.admission.set", sourceId: "source-host-camera", admitted: true });
+    await vi.advanceTimersByTimeAsync(8_000);
+    expect(first.isSynchronized.value).toBe(false);
+    expect(commit(writes[0])).toBe(true);
+    expect(authoritative.onStageSourceIds).toContain("source-host-camera");
+    await vi.advanceTimersByTimeAsync(100);
+    expect(writes[1].expectedRevision).toBe(1);
+    expect(first.isSynchronized.value).toBe(false);
+    await vi.advanceTimersByTimeAsync(100);
+    expect(writes[2].expectedRevision).toBe(2);
+    expect(authoritative.onStageSourceIds).not.toContain("source-host-camera");
+    expect(first.isSynchronized.value).toBe(true);
+    oldResponse.resolve(snapshot(2, writes[0].state));
+    await flush();
+    expect(first.state.value.onStageSourceIds).not.toContain("source-host-camera");
+  });
+
+  it("conservatively revokes a newer admission of the same source while resolving uncertainty", async () => {
+    let authoritative = createInitialStudioState();
+    let revision = 1;
+    const oldResponse = deferred<Response>();
+    const barrierResponse = deferred<Response>();
+    const writes: Array<{ expectedRevision: number; state: StudioState }> = [];
+    const commit = (body: { expectedRevision: number; state: StudioState }) => {
+      if (body.expectedRevision !== revision) return false;
+      authoritative = body.state;
+      revision += 1;
+      return true;
+    };
+    vi.stubGlobal("fetch", vi.fn((_url: string, init?: RequestInit) => {
+      if (init?.method !== "POST") return Promise.resolve(snapshot(revision, authoritative));
+      const body = JSON.parse(String(init.body)) as { expectedRevision: number; state: StudioState };
+      writes.push(body);
+      if (writes.length === 1) return oldResponse.promise;
+      if (writes.length === 2) return barrierResponse.promise;
+      const accepted = commit(body);
+      return Promise.resolve(snapshot(revision, authoritative, accepted ? 200 : 409));
+    }));
+    const first = mountMachine();
+    const second = mountMachine();
+    await flush();
+    first.send({ type: "source.admission.set", sourceId: "source-host-camera", admitted: true });
+    await vi.advanceTimersByTimeAsync(8_100);
+    expect(first.isSynchronized.value).toBe(false);
+    expect(writes).toHaveLength(2);
+    expect(second.isSynchronized.value).toBe(true);
+
+    // The other producer makes a new, valid admission while the old barrier is delayed.
+    second.send({ type: "source.admission.set", sourceId: "source-host-camera", admitted: true });
+    await vi.advanceTimersByTimeAsync(100);
+    expect(authoritative.onStageSourceIds).toContain("source-host-camera");
+    expect(revision).toBe(2);
+    expect(commit(writes[1])).toBe(false);
+    barrierResponse.resolve(snapshot(revision, authoritative, 409));
+    await flush();
+    expect(first.isSynchronized.value).toBe(false);
+    await vi.advanceTimersByTimeAsync(100);
+    expect(authoritative.onStageSourceIds).not.toContain("source-host-camera");
+    expect(first.syncConflictNotice.value).toContain("Pending admissions were cleared");
+    expect(first.isSynchronized.value).toBe(true);
+    expect(commit(writes[0])).toBe(false);
+    oldResponse.resolve(snapshot(revision, authoritative, 409));
+    await flush();
+  });
+
+  it("revokes an uncertain admission that committed while retaining another producer's edits", async () => {
+    let authoritative = createInitialStudioState();
+    let revision = 1;
+    const oldResponse = deferred<Response>();
+    let writes = 0;
+    vi.stubGlobal("fetch", vi.fn((_url: string, init?: RequestInit) => {
+      if (init?.method !== "POST") return Promise.resolve(snapshot(revision, authoritative));
+      const body = JSON.parse(String(init.body)) as { expectedRevision: number; state: StudioState };
+      writes += 1;
+      if (body.expectedRevision !== revision) return Promise.resolve(snapshot(revision, authoritative, 409));
+      authoritative = body.state;
+      revision += 1;
+      if (writes === 1) return oldResponse.promise;
+      return Promise.resolve(snapshot(revision, authoritative));
+    }));
+    const first = mountMachine();
+    const second = mountMachine();
+    await flush();
+    first.send({ type: "source.admission.set", sourceId: "source-host-camera", admitted: true });
+    await vi.advanceTimersByTimeAsync(2_000);
+    expect(second.state.value.onStageSourceIds).toContain("source-host-camera");
+    second.send({ type: "source.admission.set", sourceId: "source-guest-camera", admitted: true });
+    second.send({ type: "scene.select", sceneId: "guests" });
+    await vi.advanceTimersByTimeAsync(6_000);
+    expect(first.isSynchronized.value).toBe(false);
+    expect(first.state.value.onStageSourceIds).not.toContain("source-host-camera");
+    await vi.advanceTimersByTimeAsync(2_100);
+    expect(authoritative.onStageSourceIds).not.toContain("source-host-camera");
+    expect(authoritative.onStageSourceIds).toContain("source-guest-camera");
+    expect(authoritative.previewSceneId).toBe("guests");
+    expect(first.isSynchronized.value).toBe(true);
+    expect(first.syncConflictNotice.value).toContain("Pending admissions were cleared");
+    oldResponse.resolve(snapshot(2, createInitialStudioState()));
+    await flush();
+    expect(first.state.value.onStageSourceIds).not.toContain("source-host-camera");
+  });
+
+  it("rejects an admission if elapsed time exceeds freshness before the timer fires", async () => {
+    const state = createInitialStudioState();
+    const fetchMock = vi.fn().mockResolvedValue(snapshot(1, state));
+    vi.stubGlobal("fetch", fetchMock);
+    const first = mountMachine();
+    mountMachine();
+    await flush();
+    vi.setSystemTime(new Date("2026-01-01T00:00:20Z"));
+    first.send({ type: "source.admission.set", sourceId: "source-host-camera", admitted: true });
+    expect(first.isSynchronized.value).toBe(false);
+    expect(first.state.value.onStageSourceIds).not.toContain("source-host-camera");
+    expect(fetchMock.mock.calls.every(([, init]) => init?.method !== "POST")).toBe(true);
+  });
+
+  it("replays an exact screen publication departure after a two-producer CAS conflict", async () => {
+    const screen = (id: string, name: string) => ({
+      id: `source-realtimekit-screen-v3.${id}`, name, type: "screen" as const, status: "ready" as const,
+      settings: { runtimeSource: "realtimekit", realtimeKitSource: "screen" },
+    });
+    const oldScreen = screen("old", "Old screen");
+    const newScreen = screen("new", "New screen");
+    let authoritative = reduceStudioState(createInitialStudioState(), { type: "sources.reconcile", sources: [oldScreen] });
+    authoritative = reduceStudioState(authoritative, { type: "source.admission.set", sourceId: oldScreen.id, admitted: true });
+    let revision = 1;
+    const writes: number[] = [];
+    vi.stubGlobal("fetch", vi.fn((_url: string, init?: RequestInit) => {
+      if (init?.method !== "POST") return Promise.resolve(snapshot(revision, authoritative));
+      const body = JSON.parse(String(init.body)) as { expectedRevision: number; state: StudioState };
+      writes.push(body.expectedRevision);
+      if (body.expectedRevision !== revision) return Promise.resolve(snapshot(revision, authoritative, 409));
+      authoritative = body.state;
+      revision += 1;
+      return Promise.resolve(snapshot(revision, authoritative));
+    }));
+    const first = mountMachine();
+    const second = mountMachine();
+    await flush();
+
+    first.send({ type: "scene.select", sceneId: "guests" });
+    first.send({ type: "sources.reconcile", sources: [newScreen] });
+    first.send({ type: "source.admission.set", sourceId: newScreen.id, admitted: true });
+    second.send({ type: "sources.reconcile", sources: [], departedSourceIds: [oldScreen.id] });
+    await vi.advanceTimersByTimeAsync(200);
+
+    expect(writes).toEqual([1, 1, 2]);
+    expect(authoritative.previewSceneId).toBe("guests");
+    expect(authoritative.sources.some((source) => source.id === oldScreen.id)).toBe(false);
+    expect(authoritative.onStageSourceIds).not.toContain(oldScreen.id);
+    expect(authoritative.sources.some((source) => source.id === newScreen.id)).toBe(true);
+    expect(authoritative.onStageSourceIds).toContain(newScreen.id);
+    expect(second.state.value.sources.some((source) => source.id === oldScreen.id)).toBe(false);
+    expect(second.syncConflictNotice.value).toBe("");
+  });
+
+  it("keeps a manually backstage screen source after a conflicting edit", async () => {
+    const screen = {
+      id: "source-realtimekit-screen-v3.retained", name: "Screen", type: "screen" as const, status: "ready" as const,
+      settings: { runtimeSource: "realtimekit", realtimeKitSource: "screen" },
+    };
+    let authoritative = reduceStudioState(createInitialStudioState(), { type: "sources.reconcile", sources: [screen] });
+    authoritative = reduceStudioState(authoritative, { type: "source.admission.set", sourceId: screen.id, admitted: true });
+    let revision = 1;
+    vi.stubGlobal("fetch", vi.fn((_url: string, init?: RequestInit) => {
+      if (init?.method !== "POST") return Promise.resolve(snapshot(revision, authoritative));
+      const body = JSON.parse(String(init.body)) as { expectedRevision: number; state: StudioState };
+      if (body.expectedRevision !== revision) return Promise.resolve(snapshot(revision, authoritative, 409));
+      authoritative = body.state;
+      revision += 1;
+      return Promise.resolve(snapshot(revision, authoritative));
+    }));
+    const first = mountMachine();
+    const second = mountMachine();
+    await flush();
+    first.send({ type: "scene.select", sceneId: "guests" });
+    second.send({ type: "source.admission.set", sourceId: screen.id, admitted: false });
+    await vi.advanceTimersByTimeAsync(200);
+    expect(authoritative.sources.some((source) => source.id === screen.id)).toBe(true);
+    expect(authoritative.onStageSourceIds).not.toContain(screen.id);
+    expect(authoritative.previewSceneId).toBe("guests");
+  });
+
+  it("keeps the exact publication removal through consecutive CAS conflicts", async () => {
+    const screen = {
+      id: "source-realtimekit-screen-v3.twice", name: "Screen", type: "screen" as const, status: "ready" as const,
+      settings: { runtimeSource: "realtimekit", realtimeKitSource: "screen" },
+    };
+    let authoritative = reduceStudioState(createInitialStudioState(), { type: "sources.reconcile", sources: [screen] });
+    authoritative = reduceStudioState(authoritative, { type: "source.admission.set", sourceId: screen.id, admitted: true });
+    let revision = 1;
+    let first: StudioMachine;
+    let injectedSecondEdit = false;
+    const writes: number[] = [];
+    vi.stubGlobal("fetch", vi.fn((_url: string, init?: RequestInit) => {
+      if (init?.method !== "POST") return Promise.resolve(snapshot(revision, authoritative));
+      const body = JSON.parse(String(init.body)) as { expectedRevision: number; state: StudioState };
+      writes.push(body.expectedRevision);
+      if (body.expectedRevision !== revision) {
+        if (!injectedSecondEdit) {
+          injectedSecondEdit = true;
+          first.send({ type: "scene.select", sceneId: "screenshare" });
+        }
+        return Promise.resolve(snapshot(revision, authoritative, 409));
+      }
+      authoritative = body.state;
+      revision += 1;
+      return Promise.resolve(snapshot(revision, authoritative));
+    }));
+    first = mountMachine();
+    const second = mountMachine();
+    await flush();
+    first.send({ type: "scene.select", sceneId: "guests" });
+    second.send({ type: "sources.reconcile", sources: [], departedSourceIds: [screen.id] });
+    await vi.advanceTimersByTimeAsync(300);
+    expect(writes).toEqual([1, 1, 2, 2, 3]);
+    expect(authoritative.previewSceneId).toBe("screenshare");
+    expect(authoritative.sources.some((source) => source.id === screen.id)).toBe(false);
+    expect(authoritative.onStageSourceIds).not.toContain(screen.id);
+    expect(second.syncConflictNotice.value).toBe("");
+  });
+
+  it("retains a publication departure but reports a conflicting real local edit", async () => {
+    const screen = {
+      id: "source-realtimekit-screen-v3.departed", name: "Screen", type: "screen" as const, status: "ready" as const,
+      settings: { runtimeSource: "realtimekit", realtimeKitSource: "screen" },
+    };
+    let authoritative = reduceStudioState(createInitialStudioState(), { type: "sources.reconcile", sources: [screen] });
+    authoritative = reduceStudioState(authoritative, { type: "source.admission.set", sourceId: screen.id, admitted: true });
+    let revision = 1;
+    vi.stubGlobal("fetch", vi.fn((_url: string, init?: RequestInit) => {
+      if (init?.method !== "POST") return Promise.resolve(snapshot(revision, authoritative));
+      const body = JSON.parse(String(init.body)) as { expectedRevision: number; state: StudioState };
+      if (body.expectedRevision !== revision) return Promise.resolve(snapshot(revision, authoritative, 409));
+      authoritative = body.state;
+      revision += 1;
+      return Promise.resolve(snapshot(revision, authoritative));
+    }));
+    const first = mountMachine();
+    const second = mountMachine();
+    await flush();
+    first.send({ type: "scene.select", sceneId: "guests" });
+    second.send({ type: "sources.reconcile", sources: [], departedSourceIds: [screen.id] });
+    second.send({ type: "scene.select", sceneId: "screenshare" });
+    await vi.advanceTimersByTimeAsync(200);
+    expect(authoritative.sources.some((source) => source.id === screen.id)).toBe(false);
+    expect(authoritative.onStageSourceIds).not.toContain(screen.id);
+    expect(authoritative.previewSceneId).toBe("guests");
+    expect(second.syncConflictNotice.value).toContain("Local changes were discarded");
+  });
+
   it("does not let a standby awaiting tracks evict an admitted peer", async () => {
     const participant = {
       id: "peer-one",

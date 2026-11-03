@@ -217,6 +217,12 @@ let livePublisherLease: PublisherLeaseHeartbeat | undefined;
 let cancellationInFlight: { token: string; promise: Promise<void> } | undefined;
 let isComponentUnmounted = false;
 const mediaVideoElements = new Map<string, HTMLVideoElement>();
+let committedMediaSourceIds = new Set<string>();
+const mediaStreamObservations = new Map<string, {
+  stream: MediaStream;
+  refreshTracks: () => boolean;
+  dispose: () => void;
+}>();
 let stingerAnimation: MotionAnimationControls | undefined;
 let stingerProgress: number | undefined;
 let stingerStartedAt: number | undefined;
@@ -360,6 +366,9 @@ async function paint(timestamp = performance.now()): Promise<void> {
     return;
   }
 
+  const renderedMediaSourceIds = new Set(props.layers.filter((layer) =>
+    layer.enabled && layer.sourceId && (layer.type === "camera" || layer.type === "screen")
+  ).map((layer) => layer.sourceId!));
   await frameCommitGuard.render(async () => {
     bufferContext.setTransform(1, 0, 0, 1, 0, 0);
     await renderProgramCanvas(bufferContext, {
@@ -381,6 +390,7 @@ async function paint(timestamp = performance.now()): Promise<void> {
     context.setTransform(1, 0, 0, 1, 0, 0);
     context.clearRect(0, 0, backingWidth, backingHeight);
     context.drawImage(buffer, 0, 0);
+    committedMediaSourceIds = renderedMediaSourceIds;
   });
 }
 
@@ -1981,17 +1991,13 @@ watch(
 );
 
 watch(
-  () => props.layers.filter((layer) => layer.enabled && layer.sourceId).map((layer) => layer.sourceId).sort().join("\u0000"),
+  () => props.layers.filter((layer) => layer.enabled && layer.sourceId)
+    .map((layer) => JSON.stringify([layer.type, layer.sourceId])).sort().join("\u0000"),
   () => {
     frameCommitGuard.invalidate();
     // Drop the previously displayed frame immediately when admission changes.
     // Waiting for an HTML overlay must not leave a removed guest on screen.
-    const canvas = canvasElement.value;
-    const context = canvas?.getContext("2d");
-    if (canvas && context) {
-      context.fillStyle = "#000";
-      context.fillRect(0, 0, canvas.width, canvas.height);
-    }
+    clearCommittedFrame();
     renderLoop.queuePaint();
   },
   { flush: "sync" },
@@ -2024,11 +2030,15 @@ watch(
 );
 
 watch(
-  () => props.mediaStreams,
-  (streams) => {
+  () => [...(props.mediaStreams ?? new Map<string, MediaStream>())],
+  (entries) => {
     frameCommitGuard.invalidate();
-    const currentStreams = streams ?? new Map();
-    syncMediaVideoElements(currentStreams);
+    const currentStreams = new Map(entries);
+    const { renderedMediaChanged, changedTracks } = syncMediaStreamObservations(currentStreams);
+    if (renderedMediaChanged) {
+      clearCommittedFrame();
+    }
+    syncMediaVideoElements(currentStreams, changedTracks);
     renderLoop.queuePaint();
   },
   { immediate: true, flush: "sync" },
@@ -2139,25 +2149,119 @@ function getOverlayTransitionProgresses(): Map<string, number> {
 }
 
 function getMediaVideoElements(): Map<string, HTMLVideoElement> {
-  return new Map(mediaVideoElements);
+  return new Map([...mediaVideoElements].filter(([sourceId]) => {
+    const tracks = mediaStreamObservations.get(sourceId)?.stream.getVideoTracks() ?? [];
+    return tracks.length > 0 && tracks.every((track) =>
+      track.readyState === "live" && track.enabled && !track.muted
+    );
+  }));
 }
 
-function syncMediaVideoElements(streams: Map<string, MediaStream>): void {
+function clearCommittedFrame(): void {
+  committedMediaSourceIds.clear();
+  const canvas = canvasElement.value;
+  const context = canvas?.getContext("2d");
+  if (!canvas || !context) return;
+
+  context.setTransform(1, 0, 0, 1, 0, 0);
+  context.globalAlpha = 1;
+  context.globalCompositeOperation = "source-over";
+  context.fillStyle = "#000";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+function isRenderedMediaSource(sourceId: string): boolean {
+  return committedMediaSourceIds.has(sourceId) || props.layers.some((layer) => layer.enabled && layer.sourceId === sourceId &&
+    (layer.type === "camera" || layer.type === "screen"));
+}
+
+function observeMediaStream(sourceId: string, stream: MediaStream) {
+  let videoTracks = new Map<MediaStreamTrack, {
+    readyState: MediaStreamTrackState;
+    enabled: boolean;
+    muted: boolean;
+  }>();
+
+  function refreshTracks(): boolean {
+    const nextTracks = new Map(stream.getVideoTracks().map((track) => [track, {
+      readyState: track.readyState, enabled: track.enabled, muted: track.muted,
+    }] as const));
+    const changed = videoTracks.size !== nextTracks.size ||
+      [...videoTracks].some(([track, state]) => {
+        const next = nextTracks.get(track);
+        return !next || next.readyState !== state.readyState || next.enabled !== state.enabled || next.muted !== state.muted;
+      });
+    for (const track of videoTracks.keys()) {
+      if (!nextTracks.has(track)) {
+        for (const event of ["ended", "mute", "unmute"]) track.removeEventListener?.(event, onTracksChanged);
+      }
+    }
+    for (const track of nextTracks.keys()) {
+      if (!videoTracks.has(track)) {
+        for (const event of ["ended", "mute", "unmute"]) track.addEventListener?.(event, onTracksChanged);
+      }
+    }
+    videoTracks = nextTracks;
+    return changed;
+  }
+
+  function onTracksChanged(): void {
+    if (!refreshTracks()) return;
+    if (isRenderedMediaSource(sourceId)) {
+      frameCommitGuard.invalidate();
+      clearCommittedFrame();
+    }
+    resetMediaVideoElement(sourceId, stream);
+    renderLoop.queuePaint();
+  }
+
+  stream.addEventListener?.("addtrack", onTracksChanged);
+  stream.addEventListener?.("removetrack", onTracksChanged);
+  refreshTracks();
+  return {
+    stream,
+    refreshTracks,
+    dispose() {
+      stream.removeEventListener?.("addtrack", onTracksChanged);
+      stream.removeEventListener?.("removetrack", onTracksChanged);
+      for (const track of videoTracks.keys()) {
+        for (const event of ["ended", "mute", "unmute"]) track.removeEventListener?.(event, onTracksChanged);
+      }
+    },
+  };
+}
+
+function syncMediaStreamObservations(streams: Map<string, MediaStream>): {
+  renderedMediaChanged: boolean;
+  changedTracks: Set<string>;
+} {
+  let renderedMediaChanged = false;
+  const changedTracks = new Set<string>();
+  for (const [sourceId, observation] of mediaStreamObservations) {
+    if (streams.get(sourceId) !== observation.stream) {
+      if (isRenderedMediaSource(sourceId)) renderedMediaChanged = true;
+      observation.dispose();
+      mediaStreamObservations.delete(sourceId);
+    } else if (observation.refreshTracks()) {
+      if (isRenderedMediaSource(sourceId)) renderedMediaChanged = true;
+      changedTracks.add(sourceId);
+    }
+  }
+  for (const [sourceId, stream] of streams) {
+    if (!mediaStreamObservations.has(sourceId)) {
+      mediaStreamObservations.set(sourceId, observeMediaStream(sourceId, stream));
+    }
+  }
+  return { renderedMediaChanged, changedTracks };
+}
+
+function syncMediaVideoElements(streams: Map<string, MediaStream>, changedTracks: Set<string>): void {
   for (const [sourceId, stream] of streams) {
     const existing = mediaVideoElements.get(sourceId);
-    if (existing?.srcObject === stream) {
+    if (existing?.srcObject === stream && !changedTracks.has(sourceId)) {
       continue;
     }
-
-    const video = existing ?? document.createElement("video");
-    video.autoplay = true;
-    video.muted = true;
-    video.playsInline = true;
-    video.srcObject = stream;
-    mediaVideoElements.set(sourceId, video);
-    video.play().catch(() => {
-      renderLoop.queuePaint();
-    });
+    resetMediaVideoElement(sourceId, stream);
   }
 
   for (const [sourceId, video] of mediaVideoElements) {
@@ -2171,7 +2275,29 @@ function syncMediaVideoElements(streams: Map<string, MediaStream>): void {
   }
 }
 
+function resetMediaVideoElement(sourceId: string, stream: MediaStream): void {
+  const previous = mediaVideoElements.get(sourceId);
+  if (previous) {
+    mediaVideoElements.delete(sourceId);
+    previous.pause();
+    previous.srcObject = null;
+  }
+
+  // A media element can retain its last decoded frame after a track change.
+  const video = document.createElement("video");
+  video.autoplay = true;
+  video.muted = true;
+  video.playsInline = true;
+  video.srcObject = stream;
+  mediaVideoElements.set(sourceId, video);
+  video.play().catch(() => {
+    renderLoop.queuePaint();
+  });
+}
+
 function clearMediaVideoElements(): void {
+  for (const observation of mediaStreamObservations.values()) observation.dispose();
+  mediaStreamObservations.clear();
   for (const video of mediaVideoElements.values()) {
     video.pause();
     video.srcObject = null;

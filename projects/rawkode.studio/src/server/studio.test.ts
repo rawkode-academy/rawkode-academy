@@ -1817,7 +1817,7 @@ describe("Studio operations", () => {
 		expect(participantSources).toContain("studio:(guest|host|producer|program):");
 		expect(studioApp).toContain("const roomMediaStreams = shallowRef(new Map<string, MediaStream>())");
 		expect(studioApp).toContain("const roomMediaSources = shallowRef(new Map<string, StudioSource>())");
-		expect(studioApp).toContain("selectRoomCameraStreams(roomMediaStreams.value, roomMediaSources.value)");
+		expect(studioApp).toContain("selectRoomProgrammeStreams(roomMediaStreams.value, roomMediaSources.value)");
 		expect(studioApp).toContain('@media-streams-change="syncRoomMediaStreams"');
 	});
 

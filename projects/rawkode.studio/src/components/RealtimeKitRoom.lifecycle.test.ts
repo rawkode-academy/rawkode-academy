@@ -103,7 +103,22 @@ beforeEach(() => {
   vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ token: "token" }))));
 });
 
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); });
+
+function screenProducer(peerId: string, producerId: string, video?: MediaStreamTrack) {
+  return {
+    producerId, producingPeerId: peerId, producingTransportId: "transport",
+    kind: "video", pause: false, screenShare: true,
+    ...(video ? { consumer: {
+      id: `consumer-${producerId}`, producerId, peerId, kind: "video", paused: false,
+      appData: { screenShare: true }, rtpReceiver: { track: video },
+    } } : {}),
+  };
+}
+
+function videoTrack(id: string): MediaStreamTrack {
+  return { id, kind: "video", readyState: "live" } as MediaStreamTrack;
+}
 
 function fakeMeeting(leave = vi.fn(async () => {})) {
   const self = Object.assign(new Emitter(), {
@@ -144,6 +159,56 @@ describe("RealtimeKit room authority lifecycle", () => {
     expect(events.at(-1)?.streams.size).toBe(0);
     leaving.resolve();
     await flush();
+    room.app.unmount();
+  });
+
+  it("deduplicates joined and active events and preserves unchanged streams across other changes", async () => {
+    const meeting = fakeMeeting();
+    const video = videoTrack("screen");
+    const sharing = Object.assign(meeting.peer, {
+      screenShareEnabled: true, screenShareTracks: { video },
+      producers: [screenProducer(meeting.peer.id, "video", video)],
+    });
+    mocks.init.mockResolvedValue(meeting);
+    const events: MediaPayload[] = [];
+    const room = mount((event) => events.push(event));
+    room.click();
+    await flush();
+    const initial = events.at(-1)!;
+    const cameraId = initial.sources.find((source) => source.type === "camera")!.id;
+    const screenId = initial.sources.find((source) => source.type === "screen")!.id;
+    const cameraStream = initial.streams.get(cameraId);
+    const screenStream = initial.streams.get(screenId);
+    expect(cameraStream).toBeDefined();
+    expect(screenStream).toBeDefined();
+    const count = events.length;
+    meeting.participants.joined.emit("participantsUpdate");
+    meeting.participants.active.emit("participantsUpdate");
+    meeting.participants.joined.emit("audioUpdate", sharing);
+    meeting.participants.active.emit("videoUpdate", sharing);
+    expect(events).toHaveLength(count);
+
+    // A change to source metadata emits an update but does not replace media.
+    sharing.name = "Renamed Guest";
+    meeting.participants.joined.emit("participantsUpdate");
+    const renamed = events.at(-1)!;
+    expect(renamed.streams.get(cameraId)).toBe(cameraStream);
+    expect(renamed.streams.get(screenId)).toBe(screenStream);
+
+    const nextVideo = videoTrack("next-screen");
+    sharing.producers = [screenProducer(sharing.id, "next-video", nextVideo)];
+    sharing.screenShareTracks = { video: nextVideo };
+    meeting.participants.active.emit("screenShareUpdate", sharing, { screenShareEnabled: true });
+    const changed = events.at(-1)!;
+    const nextScreenId = changed.sources.find((source) => source.type === "screen")!.id;
+    expect(nextScreenId).not.toBe(screenId);
+    expect(changed.departedSourceIds).toContain(screenId);
+    expect(changed.streams.get(cameraId)).toBe(cameraStream);
+    expect(changed.streams.get(nextScreenId)).not.toBe(screenStream);
+
+    // A departure must still be emitted even if its accompanying snapshot is unchanged.
+    meeting.participants.joined.emit("participantLeft", sharing);
+    expect(events.at(-1)!.departedSourceIds).toContain(nextScreenId);
     room.app.unmount();
   });
 
@@ -194,8 +259,9 @@ describe("RealtimeKit room authority lifecycle", () => {
     expect(events.at(-1)?.departedSourceIds).toEqual([sourceId]);
     meeting.self.emit("roomJoined");
     expect(events.at(-1)?.authoritative).toBe(false);
+    const offlineCount = events.length;
     windowEvents.emit("offline");
-    expect(events.at(-1)?.departedSourceIds).toEqual([]);
+    expect(events).toHaveLength(offlineCount);
     meeting.self.emit("roomLeft");
     meeting.participants.joined.emit("participantLeft", meeting.peer);
     expect(events.at(-1)?.authoritative).toBe(false);
@@ -281,11 +347,14 @@ describe("RealtimeKit room authority lifecycle", () => {
     room.app.unmount();
   });
 
-  it("revokes a stopped screen even if participant snapshots still contain the old share", async () => {
+  it("revokes a disappeared publication without attributing a late false event to the new share", async () => {
     const meeting = fakeMeeting();
+    const oldVideo = videoTrack("old");
+    const newVideo = videoTrack("new");
     const sharing = Object.assign(meeting.peer, {
       screenShareEnabled: true,
-      screenShareTracks: { video: { kind: "video", readyState: "live" } },
+      screenShareTracks: { video: oldVideo },
+      producers: [screenProducer(meeting.peer.id, "old", oldVideo)],
     });
     mocks.init.mockResolvedValue(meeting);
     const events: MediaPayload[] = [];
@@ -299,11 +368,17 @@ describe("RealtimeKit room authority lifecycle", () => {
     state = reduceStudioState(state, { type: "source.admission.set", sourceId: camera.id, admitted: true });
     state = reduceStudioState(state, { type: "source.admission.set", sourceId: screen.id, admitted: true });
 
-    // Both maps still expose the old sharing=true object when the stop fires.
+    // The old producer has vanished and the new track is already present when
+    // the old consumer's false event is delivered.
+    sharing.producers = [screenProducer(meeting.peer.id, "new", newVideo)];
+    sharing.screenShareTracks = { video: newVideo };
     meeting.participants.joined.emit("screenShareUpdate", sharing, { screenShareEnabled: false });
     const stopped = events.at(-1)!;
-    expect(stopped.sources.some((source) => source.id === screen.id)).toBe(true);
-    expect(stopped.departedSourceIds).toEqual([screen.id]);
+    const nextScreen = stopped.sources.find((source) => source.type === "screen")!;
+    expect(nextScreen.id).not.toBe(screen.id);
+    expect(stopped.departedSourceIds).toContain(screen.id);
+    expect(stopped.departedSourceIds).not.toContain(nextScreen.id);
+    expect(stopped.streams.has(nextScreen.id)).toBe(false);
     state = reduceStudioState(state, {
       type: "sources.reconcile", sources: stopped.sources, departedSourceIds: stopped.departedSourceIds,
     });
@@ -312,6 +387,129 @@ describe("RealtimeKit room authority lifecycle", () => {
     state = reduceStudioState(state, { type: "sources.reconcile", sources: nextShare.sources });
     expect(state.onStageSourceIds).toContain(camera.id);
     expect(state.onStageSourceIds).not.toContain(screen.id);
+    expect(state.onStageSourceIds).not.toContain(nextScreen.id);
+    expect(nextShare.streams.has(nextScreen.id)).toBe(true);
     room.app.unmount();
+  });
+
+  it("keeps screen membership without a local subscription and revokes it when the producer disappears", async () => {
+    const meeting = fakeMeeting();
+    const sharing = Object.assign(meeting.peer, {
+      screenShareEnabled: false,
+      screenShareTracks: undefined as { video: MediaStreamTrack } | undefined,
+      producers: [screenProducer(meeting.peer.id, "video")],
+    });
+    mocks.init.mockResolvedValue(meeting);
+    const events: MediaPayload[] = [];
+    const room = mount((event) => events.push(event));
+    room.click();
+    await flush();
+    const screen = events.at(-1)!.sources.find((source) => source.type === "screen")!;
+    expect(screen).toBeDefined();
+    expect(events.at(-1)!.streams.has(screen.id)).toBe(false);
+    Object.assign(sharing, { producers: undefined });
+    meeting.participants.joined.emit("participantsUpdate");
+    expect(events.at(-1)!.departedSourceIds).not.toContain(screen.id);
+    sharing.producers = [];
+    meeting.participants.joined.emit("screenShareUpdate", sharing, { screenShareEnabled: false });
+    expect(events.at(-1)!.departedSourceIds).toContain(screen.id);
+    room.app.unmount();
+  });
+
+  it("revokes every observed screen on departure and room authority loss", async () => {
+    const meeting = fakeMeeting();
+    const sharing = Object.assign(meeting.peer, {
+      screenShareEnabled: false,
+      producers: [screenProducer(meeting.peer.id, "video")],
+    });
+    mocks.init.mockResolvedValue(meeting);
+    const events: MediaPayload[] = [];
+    const room = mount((event) => events.push(event));
+    room.click();
+    await flush();
+    const screenId = events.at(-1)!.sources.find((source) => source.type === "screen")!.id;
+    // Metadata can be gone already by the time participantLeft is delivered.
+    sharing.producers = [];
+    meeting.participants.joined.delete(sharing.id);
+    meeting.participants.joined.emit("participantLeft", sharing);
+    expect(events.at(-1)!.departedSourceIds).toContain(screenId);
+
+    sharing.producers = [screenProducer(sharing.id, "video-next")];
+    meeting.participants.joined.set(sharing.id, sharing);
+    meeting.participants.joined.emit("participantJoined", sharing);
+    const nextId = events.at(-1)!.sources.find((source) => source.type === "screen")!.id;
+    meeting.meta.emit("socketConnectionUpdate", { state: "reconnecting" });
+    expect(events.at(-1)).toMatchObject({ authoritative: false, departedSourceIds: expect.arrayContaining([nextId]) });
+    meeting.meta.emit("socketConnectionUpdate", { state: "connected" });
+    meeting.self.emit("roomJoined");
+    expect(events.at(-1)!.sources.find((source) => source.type === "screen")?.id).toBe(nextId);
+    room.app.unmount();
+  });
+
+  it("resnapshots silent producer changes without churning stable streams and clears its timer", async () => {
+    vi.useFakeTimers();
+    const meeting = fakeMeeting();
+    const oldVideo = videoTrack("old");
+    const nextVideo = videoTrack("new");
+    const sharing = Object.assign(meeting.peer, {
+      screenShareEnabled: true,
+      screenShareTracks: { video: oldVideo },
+      producers: [screenProducer(meeting.peer.id, "old", oldVideo)],
+    });
+    mocks.init.mockResolvedValue(meeting);
+    const events: MediaPayload[] = [];
+    const room = mount((event) => events.push(event));
+    room.click();
+    await flush();
+    const first = events.at(-1)!;
+    const oldId = first.sources.find((source) => source.type === "screen")!.id;
+    const eventCount = events.length;
+    vi.advanceTimersByTime(500);
+    expect(events).toHaveLength(eventCount);
+    sharing.producers = [screenProducer(sharing.id, "new", nextVideo)];
+    // New producer metadata must not be paired with the old track.
+    vi.advanceTimersByTime(500);
+    const changed = events.at(-1)!;
+    const nextId = changed.sources.find((source) => source.type === "screen")!.id;
+    expect(changed.departedSourceIds).toContain(oldId);
+    expect(changed.streams.has(nextId)).toBe(false);
+    sharing.screenShareTracks = { video: nextVideo };
+    vi.advanceTimersByTime(500);
+    expect(events.at(-1)!.streams.has(nextId)).toBe(true);
+    room.app.unmount();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("immediately fences muted or ended screen tracks and removes track listeners on unmount", async () => {
+    const meeting = fakeMeeting();
+    const eventsOnTrack = new Emitter();
+    const video = {
+      id: "screen", kind: "video", readyState: "live", enabled: true, muted: false,
+      addEventListener: (event: string, listener: Listener) => eventsOnTrack.on(event, listener),
+      removeEventListener: (event: string, listener: Listener) => eventsOnTrack.off(event, listener),
+    };
+    const mediaTrack = video as unknown as MediaStreamTrack;
+    Object.assign(meeting.peer, {
+      screenShareEnabled: true, screenShareTracks: { video: mediaTrack },
+      producers: [screenProducer(meeting.peer.id, "video", mediaTrack)],
+    });
+    mocks.init.mockResolvedValue(meeting);
+    const events: MediaPayload[] = [];
+    const room = mount((event) => events.push(event));
+    room.click();
+    await flush();
+    const screenId = events.at(-1)!.sources.find((source) => source.type === "screen")!.id;
+    expect(events.at(-1)!.streams.has(screenId)).toBe(true);
+    video.muted = true;
+    eventsOnTrack.emit("mute");
+    expect(events.at(-1)!.streams.has(screenId)).toBe(false);
+    video.muted = false;
+    eventsOnTrack.emit("unmute");
+    expect(events.at(-1)!.streams.has(screenId)).toBe(true);
+    video.readyState = "ended";
+    eventsOnTrack.emit("ended");
+    expect(events.at(-1)!.streams.has(screenId)).toBe(false);
+    room.app.unmount();
+    expect([...eventsOnTrack.listeners.values()].every((listeners) => listeners.size === 0)).toBe(true);
   });
 });

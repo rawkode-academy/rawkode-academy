@@ -4,6 +4,7 @@ import { getDynamicGridBounds, getScreenshareCameraBounds } from "./layouts";
 import { getSceneLayerStack } from "./layerStack";
 import { STUDIO_SCENE_DEFINITIONS } from "./seed";
 import { setSourceOnStage } from "./sourceAdmission";
+import { isRealtimeKitScreenSourceId } from "./programmeMediaGate";
 import { markLayerBoundsEdited, reconcileStudioSources } from "./sourceReconciliation";
 
 const MAXIMUM_SCENES = 24;
@@ -164,10 +165,13 @@ export function reduceStudioState(state: StudioState, event: StudioEvent): Studi
         ...state,
         status: "Program frame exported",
       };
-    case "sources.reconcile":
-      return revokeDepartedSourceAdmission(reconcileStudioSources(state, event.sources, STUDIO_SCENE_DEFINITIONS, {
+    case "sources.reconcile": {
+      const departedScreens = new Set((event.departedSourceIds ?? []).filter(isRealtimeKitScreenSourceId));
+      return revokeDepartedSourceAdmission(reconcileStudioSources(state, event.sources.filter((source) => !departedScreens.has(source.id)), STUDIO_SCENE_DEFINITIONS, {
         authoritativeRuntimeSource: event.authoritativeRuntimeSource,
+        removeSourceIds: [...departedScreens],
       }), event.departedSourceIds);
+    }
     case "source.remove":
       return reconcileStudioSources(state, [], STUDIO_SCENE_DEFINITIONS, {
         removeSourceIds: [event.sourceId],

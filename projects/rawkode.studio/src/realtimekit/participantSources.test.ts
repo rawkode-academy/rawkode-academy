@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { createHash } from "node:crypto";
 import { selectProgrammeAudioStreams } from "../audio/programmeAudioSources";
 import { isStudioControlState } from "../server/control-state";
 import { createInitialStudioState } from "../studio/seed";
@@ -8,6 +9,7 @@ import {
   isRealtimeKitSnapshotAuthoritative,
   mapRealtimeKitParticipantSources,
   type RealtimeKitParticipant,
+  type RealtimeKitProducerState,
 } from "./participantSources";
 
 function track(
@@ -32,6 +34,17 @@ function participant(
     videoEnabled: true,
     videoTrack: track("video", `${id}-camera`),
     ...overrides,
+  };
+}
+
+function screenProducer(peerId: string, video?: MediaStreamTrack, producerId = "screen-video", transportId = "screen-transport"): RealtimeKitProducerState {
+  return {
+    producerId, producingPeerId: peerId, producingTransportId: transportId,
+    kind: "video", pause: false, screenShare: true,
+    ...(video ? { consumer: {
+      id: `consumer-${producerId}`, producerId, peerId, kind: "video", paused: false,
+      appData: { screenShare: true }, rtpReceiver: { track: video },
+    } } : {}),
   };
 }
 
@@ -130,7 +143,7 @@ describe("RealtimeKit participant source mapping", () => {
     expect(mapping.streams[1]?.tracks.map((mediaTrack) => mediaTrack.kind)).toEqual(["audio"]);
   });
 
-  it("keeps camera and screen-share video and audio in separate streams", () => {
+  it("keeps camera audio separate and maps only matched screen video", () => {
     const cameraVideo = track("video", "camera");
     const microphone = track("audio", "microphone");
     const screenVideo = track("video", "screen");
@@ -143,9 +156,12 @@ describe("RealtimeKit participant source mapping", () => {
           audio: screenAudio,
           video: screenVideo,
         },
+        producers: [screenProducer("speaker-peer", screenVideo)],
         videoTrack: cameraVideo,
       }),
-    ]);
+    ], "session");
+
+    const screen = mapping.sources.find((source) => source.type === "screen")!;
 
     expect(mapping.sources).toEqual([
       expect.objectContaining({
@@ -155,8 +171,9 @@ describe("RealtimeKit participant source mapping", () => {
         status: "ready",
       }),
       expect.objectContaining({
-        id: "source-realtimekit-screen-v2.c3BlYWtlci1wZWVy",
-        settings: expect.objectContaining({ runtimeSource: "realtimekit" }),
+        id: expect.stringMatching(/^source-realtimekit-screen-v3\./),
+        settings: expect.objectContaining({ runtimeSource: "realtimekit", realtimeKitSource: "screen",
+          realtimeKitScreenProducerId: "screen-video", realtimeKitScreenTransportId: "screen-transport" }),
         type: "screen",
         status: "ready",
       }),
@@ -167,8 +184,8 @@ describe("RealtimeKit participant source mapping", () => {
         tracks: [cameraVideo, microphone],
       },
       {
-        sourceId: "source-realtimekit-screen-v2.c3BlYWtlci1wZWVy",
-        tracks: [screenVideo, screenAudio],
+        sourceId: screen.id,
+        tracks: [screenVideo],
       },
     ]);
   });
@@ -217,13 +234,16 @@ describe("RealtimeKit participant source mapping", () => {
   });
 
   it("keeps shared peer and screen membership stable while a standby waits for tracks", () => {
+    const screen = track("video", "screen");
     const ready = participant("guest", "guest", {
       screenShareEnabled: true,
-      screenShareTracks: { video: track("video", "screen"), audio: track("audio", "screen-audio") },
+      screenShareTracks: { video: screen, audio: track("audio", "screen-audio") },
+      producers: [screenProducer("guest-peer", screen)],
     });
-    const delayed = { ...ready, audioTrack: undefined, videoTrack: undefined, screenShareTracks: undefined };
-    const primary = mapRealtimeKitParticipantSources([ready]);
-    const standby = mapRealtimeKitParticipantSources([delayed]);
+    const delayed = { ...ready, audioTrack: undefined, videoTrack: undefined, screenShareTracks: undefined,
+      screenShareEnabled: false, producers: [screenProducer("guest-peer")] };
+    const primary = mapRealtimeKitParticipantSources([ready], "session");
+    const standby = mapRealtimeKitParticipantSources([delayed], "session");
     expect(primary.sources).toEqual(standby.sources);
     expect(primary.streams).toHaveLength(2);
     expect(standby.streams).toEqual([]);
@@ -239,11 +259,96 @@ describe("RealtimeKit participant source mapping", () => {
     });
     expect(afterStandby.onStageSourceIds).toEqual(primary.sources.map((source) => source.id));
     expect(afterStandby.sources).toEqual(state.sources);
-    const endedShare = mapRealtimeKitParticipantSources([{ ...delayed, screenShareEnabled: false }]);
+    const endedShare = mapRealtimeKitParticipantSources([{ ...delayed, producers: [] }], "session");
     const afterShareEnds = reduceStudioState(afterStandby, {
       type: "sources.reconcile", authoritativeRuntimeSource: "realtimekit", sources: endedShare.sources,
+      departedSourceIds: [primary.sources[1].id],
     });
     expect(afterShareEnds.onStageSourceIds).toEqual([primary.sources[0].id]);
+  });
+
+  it("uses a bounded SHA-256 publication identity for each session, peer, transport and producer", () => {
+    const video = track("video", "screen");
+    const peer = participant("guest", "guest", {
+      id: "peér", screenShareEnabled: true, screenShareTracks: { video },
+      producers: [screenProducer("peér", video, "producer.a", "transport-b")],
+    });
+    const screenId = (value: RealtimeKitParticipant, sessionId = "session-🦊") =>
+      mapRealtimeKitParticipantSources([value], sessionId).sources.find((source) => source.type === "screen")?.id;
+    const first = screenId(peer)!;
+    expect(first).toMatch(/^source-realtimekit-screen-v3\./);
+    const digest = createHash("sha256").update(JSON.stringify(["session-🦊", "peér", "transport-b", "producer.a"])).digest("base64url");
+    expect(first).toBe(`source-realtimekit-screen-v3.${digest}`);
+    const changedSession = screenId(peer, "session-🦋");
+    const changedPeer = screenId({ ...peer, id: "peér2", producers: [screenProducer("peér2", video, "producer.a", "transport-b")] });
+    const changedTransport = screenId({ ...peer, producers: [screenProducer("peér", video, "producer.a", "transport-b2")] });
+    const changedProducer = screenId({ ...peer, producers: [screenProducer("peér", video, "producer.b", "transport-b")] });
+    expect(new Set([first, changedSession, changedPeer, changedTransport, changedProducer]).size).toBe(5);
+    expect(screenId(peer, "\ud800")).toBeUndefined();
+    const longSession = "a-real-show-with-a-long-name-".repeat(120);
+    const longId = screenId(peer, longSession)!;
+    expect(longId).toHaveLength(first.length);
+    expect(longId).not.toBe(first);
+    expect(screenId(peer, `${longSession}-another`)).not.toBe(longId);
+    expect(mapRealtimeKitParticipantSources([peer]).sources.map((source) => source.type)).toEqual(["camera"]);
+    let state = reduceStudioState(createInitialStudioState(), { type: "sources.reconcile", sources: mapRealtimeKitParticipantSources([peer], "session-🦊").sources });
+    state = reduceStudioState(state, { type: "source.admission.set", sourceId: first, admitted: true });
+    expect(isStudioControlState(state)).toBe(true);
+    const next = mapRealtimeKitParticipantSources([{ ...peer, producers: [screenProducer("peér", video, "producer.b", "transport-b")] }], "session-🦊");
+    state = reduceStudioState(state, { type: "sources.reconcile", sources: next.sources, departedSourceIds: [first] });
+    expect(state.onStageSourceIds).not.toContain(changedProducer);
+  });
+
+  it("derives membership from joined metadata and fails closed on ambiguous publications", () => {
+    const video = track("video", "screen");
+    const valid = screenProducer("peer", video);
+    const joined = participant("guest", "guest", { id: "peer", screenShareEnabled: true,
+      screenShareTracks: { video }, producers: [valid] });
+    const standby = { ...joined, screenShareEnabled: false, screenShareTracks: undefined,
+      producers: [screenProducer("peer")] };
+    const primary = mapRealtimeKitParticipantSources([joined], "session", [joined]);
+    const waiting = mapRealtimeKitParticipantSources([standby], "session", [standby]);
+    expect(waiting.sources).toEqual(primary.sources);
+    expect(waiting.streams.find((stream) => stream.sourceId === waiting.sources[1].id)).toBeUndefined();
+    const activeOnly = mapRealtimeKitParticipantSources([joined], "session", [{ ...joined, producers: [] }]);
+    expect(activeOnly.sources.map((source) => source.type)).toEqual(["camera"]);
+    for (const producers of [
+      undefined, [], [valid, { ...valid }], [valid, screenProducer("peer", video, "other")],
+      [{ ...valid, pause: true }], [{ ...valid, producingPeerId: "other" }],
+      [{ ...valid, producingTransportId: "" }], [{ ...valid, producerId: undefined }],
+      [valid, { kind: undefined, screenShare: true }],
+    ]) {
+      const result = mapRealtimeKitParticipantSources([{ ...joined, producers }], "session");
+      expect(result.sources.map((source) => source.type)).toEqual(["camera"]);
+      expect(result.streams.every((stream) => stream.sourceId.startsWith("source-realtimekit-camera-v2."))).toBe(true);
+    }
+  });
+
+  it("rejects stale or inconsistent consumer tracks without removing publication membership", () => {
+    const video = track("video", "screen");
+    const stale = track("video", "old-screen");
+    const muted = { ...track("video", "muted-screen"), muted: true } as MediaStreamTrack;
+    const producer = screenProducer("peer", video);
+    const peer = participant("guest", "guest", { id: "peer", screenShareEnabled: true,
+      screenShareTracks: { video, audio: track("audio", "unrelated-screen-audio") }, producers: [producer] });
+    const invalid = [
+      { ...peer, screenShareEnabled: false },
+      { ...peer, screenShareEnabled: true, screenshareEnabled: false },
+      { ...peer, screenShareTracks: { video: stale } },
+      { ...peer, screenShareTracks: { video, videoTrack: stale } },
+      { ...peer, screenShareTracks: { video: muted }, producers: [screenProducer("peer", muted)] },
+      { ...peer, producers: [{ ...producer, consumer: undefined }] },
+      ...[
+        { id: undefined }, { producerId: "other" }, { peerId: "other" }, { kind: "audio" },
+        { paused: true }, { appData: { screenShare: false } }, { rtpReceiver: { track: stale } },
+      ].map((change) => ({ ...peer, producers: [{ ...producer, consumer: { ...producer.consumer, ...change } }] })),
+    ];
+    for (const entry of invalid) {
+      const result = mapRealtimeKitParticipantSources([entry], "session");
+      const screen = result.sources.find((source) => source.type === "screen");
+      expect(screen).toBeDefined();
+      expect(result.streams.some((stream) => stream.sourceId === screen!.id)).toBe(false);
+    }
   });
 
   it("encodes full Unicode peer IDs without normalizing or conflating them", () => {

@@ -3,6 +3,7 @@ import type { StudioLayer, StudioScene, StudioSource, StudioState } from "../typ
 import { getDynamicGridBounds, getScreenshareCameraBounds } from "./layouts";
 import { compileScenes, type SceneDefinition } from "./scenes/sceneDsl";
 import { reconcileOnStageSourceIds } from "./sourceAdmission";
+import { isRealtimeKitScreenSource } from "./programmeMediaGate";
 
 const RUNTIME_SOURCE_TYPES = new Set<StudioSource["type"]>(["audio", "camera", "screen"]);
 const MANUAL_BOUNDS_SETTING = "studioManualBounds";
@@ -120,6 +121,7 @@ function reconcileSourceList(
     if (
       options.authoritativeRuntimeSource === "realtimekit" &&
       isRealtimeKitOrLegacyRuntimeSource(source) &&
+      !isRealtimeKitScreenSource(source) &&
       !incomingSourceIds.has(source.id)
     ) {
       return false;

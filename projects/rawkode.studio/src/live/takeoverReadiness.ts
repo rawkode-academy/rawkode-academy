@@ -1,4 +1,5 @@
 import type { StudioAudioMixControl, StudioLayer, StudioSource } from "../types";
+import { isRealtimeKitScreenSource } from "../studio/programmeMediaGate";
 
 export function getRequiredProgrammeAudioSourceIds(
 	sources: readonly StudioSource[],
@@ -10,7 +11,7 @@ export function getRequiredProgrammeAudioSourceIds(
 	return sources.filter((source) => {
 		const mix = audioMix[source.id];
 		return admitted.has(source.id) && !mix?.muted && (mix?.gain ?? 1) > 0 &&
-			(source.type === "camera" || (source.type === "screen" && source.id === activeScreenSourceId));
+			(source.type === "camera" || (source.type === "screen" && !isRealtimeKitScreenSource(source) && source.id === activeScreenSourceId));
 	}).map((source) => source.id);
 }
 

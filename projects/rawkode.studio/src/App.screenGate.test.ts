@@ -39,6 +39,62 @@ const renderer = createRenderer<Node, Node>({
 afterEach(() => vi.unstubAllGlobals());
 
 describe("App screen output and recovery controls", () => {
+  it("does not let a standby admit a guest screen without its own current preview", async () => {
+    const guest: StudioSource = {
+      id: "source-realtimekit-screen-v3.guest-share", name: "Guest screen", type: "screen", status: "ready",
+      settings: { runtimeSource: "realtimekit", realtimeKitSource: "screen" },
+    };
+    const shared = ref(reduceStudioState(createInitialStudioState(), { type: "sources.reconcile", sources: [guest] }));
+    const isSynchronized = ref(true);
+    mocks.machine = {
+      state: shared,
+      send: (event: StudioEvent) => { shared.value = reduceStudioState(shared.value, event); },
+      acknowledgeConflict: () => {},
+      hasStagedScene: ref(false), programLayers: ref([]), programScene: ref(undefined),
+      previewLayers: ref([]), previewScene: ref(undefined),
+      isSynchronized, remoteStateEpoch: ref(0), syncConflictNotice: ref(""), syncError: ref(""), syncStatus: ref("ready"),
+    };
+    vi.stubGlobal("crypto", { randomUUID: () => "owner-a" });
+    vi.stubGlobal("navigator", {});
+    vi.stubGlobal("window", { innerHeight: 900, addEventListener: vi.fn(), removeEventListener: vi.fn() });
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("{}")));
+    let setup: Record<string, unknown> = {};
+    const component = {
+      ...App,
+      render(this: { $: { setupState: Record<string, unknown> } }) {
+        setup = this.$.setupState;
+        return h("div");
+      },
+    };
+    const app = renderer.createApp(component, { sessionId: "session", roomRole: "producer" });
+    app.provide(ssrContextKey, { modules: new Set() });
+    app.mount({ children: [] });
+    await nextTick();
+    const sync = setup.syncRoomMediaStreams as (payload: unknown) => void;
+    const admit = setup.setSourceAdmission as (id: string, admitted: boolean, stream?: MediaStream, track?: MediaStreamTrack) => void;
+    const track = { kind: "video", readyState: "live", enabled: true, muted: false } as MediaStreamTrack;
+    const stream = { getVideoTracks: () => [track], getAudioTracks: () => [] } as unknown as MediaStream;
+    sync({ authoritative: true, sources: [guest], streams: new Map() });
+    await nextTick();
+    admit(guest.id, true);
+    expect(shared.value.onStageSourceIds).not.toContain(guest.id);
+    sync({ authoritative: true, sources: [guest], streams: new Map([[guest.id, stream]]) });
+    await nextTick();
+    admit(guest.id, true);
+    expect(shared.value.onStageSourceIds).not.toContain(guest.id);
+    isSynchronized.value = false;
+    admit(guest.id, true, stream, track);
+    expect(shared.value.onStageSourceIds).not.toContain(guest.id);
+    isSynchronized.value = true;
+    admit(guest.id, true, stream, track);
+    expect(shared.value.onStageSourceIds).toContain(guest.id);
+    sync({ authoritative: true, sources: [guest], streams: new Map() });
+    await nextTick();
+    admit(guest.id, false);
+    expect(shared.value.onStageSourceIds).not.toContain(guest.id);
+    app.unmount();
+  });
+
   it("keeps an admitted foreign local screen visible and blocks missing media until removed", async () => {
     const foreign: StudioSource = {
       id: "foreign-screen", name: "Other producer's screen", type: "screen", status: "ready",

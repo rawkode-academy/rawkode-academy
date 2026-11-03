@@ -1,4 +1,5 @@
 import type { StudioSource } from "../types";
+import { sha256 } from "@noble/hashes/sha2.js";
 
 export type RealtimeKitParticipantRole = "guest" | "host" | "producer" | "program";
 
@@ -9,6 +10,24 @@ export interface RealtimeKitScreenShareTracks {
   videoTrack?: MediaStreamTrack | null;
 }
 
+export interface RealtimeKitProducerState {
+  producerId?: string | null;
+  producingPeerId?: string | null;
+  producingTransportId?: string | null;
+  kind?: string;
+  pause?: boolean;
+  screenShare?: boolean;
+  consumer?: {
+    id?: string | null;
+    producerId?: string | null;
+    peerId?: string | null;
+    kind?: string;
+    paused?: boolean;
+    appData?: Record<string, unknown>;
+    rtpReceiver?: { track?: MediaStreamTrack | null } | null;
+  } | null;
+}
+
 export interface RealtimeKitParticipant {
   audioEnabled?: boolean;
   audioTrack?: MediaStreamTrack | null;
@@ -16,6 +35,7 @@ export interface RealtimeKitParticipant {
   id?: string | null;
   name?: string | null;
   presetName?: string | null;
+  producers?: RealtimeKitProducerState[] | null;
   screenShareTracks?: RealtimeKitScreenShareTracks | MediaStreamTrack[] | null;
   screenshareEnabled?: boolean;
   screenShareEnabled?: boolean;
@@ -67,9 +87,12 @@ type SourceRole = "guest" | "host" | "producer";
 const MAXIMUM_SOURCE_ID_LENGTH = 240;
 const CAMERA_SOURCE_PREFIX = "source-realtimekit-camera-v2.";
 const SCREEN_SOURCE_PREFIX = "source-realtimekit-screen-v2.";
+const SCREEN_PUBLICATION_PREFIX = "source-realtimekit-screen-v3.";
 
 export function mapRealtimeKitParticipantSources(
   participants: RealtimeKitParticipant[],
+  sessionId?: string,
+  joinedParticipants: RealtimeKitParticipant[] = participants,
 ): RealtimeKitParticipantSourceMapping {
   const sources: StudioSource[] = [];
   const streams: RealtimeKitParticipantSourceMapping["streams"] = [];
@@ -78,12 +101,23 @@ export function mapRealtimeKitParticipantSources(
     host: 0,
     producer: 0,
   };
+  // Only the joined map establishes publication membership. Active-map media
+  // subscription varies independently in each producer tab.
+  const joinedByIdentity = new Map<string, RealtimeKitParticipant>();
+  const ambiguousJoined = new Set<string>();
+  for (const joined of joinedParticipants) {
+    const identity = getRealtimeKitParticipantIdentity(joined);
+    if (!identity) continue;
+    const existing = joinedByIdentity.get(identity);
+    if (existing && existing !== joined) ambiguousJoined.add(identity);
+    else joinedByIdentity.set(identity, joined);
+  }
 
   for (const participant of getStableParticipants(participants)) {
     const identity = getRealtimeKitParticipantIdentity(participant);
     if (identity === undefined) continue;
-    const [cameraSourceId, screenSourceId] = getRealtimeKitParticipantSourceIds(participant);
-    if (!cameraSourceId || !screenSourceId) continue;
+    const [cameraSourceId] = getRealtimeKitParticipantSourceIds(participant);
+    if (!cameraSourceId) continue;
     const role = getRealtimeKitParticipantRole(participant);
     const sourceRole = role === "program" ? "producer" : role;
     const roleIndex = roleIndexes[sourceRole];
@@ -97,10 +131,12 @@ export function mapRealtimeKitParticipantSources(
       streams.push({ sourceId: cameraSourceId, tracks: cameraTracks });
     }
 
-    if (hasScreenShareEnabled(participant)) {
-      sources.push(createScreenSource(screenSourceId, participant, role));
-      const screenTracks = getScreenTracks(participant);
-      if (screenTracks.length > 0) streams.push({ sourceId: screenSourceId, tracks: screenTracks });
+    const joined = ambiguousJoined.has(identity) ? undefined : joinedByIdentity.get(identity);
+    const publication = joined && getScreenPublication(joined, sessionId);
+    if (joined && publication) {
+      sources.push(createScreenSource(publication.id, joined, role, publication.producer));
+      const videoTrack = getBoundScreenVideoTrack(joined, publication.producer);
+      if (videoTrack) streams.push({ sourceId: publication.id, tracks: [videoTrack] });
     }
   }
 
@@ -189,41 +225,51 @@ function getCameraTracks(
   return [videoTrack, audioTrack].filter(isLiveTrack);
 }
 
-function getScreenTracks(
+function getScreenPublication(
   participant: RealtimeKitParticipant,
-): MediaStreamTrack[] {
-  if (!hasScreenShareEnabled(participant)) {
-    return [];
-  }
-
-  return [
-    getScreenShareTrack(participant, "video"),
-    getScreenShareTrack(participant, "audio"),
-  ].filter(isLiveTrack);
+  sessionId: string | undefined,
+): { id: string; producer: RealtimeKitProducerState } | undefined {
+  const peerId = getRealtimeKitParticipantIdentity(participant);
+  const producers = participant.producers;
+  if (!peerId || !isValidIdentity(sessionId) || !Array.isArray(producers)) return undefined;
+  // Unknown producer classifications could hide another screen publication.
+  if (producers.some((producer) =>
+    !producer || (producer.kind !== "audio" && producer.kind !== "video") ||
+    typeof producer.screenShare !== "boolean"
+  )) return undefined;
+  const screens = producers.filter((producer) => producer.kind === "video" && producer.screenShare === true);
+  if (screens.length !== 1) return undefined;
+  const producer = screens[0];
+  if (producer.pause !== false || producer.producingPeerId !== peerId ||
+      !isValidIdentity(producer.producerId) || !isValidIdentity(producer.producingTransportId)) return undefined;
+  const encoded = encodeIdentityTuple([sessionId, peerId, producer.producingTransportId, producer.producerId]);
+  if (!encoded || SCREEN_PUBLICATION_PREFIX.length + encoded.length > MAXIMUM_SOURCE_ID_LENGTH) return undefined;
+  return { id: `${SCREEN_PUBLICATION_PREFIX}${encoded}`, producer };
 }
 
-function getScreenShareTrack(
+function getBoundScreenVideoTrack(
   participant: RealtimeKitParticipant,
-  kind: MediaStreamTrack["kind"],
+  producer: RealtimeKitProducerState,
 ): MediaStreamTrack | undefined {
-  const screenShareTracks = participant.screenShareTracks;
-  if (!screenShareTracks) {
-    return undefined;
+  if (participant.screenShareEnabled !== true || participant.screenshareEnabled === false) return undefined;
+  const shares = participant.screenShareTracks;
+  if (!shares) return undefined;
+  let video: MediaStreamTrack | null | undefined;
+  if (Array.isArray(shares)) {
+    const videoTracks = shares.filter((track) => track.kind === "video");
+    if (videoTracks.length !== 1) return undefined;
+    video = videoTracks[0];
+  } else {
+    if (shares.video && shares.videoTrack && shares.video !== shares.videoTrack) return undefined;
+    video = shares.video ?? shares.videoTrack;
   }
-  if (Array.isArray(screenShareTracks)) {
-    return screenShareTracks.find((track) =>
-      track.kind === kind && track.readyState === "live"
-    );
-  }
-
-  const track = kind === "audio"
-    ? screenShareTracks.audio ?? screenShareTracks.audioTrack
-    : screenShareTracks.video ?? screenShareTracks.videoTrack;
-  return getLiveTrack(track);
-}
-
-function hasScreenShareEnabled(participant: RealtimeKitParticipant): boolean {
-  return participant.screenShareEnabled === true || participant.screenshareEnabled === true;
+  const consumer = producer.consumer;
+  if (!video || video.kind !== "video" || video.readyState !== "live" || video.enabled === false || video.muted === true ||
+      !consumer || !isValidIdentity(consumer.id) || consumer.kind !== "video" ||
+      consumer.producerId !== producer.producerId ||
+      consumer.peerId !== producer.producingPeerId || consumer.paused !== false ||
+      consumer.appData?.screenShare !== true || consumer.rtpReceiver?.track !== video) return undefined;
+  return video;
 }
 
 function getLiveTrack(
@@ -266,6 +312,7 @@ function createScreenSource(
   sourceId: string,
   participant: RealtimeKitParticipant,
   role: RealtimeKitParticipantRole,
+  producer: RealtimeKitProducerState,
 ): StudioSource {
   const participantName = participant.name?.trim() || getFallbackSourceName(role, 1);
   return {
@@ -279,6 +326,8 @@ function createScreenSource(
       realtimeKitParticipantId: participant.id ?? getRealtimeKitParticipantIdentity(participant),
       realtimeKitRole: role,
       realtimeKitSource: "screen",
+      realtimeKitScreenProducerId: producer.producerId,
+      realtimeKitScreenTransportId: producer.producingTransportId,
       runtimeSource: "realtimekit",
     },
   };
@@ -333,6 +382,25 @@ function encodePeerIdentity(value: string): string | undefined {
   } catch {
     return undefined;
   }
+}
+
+function isValidIdentity(value: unknown): value is string {
+  if (typeof value !== "string" || !value.trim()) return false;
+  try {
+    encodeURIComponent(value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function encodeIdentityTuple(values: readonly string[]): string | undefined {
+  if (!values.every(isValidIdentity)) return undefined;
+  // JSON preserves tuple boundaries, while a full SHA-256 digest keeps the
+  // source ID bounded even when a valid Studio session has a long show slug.
+  const digest = sha256(new TextEncoder().encode(JSON.stringify(values)));
+  return btoa(Array.from(digest, (byte) => String.fromCharCode(byte)).join(""))
+    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
 function isRealtimeKitParticipantRole(

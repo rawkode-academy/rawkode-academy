@@ -1,4 +1,5 @@
 import type { StudioSource } from "../types";
+import { isRealtimeKitScreenSource } from "../studio/programmeMediaGate";
 
 export function selectProgrammeAudioStreams(
   streams: ReadonlyMap<string, MediaStream>,
@@ -15,7 +16,7 @@ export function selectProgrammeAudioStreams(
     if (
       admitted.has(sourceId) &&
       (source?.type === "camera" ||
-      (source?.type === "screen" && sourceId === activeScreenShareSourceId))
+      (source?.type === "screen" && !isRealtimeKitScreenSource(source) && sourceId === activeScreenShareSourceId))
     ) {
       selected.set(sourceId, stream);
     }

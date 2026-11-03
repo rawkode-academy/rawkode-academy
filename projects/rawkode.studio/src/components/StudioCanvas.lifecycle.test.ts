@@ -1,4 +1,4 @@
-import { createRenderer, h, nextTick, ssrContextKey } from "vue";
+import { createRenderer, h, nextTick, shallowRef, ssrContextKey, type Component } from "vue";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { StudioLayer } from "../types";
 
@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   audible: true,
   leaseLost: undefined as undefined | ((error: unknown) => Promise<void>),
   getSourceState: vi.fn(),
+  renderCanvas: vi.fn(),
   resume: vi.fn(),
   startWhip: vi.fn(),
 }));
@@ -31,6 +32,9 @@ vi.mock("../audio/programmeAudioMixer", () => ({
 }));
 vi.mock("../canvas/useCanvasRenderLoop", () => ({
   useCanvasRenderLoop: () => ({ queuePaint: vi.fn(), stop: vi.fn() }),
+}));
+vi.mock("../canvas/programRenderer", () => ({
+  renderProgramCanvas: mocks.renderCanvas,
 }));
 vi.mock("../recording/recordingBackup", () => ({
   appendRecordingBackupChunk: vi.fn(), closeRecordingBackup: vi.fn(),
@@ -62,11 +66,15 @@ interface Node {
   captureStream?: () => FakeStream;
 }
 
-class FakeStream {
-  constructor(private readonly tracks: Array<{ kind: string; readyState: string; enabled?: boolean; stop?: () => void }>) {}
+class FakeStream extends EventTarget {
+  constructor(private tracks: Array<{ kind: string; readyState: string; enabled?: boolean; stop?: () => void }>) { super(); }
   getTracks() { return this.tracks; }
   getVideoTracks() { return this.tracks.filter((track) => track.kind === "video"); }
   getAudioTracks() { return this.tracks.filter((track) => track.kind === "audio"); }
+  replaceTracks(tracks: Array<{ kind: string; readyState: string; enabled?: boolean; stop?: () => void }>, notify = true) {
+    this.tracks = tracks;
+    if (notify) this.dispatchEvent(new Event("removetrack"));
+  }
 }
 
 const capturedTracks: Array<{ kind: string; readyState: string; stop: ReturnType<typeof vi.fn> }> = [];
@@ -173,6 +181,73 @@ function mount(
   return { app, root };
 }
 
+class FakeVideoTrack extends EventTarget {
+  kind = "video";
+  readyState = "live";
+  enabled = true;
+  muted = false;
+
+  end() {
+    this.readyState = "ended";
+    this.dispatchEvent(new Event("ended"));
+  }
+
+  mute() {
+    this.muted = true;
+    this.dispatchEvent(new Event("mute"));
+  }
+
+  unmute() {
+    this.muted = false;
+    this.dispatchEvent(new Event("unmute"));
+  }
+}
+
+function mountProgrammeCanvas(initialStreams: Map<string, MediaStream>) {
+  const streams = shallowRef(initialStreams);
+  const layers = shallowRef<StudioLayer[]>([{
+    id: "camera", name: "Camera", type: "camera", sourceId: "camera-a",
+    enabled: true, opacity: 1, bounds: { x: 0, y: 0, width: 100, height: 100 },
+  }]);
+  const context = {
+    setTransform: vi.fn(), clearRect: vi.fn(), drawImage: vi.fn(), fillRect: vi.fn(),
+    globalAlpha: 1, globalCompositeOperation: "source-over", fillStyle: "",
+  };
+  const buffer = { width: 1920, height: 1080, getContext: () => ({ setTransform: vi.fn() }) };
+  const videos: Array<{ srcObject: unknown; pause: ReturnType<typeof vi.fn> }> = [];
+  let failVideoCreation = false;
+  const originalDocument = document;
+  vi.stubGlobal("document", {
+    ...originalDocument,
+    createElement: (type: string) => {
+      if (type === "canvas") return buffer;
+      if (type === "video" && failVideoCreation) throw new Error("Video setup failed");
+      const video = originalDocument.createElement(type);
+      if (type === "video") videos.push(video as unknown as (typeof videos)[number]);
+      return video;
+    },
+  });
+  let paint!: (timestamp?: number) => Promise<void>;
+  const component = {
+    ...StudioCanvas,
+    render(this: { $: { setupState: Record<string, unknown> } }) {
+      paint = this.$.setupState.paint as (timestamp?: number) => Promise<void>;
+      return h("canvas", { ref: "canvasElement" });
+    },
+  };
+  const app = renderer.createApp({
+    render: () => h(component as unknown as Component, {
+      title: "Programme", layers: layers.value, mediaStreams: streams.value, previewOnly: true,
+      isPlaying: true, isRecording: false, resolution: { width: 1920, height: 1080, fps: 30 },
+    }),
+  });
+  app.provide(ssrContextKey, { modules: new Set() });
+  const root = node("root");
+  app.mount(root);
+  Object.assign(root.children[0], { width: 1920, height: 1080, getContext: () => context });
+  return { app, context, layers, paint: () => paint(), streams, videos, failVideoSetup: () => { failVideoCreation = true; } };
+}
+
 function response(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 }
@@ -189,6 +264,8 @@ beforeEach(() => {
   mocks.leaseLost = undefined;
   mocks.getSourceState.mockReset();
   mocks.getSourceState.mockReturnValue({ active: true, gain: 1, muted: false, trackCount: 1 });
+  mocks.renderCanvas.mockReset();
+  mocks.renderCanvas.mockResolvedValue(undefined);
   mocks.resume.mockReset();
   mocks.resume.mockImplementation(() => Promise.resolve(mocks.audioReady));
   mocks.startWhip.mockReset();
@@ -231,6 +308,149 @@ beforeEach(() => {
 afterEach(() => {
   vi.useRealTimers();
   vi.unstubAllGlobals();
+});
+
+describe("programme canvas media fencing", () => {
+  it.each(["removed", "replaced"] as const)(
+    "blanks a committed frame when a displayed stream is %s, even if rendering stalls or fails",
+    async (change) => {
+      const oldTrack = new FakeVideoTrack();
+      const oldStream = new FakeStream([oldTrack]);
+      const canvas = mountProgrammeCanvas(new Map([["camera-a", oldStream as unknown as MediaStream]]));
+      await canvas.paint();
+      expect(canvas.context.drawImage).toHaveBeenCalledTimes(1);
+
+      const overlay = deferred<void>();
+      mocks.renderCanvas.mockReturnValueOnce(overlay.promise);
+      const stalePaint = canvas.paint();
+      canvas.streams.value = change === "removed" ? new Map() : new Map([
+        ["camera-a", new FakeStream([new FakeVideoTrack()]) as unknown as MediaStream],
+      ]);
+      await nextTick();
+      expect(canvas.context.fillStyle).toBe("#000");
+      expect(canvas.context.fillRect).toHaveBeenCalledWith(0, 0, 1920, 1080);
+      expect(canvas.context.drawImage).toHaveBeenCalledTimes(1);
+      expect(canvas.videos[0].srcObject).toBeNull();
+      if (change === "replaced") expect(canvas.videos).toHaveLength(2);
+
+      overlay.resolve();
+      await stalePaint;
+      expect(canvas.context.drawImage).toHaveBeenCalledTimes(1);
+      mocks.renderCanvas.mockRejectedValueOnce(new Error("Overlay SVG failed to decode"));
+      await expect(canvas.paint()).rejects.toThrow("Overlay SVG failed to decode");
+      expect(canvas.context.drawImage).toHaveBeenCalledTimes(1);
+      expect(canvas.context.fillRect).toHaveBeenCalledTimes(1);
+      canvas.app.unmount();
+    },
+  );
+
+  it("keeps the committed frame for identical snapshots and unrelated streams", async () => {
+    const stream = new FakeStream([new FakeVideoTrack()]) as unknown as MediaStream;
+    const backstage = new FakeStream([new FakeVideoTrack()]) as unknown as MediaStream;
+    const canvas = mountProgrammeCanvas(new Map([["camera-a", stream], ["backstage", backstage]]));
+    await canvas.paint();
+    canvas.streams.value = new Map([["camera-a", stream], ["backstage", backstage]]);
+    await nextTick();
+    canvas.streams.value = new Map([["camera-a", stream]]);
+    await nextTick();
+    expect(canvas.context.fillRect).not.toHaveBeenCalled();
+    expect(canvas.context.drawImage).toHaveBeenCalledTimes(1);
+    canvas.app.unmount();
+  });
+
+  it("clears immediately for an in-place video-track replacement and ignores events from the old track", async () => {
+    const oldTrack = new FakeVideoTrack();
+    const stream = new FakeStream([oldTrack]);
+    const canvas = mountProgrammeCanvas(new Map([["camera-a", stream as unknown as MediaStream]]));
+    await canvas.paint();
+    const overlay = deferred<void>();
+    mocks.renderCanvas.mockReturnValueOnce(overlay.promise);
+    const stalePaint = canvas.paint();
+
+    stream.replaceTracks([new FakeVideoTrack()]);
+    expect(canvas.context.fillRect).toHaveBeenCalledTimes(1);
+    expect(canvas.videos).toHaveLength(2);
+    expect(canvas.videos[0].srcObject).toBeNull();
+    overlay.resolve();
+    await stalePaint;
+    expect(canvas.context.drawImage).toHaveBeenCalledTimes(1);
+    await canvas.paint();
+    expect(canvas.context.drawImage).toHaveBeenCalledTimes(2);
+    oldTrack.end();
+    expect(canvas.context.fillRect).toHaveBeenCalledTimes(1);
+    expect(canvas.videos).toHaveLength(2);
+    canvas.app.unmount();
+  });
+
+  it("clears immediately when a displayed video track ends", async () => {
+    const track = new FakeVideoTrack();
+    const canvas = mountProgrammeCanvas(new Map([["camera-a", new FakeStream([track]) as unknown as MediaStream]]));
+    await canvas.paint();
+    track.end();
+    expect(canvas.context.fillRect).toHaveBeenCalledWith(0, 0, 1920, 1080);
+    expect(canvas.videos[0].srcObject).toBeNull();
+    await canvas.paint();
+    const options = mocks.renderCanvas.mock.lastCall?.[1] as { mediaVideoElements: Map<string, unknown> };
+    expect(options.mediaVideoElements.has("camera-a")).toBe(false);
+    canvas.app.unmount();
+  });
+
+  it("keeps a muted track off programme through a stalled or failed render, then recovers on unmute", async () => {
+    const track = new FakeVideoTrack();
+    const canvas = mountProgrammeCanvas(new Map([["camera-a", new FakeStream([track]) as unknown as MediaStream]]));
+    await canvas.paint();
+    const overlay = deferred<void>();
+    mocks.renderCanvas.mockReturnValueOnce(overlay.promise);
+    const stalePaint = canvas.paint();
+
+    track.mute();
+    expect(canvas.context.fillRect).toHaveBeenCalledTimes(1);
+    overlay.resolve();
+    await stalePaint;
+    expect(canvas.context.drawImage).toHaveBeenCalledTimes(1);
+    mocks.renderCanvas.mockRejectedValueOnce(new Error("Overlay SVG failed to decode"));
+    await expect(canvas.paint()).rejects.toThrow("Overlay SVG failed to decode");
+    let options = mocks.renderCanvas.mock.lastCall?.[1] as { mediaVideoElements: Map<string, unknown> };
+    expect(options.mediaVideoElements.has("camera-a")).toBe(false);
+    expect(canvas.context.drawImage).toHaveBeenCalledTimes(1);
+
+    track.unmute();
+    expect(canvas.context.fillRect).toHaveBeenCalledTimes(2);
+    await canvas.paint();
+    options = mocks.renderCanvas.mock.lastCall?.[1] as { mediaVideoElements: Map<string, unknown> };
+    expect(options.mediaVideoElements.has("camera-a")).toBe(true);
+    expect(canvas.context.drawImage).toHaveBeenCalledTimes(2);
+    canvas.app.unmount();
+  });
+
+  it("blanks before video setup when an in-place track change is discovered during map refresh", async () => {
+    const stream = new FakeStream([new FakeVideoTrack()]);
+    const canvas = mountProgrammeCanvas(new Map([["camera-a", stream as unknown as MediaStream]]));
+    await canvas.paint();
+    const errors: unknown[] = [];
+    canvas.app.config.errorHandler = (error) => { errors.push(error); };
+    stream.replaceTracks([new FakeVideoTrack()], false);
+    canvas.failVideoSetup();
+    canvas.streams.value = new Map([["camera-a", stream as unknown as MediaStream]]);
+    await nextTick();
+
+    expect(errors).toEqual([expect.objectContaining({ message: "Video setup failed" })]);
+    expect(canvas.context.fillRect).toHaveBeenCalledWith(0, 0, 1920, 1080);
+    await canvas.paint();
+    const options = mocks.renderCanvas.mock.lastCall?.[1] as { mediaVideoElements: Map<string, unknown> };
+    expect(options.mediaVideoElements.has("camera-a")).toBe(false);
+    canvas.app.unmount();
+  });
+
+  it("clears when a layer stops rendering media but retains the same source ID", async () => {
+    const stream = new FakeStream([new FakeVideoTrack()]) as unknown as MediaStream;
+    const canvas = mountProgrammeCanvas(new Map([["camera-a", stream]]));
+    await canvas.paint();
+    canvas.layers.value = [{ ...canvas.layers.value[0], type: "background" }];
+    await nextTick();
+    expect(canvas.context.fillRect).toHaveBeenCalledWith(0, 0, 1920, 1080);
+    canvas.app.unmount();
+  });
 });
 
 describe("Studio publisher lifecycle", () => {

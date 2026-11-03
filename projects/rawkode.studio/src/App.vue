@@ -10,8 +10,10 @@ import { getRequiredProgrammeAudioSourceIds } from "./live/takeoverReadiness";
 import { useStudioMachine } from "./studio/useStudioMachine";
 import {
   filterProgrammeScreenLayers,
+  canChangeScreenAdmission,
+  isRealtimeKitScreenSource,
   isVisibleProducerScreen,
-  selectRoomCameraStreams,
+  selectRoomProgrammeStreams,
 } from "./studio/programmeMediaGate";
 import {
   createLocalSourceIdentity,
@@ -120,7 +122,7 @@ const studioLayoutStyle = computed(() => ({
   "--widgets-height": `${widgetHeight.value}px`,
 }));
 const mediaStreams = computed(() => {
-  const streams = selectRoomCameraStreams(roomMediaStreams.value, roomMediaSources.value);
+  const streams = selectRoomProgrammeStreams(roomMediaStreams.value, roomMediaSources.value);
   if (hostMediaStream.value) {
     streams.set(localCameraSourceId.value, hostMediaStream.value);
   }
@@ -216,7 +218,11 @@ function moveScene(sceneId: string, direction: "up" | "down"): void {
   send({ type: "scene.move", sceneId, direction });
 }
 
-function setSourceAdmission(sourceId: string, admitted: boolean): void {
+function setSourceAdmission(sourceId: string, admitted: boolean, previewedStream?: MediaStream, previewedTrack?: MediaStreamTrack): void {
+  if (admitted && !isSynchronized.value) return;
+  const source = state.value.sources.find((candidate) => candidate.id === sourceId);
+  if (admitted && source && isRealtimeKitScreenSource(source) &&
+      !canChangeScreenAdmission(source, false, mediaStreams.value.get(sourceId), previewedStream, previewedTrack)) return;
   send({ type: "source.admission.set", sourceId, admitted });
 }
 
@@ -551,7 +557,7 @@ function withRuntimeMediaState(source: StudioSource): StudioSource {
 
 function isVisibleRuntimeSource(source: StudioSource): boolean {
   if (source.type === "screen") {
-    return isVisibleProducerScreen(source, runtimeOwnerId, screenShareSources.value, state.value.onStageSourceIds);
+    return isVisibleProducerScreen(source, runtimeOwnerId, screenShareSources.value, state.value.onStageSourceIds, roomMediaSources.value);
   }
   if (source.type !== "camera") {
     return true;
@@ -1129,7 +1135,8 @@ function updateWidgetMaxHeight(): void {
         <p>
           Use RealtimeKit to check your camera and microphone, then join the other contributors.
           Programme switching, streaming, and recording are managed by the producer.
-          RealtimeKit screen sharing does not appear in Programme.
+          You can share your screen in the room; the producer can preview and add it to Programme.
+          Screen-share audio is not included yet.
         </p>
         <RealtimeKitRoom
           v-if="props.sessionId"
@@ -1161,6 +1168,7 @@ function updateWidgetMaxHeight(): void {
 
     <StudioWidgets
       v-if="hasProductionControls"
+      :can-admit="isSynchronized"
       :sources="sourcesForUi"
       :media-streams="mediaStreams"
       :active-screen-share-source-id="state.activeScreenShareSourceId"

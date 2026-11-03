@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, shallowRef } from "vue";
 import type { StudioAudioMixControl, StudioSource } from "../types";
+import { canChangeScreenAdmission, isRealtimeKitScreenSource } from "../studio/programmeMediaGate";
 import MediaStreamPreview from "./MediaStreamPreview.vue";
 
 const props = defineProps<{
   activeScreenShareSourceId: string;
   audioControls?: Record<string, StudioAudioMixControl>;
+  canAdmit?: boolean;
   localOwnerId: string;
   mediaStreams?: Map<string, MediaStream>;
   /** Sources explicitly admitted by the producer. Omission is deliberately backstage. */
@@ -19,11 +21,14 @@ const emit = defineEmits<{
   "audio-mute-change": [sourceId: string, muted: boolean];
   "retry-screen-share": [sourceId: string];
   "select-screen-share": [sourceId: string];
-  "source-admission-change": [sourceId: string, admitted: boolean];
+  "source-admission-change": [sourceId: string, admitted: boolean, previewedStream?: MediaStream, previewedTrack?: MediaStreamTrack];
   "stop-screen-share": [sourceId: string];
 }>();
 
 const screenSources = computed(() => props.sources.filter((source) => source.type === "screen"));
+const previews = shallowRef(new Map<string, { stream: MediaStream; track: MediaStreamTrack }>());
+const previewKeys = new WeakMap<MediaStream, number>();
+let nextPreviewKey = 0;
 
 function getScreenStatus(source: StudioSource): string {
   if ((source.settings?.runtimeSource === "local" || source.settings?.runtimeSource === "unavailable-local") &&
@@ -32,6 +37,10 @@ function getScreenStatus(source: StudioSource): string {
   }
   const status = source.settings?.captureStatus;
   if (status === "ready") {
+    const preview = previews.value.get(source.id);
+    if (isRealtimeKitScreenSource(source) && !canChangeScreenAdmission(source, false, getStream(source), preview?.stream, preview?.track)) {
+      return "Loading preview";
+    }
     return source.id === props.activeScreenShareSourceId ? "Selected for editing" : "Capture ready";
   }
 
@@ -86,6 +95,38 @@ function setAudioGain(sourceId: string, event: Event): void {
 function getStream(source: StudioSource): MediaStream | undefined {
   return props.mediaStreams?.get(source.id);
 }
+
+function getPreviewKey(source: StudioSource): string {
+  const stream = getStream(source);
+  if (!stream) return source.id;
+  let key = previewKeys.get(stream);
+  if (key === undefined) {
+    key = ++nextPreviewKey;
+    previewKeys.set(stream, key);
+  }
+  return `${source.id}:${key}`;
+}
+
+function setPreviewReadiness(sourceId: string, stream: MediaStream | undefined, track: MediaStreamTrack | undefined, ready: boolean): void {
+  const next = new Map(previews.value);
+  const tracks = stream?.getVideoTracks() ?? [];
+  if (ready && stream && track && tracks.length === 1 && tracks[0] === track && props.mediaStreams?.get(sourceId) === stream) {
+    next.set(sourceId, { stream, track });
+  } else if (!stream || next.get(sourceId)?.stream === stream) next.delete(sourceId);
+  previews.value = next;
+}
+
+function canChangeAdmission(source: StudioSource): boolean {
+  if (!isOnStage(source.id) && props.canAdmit === false) return false;
+  const preview = previews.value.get(source.id);
+  return canChangeScreenAdmission(source, isOnStage(source.id), getStream(source), preview?.stream, preview?.track);
+}
+
+function changeAdmission(source: StudioSource): void {
+  if (!canChangeAdmission(source)) return;
+  const preview = isRealtimeKitScreenSource(source) ? previews.value.get(source.id) : undefined;
+  emit("source-admission-change", source.id, !isOnStage(source.id), preview?.stream, preview?.track);
+}
 </script>
 
 <template>
@@ -93,8 +134,8 @@ function getStream(source: StudioSource): MediaStream | undefined {
     <header class="studio-widgets-heading">
       <div>
         <h2 id="screen-sources-heading">Screen sources</h2>
-        <p>Add, preview, and select browser screen captures for the programme.</p>
-        <p>Only screens shared in this producer tab can appear in Programme. RealtimeKit guest screens are unavailable.</p>
+        <p>Add, preview, and select screen shares for the programme.</p>
+        <p>Guest screen video can be added to stage. Guest screen audio is not included yet.</p>
       </div>
       <button
         class="primary-button compact"
@@ -124,7 +165,12 @@ function getStream(source: StudioSource): MediaStream | undefined {
           @click="emit('select-screen-share', source.id)"
         >
           <span class="screen-share-preview">
-            <MediaStreamPreview v-if="getStream(source)" :stream="getStream(source)" />
+            <MediaStreamPreview
+              v-if="getStream(source)"
+              :key="getPreviewKey(source)"
+              :stream="getStream(source)"
+              @readiness-change="(stream, track, ready) => setPreviewReadiness(source.id, stream, track, ready)"
+            />
           </span>
           <span class="screen-share-copy">
             <strong>{{ source.name }}</strong>
@@ -143,8 +189,9 @@ function getStream(source: StudioSource): MediaStream | undefined {
             <button
               class="ghost-button mini"
               type="button"
+              :disabled="!canChangeAdmission(source)"
               :aria-label="`${isOnStage(source.id) ? 'Remove' : 'Add'} ${source.name} ${isOnStage(source.id) ? 'from' : 'to'} stage`"
-              @click="emit('source-admission-change', source.id, !isOnStage(source.id))"
+              @click="changeAdmission(source)"
             >
               {{ isOnStage(source.id) ? "Remove from stage" : "Add to stage" }}
             </button>

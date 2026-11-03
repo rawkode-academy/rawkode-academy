@@ -42,6 +42,37 @@ function audio(id: string, name: string): StudioSource {
 }
 
 describe("source reconciliation", () => {
+  it("preserves a guest screen across an incomplete standby snapshot until an observed departure", () => {
+    const guestScreen = {
+      ...screen("source-realtimekit-screen-v3.publication-a", "Guest screen"),
+      settings: { runtimeSource: "realtimekit", realtimeKitSource: "screen" },
+    };
+    let state = reduceStudioState(createInitialStudioState(), {
+      type: "sources.reconcile", authoritativeRuntimeSource: "realtimekit", sources: [guestScreen],
+    });
+    state = reduceStudioState(state, { type: "source.admission.set", sourceId: guestScreen.id, admitted: true });
+    state = reduceStudioState(state, {
+      type: "sources.reconcile", authoritativeRuntimeSource: "realtimekit", sources: [],
+    });
+    expect(state.sources).toContainEqual(guestScreen);
+    expect(state.onStageSourceIds).toContain(guestScreen.id);
+
+    // A departure wins even if the same event carries a stale source snapshot.
+    state = reduceStudioState(state, {
+      type: "sources.reconcile", authoritativeRuntimeSource: "realtimekit",
+      sources: [guestScreen], departedSourceIds: [guestScreen.id],
+    });
+    expect(state.sources.some((source) => source.id === guestScreen.id)).toBe(false);
+    expect(state.onStageSourceIds).not.toContain(guestScreen.id);
+
+    const nextScreen = { ...guestScreen, id: "source-realtimekit-screen-v3.publication-b" };
+    state = reduceStudioState(state, {
+      type: "sources.reconcile", authoritativeRuntimeSource: "realtimekit", sources: [nextScreen],
+    });
+    expect(state.sources).toContainEqual(nextScreen);
+    expect(state.onStageSourceIds).not.toContain(nextScreen.id);
+  });
+
   it("preserves shared sources for standby setup, close, and unmount snapshots", () => {
     const initial = createInitialStudioState();
     const unopened = reduceStudioState(initial, {

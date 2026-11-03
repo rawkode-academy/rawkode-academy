@@ -10,6 +10,7 @@ import {
   mapRealtimeKitParticipantSources,
   type RealtimeKitParticipant,
   type RealtimeKitParticipantRole,
+  type RealtimeKitParticipantSourceMapping,
 } from "../realtimekit/participantSources";
 import {
   getRealtimeKitRoomStatus,
@@ -56,6 +57,13 @@ const roomMediaEvents = [
 ] as const;
 let removeRoomMediaListeners: Array<() => void> = [];
 const roomSourceAuthority = createRealtimeKitSourceAuthority();
+const observedScreenPublications = new Map<string, { peerId: string; producerId: string; transportId: string }>();
+let previousRoomSnapshot: {
+  authoritative: boolean;
+  sources: string;
+  streams: RealtimeKitParticipantSourceMapping["streams"];
+} | undefined;
+let roomStreamCache = new Map<string, { tracks: MediaStreamTrack[]; stream: MediaStream }>();
 
 const buttonLabel = computed(() => {
   if (state.value === "opening") return "Opening device check";
@@ -192,23 +200,52 @@ async function registerRealtimeKitElements(): Promise<void> {
 
 function watchRoomMedia(nextMeeting: RealtimeKitMeeting): void {
   stopWatchingRoomMedia();
+  previousRoomSnapshot = undefined;
+  const suppressedScreenPeers = new Set<string>();
   let roomJoinedEventObserved = false;
   let roomConnectionInterrupted = false;
   let browserOffline = typeof navigator !== "undefined" && navigator.onLine === false;
   let socketDisconnected = nextMeeting.meta.socketState?.state !== "connected";
+  const watchedScreenTracks = new Map<MediaStreamTrack, () => void>();
+  const refreshScreenTrackListeners = () => {
+    const tracks = new Set<MediaStreamTrack>();
+    for (const participant of nextMeeting.participants.joined.values()) {
+      const share = participant.screenShareTracks;
+      const videos = Array.isArray(share) ? share.filter((track) => track.kind === "video") : [share?.video];
+      for (const track of videos) if (track) tracks.add(track);
+    }
+    for (const [track, remove] of watchedScreenTracks) {
+      if (!tracks.has(track)) { remove(); watchedScreenTracks.delete(track); }
+    }
+    for (const track of tracks) {
+      if (watchedScreenTracks.has(track) || typeof track.addEventListener !== "function") continue;
+      const changed = () => syncMedia();
+      for (const event of ["ended", "mute", "unmute"]) track.addEventListener(event, changed);
+      watchedScreenTracks.set(track, () => {
+        for (const event of ["ended", "mute", "unmute"]) track.removeEventListener(event, changed);
+      });
+    }
+  };
   const syncMedia = (departedSourceIds: string[] = [], authoritative?: boolean) => {
     if (meeting.value !== nextMeeting) {
       return;
     }
+    refreshScreenTrackListeners();
     emitRoomMediaStreams(
       nextMeeting,
       !roomConnectionInterrupted && !browserOffline && !socketDisconnected &&
         (authoritative ?? isRealtimeKitSnapshotAuthoritative(nextMeeting.self, roomJoinedEventObserved)),
       departedSourceIds,
+      suppressedScreenPeers,
     );
   };
+  removeRoomMediaListeners.push(() => {
+    for (const remove of watchedScreenTracks.values()) remove();
+    watchedScreenTracks.clear();
+  });
   const handleRoomJoined = () => {
     if (browserOffline || socketDisconnected || nextMeeting.self.roomJoined !== true) return;
+    suppressedScreenPeers.clear();
     roomJoinedEventObserved = true;
     roomConnectionInterrupted = false;
     if (meeting.value === nextMeeting) {
@@ -229,7 +266,12 @@ function watchRoomMedia(nextMeeting: RealtimeKitMeeting): void {
   const handleParticipantLeft = (participant: RealtimeKitParticipant) => {
     // Revoke before a peer can reappear in a coalesced map snapshot.
     const sourceIds = getRealtimeKitParticipantSourceIds(participant);
-    if (sourceIds.length > 0) syncMedia(sourceIds);
+    if (sourceIds.length > 0 && participant.id) {
+      for (const [sourceId, publication] of observedScreenPublications) {
+        if (publication.peerId === participant.id) sourceIds.push(sourceId);
+      }
+      syncMedia(sourceIds);
+    }
     else handleConnectionLost();
   };
   const handleConnectionLost = () => {
@@ -245,12 +287,11 @@ function watchRoomMedia(nextMeeting: RealtimeKitMeeting): void {
     update?: { screenShareEnabled?: boolean },
   ) => {
     const enabled = update?.screenShareEnabled ?? participant.screenShareEnabled ?? participant.screenshareEnabled;
-    if (enabled !== true) {
-      const screenSourceId = getRealtimeKitParticipantSourceIds(participant)[1];
-      if (screenSourceId) syncMedia([screenSourceId]);
-      else handleConnectionLost();
-      return;
-    }
+    if (!participant.id) return handleConnectionLost();
+    // A false update can be the late closure of an older consumer. It blocks
+    // local output, but cannot identify the peer's current publication.
+    if (enabled === true) suppressedScreenPeers.delete(participant.id);
+    else suppressedScreenPeers.add(participant.id);
     syncMedia();
   };
   const handleSocketState = ({ state: socketState }: { state: string }) => {
@@ -317,6 +358,9 @@ function watchRoomMedia(nextMeeting: RealtimeKitMeeting): void {
   }
 
   syncMedia();
+  // Producer-list changes are not guaranteed to emit a participant-map event.
+  const resnapshotTimer = setInterval(() => syncMedia(), 500);
+  removeRoomMediaListeners.push(() => clearInterval(resnapshotTimer));
 }
 
 /** Uses RealtimeKit Self's documented audioTrack/videoTrack getters. */
@@ -340,29 +384,98 @@ function stopWatchingRoomMedia(): void {
 function emitRoomMediaStreams(
   nextMeeting: RealtimeKitMeeting,
   authoritative: boolean,
-  departedSourceIds: string[] = [],
+  departedSourceIds: string[],
+  suppressedScreenPeers: ReadonlySet<string>,
 ): void {
+  const joined = [...nextMeeting.participants.joined.values()];
   const mapping = authoritative
-    ? mapRealtimeKitParticipantSources(getRemoteParticipants(nextMeeting))
+    ? mapRealtimeKitParticipantSources(getRemoteParticipants(nextMeeting), props.sessionId, joined)
     : { sources: [], streams: [] };
+  if (authoritative) {
+    departedSourceIds.push(...getGoneScreenPublicationIds(joined));
+    for (const source of mapping.sources) {
+      const peerId = source.settings?.realtimeKitParticipantId;
+      const producerId = source.settings?.realtimeKitScreenProducerId;
+      const transportId = source.settings?.realtimeKitScreenTransportId;
+      if (source.type === "screen" && typeof peerId === "string" &&
+          typeof producerId === "string" && typeof transportId === "string") {
+        observedScreenPublications.set(source.id, { peerId, producerId, transportId });
+      }
+    }
+    const suppressedSourceIds = new Set(mapping.sources.filter((source) =>
+      source.type === "screen" && typeof source.settings?.realtimeKitParticipantId === "string" &&
+      suppressedScreenPeers.has(source.settings.realtimeKitParticipantId)
+    ).map((source) => source.id));
+    mapping.streams = mapping.streams.filter(({ sourceId }) => !suppressedSourceIds.has(sourceId));
+  } else {
+    observedScreenPublications.clear();
+  }
+  const revoked = roomSourceAuthority.update(
+    authoritative,
+    mapping.sources.map((source) => source.id),
+    departedSourceIds,
+  );
+  const sourceSnapshot = JSON.stringify(mapping.sources);
+  const previous = previousRoomSnapshot;
+  const sameStreams = previous && previous.streams.length === mapping.streams.length &&
+    previous.streams.every((stream, index) => {
+      const current = mapping.streams[index];
+      return stream.sourceId === current?.sourceId && stream.tracks.length === current.tracks.length &&
+        stream.tracks.every((track, trackIndex) => track === current.tracks[trackIndex]);
+    });
+  previousRoomSnapshot = { authoritative, sources: sourceSnapshot, streams: mapping.streams };
+  if (revoked.length === 0 && previous?.authoritative === authoritative &&
+      previous.sources === sourceSnapshot && sameStreams) return;
+  const nextCache = new Map<string, { tracks: MediaStreamTrack[]; stream: MediaStream }>();
+  for (const { sourceId, tracks } of mapping.streams) {
+    const cached = roomStreamCache.get(sourceId);
+    const unchanged = cached && cached.tracks.length === tracks.length &&
+      cached.tracks.every((track, index) => track === tracks[index]);
+    nextCache.set(sourceId, unchanged ? cached : { tracks, stream: new MediaStream(tracks) });
+  }
+  roomStreamCache = nextCache;
   emit("media-streams-change", {
     authoritative,
-    departedSourceIds: roomSourceAuthority.update(
-      authoritative,
-      mapping.sources.map((source) => source.id),
-      departedSourceIds,
-    ),
+    departedSourceIds: revoked,
     sources: mapping.sources,
-    streams: new Map(
-      mapping.streams.map(({ sourceId, tracks }) => [sourceId, new MediaStream(tracks)]),
-    ),
+    streams: new Map([...roomStreamCache].map(([sourceId, entry]) => [sourceId, entry.stream])),
   });
 }
 
+/** A missing list is unknown; only a formerly observed publication can depart. */
+function getGoneScreenPublicationIds(joined: RealtimeKitParticipant[]): string[] {
+  const participants = new Map(joined.map((participant) => [participant.id, participant]));
+  const gone: string[] = [];
+  for (const [sourceId, publication] of observedScreenPublications) {
+    const participant = participants.get(publication.peerId);
+    if (!participant) {
+      gone.push(sourceId);
+    } else if (Array.isArray(participant.producers) && participant.producers.every((producer) =>
+      producer && typeof producer.producerId === "string" && producer.producerId.trim()
+    )) {
+      const sameId = participant.producers.filter((producer) => producer.producerId === publication.producerId);
+      if (sameId.length === 0 || (sameId.every((producer) =>
+        typeof producer.producingTransportId === "string" && producer.producingTransportId.trim()
+      ) && sameId.every((producer) => producer.producingTransportId !== publication.transportId))) {
+        gone.push(sourceId);
+      }
+    }
+  }
+  for (const sourceId of gone) observedScreenPublications.delete(sourceId);
+  return gone;
+}
+
 function emitRoomMediaLoss(): void {
+  const previous = previousRoomSnapshot;
+  const revoked = roomSourceAuthority.update(false, []);
+  previousRoomSnapshot = { authoritative: false, sources: "[]", streams: [] };
+  roomStreamCache.clear();
+  observedScreenPublications.clear();
+  if (revoked.length === 0 && previous?.authoritative === false &&
+      previous.sources === "[]" && previous.streams.length === 0) return;
   emit("media-streams-change", {
     authoritative: false,
-    departedSourceIds: roomSourceAuthority.update(false, []),
+    departedSourceIds: revoked,
     sources: [],
     streams: new Map(),
   });

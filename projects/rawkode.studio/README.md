@@ -17,7 +17,7 @@ This is an operator runbook for the current MVP. “Implemented” below means p
 - [x] RealtimeKit host, producer, guest, and program presets with guest invites and durable participant identities for token refresh/rejoin.
 - [x] Producer compositor with persisted, revision-checked control state.
 - [x] Separate Preview and Programme monitors, explicit Take, basic scene rundown editing, and producer-controlled backstage/on-stage sources. Explicit departure revokes a reappearing durable source ID, and a synchronous frame fence prevents an older asynchronous render from returning a backstage source to Programme. Live browser rehearsal remains required.
-- [ ] RealtimeKit guest screen sharing is unavailable in Programme until a reliable per-capture identity is established. Only a screen captured in the publishing producer tab can appear in Programme; camera and microphone sources remain separate.
+- [x] Guest RealtimeKit screen video can be previewed, admitted, and selected for Programme. Each publication has a separate admission; guest screen audio is not included. The provider identity and multi-browser rehearsal gate below remains open.
 - [x] Cloudflare Stream WebRTC/WHIP publishing with a 5-second publisher heartbeat, a 20-second server lease, explicit takeover, and a provider-retirement barrier before a replacement production publisher is granted credentials.
 - [x] Prod-only public live state and one notification claim after Stream confirms the input is connected.
 - [x] Content-backed prod browser programme recording with a 30-second heartbeat/120-second per-video lease, one immutable canonical VOD claim per content video, durable browser recovery, ready-marker handoff, and identity-checked transcode status. Test and standalone production recordings stay local to the browser.
@@ -311,7 +311,7 @@ Complete this in order. Stop if any required check fails.
 3. Keep only one recording Producer active for a content video. Recording renews its server lease every 30 seconds and loses ownership after 120 seconds without a successful heartbeat; another prod session for the same video receives a controlled conflict. Different videos may record concurrently.
 4. Confirm sufficient browser storage and disk space. Recording uses IndexedDB as a durable backup before R2 completion.
 5. Assign one primary Producer and one takeover operator with an out-of-band voice/text channel.
-6. Join every host/guest, verify names and roles, keep new sources backstage, preview and explicitly admit each source, check programme audio, and rehearse mute, return-to-backstage, leave/rejoin, producer-local screen capture, transition, and Take changes. RealtimeKit guest screens are unavailable in Programme. Require no backstage picture, stale frame, or sound in Programme.
+6. Join every host/guest, verify names and roles, keep new sources backstage, preview and explicitly admit each source, check programme audio, and rehearse mute, return-to-backstage, leave/rejoin, guest and producer-local screen sharing, transition, and Take changes. Guest screen audio is not included. Require no backstage picture, stale frame, or sound in Programme.
 7. Open the session’s Recordings page in a separate tab for handoff observation; do not use it as the active producer tab.
 
 ## Rehearsals
@@ -322,7 +322,7 @@ Test mode still creates/uses real Cloudflare Stream resources, but recording is 
 
 1. Create a content-backed session with `streamEnvironment: test`.
 2. Join from separate browser profiles as Producer, Host, and at least one Guest.
-3. Exercise camera, microphone, producer-local screen capture, Preview/Take, scene CRUD, overlays, explicit admit/return-to-backstage, leave/rejoin, control-state refresh, and a second producer’s state view. Verify that RealtimeKit guest screens do not enter Programme and that no backstage picture or sound reaches Programme during a transition.
+3. Exercise camera, microphone, guest and producer-local screen sharing, Preview/Take, scene CRUD, overlays, explicit admit/return-to-backstage, leave/rejoin, control-state refresh, and a second producer’s state view. Verify guest screen video is backstage until previewed and admitted, guest screen audio is absent, and no backstage picture or sound reaches Programme during a transition.
 4. Start recording, wait for the red recording state, then click **Go live**.
 5. Require the state sequence **Starting live stream** → **Confirming stream** → **Test stream live**.
 6. Verify Cloudflare playback, remain live for at least two lease windows (40 seconds), and exercise one deliberate takeover.
@@ -370,7 +370,7 @@ health.
 ### Planned takeover
 
 1. Contact the active Producer out of band. Takeover intentionally interrupts the current publisher.
-2. Open or refresh the standby Producer page to observe the current publisher. Check that its admitted camera and producer-local screen pictures are available in this browser, and that each unmuted programme audio source is present. For an intentionally silent source, mute its programme mix; otherwise connect it or take it backstage before takeover.
+2. Open or refresh the standby Producer page to observe the current publisher. Check that its admitted camera and screen pictures are available in this browser, and that each unmuted programme audio source is present. For an intentionally silent source, mute its programme mix; otherwise connect it or take it backstage before takeover.
 3. Click **Stop current publisher** once. Studio ends that observed lease and requests retirement of its exact WHIP input; it does not start a replacement automatically.
 4. If retirement is pending or the response is ambiguous, use **Check takeover**. An `active` observation does not prove the original request cannot still arrive. After confirmed retirement, explicitly click **Go live**. Require the standby UI to reach the expected test/prod live state and re-check every playback destination.
 
@@ -453,6 +453,7 @@ Cloudflare live-input GET responses can expose RTMPS/SRT ingest credentials, and
 | cuenv toolchain | The shared CI contributor must resolve a reviewed, explicitly pinned cuenv release. The current generated bootstrap follows `releases/latest`, so production release approval remains blocked until the shared contributor or generator supports and uses a pin. | No. Confirm the generated workflow and bootstrap asset before every release. |
 | Rawkode identity | OAuth client `rawkode-studio`, callback URL, session KV, and GitHub handle claims work. | KV and unauthenticated route only; interactive login is manual. |
 | RealtimeKit | One app contains the host/producer/guest/program presets; runtime token can create meetings and participants. | App/preset visibility and secret bindings; write capability needs a rehearsal. |
+| Guest screen video | Confirm RealtimeKit publication IDs agree across producers, are not reused across the normal stop/start path, and identify the media delivered to each receiver. Rehearse with a guest and two producer browsers, including stop/start, delayed subscription, reconnect, and takeover. | No. The implementation follows pinned SDK 2.0.0 internals; public provider guarantees and an end-to-end rehearsal are still required. |
 | Cloudflare Stream | Runtime token can create/read live inputs and manage outputs; browser network permits WHIP/WHEP. Migration `0009` and its output-input table/mode/state index are present. | Deploy-token read capability, binding, and schema only; provisioning, publishing, output mutation, and playback need isolated test resources. |
 | YouTube | A separate RTMPS/SRT input and external encoder are deployed, the destination starts disabled, ingest/viewer playback are correct, and an owner can disable it independently. A Cloudflare output attached to the WHIP input is unsupported. | No. Validate end to end without exposing the key. |
 | Content GraphQL | A content-backed event resolves to the expected video ID, slug, hosts, and guests. | No. Required for content-backed production events. |
@@ -462,6 +463,21 @@ Cloudflare live-input GET responses can expose RTMPS/SRT ingest credentials, and
 | Browser/operator | Supported Chromium, permissions, storage, stable uplink, primary and standby operators, incident backchannel. | No. |
 
 No prod event is ready while any required gate is unknown.
+
+Guest-screen admission applies to an ongoing video publication, not to an
+immutable window or tab. A guest or browser can change the content of an
+existing publication without another producer admission. Screen audio is not
+included. Do not open the production WHIP gate for guest-screen use until the
+publication identity and receiver binding above have been verified with the
+provider and in a real multi-browser rehearsal.
+
+A standby producer losing room authority can currently revoke its observed
+shared admissions and interrupt the primary programme. A pending admission
+write can also commit after its tab closes or reloads before recovery; after
+reopening, inspect the shared stage and take an unwanted source backstage.
+While a tab remains open, its recovery barrier can conservatively take a newer
+admission of the same source backstage. Coordinate these actions between
+producers during rehearsal.
 
 ## Runtime binding reference
 

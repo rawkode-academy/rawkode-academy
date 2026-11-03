@@ -12,21 +12,26 @@ import { json, requestHasAllowedOrigin } from "../../../server/http";
 
 export const GET: APIRoute = async ({ locals, url }) => {
 	if (!locals.user) {
-		return json({ error: "Sign in with rawkode.academy identity." }, 401);
+		return noStore(json({ error: "Sign in with rawkode.academy identity." }, 401));
 	}
 
 	const sessionId = url.searchParams.get("sessionId") ?? "";
 	if (!sessionId) {
-		return json({ error: "sessionId is required." }, 400);
+		return noStore(json({ error: "sessionId is required." }, 400));
 	}
 
 	try {
 		await requireStudioControlAccess(env as StudioEnv, locals.user, sessionId);
-		return json(await getStudioControlState(env as StudioEnv, sessionId));
+		return noStore(json(await getStudioControlState(env as StudioEnv, sessionId)));
 	} catch (error) {
-		return controlStateErrorResponse(error);
+		return noStore(controlStateErrorResponse(error));
 	}
 };
+
+function noStore(response: Response): Response {
+	response.headers.set("Cache-Control", "no-store");
+	return response;
+}
 
 export const POST: APIRoute = async ({ locals, request }) => {
 	if (!locals.user) {

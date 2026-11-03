@@ -9,6 +9,7 @@ import {
 } from "./studioMachine";
 import type { StudioState } from "../types";
 import { selectOnStageLayers, sourceRequiresAdmission } from "./sourceAdmission";
+import { isRealtimeKitScreenSourceId } from "./programmeMediaGate";
 import {
   resolveStudioControlStateConflict,
   shouldFlushStudioControlStateAfterSave,
@@ -32,11 +33,15 @@ type StingerEvent = Extract<StudioEvent, { type: "stinger.midpoint" | "stinger.f
 type ReplayableChange =
   | { kind: "stinger"; event: StingerEvent; identity: string }
   | { kind: "reconciliation" }
+  | { kind: "admission-barrier"; sourceId: string; expectedRevision: number }
+  | { kind: "publication-removal"; sourceId: string }
   | { kind: "revocation"; sourceId: string };
 interface PendingChange {
   serial: number;
   replayable?: ReplayableChange;
   revokedSourceIds?: readonly string[];
+  removedPublicationIds?: readonly string[];
+  admittedSourceId?: string;
 }
 
 function elapsedSince(start: RequestStart): number {
@@ -65,6 +70,8 @@ export function useStudioMachine(
   let changeSerial = 0;
   let savedSerial = 0;
   let pendingChanges: PendingChange[] = [];
+  let lastDispatchedSave: { serial: number; expectedRevision: number } | undefined;
+  let freshnessStartedAt: RequestStart | undefined;
   let syncGeneration = 0;
   let saveTimer: number | undefined;
   let pollTimer: number | undefined;
@@ -77,6 +84,14 @@ export function useStudioMachine(
   function send(event: StudioEvent): void {
     if (synchronize && syncStatus.value === "loading") {
       return;
+    }
+    if (synchronize && event.type === "source.admission.set" && event.admitted) {
+      // Timers can be delayed while the tab is suspended. Check freshness at
+      // the action itself rather than relying only on the timeout callback.
+      if (hasFreshState.value && (!freshnessStartedAt || elapsedSince(freshnessStartedAt) >= CONTROL_STATE_FRESHNESS_MS)) {
+        setSyncError(new Error("Studio control state is stale. Reconnecting before resuming programme."));
+      }
+      if (!hasFreshState.value) return;
     }
     const current = state.value;
     const next = reduceStudioState(current, event);
@@ -108,6 +123,8 @@ export function useStudioMachine(
         serial: changeSerial,
         replayable,
         revokedSourceIds,
+        removedPublicationIds: departures.filter(isRealtimeKitScreenSourceId),
+        admittedSourceId: event.type === "source.admission.set" && event.admitted ? event.sourceId : undefined,
       });
       scheduleSave();
     }
@@ -166,6 +183,7 @@ export function useStudioMachine(
 
   function refreshFreshness(requestStartedAt: RequestStart): void {
     if (freshnessTimer !== undefined) window.clearTimeout(freshnessTimer);
+    freshnessStartedAt = requestStartedAt;
     const remaining = Math.max(0, CONTROL_STATE_FRESHNESS_MS - elapsedSince(requestStartedAt));
     freshnessTimer = window.setTimeout(() => {
       freshnessTimer = undefined;
@@ -274,7 +292,7 @@ export function useStudioMachine(
         return;
       }
       if (hasLocalChanges) {
-        if (statesEqual(state.value, remote.state)) {
+        if (statesEqual(state.value, remote.state) && !requiresAdmissionBarrier(remote.revision)) {
           invalidateRequests();
           applyRemoteState(remote);
         } else if (rebasePendingSafeChanges(remote)) {
@@ -317,6 +335,8 @@ export function useStudioMachine(
         state: state.value,
       });
       const { result, startedAt } = await requestControlState(async (signal) => {
+        // Once dispatched, the server may commit even if the response is lost.
+        lastDispatchedSave = { serial: requestSerial, expectedRevision };
         const response = await fetch("/api/studio/state", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -329,7 +349,7 @@ export function useStudioMachine(
       const { response, remote } = result;
 
       if (response.status === 409) {
-        if (remote.state && statesEqual(state.value, remote.state)) {
+        if (remote.state && statesEqual(state.value, remote.state) && !requiresAdmissionBarrier(remote.revision)) {
           invalidateRequests();
           applyRemoteState(remote);
           outcome = "saved";
@@ -403,17 +423,31 @@ export function useStudioMachine(
     if (!remote.state || pendingChanges.length === 0) return false;
     const hasOtherEdits = pendingChanges.some((change) => !change.replayable);
     const revocations = [...new Set(pendingChanges.flatMap((change) => change.revokedSourceIds ?? []))];
+    const removedPublications = new Set(pendingChanges.flatMap((change) => change.removedPublicationIds ?? []));
+    const admissionBarriers = pendingChanges.flatMap((change): ReplayableChange[] =>
+      change.replayable?.kind === "admission-barrier" ? [change.replayable] : []
+    );
     if (hasOtherEdits && revocations.length === 0) return false;
 
     // If unrelated edits also conflicted, discard them explicitly but never
-    // discard a pending backstage removal. Never replay an admission. Runtime
+    // discard a pending backstage removal or exact publication departure.
+    // Never replay an admission. Runtime
     // discovery is recomputed by the consumer after remoteStateEpoch changes;
     // replaying an old snapshot could remove or overwrite newer sources.
     const candidates: ReplayableChange[] = hasOtherEdits
-      ? revocations.map((sourceId) => ({ kind: "revocation", sourceId }))
+      ? [
+        ...revocations.map((sourceId): ReplayableChange => ({
+          kind: removedPublications.has(sourceId) ? "publication-removal" : "revocation",
+          sourceId,
+        })),
+        ...admissionBarriers,
+      ]
       : pendingChanges.flatMap((change): ReplayableChange[] =>
         change.replayable?.kind === "reconciliation"
-          ? (change.revokedSourceIds ?? []).map((sourceId) => ({ kind: "revocation", sourceId }))
+          ? (change.revokedSourceIds ?? []).map((sourceId) => ({
+            kind: change.removedPublicationIds?.includes(sourceId) ? "publication-removal" : "revocation",
+            sourceId,
+          }))
           : [change.replayable!]
       );
     let rebased = remote.state;
@@ -421,11 +455,20 @@ export function useStudioMachine(
     for (const change of candidates) {
       if (change.kind === "reconciliation") continue;
       if (change.kind === "stinger" && getStingerIdentity(rebased) !== change.identity) continue;
+      if (change.kind === "publication-removal" &&
+          !rebased.sources.some((source) => source.id === change.sourceId) &&
+          !rebased.onStageSourceIds.includes(change.sourceId)) continue;
       const event: StudioEvent = change.kind === "stinger"
         ? change.event
-        : { type: "source.admission.set", sourceId: change.sourceId, admitted: false };
+        : change.kind === "publication-removal"
+          ? { type: "source.remove", sourceId: change.sourceId }
+          : { type: "source.admission.set", sourceId: change.sourceId, admitted: false };
       const next = reduceStudioState(rebased, event);
-      if (next !== rebased) replayed.push(change);
+      // A no-op backstage decision still needs a CAS write if an older
+      // admission request could arrive using this same revision.
+      if (next !== rebased || (change.kind === "admission-barrier" && remote.revision <= change.expectedRevision)) {
+        replayed.push(change);
+      }
       rebased = next;
     }
 
@@ -440,7 +483,10 @@ export function useStudioMachine(
     pendingChanges = replayed.map((replayable) => ({
       serial: ++changeSerial,
       replayable,
-      revokedSourceIds: replayable.kind === "revocation" ? [replayable.sourceId] : [],
+      revokedSourceIds: replayable.kind === "revocation" || replayable.kind === "publication-removal" ||
+        replayable.kind === "admission-barrier"
+        ? [replayable.sourceId] : [],
+      removedPublicationIds: replayable.kind === "publication-removal" ? [replayable.sourceId] : [],
     }));
     if (conflict) {
       syncConflictNotice.value = conflict.error;
@@ -465,9 +511,44 @@ export function useStudioMachine(
       window.clearTimeout(freshnessTimer);
       freshnessTimer = undefined;
     }
+    freshnessStartedAt = undefined;
+    discardUnconfirmedAdmissions();
     hasFreshState.value = false;
     syncStatus.value = "error";
     syncError.value = error instanceof Error ? error.message : "Studio state synchronization failed";
+  }
+
+  function requiresAdmissionBarrier(remoteRevision: number): boolean {
+    return pendingChanges.some((change) => change.replayable?.kind === "admission-barrier" &&
+      remoteRevision <= change.replayable.expectedRevision);
+  }
+
+  function discardUnconfirmedAdmissions(): void {
+    const admissions = pendingChanges.filter((change) => change.admittedSourceId !== undefined);
+    if (admissions.length === 0) return;
+    const sourceIds = new Set(admissions.map((change) => change.admittedSourceId!));
+    const uncertain = new Set(admissions.filter((change) =>
+      lastDispatchedSave !== undefined && change.serial <= lastDispatchedSave.serial
+    ).map((change) => change.admittedSourceId!));
+    pendingChanges = pendingChanges.filter((change) => change.admittedSourceId === undefined);
+    state.value = {
+      ...state.value,
+      onStageSourceIds: state.value.onStageSourceIds.filter((sourceId) => !sourceIds.has(sourceId)),
+    };
+    // A matching read is insufficient: advance the CAS revision so an older
+    // admission write cannot arrive after recovery and put the source on air.
+    for (const sourceId of uncertain) {
+      pendingChanges.push({
+        serial: ++changeSerial,
+        replayable: { kind: "admission-barrier", sourceId, expectedRevision: lastDispatchedSave!.expectedRevision },
+        revokedSourceIds: [sourceId],
+      });
+    }
+    if (pendingChanges.length === 0) savedSerial = changeSerial;
+    const notice = "Pending admissions were cleared after synchronization was lost. Review and admit sources again.";
+    if (!syncConflictNotice.value.includes(notice)) {
+      syncConflictNotice.value = [syncConflictNotice.value, notice].filter(Boolean).join(" ");
+    }
   }
 
   onMounted(() => {
@@ -518,7 +599,7 @@ function getStingerIdentity(state: StudioState): string | undefined {
 }
 
 async function fetchControlState(sessionId: string, signal: AbortSignal): Promise<StudioControlStateResponse> {
-  const response = await fetch(`/api/studio/state?sessionId=${encodeURIComponent(sessionId)}`, { signal });
+  const response = await fetch(`/api/studio/state?sessionId=${encodeURIComponent(sessionId)}`, { signal, cache: "no-store" });
   const state = await readControlStateResponse(response);
   if (!response.ok) {
     throw new Error(state.error ?? `Studio state load failed with ${response.status}`);
