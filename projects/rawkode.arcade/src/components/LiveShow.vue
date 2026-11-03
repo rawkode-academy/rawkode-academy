@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from "vue";
+import { createLiveStatePoller } from "@rawkodeacademy/live-viewer";
 import { css } from "@/../styled-system/css";
 import { control, shell, slug, stage, text } from "@/styles/arcade";
 import ShowPlayer from "@/components/ShowPlayer.vue";
@@ -25,6 +26,19 @@ type Lineup = {
 const lineup = ref<Lineup>();
 const unavailable = ref(false);
 let timer: number | undefined;
+const livePoller = createLiveStatePoller({
+	async load(signal): Promise<Lineup> {
+		const response = await fetch("/api/show-lineup", { cache: "no-store", signal });
+		if (!response.ok) throw new Error("Show schedule unavailable");
+		const value: unknown = await response.json();
+		if (!value || typeof value !== "object" || !Array.isArray((value as Partial<Lineup>).upcoming)) {
+			throw new Error("Show schedule unavailable");
+		}
+		return value as Lineup;
+	},
+	onState(value) { lineup.value = value; unavailable.value = false; },
+	onUnavailable() { lineup.value = undefined; unavailable.value = true; },
+});
 
 function dateLabel(value: string): string {
 	const date = new Date(value);
@@ -35,23 +49,14 @@ function dateLabel(value: string): string {
 	}).format(date);
 }
 
-async function refresh() {
-	try {
-		const response = await fetch("/api/show-lineup", { cache: "no-store" });
-		if (!response.ok) throw new Error("Show schedule unavailable");
-		lineup.value = await response.json() as Lineup;
-		unavailable.value = false;
-	} catch {
-		lineup.value = undefined;
-		unavailable.value = true;
-	}
-}
-
 onMounted(() => {
-	void refresh();
-	timer = window.setInterval(() => void refresh(), 15_000);
+	void livePoller.refresh();
+	timer = window.setInterval(() => void livePoller.refresh(), 15_000);
 });
-onUnmounted(() => { if (timer !== undefined) window.clearInterval(timer); });
+onUnmounted(() => {
+	if (timer !== undefined) window.clearInterval(timer);
+	livePoller.dispose();
+});
 </script>
 
 <template>

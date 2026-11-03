@@ -11,6 +11,7 @@ on:
     - bun.lock
     - bun.lock/**
     - cue.mod/**
+    - packages/live-viewer/**
     - projects/rawkode.arcade/astro.config.mts
     - projects/rawkode.arcade/astro.config.mts/**
     - projects/rawkode.arcade/devenv.nix

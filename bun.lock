@@ -29,6 +29,10 @@
         "vue": ">=3.5.0",
       },
     },
+    "packages/live-viewer": {
+      "name": "@rawkodeacademy/live-viewer",
+      "version": "0.0.0",
+    },
     "packages/rich-text": {
       "name": "@rawkodeacademy/rich-text",
       "version": "0.0.0",
@@ -1108,6 +1112,7 @@
         "@heroicons/react": "^2.2.0",
         "@heroicons/vue": "^2.2.0",
         "@rawkodeacademy/design-system": "workspace:*",
+        "@rawkodeacademy/live-viewer": "workspace:*",
         "@rawkodeacademy/rich-text": "workspace:*",
         "@webcontainer/api": "^1.6.1",
         "astro": "7.4.2",
@@ -1178,6 +1183,7 @@
         "@pandacss/dev": "2.0.0-beta.18",
         "@pandacss/preset-base": "2.0.0-beta.18",
         "@pandacss/preset-panda": "2.0.0-beta.18",
+        "@rawkodeacademy/live-viewer": "workspace:*",
         "astro": "6.4.2",
         "vue": "3.5.35",
       },
@@ -2317,6 +2323,8 @@
     "@rawkode/studio": ["@rawkode/studio@workspace:projects/rawkode.studio"],
 
     "@rawkodeacademy/design-system": ["@rawkodeacademy/design-system@workspace:packages/design-system"],
+
+    "@rawkodeacademy/live-viewer": ["@rawkodeacademy/live-viewer@workspace:packages/live-viewer"],
 
     "@rawkodeacademy/rich-text": ["@rawkodeacademy/rich-text@workspace:packages/rich-text"],
 
