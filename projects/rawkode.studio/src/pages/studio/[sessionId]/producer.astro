@@ -3,6 +3,7 @@ import App from "../../../App.vue";
 import StudioLayout from "../../../layouts/StudioLayout.astro";
 import {
 	getStudioSession,
+	getStudioStreamTakeoverObservation,
 	userCanManageStudioSession,
 } from "../../../server/studio";
 import { env } from "cloudflare:workers";
@@ -21,6 +22,10 @@ if (!(await userCanManageStudioSession(env, session, Astro.locals.user))) {
 		status: 403,
 	});
 }
+const streamObservation = await getStudioStreamTakeoverObservation(env, session.id);
+if (!streamObservation) {
+	return new Response("Studio session not found", { status: 404 });
+}
 const providerStatus = session.realtimeKitMeetingId ? "RealtimeKit ready" : "Meeting pending";
 ---
 
@@ -37,13 +42,15 @@ const providerStatus = session.realtimeKitMeetingId ? "RealtimeKit ready" : "Mee
 	>
 		<App
 			client:only="vue"
+			contentBacked={Boolean(session.contentVideoId)}
 			providerStatus={providerStatus}
 			recordingStatus={session.recordingStatus}
 			roomRole="Producer"
 			sessionId={session.id}
 			sessionTitle={session.title}
 			streamEnvironment={session.streamEnvironment}
-			streamStatus={session.streamStatus}
+			streamStatus={streamObservation.streamStatus}
+			takeoverLease={streamObservation.takeoverLease}
 		/>
 	</section>
 </StudioLayout>

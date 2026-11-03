@@ -107,7 +107,7 @@ export const server = {
 	startStream: defineAction({
 		input: z.object({
 			sessionId: z.string().min(1),
-			streamToken: z.string().min(1).optional(),
+			streamToken: z.string().trim().min(1).max(256),
 		}),
 		handler: async (input, context) => {
 			const user = requireUser(context);
@@ -123,7 +123,7 @@ export const server = {
 	confirmStream: defineAction({
 		input: z.object({
 			sessionId: z.string().min(1),
-			streamToken: z.string().min(1).optional(),
+			streamToken: z.string().trim().min(1).max(256),
 		}),
 		handler: async (input, context) => {
 			const user = requireUser(context);
@@ -139,7 +139,7 @@ export const server = {
 	stopStream: defineAction({
 		input: z.object({
 			sessionId: z.string().min(1),
-			streamToken: z.string().min(1).optional(),
+			streamToken: z.string().trim().min(1).max(256),
 		}),
 		handler: async (input, context) => {
 			const user = requireUser(context);

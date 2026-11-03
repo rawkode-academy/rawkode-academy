@@ -43,6 +43,7 @@ const providerStatus = session.realtimeKitMeetingId ? "RealtimeKit ready" : "Mee
 	>
 		<App
 			client:only="vue"
+			contentBacked={Boolean(session.contentVideoId)}
 			inviteToken={inviteToken ?? undefined}
 			providerStatus={providerStatus}
 			recordingStatus={session.recordingStatus}

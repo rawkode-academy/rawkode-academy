@@ -10,6 +10,7 @@ import {
 	abortStudioRecordingUpload,
 	completeStudioRecordingUpload,
 	createStudioRecordingUpload,
+	heartbeatStudioRecording,
 	uploadStudioRecordingPart,
 } from "../../../server/operations";
 
@@ -40,7 +41,7 @@ export const POST: APIRoute = async ({ locals, request }) => {
 	if (!requestHasAllowedOrigin(request)) return crossOrigin();
 
 	const body = (await request.json().catch(() => null)) as {
-		action?: "complete" | "create";
+		action?: "complete" | "create" | "heartbeat";
 		parts?: Array<{ etag?: string; partNumber?: number }>;
 		recordingId?: string;
 		sessionId?: string;
@@ -48,12 +49,26 @@ export const POST: APIRoute = async ({ locals, request }) => {
 		uploadId?: string;
 	} | null;
 	const action = body?.action ?? "create";
-	const sourceFormat = parseSourceFormat(body?.sourceFormat);
-	if (!body?.sessionId || !sourceFormat) {
+	if (!body?.sessionId) {
 		return invalidRecordingUpload();
 	}
 
 	try {
+		if (action === "heartbeat") {
+			if (!body.recordingId) return invalidRecordingUpload();
+			const result = await heartbeatStudioRecording(
+				env as StudioEnv,
+				locals.user,
+				{
+					recordingId: body.recordingId,
+					sessionId: body.sessionId,
+				},
+			);
+			return json(result);
+		}
+
+		const sourceFormat = parseSourceFormat(body.sourceFormat);
+		if (!sourceFormat) return invalidRecordingUpload();
 		if (action === "complete") {
 			if (!body.recordingId || !body.uploadId || !body.parts) {
 				return invalidRecordingUpload();
