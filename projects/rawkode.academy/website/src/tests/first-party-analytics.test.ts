@@ -70,6 +70,26 @@ describe("track()", () => {
 		expect(fetchMock).toHaveBeenCalledTimes(1);
 	});
 
+	it("sends at once when the page is already hidden", () => {
+		// web-vitals reports final CLS/INP after visibilitychange.
+		const hidden = vi
+			.spyOn(document, "visibilityState", "get")
+			.mockReturnValue("hidden");
+		const beacon = vi.fn().mockReturnValue(true);
+		Object.defineProperty(navigator, "sendBeacon", {
+			value: beacon,
+			configurable: true,
+		});
+		try {
+			track("web_vitals", { name: "CLS" });
+			expect(beacon).toHaveBeenCalledTimes(1);
+			expect(beacon.mock.calls[0]?.[0]).toBe("/api/e");
+		} finally {
+			hidden.mockRestore();
+			delete (navigator as { sendBeacon?: unknown }).sendBeacon;
+		}
+	});
+
 	it("respects Do Not Track, as posthog-js is configured to", () => {
 		Object.defineProperty(navigator, "doNotTrack", {
 			value: "1",
@@ -123,7 +143,7 @@ describe("POST /api/e", () => {
 		};
 		const request = {
 			headers: { get: (name: string) => all[name.toLowerCase()] ?? null },
-			json: async () => body,
+			text: async () => (typeof body === "string" ? body : JSON.stringify(body)),
 		};
 		return POST({
 			request,
@@ -161,6 +181,12 @@ describe("POST /api/e", () => {
 	it("rejects a malformed envelope", async () => {
 		expect((await call({ nope: true })).status).toBe(400);
 		expect((await call({ events: [] })).status).toBe(400);
+	});
+
+	it("rejects an oversized body without a Content-Length", async () => {
+		const response = await call("x".repeat(64 * 1024 + 1));
+		expect(response.status).toBe(413);
+		expect(analytics.fetch).not.toHaveBeenCalled();
 	});
 
 	it("caps a batch at 50 events", async () => {

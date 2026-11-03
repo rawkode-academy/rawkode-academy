@@ -218,7 +218,8 @@ export function rowFromCloudEvent(input: CloudEventInput): AnalyticsRow {
 	const sessionId = str(take("sessionId")) ?? str(take("session_id"));
 	row.user_id = userId;
 	row.session_id = sessionId;
-	row.distinct_id = userId ?? distinctId ?? sessionId;
+	// Same precedence as the PostHog export in DataBuffer.
+	row.distinct_id = userId ?? sessionId ?? distinctId;
 
 	row.url_host = str(take("domain"));
 	row.url_path = str(take("page_path")) ?? str(take("path"));
@@ -235,10 +236,31 @@ export function rowFromCloudEvent(input: CloudEventInput): AnalyticsRow {
 	return row;
 }
 
+/**
+ * PostHog and Grafana receive the user agent's classification, never the raw
+ * string. Call after rowFromCloudEvent, which classifies it for the stream.
+ */
+export function redactUserAgent<T extends { data?: unknown }>(event: T): T {
+	const data = event.data;
+	if (!data || typeof data !== "object" || !("user_agent" in data)) {
+		return event;
+	}
+	const { user_agent, ...rest } = data as Record<string, unknown>;
+	return {
+		...event,
+		data: { ...rest, ...classifyUserAgent(String(user_agent ?? "")) },
+	};
+}
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+	typeof value === "object" && value !== null && !Array.isArray(value);
+
 export function rowFromWebEvent(
 	input: WebEvent,
 	context: WebContext,
 ): AnalyticsRow | null {
+	// Events come from the browser unvalidated.
+	if (!isRecord(input)) return null;
 	const eventId = str(input.event_id);
 	const event = str(input.event);
 	if (!eventId || !event) return null;
@@ -260,7 +282,9 @@ export function rowFromWebEvent(
 	}
 	Object.assign(row, classifyUserAgent(context.user_agent ?? ""));
 
-	row.properties_json = propertiesJson(input.properties ?? {});
+	row.properties_json = propertiesJson(
+		isRecord(input.properties) ? input.properties : {},
+	);
 	return row;
 }
 

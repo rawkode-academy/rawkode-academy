@@ -9,6 +9,8 @@
 // endpoint, and Basin records page views on load rather than after idle.
 // Exits 1 when a server event drifts or Basin is missing a day of data.
 
+import { basinQuery } from "../../../rawkode.academy/website/src/server/basin";
+
 const TOLERANCE = 0.05;
 const DAYS = Number(process.env.DAYS ?? 7);
 
@@ -69,35 +71,13 @@ async function posthog(query: string): Promise<unknown[][]> {
 	return ((await response.json()) as { results: unknown[][] }).results;
 }
 
-async function basin(query: string): Promise<Record<string, unknown>[]> {
-	const response = await fetch(
-		`https://api.sql.cloudflarestorage.com/api/v1/accounts/${required("CLOUDFLARE_ACCOUNT_ID")}/basin-sql/query/${process.env.BASIN_BUCKET ?? "rawkode-analytics"}`,
-		{
-			method: "POST",
-			headers: {
-				Authorization: `Bearer ${required("BASIN_SQL_TOKEN")}`,
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({ query }),
-		},
-	);
-	const payload = (await response.json().catch(() => null)) as {
-		result?: { rows?: unknown[]; schema?: Array<{ name: string } | string> };
-	} | null;
-	if (!response.ok) {
-		throw new Error(`Basin SQL ${response.status}: ${JSON.stringify(payload)}`);
-	}
-	const rows = payload?.result?.rows ?? [];
-	if (rows.length === 0 || !Array.isArray(rows[0])) {
-		return rows as Record<string, unknown>[];
-	}
-	const columns = (payload?.result?.schema ?? []).map((c) =>
-		typeof c === "string" ? c : c.name,
-	);
-	return (rows as unknown[][]).map((values) =>
-		Object.fromEntries(values.map((v, i) => [columns[i], v])),
-	);
-}
+// Same client the dashboard uses. Bun has no `caches`, so nothing is cached.
+const basinConfig = {
+	accountId: required("CLOUDFLARE_ACCOUNT_ID"),
+	bucket: process.env.BASIN_BUCKET ?? "rawkode-analytics",
+	token: required("BASIN_SQL_TOKEN"),
+};
+const basin = (query: string) => basinQuery(basinConfig, query);
 
 // The PostHog project's timezone is Europe/London; days are compared in UTC.
 const posthogRows = await posthog(`

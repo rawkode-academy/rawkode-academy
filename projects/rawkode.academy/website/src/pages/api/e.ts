@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { env } from "cloudflare:workers";
+import { env, waitUntil } from "cloudflare:workers";
 import { createLogger } from "@/lib/logger";
 
 export const prerender = false;
@@ -22,10 +22,19 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
 	if (length > MAX_BODY_BYTES) {
 		return new Response(null, { status: 413 });
 	}
+	// Content-Length is absent on chunked bodies, so check what was read too.
+	const text = await request.text().catch(() => "");
+	if (new TextEncoder().encode(text).byteLength > MAX_BODY_BYTES) {
+		return new Response(null, { status: 413 });
+	}
 
-	const body = (await request.json().catch(() => null)) as {
-		events?: unknown;
-	} | null;
+	const body = (() => {
+		try {
+			return JSON.parse(text) as { events?: unknown } | null;
+		} catch {
+			return null;
+		}
+	})();
 	if (!body || !Array.isArray(body.events) || body.events.length === 0) {
 		return new Response(null, { status: 400 });
 	}
@@ -35,8 +44,8 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
 
 	const cf = (request as Request & { cf?: IncomingRequestCfProperties }).cf;
 
-	try {
-		await analytics.fetch("https://analytics.internal/ingest", {
+	const forward = analytics
+		.fetch("https://analytics.internal/ingest", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({
@@ -48,10 +57,12 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
 					continent: cf?.continent,
 				},
 			}),
+		})
+		.catch((error) => {
+			logger.error("Analytics ingest failed", error);
 		});
-	} catch (error) {
-		logger.error("Analytics ingest failed", error);
-	}
+	// The reader's request shouldn't wait on the lake.
+	waitUntil(forward);
 
 	return new Response(null, { status: 204 });
 };

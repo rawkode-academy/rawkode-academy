@@ -58,6 +58,8 @@ const results = Object.fromEntries(
 ) as Record<DashboardQuery, Panel>;
 
 const num = (value: unknown) => Number(value ?? 0);
+// Basin SQL may return booleans as strings.
+const isTrue = (value: unknown) => value === true || value === "true";
 const fmt = new Intl.NumberFormat("en-GB");
 const pct = (part: number, whole: number) =>
 	whole > 0 ? `${((part / whole) * 100).toFixed(1)}%` : "–";
@@ -71,7 +73,7 @@ const signInCount = (event: string, isBot?: boolean) =>
 		.filter(
 			(row) =>
 				row.event === event &&
-				(isBot === undefined || Boolean(row.is_bot) === isBot),
+				(isBot === undefined || isTrue(row.is_bot) === isBot),
 		)
 		.reduce((sum, row) => sum + num(row.events), 0);
 const initiatedHuman = signInCount(SIGN_IN_EVENTS.initiated, false);

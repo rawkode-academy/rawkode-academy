@@ -7,6 +7,7 @@ import {
 	rowFromCloudEvent,
 	rowFromException,
 	rowFromMetric,
+	redactUserAgent,
 	rowFromWebEvent,
 	toStreamRecord,
 	type WebContext,
@@ -80,21 +81,31 @@ export class PostHogCollector extends WorkerEntrypoint<Env> {
 		// Browser events from the website's /api/e. These go to the Basin stream
 		// only: posthog-js already sends them to PostHog during the dual-run.
 		if (url.pathname === "/ingest" && request.method === "POST") {
-			const body = (await request.json().catch(() => null)) as {
-				events?: unknown;
-				context?: WebContext;
-			} | null;
-			if (!body || !Array.isArray(body.events)) {
+			try {
+				const body = (await request.json().catch(() => null)) as {
+					events?: unknown;
+					context?: WebContext;
+				} | null;
+				if (!body || !Array.isArray(body.events)) {
+					return Response.json(
+						{ success: false, error: "Expected { events: [] }" },
+						{ status: 400 },
+					);
+				}
+				const accepted = await this.ingestWebEvents(
+					body.events as WebEvent[],
+					body.context ?? {},
+				);
+				return Response.json({ success: true, accepted });
+			} catch (error) {
+				const errorMessage =
+					error instanceof Error ? error.message : "Unknown error";
+				console.error("Ingest endpoint error", { error: errorMessage });
 				return Response.json(
-					{ success: false, error: "Expected { events: [] }" },
+					{ success: false, error: errorMessage },
 					{ status: 400 },
 				);
 			}
-			const accepted = await this.ingestWebEvents(
-				body.events as WebEvent[],
-				body.context ?? {},
-			);
-			return Response.json({ success: true, accepted });
 		}
 
 		// CloudEvent tracking endpoint (compatible with analytics worker)
@@ -145,8 +156,9 @@ export class PostHogCollector extends WorkerEntrypoint<Env> {
 		const buffer = this.env.DATA_BUFFER.get(id);
 
 		const json = validation.event.toJSON();
-		await buffer.addEvent(json, options?.attributes);
-		this.stream([rowFromCloudEvent(json as unknown as CloudEventInput)]);
+		const row = rowFromCloudEvent(json as unknown as CloudEventInput);
+		await buffer.addEvent(redactUserAgent(json), options?.attributes);
+		this.stream([row]);
 
 		return { success: true };
 	}

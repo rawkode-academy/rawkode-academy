@@ -130,7 +130,11 @@ export function track(event: string, properties?: Record<string, unknown>): void
 				: {}),
 		});
 		listenForUnload();
-		if (queue.length >= MAX_BATCH) {
+		// web-vitals reports final CLS/INP after the page is hidden, when a
+		// timer may never fire.
+		if (document.visibilityState === "hidden") {
+			flush(true);
+		} else if (queue.length >= MAX_BATCH) {
 			flush();
 		} else if (!timer) {
 			timer = setTimeout(() => flush(), FLUSH_DELAY_MS);

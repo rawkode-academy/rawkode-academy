@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import schema from "../basin/schema.json";
 import {
 	classifyUserAgent,
+	redactUserAgent,
 	rowFromCloudEvent,
 	rowFromException,
 	rowFromMetric,
@@ -193,5 +194,43 @@ describe("metrics and exceptions", () => {
 				}),
 			),
 		);
+	});
+});
+
+describe("redactUserAgent", () => {
+	test("replaces the raw user agent with its classification", () => {
+		const event = {
+			id: "1",
+			data: { path: "/x", user_agent: IPHONE_SAFARI },
+		};
+		const redacted = redactUserAgent(event);
+		expect(redacted.data).toEqual({
+			path: "/x",
+			device: "mobile",
+			browser: "safari",
+			is_bot: false,
+		});
+		expect(event.data.user_agent).toBe(IPHONE_SAFARI);
+	});
+
+	test("leaves events without a user agent untouched", () => {
+		const event = { id: "1", data: { path: "/x" } };
+		expect(redactUserAgent(event)).toBe(event);
+	});
+});
+
+describe("untrusted web events", () => {
+	test("drops entries that aren't objects", () => {
+		for (const input of [null, 42, "page_view", []]) {
+			expect(rowFromWebEvent(input as never, {})).toBeNull();
+		}
+	});
+
+	test("ignores non-object properties", () => {
+		const row = rowFromWebEvent(
+			{ event_id: "e1", ts_ms: 1, event: "x", properties: "oops" as never },
+			{},
+		);
+		expect(row?.properties_json).toBeNull();
 	});
 });

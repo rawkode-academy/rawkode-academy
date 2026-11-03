@@ -24,13 +24,27 @@ PIPELINE="analytics_events_pipeline"
 
 wrangler() { bun x wrangler "$@"; }
 
+# Re-runs are expected: tolerate "already enabled", fail on anything else so a
+# bad token stops the script before the immutable resources are created.
+idempotent() {
+	local output
+	if output=$("$@" 2>&1); then
+		echo "$output"
+	elif grep -qi "already" <<<"$output"; then
+		echo "$output"
+	else
+		echo "$output" >&2
+		return 1
+	fi
+}
+
 if ! wrangler r2 bucket list | grep -q "name:\s*${BUCKET}$"; then
 	wrangler r2 bucket create "$BUCKET"
 fi
 
-wrangler basin catalog enable "$BUCKET" || true
-wrangler basin catalog compaction enable "$BUCKET" --target-size 128 --token "$BASIN_CATALOG_TOKEN" || true
-wrangler basin catalog snapshot-expiration enable "$BUCKET" --token "$BASIN_CATALOG_TOKEN" --older-than-days 7 --retain-last 10 || true
+idempotent wrangler basin catalog enable "$BUCKET"
+idempotent wrangler basin catalog compaction enable "$BUCKET" --target-size 128 --token "$BASIN_CATALOG_TOKEN"
+idempotent wrangler basin catalog snapshot-expiration enable "$BUCKET" --token "$BASIN_CATALOG_TOKEN" --older-than-days 7 --retain-last 10
 
 if ! wrangler basin pipelines streams list | grep -q "$STREAM"; then
 	wrangler basin pipelines streams create "$STREAM" --schema-file schema.json

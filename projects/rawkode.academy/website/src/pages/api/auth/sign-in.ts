@@ -6,7 +6,14 @@ import { captureServerEvent, getDistinctId } from "@/server/analytics";
 
 export const GET: APIRoute = async (context) => {
 	if (isPrefetch(context.request)) {
-		return new Response(null, { status: 204 });
+		// Never let the browser reuse this empty response for the real click.
+		return new Response(null, {
+			status: 204,
+			headers: {
+				"Cache-Control": "no-store",
+				Vary: "Sec-Purpose, Purpose, Sec-Fetch-Mode",
+			},
+		});
 	}
 
 	let returnTo = context.url.searchParams.get("returnTo") || "/";
