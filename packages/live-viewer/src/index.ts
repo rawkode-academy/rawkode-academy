@@ -77,8 +77,14 @@ interface PlaybackAttempt {
 	version: number;
 	resourceUrl: string | null;
 	deletedResourceUrl: string | null;
+	mediaDeadline: number;
+	mediaMonotonicDeadline: number;
+	mediaTimer?: ReturnType<typeof setTimeout>;
+	negotiated: boolean;
+	receivedMedia: boolean;
 	onTrack: (event: RTCTrackEvent) => void;
 	onConnectionStateChange: () => void;
+	onMediaReady: () => void;
 }
 
 export function createWhepPlayback(options: {
@@ -114,6 +120,10 @@ export function createWhepPlayback(options: {
 	function closeAttempt(attempt: PlaybackAttempt): void {
 		if (current === attempt) current = undefined;
 		attempt.controller.abort();
+		if (attempt.mediaTimer !== undefined) clearTimeout(attempt.mediaTimer);
+		attempt.mediaTimer = undefined;
+		options.video.removeEventListener("loadeddata", attempt.onMediaReady);
+		options.video.removeEventListener("playing", attempt.onMediaReady);
 		attempt.peer.removeEventListener("track", attempt.onTrack);
 		attempt.peer.removeEventListener("connectionstatechange", attempt.onConnectionStateChange);
 		attempt.peer.close();
@@ -133,6 +143,18 @@ export function createWhepPlayback(options: {
 			retryTimer = undefined;
 			if (!disposed && generation === attempt.version) connect(attempt.url);
 		}, options.retryMs ?? 5_000);
+	}
+
+	function markMediaReceived(attempt: PlaybackAttempt): void {
+		if (!isCurrent(attempt) || attempt.receivedMedia) return;
+		if (Date.now() >= attempt.mediaDeadline || performance.now() >= attempt.mediaMonotonicDeadline) {
+			retry(attempt, new Error("Live playback did not receive video."));
+			return;
+		}
+		attempt.receivedMedia = true;
+		if (attempt.mediaTimer !== undefined) clearTimeout(attempt.mediaTimer);
+		attempt.mediaTimer = undefined;
+		if (attempt.negotiated) options.onStatus("live");
 	}
 
 	async function negotiate(attempt: PlaybackAttempt, signal: AbortSignal): Promise<void> {
@@ -167,13 +189,16 @@ export function createWhepPlayback(options: {
 		if (current) closeAttempt(current);
 		if (!url) return;
 		let attempt: PlaybackAttempt;
+		const timeoutMs = options.connectTimeoutMs ?? 15_000;
 		try {
 			const stream = new MediaStream();
 			const peer = new RTCPeerConnection();
 			attempt = {
 				controller: new AbortController(), peer, stream,
 				url, version, resourceUrl: null, deletedResourceUrl: null,
-				onTrack: () => undefined, onConnectionStateChange: () => undefined,
+				mediaDeadline: Date.now() + timeoutMs, mediaMonotonicDeadline: performance.now() + timeoutMs,
+				negotiated: false, receivedMedia: false,
+				onTrack: () => undefined, onConnectionStateChange: () => undefined, onMediaReady: () => undefined,
 			};
 		} catch (error) {
 			options.onStatus("failed", error instanceof Error ? error.message : "Live playback failed.");
@@ -186,18 +211,35 @@ export function createWhepPlayback(options: {
 		attempt.onTrack = (event) => {
 			if (!isCurrent(attempt)) return;
 			attempt.stream.addTrack(event.track);
-			options.video.srcObject = attempt.stream;
+			if (options.video.srcObject !== attempt.stream) options.video.srcObject = attempt.stream;
 			void options.video.play().catch(() => undefined);
-			options.onStatus("live");
+		};
+		attempt.onMediaReady = () => {
+			if (options.video.srcObject === attempt.stream && options.video.readyState >= 2 &&
+				options.video.videoWidth > 0 && options.video.videoHeight > 0) markMediaReceived(attempt);
 		};
 		attempt.onConnectionStateChange = () => {
 			if (attempt.peer.connectionState === "failed" || attempt.peer.connectionState === "disconnected") retry(attempt);
 		};
 		attempt.peer.addEventListener("track", attempt.onTrack);
 		attempt.peer.addEventListener("connectionstatechange", attempt.onConnectionStateChange);
+		options.video.addEventListener("loadeddata", attempt.onMediaReady);
+		options.video.addEventListener("playing", attempt.onMediaReady);
 		options.onStatus("connecting");
 		void bounded((signal) => negotiate(attempt, signal), {
-			signal: attempt.controller.signal, timeoutMs: options.connectTimeoutMs ?? 15_000,
+			signal: attempt.controller.signal, timeoutMs,
+		}).then(() => {
+			if (!isCurrent(attempt)) return;
+			attempt.negotiated = true;
+			if (attempt.receivedMedia) {
+				options.onStatus("live");
+				return;
+			}
+			// SDP may complete without a video track or any received video. Keep a
+			// separate deadline after negotiation until video arrives.
+			attempt.mediaDeadline = Date.now() + timeoutMs;
+			attempt.mediaMonotonicDeadline = performance.now() + timeoutMs;
+			attempt.mediaTimer = setTimeout(() => retry(attempt, new Error("Live playback did not receive video.")), timeoutMs);
 		}).catch((error: unknown) => retry(attempt, error));
 	}
 

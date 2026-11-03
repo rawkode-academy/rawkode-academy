@@ -17,9 +17,46 @@ function stubGlobal(name: string, value: unknown) {
 	Object.defineProperty(globalThis, name, { configurable: true, writable: true, value });
 }
 
+class FakeTrack {
+	muted = true;
+	readyState = "live";
+	listeners = new Set<() => void>();
+	history: Array<() => void> = [];
+	constructor(readonly id: string, readonly kind: "audio" | "video" = "video") {}
+	addEventListener(type: string, callback: () => void) {
+		if (type === "unmute") { this.listeners.add(callback); this.history.push(callback); }
+	}
+	removeEventListener(type: string, callback: () => void) {
+		if (type === "unmute") this.listeners.delete(callback);
+	}
+	unmute() { this.muted = false; for (const listener of this.listeners) listener(); }
+	lateUnmute() { this.muted = false; for (const listener of this.history) listener(); }
+}
+
 class FakeStream {
 	tracks: unknown[] = [];
 	addTrack(track: unknown) { this.tracks.push(track); }
+}
+
+class FakeVideo {
+	srcObject: unknown = null;
+	readyState = 0;
+	videoWidth = 0;
+	videoHeight = 0;
+	pause = vi.fn();
+	play = vi.fn(async () => {});
+	listeners = new Map<string, Set<() => void>>();
+	history = new Map<string, Array<() => void>>();
+	addEventListener(type: string, callback: () => void) {
+		const listeners = this.listeners.get(type) ?? new Set();
+		listeners.add(callback);
+		this.listeners.set(type, listeners);
+		const callbacks = this.history.get(type) ?? [];
+		callbacks.push(callback);
+		this.history.set(type, callbacks);
+	}
+	removeEventListener(type: string, callback: () => void) { this.listeners.get(type)?.delete(callback); }
+	emit(type: string) { for (const callback of this.listeners.get(type) ?? []) callback(); }
 }
 
 class FakePeer {
@@ -55,12 +92,12 @@ class FakePeer {
 }
 
 let peers: FakePeer[];
-let video: { srcObject: unknown; pause: ReturnType<typeof vi.fn>; play: ReturnType<typeof vi.fn> };
+let video: FakeVideo;
 
 beforeEach(() => {
 	vi.useFakeTimers();
 	peers = [];
-	video = { srcObject: null, pause: vi.fn(), play: vi.fn(async () => {}) };
+	video = new FakeVideo();
 	stubGlobal("MediaStream", FakeStream);
 	stubGlobal("RTCPeerConnection", class extends FakePeer { constructor() { super(); peers.push(this); } });
 });
@@ -166,15 +203,15 @@ describe("WHEP playback", () => {
 		const player = createWhepPlayback({ video: video as unknown as HTMLVideoElement, onStatus: vi.fn() });
 		player.connect("https://stream.test/old");
 		await flush();
-		peers[0]?.track({ id: "old" });
+		peers[0]?.track(new FakeTrack("old"));
 		const oldStream = video.srcObject;
 		player.connect("https://stream.test/new");
 		await flush();
 		expect(peers[0]?.closed).toBe(true);
-		peers[1]?.track({ id: "new" });
+		peers[1]?.track(new FakeTrack("new"));
 		const replacement = video.srcObject;
 		expect(replacement).not.toBe(oldStream);
-		peers[0]?.track({ id: "late-old" });
+		peers[0]?.track(new FakeTrack("late-old"));
 		peers[0]?.lateState("failed");
 		expect(video.srcObject).toBe(replacement);
 		vi.advanceTimersByTime(5_000);
@@ -200,13 +237,210 @@ describe("WHEP playback", () => {
 		await flush();
 		player.connect("https://stream.test/new");
 		await flush();
-		peers[1]?.track({ id: "new" });
+		peers[1]?.track(new FakeTrack("new"));
 		const replacement = video.srcObject;
 		oldPost.resolve(new Response("answer", { status: 201, headers: { Location: "/late-resource" } }));
 		await flush();
 		expect(requests).toHaveBeenCalledWith("https://stream.test/late-resource", expect.objectContaining({ method: "DELETE" }));
 		expect(video.srcObject).toBe(replacement);
 		player.dispose();
+	});
+
+	it("retries after SDP completes without any media and ignores a late track", async () => {
+		const requests = vi.fn((_url: string, init?: RequestInit) => Promise.resolve(
+			init?.method === "DELETE" ? new Response(null, { status: 204 })
+				: new Response("answer", { status: 201, headers: { Location: "/resource" } }),
+		));
+		stubGlobal("fetch", requests);
+		const statuses: string[] = [];
+		const player = createWhepPlayback({
+			video: video as unknown as HTMLVideoElement, onStatus: (status) => statuses.push(status),
+			connectTimeoutMs: 1_000, retryMs: 500,
+		});
+		player.connect("https://stream.test/no-media");
+		await flush();
+		vi.advanceTimersByTime(1_000);
+		await flush();
+		expect(peers[0]?.closed).toBe(true);
+		expect(statuses.at(-1)).toBe("failed");
+		expect(requests).toHaveBeenCalledWith("https://stream.test/resource", expect.objectContaining({ method: "DELETE" }));
+		peers[0]?.track(new FakeTrack("late"));
+		expect(video.srcObject).toBeNull();
+		vi.advanceTimersByTime(500);
+		await flush();
+		expect(peers).toHaveLength(2);
+		player.dispose();
+	});
+
+	it("waits for a muted track to deliver media before reporting live", async () => {
+		stubGlobal("fetch", vi.fn(async () => new Response("answer", { status: 201 })));
+		const statuses: string[] = [];
+		const player = createWhepPlayback({
+			video: video as unknown as HTMLVideoElement, onStatus: (status) => statuses.push(status), connectTimeoutMs: 1_000,
+		});
+		player.connect("https://stream.test/muted");
+		await flush();
+		const track = new FakeTrack("muted");
+		peers[0]?.track(track);
+		expect(statuses.at(-1)).toBe("connecting");
+		vi.advanceTimersByTime(900);
+		track.unmute();
+		expect(statuses.at(-1)).toBe("connecting");
+		video.readyState = 2;
+		video.videoWidth = 640;
+		video.videoHeight = 360;
+		video.emit("loadeddata");
+		expect(statuses.at(-1)).toBe("live");
+		vi.advanceTimersByTime(1_000);
+		await flush();
+		expect(peers[0]?.closed).toBe(false);
+		expect(peers).toHaveLength(1);
+		player.dispose();
+	});
+
+	it("times out an announced track that stays muted", async () => {
+		stubGlobal("fetch", vi.fn(async () => new Response("answer", { status: 201 })));
+		const statuses: string[] = [];
+		const player = createWhepPlayback({
+			video: video as unknown as HTMLVideoElement, onStatus: (status) => statuses.push(status), connectTimeoutMs: 1_000,
+		});
+		player.connect("https://stream.test/no-packets");
+		await flush();
+		const track = new FakeTrack("muted");
+		peers[0]?.track(track);
+		video.emit("playing");
+		expect(statuses.at(-1)).toBe("connecting");
+		vi.advanceTimersByTime(1_000);
+		await flush();
+		expect(peers[0]?.closed).toBe(true);
+		expect(statuses.at(-1)).toBe("failed");
+		track.lateUnmute();
+		expect(statuses.at(-1)).toBe("failed");
+		player.dispose();
+	});
+
+	it("retries when video packets arrive but no frame is decoded", async () => {
+		stubGlobal("fetch", vi.fn(async () => new Response("answer", { status: 201 })));
+		const statuses: string[] = [];
+		const player = createWhepPlayback({
+			video: video as unknown as HTMLVideoElement, onStatus: (status) => statuses.push(status),
+			connectTimeoutMs: 1_000, retryMs: 500,
+		});
+		player.connect("https://stream.test/undecoded");
+		await flush();
+		const track = new FakeTrack("video");
+		peers[0]?.track(track);
+		track.unmute();
+		expect(statuses.at(-1)).toBe("connecting");
+		vi.advanceTimersByTime(1_000);
+		await flush();
+		expect(peers[0]?.closed).toBe(true);
+		expect(statuses.at(-1)).toBe("failed");
+		vi.advanceTimersByTime(500);
+		await flush();
+		expect(peers).toHaveLength(2);
+		player.dispose();
+	});
+
+	it("does not let audio alone satisfy the first-video watchdog", async () => {
+		stubGlobal("fetch", vi.fn(async () => new Response("answer", { status: 201 })));
+		const statuses: string[] = [];
+		const player = createWhepPlayback({
+			video: video as unknown as HTMLVideoElement, onStatus: (status) => statuses.push(status), connectTimeoutMs: 1_000,
+		});
+		player.connect("https://stream.test/audio-only");
+		await flush();
+		const audio = new FakeTrack("audio", "audio");
+		peers[0]?.track(audio);
+		audio.unmute();
+		video.readyState = 2;
+		video.emit("loadeddata");
+		expect(statuses.at(-1)).toBe("connecting");
+		vi.advanceTimersByTime(1_000);
+		await flush();
+		expect(peers[0]?.closed).toBe(true);
+		expect(statuses.at(-1)).toBe("failed");
+		player.dispose();
+	});
+
+	it("waits for SDP completion even when media arrives first", async () => {
+		stubGlobal("fetch", vi.fn(async () => new Response("answer", { status: 201 })));
+		const answer = deferred<void>();
+		const statuses: string[] = [];
+		const player = createWhepPlayback({ video: video as unknown as HTMLVideoElement, onStatus: (status) => statuses.push(status) });
+		player.connect("https://stream.test/negotiating");
+		peers[0]!.setRemoteDescription = () => answer.promise;
+		await flush();
+		const track = new FakeTrack("early");
+		peers[0]?.track(track);
+		track.unmute();
+		video.readyState = 2;
+		video.videoWidth = 640;
+		video.videoHeight = 360;
+		video.emit("playing");
+		expect(statuses.at(-1)).toBe("connecting");
+		answer.resolve();
+		await flush();
+		expect(statuses.at(-1)).toBe("live");
+		player.dispose();
+	});
+
+	it("accepts loaded media but not an unmuted track announcement alone", async () => {
+		stubGlobal("fetch", vi.fn(async () => new Response("answer", { status: 201 })));
+		const statuses: string[] = [];
+		const player = createWhepPlayback({
+			video: video as unknown as HTMLVideoElement, onStatus: (status) => statuses.push(status), connectTimeoutMs: 1_000,
+		});
+		player.connect("https://stream.test/frames");
+		await flush();
+		const track = new FakeTrack("announced");
+		track.muted = false;
+		peers[0]?.track(track);
+		expect(statuses.at(-1)).toBe("connecting");
+		video.readyState = 2;
+		video.videoWidth = 640;
+		video.videoHeight = 360;
+		video.emit("loadeddata");
+		expect(statuses.at(-1)).toBe("live");
+		player.dispose();
+	});
+
+	it("cancels the old media deadline and ignores late media after replacement or disposal", async () => {
+		stubGlobal("fetch", vi.fn(async () => new Response("answer", { status: 201 })));
+		const statuses: string[] = [];
+		const player = createWhepPlayback({
+			video: video as unknown as HTMLVideoElement, onStatus: (status) => statuses.push(status), connectTimeoutMs: 1_000,
+		});
+		player.connect("https://stream.test/old");
+		await flush();
+		const old = new FakeTrack("old");
+		peers[0]?.track(old);
+		vi.advanceTimersByTime(700);
+		player.connect("https://stream.test/new");
+		await flush();
+		const replacement = new FakeTrack("new");
+		peers[1]?.track(replacement);
+		old.lateUnmute();
+		video.readyState = 2;
+		video.videoWidth = 640;
+		video.videoHeight = 360;
+		video.history.get("loadeddata")?.[0]?.();
+		expect(statuses.at(-1)).toBe("connecting");
+		vi.advanceTimersByTime(300);
+		await flush();
+		expect(peers).toHaveLength(2);
+		expect(peers[1]?.closed).toBe(false);
+		replacement.unmute();
+		expect(statuses.at(-1)).toBe("connecting");
+		video.emit("loadeddata");
+		expect(statuses.at(-1)).toBe("live");
+		player.dispose();
+		const statusCount = statuses.length;
+		replacement.lateUnmute();
+		vi.advanceTimersByTime(2_000);
+		await flush();
+		expect(statuses).toHaveLength(statusCount);
+		expect(peers).toHaveLength(2);
 	});
 
 	it("closes a hung connection attempt and retries without affecting a replacement", async () => {
