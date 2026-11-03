@@ -27,7 +27,10 @@ export async function startWhipPublishing(input: {
 	};
 	input.signal?.addEventListener("abort", handleAbort, { once: true });
 	for (const track of input.stream.getTracks()) {
-		peerConnection.addTrack(track, input.stream);
+		peerConnection.addTransceiver(track, {
+			direction: "sendonly",
+			streams: [input.stream],
+		});
 	}
 
 	try {
