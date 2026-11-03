@@ -247,6 +247,10 @@ describe("studio recording ingest contracts", () => {
 			"../../../../.github/workflows/rawkode-academy-platform-studio-recording-ingest-pullrequest.yml",
 			"utf8",
 		);
+		const defaultPipeline = envCue.slice(
+			envCue.indexOf("default: {"),
+			envCue.indexOf("pullRequest: {"),
+		);
 
 		expect(wrangler.secrets_store_secrets).toContainEqual(
 			expect.objectContaining({
@@ -302,16 +306,21 @@ describe("studio recording ingest contracts", () => {
 		expect(processingLeaseMigration).toContain(
 			"studio_recording_vod_claims_dispatch_token_idx",
 		);
-		expect(envCue).toContain(
-			'tasks: [_t.check, _t.test, _t.deploy."dry-run", _t.migrations.remote, _t.deploy.main]',
+		expect(defaultPipeline).toContain(
+			'tasks: [_t.check, _t.test, _t.deploy."dry-run"]',
 		);
+		expect(defaultPipeline).not.toContain("_t.migrations.remote");
+		expect(defaultPipeline).not.toContain("_t.deploy.main");
+		expect(defaultPipeline).not.toContain('environment: "production"');
 		expect(envCue).toContain('deploy: schema.#TaskGroup');
 		expect(envCue).toContain('migrations: schema.#TaskGroup');
 		expect(envCue).toContain('queues: schema.#TaskGroup');
 		expect(envCue).toContain('notify: schema.#TaskGroup');
 		expect(envCue).toContain('dependsOn: [_t.migrations.remote]');
 		expect(envCue).toContain("../../../../bun.lock");
-		expect(defaultWorkflow).toContain("environment: production");
+		expect(defaultWorkflow).not.toContain("environment: production");
+		expect(defaultWorkflow).not.toContain("OP_SERVICE_ACCOUNT_TOKEN");
+		expect(defaultWorkflow).not.toContain("CUENV_ENVIRONMENT");
 		expect(defaultWorkflow).toContain("bun.lock");
 		expect(defaultWorkflow).toContain(
 			"projects/rawkode.academy/platform/studio-recording-ingest/data-model/**",

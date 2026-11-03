@@ -32,25 +32,20 @@ env: {
 
 ci: pipelines: {
 	default: {
-		environment: "production"
 		when: {
 			branch: ["main"]
 			defaultBranch: true
 			manual:        true
 		}
-		tasks: [_t.deploy.main]
+		// Hold deployment until the Studio and viewer rollout is coordinated.
+		tasks: [_t.build]
 	}
 
 	pullRequest: {
-		environment: "production"
 		when: {
 			pullRequest: true
 		}
-		tasks: [_t.deploy.preview]
-		annotations: "Preview URL": schema.#TaskCaptureRef & {
-			cuenvTask:    "deploy.preview"
-			cuenvCapture: "previewUrl"
-		}
+		tasks: [_t.build]
 	}
 }
 

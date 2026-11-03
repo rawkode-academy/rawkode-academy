@@ -22,13 +22,12 @@ env: {
 
 ci: pipelines: {
 	default: {
-		environment: "production"
 		when: {
 			branch: ["main"]
 			defaultBranch: true
 			manual:        true
 		}
-		tasks: [_t.check, _t.test, _t.deploy."dry-run", _t.migrations.remote, _t.deploy.main]
+		tasks: [_t.check, _t.test, _t.deploy."dry-run"]
 	}
 
 	pullRequest: {

@@ -12,17 +12,14 @@ let _t = tasks
 
 ci: pipelines: {
 	default: {
-		environment: "production"
 		when: { branch: ["main"], defaultBranch: true, manual: true }
-		// Deployment's validation prerequisite runs every gate in sequence.
-		tasks: [_t.deploy.main]
+		// Hold deployment until the Studio and viewer rollout is coordinated.
+		tasks: [_t.validate]
 	}
 	pullRequest: {
-		// Pull-request validation is intentionally hermetic. Production secrets are
-		// resolved only by the default-branch deployment pipeline.
 		environment: "development"
 		when: { pullRequest: true }
-		tasks: [_t.deploy.preview]
+		tasks: [_t.validate]
 	}
 }
 
