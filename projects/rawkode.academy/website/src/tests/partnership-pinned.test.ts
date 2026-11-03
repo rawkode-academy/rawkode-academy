@@ -40,7 +40,13 @@ const scriptEnd = page.indexOf("</script>", scriptStart);
 if (scriptStart === -1 || scriptEnd === -1) {
 	throw new Error("Partnership page script is missing");
 }
-const script = page.slice(scriptStart + "<script>".length, scriptEnd);
+// The script imports capture(); the test passes the mock in its place.
+const script = page
+	.slice(scriptStart + "<script>".length, scriptEnd)
+	.replace(/^\s*import \{ capture \} from "@\/lib\/analytics\/track";$/m, "");
+if (script.includes("import ")) {
+	throw new Error("Partnership page script has an import the test can't run");
+}
 const { outputText } = ts.transpileModule(script, {
 	compilerOptions: { target: ts.ScriptTarget.ES2022 },
 });
@@ -102,8 +108,11 @@ beforeEach(() => {
 		scheduled = callback;
 		return setImmediate(() => {});
 	};
-	Object.assign(browser, { posthog: { capture } });
-	new Function("document", "window", outputText)(browser.document, browser);
+	new Function("document", "window", "capture", outputText)(
+		browser.document,
+		browser,
+		capture,
+	);
 });
 
 afterEach(async () => {
