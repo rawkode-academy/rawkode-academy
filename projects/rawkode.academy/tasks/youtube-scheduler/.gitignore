@@ -1,0 +1,6 @@
+*.state.json
+*.state.json.lock
+*.tmp
+*.credentials.json
+client-secrets*.json
+__pycache__/
