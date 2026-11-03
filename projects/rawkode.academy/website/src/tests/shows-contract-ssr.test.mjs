@@ -1,5 +1,7 @@
-// Actual Astro SSR and route/plugin handlers, with local content/service fixtures.
-// Shell/CSS and the unchanged Vue bracket board are stubs. No live I/O or auth.
+// Actual Astro SSR and route/plugin handlers, with live-content fixtures (the
+// @/lib/live-content data layer is mocked with entries shaped like the live
+// collections) and service fixtures. Shell/CSS and the unchanged Vue bracket
+// board are stubs. No live I/O or auth.
 // node --experimental-vm-modules --import tsx --test src/tests/shows-contract-ssr.test.mjs
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
@@ -22,29 +24,52 @@ class FixedDate extends Date {
 		return now;
 	}
 }
+const ref = (collection, id) => ({ collection, id });
+// Values created inside the VM realm (arrays) compare by realm in deepEqual.
+const plain = (value) => JSON.parse(JSON.stringify(value));
 const show = (id = "klustered", publish = true) => ({
 	id,
+	collection: "shows",
 	data: {
 		id,
 		name: `${id} show`,
+		status: "active",
 		publish,
 		hosts: [],
+		subscribeLinks: [],
 		description: "Authored description",
 	},
+	body: "",
+	cacheHint: { tags: ["shows", `shows:${id}`] },
 });
 const video = (id, data = {}) => ({
 	id,
+	collection: "videos",
 	data: {
 		id,
 		slug: id,
 		title: id,
 		description: "Authored episode",
 		publishedAt: new Date("2020-01-01"),
-		show: "klustered",
+		show: ref("shows", "klustered"),
 		duration: 90,
 		chapters: [{ startTime: 0, title: "Start" }],
+		guests: [],
+		technologies: [],
+		whatYouWillLearn: [],
 		...data,
 	},
+	body: "",
+	cacheHint: { tags: ["videos", `videos:${id}`] },
+});
+const remoteCover = (name) => ({
+	image: {
+		src: `https://content.rawkode.academy/shows/${name}.png`,
+		width: 1280,
+		height: 720,
+		format: "png",
+	},
+	alt: `${name} artwork`,
 });
 const bracket = (data = {}) => ({
 	id: "b",
@@ -69,9 +94,9 @@ const fixtureVideos = () => [
 		publishedAt: new Date(now + 1),
 		type: "recorded",
 	}),
-	video("recent", { publishedAt: new Date(now), show: { id: "klustered" } }),
+	video("recent", { publishedAt: new Date(now) }),
 	video("future-live", { publishedAt: new Date(now + 1), type: "live" }),
-	video("other", { show: "other" }),
+	video("other", { show: ref("shows", "other") }),
 ];
 const plugin = "lib/shows/plugins/bracket/";
 const extras = "pages/shows/[showId]/[...slug].astro";
@@ -85,7 +110,9 @@ function harness({
 	writeError = false,
 } = {}) {
 	const reads = [],
-		writes = [];
+		writes = [],
+		cacheCalls = [],
+		cacheDisabled = [];
 	const env = {
 		BRACKETS_READ: {
 			fetch: async (_url, init) => {
@@ -110,7 +137,6 @@ function harness({
 	};
 	const context = vm.createContext({
 		console,
-		__NEWS_DEPLOYMENT_CUTOFF_MS__: now,
 		URL,
 		Date: FixedDate,
 		Response,
@@ -123,16 +149,50 @@ function harness({
 	);
 	const styles = () =>
 		new Proxy({}, { get: (_, key) => `academy-${String(key)}` });
+	// Same semantics as @/lib/live-content: scheduled (future-dated) entries
+	// are hidden except for videos, missing entries are undefined, getEntries
+	// drops missing references.
+	const idOf = (value) =>
+		(typeof value === "string" ? value : value?.id)?.replace(/\/index$/, "");
+	const visible = (name, options = {}) =>
+		(collections[name] ?? []).filter(
+			(entry) =>
+				name === "videos" ||
+				options.scheduled === "include" ||
+				!(entry.data.publishedAt?.getTime() > now),
+		);
+	const getEntry = async (nameOrRef, idOrOptions, maybeOptions) => {
+		const [name, id, options] =
+			typeof nameOrRef === "object" && nameOrRef
+				? [nameOrRef.collection, nameOrRef.id, idOrOptions]
+				: [nameOrRef, idOrOptions, maybeOptions];
+		if (!name || !id) return undefined;
+		return visible(name, options).find((entry) => entry.id === idOf(id));
+	};
+	const liveContent = {
+		getCollection: async (name, filter, options) =>
+			visible(name, options).filter(filter ?? (() => true)),
+		getEntry,
+		getEntries: async (refs = [], options) =>
+			(await Promise.all(refs.map((r) => getEntry(r, options)))).filter(
+				Boolean,
+			),
+		sameId: (a, b) => idOf(a) !== undefined && idOf(a) === idOf(b),
+		setContentCache: async (astro, input = {}) => {
+			cacheCalls.push(input);
+			return {
+				maxAge: input.maxAge ?? 3600,
+				swr: input.swr ?? 86400,
+				tags: [],
+			};
+		},
+		disableContentCache: (astro) => {
+			cacheDisabled.push(astro);
+		},
+	};
 	const mocks = {
 		"astro/runtime/server/index.js": { ...runtime, createMetadata: () => ({}) },
-		"astro:content": {
-			getCollection: async (name, filter) =>
-				(collections[name] ?? []).filter(filter ?? (() => true)),
-			getEntries: async (refs) =>
-				refs.map((ref) =>
-					(collections.people ?? []).find((p) => p.id === (ref.id ?? ref)),
-				),
-		},
+		"@/lib/live-content": liveContent,
 		"cloudflare:workers": { env },
 		// Feedsmith checks object.constructor === Object; bridge VM realms while
 		// preserving Dates and running the real serializer on the unchanged values.
@@ -146,10 +206,7 @@ function harness({
 			academyDocument: styles,
 			academyNavigation: styles,
 		},
-		"astro:assets": {
-			Image: empty,
-			getImage: async ({ src }) => ({ src: src.src }),
-		},
+		"astro:assets": { Image: empty },
 		"@/lib/logger": { createLogger: () => ({ error() {} }) },
 		"@/components/breadcrumb/Breadcrumb.astro": { default: empty },
 		"@/components/show/SubscribeLinks.astro": { default: empty },
@@ -242,16 +299,25 @@ function harness({
 			}),
 		};
 	};
-	return { render, module, reads, writes, routeContext };
+	return {
+		render,
+		module,
+		reads,
+		writes,
+		routeContext,
+		cacheCalls,
+		cacheDisabled,
+	};
 }
 
 test("archive filters future/draft data, sorts preview, preserves authored cover, and has H1/H2 outline", async () => {
 	for (const videos of [fixtureVideos(), fixtureVideos().reverse()]) {
 		const entry = show();
-		entry.data.cover = { image: { src: "/real-cover.png" } };
-		const { dom } = await harness({
+		entry.data.cover = remoteCover("real-cover");
+		const h = harness({
 			collections: { shows: [entry, show("hidden", false)], videos },
-		}).render("pages/shows/index.astro");
+		});
+		const { dom } = await h.render("pages/shows/index.astro");
 		assert.deepEqual(
 			dom.querySelectorAll("h1,h2,h3").map((n) => [n.tagName, n.text]),
 			[
@@ -268,13 +334,22 @@ test("archive filters future/draft data, sorts preview, preserves authored cover
 		);
 		assert.equal(
 			dom.querySelector("img").getAttribute("src"),
-			"/real-cover.png",
+			"https://content.rawkode.academy/shows/real-cover.png",
 		);
 		const metadata = JSON.parse(
 			dom.querySelector('script[type="application/ld+json"]').text,
 		);
 		assert.equal(metadata.itemListElement[0].item.numberOfEpisodes, 2);
 		assert.equal(metadata.numberOfItems, 1);
+		// The listing is cached under the shows and videos collection tags (so
+		// a scheduled episode caps maxAge) and the rendered show's entity tags.
+		assert.equal(h.cacheCalls.length, 1);
+		assert.deepEqual(plain(h.cacheCalls[0].collections), ["shows", "videos"]);
+		assert.deepEqual(
+			plain(h.cacheCalls[0].entries.map((e) => `${e.collection}:${e.id}`)),
+			["shows:klustered"],
+		);
+		assert.equal(h.cacheDisabled.length, 0);
 	}
 });
 
@@ -322,6 +397,63 @@ test("detail/episode list/PodcastSeries agree with archive eligibility and newes
 		dom.querySelector('link[type="application/rss+xml"]').getAttribute("href"),
 		"/api/feeds/shows/klustered.xml",
 	);
+	assert.equal(h.cacheCalls.length, 1);
+	assert.deepEqual(plain(h.cacheCalls[0].collections), ["videos"]);
+	assert.equal(h.cacheCalls[0].entries[0].id, "klustered");
+});
+
+test("detail renders hosts and remote cover artwork, and only links https game formats", async () => {
+	for (const [gameFormatUrl, linked] of [
+		["https://play.rawkode.academy/games/klustered", true],
+		["http://play.rawkode.academy/games/klustered", false],
+		["javascript:alert(1)", false],
+	]) {
+		const entry = show();
+		entry.data.hosts = [ref("people", "rawkode")];
+		entry.data.gameFormatUrl = gameFormatUrl;
+		entry.data.cover = remoteCover("klustered");
+		entry.data.podcast = {
+			email: "a@b.c",
+			category: "Technology",
+			explicit: false,
+		};
+		const host = {
+			id: "rawkode",
+			collection: "people",
+			data: { id: "rawkode", name: "David Flanagan", links: [], handles: {} },
+			body: "",
+			cacheHint: { tags: ["people", "people:rawkode"] },
+		};
+		const h = harness({
+			collections: { shows: [entry], people: [host], videos: fixtureVideos() },
+		});
+		const { dom } = await h.render(
+			"pages/shows/[showId].astro",
+			{},
+			{ params: { showId: "klustered" } },
+		);
+		assert.equal(
+			dom.querySelector('a[href="/people/rawkode"]').text,
+			"David Flanagan",
+		);
+		assert.equal(
+			Boolean(dom.querySelector(`a[href="${gameFormatUrl}"]`)),
+			linked,
+		);
+		assert.equal(/Explore the game format/.test(dom.text), linked);
+		const metadata = JSON.parse(
+			dom.querySelector('script[type="application/ld+json"]').text,
+		);
+		assert.equal(
+			metadata.image,
+			"https://content.rawkode.academy/shows/klustered.png",
+		);
+		assert.equal(metadata.author[0].name, "David Flanagan");
+		assert.deepEqual(
+			plain(h.cacheCalls[0].entries.map((e) => `${e.collection}:${e.id}`)),
+			["shows:klustered", "people:rawkode"],
+		);
+	}
 });
 
 test("future-only detail has an honest empty state/archive link; hidden detail returns 404", async () => {
@@ -350,6 +482,9 @@ test("future-only detail has an honest empty state/archive link; hidden detail r
 		).status,
 		404,
 	);
+	// The 404 is not cached (no cache intent), so publishing the show is
+	// visible immediately.
+	assert.equal(h.cacheCalls.length, 1);
 });
 
 test("forged success GET cannot claim saved/entered or call registration", async () => {
@@ -369,6 +504,9 @@ test("forged success GET cannot claim saved/entered or call registration", async
 		assert.doesNotMatch(result.dom.text, /Application saved|Entered/);
 		assert.equal(result.dom.querySelectorAll("form").length, 0);
 		assert.equal(h.writes.length, 0);
+		// The apply page renders per visitor: never stored by the CDN.
+		assert.equal(h.cacheCalls.length, 0);
+		assert.equal(h.cacheDisabled.length, 1);
 	}
 });
 
@@ -545,8 +683,7 @@ test("only active, unexpired brackets link to applications, without service call
 			.querySelectorAll("a")
 			.slice(0, 2)
 			.every(
-				(a) =>
-					a.text.includes("View bracket") && !a.text.includes("Apply"),
+				(a) => a.text.includes("View bracket") && !a.text.includes("Apply"),
 			),
 	);
 	assert.equal(h.reads.length, 0);
@@ -614,18 +751,25 @@ test("empty schedule/seasons have honest empty states and no actions", async () 
 });
 
 test("real RSS and chapter handlers share publication cutoff/membership and preserve media/chapter values", async () => {
+	const soon = show("soon");
+	soon.data.status = "coming-soon";
 	const h = harness({
 		collections: {
-			shows: [show(), show("hidden", false)],
-			videos: fixtureVideos(),
+			shows: [show(), show("hidden", false), soon],
+			videos: [
+				...fixtureVideos(),
+				video("no-chapters", { chapters: [] }),
+				video("soon-episode", { show: ref("shows", "soon") }),
+			],
 		},
 	});
 	const rss = await h.module(feed),
 		chapter = await h.module(chapters);
-	const paths = await rss.getStaticPaths();
-	assert.deepEqual(JSON.parse(JSON.stringify(paths)), [
-		{ params: { showId: "klustered" } },
-	]);
+	// Server-rendered on request: no build-time path list any more.
+	assert.equal(rss.getStaticPaths, undefined);
+	assert.equal(chapter.getStaticPaths, undefined);
+	assert.equal(rss.prerender, false);
+	assert.equal(chapter.prerender, false);
 	const response = await rss.GET({
 		params: { showId: "klustered" },
 		site: new URL("https://academy.test"),
@@ -635,31 +779,38 @@ test("real RSS and chapter handlers share publication cutoff/membership and pres
 	const xml = parse(await response.text());
 	assert.deepEqual(
 		xml.querySelectorAll("item title").map((n) => n.text),
-		["recent", "old"],
+		["recent", "old", "no-chapters"],
 	);
 	assert.match(
 		xml.querySelector("enclosure").getAttribute("url"),
 		/\/recent\/original\.mp3$/,
 	);
-	const chapterPaths = JSON.parse(
-		JSON.stringify(await chapter.getStaticPaths()),
-	);
+	// The feed lists videos: cached under the videos collection tag so a
+	// scheduled episode caps maxAge, plus the show's tags.
+	assert.equal(h.cacheCalls.length, 1);
+	assert.deepEqual(plain(h.cacheCalls[0].collections), ["videos"]);
+	assert.equal(h.cacheCalls[0].entries[0].id, "klustered");
+	for (const episodeId of ["recent", "old"]) {
+		const good = await chapter.GET({
+			params: { showId: "klustered", episodeId },
+		});
+		assert.equal(good.status, 200);
+		assert.deepEqual(await good.json(), {
+			version: "1.2.0",
+			chapters: [{ startTime: 0, title: "Start" }],
+		});
+	}
+	assert.equal(h.cacheCalls.length, 3);
+	assert.equal(h.cacheCalls[1].maxAge, 86400);
 	assert.deepEqual(
-		chapterPaths.map((p) => p.params.episodeId),
-		["recent", "old"],
+		plain(h.cacheCalls[1].entries.map((e) => `${e.collection}:${e.id}`)),
+		["shows:klustered", "videos:recent"],
 	);
-	const good = await chapter.GET({
-		params: { showId: "klustered", episodeId: "recent" },
-	});
-	assert.equal(good.status, 200);
-	assert.deepEqual(await good.json(), {
-		version: "1.2.0",
-		chapters: [{ startTime: 0, title: "Start" }],
-	});
 	for (const episodeId of [
 		"future-recorded",
 		"future-live",
 		"other",
+		"no-chapters",
 		"missing",
 	]) {
 		assert.equal(
@@ -668,30 +819,42 @@ test("real RSS and chapter handlers share publication cutoff/membership and pres
 			404,
 		);
 	}
-	for (const showId of ["hidden", "missing"]) {
+	for (const [showId, episodeId] of [
+		["hidden", "recent"],
+		["missing", "recent"],
+		["soon", "soon-episode"],
+	]) {
 		assert.equal((await rss.GET({ params: { showId } })).status, 404);
 		assert.equal(
-			(await chapter.GET({ params: { showId, episodeId: "recent" } })).status,
+			(await chapter.GET({ params: { showId, episodeId } })).status,
 			404,
 		);
 	}
+	// Error responses carry no cache intent.
+	assert.equal(h.cacheCalls.length, 3);
 	assert.equal(h.reads.length, 0);
 	assert.equal(h.writes.length, 0);
 });
-
 
 test("coming-soon archive cards retain branding and omit episode claims", async () => {
 	const entry = show();
 	entry.data.status = "coming-soon";
 	entry.data.tagline = "A game of cluster recovery";
-	entry.data.cover = { image: { src: "/coming-soon-cover.png" } };
+	entry.data.cover = remoteCover("coming-soon-cover");
 	const { dom } = await harness({
 		collections: { shows: [entry], videos: fixtureVideos() },
 	}).render("pages/shows/index.astro");
 	assert.match(dom.text, /Coming soon/);
 	assert.match(dom.text, /A game of cluster recovery/);
-	assert(!dom.text.includes("published episodes") && !dom.text.includes("recent"));
-	assert.equal(dom.querySelector("img").getAttribute("src"), "/coming-soon-cover.png");
-	const metadata = JSON.parse(dom.querySelector('script[type="application/ld+json"]').text);
+	assert(
+		!dom.text.includes("published episodes") && !dom.text.includes("recent"),
+	);
+	assert.equal(
+		dom.querySelector("img").getAttribute("src"),
+		"https://content.rawkode.academy/shows/coming-soon-cover.png",
+	);
+	const metadata = JSON.parse(
+		dom.querySelector('script[type="application/ld+json"]').text,
+	);
 	assert.equal(metadata.itemListElement[0].item.numberOfEpisodes, undefined);
 });

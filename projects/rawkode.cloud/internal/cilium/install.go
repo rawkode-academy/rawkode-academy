@@ -12,7 +12,7 @@ import (
 	ciliuminstall "github.com/cilium/cilium/cilium-cli/install"
 	ciliumk8s "github.com/cilium/cilium/cilium-cli/k8s"
 	ciliumstatus "github.com/cilium/cilium/cilium-cli/status"
-	"helm.sh/helm/v3/pkg/cli/values"
+	"helm.sh/helm/v4/pkg/cli/values"
 )
 
 // InstallParams holds parameters for Cilium CNI installation.

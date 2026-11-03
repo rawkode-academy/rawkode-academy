@@ -1,0 +1,215 @@
+---
+import { actions, isInputError } from "astro:actions";
+import PartnershipApplicationForm from "@/components/organizations/PartnershipApplicationForm.vue";
+import EditorialShell from "@/components/ui/EditorialShell.astro";
+import { disableContentCache } from "@/lib/live-content";
+import {
+	PARTNERSHIP_EMAIL,
+	resolveApplicationPath,
+	supportAcademyOffer,
+	supportBriefMailto,
+	supporterIndependenceRules,
+	supportOurWorkDescription,
+} from "@/lib/partnerships";
+import Page from "@/wrappers/page.astro";
+
+export const prerender = false;
+
+disableContentCache(Astro);
+Astro.response.headers.set("Cache-Control", "private, no-cache");
+
+const supportPath = "Support Our Work" as const;
+const supportPrice = supportAcademyOffer.price.match(/^(\$[\d,]+)\s+(.+)$/);
+const applyHref = `/organizations/support-our-work?route=${encodeURIComponent(supportPath)}#enquiry-form`;
+const initialPath =
+	resolveApplicationPath(Astro.url.searchParams.get("route")) ?? supportPath;
+const submittedEnquiry = Astro.getActionResult(actions.partnership.applyForm);
+const submittedData = submittedEnquiry?.data;
+const enquiryReceived =
+	submittedData != null &&
+	"success" in submittedData &&
+	submittedData.success === true;
+const enquiryRateLimited =
+	submittedData != null &&
+	"rateLimited" in submittedData &&
+	submittedData.rateLimited === true;
+const enquiryFallback =
+	submittedData != null &&
+	"fallback" in submittedData &&
+	submittedData.fallback === "mailto";
+const enquiryErrorCode =
+	enquiryFallback &&
+	submittedData != null &&
+	"code" in submittedData &&
+	typeof submittedData.code === "string"
+		? submittedData.code
+		: undefined;
+const enquiryError = submittedEnquiry?.error;
+const enquiryFields = ["name", "email", "company", "path", "message"] as const;
+const serverFieldErrors =
+	enquiryError && isInputError(enquiryError)
+		? Object.fromEntries(
+				enquiryFields.flatMap((field) => {
+					const message = enquiryError.fields[field]?.find(
+						(item) => item.length > 0,
+					);
+					return message ? [[field, message]] : [];
+				}),
+			)
+		: {};
+const emptySubmission = {
+	name: "",
+	email: "",
+	company: "",
+	path: "",
+	message: "",
+};
+const submittedValues =
+	enquiryError || enquiryRateLimited || enquiryFallback
+		? await (async () => {
+				if (Astro.request.method !== "POST") return emptySubmission;
+				try {
+					const formData = await Astro.request.formData();
+					return Object.fromEntries(
+						Object.keys(emptySubmission).map((key) => {
+							const value = formData.get(key);
+							return [key, typeof value === "string" ? value : ""];
+						}),
+					) as typeof emptySubmission;
+				} catch {
+					return emptySubmission;
+				}
+			})()
+		: emptySubmission;
+---
+
+<Page
+	title="Support Our Work"
+	subtitle="Fund free developer education"
+	description={supportOurWorkDescription}
+	image={{ text: "Back practical tutorials, live streams and shows for developers. Be recognised as a supporter.", template: "gradient" }}
+>
+	<EditorialShell
+		eyebrow="Support Our Work"
+		title="Support Our Work"
+		lede="Help keep practical developer education free. Rawkode Academy helps engineers learn by building. Your support funds tutorials, live streams and shows that anyone can use."
+	>
+		<div class="support-hero-actions" slot="actions">
+			<a class="editorial-button" href={applyHref} data-apply-path={supportPath}>Become a supporter</a>
+			<a class="support-text-link" href="#supporter">See the offer</a>
+		</div>
+
+		<nav class="support-rail" aria-label="On this page">
+			<a href="#why-support">Why support</a>
+			<a href="#supporter">The offer</a>
+			<a href="#independence">Editorial independence</a>
+			<a href="#apply">Enquire</a>
+		</nav>
+
+		<section id="why-support" class="editorial-section editorial-section--split" aria-labelledby="why-support-title">
+			<div class="editorial-section__header">
+				<h2 id="why-support-title" class="editorial-section__title">Give more engineers a place to learn</h2>
+				<p class="editorial-section__lede">Useful education should be open to the engineer trying a tool for the first time and the team putting it into production.</p>
+			</div>
+			<div class="support-prose">
+				<p>Supporting the Academy helps David make practical lessons and live work available without a paywall. It also gives your company an honest, visible place alongside the education it helps fund.</p>
+				<p>This offer is for teams that want to back the community. Work focused on your product belongs in a <a href="/organizations/partnerships">Partnership</a>.</p>
+			</div>
+		</section>
+
+		<section id="supporter" class="editorial-section" aria-labelledby="supporter-title">
+			<span id="plan-support-the-academy" class="sr-only" aria-hidden="true"></span>
+			<div class="editorial-section__header">
+				<h2 id="supporter-title" class="editorial-section__title">The supporter offer</h2>
+				<p class="editorial-section__lede">A clear way to fund free developer education and be recognised for doing it.</p>
+			</div>
+			<article class="support-offer" aria-labelledby="support-offer-title">
+				<div class="support-offer__terms">
+					<h3 id="support-offer-title">Community supporter</h3>
+					<p class="support-offer__price"><span>{supportPrice?.[1] ?? supportAcademyOffer.price}</span> <span>{supportPrice?.[2]}</span></p>
+					<p>{supportAcademyOffer.cadence}</p>
+					<a class="editorial-button" href={applyHref} data-apply-path={supportPath}>Enquire about support</a>
+				</div>
+				<div class="support-offer__benefits">
+					<h3>What supporters receive</h3>
+					<ul>{supportAcademyOffer.included.map((item) => <li>{item}</li>)}</ul>
+					<p>The livestream is for each of the first ten companies to become supporters. Every current supporter joins the same shared monthly Q&A, rather than receiving a private call.</p>
+				</div>
+			</article>
+			<p class="support-brief"><a class="support-text-link" href={supportBriefMailto}>Send the supporter brief to your team</a></p>
+		</section>
+
+		<section id="independence" class="editorial-section editorial-section--split" aria-labelledby="independence-title">
+			<div class="editorial-section__header">
+				<h2 id="independence-title" class="editorial-section__title">Recognition with independent editorial work</h2>
+				<p class="editorial-section__lede">Support keeps education open. It does not buy a recommendation or control what David concludes.</p>
+			</div>
+			<ul class="support-rules">
+				{supporterIndependenceRules.map((rule) => <li><strong>{rule.title}</strong><span>{rule.detail}</span></li>)}
+			</ul>
+		</section>
+
+		<section id="collaborate" class="editorial-section editorial-section--split support-collaborate" aria-labelledby="collaborate-title">
+			<div class="editorial-section__header">
+				<p class="support-label">Want to Collaborate?</p>
+				<h2 id="collaborate-title" class="editorial-section__title">Build something around your product</h2>
+			</div>
+			<div class="support-prose">
+				<p>A Partnership adds agreed hands-on engineering, content and community work across Awareness, Adoption, and Support. Adoption reviews stay within that one partnership.</p>
+				<a class="editorial-button editorial-button--secondary" href="/organizations/partnerships">Explore Partnerships</a>
+			</div>
+		</section>
+
+		<section id="apply" class="editorial-section editorial-section--split support-apply" aria-labelledby="apply-title">
+			<div class="editorial-section__header">
+				<h2 id="apply-title" class="editorial-section__title">Become a supporter</h2>
+				<p class="editorial-section__lede">Tell David about your company and what draws you to the Academy. He reads every enquiry and replies by email.</p>
+			</div>
+			<div id="enquiry-form" class="support-apply__form">
+				{enquiryReceived ? (
+					<div><h3>Enquiry received</h3><p>I read every enquiry and will reply by email.</p></div>
+				) : (
+					<>
+						{enquiryRateLimited && <p role="alert">Too many enquiries were sent recently. Please wait a minute and try again.</p>}
+						{enquiryFallback && <p role="alert" data-error-code={enquiryErrorCode}>Something went wrong, so your enquiry wasn't sent. Please <a href={`mailto:${PARTNERSHIP_EMAIL}`}>email me directly</a>.</p>}
+						{submittedEnquiry?.error && <p role="alert">Please check the highlighted fields.</p>}
+						<PartnershipApplicationForm client:visible initialPath={initialPath} submittedValues={submittedValues} serverFieldErrors={serverFieldErrors} />
+					</>
+				)}
+			</div>
+		</section>
+	</EditorialShell>
+</Page>
+
+<style>
+	.editorial-section { padding-block: clamp(3.5rem, 7vw, 6rem); row-gap: 2rem; }
+	.editorial-section__header { gap: 1.25rem; }
+	.support-hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 1.25rem 2rem; width: 100%; margin-block: 1.25rem 2rem; }
+	.support-text-link, .support-prose a:not(.editorial-button) { color: var(--colors-academy-text); font-weight: 600; text-decoration: underline; text-underline-offset: 0.2em; }
+	.support-rail { display: flex; flex-wrap: wrap; gap: 0.75rem 1.5rem; padding: 1rem 0; border-block: 1px solid var(--colors-academy-border); }
+	.support-rail a { color: var(--colors-academy-text); font-weight: 600; text-decoration: none; }
+	.support-rail a:hover { text-decoration: underline; text-underline-offset: 0.2em; }
+	.support-prose { display: grid; align-content: start; justify-items: start; gap: 1.5rem; max-width: 44rem; }
+	.support-prose p { margin: 0; line-height: 1.75; }
+	.support-offer { display: grid; gap: clamp(2rem, 4vw, 4rem); padding: clamp(1.75rem, 4vw, 3rem); border: 1px solid var(--colors-academy-border); border-radius: var(--radii-academy-l); background: var(--colors-academy-panel); }
+	.support-offer h3 { margin: 0; font-family: var(--fonts-academy-display), system-ui, sans-serif; font-size: clamp(1.3rem, 2vw, 1.7rem); }
+	.support-offer__terms, .support-offer__benefits { display: grid; align-content: start; justify-items: start; gap: 1.5rem; }
+	.support-offer__terms p, .support-offer__benefits p { margin: 0; line-height: 1.7; }
+	.support-offer__price { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.35rem 0.75rem; font-family: var(--fonts-academy-display), system-ui, sans-serif; font-weight: 700; color: var(--colors-academy-text); }
+	.support-offer__price span:first-child { font-size: clamp(2rem, 4vw, 3rem); }
+	.support-offer__price span:last-child { font-size: 1.1rem; }
+	.support-offer__benefits ul { display: grid; gap: 1.25rem; margin: 0; padding: 0; list-style: none; line-height: 1.7; }
+	.support-offer__benefits li { position: relative; padding-left: 1.75rem; }
+	.support-offer__benefits li::before { content: "✓"; position: absolute; left: 0; font-weight: 700; color: var(--colors-academy-accent); }
+	.support-brief { margin: 1.5rem 0 0; }
+	.support-rules { display: grid; gap: 1rem; margin: 0; padding: 0; list-style: none; }
+	.support-rules li { display: grid; gap: 0.75rem; padding: 1.5rem; border: 1px solid var(--colors-academy-border); border-radius: var(--radii-academy-l); background: var(--colors-academy-panel); line-height: 1.7; }
+	.support-rules strong { color: var(--colors-academy-text); }
+	.support-label { margin: 0; font-family: var(--fonts-academy-mono), ui-monospace, monospace; font-size: 0.85rem; font-weight: 700; color: var(--colors-academy-text-muted); }
+	.support-collaborate .support-prose { align-content: center; }
+	.support-apply__form { max-width: 42rem; scroll-margin-top: 8rem; }
+	.support-apply__form a { color: var(--colors-academy-text); }
+	.support-rail a:focus-visible, .support-text-link:focus-visible, .support-prose a:focus-visible { outline: 2px solid var(--colors-academy-accent); outline-offset: 4px; }
+	@media (min-width: 48rem) { .support-offer { grid-template-columns: minmax(15rem, 0.7fr) minmax(0, 1.3fr); } }
+	@media (max-width: 39.99rem) { .support-hero-actions { display: grid; justify-items: stretch; text-align: center; } .support-hero-actions .support-text-link { padding: 0.8rem; } }
+</style>

@@ -4,6 +4,7 @@
  * history. Missing marks use the company name rather than an invented logo.
  */
 import controlplane from "@/components/partner/logos/controlplane.svg?url";
+import datum from "@/components/partner/logos/datum.svg?url";
 import fermyon from "@/components/partner/logos/fermyon.svg?url";
 import guidepad from "@/components/partner/logos/guidepad.svg?url";
 import heroku from "@/components/partner/logos/heroku.svg?url";
@@ -17,113 +18,99 @@ import zitadel from "@/components/partner/logos/zitadel.svg?url";
 interface Company {
 	name: string;
 	src?: string;
-	/** Override for marks with unusual padding or proportions. */
-	height?: string;
 	/** Show the name beside marks that are an icon only. */
 	wordmark?: boolean;
+	/** Height in the grid tiles, so marks read at the same optical size. */
+	tileHeight?: string;
 }
 
-interface Props {
-	showCurrent?: boolean;
-}
-
-const { showCurrent = true } = Astro.props;
-
-const currentCompanies: Company[] = [{ name: "Datum Cloud" }];
+const currentCompanies: Company[] = [
+	{ name: "Datum Cloud", src: datum, tileHeight: "1.35rem" },
+];
 
 const pastCompanies: Company[] = [
-	{ name: "Spectro Cloud", src: spectrocloud },
+	{ name: "Spectro Cloud", src: spectrocloud, tileHeight: "2rem" },
 	{ name: "Teleport", src: teleport },
 	{ name: "ControlPlane", src: controlplane },
-	{ name: "Fermyon", src: fermyon },
+	{ name: "Fermyon", src: fermyon, tileHeight: "1rem" },
 	{ name: "Guidepad", src: guidepad },
-	{ name: "Heroku", src: heroku, height: "2.75rem" },
-	{ name: "Microsoft Azure", src: microsoft },
+	{ name: "Heroku", src: heroku, tileHeight: "2rem" },
+	{ name: "Microsoft Azure", src: microsoft, tileHeight: "1.75rem" },
 	{ name: "ngrok", src: ngrok },
 	{ name: "WunderGraph", src: wundergraph, wordmark: true },
-	{ name: "Zitadel", src: zitadel },
+	{ name: "Zitadel", src: zitadel, tileHeight: "2rem" },
 ];
+
+const allCompanies = [...currentCompanies, ...pastCompanies].sort((a, b) =>
+	a.name.localeCompare(b.name, "en", { sensitivity: "base" }),
+);
 ---
 
-<figure class="partner-logos" aria-labelledby="partner-logos-caption">
-	<figcaption id="partner-logos-caption" class="partner-logos__caption">
-		Teams we've worked with
-	</figcaption>
-	{showCurrent && (
-		<div class="partner-logos__group">
-			<p class="partner-logos__label">Current partner</p>
-			<ul class="partner-logos__list">
-				{currentCompanies.map((company) => (
-					<li class="partner-logos__item">
-						<span class="partner-logos__wordmark">{company.name}</span>
-					</li>
-				))}
-			</ul>
-		</div>
-	)}
-	<div class="partner-logos__group">
-		<p class="partner-logos__label">Past partners</p>
-		<ul class="partner-logos__list">
-			{pastCompanies.map((company) => (
-				<li class="partner-logos__item">
-					{company.src && (
-						<img
-							src={company.src}
-							alt={company.wordmark ? "" : company.name}
-							loading="lazy"
-							decoding="async"
-							height="28"
-							style={company.height ? `height: ${company.height}` : undefined}
-						/>
-					)}
-					{company.wordmark && <span class="partner-logos__wordmark">{company.name}</span>}
-				</li>
-			))}
-		</ul>
-	</div>
-</figure>
+<ul class="partner-grid">
+	{allCompanies.map((company) => (
+		<li class="partner-grid__tile">
+			{company.src && (
+				<img
+					src={company.src}
+					alt={company.wordmark ? "" : company.name}
+					loading="lazy"
+					decoding="async"
+					height="28"
+					style={company.tileHeight ? `height: ${company.tileHeight}` : undefined}
+				/>
+			)}
+			{(!company.src || company.wordmark) && <span class="partner-logos__wordmark">{company.name}</span>}
+		</li>
+	))}
+</ul>
 
 <style>
-	.partner-logos {
+	.partner-grid {
 		display: grid;
-		gap: 1rem;
-		margin: 0;
-	}
-
-	.partner-logos__caption {
-		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
-		font-size: 0.75rem;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-		color: var(--colors-academy-text-muted);
-	}
-
-	.partner-logos__group {
-		display: grid;
-		gap: 0.75rem;
-	}
-
-	.partner-logos__label {
-		margin: 0;
-		font-family: var(--fonts-academy-text), system-ui, sans-serif;
-		font-weight: 700;
-		color: var(--colors-academy-text);
-	}
-
-	.partner-logos__list {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 1.25rem 2rem;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.5rem;
 		margin: 0;
 		padding: 0;
 		list-style: none;
 	}
 
-	.partner-logos__item {
+	@media (min-width: 40rem) {
+		.partner-grid {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+	}
+
+	@media (min-width: 64rem) {
+		.partner-grid {
+			grid-template-columns: repeat(4, minmax(0, 1fr));
+		}
+	}
+
+	.partner-grid__tile {
 		display: flex;
 		align-items: center;
+		justify-content: center;
 		gap: 0.5rem;
+		min-height: 4rem;
+		padding: 0.75rem 1rem;
+		border: 1px solid var(--colors-academy-border);
+		border-radius: var(--radii-academy-m);
+		background: var(--colors-academy-panel);
+	}
+
+	.partner-grid__tile img {
+		display: block;
+		width: auto;
+		max-width: 100%;
+		height: 1.5rem;
+		object-fit: contain;
+		filter: brightness(0);
+		opacity: 0.72;
+	}
+
+	:global(html.dark) .partner-grid__tile img {
+		filter: brightness(0) invert(1);
+		opacity: 0.8;
 	}
 
 	.partner-logos__wordmark {
@@ -133,20 +120,5 @@ const pastCompanies: Company[] = [
 		letter-spacing: -0.01em;
 		color: var(--colors-academy-text);
 		opacity: 0.72;
-	}
-
-	.partner-logos__list img {
-		display: block;
-		width: auto;
-		max-width: 9rem;
-		height: 1.75rem;
-		object-fit: contain;
-		filter: brightness(0);
-		opacity: 0.72;
-	}
-
-	:global(html.dark) .partner-logos__list img {
-		filter: brightness(0) invert(1);
-		opacity: 0.8;
 	}
 </style>

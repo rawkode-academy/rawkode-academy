@@ -1,7 +1,9 @@
 ---
 import Page from "@/wrappers/page.astro";
 import { academySearch } from "@rawkodeacademy/design-system";
-export const prerender = true;
+// Rendered on request: a prerendered 404 is served from assets without
+// running middleware, which would disable the legacy redirects.
+export const prerender = false;
 const s = academySearch();
 ---
 

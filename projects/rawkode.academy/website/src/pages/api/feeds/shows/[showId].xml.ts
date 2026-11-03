@@ -1,8 +1,16 @@
-import { getCollection, getEntries } from "astro:content";
 import type { APIContext } from "astro";
 import { generateRssFeed } from "feedsmith";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { getPublishedVideos } from "@/lib/content";
+import {
+	type ContentEntry,
+	getEntries,
+	getEntry,
+	sameId,
+	setContentCache,
+} from "@/lib/live-content";
+
+export const prerender = false;
 
 /**
  * Generate a squared podcast artwork URL using Cloudflare Image Resizing.
@@ -15,13 +23,6 @@ function getSquaredArtworkUrl(site: string, originalUrl: string): string {
 	return `${site}/cdn-cgi/image/${params}/${originalUrl}`;
 }
 
-export async function getStaticPaths() {
-	const shows = await getCollection("shows");
-	return shows
-		.filter((show) => show.data.publish && show.data.status !== "coming-soon")
-		.map((show) => ({ params: { showId: show.data.id } }));
-}
-
 export async function GET(context: APIContext) {
 	const { showId } = context.params;
 	const site = (context.site?.toString() || "https://rawkode.academy").replace(
@@ -29,8 +30,7 @@ export async function GET(context: APIContext) {
 		"",
 	);
 
-	const shows = await getCollection("shows");
-	const show = shows.find((s) => s.data.id === showId);
+	const show = await getEntry("shows", showId);
 
 	if (!show || !show.data.publish || show.data.status === "coming-soon") {
 		return new Response("Show feed not found", { status: 404 });
@@ -38,12 +38,7 @@ export async function GET(context: APIContext) {
 
 	const videos = await getPublishedVideos();
 	const showVideos = videos
-		.filter((video) => {
-			const videoShow = video.data.show;
-			if (!videoShow) return false;
-			const showRef = typeof videoShow === "string" ? videoShow : videoShow.id;
-			return showRef === showId;
-		})
+		.filter((video) => sameId(video.data.show, show.data.id))
 		.sort(
 			(a, b) =>
 				new Date(b.data.publishedAt).getTime() -
@@ -74,12 +69,12 @@ export async function GET(context: APIContext) {
 		? getSquaredArtworkUrl(site, originalShowImageUrl)
 		: "";
 
+	const guestPeople: ContentEntry<"people">[] = [];
+
 	// Build items
 	const items = await Promise.all(
 		showVideos.map(async (video, index) => {
 			const episodeNumber = showVideos.length - index;
-			const duration =
-				typeof video.data.duration === "number" ? video.data.duration : 0;
 			const audioUrl = `https://content.rawkode.academy/videos/${video.data.id}/original.mp3`;
 			const originalThumbnailUrl = getVideoThumbnailUrl(video.data.id);
 			const episodeUrl = `${site}/watch/${video.data.slug}/`;
@@ -93,6 +88,7 @@ export async function GET(context: APIContext) {
 			const guestEntries = video.data.guests?.length
 				? await getEntries(video.data.guests)
 				: [];
+			guestPeople.push(...guestEntries);
 
 			const guestPersons = guestEntries.map((guest) => ({
 				display: guest.data.name,
@@ -134,7 +130,11 @@ export async function GET(context: APIContext) {
 				],
 				itunes: {
 					title: video.data.title,
-					duration: duration,
+					...(typeof video.data.duration === "number" &&
+					Number.isFinite(video.data.duration) &&
+					video.data.duration > 0
+						? { duration: video.data.duration }
+						: {}),
 					image: thumbnailUrl,
 					explicit: podcastConfig?.explicit ?? false,
 					author: "Rawkode Academy",
@@ -227,10 +227,16 @@ export async function GET(context: APIContext) {
 
 	const rss = generateRssFeed(feed);
 
+	// Episodes come from the videos collection: listing it caps maxAge at the
+	// next scheduled video so podcast apps see new episodes on time.
+	await setContentCache(context, {
+		entries: [show, ...hostEntries, ...guestPeople],
+		collections: ["videos"],
+	});
+
 	return new Response(rss, {
 		headers: {
 			"Content-Type": "application/rss+xml; charset=utf-8",
-			"Cache-Control": "max-age=3600",
 		},
 	});
 }

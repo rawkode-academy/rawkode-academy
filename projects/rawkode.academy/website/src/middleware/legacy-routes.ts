@@ -1,4 +1,5 @@
 import { defineMiddleware } from "astro:middleware";
+import { resolveApplicationPath } from "@/lib/partnerships";
 import { resolveLegacyPersonRedirect } from "./legacy-person-redirects";
 
 type LegacyRouteResult =
@@ -17,10 +18,12 @@ const PERMANENT_REDIRECTS = new Map<string, string>([
 	["/events", "/watch"],
 	["/community-day", "/about"],
 	["/metal", "/technology/equinix-metal"],
+	["/organizations", "/organizations/partnerships"],
 	["/organizations/consulting", "/organizations/partnerships"],
 	["/organizations/training", "/organizations/partnerships"],
-	// The Talos on Hetzner series was retired before any article shipped.
-	["/series/talos-on-hetzner", "/series"],
+	// Article series were retired; the Talos on Hetzner series never shipped.
+	["/series", "/read"],
+	["/series/talos-on-hetzner", "/read"],
 ]);
 
 export function resolveLegacyRoute(url: URL): LegacyRouteResult | undefined {
@@ -28,6 +31,18 @@ export function resolveLegacyRoute(url: URL): LegacyRouteResult | undefined {
 		url.pathname.length > 1 && url.pathname.endsWith("/")
 			? url.pathname.slice(0, -1)
 			: url.pathname;
+
+	// Older combined-offer links carried the supporter choice on the
+	// partnership URL. Keep those links pointed at the matching new page.
+	if (
+		pathname === "/organizations/partnerships" &&
+		resolveApplicationPath(url.searchParams.get("route")) === "Support Our Work"
+	) {
+		const target = new URL("/organizations/support-our-work", url);
+		target.search = url.search;
+		target.hash = url.hash;
+		return { kind: "redirect", status: 302, location: target.toString() };
+	}
 
 	const permanentTarget = PERMANENT_REDIRECTS.get(pathname);
 	if (permanentTarget) {

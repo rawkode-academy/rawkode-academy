@@ -1,5 +1,5 @@
 ---
-import { getCollection } from "astro:content";
+import { getCollection, optionalContent } from "@/lib/live-content";
 import MLabel from "@/components/ui/MLabel.vue";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 
@@ -10,6 +10,7 @@ import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
  * stays publicly cacheable — this component is fetched in a separate,
  * uncacheable request that sees the signed-in user via Astro.locals.
  * Renders nothing for signed-out users or when there is no watch history.
+ * Never calls setContentCache: the island response is personalised.
  */
 
 export const prerender = false;
@@ -34,7 +35,7 @@ let items: RailItem[] = [];
 if (user) {
 	let positions: WatchPosition[] = [];
 	try {
-		const response = await fetch("https://api.rawkode.academy/graphql", {
+		const response = await fetch("https://api.rawkode.academy/", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({
@@ -59,7 +60,8 @@ if (user) {
 	}
 
 	if (positions.length > 0) {
-		const allVideos = await getCollection("videos");
+		// Optional rail: a content failure renders nothing.
+		const allVideos = await optionalContent(getCollection("videos"), []);
 		const videoById = new Map(allVideos.map((v) => [v.data.id, v]));
 
 		items = positions

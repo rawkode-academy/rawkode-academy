@@ -1,0 +1,59 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "3b0e4943-a94a-4872-9363-802dd3fad49d",
+  "prevId": "cc571690-1763-4e98-88e8-8394c0234339",
+  "tables": {
+    "transcription_terms": {
+      "name": "transcription_terms",
+      "columns": {
+        "kind": {
+          "name": "kind",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'technology'"
+        },
+        "foreignId": {
+          "name": "foreignId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "term": {
+          "name": "term",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "transcription_terms_kind_foreignId_term_pk": {
+          "columns": [
+            "kind",
+            "foreignId",
+            "term"
+          ],
+          "name": "transcription_terms_kind_foreignId_term_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
+}

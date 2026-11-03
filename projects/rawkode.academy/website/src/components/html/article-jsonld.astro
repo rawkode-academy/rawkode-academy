@@ -1,9 +1,9 @@
 ---
-import type { CollectionEntry } from "astro:content";
+import type { ContentEntry } from "@/lib/live-content";
 
 interface Props {
-	article: CollectionEntry<"articles">;
-	authors: CollectionEntry<"people">[];
+	article: ContentEntry<"articles">;
+	authors: ContentEntry<"people">[];
 	imageUrl?: URL; // absolute URL if available
 	// Allow placement into a named slot in parents (for TS exactOptionalPropertyTypes)
 	slot?: string;

@@ -1,10 +1,29 @@
-import { getCollection } from "astro:content";
 import { getPublishedVideos } from "@/lib/content";
+import { type CollectionName, getCollection } from "@/lib/live-content";
 import { getCourseModuleSlug } from "@/utils/course-path";
 import { isNewsPublished } from "@/lib/news-publication";
 
 const DEFAULT_SITE_URL = "https://rawkode.academy";
-const BUILD_TIME = new Date();
+const MODULE_LOADED_AT = new Date();
+let deployedAt: Date | undefined;
+
+/**
+ * The deployed version's upload time (CF_VERSION_METADATA), used as the
+ * lastmod of pages without an editorial date. Sitemaps used to be built at
+ * deploy time and stamped those with the build time; now they render on
+ * request, and the isolate start time would churn lastmod for crawlers.
+ */
+export async function getDeployTime(): Promise<Date> {
+	if (deployedAt) return deployedAt;
+	try {
+		const { env } = await import("cloudflare:workers");
+		const timestamp = (env as { CF_VERSION_METADATA?: { timestamp?: string } })
+			.CF_VERSION_METADATA?.timestamp;
+		const parsed = timestamp ? new Date(timestamp) : undefined;
+		if (parsed && !Number.isNaN(parsed.getTime())) deployedAt = parsed;
+	} catch {}
+	return deployedAt ?? MODULE_LOADED_AT;
+}
 
 export type SitemapChangeFreq =
 	| "always"
@@ -35,6 +54,8 @@ export interface SitemapIndexEntry {
 export interface SitemapDefinition {
 	path: string;
 	getEntries: () => Promise<SitemapUrlEntry[]>;
+	/** Collections the sitemap lists; pass them to setContentCache(). */
+	collections: readonly CollectionName[];
 }
 
 type StaticPageDefinition = {
@@ -44,6 +65,7 @@ type StaticPageDefinition = {
 };
 
 const staticPages: StaticPageDefinition[] = [
+	{ path: "/games/kubele", changefreq: "daily", priority: 0.5 },
 	// Homepage is the strongest within-site signal.
 	{ path: "/", changefreq: "daily", priority: 1.0 },
 	// Top-level content listings - primary navigation targets.
@@ -64,8 +86,8 @@ const staticPages: StaticPageDefinition[] = [
 	{ path: "/changelog", changefreq: "daily", priority: 0.6 },
 	{ path: "/feeds", changefreq: "monthly", priority: 0.5 },
 	// Organization / commercial pages.
-	{ path: "/organizations", changefreq: "monthly", priority: 0.7 },
 	{ path: "/organizations/partnerships", changefreq: "monthly", priority: 0.7 },
+	{ path: "/organizations/support-our-work", changefreq: "monthly", priority: 0.7 },
 	{ path: "/organizations/lets-chat", changefreq: "monthly", priority: 0.5 },
 	{ path: "/organizations/branding", changefreq: "yearly", priority: 0.4 },
 	// Long-tail / utility pages.
@@ -106,14 +128,14 @@ function toValidDate(value: unknown): Date | undefined {
 	return undefined;
 }
 
-function pickLastmod(fallback: Date | undefined, ...values: unknown[]): Date {
+function pickLastmod(fallback: Date, ...values: unknown[]): Date {
 	for (const value of values) {
 		const parsed = toValidDate(value);
 		if (parsed) {
 			return parsed;
 		}
 	}
-	return fallback ?? BUILD_TIME;
+	return fallback;
 }
 
 function escapeXml(value: unknown): string {
@@ -161,11 +183,15 @@ export function toAbsoluteUrl(
 	return new URL(normalizePath(path), base).href;
 }
 
+/**
+ * Sitemap responses carry no hand-written cache headers: endpoints call
+ * setContentCache(context, { collections: definition.collections }) and the
+ * Cloudflare cache provider emits the CDN headers and cache tags.
+ */
 export function xmlResponse(xml: string): Response {
 	return new Response(xml, {
 		headers: {
 			"Content-Type": "application/xml; charset=utf-8",
-			"Cache-Control": "public, max-age=3600",
 		},
 	});
 }
@@ -219,9 +245,10 @@ ${body}
 }
 
 export async function getPagesSitemapEntries(): Promise<SitemapUrlEntry[]> {
+	const deployTime = await getDeployTime();
 	const entries = staticPages.map((page) => ({
 		path: page.path,
-		lastmod: BUILD_TIME,
+		lastmod: deployTime,
 		changefreq: page.changefreq,
 		priority: page.priority,
 	}));
@@ -230,12 +257,15 @@ export async function getPagesSitemapEntries(): Promise<SitemapUrlEntry[]> {
 }
 
 export async function getArticleSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const articles = await getCollection("articles");
+	const [articles, deployTime] = await Promise.all([
+		getCollection("articles"),
+		getDeployTime(),
+	]);
 
 	const entries = articles.map((article) => ({
 		path: `/read/${article.id}`,
 		lastmod: pickLastmod(
-			undefined,
+			deployTime,
 			article.data.updatedAt,
 			article.data.publishedAt,
 		),
@@ -249,59 +279,40 @@ export async function getArticleSitemapEntries(): Promise<SitemapUrlEntry[]> {
 export async function getTechnologySitemapEntries(): Promise<
 	SitemapUrlEntry[]
 > {
-	const [technologies, allVideos] = await Promise.all([
+	const [technologies, deployTime] = await Promise.all([
 		getCollection("technologies"),
-		getPublishedVideos(),
+		getDeployTime(),
 	]);
 
-	// Build a Set of technology IDs that have at least one video, so we can
-	// exclude empty/thin tech pages from the sitemap (Google penalizes thin
-	// content site-wide). Tech IDs in videos are normalized to "<id>/index".
-	const techsWithVideos = new Set<string>();
-	for (const v of allVideos) {
-		const refs = (v.data as { technologies?: unknown }).technologies;
-		if (Array.isArray(refs)) {
-			for (const ref of refs) {
-				const id =
-					typeof ref === "string"
-						? ref
-						: ref && typeof ref === "object" && "id" in ref
-							? (ref as { id: string }).id
-							: undefined;
-				if (id) techsWithVideos.add(id);
-			}
-		}
-	}
-
-	const entries = technologies
-		.filter((technology) => {
-			const hasBody = Boolean(
-				technology.body && technology.body.trim().length > 0,
-			);
-			return hasBody || techsWithVideos.has(technology.id);
-		})
-		.map((technology) => ({
-			path: `/technology/${technology.id.replace(/\/index$/, "")}`,
-			lastmod: pickLastmod(
-				undefined,
-				(technology.data as Record<string, unknown>).updatedAt,
-				(technology.data as Record<string, unknown>).publishedAt,
-			),
-			changefreq: "weekly" as const,
-			priority: 0.5,
-		}));
+	// Every technology page has a written profile (the technologies service
+	// stores a body for each one; the list query omits bodies to stay small),
+	// so none is a thin page. This used to check the MDX body and fall back
+	// to "has at least one published video".
+	const entries = technologies.map((technology) => ({
+		path: `/technology/${technology.id}`,
+		lastmod: pickLastmod(
+			deployTime,
+			(technology.data as unknown as Record<string, unknown>).updatedAt,
+			(technology.data as unknown as Record<string, unknown>).publishedAt,
+		),
+		changefreq: "weekly" as const,
+		priority: 0.5,
+	}));
 
 	return sortByPath(entries);
 }
 
 export async function getVideoSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const videos = await getPublishedVideos();
+	const [videos, deployTime] = await Promise.all([
+		getPublishedVideos(),
+		getDeployTime(),
+	]);
 
 	const entries = videos.map((video) => ({
 		path: `/watch/${video.data.slug}`,
 		lastmod: pickLastmod(
-			undefined,
-			(video.data as Record<string, unknown>).updatedAt,
+			deployTime,
+			(video.data as unknown as Record<string, unknown>).updatedAt,
 			video.data.publishedAt,
 		),
 		changefreq: "daily" as const,
@@ -312,15 +323,16 @@ export async function getVideoSitemapEntries(): Promise<SitemapUrlEntry[]> {
 }
 
 export async function getCourseSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const [courses, modules] = await Promise.all([
+	const [courses, modules, deployTime] = await Promise.all([
 		getCollection("courses"),
 		getCollection("courseModules", ({ data }) => !data.draft),
+		getDeployTime(),
 	]);
 
 	const courseEntries = courses.map((course) => ({
 		path: `/courses/${course.id}`,
 		lastmod: pickLastmod(
-			undefined,
+			deployTime,
 			course.data.updatedAt,
 			course.data.publishedAt,
 		),
@@ -333,7 +345,7 @@ export async function getCourseSitemapEntries(): Promise<SitemapUrlEntry[]> {
 		return {
 			path: `/courses/${module.data.course.id}/${slug}`,
 			lastmod: pickLastmod(
-				undefined,
+				deployTime,
 				module.data.updatedAt,
 				module.data.publishedAt,
 			),
@@ -348,13 +360,16 @@ export async function getCourseSitemapEntries(): Promise<SitemapUrlEntry[]> {
 export async function getLearningPathSitemapEntries(): Promise<
 	SitemapUrlEntry[]
 > {
-	const learningPaths = await getCollection("learningPaths");
+	const [learningPaths, deployTime] = await Promise.all([
+		getCollection("learningPaths"),
+		getDeployTime(),
+	]);
 
 	const entries = learningPaths.map((learningPath) => ({
 		path: `/learning-paths/${learningPath.id}`,
 		lastmod: pickLastmod(
-			undefined,
-			(learningPath.data as Record<string, unknown>).updatedAt,
+			deployTime,
+			(learningPath.data as unknown as Record<string, unknown>).updatedAt,
 			learningPath.data.publishedAt,
 		),
 		changefreq: "weekly" as const,
@@ -365,15 +380,23 @@ export async function getLearningPathSitemapEntries(): Promise<
 }
 
 export async function getPeopleSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const [people, allVideos, allShows] = await Promise.all([
-		getCollection("people"),
-		getPublishedVideos(),
-		getCollection("shows"),
-	]);
+	const now = new Date();
+	const [people, allVideos, allShows, allNews, allArticles, deployTime] =
+		await Promise.all([
+			getCollection("people"),
+			getPublishedVideos(),
+			getCollection("shows", ({ data }) => data.publish),
+			getCollection("news", ({ data }) =>
+				isNewsPublished(data.publishedAt, now),
+			),
+			getCollection("articles"),
+			getDeployTime(),
+		]);
 
-	// Build a Set of person IDs who appear as a guest in at least one video
-	// or host at least one show. People without any appearances are excluded
-	// from the sitemap to avoid shipping thin/empty profiles to Google.
+	// Mirror the profile page's noindex rule (pages/people/[id].astro): a
+	// profile is indexable with a biography, a guest appearance, a hosted
+	// published show, or authored news or articles. Thin profiles stay out
+	// of the sitemap, and every indexable one is listed.
 	const peopleWithAppearances = new Set<string>();
 	const collectRefId = (ref: unknown): string | undefined => {
 		if (typeof ref === "string") return ref;
@@ -400,6 +423,12 @@ export async function getPeopleSitemapEntries(): Promise<SitemapUrlEntry[]> {
 			}
 		}
 	}
+	for (const item of [...allNews, ...allArticles]) {
+		for (const author of item.data.authors ?? []) {
+			const id = collectRefId(author);
+			if (id) peopleWithAppearances.add(id);
+		}
+	}
 
 	const entries = people
 		.filter((person) => {
@@ -409,9 +438,9 @@ export async function getPeopleSitemapEntries(): Promise<SitemapUrlEntry[]> {
 		.map((person) => ({
 			path: `/people/${person.data.id}`,
 			lastmod: pickLastmod(
-				undefined,
-				(person.data as Record<string, unknown>).updatedAt,
-				(person.data as Record<string, unknown>).publishedAt,
+				deployTime,
+				(person.data as unknown as Record<string, unknown>).updatedAt,
+				(person.data as unknown as Record<string, unknown>).publishedAt,
 			),
 			changefreq: "monthly" as const,
 			priority: 0.4,
@@ -421,14 +450,17 @@ export async function getPeopleSitemapEntries(): Promise<SitemapUrlEntry[]> {
 }
 
 export async function getShowSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const shows = await getCollection("shows");
+	const [shows, deployTime] = await Promise.all([
+		getCollection("shows"),
+		getDeployTime(),
+	]);
 
 	const entries = shows.map((show) => ({
 		path: `/shows/${show.data.id}`,
 		lastmod: pickLastmod(
-			undefined,
-			(show.data as Record<string, unknown>).updatedAt,
-			(show.data as Record<string, unknown>).publishedAt,
+			deployTime,
+			(show.data as unknown as Record<string, unknown>).updatedAt,
+			(show.data as unknown as Record<string, unknown>).publishedAt,
 		),
 		changefreq: "weekly" as const,
 		priority: 0.6,
@@ -437,45 +469,23 @@ export async function getShowSitemapEntries(): Promise<SitemapUrlEntry[]> {
 	return sortByPath(entries);
 }
 
-export async function getSeriesSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const [seriesEntries, articles] = await Promise.all([
-		getCollection("series"),
-		getCollection("articles"),
-	]);
-	const publishedSeriesIds = new Set(
-		articles
-			.map((article) => article.data.series?.id)
-			.filter((id): id is string => Boolean(id)),
-	);
-
-	const entries = seriesEntries
-		.filter((series) => publishedSeriesIds.has(series.id))
-		.map((seriesEntry) => ({
-			path: `/series/${seriesEntry.id}`,
-			lastmod: pickLastmod(
-				undefined,
-				(seriesEntry.data as Record<string, unknown>).updatedAt,
-				(seriesEntry.data as Record<string, unknown>).publishedAt,
-			),
-			changefreq: "weekly" as const,
-			priority: 0.5,
-		}));
-
-	return sortByPath(entries);
-}
-
 export async function getNewsSitemapEntries(
 	now = new Date(),
 ): Promise<SitemapUrlEntry[]> {
-	const newsItems = await getCollection("news", ({ data }) =>
-		isNewsPublished(data.publishedAt, now),
-	);
+	const [newsItems, deployTime] = await Promise.all([
+		getCollection(
+			"news",
+			({ data }) => isNewsPublished(data.publishedAt, now),
+			{ now },
+		),
+		getDeployTime(),
+	]);
 
 	const entries = newsItems.map((item) => ({
 		path: `/news/${item.id}`,
 		lastmod: pickLastmod(
-			undefined,
-			(item.data as Record<string, unknown>).updatedAt,
+			deployTime,
+			(item.data as unknown as Record<string, unknown>).updatedAt,
 			item.data.publishedAt,
 		),
 		changefreq: "weekly" as const,
@@ -493,9 +503,10 @@ export function selectFreshNewsItems<T extends { data: { publishedAt: Date } }>(
 ): T[] {
 	const cutoff = now.getTime() - GOOGLE_NEWS_FRESHNESS_MS;
 	return [...items]
-		.filter((item) =>
-			isNewsPublished(item.data.publishedAt, now) &&
-			item.data.publishedAt.getTime() >= cutoff,
+		.filter(
+			(item) =>
+				isNewsPublished(item.data.publishedAt, now) &&
+				item.data.publishedAt.getTime() >= cutoff,
 		)
 		.sort(
 			(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
@@ -505,7 +516,7 @@ export function selectFreshNewsItems<T extends { data: { publishedAt: Date } }>(
 export async function getFreshNewsSitemapEntries(
 	now: Date = new Date(),
 ): Promise<SitemapUrlEntry[]> {
-	const newsItems = await getCollection("news");
+	const newsItems = await getCollection("news", undefined, { now });
 	return selectFreshNewsItems(newsItems, now).map((item) => ({
 		path: `/news/${item.id}`,
 		lastmod: item.data.publishedAt,
@@ -515,14 +526,17 @@ export async function getFreshNewsSitemapEntries(
 }
 
 export async function getAdrSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const adrs = await getCollection("adrs");
+	const [adrs, deployTime] = await Promise.all([
+		getCollection("adrs"),
+		getDeployTime(),
+	]);
 
 	const entries = adrs.map((adr) => ({
 		path: `/adrs/${adr.id}`,
 		lastmod: pickLastmod(
-			undefined,
+			deployTime,
 			adr.data.adoptedAt,
-			(adr.data as Record<string, unknown>).updatedAt,
+			(adr.data as unknown as Record<string, unknown>).updatedAt,
 		),
 		changefreq: "monthly" as const,
 		priority: 0.4,
@@ -535,55 +549,62 @@ export const sitemapDefinitions: readonly SitemapDefinition[] = [
 	{
 		path: "/sitemaps/pages.xml",
 		getEntries: getPagesSitemapEntries,
+		collections: [],
 	},
 	{
 		path: "/sitemaps/articles.xml",
 		getEntries: getArticleSitemapEntries,
+		collections: ["articles"],
 	},
 	{
 		path: "/sitemaps/technologies.xml",
 		getEntries: getTechnologySitemapEntries,
+		collections: ["technologies"],
 	},
 	{
 		path: "/video-sitemap.xml",
 		getEntries: getVideoSitemapEntries,
+		collections: ["videos"],
 	},
 	{
 		path: "/sitemaps/courses.xml",
 		getEntries: getCourseSitemapEntries,
+		collections: ["courses", "courseModules"],
 	},
 	{
 		path: "/sitemaps/learning-paths.xml",
 		getEntries: getLearningPathSitemapEntries,
+		collections: ["learningPaths"],
 	},
 	{
 		path: "/sitemaps/people.xml",
 		getEntries: getPeopleSitemapEntries,
+		collections: ["people", "videos", "shows", "news", "articles"],
 	},
 	{
 		path: "/sitemaps/shows.xml",
 		getEntries: getShowSitemapEntries,
-	},
-	{
-		path: "/sitemaps/series.xml",
-		getEntries: getSeriesSitemapEntries,
+		collections: ["shows"],
 	},
 	{
 		path: "/sitemaps/news.xml",
 		getEntries: getNewsSitemapEntries,
+		collections: ["news"],
 	},
 	{
 		path: "/news-sitemap.xml",
 		getEntries: getFreshNewsSitemapEntries,
+		collections: ["news"],
 	},
 	{
 		path: "/sitemaps/adrs.xml",
 		getEntries: getAdrSitemapEntries,
+		collections: ["adrs"],
 	},
 ] as const;
 
 export async function buildSitemapIndexEntries(
-	definitions: readonly SitemapDefinition[],
+	definitions: ReadonlyArray<Pick<SitemapDefinition, "path" | "getEntries">>,
 ): Promise<SitemapIndexEntry[]> {
 	const sitemapEntries = await Promise.all(
 		definitions.map(async (definition) => {
@@ -606,3 +627,18 @@ export async function buildSitemapIndexEntries(
 export async function getSitemapIndexEntries(): Promise<SitemapIndexEntry[]> {
 	return buildSitemapIndexEntries(sitemapDefinitions);
 }
+
+/** Collections behind one sitemap (by its path), for setContentCache(). */
+export function sitemapCollections(path: string): CollectionName[] {
+	return [
+		...(sitemapDefinitions.find((definition) => definition.path === path)
+			?.collections ?? []),
+	];
+}
+
+/** Every collection behind the sitemap index (it lists their lastmods). */
+export const SITEMAP_INDEX_COLLECTIONS: readonly CollectionName[] = [
+	...new Set(
+		sitemapDefinitions.flatMap((definition) => definition.collections),
+	),
+];

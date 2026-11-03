@@ -14,7 +14,7 @@ interface Props {
 	description: string;
 	thumbnailUrl?: string;
 	publishedAt?: string;
-	duration?: number;
+	duration?: number | undefined;
 	streamUrl?: string;
 	embedUrl?: string; // Only when a true embeddable player URL (e.g., YouTube/Vimeo)
 	captionUrl?: string | undefined;
@@ -40,7 +40,6 @@ const {
 	captionUrl,
 	transcript,
 	keywords = [],
-	isLiveBroadcast = false,
 	category,
 	isVideoList = false,
 	clips = [],
@@ -74,7 +73,10 @@ function formatDuration(seconds: number): string {
 	return result;
 }
 
-const formattedDuration = formatDuration(duration ?? 0);
+const formattedDuration =
+	typeof duration === "number" && Number.isFinite(duration) && duration > 0
+		? formatDuration(duration)
+		: undefined;
 
 // Generate structured data
 // Compute a safe embedUrl: only use if explicitly provided or clearly an embed player URL
@@ -112,7 +114,7 @@ const structuredData = isVideoList
 			description: description,
 			thumbnailUrl: thumbnailUrl ? [thumbnailUrl] : undefined,
 			uploadDate: publishedAt,
-			duration: formattedDuration,
+			...(formattedDuration ? { duration: formattedDuration } : {}),
 			contentUrl: streamUrl,
 			...(computedEmbedUrl ? { embedUrl: computedEmbedUrl } : {}),
 			url: Astro.url.href,
@@ -174,7 +176,6 @@ const structuredData = isVideoList
 				: undefined,
 			isAccessibleForFree: true,
 			requiresSubscription: false,
-			isLiveBroadcast,
 			isFamilyFriendly: true,
 			inLanguage: "en-US",
 			genre: category,

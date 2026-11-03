@@ -2,6 +2,7 @@
 import { computed, useId } from "vue";
 import { academyBracket } from "@rawkodeacademy/design-system";
 import type { Bracket, BracketMatch, BracketSide } from "./queries";
+import { localTime } from "@/lib/local-time";
 
 const props = defineProps<{ brackets: readonly Bracket[] }>();
 const s = academyBracket();
@@ -21,13 +22,14 @@ function roundsOf(matches: readonly BracketMatch[]): [number, BracketMatch[]][] 
 const boards = computed(() => props.brackets.map(bracket => ({ bracket, rounds: roundsOf(bracket.matches), start: startDate(bracket.startsAt) })));
 const sideLabel = (side: BracketSide | null | undefined) => side?.displayName?.trim() || "TBD";
 const isWinner = (side: BracketSide | null | undefined, match: BracketMatch) => Boolean(side?.id && match.winner?.id === side.id);
-const dateFormatter = new Intl.DateTimeFormat("en-GB", {
-	weekday: "short", day: "numeric", month: "short", year: "numeric",
-	hour: "2-digit", minute: "2-digit", timeZone: "UTC", timeZoneName: "short",
-});
-function startDate(iso: string): { iso: string; label: string } | null {
+function startDate(iso: string): { iso: string; label: string; spec: string } | null {
 	const date = new Date(iso);
-	return Number.isFinite(date.getTime()) ? { iso: date.toISOString(), label: dateFormatter.format(date) } : null;
+	if (!Number.isFinite(date.getTime())) return null;
+	const time = localTime(date, {
+		weekday: "short", day: "numeric", month: "short", year: "numeric",
+		hour: "2-digit", minute: "2-digit", timeZoneName: "short",
+	}, "en-GB");
+	return { iso: time.iso, label: time.text, spec: time.attrs["data-local-time"] };
 }
 </script>
 
@@ -41,7 +43,7 @@ function startDate(iso: string): { iso: string; label: string } | null {
 				<div :class="s.metadata">
 					<span>{{ bracket.kind }} · {{ bracket.status }}</span>
 					<span v-if="start">
-						Starts <time :datetime="start.iso">{{ start.label }}</time>
+						Starts <time :datetime="start.iso" :data-local-time="start.spec">{{ start.label }}</time>
 					</span>
 					<span v-else>Start date to be announced</span>
 				</div>

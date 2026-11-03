@@ -1,5 +1,7 @@
 # Website design audit — PR #1355
 
+> **Historical note:** content now lives in D1 platform services behind the API gateway and the website reads it through `src/lib/live-content` (see `docs/live-content.md`). References below to `content/**` files and `src/content.config.ts` describe the file-based sources at the time of this audit.
+
 Status: in progress. No blanket visual sign-off.
 
 ## Acceptance standard
@@ -44,7 +46,7 @@ duplicate navigation. Preserve useful content and functional behavior.
 | F17 | Transcript search does not update results | Single-copy SSR with DOM filtering, safe highlights and scoped announcements; final Browser recheck pending | `video/VideoTranscript.astro` |
 | F18 | Technology profiles retain mismatched legacy composition | In implementation | `technology/[id].astro` |
 | F19 | Watch page squeezes player beside metadata, duplicates transcripts and interrupts learning with signup | Full-width player; one server-rendered searchable transcript; signup after learning/related content | `watch/[...slug].astro` |
-| F20 | Lesson header repeats course context, generic instructions, and next action before the lesson | Removed filler; retained course breadcrumb, position, resources, and previous/next navigation | `courses/[course]/[...slug].astro` |
+| F20 | Lesson header repeats course context, generic instructions, and next action before the lesson | Removed filler; retained course breadcrumb, position, resources, and previous/next navigation | `courses/[course]/[slug].astro` |
 | F21 | News detail infers categories by regex and repeats tags; related stories have no page bounds | Honest section label, one tag set, bounded generic-image recommendations | `news/[...slug].astro`, `RelatedNews.astro` |
 | F22 | Search retains retired typography and silently caps filtered results | Academy recipe, visible label, 24-result pagination; Browser verification pending | `search.astro` |
 | F23 | ADR index/detail use large cards for redundant status and format labels | Compact ruled index and author/date byline | `adrs/` |

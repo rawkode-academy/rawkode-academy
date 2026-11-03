@@ -1,0 +1,34 @@
+{
+  "version": "5",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1709128179664,
+      "tag": "0000_kind_hedge_knight",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1792310120273,
+      "tag": "0001_content_fields",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1792783482805,
+      "tag": "0002_cover_dimensions",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1792783801204,
+      "tag": "0003_description_doc",
+      "breakpoints": true
+    }
+  ]
+}

@@ -5,11 +5,31 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const platformDir = join(__dirname, "../../platform");
-const websiteDir = join(__dirname, "../../website");
 const schemasDir = join(__dirname, "../schemas");
 
-// User interaction services (platform/ directory)
 const PLATFORM_SERVICES = [
+	// Content entities
+	"people",
+	"technologies",
+	"shows",
+	"videos",
+	// Content relationships
+	"video-guests",
+	"video-technologies",
+	"show-hosts",
+	"episodes",
+	"chapters",
+	"people-links",
+	"people-biographies",
+	"transcription-terms",
+	// Editorial content
+	"articles",
+	"news",
+	"changelog",
+	"adrs",
+	"testimonials",
+	"courses",
+	// User interaction services
 	"emoji-reactions",
 	"email-preferences",
 	"watch-history",
@@ -82,45 +102,13 @@ async function collectSchemas() {
 		}
 	}
 
-	// Collect website subgraph schema
-	console.log("\nCollecting website subgraph schema...");
-	const websitePublishPath = join(websiteDir, "src/subgraph/publish.ts");
-
-	if (existsSync(websitePublishPath)) {
-		try {
-			console.log("  Running website publish.ts...");
-			execSync("bun run src/subgraph/publish.ts", {
-				cwd: websiteDir,
-				stdio: "pipe",
-			});
-
-			const websiteSchemaPath = join(websiteDir, "src/subgraph/schema.gql");
-			if (existsSync(websiteSchemaPath)) {
-				const destPath = join(schemasDir, "website.graphql");
-				copyFileSync(websiteSchemaPath, destPath);
-				console.log("  Success: copied to schemas/website.graphql");
-				successCount++;
-			} else {
-				console.log("  Failed: schema.gql not generated");
-				failCount++;
-			}
-		} catch (error) {
-			console.log(
-				`  Failed: ${error instanceof Error ? error.message : "unknown error"}`,
-			);
-			failCount++;
-		}
-	} else {
-		console.log("  Skipped: no publish.ts script found");
-		failCount++;
-	}
-
 	console.log(`\nSchema collection complete:`);
 	console.log(`  Success: ${successCount}`);
 	console.log(`  Failed: ${failCount}`);
 
-	if (successCount === 0) {
-		console.error("\nNo schemas were collected.");
+	// A missing subgraph silently drops its fields from the API, so fail instead.
+	if (failCount > 0) {
+		console.error("\nSome schemas were not collected.");
 		process.exit(1);
 	}
 }

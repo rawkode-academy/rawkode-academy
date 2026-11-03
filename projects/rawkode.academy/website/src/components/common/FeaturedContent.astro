@@ -1,6 +1,7 @@
 ---
 import { Image } from "astro:assets";
 import { getTypeBadgeConfig } from "@/utils/article-types";
+import { localTime } from "@/lib/local-time";
 
 interface Props {
 	type: "article" | "video";
@@ -46,8 +47,8 @@ const sectionClass = Astro.props.class ?? "";
 
 const badgeConfig = articleType && getTypeBadgeConfig(articleType);
 
-function formatDate(dateString: string): string {
-	return new Date(dateString).toLocaleDateString("en-US", {
+function formatDate(dateString: string) {
+	return localTime(dateString, {
 		year: "numeric",
 		month: "short",
 		day: "numeric",
@@ -169,7 +170,7 @@ const truncatedDescription = truncateDescription(
 						<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
 						</svg>
-						<span>{displayDate}</span>
+						<time {...displayDate.attrs}>{displayDate.text}</time>
 					</div>
 				</div>
 
@@ -263,7 +264,7 @@ const truncatedDescription = truncateDescription(
 							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
 							</svg>
-							<span>{displayDate}</span>
+							<time {...displayDate.attrs}>{displayDate.text}</time>
 						</div>
 					</div>
 

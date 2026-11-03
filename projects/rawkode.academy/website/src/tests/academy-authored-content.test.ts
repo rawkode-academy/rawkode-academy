@@ -6,6 +6,7 @@ import * as runtime from "astro/runtime/server/index.js";
 import ts from "typescript";
 import { academyRelatedContent } from "@rawkodeacademy/design-system";
 import { academyCallout } from "../../../../../packages/design-system/src/recipes/academyCallout";
+import { ContentError, optionalContent } from "@/lib/live-content/collections";
 
 type Component = Parameters<
 	Awaited<ReturnType<typeof AstroContainer.create>>["renderToString"]
@@ -13,18 +14,17 @@ type Component = Parameters<
 let aside: Component;
 let related: Component;
 let articles: ReturnType<typeof article>[] = [];
+let collectionReads: string[] = [];
+let contentLayerDown = false;
 
-const article = (
-	id: string,
-	publishedAt: string,
-	series?: string,
-	draft = false,
-) => ({
+// Live-collection-shaped article entries (articles have no series).
+const article = (id: string, publishedAt: string, draft = false) => ({
 	id,
+	collection: "articles" as const,
+	body: "",
 	data: {
 		title: id,
-		publishedAt,
-		series: series ? { id: series } : undefined,
+		publishedAt: new Date(publishedAt),
 		draft,
 	},
 });
@@ -59,11 +59,20 @@ beforeAll(async () => {
 	});
 	related = await compile("articles/RelatedArticles.astro", {
 		"@rawkodeacademy/design-system": { academyRelatedContent },
-		"astro:content": {
+		"@/lib/live-content": {
+			optionalContent,
 			getCollection: async (
-				_name: string,
-				filter: (entry: ReturnType<typeof article>) => boolean,
-			) => articles.filter(filter),
+				name: string,
+				filter?: (entry: ReturnType<typeof article>) => boolean,
+			) => {
+				collectionReads.push(name);
+				if (contentLayerDown)
+					throw new ContentError(
+						"Loading articles failed: gateway down",
+						"articles",
+					);
+				return articles.filter(filter ?? (() => true));
+			},
 		},
 		"./ArticleCard.astro": {
 			__esModule: true,
@@ -142,22 +151,23 @@ describe("authored callouts", () => {
 });
 
 describe("related article ranking", () => {
-	it("keeps series order before recent extras, excludes drafts/current/duplicates, and honors limits", async () => {
-		const current = article("current", "2026-01-01", "series");
+	const ids = (dom: HTMLElement) =>
+		[...dom.querySelectorAll("article")].map((node) => node.dataset.articleId);
+
+	it("ranks newest first, excludes the current article, keeps draft-flagged articles (no draft gating) and honors limits", async () => {
+		collectionReads = [];
+		const current = article("current", "2026-01-01");
 		articles = [
 			current,
-			article("older-series", "2020-01-01", "series"),
+			article("older", "2020-01-01"),
 			article("newest", "2026-03-01"),
-			article("newer-series", "2025-01-01", "series"),
-			article("draft", "2026-04-01", "series", true),
+			article("newer", "2025-01-01"),
+			article("draft-flagged", "2026-04-01", true),
 			article("recent", "2026-02-01"),
 		];
 		const dom = await render(related, { currentArticle: current });
-		expect(
-			[...dom.querySelectorAll("article")].map(
-				(node) => node.dataset.articleId,
-			),
-		).toEqual(["older-series", "newer-series", "newest"]);
+		expect(ids(dom)).toEqual(["draft-flagged", "newest", "recent"]);
+		expect(collectionReads).toEqual(["articles"]);
 		expect(dom.querySelector("section")?.className).toBe(
 			`${academyRelatedContent().section} ${academyRelatedContent().related}`,
 		);
@@ -168,11 +178,23 @@ describe("related article ranking", () => {
 			currentArticle: current,
 			limit: 1,
 		});
-		expect(
-			[...limited.querySelectorAll("article")].map(
-				(node) => node.dataset.articleId,
-			),
-		).toEqual(["older-series"]);
+		expect(ids(limited)).toEqual(["draft-flagged"]);
+	});
+	it("ranks the page-provided pool without refetching or reordering the caller's array", async () => {
+		collectionReads = [];
+		const current = article("current", "2026-01-01");
+		const pool = [
+			article("older", "2025-01-01"),
+			current,
+			article("newer", "2026-02-01"),
+		];
+		const dom = await render(related, {
+			currentArticle: current,
+			articles: pool,
+		});
+		expect(ids(dom)).toEqual(["newer", "older"]);
+		expect(collectionReads).toEqual([]);
+		expect(pool.map(({ id }) => id)).toEqual(["older", "current", "newer"]);
 	});
 	it("orders recent-only results newest first and omits empty sections", async () => {
 		const current = article("current", "2026-01-01");
@@ -182,16 +204,23 @@ describe("related article ranking", () => {
 			article("newer", "2026-02-01"),
 		];
 		const dom = await render(related, { currentArticle: current });
-		expect(
-			[...dom.querySelectorAll("article")].map(
-				(node) => node.dataset.articleId,
-			),
-		).toEqual(["newer", "older"]);
+		expect(ids(dom)).toEqual(["newer", "older"]);
 		articles = [current];
 		expect(
 			(await render(related, { currentArticle: current })).querySelector(
 				"section",
 			),
 		).toBeNull();
+	});
+	it("leaves the optional section out when the content layer fails", async () => {
+		const current = article("current", "2026-01-01");
+		articles = [current, article("other", "2026-02-01")];
+		contentLayerDown = true;
+		try {
+			const dom = await render(related, { currentArticle: current });
+			expect(dom.querySelector("section")).toBeNull();
+		} finally {
+			contentLayerDown = false;
+		}
 	});
 });

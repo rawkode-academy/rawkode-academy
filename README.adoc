@@ -48,7 +48,6 @@ Please read our link:https://github.com/RawkodeAcademy/RawkodeAcademy/blob/main/
 
 We use modern tools and technologies including:
 
-* *Dagger* for CI/CD pipelines
 * *Cloudflare Workers* for edge computing
 * *TypeScript* & *Deno* for our applications
 * *Kubernetes* for container orchestration

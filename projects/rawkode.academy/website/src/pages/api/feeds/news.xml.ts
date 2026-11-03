@@ -1,7 +1,12 @@
-import { getCollection, getEntries } from "astro:content";
 import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
 import { withRssMimeType } from "../../../lib/feed-utils";
+import {
+	type ContentEntry,
+	getCollection,
+	getEntries,
+	setContentCache,
+} from "@/lib/live-content";
 import { isNewsPublished } from "@/lib/news-publication";
 
 export async function GET(context: APIContext) {
@@ -16,9 +21,11 @@ export async function GET(context: APIContext) {
 			new Date(a.data.publishedAt).getTime(),
 	);
 
+	const authorEntries: ContentEntry<"people">[] = [];
 	const items = await Promise.all(
 		sortedNews.map(async (story) => {
 			const authors = await getEntries(story.data.authors);
+			authorEntries.push(...authors);
 			return {
 				title: story.data.title,
 				description: story.data.description,
@@ -29,6 +36,11 @@ export async function GET(context: APIContext) {
 			};
 		}),
 	);
+
+	await setContentCache(context, {
+		entries: [...sortedNews, ...authorEntries],
+		collections: ["news"],
+	});
 
 	return withRssMimeType(
 		await rss({

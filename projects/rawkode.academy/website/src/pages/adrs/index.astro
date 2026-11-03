@@ -1,11 +1,10 @@
 ---
-import { getCollection, getEntries } from "astro:content";
+import { getCollection, getEntries, setContentCache } from "@/lib/live-content";
 import { createLogger } from "@/lib/logger";
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
 import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 import Page from "@/wrappers/page.astro";
-
-export const prerender = true;
+import { localTime } from "@/lib/local-time";
 
 const logger = createLogger("adrs");
 const allAdrs = await getCollection("adrs");
@@ -33,13 +32,13 @@ const adrAuthors = await Promise.all(
 	}),
 );
 
-const formatDate = (date: Date): string => {
-	return new Intl.DateTimeFormat("en-US", {
-		year: "numeric",
-		month: "long",
-		day: "numeric",
-	}).format(date);
-};
+await setContentCache(Astro, {
+	entries: [...allAdrs, ...adrAuthors.flatMap((entry) => entry.authors)],
+	collections: ["adrs"],
+});
+
+const formatDate = (date: Date) =>
+	localTime(date, { year: "numeric", month: "long", day: "numeric" });
 
 const getAdrNumber = (id: string): string => {
 	return id.match(/^(\d{4})-/)?.[1] || "0000";
@@ -69,7 +68,7 @@ const catalog = academyCatalog();
 							<div class={catalog.rowMain}>
 								<h2 class={catalog.rowTitle}>{adr.data.title}</h2>
 								<span class={catalog.rowMeta}>
-									<time datetime={adr.data.adoptedAt.toISOString()}>{formatDate(adr.data.adoptedAt)}</time>
+									<time {...formatDate(adr.data.adoptedAt).attrs}>{formatDate(adr.data.adoptedAt).text}</time>
 									{authors.length > 0 && <span>By {authors.map((author) => author.data.name).join(", ")}</span>}
 								</span>
 							</div>

@@ -38,7 +38,7 @@
  <div class="card-body">
  <!-- Why section -->
  <div v-if="technology.cardData.why" class="card-section">
- <div class="section-label">Why I use it</div>
+ <div class="section-label">Why it is here</div>
  <p class="section-text">{{ technology.cardData.why }}</p>
  </div>
 

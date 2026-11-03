@@ -1,5 +1,7 @@
 # Wave 2 High-Intent Discovery Backlog (March 26, 2026)
 
+> **Historical note:** content now lives in D1 platform services behind the API gateway and the website reads it through `src/lib/live-content` (see `docs/live-content.md`). References below to `content/**` files and `src/content.config.ts` describe the file-based sources at the time of this audit.
+
 ## Scope
 This backlog defines and prioritizes high-intent organic discovery work only. It does not modify content implementation files.
 

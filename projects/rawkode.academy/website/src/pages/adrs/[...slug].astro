@@ -2,54 +2,45 @@
 import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
 const styles = academyLayout({ width: "reading" });
-import { getCollection, getEntries, render } from "astro:content";
-import type { CollectionEntry } from "astro:content";
-import type { GetStaticPaths, GetStaticPathsResult } from "astro";
+import {
+	type ContentEntry,
+	getEntries,
+	getEntry,
+	renderEntry,
+	setContentCache,
+} from "@/lib/live-content";
+import RichText from "@/components/content/RichText.astro";
 import AdrJsonLd from "@/components/html/adr-jsonld.astro";
 import { createLogger } from "@/lib/logger";
 import ArticleHeader from "@/components/read/ArticleHeader.astro";
 import ArticleByline from "@/components/read/ArticleByline.astro";
 import Page from "@/wrappers/page.astro";
-
-export const prerender = true;
+import { localTime } from "@/lib/local-time";
 
 const logger = createLogger("adrs");
 
-type Props = {
-	adr: CollectionEntry<"adrs">;
-};
+const adr = Astro.params.slug
+	? await getEntry("adrs", Astro.params.slug)
+	: undefined;
+if (!adr) return new Response(null, { status: 404 });
 
-export const getStaticPaths: GetStaticPaths =
-	async (): Promise<GetStaticPathsResult> => {
-		const adrs = await getCollection("adrs");
+const { html } = await renderEntry(adr);
 
-		return adrs.map((adr) => ({
-			params: {
-				slug: adr.id,
-			},
-			props: {
-				adr,
-			},
-		}));
-	};
-
-const { adr } = Astro.props;
-const { Content } = await render(adr);
-
-let authors: CollectionEntry<"people">[] = [];
+let authors: ContentEntry<"people">[] = [];
 try {
 	authors = await getEntries(adr.data.authors);
 } catch (error) {
 	logger.error(`Error fetching authors for ADR ${adr.id}`, error);
 }
 
-const formatDate = (date: Date): string => {
-	return new Intl.DateTimeFormat("en-US", {
-		year: "numeric",
-		month: "long",
-		day: "numeric",
-	}).format(date);
-};
+await setContentCache(Astro, {
+	entries: [adr, ...authors],
+	// The body autolinks technologies, so renames and additions refresh it.
+	collections: ["technologies"],
+});
+
+const formatDate = (date: Date) =>
+	localTime(date, { year: "numeric", month: "long", day: "numeric" });
 
 const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
 const adoptedLabel = adr.data.adoptedAt
@@ -73,7 +64,7 @@ const validAuthors = authors.filter((author) => author && author.data);
 
 		<section class={doc.reading}>
 			<article class={[styles.prose, doc.adrProse].join(" ")}>
-				<Content />
+				<RichText html={html} />
 			</article>
 		</section>
 </Page>

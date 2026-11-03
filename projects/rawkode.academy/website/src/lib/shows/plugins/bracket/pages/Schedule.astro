@@ -1,5 +1,6 @@
 ---
 import type { BracketMatch } from "../queries";
+import { localTime } from "@/lib/local-time";
 
 interface Props {
 	matches: BracketMatch[];
@@ -39,22 +40,23 @@ const groups = [
 	},
 ].filter((group) => group.matches.length > 0);
 
-function fmt(iso?: string | null): { iso: string; label: string } | null {
+function fmt(iso?: string | null) {
 	const date = new Date(iso ?? "");
 	if (!Number.isFinite(date.getTime())) return null;
-	return {
-		iso: date.toISOString(),
-		label: date.toLocaleString("en-GB", {
+	const time = localTime(
+		date,
+		{
 			weekday: "short",
 			day: "numeric",
 			month: "short",
 			year: "numeric",
 			hour: "2-digit",
 			minute: "2-digit",
-			timeZone: "UTC",
 			timeZoneName: "short",
-		}),
-	};
+		},
+		"en-GB",
+	);
+	return { iso: time.iso, label: time.text, attrs: time.attrs };
 }
 ---
 
@@ -84,7 +86,7 @@ function fmt(iso?: string | null): { iso: string; label: string } | null {
 										<span class="font-medium text-primary-content">{m.sideB?.displayName ?? "TBD"}</span>
 									</div>
 									<div class="flex items-center gap-3 text-sm text-muted">
-										{date ? <time datetime={date.iso}>{date.label}</time> : <span>{m.status === "completed" ? "Time unavailable" : "Time to be announced"}</span>}
+										{date ? <time {...date.attrs}>{date.label}</time> : <span>{m.status === "completed" ? "Time unavailable" : "Time to be announced"}</span>}
 										{m.status === "live" && <span class="font-semibold text-secondary">● LIVE</span>}
 										{m.status === "completed" && (
 											<span class="text-xs">{m.winner?.displayName ? `${m.winner.displayName} won` : "Completed"}</span>

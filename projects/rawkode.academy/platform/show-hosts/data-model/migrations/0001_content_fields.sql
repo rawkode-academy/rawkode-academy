@@ -1,0 +1,1 @@
+ALTER TABLE `show_hosts` ADD `position` integer DEFAULT 0 NOT NULL;

@@ -2,7 +2,7 @@
 import { env } from "cloudflare:workers";
 import Page from "@/wrappers/page.astro";
 import K8sCheatsheetCTA from "@/components/lead-magnet/K8sCheatsheetCTA.vue";
-import { createLearnerId } from "@/actions/newsletter";
+import { createLearnerId } from "@/lib/newsletter-ids";
 import { academyLayout, academyReference } from "@rawkodeacademy/design-system";
 import "@rawkodeacademy/design-system/styles.css";
 
@@ -57,7 +57,6 @@ const layout = academyLayout({ width: "reading" });
 <Page title={pageTitle} description={pageDescription}>
 	<div class={layout.root}>
 	{hasAccess ? (
-		<!-- Cheatsheet Content for Subscribed Users -->
 		<section class={layout.section}>
 			<div class={layout.container}>
 				<!-- Success Header -->
@@ -348,7 +347,6 @@ const layout = academyLayout({ width: "reading" });
 			</div>
 		</section>
 	) : (
-		<!-- Lead Magnet CTA for Non-Subscribers -->
 		<section class={layout.section}>
 			<div class:list={[layout.container, reference.center]}>
 				<h1 class={layout.title}>

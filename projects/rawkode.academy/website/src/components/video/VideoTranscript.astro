@@ -7,6 +7,7 @@ import {
 	normalizeTranscriptCues,
 	transcriptSections,
 } from "./transcript-content";
+import { timestampHref } from "@/lib/video-deep-link";
 
 interface Props {
 	cues: readonly InitialTranscriptCue[];
@@ -37,7 +38,7 @@ const searchId = `transcript-search-${crypto.randomUUID()}`;
 					<section data-transcript-section aria-label={section.chapter?.title}>
 						{section.chapter && (
 							<h3 class={styles.transcriptChapter}>
-								<a href={`?t=${section.chapter.startTime}`} data-chapter-link={section.chapter.startTime} class={styles.transcriptChapterLink}>
+								<a href={timestampHref(section.chapter.startTime)} data-chapter-link={section.chapter.startTime} class={styles.transcriptChapterLink}>
 									<span class={styles.transcriptTimestamp}>{formatTranscriptTimestamp(section.chapter.startTime)}</span>
 									{section.chapter.title}
 								</a>
@@ -45,7 +46,7 @@ const searchId = `transcript-search-${crypto.randomUUID()}`;
 						)}
 						{section.cues.map((cue) => (
 							<p data-transcript-row class={styles.transcriptParagraph}>
-								<a href={`?t=${cue.startSeconds}`} data-chapter-link={cue.startSeconds} aria-label={`Jump to ${formatTranscriptTimestamp(cue.startSeconds)}`} class={styles.transcriptTimestampLink}>
+								<a href={timestampHref(cue.startSeconds)} data-chapter-link={cue.startSeconds} aria-label={`Jump to ${formatTranscriptTimestamp(cue.startSeconds)}`} class={styles.transcriptTimestampLink}>
 									<span class={styles.transcriptTimestamp}>{formatTranscriptTimestamp(cue.startSeconds)}</span>
 								</a>
 								<span data-transcript-text>{cue.text}</span>

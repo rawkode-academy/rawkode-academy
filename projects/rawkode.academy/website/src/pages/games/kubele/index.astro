@@ -1,0 +1,12 @@
+---
+import PageWrapper from "@/wrappers/page.astro";
+import Kubele from "@/components/games/kubele/Kubele.vue";
+import { academyLayout } from "@rawkodeacademy/design-system";
+const layout = academyLayout({ width: "wide" });
+---
+<PageWrapper title="Kubele — a daily cloud native word game" description="Six guesses. One cloud native project or term. Play Kubele, featuring CNCF projects, including Sandbox projects.">
+	<section class:list={[layout.root, layout.section]}>
+		<Kubele registered={Boolean(Astro.locals.user)} client:only="vue"><p slot="fallback">Loading Kubele…</p></Kubele>
+		<noscript>Enable JavaScript to play Kubele.</noscript>
+	</section>
+</PageWrapper>

@@ -1,0 +1,1 @@
+ALTER TABLE `video_guests` ADD `position` integer DEFAULT 0 NOT NULL;

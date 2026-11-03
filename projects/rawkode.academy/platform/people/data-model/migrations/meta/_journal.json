@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1734526282412,
+      "tag": "0000_shiny_korvac",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1792310015286,
+      "tag": "0001_content_fields",
+      "breakpoints": true
+    }
+  ]
+}

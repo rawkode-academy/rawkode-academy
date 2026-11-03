@@ -312,7 +312,7 @@ import (
 		devDependencies: {
 			"@biomejs/biome":            "^1.9.4"
 			"@cloudflare/workers-types": "^4.20250426.0"
-			"@types/bun":                "latest"
+			"@types/bun":                "^1.4.4"
 			"@types/node":               "^22.15.2"
 			"vitest":                    "^4.1.8"
 			"wrangler":                  "^4.13.2"
@@ -600,17 +600,25 @@ import (
 			\(_envInterface)
 		}
 
+		// Building the schema costs more than most queries, and every federated
+		// hop pays it, so build it once per isolate rather than per request.
+		let yoga: ReturnType<typeof createYoga> | undefined;
+		let yogaEnv: Env | undefined;
+
 		export default {
 			fetch(request: Request, env: Env, ctx: ExecutionContext) {
-				const yoga = createYoga({
-					schema: getSchema(env),
-					graphqlEndpoint: "/",
-					context: ({ request }) => ({
-						// The gateway forwards the authenticated member id for
-						// per-user participation queries.
-						userId: request.headers.get("X-Gateway-User-Id"),
-					}),
-				});
+				if (!yoga || yogaEnv !== env) {
+					yogaEnv = env;
+					yoga = createYoga({
+						schema: getSchema(env),
+						graphqlEndpoint: "/",
+						context: ({ request }) => ({
+							// The gateway forwards the authenticated member id for
+							// per-user participation queries.
+							userId: request.headers.get("X-Gateway-User-Id"),
+						}),
+					});
+				}
 
 				return yoga.fetch(request, env, ctx);
 			},

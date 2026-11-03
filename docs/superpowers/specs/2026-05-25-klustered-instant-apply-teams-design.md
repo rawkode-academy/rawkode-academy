@@ -1,5 +1,7 @@
 # Klustered instant-apply + self-service teams — design
 
+> **Historical note:** content now lives in D1 platform services behind the API gateway (`projects/rawkode.academy/platform/<service>`), and the repository `content/` tree has been removed. Paths below under `content/` describe the file-based layout at the time this was written.
+
 Date: 2026-05-25
 Status: Approved for planning
 Scope: `projects/rawkode.academy/platform/brackets`, `projects/rawkode.academy/website`, `projects/klustered.dev`

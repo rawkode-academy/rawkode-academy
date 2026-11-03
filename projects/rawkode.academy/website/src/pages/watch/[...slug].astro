@@ -1,5 +1,14 @@
 ---
-import { getCollection, getEntry } from "astro:content";
+import {
+	disableContentCache,
+	getCollection,
+	getEntries,
+	getEntry,
+	optionalContent,
+	renderEntry,
+	setContentCache,
+} from "@/lib/live-content";
+import RichText from "@/components/content/RichText.astro";
 import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
 import VideoMetadata from "@/components/html/video-metadata.astro";
 import VideoPlayer from "@/components/video/player.vue";
@@ -7,6 +16,7 @@ import LiveStreamGate from "@/components/video/LiveStreamGate.vue";
 import VideoReactions from "@/components/video/VideoReactions.astro";
 import VideoContentTabs from "@/components/video/video-content-tabs.vue";
 import VideoTranscript from "@/components/video/VideoTranscript.astro";
+import { timestampHref } from "@/lib/video-deep-link";
 import VideoCast from "@/components/video/VideoCast.astro";
 import TechnologyVideoSection from "@/components/video/TechnologyVideoSection.astro";
 import ShowVideoSection from "@/components/video/ShowVideoSection.astro";
@@ -15,7 +25,6 @@ import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import MLabel from "@/components/ui/MLabel.vue";
 import LiveDot from "@/components/ui/LiveDot.vue";
 import Page from "@/wrappers/page.astro";
-import { Marked } from "marked";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
 import { buildWatchVideoSeoText } from "@/utils/watch-video-seo";
@@ -34,6 +43,7 @@ import {
 	type StudioBindingEnv,
 } from "@/lib/studio-live";
 import { env } from "cloudflare:workers";
+import { localTime } from "@/lib/local-time";
 
 export const prerender = false;
 const layout = academyLayout({ width: "wide" });
@@ -42,6 +52,7 @@ const watch = academyWatch();
 
 const { slug } = Astro.params;
 
+// Videos include scheduled (future-dated) entries: upcoming streams have pages.
 const videos = await getCollection("videos");
 let video: (typeof videos)[0] | undefined = videos.find(
 	(v) => v.data.slug === slug,
@@ -51,25 +62,12 @@ if (!video) {
 	return new Response(null, { status: 404 });
 }
 
-if (video.data.type === "live") {
-	Astro.response.headers.set("Cache-Control", "no-store");
-	Astro.response.headers.set("CDN-Cache-Control", "no-store");
-} else {
-	Astro.response.headers.set(
-		"Cache-Control",
-		"public, max-age=600, s-maxage=7200, stale-while-revalidate=172800",
-	);
-	Astro.response.headers.set("CDN-Cache-Control", "public, max-age=7200");
-}
-Astro.response.headers.set(
-	"Cache-Tag",
-	`video-${video.data.slug}, videos-page, video-detail`,
-);
 Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 
-const marked = new Marked({ breaks: true, gfm: true });
+// Plain-text Markdown source for meta descriptions and SEO text; the page
+// body renders the description document (marked-equivalent profile).
 const processedDescription = video.data.description.replace(/\\n/g, "\n");
-const renderedDescriptionHtml = marked.parse(processedDescription);
+const { html: renderedDescriptionHtml } = await renderEntry(video);
 
 type Chapter = { startTime: number; title: string };
 let clips: VideoClip[] = [];
@@ -96,14 +94,8 @@ const formatTimestamp = (seconds: number) => {
 		: `${m}:${String(s).padStart(2, "0")}`;
 };
 
-const formatDate = (date: Date | string) => {
-	const d = typeof date === "string" ? new Date(date) : date;
-	return d.toLocaleDateString("en-US", {
-		year: "numeric",
-		month: "long",
-		day: "numeric",
-	});
-};
+const formatDate = (date: Date | string) =>
+	localTime(date, { year: "numeric", month: "long", day: "numeric" });
 
 const formatLabel = (value?: string | null) => {
 	if (!value) return null;
@@ -111,14 +103,9 @@ const formatLabel = (value?: string | null) => {
 };
 
 // Resolve referenced show and technologies
-const showRef = video.data.show;
-const showId =
-	typeof showRef === "string"
-		? showRef
-		: showRef && typeof showRef === "object" && "id" in showRef
-			? (showRef as { id: string }).id
-			: null;
-const showEntry = showId ? await getEntry("shows", showId) : null;
+// The show block is optional too.
+const showEntry =
+	(await optionalContent(getEntry(video.data.show), undefined)) ?? null;
 
 const RELATED_VIDEO_LIMIT = 6;
 const now = new Date();
@@ -147,17 +134,17 @@ const showRelatedVideos = showRelatedAll.slice(0, RELATED_VIDEO_LIMIT).map(toRel
 const normalizedTechIds = normalizeTechnologyReferences(
 	video.data.technologies,
 );
-const techEntries = (
-	await Promise.all(
-		normalizedTechIds.map(async (id) => {
-			try {
-				return await getEntry("technologies", id);
-			} catch {
-				return null;
-			}
-		}),
-	)
-).filter((t): t is NonNullable<typeof t> => Boolean(t));
+// One cached list lookup instead of a technologyById request per technology
+// (the page shows names and logos, not profile bodies). A failure renders no
+// technologies rather than failing the page.
+const technologiesById = new Map(
+	(await optionalContent(getCollection("technologies"), [])).map(
+		(technology) => [technology.id, technology] as const,
+	),
+);
+const techEntries = normalizedTechIds
+	.map((id) => technologiesById.get(id))
+	.filter((t): t is NonNullable<typeof t> => Boolean(t));
 
 let technologyRecommendation: {
 	technology: (typeof techEntries)[number];
@@ -168,7 +155,7 @@ if (showRelatedVideos.length === 0) {
 	// Declaration order is intentional. Stop as soon as one technology has
 	// published alternatives; do not collect rails for every technology.
 	for (const technology of techEntries) {
-		const id = technology.id.replace(/\/index$/, "");
+		const id = technology.id;
 		const related = relatedCandidates.filter((candidate) =>
 			normalizeTechnologyReferences(candidate.data.technologies).includes(id),
 		);
@@ -182,36 +169,15 @@ if (showRelatedVideos.length === 0) {
 	}
 }
 
-const hostEntries =
-	showEntry && Array.isArray(showEntry.data.hosts)
-		? (
-				await Promise.all(
-					showEntry.data.hosts.map(async (hostRef) => {
-						try {
-							return await getEntry("people", hostRef.id);
-						} catch {
-							return null;
-						}
-					}),
-				)
-			).filter((h): h is NonNullable<typeof h> => Boolean(h))
-		: [];
-
-const guestEntries = Array.isArray(video.data.guests)
-	? (
-			await Promise.all(
-				video.data.guests.map(async (guestRef) => {
-					try {
-						return await getEntry("people", guestRef.id);
-					} catch {
-						return null;
-					}
-				}),
-			)
-		).filter((g): g is NonNullable<typeof g> => Boolean(g))
+// The cast is optional: a people lookup failure renders no cast.
+const hostEntries = showEntry
+	? await optionalContent(getEntries(showEntry.data.hosts), [])
 	: [];
+const guestEntries = await optionalContent(getEntries(video.data.guests), []);
 
-const thumbnailUrl = getVideoThumbnailUrl(video.data.id);
+const thumbnailUrl = video.data.youtubeId
+	? `https://i.ytimg.com/vi/${video.data.youtubeId}/hqdefault.jpg`
+	: getVideoThumbnailUrl(video.data.id);
 const streamUrl = `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`;
 const captionUrl = `https://content.rawkode.academy/videos/${video.data.id}/captions/en.vtt`;
 const isLive = video.data.type === "live";
@@ -232,6 +198,22 @@ const shouldMountLiveGate = shouldMountStudioLiveGate({
 });
 const shouldRenderVodFallback =
 	shouldMountLiveGate && !isUpcomingLive && !studioLiveState.live;
+
+if (shouldMountLiveGate) {
+	// The live gate renders the studio's live state (upcoming, on air, or
+	// within the polling window after the start): never cache it. A past live
+	// session outside that window renders like a recording and is cached.
+	disableContentCache(Astro);
+	Astro.response.headers.set("Cache-Control", "no-store");
+} else {
+	// Everything shown on the page, plus the video listing behind the
+	// recommendations (a scheduled video caps the cache lifetime). Signed-in
+	// renders (watch position) are skipped by setContentCache.
+	await setContentCache(Astro, {
+		entries: [video, showEntry, ...techEntries, ...hostEntries, ...guestEntries],
+		collections: ["videos"],
+	});
+}
 
 const META_DESCRIPTION_LIMIT = 160;
 const metaDescription = (() => {
@@ -284,7 +266,7 @@ if (
 	user?.id
 ) {
 	try {
-		const response = await fetch("https://api.rawkode.academy/graphql", {
+		const response = await fetch("https://api.rawkode.academy/", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({
@@ -320,7 +302,7 @@ const runtimeLabel = formatVideoRuntimeLabel(
 	now,
 );
 const publishedLabel = formatDate(video.data.publishedAt);
-const scheduledLabel = new Intl.DateTimeFormat("en-US", {
+const scheduled = localTime(video.data.publishedAt, {
 	weekday: "long",
 	year: "numeric",
 	month: "long",
@@ -328,7 +310,7 @@ const scheduledLabel = new Intl.DateTimeFormat("en-US", {
 	hour: "numeric",
 	minute: "2-digit",
 	timeZoneName: "short",
-}).format(video.data.publishedAt);
+});
 const notificationsPublicKey = env.NOTIFICATIONS_VAPID_PUBLIC_KEY ?? "";
 const publishedIso =
 	video.data.publishedAt instanceof Date
@@ -357,7 +339,7 @@ const watchStatusLabel = isLiveNow
 		description={video.data.description}
 		thumbnailUrl={thumbnailUrl}
 		publishedAt={publishedIso}
-		duration={durationSec ?? 0}
+		duration={durationSec ?? undefined}
 		streamUrl={streamUrl}
 		captionUrl={captionUrl}
 		transcript={watchVideoSeoText.transcriptExcerpt}
@@ -422,11 +404,13 @@ const watchStatusLabel = isLiveNow
 				<dl class={watch.facts}>
 					<div class={watch.fact}>
 						<dt class={watch.factLabel}>Date</dt>
-						<dd class={watch.factValue}><time datetime={publishedIso}>{publishedLabel}</time></dd>
+						<dd class={watch.factValue}><time {...publishedLabel.attrs}>{publishedLabel.text}</time></dd>
 					</div>
 					<div class={watch.fact}>
 						<dt class={watch.factLabel}>Runtime</dt>
-						<dd class={watch.factValue}>{runtimeLabel}</dd>
+						{runtimeLabel !== "--:--" && (
+							<dd class={watch.factValue}>{runtimeLabel}</dd>
+						)}
 					</div>
 					<div class={watch.fact}>
 						<dt class={watch.factLabel}>Share</dt>
@@ -447,9 +431,19 @@ const watchStatusLabel = isLiveNow
 					<div class={watch.upcoming} aria-label="Upcoming stream details">
 						<h2 class={watch.noticeTitle}>This session has not started yet.</h2>
 						<p class={watch.noticeCopy}>
-							Join us on <time datetime={publishedIso}>{scheduledLabel}</time>.
+							Join us on <time {...scheduled.attrs}>{scheduled.text}</time>.
 							The player will activate when the stream is available.
 						</p>
+						{video.data.youtubeId && (
+							<a
+								class={watch.factLink}
+								href={`https://www.youtube.com/live/${video.data.youtubeId}`}
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								Open the scheduled stream on YouTube ↗
+							</a>
+						)}
 						<StreamNotifyButton
 							client:visible
 							videoSlug={video.data.slug}
@@ -522,7 +516,7 @@ const watchStatusLabel = isLiveNow
 						</ol>
 					</section>
 				)}
-				<div class:list={[layout.prose, watch.description]} data-academy-prose set:html={renderedDescriptionHtml} />
+				<div class:list={[layout.prose, watch.description]} data-academy-prose><RichText html={renderedDescriptionHtml} /></div>
 			</section>
 
 			{chapterSource.length > 0 && (
@@ -537,7 +531,7 @@ const watchStatusLabel = isLiveNow
 								<li>
 									<a
 										class={watch.chapterLink}
-										href={`?t=${chapter.startTime}`}
+										href={timestampHref(chapter.startTime)}
 										data-chapter-link={String(chapter.startTime)}
 									>
 										<span class={watch.chapterTime}>
@@ -572,7 +566,7 @@ const watchStatusLabel = isLiveNow
 					<div class={watch.techGrid}>
 						{techEntries.map((tech) => (
 							<a
-								href={`/technology/${tech.id.replace(/\/index$/, "")}`}
+								href={`/technology/${tech.id}`}
 								class={watch.techChip}
 							>
 								{resolveTechnologyIconUrl(tech.id, tech.data.logos) && <span class={watch.techIcon}>
@@ -622,6 +616,8 @@ const watchStatusLabel = isLiveNow
 </Page>
 
 <script>
+	import { startTimeFromUrl } from "@/lib/video-deep-link";
+
 	function getPlayerVideo(): HTMLVideoElement | null {
 		return document.querySelector<HTMLVideoElement>(
 			"#watch-detail-player video",
@@ -677,26 +673,37 @@ const watchStatusLabel = isLiveNow
 		}, 2000);
 	});
 
-	// Chapter links carry ?t=SECONDS so they work as plain navigations
-	// (the player reads ?t on load). When the player is already hydrated,
-	// seek in place instead of reloading.
+	// Chapter and transcript links are #t=SECONDS fragments: crawlers ignore
+	// them, and the player reads #t (or a shared ?t) when it mounts. When the
+	// player is already hydrated, seek in place.
+	function seekTo(seconds: number): boolean {
+		const media = getPlayerVideo();
+		if (!media) return false;
+		media.currentTime = seconds;
+		void media.play()?.catch(() => {});
+		document
+			.getElementById("watch-detail-player")
+			?.scrollIntoView({ behavior: "smooth", block: "center" });
+		return true;
+	}
+
 	for (const link of document.querySelectorAll<HTMLAnchorElement>(
 		"[data-chapter-link]",
 	)) {
 		link.addEventListener("click", (event) => {
 			const seconds = Number.parseInt(link.dataset.chapterLink ?? "", 10);
-			if (Number.isNaN(seconds)) return;
-			const media = getPlayerVideo();
-			if (!media) return;
+			if (Number.isNaN(seconds) || !seekTo(seconds)) return;
 			event.preventDefault();
-			media.currentTime = seconds;
-			void media.play()?.catch(() => {});
 			const url = new URL(window.location.href);
-			url.searchParams.set("t", String(seconds));
+			url.searchParams.delete("t");
+			url.hash = `t=${seconds}`;
 			history.replaceState(null, "", url);
-			document
-				.getElementById("watch-detail-player")
-				?.scrollIntoView({ behavior: "smooth", block: "center" });
 		});
 	}
+
+	// Back/forward or an edited #t= seeks too.
+	window.addEventListener("hashchange", () => {
+		const seconds = startTimeFromUrl(new URL(window.location.href));
+		if (seconds !== undefined) seekTo(seconds);
+	});
 </script>

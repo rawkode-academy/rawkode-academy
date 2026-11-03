@@ -1,7 +1,7 @@
 ---
 import { academyAccount } from "@rawkodeacademy/design-system";
 const account = academyAccount();
-import { getCollection } from "astro:content";
+import { disableContentCache, getCollection } from "@/lib/live-content";
 import VideoFeed from "@/components/video/video-feed.astro";
 import Page from "@/wrappers/page.astro";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
@@ -11,6 +11,9 @@ import "@rawkodeacademy/design-system/styles.css";
 export const prerender = false;
 
 const user = Astro.locals.user;
+
+// Personalised dashboard: never stored by the CDN (sticky for the request).
+disableContentCache(Astro);
 
 if (!user) {
 	return Astro.redirect(
@@ -32,7 +35,7 @@ let historyUnavailable = false;
 let continueWatchingData: WatchPosition[] = [];
 
 try {
-	const response = await fetch("https://api.rawkode.academy/graphql", {
+	const response = await fetch("https://api.rawkode.academy/", {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({

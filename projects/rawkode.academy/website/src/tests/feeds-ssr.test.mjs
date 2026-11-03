@@ -1,5 +1,5 @@
 // Run from website: node --experimental-vm-modules --test src/tests/feeds-ssr.test.mjs
-// Render the actual Feeds page with local collections; only shared chrome/styles are stubbed.
+// Render the actual Feeds page with a mocked content layer; only shared chrome/styles are stubbed.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
@@ -53,15 +53,21 @@ async function renderFeeds(collection = shows) {
 	const context = vm.createContext({ console });
 	const pageProps = [];
 	const collectionsRead = [];
+	const cacheCalls = [];
 	const mocks = {
 		// CSS is a build artifact, not executable in this semantic SSR harness.
 		"feeds.astro?astro&type=style&index=0&lang.css": {},
 		"astro/runtime/server/index.js": { ...runtime, createMetadata: () => ({}) },
-		"astro:content": {
+		"@/lib/live-content": {
 			getCollection: async (name, filter) => {
 				assert.equal(name, "shows", "Unexpected collection read");
 				collectionsRead.push(name);
 				return collection.filter(filter ?? (() => true));
+			},
+			setContentCache: async (astro, input) => {
+				assert(astro?.request, "setContentCache needs the Astro global");
+				cacheCalls.push(input);
+				return {};
 			},
 		},
 		"@rawkodeacademy/design-system": {
@@ -110,6 +116,11 @@ async function renderFeeds(collection = shows) {
 		request: new Request("https://rawkode.academy/feeds"),
 	});
 	assert.deepEqual(collectionsRead, ["shows"]);
+	// The page lists shows, so any show change (or publication) purges it.
+	// The page module runs in its own realm: compare plain data.
+	assert.deepEqual(JSON.parse(JSON.stringify(cacheCalls)), [
+		{ collections: ["shows"] },
+	]);
 	return { html, dom: parse(html), pageProps };
 }
 

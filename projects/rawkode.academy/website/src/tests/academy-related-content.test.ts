@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { mount, type VueWrapper } from "@vue/test-utils";
-import type { CollectionEntry } from "astro:content";
+import type { ContentEntry } from "@/lib/live-content";
 import AuthorAvatarGroup from "../components/common/AuthorAvatarGroup.vue";
 import Container from "../components/ui/Container.vue";
 import {
@@ -20,10 +20,10 @@ const authors = Array.from({ length: 5 }, (_, i) => ({
 		name: `Author ${i}`,
 		avatarUrl: `https://example.test/author-${i}.jpg`,
 	},
-})) as CollectionEntry<"people">[];
+})) as ContentEntry<"people">[];
 const group = (
 	props: {
-		authors?: CollectionEntry<"people">[];
+		authors?: ContentEntry<"people">[];
 		maxDisplay?: number;
 		showNames?: boolean;
 		showActiveIndicator?: boolean;

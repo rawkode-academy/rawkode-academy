@@ -1,54 +1,39 @@
 ---
-import { type CollectionEntry, getCollection } from "astro:content";
+import {
+	type ContentEntry,
+	getCollection,
+	optionalContent,
+} from "@/lib/live-content";
 import ArticleCard from "./ArticleCard.astro";
 import { academyRelatedContent } from "@rawkodeacademy/design-system";
 
 interface Props {
-	currentArticle: CollectionEntry<"articles">;
+	currentArticle: ContentEntry<"articles">;
+	/**
+	 * Candidate pool. Pages pass the articles they already fetched (and hand
+	 * them to setContentCache); without it the component fetches the list.
+	 */
+	articles?: ReadonlyArray<ContentEntry<"articles">> | undefined;
 	limit?: number;
 }
 
-const { currentArticle, limit = 3 } = Astro.props;
+const { currentArticle, articles, limit = 3 } = Astro.props;
 const styles = academyRelatedContent();
 
-// Get all published articles
-const allArticles = await getCollection("articles");
+// Related reading is optional: if the content layer is unavailable the
+// section is left out rather than failing the article page.
+const allArticles: ReadonlyArray<ContentEntry<"articles">> =
+	articles ?? (await optionalContent(getCollection("articles"), []));
 
-// Find related articles based on:
-// 1. Same series (if applicable)
-// 2. Recent articles (excluding current)
-const relatedArticles: CollectionEntry<"articles">[] = [];
-
-// First, add articles from the same series
-if (currentArticle.data.series) {
-	const seriesArticles = allArticles.filter(
-		(article) =>
-			article.data.series?.id === currentArticle.data.series?.id &&
-			article.id !== currentArticle.id,
-	);
-	relatedArticles.push(...seriesArticles);
-}
-
-// Then, add recent articles if we need more
-if (relatedArticles.length < limit) {
-	const recentArticles = allArticles
-		.filter(
-			(article) =>
-				article.id !== currentArticle.id &&
-				!relatedArticles.find((r) => r.id === article.id),
-		)
-		.sort(
-			(a, b) =>
-				new Date(b.data.publishedAt).getTime() -
-				new Date(a.data.publishedAt).getTime(),
-		)
-		.slice(0, limit - relatedArticles.length);
-
-	relatedArticles.push(...recentArticles);
-}
-
-// Limit to requested number
-const finalRelatedArticles = relatedArticles.slice(0, limit);
+// Most recent articles, excluding the current one (articles have no series).
+const finalRelatedArticles = allArticles
+	.filter((article) => article.id !== currentArticle.id)
+	.sort(
+		(a, b) =>
+			new Date(b.data.publishedAt).getTime() -
+			new Date(a.data.publishedAt).getTime(),
+	)
+	.slice(0, Math.max(0, limit));
 ---
 
 {finalRelatedArticles.length > 0 && (

@@ -30,32 +30,6 @@ export const ACCESS_APPLICATIONS: AccessApplication[] = [
 		],
 	},
 	{
-		clientId: "rawkode-academy-payload",
-		name: "Rawkode Academy CMS",
-		description: "admin.rawkode.academy and preview.rawkode.academy (Payload)",
-		roles: [
-			{
-				key: "staff",
-				label: "Staff",
-				description:
-					"Editorial admin, review intake, grants and publish in production Payload.",
-			},
-		],
-	},
-	{
-		clientId: "rawkode-academy-preview",
-		name: "Rawkode Academy CMS (PR previews)",
-		description: "Payload PR preview Workers backed by -preview data",
-		roles: [
-			{
-				key: "staff",
-				label: "Staff",
-				description:
-					"Staff on PR preview Workers backed by -preview data only.",
-			},
-		],
-	},
-	{
 		clientId: "rawkode-studio",
 		name: "Rawkode Studio",
 		description: "rawkode.studio live production",
@@ -71,7 +45,6 @@ export const ACCESS_APPLICATIONS: AccessApplication[] = [
 ];
 
 export const ROLE_KEYS = Object.freeze({
-	staff: "staff",
 	studioOperator: "studio_operator",
 } as const);
 

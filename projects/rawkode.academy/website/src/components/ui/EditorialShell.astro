@@ -17,20 +17,29 @@ const { eyebrow, title, lede, compact = false } = Astro.props as Props;
 const layout = academyLayout({ width: compact ? "reading" : "wide" });
 const marketing = academyMarketing();
 const editorial = academyEditorial();
+const hasAside = Astro.slots.has("aside");
+// Pages with an aside get the two-column hero; the rest keep a single column.
+const HeroInner = hasAside ? "div" : Fragment;
+const heroInnerProps = hasAside
+	? { class: layout.heroInner, style: "align-items: center" }
+	: {};
 ---
 
 <div class:list={[layout.root, editorial.root]} data-reading={compact}>
 	<header class={layout.hero}>
 		<div class={layout.container}>
-			<div class={layout.heroCopy}>
-			{eyebrow && <p class={marketing.eyebrow}>{eyebrow}</p>}
-			<h1 class={layout.title}>{title}</h1>
-			{lede && <p class={layout.description}>{lede}</p>}
-			<slot name="intro" />
-			{Astro.slots.has("actions") && (
-				<div class={marketing.actions}><slot name="actions" /></div>
-			)}
-			</div>
+			<HeroInner {...heroInnerProps}>
+				<div class={layout.heroCopy}>
+				{eyebrow && <p class={marketing.eyebrow}>{eyebrow}</p>}
+				<h1 class={layout.title}>{title}</h1>
+				{lede && <p class={layout.description}>{lede}</p>}
+				<slot name="intro" />
+				{Astro.slots.has("actions") && (
+					<div class={marketing.actions}><slot name="actions" /></div>
+				)}
+				</div>
+				{hasAside && <slot name="aside" />}
+			</HeroInner>
 		</div>
 	</header>
 	<div class={layout.container}>

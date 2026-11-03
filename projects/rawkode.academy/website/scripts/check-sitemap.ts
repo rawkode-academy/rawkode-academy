@@ -48,7 +48,6 @@ export const REQUIRED_SITEMAP_PATHS = [
 	"/sitemaps/learning-paths.xml",
 	"/sitemaps/people.xml",
 	"/sitemaps/shows.xml",
-	"/sitemaps/series.xml",
 	"/sitemaps/news.xml",
 	"/news-sitemap.xml",
 	"/sitemaps/adrs.xml",
@@ -100,9 +99,7 @@ async function fetchText(url: string) {
 export function extractLocsFromXml(xml: string): string[] {
 	const locs: string[] = [];
 	const re = /<loc>\s*([^<]+?)\s*<\/loc>/gi;
-	let match: RegExpExecArray | null;
-
-	while ((match = re.exec(xml))) {
+	for (const match of xml.matchAll(re)) {
 		const loc = match[1];
 		if (typeof loc === "string") {
 			locs.push(loc.trim());

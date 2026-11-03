@@ -1,30 +1,32 @@
 ---
-export const prerender = true;
+export const prerender = false;
 
 import TopicHub from "@/components/technology/TopicHub.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
+import RichText from "@/components/content/RichText.astro";
 import Page from "@/wrappers/page.astro";
 import TechnologyJsonLd from "@/components/html/technology-jsonld.astro";
 import TechnologyArticleJsonLd from "@/components/html/technology-article-jsonld.astro";
-import type { GetStaticPaths } from "astro";
-import { getCollection, render } from "astro:content";
-import matter from "gray-matter";
-import { readdir, readFile } from "node:fs/promises";
-import { join } from "node:path";
+import MLabel from "@/components/ui/MLabel.vue";
 import {
+	getCollection,
+	getEntry,
+	optionalContent,
+	renderEntry,
+	setContentCache,
 	type TechnologyData,
-	DEFAULT_TECHNOLOGY_STATUS,
-	DEFAULT_TECHNOLOGY_LICENSE,
-} from "@rawkodeacademy/content";
-import { resolveContentDirSync } from "@rawkodeacademy/content/utils";
+} from "@/lib/live-content";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
-import { getVideosForTechnology } from "@/utils/get-videos-for-technology";
+import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
+import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { isNewsPublished } from "@/lib/news-publication";
 import { academyTechnology } from "@rawkodeacademy/design-system";
 import "@rawkodeacademy/design-system/styles.css";
+import { localTime } from "@/lib/local-time";
+import { SUPPORTERS_PATH, supporterForTechnology } from "@/lib/supporters";
 
-export interface Technology extends Omit<TechnologyData, "logos"> {
+export interface Technology extends Omit<TechnologyData, "logos" | "body"> {
 	id: string;
 	logo?: string | undefined;
 	videos?:
@@ -40,203 +42,73 @@ export interface Technology extends Omit<TechnologyData, "logos"> {
 	articleCount?: number;
 }
 
-export const getStaticPaths = (async () => {
-	try {
-		const items = await getCollection("technologies");
-		if (items.length > 0) {
-			return Promise.all(
-				items.map(async (e) => {
-					const logo =
-						resolveTechnologyIconUrl(e.id, e.data.logos) ?? undefined;
-					const videos = await getVideosForTechnology(e.id);
-					return {
-						params: { id: e.id },
-						props: {
-							technology: {
-								id: e.id,
-								name: e.data.name,
-								seo: e.data.seo,
-								documentation: e.data.documentation,
-								website: e.data.website,
-								source: e.data.source,
-								aliases: e.data.aliases,
-								terms: e.data.terms,
-								relatedTechnologies: e.data.relatedTechnologies,
-								license: e.data.license,
-								category: e.data.category,
-								subcategory: e.data.subcategory,
-								status: e.data.status,
-								logo,
-								videos,
-								matrix: e.data.matrix,
-								cncf: e.data.cncf,
-								community: e.data.community,
-							} as Technology,
-						},
-					};
-				}),
-			);
-		}
-	} catch (error) {
-		console.warn(
-			"getCollection('technologies') failed; falling back to FS glob:",
-			error,
-		);
-	}
-
-	try {
-		const base = resolveContentDirSync("technologies");
-		async function walk(dir: string, rel = ""): Promise<string[]> {
-			const out: string[] = [];
-			const entries = await readdir(dir, { withFileTypes: true });
-			for (const e of entries) {
-				const p = join(dir, e.name);
-				const r = rel ? join(rel, e.name) : e.name;
-				if (e.isDirectory()) out.push(...(await walk(p, r)));
-				else if (e.isFile() && /\.mdx$/i.test(e.name)) out.push(r);
-			}
-			return out;
-		}
-		const files = await walk(base);
-
-		return await Promise.all(
-			files.map(async (rel) => {
-				const id = rel.replace(/\.mdx$/i, "");
-				try {
-					const raw = await readFile(join(base, rel), "utf8");
-					const fm = matter(raw).data as any;
-					const logo = resolveTechnologyIconUrl(id, fm.logos) ?? undefined;
-					const videos = await getVideosForTechnology(id);
-					return {
-						params: { id },
-						props: {
-							technology: {
-								id,
-								name: fm.name ?? id,
-								seo: fm.seo,
-								documentation: fm.documentation,
-								website: fm.website,
-								source: fm.source,
-								aliases: fm.aliases,
-								terms: fm.terms,
-								relatedTechnologies: fm.relatedTechnologies,
-								license: fm.license,
-								category: fm.category,
-								subcategory: fm.subcategory,
-								status: fm.status,
-								logo,
-								videos,
-								matrix: fm.matrix,
-								cncf: fm.cncf,
-								community: fm.community,
-							} as Technology,
-						},
-					};
-				} catch {
-					const videos = await getVideosForTechnology(id);
-					return {
-						params: { id },
-						props: {
-							technology: {
-								id,
-								name: id,
-								videos,
-								status: DEFAULT_TECHNOLOGY_STATUS,
-								website: "",
-								license: DEFAULT_TECHNOLOGY_LICENSE,
-							} as Technology,
-						},
-					};
-				}
-			}),
-		);
-	} catch (error) {
-		console.error("FS fallback for technologies failed:", error);
-		return [];
-	}
-}) satisfies GetStaticPaths;
-
-let { technology } = Astro.props as { technology?: Technology };
-
 const id = Astro.params.id as string;
-const items = await getCollection("technologies");
-const technologyEntry = items.find((x) => x.id === id);
-let Content: any = null;
-let hasContent = false;
-
-if (technologyEntry) {
-	try {
-		const rendered = await render(technologyEntry);
-		Content = rendered.Content;
-		hasContent = Boolean(
-			technologyEntry.body && technologyEntry.body.trim().length > 0,
-		);
-	} catch (err) {
-		console.warn("Failed to render technology content:", err);
-	}
+// getEntry loads the profile body (the list omits it) and normalises "/index".
+const technologyEntry = id ? await getEntry("technologies", id) : undefined;
+if (!technologyEntry) {
+	return new Response(null, { status: 404 });
 }
 
-if (!technology) {
-	try {
-		const e = technologyEntry;
-		if (e) {
-			const logo = resolveTechnologyIconUrl(e.id, e.data.logos) ?? undefined;
-			const videos = await getVideosForTechnology(e.id);
-			technology = {
-				id: e.id,
-				name: e.data.name,
-				seo: e.data.seo,
-				documentation: e.data.documentation,
-				website: e.data.website,
-				source: e.data.source,
-				aliases: e.data.aliases,
-				terms: e.data.terms,
-				relatedTechnologies: e.data.relatedTechnologies,
-				license: e.data.license,
-				category: e.data.category,
-				subcategory: e.data.subcategory,
-				status: e.data.status,
-				logo,
-				videos,
-				matrix: e.data.matrix,
-				cncf: e.data.cncf,
-				community: e.data.community,
-			};
-		} else {
-			const base = resolveContentDirSync("technologies");
-			const raw = await readFile(join(base, `${id}.mdx`), "utf8");
-			const fm = matter(raw).data as any;
-			const logo = resolveTechnologyIconUrl(id, fm.logos) ?? undefined;
-			const videos = await getVideosForTechnology(id);
-			technology = {
-				id,
-				name: fm.name ?? id,
-				seo: fm.seo,
-				documentation: fm.documentation,
-				website: fm.website,
-				source: fm.source,
-				aliases: fm.aliases,
-				terms: fm.terms,
-				relatedTechnologies: fm.relatedTechnologies,
-				license: fm.license,
-				category: fm.category,
-				subcategory: fm.subcategory,
-				status: fm.status,
-				logo,
-				videos,
-				matrix: fm.matrix,
-				cncf: fm.cncf,
-				community: fm.community,
-			};
-		}
-	} catch (err) {
-		console.error("Failed to load technology at runtime:", err);
-	}
-}
+// The profile is the page; the video rails, related technologies, topic hub
+// and supporter badge are optional and render nothing when the content layer
+// is down.
+const [items, allVideos, supporters] = await Promise.all([
+	optionalContent(getCollection("technologies"), []),
+	optionalContent(getCollection("videos"), []),
+	optionalContent(getCollection("supporters"), []),
+]);
+const supporter = supporterForTechnology(supporters, technologyEntry.id);
 
-if (!technology) {
-	return Astro.redirect("/technology");
-}
+const now = new Date();
+const upcomingSessions = allVideos
+	.filter(
+		({ data }) =>
+			data.type === "live" &&
+			data.publishedAt > now &&
+			normalizeTechnologyReferences(data.technologies).includes(technologyEntry.id),
+	)
+	.sort((a, b) => a.data.publishedAt.getTime() - b.data.publishedAt.getTime());
+// Published recordings about this technology, most recent first.
+const technologyVideos = allVideos
+	.filter(
+		({ data }) =>
+			data.publishedAt <= now &&
+			normalizeTechnologyReferences(data.technologies).includes(technologyEntry.id),
+	)
+	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
+
+const hasContent = technologyEntry.body.trim().length > 0;
+const profileHtml = hasContent ? (await renderEntry(technologyEntry)).html : "";
+
+const e = technologyEntry;
+const technology: Technology = {
+	id: e.id,
+	name: e.data.name,
+	seo: e.data.seo,
+	documentation: e.data.documentation,
+	website: e.data.website,
+	source: e.data.source,
+	aliases: e.data.aliases,
+	terms: e.data.terms,
+	relatedTechnologies: e.data.relatedTechnologies,
+	license: e.data.license,
+	category: e.data.category,
+	subcategory: e.data.subcategory,
+	status: e.data.status,
+	logo: resolveTechnologyIconUrl(e.id, e.data.logos) ?? undefined,
+	videos: technologyVideos.map((video) => ({
+		id: video.data.id,
+		title: video.data.title,
+		thumbnailUrl: getVideoThumbnailUrl(video.data.id),
+		slug: video.data.slug,
+		duration: video.data.duration,
+		publishedAt: video.data.publishedAt,
+		type: video.data.type,
+	})),
+	matrix: e.data.matrix,
+	cncf: e.data.cncf,
+	community: e.data.community,
+};
 
 const videoCount = technology.videos?.length ?? 0;
 const featuredVideos = (technology.videos ?? []).slice(0, 4);
@@ -252,7 +124,7 @@ const allTechItems = items;
 const techById = new Map(allTechItems.map((t) => [t.id, t]));
 
 const explicitMatches = explicitRelated
-	.map((relId) => techById.get(relId) ?? techById.get(`${relId}/index`))
+	.map((relId) => techById.get(relId))
 	.filter((t): t is (typeof allTechItems)[number] => Boolean(t));
 
 let siblingMatches: typeof allTechItems = [];
@@ -331,7 +203,7 @@ const noindex = !hasContent && videoCount === 0;
 const styles = academyTechnology();
 
 const technologyUrl = new URL(
-	`/technology/${technology.id.replace(/\/index$/, "")}`,
+	`/technology/${technology.id}`,
 	Astro.site,
 ).href;
 const absoluteLogo = technology.logo
@@ -370,9 +242,8 @@ const statusLabel = technology.matrix?.status
 	? statusLabels[technology.matrix.status] ?? technology.matrix.status
 	: undefined;
 const description = technology.seo?.description?.trim();
-const videoDateFormatter = new Intl.DateTimeFormat("en-GB", {
-	day: "numeric", month: "short", year: "numeric", timeZone: "UTC",
-});
+const videoDate = (value: string | Date) =>
+	localTime(value, { day: "numeric", month: "short", year: "numeric" }, "en-GB");
 const historicalStatuses = new Set(["abandoned", "deprecated", "superseded"]);
 const remainingVideos = (technology.videos ?? []).slice(featuredVideos.length);
 const breadcrumbs = [
@@ -440,15 +311,40 @@ const matchesTechnology = (
 		return id.replace(/\/index$/, "") === normalizedTechnologyId;
 	});
 const [articles, news, learningPaths] = await Promise.all([
-	getCollection("articles"), getCollection("news"), getCollection("learningPaths"),
+	optionalContent(getCollection("articles"), []),
+	optionalContent(getCollection("news"), []),
+	optionalContent(getCollection("learningPaths"), []),
 ]);
-const now = new Date();
 const hasTopicContent =
 	articles.some(({ data }) => data.publishedAt <= now && matchesTechnology(data.technologies)) ||
 	news.some(({ data }) => isNewsPublished(data.publishedAt, now) && matchesTechnology(data.technologies)) ||
 	learningPaths.some(({ data }) => data.publishedAt <= now && matchesTechnology(data.technologies));
 const hasAside = videoCount > 0 || hasMatrixDetails ||
 	Boolean(technology.cncf?.status) || cncfDates.length > 0 || cncfLinks.length > 0 || communityLinks.length > 0;
+
+// TopicHub (articles, news, learning paths), the video rails and the related
+// technologies rail all list collections, so their tags and schedules apply.
+// The supporter badge relies on entity tags instead: supporter entries carry
+// "technologies:<id>", so only the supported page is purged when a supporter
+// starts, changes or ends, and a failing supporters load keeps the full TTL.
+const relatedEntryIds = new Set(relatedTechnologies.map((related) => related.id));
+await setContentCache(Astro, {
+	entries: [
+		technologyEntry,
+		supporter,
+		...technologyVideos,
+		...upcomingSessions,
+		...items.filter((t) => relatedEntryIds.has(t.id)),
+		...(hasTopicContent
+			? [
+					...articles.filter(({ data }) => matchesTechnology(data.technologies)),
+					...news.filter(({ data }) => matchesTechnology(data.technologies)),
+					...learningPaths.filter(({ data }) => matchesTechnology(data.technologies)),
+				]
+			: []),
+	],
+	collections: ["technologies", "videos", "articles", "news", "learningPaths"],
+});
 ---
 
 <Page
@@ -516,6 +412,14 @@ const hasAside = videoCount > 0 || hasMatrixDetails ||
 				)}
 				<h1 class={styles.title}>{technology.name}</h1>
 			</div>
+			{supporter && (
+				<p class="technology-supporter">
+					<a class="technology-supporter__link focus-ring" href={SUPPORTERS_PATH}>
+						<MLabel tone="spruce">Community supporter</MLabel>
+						<span class="technology-supporter__name">{supporter.data.name}</span>
+					</a>
+				</p>
+			)}
 			{description && <p class={styles.description}>{description}</p>}
 			{metadata.length > 0 && (
 				<dl class={styles.metadata}>
@@ -539,10 +443,33 @@ const hasAside = videoCount > 0 || hasMatrixDetails ||
 			)}
 		</header>
 
+		{upcomingSessions.length > 0 && (
+			<section class={styles.ruledSection} aria-labelledby="upcoming-sessions-heading">
+				<h2 id="upcoming-sessions-heading" class={styles.heading}>Upcoming sessions</h2>
+				<ul class={styles.videoGrid}>
+					{upcomingSessions.map(({ data: video }) => {
+						const startsAt = localTime(video.publishedAt, {
+							month: "short", day: "numeric", year: "numeric",
+							hour: "numeric", minute: "2-digit", timeZoneName: "short",
+						}, "en-GB");
+						return (
+							<li>
+								<a href={"/watch/" + video.slug} class={styles.video}>
+									<img src={getVideoThumbnailUrl(video.id)} alt="" loading="lazy" width="480" height="270" />
+									<span>{video.title}</span>
+									<time class={styles.videoDate} {...startsAt.attrs}>{startsAt.text}</time>
+								</a>
+							</li>
+						);
+					})}
+				</ul>
+			</section>
+		)}
+
 		<div class={hasAside ? styles.columns : styles.reading}>
-			{hasContent && Content ? (
+			{hasContent ? (
 				<article id="complete-guide" class={styles.prose} aria-label={technology.name + " profile"}>
-					<Content />
+					<RichText html={profileHtml} />
 				</article>
 			) : (
 				<section class={styles.section} aria-labelledby="overview-heading">
@@ -565,7 +492,7 @@ const hasAside = videoCount > 0 || hasMatrixDetails ||
 										<a href={"/watch/" + video.slug} class={styles.video}>
 											<img src={video.thumbnailUrl} alt="" loading="lazy" width="480" height="270" />
 											<span>{video.title}</span>
-											<time class={styles.videoDate} datetime={new Date(video.publishedAt).toISOString()}>{videoDateFormatter.format(new Date(video.publishedAt))}</time>
+											<time class={styles.videoDate} {...videoDate(video.publishedAt).attrs}>{videoDate(video.publishedAt).text}</time>
 										</a>
 									</li>
 								))}
@@ -630,7 +557,7 @@ const hasAside = videoCount > 0 || hasMatrixDetails ||
 							<a href={"/watch/" + video.slug} class={styles.video}>
 								<img src={video.thumbnailUrl} alt="" loading="lazy" width="480" height="270" />
 								<span>{video.title}</span>
-								<time class={styles.videoDate} datetime={new Date(video.publishedAt).toISOString()}>{videoDateFormatter.format(new Date(video.publishedAt))}</time>
+								<time class={styles.videoDate} {...videoDate(video.publishedAt).attrs}>{videoDate(video.publishedAt).text}</time>
 							</a>
 						</li>
 					))}
@@ -673,5 +600,56 @@ const hasAside = videoCount > 0 || hasMatrixDetails ||
 				<p slot="fallback" class={styles.copy}>Email signup loads here. You can also <a class={styles.link} href="/settings">manage email preferences in account settings</a>.</p>
 			</NewsletterCTA>
 		</div>
+		<p class="technology-vendor">
+			<a href="/organizations/partnerships">Build {technology.name}? I'll show you where engineers get stuck with it →</a>
+			<span aria-hidden="true"> · </span>
+			<a href="/organizations/support-our-work#supporter">Back free content for the community →</a>
+		</p>
 	</div>
 </Page>
+
+<style>
+	.technology-supporter {
+		margin: 0;
+	}
+
+	.technology-supporter__link {
+		display: inline-flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.35rem 0.75rem;
+		padding: 0.45rem 0.7rem;
+		border: 1px solid var(--editorial-hairline);
+		color: var(--editorial-ink-soft);
+		text-decoration: none;
+	}
+
+	.technology-supporter__link:hover .technology-supporter__name {
+		color: var(--editorial-ink);
+		text-decoration: underline;
+		text-underline-offset: 0.2em;
+	}
+
+	.technology-vendor {
+		margin: 0;
+		padding-top: 1rem;
+		border-top: 1px solid var(--editorial-hairline);
+		font-size: 0.875rem;
+		line-height: 1.6;
+		color: var(--editorial-ink-mute);
+	}
+
+	.technology-vendor a {
+		color: var(--editorial-ink-soft);
+		text-underline-offset: 0.2em;
+	}
+
+	.technology-vendor a:hover {
+		color: var(--editorial-ink);
+	}
+
+	.technology-supporter__name {
+		font-weight: 600;
+		overflow-wrap: anywhere;
+	}
+</style>

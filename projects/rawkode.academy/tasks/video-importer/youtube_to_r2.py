@@ -11,7 +11,7 @@ import tempfile
 from pathlib import Path
 import subprocess
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 import requests
 import boto3
 from botocore.exceptions import NoCredentialsError, ClientError
@@ -20,6 +20,13 @@ import ffmpeg
 from cuid2 import Cuid
 import json
 import time
+from content_api import (
+    D1Client,
+    insert_video_sql,
+    invalidate_cache,
+    video_row,
+    write_video,
+)
 
 # Create a cuid generator instance
 cuid_generator = Cuid()
@@ -43,9 +50,11 @@ class ProcessingState:
         'audio_uploaded_content',
         'thumbnail_webp_uploaded_content',
         'cloud_run_triggered',
+        'd1_written',
+        'cache_invalidated',
         'completed'
     ]
-    
+
     def __init__(self, youtube_id, state_dir=None):
         self.youtube_id = youtube_id
         self.state_dir = state_dir or Path.home() / '.youtube_to_r2_state'
@@ -175,8 +184,8 @@ class YouTubeToR2:
             region_name='auto'
         )
 
-        # Cloud Run Jobs client
-        self.jobs_client = run_v2.JobsClient()
+        # Cloud Run Jobs client, created on first use so --skip-cloud-run works without GCP credentials
+        self.jobs_client = None
 
     def fetch_metadata_only(self, youtube_id, cookies_from_browser=None):
         """Fetch YouTube video metadata without downloading the video."""
@@ -627,6 +636,8 @@ class YouTubeToR2:
             )
 
             # Execute the job
+            if self.jobs_client is None:
+                self.jobs_client = run_v2.JobsClient()
             operation = self.jobs_client.run_job(request=request)
 
             # Get the operation name from the response
@@ -643,62 +654,25 @@ class YouTubeToR2:
             logger.error(f"Error triggering Cloud Run job: {str(e)}")
             raise
 
-    def generate_slug(self, title):
-        """Generate a URL-friendly slug from the video title."""
-        # Convert to lowercase
-        slug = title.lower()
-        # Replace special characters with spaces
-        slug = re.sub(r'[^\w\s-]', ' ', slug)
-        # Replace multiple spaces with single space
-        slug = re.sub(r'\s+', ' ', slug)
-        # Replace spaces with hyphens
-        slug = slug.strip().replace(' ', '-')
-        # Remove multiple hyphens
-        slug = re.sub(r'-+', '-', slug)
-        return slug
+    def build_video_row(self, cuid, youtube_id, video_info):
+        """The platform-videos row; description_doc is the TipTap document."""
+        # upload_date is YYYYMMDD (UTC); publishedAt is Unix seconds
+        upload_date = video_info.get('upload_date', '')
+        try:
+            published_at = datetime.strptime(upload_date, '%Y%m%d').replace(tzinfo=timezone.utc)
+        except (TypeError, ValueError):
+            published_at = datetime.now(timezone.utc)
 
-    def generate_sql_insert(self, cuid, video_info):
-        """Generate SQL insert statement for the videos table."""
-        # Escape function for SQL strings
-        def escape_sql(text):
-            if not text:
-                return ''
-            # Replace single quotes with double single quotes
-            text = text.replace("'", "''")
-            # Replace newlines with escaped newlines
-            text = text.replace('\n', '\\n')
-            # Replace carriage returns
-            text = text.replace('\r', '\\r')
-            # Replace tabs
-            text = text.replace('\t', '\\t')
-            return text
-        
-        title = escape_sql(video_info.get('title', ''))
-        description = escape_sql(video_info.get('description', ''))
-        duration = video_info.get('duration', 0)  # Duration in seconds
-        slug = self.generate_slug(video_info.get('title', ''))
+        return video_row(
+            cuid,
+            video_info.get('title', ''),
+            video_info.get('description', ''),
+            video_info.get('duration', 0),
+            published_at,
+            youtube_id=youtube_id,
+        )
 
-        # Parse upload date to Unix timestamp
-        upload_date = video_info.get('upload_date', '')  # Format: YYYYMMDD
-        if upload_date:
-            try:
-                dt = datetime.strptime(upload_date, '%Y%m%d')
-                published_at = int(dt.timestamp())
-            except:
-                published_at = int(datetime.now().timestamp())
-        else:
-            published_at = int(datetime.now().timestamp())
-
-        # For subtitle, we'll use the first line of description or a truncated version
-        subtitle_raw = video_info.get('description', '').split('\n')[0][:200] if video_info.get('description') else ''
-        subtitle = escape_sql(subtitle_raw)
-
-        sql = f"""INSERT INTO videos (id, title, subtitle, slug, description, duration, publishedAt)
-VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}, {published_at});"""
-
-        return sql
-
-    def process_video(self, youtube_id, resume=True, skip_cloud_run=False, force_cloud_run=False, local_video_path=None, cookies_from_browser=None):
+    def process_video(self, youtube_id, resume=True, skip_cloud_run=False, force_cloud_run=False, local_video_path=None, cookies_from_browser=None, d1_client=None):
         """Download video, extract audio, and upload all assets."""
         # Initialize state management
         state = ProcessingState(youtube_id)
@@ -825,25 +799,37 @@ VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}
                         logger.info("Skipping WebP thumbnail upload to content bucket - already completed")
 
                 # Trigger Cloud Run job
-                if not state.is_step_completed('cloud_run_triggered') or force_cloud_run:
+                if skip_cloud_run and not force_cloud_run:
+                    logger.info("Skipping Cloud Run job trigger as requested")
+                    operation_name = None
+                elif not state.is_step_completed('cloud_run_triggered') or force_cloud_run:
                     if state.is_step_completed('cloud_run_triggered') and force_cloud_run:
                         logger.info("Forcing Cloud Run job trigger (already completed previously)")
                     operation_name = self.trigger_cloud_run_job(video_cuid)
                     state.set_artifact('cloud_run_operation', operation_name)
                     state.set_artifact('cloud_run_triggered_at', datetime.now().isoformat())
                     state.mark_step_completed('cloud_run_triggered')
-                elif skip_cloud_run:
-                    logger.info("Skipping Cloud Run job trigger as requested")
-                    operation_name = None
                 else:
                     previous_trigger = state.get_artifact('cloud_run_triggered_at')
                     logger.info(f"Cloud Run job already triggered at {previous_trigger}")
                     logger.info("Use --force-cloud-run to trigger again or --skip-cloud-run to skip")
                     operation_name = state.get_artifact('cloud_run_operation')
 
-                # Generate SQL insert statement
-                sql_insert = self.generate_sql_insert(video_cuid, video_info)
-                
+                # Create the platform-videos row, then tell the website
+                row = self.build_video_row(video_cuid, youtube_id, video_info)
+                sql_insert = insert_video_sql(row)
+                if d1_client is None:
+                    logger.info("Skipping D1 write as requested; apply the SQL below yourself")
+                elif not state.is_step_completed('d1_written'):
+                    write_video(d1_client, row)
+                    state.mark_step_completed('d1_written')
+                else:
+                    logger.info("Skipping D1 write - already completed")
+
+                if d1_client is not None and state.is_step_completed('d1_written') and not state.is_step_completed('cache_invalidated'):
+                    if invalidate_cache([f"videos:{video_cuid}"]):
+                        state.mark_step_completed('cache_invalidated')
+
                 # Mark as completed
                 state.mark_step_completed('completed')
 
@@ -860,6 +846,8 @@ VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}
                     },
                     'cloud_run_operation': operation_name if not skip_cloud_run else None,
                     'sql_insert': sql_insert,
+                    'd1_written': state.is_step_completed('d1_written'),
+                    'cache_invalidated': state.is_step_completed('cache_invalidated'),
                     'video_info': {
                         'duration': video_info.get('duration', 0),
                         'upload_date': video_info.get('upload_date', ''),
@@ -880,6 +868,8 @@ def main():
     parser.add_argument('--show-state', action='store_true', help='Show current state and exit')
     parser.add_argument('--skip-cloud-run', action='store_true', help='Skip Cloud Run job trigger even if not completed')
     parser.add_argument('--force-cloud-run', action='store_true', help='Force Cloud Run job trigger even if already completed')
+    parser.add_argument('--skip-d1', action='store_true',
+                        help='Do not create the platform-videos row (or invalidate the website cache); only print the SQL')
     parser.add_argument('--local-video', help='Path to local video file (skip YouTube download, fetch metadata only)')
     parser.add_argument('--cookies-from-browser', choices=['chrome', 'firefox', 'safari', 'edge', 'opera', 'brave', 'chromium', 'vivaldi'],
                         help='Browser to extract cookies from (overrides YOUTUBE_COOKIES_BROWSER env var)')
@@ -949,9 +939,18 @@ def main():
     if not content_bucket:
         missing_vars.append('CONTENT_BUCKET')
 
+    # D1 (platform-videos) credentials, unless only printing the SQL
+    d1_client = None
+    if not args.skip_d1:
+        d1_client = D1Client.from_env()
+        if d1_client is None:
+            missing_vars.extend(v for v in ('CLOUDFLARE_ACCOUNT_ID', 'CLOUDFLARE_API_TOKEN') if not os.environ.get(v))
+        if not os.environ.get('CACHE_INVALIDATION_TOKEN'):
+            logger.warning("CACHE_INVALIDATION_TOKEN is not set; the website cache will not be invalidated after the D1 write")
+
     if missing_vars:
         logger.error(f"Missing required environment variables: {', '.join(missing_vars)}")
-        logger.error("Please set these in your .envrc file (see .envrc.example)")
+        logger.error("Run with `cuenv exec -e production -- ...` (see env.cue), or pass --skip-d1 to only print the SQL")
         sys.exit(1)
 
     try:
@@ -971,7 +970,8 @@ def main():
             skip_cloud_run=args.skip_cloud_run,
             force_cloud_run=args.force_cloud_run,
             local_video_path=args.local_video,
-            cookies_from_browser=args.cookies_from_browser
+            cookies_from_browser=args.cookies_from_browser,
+            d1_client=d1_client
         )
 
         print(f"\nSuccess!")
@@ -989,8 +989,10 @@ def main():
             triggered_at = state.get_artifact('cloud_run_triggered_at')
             if triggered_at:
                 print(f"  Triggered at: {triggered_at}")
+        print(f"\nplatform-videos row: {'written' if result['d1_written'] else 'NOT written'}")
+        print(f"Website cache: {'invalidated' if result['cache_invalidated'] else 'NOT invalidated'}")
         print(f"\n{'='*80}")
-        print("SQL INSERT STATEMENT:")
+        print("SQL INSERT STATEMENT (platform-videos):")
         print("="*80)
         print(result['sql_insert'])
         print("="*80)

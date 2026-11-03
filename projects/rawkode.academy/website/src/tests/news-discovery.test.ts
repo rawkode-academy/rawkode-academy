@@ -1,17 +1,33 @@
-import { readFileSync, readdirSync } from "node:fs";
-import { resolve } from "node:path";
 import type { APIContext } from "astro";
-import matter from "gray-matter";
 import { parseAtomFeed, parseRssFeed } from "feedsmith";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const { collections, getCollection, getEntries, render } = vi.hoisted(() => ({
+const {
+	collections,
+	getCollection,
+	getEntries,
+	getEntry,
+	render,
+	setContentCache,
+} = vi.hoisted(() => ({
 	collections: {} as Record<string, any[]>,
 	getCollection: vi.fn(),
 	getEntries: vi.fn(),
+	getEntry: vi.fn(),
 	render: vi.fn(),
+	setContentCache: vi.fn(),
 }));
-vi.mock("astro:content", () => ({ getCollection, getEntries, render }));
+// The collection boundary is the live content layer. Its wrappers hide
+// scheduled stories on their own; the mock deliberately does not, so these
+// contracts fail if a route drops its own publication filter.
+vi.mock("@/lib/live-content", async (importOriginal) => ({
+	...(await importOriginal<typeof import("@/lib/live-content")>()),
+	getCollection,
+	getEntries,
+	getEntry,
+	setContentCache,
+	disableContentCache: vi.fn(),
+}));
 
 import { GET as newsRss } from "../pages/api/feeds/news.xml";
 import { GET as newsAtom } from "../pages/api/feeds/news.atom";
@@ -19,7 +35,7 @@ import { GET as newsJson } from "../pages/api/feeds/news.json";
 import { GET as allRss } from "../pages/api/feeds/all.xml";
 import { GET as allAtom } from "../pages/api/feeds/all.atom";
 import { GET as allJson } from "../pages/api/feeds/all.json";
-import { GET as technologyRss } from "../pages/api/feeds/technology/[id].xml";
+import { GET as technologyFeed } from "../pages/api/feeds/technology/[id].xml";
 import { GET as personRss } from "../pages/api/feeds/people/[id].xml";
 import { GET as opml } from "../pages/feeds.opml";
 import { GET as googleNews } from "../pages/news-sitemap.xml";
@@ -55,6 +71,9 @@ const invalid = entry("invalid", new Date(Number.NaN));
 const context = () =>
 	({
 		site: new URL("https://academy.test"),
+		cache: { enabled: true, set: vi.fn() },
+		locals: {},
+		request: new Request("https://academy.test/"),
 		params: { id: "reporter" },
 		props: {
 			technologyName: "Kubernetes",
@@ -62,6 +81,10 @@ const context = () =>
 			technologyIndexedId: "kubernetes/index",
 		},
 	}) as unknown as APIContext;
+
+// The technology feed resolves its technology from the route param.
+const technologyRss = (request: APIContext) =>
+	technologyFeed({ ...request, params: { id: "kubernetes" } } as APIContext);
 
 const feeds = [
 	["News RSS", newsRss],
@@ -106,6 +129,7 @@ beforeEach(() => {
 	for (const key of Object.keys(collections)) delete collections[key];
 	collections.news = [future, invalid, past, boundary];
 	collections.people = [entry("reporter", now)];
+	collections.technologies = [entry("kubernetes", now, { name: "Kubernetes" })];
 	getCollection.mockImplementation(async (name, filter) =>
 		(collections[name] ?? []).filter(filter ?? (() => true)),
 	);
@@ -114,7 +138,25 @@ beforeEach(() => {
 			entry(typeof ref === "string" ? ref : ref.id, now),
 		),
 	);
+	getEntry.mockImplementation(
+		async (
+			collection: string | { collection: string; id: string },
+			id?: unknown,
+		) => {
+			const [name, key] =
+				typeof collection === "string"
+					? [collection, id]
+					: [collection.collection, collection.id];
+			return (collections[name] ?? []).find((item) => item.id === key);
+		},
+	);
 	render.mockResolvedValue({});
+	setContentCache.mockReset();
+	setContentCache.mockImplementation(async () => ({
+		maxAge: 3600,
+		swr: 86400,
+		tags: [],
+	}));
 });
 afterEach(() => {
 	vi.useRealTimers();
@@ -168,12 +210,14 @@ describe("News discovery publication contracts", () => {
 		expect(await feedNewsPaths(handler)).toEqual([]);
 	});
 
+	// The technology feed lists published recordings only (upcoming streams
+	// are filtered by the route); the site-wide feeds keep announcing them.
 	it.each([
-		["All RSS", allRss],
-		["All Atom", allAtom],
-		["All JSON", allJson],
-		["Technology RSS", technologyRss],
-	] as const)("%s includes articles regardless of the legacy flag and preserves News publication rules", async (_name, handler) => {
+		["All RSS", allRss, true],
+		["All Atom", allAtom, true],
+		["All JSON", allJson, true],
+		["Technology RSS", technologyRss, false],
+	] as const)("%s includes articles regardless of the legacy flag and preserves News publication rules", async (_name, handler, listsUpcomingVideos) => {
 		collections.articles = [
 			entry("future-article", future.data.publishedAt),
 			entry("draft-article", now, { draft: true }),
@@ -181,7 +225,8 @@ describe("News discovery publication contracts", () => {
 		collections.videos = [entry("future-video", future.data.publishedAt)];
 		const text = await (await handler(context())).text();
 		expect(text).toContain("/read/future-article/");
-		expect(text).toContain("/watch/future-video/");
+		if (listsUpcomingVideos) expect(text).toContain("/watch/future-video/");
+		else expect(text).not.toContain("/watch/future-video/");
 		expect(text).toContain("/read/draft-article/");
 		expect(text).not.toContain("/news/future/");
 	});
@@ -267,20 +312,16 @@ describe("News discovery publication contracts", () => {
 	});
 
 	it("all 37 authored News URLs survive in feeds, search and the regular sitemap", async () => {
-		const root = resolve("../../../content/news");
-		collections.news = readdirSync(root, { recursive: true })
-			.filter((path) => typeof path === "string" && /\.(md|mdx)$/.test(path))
-			.map((path) => {
-				const data = matter(
-					readFileSync(resolve(root, String(path)), "utf8"),
-				).data;
-				return {
-					id: String(path)
-						.replace(/\/index\.mdx?$/, "")
-						.replace(/\.mdx?$/, ""),
-					data: { ...data, publishedAt: new Date(data.publishedAt) },
-				};
-			});
+		collections.news = AUTHORED_NEWS.map(([id, publishedAt]) => ({
+			id,
+			data: {
+				title: `Discovery ${id}`,
+				description: `About ${id}`,
+				publishedAt: new Date(publishedAt),
+				authors: [{ collection: "people", id: "reporter" }],
+				technologies: ["kubernetes"],
+			},
+		}));
 		expect(collections.news).toHaveLength(37);
 		const expected = collections.news.map((item) => `/news/${item.id}`).sort();
 		for (const [, handler] of feeds.slice(0, 6))
@@ -295,4 +336,91 @@ describe("News discovery publication contracts", () => {
 			expected,
 		);
 	});
+
+	it.each([
+		["News RSS", newsRss],
+		["News Atom", newsAtom],
+		["News JSON", newsJson],
+		["Google News sitemap", googleNews],
+	] as const)("%s caches on the news collection and only tags published stories", async (_name, handler) => {
+		const request = context();
+		await handler(request);
+		expect(setContentCache).toHaveBeenCalledTimes(1);
+		const [target, input] = setContentCache.mock.calls[0]!;
+		expect(target).toBe(request);
+		expect(input.collections).toContain("news");
+		const ids = (input.entries as { id: string }[]).map((item) => item.id);
+		expect(ids).toContain("boundary");
+		expect(ids).not.toContain("future");
+		expect(ids).not.toContain("invalid");
+	});
 });
+
+// Every News story authored before the move to D1 (slug, publishedAt), from the
+// former content/news tree and the platform news seed; these URLs must stay live.
+const AUTHORED_NEWS: ReadonlyArray<readonly [string, string]> = [
+	["2026-06-01-cloud-native-ai-infra-digest", "2026-06-01T00:00:00.000Z"],
+	["2026-06-05-envoy-istio-nccl", "2026-06-05T00:00:00.000Z"],
+	["2026-06-09-nccl-opentelemetry-cert-manager", "2026-06-09T00:00:00.000Z"],
+	["2026-06-13-vllm-sglang-kubernetes-kueue-helm", "2026-06-13T00:00:00.000Z"],
+	["2026-06-20-runc-1-5-prometheus-3-13-talos", "2026-06-20T00:00:00.000Z"],
+	["2026-09-18-gloo-interrupted-validation", "2026-09-18T00:00:00.000Z"],
+	[
+		"2026-09-19-externaldns-023-dry-run-crd-registry",
+		"2026-09-19T00:00:00.000Z",
+	],
+	[
+		"aks-critical-privilege-escalation-cve-2026-33105",
+		"2026-04-05T00:00:00.000Z",
+	],
+	[
+		"backstage-1-51-catalog-perf-ms-graph-incremental",
+		"2026-05-20T00:00:00.000Z",
+	],
+	["cilium-may-2026-patch-wave", "2026-05-13T00:00:00.000Z"],
+	["containerd-cve-2026-46680-runasnonroot-bypass", "2026-05-20T00:00:00.000Z"],
+	["crio-1-36-spdystream-cve-2026-35469", "2026-05-05T00:00:00.000Z"],
+	[
+		"dragonfly-native-huggingface-modelscope-protocols",
+		"2026-04-08T00:00:00.000Z",
+	],
+	["etcd-3-7-beta-v2-api-removed", "2026-05-20T00:00:00.000Z"],
+	["flux-2-8-8-go-git-cves-helm-controller-memory", "2026-05-20T00:00:00.000Z"],
+	["helm-4-2-3-21-v3-eol-warning", "2026-05-14T00:00:00.000Z"],
+	[
+		"istio-ambient-multicluster-inference-extension",
+		"2026-03-25T00:00:00.000Z",
+	],
+	["kubernetes-1-36-dra-drivers-features-beta", "2026-05-07T00:00:00.000Z"],
+	[
+		"kubernetes-1-36-pod-level-resource-managers-alpha",
+		"2026-05-01T00:00:00.000Z",
+	],
+	["kubernetes-1-36-podgroup-workload-scheduling", "2026-05-13T00:00:00.000Z"],
+	["kubernetes-1-36-psi-metrics-ga", "2026-05-12T00:00:00.000Z"],
+	[
+		"kubernetes-1-36-server-side-sharded-list-watch-alpha",
+		"2026-05-06T00:00:00.000Z",
+	],
+	[
+		"kubernetes-1-36-service-externalips-deprecation",
+		"2026-05-14T00:00:00.000Z",
+	],
+	["kubernetes-1-36-sneak-peek", "2026-03-30T00:00:00.000Z"],
+	["kubernetes-may-2026-patch-wave", "2026-05-12T00:00:00.000Z"],
+	["kubevirt-1-8-hypervisor-abstraction", "2026-03-25T00:00:00.000Z"],
+	["kyverno-graduates-cncf", "2026-03-24T00:00:00.000Z"],
+	["linux-foundation-12m-ai-security", "2026-03-17T00:00:00.000Z"],
+	["llm-d-accepted-cncf-sandbox", "2026-03-24T00:00:00.000Z"],
+	["microcks-cncf-incubation", "2026-05-07T00:00:00.000Z"],
+	["nvidia-donates-gpu-dra-driver-to-cncf", "2026-03-24T00:00:00.000Z"],
+	["ofu-fleet-scale-gpu-efficiency-arxiv", "2026-05-20T00:00:00.000Z"],
+	["openai-acquires-astral-ruff-uv", "2026-03-19T00:00:00.000Z"],
+	["otel-collector-0-152-genai-normalizer", "2026-05-12T00:00:00.000Z"],
+	[
+		"prometheus-3-12-rc-promql-window-functions-stackit-fix",
+		"2026-05-20T00:00:00.000Z",
+	],
+	["spire-1-15-sigstore-stable-vault-key-manager", "2026-05-20T00:00:00.000Z"],
+	["vllm-0-21-blackwell-transformers-v5", "2026-05-15T00:00:00.000Z"],
+];

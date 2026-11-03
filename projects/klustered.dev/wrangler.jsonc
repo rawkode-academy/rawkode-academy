@@ -45,6 +45,10 @@
 	},
 	"services": [
 		{
+			"binding": "API",
+			"service": "platform-api-gateway"
+		},
+		{
 			"binding": "BRACKETS_WRITE",
 			"service": "platform-brackets-write-model"
 		}

@@ -1,5 +1,5 @@
 ---
-import type { CollectionEntry } from "astro:content";
+import type { ContentEntry } from "@/lib/live-content";
 import { resolveOpenGraphImage } from "@/lib/open-graph";
 import { SITE_DESCRIPTION } from "@/lib/site";
 
@@ -41,7 +41,7 @@ const shouldShowArticleMeta = isArticle;
 const TWITTER_SITE_HANDLE = "@RawkodeAcademy";
 const firstAuthorTwitterHandle = shouldShowArticleMeta
 	? authors?.find(
-			(author: CollectionEntry<"people">) =>
+			(author: ContentEntry<"people">) =>
 				typeof author.data.handles?.twitter === "string" &&
 				author.data.handles.twitter.trim().length > 0,
 		)?.data.handles?.twitter
@@ -54,7 +54,7 @@ const twitterCreator = firstAuthorTwitterHandle
 // previews when this meta tag is present and points at a profile URL.
 const firstAuthorMastodon = shouldShowArticleMeta
 	? authors?.find(
-			(author: CollectionEntry<"people">) =>
+			(author: ContentEntry<"people">) =>
 				typeof author.data.mastodon === "string" &&
 				author.data.mastodon.trim().length > 0,
 		)?.data.mastodon
@@ -108,13 +108,13 @@ const firstAuthorMastodon = shouldShowArticleMeta
 			{articleTags?.map((tag: string) => (
 				<meta property="article:tag" content={tag} />
 			))}
-			{authors && authors.map((author: CollectionEntry<"people">) => (
+			{authors && authors.map((author: ContentEntry<"people">) => (
 				author.data.github && <meta property="article:author" content={author.data.github} />
 			))}
 			{authors && authors.length > 0 && (
 				<meta
 					name="author"
-					content={authors.map((author: CollectionEntry<"people">) => author.data.name).join(", ")}
+					content={authors.map((author: ContentEntry<"people">) => author.data.name).join(", ")}
 				/>
 			)}
 		</>

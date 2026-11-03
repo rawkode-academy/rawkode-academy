@@ -1,4 +1,4 @@
-import { getCollection } from "astro:content";
+import { type CollectionName, getCollection } from "@/lib/live-content";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { isNewsPublished } from "@/lib/news-publication";
 
@@ -40,7 +40,8 @@ const formatDate = (value: Date) =>
 		timeZone: "UTC",
 	});
 
-const formatDuration = (seconds: number) => {
+const formatDuration = (seconds?: number) => {
+	if (!seconds || !Number.isFinite(seconds) || seconds <= 0) return undefined;
 	const minutes = Math.floor(seconds / 60);
 	if (minutes < 60) return `${minutes} min`;
 	const hours = Math.floor(minutes / 60);
@@ -76,6 +77,15 @@ export async function getUpcomingVideos() {
 	);
 }
 
+/** Collections getLatestContent() lists; pass them to setContentCache(). */
+export const LATEST_CONTENT_COLLECTIONS = [
+	"videos",
+	"articles",
+	"news",
+	"courses",
+	"learningPaths",
+] as const satisfies readonly CollectionName[];
+
 /**
  * Build the Academy-wide latest feed.
  *
@@ -89,26 +99,35 @@ export async function getLatestContent(
 ): Promise<AcademyContentItem[]> {
 	const [videos, articles, news, courses, learningPaths] = await Promise.all([
 		getPublishedVideos(),
-		getCollection("articles", ({ data }) => data.publishedAt <= now),
-		getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
-		getCollection("courses", ({ data }) => data.publishedAt <= now),
-		getCollection("learningPaths", ({ data }) => data.publishedAt <= now),
+		getCollection("articles", ({ data }) => data.publishedAt <= now, { now }),
+		getCollection(
+			"news",
+			({ data }) => isNewsPublished(data.publishedAt, now),
+			{ now },
+		),
+		getCollection("courses", ({ data }) => data.publishedAt <= now, { now }),
+		getCollection("learningPaths", ({ data }) => data.publishedAt <= now, {
+			now,
+		}),
 	]);
 
 	const items: AcademyContentItem[] = [
-		...videos.map((video) => ({
-			kind: "Video" as const,
-			href: `/watch/${video.data.slug}`,
-			title: video.data.title,
-			description: compactCopy(video.data.subtitle || video.data.description),
-			publishedAt: video.data.publishedAt.toISOString(),
-			meta: [
-				"Video",
-				formatDate(video.data.publishedAt),
-				formatDuration(video.data.duration),
-			],
-			mediaSrc: getVideoThumbnailUrl(video.data.id),
-		})),
+		...videos.map((video) => {
+			const duration = formatDuration(video.data.duration);
+			return {
+				kind: "Video" as const,
+				href: `/watch/${video.data.slug}`,
+				title: video.data.title,
+				description: compactCopy(video.data.subtitle || video.data.description),
+				publishedAt: video.data.publishedAt.toISOString(),
+				meta: [
+					"Video",
+					formatDate(video.data.publishedAt),
+					...(duration ? [duration] : []),
+				],
+				mediaSrc: getVideoThumbnailUrl(video.data.id),
+			};
+		}),
 		...articles.map((article) => ({
 			kind: "Article" as const,
 			href: `/read/${article.id}`,

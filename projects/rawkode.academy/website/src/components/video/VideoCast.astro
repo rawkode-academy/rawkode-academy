@@ -1,10 +1,10 @@
 ---
-import type { CollectionEntry } from "astro:content";
+import type { ContentEntry } from "@/lib/live-content";
 import { academyWatch } from "@rawkodeacademy/design-system";
 
 interface Props {
-	hosts: CollectionEntry<"people">[];
-	guests: CollectionEntry<"people">[];
+	hosts: ContentEntry<"people">[];
+	guests: ContentEntry<"people">[];
 }
 
 const { hosts, guests } = Astro.props;

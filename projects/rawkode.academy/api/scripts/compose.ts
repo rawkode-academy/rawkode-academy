@@ -13,8 +13,27 @@ const outputPath = join(__dirname, "../supergraph.graphql");
 
 // All subgraph service names - these must match the schema file names
 const SUBGRAPHS = [
-	// Website serves all content subgraphs (videos, shows, people, technologies, etc.)
-	"website",
+	// Content entities
+	"people",
+	"technologies",
+	"shows",
+	"videos",
+	// Content relationships
+	"video-guests",
+	"video-technologies",
+	"show-hosts",
+	"episodes",
+	"chapters",
+	"people-links",
+	"people-biographies",
+	"transcription-terms",
+	// Editorial content
+	"articles",
+	"news",
+	"changelog",
+	"adrs",
+	"testimonials",
+	"courses",
 	// User interaction services (dynamic data requiring D1)
 	"emoji-reactions",
 	"email-preferences",

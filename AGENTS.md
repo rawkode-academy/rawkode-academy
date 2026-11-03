@@ -2,3 +2,4 @@
     - fix(rawkode.cloud): thing
     - where () is the project/directory we're working on
 - Before running dependency installs, Bun workspace commands, tests, or generated CI checks, run `cuenv sync -A` from the git root.
+- CUE: never use `if` comprehensions. Express variation through composition instead: mixin definitions unified onto a base (`zone.#CloudflareRegistrar & zone.#Gmail & {…}`), lookups into structs, and conflicts that unification reports for you. `for` comprehensions over data are fine.

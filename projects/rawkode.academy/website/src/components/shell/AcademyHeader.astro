@@ -9,12 +9,8 @@ import {
 	navigationGroups,
 	primaryNavigation,
 } from "@/lib/navigation";
-import { applicationPaths } from "@/lib/partnerships";
 
 const styles = academyShell();
-const onPartnershipsPage =
-	Astro.url.pathname.replace(/\/$/, "") === "/organizations/partnerships";
-const reviewApplyHref = `/organizations/partnerships?route=${encodeURIComponent(applicationPaths[1])}#enquiry-form`;
 ---
 
 <header class={styles.header}>
@@ -40,50 +36,7 @@ const reviewApplyHref = `/organizations/partnerships?route=${encodeURIComponent(
 			<MobileNavigation client:load primary={primaryNavigation} groups={navigationGroups} currentPath={Astro.url.pathname} />
 		</div>
 	</div>
-	{onPartnershipsPage && (
-		<div class:list={[styles.nav, "partnership-header-cta-bar"]}>
-			<a
-				class="partnership-header-cta"
-				href={reviewApplyHref}
-				data-apply-path={applicationPaths[1]}
-				data-partnership-cta
-				data-cta-location="header"
-			>Book a product review</a>
-		</div>
-	)}
 </header>
-
-<style>
-	.partnership-header-cta-bar {
-		min-height: 0;
-		justify-content: flex-end;
-		padding-block: 0 0.85rem;
-	}
-
-	.partnership-header-cta {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		min-height: 2.75rem;
-		padding-inline: 1.15rem;
-		border-radius: 2px;
-		background: var(--colors-academy-accent);
-		color: var(--colors-academy-accent-foreground);
-		font-weight: 700;
-		text-decoration: none;
-	}
-
-	.partnership-header-cta:focus-visible {
-		outline: 2px solid var(--colors-academy-accent);
-		outline-offset: 4px;
-	}
-
-	@media (max-width: 1023px) {
-		.partnership-header-cta {
-			width: 100%;
-		}
-	}
-</style>
 
 <script>
 	// Preserve real search links and load the command palette only on demand.

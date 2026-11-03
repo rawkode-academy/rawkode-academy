@@ -4,8 +4,8 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import { after, test } from "node:test";
+import { fileURLToPath } from "node:url";
 import { Window } from "happy-dom";
 
 const require = createRequire(import.meta.url);
@@ -272,9 +272,31 @@ for (const fixture of fixtures) {
 		const form = host.querySelector("form");
 		assert.equal(form.method.toLowerCase(), "post");
 		assert.equal(form.hasAttribute("novalidate"), false);
-		assert.equal(form.getAttribute("aria-busy"), "true");
 		const fieldset = form.querySelector("fieldset");
-		assert.equal(fieldset.disabled, true);
+		if (fixture.partnership) {
+			assert.equal(
+				form.getAttribute("action"),
+				"?_action=partnership.applyForm",
+			);
+			assert.notEqual(form.getAttribute("aria-busy"), "true");
+			assert.equal(fieldset.disabled, false);
+			assert.deepEqual(
+				Array.from(
+					form.querySelectorAll("select[name=path] option"),
+					(option) => option.textContent,
+				),
+				[
+					"Support Our Work",
+					"Partnership",
+					"Bespoke project",
+					"Community challenge series",
+					"Not sure yet",
+				],
+			);
+		} else {
+			assert.equal(form.getAttribute("aria-busy"), "true");
+			assert.equal(fieldset.disabled, true);
+		}
 		assert.ok(fieldset.getAttribute("aria-label"));
 		for (const control of form.querySelectorAll(
 			"input, select, textarea, button",
@@ -295,18 +317,21 @@ for (const fixture of fixtures) {
 			host.querySelector('[role="status"]').textContent,
 			/Loading .* form/,
 		);
-		const fallback = form.querySelector("noscript").innerHTML;
-		assert.match(fallback, /JavaScript is required/);
-		// Text-only noscript avoids SSR hydration mismatch when scripting-enabled
-		// HTML parsers treat noscript contents as raw text rather than elements.
-		assert.equal(form.querySelector("noscript").children.length, 0);
-		if (fixture.partnership)
+		if (fixture.partnership) {
+			assert.equal(form.querySelector("noscript"), null);
+			assert.doesNotMatch(host.textContent, /JavaScript is required/);
 			assert.ok(form.querySelector('a[href="mailto:david@rawkode.academy"]'));
-		else
+		} else {
+			const fallback = form.querySelector("noscript").innerHTML;
+			assert.match(fallback, /JavaScript is required/);
+			// Text-only noscript avoids SSR hydration mismatch when scripting-enabled
+			// HTML parsers treat noscript contents as raw text rather than elements.
+			assert.equal(form.querySelector("noscript").children.length, 0);
 			assert.match(
 				fallback,
 				/Course content remains available without signing up/,
 			);
+		}
 		assert.equal(calls.length, 0, "SSR must not invoke actions");
 	});
 
@@ -353,7 +378,7 @@ for (const fixture of fixtures) {
 					.dispatchEvent(new window.Event("focusin", { bubbles: true }));
 				assert.deepEqual(
 					capturedEvents.map(({ event }) => event),
-					["partnership_form_started"],
+					["enquiry_form_started"],
 				);
 			}
 			for (const input of form.querySelectorAll(
@@ -393,7 +418,7 @@ for (const fixture of fixtures) {
 					name: "Test Person",
 					email: "person@example.test",
 					company: "Test Company",
-					path: "Not sure yet",
+					path: "Partnership",
 					message: "Our quick start loses Kubernetes users.",
 					website: "",
 				});
@@ -419,11 +444,16 @@ for (const fixture of fixtures) {
 				host.querySelector("[role=alert]").textContent,
 				/highlighted|try again/,
 			);
-			if (fixture.partnership)
+			if (fixture.partnership) {
+				const email = host.querySelector("[name=email]");
+				const describedBy = email.getAttribute("aria-describedby");
+				assert.equal(email.getAttribute("aria-invalid"), "true");
+				assert.ok(describedBy);
 				assert.equal(
-					host.querySelector("[name=email]").getAttribute("aria-invalid"),
-					"true",
+					host.querySelector(`[id="${describedBy}"]`).textContent,
+					"Please check this email",
 				);
+			}
 			form.requestSubmit();
 			assert.equal(calls.length, 2);
 			respond({ data: { success: true, message: "Check your inbox" } });
@@ -432,9 +462,11 @@ for (const fixture of fixtures) {
 				assert.equal(host.querySelector("form"), null);
 				assert.deepEqual(
 					capturedEvents.map(({ event }) => event),
-					["partnership_form_started", "partnership_form_submitted"],
+					["enquiry_form_started", "enquiry_form_submitted"],
 				);
 				assert.equal(capturedEvents[1].properties.form, "partnership_enquiry");
+				assert.equal(capturedEvents[1].properties.route, "Partnership");
+				assert.equal(capturedEvents[1].properties.offer, "Partnership");
 			} else {
 				assert.equal(host.querySelector("[type=checkbox]").checked, false);
 				assert.equal(host.querySelector("button[type=submit]").disabled, true);
@@ -450,7 +482,7 @@ for (const fixture of fixtures) {
 	});
 }
 
-test("partnership CRM fallback keeps the form and offers a prefilled email", async () => {
+test("partnership email fallback keeps the form and offers a prefilled email", async () => {
 	calls = [];
 	const capturedEvents = [];
 	window.posthog = {
@@ -471,20 +503,24 @@ test("partnership CRM fallback keeps the form and offers a prefilled email", asy
 			.querySelector("[name=name]")
 			.dispatchEvent(new window.Event("focusin", { bubbles: true }));
 		view.host.querySelector("form").requestSubmit();
-		respond({ data: { success: false, fallback: "mailto" } });
+		respond({
+			data: { success: false, fallback: "mailto", code: "email_send_failed" },
+		});
 		await flush();
 
 		assert(view.host.querySelector("form"));
+		const alert = view.host.querySelector("[role=alert]");
 		assert.match(
-			view.host.querySelector("[role=alert]").textContent,
-			/not sent automatically/,
+			alert.textContent,
+			/Something went wrong, so your enquiry wasn't sent\. Please email me directly\./,
 		);
+		assert.equal(alert.getAttribute("data-error-code"), "email_send_failed");
 		const fallback = view.host.querySelector(
 			'a[href^="mailto:david@rawkode.academy"]',
 		);
 		assert(fallback);
 		assert.match(decodeURIComponent(fallback.href), /Test Company/);
-		assert.deepEqual(capturedEvents, ["partnership_form_started"]);
+		assert.deepEqual(capturedEvents, ["enquiry_form_started"]);
 	} finally {
 		view.close();
 		delete window.posthog;
@@ -695,6 +731,62 @@ for (const fixture of fixtures.filter((item) => !item.partnership)) {
 		}
 	});
 }
+test("partnership enquiry keeps rejected values and describes each field error", async () => {
+	const fixture = fixtures.find((item) => item.partnership);
+	const submittedValues = {
+		name: "  Ada ",
+		email: "not-an-email",
+		company: "Analytical Engine",
+		path: "Ongoing partnership",
+		message: "   ",
+	};
+	const serverFieldErrors = {
+		name: "Please tell us your name",
+		email: "Please enter a valid work email",
+		message: "Please add a message",
+	};
+	const view = await hydrate(fixture, { submittedValues, serverFieldErrors });
+	try {
+		const form = view.host.querySelector("form");
+		assert.equal(form.querySelector("[name=name]").value, "  Ada ");
+		assert.equal(form.querySelector("[name=email]").value, "not-an-email");
+		assert.equal(
+			form.querySelector("[name=company]").value,
+			"Analytical Engine",
+		);
+		assert.equal(form.querySelector("[name=path]").value, "Partnership");
+		assert.equal(form.querySelector("[name=message]").value, "   ");
+		assert.equal(
+			form.querySelector("[name=name]").getAttribute("maxlength"),
+			"200",
+		);
+		assert.equal(
+			form.querySelector("[name=company]").getAttribute("maxlength"),
+			"1000",
+		);
+		assert.equal(
+			form.querySelector("[name=message]").getAttribute("maxlength"),
+			"5000",
+		);
+		assert.equal(
+			form.querySelector("[name=company]").hasAttribute("aria-describedby"),
+			false,
+		);
+		for (const [name, message] of Object.entries(serverFieldErrors)) {
+			const control = form.querySelector(`[name=${name}]`);
+			const describedBy = control.getAttribute("aria-describedby");
+			assert.equal(control.getAttribute("aria-invalid"), "true");
+			assert.ok(describedBy);
+			assert.equal(
+				form.querySelector(`[id="${describedBy}"]`).textContent,
+				message,
+			);
+		}
+	} finally {
+		view.close();
+	}
+});
+
 after(async () => {
 	await window.happyDOM.abort();
 });

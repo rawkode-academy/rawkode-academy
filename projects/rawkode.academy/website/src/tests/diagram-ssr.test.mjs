@@ -86,22 +86,7 @@ test("one named graphic, native zoom checkbox and keyboard-scrollable region wit
 	);
 });
 
-test("every published D2 article supplies a descriptive, expandable wrapper", () => {
-	for (const name of [
-		"architecture-overview",
-		"federated-graphql-microservice",
-	]) {
-		const source = readFileSync(
-			new URL(
-				`../../../../../content/articles/${name}/index.mdx`,
-				import.meta.url,
-			),
-			"utf8",
-		);
-		assert.match(
-			source,
-			/<Diagram id="[^"]+" title="[^"]+" description="[^"]+">\s+```d2/,
-		);
-		assert.match(source, /```\s+<\/Diagram>/);
-	}
-});
+// Article bodies (and their diagram nodes with title/description) now live in
+// platform-articles as rich-text documents; the authored-content contract for
+// D2 diagrams moved with them, and the renderer's diagram output is covered in
+// src/tests/live-content/render.test.ts.

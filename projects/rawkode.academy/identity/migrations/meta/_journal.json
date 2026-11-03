@@ -120,6 +120,27 @@
       "when": 1791131436000,
       "tag": "0017_add_rawkode_academy_admin_oauth_callback",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1791132000000,
+      "tag": "0018_add_rawkode_academy_worker_preview_oauth_callback",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1791210000000,
+      "tag": "0019_add_rawkode_academy_payload_oauth",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1792886400000,
+      "tag": "0020_remove_academy_cms_oauth",
+      "breakpoints": true
     }
   ]
 }

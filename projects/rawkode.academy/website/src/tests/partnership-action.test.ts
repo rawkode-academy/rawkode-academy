@@ -1,69 +1,67 @@
 import { readFileSync } from "node:fs";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { escapeHtml } from "@rawkodeacademy/rich-text";
 import { z } from "astro/zod";
 import ts from "typescript";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const limit = vi.fn();
-let attioApiKey: string | undefined;
+const send = vi.fn();
 const workerEnv = {
 	PARTNERSHIP_FORM_RATE_LIMITER: { limit },
-	ATTIO_INBOUND_DEAL_STAGE: undefined as string | undefined,
-	ATTIO_INBOUND_DEAL_VALUE_USD: undefined as string | undefined,
-	ATTIO_INBOUND_DEAL_OFFER_ATTRIBUTE: undefined as string | undefined,
-	ATTIO_INBOUND_DEAL_OFFER_OPTION: undefined as string | undefined,
-	ATTIO_SOURCE_ATTRIBUTE: undefined as string | undefined,
-	ATTIO_SOURCE_VALUE: undefined as string | undefined,
+	PARTNERSHIP_EMAIL: { send } as { send: typeof send } | undefined,
 };
-const imports: Record<string, unknown> = {
-	"astro:actions": { defineAction: (definition: unknown) => definition },
-	"astro:env/server": {
-		getSecret: (name: string) =>
-			name === "ATTIO_API_KEY" ? attioApiKey : undefined,
-	},
-	"astro/zod": { z },
-	"cloudflare:workers": { env: workerEnv },
-	"@/lib/partnerships": {
-		applicationPaths: [
-			"90-day partnership",
-			"Product review",
-			"Annual partnership",
-			"Not sure yet",
-		],
-		applicationPathLabels: {
-			"90-day partnership": "Full 90-day partnership",
-			"Product review": "Product review",
-			"Annual partnership": "Annual partnership",
-			"Not sure yet": "Not sure yet",
-		},
-	},
-};
-const code = ts.transpileModule(
-	readFileSync("src/actions/partnership.ts", "utf8"),
-	{
+const loadModule = (
+	filename: string,
+	imports: Record<string, unknown> = {},
+) => {
+	const output = ts.transpileModule(readFileSync(filename, "utf8"), {
 		compilerOptions: {
 			module: ts.ModuleKind.CommonJS,
 			target: ts.ScriptTarget.ES2022,
 		},
-	},
-).outputText;
+	}).outputText;
+	const module = { exports: {} as Record<string, unknown> };
+	new Function("require", "module", "exports", output)(
+		(id: string) => {
+			if (!(id in imports)) throw new Error(`Unexpected import ${id}`);
+			return imports[id];
+		},
+		module,
+		module.exports,
+	);
+	return module.exports;
+};
+const partnerships = loadModule(
+	"src/lib/partnerships.ts",
+) as typeof import("@/lib/partnerships");
 type Action = {
+	accept?: string;
+	input: { parse: (value: unknown) => Record<string, unknown> };
 	handler: (
 		input: Record<string, unknown>,
 		context: { request: Request },
 	) => Promise<Record<string, unknown>>;
 };
-const exports: { partnership?: { apply: Action } } = {};
-new Function("require", "exports", code)((id: string) => {
-	if (!(id in imports)) throw new Error(`Unexpected import ${id}`);
-	return imports[id];
-}, exports);
-const apply = exports.partnership!.apply;
-
+const { partnership } = loadModule("src/actions/partnership.ts", {
+	"@rawkodeacademy/rich-text": { escapeHtml },
+	"astro:actions": { defineAction: (definition: unknown) => definition },
+	"astro/zod": { z },
+	"cloudflare:workers": { env: workerEnv },
+	"@/lib/partnerships": partnerships,
+}) as { partnership: { apply: Action; applyForm: Action } };
+const { apply, applyForm } = partnership;
+// Exercise Astro's own FormData coercion as well as the shared schema.
+const { defineAction, ACTION_API_CONTEXT_SYMBOL } = await import(
+	new URL(
+		"./dist/actions/runtime/server.js",
+		import.meta.resolve("astro/package.json"),
+	).href
+);
 const input = {
 	name: "Ada Lovelace",
 	email: "ada@analytical.engine",
 	company: "Analytical Engine",
-	path: "Product review",
+	path: "Partnership",
 	message: "Please review our Kubernetes quick start.",
 	website: "",
 };
@@ -72,233 +70,334 @@ const context = {
 		headers: { "CF-Connecting-IP": "192.0.2.10" },
 	}),
 };
-const recordResponse = (recordId: string) =>
-	new Response(JSON.stringify({ data: { id: { record_id: recordId } } }), {
-		status: 200,
-		headers: { "Content-Type": "application/json" },
-	});
-const requestBody = (call: readonly unknown[]) =>
-	JSON.parse((call[1] as RequestInit).body as string);
+const submit = (values = input) =>
+	apply.handler(apply.input.parse(values), context);
 
 beforeEach(() => {
-	attioApiKey = "attio-test-key";
-	workerEnv.ATTIO_INBOUND_DEAL_STAGE = undefined;
-	workerEnv.ATTIO_INBOUND_DEAL_VALUE_USD = undefined;
-	workerEnv.ATTIO_INBOUND_DEAL_OFFER_ATTRIBUTE = undefined;
-	workerEnv.ATTIO_INBOUND_DEAL_OFFER_OPTION = undefined;
-	workerEnv.ATTIO_SOURCE_ATTRIBUTE = undefined;
-	workerEnv.ATTIO_SOURCE_VALUE = undefined;
+	workerEnv.PARTNERSHIP_EMAIL = { send };
 	limit.mockReset().mockResolvedValue({ success: true });
+	send.mockReset().mockResolvedValue({ messageId: "test-message" });
 	vi.stubGlobal("fetch", vi.fn());
+	vi.spyOn(console, "error").mockImplementation(() => {});
 });
 
 afterEach(() => {
 	vi.restoreAllMocks();
+	vi.unstubAllGlobals();
 });
 
-describe("partnership Attio action", () => {
-	it("accepts honeypot submissions without touching Attio or PostHog", async () => {
-		await expect(
-			apply.handler({ ...input, website: "https://spam.test" }, context),
-		).resolves.toEqual({ success: true, accepted: false });
-		expect(limit).not.toHaveBeenCalled();
+describe("partnership email action", () => {
+	it.each(
+		partnerships.applicationPaths,
+	)("emails a complete %s enquiry to David", async (path) => {
+		await expect(submit({ ...input, path })).resolves.toEqual({
+			success: true,
+			accepted: true,
+		});
+		expect(send).toHaveBeenCalledOnce();
+		const message = send.mock.calls[0]![0];
+		expect(message).toMatchObject({
+			from: { email: "david@rawkode.email", name: "Rawkode Academy enquiries" },
+			to: "david@rawkode.academy",
+			replyTo: input.email,
+			subject: `Rawkode Academy enquiry: ${partnerships.applicationPathLabels[path]}`,
+		});
+		for (const value of [
+			input.name,
+			input.email,
+			input.company,
+			input.message,
+			partnerships.applicationPathLabels[path],
+		]) {
+			expect(message.text).toContain(value);
+			expect(message.html).toContain(value);
+		}
 		expect(fetch).not.toHaveBeenCalled();
 	});
 
-	it("returns a mailto fallback when ATTIO_API_KEY is missing", async () => {
-		attioApiKey = undefined;
-		vi.spyOn(console, "error").mockImplementation(() => {});
+	it("uses the same validation and delivery for native form posts", async () => {
+		expect(applyForm.accept).toBe("form");
+		expect(applyForm.input).toBe(apply.input);
+		expect(applyForm.handler).toBe(apply.handler);
+		await expect(
+			applyForm.handler(applyForm.input.parse(input), context),
+		).resolves.toEqual({
+			success: true,
+			accepted: true,
+		});
+		expect(send).toHaveBeenCalledOnce();
+	});
 
-		await expect(apply.handler(input, context)).resolves.toEqual({
-			success: false,
-			fallback: "mailto",
+	describe.each([
+		["JSON", apply],
+		["native form", applyForm],
+	] as const)("%s action compatibility", (_name, action) => {
+		const runtimeAction = defineAction(action);
+		const submitAction = (values: Record<string, string | undefined>) => {
+			const form = new FormData();
+			for (const [key, value] of Object.entries(values)) {
+				if (value !== undefined) form.set(key, value);
+			}
+			return runtimeAction.call(
+				{ ...context, [ACTION_API_CONTEXT_SYMBOL]: true },
+				action.accept === "form" ? form : values,
+			);
+		};
+
+		it.each(
+			Object.entries(partnerships.legacyApplicationPaths),
+		)("emails legacy %s enquiries as %s", async (previous, current) => {
+			const parsed = action.input.parse({ ...input, path: previous });
+			expect(parsed.path).toBe(current);
+			await expect(submitAction({ ...input, path: previous })).resolves.toEqual(
+				{
+					data: { success: true, accepted: true },
+					error: undefined,
+				},
+			);
+			expect(send).toHaveBeenCalledOnce();
+			expect(send.mock.calls[0]?.[0]).toMatchObject({
+				subject: `Rawkode Academy enquiry: ${partnerships.applicationPathLabels[current]}`,
+				text: expect.stringContaining(`Interested in: ${current}`),
+				html: expect.stringContaining(`<dd>${current}</dd>`),
+			});
+		});
+
+		it.each([
+			"",
+			"  ",
+			undefined,
+		])("accepts a blank or omitted honeypot: %j", async (website) => {
+			expect(action.input.parse({ ...input, website }).website).toBe("");
+			await expect(submitAction({ ...input, website })).resolves.toEqual({
+				data: { success: true, accepted: true },
+				error: undefined,
+			});
+			expect(send).toHaveBeenCalledOnce();
+		});
+
+		it("silently rejects a populated honeypot before rate limiting or delivery", async () => {
+			await expect(
+				submitAction({ ...input, website: "https://spam.test" }),
+			).resolves.toEqual({
+				data: { success: true, accepted: false },
+				error: undefined,
+			});
+			expect(limit).not.toHaveBeenCalled();
+			expect(send).not.toHaveBeenCalled();
+		});
+
+		it.each([
+			{ path: "unknown" },
+			{ path: "constructor" },
+			{ path: "__proto__" },
+			{ website: "x".repeat(501) },
+		])("rejects malformed action input: %j", async (invalid) => {
+			await expect(
+				submitAction({ ...input, ...invalid }),
+			).resolves.toMatchObject({
+				data: undefined,
+				error: { type: "AstroActionInputError" },
+			});
+			expect(limit).not.toHaveBeenCalled();
+			expect(send).not.toHaveBeenCalled();
+		});
+	});
+
+	it("awaits the email service before reporting an accepted enquiry", async () => {
+		let accept!: (value: { messageId: string }) => void;
+		send.mockReturnValueOnce(
+			new Promise((resolve) => {
+				accept = resolve;
+			}),
+		);
+		let settled = false;
+		const pending = submit().then((result) => {
+			settled = true;
+			return result;
+		});
+		await vi.waitFor(() => expect(send).toHaveBeenCalledOnce());
+		expect(settled).toBe(false);
+		accept({ messageId: "accepted-message" });
+		await expect(pending).resolves.toEqual({ success: true, accepted: true });
+	});
+
+	it("accepts honeypot submissions without sending email or counting a lead", async () => {
+		await expect(
+			submit({ ...input, website: "https://spam.test" }),
+		).resolves.toEqual({
+			success: true,
+			accepted: false,
 		});
 		expect(limit).not.toHaveBeenCalled();
-		expect(fetch).not.toHaveBeenCalled();
+		expect(send).not.toHaveBeenCalled();
 	});
 
-	it("rate limits before writing CRM records", async () => {
+	it("rate limits before sending and hashes the client address", async () => {
 		limit.mockResolvedValue({ success: false });
-
-		await expect(apply.handler(input, context)).resolves.toEqual({
+		await expect(submit()).resolves.toEqual({
 			success: false,
 			rateLimited: true,
 		});
 		expect(limit).toHaveBeenCalledOnce();
-		const key = limit.mock.calls[0]![0].key;
-		expect(key).toMatch(/^[a-f0-9]{64}$/);
-		expect(key).not.toContain(input.email);
-		expect(fetch).not.toHaveBeenCalled();
+		expect(limit.mock.calls[0]![0].key).toMatch(/^[a-f0-9]{64}$/);
+		expect(limit.mock.calls[0]![0].key).not.toContain("192.0.2.10");
+		expect(send).not.toHaveBeenCalled();
 	});
 
-	it.each([
-		["Product review", 5000],
-		["90-day partnership", 5000],
-	])("writes person, company, note and a %s deal worth $%i", async (path, value) => {
-		vi.mocked(fetch)
-			.mockResolvedValueOnce(recordResponse("company-id"))
-			.mockResolvedValueOnce(recordResponse("person-id"))
-			.mockResolvedValueOnce(new Response(null, { status: 200 }))
-			.mockResolvedValueOnce(new Response(null, { status: 200 }))
-			.mockResolvedValueOnce(recordResponse("deal-id"));
+	it("does not send when the rate limiter is unavailable", async () => {
+		limit.mockRejectedValue(new Error("unavailable"));
+		await expect(submit()).resolves.toEqual({
+			success: false,
+			fallback: "mailto",
+			code: "enquiry_unavailable",
+		});
+		expect(send).not.toHaveBeenCalled();
+	});
 
-		await expect(apply.handler({ ...input, path }, context)).resolves.toEqual({
-			success: true,
-			accepted: true,
+	it("returns a mailto fallback when the email binding is absent", async () => {
+		workerEnv.PARTNERSHIP_EMAIL = undefined;
+		await expect(submit()).resolves.toEqual({
+			success: false,
+			fallback: "mailto",
+			code: "email_unconfigured",
 		});
-		expect(fetch).toHaveBeenCalledTimes(5);
+		expect(send).not.toHaveBeenCalled();
+	});
 
-		const calls = vi.mocked(fetch).mock.calls;
-		const company = calls[0]!;
-		const person = calls[1]!;
-		const attribute = calls[2]!;
-		const note = calls[3]!;
-		const deal = calls[4]!;
-		expect(company[0]).toBe(
-			"https://api.attio.com/v2/objects/companies/records?matching_attribute=domains",
+	it("preserves plain text and escapes all submitted HTML", async () => {
+		const values = {
+			...input,
+			name: 'Zoë <img src=x onerror="alert(1)">',
+			company: 'R&D "Labs"\r\nBcc: attacker@example.com',
+			message: "<script>alert(1)</script>\nWe use Rust & Kubernetes. 👋",
+		};
+		await submit(values);
+		const message = send.mock.calls[0]![0];
+		for (const value of [values.name, values.company, values.message]) {
+			expect(message.text).toContain(value);
+			expect(message.html).toContain(escapeHtml(value));
+		}
+		expect(message.html).not.toContain("<img");
+		expect(message.html).not.toContain("<script");
+		expect(message.html).toContain("white-space: pre-wrap");
+		expect(message.subject).toBe("Rawkode Academy enquiry: Partnership");
+		expect(message).not.toHaveProperty("bcc");
+		expect(message).not.toHaveProperty("cc");
+		expect(message).not.toHaveProperty("headers");
+	});
+
+	it("ignores submitted sender and recipient overrides", async () => {
+		await apply.handler(
+			apply.input.parse({
+				...input,
+				to: "attacker@example.com",
+				from: "forged@example.com",
+				replyTo: "other@example.com",
+			}),
+			context,
 		);
-		expect(requestBody(company)).toEqual({
-			data: {
-				values: {
-					name: input.company,
-					domains: ["analytical.engine"],
-				},
-			},
+		expect(send.mock.calls[0]![0]).toMatchObject({
+			to: "david@rawkode.academy",
+			from: { email: "david@rawkode.email" },
+			replyTo: input.email,
 		});
-		expect(person[0]).toBe(
-			"https://api.attio.com/v2/objects/people/records?matching_attribute=email_addresses",
+	});
+
+	it("offers a fallback on delivery failure without exposing private data", async () => {
+		send.mockRejectedValue(
+			Object.assign(new Error(`${input.email}: ${input.message}`), {
+				code: input.name,
+			}),
 		);
-		expect(requestBody(person).data.values.company[0].target_record_id).toBe(
-			"company-id",
-		);
-		expect(attribute[0]).toBe(
-			"https://api.attio.com/v2/objects/deals/attributes/source",
-		);
-		expect(note[0]).toBe("https://api.attio.com/v2/notes");
-		expect(requestBody(note).data).toMatchObject({
-			parent_object: "people",
-			parent_record_id: "person-id",
-			title: `Partnership enquiry: ${path === "90-day partnership" ? "Full 90-day partnership" : "Product review"}`,
-			content: input.message,
+		const result = await submit();
+		expect(result).toEqual({
+			success: false,
+			fallback: "mailto",
+			code: "email_send_failed",
 		});
-		expect(deal[0]).toBe("https://api.attio.com/v2/objects/deals/records");
-		expect(requestBody(deal).data.values).toMatchObject({
-			stage: "In Progress",
-			owner: "david@rawkode.academy",
-			value,
-			offer: "Review",
-			source: "Inbound: partnerships page",
-			associated_company: {
-				target_object: "companies",
-				target_record_id: "company-id",
-			},
-		});
-		for (const call of vi.mocked(fetch).mock.calls) {
-			expect((call[1] as RequestInit).headers).toMatchObject({
-				Authorization: "Bearer attio-test-key",
-			});
+		expect(send).toHaveBeenCalledOnce();
+		const output = JSON.stringify([
+			result,
+			vi.mocked(console.error).mock.calls,
+		]);
+		for (const value of [
+			input.email,
+			input.message,
+			input.name,
+			input.company,
+		]) {
+			expect(output).not.toContain(value);
 		}
 	});
 
-	it("keeps the core Attio writes when deal creation fails", async () => {
-		vi.spyOn(console, "error").mockImplementation(() => {});
-		vi.mocked(fetch)
-			.mockResolvedValueOnce(recordResponse("company-id"))
-			.mockResolvedValueOnce(recordResponse("person-id"))
-			.mockResolvedValueOnce(new Response(null, { status: 200 }))
-			.mockResolvedValueOnce(new Response(null, { status: 200 }))
-			.mockResolvedValueOnce(new Response(null, { status: 500 }));
-
-		await expect(apply.handler(input, context)).resolves.toEqual({
-			success: true,
-			accepted: true,
-		});
-		expect(fetch).toHaveBeenCalledTimes(5);
+	it.each([
+		{ name: " " },
+		{ name: "x".repeat(201) },
+		{ email: "not-an-email" },
+		{ email: "ada@example.com\r\nBcc: attacker@example.com" },
+		{ company: " " },
+		{ company: "x".repeat(1001) },
+		{ message: " " },
+		{ message: "x".repeat(5001) },
+		{ path: "unknown" },
+		{ path: "constructor" },
+		{ path: "toString" },
+		{ path: "__proto__" },
+		{ path: "" },
+		{ path: null },
+		{ path: undefined },
+		{ path: 42 },
+		{ path: ["Support the Academy"] },
+	])("rejects invalid input before any delivery: %j", (invalid) => {
+		expect(() => apply.input.parse({ ...input, ...invalid })).toThrow();
+		expect(send).not.toHaveBeenCalled();
 	});
 
-	it("uses the configured inbound deal stage", async () => {
-		workerEnv.ATTIO_INBOUND_DEAL_STAGE = "Qualified";
-		vi.mocked(fetch)
-			.mockResolvedValueOnce(recordResponse("company-id"))
-			.mockResolvedValueOnce(recordResponse("person-id"))
-			.mockResolvedValueOnce(new Response(null, { status: 200 }))
-			.mockResolvedValueOnce(new Response(null, { status: 200 }))
-			.mockResolvedValueOnce(recordResponse("deal-id"));
-
-		await apply.handler(input, context);
-
-		const deal = vi.mocked(fetch).mock.calls[4]!;
-		expect(requestBody(deal).data.values.stage).toBe("Qualified");
-	});
-
-	it("uses the configured deal value and Offer attribute slug", async () => {
-		workerEnv.ATTIO_INBOUND_DEAL_VALUE_USD = "6500";
-		workerEnv.ATTIO_INBOUND_DEAL_OFFER_ATTRIBUTE = "inbound_offer";
-		workerEnv.ATTIO_INBOUND_DEAL_OFFER_OPTION = "Custom review";
-		vi.mocked(fetch)
-			.mockResolvedValueOnce(recordResponse("company-id"))
-			.mockResolvedValueOnce(recordResponse("person-id"))
-			.mockResolvedValueOnce(new Response(null, { status: 200 }))
-			.mockResolvedValueOnce(new Response(null, { status: 200 }))
-			.mockResolvedValueOnce(recordResponse("deal-id"));
-
-		await apply.handler(input, context);
-
-		const deal = vi.mocked(fetch).mock.calls[4]!;
-		expect(requestBody(deal).data.values).toMatchObject({
-			value: 6500,
-			inbound_offer: "Custom review",
+	it("limits the deployed binding to David's inbox", () => {
+		const config = JSON.parse(readFileSync("wrangler.jsonc", "utf8"));
+		expect(config.send_email).toContainEqual({
+			name: "PARTNERSHIP_EMAIL",
+			destination_address: "david@rawkode.academy",
 		});
 	});
+});
 
-	it("uses configured source attribution when the Deal attribute exists", async () => {
-		workerEnv.ATTIO_SOURCE_ATTRIBUTE = "lead_source";
-		workerEnv.ATTIO_SOURCE_VALUE = "Website";
-		vi.mocked(fetch)
-			.mockResolvedValueOnce(recordResponse("company-id"))
-			.mockResolvedValueOnce(recordResponse("person-id"))
-			.mockResolvedValueOnce(new Response(null, { status: 200 }))
-			.mockResolvedValueOnce(new Response(null, { status: 200 }))
-			.mockResolvedValueOnce(recordResponse("deal-id"));
-
-		await apply.handler(input, context);
-
-		const calls = vi.mocked(fetch).mock.calls;
-		expect(calls[2]![0]).toBe(
-			"https://api.attio.com/v2/objects/deals/attributes/lead_source",
-		);
-		expect(requestBody(calls[3]!).data.title).not.toContain("Source");
-		expect(requestBody(calls[4]!).data.values.lead_source).toBe("Website");
+describe("partnership enquiry routes", () => {
+	it.each(
+		partnerships.applicationPaths,
+	)("keeps the current %s route selectable", (route) => {
+		expect(partnerships.resolveApplicationPath(route)).toBe(route);
 	});
 
-	it("falls back to the note title when the source attribute is missing", async () => {
-		vi.mocked(fetch)
-			.mockResolvedValueOnce(recordResponse("company-id"))
-			.mockResolvedValueOnce(recordResponse("person-id"))
-			.mockResolvedValueOnce(new Response(null, { status: 404 }))
-			.mockResolvedValueOnce(new Response(null, { status: 200 }))
-			.mockResolvedValueOnce(recordResponse("deal-id"));
-
-		await expect(apply.handler(input, context)).resolves.toEqual({
-			success: true,
-			accepted: true,
-		});
-
-		const calls = vi.mocked(fetch).mock.calls;
-		expect(requestBody(calls[3]!).data.title).toContain(
-			"Source: Inbound: partnerships page",
-		);
-		expect(requestBody(calls[4]!).data.values).not.toHaveProperty("source");
+	it.each([
+		["Customer workshops", "Bespoke project"],
+		["Event content and hosting", "Bespoke project"],
+		["Community Support", "Support Our Work"],
+		["Community supporter", "Support Our Work"],
+		["Support the Academy", "Support Our Work"],
+		["Hands-on content", "Partnership"],
+		["Developer support", "Partnership"],
+		["Ongoing partnership", "Partnership"],
+		["Product review", "Partnership"],
+		["Adoption review", "Partnership"],
+		["First-run review", "Partnership"],
+		["Fit & Proof Review", "Partnership"],
+		["Production review", "Partnership"],
+		["Annual partnership", "Partnership"],
+		["Annual plan", "Partnership"],
+		["90-day partnership", "Partnership"],
+		["Adoption Advisory", "Partnership"],
+	])("maps the legacy %s link to %s", (previous, current) => {
+		expect(partnerships.resolveApplicationPath(previous)).toBe(current);
 	});
-
-	it("returns a mailto fallback when a core Attio write fails", async () => {
-		vi.spyOn(console, "error").mockImplementation(() => {});
-		vi.mocked(fetch).mockResolvedValueOnce(new Response(null, { status: 500 }));
-
-		await expect(apply.handler(input, context)).resolves.toEqual({
-			success: false,
-			fallback: "mailto",
-		});
-		expect(fetch).toHaveBeenCalledOnce();
+	it.each([
+		"unknown",
+		"constructor",
+		"toString",
+		"__proto__",
+		"",
+	])("ignores an unrecognised route: %s", (route) => {
+		expect(partnerships.resolveApplicationPath(route)).toBeUndefined();
 	});
 });

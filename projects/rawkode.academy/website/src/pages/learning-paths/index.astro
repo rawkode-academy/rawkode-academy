@@ -1,7 +1,12 @@
 ---
-export const prerender = true;
+export const prerender = false;
 
-import { getCollection, getEntries } from "astro:content";
+import {
+	type ContentEntry,
+	getCollection,
+	getEntries,
+	setContentCache,
+} from "@/lib/live-content";
 import AcademyPage from "@/components/academy/AcademyPage.vue";
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
 import { getTechnologyLogos, logosFor } from "@/lib/technology-logos";
@@ -20,10 +25,7 @@ learningPaths.sort(
 
 const technologyNameById = new Map<string, string>();
 for (const technology of technologies) {
-	technologyNameById.set(
-		technology.id.replace(/\/index$/, ""),
-		technology.data.name,
-	);
+	technologyNameById.set(technology.id, technology.data.name);
 }
 // The masthead schedules the tools the paths teach, newest path first.
 const mosaic = logosFor(
@@ -31,12 +33,14 @@ const mosaic = logosFor(
 	await getTechnologyLogos(),
 );
 
+const authorEntries: ContentEntry<"people">[] = [];
 const itemListPaths = await Promise.all(
 	learningPaths.map(async (path) => {
-		const authorEntries = await getEntries(path.data.authors);
+		const pathAuthors = await getEntries(path.data.authors);
+		authorEntries.push(...pathAuthors);
 		return {
 			path,
-			authors: authorEntries.map((author) => ({
+			authors: pathAuthors.map((author) => ({
 				id: author.data.id,
 				name: author.data.name,
 			})),
@@ -46,6 +50,12 @@ const itemListPaths = await Promise.all(
 		};
 	}),
 );
+
+await setContentCache(Astro, {
+	entries: [...learningPaths, ...authorEntries],
+	// Technology names and logos come from the technologies listing.
+	collections: ["learningPaths", "technologies"],
+});
 
 const compactCopy = (value: string | undefined, maxLength = 220) => {
 	const normalized = (value ?? "").replace(/\s+/g, " ").trim();

@@ -4,13 +4,19 @@ import PortalLayout from "@/layouts/PortalLayout.astro";
 import { getBracketsDb } from "@/db/client";
 import { COMPETITOR_NAV } from "@/lib/nav";
 import { getCompetitorForUser } from "@/lib/competitor";
-import { getPerson } from "@/lib/content";
+import { getPerson } from "@/lib/people";
 
 const user = Astro.locals.user!;
 const db = getBracketsDb(env.BRACKETS);
 
 const competitor = await getCompetitorForUser(db, user.id);
-const person = competitor ? await getPerson(competitor.personSlug) : undefined;
+// The person only picks the hint below; a gateway outage must not fail the page.
+const person = competitor
+	? await getPerson(competitor.personSlug).catch((error) => {
+			console.error("Failed to load person profile", error);
+			return undefined;
+		})
+	: undefined;
 ---
 
 <PortalLayout title="Profile" section="me" nav={[...COMPETITOR_NAV]}>
@@ -89,11 +95,11 @@ const person = competitor ? await getPerson(competitor.personSlug) : undefined;
 				{competitor.bio && <p class="mt-4 text-slate-400">{competitor.bio}</p>}
 				{person ? (
 					<p class="mt-4 text-xs text-slate-500">
-						Bio + public profile fields live in <code class="rounded bg-slate-800 px-1 py-0.5">content/people/{competitor.personSlug}.mdx</code> — open a PR to edit them.
+						Bio + public profile fields come from your Rawkode Academy person profile (<code class="rounded bg-slate-800 px-1 py-0.5">{competitor.personSlug}</code>).
 					</p>
 				) : (
 					<p class="mt-4 text-xs text-slate-500">
-						This self-service competitor record does not have a public content profile yet.
+						This self-service competitor record does not have a public person profile yet.
 					</p>
 				)}
 			</section>

@@ -7,9 +7,12 @@ import (
 	"time"
 
 	talosconfig "github.com/siderolabs/talos/pkg/machinery/config"
+	talosdoc "github.com/siderolabs/talos/pkg/machinery/config/config"
+	taloscontainer "github.com/siderolabs/talos/pkg/machinery/config/container"
 	talosgenerate "github.com/siderolabs/talos/pkg/machinery/config/generate"
 	talossecrets "github.com/siderolabs/talos/pkg/machinery/config/generate/secrets"
 	"github.com/siderolabs/talos/pkg/machinery/config/machine"
+	talosk8s "github.com/siderolabs/talos/pkg/machinery/config/types/k8s"
 	v1alpha1 "github.com/siderolabs/talos/pkg/machinery/config/types/v1alpha1"
 	talosconstants "github.com/siderolabs/talos/pkg/machinery/constants"
 	"gopkg.in/yaml.v3"
@@ -106,7 +109,6 @@ func GenerateConfig(ctx context.Context, params GenConfigParams) (*GenConfigResu
 		talosgenerate.WithVersionContract(versionContract),
 		talosgenerate.WithSecretsBundle(secretsBundle),
 		talosgenerate.WithEndpointList([]string{talosEndpoint}),
-		talosgenerate.WithClusterCNIConfig(&v1alpha1.CNIConfig{CNIName: "none"}),
 		talosgenerate.WithAllowSchedulingOnControlPlanes(allowSchedulingOnControlPlanes(params.ControlPlaneTaints)),
 		talosgenerate.WithInstallDisk(installDisk),
 	}
@@ -129,6 +131,10 @@ func GenerateConfig(ctx context.Context, params GenConfigParams) (*GenConfigResu
 	if err != nil {
 		return nil, fmt.Errorf("generate control-plane config: %w", err)
 	}
+	controlPlaneConfig, err = withoutTalosManagedCNI(controlPlaneConfig)
+	if err != nil {
+		return nil, fmt.Errorf("disable talos-managed cni on control-plane config: %w", err)
+	}
 	controlPlane, err := controlPlaneConfig.Bytes()
 	if err != nil {
 		return nil, fmt.Errorf("encode control-plane config: %w", err)
@@ -137,6 +143,10 @@ func GenerateConfig(ctx context.Context, params GenConfigParams) (*GenConfigResu
 	workerConfig, err := input.Config(machine.TypeWorker)
 	if err != nil {
 		return nil, fmt.Errorf("generate worker config: %w", err)
+	}
+	workerConfig, err = withoutTalosManagedCNI(workerConfig)
+	if err != nil {
+		return nil, fmt.Errorf("disable talos-managed cni on worker config: %w", err)
 	}
 	worker, err := workerConfig.Bytes()
 	if err != nil {
@@ -157,6 +167,44 @@ func GenerateConfig(ctx context.Context, params GenConfigParams) (*GenConfigResu
 		Worker:       worker,
 		Talosconfig:  talosconfigBytes,
 	}, nil
+}
+
+// withoutTalosManagedCNI keeps Talos from installing Flannel so Cilium stays the only CNI.
+//
+// Talos 1.14 removed generate.WithClusterCNIConfig. Contracts through 1.13 still emit
+// cluster.network and default the CNI to Flannel unless name is "none". Talos 1.14+
+// emits a KubeFlannelCNIConfig document instead; dropping that document is the same
+// as cni.name=none.
+func withoutTalosManagedCNI(provider talosconfig.Provider) (talosconfig.Provider, error) {
+	documents := provider.Documents()
+	filtered := make([]talosdoc.Document, 0, len(documents))
+	removedFlannel := false
+	for _, document := range documents {
+		if document.Kind() == talosk8s.KubeFlannelCNIConfig {
+			removedFlannel = true
+			continue
+		}
+		filtered = append(filtered, document)
+	}
+
+	next := provider
+	if removedFlannel {
+		rebuilt, err := taloscontainer.New(filtered...)
+		if err != nil {
+			return nil, fmt.Errorf("drop talos flannel cni document: %w", err)
+		}
+		next = rebuilt
+	}
+
+	raw := next.RawV1Alpha1()
+	if raw == nil || raw.ClusterConfig == nil || raw.ClusterConfig.ClusterNetwork == nil {
+		return next, nil
+	}
+
+	return next.PatchV1Alpha1(func(cfg *v1alpha1.Config) error {
+		cfg.ClusterConfig.ClusterNetwork.CNI = &v1alpha1.CNIConfig{CNIName: talosconstants.NoneCNI}
+		return nil
+	})
 }
 
 func buildInstallerImage(talosVersion, talosSchematic string) string {

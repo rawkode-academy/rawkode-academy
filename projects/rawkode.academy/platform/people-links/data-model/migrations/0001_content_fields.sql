@@ -1,0 +1,1 @@
+ALTER TABLE `people_links` ADD `position` integer DEFAULT 0 NOT NULL;

@@ -1,0 +1,264 @@
+---
+import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
+const doc = academyDocument();
+const styles = academyLayout({ width: "reading" });
+import {
+	type ContentEntry,
+	getCollection,
+	getEntry,
+	renderEntry,
+	setContentCache,
+} from "@/lib/live-content";
+import RichText from "@/components/content/RichText.astro";
+import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
+import CourseSignupForm from "@/components/courses/CourseSignupForm.astro";
+import ResourceList from "@/components/courses/ResourceList.vue";
+import VideoPlayer from "@/components/video/player.vue";
+import Page from "@/wrappers/page.astro";
+import { getCourseModuleSlug } from "@/utils/course-path";
+
+export const prerender = false;
+
+// A single [slug] segment (not [...slug]): on demand, a rest param would also
+// match /courses/<course> and shadow the course page (courses/[...slug].astro).
+const courseId = Astro.params.course;
+const lessonSlug = Astro.params.slug;
+if (!courseId || !lessonSlug) {
+	return new Response(null, { status: 404 });
+}
+
+const [course, module] = await Promise.all([
+	getEntry("courses", courseId),
+	getEntry("courseModules", `${courseId}/${lessonSlug}`),
+]);
+
+if (!course || !module || module.data.course.id !== course.id) {
+	return new Response(null, { status: 404 });
+}
+
+if (module.data.draft) {
+	return new Response(null, { status: 404 });
+}
+
+// Google truncates SERP titles around 60 chars (pixel-based, so the
+// real cutoff varies). Append the course title for context only when
+// the module title is short (e.g. "Introduction", "Prerequisites") and
+// the composite stays under 58 chars; that leaves a 2-char buffer for
+// pixel-width variance. Otherwise the module title stands alone -
+// course context is still available in the breadcrumb and JSON-LD.
+//
+// Note: head.astro's TITLE_MAX_LENGTH=60 is a separate gate that
+// controls whether ` | Rawkode Academy` is appended to the page
+// title. Anything longer than 42 chars (60 - 18) already has the
+// suffix dropped, so by the time we hit this 58-char rule the
+// suffix is never in play.
+const composite = `${module.data.title} - ${course.data.title}`;
+const pageTitle = composite.length <= 58 ? composite : module.data.title;
+
+const [{ html }, allCourseModules] = await Promise.all([
+	renderEntry(module),
+	getCollection(
+		"courseModules",
+		({ data }) => data.course.id === course.id && !data.draft,
+	).then((modules) => modules.sort((a, b) => a.data.order - b.data.order)),
+]);
+
+await setContentCache(Astro, {
+	entries: [module, course, ...allCourseModules],
+	// The lesson navigation lists this course's modules; the body is autolinked.
+	collections: ["courseModules", "technologies"],
+});
+
+const allResources = [
+	...(course.data.resources || []),
+	...(module.data.resources || []),
+];
+
+const dedupedResources = Array.from(
+	new Map(
+		allResources.map((resource) => {
+			const key = [
+				resource.type,
+				resource.title,
+				resource.url || "",
+				resource.filePath || "",
+				resource.embedConfig?.src || "",
+			].join("::");
+
+			return [key, resource];
+		}),
+	).values(),
+);
+
+// Covers are remote images; the runtime image service is a passthrough.
+const imageUrl = module.data.cover?.image.src ?? null;
+const moduleSlug = getCourseModuleSlug(course.id, module.id);
+
+const breadcrumbElements = [
+	{ title: "Home", link: "/" },
+	{ title: "Courses", link: "/courses" },
+	{ title: course.data.title, link: `/courses/${course.id}` },
+	{
+		title: module.data.title,
+		link: `/courses/${course.id}/${moduleSlug}`,
+	},
+];
+
+const currentIndex = allCourseModules.findIndex(
+	(entry) => entry.id === module.id,
+);
+const previousModule =
+	currentIndex > 0 ? allCourseModules[currentIndex - 1] : null;
+const nextModule =
+	currentIndex >= 0 && currentIndex < allCourseModules.length - 1
+		? allCourseModules[currentIndex + 1]
+		: null;
+
+const lessonCourseId = course.id;
+function moduleHref(entry: ContentEntry<"courseModules">) {
+	return `/courses/${lessonCourseId}/${getCourseModuleSlug(lessonCourseId, entry.id)}`;
+}
+
+function formatDuration(minutes?: number) {
+	if (!minutes || minutes <= 0) return null;
+
+	const hours = Math.floor(minutes / 60);
+	const mins = minutes % 60;
+
+	if (hours > 0 && mins > 0) return `${hours}h ${mins}m`;
+	if (hours > 0) return `${hours}h`;
+	return `${mins}m`;
+}
+---
+
+<Page
+	title={pageTitle}
+	description={module.data.description}
+	image={imageUrl
+		? {
+				image: imageUrl.startsWith("http")
+					? new URL(imageUrl)
+					: new URL(imageUrl, Astro.site || "https://rawkode.academy"),
+				text: module.data.title,
+				format: "png" as const,
+			}
+		: undefined}
+>
+	<section class={doc.section}>
+		<div class={[doc.container, doc.stack].join(" ")}>
+			<Breadcrumb elements={breadcrumbElements} />
+
+			<header>
+				<div>
+					<div class={doc.stack}>
+						<div class={doc.kicker}>
+							<span>Lesson {currentIndex + 1} of {allCourseModules.length}</span>
+							{formatDuration(module.data.duration) && (
+								<>
+									<span class={doc.dot}></span>
+									<span>{formatDuration(module.data.duration)}</span>
+								</>
+							)}
+							{module.data.difficulty && (
+								<>
+									<span class={doc.dot}></span>
+									<span class={doc.copy}>{module.data.difficulty}</span>
+								</>
+							)}
+						</div>
+
+						<div class={doc.stack}>
+							<h1 class={doc.title}>
+								{module.data.title}
+							</h1>
+							<p class={doc.lede}>
+								{module.data.description}
+							</p>
+						</div>
+					</div>
+
+				</div>
+			</header>
+
+			<div class:list={[doc.moduleFlow, dedupedResources.length > 0 && doc.moduleFlowRail]}>
+				{module.data.video && (
+					<section class={doc.moduleMain}>
+						<div class={doc.media}>
+							<VideoPlayer
+								video={module.data.video.id}
+								thumbnailUrl={module.data.video.thumbnailUrl || module.data.video.poster || ""}
+								client:only="vue"
+								isAuthenticated={false}
+							/>
+						</div>
+					</section>
+				)}
+
+				<article class={doc.moduleMain}>
+					<div class={styles.prose}>
+						<RichText html={html} />
+					</div>
+				</article>
+
+				{dedupedResources.length > 0 && (
+					<aside class={doc.moduleRail}>
+						<ResourceList resources={dedupedResources} courseId={course.id} client:load />
+					</aside>
+				)}
+
+				{(previousModule || nextModule) && (
+					<nav aria-label="Course lessons" class={[doc.moduleMain, doc.rule].join(" ")}>
+						<div class={doc.gridTwo}>
+							{previousModule && (
+								<a
+									href={moduleHref(previousModule)}
+									class={doc.link}
+								>
+									<p class={doc.kicker}>Previous</p>
+									<div class={doc.rowBetween}>
+										<p class={doc.copy}>
+											{previousModule.data.title}
+										</p>
+										<span class={doc.link}>←</span>
+									</div>
+								</a>
+							)}
+
+							{nextModule && (
+								<a
+									href={moduleHref(nextModule)}
+									class={doc.link}
+								>
+									<p class={doc.kicker}>Next</p>
+									<div class={doc.rowBetween}>
+										<p class={doc.copy}>
+											{nextModule.data.title}
+										</p>
+										<span class={doc.link}>→</span>
+									</div>
+								</a>
+							)}
+						</div>
+					</nav>
+				)}
+			</div>
+
+			{course.data.signupConfig && (
+				<div class={doc.container}>
+					<CourseSignupForm
+						courseId={course.id}
+						courseTitle={course.data.title}
+						pagePath={Astro.url.pathname}
+						signupConfig={course.data.signupConfig}
+						server:defer
+					>
+						<p slot="fallback" class={doc.copy}>
+							Loading optional course email signup. If it does not load, <a href={Astro.url.pathname}>reload this lesson to retry</a>.
+							Signup requires JavaScript; all lesson content remains available without signing up.
+						</p>
+					</CourseSignupForm>
+				</div>
+			)}
+		</div>
+	</section>
+</Page>

@@ -50,7 +50,6 @@ Please read our [Contributing Guidelines](https://github.com/RawkodeAcademy/Rawk
 
 We use modern tools and technologies including:
 
-* **Dagger** for CI/CD pipelines
 * **Cloudflare Workers** for edge computing
 * **TypeScript** & **Deno** for our applications
 * **Kubernetes** for container orchestration

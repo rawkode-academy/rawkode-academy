@@ -2,7 +2,7 @@
 import { env } from "cloudflare:workers";
 import Page from "@/wrappers/page.astro";
 import UtilityShell from "@/components/ui/UtilityShell.astro";
-import { createLearnerId } from "@/actions/newsletter";
+import { createLearnerId } from "@/lib/newsletter-ids";
 
 const user = Astro.locals.user;
 

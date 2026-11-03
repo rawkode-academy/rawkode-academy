@@ -1,5 +1,4 @@
-import type { CollectionEntry } from "astro:content";
-import { render } from "astro:content";
+import type { ContentEntry } from "@/lib/live-content";
 import sanitizeHtml from "sanitize-html";
 
 interface RenderResult {
@@ -28,38 +27,17 @@ export function withRssMimeType(res: Response): Response {
 }
 
 /**
- * Render and sanitize a single article's content to HTML
- * Attempts to render MDX content to HTML with fallbacks
+ * Build the sanitized feed HTML for an article: its description plus a
+ * pointer to the full, interactive article on the website. (The feeds never
+ * carried the rendered body; interactive elements only work on the site.)
  */
 export async function renderAndSanitizeArticle(
-	article: CollectionEntry<"articles">,
+	article: ContentEntry<"articles">,
 ): Promise<RenderResult> {
 	try {
-		// Try to render the article content
-		await render(article);
-
-		// Convert the rendered content to HTML string
-		// Note: This is a simplified approach. In production, you might need
-		// to use Astro's container API or a custom MDX renderer
-		let htmlContent = "";
-
-		// For now, we'll use a workaround by rendering to a string
-		// This may not work perfectly with all MDX components
-		try {
-			// Attempt to get HTML from the Content component
-			// This is a placeholder - actual implementation would need
-			// proper MDX to HTML conversion
-			htmlContent = article.data.description;
-
-			// Add a note about full content
-			htmlContent += `<hr/><p><em>Note: Full article content with interactive elements is available on our website.</em></p>`;
-			htmlContent += `<p><a href="/read/${article.id}/">Read the full article with all features on our website</a></p>`;
-		} catch (renderError) {
-			console.warn(
-				`Could not render MDX content for ${article.id}, using description`,
-			);
-			htmlContent = article.data.description;
-		}
+		let htmlContent = article.data.description;
+		htmlContent += `<hr/><p><em>Note: Full article content with interactive elements is available on our website.</em></p>`;
+		htmlContent += `<p><a href="/read/${article.id}/">Read the full article with all features on our website</a></p>`;
 
 		// Sanitize the HTML content for RSS
 		const sanitizedContent = sanitizeHtml(htmlContent, {
@@ -96,7 +74,7 @@ export async function renderAndSanitizeArticle(
  * Render and sanitize multiple articles in parallel for better performance
  */
 export async function renderAndSanitizeArticles(
-	articles: CollectionEntry<"articles">[],
+	articles: ContentEntry<"articles">[],
 ): Promise<Map<string, RenderResult>> {
 	// Process all articles in parallel for better performance
 	const renderPromises = articles.map(async (article) => ({

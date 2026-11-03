@@ -54,8 +54,11 @@ tasks: {
 		]
 	}
 	deploy: schema.#Task & {
-		command: "bun"
-		args: ["x", "wrangler", "deploy"]
+		// Wrangler needs Node.js 22 or newer and the runner's default is 20, so
+		// take the toolchain from Nix, as the website's deploy does.
+		command: "sh"
+		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun x wrangler deploy"]
+		env: PATH: "/home/runner/.bun/bin:/Users/rawkode/.bun/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
 		dependsOn: [_t.compose]
 
 		// Keep API deploy affected when the source schemas that compose the

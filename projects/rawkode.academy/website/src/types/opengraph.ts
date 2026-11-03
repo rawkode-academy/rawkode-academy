@@ -1,4 +1,4 @@
-import type { CollectionEntry } from "astro:content";
+import type { ContentEntry } from "@/lib/live-content";
 import type { ImageServicePayload } from "./image-service";
 
 type OpenGraphImagePayload = Omit<Partial<ImageServicePayload>, "image"> & {
@@ -28,7 +28,7 @@ export interface OpenGraphProps {
 	isArticle?: boolean | undefined;
 	publishedAt?: Date | undefined;
 	updatedAt?: Date | undefined;
-	authors?: CollectionEntry<"people">[] | undefined;
+	authors?: ContentEntry<"people">[] | undefined;
 	noindex?: boolean | undefined;
 	pageType?: PageType | undefined;
 	/**

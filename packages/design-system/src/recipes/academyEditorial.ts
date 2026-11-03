@@ -156,13 +156,17 @@ export const academyEditorial = sva({
 			"& .editorial-prose ol": { listStyle: "decimal" },
 			"& .editorial-faq": { display: "grid", gap: "3" },
 			"& .editorial-faq details": {
-				padding: "5",
+				padding: "0",
 				border: "hairline",
 				borderColor: "academy.border",
 				borderRadius: "academy-m",
 				background: "academy.panel",
 			},
 			"& .editorial-faq summary": {
+				display: "block",
+				width: "full",
+				minHeight: "11",
+				padding: "5",
 				cursor: "pointer",
 				color: "academy.text",
 				fontWeight: "bold",
@@ -173,6 +177,9 @@ export const academyEditorial = sva({
 				},
 			},
 			"& .editorial-faq p": {
+				margin: "0",
+				paddingInline: "5",
+				paddingBlockEnd: "5",
 				color: "academy.textSoft",
 				lineHeight: "relaxed",
 			},

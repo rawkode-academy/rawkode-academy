@@ -1,0 +1,1 @@
+ALTER TABLE `video_technologies` ADD `position` integer DEFAULT 0 NOT NULL;

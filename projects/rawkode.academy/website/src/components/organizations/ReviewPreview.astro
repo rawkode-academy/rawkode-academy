@@ -1,0 +1,155 @@
+---
+/**
+ * What a adoption review hands over. Describes the shape of each finding
+ * rather than showing invented findings.
+ */
+interface Props {
+	/**
+	 * `hero` shows only on wide screens beside the hero copy; `inline`
+	 * shows only on narrow screens, inside the review steps.
+	 */
+	placement?: "hero" | "inline" | "always";
+}
+
+const { placement = "always" } = Astro.props;
+
+const findingParts = [
+	{
+		title: "The step",
+		detail: "Where I got stuck, with a reference to the recording.",
+	},
+	{
+		title: "The impact",
+		detail: "What the obstacle prevents or makes harder for the intended user.",
+	},
+	{
+		title: "The fix",
+		detail:
+			"What to fix, explain or teach and whether it's for product, docs or DevRel.",
+	},
+];
+---
+
+<aside class="review-preview" data-placement={placement} aria-label="What the adoption review delivers">
+	<p class="review-preview__kicker">What you receive</p>
+	<p class="review-preview__title">A ranked list of what to fix first</p>
+	<p class="review-preview__meta">Each finding includes</p>
+	<ol class="review-preview__list">
+		{findingParts.map((part, index) => (
+			<li>
+				<span class="review-preview__index" aria-hidden="true">{index + 1}</span>
+				<span>
+					<strong>{part.title}</strong>
+					<span class="review-preview__detail">{part.detail}</span>
+				</span>
+			</li>
+		))}
+	</ol>
+	<ul class="review-preview__extras">
+		<li>A one-hour call to go through it with your team</li>
+	</ul>
+</aside>
+
+<style>
+	.review-preview {
+		display: grid;
+		gap: 0.85rem;
+		padding: 1.5rem;
+		border: 1px solid var(--colors-academy-border);
+		border-radius: var(--radii-academy-l);
+		background: var(--colors-academy-panel);
+	}
+
+	.review-preview[data-placement="hero"] {
+		display: none;
+	}
+
+	@media (min-width: 64rem) {
+		.review-preview[data-placement="hero"] {
+			display: grid;
+		}
+
+		.review-preview[data-placement="inline"] {
+			display: none;
+		}
+	}
+
+	.review-preview p {
+		margin: 0;
+	}
+
+	.review-preview__kicker,
+	.review-preview__meta {
+		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
+		font-size: 0.75rem;
+		color: var(--colors-academy-text-muted);
+	}
+
+	.review-preview__title {
+		font-family: var(--fonts-academy-display), system-ui, sans-serif;
+		font-size: 1.35rem;
+		font-weight: 800;
+		line-height: 1.2;
+		letter-spacing: -0.015em;
+		color: var(--colors-academy-text);
+	}
+
+	.review-preview__list,
+	.review-preview__extras {
+		display: grid;
+		gap: 0.5rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.review-preview__list li {
+		display: flex;
+		gap: 0.75rem;
+		align-items: flex-start;
+		padding: 0.75rem 0.85rem;
+		border: 1px solid var(--colors-academy-border);
+		border-radius: var(--radii-academy-m);
+		background: var(--colors-academy-canvas);
+	}
+
+	.review-preview__list strong {
+		display: block;
+		color: var(--colors-academy-text);
+	}
+
+	.review-preview__index {
+		flex: none;
+		min-width: 1.5rem;
+		padding: 0.1rem 0.4rem;
+		border-radius: var(--radii-academy-s);
+		background: var(--colors-academy-text);
+		color: var(--colors-academy-canvas);
+		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
+		font-size: 0.8rem;
+		text-align: center;
+	}
+
+	.review-preview__list li:first-child .review-preview__index {
+		background: var(--colors-academy-accent);
+		color: var(--colors-academy-accent-foreground);
+	}
+
+	.review-preview__detail {
+		display: block;
+		font-size: 0.9rem;
+		line-height: 1.45;
+		color: var(--colors-academy-text-soft);
+	}
+
+	.review-preview__extras li {
+		font-size: 0.9rem;
+		color: var(--colors-academy-text-soft);
+	}
+
+	.review-preview__extras li::before {
+		content: "+ ";
+		color: var(--colors-academy-accent);
+		font-weight: 700;
+	}
+</style>

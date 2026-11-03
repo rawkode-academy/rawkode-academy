@@ -17,6 +17,5 @@ If you prefer not to use `+nix+`, you can manually install the following depende
 
 ### CI/CD
 
-- dagger
 - oras
 - rover (Apollo GraphQL)

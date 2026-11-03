@@ -1,10 +1,10 @@
 ---
-import type { CollectionEntry } from "astro:content";
+import type { ContentEntry } from "@/lib/live-content";
 import { buildLearningPathJsonLd } from "@/lib/learning-path-jsonld";
 
 interface Props {
-	learningPath: CollectionEntry<"learningPaths">;
-	authors: ReadonlyArray<CollectionEntry<"people">>;
+	learningPath: ContentEntry<"learningPaths">;
+	authors: ReadonlyArray<ContentEntry<"people">>;
 	technologyLabels: ReadonlyArray<string>;
 	slot?: string;
 }

@@ -8,7 +8,6 @@
         "devenv.yaml",
         "devenv.nix",
         "env.cue",
-        "config/**/*.ts",
         "tsconfig.json"
       ]
     },
@@ -16,15 +15,12 @@
       "entry": [
         "astro.config.mts",
         "scripts/*.ts",
-        ".storybook/main.ts"
+        ".storybook/main.ts",
+        "src/live.config.ts",
+        "src/lib/live-content/render/shiki-*.ts"
       ],
       "ignore": [
-        "content/**/examples/**"
-      ]
-    },
-    "dagger/*": {
-      "entry": [
-        "src/index.ts"
+        "src/webcontainer-demos/**"
       ]
     },
     "projects/rawkode.academy/platform/*": {
@@ -47,7 +43,6 @@
   "ignore": [
     "**/dist/**",
     "**/.astro/**",
-    "**/.dagger/**",
     "**/node_modules/**",
     "**/*.generated.*"
   ]

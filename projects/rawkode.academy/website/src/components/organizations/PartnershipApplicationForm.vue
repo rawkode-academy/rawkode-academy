@@ -1,17 +1,25 @@
 <template>
 	<div :class="s.root">
-		<p role="status" aria-live="polite" aria-atomic="true" :class="ready ? s.hidden : s.copy">{{ statusMessage }}</p>
-		<p :id="errorId" role="alert" aria-atomic="true" :class="error ? s.error : s.hidden">{{ error }}</p>
+		<p role="status" aria-live="polite" aria-atomic="true" :class="s.hidden">{{ statusMessage }}</p>
+		<p :id="errorId" role="alert" aria-atomic="true" :class="error ? s.error : s.hidden" :data-error-code="errorCode || undefined">{{ error }}</p>
 		<p v-if="fallback" :class="s.copy">
-			<a :href="fallbackMailto">Email David directly</a> with the details you entered.
+			<a :href="fallbackMailto">Email me directly</a> with the details you entered.
 		</p>
 		<div v-if="submitted" :class="[s.panel, s.status]">
-			<h3 :class="s.heading">Enquiry received</h3>
-			<p :class="s.copy">David reads every enquiry and replies within two business days.</p>
+			<h3 ref="successHeading" :class="s.heading" tabindex="-1">Enquiry received</h3>
+			<p :class="s.copy">I read every enquiry and will reply by email.</p>
 		</div>
-		<form v-else method="POST" :class="s.form" @submit.prevent="submit" :aria-busy="!ready || loading" :aria-describedby="error ? errorId : undefined">
-			<fieldset :class="[s.form, 'form-controls']" :disabled="!ready || loading" aria-label="Product review enquiry" @focusin="trackStarted">
-				<input type="hidden" name="path" :value="path" />
+		<form
+			v-else
+			method="POST"
+			action="?_action=partnership.applyForm"
+			ref="formElement"
+			:class="s.form"
+			@submit="onSubmit"
+			:aria-busy="loading"
+			:aria-describedby="error ? errorId : undefined"
+		>
+			<fieldset :class="[s.form, 'form-controls']" :disabled="loading" aria-label="Academy enquiry" @input="trackStarted">
 				<div class="form-honeypot" aria-hidden="true">
 					<label :for="honeypotId">Website</label>
 					<input
@@ -21,88 +29,168 @@
 						name="website"
 						tabindex="-1"
 						autocomplete="off"
+						maxlength="500"
 					/>
 				</div>
 				<div :class="s.row">
-					<Field.Root :class="s.field" :invalid="Boolean(fieldErrors.name)" :disabled="loading">
-						<Field.Label :class="s.label">Name</Field.Label>
-						<Field.Input :class="s.input"
+					<div :class="s.field">
+						<label :class="s.label" :for="nameId">Name</label>
+						<input
+							:id="nameId"
 							v-model="name"
+							:class="s.input"
 							type="text"
 							name="name"
 							autocomplete="name"
 							required
+							maxlength="200"
+							:aria-invalid="fieldErrors.name ? 'true' : undefined"
+							:aria-describedby="fieldErrors.name ? nameErrorId : undefined"
 						/>
-						<Field.ErrorText v-if="fieldErrors.name" :class="s.fieldError">{{ fieldErrors.name }}</Field.ErrorText>
-					</Field.Root>
-					<Field.Root :class="s.field" :invalid="Boolean(fieldErrors.email)" :disabled="loading">
-						<Field.Label :class="s.label">Work email</Field.Label>
-						<Field.Input :class="s.input"
+						<p v-if="fieldErrors.name" :id="nameErrorId" :class="s.fieldError">{{ fieldErrors.name }}</p>
+					</div>
+					<div :class="s.field">
+						<label :class="s.label" :for="emailId">Work email</label>
+						<input
+							:id="emailId"
 							v-model="email"
+							:class="s.input"
 							type="email"
+							maxlength="254"
 							name="email"
 							autocomplete="email"
 							required
+							:aria-invalid="fieldErrors.email ? 'true' : undefined"
+							:aria-describedby="fieldErrors.email ? emailErrorId : undefined"
 						/>
-						<Field.ErrorText v-if="fieldErrors.email" :class="s.fieldError">{{ fieldErrors.email }}</Field.ErrorText>
-					</Field.Root>
+						<p v-if="fieldErrors.email" :id="emailErrorId" :class="s.fieldError">{{ fieldErrors.email }}</p>
+					</div>
 				</div>
 
-				<Field.Root :class="s.field" :invalid="Boolean(fieldErrors.company)" :disabled="loading">
-					<Field.Label :class="s.label">Company</Field.Label>
-					<Field.Input :class="s.input"
+				<div :class="s.field">
+					<label :class="s.label" :for="companyId">Company</label>
+					<input
+						:id="companyId"
 						v-model="company"
+						:class="s.input"
 						type="text"
 						name="company"
 						autocomplete="organization"
 						required
+						maxlength="1000"
+						:aria-invalid="fieldErrors.company ? 'true' : undefined"
+						:aria-describedby="fieldErrors.company ? companyErrorId : undefined"
 					/>
-					<Field.ErrorText v-if="fieldErrors.company" :class="s.fieldError">{{ fieldErrors.company }}</Field.ErrorText>
-				</Field.Root>
+					<p v-if="fieldErrors.company" :id="companyErrorId" :class="s.fieldError">{{ fieldErrors.company }}</p>
+				</div>
 
-				<Field.Root :class="s.field" :invalid="Boolean(fieldErrors.message)" :disabled="loading">
-					<Field.Label :class="s.label">Message</Field.Label>
-					<Field.Textarea :class="[s.input, s.textarea]"
+				<div :class="s.field">
+					<label :class="s.label" :for="pathId">What are you interested in?</label>
+					<select
+						:id="pathId"
+						v-model="path"
+						:class="s.input"
+						name="path"
+						required
+						:aria-invalid="fieldErrors.path ? 'true' : undefined"
+						:aria-describedby="fieldErrors.path ? pathErrorId : undefined"
+					>
+						<option v-for="option in applicationPaths" :key="option" :value="option">{{ applicationPathLabels[option] }}</option>
+					</select>
+					<p v-if="fieldErrors.path" :id="pathErrorId" :class="s.fieldError">{{ fieldErrors.path }}</p>
+				</div>
+
+				<div :class="s.field">
+					<label :class="s.label" :for="messageId">Message</label>
+					<textarea
+						:id="messageId"
 						v-model="message"
+						:class="[s.input, s.textarea]"
 						name="message"
 						rows="4"
 						required
+						maxlength="5000"
+						:aria-invalid="fieldErrors.message ? 'true' : undefined"
+						:aria-describedby="fieldErrors.message ? messageErrorId : undefined"
 					/>
-					<Field.ErrorText v-if="fieldErrors.message" :class="s.fieldError">{{ fieldErrors.message }}</Field.ErrorText>
-				</Field.Root>
+					<p v-if="fieldErrors.message" :id="messageErrorId" :class="s.fieldError">{{ fieldErrors.message }}</p>
+				</div>
 
 				<button type="submit" :class="s.button" :disabled="loading">
 					{{ loading ? "Sending enquiry..." : "Send enquiry" }}
 				</button>
 			</fieldset>
-			<p v-if="!ready" :class="s.copy"><noscript>JavaScript is required to send this enquiry. </noscript>You can <a href="mailto:david@rawkode.academy">email us directly</a> instead.</p>
+			<p v-if="!ready" :class="s.copy">You can <a href="mailto:david@rawkode.academy">email me directly</a> instead.</p>
 		</form>
 	</div>
 </template>
 
 <script setup lang="ts">
 import { actions, isInputError } from "astro:actions";
-import { Field } from "@ark-ui/vue/field";
 import { academyForms } from "@rawkodeacademy/design-system";
-import { computed, onBeforeUnmount, onMounted, ref, useId } from "vue";
+import {
+	computed,
+	nextTick,
+	onBeforeUnmount,
+	onMounted,
+	ref,
+	useId,
+} from "vue";
 import {
 	type ApplicationPath,
+	applicationPathLabels,
 	applicationPaths,
 	resolveApplicationPath,
 } from "@/lib/partnerships";
 
+const props = withDefaults(
+	defineProps<{
+		initialPath?: ApplicationPath;
+		submittedValues?: {
+			name?: string;
+			email?: string;
+			company?: string;
+			path?: string;
+			message?: string;
+		};
+		serverFieldErrors?: Record<string, string>;
+	}>(),
+	{
+		initialPath: "Partnership",
+		submittedValues: () => ({}),
+		serverFieldErrors: () => ({}),
+	},
+);
+
 const s = academyForms();
 const errorId = `${useId()}-error`;
 const honeypotId = `${useId()}-website`;
+const nameId = useId();
+const emailId = useId();
+const companyId = useId();
+const pathId = useId();
+const messageId = useId();
+const nameErrorId = `${nameId}-error`;
+const emailErrorId = `${emailId}-error`;
+const companyErrorId = `${companyId}-error`;
+const pathErrorId = `${pathId}-error`;
+const messageErrorId = `${messageId}-error`;
 
 const FALLBACK_ERROR =
-	"We could not send your enquiry. Please email david@rawkode.academy directly.";
+	"Your enquiry wasn't sent. Please email me at david@rawkode.academy.";
 
-const name = ref("");
-const email = ref("");
-const company = ref("");
-const path = ref<ApplicationPath>("Not sure yet");
-const message = ref("");
+const isApplicationPath = (value: string): value is ApplicationPath =>
+	(applicationPaths as readonly string[]).includes(value);
+
+const submittedText = (value: string | undefined) => value ?? "";
+const name = ref(submittedText(props.submittedValues.name));
+const email = ref(submittedText(props.submittedValues.email));
+const company = ref(submittedText(props.submittedValues.company));
+const submittedPath = props.submittedValues.path ?? "";
+const path = ref<ApplicationPath>(
+	resolveApplicationPath(submittedPath) ?? props.initialPath,
+);
+const message = ref(submittedText(props.submittedValues.message));
 const website = ref("");
 
 const ready = ref(false);
@@ -111,9 +199,12 @@ const submitted = ref(false);
 const formStarted = ref(false);
 const fallback = ref(false);
 const error = ref("");
-const fieldErrors = ref<Record<string, string>>({});
+const errorCode = ref("");
+const fieldErrors = ref<Record<string, string>>({
+	...props.serverFieldErrors,
+});
 const fallbackMailto = computed(() => {
-	const subject = encodeURIComponent("Product review enquiry");
+	const subject = encodeURIComponent(`Rawkode Academy enquiry: ${applicationPathLabels[path.value]}`);
 	const body = encodeURIComponent(
 		[
 			`Name: ${name.value}`,
@@ -129,12 +220,25 @@ const fallbackMailto = computed(() => {
 const statusMessage = computed(() => {
 	if (!ready.value) return "Loading enquiry form...";
 	if (submitted.value)
-		return "Enquiry received. David reads every enquiry and replies within two business days.";
+		return "Enquiry received. I read every enquiry and will reply by email.";
 	return loading.value ? "Sending enquiry..." : "";
 });
 
-const isApplicationPath = (value: string): value is ApplicationPath =>
-	(applicationPaths as readonly string[]).includes(value);
+const formElement = ref<HTMLFormElement | null>(null);
+const successHeading = ref<HTMLHeadingElement | null>(null);
+
+// The form is replaced on success and the submit button keeps focus on
+// errors, so move focus to where the result is.
+const focusResult = async () => {
+	await nextTick();
+	if (submitted.value) {
+		successHeading.value?.focus();
+		return;
+	}
+	formElement.value
+		?.querySelector<HTMLElement>("[aria-invalid='true']")
+		?.focus();
+};
 
 const onDocumentClick = (event: MouseEvent) => {
 	const target = event.target as HTMLElement | null;
@@ -160,29 +264,54 @@ onBeforeUnmount(() => {
 	document.removeEventListener("click", onDocumentClick);
 });
 
-const capturePartnershipEvent = (event: string) => {
+const capturePartnershipEvent = (
+	event: "enquiry_form_started" | "enquiry_form_submitted",
+) => {
 	window.posthog?.capture(event, {
 		form: "partnership_enquiry",
 		path: window.location.pathname,
 		route: path.value,
+		...(event === "enquiry_form_submitted"
+			? {
+					offer:
+						path.value === "Not sure yet"
+							? null
+							: applicationPathLabels[path.value],
+				}
+			: {}),
 	});
 };
 
-const trackStarted = (event: FocusEvent) => {
-	const target = event.target as HTMLElement | null;
+const trackStarted = (event: Event) => {
+	const target = event.target;
 	if (
 		formStarted.value ||
-		!target?.matches("input:not([type='hidden']), textarea")
+		!(
+			target instanceof HTMLInputElement ||
+			target instanceof HTMLTextAreaElement
+		) ||
+		!target.matches(
+			"input:not([type='hidden']):not([name='website']), textarea",
+		) ||
+		target.value.length === 0
 	) {
 		return;
 	}
 	formStarted.value = true;
-	capturePartnershipEvent("partnership_form_started");
+	capturePartnershipEvent("enquiry_form_started");
+};
+
+const onSubmit = (event: Event) => {
+	if (!ready.value) return;
+	event.preventDefault();
+	if (loading.value) return;
+	void submit();
 };
 
 async function submit() {
 	if (!ready.value || loading.value) return;
 	error.value = "";
+	errorCode.value = "";
 	fieldErrors.value = {};
 	fallback.value = false;
 	loading.value = true;
@@ -212,21 +341,28 @@ async function submit() {
 		} else if (result.data?.success) {
 			submitted.value = true;
 			if (result.data.accepted !== false) {
-				capturePartnershipEvent("partnership_form_submitted");
+				capturePartnershipEvent("enquiry_form_submitted");
 			}
 		} else if (result.data?.rateLimited) {
 			error.value =
 				"Too many enquiries were sent recently. Please wait a minute and try again.";
 		} else {
 			fallback.value = true;
+			errorCode.value =
+				result.data &&
+				"code" in result.data &&
+				typeof result.data.code === "string"
+					? result.data.code
+					: "";
 			error.value =
-				"Attio is not available, so your enquiry was not sent automatically.";
+				"Something went wrong, so your enquiry wasn't sent. Please email me directly.";
 		}
 	} catch {
 		fallback.value = true;
 		error.value = FALLBACK_ERROR;
 	} finally {
 		loading.value = false;
+		void focusResult();
 	}
 }
 </script>

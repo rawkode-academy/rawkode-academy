@@ -1,7 +1,0 @@
-{
-  "name": "gitlab",
-  "engineVersion": "v0.18.8",
-  "sdk": {
-    "source": "typescript"
-  }
-}

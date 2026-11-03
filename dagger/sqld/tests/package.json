@@ -1,9 +1,0 @@
-{
-	"dependencies": {
-		"@dagger.io/dagger": "./sdk",
-		"typescript": "^5.5.4"
-	},
-	"devDependencies": {
-		"@types/bun": "latest"
-	}
-}

@@ -408,7 +408,7 @@ export const academyShell = sva({
 			display: "grid",
 			gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
 			gap: "8",
-			_lg: { gridTemplateColumns: "repeat(4, minmax(0, 1fr))" },
+			_lg: { gridTemplateColumns: "repeat(5, minmax(0, 1fr))" },
 		},
 		footerGroup: {
 			display: "flex",

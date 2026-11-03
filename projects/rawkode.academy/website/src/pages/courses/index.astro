@@ -1,16 +1,23 @@
 ---
-import { getCollection, getEntries } from "astro:content";
-import { getImage } from "astro:assets";
+import {
+	type ContentEntry,
+	getCollection,
+	getEntries,
+	setContentCache,
+} from "@/lib/live-content";
 import AcademyCatalogCard from "@/components/academy/AcademyCatalogCard.astro";
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
 import CourseItemListJsonLd from "@/components/html/course-itemlist-jsonld.astro";
 import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 import { getCourseModuleSlug } from "@/utils/course-path";
 import Page from "@/wrappers/page.astro";
+import { type LocalTimeValue, localTime } from "@/lib/local-time";
 
-export const prerender = true;
+export const prerender = false;
 
-// Get all courses and sort by published date
+// Get all published courses and sort by published date (scheduled courses
+// stay hidden until their publishedAt; setContentCache caps the page's maxAge
+// at that instant).
 const allCourses = (await getCollection("courses")).sort(
 	(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
 );
@@ -26,23 +33,11 @@ function availabilityLabel(courseId: string) {
 		? "Announced · no lessons available yet"
 		: `${count} lesson${count === 1 ? "" : "s"} available`;
 }
+// Covers are remote (content.rawkode.academy); the runtime image service is a
+// passthrough on SSR routes, so use the source URL directly.
 const courseImages = new Map(
-	await Promise.all(
-		allCourses.map(
-			async (course) =>
-				[
-					course.id,
-					course.data.cover
-						? (
-								await getImage({
-									src: course.data.cover.image,
-									width: 960,
-									format: "webp",
-								})
-							).src
-						: undefined,
-				] as const,
-		),
+	allCourses.map(
+		(course) => [course.id, course.data.cover?.image.src] as const,
 	),
 );
 
@@ -51,7 +46,8 @@ let featuredModuleCount = 0;
 let featuredAvailableModuleCount = 0;
 let firstModuleSlug: string | undefined;
 let featuredAuthors: { name: string; avatarUrl?: string | undefined }[] = [];
-let featuredPublishedLabel: string | undefined;
+let featuredPublished: LocalTimeValue | undefined;
+let featuredAuthorEntries: ContentEntry<"people">[] = [];
 
 if (featuredCourse) {
 	const courseModules = allModules
@@ -69,19 +65,22 @@ if (featuredCourse) {
 		: undefined;
 
 	const authors = await getEntries(featuredCourse.data.authors);
+	featuredAuthorEntries = authors;
 	featuredAuthors = authors.map((author) => ({
 		name: author.data.name,
 		avatarUrl: author.data.avatarUrl,
 	}));
-	featuredPublishedLabel = featuredCourse.data.publishedAt.toLocaleDateString(
-		"en-US",
-		{
-			month: "short",
-			day: "numeric",
-			year: "numeric",
-		},
-	);
+	featuredPublished = localTime(featuredCourse.data.publishedAt, {
+		month: "short",
+		day: "numeric",
+		year: "numeric",
+	});
 }
+
+await setContentCache(Astro, {
+	entries: [...allCourses, ...allModules, ...featuredAuthorEntries],
+	collections: ["courses", "courseModules"],
+});
 
 const pageTitle = "Cloud Native Courses";
 const pageDescription =
@@ -107,7 +106,7 @@ const catalog = academyCatalog();
 						<p class={catalog.featuredKicker}>Featured course · {featuredAvailableModuleCount > 0 ? `${featuredAvailableModuleCount}/${featuredModuleCount} lessons available` : availabilityLabel(featuredCourse.id)}</p>
 						<h2 class={catalog.featuredTitle}>{featuredCourse.data.title}</h2>
 						<p class={catalog.featuredDescription}>{featuredCourse.data.description}</p>
-						<p class={catalog.rowMeta}>{featuredCourse.data.difficulty} · {featuredPublishedLabel}{featuredAuthors.length > 0 && ` · ${featuredAuthors.map((author) => author.name).join(", ")}`}</p>
+						<p class={catalog.rowMeta}>{featuredCourse.data.difficulty} · {featuredPublished && <time {...featuredPublished.attrs}>{featuredPublished.text}</time>}{featuredAuthors.length > 0 && ` · ${featuredAuthors.map((author) => author.name).join(", ")}`}</p>
 						<a class={styles.button} href={firstModuleSlug ? `/courses/${featuredCourse.id}/${firstModuleSlug}` : `/courses/${featuredCourse.id}`}>{firstModuleSlug ? "Start the course →" : "View course plan →"}</a>
 					</div>
 					{courseImages.get(featuredCourse.id) && <a class={catalog.featuredMedia} href={`/courses/${featuredCourse.id}`} aria-label={`Explore ${featuredCourse.data.title}`}>

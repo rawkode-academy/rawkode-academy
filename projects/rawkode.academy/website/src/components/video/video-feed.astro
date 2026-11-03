@@ -2,6 +2,7 @@
 import VideoProgressBar from "@/components/video/VideoProgressBar.vue";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { formatVideoRuntimeLabel } from "@/lib/video-runtime";
+import { localTime } from "@/lib/local-time";
 import { academyDocument } from "@rawkodeacademy/design-system";
 
 const doc = academyDocument();
@@ -47,7 +48,7 @@ const videos = passedVideos.map((v) => ({
 }));
 
 function formatDate(dateString: string) {
-	return new Date(dateString).toLocaleDateString("en-US", {
+	return localTime(dateString, {
 		year: "numeric",
 		month: "short",
 		day: "numeric",
@@ -86,7 +87,7 @@ function calculateProgress(videoId: string, duration: number): number | null {
 				</div>
 				<div class="vfeed__body-wrap">
 					<div class:list={[doc.meta, "vfeed__meta"]}>
-						<time datetime={video.publishedAt}>{formatDate(video.publishedAt)}</time>
+						<time {...formatDate(video.publishedAt).attrs}>{formatDate(video.publishedAt).text}</time>
 					</div>
 					<h3 class:list={[doc.cardTitle, "vfeed__item-title"]}>{video.title}</h3>
 				</div>

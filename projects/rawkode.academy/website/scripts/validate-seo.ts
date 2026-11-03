@@ -1,18 +1,38 @@
 #!/usr/bin/env bun
-import { glob } from "glob";
-import { readFile } from "node:fs/promises";
-import { fileURLToPath } from "node:url";
-import matter from "gray-matter";
+// Validates SEO-relevant fields of the content served by the API gateway
+// (content lives in D1 platform services, not in files). Point it at another
+// gateway with GRAPHQL_ENDPOINT, e.g. a local composed gateway.
+const GRAPHQL_ENDPOINT =
+	process.env.GRAPHQL_ENDPOINT ?? "https://api.rawkode.academy/";
+
+// biome-ignore lint/suspicious/noExplicitAny: untyped gateway JSON
+type Data = Record<string, any>;
 
 interface ValidationError {
 	file: string;
 	errors: string[];
 }
 
-async function validateArticle(filePath: string): Promise<string[]> {
+async function query<T>(operationName: string, query: string): Promise<T> {
+	const response = await fetch(GRAPHQL_ENDPOINT, {
+		method: "POST",
+		headers: { "content-type": "application/json" },
+		body: JSON.stringify({ operationName, query }),
+	});
+	const payload = (await response.json()) as {
+		data?: T;
+		errors?: { message: string }[];
+	};
+	if (!response.ok || payload.errors?.length || !payload.data) {
+		throw new Error(
+			`${operationName} failed: HTTP ${response.status} ${payload.errors?.map((e) => e.message).join("; ") ?? ""}`,
+		);
+	}
+	return payload.data;
+}
+
+function validateArticle(data: Data): string[] {
 	const errors: string[] = [];
-	const content = await readFile(filePath, "utf-8");
-	const { data } = matter(content);
 
 	// Title validation
 	if (!data.title) {
@@ -72,10 +92,8 @@ async function validateArticle(filePath: string): Promise<string[]> {
 	return errors;
 }
 
-async function validateCourse(filePath: string): Promise<string[]> {
+function validateCourse(data: Data): string[] {
 	const errors: string[] = [];
-	const content = await readFile(filePath, "utf-8");
-	const { data } = matter(content);
 
 	// Title validation
 	if (!data.title) {
@@ -107,10 +125,8 @@ async function validateCourse(filePath: string): Promise<string[]> {
 	return errors;
 }
 
-async function validateVideo(filePath: string): Promise<string[]> {
+function validateVideo(data: Data): string[] {
 	const errors: string[] = [];
-	const content = await readFile(filePath, "utf-8");
-	const { data } = matter(content);
 
 	if (!data.id || String(data.id).trim().length === 0) {
 		errors.push("Missing video id");
@@ -142,38 +158,49 @@ async function validateVideo(filePath: string): Promise<string[]> {
 }
 
 async function main() {
-	console.log("🔍 Validating SEO requirements...\n");
-
-	const validationErrors: ValidationError[] = [];
-	const contentRoot = fileURLToPath(
-		new URL("../../../../content", import.meta.url),
+	console.log(
+		`🔍 Validating SEO requirements against ${GRAPHQL_ENDPOINT}...\n`,
 	);
 
-	// Validate articles
-	const articleFiles = await glob(`${contentRoot}/articles/**/*.{md,mdx}`);
-	for (const file of articleFiles) {
-		const errors = await validateArticle(file);
-		if (errors.length > 0) {
-			validationErrors.push({ file, errors });
+	const validationErrors: ValidationError[] = [];
+	const [{ allArticles }, { allCourses }, { getAllVideos }] = await Promise.all(
+		[
+			query<{ allArticles: Data[] }>(
+				"SeoArticles",
+				"query SeoArticles { allArticles { id title description openGraph { title subtitle } publishedAt authors { id } cover { alt } } }",
+			),
+			query<{ allCourses: Data[] }>(
+				"SeoCourses",
+				"query SeoCourses { allCourses { id title description publishedAt difficulty modules { id title description publishedAt difficulty } } }",
+			),
+			query<{ getAllVideos: Data[] }>(
+				"SeoVideos",
+				"query SeoVideos { getAllVideos { id slug title description publishedAt duration } }",
+			),
+		],
+	);
+
+	const check = (file: string, errors: string[]) => {
+		if (errors.length > 0) validationErrors.push({ file, errors });
+	};
+	for (const article of allArticles) {
+		check(`articles/${article.id}`, validateArticle(article));
+	}
+	for (const course of allCourses) {
+		check(`courses/${course.id}`, validateCourse(course));
+		for (const module of course.modules ?? []) {
+			// Modules inherit the course difficulty when they have none.
+			check(
+				`courseModules/${module.id}`,
+				validateCourse({
+					...module,
+					difficulty: module.difficulty ?? course.difficulty,
+				}),
+			);
 		}
 	}
-
-	// Validate courses
-	const courseFiles = await glob(`${contentRoot}/courses/**/*.{md,mdx}`);
-	for (const file of courseFiles) {
-		const errors = await validateCourse(file);
-		if (errors.length > 0) {
-			validationErrors.push({ file, errors });
-		}
-	}
-
-	// Validate videos
-	const videoFiles = await glob(`${contentRoot}/videos/**/*.{md,mdx}`);
-	for (const file of videoFiles) {
-		const errors = await validateVideo(file);
-		if (errors.length > 0) {
-			validationErrors.push({ file, errors });
-		}
+	for (const video of getAllVideos) {
+		check(`videos/${video.id}`, validateVideo(video));
 	}
 
 	// Report results
@@ -191,7 +218,7 @@ async function main() {
 			console.error("");
 		}
 
-		console.error(`Total files with errors: ${validationErrors.length}`);
+		console.error(`Total entries with errors: ${validationErrors.length}`);
 		process.exit(1);
 	}
 }

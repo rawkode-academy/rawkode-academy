@@ -4,13 +4,27 @@ import { print } from "graphql";
 /**
  * Map subgraph names (as they appear in the supergraph) to service binding keys.
  * The keys must match the binding names in wrangler.jsonc.
- *
- * Content subgraphs are served by the website worker via its /graphql endpoint.
- * User interaction subgraphs remain as separate workers.
  */
 export const SUBGRAPH_BINDING_MAP: Record<string, keyof Env> = {
-	// Website serves all content subgraphs
-	website: "WEBSITE",
+	people: "PEOPLE",
+	technologies: "TECHNOLOGIES",
+	shows: "SHOWS",
+	videos: "VIDEOS",
+	"video-guests": "VIDEO_GUESTS",
+	"video-technologies": "VIDEO_TECHNOLOGIES",
+	"show-hosts": "SHOW_HOSTS",
+	episodes: "EPISODES",
+	chapters: "CHAPTERS",
+	"people-links": "PEOPLE_LINKS",
+	"people-biographies": "PEOPLE_BIOGRAPHIES",
+	"transcription-terms": "TRANSCRIPTION_TERMS",
+	// Editorial content
+	articles: "ARTICLES",
+	news: "NEWS",
+	changelog: "CHANGELOG",
+	adrs: "ADRS",
+	testimonials: "TESTIMONIALS",
+	courses: "COURSES",
 	// User interaction services (dynamic data)
 	"emoji-reactions": "EMOJI_REACTIONS",
 	"email-preferences": "EMAIL_PREFERENCES",
@@ -88,13 +102,7 @@ export function createServiceBindingTransport(env: Env): Transport {
 					}
 				}
 
-				// Execute via service binding
-				// For the website subgraph, we need to hit the /graphql endpoint
-				const url =
-					subgraphName === "website"
-						? "https://internal/graphql"
-						: "https://internal/";
-				const response = await serviceBinding.fetch(url, {
+				const response = await serviceBinding.fetch("https://internal/", {
 					method: "POST",
 					headers,
 					body: JSON.stringify({
