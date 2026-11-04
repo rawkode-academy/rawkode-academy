@@ -230,5 +230,7 @@ const structuredData = isVideoList
 {!isVideoList && duration && <meta property="og:video:duration" content={String(Math.floor(duration))} />}
 {!isVideoList && publishedAt && <meta property="og:video:release_date" content={publishedAt} />}
 
+<!-- Twitter cards are emitted once by the shared OpenGraph metadata. -->
+
 <!-- Structured Data -->
 <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
