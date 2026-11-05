@@ -83,7 +83,9 @@ const logAnalytics = async (
 		attributes: ["path", "country", "continent"],
 	};
 
-	console.log("Sending analytics event", { payload });
+	// Log the id, not the payload: it carries the raw user agent, and these
+	// logs are exported to Grafana.
+	console.log("Sending analytics event", { id: event.id });
 
 	const response = await env.ANALYTICS.fetch("https://analytics/track", {
 		method: "POST",
@@ -96,7 +98,7 @@ const logAnalytics = async (
 		console.error("Analytics tracking failed", {
 			status: response.status,
 			body,
-			event,
+			id: event.id,
 		});
 	}
 };

@@ -3,11 +3,12 @@
 //   cuenv task reconcile -e production          # last 7 full days
 //   DAYS=14 cuenv task reconcile -e production
 //
-// Server-side events (`<source>.<type>`, written by both destinations from the
-// collector) must agree within TOLERANCE. Browser events should read the same
-// or higher in Basin: ad blockers stop posthog-js but not the first-party
-// endpoint, and Basin records page views on load rather than after idle.
-// Exits 1 when a server event drifts or Basin is missing a day of data.
+// Each event is compared day by day over every full day since ingestion
+// started. Server-side events (`<source>.<type>`, written by both destinations
+// from the collector) must agree within TOLERANCE. Browser events should read
+// the same or higher in Basin: ad blockers stop posthog-js but not the
+// first-party endpoint, and Basin records page views on load rather than after
+// idle. Exits 1 when any event fails on any day or Basin is missing a day.
 
 import { basinQuery } from "../../../rawkode.academy/website/src/server/basin";
 
@@ -102,27 +103,59 @@ for (const row of basinRows) {
 	add(lake, String(row.event), String(row.day), Number(row.c));
 }
 
-// Compare only full days after the stream started receiving data.
-const basinDays = [...lake.values()].flatMap((days) => [...days.keys()]).sort();
-const firstFullDay = basinDays[0];
-if (!firstFullDay) {
-	console.error(`No rows in analytics.events between ${fromIso} and ${toIso}.`);
+// Find when ingestion started from the whole table, not this window: a stream
+// that stopped and resumed inside the window must fail, not look like a
+// fresh start. The first day is partial unless it began at midnight.
+const [startRow] = await basin("SELECT min(ts) AS first FROM analytics.events");
+const firstTs = startRow?.first ? new Date(String(startRow.first)) : undefined;
+if (!firstTs || Number.isNaN(firstTs.getTime())) {
+	console.error("analytics.events has no rows: the stream isn't receiving data.");
 	process.exit(1);
 }
+const firstFullDay = new Date(
+	Date.UTC(
+		firstTs.getUTCFullYear(),
+		firstTs.getUTCMonth(),
+		firstTs.getUTCDate(),
+	),
+);
+if (firstFullDay.getTime() < firstTs.getTime()) {
+	firstFullDay.setUTCDate(firstFullDay.getUTCDate() + 1);
+}
+
 const days: string[] = [];
-for (let d = new Date(`${firstFullDay}T00:00:00Z`); d < to; ) {
-	d.setUTCDate(d.getUTCDate() + 1);
-	if (d < to) days.push(d.toISOString().slice(0, 10));
+for (
+	const d = new Date(Math.max(from.getTime(), firstFullDay.getTime()));
+	d < to;
+	d.setUTCDate(d.getUTCDate() + 1)
+) {
+	days.push(d.toISOString().slice(0, 10));
 }
 if (days.length === 0) {
-	console.log(`Basin data starts ${firstFullDay}; no full day to compare yet.`);
+	console.log(
+		`Ingestion started ${firstTs.toISOString()}; no full day to compare yet.`,
+	);
 	process.exit(0);
 }
 
+const count = (counts: Counts, event: string, day: string) =>
+	counts.get(event)?.get(day) ?? 0;
 const total = (counts: Counts, event: string) =>
-	days.reduce((sum, day) => sum + (counts.get(event)?.get(day) ?? 0), 0);
+	days.reduce((sum, day) => sum + count(counts, event, day), 0);
 
-type Line = { event: string; posthog: number; basin: number; status: string };
+// Each event is checked day by day: window totals can hide a day that ran
+// double and another that ran half. The absolute slack stops a single event
+// landing either side of midnight failing a low-volume event.
+const SLACK = 2;
+const allowed = (p: number) => Math.max(p * TOLERANCE, SLACK);
+
+type Line = {
+	event: string;
+	posthog: number;
+	basin: number;
+	status: string;
+	failing_days: string;
+};
 const lines: Line[] = [];
 let failed = false;
 
@@ -132,25 +165,43 @@ for (const event of [...events].sort()) {
 	const b = total(lake, event);
 	if (p === 0 && b === 0) continue;
 
-	let status: string;
-	if (POSTHOG_ONLY.has(event)) {
-		status = "PostHog only (not migrated)";
-	} else if (BASIN_ONLY.has(event)) {
-		status = "Basin only";
-	} else if (!event.includes(".")) {
-		// Browser event: Basin should match or exceed PostHog.
-		status =
-			b >= p * (1 - TOLERANCE)
-				? b > p * (1 + TOLERANCE)
-					? `ok (+${(((b - p) / Math.max(p, 1)) * 100).toFixed(0)}% blockers/early capture)`
-					: "ok"
-				: "LOW";
-	} else {
-		const drift = Math.abs(b - p) / Math.max(p, 1);
-		status = drift <= TOLERANCE ? "ok" : `DRIFT ${(drift * 100).toFixed(1)}%`;
+	if (POSTHOG_ONLY.has(event) || BASIN_ONLY.has(event)) {
+		lines.push({
+			event,
+			posthog: p,
+			basin: b,
+			status: POSTHOG_ONLY.has(event)
+				? "PostHog only (not migrated)"
+				: "Basin only",
+			failing_days: "",
+		});
+		continue;
 	}
-	if (status === "LOW" || status.startsWith("DRIFT")) failed = true;
-	lines.push({ event, posthog: p, basin: b, status });
+
+	// Browser events may read higher in Basin; server events must match.
+	const browser = !event.includes(".");
+	const failing = days.filter((day) => {
+		const pd = count(ph, event, day);
+		const bd = count(lake, event, day);
+		return browser ? bd < pd - allowed(pd) : Math.abs(bd - pd) > allowed(pd);
+	});
+
+	let status: string;
+	if (failing.length > 0) {
+		status = browser ? "LOW" : "DRIFT";
+		failed = true;
+	} else if (browser && b > p + allowed(p)) {
+		status = `ok (+${(((b - p) / Math.max(p, 1)) * 100).toFixed(0)}% blockers/early capture)`;
+	} else {
+		status = "ok";
+	}
+	lines.push({
+		event,
+		posthog: p,
+		basin: b,
+		status,
+		failing_days: failing.join(", "),
+	});
 }
 
 const missingDays = days.filter(
@@ -158,7 +209,9 @@ const missingDays = days.filter(
 );
 if (missingDays.length > 0) failed = true;
 
-console.log(`Reconciling ${days[0]} to ${days.at(-1)} (${days.length} full days)\n`);
+console.log(
+	`Reconciling ${days[0]} to ${days.at(-1)} (${days.length} full days, ingestion started ${firstTs.toISOString()})\n`,
+);
 console.table(lines);
 if (missingDays.length > 0) {
 	console.log(`Basin has no rows at all on: ${missingDays.join(", ")}`);

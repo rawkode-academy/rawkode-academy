@@ -78,36 +78,6 @@ export class PostHogCollector extends WorkerEntrypoint<Env> {
 			}
 		}
 
-		// Browser events from the website's /api/e. These go to the Basin stream
-		// only: posthog-js already sends them to PostHog during the dual-run.
-		if (url.pathname === "/ingest" && request.method === "POST") {
-			try {
-				const body = (await request.json().catch(() => null)) as {
-					events?: unknown;
-					context?: WebContext;
-				} | null;
-				if (!body || !Array.isArray(body.events)) {
-					return Response.json(
-						{ success: false, error: "Expected { events: [] }" },
-						{ status: 400 },
-					);
-				}
-				const accepted = await this.ingestWebEvents(
-					body.events as WebEvent[],
-					body.context ?? {},
-				);
-				return Response.json({ success: true, accepted });
-			} catch (error) {
-				const errorMessage =
-					error instanceof Error ? error.message : "Unknown error";
-				console.error("Ingest endpoint error", { error: errorMessage });
-				return Response.json(
-					{ success: false, error: errorMessage },
-					{ status: 400 },
-				);
-			}
-		}
-
 		// CloudEvent tracking endpoint (compatible with analytics worker)
 		if (url.pathname === "/track" && request.method === "POST") {
 			try {
@@ -177,6 +147,12 @@ export class PostHogCollector extends WorkerEntrypoint<Env> {
 		return { success: true };
 	}
 
+	/**
+	 * Browser events from the website's /api/e, written to the Basin stream only:
+	 * posthog-js already sends them to PostHog during the dual-run. RPC only,
+	 * never HTTP: the collector is public on workers.dev, and `context` (user,
+	 * geography, user agent) must come from the website, not the caller.
+	 */
 	async ingestWebEvents(
 		events: WebEvent[],
 		context: WebContext,

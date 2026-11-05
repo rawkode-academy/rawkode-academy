@@ -8,7 +8,8 @@ export const RANGES = { "7d": 7, "30d": 30, "90d": 90 } as const;
 export type Range = keyof typeof RANGES;
 
 export function parseRange(value: string | null): Range {
-	return value && value in RANGES ? (value as Range) : "30d";
+	// Own keys only: `in` also accepts "constructor", "__proto__" and friends.
+	return value && Object.hasOwn(RANGES, value) ? (value as Range) : "30d";
 }
 
 /** Midnight UTC, `days` days ago, so cached results stay stable all day. */
@@ -100,6 +101,12 @@ export const dashboardQueries = (range: Range) => ({
 		FROM ${TABLE}
 		WHERE ${since(range)} AND event IN (${list(Object.values(SIGN_IN_EVENTS))})
 		GROUP BY 1, 2`,
+
+	linkTotals: `
+		SELECT count(*) AS clicks,
+			sum(CASE WHEN is_bot THEN 1 ELSE 0 END) AS bot_clicks
+		FROM ${TABLE}
+		WHERE ${since(range)} AND event = 'rawkode-link.link.redirect'`,
 
 	links: `
 		SELECT url_host, url_path,

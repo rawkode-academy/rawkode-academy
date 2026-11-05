@@ -5,11 +5,11 @@ Iceberg table, `analytics.events`, in the R2 bucket `rawkode-analytics`, and
 are queried with Basin SQL (or DuckDB, Spark, anything that reads Iceberg).
 
 ```
-website (browser) ── /api/e ──┐
-                               ├─► observability-collector ─► stream analytics_events
-services (CloudEvents) ─ /track┘        │                         │ pipeline.sql
-                                         └─► PostHog, Grafana       ▼
-                                             (until cutover)   sink ─► analytics.events (Iceberg)
+website (browser) ─ /api/e ─ RPC ─┐
+                                   ├─► observability-collector ─► stream analytics_events
+services (CloudEvents) ─── /track ─┘        │                        │ pipeline.sql
+                                             └─► PostHog, Grafana     ▼
+                                                 (until cutover)   sink ─► analytics.events (Iceberg)
 ```
 
 - **Server events** already flow through the collector's `/track`. Each one is
@@ -18,8 +18,11 @@ services (CloudEvents) ─ /track┘        │                         │ pipe
 - **Browser events** go through `track()` / `capture()` in
   `website/src/lib/analytics/track.ts`, which beacons to the website's
   same-origin `/api/e`. The website adds user, country and user agent, and
-  forwards to the collector's `/ingest`, which writes to the stream only:
-  posthog-js still sends its own copy during the dual-run.
+  forwards them over its service binding to the collector's `ingestWebEvents`
+  RPC method, which writes to the stream only: posthog-js still sends its own
+  copy during the dual-run. There is deliberately no HTTP route for this: the
+  collector is public on workers.dev, so a route would let anyone forge the
+  user and request context.
 - The collector owns the row schema (`src/events.ts`). Raw user agents and IPs
   are never stored: user agents are reduced to `device`, `browser` and
   `is_bot` before the row is written.

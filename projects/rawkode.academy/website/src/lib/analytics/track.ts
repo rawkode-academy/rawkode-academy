@@ -9,6 +9,11 @@ const SESSION_KEY = "rk_sid";
 const SESSION_IDLE_MS = 30 * 60 * 1000;
 const FLUSH_DELAY_MS = 2000;
 const MAX_BATCH = 50;
+// /api/e rejects bodies over 64 KiB, and keepalive fetch and sendBeacon share
+// a 64 KiB budget, so batches are cut by size, leaving room for the envelope.
+const MAX_BATCH_BYTES = 60 * 1024;
+// The collector keeps at most 8 KB of properties per event anyway.
+const MAX_EVENT_BYTES = 8 * 1024;
 
 export interface TrackedEvent {
 	event_id: string;
@@ -96,9 +101,32 @@ export function flush(unloading = false): void {
 		clearTimeout(timer);
 		timer = undefined;
 	}
-	while (queue.length > 0) {
-		send(queue.splice(0, MAX_BATCH), unloading);
+	const encoder = new TextEncoder();
+	let batch: TrackedEvent[] = [];
+	let batchBytes = 0;
+	for (const queued of queue.splice(0)) {
+		let event = queued;
+		let bytes = encoder.encode(JSON.stringify(event)).byteLength;
+		if (bytes > MAX_EVENT_BYTES && event.properties) {
+			event = {
+				...event,
+				properties: { _truncated: true, keys: Object.keys(event.properties) },
+			};
+			bytes = encoder.encode(JSON.stringify(event)).byteLength;
+		}
+		if (bytes > MAX_EVENT_BYTES) continue;
+		if (
+			batch.length > 0 &&
+			(batch.length >= MAX_BATCH || batchBytes + bytes > MAX_BATCH_BYTES)
+		) {
+			send(batch, unloading);
+			batch = [];
+			batchBytes = 0;
+		}
+		batch.push(event);
+		batchBytes += bytes + 1;
 	}
+	if (batch.length > 0) send(batch, unloading);
 }
 
 function listenForUnload(): void {

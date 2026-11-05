@@ -65,6 +65,32 @@ describe("track()", () => {
 		expect(document.cookie).toContain(`rk_aid=${first?.anonymous_id}`);
 	});
 
+	it("splits batches by size so none exceeds the 64 KiB endpoint limit", () => {
+		for (let i = 0; i < 40; i++) track("$exception", { stack: "x".repeat(3000) });
+		flush();
+		const bodies = fetchMock.mock.calls.map(
+			([, init]) => (init as RequestInit).body as string,
+		);
+		expect(bodies.length).toBeGreaterThan(1);
+		for (const body of bodies) {
+			expect(new TextEncoder().encode(body).byteLength).toBeLessThan(64 * 1024);
+		}
+		const sent = sentBatches(fetchMock).flatMap((batch) => batch.events);
+		expect(sent).toHaveLength(40);
+	});
+
+	it("keeps an oversized event but drops its properties", () => {
+		track("page_view");
+		track("$exception", { stack: "x".repeat(20_000) });
+		flush();
+		const [batch] = sentBatches(fetchMock);
+		expect(batch?.events.map((e) => e.event)).toEqual(["page_view", "$exception"]);
+		expect(batch?.events[1]?.properties).toEqual({
+			_truncated: true,
+			keys: ["stack"],
+		});
+	});
+
 	it("flushes immediately once a batch is full", () => {
 		for (let i = 0; i < 50; i++) track("seek");
 		expect(fetchMock).toHaveBeenCalledTimes(1);
@@ -121,11 +147,11 @@ describe("track()", () => {
 });
 
 describe("POST /api/e", () => {
-	const analytics = { fetch: vi.fn() };
+	const analytics = { ingestWebEvents: vi.fn() };
 	const testEnv = env as unknown as Record<string, unknown>;
 
 	beforeEach(() => {
-		analytics.fetch.mockResolvedValue(Response.json({ success: true }));
+		analytics.ingestWebEvents.mockResolvedValue(1);
 		testEnv.ANALYTICS = analytics;
 	});
 
@@ -159,11 +185,9 @@ describe("POST /api/e", () => {
 		);
 
 		expect(response.status).toBe(204);
-		const [url, init] = analytics.fetch.mock.calls[0] ?? [];
-		expect(url).toBe("https://analytics.internal/ingest");
-		const forwarded = JSON.parse((init as RequestInit).body as string);
-		expect(forwarded.events).toHaveLength(1);
-		expect(forwarded.context).toMatchObject({
+		const [events, context] = analytics.ingestWebEvents.mock.calls[0] ?? [];
+		expect(events).toHaveLength(1);
+		expect(context).toMatchObject({
 			user_id: "user-1",
 			user_agent: "Mozilla/5.0 Chrome/130.0",
 		});
@@ -175,7 +199,7 @@ describe("POST /api/e", () => {
 			{ origin: "https://evil.example" },
 		);
 		expect(response.status).toBe(403);
-		expect(analytics.fetch).not.toHaveBeenCalled();
+		expect(analytics.ingestWebEvents).not.toHaveBeenCalled();
 	});
 
 	it("rejects a malformed envelope", async () => {
@@ -186,7 +210,7 @@ describe("POST /api/e", () => {
 	it("rejects an oversized body without a Content-Length", async () => {
 		const response = await call("x".repeat(64 * 1024 + 1));
 		expect(response.status).toBe(413);
-		expect(analytics.fetch).not.toHaveBeenCalled();
+		expect(analytics.ingestWebEvents).not.toHaveBeenCalled();
 	});
 
 	it("caps a batch at 50 events", async () => {
@@ -195,8 +219,7 @@ describe("POST /api/e", () => {
 			event: "seek",
 		}));
 		await call({ events });
-		const init = analytics.fetch.mock.calls[0]?.[1] as RequestInit;
-		expect(JSON.parse(init.body as string).events).toHaveLength(50);
+		expect(analytics.ingestWebEvents.mock.calls[0]?.[0]).toHaveLength(50);
 	});
 });
 

@@ -14,6 +14,12 @@ describe("analytics dashboard queries", () => {
 		expect(parseRange("7d")).toBe("7d");
 	});
 
+	it("rejects inherited property names as ranges", () => {
+		for (const value of ["constructor", "__proto__", "toString"]) {
+			expect(parseRange(value)).toBe("30d");
+		}
+	});
+
 	it("starts ranges at midnight UTC so cached results hold all day", () => {
 		const now = new Date("2026-10-25T17:42:00Z");
 		expect(rangeStart("7d", now)).toBe("2026-10-18T00:00:00.000Z");

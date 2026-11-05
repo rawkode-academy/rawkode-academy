@@ -92,8 +92,9 @@ const clicks = newsletter.get(clicksEvent) ?? 0;
 const attempts = newsletter.get(attemptsEvent) ?? 0;
 const subscribed = newsletter.get(subscribedEvent) ?? 0;
 
-const linkClicks = results.links.rows.reduce((s, r) => s + num(r.clicks), 0);
-const linkBots = results.links.rows.reduce((s, r) => s + num(r.bot_clicks), 0);
+// All links, not just the top 25 listed below.
+const linkClicks = num(results.linkTotals.rows[0]?.clicks);
+const linkBots = num(results.linkTotals.rows[0]?.bot_clicks);
 ---
 
 <Page title="Analytics" description="First-party analytics from the Basin lake.">
@@ -143,6 +144,17 @@ const linkBots = results.links.rows.reduce((s, r) => s + num(r.bot_clicks), 0);
 					})
 				}
 			</svg>
+			<details class="figures">
+				<summary>Daily figures</summary>
+				<table>
+					<thead><tr><th>Day</th><th>Views</th><th>Visitors</th></tr></thead>
+					<tbody>
+						{traffic.map((row) => (
+							<tr><td>{row.day}</td><td>{fmt.format(num(row.views))}</td><td>~{fmt.format(num(row.visitors))}</td></tr>
+						))}
+					</tbody>
+				</table>
+			</details>
 		</section>
 
 		<div class="grid">
@@ -227,6 +239,7 @@ const linkBots = results.links.rows.reduce((s, r) => s + num(r.bot_clicks), 0);
 
 			<section class="panel">
 				<h2>Link redirects</h2>
+				{results.linkTotals.error && <p class="error">{results.linkTotals.error}</p>}
 				{results.links.error && <p class="error">{results.links.error}</p>}
 				<p class="stat">
 					<strong>{fmt.format(linkClicks - linkBots)}</strong> human clicks,
@@ -309,6 +322,20 @@ const linkBots = results.links.rows.reduce((s, r) => s + num(r.bot_clicks), 0);
 	}
 	.bars rect:hover {
 		fill: var(--editorial-ink);
+	}
+	.figures {
+		margin-block-start: 0.75rem;
+	}
+	.figures summary {
+		cursor: pointer;
+		font-family: var(--font-jetbrains-mono, ui-monospace, monospace);
+		font-size: 0.6875rem;
+		text-transform: uppercase;
+		letter-spacing: 0.14em;
+		color: var(--editorial-ink-mute);
+	}
+	.figures table {
+		margin-block-start: 0.5rem;
 	}
 	table {
 		width: 100%;

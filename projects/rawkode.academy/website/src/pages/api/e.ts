@@ -9,6 +9,20 @@ const logger = createLogger("analytics-ingest");
 const MAX_BODY_BYTES = 64 * 1024;
 const MAX_EVENTS = 50;
 
+// The collector's RPC method; it has no HTTP route, so callers can't forge
+// the user and request context added here.
+interface CollectorRpc {
+	ingestWebEvents(
+		events: unknown[],
+		context: {
+			user_id?: string | undefined;
+			user_agent: string;
+			country?: string | undefined;
+			continent?: string | undefined;
+		},
+	): Promise<number>;
+}
+
 // Browser events collected by src/lib/analytics/track.ts. The collector owns
 // the row schema; this endpoint only checks the envelope and attaches request
 // context the browser can't be trusted to supply.
@@ -39,26 +53,19 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
 		return new Response(null, { status: 400 });
 	}
 
-	const analytics = env.ANALYTICS as Fetcher | undefined;
+	const analytics = env.ANALYTICS as unknown as CollectorRpc | undefined;
 	if (!analytics) return new Response(null, { status: 204 });
 
 	const cf = (request as Request & { cf?: IncomingRequestCfProperties }).cf;
 
 	const forward = analytics
-		.fetch("https://analytics.internal/ingest", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({
-				events: body.events.slice(0, MAX_EVENTS),
-				context: {
-					user_id: locals.user?.id,
-					user_agent: request.headers.get("user-agent") ?? "",
-					country: cf?.country,
-					continent: cf?.continent,
-				},
-			}),
+		.ingestWebEvents(body.events.slice(0, MAX_EVENTS), {
+			user_id: locals.user?.id,
+			user_agent: request.headers.get("user-agent") ?? "",
+			country: cf?.country,
+			continent: cf?.continent,
 		})
-		.catch((error) => {
+		.catch((error: unknown) => {
 			logger.error("Analytics ingest failed", error);
 		});
 	// The reader's request shouldn't wait on the lake.
