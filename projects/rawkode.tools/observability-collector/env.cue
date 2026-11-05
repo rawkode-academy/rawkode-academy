@@ -19,14 +19,48 @@ let _deployInputs = [
 	"wrangler.jsonc",
 ]
 
+// infrastructure.cue needs nested output references (cuenv 0.67.0).
+_cuenvBinary:     "0.67.0"
+_ciInfisicalOidc: true
+
+let _infrastructure = [{allowInfrastructure: ["plan", "apply", "import", "destroy"]}]
+
+_cloudflareToken: schema.#OnePasswordRef & {
+	ref: "op://sa.rawkode.academy/cloudflare/api-tokens/workers"
+}
+
+// Where infrastructure.cue writes the Basin tokens.
+_basinSecret: schema.#InfisicalSecret & {
+	projectId:   "6575a392d7a5ef0555ade86b"
+	environment: "production"
+	secretPath:  "/projects/basin"
+	apiUrl:      "https://app.infisical.com"
+}
+
 env: {
 	SERVICE_NAME:          "observability-collector"
 	CLOUDFLARE_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce"
 
+	// Plan and apply run without an environment.
+	CLOUDFLARE_API_TOKEN: {
+		value: _cloudflareToken
+		policies: _infrastructure
+	}
+
+	// cuenv withholds Infisical credentials from providers unless the project
+	// passes them explicitly. The Infisical provider logs in with these; in CI
+	// the Infisical OIDC contributor sets them.
+	INFISICAL_AUTH_JWT: {
+		value: schema.#ExecSecret & {command: "printenv", args: ["INFISICAL_AUTH_JWT"]}
+		policies: _infrastructure
+	}
+	INFISICAL_MACHINE_IDENTITY_ID: {
+		value: schema.#ExecSecret & {command: "printenv", args: ["INFISICAL_MACHINE_IDENTITY_ID"]}
+		policies: _infrastructure
+	}
+
 	environment: production: {
-		CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {
-			ref: "op://sa.rawkode.academy/cloudflare/api-tokens/workers"
-		}
+		CLOUDFLARE_API_TOKEN: _cloudflareToken
 	}
 }
 
@@ -41,12 +75,12 @@ ci: pipelines: {
 		tasks: [_t.deploy]
 	}
 
-	// Streams, sinks and pipeline SQL are immutable, so provisioning is a
-	// deliberate, manual run rather than part of every deploy.
-	provision: {
+	// Compaction and snapshot expiry aren't in the Cloudflare provider yet,
+	// so infrastructure.cue can't enable them. Run once after the first apply.
+	maintenance: {
 		environment: "production"
 		when: manual: true
-		tasks: [_t.provision]
+		tasks: [_t.maintenance]
 	}
 }
 
@@ -73,18 +107,13 @@ tasks: {
 	}
 
 	// Secrets for these two tasks are scoped here, not to the environment, so
-	// a missing 1Password item can't break the collector's deploy.
-	provision: schema.#Task & {
+	// a missing Infisical secret can't break the collector's deploy.
+	maintenance: schema.#Task & {
 		hermetic: false
 		command:  "bash"
-		args: ["basin/provision.sh"]
-		inputs: ["basin/**"]
-		env: {
-			// R2 Admin Read & Write: used by the Iceberg sink and table maintenance.
-			BASIN_CATALOG_TOKEN: schema.#OnePasswordRef & {
-				ref: "op://sa.rawkode.academy/cloudflare/api-tokens/basin-catalog"
-			}
-		}
+		args: ["basin/maintenance.sh"]
+		inputs: ["basin/maintenance.sh"]
+		env: BASIN_CATALOG_TOKEN: _basinSecret & {secretName: "BASIN_CATALOG_TOKEN"}
 	}
 
 	reconcile: schema.#Task & {
@@ -92,9 +121,7 @@ tasks: {
 		command:  "bun"
 		args: ["basin/reconcile.ts"]
 		env: {
-			BASIN_SQL_TOKEN: schema.#OnePasswordRef & {
-				ref: "op://sa.rawkode.academy/cloudflare/api-tokens/basin-sql-read"
-			}
+			BASIN_SQL_TOKEN: _basinSecret & {secretName: "BASIN_SQL_TOKEN"}
 			POSTHOG_PROJECT_ID: "12084"
 			POSTHOG_PERSONAL_API_KEY: schema.#OnePasswordRef & {
 				ref: "op://sa.rawkode.academy/posthog/personal-api-key"

@@ -22,7 +22,7 @@ export interface Env {
 	DATA_BUFFER: DurableObjectNamespace<DataBuffer>;
 	POSTHOG_PROJECT_TOKEN: SecretsStoreSecret;
 	POSTHOG_HOST: string;
-	/** Basin stream `analytics_events`; absent until basin/provision.sh has run. */
+	/** Basin stream `analytics_events`; absent until the wrangler.jsonc binding is uncommented. */
 	EVENTS?: EventsStream;
 }
 

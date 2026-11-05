@@ -38,6 +38,8 @@ ci: pipelines: {
 			manual:        true
 		}
 		// Hold deployment until the Studio and viewer rollout is coordinated.
+		// deploy.main reads BASIN_SQL_TOKEN from Infisical, so set
+		// _ciInfisicalOidc when this pipeline runs it.
 		tasks: [_t.build]
 	}
 
@@ -106,7 +108,18 @@ tasks: {
 				"-lc",
 				"\(_toolchain) sh -c 'bun run build && bun scripts/wrangler-deploy.ts deploy --config ./dist/server/wrangler.json --purge'",
 			]
-			env: PATH: _taskPath
+			env: {
+				PATH: _taskPath
+				// Written to Infisical by the observability collector's
+				// infrastructure.cue. scripts/wrangler-deploy.ts uploads it.
+				BASIN_SQL_TOKEN: schema.#InfisicalSecret & {
+					projectId:   "6575a392d7a5ef0555ade86b"
+					environment: "production"
+					secretPath:  "/projects/basin"
+					secretName:  "BASIN_SQL_TOKEN"
+					apiUrl:      "https://app.infisical.com"
+				}
+			}
 			// env.cue drives build-time vars (e.g. DISABLE_GAME_AUTH); include it so
 			// an env-only change marks this deploy affected (else CI skips it).
 			inputs: [

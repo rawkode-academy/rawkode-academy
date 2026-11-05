@@ -36,21 +36,34 @@ services (CloudEvents) ─ /track┘        │                         │ pipe
   compaction and snapshot expiry keep file counts down.
 - Basin SQL returns at most 10,000 rows per query and has no `OFFSET`.
 
-## Provisioning (once)
+## Provisioning
 
-1. Create two Cloudflare API tokens and store them in 1Password
-   (`sa.rawkode.academy` vault):
-   - `cloudflare/api-tokens/basin-catalog`: R2 Admin Read & Write. Used by the
-     sink and table maintenance.
-   - `cloudflare/api-tokens/basin-sql-read`: Basin Catalog read, R2 read, Basin
-     SQL read. Used by the dashboard and `reconcile`.
-2. Run the `rawkode-tools-observability-collector-provision` workflow, or
-   locally: `cuenv task provision -e production`.
-3. Uncomment the `pipelines` binding in `../wrangler.jsonc` with the stream ID
-   the script prints, and merge. Until then the collector skips the stream.
-4. Add `BASIN_SQL_TOKEN` (the read token) to the website's production env in
-   `website/env.cue`. The deploy script uploads it when present; without it,
-   `/internal/analytics` shows "not configured".
+`../infrastructure.cue` declares the bucket, catalog, API tokens, stream, sink,
+pipeline and the Infisical secrets. Pull requests plan it and merging to `main`
+applies it, the same way as `infrastructure/dns`.
+
+Before the first plan:
+
+1. Create an Infisical machine identity with GitHub OIDC auth and access to
+   `/projects/basin` in the `production` environment, and add its ID as the
+   `INFISICAL_MACHINE_IDENTITY_ID` repository secret.
+2. Give the `workers` Cloudflare token (`cloudflare/api-tokens/workers` in
+   1Password) edit permission on Pipelines, R2 Data Catalog and Account API
+   Tokens.
+
+After the first apply:
+
+1. Uncomment the `pipelines` binding in `../wrangler.jsonc` with the stream ID
+   from `bun x wrangler pipelines streams list`, and merge. Until then the
+   collector skips the stream.
+2. Run the `rawkode-tools-observability-collector-maintenance` workflow once to
+   enable compaction and snapshot expiry, which the Cloudflare provider can't
+   manage yet.
+
+The website's `deploy.main` task reads `BASIN_SQL_TOKEN` from Infisical, so run
+it locally with `INFISICAL_CLIENT_ID` and `INFISICAL_CLIENT_SECRET` set. A
+deployed Worker without the token shows "not configured" on
+`/internal/analytics`.
 
 ## Dual-run and cutover
 
