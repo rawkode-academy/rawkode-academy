@@ -108,6 +108,7 @@ tasks: {
 				"-lc",
 				"\(_toolchain) sh -c 'bun run build && bun scripts/wrangler-deploy.ts deploy --config ./dist/server/wrangler.json --purge'",
 			]
+			labels: ["infisical"]
 			env: {
 				PATH: _taskPath
 				// Written to Infisical by the observability collector's

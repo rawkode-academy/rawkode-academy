@@ -42,17 +42,20 @@ services (CloudEvents) ─── /track ─┘        │                       
 ## Provisioning
 
 `../infrastructure.cue` declares the bucket, catalog, API tokens, stream, sink,
-pipeline and the Infisical secrets. Pull requests plan it and merging to `main`
-applies it, the same way as `infrastructure/dns`.
+pipeline and the Infisical secrets. The
+`rawkode-tools-observability-collector-infrastructure` workflow applies it on
+merge to `main`. CI can only log in to Infisical from `main`, so pull requests
+don't plan it. Changing the stream, sink or pipeline replaces them on merge.
 
-Before the first plan:
+Before the first apply:
 
-1. Create an Infisical machine identity with GitHub OIDC auth and access to
-   `/projects/basin` in the `production` environment, and add its ID as the
-   `INFISICAL_MACHINE_IDENTITY_ID` repository secret.
-2. Give the `workers` Cloudflare token (`cloudflare/api-tokens/workers` in
-   1Password) edit permission on Pipelines, R2 Data Catalog and Account API
-   Tokens.
+1. Save a Cloudflare token with full account access from the dashboard to
+   `/infrastructure/CLOUDFLARE_ROOT_TOKEN` in Infisical's `production`
+   environment.
+2. Apply `infrastructure/bootstrap` by hand. It creates CI's Infisical identity,
+   its login from `main`, the folders and the state credentials.
+3. Set the `INFISICAL_MACHINE_IDENTITY_ID` repository secret to the new identity's
+   ID.
 
 After the first apply:
 

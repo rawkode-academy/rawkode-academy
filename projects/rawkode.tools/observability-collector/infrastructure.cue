@@ -5,7 +5,6 @@ package cuenv
 import (
 	"encoding/json"
 
-	"github.com/cuenv/cuenv/schema"
 	"registry.terraform.io/cloudflare/cloudflare:cloudflare_provider"
 	"registry.terraform.io/infisical/infisical:infisical_provider"
 	r2_bucket "registry.terraform.io/cloudflare/cloudflare/resources/cloudflare_r2_bucket"
@@ -14,14 +13,15 @@ import (
 	pipeline_stream "registry.terraform.io/cloudflare/cloudflare/resources/cloudflare_pipeline_stream"
 	pipeline_sink "registry.terraform.io/cloudflare/cloudflare/resources/cloudflare_pipeline_sink"
 	pipeline "registry.terraform.io/cloudflare/cloudflare/resources/cloudflare_pipeline"
-	infisical_secret_folder "registry.terraform.io/infisical/infisical/resources/infisical_secret_folder"
 	infisical_secret "registry.terraform.io/infisical/infisical/resources/infisical_secret"
 )
 
 // The analytics lake: an R2 bucket with Basin Catalog, the stream the
 // collector writes to, an Iceberg sink and the pipeline between them, plus the
-// two API tokens that read and write it. The tokens are copied to Infisical
-// for the tasks and the website that need them.
+// two API tokens that read and write it. The root token in Infisical creates
+// all of it, and the two tokens are copied to Infisical for the tasks and the
+// website that need them. infrastructure/bootstrap creates the folders and the
+// identity CI logs in with.
 //
 // Streams, sinks and pipelines can't be changed after creation: changing
 // their configuration (including the schema, the SQL or the sink token)
@@ -46,11 +46,6 @@ _permissionGroups: {
 	sqlRead:           "f45430d92e2b4a6cb9f94f2594c141b8" // Workers R2 SQL Read
 }
 
-_infisical: {
-	projectId:   "6575a392d7a5ef0555ade86b"
-	environment: "production"
-}
-
 _streamSchema: _ @embed(file=basin/schema.json)
 _pipelineSql:  string @embed(file=basin/pipeline.sql, type=text)
 
@@ -61,8 +56,14 @@ infrastructure: {
 		bucket:   "cuenv-state"
 		region:   "auto"
 		endpoint: "https://0aeb879de8e3cdde5fb3d413025222ce.r2.cloudflarestorage.com"
-		accessKeyId: schema.#OnePasswordRef & {ref: "op://sa.rawkode.academy/cuenv-state/username"}
-		secretAccessKey: schema.#OnePasswordRef & {ref: "op://sa.rawkode.academy/cuenv-state/password"}
+		accessKeyId: _infisicalSecret & {
+			secretPath: "/infrastructure"
+			secretName: "CUENV_STATE_ACCESS_KEY_ID"
+		}
+		secretAccessKey: _infisicalSecret & {
+			secretPath: "/infrastructure"
+			secretName: "CUENV_STATE_SECRET_ACCESS_KEY"
+		}
 	}
 
 	providers: {
@@ -170,20 +171,11 @@ infrastructure: {
 			}
 		}
 
-		secret_folder: infisical_secret_folder.#Resource & {
-			configuration: {
-				project_id:       _infisical.projectId
-				environment_slug: _infisical.environment
-				folder_path:      "/projects"
-				name:             "basin"
-			}
-		}
-
 		catalog_token_secret: infisical_secret.#Resource & {
 			configuration: {
-				workspace_id: _infisical.projectId
-				env_slug:     _infisical.environment
-				folder_path:  infrastructure.resources.secret_folder.outputs.path
+				workspace_id: _infisicalSecret.projectId
+				env_slug:     _infisicalSecret.environment
+				folder_path:  _basinSecret.secretPath
 				name:         "BASIN_CATALOG_TOKEN"
 				value:        infrastructure.resources.catalog_token.outputs.value
 			}
@@ -191,15 +183,12 @@ infrastructure: {
 
 		sql_read_token_secret: infisical_secret.#Resource & {
 			configuration: {
-				workspace_id: _infisical.projectId
-				env_slug:     _infisical.environment
-				folder_path:  infrastructure.resources.secret_folder.outputs.path
+				workspace_id: _infisicalSecret.projectId
+				env_slug:     _infisicalSecret.environment
+				folder_path:  _basinSecret.secretPath
 				name:         "BASIN_SQL_TOKEN"
 				value:        infrastructure.resources.sql_read_token.outputs.value
 			}
 		}
 	}
-
-	// Plan (and comment the plan) on pull requests; apply on pushes to main.
-	workflows: {}
 }

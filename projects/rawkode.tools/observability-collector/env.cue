@@ -29,13 +29,14 @@ _cloudflareToken: schema.#OnePasswordRef & {
 	ref: "op://sa.rawkode.academy/cloudflare/api-tokens/workers"
 }
 
-// Where infrastructure.cue writes the Basin tokens.
-_basinSecret: schema.#InfisicalSecret & {
+_infisicalSecret: schema.#InfisicalSecret & {
 	projectId:   "6575a392d7a5ef0555ade86b"
 	environment: "production"
-	secretPath:  "/projects/basin"
 	apiUrl:      "https://app.infisical.com"
 }
+
+// Where infrastructure.cue writes the Basin tokens.
+_basinSecret: _infisicalSecret & {secretPath: "/projects/basin"}
 
 env: {
 	SERVICE_NAME:          "observability-collector"
@@ -43,7 +44,10 @@ env: {
 
 	// Plan and apply run without an environment.
 	CLOUDFLARE_API_TOKEN: {
-		value: _cloudflareToken
+		value: _infisicalSecret & {
+			secretPath: "/infrastructure"
+			secretName: "CLOUDFLARE_ROOT_TOKEN"
+		}
 		policies: _infrastructure
 	}
 
@@ -73,6 +77,18 @@ ci: pipelines: {
 			manual:        true
 		}
 		tasks: [_t.deploy]
+	}
+
+	// CI can only read the root token on main, so pull requests can't plan.
+	// Without a pull request plan, a change to the stream, sink or pipeline
+	// replaces them as soon as it merges.
+	infrastructure: {
+		when: {
+			branch: ["main"]
+			defaultBranch: true
+			manual:        true
+		}
+		tasks: [_t.infrastructure]
 	}
 
 	// Compaction and snapshot expiry aren't in the Cloudflare provider yet,
@@ -106,6 +122,13 @@ tasks: {
 		inputs: _deployInputs
 	}
 
+	infrastructure: schema.#Task & {
+		hermetic: false
+		script:   "cuenv infra init && cuenv infrastructure apply --yes"
+		inputs: ["basin/pipeline.sql", "basin/schema.json", "env.cue", "infrastructure.cue"]
+		labels: ["infisical"]
+	}
+
 	// Secrets for these two tasks are scoped here, not to the environment, so
 	// a missing Infisical secret can't break the collector's deploy.
 	maintenance: schema.#Task & {
@@ -113,6 +136,7 @@ tasks: {
 		command:  "bash"
 		args: ["basin/maintenance.sh"]
 		inputs: ["basin/maintenance.sh"]
+		labels: ["infisical"]
 		env: BASIN_CATALOG_TOKEN: _basinSecret & {secretName: "BASIN_CATALOG_TOKEN"}
 	}
 
