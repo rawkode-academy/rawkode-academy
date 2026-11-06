@@ -50,10 +50,10 @@ don't plan it. Changing the stream, sink or pipeline replaces them on merge.
 Before the first apply:
 
 1. Apply `infrastructure/bootstrap` by hand. It creates CI's Infisical identity,
-   its login from `main`, the folders and the state credentials.
-2. Run its `copy-root-token` task, which copies the all-access Cloudflare token
-   from 1Password to `/infrastructure/CLOUDFLARE_ROOT_TOKEN` in Infisical.
-3. Set the `INFISICAL_MACHINE_IDENTITY_ID` repository secret to the new identity's
+   its login from `main`, the folders and the state credentials, and writes the
+   all-access Cloudflare token from 1Password to
+   `/infrastructure/CLOUDFLARE_ROOT_TOKEN` in Infisical.
+2. Set the `INFISICAL_MACHINE_IDENTITY_ID` repository secret to the new identity's
    ID.
 
 After the first apply:

@@ -17,9 +17,9 @@ import (
 )
 
 // What CI needs before it can run infrastructure: an Infisical identity that
-// logs in from main and reads only what it needs, and the state bucket
-// credentials. Projects create their own Cloudflare resources and tokens with
-// the root token.
+// logs in from main and reads only what it needs, the root Cloudflare token and
+// the state bucket credentials. Projects create their own Cloudflare resources
+// and tokens with the root token.
 
 _account: env.CLOUDFLARE_ACCOUNT_ID
 
@@ -134,6 +134,18 @@ infrastructure: {
 				environment_slug: _infisical.environment
 				folder_path:      "/projects"
 				name:             "basin"
+			}
+		}
+
+		// What CI runs infrastructure with. cuenv keeps the value in this
+		// project's state.
+		root_token_secret: infisical_secret.#Resource & {
+			configuration: {
+				workspace_id: _infisical.projectId
+				env_slug:     _infisical.environment
+				folder_path:  infrastructure.resources.infrastructure_folder.outputs.path
+				name:         "CLOUDFLARE_ROOT_TOKEN"
+				value:        _rootToken
 			}
 		}
 

@@ -12,9 +12,6 @@ let _infrastructure = [{allowInfrastructure: ["plan", "apply", "import", "destro
 // create other tokens.
 _rootToken: schema.#OnePasswordRef & {ref: "op://Employee/Cloudflare/api-tokens/all-access"}
 
-_infisicalClientId: schema.#OnePasswordRef & {ref: "op://Employee/Infisical/machine-identity/client-id"}
-_infisicalClientSecret: schema.#OnePasswordRef & {ref: "op://Employee/Infisical/machine-identity/client-secret"}
-
 // Run by hand with 1Password credentials: everything CI needs comes from here,
 // so this project can't depend on any of it.
 env: {
@@ -25,22 +22,11 @@ env: {
 		policies: _infrastructure
 	}
 	INFISICAL_UNIVERSAL_AUTH_CLIENT_ID: {
-		value: _infisicalClientId
+		value: schema.#OnePasswordRef & {ref: "op://Employee/Infisical/machine-identity/client-id"}
 		policies: _infrastructure
 	}
 	INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET: {
-		value: _infisicalClientSecret
+		value: schema.#OnePasswordRef & {ref: "op://Employee/Infisical/machine-identity/client-secret"}
 		policies: _infrastructure
-	}
-}
-
-tasks: "copy-root-token": schema.#Task & {
-	hermetic: false
-	command:  "bun"
-	args: ["copy-root-token.ts"]
-	env: {
-		CLOUDFLARE_ROOT_TOKEN:   _rootToken
-		INFISICAL_CLIENT_ID:     _infisicalClientId
-		INFISICAL_CLIENT_SECRET: _infisicalClientSecret
 	}
 }

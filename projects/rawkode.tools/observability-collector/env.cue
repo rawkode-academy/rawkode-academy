@@ -19,8 +19,8 @@ let _deployInputs = [
 	"wrangler.jsonc",
 ]
 
-// infrastructure.cue needs nested output references (cuenv 0.67.0).
-_cuenvBinary:     "0.67.0"
+// infrastructure.cue needs nested output references, added in cuenv 0.67.0.
+_cuenvBinary:     "0.68.0"
 _ciInfisicalOidc: true
 
 let _infrastructure = [{allowInfrastructure: ["plan", "apply", "import", "destroy"]}]
