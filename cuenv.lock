@@ -12,7 +12,7 @@ subtree = "93741fc7e8359b5f341c5e2a620a5e58af007857"
 
 [infrastructure_providers."registry.terraform.io/cloudflare/cloudflare"]
 version = "5.28.1"
-schema_digest = "sha256:551fd6d313094f43ff7c7409a8b1a7ecd070ab2ff166fdf51db66c42366aa6dc"
+schema_digest = "sha256:128a8189f6a781073cbe582a6c8af706e8671b528486abfa7e088ac26d17f9bf"
 
 [infrastructure_providers."registry.terraform.io/cloudflare/cloudflare".platforms]
 darwin_amd64 = "sha256:bef2ffbdb68569549fe432b550592e07456759a7288f84f7c37c9d933a493f54"
