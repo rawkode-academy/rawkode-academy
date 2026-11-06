@@ -137,15 +137,17 @@ infrastructure: {
 			}
 		}
 
-		// What CI runs infrastructure with. cuenv keeps the value in this
-		// project's state.
+		// What CI runs infrastructure with. Write-only keeps it out of state, where
+		// any branch could read it. Changing the secret doesn't plan an update, so
+		// bump the version to rotate it.
 		root_token_secret: infisical_secret.#Resource & {
 			configuration: {
-				workspace_id: _infisical.projectId
-				env_slug:     _infisical.environment
-				folder_path:  infrastructure.resources.infrastructure_folder.outputs.path
-				name:         "CLOUDFLARE_ROOT_TOKEN"
-				value:        _rootToken
+				workspace_id:     _infisical.projectId
+				env_slug:         _infisical.environment
+				folder_path:      infrastructure.resources.infrastructure_folder.outputs.path
+				name:             "CLOUDFLARE_ROOT_TOKEN"
+				value_wo:         schema.#WriteOnly & _rootToken
+				value_wo_version: 1
 			}
 		}
 

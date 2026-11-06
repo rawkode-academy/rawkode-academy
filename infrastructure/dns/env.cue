@@ -6,6 +6,10 @@ schema.#Project
 
 name: "infrastructure-dns"
 
+// Shares cuenv.lock's provider pins with the collector, and the CLI computes their
+// digests, so both need the same release.
+_cuenvBinary: "0.69.0"
+
 // Used by the Cloudflare provider and by the D1 state store.
 _cloudflareToken: schema.#OnePasswordRef & {ref: "op://sa.rawkode.academy/cloudflare/api-tokens/workers"}
 

@@ -12,7 +12,7 @@ subtree = "93741fc7e8359b5f341c5e2a620a5e58af007857"
 
 [infrastructure_providers."registry.terraform.io/cloudflare/cloudflare"]
 version = "5.28.1"
-schema_digest = "sha256:551fd6d313094f43ff7c7409a8b1a7ecd070ab2ff166fdf51db66c42366aa6dc"
+schema_digest = "sha256:945ef718d843fde13b82992d851b4d968e858e5bee361676aceeb2a58c3025fe"
 
 [infrastructure_providers."registry.terraform.io/cloudflare/cloudflare".platforms]
 darwin_amd64 = "sha256:bef2ffbdb68569549fe432b550592e07456759a7288f84f7c37c9d933a493f54"
@@ -45,7 +45,7 @@ windows_arm64 = "sha256:a6c15afefe1814502ff055ef5e7eb754b96a37e91472be97f5b7036d
 
 [infrastructure_providers."registry.terraform.io/infisical/infisical"]
 version = "0.20.10"
-schema_digest = "sha256:642e5a4080663425f71113ef08e7dacccfc3cd2ef68f35352bbba66ae4c60d8b"
+schema_digest = "sha256:0e06a64aacc107e1a7487acb032d9c4db408e12a72bb04b9a2d3f20f79d81579"
 
 [infrastructure_providers."registry.terraform.io/infisical/infisical".platforms]
 darwin_amd64 = "sha256:3b8a2e7ad90ab00e2fd44a9cd9d1cc575f0333f23bc96167d01e2884e7ecff97"
