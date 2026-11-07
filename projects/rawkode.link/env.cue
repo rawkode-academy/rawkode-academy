@@ -6,9 +6,8 @@ schema.#Project
 
 name: "rawkode-link"
 
-// No runtime: under the devenv runtime every CI deploy since July failed to
-// spawn bun. The collector deploys with CI's own bun, so this does the same.
-hooks: onEnter: devenv: schema.#Devenv
+// No devenv: with it, every CI deploy since July failed to spawn bun. The
+// collector deploys with CI's own bun, so this does the same.
 
 let _t = tasks
 
