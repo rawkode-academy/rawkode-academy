@@ -83,12 +83,33 @@ hooks: onEnter: devenv: schema.#Devenv
 // report (.cuenv/reports/<sha>/<absolute project path with / as ->.json).
 _ciRequireReport?: string
 
+// A project that reads #InfisicalSecret values in CI sets _ciInfisicalOidc and
+// labels those tasks "infisical". Only their pipelines log in to Infisical with
+// the job's GitHub OIDC token, so a deploy that doesn't read Infisical never
+// holds it. The machine identity's ID is the INFISICAL_MACHINE_IDENTITY_ID
+// repository secret. The login only works on main.
+_ciInfisicalOidc?: true
+
 ci: providers: ["github"]
 ci: contributors: [
 	_NamespaceNix,
 	c.#BunWorkspace,
 	c.#CuenvRelease,
 	c.#OnePassword,
+	if _ciInfisicalOidc != _|_ {
+		schema.#Contributor & {
+			id: "infisical-oidc"
+			when: taskLabels: ["infisical"]
+			tasks: c.#InfisicalOidc.tasks
+		}
+	},
+	if _ciInfisicalOidc != _|_ {
+		schema.#Contributor & {
+			id: "infisical"
+			when: taskLabels: ["infisical"]
+			tasks: c.#Infisical.tasks
+		}
+	},
 	if _ciRequireReport != _|_ {
 		schema.#Contributor & {
 			id: "requireReport"

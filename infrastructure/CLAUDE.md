@@ -6,6 +6,7 @@ This directory contains infrastructure-as-code configurations for DNS, GitHub or
 
 | Directory | Tool | Purpose |
 |-----------|------|---------|
+| `bootstrap/` | cuenv infrastructure | Identity access and credentials CI uses for infrastructure; run by hand |
 | `dns/` | cuenv infrastructure | DNS records for all domains |
 | `github/` | Terraform | GitHub organization and repository settings |
 | `google-cloud/` | Scripts | Workload Identity and secret access |

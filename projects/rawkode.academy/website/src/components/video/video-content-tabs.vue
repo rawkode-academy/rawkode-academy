@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Tabs } from "@ark-ui/vue/tabs";
 import { computed, ref, watch as watchValue } from "vue";
+import { capture } from "@/lib/analytics/track";
 import { academyWatch, tabs as academyTabs } from "@rawkodeacademy/design-system";
 import VideoComments from "./comments.vue";
 
@@ -76,15 +77,11 @@ const setActiveTab = (tabId: string) => {
 	if (!tabs.some((tab) => tab.id === tabId) || activeTab.value === tabId) return;
 	const previousTab = activeTab.value;
 	activeTab.value = tabId;
-	try {
-		window.posthog?.capture("video_tab_viewed", {
-			tab_id: tabId,
-			previous_tab: previousTab,
-			video_id: props.videoId,
-		});
-	} catch {
-		// Analytics must never block tab navigation.
-	}
+	capture("video_tab_viewed", {
+		tab_id: tabId,
+		previous_tab: previousTab,
+		video_id: props.videoId,
+	});
 };
 </script>
 
