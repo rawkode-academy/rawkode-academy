@@ -1,13 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import schema from "../basin/schema.json";
+import typedSql from "../basin/typed.sql" with { type: "text" };
 import {
 	classifyUserAgent,
+	prepareCloudEvent,
 	redactUserAgent,
-	rowFromCloudEvent,
-	rowFromException,
-	rowFromMetric,
-	rowFromWebEvent,
-	toStreamRecord,
 } from "../src/events";
 
 const CHROME_MAC =
@@ -15,29 +11,23 @@ const CHROME_MAC =
 const IPHONE_SAFARI =
 	"Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1";
 
-const fields = new Map(schema.fields.map((field) => [field.name, field]));
-
-function expectMatchesSchema(record: Record<string, unknown>) {
-	for (const field of schema.fields) {
-		if (field.required) expect(record).toHaveProperty(field.name);
-	}
-	for (const [key, value] of Object.entries(record)) {
-		const field = fields.get(key);
-		expect(field, `unexpected field ${key}`).toBeDefined();
-		switch (field?.type) {
-			case "string":
-				expect(typeof value).toBe("string");
-				break;
-			case "bool":
-				expect(typeof value).toBe("boolean");
-				break;
-			case "int32":
-			case "int64":
-				expect(Number.isInteger(value)).toBe(true);
-				break;
-		}
-	}
-}
+const shortLink = {
+	specversion: "1.0",
+	id: "evt-1",
+	source: "rawkode-link",
+	type: "shortLink",
+	time: "2026-11-07T18:12:08.315Z",
+	referrer: "https://www.youtube.com/",
+	country: "GB",
+	continent: "EU",
+	useragent: CHROME_MAC,
+	data: {
+		domain: "rawkode.link",
+		path: "discord",
+		matched: true,
+		destination: "https://discord.gg/rawkode",
+	},
+};
 
 describe("classifyUserAgent", () => {
 	test("desktop chrome", () => {
@@ -71,129 +61,40 @@ describe("classifyUserAgent", () => {
 	});
 });
 
-describe("rowFromCloudEvent", () => {
-	const linkRedirect = {
-		specversion: "1.0",
-		id: "evt-1",
-		source: "rawkode-link",
-		type: "link.redirect",
-		time: "2026-10-25T12:00:00.000Z",
-		data: {
-			domain: "rawkode.link",
-			path: "discord",
-			referrer: "https://www.youtube.com/watch?v=abc",
-			country: "GB",
-			continent: "EU",
-			user_agent: CHROME_MAC,
-		},
-	};
-
-	test("uses the PostHog event name and promotes known fields", () => {
-		const row = rowFromCloudEvent(linkRedirect);
-		expect(row.event).toBe("rawkode-link.link.redirect");
-		expect(row.ts_ms).toBe(Date.parse("2026-10-25T12:00:00.000Z"));
-		expect(row.url_host).toBe("rawkode.link");
-		expect(row.url_path).toBe("discord");
-		expect(row.referrer_host).toBe("www.youtube.com");
-		expect(row.country).toBe("GB");
-		expect(row.device).toBe("desktop");
-		expect(row.properties_json).toBeNull();
+describe("prepareCloudEvent", () => {
+	test("replaces the user agent with device and browser", () => {
+		const prepared = prepareCloudEvent(shortLink);
+		expect(prepared).not.toHaveProperty("useragent");
+		expect(prepared?.device).toBe("desktop");
+		expect(prepared?.browser).toBe("chrome");
+		expect(JSON.stringify(prepared)).not.toContain("Macintosh");
 	});
 
-	test("never stores the raw user agent", () => {
-		const row = rowFromCloudEvent(linkRedirect);
-		expect(JSON.stringify(row)).not.toContain("Macintosh");
+	test("drops bot traffic", () => {
+		expect(
+			prepareCloudEvent({ ...shortLink, useragent: "curl/8.4.0" }),
+		).toBeNull();
+		expect(prepareCloudEvent({ ...shortLink, useragent: "" })).toBeNull();
 	});
 
-	test("resolves distinct_id the way the PostHog flush does", () => {
-		const row = rowFromCloudEvent({
-			id: "evt-2",
-			source: "rawkode-academy-website",
-			type: "auth.sign_in_completed",
-			data: { user_id: "user-1", distinct_id: "ph-anon", method: "github" },
-		});
-		expect(row.distinct_id).toBe("user-1");
-		expect(row.user_id).toBe("user-1");
-		expect(JSON.parse(row.properties_json ?? "{}")).toEqual({
-			method: "github",
-		});
+	test("leaves events without a user agent untouched", () => {
+		const { useragent: _, ...event } = shortLink;
+		expect(prepareCloudEvent(event)).toBe(event);
 	});
 
-	test("matches the stream schema", () => {
-		expectMatchesSchema(toStreamRecord(rowFromCloudEvent(linkRedirect)));
-	});
-});
-
-describe("rowFromWebEvent", () => {
-	const pageView = {
-		event_id: "web-1",
-		ts_ms: 1761393600000,
-		event: "page_view",
-		anonymous_id: "anon-1",
-		session_id: "sess-1",
-		url: "https://rawkode.academy/watch/foo?utm_source=YouTube&utm_medium=video",
-		referrer: "https://www.google.com/",
-		properties: { title: "Foo" },
-	};
-
-	test("parses the URL into host, path and UTM columns", () => {
-		const row = rowFromWebEvent(pageView, {
-			user_agent: CHROME_MAC,
-			country: "US",
-		});
-		expect(row?.source).toBe("web");
-		expect(row?.url_host).toBe("rawkode.academy");
-		expect(row?.url_path).toBe("/watch/foo");
-		expect(row?.utm_source).toBe("YouTube");
-		expect(row?.referrer_host).toBe("www.google.com");
-		expect(row?.distinct_id).toBe("anon-1");
-		expect(row?.is_bot).toBe(false);
-	});
-
-	test("the signed-in user wins distinct_id", () => {
-		const row = rowFromWebEvent(pageView, { user_id: "user-9" });
-		expect(row?.distinct_id).toBe("user-9");
-	});
-
-	test("rejects events without an id or name", () => {
-		expect(rowFromWebEvent({ ...pageView, event_id: "" }, {})).toBeNull();
-		expect(rowFromWebEvent({ ...pageView, event: "" }, {})).toBeNull();
-	});
-
-	test("caps oversized properties", () => {
-		const row = rowFromWebEvent(
-			{ ...pageView, properties: { blob: "x".repeat(20_000) } },
-			{},
+	test("carries every field the typed pipeline reads", () => {
+		const prepared = prepareCloudEvent(shortLink) as Record<string, unknown>;
+		const paths = [...typedSql.matchAll(/json_get_\w+\(value, ([^)]+)\)/g)].map(
+			(match) => match[1].split(",").map((key) => key.trim().slice(1, -1)),
 		);
-		expect(JSON.parse(row?.properties_json ?? "{}")._truncated).toBe(true);
-	});
-
-	test("matches the stream schema", () => {
-		const row = rowFromWebEvent(pageView, { user_agent: CHROME_MAC });
-		expectMatchesSchema(toStreamRecord(row!));
-	});
-});
-
-describe("metrics and exceptions", () => {
-	test("both match the stream schema", () => {
-		expectMatchesSchema(
-			toStreamRecord(
-				rowFromMetric({
-					name: "kubele.solve_time",
-					value: 42,
-					attributes: { userId: "u1", puzzle: "7" },
-				}),
-			),
-		);
-		expectMatchesSchema(
-			toStreamRecord(
-				rowFromException({
-					message: "boom",
-					name: "TypeError",
-					timestamp: new Date().toISOString(),
-				}),
-			),
-		);
+		expect(paths.length).toBeGreaterThan(0);
+		for (const path of paths) {
+			const value = path.reduce<unknown>(
+				(node, key) => (node as Record<string, unknown> | undefined)?.[key],
+				prepared,
+			);
+			expect(value, path.join(".")).toBeDefined();
+		}
 	});
 });
 
@@ -216,21 +117,5 @@ describe("redactUserAgent", () => {
 	test("leaves events without a user agent untouched", () => {
 		const event = { id: "1", data: { path: "/x" } };
 		expect(redactUserAgent(event)).toBe(event);
-	});
-});
-
-describe("untrusted web events", () => {
-	test("drops entries that aren't objects", () => {
-		for (const input of [null, 42, "page_view", []]) {
-			expect(rowFromWebEvent(input as never, {})).toBeNull();
-		}
-	});
-
-	test("ignores non-object properties", () => {
-		const row = rowFromWebEvent(
-			{ event_id: "e1", ts_ms: 1, event: "x", properties: "oops" as never },
-			{},
-		);
-		expect(row?.properties_json).toBeNull();
 	});
 });

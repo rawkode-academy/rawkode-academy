@@ -123,7 +123,7 @@ tasks: {
 	infrastructure: schema.#Task & {
 		hermetic: false
 		script:   "cuenv infra init && cuenv infrastructure apply --yes"
-		inputs: ["basin/pipeline.sql", "basin/schema.json", "env.cue", "infrastructure.cue"]
+		inputs: ["basin/archive.sql", "basin/typed.sql", "env.cue", "infrastructure.cue"]
 		labels: ["infisical"]
 		// CI starts tasks with an empty environment, so the nested cuenv needs
 		// the Infisical OIDC login passed through to read the state credentials.
