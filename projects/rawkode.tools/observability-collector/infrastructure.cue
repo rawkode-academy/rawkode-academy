@@ -35,6 +35,13 @@ _bucketResources: json.Marshal({
 	"com.cloudflare.edge.r2.bucket.\(_account)_default_\(_bucket)": "*"
 })
 
+// The sink refuses a bucket-scoped token ("the provided token is not authorized
+// the provided bucket or account_id"), so its token is scoped to the account, as
+// in Cloudflare's Pipelines Terraform guide.
+_accountResources: json.Marshal({
+	"com.cloudflare.api.account.\(_account)": "*"
+})
+
 // Cloudflare API token permission groups, from the Basin Catalog and Basin SQL
 // docs. The permission-group data sources return a list, which cuenv can't
 // reference yet.
@@ -101,7 +108,7 @@ infrastructure: {
 				name:       "basin-catalog-writer"
 				policies: [{
 					effect:    "allow"
-					resources: _bucketResources
+					resources: _accountResources
 					permission_groups: [
 						{id: _permissionGroups.catalogWrite},
 						{id: _permissionGroups.storageItemWrite},
@@ -134,9 +141,12 @@ infrastructure: {
 				format: type: "json"
 				schema: fields: _streamSchema.fields
 				worker_binding: enabled: true
+				// Cloudflare stores a disabled endpoint this way; anything else
+				// plans an update that the API rejects.
 				http: {
 					enabled:        false
-					authentication: true
+					authentication: false
+					cors: {}
 				}
 			}
 		}
