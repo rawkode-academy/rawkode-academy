@@ -14,14 +14,14 @@
 		"mode": "smart"
 	},
 	"workers_dev": true,
-	// Basin stream `analytics_events`, created by infrastructure.cue. Uncomment
-	// with its ID after the first apply. Until then the collector skips the stream.
-	// "pipelines": [
-	// 	{
-	// 		"binding": "EVENTS",
-	// 		"stream": "<STREAM_ID>"
-	// 	}
-	// ],
+	// Basin stream `analytics_events`, created by infrastructure.cue. Its only
+	// column is a JSON `value`, so it is never replaced and this ID never changes.
+	"pipelines": [
+		{
+			"binding": "EVENTS",
+			"stream": "b04e490b37c44b7fb7026ff5818067e0"
+		}
+	],
 	"durable_objects": {
 		"bindings": [
 			{
