@@ -17,15 +17,20 @@ import (
 )
 
 // The analytics lake: an R2 bucket with Basin Catalog, the stream the
-// collector writes to, an Iceberg sink and the pipeline between them, plus the
-// two API tokens that read and write it. The root token in Infisical creates
-// all of it, and the two tokens are copied to Infisical for the tasks and the
-// website that need them. infrastructure/bootstrap creates the folders and the
-// identity CI logs in with.
+// collector writes to, the Iceberg sinks and the pipelines between them, plus
+// the two API tokens that read and write it. The root token in Infisical
+// creates all of it, and the two tokens are copied to Infisical for the tasks
+// and the website that need them. infrastructure/bootstrap creates the folders
+// and the identity CI logs in with.
+//
+// The stream takes any CloudEvent as JSON and is never replaced, so its ID in
+// wrangler.jsonc never changes. Two pipelines read it: the archive keeps every
+// event as sent and never changes; the typed pipeline turns events into typed
+// tables and is replaced whenever a table changes.
 //
 // Streams, sinks and pipelines can't be changed after creation: changing
-// their configuration (including the schema, the SQL or the sink token)
-// replaces them. Read the plan before merging.
+// their configuration (including the SQL or the sink token) replaces them.
+// Read the plan before merging.
 
 _account: env.CLOUDFLARE_ACCOUNT_ID
 _bucket:  "rawkode-analytics"
@@ -53,8 +58,25 @@ _permissionGroups: {
 	sqlRead:           "f45430d92e2b4a6cb9f94f2594c141b8" // Workers R2 SQL Read
 }
 
-_streamSchema: _ @embed(file=basin/schema.json)
-_pipelineSql:  string @embed(file=basin/pipeline.sql, type=text)
+_archiveSql: string @embed(file=basin/archive.sql, type=text)
+_typedSql:   string @embed(file=basin/typed.sql, type=text)
+
+// Every sink writes Parquet into the analytics namespace of the catalog.
+_icebergSink: {
+	account_id: _account
+	type:       "r2_data_catalog"
+	format: {
+		type:        "parquet"
+		compression: "zstd"
+	}
+	config: {
+		account_id: _account
+		bucket:     infrastructure.resources.catalog.outputs.bucket_name
+		namespace:  "analytics"
+		token:      infrastructure.resources.catalog_token.outputs.value
+		rolling_policy: interval_seconds: 300
+	}
+}
 
 infrastructure: {
 	// The cuenv-state R2 bucket, which holds all cuenv state keyed by module
@@ -139,7 +161,13 @@ infrastructure: {
 				account_id: _account
 				name:       "analytics_events"
 				format: type: "json"
-				schema: fields: _streamSchema.fields
+				// One JSON column, so the schema never has to change. The
+				// collector sends each CloudEvent as { value: event }.
+				schema: fields: [{
+					name:     "value"
+					type:     "json"
+					required: true
+				}]
 				worker_binding: enabled: true
 				// Cloudflare stores a disabled endpoint this way; anything else
 				// plans an update that the API rejects.
@@ -151,33 +179,37 @@ infrastructure: {
 			}
 		}
 
-		sink: pipeline_sink.#Resource & {
-			configuration: {
-				account_id: _account
-				name:       "analytics_events_iceberg"
-				type:       "r2_data_catalog"
-				format: {
-					type:        "parquet"
-					compression: "zstd"
-				}
-				config: {
-					account_id: _account
-					bucket:     infrastructure.resources.catalog.outputs.bucket_name
-					namespace:  "analytics"
-					table_name: "events"
-					token:      infrastructure.resources.catalog_token.outputs.value
-					rolling_policy: interval_seconds: 300
-				}
+		archive_sink: pipeline_sink.#Resource & {
+			configuration: _icebergSink & {
+				name: "analytics_events_archive"
+				config: table_name: "events_archive"
 			}
 		}
 
-		// The SQL names the stream and the sink, so it has to wait for both.
-		events_pipeline: pipeline.#Resource & {
-			dependsOn: ["stream", "sink"]
+		short_links_sink: pipeline_sink.#Resource & {
+			configuration: _icebergSink & {
+				name: "short_links"
+				config: table_name: "short_links"
+			}
+		}
+
+		// Each pipeline's SQL names the stream and its sinks, so it has to wait
+		// for them.
+		archive_pipeline: pipeline.#Resource & {
+			dependsOn: ["stream", "archive_sink"]
 			configuration: {
 				account_id: _account
-				name:       "analytics_events_pipeline"
-				sql:        _pipelineSql
+				name:       "analytics_archive"
+				sql:        _archiveSql
+			}
+		}
+
+		typed_pipeline: pipeline.#Resource & {
+			dependsOn: ["stream", "short_links_sink"]
+			configuration: {
+				account_id: _account
+				name:       "analytics_typed"
+				sql:        _typedSql
 			}
 		}
 

@@ -2,14 +2,8 @@ import { WorkerEntrypoint } from "cloudflare:workers";
 import { validateCloudEvent } from "./cloudevents";
 import type { DataBuffer } from "./durable-objects/data-buffer";
 import {
-	type AnalyticsRow,
-	type CloudEventInput,
-	rowFromCloudEvent,
-	rowFromException,
-	rowFromMetric,
+	prepareCloudEvent,
 	redactUserAgent,
-	rowFromWebEvent,
-	toStreamRecord,
 	type WebContext,
 	type WebEvent,
 } from "./events";
@@ -22,12 +16,9 @@ export interface Env {
 	DATA_BUFFER: DurableObjectNamespace<DataBuffer>;
 	POSTHOG_PROJECT_TOKEN: SecretsStoreSecret;
 	POSTHOG_HOST: string;
-	/** Basin stream `analytics_events`; absent until the wrangler.jsonc binding is uncommented. */
+	/** Basin stream `analytics_events`; absent until the wrangler.jsonc binding is set. */
 	EVENTS?: EventsStream;
 }
-
-const MAX_WEB_EVENTS_PER_BATCH = 50;
-
 
 export interface TrackEventResult {
 	success: boolean;
@@ -122,13 +113,17 @@ export class PostHogCollector extends WorkerEntrypoint<Env> {
 			return { success: false, error: validation.error };
 		}
 
+		const prepared = prepareCloudEvent(
+			validation.event.toJSON() as Record<string, unknown>,
+		);
+		// Bot traffic is accepted and dropped, so senders don't retry it.
+		if (!prepared) return { success: true };
+		const json = redactUserAgent(prepared);
+
 		const id = this.env.DATA_BUFFER.idFromName("buffer-events");
 		const buffer = this.env.DATA_BUFFER.get(id);
-
-		const json = validation.event.toJSON();
-		const row = rowFromCloudEvent(json as unknown as CloudEventInput);
-		await buffer.addEvent(redactUserAgent(json), options?.attributes);
-		this.stream([row]);
+		await buffer.addEvent(json, options?.attributes);
+		this.stream(json);
 
 		return { success: true };
 	}
@@ -142,42 +137,38 @@ export class PostHogCollector extends WorkerEntrypoint<Env> {
 		const buffer = this.env.DATA_BUFFER.get(id);
 
 		await buffer.addMetric({ name, value, attributes });
-		this.stream([rowFromMetric({ name, value, attributes })]);
 
 		return { success: true };
 	}
 
 	/**
-	 * Browser events from the website's /api/e, written to the Basin stream only:
-	 * posthog-js already sends them to PostHog during the dual-run. RPC only,
-	 * never HTTP: the collector is public on workers.dev, and `context` (user,
-	 * geography, user agent) must come from the website, not the caller.
+	 * Browser events from the website's /api/e. They reach Basin once each one
+	 * is defined as a CloudEvent with a typed table; until then posthog-js is
+	 * their only destination and this records nothing. RPC only, never HTTP:
+	 * the collector is public on workers.dev, and `context` (user, geography,
+	 * user agent) must come from the website, not the caller.
 	 */
 	async ingestWebEvents(
-		events: WebEvent[],
-		context: WebContext,
+		_events: WebEvent[],
+		_context: WebContext,
 	): Promise<number> {
-		const rows = events
-			.slice(0, MAX_WEB_EVENTS_PER_BATCH)
-			.map((event) => rowFromWebEvent(event, context))
-			.filter((row): row is AnalyticsRow => row !== null);
-		if (rows.length > 0) await this.sendRows(rows);
-		return rows.length;
+		return 0;
 	}
 
 	/** Fire-and-forget: the stream must never fail a PostHog/Grafana write. */
-	private stream(rows: AnalyticsRow[]): void {
-		this.ctx.waitUntil(this.sendRows(rows));
+	private stream(event: Record<string, unknown>): void {
+		this.ctx.waitUntil(this.send(event));
 	}
 
-	private async sendRows(rows: AnalyticsRow[]): Promise<void> {
+	private async send(event: Record<string, unknown>): Promise<void> {
 		if (!this.env.EVENTS) return;
 		try {
-			await this.env.EVENTS.send(rows.map(toStreamRecord));
+			// The stream's only column is `value`, holding the whole CloudEvent.
+			await this.env.EVENTS.send([{ value: event }]);
 		} catch (error) {
 			console.error("Basin stream send failed", {
 				error: error instanceof Error ? error.message : String(error),
-				count: rows.length,
+				id: event.id,
 			});
 		}
 	}
@@ -200,14 +191,13 @@ export class PostHogCollector extends WorkerEntrypoint<Env> {
 		};
 
 		await buffer.addException(exceptionData);
-		this.stream([rowFromException(exceptionData)]);
 
 		return { success: true };
 	}
 }
 
-export { DataBuffer } from "./durable-objects/data-buffer";
 export type { CloudEvent } from "./cloudevents";
+export { DataBuffer } from "./durable-objects/data-buffer";
 
 export default class extends PostHogCollector {
 	async tail(events: TraceItem[]): Promise<void> {
@@ -217,7 +207,9 @@ export default class extends PostHogCollector {
 		for (const trace of events) {
 			// Extract request info from fetch events
 			const eventInfo = trace.event as
-				| { request?: { url?: string; method?: string; cf?: { colo?: string } } }
+				| {
+						request?: { url?: string; method?: string; cf?: { colo?: string } };
+				  }
 				| undefined;
 
 			// Serialize TraceItem to a plain object for Durable Object storage
