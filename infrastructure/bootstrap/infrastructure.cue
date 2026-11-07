@@ -8,7 +8,11 @@ import (
 	"github.com/cuenv/cuenv/schema"
 	"registry.terraform.io/cloudflare/cloudflare:cloudflare_provider"
 	"registry.terraform.io/infisical/infisical:infisical_provider"
+	"registry.terraform.io/integrations/github:github_provider"
 	account_token "registry.terraform.io/cloudflare/cloudflare/resources/cloudflare_account_token"
+	github_actions_variable "registry.terraform.io/integrations/github/resources/github_actions_variable"
+	github_repository_environment "registry.terraform.io/integrations/github/resources/github_repository_environment"
+	github_repository_environment_deployment_policy "registry.terraform.io/integrations/github/resources/github_repository_environment_deployment_policy"
 	infisical_identity_oidc_auth "registry.terraform.io/infisical/infisical/resources/infisical_identity_oidc_auth"
 	infisical_project_role "registry.terraform.io/infisical/infisical/resources/infisical_project_role"
 	infisical_project_scoped_identity "registry.terraform.io/infisical/infisical/resources/infisical_project_scoped_identity"
@@ -16,10 +20,22 @@ import (
 	infisical_secret_folder "registry.terraform.io/infisical/infisical/resources/infisical_secret_folder"
 )
 
-// What CI needs before it can run infrastructure: an Infisical identity that
-// logs in from main and reads only what it needs, the root Cloudflare token and
-// the state bucket credentials. Projects create their own Cloudflare resources
-// and tokens with the root token.
+// What CI needs before it can run infrastructure, and nothing more:
+//
+// - github-read-write, the Infisical identity infrastructure applies log in
+//   as. Its login only works from main, in the `production` GitHub
+//   environment, so every apply waits for a reviewer. It reads the
+//   github-read-write Cloudflare token (CLOUDFLARE_ROOT_TOKEN), the DNSimple
+//   token and the state bucket credentials.
+// - github-actions, the identity other jobs on main log in as. Until the
+//   collector's infrastructure also applies through review, it can read the
+//   same tokens; then it drops to project secrets only.
+//
+// Pull requests get no identity at all: they review a diff of the
+// configuration, not a live plan.
+//
+// Projects create their own Cloudflare resources and tokens with the
+// github-read-write token.
 
 _account: env.CLOUDFLARE_ACCOUNT_ID
 
@@ -29,10 +45,16 @@ _infisical: {
 }
 
 _github: {
-	issuer: "https://token.actions.githubusercontent.com"
-	repo:   "rawkode-academy/rawkode-academy"
+	issuer:     "https://token.actions.githubusercontent.com"
+	owner:      "rawkode-academy"
+	repository: "rawkode-academy"
+	repo:       "\(owner)/\(repository)"
 	// The audience GitHub issues when a job doesn't request one.
 	audience: "https://github.com/rawkode-academy"
+	// The GitHub environment infrastructure applies run in.
+	environment: "production"
+	// Who approves an apply: rawkode.
+	reviewers: [145816]
 }
 
 // Cloudflare API token permission groups.
@@ -54,6 +76,10 @@ infrastructure: {
 
 	providers: {
 		cloudflare: cloudflare_provider.#Provider
+		// The token comes from GITHUB_TOKEN in env.cue.
+		github: github_provider.#Provider & {
+			configuration: owner: _github.owner
+		}
 		// Universal Auth: the client ID and secret come from env.cue.
 		infisical: infisical_provider.#Provider & {
 			configuration: {
@@ -64,6 +90,9 @@ infrastructure: {
 	}
 
 	resources: {
+		// For jobs on main that didn't go through review. It still reads
+		// /infrastructure because the collector's infrastructure pipeline runs
+		// as an ordinary pipeline; drop that once it moves to a reviewed apply.
 		ci_role: infisical_project_role.#Resource & {
 			configuration: {
 				project_id: _infisical.projectId
@@ -92,7 +121,6 @@ infrastructure: {
 			}
 		}
 
-		// Its ID is the INFISICAL_MACHINE_IDENTITY_ID repository secret.
 		ci_identity: infisical_project_scoped_identity.#Resource & {
 			configuration: {
 				project_id: _infisical.projectId
@@ -115,6 +143,102 @@ infrastructure: {
 				}
 				access_token_ttl:     3600
 				access_token_max_ttl: 3600
+			}
+		}
+
+		// The tokens infrastructure runs with, for reviewed applies only.
+		read_write_role: infisical_project_role.#Resource & {
+			configuration: {
+				project_id: _infisical.projectId
+				name:       "github-read-write"
+				slug:       "github-read-write"
+				permissions_v2: [
+					// The Cloudflare and DNSimple tokens and the state credentials.
+					{
+						subject: "secrets"
+						action: ["describeSecret", "readValue"]
+						conditions: json.Marshal({
+							environment: "$eq": _infisical.environment
+							secretPath: "$eq":  "/infrastructure"
+						})
+					},
+					// The Basin tokens the collector's infrastructure.cue writes.
+					{
+						subject: "secrets"
+						action: ["describeSecret", "readValue", "create", "edit", "delete"]
+						conditions: json.Marshal({
+							environment: "$eq": _infisical.environment
+							secretPath: "$eq":  "/projects/basin"
+						})
+					},
+				]
+			}
+		}
+
+		read_write_identity: infisical_project_scoped_identity.#Resource & {
+			configuration: {
+				project_id: _infisical.projectId
+				name:       "github-read-write"
+				roles: [{role_slug: infrastructure.resources.read_write_role.outputs.slug}]
+			}
+		}
+
+		// Only a job on main in the `production` environment, which a reviewer
+		// has approved, can log in.
+		read_write_oidc_login: infisical_identity_oidc_auth.#Resource & {
+			configuration: {
+				identity_id:        infrastructure.resources.read_write_identity.outputs.id
+				oidc_discovery_url: _github.issuer
+				bound_issuer:       _github.issuer
+				bound_audiences: [_github.audience]
+				bound_claims: {
+					repository:  _github.repo
+					ref:         "refs/heads/main"
+					environment: _github.environment
+				}
+				access_token_ttl:     3600
+				access_token_max_ttl: 3600
+			}
+		}
+
+		production_environment: github_repository_environment.#Resource & {
+			configuration: {
+				repository:  _github.repository
+				environment: _github.environment
+				// rawkode reviews alone, so approving their own merges must work.
+				prevent_self_review: false
+				can_admins_bypass:   false
+				reviewers: [{users: _github.reviewers}]
+				deployment_branch_policy: [{
+					protected_branches:     false
+					custom_branch_policies: true
+				}]
+			}
+		}
+
+		production_from_main: github_repository_environment_deployment_policy.#Resource & {
+			dependsOn: ["production_environment"]
+			configuration: {
+				repository:     _github.repository
+				environment:    _github.environment
+				branch_pattern: "main"
+			}
+		}
+
+		// Identity IDs aren't secret; the root env.cue picks one per workflow.
+		ci_identity_variable: github_actions_variable.#Resource & {
+			configuration: {
+				repository:    _github.repository
+				variable_name: "INFISICAL_MACHINE_IDENTITY_ID"
+				value:         infrastructure.resources.ci_identity.outputs.id
+			}
+		}
+
+		read_write_identity_variable: github_actions_variable.#Resource & {
+			configuration: {
+				repository:    _github.repository
+				variable_name: "INFISICAL_READ_WRITE_IDENTITY_ID"
+				value:         infrastructure.resources.read_write_identity.outputs.id
 			}
 		}
 
@@ -147,6 +271,18 @@ infrastructure: {
 				folder_path:      infrastructure.resources.infrastructure_folder.outputs.path
 				name:             "CLOUDFLARE_ROOT_TOKEN"
 				value_wo:         schema.#WriteOnly & _rootToken
+				value_wo_version: 1
+			}
+		}
+
+		// What DNS registers its delegations with.
+		dnsimple_token_secret: infisical_secret.#Resource & {
+			configuration: {
+				workspace_id:     _infisical.projectId
+				env_slug:         _infisical.environment
+				folder_path:      infrastructure.resources.infrastructure_folder.outputs.path
+				name:             "DNSIMPLE_TOKEN"
+				value_wo:         schema.#WriteOnly & _dnsimpleToken
 				value_wo_version: 1
 			}
 		}

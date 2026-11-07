@@ -1,7 +1,6 @@
 package cuenv
 
 import (
-	"github.com/cuenv/cuenv/schema"
 	"github.com/rawkode-academy/rawkode-academy/infrastructure/dns/domains"
 	"registry.terraform.io/cloudflare/cloudflare:cloudflare_provider"
 	"registry.terraform.io/dnsimple/dnsimple:dnsimple_provider"
@@ -14,8 +13,8 @@ infrastructure: {
 		bucket:   "cuenv-state"
 		region:   "auto"
 		endpoint: "https://0aeb879de8e3cdde5fb3d413025222ce.r2.cloudflarestorage.com"
-		accessKeyId: schema.#OnePasswordRef & {ref: "op://sa.rawkode.academy/cuenv-state/username"}
-		secretAccessKey: schema.#OnePasswordRef & {ref: "op://sa.rawkode.academy/cuenv-state/password"}
+		accessKeyId: _infrastructureSecret & {secretName: "CUENV_STATE_ACCESS_KEY_ID"}
+		secretAccessKey: _infrastructureSecret & {secretName: "CUENV_STATE_SECRET_ACCESS_KEY"}
 	}
 
 	providers: {
@@ -27,6 +26,8 @@ infrastructure: {
 
 	resources: {for _, zone in domains.zones {zone.resources}}
 
-	// Plan (and comment the plan) on pull requests; apply on pushes to main.
-	workflows: {}
+	// Pull requests comment a diff of the configuration, with no credentials.
+	// Pushes to main apply in the `production` GitHub environment, which waits
+	// for a reviewer; only then can the job log in to Infisical for the tokens.
+	workflows: apply: environment: "production"
 }

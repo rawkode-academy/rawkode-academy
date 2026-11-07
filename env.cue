@@ -86,9 +86,21 @@ _ciRequireReport?: string
 // A project that reads #InfisicalSecret values in CI sets _ciInfisicalOidc and
 // labels those tasks "infisical". Only their pipelines log in to Infisical with
 // the job's GitHub OIDC token, so a deploy that doesn't read Infisical never
-// holds it. The machine identity's ID is the INFISICAL_MACHINE_IDENTITY_ID
-// repository secret. The login only works on main.
+// holds it.
 _ciInfisicalOidc?: true
+
+// A project whose infrastructure workflows read #InfisicalSecret values sets
+// _ciInfisicalInfrastructure. Only the apply job logs in: pull requests get a
+// diff of the configuration and no credentials.
+_ciInfisicalInfrastructure?: true
+
+// Which Infisical identity a job logs in as. infrastructure/bootstrap writes
+// both IDs as repository variables. Infrastructure applies use
+// github-read-write, whose login also requires the `production` GitHub
+// environment, so a job that skipped review is refused even if it asks for it.
+// Every other job on main uses github-actions, which reads project secrets.
+let _infisicalIdentity = "${{ endsWith(github.workflow, '-infrastructure-apply') && vars.INFISICAL_READ_WRITE_IDENTITY_ID || vars.INFISICAL_MACHINE_IDENTITY_ID }}"
+let _infisicalOidcTasks = (c.#InfisicalOidc & {#identityId: _infisicalIdentity}).tasks
 
 ci: providers: ["github"]
 ci: contributors: [
@@ -100,13 +112,27 @@ ci: contributors: [
 		schema.#Contributor & {
 			id: "infisical-oidc"
 			when: taskLabels: ["infisical"]
-			tasks: c.#InfisicalOidc.tasks
+			tasks: _infisicalOidcTasks
 		}
 	},
 	if _ciInfisicalOidc != _|_ {
 		schema.#Contributor & {
 			id: "infisical"
 			when: taskLabels: ["infisical"]
+			tasks: c.#Infisical.tasks
+		}
+	},
+	if _ciInfisicalInfrastructure != _|_ {
+		schema.#Contributor & {
+			id: "infisical-oidc"
+			when: secretsProvider: ["infisical"]
+			tasks: _infisicalOidcTasks
+		}
+	},
+	if _ciInfisicalInfrastructure != _|_ {
+		schema.#Contributor & {
+			id: "infisical"
+			when: secretsProvider: ["infisical"]
 			tasks: c.#Infisical.tasks
 		}
 	},

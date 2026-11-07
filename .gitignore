@@ -59,4 +59,5 @@ devenv.local.nix
 /cue.mod/gen/registry.terraform.io/cloudflare/cloudflare/
 /cue.mod/gen/registry.terraform.io/dnsimple/dnsimple/
 /cue.mod/gen/registry.terraform.io/infisical/infisical/
+/cue.mod/gen/registry.terraform.io/integrations/github/
 # END cuenv infrastructure
