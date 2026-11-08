@@ -109,7 +109,7 @@ jobs:
           printf 'INFISICAL_MACHINE_IDENTITY_ID<<%s\n%s\n%s\n' "$delimiter" "$INFISICAL_MACHINE_IDENTITY_ID" "$delimiter"
         } >> "$GITHUB_ENV"
       env:
-        INFISICAL_MACHINE_IDENTITY_ID: ${{ secrets.INFISICAL_MACHINE_IDENTITY_ID }}
+        INFISICAL_MACHINE_IDENTITY_ID: ${{ endsWith(github.workflow, '-infrastructure-apply') && vars.INFISICAL_READ_WRITE_IDENTITY_ID || vars.INFISICAL_MACHINE_IDENTITY_ID }}
     - name: Install Bun dependencies
       run: cuenv exec -- bun install --frozen-lockfile
     - name: Setup 1Password
@@ -131,7 +131,7 @@ jobs:
         GITHUB_REF_TYPE: ${{ github.ref_type }}
         GITHUB_REF_NAME: ${{ github.ref_name }}
         CUENV_ENVIRONMENT: production
-        INFISICAL_MACHINE_IDENTITY_ID: ${{ secrets.INFISICAL_MACHINE_IDENTITY_ID }}
+        INFISICAL_MACHINE_IDENTITY_ID: ${{ endsWith(github.workflow, '-infrastructure-apply') && vars.INFISICAL_READ_WRITE_IDENTITY_ID || vars.INFISICAL_MACHINE_IDENTITY_ID }}
         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
         INFISICAL_CLIENT_ID: ${{ secrets.INFISICAL_CLIENT_ID }}
         INFISICAL_CLIENT_SECRET: ${{ secrets.INFISICAL_CLIENT_SECRET }}

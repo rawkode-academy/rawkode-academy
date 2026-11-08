@@ -27,16 +27,13 @@ ci: pipelines: {
 		tasks: [_t.deploy.main]
 	}
 
+	// Pull requests run without credentials: no previews or dry runs until a
+	// trusted publisher deploys them.
 	pullRequest: {
-		environment: "production"
 		when: {
 			pullRequest: true
 		}
-		tasks: [_t.deploy.preview]
-		annotations: "Preview URL": schema.#TaskCaptureRef & {
-			cuenvTask:    "deploy.preview"
-			cuenvCapture: "previewUrl"
-		}
+		tasks: [_t.check, _t.build]
 	}
 }
 

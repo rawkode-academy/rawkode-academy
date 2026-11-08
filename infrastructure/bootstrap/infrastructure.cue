@@ -13,6 +13,7 @@ import (
 	github_actions_variable "registry.terraform.io/integrations/github/resources/github_actions_variable"
 	github_repository_environment "registry.terraform.io/integrations/github/resources/github_repository_environment"
 	github_repository_environment_deployment_policy "registry.terraform.io/integrations/github/resources/github_repository_environment_deployment_policy"
+	github_repository_ruleset "registry.terraform.io/integrations/github/resources/github_repository_ruleset"
 	infisical_identity_oidc_auth "registry.terraform.io/infisical/infisical/resources/infisical_identity_oidc_auth"
 	infisical_project_role "registry.terraform.io/infisical/infisical/resources/infisical_project_role"
 	infisical_project_scoped_identity "registry.terraform.io/infisical/infisical/resources/infisical_project_scoped_identity"
@@ -23,19 +24,16 @@ import (
 // What CI needs before it can run infrastructure, and nothing more:
 //
 // - github-read-write, the Infisical identity infrastructure applies log in
-//   as. Its login only works from main, in the `production` GitHub
-//   environment, so every apply waits for a reviewer. It reads the
-//   github-read-write Cloudflare token (CLOUDFLARE_ROOT_TOKEN), the DNSimple
-//   token and the state bucket credentials.
-// - github-actions, the identity other jobs on main log in as. Until the
-//   collector's infrastructure also applies through review, it can read the
-//   same tokens; then it drops to project secrets only.
+//   as. Its login only works from an apply workflow on main, in the
+//   `infrastructure` GitHub environment, so every apply waits for a reviewer.
+//   It reads the github-read-write Cloudflare token (CLOUDFLARE_ROOT_TOKEN),
+//   the DNSimple token and the state bucket credentials.
+// - github-actions, the identity deploys on main log in as, in the
+//   `production` GitHub environment. It reads project secrets only.
 //
-// Pull requests get no identity at all: they review a diff of the
-// configuration, not a live plan.
-//
-// Projects create their own Cloudflare resources and tokens with the
-// github-read-write token.
+// Pull requests get no identity and no secrets. Only main can enter either
+// environment, and the rulesets below make every change to main a reviewed
+// pull request with passing checks.
 
 _account: env.CLOUDFLARE_ACCOUNT_ID
 
@@ -49,12 +47,22 @@ _github: {
 	owner:      "rawkode-academy"
 	repository: "rawkode-academy"
 	repo:       "\(owner)/\(repository)"
+	// IDs survive a rename; a recreated repository with the same name gets
+	// new ones.
+	repositoryId: "464263102"
+	ownerId:      "88555011"
 	// The audience GitHub issues when a job doesn't request one.
 	audience: "https://github.com/rawkode-academy"
-	// The GitHub environment infrastructure applies run in.
-	environment: "production"
+	// The GitHub environment deploys run in, and the one infrastructure
+	// applies run in.
+	deployEnvironment:         "production"
+	infrastructureEnvironment: "infrastructure"
 	// Who approves an apply: rawkode.
 	reviewers: [145816]
+	// The check every pull request must pass: .github/workflows/pull-request.yml.
+	requiredCheck: "validate"
+	// GitHub Actions, as the app that reports the required check.
+	actionsAppId: 15368
 }
 
 // Cloudflare API token permission groups.
@@ -90,28 +98,18 @@ infrastructure: {
 	}
 
 	resources: {
-		// For jobs on main that didn't go through review. It still reads
-		// /infrastructure because the collector's infrastructure pipeline runs
-		// as an ordinary pipeline; drop that once it moves to a reviewed apply.
+		// For deploys on main. No infrastructure credentials: those need a
+		// reviewed apply.
 		ci_role: infisical_project_role.#Resource & {
 			configuration: {
 				project_id: _infisical.projectId
 				name:       "CI"
 				slug:       "ci"
 				permissions_v2: [
-					// The root token and the state credentials.
+					// The Basin tokens the collector's maintenance task reads.
 					{
 						subject: "secrets"
 						action: ["describeSecret", "readValue"]
-						conditions: json.Marshal({
-							environment: "$eq": _infisical.environment
-							secretPath: "$eq":  "/infrastructure"
-						})
-					},
-					// The Basin tokens the collector's infrastructure.cue writes.
-					{
-						subject: "secrets"
-						action: ["describeSecret", "readValue", "create", "edit", "delete"]
 						conditions: json.Marshal({
 							environment: "$eq": _infisical.environment
 							secretPath: "$eq":  "/projects/basin"
@@ -137,9 +135,14 @@ infrastructure: {
 				bound_audiences: [_github.audience]
 				// Claims rather than a subject, because a job in a GitHub environment
 				// has that environment as its subject instead of its branch.
+				// Infisical splits each value on commas and matches any part.
 				bound_claims: {
-					repository: _github.repo
-					ref:        "refs/heads/main"
+					repository:          _github.repo
+					repository_id:       _github.repositoryId
+					repository_owner_id: _github.ownerId
+					ref:                 "refs/heads/main"
+					environment:         _github.deployEnvironment
+					event_name:          "push,workflow_dispatch"
 				}
 				access_token_ttl:     3600
 				access_token_max_ttl: 3600
@@ -183,8 +186,10 @@ infrastructure: {
 			}
 		}
 
-		// Only a job on main in the `production` environment, which a reviewer
-		// has approved, can log in.
+		// Only an apply workflow on main, in the `infrastructure` environment,
+		// which a reviewer has approved, can log in. Pull requests,
+		// pull_request_target and workflow_run runs can't: their event,
+		// environment or ref doesn't match.
 		read_write_oidc_login: infisical_identity_oidc_auth.#Resource & {
 			configuration: {
 				identity_id:        infrastructure.resources.read_write_identity.outputs.id
@@ -192,23 +197,26 @@ infrastructure: {
 				bound_issuer:       _github.issuer
 				bound_audiences: [_github.audience]
 				bound_claims: {
-					repository:  _github.repo
-					ref:         "refs/heads/main"
-					environment: _github.environment
+					repository:          _github.repo
+					repository_id:       _github.repositoryId
+					repository_owner_id: _github.ownerId
+					ref:                 "refs/heads/main"
+					environment:         _github.infrastructureEnvironment
+					event_name:          "push,workflow_dispatch"
+					workflow_ref:        "\(_github.repo)/.github/workflows/*-infrastructure-apply.yml@refs/heads/main"
 				}
 				access_token_ttl:     3600
 				access_token_max_ttl: 3600
 			}
 		}
 
+		// Deploys. No reviewer, but only main can enter it, so a pull request
+		// can't reach the secrets it holds even by naming it.
 		production_environment: github_repository_environment.#Resource & {
 			configuration: {
-				repository:  _github.repository
-				environment: _github.environment
-				// rawkode reviews alone, so approving their own merges must work.
-				prevent_self_review: false
-				can_admins_bypass:   false
-				reviewers: [{users: _github.reviewers}]
+				repository:        _github.repository
+				environment:       _github.deployEnvironment
+				can_admins_bypass: false
 				deployment_branch_policy: [{
 					protected_branches:     false
 					custom_branch_policies: true
@@ -220,8 +228,84 @@ infrastructure: {
 			dependsOn: ["production_environment"]
 			configuration: {
 				repository:     _github.repository
-				environment:    _github.environment
+				environment:    _github.deployEnvironment
 				branch_pattern: "main"
+			}
+		}
+
+		// Infrastructure applies. Each waits for a reviewer.
+		infrastructure_environment: github_repository_environment.#Resource & {
+			configuration: {
+				repository:  _github.repository
+				environment: _github.infrastructureEnvironment
+				// rawkode reviews alone, so approving their own applies must work.
+				prevent_self_review: false
+				can_admins_bypass:   false
+				reviewers: [{users: _github.reviewers}]
+				deployment_branch_policy: [{
+					protected_branches:     false
+					custom_branch_policies: true
+				}]
+			}
+		}
+
+		infrastructure_from_main: github_repository_environment_deployment_policy.#Resource & {
+			dependsOn: ["infrastructure_environment"]
+			configuration: {
+				repository:     _github.repository
+				environment:    _github.infrastructureEnvironment
+				branch_pattern: "main"
+			}
+		}
+
+		// Two rulesets, because a bypass lifts everything in its ruleset. Nobody
+		// can bypass this one: every change to main is a pull request whose
+		// checks pass.
+		main_merge_requirements: github_repository_ruleset.#Resource & {
+			configuration: {
+				repository:  _github.repository
+				name:        "main: merge requirements"
+				target:      "branch"
+				enforcement: "active"
+				conditions: [{ref_name: [{include: ["~DEFAULT_BRANCH"], exclude: []}]}]
+				rules: [{
+					deletion:         true
+					non_fast_forward: true
+					pull_request: [{required_approving_review_count: 0}]
+					required_status_checks: [{
+						strict_required_status_checks_policy: false
+						required_check: [{
+							context:        _github.requiredCheck
+							integration_id: _github.actionsAppId
+						}]
+					}]
+				}]
+			}
+		}
+
+		// Code owner review. rawkode reviews alone and can't approve their own
+		// pull requests, so organisation admins (only rawkode) may merge
+		// without it, through a pull request only.
+		main_review_requirements: github_repository_ruleset.#Resource & {
+			configuration: {
+				repository:  _github.repository
+				name:        "main: review requirements"
+				target:      "branch"
+				enforcement: "active"
+				conditions: [{ref_name: [{include: ["~DEFAULT_BRANCH"], exclude: []}]}]
+				bypass_actors: [{
+					actor_id:    1
+					actor_type:  "OrganizationAdmin"
+					bypass_mode: "pull_request"
+				}]
+				rules: [{
+					pull_request: [{
+						required_approving_review_count: 1
+						require_code_owner_review:       true
+						dismiss_stale_reviews_on_push:   true
+						require_last_push_approval:      true
+					}]
+				}]
 			}
 		}
 

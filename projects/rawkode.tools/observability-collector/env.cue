@@ -77,18 +77,6 @@ ci: pipelines: {
 		tasks: [_t.deploy]
 	}
 
-	// CI can only read the root token on main, so pull requests can't plan.
-	// Without a pull request plan, a change to the stream, sink or pipeline
-	// replaces them as soon as it merges.
-	infrastructure: {
-		when: {
-			branch: ["main"]
-			defaultBranch: true
-			manual:        true
-		}
-		tasks: [_t.infrastructure]
-	}
-
 	// Compaction and snapshot expiry aren't in the Cloudflare provider yet,
 	// so infrastructure.cue can't enable them. Run once after the first apply.
 	maintenance: {

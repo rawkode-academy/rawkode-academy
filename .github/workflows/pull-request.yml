@@ -1,0 +1,30 @@
+# The check every pull request must pass before it can merge. It runs without
+# secrets, so it also runs for forks: it evaluates the configuration and
+# checks the generated files are in sync, but contacts no provider and reads
+# no state.
+
+name: pull-request
+on:
+  pull_request: {}
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    name: validate
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Install cuenv
+      run: |-
+        cuenv_version="$(sed -n 's/^\t\tversion: "\(.*\)"$/\1/p' env.cue | head -n 1)"
+        curl -fsSL -o "$RUNNER_TEMP/cuenv" "https://github.com/cuenv/cuenv/releases/download/${cuenv_version}/cuenv-linux-x64"
+        chmod +x "$RUNNER_TEMP/cuenv"
+        echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+    - name: Check generated files are in sync
+      run: cuenv sync -A --check

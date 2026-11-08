@@ -6,7 +6,7 @@ This directory contains infrastructure-as-code configurations for DNS, GitHub or
 
 | Directory | Tool | Purpose |
 |-----------|------|---------|
-| `bootstrap/` | cuenv infrastructure | Identity access and credentials CI uses for infrastructure, and the `production` GitHub environment applies wait in; run by hand |
+| `bootstrap/` | cuenv infrastructure | Identity access and credentials CI uses, the `production` and `infrastructure` GitHub environments, and the rulesets on `main`; run by hand |
 | `dns/` | cuenv infrastructure | DNS records for all domains |
 | `github/` | Terraform | GitHub organization and repository settings |
 | `google-cloud/` | Scripts | Workload Identity and secret access |
@@ -47,7 +47,7 @@ cuenv i apply
 
 **Importing:** bring an existing object under management with `cuenv i import <type>.<name> <provider id>` (DNS records take `<zone id>/<record id>`), then `cuenv i plan`.
 
-**CI:** pull requests get a comment with a diff of the configuration and no credentials. Merges to `main` apply in the `production` GitHub environment, which waits for a reviewer; only then can the job log in to Infisical as `github-read-write` and read the tokens.
+**CI:** none for now. cuenv's plan workflow would log in with the apply's credentials, which pull requests must never get, so DNS plans and applies run locally until each workflow can name its own credentials.
 
 **Provider types:** pinned in the root `cuenv.lock`; generated into `cue.mod/gen` (gitignored). Run `cuenv sync infrastructure` after cloning.
 

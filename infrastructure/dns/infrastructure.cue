@@ -26,8 +26,7 @@ infrastructure: {
 
 	resources: {for _, zone in domains.zones {zone.resources}}
 
-	// Pull requests comment a diff of the configuration, with no credentials.
-	// Pushes to main apply in the `production` GitHub environment, which waits
-	// for a reviewer; only then can the job log in to Infisical for the tokens.
-	workflows: apply: environment: "production"
+	// No CI workflows for now: cuenv's plan workflow logs in with the same
+	// credentials as the apply, which pull requests must never get. Plan and
+	// apply locally until each workflow can name its own credentials.
 }

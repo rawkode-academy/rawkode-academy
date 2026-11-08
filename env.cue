@@ -96,13 +96,22 @@ _ciInfisicalInfrastructure?: true
 
 // Which Infisical identity a job logs in as. infrastructure/bootstrap writes
 // both IDs as repository variables. Infrastructure applies use
-// github-read-write, whose login also requires the `production` GitHub
+// github-read-write, whose login also requires the `infrastructure` GitHub
 // environment, so a job that skipped review is refused even if it asks for it.
-// Every other job on main uses github-actions, which reads project secrets.
+// Deploys on main use github-actions, which reads project secrets.
 let _infisicalIdentity = "${{ endsWith(github.workflow, '-infrastructure-apply') && vars.INFISICAL_READ_WRITE_IDENTITY_ID || vars.INFISICAL_MACHINE_IDENTITY_ID }}"
 let _infisicalOidcTasks = (c.#InfisicalOidc & {#identityId: _infisicalIdentity}).tasks
 
 ci: providers: ["github"]
+
+// Pull request jobs run code anyone with write access can change, so their
+// GITHUB_TOKEN can read the repository and report checks, nothing more.
+ci: pipelines: pullRequest?: provider: github: permissions: {
+	contents: "read"
+	packages: "none"
+	actions:  "none"
+	issues:   "none"
+}
 ci: contributors: [
 	_NamespaceNix,
 	c.#BunWorkspace,
