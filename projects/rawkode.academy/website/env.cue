@@ -9,6 +9,9 @@ name: "rawkode-academy-website"
 runtime: schema.#DevenvRuntime
 hooks: onEnter: devenv: schema.#Devenv
 
+// deploy.main reads BASIN_SQL_TOKEN from Infisical.
+_ciInfisicalOidc: true
+
 let _t = tasks
 // CI tasks resolve their tools through Nix directly, the way the platform
 // services do, instead of relying on the devenv shell being materialised on
@@ -32,15 +35,13 @@ env: {
 
 ci: pipelines: {
 	default: {
+		environment: "production"
 		when: {
 			branch: ["main"]
 			defaultBranch: true
 			manual:        true
 		}
-		// Hold deployment until the Studio and viewer rollout is coordinated.
-		// deploy.main reads BASIN_SQL_TOKEN from Infisical, so set
-		// _ciInfisicalOidc when this pipeline runs it.
-		tasks: [_t.build]
+		tasks: [_t.deploy.main]
 	}
 
 	pullRequest: {
