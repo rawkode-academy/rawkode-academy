@@ -1,4 +1,6 @@
 import { sva } from "../../styled-system/css";
+import { focusRing, focusRingInk } from "../styles/focus";
+import { systemGridTop } from "../styles/systemGrid";
 
 /**
  * The Academy front door, video library, and learning-path directory.
@@ -24,9 +26,6 @@ export const academyPage = sva({
 		"lede",
 		"heroLede",
 		"actions",
-		"buttonPrimary",
-		"buttonSecondary",
-		"buttonGhost",
 		"textLink",
 		"featureCard",
 		"featureArt",
@@ -107,23 +106,7 @@ export const academyPage = sva({
 			borderBottom: "hairline",
 			borderColor: "academy.inkBorder",
 			_lg: { paddingBlockStart: "academy-hero" },
-			// The system grid: a faint measurement grid that fades out towards
-			// the bottom edge. It is the one decorative motif and it only lives
-			// on ink surfaces.
-			"--academy-grid-line":
-				"color-mix(in srgb, var(--colors-academy-ink-border) 70%, transparent)",
-			_before: {
-				content: '""',
-				position: "absolute",
-				inset: "0",
-				pointerEvents: "none",
-				backgroundImage:
-					"[linear-gradient(var(--academy-grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--academy-grid-line) 1px, transparent 1px)]",
-				backgroundSize: "[4rem 4rem]",
-				backgroundPosition: "[center top]",
-				maskImage:
-					"[radial-gradient(120% 100% at 50% 0%, black 20%, transparent 100%)]",
-			},
+			...systemGridTop,
 			"& > :not(canvas)": { position: "relative" },
 		},
 		// The living system is drawn on the same lattice as the grid and
@@ -221,99 +204,6 @@ export const academyPage = sva({
 			animationDelay: "stagger-3",
 			_motionReduce: { animation: "none" },
 		},
-		buttonPrimary: {
-			display: "inline-flex",
-			alignItems: "center",
-			justifyContent: "center",
-			gap: "3",
-			minHeight: "12",
-			paddingInline: "5",
-			paddingBlock: "3",
-			border: "academy-button",
-			borderRadius: "academy-s",
-			backgroundColor: "academy.accent",
-			color: "academy.accentForeground",
-			fontFamily: "academy-text",
-			fontSize: "sm",
-			fontWeight: "bold",
-			lineHeight: "academy-card",
-			textDecoration: "none",
-			cursor: "pointer",
-			transitionProperty: "common",
-			transitionDuration: "base",
-			transitionTimingFunction: "academy-out",
-			"& > span": {
-				transitionProperty: "[transform]",
-				transitionDuration: "base",
-				transitionTimingFunction: "academy-out",
-			},
-			_hover: { "& > span": { transform: "translateX(0.2em)" } },
-			_active: { transform: "translateY(1px)" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
-			_motionReduce: {
-				transitionDuration: "none",
-				"& > span": { transitionDuration: "none" },
-			},
-		},
-		buttonSecondary: {
-			display: "inline-flex",
-			alignItems: "center",
-			justifyContent: "center",
-			gap: "3",
-			minHeight: "12",
-			paddingInline: "5",
-			paddingBlock: "3",
-			border: "hairline",
-			borderColor: "academy.inputBorder",
-			borderRadius: "academy-s",
-			backgroundColor: "academy.panel",
-			color: "academy.text",
-			fontWeight: "semibold",
-			textDecoration: "none",
-			cursor: "pointer",
-			transitionProperty: "colors",
-			transitionDuration: "base",
-			_hover: { borderColor: "academy.accent", color: "academy.accent" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
-			_motionReduce: { transitionDuration: "none" },
-		},
-		buttonGhost: {
-			display: "inline-flex",
-			alignItems: "center",
-			justifyContent: "center",
-			gap: "3",
-			minHeight: "12",
-			paddingInline: "5",
-			paddingBlock: "3",
-			border: "hairline",
-			borderColor: "academy.inkBorder",
-			borderRadius: "academy-s",
-			backgroundColor: "transparent",
-			color: "academy.inkText",
-			fontSize: "sm",
-			fontWeight: "semibold",
-			textDecoration: "none",
-			transitionProperty: "colors",
-			transitionDuration: "base",
-			_hover: {
-				borderColor: "academy.inkText",
-				backgroundColor: "academy.inkRaised",
-			},
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.inkAccent",
-				outlineOffset: "focus",
-			},
-			_motionReduce: { transitionDuration: "none" },
-		},
 		textLink: {
 			display: "inline-flex",
 			alignItems: "center",
@@ -335,11 +225,7 @@ export const academyPage = sva({
 				textUnderlineOffset: "0.2em",
 				"& > span": { transform: "translateX(0.2em)" },
 			},
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 			_motionReduce: { "& > span": { transitionDuration: "none" } },
 		},
 		featureCard: {
@@ -355,11 +241,7 @@ export const academyPage = sva({
 				"& [data-play]": { transform: "scale(1.08)" },
 				"& h2": { color: "academy.inkAccent" },
 			},
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.inkAccent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRingInk,
 			_motionReduce: { animation: "none" },
 		},
 		featureArt: {
@@ -490,11 +372,7 @@ export const academyPage = sva({
 				color: "academy.inkAccent",
 				_after: { transform: "scaleX(1)" },
 			},
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.inkAccent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRingInk,
 			_motionReduce: { _after: { transitionDuration: "none" } },
 		},
 		archiveNote: {
@@ -573,11 +451,7 @@ export const academyPage = sva({
 				"& img": { transform: "scale(1.03)" },
 				"& [data-body]": { transform: "translateX(0.35rem)" },
 			},
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 			_motionReduce: { animation: "none" },
 		},
 		// The day is the numeral; month and year sit beneath it in mono.
@@ -710,11 +584,7 @@ export const academyPage = sva({
 				"& h3": { color: "academy.accent" },
 				"& img": { transform: "scale(1.03)" },
 			},
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		cardArt: {
 			position: "relative",
@@ -811,11 +681,7 @@ export const academyPage = sva({
 				"& [data-arrow]": { transform: "translate(0.15em, -0.15em)" },
 				"& [data-index]": { color: "academy.accent" },
 			},
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 			_motionReduce: { animation: "none" },
 		},
 		// A ghost numeral: large, quiet, and lit on hover.
@@ -900,11 +766,7 @@ export const academyPage = sva({
 				"& img": { transform: "scale(1.03)" },
 				"& [data-play]": { transform: "scale(1.08)" },
 			},
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		watchTitle: {
 			margin: "0",
@@ -938,11 +800,7 @@ export const academyPage = sva({
 			color: "academy.text",
 			fontFamily: "academy-text",
 			fontSize: "md",
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		empty: { paddingBlock: "10", color: "academy.textSoft" },
 		more: {

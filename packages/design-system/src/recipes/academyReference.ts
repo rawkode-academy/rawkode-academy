@@ -1,4 +1,5 @@
 import { sva } from "../../styled-system/css";
+import { focusRing, focusRingInset } from "../styles/focus";
 
 /** Dense reference pages: readable code, mobile cards, and wide-screen tables. */
 export const academyReference = sva({
@@ -183,11 +184,7 @@ export const academyReference = sva({
 			flexShrink: "0",
 			accentColor: "academy.accent",
 			marginTop: "1",
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		mobile: {
 			display: "flex",
@@ -253,11 +250,7 @@ export const academyReference = sva({
 			textAlign: "start",
 			cursor: "pointer",
 			_hover: { color: "academy.accent" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus-inset",
-			},
+			_focusVisible: focusRingInset,
 		},
 		accordionTag: {
 			display: "inline-flex",

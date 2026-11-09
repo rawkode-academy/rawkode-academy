@@ -1,4 +1,5 @@
 import { sva } from "../../styled-system/css";
+import { focusRing } from "../styles/focus";
 
 /** Shared document sections used by marketing, utility, and legal pages. */
 export const academyEditorial = sva({
@@ -97,11 +98,7 @@ export const academyEditorial = sva({
 				color: "academy.accentForeground",
 				fontWeight: "bold",
 				textDecoration: "none",
-				_focusVisible: {
-					outline: "focus",
-					outlineColor: "academy.accent",
-					outlineOffset: "focus",
-				},
+				_focusVisible: focusRing,
 			},
 			"& .editorial-button--secondary": {
 				borderColor: "academy.border",
@@ -170,11 +167,7 @@ export const academyEditorial = sva({
 				cursor: "pointer",
 				color: "academy.text",
 				fontWeight: "bold",
-				_focusVisible: {
-					outline: "focus",
-					outlineColor: "academy.accent",
-					outlineOffset: "focus",
-				},
+				_focusVisible: focusRing,
 			},
 			"& .editorial-faq p": {
 				margin: "0",

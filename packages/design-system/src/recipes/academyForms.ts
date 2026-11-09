@@ -1,4 +1,5 @@
 import { sva } from "../../styled-system/css";
+import { focusRing } from "../styles/focus";
 
 /** Shared acquisition fields, feedback, badges, and native simulator controls. */
 export const academyForms = sva({
@@ -18,7 +19,6 @@ export const academyForms = sva({
 		"label",
 		"input",
 		"textarea",
-		"button",
 		"consent",
 		"courseConsent",
 		"checkbox",
@@ -142,42 +142,13 @@ export const academyForms = sva({
 			fontSize: "md",
 			lineHeight: "body",
 			_placeholder: { color: "academy.textMuted", opacity: "1" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 			_disabled: { opacity: "0.6", cursor: "not-allowed" },
 			"&:is([aria-invalid='true'], :user-invalid)": {
 				borderColor: "academy.statusRust",
 			},
 		},
 		textarea: { resize: "vertical", minHeight: "24" },
-		button: {
-			display: "inline-flex",
-			alignItems: "center",
-			justifyContent: "center",
-			gap: "2",
-			width: "full",
-			minHeight: "11",
-			paddingInline: "4",
-			paddingBlock: "3",
-			border: "academy-button",
-			borderRadius: "academy-s",
-			backgroundColor: "academy.accent",
-			color: "academy.accentForeground",
-			fontFamily: "academy-text",
-			fontSize: "sm",
-			fontWeight: "bold",
-			cursor: "pointer",
-			_hover: { opacity: "0.9" },
-			_disabled: { opacity: "0.6", cursor: "not-allowed" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
-		},
 		courseConsent: {
 			display: "flex",
 			alignItems: "start",
@@ -205,11 +176,7 @@ export const academyForms = sva({
 			flexShrink: "0",
 			marginBlockStart: "0.5",
 			accentColor: "academy.accent",
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 			_disabled: { cursor: "not-allowed" },
 		},
 		notice: {
@@ -291,11 +258,7 @@ export const academyForms = sva({
 				color: "academy.accentForeground",
 				borderColor: "academy.accent",
 			},
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		simulatorGrid: {
 			display: "grid",
@@ -319,11 +282,7 @@ export const academyForms = sva({
 			margin: "0",
 			cursor: "pointer",
 			accentColor: "academy.accent",
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		mono: {
 			color: "academy.text",

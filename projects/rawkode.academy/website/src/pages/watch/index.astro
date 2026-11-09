@@ -2,7 +2,7 @@
 export const prerender = false;
 
 import { getCollection, setContentCache } from "@/lib/live-content";
-import { academyPage } from "@rawkodeacademy/design-system";
+import { academyPage, button } from "@rawkodeacademy/design-system";
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Page from "@/wrappers/page.astro";
@@ -169,7 +169,7 @@ const pageDescription =
 			<form action="/watch" method="get" role="search" aria-label="Search the video library" class={styles.searchBar}>
 				<label for="video-search">Find a session</label>
 				<input id="video-search" name="q" value={archive.query} class={styles.input} type="search" placeholder="Search topics, tools, or speakers" autocomplete="off" />
-				<button class={styles.buttonPrimary} type="submit">Search</button>
+				<button class={button({ size: "lg" })} type="submit">Search</button>
 			</form>
 			<div class={styles.sectionHead}>
 				{archive.total > 0 && <p class={styles.resultCount}>Showing {archive.first}–{archive.last} of {archive.total} {archive.total === 1 ? "video" : "videos"}{archive.query && ` matching “${archive.query}”`}</p>}
@@ -195,9 +195,9 @@ const pageDescription =
 			{archive.pageCount > 1 && (
 				<nav class={styles.more} aria-label="Video library pages">
 					<div class={styles.actions}>
-						{archive.page > 1 && <a class={styles.buttonSecondary} href={watchArchiveHref(archive.query, archive.page - 1)} rel="prev">Previous</a>}
+						{archive.page > 1 && <a class={button({ variant: "outline" })} href={watchArchiveHref(archive.query, archive.page - 1)} rel="prev">Previous</a>}
 						<p class={styles.resultCount}>Page {archive.page} of {archive.pageCount}</p>
-						{archive.page < archive.pageCount && <a class={styles.buttonSecondary} href={watchArchiveHref(archive.query, archive.page + 1)} rel="next">Next</a>}
+						{archive.page < archive.pageCount && <a class={button({ variant: "outline" })} href={watchArchiveHref(archive.query, archive.page + 1)} rel="next">Next</a>}
 					</div>
 				</nav>
 			)}

@@ -1,4 +1,5 @@
 import { sva } from "../../styled-system/css";
+import { focusRing } from "../styles/focus";
 
 /** Secondary orientation without competing with the page's primary action. */
 export const academyNavigation = sva({
@@ -30,11 +31,7 @@ export const academyNavigation = sva({
 			color: "academy.textMuted",
 			textDecoration: "none",
 			_hover: { color: "academy.accent", textDecoration: "underline" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		separator: { color: "academy.textMuted" },
 		sections: { borderBlockEnd: "hairline", backgroundColor: "academy.canvas" },
@@ -63,11 +60,7 @@ export const academyNavigation = sva({
 				fontWeight: "bold",
 			},
 			_hover: { color: "academy.accent" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 	},
 });

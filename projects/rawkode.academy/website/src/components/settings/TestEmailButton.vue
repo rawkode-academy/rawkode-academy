@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { academyAccount } from "@rawkodeacademy/design-system";
+import { academyAccount, button } from "@rawkodeacademy/design-system";
 const account = academyAccount();
 
 import { ref } from "vue";
@@ -44,7 +44,7 @@ const sendTestEmail = async () => {
 				type="button"
 				:disabled="isSending"
 				@click="sendTestEmail"
-				:class="account.button"
+				:class="button()"
 			>
 				<svg
 					v-if="isSending"

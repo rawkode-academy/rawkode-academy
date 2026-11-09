@@ -1,4 +1,5 @@
 import { sva } from "../../styled-system/css";
+import { focusRing } from "../styles/focus";
 
 /**
  * Presentational additions for the Academy's informational and commercial
@@ -35,7 +36,6 @@ export const academyMarketing = sva({
 		"newsletterWidget",
 		"newsletterSuccess",
 		"newsletterError",
-		"newsletterButton",
 		"newsletterSpinner",
 		"newsletterForm",
 		"newsletterInputRow",
@@ -179,28 +179,8 @@ export const academyMarketing = sva({
 			alignItems: "center",
 			gap: "3",
 		},
-		copyButton: {
-			display: "inline-flex",
-			minWidth: "32",
-			alignItems: "center",
-			justifySelf: "start",
-			minHeight: "11",
-			paddingInline: "3",
-			border: "hairline",
-			borderColor: "academy.border",
-			borderRadius: "academy-s",
-			backgroundColor: "transparent",
-			color: "academy.text",
-			fontSize: "sm",
-			fontWeight: "semibold",
-			cursor: "pointer",
-			_hover: { backgroundColor: "academy.ground" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
-		},
+		// Layout only: the control itself is `button({ variant: "outline" })`.
+		copyButton: { minWidth: "32", justifySelf: "start" },
 		newsletter: { width: "full" },
 		newsletterSection: {
 			overflow: "hidden",
@@ -252,11 +232,7 @@ export const academyMarketing = sva({
 			color: "academy.accent",
 			fontSize: "sm",
 			fontWeight: "semibold",
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 			"& svg": { width: "5", height: "5", flexShrink: "0" },
 		},
 		newsletterError: {
@@ -278,32 +254,6 @@ export const academyMarketing = sva({
 				flexShrink: "0",
 				color: "academy.accent",
 			},
-		},
-		newsletterButton: {
-			display: "inline-flex",
-			alignItems: "center",
-			justifyContent: "center",
-			gap: "2",
-			width: "full",
-			minHeight: "11",
-			paddingInline: "4",
-			paddingBlock: "3",
-			border: "academy-button",
-			borderRadius: "academy-s",
-			backgroundColor: "academy.accent",
-			color: "academy.accentForeground",
-			fontFamily: "academy-text",
-			fontSize: "sm",
-			fontWeight: "semibold",
-			cursor: "pointer",
-			_hover: { opacity: "0.9" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
-			_disabled: { cursor: "wait", opacity: "0.7" },
-			"& svg": { width: "4", height: "4", flexShrink: "0" },
 		},
 		newsletterSpinner: {
 			width: "4",
@@ -331,11 +281,7 @@ export const academyMarketing = sva({
 			color: "academy.text",
 			fontFamily: "academy-text",
 			fontSize: "sm",
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 			_disabled: { opacity: "0.6" },
 		},
 		newsletterSubmit: {
@@ -352,11 +298,7 @@ export const academyMarketing = sva({
 			backgroundColor: "academy.accent",
 			color: "academy.accentForeground",
 			cursor: "pointer",
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 			_disabled: { cursor: "not-allowed", opacity: "0.5" },
 			"& svg": { width: "4", height: "4" },
 		},
@@ -388,11 +330,7 @@ export const academyMarketing = sva({
 			fontWeight: "semibold",
 			textDecoration: "none",
 			_hover: { borderColor: "academy.accent", color: "academy.accent" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 	},
 	variants: {

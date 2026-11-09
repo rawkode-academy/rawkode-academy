@@ -1,5 +1,5 @@
 ---
-import { academyDocument } from "@rawkodeacademy/design-system";
+import { academyDocument, button } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
 export const prerender = false;
 
@@ -207,7 +207,7 @@ function formatDuration(seconds: number) {
 
  {gameFormatUrl && (
  <div class={doc.actions}>
- <a href={gameFormatUrl} class={doc.buttonSecondary} rel="noopener noreferrer">Explore the game format ↗</a>
+ <a href={gameFormatUrl} class={button({ variant: "outline" })} rel="noopener noreferrer">Explore the game format ↗</a>
  </div>
  )}
 

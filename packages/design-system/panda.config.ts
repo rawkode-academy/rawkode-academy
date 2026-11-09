@@ -39,6 +39,7 @@ export default defineConfig({
 						"text-soft": { value: "#bfcbdd" },
 						"text-muted": { value: "#8fa0b8" },
 						accent: { value: "#ff7ab6" },
+						"accent-hover": { value: "#ff9cc8" },
 						"accent-foreground": { value: "#2a0616" },
 						input: { value: "#0a1220" },
 						"input-border": { value: "#64768f" },
@@ -289,6 +290,15 @@ export default defineConfig({
 							value: {
 								base: "#c2185b",
 								_dark: "{colors.academyBase.accent}",
+							},
+						},
+						// The accent under the pointer: one step further from the
+						// surface it sits on (deeper on the light canvas, brighter
+						// on navy), so a filled control answers without fading.
+						accentHover: {
+							value: {
+								base: "#a3124b",
+								_dark: "{colors.academyBase.accent-hover}",
 							},
 						},
 						accentForeground: {

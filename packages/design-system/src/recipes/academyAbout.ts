@@ -1,4 +1,5 @@
 import { sva } from "../../styled-system/css";
+import { focusRing } from "../styles/focus";
 
 /** About-page composition; the shared layout owns the page width and gutters. */
 export const academyAbout = sva({
@@ -226,11 +227,7 @@ export const academyAbout = sva({
 			fontWeight: "medium",
 			textDecoration: "underline",
 			_hover: { color: "academy.accent" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		linkMeta: {
 			color: "academy.textMuted",
@@ -261,11 +258,7 @@ export const academyAbout = sva({
 			_hover: {
 				"& h3": { color: "academy.accent", textDecoration: "underline" },
 			},
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		formatTitle: {
 			display: "flex",

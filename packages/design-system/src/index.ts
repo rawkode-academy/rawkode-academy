@@ -1,3 +1,6 @@
+export { button, type ButtonVariants } from "./recipes/button";
+export { focusRing, focusRingInk, focusRingInset } from "./styles/focus";
+export { systemGridBottom, systemGridTop } from "./styles/systemGrid";
 export { dialog } from "./recipes/dialog";
 export { academyPage } from "./recipes/academyPage";
 export { academyShell } from "./recipes/academyShell";
@@ -12,7 +15,7 @@ export { academyLabel } from "./recipes/academyLabel";
 export { academySkeleton } from "./recipes/academySkeleton";
 export { academyWatch } from "./recipes/academyWatch";
 export { tabs } from "./recipes/tabs";
-export { Dialog } from "./vue";
+export { Button, Dialog } from "./vue";
 export { academyCommand } from "./recipes/academyCommand";
 export { academyAccount } from "./recipes/academyAccount";
 export { academyCourse } from "./recipes/academyCourse";

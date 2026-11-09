@@ -1,5 +1,5 @@
 ---
-import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
+import { academyDocument, academyLayout, button } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
 const styles = academyLayout({ width: "reading" });
 import {
@@ -141,7 +141,7 @@ const pageDescription = learningPath.data.description;
 					</aside>
 				)}
 				<div class={doc.actions}>
-					<a class={doc.button} href={firstResource ? `#${firstResource.slug}` : "#path-content"}>
+					<a class={button()} href={firstResource ? `#${firstResource.slug}` : "#path-content"}>
 						Start learning
 					</a>
 				</div>

@@ -3,6 +3,7 @@
 // content layer (fixtures below) and RichText are stubs; no browser layout,
 // remote imagery, production middleware, gateway or KV are tested.
 import assert from "node:assert/strict";
+import { readRecipeConfig } from "./helpers/recipe-config.mjs";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import vm from "node:vm";
@@ -93,6 +94,7 @@ async function render(
 			academyLayout: styles,
 			academyWatch: styles,
 			academyCatalog: styles,
+			button: ({ variant = "solid" } = {}) => `button-${variant}`,
 		},
 		// Pass-through fixtures: the layer's own scheduled-entry hiding is not
 		// applied, so the page's publication filters are what these tests prove.
@@ -595,35 +597,8 @@ test("empty cast omits its heading and names remain escaped in real cast markup"
 });
 
 test("initials presentation belongs to academyWatch and preserves the avatar size/hidden contract", async () => {
-	const source = readFileSync(
-		new URL(
-			"../../../../../packages/design-system/src/recipes/academyWatch.ts",
-			import.meta.url,
-		),
-		"utf8",
-	);
-	const context = vm.createContext({});
-	const module = new vm.SourceTextModule(
-		ts.transpileModule(source, {
-			compilerOptions: {
-				module: ts.ModuleKind.ESNext,
-				target: ts.ScriptTarget.ES2022,
-			},
-		}).outputText,
-		{ context },
-	);
-	await module.link((specifier) => {
-		assert.equal(specifier, "../../styled-system/css");
-		return new vm.SyntheticModule(
-			["sva"],
-			function () {
-				this.setExport("sva", (value) => value);
-			},
-			{ context },
-		);
-	});
-	await module.evaluate();
-	const recipe = module.namespace.academyWatch;
+	const config = await readRecipeConfig("academyWatch.ts", "academyWatch");
+	const recipe = config;
 	assert(recipe.slots.includes("castInitials"));
 	assert.deepEqual(JSON.parse(JSON.stringify(recipe.base.castInitials)), {
 		display: "grid",

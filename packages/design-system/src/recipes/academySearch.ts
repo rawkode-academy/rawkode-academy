@@ -1,4 +1,6 @@
 import { sva } from "../../styled-system/css";
+import { focusRing, focusRingInk } from "../styles/focus";
+import { systemGridTop } from "../styles/systemGrid";
 
 export const academySearch = sva({
 	slots: [
@@ -12,7 +14,6 @@ export const academySearch = sva({
 		"form",
 		"field",
 		"input",
-		"button",
 		"filters",
 		"filter",
 		"groups",
@@ -49,20 +50,7 @@ export const academySearch = sva({
 			borderBottom: "hairline",
 			borderColor: "academy.inkBorder",
 			_lg: { paddingBlock: "academy-hero" },
-			"--academy-grid-line":
-				"color-mix(in srgb, var(--colors-academy-ink-border) 70%, transparent)",
-			_before: {
-				content: '""',
-				position: "absolute",
-				inset: "0",
-				pointerEvents: "none",
-				backgroundImage:
-					"[linear-gradient(var(--academy-grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--academy-grid-line) 1px, transparent 1px)]",
-				backgroundSize: "[4rem 4rem]",
-				backgroundPosition: "[center top]",
-				maskImage:
-					"[radial-gradient(120% 100% at 50% 0%, black 20%, transparent 100%)]",
-			},
+			...systemGridTop,
 			"& > *": { position: "relative" },
 		},
 		headerInner: {
@@ -99,11 +87,7 @@ export const academySearch = sva({
 			fontWeight: "semibold",
 			textUnderlineOffset: "0.2em",
 			_hover: { color: "academy.inkAccent" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.inkAccent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRingInk,
 		},
 		title: {
 			margin: "0",
@@ -149,27 +133,7 @@ export const academySearch = sva({
 			border: "hairline",
 			borderColor: "academy.inputBorder",
 			borderRadius: "academy-s",
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
-		},
-		button: {
-			minHeight: "12",
-			paddingInline: "5",
-			background: "academy.accent",
-			color: "academy.accentForeground",
-			fontWeight: "bold",
-			border: "none",
-			borderRadius: "academy-s",
-			cursor: "pointer",
-			_hover: { opacity: "0.9" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		filters: {
 			display: "flex",
@@ -195,11 +159,7 @@ export const academySearch = sva({
 				borderColor: "academy.inkAccent",
 				fontWeight: "bold",
 			},
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		groups: { display: "grid", gap: "12", paddingTop: "8" },
 		groupHeader: {
@@ -227,11 +187,7 @@ export const academySearch = sva({
 			color: "academy.text",
 			textDecoration: "none",
 			_hover: { color: "academy.accent" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		resultTitle: {
 			margin: "0",
@@ -261,11 +217,7 @@ export const academySearch = sva({
 			fontSize: "sm",
 			fontWeight: "semibold",
 			textUnderlineOffset: "0.2em",
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		pager: {
 			display: "flex",

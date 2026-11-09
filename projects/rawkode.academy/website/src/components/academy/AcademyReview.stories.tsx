@@ -3,6 +3,7 @@ import {
 	academyDocument,
 	academyForms,
 	academyLayout,
+	button,
 } from "@rawkodeacademy/design-system";
 import { useId } from "react";
 import { defineComponent, h } from "vue";
@@ -293,7 +294,7 @@ function FormRecipeFixture({ state = "default" }: { state?: FormState }) {
 					Optional consent checkbox specimen
 				</label>
 			</div>
-			<button className={form.button} type="button" disabled={disabled}>
+			<button className={button({ fullWidth: true })} type="button" disabled={disabled}>
 				Button specimen · no submission
 			</button>
 		</section>

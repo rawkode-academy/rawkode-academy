@@ -35,6 +35,7 @@ import {
 	academyLayout,
 	academyMedia,
 	academyWatch,
+	button,
 } from "@rawkodeacademy/design-system";
 import "@rawkodeacademy/design-system/styles.css";
 import {
@@ -417,7 +418,7 @@ const watchStatusLabel = isLiveNow
 						<dd class={watch.factValue}>
 							<button
 								type="button"
-								class={watch.copyButton}
+								class={button({ variant: "outline", size: "sm" })}
 								data-copy-link
 								title="Copy a link to this video at the current timestamp"
 							>

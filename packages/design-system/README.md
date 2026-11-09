@@ -20,9 +20,79 @@ bun run --cwd packages/design-system check
 
 The generated `styled-system/` directory is produced by Panda's build step. It is part of the package's local build contract and should be regenerated whenever `panda.config.ts` changes.
 
+## Layers
+
+The package has three layers. Reach for the highest one that fits.
+
+| Layer | Where | What |
+| --- | --- | --- |
+| Components | `src/vue` | `Button`, `Dialog`, `Tabs`, `NavigationDrawer`: behaviour plus styles |
+| Primitive recipes | `src/recipes/button.ts`, `academyLabel`, `academyContainer`, ... | One element, usable from Astro, Vue and React |
+| Style fragments | `src/styles` | `focusRing*`, `systemGridTop` / `systemGridBottom`: spread into any recipe |
+
+Page recipes (`academyPage`, `academyWatch`, ...) sit on top and own layout
+only. A page recipe that needs an action, a focus ring or the grid motif
+composes the shared piece; it does not restate it.
+
+### Button
+
+```astro
+---
+import { button } from "@rawkodeacademy/design-system";
+---
+<a class={button({ size: "lg" })} href="/watch">
+	Watch the latest session <span data-part="arrow" aria-hidden="true">→</span>
+</a>
+<button class={button({ variant: "outline" })} type="submit">Apply filters</button>
+```
+
+```vue
+<script setup lang="ts">
+import { Button } from "@rawkodeacademy/design-system/vue";
+</script>
+
+<template>
+	<Button href="/read" arrow>Read the article</Button>
+	<Button variant="outline" :loading="saving" @click="save">Save</Button>
+</template>
+```
+
+| Variant | Use |
+| --- | --- |
+| `solid` | The one primary action in a view |
+| `outline` | A secondary action; also toggles via `aria-pressed` |
+| `ink` | A secondary action on an ink surface |
+| `quiet` | Toolbar and in-panel controls |
+
+Sizes are `sm` (36px), `md` (44px, the default) and `lg` (48px). `fullWidth`
+stretches a form submit; `icon` makes a square control and needs an
+`aria-label`.
+
+### Style fragments and static extraction
+
+```ts
+import { sva } from "../../styled-system/css";
+import { focusRing } from "../styles/focus";
+import { systemGridTop } from "../styles/systemGrid";
+
+export const example = sva({
+	slots: ["hero", "link"],
+	base: {
+		hero: { position: "relative", overflow: "hidden", ...systemGridTop },
+		link: { _focusVisible: focusRing },
+	},
+});
+```
+
+Panda extracts styles statically. A fragment must be a plain object literal
+(spreading other literals is fine). A function that builds a style object is
+not followed: the recipe still returns class names at runtime, but no CSS is
+generated. The website's `design-system-coverage` test fails when a recipe
+emits a class the stylesheet does not define.
+
 ## Dialog
 
-The shared components currently include an Ark UI dialog and tabs, both styled with Panda slot recipes:
+The Ark UI dialog and tabs are styled with Panda slot recipes:
 
 ```vue
 <script setup lang="ts">

@@ -87,6 +87,7 @@ async function renderArchive(search = "", data = collections) {
 				new Proxy({}, { get: (_, slot) => `archive-${String(slot)}` }),
 			academyLayout: () =>
 				new Proxy({}, { get: (_, slot) => `layout-${String(slot)}` }),
+			button: ({ variant = "solid" } = {}) => `button-${variant}`,
 		},
 		"@/lib/video-thumbnail": {
 			getVideoThumbnailUrl: (id) => `https://images.example.test/${id}.webp`,

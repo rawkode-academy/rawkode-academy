@@ -1,4 +1,6 @@
 import { sva } from "../../styled-system/css";
+import { focusRing } from "../styles/focus";
+import { systemGridTop } from "../styles/systemGrid";
 
 /**
  * Video-detail composition for the Academy watch route.
@@ -23,7 +25,6 @@ export const academyWatch = sva({
 		"factLabel",
 		"factValue",
 		"factLink",
-		"copyButton",
 		"upcoming",
 		"noticeTitle",
 		"noticeCopy",
@@ -163,11 +164,7 @@ export const academyWatch = sva({
 			color: "academy.textSoft",
 			textDecoration: "none",
 			_hover: { color: "academy.accent" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		breadcrumbStatus: { color: "academy.textMuted", marginInlineStart: "auto" },
 		hero: {
@@ -241,34 +238,7 @@ export const academyWatch = sva({
 			textDecoration: "underline",
 			textUnderlineOffset: "2px",
 			_hover: { color: "academy.accent" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
-		},
-		copyButton: {
-			display: "inline-flex",
-			alignItems: "center",
-			justifyContent: "center",
-			minHeight: "11",
-			paddingInline: "3",
-			border: "hairline",
-			borderColor: "academy.inputBorder",
-			borderRadius: "academy-s",
-			backgroundColor: "transparent",
-			color: "academy.text",
-			fontFamily: "academy-mono",
-			fontSize: "xs",
-			fontWeight: "semibold",
-			letterSpacing: "wide",
-			cursor: "pointer",
-			_hover: { borderColor: "academy.accent", color: "academy.accent" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		upcoming: {
 			display: "flex",
@@ -305,20 +275,7 @@ export const academyWatch = sva({
 			borderBottom: "hairline",
 			borderColor: "academy.inkBorder",
 			_lg: { paddingBlock: "10" },
-			"--academy-grid-line":
-				"color-mix(in srgb, var(--colors-academy-ink-border) 70%, transparent)",
-			_before: {
-				content: '""',
-				position: "absolute",
-				inset: "0",
-				pointerEvents: "none",
-				backgroundImage:
-					"[linear-gradient(var(--academy-grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--academy-grid-line) 1px, transparent 1px)]",
-				backgroundSize: "[4rem 4rem]",
-				backgroundPosition: "[center top]",
-				maskImage:
-					"[radial-gradient(120% 100% at 50% 0%, black 20%, transparent 100%)]",
-			},
+			...systemGridTop,
 			"& > *": { position: "relative" },
 		},
 		playerFrame: {
@@ -446,11 +403,7 @@ export const academyWatch = sva({
 			color: "academy.text",
 			textDecoration: "none",
 			_hover: { color: "academy.accent" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		chapterTime: {
 			color: "academy.textMuted",
@@ -479,11 +432,7 @@ export const academyWatch = sva({
 			fontWeight: "semibold",
 			letterSpacing: "wide",
 			cursor: "pointer",
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		transcriptBody: { paddingBlockEnd: "3" },
 		transcriptChapter: {
@@ -501,11 +450,7 @@ export const academyWatch = sva({
 			color: "academy.text",
 			textDecoration: "none",
 			_hover: { color: "academy.accent" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		transcriptParagraph: {
 			maxWidth: "academy-copy",
@@ -525,11 +470,7 @@ export const academyWatch = sva({
 			marginInlineEnd: "2",
 			textDecoration: "none",
 			_hover: { textDecoration: "underline", textUnderlineOffset: "2px" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		transcriptRow: {
 			display: "grid",
@@ -553,11 +494,7 @@ export const academyWatch = sva({
 			fontSize: "sm",
 			textDecoration: "none",
 			_hover: { borderColor: "academy.accent", color: "academy.accent" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		techIcon: {
 			display: "inline-flex",
@@ -628,11 +565,7 @@ export const academyWatch = sva({
 			fontSize: "sm",
 			cursor: "pointer",
 			_hover: { borderColor: "academy.accent" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		reactionEmoji: { fontSize: "lg", lineHeight: "none" },
 		reactionCount: {
@@ -669,11 +602,7 @@ export const academyWatch = sva({
 				borderColor: "academy.accent",
 				backgroundColor: "academy.canvas",
 			},
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		tabsRoot: {
 			minWidth: "0",
@@ -703,11 +632,7 @@ export const academyWatch = sva({
 			color: "academy.text",
 			textDecoration: "none",
 			_hover: { borderColor: "academy.accent", color: "academy.accent" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		resourceIcon: {
 			width: "5",
@@ -815,11 +740,7 @@ export const academyWatch = sva({
 			textDecoration: "none",
 			"& svg": { width: "4", height: "4" },
 			_hover: { textDecoration: "underline" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		cast: {
 			display: "flex",
@@ -849,11 +770,7 @@ export const academyWatch = sva({
 			color: "academy.text",
 			textDecoration: "none",
 			_hover: { borderColor: "academy.accent", color: "academy.accent" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		castAvatarWrap: { position: "relative", flexShrink: "0" },
 		castAvatar: {
@@ -939,11 +856,7 @@ export const academyWatch = sva({
 			fontWeight: "semibold",
 			textDecoration: "none",
 			_hover: { textDecoration: "underline" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		railGrid: {
 			display: "grid",
@@ -963,11 +876,7 @@ export const academyWatch = sva({
 			color: "academy.text",
 			textDecoration: "none",
 			_hover: { borderColor: "academy.accent" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		railMedia: {
 			position: "relative",
@@ -1012,11 +921,7 @@ export const academyWatch = sva({
 			color: "academy.text",
 			fontFamily: "academy-text",
 			fontSize: "sm",
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		searchIcon: {
 			position: "absolute",

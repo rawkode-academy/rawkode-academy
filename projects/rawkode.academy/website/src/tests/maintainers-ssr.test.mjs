@@ -1,5 +1,6 @@
 // Actual Astro page + EditorialShell SSR; no Browser, mail handler or network.
 import assert from "node:assert/strict";
+import { readRecipeConfig } from "./helpers/recipe-config.mjs";
 import { existsSync, readFileSync } from "node:fs";
 import { test } from "node:test";
 import vm from "node:vm";
@@ -101,24 +102,8 @@ async function renderPage() {
 	return parse(await container.renderToString(module.namespace.default));
 }
 
-async function readRecipe(url = recipeUrl, name = "academyMaintainers") {
-	const context = vm.createContext({});
-	const module = new vm.SourceTextModule(transpile(readFileSync(url, "utf8")), {
-		context,
-	});
-	await module.link((specifier) => {
-		assert.equal(specifier, "../../styled-system/css");
-		return new vm.SyntheticModule(
-			["sva"],
-			function () {
-				this.setExport("sva", (config) => config);
-			},
-			{ context },
-		);
-	});
-	await module.evaluate();
-	return module.namespace[name];
-}
+const readRecipe = (file = "academyMaintainers.ts", name = "academyMaintainers") =>
+	readRecipeConfig(file, name);
 
 test("styled ordered list explicitly preserves four listitems, H3s and exact step copy", async () => {
 	const dom = await renderPage();
@@ -207,10 +192,7 @@ test("both inline destinations use recipe-backed 44px targets and explicit focus
 test("both hero destinations retain shared editorial 44px targets and focus", async () => {
 	const dom = await renderPage();
 	assert.equal(dom.querySelectorAll("a.editorial-button").length, 2);
-	const recipe = await readRecipe(
-		new URL("academyEditorial.ts", recipeUrl),
-		"academyEditorial",
-	);
+	const recipe = await readRecipe("academyEditorial.ts", "academyEditorial");
 	const button = recipe.base.root["& .editorial-button"];
 	assert.equal(button.minHeight, "11");
 	assert.equal(button._focusVisible.outline, "focus");

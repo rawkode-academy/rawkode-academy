@@ -1,4 +1,5 @@
 import { sva } from "../../styled-system/css";
+import { focusRing, focusRingInk, focusRingInset } from "../styles/focus";
 
 /**
  * Listing-specific pieces that sit on top of the shared Academy layout.
@@ -109,11 +110,7 @@ export const academyCatalog = sva({
 				"& img": { transform: "scale(1.03)" },
 				"& [data-body]": { transform: "translateX(0.35rem)" },
 			},
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 			_motionReduce: { animation: "none" },
 		},
 		// The day is the numeral; month and year sit beneath it in mono.
@@ -248,11 +245,7 @@ export const academyCatalog = sva({
 				backgroundColor: "academy.panel",
 				"& [data-name]": { color: "academy.accent" },
 			},
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus-inset",
-			},
+			_focusVisible: focusRingInset,
 			"&[hidden]": { display: "none" },
 		},
 		indexMark: {
@@ -427,11 +420,7 @@ export const academyCatalog = sva({
 			textUnderlineOffset: "0.25em",
 			textDecorationColor: "academy.inkAccent",
 			_hover: { color: "academy.inkAccent" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.inkAccent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRingInk,
 		},
 		filterForm: {
 			display: "grid",
@@ -480,11 +469,7 @@ export const academyCatalog = sva({
 			textDecoration: "none",
 			_sm: { gridTemplateColumns: "6rem minmax(0, 1fr)", gap: "4" },
 			_hover: { color: "academy.accent" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		rowIndex: {
 			color: "academy.accent",
@@ -550,11 +535,7 @@ export const academyCatalog = sva({
 			transitionDuration: "fast",
 			"&[hidden]": { display: "none" },
 			_hover: { borderColor: "academy.accent", background: "academy.ground" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 			_motionReduce: { transitionDuration: "none" },
 		},
 		identityMark: {

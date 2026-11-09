@@ -1,4 +1,6 @@
 import { sva } from "../../styled-system/css";
+import { focusRing, focusRingInk, focusRingInset } from "../styles/focus";
+import { systemGridBottom } from "../styles/systemGrid";
 
 /** Production chrome, shared by every Academy document. */
 export const academyShell = sva({
@@ -15,7 +17,6 @@ export const academyShell = sva({
 		"searchLabel",
 		"searchKey",
 		"account",
-		"authButton",
 		"profileTrigger",
 		"profileAvatar",
 		"profilePositioner",
@@ -97,11 +98,7 @@ export const academyShell = sva({
 			flexShrink: "1",
 			minWidth: "0",
 			minHeight: "11",
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		brandArt: {
 			display: "block",
@@ -148,11 +145,7 @@ export const academyShell = sva({
 				_after: { transform: "scaleX(1)" },
 			},
 			_motionReduce: { _after: { transitionDuration: "none" } },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		actions: {
 			display: "flex",
@@ -186,11 +179,7 @@ export const academyShell = sva({
 				color: "academy.textSoft",
 				_hover: { borderColor: "academy.inputBorder", color: "academy.text" },
 			},
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		searchLabel: { display: "none", _lg: { display: "inline" } },
 		searchKey: {
@@ -208,32 +197,6 @@ export const academyShell = sva({
 		},
 		// Below lg, sign in lives at the top of the navigation drawer.
 		account: { display: "none", _lg: { display: "block" } },
-		authButton: {
-			display: "inline-flex",
-			alignItems: "center",
-			justifyContent: "center",
-			minHeight: "9",
-			paddingInline: "4",
-			paddingBlock: "2",
-			border: "academy-button",
-			borderRadius: "academy-s",
-			backgroundColor: "academy.accent",
-			color: "academy.accentForeground",
-			fontFamily: "academy-text",
-			fontSize: "sm",
-			fontWeight: "bold",
-			lineHeight: "none",
-			textDecoration: "none",
-			transitionProperty: "[transform]",
-			transitionDuration: "fast",
-			_hover: { opacity: "0.92" },
-			_active: { transform: "translateY(1px)" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
-		},
 		profileTrigger: {
 			display: "inline-flex",
 			alignItems: "center",
@@ -243,11 +206,7 @@ export const academyShell = sva({
 			borderRadius: "full",
 			color: "academy.text",
 			cursor: "pointer",
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		profileAvatar: {
 			width: "8",
@@ -309,11 +268,7 @@ export const academyShell = sva({
 				color: "academy.text",
 				outline: "none",
 			},
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		profileMenuButton: {
 			width: "full",
@@ -348,22 +303,7 @@ export const academyShell = sva({
 			paddingInline: "academy-gutter",
 			paddingBlock: "14",
 			_lg: { paddingBlock: "20" },
-			// The same system grid as the hero, rising from the bottom edge so
-			// every page opens and closes on the motif.
-			"--academy-grid-line":
-				"color-mix(in srgb, var(--colors-academy-ink-border) 70%, transparent)",
-			_before: {
-				content: '""',
-				position: "absolute",
-				inset: "0",
-				pointerEvents: "none",
-				backgroundImage:
-					"[linear-gradient(var(--academy-grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--academy-grid-line) 1px, transparent 1px)]",
-				backgroundSize: "[4rem 4rem]",
-				backgroundPosition: "[center bottom]",
-				maskImage:
-					"[radial-gradient(120% 100% at 50% 100%, black 20%, transparent 100%)]",
-			},
+			...systemGridBottom,
 		},
 		footerInner: {
 			position: "relative",
@@ -430,11 +370,7 @@ export const academyShell = sva({
 			textDecoration: "none",
 			paddingBlock: "2",
 			_hover: { color: "academy.inkText", textDecoration: "underline", textUnderlineOffset: "0.25em" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.inkAccent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRingInk,
 		},
 		copyright: {
 			margin: "0",
@@ -540,11 +476,7 @@ export const academyShell = sva({
 			textDecoration: "none",
 			_hover: { opacity: "0.92" },
 			_active: { transform: "translateY(1px)" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		menuIdentity: {
 			display: "flex",
@@ -613,11 +545,7 @@ export const academyShell = sva({
 			transitionDuration: "fast",
 			_hover: { color: "academy.accent" },
 			"&[aria-current=page]": { color: "academy.accent" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus-inset",
-			},
+			_focusVisible: focusRingInset,
 		},
 		menuArrow: {
 			color: "academy.textMuted",

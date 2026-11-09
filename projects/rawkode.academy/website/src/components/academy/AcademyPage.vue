@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { academyPage } from "@rawkodeacademy/design-system";
+import { academyPage, button } from "@rawkodeacademy/design-system";
 import { localTime } from "@/lib/local-time";
 
 interface AcademyCard {
@@ -76,8 +76,8 @@ const dateParts = (iso: string) => {
 						<div :class="styles.heroCopy" data-system-avoid>
 							<p :class="styles.heroLede">Cloud native, taught by the engineers doing the work, with every decision on screen.</p>
 							<div :class="styles.actions">
-								<a :href="props.featured.href" :class="styles.buttonPrimary">Watch the latest session <span aria-hidden="true">→</span></a>
-								<a href="/watch" :class="styles.buttonGhost">Browse the library</a>
+								<a :href="props.featured.href" :class="button({ size: 'lg' })">Watch the latest session <span data-part="arrow" aria-hidden="true">→</span></a>
+								<a href="/watch" :class="button({ variant: 'ink', size: 'lg' })">Browse the library</a>
 							</div>
 						</div>
 						<a :href="props.featured.href" :class="styles.featureCard" :aria-label="`Watch ${props.featured.title}`" data-system-avoid>

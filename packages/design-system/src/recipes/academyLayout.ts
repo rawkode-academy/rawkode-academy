@@ -1,4 +1,6 @@
 import { sva } from "../../styled-system/css";
+import { focusRing } from "../styles/focus";
+import { systemGridTop } from "../styles/systemGrid";
 
 /** Content primitives. The document wrapper owns header/main/footer landmarks. */
 export const academyLayout = sva({
@@ -39,8 +41,6 @@ export const academyLayout = sva({
 		"split",
 		"toolbar",
 		"input",
-		"button",
-		"buttonSecondary",
 		"tag",
 		"empty",
 		"notice",
@@ -97,20 +97,7 @@ export const academyLayout = sva({
 				paddingBlockStart: "academy-masthead-top",
 				paddingBlockEnd: "12",
 			},
-			"--academy-grid-line":
-				"color-mix(in srgb, var(--colors-academy-ink-border) 70%, transparent)",
-			_before: {
-				content: '""',
-				position: "absolute",
-				inset: "0",
-				pointerEvents: "none",
-				backgroundImage:
-					"[linear-gradient(var(--academy-grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--academy-grid-line) 1px, transparent 1px)]",
-				backgroundSize: "[4rem 4rem]",
-				backgroundPosition: "[center top]",
-				maskImage:
-					"[radial-gradient(120% 100% at 50% 0%, black 20%, transparent 100%)]",
-			},
+			...systemGridTop,
 			"& > *": { position: "relative" },
 		},
 		mastheadInner: {
@@ -331,11 +318,7 @@ export const academyLayout = sva({
 			transitionProperty: "colors",
 			transitionDuration: "fast",
 			_hover: { borderColor: "academy.accent" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 			_motionReduce: { transitionDuration: "none" },
 		},
 		cardMedia: {
@@ -465,58 +448,7 @@ export const academyLayout = sva({
 			backgroundColor: "academy.input",
 			color: "academy.text",
 			font: "inherit",
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
-		},
-		button: {
-			display: "inline-flex",
-			alignItems: "center",
-			justifyContent: "center",
-			gap: "2",
-			minHeight: "11",
-			paddingInline: "5",
-			paddingBlock: "3",
-			backgroundColor: "academy.accent",
-			color: "academy.accentForeground",
-			border: "academy-button",
-			borderRadius: "academy-s",
-			fontSize: "sm",
-			fontWeight: "bold",
-			textDecoration: "none",
-			cursor: "pointer",
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.text",
-				outlineOffset: "focus",
-			},
-			_disabled: { opacity: "0.5", cursor: "not-allowed" },
-		},
-		buttonSecondary: {
-			display: "inline-flex",
-			alignItems: "center",
-			justifyContent: "center",
-			gap: "2",
-			minHeight: "11",
-			paddingInline: "5",
-			paddingBlock: "3",
-			backgroundColor: "transparent",
-			color: "academy.text",
-			border: "hairline",
-			borderColor: "academy.border",
-			borderRadius: "academy-s",
-			fontSize: "sm",
-			fontWeight: "semibold",
-			textDecoration: "none",
-			cursor: "pointer",
-			_hover: { backgroundColor: "academy.panel" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		tag: {
 			display: "inline-flex",

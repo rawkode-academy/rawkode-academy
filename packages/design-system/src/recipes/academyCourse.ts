@@ -1,4 +1,5 @@
 import { sva } from "../../styled-system/css";
+import { focusRing, focusRingInset } from "../styles/focus";
 
 export const academyCourse = sva({
 	slots: [
@@ -35,7 +36,6 @@ export const academyCourse = sva({
 		"terminalOutput",
 		"terminalLine",
 		"link",
-		"button",
 		"embed",
 		"fill",
 		"detailHero",
@@ -50,7 +50,6 @@ export const academyCourse = sva({
 		"byline",
 		"author",
 		"avatar",
-		"curriculumAction",
 		"detailBody",
 		"detailGrid",
 		"detailStack",
@@ -176,11 +175,7 @@ export const academyCourse = sva({
 			color: "academy.text",
 			textDecoration: "none",
 			_hover: { textDecoration: "underline" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		avatar: {
 			width: "7",
@@ -189,28 +184,6 @@ export const academyCourse = sva({
 			borderRadius: "full",
 			objectFit: "cover",
 			background: "academy.panel",
-		},
-		curriculumAction: {
-			display: "inline-flex",
-			alignItems: "center",
-			justifyContent: "center",
-			minHeight: "11",
-			paddingInline: "4",
-			paddingBlock: "2",
-			marginBlockStart: "1",
-			border: "academy-button",
-			borderRadius: "academy-s",
-			background: "academy.accent",
-			color: "academy.accentForeground",
-			fontSize: "sm",
-			fontWeight: "bold",
-			textDecoration: "none",
-			_hover: { opacity: "0.9" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
 		},
 		detailBody: {
 			display: "grid",
@@ -306,11 +279,7 @@ export const academyCourse = sva({
 		},
 		lessonLink: {
 			_hover: { background: "academy.ground" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus-inset",
-			},
+			_focusVisible: focusRingInset,
 		},
 		lessonIndex: {
 			paddingBlockStart: "0.5",
@@ -396,11 +365,7 @@ export const academyCourse = sva({
 			textDecoration: "none",
 			cursor: "pointer",
 			_hover: { background: "academy.ground" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		icon: { width: "5", height: "5", flexShrink: "0" },
 		iconBadge: {
@@ -511,11 +476,7 @@ export const academyCourse = sva({
 			border: "hairline",
 			borderColor: "academy.inputBorder",
 			borderRadius: "academy-s",
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		editorFrame: { flex: "1", position: "relative", minHeight: "64" },
 		editor: {
@@ -529,11 +490,7 @@ export const academyCourse = sva({
 			fontFamily: "academy-mono",
 			fontSize: "sm",
 			resize: "none",
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus-inset",
-			},
+			_focusVisible: focusRingInset,
 		},
 		preview: {
 			position: "absolute",
@@ -577,27 +534,7 @@ export const academyCourse = sva({
 			fontSize: "sm",
 			textDecoration: "underline",
 			overflowWrap: "anywhere",
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
-		},
-		button: {
-			minHeight: "11",
-			minWidth: "11",
-			paddingInline: "3",
-			color: "academy.textSoft",
-			fontSize: "sm",
-			borderRadius: "academy-s",
-			cursor: "pointer",
-			_hover: { background: "academy.ground", color: "academy.text" },
-			_disabled: { opacity: "0.5", cursor: "not-allowed" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		embed: {
 			position: "relative",

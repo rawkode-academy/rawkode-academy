@@ -24,7 +24,7 @@
 					<input v-model="sponsorConsent" :id="consentId" type="checkbox" name="allowSponsorContact" :class="s.checkbox" :disabled="loading" />
 					<label :for="consentId" :class="s.copy">Optional: share my email with {{ signupConfig.sponsor }} so they can contact me with relevant offers and product updates.</label>
 				</div>
-				<button type="submit" :disabled="loading || (courseSaved && !sponsorConsent)" :class="s.button">{{ loading ? 'Submitting...' : courseSaved ? (sponsorStatus === 'unconfirmed' ? 'Retry sponsor signup' : 'Request sponsor contact') : 'Sign Up for Updates' }}</button>
+				<button type="submit" :disabled="loading || (courseSaved && !sponsorConsent)" :class="button({ fullWidth: true })">{{ loading ? 'Submitting...' : courseSaved ? (sponsorStatus === 'unconfirmed' ? 'Retry sponsor signup' : 'Request sponsor contact') : 'Sign Up for Updates' }}</button>
 			</fieldset>
 			<noscript :class="s.copy">JavaScript is required to sign up for course updates. Course content remains available without signing up.</noscript>
 		</form>
@@ -33,7 +33,7 @@
 
 <script setup lang="ts">
 import { computed, ref, onMounted, useId } from "vue";
-import { academyForms } from "@rawkodeacademy/design-system";
+import { academyForms, button } from "@rawkodeacademy/design-system";
 
 import { actions } from "astro:actions";
 import {

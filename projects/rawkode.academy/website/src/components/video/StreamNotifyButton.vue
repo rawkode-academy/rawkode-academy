@@ -6,7 +6,7 @@ import {
 	ExclamationTriangleIcon,
 } from "@heroicons/vue/24/outline";
 import { computed, onMounted, ref } from "vue";
-import { academyDocument } from "@rawkodeacademy/design-system";
+import { academyDocument, button } from "@rawkodeacademy/design-system";
 import { getNotificationServiceWorkerRegistration } from "@/lib/notification-service-worker";
 
 const props = defineProps<{
@@ -217,7 +217,7 @@ onMounted(() => {
 	<div :class="doc.stackSmall">
 		<button
 			type="button"
-			:class="doc.button"
+			:class="button()"
 			:disabled="isDisabled"
 			@click="enableNotifications"
 		>

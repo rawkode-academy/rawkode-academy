@@ -1,6 +1,7 @@
 // node --experimental-vm-modules --test src/tests/technology-contract-ssr.test.mjs
 // Actual Astro compilation/JSON-LD render and executed template declarations; no services.
 import assert from "node:assert/strict";
+import { readRecipeConfig } from "./helpers/recipe-config.mjs";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import vm from "node:vm";
@@ -241,35 +242,8 @@ test("empty related content emits no section; names remain escaped", async () =>
 });
 
 test("related mark recipe fixes both states at 40px and honors hidden after image failure", async () => {
-	const source = readFileSync(
-		new URL(
-			"../../../../../packages/design-system/src/recipes/academyTechnology.ts",
-			import.meta.url,
-		),
-		"utf8",
-	);
-	const context = vm.createContext({});
-	const module = new vm.SourceTextModule(
-		ts.transpileModule(source, {
-			compilerOptions: {
-				module: ts.ModuleKind.ESNext,
-				target: ts.ScriptTarget.ES2022,
-			},
-		}).outputText,
-		{ context },
-	);
-	await module.link(
-		() =>
-			new vm.SyntheticModule(
-				["sva"],
-				function () {
-					this.setExport("sva", (config) => config);
-				},
-				{ context },
-			),
-	);
-	await module.evaluate();
-	const s = module.namespace.academyTechnology.base;
+	const config = await readRecipeConfig("academyTechnology.ts", "academyTechnology");
+	const s = config.base;
 	assert.equal(s.relatedMark.width, "10");
 	assert.equal(s.relatedMark.height, "10");
 	assert.equal(s.relatedMark.flexShrink, "0");

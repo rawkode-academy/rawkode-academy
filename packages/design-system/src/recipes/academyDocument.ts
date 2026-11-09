@@ -1,4 +1,5 @@
 import { sva } from "../../styled-system/css";
+import { focusRing } from "../styles/focus";
 
 /** Shared Academy reading, course, show and contributor compositions.
  * Static document structure stays server rendered; interactive islands own behavior.
@@ -35,8 +36,6 @@ export const academyDocument = sva({
 		"link",
 		"tag",
 		"tagList",
-		"button",
-		"buttonSecondary",
 		"sidebar",
 		"rule",
 		"list",
@@ -56,7 +55,6 @@ export const academyDocument = sva({
 		"icon",
 		"iconSmall",
 		"iconLarge",
-		"iconButton",
 		"spacer",
 		"dot",
 		"hidden",
@@ -115,11 +113,7 @@ export const academyDocument = sva({
 			fontSize: "sm",
 			textDecoration: "none",
 			_hover: { color: "academy.accent" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		root: {
 			background: "academy.canvas",
@@ -368,11 +362,7 @@ export const academyDocument = sva({
 				textDecoration: "underline",
 				textUnderlineOffset: "3px",
 			},
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		tag: {
 			display: "inline-flex",
@@ -400,58 +390,6 @@ export const academyDocument = sva({
 			listStyle: "none",
 			margin: "0",
 			padding: "0",
-		},
-		button: {
-			display: "inline-flex",
-			alignItems: "center",
-			justifyContent: "center",
-			gap: "2",
-			minHeight: "11",
-			paddingInline: "5",
-			paddingBlock: "3",
-			background: "academy.accent",
-			color: "academy.accentForeground",
-			border: "academy-button",
-			borderRadius: "academy-s",
-			fontFamily: "academy-text",
-			fontWeight: "semibold",
-			textDecoration: "none",
-			cursor: "pointer",
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
-			_hover: {
-				opacity: "0.9",
-			},
-		},
-		buttonSecondary: {
-			display: "inline-flex",
-			alignItems: "center",
-			justifyContent: "center",
-			gap: "2",
-			minHeight: "11",
-			paddingInline: "5",
-			paddingBlock: "3",
-			background: "academy.panel",
-			color: "academy.text",
-			border: "hairline",
-			borderColor: "academy.inputBorder",
-			borderRadius: "academy-s",
-			fontFamily: "academy-text",
-			fontWeight: "semibold",
-			textDecoration: "none",
-			cursor: "pointer",
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
-			_hover: {
-				borderColor: "academy.accent",
-				color: "academy.accent",
-			},
 		},
 		sidebar: {
 			display: "flex",
@@ -621,27 +559,6 @@ export const academyDocument = sva({
 			height: "6",
 			flexShrink: "0",
 		},
-		iconButton: {
-			display: "inline-flex",
-			alignItems: "center",
-			justifyContent: "center",
-			width: "11",
-			height: "11",
-			border: "hairline",
-			borderColor: "academy.border",
-			borderRadius: "academy-s",
-			background: "academy.panel",
-			color: "academy.textSoft",
-			_hover: {
-				color: "academy.accent",
-				borderColor: "academy.accent",
-			},
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
-		},
 		spacer: {
 			flex: "1",
 			minWidth: "0",
@@ -742,11 +659,7 @@ export const academyDocument = sva({
 			cursor: "pointer",
 			fontSize: "sm",
 			fontWeight: "semibold",
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		tocLink: {
 			display: "block",
@@ -758,11 +671,7 @@ export const academyDocument = sva({
 			fontSize: "sm",
 			lineHeight: "relaxed",
 			"&[data-depth='3']": { paddingInlineStart: "4" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 			_hover: {
 				color: "academy.accent",
 			},
