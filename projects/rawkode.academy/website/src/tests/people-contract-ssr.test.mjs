@@ -58,7 +58,6 @@ async function render(
 	const context = vm.createContext({ console, URL, Response });
 	const pageProps = [],
 		showProps = [],
-		jsonLdProps = [],
 		cacheCalls = [],
 		rendered = [];
 	const empty = runtime.createComponent(() => runtime.render``);
@@ -130,12 +129,6 @@ async function render(
 				return runtime.render`<main>${runtime.renderSlot(result, slots["extra-head"])}${runtime.renderSlot(result, slots.default)}</main>`;
 			}),
 		},
-		"@/components/html/person-jsonld.astro": {
-			default: runtime.createComponent((_result, props) => {
-				jsonLdProps.push(props);
-				return runtime.render``;
-			}),
-		},
 		"@/components/show/ShowCard.astro": {
 			default: runtime.createComponent((_result, props) => {
 				showProps.push(props.show);
@@ -194,7 +187,6 @@ async function render(
 		status: response.status,
 		pageProps,
 		showProps,
-		jsonLdProps,
 		cacheCalls,
 		rendered,
 	};
@@ -208,7 +200,7 @@ const renderPerson = (entry, collections = {}, options = {}) =>
 
 test("profile SSR exposes YouTube and merges exact URLs with labels, including identity metadata", async () => {
 	const url = "https://example.test/profile";
-	const { dom, jsonLdProps } = await renderPerson(
+	const { dom, pageProps } = await renderPerson(
 		person({
 			github: url,
 			website: url,
@@ -229,7 +221,9 @@ test("profile SSR exposes YouTube and merges exact URLs with labels, including i
 			.map((link) => link.getAttribute("href")),
 		[url],
 	);
-	assert.deepEqual(Array.from(jsonLdProps[0].sameAs), [url]);
+	assert.deepEqual(Array.from(pageProps[0].mainEntity.sameAs), [url]);
+	assert.equal(pageProps[0].pageType, "ProfilePage");
+	assert.equal(pageProps[0].mainEntity["@type"], "Person");
 	assert(links.every((a) => a.getAttribute("rel").includes("noopener")));
 	assert.equal(links[0].getAttribute("rel"), "me noopener noreferrer");
 	assert.equal(links[1].getAttribute("rel"), "noopener noreferrer");
@@ -253,7 +247,7 @@ test("distinct authored URL fragments remain separate controls", async () => {
 });
 
 test("generic organization/content links stay visible without person identity claims", async () => {
-	const { dom, jsonLdProps } = await renderPerson(
+	const { dom, pageProps } = await renderPerson(
 		person({
 			website: "https://rawkode.academy/watch/episode/",
 			youtube: "https://youtube.com/@RawkodeAcademy",
@@ -266,7 +260,7 @@ test("generic organization/content links stay visible without person identity cl
 			.every((a) => a.getAttribute("rel") === "noopener noreferrer"),
 	);
 	assert.equal(dom.querySelectorAll('link[rel="me"]').length, 0);
-	assert.equal(jsonLdProps[0].sameAs.length, 0);
+	assert.equal(pageProps[0].mainEntity.sameAs, undefined);
 });
 
 test("directory and detail share conservative identity metadata without losing native profile links", async () => {
@@ -285,7 +279,7 @@ test("directory and detail share conservative identity metadata without losing n
 	const detail = await renderPerson(entry);
 	assert.deepEqual(
 		metadata.itemListElement[0].item.sameAs,
-		Array.from(detail.jsonLdProps[0].sameAs),
+		Array.from(detail.pageProps[0].mainEntity.sameAs),
 	);
 	assert.deepEqual(metadata.itemListElement[0].item.sameAs, [
 		entry.data.github,

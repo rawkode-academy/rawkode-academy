@@ -1,5 +1,6 @@
 ---
 import type { ContentEntry } from "@/lib/live-content";
+import { buildPersonJsonLd } from "@/lib/person-jsonld";
 
 interface Props {
 	course: ContentEntry<"courses">;
@@ -78,11 +79,9 @@ const courseJsonLd = {
 	image:
 		imageUrl?.toString() ||
 		"https://rawkode.academy/android-chrome-512x512.png",
-	creator: authors.map((author) => ({
-		"@type": "Person",
-		name: author.data.name,
-		url: author.data.github,
-	})),
+	creator: authors.map((author) =>
+		buildPersonJsonLd(author.data, "https://rawkode.academy"),
+	),
 	teaches: publishedModules.map((module) => module.data.title),
 	educationalLevel: getSkillLevel(course.data.difficulty),
 	learningResourceType: "Online Course",
