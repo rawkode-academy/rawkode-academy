@@ -1,5 +1,6 @@
 export { button, type ButtonVariants } from "./recipes/button";
 export { focusRing, focusRingInk, focusRingInset } from "./styles/focus";
+export { scrollReveal } from "./styles/motion";
 export { systemGridBottom, systemGridTop } from "./styles/systemGrid";
 export { dialog } from "./recipes/dialog";
 export { academyPage } from "./recipes/academyPage";

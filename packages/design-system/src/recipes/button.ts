@@ -7,7 +7,7 @@ import { focusRing, focusRingInk } from "../styles/focus";
  *
  *   button()                               // the page's primary action
  *   button({ variant: "outline" })         // a secondary action beside it
- *   button({ variant: "ink" })             // a secondary action on an ink surface
+ *   button({ surface: "ink" })             // the same actions on an ink surface
  *   button({ variant: "quiet", size: "sm" }) // toolbar and in-panel controls
  *
  * A page has at most one `solid` button per view: it is the accent, and the
@@ -87,16 +87,6 @@ export const button = cva({
 					color: "academy.accentForeground",
 				},
 			},
-			ink: {
-				borderColor: "academy.inkBorder",
-				backgroundColor: "transparent",
-				color: "academy.inkText",
-				"&:is(:hover, [data-hover]):not(:disabled)": {
-					borderColor: "academy.inkText",
-					backgroundColor: "academy.inkRaised",
-				},
-				_focusVisible: focusRingInk,
-			},
 			quiet: {
 				backgroundColor: "transparent",
 				color: "academy.textSoft",
@@ -110,6 +100,12 @@ export const button = cva({
 				},
 			},
 		},
+		/**
+		 * The surface the button sits on. Ink surfaces (hero, masthead, video
+		 * stage, footer) carry their own accent and border tokens, so a button
+		 * placed on one must say so.
+		 */
+		surface: { canvas: {}, ink: { _focusVisible: focusRingInk } },
 		size: {
 			sm: { minHeight: "9", paddingInline: "4", paddingBlock: "2" },
 			md: { minHeight: "11", paddingInline: "5", paddingBlock: "2" },
@@ -126,11 +122,55 @@ export const button = cva({
 		icon: { true: { paddingInline: "0", paddingBlock: "0" } },
 	},
 	compoundVariants: [
+		{
+			variant: "solid",
+			surface: "ink",
+			css: {
+				backgroundColor: "academy.inkAccent",
+				color: "academy.inkAccentForeground",
+				"&:is(:hover, [data-hover]):not(:disabled)": {
+					backgroundColor: "academy.inkAccentHover",
+				},
+			},
+		},
+		{
+			variant: "outline",
+			surface: "ink",
+			css: {
+				borderColor: "academy.inkBorder",
+				color: "academy.inkText",
+				"&:is(:hover, [data-hover]):not(:disabled)": {
+					borderColor: "academy.inkText",
+					backgroundColor: "academy.inkRaised",
+					color: "academy.inkText",
+				},
+				"&[aria-pressed=true]": {
+					borderColor: "academy.inkAccent",
+					backgroundColor: "academy.inkAccent",
+					color: "academy.inkAccentForeground",
+				},
+			},
+		},
+		{
+			variant: "quiet",
+			surface: "ink",
+			css: {
+				color: "academy.inkTextSoft",
+				"&:is(:hover, [data-hover]):not(:disabled)": {
+					backgroundColor: "academy.inkRaised",
+					color: "academy.inkText",
+				},
+				"&[aria-pressed=true]": {
+					backgroundColor: "academy.inkRaised",
+					color: "academy.inkAccent",
+				},
+			},
+		},
 		{ icon: true, size: "sm", css: { width: "9" } },
 		{ icon: true, size: "md", css: { width: "11" } },
 		{ icon: true, size: "lg", css: { width: "12" } },
 	],
-	defaultVariants: { variant: "solid", size: "md" },
+	defaultVariants: { variant: "solid", surface: "canvas", size: "md" },
 });
 
 export type ButtonVariants = NonNullable<Parameters<typeof button>[0]>;

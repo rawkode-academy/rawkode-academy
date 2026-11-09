@@ -28,7 +28,7 @@ The package has three layers. Reach for the highest one that fits.
 | --- | --- | --- |
 | Components | `src/vue` | `Button`, `Dialog`, `Tabs`, `NavigationDrawer`: behaviour plus styles |
 | Primitive recipes | `src/recipes/button.ts`, `academyLabel`, `academyContainer`, ... | One element, usable from Astro, Vue and React |
-| Style fragments | `src/styles` | `focusRing*`, `systemGridTop` / `systemGridBottom`: spread into any recipe |
+| Style fragments | `src/styles` | `focusRing*`, `systemGridTop` / `systemGridBottom`, `scrollReveal`: spread into any recipe |
 
 Page recipes (`academyPage`, `academyWatch`, ...) sit on top and own layout
 only. A page recipe that needs an action, a focus ring or the grid motif
@@ -61,8 +61,11 @@ import { Button } from "@rawkodeacademy/design-system/vue";
 | --- | --- |
 | `solid` | The one primary action in a view |
 | `outline` | A secondary action; also toggles via `aria-pressed` |
-| `ink` | A secondary action on an ink surface |
 | `quiet` | Toolbar and in-panel controls |
+
+Pass `surface: "ink"` to any variant that sits on an ink surface (hero,
+masthead, video stage, footer). Ink surfaces carry their own accent, border
+and focus tokens.
 
 Sizes are `sm` (36px), `md` (44px, the default) and `lg` (48px). `fullWidth`
 stretches a form submit; `icon` makes a square control and needs an

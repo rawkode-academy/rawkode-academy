@@ -6,6 +6,8 @@ const props = withDefaults(
 	defineProps<{
 		variant?: ButtonVariants["variant"];
 		size?: ButtonVariants["size"];
+		/** Set to `ink` when the button sits on an ink surface. */
+		surface?: ButtonVariants["surface"];
 		/** Renders an anchor. Without it the component is a `<button>`. */
 		href?: string;
 		type?: "button" | "submit" | "reset";
@@ -21,6 +23,7 @@ const props = withDefaults(
 	{
 		variant: "solid",
 		size: "md",
+		surface: "canvas",
 		href: undefined,
 		type: "button",
 		fullWidth: false,
@@ -35,6 +38,7 @@ const classes = computed(() =>
 	button({
 		variant: props.variant,
 		size: props.size,
+		surface: props.surface,
 		fullWidth: props.fullWidth,
 		icon: props.icon,
 	}),

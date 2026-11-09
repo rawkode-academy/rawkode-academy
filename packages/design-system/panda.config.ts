@@ -390,6 +390,12 @@ export default defineConfig({
 								_dark: "{colors.academyBase.accent}",
 							},
 						},
+						inkAccentHover: {
+							value: {
+								base: "{colors.academyBase.accent-hover}",
+								_dark: "{colors.academyBase.accent-hover}",
+							},
+						},
 						inkAccentForeground: {
 							value: {
 								base: "{colors.academyBase.accent-foreground}",

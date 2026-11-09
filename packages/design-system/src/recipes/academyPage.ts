@@ -1,6 +1,7 @@
 import { sva } from "../../styled-system/css";
 import { focusRing, focusRingInk } from "../styles/focus";
 import { systemGridTop } from "../styles/systemGrid";
+import { scrollReveal } from "../styles/motion";
 
 /**
  * The Academy front door, video library, and learning-path directory.
@@ -441,11 +442,7 @@ export const academyPage = sva({
 				columnGap: "8",
 				paddingBlock: "6",
 			},
-			"@supports (animation-timeline: view())": {
-				animation: "academy-reveal",
-				animationTimeline: "view()",
-				animationRange: "entry 0% entry 35%",
-			},
+			...scrollReveal,
 			_hover: {
 				"& h3": { color: "academy.accent" },
 				"& img": { transform: "scale(1.03)" },
@@ -574,11 +571,7 @@ export const academyPage = sva({
 			gap: "3",
 			color: "academy.text",
 			textDecoration: "none",
-			"@supports (animation-timeline: view())": {
-				animation: "academy-reveal",
-				animationTimeline: "view()",
-				animationRange: "entry 0% entry 35%",
-			},
+			...scrollReveal,
 			_motionReduce: { animation: "none" },
 			_hover: {
 				"& h3": { color: "academy.accent" },
@@ -671,11 +664,7 @@ export const academyPage = sva({
 				gap: "8",
 				paddingBlock: "8",
 			},
-			"@supports (animation-timeline: view())": {
-				animation: "academy-reveal",
-				animationTimeline: "view()",
-				animationRange: "entry 0% entry 35%",
-			},
+			...scrollReveal,
 			_hover: {
 				"& :is(h2, h3)": { color: "academy.accent" },
 				"& [data-arrow]": { transform: "translate(0.15em, -0.15em)" },

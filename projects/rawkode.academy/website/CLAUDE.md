@@ -38,10 +38,13 @@ behaviour, Vue components).
 1. **Shared primitives** come from the package. Use these before writing
    anything new:
    - `button()` / `<Button>`: every action. Variants `solid`, `outline`,
-     `ink`, `quiet`; sizes `sm`, `md`, `lg`; `fullWidth`; `icon`.
+     `quiet`; `surface: "ink"` on ink surfaces; sizes `sm`, `md`, `lg`;
+     `fullWidth`; `icon`.
    - `focusRing`, `focusRingInset`, `focusRingInk`: compose under
      `_focusVisible`. Do not hand-write an outline.
    - `systemGridTop`, `systemGridBottom`: the grid motif, on ink surfaces only.
+   - `scrollReveal`: the scroll-driven entrance for list rows and cards.
+     Content stays visible in print and without scroll timelines.
    - `Dialog`, `Tabs`, `NavigationDrawer`: Ark-backed Vue components.
    - `academyLabel`, `academyContainer`, `academySkeleton`, `academyCallout`.
 2. **Page recipes** (`academyPage`, `academyWatch`, `academyCatalog`, ...)

@@ -127,7 +127,7 @@ const s = academySearch();
 					<input id="academy-search-query" class={s.input} type="search" name="q" value={searchQuery} placeholder="Kubernetes, eBPF, GitOps…" autocomplete="off" />
 				</label>
 				{activeType && <input type="hidden" name="type" value={activeType} />}
-				<button class={button({ size: "lg" })} type="submit">Search</button>
+				<button class={button({ surface: "ink", size: "lg" })} type="submit">Search</button>
 			</form>
 			{!searchQuery && <nav aria-label="Suggested searches"><ul class={s.filters}>{suggestions.map((suggestion) => <li><a class={s.filter} href={suggestion.href}>{suggestion.label}</a></li>)}</ul></nav>}
 			{searchQuery && allRanked.length > 0 && <nav aria-label="Filter results by type"><ul class={s.filters}>{typeFilters.map((filter) => <li><a class={s.filter} href={filter.href} aria-current={filter.active ? "page" : undefined}>{filter.label} · {filter.count}</a></li>)}</ul></nav>}

@@ -149,13 +149,29 @@ export const Variants: Story = {
 				</Specimen>
 			</div>
 			<div style={surface(true)}>
-				<Specimen label="ink: the second action on an ink surface">
-					<a className={button({ size: "lg" })} href="#solid-ink">
+				<Specimen label="surface ink: the same actions on an ink surface">
+					<a
+						className={button({ surface: "ink", size: "lg" })}
+						href="#solid-ink"
+					>
 						Watch the latest session <Arrow />
 					</a>
-					<a className={button({ variant: "ink", size: "lg" })} href="#ink">
+					<a
+						className={button({
+							variant: "outline",
+							surface: "ink",
+							size: "lg",
+						})}
+						href="#ink"
+					>
 						Browse the library
 					</a>
+					<button
+						className={button({ variant: "quiet", surface: "ink" })}
+						type="button"
+					>
+						Dismiss
+					</button>
 				</Specimen>
 			</div>
 		</>

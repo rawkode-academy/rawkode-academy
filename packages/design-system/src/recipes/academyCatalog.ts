@@ -1,5 +1,6 @@
 import { sva } from "../../styled-system/css";
 import { focusRing, focusRingInk, focusRingInset } from "../styles/focus";
+import { scrollReveal } from "../styles/motion";
 
 /**
  * Listing-specific pieces that sit on top of the shared Academy layout.
@@ -100,11 +101,7 @@ export const academyCatalog = sva({
 				columnGap: "8",
 				paddingBlock: "6",
 			},
-			"@supports (animation-timeline: view())": {
-				animation: "academy-reveal",
-				animationTimeline: "view()",
-				animationRange: "entry 0% entry 35%",
-			},
+			...scrollReveal,
 			_hover: {
 				"& h2, & h3": { color: "academy.accent" },
 				"& img": { transform: "scale(1.03)" },
