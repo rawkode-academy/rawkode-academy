@@ -835,9 +835,8 @@ describe("Crawlability and Sitemaps", () => {
 	});
 
 	it("renders robots.txt with private routes blocked and the sitemap index declared", async () => {
-		const { GET, ROBOTS_DISALLOWS, ROBOTS_SITEMAP_PATH } = await import(
-			"../pages/robots.txt.ts"
-		);
+		const { GET, ROBOTS_ALLOWS, ROBOTS_DISALLOWS, ROBOTS_SITEMAP_PATH } =
+			await import("../pages/robots.txt.ts");
 
 		const response = await GET({
 			site: new URL("https://rawkode.academy"),
@@ -855,6 +854,12 @@ describe("Crawlability and Sitemaps", () => {
 		}
 		// Search results carry noindex; blocking the crawl would hide it.
 		expect(body).not.toMatch(/^Disallow: \/search$/m);
+
+		// Feeds sit under /api/; the longer Allow must override Disallow: /api/.
+		expect(ROBOTS_ALLOWS).toContain("/api/feeds/");
+		for (const path of ROBOTS_ALLOWS) {
+			expect(body).toMatch(new RegExp(`^Allow: ${path}$`, "m"));
+		}
 	});
 
 	it("keeps all intended sitemap sections in the index, even if a section is empty", async () => {
