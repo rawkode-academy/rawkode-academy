@@ -10,6 +10,7 @@ import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import * as runtime from "astro/runtime/server/index.js";
 import ts from "typescript";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import * as personJsonLd from "../lib/person-jsonld";
 
 interface Entry {
 	id: string;
@@ -220,7 +221,7 @@ async function loadArticlePage(): Promise<Component> {
 		new Proxy({}, { get: (_, key) => `academy-${String(key)}` });
 	const articleJsonLd = await compileAstro(
 		"components/html/article-jsonld.astro",
-		{},
+		{ "@/lib/person-jsonld": personJsonLd },
 	);
 	articlePage = await compileAstro("pages/read/[...slug].astro", {
 		"@rawkodeacademy/design-system": {
@@ -387,7 +388,7 @@ describe("Published route and sitemap contracts", () => {
 				{
 					"@type": "Person",
 					name: "David Flanagan",
-					url: "https://github.com/rawkode",
+					url: "https://rawkode.academy/people/rawkode",
 				},
 			],
 		});

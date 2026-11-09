@@ -14,6 +14,7 @@ const {
 	updatedAt,
 	authors,
 	pageType = "WebPage",
+	mainEntity,
 	articleSection,
 	articleTags,
 } = Astro.props;
@@ -153,10 +154,7 @@ const firstAuthorMastodon = shouldShowArticleMeta
 					).href,
 				},
 			},
-			mainEntityOfPage: {
-				"@type": pageType,
-				"@id": openGraphUrl.toString(),
-			},
+			...(mainEntity ? { mainEntity } : {}),
 		})}
 	></script>
 )}

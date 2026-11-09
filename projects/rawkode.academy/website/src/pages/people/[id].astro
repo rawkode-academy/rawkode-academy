@@ -16,11 +16,11 @@ import {
 import RichText from "@/components/content/RichText.astro";
 import VideoFeed from "@/components/video/video-feed.astro";
 import ShowCard from "@/components/show/ShowCard.astro";
-import PersonJsonLd from "@/components/html/person-jsonld.astro";
 import type { ShowSummary } from "@/types/show";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { getPersonIdentityUrls } from "@/lib/person-identity-links";
+import { buildPersonJsonLd } from "@/lib/person-jsonld";
 import { isNewsPublished } from "@/lib/news-publication";
 import { localTime } from "@/lib/local-time";
 
@@ -240,6 +240,13 @@ const socialLinks = [...linksByUrl.values()];
 const relMeUrls = getPersonIdentityUrls(person.data);
 const identityUrls = new Set(relMeUrls);
 
+// Google's ProfilePage markup expects the person as the page's mainEntity.
+const profileEntity = {
+	...buildPersonJsonLd(person.data, profileUrl),
+	description: pageDescription,
+	...(person.data.avatarUrl ? { image: person.data.avatarUrl } : {}),
+};
+
 await setContentCache(Astro, {
 	entries: [
 		person,
@@ -268,17 +275,10 @@ await setContentCache(Astro, {
  description={pageDescription}
  noindex={noindex}
  pageType="ProfilePage"
+ mainEntity={profileEntity}
  useImageDirectly={Boolean(person.data.avatarUrl)}
  image={person.data.avatarUrl ? { image: new URL(person.data.avatarUrl) } : undefined}
 >
- <PersonJsonLd
- slot="extra-head"
- name={person.data.name}
- url={profileUrl}
- description={pageDescription}
- image={person.data.avatarUrl}
- sameAs={relMeUrls}
- />
  <Fragment slot="extra-head">
  {relMeUrls.map((url) => (
  <link rel="me" href={url} />

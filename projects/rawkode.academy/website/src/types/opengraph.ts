@@ -32,6 +32,11 @@ export interface OpenGraphProps {
 	noindex?: boolean | undefined;
 	pageType?: PageType | undefined;
 	/**
+	 * The entity the page is about, emitted as `mainEntity` on the inline
+	 * WebPage-family JSON-LD. ProfilePage needs the Person here.
+	 */
+	mainEntity?: Record<string, unknown> | undefined;
+	/**
 	 * Optional pre-built schema.org JSON-LD blob to emit in <head> in
 	 * addition to the inline WebPage / Article JSON-LD. Use for entity
 	 * types that aren't covered by the standard emitters — e.g. HowTo
