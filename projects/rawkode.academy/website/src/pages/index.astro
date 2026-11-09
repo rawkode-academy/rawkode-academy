@@ -176,6 +176,11 @@ Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 ---
 
 <Page title={pageTitle} description={pageDescription}>
+		<Fragment slot="extra-head">
+			<link rel="alternate" type="application/rss+xml" title="Rawkode Academy - All Content (RSS)" href="/api/feeds/all.xml" />
+			<link rel="alternate" type="application/atom+xml" title="Rawkode Academy - All Content (Atom)" href="/api/feeds/all.atom" />
+			<link rel="alternate" type="application/feed+json" title="Rawkode Academy - All Content (JSON Feed)" href="/api/feeds/all.json" />
+		</Fragment>
 		{featuredMedia && (
 			<link
 				slot="extra-head"
