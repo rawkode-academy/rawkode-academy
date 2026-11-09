@@ -6,7 +6,8 @@ import type { LocalTimeValue } from "@/lib/local-time";
 
 interface Tag {
 	label: string;
-	href: string;
+	// Tags without a page render as a plain label.
+	href?: string | undefined;
 }
 
 interface Props {
@@ -47,7 +48,9 @@ const {
 	{tags.length > 0 && (
 		<div class={doc.tagList}>
 			{tags.map((t) => (
-				<a class={doc.tag} href={t.href}>#{t.label}</a>
+				t.href
+					? <a class={doc.tag} href={t.href}>#{t.label}</a>
+					: <span class={doc.tag}>#{t.label}</span>
 			))}
 		</div>
 	)}

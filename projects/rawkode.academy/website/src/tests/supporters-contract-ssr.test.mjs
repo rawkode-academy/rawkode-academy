@@ -188,8 +188,14 @@ test("wall shows each supporter's logo or name, its website and the technologies
 			websiteUrl: "https://acme.example/",
 			logoUrl: "https://cdn.example/acme.svg",
 			technologies: [
-				{ id: "kubernetes", name: "Kubernetes" },
-				{ id: "docker", name: "Docker" },
+				{
+					id: "kubernetes",
+					label: "Kubernetes",
+					href: "/technology/kubernetes",
+				},
+				{ id: "docker", label: "Docker", href: "/technology/docker" },
+				// No technology page: listed, but not linked.
+				{ id: "nix", label: "nix" },
 			],
 		},
 		{
@@ -222,6 +228,12 @@ test("wall shows each supporter's logo or name, its website and the technologies
 			["/technology/kubernetes", "Kubernetes"],
 			["/technology/docker", "Docker"],
 		],
+	);
+	assert.deepEqual(
+		acme
+			.querySelectorAll(".supporter-wall__technologies li")
+			.map((item) => item.text.trim()),
+		["Kubernetes", "Docker", "nix"],
 	);
 
 	assert.equal(zeta.querySelector("img"), null);

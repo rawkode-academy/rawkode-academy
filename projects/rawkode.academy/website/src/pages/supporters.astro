@@ -12,14 +12,14 @@ import {
 	setContentCache,
 } from "@/lib/live-content";
 import { BECOME_A_SUPPORTER_PATH } from "@/lib/supporters";
+import { buildTechnologyTags } from "@/lib/technology-tags";
 
-// The supporters are the page; technology names are secondary, so a link
-// falls back to the technology id when they cannot be loaded.
+// The supporters are the page; technology names are secondary, so a label
+// falls back to the technology id, unlinked, when it cannot be loaded.
 const [supporters, technologies] = await Promise.all([
 	getCollection("supporters"),
 	optionalContent(getCollection("technologies"), []),
 ]);
-const technologyById = new Map(technologies.map((t) => [t.id, t]));
 
 // The gateway lists active supporters only, longest-standing first.
 const wall = supporters
@@ -29,10 +29,11 @@ const wall = supporters
 		name: data.name,
 		websiteUrl: data.websiteUrl,
 		logoUrl: data.logoUrl,
-		technologies: data.technologies.map((technology) => ({
-			id: technology.id,
-			name: technologyById.get(technology.id)?.data.name ?? technology.id,
-		})),
+		technologies: buildTechnologyTags(
+			data.technologies.map((technology) => technology.id),
+			technologies,
+			(technologyId) => technologyId,
+		),
 	}));
 
 const supportedIds = new Set(
@@ -95,7 +96,9 @@ const styles = academyLayout({ width: "wide" });
 											<MLabel>Supports</MLabel>
 											<ul class="supporter-wall__technologies">
 												{supporter.technologies.map((technology) => (
-													<li><a class="supporter-wall__technology focus-ring" href={`/technology/${technology.id}`}>{technology.name}</a></li>
+													<li>{technology.href
+														? <a class="supporter-wall__technology focus-ring" href={technology.href}>{technology.label}</a>
+														: technology.label}</li>
 												))}
 											</ul>
 										</div>
