@@ -1,5 +1,6 @@
 import { sva } from "../../styled-system/css";
 import { focusRing, focusRingInk, focusRingInset } from "../styles/focus";
+import { panelSurface } from "../styles/surface";
 import { systemGridBottom } from "../styles/systemGrid";
 
 /** Production chrome, shared by every Academy document. */
@@ -100,11 +101,13 @@ export const academyShell = sva({
 			minHeight: "11",
 			_focusVisible: focusRing,
 		},
+		// The wordmark is embedded cropped to its glyphs (AcademyBrand.astro),
+		// so its first stem sits on the shell edge with the content below.
 		brandArt: {
 			display: "block",
-			width: "36",
+			width: "28",
 			maxWidth: "full",
-			_lg: { width: "48" },
+			_lg: { width: "[9.25rem]" },
 			"& svg": { display: "block", width: "full", height: "auto" },
 			"& path": { fill: "currentColor" },
 		},
@@ -220,10 +223,7 @@ export const academyShell = sva({
 		profileMenu: {
 			width: "56",
 			overflow: "hidden",
-			border: "hairline",
-			borderColor: "academy.border",
-			borderRadius: "academy-m",
-			backgroundColor: "academy.panel",
+			...panelSurface,
 			color: "academy.text",
 			boxShadow: "dialog",
 			outline: "none",
@@ -369,7 +369,11 @@ export const academyShell = sva({
 			fontSize: "sm",
 			textDecoration: "none",
 			paddingBlock: "2",
-			_hover: { color: "academy.inkText", textDecoration: "underline", textUnderlineOffset: "0.25em" },
+			_hover: {
+				color: "academy.inkText",
+				textDecoration: "underline",
+				textUnderlineOffset: "0.25em",
+			},
 			_focusVisible: focusRingInk,
 		},
 		copyright: {
@@ -402,7 +406,7 @@ export const academyShell = sva({
 			position: "fixed",
 			inset: "0",
 			zIndex: "overlay",
-			backgroundColor: "editorial.overlay",
+			backgroundColor: "academy.scrim",
 			_open: { animation: "academy-fade" },
 			_motionReduce: { animation: "none" },
 		},

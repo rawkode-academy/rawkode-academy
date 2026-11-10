@@ -39,7 +39,7 @@ const declarationNames = new Set([
 	"matrixMetadata",
 	"hasMatrixDetails",
 	"historicalStatuses",
-	"videoDate",
+	"sentenceCase",
 ]);
 const statements = frontmatter.statements.filter(
 	(statement) =>
@@ -76,7 +76,7 @@ function contracts(
 	resolveTechnologyIconUrl = () => undefined,
 ) {
 	return vm.runInNewContext(
-		`${code}\n({ relatedTechnologies, sharedRelatedSubcategory, relatedInitials, officialLinks, description, hasMatrixDetails, historicalStatuses, videoDate });`,
+		`${code}\n({ relatedTechnologies, sharedRelatedSubcategory, relatedInitials, officialLinks, description, hasMatrixDetails, historicalStatuses });`,
 		{
 			technology,
 			id: technology.id,
@@ -242,7 +242,10 @@ test("empty related content emits no section; names remain escaped", async () =>
 });
 
 test("related mark recipe fixes both states at 40px and honors hidden after image failure", async () => {
-	const config = await readRecipeConfig("academyTechnology.ts", "academyTechnology");
+	const config = await readRecipeConfig(
+		"academyTechnology.ts",
+		"academyTechnology",
+	);
 	const s = config.base;
 	assert.equal(s.relatedMark.width, "10");
 	assert.equal(s.relatedMark.height, "10");
@@ -259,10 +262,10 @@ test("related mark recipe fixes both states at 40px and honors hidden after imag
 test("detail template compiles with every new branch and date slot", async () => {
 	const compiled = await transform(page, { filename: "technology.astro" });
 	assert.deepEqual(compiled.diagnostics, []);
-	assert.equal(
-		(page.match(/<time class=\{styles.videoDate\}/g) ?? []).length,
-		3,
-	);
+	// Recordings and upcoming sessions render through the shared video card,
+	// which sets the date; the page keeps no date slot of its own.
+	assert.equal((page.match(/<VideoCard /g) ?? []).length, 2);
+	assert(!page.includes("styles.videoDate"));
 	assert.match(page, /historicalStatuses.has\(related.status\)/);
 	assert.match(page, /Project status: \{related.status\}/);
 	assert.match(page, /!hasMatrixDetails/);
@@ -364,13 +367,16 @@ test("only editorial SEO description is promoted, while personal opinions are re
 });
 
 test("historic recording date formatting is stable and not a live-now claim", () => {
-	const recorded = contracts(technology).videoDate(
-		new Date("2020-09-30T17:00:00Z"),
-	);
-	assert.equal(recorded.text, "30 Sept 2020");
+	const recorded = localTimeExports.localDate(new Date("2020-09-30T17:00:00Z"));
+	// Every month is three letters: en-GB's "Sept" is normalised.
+	assert.equal(recorded.text, "30 Sep 2020");
 	assert.equal(recorded.attrs.datetime, "2020-09-30T17:00:00.000Z");
 	assert.ok(recorded.attrs["data-local-time"]);
-	assert.match(page, /Related recordings/);
+	assert.match(page, /\{technology\.name\} recordings/);
+	assert.match(
+		read("components/video/VideoCard.astro"),
+		/localDate\(publishedAt\)/,
+	);
 });
 
 async function jsonLd(file, props) {

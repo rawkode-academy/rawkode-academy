@@ -401,7 +401,7 @@ const formatTechName = (id: string) => {
 			v-if="!hasAnySubscription"
 			:class="account.empty"
 		>
-			<p class="text-sm">You are not subscribed to any emails.</p>
+			<p>You are not subscribed to any emails.</p>
 			<a
 				href="/"
 				:class="account.link"

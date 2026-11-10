@@ -17,6 +17,12 @@ const defaultReactions = [
 	{ emoji: "🚀", label: "Rocket" },
 	{ emoji: "💡", label: "Insightful" },
 ];
+// A count appears once someone has reacted; a row of zeros reads as unfinished.
+const reactionLabel = (reaction: { emoji: string; label: string }) => {
+	const count = counts[reaction.emoji] ?? 0;
+	if (count === 0) return reaction.label;
+	return `${reaction.label}, ${count} ${count === 1 ? "reaction" : "reactions"}`;
+};
 const extraEmojis = ["😊", "😍", "🤔", "😎", "🙌", "💯", "🎉", "💪", "🤯", "🤩", "😂", "🤝", "👀", "🧠"];
 
 const react = async (emoji: string) => {
@@ -46,18 +52,18 @@ const react = async (emoji: string) => {
 
 <template>
 	<div :class="watch.reactions">
-		<div :class="watch.reactionList">
+		<div :class="watch.reactionList" role="group" aria-label="React to this video">
 			<button
 				v-for="reaction in defaultReactions"
 				:key="reaction.emoji"
 				type="button"
 				:class="reactionButtonClass(reaction.emoji)"
-				:aria-label="`${reaction.label}, ${counts[reaction.emoji] || 0} reactions`"
+				:aria-label="reactionLabel(reaction)"
 				:aria-pressed="Boolean(pressed[reaction.emoji])"
 				@click="react(reaction.emoji)"
 			>
 				<span :class="watch.reactionEmoji">{{ reaction.emoji }}</span>
-				<span :class="watch.reactionCount">{{ counts[reaction.emoji] || 0 }}</span>
+				<span v-if="counts[reaction.emoji]" :class="watch.reactionCount">{{ counts[reaction.emoji] }}</span>
 			</button>
 
 			<Popover.Root
@@ -67,7 +73,7 @@ const react = async (emoji: string) => {
 				:portalled="false"
 				:positioning="{ placement: 'bottom-end', gutter: 8 }"
 			>
-				<Popover.Trigger :class="watch.reactionButton" aria-label="Add custom emoji">+</Popover.Trigger>
+				<Popover.Trigger :class="watch.reactionButton" aria-label="React with another emoji">+</Popover.Trigger>
 				<Popover.Positioner>
 					<Popover.Content :class="watch.reactionPicker">
 						<Popover.Arrow><Popover.ArrowTip /></Popover.Arrow>

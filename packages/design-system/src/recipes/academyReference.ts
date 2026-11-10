@@ -1,5 +1,6 @@
 import { sva } from "../../styled-system/css";
 import { focusRing, focusRingInset } from "../styles/focus";
+import { panelSurface, pill } from "../styles/surface";
 
 /** Dense reference pages: readable code, mobile cards, and wide-screen tables. */
 export const academyReference = sva({
@@ -44,13 +45,10 @@ export const academyReference = sva({
 	],
 	base: {
 		panel: {
+			...panelSurface,
+			minWidth: "0",
 			padding: "6",
 			marginBottom: "8",
-			border: "hairline",
-			borderColor: "academy.border",
-			borderRadius: "academy-m",
-			background: "academy.panel",
-			minWidth: "0",
 			_lg: { padding: "10" },
 		},
 		notice: {
@@ -153,17 +151,10 @@ export const academyReference = sva({
 			overflowWrap: "anywhere",
 		},
 		tag: {
-			display: "inline-flex",
-			alignItems: "center",
+			...pill,
 			gap: "2",
-			paddingInline: "3",
-			paddingBlock: "1",
-			borderRadius: "academy-pill",
-			border: "hairline",
-			borderColor: "academy.border",
-			background: "academy.ground",
+			backgroundColor: "academy.ground",
 			color: "academy.accent",
-			fontSize: "xs",
 			fontWeight: "medium",
 		},
 		iconBadge: {

@@ -19,16 +19,6 @@ export default defineConfig({
 		extend: {
 			tokens: {
 				colors: {
-					editorial: {
-						paper: { value: "oklch(0.97 0.008 85)" },
-						"paper-deep": { value: "oklch(0.93 0.012 85)" },
-						ink: { value: "oklch(0.18 0.02 60)" },
-						"ink-soft": { value: "oklch(0.36 0.015 60)" },
-						"ink-mute": { value: "oklch(0.58 0.012 60)" },
-						hairline: { value: "oklch(0.18 0.02 60 / 0.12)" },
-						spruce: { value: "oklch(0.52 0.09 165)" },
-						overlay: { value: "oklch(0 0 0 / 0.55)" },
-					},
 					academyBase: {
 						ground: { value: "#0a1220" },
 						"ground-raised": { value: "#0d1728" },
@@ -345,6 +335,14 @@ export default defineConfig({
 								_dark: "{colors.academyBase.segment-off}",
 							},
 						},
+						// The backdrop behind a dialog or drawer. It is the same in
+						// both schemes: a scrim mixed from a themed colour stops
+						// dimming once the page beneath it is already that colour.
+						scrim: {
+							value: {
+								base: "oklch(0 0 0 / 0.55)",
+							},
+						},
 						// Ink surfaces: the navy that carries the homepage hero and
 						// the footer in light mode. In dark mode the canvas is already
 						// navy, so ink becomes a raised, bordered panel instead.
@@ -400,62 +398,6 @@ export default defineConfig({
 							value: {
 								base: "{colors.academyBase.accent-foreground}",
 								_dark: "{colors.academyBase.accent-foreground}",
-							},
-						},
-					},
-					surface: {
-						canvas: {
-							value: {
-								base: "{colors.editorial.paper}",
-								_dark: "oklch(0.14 0.01 280)",
-							},
-						},
-						panel: {
-							value: {
-								base: "{colors.editorial.paper-deep}",
-								_dark: "oklch(0.26 0.014 280)",
-							},
-						},
-					},
-					content: {
-						primary: {
-							value: {
-								base: "{colors.editorial.ink}",
-								_dark: "oklch(0.93 0.008 85)",
-							},
-						},
-						muted: {
-							value: {
-								base: "{colors.editorial.ink-soft}",
-								_dark: "oklch(0.72 0.012 280)",
-							},
-						},
-					},
-					border: {
-						default: {
-							value: {
-								base: "{colors.editorial.hairline}",
-								_dark: "oklch(1 0 0 / 0.16)",
-							},
-						},
-					},
-					action: {
-						primary: {
-							value: {
-								base: "{colors.editorial.ink}",
-								_dark: "{colors.editorial.paper}",
-							},
-						},
-						interactive: {
-							value: {
-								base: "{colors.editorial.spruce}",
-								_dark: "oklch(0.72 0.16 165)",
-							},
-						},
-						primaryForeground: {
-							value: {
-								base: "{colors.editorial.paper}",
-								_dark: "{colors.editorial.ink}",
 							},
 						},
 					},

@@ -94,6 +94,7 @@ async function render(
 			academyLayout: styles,
 			academyWatch: styles,
 			academyCatalog: styles,
+			academyPage: styles,
 			button: ({ variant = "solid" } = {}) => `button-${variant}`,
 		},
 		// Pass-through fixtures: the layer's own scheduled-entry hiding is not
@@ -518,7 +519,12 @@ test("titled VideoFeed preserves title, description, date, runtime and real dest
 		dom.querySelector("img").getAttribute("src"),
 		"https://images.test/real.webp",
 	);
-	assert.match(dom.text, /1:05/);
+	// The feed draws the shared video card: one runtime form, a decorative
+	// still, and the title as the link's name.
+	assert.match(dom.text, /1 min/);
+	assert.equal(dom.querySelector("a").getAttribute("class"), "academy-card");
+	assert.equal(dom.querySelector("img").getAttribute("alt"), "");
+	assert.equal(dom.querySelector("h3").text, video("real").data.title);
 	assert.match(dom.text, /2020/);
 });
 
@@ -553,8 +559,11 @@ test("cast with missing portraits uses initials, never a missing asset or invent
 		dom.querySelectorAll("a").map((a) => a.getAttribute("href")),
 		["/people/person", "/people/guest"],
 	);
-	assert.match(dom.text, /HOST/);
-	assert.match(dom.text, /GUEST/);
+	// The role is sentence-case mono under the name, not a badge on the avatar.
+	assert.deepEqual(
+		dom.querySelectorAll(".academy-castMeta").map((m) => m.text.trim()),
+		["Host", "Guest"],
+	);
 });
 
 test("cast retains real avatar/handle and its image-error handler reveals existing initials", async () => {

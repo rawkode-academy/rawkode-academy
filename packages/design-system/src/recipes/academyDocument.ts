@@ -1,5 +1,8 @@
 import { sva } from "../../styled-system/css";
 import { focusRing } from "../styles/focus";
+import { coverImage, videoFrame } from "../styles/media";
+import { linkedPanel, panelSurface, pill } from "../styles/surface";
+import { headingLg, headingMd, kicker } from "../styles/type";
 
 /** Shared Academy reading, course, show and contributor compositions.
  * Static document structure stays server rendered; interactive islands own behavior.
@@ -63,7 +66,7 @@ export const academyDocument = sva({
 		"byline",
 		"author",
 		"authorMeta",
-		"breadcrumb",
+		"articleProse",
 		"toc",
 		"tocMobile",
 		"tocDesktop",
@@ -189,16 +192,11 @@ export const academyDocument = sva({
 			minWidth: "0",
 		},
 		panel: {
+			...panelSurface,
 			minWidth: "0",
 			padding: "6",
-			background: "academy.panel",
-			border: "hairline",
-			borderColor: "academy.border",
-			borderRadius: "academy-m",
 			scrollMarginTop: "24",
-			_lg: {
-				padding: "8",
-			},
+			_lg: { padding: "8" },
 		},
 		stack: {
 			display: "flex",
@@ -301,27 +299,13 @@ export const academyDocument = sva({
 			},
 		},
 		sectionTitle: {
-			margin: "0",
-			fontFamily: "academy-display",
-			fontSize: "2xl",
-			fontWeight: "bold",
+			...headingLg,
 			color: "academy.text",
-			lineHeight: "tight",
 			letterSpacing: "tight",
 			textWrap: "balance",
-			_lg: {
-				fontSize: "3xl",
-			},
+			_lg: { fontSize: "3xl" },
 		},
-		cardTitle: {
-			margin: "0",
-			fontFamily: "academy-display",
-			fontSize: "xl",
-			fontWeight: "bold",
-			color: "academy.text",
-			lineHeight: "tight",
-			textWrap: "balance",
-		},
+		cardTitle: { ...headingMd, color: "academy.text", textWrap: "balance" },
 		lede: {
 			margin: "0",
 			maxWidth: "academy-copy",
@@ -347,14 +331,7 @@ export const academyDocument = sva({
 			fontSize: "xs",
 			lineHeight: "relaxed",
 		},
-		kicker: {
-			margin: "0",
-			color: "academy.accent",
-			fontFamily: "academy-mono",
-			fontSize: "xs",
-			fontWeight: "semibold",
-			letterSpacing: "wide",
-		},
+		kicker: kicker,
 		link: {
 			color: "academy.accent",
 			textDecoration: "none",
@@ -365,23 +342,13 @@ export const academyDocument = sva({
 			_focusVisible: focusRing,
 		},
 		tag: {
-			display: "inline-flex",
-			alignItems: "center",
+			...pill,
 			gap: "2",
-			paddingInline: "3",
-			paddingBlock: "1",
-			border: "hairline",
-			borderColor: "academy.border",
-			borderRadius: "academy-pill",
 			color: "academy.textSoft",
-			background: "academy.ground",
+			backgroundColor: "academy.ground",
 			fontFamily: "academy-mono",
-			fontSize: "xs",
 			textDecoration: "none",
-			_hover: {
-				borderColor: "academy.accent",
-				color: "academy.accent",
-			},
+			_hover: { borderColor: "academy.accent", color: "academy.accent" },
 		},
 		tagList: {
 			display: "flex",
@@ -482,25 +449,12 @@ export const academyDocument = sva({
 				height: "48",
 			},
 		},
-		image: {
-			display: "block",
-			width: "full",
-			height: "full",
-			objectFit: "cover",
-		},
+		image: coverImage,
 		media: {
-			position: "relative",
-			overflow: "hidden",
+			...videoFrame,
 			border: "hairline",
-			borderColor: "academy.border",
 			borderRadius: "academy-m",
-			background: "academy.ground",
-			aspectRatio: "academy-video",
-			"& img": {
-				width: "full",
-				height: "full",
-				objectFit: "cover",
-			},
+			"& img": coverImage,
 		},
 		mediaColumn: {
 			width: "full",
@@ -574,17 +528,14 @@ export const academyDocument = sva({
 			display: "none",
 		},
 		empty: {
-			textAlign: "center",
-			padding: "12",
-			border: "hairline",
-			borderColor: "academy.border",
-			borderRadius: "academy-m",
-			background: "academy.panel",
-			color: "academy.textSoft",
+			...panelSurface,
 			display: "flex",
 			flexDirection: "column",
 			alignItems: "center",
 			gap: "4",
+			padding: "12",
+			color: "academy.textSoft",
+			textAlign: "center",
 		},
 		notice: {
 			padding: "4",
@@ -619,18 +570,12 @@ export const academyDocument = sva({
 			fontSize: "sm",
 			fontWeight: "medium",
 		},
-		breadcrumb: {
-			display: "flex",
-			flexWrap: "wrap",
-			gap: "3",
-			alignItems: "center",
-			maxWidth: "academy-shell",
-			marginInline: "auto",
-			paddingInline: "academy-gutter",
-			paddingBlock: "4",
-			color: "academy.textMuted",
-			fontFamily: "academy-mono",
-			fontSize: "xs",
+		// Reading measure: running text keeps to 680px inside the article
+		// column; code, tables, figures and diagrams may use its full width.
+		articleProse: {
+			"& > :where(p, ul, ol, dl, blockquote, h2, h3, h4, h5, h6)": {
+				maxWidth: "academy-copy",
+			},
 		},
 		toc: {
 			display: "flex",
@@ -703,19 +648,11 @@ export const academyDocument = sva({
 			marginTop: "12",
 		},
 		relatedCard: {
+			...linkedPanel,
 			display: "flex",
 			flexDirection: "column",
 			gap: "3",
 			padding: "6",
-			border: "hairline",
-			borderColor: "academy.border",
-			borderRadius: "academy-m",
-			background: "academy.panel",
-			color: "academy.text",
-			textDecoration: "none",
-			_hover: {
-				borderColor: "academy.accent",
-			},
 		},
 		moduleFlow: {
 			display: "grid",
@@ -822,11 +759,7 @@ export const academyDocument = sva({
 		},
 		resourceTarget: {
 			scrollMarginTop: "24",
-			"&:target > a": {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			"&:target > a": focusRing,
 		},
 	},
 });

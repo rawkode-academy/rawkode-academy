@@ -13,7 +13,7 @@ import { calculateReadingTime } from "@/utils/reading-time";
 import { getTypeBadgeConfig } from "@/utils/article-types";
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
 import { academyCatalog, academyLayout, button } from "@rawkodeacademy/design-system";
-import { localTime } from "@/lib/local-time";
+import { localDate, localTime } from "@/lib/local-time";
 
 export const prerender = false;
 
@@ -168,7 +168,7 @@ const featuredImage = coverImage(featured?.data.cover, 1200);
 // ─── Helpers ───────────────────────────────────────────────────
 
 const featuredDate = (date: Date) =>
-	localTime(date, { month: "short", day: "2-digit", year: "numeric" });
+	localDate(date);
 // Ledger dates: the day is the numeral, month and year sit beneath it.
 const ledgerDay = (date: Date) => localTime(date, { day: "2-digit" }, "en-GB");
 const ledgerMonth = (date: Date) =>
@@ -292,7 +292,7 @@ const catalog = academyCatalog();
 					</div>
 				</a>
 			))}</div>}
-			{totalPages > 1 && <nav class={catalog.pager} aria-label="Article pages">{page > 1 ? <a class={button({ variant: "outline" })} href={readPathFor(page - 1)}>← Previous</a> : <span />}{hasNextPage && <a class={button()} href={readPathFor(page + 1)}>Next <span data-part="arrow" aria-hidden="true">→</span></a>}</nav>}
+			{totalPages > 1 && <nav class={catalog.pager} aria-label="Article pages">{page > 1 ? <a class={button({ variant: "outline" })} href={readPathFor(page - 1)}>← Previous</a> : <span />}<p class={catalog.pagerLabel}>Page {page} of {totalPages}</p>{hasNextPage ? <a class={button({ variant: "outline" })} href={readPathFor(page + 1)}>Next <span data-part="arrow" aria-hidden="true">→</span></a> : <span />}</nav>}
 		</div></section>
 	</div>
 </Page>

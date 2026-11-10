@@ -1,41 +1,52 @@
 # Theme System
 
-The website ships a **single brand theme — Rawkode Blue** — with both light and dark color schemes. Users can flip between light and dark; the brand palette is fixed.
+The website ships one brand theme with a light and a dark colour scheme. Users choose light, dark or system; the palette itself is fixed. `DESIGN.md` is the design direction.
 
-## Palette
+## Tokens
 
-- **Primary**: `#5F5ED7` (Purple)
-- **Secondary**: `#00CEFF` (Cyan)
-- **Accent**: `#111827` (Dark Blue-Gray)
-- **Brand gradient**: 135° from `--brand-primary` → `--brand-secondary`
+Colour, type, radius, spacing and motion tokens are defined once, in `packages/design-system/panda.config.ts`. Panda emits each one as a CSS custom property that resolves per colour scheme (`html.dark` selects the dark values), so a token never needs a second declaration in website CSS.
 
-## Color schemes
+| Token | CSS variable | Use |
+|-------|--------------|-----|
+| `academy.canvas` | `--colors-academy-canvas` | Page background |
+| `academy.ground` | `--colors-academy-ground` | Recessed surface, placeholders |
+| `academy.panel` | `--colors-academy-panel` | Framed panels and cards |
+| `academy.border` | `--colors-academy-border` | Hairlines |
+| `academy.inputBorder` | `--colors-academy-input-border` | Form controls, stronger rules |
+| `academy.text` | `--colors-academy-text` | Primary text |
+| `academy.textSoft` | `--colors-academy-text-soft` | Secondary text |
+| `academy.textMuted` | `--colors-academy-text-muted` | Metadata |
+| `academy.accent` | `--colors-academy-accent` | The next action, focus rings |
+| `academy.ink*` | `--colors-academy-ink-*` | Ink surfaces that open and close a page |
+| `academy.status*` | `--colors-academy-status-*` | A real state (spruce, amber, rust, sky, violet), never decoration |
 
-| Scheme | When applied | Surface base |
-|--------|--------------|--------------|
-| Light  | default      | `#eef2ff` |
-| Dark   | `html.dark`  | `#040712` |
+Other families follow the same pattern: `--fonts-academy-display|text|mono`, `--radii-academy-s|m|l`, `--durations-fast|base|slow`, `--easings-academy-out|standard`, `--spacing-academy-gutter`.
 
-## CSS variables
+Review the resolved values in Storybook under `Design System/Tokens`, in both schemes.
 
-Defined in `src/styles/global.css`:
+## Using tokens
 
-- `--brand-primary`, `--brand-secondary`, `--brand-accent` — RGB triplets for the brand palette.
-- `--surface-base`, `--surface-overlay`, `--surface-card`, `--surface-card-muted`, `--surface-border`, `--surface-border-strong` — semantic surfaces, swapped under `html.dark`.
-- `--surface-shadow`, `--surface-shadow-strong` — shadow ramp tokens.
-- `--app-backdrop` — full-page radial-gradient backdrop, swapped under `html.dark`.
-- Spacing tokens (`--space-page-*`, `--space-section-*`, `--space-stack-*`, `--space-card-pad-*`).
+- In a design-system recipe, use the token name: `color: "academy.text"`.
+- In a component-scoped `<style>`, use the generated variable: `color: var(--colors-academy-text)`.
+- For a tint, mix the token: `color-mix(in srgb, var(--colors-academy-accent) 30%, transparent)`.
+- Never copy a hex value into a component.
+
+## Retired names
+
+`--brand-*`, `--surface-*`, `--editorial-*`, `--text-*-content`, `--text-muted`, `--radius-*`, `--duration-*`, `--ease-*` and the `--font-instrument-serif|inter-tight|jetbrains-mono` variables were compatibility aliases onto the tokens above. Do not use them; when you touch a file that still does, replace each with the generated `academy` variable.
 
 ## Library API
 
 `src/lib/theme.ts`:
 
-- `getColorScheme()` / `setColorScheme(scheme)` / `toggleColorScheme()` — the only knobs users actually need.
-- `initTheme()` — call early to apply the persisted color-scheme preference and avoid FOUC.
-- `getThemeColors()` — returns the canonical brand palette.
+- `getColorSchemePreference()`: the stored choice, `"light"`, `"dark"` or `"system"`.
+- `getColorScheme()`: the scheme applied to the page, `"light"` or `"dark"`.
+- `setColorScheme(preference)`: persists and applies a preference.
+- `toggleColorScheme()`: cycles light, dark, system.
+- `initTheme()`: applies the persisted preference and follows the OS setting while the preference is `"system"`.
 
-The legacy `getTheme` / `setTheme` / `toggleTheme` / `ALL_THEMES` / `getThemeDisplayName` exports remain as thin shims so older callers (the toggle button, the command palette) keep compiling until the next loop replaces those UIs with a dark-mode toggle.
+`ThemeScript.astro` sits in `<head>` and applies the scheme before first paint. A `color-scheme-change` event fires on `window` when the applied scheme changes.
 
 ## Persistence
 
-The color scheme is stored in `localStorage` under the key `rawkode-color-scheme` (`"light"` | `"dark"`).
+The preference is stored in `localStorage` under the key `rawkode-color-scheme` (`"light"`, `"dark"` or `"system"`).

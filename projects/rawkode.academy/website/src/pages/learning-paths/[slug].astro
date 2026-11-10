@@ -16,7 +16,7 @@ import ArticleTOC from "@/components/read/ArticleTOC.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import LearningPathJsonLd from "@/components/html/learning-path-jsonld.astro";
 import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
-import { localTime } from "@/lib/local-time";
+import { localDate } from "@/lib/local-time";
 import { buildTechnologyTags } from "@/lib/technology-tags";
 
 export const prerender = false;
@@ -69,11 +69,7 @@ const difficultyLabel =
 	learningPath.data.difficulty.charAt(0).toUpperCase() +
 	learningPath.data.difficulty.slice(1);
 
-const publishDate = localTime(learningPath.data.publishedAt, {
-	month: "short",
-	day: "numeric",
-	year: "numeric",
-});
+const publishDate = localDate(learningPath.data.publishedAt);
 
 const pageTitle = `${learningPath.data.title} | Learning Path`;
 const pageDescription = learningPath.data.description;

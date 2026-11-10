@@ -1,4 +1,5 @@
 ---
+import { button } from "@rawkodeacademy/design-system";
 import { actions, isInputError } from "astro:actions";
 import PartnershipApplicationForm from "@/components/organizations/PartnershipApplicationForm.vue";
 import EditorialShell from "@/components/ui/EditorialShell.astro";
@@ -95,7 +96,7 @@ const submittedValues =
 		lede="Help keep practical developer education free. Rawkode Academy helps engineers learn by building. Your support funds tutorials, live streams and shows that anyone can use."
 	>
 		<div class="support-hero-actions" slot="actions">
-			<a class="editorial-button" href={applyHref} data-apply-path={supportPath}>Become a supporter</a>
+			<a class={button()} href={applyHref} data-apply-path={supportPath}>Become a supporter</a>
 			<a class="support-text-link" href="#supporter">See the offer</a>
 		</div>
 
@@ -128,7 +129,7 @@ const submittedValues =
 					<h3 id="support-offer-title">Community supporter</h3>
 					<p class="support-offer__price"><span>{supportPrice?.[1] ?? supportAcademyOffer.price}</span> <span>{supportPrice?.[2]}</span></p>
 					<p>{supportAcademyOffer.cadence}</p>
-					<a class="editorial-button" href={applyHref} data-apply-path={supportPath}>Enquire about support</a>
+					<a class:list={[button(), "support-action"]} href={applyHref} data-apply-path={supportPath}>Enquire about support</a>
 				</div>
 				<div class="support-offer__benefits">
 					<h3>What supporters receive</h3>
@@ -156,11 +157,11 @@ const submittedValues =
 			</div>
 			<div class="support-prose">
 				<p>A Partnership adds agreed hands-on engineering, content and community work across Awareness, Adoption, and Support. Adoption reviews stay within that one partnership.</p>
-				<a class="editorial-button editorial-button--secondary" href="/organizations/partnerships">Explore Partnerships</a>
+				<a class:list={[button({ variant: "outline" }), "support-action"]} href="/organizations/partnerships">Explore Partnerships</a>
 			</div>
 		</section>
 
-		<section id="apply" class="editorial-section editorial-section--split support-apply" aria-labelledby="apply-title">
+		<section id="apply" class="editorial-section editorial-section--split" aria-labelledby="apply-title">
 			<div class="editorial-section__header">
 				<h2 id="apply-title" class="editorial-section__title">Become a supporter</h2>
 				<p class="editorial-section__lede">Tell David about your company and what draws you to the Academy. He reads every enquiry and replies by email.</p>
@@ -185,7 +186,7 @@ const submittedValues =
 	.editorial-section { padding-block: clamp(3.5rem, 7vw, 6rem); row-gap: 2rem; }
 	.editorial-section__header { gap: 1.25rem; }
 	.support-hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 1.25rem 2rem; width: 100%; margin-block: 1.25rem 2rem; }
-	.support-text-link, .support-prose a:not(.editorial-button) { color: var(--colors-academy-text); font-weight: 600; text-decoration: underline; text-underline-offset: 0.2em; }
+	.support-text-link, .support-prose a:not(.support-action) { color: var(--colors-academy-text); font-weight: 600; text-decoration: underline; text-underline-offset: 0.2em; }
 	.support-rail { display: flex; flex-wrap: wrap; gap: 0.75rem 1.5rem; padding: 1rem 0; border-block: 1px solid var(--colors-academy-border); }
 	.support-rail a { color: var(--colors-academy-text); font-weight: 600; text-decoration: none; }
 	.support-rail a:hover { text-decoration: underline; text-underline-offset: 0.2em; }

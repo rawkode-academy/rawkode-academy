@@ -1,5 +1,8 @@
 import { sva } from "../../styled-system/css";
 import { focusRing, focusRingInset } from "../styles/focus";
+import { coverImage, videoFrame } from "../styles/media";
+import { panelSurface } from "../styles/surface";
+import { headingLg, kicker } from "../styles/type";
 
 export const academyCourse = sva({
 	slots: [
@@ -44,6 +47,7 @@ export const academyCourse = sva({
 		"heroCopy",
 		"heroTitle",
 		"heroDescription",
+		"heroCoverFrame",
 		"heroCover",
 		"kicker",
 		"metadata",
@@ -129,24 +133,22 @@ export const academyCourse = sva({
 			lineHeight: "body",
 			textWrap: "pretty",
 		},
-		heroCover: {
-			display: "block",
+		// A fixed 16:9 box on the ground colour. A cover that is late or
+		// fails leaves a quiet frame, never a line of alt text.
+		heroCoverFrame: {
+			...videoFrame,
 			width: "full",
-			maxWidth: "full",
-			height: "auto",
-			aspectRatio: "academy-video",
-			objectFit: "contain",
 			borderRadius: "academy-m",
-			background: "academy.ground",
 		},
-		kicker: {
-			margin: "0",
-			color: "academy.accent",
-			fontFamily: "academy-mono",
-			fontSize: "xs",
-			fontWeight: "semibold",
-			letterSpacing: "wide",
+		heroCover: {
+			...coverImage,
+			objectFit: "contain",
+			// The alt text stays for assistive technology but is not drawn
+			// in the frame when the image is missing.
+			color: "transparent",
+			fontSize: "[0]",
 		},
+		kicker: kicker,
 		metadata: {
 			display: "flex",
 			flexWrap: "wrap",
@@ -206,14 +208,7 @@ export const academyCourse = sva({
 			_lg: { gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1fr)" },
 		},
 		detailStack: { display: "grid", gap: "6", minWidth: "0" },
-		sectionHeading: {
-			margin: "0",
-			color: "academy.text",
-			fontFamily: "academy-display",
-			fontSize: "2xl",
-			fontWeight: "bold",
-			lineHeight: "tight",
-		},
+		sectionHeading: { ...headingLg, color: "academy.text" },
 		objectiveList: {
 			display: "grid",
 			gap: "2",
@@ -232,14 +227,11 @@ export const academyCourse = sva({
 			minWidth: "0",
 		},
 		signup: {
+			...panelSurface,
 			display: "grid",
 			gap: "4",
 			minWidth: "0",
 			padding: "5",
-			border: "hairline",
-			borderColor: "academy.border",
-			borderRadius: "academy-m",
-			background: "academy.panel",
 		},
 		curriculum: {
 			display: "grid",

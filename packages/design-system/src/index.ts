@@ -1,7 +1,38 @@
 export { button, type ButtonVariants } from "./recipes/button";
+export { inputField } from "./styles/field";
 export { focusRing, focusRingInk, focusRingInset } from "./styles/focus";
+export { inkStage, inkSurface } from "./styles/ink";
+export {
+	ledgerBody,
+	ledgerDate,
+	ledgerDescription,
+	ledgerImage,
+	ledgerMedia,
+	ledgerRow,
+	ledgerTitle,
+	ruledList,
+} from "./styles/ledger";
+export {
+	coverImage,
+	coverImageZoom,
+	runtimeBadge,
+	videoFrame,
+} from "./styles/media";
 export { scrollReveal } from "./styles/motion";
+export { textLink } from "./styles/link";
+export { linkedPanel, panelSurface, pill } from "./styles/surface";
 export { systemGridBottom, systemGridTop } from "./styles/systemGrid";
+export {
+	cardTitle,
+	headingLg,
+	headingMd,
+	kicker,
+	ledeText,
+	mastheadTitle,
+	monoMeta,
+	posterTitle,
+	sectionTitle,
+} from "./styles/type";
 export { dialog } from "./recipes/dialog";
 export { academyPage } from "./recipes/academyPage";
 export { academyShell } from "./recipes/academyShell";

@@ -1,5 +1,6 @@
 import { sva } from "../../styled-system/css";
 import { focusRing } from "../styles/focus";
+import { sectionTitle } from "../styles/type";
 
 /** About-page composition; the shared layout owns the page width and gutters. */
 export const academyAbout = sva({
@@ -108,16 +109,7 @@ export const academyAbout = sva({
 			minWidth: "0",
 			maxWidth: "academy-copy",
 		},
-		sectionTitle: {
-			margin: "0",
-			fontFamily: "academy-display",
-			fontSize: "academy-section",
-			fontWeight: "bold",
-			letterSpacing: "academy-display",
-			lineHeight: "academy-title",
-			textWrap: "balance",
-			overflowWrap: "anywhere",
-		},
+		sectionTitle: { ...sectionTitle, overflowWrap: "anywhere" },
 		copy: {
 			margin: "0",
 			color: "academy.textSoft",

@@ -205,6 +205,7 @@ function harness({
 			academyCatalog: styles,
 			academyDocument: styles,
 			academyNavigation: styles,
+			academyPage: styles,
 			button: ({ variant = "solid" } = {}) => `button-${variant}`,
 		},
 		"astro:assets": { Image: empty },

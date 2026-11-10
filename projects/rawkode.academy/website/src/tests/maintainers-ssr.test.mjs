@@ -58,6 +58,8 @@ async function renderPage() {
 			academyLayout: slots("layout"),
 			academyMarketing: slots("marketing"),
 			academyEditorial: slots("editorial"),
+			// Stand-in for the design-system button recipe.
+			button: (props = {}) => `button button--${props.variant ?? "solid"}`,
 		},
 		"@/wrappers/page.astro": {
 			default: runtime.createComponent(
@@ -102,8 +104,10 @@ async function renderPage() {
 	return parse(await container.renderToString(module.namespace.default));
 }
 
-const readRecipe = (file = "academyMaintainers.ts", name = "academyMaintainers") =>
-	readRecipeConfig(file, name);
+const readRecipe = (
+	file = "academyMaintainers.ts",
+	name = "academyMaintainers",
+) => readRecipeConfig(file, name);
 
 test("styled ordered list explicitly preserves four listitems, H3s and exact step copy", async () => {
 	const dom = await renderPage();
@@ -189,14 +193,18 @@ test("both inline destinations use recipe-backed 44px targets and explicit focus
 	assert.equal(base.link._focusVisible.outlineOffset, "1");
 });
 
-test("both hero destinations retain shared editorial 44px targets and focus", async () => {
+test("both hero destinations use the shared button at its 44px size with the focus ring", async () => {
 	const dom = await renderPage();
-	assert.equal(dom.querySelectorAll("a.editorial-button").length, 2);
-	const recipe = await readRecipe("academyEditorial.ts", "academyEditorial");
-	const button = recipe.base.root["& .editorial-button"];
-	assert.equal(button.minHeight, "11");
-	assert.equal(button._focusVisible.outline, "focus");
-	assert.equal(button._focusVisible.outlineColor, "academy.accent");
+	assert.equal(dom.querySelectorAll("a.button").length, 2);
+	assert.equal(dom.querySelectorAll("a.button--solid").length, 1);
+	assert.equal(dom.querySelectorAll("a.button--outline").length, 1);
+	const recipe = await readRecipe("button.ts", "button");
+	assert.equal(recipe.defaultVariants.size, "md");
+	assert.equal(recipe.variants.size.md.minHeight, "11");
+	assert.equal(recipe.base._focusVisible.outline, "focus");
+	assert.equal(recipe.base._focusVisible.outlineColor, "academy.accent");
+	const editorial = await readRecipe("academyEditorial.ts", "academyEditorial");
+	assert.equal(editorial.base.root["& .editorial-button"], undefined);
 });
 
 test("page has no scoped stylesheet; retired shells stay absent without removing negative guards", () => {

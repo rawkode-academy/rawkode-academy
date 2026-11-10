@@ -17,10 +17,9 @@ import EmptyState from "../ui/EmptyState.vue";
 import ErrorState from "../common/ErrorState.vue";
 import SkeletonTranscript from "../common/SkeletonTranscript.vue";
 import ResourceSimulator from "../articles/cgroups/ResourceSimulator";
-
-// Course covers are served from the content CDN (platform-courses).
-const teleportCover =
-	"https://content.rawkode.academy/courses/teleport-for-kubernetes/teleport-for-kubernetes.png";
+// Production covers come from the content CDN. A story must render with no
+// network, so the fixture uses artwork that ships in public/.
+import teleportCover from "../../../public/games/secret-of-kubernetes-island/scenes/scene-control-plane.webp?url";
 
 const doc = academyDocument();
 const form = academyForms();
@@ -104,7 +103,11 @@ function CourseFixture({ empty = false }: { empty?: boolean }) {
 	);
 }
 
-export const Default: Story = { render: () => <CourseFixture /> };
+// Composed specimens with a screenshot baseline (bun run test:visual).
+export const Default: Story = {
+	tags: ["visual", "visual-mobile"],
+	render: () => <CourseFixture />,
+};
 export const CourseWithoutLessons: Story = {
 	render: () => <CourseFixture empty />,
 	play: async ({ canvasElement }) => {
@@ -294,7 +297,11 @@ function FormRecipeFixture({ state = "default" }: { state?: FormState }) {
 					Optional consent checkbox specimen
 				</label>
 			</div>
-			<button className={button({ fullWidth: true })} type="button" disabled={disabled}>
+			<button
+				className={button({ fullWidth: true })}
+				type="button"
+				disabled={disabled}
+			>
 				Button specimen · no submission
 			</button>
 		</section>
@@ -321,6 +328,7 @@ export const FormLabels: Story = {
 	},
 };
 export const FormError: Story = {
+	tags: ["visual"],
 	render: () => <FormRecipeFixture state="error" />,
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -409,6 +417,7 @@ const resourceFixtures = [
 ] as const;
 
 export const Resources: Story = {
+	tags: ["visual"],
 	render: () => (
 		<div
 			className={[layout.container, doc.stack].join(" ")}

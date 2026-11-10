@@ -1,6 +1,17 @@
 import { sva } from "../../styled-system/css";
 import { focusRing, focusRingInk, focusRingInset } from "../styles/focus";
-import { scrollReveal } from "../styles/motion";
+import {
+	ledgerBody,
+	ledgerDate,
+	ledgerDescription,
+	ledgerImage,
+	ledgerMedia,
+	ledgerRow,
+	ledgerTitle,
+	ruledList,
+} from "../styles/ledger";
+import { headingMd, ledeText, monoMeta, sectionTitle } from "../styles/type";
+import { coverImage, videoFrame } from "../styles/media";
 
 /**
  * Listing-specific pieces that sit on top of the shared Academy layout.
@@ -54,6 +65,8 @@ export const academyCatalog = sva({
 		"statValue",
 		"statLabel",
 		"pager",
+		"pagerLabel",
+		"pairGrid",
 		"editorialList",
 		"editorialRow",
 		"editorialDate",
@@ -74,127 +87,22 @@ export const academyCatalog = sva({
 		"indexMeta",
 	],
 	base: {
-		editorialList: {
-			display: "grid",
-			borderTop: "hairline",
-			borderColor: "academy.border",
-		},
-		editorialRow: {
-			display: "grid",
-			gridTemplateColumns: "5.5rem minmax(0, 1fr)",
-			columnGap: "4",
-			rowGap: "3",
-			alignItems: "start",
-			paddingBlock: "5",
-			borderBottom: "hairline",
-			borderColor: "academy.border",
-			color: "academy.text",
-			textDecoration: "none",
-			"&[data-media='false']": { gridTemplateColumns: "minmax(0, 1fr)" },
-			// On wide screens the still sits in its own trailing column so every
-			// title in the ledger starts on the same line, still or not.
-			_lg: {
-				gridTemplateColumns: "6.5rem minmax(0, 1fr) 12rem",
-				"&[data-media='false']": {
-					gridTemplateColumns: "6.5rem minmax(0, 1fr) 12rem",
-				},
-				columnGap: "8",
-				paddingBlock: "6",
-			},
-			...scrollReveal,
-			_hover: {
-				"& h2, & h3": { color: "academy.accent" },
-				"& img": { transform: "scale(1.03)" },
-				"& [data-body]": { transform: "translateX(0.35rem)" },
-			},
-			_focusVisible: focusRing,
-			_motionReduce: { animation: "none" },
-		},
+		editorialList: ruledList,
+		editorialRow: ledgerRow,
 		// The day is the numeral; month and year sit beneath it in mono.
-		editorialDate: {
-			gridColumn: "1 / -1",
-			display: "flex",
-			alignItems: "baseline",
-			gap: "2",
-			color: "academy.textMuted",
-			fontFamily: "academy-mono",
-			fontSize: "xs",
-			lineHeight: "body",
-			"& strong": {
-				color: "academy.text",
-				fontFamily: "academy-display",
-				fontSize: "xl",
-				fontWeight: "extrabold",
-				letterSpacing: "academy-tight",
-				lineHeight: "none",
-				fontVariantNumeric: "tabular-nums",
-			},
-			_lg: {
-				gridColumn: "1",
-				display: "grid",
-				gap: "1",
-				paddingBlockStart: "0.5",
-				"& strong": { fontSize: "academy-ledger-day" },
-			},
-		},
-		editorialMedia: {
-			_lg: { gridColumn: "3", gridRow: "1" },
-			display: "block",
-			overflow: "hidden",
-			aspectRatio: "academy-video",
-			borderRadius: "academy-s",
-			backgroundColor: "academy.ground",
-		},
-		editorialImage: {
-			width: "full",
-			height: "full",
-			objectFit: "cover",
-			transitionProperty: "[transform]",
-			transitionDuration: "reveal",
-			transitionTimingFunction: "academy-out",
-			_motionReduce: { transitionDuration: "none" },
-		},
-		editorialBody: {
-			_lg: { gridColumn: "2", gridRow: "1" },
-			display: "grid",
-			gap: "2",
-			minWidth: "0",
-			transitionProperty: "[transform]",
-			transitionDuration: "slow",
-			transitionTimingFunction: "academy-out",
-			_motionReduce: { transitionDuration: "none" },
-		},
+		editorialDate: ledgerDate,
+		editorialMedia: ledgerMedia,
+		editorialImage: ledgerImage,
+		editorialBody: ledgerBody,
 		editorialKind: {
+			...monoMeta,
 			display: "flex",
 			flexWrap: "wrap",
 			alignItems: "center",
 			columnGap: "2",
-			margin: "0",
-			color: "academy.textMuted",
-			fontFamily: "academy-mono",
-			fontSize: "xs",
-			lineHeight: "body",
 		},
-		editorialTitle: {
-			margin: "0",
-			fontFamily: "academy-display",
-			fontSize: "lg",
-			fontWeight: "bold",
-			lineHeight: "tight",
-			letterSpacing: "academy-tight",
-			textWrap: "pretty",
-			transitionProperty: "colors",
-			transitionDuration: "base",
-			_lg: { fontSize: "2xl" },
-		},
-		editorialDescription: {
-			margin: "0",
-			maxWidth: "academy-copy",
-			color: "academy.textSoft",
-			fontSize: "sm",
-			lineHeight: "academy-reading",
-			textWrap: "pretty",
-		},
+		editorialTitle: ledgerTitle,
+		editorialDescription: ledgerDescription,
 		// A–Z directory for large reference collections. One letter per
 		// group, compact rows inside, so hundreds of entries stay scannable.
 		indexGroup: {
@@ -345,33 +253,22 @@ export const academyCatalog = sva({
 			fontSize: "sm",
 		},
 		leadTitle: {
-			margin: "0",
+			...sectionTitle,
 			color: "academy.text",
-			fontFamily: "academy-display",
-			fontSize: "academy-section",
 			fontWeight: "extrabold",
-			letterSpacing: "academy-display",
-			lineHeight: "academy-title",
-			textWrap: "balance",
 		},
 		leadDescription: {
-			margin: "0",
+			...ledeText,
 			maxWidth: "academy-copy",
 			color: "academy.textSoft",
-			fontSize: "academy-lede",
-			lineHeight: "academy-reading",
-			textWrap: "pretty",
 		},
 		featuredMedia: {
-			display: "block",
-			overflow: "hidden",
+			...videoFrame,
 			borderRadius: "academy-m",
-			background: "academy.ground",
-			aspectRatio: "academy-video",
 			order: "-1",
 			_lg: { order: "0" },
 		},
-		featuredImage: { width: "full", height: "full", objectFit: "cover" },
+		featuredImage: coverImage,
 		featuredBody: {
 			display: "flex",
 			flexDirection: "column",
@@ -455,7 +352,7 @@ export const academyCatalog = sva({
 				color: "academy.accentForeground",
 			},
 		},
-		rows: { display: "grid", borderTop: "hairline" },
+		rows: ruledList,
 		row: {
 			display: "grid",
 			gap: "3",
@@ -490,15 +387,7 @@ export const academyCatalog = sva({
 			fontSize: "sm",
 			lineHeight: "body",
 		},
-		rowMeta: {
-			display: "flex",
-			flexWrap: "wrap",
-			gap: "2",
-			color: "academy.textMuted",
-			fontFamily: "academy-mono",
-			fontSize: "xs",
-			lineHeight: "body",
-		},
+		rowMeta: { ...monoMeta, display: "flex", flexWrap: "wrap", gap: "2" },
 		avatar: {
 			width: "12",
 			height: "12",
@@ -557,12 +446,7 @@ export const academyCatalog = sva({
 			borderRadius: "full",
 			background: "academy.ground",
 		},
-		identityAvatar: {
-			display: "block",
-			width: "full",
-			height: "full",
-			objectFit: "cover",
-		},
+		identityAvatar: coverImage,
 		identityInitials: {
 			color: "academy.textSoft",
 			fontFamily: "academy-mono",
@@ -619,14 +503,7 @@ export const academyCatalog = sva({
 			textAlign: "center",
 			color: "academy.textSoft",
 			"&[hidden]": { display: "none" },
-			"& h2": {
-				margin: "0",
-				color: "academy.text",
-				fontFamily: "academy-display",
-				fontSize: "xl",
-				fontWeight: "bold",
-				lineHeight: "tight",
-			},
+			"& h2": { ...headingMd, color: "academy.text" },
 			"& p": { marginBlockStart: "2", marginBlockEnd: "0", fontSize: "sm" },
 		},
 		statGrid: {
@@ -659,9 +536,19 @@ export const academyCatalog = sva({
 		},
 		pager: {
 			display: "flex",
+			alignItems: "center",
 			justifyContent: "space-between",
 			gap: "3",
 			marginBlockStart: "8",
+		},
+		pagerLabel: { ...monoMeta, fontVariantNumeric: "tabular-nums" },
+		// Framed cards with artwork, two to a row, so a short collection
+		// (the published shows) reads as a set and never leaves an orphan
+		// beside empty columns.
+		pairGrid: {
+			display: "grid",
+			gap: "6",
+			_sm: { gridTemplateColumns: "repeat(2, minmax(0, 1fr))" },
 		},
 	},
 	variants: {

@@ -28,7 +28,7 @@ The package has three layers. Reach for the highest one that fits.
 | --- | --- | --- |
 | Components | `src/vue` | `Button`, `Dialog`, `Tabs`, `NavigationDrawer`: behaviour plus styles |
 | Primitive recipes | `src/recipes/button.ts`, `academyLabel`, `academyContainer`, ... | One element, usable from Astro, Vue and React |
-| Style fragments | `src/styles` | `focusRing*`, `systemGridTop` / `systemGridBottom`, `scrollReveal`: spread into any recipe |
+| Style fragments | `src/styles` | Plain objects spread into any recipe slot; see the table below |
 
 Page recipes (`academyPage`, `academyWatch`, ...) sit on top and own layout
 only. A page recipe that needs an action, a focus ring or the grid motif
@@ -71,27 +71,84 @@ Sizes are `sm` (36px), `md` (44px, the default) and `lg` (48px). `fullWidth`
 stretches a form submit; `icon` makes a square control and needs an
 `aria-label`.
 
-### Style fragments and static extraction
+### Style fragments
+
+A fragment is the single definition of something more than one surface
+draws. A page recipe spreads it into a slot and adds only what is local:
+layout, padding, an entrance animation.
+
+| File | Fragments | Use |
+| --- | --- | --- |
+| `focus.ts` | `focusRing`, `focusRingInset`, `focusRingInk` | Under `_focusVisible`; never hand-write an outline |
+| `systemGrid.ts` | `systemGridTop`, `systemGridBottom` | The grid motif, ink surfaces only |
+| `motion.ts` | `scrollReveal` | Scroll-driven entrance for rows and cards |
+| `ink.ts` | `inkSurface`, `inkStage` | The ink surface that opens a page: hero, masthead, Search, video stage |
+| `ledger.ts` | `ruledList`, `ledgerRow`, `ledgerDate`, `ledgerMedia`, `ledgerImage`, `ledgerBody`, `ledgerTitle`, `ledgerDescription` | The chronological row shared by the homepage stream, Read and News |
+| `media.ts` | `videoFrame`, `coverImage`, `coverImageZoom`, `runtimeBadge` | The 16:9 still, the image that fills it, the runtime set over it |
+| `surface.ts` | `panelSurface`, `linkedPanel`, `pill` | Framed panels (static and linked) and the tag outline, the one fully round surface |
+| `link.ts` | `textLink` | The standalone text link with a travelling arrow |
+| `field.ts` | `inputField` | A text input's surface and states; the slot sets the metrics |
+| `type.ts` | `posterTitle`, `mastheadTitle`, `ledeText`, `sectionTitle`, `headingLg`, `headingMd`, `cardTitle`, `monoMeta`, `kicker` | The type steps more than one surface sets |
 
 ```ts
 import { sva } from "../../styled-system/css";
-import { focusRing } from "../styles/focus";
-import { systemGridTop } from "../styles/systemGrid";
+import { inputField } from "../styles/field";
+import { inkStage } from "../styles/ink";
+import { ledgerDate, ledgerRow, ruledList } from "../styles/ledger";
+import { runtimeBadge, videoFrame } from "../styles/media";
+import { linkedPanel } from "../styles/surface";
+import { ledeText, mastheadTitle, monoMeta } from "../styles/type";
 
 export const example = sva({
-	slots: ["hero", "link"],
+	slots: ["masthead", "title", "lede", "list", "row", "date", "kind", "card", "still", "runtime", "input"],
 	base: {
-		hero: { position: "relative", overflow: "hidden", ...systemGridTop },
-		link: { _focusVisible: focusRing },
+		// The fragment is the surface; the slot owns its padding.
+		masthead: { ...inkStage, paddingBlock: "academy-hero-tight" },
+		title: mastheadTitle,
+		lede: { ...ledeText, color: "academy.inkTextSoft" },
+		// A whole fragment can be the slot.
+		list: ruledList,
+		row: ledgerRow,
+		date: ledgerDate,
+		kind: { ...monoMeta, display: "flex", gap: "2" },
+		card: { ...linkedPanel, display: "flex", flexDirection: "column" },
+		still: { ...videoFrame, borderRadius: "academy-m" },
+		runtime: runtimeBadge,
+		input: { ...inputField, minHeight: "12", paddingInline: "4" },
 	},
 });
 ```
+
+Three rules keep fragments honest:
+
+- **A spread is shallow.** A slot that spreads a fragment and then declares
+  its own `_hover`, `_lg` or `"& strong"` replaces the fragment's whole
+  block. Override with flat keys, or restate the block (a slot with its own
+  hover on a `linkedPanel` restates `borderColor: "academy.accent"`).
+- **`border: "hairline"` already carries `academy.border`.** Set a border
+  colour only when it differs (ink borders, input borders, a hover accent).
+- **Fragments share pieces, not containers.** `academyPage.card` is the one
+  video card (the library, show and technology recordings, the rail under a
+  video). The related card under an article uses the same still, image and
+  title but stays its own slot, because it is closed by a rule.
+
+The ledger's markup contract is documented at the top of
+`src/styles/ledger.ts`. Storybook shows each fragment through a slot that
+spreads it: `Design System/Ledger`, `Media card`, `Ink masthead` and
+`Surfaces and type`.
+
+### Static extraction
 
 Panda extracts styles statically. A fragment must be a plain object literal
 (spreading other literals is fine). A function that builds a style object is
 not followed: the recipe still returns class names at runtime, but no CSS is
 generated. The website's `design-system-coverage` test fails when a recipe
 emits a class the stylesheet does not define.
+
+A fragment may build on a sibling fragment (`ledger.ts` spreads `videoFrame`
+from `media.ts`); the extractor follows those imports. A recipe may import
+only `../../styled-system/css` and `../styles/*`, which is what the website's
+SSR tests evaluate.
 
 ## Dialog
 
@@ -112,7 +169,7 @@ import { Dialog } from "@rawkodeacademy/design-system/vue";
 
 Applications must import `@rawkodeacademy/design-system/styles.css` once at their application styling boundary. Applications own any global normalization needed around the package's recipes.
 
-The dialog is rendered through `body` and owns viewport scrolling, so long forms remain reachable on small screens. Its `dialog` shadow is an intentional modal-elevation exception: the backdrop and elevated surface are kept visually distinct from ordinary panels.
+The dialog is rendered through `body` and owns viewport scrolling, so long forms remain reachable on small screens. Its backdrop, like the navigation drawer's, is `academy.scrim`: one black veil for both colour schemes, because a scrim mixed from a themed colour stops dimming a dark page. Its `dialog` shadow is an intentional modal-elevation exception: the backdrop and elevated surface are kept visually distinct from ordinary panels.
 
 ## Website integration
 

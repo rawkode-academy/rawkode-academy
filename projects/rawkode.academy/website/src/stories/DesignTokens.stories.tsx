@@ -3,6 +3,8 @@ import type { CSSProperties } from "react";
 
 const meta = {
 	title: "Design System/Tokens",
+	// Screenshot baselines in visual/__screenshots__ (bun run test:visual).
+	tags: ["visual"],
 	parameters: {
 		layout: "fullscreen",
 		docs: {
@@ -21,7 +23,7 @@ type Story = StoryObj<typeof meta>;
 const page: CSSProperties = {
 	display: "grid",
 	gap: "3rem",
-	padding: "3rem clamp(20px, 4vw, 48px)",
+	padding: "3rem var(--spacing-academy-gutter)",
 	background: "var(--colors-academy-canvas)",
 	color: "var(--colors-academy-text)",
 	fontFamily: "var(--fonts-academy-text)",
@@ -142,7 +144,7 @@ export const Colour: Story = {
 								<div
 									style={{
 										height: "4.5rem",
-										borderRadius: "4px",
+										borderRadius: "var(--radii-academy-m)",
 										border: "1px solid var(--colors-academy-border)",
 										background: `var(--colors-academy-${cssName})`,
 									}}

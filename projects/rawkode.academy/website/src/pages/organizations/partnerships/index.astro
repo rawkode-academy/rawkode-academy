@@ -1,4 +1,5 @@
 ---
+import { button } from "@rawkodeacademy/design-system";
 import { actions, isInputError } from "astro:actions";
 import {
 	type ContentEntry,
@@ -244,7 +245,7 @@ const partnerQuotes = (
 			</div>
 		</dl>
 		<div class="partnership-hero-actions" slot="actions">
-			<a id="partnership-hero-cta" class="editorial-button" href={applyHref(partnershipPath)} data-apply-path={partnershipPath} data-partnership-cta data-cta="ask_about_a_partnership" data-cta-location="hero">Ask about a partnership</a>
+			<a id="partnership-hero-cta" class={button()} href={applyHref(partnershipPath)} data-apply-path={partnershipPath} data-partnership-cta data-cta="ask_about_a_partnership" data-cta-location="hero">Ask about a partnership</a>
 			<a class="partnership-text-link" href="#pricing">See the offer</a>
 		</div>
 		<div class="partnership-watch" slot="actions">
@@ -288,7 +289,7 @@ const partnerQuotes = (
 			<div class="partnership-main partnership-main--single">
 				<div class="partnership-details">
 					<article
-						class="partnership-plan partnership-ongoing"
+						class="partnership-plan"
 						aria-labelledby={`plan-${ongoingPartnershipOffer.id}`}
 						data-pinned-name={ongoingPartnershipOffer.name}
 						data-pinned-price={ongoingPartnershipOffer.price}
@@ -303,7 +304,7 @@ const partnerQuotes = (
 						<p class="partnership-plan__summary">{ongoingPartnershipOffer.summary}</p>
 						<ul class="partnership-plan__list">{ongoingPartnershipOffer.included.map((item) => <li>{item}</li>)}</ul>
 						{ongoingPartnershipOffer.notes.map((note) => <p class="partnership-plan__note">{note}</p>)}
-						<a class="editorial-button" href={applyHref(ongoingPath)} data-apply-path={ongoingPath} data-partnership-cta data-cta="ask_about_a_partnership" data-cta-location="pricing-ongoing">Ask about a partnership</a>
+						<a class={button({ variant: "outline", fullWidth: true })} href={applyHref(ongoingPath)} data-apply-path={ongoingPath} data-partnership-cta data-cta="ask_about_a_partnership" data-cta-location="pricing-ongoing">Ask about a partnership</a>
 					</article>
 					<div class="partnership-quarter-example" aria-labelledby="quarter-example-title">
 						<h3 id="quarter-example-title">An example quarter</h3>
@@ -413,7 +414,7 @@ const partnerQuotes = (
 				<p class="partnership-plan__summary">{bespokeProjectOffer.summary}</p>
 				<ul class="partnership-plan__list">{bespokeProjectOffer.included.map((item) => <li>{item}</li>)}</ul>
 				{bespokeProjectOffer.notes.map((note) => <p class="partnership-plan__note">{note}</p>)}
-				<a class="editorial-button editorial-button--secondary" href={applyHref("Bespoke project")} data-apply-path="Bespoke project" data-partnership-cta data-cta="discuss_a_project" data-cta-location="bespoke">Discuss a project</a>
+				<a class={button({ variant: "outline" })} href={applyHref("Bespoke project")} data-apply-path="Bespoke project" data-partnership-cta data-cta="discuss_a_project" data-cta-location="bespoke">Discuss a project</a>
 			</article>
 		</section>
 
@@ -429,7 +430,7 @@ const partnerQuotes = (
 				<div class="partnership-plan__heading"><h3 id={`plan-${challengeOffer.id}`}>{challengeOffer.title}</h3></div>
 				<p class="partnership-plan__price partnership-plan__price--quoted"><span>{challengeOffer.price}</span></p>
 				<p class="partnership-plan__summary">{challengeOffer.detail}</p>
-				<a class="editorial-button editorial-button--secondary" href={applyHref(challengeOffer.route)} data-apply-path={challengeOffer.route} data-partnership-cta data-cta="ask_about_a_challenge_series" data-cta-location="challenges">{challengeOffer.cta}</a>
+				<a class={button({ variant: "outline" })} href={applyHref(challengeOffer.route)} data-apply-path={challengeOffer.route} data-partnership-cta data-cta="ask_about_a_challenge_series" data-cta-location="challenges">{challengeOffer.cta}</a>
 			</article>
 		</section>
 
@@ -452,7 +453,7 @@ const partnerQuotes = (
 				<h2 id="independence-title" class="editorial-section__title">Independent public work</h2>
 				<p class="editorial-section__lede">Your team helps set the scope and checks technical accuracy. What I publish about the product reflects my experience of using it.</p>
 			</div>
-			<ul class="partnership-fit partnership-independence">
+			<ul class="partnership-fit">
 				{independenceRules.map((rule) => (
 					<li><strong>{rule.title}.</strong> {rule.detail}</li>
 				))}
@@ -482,16 +483,16 @@ const partnerQuotes = (
 			</div>
 			<div>
 				<p>Want to back practical developer education without planning product work together? Support Our Work gives your company clear recognition while the Academy's editorial conclusions stay independent.</p>
-				<a class="editorial-button editorial-button--secondary" href="/organizations/support-our-work">Explore Support Our Work</a>
+				<a class={button({ variant: "outline" })} href="/organizations/support-our-work">Explore Support Our Work</a>
 			</div>
 		</section>
 
-		<section id="apply" class="editorial-section editorial-section--split partnerships-apply" aria-labelledby="apply-title">
+		<section id="apply" class="editorial-section editorial-section--split" aria-labelledby="apply-title">
 			<div class="editorial-section__header">
 				<h2 id="apply-title" class="editorial-section__title">What are you building?</h2>
 				<p class="editorial-section__lede">Tell me about your product, who uses it and what you want to help them do. I read every enquiry and reply with a recommendation for how we could work together.</p>
 			</div>
-			<div id="enquiry-form" class="partnerships-apply__body">
+			<div id="enquiry-form">
 				{enquiryReceived ? (
 					<div>
 						<h3>Enquiry received</h3>
@@ -984,8 +985,7 @@ const partnerQuotes = (
 		color: var(--colors-academy-text-muted);
 	}
 
-	.partnership-plan > .editorial-button {
-		width: 100%;
+	.partnership-plan > a {
 		margin-top: 0.5rem;
 	}
 
@@ -1243,13 +1243,13 @@ const partnerQuotes = (
 		color: var(--colors-academy-ink-text);
 		transform: translateY(100%);
 		visibility: hidden;
-		transition: transform var(--duration-base, 200ms) ease, visibility 0s linear var(--duration-base, 200ms);
+		transition: transform var(--durations-base) ease, visibility 0s linear var(--durations-base);
 	}
 
 	.partnership-pinned[data-visible] {
 		transform: translateY(0);
 		visibility: visible;
-		transition: transform var(--duration-base, 200ms) ease;
+		transition: transform var(--durations-base) ease;
 	}
 
 	.partnership-pinned p {

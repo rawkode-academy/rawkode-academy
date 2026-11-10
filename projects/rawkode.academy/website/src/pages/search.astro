@@ -14,7 +14,7 @@ import {
 } from "@/lib/search";
 import { academySearch, button } from "@rawkodeacademy/design-system";
 import "@rawkodeacademy/design-system/styles.css";
-import { localTime } from "@/lib/local-time";
+import { localDate } from "@/lib/local-time";
 
 const searchQuery = (Astro.url.searchParams.get("q") || "").trim();
 const typeParam = (Astro.url.searchParams.get("type") || "").trim();
@@ -98,7 +98,7 @@ const typeFilters = [
 ];
 
 const resultDate = (iso: string) =>
-	localTime(iso, { day: "2-digit", month: "short", year: "numeric" }, "en-GB");
+	localDate(iso);
 
 const truncate = (text: string, maxLength: number): string => {
 	const normalized = text.replace(/\s+/g, " ").trim();

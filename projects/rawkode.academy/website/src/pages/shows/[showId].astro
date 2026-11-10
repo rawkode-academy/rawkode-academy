@@ -22,7 +22,7 @@ import { createLogger } from "@/lib/logger";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import ShowNav from "@/components/show/ShowNav.astro";
 import { getShowNav, hasExtension } from "@/lib/shows/registry";
-import { localTime } from "@/lib/local-time";
+import { localDate } from "@/lib/local-time";
 
 const logger = createLogger("shows");
 const { showId } = Astro.params;
@@ -125,11 +125,7 @@ if (hasEpisodeFeed && showEntry.data.podcast?.artworkUrl) {
 }
 
 function formatDate(dateString: string) {
-	return localTime(dateString, {
-		year: "numeric",
-		month: "short",
-		day: "numeric",
-	});
+	return localDate(dateString);
 }
 
 function formatDuration(seconds: number) {

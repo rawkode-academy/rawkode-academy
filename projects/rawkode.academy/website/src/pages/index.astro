@@ -10,7 +10,8 @@ import {
 	LATEST_CONTENT_COLLECTIONS,
 } from "@/lib/content";
 import { getCollection, setContentCache } from "@/lib/live-content";
-import { localTime } from "@/lib/local-time";
+import { localDateTime } from "@/lib/local-time";
+import { formatRuntime } from "@/lib/video-runtime";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 
 const styles = academyPage();
@@ -49,15 +50,6 @@ const compactCopy = (value: string | undefined, maxLength = 220) => {
 	return `${normalized.slice(0, maxLength).trimEnd()}…`;
 };
 
-const formatDuration = (seconds?: number | null) => {
-	if (!seconds || seconds <= 0) return undefined;
-	const minutes = Math.floor(seconds / 60);
-	if (minutes < 60) return `${minutes} min`;
-	const hours = Math.floor(minutes / 60);
-	const remainder = minutes % 60;
-	return remainder > 0 ? `${hours}h ${remainder}m` : `${hours}h`;
-};
-
 const formatPathDuration = (minutes?: number | null) => {
 	if (!minutes || minutes <= 0) return "Self-paced";
 	if (minutes < 60) return `${minutes} min core video`;
@@ -69,7 +61,7 @@ const formatPathDuration = (minutes?: number | null) => {
 };
 
 const videos = publishedVideos.slice(0, 1).map((video) => {
-	const duration = formatDuration(video.data.duration);
+	const duration = formatRuntime(video.data.duration);
 	return {
 		href: `/watch/${video.data.slug}`,
 		title: video.data.title,
@@ -86,14 +78,7 @@ const videos = publishedVideos.slice(0, 1).map((video) => {
 // thing on it. Times render in UTC and follow the reader's time zone in the
 // browser.
 const upcoming = upcomingVideos.slice(0, 3).map((video) => {
-	const scheduled = localTime(video.data.publishedAt, {
-		weekday: "short",
-		day: "numeric",
-		month: "short",
-		hour: "numeric",
-		minute: "2-digit",
-		timeZoneName: "short",
-	});
+	const scheduled = localDateTime(video.data.publishedAt);
 	return {
 		href: `/watch/${video.data.slug}`,
 		title: video.data.title,

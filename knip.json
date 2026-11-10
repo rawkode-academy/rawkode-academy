@@ -21,7 +21,11 @@
       ],
       "ignore": [
         "src/webcontainer-demos/**"
-      ]
+      ],
+      "playwright": {
+        "config": ["visual/playwright.config.ts"],
+        "entry": ["visual/**/*.visual.ts", "visual/serve.ts"]
+      }
     },
     "projects/rawkode.academy/platform/*": {
       "entry": [

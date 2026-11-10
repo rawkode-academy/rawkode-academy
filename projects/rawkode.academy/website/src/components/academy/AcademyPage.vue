@@ -36,6 +36,9 @@ interface LearnProps {
 	archive?: never;
 }
 const props = withDefaults(defineProps<HomeProps | LearnProps>(), { page: "home" });
+// The scheduled-stream grid below repeats the markup of VideoCard.astro
+// (card, cardArt, streamMeta, cardTitle, cardDescription): a Vue component
+// cannot import an Astro one. Change both together.
 const styles = academyPage();
 
 // Difficulty reads as a three-bar meter beside its label, so the level is
@@ -103,15 +106,28 @@ const dateParts = (iso: string) => {
 					<div><h2 id="upcoming-title" :class="styles.sectionTitle">Upcoming live streams</h2><p :class="styles.sectionLede">Scheduled builds, shown in your time zone. Join live and ask questions as we go.</p></div>
 					<a href="/watch" :class="styles.textLink">All videos <span aria-hidden="true">→</span></a>
 				</div>
-				<div :class="styles.feedGrid">
+				<div v-if="props.upcoming.length < 3" :class="styles.streamList">
+					<a v-for="item in props.upcoming" :key="item.href" :href="item.href" :class="styles.streamFeature">
+						<div :class="styles.cardArt">
+							<img v-if="item.mediaSrc" :src="item.mediaSrc" alt="" :class="styles.cardImage" width="960" height="540" loading="lazy" />
+						</div>
+						<div :class="styles.featureCopy">
+							<p :class="styles.streamMeta"><span data-label>{{ item.meta[0] }}</span><time :datetime="item.publishedAt" :data-local-time="item.localTime">{{ item.meta[1] }}</time></p>
+							<h3 :class="styles.streamTitle">{{ item.title }}</h3>
+							<p :class="styles.sectionLede">{{ item.description }}</p>
+							<span :class="styles.textLink">Get notified <span aria-hidden="true">→</span></span>
+						</div>
+					</a>
+				</div>
+				<div v-else :class="styles.feedGrid">
 					<a v-for="item in props.upcoming" :key="item.href" :href="item.href" :class="styles.card">
 						<div :class="styles.cardArt">
 							<img v-if="item.mediaSrc" :src="item.mediaSrc" alt="" :class="styles.cardImage" width="640" height="360" loading="lazy" />
 						</div>
 						<div :class="styles.cardBody">
-							<p :class="styles.cardMeta">{{ item.meta[0] }} · <time :datetime="item.publishedAt" :data-local-time="item.localTime">{{ item.meta[1] }}</time></p>
+							<p :class="styles.streamMeta"><span data-label>{{ item.meta[0] }}</span><time :datetime="item.publishedAt" :data-local-time="item.localTime">{{ item.meta[1] }}</time></p>
 							<h3 :class="styles.cardTitle">{{ item.title }}</h3>
-							<p :class="styles.lede">{{ item.description }}</p>
+							<p :class="styles.cardDescription">{{ item.description }}</p>
 						</div>
 					</a>
 				</div>

@@ -1,5 +1,6 @@
 import { sva } from "../../styled-system/css";
 import { focusRing } from "../styles/focus";
+import { monoMeta } from "../styles/type";
 
 /** Secondary orientation without competing with the page's primary action. */
 export const academyNavigation = sva({
@@ -13,24 +14,30 @@ export const academyNavigation = sva({
 		"sectionLink",
 	],
 	base: {
-		breadcrumb: { color: "academy.textMuted", fontSize: "sm" },
+		// One trail for every detail page: sentence-case mono in the muted
+		// text colour, parent links only, inside the page header. Items sit
+		// on one baseline; the padding gives each link its hit area.
+		breadcrumb: { ...monoMeta, minWidth: "0" },
 		trail: {
 			display: "flex",
 			flexWrap: "wrap",
-			alignItems: "center",
-			gap: "3",
+			alignItems: "baseline",
+			columnGap: "2",
 			margin: "0",
 			padding: "0",
 			listStyle: "none",
-			"& li": { display: "inline-flex", alignItems: "center", gap: "3" },
+			"& li": { display: "inline-flex", alignItems: "baseline", gap: "2" },
 		},
 		crumb: {
-			display: "inline-flex",
-			alignItems: "center",
-			minHeight: "11",
+			display: "inline-block",
+			paddingBlock: "3",
 			color: "academy.textMuted",
 			textDecoration: "none",
-			_hover: { color: "academy.accent", textDecoration: "underline" },
+			_hover: {
+				color: "academy.accent",
+				textDecoration: "underline",
+				textUnderlineOffset: "0.2em",
+			},
 			_focusVisible: focusRing,
 		},
 		separator: { color: "academy.textMuted" },

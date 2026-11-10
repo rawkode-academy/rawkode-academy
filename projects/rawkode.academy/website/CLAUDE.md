@@ -9,6 +9,7 @@ bun run test          # Run vitest
 bun run test:watch    # Watch mode
 bun run format        # Biome format
 bun run storybook     # Component development
+bun run test:visual   # Storybook axe + screenshot checks
 ```
 
 ## Design system
@@ -28,8 +29,10 @@ behaviour, Vue components).
 - **Colour:** semantic `academy.*` tokens only (`academy.canvas`,
   `academy.text`, `academy.accent`, `academy.ink*`, `academy.status*`). They
   resolve per colour scheme. Never copy a hex value into a component.
-- **Surfaces:** flat, 3 to 6px radii, hairline borders. Shadows are for
-  floating layers (dialogs). Ink surfaces open and close every page.
+- **Surfaces:** flat, 3 to 6px radii, hairline borders; tags and chips are
+  the one pill (`pill`, `academy-pill`). Shadows are for floating layers
+  (dialogs), which dim the page with `academy.scrim`. Ink surfaces open and
+  close every page.
 - **Motion:** `fast` / `base` / `slow` / `reveal` durations with
   `academy-out` easing. Every animation has a reduced-motion alternative.
 
@@ -45,15 +48,43 @@ behaviour, Vue components).
    - `systemGridTop`, `systemGridBottom`: the grid motif, on ink surfaces only.
    - `scrollReveal`: the scroll-driven entrance for list rows and cards.
      Content stays visible in print and without scroll timelines.
+   - `inkSurface`, `inkStage`: the ink surface that opens a page (hero,
+     masthead, Search, video stage). The slot adds its own padding.
+   - `ledgerRow` and the other `ledger*` fragments, `ruledList`: the row
+     shared by the homepage stream (`academyPage.ledger*`), Read and News
+     (`academyCatalog.editorial*`). Markup contract in `src/styles/ledger.ts`.
+   - `videoFrame`, `coverImage`, `coverImageZoom`, `runtimeBadge`: the 16:9
+     still, the image that fills it and the runtime set over it.
+   - `panelSurface`, `linkedPanel`, `pill`: framed panels and the tag outline.
+   - `textLink`: the standalone text link ("All videos →", a project link).
+     A link inside a sentence stays underlined in the accent.
+   - `VideoCard.astro` (`academyPage.card`): the one video card, also behind
+     `video-feed.astro` (its `progress` slot takes a watch-progress bar) and,
+     with `scheduled`, an upcoming stream. `AcademyPage.vue` repeats the
+     scheduled markup because a Vue component cannot import an Astro one;
+     change both together. `localDate` (`17 Jul 2026`) and `formatRuntime`
+     (`1h 2m`) are the one date and runtime form; `Breadcrumb.astro` is the
+     one breadcrumb.
+   - `inputField`: a text input's surface and its placeholder, invalid,
+     disabled and focus states. The slot sets height, padding and font size.
+   - `mastheadTitle`, `posterTitle`, `ledeText`, `sectionTitle`, `headingLg`,
+     `headingMd`, `cardTitle`, `monoMeta`, `kicker`: shared type steps.
    - `Dialog`, `Tabs`, `NavigationDrawer`: Ark-backed Vue components.
    - `academyLabel`, `academyContainer`, `academySkeleton`, `academyCallout`.
 2. **Page recipes** (`academyPage`, `academyWatch`, `academyCatalog`, ...)
    hold the layout of one surface. They compose the shared fragments above
-   and must not redefine a button, focus ring or grid.
-3. **Website CSS** is `src/styles/global.css` (reset, prose, compatibility
-   aliases) plus styles scoped to a component. There is no utility-CSS
-   compiler: a Tailwind-style class such as `flex` or `px-4` has no CSS behind
-   it and renders unstyled.
+   and must not redefine a button, focus ring, grid, ink surface, ledger
+   row, still, panel, input or type step. Fragments are style objects, not
+   classes: a page or component uses them through a recipe slot.
+3. **Website CSS** is `src/styles/global.css` (reset, base type ramp, list
+   markers for rendered rich text, the `sr-only` helper and the
+   `--terminal-*` code-block tokens) plus styles scoped to a component. A
+   scoped style reads the variables Panda generates from the tokens:
+   `var(--colors-academy-text)`, `var(--colors-academy-border)`,
+   `var(--fonts-academy-mono)`, `var(--radii-academy-s)`,
+   `var(--durations-base)`, `var(--easings-academy-standard)`. There is no
+   utility-CSS compiler: a Tailwind-style class such as `flex` or `px-4` has
+   no CSS behind it and renders unstyled.
 
 ```astro
 ---
@@ -73,15 +104,41 @@ const s = academyLayout({ width: "wide" });
 - Panda extracts styles statically. Shared fragments must be plain object
   literals: a function that builds styles returns class names with no CSS.
   `src/tests/design-system-coverage.test.ts` fails when that happens.
+- A spread is shallow. A slot that spreads a fragment and then declares its
+  own `_hover` or `_lg` replaces the fragment's block; override with flat
+  keys or restate the block.
 - After changing a recipe or token run
   `bun run --cwd ../../../packages/design-system check`.
-- `--editorial-*`, `--brand-*` and `--surface-*` variables in `global.css`
-  are compatibility aliases onto `academy.*` tokens, kept for older surfaces.
-  Do not use them in new code; migrate a consumer when you touch it.
+- The old alias layer is retired. Do not use `--editorial-*`, `--brand-*`,
+  `--surface-*`, `--text-*-content`, `--text-muted`, `--radius-*`,
+  `--duration-*`, `--ease-*` or `--font-instrument-serif` /
+  `--font-inter-tight` / `--font-jetbrains-mono`, nor the classes that went
+  with them (`paper-card`, `hairline-chip`, `focus-ring`, `text-muted`,
+  `text-primary-content`, `bg-primary`). Use a recipe slot, `button()`, or
+  the Panda variable for the matching `academy.*` token.
+  `scripts/check-academy-shell.mjs` bans these names in the watch sources.
+- In a scoped style the focus ring is
+  `outline: 2px solid var(--colors-academy-accent); outline-offset: 2px`
+  under `:focus-visible`, the same values as `focusRing`.
 - No uppercase tracked eyebrows, gradient text, glass blur, side-stripe
   borders or decorative metadata. See `DESIGN.md`.
 - Review in Storybook (`Design System/*`) in both colour schemes before
   shipping a primitive.
+- After a recipe, token or story change run `bun run test:visual`. It builds
+  Storybook, runs axe on every story in light and dark, and compares the
+  stories tagged `visual` with `visual/__screenshots__/`. It needs no network.
+  This check is manual: no CI workflow runs it yet, so a change that skips
+  it can merge with a failing story or a stale baseline.
+- For an intended visual change run `bun run test:visual:update`, review the
+  changed PNGs and commit them. Baselines are Linux-only; see
+  `.storybook/README.md`.
+- `src/tests/design-tokens.test.ts` fails on a raw colour (hex, `rgb()`,
+  `oklch()`) anywhere in `src` outside its allowlist and counted baseline, a
+  `var(--name)` that nothing defines (which is what a retired alias is), and
+  a class name that no rule reaches. A scoped style only counts inside its
+  own file; HTML built as a string needs a global rule. A class held in a
+  variable (`const cls = "..."`) is not read, so keep class names in the
+  template.
 
 ### Navigation
 
@@ -124,7 +181,7 @@ import {
 - Indentation: tabs. YAML: spaces.
 - Astro: prop bindings to Vue components use plain `prop={value}` syntax, **not** Vue's `:prop=` (Astro errors on the colon-prefixed form).
 - React `client:only="react"` should be reserved for genuinely interactive surfaces. SEO falls off otherwise.
-- Long-form prose flows through the `academyDocument` recipe and the prose rules in `global.css`.
+- Long-form prose is styled by the `prose` slot of `academyLayout` (and `academyDocument` for document pages). `global.css` only restores list markers for `[data-academy-prose]` and `[data-academy-learn-list]`; no markup carries a literal `prose` class.
 
 ## Show Extensions & Plugins
 

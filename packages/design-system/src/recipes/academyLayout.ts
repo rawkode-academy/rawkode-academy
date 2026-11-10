@@ -1,6 +1,9 @@
 import { sva } from "../../styled-system/css";
-import { focusRing } from "../styles/focus";
-import { systemGridTop } from "../styles/systemGrid";
+import { inputField } from "../styles/field";
+import { inkStage } from "../styles/ink";
+import { coverImage } from "../styles/media";
+import { linkedPanel, panelSurface, pill } from "../styles/surface";
+import { headingLg, headingMd, ledeText, mastheadTitle } from "../styles/type";
 
 /** Content primitives. The document wrapper owns header/main/footer landmarks. */
 export const academyLayout = sva({
@@ -83,22 +86,15 @@ export const academyLayout = sva({
 		// the work instead of decorating an empty panel. Reading pages keep the
 		// canvas hero above.
 		masthead: {
-			position: "relative",
-			overflow: "hidden",
+			...inkStage,
 			paddingBlockStart: "academy-hero-tight",
 			paddingBlockEnd: "10",
 			paddingInline: "academy-gutter",
-			backgroundColor: "academy.ink",
-			color: "academy.inkText",
-			borderBottom: "hairline",
-			borderColor: "academy.inkBorder",
 			_lg: {
 				minHeight: "academy-masthead",
 				paddingBlockStart: "academy-masthead-top",
 				paddingBlockEnd: "12",
 			},
-			...systemGridTop,
-			"& > *": { position: "relative" },
 		},
 		mastheadInner: {
 			display: "grid",
@@ -121,15 +117,7 @@ export const academyLayout = sva({
 			fontSize: "sm",
 		},
 		mastheadTitle: {
-			margin: "0",
-			color: "academy.inkText",
-			fontFamily: "academy-display",
-			fontSize: "academy-masthead",
-			fontWeight: "extrabold",
-			lineHeight: "academy-poster",
-			letterSpacing: "academy-poster",
-			textWrap: "balance",
-			overflowWrap: "anywhere",
+			...mastheadTitle,
 			animation: "academy-rise",
 			_motionReduce: { animation: "none" },
 		},
@@ -163,12 +151,8 @@ export const academyLayout = sva({
 		},
 		mastheadSummary: { srOnly: true },
 		mastheadDescription: {
-			margin: "0",
-			maxWidth: "academy-lede",
+			...ledeText,
 			color: "academy.inkTextSoft",
-			fontSize: "academy-lede",
-			lineHeight: "academy-reading",
-			textWrap: "pretty",
 			animation: "academy-rise",
 			animationDelay: "stagger-2",
 			_motionReduce: { animation: "none" },
@@ -216,10 +200,7 @@ export const academyLayout = sva({
 			},
 		},
 		mastheadImage: {
-			display: "block",
-			width: "full",
-			height: "full",
-			objectFit: "cover",
+			...coverImage,
 			// Everything but the lead tile is printed in the ink itself, a
 			// navy duotone, so the wall reads as one surface and the lead as
 			// the thing on air.
@@ -292,34 +273,18 @@ export const academyLayout = sva({
 			gap: "4",
 			marginBottom: "6",
 		},
-		sectionTitle: {
-			margin: "0",
-			fontFamily: "academy-display",
-			fontSize: "2xl",
-			fontWeight: "bold",
-			lineHeight: "tight",
-		},
+		sectionTitle: headingLg,
 		grid: {
 			display: "grid",
 			gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 18rem), 1fr))",
 			gap: "6",
 		},
 		card: {
+			...linkedPanel,
 			display: "flex",
 			flexDirection: "column",
 			minWidth: "0",
 			overflow: "hidden",
-			border: "hairline",
-			borderColor: "academy.border",
-			borderRadius: "academy-m",
-			backgroundColor: "academy.panel",
-			color: "academy.text",
-			textDecoration: "none",
-			transitionProperty: "colors",
-			transitionDuration: "fast",
-			_hover: { borderColor: "academy.accent" },
-			_focusVisible: focusRing,
-			_motionReduce: { transitionDuration: "none" },
 		},
 		cardMedia: {
 			width: "full",
@@ -333,13 +298,7 @@ export const academyLayout = sva({
 			flexDirection: "column",
 			gap: "3",
 		},
-		cardTitle: {
-			margin: "0",
-			fontFamily: "academy-display",
-			fontSize: "xl",
-			fontWeight: "bold",
-			lineHeight: "tight",
-		},
+		cardTitle: headingMd,
 		meta: {
 			display: "flex",
 			flexWrap: "wrap",
@@ -391,13 +350,10 @@ export const academyLayout = sva({
 			},
 		},
 		sidebar: {
+			...panelSurface,
 			minWidth: "0",
 			alignSelf: "start",
 			padding: "6",
-			border: "hairline",
-			borderColor: "academy.border",
-			borderRadius: "academy-m",
-			backgroundColor: "academy.panel",
 		},
 		split: {
 			display: "grid",
@@ -437,28 +393,14 @@ export const academyLayout = sva({
 			},
 		},
 		input: {
-			width: "full",
-			minWidth: "0",
+			...inputField,
 			minHeight: "12",
 			paddingInline: "4",
 			paddingBlock: "2",
-			border: "hairline",
-			borderColor: "academy.inputBorder",
-			borderRadius: "academy-s",
-			backgroundColor: "academy.input",
-			color: "academy.text",
 			font: "inherit",
-			_focusVisible: focusRing,
 		},
 		tag: {
-			display: "inline-flex",
-			alignItems: "center",
-			paddingInline: "3",
-			paddingBlock: "1",
-			border: "hairline",
-			borderColor: "academy.border",
-			borderRadius: "academy-pill",
-			fontSize: "xs",
+			...pill,
 			color: "academy.textSoft",
 			backgroundColor: "academy.panel",
 			textDecoration: "none",

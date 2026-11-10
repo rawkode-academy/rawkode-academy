@@ -1,6 +1,8 @@
 import { sva } from "../../styled-system/css";
 import { focusRing, focusRingInk } from "../styles/focus";
-import { systemGridTop } from "../styles/systemGrid";
+import { inputField } from "../styles/field";
+import { inkStage } from "../styles/ink";
+import { headingLg, ledeText, mastheadTitle } from "../styles/type";
 
 export const academySearch = sva({
 	slots: [
@@ -40,24 +42,19 @@ export const academySearch = sva({
 		},
 		// Search and the not-found page open in ink like every collection.
 		header: {
-			position: "relative",
-			overflow: "hidden",
+			...inkStage,
 			paddingBlock: "academy-hero-tight",
 			paddingInline: "academy-gutter",
-			backgroundColor: "academy.ink",
-			color: "academy.inkText",
 			fontFamily: "academy-text",
-			borderBottom: "hairline",
-			borderColor: "academy.inkBorder",
 			_lg: { paddingBlock: "academy-hero" },
-			...systemGridTop,
-			"& > *": { position: "relative" },
 		},
 		headerInner: {
 			display: "grid",
 			gap: "5",
 			width: "full",
-			maxWidth: "academy-shell",
+			// The header carries the gutter, so the inner box is the content
+			// width and its left edge is the shell's.
+			maxWidth: "academy-content",
 			marginInline: "auto",
 		},
 		figure: {
@@ -89,24 +86,8 @@ export const academySearch = sva({
 			_hover: { color: "academy.inkAccent" },
 			_focusVisible: focusRingInk,
 		},
-		title: {
-			margin: "0",
-			color: "academy.inkText",
-			fontFamily: "academy-display",
-			fontSize: "academy-masthead",
-			lineHeight: "academy-poster",
-			letterSpacing: "academy-poster",
-			fontWeight: "extrabold",
-			textWrap: "balance",
-			overflowWrap: "anywhere",
-		},
-		lede: {
-			margin: "0",
-			maxWidth: "academy-lede",
-			fontSize: "academy-lede",
-			lineHeight: "academy-reading",
-			color: "academy.inkTextSoft",
-		},
+		title: mastheadTitle,
+		lede: { ...ledeText, color: "academy.inkTextSoft" },
 		form: {
 			display: "grid",
 			gap: "3",
@@ -122,18 +103,13 @@ export const academySearch = sva({
 			fontWeight: "semibold",
 		},
 		input: {
-			width: "full",
-			minWidth: "0",
+			...inputField,
 			minHeight: "12",
 			paddingInline: "3",
 			fontSize: "md",
 			fontWeight: "normal",
-			background: "academy.input",
-			color: "academy.text",
-			border: "hairline",
-			borderColor: "academy.inputBorder",
-			borderRadius: "academy-s",
-			_focusVisible: focusRing,
+			// The field sits in the ink header.
+			_focusVisible: focusRingInk,
 		},
 		filters: {
 			display: "flex",
@@ -159,7 +135,8 @@ export const academySearch = sva({
 				borderColor: "academy.inkAccent",
 				fontWeight: "bold",
 			},
-			_focusVisible: focusRing,
+			// The filters sit in the ink header.
+			_focusVisible: focusRingInk,
 		},
 		groups: { display: "grid", gap: "12", paddingTop: "8" },
 		groupHeader: {
@@ -170,12 +147,7 @@ export const academySearch = sva({
 			gap: "3",
 			paddingBottom: "4",
 			borderBottom: "hairline",
-			"& h2": {
-				margin: "0",
-				fontFamily: "academy-display",
-				fontSize: "2xl",
-				fontWeight: "bold",
-			},
+			"& h2": headingLg,
 		},
 		count: { fontSize: "sm", color: "academy.textMuted" },
 		list: { margin: "0", padding: "0", listStyle: "none" },
@@ -231,12 +203,7 @@ export const academySearch = sva({
 			display: "grid",
 			gap: "3",
 			paddingBlock: "10",
-			"& h2": {
-				margin: "0",
-				fontFamily: "academy-display",
-				fontSize: "2xl",
-				fontWeight: "bold",
-			},
+			"& h2": headingLg,
 			"& p": { margin: "0", color: "academy.textSoft" },
 			"& a": { color: "academy.accent", textDecoration: "underline" },
 		},

@@ -1,4 +1,5 @@
 ---
+import { button } from "@rawkodeacademy/design-system";
 import type { MyParticipation } from "../queries";
 
 interface Props {
@@ -22,69 +23,53 @@ const manageLabel = (kind: string, hasTeam: boolean) => {
 };
 ---
 
-<div class="mx-auto max-w-3xl">
+<div class="bracket-apply">
 	{
 		cards.length === 0 ? (
-			<div class="rounded-sm paper-card p-12 text-center">
-				<p class="text-lg font-medium text-secondary-content">
-					Applications are closed
-				</p>
-				<p class="mt-2 text-sm text-muted">
+			<div class="bracket-apply__closed">
+				<p class="bracket-apply__closed-title">Applications are closed</p>
+				<p class="bracket-apply__note">
 					There are no brackets open for entry right now.
 				</p>
 			</div>
 		) : (
-			<div class="grid gap-4 md:grid-cols-2">
+			<div class="bracket-apply__grid">
 				{cards.map((card) => (
-					<section
-						class="rounded-sm border p-5"
-						style="border-color: var(--surface-border); background: var(--surface-raised)"
-					>
-						<div class="flex items-start justify-between gap-4">
+					<section class="bracket-apply__card">
+						<div class="bracket-apply__header">
 							<div>
-								<p class="font-mono text-xs uppercase text-muted">
+								<p class="bracket-apply__kind">
 									{card.bracketKind === "team" ? "Team" : "Individual"}
 								</p>
-								<h2 class="mt-1 text-xl font-semibold text-primary-content">
-									{card.bracketName}
-								</h2>
+								<h2 class="bracket-apply__name">{card.bracketName}</h2>
 							</div>
 							{card.applied && (
-								<span class="rounded-sm border px-2 py-1 font-mono text-xs uppercase text-primary-content" style="border-color: var(--surface-border)">
-									Entered
-								</span>
+								<span class="bracket-apply__entered">Entered</span>
 							)}
 						</div>
 
 						{card.bracketKind === "team" && (
-							<p class="mt-3 text-sm text-muted">
+							<p class="bracket-apply__note">
 								Teams are capped at {card.teamSize} competitors.
 							</p>
 						)}
 
-						<div class="mt-5">
+						<div class="bracket-apply__action">
 							{!isSignedIn ? (
-								<a
-									href={signInUrl}
-									class="focus-ring inline-flex rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-white"
-								>
+								<a href={signInUrl} class={button()}>
 									Sign in to apply
 								</a>
 							) : card.applied ? (
 								<a
 									href={manageUrl(card.bracketKind)}
-									class="focus-ring inline-flex rounded-sm border px-4 py-2 text-sm font-semibold text-primary-content"
-									style="border-color: var(--surface-border)"
+									class={button({ variant: "outline" })}
 								>
 									{manageLabel(card.bracketKind, Boolean(card.team))}
 								</a>
 							) : (
 								<form method="POST" action={actionUrl}>
 									<input type="hidden" name="bracketId" value={card.bracketId} />
-									<button
-										type="submit"
-										class="focus-ring rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-white"
-									>
+									<button type="submit" class={button()}>
 										Apply for {card.bracketKind === "team" ? "Team" : "Individual"}
 									</button>
 								</form>
@@ -96,3 +81,90 @@ const manageLabel = (kind: string, hasTeam: boolean) => {
 		)
 	}
 </div>
+
+<style>
+	.bracket-apply {
+		max-width: 48rem;
+		margin-inline: auto;
+	}
+
+	.bracket-apply__closed,
+	.bracket-apply__card {
+		border: 1px solid var(--colors-academy-border);
+		border-radius: var(--radii-academy-m);
+		background: var(--colors-academy-panel);
+	}
+
+	.bracket-apply__closed {
+		padding: 3rem;
+		text-align: center;
+	}
+
+	.bracket-apply__closed-title {
+		margin: 0;
+		color: var(--colors-academy-text-soft);
+		font-size: var(--font-sizes-lg);
+		font-weight: 500;
+	}
+
+	.bracket-apply__grid {
+		display: grid;
+		gap: 1rem;
+	}
+
+	@media (min-width: 768px) {
+		.bracket-apply__grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+
+	.bracket-apply__card {
+		padding: 1.25rem;
+	}
+
+	.bracket-apply__header {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 1rem;
+	}
+
+	.bracket-apply__kind,
+	.bracket-apply__entered {
+		font-family: var(--fonts-academy-mono);
+		font-size: var(--font-sizes-xs);
+	}
+
+	.bracket-apply__kind {
+		margin: 0;
+		color: var(--colors-academy-text-muted);
+	}
+
+	.bracket-apply__name {
+		margin: 0.25rem 0 0;
+		color: var(--colors-academy-text);
+		font-size: var(--font-sizes-xl);
+		font-weight: 600;
+	}
+
+	.bracket-apply__entered {
+		padding: 0.25rem 0.5rem;
+		border: 1px solid var(--colors-academy-border);
+		border-radius: var(--radii-sm);
+		color: var(--colors-academy-text);
+	}
+
+	.bracket-apply__note {
+		margin: 0.75rem 0 0;
+		color: var(--colors-academy-text-muted);
+		font-size: var(--font-sizes-sm);
+	}
+
+	.bracket-apply__closed .bracket-apply__note {
+		margin-top: 0.5rem;
+	}
+
+	.bracket-apply__action {
+		margin-top: 1.25rem;
+	}
+</style>

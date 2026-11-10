@@ -1,5 +1,7 @@
 import { sva } from "../../styled-system/css";
 import { focusRing } from "../styles/focus";
+import { inputField } from "../styles/field";
+import { panelSurface, pill } from "../styles/surface";
 
 /**
  * Presentational additions for the Academy's informational and commercial
@@ -49,14 +51,7 @@ export const academyMarketing = sva({
 	],
 	base: {
 		actions: { display: "flex", flexWrap: "wrap", gap: "3", marginTop: "6" },
-		card: {
-			minWidth: "0",
-			padding: "6",
-			border: "hairline",
-			borderColor: "academy.border",
-			borderRadius: "academy-m",
-			backgroundColor: "academy.panel",
-		},
+		card: { ...panelSurface, minWidth: "0", padding: "6" },
 		cardBody: { color: "academy.textSoft", lineHeight: "relaxed" },
 		eyebrow: {
 			margin: "0",
@@ -79,17 +74,7 @@ export const academyMarketing = sva({
 			fontSize: "xs",
 			letterSpacing: "wide",
 		},
-		pill: {
-			display: "inline-flex",
-			alignItems: "center",
-			paddingInline: "3",
-			paddingBlock: "1",
-			border: "hairline",
-			borderColor: "academy.border",
-			borderRadius: "academy-pill",
-			color: "academy.textSoft",
-			fontSize: "xs",
-		},
+		pill: { ...pill, color: "academy.textSoft" },
 		statGrid: {
 			display: "grid",
 			gridTemplateColumns: "repeat(auto-fit, minmax(10rem, 1fr))",
@@ -120,10 +105,7 @@ export const academyMarketing = sva({
 			gap: "3",
 			"& details": {
 				padding: "5",
-				border: "hairline",
-				borderColor: "academy.border",
-				borderRadius: "academy-m",
-				backgroundColor: "academy.panel",
+				...panelSurface,
 			},
 			"& summary": {
 				cursor: "pointer",
@@ -168,10 +150,7 @@ export const academyMarketing = sva({
 			gap: "4",
 			width: "full",
 			padding: "6",
-			border: "hairline",
-			borderColor: "academy.border",
-			borderRadius: "academy-m",
-			backgroundColor: "academy.panel",
+			...panelSurface,
 		},
 		contactRow: {
 			display: "flex",
@@ -270,19 +249,12 @@ export const academyMarketing = sva({
 			color: "academy.text",
 		},
 		newsletterField: {
-			width: "full",
+			...inputField,
 			minHeight: "14",
 			paddingInlineStart: "3",
 			paddingInlineEnd: "14",
-			border: "hairline",
-			borderColor: "academy.inputBorder",
-			borderRadius: "academy-s",
-			backgroundColor: "academy.input",
-			color: "academy.text",
 			fontFamily: "academy-text",
 			fontSize: "sm",
-			_focusVisible: focusRing,
-			_disabled: { opacity: "0.6" },
 		},
 		newsletterSubmit: {
 			position: "absolute",

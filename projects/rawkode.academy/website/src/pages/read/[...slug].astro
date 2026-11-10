@@ -33,7 +33,7 @@ import EndSlug from "@/components/read/EndSlug.astro";
 
 import { calculateReadingTime } from "@/utils/reading-time";
 import { getTypeBadgeConfig } from "@/utils/article-types";
-import { localTime } from "@/lib/local-time";
+import { localDate } from "@/lib/local-time";
 import { buildTechnologyTags } from "@/lib/technology-tags";
 
 export const prerender = false;
@@ -106,12 +106,7 @@ const tags = buildTechnologyTags(
 const articleType = article.data.type || "tutorial";
 const badgeConfig = getTypeBadgeConfig(articleType);
 
-const dateOptions: Intl.DateTimeFormatOptions = {
-	month: "short",
-	day: "2-digit",
-	year: "numeric",
-};
-const publishDate = localTime(article.data.publishedAt, dateOptions);
+const publishDate = localDate(article.data.publishedAt);
 
 const sameCalendarDayUtc = (a: Date, b: Date): boolean =>
 	a.getUTCFullYear() === b.getUTCFullYear() &&
@@ -124,7 +119,7 @@ const wasUpdated =
 	!sameCalendarDayUtc(article.data.updatedAt, article.data.publishedAt);
 
 const updateDate = wasUpdated
-	? localTime(article.data.updatedAt as Date, dateOptions)
+	? localDate(article.data.updatedAt as Date)
 	: undefined;
 
 // Breadcrumb trail.
@@ -196,7 +191,7 @@ const subtitle = article.data.openGraph?.subtitle || article.data.subtitle;
 
 		<div class={doc.body}>
 			<div class={doc.main}>
-				<article class={styles.prose}>
+				<article class={[styles.prose, doc.articleProse].join(" ")}>
 					<Updates updates={article.data.updates} />
 					<RichText html={html} />
 				</article>

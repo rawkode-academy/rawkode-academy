@@ -1,4 +1,5 @@
 import { sva } from "../../styled-system/css";
+import { focusRing } from "../styles/focus";
 
 export const dialog = sva({
 	slots: [
@@ -22,21 +23,17 @@ export const dialog = sva({
 			minHeight: "10",
 			paddingInline: "4",
 			borderRadius: "md",
-			backgroundColor: "action.primary",
-			color: "action.primaryForeground",
+			backgroundColor: "academy.accent",
+			color: "academy.accentForeground",
 			fontSize: "sm",
 			fontWeight: "semibold",
 			lineHeight: "tight",
 			transitionProperty: "colors",
 			transitionDuration: "fast",
 			_hover: {
-				backgroundColor: "action.interactive",
+				backgroundColor: "academy.accentHover",
 			},
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "action.interactive",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 			_motionReduce: {
 				transitionDuration: "none",
 			},
@@ -45,7 +42,7 @@ export const dialog = sva({
 			position: "fixed",
 			inset: "0",
 			zIndex: "overlay",
-			backgroundColor: "editorial.overlay",
+			backgroundColor: "academy.scrim",
 		},
 		positioner: {
 			position: "fixed",
@@ -62,11 +59,11 @@ export const dialog = sva({
 			maxWidth: "lg",
 			marginBlock: "auto",
 			border: "hairline",
-			borderColor: "border.default",
+			borderColor: "academy.border",
 			borderRadius: "md",
-			backgroundColor: "surface.panel",
+			backgroundColor: "academy.panel",
 			boxShadow: "dialog",
-			color: "content.primary",
+			color: "academy.text",
 		},
 		header: {
 			display: "flex",
@@ -84,13 +81,13 @@ export const dialog = sva({
 		},
 		description: {
 			marginTop: "2",
-			color: "content.muted",
+			color: "academy.textSoft",
 			fontSize: "sm",
 			lineHeight: "body",
 		},
 		body: {
 			padding: "6",
-			color: "content.primary",
+			color: "academy.text",
 		},
 		footer: {
 			display: "flex",
@@ -106,64 +103,41 @@ export const dialog = sva({
 			width: "8",
 			height: "8",
 			borderRadius: "sm",
-			color: "content.muted",
+			color: "academy.textSoft",
 			fontSize: "xl",
 			lineHeight: "tight",
 			transitionProperty: "colors",
 			transitionDuration: "fast",
 			_hover: {
-				backgroundColor: "surface.canvas",
-				color: "content.primary",
+				backgroundColor: "academy.canvas",
+				color: "academy.text",
 			},
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "action.interactive",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 			_motionReduce: {
 				transitionDuration: "none",
 			},
 		},
 	},
 	variants: {
+		// The base is the Academy dialog. `editorial` is the retired default
+		// name and renders the base; `academy` adds the display title face
+		// and the quieter close control the website modals use.
 		tone: {
 			editorial: {},
 			academy: {
 				trigger: {
-					backgroundColor: "academy.accent",
-					color: "academy.accentForeground",
 					_hover: {
 						backgroundColor: "academy.accent",
 					},
-					_focusVisible: {
-						outlineColor: "academy.accent",
-					},
-				},
-				content: {
-					borderColor: "academy.border",
-					backgroundColor: "academy.panel",
-					color: "academy.text",
 				},
 				title: {
 					fontFamily: "academy-display",
-				},
-				description: {
-					color: "academy.textSoft",
-				},
-				body: {
-					color: "academy.text",
-				},
-				footer: {
-					color: "academy.text",
 				},
 				closeTrigger: {
 					color: "academy.textMuted",
 					_hover: {
 						backgroundColor: "academy.ground",
 						color: "academy.text",
-					},
-					_focusVisible: {
-						outlineColor: "academy.accent",
 					},
 				},
 			},

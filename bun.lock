@@ -1150,7 +1150,12 @@
       },
       "devDependencies": {
         "@astrojs/compiler": "3.0.1",
+        "@axe-core/playwright": "4.13.0",
         "@biomejs/biome": "2.4.9",
+        "@fontsource-variable/red-hat-display": "5.3.0",
+        "@fontsource-variable/red-hat-mono": "5.3.0",
+        "@fontsource-variable/red-hat-text": "5.3.0",
+        "@playwright/test": "1.63.0",
         "@storybook/addon-docs": "^10.3.3",
         "@storybook/addon-links": "^10.3.3",
         "@storybook/react": "^10.3.3",
@@ -1769,6 +1774,12 @@
     "@floating-ui/dom": ["@floating-ui/dom@1.7.6", "", { "dependencies": { "@floating-ui/core": "^1.7.5", "@floating-ui/utils": "^0.2.11" } }, "sha512-9gZSAI5XM36880PPMm//9dfiEngYoC6Am2izES1FF406YFsjvyBMmeJ2g4SAju3xWwtuynNRFL2s9hgxpLI5SQ=="],
 
     "@floating-ui/utils": ["@floating-ui/utils@0.2.11", "", {}, "sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg=="],
+
+    "@fontsource-variable/red-hat-display": ["@fontsource-variable/red-hat-display@5.3.0", "", {}, "sha512-8u4FI+i3fkB8erlN9lMGa7Hm7aBCRP34y/aPwriBUiDYoxmS/N1QvBrd/hghUBnHJKrVKRg3h4Oubpyl2H8smw=="],
+
+    "@fontsource-variable/red-hat-mono": ["@fontsource-variable/red-hat-mono@5.3.0", "", {}, "sha512-/mEvTCcruJY64xRgx1gsmsYuGR7MtOduOsuyeHVJ07p+2gGvCqROauIwaTCcVHL4eBGi+Lns4EUIjrPZLCn5gQ=="],
+
+    "@fontsource-variable/red-hat-text": ["@fontsource-variable/red-hat-text@5.3.0", "", {}, "sha512-DvwcJ6vj6ZR4xGnrcBpzWEnl35TXXroCYHGoTIdWpkgeYKq/Hda7JhvNuJFplKoGpu4DsCO2ZnyJjiGxvn4Etg=="],
 
     "@fortawesome/fontawesome-common-types": ["@fortawesome/fontawesome-common-types@7.2.0", "", {}, "sha512-IpR0bER9FY25p+e7BmFH25MZKEwFHTfRAfhOyJubgiDnoJNsSvJ7nigLraHtp4VOG/cy8D7uiV0dLkHOne5Fhw=="],
 

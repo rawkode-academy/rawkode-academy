@@ -7,6 +7,8 @@ import { VueInReact } from "../components/vue-wrapper";
 
 const meta = {
 	title: "Design System/Button",
+	// Screenshot baselines in visual/__screenshots__ (bun run test:visual).
+	tags: ["visual"],
 	parameters: {
 		layout: "fullscreen",
 		docs: {

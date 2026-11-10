@@ -18,8 +18,9 @@ const transpile = (source) =>
 /**
  * Evaluate a design-system recipe and return the raw config it passes to
  * `sva` / `cva`, so a test can assert on authored style values rather than
- * generated class names. Shared style fragments (`../styles/*`) are evaluated
- * from source; nothing else may be imported by a recipe.
+ * generated class names. Shared style fragments (`../styles/*`, and the sibling
+ * fragments they build on) are evaluated from source; nothing else may be
+ * imported by a recipe.
  */
 export async function readRecipeConfig(file, exportName) {
 	const context = vm.createContext({});
@@ -42,7 +43,12 @@ export async function readRecipeConfig(file, exportName) {
 					{ context },
 				);
 			}
-			if (specifier.startsWith("../styles/")) {
+			// A recipe imports a fragment; a fragment may build on a sibling.
+			const fromFragment = /\/src\/styles\/[^/]+$/.test(referencing.identifier);
+			if (
+				specifier.startsWith("../styles/") ||
+				(fromFragment && /^\.\/[\w-]+$/.test(specifier))
+			) {
 				return load(new URL(`${specifier}.ts`, referencing.identifier));
 			}
 			throw new Error(`Unexpected recipe import: ${specifier}`);

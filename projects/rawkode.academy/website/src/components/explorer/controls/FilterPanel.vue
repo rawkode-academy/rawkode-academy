@@ -136,7 +136,7 @@ const handleSearchInput = (event: Event) => {
  border: none;
  font-size: 0.7rem;
  font-weight: 600;
- color: rgb(239, 68, 68);
+ color: var(--colors-academy-status-rust);
  cursor: pointer;
  transition: opacity 0.15s ease;
 }

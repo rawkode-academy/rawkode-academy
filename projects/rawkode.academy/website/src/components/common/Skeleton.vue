@@ -2,14 +2,19 @@
 	<div :class="className" role="status" :aria-label="ariaLabel">
 		<span class="sr-only">{{ ariaLabel }}</span>
 		<div
-			class="animate-pulse bg-[var(--surface-skeleton)]"
-			:class="[rounded ? 'rounded-full' : 'rounded']"
-			:style="{ width, height }"
+			:class="skeleton.line"
+			:style="{
+				width,
+				height,
+				borderRadius: rounded ? '9999px' : undefined,
+			}"
 		/>
 	</div>
 </template>
 
 <script setup lang="ts">
+import { academySkeleton } from "@rawkodeacademy/design-system";
+
 interface Props {
 	width?: string;
 	height?: string;
@@ -25,4 +30,5 @@ withDefaults(defineProps<Props>(), {
 	className: "",
 	ariaLabel: "Loading content...",
 });
+const skeleton = academySkeleton();
 </script>

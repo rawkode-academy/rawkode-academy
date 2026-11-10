@@ -21,7 +21,7 @@ controls, and duplicate recommendations.
 - Red Hat Text: navigation, descriptions, forms, and reading.
 - Red Hat Mono: technical identifiers and concise metadata.
 - Fonts resolve through Astro's generated CSS variables, not hardcoded family
-  names. Historical font variables alias the same three Academy families.
+  names.
 - Cool light canvas (`#f4f7fb`), navy text (`#0c1626`), pink action accent
   (`#c2185b`). Dark mode uses navy canvas, light text, and brighter pink.
   Use semantic tokens rather than copying these values into components.
@@ -72,6 +72,12 @@ controls, and duplicate recommendations.
   dot with its label so colour is never the only signal.
 - Borders include their semantic color. Hairlines must not default to text color.
 - Flat surfaces and modest 3–6px radii. Reserve shadows for floating layers.
+  Tags, technology chips, filter links and reaction buttons are the one
+  fully round surface (`academy-pill`), with dots, avatars and progress
+  tracks; nothing else is a pill.
+- A dialog or drawer dims the page with `academy.scrim`, the same black veil
+  in both colour schemes. A scrim mixed from a themed colour stops dimming
+  in dark mode.
 - Motion is one entrance sequence on the homepage hero (staggered rise, 720ms,
   ease-out) with the living system fading in over the grid, a masthead
   entrance where the title rises and the mosaic tiles open from their centres
@@ -110,9 +116,21 @@ in mono beneath it, an optional 16:9 still, then kind, title, and a
 one-sentence description, separated by hairlines. Learning paths use the
 same rule with a two-digit index and a three-bar difficulty meter. Video
 libraries use a 16:9 grid because the still is the primary way to recognise
-a session. On wide screens a ledger row's still sits in its own trailing
-column so every title in the ledger starts on the same line whether or not
-the row has a still.
+a session. A ledger row's still sits in its own trailing column so every
+title in the ledger starts on the same line whether or not the row has a
+still; on a phone the row is text-led and the still is left out.
+
+A session is drawn one way wherever it is listed (the library, a show's or a
+technology's recordings, the rail under a video): a frameless 16:9 still, a
+mono line with the runtime and date (`1h 2m · 17 Jul 2026`), then the title
+(`VideoCard.astro`, `academyPage.card`). Dates are day, three-letter month,
+year (`localDate`); runtimes are `42 min` or `1h 2m` (`formatRuntime`). One
+or two scheduled streams are set as a horizontal feature, never a lone card
+in an empty grid; three or more use the same card with `Upcoming` in the
+accent, the start time, and one sentence of description where there is one.
+
+Detail pages carry one breadcrumb (`Breadcrumb.astro`): sentence-case mono,
+parent links only, inside the page header.
 
 People is a contact sheet: square portraits without frames, printed in
 greyscale so mismatched photographs read as one set, each coming into colour

@@ -3,7 +3,9 @@ export const prerender = false;
 
 import TopicHub from "@/components/technology/TopicHub.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
+import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
+import VideoCard from "@/components/video/VideoCard.astro";
 import RichText from "@/components/content/RichText.astro";
 import Page from "@/wrappers/page.astro";
 import TechnologyJsonLd from "@/components/html/technology-jsonld.astro";
@@ -21,9 +23,12 @@ import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { isNewsPublished } from "@/lib/news-publication";
-import { academyTechnology } from "@rawkodeacademy/design-system";
+import {
+	academyPage,
+	academyTechnology,
+	button,
+} from "@rawkodeacademy/design-system";
 import "@rawkodeacademy/design-system/styles.css";
-import { localTime } from "@/lib/local-time";
 import { SUPPORTERS_PATH, supporterForTechnology } from "@/lib/supporters";
 
 export interface Technology extends Omit<TechnologyData, "logos" | "body"> {
@@ -35,7 +40,9 @@ export interface Technology extends Omit<TechnologyData, "logos" | "body"> {
 				title: string;
 				thumbnailUrl: string;
 				slug: string;
+				duration?: number | undefined;
 				publishedAt: Date | string;
+				type?: string | undefined;
 		  }[]
 		| undefined;
 	videoCount?: number;
@@ -111,7 +118,6 @@ const technology: Technology = {
 };
 
 const videoCount = technology.videos?.length ?? 0;
-const featuredVideos = (technology.videos ?? []).slice(0, 4);
 const categoryLabel =
 	technology.subcategory ?? technology.category ?? "Cloud Native";
 
@@ -201,6 +207,7 @@ const seoDescription = (() => {
 // noindex these so Google doesn't classify the site as low-quality.
 const noindex = !hasContent && videoCount === 0;
 const styles = academyTechnology();
+const page = academyPage();
 
 const technologyUrl = new URL(
 	`/technology/${technology.id}`,
@@ -242,17 +249,17 @@ const statusLabel = technology.matrix?.status
 	? statusLabels[technology.matrix.status] ?? technology.matrix.status
 	: undefined;
 const description = technology.seo?.description?.trim();
-const videoDate = (value: string | Date) =>
-	localTime(value, { day: "numeric", month: "short", year: "numeric" }, "en-GB");
+// Stored values are lowercase identifiers ("stable", "rising"); set them as words.
+const sentenceCase = (value: string) =>
+	value.charAt(0).toUpperCase() + value.slice(1).replace(/[-_]/g, " ");
 const historicalStatuses = new Set(["abandoned", "deprecated", "superseded"]);
-const remainingVideos = (technology.videos ?? []).slice(featuredVideos.length);
 const breadcrumbs = [
 	{ title: "Home", link: "/" },
 	{ title: "Technologies", link: "/technology" },
 	{ title: technology.name, link: technologyUrl },
 ];
 const metadata = [
-	["Status", technology.status],
+	["Status", technology.status && sentenceCase(technology.status)],
 	["Category", technology.category],
 	["Subcategory", technology.subcategory],
 	["License", technology.license],
@@ -293,7 +300,10 @@ const matrixMetadata = [
 	["First used", technology.matrix?.firstUsed],
 	["Last used", technology.matrix?.lastUsed],
 	["Confidence", technology.matrix?.confidence && confidenceLabels[technology.matrix.confidence]],
-	["Trajectory", technology.matrix?.trajectory],
+	[
+		"Trajectory",
+		technology.matrix?.trajectory && sentenceCase(technology.matrix.trajectory),
+	],
 ].filter((entry): entry is [string, string] => Boolean(entry[1]));
 const hasMatrixDetails = Boolean(
 	technology.matrix?.why || technology.matrix?.spicyTake ||
@@ -319,7 +329,7 @@ const hasTopicContent =
 	articles.some(({ data }) => data.publishedAt <= now && matchesTechnology(data.technologies)) ||
 	news.some(({ data }) => isNewsPublished(data.publishedAt, now) && matchesTechnology(data.technologies)) ||
 	learningPaths.some(({ data }) => data.publishedAt <= now && matchesTechnology(data.technologies));
-const hasAside = videoCount > 0 || hasMatrixDetails ||
+const hasAside = hasMatrixDetails ||
 	Boolean(technology.cncf?.status) || cncfDates.length > 0 || cncfLinks.length > 0 || communityLinks.length > 0;
 
 // TopicHub (articles, news, learning paths), the video rails and the related
@@ -393,18 +403,7 @@ await setContentCache(Astro, {
 	</Fragment>
 	<div class={styles.root}>
 		<header class={styles.hero}>
-			<nav aria-label="Breadcrumb">
-				<ol class={styles.breadcrumb}>
-					{breadcrumbs.map((crumb, index) => (
-						<li>
-							{index > 0 && <span aria-hidden="true">/</span>}
-							{index === breadcrumbs.length - 1
-								? <span aria-current="page">{crumb.title}</span>
-								: <a class={styles.link} href={crumb.link}>{crumb.title}</a>}
-						</li>
-					))}
-				</ol>
-			</nav>
+			<Breadcrumb parents={breadcrumbs.slice(0, -1)} />
 			<div class={styles.identity}>
 				{technology.logo && (
 					<img src={technology.logo} alt="" width="64" height="64" class={styles.logo}
@@ -414,7 +413,7 @@ await setContentCache(Astro, {
 			</div>
 			{supporter && (
 				<p class="technology-supporter">
-					<a class="technology-supporter__link focus-ring" href={SUPPORTERS_PATH}>
+					<a class="technology-supporter__link" href={SUPPORTERS_PATH}>
 						<MLabel tone="spruce">Community supporter</MLabel>
 						<span class="technology-supporter__name">{supporter.data.name}</span>
 					</a>
@@ -437,7 +436,7 @@ await setContentCache(Astro, {
 			{officialLinks.length > 0 && (
 				<ul class={styles.actions} aria-label="Project links">
 					{officialLinks.map(([label, url]) => (
-						<li><a href={url} class={styles.link} target="_blank" rel="noopener noreferrer">{label}</a></li>
+						<li><a href={url} class={button({ variant: "outline", size: "sm" })} target="_blank" rel="noopener noreferrer">{label} <span aria-hidden="true">↗</span></a></li>
 					))}
 				</ul>
 			)}
@@ -446,67 +445,51 @@ await setContentCache(Astro, {
 		{upcomingSessions.length > 0 && (
 			<section class={styles.ruledSection} aria-labelledby="upcoming-sessions-heading">
 				<h2 id="upcoming-sessions-heading" class={styles.heading}>Upcoming sessions</h2>
-				<ul class={styles.videoGrid}>
-					{upcomingSessions.map(({ data: video }) => {
-						const startsAt = localTime(video.publishedAt, {
-							month: "short", day: "numeric", year: "numeric",
-							hour: "numeric", minute: "2-digit", timeZoneName: "short",
-						}, "en-GB");
-						return (
-							<li>
-								<a href={"/watch/" + video.slug} class={styles.video}>
-									<img src={getVideoThumbnailUrl(video.id)} alt="" loading="lazy" width="480" height="270" />
-									<span>{video.title}</span>
-									<time class={styles.videoDate} {...startsAt.attrs}>{startsAt.text}</time>
-								</a>
-							</li>
-						);
-					})}
-				</ul>
+				<div class={page.feedGrid}>
+					{upcomingSessions.map(({ data: video }) => (
+						<VideoCard href={"/watch/" + video.slug} title={video.title} thumbnailUrl={getVideoThumbnailUrl(video.id)} publishedAt={video.publishedAt} scheduled />
+					))}
+				</div>
 			</section>
 		)}
 
 		<div class={hasAside ? styles.columns : styles.reading}>
-			{hasContent ? (
-				<article id="complete-guide" class={styles.prose} aria-label={technology.name + " profile"}>
-					<RichText html={profileHtml} />
-				</article>
-			) : (
-				<section class={styles.section} aria-labelledby="overview-heading">
-					<h2 id="overview-heading" class={styles.heading}>Overview</h2>
-					<p class={styles.copy}>A written overview of {technology.name} is not available here.</p>
-					{officialLinks.length > 0 && (
-						<p class={styles.copy}>Explore the project links above for information from its maintainers.</p>
-					)}
-				</section>
-			)}
+			<div class={styles.main}>
+				{hasContent ? (
+					<article id="complete-guide" class={styles.prose} aria-label={technology.name + " profile"}>
+						<RichText html={profileHtml} />
+					</article>
+				) : (
+					<section class={styles.section} aria-labelledby="overview-heading">
+						<h2 id="overview-heading" class={styles.heading}>Overview</h2>
+						<p class={styles.copy}>A written overview of {technology.name} is not available here.</p>
+						{officialLinks.length > 0 && (
+							<p class={styles.copy}>Explore the project links above for information from its maintainers.</p>
+						)}
+					</section>
+				)}
+
+				{videoCount > 0 && (
+					<section id="videos" class={styles.ruledSection} aria-labelledby="videos-heading">
+						<div class={styles.sectionHead}>
+							<h2 id="videos-heading" class={styles.heading}>{technology.name} recordings</h2>
+							<p class={styles.copy}>{videoCount} {videoCount === 1 ? "recording" : "recordings"}, newest first</p>
+						</div>
+						<div class={page.feedGrid}>
+							{(technology.videos ?? []).map((video) => (
+								<VideoCard href={"/watch/" + video.slug} title={video.title} thumbnailUrl={video.thumbnailUrl} duration={video.duration} publishedAt={video.publishedAt} type={video.type} />
+							))}
+						</div>
+					</section>
+				)}
+			</div>
 
 			{hasAside && (
-				<aside class={styles.aside} aria-label={technology.name + " videos and resources"}>
-					{featuredVideos.length > 0 && (
-						<section class={styles.section} aria-labelledby="videos-heading">
-							<h2 id="videos-heading" class={styles.heading}>Related recordings</h2>
-							<ul class={styles.list}>
-								{featuredVideos.map((video) => (
-									<li>
-										<a href={"/watch/" + video.slug} class={styles.video}>
-											<img src={video.thumbnailUrl} alt="" loading="lazy" width="480" height="270" />
-											<span>{video.title}</span>
-											<time class={styles.videoDate} {...videoDate(video.publishedAt).attrs}>{videoDate(video.publishedAt).text}</time>
-										</a>
-									</li>
-								))}
-							</ul>
-							{remainingVideos.length > 0 && (
-								<a href="#more-videos" class={styles.link}>More {technology.name} videos ({remainingVideos.length})</a>
-							)}
-						</section>
-					)}
+				<aside class={styles.aside} aria-label={technology.name + " facts and links"}>
 					{technology.matrix && hasMatrixDetails && (
 						<section class={styles.section} aria-labelledby="matrix-heading">
 							<h2 id="matrix-heading" class={styles.heading}>Rawkode’s take</h2>
 							{statusLabel && <p class={styles.copy}>Personal rating: <a class={styles.link} href="/technology/matrix">{statusLabel}</a></p>}
-							{technology.matrix.makesMeFeel && <p class={styles.copy}>Makes me feel: {technology.matrix.makesMeFeel}</p>}
 							{technology.matrix.why && <p class={styles.copy}>{technology.matrix.why}</p>}
 							{technology.matrix.spicyTake && <blockquote class={styles.quote}>{technology.matrix.spicyTake}</blockquote>}
 							{matrixMetadata.length > 0 && (
@@ -528,7 +511,7 @@ await setContentCache(Astro, {
 							{cncfLinks.length > 0 && (
 								<ul class={styles.list}>
 									{cncfLinks.map(([label, url]) => (
-										<li><a href={url} class={styles.link} target="_blank" rel="noopener noreferrer">{label}</a></li>
+										<li><a href={url} class={styles.listLink} target="_blank" rel="noopener noreferrer">{label} <span aria-hidden="true">↗</span></a></li>
 									))}
 								</ul>
 							)}
@@ -539,7 +522,7 @@ await setContentCache(Astro, {
 							<h2 id="community-heading" class={styles.heading}>Community</h2>
 							<ul class={styles.list}>
 								{communityLinks.map(([label, url]) => (
-									<li><a href={url} class={styles.link} target="_blank" rel="noopener noreferrer">{label}</a></li>
+									<li><a href={url} class={styles.listLink} target="_blank" rel="noopener noreferrer">{label} <span aria-hidden="true">↗</span></a></li>
 								))}
 							</ul>
 						</section>
@@ -548,22 +531,6 @@ await setContentCache(Astro, {
 			)}
 		</div>
 
-		{remainingVideos.length > 0 && (
-			<section id="more-videos" class={styles.ruledSection} aria-labelledby="more-videos-heading">
-				<h2 id="more-videos-heading" class={styles.heading}>More {technology.name} videos</h2>
-				<ul class={styles.videoGrid}>
-					{remainingVideos.map((video) => (
-						<li>
-							<a href={"/watch/" + video.slug} class={styles.video}>
-								<img src={video.thumbnailUrl} alt="" loading="lazy" width="480" height="270" />
-								<span>{video.title}</span>
-								<time class={styles.videoDate} {...videoDate(video.publishedAt).attrs}>{videoDate(video.publishedAt).text}</time>
-							</a>
-						</li>
-					))}
-				</ul>
-			</section>
-		)}
 		{hasTopicContent && (
 			<section id="more-content" class={styles.ruledSection} aria-label={technology.name + " learning resources"}>
 				<TopicHub technologyId={technology.id} technologyName={technology.name}
@@ -619,13 +586,19 @@ await setContentCache(Astro, {
 		align-items: center;
 		gap: 0.35rem 0.75rem;
 		padding: 0.45rem 0.7rem;
-		border: 1px solid var(--editorial-hairline);
-		color: var(--editorial-ink-soft);
+		border: 1px solid var(--colors-academy-border);
+		color: var(--colors-academy-text-soft);
 		text-decoration: none;
 	}
 
+	.technology-supporter__link:focus-visible {
+		outline: 2px solid var(--colors-academy-accent);
+		outline-offset: 2px;
+		border-radius: var(--radii-sm);
+	}
+
 	.technology-supporter__link:hover .technology-supporter__name {
-		color: var(--editorial-ink);
+		color: var(--colors-academy-text);
 		text-decoration: underline;
 		text-underline-offset: 0.2em;
 	}
@@ -633,19 +606,19 @@ await setContentCache(Astro, {
 	.technology-vendor {
 		margin: 0;
 		padding-top: 1rem;
-		border-top: 1px solid var(--editorial-hairline);
+		border-top: 1px solid var(--colors-academy-border);
 		font-size: 0.875rem;
 		line-height: 1.6;
-		color: var(--editorial-ink-mute);
+		color: var(--colors-academy-text-muted);
 	}
 
 	.technology-vendor a {
-		color: var(--editorial-ink-soft);
+		color: var(--colors-academy-text-soft);
 		text-underline-offset: 0.2em;
 	}
 
 	.technology-vendor a:hover {
-		color: var(--editorial-ink);
+		color: var(--colors-academy-text);
 	}
 
 	.technology-supporter__name {

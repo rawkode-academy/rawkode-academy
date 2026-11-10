@@ -74,6 +74,25 @@ const showsToRender: ShowSummary[] = await (async () => {
 })();
 
 const hasShows = showsToRender.length > 0;
+const artworkOf = (show: ShowSummary) =>
+	show.cover?.image.src ?? show.episodes?.[0]?.video?.thumbnailUrl;
+const episodeCount = (show: ShowSummary) => show.episodes?.length ?? 0;
+const statusLine = (show: ShowSummary) =>
+	show.status === "coming-soon"
+		? "Coming soon"
+		: `${show.status === "archived" ? "Archived · " : ""}${episodeCount(show)} published ${episodeCount(show) === 1 ? "episode" : "episodes"}`;
+// Shows with episodes and artwork lead, the largest archive first, as framed
+// cards. Shows that are announced (or have nothing to picture yet) follow as
+// a ledger: a name, a line and a status, with no empty frame.
+const pictured = showsToRender
+	.filter((show) => show.status !== "coming-soon" && artworkOf(show))
+	.sort(
+		(a, b) => episodeCount(b) - episodeCount(a) || a.name.localeCompare(b.name),
+	);
+const listed = showsToRender.filter((show) => !pictured.includes(show));
+const listedTitle = listed.every((show) => show.status === "coming-soon")
+	? "Announced"
+	: "More shows";
 
 const showsJsonLd = showEntries.map((s) => {
 	const episodeCount = videos.filter(
@@ -102,84 +121,53 @@ const catalog = academyCatalog();
 		listName="Rawkode Academy Shows"
 	/>
 	<div class={styles.root}>
-		<AcademyCatalogMasthead title="Shows" description="Recurring programmes, each with its own format, hosts, and archive of episodes." figure={showsToRender.length} figureLabel={showsToRender.length === 1 ? "show" : "shows"} mosaic={showsToRender.map((show) => show.cover?.image.src ?? show.episodes?.[0]?.video?.thumbnailUrl).filter((src): src is string => Boolean(src))} mosaicShape="video" />
+		<AcademyCatalogMasthead title="Shows" description="Recurring programmes, each with its own format, hosts, and archive of episodes." figure={showsToRender.length} figureLabel={showsToRender.length === 1 ? "show" : "shows"} mosaic={showsToRender.map(artworkOf).filter((src): src is string => Boolean(src))} mosaicShape="video" />
 
-		<section class={styles.section} aria-label="Shows">
-			<div class={styles.container}>
-			{hasShows ? (
-				<div class={styles.grid}>
-					{showsToRender.map((show) => (
-						<a class={styles.card} href={`/shows/${show.id}`} data-show-status={show.status}>
-							{(show.cover?.image.src ?? show.episodes?.[0]?.video?.thumbnailUrl) && (
-								<span class={catalog.featuredMedia}>
-									<img class={catalog.featuredImage} src={show.cover?.image.src ?? show.episodes?.[0]?.video?.thumbnailUrl} alt="" loading="lazy" />
-								</span>
-							)}
-							<div class={styles.cardBody}>
-								<span class={catalog.rowMeta}>{show.status === "coming-soon" ? "Coming soon" : `${show.status === "archived" ? "Archived · " : ""}${show.episodes?.length ?? 0} published ${show.episodes?.length === 1 ? "episode" : "episodes"}`}</span>
-								<h2 class={styles.cardTitle}>{show.name}</h2>
-								{show.tagline && <span class={catalog.rowDescription}>{show.tagline}</span>}
-								{show.episodes?.[0]?.video?.title && <span class={catalog.rowDescription}>{show.episodes[0].video.title}</span>}
-							</div>
-						</a>
-					))}
+		{(pictured.length > 0 || !hasShows) && (
+			<section class={styles.section} aria-label="Shows">
+				<div class={styles.container}>
+					{hasShows ? (
+						<div class={catalog.pairGrid}>
+							{pictured.map((show) => (
+								<a class={styles.card} href={`/shows/${show.id}`} data-show-status={show.status}>
+									<span class={catalog.featuredMedia}>
+										<img class={catalog.featuredImage} src={artworkOf(show)} alt="" loading="lazy" />
+									</span>
+									<div class={styles.cardBody}>
+										<span class={catalog.rowMeta}>{statusLine(show)}</span>
+										<h2 class={styles.cardTitle}>{show.name}</h2>
+										{show.tagline && <span class={catalog.rowDescription}>{show.tagline}</span>}
+										{show.episodes?.[0]?.video?.title && <span class={catalog.rowDescription}>Latest: {show.episodes[0].video.title}</span>}
+									</div>
+								</a>
+							))}
+						</div>
+					) : (
+						<div class={styles.empty}>No shows available yet. New programs will appear here when they are ready.</div>
+					)}
 				</div>
-			) : (
-				<div class={styles.empty}>No shows available yet. New programs will appear here when they are ready.</div>
-			)}
-			</div>
-		</section>
+			</section>
+		)}
+
+		{listed.length > 0 && (
+			<section class={styles.section} aria-labelledby="listed-shows-title">
+				<div class={styles.container}>
+					<header class={styles.sectionHeader}>
+						<h2 id="listed-shows-title" class={styles.sectionTitle}>{listedTitle}</h2>
+					</header>
+					<div class={catalog.rows}>
+						{listed.map((show) => (
+							<a class={catalog.row} href={`/shows/${show.id}`} data-show-status={show.status}>
+								<span class={catalog.rowMeta}>{statusLine(show)}</span>
+								<div class={catalog.rowMain}>
+									<h3 class={catalog.rowTitle}>{show.name}</h3>
+									{show.tagline && <span class={catalog.rowDescription}>{show.tagline}</span>}
+								</div>
+							</a>
+						))}
+					</div>
+				</div>
+			</section>
+		)}
 	</div>
 </Page>
-
-<style>
-	.shows-page {
-		background: var(--colors-academy-canvas);
-		color: var(--colors-academy-text);
-	}
-
-	.shows-page__grid-section {
-		padding: 2rem var(--space-section-pad-x) 3rem;
-	}
-
-	.shows-page__grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
-		gap: 1.25rem;
-	}
-
-	.shows-page__empty {
-		border: 1px solid var(--colors-academy-border);
-		background: var(--colors-academy-ground);
-		padding: 2rem;
-		max-width: 36rem;
-	}
-
-	.shows-page__empty h2 {
-		font-family: var(--fonts-academy-text), sans-serif;
-		font-size: clamp(1.375rem, 2vw, 1.875rem);
-		font-weight: 700;
-		line-height: 1.1;
-		letter-spacing: 0;
-		color: var(--colors-academy-text);
-		margin: 0;
-	}
-
-	.shows-page__empty p {
-		font-family: var(--fonts-academy-text), sans-serif;
-		color: var(--colors-academy-text-soft);
-		margin: 0.5rem 0 0;
-	}
-
-	@media (max-width: 720px) {
-		.shows-page__grid-section {
-			padding: 1.5rem 1rem 2.5rem;
-		}
-		.shows-page__grid {
-			grid-template-columns: 1fr;
-		}
-		.shows-page__empty {
-			padding: 1.5rem;
-		}
-	}
-</style>

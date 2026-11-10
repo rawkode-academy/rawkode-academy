@@ -38,4 +38,13 @@ describe("Skeleton Components", () => {
 		expect(skeletonList).toContain("getTitleWidth");
 		expect(skeletonList).toContain("getSubtitleWidth");
 	});
+
+	it("draws the React list from the shared skeleton recipe", () => {
+		const skeletonList = readComponent("SkeletonList.tsx");
+
+		expect(skeletonList).toContain('role="status"');
+		expect(skeletonList).toContain("sr-only");
+		expect(skeletonList).toContain("academySkeleton()");
+		expect(skeletonList).not.toMatch(/--surface-|border-surface|animate-pulse/);
+	});
 });
