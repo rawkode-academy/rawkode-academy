@@ -1,4 +1,4 @@
-import { academyCatalog, academyPage } from "@rawkodeacademy/design-system";
+import { academyCatalog } from "@rawkodeacademy/design-system";
 import type { Meta, StoryObj } from "@storybook/react";
 import { canvas, Specimen, stills } from "./specimen";
 
@@ -11,7 +11,7 @@ const meta = {
 		docs: {
 			description: {
 				component:
-					"The row every chronological collection shares: the day as a numeral, an optional 16:9 still in its own trailing column, then kind, title and one sentence. The `ledger*` fragments in `src/styles/ledger.ts` are spread into `academyPage.ledger*` (homepage stream) and `academyCatalog.editorial*` (Read, News).",
+					"The row every chronological collection shares: the day as a numeral, an optional 16:9 still in its own trailing column, then kind, title and one sentence. The `ledger*` fragments in `src/styles/ledger.ts` are spread into `academyCatalog.editorial*` (Read, News). The homepage sets a compact three-column form of the same row (`academyPage.entry*`, see `Pages/Homepage`).",
 			},
 		},
 	},
@@ -41,77 +41,7 @@ const stream = [
 			"Authentication, admission, defaulting and validation, in the order they run and with the flags that change them.",
 		still: stills.apiServer,
 	},
-	{
-		day: "29",
-		month: "Oct 2026",
-		kind: "News",
-		detail: "",
-		title: "Kubernetes 1.36 graduates in-place pod resize to stable",
-		description:
-			"CPU and memory can now change on a running pod without a restart, with a resize policy per container.",
-		still: undefined,
-	},
-	{
-		day: "21",
-		month: "Oct 2026",
-		kind: "Course",
-		detail: "14 lessons",
-		title: "Complete guide to Zitadel",
-		description:
-			"Identity for a real product: organisations, projects, actions and machine users, built up one working step at a time.",
-		still: stills.controlPlane,
-	},
 ];
-
-/** The homepage stream: every kind in one ledger, each with its status dot. */
-export const HomepageStream: Story = {
-	tags: ["visual-mobile"],
-	render: () => {
-		const s = academyPage();
-		return (
-			<div style={canvas}>
-				<Specimen label="academyPage.ledger*: mixed kinds, stills where the content has one">
-					<div className={s.ledger}>
-						{stream.map((item) => (
-							<a
-								key={item.title}
-								className={s.ledgerRow}
-								href="#row"
-								data-media={Boolean(item.still)}
-							>
-								<time className={s.ledgerDate}>
-									<strong>{item.day}</strong>
-									<span>{item.month}</span>
-								</time>
-								{item.still && (
-									<span className={s.ledgerMedia}>
-										<img
-											className={s.ledgerImage}
-											src={item.still}
-											alt=""
-											width="640"
-											height="360"
-										/>
-									</span>
-								)}
-								<span className={s.ledgerBody} data-body>
-									<span className={s.ledgerKind} data-kind={item.kind}>
-										{item.kind}
-										{item.detail && ` · ${item.detail}`}
-									</span>
-									<h3 className={s.ledgerTitle}>{item.title}</h3>
-									<span className={s.ledgerDescription}>
-										{item.description}
-									</span>
-								</span>
-							</a>
-						))}
-					</div>
-				</Specimen>
-			</div>
-		);
-	},
-};
 
 /** Read and News: one kind per collection, so the line carries facts instead of a dot. */
 export const ArticlesAndNews: Story = {
