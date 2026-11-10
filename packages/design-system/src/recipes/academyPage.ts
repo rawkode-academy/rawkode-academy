@@ -74,6 +74,7 @@ export const academyPage = sva({
 		"entryBody",
 		"entryTitle",
 		"entryMeta",
+		"entryStill",
 		"paths",
 		"pathsIntro",
 		"pathTable",
@@ -875,6 +876,14 @@ export const academyPage = sva({
 			display: "grid",
 			gridTemplateColumns: "3.75rem minmax(0, 1fr)",
 			columnGap: "3.5",
+			// A column with any still gives every row the same trailing track,
+			// so each title starts and ends on the same lines, still or not.
+			// A phone has no room for it: the row stays text-led there.
+			_sm: {
+				"[data-media] > li > &": {
+					gridTemplateColumns: "3.75rem minmax(0, 1fr) 5.5rem",
+				},
+			},
 			alignItems: "start",
 			height: "full",
 			paddingBlock: "4",
@@ -897,7 +906,10 @@ export const academyPage = sva({
 			_active: { "& [data-title]": { color: "academy.accentHover" } },
 			_motionSafe: {
 				"@media (hover: hover)": {
-					_hover: { "& [data-body]": { transform: "translateX(0.25rem)" } },
+					_hover: {
+						"& [data-body]": { transform: "translateX(0.25rem)" },
+						"& img": { transform: "scale(1.03)" },
+					},
 				},
 				_focusVisible: {
 					"& [data-body]": { transform: "translateX(0.25rem)" },
@@ -943,6 +955,14 @@ export const academyPage = sva({
 			transitionTimingFunction: "academy-out",
 		},
 		entryMeta: monoMeta,
+		// The row's 16:9 still in its trailing track, from sm up.
+		entryStill: {
+			...videoFrame,
+			display: "none",
+			borderRadius: "academy-s",
+			border: "hairline",
+			_sm: { display: "block", gridColumn: "3" },
+		},
 		// Learning paths as a ruled table: the path, then how many sessions
 		// it puts in order. From lg it shares the ledger's three tracks: the
 		// introduction in the first, the table from the second.

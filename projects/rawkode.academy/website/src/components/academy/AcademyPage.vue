@@ -31,6 +31,8 @@ interface LedgerEntry {
 	title: string;
 	publishedAt: string;
 	meta?: string[];
+	/** A 16:9 still: a session's thumbnail or an article's cover. */
+	mediaSrc?: string;
 }
 /** One collection's recent entries. A column with no entries is not drawn. */
 interface LedgerColumn {
@@ -217,7 +219,7 @@ const laterStarts = laterStreams.map((stream) => ({ ...stream, start: localDateT
 				<div :class="styles.columns" :data-columns="columns.length">
 					<section v-for="column in columns" :key="column.id" :class="styles.column" :data-short="column.entries.length < 3 ? '' : undefined" :aria-labelledby="`recent-${column.id}`">
 						<h3 :id="`recent-${column.id}`" :class="styles.columnHead">{{ column.title }}</h3>
-						<ol :class="styles.entries" :data-wide="columns.length === 1 ? '' : undefined">
+						<ol :class="styles.entries" :data-wide="columns.length === 1 ? '' : undefined" :data-media="column.entries.some((entry) => entry.mediaSrc) ? '' : undefined">
 							<li v-for="item in column.entries" :key="item.href">
 								<a :href="item.href" :class="styles.entry">
 									<time v-if="dateParts(item.publishedAt)" :datetime="item.publishedAt" :class="styles.entryDate"><strong v-bind="dateParts(item.publishedAt)?.day.attrs">{{ dateParts(item.publishedAt)?.day.text }}</strong><span v-bind="dateParts(item.publishedAt)?.month.attrs">{{ dateParts(item.publishedAt)?.month.text }}</span></time>
@@ -225,6 +227,7 @@ const laterStarts = laterStreams.map((stream) => ({ ...stream, start: localDateT
 									<span :class="styles.entryBody" data-body>
 										<span :class="styles.entryTitle" data-title>{{ item.title }}</span> <span v-if="item.meta?.length" :class="styles.entryMeta">{{ item.meta.join(" · ") }}</span>
 									</span>
+									<span v-if="item.mediaSrc" :class="styles.entryStill"><img :src="item.mediaSrc" alt="" :class="styles.plateImage" width="1280" height="720" loading="lazy" decoding="async" /></span>
 								</a>
 							</li>
 						</ol>

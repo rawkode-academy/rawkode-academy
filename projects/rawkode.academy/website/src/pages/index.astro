@@ -19,7 +19,10 @@ import {
 import { isNewsPublished } from "@/lib/news-publication";
 import { getTypeBadgeConfig } from "@/utils/article-types";
 import { formatRuntime } from "@/lib/video-runtime";
-import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import {
+	getVideoThumbnailResizedUrl,
+	getVideoThumbnailUrl,
+} from "@/lib/video-thumbnail";
 
 const styles = academyPage();
 
@@ -233,6 +236,7 @@ const ledger = [
 					...(runtime ? [runtime] : []),
 					...(guests.length ? [`with ${guests.join(", ")}`] : []),
 				],
+				mediaSrc: getVideoThumbnailResizedUrl(video.data.id, 384),
 			};
 		}),
 	},
@@ -251,6 +255,9 @@ const ledger = [
 					getTypeBadgeConfig(article.data.type).label,
 					...(authors.length ? [authors.join(", ")] : []),
 				],
+				...(article.data.cover?.image.src
+					? { mediaSrc: article.data.cover.image.src }
+					: {}),
 			};
 		}),
 	},
