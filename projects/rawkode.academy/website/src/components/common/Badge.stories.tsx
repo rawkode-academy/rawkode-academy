@@ -19,6 +19,13 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// Story layout only. The website has no utility-CSS compiler, so the Vue
+// templates below carry inline styles built from the Academy variables.
+const wrap = (gap: string) => `display:flex;flex-wrap:wrap;gap:${gap}`;
+const row = (gap: string) => `display:flex;align-items:center;gap:${gap}`;
+const stack = "display:grid;gap:1rem";
+const caption = "color:var(--colors-academy-text-soft)";
+
 export const Default: Story = {
 	args: {
 		component: Badge,
@@ -45,7 +52,7 @@ export const AllVariants: Story = {
 		<VueInReact
 			component={{
 				template: `
-          <div class="flex flex-wrap gap-4">
+          <div style="${wrap("1rem")}">
             <Badge variant="default">Default</Badge>
             <Badge variant="primary">Primary</Badge>
             <Badge variant="secondary">Secondary</Badge>
@@ -69,7 +76,7 @@ export const AllSizes: Story = {
 		<VueInReact
 			component={{
 				template: `
-          <div class="flex items-center gap-4">
+          <div style="${row("1rem")}">
             <Badge size="xs" variant="primary">Extra Small</Badge>
             <Badge size="sm" variant="primary">Small</Badge>
             <Badge size="md" variant="primary">Medium</Badge>
@@ -90,7 +97,7 @@ export const OutlineVariants: Story = {
 		<VueInReact
 			component={{
 				template: `
-          <div class="flex flex-wrap gap-4">
+          <div style="${wrap("1rem")}">
             <Badge variant="default" :outline="true">Default</Badge>
             <Badge variant="primary" :outline="true">Primary</Badge>
             <Badge variant="secondary" :outline="true">Secondary</Badge>
@@ -114,7 +121,7 @@ export const RoundedVariants: Story = {
 		<VueInReact
 			component={{
 				template: `
-          <div class="flex flex-wrap gap-4">
+          <div style="${wrap("1rem")}">
             <Badge rounded="none" variant="primary">None</Badge>
             <Badge rounded="sm" variant="primary">Small</Badge>
             <Badge rounded="md" variant="primary">Medium</Badge>
@@ -136,17 +143,17 @@ export const StatusBadges: Story = {
 		<VueInReact
 			component={{
 				template: `
-          <div class="space-y-4">
-            <div class="flex items-center gap-4">
-              <span class="text-secondary-content">Status:</span>
+          <div style="${stack}">
+            <div style="${row("1rem")}">
+              <span style="${caption}">Status:</span>
               <Badge variant="success" size="sm">Active</Badge>
             </div>
-            <div class="flex items-center gap-4">
-              <span class="text-secondary-content">Status:</span>
+            <div style="${row("1rem")}">
+              <span style="${caption}">Status:</span>
               <Badge variant="warning" size="sm">Pending</Badge>
             </div>
-            <div class="flex items-center gap-4">
-              <span class="text-secondary-content">Status:</span>
+            <div style="${row("1rem")}">
+              <span style="${caption}">Status:</span>
               <Badge variant="danger" size="sm">Inactive</Badge>
             </div>
           </div>
@@ -165,7 +172,7 @@ export const DifficultyBadges: Story = {
 		<VueInReact
 			component={{
 				template: `
-          <div class="flex gap-4">
+          <div style="display:flex;gap:1rem">
             <Badge variant="success" size="sm">Beginner</Badge>
             <Badge variant="warning" size="sm">Intermediate</Badge>
             <Badge variant="danger" size="sm">Advanced</Badge>
@@ -185,14 +192,14 @@ export const CourseBadges: Story = {
 		<VueInReact
 			component={{
 				template: `
-          <div class="space-y-4">
-            <div class="flex flex-wrap gap-2">
+          <div style="${stack}">
+            <div style="${wrap("0.5rem")}">
               <Badge variant="primary" size="xs">Article</Badge>
               <Badge variant="secondary" size="xs">Video</Badge>
               <Badge variant="info" size="xs">Course</Badge>
               <Badge variant="success" size="xs">Free</Badge>
             </div>
-            <div class="flex flex-wrap gap-2">
+            <div style="${wrap("0.5rem")}">
               <Badge variant="default" size="sm">Kubernetes</Badge>
               <Badge variant="default" size="sm">Docker</Badge>
               <Badge variant="default" size="sm">GitOps</Badge>
@@ -214,17 +221,17 @@ export const CountBadges: Story = {
 		<VueInReact
 			component={{
 				template: `
-          <div class="flex items-center gap-4">
-            <div class="flex items-center gap-2">
-              <span class="text-secondary-content">Notifications</span>
+          <div style="${row("1rem")}">
+            <div style="${row("0.5rem")}">
+              <span style="${caption}">Notifications</span>
               <Badge variant="danger" size="xs" rounded="full">3</Badge>
             </div>
-            <div class="flex items-center gap-2">
-              <span class="text-secondary-content">Messages</span>
+            <div style="${row("0.5rem")}">
+              <span style="${caption}">Messages</span>
               <Badge variant="primary" size="xs" rounded="full">12</Badge>
             </div>
-            <div class="flex items-center gap-2">
-              <span class="text-secondary-content">Updates</span>
+            <div style="${row("0.5rem")}">
+              <span style="${caption}">Updates</span>
               <Badge variant="info" size="xs" rounded="full">99+</Badge>
             </div>
           </div>

@@ -3,6 +3,7 @@
 // content layer (fixtures below) and RichText are stubs; no browser layout,
 // remote imagery, production middleware, gateway or KV are tested.
 import assert from "node:assert/strict";
+import { readRecipeConfig } from "./helpers/recipe-config.mjs";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import vm from "node:vm";
@@ -93,6 +94,8 @@ async function render(
 			academyLayout: styles,
 			academyWatch: styles,
 			academyCatalog: styles,
+			academyPage: styles,
+			button: ({ variant = "solid" } = {}) => `button-${variant}`,
 		},
 		// Pass-through fixtures: the layer's own scheduled-entry hiding is not
 		// applied, so the page's publication filters are what these tests prove.
@@ -160,6 +163,11 @@ async function render(
 				const local = specifier.slice(2);
 				return load(local.endsWith(".astro") ? local : `${local}.ts`);
 			}
+			// A sibling module of the component under test (pure helpers).
+			if (!exports && specifier.startsWith("./"))
+				return load(
+					`${path.slice(0, path.lastIndexOf("/") + 1)}${specifier.slice(2)}.ts`,
+				);
 			assert(exports, `Unexpected import ${specifier}`);
 			return new vm.SyntheticModule(
 				Object.keys(exports),
@@ -516,7 +524,12 @@ test("titled VideoFeed preserves title, description, date, runtime and real dest
 		dom.querySelector("img").getAttribute("src"),
 		"https://images.test/real.webp",
 	);
-	assert.match(dom.text, /1:05/);
+	// The feed draws the shared video card: one runtime form, a decorative
+	// still, and the title as the link's name.
+	assert.match(dom.text, /1 min/);
+	assert.equal(dom.querySelector("a").getAttribute("class"), "academy-card");
+	assert.equal(dom.querySelector("img").getAttribute("alt"), "");
+	assert.equal(dom.querySelector("h3").text, video("real").data.title);
 	assert.match(dom.text, /2020/);
 });
 
@@ -551,8 +564,25 @@ test("cast with missing portraits uses initials, never a missing asset or invent
 		dom.querySelectorAll("a").map((a) => a.getAttribute("href")),
 		["/people/person", "/people/guest"],
 	);
-	assert.match(dom.text, /HOST/);
-	assert.match(dom.text, /GUEST/);
+	// The role is sentence-case mono at the end of the row, not a badge on
+	// the avatar.
+	assert.deepEqual(
+		dom.querySelectorAll(".academy-castMeta").map((m) => m.text.trim()),
+		["Host", "Guest"],
+	);
+	// A ruled row reads in source order: portrait, name (and handle), role.
+	assert.deepEqual(
+		dom
+			.querySelector("a")
+			.childNodes.filter((node) => node.nodeType === 1)
+			.map((node) => node.getAttribute("class")),
+		[
+			"academy-castAvatar academy-castInitials",
+			"academy-castBody",
+			"academy-castMeta",
+		],
+	);
+	assert.equal(dom.querySelectorAll(".academy-castBody > h3").length, 2);
 });
 
 test("cast retains real avatar/handle and its image-error handler reveals existing initials", async () => {
@@ -571,6 +601,16 @@ test("cast retains real avatar/handle and its image-error handler reveals existi
 	assert.equal(img.getAttribute("src"), "https://images.test/real");
 	assert.equal(img.getAttribute("alt"), "");
 	assert.match(dom.text, /@actual-handle/);
+	// The handle sits under the name, inside the row's body.
+	assert.deepEqual(
+		dom
+			.querySelector(".academy-castBody")
+			.childNodes.filter((node) => node.nodeType === 1)
+			.map((node) => node.getAttribute("class")),
+		["academy-castName", "academy-castHandle"],
+	);
+	assert.equal(img.getAttribute("width"), "40");
+	assert.equal(img.getAttribute("height"), "40");
 	assert(dom.querySelector("span[aria-hidden='true']").hasAttribute("hidden"));
 	const element = { hidden: false, nextElementSibling: { hidden: true } };
 	vm.runInNewContext(
@@ -595,39 +635,14 @@ test("empty cast omits its heading and names remain escaped in real cast markup"
 });
 
 test("initials presentation belongs to academyWatch and preserves the avatar size/hidden contract", async () => {
-	const source = readFileSync(
-		new URL(
-			"../../../../../packages/design-system/src/recipes/academyWatch.ts",
-			import.meta.url,
-		),
-		"utf8",
-	);
-	const context = vm.createContext({});
-	const module = new vm.SourceTextModule(
-		ts.transpileModule(source, {
-			compilerOptions: {
-				module: ts.ModuleKind.ESNext,
-				target: ts.ScriptTarget.ES2022,
-			},
-		}).outputText,
-		{ context },
-	);
-	await module.link((specifier) => {
-		assert.equal(specifier, "../../styled-system/css");
-		return new vm.SyntheticModule(
-			["sva"],
-			function () {
-				this.setExport("sva", (value) => value);
-			},
-			{ context },
-		);
-	});
-	await module.evaluate();
-	const recipe = module.namespace.academyWatch;
+	const config = await readRecipeConfig("academyWatch.ts", "academyWatch");
+	const recipe = config;
 	assert(recipe.slots.includes("castInitials"));
 	assert.deepEqual(JSON.parse(JSON.stringify(recipe.base.castInitials)), {
 		display: "grid",
 		placeItems: "center",
+		border: "hairline",
+		borderColor: "academy.border",
 		background: "academy.ground",
 		color: "academy.textSoft",
 		fontFamily: "academy-text",
@@ -635,7 +650,88 @@ test("initials presentation belongs to academyWatch and preserves the avatar siz
 		fontWeight: "semibold",
 		"&[hidden]": { display: "none" },
 	});
-	assert.equal(recipe.base.castAvatar.width, "12");
-	assert.equal(recipe.base.castAvatar.height, "12");
+	// The workbench cast is ruled rows: a 2.5rem portrait in the label gutter.
+	assert.equal(recipe.base.castAvatar.width, "10");
+	assert.equal(recipe.base.castAvatar.height, "10");
+	assert(recipe.slots.includes("castBody"));
+	assert.equal(recipe.base.castAvatar["&[hidden]"].display, "none");
 	assert(!read("components/video/VideoCast.astro").includes("<style"));
+});
+
+test("resources put the name first, then the note, then the resource's own category, then the arrow", async () => {
+	const { dom } = await render("components/video/VideoResources.astro", {
+		props: {
+			resources: [
+				{
+					title: "Docs <b>",
+					description: "A note",
+					type: "url",
+					url: "https://example.test/docs",
+					category: "documentation",
+				},
+				{ title: "Download", type: "file", filePath: "/files/a.zip" },
+				{
+					title: "Unknown category",
+					type: "url",
+					url: "https://example.test/x",
+					category: "surprise",
+				},
+				{ title: "Unsafe", type: "url", url: "javascript:alert(1)" },
+			],
+		},
+	});
+	const rows = dom.querySelectorAll("a");
+	assert.deepEqual(
+		rows.map((a) => [
+			a.getAttribute("href"),
+			a.getAttribute("target") ?? null,
+			a.getAttribute("rel") ?? null,
+		]),
+		[
+			["https://example.test/docs", "_blank", "noopener noreferrer"],
+			["/files/a.zip", null, null],
+			["https://example.test/x", "_blank", "noopener noreferrer"],
+		],
+	);
+	const classes = (node) =>
+		node.childNodes
+			.filter((child) => child.nodeType === 1)
+			.map((child) => child.getAttribute("class"));
+	// DOM order is the visual order; there is no kind column and no layout switch.
+	// A link that leaves the site says so to a screen reader, after the arrow.
+	assert.deepEqual(classes(rows[0]), [
+		"academy-linkBody",
+		"academy-linkArrow",
+		"sr-only",
+	]);
+	assert.equal(
+		rows[0].querySelector(".sr-only").text.trim(),
+		"(opens in a new tab)",
+	);
+	assert.equal(rows[1].querySelector(".sr-only"), null);
+	assert.deepEqual(classes(rows[0].querySelector(".academy-linkBody")), [
+		"academy-linkName",
+		"academy-linkNote",
+		"academy-linkKind",
+	]);
+	assert.equal(
+		rows[0].querySelector(".academy-linkKind").text,
+		"documentation",
+	);
+	assert.equal(rows[0].querySelector(".academy-linkName").text, "Docs <b>");
+	assert.equal(dom.querySelectorAll("b").length, 0);
+	// "other" (and an unknown category) says nothing: no kind, and no
+	// link/file/embed stand-in.
+	for (const row of rows.slice(1)) {
+		assert.deepEqual(classes(row.querySelector(".academy-linkBody")), [
+			"academy-linkName",
+		]);
+	}
+	assert.deepEqual(classes(rows[1]), ["academy-linkBody"]);
+	assert(rows.every((row) => !row.hasAttribute("data-kinds")));
+	assert(!/\b(?:link|file|embed)\b/.test(dom.querySelector("ul").text));
+	const empty = await render("components/video/VideoResources.astro", {
+		props: { resources: [] },
+	});
+	assert.equal(empty.dom.querySelectorAll("section, h2, a").length, 0);
 });

@@ -3,25 +3,17 @@ import { createElement, Fragment, useLayoutEffect } from "react";
 import "../src/styles/global.css";
 import "@rawkodeacademy/design-system/styles.css";
 
-// Reuse Astro's local font cache without calling a font provider or requiring
-// Astro's virtual assets runtime. An uncached checkout uses the named fallbacks.
-const fontAssets = import.meta.glob<string>(
-	"../.astro/fonts/font-red-hat-*-normal-latin-*.woff2",
-	{ eager: true, query: "?url", import: "default" },
-);
-const fontFaces = Object.entries(fontAssets)
-	.map(([path, url]) => {
-		const match = path.match(/font-red-hat-(display|text|mono)-(\d+)-normal/);
-		if (!match) return "";
-		const family = `Red Hat ${match[1]![0]!.toUpperCase()}${match[1]!.slice(1)}`;
-		return `@font-face { font-family: "${family}"; src: url("${url}") format("woff2"); font-weight: ${match[2]}; font-style: normal; font-display: swap; }`;
-	})
-	.join("\n");
-const fontStyles = `${fontFaces}
-:root {
-	--font-red-hat-display: "Red Hat Display";
-	--font-red-hat-text: "Red Hat Text";
-	--font-red-hat-mono: "Red Hat Mono";
+// The site loads Red Hat through Astro's font integration, which Storybook
+// cannot call. These packages vendor the same variable fonts, so a story (and
+// its screenshot baseline) renders identically on every machine, offline.
+import "@fontsource-variable/red-hat-display";
+import "@fontsource-variable/red-hat-text";
+import "@fontsource-variable/red-hat-mono";
+
+const fontStyles = `:root {
+	--font-red-hat-display: "Red Hat Display Variable";
+	--font-red-hat-text: "Red Hat Text Variable";
+	--font-red-hat-mono: "Red Hat Mono Variable";
 }`;
 
 const preview: Preview = {

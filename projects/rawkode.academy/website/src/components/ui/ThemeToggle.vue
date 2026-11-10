@@ -1,7 +1,7 @@
 <template>
 	<button
 		@click="handleToggle"
-		:class="props.variant === 'button' || props.showLabel ? layoutStyles.buttonSecondary : shellStyles.menuTrigger"
+		:class="props.variant === 'button' || props.showLabel ? button({ variant: 'outline' }) : shellStyles.menuTrigger"
 		:aria-label="ariaLabel"
 		:title="ariaLabel"
 		type="button"
@@ -77,7 +77,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from "vue";
-import { academyLayout, academyShell } from "@rawkodeacademy/design-system";
+import { academyShell, button } from "@rawkodeacademy/design-system";
 import { capture } from "@/lib/analytics/track";
 import {
 	type ColorScheme,
@@ -102,7 +102,6 @@ const props = withDefaults(defineProps<Props>(), {
 
 const preference = ref<ColorSchemePreference>("system");
 const shellStyles = academyShell();
-const layoutStyles = academyLayout();
 
 const NEXT_DESCRIPTION: Record<ColorSchemePreference, string> = {
 	light: "Switch to dark mode",

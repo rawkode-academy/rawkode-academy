@@ -9,7 +9,7 @@ name: "rawkode-academy-website"
 runtime: schema.#DevenvRuntime
 hooks: onEnter: devenv: schema.#Devenv
 
-// deploy.main reads BASIN_SQL_TOKEN from Infisical.
+// deploy.main and deploy.preview read BASIN_SQL_TOKEN from Infisical.
 _ciInfisicalOidc: true
 
 let _t = tasks
@@ -45,10 +45,15 @@ ci: pipelines: {
 	}
 
 	pullRequest: {
+		environment: "production"
 		when: {
 			pullRequest: true
 		}
-		tasks: [_t.build]
+		tasks: [_t.deploy.preview]
+		annotations: "Preview URL": schema.#TaskCaptureRef & {
+			cuenvTask:    "deploy.preview"
+			cuenvCapture: "previewUrl"
+		}
 	}
 }
 

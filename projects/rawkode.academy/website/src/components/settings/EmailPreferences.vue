@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { academyAccount, dialog, academyLayout } from "@rawkodeacademy/design-system";
+import { academyAccount, button, dialog } from "@rawkodeacademy/design-system";
 const account = academyAccount();
 const modal = dialog({ tone: "academy" });
-const layout = academyLayout();
 
 import { Dialog } from "@ark-ui/vue/dialog";
 import { actions } from "astro:actions";
@@ -385,10 +384,10 @@ const formatTechName = (id: string) => {
 								You will stop receiving all newsletters and notifications from Rawkode Academy.
 							</Dialog.Description>
 							<div :class="account.actions">
-								<button type="button" :disabled="isUnsubscribingAll" @click="unsubscribeFromAll" :class="account.button">
+								<button type="button" :disabled="isUnsubscribingAll" @click="unsubscribeFromAll" :class="button()">
 									{{ isUnsubscribingAll ? "Unsubscribing..." : "Yes, unsubscribe" }}
 								</button>
-								<Dialog.CloseTrigger :disabled="isUnsubscribingAll" :class="layout.buttonSecondary">Cancel</Dialog.CloseTrigger>
+								<Dialog.CloseTrigger :disabled="isUnsubscribingAll" :class="button({ variant: 'outline' })">Cancel</Dialog.CloseTrigger>
 							</div>
 						</div>
 						</Dialog.Content>
@@ -402,7 +401,7 @@ const formatTechName = (id: string) => {
 			v-if="!hasAnySubscription"
 			:class="account.empty"
 		>
-			<p class="text-sm">You are not subscribed to any emails.</p>
+			<p>You are not subscribed to any emails.</p>
 			<a
 				href="/"
 				:class="account.link"

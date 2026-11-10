@@ -176,8 +176,13 @@ const wallMarkup = fragment(
 const renderWall = (wall) =>
 	render(
 		wallMarkup,
-		["wall", "BECOME_A_SUPPORTER_PATH", "MLabel", "EmptyState"],
-		{ wall, BECOME_A_SUPPORTER_PATH: "/organizations/support-our-work#supporter" },
+		["wall", "BECOME_A_SUPPORTER_PATH", "MLabel", "EmptyState", "button"],
+		{
+			wall,
+			BECOME_A_SUPPORTER_PATH: "/organizations/support-our-work#supporter",
+			// Stand-in for the design-system button recipe.
+			button: () => "button",
+		},
 	);
 
 test("wall shows each supporter's logo or name, its website and the technologies it supports", async () => {

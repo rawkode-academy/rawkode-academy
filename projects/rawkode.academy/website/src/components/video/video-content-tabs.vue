@@ -4,16 +4,7 @@ import { computed, ref, watch as watchValue } from "vue";
 import { capture } from "@/lib/analytics/track";
 import { academyWatch, tabs as academyTabs } from "@rawkodeacademy/design-system";
 import VideoComments from "./comments.vue";
-
-interface Resource {
-	id?: string | undefined;
-	title: string;
-	description?: string | undefined;
-	type: "url" | "file" | "embed";
-	url?: string | undefined;
-	filePath?: string | undefined;
-	category?: string | undefined;
-}
+import { type VideoResource as Resource, validVideoResources } from "./video-resources";
 
 const props = withDefaults(defineProps<{ videoId: string; resources?: Resource[] }>(), {
 	resources: () => [],
@@ -37,25 +28,7 @@ const categoryIcons: Record<string, string> = {
 	other: "M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1",
 };
 
-function resourceHref(resource: Resource): string | undefined {
-	for (const candidate of [resource.url, resource.filePath]) {
-		const href = candidate?.trim();
-		if (!href || href.startsWith("#") || href.startsWith("//") || /[\\\u0000-\u0020]/.test(href)) continue;
-		try {
-			const url = new URL(href, "https://rawkode.academy/");
-			if (url.protocol === "https:" || url.protocol === "http:") return href;
-		} catch {
-			// An invalid destination is not a resource link.
-		}
-	}
-	return undefined;
-}
-
-const validResources = computed(() => props.resources.flatMap((resource) => {
-	const href = resourceHref(resource);
-	if (!href || !resource.title.trim()) return [];
-	return [{ ...resource, href, category: categoryOrder.includes(resource.category ?? "") ? resource.category! : "other" }];
-}));
+const validResources = computed(() => validVideoResources(props.resources));
 const activeTab = ref(validResources.value.length > 0 ? "resources" : "comments");
 const tabs = [{ id: "comments", label: "Comments" }, { id: "resources", label: "Resources" }];
 watchValue(validResources, (resources) => {
@@ -86,7 +59,7 @@ const setActiveTab = (tabId: string) => {
 </script>
 
 <template>
-	<section v-if="validResources.length === 0" :class="watch.section">
+	<section v-if="validResources.length === 0">
 		<VideoComments :video-id="videoId" :heading-level="2" />
 	</section>
 	<Tabs.Root v-else :value="activeTab" :default-value="activeTab" :class="watch.tabsRoot" @value-change="setActiveTab($event.value)">

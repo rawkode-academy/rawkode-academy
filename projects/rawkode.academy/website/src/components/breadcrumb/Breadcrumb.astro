@@ -2,12 +2,19 @@
 import { academyNavigation } from "@rawkodeacademy/design-system";
 import BreadcrumbJsonLd from "./BreadcrumbJsonLd.astro";
 
-interface Props { elements: { title: string; link: string }[]; }
-const { elements } = Astro.props;
-const visibleElements = elements.slice(0, -1);
+type Crumb = { title: string; link: string };
+/**
+ * The one breadcrumb: parent links only, set in the page header.
+ *
+ * Pass `elements` (the full trail, current page last) to also emit the
+ * BreadcrumbList JSON-LD, or `parents` when the page emits its own.
+ */
+type Props = { elements: Crumb[]; parents?: never } | { parents: Crumb[]; elements?: never };
+const { elements, parents } = Astro.props as Props;
+const visibleElements = parents ?? elements.slice(0, -1);
 const styles = academyNavigation();
 ---
-<BreadcrumbJsonLd elements={elements} />
+{elements && <BreadcrumbJsonLd elements={elements} />}
 {visibleElements.length > 0 && <nav class={styles.breadcrumb} aria-label="Breadcrumb">
 	<ol class={styles.trail}>
 		{visibleElements.map((element, index) => <li>
