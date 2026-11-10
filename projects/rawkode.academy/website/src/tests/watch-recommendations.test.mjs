@@ -412,7 +412,7 @@ test("the pinned pane has a measured fallback and the scheduled start uses the A
 	// its `--watch-rest` plus the 619px player's height, on a 0.25rem step.
 	const tiers = [
 		...recipe.matchAll(
-			/\(min-height: ([\d.]+)rem\)[^{]*\{\s*(?:\/\/[^\n]*\s*)*"&\[data-pin\]": \{ "--watch-rest": "([\d.]+)rem" \}/g,
+			/\(min-height: ([\d.]+)rem\)[^{]*\{\s*(?:\/\/[^\n]*\n\s*)*"&\[data-pin\]": \{ "--watch-rest": "([\d.]+)rem" \}/g,
 		),
 	].map(([, from, rest]) => [Number(from), Number(rest)]);
 	assert.deepEqual(tiers, [
