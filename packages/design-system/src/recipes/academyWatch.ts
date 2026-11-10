@@ -2,7 +2,6 @@ import { sva } from "../../styled-system/css";
 import { focusRing, focusRingInk } from "../styles/focus";
 import { inputField } from "../styles/field";
 import { coverImage, coverImageZoom, videoFrame } from "../styles/media";
-import { scrollReveal } from "../styles/motion";
 import { panelSurface } from "../styles/surface";
 import { systemGridBottom } from "../styles/systemGrid";
 import { ledeText, monoMeta } from "../styles/type";
@@ -33,11 +32,15 @@ import { ledeText, monoMeta } from "../styles/type";
  *         </div></div>
  *         <div class={deckSpace} />
  *         <header class={session}>…</header>
- *         <aside class={extras}>…</aside>
  *       </div></div></div>
  *       <div class={notes}><div class={notesInner}>…</div></div>
+ *       <aside class={more} data-watch-more><div class={moreInner}>…</div></aside>
  *     </div>
+ *     <div class={outro}>…newsletter…</div>
  *   </div>
+ *
+ * `bench` takes `data-pin` when "more from" exists and may be pinned, and
+ * `data-notice` when the session carries the upcoming-stream notice.
  *
  * Playback, deferred islands and route data remain owned by the website.
  */
@@ -70,8 +73,10 @@ export const academyWatch = sva({
 		"noticeTitle",
 		"noticeCopy",
 		"factLink",
-		"actions",
-		"extras",
+		"tools",
+		"toolsEnd",
+		"more",
+		"moreInner",
 		"extrasBlock",
 		"inkHeader",
 		"inkHeading",
@@ -107,6 +112,8 @@ export const academyWatch = sva({
 		"castInitials",
 		"castName",
 		"castMeta",
+		"castHandle",
+		"outro",
 		"chapterList",
 		"chapterLink",
 		"chapterTime",
@@ -185,24 +192,60 @@ export const academyWatch = sva({
 		// One column until `lg`, then the split. The outer tracks grow past
 		// 1180px so each pane bleeds to its edge of the window while its
 		// content stays on the shell.
+		//
+		// Source order is the reading order at every width: player, session,
+		// notes, then "more from". From `lg` the last is placed back in the
+		// ink column by the grid. `--watch-rest` is everything in the first
+		// viewport that is not the player (the site header, the session and,
+		// when it is pinned, "more from"); the player takes what is left.
 		bench: {
+			"--watch-rest": "22.5rem",
 			display: "flex",
 			flexDirection: "column",
 			timelineScope: "--watch-deck",
+			"&[data-notice]": { "--watch-rest": "33.5rem" },
 			_lg: {
 				display: "grid",
 				gridTemplateColumns:
 					"[minmax(0, 1fr) minmax(0, 708px) minmax(0, 472px) minmax(0, 1fr)]",
+				gridTemplateRows: "[1fr auto]",
+			},
+			// A viewport with room pins "more from" to the foot of the ink
+			// pane, so the pane is a complete side of the bench. A shorter one
+			// leaves it at the end of the column, where the page scrolls to it;
+			// nothing ever scrolls inside the pane.
+			"@media (min-width: 1024px) and (min-height: 54rem)": {
+				"&[data-pin]": { "--watch-rest": "36.75rem" },
+				"&[data-pin] > [data-watch-pane]": { gridRow: "1 / 3" },
+				"&[data-pin] > [data-watch-more]": {
+					gridRow: "1 / 3",
+					alignSelf: "end",
+					position: "sticky",
+					bottom: "0",
+					paddingBlockEnd: "4",
+					borderInlineEndColor: "transparent",
+					backgroundColor: "transparent",
+				},
+				// Two rows until the viewport has room for the third.
+				"&[data-pin] > [data-watch-more] li:nth-child(n + 3)": {
+					display: "none",
+				},
+			},
+			"@media (min-width: 1024px) and (min-height: 62rem)": {
+				"&[data-pin]": { "--watch-rest": "41rem" },
+				"&[data-pin] > [data-watch-more] li:nth-child(n + 3)": {
+					display: "block",
+				},
 			},
 		},
 		// Below `lg` the pane and its wrappers dissolve so the player can
-		// stick against the whole page and the notes can sit between the
-		// session header and the extras.
+		// stick against the whole page.
 		pane: {
 			display: "contents",
 			_lg: {
 				display: "block",
 				gridColumn: "1 / 3",
+				gridRow: "1",
 				minWidth: "0",
 				// In dark the ink token is one step from the canvas, so the pane
 				// takes the raised panel colour and the edge stays a clear rule.
@@ -223,30 +266,26 @@ export const academyWatch = sva({
 				...systemGridBottom,
 			},
 		},
-		// Sticky only while it fits: a pane taller than the viewport scrolls
-		// inside itself instead of clipping, as the technology rail does.
+		// The player narrows on a short viewport so the pane always fits
+		// under the site header; the pane has no scroll of its own.
 		paneInner: {
 			display: "contents",
 			_lg: {
 				"--watch-player-w":
-					"min(100%, max(20rem, calc((100dvh - 26rem) * 16 / 9)))",
+					"min(100%, max(18rem, calc((100dvh - var(--watch-rest)) * 16 / 9)))",
 				position: "relative",
 				display: "flex",
 				flexDirection: "column",
 				width: "full",
 				// The 708px track less the pane's own rule.
 				maxWidth: "[707px]",
-				maxHeight: "[100dvh]",
 				marginInlineStart: "auto",
-				paddingBlock: "6",
+				paddingBlock: "5",
 				paddingInlineStart: "academy-gutter",
 				paddingInlineEnd: "10",
-				overflowY: "auto",
-				scrollbarWidth: "thin",
 			},
 		},
 		deck: {
-			order: "1",
 			position: "relative",
 			flexShrink: "0",
 			height: "[var(--watch-full)]",
@@ -296,7 +335,6 @@ export const academyWatch = sva({
 			"@media screen and (max-width: 1023.98px) and (prefers-reduced-motion: no-preference)":
 				{
 					"@supports (animation-timeline: view())": {
-						order: "1",
 						display: "block",
 						flexShrink: "0",
 						height: "[calc(var(--watch-full) - var(--watch-strip))]",
@@ -426,7 +464,6 @@ export const academyWatch = sva({
 		},
 		// Breadcrumb, title, date, runtime and kind: the session, once.
 		session: {
-			order: "2",
 			position: "relative",
 			overflow: "hidden",
 			paddingInline: "academy-gutter",
@@ -442,10 +479,9 @@ export const academyWatch = sva({
 			},
 			_lg: {
 				flexShrink: "0",
-				width: "[var(--watch-player-w)]",
 				overflow: "visible",
 				paddingInline: "0",
-				paddingBlockStart: "4",
+				paddingBlockStart: "3",
 				paddingBlockEnd: "0",
 				backgroundColor: "transparent",
 			},
@@ -518,11 +554,12 @@ export const academyWatch = sva({
 			display: "flex",
 			flexDirection: "column",
 			alignItems: "start",
-			gap: "3",
-			marginBlockStart: "5",
-			paddingBlockStart: "5",
+			gap: "2",
+			marginBlockStart: "4",
+			paddingBlockStart: "4",
 			borderTop: "hairline",
 			borderTopColor: "academy.inkBorder",
+			"& > :last-child": { marginBlockStart: "2" },
 		},
 		noticeTitle: {
 			margin: "0",
@@ -545,39 +582,50 @@ export const academyWatch = sva({
 			_hover: { color: "academy.inkAccent" },
 			_focusVisible: focusRingInk,
 		},
-		actions: {
+		// Under the meta line: the technologies as pills, then the share
+		// link at the trailing edge of the same row.
+		tools: {
 			display: "flex",
 			flexWrap: "wrap",
 			alignItems: "center",
-			gap: "3",
-			marginBlockStart: "5",
+			gap: "2",
+			marginBlockStart: "4",
 		},
-		// What the session is about and what to watch next. It completes the
-		// ink pane on wide screens and closes the page in ink on narrow ones.
-		extras: {
-			order: "4",
-			display: "grid",
-			gap: "8",
-			paddingInline: "academy-gutter",
+		toolsEnd: { marginInlineStart: "auto" },
+		// What to watch next. It follows the notes in the source, closes the
+		// page in ink on narrow screens and is placed at the foot of the ink
+		// column from `lg` (pinned there when `bench` has the room).
+		more: {
 			paddingBlock: "10",
 			borderTop: "hairline",
 			borderTopColor: "academy.inkBorder",
 			backgroundColor: "academy.ink",
 			color: "academy.inkText",
-			_sm: {
-				gridTemplateColumns: "[minmax(0, 2fr) minmax(0, 3fr)]",
-			},
 			_lg: {
-				flexShrink: "0",
-				gridTemplateColumns: "[minmax(0, 2fr) minmax(0, 3fr)]",
-				columnGap: "8",
-				marginBlockStart: "6",
-				paddingInline: "0",
-				paddingBlockStart: "5",
-				paddingBlockEnd: "0",
-				borderTop: "hairline",
-				borderTopColor: "academy.inkBorder",
-				backgroundColor: "transparent",
+				gridColumn: "1 / 3",
+				gridRow: "2",
+				minWidth: "0",
+				paddingBlockStart: "0",
+				paddingBlockEnd: "8",
+				borderTop: "none",
+				borderInlineEnd: "hairline",
+				borderInlineEndColor: "academy.inkBorder",
+				backgroundColor: { base: "academy.ink", _dark: "academy.inkRaised" },
+			},
+		},
+		moreInner: {
+			paddingInline: "academy-gutter",
+			_lg: {
+				width: "full",
+				// As `paneInner`: the 708px track less the pane's own rule.
+				maxWidth: "[707px]",
+				marginInlineStart: "auto",
+				paddingInlineEnd: "10",
+				"& > *": {
+					paddingBlockStart: "4",
+					borderTop: "hairline",
+					borderTopColor: "academy.inkBorder",
+				},
 			},
 		},
 		extrasBlock: {
@@ -637,7 +685,7 @@ export const academyWatch = sva({
 			display: "inline-flex",
 			alignItems: "center",
 			gap: "2",
-			minHeight: "11",
+			minHeight: "9",
 			paddingInlineStart: "2",
 			paddingInlineEnd: "3",
 			border: "hairline",
@@ -668,6 +716,7 @@ export const academyWatch = sva({
 		techName: { color: "currentColor" },
 		upNextList: {
 			display: "grid",
+			columnGap: "6",
 			margin: "0",
 			padding: "0",
 			listStyle: "none",
@@ -675,6 +724,8 @@ export const academyWatch = sva({
 				borderTop: "hairline",
 				borderTopColor: "academy.inkBorder",
 			},
+			_sm: { gridTemplateColumns: "repeat(2, minmax(0, 1fr))" },
+			_lg: { gridTemplateColumns: "minmax(0, 1fr)" },
 		},
 		upNextLink: {
 			display: "grid",
@@ -717,13 +768,13 @@ export const academyWatch = sva({
 		},
 		// The canvas pane: the working notes, in the order you need them.
 		notes: {
-			order: "3",
 			minWidth: "0",
 			paddingInline: "academy-gutter",
 			paddingBlockStart: "8",
 			paddingBlockEnd: "16",
 			_lg: {
 				gridColumn: "3 / 5",
+				gridRow: "1 / 3",
 				paddingInlineStart: "10",
 				paddingBlockStart: "10",
 				paddingBlockEnd: "20",
@@ -759,7 +810,6 @@ export const academyWatch = sva({
 			flexDirection: "column",
 			gap: "4",
 			minWidth: "0",
-			...scrollReveal,
 		},
 		sectionTitle: {
 			margin: "0",
@@ -870,7 +920,7 @@ export const academyWatch = sva({
 		// into colour under the pointer or focus, as on People.
 		castGrid: {
 			display: "grid",
-			gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+			gridTemplateColumns: "repeat(auto-fill, minmax(6.5rem, 1fr))",
 			columnGap: "3",
 			rowGap: "5",
 			margin: "0",
@@ -923,6 +973,21 @@ export const academyWatch = sva({
 			transitionDuration: "fast",
 		},
 		castMeta: { ...monoMeta, overflowWrap: "anywhere" },
+		// A handle is one word: it takes its own line and never breaks.
+		castHandle: {
+			...monoMeta,
+			maxWidth: "full",
+			overflow: "hidden",
+			textOverflow: "ellipsis",
+			whiteSpace: "nowrap",
+		},
+		// The newsletter, full width under both panes and above the footer.
+		outro: {
+			width: "full",
+			maxWidth: "academy-shell",
+			marginInline: "auto",
+			paddingInline: "academy-gutter",
+		},
 		chapterList: {
 			display: "grid",
 			margin: "0",

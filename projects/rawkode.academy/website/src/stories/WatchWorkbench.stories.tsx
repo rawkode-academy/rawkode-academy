@@ -1,6 +1,7 @@
 import {
 	academyLabel,
 	academyLayout,
+	academyMarketing,
 	academyNavigation,
 	academyWatch,
 	button,
@@ -40,6 +41,7 @@ interface Resource {
 	title: string;
 	description?: string;
 	category: string;
+	type?: "link" | "file" | "embed";
 }
 interface Session {
 	title: string;
@@ -69,6 +71,39 @@ const initials = (name: string) =>
 		.map((part) => part[0])
 		.join("");
 
+/** `NewsletterCTA.astro` with the signed-in widget: one button, no form. */
+const Newsletter = () => {
+	const marketing = academyMarketing({ newsletterVariant: "card" });
+	return (
+		<section className={marketing.newsletter}>
+			<div className={marketing.newsletterSection}>
+				<div className={marketing.newsletterGrid}>
+					<div className={marketing.newsletterCopy}>
+						<div className={marketing.newsletterBadge}>
+							<span>Rawkode Academy newsletter</span>
+						</div>
+						<h2 className={marketing.newsletterTitle}>
+							Academy publications by email
+						</h2>
+						<p className={marketing.newsletterLead}>
+							Get an email when Rawkode Academy publishes new tutorials,
+							articles, and videos.
+						</p>
+					</div>
+					<div className={marketing.newsletterWidget}>
+						<button
+							type="button"
+							className={button({ variant: "outline", fullWidth: true })}
+						>
+							Subscribe
+						</button>
+					</div>
+				</div>
+			</div>
+		</section>
+	);
+};
+
 const Workbench = ({ session }: { session: Session }) => {
 	const watch = academyWatch();
 	const nav = academyNavigation();
@@ -78,8 +113,12 @@ const Workbench = ({ session }: { session: Session }) => {
 	const hasKinds = session.resources.some((r) => r.category !== "other");
 	return (
 		<div className={watch.root}>
-			<div className={watch.bench}>
-				<div className={watch.pane}>
+			<div
+				className={watch.bench}
+				data-pin={session.upNext.length > 0 && !upcoming ? "" : undefined}
+				data-notice={upcoming ? "" : undefined}
+			>
+				<div className={watch.pane} data-watch-pane>
 					<div className={watch.paneSticky}>
 						<div className={watch.paneInner}>
 							<div className={watch.deck}>
@@ -164,6 +203,32 @@ const Workbench = ({ session }: { session: Session }) => {
 										<span className={label.root}>{session.kind}</span>
 									</span>
 								</p>
+								<div className={watch.tools}>
+									{session.technologies.length > 0 && (
+										<ul
+											className={watch.techGrid}
+											aria-label="Technologies featured"
+										>
+											{session.technologies.map((name) => (
+												<li key={name}>
+													<a className={watch.techChip} href="#technology">
+														<span className={watch.techName}>{name}</span>
+													</a>
+												</li>
+											))}
+										</ul>
+									)}
+									<button
+										type="button"
+										className={`${button({
+											variant: "outline",
+											surface: "ink",
+											size: "sm",
+										})} ${watch.toolsEnd}`}
+									>
+										Copy link
+									</button>
+								</div>
 								{upcoming && (
 									<div className={watch.upcoming}>
 										<h2 className={watch.noticeTitle}>
@@ -173,87 +238,20 @@ const Workbench = ({ session }: { session: Session }) => {
 											Join us on <time>{session.scheduled}</time>. The player
 											will activate when the stream is available.
 										</p>
-										<button
-											type="button"
-											className={button({ surface: "ink" })}
-										>
-											Notify me
-										</button>
+										<a className={watch.factLink} href="#youtube">
+											Open the scheduled stream on YouTube ↗
+										</a>
+										<div>
+											<button
+												type="button"
+												className={button({ surface: "ink" })}
+											>
+												Notify me
+											</button>
+										</div>
 									</div>
 								)}
-								<div className={watch.actions}>
-									<button
-										type="button"
-										className={button({
-											variant: "outline",
-											surface: "ink",
-											size: "sm",
-										})}
-									>
-										Copy link
-									</button>
-								</div>
 							</header>
-
-							{(session.technologies.length > 0 ||
-								session.upNext.length > 0) && (
-								<aside className={watch.extras} aria-label="About this session">
-									{session.technologies.length > 0 && (
-										<section className={watch.extrasBlock}>
-											<h2 className={watch.inkHeading}>
-												Technologies featured
-											</h2>
-											<ul className={watch.techGrid}>
-												{session.technologies.map((name) => (
-													<li key={name}>
-														<a className={watch.techChip} href="#technology">
-															<span className={watch.techName}>{name}</span>
-														</a>
-													</li>
-												))}
-											</ul>
-										</section>
-									)}
-									{session.upNext.length > 0 && (
-										<section className={watch.extrasBlock}>
-											<div className={watch.inkHeader}>
-												<h2 className={watch.inkHeading}>
-													More from {session.show}
-												</h2>
-												<a className={watch.inkLink} href="#show">
-													All {session.total} episodes{" "}
-													<span aria-hidden="true">→</span>
-												</a>
-											</div>
-											<ul className={watch.upNextList}>
-												{session.upNext.map((video) => (
-													<li key={video.title}>
-														<a className={watch.upNextLink} href="#video">
-															<span className={watch.upNextStill}>
-																<img
-																	className={watch.upNextImage}
-																	src={video.still}
-																	alt=""
-																	width="320"
-																	height="180"
-																/>
-															</span>
-															<span className={watch.upNextBody}>
-																<span className={watch.upNextMeta}>
-																	{video.runtime}
-																</span>
-																<h3 className={watch.upNextTitle} data-title>
-																	{video.title}
-																</h3>
-															</span>
-														</a>
-													</li>
-												))}
-											</ul>
-										</section>
-									)}
-								</aside>
-							)}
 						</div>
 					</div>
 				</div>
@@ -331,7 +329,7 @@ const Workbench = ({ session }: { session: Session }) => {
 												{hasKinds && (
 													<span className={watch.linkKind}>
 														{resource.category === "other"
-															? ""
+															? (resource.type ?? "link")
 															: resource.category}
 													</span>
 												)}
@@ -387,7 +385,7 @@ const Workbench = ({ session }: { session: Session }) => {
 												</h3>
 												<p className={watch.castMeta}>{person.role}</p>
 												{person.handle && (
-													<p className={watch.castMeta}>@{person.handle}</p>
+													<p className={watch.castHandle}>@{person.handle}</p>
 												)}
 											</a>
 										</li>
@@ -500,6 +498,55 @@ const Workbench = ({ session }: { session: Session }) => {
 						</section>
 					</div>
 				</div>
+
+				{session.upNext.length > 0 && (
+					<aside
+						className={watch.more}
+						data-watch-more
+						aria-label="More to watch"
+					>
+						<div className={watch.moreInner}>
+							<section className={watch.extrasBlock}>
+								<div className={watch.inkHeader}>
+									<h2 className={watch.inkHeading}>More from {session.show}</h2>
+									<a className={watch.inkLink} href="#show">
+										All {session.total} episodes{" "}
+										<span aria-hidden="true">→</span>
+									</a>
+								</div>
+								<ul className={watch.upNextList}>
+									{session.upNext.map((video) => (
+										<li key={video.title}>
+											<a className={watch.upNextLink} href="#video">
+												<span className={watch.upNextStill}>
+													<img
+														className={watch.upNextImage}
+														src={video.still}
+														alt=""
+														width="320"
+														height="180"
+													/>
+												</span>
+												<span className={watch.upNextBody}>
+													<span className={watch.upNextMeta}>
+														{video.runtime}
+													</span>
+													<h3 className={watch.upNextTitle} data-title>
+														{video.title}
+													</h3>
+												</span>
+											</a>
+										</li>
+									))}
+								</ul>
+							</section>
+						</div>
+					</aside>
+				)}
+			</div>
+
+			<div className={watch.outro}>
+				<Newsletter />
 			</div>
 		</div>
 	);
@@ -540,7 +587,7 @@ const recorded: Session = {
 			handle: "rawkode",
 			portrait: stills.controlPlane,
 		},
-		{ name: "Liz Rice", role: "Guest", handle: "lizrice" },
+		{ name: "Yoshua Wuyts", role: "Guest", handle: "yoshuawuyts" },
 		{ name: "Duffie Cooley", role: "Guest" },
 		{ name: "Thomas Graf", role: "Guest" },
 	],
@@ -603,6 +650,29 @@ const recorded: Session = {
 		},
 	],
 	total: 175,
+};
+
+/**
+ * The newsletter card answers to its container: stacked in a narrow column
+ * on a wide screen, two columns when it has the room.
+ */
+export const NewsletterWidths: Story = {
+	tags: ["!visual-mobile"],
+	render: () => (
+		<div
+			style={{
+				display: "grid",
+				gap: "2rem",
+				padding: "2rem",
+				background: "var(--colors-academy-canvas)",
+			}}
+		>
+			<div style={{ width: "384px" }}>
+				<Newsletter />
+			</div>
+			<Newsletter />
+		</div>
+	),
 };
 
 /** A recorded session with everything the content layer can supply. */

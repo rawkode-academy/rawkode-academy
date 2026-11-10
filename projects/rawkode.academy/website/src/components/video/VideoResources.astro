@@ -4,8 +4,9 @@ import { type VideoResource, validVideoResources } from "./video-resources";
 
 /**
  * A session's resources as a ruled list, rendered on the server. The kind
- * column is the resource's own category; "other" says nothing, so it is left
- * blank, and the column goes when no resource has a named category.
+ * column is the resource's own category. "other" says nothing, so those
+ * rows fall back to what the resource is (its type: a link, a file or an
+ * embed), and the column goes when no resource has a named category.
  */
 interface Props {
 	resources: readonly VideoResource[];
@@ -13,6 +14,9 @@ interface Props {
 
 const resources = validVideoResources(Astro.props.resources);
 const hasKinds = resources.some((resource) => resource.category !== "other");
+const typeLabels = { url: "link", file: "file", embed: "embed" } as const;
+const kindOf = (resource: (typeof resources)[number]) =>
+	resource.category === "other" ? typeLabels[resource.type] : resource.category;
 const watch = academyWatch();
 ---
 
@@ -30,7 +34,7 @@ const watch = academyWatch();
 						rel={resource.type === "url" ? "noopener noreferrer" : undefined}
 					>
 						{hasKinds && (
-							<span class={watch.linkKind}>{resource.category === "other" ? "" : resource.category}</span>
+							<span class={watch.linkKind}>{kindOf(resource)}</span>
 						)}
 						<span class={watch.linkBody}>
 							<span class={watch.linkName} data-name>{resource.title}</span>

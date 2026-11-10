@@ -66,7 +66,7 @@ const show = { id: "show", data: { name: "Fixture show" } };
 async function select(videos, showEntry = show, video = current) {
 	const lookups = [];
 	const selected = await vm.runInNewContext(
-		`(async () => { ${transpile(selection)}; return { showEntry, showRelatedAll, showRelatedVideos, technologyRecommendation, techEntries }; })()`,
+		`(async () => { ${transpile(selection)}; return { showEntry, showRelatedAll, showRelatedVideos, showEpisodeTotal, technologyRecommendation, techEntries }; })()`,
 		{
 			videos,
 			video,
@@ -94,11 +94,11 @@ async function select(videos, showEntry = show, video = current) {
 
 async function renderRecommendations(props) {
 	const calls = [];
-	// The recommendation is the last thing in the ink pane's aside.
+	// The recommendation is the only thing inside the "more to watch" aside.
 	const start = source.indexOf("{showEntry && showRelatedVideos.length > 0 ?");
-	const markup = source.slice(start, source.indexOf("</aside>", start));
+	const markup = source.slice(start, source.indexOf("</div>", start));
 	assert(markup.includes("TechnologyVideoSection"));
-	const input = `---\nimport ShowVideoSection from "show";\nimport TechnologyVideoSection from "technology";\nconst { showEntry, showRelatedAll, showRelatedVideos, technologyRecommendation } = Astro.props;\n---\n${markup}`;
+	const input = `---\nimport ShowVideoSection from "show";\nimport TechnologyVideoSection from "technology";\nconst { showEntry, showRelatedAll, showRelatedVideos, showEpisodeTotal, technologyRecommendation } = Astro.props;\n---\n${markup}`;
 	const compiled = await transform(input, {
 		filename: "recommendations.astro",
 	});
@@ -177,7 +177,20 @@ test("one show section wins, capped at six newest, without reading technology re
 	assert.equal(dom.querySelectorAll("section").length, 1);
 	assert.equal(dom.querySelectorAll("a").length, 6);
 	assert.equal(calls[0].kind, "show");
-	assert.equal(calls[0].props.totalVideos, 9);
+	// The label counts what the show page lists: every published episode,
+	// the one being watched included.
+	assert.equal(selected.showEpisodeTotal, 10);
+	assert.equal(calls[0].props.totalVideos, 10);
+	// A scheduled stream is not an episode yet, so it is not counted.
+	const upcoming = makeVideo("current", {
+		publishedAt: new Date("2999-01-01"),
+		technologies: [],
+	});
+	assert.equal(
+		(await select([upcoming, ...alternatives], show, upcoming))
+			.showEpisodeTotal,
+		9,
+	);
 });
 
 test("fallback chooses only the first declared technology with published alternatives", async () => {
@@ -195,7 +208,8 @@ test("fallback chooses only the first declared technology with published alterna
 	]);
 	assert.equal(selected.showRelatedVideos.length, 0);
 	assert.equal(selected.technologyRecommendation.technology.id, "second");
-	assert.equal(selected.technologyRecommendation.totalVideos, 8);
+	// Eight alternatives plus the published video being watched.
+	assert.equal(selected.technologyRecommendation.totalVideos, 9);
 	assert.equal(selected.technologyRecommendation.videos.length, 6);
 	assert.equal(selected.technologyRecommendation.videos[0].slug, "second-7");
 	const { dom, calls } = await renderRecommendations(selected);
@@ -211,7 +225,7 @@ test("current and future videos cannot become recommendations or inflate totals"
 	const eligible = makeVideo("published", { show: undefined });
 	const selected = await select([current, ...future, eligible]);
 	assert.equal(selected.showRelatedAll.length, 0);
-	assert.equal(selected.technologyRecommendation.totalVideos, 1);
+	assert.equal(selected.technologyRecommendation.totalVideos, 2);
 	assert.equal(selected.technologyRecommendation.videos[0].slug, "published");
 	const none = await select([current, ...future]);
 	assert.equal(none.technologyRecommendation, null);

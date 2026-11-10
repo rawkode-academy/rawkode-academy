@@ -160,7 +160,9 @@ export const academyMarketing = sva({
 		},
 		// Layout only: the control itself is `button({ variant: "outline" })`.
 		copyButton: { minWidth: "32", justifySelf: "start" },
-		newsletter: { width: "full" },
+		// The card answers to the width it is given, not the window: its two
+		// columns need a wide viewport and a container with room for both.
+		newsletter: { width: "full", containerType: "inline-size" },
 		newsletterSection: {
 			overflow: "hidden",
 			border: "hairline",
@@ -194,7 +196,10 @@ export const academyMarketing = sva({
 			color: "academy.textSoft",
 			lineHeight: "relaxed",
 		},
-		newsletterWidget: { width: "full", _lg: { justifySelf: "end" } },
+		newsletterWidget: {
+			width: "full",
+			_lg: { "@container (min-width: 40rem)": { justifySelf: "end" } },
+		},
 		newsletterSuccess: {
 			margin: "0",
 			display: "flex",
@@ -317,7 +322,12 @@ export const academyMarketing = sva({
 				},
 				newsletterGrid: {
 					gap: "5",
-					_lg: { gridTemplateColumns: "minmax(0, 1fr) 18rem", gap: "8" },
+					_lg: {
+						"@container (min-width: 40rem)": {
+							gridTemplateColumns: "minmax(0, 1fr) 18rem",
+							gap: "8",
+						},
+					},
 				},
 				newsletterCopy: { gap: "2" },
 				newsletterTitle: { fontSize: "xl", _lg: { fontSize: "2xl" } },
@@ -334,7 +344,12 @@ export const academyMarketing = sva({
 				},
 				newsletterGrid: {
 					gap: "6",
-					_lg: { gridTemplateColumns: "minmax(0, 1fr) 20rem", gap: "10" },
+					_lg: {
+						"@container (min-width: 40rem)": {
+							gridTemplateColumns: "minmax(0, 1fr) 20rem",
+							gap: "10",
+						},
+					},
 				},
 				newsletterCopy: { gap: "3" },
 				newsletterTitle: { fontSize: "2xl", _lg: { fontSize: "3xl" } },

@@ -41,7 +41,7 @@ const watch = academyWatch();
 						>{initials(person.data.name)}</span>
 						<h3 class={watch.castName} data-name>{person.data.name}</h3>
 						<p class={watch.castMeta}>{role}</p>
-						{person.data.handles?.github && <p class={watch.castMeta}>@{person.data.handles.github}</p>}
+						{person.data.handles?.github && <p class={watch.castHandle}>@{person.data.handles.github}</p>}
 					</a>
 				</li>
 			))}

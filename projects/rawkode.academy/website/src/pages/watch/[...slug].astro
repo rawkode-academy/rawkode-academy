@@ -131,6 +131,11 @@ const showRelatedAll = showEntry
 	})
 	: [];
 const showRelatedVideos = showRelatedAll.slice(0, RELATED_VIDEO_LIMIT).map(toRelatedVideo);
+// "All N episodes" is the count the show page displays: every published
+// episode, this one included once it is published. The recommendations
+// themselves never include the video being watched.
+const currentIsPublished = video.data.publishedAt <= now;
+const showEpisodeTotal = showRelatedAll.length + (showEntry && currentIsPublished ? 1 : 0);
 
 const normalizedTechIds = normalizeTechnologyReferences(
 	video.data.technologies,
@@ -164,7 +169,8 @@ if (showRelatedVideos.length === 0) {
 		technologyRecommendation = {
 			technology,
 			videos: related.slice(0, RELATED_VIDEO_LIMIT).map(toRelatedVideo),
-			totalVideos: related.length,
+			// As above: the technology's published videos, this one included.
+			totalVideos: related.length + (currentIsPublished ? 1 : 0),
 		};
 		break;
 	}
@@ -327,6 +333,9 @@ const breadcrumbParents = [
 		? [{ title: showEntry.data.name, link: `/shows/${showEntry.id}` }]
 		: []),
 ];
+// What the ink pane has to budget for (see `academyWatch.bench`).
+const hasNotice = isUpcomingLive && !studioLiveState.live;
+const hasMore = showRelatedVideos.length > 0 || technologyRecommendation !== null;
 const watchStatusLabel = isLiveNow
 	? "Live now"
 	: isUpcomingLive
@@ -375,8 +384,12 @@ const watchStatusLabel = isLiveNow
 	<link slot="extra-head" rel="alternate" type="application/feed+json" title="Rawkode Academy - Videos (JSON Feed)" href="/api/feeds/videos.json" />
 
 	<div class:list={[media.root, watch.root]}>
-		<div class={watch.bench}>
-			<div class={watch.pane}>
+		<div
+			class={watch.bench}
+			data-pin={hasMore && !hasNotice ? "" : undefined}
+			data-notice={hasNotice ? "" : undefined}
+		>
+			<div class={watch.pane} data-watch-pane>
 				<div class={watch.paneSticky}>
 					<div class={watch.paneInner}>
 						<div class={watch.deck}>
@@ -464,7 +477,40 @@ const watchStatusLabel = isLiveNow
 								</span>
 							</p>
 
-							{isUpcomingLive && !studioLiveState.live && (
+							<div class={watch.tools}>
+								{techEntries.length > 0 && (
+									<ul class={watch.techGrid} aria-label="Technologies featured">
+										{techEntries.map((tech) => (
+											<li>
+												<a href={`/technology/${tech.id}`} class={watch.techChip}>
+													{resolveTechnologyIconUrl(tech.id, tech.data.logos) && <span class={watch.techIcon}>
+														<img
+															src={resolveTechnologyIconUrl(tech.id, tech.data.logos)!}
+															alt=""
+															width="20"
+															height="20"
+															loading="lazy"
+															decoding="async"
+															onerror="this.parentElement.hidden=true"
+														/>
+													</span>}
+													<span class={watch.techName}>{tech.data.name}</span>
+												</a>
+											</li>
+										))}
+									</ul>
+								)}
+								<button
+									type="button"
+									class:list={[button({ variant: "outline", surface: "ink", size: "sm" }), watch.toolsEnd]}
+									data-copy-link
+									title="Copy a link to this video at the current timestamp"
+								>
+									<span data-copy-link-label>Copy link</span>
+								</button>
+							</div>
+
+							{hasNotice && (
 								<div class={watch.upcoming} role="group" aria-label="Upcoming stream details">
 									<h2 class={watch.noticeTitle}>This session has not started yet.</h2>
 									<p class={watch.noticeCopy}>
@@ -488,61 +534,7 @@ const watchStatusLabel = isLiveNow
 									/>
 								</div>
 							)}
-
-							<div class={watch.actions}>
-								<button
-									type="button"
-									class={button({ variant: "outline", surface: "ink", size: "sm" })}
-									data-copy-link
-									title="Copy a link to this video at the current timestamp"
-								>
-									<span data-copy-link-label>Copy link</span>
-								</button>
-							</div>
 						</header>
-
-						{(techEntries.length > 0 || showRelatedVideos.length > 0 || technologyRecommendation) && (
-							<aside class={watch.extras} aria-label="About this session">
-								{techEntries.length > 0 && (
-									<section class={watch.extrasBlock} aria-labelledby="watch-detail-tech-heading">
-										<h2 id="watch-detail-tech-heading" class={watch.inkHeading}>Technologies featured</h2>
-										<ul class={watch.techGrid}>
-											{techEntries.map((tech) => (
-												<li>
-													<a href={`/technology/${tech.id}`} class={watch.techChip}>
-														{resolveTechnologyIconUrl(tech.id, tech.data.logos) && <span class={watch.techIcon}>
-															<img
-																src={resolveTechnologyIconUrl(tech.id, tech.data.logos)!}
-																alt=""
-																width="20"
-																height="20"
-																loading="lazy"
-																decoding="async"
-																onerror="this.parentElement.hidden=true"
-															/>
-														</span>}
-														<span class={watch.techName}>{tech.data.name}</span>
-													</a>
-												</li>
-											))}
-										</ul>
-									</section>
-								)}
-								{showEntry && showRelatedVideos.length > 0 ? (
-									<ShowVideoSection
-										show={showEntry}
-										videos={showRelatedVideos}
-										totalVideos={showRelatedAll.length}
-									/>
-								) : technologyRecommendation && (
-									<TechnologyVideoSection
-										technology={technologyRecommendation.technology}
-										videos={technologyRecommendation.videos}
-										totalVideos={technologyRecommendation.totalVideos}
-									/>
-								)}
-							</aside>
-						)}
 					</div>
 				</div>
 			</div>
@@ -614,10 +606,32 @@ const watchStatusLabel = isLiveNow
 						client:idle
 						videoId={video.data.id}
 					/>
-
-					<NewsletterCTA />
 				</div>
 			</div>
+
+			{hasMore && (
+				<aside class={watch.more} data-watch-more aria-label="More to watch">
+					<div class={watch.moreInner}>
+						{showEntry && showRelatedVideos.length > 0 ? (
+							<ShowVideoSection
+								show={showEntry}
+								videos={showRelatedVideos}
+								totalVideos={showEpisodeTotal}
+							/>
+						) : technologyRecommendation && (
+							<TechnologyVideoSection
+								technology={technologyRecommendation.technology}
+								videos={technologyRecommendation.videos}
+								totalVideos={technologyRecommendation.totalVideos}
+							/>
+						)}
+					</div>
+				</aside>
+			)}
+		</div>
+
+		<div class={watch.outro}>
+			<NewsletterCTA />
 		</div>
 	</div>
 </Page>
