@@ -44,11 +44,10 @@ jobs:
     permissions:
       contents: read
       checks: write
-      packages: write
       id-token: write
     name: rawkode-academy-website-default
-    environment: production
     runs-on: namespace-profile-linux-x86
+    environment: production
     steps:
     - name: Checkout
       uses: actions/checkout@v7
@@ -164,8 +163,8 @@ jobs:
         GITHUB_REF_TYPE: ${{ github.ref_type }}
         GITHUB_REF_NAME: ${{ github.ref_name }}
         CUENV_ENVIRONMENT: production
-        OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
         INFISICAL_MACHINE_IDENTITY_ID: ${{ endsWith(github.workflow, '-infrastructure-apply') && vars.INFISICAL_READ_WRITE_IDENTITY_ID || vars.INFISICAL_MACHINE_IDENTITY_ID }}
+        OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
         INFISICAL_CLIENT_ID: ${{ secrets.INFISICAL_CLIENT_ID }}
         INFISICAL_CLIENT_SECRET: ${{ secrets.INFISICAL_CLIENT_SECRET }}
         INFISICAL_ORGANIZATION_SLUG: ${{ secrets.INFISICAL_ORGANIZATION_SLUG }}
