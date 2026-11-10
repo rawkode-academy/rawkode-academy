@@ -6,7 +6,7 @@ This directory contains infrastructure-as-code configurations for DNS, GitHub or
 
 | Directory | Tool | Purpose |
 |-----------|------|---------|
-| `bootstrap/` | cuenv infrastructure | Identity access and credentials CI uses, the `production` and `infrastructure` GitHub environments, and the rulesets on `main`; run by hand |
+| `bootstrap/` | cuenv infrastructure | Identity access and credentials CI uses, the `production`, `infrastructure` and `infrastructure-plan` GitHub environments, and the rulesets on `main`; run by hand |
 | `dns/` | cuenv infrastructure | DNS records for all domains |
 | `github/` | Terraform | GitHub organization and repository settings |
 | `google-cloud/` | Scripts | Workload Identity and secret access |
@@ -16,7 +16,7 @@ This directory contains infrastructure-as-code configurations for DNS, GitHub or
 Manages DNS with cuenv infrastructure (`cuenv infrastructure`, alias `cuenv i`), which drives the Cloudflare and DNSimple Terraform providers directly. State lives in the `rawkode-academy-cuenv-infrastructure` Cloudflare D1 database.
 
 **Layout:**
-- `env.cue` - the cuenv project; Infisical-backed credentials limited to infrastructure actions
+- `env.cue` - the cuenv project; Infisical-backed credentials chosen by context: read-only for `plan`, read-write for `apply`, `import` and `destroy`
 - `infrastructure.cue` - state, providers, and every zone's resources flattened together
 - `zone/` - package `zone`: `#Zone` (records, settings) and one file per mixin: registrars (`cloudflare_registrar.cue`, `dnsimple_registrar.cue`) and services (`gmail.cue`, `fastmail.cue`, `cloudflare_email_routing.cue`, `no_email.cue`, `transistor.cue`)
 - `domains/` - package `domains`: one file per domain, named after it, composing mixins
@@ -47,7 +47,7 @@ cuenv i apply
 
 **Importing:** bring an existing object under management with `cuenv i import <type>.<name> <provider id>` (DNS records take `<zone id>/<record id>`), then `cuenv i plan`.
 
-**CI:** none for now. cuenv's plan workflow would log in with the apply's credentials, which pull requests must never get, so DNS plans and applies run locally until each workflow can name its own credentials.
+**CI:** pull requests that touch DNS get a plan as a comment; the plan job logs in to Infisical as `github-read-only`. Pushes to `main` apply as `github-read-write`, in the `infrastructure` GitHub environment, once rawkode approves the job.
 
 **Provider types:** pinned in the root `cuenv.lock`; generated into `cue.mod/gen` (gitignored). Run `cuenv sync infrastructure` after cloning.
 
@@ -76,9 +76,10 @@ Scripts for Google Cloud Workload Identity configuration.
 
 ## Environment Variables
 
-DNS infrastructure requires these secrets (configured in `dns/env.cue`):
-- `CLOUDFLARE_API_TOKEN` - Cloudflare DNS (the github-read-write token, `CLOUDFLARE_ROOT_TOKEN` in Infisical)
-- `DNSIMPLE_TOKEN` - DNSimple delegation
-- the state bucket credentials (`CUENV_STATE_ACCESS_KEY_ID`, `CUENV_STATE_SECRET_ACCESS_KEY`, in `infrastructure.cue`)
+DNS infrastructure reads these secrets (configured in `dns/env.cue` and `dns/infrastructure.cue`), written to Infisical by `bootstrap/`:
 
-All of them are in Infisical under `/infrastructure`, written there by `bootstrap/`.
+| Secret | Plan (`/infrastructure/read-only`) | Apply (`/infrastructure`) |
+|--------|------------------------------------|---------------------------|
+| `CLOUDFLARE_API_TOKEN` | `CLOUDFLARE_API_TOKEN`, reads zones | `CLOUDFLARE_ROOT_TOKEN` |
+| `DNSIMPLE_TOKEN` | `DNSIMPLE_TOKEN` (DNSimple has no read-only tokens) | `DNSIMPLE_TOKEN` |
+| State bucket credentials | `CUENV_STATE_ACCESS_KEY_ID`, `CUENV_STATE_SECRET_ACCESS_KEY`, read only | the same names, read and write |

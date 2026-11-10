@@ -66,7 +66,7 @@ _cuenvBinary?: string
 config: ci: cuenv: {
 	source: "release"
 	if _cuenvBinary == _|_ {
-		version: "0.70.1"
+		version: "0.72.0"
 	}
 	if _cuenvBinary != _|_ {
 		version: _cuenvBinary
@@ -90,16 +90,17 @@ _ciRequireReport?: string
 _ciInfisicalOidc?: true
 
 // A project whose infrastructure workflows read #InfisicalSecret values sets
-// _ciInfisicalInfrastructure. Only the apply job logs in: pull requests get a
-// diff of the configuration and no credentials.
+// _ciInfisicalInfrastructure, so its plan and apply jobs log in.
 _ciInfisicalInfrastructure?: true
 
 // Which Infisical identity a job logs in as. infrastructure/bootstrap writes
-// both IDs as repository variables. Infrastructure applies use
+// the IDs as repository variables. Infrastructure applies use
 // github-read-write, whose login also requires the `infrastructure` GitHub
 // environment, so a job that skipped review is refused even if it asks for it.
-// Deploys on main use github-actions, which reads project secrets.
-let _infisicalIdentity = "${{ endsWith(github.workflow, '-infrastructure-apply') && vars.INFISICAL_READ_WRITE_IDENTITY_ID || vars.INFISICAL_MACHINE_IDENTITY_ID }}"
+// Infrastructure plans on pull requests use github-read-only, which reads
+// credentials that can't change anything. Deploys on main use github-actions,
+// which reads project secrets.
+let _infisicalIdentity = "${{ endsWith(github.workflow, '-infrastructure-apply') && vars.INFISICAL_READ_WRITE_IDENTITY_ID || endsWith(github.workflow, '-infrastructure-plan') && vars.INFISICAL_READ_ONLY_IDENTITY_ID || vars.INFISICAL_MACHINE_IDENTITY_ID }}"
 let _infisicalOidcTasks = (c.#InfisicalOidc & {#identityId: _infisicalIdentity}).tasks
 
 ci: providers: ["github"]

@@ -28,12 +28,16 @@ import (
 //   `infrastructure` GitHub environment, so every apply waits for a reviewer.
 //   It reads the github-read-write Cloudflare token (CLOUDFLARE_ROOT_TOKEN),
 //   the DNSimple token and the state bucket credentials.
+// - github-read-only, the identity infrastructure plans on pull requests log
+//   in as, in the `infrastructure-plan` GitHub environment. It reads
+//   /infrastructure/read-only: a Cloudflare token and a state key that can
+//   only read, and the DNSimple token, which has no read-only form.
 // - github-actions, the identity deploys on main log in as, in the
 //   `production` GitHub environment. It reads project secrets only.
 //
-// Pull requests get no identity and no secrets. Only main can enter either
-// environment, and the rulesets below make every change to main a reviewed
-// pull request with passing checks.
+// Every other pull request job gets no identity and no secrets. Only main can
+// enter the `production` and `infrastructure` environments, and the rulesets
+// below make every change to main a reviewed pull request with passing checks.
 
 _account: env.CLOUDFLARE_ACCOUNT_ID
 
@@ -57,6 +61,8 @@ _github: {
 	// applies run in.
 	deployEnvironment:         "production"
 	infrastructureEnvironment: "infrastructure"
+	// The one infrastructure plans on pull requests run in.
+	planEnvironment: "infrastructure-plan"
 	// Who approves an apply: rawkode.
 	reviewers: [145816]
 	// The check every pull request must pass: .github/workflows/pull-request.yml.
@@ -69,6 +75,11 @@ _github: {
 _permissionGroups: {
 	storageItemWrite: "2efd5506f9c8494dacb1fa10a3e7d5b6" // Workers R2 Storage Bucket Item Write
 	storageItemRead:  "6a018a9f2fc74eb6b293b0c548f38b39" // Workers R2 Storage Bucket Item Read
+	zoneRead:         "c8fed203ed3043cba015a93ad1616f1f" // Zone Read
+	zoneSettingsRead: "517b21aee92c4d89936c976ba6e4be55" // Zone Settings Read
+	dnsRead:          "82e64a83756745bbbb1c9c2701bf816b" // DNS Read
+	sslRead:          "7b7216b327b04b8fbc8f524e1f9b7531" // SSL and Certificates Read
+	botRead:          "07bea2220b2343fa9fae15656c0d8e88" // Bot Management Read
 }
 
 _stateBucket: "cuenv-state"
@@ -210,6 +221,54 @@ infrastructure: {
 			}
 		}
 
+		// What a plan may read. Nothing here can change Cloudflare or the state.
+		read_only_role: infisical_project_role.#Resource & {
+			configuration: {
+				project_id: _infisical.projectId
+				name:       "github-read-only"
+				slug:       "github-read-only"
+				permissions_v2: [{
+					subject: "secrets"
+					action: ["describeSecret", "readValue"]
+					conditions: json.Marshal({
+						environment: "$eq": _infisical.environment
+						secretPath: "$eq":  "/infrastructure/read-only"
+					})
+				}]
+			}
+		}
+
+		read_only_identity: infisical_project_scoped_identity.#Resource & {
+			configuration: {
+				project_id: _infisical.projectId
+				name:       "github-read-only"
+				roles: [{role_slug: infrastructure.resources.read_only_role.outputs.slug}]
+			}
+		}
+
+		// A plan workflow on a pull request, in the `infrastructure-plan`
+		// environment. Anyone who can push a branch can change that workflow,
+		// so treat everything this identity reads as readable by them.
+		read_only_oidc_login: infisical_identity_oidc_auth.#Resource & {
+			configuration: {
+				identity_id:        infrastructure.resources.read_only_identity.outputs.id
+				oidc_discovery_url: _github.issuer
+				bound_issuer:       _github.issuer
+				bound_audiences: [_github.audience]
+				bound_claims: {
+					repository:          _github.repo
+					repository_id:       _github.repositoryId
+					repository_owner_id: _github.ownerId
+					ref:                 "refs/pull/*/merge"
+					environment:         _github.planEnvironment
+					event_name:          "pull_request"
+					workflow_ref:        "\(_github.repo)/.github/workflows/*-infrastructure-plan.yml@refs/pull/*/merge"
+				}
+				access_token_ttl:     3600
+				access_token_max_ttl: 3600
+			}
+		}
+
 		// Deploys. No reviewer, but only main can enter it, so a pull request
 		// can't reach the secrets it holds even by naming it.
 		production_environment: github_repository_environment.#Resource & {
@@ -255,6 +314,15 @@ infrastructure: {
 				repository:     _github.repository
 				environment:    _github.infrastructureEnvironment
 				branch_pattern: "main"
+			}
+		}
+
+		// Infrastructure plans on pull requests. Any branch can enter it and it
+		// holds no secrets: it only names the job in its OIDC token.
+		plan_environment: github_repository_environment.#Resource & {
+			configuration: {
+				repository:  _github.repository
+				environment: _github.planEnvironment
 			}
 		}
 
@@ -326,12 +394,29 @@ infrastructure: {
 			}
 		}
 
+		read_only_identity_variable: github_actions_variable.#Resource & {
+			configuration: {
+				repository:    _github.repository
+				variable_name: "INFISICAL_READ_ONLY_IDENTITY_ID"
+				value:         infrastructure.resources.read_only_identity.outputs.id
+			}
+		}
+
 		infrastructure_folder: infisical_secret_folder.#Resource & {
 			configuration: {
 				project_id:       _infisical.projectId
 				environment_slug: _infisical.environment
 				folder_path:      "/"
 				name:             "infrastructure"
+			}
+		}
+
+		read_only_folder: infisical_secret_folder.#Resource & {
+			configuration: {
+				project_id:       _infisical.projectId
+				environment_slug: _infisical.environment
+				folder_path:      infrastructure.resources.infrastructure_folder.outputs.path
+				name:             "read-only"
 			}
 		}
 
@@ -406,6 +491,81 @@ infrastructure: {
 				folder_path:  infrastructure.resources.infrastructure_folder.outputs.path
 				name:         "CUENV_STATE_SECRET_ACCESS_KEY"
 				value:        hex.Encode(sha256.Sum256(infrastructure.resources.state_token.outputs.value))
+			}
+		}
+
+		// What plans read Cloudflare with: every zone's records and settings.
+		read_only_token: account_token.#Resource & {
+			configuration: {
+				account_id: _account
+				name:       "infrastructure-ci-read-only"
+				policies: [{
+					effect:    "allow"
+					resources: json.Marshal({"com.cloudflare.api.account.\(_account)": "*"})
+					permission_groups: [
+						{id: _permissionGroups.zoneRead},
+						{id: _permissionGroups.zoneSettingsRead},
+						{id: _permissionGroups.dnsRead},
+						{id: _permissionGroups.sslRead},
+						{id: _permissionGroups.botRead},
+					]
+				}]
+			}
+		}
+
+		read_only_token_secret: infisical_secret.#Resource & {
+			configuration: {
+				workspace_id: _infisical.projectId
+				env_slug:     _infisical.environment
+				folder_path:  infrastructure.resources.read_only_folder.outputs.path
+				name:         "CLOUDFLARE_API_TOKEN"
+				value:        infrastructure.resources.read_only_token.outputs.value
+			}
+		}
+
+		// DNSimple has no read-only tokens, so plans hold the same one applies do.
+		read_only_dnsimple_token_secret: infisical_secret.#Resource & {
+			configuration: {
+				workspace_id:     _infisical.projectId
+				env_slug:         _infisical.environment
+				folder_path:      infrastructure.resources.read_only_folder.outputs.path
+				name:             "DNSIMPLE_TOKEN"
+				value_wo:         schema.#WriteOnly & _dnsimpleToken
+				value_wo_version: 1
+			}
+		}
+
+		// R2 credentials that read the state bucket and can't write it. The
+		// bucket holds every project's state, so a plan can read all of it.
+		state_read_only_token: account_token.#Resource & {
+			configuration: {
+				account_id: _account
+				name:       "infrastructure-ci-state-read-only"
+				policies: [{
+					effect:    "allow"
+					resources: json.Marshal({"com.cloudflare.edge.r2.bucket.\(_account)_default_\(_stateBucket)": "*"})
+					permission_groups: [{id: _permissionGroups.storageItemRead}]
+				}]
+			}
+		}
+
+		state_read_only_access_key_id_secret: infisical_secret.#Resource & {
+			configuration: {
+				workspace_id: _infisical.projectId
+				env_slug:     _infisical.environment
+				folder_path:  infrastructure.resources.read_only_folder.outputs.path
+				name:         "CUENV_STATE_ACCESS_KEY_ID"
+				value:        infrastructure.resources.state_read_only_token.outputs.id
+			}
+		}
+
+		state_read_only_secret_access_key_secret: infisical_secret.#Resource & {
+			configuration: {
+				workspace_id: _infisical.projectId
+				env_slug:     _infisical.environment
+				folder_path:  infrastructure.resources.read_only_folder.outputs.path
+				name:         "CUENV_STATE_SECRET_ACCESS_KEY"
+				value:        hex.Encode(sha256.Sum256(infrastructure.resources.state_read_only_token.outputs.value))
 			}
 		}
 	}

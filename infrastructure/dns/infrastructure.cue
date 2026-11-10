@@ -13,8 +13,13 @@ infrastructure: {
 		bucket:   "cuenv-state"
 		region:   "auto"
 		endpoint: "https://0aeb879de8e3cdde5fb3d413025222ce.r2.cloudflarestorage.com"
-		accessKeyId: _infrastructureSecret & {secretName: "CUENV_STATE_ACCESS_KEY_ID"}
-		secretAccessKey: _infrastructureSecret & {secretName: "CUENV_STATE_SECRET_ACCESS_KEY"}
+		// Used by plans and state commands: this key can't write.
+		accessKeyId: _readOnly & {secretName: "CUENV_STATE_ACCESS_KEY_ID"}
+		secretAccessKey: _readOnly & {secretName: "CUENV_STATE_SECRET_ACCESS_KEY"}
+		context: apply: {
+			accessKeyId: _readWrite & {secretName: "CUENV_STATE_ACCESS_KEY_ID"}
+			secretAccessKey: _readWrite & {secretName: "CUENV_STATE_SECRET_ACCESS_KEY"}
+		}
 	}
 
 	providers: {
@@ -26,7 +31,10 @@ infrastructure: {
 
 	resources: {for _, zone in domains.zones {zone.resources}}
 
-	// No CI workflows for now: cuenv's plan workflow logs in with the same
-	// credentials as the apply, which pull requests must never get. Plan and
-	// apply locally until each workflow can name its own credentials.
+	// Plan (and comment the plan) on pull requests with the read-only
+	// credentials; apply on pushes to main, once a reviewer approves the job.
+	workflows: {
+		plan: environment:  "infrastructure-plan"
+		apply: environment: "infrastructure"
+	}
 }
