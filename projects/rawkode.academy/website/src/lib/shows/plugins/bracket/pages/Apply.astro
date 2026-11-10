@@ -10,6 +10,8 @@ interface Props {
 
 const { showId, isSignedIn, participation } = Astro.props;
 const cards = participation.brackets;
+// A view has one solid button: the first bracket still open to this viewer.
+const primaryId = cards.find((card) => !card.applied)?.bracketId;
 const applyPath = `/shows/${showId}/apply`;
 const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(applyPath)}`;
 const actionUrl = `/api/shows/${showId}/apply`;
@@ -33,6 +35,14 @@ const manageLabel = (kind: string, hasTeam: boolean) => {
 				</p>
 			</div>
 		) : (
+			<Fragment>
+			{!isSignedIn && (
+				<p class="bracket-apply__sign-in">
+					<a href={signInUrl} class={button()}>
+						Sign in to apply
+					</a>
+				</p>
+			)}
 			<div class="bracket-apply__grid">
 				{cards.map((card) => (
 					<section class="bracket-apply__card">
@@ -54,12 +64,9 @@ const manageLabel = (kind: string, hasTeam: boolean) => {
 							</p>
 						)}
 
+						{isSignedIn && (
 						<div class="bracket-apply__action">
-							{!isSignedIn ? (
-								<a href={signInUrl} class={button()}>
-									Sign in to apply
-								</a>
-							) : card.applied ? (
+							{card.applied ? (
 								<a
 									href={manageUrl(card.bracketKind)}
 									class={button({ variant: "outline" })}
@@ -69,15 +76,23 @@ const manageLabel = (kind: string, hasTeam: boolean) => {
 							) : (
 								<form method="POST" action={actionUrl}>
 									<input type="hidden" name="bracketId" value={card.bracketId} />
-									<button type="submit" class={button()}>
+									<button
+										type="submit"
+										class={button({
+											variant:
+												card.bracketId === primaryId ? "solid" : "outline",
+										})}
+									>
 										Apply for {card.bracketKind === "team" ? "Team" : "Individual"}
 									</button>
 								</form>
 							)}
 						</div>
+						)}
 					</section>
 				))}
 			</div>
+			</Fragment>
 		)
 	}
 </div>
@@ -85,7 +100,10 @@ const manageLabel = (kind: string, hasTeam: boolean) => {
 <style>
 	.bracket-apply {
 		max-width: 48rem;
-		margin-inline: auto;
+	}
+
+	.bracket-apply__sign-in {
+		margin: 0 0 1rem;
 	}
 
 	.bracket-apply__closed,

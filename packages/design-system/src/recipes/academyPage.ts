@@ -289,7 +289,7 @@ export const academyPage = sva({
 			marginTop: "12",
 			paddingBlock: "7",
 			borderTop: "hairline",
-			borderColor: "academy.inkBorder",
+			borderTopColor: "academy.inkBorder",
 			animation: "academy-fade",
 			animationDelay: "stagger-4",
 			_lg: { columnGap: "12", marginTop: "16", paddingBlock: "9" },

@@ -13,6 +13,7 @@ import { getPublishedVideos } from "@/lib/content";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import VideoMetadata from "@/components/html/video-metadata.astro";
 import PodcastSeriesJsonLd from "@/components/html/podcast-series-jsonld.astro";
+import VideoCard from "@/components/video/VideoCard.astro";
 import VideoFeed from "@/components/video/video-feed.astro";
 import SubscribeLinks from "@/components/show/SubscribeLinks.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
@@ -22,7 +23,6 @@ import { createLogger } from "@/lib/logger";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import ShowNav from "@/components/show/ShowNav.astro";
 import { getShowNav, hasExtension } from "@/lib/shows/registry";
-import { localDate } from "@/lib/local-time";
 
 const logger = createLogger("shows");
 const { showId } = Astro.params;
@@ -122,21 +122,6 @@ if (hasEpisodeFeed && showEntry.data.podcast?.artworkUrl) {
 	} catch {
 		// Fall through with no image - JSON-LD `image` is optional.
 	}
-}
-
-function formatDate(dateString: string) {
-	return localDate(dateString);
-}
-
-function formatDuration(seconds: number) {
-	if (seconds <= 0) return "--:--";
-	const hours = Math.floor(seconds / 3600);
-	const minutes = Math.floor((seconds % 3600) / 60);
-	const remainingSeconds = Math.floor(seconds % 60);
-	if (hours > 0) {
-		return `${hours}:${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
-	}
-	return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
 }
 ---
 
@@ -244,34 +229,16 @@ function formatDuration(seconds: number) {
  </div>
  ) : latestEpisode ? (
  <div class={doc.mediaColumn}>
- <a href={`/watch/${latestEpisode.slug}`} class={doc.main}>
- <div class={doc.media}>
- <img
- src={latestEpisode.thumbnailUrl}
- alt={`Latest episode: ${latestEpisode.title}`}
- class={doc.image}
- loading="eager"
+ <p class={doc.kicker}>Latest episode</p>
+ <VideoCard
+ href={`/watch/${latestEpisode.slug}`}
+ title={latestEpisode.title}
+ thumbnailUrl={latestEpisode.thumbnailUrl}
+ duration={latestEpisode.duration}
+ publishedAt={latestEpisode.publishedAt}
+ type={latestEpisode.type}
+ heading="h2"
  />
- <div class={doc.mediaOverlay}></div>
- <div class={doc.playOverlay} aria-hidden="true">
- <div class={doc.play}>
- <svg class={doc.iconLarge} fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
- <path d="M8 5v14l11-7z" />
- </svg>
- </div>
- </div>
- <div class={doc.mediaCaption}>
- <p class={doc.mediaMeta}>Latest Episode</p>
- <p class={doc.mediaTitle}>{latestEpisode.title}</p>
- <div class={doc.mediaMeta}>
- <time {...formatDate(latestEpisode.publishedAt).attrs}>{formatDate(latestEpisode.publishedAt).text}</time>
- {latestEpisode.duration > 0 && (
- <span>{formatDuration(latestEpisode.duration)}</span>
- )}
- </div>
- </div>
- </div>
- </a>
  </div>
  ) : null}
  </div>

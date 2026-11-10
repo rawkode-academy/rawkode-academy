@@ -22,6 +22,7 @@ import {
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import { localDateTime } from "@/lib/local-time";
 import { isNewsPublished } from "@/lib/news-publication";
 import {
 	academyPage,
@@ -442,17 +443,6 @@ await setContentCache(Astro, {
 			)}
 		</header>
 
-		{upcomingSessions.length > 0 && (
-			<section class={styles.ruledSection} aria-labelledby="upcoming-sessions-heading">
-				<h2 id="upcoming-sessions-heading" class={styles.heading}>Upcoming sessions</h2>
-				<div class={page.feedGrid}>
-					{upcomingSessions.map(({ data: video }) => (
-						<VideoCard href={"/watch/" + video.slug} title={video.title} thumbnailUrl={getVideoThumbnailUrl(video.id)} publishedAt={video.publishedAt} scheduled />
-					))}
-				</div>
-			</section>
-		)}
-
 		<div class={hasAside ? styles.columns : styles.reading}>
 			<div class={styles.main}>
 				{hasContent ? (
@@ -465,6 +455,37 @@ await setContentCache(Astro, {
 						<p class={styles.copy}>A written overview of {technology.name} is not available here.</p>
 						{officialLinks.length > 0 && (
 							<p class={styles.copy}>Explore the project links above for information from its maintainers.</p>
+						)}
+					</section>
+				)}
+
+				{upcomingSessions.length > 0 && (
+					<section class={styles.ruledSection} aria-labelledby="upcoming-sessions-heading">
+						<h2 id="upcoming-sessions-heading" class={styles.heading}>Upcoming sessions</h2>
+						{upcomingSessions.length < 3 ? (
+							<div class={page.streamList}>
+								{upcomingSessions.map(({ data: video }) => {
+									const startsAt = localDateTime(video.publishedAt);
+									return (
+										<a href={"/watch/" + video.slug} class={page.streamFeature}>
+											<div class={page.cardArt}>
+												<img src={getVideoThumbnailUrl(video.id)} alt="" class={page.cardImage} width="960" height="540" loading="lazy" />
+											</div>
+											<div class={page.featureCopy}>
+												<p class={page.streamMeta}><span data-label>Upcoming live stream</span><time {...startsAt.attrs}>{startsAt.text}</time></p>
+												<h3 class={page.streamTitle}>{video.title}</h3>
+												<span class={page.textLink}>Get notified <span aria-hidden="true">→</span></span>
+											</div>
+										</a>
+									);
+								})}
+							</div>
+						) : (
+							<div class={page.feedGrid}>
+								{upcomingSessions.map(({ data: video }) => (
+									<VideoCard href={"/watch/" + video.slug} title={video.title} thumbnailUrl={getVideoThumbnailUrl(video.id)} publishedAt={video.publishedAt} scheduled />
+								))}
+							</div>
 						)}
 					</section>
 				)}

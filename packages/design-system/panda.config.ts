@@ -174,7 +174,7 @@ export default defineConfig({
 					// Scroll-driven: paired with animation-timeline: view() so rows
 					// rise as they enter the viewport. Browsers without scroll
 					// timelines never apply it (see the @supports guards).
-					"academy-reveal": { value: "academy-reveal linear both" },
+					"academy-reveal": { value: "academy-reveal linear forwards" },
 					// A tile being placed into a grid cell: it opens from its
 					// centre, the way the scheduler fills a node.
 					"academy-schedule": {

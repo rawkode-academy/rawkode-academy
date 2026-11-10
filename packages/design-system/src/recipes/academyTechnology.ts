@@ -439,7 +439,6 @@ export const academyTechnology = sva({
 		newsletter: {
 			width: "full",
 			maxWidth: "academy-copy",
-			marginInline: "auto",
 			minWidth: "0",
 		},
 	},

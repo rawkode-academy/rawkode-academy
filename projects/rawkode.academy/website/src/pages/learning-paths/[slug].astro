@@ -99,7 +99,7 @@ const pageDescription = learningPath.data.description;
 	<div class={doc.root}>
 		<header class={doc.pathHero}>
 			<div class={doc.body}>
-			<div class={[doc.main, styles.container, styles.heroCopy].join(" ")}>
+			<div class={[doc.pathColumn, styles.heroCopy].join(" ")}>
 				<a class={doc.link} href="/learning-paths">Learning paths</a>
 				<h1 class={doc.title}>{learningPath.data.title}</h1>
 				<div class={styles.meta}>
@@ -146,7 +146,7 @@ const pageDescription = learningPath.data.description;
 		</header>
 
 		<div class={doc.body}>
-			<div class={[doc.main, styles.container, doc.stack].join(" ")}>
+			<div class={[doc.pathColumn, doc.stack].join(" ")}>
 				{prerequisites.length > 0 && (
 					<details>
 						<summary class={doc.tocSummary}>Before you start</summary>

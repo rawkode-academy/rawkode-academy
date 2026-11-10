@@ -357,7 +357,7 @@ export const academyCgroups = sva({
 			padding: "1",
 			width: "max-content",
 		},
-		milestoneItem: { width: "64", minWidth: "0" },
+		milestoneItem: { width: "64", minWidth: "0", paddingInlineStart: "0" },
 		milestone: {
 			display: "grid",
 			gap: "2",

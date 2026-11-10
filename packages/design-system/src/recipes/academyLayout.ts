@@ -2,6 +2,7 @@ import { sva } from "../../styled-system/css";
 import { inputField } from "../styles/field";
 import { inkStage } from "../styles/ink";
 import { coverImage } from "../styles/media";
+import { proseLists } from "../styles/prose";
 import { linkedPanel, panelSurface, pill } from "../styles/surface";
 import { headingLg, headingMd, ledeText, mastheadTitle } from "../styles/type";
 
@@ -326,20 +327,7 @@ export const academyLayout = sva({
 				textDecoration: "underline",
 				textUnderlineOffset: "0.2em",
 			},
-			"& ul, & ol": {
-				display: "grid",
-				gap: "3",
-				margin: "0",
-				paddingInlineStart: "6",
-			},
-			"& ul": { listStyle: "disc" },
-			"& ol": { listStyle: "decimal" },
-			"& li": { paddingInlineStart: "1" },
-			"& li::marker": {
-				color: "academy.accent",
-				fontFamily: "academy-mono",
-				fontWeight: "bold",
-			},
+			...proseLists,
 			"& img": { maxWidth: "full", height: "auto" },
 			"& pre": {
 				maxWidth: "full",
@@ -348,6 +336,32 @@ export const academyLayout = sva({
 				borderRadius: "academy-m",
 				backgroundColor: "academy.ground",
 			},
+			// Rich text emits a bare table with no wrapper, so the table is its
+			// own scroll container: a wide one scrolls inside the column rather
+			// than breaking identifiers mid-word.
+			"& table": {
+				display: "block",
+				width: "max-content",
+				maxWidth: "full",
+				overflowX: "auto",
+				borderCollapse: "collapse",
+				fontSize: "sm",
+				lineHeight: "normal",
+				overflowWrap: "normal",
+			},
+			"& th, & td": {
+				padding: "3",
+				textAlign: "start",
+				verticalAlign: "top",
+				borderBottom: "hairline",
+				borderBottomColor: "academy.border",
+			},
+			"& th": {
+				color: "academy.text",
+				fontWeight: "semibold",
+				backgroundColor: "academy.ground",
+			},
+			"& td code": { whiteSpace: "nowrap" },
 		},
 		sidebar: {
 			...panelSurface,

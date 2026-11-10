@@ -297,7 +297,7 @@ export const academyShell = sva({
 			position: "relative",
 			overflow: "hidden",
 			borderTop: "hairline",
-			borderColor: "academy.inkBorder",
+			borderTopColor: "academy.inkBorder",
 			backgroundColor: "academy.ink",
 			color: "academy.inkText",
 			paddingInline: "academy-gutter",

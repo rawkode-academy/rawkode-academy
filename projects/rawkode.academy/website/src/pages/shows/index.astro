@@ -8,6 +8,7 @@ import {
 	setContentCache,
 } from "@/lib/live-content";
 import ShowItemListJsonLd from "@/components/html/show-itemlist-jsonld.astro";
+import ShowCard from "@/components/show/ShowCard.astro";
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
 import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 import Page from "@/wrappers/page.astro";
@@ -129,17 +130,7 @@ const catalog = academyCatalog();
 					{hasShows ? (
 						<div class={catalog.pairGrid}>
 							{pictured.map((show) => (
-								<a class={styles.card} href={`/shows/${show.id}`} data-show-status={show.status}>
-									<span class={catalog.featuredMedia}>
-										<img class={catalog.featuredImage} src={artworkOf(show)} alt="" loading="lazy" />
-									</span>
-									<div class={styles.cardBody}>
-										<span class={catalog.rowMeta}>{statusLine(show)}</span>
-										<h2 class={styles.cardTitle}>{show.name}</h2>
-										{show.tagline && <span class={catalog.rowDescription}>{show.tagline}</span>}
-										{show.episodes?.[0]?.video?.title && <span class={catalog.rowDescription}>Latest: {show.episodes[0].video.title}</span>}
-									</div>
-								</a>
+								<ShowCard show={show} heading="h2" />
 							))}
 						</div>
 					) : (

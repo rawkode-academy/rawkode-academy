@@ -27,6 +27,7 @@
 						:width="cover.width"
 						:height="cover.height"
 						:class="s.heroCover"
+						crossorigin="anonymous"
 						loading="eager"
 						fetchpriority="high"
 						decoding="async"

@@ -840,7 +840,7 @@ const partnerQuotes = (
 		gap: 0.5rem 2rem;
 		min-width: 0;
 		margin: 0;
-		padding: 0.5rem 0;
+		padding: 0.5rem var(--spacing-academy-gutter);
 		overflow-x: auto;
 		list-style: none;
 	}
@@ -1305,6 +1305,10 @@ const partnerQuotes = (
 	}
 
 	@media (min-width: 64rem) {
+		.partnership-rail ul {
+			padding-inline: 0;
+		}
+
 		.partnership-rail {
 			position: sticky;
 			top: 64px;
