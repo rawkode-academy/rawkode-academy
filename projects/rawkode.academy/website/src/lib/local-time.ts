@@ -105,7 +105,7 @@ export const ACADEMY_DATE = {
 export const localDate = (value: Date | string | number) =>
 	localTime(value, ACADEMY_DATE, ACADEMY_DATE_LOCALE);
 
-/** A scheduled start: "Wed 11 Nov 2026, 12:00 GMT" in the reader's zone. */
+/** A scheduled start: "Wed, 11 Nov 2026, 12:00 GMT" in the reader's zone. */
 export const ACADEMY_DATE_TIME = {
 	weekday: "short",
 	day: "numeric",

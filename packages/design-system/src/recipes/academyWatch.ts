@@ -244,62 +244,73 @@ export const academyWatch = sva({
 			// `fitWatchPane` when the session's own content does not leave the
 			// room the tier assumed: the block then falls back to row 2. The
 			// player keeps its size either way.
-			//
-			// Laptop heights pin one row, without its still.
-			"@media (min-width: 1024px) and (min-height: 46rem) and (max-height: 53.99rem)":
-				{
-					"&[data-pin]": { "--watch-rest": "30.5rem" },
-					"&[data-pin]:not([data-pane-flow]) > [data-watch-pane]": { gridRow: "1 / 3" },
-					"&[data-pin]:not([data-pane-flow]) > [data-watch-more]": {
-						gridRow: "1 / 3",
-						alignSelf: "end",
-						position: "sticky",
-						bottom: "0",
-						paddingBlockEnd: "4",
-						borderInlineEndColor: "transparent",
-						backgroundColor: {
-							base: "academy.ink",
-							_dark: "academy.inkRaised",
-						},
-					},
-					"&[data-pin]:not([data-pane-flow]) > [data-watch-more] li:nth-child(n + 2)": {
-						display: "none",
-					},
-					"&[data-pin]:not([data-pane-flow]) > [data-watch-more] [data-still]": { display: "none" },
-					"&[data-pin]:not([data-pane-flow]) > [data-watch-more] [data-up-next-link]": {
-						gridTemplateColumns: "minmax(0, 1fr)",
-					},
+			"@media (min-width: 1024px) and (min-height: 46rem)": {
+				"&[data-pin]:not([data-pane-flow]) > [data-watch-pane]": {
+					gridRow: "1 / 3",
 				},
-			// A short viewport cannot hold the upcoming notice beside the
-			// player: the pane scrolls with the page so "Notify me" is reachable.
-			"@media (min-width: 1024px) and (max-height: 56rem)": {
-				"&[data-notice] [data-watch-pane-sticky]": { position: "static" },
-			},
-			"@media (min-width: 1024px) and (min-height: 54rem)": {
-				"&[data-pin]": { "--watch-rest": "37.5rem" },
-				"&[data-pin]:not([data-pane-flow]) > [data-watch-pane]": { gridRow: "1 / 3" },
+				// Its end border lands on the pane's: one unbroken seam.
 				"&[data-pin]:not([data-pane-flow]) > [data-watch-more]": {
 					gridRow: "1 / 3",
 					alignSelf: "end",
 					position: "sticky",
 					bottom: "0",
 					paddingBlockEnd: "4",
-					borderInlineEndColor: "transparent",
 					backgroundColor: {
 						base: "academy.ink",
 						_dark: "academy.inkRaised",
 					},
 				},
-				// Two rows until the viewport has room for the third.
-				"&[data-pin]:not([data-pane-flow]) > [data-watch-more] li:nth-child(n + 3)": {
-					display: "none",
-				},
 			},
-			"@media (min-width: 1024px) and (min-height: 62rem)": {
-				"&[data-pin]": { "--watch-rest": "41.75rem" },
-				"&[data-pin]:not([data-pane-flow]) > [data-watch-more] li:nth-child(n + 3)": {
-					display: "block",
+			// How much is pinned grows with the viewport's height, and the
+			// player never pays for it: a richer tier starts where the
+			// full-width player (619px, so 348.2px tall) still fits above it,
+			// at `--watch-rest` + 348.2px rounded up to 0.25rem. The player's
+			// width therefore never decreases as the viewport gets taller.
+			//
+			// One row, from laptop heights.
+			"@media (min-width: 1024px) and (min-height: 46rem) and (max-height: 59.49rem)":
+				{
+					"&[data-pin]": { "--watch-rest": "30.5rem" },
+					"&[data-pin]:not([data-pane-flow]) > [data-watch-more] li:nth-child(n + 2)":
+						{
+							display: "none",
+						},
 				},
+			// Without its still until the row with one fits.
+			"@media (min-width: 1024px) and (min-height: 46rem) and (max-height: 53.99rem)":
+				{
+					"&[data-pin]:not([data-pane-flow]) > [data-watch-more] [data-still]":
+						{ display: "none" },
+					"&[data-pin]:not([data-pane-flow]) > [data-watch-more] [data-up-next-link]":
+						{
+							gridTemplateColumns: "minmax(0, 1fr)",
+						},
+				},
+			"@media (min-width: 1024px) and (min-height: 54rem) and (max-height: 59.49rem)":
+				{
+					// The still adds 13.3px to the row.
+					"&[data-pin]": { "--watch-rest": "31.5rem" },
+				},
+			// A short viewport cannot hold the upcoming notice beside the
+			// player: the pane scrolls with the page so "Notify me" is reachable.
+			"@media (min-width: 1024px) and (max-height: 56rem)": {
+				"&[data-notice] [data-watch-pane-sticky]": { position: "static" },
+			},
+			// Two rows.
+			"@media (min-width: 1024px) and (min-height: 59.5rem)": {
+				"&[data-pin]": { "--watch-rest": "37.5rem" },
+				"&[data-pin]:not([data-pane-flow]) > [data-watch-more] li:nth-child(n + 3)":
+					{
+						display: "none",
+					},
+			},
+			// Three rows.
+			"@media (min-width: 1024px) and (min-height: 63.75rem)": {
+				"&[data-pin]": { "--watch-rest": "41.75rem" },
+				"&[data-pin]:not([data-pane-flow]) > [data-watch-more] li:nth-child(n + 3)":
+					{
+						display: "block",
+					},
 			},
 		},
 		// Below `lg` the pane and its wrappers dissolve so the player can
@@ -770,6 +781,7 @@ export const academyWatch = sva({
 			fontWeight: "semibold",
 			textDecoration: "none",
 			whiteSpace: "nowrap",
+			...watchFeedback,
 			"& > span": {
 				transitionProperty: "[transform]",
 				transitionDuration: "base",
@@ -781,8 +793,13 @@ export const academyWatch = sva({
 				textUnderlineOffset: "0.2em",
 				"& > span": { transform: "translateX(0.2em)" },
 			},
+			_active: { color: "academy.inkAccent" },
 			_focusVisible: focusRingInk,
-			_motionReduce: { "& > span": { transitionDuration: "none" } },
+			// Restated whole: this key replaces the fragment's.
+			_motionReduce: {
+				transitionDuration: "none",
+				"& > span": { transitionDuration: "none" },
+			},
 		},
 		techGrid: {
 			display: "flex",
@@ -1260,6 +1277,7 @@ export const academyWatch = sva({
 			textDecoration: "none",
 			...watchFeedback,
 			_hover: { color: "academy.accent" },
+			_active: { color: "academy.accent" },
 			_focusVisible: focusRingInset,
 		},
 		// One line of the transcript: its time code, then the words.
@@ -1579,6 +1597,7 @@ export const academyWatch = sva({
 			backgroundColor: "academy.statusSky",
 			transitionProperty: "[width]",
 			transitionDuration: "fast",
+			transitionTimingFunction: "academy-out",
 			_motionReduce: { transitionDuration: "none" },
 		},
 		progressLabel: {

@@ -398,7 +398,7 @@ test("the pinned pane has a measured fallback and the scheduled start uses the A
 	);
 	// Every pin rule yields to the attribute; the player's budget does not.
 	const pinned = recipe.match(/"&\[data-pin\][^"]*"/g);
-	assert.equal(pinned.length, 12);
+	assert.equal(pinned.length, 11);
 	for (const selector of pinned) {
 		if (selector === '"&[data-pin]"') continue;
 		assert(
@@ -406,7 +406,27 @@ test("the pinned pane has a measured fallback and the scheduled start uses the A
 			selector,
 		);
 	}
-	assert.equal(pinned.filter((s) => s === '"&[data-pin]"').length, 3);
+	assert.equal(pinned.filter((s) => s === '"&[data-pin]"').length, 4);
+	// A richer tier starts where the full-width player still fits, so the
+	// player never narrows as the viewport gets taller: each tier's start is
+	// its `--watch-rest` plus the 619px player's height, on a 0.25rem step.
+	const tiers = [
+		...recipe.matchAll(
+			/\(min-height: ([\d.]+)rem\)[^{]*\{\s*(?:\/\/[^\n]*\s*)*"&\[data-pin\]": \{ "--watch-rest": "([\d.]+)rem" \}/g,
+		),
+	].map(([, from, rest]) => [Number(from), Number(rest)]);
+	assert.deepEqual(tiers, [
+		[46, 30.5],
+		[54, 31.5],
+		[59.5, 37.5],
+		[63.75, 41.75],
+	]);
+	for (const [from, rest] of tiers.slice(1)) {
+		const fits = Math.ceil((rest + (619 * 9) / 16 / 16) * 4) / 4;
+		assert(from >= fits, `${from}rem starts before ${fits}rem`);
+	}
+	// The pinned block keeps its end border: the seam is one unbroken rule.
+	assert(!recipe.includes('borderInlineEndColor: "transparent"'));
 	assert.match(
 		recipe,
 		/"&\[data-pane-flow=all\] \[data-watch-pane-sticky\]": \{\s*position: "static",\s*overflow: "visible",\s*\}/,

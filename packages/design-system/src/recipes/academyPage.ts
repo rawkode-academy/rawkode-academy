@@ -265,9 +265,9 @@ export const academyPage = sva({
 				borderTopWidth: "[1px]",
 				borderTopStyle: "solid",
 				borderTopColor: "academy.inkBorder",
-				...scrollReveal,
-				// Two cells a row: every rule lands on a grid line.
-				_lg: { boxSizing: "border-box", blockSize: "32" },
+				// Two cells a row: every rule lands on a grid line. A minimum,
+				// so a row grows instead of clipping when the text is enlarged.
+				_lg: { display: "grid", boxSizing: "border-box", minBlockSize: "32" },
 			},
 		},
 		// A row answers the pointer, the keyboard and a press the same way:
@@ -288,6 +288,9 @@ export const academyPage = sva({
 			borderRadius: "academy-s",
 			color: "academy.inkText",
 			textDecoration: "none",
+			// The row's content reveals; its rule belongs to the item and
+			// holds still.
+			...scrollReveal,
 			// From 768 the row is two columns, split where the pair splits (the
 			// lg block below takes over at 1024).
 			"@media (min-width: 768px) and (max-width: 1023.98px)": {
@@ -298,7 +301,6 @@ export const academyPage = sva({
 			// The description starts on the page's half line, the same x as
 			// the pair's second column.
 			_lg: {
-				height: "full",
 				gridTemplateColumns: "[calc(50% - 1.5rem) minmax(0, 1fr) auto]",
 				columnGap: "12",
 				alignContent: "end",
@@ -334,8 +336,13 @@ export const academyPage = sva({
 					"& [data-name]": { transform: "translateX(0.75rem)" },
 				},
 			},
+			// Reduced motion: nothing travels, and the colour change keeps its
+			// own transition (the site's reduced-motion reset caps its length).
 			_motionReduce: {
-				"& [data-name], & [data-arrow]": { transitionDuration: "none" },
+				"& [data-name], & [data-arrow]": {
+					transitionProperty: "colors",
+					transitionDuration: "base",
+				},
 			},
 		},
 		indexName: {
@@ -382,7 +389,7 @@ export const academyPage = sva({
 			_lg: {
 				gridColumn: "2",
 				gridRow: "1",
-				maxWidth: "[44ch]",
+				maxWidth: "[34ch]",
 				fontSize: "md",
 			},
 		},
@@ -602,6 +609,7 @@ export const academyPage = sva({
 				textDecoration: "none",
 				transitionProperty: "colors",
 				transitionDuration: "base",
+				transitionTimingFunction: "academy-out",
 				// Time beside title only where the column can hold both.
 				"@media (min-width: 1280px)": {
 					gridTemplateColumns: "13.5rem minmax(0, 1fr)",
@@ -737,6 +745,7 @@ export const academyPage = sva({
 				textUnderlineOffset: "0.2em",
 				transitionProperty: "colors",
 				transitionDuration: "base",
+				transitionTimingFunction: "academy-out",
 				"@media (hover: hover)": {
 					"&:hover:not(:active)": { color: "academy.accent" },
 				},
@@ -927,7 +936,7 @@ export const academyPage = sva({
 			fontSize: "md",
 			fontWeight: "semibold",
 			lineHeight: "academy-card",
-			textWrap: "pretty",
+			textWrap: "balance",
 			overflowWrap: "anywhere",
 			transitionProperty: "colors",
 			transitionDuration: "base",
@@ -1012,7 +1021,10 @@ export const academyPage = sva({
 			},
 			_motionReduce: {
 				animation: "none",
-				"& [data-name]": { transitionDuration: "none" },
+				"& [data-name]": {
+					transitionProperty: "colors",
+					transitionDuration: "base",
+				},
 			},
 		},
 		pathRowBody: { display: "grid", gap: "1.5", minWidth: "0" },
@@ -1044,6 +1056,7 @@ export const academyPage = sva({
 				fontVariantNumeric: "tabular-nums",
 				transitionProperty: "colors",
 				transitionDuration: "base",
+				transitionTimingFunction: "academy-out",
 			},
 		},
 		featureCopy: {
