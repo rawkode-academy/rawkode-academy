@@ -548,9 +548,9 @@ export const academyWatch = sva({
 				borderBottomColor: "academy.inkBorder",
 			},
 			// The notes' cap, from the same gutter: the share link ends on the
-			// ledger's right rule.
+			// ledger's right rule. The title keeps its own measure.
 			"@media (min-width: 768px) and (max-width: 1023.98px)": {
-				"& > *": { maxWidth: "[50rem]" },
+				"& > :not(h1)": { maxWidth: "[50rem]" },
 			},
 			_lg: {
 				flexShrink: "0",

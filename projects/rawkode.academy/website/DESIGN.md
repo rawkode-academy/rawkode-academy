@@ -44,7 +44,11 @@ controls, and duplicate recommendations.
     element marked `data-system-avoid`, pauses off screen and in hidden tabs,
     moves for five seconds after load or the last pointer interaction and
     then holds a still frame, and with reduced motion renders only still
-    frames with no autonomous failures (`src/lib/system-canvas.ts`).
+    frames with no autonomous failures (`src/lib/system-canvas.ts`). Below
+    640px, where the copy fills the measure, the hero keeps two cells of
+    room at its foot and the system is the one lattice row there, unmasked:
+    two nodes and their pods on a single route, at least half a cell under
+    the lede.
   - On collection mastheads the collection's own artwork is scheduled into
     its cells on wide screens: stills as a bricked wall of 3×2 screens,
     portraits as staggered 2×2 squares, logos as single cells on paper tiles

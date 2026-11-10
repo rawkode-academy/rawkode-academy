@@ -290,26 +290,32 @@ export function mountSystem(hero: HTMLElement, options: SystemOptions = {}) {
 				.filter((rects) => rects.length > 0)
 				.map((rects) => Math.max(...rects.map((rect) => rect.right))),
 		);
-		// A row with half a cell clear under all of the copy is open across the
-		// hero and may sit closer to its foot: on a phone, where the copy fills
-		// the measure, that row is where the system lives.
-		const under =
-			avoid.length > 0
-				? Math.max(...avoid.map((rect) => rect.bottom)) - pad + cell * 0.5
-				: Number.POSITIVE_INFINITY;
-		free = [];
-		for (let y = cell; y <= height - cell * 0.4; y += cell) {
-			const open = y >= under;
-			if (!open && y > height - cell * 0.75) continue;
-			for (let x = originX; x < width - cell * 0.4; x += cell) {
-				if (x < cell * 0.4 || (!open && boxes.length > 0 && x < column))
-					continue;
-				const blocked = avoid.some(
-					(rect) => x < rect.right && y > rect.top && y < rect.bottom,
-				);
-				if (!blocked) free.push({ x, y });
+		// Where the copy fills the measure (a phone), the hero keeps room at its
+		// foot, and the one lattice row there is where the system lives: half a
+		// cell clear of the copy and of the edge, open across the hero. The
+		// row is found from the hero's own padding, which no entrance
+		// animation moves.
+		const foot =
+			height - Number.parseFloat(getComputedStyle(hero).paddingBottom);
+		const under = boxes.length > 0 ? foot + cell * 0.5 : height;
+		const points = (open: boolean) => {
+			const found: Point[] = [];
+			for (let y = cell; y < height - cell * 0.5; y += cell) {
+				if (open !== y >= under) continue;
+				if (!open && y > height - cell * 0.75) continue;
+				for (let x = originX; x < width - cell * 0.4; x += cell) {
+					if (x < cell * 0.4 || (!open && boxes.length > 0 && x < column))
+						continue;
+					const blocked = avoid.some(
+						(rect) => x < rect.right && y > rect.top && y < rect.bottom,
+					);
+					if (!blocked) found.push({ x, y });
+				}
 			}
-		}
+			return found;
+		};
+		const row = points(true);
+		free = row.length > 0 ? row : points(false);
 
 		const now = performance.now();
 		nodes = [];
@@ -318,7 +324,7 @@ export function mountSystem(hero: HTMLElement, options: SystemOptions = {}) {
 
 		// The first node goes where the open lattice is densest; each one
 		// after it goes as far from the others as the lattice allows (at least
-		// three cells), so the cluster spans the space the layout leaves free.
+		// three cells, or two on a row too short for three), so the cluster spans the space the layout leaves free.
 		const nodeCount = Math.max(2, Math.min(5, Math.round(free.length / 10)));
 		const reach = cell * 2.5;
 		const distance = (a: Point, b: Point) =>
@@ -332,11 +338,14 @@ export function mountSystem(hero: HTMLElement, options: SystemOptions = {}) {
 		);
 		const picks: Point[] = [];
 		while (picks.length < nodeCount) {
-			const next = free
-				.filter((point) =>
-					picks.every((pick) => distance(pick, point) >= cell * 3),
+			const next = [3, 2]
+				.map((apart) =>
+					free.filter((point) =>
+						picks.every((pick) => distance(pick, point) >= cell * apart),
+					),
 				)
-				.map((point) => ({
+				.find((candidates) => candidates.length > 0)
+				?.map((point) => ({
 					point,
 					score:
 						(density.get(point) ?? 0) +
