@@ -11,6 +11,8 @@ const pressed = reactive<Record<string, boolean>>({});
 const pickerOpen = ref(false);
 const reactionButtonClass = (emoji: string) =>
 	academyWatch({ pressed: Boolean(pressed[emoji]) }).reactionButton;
+const reactionCountClass = (emoji: string) =>
+	academyWatch({ pressed: Boolean(pressed[emoji]) }).reactionCount;
 const defaultReactions = [
 	{ emoji: "👍", label: "Like" },
 	{ emoji: "👏", label: "Applause" },
@@ -63,7 +65,7 @@ const react = async (emoji: string) => {
 				@click="react(reaction.emoji)"
 			>
 				<span :class="watch.reactionEmoji">{{ reaction.emoji }}</span>
-				<span v-if="counts[reaction.emoji]" :class="watch.reactionCount">{{ counts[reaction.emoji] }}</span>
+				<span v-if="counts[reaction.emoji]" :class="reactionCountClass(reaction.emoji)">{{ counts[reaction.emoji] }}</span>
 			</button>
 
 			<Popover.Root

@@ -383,14 +383,14 @@ const watchStatusLabel = isLiveNow
 	<link slot="extra-head" rel="alternate" type="application/atom+xml" title="Rawkode Academy - Videos (Atom)" href="/api/feeds/videos.atom" />
 	<link slot="extra-head" rel="alternate" type="application/feed+json" title="Rawkode Academy - Videos (JSON Feed)" href="/api/feeds/videos.json" />
 
-	<div class:list={[media.root, watch.root]}>
+	<div class:list={[media.root, watch.root]} data-watch-root>
 		<div
 			class={watch.bench}
 			data-pin={hasMore && !hasNotice ? "" : undefined}
 			data-notice={hasNotice ? "" : undefined}
 		>
 			<div class={watch.pane} data-watch-pane>
-				<div class={watch.paneSticky}>
+				<div class={watch.paneSticky} data-watch-pane-sticky>
 					<div class={watch.paneInner}>
 						<div class={watch.deck}>
 							<div class={watch.deckInner}>
@@ -508,14 +508,15 @@ const watchStatusLabel = isLiveNow
 								>
 									<span data-copy-link-label>Copy link</span>
 								</button>
+								<span class="sr-only" role="status" data-copy-link-status></span>
 							</div>
 
 							{hasNotice && (
 								<div class={watch.upcoming} role="group" aria-label="Upcoming stream details">
-									<h2 class={watch.noticeTitle}>This session has not started yet.</h2>
+									<h2 class={watch.noticeTitle}>This session has not started yet</h2>
 									<p class={watch.noticeCopy}>
 										Join us on <time {...scheduled.attrs}>{scheduled.text}</time>.
-										The player will activate when the stream is available.
+										The player on this page starts when the stream does.
 									</p>
 									{video.data.youtubeId && (
 										<a
@@ -547,13 +548,12 @@ const watchStatusLabel = isLiveNow
 							<p class={watch.lede}>{heroDescription}</p>
 						)}
 						<div class:list={[layout.prose, watch.description]} data-academy-prose><RichText html={renderedDescriptionHtml} /></div>
-						<VideoReactions server:defer videoId={video.data.slug} />
 					</section>
 
 					{video.data.whatYouWillLearn.length > 0 && (
 						<section class={watch.section} aria-labelledby="watch-detail-learn-heading">
 							<h2 id="watch-detail-learn-heading" class={watch.sectionTitle}>
-								What you'll learn
+								What you’ll learn
 							</h2>
 							<ol class={watch.learnList} data-academy-learn-list>
 								{video.data.whatYouWillLearn.map((item) => (
@@ -572,7 +572,7 @@ const watchStatusLabel = isLiveNow
 							<h2 id="watch-detail-chapters-heading" class={watch.sectionTitle}>
 								Jump to a chapter
 							</h2>
-							<ol class={watch.chapterList}>
+							<ol class={watch.chapterList} data-watch-chapters>
 								{chapterSource.map((chapter) => (
 									<li>
 										<a
@@ -580,10 +580,10 @@ const watchStatusLabel = isLiveNow
 											href={timestampHref(chapter.startTime)}
 											data-chapter-link={String(chapter.startTime)}
 										>
-											<span class={watch.chapterTime}>
+											<span class={watch.chapterTime} data-time>
 												{formatTimestamp(chapter.startTime)}
 											</span>
-											<span class={watch.chapterName}>{chapter.title}</span>
+											<span class={watch.chapterName} data-name>{chapter.title}</span>
 										</a>
 									</li>
 								))}
@@ -602,10 +602,15 @@ const watchStatusLabel = isLiveNow
 						</section>
 					)}
 
-					<VideoContentTabs
-						client:idle
-						videoId={video.data.id}
-					/>
+					<div class={watch.discussion}>
+						<VideoReactions server:defer videoId={video.data.slug}>
+							<div slot="fallback" class={watch.reactions} aria-hidden="true" />
+						</VideoReactions>
+						<VideoContentTabs
+							client:idle
+							videoId={video.data.id}
+						/>
+					</div>
 				</div>
 			</div>
 
@@ -674,6 +679,10 @@ const watchStatusLabel = isLiveNow
 	const copyLabel = copyButton?.querySelector<HTMLElement>(
 		"[data-copy-link-label]",
 	);
+	// The same result, announced: the button's own label swap is not.
+	const copyStatus = document.querySelector<HTMLElement>(
+		"[data-copy-link-status]",
+	);
 	let copyResetTimer: ReturnType<typeof setTimeout> | undefined;
 
 	copyButton?.addEventListener("click", async () => {
@@ -687,24 +696,35 @@ const watchStatusLabel = isLiveNow
 		}
 		const copied = await copyText(url.toString());
 		if (!copyLabel) return;
-		copyLabel.textContent = copied ? "Link copied" : "Copy failed";
+		const result = copied ? "Link copied" : "Copy failed";
+		copyLabel.textContent = result;
+		if (copyStatus) copyStatus.textContent = result;
 		if (copyResetTimer) clearTimeout(copyResetTimer);
 		copyResetTimer = setTimeout(() => {
 			copyLabel.textContent = "Copy link";
+			if (copyStatus) copyStatus.textContent = "";
 		}, 2000);
 	});
 
 	// Chapter and transcript links are #t=SECONDS fragments: crawlers ignore
 	// them, and the player reads #t (or a shared ?t) when it mounts. When the
-	// player is already hydrated, seek in place.
+	// player is already hydrated, seek in place. The page only moves when the
+	// player is out of sight: the pinned pane and the docked strip are not.
 	function seekTo(seconds: number): boolean {
 		const media = getPlayerVideo();
 		if (!media) return false;
 		media.currentTime = seconds;
 		void media.play()?.catch(() => {});
-		document
-			.getElementById("watch-detail-player")
-			?.scrollIntoView({ behavior: "smooth", block: "center" });
+		const frame = document.getElementById("watch-detail-player");
+		if (!frame) return true;
+		const r = frame.getBoundingClientRect();
+		if (r.bottom > 0 && r.top < window.innerHeight) return true;
+		frame.scrollIntoView({
+			block: "start",
+			behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+				? "auto"
+				: "smooth",
+		});
 		return true;
 	}
 
@@ -741,6 +761,33 @@ const watchStatusLabel = isLiveNow
 	};
 	let boundMedia: HTMLVideoElement | null = null;
 
+	// The chapter being played is marked in the notes (aria-current; the
+	// recipe sets it in a heavier weight). Nothing is marked before playback.
+	const chapterLinks = Array.from(
+		document.querySelectorAll<HTMLAnchorElement>(
+			"[data-watch-chapters] [data-chapter-link]",
+		),
+	);
+	const chapterStarts = chapterLinks.map((link) =>
+		Number.parseInt(link.dataset.chapterLink ?? "", 10),
+	);
+	let currentChapter = -1;
+
+	function syncChapter() {
+		if (!boundMedia || chapterLinks.length === 0) return;
+		const time = boundMedia.currentTime;
+		let index = -1;
+		if (time > 0 || boundMedia.played.length > 0) {
+			for (const [i, start] of chapterStarts.entries()) {
+				if (start <= time) index = i;
+			}
+		}
+		if (index === currentChapter) return;
+		chapterLinks[currentChapter]?.removeAttribute("aria-current");
+		chapterLinks[index]?.setAttribute("aria-current", "true");
+		currentChapter = index;
+	}
+
 	function syncStrip() {
 		if (!stripToggle || !boundMedia) return;
 		const playing = !boundMedia.paused && !boundMedia.ended;
@@ -753,8 +800,13 @@ const watchStatusLabel = isLiveNow
 
 	function bindStrip() {
 		const media = getPlayerVideo();
-		if (!stripToggle || !media || media === boundMedia) return;
+		if (!media || media === boundMedia) return;
 		boundMedia = media;
+		for (const type of ["timeupdate", "seeking"]) {
+			media.addEventListener(type, syncChapter);
+		}
+		syncChapter();
+		if (!stripToggle) return;
 		for (const type of [
 			"play",
 			"pause",
@@ -775,7 +827,7 @@ const watchStatusLabel = isLiveNow
 		else media.pause();
 	});
 
-	if (playerFrame && stripToggle) {
+	if (playerFrame) {
 		bindStrip();
 		// The player is a client-only island (and the live gate can swap a
 		// thumbnail for a player), so watch for its <video>.

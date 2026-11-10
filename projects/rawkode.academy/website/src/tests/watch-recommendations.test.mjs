@@ -312,3 +312,60 @@ test("breadcrumb status exists only for actual live/upcoming states; page remain
 		[],
 	);
 });
+
+test("workbench notes: reactions close the notes beside comments, with a sized fallback", () => {
+	const template = source.slice(0, source.lastIndexOf("<script>"));
+	const about = template.slice(
+		template.indexOf('aria-labelledby="watch-detail-about-heading"'),
+		template.indexOf("video.data.whatYouWillLearn.length > 0"),
+	);
+	assert(!about.includes("VideoReactions"));
+	const transcript = template.indexOf("<VideoTranscript");
+	const discussion = template.indexOf("<div class={watch.discussion}>");
+	const reactions = template.indexOf("<VideoReactions server:defer");
+	const comments = template.indexOf("<VideoContentTabs");
+	assert(transcript > 0);
+	assert(transcript < discussion && discussion < reactions);
+	assert(reactions < comments);
+	assert.equal(template.match(/<VideoReactions\b/g).length, 1);
+	// The deferred island's placeholder holds the row's height.
+	assert.match(
+		template,
+		/<VideoReactions server:defer videoId=\{video\.data\.slug\}>\s*<div slot="fallback" class=\{watch\.reactions\} aria-hidden="true" \/>\s*<\/VideoReactions>/,
+	);
+});
+
+test("copy link announces its result and jumps only scroll to a player that is out of view", () => {
+	const template = source.slice(0, source.lastIndexOf("<script>"));
+	const script = source.slice(source.lastIndexOf("<script>"));
+	// An empty live region right after the button on the server.
+	assert.match(
+		template,
+		/data-copy-link-label>Copy link<\/span>\s*<\/button>\s*<span class="sr-only" role="status" data-copy-link-status><\/span>/,
+	);
+	assert.match(
+		script,
+		/copyStatus\.textContent = result;[\s\S]*copyStatus\.textContent = "";/,
+	);
+	const seek = script.slice(
+		script.indexOf("function seekTo"),
+		script.indexOf("for (const link of"),
+	);
+	// Visible (pinned pane or docked strip): seek in place, no scroll.
+	assert.match(
+		seek,
+		/if \(r\.bottom > 0 && r\.top < window\.innerHeight\) return true;[\s\S]*scrollIntoView/,
+	);
+	assert.match(
+		seek,
+		/behavior: matchMedia\("\(prefers-reduced-motion: reduce\)"\)\.matches\s*\? "auto"\s*: "smooth"/,
+	);
+	assert(!seek.includes('block: "center"'));
+	// The chapter being played is marked for assistive technology too.
+	assert.match(
+		template,
+		/<ol class=\{watch\.chapterList\} data-watch-chapters>/,
+	);
+	assert.match(script, /setAttribute\("aria-current", "true"\)/);
+	assert.match(script, /removeAttribute\("aria-current"\)/);
+});

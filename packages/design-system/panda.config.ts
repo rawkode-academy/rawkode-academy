@@ -8,6 +8,19 @@ export default defineConfig({
 	strictTokens: true,
 	include: ["./src/**/*.{ts,vue}"],
 	outdir: "./styled-system",
+	// The watch page's player is a sticky 3.5rem strip on narrow screens
+	// (`academyWatch.deck`, same conditions): a row scrolled to by focus or a
+	// fragment stops below it. A recipe slot cannot style its ancestor.
+	globalCss: {
+		"html:has([data-watch-root])": {
+			"@media screen and (max-width: 1023.98px) and (prefers-reduced-motion: no-preference)":
+				{
+					"@supports (animation-timeline: view())": {
+						scrollPaddingBlockStart: "16",
+					},
+				},
+		},
+	},
 	conditions: {
 		extend: {
 			sm: "@media (min-width: 640px)",
@@ -165,6 +178,11 @@ export default defineConfig({
 					"academy-rise": {
 						value: "academy-rise 720ms cubic-bezier(0.22, 1, 0.36, 1) both",
 					},
+					// Transform only, for content that must never be hidden: the
+					// homepage's first-screen stills settle in under the statement.
+					"academy-settle": {
+						value: "academy-settle 720ms cubic-bezier(0.22, 1, 0.36, 1) both",
+					},
 					"academy-fade": {
 						value: "academy-fade 900ms cubic-bezier(0.22, 1, 0.36, 1) both",
 					},
@@ -203,6 +221,10 @@ export default defineConfig({
 				"academy-rise": {
 					from: { opacity: "0", transform: "translateY(0.75rem)" },
 					to: { opacity: "1", transform: "translateY(0)" },
+				},
+				"academy-settle": {
+					from: { transform: "translateY(1rem)" },
+					to: { transform: "translateY(0)" },
 				},
 				"academy-fade": {
 					from: { opacity: "0" },

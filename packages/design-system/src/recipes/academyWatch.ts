@@ -1,10 +1,11 @@
 import { sva } from "../../styled-system/css";
-import { focusRing, focusRingInk } from "../styles/focus";
+import { focusRing, focusRingInk, focusRingInset } from "../styles/focus";
 import { inputField } from "../styles/field";
 import { coverImage, coverImageZoom, videoFrame } from "../styles/media";
 import { panelSurface } from "../styles/surface";
 import { systemGridBottom } from "../styles/systemGrid";
 import { ledeText, monoMeta } from "../styles/type";
+import { watchFeedback, watchLedger } from "../styles/watch";
 
 /**
  * The workbench: the Academy watch route as two panes.
@@ -110,6 +111,7 @@ export const academyWatch = sva({
 		"castCard",
 		"castAvatar",
 		"castInitials",
+		"castBody",
 		"castName",
 		"castMeta",
 		"castHandle",
@@ -138,6 +140,7 @@ export const academyWatch = sva({
 		"livePlayer",
 		"livePlayerVideo",
 		"livePlayerStatus",
+		"discussion",
 		"reactions",
 		"reactionList",
 		"reactionButton",
@@ -177,10 +180,10 @@ export const academyWatch = sva({
 	base: {
 		root: {
 			// The strip the narrow player shrinks to, and its full height:
-			// 16:9 of the viewport width, capped so a tablet or a landscape
-			// phone still shows the title beneath it.
+			// 16:9 of the viewport width (full bleed), capped by the viewport
+			// height so a landscape phone still shows the title beneath it.
 			"--watch-strip": "3.5rem",
-			"--watch-full": "min(56.25vw, 26rem, 70svh)",
+			"--watch-full": "min(56.25vw, 70svh)",
 			backgroundColor: "academy.canvas",
 			color: "academy.text",
 			fontFamily: "academy-text",
@@ -199,11 +202,11 @@ export const academyWatch = sva({
 		// viewport that is not the player (the site header, the session and,
 		// when it is pinned, "more from"); the player takes what is left.
 		bench: {
-			"--watch-rest": "22.5rem",
+			"--watch-rest": "23.25rem",
 			display: "flex",
 			flexDirection: "column",
 			timelineScope: "--watch-deck",
-			"&[data-notice]": { "--watch-rest": "33.5rem" },
+			"&[data-notice]": { "--watch-rest": "34.25rem" },
 			_lg: {
 				display: "grid",
 				gridTemplateColumns:
@@ -214,8 +217,36 @@ export const academyWatch = sva({
 			// pane, so the pane is a complete side of the bench. A shorter one
 			// leaves it at the end of the column, where the page scrolls to it;
 			// nothing ever scrolls inside the pane.
+			//
+			// Laptop heights pin one row, without its still.
+			"@media (min-width: 1024px) and (min-height: 46rem) and (max-height: 53.99rem)":
+				{
+					"&[data-pin]": { "--watch-rest": "30.5rem" },
+					"&[data-pin] > [data-watch-pane]": { gridRow: "1 / 3" },
+					"&[data-pin] > [data-watch-more]": {
+						gridRow: "1 / 3",
+						alignSelf: "end",
+						position: "sticky",
+						bottom: "0",
+						paddingBlockEnd: "4",
+						borderInlineEndColor: "transparent",
+						backgroundColor: "transparent",
+					},
+					"&[data-pin] > [data-watch-more] li:nth-child(n + 2)": {
+						display: "none",
+					},
+					"&[data-pin] > [data-watch-more] [data-still]": { display: "none" },
+					"&[data-pin] > [data-watch-more] [data-up-next-link]": {
+						gridTemplateColumns: "minmax(0, 1fr)",
+					},
+				},
+			// A short viewport cannot hold the upcoming notice beside the
+			// player: the pane scrolls with the page so "Notify me" is reachable.
+			"@media (min-width: 1024px) and (max-height: 56rem)": {
+				"&[data-notice] [data-watch-pane-sticky]": { position: "static" },
+			},
 			"@media (min-width: 1024px) and (min-height: 54rem)": {
-				"&[data-pin]": { "--watch-rest": "36.75rem" },
+				"&[data-pin]": { "--watch-rest": "37.5rem" },
 				"&[data-pin] > [data-watch-pane]": { gridRow: "1 / 3" },
 				"&[data-pin] > [data-watch-more]": {
 					gridRow: "1 / 3",
@@ -232,7 +263,7 @@ export const academyWatch = sva({
 				},
 			},
 			"@media (min-width: 1024px) and (min-height: 62rem)": {
-				"&[data-pin]": { "--watch-rest": "41rem" },
+				"&[data-pin]": { "--watch-rest": "41.75rem" },
 				"&[data-pin] > [data-watch-more] li:nth-child(n + 3)": {
 					display: "block",
 				},
@@ -264,6 +295,12 @@ export const academyWatch = sva({
 				minHeight: "[100dvh]",
 				overflow: "hidden",
 				...systemGridBottom,
+				// The lattice is registered to the seam: one line lies on the
+				// player's right border, and none sits beside the pane's own rule.
+				_before: {
+					...systemGridBottom._before,
+					backgroundPosition: "[right calc(2.5rem + 1px) bottom]",
+				},
 			},
 		},
 		// The player narrows on a short viewport so the pane always fits
@@ -280,7 +317,9 @@ export const academyWatch = sva({
 				// The 708px track less the pane's own rule.
 				maxWidth: "[707px]",
 				marginInlineStart: "auto",
-				paddingBlock: "5",
+				// The player's top edge and the first line of the notes share a line.
+				paddingBlockStart: "8",
+				paddingBlockEnd: "5",
 				paddingInlineStart: "academy-gutter",
 				paddingInlineEnd: "10",
 			},
@@ -480,6 +519,8 @@ export const academyWatch = sva({
 			_lg: {
 				flexShrink: "0",
 				overflow: "visible",
+				// As wide as the player, so the share link ends on its edge.
+				maxWidth: "[var(--watch-player-w)]",
 				paddingInline: "0",
 				paddingBlockStart: "3",
 				paddingBlockEnd: "0",
@@ -536,6 +577,8 @@ export const academyWatch = sva({
 				content: '"\\b7"',
 				marginInlineEnd: "3",
 				color: "academy.inkTextMuted",
+				// Where alt text is supported the dot is not spoken.
+				'@supports (content: "x" / "")': { content: '"\\b7" / ""' },
 			},
 		},
 		// The kind label (MLabel) is set for the canvas; on ink it reads as
@@ -567,12 +610,16 @@ export const academyWatch = sva({
 			fontSize: "md",
 			fontWeight: "bold",
 			lineHeight: "tight",
+			textWrap: "balance",
 		},
 		noticeCopy: {
+			maxWidth: "[60ch]",
 			margin: "0",
 			color: "academy.inkTextSoft",
 			fontSize: "sm",
 			lineHeight: "body",
+			textWrap: "pretty",
+			"& time": { color: "academy.inkText", fontWeight: "medium" },
 		},
 		factLink: {
 			color: "academy.inkText",
@@ -582,16 +629,26 @@ export const academyWatch = sva({
 			_hover: { color: "academy.inkAccent" },
 			_focusVisible: focusRingInk,
 		},
-		// Under the meta line: the technologies as pills, then the share
-		// link at the trailing edge of the same row.
+		// Under the meta line: the technologies as pills in the first track,
+		// the share link top right in the second, whatever the chip count.
 		tools: {
-			display: "flex",
-			flexWrap: "wrap",
-			alignItems: "center",
-			gap: "2",
+			display: "grid",
+			gridTemplateColumns: "[minmax(0, 1fr) auto]",
+			alignItems: "start",
+			columnGap: "3",
 			marginBlockStart: "4",
 		},
-		toolsEnd: { marginInlineStart: "auto" },
+		// Composed with `button()`: the doubled selector wins over the
+		// button's own size. The width holds "Link copied" so the label swap
+		// does not resize it.
+		toolsEnd: {
+			"&&": {
+				gridColumn: "2",
+				minWidth: "[7rem]",
+				whiteSpace: "nowrap",
+				"@media (max-width: 1023.98px)": { minHeight: "11" },
+			},
+		},
 		// What to watch next. It follows the notes in the source, closes the
 		// page in ink on narrow screens and is placed at the foot of the ink
 		// column from `lg` (pinned there when `bench` has the room).
@@ -637,7 +694,7 @@ export const academyWatch = sva({
 		inkHeader: {
 			display: "flex",
 			flexWrap: "wrap",
-			alignItems: "baseline",
+			alignItems: "center",
 			justifyContent: "space-between",
 			columnGap: "3",
 			rowGap: "1",
@@ -654,6 +711,7 @@ export const academyWatch = sva({
 			display: "inline-flex",
 			alignItems: "center",
 			gap: "1",
+			minHeight: { base: "11", lg: "auto" },
 			color: "academy.inkTextSoft",
 			fontSize: "sm",
 			fontWeight: "semibold",
@@ -685,7 +743,7 @@ export const academyWatch = sva({
 			display: "inline-flex",
 			alignItems: "center",
 			gap: "2",
-			minHeight: "9",
+			minHeight: { base: "11", lg: "9" },
 			paddingInlineStart: "2",
 			paddingInlineEnd: "3",
 			border: "hairline",
@@ -694,11 +752,9 @@ export const academyWatch = sva({
 			color: "academy.inkText",
 			fontSize: "sm",
 			textDecoration: "none",
-			transitionProperty: "colors",
-			transitionDuration: "fast",
+			...watchFeedback,
 			_hover: { borderColor: "academy.inkAccent", color: "academy.inkAccent" },
 			_focusVisible: focusRingInk,
-			_motionReduce: { transitionDuration: "none" },
 		},
 		// A logo is drawn for paper, so it keeps a paper tile in both schemes.
 		techIcon: {
@@ -725,6 +781,10 @@ export const academyWatch = sva({
 				borderTopColor: "academy.inkBorder",
 			},
 			_sm: { gridTemplateColumns: "repeat(2, minmax(0, 1fr))" },
+			// Two columns never orphan a third row.
+			"@media (min-width: 640px) and (max-width: 1023.98px)": {
+				"& > li:nth-child(n + 3)": { display: "none" },
+			},
 			_lg: { gridTemplateColumns: "minmax(0, 1fr)" },
 		},
 		upNextLink: {
@@ -739,6 +799,7 @@ export const academyWatch = sva({
 				"& [data-title]": { color: "academy.inkAccent" },
 				"& img": { transform: "scale(1.04)" },
 			},
+			_active: { "& [data-title]": { color: "academy.inkAccent" } },
 			_focusVisible: focusRingInk,
 		},
 		upNextStill: {
@@ -750,7 +811,7 @@ export const academyWatch = sva({
 		upNextBody: { display: "grid", minWidth: "0" },
 		upNextMeta: {
 			...monoMeta,
-			color: "academy.inkTextMuted",
+			color: "academy.inkTextSoft",
 			fontVariantNumeric: "tabular-nums",
 		},
 		upNextTitle: {
@@ -763,8 +824,7 @@ export const academyWatch = sva({
 			lineHeight: "academy-card",
 			lineClamp: "2",
 			boxOrient: "vertical",
-			transitionProperty: "colors",
-			transitionDuration: "base",
+			...watchFeedback,
 		},
 		// The canvas pane: the working notes, in the order you need them.
 		notes: {
@@ -776,7 +836,7 @@ export const academyWatch = sva({
 				gridColumn: "3 / 5",
 				gridRow: "1 / 3",
 				paddingInlineStart: "10",
-				paddingBlockStart: "10",
+				paddingBlockStart: "8",
 				paddingBlockEnd: "20",
 			},
 		},
@@ -785,9 +845,26 @@ export const academyWatch = sva({
 			flexDirection: "column",
 			gap: "12",
 			maxWidth: "academy-copy",
-			marginInline: "auto",
+			// On the gutter, under the title.
+			marginInline: "0",
+			// A tablet has room for the ledger: headings in a label track.
+			// The about block has no visible heading and spans both tracks.
+			"@media (min-width: 768px) and (max-width: 1023.98px)": {
+				maxWidth: "[50rem]",
+				"& > section:first-child": {
+					display: "flex",
+					"& > *": { maxWidth: "[38rem]" },
+				},
+			},
 			// 472px of track less the pane's own padding and the shell gutter.
-			_lg: { gap: "14", maxWidth: "[384px]", marginInline: "0" },
+			_lg: {
+				gap: "14",
+				maxWidth: "[384px]",
+				// With no lede the description opens the notes: its first line
+				// is trimmed like the lede's (child 1 is the sr-only heading).
+				"& > section:first-child > [data-academy-prose]:nth-child(2) > :first-child":
+					{ marginBlockStart: "[-0.4em]" },
+			},
 		},
 		lede: {
 			...ledeText,
@@ -795,6 +872,10 @@ export const academyWatch = sva({
 			color: "academy.text",
 			fontWeight: "medium",
 			lineHeight: "body",
+			textWrap: "balance",
+			// The leading above the first line is trimmed so its cap line sits
+			// on the player's top edge across the seam.
+			_lg: { marginBlockStart: "[-0.4em]" },
 		},
 		// The description is rendered rich text (the `prose` slot of
 		// `academyLayout`), stepped down to sit in a notes column.
@@ -810,6 +891,9 @@ export const academyWatch = sva({
 			flexDirection: "column",
 			gap: "4",
 			minWidth: "0",
+			"@media (min-width: 768px) and (max-width: 1023.98px)": {
+				...watchLedger,
+			},
 		},
 		sectionTitle: {
 			margin: "0",
@@ -820,15 +904,20 @@ export const academyWatch = sva({
 			letterSpacing: "academy-tight",
 			lineHeight: "tight",
 			textWrap: "balance",
+			"@media (min-width: 768px) and (max-width: 1023.98px)": {
+				fontSize: "xl",
+			},
 		},
 		// Numbered because the order is real. The numeral is the list marker
 		// itself, so the list stays an ordered list for every reader.
 		learnList: {
 			display: "grid",
 			margin: "0",
-			// The site's list reset indents this list by 1.5rem; pull it back
-			// so the numeral starts on the rule.
-			marginInlineStart: "[-0.4rem]",
+			// The numeral right-aligns in the 3.25rem label gutter the time
+			// codes use, and the text starts on the same 4rem edge. The site's
+			// list reset (unlayered, so it wins) already indents this list by
+			// 1.5rem; the margin makes up the rest of the gutter.
+			marginInlineStart: "[1.75rem]",
 			color: "academy.text",
 			fontSize: "md",
 			lineHeight: "body",
@@ -841,7 +930,7 @@ export const academyWatch = sva({
 					content: '""',
 					position: "absolute",
 					top: "0",
-					insetInlineStart: "[-1.1rem]",
+					insetInlineStart: "[-3.25rem]",
 					insetInlineEnd: "0",
 					borderTop: "hairline",
 				},
@@ -849,7 +938,7 @@ export const academyWatch = sva({
 					content: "counter(list-item)",
 					color: "academy.accent",
 					fontFamily: "academy-display",
-					fontSize: "2xl",
+					fontSize: "xl",
 					fontWeight: "extrabold",
 					fontVariantNumeric: "tabular-nums",
 				},
@@ -859,14 +948,14 @@ export const academyWatch = sva({
 					content: '""',
 					position: "absolute",
 					bottom: "0",
-					insetInlineStart: "[-1.1rem]",
+					insetInlineStart: "[-3.25rem]",
 					insetInlineEnd: "0",
 					borderTop: "hairline",
 				},
 			},
 		},
-		// Resources: a ruled list. The kind column is the resource's own
-		// category and is left out when no resource has one.
+		// Resources: a ruled list. The name takes the full measure; the kind
+		// (the resource's own category, when it has one) sits beneath it.
 		linkList: {
 			display: "grid",
 			margin: "0",
@@ -884,15 +973,16 @@ export const academyWatch = sva({
 			paddingBlock: "3",
 			color: "academy.text",
 			textDecoration: "none",
-			"&[data-kinds='true']": {
-				gridTemplateColumns: "[6.75rem minmax(0, 1fr) auto]",
-			},
 			_hover: {
 				"& [data-name]": { color: "academy.accent" },
 				"& [data-arrow]": {
 					color: "academy.accent",
 					transform: "translate(2px, -2px)",
 				},
+			},
+			_active: {
+				"& [data-name]": { color: "academy.accent" },
+				"& [data-arrow]": { color: "academy.accent" },
 			},
 			_focusVisible: focusRing,
 		},
@@ -901,8 +991,7 @@ export const academyWatch = sva({
 		linkName: {
 			fontWeight: "semibold",
 			lineHeight: "academy-card",
-			transitionProperty: "colors",
-			transitionDuration: "fast",
+			...watchFeedback,
 		},
 		linkNote: {
 			color: "academy.textMuted",
@@ -916,34 +1005,41 @@ export const academyWatch = sva({
 			transitionTimingFunction: "academy-out",
 			_motionReduce: { transitionDuration: "none" },
 		},
-		// The cast is a small contact sheet: portraits in greyscale that come
-		// into colour under the pointer or focus, as on People.
+		// The cast in the ledger grammar: ruled rows of portrait, name and
+		// handle, role. The portrait sits in the label gutter in greyscale and
+		// comes into colour under the pointer or focus, as on People.
 		castGrid: {
 			display: "grid",
-			gridTemplateColumns: "repeat(auto-fill, minmax(6.5rem, 1fr))",
-			columnGap: "3",
-			rowGap: "5",
+			gridTemplateColumns: "minmax(0, 1fr)",
+			gap: "0",
 			margin: "0",
 			padding: "0",
 			listStyle: "none",
+			borderTop: "hairline",
+			"& > li": { borderBottom: "hairline" },
 		},
 		castCard: {
 			display: "grid",
-			justifyItems: "start",
-			gap: "1",
+			gridTemplateColumns: "[3.25rem minmax(0, 1fr) auto]",
+			columnGap: "3",
+			alignItems: "center",
 			minWidth: "0",
+			minHeight: "14",
+			paddingBlock: "2",
 			color: "academy.text",
 			textDecoration: "none",
 			_hover: {
 				"& [data-name]": { color: "academy.accent" },
 				"& img": { filter: "[none]" },
 			},
+			_active: { "& [data-name]": { color: "academy.accent" } },
 			_focusVisible: { ...focusRing, "& img": { filter: "[none]" } },
 		},
 		castAvatar: {
-			width: "[4.5rem]",
-			height: "[4.5rem]",
-			marginBlockEnd: "2",
+			justifySelf: "start",
+			width: "10",
+			height: "10",
+			marginBlockEnd: "0",
 			borderRadius: "full",
 			objectFit: "cover",
 			filter: "[grayscale(1) contrast(1.05)]",
@@ -955,13 +1051,16 @@ export const academyWatch = sva({
 		castInitials: {
 			display: "grid",
 			placeItems: "center",
+			border: "hairline",
+			borderColor: "academy.border",
 			background: "academy.ground",
 			color: "academy.textSoft",
 			fontFamily: "academy-text",
-			fontSize: "md",
+			fontSize: "sm",
 			fontWeight: "semibold",
 			"&[hidden]": { display: "none" },
 		},
+		castBody: { display: "grid", minWidth: "0" },
 		castName: {
 			margin: "0",
 			color: "currentColor",
@@ -969,10 +1068,9 @@ export const academyWatch = sva({
 			fontWeight: "semibold",
 			lineHeight: "academy-card",
 			overflowWrap: "anywhere",
-			transitionProperty: "colors",
-			transitionDuration: "fast",
+			...watchFeedback,
 		},
-		castMeta: { ...monoMeta, overflowWrap: "anywhere" },
+		castMeta: { ...monoMeta, justifySelf: "end", whiteSpace: "nowrap" },
 		// A handle is one word: it takes its own line and never breaks.
 		castHandle: {
 			...monoMeta,
@@ -995,26 +1093,43 @@ export const academyWatch = sva({
 			listStyle: "none",
 			borderTop: "hairline",
 		},
+		// One label gutter for the notes: time codes (and the learn list's
+		// numerals) right-align in a 3.25rem track, and every row's text
+		// starts 4rem from the column edge.
 		chapterLink: {
 			display: "grid",
-			gridTemplateColumns: "[4.25rem minmax(0, 1fr)]",
-			gap: "3",
+			gridTemplateColumns: "[3.25rem minmax(0, 1fr)]",
+			columnGap: "3",
 			alignItems: "baseline",
 			minHeight: "11",
 			paddingBlock: "3",
 			borderBottom: "hairline",
 			color: "academy.text",
 			textDecoration: "none",
+			...watchFeedback,
 			_hover: { color: "academy.accent" },
+			_active: { color: "academy.accent" },
 			_focusVisible: focusRing,
+			// The chapter being played: weight is the cue, not colour.
+			"&[aria-current='true']": {
+				"& [data-name]": { fontWeight: "semibold" },
+				"& [data-time]": { fontWeight: "bold" },
+			},
 		},
 		chapterTime: {
+			justifySelf: "end",
 			color: "academy.accent",
 			fontFamily: "academy-mono",
 			fontSize: "xs",
 			fontVariantNumeric: "tabular-nums",
+			textAlign: "end",
+			whiteSpace: "nowrap",
 		},
-		chapterName: { color: "currentColor", fontSize: "sm", lineHeight: "body" },
+		chapterName: {
+			color: "currentColor",
+			fontSize: "md",
+			lineHeight: "academy-card",
+		},
 		transcript: { display: "flex", flexDirection: "column", gap: "3" },
 		transcriptNote: {
 			margin: "0",
@@ -1057,9 +1172,8 @@ export const academyWatch = sva({
 		// A whole session's transcript is long: it scrolls inside its own
 		// frame so the notes after it stay within reach.
 		transcriptContainer: {
-			maxHeight: "academy-transcript",
+			maxHeight: "[min(var(--sizes-academy-transcript), 70svh)]",
 			overflowY: "auto",
-			paddingInlineEnd: "3",
 			borderBlock: "hairline",
 			scrollbarWidth: "thin",
 			_focusVisible: focusRing,
@@ -1068,27 +1182,34 @@ export const academyWatch = sva({
 			display: "grid",
 			"& > section:last-child > p:last-child": { borderBottom: "none" },
 		},
+		// The link inside is 44px tall with its text centred, so the heading's
+		// own margins are what is left of the 20px above and 8px below.
 		transcriptChapter: {
-			marginBlockStart: "5",
-			marginBlockEnd: "2",
+			marginBlockStart: "2",
+			marginBlockEnd: "0",
 			color: "academy.text",
 			fontSize: "md",
 			fontWeight: "bold",
 			lineHeight: "tight",
 		},
 		transcriptChapterLink: {
-			display: "inline-flex",
+			display: "grid",
+			gridTemplateColumns: "[3.25rem minmax(0, 1fr)]",
+			columnGap: "3",
 			alignItems: "baseline",
-			gap: "3",
+			alignContent: "center",
+			width: "full",
+			minHeight: "11",
 			color: "academy.text",
 			textDecoration: "none",
+			...watchFeedback,
 			_hover: { color: "academy.accent" },
-			_focusVisible: focusRing,
+			_focusVisible: focusRingInset,
 		},
 		// One line of the transcript: its time code, then the words.
 		transcriptParagraph: {
 			display: "grid",
-			gridTemplateColumns: "[4.25rem minmax(0, 1fr)]",
+			gridTemplateColumns: "[3.25rem minmax(0, 1fr)]",
 			columnGap: "3",
 			alignItems: "baseline",
 			margin: "0",
@@ -1101,17 +1222,31 @@ export const academyWatch = sva({
 			"&[hidden]": { display: "none" },
 		},
 		transcriptTimestamp: {
+			justifySelf: "end",
 			color: "academy.accent",
 			fontFamily: "academy-mono",
 			fontSize: "xs",
 			fontVariantNumeric: "tabular-nums",
+			whiteSpace: "nowrap",
 		},
+		// The time cell is the row's whole height (a 44px target) without
+		// changing it: the padding is taken back by the margin. The ring is
+		// inset because the scroll container would clip an outset one.
 		transcriptTimestampLink: {
-			display: "inline-flex",
-			justifySelf: "start",
+			display: "block",
+			alignSelf: "stretch",
+			width: "full",
+			minHeight: "11",
+			paddingBlock: "3",
+			marginBlock: "-3",
+			// A block, not a flex row: the time then sits on a line with the
+			// paragraph's own strut, so both columns share a first baseline.
+			lineHeight: "body",
+			textAlign: "end",
 			textDecoration: "none",
+			...watchFeedback,
 			_hover: { textDecoration: "underline", textUnderlineOffset: "2px" },
-			_focusVisible: focusRing,
+			_focusVisible: focusRingInset,
 		},
 		transcriptHighlight: {
 			paddingInline: "0.5",
@@ -1146,8 +1281,21 @@ export const academyWatch = sva({
 			fontSize: "sm",
 			fontWeight: "bold",
 		},
+		// Reactions and comments: one block at the end of the notes.
+		discussion: {
+			display: "flex",
+			flexDirection: "column",
+			gap: "6",
+			minWidth: "0",
+		},
+		// The height is held before the deferred island arrives.
 		reactions: {
 			minWidth: "0",
+			minHeight: "11",
+			// In the tablet ledger the row sits in the content track.
+			"@media (min-width: 768px) and (max-width: 1023.98px)": {
+				marginInlineStart: "[16rem]",
+			},
 		},
 		reactionList: {
 			position: "relative",
@@ -1165,18 +1313,22 @@ export const academyWatch = sva({
 			minHeight: "11",
 			paddingInline: "3",
 			border: "hairline",
+			borderColor: "academy.border",
 			borderRadius: "academy-pill",
-			backgroundColor: "academy.ground",
+			backgroundColor: "transparent",
 			color: "academy.text",
 			fontFamily: "academy-text",
 			fontSize: "sm",
 			cursor: "pointer",
+			...watchFeedback,
+			transitionProperty: "[color, background-color, border-color, transform]",
 			_hover: { borderColor: "academy.accent" },
+			_active: { transform: "translateY(1px)" },
 			_focusVisible: focusRing,
 		},
-		reactionEmoji: { fontSize: "lg", lineHeight: "none" },
+		reactionEmoji: { fontSize: "md", lineHeight: "none" },
 		reactionCount: {
-			color: "currentColor",
+			color: "academy.textMuted",
 			fontFamily: "academy-mono",
 			fontSize: "xs",
 			fontVariantNumeric: "tabular-nums",
@@ -1203,10 +1355,13 @@ export const academyWatch = sva({
 			backgroundColor: "academy.ground",
 			fontSize: "lg",
 			cursor: "pointer",
+			...watchFeedback,
+			transitionProperty: "[color, background-color, border-color, transform]",
 			_hover: {
 				borderColor: "academy.accent",
 				backgroundColor: "academy.canvas",
 			},
+			_active: { transform: "translateY(1px)" },
 			_focusVisible: focusRing,
 		},
 		tabsRoot: {
@@ -1263,7 +1418,15 @@ export const academyWatch = sva({
 			marginBlockStart: "1",
 			color: "academy.textMuted",
 		},
-		comments: { display: "flex", flexDirection: "column", gap: "4" },
+		comments: {
+			display: "flex",
+			flexDirection: "column",
+			gap: "4",
+			minWidth: "0",
+			"@media (min-width: 768px) and (max-width: 1023.98px)": {
+				...watchLedger,
+			},
+		},
 		commentsTitle: {
 			margin: "0",
 			color: "academy.text",
@@ -1414,11 +1577,13 @@ export const academyWatch = sva({
 		},
 		pressed: {
 			true: {
+				// No solid fill: `aria-pressed` and the bold count carry the state.
 				reactionButton: {
 					borderColor: "academy.accent",
-					backgroundColor: "academy.accent",
-					color: "academy.accentForeground",
+					backgroundColor: "academy.ground",
+					color: "academy.text",
 				},
+				reactionCount: { color: "academy.accent", fontWeight: "bold" },
 			},
 			false: {},
 		},

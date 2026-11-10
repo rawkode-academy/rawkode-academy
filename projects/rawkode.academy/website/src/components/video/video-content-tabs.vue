@@ -59,7 +59,7 @@ const setActiveTab = (tabId: string) => {
 </script>
 
 <template>
-	<section v-if="validResources.length === 0" :class="watch.section">
+	<section v-if="validResources.length === 0">
 		<VideoComments :video-id="videoId" :heading-level="2" />
 	</section>
 	<Tabs.Root v-else :value="activeTab" :default-value="activeTab" :class="watch.tabsRoot" @value-change="setActiveTab($event.value)">

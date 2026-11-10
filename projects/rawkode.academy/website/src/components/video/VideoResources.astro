@@ -3,20 +3,15 @@ import { academyWatch } from "@rawkodeacademy/design-system";
 import { type VideoResource, validVideoResources } from "./video-resources";
 
 /**
- * A session's resources as a ruled list, rendered on the server. The kind
- * column is the resource's own category. "other" says nothing, so those
- * rows fall back to what the resource is (its type: a link, a file or an
- * embed), and the column goes when no resource has a named category.
+ * A session's resources as a ruled list, rendered on the server. The name
+ * takes the full measure; the resource's own category sits beneath it.
+ * "other" says nothing, so those rows carry no kind.
  */
 interface Props {
 	resources: readonly VideoResource[];
 }
 
 const resources = validVideoResources(Astro.props.resources);
-const hasKinds = resources.some((resource) => resource.category !== "other");
-const typeLabels = { url: "link", file: "file", embed: "embed" } as const;
-const kindOf = (resource: (typeof resources)[number]) =>
-	resource.category === "other" ? typeLabels[resource.type] : resource.category;
 const watch = academyWatch();
 ---
 
@@ -28,17 +23,14 @@ const watch = academyWatch();
 				<li>
 					<a
 						class={watch.linkRow}
-						data-kinds={hasKinds ? "true" : "false"}
 						href={resource.href}
 						target={resource.type === "url" ? "_blank" : undefined}
 						rel={resource.type === "url" ? "noopener noreferrer" : undefined}
 					>
-						{hasKinds && (
-							<span class={watch.linkKind}>{kindOf(resource)}</span>
-						)}
 						<span class={watch.linkBody}>
 							<span class={watch.linkName} data-name>{resource.title}</span>
 							{resource.description && <span class={watch.linkNote}>{resource.description}</span>}
+							{resource.category !== "other" && <span class={watch.linkKind}>{resource.category}</span>}
 						</span>
 						{resource.type === "url" && <span class={watch.linkArrow} data-arrow aria-hidden="true">↗</span>}
 					</a>

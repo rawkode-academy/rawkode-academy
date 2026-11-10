@@ -37,8 +37,8 @@ const UP_NEXT_LIMIT = 3;
 		<ul class={watch.upNextList}>
 			{videos.slice(0, UP_NEXT_LIMIT).map((video) => (
 				<li>
-					<a href={`/watch/${video.slug}`} class={watch.upNextLink}>
-						<span class={watch.upNextStill}>
+					<a href={`/watch/${video.slug}`} class={watch.upNextLink} data-up-next-link>
+						<span class={watch.upNextStill} data-still>
 							<img src={video.thumbnailUrl} alt="" class={watch.upNextImage} width="320" height="180" loading="lazy" decoding="async" />
 						</span>
 						<span class={watch.upNextBody}>

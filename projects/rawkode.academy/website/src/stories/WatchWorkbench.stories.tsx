@@ -41,7 +41,6 @@ interface Resource {
 	title: string;
 	description?: string;
 	category: string;
-	type?: "link" | "file" | "embed";
 }
 interface Session {
 	title: string;
@@ -61,7 +60,7 @@ interface Session {
 	chapters: { time: string; title: string }[];
 	transcript: { time: string; text: string }[];
 	upNext: { title: string; runtime: string; still: string }[];
-	total?: number;
+	total?: number | undefined;
 }
 
 const initials = (name: string) =>
@@ -104,22 +103,63 @@ const Newsletter = () => {
 	);
 };
 
-const Workbench = ({ session }: { session: Session }) => {
+const toSeconds = (time: string) =>
+	time.split(":").reduce((total, part) => total * 60 + Number(part), 0);
+
+/**
+ * `header` stands in for the site header (6rem and its rule from `lg`,
+ * 5rem below), so the pane's first-screen budget can be checked.
+ */
+const Workbench = ({
+	session,
+	header = false,
+}: {
+	session: Session;
+	header?: boolean;
+}) => {
 	const watch = academyWatch();
+	// The viewer's own reaction (the story shows one pressed).
+	const pressed = academyWatch({ pressed: true });
 	const nav = academyNavigation();
 	const prose = academyLayout({ width: "wide" }).prose;
 	const label = academyLabel({ tone: "accent" });
 	const upcoming = session.status === "Upcoming";
-	const hasKinds = session.resources.some((r) => r.category !== "other");
+	// As `transcriptSections`: cues grouped under the chapter they fall in.
+	const transcriptGroups = [
+		{ chapter: undefined, start: -1 },
+		...session.chapters.map((chapter) => ({
+			chapter,
+			start: toSeconds(chapter.time),
+		})),
+	]
+		.map((group, index, groups) => ({
+			...group,
+			cues: session.transcript.filter((cue) => {
+				const at = toSeconds(cue.time);
+				const next = groups[index + 1]?.start ?? Number.POSITIVE_INFINITY;
+				return at >= group.start && at < next;
+			}),
+		}))
+		.filter((group) => group.cues.length > 0);
 	return (
-		<div className={watch.root}>
+		<div className={watch.root} data-watch-root>
+			{header && (
+				<div
+					aria-hidden="true"
+					style={{
+						height: "clamp(81px, calc((100vw - 1023px) * 9999), 97px)",
+						borderBottom: "1px solid var(--colors-academy-border)",
+						boxSizing: "border-box",
+					}}
+				/>
+			)}
 			<div
 				className={watch.bench}
 				data-pin={session.upNext.length > 0 && !upcoming ? "" : undefined}
 				data-notice={upcoming ? "" : undefined}
 			>
 				<div className={watch.pane} data-watch-pane>
-					<div className={watch.paneSticky}>
+					<div className={watch.paneSticky} data-watch-pane-sticky>
 						<div className={watch.paneInner}>
 							<div className={watch.deck}>
 								<div className={watch.deckInner}>
@@ -228,15 +268,16 @@ const Workbench = ({ session }: { session: Session }) => {
 									>
 										Copy link
 									</button>
+									<span className="sr-only" role="status" />
 								</div>
 								{upcoming && (
 									<div className={watch.upcoming}>
 										<h2 className={watch.noticeTitle}>
-											This session has not started yet.
+											This session has not started yet
 										</h2>
 										<p className={watch.noticeCopy}>
-											Join us on <time>{session.scheduled}</time>. The player
-											will activate when the stream is available.
+											Join us on <time>{session.scheduled}</time>. The player on
+											this page starts when the stream does.
 										</p>
 										<a className={watch.factLink} href="#youtube">
 											Open the scheduled stream on YouTube ↗
@@ -269,44 +310,11 @@ const Workbench = ({ session }: { session: Session }) => {
 									<p key={paragraph}>{paragraph}</p>
 								))}
 							</div>
-							<div className={watch.reactions}>
-								<div
-									className={watch.reactionList}
-									role="group"
-									aria-label="React to this video"
-								>
-									{[
-										["👍", "Like", 12],
-										["👏", "Applause", 0],
-										["🚀", "Rocket", 3],
-										["💡", "Insightful", 0],
-									].map(([emoji, name, count]) => (
-										<button
-											key={name}
-											type="button"
-											className={watch.reactionButton}
-											aria-label={String(name)}
-										>
-											<span className={watch.reactionEmoji}>{emoji}</span>
-											{count ? (
-												<span className={watch.reactionCount}>{count}</span>
-											) : null}
-										</button>
-									))}
-									<button
-										type="button"
-										className={watch.reactionButton}
-										aria-label="React with another emoji"
-									>
-										+
-									</button>
-								</div>
-							</div>
 						</section>
 
 						{session.learn.length > 0 && (
 							<section className={watch.section}>
-								<h2 className={watch.sectionTitle}>What you'll learn</h2>
+								<h2 className={watch.sectionTitle}>What you’ll learn</h2>
 								<ol className={watch.learnList} data-academy-learn-list>
 									{session.learn.map((item) => (
 										<li key={item}>{item}</li>
@@ -321,18 +329,7 @@ const Workbench = ({ session }: { session: Session }) => {
 								<ul className={watch.linkList}>
 									{session.resources.map((resource) => (
 										<li key={resource.title}>
-											<a
-												className={watch.linkRow}
-												data-kinds={hasKinds ? "true" : "false"}
-												href="#resource"
-											>
-												{hasKinds && (
-													<span className={watch.linkKind}>
-														{resource.category === "other"
-															? (resource.type ?? "link")
-															: resource.category}
-													</span>
-												)}
+											<a className={watch.linkRow} href="#resource">
 												<span className={watch.linkBody}>
 													<span className={watch.linkName} data-name>
 														{resource.title}
@@ -340,6 +337,11 @@ const Workbench = ({ session }: { session: Session }) => {
 													{resource.description && (
 														<span className={watch.linkNote}>
 															{resource.description}
+														</span>
+													)}
+													{resource.category !== "other" && (
+														<span className={watch.linkKind}>
+															{resource.category}
 														</span>
 													)}
 												</span>
@@ -369,8 +371,8 @@ const Workbench = ({ session }: { session: Session }) => {
 														className={watch.castAvatar}
 														src={person.portrait}
 														alt=""
-														width="72"
-														height="72"
+														width="40"
+														height="40"
 													/>
 												) : (
 													<span
@@ -380,13 +382,15 @@ const Workbench = ({ session }: { session: Session }) => {
 														{initials(person.name)}
 													</span>
 												)}
-												<h3 className={watch.castName} data-name>
-													{person.name}
-												</h3>
+												<div className={watch.castBody}>
+													<h3 className={watch.castName} data-name>
+														{person.name}
+													</h3>
+													{person.handle && (
+														<p className={watch.castHandle}>@{person.handle}</p>
+													)}
+												</div>
 												<p className={watch.castMeta}>{person.role}</p>
-												{person.handle && (
-													<p className={watch.castHandle}>@{person.handle}</p>
-												)}
 											</a>
 										</li>
 									))}
@@ -397,14 +401,14 @@ const Workbench = ({ session }: { session: Session }) => {
 						{session.chapters.length > 0 && (
 							<section className={watch.section}>
 								<h2 className={watch.sectionTitle}>Jump to a chapter</h2>
-								<ol className={watch.chapterList}>
+								<ol className={watch.chapterList} data-watch-chapters>
 									{session.chapters.map((chapter) => (
 										<li key={chapter.time}>
 											<a className={watch.chapterLink} href="#chapter">
-												<span className={watch.chapterTime}>
+												<span className={watch.chapterTime} data-time>
 													{chapter.time}
 												</span>
-												<span className={watch.chapterName}>
+												<span className={watch.chapterName} data-name>
 													{chapter.title}
 												</span>
 											</a>
@@ -433,7 +437,6 @@ const Workbench = ({ session }: { session: Session }) => {
 											<input
 												id="story-transcript"
 												type="search"
-												placeholder="Search transcript..."
 												className={watch.searchInput}
 											/>
 											<svg
@@ -461,41 +464,101 @@ const Workbench = ({ session }: { session: Session }) => {
 										tabIndex={0}
 									>
 										<div className={watch.transcriptBody}>
-											<section>
-												{session.transcript.map((cue) => (
-													<p
-														key={cue.time}
-														className={watch.transcriptParagraph}
-													>
-														<a
-															className={watch.transcriptTimestampLink}
-															href="#t"
-															aria-label={`Jump to ${cue.time}`}
+											{transcriptGroups.map((group) => (
+												<section
+													key={group.start}
+													aria-label={group.chapter?.title}
+												>
+													{group.chapter && (
+														<h3 className={watch.transcriptChapter}>
+															<a
+																className={watch.transcriptChapterLink}
+																href="#t"
+															>
+																<span className={watch.transcriptTimestamp}>
+																	{group.chapter.time}
+																</span>
+																{group.chapter.title}
+															</a>
+														</h3>
+													)}
+													{group.cues.map((cue) => (
+														<p
+															key={cue.time}
+															className={watch.transcriptParagraph}
 														>
-															<span className={watch.transcriptTimestamp}>
-																{cue.time}
-															</span>
-														</a>
-														<span>{cue.text}</span>
-													</p>
-												))}
-											</section>
+															<a
+																className={watch.transcriptTimestampLink}
+																href="#t"
+																aria-label={`Jump to ${cue.time}`}
+															>
+																<span className={watch.transcriptTimestamp}>
+																	{cue.time}
+																</span>
+															</a>
+															<span>{cue.text}</span>
+														</p>
+													))}
+												</section>
+											))}
 										</div>
 									</div>
 								</div>
 							</section>
 						)}
 
-						<section className={watch.section}>
-							<div className={watch.comments}>
-								<h2 className={watch.sectionTitle}>Comments (0)</h2>
-								<div className={watch.commentList}>
-									<p className={watch.transcriptNote}>
-										No comments yet. Be the first to start the discussion.
-									</p>
+						<div className={watch.discussion}>
+							<div className={watch.reactions}>
+								<div
+									className={watch.reactionList}
+									role="group"
+									aria-label="React to this video"
+								>
+									{[
+										["👍", "Like", 12],
+										["👏", "Applause", 0],
+										["🚀", "Rocket", 3],
+										["💡", "Insightful", 0],
+									].map(([emoji, name, count]) => (
+										<button
+											key={name}
+											type="button"
+											className={
+												(name === "Rocket" ? pressed : watch).reactionButton
+											}
+											aria-label={String(name)}
+											aria-pressed={name === "Rocket"}
+										>
+											<span className={watch.reactionEmoji}>{emoji}</span>
+											{count ? (
+												<span
+													className={
+														(name === "Rocket" ? pressed : watch).reactionCount
+													}
+												>
+													{count}
+												</span>
+											) : null}
+										</button>
+									))}
+									<button
+										type="button"
+										className={watch.reactionButton}
+										aria-label="React with another emoji"
+									>
+										+
+									</button>
 								</div>
 							</div>
-						</section>
+							<section>
+								<div className={watch.comments}>
+									<h2 className={watch.sectionTitle}>Comments</h2>
+									<div className={watch.commentList}>
+										<p className={watch.transcriptNote}>No comments yet.</p>
+									</div>
+								</div>
+							</section>
+						</div>
 					</div>
 				</div>
 
@@ -510,15 +573,21 @@ const Workbench = ({ session }: { session: Session }) => {
 								<div className={watch.inkHeader}>
 									<h2 className={watch.inkHeading}>More from {session.show}</h2>
 									<a className={watch.inkLink} href="#show">
-										All {session.total} episodes{" "}
+										{session.total
+											? `All ${session.total} episodes`
+											: "View the show"}{" "}
 										<span aria-hidden="true">→</span>
 									</a>
 								</div>
 								<ul className={watch.upNextList}>
 									{session.upNext.map((video) => (
 										<li key={video.title}>
-											<a className={watch.upNextLink} href="#video">
-												<span className={watch.upNextStill}>
+											<a
+												className={watch.upNextLink}
+												href="#video"
+												data-up-next-link
+											>
+												<span className={watch.upNextStill} data-still>
 													<img
 														className={watch.upNextImage}
 														src={video.still}
@@ -729,6 +798,93 @@ export const Upcoming: Story = {
 				chapters: [],
 				transcript: [],
 				technologies: ["Atuin"],
+			}}
+		/>
+	),
+};
+
+/**
+ * The recorded session under a stand-in for the site header: the first
+ * screen the pane has to fit at laptop heights.
+ */
+export const RecordedUnderHeader: Story = {
+	tags: ["!visual", "!visual-mobile"],
+	render: () => <Workbench session={recorded} header />,
+};
+
+const stress: Session = {
+	...recorded,
+	title:
+		"Rebuilding a multi-tenant platform with kubernetesfederationcontroller and no downtime at all",
+	technologies: [
+		"Kubernetes",
+		"Cilium",
+		"eBPF",
+		"Envoy Gateway",
+		"OpenTelemetry",
+		"Crossplane",
+		"Argo CD",
+		"cert-manager",
+	],
+	cast: [
+		{
+			name: "David Flanagan",
+			role: "Host",
+			handle: "rawkode",
+			portrait: stills.controlPlane,
+		},
+		{
+			name: "Wilhelmina Featherstonhaugh-Li",
+			role: "Guest",
+			handle: "wilhelmina-fl",
+			portrait: stills.apiServer,
+		},
+		{
+			name: "Yoshua Wuyts",
+			role: "Guest",
+			handle: "a-twenty-char-handle",
+			portrait: stills.serviceMesh,
+		},
+		{ name: "Duffie Cooley", role: "Guest" },
+		{ name: "Thomas Graf", role: "Guest", portrait: stills.controlPlane },
+		{ name: "Liz Rice", role: "Guest", portrait: stills.apiServer },
+		{ name: "Kat Cosgrove", role: "Guest", portrait: stills.serviceMesh },
+	],
+	resources: [
+		{
+			title:
+				"The complete cluster federation migration runbook with every manifest we applied on stream",
+			category: "documentation",
+		},
+		...recorded.resources,
+	],
+	chapters: [{ time: "1:02:33", title: "The whole session in one chapter" }],
+	upNext: recorded.upNext.slice(0, 1),
+	total: undefined,
+};
+
+/** Long and unbroken content at every slot, and a single chapter and row. */
+export const Stress: Story = {
+	tags: ["!visual", "!visual-mobile"],
+	render: () => <Workbench session={stress} header />,
+};
+
+/** The same content as a scheduled stream: the notice must stay reachable. */
+export const StressUpcoming: Story = {
+	tags: ["!visual", "!visual-mobile"],
+	render: () => (
+		<Workbench
+			header
+			session={{
+				...stress,
+				runtime: "Upcoming",
+				kind: "Live session",
+				status: "Upcoming",
+				scheduled: "Wednesday, 11 November 2026 at 17:00 UTC",
+				lede: undefined,
+				learn: [],
+				chapters: [],
+				transcript: [],
 			}}
 		/>
 	),

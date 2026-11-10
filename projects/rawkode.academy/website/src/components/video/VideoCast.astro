@@ -28,8 +28,8 @@ const watch = academyWatch();
 							src={person.data.avatarUrl}
 							alt=""
 							class={watch.castAvatar}
-							width="72"
-							height="72"
+							width="40"
+							height="40"
 							loading="lazy"
 							decoding="async"
 							onerror="this.hidden=true; this.nextElementSibling.hidden=false;"
@@ -39,9 +39,11 @@ const watch = academyWatch();
 							hidden={Boolean(person.data.avatarUrl)}
 							aria-hidden="true"
 						>{initials(person.data.name)}</span>
-						<h3 class={watch.castName} data-name>{person.data.name}</h3>
+						<div class={watch.castBody}>
+							<h3 class={watch.castName} data-name>{person.data.name}</h3>
+							{person.data.handles?.github && <p class={watch.castHandle}>@{person.data.handles.github}</p>}
+						</div>
 						<p class={watch.castMeta}>{role}</p>
-						{person.data.handles?.github && <p class={watch.castHandle}>@{person.data.handles.github}</p>}
 					</a>
 				</li>
 			))}
