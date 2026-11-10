@@ -1,11 +1,13 @@
 import { sva } from "../../styled-system/css";
+import { focusRing } from "../styles/focus";
+import { textLink } from "../styles/link";
+import { headingMd } from "../styles/type";
 
 /** Content-first technology profiles; all columns share the Academy shell gutter. */
 export const academyTechnology = sva({
 	slots: [
 		"root",
 		"hero",
-		"breadcrumb",
 		"identity",
 		"logo",
 		"title",
@@ -16,18 +18,18 @@ export const academyTechnology = sva({
 		"link",
 		"columns",
 		"reading",
+		"main",
 		"prose",
 		"aside",
 		"section",
 		"heading",
 		"copy",
 		"list",
-		"video",
-		"videoDate",
+		"listLink",
 		"quote",
 		"facts",
 		"ruledSection",
-		"videoGrid",
+		"sectionHead",
 		"relatedGrid",
 		"related",
 		"relatedContext",
@@ -55,11 +57,7 @@ export const academyTechnology = sva({
 			"& img[hidden]": {
 				display: "none",
 			},
-			"& :where(a, summary):focus-visible": {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			"& :where(a, summary):focus-visible": focusRing,
 			_lg: {
 				paddingBlock: "12",
 				gap: "12",
@@ -73,29 +71,6 @@ export const academyTechnology = sva({
 			borderBottom: "hairline",
 			borderColor: "academy.border",
 			minWidth: "0",
-		},
-		breadcrumb: {
-			display: "flex",
-			flexWrap: "wrap",
-			gap: "2",
-			margin: "0",
-			padding: "0",
-			listStyle: "none",
-			fontSize: "sm",
-			color: "academy.textSoft",
-			"& li": {
-				display: "inline-flex",
-				alignItems: "baseline",
-				gap: "2",
-				minWidth: "0",
-			},
-			"& a": {
-				color: "inherit",
-				paddingBlock: "2",
-			},
-			"& [aria-current]": {
-				color: "academy.textMuted",
-			},
 		},
 		identity: {
 			display: "flex",
@@ -169,11 +144,6 @@ export const academyTechnology = sva({
 			margin: "0",
 			padding: "0",
 			listStyle: "none",
-			"& a": {
-				display: "inline-flex",
-				alignItems: "center",
-				minHeight: "11",
-			},
 		},
 		link: {
 			color: "academy.accent",
@@ -195,13 +165,22 @@ export const academyTechnology = sva({
 				gap: "12",
 			},
 		},
+		// Without a rail the page is one column; the profile keeps the
+		// reading measure and the recordings take the shell.
 		reading: {
 			minWidth: "0",
-			maxWidth: "academy-copy",
 			width: "full",
+		},
+		// The main column: the profile, then every recording about it.
+		main: {
+			display: "flex",
+			flexDirection: "column",
+			gap: "12",
+			minWidth: "0",
 		},
 		prose: {
 			minWidth: "0",
+			maxWidth: "academy-copy",
 			color: "academy.textSoft",
 			fontFamily: "academy-text",
 			fontSize: "md",
@@ -255,8 +234,9 @@ export const academyTechnology = sva({
 				marginBlock: "2",
 			},
 			"& blockquote": {
-				borderInlineStart: "hairline",
-				borderColor: "academy.accent",
+				borderTop: "hairline",
+				borderColor: "academy.border",
+				paddingTop: "4",
 				paddingInlineStart: "5",
 				color: "academy.text",
 			},
@@ -293,11 +273,19 @@ export const academyTechnology = sva({
 				borderColor: "academy.border",
 			},
 		},
+		// The rail holds facts only (the personal rating, foundation dates,
+		// links) and stays in view while the recordings scroll past.
 		aside: {
 			display: "flex",
 			flexDirection: "column",
 			gap: "8",
 			minWidth: "0",
+			_lg: {
+				position: "sticky",
+				top: "24",
+				maxHeight: "[calc(100vh - 7rem)]",
+				overflowY: "auto",
+			},
 			"& > section + section": {
 				borderTop: "hairline",
 				borderColor: "academy.border",
@@ -310,14 +298,7 @@ export const academyTechnology = sva({
 			gap: "4",
 			minWidth: "0",
 		},
-		heading: {
-			margin: "0",
-			fontFamily: "academy-display",
-			fontSize: "xl",
-			fontWeight: "bold",
-			lineHeight: "tight",
-			color: "academy.text",
-		},
+		heading: { ...headingMd, color: "academy.text" },
 		copy: {
 			margin: "0",
 			color: "academy.textSoft",
@@ -327,53 +308,29 @@ export const academyTechnology = sva({
 		list: {
 			display: "flex",
 			flexDirection: "column",
-			gap: "4",
+			gap: "1",
 			listStyle: "none",
 			margin: "0",
 			padding: "0",
 			minWidth: "0",
 		},
-		video: {
-			display: "flex",
-			flexDirection: "column",
-			gap: "3",
-			minWidth: "0",
-			textDecoration: "none",
-			color: "academy.text",
-			fontFamily: "academy-display",
-			fontWeight: "semibold",
-			fontSize: "md",
-			lineHeight: "snug",
-			"& img": {
-				width: "full",
-				height: "auto",
-				aspectRatio: "academy-video",
-				objectFit: "cover",
-				borderRadius: "academy-s",
-			},
-			_hover: {
-				color: "academy.accent",
-				"& span": {
-					textDecoration: "underline",
-					textUnderlineOffset: "3px",
-				},
-			},
-		},
-		videoDate: {
-			fontFamily: "academy-text",
-			fontSize: "sm",
-			fontWeight: "normal",
-			color: "academy.textMuted",
-			lineHeight: "relaxed",
-		},
+		// A standalone link in a list: the shared text link, not a bare
+		// underlined accent.
+		listLink: textLink,
+		// An opinion, set apart by a hairline above and an indent. No side
+		// stripe.
 		quote: {
 			margin: "0",
+			paddingTop: "4",
 			paddingInlineStart: "4",
-			borderInlineStart: "hairline",
-			borderColor: "academy.accent",
+			borderTop: "hairline",
+			borderColor: "academy.border",
 			color: "academy.text",
-			fontSize: "sm",
-			lineHeight: "relaxed",
+			fontFamily: "academy-display",
+			fontSize: "md",
+			fontWeight: "semibold",
+			lineHeight: "snug",
+			textWrap: "pretty",
 		},
 		facts: {
 			margin: "0",
@@ -405,19 +362,13 @@ export const academyTechnology = sva({
 			borderColor: "academy.border",
 			scrollMarginTop: "24",
 		},
-		videoGrid: {
-			display: "grid",
-			gridTemplateColumns: "minmax(0, 1fr)",
-			gap: "6",
-			listStyle: "none",
-			padding: "0",
-			margin: "0",
-			sm: {
-				gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-			},
-			_lg: {
-				gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-			},
+		sectionHead: {
+			display: "flex",
+			flexWrap: "wrap",
+			alignItems: "baseline",
+			justifyContent: "space-between",
+			columnGap: "6",
+			rowGap: "2",
 		},
 		relatedGrid: {
 			display: "grid",
@@ -488,7 +439,6 @@ export const academyTechnology = sva({
 		newsletter: {
 			width: "full",
 			maxWidth: "academy-copy",
-			marginInline: "auto",
 			minWidth: "0",
 		},
 	},

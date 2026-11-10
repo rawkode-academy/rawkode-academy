@@ -22,6 +22,7 @@ node_modules
 public/d2/
 .cursor
 storybook-static/
+visual/test-results/
 
 # Bun
 bun.lock

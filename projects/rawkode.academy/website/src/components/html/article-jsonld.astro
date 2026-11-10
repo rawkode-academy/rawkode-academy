@@ -1,5 +1,6 @@
 ---
 import type { ContentEntry } from "@/lib/live-content";
+import { buildPersonJsonLd } from "@/lib/person-jsonld";
 
 interface Props {
 	article: ContentEntry<"articles">;
@@ -17,11 +18,7 @@ const jsonLd = {
 	"@type": "TechArticle",
 	headline: article.data.title,
 	description: article.data.description,
-	author: authors.map((a) => ({
-		"@type": "Person",
-		name: a.data.name,
-		...(a.data.github ? { url: a.data.github } : {}),
-	})),
+	author: authors.map((author) => buildPersonJsonLd(author.data, siteOrigin)),
 	datePublished: new Date(article.data.publishedAt).toISOString(),
 	dateModified: new Date(
 		article.data.updatedAt ?? article.data.publishedAt,

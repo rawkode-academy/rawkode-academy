@@ -40,7 +40,7 @@ bun run knip         # Detect unused dependencies
 
 - **Runtime:** Bun
 - **Framework:** Astro 7 (SSR on Cloudflare Workers) with React/Vue islands
-- **Styling:** Tailwind CSS v4
+- **Styling:** Panda CSS v2 recipes and Ark UI in `packages/design-system` (no utility-CSS compiler)
 - **API:** GraphQL federation (Hive Gateway) on Cloudflare Workers
 - **Database:** Cloudflare D1 with Drizzle ORM
 - **Testing:** Vitest

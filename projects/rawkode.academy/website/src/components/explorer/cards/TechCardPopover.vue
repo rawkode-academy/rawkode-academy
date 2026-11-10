@@ -161,7 +161,7 @@ const formatDate = (dateStr: string | null): string => {
  Modal Container
  ================================= */
 .tech-card-popover {
- /* Stage colors derive from the editorial palette, mirroring the matrix page */
+ /* Stage colors derive from the academy status tokens, mirroring the matrix page */
  --stage-skip: var(--colors-academy-status-rust);
  --stage-watch: var(--colors-academy-status-amber);
  --stage-explore: color-mix(
@@ -190,7 +190,7 @@ const formatDate = (dateStr: string | null): string => {
 .tech-card-backdrop {
  position: fixed;
  inset: 0;
- background: rgb(0 0 0 / 0.6);
+ background: var(--colors-academy-scrim);
 }
 
 .tech-card-positioner {
@@ -204,7 +204,7 @@ const formatDate = (dateStr: string | null): string => {
 }
 
 .tech-card-popover[data-state="open"] {
- animation: scaleIn 0.2s var(--ease-standard, ease);
+ animation: scaleIn var(--durations-base) var(--easings-academy-standard);
 }
 
 @keyframes scaleIn {
@@ -252,7 +252,7 @@ const formatDate = (dateStr: string | null): string => {
 .card-frame {
  background: var(--colors-academy-panel);
  border: 1px solid var(--colors-academy-input-border);
- border-radius: var(--radius-4xl);
+ border-radius: var(--radii-lg);
  overflow: hidden;
  max-height: calc(100vh - 4rem);
  overflow-y: auto;
@@ -286,7 +286,7 @@ const formatDate = (dateStr: string | null): string => {
  width: 80px;
  height: 80px;
  object-fit: contain;
- border-radius: var(--radius-4xl);
+ border-radius: var(--radii-lg);
  background: var(--colors-academy-panel);
  padding: 0.875rem;
  border: 1px solid var(--colors-academy-border);
@@ -299,7 +299,7 @@ const formatDate = (dateStr: string | null): string => {
  align-items: center;
  justify-content: center;
  background: var(--colors-academy-panel);
- border-radius: var(--radius-4xl);
+ border-radius: var(--radii-lg);
  border: 1px solid var(--colors-academy-border);
  font-size: 2rem;
  font-weight: 700;
@@ -331,7 +331,7 @@ const formatDate = (dateStr: string | null): string => {
  font-weight: 700;
  letter-spacing: 0.04em;
  padding: 0.375rem 0.75rem;
- border-radius: var(--radius-md);
+ border-radius: var(--radii-academy-s);
  color: var(--colors-academy-canvas);
  background: var(--colors-academy-text-muted);
 }
@@ -394,7 +394,7 @@ const formatDate = (dateStr: string | null): string => {
  gap: 0.25rem;
  padding: 0.875rem 0.5rem;
  background: var(--colors-academy-ground);
- border-radius: var(--radius-3xl);
+ border-radius: var(--radii-academy-l);
 }
 
 .stat-value {
@@ -419,7 +419,7 @@ const formatDate = (dateStr: string | null): string => {
  padding: 1rem;
  background: color-mix(in oklab, var(--colors-academy-status-rust) 8%, transparent);
  border: 1px solid color-mix(in oklab, var(--colors-academy-status-rust) 18%, transparent);
- border-radius: var(--radius-3xl);
+ border-radius: var(--radii-academy-l);
 }
 
 .spicy-icon {
@@ -452,7 +452,7 @@ const formatDate = (dateStr: string | null): string => {
  background: var(--colors-academy-text);
  color: var(--colors-academy-canvas);
  border: 1px solid var(--colors-academy-text);
- border-radius: var(--radius-md);
+ border-radius: var(--radii-academy-s);
  font-size: 0.875rem;
  font-weight: 700;
  letter-spacing: 0.04em;

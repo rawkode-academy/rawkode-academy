@@ -1,0 +1,71 @@
+---
+import { academyPage } from "@rawkodeacademy/design-system";
+import { localDate, localDateTime } from "@/lib/local-time";
+import { formatRuntimeLabel } from "@/lib/video-runtime";
+
+/**
+ * The one video card: a frameless 16:9 still, a mono meta line
+ * ("1h 2m · 17 Jul 2026"), then the title. Lay cards out with
+ * `academyPage().feedGrid`.
+ *
+ * A scheduled stream sets "Upcoming" in the accent with its start time, and
+ * may add one sentence of description. The `progress` slot sits over the
+ * still, for a watch-progress bar.
+ */
+interface Props {
+	href: string;
+	title: string;
+	thumbnailUrl: string;
+	duration?: number | null | undefined;
+	publishedAt?: Date | string | undefined;
+	type?: string | null | undefined;
+	/** A scheduled stream: the meta line carries its start time instead. */
+	scheduled?: boolean;
+	description?: string | undefined;
+	heading?: "h2" | "h3" | "h4";
+}
+
+const {
+	href,
+	title,
+	thumbnailUrl,
+	duration,
+	publishedAt,
+	type,
+	scheduled = false,
+	description,
+	heading: Heading = "h3",
+} = Astro.props;
+const styles = academyPage();
+const runtime = scheduled
+	? undefined
+	: formatRuntimeLabel({ duration, publishedAt, type });
+const date = publishedAt
+	? scheduled
+		? localDateTime(publishedAt)
+		: localDate(publishedAt)
+	: undefined;
+---
+
+<a href={href} class={styles.card}>
+	<div class={styles.cardArt}>
+		<img src={thumbnailUrl} alt="" class={styles.cardImage} width="640" height="360" loading="lazy" decoding="async" />
+		<slot name="progress" />
+	</div>
+	<div class={styles.cardBody}>
+		{scheduled ? (
+			<p class={styles.streamMeta}>
+				<span data-label>Upcoming</span>
+				{date && <time {...date.attrs}>{date.text}</time>}
+			</p>
+		) : (runtime || date) && (
+			<p class={styles.cardMeta}>
+				{runtime && <span>{runtime}</span>}
+				{runtime && date && <span aria-hidden="true">·</span>}
+				{date && <time {...date.attrs}>{date.text}</time>}
+			</p>
+		)}
+		<Heading class={styles.cardTitle}>{title}</Heading>
+		{description && <p class={styles.cardDescription}>{description}</p>}
+	</div>
+</a>

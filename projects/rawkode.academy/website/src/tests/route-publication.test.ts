@@ -10,6 +10,7 @@ import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import * as runtime from "astro/runtime/server/index.js";
 import ts from "typescript";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import * as personJsonLd from "../lib/person-jsonld";
 
 interface Entry {
 	id: string;
@@ -24,6 +25,7 @@ const NOW = Date.parse("2026-10-23T12:00:00Z");
 
 const state = vi.hoisted(() => ({
 	collections: {} as Record<string, Entry[]>,
+	failingCollections: new Set<string>(),
 	cacheCalls: [] as Array<{ target: unknown; input: Record<string, unknown> }>,
 	markdown: "",
 }));
@@ -56,11 +58,17 @@ const liveContent = vi.hoisted(() => {
 			name: string,
 			filter?: (entry: Entry) => unknown,
 			options?: { scheduled?: string },
-		) =>
-			visible(name, options).filter((entry) => (filter ? filter(entry) : true)),
+		) => {
+			if (state.failingCollections.has(name)) {
+				throw new Error(`${name} failed to load`);
+			}
+			return visible(name, options).filter((entry) =>
+				filter ? filter(entry) : true,
+			);
+		},
 		getEntry,
-		// Pass-through: this fixture never fails.
-		optionalContent: async <T>(load: Promise<T>) => load,
+		optionalContent: async <T>(load: Promise<T>, fallback: T) =>
+			load.catch(() => fallback),
 		getEntries: async (refs: Ref[] = []) =>
 			(await Promise.all(refs.map((ref) => getEntry(ref)))).filter(
 				(entry): entry is Entry => Boolean(entry),
@@ -95,6 +103,7 @@ import * as howto from "../lib/howto-jsonld";
 import * as localTime from "../lib/local-time";
 import * as readingTime from "../utils/reading-time";
 import * as articleTypes from "../utils/article-types";
+import * as technologyTags from "../lib/technology-tags";
 
 const ref = (collection: string, id: string): Ref => ({ collection, id });
 
@@ -201,6 +210,7 @@ async function compileAstro(
 
 const pageProps: Array<Record<string, unknown>> = [];
 const relatedProps: Array<Record<string, unknown>> = [];
+const bylineProps: Array<Record<string, unknown>> = [];
 let articlePage: Component | undefined;
 
 // Astro's runtime types expect compiler-generated factories; the stubs here
@@ -220,7 +230,7 @@ async function loadArticlePage(): Promise<Component> {
 		new Proxy({}, { get: (_, key) => `academy-${String(key)}` });
 	const articleJsonLd = await compileAstro(
 		"components/html/article-jsonld.astro",
-		{},
+		{ "@/lib/person-jsonld": personJsonLd },
 	);
 	articlePage = await compileAstro("pages/read/[...slug].astro", {
 		"@rawkodeacademy/design-system": {
@@ -259,12 +269,18 @@ async function loadArticlePage(): Promise<Component> {
 					runtime.render`<header>${runtime.renderSlot(result, slots.default as never)}</header>`,
 			),
 		},
-		"@/components/read/ArticleByline.astro": { default: empty },
+		"@/components/read/ArticleByline.astro": {
+			default: stub((_result, props: Record<string, unknown>) => {
+				bylineProps.push(props);
+				return runtime.render``;
+			}),
+		},
 		"@/components/read/ArticleTOC.astro": { default: empty },
 		"@/components/read/EndSlug.astro": { default: empty },
 		"@/utils/reading-time": readingTime,
 		"@/utils/article-types": articleTypes,
 		"@/lib/local-time": localTime,
+		"@/lib/technology-tags": technologyTags,
 	});
 	return articlePage;
 }
@@ -288,6 +304,8 @@ beforeEach(() => {
 	state.markdown = "";
 	pageProps.length = 0;
 	relatedProps.length = 0;
+	bylineProps.length = 0;
+	state.failingCollections = new Set();
 	collections([]);
 });
 
@@ -387,10 +405,38 @@ describe("Published route and sitemap contracts", () => {
 				{
 					"@type": "Person",
 					name: "David Flanagan",
-					url: "https://github.com/rawkode",
+					url: "https://rawkode.academy/people/rawkode",
 				},
 			],
 		});
+	});
+
+	it("read/[...slug].astro links only technology tags that have a page", async () => {
+		const kubernetes: Entry = {
+			id: "kubernetes",
+			collection: "technologies",
+			body: "",
+			data: { name: "Kubernetes" },
+		};
+		collections(
+			[article("tagged", { technologies: ["kubernetes", "dotfiles"] })],
+			{ technologies: [kubernetes] },
+		);
+		await renderArticle("tagged");
+		expect(bylineProps[0]!.tags).toEqual([
+			{ id: "kubernetes", label: "Kubernetes", href: "/technology/kubernetes" },
+			{ id: "dotfiles", label: "Dotfiles" },
+		]);
+
+		// A failed technologies load leaves every tag as a plain label.
+		state.failingCollections = new Set(["technologies"]);
+		bylineProps.length = 0;
+		const { status } = await renderArticle("tagged");
+		expect(status).toBe(200);
+		expect(bylineProps[0]!.tags).toEqual([
+			{ id: "kubernetes", label: "Kubernetes" },
+			{ id: "dotfiles", label: "Dotfiles" },
+		]);
 	});
 
 	it("read/[...slug].astro builds HowTo JSON-LD from the Markdown rendition of the document", async () => {

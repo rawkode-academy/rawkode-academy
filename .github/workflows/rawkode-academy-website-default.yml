@@ -45,7 +45,9 @@ jobs:
       contents: read
       checks: write
       packages: write
+      id-token: write
     name: rawkode-academy-website-default
+    environment: production
     runs-on: namespace-profile-linux-x86
     steps:
     - name: Checkout
@@ -100,8 +102,60 @@ jobs:
         curl -fsSL -o /usr/local/bin/cuenv "$cuenv_url" && chmod +x /usr/local/bin/cuenv && /usr/local/bin/cuenv sync -A
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Get GitHub OIDC token for Infisical
+      run: |-
+        set -eu
+        if [ -z "${ACTIONS_ID_TOKEN_REQUEST_URL:-}" ] || [ -z "${ACTIONS_ID_TOKEN_REQUEST_TOKEN:-}" ]; then
+          echo "::error::No GitHub Actions OIDC token endpoint: the job needs 'id-token: write' and must run on GitHub Actions" >&2
+          exit 1
+        fi
+        if [ -z "${INFISICAL_MACHINE_IDENTITY_ID:-}" ]; then
+          echo "::error::INFISICAL_MACHINE_IDENTITY_ID is empty: add the repository secret or set #identityId on #InfisicalOidc" >&2
+          exit 1
+        fi
+        request_url="$ACTIONS_ID_TOKEN_REQUEST_URL"
+        audience=''
+        if [ -n "$audience" ]; then
+          request_url="${request_url}&audience=$(jq -rn --arg value "$audience" '$value|@uri')"
+        fi
+        jwt="$(curl -fsS -H "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "$request_url" | jq -r '.value // empty')"
+        if [ -z "$jwt" ]; then
+          echo "::error::GitHub Actions returned no OIDC token" >&2
+          exit 1
+        fi
+        # A line break in a value would let it set other variables (and break
+        # ::add-mask::), so refuse it without printing the value.
+        has_line_break() { [ "$(printf '%s' "$1" | tr -d '\r\n')" != "$1" ]; }
+        if has_line_break "$INFISICAL_MACHINE_IDENTITY_ID"; then
+          echo "::error::INFISICAL_MACHINE_IDENTITY_ID contains a line break; check the secret or #identityId" >&2
+          exit 1
+        fi
+        if has_line_break "$jwt"; then
+          echo "::error::GitHub Actions returned an OIDC token containing a line break" >&2
+          exit 1
+        fi
+        echo "::add-mask::${jwt}"
+        echo "::add-mask::${INFISICAL_MACHINE_IDENTITY_ID}"
+        delimiter="ghadelimiter_$(od -An -N16 -tx1 /dev/urandom | tr -d ' \n')"
+        {
+          printf 'INFISICAL_AUTH_JWT<<%s\n%s\n%s\n' "$delimiter" "$jwt" "$delimiter"
+          printf 'INFISICAL_MACHINE_IDENTITY_ID<<%s\n%s\n%s\n' "$delimiter" "$INFISICAL_MACHINE_IDENTITY_ID" "$delimiter"
+        } >> "$GITHUB_ENV"
+      env:
+        INFISICAL_MACHINE_IDENTITY_ID: ${{ endsWith(github.workflow, '-infrastructure-apply') && vars.INFISICAL_READ_WRITE_IDENTITY_ID || vars.INFISICAL_MACHINE_IDENTITY_ID }}
     - name: Install Bun dependencies
       run: cuenv exec -- bun install --frozen-lockfile
+    - name: Setup 1Password
+      run: cuenv secrets setup onepassword
+      env:
+        OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+    - name: Setup Infisical
+      run: cuenv exec -- cuenv secrets setup infisical
+      env:
+        INFISICAL_CLIENT_ID: ${{ secrets.INFISICAL_CLIENT_ID }}
+        INFISICAL_CLIENT_SECRET: ${{ secrets.INFISICAL_CLIENT_SECRET }}
+        INFISICAL_ORGANIZATION_SLUG: ${{ secrets.INFISICAL_ORGANIZATION_SLUG }}
+        INFISICAL_TOKEN: ${{ secrets.INFISICAL_TOKEN }}
     - name: 'Run pipeline: default'
       run: cuenv ci --pipeline default --path projects/rawkode.academy/website
       env:
@@ -109,3 +163,10 @@ jobs:
         GITHUB_ACTOR: ${{ github.actor }}
         GITHUB_REF_TYPE: ${{ github.ref_type }}
         GITHUB_REF_NAME: ${{ github.ref_name }}
+        CUENV_ENVIRONMENT: production
+        OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+        INFISICAL_MACHINE_IDENTITY_ID: ${{ endsWith(github.workflow, '-infrastructure-apply') && vars.INFISICAL_READ_WRITE_IDENTITY_ID || vars.INFISICAL_MACHINE_IDENTITY_ID }}
+        INFISICAL_CLIENT_ID: ${{ secrets.INFISICAL_CLIENT_ID }}
+        INFISICAL_CLIENT_SECRET: ${{ secrets.INFISICAL_CLIENT_SECRET }}
+        INFISICAL_ORGANIZATION_SLUG: ${{ secrets.INFISICAL_ORGANIZATION_SLUG }}
+        INFISICAL_TOKEN: ${{ secrets.INFISICAL_TOKEN }}

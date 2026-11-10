@@ -1,4 +1,6 @@
 ---
+import { buildBroadcastEventJsonLd } from "@/lib/broadcast-event-jsonld";
+
 interface PersonRef {
 	name: string;
 	url?: string;
@@ -40,6 +42,7 @@ const {
 	captionUrl,
 	transcript,
 	keywords = [],
+	isLiveBroadcast = false,
 	category,
 	isVideoList = false,
 	clips = [],
@@ -94,6 +97,14 @@ const computedEmbedUrl = (() => {
 	return undefined; // Avoid using HLS/MP4 as embedUrl
 })();
 
+const broadcastEvent =
+	isLiveBroadcast && publishedAt
+		? buildBroadcastEventJsonLd({
+				startDate: publishedAt,
+				durationSeconds: duration,
+			})
+		: undefined;
+
 const clipBaseUrl = `${Astro.url.origin}${Astro.url.pathname}`;
 const normalizedKeywords = keywords
 	.map((keyword) => keyword.trim())
@@ -115,6 +126,7 @@ const structuredData = isVideoList
 			thumbnailUrl: thumbnailUrl ? [thumbnailUrl] : undefined,
 			uploadDate: publishedAt,
 			...(formattedDuration ? { duration: formattedDuration } : {}),
+			...(broadcastEvent ? { publication: broadcastEvent } : {}),
 			contentUrl: streamUrl,
 			...(computedEmbedUrl ? { embedUrl: computedEmbedUrl } : {}),
 			url: Astro.url.href,

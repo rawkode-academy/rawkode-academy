@@ -6,7 +6,7 @@ import * as runtime from "astro/runtime/server/index.js";
 import ts from "typescript";
 import { webcontainerDemosPlugin } from "../utils/vite-plugin-webcontainer-demos";
 import { getCourseModuleSlug } from "../utils/course-path";
-import { localTime } from "../lib/local-time";
+import { localDate } from "../lib/local-time";
 import { setContentEnv } from "../lib/live-content/env";
 import { resetContentCacheForTests } from "../lib/live-content/kv-cache";
 import { contentLoader } from "../lib/live-content/loader";
@@ -252,7 +252,7 @@ describe("catalog availability and curriculum", () => {
 					cacheCalls.push(args);
 				},
 				getCourseModuleSlug,
-				localTime,
+				localDate,
 				academyLayout: () => ({}),
 				academyCatalog: () => ({}),
 			},
@@ -273,9 +273,7 @@ describe("catalog availability and curriculum", () => {
 	}
 	it("announces empty courses and chooses the first published lesson", async () => {
 		const announced = await catalog([moduleEntry("course/draft", 1, true)]);
-		expect(announced.availabilityLabel("course")).toBe(
-			"Announced · no lessons available yet",
-		);
+		expect(announced.availabilityLabel("course")).toBe("Announced");
 		expect(announced.firstModuleSlug).toBeUndefined();
 		const available = await catalog([
 			moduleEntry("course/draft", 1, true),

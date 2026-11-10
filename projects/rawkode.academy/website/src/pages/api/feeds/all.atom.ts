@@ -5,7 +5,11 @@ import {
 	getEntries,
 	setContentCache,
 } from "@/lib/live-content";
-import { renderAndSanitizeArticles } from "../../../lib/feed-utils";
+import {
+	escapeAttribute,
+	renderAndSanitizeArticles,
+} from "../../../lib/feed-utils";
+import { getPublishedVideos } from "@/lib/content";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { isNewsPublished } from "@/lib/news-publication";
 
@@ -27,8 +31,9 @@ export async function GET(context: APIContext) {
 	const now = new Date();
 	const [articles, videos, technologies, news] = await Promise.all([
 		getCollection("articles"),
-		// Videos include upcoming streams (they have pages), as before.
-		getCollection("videos"),
+		// Published videos only, like the videos feeds: a scheduled stream
+		// must not lead the feed or push its <updated> into the future.
+		getPublishedVideos(),
 		getCollection("technologies"),
 		getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
 	]);
@@ -44,7 +49,7 @@ export async function GET(context: APIContext) {
 	const feedUrl = `${site}/api/feeds/all.atom`;
 
 	// Render all articles in parallel for better performance
-	const renderedContent = await renderAndSanitizeArticles(articles);
+	const renderedContent = await renderAndSanitizeArticles(articles, site);
 
 	const entries: AtomEntry[] = [];
 	const authorEntries: ContentEntry<"people">[] = [];
@@ -160,9 +165,12 @@ ${entries
 		<updated>${entry.updated}</updated>
 		<summary><![CDATA[${entry.description}]]></summary>
 		<content type="html"><![CDATA[${content}]]></content>
-		${entry.author ? `<author><name>${entry.author}</name></author>` : ""}
+		${entry.author ? `<author><name>${escapeAttribute(entry.author)}</name></author>` : ""}
 		${entry.categories
-			.map((cat) => `<category term="${cat}" label="${cat}"/>`)
+			.map((cat) => {
+				const name = escapeAttribute(cat);
+				return `<category term="${name}" label="${name}"/>`;
+			})
 			.join("\n\t\t")}
 	</entry>`;
 	})

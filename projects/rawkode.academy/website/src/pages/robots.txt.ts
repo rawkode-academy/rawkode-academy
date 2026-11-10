@@ -21,6 +21,10 @@ export const ROBOTS_DISALLOWS = [
 	"/_partytown/",
 ] as const;
 
+// Public RSS/Atom/JSON feeds live under /api/. Crawlers pick the longest
+// matching rule, so these win over the /api/ disallow.
+export const ROBOTS_ALLOWS = ["/api/feeds/"] as const;
+
 export const getRobotsTxt = (sitemapIndexURL: URL) => `
 # Host directive to specify canonical domain
 Host: rawkode.academy
@@ -31,6 +35,9 @@ Allow: /
 
 # Keep private areas out of search
 ${ROBOTS_DISALLOWS.map((path) => `Disallow: ${path}`).join("\n")}
+
+# Public feeds
+${ROBOTS_ALLOWS.map((path) => `Allow: ${path}`).join("\n")}
 
 # Sitemap locations
 Sitemap: ${sitemapIndexURL.href}

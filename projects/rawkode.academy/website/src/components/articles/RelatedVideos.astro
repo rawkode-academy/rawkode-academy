@@ -5,7 +5,7 @@ import {
 	optionalContent,
 } from "@/lib/live-content";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
-import { formatVideoRuntimeLabel, isUpcomingLiveVideo } from "@/lib/video-runtime";
+import { formatRuntimeLabel, isUpcomingLiveVideo } from "@/lib/video-runtime";
 import { academyRelatedContent } from "@rawkodeacademy/design-system";
 
 interface Props {
@@ -100,7 +100,7 @@ if (articleTechnologySet.size > 0) {
 {relatedVideos.length > 0 && (
 	<section class:list={[s.section, s.related]}>
 		<h2 class={s.heading}>
-			Related Videos
+			Related videos
 		</h2>
 		<div class={s.grid}>
 			{relatedVideos.map((video) => (
@@ -118,14 +118,9 @@ if (articleTechnologySet.size > 0) {
 							loading="lazy"
 							decoding="async"
 						/>
-						{(
-							isUpcomingLiveVideo(video) ||
-							(typeof video.duration === "number" &&
-								Number.isFinite(video.duration) &&
-								video.duration > 0)
-						) && (
+						{formatRuntimeLabel(video) && (
 							<span class={s.duration}>
-								{formatVideoRuntimeLabel(video)}
+								{formatRuntimeLabel(video)}
 							</span>
 						)}
 					</div>

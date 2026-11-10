@@ -9,6 +9,7 @@ import {
 	setContentCache,
 } from "@/lib/live-content";
 import RichText from "@/components/content/RichText.astro";
+import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
 import VideoMetadata from "@/components/html/video-metadata.astro";
 import VideoPlayer from "@/components/video/player.vue";
@@ -18,6 +19,7 @@ import VideoContentTabs from "@/components/video/video-content-tabs.vue";
 import VideoTranscript from "@/components/video/VideoTranscript.astro";
 import { timestampHref } from "@/lib/video-deep-link";
 import VideoCast from "@/components/video/VideoCast.astro";
+import VideoResources from "@/components/video/VideoResources.astro";
 import TechnologyVideoSection from "@/components/video/TechnologyVideoSection.astro";
 import ShowVideoSection from "@/components/video/ShowVideoSection.astro";
 import StreamNotifyButton from "@/components/video/StreamNotifyButton.vue";
@@ -30,11 +32,12 @@ import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs
 import { buildWatchVideoSeoText } from "@/utils/watch-video-seo";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { buildVideoClips, type VideoClip } from "@/lib/video-clips";
-import { formatVideoRuntimeLabel } from "@/lib/video-runtime";
+import { formatRuntimeLabel } from "@/lib/video-runtime";
 import {
 	academyLayout,
 	academyMedia,
 	academyWatch,
+	button,
 } from "@rawkodeacademy/design-system";
 import "@rawkodeacademy/design-system/styles.css";
 import {
@@ -43,7 +46,7 @@ import {
 	type StudioBindingEnv,
 } from "@/lib/studio-live";
 import { env } from "cloudflare:workers";
-import { localTime } from "@/lib/local-time";
+import { localDate, localDateTime } from "@/lib/local-time";
 
 export const prerender = false;
 const layout = academyLayout({ width: "wide" });
@@ -94,8 +97,6 @@ const formatTimestamp = (seconds: number) => {
 		: `${m}:${String(s).padStart(2, "0")}`;
 };
 
-const formatDate = (date: Date | string) =>
-	localTime(date, { year: "numeric", month: "long", day: "numeric" });
 
 const formatLabel = (value?: string | null) => {
 	if (!value) return null;
@@ -130,6 +131,11 @@ const showRelatedAll = showEntry
 	})
 	: [];
 const showRelatedVideos = showRelatedAll.slice(0, RELATED_VIDEO_LIMIT).map(toRelatedVideo);
+// "All N episodes" is the count the show page displays: every published
+// episode, this one included once it is published. The recommendations
+// themselves never include the video being watched.
+const currentIsPublished = video.data.publishedAt <= now;
+const showEpisodeTotal = showRelatedAll.length + (showEntry && currentIsPublished ? 1 : 0);
 
 const normalizedTechIds = normalizeTechnologyReferences(
 	video.data.technologies,
@@ -163,7 +169,8 @@ if (showRelatedVideos.length === 0) {
 		technologyRecommendation = {
 			technology,
 			videos: related.slice(0, RELATED_VIDEO_LIMIT).map(toRelatedVideo),
-			totalVideos: related.length,
+			// As above: the technology's published videos, this one included.
+			totalVideos: related.length + (currentIsPublished ? 1 : 0),
 		};
 		break;
 	}
@@ -293,7 +300,7 @@ if (
 const categoryLabel =
 	formatLabel(video.data.category) ||
 	(video.data.type === "live" ? "Live session" : "Recorded session");
-const runtimeLabel = formatVideoRuntimeLabel(
+const runtimeLabel = formatRuntimeLabel(
 	{
 		duration: durationSec,
 		publishedAt: video.data.publishedAt,
@@ -301,16 +308,8 @@ const runtimeLabel = formatVideoRuntimeLabel(
 	},
 	now,
 );
-const publishedLabel = formatDate(video.data.publishedAt);
-const scheduled = localTime(video.data.publishedAt, {
-	weekday: "long",
-	year: "numeric",
-	month: "long",
-	day: "numeric",
-	hour: "numeric",
-	minute: "2-digit",
-	timeZoneName: "short",
-});
+const publishedLabel = localDate(video.data.publishedAt);
+const scheduled = localDateTime(video.data.publishedAt);
 const notificationsPublicKey = env.NOTIFICATIONS_VAPID_PUBLIC_KEY ?? "";
 const publishedIso =
 	video.data.publishedAt instanceof Date
@@ -319,6 +318,16 @@ const publishedIso =
 const heroDescription =
 	video.data.tagline ?? video.data.subtitle;
 const isLiveNow = isLive && studioLiveState.live;
+// The visible trail: Watch, then the show when the session belongs to one.
+const breadcrumbParents = [
+	{ title: "Watch", link: "/watch" },
+	...(showEntry
+		? [{ title: showEntry.data.name, link: `/shows/${showEntry.id}` }]
+		: []),
+];
+// What the ink pane has to budget for (see `academyWatch.bench`).
+const hasNotice = isUpcomingLive && !studioLiveState.live;
+const hasMore = showRelatedVideos.length > 0 || technologyRecommendation !== null;
 const watchStatusLabel = isLiveNow
 	? "Live now"
 	: isUpcomingLive
@@ -366,257 +375,273 @@ const watchStatusLabel = isLiveNow
 	<link slot="extra-head" rel="alternate" type="application/atom+xml" title="Rawkode Academy - Videos (Atom)" href="/api/feeds/videos.atom" />
 	<link slot="extra-head" rel="alternate" type="application/feed+json" title="Rawkode Academy - Videos (JSON Feed)" href="/api/feeds/videos.json" />
 
-	<div class:list={[layout.root, media.root, watch.root]}>
-		<div class={watch.breadcrumb}>
-			<a class={watch.crumb} href="/watch">Watch</a>
-			<span aria-hidden="true">/</span>
-			{showEntry ? (
-				<>
-					<a class={watch.crumb} href={`/shows/${showEntry.id}`}>{showEntry.data.name}</a>
-				</>
-			) : (
-				<>
-					<span>{categoryLabel}</span>
-				</>
-			)}
-			{watchStatusLabel && <span class={watch.breadcrumbStatus}>{watchStatusLabel}</span>}
-		</div>
-
-		<section
-			class={watch.hero}
-			aria-labelledby="watch-detail-title"
-			data-watch-hero
+	<div class:list={[media.root, watch.root]} data-watch-root>
+		<div
+			class={watch.bench}
+			data-watch-bench
+			data-pin={hasMore && !hasNotice ? "" : undefined}
+			data-notice={hasNotice ? "" : undefined}
 		>
-			<header class={watch.summary}>
-				<div class={watch.summaryCopy}>
-					<MLabel tone={isLiveNow ? "amber" : "accent"}>
-						{isLiveNow && <LiveDot color="amber" />}
-						{isLiveNow ? "Live · " : ""}{categoryLabel}
-					</MLabel>
-					<h1 id="watch-detail-title" class={watch.title}>
-						{video.data.title}
-					</h1>
-					{heroDescription && (
-						<p class={watch.dek}>{heroDescription}</p>
-					)}
-				</div>
-
-				<dl class={watch.facts}>
-					<div class={watch.fact}>
-						<dt class={watch.factLabel}>Date</dt>
-						<dd class={watch.factValue}><time {...publishedLabel.attrs}>{publishedLabel.text}</time></dd>
-					</div>
-					<div class={watch.fact}>
-						<dt class={watch.factLabel}>Runtime</dt>
-						{runtimeLabel !== "--:--" && (
-							<dd class={watch.factValue}>{runtimeLabel}</dd>
-						)}
-					</div>
-					<div class={watch.fact}>
-						<dt class={watch.factLabel}>Share</dt>
-						<dd class={watch.factValue}>
-							<button
-								type="button"
-								class={watch.copyButton}
-								data-copy-link
-								title="Copy a link to this video at the current timestamp"
-							>
-								<span data-copy-link-label>Copy link</span>
-							</button>
-						</dd>
-					</div>
-				</dl>
-
-				{isUpcomingLive && !studioLiveState.live && (
-					<div class={watch.upcoming} aria-label="Upcoming stream details">
-						<h2 class={watch.noticeTitle}>This session has not started yet.</h2>
-						<p class={watch.noticeCopy}>
-							Join us on <time {...scheduled.attrs}>{scheduled.text}</time>.
-							The player will activate when the stream is available.
-						</p>
-						{video.data.youtubeId && (
-							<a
-								class={watch.factLink}
-								href={`https://www.youtube.com/live/${video.data.youtubeId}`}
-								target="_blank"
-								rel="noopener noreferrer"
-							>
-								Open the scheduled stream on YouTube ↗
-							</a>
-						)}
-						<StreamNotifyButton
-							client:visible
-							videoSlug={video.data.slug}
-							publicKey={notificationsPublicKey}
-						/>
-					</div>
-				)}
-			</header>
-
-			<div class={watch.playerWrap}>
-				<div id="watch-detail-player" class={watch.playerFrame} data-watch-player-frame>
-					<img
-						class={watch.poster}
-						data-watch-player-poster
-						src={thumbnailUrl}
-						alt=""
-						width="1280"
-						height="720"
-						fetchpriority="high"
-						decoding="async"
-					/>
-					{shouldMountLiveGate ? (
-						<LiveStreamGate
-							client:only="vue"
-							videoSlug={video.data.slug}
-							initialState={studioLiveState}
-							thumbnailUrl={thumbnailUrl}
-							title={video.data.title}
-							fallbackVideoId={shouldRenderVodFallback ? video.data.id : undefined}
-							fallbackInitialPosition={initialPosition}
-							fallbackIsAuthenticated={isAuthenticated}
-							youtubeId={isUpcomingLive ? undefined : video.data.youtubeId}
-						/>
-					) : (
-						<VideoPlayer
-							client:only="vue"
-							video={video.data.id}
-							thumbnailUrl={thumbnailUrl}
-							initialPosition={initialPosition}
-							isAuthenticated={isAuthenticated}
-						/>
-					)}
-					<noscript>
-						<div class={watch.noscript}>
-							<p>The embedded player needs JavaScript.</p>
-							<p class={watch.noscriptLinks}>
-								<a href={streamUrl}>Open the video stream (HLS)</a>
-								<a href={captionUrl}>Download captions (VTT)</a>
-							</p>
+			<div class={watch.pane} data-watch-pane>
+				<div class={watch.paneSticky} data-watch-pane-sticky>
+					<div class={watch.paneInner}>
+						<div class={watch.deck}>
+							<div class={watch.deckInner}>
+								<div id="watch-detail-player" class={watch.playerFrame} data-watch-player-frame>
+									<img
+										class={watch.poster}
+										data-watch-player-poster
+										src={thumbnailUrl}
+										alt=""
+										width="1280"
+										height="720"
+										fetchpriority="high"
+										decoding="async"
+									/>
+									{shouldMountLiveGate ? (
+										<LiveStreamGate
+											client:only="vue"
+											videoSlug={video.data.slug}
+											initialState={studioLiveState}
+											thumbnailUrl={thumbnailUrl}
+											title={video.data.title}
+											fallbackVideoId={shouldRenderVodFallback ? video.data.id : undefined}
+											fallbackInitialPosition={initialPosition}
+											fallbackIsAuthenticated={isAuthenticated}
+											youtubeId={isUpcomingLive ? undefined : video.data.youtubeId}
+										/>
+									) : (
+										<VideoPlayer
+											client:only="vue"
+											video={video.data.id}
+											thumbnailUrl={thumbnailUrl}
+											initialPosition={initialPosition}
+											isAuthenticated={isAuthenticated}
+										/>
+									)}
+									<noscript>
+										<div class={watch.noscript}>
+											<p>The embedded player needs JavaScript.</p>
+											<p class={watch.noscriptLinks}>
+												<a href={streamUrl}>Open the video stream (HLS)</a>
+												<a href={captionUrl}>Download captions (VTT)</a>
+											</p>
+										</div>
+									</noscript>
+								</div>
+								<div class={watch.strip} data-watch-strip>
+									<button
+										type="button"
+										class={button({ variant: "quiet", surface: "ink", icon: true })}
+										data-watch-strip-toggle
+										data-state="paused"
+										aria-label="Play"
+										hidden
+									>
+										<svg data-icon="play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.2v13.6a.6.6 0 0 0 .92.5l10.5-6.8a.6.6 0 0 0 0-1L8.92 4.7A.6.6 0 0 0 8 5.2Z" /></svg>
+										<svg data-icon="pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" /></svg>
+									</button>
+									<a class={watch.stripLink} href="#main-content">
+										<span class="sr-only">Back to the player:</span>
+										<span class={watch.stripTitle}>{video.data.title}</span>
+										{runtimeLabel && <span class={watch.stripTime} data-watch-strip-time>{runtimeLabel}</span>}
+									</a>
+								</div>
+							</div>
 						</div>
-					</noscript>
+						<div class={watch.deckSpace} aria-hidden="true"></div>
+
+						<header class={watch.session} data-watch-hero>
+							<div class={watch.breadcrumb}>
+								<Breadcrumb parents={breadcrumbParents} />
+								{watchStatusLabel && <span class={watch.breadcrumbStatus}>{watchStatusLabel}</span>}
+							</div>
+							<h1 id="watch-detail-title" class={watch.title}>
+								{video.data.title}
+							</h1>
+							<p class={watch.meta}>
+								<time {...publishedLabel.attrs}>{publishedLabel.text}</time>
+								{runtimeLabel && !isUpcomingLive && <span>{runtimeLabel}</span>}
+								<span class={watch.metaKind}>
+									<MLabel tone={isLiveNow ? "amber" : "accent"}>
+										{isLiveNow && <LiveDot color="amber" />}
+										{isLiveNow ? "Live · " : ""}{categoryLabel}
+									</MLabel>
+								</span>
+							</p>
+
+							<div class={watch.tools}>
+								{techEntries.length > 0 && (
+									<ul class={watch.techGrid} aria-label="Technologies featured">
+										{techEntries.map((tech) => (
+											<li>
+												<a href={`/technology/${tech.id}`} class={watch.techChip}>
+													{resolveTechnologyIconUrl(tech.id, tech.data.logos) && <span class={watch.techIcon}>
+														<img
+															src={resolveTechnologyIconUrl(tech.id, tech.data.logos)!}
+															alt=""
+															width="20"
+															height="20"
+															loading="lazy"
+															decoding="async"
+															onerror="this.parentElement.hidden=true"
+														/>
+													</span>}
+													<span class={watch.techName}>{tech.data.name}</span>
+												</a>
+											</li>
+										))}
+									</ul>
+								)}
+								<button
+									type="button"
+									class:list={[button({ variant: "outline", surface: "ink", size: "sm" }), watch.toolsEnd]}
+									data-copy-link
+									title="Copy a link to this video at the current timestamp"
+								>
+									<span data-copy-link-label>Copy link</span>
+								</button>
+								<span class="sr-only" role="status" data-copy-link-status></span>
+							</div>
+
+							{hasNotice && (
+								<div class={watch.upcoming} role="group" aria-label="Upcoming stream details">
+									<h2 class={watch.noticeTitle}>This session has not started yet</h2>
+									<p class={watch.noticeCopy}>
+										Join us on <time {...scheduled.attrs}>{scheduled.text}</time>.
+										The player on this page starts when the stream does.
+									</p>
+									{video.data.youtubeId && (
+										<a
+											class={watch.factLink}
+											href={`https://www.youtube.com/live/${video.data.youtubeId}`}
+											target="_blank"
+											rel="noopener noreferrer"
+										>
+											Open the scheduled stream on YouTube <span aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span>
+										</a>
+									)}
+									<StreamNotifyButton
+										client:visible
+										videoSlug={video.data.slug}
+										publicKey={notificationsPublicKey}
+									/>
+								</div>
+							)}
+						</header>
+					</div>
 				</div>
 			</div>
-		</section>
 
-		<div class={watch.body}>
-			<VideoReactions server:defer videoId={video.data.slug} />
-
-			<section class={watch.section}>
-				<h2 class={watch.sectionTitle}>About this video</h2>
-				{video.data.whatYouWillLearn.length > 0 && (
-					<section class={watch.learn} aria-labelledby="watch-detail-learn-heading">
-						<h3 id="watch-detail-learn-heading" class={watch.learnTitle}>
-							What You'll Learn
-						</h3>
-						<ol class={watch.learnList} data-academy-learn-list>
-							{video.data.whatYouWillLearn.map((item) => (
-								<li>{item}</li>
-							))}
-						</ol>
+			<div class={watch.notes}>
+				<div class={watch.notesInner}>
+					<section class={watch.section} aria-labelledby="watch-detail-about-heading">
+						<h2 id="watch-detail-about-heading" class="sr-only">About this video</h2>
+						{heroDescription && (
+							<p class={watch.lede}>{heroDescription}</p>
+						)}
+						<div class:list={[layout.prose, watch.description]} data-academy-prose><RichText html={renderedDescriptionHtml} /></div>
 					</section>
-				)}
-				<div class:list={[layout.prose, watch.description]} data-academy-prose><RichText html={renderedDescriptionHtml} /></div>
-			</section>
 
-			{chapterSource.length > 0 && (
-				<section class={watch.section} aria-labelledby="watch-detail-chapters-heading">
-					<h2 id="watch-detail-chapters-heading" class={watch.sectionTitle}>
-						Jump to a chapter
-					</h2>
-					<details class={watch.transcriptDetails}>
-						<summary class={watch.transcriptSummary}>View {chapterSource.length} chapters</summary>
-						<ol class={watch.chapterList}>
-							{chapterSource.map((chapter) => (
-								<li>
-									<a
-										class={watch.chapterLink}
-										href={timestampHref(chapter.startTime)}
-										data-chapter-link={String(chapter.startTime)}
-									>
-										<span class={watch.chapterTime}>
-											{formatTimestamp(chapter.startTime)}
-										</span>
-										<span class={watch.chapterName}>{chapter.title}</span>
-									</a>
-								</li>
-							))}
-						</ol>
-					</details>
-				</section>
-			)}
+					{video.data.whatYouWillLearn.length > 0 && (
+						<section class={watch.section} aria-labelledby="watch-detail-learn-heading">
+							<h2 id="watch-detail-learn-heading" class={watch.sectionTitle}>
+								What you’ll learn
+							</h2>
+							<ol class={watch.learnList} data-academy-learn-list>
+								{video.data.whatYouWillLearn.map((item) => (
+									<li>{item}</li>
+								))}
+							</ol>
+						</section>
+					)}
 
-			{transcriptCues.length > 0 && (
-				<section class={watch.section} aria-labelledby="watch-detail-transcript-heading">
-					<h2 id="watch-detail-transcript-heading" class={watch.sectionTitle}>Transcript</h2>
-					<p class={watch.transcriptNote}>Generated from English captions. Select a timestamp to jump to that moment.</p>
-					<details class={watch.transcriptDetails}>
-						<summary class={watch.transcriptSummary}>Read and search the transcript</summary>
-						<VideoTranscript
-							cues={transcriptCues}
-							chapters={chapterSource}
+					<VideoResources resources={video.data.resources ?? []} />
+
+					<VideoCast hosts={hostEntries} guests={guestEntries} />
+
+					{chapterSource.length > 0 && (
+						<section class={watch.section} aria-labelledby="watch-detail-chapters-heading">
+							<h2 id="watch-detail-chapters-heading" class={watch.sectionTitle}>
+								Jump to a chapter
+							</h2>
+							<ol class={watch.chapterList} data-watch-chapters>
+								{chapterSource.map((chapter) => (
+									<li>
+										<a
+											class={watch.chapterLink}
+											href={timestampHref(chapter.startTime)}
+											data-chapter-link={String(chapter.startTime)}
+										>
+											<span class={watch.chapterTime} data-time>
+												{formatTimestamp(chapter.startTime)}
+											</span>
+											<span class={watch.chapterName} data-name>{chapter.title}</span>
+										</a>
+									</li>
+								))}
+							</ol>
+						</section>
+					)}
+
+					{transcriptCues.length > 0 && (
+						<section class={watch.section} aria-labelledby="watch-detail-transcript-heading">
+							<h2 id="watch-detail-transcript-heading" class={watch.sectionTitle}>Transcript</h2>
+							<p class={watch.transcriptNote}>Generated from English captions. Select a timestamp to jump to that moment.</p>
+							<VideoTranscript
+								cues={transcriptCues}
+								chapters={chapterSource}
+							/>
+						</section>
+					)}
+
+					<div class={watch.discussion}>
+						<VideoReactions server:defer videoId={video.data.slug}>
+							<div slot="fallback" class={watch.reactions} aria-hidden="true" />
+						</VideoReactions>
+						<VideoContentTabs
+							client:idle
+							videoId={video.data.id}
 						/>
-					</details>
-				</section>
-			)}
-
-			{techEntries.length > 0 && (
-				<section class={watch.section} aria-labelledby="watch-detail-tech-heading">
-					<h2 id="watch-detail-tech-heading" class={watch.sectionTitle}>Technologies featured</h2>
-					<div class={watch.techGrid}>
-						{techEntries.map((tech) => (
-							<a
-								href={`/technology/${tech.id}`}
-								class={watch.techChip}
-							>
-								{resolveTechnologyIconUrl(tech.id, tech.data.logos) && <span class={watch.techIcon}>
-									<img
-										src={resolveTechnologyIconUrl(tech.id, tech.data.logos)!}
-										alt=""
-										width="20"
-										height="20"
-										loading="lazy"
-										decoding="async"
-										onerror="this.parentElement.hidden=true"
-									/>
-								</span>}
-								<span class={watch.techName}>{tech.data.name}</span>
-								<span class={watch.techArrow} aria-hidden="true">→</span>
-							</a>
-						))}
 					</div>
-				</section>
+				</div>
+			</div>
+
+			{hasMore && (
+				<aside class={watch.more} data-watch-more aria-label="More to watch">
+					<div class={watch.moreInner}>
+						{showEntry && showRelatedVideos.length > 0 ? (
+							<ShowVideoSection
+								show={showEntry}
+								videos={showRelatedVideos}
+								totalVideos={showEpisodeTotal}
+							/>
+						) : technologyRecommendation && (
+							<TechnologyVideoSection
+								technology={technologyRecommendation.technology}
+								videos={technologyRecommendation.videos}
+								totalVideos={technologyRecommendation.totalVideos}
+							/>
+						)}
+					</div>
+				</aside>
 			)}
-
-			<VideoCast hosts={hostEntries} guests={guestEntries} />
-
-			<VideoContentTabs
-				client:idle
-				videoId={video.data.id}
-				resources={video.data.resources ?? []}
-			/>
-
-			{showEntry && showRelatedVideos.length > 0 ? (
-				<ShowVideoSection
-					show={showEntry}
-					videos={showRelatedVideos}
-					totalVideos={showRelatedAll.length}
-				/>
-			) : technologyRecommendation && (
-				<TechnologyVideoSection
-					technology={technologyRecommendation.technology}
-					videos={technologyRecommendation.videos}
-					totalVideos={technologyRecommendation.totalVideos}
-				/>
-			)}
-			<NewsletterCTA />
 		</div>
 
+		<div class={watch.outro}>
+			<NewsletterCTA />
+		</div>
 	</div>
 </Page>
 
 <script>
 	import { startTimeFromUrl } from "@/lib/video-deep-link";
+	import { fitWatchPane } from "@/lib/watch-pane-fit";
+
+	// The pinned pane is sized by viewport height; this measures the real
+	// session and unpins what does not fit (see `academyWatch.bench`).
+	const bench = document.querySelector<HTMLElement>("[data-watch-bench]");
+	if (bench) fitWatchPane(bench);
 
 	function getPlayerVideo(): HTMLVideoElement | null {
 		return document.querySelector<HTMLVideoElement>(
@@ -653,6 +678,10 @@ const watchStatusLabel = isLiveNow
 	const copyLabel = copyButton?.querySelector<HTMLElement>(
 		"[data-copy-link-label]",
 	);
+	// The same result, announced: the button's own label swap is not.
+	const copyStatus = document.querySelector<HTMLElement>(
+		"[data-copy-link-status]",
+	);
 	let copyResetTimer: ReturnType<typeof setTimeout> | undefined;
 
 	copyButton?.addEventListener("click", async () => {
@@ -666,24 +695,35 @@ const watchStatusLabel = isLiveNow
 		}
 		const copied = await copyText(url.toString());
 		if (!copyLabel) return;
-		copyLabel.textContent = copied ? "Link copied" : "Copy failed";
+		const result = copied ? "Link copied" : "Copy failed";
+		copyLabel.textContent = result;
+		if (copyStatus) copyStatus.textContent = result;
 		if (copyResetTimer) clearTimeout(copyResetTimer);
 		copyResetTimer = setTimeout(() => {
 			copyLabel.textContent = "Copy link";
+			if (copyStatus) copyStatus.textContent = "";
 		}, 2000);
 	});
 
 	// Chapter and transcript links are #t=SECONDS fragments: crawlers ignore
 	// them, and the player reads #t (or a shared ?t) when it mounts. When the
-	// player is already hydrated, seek in place.
+	// player is already hydrated, seek in place. The page only moves when the
+	// player is out of sight: the pinned pane and the docked strip are not.
 	function seekTo(seconds: number): boolean {
 		const media = getPlayerVideo();
 		if (!media) return false;
 		media.currentTime = seconds;
 		void media.play()?.catch(() => {});
-		document
-			.getElementById("watch-detail-player")
-			?.scrollIntoView({ behavior: "smooth", block: "center" });
+		const frame = document.getElementById("watch-detail-player");
+		if (!frame) return true;
+		const r = frame.getBoundingClientRect();
+		if (r.bottom > 0 && r.top < window.innerHeight) return true;
+		frame.scrollIntoView({
+			block: "start",
+			behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+				? "auto"
+				: "smooth",
+		});
 		return true;
 	}
 
@@ -698,6 +738,101 @@ const watchStatusLabel = isLiveNow
 			url.searchParams.delete("t");
 			url.hash = `t=${seconds}`;
 			history.replaceState(null, "", url);
+		});
+	}
+
+	// The strip beside the shrunken player on narrow screens. Its play/pause
+	// control drives the same <video> the player owns, so it only appears
+	// once there is one (not for an embed or a stream that has not started).
+	const playerFrame = document.getElementById("watch-detail-player");
+	const stripToggle = document.querySelector<HTMLButtonElement>(
+		"[data-watch-strip-toggle]",
+	);
+	const stripTime = document.querySelector<HTMLElement>(
+		"[data-watch-strip-time]",
+	);
+	const clock = (seconds: number) => {
+		const total = Math.max(0, Math.floor(seconds));
+		const h = Math.floor(total / 3600);
+		const m = Math.floor((total % 3600) / 60);
+		const s = String(total % 60).padStart(2, "0");
+		return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${s}` : `${m}:${s}`;
+	};
+	let boundMedia: HTMLVideoElement | null = null;
+
+	// The chapter being played is marked in the notes (aria-current; the
+	// recipe sets it in a heavier weight). Nothing is marked before playback.
+	const chapterLinks = Array.from(
+		document.querySelectorAll<HTMLAnchorElement>(
+			"[data-watch-chapters] [data-chapter-link]",
+		),
+	);
+	const chapterStarts = chapterLinks.map((link) =>
+		Number.parseInt(link.dataset.chapterLink ?? "", 10),
+	);
+	let currentChapter = -1;
+
+	function syncChapter() {
+		if (!boundMedia || chapterLinks.length === 0) return;
+		const time = boundMedia.currentTime;
+		let index = -1;
+		if (time > 0 || boundMedia.played.length > 0) {
+			for (const [i, start] of chapterStarts.entries()) {
+				if (start <= time) index = i;
+			}
+		}
+		if (index === currentChapter) return;
+		chapterLinks[currentChapter]?.removeAttribute("aria-current");
+		chapterLinks[index]?.setAttribute("aria-current", "true");
+		currentChapter = index;
+	}
+
+	function syncStrip() {
+		if (!stripToggle || !boundMedia) return;
+		const playing = !boundMedia.paused && !boundMedia.ended;
+		stripToggle.setAttribute("aria-label", playing ? "Pause" : "Play");
+		stripToggle.dataset.state = playing ? "playing" : "paused";
+		if (stripTime && Number.isFinite(boundMedia.duration)) {
+			stripTime.textContent = `${clock(boundMedia.currentTime)} / ${clock(boundMedia.duration)}`;
+		}
+	}
+
+	function bindStrip() {
+		const media = getPlayerVideo();
+		if (!media || media === boundMedia) return;
+		boundMedia = media;
+		for (const type of ["timeupdate", "seeking"]) {
+			media.addEventListener(type, syncChapter);
+		}
+		syncChapter();
+		if (!stripToggle) return;
+		for (const type of [
+			"play",
+			"pause",
+			"ended",
+			"timeupdate",
+			"durationchange",
+		]) {
+			media.addEventListener(type, syncStrip);
+		}
+		stripToggle.hidden = false;
+		syncStrip();
+	}
+
+	stripToggle?.addEventListener("click", () => {
+		const media = getPlayerVideo();
+		if (!media) return;
+		if (media.paused || media.ended) void media.play()?.catch(() => {});
+		else media.pause();
+	});
+
+	if (playerFrame) {
+		bindStrip();
+		// The player is a client-only island (and the live gate can swap a
+		// thumbnail for a player), so watch for its <video>.
+		new MutationObserver(bindStrip).observe(playerFrame, {
+			childList: true,
+			subtree: true,
 		});
 	}
 
