@@ -6,7 +6,7 @@ import {
 	ExclamationTriangleIcon,
 } from "@heroicons/vue/24/outline";
 import { computed, onMounted, ref } from "vue";
-import { academyDocument, button } from "@rawkodeacademy/design-system";
+import { academyDocument, academyWatch, button } from "@rawkodeacademy/design-system";
 import { getNotificationServiceWorkerRegistration } from "@/lib/notification-service-worker";
 
 const props = defineProps<{
@@ -14,6 +14,7 @@ const props = defineProps<{
 	publicKey: string;
 }>();
 const doc = academyDocument();
+const watch = academyWatch();
 
 type NotifyState =
 	| "checking"
@@ -217,7 +218,7 @@ onMounted(() => {
 	<div :class="doc.stackSmall">
 		<button
 			type="button"
-			:class="button()"
+			:class="button({ surface: 'ink' })"
 			:disabled="isDisabled"
 			@click="enableNotifications"
 		>
@@ -230,7 +231,7 @@ onMounted(() => {
 			<BellIcon v-else :class="doc.iconSmall" aria-hidden="true" />
 			<span>{{ buttonLabel }}</span>
 		</button>
-		<p v-if="message" :class="doc.copy" role="status">
+		<p v-if="message" :class="watch.noticeCopy" role="status">
 			{{ message }}
 		</p>
 	</div>

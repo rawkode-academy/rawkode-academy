@@ -94,10 +94,9 @@ async function select(videos, showEntry = show, video = current) {
 
 async function renderRecommendations(props) {
 	const calls = [];
-	const markup = source.slice(
-		source.indexOf("{showEntry && showRelatedVideos.length > 0 ?"),
-		source.indexOf("<NewsletterCTA />"),
-	);
+	// The recommendation is the last thing in the ink pane's aside.
+	const start = source.indexOf("{showEntry && showRelatedVideos.length > 0 ?");
+	const markup = source.slice(start, source.indexOf("</aside>", start));
 	assert(markup.includes("TechnologyVideoSection"));
 	const input = `---\nimport ShowVideoSection from "show";\nimport TechnologyVideoSection from "technology";\nconst { showEntry, showRelatedAll, showRelatedVideos, technologyRecommendation } = Astro.props;\n---\n${markup}`;
 	const compiled = await transform(input, {
@@ -272,7 +271,9 @@ test("breadcrumb status exists only for actual live/upcoming states; page remain
 			source,
 		),
 	);
-	assert(!source.includes('video.data.type === "live") {\n\tdisableContentCache'));
+	assert(
+		!source.includes('video.data.type === "live") {\n\tdisableContentCache'),
+	);
 	assert(!source.includes("astro:content"));
 	assert(source.includes('from "@/lib/live-content"'));
 	// The only hand-written header is the browser no-store on live sessions

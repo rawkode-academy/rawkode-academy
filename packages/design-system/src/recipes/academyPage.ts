@@ -554,12 +554,15 @@ export const academyPage = sva({
 			transitionDuration: "base",
 		},
 		entryMeta: monoMeta,
+		// Three lines at most, so one long summary cannot stretch its column
+		// far past its neighbours.
 		entryDescription: {
 			marginTop: "1",
 			color: "academy.textSoft",
 			fontSize: "sm",
 			lineHeight: "body",
 			textWrap: "pretty",
+			lineClamp: "3",
 		},
 		entryCover: {
 			...videoFrame,

@@ -1,0 +1,45 @@
+---
+import { academyWatch } from "@rawkodeacademy/design-system";
+import { type VideoResource, validVideoResources } from "./video-resources";
+
+/**
+ * A session's resources as a ruled list, rendered on the server. The kind
+ * column is the resource's own category; "other" says nothing, so it is left
+ * blank, and the column goes when no resource has a named category.
+ */
+interface Props {
+	resources: readonly VideoResource[];
+}
+
+const resources = validVideoResources(Astro.props.resources);
+const hasKinds = resources.some((resource) => resource.category !== "other");
+const watch = academyWatch();
+---
+
+{resources.length > 0 && (
+	<section class={watch.section} aria-labelledby="watch-detail-resources-heading">
+		<h2 id="watch-detail-resources-heading" class={watch.sectionTitle}>Resources</h2>
+		<ul class={watch.linkList}>
+			{resources.map((resource) => (
+				<li>
+					<a
+						class={watch.linkRow}
+						data-kinds={hasKinds ? "true" : "false"}
+						href={resource.href}
+						target={resource.type === "url" ? "_blank" : undefined}
+						rel={resource.type === "url" ? "noopener noreferrer" : undefined}
+					>
+						{hasKinds && (
+							<span class={watch.linkKind}>{resource.category === "other" ? "" : resource.category}</span>
+						)}
+						<span class={watch.linkBody}>
+							<span class={watch.linkName} data-name>{resource.title}</span>
+							{resource.description && <span class={watch.linkNote}>{resource.description}</span>}
+						</span>
+						{resource.type === "url" && <span class={watch.linkArrow} data-arrow aria-hidden="true">↗</span>}
+					</a>
+				</li>
+			))}
+		</ul>
+	</section>
+)}

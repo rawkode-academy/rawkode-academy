@@ -227,6 +227,7 @@ export const Full: Story = {
 
 /** Nothing scheduled: the ink band is not rendered and the hero drops "Next live". */
 export const NoUpcomingStream: Story = {
+	tags: ["!visual"],
 	render: () => (
 		<VueInReact component={AcademyPage} props={{ ...full, upcoming: [] }} />
 	),
@@ -234,7 +235,7 @@ export const NoUpcomingStream: Story = {
 
 /** One article and no news: the News column is gone and two columns share the measure 7/5. */
 export const Sparse: Story = {
-	tags: ["visual-mobile"],
+	tags: ["!visual"],
 	render: () => (
 		<VueInReact
 			component={AcademyPage}

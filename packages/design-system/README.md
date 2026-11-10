@@ -83,7 +83,7 @@ layout, padding, an entrance animation.
 | `systemGrid.ts` | `systemGridTop`, `systemGridBottom` | The grid motif, ink surfaces only |
 | `motion.ts` | `scrollReveal` | Scroll-driven entrance for rows and cards |
 | `ink.ts` | `inkSurface`, `inkStage` | The ink surface that opens a page: hero, masthead, Search, video stage |
-| `ledger.ts` | `ruledList`, `ledgerRow`, `ledgerDate`, `ledgerMedia`, `ledgerImage`, `ledgerBody`, `ledgerTitle`, `ledgerDescription` | The chronological row shared by the homepage stream, Read and News |
+| `ledger.ts` | `ruledList`, `ledgerRow`, `ledgerDate`, `ledgerMedia`, `ledgerImage`, `ledgerBody`, `ledgerTitle`, `ledgerDescription` | The chronological row shared by Read and News |
 | `media.ts` | `videoFrame`, `coverImage`, `coverImageZoom`, `runtimeBadge` | The 16:9 still, the image that fills it, the runtime set over it |
 | `surface.ts` | `panelSurface`, `linkedPanel`, `pill` | Framed panels (static and linked) and the tag outline, the one fully round surface |
 | `link.ts` | `textLink` | The standalone text link with a travelling arrow |
@@ -174,14 +174,12 @@ The dialog is rendered through `body` and owns viewport scrolling, so long forms
 ## Website integration
 
 The production website homepage uses the Academy palette and the `academyPage`
-recipe. It renders live content from every publishable collection in one
-chronological Latest feed:
-
-- videos
-- articles
-- news
-- courses
-- learning paths
+recipe. It is an index of the archive, rendered from live content: the four
+collections with their real counts in the hero (`index*`), the latest session
+as a spread (`spread`, `plate`, `colophon`, `facts`), a compact ledger with a
+column per collection (`columns`, `column*`, `entry*`), the next live stream
+as an ink band (`band*`) and learning paths as a ruled table (`paths`,
+`pathRow*`).
 
 Format-specific routes such as `/watch` and `/read` remain focused views. The
 homepage uses Panda-generated classes plus the shared Ark Tabs and Dialog.

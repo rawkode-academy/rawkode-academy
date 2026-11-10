@@ -51,8 +51,9 @@ behaviour, Vue components).
    - `inkSurface`, `inkStage`: the ink surface that opens a page (hero,
      masthead, Search, video stage). The slot adds its own padding.
    - `ledgerRow` and the other `ledger*` fragments, `ruledList`: the row
-     shared by the homepage stream (`academyPage.ledger*`), Read and News
-     (`academyCatalog.editorial*`). Markup contract in `src/styles/ledger.ts`.
+     shared by Read and News (`academyCatalog.editorial*`). Markup contract
+     in `src/styles/ledger.ts`. The homepage sets a compact three-column
+     form of the row in its own slots (`academyPage.columns`, `entry*`).
    - `videoFrame`, `coverImage`, `coverImageZoom`, `runtimeBadge`: the 16:9
      still, the image that fills it and the runtime set over it.
    - `panelSurface`, `linkedPanel`, `pill`: framed panels and the tag outline.
@@ -60,9 +61,8 @@ behaviour, Vue components).
      A link inside a sentence stays underlined in the accent.
    - `VideoCard.astro` (`academyPage.card`): the one video card, also behind
      `video-feed.astro` (its `progress` slot takes a watch-progress bar) and,
-     with `scheduled`, an upcoming stream. `AcademyPage.vue` repeats the
-     scheduled markup because a Vue component cannot import an Astro one;
-     change both together. `localDate` (`17 Jul 2026`) and `formatRuntime`
+     with `scheduled`, an upcoming stream. The homepage (`AcademyPage.vue`) sets
+     the next stream as an ink band instead (`academyPage.band*`). `localDate` (`17 Jul 2026`) and `formatRuntime`
      (`1h 2m`) are the one date and runtime form; `Breadcrumb.astro` is the
      one breadcrumb.
    - `inputField`: a text input's surface and its placeholder, invalid,

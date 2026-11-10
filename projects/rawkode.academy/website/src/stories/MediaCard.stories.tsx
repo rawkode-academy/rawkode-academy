@@ -1,9 +1,6 @@
 import {
-	academyNavigation,
 	academyPage,
 	academyRelatedContent,
-	academyWatch,
-	button,
 } from "@rawkodeacademy/design-system";
 import type { Meta, StoryObj } from "@storybook/react";
 import { canvas, Specimen, stills } from "./specimen";
@@ -15,7 +12,7 @@ const meta = {
 		docs: {
 			description: {
 				component:
-					"The pieces of a video card, from `src/styles/media.ts` and `src/styles/type.ts`: `videoFrame` (the 16:9 still), `coverImage` / `coverImageZoom`, `runtimeBadge`, `cardTitle` and `monoMeta`. `academyPage.card` is the one video card (library, show and technology rails). A scheduled stream is a horizontal feature; the watch page keeps its secondary facts in a rail.",
+					"The pieces of a video card, from `src/styles/media.ts` and `src/styles/type.ts`: `videoFrame` (the 16:9 still), `coverImage` / `coverImageZoom`, `runtimeBadge`, `cardTitle` and `monoMeta`. `academyPage.card` is the one video card (library, show and technology rails). A scheduled stream is a horizontal feature. The watch page is in `Pages/Watch workbench`.",
 			},
 		},
 	},
@@ -137,126 +134,6 @@ export const UpcomingStream: Story = {
 								</span>
 							</div>
 						</a>
-					</div>
-				</Specimen>
-			</div>
-		);
-	},
-};
-
-/** Under the player: the lesson in a reading column, facts in a rail. */
-export const WatchDetail: Story = {
-	render: () => {
-		const watch = academyWatch();
-		const nav = academyNavigation();
-		return (
-			<div style={canvas}>
-				<Specimen label="academyWatch.detail: 680px lesson column, with technologies, cast and the share link in the rail">
-					<div className={watch.summaryCopy}>
-						<nav className={nav.breadcrumb} aria-label="Breadcrumb">
-							<ol className={nav.trail}>
-								<li>
-									<a className={nav.crumb} href="#watch">
-										Watch
-									</a>
-								</li>
-								<li>
-									<span className={nav.separator} aria-hidden="true">
-										/
-									</span>
-									<a className={nav.crumb} href="#show">
-										Rawkode Live
-									</a>
-								</li>
-							</ol>
-						</nav>
-						<h1 className={watch.title}>Hands-on introduction to Kueue</h1>
-						<p className={watch.meta}>
-							<time>17 Jul 2026</time>
-							<span>1h 2m</span>
-						</p>
-					</div>
-					<div className={watch.detail}>
-						<div className={watch.detailMain}>
-							<section className={watch.section}>
-								<h2 className={watch.sectionTitle}>About this video</h2>
-								<section className={watch.learn}>
-									<h3 className={watch.learnTitle}>What you'll learn</h3>
-									<ol className={watch.learnList} data-academy-learn-list>
-										<li>How Kueue admits and queues batch workloads</li>
-										<li>Where cluster queues and resource flavours fit</li>
-									</ol>
-								</section>
-								<p className={watch.dek}>
-									Kueue is a Kubernetes-native job queueing system. We install
-									it, define quotas, and watch it decide which jobs run.
-								</p>
-								<div className={watch.reactions}>
-									<div className={watch.reactionList}>
-										<button type="button" className={watch.reactionButton}>
-											<span className={watch.reactionEmoji}>👍</span>
-											<span className={watch.reactionCount}>12</span>
-										</button>
-										<button type="button" className={watch.reactionButton}>
-											<span className={watch.reactionEmoji}>🚀</span>
-										</button>
-										<button type="button" className={watch.reactionButton}>
-											+
-										</button>
-									</div>
-								</div>
-							</section>
-						</div>
-						<aside className={watch.detailRail}>
-							<section className={watch.railSection}>
-								<h2 className={watch.railHeading}>Technologies featured</h2>
-								<div className={watch.techGrid}>
-									{["Kubernetes", "Kueue"].map((name) => (
-										<a key={name} className={watch.techChip} href="#tech">
-											<span className={watch.techName}>{name}</span>
-											<span className={watch.techArrow} aria-hidden="true">
-												→
-											</span>
-										</a>
-									))}
-								</div>
-							</section>
-							<section className={watch.cast}>
-								<h2 className={watch.railHeading}>Cast</h2>
-								<ul className={watch.castGrid}>
-									{[
-										["David Flanagan", "Host · @rawkode"],
-										["Yuki Iwai", "Guest"],
-									].map(([name, role]) => (
-										<li key={name}>
-											<a className={watch.castCard} href="#person">
-												<span
-													className={`${watch.castAvatar} ${watch.castInitials}`}
-													aria-hidden="true"
-												>
-													{name
-														?.split(" ")
-														.map((part) => part[0])
-														.join("")}
-												</span>
-												<span className={watch.castBody}>
-													<span className={watch.castName}>{name}</span>
-													<span className={watch.castMeta}>{role}</span>
-												</span>
-											</a>
-										</li>
-									))}
-								</ul>
-							</section>
-							<div className={watch.railSection}>
-								<button
-									type="button"
-									className={button({ variant: "outline", size: "sm" })}
-								>
-									Copy link
-								</button>
-							</div>
-						</aside>
 					</div>
 				</Specimen>
 			</div>

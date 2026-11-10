@@ -615,11 +615,13 @@ test("initials presentation belongs to academyWatch and preserves the avatar siz
 		background: "academy.ground",
 		color: "academy.textSoft",
 		fontFamily: "academy-text",
-		fontSize: "sm",
+		fontSize: "md",
 		fontWeight: "semibold",
 		"&[hidden]": { display: "none" },
 	});
-	assert.equal(recipe.base.castAvatar.width, "12");
-	assert.equal(recipe.base.castAvatar.height, "12");
+	// The workbench cast is a contact sheet: 4.5rem portraits.
+	assert.equal(recipe.base.castAvatar.width, "[4.5rem]");
+	assert.equal(recipe.base.castAvatar.height, "[4.5rem]");
+	assert.equal(recipe.base.castAvatar["&[hidden]"].display, "none");
 	assert(!read("components/video/VideoCast.astro").includes("<style"));
 });

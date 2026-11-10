@@ -20,11 +20,11 @@ const styles = academyWatch();
 const searchId = `transcript-search-${crypto.randomUUID()}`;
 ---
 
-<academy-transcript class={styles.comments} data-highlight-class={styles.transcriptHighlight}>
+<academy-transcript class={styles.transcript} data-highlight-class={styles.transcriptHighlight}>
 	{sections.length > 0 ? (
 		<>
 			<div data-transcript-controls hidden>
-				<label for={searchId} class={styles.noticeCopy}>Search transcript</label>
+				<label for={searchId} class={styles.fieldLabel}>Search transcript</label>
 				<div class={styles.search}>
 					<input id={searchId} type="search" placeholder="Search transcript..." class={styles.searchInput} />
 					<svg class={styles.searchIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -33,6 +33,7 @@ const searchId = `transcript-search-${crypto.randomUUID()}`;
 				</div>
 				<p class={styles.searchSummary} role="status" aria-atomic="true" />
 			</div>
+			<div class={styles.transcriptContainer} role="region" aria-label="Transcript text" tabindex="0">
 			<div class={styles.transcriptBody}>
 				{sections.map((section) => (
 					<section data-transcript-section aria-label={section.chapter?.title}>
@@ -55,8 +56,9 @@ const searchId = `transcript-search-${crypto.randomUUID()}`;
 					</section>
 				))}
 			</div>
+			</div>
 		</>
-	) : <p class={styles.noticeCopy}>No transcript is available for this video.</p>}
+	) : <p class={styles.transcriptNote}>No transcript is available for this video.</p>}
 </academy-transcript>
 
 <script>

@@ -224,6 +224,22 @@ export default defineConfig({
 					from: { transform: "scaleX(0)" },
 					to: { transform: "scaleX(1)" },
 				},
+				// The watch page's narrow player, scroll-driven along the
+				// `--watch-deck` view timeline (see `academyWatch`).
+				"academy-watch-shrink": {
+					from: { height: "var(--watch-full)" },
+					to: { height: "var(--watch-strip)" },
+				},
+				"academy-watch-dock": {
+					to: { marginInlineStart: "0" },
+				},
+				"academy-watch-chrome-out": {
+					to: { opacity: "0", visibility: "hidden" },
+				},
+				"academy-watch-strip-in": {
+					from: { opacity: "0", visibility: "hidden" },
+					to: { opacity: "1", visibility: "visible" },
+				},
 			},
 			semanticTokens: {
 				colors: {

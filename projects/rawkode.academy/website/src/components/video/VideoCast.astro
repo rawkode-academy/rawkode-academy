@@ -18,8 +18,8 @@ const watch = academyWatch();
 ---
 
 {speakers.length > 0 && (
-	<section class={watch.cast} aria-labelledby="watch-detail-cast-heading">
-		<h2 id="watch-detail-cast-heading" class={watch.railHeading}>Cast</h2>
+	<section class={watch.section} aria-labelledby="watch-detail-cast-heading">
+		<h2 id="watch-detail-cast-heading" class={watch.sectionTitle}>Cast</h2>
 		<ul class={watch.castGrid}>
 			{speakers.map(({ person, role }) => (
 				<li>
@@ -28,8 +28,8 @@ const watch = academyWatch();
 							src={person.data.avatarUrl}
 							alt=""
 							class={watch.castAvatar}
-							width="48"
-							height="48"
+							width="72"
+							height="72"
 							loading="lazy"
 							decoding="async"
 							onerror="this.hidden=true; this.nextElementSibling.hidden=false;"
@@ -39,10 +39,9 @@ const watch = academyWatch();
 							hidden={Boolean(person.data.avatarUrl)}
 							aria-hidden="true"
 						>{initials(person.data.name)}</span>
-						<div class={watch.castBody}>
-							<h3 class={watch.castName}>{person.data.name}</h3>
-							<p class={watch.castMeta}>{role}{person.data.handles?.github && ` · @${person.data.handles.github}`}</p>
-						</div>
+						<h3 class={watch.castName} data-name>{person.data.name}</h3>
+						<p class={watch.castMeta}>{role}</p>
+						{person.data.handles?.github && <p class={watch.castMeta}>@{person.data.handles.github}</p>}
 					</a>
 				</li>
 			))}

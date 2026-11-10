@@ -1,7 +1,7 @@
 ---
 import type { ContentEntry } from "@/lib/live-content";
-import { academyPage, academyWatch } from "@rawkodeacademy/design-system";
-import VideoCard from "./VideoCard.astro";
+import { academyWatch } from "@rawkodeacademy/design-system";
+import { formatRuntimeLabel } from "@/lib/video-runtime";
 
 interface Props {
 	show: ContentEntry<"shows">;
@@ -22,31 +22,32 @@ const { show, videos, totalVideos } = Astro.props;
 const hasMoreVideos =
 	typeof totalVideos === "number" && totalVideos > videos.length;
 const watch = academyWatch();
-const page = academyPage();
+// The ink pane has room for three; the show or technology page has the rest.
+const UP_NEXT_LIMIT = 3;
 ---
 
 {videos.length > 0 && (
-	<section class={watch.rail}>
-		<div class={watch.railHeader}>
-			<h2 class={watch.railTitle}>
-				More from {show.data.name}
-			</h2>
-			<a href={`/shows/${show.id}`} class={page.textLink}>
+	<section class={watch.extrasBlock}>
+		<div class={watch.inkHeader}>
+			<h2 class={watch.inkHeading}>More from {show.data.name}</h2>
+			<a href={`/shows/${show.id}`} class={watch.inkLink}>
 				{hasMoreVideos ? `All ${totalVideos} episodes` : "View the show"} <span aria-hidden="true">→</span>
 			</a>
 		</div>
-
-		<div class={page.feedGrid}>
-			{videos.map((video) => (
-				<VideoCard
-					href={`/watch/${video.slug}`}
-					title={video.title}
-					thumbnailUrl={video.thumbnailUrl}
-					duration={video.duration}
-					publishedAt={video.publishedAt}
-					type={video.type}
-				/>
+		<ul class={watch.upNextList}>
+			{videos.slice(0, UP_NEXT_LIMIT).map((video) => (
+				<li>
+					<a href={`/watch/${video.slug}`} class={watch.upNextLink}>
+						<span class={watch.upNextStill}>
+							<img src={video.thumbnailUrl} alt="" class={watch.upNextImage} width="320" height="180" loading="lazy" decoding="async" />
+						</span>
+						<span class={watch.upNextBody}>
+							{formatRuntimeLabel(video) && <span class={watch.upNextMeta}>{formatRuntimeLabel(video)}</span>}
+							<h3 class={watch.upNextTitle} data-title>{video.title}</h3>
+						</span>
+					</a>
+				</li>
 			))}
-		</div>
+		</ul>
 	</section>
 )}

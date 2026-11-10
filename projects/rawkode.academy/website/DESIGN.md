@@ -61,7 +61,8 @@ controls, and duplicate recommendations.
   rail on the homepage and each masthead set the collection's name with its
   count as an accent mono superscript (`Videos³²⁹`), the same form in both
   places so the homepage previews the page you land on; the two-digit day
-  that leads every ledger row, and the ghost index on a learning path (quiet
+  that leads every ledger row, the day a scheduled stream starts, the
+  session count beside a learning path on the homepage, and the ghost index on a learning path (quiet
   by default, lit in the accent on hover). Numerals are Red Hat Display
   extrabold with tabular figures; their labels are sentence-case mono.
 - Status colors communicate actual status. A topic or decorative eyebrow is
@@ -97,6 +98,11 @@ The 1180px shell includes responsive 20–48px gutters; usable desktop content i
 1084px. Header, page content, and footer align to this grid. Focused reading
 surfaces target 680px of text. Dense technical diagrams and video may be wider.
 
+The watch page is the one deliberate exception to the shell: a full-bleed
+split, with the player pinned in an ink pane and the notes in a canvas pane.
+The content of each pane stays on the grid, so the ink pane's left edge and
+the canvas pane's right edge sit on the shell edges from 1440px up.
+
 Use space and rules before boxes. Cards earn a frame when they are independent
 linked items or contain an interactive task. Do not wrap a whole reading page
 in a card or put cards inside redundant cards.
@@ -110,7 +116,20 @@ Directory pages explain the collection and show real choices. Filters have
 labels, real results, and an empty state. A decorative tab or fake pagination
 label is not acceptable. Keep critical content server-rendered.
 
-Chronological collections (the homepage stream, Read, News) share one ledger
+The homepage is an index of the archive. Its ink hero holds the statement,
+one sentence, the dates of the latest session and the next live stream, and
+the four collections as ruled links (name, count superscript, one line, an
+arrow), short enough that the latest session's still shows in the first
+viewport of a laptop. Beneath it: the latest session as a spread (the still
+as a plate, a colophon of real facts, the page's one solid button); Recently
+published as a compact ledger with one column per collection (three share
+the measure 5/4/3, two share it 7/5, one runs full width with its rows two
+abreast; a collection with nothing new has no column); the next live stream
+as a full-width ink band with its day at numeral scale, rendered only when
+a stream is scheduled; and learning paths as a ruled table with each path's
+real session count.
+
+Chronological collections (Read, News) share one ledger
 row: a date column led by the two-digit day as a numeral with month and year
 in mono beneath it, an optional 16:9 still, then kind, title, and a
 one-sentence description, separated by hairlines. Learning paths use the
