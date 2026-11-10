@@ -221,8 +221,7 @@ const ledger = [
 		id: "sessions",
 		title: "Sessions",
 		href: "/watch",
-		more: `All ${publishedVideos.length} ${plural(publishedVideos.length, "video")}`,
-		total: publishedVideos.length,
+		more: "All sessions",
 		entries: recentVideos.map((video, index) => {
 			const runtime = formatRuntime(video.data.duration);
 			const guests = sessionGuests[index] ?? [];
@@ -241,8 +240,7 @@ const ledger = [
 		id: "articles",
 		title: "Articles",
 		href: "/read",
-		more: `All ${articles.length} ${plural(articles.length, "article")}`,
-		total: articles.length,
+		more: "All articles",
 		entries: recentArticles.map((article, index) => {
 			const authors = articleAuthors[index] ?? [];
 			return {
@@ -261,7 +259,6 @@ const ledger = [
 		title: "News",
 		href: "/news",
 		more: "All news",
-		total: news.length,
 		entries: recentNews.map((item, index) => {
 			const authors = newsAuthors[index] ?? [];
 			return {

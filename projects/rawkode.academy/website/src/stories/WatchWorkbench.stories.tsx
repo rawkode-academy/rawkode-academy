@@ -7,6 +7,9 @@ import {
 	button,
 } from "@rawkodeacademy/design-system";
 import type { Meta, StoryObj } from "@storybook/react";
+import { useEffect, useRef } from "react";
+import { localDate, localDateTime } from "../lib/local-time";
+import { fitWatchPane } from "../lib/watch-pane-fit";
 import { stills } from "./specimen";
 
 // The watch page (`src/pages/watch/[...slug].astro`) cannot render in
@@ -124,6 +127,12 @@ const Workbench = ({
 	const prose = academyLayout({ width: "wide" }).prose;
 	const label = academyLabel({ tone: "accent" });
 	const upcoming = session.status === "Upcoming";
+	// The route's own script: the stories prove the shipped fitter.
+	const bench = useRef<HTMLDivElement>(null);
+	useEffect(
+		() => (bench.current ? fitWatchPane(bench.current) : undefined),
+		[],
+	);
 	// As `transcriptSections`: cues grouped under the chapter they fall in.
 	const transcriptGroups = [
 		{ chapter: undefined, start: -1 },
@@ -142,7 +151,7 @@ const Workbench = ({
 		}))
 		.filter((group) => group.cues.length > 0);
 	return (
-		<div className={watch.root} data-watch-root>
+		<div className={watch.root} data-watch-root lang="en">
 			{header && (
 				<div
 					aria-hidden="true"
@@ -154,7 +163,9 @@ const Workbench = ({
 				/>
 			)}
 			<div
+				ref={bench}
 				className={watch.bench}
+				data-watch-bench
 				data-pin={session.upNext.length > 0 && !upcoming ? "" : undefined}
 				data-notice={upcoming ? "" : undefined}
 			>
@@ -206,7 +217,7 @@ const Workbench = ({
 							</div>
 							<div className={watch.deckSpace} aria-hidden="true" />
 
-							<header className={watch.session}>
+							<header className={watch.session} data-watch-hero>
 								<div className={watch.breadcrumb}>
 									<nav className={nav.breadcrumb} aria-label="Breadcrumb">
 										<ol className={nav.trail}>
@@ -280,7 +291,9 @@ const Workbench = ({
 											this page starts when the stream does.
 										</p>
 										<a className={watch.factLink} href="#youtube">
-											Open the scheduled stream on YouTube ↗
+											Open the scheduled stream on YouTube{" "}
+											<span aria-hidden="true">↗</span>
+											<span className="sr-only"> (opens in a new tab)</span>
 										</a>
 										<div>
 											<button
@@ -352,6 +365,7 @@ const Workbench = ({
 												>
 													↗
 												</span>
+												<span className="sr-only"> (opens in a new tab)</span>
 											</a>
 										</li>
 									))}
@@ -465,10 +479,7 @@ const Workbench = ({
 									>
 										<div className={watch.transcriptBody}>
 											{transcriptGroups.map((group) => (
-												<section
-													key={group.start}
-													aria-label={group.chapter?.title}
-												>
+												<section key={group.start}>
 													{group.chapter && (
 														<h3 className={watch.transcriptChapter}>
 															<a
@@ -775,6 +786,14 @@ export const Minimal: Story = {
 	),
 };
 
+// One instant for a scheduled stream: the meta date and the notice's start
+// are both derived from it, in the forms the route uses.
+const streamStart = new Date("2026-11-11T17:00:00Z");
+const scheduledFixture = {
+	date: localDate(streamStart).text,
+	scheduled: localDateTime(streamStart).text,
+};
+
 /** A scheduled stream: the notice and "Notify me" sit under the title. */
 export const Upcoming: Story = {
 	tags: ["!visual", "!visual-mobile"],
@@ -783,11 +802,10 @@ export const Upcoming: Story = {
 			session={{
 				...recorded,
 				title: "Make Your Shell Magical with Atuin",
-				date: "11 Nov 2026",
+				...scheduledFixture,
 				runtime: "Upcoming",
 				kind: "Live session",
 				status: "Upcoming",
-				scheduled: "Wednesday, 11 November 2026 at 17:00 UTC",
 				still: stills.controlPlane,
 				lede: undefined,
 				description: [
@@ -810,6 +828,12 @@ export const Upcoming: Story = {
 export const RecordedUnderHeader: Story = {
 	tags: ["!visual", "!visual-mobile"],
 	render: () => <Workbench session={recorded} header />,
+};
+
+/** No technologies: the share link stands alone in its row. */
+export const NoTechnologies: Story = {
+	tags: ["!visual", "!visual-mobile"],
+	render: () => <Workbench session={{ ...recorded, technologies: [] }} />,
 };
 
 const stress: Session = {
@@ -877,10 +901,10 @@ export const StressUpcoming: Story = {
 			header
 			session={{
 				...stress,
+				...scheduledFixture,
 				runtime: "Upcoming",
 				kind: "Live session",
 				status: "Upcoming",
-				scheduled: "Wednesday, 11 November 2026 at 17:00 UTC",
 				lede: undefined,
 				learn: [],
 				chapters: [],

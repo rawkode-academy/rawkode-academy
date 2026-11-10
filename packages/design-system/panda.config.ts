@@ -161,6 +161,7 @@ export default defineConfig({
 					"stagger-2": { value: "140ms" },
 					"stagger-3": { value: "220ms" },
 					"stagger-4": { value: "320ms" },
+					"stagger-5": { value: "420ms" },
 				},
 				easings: {
 					"academy-out": { value: "cubic-bezier(0.22, 1, 0.36, 1)" },

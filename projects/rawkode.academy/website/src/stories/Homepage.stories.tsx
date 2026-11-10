@@ -70,8 +70,7 @@ const sessions = {
 	id: "sessions",
 	title: "Sessions",
 	href: "/watch",
-	more: "All 330 videos",
-	total: 330,
+	more: "All sessions",
 	entries: [
 		{
 			href: "/watch/hands-on-introduction-to-kueue",
@@ -118,8 +117,7 @@ const articles = {
 	id: "articles",
 	title: "Articles",
 	href: "/read",
-	more: "All 34 articles",
-	total: 34,
+	more: "All articles",
 	entries: [
 		leadArticle,
 		{
@@ -154,7 +152,6 @@ const news = {
 	title: "News",
 	href: "/news",
 	more: "All news",
-	total: 12,
 	entries: [
 		{
 			href: "/news/klustered-winter-2026",
@@ -246,28 +243,41 @@ const laterStream = {
 	publishedAt: "2026-11-18T17:30:00.000Z",
 };
 
+// The living system is random on the site. Stories seed it, and every story
+// but LivingSystem holds its still frame, so renders are deterministic.
+const SYSTEM_SEED = 20261111;
+
+const Home = ({
+	props = full,
+	still = true,
+}: {
+	props?: Record<string, unknown>;
+	still?: boolean;
+}) => {
+	useEffect(() => {
+		const hero = document.querySelector<HTMLElement>("[data-system]");
+		if (hero) mountSystem(hero, { seed: SYSTEM_SEED, still });
+	}, [still]);
+	return <VueInReact component={AcademyPage} props={props} />;
+};
+
 /** Every section present: a stream scheduled beside the latest session, three ledger columns. */
 export const Full: Story = {
 	tags: ["visual-mobile"],
-	render: () => <VueInReact component={AcademyPage} props={full} />,
+	render: () => <Home />,
 };
 
 /** Nothing scheduled: the latest session takes the full width as a spread, with the solid action. */
 export const NoUpcomingStream: Story = {
 	tags: ["!visual", "!visual-mobile"],
-	render: () => (
-		<VueInReact component={AcademyPage} props={{ ...full, upcoming: [] }} />
-	),
+	render: () => <Home props={{ ...full, upcoming: [] }} />,
 };
 
 /** Two streams scheduled: the first is in the pair, the second is listed under it. */
 export const TwoStreams: Story = {
 	tags: ["!visual", "!visual-mobile"],
 	render: () => (
-		<VueInReact
-			component={AcademyPage}
-			props={{ ...full, upcoming: [...upcoming, laterStream] }}
-		/>
+		<Home props={{ ...full, upcoming: [...upcoming, laterStream] }} />
 	),
 };
 
@@ -275,19 +285,13 @@ export const TwoStreams: Story = {
 export const Sparse: Story = {
 	tags: ["!visual", "!visual-mobile"],
 	render: () => (
-		<VueInReact
-			component={AcademyPage}
+		<Home
 			props={{
 				...full,
 				ledger: [
 					sessions,
-					{
-						...articles,
-						more: "All 1 article",
-						total: 1,
-						entries: [leadArticle],
-					},
-					{ ...news, total: 0, entries: [] },
+					{ ...articles, entries: [leadArticle] },
+					{ ...news, entries: [] },
 				],
 				upcoming: [],
 			}}
@@ -298,27 +302,48 @@ export const Sparse: Story = {
 /** Only sessions: one column runs the full measure with its rows two abreast. */
 export const SessionsOnly: Story = {
 	tags: ["!visual", "!visual-mobile"],
+	render: () => <Home props={{ ...full, ledger: [sessions] }} />,
+};
+
+/** Long titles, three guests, a long show name and a four-digit count: nothing clips, and the pair's rows stay level. */
+export const LongContent: Story = {
+	tags: ["!visual", "!visual-mobile"],
 	render: () => (
-		<VueInReact
-			component={AcademyPage}
-			props={{ ...full, ledger: [sessions] }}
+		<Home
+			props={{
+				...full,
+				collections: collections.map((collection, index) =>
+					index === 0 ? { ...collection, count: 1284 } : collection,
+				),
+				upcoming: [
+					{
+						...upcoming[0],
+						title:
+							"Rebuilding a Kubernetes control plane from an etcd snapshot after losing two of three nodes",
+					},
+				],
+				featured: {
+					...featured,
+					title:
+						"Tracing one request through Cilium, Envoy and the kernel to find where the latency goes",
+					guests: ["Nick Stinemates", "Yuki Iwai", "Rüdiger Klaehn"],
+					show: {
+						href: "/shows/cloud-native-compass",
+						name: "Cloud Native Compass: Platform Engineering Edition",
+						episodes: 175,
+					},
+				},
+			}}
 		/>
 	),
 };
 
-const WithSystem = () => {
-	useEffect(() => {
-		const hero = document.querySelector<HTMLElement>("[data-system]");
-		if (hero) mountSystem(hero);
-	}, []);
-	return <VueInReact component={AcademyPage} props={full} />;
-};
-
 /**
- * The hero with the living system mounted, as on the site. The system is
- * random, so this story has no screenshot baseline.
+ * The hero with the living system in motion, as on the site: it runs for
+ * five seconds, then holds a still frame. It moves, so this story has no
+ * screenshot baseline.
  */
 export const LivingSystem: Story = {
 	tags: ["!visual", "!visual-mobile"],
-	render: () => <WithSystem />,
+	render: () => <Home still={false} />,
 };

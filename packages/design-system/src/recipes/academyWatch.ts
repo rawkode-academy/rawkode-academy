@@ -41,7 +41,9 @@ import { watchFeedback, watchLedger } from "../styles/watch";
  *   </div>
  *
  * `bench` takes `data-pin` when "more from" exists and may be pinned, and
- * `data-notice` when the session carries the upcoming-stream notice.
+ * `data-notice` when the session carries the upcoming-stream notice. The
+ * website's `fitWatchPane` adds `data-pane-flow` ("more" or "all") when the
+ * measured session does not fit the pinned pane.
  *
  * Playback, deferred islands and route data remain owned by the website.
  */
@@ -212,31 +214,59 @@ export const academyWatch = sva({
 				gridTemplateColumns:
 					"[minmax(0, 1fr) minmax(0, 708px) minmax(0, 472px) minmax(0, 1fr)]",
 				gridTemplateRows: "[1fr auto]",
+				// The player's width, shared by both ink blocks so they end on
+				// one edge. `100%` resolves where it is used: `paneInner` and
+				// `moreInner` have the same content width.
+				"--watch-player-cap":
+					"max(18rem, calc((100dvh - var(--watch-rest)) * 16 / 9))",
+				"--watch-player-w": "min(100%, var(--watch-player-cap))",
+				// It narrows in whole 4rem cells, so its right edge stays on a
+				// lattice line. Rounding up only makes it smaller.
+				// (Doubled selector: the generated rule is emitted before the
+				// plain `lg` one and would otherwise lose to it.)
+				"@supports (width: round(up, 1px, 1px))": {
+					"&&": {
+						"--watch-player-w":
+							"calc(100% - round(up, max(0px, 100% - var(--watch-player-cap)), 4rem))",
+					},
+				},
+				// Measured (`fitWatchPane`): the session is taller than the first
+				// viewport, so the pane scrolls with the page.
+				"&[data-pane-flow=all] [data-watch-pane-sticky]": {
+					position: "static",
+					overflow: "visible",
+				},
 			},
 			// A viewport with room pins "more from" to the foot of the ink
 			// pane, so the pane is a complete side of the bench. A shorter one
 			// leaves it at the end of the column, where the page scrolls to it;
-			// nothing ever scrolls inside the pane.
+			// nothing ever scrolls inside the pane. `data-pane-flow` is set by
+			// `fitWatchPane` when the session's own content does not leave the
+			// room the tier assumed: the block then falls back to row 2. The
+			// player keeps its size either way.
 			//
 			// Laptop heights pin one row, without its still.
 			"@media (min-width: 1024px) and (min-height: 46rem) and (max-height: 53.99rem)":
 				{
 					"&[data-pin]": { "--watch-rest": "30.5rem" },
-					"&[data-pin] > [data-watch-pane]": { gridRow: "1 / 3" },
-					"&[data-pin] > [data-watch-more]": {
+					"&[data-pin]:not([data-pane-flow]) > [data-watch-pane]": { gridRow: "1 / 3" },
+					"&[data-pin]:not([data-pane-flow]) > [data-watch-more]": {
 						gridRow: "1 / 3",
 						alignSelf: "end",
 						position: "sticky",
 						bottom: "0",
 						paddingBlockEnd: "4",
 						borderInlineEndColor: "transparent",
-						backgroundColor: "transparent",
+						backgroundColor: {
+							base: "academy.ink",
+							_dark: "academy.inkRaised",
+						},
 					},
-					"&[data-pin] > [data-watch-more] li:nth-child(n + 2)": {
+					"&[data-pin]:not([data-pane-flow]) > [data-watch-more] li:nth-child(n + 2)": {
 						display: "none",
 					},
-					"&[data-pin] > [data-watch-more] [data-still]": { display: "none" },
-					"&[data-pin] > [data-watch-more] [data-up-next-link]": {
+					"&[data-pin]:not([data-pane-flow]) > [data-watch-more] [data-still]": { display: "none" },
+					"&[data-pin]:not([data-pane-flow]) > [data-watch-more] [data-up-next-link]": {
 						gridTemplateColumns: "minmax(0, 1fr)",
 					},
 				},
@@ -247,24 +277,27 @@ export const academyWatch = sva({
 			},
 			"@media (min-width: 1024px) and (min-height: 54rem)": {
 				"&[data-pin]": { "--watch-rest": "37.5rem" },
-				"&[data-pin] > [data-watch-pane]": { gridRow: "1 / 3" },
-				"&[data-pin] > [data-watch-more]": {
+				"&[data-pin]:not([data-pane-flow]) > [data-watch-pane]": { gridRow: "1 / 3" },
+				"&[data-pin]:not([data-pane-flow]) > [data-watch-more]": {
 					gridRow: "1 / 3",
 					alignSelf: "end",
 					position: "sticky",
 					bottom: "0",
 					paddingBlockEnd: "4",
 					borderInlineEndColor: "transparent",
-					backgroundColor: "transparent",
+					backgroundColor: {
+						base: "academy.ink",
+						_dark: "academy.inkRaised",
+					},
 				},
 				// Two rows until the viewport has room for the third.
-				"&[data-pin] > [data-watch-more] li:nth-child(n + 3)": {
+				"&[data-pin]:not([data-pane-flow]) > [data-watch-more] li:nth-child(n + 3)": {
 					display: "none",
 				},
 			},
 			"@media (min-width: 1024px) and (min-height: 62rem)": {
 				"&[data-pin]": { "--watch-rest": "41.75rem" },
-				"&[data-pin] > [data-watch-more] li:nth-child(n + 3)": {
+				"&[data-pin]:not([data-pane-flow]) > [data-watch-more] li:nth-child(n + 3)": {
 					display: "block",
 				},
 			},
@@ -308,8 +341,6 @@ export const academyWatch = sva({
 		paneInner: {
 			display: "contents",
 			_lg: {
-				"--watch-player-w":
-					"min(100%, max(18rem, calc((100dvh - var(--watch-rest)) * 16 / 9)))",
 				position: "relative",
 				display: "flex",
 				flexDirection: "column",
@@ -516,6 +547,11 @@ export const academyWatch = sva({
 				borderBottom: "hairline",
 				borderBottomColor: "academy.inkBorder",
 			},
+			// The notes' cap, from the same gutter: the share link ends on the
+			// ledger's right rule.
+			"@media (min-width: 768px) and (max-width: 1023.98px)": {
+				"& > *": { maxWidth: "[50rem]" },
+			},
 			_lg: {
 				flexShrink: "0",
 				overflow: "visible",
@@ -538,6 +574,7 @@ export const academyWatch = sva({
 			columnGap: "4",
 			"& nav a": {
 				color: "academy.inkTextMuted",
+				...watchFeedback,
 				_hover: { color: "academy.inkText" },
 				_focusVisible: focusRingInk,
 			},
@@ -558,7 +595,13 @@ export const academyWatch = sva({
 			letterSpacing: "academy-tight",
 			lineHeight: "academy-title",
 			textWrap: "balance",
-			overflowWrap: "anywhere",
+			overflowWrap: "break-word",
+			// Only a very long word is hyphenated, and only where the limit is
+			// honoured: an ordinary title never is.
+			"@supports (hyphenate-limit-chars: 14 6 6)": {
+				hyphens: "auto",
+				hyphenateLimitChars: "[14 6 6]",
+			},
 			_lg: { fontSize: "[clamp(1.875rem, 0.6rem + 2vw, 2.25rem)]" },
 		},
 		// Date, runtime and kind on one mono line, separated by a middle dot.
@@ -626,16 +669,23 @@ export const academyWatch = sva({
 			fontSize: "sm",
 			textDecoration: "underline",
 			textUnderlineOffset: "2px",
+			...watchFeedback,
 			_hover: { color: "academy.inkAccent" },
+			_active: { color: "academy.inkAccent" },
 			_focusVisible: focusRingInk,
 		},
 		// Under the meta line: the technologies as pills in the first track,
 		// the share link top right in the second, whatever the chip count.
+		// Below `sm` the pills take the full width and the link its own row.
 		tools: {
 			display: "grid",
-			gridTemplateColumns: "[minmax(0, 1fr) auto]",
+			gridTemplateColumns: {
+				base: "[minmax(0, 1fr)]",
+				sm: "[minmax(0, 1fr) auto]",
+			},
 			alignItems: "start",
 			columnGap: "3",
+			rowGap: "3",
 			marginBlockStart: "4",
 		},
 		// Composed with `button()`: the doubled selector wins over the
@@ -643,7 +693,8 @@ export const academyWatch = sva({
 		// does not resize it.
 		toolsEnd: {
 			"&&": {
-				gridColumn: "2",
+				gridColumn: { base: "1", sm: "2" },
+				justifySelf: { base: "start", sm: "auto" },
 				minWidth: "[7rem]",
 				whiteSpace: "nowrap",
 				"@media (max-width: 1023.98px)": { minHeight: "11" },
@@ -679,6 +730,8 @@ export const academyWatch = sva({
 				marginInlineStart: "auto",
 				paddingInlineEnd: "10",
 				"& > *": {
+					// Ends on the player's right edge.
+					maxWidth: "[var(--watch-player-w)]",
 					paddingBlockStart: "4",
 					borderTop: "hairline",
 					borderTopColor: "academy.inkBorder",
@@ -754,6 +807,7 @@ export const academyWatch = sva({
 			textDecoration: "none",
 			...watchFeedback,
 			_hover: { borderColor: "academy.inkAccent", color: "academy.inkAccent" },
+			_active: { borderColor: "academy.inkAccent", color: "academy.inkAccent" },
 			_focusVisible: focusRingInk,
 		},
 		// A logo is drawn for paper, so it keeps a paper tile in both schemes.
@@ -853,7 +907,7 @@ export const academyWatch = sva({
 				maxWidth: "[50rem]",
 				"& > section:first-child": {
 					display: "flex",
-					"& > *": { maxWidth: "[38rem]" },
+					"& > *": { maxWidth: "[32rem]" },
 				},
 			},
 			// 472px of track less the pane's own padding and the shell gutter.
@@ -883,6 +937,7 @@ export const academyWatch = sva({
 			minWidth: "0",
 			"&&": { fontSize: "md", lineHeight: "body" },
 			"&& > * + *": { marginTop: "4" },
+			"&& :is(p, li)": { textWrap: "pretty" },
 			"&& h2": { fontSize: "xl" },
 			"&& h3": { fontSize: "lg" },
 		},
@@ -1045,6 +1100,7 @@ export const academyWatch = sva({
 			filter: "[grayscale(1) contrast(1.05)]",
 			transitionProperty: "[filter]",
 			transitionDuration: "base",
+			transitionTimingFunction: "academy-out",
 			"&[hidden]": { display: "none" },
 			_motionReduce: { transitionDuration: "none" },
 		},
@@ -1064,7 +1120,7 @@ export const academyWatch = sva({
 		castName: {
 			margin: "0",
 			color: "currentColor",
-			fontSize: "sm",
+			fontSize: "md",
 			fontWeight: "semibold",
 			lineHeight: "academy-card",
 			overflowWrap: "anywhere",

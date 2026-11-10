@@ -42,8 +42,9 @@ controls, and duplicate recommendations.
     healthy node. It is pure animation: no readout, no controls, no
     announcements, and it carries no content. It keeps clear of every
     element marked `data-system-avoid`, pauses off screen and in hidden tabs,
-    and with reduced motion renders still frames with no packets or
-    autonomous failures (`src/lib/system-canvas.ts`).
+    moves for five seconds after load or the last pointer interaction and
+    then holds a still frame, and with reduced motion renders only still
+    frames with no autonomous failures (`src/lib/system-canvas.ts`).
   - On collection mastheads the collection's own artwork is scheduled into
     its cells on wide screens: stills as a bricked wall of 3×2 screens,
     portraits as staggered 2×2 squares, logos as single cells on paper tiles
@@ -79,7 +80,7 @@ controls, and duplicate recommendations.
 - A dialog or drawer dims the page with `academy.scrim`, the same black veil
   in both colour schemes. A scrim mixed from a themed colour stops dimming
   in dark mode.
-- Motion is one entrance sequence on the homepage hero (staggered rise, 720ms,
+- Motion is one entrance sequence on the homepage (staggered rise, 720ms,
   ease-out) with the living system fading in over the grid, a masthead
   entrance where the title rises and the mosaic tiles open from their centres
   in a sweep across the lattice (`academy-schedule`), a scroll-driven reveal on ledger rows, path cards, and library
@@ -90,7 +91,8 @@ controls, and duplicate recommendations.
   drawer slide). Articles carry a fixed reading rule that tracks the document
   scroll (`animation-timeline: scroll(root)`). Every animation has a
   `prefers-reduced-motion` alternative that removes it. Text selection
-  carries the accent.
+  carries the accent. The homepage entrance sequence runs statement, lede,
+  then the pair.
 
 ## Composition
 

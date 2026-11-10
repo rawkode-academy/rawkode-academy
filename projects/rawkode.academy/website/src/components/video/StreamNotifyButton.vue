@@ -35,7 +35,7 @@ const isDisabled = computed(() =>
 );
 
 const buttonLabel = computed(() => {
-	if (state.value === "loading") return "Enabling...";
+	if (state.value === "loading") return "Enabling…";
 	if (state.value === "enabled") return "Notifications on";
 	if (state.value === "denied") return "Notifications blocked";
 	if (state.value === "unsupported") return "Notifications unavailable";

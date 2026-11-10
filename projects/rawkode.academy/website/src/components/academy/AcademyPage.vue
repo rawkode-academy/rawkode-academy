@@ -38,7 +38,6 @@ interface LedgerColumn {
 	title: string;
 	href: string;
 	more: string;
-	total?: number;
 	entries: LedgerEntry[];
 }
 interface Stream {
@@ -100,20 +99,21 @@ const dateParts = (iso: string) =>
 	valid(iso)
 		? { day: part(iso, { day: "2-digit" }), month: part(iso, { month: "short", year: "numeric" }) }
 		: undefined;
-// A scheduled start: the day at numeral scale, then the weekday, the date
-// and the time.
+// A scheduled start: the day at numeral scale, then the weekday and the
+// time, with the month and year beneath. The day is printed once.
 const startParts = (iso: string) =>
 	valid(iso)
 		? {
 				day: part(iso, { day: "2-digit" }),
 				weekday: part(iso, { weekday: "long" }),
-				date: part(iso, { day: "numeric", month: "long", year: "numeric" }),
+				month: part(iso, { month: "long", year: "numeric" }),
 				time: part(iso, { hour: "2-digit", minute: "2-digit", timeZoneName: "short" }),
+				// The whole start as one phrase, for assistive technology.
+				full: part(iso, { weekday: "long", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", timeZoneName: "short" }),
 			}
 		: undefined;
 
 const columns = (props.ledger ?? []).filter((column) => column.entries.length > 0);
-const entryCount = columns.reduce((total, column) => total + column.entries.length, 0);
 const featuredDate = props.featured && valid(props.featured.publishedAt) ? localDate(props.featured.publishedAt) : undefined;
 const [nextStream, ...laterStreams] = (props.upcoming ?? []).filter((stream) => valid(stream.publishedAt));
 const nextStart = nextStream ? startParts(nextStream.publishedAt) : undefined;
@@ -132,16 +132,22 @@ const laterStarts = laterStreams.map((stream) => ({ ...stream, start: localDateT
 			</section>
 			<section v-if="nextStream && nextStart" :class="styles.sectionLead" aria-label="Next live stream and latest session">
 				<div :class="styles.pair">
-					<article :class="styles.pairItem" aria-labelledby="upcoming-title">
-						<a v-if="nextStream.mediaSrc" :href="nextStream.href" :class="styles.pairStill" tabindex="-1" aria-hidden="true"><img :src="nextStream.mediaSrc" alt="" :class="styles.plateImage" width="1280" height="720" /></a>
-						<span v-else />
-						<p :class="styles.dotLabel">Next live stream</p>
-						<h2 id="upcoming-title" :class="styles.pairTitle">{{ nextStream.title }}</h2>
-						<p v-if="nextStream.description" :class="styles.pairLine">{{ nextStream.description }}</p>
-						<span v-else />
+					<article :class="styles.pairItem" aria-labelledby="upcoming-kind upcoming-title">
+						<a v-if="nextStream.mediaSrc" :href="nextStream.href" :class="styles.pairStill" tabindex="-1" aria-hidden="true"><img :src="nextStream.mediaSrc" alt="" :class="styles.plateImage" width="1280" height="720" fetchpriority="high" /></a>
+						<span v-else :class="styles.pairStill" aria-hidden="true" />
+						<p id="upcoming-kind" :class="styles.pairChip"><span data-dot aria-hidden="true" />Next live stream</p>
+						<div :class="styles.pairHead">
+							<h2 id="upcoming-title" :class="styles.pairTitle"><a :href="nextStream.href" data-title tabindex="-1">{{ nextStream.title }}</a></h2>
+							<p v-if="nextStream.description" :class="styles.pairLine">{{ nextStream.description }}</p>
+						</div>
 						<p :class="styles.pairWhen">
-							<time :datetime="nextStream.publishedAt"><strong v-bind="nextStart.day.attrs">{{ nextStart.day.text }}</strong></time>
-							<span data-date><span v-bind="nextStart.weekday.attrs">{{ nextStart.weekday.text }}</span> <span v-bind="nextStart.date.attrs">{{ nextStart.date.text }}</span> <span v-bind="nextStart.time.attrs">{{ nextStart.time.text }}</span></span>
+							<time :datetime="nextStream.publishedAt">
+								<span :class="styles.visuallyHidden" v-bind="nextStart.full.attrs">{{ nextStart.full.text }}</span>
+								<span data-visible aria-hidden="true">
+									<strong v-bind="nextStart.day.attrs">{{ nextStart.day.text }}</strong>
+									<span data-date><span data-lead><span v-bind="nextStart.weekday.attrs">{{ nextStart.weekday.text }}</span>, <span data-time v-bind="nextStart.time.attrs">{{ nextStart.time.text }}</span></span> <span v-bind="nextStart.month.attrs">{{ nextStart.month.text }}</span></span>
+								</span>
+							</time>
 						</p>
 						<a :href="nextStream.href" :class="button({ size: 'lg' })">Get notified <span data-part="arrow" aria-hidden="true">→</span></a>
 						<div v-if="laterStarts.length" :class="styles.pairLater">
@@ -151,15 +157,15 @@ const laterStarts = laterStreams.map((stream) => ({ ...stream, start: localDateT
 							</ul>
 						</div>
 					</article>
-					<article v-if="props.featured" :class="styles.pairItem" aria-labelledby="latest-session-title">
+					<article v-if="props.featured" :class="styles.pairItem" aria-labelledby="latest-kind latest-session-title">
 						<a :href="props.featured.href" :class="styles.pairStill" tabindex="-1" aria-hidden="true">
 							<img v-if="props.featured.mediaSrc" :src="props.featured.mediaSrc" alt="" :class="styles.plateImage" width="1280" height="720" fetchpriority="high" />
-							<span v-if="props.featured.runtime" :class="styles.plateRuntime"><svg viewBox="0 0 10 12"><path d="M0 0l10 6-10 6z" /></svg>{{ props.featured.runtime }}</span>
 						</a>
-						<p :class="styles.dotLabel">Latest session</p>
-						<h2 id="latest-session-title" :class="styles.pairTitle">{{ props.featured.title }}</h2>
-						<p v-if="props.featured.description" :class="styles.pairLine">{{ props.featured.description }}</p>
-						<span v-else />
+						<p id="latest-kind" :class="styles.pairChip"><svg viewBox="0 0 10 12" aria-hidden="true"><path d="M0 0l10 6-10 6z" /></svg>Latest session</p>
+						<div :class="styles.pairHead">
+							<h2 id="latest-session-title" :class="styles.pairTitle"><a :href="props.featured.href" data-title tabindex="-1">{{ props.featured.title }}</a></h2>
+							<p v-if="props.featured.description" :class="styles.pairLine">{{ props.featured.description }}</p>
+						</div>
 						<dl :class="styles.facts" data-pair>
 							<div v-if="featuredDate"><dt>Published</dt><dd><time v-bind="featuredDate.attrs">{{ featuredDate.text }}</time></dd></div>
 							<div v-if="props.featured.runtime"><dt>Runtime</dt><dd>{{ props.featured.runtime }}</dd></div>
@@ -178,7 +184,7 @@ const laterStarts = laterStreams.map((stream) => ({ ...stream, start: localDateT
 					</a>
 					<div :class="styles.colophon">
 						<p :class="styles.dotLabel">Latest session</p>
-						<h2 id="latest-session-title" :class="styles.colophonTitle">{{ props.featured.title }}</h2>
+						<h2 id="latest-session-title" :class="styles.colophonTitle"><a :href="props.featured.href" data-title tabindex="-1">{{ props.featured.title }}</a></h2>
 						<dl :class="styles.facts">
 							<div v-if="featuredDate"><dt>Published</dt><dd><time v-bind="featuredDate.attrs">{{ featuredDate.text }}</time></dd></div>
 							<div v-if="props.featured.runtime"><dt>Runtime</dt><dd>{{ props.featured.runtime }}</dd></div>
@@ -207,23 +213,22 @@ const laterStarts = laterStreams.map((stream) => ({ ...stream, start: localDateT
 			<section v-if="columns.length" :class="styles.section" aria-labelledby="latest-title">
 				<div :class="styles.sectionHead">
 					<h2 id="latest-title" :class="styles.sectionTitle">Recently published</h2>
-					<p :class="styles.sectionNote">{{ count(entryCount, "entry", "entries") }}, newest first</p>
 				</div>
 				<div :class="styles.columns" :data-columns="columns.length">
 					<section v-for="column in columns" :key="column.id" :class="styles.column" :data-short="column.entries.length < 3 ? '' : undefined" :aria-labelledby="`recent-${column.id}`">
-						<h3 :id="`recent-${column.id}`" :class="styles.columnHead">{{ column.title }} <span v-if="column.total">{{ column.entries.length }} of {{ column.total }}</span></h3>
+						<h3 :id="`recent-${column.id}`" :class="styles.columnHead">{{ column.title }}</h3>
 						<ol :class="styles.entries" :data-wide="columns.length === 1 ? '' : undefined">
 							<li v-for="item in column.entries" :key="item.href">
 								<a :href="item.href" :class="styles.entry">
 									<time v-if="dateParts(item.publishedAt)" :datetime="item.publishedAt" :class="styles.entryDate"><strong v-bind="dateParts(item.publishedAt)?.day.attrs">{{ dateParts(item.publishedAt)?.day.text }}</strong><span v-bind="dateParts(item.publishedAt)?.month.attrs">{{ dateParts(item.publishedAt)?.month.text }}</span></time>
-									<span v-else />
+									<span v-else aria-hidden="true" />
 									<span :class="styles.entryBody" data-body>
 										<span :class="styles.entryTitle" data-title>{{ item.title }}</span> <span v-if="item.meta?.length" :class="styles.entryMeta">{{ item.meta.join(" · ") }}</span>
 									</span>
 								</a>
 							</li>
 						</ol>
-						<a :href="column.href" :class="styles.textLink">{{ column.more }} <span aria-hidden="true">→</span></a>
+						<a :href="column.href" :class="styles.textLink" data-more>{{ column.more }} <span aria-hidden="true">→</span></a>
 					</section>
 				</div>
 			</section>
@@ -241,7 +246,7 @@ const laterStarts = laterStreams.map((stream) => ({ ...stream, start: localDateT
 								<a :href="path.href" :class="styles.pathRow">
 									<span :class="styles.pathRowBody">
 										<span :class="styles.pathRowName" data-name>{{ path.title }}</span> <span v-if="path.meta.length" :class="styles.pathRowMeta">{{ path.meta.join(" · ") }}</span>
-									</span> <span v-if="path.sessions" :class="styles.pathRowCount"><strong>{{ path.sessions }}</strong> {{ path.sessions === 1 ? "session" : "sessions" }}</span>
+									</span> <span v-if="path.sessions" :class="styles.pathRowCount"><strong>{{ path.sessions }}</strong> <span :class="styles.visuallyHidden">{{ path.sessions === 1 ? "session" : "sessions" }}</span></span>
 								</a>
 							</li>
 						</ul>

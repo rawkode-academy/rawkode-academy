@@ -36,7 +36,7 @@ const searchId = `transcript-search-${crypto.randomUUID()}`;
 			<div class={styles.transcriptContainer} role="region" aria-label="Transcript text" tabindex="0">
 			<div class={styles.transcriptBody}>
 				{sections.map((section) => (
-					<section data-transcript-section aria-label={section.chapter?.title}>
+					<section data-transcript-section>
 						{section.chapter && (
 							<h3 class={styles.transcriptChapter}>
 								<a href={timestampHref(section.chapter.startTime)} data-chapter-link={section.chapter.startTime} class={styles.transcriptChapterLink}>

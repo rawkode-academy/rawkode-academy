@@ -46,7 +46,7 @@ import {
 	type StudioBindingEnv,
 } from "@/lib/studio-live";
 import { env } from "cloudflare:workers";
-import { localDate, localTime } from "@/lib/local-time";
+import { localDate, localDateTime } from "@/lib/local-time";
 
 export const prerender = false;
 const layout = academyLayout({ width: "wide" });
@@ -309,15 +309,7 @@ const runtimeLabel = formatRuntimeLabel(
 	now,
 );
 const publishedLabel = localDate(video.data.publishedAt);
-const scheduled = localTime(video.data.publishedAt, {
-	weekday: "long",
-	year: "numeric",
-	month: "long",
-	day: "numeric",
-	hour: "numeric",
-	minute: "2-digit",
-	timeZoneName: "short",
-});
+const scheduled = localDateTime(video.data.publishedAt);
 const notificationsPublicKey = env.NOTIFICATIONS_VAPID_PUBLIC_KEY ?? "";
 const publishedIso =
 	video.data.publishedAt instanceof Date
@@ -386,6 +378,7 @@ const watchStatusLabel = isLiveNow
 	<div class:list={[media.root, watch.root]} data-watch-root>
 		<div
 			class={watch.bench}
+			data-watch-bench
 			data-pin={hasMore && !hasNotice ? "" : undefined}
 			data-notice={hasNotice ? "" : undefined}
 		>
@@ -525,7 +518,7 @@ const watchStatusLabel = isLiveNow
 											target="_blank"
 											rel="noopener noreferrer"
 										>
-											Open the scheduled stream on YouTube ↗
+											Open the scheduled stream on YouTube <span aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span>
 										</a>
 									)}
 									<StreamNotifyButton
@@ -643,6 +636,12 @@ const watchStatusLabel = isLiveNow
 
 <script>
 	import { startTimeFromUrl } from "@/lib/video-deep-link";
+	import { fitWatchPane } from "@/lib/watch-pane-fit";
+
+	// The pinned pane is sized by viewport height; this measures the real
+	// session and unpins what does not fit (see `academyWatch.bench`).
+	const bench = document.querySelector<HTMLElement>("[data-watch-bench]");
+	if (bench) fitWatchPane(bench);
 
 	function getPlayerVideo(): HTMLVideoElement | null {
 		return document.querySelector<HTMLVideoElement>(

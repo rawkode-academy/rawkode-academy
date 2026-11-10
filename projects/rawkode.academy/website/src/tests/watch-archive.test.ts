@@ -194,12 +194,11 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 		title: `${collection} item ${index}`,
 		publishedAt: "2026-09-20T12:00:00.000Z",
 	});
-	const column = (id: string, length: number, total = 40) => ({
+	const column = (id: string, length: number) => ({
 		id,
 		title: id,
 		href: `/${id}`,
 		more: `All ${id}`,
-		total,
 		entries: Array.from({ length }, (_, index) => entry(id, index)),
 	});
 	const props = {
@@ -317,7 +316,7 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 	it("states the latest session's real facts once, and gives the page one solid action", async () => {
 		const dom = await renderHome();
 		const spread = dom.querySelector(
-			'[aria-labelledby="latest-session-title"]',
+			'[aria-labelledby="latest-kind latest-session-title"]',
 		);
 		expect(spread?.querySelector("h2")?.text).toBe("Real session");
 		const facts = Object.fromEntries(
@@ -344,15 +343,38 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 		expect(still?.getAttribute("tabindex")).toBe("-1");
 		expect(still?.querySelector("img")?.getAttribute("alt")).toBe("");
 		expect(
-			spread?.querySelectorAll(
-				'a[href="/watch/real-session"]:not([aria-hidden])',
-			),
-		).toHaveLength(1);
+			spread
+				?.querySelectorAll(
+					'a[href="/watch/real-session"]:not([aria-hidden]):not([tabindex="-1"])',
+				)
+				.map((link) => link.text.trim()),
+		).toEqual(["Watch the session →"]);
+		// The title is a pointer target too, outside the tab order, and goes
+		// where the button goes.
+		const title = spread?.querySelector("h2 a[data-title]");
+		expect(title?.getAttribute("tabindex")).toBe("-1");
+		expect(title?.getAttribute("href")).toBe("/watch/real-session");
+		expect(title?.hasAttribute("aria-hidden")).toBe(false);
 		// A solid button is the one filled with the accent. The time-bound
 		// action takes it; with nothing scheduled the session does.
 		expect(solidActions(dom)).toEqual(["Get notified →"]);
 		const alone = await renderHome({ upcoming: [] });
 		expect(solidActions(alone)).toEqual(["Watch the session →"]);
+		const plate = alone.querySelector(
+			'[aria-labelledby="latest-session-title"]',
+		);
+		expect(
+			plate
+				?.querySelectorAll(
+					'a[href="/watch/real-session"]:not([aria-hidden]):not([tabindex="-1"])',
+				)
+				.map((link) => link.text.trim()),
+		).toEqual(["Watch the session →"]);
+		const plateTitle = plate?.querySelector("h2 a[data-title]");
+		expect(plateTitle?.getAttribute("tabindex")).toBe("-1");
+		expect(plateTitle?.getAttribute("href")).toBe("/watch/real-session");
+		// Alone, the runtime stays on the plate.
+		expect(plate?.querySelector("a[aria-hidden]")?.text.trim()).toBe("25 min");
 		expect(
 			alone
 				.querySelector('[aria-labelledby="latest-session-title"]')
@@ -370,15 +392,17 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 			},
 		});
 		const spread = dom.querySelector(
-			'[aria-labelledby="latest-session-title"]',
+			'[aria-labelledby="latest-kind latest-session-title"]',
 		);
 		expect(spread?.querySelectorAll("dt").map((term) => term.text)).toEqual([
 			"Published",
 		]);
 		expect(spread?.querySelector("img")).toBeNull();
+		// No runtime: the chip is the kind alone.
+		expect(spread?.querySelector("#latest-kind")?.text).toBe("Latest session");
 		expect(
 			(await renderHome({ featured: undefined })).querySelector(
-				'[aria-labelledby="latest-session-title"]',
+				"#latest-session-title",
 			),
 		).toBeNull();
 	});
@@ -396,12 +420,18 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 		];
 		const dom = await renderHome({ ledger });
 		const section = dom.querySelector('[aria-labelledby="latest-title"]');
-		expect(section?.querySelector("p")?.text).toBe("15 entries, newest first");
+		// The section is its title and its columns: no note, no counts.
+		expect(section?.querySelector("p")).toBeNull();
 		const columns = section?.querySelectorAll("section") ?? [];
 		expect(columns.map((item) => item.querySelector("h3")?.text)).toEqual([
-			"watch 5 of 40",
-			"read 5 of 40",
-			"news 5 of 40",
+			"watch",
+			"read",
+			"news",
+		]);
+		expect(columns.map((item) => item.querySelector("ol + a")?.text)).toEqual([
+			"All watch →",
+			"All read →",
+			"All news →",
 		]);
 		expect(
 			columns.map((item) =>
@@ -434,7 +464,7 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 		).toBe("2");
 		expect(
 			section?.querySelectorAll("h3").map((heading) => heading.text),
-		).toEqual(["watch 5 of 40", "read 1 of 40"]);
+		).toEqual(["watch", "read"]);
 		expect(section?.querySelectorAll("ol:empty")).toHaveLength(0);
 		expect(
 			(
@@ -452,29 +482,95 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 				?.querySelectorAll("article")
 				.map((item) => item.querySelector("h2")?.text),
 		).toEqual(["Next stream", "Real session"]);
-		const next = pair?.querySelector('[aria-labelledby="upcoming-title"]');
+		// Each is labelled by its kind and its title.
+		expect(
+			pair
+				?.querySelectorAll("article")
+				.map((item) => item.getAttribute("aria-labelledby")),
+		).toEqual([
+			"upcoming-kind upcoming-title",
+			"latest-kind latest-session-title",
+		]);
+		const next = pair?.querySelector(
+			'[aria-labelledby="upcoming-kind upcoming-title"]',
+		);
+		const latest = pair?.querySelector(
+			'[aria-labelledby="latest-kind latest-session-title"]',
+		);
+		// The kind is a chip set on the still: real text, outside the still's
+		// hidden link, so it is read and never clipped with the image.
+		expect(next?.querySelector("#upcoming-kind")?.text).toBe(
+			"Next live stream",
+		);
+		expect(latest?.querySelector("#latest-kind")?.text).toBe("Latest session");
+		for (const [item, id] of [
+			[next, "upcoming-kind"],
+			[latest, "latest-kind"],
+		] as const) {
+			const chip = item?.querySelector(`#${id}`);
+			expect(chip?.tagName).toBe("P");
+			expect(chip?.parentNode).toBe(item);
+			expect(chip?.hasAttribute("aria-hidden")).toBe(false);
+			expect(item?.querySelector(`[aria-hidden] #${id}`)).toBeNull();
+			// The mark beside the words is decoration.
+			expect(
+				chip?.querySelector("[data-dot], svg")?.getAttribute("aria-hidden"),
+			).toBe("true");
+			// The still holds the image and nothing else.
+			expect(item?.querySelector("a[aria-hidden]")?.text.trim()).toBe("");
+		}
 		expect(next?.text).toContain("What the stream covers.");
-		expect(next?.querySelector("time")?.getAttribute("datetime")).toBe(
-			"2026-11-11T12:00:00.000Z",
-		);
-		expect(next?.querySelector("time strong")?.text).toBe("11");
-		expect(next?.querySelector("[data-date]")?.text).toBe(
-			"Wednesday 11 November 2026 12:00 UTC",
-		);
+		// One time element states the start. Assistive technology reads it as
+		// one phrase; the visible parts print the day once and are hidden.
+		const when = next
+			?.querySelectorAll("p")
+			.find((p) => p.querySelector("time"));
+		const times = when?.querySelectorAll("time[datetime]") ?? [];
+		expect(times).toHaveLength(1);
+		const [start] = times;
+		expect(start?.getAttribute("datetime")).toBe("2026-11-11T12:00:00.000Z");
+		const spoken = start?.querySelector("span:not([data-visible])");
+		expect(spoken?.text).toBe("Wednesday, 11 November 2026 at 12:00 UTC");
+		expect(spoken?.hasAttribute("aria-hidden")).toBe(false);
+		const visible = start?.querySelector("[data-visible]");
+		expect(visible?.getAttribute("aria-hidden")).toBe("true");
+		expect(visible?.querySelector("strong")?.text).toBe("11");
+		expect(
+			visible?.querySelector("[data-date]")?.text.replace(/\s+/g, " "),
+		).toBe("Wednesday, 12:00 UTC November 2026");
 		// Every part of the start follows the reader's time zone in the browser.
 		for (const part of next?.querySelectorAll("[data-local-time]") ?? []) {
 			expect(part.getAttribute("data-datetime")).toBe(
 				"2026-11-11T12:00:00.000Z",
 			);
 		}
-		expect(next?.querySelectorAll("[data-local-time]")).toHaveLength(4);
+		expect(next?.querySelectorAll("[data-local-time]")).toHaveLength(5);
+		expect(spoken?.hasAttribute("data-local-time")).toBe(true);
+		expect(
+			visible?.querySelectorAll("[data-local-time]").map((part) => part.text),
+		).toEqual(["11", "Wednesday", "12:00 UTC", "November 2026"]);
 		const still = next?.querySelector("a[aria-hidden]");
 		expect(still?.getAttribute("tabindex")).toBe("-1");
 		expect(
 			next
-				?.querySelectorAll('a[href="/watch/next-stream"]:not([aria-hidden])')
+				?.querySelectorAll(
+					'a[href="/watch/next-stream"]:not([aria-hidden]):not([tabindex="-1"])',
+				)
 				.map((link) => link.text.trim()),
 		).toEqual(["Get notified →"]);
+		const nextTitle = next?.querySelector("h2 a[data-title]");
+		expect(nextTitle?.getAttribute("tabindex")).toBe("-1");
+		expect(nextTitle?.getAttribute("href")).toBe("/watch/next-stream");
+		// With no still, the chip keeps a frame to sit on.
+		const bare = await renderHome({
+			upcoming: [{ ...props.upcoming[0], mediaSrc: undefined }],
+		});
+		const frame = bare.querySelector("#upcoming-kind")?.previousElementSibling;
+		expect(frame?.tagName).toBe("SPAN");
+		expect(frame?.getAttribute("aria-hidden")).toBe("true");
+		expect(frame?.getAttribute("class")).toBe(
+			pair?.querySelector("a[aria-hidden]")?.getAttribute("class"),
+		);
 		expect(next?.text).not.toContain("Also scheduled");
 		// The pair replaces the band: the stream is stated once.
 		expect(scheduled.querySelectorAll("#upcoming-title")).toHaveLength(1);
@@ -530,7 +626,9 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 				},
 			],
 		});
-		const next = dom.querySelector('[aria-labelledby="upcoming-title"]');
+		const next = dom.querySelector(
+			'[aria-labelledby="upcoming-kind upcoming-title"]',
+		);
 		const list = next?.querySelector("ul");
 		expect(
 			dom.querySelector(`#${list?.getAttribute("aria-labelledby")}`)?.text,

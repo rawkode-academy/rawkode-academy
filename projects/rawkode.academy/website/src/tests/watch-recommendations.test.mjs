@@ -369,3 +369,55 @@ test("copy link announces its result and jumps only scroll to a player that is o
 	assert.match(script, /setAttribute\("aria-current", "true"\)/);
 	assert.match(script, /removeAttribute\("aria-current"\)/);
 });
+
+test("the pinned pane has a measured fallback and the scheduled start uses the Academy date form", () => {
+	const template = source.slice(0, source.lastIndexOf("<script>"));
+	const script = source.slice(source.lastIndexOf("<script>"));
+	// The route runs the shipped fitter against the bench it renders.
+	assert.match(
+		script,
+		/import \{ fitWatchPane \} from "@\/lib\/watch-pane-fit";/,
+	);
+	assert.match(script, /if \(bench\) fitWatchPane\(bench\);/);
+	assert.match(template, /class=\{watch\.bench\}\s+data-watch-bench/);
+	const fitter = readFileSync(
+		new URL("../lib/watch-pane-fit.ts", import.meta.url),
+		"utf8",
+	);
+	assert(fitter.includes('bench.dataset.paneFlow = "all"'));
+	assert(fitter.includes('bench.dataset.paneFlow = "more"'));
+	// It never observes the block whose size its own attribute changes.
+	assert.equal(fitter.match(/\.observe\(/g).length, 1);
+	assert(fitter.includes("observer?.observe(hero)"));
+	const recipe = readFileSync(
+		new URL(
+			"../../../../../packages/design-system/src/recipes/academyWatch.ts",
+			import.meta.url,
+		),
+		"utf8",
+	);
+	// Every pin rule yields to the attribute; the player's budget does not.
+	const pinned = recipe.match(/"&\[data-pin\][^"]*"/g);
+	assert.equal(pinned.length, 12);
+	for (const selector of pinned) {
+		if (selector === '"&[data-pin]"') continue;
+		assert(
+			selector.startsWith('"&[data-pin]:not([data-pane-flow]) > [data-watch-'),
+			selector,
+		);
+	}
+	assert.equal(pinned.filter((s) => s === '"&[data-pin]"').length, 3);
+	assert.match(
+		recipe,
+		/"&\[data-pane-flow=all\] \[data-watch-pane-sticky\]": \{\s*position: "static",\s*overflow: "visible",\s*\}/,
+	);
+	// The notice: one date form, following the reader's zone.
+	assert(
+		source.includes("const scheduled = localDateTime(video.data.publishedAt);"),
+	);
+	assert(!/\blocalTime\(/.test(source));
+	assert.match(
+		template,
+		/Join us on <time \{\.\.\.scheduled\.attrs\}>\{scheduled\.text\}<\/time>\./,
+	);
+});

@@ -698,7 +698,17 @@ test("resources put the name first, then the note, then the resource's own categ
 			.filter((child) => child.nodeType === 1)
 			.map((child) => child.getAttribute("class"));
 	// DOM order is the visual order; there is no kind column and no layout switch.
-	assert.deepEqual(classes(rows[0]), ["academy-linkBody", "academy-linkArrow"]);
+	// A link that leaves the site says so to a screen reader, after the arrow.
+	assert.deepEqual(classes(rows[0]), [
+		"academy-linkBody",
+		"academy-linkArrow",
+		"sr-only",
+	]);
+	assert.equal(
+		rows[0].querySelector(".sr-only").text.trim(),
+		"(opens in a new tab)",
+	);
+	assert.equal(rows[1].querySelector(".sr-only"), null);
 	assert.deepEqual(classes(rows[0].querySelector(".academy-linkBody")), [
 		"academy-linkName",
 		"academy-linkNote",

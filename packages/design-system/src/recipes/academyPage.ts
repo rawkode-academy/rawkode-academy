@@ -1,5 +1,5 @@
 import { sva } from "../../styled-system/css";
-import { focusRing, focusRingInk } from "../styles/focus";
+import { focusRing, focusRingInk, focusRingInset } from "../styles/focus";
 import { scrollReveal } from "../styles/motion";
 import { ruledList } from "../styles/ledger";
 import {
@@ -13,11 +13,7 @@ import {
 import { inputField } from "../styles/field";
 import { textLink } from "../styles/link";
 import { inkStage, inkSurface } from "../styles/ink";
-import {
-	coverImageZoom,
-	runtimeBadge,
-	videoFrame,
-} from "../styles/media";
+import { coverImageZoom, runtimeBadge, videoFrame } from "../styles/media";
 
 /**
  * The Academy front door, video library, and learning-path directory.
@@ -27,8 +23,8 @@ import {
  * system. The canvas follows with the next live stream and the latest
  * session as a pair, then the field index of the four collections on its own
  * ink band, the three-column ledger and the learning paths. Motion is a
- * single entrance sequence on the hero; everything else moves only on
- * interaction or as it scrolls into view.
+ * single entrance sequence (statement, lede, then the pair); everything
+ * else moves only on interaction or as it scrolls into view.
  */
 export const academyPage = sva({
 	slots: [
@@ -54,6 +50,8 @@ export const academyPage = sva({
 		"pair",
 		"pairItem",
 		"pairStill",
+		"pairChip",
+		"pairHead",
 		"pairTitle",
 		"pairLine",
 		"pairWhen",
@@ -67,7 +65,6 @@ export const academyPage = sva({
 		"colophonTitle",
 		"facts",
 		"sectionLead",
-		"sectionNote",
 		"columns",
 		"column",
 		"columnHead",
@@ -168,8 +165,18 @@ export const academyPage = sva({
 		hero: {
 			...inkSurface,
 			paddingBlockStart: "10",
-			paddingBlockEnd: "10",
-			_lg: { paddingBlockStart: "12", paddingBlockEnd: "12" },
+			// On phones the foot holds one lattice row for the living system:
+			// half a cell clear of the lede, one cell of lattice, and room for a
+			// node above the edge, so a row lands there at any width.
+			paddingBlockEnd: "32",
+			_sm: { paddingBlockEnd: "10" },
+			// From lg the statement's cap height sits on the first grid line: one
+			// cell, less the gap between the line box and the capitals.
+			_lg: {
+				paddingBlockStart:
+					"[calc(4rem - var(--font-sizes-academy-poster) * 0.106)]",
+				paddingBlockEnd: "8",
+			},
 			// Not inkStage: the living-system canvas is absolutely positioned.
 			"& > :not(canvas)": { position: "relative" },
 		},
@@ -185,8 +192,12 @@ export const academyPage = sva({
 			transitionProperty: "[opacity]",
 			transitionDuration: "reveal",
 			transitionTimingFunction: "academy-out",
-			maskImage:
-				"[radial-gradient(120% 100% at 50% 0%, black 30%, transparent 100%)]",
+			// On phones the system is one row at the hero's foot: not faded.
+			maskImage: "none",
+			_sm: {
+				maskImage:
+					"[radial-gradient(140% 120% at 50% 0%, black 65%, transparent 100%)]",
+			},
 			"&[data-ready]": { opacity: "1" },
 			_motionReduce: { transitionDuration: "none" },
 		},
@@ -202,13 +213,17 @@ export const academyPage = sva({
 		title: {
 			...posterTitle,
 			color: "academy.inkText",
-			fontSize: "academy-poster",
+			// Below 350px the poster clamp's floor would break "Understand".
+			fontSize: {
+				base: "[clamp(2.75rem, 16vw, 3.5rem)]",
+				sm: "academy-poster",
+			},
 		},
 		titleLine: {
 			display: "block",
 			width: "fit-content",
 			animation: "academy-rise",
-			"&:nth-child(2)": { animationDelay: "stagger-1" },
+			"&:nth-child(2)": { animationDelay: "stagger-2" },
 			_motionReduce: { animation: "none" },
 		},
 		titleAccent: { color: "academy.inkAccent" },
@@ -220,7 +235,8 @@ export const academyPage = sva({
 			color: "academy.inkTextSoft",
 			lineHeight: "[1.4]",
 			animation: "academy-rise",
-			animationDelay: "stagger-2",
+			animationDelay: "stagger-3",
+			_lg: { marginTop: "10" },
 			_motionReduce: { animation: "none" },
 		},
 		// The field index: its own ink band under the next and latest pair.
@@ -233,21 +249,31 @@ export const academyPage = sva({
 			marginTop: "16",
 			paddingBlock: "12",
 			borderTop: "hairline",
-			_lg: { marginTop: "24", paddingBlock: "20" },
+			// One cell of padding, so the rows below sit on the lattice.
+			_lg: { marginTop: "24", paddingBlock: "16" },
 		},
 		index: {
 			display: "grid",
 			margin: "0",
 			padding: "0",
 			listStyle: "none",
-			borderBottom: "hairline",
-			borderColor: "academy.inkBorder",
+			// Side longhands: one rule colour whatever order the classes land in.
+			borderBottomWidth: "[1px]",
+			borderBottomStyle: "solid",
+			borderBottomColor: "academy.inkBorder",
 			"& > li": {
-				borderTop: "hairline",
-				borderColor: "academy.inkBorder",
+				borderTopWidth: "[1px]",
+				borderTopStyle: "solid",
+				borderTopColor: "academy.inkBorder",
 				...scrollReveal,
+				// Two cells a row: every rule lands on a grid line.
+				_lg: { boxSizing: "border-box", blockSize: "32" },
 			},
 		},
+		// A row answers the pointer, the keyboard and a press the same way:
+		// the name and the arrow take the accent and travel. Hover is kept to
+		// devices that hover, so it never sticks after a tap, and the travel
+		// to readers who have not asked for reduced motion.
 		indexLink: {
 			display: "grid",
 			gridTemplateColumns: "minmax(0, 1fr) auto",
@@ -255,30 +281,61 @@ export const academyPage = sva({
 			rowGap: "2",
 			alignItems: "baseline",
 			paddingBlock: "5",
+			// Inline room, pulled back: the inset focus ring clears the content
+			// and the text stays on the column edge.
+			paddingInline: "3",
+			marginInline: "-3",
+			borderRadius: "academy-s",
 			color: "academy.inkText",
 			textDecoration: "none",
-			_lg: {
-				gridTemplateColumns: "minmax(0, 5fr) minmax(0, 6fr) minmax(0, 1fr)",
+			// From 768 the row is two columns, split where the pair splits (the
+			// lg block below takes over at 1024).
+			"@media (min-width: 768px) and (max-width: 1023.98px)": {
+				gridTemplateColumns: "[calc(50% - 0.75rem) minmax(0, 1fr) auto]",
 				columnGap: "6",
-				paddingBlockStart: "6",
+				alignItems: "last baseline",
+			},
+			// The description starts on the page's half line, the same x as
+			// the pair's second column.
+			_lg: {
+				height: "full",
+				gridTemplateColumns: "[calc(50% - 1.5rem) minmax(0, 1fr) auto]",
+				columnGap: "12",
+				alignContent: "end",
+				// Last baseline: the name sits on the row's bottom line whether
+				// its description runs to one line or two.
+				alignItems: "last baseline",
+				paddingBlockStart: "0",
 				paddingBlockEnd: "5",
 			},
-			_hover: {
-				"& [data-name]": {
-					color: "academy.inkAccent",
-					transform: "translateX(0.75rem)",
-				},
-				"& [data-arrow]": {
-					color: "academy.inkAccent",
-					transform: "translateX(0.375rem)",
+			// The hover colour steps aside for the press, so the press shows.
+			"@media (hover: hover)": {
+				"&:hover:not(:active)": {
+					"& [data-name], & [data-arrow]": { color: "academy.inkAccent" },
 				},
 			},
-			_focusVisible: focusRingInk,
-			_motionReduce: {
-				"& [data-name], & [data-arrow]": {
-					transitionDuration: "none",
-					transform: "none",
+			_focusVisible: {
+				...focusRingInk,
+				outlineOffset: "focus-inset",
+				"& [data-name], & [data-arrow]": { color: "academy.inkAccent" },
+			},
+			_active: {
+				"& [data-name], & [data-arrow]": { color: "academy.inkAccentHover" },
+			},
+			_motionSafe: {
+				"@media (hover: hover)": {
+					_hover: {
+						"& [data-name]": { transform: "translateX(0.75rem)" },
+						"& [data-arrow]": { transform: "translateX(0.375rem)" },
+					},
 				},
+				_focusVisible: {
+					"& [data-name]": { transform: "translateX(0.75rem)" },
+					"& [data-arrow]": { transform: "translateX(0.375rem)" },
+				},
+			},
+			_motionReduce: {
+				"& [data-name], & [data-arrow]": { transitionDuration: "none" },
 			},
 		},
 		indexName: {
@@ -290,7 +347,12 @@ export const academyPage = sva({
 			transitionProperty: "[transform, color]",
 			transitionDuration: "slow",
 			transitionTimingFunction: "academy-out",
-			_lg: { fontSize: "6xl" },
+			// Stepped with the width, so "Learning paths" holds one line.
+			"@media (min-width: 768px) and (max-width: 1023.98px)": {
+				whiteSpace: "nowrap",
+			},
+			_lg: { fontSize: "5xl", whiteSpace: "nowrap" },
+			"@media (min-width: 1280px)": { fontSize: "6xl" },
 			"& sup": {
 				position: "relative",
 				top: "[0.2em]",
@@ -308,12 +370,21 @@ export const academyPage = sva({
 		indexWhat: {
 			gridColumn: "1 / -1",
 			gridRow: "2",
-			maxWidth: "[46ch]",
+			maxWidth: "[40ch]",
 			color: "academy.inkTextSoft",
 			fontSize: "sm",
 			lineHeight: "body",
-			textWrap: "pretty",
-			_lg: { gridColumn: "2", gridRow: "1", maxWidth: "[none]" },
+			textWrap: "balance",
+			"@media (min-width: 768px) and (max-width: 1023.98px)": {
+				gridColumn: "2",
+				gridRow: "1",
+			},
+			_lg: {
+				gridColumn: "2",
+				gridRow: "1",
+				maxWidth: "[44ch]",
+				fontSize: "md",
+			},
 		},
 		indexArrow: {
 			justifySelf: "end",
@@ -332,7 +403,8 @@ export const academyPage = sva({
 		// same part of the other.
 		pair: {
 			display: "grid",
-			rowGap: "10",
+			// Stacked, the gap between the two is larger than any gap inside one.
+			rowGap: "16",
 			_sm: {
 				gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
 				columnGap: "6",
@@ -345,46 +417,125 @@ export const academyPage = sva({
 			minWidth: "0",
 			alignContent: "start",
 			justifyItems: "start",
+			animation: "academy-settle",
+			animationDelay: "stagger-4",
+			"&:nth-child(2)": { animationDelay: "stagger-5" },
+			// Still, head, start or facts, action, also scheduled.
 			_sm: {
 				gridTemplateRows: "subgrid",
-				gridRow: "span 7",
+				gridRow: "span 5",
 				alignContent: "stretch",
 			},
 			"& > *": { minWidth: "0" },
+			// The still and the title are one target: either lights the title,
+			// and eases the still for readers who have not asked for less motion.
+			"@media (hover: hover)": {
+				"&:has(> a[aria-hidden]:hover, [data-title]:hover)": {
+					"& [data-title]": { color: "academy.accent" },
+				},
+			},
+			_motionSafe: {
+				"@media (hover: hover)": {
+					"&:has(> a[aria-hidden]:hover, [data-title]:hover)": {
+						"& img": { transform: "scale(1.03)" },
+					},
+				},
+			},
+			_motionReduce: { animation: "none" },
 		},
 		pairStill: {
 			...videoFrame,
+			gridRow: "1",
+			gridColumn: "1",
 			width: "full",
 			marginBottom: "4",
 			borderRadius: "academy-m",
 			border: "hairline",
-			_hover: { "& img": { transform: "scale(1.03)" } },
+			_motionReduce: { "& img": { transform: "none" } },
+		},
+		// The kind label is a chip on the still's bottom-start corner: real
+		// text, outside the still's hidden link, ink in both schemes. Only the
+		// next stream's chip carries the accent dot.
+		pairChip: {
+			...runtimeBadge,
+			position: "relative",
+			zIndex: "[1]",
+			insetBlockEnd: "auto",
+			insetInlineEnd: "auto",
+			gridRow: "1",
+			gridColumn: "1",
+			alignSelf: "end",
+			justifySelf: "start",
+			display: "inline-flex",
+			alignItems: "center",
+			gap: "2.5",
+			margin: "0",
+			marginBottom: "4",
+			paddingInline: "3.5",
+			paddingBlock: "2.5",
+			borderRadius: "[0px]",
+			borderStartEndRadius: "academy-m",
+			borderEndStartRadius: "academy-m",
+			pointerEvents: "none",
+			"& [data-dot]": {
+				width: "2",
+				height: "2",
+				flexShrink: "0",
+				borderRadius: "full",
+				backgroundColor: "academy.inkAccent",
+			},
+			"& svg": {
+				width: "2.5",
+				height: "3",
+				flexShrink: "0",
+				fill: "currentColor",
+			},
+		},
+		// The title and its sentence are one unit: one row of the subgrid, so
+		// the sentence sits under its own title whatever the other title does.
+		pairHead: {
+			display: "grid",
+			gap: "2",
+			alignContent: "start",
+			justifySelf: "stretch",
+			minWidth: "0",
+			marginTop: "2",
 		},
 		pairTitle: {
 			...headingLg,
-			marginTop: "2",
+			marginTop: "0",
 			fontSize: "2xl",
 			fontWeight: "extrabold",
-			letterSpacing: "academy-display",
+			letterSpacing: "academy-tight",
 			lineHeight: "[1.1]",
 			textWrap: "balance",
 			_lg: { fontSize: "3xl" },
+			"& [data-title]": {
+				color: "inherit",
+				textDecoration: "none",
+				transitionProperty: "colors",
+				transitionDuration: "base",
+				transitionTimingFunction: "academy-out",
+			},
 		},
 		pairLine: {
 			margin: "0",
-			marginTop: "2",
+			marginTop: "0",
 			maxWidth: "[52ch]",
 			color: "academy.textSoft",
 			lineHeight: "body",
 			textWrap: "pretty",
 		},
 		// The next stream's facts are its start: the day at numeral scale,
-		// then the weekday, the date and the time in the reader's zone. It
-		// is ruled above and below like the fact list it sits beside.
+		// then the weekday and the time in the reader's zone over the month
+		// and year. It is ruled above and below like the fact list it sits
+		// beside. One time element holds it; the visible parts are hidden
+		// from assistive technology, which reads the whole start as a phrase.
 		pairWhen: {
-			display: "flex",
-			alignItems: "center",
-			columnGap: "5",
+			// Stretched to the fact list beside it, with the start centred
+			// between its two rules.
+			display: "grid",
+			alignContent: "center",
 			alignSelf: "stretch",
 			width: "full",
 			margin: "0",
@@ -392,14 +543,19 @@ export const academyPage = sva({
 			marginBottom: "7",
 			paddingBlock: "4",
 			borderBlock: "hairline",
+			"& [data-visible]": {
+				display: "flex",
+				alignItems: "center",
+				columnGap: "5",
+			},
 			"& strong": {
 				display: "block",
 				marginInlineStart: "[-0.04em]",
 				color: "academy.text",
 				fontFamily: "academy-display",
 				fontSize: "[clamp(5.5rem, 9vw, 7.5rem)]",
-				fontWeight: "black",
-				letterSpacing: "academy-poster",
+				fontWeight: "extrabold",
+				letterSpacing: "academy-display",
 				lineHeight: "[0.8]",
 				fontVariantNumeric: "tabular-nums",
 			},
@@ -411,7 +567,9 @@ export const academyPage = sva({
 				fontSize: "xs",
 				lineHeight: "body",
 			},
-			"& [data-date] > :first-child": {
+			// The time keeps its zone: the lead line breaks after the comma only.
+			"& [data-time]": { whiteSpace: "nowrap" },
+			"& [data-date] > [data-lead]": {
 				color: "academy.text",
 				fontFamily: "academy-text",
 				fontSize: "md",
@@ -442,9 +600,17 @@ export const academyPage = sva({
 				fontWeight: "semibold",
 				lineHeight: "academy-card",
 				textDecoration: "none",
-				_sm: { gridTemplateColumns: "13.5rem minmax(0, 1fr)" },
-				_hover: { color: "academy.accent" },
+				transitionProperty: "colors",
+				transitionDuration: "base",
+				// Time beside title only where the column can hold both.
+				"@media (min-width: 1280px)": {
+					gridTemplateColumns: "13.5rem minmax(0, 1fr)",
+				},
+				"@media (hover: hover)": {
+					"&:hover:not(:active)": { color: "academy.accent" },
+				},
 				_focusVisible: focusRing,
+				_active: { color: "academy.accentHover" },
 			},
 			"& time": {
 				color: "academy.textMuted",
@@ -459,16 +625,34 @@ export const academyPage = sva({
 			display: "grid",
 			gap: "7",
 			alignItems: "start",
+			animation: "academy-settle",
+			animationDelay: "stagger-4",
+			// The plate takes the page's half, as a pair still does, and the
+			// colophon starts on the half line with the index descriptions.
 			_lg: {
-				gridTemplateColumns: "minmax(0, 7fr) minmax(0, 5fr)",
-				columnGap: "10",
+				gridTemplateColumns: "[calc(50% - 1.5rem) minmax(0, 1fr)]",
+				columnGap: "12",
 			},
+			// As in the pair: the plate and the title are one target.
+			"@media (hover: hover)": {
+				"&:has(> a[aria-hidden]:hover, [data-title]:hover)": {
+					"& [data-title]": { color: "academy.accent" },
+				},
+			},
+			_motionSafe: {
+				"@media (hover: hover)": {
+					"&:has(> a[aria-hidden]:hover, [data-title]:hover)": {
+						"& img": { transform: "scale(1.03)" },
+					},
+				},
+			},
+			_motionReduce: { animation: "none" },
 		},
 		plate: {
 			...videoFrame,
 			borderRadius: "academy-m",
 			border: "hairline",
-			_hover: { "& img": { transform: "scale(1.03)" } },
+			_motionReduce: { "& img": { transform: "none" } },
 		},
 		plateImage: coverImageZoom,
 		// Set over the leading corner, with a play mark: the still is the way in.
@@ -491,7 +675,8 @@ export const academyPage = sva({
 			},
 		},
 		colophon: { display: "grid", minWidth: "0", justifyItems: "start" },
-		// A kind label: the dot and the words say the same thing.
+		// A kind label in the colophon: a hollow ring and the words. The
+		// accent dot belongs to the next stream's chip alone.
 		dotLabel: {
 			...monoMeta,
 			display: "flex",
@@ -503,7 +688,9 @@ export const academyPage = sva({
 				height: "2",
 				flexShrink: "0",
 				borderRadius: "full",
-				backgroundColor: "academy.accent",
+				backgroundColor: "transparent",
+				border: "hairline",
+				borderColor: "academy.textMuted",
 			},
 		},
 		colophonTitle: {
@@ -511,10 +698,17 @@ export const academyPage = sva({
 			marginTop: "3",
 			fontSize: "3xl",
 			fontWeight: "extrabold",
-			letterSpacing: "academy-display",
+			letterSpacing: "academy-tight",
 			lineHeight: "[1.05]",
 			textWrap: "balance",
-			_lg: { fontSize: "4xl" },
+			_lg: { fontSize: "4xl", letterSpacing: "academy-display" },
+			"& [data-title]": {
+				color: "inherit",
+				textDecoration: "none",
+				transitionProperty: "colors",
+				transitionDuration: "base",
+				transitionTimingFunction: "academy-out",
+			},
 		},
 		facts: {
 			display: "grid",
@@ -533,15 +727,31 @@ export const academyPage = sva({
 			},
 			"& dt": monoMeta,
 			"& dd": { margin: "0", fontWeight: "medium" },
+			// Padded and pulled back, so the link is 24px tall without moving.
 			"& dd a": {
+				display: "inline-block",
+				paddingBlock: "1",
+				marginBlock: "-1",
 				color: "inherit",
 				textDecorationColor: "academy.textMuted",
 				textUnderlineOffset: "0.2em",
-				_hover: { color: "academy.accent" },
+				transitionProperty: "colors",
+				transitionDuration: "base",
+				"@media (hover: hover)": {
+					"&:hover:not(:active)": { color: "academy.accent" },
+				},
 				_focusVisible: focusRing,
+				_active: { color: "academy.accentHover" },
+			},
+			// A count beside its link stays whole: beside it, or under it.
+			"& dd:has(small)": {
+				display: "flex",
+				flexWrap: "wrap",
+				alignItems: "baseline",
+				columnGap: "2",
 			},
 			"& dd small": {
-				marginInlineStart: "2",
+				whiteSpace: "nowrap",
 				color: "academy.textMuted",
 				fontFamily: "academy-mono",
 				fontSize: "xs",
@@ -555,53 +765,76 @@ export const academyPage = sva({
 			paddingInline: "academy-gutter",
 			paddingTop: "10",
 		},
-		sectionNote: { ...monoMeta, paddingBlockEnd: "2" },
 		// Recently published: one column per collection that has something
 		// new, each the same thing: the same width, the same number of rows,
-		// the same row. Three share the measure in thirds, two in halves, and
-		// one runs the full measure with its rows two abreast. An empty
-		// collection has no column, so the ledger never shows a blank one.
-		// Columns stretch to the tallest so their closing links share a line.
+		// the same row. An empty collection has no column, so the ledger never
+		// shows a blank one.
+		//
+		// From lg, three share the measure in thirds, two in halves, and one
+		// runs the full measure with its rows two abreast. The columns share
+		// one set of rows through a subgrid (the name, LEDGER_ROWS entries,
+		// the closing link), so every rule and every closing link runs level
+		// across them. From sm to lg each column is the same rail: its name
+		// and closing link on the left, its rows on the right.
 		columns: {
 			display: "grid",
 			rowGap: "12",
 			columnGap: "6",
-			_sm: {
-				gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-				"&[data-columns='3'] > :first-child": { gridColumn: "1 / -1" },
-				"&[data-columns='1'] > :first-child": { gridColumn: "1 / -1" },
-			},
+			_sm: { gridTemplateColumns: "minmax(0, 1fr)" },
 			_lg: {
 				columnGap: "10",
+				rowGap: "0",
 				"&[data-columns='3']": {
 					gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
 				},
-				"&[data-columns='3'] > :first-child": { gridColumn: "auto" },
+				"&[data-columns='2']": {
+					gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+				},
 			},
 		},
-		// A column with fewer than three rows is not stretched: its closing
+		// A column with fewer than three rows keeps its own rows: its closing
 		// link follows its last row instead of being stranded at the foot.
 		column: {
 			display: "grid",
 			gridTemplateRows: "auto 1fr auto",
 			minWidth: "0",
 			"&[data-short]": { alignSelf: "start" },
+			_sm: {
+				gridTemplateColumns: "minmax(0, 3fr) minmax(0, 9fr)",
+				gridTemplateRows: "auto 1fr",
+				columnGap: "6",
+				"& > [data-more]": {
+					gridColumn: "1",
+					gridRow: "2",
+					alignSelf: "start",
+				},
+			},
+			// 7 = the name + LEDGER_ROWS (5, in the homepage's index.astro) +
+			// the closing link. Change them together.
+			_lg: {
+				gridTemplateColumns: "minmax(0, 1fr)",
+				gridTemplateRows: "auto 1fr auto",
+				gridRow: "span 7",
+				"&:not([data-short])": { gridTemplateRows: "subgrid" },
+				"& > [data-more]": {
+					gridColumn: "auto",
+					gridRow: "auto",
+					alignSelf: "auto",
+				},
+			},
 		},
 		columnHead: {
-			display: "flex",
-			alignItems: "baseline",
-			justifyContent: "space-between",
-			columnGap: "3",
 			margin: "0",
 			paddingBlockEnd: "2.5",
 			borderBottom: "academy-tab",
 			borderColor: "academy.text",
 			fontFamily: "academy-display",
-			fontSize: "lg",
+			fontSize: "2xl",
 			fontWeight: "extrabold",
 			letterSpacing: "academy-tight",
 			lineHeight: "tight",
-			"& span": { ...monoMeta, fontWeight: "normal" },
+			_sm: { gridColumn: "1", gridRow: "1", alignSelf: "start" },
+			_lg: { gridColumn: "auto", gridRow: "auto", alignSelf: "auto" },
 		},
 		entries: {
 			display: "grid",
@@ -609,8 +842,19 @@ export const academyPage = sva({
 			margin: "0",
 			padding: "0",
 			listStyle: "none",
-			"&[data-wide]": {
-				_lg: {
+			// The rule is the item's; the link inside it bleeds past the rule.
+			"& > li": { borderBottom: "hairline" },
+			_sm: { gridColumn: "2", gridRow: "1 / -1" },
+			_lg: {
+				gridColumn: "auto",
+				gridRow: "auto",
+				"& > li": { display: "grid" },
+				// 5 = LEDGER_ROWS in the homepage's index.astro.
+				"&:not([data-wide])": {
+					gridRow: "span 5",
+					gridTemplateRows: "subgrid",
+				},
+				"&[data-wide]": {
 					gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
 					columnGap: "6",
 				},
@@ -620,20 +864,36 @@ export const academyPage = sva({
 		// beneath it, then the title and one mono line of facts.
 		entry: {
 			display: "grid",
-			gridTemplateColumns: "3.25rem minmax(0, 1fr)",
+			gridTemplateColumns: "3.75rem minmax(0, 1fr)",
 			columnGap: "3.5",
 			alignItems: "start",
 			height: "full",
 			paddingBlock: "4",
-			borderBottom: "hairline",
+			// Inline room, pulled back: the inset focus ring clears the content.
+			paddingInline: "3",
+			marginInline: "-3",
+			borderRadius: "academy-s",
 			color: "academy.text",
 			textDecoration: "none",
 			...scrollReveal,
-			_hover: {
-				"& [data-title]": { color: "academy.accent" },
-				"& [data-body]": { transform: "translateX(0.25rem)" },
+			"@media (hover: hover)": {
+				"&:hover:not(:active)": {
+					"& [data-title]": { color: "academy.accent" },
+				},
 			},
-			_focusVisible: focusRing,
+			_focusVisible: {
+				...focusRingInset,
+				"& [data-title]": { color: "academy.accent" },
+			},
+			_active: { "& [data-title]": { color: "academy.accentHover" } },
+			_motionSafe: {
+				"@media (hover: hover)": {
+					_hover: { "& [data-body]": { transform: "translateX(0.25rem)" } },
+				},
+				_focusVisible: {
+					"& [data-body]": { transform: "translateX(0.25rem)" },
+				},
+			},
 			_motionReduce: { animation: "none" },
 		},
 		entryDate: {
@@ -641,13 +901,13 @@ export const academyPage = sva({
 			gap: "1",
 			color: "academy.textMuted",
 			fontFamily: "academy-mono",
-			fontSize: "academy-caption",
+			fontSize: "xs",
 			lineHeight: "body",
 			whiteSpace: "nowrap",
 			"& strong": {
 				color: "academy.text",
 				fontFamily: "academy-display",
-				fontSize: "2xl",
+				fontSize: "xl",
 				fontWeight: "extrabold",
 				letterSpacing: "academy-tight",
 				lineHeight: "none",
@@ -668,19 +928,23 @@ export const academyPage = sva({
 			fontWeight: "semibold",
 			lineHeight: "academy-card",
 			textWrap: "pretty",
+			overflowWrap: "anywhere",
 			transitionProperty: "colors",
 			transitionDuration: "base",
+			transitionTimingFunction: "academy-out",
 		},
 		entryMeta: monoMeta,
 		// Learning paths as a ruled table: the path, then how many sessions
-		// it puts in order.
+		// it puts in order. From lg it shares the ledger's three tracks: the
+		// introduction in the first, the table from the second.
 		paths: {
 			display: "grid",
 			rowGap: "7",
 			alignItems: "start",
 			_lg: {
-				gridTemplateColumns: "minmax(0, 4fr) minmax(0, 8fr)",
-				columnGap: "6",
+				gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+				columnGap: "10",
+				"& > :last-child": { gridColumn: "2 / -1" },
 			},
 		},
 		pathsIntro: {
@@ -692,6 +956,7 @@ export const academyPage = sva({
 				maxWidth: "[46ch]",
 				color: "academy.textSoft",
 				lineHeight: "body",
+				textWrap: "balance",
 				_lg: { maxWidth: "[28ch]" },
 			},
 		},
@@ -700,6 +965,7 @@ export const academyPage = sva({
 			margin: "0",
 			padding: "0",
 			listStyle: "none",
+			"& > li": { borderBottom: "hairline" },
 		},
 		pathTableHead: {
 			...monoMeta,
@@ -714,23 +980,39 @@ export const academyPage = sva({
 			display: "grid",
 			gridTemplateColumns: "minmax(0, 1fr) auto",
 			columnGap: "6",
-			alignItems: "baseline",
+			alignItems: "center",
 			paddingBlock: "4",
-			borderBottom: "hairline",
+			// Inline room, pulled back: the inset focus ring clears the content.
+			paddingInline: "3",
+			marginInline: "-3",
+			borderRadius: "academy-s",
 			color: "academy.text",
 			textDecoration: "none",
 			_lg: { paddingBlock: "5" },
 			...scrollReveal,
-			_hover: {
-				"& [data-name]": {
-					color: "academy.accent",
-					transform: "translateX(0.5rem)",
+			"@media (hover: hover)": {
+				"&:hover:not(:active)": {
+					"& [data-name], & strong": { color: "academy.accent" },
 				},
 			},
-			_focusVisible: focusRing,
+			_focusVisible: {
+				...focusRingInset,
+				"& [data-name], & strong": { color: "academy.accent" },
+			},
+			_active: {
+				"& [data-name], & strong": { color: "academy.accentHover" },
+			},
+			_motionSafe: {
+				"@media (hover: hover)": {
+					_hover: { "& [data-name]": { transform: "translateX(0.5rem)" } },
+				},
+				_focusVisible: {
+					"& [data-name]": { transform: "translateX(0.5rem)" },
+				},
+			},
 			_motionReduce: {
 				animation: "none",
-				"& [data-name]": { transitionDuration: "none", transform: "none" },
+				"& [data-name]": { transitionDuration: "none" },
 			},
 		},
 		pathRowBody: { display: "grid", gap: "1.5", minWidth: "0" },
@@ -738,7 +1020,7 @@ export const academyPage = sva({
 			fontFamily: "academy-display",
 			fontSize: "2xl",
 			fontWeight: "extrabold",
-			letterSpacing: "academy-display",
+			letterSpacing: "academy-tight",
 			lineHeight: "[1.1]",
 			textWrap: "balance",
 			transitionProperty: "[transform, color]",
@@ -747,21 +1029,21 @@ export const academyPage = sva({
 			_lg: { fontSize: "3xl" },
 		},
 		pathRowMeta: monoMeta,
+		// The count is a numeral alone; the column's head names its unit once.
 		pathRowCount: {
-			...monoMeta,
-			display: "flex",
-			alignItems: "baseline",
-			columnGap: "1.5",
-			whiteSpace: "nowrap",
+			justifySelf: "end",
+			textAlign: "end",
 			"& strong": {
+				display: "block",
 				color: "academy.text",
 				fontFamily: "academy-display",
-				fontSize: "2xl",
+				fontSize: "academy-numeral",
 				fontWeight: "extrabold",
-				letterSpacing: "academy-tight",
+				letterSpacing: "academy-display",
 				lineHeight: "none",
 				fontVariantNumeric: "tabular-nums",
-				_lg: { fontSize: "3xl" },
+				transitionProperty: "colors",
+				transitionDuration: "base",
 			},
 		},
 		featureCopy: {

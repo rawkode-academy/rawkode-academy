@@ -33,6 +33,7 @@ const watch = academyWatch();
 							{resource.category !== "other" && <span class={watch.linkKind}>{resource.category}</span>}
 						</span>
 						{resource.type === "url" && <span class={watch.linkArrow} data-arrow aria-hidden="true">↗</span>}
+					{resource.type === "url" && <span class="sr-only"> (opens in a new tab)</span>}
 					</a>
 				</li>
 			))}
