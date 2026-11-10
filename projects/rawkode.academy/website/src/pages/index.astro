@@ -26,9 +26,8 @@ const styles = academyPage();
 // The homepage is an index of the archive: the four collections with their
 // real sizes, the latest session, what each collection published most
 // recently, the next live stream, and the learning paths.
-const SESSION_ROWS = 6;
-const ARTICLE_ROWS = 4;
-const NEWS_ROWS = 4;
+// Every ledger column holds the same number of rows.
+const LEDGER_ROWS = 5;
 
 const now = new Date();
 const [
@@ -92,41 +91,42 @@ const sessionsIn = (body: unknown) =>
 
 // Guests, the latest session's show and article authors are secondary facts:
 // when the content layer cannot resolve one, its line is left out.
-const guestNames = async (video: ContentEntry<"videos">) =>
-	(await optionalContent(getEntries(video.data.guests), [])).map(
-		(guest) => guest.data.name,
-	);
-const authorNames = async (article: ContentEntry<"articles">) =>
-	(await optionalContent(getEntries(article.data.authors), [])).map(
-		(author) => author.data.name,
+const namesOf = async (people: ContentEntry<"videos">["data"]["guests"]) =>
+	(await optionalContent(getEntries(people), [])).map(
+		(person) => person.data.name,
 	);
 
-// The latest session is the spread; the Sessions column continues from the
-// one after it, so the same session is not listed twice in a row.
+// The latest session sits beside the next live stream; the Sessions column
+// continues from the one after it, so the same session is not listed twice.
 const latestVideo = publishedVideos[0];
-const recentVideos = publishedVideos.slice(1, 1 + SESSION_ROWS);
-const recentArticles = articles.slice(0, ARTICLE_ROWS);
-const recentNews = news.slice(0, NEWS_ROWS);
+const recentVideos = publishedVideos.slice(1, 1 + LEDGER_ROWS);
+const recentArticles = articles.slice(0, LEDGER_ROWS);
+const recentNews = news.slice(0, LEDGER_ROWS);
 
-const [latestGuests, latestShow, sessionGuests, articleAuthors] =
+const [latestGuests, latestShow, sessionGuests, articleAuthors, newsAuthors] =
 	await Promise.all([
-		latestVideo ? guestNames(latestVideo) : [],
+		latestVideo ? namesOf(latestVideo.data.guests) : [],
 		latestVideo?.data.show
 			? optionalContent(getEntry(latestVideo.data.show), undefined)
 			: undefined,
-		Promise.all(recentVideos.map(guestNames)),
-		Promise.all(recentArticles.map(authorNames)),
+		Promise.all(recentVideos.map((video) => namesOf(video.data.guests))),
+		Promise.all(recentArticles.map((article) => namesOf(article.data.authors))),
+		Promise.all(recentNews.map((item) => namesOf(item.data.authors))),
 	]);
 const latestShowEpisodes = latestShow
 	? publishedVideos.filter((video) => video.data.show?.id === latestShow.id)
 			.length
 	: 0;
 
+const latestDescription =
+	latestVideo &&
+	compactCopy(latestVideo.data.subtitle || latestVideo.data.description);
 const latestRuntime = latestVideo && formatRuntime(latestVideo.data.duration);
 const featured = latestVideo && {
 	href: `/watch/${latestVideo.data.slug}`,
 	title: latestVideo.data.title,
 	publishedAt: latestVideo.data.publishedAt.toISOString(),
+	...(latestDescription ? { description: latestDescription } : {}),
 	mediaSrc: getVideoThumbnailUrl(latestVideo.data.id),
 	...(latestRuntime ? { runtime: latestRuntime } : {}),
 	guests: latestGuests,
@@ -142,8 +142,8 @@ const featured = latestVideo && {
 };
 const featuredMedia = featured?.mediaSrc;
 
-// Scheduled live streams. The next one is the ink band; any after it are
-// listed beneath. Times render in UTC and follow the reader's time zone in
+// Scheduled live streams. The next one sits beside the latest session; any
+// after it are listed beneath it. Times render in UTC and follow the reader's time zone in
 // the browser.
 const upcoming = upcomingVideos.slice(0, 3).map((video) => {
 	const description = compactCopy(
@@ -245,16 +245,6 @@ const ledger = [
 		total: articles.length,
 		entries: recentArticles.map((article, index) => {
 			const authors = articleAuthors[index] ?? [];
-			// The newest article leads its column with a sentence and its cover.
-			const description =
-				index === 0
-					? compactCopy(
-							article.data.openGraph?.subtitle ||
-								article.data.subtitle ||
-								article.data.description,
-						)
-					: undefined;
-			const cover = index === 0 ? article.data.cover?.image.src : undefined;
 			return {
 				href: `/read/${article.id}`,
 				title: article.data.title,
@@ -263,8 +253,6 @@ const ledger = [
 					getTypeBadgeConfig(article.data.type).label,
 					...(authors.length ? [authors.join(", ")] : []),
 				],
-				...(description ? { description } : {}),
-				...(cover ? { mediaSrc: cover } : {}),
 			};
 		}),
 	},
@@ -274,13 +262,13 @@ const ledger = [
 		href: "/news",
 		more: "All news",
 		total: news.length,
-		entries: recentNews.map((item) => {
-			const description = compactCopy(item.data.description);
+		entries: recentNews.map((item, index) => {
+			const authors = newsAuthors[index] ?? [];
 			return {
 				href: `/news/${item.id}`,
 				title: item.data.title,
 				publishedAt: item.data.publishedAt.toISOString(),
-				...(description ? { description } : {}),
+				meta: authors.length ? [authors.join(", ")] : [],
 			};
 		}),
 	},
@@ -295,7 +283,7 @@ const pageDescription =
 // Video and article cache hints carry their guests', show's and authors' tags.
 await setContentCache(Astro, {
 	entries: [
-		...publishedVideos.slice(0, 1 + SESSION_ROWS),
+		...publishedVideos.slice(0, 1 + LEDGER_ROWS),
 		...upcomingVideos.slice(0, 3),
 		...learningPaths.slice(0, 8),
 		...recentArticles,
@@ -331,7 +319,7 @@ Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 			upcoming={upcoming}
 			learningPaths={paths}
 		/>
-		<div id="join" class={styles.section}>
+		<div id="join" class={styles.join}>
 			<NewsletterCTA
 				badge="Rawkode Academy newsletter"
 				headline="Keep learning"

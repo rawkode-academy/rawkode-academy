@@ -174,12 +174,13 @@ The dialog is rendered through `body` and owns viewport scrolling, so long forms
 ## Website integration
 
 The production website homepage uses the Academy palette and the `academyPage`
-recipe. It is an index of the archive, rendered from live content: the four
-collections with their real counts in the hero (`index*`), the latest session
-as a spread (`spread`, `plate`, `colophon`, `facts`), a compact ledger with a
-column per collection (`columns`, `column*`, `entry*`), the next live stream
-as an ink band (`band*`) and learning paths as a ruled table (`paths`,
-`pathRow*`).
+recipe. It is rendered from live content: a statement hero (`hero`, `title`,
+`system`), the next live stream and the latest session as a pair of equals
+(`pair*`, `facts`; the latest session alone is a spread: `spread`, `plate`,
+`colophon`), the field index of the four collections with their real counts
+on an ink band (`indexBand`, `index*`), a compact ledger with an equal
+column per collection (`columns`, `column*`, `entry*`) and learning paths as
+a ruled table (`paths`, `pathRow*`).
 
 Format-specific routes such as `/watch` and `/read` remain focused views. The
 homepage uses Panda-generated classes plus the shared Ark Tabs and Dialog.

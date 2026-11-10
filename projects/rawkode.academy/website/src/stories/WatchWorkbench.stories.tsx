@@ -657,7 +657,7 @@ const recorded: Session = {
  * on a wide screen, two columns when it has the room.
  */
 export const NewsletterWidths: Story = {
-	tags: ["!visual-mobile"],
+	tags: ["!visual", "!visual-mobile"],
 	render: () => (
 		<div
 			style={{

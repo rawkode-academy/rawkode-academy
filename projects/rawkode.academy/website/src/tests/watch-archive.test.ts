@@ -226,7 +226,7 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 			guests: ["Real Guest"],
 			show: { href: "/shows/real-show", name: "Real Show", episodes: 175 },
 		},
-		ledger: [column("watch", 6), column("read", 3), column("news", 2)],
+		ledger: [column("watch", 5), column("read", 5), column("news", 5)],
 		upcoming: [
 			{
 				href: "/watch/next-stream",
@@ -243,6 +243,15 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 			sessions: i + 1,
 		})),
 	};
+	const solidActions = (dom: ReturnType<typeof parse>) =>
+		dom
+			.querySelectorAll("a, button")
+			.filter((control) =>
+				(control.getAttribute("class") ?? "")
+					.split(/\s+/)
+					.some((name) => /^bg-c_academy\.(accent|inkAccent)$/.test(name)),
+			)
+			.map((control) => control.text.trim());
 	const renderHome = async (overrides: Record<string, unknown> = {}) =>
 		parse(
 			await renderToString(
@@ -278,7 +287,19 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 	});
 	it("sets each collection in the index with its real count, hidden from and restated for assistive technology", async () => {
 		const dom = await renderHome();
-		const links = dom.querySelectorAll('nav[aria-label="The archive"] a');
+		const nav = dom.querySelector('nav[aria-labelledby="archive-title"]');
+		expect(dom.querySelector("#archive-title")?.text).toBe("The archive");
+		// The index is its own section: the hero holds only the statement.
+		expect(dom.querySelector('[aria-labelledby="home-title"] nav')).toBeNull();
+		expect(
+			dom
+				.querySelector('[aria-labelledby="home-title"]')
+				?.text.replace(/\s+/g, " ")
+				.trim(),
+		).toBe(
+			"Understand the system.Cloud native, taught by the engineers doing the work, with every decision on screen.",
+		);
+		const links = nav?.querySelectorAll("a") ?? [];
 		expect(links.map((link) => link.getAttribute("href"))).toEqual([
 			"/watch",
 			"/read",
@@ -293,7 +314,7 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 		);
 		expect(videos?.text).toContain("Hands-on sessions.");
 	});
-	it("states the latest session's real facts once, with one solid action", async () => {
+	it("states the latest session's real facts once, and gives the page one solid action", async () => {
 		const dom = await renderHome();
 		const spread = dom.querySelector(
 			'[aria-labelledby="latest-session-title"]',
@@ -327,17 +348,17 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 				'a[href="/watch/real-session"]:not([aria-hidden])',
 			),
 		).toHaveLength(1);
-		// A solid button is the one filled with the accent.
-		const solid = dom
-			.querySelectorAll("a, button")
-			.filter((control) =>
-				(control.getAttribute("class") ?? "")
-					.split(/\s+/)
-					.some((name) => /^bg-c_academy\.(accent|inkAccent)$/.test(name)),
-			);
-		expect(solid.map((control) => control.text.trim())).toEqual([
-			"Watch the session →",
-		]);
+		// A solid button is the one filled with the accent. The time-bound
+		// action takes it; with nothing scheduled the session does.
+		expect(solidActions(dom)).toEqual(["Get notified →"]);
+		const alone = await renderHome({ upcoming: [] });
+		expect(solidActions(alone)).toEqual(["Watch the session →"]);
+		expect(
+			alone
+				.querySelector('[aria-labelledby="latest-session-title"]')
+				?.querySelectorAll("dt")
+				.map((term) => term.text),
+		).toEqual(["Published", "Runtime", "Guest", "Show"]);
 	});
 	it("leaves out a fact the content does not have", async () => {
 		const dom = await renderHome({
@@ -361,42 +382,40 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 			),
 		).toBeNull();
 	});
-	it("keeps each supplied column in order with dated, imageless-safe rows", async () => {
+	it("keeps each supplied column in order, every row a date, a title and one line of facts", async () => {
 		const ledger = [
-			column("watch", 6),
+			column("watch", 5),
 			{
-				...column("read", 2),
+				...column("read", 5),
 				entries: [
-					{
-						...entry("read", 0),
-						meta: ["Guide", "Real Author"],
-						description: "One sentence.",
-						mediaSrc: "/images/example-cover.webp",
-					},
-					entry("read", 1),
+					{ ...entry("read", 0), meta: ["Guide", "Real Author"] },
+					...column("read", 5).entries.slice(1),
 				],
 			},
-			column("news", 1),
+			column("news", 5),
 		];
 		const dom = await renderHome({ ledger });
 		const section = dom.querySelector('[aria-labelledby="latest-title"]');
-		expect(section?.querySelector("p")?.text).toBe("9 entries, newest first");
+		expect(section?.querySelector("p")?.text).toBe("15 entries, newest first");
 		const columns = section?.querySelectorAll("section") ?? [];
 		expect(columns.map((item) => item.querySelector("h3")?.text)).toEqual([
-			"watch 6 of 40",
-			"read 2 of 40",
-			"news 1 of 40",
+			"watch 5 of 40",
+			"read 5 of 40",
+			"news 5 of 40",
 		]);
 		expect(
 			columns.map((item) =>
 				item.querySelectorAll("ol a").map((row) => row.getAttribute("href")),
 			),
 		).toEqual(ledger.map((item) => item.entries.map((row) => row.href)));
-		const [first, second] = columns[1]?.querySelectorAll("ol a") ?? [];
-		if (!first || !second) throw new Error("Expected two article rows");
-		expect(first.querySelector("img")?.getAttribute("alt")).toBe("");
-		expect(first.text).toContain("Guide · Real Author");
-		expect(second.querySelector("img")).toBeNull();
+		// Each column closes on its own link to the collection.
+		expect(
+			columns.map((item) => item.querySelector("ol + a")?.getAttribute("href")),
+		).toEqual(["/watch", "/read", "/news"]);
+		const [first] = columns[1]?.querySelectorAll("ol a") ?? [];
+		expect(first?.text).toContain("Guide · Real Author");
+		// The three columns are the same thing: no column carries a cover.
+		expect(section?.querySelectorAll("img")).toHaveLength(0);
 		for (const row of section?.querySelectorAll("ol a") ?? []) {
 			expect(row.querySelector("time")?.getAttribute("datetime")).toBe(
 				"2026-09-20T12:00:00.000Z",
@@ -407,7 +426,7 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 	});
 	it("collapses the ledger instead of drawing an empty column", async () => {
 		const dom = await renderHome({
-			ledger: [column("watch", 6), column("read", 1), column("news", 0)],
+			ledger: [column("watch", 5), column("read", 1), column("news", 0)],
 		});
 		const section = dom.querySelector('[aria-labelledby="latest-title"]');
 		expect(
@@ -415,7 +434,7 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 		).toBe("2");
 		expect(
 			section?.querySelectorAll("h3").map((heading) => heading.text),
-		).toEqual(["watch 6 of 40", "read 1 of 40"]);
+		).toEqual(["watch 5 of 40", "read 1 of 40"]);
 		expect(section?.querySelectorAll("ol:empty")).toHaveLength(0);
 		expect(
 			(
@@ -423,32 +442,114 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 			).querySelector('[aria-labelledby="latest-title"]'),
 		).toBeNull();
 	});
-	it("renders the stream band only when a stream is scheduled", async () => {
+	it("sets the next stream beside the latest session, next first, only when one is scheduled", async () => {
 		const scheduled = await renderHome();
-		const band = scheduled.querySelector('[aria-labelledby="upcoming-title"]');
-		expect(band?.querySelector("h2")?.text).toBe("Next stream");
-		expect(band?.querySelector("time")?.getAttribute("datetime")).toBe(
-			"2026-11-11T12:00:00.000Z",
-		);
-		expect(band?.querySelector("time strong")?.text).toBe("11");
-		expect(band?.querySelector("[data-date]")?.text).toContain(
-			"Wednesday, 11 November 2026 12:00 UTC",
+		const pair = scheduled.querySelector(
+			'[aria-label="Next live stream and latest session"]',
 		);
 		expect(
-			band
+			pair
+				?.querySelectorAll("article")
+				.map((item) => item.querySelector("h2")?.text),
+		).toEqual(["Next stream", "Real session"]);
+		const next = pair?.querySelector('[aria-labelledby="upcoming-title"]');
+		expect(next?.text).toContain("What the stream covers.");
+		expect(next?.querySelector("time")?.getAttribute("datetime")).toBe(
+			"2026-11-11T12:00:00.000Z",
+		);
+		expect(next?.querySelector("time strong")?.text).toBe("11");
+		expect(next?.querySelector("[data-date]")?.text).toBe(
+			"Wednesday 11 November 2026 12:00 UTC",
+		);
+		// Every part of the start follows the reader's time zone in the browser.
+		for (const part of next?.querySelectorAll("[data-local-time]") ?? []) {
+			expect(part.getAttribute("data-datetime")).toBe(
+				"2026-11-11T12:00:00.000Z",
+			);
+		}
+		expect(next?.querySelectorAll("[data-local-time]")).toHaveLength(4);
+		const still = next?.querySelector("a[aria-hidden]");
+		expect(still?.getAttribute("tabindex")).toBe("-1");
+		expect(
+			next
 				?.querySelectorAll('a[href="/watch/next-stream"]:not([aria-hidden])')
 				.map((link) => link.text.trim()),
 		).toEqual(["Get notified →"]);
-		expect(scheduled.querySelector("dl")?.text).toContain("Next live");
+		expect(next?.text).not.toContain("Also scheduled");
+		// The pair replaces the band: the stream is stated once.
+		expect(scheduled.querySelectorAll("#upcoming-title")).toHaveLength(1);
 
 		for (const upcoming of [[], undefined]) {
 			const quiet = await renderHome({ upcoming });
 			expect(
-				quiet.querySelector('[aria-labelledby="upcoming-title"]'),
+				quiet.querySelector(
+					'[aria-label="Next live stream and latest session"]',
+				),
 			).toBeNull();
-			expect(quiet.toString()).not.toContain("Upcoming live stream");
-			expect(quiet.toString()).not.toContain("Next live");
+			expect(quiet.querySelector("#upcoming-title")).toBeNull();
+			expect(quiet.toString()).not.toContain("Next live stream");
+			expect(quiet.querySelectorAll("#latest-session-title")).toHaveLength(1);
 		}
+	});
+	it("orders the page: statement, next and latest, the index, the ledger, the paths", async () => {
+		const dom = await renderHome();
+		expect(
+			dom.querySelectorAll("h1, h2").map((heading) => heading.text),
+		).toEqual([
+			"Understand the system.",
+			"Next stream",
+			"Real session",
+			"The archive",
+			"Recently published",
+			"Learning paths",
+		]);
+	});
+	it("does not stretch a ledger column that has fewer than three rows", async () => {
+		const dom = await renderHome({
+			ledger: [column("watch", 5), column("read", 2), column("news", 3)],
+		});
+		expect(
+			dom
+				.querySelectorAll('[aria-labelledby="latest-title"] section')
+				.map((item) => item.hasAttribute("data-short")),
+		).toEqual([false, true, false]);
+	});
+	it("lists streams after the next one under it, in order", async () => {
+		const dom = await renderHome({
+			upcoming: [
+				...props.upcoming,
+				{
+					href: "/watch/later-stream",
+					title: "Later stream",
+					publishedAt: "2026-11-18T17:30:00.000Z",
+				},
+				{
+					href: "/watch/last-stream",
+					title: "Last stream",
+					publishedAt: "2026-11-25T17:30:00.000Z",
+				},
+			],
+		});
+		const next = dom.querySelector('[aria-labelledby="upcoming-title"]');
+		const list = next?.querySelector("ul");
+		expect(
+			dom.querySelector(`#${list?.getAttribute("aria-labelledby")}`)?.text,
+		).toBe("Also scheduled");
+		expect(
+			list
+				?.querySelectorAll("a")
+				.map((link) => [
+					link.getAttribute("href"),
+					link.querySelector("time")?.getAttribute("datetime"),
+					link.querySelector("span")?.text,
+				]),
+		).toEqual([
+			["/watch/later-stream", "2026-11-18T17:30:00.000Z", "Later stream"],
+			["/watch/last-stream", "2026-11-25T17:30:00.000Z", "Last stream"],
+		]);
+		expect(
+			dom.querySelectorAll("h2").map((heading) => heading.text),
+		).not.toContain("Later stream");
 	});
 	it("counts each path's sessions and leaves the count out when there is none", async () => {
 		const dom = await renderHome({

@@ -14,7 +14,7 @@ const meta = {
 		docs: {
 			description: {
 				component:
-					"The homepage composition (`AcademyPage.vue`, `academyPage` recipe) with local fixtures: the hero index of the four collections, the latest session as a spread, the three-column ledger, the upcoming-stream band and the learning paths. Production stills come from the content CDN; these fixtures use artwork that ships in `public/`. The site header, the newsletter and the footer are Astro and are not part of the story.",
+					"The homepage composition (`AcademyPage.vue`, `academyPage` recipe) with local fixtures: the statement hero, the next live stream and the latest session as a pair, the field index of the four collections on an ink band, the three-column ledger and the learning paths. Production stills come from the content CDN; these fixtures use artwork that ships in `public/`. The site header, the newsletter and the footer are Astro and are not part of the story.",
 			},
 		},
 	},
@@ -58,6 +58,8 @@ const featured = {
 	href: "/watch/hands-on-introduction-to-swamp-club",
 	title: "Hands-on Introduction to Swamp Club",
 	publishedAt: "2026-10-22T16:00:00.000Z",
+	description:
+		"A first build in Swamp Club, from an empty project to a running service.",
 	mediaSrc: stills.controlPlane,
 	runtime: "1h 2m",
 	guests: ["Nick Stinemates"],
@@ -101,12 +103,6 @@ const sessions = {
 			publishedAt: "2026-09-17T16:00:00.000Z",
 			meta: ["1h 31m"],
 		},
-		{
-			href: "/watch/hadron-minimal-secure-linux-for-cloud",
-			title: "Hadron: Minimal & Secure Linux for Cloud",
-			publishedAt: "2026-09-10T16:00:00.000Z",
-			meta: ["9 min"],
-		},
 	],
 };
 
@@ -116,9 +112,6 @@ const leadArticle = {
 		"Seccomp for Kubernetes workloads: from RuntimeDefault to application profiles",
 	publishedAt: "2026-10-01T00:00:00.000Z",
 	meta: ["Guide", "David Flanagan"],
-	description:
-		"Record, review, and roll out application seccomp profiles for Kubernetes, with errno compatibility, logging, distroless verification, and new-node handling.",
-	mediaSrc: stills.apiServer,
 };
 
 const articles = {
@@ -141,6 +134,18 @@ const articles = {
 			publishedAt: "2026-08-27T00:00:00.000Z",
 			meta: ["Tutorial", "David Flanagan"],
 		},
+		{
+			href: "/read/ebpf-without-the-magic",
+			title: "eBPF without the magic: one probe, read line by line",
+			publishedAt: "2026-08-06T00:00:00.000Z",
+			meta: ["Tutorial", "David Flanagan"],
+		},
+		{
+			href: "/read/what-admission-does",
+			title: "What the API server does with your manifest before etcd sees it",
+			publishedAt: "2026-07-21T00:00:00.000Z",
+			meta: ["Article", "David Flanagan"],
+		},
 	],
 };
 
@@ -155,15 +160,31 @@ const news = {
 			href: "/news/klustered-winter-2026",
 			title: "Klustered Winter 2026 starts Wednesday 18 November",
 			publishedAt: "2026-09-25T09:00:00.000Z",
-			description:
-				"A pre-season from 18 November, then the Solo bracket in January, at 17:30 GMT.",
+			meta: ["David Flanagan"],
 		},
 		{
 			href: "/news/kubernetes-1-36",
 			title: "Kubernetes 1.36 graduates in-place pod resize to stable",
 			publishedAt: "2026-09-02T09:00:00.000Z",
-			description:
-				"CPU and memory can now change on a running pod without a restart.",
+			meta: ["David Flanagan"],
+		},
+		{
+			href: "/news/cilium-1-19",
+			title: "Cilium 1.19 adds per-node BGP advertisement policies",
+			publishedAt: "2026-08-19T09:00:00.000Z",
+			meta: ["David Flanagan"],
+		},
+		{
+			href: "/news/gateway-api-1-4",
+			title: "Gateway API 1.4 moves BackendTLSPolicy to the standard channel",
+			publishedAt: "2026-08-04T09:00:00.000Z",
+			meta: ["David Flanagan"],
+		},
+		{
+			href: "/news/containerd-2-2",
+			title: "containerd 2.2 ships with user namespaces on by default",
+			publishedAt: "2026-07-15T09:00:00.000Z",
+			meta: ["David Flanagan"],
 		},
 	],
 };
@@ -219,23 +240,40 @@ const full = {
 	learningPaths,
 };
 
-/** Every section present: three ledger columns and an upcoming stream. */
+const laterStream = {
+	href: "/watch/debugging-a-cilium-network-policy",
+	title: "Debugging a Cilium network policy that drops DNS",
+	publishedAt: "2026-11-18T17:30:00.000Z",
+};
+
+/** Every section present: a stream scheduled beside the latest session, three ledger columns. */
 export const Full: Story = {
 	tags: ["visual-mobile"],
 	render: () => <VueInReact component={AcademyPage} props={full} />,
 };
 
-/** Nothing scheduled: the ink band is not rendered and the hero drops "Next live". */
+/** Nothing scheduled: the latest session takes the full width as a spread, with the solid action. */
 export const NoUpcomingStream: Story = {
-	tags: ["!visual"],
+	tags: ["!visual", "!visual-mobile"],
 	render: () => (
 		<VueInReact component={AcademyPage} props={{ ...full, upcoming: [] }} />
 	),
 };
 
-/** One article and no news: the News column is gone and two columns share the measure 7/5. */
+/** Two streams scheduled: the first is in the pair, the second is listed under it. */
+export const TwoStreams: Story = {
+	tags: ["!visual", "!visual-mobile"],
+	render: () => (
+		<VueInReact
+			component={AcademyPage}
+			props={{ ...full, upcoming: [...upcoming, laterStream] }}
+		/>
+	),
+};
+
+/** One article and no news: the News column is gone, two columns share the measure in halves, and the one-row column is not stretched. */
 export const Sparse: Story = {
-	tags: ["!visual"],
+	tags: ["!visual", "!visual-mobile"],
 	render: () => (
 		<VueInReact
 			component={AcademyPage}
@@ -259,23 +297,11 @@ export const Sparse: Story = {
 
 /** Only sessions: one column runs the full measure with its rows two abreast. */
 export const SessionsOnly: Story = {
-	tags: ["!visual"],
+	tags: ["!visual", "!visual-mobile"],
 	render: () => (
 		<VueInReact
 			component={AcademyPage}
-			props={{
-				...full,
-				ledger: [sessions],
-				upcoming: [
-					...upcoming,
-					{
-						...upcoming[0],
-						href: "/watch/later",
-						title: "Debugging a Cilium network policy that drops DNS",
-						publishedAt: "2026-11-18T17:30:00.000Z",
-					},
-				],
-			}}
+			props={{ ...full, ledger: [sessions] }}
 		/>
 	),
 };
@@ -293,6 +319,6 @@ const WithSystem = () => {
  * random, so this story has no screenshot baseline.
  */
 export const LivingSystem: Story = {
-	tags: ["!visual"],
+	tags: ["!visual", "!visual-mobile"],
 	render: () => <WithSystem />,
 };

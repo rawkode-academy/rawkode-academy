@@ -14,7 +14,6 @@ import { inputField } from "../styles/field";
 import { textLink } from "../styles/link";
 import { inkStage, inkSurface } from "../styles/ink";
 import {
-	coverImage,
 	coverImageZoom,
 	runtimeBadge,
 	videoFrame,
@@ -23,16 +22,19 @@ import {
 /**
  * The Academy front door, video library, and learning-path directory.
  *
- * The homepage is an index of the archive. It opens on an ink surface (navy
- * in light mode, a raised panel in dark mode) that holds the statement and
- * the four collections as ruled links, then hands over to the canvas for
- * the latest session, the three-column ledger and the learning paths, with
- * the next live stream as an ink band between them. Motion is a single
- * entrance sequence on the hero; everything else moves only on interaction.
+ * The homepage opens on a short ink hero (navy in light mode, a raised
+ * panel in dark mode) that holds only the statement, its lede and the living
+ * system. The canvas follows with the next live stream and the latest
+ * session as a pair, then the field index of the four collections on its own
+ * ink band, the three-column ledger and the learning paths. Motion is a
+ * single entrance sequence on the hero; everything else moves only on
+ * interaction or as it scrolls into view.
  */
 export const academyPage = sva({
 	slots: [
 		"root",
+		"rootHome",
+		"join",
 		"container",
 		"hero",
 		"system",
@@ -41,15 +43,21 @@ export const academyPage = sva({
 		"titleLine",
 		"titleAccent",
 		"lede",
-		"heroSub",
 		"heroLede",
-		"heroFacts",
+		"indexBand",
 		"index",
 		"indexLink",
 		"indexName",
 		"indexWhat",
 		"indexArrow",
 		"visuallyHidden",
+		"pair",
+		"pairItem",
+		"pairStill",
+		"pairTitle",
+		"pairLine",
+		"pairWhen",
+		"pairLater",
 		"spread",
 		"plate",
 		"plateImage",
@@ -69,19 +77,6 @@ export const academyPage = sva({
 		"entryBody",
 		"entryTitle",
 		"entryMeta",
-		"entryDescription",
-		"entryCover",
-		"entryCoverImage",
-		"band",
-		"bandGrid",
-		"bandWhen",
-		"bandCopy",
-		"bandState",
-		"bandTitle",
-		"bandLede",
-		"bandStill",
-		"bandStillImage",
-		"bandLater",
 		"paths",
 		"pathsIntro",
 		"pathTable",
@@ -144,6 +139,22 @@ export const academyPage = sva({
 			paddingBottom: "16",
 			minWidth: "0",
 		},
+		// The homepage closes on its own sections, not on the root's padding.
+		rootHome: {
+			backgroundColor: "academy.canvas",
+			color: "academy.text",
+			fontFamily: "academy-text",
+			minWidth: "0",
+		},
+		// The newsletter under the homepage. Its card pads itself, so this
+		// adds only what brings the gap above it to the section rhythm.
+		join: {
+			maxWidth: "academy-shell",
+			marginInline: "auto",
+			paddingInline: "academy-gutter",
+			paddingTop: "4",
+			_lg: { paddingTop: "12" },
+		},
 		container: {
 			maxWidth: "academy-shell",
 			marginInline: "auto",
@@ -156,8 +167,9 @@ export const academyPage = sva({
 		// viewport of a laptop.
 		hero: {
 			...inkSurface,
-			paddingBlockStart: "8",
-			paddingBlockEnd: "8",
+			paddingBlockStart: "10",
+			paddingBlockEnd: "10",
+			_lg: { paddingBlockStart: "12", paddingBlockEnd: "12" },
 			// Not inkStage: the living-system canvas is absolutely positioned.
 			"& > :not(canvas)": { position: "relative" },
 		},
@@ -185,14 +197,12 @@ export const academyPage = sva({
 			fontSize: "sm",
 			fontWeight: "medium",
 		},
-		// Poster scale on a phone and a tablet; one step down on wide screens,
-		// where two lines at full poster scale would push the index off the
-		// first viewport.
+		// The statement is the hero: poster scale, with only the lede under it
+		// and the living system on the free lattice beside it.
 		title: {
 			...posterTitle,
 			color: "academy.inkText",
 			fontSize: "academy-poster",
-			_lg: { fontSize: "[clamp(7rem, 9.4vw, 8.5rem)]" },
 		},
 		titleLine: {
 			display: "block",
@@ -203,66 +213,40 @@ export const academyPage = sva({
 		},
 		titleAccent: { color: "academy.inkAccent" },
 		lede: { ...ledeText, color: "academy.textSoft" },
-		// The sentence and the two dated facts share the row under the title.
-		heroSub: {
-			display: "grid",
-			gap: "6",
-			alignItems: "end",
-			marginTop: "6",
-			animation: "academy-rise",
-			animationDelay: "stagger-2",
-			_lg: {
-				gridTemplateColumns: "minmax(0, 1fr) minmax(0, 22rem)",
-				columnGap: "16",
-				marginTop: "5",
-			},
-			_motionReduce: { animation: "none" },
-		},
 		heroLede: {
 			...ledeText,
 			maxWidth: "[30ch]",
+			marginTop: "6",
 			color: "academy.inkTextSoft",
 			lineHeight: "[1.4]",
+			animation: "academy-rise",
+			animationDelay: "stagger-2",
+			_motionReduce: { animation: "none" },
 		},
-		heroFacts: {
-			display: "grid",
-			margin: "0",
-			color: "academy.inkTextMuted",
-			fontFamily: "academy-mono",
-			fontSize: "xs",
-			lineHeight: "body",
-			"& > div": {
-				display: "flex",
-				justifyContent: "space-between",
-				columnGap: "4",
-				paddingBlock: "1.5",
-				borderTop: "hairline",
-				borderColor: "academy.inkBorder",
-			},
-			"& dt, & dd": { margin: "0" },
-			"& dd": { color: "academy.inkText", textAlign: "end" },
+		// The field index: its own ink band under the next and latest pair.
+		// Each collection by name with its real count as an accent mono
+		// superscript (the form its own masthead takes), one line on what is
+		// in it, and an arrow. A ruled list, one link per row, with room
+		// between the rules.
+		indexBand: {
+			...inkStage,
+			marginTop: "16",
+			paddingBlock: "12",
+			borderTop: "hairline",
+			_lg: { marginTop: "24", paddingBlock: "20" },
 		},
-		// The index: each collection by name with its real count as an accent
-		// mono superscript (the form its own masthead takes), one line on what
-		// is in it, and an arrow. A ruled list, one link per row.
 		index: {
 			display: "grid",
 			margin: "0",
-			marginTop: "8",
 			padding: "0",
 			listStyle: "none",
 			borderBottom: "hairline",
 			borderColor: "academy.inkBorder",
-			_lg: { marginTop: "6" },
 			"& > li": {
 				borderTop: "hairline",
 				borderColor: "academy.inkBorder",
-				animation: "academy-rise",
-				animationDelay: "stagger-2",
+				...scrollReveal,
 			},
-			"& > li:nth-child(2)": { animationDelay: "stagger-3" },
-			"& > li:nth-child(n + 3)": { animationDelay: "stagger-4" },
-			_motionReduce: { "& > li": { animation: "none" } },
 		},
 		indexLink: {
 			display: "grid",
@@ -270,14 +254,14 @@ export const academyPage = sva({
 			columnGap: "4",
 			rowGap: "2",
 			alignItems: "baseline",
-			paddingBlock: "4",
+			paddingBlock: "5",
 			color: "academy.inkText",
 			textDecoration: "none",
 			_lg: {
 				gridTemplateColumns: "minmax(0, 5fr) minmax(0, 6fr) minmax(0, 1fr)",
 				columnGap: "6",
-				paddingBlockStart: "3",
-				paddingBlockEnd: "2.5",
+				paddingBlockStart: "6",
+				paddingBlockEnd: "5",
 			},
 			_hover: {
 				"& [data-name]": {
@@ -306,7 +290,7 @@ export const academyPage = sva({
 			transitionProperty: "[transform, color]",
 			transitionDuration: "slow",
 			transitionTimingFunction: "academy-out",
-			_lg: { fontSize: "5xl" },
+			_lg: { fontSize: "6xl" },
 			"& sup": {
 				position: "relative",
 				top: "[0.2em]",
@@ -341,6 +325,134 @@ export const academyPage = sva({
 			transitionTimingFunction: "academy-out",
 		},
 		visuallyHidden: { srOnly: true },
+		// Next and latest as equals, directly under the hero: two columns of
+		// the same width and the same structure (still, label, title, one
+		// sentence, facts, action). Beside each other, the columns share their
+		// rows through a subgrid, so every part of one sits level with the
+		// same part of the other.
+		pair: {
+			display: "grid",
+			rowGap: "10",
+			_sm: {
+				gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+				columnGap: "6",
+				rowGap: "0",
+			},
+			_lg: { columnGap: "12" },
+		},
+		pairItem: {
+			display: "grid",
+			minWidth: "0",
+			alignContent: "start",
+			justifyItems: "start",
+			_sm: {
+				gridTemplateRows: "subgrid",
+				gridRow: "span 7",
+				alignContent: "stretch",
+			},
+			"& > *": { minWidth: "0" },
+		},
+		pairStill: {
+			...videoFrame,
+			width: "full",
+			marginBottom: "4",
+			borderRadius: "academy-m",
+			border: "hairline",
+			_hover: { "& img": { transform: "scale(1.03)" } },
+		},
+		pairTitle: {
+			...headingLg,
+			marginTop: "2",
+			fontSize: "2xl",
+			fontWeight: "extrabold",
+			letterSpacing: "academy-display",
+			lineHeight: "[1.1]",
+			textWrap: "balance",
+			_lg: { fontSize: "3xl" },
+		},
+		pairLine: {
+			margin: "0",
+			marginTop: "2",
+			maxWidth: "[52ch]",
+			color: "academy.textSoft",
+			lineHeight: "body",
+			textWrap: "pretty",
+		},
+		// The next stream's facts are its start: the day at numeral scale,
+		// then the weekday, the date and the time in the reader's zone. It
+		// is ruled above and below like the fact list it sits beside.
+		pairWhen: {
+			display: "flex",
+			alignItems: "center",
+			columnGap: "5",
+			alignSelf: "stretch",
+			width: "full",
+			margin: "0",
+			marginTop: "6",
+			marginBottom: "7",
+			paddingBlock: "4",
+			borderBlock: "hairline",
+			"& strong": {
+				display: "block",
+				marginInlineStart: "[-0.04em]",
+				color: "academy.text",
+				fontFamily: "academy-display",
+				fontSize: "[clamp(5.5rem, 9vw, 7.5rem)]",
+				fontWeight: "black",
+				letterSpacing: "academy-poster",
+				lineHeight: "[0.8]",
+				fontVariantNumeric: "tabular-nums",
+			},
+			"& [data-date]": {
+				display: "grid",
+				gap: "1",
+				color: "academy.textMuted",
+				fontFamily: "academy-mono",
+				fontSize: "xs",
+				lineHeight: "body",
+			},
+			"& [data-date] > :first-child": {
+				color: "academy.text",
+				fontFamily: "academy-text",
+				fontSize: "md",
+				fontWeight: "medium",
+			},
+		},
+		// Streams scheduled after the next one: a short ruled list under it.
+		pairLater: {
+			display: "grid",
+			width: "full",
+			marginTop: "8",
+			"& p": { ...monoMeta, paddingBlockEnd: "2" },
+			"& ul": {
+				display: "grid",
+				margin: "0",
+				padding: "0",
+				listStyle: "none",
+				borderBottom: "hairline",
+			},
+			"& a": {
+				display: "grid",
+				rowGap: "0.5",
+				columnGap: "4",
+				alignItems: "baseline",
+				paddingBlock: "3",
+				borderTop: "hairline",
+				color: "academy.text",
+				fontWeight: "semibold",
+				lineHeight: "academy-card",
+				textDecoration: "none",
+				_sm: { gridTemplateColumns: "13.5rem minmax(0, 1fr)" },
+				_hover: { color: "academy.accent" },
+				_focusVisible: focusRing,
+			},
+			"& time": {
+				color: "academy.textMuted",
+				fontFamily: "academy-mono",
+				fontSize: "xs",
+				fontWeight: "normal",
+			},
+		},
 		// The latest session as a spread: the still as a plate, then a
 		// colophon of facts and the page's one solid action.
 		spread: {
@@ -445,30 +557,36 @@ export const academyPage = sva({
 		},
 		sectionNote: { ...monoMeta, paddingBlockEnd: "2" },
 		// Recently published: one column per collection that has something
-		// new. Three share the measure 5/4/3, two share it 7/5, and one runs
-		// the full measure with its rows two abreast. An empty collection
-		// has no column, so the ledger never shows a blank one.
+		// new, each the same thing: the same width, the same number of rows,
+		// the same row. Three share the measure in thirds, two in halves, and
+		// one runs the full measure with its rows two abreast. An empty
+		// collection has no column, so the ledger never shows a blank one.
+		// Columns stretch to the tallest so their closing links share a line.
 		columns: {
 			display: "grid",
 			rowGap: "12",
 			columnGap: "6",
-			alignItems: "start",
 			_sm: {
 				gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-				"& > :first-child": { gridColumn: "1 / -1" },
-				"&[data-columns='2'] > *": { gridColumn: "1 / -1" },
-			},
-			_lg: {
-				gridTemplateColumns: "repeat(12, minmax(0, 1fr))",
-				"& > :first-child": { gridColumn: "span 5" },
-				"& > :nth-child(2)": { gridColumn: "span 4" },
-				"& > :nth-child(3)": { gridColumn: "span 3" },
-				"&[data-columns='2'] > :nth-child(2)": { gridColumn: "span 5" },
-				"&[data-columns='2'] > :first-child": { gridColumn: "span 7" },
+				"&[data-columns='3'] > :first-child": { gridColumn: "1 / -1" },
 				"&[data-columns='1'] > :first-child": { gridColumn: "1 / -1" },
 			},
+			_lg: {
+				columnGap: "10",
+				"&[data-columns='3']": {
+					gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+				},
+				"&[data-columns='3'] > :first-child": { gridColumn: "auto" },
+			},
 		},
-		column: { display: "grid", minWidth: "0", alignContent: "start" },
+		// A column with fewer than three rows is not stretched: its closing
+		// link follows its last row instead of being stranded at the foot.
+		column: {
+			display: "grid",
+			gridTemplateRows: "auto 1fr auto",
+			minWidth: "0",
+			"&[data-short]": { alignSelf: "start" },
+		},
 		columnHead: {
 			display: "flex",
 			alignItems: "baseline",
@@ -487,6 +605,7 @@ export const academyPage = sva({
 		},
 		entries: {
 			display: "grid",
+			alignContent: "start",
 			margin: "0",
 			padding: "0",
 			listStyle: "none",
@@ -498,15 +617,14 @@ export const academyPage = sva({
 			},
 		},
 		// One compact ledger row: the day as a numeral with month and year
-		// beneath it, then the title, a mono line of facts and, where the
-		// entry leads its column, a sentence and its cover.
+		// beneath it, then the title and one mono line of facts.
 		entry: {
 			display: "grid",
 			gridTemplateColumns: "3.25rem minmax(0, 1fr)",
 			columnGap: "3.5",
 			alignItems: "start",
 			height: "full",
-			paddingBlock: "3.5",
+			paddingBlock: "4",
 			borderBottom: "hairline",
 			color: "academy.text",
 			textDecoration: "none",
@@ -554,159 +672,6 @@ export const academyPage = sva({
 			transitionDuration: "base",
 		},
 		entryMeta: monoMeta,
-		// Three lines at most, so one long summary cannot stretch its column
-		// far past its neighbours.
-		entryDescription: {
-			marginTop: "1",
-			color: "academy.textSoft",
-			fontSize: "sm",
-			lineHeight: "body",
-			textWrap: "pretty",
-			lineClamp: "3",
-		},
-		entryCover: {
-			...videoFrame,
-			maxWidth: "[22.5rem]",
-			marginTop: "2",
-			borderRadius: "academy-s",
-			border: "hairline",
-		},
-		entryCoverImage: coverImage,
-		// The next live stream: a full-width ink band with the day it starts
-		// at numeral scale, what it is, and its still.
-		band: {
-			...inkStage,
-			marginTop: "16",
-			paddingBlock: "12",
-			borderTop: "hairline",
-			_lg: { marginTop: "24", paddingBlock: "16" },
-		},
-		bandGrid: {
-			display: "grid",
-			rowGap: "7",
-			columnGap: "6",
-			alignItems: "center",
-			maxWidth: "academy-shell",
-			marginInline: "auto",
-			paddingInline: "academy-gutter",
-			_sm: { gridTemplateColumns: "auto minmax(0, 1fr)", columnGap: "10" },
-			_lg: {
-				gridTemplateColumns: "minmax(0, 3fr) minmax(0, 5fr) minmax(0, 4fr)",
-				columnGap: "6",
-			},
-		},
-		bandWhen: {
-			display: "flex",
-			alignItems: "flex-end",
-			columnGap: "4",
-			margin: "0",
-			color: "academy.inkText",
-			_sm: { display: "grid", rowGap: "5" },
-			"& strong": {
-				display: "block",
-				marginInlineStart: "[-0.04em]",
-				fontFamily: "academy-display",
-				fontSize: "[clamp(7rem, 17vw, 11.5rem)]",
-				fontWeight: "black",
-				letterSpacing: "academy-poster",
-				lineHeight: "[0.74]",
-				fontVariantNumeric: "tabular-nums",
-			},
-			"& [data-date]": {
-				display: "grid",
-				color: "academy.inkTextSoft",
-				fontFamily: "academy-mono",
-				fontSize: "xs",
-				lineHeight: "body",
-			},
-		},
-		bandCopy: {
-			display: "grid",
-			justifyItems: "start",
-			minWidth: "0",
-		},
-		// An upcoming stream is marked the way the library marks it: the accent,
-		// with the words beside the dot.
-		bandState: {
-			...monoMeta,
-			display: "flex",
-			alignItems: "center",
-			gap: "2",
-			color: "academy.inkAccent",
-			"&::before": {
-				content: '""',
-				width: "2",
-				height: "2",
-				flexShrink: "0",
-				borderRadius: "full",
-				backgroundColor: "academy.inkAccent",
-			},
-		},
-		bandTitle: {
-			...headingLg,
-			marginTop: "3",
-			color: "academy.inkText",
-			fontSize: "3xl",
-			fontWeight: "extrabold",
-			letterSpacing: "academy-display",
-			lineHeight: "[1.05]",
-			textWrap: "balance",
-			_lg: { fontSize: "4xl" },
-		},
-		bandLede: {
-			margin: "0",
-			marginTop: "3",
-			marginBottom: "6",
-			maxWidth: "[44ch]",
-			color: "academy.inkTextSoft",
-			lineHeight: "body",
-			textWrap: "pretty",
-		},
-		// The still closes the band's measure at the same height as the copy
-		// beside it, framed like the plate, so it belongs to the row.
-		bandStill: {
-			...videoFrame,
-			gridColumn: "1 / -1",
-			backgroundColor: "academy.inkRaised",
-			borderRadius: "academy-m",
-			border: "hairline",
-			borderColor: "academy.inkBorder",
-			_sm: { display: "none" },
-			_lg: { display: "block", gridColumn: "3" },
-			_hover: { "& img": { transform: "scale(1.03)" } },
-		},
-		bandStillImage: coverImageZoom,
-		// Streams scheduled after the next one: a ruled list under the band.
-		bandLater: {
-			display: "grid",
-			gridColumn: "1 / -1",
-			margin: "0",
-			padding: "0",
-			listStyle: "none",
-			borderBottom: "hairline",
-			borderColor: "academy.inkBorder",
-			"& a": {
-				display: "grid",
-				rowGap: "1",
-				columnGap: "6",
-				alignItems: "baseline",
-				paddingBlock: "3",
-				borderTop: "hairline",
-				borderColor: "academy.inkBorder",
-				color: "academy.inkText",
-				fontWeight: "semibold",
-				textDecoration: "none",
-				_sm: { gridTemplateColumns: "16rem minmax(0, 1fr)" },
-				_hover: { color: "academy.inkAccent" },
-				_focusVisible: focusRingInk,
-			},
-			"& time": {
-				color: "academy.inkTextMuted",
-				fontFamily: "academy-mono",
-				fontSize: "xs",
-				fontWeight: "normal",
-			},
-		},
 		// Learning paths as a ruled table: the path, then how many sessions
 		// it puts in order.
 		paths: {
@@ -783,11 +748,11 @@ export const academyPage = sva({
 		},
 		pathRowMeta: monoMeta,
 		pathRowCount: {
+			...monoMeta,
 			display: "flex",
 			alignItems: "baseline",
 			columnGap: "1.5",
 			whiteSpace: "nowrap",
-			...monoMeta,
 			"& strong": {
 				color: "academy.text",
 				fontFamily: "academy-display",

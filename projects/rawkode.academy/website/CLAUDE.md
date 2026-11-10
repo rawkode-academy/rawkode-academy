@@ -52,8 +52,8 @@ behaviour, Vue components).
      masthead, Search, video stage). The slot adds its own padding.
    - `ledgerRow` and the other `ledger*` fragments, `ruledList`: the row
      shared by Read and News (`academyCatalog.editorial*`). Markup contract
-     in `src/styles/ledger.ts`. The homepage sets a compact three-column
-     form of the row in its own slots (`academyPage.columns`, `entry*`).
+     in `src/styles/ledger.ts`. The homepage sets a compact form of the
+     row in equal columns in its own slots (`academyPage.columns`, `entry*`).
    - `videoFrame`, `coverImage`, `coverImageZoom`, `runtimeBadge`: the 16:9
      still, the image that fills it and the runtime set over it.
    - `panelSurface`, `linkedPanel`, `pill`: framed panels and the tag outline.
@@ -62,7 +62,7 @@ behaviour, Vue components).
    - `VideoCard.astro` (`academyPage.card`): the one video card, also behind
      `video-feed.astro` (its `progress` slot takes a watch-progress bar) and,
      with `scheduled`, an upcoming stream. The homepage (`AcademyPage.vue`) sets
-     the next stream as an ink band instead (`academyPage.band*`). `localDate` (`17 Jul 2026`) and `formatRuntime`
+     the next stream beside the latest session instead (`academyPage.pair*`). `localDate` (`17 Jul 2026`) and `formatRuntime`
      (`1h 2m`) are the one date and runtime form; `Breadcrumb.astro` is the
      one breadcrumb.
    - `inputField`: a text input's surface and its placeholder, invalid,

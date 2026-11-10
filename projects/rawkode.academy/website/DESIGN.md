@@ -61,7 +61,7 @@ controls, and duplicate recommendations.
   rail on the homepage and each masthead set the collection's name with its
   count as an accent mono superscript (`Videos³²⁹`), the same form in both
   places so the homepage previews the page you land on; the two-digit day
-  that leads every ledger row, the day a scheduled stream starts, the
+  that leads every ledger row, the day the next stream starts, the
   session count beside a learning path on the homepage, and the ghost index on a learning path (quiet
   by default, lit in the accent on hover). Numerals are Red Hat Display
   extrabold with tabular figures; their labels are sentence-case mono.
@@ -116,18 +116,26 @@ Directory pages explain the collection and show real choices. Filters have
 labels, real results, and an empty state. A decorative tab or fake pagination
 label is not acceptable. Keep critical content server-rendered.
 
-The homepage is an index of the archive. Its ink hero holds the statement,
-one sentence, the dates of the latest session and the next live stream, and
-the four collections as ruled links (name, count superscript, one line, an
-arrow), short enough that the latest session's still shows in the first
-viewport of a laptop. Beneath it: the latest session as a spread (the still
-as a plate, a colophon of real facts, the page's one solid button); Recently
-published as a compact ledger with one column per collection (three share
-the measure 5/4/3, two share it 7/5, one runs full width with its rows two
-abreast; a collection with nothing new has no column); the next live stream
-as a full-width ink band with its day at numeral scale, rendered only when
-a stream is scheduled; and learning paths as a ruled table with each path's
-real session count.
+The homepage opens on a short ink hero that holds only the statement, its
+lede and the living system (about 470px at 1440), so the canvas beneath it
+starts in the first screen. There the next live stream and the latest
+session sit side by side as equals: two columns of the same width and
+structure (still, label, title, one sentence, facts, action) sharing their
+rows, next first. The stream's facts are its start, with the day at numeral
+scale; the session's are its date, runtime, guest and show. The stream's
+action is the page's one solid button because it is time-bound; with
+nothing scheduled the latest session takes the full width as a spread and
+the solid button with it. Further scheduled streams are a short ruled list
+under the next one. The field index follows on its own full-width ink band,
+the one ink moment between the hero and the footer: the four collections as
+large ruled links (name, count superscript, one line, an arrow) with room
+between the rules. Then Recently published, a compact ledger with one
+column per collection, each the same thing: equal widths (thirds, halves,
+or one full-width column with its rows two abreast), the same number of
+rows, each row a day numeral, a title and one mono line, and the closing
+links on one line (a column with fewer than three rows is not stretched);
+a collection with nothing new has no column. Learning paths close the page
+on the canvas as a ruled table with each path's real session count.
 
 Chronological collections (Read, News) share one ledger
 row: a date column led by the two-digit day as a numeral with month and year
