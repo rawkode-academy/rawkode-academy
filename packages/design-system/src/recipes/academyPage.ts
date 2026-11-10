@@ -329,9 +329,9 @@ export const academyPage = sva({
 						"& [data-arrow]": { transform: "translateX(0.375rem)" },
 					},
 				},
+				// The arrow holds still under the ring; it travels on hover only.
 				_focusVisible: {
 					"& [data-name]": { transform: "translateX(0.75rem)" },
-					"& [data-arrow]": { transform: "translateX(0.375rem)" },
 				},
 			},
 			_motionReduce: {
