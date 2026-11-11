@@ -27,7 +27,7 @@ import (
 //
 // - github-read-write, the Infisical identity infrastructure applies log in
 //   as. Its login only works from an apply workflow on main, in the
-//   `infrastructure` GitHub environment, so every apply waits for a reviewer.
+//   `infrastructure` GitHub environment, so only a reviewed merge applies.
 //   It reads the github-read-write Cloudflare token (CLOUDFLARE_ROOT_TOKEN)
 //   and the state bucket credentials.
 // - github-read-only, the identity infrastructure plans on pull requests log
@@ -70,8 +70,6 @@ _github: {
 	infrastructureEnvironment: "infrastructure"
 	// The one infrastructure plans on pull requests run in.
 	planEnvironment: "infrastructure-plan"
-	// Who approves an apply: rawkode.
-	reviewers: [145816]
 	// The check every pull request must pass: .github/workflows/pull-request.yml.
 	requiredCheck: "validate"
 	// GitHub Actions, as the app that reports the required check.
@@ -226,7 +224,7 @@ infrastructure: {
 		}
 
 		// Only an apply workflow on main, in the `infrastructure` environment,
-		// which a reviewer has approved, can log in. Pull requests,
+		// can log in. Pull requests,
 		// pull_request_target and workflow_run runs can't: their event,
 		// environment or ref doesn't match.
 		read_write_oidc_login: infisical_identity_oidc_auth.#Resource & {
@@ -320,15 +318,14 @@ infrastructure: {
 			}
 		}
 
-		// Infrastructure applies. Each waits for a reviewer.
+		// Infrastructure applies. Only main can enter it. Applies run as soon
+		// as a change merges: the merge is the approval, made after reading the
+		// plan on the pull request.
 		infrastructure_environment: github_repository_environment.#Resource & {
 			configuration: {
-				repository:  _github.repository
-				environment: _github.infrastructureEnvironment
-				// rawkode reviews alone, so approving their own applies must work.
-				prevent_self_review: false
-				can_admins_bypass:   false
-				reviewers: [{users: _github.reviewers}]
+				repository:        _github.repository
+				environment:       _github.infrastructureEnvironment
+				can_admins_bypass: false
 				deployment_branch_policy: [{
 					protected_branches:     false
 					custom_branch_policies: true

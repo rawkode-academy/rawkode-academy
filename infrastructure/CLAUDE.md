@@ -47,7 +47,7 @@ cuenv i apply
 
 **Importing:** bring an existing object under management with `cuenv i import <type>.<name> <provider id>` (DNS records take `<zone id>/<record id>`), then `cuenv i plan`.
 
-**CI:** pull requests that touch DNS get a plan as a comment; the plan job logs in to Infisical as `github-read-only`. Pushes to `main` apply as `github-read-write`, in the `infrastructure` GitHub environment, once rawkode approves the job.
+**CI:** pull requests that touch DNS get a plan as a comment; the plan job logs in to Infisical as `github-read-only`. Pushes to `main` apply as `github-read-write`, in the `infrastructure` GitHub environment, which only `main` can enter.
 
 **Provider types:** pinned in the root `cuenv.lock`; generated into `cue.mod/gen` (gitignored). Run `cuenv sync infrastructure` after cloning.
 

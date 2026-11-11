@@ -28,7 +28,7 @@ infrastructure: {
 	resources: {for _, zone in domains.zones {zone.resources}}
 
 	// Plan (and comment the plan) on pull requests with the read-only
-	// credentials; apply on pushes to main, once a reviewer approves the job.
+	// credentials; apply on pushes to main.
 	workflows: {
 		plan: environment:  "infrastructure-plan"
 		apply: environment: "infrastructure"
