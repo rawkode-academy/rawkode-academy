@@ -4,4 +4,4 @@ repoId: 90cc946c-d16e-4830-808b-05b5bacde178
 tools:
   - claude
 defaultVault: default
-gitignoreManaged: true
+gitignoreManaged: false
