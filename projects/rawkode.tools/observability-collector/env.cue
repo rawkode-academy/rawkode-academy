@@ -19,7 +19,8 @@ let _deployInputs = [
 	"wrangler.jsonc",
 ]
 
-_ciInfisicalOidc: true
+_ciInfisicalOidc:           true
+_ciInfisicalInfrastructure: true
 
 let _infrastructure = [{allowInfrastructure: ["plan", "apply", "import", "destroy"]}]
 
@@ -36,18 +37,26 @@ _infisicalSecret: schema.#InfisicalSecret & {
 // Where infrastructure.cue writes the Basin tokens.
 _basinSecret: _infisicalSecret & {secretPath: "/projects/basin"}
 
+// What infrastructure/bootstrap writes to Infisical. A reviewed apply logs in
+// as github-read-write and reads /infrastructure. A plan on a pull request
+// logs in as github-read-only and reads /infrastructure/github-read-only.
+_readWrite: _infisicalSecret & {secretPath: "/infrastructure"}
+_readOnly: _infisicalSecret & {secretPath: "/infrastructure/github-read-only"}
+
+contexts: {
+	plan: schema.#When & {infrastructure: "plan"}
+	// State commands that write need the read-write state key too.
+	apply: schema.#When & {infrastructure: "apply|import|destroy|state-remove"}
+}
+
+env: context: {
+	plan: CLOUDFLARE_API_TOKEN: _readOnly & {secretName: "CLOUDFLARE_API_TOKEN"}
+	apply: CLOUDFLARE_API_TOKEN: _readWrite & {secretName: "CLOUDFLARE_ROOT_TOKEN"}
+}
+
 env: {
 	SERVICE_NAME:          "observability-collector"
 	CLOUDFLARE_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce"
-
-	// Plan and apply run without an environment.
-	CLOUDFLARE_API_TOKEN: {
-		value: _infisicalSecret & {
-			secretPath: "/infrastructure"
-			secretName: "CLOUDFLARE_ROOT_TOKEN"
-		}
-		policies: _infrastructure
-	}
 
 	// cuenv withholds Infisical credentials from providers unless the project
 	// passes them explicitly. The Infisical provider logs in with these; in CI
@@ -106,19 +115,6 @@ tasks: {
 		args: ["x", "wrangler", "deploy"]
 		dependsOn: [_t.test]
 		inputs: _deployInputs
-	}
-
-	infrastructure: schema.#Task & {
-		hermetic: false
-		script:   "cuenv infra init && cuenv infrastructure apply --yes"
-		inputs: ["basin/archive.sql", "basin/typed.sql", "env.cue", "infrastructure.cue"]
-		labels: ["infisical"]
-		// CI starts tasks with an empty environment, so the nested cuenv needs
-		// the Infisical OIDC login passed through to read the state credentials.
-		env: {
-			INFISICAL_AUTH_JWT:            schema.#EnvPassthrough
-			INFISICAL_MACHINE_IDENTITY_ID: schema.#EnvPassthrough
-		}
 	}
 
 	// Secrets for these two tasks are scoped here, not to the environment, so

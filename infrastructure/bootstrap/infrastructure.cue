@@ -33,7 +33,8 @@ import (
 // - github-read-only, the identity infrastructure plans on pull requests log
 //   in as, in the `infrastructure-plan` GitHub environment. It reads
 //   /infrastructure/github-read-only: a Cloudflare token and a state key
-//   that can only read.
+//   that can only read. It also reads /projects/basin, which the
+//   collector's plan refreshes.
 // - github-actions, the identity deploys on main log in as, in the
 //   `production` GitHub environment. It reads project secrets only.
 //
@@ -86,6 +87,10 @@ _permissionGroups: {
 	dnsRead:          "82e64a83756745bbbb1c9c2701bf816b" // DNS Read
 	sslRead:          "7b7216b327b04b8fbc8f524e1f9b7531" // SSL and Certificates Read
 	botRead:          "07bea2220b2343fa9fae15656c0d8e88" // Bot Management Read
+	storageRead:      "b4992e1108244f5d8bfbd5744320c2e1" // Workers R2 Storage Read
+	catalogRead:      "45db74139a62490b9b60eb7c4f34994b" // Workers R2 Data Catalog Read
+	pipelinesRead:    "14b9cf2f410f4c0c9a16bb10a81c0e0b" // Pipelines Read
+	accountTokenRead: "eb56a6953c034b9d97dd838155666f06" // Account API Tokens Read
 }
 
 _stateBucket: "cuenv-state"
@@ -250,14 +255,27 @@ infrastructure: {
 				project_id: _infisical.projectId
 				name:       "github-read-only"
 				slug:       "github-read-only"
-				permissions_v2: [{
-					subject: "secrets"
-					action: ["describeSecret", "readValue"]
-					conditions: json.Marshal({
-						environment: "$eq": _infisical.environment
-						secretPath: "$eq":  "/infrastructure/github-read-only"
-					})
-				}]
+				permissions_v2: [
+					{
+						subject: "secrets"
+						action: ["describeSecret", "readValue"]
+						conditions: json.Marshal({
+							environment: "$eq": _infisical.environment
+							secretPath: "$eq":  "/infrastructure/github-read-only"
+						})
+					},
+					// The collector's plan refreshes the Basin tokens it writes
+					// here. Its state already holds them, so this exposes
+					// nothing a plan can't read.
+					{
+						subject: "secrets"
+						action: ["describeSecret", "readValue"]
+						conditions: json.Marshal({
+							environment: "$eq": _infisical.environment
+							secretPath: "$eq":  "/projects/basin"
+						})
+					},
+				]
 			}
 		}
 
@@ -492,7 +510,9 @@ infrastructure: {
 			}
 		}
 
-		// What plans read Cloudflare with: every zone's records and settings.
+		// What plans read Cloudflare with: every zone's records and settings,
+		// and the collector's analytics lake. R2 read is account-wide, so a
+		// plan can read every bucket's objects, the analytics events included.
 		read_only_token: account_token.#Resource & {
 			configuration: {
 				account_id: _account
@@ -506,6 +526,10 @@ infrastructure: {
 						{id: _permissionGroups.dnsRead},
 						{id: _permissionGroups.sslRead},
 						{id: _permissionGroups.botRead},
+						{id: _permissionGroups.storageRead},
+						{id: _permissionGroups.catalogRead},
+						{id: _permissionGroups.pipelinesRead},
+						{id: _permissionGroups.accountTokenRead},
 					]
 				}]
 			}

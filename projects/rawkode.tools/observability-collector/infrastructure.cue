@@ -51,11 +51,11 @@ _accountResources: json.Marshal({
 // docs. The permission-group data sources return a list, which cuenv can't
 // reference yet.
 _permissionGroups: {
-	catalogWrite:      "d229766a2f7f4d299f20eaa8c9b1fde9" // Workers R2 Data Catalog Write
-	catalogRead:       "45db74139a62490b9b60eb7c4f34994b" // Workers R2 Data Catalog Read
-	storageItemWrite:  "2efd5506f9c8494dacb1fa10a3e7d5b6" // Workers R2 Storage Bucket Item Write
-	storageItemRead:   "6a018a9f2fc74eb6b293b0c548f38b39" // Workers R2 Storage Bucket Item Read
-	sqlRead:           "f45430d92e2b4a6cb9f94f2594c141b8" // Workers R2 SQL Read
+	catalogWrite:     "d229766a2f7f4d299f20eaa8c9b1fde9" // Workers R2 Data Catalog Write
+	catalogRead:      "45db74139a62490b9b60eb7c4f34994b" // Workers R2 Data Catalog Read
+	storageItemWrite: "2efd5506f9c8494dacb1fa10a3e7d5b6" // Workers R2 Storage Bucket Item Write
+	storageItemRead:  "6a018a9f2fc74eb6b293b0c548f38b39" // Workers R2 Storage Bucket Item Read
+	sqlRead:          "f45430d92e2b4a6cb9f94f2594c141b8" // Workers R2 SQL Read
 }
 
 _archiveSql: string @embed(file=basin/archive.sql, type=text)
@@ -85,13 +85,12 @@ infrastructure: {
 		bucket:   "cuenv-state"
 		region:   "auto"
 		endpoint: "https://0aeb879de8e3cdde5fb3d413025222ce.r2.cloudflarestorage.com"
-		accessKeyId: _infisicalSecret & {
-			secretPath: "/infrastructure"
-			secretName: "CUENV_STATE_ACCESS_KEY_ID"
-		}
-		secretAccessKey: _infisicalSecret & {
-			secretPath: "/infrastructure"
-			secretName: "CUENV_STATE_SECRET_ACCESS_KEY"
+		// Used by plans and state commands: this key can't write.
+		accessKeyId: _readOnly & {secretName: "CUENV_STATE_ACCESS_KEY_ID"}
+		secretAccessKey: _readOnly & {secretName: "CUENV_STATE_SECRET_ACCESS_KEY"}
+		context: apply: {
+			accessKeyId: _readWrite & {secretName: "CUENV_STATE_ACCESS_KEY_ID"}
+			secretAccessKey: _readWrite & {secretName: "CUENV_STATE_SECRET_ACCESS_KEY"}
 		}
 	}
 
@@ -105,6 +104,13 @@ infrastructure: {
 				auth: oidc: {}
 			}
 		}
+	}
+
+	// Plan (and comment the plan) on pull requests with the read-only
+	// credentials; apply on pushes to main, once a reviewer approves the job.
+	workflows: {
+		plan: environment:  "infrastructure-plan"
+		apply: environment: "infrastructure"
 	}
 
 	resources: {
