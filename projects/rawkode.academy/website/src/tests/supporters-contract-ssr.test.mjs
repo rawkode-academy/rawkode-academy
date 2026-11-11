@@ -119,21 +119,26 @@ const renderBadge = (supporter) =>
 		SUPPORTERS_PATH: "/supporters",
 	});
 
-test("technology badge links to the supporters wall only when the technology has a supporter", async () => {
+test("technology credit thanks the supporter, links to its website and to the wall", async () => {
 	const supported = await renderBadge({
 		id: "acme",
 		data: { name: "Acme <Cloud>", websiteUrl: "https://acme.example/" },
 	});
-	const link = supported.querySelector("a");
-	assert.equal(link.getAttribute("href"), "/supporters");
 	assert.equal(supported.querySelector(".m-label").text, "Community supporter");
 	assert.equal(
 		supported.querySelector(".m-label").getAttribute("data-tone"),
 		"spruce",
 	);
+	const website = supported.querySelector(".technology-supporter__name");
+	assert.equal(website.getAttribute("href"), "https://acme.example/");
+	assert.equal(website.getAttribute("target"), "_blank");
+	assert.match(website.getAttribute("rel"), /\bnoopener\b/);
+	assert.equal(website.firstChild.text, "Acme <Cloud>");
+	assert.equal(website.querySelector(".sr-only").text, " (opens in a new tab)");
+	assert.match(supported.text, /Thank you\./);
 	assert.equal(
-		supported.querySelector(".technology-supporter__name").text,
-		"Acme <Cloud>",
+		supported.querySelector(".technology-supporter__wall").getAttribute("href"),
+		"/supporters",
 	);
 	assert.doesNotMatch(supported.text, /sponsor|advert|\bad\b/i);
 
