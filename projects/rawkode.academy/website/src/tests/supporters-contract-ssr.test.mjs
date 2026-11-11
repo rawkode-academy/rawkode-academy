@@ -279,8 +279,8 @@ test("wall is cached under the supporters tag", () => {
 		wallPage,
 		/optionalContent\(getCollection\("supporters"\)/,
 	);
-	// Held until the gateway serves Query.supporters (see the service README).
-	assert.doesNotMatch(sitemaps, /path: "\/supporters"/);
+	// Listed now that the gateway serves Query.supporters.
+	assert.match(sitemaps, /path: "\/supporters"/);
 });
 
 test("support page does not link to the wall until the service is live", () => {
