@@ -1610,7 +1610,7 @@ describe("Structured Data Validation", () => {
 				price: "0",
 				priceCurrency: "USD",
 				availability: "https://schema.org/InStock",
-				category: "Educational",
+				category: "Free",
 				itemOffered: {
 					"@type": "Course",
 					name: mockCourse.data.title,
@@ -1634,7 +1634,7 @@ describe("Structured Data Validation", () => {
 		expect(courseJsonLd.offers.price).toBe("0");
 		expect(courseJsonLd.offers.priceCurrency).toBe("USD");
 		expect(courseJsonLd.offers.availability).toBe("https://schema.org/InStock");
-		expect(courseJsonLd.offers.category).toBe("Educational");
+		expect(courseJsonLd.offers.category).toBe("Free");
 		expect(courseJsonLd.offers.itemOffered).toBeDefined();
 		expect(courseJsonLd.offers.itemOffered["@type"]).toBe("Course");
 		expect(courseJsonLd.offers.itemOffered.url).toBeDefined();

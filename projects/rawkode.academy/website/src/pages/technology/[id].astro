@@ -73,7 +73,9 @@ const upcomingSessions = allVideos
 		({ data }) =>
 			data.type === "live" &&
 			data.publishedAt > now &&
-			normalizeTechnologyReferences(data.technologies).includes(technologyEntry.id),
+			normalizeTechnologyReferences(data.technologies).includes(
+				technologyEntry.id,
+			),
 	)
 	.sort((a, b) => a.data.publishedAt.getTime() - b.data.publishedAt.getTime());
 // Published recordings about this technology, most recent first.
@@ -81,7 +83,9 @@ const technologyVideos = allVideos
 	.filter(
 		({ data }) =>
 			data.publishedAt <= now &&
-			normalizeTechnologyReferences(data.technologies).includes(technologyEntry.id),
+			normalizeTechnologyReferences(data.technologies).includes(
+				technologyEntry.id,
+			),
 	)
 	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
 
@@ -156,14 +160,22 @@ const relatedTechnologies = relatedTechSeed
 		status: entry.data.status,
 	}));
 const firstRelatedSubcategory = relatedTechnologies[0]?.subcategory?.trim();
-const sharedRelatedSubcategory = firstRelatedSubcategory &&
-	relatedTechnologies.every((related) => related.subcategory?.trim() === firstRelatedSubcategory)
-		? firstRelatedSubcategory : undefined;
+const sharedRelatedSubcategory =
+	firstRelatedSubcategory &&
+	relatedTechnologies.every(
+		(related) => related.subcategory?.trim() === firstRelatedSubcategory,
+	)
+		? firstRelatedSubcategory
+		: undefined;
 const relatedInitials = (name: string) => {
 	const words = name.trim().split(/[\s-]+/u);
-	return (words.length > 1
-		? words.slice(0, 2).map((word) => Array.from(word)[0]).join("")
-		: Array.from(name).slice(0, 2).join("")
+	return (
+		words.length > 1
+			? words
+					.slice(0, 2)
+					.map((word) => Array.from(word)[0])
+					.join("")
+			: Array.from(name).slice(0, 2).join("")
 	).toUpperCase();
 };
 
@@ -188,9 +200,10 @@ const cncfStatusLabel = (() => {
 const seoDescription = (() => {
 	if (technology.seo?.description) return technology.seo.description;
 	const parts: string[] = [];
+	const article = /^[aeiou]/i.test(categoryLabel) ? "an" : "a";
 	const projectQualifier = cncfStatusLabel
 		? `a ${cncfStatusLabel} ${categoryLabel} project`
-		: `a ${categoryLabel} project`;
+		: `${article} ${categoryLabel} project`;
 	if (videoCount > 0) {
 		parts.push(
 			`${videoCount} video${videoCount === 1 ? "" : "s"} and tutorials covering ${technology.name}, ${projectQualifier}`,
@@ -210,10 +223,7 @@ const noindex = !hasContent && videoCount === 0;
 const styles = academyTechnology();
 const page = academyPage();
 
-const technologyUrl = new URL(
-	`/technology/${technology.id}`,
-	Astro.site,
-).href;
+const technologyUrl = new URL(`/technology/${technology.id}`, Astro.site).href;
 const absoluteLogo = technology.logo
 	? technology.logo.startsWith("http")
 		? technology.logo
@@ -247,7 +257,7 @@ const statusLabels: Record<string, string> = {
 };
 
 const statusLabel = technology.matrix?.status
-	? statusLabels[technology.matrix.status] ?? technology.matrix.status
+	? (statusLabels[technology.matrix.status] ?? technology.matrix.status)
 	: undefined;
 const description = technology.seo?.description?.trim();
 // Stored values are lowercase identifiers ("stable", "rising"); set them as words.
@@ -278,8 +288,14 @@ for (const [label, url] of projectLinks) {
 	else officialLinks.push([label, url]);
 }
 const communityLabels: Record<string, string> = {
-	twitter: "Twitter / X", youtube: "YouTube", slack: "Slack", discord: "Discord",
-	blog: "Blog", mailingList: "Mailing list", githubDiscussions: "GitHub discussions", chat: "Chat",
+	twitter: "Twitter / X",
+	youtube: "YouTube",
+	slack: "Slack",
+	discord: "Discord",
+	blog: "Blog",
+	mailingList: "Mailing list",
+	githubDiscussions: "GitHub discussions",
+	chat: "Chat",
 };
 const communityLinks = Object.entries(technology.community ?? {})
 	.filter((entry): entry is [string, string] => Boolean(entry[1]))
@@ -295,20 +311,27 @@ const cncfLinks = [
 	["Annual review", technology.cncf?.annualReviewUrl],
 ].filter((entry): entry is [string, string] => Boolean(entry[1]));
 const confidenceLabels: Record<string, string> = {
-	"deep-experience": "Deep experience", "some-experience": "Some experience", gut: "Gut feeling",
+	"deep-experience": "Deep experience",
+	"some-experience": "Some experience",
+	gut: "Gut feeling",
 };
 const matrixMetadata = [
 	["First used", technology.matrix?.firstUsed],
 	["Last used", technology.matrix?.lastUsed],
-	["Confidence", technology.matrix?.confidence && confidenceLabels[technology.matrix.confidence]],
+	[
+		"Confidence",
+		technology.matrix?.confidence &&
+			confidenceLabels[technology.matrix.confidence],
+	],
 	[
 		"Trajectory",
 		technology.matrix?.trajectory && sentenceCase(technology.matrix.trajectory),
 	],
 ].filter((entry): entry is [string, string] => Boolean(entry[1]));
 const hasMatrixDetails = Boolean(
-	technology.matrix?.why || technology.matrix?.spicyTake ||
-	technology.matrix?.makesMeFeel,
+	technology.matrix?.why ||
+		technology.matrix?.spicyTake ||
+		technology.matrix?.makesMeFeel,
 );
 
 // Mirror TopicHub's matching rules so its generic empty state cannot contradict
@@ -317,7 +340,8 @@ const normalizedTechnologyId = technology.id.replace(/\/index$/, "");
 const matchesTechnology = (
 	references: ReadonlyArray<string | { id: string }> | undefined,
 ) =>
-	Array.isArray(references) && references.some((reference) => {
+	Array.isArray(references) &&
+	references.some((reference) => {
 		const id = typeof reference === "string" ? reference : reference.id;
 		return id.replace(/\/index$/, "") === normalizedTechnologyId;
 	});
@@ -327,18 +351,34 @@ const [articles, news, learningPaths] = await Promise.all([
 	optionalContent(getCollection("learningPaths"), []),
 ]);
 const hasTopicContent =
-	articles.some(({ data }) => data.publishedAt <= now && matchesTechnology(data.technologies)) ||
-	news.some(({ data }) => isNewsPublished(data.publishedAt, now) && matchesTechnology(data.technologies)) ||
-	learningPaths.some(({ data }) => data.publishedAt <= now && matchesTechnology(data.technologies));
-const hasAside = hasMatrixDetails ||
-	Boolean(technology.cncf?.status) || cncfDates.length > 0 || cncfLinks.length > 0 || communityLinks.length > 0;
+	articles.some(
+		({ data }) =>
+			data.publishedAt <= now && matchesTechnology(data.technologies),
+	) ||
+	news.some(
+		({ data }) =>
+			isNewsPublished(data.publishedAt, now) &&
+			matchesTechnology(data.technologies),
+	) ||
+	learningPaths.some(
+		({ data }) =>
+			data.publishedAt <= now && matchesTechnology(data.technologies),
+	);
+const hasAside =
+	hasMatrixDetails ||
+	Boolean(technology.cncf?.status) ||
+	cncfDates.length > 0 ||
+	cncfLinks.length > 0 ||
+	communityLinks.length > 0;
 
 // TopicHub (articles, news, learning paths), the video rails and the related
 // technologies rail all list collections, so their tags and schedules apply.
 // The supporter badge relies on entity tags instead: supporter entries carry
 // "technologies:<id>", so only the supported page is purged when a supporter
 // starts, changes or ends, and a failing supporters load keeps the full TTL.
-const relatedEntryIds = new Set(relatedTechnologies.map((related) => related.id));
+const relatedEntryIds = new Set(
+	relatedTechnologies.map((related) => related.id),
+);
 await setContentCache(Astro, {
 	entries: [
 		technologyEntry,
@@ -348,9 +388,13 @@ await setContentCache(Astro, {
 		...items.filter((t) => relatedEntryIds.has(t.id)),
 		...(hasTopicContent
 			? [
-					...articles.filter(({ data }) => matchesTechnology(data.technologies)),
+					...articles.filter(({ data }) =>
+						matchesTechnology(data.technologies),
+					),
 					...news.filter(({ data }) => matchesTechnology(data.technologies)),
-					...learningPaths.filter(({ data }) => matchesTechnology(data.technologies)),
+					...learningPaths.filter(({ data }) =>
+						matchesTechnology(data.technologies),
+					),
 				]
 			: []),
 	],

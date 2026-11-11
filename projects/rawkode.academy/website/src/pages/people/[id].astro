@@ -57,8 +57,7 @@ const authoredArticles = articles
 	)
 	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
 
-const formatPublishDate = (date: Date) =>
-	localDate(date);
+const formatPublishDate = (date: Date) => localDate(date);
 
 // Prepare Show Summaries
 const showHosts = await Promise.all(
@@ -181,7 +180,9 @@ const pageDescription = (() => {
 	if (parts.length === 0) {
 		return `${person.data.name} on Rawkode Academy: interviews, live coding, and conversations with leaders in Cloud Native and open source.`;
 	}
-	return `${person.data.name}: ${parts.join(", ")}. Watch interviews, live coding, and technical discussions on Rawkode Academy.`;
+	const summary = `${person.data.name}: ${parts.join(", ")}.`;
+	const withCallToAction = `${summary} Watch interviews, live coding, and technical discussions.`;
+	return withCallToAction.length <= 160 ? withCallToAction : summary;
 })();
 
 const profileUrl = new URL(`/people/${person.data.id}`, Astro.site).href;
@@ -227,7 +228,10 @@ const authoredSocialLinks = [
 ].filter((link) => typeof link === "object");
 
 // Exact equality only: authored fragments can identify different destinations.
-const linksByUrl = new Map<string, { name: string; url: string; icon: string; filled?: boolean }>();
+const linksByUrl = new Map<
+	string,
+	{ name: string; url: string; icon: string; filled?: boolean }
+>();
 for (const link of authoredSocialLinks) {
 	const existing = linksByUrl.get(link.url);
 	if (existing) existing.name += ` / ${link.name}`;

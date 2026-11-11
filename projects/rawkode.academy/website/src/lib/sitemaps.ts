@@ -36,7 +36,8 @@ export type SitemapChangeFreq =
 
 export interface SitemapUrlEntry {
 	path: string;
-	lastmod: Date;
+	/** Omit when no real modification date is known. */
+	lastmod?: Date;
 	changefreq: SitemapChangeFreq;
 	/**
 	 * 0.0–1.0; only emitted into the sitemap when set. Most crawlers
@@ -66,6 +67,7 @@ type StaticPageDefinition = {
 
 const staticPages: StaticPageDefinition[] = [
 	{ path: "/games/kubele", changefreq: "daily", priority: 0.5 },
+	{ path: "/games/cnicon", changefreq: "monthly", priority: 0.5 },
 	// Homepage is the strongest within-site signal.
 	{ path: "/", changefreq: "daily", priority: 1.0 },
 	// Top-level content listings - primary navigation targets.
@@ -168,15 +170,12 @@ function sortByPath(entries: SitemapUrlEntry[]): SitemapUrlEntry[] {
 }
 
 function getLatestLastmod(entries: SitemapUrlEntry[]): Date | undefined {
-	const firstEntry = entries[0];
-	if (!firstEntry) {
-		return undefined;
-	}
-	return entries.reduce(
-		(latest, entry) =>
-			entry.lastmod.getTime() > latest.getTime() ? entry.lastmod : latest,
-		firstEntry.lastmod,
-	);
+	return entries.reduce<Date | undefined>((latest, entry) => {
+		if (!entry.lastmod) return latest;
+		return !latest || entry.lastmod.getTime() > latest.getTime()
+			? entry.lastmod
+			: latest;
+	}, undefined);
 }
 
 export function toAbsoluteUrl(
@@ -207,13 +206,15 @@ export function renderUrlSet(
 	const body = sortByPath(entries)
 		.map((entry) => {
 			const loc = escapeXml(toAbsoluteUrl(site, entry.path));
+			const lastmodLine = entry.lastmod
+				? `\n    <lastmod>${entry.lastmod.toISOString()}</lastmod>`
+				: "";
 			const priorityLine =
 				typeof entry.priority === "number"
 					? `\n    <priority>${entry.priority.toFixed(1)}</priority>`
 					: "";
 			return `  <url>
-    <loc>${loc}</loc>
-    <lastmod>${entry.lastmod.toISOString()}</lastmod>
+    <loc>${loc}</loc>${lastmodLine}
     <changefreq>${entry.changefreq}</changefreq>${priorityLine}
   </url>`;
 		})
@@ -249,10 +250,10 @@ ${body}
 }
 
 export async function getPagesSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const deployTime = await getDeployTime();
+	// Static pages have no recorded modification date, and a deploy-time
+	// lastmod would change on every release, so none is emitted.
 	const entries = staticPages.map((page) => ({
 		path: page.path,
-		lastmod: deployTime,
 		changefreq: page.changefreq,
 		priority: page.priority,
 	}));
