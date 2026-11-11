@@ -77,9 +77,16 @@ export async function checkLink(url: string): Promise<LinkCheck> {
 			? { state: "redirected", status: response.status, finalUrl: response.url }
 			: { state: "ok", status: response.status };
 	} catch (error) {
-		const detail = error instanceof Error ? error.message : String(error);
+		// The reason for a failed fetch (for example a DNS error) is on its cause.
+		const cause = error instanceof Error ? error.cause : undefined;
+		const detail = [error, cause]
+			.filter((part) => part !== undefined)
+			.map((part) => (part instanceof Error ? part.message : String(part)))
+			.join(": ");
 		return {
-			state: /dns|lookup|not known/i.test(detail) ? "broken" : "error",
+			state: /dns|lookup|not known|ENOTFOUND/i.test(detail)
+				? "broken"
+				: "error",
 			detail,
 		};
 	}
