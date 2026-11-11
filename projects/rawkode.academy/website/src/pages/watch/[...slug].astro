@@ -222,6 +222,19 @@ if (shouldMountLiveGate) {
 	});
 }
 
+// Episode titles such as "22. Borko Vs. Bojan" carry no searchable topic, so
+// the show name is appended when the title does not already mention it.
+const SEO_TITLE_LIMIT = 60;
+const seoTitle = (() => {
+	const showName = showEntry?.data.name;
+	if (!showName) return video.data.title;
+	if (video.data.title.toLowerCase().includes(showName.toLowerCase())) {
+		return video.data.title;
+	}
+	const withShow = `${video.data.title} | ${showName}`;
+	return withShow.length <= SEO_TITLE_LIMIT ? withShow : video.data.title;
+})();
+
 const META_DESCRIPTION_LIMIT = 160;
 const metaDescription = (() => {
 	const firstParagraph =
@@ -336,7 +349,7 @@ const watchStatusLabel = isLiveNow
 ---
 
 <Page
-	title={video.data.title}
+	title={seoTitle}
 	description={metaDescription}
 	noindex={metaDescription.length < 30}
 	ogType="video.other"
