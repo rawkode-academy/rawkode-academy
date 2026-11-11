@@ -76,6 +76,10 @@ _icebergSink: {
 		token:      infrastructure.resources.catalog_token.outputs.value
 		rolling_policy: interval_seconds: 300
 	}
+	// The pipeline's SQL shapes the rows, so the sink declares no fields.
+	// Cloudflare reports an empty field list, and leaving it unset makes every
+	// plan replace the sink.
+	schema: fields: []
 }
 
 infrastructure: {
