@@ -11,6 +11,7 @@ import {
 	optionalContent,
 	setContentCache,
 } from "@/lib/live-content";
+import { supporterLogo } from "@/lib/supporter-logos";
 import { BECOME_A_SUPPORTER_PATH, supporterHost } from "@/lib/supporters";
 import { buildTechnologyTags } from "@/lib/technology-tags";
 
@@ -24,12 +25,18 @@ const [supporters, technologies] = await Promise.all([
 // The gateway lists active supporters only, longest-standing first.
 const wall = supporters
 	.filter(({ data }) => data.name && data.websiteUrl)
-	.map(({ id, data }) => ({
+	.map((supporter) => ({
+		supporter,
+		logo: supporterLogo(supporter, technologies),
+	}))
+	.map(({ supporter: { id, data }, logo }) => ({
 		id,
 		name: data.name,
 		websiteUrl: data.websiteUrl,
 		host: supporterHost(data.websiteUrl),
-		logoUrl: data.logoUrl,
+		logoUrl: logo?.src,
+		// An icon-only mark keeps the name beside it.
+		wordmark: logo?.wordmark,
 		technologies: buildTechnologyTags(
 			data.technologies.map((technology) => technology.id),
 			technologies,
@@ -83,19 +90,19 @@ const styles = academyLayout({ width: "wide" });
 												<img
 													class="supporter-wall__logo"
 													src={supporter.logoUrl}
-													alt={supporter.name}
+													alt={supporter.wordmark ? "" : supporter.name}
 													width="320"
 													height="96"
-													loading="lazy"
 													onerror="this.hidden=true; this.nextElementSibling.hidden=false;"
 												/>
 											)}
-											<span class="supporter-wall__name" hidden={Boolean(supporter.logoUrl)}>{supporter.name}</span>
+											<span class="supporter-wall__name" hidden={Boolean(supporter.logoUrl) && !supporter.wordmark}>{supporter.name}</span>
 											<span class="sr-only"> (opens in a new tab)</span>
 											<span class="supporter-wall__arrow" aria-hidden="true">↗</span>
 										</a>
 									</h3>
 									<div class="supporter-wall__detail">
+										{supporter.host && <p class="supporter-wall__host">{supporter.host}</p>}
 										{supporter.technologies.length > 0 && (
 											<div class="supporter-wall__support">
 												<MLabel>Supports</MLabel>
@@ -108,15 +115,15 @@ const styles = academyLayout({ width: "wide" });
 												</ul>
 											</div>
 										)}
-										{supporter.host && <p class="supporter-wall__host">{supporter.host}</p>}
 									</div>
 								</li>
 							))}
+							<li class="supporter-wall__invite">
+								<p class="supporter-wall__invite-title">Your logo here</p>
+								<p class="supporter-wall__invite-body">Keep the Academy free to watch, and take your place on the wall.</p>
+								<a class={button({ variant: "outline" })} href={BECOME_A_SUPPORTER_PATH}>Become a community supporter <span data-part="arrow" aria-hidden="true">→</span></a>
+							</li>
 						</ul>
-						<div class="supporter-wall__invite">
-							<p>Put your organisation's name beside theirs.</p>
-							<a class={button({ variant: "outline" })} href={BECOME_A_SUPPORTER_PATH}>Become a community supporter <span data-part="arrow" aria-hidden="true">→</span></a>
-						</div>
 					</>
 				) : (
 					<EmptyState
@@ -144,106 +151,134 @@ const styles = academyLayout({ width: "wide" });
 	}
 
 	.supporter-wall {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+		gap: 1rem;
 		margin: 0;
 		padding: 0;
 		list-style: none;
-		border-bottom: 1px solid var(--colors-academy-border);
+	}
+
+	.supporter-wall__item,
+	.supporter-wall__invite {
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+		min-height: 19rem;
+		border: 1px solid var(--colors-academy-border);
+		border-radius: var(--radii-academy-m);
 	}
 
 	.supporter-wall__item {
-		display: grid;
-		gap: 1.25rem 3rem;
-		min-width: 0;
-		padding-block: 2rem;
-		border-top: 1px solid var(--colors-academy-border);
+		background: var(--colors-academy-panel);
+		transition: border-color var(--durations-base) var(--easings-academy-out);
 	}
 
-	@media (min-width: 56rem) {
-		.supporter-wall__item {
-			grid-template-columns: minmax(0, 1fr) minmax(14rem, 20rem);
-			align-items: end;
-			padding-block: 3rem;
-		}
+	.supporter-wall__item:hover,
+	.supporter-wall__item:focus-within {
+		border-color: var(--colors-academy-text);
 	}
 
 	.supporter-wall__heading {
+		display: flex;
+		flex: 1;
 		margin: 0;
 		font: inherit;
 		letter-spacing: normal;
 	}
 
+	/* The stage: the mark, large and centred, is the whole link. */
 	.supporter-wall__identity {
-		display: inline-flex;
-		align-items: baseline;
-		gap: 0.75rem;
-		max-width: 100%;
+		position: relative;
+		display: flex;
+		flex: 1;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: center;
+		gap: 0.75rem 1rem;
+		min-width: 0;
+		padding: 3rem 2rem;
+		border-radius: var(--radii-academy-m);
 		color: var(--colors-academy-text);
 		text-decoration: none;
 	}
 
+	/* Marks are one ink on a transparent ground: set them in the text colour. */
+	.supporter-wall__logo {
+		width: auto;
+		max-width: min(100%, 15rem);
+		height: clamp(3rem, 6vw, 4.25rem);
+		object-fit: contain;
+		filter: brightness(0);
+		opacity: 0.82;
+		transition:
+			opacity var(--durations-base) var(--easings-academy-out),
+			transform var(--durations-base) var(--easings-academy-out);
+	}
+
+	:global(html.dark) .supporter-wall__logo {
+		filter: brightness(0) invert(1);
+	}
+
 	.supporter-wall__name {
 		font-family: var(--fonts-academy-display);
-		font-size: clamp(3rem, 9vw, 6rem);
+		font-size: clamp(2rem, 4.5vw, 3rem);
 		font-weight: 800;
 		letter-spacing: var(--letter-spacings-academy-display);
-		line-height: 0.95;
+		line-height: 1;
 		overflow-wrap: anywhere;
-		transition: color var(--durations-base) var(--easings-academy-out);
 	}
 
 	.supporter-wall__arrow {
+		position: absolute;
+		top: 1rem;
+		right: 1.25rem;
 		color: var(--colors-academy-text-muted);
-		font-size: clamp(1.5rem, 4vw, 2.5rem);
+		font-size: 1.25rem;
 		line-height: 1;
 		transition:
 			transform var(--durations-base) var(--easings-academy-out),
 			color var(--durations-base) var(--easings-academy-out);
 	}
 
-	.supporter-wall__identity:hover .supporter-wall__name,
-	.supporter-wall__identity:hover .supporter-wall__arrow {
-		color: var(--colors-academy-accent);
+	.supporter-wall__identity:hover .supporter-wall__logo {
+		opacity: 1;
+		transform: scale(1.04);
 	}
 
 	.supporter-wall__identity:hover .supporter-wall__arrow {
-		transform: translate(0.2rem, -0.2rem);
+		color: var(--colors-academy-accent);
+		transform: translate(0.15rem, -0.15rem);
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.supporter-wall__name,
+		.supporter-wall__item,
+		.supporter-wall__logo,
 		.supporter-wall__arrow {
 			transition: none;
 		}
 
+		.supporter-wall__identity:hover .supporter-wall__logo,
 		.supporter-wall__identity:hover .supporter-wall__arrow {
 			transform: none;
 		}
 	}
 
-	/* Logos are supplied for light backgrounds, so the plate stays light
-	   paper with a light-mode hairline in both schemes. */
-	.supporter-wall__logo {
-		--supporter-plate: oklch(0.97 0.008 85);
-		--supporter-plate-hairline: oklch(0.18 0.02 60 / 0.12);
-		width: auto;
-		max-width: 100%;
-		height: clamp(4.5rem, 10vw, 7rem);
-		padding: 1rem 1.5rem;
-		border: 1px solid var(--supporter-plate-hairline);
-		border-radius: var(--radii-academy-s);
-		background: var(--supporter-plate);
-		object-fit: contain;
-	}
-
 	.supporter-wall__detail {
-		display: grid;
-		gap: 1rem;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 0.5rem 1.5rem;
+		padding: 1rem 1.25rem;
+		border-top: 1px solid var(--colors-academy-border);
 	}
 
 	.supporter-wall__support {
 		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 0.35rem 0.75rem;
 	}
 
 	.supporter-wall__technologies {
@@ -281,18 +316,28 @@ const styles = academyLayout({ width: "wide" });
 		outline-offset: 2px;
 	}
 
+	/* The open place on the wall. */
 	.supporter-wall__invite {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		justify-content: space-between;
-		gap: 1rem 2rem;
-		margin-top: 2.5rem;
+		align-items: flex-start;
+		justify-content: center;
+		gap: 0.75rem;
+		padding: 2rem;
+		border-style: dashed;
+		border-color: var(--colors-academy-input-border);
 	}
 
-	.supporter-wall__invite p {
+	.supporter-wall__invite-title {
 		margin: 0;
+		font-family: var(--fonts-academy-display);
+		font-size: clamp(2rem, 4.5vw, 3rem);
+		font-weight: 800;
+		letter-spacing: var(--letter-spacings-academy-display);
+		line-height: 1;
+	}
+
+	.supporter-wall__invite-body {
+		max-width: 28ch;
+		margin: 0 0 0.75rem;
 		color: var(--colors-academy-text-soft);
-		font-size: 1.125rem;
 	}
 </style>

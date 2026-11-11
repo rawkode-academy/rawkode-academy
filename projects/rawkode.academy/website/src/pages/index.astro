@@ -17,6 +17,7 @@ import {
 	setContentCache,
 } from "@/lib/live-content";
 import { isNewsPublished } from "@/lib/news-publication";
+import { supporterLogo } from "@/lib/supporter-logos";
 import { SUPPORTERS_PATH } from "@/lib/supporters";
 import { getTypeBadgeConfig } from "@/utils/article-types";
 import { formatRuntime } from "@/lib/video-runtime";
@@ -339,9 +340,13 @@ Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 				<div class="home-supporters">
 					<h2 id="home-supporters-title" class="home-supporters__title">Free to watch, thanks to</h2>
 					<ul class="home-supporters__names">
-						{supporters.map(({ data }) => (
+						{supporters.map((supporter) => ({ data: supporter.data, logo: supporterLogo(supporter) })).map(({ data, logo }) => (
 							<li>
-								<a href={data.websiteUrl} target="_blank" rel="sponsored noopener">{data.name}<span class="sr-only"> (opens in a new tab)</span></a>
+								<a href={data.websiteUrl} target="_blank" rel="sponsored noopener">
+									{logo && <img src={logo.src} alt={logo.wordmark ? "" : data.name} width="160" height="40" loading="lazy" onerror="this.hidden=true; this.nextElementSibling.hidden=false;" />}
+									<span hidden={Boolean(logo) && !logo?.wordmark}>{data.name}</span>
+									<span class="sr-only"> (opens in a new tab)</span>
+								</a>
 							</li>
 						))}
 					</ul>
@@ -376,7 +381,7 @@ Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 	@media (min-width: 64rem) {
 		.home-supporters {
 			grid-template-columns: 16rem minmax(0, 1fr);
-			align-items: baseline;
+			align-items: center;
 		}
 
 		.home-supporters__all {
@@ -397,26 +402,43 @@ Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 	.home-supporters__names {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.5rem 2.5rem;
+		align-items: center;
+		gap: 1.5rem 3.5rem;
 		margin: 0;
 		padding: 0;
 		list-style: none;
 	}
 
 	.home-supporters__names a {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
 		color: var(--colors-academy-text);
 		font-family: var(--fonts-academy-display);
-		font-size: var(--font-sizes-academy-section);
+		font-size: clamp(1.75rem, 3vw, 2.25rem);
 		font-weight: 800;
 		letter-spacing: var(--letter-spacings-academy-display);
 		line-height: 1;
 		overflow-wrap: anywhere;
 		text-decoration: none;
-		transition: color var(--durations-base) var(--easings-academy-out);
+		opacity: 0.82;
+		transition: opacity var(--durations-base) var(--easings-academy-out);
 	}
 
 	.home-supporters__names a:hover {
-		color: var(--colors-academy-accent);
+		opacity: 1;
+	}
+
+	/* One-ink marks, set in the text colour of either scheme. */
+	.home-supporters__names img {
+		width: auto;
+		height: clamp(2rem, 3.5vw, 2.75rem);
+		object-fit: contain;
+		filter: brightness(0);
+	}
+
+	:global(html.dark) .home-supporters__names img {
+		filter: brightness(0) invert(1);
 	}
 
 	.home-supporters__all {
