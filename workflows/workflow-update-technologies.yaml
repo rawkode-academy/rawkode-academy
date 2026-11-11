@@ -94,6 +94,7 @@ jobs:
             accept: ${{ inputs.accept }}
             changes: ${{ inputs.changes }}
             drafts: ${{ data.findBySpec("seo-writer", "cliResult") }}
+            run: ${{ run.id }}
       - name: redraft
         description: Give every draft that failed the checks one more attempt
         dependsOn:
@@ -124,6 +125,7 @@ jobs:
             accept: ${{ inputs.accept }}
             changes: ${{ inputs.changes }}
             drafts: ${{ data.findBySpec("seo-writer", "cliResult") }}
+            run: ${{ run.id }}
       - name: approve
         description: Review the plan before anything is written
         dependsOn:
@@ -136,13 +138,12 @@ jobs:
               conditions:
                 - type: succeeded
                 - type: skipped
-        guard: ${{ size(data.latest("technology-profiles", "plan").attributes.statements) == 0 }}
+        guard: ${{ size(data.latest("technology-profiles", "plan-" + run.id).attributes.statements) == 0 }}
         task:
           type: manual_approval
           prompt: >-
-            Review the planned technology updates before they are written to
-            production D1: swamp data query 'modelName == "technology-profiles"
-            && name == "plan"' --select attributes.summary
+            Review the planned technology updates, listed by the plan step
+            above, before they are written to production D1.
           timeout: 86400
       - name: write
         description: Apply the planned updates to D1 in one batch
@@ -150,7 +151,7 @@ jobs:
           - step: approve
             condition:
               type: succeeded
-        guard: ${{ size(data.latest("technology-profiles", "plan").attributes.statements) == 0 }}
+        guard: ${{ size(data.latest("technology-profiles", "plan-" + run.id).attributes.statements) == 0 }}
         task:
           type: behavior
           behavior: technologies-database
@@ -158,14 +159,14 @@ jobs:
           inputs:
             database_id: 4671b796-cdc8-4a4e-aa58-4e10eb24b67d
             body:
-              batch: ${{ data.latest("technology-profiles", "plan").attributes.statements }}
+              batch: ${{ data.latest("technology-profiles", "plan-" + run.id).attributes.statements }}
       - name: reread
         description: Read the rows back from D1
         dependsOn:
           - step: write
             condition:
               type: succeeded
-        guard: ${{ size(data.latest("technology-profiles", "plan").attributes.statements) == 0 }}
+        guard: ${{ size(data.latest("technology-profiles", "plan-" + run.id).attributes.statements) == 0 }}
         task:
           type: behavior
           behavior: technologies-database
@@ -185,23 +186,25 @@ jobs:
           - step: reread
             condition:
               type: succeeded
-        guard: ${{ size(data.latest("technology-profiles", "plan").attributes.statements) == 0 }}
+        guard: ${{ size(data.latest("technology-profiles", "plan-" + run.id).attributes.statements) == 0 }}
         task:
           type: behavior
           behavior: technology-profiles
           methodName: confirm
           inputs:
             rows: ${{ data.latest("technologies-database", "d1_query_database-current").attributes[0].results }}
+            run: ${{ run.id }}
       - name: invalidate
         description: Purge the website cache for the updated technologies
         dependsOn:
           - step: confirm
             condition:
               type: succeeded
-        guard: ${{ size(data.latest("technology-profiles", "plan").attributes.statements) == 0 }}
+        guard: ${{ size(data.latest("technology-profiles", "plan-" + run.id).attributes.statements) == 0 }}
         task:
           type: behavior
           behavior: technology-profiles
           methodName: invalidate
           inputs:
             token: ${{ vault.get(rawkode-academy, website-cache-invalidation) }}
+            run: ${{ run.id }}

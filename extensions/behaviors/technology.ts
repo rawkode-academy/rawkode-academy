@@ -392,6 +392,16 @@ const ChangesSchema = z.record(z.string(), z.record(z.string(), z.unknown()))
 		"Values to write regardless of the findings: id, then field path, then value (null clears)",
 	);
 
+const RunSchema = z.string().default("")
+	.describe(
+		"Id of the workflow run, so its plan is kept apart from other runs' plans; empty when run by hand",
+	);
+
+/** The data name of a run's plan. */
+function planName(run: string): string {
+	return run === "" ? "plan" : `plan-${run}`;
+}
+
 function split(list: string): string[] {
 	return list.split(",").map((entry) => entry.trim()).filter(Boolean);
 }
@@ -417,10 +427,11 @@ export const behavior = {
 			garbageCollection: 10,
 		},
 		plan: {
-			description: "The statements the latest audit wants written to D1",
+			description:
+				"The statements a run wants written to D1, one plan per workflow run",
 			schema: PlanSchema,
-			lifetime: "infinite" as const,
-			garbageCollection: 20,
+			lifetime: "90d" as const,
+			garbageCollection: 5,
 		},
 		gaps: {
 			description: "CNCF projects that have no technology profile",
@@ -566,6 +577,7 @@ export const behavior = {
 					.describe(
 						"The copywriter's answers, keyed by technology id: `cliResult` records of @keeb/anthropic/claude",
 					),
+				run: RunSchema,
 			}),
 			execute: async (
 				args: {
@@ -573,6 +585,7 @@ export const behavior = {
 					accept: string;
 					changes: Record<string, Record<string, unknown>>;
 					drafts: unknown[];
+					run: string;
 				},
 				context: Context,
 			): Promise<{ dataHandles: Array<{ name: string }> }> => {
@@ -609,18 +622,31 @@ export const behavior = {
 							values: {},
 							rejected: [`not drafted: ${draft?.error ?? "no answer"}`],
 						};
+					// A sourced or drafted value that breaks the column's rules is left
+					// out and reported; one the caller asked for fails the plan below.
+					const dropped: string[] = [];
+					const changes = planChanges(
+						technology,
+						audit.findings,
+						accept,
+						requested,
+						accepted,
+						review.values,
+					).filter((change) => {
+						if (
+							change.field === "body" ||
+							["accepted", "requested"].includes(change.reason)
+						) return true;
+						const problem = validateValue(change.field, change.to, known);
+						if (problem !== null) dropped.push(problem);
+						return problem === null;
+					});
 					planned.push({
 						technology,
 						findings: audit.findings,
 						rejected: review.rejected,
-						changes: planChanges(
-							technology,
-							audit.findings,
-							accept,
-							requested,
-							accepted,
-							review.values,
-						),
+						dropped,
+						changes,
 					});
 				}
 
@@ -649,7 +675,9 @@ export const behavior = {
 				let needsReview = 0;
 				const now = new Date().toISOString();
 				const handles: Array<{ name: string }> = [];
-				for (const { technology, findings, changes, rejected } of planned) {
+				for (
+					const { technology, findings, changes, rejected, dropped } of planned
+				) {
 					const counts: Record<string, number> = {};
 					for (const finding of findings) {
 						counts[finding.status] = (counts[finding.status] ?? 0) + 1;
@@ -660,7 +688,7 @@ export const behavior = {
 						) &&
 						!changes.some((change: Change) => change.field === finding.field)
 					);
-					needsReview += open.length;
+					needsReview += open.length + dropped.length;
 
 					if (changes.length > 0) {
 						const description = changes.find((change) =>
@@ -701,6 +729,10 @@ export const behavior = {
 									(finding.note ? ` (${finding.note})` : ""),
 							);
 						}
+					}
+					if (dropped.length > 0) {
+						lines.push(`${technology.id} not written:`);
+						lines.push(...dropped.map((problem) => `  ${problem}`));
 					}
 					if (rejected.length > 0) {
 						lines.push(`${technology.id} drafts rejected:`);
@@ -745,7 +777,7 @@ export const behavior = {
 				for (const line of lines) context.logger.info("{line}", { line });
 
 				handles.push(
-					await context.writeResource("plan", "plan", {
+					await context.writeResource("plan", planName(args.run), {
 						createdAt: now,
 						audited: planned.length,
 						technologies: Object.keys(expected),
@@ -836,12 +868,14 @@ export const behavior = {
 		confirm: {
 			description:
 				"Compare freshly read technology rows with the latest plan and fail unless every planned value is stored",
-			arguments: z.object({ rows: RowsSchema }),
+			arguments: z.object({ rows: RowsSchema, run: RunSchema }),
 			execute: async (
-				args: { rows: Array<Record<string, unknown>> },
+				args: { rows: Array<Record<string, unknown>>; run: string },
 				context: Context,
 			): Promise<{ dataHandles: Array<{ name: string }> }> => {
-				const plan = await context.readResource!("plan") as Plan | null;
+				const plan = await context.readResource!(planName(args.run)) as
+					| Plan
+					| null;
 				if (!plan) throw new Error("No plan to confirm: run plan first");
 				const stored = new Map(
 					args.rows.map(parseRow).map((
@@ -886,12 +920,15 @@ export const behavior = {
 					.describe(
 						"Bearer token of the website's cache invalidation endpoint; wire it with vault.get",
 					),
+				run: RunSchema,
 			}),
 			execute: async (
-				args: { token: string },
+				args: { token: string; run: string },
 				context: Context,
 			): Promise<{ dataHandles: Array<{ name: string }> }> => {
-				const plan = await context.readResource!("plan") as Plan | null;
+				const plan = await context.readResource!(planName(args.run)) as
+					| Plan
+					| null;
 				if (!plan || plan.technologies.length === 0) {
 					throw new Error("The latest plan changed nothing");
 				}
