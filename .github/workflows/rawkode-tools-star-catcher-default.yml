@@ -67,7 +67,7 @@ jobs:
           Darwin-arm64) cuenv_asset="cuenv-darwin-arm64" ;;
           *) echo "Unsupported platform: $platform" >&2; exit 1 ;;
         esac
-        cuenv_version="0.73.0"
+        cuenv_version="0.73.1"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi

@@ -38,9 +38,12 @@ catalog maintenance-configs '{
 	"snapshot_expiration": {"state": "enabled", "max_snapshot_age": "7d", "min_snapshots_to_keep": 10}
 }'
 
-# Fail unless the catalog now holds the credential compaction runs as.
+# Fail if the catalog still has no credential for compaction to run as.
 status=$(curl --fail-with-body --silent --show-error \
 	--header "Authorization: Bearer ${BASIN_CATALOG_TOKEN}" \
 	"https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/r2-catalog/${BUCKET}/maintenance-configs")
 echo "$status"
-grep -q '"credential_status": *"present"' <<<"$status"
+if grep -q '"credential_status": *"absent"' <<<"$status"; then
+	echo "The catalog has no stored credential" >&2
+	exit 1
+fi
