@@ -106,6 +106,17 @@ const PlanSchema = z.object({
 });
 type Plan = z.infer<typeof PlanSchema>;
 
+const TriageSchema = z.object({
+	checkedAt: z.string(),
+	technologies: z.array(z.object({
+		id: z.string(),
+		name: z.string(),
+		category: z.string().nullable(),
+		cncf: z.string().nullable(),
+		website: z.string().nullable(),
+	})),
+});
+
 const GapsSchema = z.object({
 	checkedAt: z.string(),
 	maturity: z.array(z.string()),
@@ -432,6 +443,12 @@ export const behavior = {
 			schema: PlanSchema,
 			lifetime: "90d" as const,
 			garbageCollection: 5,
+		},
+		triage: {
+			description: "Technologies whose matrix placement is still under review",
+			schema: TriageSchema,
+			lifetime: "infinite" as const,
+			garbageCollection: 12,
 		},
 		gaps: {
 			description: "CNCF projects that have no technology profile",
@@ -797,6 +814,49 @@ export const behavior = {
 					},
 				);
 				return { dataHandles: handles };
+			},
+		},
+		triage: {
+			description:
+				"List the given technology rows that await a matrix placement: those under review and those with no matrix at all",
+			arguments: z.object({ rows: RowsSchema }),
+			execute: async (
+				args: { rows: Array<Record<string, unknown>> },
+				context: Context,
+			): Promise<{ dataHandles: Array<{ name: string }> }> => {
+				const text = (value: unknown) =>
+					typeof value === "string" && value !== "" ? value : null;
+				const technologies = args.rows.map(parseRow)
+					.filter(({ columns }) => {
+						const matrix = columns.matrix as { status?: string } | null;
+						return !matrix?.status || matrix.status === "under-review";
+					})
+					.map(({ id, columns }) => ({
+						id,
+						name: String(columns.name ?? id),
+						category: text(columns.category),
+						cncf: text((columns.cncf as { status?: string } | null)?.status),
+						website: text(columns.website),
+					}));
+				for (const technology of technologies) {
+					context.logger.info("{id}: {name} ({detail}) {website}", {
+						id: technology.id,
+						name: technology.name,
+						detail: [
+							technology.category,
+							technology.cncf && `CNCF ${technology.cncf}`,
+						].filter(Boolean).join(", ") || "uncategorised",
+						website: technology.website ?? "",
+					});
+				}
+				context.logger.info("{count} technologies await a matrix placement", {
+					count: technologies.length,
+				});
+				const handle = await context.writeResource("triage", "triage", {
+					checkedAt: new Date().toISOString(),
+					technologies,
+				});
+				return { dataHandles: [handle] };
 			},
 		},
 		discover: {
