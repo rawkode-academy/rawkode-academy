@@ -9,6 +9,7 @@ export const MATRIX_GROUPING_VALUES = [
 ] as const;
 
 export const MATRIX_STATUS_VALUES = [
+	"under-review",
 	"skip",
 	"watch",
 	"explore",
@@ -111,6 +112,13 @@ const matrixGroupingValues: DimensionValue[] = [
 
 // Matrix Pipeline Status
 const matrixStatusValues: DimensionValue[] = [
+	{
+		value: "under-review",
+		label: "Under Review",
+		description: "Not triaged yet",
+		color: "#6b7280", // gray-500
+		darkColor: "#9ca3af",
+	},
 	{
 		value: "skip",
 		label: "Skip",
