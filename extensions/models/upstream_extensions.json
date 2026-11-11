@@ -30,5 +30,37 @@
     "filesChecksum": "2e41064d566d4b767442b04494201f245923b198f7cde2efc447ca50eebccef5",
     "serverUrl": "https://swamp-club.com",
     "publishedChannel": "stable"
+  },
+  "@webframp/cloudflare/queues": {
+    "version": "2026.11.03.1",
+    "pulledAt": "2026-11-11T18:59:05.402Z",
+    "files": [
+      ".swamp/pulled-extensions/@webframp/cloudflare/queues/dependency-audit.json",
+      ".swamp/pulled-extensions/@webframp/cloudflare/queues/files/LICENSE.md",
+      ".swamp/pulled-extensions/@webframp/cloudflare/queues/files/README.md",
+      ".swamp/pulled-extensions/@webframp/cloudflare/queues/manifest.yaml",
+      ".swamp/pulled-extensions/@webframp/cloudflare/queues/models/cloudflare/_lib/api.ts",
+      ".swamp/pulled-extensions/@webframp/cloudflare/queues/models/cloudflare/queues.ts"
+    ],
+    "checksum": "48cd7d1efe0ba29e30fbe4df51c9da32eeea309b32fd7e904e65390e1a80050f",
+    "filesChecksum": "8889eb0ef65f878ec330ecdf0e693edcc30d29ee25af0470db2ff6ee66172742",
+    "serverUrl": "https://swamp-club.com",
+    "publishedChannel": "stable"
+  },
+  "@webframp/cloudflare/workers-scripts": {
+    "version": "2026.11.03.1",
+    "pulledAt": "2026-11-11T18:59:10.668Z",
+    "files": [
+      ".swamp/pulled-extensions/@webframp/cloudflare/workers-scripts/dependency-audit.json",
+      ".swamp/pulled-extensions/@webframp/cloudflare/workers-scripts/files/LICENSE.md",
+      ".swamp/pulled-extensions/@webframp/cloudflare/workers-scripts/files/README.md",
+      ".swamp/pulled-extensions/@webframp/cloudflare/workers-scripts/manifest.yaml",
+      ".swamp/pulled-extensions/@webframp/cloudflare/workers-scripts/models/cloudflare/_lib/api.ts",
+      ".swamp/pulled-extensions/@webframp/cloudflare/workers-scripts/models/cloudflare/workers_scripts.ts"
+    ],
+    "checksum": "e8724edf82b7e90e83978e6819776e85383ccf8733d3b56d6fbd1b42f7d748a4",
+    "filesChecksum": "3d45e617548bf94e2dc97c8927a27752d0615b4e333611cc8d6a1f9dcfdc5827",
+    "serverUrl": "https://swamp-club.com",
+    "publishedChannel": "stable"
   }
 }
