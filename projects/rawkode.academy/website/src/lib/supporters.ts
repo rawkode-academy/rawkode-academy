@@ -3,7 +3,8 @@ import type { ContentEntry } from "@/lib/live-content/types";
 
 export const SUPPORTERS_PATH = "/supporters";
 /** Where organisations learn how to become a community supporter. */
-export const BECOME_A_SUPPORTER_PATH = "/organizations/support-our-work#supporter";
+export const BECOME_A_SUPPORTER_PATH =
+	"/organizations/support-our-work#supporter";
 
 /**
  * The active community supporter of a technology, if any. The supporters
@@ -17,4 +18,13 @@ export function supporterForTechnology(
 	return supporters.find(({ data }) =>
 		data.technologies.some((technology) => technology.id === id),
 	);
+}
+
+/** A supporter's website as people say it: "www.acme.dev/" becomes "acme.dev". */
+export function supporterHost(websiteUrl: string): string | undefined {
+	try {
+		return new URL(websiteUrl).hostname.replace(/^www\./, "");
+	} catch {
+		return undefined;
+	}
 }

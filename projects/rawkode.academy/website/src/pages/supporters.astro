@@ -11,7 +11,8 @@ import {
 	optionalContent,
 	setContentCache,
 } from "@/lib/live-content";
-import { BECOME_A_SUPPORTER_PATH } from "@/lib/supporters";
+import { supporterLogo } from "@/lib/supporter-logos";
+import { BECOME_A_SUPPORTER_PATH, supporterHost } from "@/lib/supporters";
 import { buildTechnologyTags } from "@/lib/technology-tags";
 
 // The supporters are the page; technology names are secondary, so a label
@@ -24,11 +25,18 @@ const [supporters, technologies] = await Promise.all([
 // The gateway lists active supporters only, longest-standing first.
 const wall = supporters
 	.filter(({ data }) => data.name && data.websiteUrl)
-	.map(({ id, data }) => ({
+	.map((supporter) => ({
+		supporter,
+		logo: supporterLogo(supporter, technologies),
+	}))
+	.map(({ supporter: { id, data }, logo }) => ({
 		id,
 		name: data.name,
 		websiteUrl: data.websiteUrl,
-		logoUrl: data.logoUrl,
+		host: supporterHost(data.websiteUrl),
+		logoUrl: logo?.src,
+		// An icon-only mark keeps the name beside it.
+		wordmark: logo?.wordmark,
 		technologies: buildTechnologyTags(
 			data.technologies.map((technology) => technology.id),
 			technologies,
@@ -56,9 +64,10 @@ const styles = academyLayout({ width: "wide" });
 >
 	<div class={styles.root}>
 		<AcademyCatalogMasthead
-			kicker="Community"
 			title="Community supporters"
-			description="Every Rawkode Academy tutorial, live stream and show is free to watch. These organisations fund that work, so the community can keep learning without a paywall."
+			description="These organisations keep every Rawkode Academy tutorial, live stream and show free to watch."
+			figure={wall.length}
+			figureLabel={wall.length === 1 ? "supporter" : "supporters"}
 		/>
 
 		<section class={styles.section} aria-labelledby="supporter-wall-title">
@@ -66,6 +75,7 @@ const styles = academyLayout({ width: "wide" });
 				<h2 id="supporter-wall-title" class="sr-only">Our community supporters</h2>
 				{wall.length > 0 ? (
 					<>
+						<p class="supporter-wall__thanks">Thank you for keeping the Academy free to watch.</p>
 						<ul class="supporter-wall">
 							{wall.map((supporter) => (
 								<li class="supporter-wall__item" data-supporter={supporter.id}>
@@ -80,35 +90,40 @@ const styles = academyLayout({ width: "wide" });
 												<img
 													class="supporter-wall__logo"
 													src={supporter.logoUrl}
-													alt={supporter.name}
-													width="160"
-													height="48"
-													loading="lazy"
+													alt={supporter.wordmark ? "" : supporter.name}
+													width="320"
+													height="96"
 													onerror="this.hidden=true; this.nextElementSibling.hidden=false;"
 												/>
 											)}
-											<span class="supporter-wall__name" hidden={Boolean(supporter.logoUrl)}>{supporter.name}</span>
+											<span class="supporter-wall__name" hidden={Boolean(supporter.logoUrl) && !supporter.wordmark}>{supporter.name}</span>
 											<span class="sr-only"> (opens in a new tab)</span>
+											<span class="supporter-wall__arrow" aria-hidden="true">↗</span>
 										</a>
 									</h3>
-									{supporter.technologies.length > 0 && (
-										<div class="supporter-wall__support">
-											<MLabel>Supports</MLabel>
-											<ul class="supporter-wall__technologies">
-												{supporter.technologies.map((technology) => (
-													<li>{technology.href
-														? <a class="supporter-wall__technology" href={technology.href}>{technology.label}</a>
-														: technology.label}</li>
-												))}
-											</ul>
-										</div>
-									)}
+									<div class="supporter-wall__detail">
+										{supporter.host && <p class="supporter-wall__host">{supporter.host}</p>}
+										{supporter.technologies.length > 0 && (
+											<div class="supporter-wall__support">
+												<MLabel>Supports</MLabel>
+												<ul class="supporter-wall__technologies">
+													{supporter.technologies.map((technology) => (
+														<li>{technology.href
+															? <a class="supporter-wall__technology" href={technology.href}>{technology.label}</a>
+															: technology.label}</li>
+													))}
+												</ul>
+											</div>
+										)}
+									</div>
 								</li>
 							))}
+							<li class="supporter-wall__invite">
+								<p class="supporter-wall__invite-title">Your logo here</p>
+								<p class="supporter-wall__invite-body">Keep the Academy free to watch, and take your place on the wall.</p>
+								<a class={button({ variant: "outline" })} href={BECOME_A_SUPPORTER_PATH}>Become a community supporter <span data-part="arrow" aria-hidden="true">→</span></a>
+							</li>
 						</ul>
-						<p class="supporter-wall__invite">
-							Want to fund free learning too? <a class="supporter-wall__technology" href={BECOME_A_SUPPORTER_PATH}>Become a community supporter</a>
-						</p>
 					</>
 				) : (
 					<EmptyState
@@ -124,73 +139,146 @@ const styles = academyLayout({ width: "wide" });
 </Page>
 
 <style>
+	.supporter-wall__thanks {
+		max-width: 18ch;
+		margin: 0 0 2.5rem;
+		font-family: var(--fonts-academy-display);
+		font-size: var(--font-sizes-academy-section);
+		font-weight: 800;
+		letter-spacing: var(--letter-spacings-academy-display);
+		line-height: 1.02;
+		text-wrap: balance;
+	}
+
 	.supporter-wall {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+		gap: 1rem;
 		margin: 0;
 		padding: 0;
 		list-style: none;
-		border-top: 1px solid var(--colors-academy-border);
-		border-left: 1px solid var(--colors-academy-border);
+	}
+
+	.supporter-wall__item,
+	.supporter-wall__invite {
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+		min-height: 19rem;
+		border: 1px solid var(--colors-academy-border);
+		border-radius: var(--radii-academy-m);
 	}
 
 	.supporter-wall__item {
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-		min-width: 0;
-		padding: 1.25rem;
-		border-right: 1px solid var(--colors-academy-border);
-		border-bottom: 1px solid var(--colors-academy-border);
+		background: var(--colors-academy-panel);
+		transition: border-color var(--durations-base) var(--easings-academy-out);
+	}
+
+	.supporter-wall__item:hover,
+	.supporter-wall__item:focus-within {
+		border-color: var(--colors-academy-text);
 	}
 
 	.supporter-wall__heading {
+		display: flex;
+		flex: 1;
 		margin: 0;
 		font: inherit;
 		letter-spacing: normal;
 	}
 
-	/* Logos are supplied for light backgrounds, so the plate stays light
-	   paper with light-mode ink and hairline in both schemes. */
+	/* The stage: the mark, large and centred, is the whole link. */
 	.supporter-wall__identity {
-		--supporter-plate: oklch(0.97 0.008 85);
-		--supporter-plate-ink: oklch(0.18 0.02 60);
-		--supporter-plate-hairline: oklch(0.18 0.02 60 / 0.12);
-		--supporter-plate-hairline-strong: oklch(0.18 0.02 60 / 0.22);
+		position: relative;
 		display: flex;
+		flex: 1;
+		flex-wrap: wrap;
 		align-items: center;
-		min-height: 5rem;
-		padding: 0.75rem;
-		border: 1px solid var(--supporter-plate-hairline);
-		background: var(--supporter-plate);
-		color: var(--supporter-plate-ink);
+		justify-content: center;
+		gap: 0.75rem 1rem;
+		min-width: 0;
+		padding: 3rem 2rem;
+		border-radius: var(--radii-academy-m);
+		color: var(--colors-academy-text);
 		text-decoration: none;
-		transition: border-color var(--durations-fast) var(--easings-academy-standard);
 	}
 
-	.supporter-wall__identity:hover {
-		border-color: var(--supporter-plate-hairline-strong);
-	}
-
+	/* Marks are one ink on a transparent ground: set them in the text colour. */
 	.supporter-wall__logo {
-		max-width: 100%;
-		height: 3rem;
 		width: auto;
+		max-width: min(100%, 17rem);
+		height: clamp(3rem, 6vw, 4.25rem);
 		object-fit: contain;
+		filter: brightness(0);
+		opacity: 0.82;
+		transition:
+			opacity var(--durations-base) var(--easings-academy-out),
+			transform var(--durations-base) var(--easings-academy-out);
+	}
+
+	:global(html.dark) .supporter-wall__logo {
+		filter: brightness(0) invert(1);
 	}
 
 	.supporter-wall__name {
 		font-family: var(--fonts-academy-display);
-		font-size: var(--font-sizes-2xl);
-		font-weight: 700;
-		line-height: 1.1;
+		font-size: clamp(2rem, 4.5vw, 3rem);
+		font-weight: 800;
+		letter-spacing: var(--letter-spacings-academy-display);
+		line-height: 1;
 		overflow-wrap: anywhere;
+	}
+
+	.supporter-wall__arrow {
+		position: absolute;
+		top: 1rem;
+		right: 1.25rem;
+		color: var(--colors-academy-text-muted);
+		font-size: 1.25rem;
+		line-height: 1;
+		transition:
+			transform var(--durations-base) var(--easings-academy-out),
+			color var(--durations-base) var(--easings-academy-out);
+	}
+
+	.supporter-wall__identity:hover .supporter-wall__logo {
+		opacity: 1;
+		transform: scale(1.04);
+	}
+
+	.supporter-wall__identity:hover .supporter-wall__arrow {
+		color: var(--colors-academy-accent);
+		transform: translate(0.15rem, -0.15rem);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.supporter-wall__item,
+		.supporter-wall__logo,
+		.supporter-wall__arrow {
+			transition: none;
+		}
+
+		.supporter-wall__identity:hover .supporter-wall__logo,
+		.supporter-wall__identity:hover .supporter-wall__arrow {
+			transform: none;
+		}
+	}
+
+	.supporter-wall__detail {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 0.5rem 1.5rem;
+		padding: 1rem 1.25rem;
+		border-top: 1px solid var(--colors-academy-border);
 	}
 
 	.supporter-wall__support {
 		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 0.35rem 0.75rem;
 	}
 
 	.supporter-wall__technologies {
@@ -214,6 +302,13 @@ const styles = academyLayout({ width: "wide" });
 		text-decoration-color: var(--colors-academy-accent);
 	}
 
+	.supporter-wall__host {
+		margin: 0;
+		color: var(--colors-academy-text-muted);
+		font-family: var(--fonts-academy-mono);
+		font-size: 0.8125rem;
+	}
+
 	/* Same ring as the design system's focusRing fragment. */
 	.supporter-wall__identity:focus-visible,
 	.supporter-wall__technology:focus-visible {
@@ -221,8 +316,28 @@ const styles = academyLayout({ width: "wide" });
 		outline-offset: 2px;
 	}
 
+	/* The open place on the wall. */
 	.supporter-wall__invite {
-		margin: 1.5rem 0 0;
+		align-items: flex-start;
+		justify-content: center;
+		gap: 0.75rem;
+		padding: 2rem;
+		border-style: dashed;
+		border-color: var(--colors-academy-input-border);
+	}
+
+	.supporter-wall__invite-title {
+		margin: 0;
+		font-family: var(--fonts-academy-display);
+		font-size: clamp(2rem, 4.5vw, 3rem);
+		font-weight: 800;
+		letter-spacing: var(--letter-spacings-academy-display);
+		line-height: 1;
+	}
+
+	.supporter-wall__invite-body {
+		max-width: 28ch;
+		margin: 0 0 0.75rem;
 		color: var(--colors-academy-text-soft);
 	}
 </style>

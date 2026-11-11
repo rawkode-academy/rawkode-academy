@@ -458,12 +458,13 @@ await setContentCache(Astro, {
 				<h1 class={styles.title}>{technology.name}</h1>
 			</div>
 			{supporter && (
-				<p class="technology-supporter">
-					<a class="technology-supporter__link" href={SUPPORTERS_PATH}>
-						<MLabel tone="spruce">Community supporter</MLabel>
-						<span class="technology-supporter__name">{supporter.data.name}</span>
-					</a>
-				</p>
+				<aside class="technology-supporter" aria-label="Community supporter">
+					<MLabel tone="spruce">Community supporter</MLabel>
+					<p class="technology-supporter__thanks">
+						<a class="technology-supporter__name" href={supporter.data.websiteUrl} target="_blank" rel="sponsored noopener">{supporter.data.name}<span class="sr-only"> (opens in a new tab)</span></a> helps keep Rawkode Academy free to watch. Thank you.
+					</p>
+					<a class="technology-supporter__wall" href={SUPPORTERS_PATH}>All community supporters <span aria-hidden="true">→</span></a>
+				</aside>
 			)}
 			{description && <p class={styles.description}>{description}</p>}
 			{metadata.length > 0 && (
@@ -643,30 +644,72 @@ await setContentCache(Astro, {
 
 <style>
 	.technology-supporter {
+		display: grid;
+		gap: 0.6rem 2rem;
+		padding: 1.1rem 1.25rem;
+		border: 1px solid
+			color-mix(
+				in oklab,
+				var(--colors-academy-status-spruce) 45%,
+				var(--colors-academy-border)
+			);
+		border-radius: var(--radii-academy-s);
+		background: color-mix(
+			in oklab,
+			var(--colors-academy-status-spruce) 7%,
+			transparent
+		);
+	}
+
+	@media (min-width: 48rem) {
+		.technology-supporter {
+			grid-template-columns: minmax(0, 1fr) auto;
+			align-items: end;
+		}
+
+		.technology-supporter > :first-child {
+			grid-column: 1 / -1;
+		}
+	}
+
+	.technology-supporter__thanks {
+		max-width: 46ch;
 		margin: 0;
+		color: var(--colors-academy-text);
+		font-size: 1.25rem;
+		line-height: 1.35;
 	}
 
-	.technology-supporter__link {
-		display: inline-flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 0.35rem 0.75rem;
-		padding: 0.45rem 0.7rem;
-		border: 1px solid var(--colors-academy-border);
+	.technology-supporter__name {
+		color: var(--colors-academy-text);
+		font-family: var(--fonts-academy-display);
+		font-weight: 800;
+		overflow-wrap: anywhere;
+		text-decoration: underline;
+		text-decoration-color: var(--colors-academy-status-spruce);
+		text-decoration-thickness: 2px;
+		text-underline-offset: 0.18em;
+	}
+
+	.technology-supporter__name:hover {
+		text-decoration-color: var(--colors-academy-accent);
+	}
+
+	.technology-supporter__wall {
 		color: var(--colors-academy-text-soft);
-		text-decoration: none;
+		font-size: 0.875rem;
+		text-underline-offset: 0.2em;
+		white-space: nowrap;
 	}
 
-	.technology-supporter__link:focus-visible {
+	.technology-supporter__wall:hover {
+		color: var(--colors-academy-text);
+	}
+
+	.technology-supporter__name:focus-visible,
+	.technology-supporter__wall:focus-visible {
 		outline: 2px solid var(--colors-academy-accent);
 		outline-offset: 2px;
-		border-radius: var(--radii-sm);
-	}
-
-	.technology-supporter__link:hover .technology-supporter__name {
-		color: var(--colors-academy-text);
-		text-decoration: underline;
-		text-underline-offset: 0.2em;
 	}
 
 	.technology-vendor {
@@ -685,10 +728,5 @@ await setContentCache(Astro, {
 
 	.technology-vendor a:hover {
 		color: var(--colors-academy-text);
-	}
-
-	.technology-supporter__name {
-		font-weight: 600;
-		overflow-wrap: anywhere;
 	}
 </style>

@@ -121,10 +121,6 @@ const COLOUR_BASELINE: Record<string, { count: number; reason: string }> = {
 		count: 2,
 		reason: "ink on a category colour",
 	},
-	"src/pages/supporters.astro": {
-		count: 4,
-		reason: "paper plate behind supporter logos, the same in both schemes",
-	},
 };
 
 /**
