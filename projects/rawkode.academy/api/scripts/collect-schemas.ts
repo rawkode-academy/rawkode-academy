@@ -29,6 +29,7 @@ const PLATFORM_SERVICES = [
 	"adrs",
 	"testimonials",
 	"courses",
+	"supporters",
 	// User interaction services
 	"emoji-reactions",
 	"email-preferences",

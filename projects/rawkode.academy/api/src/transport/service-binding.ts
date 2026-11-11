@@ -25,6 +25,7 @@ export const SUBGRAPH_BINDING_MAP: Record<string, keyof Env> = {
 	adrs: "ADRS",
 	testimonials: "TESTIMONIALS",
 	courses: "COURSES",
+	supporters: "SUPPORTERS",
 	// User interaction services (dynamic data)
 	"emoji-reactions": "EMOJI_REACTIONS",
 	"email-preferences": "EMAIL_PREFERENCES",

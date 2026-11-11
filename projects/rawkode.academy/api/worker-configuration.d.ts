@@ -20,6 +20,7 @@ interface __BaseEnv_Env {
 	ADRS: Fetcher /* platform-adrs-read-model */;
 	TESTIMONIALS: Fetcher /* platform-testimonials-read-model */;
 	COURSES: Fetcher /* platform-courses-read-model */;
+	SUPPORTERS: Fetcher /* platform-supporters-read-model */;
 	EMOJI_REACTIONS: Fetcher /* platform-emoji-reactions-read-model */;
 	EMAIL_PREFERENCES: Fetcher /* platform-email-preferences-read-model */;
 	WATCH_HISTORY: Fetcher /* platform-watch-history-read-model */;
