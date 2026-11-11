@@ -91,6 +91,10 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Install Bun dependencies
       run: cuenv exec -- bun install --frozen-lockfile
+    - name: Setup 1Password
+      run: cuenv secrets setup onepassword
+      env:
+        OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
     - name: 'Run pipeline: default'
       run: cuenv ci --pipeline default --path packages/design-system
       env:
@@ -99,3 +103,4 @@ jobs:
         GITHUB_REF_TYPE: ${{ github.ref_type }}
         GITHUB_REF_NAME: ${{ github.ref_name }}
         CUENV_ENVIRONMENT: production
+        OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}

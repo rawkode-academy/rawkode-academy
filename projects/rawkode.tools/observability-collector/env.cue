@@ -24,35 +24,8 @@ _ciInfisicalInfrastructure: true
 
 let _infrastructure = [{allowInfrastructure: ["plan", "apply", "import", "destroy"]}]
 
-_cloudflareToken: schema.#OnePasswordRef & {
-	ref: "op://sa.rawkode.academy/cloudflare/api-tokens/workers"
-}
-
-_infisicalSecret: schema.#InfisicalSecret & {
-	projectId:   "6575a392d7a5ef0555ade86b"
-	environment: "production"
-	apiUrl:      "https://app.infisical.com"
-}
-
 // Where infrastructure.cue writes the Basin tokens.
 _basinSecret: _infisicalSecret & {secretPath: "/projects/basin"}
-
-// What infrastructure/bootstrap writes to Infisical. A reviewed apply logs in
-// as github-read-write and reads /infrastructure. A plan on a pull request
-// logs in as github-read-only and reads /infrastructure/github-read-only.
-_readWrite: _infisicalSecret & {secretPath: "/infrastructure"}
-_readOnly: _infisicalSecret & {secretPath: "/infrastructure/github-read-only"}
-
-contexts: {
-	plan: schema.#When & {infrastructure: "plan"}
-	// State commands that write need the read-write state key too.
-	apply: schema.#When & {infrastructure: "apply|import|destroy|state-remove"}
-}
-
-env: context: {
-	plan: CLOUDFLARE_API_TOKEN: _readOnly & {secretName: "CLOUDFLARE_API_TOKEN"}
-	apply: CLOUDFLARE_API_TOKEN: _readWrite & {secretName: "CLOUDFLARE_ROOT_TOKEN"}
-}
 
 env: {
 	SERVICE_NAME:          "observability-collector"
@@ -68,10 +41,6 @@ env: {
 	INFISICAL_MACHINE_IDENTITY_ID: {
 		value: schema.#ExecSecret & {command: "printenv", args: ["INFISICAL_MACHINE_IDENTITY_ID"]}
 		policies: _infrastructure
-	}
-
-	environment: production: {
-		CLOUDFLARE_API_TOKEN: _cloudflareToken
 	}
 }
 

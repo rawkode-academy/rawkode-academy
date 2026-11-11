@@ -12,24 +12,23 @@ let _t = tasks
 
 ci: pipelines: {
 	default: {
-		when: { branch: ["main"], defaultBranch: true, manual: true }
+		when: {branch: ["main"], defaultBranch: true, manual: true}
 		// Hold deployment until the Studio and viewer rollout is coordinated.
 		tasks: [_t.validate]
 	}
 	pullRequest: {
 		environment: "development"
-		when: { pullRequest: true }
+		when: {pullRequest: true}
 		tasks: [_t.validate]
 	}
 }
 
 env: {
-	TICKET_SECRET: "local-development-secret-change-me"
+	TICKET_SECRET:  "local-development-secret-change-me"
 	SESSION_SECRET: "local-development-secret-change-me"
-	ENVIRONMENT: "development"
+	ENVIRONMENT:    "development"
 
 	environment: production: {
-		CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {ref: "op://sa.rawkode.academy/cloudflare/api-tokens/workers"}
 		TICKET_SECRET: schema.#OnePasswordRef & {ref: "op://sa.rawkode.academy/arcade/ticket-secret"}
 		SESSION_SECRET: schema.#OnePasswordRef & {ref: "op://sa.rawkode.academy/arcade/session-secret"}
 	}
@@ -38,7 +37,7 @@ env: {
 tasks: {
 	check: schema.#Task & {
 		hermetic: false
-		command: "bun"
+		command:  "bun"
 		args: ["run", "check"]
 		// panda.config.ts and astro.config.mts are load-bearing for `check`:
 		// it runs panda codegen and the design-token guard, which reads the
@@ -48,13 +47,13 @@ tasks: {
 	}
 	test: schema.#Task & {
 		hermetic: false
-		command: "bun"
+		command:  "bun"
 		args: ["run", "test"]
 		inputs: ["src/**", "tests/**", "scripts/**", "migrations/**", "vitest.config.ts", "wrangler.test.jsonc", "panda.config.ts", "package.json", "../../bun.lock", "../../packages/live-viewer/**"]
 	}
 	e2e: schema.#Task & {
 		hermetic: false
-		command: "sh"
+		command:  "sh"
 		args: ["-lc", "bun x playwright install --with-deps chromium && bun run test:e2e"]
 		// Task environments are explicit: do not rely on the runner's CI variable
 		// surviving cuenv's environment filtering.
@@ -64,19 +63,19 @@ tasks: {
 	}
 	dev: schema.#Task & {
 		hermetic: false
-		command: "bun"
+		command:  "bun"
 		args: ["run", "dev"]
 	}
 	build: schema.#Task & {
 		hermetic: false
-		command: "bun"
+		command:  "bun"
 		args: ["run", "build"]
 		inputs: ["src/**", "scripts/**", "public/**", "astro.config.mts", "panda.config.ts", "tsconfig.json", "wrangler.jsonc", "env.cue", "package.json", "devenv.nix", "../../bun.lock", "../../packages/live-viewer/**"]
 		outputs: ["dist/**", ".wrangler/deploy/config.json"]
 	}
 	validate: schema.#Task & {
 		hermetic: false
-		command: "bun"
+		command:  "bun"
 		args: ["run", "validate"]
 		env: CI: "true"
 		// Keep workerd users sequential and build exactly once. A single task
@@ -88,7 +87,7 @@ tasks: {
 		type: "group"
 		remote: schema.#Task & {
 			hermetic: false
-			command: "bun"
+			command:  "bun"
 			args: ["run", "db:migrate:remote"]
 			dependsOn: [_t.build]
 			inputs: ["migrations/**", "wrangler.jsonc", "package.json", "../../bun.lock"]
@@ -98,7 +97,7 @@ tasks: {
 		type: "group"
 		main: schema.#Task & {
 			hermetic: false
-			command: "bun"
+			command:  "bun"
 			// Deploy the exact artifact that passed browser validation.
 			args: ["run", "deploy:built"]
 			dependsOn: [_t.validate]
@@ -106,7 +105,7 @@ tasks: {
 		}
 		preview: schema.#Task & {
 			hermetic: false
-			command: "bun"
+			command:  "bun"
 			args: ["run", "deploy:preview:built"]
 			dependsOn: [_t.validate]
 			inputs: ["src/**", "tests/**", "e2e/**", "scripts/**", "migrations/**", "astro.config.mts", "panda.config.ts", "wrangler.jsonc", "package.json", "../../bun.lock", "../../packages/live-viewer/**"]
