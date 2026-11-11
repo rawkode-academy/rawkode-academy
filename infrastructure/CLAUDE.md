@@ -78,7 +78,7 @@ Scripts for Google Cloud Workload Identity configuration.
 
 DNS infrastructure reads these secrets (configured in `dns/env.cue` and `dns/infrastructure.cue`), written to Infisical by `bootstrap/`:
 
-| Secret | Plan (`/infrastructure/read-only`) | Apply (`/infrastructure`) |
+| Secret | Plan (`/infrastructure/github-read-only`) | Apply (`/infrastructure`) |
 |--------|------------------------------------|---------------------------|
 | `CLOUDFLARE_API_TOKEN` | `CLOUDFLARE_API_TOKEN`, reads zones | `CLOUDFLARE_ROOT_TOKEN` |
 | State bucket credentials | `CUENV_STATE_ACCESS_KEY_ID`, `CUENV_STATE_SECRET_ACCESS_KEY`, read only | the same names, read and write |

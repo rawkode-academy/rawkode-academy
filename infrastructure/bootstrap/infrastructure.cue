@@ -32,8 +32,8 @@ import (
 //   and the state bucket credentials.
 // - github-read-only, the identity infrastructure plans on pull requests log
 //   in as, in the `infrastructure-plan` GitHub environment. It reads
-//   /infrastructure/read-only: a Cloudflare token and a state key that can
-//   only read.
+//   /infrastructure/github-read-only: a Cloudflare token and a state key
+//   that can only read.
 // - github-actions, the identity deploys on main log in as, in the
 //   `production` GitHub environment. It reads project secrets only.
 //
@@ -255,7 +255,7 @@ infrastructure: {
 					action: ["describeSecret", "readValue"]
 					conditions: json.Marshal({
 						environment: "$eq": _infisical.environment
-						secretPath: "$eq":  "/infrastructure/read-only"
+						secretPath: "$eq":  "/infrastructure/github-read-only"
 					})
 				}]
 			}
@@ -426,7 +426,7 @@ infrastructure: {
 				project_id:       _infisical.projectId
 				environment_slug: _infisical.environment
 				folder_path:      infrastructure.resources.infrastructure_folder.outputs.path
-				name:             "read-only"
+				name:             "github-read-only"
 			}
 		}
 
