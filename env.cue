@@ -66,7 +66,7 @@ _cuenvBinary?: string
 config: ci: cuenv: {
 	source: "release"
 	if _cuenvBinary == _|_ {
-		version: "0.70.1"
+		version: "0.72.0"
 	}
 	if _cuenvBinary != _|_ {
 		version: _cuenvBinary
@@ -86,11 +86,33 @@ _ciRequireReport?: string
 // A project that reads #InfisicalSecret values in CI sets _ciInfisicalOidc and
 // labels those tasks "infisical". Only their pipelines log in to Infisical with
 // the job's GitHub OIDC token, so a deploy that doesn't read Infisical never
-// holds it. The machine identity's ID is the INFISICAL_MACHINE_IDENTITY_ID
-// repository secret. The login only works on main.
+// holds it.
 _ciInfisicalOidc?: true
 
+// A project whose infrastructure workflows read #InfisicalSecret values sets
+// _ciInfisicalInfrastructure, so its plan and apply jobs log in.
+_ciInfisicalInfrastructure?: true
+
+// Which Infisical identity a job logs in as. infrastructure/bootstrap writes
+// the IDs as repository variables. Infrastructure applies use
+// github-read-write, whose login also requires the `infrastructure` GitHub
+// environment, so a job that skipped review is refused even if it asks for it.
+// Infrastructure plans on pull requests use github-read-only, which reads
+// credentials that can't change anything. Deploys on main use github-actions,
+// which reads project secrets.
+let _infisicalIdentity = "${{ endsWith(github.workflow, '-infrastructure-apply') && vars.INFISICAL_READ_WRITE_IDENTITY_ID || endsWith(github.workflow, '-infrastructure-plan') && vars.INFISICAL_READ_ONLY_IDENTITY_ID || vars.INFISICAL_MACHINE_IDENTITY_ID }}"
+let _infisicalOidcTasks = (c.#InfisicalOidc & {#identityId: _infisicalIdentity}).tasks
+
 ci: providers: ["github"]
+
+// Pull request jobs run code anyone with write access can change, so their
+// GITHUB_TOKEN can read the repository and report checks, nothing more.
+ci: pipelines: pullRequest?: provider: github: permissions: {
+	contents: "read"
+	packages: "none"
+	actions:  "none"
+	issues:   "none"
+}
 ci: contributors: [
 	_NamespaceNix,
 	c.#BunWorkspace,
@@ -100,13 +122,27 @@ ci: contributors: [
 		schema.#Contributor & {
 			id: "infisical-oidc"
 			when: taskLabels: ["infisical"]
-			tasks: c.#InfisicalOidc.tasks
+			tasks: _infisicalOidcTasks
 		}
 	},
 	if _ciInfisicalOidc != _|_ {
 		schema.#Contributor & {
 			id: "infisical"
 			when: taskLabels: ["infisical"]
+			tasks: c.#Infisical.tasks
+		}
+	},
+	if _ciInfisicalInfrastructure != _|_ {
+		schema.#Contributor & {
+			id: "infisical-oidc"
+			when: secretsProvider: ["infisical"]
+			tasks: _infisicalOidcTasks
+		}
+	},
+	if _ciInfisicalInfrastructure != _|_ {
+		schema.#Contributor & {
+			id: "infisical"
+			when: secretsProvider: ["infisical"]
 			tasks: c.#Infisical.tasks
 		}
 	},

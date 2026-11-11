@@ -1,10 +1,8 @@
 package cuenv
 
 import (
-	"github.com/cuenv/cuenv/schema"
 	"github.com/rawkode-academy/rawkode-academy/infrastructure/dns/domains"
 	"registry.terraform.io/cloudflare/cloudflare:cloudflare_provider"
-	"registry.terraform.io/dnsimple/dnsimple:dnsimple_provider"
 )
 
 infrastructure: {
@@ -14,19 +12,25 @@ infrastructure: {
 		bucket:   "cuenv-state"
 		region:   "auto"
 		endpoint: "https://0aeb879de8e3cdde5fb3d413025222ce.r2.cloudflarestorage.com"
-		accessKeyId: schema.#OnePasswordRef & {ref: "op://sa.rawkode.academy/cuenv-state/username"}
-		secretAccessKey: schema.#OnePasswordRef & {ref: "op://sa.rawkode.academy/cuenv-state/password"}
+		// Used by plans and state commands: this key can't write.
+		accessKeyId: _readOnly & {secretName: "CUENV_STATE_ACCESS_KEY_ID"}
+		secretAccessKey: _readOnly & {secretName: "CUENV_STATE_SECRET_ACCESS_KEY"}
+		context: apply: {
+			accessKeyId: _readWrite & {secretName: "CUENV_STATE_ACCESS_KEY_ID"}
+			secretAccessKey: _readWrite & {secretName: "CUENV_STATE_SECRET_ACCESS_KEY"}
+		}
 	}
 
 	providers: {
 		cloudflare: cloudflare_provider.#Provider
-		dnsimple: dnsimple_provider.#Provider & {
-			configuration: account: "126046"
-		}
 	}
 
 	resources: {for _, zone in domains.zones {zone.resources}}
 
-	// Plan (and comment the plan) on pull requests; apply on pushes to main.
-	workflows: {}
+	// Plan (and comment the plan) on pull requests with the read-only
+	// credentials; apply on pushes to main, once a reviewer approves the job.
+	workflows: {
+		plan: environment:  "infrastructure-plan"
+		apply: environment: "infrastructure"
+	}
 }
