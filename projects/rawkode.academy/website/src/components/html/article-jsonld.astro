@@ -1,5 +1,6 @@
 ---
 import type { ContentEntry } from "@/lib/live-content";
+import { resolveOpenGraphImage } from "@/lib/open-graph";
 import { buildPersonJsonLd } from "@/lib/person-jsonld";
 
 interface Props {
@@ -12,31 +13,42 @@ interface Props {
 
 const { article, authors, imageUrl } = Astro.props;
 const siteOrigin = (Astro.site ?? Astro.url).origin;
+const pageUrl = new URL(Astro.url.pathname, Astro.site ?? Astro.url);
+const publisher = {
+	"@type": "Organization",
+	name: "Rawkode Academy",
+	url: siteOrigin,
+	logo: {
+		"@type": "ImageObject",
+		url: new URL("/android-chrome-512x512.png", siteOrigin).href,
+	},
+};
+// Without a cover, use the generated 1200x630 share image, not the logo.
+const articleImage =
+	imageUrl?.href ??
+	resolveOpenGraphImage({
+		title: article.data.title,
+		description: article.data.description,
+		pageUrl,
+	}).url;
 
 const jsonLd = {
 	"@context": "https://schema.org",
 	"@type": "TechArticle",
 	headline: article.data.title,
 	description: article.data.description,
-	author: authors.map((author) => buildPersonJsonLd(author.data, siteOrigin)),
+	author:
+		authors.length > 0
+			? authors.map((author) => buildPersonJsonLd(author.data, siteOrigin))
+			: publisher,
 	datePublished: new Date(article.data.publishedAt).toISOString(),
 	dateModified: new Date(
 		article.data.updatedAt ?? article.data.publishedAt,
 	).toISOString(),
-	mainEntityOfPage: { "@type": "WebPage", "@id": Astro.url.href },
-	url: Astro.url.href,
-	image: imageUrl
-		? imageUrl.href
-		: new URL("/android-chrome-512x512.png", Astro.site || Astro.url).href,
-	publisher: {
-		"@type": "Organization",
-		name: "Rawkode Academy",
-		url: siteOrigin,
-		logo: {
-			"@type": "ImageObject",
-			url: new URL("/android-chrome-512x512.png", siteOrigin).href,
-		},
-	},
+	mainEntityOfPage: { "@type": "WebPage", "@id": pageUrl.href },
+	url: pageUrl.href,
+	image: articleImage,
+	publisher,
 	speakable: {
 		"@type": "SpeakableSpecification",
 		cssSelector: [".article-header h1"],

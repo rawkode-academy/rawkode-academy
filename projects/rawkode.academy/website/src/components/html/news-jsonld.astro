@@ -42,7 +42,7 @@ const jsonLd = buildNewsArticleJsonLd({
 		readingMinutes: reading.minutes,
 	},
 	authors: authors.map((author) => buildPersonJsonLd(author.data, siteUrl)),
-	url: Astro.url.href,
+	url: new URL(Astro.url.pathname, Astro.site ?? Astro.url).href,
 	imageUrl,
 	siteUrl,
 });

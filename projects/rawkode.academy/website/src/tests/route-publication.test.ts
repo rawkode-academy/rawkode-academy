@@ -230,7 +230,10 @@ async function loadArticlePage(): Promise<Component> {
 		new Proxy({}, { get: (_, key) => `academy-${String(key)}` });
 	const articleJsonLd = await compileAstro(
 		"components/html/article-jsonld.astro",
-		{ "@/lib/person-jsonld": personJsonLd },
+		{
+			"@/lib/open-graph": await import("@/lib/open-graph"),
+			"@/lib/person-jsonld": personJsonLd,
+		},
 	);
 	articlePage = await compileAstro("pages/read/[...slug].astro", {
 		"@rawkodeacademy/design-system": {
