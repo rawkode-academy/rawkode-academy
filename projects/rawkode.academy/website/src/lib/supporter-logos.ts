@@ -1,4 +1,5 @@
 import datum from "@/components/partner/logos/datum.svg?url";
+import swamp from "@/components/partner/logos/swamp-club.svg?url";
 import type { ContentEntry } from "@/lib/live-content/types";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 
@@ -9,7 +10,7 @@ export interface SupporterLogo {
 }
 
 /** Marks kept in the repository, by supporter id. */
-const bundledLogos: Record<string, string> = { datum };
+const bundledLogos: Record<string, string> = { datum, swamp };
 
 /**
  * A supporter's logo: the one on its record, then a mark kept in the
