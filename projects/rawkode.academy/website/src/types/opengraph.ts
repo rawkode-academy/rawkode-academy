@@ -26,6 +26,8 @@ export interface OpenGraphProps {
 	useImageDirectly?: boolean | undefined;
 	image?: OpenGraphImagePayload | undefined;
 	isArticle?: boolean | undefined;
+	/** Overrides the Open Graph type for non-article pages, e.g. `video.other`. */
+	ogType?: string | undefined;
 	publishedAt?: Date | undefined;
 	updatedAt?: Date | undefined;
 	authors?: ContentEntry<"people">[] | undefined;

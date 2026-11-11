@@ -10,6 +10,7 @@ const {
 	image,
 	useImageDirectly = false,
 	isArticle = false,
+	ogType = "website",
 	publishedAt,
 	updatedAt,
 	authors,
@@ -64,7 +65,7 @@ const firstAuthorMastodon = shouldShowArticleMeta
 
 <meta
 	property="og:type"
-	content={shouldShowArticleMeta ? "article" : "website"}
+	content={shouldShowArticleMeta ? "article" : ogType}
 />
 <meta property="og:site_name" content="Rawkode Academy" />
 <meta property="og:locale" content="en_US" />

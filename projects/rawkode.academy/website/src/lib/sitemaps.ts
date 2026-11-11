@@ -87,7 +87,11 @@ const staticPages: StaticPageDefinition[] = [
 	{ path: "/feeds", changefreq: "monthly", priority: 0.5 },
 	// Organization / commercial pages.
 	{ path: "/organizations/partnerships", changefreq: "monthly", priority: 0.7 },
-	{ path: "/organizations/support-our-work", changefreq: "monthly", priority: 0.7 },
+	{
+		path: "/organizations/support-our-work",
+		changefreq: "monthly",
+		priority: 0.7,
+	},
 	{ path: "/organizations/lets-chat", changefreq: "monthly", priority: 0.5 },
 	{ path: "/organizations/branding", changefreq: "yearly", priority: 0.4 },
 	// Long-tail / utility pages.
@@ -292,7 +296,7 @@ export async function getTechnologySitemapEntries(): Promise<
 		path: `/technology/${technology.id}`,
 		lastmod: pickLastmod(
 			deployTime,
-			(technology.data as unknown as Record<string, unknown>).updatedAt,
+			technology.data.recordUpdatedAt,
 			(technology.data as unknown as Record<string, unknown>).publishedAt,
 		),
 		changefreq: "weekly" as const,
@@ -312,7 +316,7 @@ export async function getVideoSitemapEntries(): Promise<SitemapUrlEntry[]> {
 		path: `/watch/${video.data.slug}`,
 		lastmod: pickLastmod(
 			deployTime,
-			(video.data as unknown as Record<string, unknown>).updatedAt,
+			video.data.recordUpdatedAt,
 			video.data.publishedAt,
 		),
 		changefreq: "daily" as const,
@@ -333,7 +337,7 @@ export async function getCourseSitemapEntries(): Promise<SitemapUrlEntry[]> {
 		path: `/courses/${course.id}`,
 		lastmod: pickLastmod(
 			deployTime,
-			course.data.updatedAt,
+			course.data.recordUpdatedAt,
 			course.data.publishedAt,
 		),
 		changefreq: "weekly" as const,
@@ -346,7 +350,7 @@ export async function getCourseSitemapEntries(): Promise<SitemapUrlEntry[]> {
 			path: `/courses/${module.data.course.id}/${slug}`,
 			lastmod: pickLastmod(
 				deployTime,
-				module.data.updatedAt,
+				module.data.recordUpdatedAt,
 				module.data.publishedAt,
 			),
 			changefreq: "weekly" as const,
@@ -369,7 +373,7 @@ export async function getLearningPathSitemapEntries(): Promise<
 		path: `/learning-paths/${learningPath.id}`,
 		lastmod: pickLastmod(
 			deployTime,
-			(learningPath.data as unknown as Record<string, unknown>).updatedAt,
+			learningPath.data.recordUpdatedAt,
 			learningPath.data.publishedAt,
 		),
 		changefreq: "weekly" as const,
@@ -439,7 +443,7 @@ export async function getPeopleSitemapEntries(): Promise<SitemapUrlEntry[]> {
 			path: `/people/${person.data.id}`,
 			lastmod: pickLastmod(
 				deployTime,
-				(person.data as unknown as Record<string, unknown>).updatedAt,
+				person.data.recordUpdatedAt,
 				(person.data as unknown as Record<string, unknown>).publishedAt,
 			),
 			changefreq: "monthly" as const,
@@ -451,7 +455,7 @@ export async function getPeopleSitemapEntries(): Promise<SitemapUrlEntry[]> {
 
 export async function getShowSitemapEntries(): Promise<SitemapUrlEntry[]> {
 	const [shows, deployTime] = await Promise.all([
-		getCollection("shows"),
+		getCollection("shows", ({ data }) => data.publish),
 		getDeployTime(),
 	]);
 
@@ -459,7 +463,7 @@ export async function getShowSitemapEntries(): Promise<SitemapUrlEntry[]> {
 		path: `/shows/${show.data.id}`,
 		lastmod: pickLastmod(
 			deployTime,
-			(show.data as unknown as Record<string, unknown>).updatedAt,
+			show.data.recordUpdatedAt,
 			(show.data as unknown as Record<string, unknown>).publishedAt,
 		),
 		changefreq: "weekly" as const,
@@ -485,7 +489,7 @@ export async function getNewsSitemapEntries(
 		path: `/news/${item.id}`,
 		lastmod: pickLastmod(
 			deployTime,
-			(item.data as unknown as Record<string, unknown>).updatedAt,
+			item.data.recordUpdatedAt,
 			item.data.publishedAt,
 		),
 		changefreq: "weekly" as const,
@@ -536,7 +540,7 @@ export async function getAdrSitemapEntries(): Promise<SitemapUrlEntry[]> {
 		lastmod: pickLastmod(
 			deployTime,
 			adr.data.adoptedAt,
-			(adr.data as unknown as Record<string, unknown>).updatedAt,
+			adr.data.recordUpdatedAt,
 		),
 		changefreq: "monthly" as const,
 		priority: 0.4,

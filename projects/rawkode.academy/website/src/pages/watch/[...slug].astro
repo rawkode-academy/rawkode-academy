@@ -339,6 +339,7 @@ const watchStatusLabel = isLiveNow
 	title={video.data.title}
 	description={metaDescription}
 	noindex={metaDescription.length < 30}
+	ogType="video.other"
 	useImageDirectly={true}
 	image={{ image: new URL(thumbnailUrl) }}
 >
