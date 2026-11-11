@@ -61,3 +61,18 @@ devenv.local.nix
 /cue.mod/gen/registry.terraform.io/infisical/infisical/
 /cue.mod/gen/registry.terraform.io/integrations/github/
 # END cuenv infrastructure
+
+# BEGIN swamp managed section - DO NOT EDIT
+
+# Runtime data (not needed in version control)
+.swamp/
+
+# Local extension sources (developer-specific, not shared)
+.swamp-sources.yaml
+
+# Claude Code configuration (managed by swamp)
+.claude/worktrees/
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+.claude/scheduled_tasks.json
+# END swamp managed section
