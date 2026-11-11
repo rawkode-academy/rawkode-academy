@@ -31,16 +31,16 @@ let _NamespaceNix = schema.#Contributor & {
 			}
 		},
 		{
-			id:        "namespaceNix.prepareReceipt"
-			label:     "Prepare Determinate receipt"
-			priority:  1
+			id:       "namespaceNix.prepareReceipt"
+			label:    "Prepare Determinate receipt"
+			priority: 1
 			dependsOn: ["namespaceNix.cache"]
-			script:    _removeDeterminateReceipt
+			script: _removeDeterminateReceipt
 		},
 		{
-			id:        "namespaceNix.install"
-			label:     "Install Determinate Nix"
-			priority:  2
+			id:       "namespaceNix.install"
+			label:    "Install Determinate Nix"
+			priority: 2
 			dependsOn: ["namespaceNix.prepareReceipt"]
 			provider: github: {
 				uses: "DeterminateSystems/determinate-nix-action@v3"
@@ -48,11 +48,11 @@ let _NamespaceNix = schema.#Contributor & {
 			}
 		},
 		{
-			id:        "namespaceNix.cleanupReceipt"
-			label:     "Prune Determinate Nix receipt"
-			priority:  3
+			id:       "namespaceNix.cleanupReceipt"
+			label:    "Prune Determinate Nix receipt"
+			priority: 3
 			dependsOn: ["namespaceNix.install"]
-			script:    _removeDeterminateReceipt
+			script: _removeDeterminateReceipt
 		},
 	]
 }
@@ -66,7 +66,7 @@ _cuenvBinary?: string
 config: ci: cuenv: {
 	source: "release"
 	if _cuenvBinary == _|_ {
-		version: "0.72.0"
+		version: "0.73.0"
 	}
 	if _cuenvBinary != _|_ {
 		version: _cuenvBinary
@@ -153,7 +153,7 @@ ci: contributors: [
 				id:       "requireReport.verify"
 				label:    "Verify cuenv ran \(_ciRequireReport)"
 				priority: 90
-				script: """
+				script:   """
 					suffix=$(printf '%s' '\(_ciRequireReport)' | tr '/' '-')
 					if ! ls ".cuenv/reports/${GITHUB_SHA}/"*"-${suffix}.json" >/dev/null 2>&1; then
 					  echo "::error::cuenv ci wrote no pipeline report for \(_ciRequireReport). It skipped the project (evaluation failed or timed out; look for 'Failed to evaluate env.cue' above) or found no affected tasks."
@@ -186,5 +186,42 @@ env: {
 	environment: production: {
 		CLOUDFLARE_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce"
 		TF_WORKSPACE:          "production"
+	}
+}
+
+_infisicalSecret: schema.#InfisicalSecret & {
+	projectId:   "6575a392d7a5ef0555ade86b"
+	environment: "production"
+	apiUrl:      "https://app.infisical.com"
+}
+
+// What infrastructure/bootstrap writes to Infisical. An apply on main logs in
+// as github-read-write and reads /infrastructure. A plan on a pull request
+// logs in as github-read-only and reads /infrastructure/github-read-only,
+// which holds nothing that can change Cloudflare or the state.
+_readWrite: _infisicalSecret & {secretPath: "/infrastructure"}
+_readOnly: _infisicalSecret & {secretPath: "/infrastructure/github-read-only"}
+
+// A project that brings its own CLOUDFLARE_API_TOKEN, such as
+// infrastructure/bootstrap, sets _ownCloudflareToken. Every other project gets
+// one of three tokens, chosen by what the invocation is: the Workers token for
+// tasks and shells, the read-only token for infrastructure plans, and the root
+// token for infrastructure applies.
+_ownCloudflareToken?: true
+
+if _ownCloudflareToken == _|_ {
+	contexts: {
+		workload: schema.#When & {infrastructure: null}
+		plan: schema.#When & {infrastructure: "plan"}
+		// State commands that write need the read-write state key too.
+		apply: schema.#When & {infrastructure: "apply|import|destroy|state-remove"}
+	}
+
+	env: context: {
+		workload: environment: production: CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {
+			ref: "op://sa.rawkode.academy/cloudflare/api-tokens/workers"
+		}
+		plan: CLOUDFLARE_API_TOKEN: _readOnly & {secretName: "CLOUDFLARE_API_TOKEN"}
+		apply: CLOUDFLARE_API_TOKEN: _readWrite & {secretName: "CLOUDFLARE_ROOT_TOKEN"}
 	}
 }
