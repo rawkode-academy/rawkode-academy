@@ -256,9 +256,11 @@ const statusLabels: Record<string, string> = {
 	trial: "Explore",
 };
 
-const statusLabel = technology.matrix?.status
-	? (statusLabels[technology.matrix.status] ?? technology.matrix.status)
-	: undefined;
+// "under-review" means not rated yet, so there is no rating to show.
+const statusLabel =
+	technology.matrix?.status && technology.matrix.status !== "under-review"
+		? (statusLabels[technology.matrix.status] ?? technology.matrix.status)
+		: undefined;
 const description = technology.seo?.description?.trim();
 // Stored values are lowercase identifiers ("stable", "rising"); set them as words.
 const sentenceCase = (value: string) =>
