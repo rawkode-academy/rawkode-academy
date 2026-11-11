@@ -56,10 +56,15 @@ ci: pipelines: {
 	}
 
 	// Compaction and snapshot expiry aren't in the Cloudflare provider yet,
-	// so infrastructure.cue can't enable them. Run once after the first apply.
+	// so infrastructure.cue can't enable them. Runs on main when the script or
+	// the infrastructure (and so the catalog token) changes.
 	maintenance: {
 		environment: "production"
-		when: manual: true
+		when: {
+			branch: ["main"]
+			defaultBranch: true
+			manual:        true
+		}
 		tasks: [_t.maintenance]
 	}
 }
@@ -92,7 +97,7 @@ tasks: {
 		hermetic: false
 		command:  "bash"
 		args: ["basin/maintenance.sh"]
-		inputs: ["basin/maintenance.sh"]
+		inputs: ["basin/maintenance.sh", "infrastructure.cue"]
 		labels: ["infisical"]
 		env: BASIN_CATALOG_TOKEN: _basinSecret & {secretName: "BASIN_CATALOG_TOKEN"}
 	}
