@@ -29,7 +29,7 @@ inputs:
         {"kubernetes": {"community.blog": "https://kubernetes.io/blog/"}}
 jobs:
   - name: update
-    description: Read, audit, approve, write, invalidate and confirm
+    description: Read, audit, draft, plan, approve, write, confirm and invalidate
     steps:
       - name: read
         description: Read the requested technology rows from D1
@@ -48,7 +48,7 @@ jobs:
               params:
                 - ${{ inputs.technologies }}
       - name: audit
-        description: Check every field against primary sources and plan the update
+        description: Check every field against primary sources and search-result standards
         dependsOn:
           - step: read
             condition:
@@ -60,12 +60,44 @@ jobs:
           inputs:
             rows: ${{ data.latest("technologies-database", "d1_query_database-current").attributes[0].results }}
             technologies: ${{ inputs.technologies }}
+            changes: ${{ inputs.changes }}
+      - name: draft
+        description: Draft the search-result title and description of every profile that lacks a good one
+        dependsOn:
+          - step: audit
+            condition:
+              type: succeeded
+        guard: ${{ size(data.latest("technology-profiles", "seo-requests").attributes.requests) == 0 }}
+        task:
+          type: behavior
+          behavior: seo-writer
+          methodName: cli_generate_many
+          inputs:
+            batch: technology-seo
+            systemPrompt: ${{ data.latest("technology-profiles", "seo-requests").attributes.systemPrompt }}
+            requests: ${{ data.latest("technology-profiles", "seo-requests").attributes.requests }}
+      - name: plan
+        description: Plan the update from the audit, the checked drafts and the inputs
+        dependsOn:
+          - step: draft
+            condition:
+              type: or
+              conditions:
+                - type: succeeded
+                - type: skipped
+        task:
+          type: behavior
+          behavior: technology-profiles
+          methodName: plan
+          inputs:
+            rows: ${{ data.latest("technologies-database", "d1_query_database-current").attributes[0].results }}
             accept: ${{ inputs.accept }}
             changes: ${{ inputs.changes }}
+            drafts: ${{ data.findBySpec("seo-writer", "cliResult") }}
       - name: approve
         description: Review the plan before anything is written
         dependsOn:
-          - step: audit
+          - step: plan
             condition:
               type: succeeded
         guard: ${{ size(data.latest("technology-profiles", "plan").attributes.statements) == 0 }}

@@ -2,7 +2,8 @@
  * Audits Rawkode Academy technology profiles (rows of the `technologies`
  * table in the `platform-technologies` D1 database) against primary sources
  * and plans the update. D1 itself is read and written by the
- * `@webframp/cloudflare/d1` behavior; this one decides what to write.
+ * `@webframp/cloudflare/d1` behavior and search-result text is drafted by
+ * `@keeb/anthropic/claude`; this one decides what to write.
  *
  * @module
  */
@@ -21,8 +22,14 @@ import {
 	parseRow,
 	planChanges,
 	type RepositoryEvidence,
+	reviewDraft,
+	SEO_DRAFT_SCHEMA,
+	SEO_SYSTEM_PROMPT,
+	seoFieldsToDraft,
+	seoPrompt,
 	type Statement,
 	type Technology,
+	uncovered,
 	validateValue,
 } from "./_lib/technology.ts";
 import { checkLink, inParallel, request } from "./_lib/http.ts";
@@ -76,6 +83,16 @@ const AuditSchema = z.object({
 	changes: z.array(ChangeSchema),
 });
 
+const DraftingSchema = z.object({
+	createdAt: z.string(),
+	systemPrompt: z.string(),
+	requests: z.array(z.object({
+		key: z.string(),
+		prompt: z.string(),
+		jsonSchema: z.record(z.string(), z.unknown()),
+	})),
+});
+
 const PlanSchema = z.object({
 	createdAt: z.string(),
 	audited: z.number(),
@@ -88,6 +105,22 @@ const PlanSchema = z.object({
 	summary: z.string(),
 });
 type Plan = z.infer<typeof PlanSchema>;
+
+const GapsSchema = z.object({
+	checkedAt: z.string(),
+	maturity: z.array(z.string()),
+	projects: z.number(),
+	missing: z.array(z.object({
+		name: z.string(),
+		maturity: z.string(),
+		accepted: z.string().nullable(),
+		category: z.string().nullable(),
+		subcategory: z.string().nullable(),
+		website: z.string().nullable(),
+		source: z.string().nullable(),
+		description: z.string().nullable(),
+	})),
+});
 
 const ConfirmationSchema = z.object({
 	confirmedAt: z.string(),
@@ -123,6 +156,8 @@ interface Landscape {
 	byWebsite: Map<string, Record<string, unknown>>;
 	byName: Map<string, Record<string, unknown>>;
 	repositories: Record<string, Record<string, unknown>>;
+	/** Every CNCF project: the landscape items that have a maturity. */
+	projects: Array<Record<string, unknown>>;
 }
 
 async function fetchLandscape(): Promise<Landscape | null> {
@@ -138,6 +173,7 @@ async function fetchLandscape(): Promise<Landscape | null> {
 			byWebsite: new Map(),
 			byName: new Map(),
 			repositories: {},
+			projects: data.items.filter((item) => !!item.maturity),
 		};
 		// CNCF projects first, so a project wins over a member entry sharing its URL.
 		const items = [...data.items].sort((left, right) =>
@@ -343,6 +379,19 @@ function describe(value: unknown): string {
 	return text.length > 120 ? `${text.slice(0, 117)}...` : text;
 }
 
+/** Every technology id in the table, which the read step attaches to each row. */
+function knownIdentifiers(rows: Array<Record<string, unknown>>): string[] {
+	return typeof rows[0]?.known_ids === "string"
+		? JSON.parse(rows[0].known_ids) as string[]
+		: rows.map((row) => String(row.id));
+}
+
+const ChangesSchema = z.record(z.string(), z.record(z.string(), z.unknown()))
+	.default({})
+	.describe(
+		"Values to write regardless of the findings: id, then field path, then value (null clears)",
+	);
+
 function split(list: string): string[] {
 	return list.split(",").map((entry) => entry.trim()).filter(Boolean);
 }
@@ -350,7 +399,7 @@ function split(list: string): string[] {
 /** Behavior definition for auditing and updating technology profiles. */
 export const behavior = {
 	type: "@rawkode/academy/technology",
-	version: "2026.11.11.1",
+	version: "2026.11.11.2",
 	globalArguments: GlobalArgsSchema,
 	resources: {
 		audit: {
@@ -360,11 +409,24 @@ export const behavior = {
 			lifetime: "infinite" as const,
 			garbageCollection: 10,
 		},
+		drafting: {
+			description:
+				"One copywriting request per technology whose search-result text is missing or weak",
+			schema: DraftingSchema,
+			lifetime: "infinite" as const,
+			garbageCollection: 10,
+		},
 		plan: {
 			description: "The statements the latest audit wants written to D1",
 			schema: PlanSchema,
 			lifetime: "infinite" as const,
 			garbageCollection: 20,
+		},
+		gaps: {
+			description: "CNCF projects that have no technology profile",
+			schema: GapsSchema,
+			lifetime: "infinite" as const,
+			garbageCollection: 10,
 		},
 		confirmation: {
 			description: "Proof that the planned values are stored in D1",
@@ -382,28 +444,19 @@ export const behavior = {
 	methods: {
 		audit: {
 			description:
-				"Check every field of the given technology rows against primary sources (HTTP, the repository host, the CNCF landscape, the content bucket) and plan the D1 update",
+				"Check every field of the given technology rows against primary sources (HTTP, the repository host, the CNCF landscape, the content bucket) and search-result standards, and ask for a draft of any search-result text that falls short",
 			arguments: z.object({
 				rows: RowsSchema,
 				technologies: z.string().default("")
 					.describe(
 						"Comma-separated ids that must be among the rows; empty accepts whatever was read",
 					),
-				accept: z.string().default("")
-					.describe(
-						"Comma-separated findings whose observed value to apply: `field` or `id:field`",
-					),
-				changes: z.record(z.string(), z.record(z.string(), z.unknown()))
-					.default({})
-					.describe(
-						"Values to write regardless of the findings: id, then field path, then value (null clears)",
-					),
+				changes: ChangesSchema,
 			}),
 			execute: async (
 				args: {
 					rows: Array<Record<string, unknown>>;
 					technologies: string;
-					accept: string;
 					changes: Record<string, Record<string, unknown>>;
 				},
 				context: Context,
@@ -420,9 +473,6 @@ export const behavior = {
 						`No technology row for: ${[...new Set(absent)].join(", ")}`,
 					);
 				}
-				const knownIdentifiers = typeof args.rows[0]?.known_ids === "string"
-					? JSON.parse(args.rows[0].known_ids) as string[]
-					: identifiers;
 
 				const landscape = await fetchLandscape();
 				const urls = [...new Set(technologies.flatMap(linksToCheck))];
@@ -435,8 +485,6 @@ export const behavior = {
 					urls.map((url, index) => [url, checks[index]]),
 				);
 
-				const accept = split(args.accept);
-				const accepted = new Set<string>();
 				const audited = await inParallel(technologies, async (technology) => {
 					const variants = ["icon", "horizontal", "stacked"];
 					const [repository, description, ...logos] = await Promise.all([
@@ -446,7 +494,7 @@ export const behavior = {
 							logoExists(context.globalArgs.contentUrl, technology.id, variant)
 						),
 					]);
-					const findings = evaluate(technology, {
+					const evidence: Evidence = {
 						landscapeAvailable: landscape !== null,
 						landscape: matchLandscape(technology, landscape),
 						repository,
@@ -454,18 +502,127 @@ export const behavior = {
 						logos: Object.fromEntries(
 							variants.map((variant, index) => [variant, logos[index]]),
 						),
-						knownIdentifiers,
+						knownIdentifiers: knownIdentifiers(args.rows),
 						websiteDescription: description,
-					});
-					const changes = planChanges(
+					};
+					const findings = evaluate(technology, evidence);
+					// Text the caller supplies needs no draft.
+					const supplied = args.changes[technology.id] ?? {};
+					const prompt = seoPrompt(
 						technology,
-						findings,
-						accept,
-						args.changes[technology.id] ?? {},
-						accepted,
+						findings.filter((finding) => !(finding.field in supplied)),
+						evidence,
 					);
-					return { technology, findings, changes };
+					return { technology, findings, prompt };
 				});
+
+				const now = new Date().toISOString();
+				const handles: Array<{ name: string }> = [];
+				for (const { technology, findings } of audited) {
+					const counts: Record<string, number> = {};
+					for (const finding of findings) {
+						counts[finding.status] = (counts[finding.status] ?? 0) + 1;
+					}
+					handles.push(
+						await context.writeResource("audit", `audit-${technology.id}`, {
+							id: technology.id,
+							auditedAt: now,
+							counts,
+							findings,
+							changes: [],
+						}),
+					);
+				}
+				const requests = audited.flatMap(({ technology, prompt }) =>
+					prompt === null
+						? []
+						: [{ key: technology.id, prompt, jsonSchema: SEO_DRAFT_SCHEMA }]
+				);
+				handles.push(
+					await context.writeResource("drafting", "seo-requests", {
+						createdAt: now,
+						systemPrompt: SEO_SYSTEM_PROMPT,
+						requests,
+					}),
+				);
+				context.logger.info(
+					"Audited {count} technologies; {drafts} need search-result text drafted",
+					{ count: audited.length, drafts: requests.length },
+				);
+				return { dataHandles: handles };
+			},
+		},
+		plan: {
+			description:
+				"Turn the latest audit of the given rows into the D1 update: sourced findings, accepted findings, drafted search-result text that passes the checks, and the caller's own values",
+			arguments: z.object({
+				rows: RowsSchema,
+				accept: z.string().default("")
+					.describe(
+						"Comma-separated findings whose observed value to apply: `field` or `id:field`",
+					),
+				changes: ChangesSchema,
+				drafts: z.array(z.unknown()).default([])
+					.describe(
+						"The copywriter's answers, keyed by technology id: `cliResult` records of @keeb/anthropic/claude",
+					),
+			}),
+			execute: async (
+				args: {
+					rows: Array<Record<string, unknown>>;
+					accept: string;
+					changes: Record<string, Record<string, unknown>>;
+					drafts: unknown[];
+				},
+				context: Context,
+			): Promise<{ dataHandles: Array<{ name: string }> }> => {
+				const technologies = args.rows.map(parseRow);
+				const known = knownIdentifiers(args.rows);
+				const drafts = new Map(args.drafts.map((entry) => {
+					const record = entry as Record<string, unknown>;
+					const answer = (record.attributes ?? record) as Record<
+						string,
+						unknown
+					>;
+					return [String(answer.key), answer];
+				}));
+
+				const accept = split(args.accept);
+				const accepted = new Set<string>();
+				const planned = [];
+				for (const technology of technologies) {
+					const audit = await context.readResource!(
+						`audit-${technology.id}`,
+					) as { findings: Finding[] } | null;
+					if (!audit) {
+						throw new Error(`No audit of ${technology.id}: run audit first`);
+					}
+					const requested = args.changes[technology.id] ?? {};
+					const fields = seoFieldsToDraft(audit.findings)
+						.filter((field) => !(field in requested));
+					const draft = drafts.get(technology.id);
+					const review = fields.length === 0
+						? { values: {}, rejected: [] }
+						: draft?.ok === true
+						? reviewDraft(technology, fields, draft.structured)
+						: {
+							values: {},
+							rejected: [`not drafted: ${draft?.error ?? "no answer"}`],
+						};
+					planned.push({
+						technology,
+						findings: audit.findings,
+						rejected: review.rejected,
+						changes: planChanges(
+							technology,
+							audit.findings,
+							accept,
+							requested,
+							accepted,
+							review.values,
+						),
+					});
+				}
 
 				const unused = accept.filter((entry) => !accepted.has(entry));
 				if (unused.length > 0) {
@@ -475,12 +632,10 @@ export const behavior = {
 						} (no finding with an observed value)`,
 					);
 				}
-				const problems = audited.flatMap(({ technology, changes }) =>
+				const problems = planned.flatMap(({ technology, changes }) =>
 					changes
 						.filter((change) => change.field !== "body")
-						.map((change) =>
-							validateValue(change.field, change.to, knownIdentifiers)
-						)
+						.map((change) => validateValue(change.field, change.to, known))
 						.filter((problem): problem is string => problem !== null)
 						.map((problem) => `${technology.id}: ${problem}`)
 				);
@@ -494,7 +649,7 @@ export const behavior = {
 				let needsReview = 0;
 				const now = new Date().toISOString();
 				const handles: Array<{ name: string }> = [];
-				for (const { technology, findings, changes } of audited) {
+				for (const { technology, findings, changes, rejected } of planned) {
 					const counts: Record<string, number> = {};
 					for (const finding of findings) {
 						counts[finding.status] = (counts[finding.status] ?? 0) + 1;
@@ -547,6 +702,10 @@ export const behavior = {
 							);
 						}
 					}
+					if (rejected.length > 0) {
+						lines.push(`${technology.id} drafts rejected:`);
+						lines.push(...rejected.map((reason) => `  ${reason}`));
+					}
 					handles.push(
 						await context.writeResource("audit", `audit-${technology.id}`, {
 							id: technology.id,
@@ -561,7 +720,7 @@ export const behavior = {
 				handles.push(
 					await context.writeResource("plan", "plan", {
 						createdAt: now,
-						audited: audited.length,
+						audited: planned.length,
 						technologies: Object.keys(expected),
 						statements,
 						expected,
@@ -580,6 +739,72 @@ export const behavior = {
 				return { dataHandles: handles };
 			},
 		},
+		discover: {
+			description:
+				"List the CNCF landscape projects that none of the given technology rows covers by repository, website, name or alias",
+			arguments: z.object({
+				rows: RowsSchema,
+				maturity: z.string().default("graduated,incubating,sandbox")
+					.describe("Comma-separated CNCF maturity levels to include"),
+			}),
+			execute: async (
+				args: { rows: Array<Record<string, unknown>>; maturity: string },
+				context: Context,
+			): Promise<{ dataHandles: Array<{ name: string }> }> => {
+				const landscape = await fetchLandscape();
+				if (!landscape) {
+					throw new Error("The CNCF landscape could not be fetched");
+				}
+				const maturity = split(args.maturity);
+				const projects = landscape.projects.filter((project) =>
+					maturity.includes(String(project.maturity))
+				);
+				const text = (value: unknown) =>
+					typeof value === "string" && value !== "" ? value : null;
+				const missing = uncovered(args.rows.map(parseRow), projects)
+					.map((project) => {
+						const repositories = (project.repositories ?? []) as Array<
+							{ url?: string; primary?: boolean }
+						>;
+						return {
+							name: String(project.name),
+							maturity: String(project.maturity),
+							accepted: text(project.accepted_at),
+							category: text(project.category),
+							subcategory: text(project.subcategory),
+							website: text(project.homepage_url),
+							source: text(
+								(repositories.find((repository) => repository.primary) ??
+									repositories[0])?.url,
+							),
+							description: text(project.description),
+						};
+					})
+					.sort((left, right) =>
+						maturity.indexOf(left.maturity) -
+							maturity.indexOf(right.maturity) ||
+						left.name.localeCompare(right.name)
+					);
+				for (const project of missing) {
+					context.logger.info("{maturity}: {name} {source}", {
+						maturity: project.maturity,
+						name: project.name,
+						source: project.source ?? project.website ?? "",
+					});
+				}
+				context.logger.info(
+					"{missing} of {projects} CNCF projects have no technology profile",
+					{ missing: missing.length, projects: projects.length },
+				);
+				const handle = await context.writeResource("gaps", "landscape-gaps", {
+					checkedAt: new Date().toISOString(),
+					maturity,
+					projects: projects.length,
+					missing,
+				});
+				return { dataHandles: [handle] };
+			},
+		},
 		confirm: {
 			description:
 				"Compare freshly read technology rows with the latest plan and fail unless every planned value is stored",
@@ -589,7 +814,7 @@ export const behavior = {
 				context: Context,
 			): Promise<{ dataHandles: Array<{ name: string }> }> => {
 				const plan = await context.readResource!("plan") as Plan | null;
-				if (!plan) throw new Error("No plan to confirm: run audit first");
+				if (!plan) throw new Error("No plan to confirm: run plan first");
 				const stored = new Map(
 					args.rows.map(parseRow).map((
 						technology,
