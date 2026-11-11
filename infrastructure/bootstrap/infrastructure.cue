@@ -7,9 +7,11 @@ import (
 
 	"github.com/cuenv/cuenv/schema"
 	"registry.terraform.io/cloudflare/cloudflare:cloudflare_provider"
+	"registry.terraform.io/dnsimple/dnsimple:dnsimple_provider"
 	"registry.terraform.io/infisical/infisical:infisical_provider"
 	"registry.terraform.io/integrations/github:github_provider"
 	account_token "registry.terraform.io/cloudflare/cloudflare/resources/cloudflare_account_token"
+	"registry.terraform.io/dnsimple/dnsimple/resources/dnsimple_domain_delegation"
 	github_actions_variable "registry.terraform.io/integrations/github/resources/github_actions_variable"
 	github_repository_environment "registry.terraform.io/integrations/github/resources/github_repository_environment"
 	github_repository_environment_deployment_policy "registry.terraform.io/integrations/github/resources/github_repository_environment_deployment_policy"
@@ -26,18 +28,22 @@ import (
 // - github-read-write, the Infisical identity infrastructure applies log in
 //   as. Its login only works from an apply workflow on main, in the
 //   `infrastructure` GitHub environment, so every apply waits for a reviewer.
-//   It reads the github-read-write Cloudflare token (CLOUDFLARE_ROOT_TOKEN),
-//   the DNSimple token and the state bucket credentials.
+//   It reads the github-read-write Cloudflare token (CLOUDFLARE_ROOT_TOKEN)
+//   and the state bucket credentials.
 // - github-read-only, the identity infrastructure plans on pull requests log
 //   in as, in the `infrastructure-plan` GitHub environment. It reads
 //   /infrastructure/read-only: a Cloudflare token and a state key that can
-//   only read, and the DNSimple token, which has no read-only form.
+//   only read.
 // - github-actions, the identity deploys on main log in as, in the
 //   `production` GitHub environment. It reads project secrets only.
 //
 // Every other pull request job gets no identity and no secrets. Only main can
-// enter the `production` and `infrastructure` environments, and the rulesets
-// below make every change to main a reviewed pull request with passing checks.
+// enter the `infrastructure` environment, and the rulesets below make every
+// change to main a reviewed pull request with passing checks.
+//
+// The DNSimple delegations live here too. DNSimple has no read-only tokens,
+// so its token stays in 1Password and only this project, run by hand, holds
+// it.
 
 _account: env.CLOUDFLARE_ACCOUNT_ID
 
@@ -99,6 +105,10 @@ infrastructure: {
 		github: github_provider.#Provider & {
 			configuration: owner: _github.owner
 		}
+		// The token comes from DNSIMPLE_TOKEN in env.cue.
+		dnsimple: dnsimple_provider.#Provider & {
+			configuration: account: "126046"
+		}
 		// Universal Auth: the client ID and secret come from env.cue.
 		infisical: infisical_provider.#Provider & {
 			configuration: {
@@ -109,6 +119,19 @@ infrastructure: {
 	}
 
 	resources: {
+		// Domains registered with DNSimple, delegated to the name servers
+		// Cloudflare assigns every zone in the account. infrastructure/dns
+		// manages their zones.
+		// The names infrastructure/dns gave them, so imports keep their address.
+		for slug, registered in {"rawko-de": "rawko.de", "rawkode-link": "rawkode.link"} {
+			"\(slug)_delegation": dnsimple_domain_delegation.#Resource & {
+				configuration: {
+					domain: registered
+					name_servers: ["curt.ns.cloudflare.com", "miki.ns.cloudflare.com"]
+				}
+			}
+		}
+
 		// For deploys on main. No infrastructure credentials: those need a
 		// reviewed apply.
 		ci_role: infisical_project_role.#Resource & {
@@ -167,7 +190,7 @@ infrastructure: {
 				name:       "github-read-write"
 				slug:       "github-read-write"
 				permissions_v2: [
-					// The Cloudflare and DNSimple tokens and the state credentials.
+					// The Cloudflare token and the state credentials.
 					{
 						subject: "secrets"
 						action: ["describeSecret", "readValue"]
@@ -269,26 +292,13 @@ infrastructure: {
 			}
 		}
 
-		// Deploys. No reviewer, but only main can enter it, so a pull request
-		// can't reach the secrets it holds even by naming it.
+		// Deploys, and website previews on pull requests. Any branch can enter
+		// it and it holds no secrets: github-actions only logs in from main.
 		production_environment: github_repository_environment.#Resource & {
 			configuration: {
 				repository:        _github.repository
 				environment:       _github.deployEnvironment
 				can_admins_bypass: false
-				deployment_branch_policy: [{
-					protected_branches:     false
-					custom_branch_policies: true
-				}]
-			}
-		}
-
-		production_from_main: github_repository_environment_deployment_policy.#Resource & {
-			dependsOn: ["production_environment"]
-			configuration: {
-				repository:     _github.repository
-				environment:    _github.deployEnvironment
-				branch_pattern: "main"
 			}
 		}
 
@@ -444,25 +454,13 @@ infrastructure: {
 			}
 		}
 
-		// What DNS registers its delegations with.
-		dnsimple_token_secret: infisical_secret.#Resource & {
-			configuration: {
-				workspace_id:     _infisical.projectId
-				env_slug:         _infisical.environment
-				folder_path:      infrastructure.resources.infrastructure_folder.outputs.path
-				name:             "DNSIMPLE_TOKEN"
-				value_wo:         schema.#WriteOnly & _dnsimpleToken
-				value_wo_version: 1
-			}
-		}
-
 		// R2 credentials for the cuenv state bucket.
 		state_token: account_token.#Resource & {
 			configuration: {
 				account_id: _account
 				name:       "infrastructure-ci-state"
 				policies: [{
-					effect:    "allow"
+					effect: "allow"
 					resources: json.Marshal({"com.cloudflare.edge.r2.bucket.\(_account)_default_\(_stateBucket)": "*"})
 					permission_groups: [
 						{id: _permissionGroups.storageItemWrite},
@@ -500,7 +498,7 @@ infrastructure: {
 				account_id: _account
 				name:       "infrastructure-ci-read-only"
 				policies: [{
-					effect:    "allow"
+					effect: "allow"
 					resources: json.Marshal({"com.cloudflare.api.account.\(_account)": "*"})
 					permission_groups: [
 						{id: _permissionGroups.zoneRead},
@@ -523,18 +521,6 @@ infrastructure: {
 			}
 		}
 
-		// DNSimple has no read-only tokens, so plans hold the same one applies do.
-		read_only_dnsimple_token_secret: infisical_secret.#Resource & {
-			configuration: {
-				workspace_id:     _infisical.projectId
-				env_slug:         _infisical.environment
-				folder_path:      infrastructure.resources.read_only_folder.outputs.path
-				name:             "DNSIMPLE_TOKEN"
-				value_wo:         schema.#WriteOnly & _dnsimpleToken
-				value_wo_version: 1
-			}
-		}
-
 		// R2 credentials that read the state bucket and can't write it. The
 		// bucket holds every project's state, so a plan can read all of it.
 		state_read_only_token: account_token.#Resource & {
@@ -542,7 +528,7 @@ infrastructure: {
 				account_id: _account
 				name:       "infrastructure-ci-state-read-only"
 				policies: [{
-					effect:    "allow"
+					effect: "allow"
 					resources: json.Marshal({"com.cloudflare.edge.r2.bucket.\(_account)_default_\(_stateBucket)": "*"})
 					permission_groups: [{id: _permissionGroups.storageItemRead}]
 				}]

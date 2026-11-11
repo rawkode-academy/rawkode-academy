@@ -13,7 +13,7 @@ This directory contains infrastructure-as-code configurations for DNS, GitHub or
 
 ## dns/
 
-Manages DNS with cuenv infrastructure (`cuenv infrastructure`, alias `cuenv i`), which drives the Cloudflare and DNSimple Terraform providers directly. State lives in the `rawkode-academy-cuenv-infrastructure` Cloudflare D1 database.
+Manages DNS with cuenv infrastructure (`cuenv infrastructure`, alias `cuenv i`), which drives the Cloudflare Terraform provider directly. Delegations of domains registered with DNSimple are in `bootstrap/`, since DNSimple has no read-only tokens. State lives in the `rawkode-academy-cuenv-infrastructure` Cloudflare D1 database.
 
 **Layout:**
 - `env.cue` - the cuenv project; Infisical-backed credentials chosen by context: read-only for `plan`, read-write for `apply`, `import` and `destroy`
@@ -81,5 +81,4 @@ DNS infrastructure reads these secrets (configured in `dns/env.cue` and `dns/inf
 | Secret | Plan (`/infrastructure/read-only`) | Apply (`/infrastructure`) |
 |--------|------------------------------------|---------------------------|
 | `CLOUDFLARE_API_TOKEN` | `CLOUDFLARE_API_TOKEN`, reads zones | `CLOUDFLARE_ROOT_TOKEN` |
-| `DNSIMPLE_TOKEN` | `DNSIMPLE_TOKEN` (DNSimple has no read-only tokens) | `DNSIMPLE_TOKEN` |
 | State bucket credentials | `CUENV_STATE_ACCESS_KEY_ID`, `CUENV_STATE_SECRET_ACCESS_KEY`, read only | the same names, read and write |

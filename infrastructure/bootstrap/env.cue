@@ -20,13 +20,17 @@ env: {
 	CLOUDFLARE_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce"
 
 	CLOUDFLARE_API_TOKEN: {
-		value: _rootToken
+		value:    _rootToken
 		policies: _infrastructure
 	}
 	// The GitHub CLI's login creates the production environment and the
 	// identity variables.
 	GITHUB_TOKEN: {
 		value: schema.#ExecSecret & {command: "gh", args: ["auth", "token"]}
+		policies: _infrastructure
+	}
+	DNSIMPLE_TOKEN: {
+		value:    _dnsimpleToken
 		policies: _infrastructure
 	}
 	INFISICAL_UNIVERSAL_AUTH_CLIENT_ID: {

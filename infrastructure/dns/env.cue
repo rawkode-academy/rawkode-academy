@@ -22,17 +22,15 @@ _readOnly: _infisicalSecret & {secretPath: "/infrastructure/read-only"}
 
 contexts: {
 	plan: schema.#When & {infrastructure: "plan"}
-	apply: schema.#When & {infrastructure: "apply|import|destroy"}
+	// State commands that write need the read-write state key too.
+	apply: schema.#When & {infrastructure: "apply|import|destroy|state-remove"}
 }
 
 env: context: {
 	plan: {
 		CLOUDFLARE_API_TOKEN: _readOnly & {secretName: "CLOUDFLARE_API_TOKEN"}
-		// DNSimple has no read-only tokens.
-		DNSIMPLE_TOKEN: _readOnly & {secretName: "DNSIMPLE_TOKEN"}
 	}
 	apply: {
 		CLOUDFLARE_API_TOKEN: _readWrite & {secretName: "CLOUDFLARE_ROOT_TOKEN"}
-		DNSIMPLE_TOKEN: _readWrite & {secretName: "DNSIMPLE_TOKEN"}
 	}
 }
