@@ -80,6 +80,10 @@ Deno.test("evaluate proposes only what an authoritative source backs", () => {
 	assertEquals(status["cncf.accepted"].status, "verified");
 	assertEquals(status["cncf.tags"].observed, ["Runtime", "Kubernetes"]);
 	assertEquals(status["matrix.status"].observed, "under-review");
+	assertEquals(
+		planChanges(technology, [status["matrix.status"]], [], {})[0].reason,
+		"default",
+	);
 	assertEquals(status["community.twitter"].status, "proposed");
 	assertEquals(status["community.slack"].status, "broken");
 	assertEquals(status.related_technologies.observed, ["kubernetes"]);

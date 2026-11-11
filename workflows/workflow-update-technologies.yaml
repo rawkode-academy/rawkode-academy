@@ -29,7 +29,7 @@ inputs:
         {"kubernetes": {"community.blog": "https://kubernetes.io/blog/"}}
 jobs:
   - name: update
-    description: Read, audit, draft, plan, approve, write, confirm and invalidate
+    description: Read, audit, draft, plan, redraft, approve, write, confirm and invalidate
     steps:
       - name: read
         description: Read the requested technology rows from D1
@@ -94,12 +94,48 @@ jobs:
             accept: ${{ inputs.accept }}
             changes: ${{ inputs.changes }}
             drafts: ${{ data.findBySpec("seo-writer", "cliResult") }}
+      - name: redraft
+        description: Give every draft that failed the checks one more attempt
+        dependsOn:
+          - step: plan
+            condition:
+              type: succeeded
+        guard: ${{ size(data.latest("technology-profiles", "seo-retries").attributes.requests) == 0 }}
+        task:
+          type: behavior
+          behavior: seo-writer
+          methodName: cli_generate_many
+          inputs:
+            batch: technology-seo
+            systemPrompt: ${{ data.latest("technology-profiles", "seo-retries").attributes.systemPrompt }}
+            requests: ${{ data.latest("technology-profiles", "seo-retries").attributes.requests }}
+      - name: replan
+        description: Plan again with the second drafts
+        dependsOn:
+          - step: redraft
+            condition:
+              type: succeeded
+        task:
+          type: behavior
+          behavior: technology-profiles
+          methodName: plan
+          inputs:
+            rows: ${{ data.latest("technologies-database", "d1_query_database-current").attributes[0].results }}
+            accept: ${{ inputs.accept }}
+            changes: ${{ inputs.changes }}
+            drafts: ${{ data.findBySpec("seo-writer", "cliResult") }}
       - name: approve
         description: Review the plan before anything is written
         dependsOn:
           - step: plan
             condition:
               type: succeeded
+          - step: replan
+            condition:
+              type: or
+              conditions:
+                - type: succeeded
+                - type: skipped
         guard: ${{ size(data.latest("technology-profiles", "plan").attributes.statements) == 0 }}
         task:
           type: manual_approval

@@ -376,7 +376,7 @@ async function renderBody(
 function describe(value: unknown): string {
 	if (value === null || value === undefined) return "(unset)";
 	const text = typeof value === "string" ? value : JSON.stringify(value);
-	return text.length > 120 ? `${text.slice(0, 117)}...` : text;
+	return text.length > 200 ? `${text.slice(0, 197)}...` : text;
 }
 
 /** Every technology id in the table, which the read step attaches to each row. */
@@ -717,6 +717,33 @@ export const behavior = {
 					);
 				}
 
+				// A rejected draft gets one more attempt, told what was wrong with it.
+				const drafting = await context.readResource!("seo-requests") as
+					| z.infer<typeof DraftingSchema>
+					| null;
+				const retries = planned.flatMap(({ technology, rejected }) => {
+					const request = drafting?.requests.find((request) =>
+						request.key === technology.id
+					);
+					return request && rejected.length > 0
+						? [{
+							...request,
+							prompt:
+								`${request.prompt}\n\nYour previous draft was rejected:\n${
+									rejected.map((reason) => `- ${reason}`).join("\n")
+								}\nWrite the title and description again.`,
+						}]
+						: [];
+				});
+				handles.push(
+					await context.writeResource("drafting", "seo-retries", {
+						createdAt: now,
+						systemPrompt: drafting?.systemPrompt ?? SEO_SYSTEM_PROMPT,
+						requests: retries,
+					}),
+				);
+				for (const line of lines) context.logger.info("{line}", { line });
+
 				handles.push(
 					await context.writeResource("plan", "plan", {
 						createdAt: now,
@@ -730,10 +757,11 @@ export const behavior = {
 					}),
 				);
 				context.logger.info(
-					"Planned {changes} updates; {review} findings need review",
+					"Planned {changes} updates; {review} findings need review; {retries} drafts to retry",
 					{
 						changes: statements.length,
 						review: needsReview,
+						retries: retries.length,
 					},
 				);
 				return { dataHandles: handles };
