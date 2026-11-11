@@ -37,3 +37,10 @@ catalog maintenance-configs '{
 	"compaction": {"state": "enabled", "target_size_mb": "128"},
 	"snapshot_expiration": {"state": "enabled", "max_snapshot_age": "7d", "min_snapshots_to_keep": 10}
 }'
+
+# Fail unless the catalog now holds the credential compaction runs as.
+status=$(curl --fail-with-body --silent --show-error \
+	--header "Authorization: Bearer ${BASIN_CATALOG_TOKEN}" \
+	"https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/r2-catalog/${BUCKET}/maintenance-configs")
+echo "$status"
+grep -q '"credential_status": *"present"' <<<"$status"
