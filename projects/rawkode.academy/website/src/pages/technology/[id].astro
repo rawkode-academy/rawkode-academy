@@ -435,6 +435,7 @@ await setContentCache(Astro, {
 			image={absoluteLogo}
 			about={technology.name}
 			keywords={technologyKeywords.join(", ")}
+			dateModified={technologyEntry?.data.recordUpdatedAt}
 		/>
 	)}
 	<BreadcrumbJsonLd slot="extra-head" elements={breadcrumbs} />

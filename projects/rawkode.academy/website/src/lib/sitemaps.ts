@@ -36,8 +36,8 @@ export type SitemapChangeFreq =
 
 export interface SitemapUrlEntry {
 	path: string;
-	/** Omit when no real modification date is known. */
-	lastmod?: Date;
+	/** Left out of the sitemap when no real modification date is known. */
+	lastmod?: Date | undefined;
 	changefreq: SitemapChangeFreq;
 	/**
 	 * 0.0–1.0; only emitted into the sitemap when set. Most crawlers
@@ -134,14 +134,19 @@ function toValidDate(value: unknown): Date | undefined {
 	return undefined;
 }
 
-function pickLastmod(fallback: Date, ...values: unknown[]): Date {
+/**
+ * The first known date, or none. A missing date is left out of the sitemap:
+ * falling back to the deploy time changed lastmod on every release, which
+ * teaches crawlers to ignore it.
+ */
+function pickLastmod(...values: unknown[]): Date | undefined {
 	for (const value of values) {
 		const parsed = toValidDate(value);
 		if (parsed) {
 			return parsed;
 		}
 	}
-	return fallback;
+	return undefined;
 }
 
 function escapeXml(value: unknown): string {
@@ -262,18 +267,11 @@ export async function getPagesSitemapEntries(): Promise<SitemapUrlEntry[]> {
 }
 
 export async function getArticleSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const [articles, deployTime] = await Promise.all([
-		getCollection("articles"),
-		getDeployTime(),
-	]);
+	const [articles] = await Promise.all([getCollection("articles")]);
 
 	const entries = articles.map((article) => ({
 		path: `/read/${article.id}`,
-		lastmod: pickLastmod(
-			deployTime,
-			article.data.updatedAt,
-			article.data.publishedAt,
-		),
+		lastmod: pickLastmod(article.data.updatedAt, article.data.publishedAt),
 		changefreq: "daily" as const,
 		priority: 0.7,
 	}));
@@ -284,10 +282,7 @@ export async function getArticleSitemapEntries(): Promise<SitemapUrlEntry[]> {
 export async function getTechnologySitemapEntries(): Promise<
 	SitemapUrlEntry[]
 > {
-	const [technologies, deployTime] = await Promise.all([
-		getCollection("technologies"),
-		getDeployTime(),
-	]);
+	const [technologies] = await Promise.all([getCollection("technologies")]);
 
 	// Every technology page has a written profile (the technologies service
 	// stores a body for each one; the list query omits bodies to stay small),
@@ -296,7 +291,6 @@ export async function getTechnologySitemapEntries(): Promise<
 	const entries = technologies.map((technology) => ({
 		path: `/technology/${technology.id}`,
 		lastmod: pickLastmod(
-			deployTime,
 			technology.data.recordUpdatedAt,
 			(technology.data as unknown as Record<string, unknown>).publishedAt,
 		),
@@ -308,18 +302,11 @@ export async function getTechnologySitemapEntries(): Promise<
 }
 
 export async function getVideoSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const [videos, deployTime] = await Promise.all([
-		getPublishedVideos(),
-		getDeployTime(),
-	]);
+	const [videos] = await Promise.all([getPublishedVideos()]);
 
 	const entries = videos.map((video) => ({
 		path: `/watch/${video.data.slug}`,
-		lastmod: pickLastmod(
-			deployTime,
-			video.data.recordUpdatedAt,
-			video.data.publishedAt,
-		),
+		lastmod: pickLastmod(video.data.recordUpdatedAt, video.data.publishedAt),
 		changefreq: "daily" as const,
 		priority: 0.7,
 	}));
@@ -328,19 +315,14 @@ export async function getVideoSitemapEntries(): Promise<SitemapUrlEntry[]> {
 }
 
 export async function getCourseSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const [courses, modules, deployTime] = await Promise.all([
+	const [courses, modules] = await Promise.all([
 		getCollection("courses"),
 		getCollection("courseModules", ({ data }) => !data.draft),
-		getDeployTime(),
 	]);
 
 	const courseEntries = courses.map((course) => ({
 		path: `/courses/${course.id}`,
-		lastmod: pickLastmod(
-			deployTime,
-			course.data.recordUpdatedAt,
-			course.data.publishedAt,
-		),
+		lastmod: pickLastmod(course.data.recordUpdatedAt, course.data.publishedAt),
 		changefreq: "weekly" as const,
 		priority: 0.7,
 	}));
@@ -350,7 +332,6 @@ export async function getCourseSitemapEntries(): Promise<SitemapUrlEntry[]> {
 		return {
 			path: `/courses/${module.data.course.id}/${slug}`,
 			lastmod: pickLastmod(
-				deployTime,
 				module.data.recordUpdatedAt,
 				module.data.publishedAt,
 			),
@@ -365,15 +346,11 @@ export async function getCourseSitemapEntries(): Promise<SitemapUrlEntry[]> {
 export async function getLearningPathSitemapEntries(): Promise<
 	SitemapUrlEntry[]
 > {
-	const [learningPaths, deployTime] = await Promise.all([
-		getCollection("learningPaths"),
-		getDeployTime(),
-	]);
+	const [learningPaths] = await Promise.all([getCollection("learningPaths")]);
 
 	const entries = learningPaths.map((learningPath) => ({
 		path: `/learning-paths/${learningPath.id}`,
 		lastmod: pickLastmod(
-			deployTime,
 			learningPath.data.recordUpdatedAt,
 			learningPath.data.publishedAt,
 		),
@@ -386,8 +363,8 @@ export async function getLearningPathSitemapEntries(): Promise<
 
 export async function getPeopleSitemapEntries(): Promise<SitemapUrlEntry[]> {
 	const now = new Date();
-	const [people, allVideos, allShows, allNews, allArticles, deployTime] =
-		await Promise.all([
+	const [people, allVideos, allShows, allNews, allArticles] = await Promise.all(
+		[
 			getCollection("people"),
 			getPublishedVideos(),
 			getCollection("shows", ({ data }) => data.publish),
@@ -395,8 +372,8 @@ export async function getPeopleSitemapEntries(): Promise<SitemapUrlEntry[]> {
 				isNewsPublished(data.publishedAt, now),
 			),
 			getCollection("articles"),
-			getDeployTime(),
-		]);
+		],
+	);
 
 	// Mirror the profile page's noindex rule (pages/people/[id].astro): a
 	// profile is indexable with a biography, a guest appearance, a hosted
@@ -443,7 +420,6 @@ export async function getPeopleSitemapEntries(): Promise<SitemapUrlEntry[]> {
 		.map((person) => ({
 			path: `/people/${person.data.id}`,
 			lastmod: pickLastmod(
-				deployTime,
 				person.data.recordUpdatedAt,
 				(person.data as unknown as Record<string, unknown>).publishedAt,
 			),
@@ -455,15 +431,13 @@ export async function getPeopleSitemapEntries(): Promise<SitemapUrlEntry[]> {
 }
 
 export async function getShowSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const [shows, deployTime] = await Promise.all([
+	const [shows] = await Promise.all([
 		getCollection("shows", ({ data }) => data.publish),
-		getDeployTime(),
 	]);
 
 	const entries = shows.map((show) => ({
 		path: `/shows/${show.data.id}`,
 		lastmod: pickLastmod(
-			deployTime,
 			show.data.recordUpdatedAt,
 			(show.data as unknown as Record<string, unknown>).publishedAt,
 		),
@@ -477,22 +451,17 @@ export async function getShowSitemapEntries(): Promise<SitemapUrlEntry[]> {
 export async function getNewsSitemapEntries(
 	now = new Date(),
 ): Promise<SitemapUrlEntry[]> {
-	const [newsItems, deployTime] = await Promise.all([
+	const [newsItems] = await Promise.all([
 		getCollection(
 			"news",
 			({ data }) => isNewsPublished(data.publishedAt, now),
 			{ now },
 		),
-		getDeployTime(),
 	]);
 
 	const entries = newsItems.map((item) => ({
 		path: `/news/${item.id}`,
-		lastmod: pickLastmod(
-			deployTime,
-			item.data.recordUpdatedAt,
-			item.data.publishedAt,
-		),
+		lastmod: pickLastmod(item.data.recordUpdatedAt, item.data.publishedAt),
 		changefreq: "weekly" as const,
 		priority: 0.7,
 	}));
@@ -531,18 +500,11 @@ export async function getFreshNewsSitemapEntries(
 }
 
 export async function getAdrSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const [adrs, deployTime] = await Promise.all([
-		getCollection("adrs"),
-		getDeployTime(),
-	]);
+	const [adrs] = await Promise.all([getCollection("adrs")]);
 
 	const entries = adrs.map((adr) => ({
 		path: `/adrs/${adr.id}`,
-		lastmod: pickLastmod(
-			deployTime,
-			adr.data.adoptedAt,
-			adr.data.recordUpdatedAt,
-		),
+		lastmod: pickLastmod(adr.data.adoptedAt, adr.data.recordUpdatedAt),
 		changefreq: "monthly" as const,
 		priority: 0.4,
 	}));
