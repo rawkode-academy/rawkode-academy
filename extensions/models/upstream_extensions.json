@@ -31,6 +31,21 @@
     "serverUrl": "https://swamp-club.com",
     "publishedChannel": "stable"
   },
+  "@keeb/anthropic": {
+    "version": "2026.10.15.1",
+    "pulledAt": "2026-11-11T22:54:06.774Z",
+    "files": [
+      ".claude/skills/anthropic",
+      ".swamp/pulled-extensions/@keeb/anthropic/files/LICENSE.txt",
+      ".swamp/pulled-extensions/@keeb/anthropic/files/README.md",
+      ".swamp/pulled-extensions/@keeb/anthropic/manifest.yaml",
+      ".swamp/pulled-extensions/@keeb/anthropic/models/claude.ts"
+    ],
+    "checksum": "3a63d126362f5ce13f2b49532ccc0e23c33169b22a6a1fe513c89c45dcf64a6b",
+    "filesChecksum": "f8a5cdcbc12997bb95db7d053be19003967be17e4a5d30e4cd2f00f7eab9e2a5",
+    "serverUrl": "https://swamp-club.com",
+    "publishedChannel": "stable"
+  },
   "@webframp/cloudflare/queues": {
     "version": "2026.11.03.1",
     "pulledAt": "2026-11-11T18:59:05.402Z",

@@ -3,6 +3,18 @@
 
 name: rawkode-tools-observability-collector-maintenance
 on:
+  push:
+    branches:
+    - main
+    paths:
+    - .github/workflows/rawkode-tools-observability-collector-maintenance.yml
+    - cue.mod/**
+    - projects/rawkode.tools/observability-collector/basin/maintenance.sh
+    - projects/rawkode.tools/observability-collector/basin/maintenance.sh/**
+    - projects/rawkode.tools/observability-collector/env.cue
+    - projects/rawkode.tools/observability-collector/infrastructure.cue
+    - projects/rawkode.tools/observability-collector/infrastructure.cue/**
+    - projects/rawkode.tools/observability-collector/schema/**
   workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
@@ -58,7 +70,7 @@ jobs:
           Darwin-arm64) cuenv_asset="cuenv-darwin-arm64" ;;
           *) echo "Unsupported platform: $platform" >&2; exit 1 ;;
         esac
-        cuenv_version="0.72.0"
+        cuenv_version="0.73.1"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi

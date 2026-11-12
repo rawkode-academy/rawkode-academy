@@ -110,8 +110,8 @@ function contentCacheCall(page) {
 
 const badgeMarkup = fragment(
 	technologyPage,
-	"\t\t\t{supporter && (",
-	"\t\t\t{description && ",
+	"\t\t\t\t{supporter && (",
+	"\t\t\t\t{description && ",
 );
 const renderBadge = (supporter) =>
 	render(badgeMarkup, ["supporter", "SUPPORTERS_PATH", "MLabel"], {
@@ -151,11 +151,11 @@ test("technology credit thanks the supporter, links to its website and to the wa
 
 test("technology badge sits directly under the identity block and its supporter is optional content", () => {
 	const identityEnd = technologyPage.indexOf(
-		"<h1 class={styles.title}>{technology.name}</h1>\n\t\t\t</div>",
+		"<h1 class={styles.title}>{technology.name}</h1>\n\t\t\t\t</div>",
 	);
 	assert(identityEnd > 0);
 	assert.equal(
-		technologyPage.indexOf("\t\t\t{supporter && (", identityEnd),
+		technologyPage.indexOf("\t\t\t\t{supporter && (", identityEnd),
 		technologyPage.indexOf(
 			"\n",
 			technologyPage.indexOf("</div>", identityEnd),
