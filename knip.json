@@ -37,6 +37,9 @@
       "ignore": [
         ".projen/**"
       ]
+    },
+    "projects/rawkode.arcade": {
+      "bun": false
     }
   },
   "astro": true,

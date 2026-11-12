@@ -98,7 +98,7 @@ const HEX_ALLOWLIST: Record<string, RegExp> = {
  */
 const COLOUR_BASELINE: Record<string, { count: number; reason: string }> = {
 	"src/lib/explorer/dimension-values.ts": {
-		count: 62,
+		count: 58,
 		reason: "explorer category palette, not yet academy.* tokens",
 	},
 	"src/lib/theme.ts": {
