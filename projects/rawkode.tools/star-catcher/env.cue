@@ -10,12 +10,6 @@ let _t = tasks
 
 env: {
 	SERVICE_NAME: "star-catcher"
-
-	environment: production: {
-		CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {
-			ref: "op://sa.rawkode.academy/cloudflare/api-tokens/workers"
-		}
-	}
 }
 
 ci: pipelines: {
