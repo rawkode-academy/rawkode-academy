@@ -8,14 +8,6 @@ name: "rawkode-academy-platform-zitadel-zulip-connector"
 
 let _t = tasks
 
-env: {
-	environment: production: {
-		CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {
-			ref: "op://sa.rawkode.academy/cloudflare/api-tokens/workers"
-		}
-	}
-}
-
 ci: pipelines: {
 	default: {
 		environment: "production"

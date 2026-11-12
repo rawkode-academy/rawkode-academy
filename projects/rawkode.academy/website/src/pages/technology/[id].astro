@@ -30,6 +30,7 @@ import {
 	button,
 } from "@rawkodeacademy/design-system";
 import "@rawkodeacademy/design-system/styles.css";
+import { DIMENSIONS } from "@/lib/explorer/dimensions";
 import { SUPPORTERS_PATH, supporterForTechnology } from "@/lib/supporters";
 
 export interface Technology extends Omit<TechnologyData, "logos" | "body"> {
@@ -256,8 +257,16 @@ const statusLabels: Record<string, string> = {
 	trial: "Explore",
 };
 
-const statusLabel = technology.matrix?.status
-	? (statusLabels[technology.matrix.status] ?? technology.matrix.status)
+// "under-review" means not rated yet, so there is no rating to show.
+const statusLabel =
+	technology.matrix?.status && technology.matrix.status !== "under-review"
+		? (statusLabels[technology.matrix.status] ?? technology.matrix.status)
+		: undefined;
+// What the placement means, in the matrix's own words.
+const statusNote = statusLabel
+	? DIMENSIONS["matrix.status"].values.find(
+			(value) => value.value === technology.matrix?.status,
+		)?.description
 	: undefined;
 const description = technology.seo?.description?.trim();
 // Stored values are lowercase identifiers ("stable", "rising"); set them as words.
@@ -449,43 +458,52 @@ await setContentCache(Astro, {
 	</Fragment>
 	<div class={styles.root}>
 		<header class={styles.hero}>
-			<Breadcrumb parents={breadcrumbs.slice(0, -1)} />
-			<div class={styles.identity}>
-				{technology.logo && (
-					<img src={technology.logo} alt="" width="64" height="64" class={styles.logo}
-						onerror="this.hidden=true;" />
-				)}
-				<h1 class={styles.title}>{technology.name}</h1>
-			</div>
-			{supporter && (
-				<aside class="technology-supporter" aria-label="Community supporter">
-					<MLabel tone="spruce">Community supporter</MLabel>
-					<p class="technology-supporter__thanks">
-						<a class="technology-supporter__name" href={supporter.data.websiteUrl} target="_blank" rel="sponsored noopener">{supporter.data.name}<span class="sr-only"> (opens in a new tab)</span></a> helps keep Rawkode Academy free to watch. Thank you.
-					</p>
-					<a class="technology-supporter__wall" href={SUPPORTERS_PATH}>All community supporters <span aria-hidden="true">→</span></a>
-				</aside>
-			)}
-			{description && <p class={styles.description}>{description}</p>}
-			{metadata.length > 0 && (
-				<dl class={styles.metadata}>
-					{metadata.map(([label, value]) => (
-						<div><dt>{label}</dt><dd>{value}</dd></div>
-					))}
-				</dl>
-			)}
-			{statusLabel && !hasMatrixDetails && (
-				<div class={styles.personalRating}>
-					<p class={styles.copy}>Rawkode’s personal rating: <a class={styles.link} href="/technology/matrix">{statusLabel}</a></p>
-					{matrixMetadata.map(([label, value]) => <span class={styles.copy}>{label}: {value}</span>)}
+			<div class={styles.heroBody}>
+				<Breadcrumb parents={breadcrumbs.slice(0, -1)} />
+				<div class={styles.identity}>
+					{technology.logo && (
+						<img src={technology.logo} alt="" width="64" height="64" class={styles.logo}
+							onerror="this.hidden=true;" />
+					)}
+					<h1 class={styles.title}>{technology.name}</h1>
 				</div>
-			)}
-			{officialLinks.length > 0 && (
-				<ul class={styles.actions} aria-label="Project links">
-					{officialLinks.map(([label, url]) => (
-						<li><a href={url} class={button({ variant: "outline", size: "sm" })} target="_blank" rel="noopener noreferrer">{label} <span aria-hidden="true">↗</span></a></li>
-					))}
-				</ul>
+				{supporter && (
+					<aside class="technology-supporter" aria-label="Community supporter">
+						<MLabel tone="spruce">Community supporter</MLabel>
+						<p class="technology-supporter__thanks">
+							<a class="technology-supporter__name" href={supporter.data.websiteUrl} target="_blank" rel="sponsored noopener">{supporter.data.name}<span class="sr-only"> (opens in a new tab)</span></a> helps keep Rawkode Academy free to watch. Thank you.
+						</p>
+						<a class="technology-supporter__wall" href={SUPPORTERS_PATH}>All community supporters <span aria-hidden="true">→</span></a>
+					</aside>
+				)}
+				{description && <p class={styles.description}>{description}</p>}
+				{metadata.length > 0 && (
+					<dl class={styles.metadata}>
+						{metadata.map(([label, value]) => (
+							<div><dt>{label}</dt><dd>{value}</dd></div>
+						))}
+					</dl>
+				)}
+				{officialLinks.length > 0 && (
+					<ul class={styles.actions} aria-label="Project links">
+						{officialLinks.map(([label, url]) => (
+							<li><a href={url} class={button({ variant: "outline", size: "sm" })} target="_blank" rel="noopener noreferrer">{label} <span aria-hidden="true">↗</span></a></li>
+						))}
+					</ul>
+				)}
+			</div>
+			{statusLabel && (
+				<a class={styles.rating} href="/technology/matrix">
+					<span class={styles.ratingLabel}>Technology matrix</span>
+					<strong class={styles.ratingStatus}>{statusLabel}</strong>
+					{statusNote && <span class={styles.ratingNote}>{statusNote}</span>}
+					{!hasMatrixDetails && matrixMetadata.length > 0 && (
+						<span class={styles.ratingFacts}>
+							{matrixMetadata.map(([label, value]) => <span>{label}: {value}</span>)}
+						</span>
+					)}
+					<span class={styles.ratingMore}>See the matrix <span aria-hidden="true">→</span></span>
+				</a>
 			)}
 		</header>
 
@@ -555,8 +573,7 @@ await setContentCache(Astro, {
 				<aside class={styles.aside} aria-label={technology.name + " facts and links"}>
 					{technology.matrix && hasMatrixDetails && (
 						<section class={styles.section} aria-labelledby="matrix-heading">
-							<h2 id="matrix-heading" class={styles.heading}>Rawkode’s take</h2>
-							{statusLabel && <p class={styles.copy}>Personal rating: <a class={styles.link} href="/technology/matrix">{statusLabel}</a></p>}
+							<h2 id="matrix-heading" class={styles.heading}>{statusLabel ? `Why ${statusLabel}` : "Notes"}</h2>
 							{technology.matrix.why && <p class={styles.copy}>{technology.matrix.why}</p>}
 							{technology.matrix.spicyTake && <blockquote class={styles.quote}>{technology.matrix.spicyTake}</blockquote>}
 							{matrixMetadata.length > 0 && (
