@@ -67,6 +67,9 @@ export interface DimensionValue {
 	darkColor?: string;
 }
 
+/** The gray of a value that carries no signal of its own. */
+const NEUTRAL = { color: "#6b7280", darkColor: "#9ca3af" } as const;
+
 export interface DimensionDefinition {
 	key: DimensionKey;
 	label: string;
@@ -116,8 +119,7 @@ const matrixStatusValues: DimensionValue[] = [
 		value: "under-review",
 		label: "Under Review",
 		description: "Not triaged yet",
-		color: "#6b7280", // gray-500
-		darkColor: "#9ca3af",
+		...NEUTRAL,
 	},
 	{
 		value: "skip",
@@ -215,8 +217,7 @@ const matrixTrajectoryValues: DimensionValue[] = [
 		value: "stable",
 		label: "Stable",
 		description: "Consistent position",
-		color: "#6b7280",
-		darkColor: "#9ca3af",
+		...NEUTRAL,
 	},
 	{
 		value: "falling",
@@ -254,8 +255,7 @@ const cncfStatusValues: DimensionValue[] = [
 		value: "archived",
 		label: "Archived",
 		description: "Deprecated CNCF project",
-		color: "#6b7280",
-		darkColor: "#9ca3af",
+		...NEUTRAL,
 	},
 ];
 
@@ -293,8 +293,7 @@ const techStatusValues: DimensionValue[] = [
 		value: "superseded",
 		label: "Superseded",
 		description: "Replaced by newer tech",
-		color: "#6b7280",
-		darkColor: "#9ca3af",
+		...NEUTRAL,
 	},
 	{
 		value: "deprecated",
