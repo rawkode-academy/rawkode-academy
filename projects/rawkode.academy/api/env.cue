@@ -73,6 +73,8 @@ tasks: {
 			"supergraph.graphql",
 			"wrangler.jsonc",
 			"package.json",
+			// The frozen install decides whether the deploy can run at all.
+			"../../../bun.lock",
 		]
 	}
 }

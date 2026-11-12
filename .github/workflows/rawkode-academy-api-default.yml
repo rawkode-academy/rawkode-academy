@@ -8,6 +8,8 @@ on:
     - main
     paths:
     - .github/workflows/rawkode-academy-api-default.yml
+    - bun.lock
+    - bun.lock/**
     - cue.mod/**
     - projects/rawkode.academy/api/env.cue
     - projects/rawkode.academy/api/package.json
