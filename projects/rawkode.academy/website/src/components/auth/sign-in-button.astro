@@ -1,12 +1,11 @@
 ---
-import { academyShell } from "@rawkodeacademy/design-system";
-
-const shell = academyShell();
+import { button } from "@rawkodeacademy/design-system";
 ---
 
 <a
 	href="/api/auth/sign-in"
-	class={shell.authButton}
+	data-astro-prefetch="false"
+	class={button({ variant: "outline", size: "sm" })}
 >
 	Sign in
 </a>

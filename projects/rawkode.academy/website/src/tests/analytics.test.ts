@@ -5,7 +5,10 @@ import {
 	serializeCampaignAttribution,
 } from "@/lib/analytics/attribution";
 import { GROWTH_EVENTS } from "@/lib/analytics/growth";
-import { getAttributionFromSource } from "@/server/analytics";
+import {
+	getAnonDistinctIdFromCookies,
+	getAttributionFromSource,
+} from "@/server/analytics";
 
 describe("server analytics helpers", () => {
 	beforeEach(() => {
@@ -139,5 +142,24 @@ describe("server analytics helpers", () => {
 			"lead_magnet_submission_attempted",
 		);
 		expect(GROWTH_EVENTS.LEAD_MAGNET_SIGNUP).toBe("lead_magnet_signup");
+	});
+});
+
+describe("getAnonDistinctIdFromCookies", () => {
+	const withCookie = (cookie: string) =>
+		({ headers: { get: () => cookie } }) as unknown as Request;
+
+	it("prefers the PostHog id during the dual-run", () => {
+		expect(
+			getAnonDistinctIdFromCookies(
+				withCookie("rk_aid=first-party; posthog_distinct_id=ph-1"),
+			),
+		).toBe("ph-1");
+	});
+
+	it("falls back to the first-party id when PostHog is blocked", () => {
+		expect(
+			getAnonDistinctIdFromCookies(withCookie("session_id=s1; rk_aid=aid-1")),
+		).toBe("aid-1");
 	});
 });

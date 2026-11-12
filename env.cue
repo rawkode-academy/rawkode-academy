@@ -31,16 +31,16 @@ let _NamespaceNix = schema.#Contributor & {
 			}
 		},
 		{
-			id:        "namespaceNix.prepareReceipt"
-			label:     "Prepare Determinate receipt"
-			priority:  1
+			id:       "namespaceNix.prepareReceipt"
+			label:    "Prepare Determinate receipt"
+			priority: 1
 			dependsOn: ["namespaceNix.cache"]
-			script:    _removeDeterminateReceipt
+			script: _removeDeterminateReceipt
 		},
 		{
-			id:        "namespaceNix.install"
-			label:     "Install Determinate Nix"
-			priority:  2
+			id:       "namespaceNix.install"
+			label:    "Install Determinate Nix"
+			priority: 2
 			dependsOn: ["namespaceNix.prepareReceipt"]
 			provider: github: {
 				uses: "DeterminateSystems/determinate-nix-action@v3"
@@ -48,11 +48,11 @@ let _NamespaceNix = schema.#Contributor & {
 			}
 		},
 		{
-			id:        "namespaceNix.cleanupReceipt"
-			label:     "Prune Determinate Nix receipt"
-			priority:  3
+			id:       "namespaceNix.cleanupReceipt"
+			label:    "Prune Determinate Nix receipt"
+			priority: 3
 			dependsOn: ["namespaceNix.install"]
-			script:    _removeDeterminateReceipt
+			script: _removeDeterminateReceipt
 		},
 	]
 }
@@ -66,7 +66,7 @@ _cuenvBinary?: string
 config: ci: cuenv: {
 	source: "release"
 	if _cuenvBinary == _|_ {
-		version: "0.63.1"
+		version: "0.73.1"
 	}
 	if _cuenvBinary != _|_ {
 		version: _cuenvBinary
@@ -83,12 +83,69 @@ hooks: onEnter: devenv: schema.#Devenv
 // report (.cuenv/reports/<sha>/<absolute project path with / as ->.json).
 _ciRequireReport?: string
 
+// A project that reads #InfisicalSecret values in CI sets _ciInfisicalOidc and
+// labels those tasks "infisical". Only their pipelines log in to Infisical with
+// the job's GitHub OIDC token, so a deploy that doesn't read Infisical never
+// holds it.
+_ciInfisicalOidc?: true
+
+// A project whose infrastructure workflows read #InfisicalSecret values sets
+// _ciInfisicalInfrastructure, so its plan and apply jobs log in.
+_ciInfisicalInfrastructure?: true
+
+// Which Infisical identity a job logs in as. infrastructure/bootstrap writes
+// the IDs as repository variables. Infrastructure applies use
+// github-read-write, whose login also requires the `infrastructure` GitHub
+// environment, so a job that skipped review is refused even if it asks for it.
+// Infrastructure plans on pull requests use github-read-only, which reads
+// credentials that can't change anything. Deploys on main use github-actions,
+// which reads project secrets.
+let _infisicalIdentity = "${{ endsWith(github.workflow, '-infrastructure-apply') && vars.INFISICAL_READ_WRITE_IDENTITY_ID || endsWith(github.workflow, '-infrastructure-plan') && vars.INFISICAL_READ_ONLY_IDENTITY_ID || vars.INFISICAL_MACHINE_IDENTITY_ID }}"
+let _infisicalOidcTasks = (c.#InfisicalOidc & {#identityId: _infisicalIdentity}).tasks
+
 ci: providers: ["github"]
+
+// Pull request jobs run code anyone with write access can change, so their
+// GITHUB_TOKEN can read the repository and report checks, nothing more.
+ci: pipelines: pullRequest?: provider: github: permissions: {
+	contents: "read"
+	packages: "none"
+	actions:  "none"
+	issues:   "none"
+}
 ci: contributors: [
 	_NamespaceNix,
 	c.#BunWorkspace,
 	c.#CuenvRelease,
 	c.#OnePassword,
+	if _ciInfisicalOidc != _|_ {
+		schema.#Contributor & {
+			id: "infisical-oidc"
+			when: taskLabels: ["infisical"]
+			tasks: _infisicalOidcTasks
+		}
+	},
+	if _ciInfisicalOidc != _|_ {
+		schema.#Contributor & {
+			id: "infisical"
+			when: taskLabels: ["infisical"]
+			tasks: c.#Infisical.tasks
+		}
+	},
+	if _ciInfisicalInfrastructure != _|_ {
+		schema.#Contributor & {
+			id: "infisical-oidc"
+			when: secretsProvider: ["infisical"]
+			tasks: _infisicalOidcTasks
+		}
+	},
+	if _ciInfisicalInfrastructure != _|_ {
+		schema.#Contributor & {
+			id: "infisical"
+			when: secretsProvider: ["infisical"]
+			tasks: c.#Infisical.tasks
+		}
+	},
 	if _ciRequireReport != _|_ {
 		schema.#Contributor & {
 			id: "requireReport"
@@ -96,7 +153,7 @@ ci: contributors: [
 				id:       "requireReport.verify"
 				label:    "Verify cuenv ran \(_ciRequireReport)"
 				priority: 90
-				script: """
+				script:   """
 					suffix=$(printf '%s' '\(_ciRequireReport)' | tr '/' '-')
 					if ! ls ".cuenv/reports/${GITHUB_SHA}/"*"-${suffix}.json" >/dev/null 2>&1; then
 					  echo "::error::cuenv ci wrote no pipeline report for \(_ciRequireReport). It skipped the project (evaluation failed or timed out; look for 'Failed to evaluate env.cue' above) or found no affected tasks."
@@ -129,5 +186,42 @@ env: {
 	environment: production: {
 		CLOUDFLARE_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce"
 		TF_WORKSPACE:          "production"
+	}
+}
+
+_infisicalSecret: schema.#InfisicalSecret & {
+	projectId:   "6575a392d7a5ef0555ade86b"
+	environment: "production"
+	apiUrl:      "https://app.infisical.com"
+}
+
+// What infrastructure/bootstrap writes to Infisical. An apply on main logs in
+// as github-read-write and reads /infrastructure. A plan on a pull request
+// logs in as github-read-only and reads /infrastructure/github-read-only,
+// which holds nothing that can change Cloudflare or the state.
+_readWrite: _infisicalSecret & {secretPath: "/infrastructure"}
+_readOnly: _infisicalSecret & {secretPath: "/infrastructure/github-read-only"}
+
+// A project that brings its own CLOUDFLARE_API_TOKEN, such as
+// infrastructure/bootstrap, sets _ownCloudflareToken. Every other project gets
+// one of three tokens, chosen by what the invocation is: the Workers token for
+// tasks and shells, the read-only token for infrastructure plans, and the root
+// token for infrastructure applies.
+_ownCloudflareToken?: true
+
+if _ownCloudflareToken == _|_ {
+	contexts: {
+		workload: schema.#When & {infrastructure: null}
+		plan: schema.#When & {infrastructure: "plan"}
+		// State commands that write need the read-write state key too.
+		apply: schema.#When & {infrastructure: "apply|import|destroy|state-remove"}
+	}
+
+	env: context: {
+		workload: environment: production: CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {
+			ref: "op://sa.rawkode.academy/cloudflare/api-tokens/workers"
+		}
+		plan: CLOUDFLARE_API_TOKEN: _readOnly & {secretName: "CLOUDFLARE_API_TOKEN"}
+		apply: CLOUDFLARE_API_TOKEN: _readWrite & {secretName: "CLOUDFLARE_ROOT_TOKEN"}
 	}
 }

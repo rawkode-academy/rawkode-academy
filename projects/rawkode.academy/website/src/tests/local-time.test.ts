@@ -3,6 +3,7 @@ import {
 	formatLocal,
 	isCalendarDate,
 	LOCAL_TIME_ATTRIBUTE,
+	localDate,
 	localTime,
 } from "@/lib/local-time";
 
@@ -60,5 +61,19 @@ describe("formatLocal", () => {
 
 	it("does not treat timed instants as calendar dates", () => {
 		expect(isCalendarDate(swampClub)).toBe(false);
+	});
+});
+
+describe("localDate", () => {
+	it("sets the Academy date form with a three-letter month, September included", () => {
+		const date = localDate("2026-09-17T12:00:00.000Z");
+		expect(date.text).toBe("17 Sep 2026");
+		expect(localDate("2026-07-17T12:00:00.000Z").text).toBe("17 Jul 2026");
+		// The browser re-format takes the same path, so the month never
+		// flips to "Sept" after hydration.
+		const spec = JSON.parse(date.attrs["data-local-time"]);
+		expect(
+			formatLocal(date.iso, spec.options, spec.locale, "Europe/London"),
+		).toBe("17 Sep 2026");
 	});
 });

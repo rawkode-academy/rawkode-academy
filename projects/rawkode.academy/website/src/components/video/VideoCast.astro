@@ -9,8 +9,8 @@ interface Props {
 
 const { hosts, guests } = Astro.props;
 const speakers = [
-	...hosts.map((person) => ({ person, role: "HOST" })),
-	...guests.map((person) => ({ person, role: "GUEST" })),
+	...hosts.map((person) => ({ person, role: "Host" })),
+	...guests.map((person) => ({ person, role: "Guest" })),
 ];
 const initials = (name: string) => name.trim().split(/\s+/u).slice(0, 2)
 	.map((part) => Array.from(part)[0] ?? "").join("").toLocaleUpperCase();
@@ -18,18 +18,18 @@ const watch = academyWatch();
 ---
 
 {speakers.length > 0 && (
-	<section class={watch.cast}>
-		<h2 class={watch.railTitle}>Meet the Cast</h2>
-		<div class={watch.castGrid}>
+	<section class={watch.section} aria-labelledby="watch-detail-cast-heading">
+		<h2 id="watch-detail-cast-heading" class={watch.sectionTitle}>Cast</h2>
+		<ul class={watch.castGrid}>
 			{speakers.map(({ person, role }) => (
-				<a href={`/people/${person.data.id}`} class={watch.castCard}>
-					<div class={watch.castAvatarWrap}>
+				<li>
+					<a href={`/people/${person.data.id}`} class={watch.castCard}>
 						{person.data.avatarUrl && <img
 							src={person.data.avatarUrl}
 							alt=""
 							class={watch.castAvatar}
-							width="48"
-							height="48"
+							width="40"
+							height="40"
 							loading="lazy"
 							decoding="async"
 							onerror="this.hidden=true; this.nextElementSibling.hidden=false;"
@@ -39,14 +39,14 @@ const watch = academyWatch();
 							hidden={Boolean(person.data.avatarUrl)}
 							aria-hidden="true"
 						>{initials(person.data.name)}</span>
-						<span class={watch.castBadge}>{role}</span>
-					</div>
-					<div class={watch.commentContent}>
-						<h3 class={watch.castName}>{person.data.name}</h3>
-						{person.data.handles?.github && <p class={watch.castMeta}>@{person.data.handles.github}</p>}
-					</div>
-				</a>
+						<div class={watch.castBody}>
+							<h3 class={watch.castName} data-name>{person.data.name}</h3>
+							{person.data.handles?.github && <p class={watch.castHandle}>@{person.data.handles.github}</p>}
+						</div>
+						<p class={watch.castMeta}>{role}</p>
+					</a>
+				</li>
 			))}
-		</div>
+		</ul>
 	</section>
 )}

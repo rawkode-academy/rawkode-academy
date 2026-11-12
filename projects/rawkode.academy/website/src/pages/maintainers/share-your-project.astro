@@ -1,7 +1,7 @@
 ---
 import EditorialShell from "@/components/ui/EditorialShell.astro";
 import Page from "@/wrappers/page.astro";
-import { academyMaintainers } from "@rawkodeacademy/design-system";
+import { academyMaintainers, button } from "@rawkodeacademy/design-system";
 
 const styles = academyMaintainers();
 
@@ -26,8 +26,8 @@ const expectations = [
 	<EditorialShell eyebrow="For open-source maintainers" title="Show us how it works."
 		lede="Bring your project to Rawkode Live. Spend 60–90 minutes with David exploring the architecture, running a demo, and answering real questions. Free for open-source projects.">
 		<div class="editorial-actions" slot="actions">
-			<a class="editorial-button" href={application}>Pitch your session</a>
-			<a class="editorial-button editorial-button--secondary" href="/shows/rawkode-live">Watch previous sessions</a>
+			<a class={button()} href={application}>Pitch your session</a>
+			<a class={button({ variant: "outline" })} href="/shows/rawkode-live">Watch previous sessions</a>
 		</div>
 
 		<section class="editorial-section editorial-section--split" aria-labelledby="session-process">

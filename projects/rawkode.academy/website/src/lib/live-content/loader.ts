@@ -3,7 +3,12 @@ import type { LiveLoader } from "astro/loaders";
 import { now } from "./kv-cache";
 import { normalizeTechnologyId, publicationDate } from "./mappers";
 import { loadCollection, loadTechnologyWithBody } from "./store";
-import type { CollectionDataMap, CollectionName, ContentEntry } from "./types";
+import type {
+	CollectionDataMap,
+	CollectionName,
+	ContentEntry,
+	LiveCollectionName,
+} from "./types";
 
 export type ScheduledMode = "include" | "exclude";
 
@@ -46,7 +51,7 @@ export function normalizeEntryId(
 		: trimmed;
 }
 
-export function contentLoader<C extends CollectionName>(
+export function contentLoader<C extends LiveCollectionName>(
 	collection: C,
 ): LiveLoader<
 	CollectionDataMap[C],

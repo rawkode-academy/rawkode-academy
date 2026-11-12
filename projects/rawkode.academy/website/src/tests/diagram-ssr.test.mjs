@@ -86,7 +86,7 @@ test("one named graphic, native zoom checkbox and keyboard-scrollable region wit
 	);
 });
 
-// Article bodies (and their diagram nodes with title/description) now live in
-// platform-articles as rich-text documents; the authored-content contract for
-// D2 diagrams moved with them, and the renderer's diagram output is covered in
-// src/tests/live-content/render.test.ts.
+// Article bodies (and their diagram nodes with title/description) are
+// rich-text documents built from content/articles; the authored-content
+// contract for D2 diagrams moved with them, and the renderer's diagram output
+// is covered in src/tests/live-content/render.test.ts.

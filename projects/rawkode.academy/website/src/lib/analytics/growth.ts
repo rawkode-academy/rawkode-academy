@@ -1,4 +1,5 @@
 import { getSessionCampaignAttribution } from "@/lib/analytics/attribution";
+import { capture } from "@/lib/analytics/track";
 
 export const GROWTH_EVENTS = {
 	ACTIVATED_USER: "activated_user",
@@ -23,18 +24,8 @@ export function captureGrowthClientEvent(
 	properties?: Record<string, unknown>,
 ): void {
 	try {
-		const campaignAttribution = getSessionCampaignAttribution();
-		(
-			window as Window & {
-				posthog?: {
-					capture?: (
-						eventName: string,
-						props?: Record<string, unknown>,
-					) => void;
-				};
-			}
-		).posthog?.capture?.(event, {
-			...campaignAttribution,
+		capture(event, {
+			...getSessionCampaignAttribution(),
 			...properties,
 		});
 	} catch {

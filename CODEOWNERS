@@ -10,3 +10,13 @@
 /projects/rawkode.studio/**/* @icepuma
 
 #################################### Generated content - do not edit! ####################################
+
+# What decides which credentials CI runs with. Last match wins, so these
+# override the project owners above.
+/CODEOWNERS @rawkode
+/.github/ @rawkode
+/infrastructure/ @rawkode
+/cue.mod/ @rawkode
+/cuenv.lock @rawkode
+env.cue @rawkode
+infrastructure.cue @rawkode

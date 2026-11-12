@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { Combobox, createListCollection } from "@ark-ui/vue/combobox";
 import { Dialog } from "@ark-ui/vue/dialog";
-import { academyCommand, academyLayout, dialog } from "@rawkodeacademy/design-system";
+import { academyCommand, button, dialog } from "@rawkodeacademy/design-system";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { getColorSchemePreference, setColorScheme, type ColorSchemePreference } from "@/lib/theme";
+import { capture } from "@/lib/analytics/track";
 
 interface Item {
 	id: string;
@@ -17,10 +18,9 @@ interface Item {
 interface SearchResult extends Omit<Item, "category"> { type: string }
 const props = defineProps<{ returnFocus: () => HTMLElement | null }>();
 function trackEvent(event: string, properties?: Record<string, unknown>) {
-	try { window.posthog?.capture(event, properties); } catch { /* Analytics must not interrupt navigation. */ }
+	capture(event, properties);
 }
 const s = academyCommand();
-const layout = academyLayout();
 const modal = dialog({ tone: "academy" });
 let returnFocus = props.returnFocus();
 const open = ref(true);
@@ -136,7 +136,7 @@ onUnmounted(() => { document.removeEventListener("open-command-palette", openPal
 				<Dialog.Content :class="s.content">
 					<div :class="s.header">
 						<Dialog.Title :class="s.title">{{ appearance ? 'Appearance' : 'Search and commands' }}</Dialog.Title>
-						<Dialog.CloseTrigger :class="layout.buttonSecondary">Close</Dialog.CloseTrigger>
+						<Dialog.CloseTrigger :class="button({ variant: 'outline' })">Close</Dialog.CloseTrigger>
 					</div>
 					<div ref="inputContainer">
 						<Combobox.Root :collection="collection" :open="true" :input-value="query" :model-value="[]" :loop-focus="true" :close-on-select="false" selection-behavior="preserve" @input-value-change="query = $event.inputValue" @value-change="selectItem($event.value[0])">

@@ -19,6 +19,19 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// Specimen layout for the composite stories. Product styles live in
+// design-system recipes; these inline styles only arrange the story.
+const stack = "display: grid; gap: var(--spacing-8)";
+const label =
+	"margin: 0 0 var(--spacing-2); color: var(--colors-academy-text-soft); font-size: var(--font-sizes-sm); font-weight: var(--font-weights-medium)";
+const panel =
+	"padding: var(--spacing-6); border: 1px solid var(--colors-academy-border); border-radius: var(--radii-academy-l); background: var(--colors-academy-panel); color: var(--colors-academy-text)";
+const heading =
+	"margin: 0 0 var(--spacing-2); font-size: var(--font-sizes-xl); font-weight: var(--font-weights-bold)";
+const byline =
+	"display: flex; align-items: center; gap: var(--spacing-4); margin-block-end: var(--spacing-4); color: var(--colors-academy-text-muted); font-size: var(--font-sizes-sm)";
+const excerpt = "margin: 0; color: var(--colors-academy-text-soft)";
+
 // Mock author data
 const mockAuthors = [
 	{
@@ -143,34 +156,34 @@ export const AllVariations: Story = {
 		<VueInReact
 			component={{
 				template: `
-          <div class="space-y-8">
+          <div style="${stack}">
             <div>
-              <h3 class="text-sm font-medium text-secondary-content mb-2">Single Author</h3>
+              <h3 style="${label}">Single Author</h3>
               <AuthorAvatarGroup :authors="authors.slice(0, 1)" />
             </div>
-            
+
             <div>
-              <h3 class="text-sm font-medium text-secondary-content mb-2">Two Authors</h3>
+              <h3 style="${label}">Two Authors</h3>
               <AuthorAvatarGroup :authors="authors.slice(0, 2)" />
             </div>
-            
+
             <div>
-              <h3 class="text-sm font-medium text-secondary-content mb-2">Multiple Authors (Default)</h3>
+              <h3 style="${label}">Multiple Authors (Default)</h3>
               <AuthorAvatarGroup :authors="authors" />
             </div>
-            
+
             <div>
-              <h3 class="text-sm font-medium text-secondary-content mb-2">Without Names</h3>
+              <h3 style="${label}">Without Names</h3>
               <AuthorAvatarGroup :authors="authors" :showNames="false" />
             </div>
-            
+
             <div>
-              <h3 class="text-sm font-medium text-secondary-content mb-2">Max Display = 2</h3>
+              <h3 style="${label}">Max Display = 2</h3>
               <AuthorAvatarGroup :authors="authors" :maxDisplay="2" />
             </div>
-            
+
             <div>
-              <h3 class="text-sm font-medium text-secondary-content mb-2">Without Active Indicator</h3>
+              <h3 style="${label}">Without Active Indicator</h3>
               <AuthorAvatarGroup :authors="authors.slice(0, 2)" :showActiveIndicator="false" />
             </div>
           </div>
@@ -192,16 +205,16 @@ export const InContext: Story = {
 		<VueInReact
 			component={{
 				template: `
-          <article class="p-6 bg-[var(--surface-card)] rounded-lg shadow">
-            <h2 class="text-xl font-bold mb-2">Understanding Kubernetes Deployments</h2>
-            <div class="flex items-center gap-4 mb-4">
+          <article style="${panel}">
+            <h2 style="${heading}">Understanding Kubernetes Deployments</h2>
+            <div style="${byline}">
               <AuthorAvatarGroup :authors="authors.slice(0, 2)" />
-              <span class="text-sm text-muted">•</span>
-              <span class="text-sm text-muted">March 15, 2024</span>
-              <span class="text-sm text-muted">•</span>
-              <span class="text-sm text-muted">5 min read</span>
+              <span aria-hidden="true">•</span>
+              <span>March 15, 2024</span>
+              <span aria-hidden="true">•</span>
+              <span>5 min read</span>
             </div>
-            <p class="text-secondary-content">
+            <p style="${excerpt}">
               Learn how to effectively manage and scale your applications using Kubernetes deployments...
             </p>
           </article>

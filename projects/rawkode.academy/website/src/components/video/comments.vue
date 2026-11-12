@@ -1,7 +1,7 @@
 <template>
  <div :class="watch.comments">
  <component :is="`h${headingLevel}`" :class="headingLevel === 2 ? watch.sectionTitle : watch.commentsTitle">
- Comments {{ !loading ? `(${comments.length})` : '' }}
+ Comments {{ !loading && comments.length > 0 ? `(${comments.length})` : '' }}
  </component>
 
  <div v-if="loading" :class="watch.commentList">
@@ -16,7 +16,7 @@
  />
 
  <div v-else-if="comments.length === 0" :class="watch.commentList">
- <p :class="watch.transcriptNote">No comments yet. Be the first to start the discussion.</p>
+ <p :class="watch.transcriptNote">No comments yet.</p>
  </div>
 
  <div v-else :class="watch.commentList">
