@@ -84,8 +84,9 @@ tasks: {
 		// env.cue is included so build-time env changes (e.g. DISABLE_GAME_AUTH)
 		// mark the build/deploy affected; otherwise CI would skip the redeploy.
 		inputs: [
-			// Content is served live from the API gateway, so content/** is no
-			// longer a build input.
+			// Articles are files compiled into the site; all other content is
+			// served live from the API gateway.
+			"../../../content/articles/**",
 			"astro.config.mts",
 			"env.cue",
 			"../../../packages/design-system/**",
@@ -130,8 +131,9 @@ tasks: {
 			// env.cue drives build-time vars (e.g. DISABLE_GAME_AUTH); include it so
 			// an env-only change marks this deploy affected (else CI skips it).
 			inputs: [
-				// Content is served live from the API gateway, so content/** is no
-				// longer a deploy input.
+				// Articles are files compiled into the site; all other content is
+				// served live from the API gateway.
+				"../../../content/articles/**",
 				"astro.config.mts",
 				"env.cue",
 				"../../../packages/design-system/**",

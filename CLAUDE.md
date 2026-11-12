@@ -65,7 +65,7 @@ This is a Bun workspace monorepo containing the Rawkode Academy platform. Key do
 
 ## Content
 
-There is no file-based content in the repo. Articles, videos, shows, people, technologies, courses, learning paths, news, changelog, ADRs and testimonials are rows in D1-backed platform services (`projects/rawkode.academy/platform/<service>`), served through the GraphQL gateway (`projects/rawkode.academy/api`, `https://api.rawkode.academy/`). Rich text is stored as TipTap/ProseMirror JSON (GraphQL scalar `RichTextDocument`); use `@rawkodeacademy/rich-text` (`packages/rich-text`) to convert from/to Markdown (`/markdown`), validate (`/schema`) and render (`toHtml`, `toText`).
+Articles are Markdown/MDX files in `content/articles` (authoring guide: `content/README.md`), compiled into the website at build time and served as static pages. They are the only file-based content. Videos, shows, people, technologies, courses, learning paths, news, changelog, ADRs and testimonials are rows in D1-backed platform services (`projects/rawkode.academy/platform/<service>`), served through the GraphQL gateway (`projects/rawkode.academy/api`, `https://api.rawkode.academy/`). Rich text is stored as TipTap/ProseMirror JSON (GraphQL scalar `RichTextDocument`); use `@rawkodeacademy/rich-text` (`packages/rich-text`) to convert from/to Markdown (`/markdown`), validate (`/schema`) and render (`toHtml`, `toText`).
 
 ## Environment & Runtime
 

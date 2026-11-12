@@ -291,10 +291,18 @@ async function loadArticlePage(): Promise<Component> {
 async function renderArticle(slug: string) {
 	const page = await loadArticlePage();
 	const container = await AstroContainer.create();
-	const response = await container.renderToResponse(page, {
-		params: { slug },
-		request: new Request(`https://rawkode.academy/read/${slug}`),
-	});
+	// The page is prerendered: getStaticPaths lists the articles, so a slug
+	// outside that list has no page (the build fails rather than rendering it).
+	let response: Response;
+	try {
+		response = await container.renderToResponse(page, {
+			params: { slug },
+			request: new Request(`https://rawkode.academy/read/${slug}`),
+		});
+	} catch (error) {
+		if (!/^No article for /.test((error as Error).message)) throw error;
+		response = new Response(null, { status: 404 });
+	}
 	const html = await response.text();
 	const dom = document.createElement("div");
 	dom.innerHTML = html;
@@ -329,23 +337,10 @@ describe("Published route and sitemap contracts", () => {
 		expect((await renderArticle("published")).status).toBe(404);
 	});
 
-	it("read/[...slug].astro caches by its article, authors, related articles and listed collections", async () => {
+	it("read/[...slug].astro is static: it sets no CDN cache and passes the related pool to RelatedArticles", async () => {
 		collections([olderPublished, published, defaultPublished, scheduled]);
 		await renderArticle("older-published");
-		expect(state.cacheCalls).toHaveLength(1);
-		const { input } = state.cacheCalls[0]!;
-		expect(
-			(input.entries as Entry[]).map(
-				(entry) => `${entry.collection}:${entry.id}`,
-			),
-		).toEqual([
-			"articles:older-published",
-			"people:rawkode",
-			"articles:published",
-			"articles:default-published",
-		]);
-		expect(input.collections).toEqual(["articles", "videos", "technologies"]);
-		// RelatedArticles gets the same pool, so the tags match what it renders.
+		expect(state.cacheCalls).toHaveLength(0);
 		expect(relatedProps[0]?.articles).toEqual([published, defaultPublished]);
 		expect(relatedProps[0]?.limit).toBe(3);
 	});

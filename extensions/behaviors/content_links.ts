@@ -1,7 +1,8 @@
 /**
- * Sweeps the outbound links of Rawkode Academy content (read from the public
+ * Sweeps the outbound links of Rawkode Academy content (articles from the
+ * repository's content/articles files, everything else from the public
  * GraphQL gateway) and records the dead and redirected ones with where each
- * appears. It only reads: one GET per content type, one per unique URL.
+ * appears. It only reads: one GET per gateway content type, one per unique URL.
  *
  * @module
  */
@@ -10,6 +11,7 @@ import {
 	collectTargets,
 	CONTENT_TYPES,
 	type ContentItem,
+	fileId,
 	parseContentTypes,
 	spreadByHost,
 	summarise,
@@ -75,6 +77,7 @@ const FindingsSchema = z.object({
 
 interface Context {
 	globalArgs: GlobalArgs;
+	repoDir: string;
 	logger: {
 		info: (message: string, properties: Record<string, unknown>) => void;
 	};
@@ -85,12 +88,42 @@ interface Context {
 	) => Promise<{ name: string }>;
 }
 
+/** Every Markdown/MDX file under a directory, as `{ id, source }` rows. */
+async function readFiles(
+	root: string,
+	prefix = "",
+): Promise<Array<Record<string, unknown>>> {
+	const entries: Deno.DirEntry[] = [];
+	for await (const entry of Deno.readDir(`${root}/${prefix}`)) {
+		entries.push(entry);
+	}
+	entries.sort((a, b) => a.name.localeCompare(b.name));
+	const rows: Array<Record<string, unknown>> = [];
+	for (const entry of entries) {
+		const path = `${prefix}${entry.name}`;
+		if (entry.isDirectory) {
+			rows.push(...await readFiles(root, `${path}/`));
+		} else if (/\.mdx?$/.test(entry.name)) {
+			rows.push({
+				id: fileId(path),
+				source: await Deno.readTextFile(`${root}/${path}`),
+			});
+		}
+	}
+	return rows;
+}
+
 async function readContent(
+	repoDir: string,
 	gatewayUrl: string,
 	contentType: string,
 	maximumItems: number,
 ): Promise<ContentItem[]> {
-	const { selection, collect } = CONTENT_TYPES[contentType];
+	const { selection, directory, collect } = CONTENT_TYPES[contentType];
+	if (directory) {
+		const files = await readFiles(`${repoDir}/${directory}`);
+		return collect(maximumItems > 0 ? files.slice(0, maximumItems) : files);
+	}
 	const url = new URL(gatewayUrl);
 	url.searchParams.set("query", `{ rows: ${selection} }`);
 	const response = await request(url.href, {
@@ -114,7 +147,7 @@ async function readContent(
 /** Behavior definition for auditing the links in published content. */
 export const behavior = {
 	type: "@rawkode/academy/content-links",
-	version: "2026.11.11.1",
+	version: "2026.11.12.1",
 	globalArguments: GlobalArgsSchema,
 	reports: ["@rawkode/academy/content-links"],
 	resources: {
@@ -135,7 +168,7 @@ export const behavior = {
 	methods: {
 		audit: {
 			description:
-				"Read the content from the gateway, collect and de-duplicate its links, request each one once and record the dead and redirected ones",
+				"Read the content (articles from the repository, the rest from the gateway), collect and de-duplicate its links, request each one once and record the dead and redirected ones",
 			arguments: z.object({
 				contentTypes: z.string().default("")
 					.describe(
@@ -163,7 +196,12 @@ export const behavior = {
 				const items: ContentItem[] = [];
 				for (const contentType of contentTypes) {
 					items.push(
-						...await readContent(gatewayUrl, contentType, args.maximumItems),
+						...await readContent(
+							context.repoDir,
+							gatewayUrl,
+							contentType,
+							args.maximumItems,
+						),
 					);
 				}
 

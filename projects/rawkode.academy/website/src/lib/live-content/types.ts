@@ -23,6 +23,18 @@ export const COLLECTIONS = [
 
 export type CollectionName = (typeof COLLECTIONS)[number];
 
+/**
+ * Articles are files in the repository (content/articles), compiled into the
+ * deployment; every other collection is loaded live from the gateway.
+ */
+export type LiveCollectionName = Exclude<CollectionName, "articles">;
+
+export function isLiveCollection(
+	collection: CollectionName,
+): collection is LiveCollectionName {
+	return collection !== "articles";
+}
+
 export interface Reference<C extends CollectionName = CollectionName> {
 	collection: C;
 	id: string;

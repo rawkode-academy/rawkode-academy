@@ -8,6 +8,7 @@ import {
 	CONTENT_TYPES,
 	type ContentItem,
 	extractUrls,
+	fileId,
 	parseContentTypes,
 	refineCheck,
 	renderReport,
@@ -119,9 +120,24 @@ Deno.test("every content type maps its rows to items with links", () => {
 	assertEquals(
 		CONTENT_TYPES.articles.collect([{
 			id: "one",
-			title: "One",
-			body,
-			resources: [{ url: "https://b.example/" }, { url: null }],
+			source: [
+				"---",
+				'title: "One"',
+				"resources:",
+				"  - title: B",
+				"    url: https://b.example/",
+				"---",
+				"",
+				"Read [a](https://a.example/), not `[code](https://code.example/)`.",
+				"",
+				"```sh",
+				"curl https://fenced.example/ # [x](https://fenced.example/)",
+				"```",
+				"",
+				'<ThemeAwareImage lightSrc="https://light.example/a.png" darkSrc="https://dark.example/a.png" alt="A" />',
+				"",
+				"<https://auto.example/>",
+			].join("\n"),
 		}]),
 		[{
 			contentType: "articles",
@@ -129,10 +145,15 @@ Deno.test("every content type maps its rows to items with links", () => {
 			title: "One",
 			links: [
 				{ url: "https://a.example/", field: "body" },
+				{ url: "https://light.example/a.png", field: "body" },
+				{ url: "https://dark.example/a.png", field: "body" },
+				{ url: "https://auto.example/", field: "body" },
 				{ url: "https://b.example/", field: "resources" },
 			],
 		}],
 	);
+	assertEquals(fileId("seccomp-kubernetes/index.mdx"), "seccomp-kubernetes");
+	assertEquals(fileId("how-i-git.md"), "how-i-git");
 	assertEquals(
 		CONTENT_TYPES.technologies.collect([
 			{ id: "acorn", name: "Acorn", body: null, learningResources: null },

@@ -27,7 +27,12 @@ import { getContentEnv } from "./env";
 import { now, readGeneration } from "./kv-cache";
 import { hasPersonalisingCookie } from "./personalisation";
 import { loadCollection, nextPublishAfter } from "./store";
-import { type CacheHint, COLLECTIONS, type CollectionName } from "./types";
+import {
+	type CacheHint,
+	COLLECTIONS,
+	type CollectionName,
+	isLiveCollection,
+} from "./types";
 
 export const DEFAULT_MAX_AGE = 60 * 60;
 export const DEFAULT_SWR = 24 * 60 * 60;
@@ -253,7 +258,8 @@ export async function setContentCache(
 	for (const entry of input.entries ?? []) {
 		if (entry?.collection) behind.add(entry.collection as CollectionName);
 	}
-	const behindList = [...behind];
+	// Articles are compiled into the deployment: never stale, never scheduled.
+	const behindList = [...behind].filter(isLiveCollection);
 	const [generation, loaded] = await Promise.all([
 		readGeneration(env.CONTENT_CACHE),
 		Promise.all(

@@ -4,7 +4,6 @@ import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { VideoData } from "@/lib/live-content";
 import {
-	mapArticle,
 	mapLearningPath,
 	mapNews,
 	mapTechnology,
@@ -160,7 +159,8 @@ function technologyTaxonomyViolations(
 function articleTaxonomySources(rows: GatewayRow[]): TaxonomySource[] {
 	return rows.map((row) => ({
 		source: `articles/${row.id}`,
-		technologies: mapArticle(row).technologies,
+		// Article frontmatter lists plain technology ids.
+		technologies: mapNews(row).technologies,
 	}));
 }
 
