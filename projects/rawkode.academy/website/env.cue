@@ -9,6 +9,9 @@ name: "rawkode-academy-website"
 runtime: schema.#DevenvRuntime
 hooks: onEnter: devenv: schema.#Devenv
 
+// deploy.main and deploy.preview read BASIN_SQL_TOKEN from Infisical.
+_ciInfisicalOidc: true
+
 let _t = tasks
 // CI tasks resolve their tools through Nix directly, the way the platform
 // services do, instead of relying on the devenv shell being materialised on
@@ -32,23 +35,33 @@ env: {
 
 ci: pipelines: {
 	default: {
+		environment: "production"
 		when: {
 			branch: ["main"]
 			defaultBranch: true
 			manual:        true
 		}
-		// Hold deployment until the Studio and viewer rollout is coordinated.
-		tasks: [_t.build]
+		tasks: [_t.deploy.main]
 	}
 
 	pullRequest: {
+		environment: "production"
 		when: {
 			pullRequest: true
 		}
-		tasks: [_t.build]
+		tasks: [_t.deploy.preview]
+		annotations: "Preview URL": schema.#TaskCaptureRef & {
+			cuenvTask:    "deploy.preview"
+			cuenvCapture: "previewUrl"
+		}
 	}
 }
 
+// cuenv ci ignores inputs outside the project directory when it decides what
+// is affected (cuenv/cuenv#611), so a change to these never deployed. Until
+// that is fixed each one is listed twice: relative to this directory, which
+// cuenv sync turns into the workflow's path trigger, and relative to the
+// repository root, which is the only form the affected check matches.
 tasks: {
 	dev: schema.#Task & {
 		hermetic: false
@@ -59,7 +72,9 @@ tasks: {
 			"astro.config.mts",
 			"package.json",
 			"../../../bun.lock",
+			"bun.lock",
 			"../../../packages/live-viewer/**",
+			"packages/live-viewer/**",
 			"scripts/**",
 			"vitest.config.ts",
 			"public/**",
@@ -76,15 +91,21 @@ tasks: {
 		// env.cue is included so build-time env changes (e.g. DISABLE_GAME_AUTH)
 		// mark the build/deploy affected; otherwise CI would skip the redeploy.
 		inputs: [
-			// Content is served live from the API gateway, so content/** is no
-			// longer a build input.
+			// Articles are files compiled into the site; all other content is
+			// served live from the API gateway.
+			"../../../content/articles/**",
+			"content/articles/**",
 			"astro.config.mts",
 			"env.cue",
 			"../../../packages/design-system/**",
+			"packages/design-system/**",
 			"../../../packages/rich-text/**",
+			"packages/rich-text/**",
 			"package.json",
 			"../../../bun.lock",
+			"bun.lock",
 			"../../../packages/live-viewer/**",
+			"packages/live-viewer/**",
 			"scripts/**",
 			"vitest.config.ts",
 			"public/**",
@@ -106,19 +127,37 @@ tasks: {
 				"-lc",
 				"\(_toolchain) sh -c 'bun run build && bun scripts/wrangler-deploy.ts deploy --config ./dist/server/wrangler.json --purge'",
 			]
-			env: PATH: _taskPath
+			labels: ["infisical"]
+			env: {
+				PATH: _taskPath
+				// Written to Infisical by the observability collector's
+				// infrastructure.cue. scripts/wrangler-deploy.ts uploads it.
+				BASIN_SQL_TOKEN: schema.#InfisicalSecret & {
+					projectId:   "6575a392d7a5ef0555ade86b"
+					environment: "production"
+					secretPath:  "/projects/basin"
+					secretName:  "BASIN_SQL_TOKEN"
+					apiUrl:      "https://app.infisical.com"
+				}
+			}
 			// env.cue drives build-time vars (e.g. DISABLE_GAME_AUTH); include it so
 			// an env-only change marks this deploy affected (else CI skips it).
 			inputs: [
-				// Content is served live from the API gateway, so content/** is no
-				// longer a deploy input.
+				// Articles are files compiled into the site; all other content is
+				// served live from the API gateway.
+				"../../../content/articles/**",
+				"content/articles/**",
 				"astro.config.mts",
 				"env.cue",
 				"../../../packages/design-system/**",
+				"packages/design-system/**",
 				"../../../packages/rich-text/**",
+				"packages/rich-text/**",
 				"package.json",
 				"../../../bun.lock",
+				"bun.lock",
 				"../../../packages/live-viewer/**",
+				"packages/live-viewer/**",
 				"scripts/**",
 				"vitest.config.ts",
 				"public/**",

@@ -33,7 +33,7 @@ export async function GET(context: APIContext) {
 			: new Date().toISOString();
 
 	// Render all articles in parallel for better performance
-	const renderedContent = await renderAndSanitizeArticles(sortedArticles);
+	const renderedContent = await renderAndSanitizeArticles(sortedArticles, site);
 
 	const authorsByArticle = new Map<string, ContentEntry<"people">[]>();
 

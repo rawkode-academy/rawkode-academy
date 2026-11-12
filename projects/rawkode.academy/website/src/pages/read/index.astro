@@ -12,8 +12,8 @@ import ArticleItemListJsonLd from "@/components/html/article-itemlist-jsonld.ast
 import { calculateReadingTime } from "@/utils/reading-time";
 import { getTypeBadgeConfig } from "@/utils/article-types";
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
-import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
-import { localTime } from "@/lib/local-time";
+import { academyCatalog, academyLayout, button } from "@rawkodeacademy/design-system";
+import { localDate, localTime } from "@/lib/local-time";
 
 export const prerender = false;
 
@@ -168,7 +168,7 @@ const featuredImage = coverImage(featured?.data.cover, 1200);
 // ─── Helpers ───────────────────────────────────────────────────
 
 const featuredDate = (date: Date) =>
-	localTime(date, { month: "short", day: "2-digit", year: "numeric" });
+	localDate(date);
 // Ledger dates: the day is the numeral, month and year sit beneath it.
 const ledgerDay = (date: Date) => localTime(date, { day: "2-digit" }, "en-GB");
 const ledgerMonth = (date: Date) =>
@@ -255,7 +255,7 @@ const catalog = academyCatalog();
 						<h2 class={catalog.featuredTitle}>{featured.data.title}</h2>
 						<p class={catalog.featuredDescription}>{compactCopy(featured.data.openGraph?.subtitle || featured.data.description, 180)}</p>
 						<p class={catalog.rowMeta}>{featuredAuthors.map((author) => author.data.name).join(", ")} · <time {...featuredDate(featured.data.publishedAt).attrs}>{featuredDate(featured.data.publishedAt).text}</time> · {calculateReadingTime(featured.body || "").text}</p>
-						<a class={styles.button} href={`/read/${featured.id}`}>Read the article →</a>
+						<a class={button()} href={`/read/${featured.id}`}>Read the article <span data-part="arrow" aria-hidden="true">→</span></a>
 					</div>
 					{featuredImage && <a class={catalog.featuredMedia} href={`/read/${featured.id}`} aria-label={`Read ${featured.data.title}`}>
 						<img class={catalog.featuredImage} src={featuredImage.src} alt={featured.data.cover?.alt ?? ""} width={featuredImage.attributes.width} height={featuredImage.attributes.height} fetchpriority="high" />
@@ -278,7 +278,7 @@ const catalog = academyCatalog();
 						{navTopics.map(([id]) => <option value={id} selected={id === selectedTopic}>{formatTopicLabel(id)}</option>)}
 					</select>
 				</label>
-				<button type="submit" class={styles.buttonSecondary}>Apply filters</button>
+				<button type="submit" class={button({ variant: "outline" })}>Apply filters</button>
 			</form>
 			{isFiltered && <p class={styles.notice}>{visibleArticles.length} {visibleArticles.length === 1 ? "article" : "articles"}{activeFilterSummary ? ` · ${activeFilterSummary}` : ""} · <a href="/read">Clear filters</a></p>}
 			{visibleArticles.length === 0 ? <div class={styles.empty}>No articles match these filters. <a href="/read">Browse all articles →</a></div> : <div class={catalog.editorialList}>{restWithMeta.map(({ article, author, readingTime, cover }) => (
@@ -292,7 +292,7 @@ const catalog = academyCatalog();
 					</div>
 				</a>
 			))}</div>}
-			{totalPages > 1 && <nav class={catalog.pager} aria-label="Article pages">{page > 1 ? <a class={styles.buttonSecondary} href={readPathFor(page - 1)}>← Previous</a> : <span />}{hasNextPage && <a class={styles.button} href={readPathFor(page + 1)}>Next →</a>}</nav>}
+			{totalPages > 1 && <nav class={catalog.pager} aria-label="Article pages">{page > 1 ? <a class={button({ variant: "outline" })} href={readPathFor(page - 1)}>← Previous</a> : <span />}<p class={catalog.pagerLabel}>Page {page} of {totalPages}</p>{hasNextPage ? <a class={button({ variant: "outline" })} href={readPathFor(page + 1)}>Next <span data-part="arrow" aria-hidden="true">→</span></a> : <span />}</nav>}
 		</div></section>
 	</div>
 </Page>

@@ -49,7 +49,11 @@ type Trajectory = (typeof MATRIX_TRAJECTORY_VALUES)[number];
 
 // CNCF Categories (dynamically discovered from data)
 const pipelineStages = MATRIX_STATUS_VALUES.filter(
-	(s) => s !== "graveyard" && s !== "guilty-pleasure" && s !== "skip",
+	(s) =>
+		s !== "under-review" &&
+		s !== "graveyard" &&
+		s !== "guilty-pleasure" &&
+		s !== "skip",
 );
 
 const categoryDescriptions: Record<string, string> = {
@@ -93,8 +97,12 @@ const trajectoryEmoji: Record<Trajectory, string> = {
 const allTechnologies = await getCollection("technologies");
 // Counts cover every video (scheduled ones included), as the static page did.
 await setContentCache(Astro, { collections: ["technologies", "videos"] });
+// Technologies still under review have no placement to show yet.
 const matrixTechnologies = allTechnologies
-	.filter((tech) => tech.data.matrix?.status)
+	.filter(
+		(tech) =>
+			tech.data.matrix?.status && tech.data.matrix.status !== "under-review",
+	)
 	.map((tech) => ({
 		id: tech.id,
 		name: tech.data.name,
@@ -200,7 +208,7 @@ const media = academyMedia();
 	title="Technology Matrix"
 	description="Rawkode's opinionated guide to cloud native and platform engineering technologies."
 >
-	<div class:list={[layout.root, media.root, "matrix-route"]}>
+	<div class:list={[layout.root, media.root]}>
 	<!-- Custom Hero -->
 	<section class:list={[layout.hero, media.hero, "matrix-hero"]}>
 		<div class="hero-background">
@@ -209,12 +217,12 @@ const media = academyMedia();
 		</div>
 		<Container size="xl" padding="lg">
 			<div class="hero-content">
-				<div class="hero-badge hairline-chip">
+				<div class="hero-badge">
 					<span class="badge-dot"></span>
 					<span>{matrixTechnologies.length} technologies mapped</span>
 				</div>
 				<h1 class="hero-title">Technology Matrix</h1>
-				<p class="hero-subtitle text-secondary-content">
+				<p class="hero-subtitle">
 					Compare cloud native tools by adoption stage, confidence, and trajectory.
 				</p>
 
@@ -314,11 +322,11 @@ const media = academyMedia();
 						<div class="lane-tabs">
 							<div class="lane-tab">
 								<span class="lane-title">{lane.label}</span>
-								<span class="lane-desc text-muted">{lane.description}</span>
+								<span class="lane-desc">{lane.description}</span>
 								<span class="lane-count">{lane.count}</span>
 							</div>
 						</div>
-						<div class="lane paper-card">
+						<div class="lane">
 							<div class="lane-grid">
 								{pipelineStages.map((stage) => (
 									<div class={`lane-cell cell-${stage}`}>
@@ -374,7 +382,7 @@ const media = academyMedia();
 					<div class="other-header">
 						<div class="other-title-group">
 							<h2 class="other-title">Skipped and retired</h2>
-							<p class="other-subtitle text-muted">Technologies marked skip or no longer active.</p>
+							<p class="other-subtitle">Technologies marked skip or no longer active.</p>
 						</div>
 						<a href="/technology/matrix/advanced" class="other-advanced-link">
 							<span>Open advanced filters</span>
@@ -736,8 +744,17 @@ const media = academyMedia();
 	.hero-badge {
 		display: inline-flex;
 		align-items: center;
+		justify-content: center;
 		gap: 0.5rem;
 		margin-bottom: 1rem;
+		padding: 0.25rem 0.6rem;
+		border: 1px solid var(--colors-academy-border);
+		border-radius: var(--radii-academy-pill);
+		background: var(--colors-academy-panel);
+		color: var(--colors-academy-text);
+		font-family: var(--fonts-academy-mono);
+		font-size: 0.6875rem;
+		font-weight: 500;
 	}
 
 	.badge-dot {
@@ -761,6 +778,7 @@ const media = academyMedia();
 
 .hero-subtitle {
 		max-width: 42rem;
+		color: var(--colors-academy-text-soft);
 		font-size: clamp(1rem, 1.8vw, 1.35rem);
 		margin: 0 0 1.75rem;
 		line-height: 1.45;
@@ -938,7 +956,6 @@ const media = academyMedia();
 		justify-content: center;
 		align-items: flex-start;
 		padding: 0.85rem 1rem;
-		background: var(--stage-color);
 		border-radius: 6px;
 	}
 
@@ -1036,6 +1053,7 @@ const media = academyMedia();
 	}
 
 	.lane-desc {
+		color: var(--colors-academy-text-muted);
 		font-size: 0.7rem;
 		white-space: nowrap;
 		overflow: hidden;
@@ -1061,6 +1079,9 @@ const media = academyMedia();
 	.lane {
 		overflow: visible;
 		position: relative;
+		border: 1px solid var(--colors-academy-border);
+		border-radius: var(--radii-academy-m);
+		background: var(--colors-academy-panel);
 	}
 
 	.lane:has(.tech-icon:hover) {
@@ -1144,7 +1165,7 @@ const media = academyMedia();
 		background: var(--colors-academy-panel);
 		border: 1px solid var(--colors-academy-input-border);
 		border-top: 2px solid var(--colors-academy-accent);
-		border-radius: var(--radius-3xl);
+		border-radius: var(--radii-academy-l);
 		font-size: 0.8rem;
 		font-weight: 600;
 		letter-spacing: 0.01em;
@@ -1152,7 +1173,7 @@ const media = academyMedia();
 		white-space: nowrap;
 		opacity: 0;
 		visibility: hidden;
-		transition: all var(--duration-base) var(--ease-standard);
+		transition: all var(--durations-base) var(--easings-academy-standard);
 		pointer-events: none;
 		z-index: 100;
 	}
@@ -1171,7 +1192,7 @@ const media = academyMedia();
 		border-top: 8px solid var(--colors-academy-input-border);
 		opacity: 0;
 		visibility: hidden;
-		transition: all var(--duration-base) var(--ease-standard);
+		transition: all var(--durations-base) var(--easings-academy-standard);
 		pointer-events: none;
 		z-index: 100;
 	}
@@ -1414,11 +1435,11 @@ const media = academyMedia();
 	}
 
 	dialog.tech-modal::backdrop {
-		background: rgb(0 0 0 / 0.6);
+		background: var(--colors-academy-scrim);
 	}
 
 	dialog.tech-modal[open] {
-		animation: modal-in var(--duration-base) var(--ease-out);
+		animation: modal-in var(--durations-base) var(--easings-out);
 	}
 
 	@keyframes modal-in {
@@ -1462,7 +1483,7 @@ const media = academyMedia();
 	.modal-card-frame {
 		background: var(--colors-academy-panel);
 		border: 1px solid var(--colors-academy-input-border);
-		border-radius: var(--radius-4xl);
+		border-radius: var(--radii-lg);
 		overflow: hidden;
 	}
 
@@ -1491,7 +1512,7 @@ const media = academyMedia();
 		width: 80px;
 		height: 80px;
 		object-fit: contain;
-		border-radius: var(--radius-4xl);
+		border-radius: var(--radii-lg);
 		background: var(--colors-academy-panel);
 		padding: 0.875rem;
 		border: 1px solid var(--colors-academy-border);
@@ -1504,7 +1525,7 @@ const media = academyMedia();
 		align-items: center;
 		justify-content: center;
 		background: var(--colors-academy-panel);
-		border-radius: var(--radius-4xl);
+		border-radius: var(--radii-lg);
 		border: 1px solid var(--colors-academy-border);
 		font-size: 2rem;
 		font-weight: 700;
@@ -1536,7 +1557,7 @@ const media = academyMedia();
 		font-weight: 700;
 		letter-spacing: 0.04em;
 		padding: 0.375rem 0.75rem;
-		border-radius: var(--radius-md);
+		border-radius: var(--radii-academy-s);
 		color: var(--colors-academy-canvas);
 		background: var(--colors-academy-text-muted);
 	}
@@ -1594,7 +1615,7 @@ const media = academyMedia();
 		gap: 0.25rem;
 		padding: 0.875rem 0.5rem;
 		background: var(--colors-academy-ground);
-		border-radius: var(--radius-3xl);
+		border-radius: var(--radii-academy-l);
 	}
 
 	.modal-stat .stat-value {
@@ -1618,7 +1639,7 @@ const media = academyMedia();
 		padding: 1rem;
 		background: color-mix(in oklab, var(--colors-academy-status-rust) 8%, transparent);
 		border: 1px solid color-mix(in oklab, var(--colors-academy-status-rust) 18%, transparent);
-		border-radius: var(--radius-3xl);
+		border-radius: var(--radii-academy-l);
 	}
 
 	.modal-spicy.visible {
@@ -1651,7 +1672,7 @@ const media = academyMedia();
 		background: var(--colors-academy-text);
 		color: var(--colors-academy-canvas);
 		border: 1px solid var(--colors-academy-text);
-		border-radius: var(--radius-md);
+		border-radius: var(--radii-academy-s);
 		font-size: 0.875rem;
 		font-weight: 700;
 		letter-spacing: 0.04em;
@@ -1739,6 +1760,7 @@ const media = academyMedia();
 	}
 
 	.other-subtitle {
+		color: var(--colors-academy-text-muted);
 		font-size: 0.8rem;
 		margin: 0;
 	}
@@ -1856,7 +1878,7 @@ const media = academyMedia();
 		padding: 0.375rem 0.625rem;
 		background: var(--colors-academy-panel);
 		border: 1px solid var(--colors-academy-input-border);
-		border-radius: var(--radius-3xl);
+		border-radius: var(--radii-academy-l);
 		font-size: 0.7rem;
 		font-weight: 600;
 		color: var(--colors-academy-text);

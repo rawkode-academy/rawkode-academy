@@ -12,7 +12,7 @@
  {{ resource.title }}
  </Dialog.Title>
  <Dialog.CloseTrigger
- :class="s.button"
+ :class="button({ variant: 'quiet' })"
  aria-label="Close"
  >
  <svg :class="s.icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -62,7 +62,7 @@
  :href="getExternalUrl()"
  target="_blank"
  rel="noopener noreferrer"
- :class="layout.buttonSecondary"
+ :class="button({ variant: 'outline' })"
  >
  Open in new tab
  <svg :class="s.smallIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -78,10 +78,9 @@
 </template>
 
 <script setup lang="ts">
-import { academyCourse, dialog, academyLayout } from "@rawkodeacademy/design-system";
+import { academyCourse, button, dialog } from "@rawkodeacademy/design-system";
 const s = academyCourse();
 const modal = dialog({ tone: "academy", size: "lg" });
-const layout = academyLayout();
 import { Dialog } from "@ark-ui/vue/dialog";
 import { ref, computed, watch } from "vue";
 import WebContainerEmbed from "./WebContainerEmbed.vue";

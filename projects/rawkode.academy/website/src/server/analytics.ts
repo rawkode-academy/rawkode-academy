@@ -21,7 +21,8 @@ export type AnalyticsAttribution = {
  * Attempt to extract an anonymous distinct id from cookies.
  * Prefers the PostHog distinct id (set client-side by the posthog component)
  * so server- and client-emitted events share a single identity. Falls back to
- * a generic `session_id` cookie for environments where PostHog hasn't booted.
+ * the first-party `rk_aid` cookie (set by lib/analytics/track.ts), which ad
+ * blockers don't stop, then to a generic `session_id` cookie.
  */
 export function getAnonDistinctIdFromCookies(req: Request): string | undefined {
 	const cookieHeader = req.headers.get("cookie");
@@ -33,6 +34,15 @@ export function getAnonDistinctIdFromCookies(req: Request): string | undefined {
 			return decodeURIComponent(phMatch[1]);
 		} catch {
 			return phMatch[1];
+		}
+	}
+
+	const aidMatch = cookieHeader.match(/(?:^|;\s*)rk_aid=([^;]+)/);
+	if (aidMatch?.[1]) {
+		try {
+			return decodeURIComponent(aidMatch[1]);
+		} catch {
+			return aidMatch[1];
 		}
 	}
 

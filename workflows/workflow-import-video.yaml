@@ -1,0 +1,112 @@
+id: ccb90a70-5208-4cb5-af03-08910b6f0b05
+name: import-video
+description: >-
+  Take a YouTube video through the Rawkode Academy import and prove every
+  stage from its own evidence: upload, video row, transcoding, transcription.
+  It fails at the first stage that is not evidenced; run the importer or
+  schedule the transcription, then run it again.
+version: 1
+tags: {}
+inputs:
+  properties:
+    youtubeId:
+      type: string
+      default: ""
+      description: YouTube id or URL of the video to import
+    videoId:
+      type: string
+      default: ""
+      description: >-
+        Rawkode Academy video id (the importer's CUID). Give it instead of the
+        YouTube id to verify a video that is already imported
+    requireImporterState:
+      type: boolean
+      default: false
+      description: >-
+        Also require the importer's state file on this machine
+        (~/.youtube_to_r2_state/<youtube id>.json) to list `completed` and
+        `d1_written`
+    transcodingWaitSeconds:
+      type: integer
+      default: 0
+      description: How long to wait for the HLS playlist before failing; 0 checks once
+    transcriptionWaitSeconds:
+      type: integer
+      default: 0
+      description: How long to wait for the captions before failing; 0 checks once
+jobs:
+  - name: import
+    description: Inspect, then verify each stage in order
+    steps:
+      - name: inspect
+        description: Record which stages are already evidenced
+        task:
+          type: behavior
+          behavior: video-imports
+          methodName: inspect
+          inputs:
+            youtubeId: ${{ inputs.youtubeId }}
+            videoId: ${{ inputs.videoId }}
+            requireImporterState: ${{ inputs.requireImporterState }}
+      - name: verify-upload
+        description: Fail unless the original video, audio and thumbnail answer 200
+        dependsOn:
+          - step: inspect
+            condition:
+              type: succeeded
+        task:
+          type: behavior
+          behavior: video-imports
+          methodName: verify
+          inputs:
+            youtubeId: ${{ inputs.youtubeId }}
+            videoId: ${{ inputs.videoId }}
+            requireImporterState: ${{ inputs.requireImporterState }}
+            through: upload
+      - name: verify-video
+        description: Fail unless videoByID returns the video from the API
+        dependsOn:
+          - step: verify-upload
+            condition:
+              type: succeeded
+        task:
+          type: behavior
+          behavior: video-imports
+          methodName: verify
+          inputs:
+            youtubeId: ${{ inputs.youtubeId }}
+            videoId: ${{ inputs.videoId }}
+            requireImporterState: ${{ inputs.requireImporterState }}
+            through: video
+      - name: verify-transcoding
+        description: Fail unless the HLS playlist answers 200 (the importer only triggers the job)
+        dependsOn:
+          - step: verify-video
+            condition:
+              type: succeeded
+        task:
+          type: behavior
+          behavior: video-imports
+          methodName: verify
+          inputs:
+            youtubeId: ${{ inputs.youtubeId }}
+            videoId: ${{ inputs.videoId }}
+            requireImporterState: ${{ inputs.requireImporterState }}
+            through: transcoding
+            waitSeconds: ${{ inputs.transcodingWaitSeconds }}
+      - name: verify-transcription
+        description: Fail unless the final captions answer 200
+        dependsOn:
+          - step: verify-transcoding
+            condition:
+              type: succeeded
+        task:
+          type: behavior
+          behavior: video-imports
+          methodName: verify
+          inputs:
+            youtubeId: ${{ inputs.youtubeId }}
+            videoId: ${{ inputs.videoId }}
+            requireImporterState: ${{ inputs.requireImporterState }}
+            through: transcription
+            waitSeconds: ${{ inputs.transcriptionWaitSeconds }}

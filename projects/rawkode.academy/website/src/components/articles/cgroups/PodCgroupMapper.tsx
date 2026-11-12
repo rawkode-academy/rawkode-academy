@@ -1,5 +1,5 @@
 import { useState, useId } from "react";
-import { academyCgroups } from "@rawkodeacademy/design-system";
+import { academyCgroups, button } from "@rawkodeacademy/design-system";
 
 type QoSClass = "guaranteed" | "burstable" | "besteffort";
 
@@ -277,7 +277,7 @@ export default function PodCgroupMapper() {
 					<button
 						key={qos}
 						type="button"
-						className={s.button}
+						className={button({ variant: "outline" })}
 						onClick={() => setActiveClass(qos)}
 						aria-pressed={qos === activeClass}
 						aria-controls={panelId}

@@ -22,8 +22,9 @@ ci: pipelines: {
 		tasks: [_t.check]
 	}
 
+	// Pull requests run outside the production environment, so they get no
+	// credentials.
 	pullRequest: {
-		environment: "production"
 		when: {
 			pullRequest: true
 		}

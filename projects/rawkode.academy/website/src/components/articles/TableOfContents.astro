@@ -34,14 +34,13 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 <!-- Mobile toggle -->
 <button
 	id="toc-mobile-toggle"
-	class="md:hidden fixed top-24 right-0 z-50 p-2.5 rounded-l-xl "
-	style="background: var(--surface-card); border: 1px solid var(--surface-border); border-right: none;"
+	class="toc-toggle"
 	aria-label="Toggle table of contents"
 >
 	<svg
 		id="toc-icon-open"
 		xmlns="http://www.w3.org/2000/svg"
-		class="h-5 w-5 text-primary"
+		class="toc-toggle-icon"
 		fill="none"
 		viewBox="0 0 24 24"
 		stroke="currentColor"
@@ -52,7 +51,7 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 	<svg
 		id="toc-icon-close"
 		xmlns="http://www.w3.org/2000/svg"
-		class="h-5 w-5 text-primary hidden"
+		class="toc-toggle-icon is-hidden"
 		fill="none"
 		viewBox="0 0 24 24"
 		stroke="currentColor"
@@ -99,7 +98,7 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 			<div class="toc-header">
 				<span class="toc-label">Contents</span>
 			</div>
-			<nav class="toc-nav">
+			<nav>
 				<ul class="toc-list">
 					{tocHeadings.map((heading) => (
 						<li class="toc-item" data-slug={heading.slug}>
@@ -127,6 +126,41 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 </aside>
 
 <style>
+	.toc-toggle {
+		position: fixed;
+		top: 6rem;
+		right: 0;
+		z-index: 50;
+		padding: 0.625rem;
+		background: var(--colors-academy-panel);
+		border: 1px solid var(--colors-academy-border);
+		border-right: none;
+		border-top-left-radius: var(--radii-academy-l);
+		border-bottom-left-radius: var(--radii-academy-l);
+		color: var(--colors-academy-accent);
+	}
+
+	.toc-toggle:focus-visible {
+		outline: 2px solid var(--colors-academy-accent);
+		outline-offset: 2px;
+	}
+
+	@media (min-width: 768px) {
+		.toc-toggle {
+			display: none;
+		}
+	}
+
+	.toc-toggle-icon {
+		display: block;
+		width: 1.25rem;
+		height: 1.25rem;
+	}
+
+	.toc-toggle-icon.is-hidden {
+		display: none;
+	}
+
 	.toc-container {
 		position: fixed;
 		right: 0.5rem;
@@ -152,9 +186,9 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 	.toc-glass {
 		position: absolute;
 		inset: 0;
-		background: var(--editorial-paper-deep);
-		border: 1px solid var(--editorial-hairline);
-		border-radius: var(--radius-sm);
+		background: var(--colors-academy-ground);
+		border: 1px solid var(--colors-academy-border);
+		border-radius: var(--radii-sm);
 	}
 
 	.toc-content-wrapper {
@@ -196,7 +230,7 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 		left: 50%;
 		width: 1px;
 		transform: translateX(-50%);
-		background: var(--editorial-hairline);
+		background: var(--colors-academy-border);
 		z-index: 0;
 		top: calc(0.5rem + 7px);
 		bottom: calc(0.5rem + 7px);
@@ -209,7 +243,7 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 		width: 1px;
 		height: 0;
 		transform: translateX(-50%);
-		background: var(--editorial-ink);
+		background: var(--colors-academy-text);
 		z-index: 1;
 		transition: height 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 		top: calc(0.5rem + 7px);
@@ -224,7 +258,7 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 		transform: translateX(-50%);
 		width: 6px;
 		height: 6px;
-		background: var(--editorial-ink);
+		background: var(--colors-academy-text);
 		border-radius: 50%;
 	}
 
@@ -236,8 +270,8 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 		width: 14px;
 		height: 14px;
 		border-radius: 50%;
-		background: var(--surface-card);
-		border: 2px solid rgb(var(--brand-primary) / 0.3);
+		background: var(--colors-academy-panel);
+		border: 2px solid color-mix(in srgb, var(--colors-academy-accent) 30%, transparent);
 		transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 		z-index: 2;
 	}
@@ -258,42 +292,42 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 		width: 4px;
 		height: 4px;
 		border-radius: 50%;
-		background: rgb(var(--brand-primary) / 0.3);
+		background: color-mix(in srgb, var(--colors-academy-accent) 30%, transparent);
 		transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 	}
 
 	.toc-dot:hover {
-		border-color: rgb(var(--brand-primary) / 0.6);
+		border-color: color-mix(in srgb, var(--colors-academy-accent) 60%, transparent);
 		transform: scale(1.15);
 	}
 
 	.toc-dot:hover .toc-dot-inner {
-		background: rgb(var(--brand-primary) / 0.6);
+		background: color-mix(in srgb, var(--colors-academy-accent) 60%, transparent);
 		transform: scale(1.2);
 	}
 
 	/* Passed state — flat ink dot. */
 	.toc-dot.passed {
-		border-color: var(--editorial-ink);
-		background: var(--editorial-ink);
+		border-color: var(--colors-academy-text);
+		background: var(--colors-academy-text);
 	}
 
 	.toc-dot.passed .toc-dot-inner {
-		background: var(--editorial-paper);
+		background: var(--colors-academy-canvas);
 		width: 6px;
 		height: 6px;
 	}
 
 	/* Active state — ink-bordered ring, no glow. */
 	.toc-dot.active {
-		border-color: var(--editorial-ink);
+		border-color: var(--colors-academy-text);
 		border-width: 2px;
-		background: var(--editorial-paper-deep);
+		background: var(--colors-academy-ground);
 		transform: scale(1.2);
 	}
 
 	.toc-dot.active .toc-dot-inner {
-		background: var(--editorial-ink);
+		background: var(--colors-academy-text);
 		width: 6px;
 		height: 6px;
 		animation: dot-pulse 1.8s ease-in-out infinite;
@@ -302,7 +336,7 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 	.toc-dot.active .toc-dot-ring {
 		position: absolute;
 		inset: -5px;
-		border: 1px solid var(--editorial-hairline-strong);
+		border: 1px solid var(--colors-academy-input-border);
 		border-radius: 50%;
 		animation: ring-pulse 1.8s ease-out infinite;
 	}
@@ -334,15 +368,14 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 	.toc-header {
 		padding-bottom: 0.625rem;
 		margin-bottom: 0.625rem;
-		border-bottom: 1px solid var(--editorial-hairline);
+		border-bottom: 1px solid var(--colors-academy-border);
 	}
 
 	.toc-label {
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.625rem;
+		font-family: var(--fonts-academy-mono);
+		font-size: 0.75rem;
 		font-weight: 500;
-		letter-spacing: 0.18em;
-		color: var(--editorial-spruce);
+		color: var(--colors-academy-text-muted);
 	}
 
 	.toc-list {
@@ -361,26 +394,26 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 		gap: 0.625rem;
 		padding: 0.45rem 0.625rem;
 		margin: 0 -0.625rem;
-		font-family: var(--font-inter-tight), sans-serif;
+		font-family: var(--fonts-academy-text);
 		font-size: 0.8125rem;
 		font-weight: 400;
-		color: var(--editorial-ink-mute);
+		color: var(--colors-academy-text-muted);
 		text-decoration: none;
 		line-height: 1.4;
-		transition: color var(--duration-base) var(--ease-standard),
-			background-color var(--duration-base) var(--ease-standard);
+		transition: color var(--durations-base) var(--easings-academy-standard),
+			background-color var(--durations-base) var(--easings-academy-standard);
 		border-left: 1px solid transparent;
 	}
 
 	.toc-link:hover {
-		color: var(--editorial-ink);
-		background: var(--surface-card-muted);
+		color: var(--colors-academy-text);
+		background: color-mix(in srgb, var(--colors-academy-text) 4%, transparent);
 	}
 
 	.toc-link.active {
-		color: var(--editorial-ink);
-		background: var(--surface-card-muted);
-		border-left-color: var(--editorial-ink);
+		color: var(--colors-academy-text);
+		background: color-mix(in srgb, var(--colors-academy-text) 4%, transparent);
+		border-left-color: var(--colors-academy-text);
 		font-weight: 500;
 	}
 
@@ -391,11 +424,11 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 		margin-top: 0.55em;
 		background: currentColor;
 		opacity: 0.5;
-		transition: opacity var(--duration-base) var(--ease-standard);
+		transition: opacity var(--durations-base) var(--easings-academy-standard);
 	}
 
 	.toc-link.active .toc-marker {
-		background: var(--editorial-ink);
+		background: var(--colors-academy-text);
 		opacity: 1;
 	}
 
@@ -418,20 +451,20 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 		display: block;
 		padding: 0.25rem 0.625rem;
 		margin: 0 -0.625rem;
-		font-family: var(--font-inter-tight), sans-serif;
+		font-family: var(--fonts-academy-text);
 		font-size: 0.75rem;
-		color: var(--editorial-ink-mute);
+		color: var(--colors-academy-text-muted);
 		text-decoration: none;
 		line-height: 1.4;
-		transition: color var(--duration-base) var(--ease-standard);
+		transition: color var(--durations-base) var(--easings-academy-standard);
 	}
 
 	.toc-sublink:hover {
-		color: var(--editorial-ink-soft);
+		color: var(--colors-academy-text-soft);
 	}
 
 	.toc-sublink.active {
-		color: var(--editorial-ink);
+		color: var(--colors-academy-text);
 	}
 
 	/* Mobile styles */
@@ -487,7 +520,7 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 			content: '';
 			width: 3rem;
 			height: 4px;
-			background: rgb(var(--brand-primary) / 0.3);
+			background: color-mix(in srgb, var(--colors-academy-accent) 30%, transparent);
 			border-radius: 2px;
 			position: absolute;
 			top: 0.75rem;
@@ -516,8 +549,8 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 			const isVisible = container.classList.toggle('mobile-visible');
 			const openIcon = newToggle.querySelector('#toc-icon-open');
 			const closeIcon = newToggle.querySelector('#toc-icon-close');
-			openIcon?.classList.toggle('hidden', isVisible);
-			closeIcon?.classList.toggle('hidden', !isVisible);
+			openIcon?.classList.toggle('is-hidden', isVisible);
+			closeIcon?.classList.toggle('is-hidden', !isVisible);
 		});
 
 		// Close on outside click
@@ -530,8 +563,8 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 				container?.classList.remove('mobile-visible');
 				const openIcon = newToggle.querySelector('#toc-icon-open');
 				const closeIcon = newToggle.querySelector('#toc-icon-close');
-				openIcon?.classList.remove('hidden');
-				closeIcon?.classList.add('hidden');
+				openIcon?.classList.remove('is-hidden');
+				closeIcon?.classList.add('is-hidden');
 			}
 		}
 		document.removeEventListener('click', handleOutsideClick);
@@ -544,8 +577,8 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 					container.classList.remove('mobile-visible');
 					const openIcon = newToggle.querySelector('#toc-icon-open');
 					const closeIcon = newToggle.querySelector('#toc-icon-close');
-					openIcon?.classList.remove('hidden');
-					closeIcon?.classList.add('hidden');
+					openIcon?.classList.remove('is-hidden');
+					closeIcon?.classList.add('is-hidden');
 				}
 			});
 		});
@@ -561,9 +594,13 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 
 	// Update active state and progress based on scroll
 	function updateActive() {
-		// Only look for headings within the article prose content
-		const headings = Array.from(document.querySelectorAll('.prose h2[id], .prose h3[id]')) as HTMLElement[];
-		const h2Headings = Array.from(document.querySelectorAll('.prose h2[id]')) as HTMLElement[];
+		// Resolve the headings this table of contents links to, in document order
+		const headingsFor = (selector: string): HTMLElement[] =>
+			Array.from(document.querySelectorAll<HTMLElement>(selector))
+				.map((item) => document.getElementById(item.dataset.slug ?? ''))
+				.filter((heading): heading is HTMLElement => heading !== null);
+		const headings = headingsFor('.toc-item[data-slug], .toc-subitem[data-slug]');
+		const h2Headings = headingsFor('.toc-item[data-slug]');
 		
 		const dots = document.querySelectorAll('.toc-dot');
 		const links = document.querySelectorAll('.toc-link, .toc-sublink');
@@ -674,7 +711,7 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 						} else {
 							// Last section - fill to end as we scroll through
 							const lastCurrentH2 = h2Headings[activeH2Index];
-							const articleEnd = document.querySelector('.prose')?.getBoundingClientRect();
+							const articleEnd = lastCurrentH2?.parentElement?.getBoundingClientRect();
 							if (articleEnd && lastCurrentH2) {
 								const endY = articleEnd.bottom + window.scrollY;
 								const sectionStart = lastCurrentH2.offsetTop;

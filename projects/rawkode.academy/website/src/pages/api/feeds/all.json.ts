@@ -5,6 +5,7 @@ import {
 	getEntries,
 	setContentCache,
 } from "@/lib/live-content";
+import { getPublishedVideos } from "@/lib/content";
 import { buildJsonFeed, type JsonFeedItem } from "@/lib/json-feed";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { isNewsPublished } from "@/lib/news-publication";
@@ -19,8 +20,9 @@ export const GET: APIRoute = async (context) => {
 
 	const [articles, videos, news, technologies] = await Promise.all([
 		getCollection("articles"),
-		// Videos include upcoming streams (they have pages), as before.
-		getCollection("videos"),
+		// Published videos only, like the videos feeds: a scheduled stream
+		// must not lead the feed with a future date.
+		getPublishedVideos(),
 		getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
 		getCollection("technologies"),
 	]);

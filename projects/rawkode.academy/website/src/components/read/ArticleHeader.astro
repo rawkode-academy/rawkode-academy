@@ -1,6 +1,7 @@
 ---
 import { academyDocument } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
+import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import MLabel from "@/components/ui/MLabel.vue";
 
 interface BreadcrumbItem {
@@ -27,29 +28,17 @@ const {
 	eyebrow,
 } = Astro.props as Props;
 
-const visibleBreadcrumbs = breadcrumbs.filter((item) => !item.current);
+// Parent links only: the title below is the current page.
+const parents = breadcrumbs.flatMap((item) =>
+	item.current || !item.href ? [] : [{ title: item.label, link: item.href }],
+);
 const eyebrowText =
 	eyebrow ?? `${kicker}${categoryTrail ? ` · ${categoryTrail}` : ""}`;
 ---
 
-{visibleBreadcrumbs.length > 0 && (
-	<div class={doc.breadcrumb}>
-		{visibleBreadcrumbs.map((b, i) => (
-			<>
-				{i > 0 && <span class={doc.meta}>/</span>}
-				{b.href ? (
-					<a class={doc.link} href={b.href}>{b.label}</a>
-				) : (
-					<span class={doc.meta}>{b.label}</span>
-				)}
-			</>
-		))}
-		<span class={doc.spacer}></span>
-	</div>
-)}
-
 <header class={doc.hero}>
 	<div class={[doc.container, doc.stack].join(" ")}>
+		<Breadcrumb parents={parents} />
 		{eyebrowText && <MLabel tone="accent">
 			{eyebrowText}
 		</MLabel>}

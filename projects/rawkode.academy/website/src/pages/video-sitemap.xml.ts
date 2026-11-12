@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { getPublishedVideos } from "@/lib/content";
 import { getCollection, setContentCache } from "@/lib/live-content";
+import { plainTextDescription } from "@/lib/plain-text-description";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
 
@@ -8,6 +9,7 @@ export const prerender = false;
 
 const DEFAULT_SITE_URL = "https://rawkode.academy";
 const MAX_VIDEO_DURATION_SECONDS = 28_800;
+const MAX_VIDEO_DESCRIPTION_LENGTH = 2048;
 
 export function toVideoDurationValue(duration: unknown): string | undefined {
 	if (typeof duration !== "number" || !Number.isFinite(duration)) {
@@ -74,6 +76,11 @@ ${sortedVideos
 		const contentUrl = `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`;
 		const duration = toVideoDurationValue(video.data.duration);
 		const publishedDate = new Date(video.data.publishedAt).toISOString();
+		const recordUpdatedAt = video.data.recordUpdatedAt;
+		const lastModified =
+			recordUpdatedAt && recordUpdatedAt > video.data.publishedAt
+				? recordUpdatedAt.toISOString()
+				: publishedDate;
 
 		// Create tags from technologies
 		const tags = normalizeTechnologyReferences(video.data.technologies)
@@ -91,13 +98,16 @@ ${sortedVideos
 			: "";
 
 		return `  <url>
-    <loc>${videoUrl}</loc>
-    <lastmod>${publishedDate}</lastmod>
+    <loc>${escapeXml(videoUrl)}</loc>
+    <lastmod>${lastModified}</lastmod>
     <video:video>
       <video:thumbnail_loc>${escapeXml(thumbnailUrl)}</video:thumbnail_loc>
       <video:title>${escapeXml(video.data.title)}</video:title>
       <video:description>${escapeXml(
-				video.data.description,
+				plainTextDescription(
+					video.data.description,
+					MAX_VIDEO_DESCRIPTION_LENGTH,
+				),
 			)}</video:description>
       <video:content_loc>${escapeXml(contentUrl)}</video:content_loc>
       ${durationXml}

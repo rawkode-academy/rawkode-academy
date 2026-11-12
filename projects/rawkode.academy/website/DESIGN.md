@@ -21,7 +21,7 @@ controls, and duplicate recommendations.
 - Red Hat Text: navigation, descriptions, forms, and reading.
 - Red Hat Mono: technical identifiers and concise metadata.
 - Fonts resolve through Astro's generated CSS variables, not hardcoded family
-  names. Historical font variables alias the same three Academy families.
+  names.
 - Cool light canvas (`#f4f7fb`), navy text (`#0c1626`), pink action accent
   (`#c2185b`). Dark mode uses navy canvas, light text, and brighter pink.
   Use semantic tokens rather than copying these values into components.
@@ -42,8 +42,13 @@ controls, and duplicate recommendations.
     healthy node. It is pure animation: no readout, no controls, no
     announcements, and it carries no content. It keeps clear of every
     element marked `data-system-avoid`, pauses off screen and in hidden tabs,
-    and with reduced motion renders still frames with no packets or
-    autonomous failures (`src/lib/system-canvas.ts`).
+    moves for five seconds after load or the last pointer interaction and
+    then holds a still frame, and with reduced motion renders only still
+    frames with no autonomous failures (`src/lib/system-canvas.ts`). Below
+    640px, where the copy fills the measure, the hero keeps two cells of
+    room at its foot and the system is the one lattice row there, unmasked:
+    two nodes and their pods on a single route, at least half a cell under
+    the lede.
   - On collection mastheads the collection's own artwork is scheduled into
     its cells on wide screens: stills as a bricked wall of 3×2 screens,
     portraits as staggered 2×2 squares, logos as single cells on paper tiles
@@ -61,7 +66,8 @@ controls, and duplicate recommendations.
   rail on the homepage and each masthead set the collection's name with its
   count as an accent mono superscript (`Videos³²⁹`), the same form in both
   places so the homepage previews the page you land on; the two-digit day
-  that leads every ledger row, and the ghost index on a learning path (quiet
+  that leads every ledger row, the day the next stream starts, the
+  session count beside a learning path on the homepage, and the ghost index on a learning path (quiet
   by default, lit in the accent on hover). Numerals are Red Hat Display
   extrabold with tabular figures; their labels are sentence-case mono.
 - Status colors communicate actual status. A topic or decorative eyebrow is
@@ -72,7 +78,13 @@ controls, and duplicate recommendations.
   dot with its label so colour is never the only signal.
 - Borders include their semantic color. Hairlines must not default to text color.
 - Flat surfaces and modest 3–6px radii. Reserve shadows for floating layers.
-- Motion is one entrance sequence on the homepage hero (staggered rise, 720ms,
+  Tags, technology chips, filter links and reaction buttons are the one
+  fully round surface (`academy-pill`), with dots, avatars and progress
+  tracks; nothing else is a pill.
+- A dialog or drawer dims the page with `academy.scrim`, the same black veil
+  in both colour schemes. A scrim mixed from a themed colour stops dimming
+  in dark mode.
+- Motion is one entrance sequence on the homepage (staggered rise, 720ms,
   ease-out) with the living system fading in over the grid, a masthead
   entrance where the title rises and the mosaic tiles open from their centres
   in a sweep across the lattice (`academy-schedule`), a scroll-driven reveal on ledger rows, path cards, and library
@@ -83,13 +95,19 @@ controls, and duplicate recommendations.
   drawer slide). Articles carry a fixed reading rule that tracks the document
   scroll (`animation-timeline: scroll(root)`). Every animation has a
   `prefers-reduced-motion` alternative that removes it. Text selection
-  carries the accent.
+  carries the accent. The homepage entrance sequence runs statement, lede,
+  then the pair.
 
 ## Composition
 
 The 1180px shell includes responsive 20–48px gutters; usable desktop content is
 1084px. Header, page content, and footer align to this grid. Focused reading
 surfaces target 680px of text. Dense technical diagrams and video may be wider.
+
+The watch page is the one deliberate exception to the shell: a full-bleed
+split, with the player pinned in an ink pane and the notes in a canvas pane.
+The content of each pane stays on the grid, so the ink pane's left edge and
+the canvas pane's right edge sit on the shell edges from 1440px up.
 
 Use space and rules before boxes. Cards earn a frame when they are independent
 linked items or contain an interactive task. Do not wrap a whole reading page
@@ -104,15 +122,48 @@ Directory pages explain the collection and show real choices. Filters have
 labels, real results, and an empty state. A decorative tab or fake pagination
 label is not acceptable. Keep critical content server-rendered.
 
-Chronological collections (the homepage stream, Read, News) share one ledger
+The homepage opens on a short ink hero that holds only the statement, its
+lede and the living system (about 470px at 1440), so the canvas beneath it
+starts in the first screen. There the next live stream and the latest
+session sit side by side as equals: two columns of the same width and
+structure (still, label, title, one sentence, facts, action) sharing their
+rows, next first. The stream's facts are its start, with the day at numeral
+scale; the session's are its date, runtime, guest and show. The stream's
+action is the page's one solid button because it is time-bound; with
+nothing scheduled the latest session takes the full width as a spread and
+the solid button with it. Further scheduled streams are a short ruled list
+under the next one. The field index follows on its own full-width ink band,
+the one ink moment between the hero and the footer: the four collections as
+large ruled links (name, count superscript, one line, an arrow) with room
+between the rules. Then Recently published, a compact ledger with one
+column per collection, each the same thing: equal widths (thirds, halves,
+or one full-width column with its rows two abreast), the same number of
+rows, each row a day numeral, a title and one mono line, and the closing
+links on one line (a column with fewer than three rows is not stretched);
+a collection with nothing new has no column. Learning paths close the page
+on the canvas as a ruled table with each path's real session count.
+
+Chronological collections (Read, News) share one ledger
 row: a date column led by the two-digit day as a numeral with month and year
 in mono beneath it, an optional 16:9 still, then kind, title, and a
 one-sentence description, separated by hairlines. Learning paths use the
 same rule with a two-digit index and a three-bar difficulty meter. Video
 libraries use a 16:9 grid because the still is the primary way to recognise
-a session. On wide screens a ledger row's still sits in its own trailing
-column so every title in the ledger starts on the same line whether or not
-the row has a still.
+a session. A ledger row's still sits in its own trailing column so every
+title in the ledger starts on the same line whether or not the row has a
+still; on a phone the row is text-led and the still is left out.
+
+A session is drawn one way wherever it is listed (the library, a show's or a
+technology's recordings, the rail under a video): a frameless 16:9 still, a
+mono line with the runtime and date (`1h 2m · 17 Jul 2026`), then the title
+(`VideoCard.astro`, `academyPage.card`). Dates are day, three-letter month,
+year (`localDate`); runtimes are `42 min` or `1h 2m` (`formatRuntime`). One
+or two scheduled streams are set as a horizontal feature, never a lone card
+in an empty grid; three or more use the same card with `Upcoming` in the
+accent, the start time, and one sentence of description where there is one.
+
+Detail pages carry one breadcrumb (`Breadcrumb.astro`): sentence-case mono,
+parent links only, inside the page header.
 
 People is a contact sheet: square portraits without frames, printed in
 greyscale so mismatched photographs read as one set, each coming into colour

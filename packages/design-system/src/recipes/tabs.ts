@@ -1,4 +1,5 @@
 import { sva } from "../../styled-system/css";
+import { focusRing } from "../styles/focus";
 
 export const tabs = sva({
 	slots: ["root", "list", "trigger", "indicator", "content"],
@@ -38,11 +39,7 @@ export const tabs = sva({
 			_hover: {
 				color: "academy.text",
 			},
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 			_selected: {
 				borderTopColor: "academy.accent",
 				background: "academy.panel",
@@ -62,11 +59,7 @@ export const tabs = sva({
 			paddingBlock: "6",
 			color: "academy.textSoft",
 			fontSize: "md",
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 	},
 	variants: {
