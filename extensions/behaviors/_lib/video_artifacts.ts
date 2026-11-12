@@ -239,7 +239,7 @@ export function instanceRequest(
 	};
 }
 
-/** Human-readable plan, shown at the approval gate. */
+/** Human-readable plan. */
 export function summarize(
 	jobs: Job[],
 	skipped: Skipped[],

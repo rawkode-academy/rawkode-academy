@@ -2,7 +2,7 @@ id: a6c293e8-f7a7-49ac-8835-30dc474904c3
 name: backfill-video-artifacts
 description: >-
   Find published videos that lack captions or a thumbnail in the content
-  bucket, start the jobs that produce them after approval, and confirm the
+  bucket, start the jobs that produce them, and confirm the
   artifacts are served.
 version: 1
 tags: {}
@@ -31,7 +31,7 @@ inputs:
       description: How long to wait for the triggered artifacts to be served before failing
 jobs:
   - name: backfill
-    description: Discover, approve, trigger and verify
+    description: Discover, trigger and verify
     steps:
       - name: discover
         description: List published videos and plan a job for every missing artifact
@@ -43,24 +43,10 @@ jobs:
             videos: ${{ inputs.videos }}
             kinds: ${{ inputs.kinds }}
             maximum: ${{ inputs.maximum }}
-      - name: approve
-        description: Review the plan before any job is started
-        dependsOn:
-          - step: discover
-            condition:
-              type: succeeded
-        guard: ${{ size(data.latest("video-artifacts", "plan").attributes.jobs) == 0 }}
-        task:
-          type: manual_approval
-          prompt: >-
-            Review the missing video artifacts before their jobs are started in
-            production: swamp data query 'modelName == "video-artifacts" &&
-            name == "plan"' --select attributes.summary
-          timeout: 86400
       - name: trigger
         description: Start one Cloudflare Workflow instance per missing artifact
         dependsOn:
-          - step: approve
+          - step: discover
             condition:
               type: succeeded
         guard: ${{ size(data.latest("video-artifacts", "plan").attributes.jobs) == 0 }}
