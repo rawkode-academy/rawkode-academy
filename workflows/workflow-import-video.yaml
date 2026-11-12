@@ -3,8 +3,8 @@ name: import-video
 description: >-
   Take a YouTube video through the Rawkode Academy import and prove every
   stage from its own evidence: upload, video row, transcoding, transcription.
-  The import and the transcription are started by hand at the two gates;
-  nothing counts as done because it was triggered.
+  It fails at the first stage that is not evidenced; run the importer or
+  schedule the transcription, then run it again.
 version: 1
 tags: {}
 inputs:
@@ -19,12 +19,6 @@ inputs:
       description: >-
         Rawkode Academy video id (the importer's CUID). Give it instead of the
         YouTube id to verify a video that is already imported
-    pauseForTriggers:
-      type: boolean
-      default: true
-      description: >-
-        Pause at the import and transcribe gates when their stage is not
-        evidenced yet; false only verifies and fails at the first missing stage
     requireImporterState:
       type: boolean
       default: false
@@ -42,7 +36,7 @@ inputs:
       description: How long to wait for the captions before failing; 0 checks once
 jobs:
   - name: import
-    description: Inspect, import, then verify each stage in order
+    description: Inspect, then verify each stage in order
     steps:
       - name: inspect
         description: Record which stages are already evidenced
@@ -54,39 +48,12 @@ jobs:
             youtubeId: ${{ inputs.youtubeId }}
             videoId: ${{ inputs.videoId }}
             requireImporterState: ${{ inputs.requireImporterState }}
-      - name: import
-        description: Trigger point for the importer (download, R2 upload, Cloud Run transcoding job, D1 row)
-        dependsOn:
-          - step: inspect
-            condition:
-              type: succeeded
-        guard: >-
-          ${{ !inputs.pauseForTriggers || inputs.youtubeId == "" ||
-          (data.latest("video-imports", "status").attributes.stages.upload.evidenced &&
-          data.latest("video-imports", "status").attributes.stages.video.evidenced) }}
-        task:
-          type: manual_approval
-          prompt: >-
-            The upload or the video row is not evidenced yet. Read what is
-            missing first: swamp data query 'modelName == "video-imports" && name
-            == "status"' --select attributes.summary. Then, in
-            projects/rawkode.academy/tasks/video-importer, check the importer
-            (cuenv exec -e production uv run python youtube_to_r2.py <youtube id>
-            --show-state), run it without --show-state if the import is not
-            done, and approve once it has finished
-          timeout: 86400
       - name: verify-upload
         description: Fail unless the original video, audio and thumbnail answer 200
         dependsOn:
           - step: inspect
             condition:
               type: succeeded
-          - step: import
-            condition:
-              type: or
-              conditions:
-                - type: succeeded
-                - type: skipped
         task:
           type: behavior
           behavior: video-imports
@@ -127,38 +94,12 @@ jobs:
             requireImporterState: ${{ inputs.requireImporterState }}
             through: transcoding
             waitSeconds: ${{ inputs.transcodingWaitSeconds }}
-      - name: transcribe
-        description: Trigger point for the transcription workflow
-        dependsOn:
-          - step: verify-transcoding
-            condition:
-              type: succeeded
-        guard: >-
-          ${{ !inputs.pauseForTriggers ||
-          data.latest("video-imports", "status").attributes.stages.transcription.evidenced }}
-        task:
-          type: manual_approval
-          prompt: >-
-            The captions are not evidenced yet. Add the episode, guest,
-            technology and transcription term rows first, then schedule the
-            transcription in projects/rawkode.academy/platform/transcriptions and
-            approve: cuenv exec -e production bun scripts/schedule_one.ts
-            <video id> en. The video id: swamp data query 'modelName ==
-            "video-imports" && name == "verification-transcoding"' --select
-            attributes.videoId
-          timeout: 86400
       - name: verify-transcription
         description: Fail unless the final captions answer 200
         dependsOn:
           - step: verify-transcoding
             condition:
               type: succeeded
-          - step: transcribe
-            condition:
-              type: or
-              conditions:
-                - type: succeeded
-                - type: skipped
         task:
           type: behavior
           behavior: video-imports
