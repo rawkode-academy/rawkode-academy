@@ -32,3 +32,6 @@ worker-configuration.d.ts
 
 # Website subgraph SDL (generated)
 subgraph/schema.gql
+
+# Images copied from content/articles by the articles loader
+public/_content/

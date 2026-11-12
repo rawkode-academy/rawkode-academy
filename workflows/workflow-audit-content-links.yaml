@@ -1,8 +1,8 @@
 id: 2efd6ea4-c617-4e5e-a243-87d01d97be24
 name: audit-content-links
 description: >-
-  Sweep the outbound links of published content (read from the public GraphQL
-  gateway), record the dead and redirected ones with where each appears, and
+  Sweep the outbound links of published content (articles from content/articles,
+  the rest from the public GraphQL gateway), record the dead and redirected ones with where each appears, and
   fail when any are dead. Reads only.
 version: 1
 tags: {}

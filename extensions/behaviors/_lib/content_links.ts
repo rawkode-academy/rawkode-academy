@@ -1,7 +1,8 @@
 /**
- * Pure logic for the content link audit: which GraphQL fields hold links,
- * how to pull URLs out of rich text, and how to turn link checks into a
- * summary, findings and a readable report.
+ * Pure logic for the content link audit: which GraphQL fields (or, for
+ * articles, which repository files) hold links, how to pull URLs out of rich
+ * text and Markdown, and how to turn link checks into a summary, findings and
+ * a readable report.
  *
  * @module
  */
@@ -65,9 +66,47 @@ type Row = Record<string, unknown>;
 
 interface ContentType {
 	/** The GraphQL selection that reads every row of this content type. */
-	selection: string;
+	selection?: string;
+	/**
+	 * For content authored in the repository: the directory of Markdown/MDX
+	 * files, relative to the repository root. Each file is a row of
+	 * `{ id, source }`.
+	 */
+	directory?: string;
 	/** Turn the rows into items with their links. */
 	collect: (rows: Row[]) => ContentItem[];
+}
+
+/** The slug of a content file: its path without extension or `/index`. */
+export function fileId(path: string): string {
+	return path.replace(/\.mdx?$/, "").replace(/\/index$/, "");
+}
+
+const FRONTMATTER = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/;
+
+/**
+ * Read a Markdown/MDX content file: its frontmatter title, the URLs its body
+ * links to (Markdown links and images, autolinks and the URL attributes of
+ * components; code is left out) and the URLs of its frontmatter resources.
+ */
+export function markdownLinks(
+	source: string,
+): { title: string; body: string[]; resources: string[] } {
+	const match = source.match(FRONTMATTER);
+	const frontmatter = match?.[1] ?? "";
+	const title = frontmatter.match(/^title:\s*(.+)$/m)?.[1]?.trim()
+		.replace(/^(["'])(.*)\1$/, "$2") ?? "";
+	const resources = [...frontmatter.matchAll(/^\s+url:\s*(\S+)\s*$/gm)]
+		.map((found) => found[1].replace(/^(["'])(.*)\1$/, "$2"));
+	const prose = source.slice(match?.[0].length ?? 0)
+		.replace(/^( {0,3})(`{3,}|~{3,})[\s\S]*?^\1\2[ \t]*$/gm, "")
+		.replace(/`[^`\n]*`/g, "");
+	const body = [
+		...prose.matchAll(
+			/\]\(\s*<?([^)\s>]+)>?(?:\s+"[^"]*")?\s*\)|<(https?:\/\/[^>\s]+)>|\b(?:href|src|lightSrc|darkSrc|thumbnailUrl)="([^"]+)"/g,
+		),
+	].map((found) => found[1] ?? found[2] ?? found[3]);
+	return { title, body, resources };
 }
 
 const RESOURCES = "resources { url }";
@@ -106,15 +145,17 @@ function item(
 
 /** Every content type the audit can read, keyed by its input name. */
 export const CONTENT_TYPES: Record<string, ContentType> = {
+	// Articles are Markdown/MDX files in the repository, not gateway rows.
 	articles: {
-		selection: `allArticles { id title body ${RESOURCES} }`,
+		directory: "content/articles",
 		collect: (rows) =>
-			rows.map((row) =>
-				item("articles", row, row.title, [
-					...richText(row.body, "body"),
-					...resources(row.resources),
-				])
-			),
+			rows.map((row) => {
+				const found = markdownLinks(text(row.source));
+				return item("articles", row, found.title, [
+					...listed(found.body, "body"),
+					...listed(found.resources, "resources"),
+				]);
+			}),
 	},
 	news: {
 		selection: "allNewsStories { id title body }",

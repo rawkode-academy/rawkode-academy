@@ -8,6 +8,7 @@ on:
     - .github/workflows/rawkode-academy-website-pullrequest.yml
     - bun.lock
     - bun.lock/**
+    - content/articles/**
     - cue.mod/**
     - packages/design-system/**
     - packages/live-viewer/**

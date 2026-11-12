@@ -58,61 +58,38 @@ afterEach(() => setContentEnv(undefined));
 describe("live loaders", () => {
 	it("load a collection through the API binding, hide scheduled entries and return cache hints", async () => {
 		const { API, calls } = gateway({
-			LiveArticles: {
-				allArticles: [
+			LiveNews: {
+				allNewsStories: [
 					article("past", "2026-10-01T00:00:00Z"),
 					article("future", "2026-10-24T00:00:00Z"),
 				],
 			},
 		});
 		setContentEnv({ API, CONTENT_CACHE: memoryKv() });
-		const loader = contentLoader("articles");
+		const loader = contentLoader("news");
 		const result = await loader.loadCollection({ filter: undefined } as never);
 		if ("error" in result) throw result.error;
 		expect(result.entries.map((e) => e.id)).toEqual(["past"]);
 		expect(result.entries[0]).toMatchObject({
-			collection: "articles",
+			collection: "news",
 			body: "Text of past",
 			cacheHint: {
 				tags: [
-					"articles",
-					"articles:past",
+					"news",
+					"news:past",
 					"people:rawkode",
 					"technologies:kubernetes",
 				],
 			},
 		});
-		expect(result.cacheHint?.tags).toEqual(["articles"]);
+		expect(result.cacheHint?.tags).toEqual(["news"]);
 		const all = await loader.loadCollection({
 			filter: { scheduled: "include" },
 		} as never);
 		if ("error" in all) throw all.error;
 		expect(all.entries).toHaveLength(2);
 		// One gateway call: the list is memoised and stored in KV.
-		expect(calls.map((c) => c.operationName)).toEqual(["LiveArticles"]);
-	});
-
-	it("drop draft articles from collections and entries", async () => {
-		const { API } = gateway({
-			LiveArticles: {
-				allArticles: [
-					article("live", "2026-10-01T00:00:00Z"),
-					{ ...article("unfinished", "2026-10-02T00:00:00Z"), draft: true },
-				],
-			},
-		});
-		setContentEnv({ API, CONTENT_CACHE: memoryKv() });
-		const loader = contentLoader("articles");
-		const result = await loader.loadCollection({
-			filter: { scheduled: "include" },
-		} as never);
-		if ("error" in result) throw result.error;
-		expect(result.entries.map((e) => e.id)).toEqual(["live"]);
-		expect(
-			await loader.loadEntry({ filter: { id: "unfinished" } } as never),
-		).toBeUndefined();
-		const live = await loader.loadEntry({ filter: { id: "live" } } as never);
-		expect(live && "data" in live ? live.id : undefined).toBe("live");
+		expect(calls.map((c) => c.operationName)).toEqual(["LiveNews"]);
 	});
 
 	it("include upcoming videos by default and look entries up in the cached list", async () => {
