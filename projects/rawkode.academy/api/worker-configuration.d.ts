@@ -14,7 +14,6 @@ interface __BaseEnv_Env {
 	PEOPLE_LINKS: Fetcher /* platform-people-links-read-model */;
 	PEOPLE_BIOGRAPHIES: Fetcher /* platform-people-biographies-read-model */;
 	TRANSCRIPTION_TERMS: Fetcher /* platform-transcription-terms-read-model */;
-	ARTICLES: Fetcher /* platform-articles-read-model */;
 	NEWS: Fetcher /* platform-news-read-model */;
 	CHANGELOG: Fetcher /* platform-changelog-read-model */;
 	ADRS: Fetcher /* platform-adrs-read-model */;
