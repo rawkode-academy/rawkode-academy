@@ -1,0 +1,71 @@
+id: 2efd6ea4-c617-4e5e-a243-87d01d97be24
+name: audit-content-links
+description: >-
+  Sweep the outbound links of published content (read from the public GraphQL
+  gateway), record the dead and redirected ones with where each appears, and
+  fail when any are dead. Reads only.
+version: 1
+tags: {}
+trigger:
+  schedule: "0 6 * * 1"
+inputs:
+  properties:
+    contentTypes:
+      type: string
+      default: ""
+      description: >-
+        Comma-separated content types to audit (articles, news, courses,
+        learning-paths, technologies, videos, changelog,
+        architecture-decision-records); empty audits articles, news, courses,
+        learning-paths and technologies
+    maximumItems:
+      type: integer
+      default: 0
+      description: Audit at most this many items of each content type; 0 audits all
+    includeInternal:
+      type: boolean
+      default: false
+      description: Also request links that point at the website itself
+jobs:
+  - name: audit
+    description: Check every link once, then judge the result
+    steps:
+      - name: audit
+        description: Collect the links, request each unique URL and record the findings
+        task:
+          type: behavior
+          behavior: content-links
+          methodName: audit
+          inputs:
+            contentTypes: ${{ inputs.contentTypes }}
+            maximumItems: ${{ inputs.maximumItems }}
+            includeInternal: ${{ inputs.includeInternal }}
+      - name: no-broken-links
+        description: Fail the run when any link is dead
+        dependsOn:
+          - step: audit
+            condition:
+              type: succeeded
+        task:
+          type: assert
+          expr: >-
+            data.latest("content-links", "summary").attributes.broken == 0
+          message: >-
+            ${{ data.latest("content-links", "summary").attributes.broken }}
+            broken links in published content; read them with: swamp report get
+            @rawkode/academy/content-links --behavior content-links --markdown
+          severity: high
+      - name: no-redirected-links
+        description: Flag links that now answer somewhere else
+        dependsOn:
+          - step: audit
+            condition:
+              type: succeeded
+        task:
+          type: assert
+          expr: >-
+            data.latest("content-links", "summary").attributes.redirected == 0
+          message: >-
+            ${{ data.latest("content-links", "summary").attributes.redirected }}
+            redirected links in published content
+          severity: low
