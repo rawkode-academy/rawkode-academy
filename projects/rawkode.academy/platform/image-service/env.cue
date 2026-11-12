@@ -11,19 +11,11 @@ let _taskPath = "/home/runner/.bun/bin:/Users/rawkode/.bun/bin:/run/current-syst
 let _previewWorkerName = "rawkode-academy-image-service-preview"
 let _workersDevSubdomain = "rawkodeacademy"
 
-env: {
-	environment: production: {
-		CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {
-			ref: "op://sa.rawkode.academy/cloudflare/api-tokens/workers"
-		}
-	}
-}
-
 ci: pipelines: {
 	default: {
 		environment: "production"
 		when: {
-			branch:        ["main"]
+			branch: ["main"]
 			defaultBranch: true
 			manual:        true
 		}

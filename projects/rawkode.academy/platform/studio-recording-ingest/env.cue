@@ -11,18 +11,10 @@ let _taskPath = "/home/runner/.bun/bin:/Users/rawkode/.bun/bin:/run/current-syst
 let _queueName = "platform-studio-recording-ingest"
 let _contentBucket = "rawkode-academy-content"
 
-env: {
-	environment: production: {
-		CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {
-			ref: "op://sa.rawkode.academy/cloudflare/api-tokens/workers"
-		}
-	}
-}
-
 ci: pipelines: {
 	default: {
 		when: {
-			branch:        ["main"]
+			branch: ["main"]
 			defaultBranch: true
 			manual:        true
 		}
@@ -40,7 +32,7 @@ ci: pipelines: {
 tasks: {
 	check: schema.#Task & {
 		hermetic: false
-		command: "sh"
+		command:  "sh"
 		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run check"]
 		env: PATH: _taskPath
 		inputs: [
@@ -57,7 +49,7 @@ tasks: {
 
 	test: schema.#Task & {
 		hermetic: false
-		command: "sh"
+		command:  "sh"
 		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run test"]
 		env: PATH: _taskPath
 		dependsOn: [_t.check]
@@ -76,7 +68,7 @@ tasks: {
 		type: "group"
 		remote: schema.#Task & {
 			hermetic: false
-			command: "sh"
+			command:  "sh"
 			args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun x wrangler d1 migrations apply \(_queueName) --remote"]
 			env: PATH: _taskPath
 			dependsOn: [_t.deploy."dry-run"]
@@ -93,7 +85,7 @@ tasks: {
 		type: "group"
 		main: schema.#Task & {
 			hermetic: false
-			command: "sh"
+			command:  "sh"
 			args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun x wrangler deploy --config ./wrangler.jsonc"]
 			env: PATH: _taskPath
 			dependsOn: [_t.migrations.remote]
@@ -108,7 +100,7 @@ tasks: {
 
 		"dry-run": schema.#Task & {
 			hermetic: false
-			command: "sh"
+			command:  "sh"
 			args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run deploy:dry-run"]
 			env: PATH: _taskPath
 			dependsOn: [_t.test]
@@ -126,7 +118,7 @@ tasks: {
 		type: "group"
 		create: schema.#Task & {
 			hermetic: false
-			command: "sh"
+			command:  "sh"
 			args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun x wrangler queues create \(_queueName) && bun x wrangler queues create \(_queueName)-dlq"]
 			env: PATH: _taskPath
 		}
@@ -136,14 +128,14 @@ tasks: {
 		type: "group"
 		create: schema.#Task & {
 			hermetic: false
-			command: "sh"
+			command:  "sh"
 			args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun x wrangler r2 bucket notification create \(_contentBucket) --event-type object-create --queue \(_queueName) --prefix \"studio/recordings/\" --suffix \"/ready.json\""]
 			env: PATH: _taskPath
 		}
 
 		list: schema.#Task & {
 			hermetic: false
-			command: "sh"
+			command:  "sh"
 			args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun x wrangler r2 bucket notification list \(_contentBucket)"]
 			env: PATH: _taskPath
 		}

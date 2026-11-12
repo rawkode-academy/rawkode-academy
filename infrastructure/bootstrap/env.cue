@@ -6,6 +6,9 @@ schema.#Project
 
 name: "infrastructure-bootstrap"
 
+// Uses its own Cloudflare token, not the ones the root env.cue chooses.
+_ownCloudflareToken: true
+
 let _infrastructure = [{allowInfrastructure: ["plan", "apply", "import", "destroy"]}]
 
 // The github-read-write Cloudflare token. Made in the dashboard: Cloudflare
