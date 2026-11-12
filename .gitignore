@@ -3,6 +3,7 @@
 
 # cuenv local config
 local.cue
+.cuenv/reports/
 
 # Devenv
 .devenv*

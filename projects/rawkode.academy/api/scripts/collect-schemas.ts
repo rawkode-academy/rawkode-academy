@@ -1,5 +1,5 @@
 import { execSync } from "node:child_process";
-import { copyFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -84,9 +84,10 @@ function collectServiceSchema(serviceDir: string, schemaName: string): boolean {
 async function collectSchemas() {
 	console.log("Collecting subgraph schemas...\n");
 
-	if (!existsSync(schemasDir)) {
-		mkdirSync(schemasDir, { recursive: true });
-	}
+	// compose.ts composes every file in schemas/, so start empty: a schema left
+	// behind by a removed or unreleased service must not reach the supergraph.
+	rmSync(schemasDir, { recursive: true, force: true });
+	mkdirSync(schemasDir, { recursive: true });
 
 	let successCount = 0;
 	let failCount = 0;
