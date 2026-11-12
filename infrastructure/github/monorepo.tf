@@ -52,7 +52,7 @@ resource "github_branch_protection" "monorepo-main" {
   required_pull_request_reviews {
     dismiss_stale_reviews      = true
     restrict_dismissals        = false
-    require_code_owner_reviews = true
+    require_code_owner_reviews = false
     require_last_push_approval = true
   }
 }

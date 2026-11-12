@@ -376,9 +376,11 @@ infrastructure: {
 			}
 		}
 
-		// Code owner review. rawkode reviews alone and can't approve their own
+		// One approving review, from anyone but the last pusher; code owners
+		// aren't required. rawkode reviews alone and can't approve their own
 		// pull requests, so organisation admins (only rawkode) may merge
-		// without it, through a pull request only.
+		// without it, through a pull request only. Dependabot's pull requests
+		// are approved by .github/workflows/dependabot-auto-merge.yml.
 		main_review_requirements: github_repository_ruleset.#Resource & {
 			configuration: {
 				repository:  _github.repository
@@ -394,7 +396,7 @@ infrastructure: {
 				rules: [{
 					pull_request: [{
 						required_approving_review_count: 1
-						require_code_owner_review:       true
+						require_code_owner_review:       false
 						dismiss_stale_reviews_on_push:   true
 						require_last_push_approval:      true
 					}]
