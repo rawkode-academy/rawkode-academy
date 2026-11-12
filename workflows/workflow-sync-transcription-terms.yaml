@@ -2,7 +2,7 @@ id: 3688096e-9c59-4723-85e3-1a50da0868c4
 name: sync-transcription-terms
 description: >-
   Add the transcription terms that technologies and people are missing to the
-  platform-transcription-terms D1 database, after approval. Additive only:
+  platform-transcription-terms D1 database. Additive only:
   orphaned terms are reported, never removed.
 version: 1
 tags: {}
@@ -25,7 +25,7 @@ inputs:
         every row of the kinds
 jobs:
   - name: synchronise
-    description: Read, plan, approve, write and confirm
+    description: Read, plan, write and confirm
     steps:
       - name: read-technologies
         description: Read the name and aliases of every technology from D1
@@ -82,24 +82,10 @@ jobs:
             terms: ${{ data.latest("transcription-terms-database", "d1_query_database-current").attributes[0].results }}
             kinds: ${{ inputs.kinds }}
             identifiers: ${{ inputs.identifiers }}
-      - name: approve
-        description: Review the plan before anything is written
-        dependsOn:
-          - step: plan
-            condition:
-              type: succeeded
-        guard: ${{ size(data.latest("transcription-terms", "plan").attributes.statements) == 0 }}
-        task:
-          type: manual_approval
-          prompt: >-
-            Review the transcription terms before they are inserted into
-            production D1: swamp data query 'modelName == "transcription-terms"
-            && name == "plan"' --select attributes.summary
-          timeout: 86400
       - name: write
         description: Insert the missing terms into D1 in one batch
         dependsOn:
-          - step: approve
+          - step: plan
             condition:
               type: succeeded
         guard: ${{ size(data.latest("transcription-terms", "plan").attributes.statements) == 0 }}

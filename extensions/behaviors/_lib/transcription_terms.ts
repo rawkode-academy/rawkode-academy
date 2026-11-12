@@ -236,7 +236,7 @@ function grouped(terms: Term[]): string[] {
 	return [...groups].map(([key, values]) => `  ${key}: ${values.join(", ")}`);
 }
 
-/** A readable account of the plan for whoever approves it. */
+/** A readable account of the plan. */
 export function summarise(synchronisation: Synchronisation): string {
 	const { missing, orphaned } = synchronisation;
 	const lines: string[] = [];
