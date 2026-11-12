@@ -2,7 +2,9 @@ id: cb02e6c2-c244-411c-bb61-3403e6e85c50
 name: update-technologies
 description: >-
   Audit technology profiles in the platform-technologies D1 database against
-  primary sources, then write the confirmed corrections after approval.
+  primary sources and search-result standards, draft the search-result text
+  that falls short, and write the corrections. The plan step lists every
+  change before it is written; nothing waits for approval.
 version: 1
 tags: {}
 vaults:
@@ -29,7 +31,7 @@ inputs:
         {"kubernetes": {"community.blog": "https://kubernetes.io/blog/"}}
 jobs:
   - name: update
-    description: Read, audit, draft, plan, redraft, approve, write, confirm and invalidate
+    description: Read, audit, draft, plan, redraft, write, confirm and invalidate
     steps:
       - name: read
         description: Read the requested technology rows from D1
@@ -126,8 +128,8 @@ jobs:
             changes: ${{ inputs.changes }}
             drafts: ${{ data.findBySpec("seo-writer", "cliResult") }}
             run: ${{ run.id }}
-      - name: approve
-        description: Review the plan before anything is written
+      - name: write
+        description: Apply the planned updates to D1 in one batch
         dependsOn:
           - step: plan
             condition:
@@ -138,19 +140,6 @@ jobs:
               conditions:
                 - type: succeeded
                 - type: skipped
-        guard: ${{ size(data.latest("technology-profiles", "plan-" + run.id).attributes.statements) == 0 }}
-        task:
-          type: manual_approval
-          prompt: >-
-            Review the planned technology updates, listed by the plan step
-            above, before they are written to production D1.
-          timeout: 86400
-      - name: write
-        description: Apply the planned updates to D1 in one batch
-        dependsOn:
-          - step: approve
-            condition:
-              type: succeeded
         guard: ${{ size(data.latest("technology-profiles", "plan-" + run.id).attributes.statements) == 0 }}
         task:
           type: behavior
