@@ -23,7 +23,6 @@ const PLATFORM_SERVICES = [
 	"people-biographies",
 	"transcription-terms",
 	// Editorial content
-	"articles",
 	"news",
 	"changelog",
 	"adrs",
