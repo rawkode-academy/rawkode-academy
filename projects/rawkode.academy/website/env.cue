@@ -57,6 +57,11 @@ ci: pipelines: {
 	}
 }
 
+// cuenv ci ignores inputs outside the project directory when it decides what
+// is affected (cuenv/cuenv#611), so a change to these never deployed. Until
+// that is fixed each one is listed twice: relative to this directory, which
+// cuenv sync turns into the workflow's path trigger, and relative to the
+// repository root, which is the only form the affected check matches.
 tasks: {
 	dev: schema.#Task & {
 		hermetic: false
@@ -67,7 +72,9 @@ tasks: {
 			"astro.config.mts",
 			"package.json",
 			"../../../bun.lock",
+			"bun.lock",
 			"../../../packages/live-viewer/**",
+			"packages/live-viewer/**",
 			"scripts/**",
 			"vitest.config.ts",
 			"public/**",
@@ -87,13 +94,18 @@ tasks: {
 			// Articles are files compiled into the site; all other content is
 			// served live from the API gateway.
 			"../../../content/articles/**",
+			"content/articles/**",
 			"astro.config.mts",
 			"env.cue",
 			"../../../packages/design-system/**",
+			"packages/design-system/**",
 			"../../../packages/rich-text/**",
+			"packages/rich-text/**",
 			"package.json",
 			"../../../bun.lock",
+			"bun.lock",
 			"../../../packages/live-viewer/**",
+			"packages/live-viewer/**",
 			"scripts/**",
 			"vitest.config.ts",
 			"public/**",
@@ -134,13 +146,18 @@ tasks: {
 				// Articles are files compiled into the site; all other content is
 				// served live from the API gateway.
 				"../../../content/articles/**",
+				"content/articles/**",
 				"astro.config.mts",
 				"env.cue",
 				"../../../packages/design-system/**",
+				"packages/design-system/**",
 				"../../../packages/rich-text/**",
+				"packages/rich-text/**",
 				"package.json",
 				"../../../bun.lock",
+				"bun.lock",
 				"../../../packages/live-viewer/**",
+				"packages/live-viewer/**",
 				"scripts/**",
 				"vitest.config.ts",
 				"public/**",

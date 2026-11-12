@@ -69,6 +69,12 @@ tasks: {
 			"schemas/**",
 			"../platform/*/read-model/schema.gql",
 			"../website/src/subgraph/**",
+			// cuenv ci ignores inputs outside the project directory when it
+			// decides what is affected (cuenv/cuenv#611). Until that is fixed
+			// they are repeated relative to the repository root, the only form
+			// the affected check matches.
+			"projects/rawkode.academy/website/src/subgraph/**",
+			"bun.lock",
 			"src/**",
 			"supergraph.graphql",
 			"wrangler.jsonc",

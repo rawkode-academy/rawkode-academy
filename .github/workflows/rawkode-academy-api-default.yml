@@ -11,9 +11,12 @@ on:
     - bun.lock
     - bun.lock/**
     - cue.mod/**
+    - projects/rawkode.academy/api/bun.lock
+    - projects/rawkode.academy/api/bun.lock/**
     - projects/rawkode.academy/api/env.cue
     - projects/rawkode.academy/api/package.json
     - projects/rawkode.academy/api/package.json/**
+    - projects/rawkode.academy/api/projects/rawkode.academy/website/src/subgraph/**
     - projects/rawkode.academy/api/schema/**
     - projects/rawkode.academy/api/schemas/**
     - projects/rawkode.academy/api/scripts/collect-schemas.ts
