@@ -1,19 +1,26 @@
 import { sva } from "../../styled-system/css";
 import { focusRing } from "../styles/focus";
 import { textLink } from "../styles/link";
-import { headingMd } from "../styles/type";
+import { linkedPanel } from "../styles/surface";
+import { headingMd, kicker, monoMeta } from "../styles/type";
 
 /** Content-first technology profiles; all columns share the Academy shell gutter. */
 export const academyTechnology = sva({
 	slots: [
 		"root",
 		"hero",
+		"heroBody",
 		"identity",
 		"logo",
 		"title",
 		"description",
 		"metadata",
-		"personalRating",
+		"rating",
+		"ratingLabel",
+		"ratingStatus",
+		"ratingNote",
+		"ratingFacts",
+		"ratingMore",
 		"actions",
 		"link",
 		"columns",
@@ -63,13 +70,24 @@ export const academyTechnology = sva({
 				gap: "12",
 			},
 		},
+		// The profile's identity, with its matrix placement beside it from lg.
 		hero: {
-			display: "flex",
-			flexDirection: "column",
-			gap: "5",
+			display: "grid",
+			gap: "8",
 			paddingBottom: "8",
 			borderBottom: "hairline",
 			borderColor: "academy.border",
+			minWidth: "0",
+			_lg: {
+				gridTemplateColumns: "minmax(0, 1fr) auto",
+				columnGap: "12",
+				alignItems: "start",
+			},
+		},
+		heroBody: {
+			display: "flex",
+			flexDirection: "column",
+			gap: "5",
 			minWidth: "0",
 		},
 		identity: {
@@ -129,12 +147,45 @@ export const academyTechnology = sva({
 				color: "academy.text",
 			},
 		},
-		personalRating: {
+		// The technology's place in the matrix: the Academy's verdict, set at
+		// numeral scale. The whole panel links to the matrix.
+		rating: {
+			...linkedPanel,
+			display: "flex",
+			flexDirection: "column",
+			gap: "3",
+			padding: "6",
+			minWidth: "0",
+			_lg: {
+				width: "80",
+				padding: "8",
+			},
+		},
+		ratingLabel: kicker,
+		ratingStatus: {
+			fontFamily: "academy-display",
+			fontSize: "academy-numeral",
+			fontWeight: "extrabold",
+			lineHeight: "tight",
+			letterSpacing: "tight",
+			color: "academy.text",
+			textWrap: "balance",
+		},
+		ratingNote: {
+			color: "academy.textSoft",
+			fontSize: "md",
+			lineHeight: "relaxed",
+		},
+		ratingFacts: {
+			...monoMeta,
 			display: "flex",
 			flexWrap: "wrap",
-			gap: "3",
-			columnGap: "6",
-			alignItems: "baseline",
+			columnGap: "4",
+			rowGap: "1",
+		},
+		ratingMore: {
+			...monoMeta,
+			color: "academy.accent",
 		},
 		actions: {
 			display: "flex",
