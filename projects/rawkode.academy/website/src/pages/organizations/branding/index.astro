@@ -1,4 +1,5 @@
 ---
+import { button } from "@rawkodeacademy/design-system";
 import EditorialShell from "@/components/ui/EditorialShell.astro";
 import Page from "@/wrappers/page.astro";
 import iconSvgRaw from "@/components/branding/logos/logo.svg?raw";
@@ -16,6 +17,8 @@ const colors = [
 	{ label: "Light ink", value: "#e8eef8", usage: "Primary text and solid artwork on dark surfaces." },
 	{ label: "Night accent", value: "#ff7ab6", usage: "Links and actions on dark surfaces." },
 ];
+
+const accentHex = colors.find((color) => color.label === "Accent")?.value;
 
 const typefaces = [
 	{ name: "Red Hat Display", role: "Display", sample: "Understand the system.", usage: "Headlines and section titles. Bold, upright, and tightly set." },
@@ -65,8 +68,8 @@ const logoAssets = [
 		lede="Official Rawkode Academy artwork, color values, and simple usage rules. Keep it consistent, legible, and uncluttered."
 	>
 		<div class="editorial-actions" slot="actions">
-			<a class="editorial-button" href="#assets">Download assets</a>
-			<a class="editorial-button editorial-button--secondary" href="#usage">Usage rules</a>
+			<a class={button()} href="#assets">Download assets</a>
+			<a class={button({ variant: "outline" })} href="#usage">Usage rules</a>
 		</div>
 
 		<section id="assets" class="editorial-section editorial-section--split">
@@ -137,7 +140,7 @@ const logoAssets = [
 			<div class="editorial-grid">
 				<div class="brand-type-grid">
 					{typefaces.map((typeface) => (
-						<article class="editorial-card brand-typeface">
+						<article class="editorial-card">
 							<p class={`brand-typeface__sample brand-typeface__sample--${typeface.role.toLowerCase()}`}>
 								{typeface.sample}
 							</p>
@@ -178,7 +181,7 @@ const logoAssets = [
 }
 
 .brand-logo--accent {
-  color: #c2185b;
+  color: ${accentHex};
 }`}</code></pre>
 					</div>
 				</article>
@@ -235,7 +238,7 @@ const logoAssets = [
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 		gap: 1rem;
-		--brand-logo-surface: var(--colors-academy-text);
+		--logo-surface: var(--colors-academy-text);
 	}
 
 	.brand-asset--wide {
@@ -270,7 +273,7 @@ const logoAssets = [
 
 	.brand-logo {
 		--logo-padding: 0;
-		color: var(--brand-logo-surface);
+		color: var(--logo-surface);
 		width: 100%;
 		height: 100%;
 		min-height: 7rem;

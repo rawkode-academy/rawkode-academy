@@ -1,31 +1,55 @@
 ---
 import { Image } from "astro:assets";
-import { type CollectionEntry, getEntries } from "astro:content";
+import {
+	type ContentEntry,
+	getEntries,
+	optionalContent,
+} from "@/lib/live-content";
 import BaseCard from "../common/BaseCard.vue";
 import { calculateReadingTime } from "@/utils/reading-time";
 import { getTypeBadgeConfig } from "@/utils/article-types";
 import { academyDocument } from "@rawkodeacademy/design-system";
-import { localTime } from "@/lib/local-time";
+import { localDate } from "@/lib/local-time";
 
 type Props = {
-	article: CollectionEntry<"articles">;
+	article: ContentEntry<"articles">;
 	headingLevel?: 2 | 3;
 };
 
 const { article, headingLevel = 2 } = Astro.props;
 const Heading = headingLevel === 3 ? "h3" : "h2";
 const doc = academyDocument();
-const authors = await getEntries(article.data.authors);
+// A card is an optional rail item: a failing people lookup drops the byline
+// footer instead of taking the whole page down.
+const authors: ContentEntry<"people">[] = await optionalContent(
+	getEntries(article.data.authors),
+	[],
+);
 const readingTime = calculateReadingTime(article.body || "");
 
 const articleType = article.data.type || "tutorial";
 const badgeConfig = getTypeBadgeConfig(articleType);
 
-const published = localTime(article.data.publishedAt, {
-	year: "numeric",
-	month: "short",
-	day: "numeric",
-});
+const published = localDate(article.data.publishedAt);
+
+// Covers are authored at up to ~2800px, but a card renders them a few hundred
+// pixels wide. Request a card-sized image (and a 2x candidate when the source
+// is large enough) with the source's aspect ratio preserved.
+const coverWidth = 640;
+const cover = article.data.cover
+	? (() => {
+			const { width, height } = article.data.cover.image;
+			const displayWidth = width > 0 ? Math.min(width, coverWidth) : coverWidth;
+			return {
+				width: displayWidth,
+				height:
+					width > 0 ? Math.round((displayWidth * height) / width) : height,
+				widths: [displayWidth, displayWidth * 2].filter(
+					(candidate) => width <= 0 || candidate <= width,
+				),
+			};
+		})()
+	: undefined;
 ---
 
 <BaseCard
@@ -34,10 +58,14 @@ const published = localTime(article.data.publishedAt, {
 	showCover={Boolean(article.data.cover)}
 	showFooter={authors.length > 0}
 >
-	{article.data.cover && (
+	{article.data.cover && cover && (
 		<Fragment slot="cover">
 			<Image
-				src={article.data.cover.image}
+				src={article.data.cover.image.src}
+				width={cover.width}
+				height={cover.height}
+				widths={cover.widths}
+				sizes={`(min-width: ${coverWidth}px) ${coverWidth}px, 100vw`}
 				alt={article.data.cover.alt}
 				loading="lazy"
 			/>

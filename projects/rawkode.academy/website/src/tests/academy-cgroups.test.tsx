@@ -8,6 +8,7 @@ import {
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
+import type { ComponentType } from "react";
 import { academyCgroups } from "@rawkodeacademy/design-system";
 import HierarchyExplorer, {
 	ControllerBadge,
@@ -15,6 +16,9 @@ import HierarchyExplorer, {
 import CgroupTimeline from "../components/articles/cgroups/CgroupTimeline";
 import PodCgroupMapper from "../components/articles/cgroups/PodCgroupMapper";
 import CgroupTreeDiagram from "../components/articles/cgroups/CgroupTreeDiagram";
+import ResourceSimulator from "../components/articles/cgroups/ResourceSimulator";
+import { splitIslands } from "../lib/live-content/render/islands";
+import { interactiveHtml } from "../lib/live-content/render/render";
 
 afterEach(() => {
 	expect(fetch).not.toHaveBeenCalled();
@@ -256,5 +260,48 @@ describe("Academy cgroups instructional controls", () => {
 		);
 		expect(source).toContain("academyCgroups");
 		expect(source).not.toMatch(/className="|style=|<style|#[0-9a-fA-F]{6}/);
+	});
+});
+
+// The cgroups article body is a stored rich-text document now: each MDX
+// `<Component client:visible />` became an `interactive` node. The renderer
+// emits an island placeholder for it and RichText mounts the component from
+// that placeholder, so the stored nodes must round-trip to the same
+// components, hydration and (empty) props the MDX used.
+describe("cgroups islands from the stored article document", () => {
+	const components = {
+		CgroupTimeline,
+		CgroupTreeDiagram,
+		HierarchyExplorer,
+		PodCgroupMapper,
+		ResourceSimulator,
+	} as const;
+
+	it.each(
+		Object.keys(components) as Array<keyof typeof components>,
+	)("%s round-trips through the island placeholder and mounts with the stored props", (component) => {
+		// Shape stored by the articles seed for cgroups-chaos-control.
+		const node = {
+			type: "interactive" as const,
+			attrs: { component, props: {}, hydrate: "visible" as const },
+		};
+		const segments = splitIslands(
+			`<p>Before</p>${interactiveHtml(node as never)}<p>After</p>`,
+		);
+		expect(segments.map((segment) => segment.kind)).toEqual([
+			"html",
+			"island",
+			"html",
+		]);
+		const island = segments[1];
+		if (island?.kind !== "island") throw new Error("no island segment");
+		expect(island.component).toBe(component);
+		expect(island.hydrate).toBe("visible");
+		expect(island.props).toEqual({});
+		const Component = components[component] as ComponentType<
+			Record<string, unknown>
+		>;
+		const { container } = render(<Component {...island.props} />);
+		expect(container.textContent?.trim().length).toBeGreaterThan(0);
 	});
 });

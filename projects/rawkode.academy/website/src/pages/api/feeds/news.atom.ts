@@ -1,5 +1,10 @@
-import { getCollection, getEntries } from "astro:content";
 import type { APIContext } from "astro";
+import {
+	type ContentEntry,
+	getCollection,
+	getEntries,
+	setContentCache,
+} from "@/lib/live-content";
 import { isNewsPublished } from "@/lib/news-publication";
 
 function escapeXml(value: string): string {
@@ -44,11 +49,13 @@ export async function GET(context: APIContext) {
 			? sortedNews[0].data.publishedAt.toISOString()
 			: now.toISOString();
 
+	const authorEntries: ContentEntry<"people">[] = [];
 	const entries = await Promise.all(
 		sortedNews.map(async (story) => {
 			const storyUrl = `${site}/news/${story.id}/`;
 			const published = new Date(story.data.publishedAt).toISOString();
 			const authors = await getEntries(story.data.authors);
+			authorEntries.push(...authors);
 
 			const authorTags = authors
 				.map(
@@ -87,10 +94,14 @@ export async function GET(context: APIContext) {
 ${entries.join("\n")}
 </feed>`;
 
+	await setContentCache(context, {
+		entries: [...sortedNews, ...authorEntries],
+		collections: ["news"],
+	});
+
 	return new Response(atomFeed, {
 		headers: {
 			"Content-Type": "application/atom+xml; charset=utf-8",
-			"Cache-Control": "public, max-age=900",
 		},
 	});
 }

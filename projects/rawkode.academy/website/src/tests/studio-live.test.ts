@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
 	emptyStudioLiveState,
 	getStudioLiveState,
@@ -9,6 +9,8 @@ import {
 	studioLiveStateUrl,
 	type StudioLiveState,
 } from "@/lib/studio-live";
+
+afterEach(() => vi.useRealTimers());
 
 describe("Studio live state", () => {
 	it("parses only active live states with WHEP playback URLs", () => {
@@ -76,6 +78,43 @@ describe("Studio live state", () => {
 		expect(studioLiveStateUrl("future-event")).toBe(
 			"https://studio.internal/api/studio/live-state?videoSlug=future-event",
 		);
+	});
+
+	it("falls back when the Studio service does not respond and aborts its request", async () => {
+		vi.useFakeTimers();
+		let request: Request | undefined;
+		let finish!: (response: Response) => void;
+		const studio = {
+			fetch: vi.fn((input: Request) => {
+				request = input;
+				return new Promise<Response>((resolve) => { finish = resolve; });
+			}),
+		} as unknown as Fetcher;
+		const pending = getStudioLiveState({ STUDIO: studio }, "future-event");
+		await vi.advanceTimersByTimeAsync(2_000);
+		await expect(pending).resolves.toEqual(emptyStudioLiveState());
+		expect(request?.signal.aborted).toBe(true);
+		finish(new Response(JSON.stringify({ live: true, playbackUrl: "https://stream.example/late" })));
+		await Promise.resolve();
+	});
+
+	it("falls back when the Studio response body stalls", async () => {
+		vi.useFakeTimers();
+		let request: Request | undefined;
+		let finish!: (value: unknown) => void;
+		const body = new Promise<unknown>((resolve) => { finish = resolve; });
+		const studio = {
+			fetch: vi.fn(async (input: Request) => {
+				request = input;
+				return { ok: true, json: () => body } as Response;
+			}),
+		} as unknown as Fetcher;
+		const pending = getStudioLiveState({ STUDIO: studio }, "future-event");
+		await vi.advanceTimersByTimeAsync(2_000);
+		await expect(pending).resolves.toEqual(emptyStudioLiveState());
+		expect(request?.signal.aborted).toBe(true);
+		finish({ live: true, playbackUrl: "https://stream.example/late" });
+		await Promise.resolve();
 	});
 
 	it("mounts the live gate for active, upcoming, and bounded late streams", () => {

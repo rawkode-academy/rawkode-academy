@@ -1,6 +1,6 @@
 ---
 title: "Tip 4: Git Commit Templates & Conventional Commits"
-description: "Git commit messages are important. We all know that, yet ... in the heat of the moment, we're prone t..."
+description: Git commit messages are important. We all know that, yet ... in the heat of the moment, we're prone t...
 type: guide
 publishedAt: 2020-01-06
 authors:
@@ -77,6 +77,7 @@ The commit message should be structured as follows:
 #### Examples
 
 ##### Commit message with description and breaking change footer
+
 ```
 feat: allow provided config object to extend other configs
 
@@ -84,11 +85,13 @@ BREAKING CHANGE: `extends` key in config file is now used for extending other co
 ```
 
 ##### Commit message with `!` to draw attention to breaking change
+
 ```
 refactor!: drop support for Node 6
 ```
 
 ##### Commit message with both `!` and BREAKING CHANGE footer
+
 ```
 refactor!: drop support for Node 6
 
@@ -96,16 +99,19 @@ BREAKING CHANGE: refactor to use JavaScript features not available in Node 6.
 ```
 
 ##### Commit message with no body
+
 ```
 docs: correct spelling of CHANGELOG
 ```
 
 ##### Commit message with scope
+
 ```
 feat(lang): add polish language
 ```
 
 ##### Commit message with multi-paragraph body and multiple footers
+
 ```
 fix: correct minor typos in code
 

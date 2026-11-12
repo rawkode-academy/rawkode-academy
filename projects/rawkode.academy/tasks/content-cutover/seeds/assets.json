@@ -1,0 +1,3737 @@
+[
+	{
+		"key": "articles/building-rust-cue-library/cover.png",
+		"content": "articles/cuengine-rust/cover.png",
+		"contentType": "image/png"
+	},
+	{
+		"key": "articles/cgroups-from-chaos-to-control/cover.webp",
+		"content": "articles/cgroups-chaos-control/cover.webp",
+		"contentType": "image/webp"
+	},
+	{
+		"key": "articles/dagger-gitlab-cloudflare-deployment/cover.png",
+		"content": "articles/dagger-cicd-gitlab/cover.png",
+		"contentType": "image/png"
+	},
+	{
+		"key": "articles/federated-graphql-microservices/cover.png",
+		"content": "articles/federated-graphql-microservice/cover.png",
+		"contentType": "image/png"
+	},
+	{
+		"key": "articles/federated-graphql-microservices/diagrams/576d733ce064c31b.svg",
+		"rendered": "diagrams/articles/federated-graphql-microservices/diagrams/576d733ce064c31b.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "articles/fluxcd-the-inevitable-choice/comparison.png",
+		"content": "articles/choose-fluxcd/comparison.png",
+		"contentType": "image/png"
+	},
+	{
+		"key": "articles/fluxcd-the-inevitable-choice/cover.png",
+		"content": "articles/choose-fluxcd/cover.png",
+		"contentType": "image/png"
+	},
+	{
+		"key": "articles/introducing-cuenv/cover.png",
+		"content": "articles/introducing-cuenv/cover.png",
+		"contentType": "image/png"
+	},
+	{
+		"key": "articles/introducing-technology-matrix/cover.png",
+		"content": "articles/introducing-technology-matrix/cover.png",
+		"contentType": "image/png"
+	},
+	{
+		"key": "articles/introducing-wassette/cover.png",
+		"content": "articles/wassette/cover.png",
+		"contentType": "image/png"
+	},
+	{
+		"key": "articles/kep-2831-kubelet-tracing/cover.png",
+		"content": "articles/kep-2831-kubelet-tracing/cover.png",
+		"contentType": "image/png"
+	},
+	{
+		"key": "articles/klustered-winter-2026/cover.webp",
+		"content": "articles/klustered-winter-2026/cover.webp",
+		"contentType": "image/webp"
+	},
+	{
+		"key": "articles/kubernetes-operators-rust-kube-rs/cover.png",
+		"content": "articles/kubernetes-operators-rust-kube-rs/cover.png",
+		"contentType": "image/png"
+	},
+	{
+		"key": "articles/kubernetes-operators-rust-kube-rs/diagrams/2000ba267a04c76f.svg",
+		"rendered": "diagrams/articles/kubernetes-operators-rust-kube-rs/diagrams/2000ba267a04c76f.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "articles/kyverno-cel-validating-policy/cover.png",
+		"content": "articles/kyverno-cel-validating-policy/cover.png",
+		"contentType": "image/png"
+	},
+	{
+		"key": "articles/lazyjournal-log-viewer/cover.png",
+		"content": "articles/discover-lazyjournal/cover.png",
+		"contentType": "image/png"
+	},
+	{
+		"key": "articles/lazyjournal-log-viewer/screenshot-dark-mode.png",
+		"content": "articles/discover-lazyjournal/screenshot-dark-mode.png",
+		"contentType": "image/png"
+	},
+	{
+		"key": "articles/lazyjournal-log-viewer/screenshot-light-mode.png",
+		"content": "articles/discover-lazyjournal/screenshot-light-mode.png",
+		"contentType": "image/png"
+	},
+	{
+		"key": "articles/news-digest-250804/cover.png",
+		"content": "articles/news-digest-250804/cover.png",
+		"contentType": "image/png"
+	},
+	{
+		"key": "articles/our-architecture/cover.jpg",
+		"content": "articles/architecture-overview/cover.jpg",
+		"contentType": "image/jpeg"
+	},
+	{
+		"key": "articles/our-architecture/diagrams/4c1747ebe1c00e58.svg",
+		"rendered": "diagrams/articles/our-architecture/diagrams/4c1747ebe1c00e58.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "articles/seccomp-kubernetes/cover.png",
+		"content": "articles/seccomp-kubernetes/cover.png",
+		"contentType": "image/png"
+	},
+	{
+		"key": "articles/zed-show-and-tell/zed-show-and-tell-01.png",
+		"content": "articles/images/zed-show-and-tell-01.png",
+		"contentType": "image/png"
+	},
+	{
+		"key": "articles/zed-show-and-tell/zed-show-and-tell-02.png",
+		"content": "articles/images/zed-show-and-tell-02.png",
+		"contentType": "image/png"
+	},
+	{
+		"key": "articles/zed-show-and-tell/zed-show-and-tell-03.png",
+		"content": "articles/images/zed-show-and-tell-03.png",
+		"contentType": "image/png"
+	},
+	{
+		"key": "articles/zed-show-and-tell/zed-show-and-tell-04.png",
+		"content": "articles/images/zed-show-and-tell-04.png",
+		"contentType": "image/png"
+	},
+	{
+		"key": "articles/zed-show-and-tell/zed-show-and-tell-05.png",
+		"content": "articles/images/zed-show-and-tell-05.png",
+		"contentType": "image/png"
+	},
+	{
+		"key": "articles/zed-show-and-tell/zed-show-and-tell-cover.png",
+		"content": "articles/images/zed-show-and-tell-cover.png",
+		"contentType": "image/png"
+	},
+	{
+		"key": "courses/complete-guide-zitadel/complete-guide-zitadel.png",
+		"content": "courses/complete-guide-zitadel.png",
+		"contentType": "image/png"
+	},
+	{
+		"key": "courses/graphql-federation-wundergraph-cosmo/graphql-federation-wundergraph-cosmo.png",
+		"content": "courses/graphql-federation-wundergraph-cosmo.png",
+		"contentType": "image/png"
+	},
+	{
+		"key": "courses/rust-for-the-rusty/rust-for-the-rusty.jpg",
+		"content": "courses/rust-for-the-rusty.jpg",
+		"contentType": "image/jpeg"
+	},
+	{
+		"key": "courses/teleport-for-kubernetes/teleport-for-kubernetes.png",
+		"content": "courses/teleport-for-kubernetes.png",
+		"contentType": "image/png"
+	},
+	{
+		"key": "shows/cloud-native-compass/cover.png",
+		"content": "shows/cloud-native-compass/cover.png",
+		"contentType": "image/png"
+	},
+	{
+		"key": "technologies/acorn/horizontal.svg",
+		"content": "technologies/acorn/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/aerakimesh/horizontal.svg",
+		"content": "technologies/aerakimesh/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/aerakimesh/icon.svg",
+		"content": "technologies/aerakimesh/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/aerakimesh/stacked.svg",
+		"content": "technologies/aerakimesh/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/akri/horizontal.svg",
+		"content": "technologies/akri/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/akri/icon.svg",
+		"content": "technologies/akri/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/akri/stacked.svg",
+		"content": "technologies/akri/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/antrea/horizontal.svg",
+		"content": "technologies/antrea/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/antrea/icon.svg",
+		"content": "technologies/antrea/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/antrea/stacked.svg",
+		"content": "technologies/antrea/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/aquaproj/horizontal.svg",
+		"content": "technologies/aquaproj/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/aquaproj/icon.svg",
+		"content": "technologies/aquaproj/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/aquaproj/stacked.svg",
+		"content": "technologies/aquaproj/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/argo/horizontal.svg",
+		"content": "technologies/argo/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/argo/icon.svg",
+		"content": "technologies/argo/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/argo/stacked.svg",
+		"content": "technologies/argo/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/armada/horizontal.svg",
+		"content": "technologies/armada/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/armada/icon.svg",
+		"content": "technologies/armada/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/armada/stacked.svg",
+		"content": "technologies/armada/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/artifacthub/horizontal.svg",
+		"content": "technologies/artifacthub/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/artifacthub/icon.svg",
+		"content": "technologies/artifacthub/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/artifacthub/stacked.svg",
+		"content": "technologies/artifacthub/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/athenz/horizontal.svg",
+		"content": "technologies/athenz/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/athenz/icon.svg",
+		"content": "technologies/athenz/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/athenz/stacked.svg",
+		"content": "technologies/athenz/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/atlantis/horizontal.svg",
+		"content": "technologies/atlantis/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/atlantis/icon.svg",
+		"content": "technologies/atlantis/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/atlantis/stacked.svg",
+		"content": "technologies/atlantis/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/aws-lambda/icon.svg",
+		"content": "technologies/aws-lambda/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/backstage/horizontal.svg",
+		"content": "technologies/backstage/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/backstage/icon.svg",
+		"content": "technologies/backstage/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/backstage/stacked.svg",
+		"content": "technologies/backstage/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/bank-vaults/horizontal.svg",
+		"content": "technologies/bank-vaults/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/bank-vaults/icon.svg",
+		"content": "technologies/bank-vaults/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/bank-vaults/stacked.svg",
+		"content": "technologies/bank-vaults/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/bfe/horizontal.svg",
+		"content": "technologies/bfe/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/bfe/icon.svg",
+		"content": "technologies/bfe/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/bfe/stacked.svg",
+		"content": "technologies/bfe/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/bootc/horizontal.svg",
+		"content": "technologies/bootc/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/bootc/icon.svg",
+		"content": "technologies/bootc/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/bootc/stacked.svg",
+		"content": "technologies/bootc/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/bpfman/horizontal.svg",
+		"content": "technologies/bpfman/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/bpfman/icon.svg",
+		"content": "technologies/bpfman/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/bpfman/stacked.svg",
+		"content": "technologies/bpfman/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/buildpacks/horizontal.svg",
+		"content": "technologies/buildpacks/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/buildpacks/icon.svg",
+		"content": "technologies/buildpacks/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/buildpacks/stacked.svg",
+		"content": "technologies/buildpacks/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cadence/horizontal.svg",
+		"content": "technologies/cadence/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cadence/icon.svg",
+		"content": "technologies/cadence/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cadence/stacked.svg",
+		"content": "technologies/cadence/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/capsule/horizontal.svg",
+		"content": "technologies/capsule/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/capsule/icon.svg",
+		"content": "technologies/capsule/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/capsule/stacked.svg",
+		"content": "technologies/capsule/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/carina/horizontal.svg",
+		"content": "technologies/carina/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/carina/icon.svg",
+		"content": "technologies/carina/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/carina/stacked.svg",
+		"content": "technologies/carina/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cartography/horizontal.svg",
+		"content": "technologies/cartography/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cartography/stacked.svg",
+		"content": "technologies/cartography/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/carvel/horizontal.svg",
+		"content": "technologies/carvel/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/carvel/icon.svg",
+		"content": "technologies/carvel/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/carvel/stacked.svg",
+		"content": "technologies/carvel/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cdk8s/horizontal.svg",
+		"content": "technologies/cdk8s/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cdk8s/icon.svg",
+		"content": "technologies/cdk8s/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cdk8s/stacked.svg",
+		"content": "technologies/cdk8s/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cert-manager/icon.svg",
+		"content": "technologies/cert-manager/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cert-manager/stacked.svg",
+		"content": "technologies/cert-manager/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/chaosblade/horizontal.svg",
+		"content": "technologies/chaosblade/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/chaosblade/icon.svg",
+		"content": "technologies/chaosblade/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/chaosblade/stacked.svg",
+		"content": "technologies/chaosblade/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/chaosmesh/horizontal.svg",
+		"content": "technologies/chaosmesh/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/chaosmesh/icon.svg",
+		"content": "technologies/chaosmesh/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/chaosmesh/stacked.svg",
+		"content": "technologies/chaosmesh/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cilium/horizontal.svg",
+		"content": "technologies/cilium/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cilium/icon.svg",
+		"content": "technologies/cilium/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cilium/stacked.svg",
+		"content": "technologies/cilium/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/civo/horizontal.svg",
+		"content": "technologies/civo/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cloud-run/icon.svg",
+		"content": "technologies/cloud-run/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cloudcustodian/horizontal.svg",
+		"content": "technologies/cloudcustodian/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cloudcustodian/icon.svg",
+		"content": "technologies/cloudcustodian/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cloudcustodian/stacked.svg",
+		"content": "technologies/cloudcustodian/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cloudevents/horizontal.svg",
+		"content": "technologies/cloudevents/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cloudevents/icon.svg",
+		"content": "technologies/cloudevents/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cloudevents/stacked.svg",
+		"content": "technologies/cloudevents/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cloudnativepg/horizontal.svg",
+		"content": "technologies/cloudnativepg/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cloudnativepg/icon.svg",
+		"content": "technologies/cloudnativepg/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cloudnativepg/stacked.svg",
+		"content": "technologies/cloudnativepg/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cluster-api/icon.svg",
+		"content": "technologies/cluster-api/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/clusternet/horizontal.svg",
+		"content": "technologies/clusternet/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/clusternet/icon.svg",
+		"content": "technologies/clusternet/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/clusternet/stacked.svg",
+		"content": "technologies/clusternet/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/clusterpedia/horizontal.svg",
+		"content": "technologies/clusterpedia/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/clusterpedia/icon.svg",
+		"content": "technologies/clusterpedia/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/clusterpedia/stacked.svg",
+		"content": "technologies/clusterpedia/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cncf-distribution/icon.svg",
+		"content": "technologies/cncf-distribution/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cncf-distribution/stacked.svg",
+		"content": "technologies/cncf-distribution/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cni/horizontal.svg",
+		"content": "technologies/cni/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cni/icon.svg",
+		"content": "technologies/cni/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cni/stacked.svg",
+		"content": "technologies/cni/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/confidential-containers/horizontal.svg",
+		"content": "technologies/confidential-containers/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/confidential-containers/icon.svg",
+		"content": "technologies/confidential-containers/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/confidential-containers/stacked.svg",
+		"content": "technologies/confidential-containers/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/connect-rpc/horizontal.svg",
+		"content": "technologies/connect-rpc/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/connect-rpc/icon.svg",
+		"content": "technologies/connect-rpc/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/connect-rpc/stacked.svg",
+		"content": "technologies/connect-rpc/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/containerd/horizontal.svg",
+		"content": "technologies/containerd/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/containerd/icon.svg",
+		"content": "technologies/containerd/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/containerd/stacked.svg",
+		"content": "technologies/containerd/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/contour/horizontal.svg",
+		"content": "technologies/contour/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/contour/icon.svg",
+		"content": "technologies/contour/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/contour/stacked.svg",
+		"content": "technologies/contour/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/copa/horizontal.svg",
+		"content": "technologies/copa/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/copa/icon.svg",
+		"content": "technologies/copa/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/copa/stacked.svg",
+		"content": "technologies/copa/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/coredns/horizontal.svg",
+		"content": "technologies/coredns/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/coredns/icon.svg",
+		"content": "technologies/coredns/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/coredns/stacked.svg",
+		"content": "technologies/coredns/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cortex/horizontal.svg",
+		"content": "technologies/cortex/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cortex/icon.svg",
+		"content": "technologies/cortex/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cortex/stacked.svg",
+		"content": "technologies/cortex/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cozystack/horizontal.svg",
+		"content": "technologies/cozystack/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cozystack/icon.svg",
+		"content": "technologies/cozystack/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cozystack/stacked.svg",
+		"content": "technologies/cozystack/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cpp/icon.svg",
+		"content": "technologies/cpp/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/crio/horizontal.svg",
+		"content": "technologies/crio/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/crio/icon.svg",
+		"content": "technologies/crio/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/crio/stacked.svg",
+		"content": "technologies/crio/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/crossplane/horizontal.svg",
+		"content": "technologies/crossplane/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/crossplane/icon.svg",
+		"content": "technologies/crossplane/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/crossplane/stacked.svg",
+		"content": "technologies/crossplane/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cubefs/horizontal.svg",
+		"content": "technologies/cubefs/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cubefs/icon.svg",
+		"content": "technologies/cubefs/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cubefs/stacked.svg",
+		"content": "technologies/cubefs/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cue/icon.svg",
+		"content": "technologies/cue/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/cueblox/logo.ico",
+		"content": "technologies/cueblox/logo.ico",
+		"contentType": "image/x-icon"
+	},
+	{
+		"key": "technologies/dagger/horizontal.svg",
+		"content": "technologies/dagger/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/dagger/icon.svg",
+		"content": "technologies/dagger/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/dagger/stacked.svg",
+		"content": "technologies/dagger/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/dalec/horizontal.svg",
+		"content": "technologies/dalec/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/dalec/icon.svg",
+		"content": "technologies/dalec/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/dalec/stacked.svg",
+		"content": "technologies/dalec/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/dapr/icon.svg",
+		"content": "technologies/dapr/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/dapr/stacked.svg",
+		"content": "technologies/dapr/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/daytona/horizontal.svg",
+		"content": "technologies/daytona/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/daytona/icon.svg",
+		"content": "technologies/daytona/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/devenv/horizontal.svg",
+		"content": "technologies/devenv/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/devfile/horizontal.svg",
+		"content": "technologies/devfile/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/devfile/icon.svg",
+		"content": "technologies/devfile/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/devfile/stacked.svg",
+		"content": "technologies/devfile/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/devpod/horizontal.svg",
+		"content": "technologies/devpod/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/devspace/icon.svg",
+		"content": "technologies/devspace/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/devspace/stacked.svg",
+		"content": "technologies/devspace/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/devstand/horizontal.svg",
+		"content": "technologies/devstand/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/dex/horizontal.svg",
+		"content": "technologies/dex/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/dex/icon.svg",
+		"content": "technologies/dex/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/dex/stacked.svg",
+		"content": "technologies/dex/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/dgraph/horizontal.svg",
+		"content": "technologies/dgraph/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/docker-build-cloud/horizontal.svg",
+		"content": "technologies/docker-build-cloud/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/docker-compose/stacked.svg",
+		"content": "technologies/docker-compose/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/docker/stacked.svg",
+		"content": "technologies/docker/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/dragonfly/horizontal.svg",
+		"content": "technologies/dragonfly/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/dragonfly/icon.svg",
+		"content": "technologies/dragonfly/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/dragonfly/stacked.svg",
+		"content": "technologies/dragonfly/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/drasi/horizontal.svg",
+		"content": "technologies/drasi/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/drasi/icon.svg",
+		"content": "technologies/drasi/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/drasi/stacked.svg",
+		"content": "technologies/drasi/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/easegress/horizontal.svg",
+		"content": "technologies/easegress/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/easegress/icon.svg",
+		"content": "technologies/easegress/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/easegress/stacked.svg",
+		"content": "technologies/easegress/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/ebpf/horizontal.svg",
+		"content": "technologies/ebpf/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/emissary-ingress/horizontal.svg",
+		"content": "technologies/emissary-ingress/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/emissary-ingress/icon.svg",
+		"content": "technologies/emissary-ingress/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/emissary-ingress/stacked.svg",
+		"content": "technologies/emissary-ingress/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/env0/horizontal.svg",
+		"content": "technologies/env0/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/envoy/horizontal.svg",
+		"content": "technologies/envoy/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/envoy/icon.svg",
+		"content": "technologies/envoy/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/envoy/stacked.svg",
+		"content": "technologies/envoy/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/equinix-metal/icon.svg",
+		"content": "technologies/equinix-metal/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/eraser/horizontal.svg",
+		"content": "technologies/eraser/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/eraser/icon.svg",
+		"content": "technologies/eraser/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/eraser/stacked.svg",
+		"content": "technologies/eraser/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/etcd/horizontal.svg",
+		"content": "technologies/etcd/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/etcd/icon.svg",
+		"content": "technologies/etcd/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/etcd/stacked.svg",
+		"content": "technologies/etcd/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/external-secrets-operator/horizontal.svg",
+		"content": "technologies/external-secrets-operator/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/external-secrets-operator/icon.svg",
+		"content": "technologies/external-secrets-operator/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/external-secrets-operator/stacked.svg",
+		"content": "technologies/external-secrets-operator/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/falco/horizontal.svg",
+		"content": "technologies/falco/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/falco/icon.svg",
+		"content": "technologies/falco/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/falco/stacked.svg",
+		"content": "technologies/falco/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/firecracker/stacked.svg",
+		"content": "technologies/firecracker/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/flatcar/horizontal.svg",
+		"content": "technologies/flatcar/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/flatcar/icon.svg",
+		"content": "technologies/flatcar/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/flatcar/stacked.svg",
+		"content": "technologies/flatcar/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/fleet/icon.svg",
+		"content": "technologies/fleet/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/flipt/horizontal.svg",
+		"content": "technologies/flipt/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/fluent-bit/horizontal.svg",
+		"content": "technologies/fluent-bit/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/fluent-bit/icon.svg",
+		"content": "technologies/fluent-bit/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/fluent-bit/stacked.svg",
+		"content": "technologies/fluent-bit/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/fluentd/horizontal.svg",
+		"content": "technologies/fluentd/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/fluentd/icon.svg",
+		"content": "technologies/fluentd/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/fluentd/stacked.svg",
+		"content": "technologies/fluentd/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/fluid/horizontal.svg",
+		"content": "technologies/fluid/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/fluid/icon.svg",
+		"content": "technologies/fluid/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/fluid/stacked.svg",
+		"content": "technologies/fluid/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/fluxcd/horizontal.svg",
+		"content": "technologies/fluxcd/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/fluxcd/icon.svg",
+		"content": "technologies/fluxcd/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/fluxcd/stacked.svg",
+		"content": "technologies/fluxcd/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/gimlet/horizontal.svg",
+		"content": "technologies/gimlet/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/gitea/horizontal.svg",
+		"content": "technologies/gitea/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/gitlab-duo/horizontal.svg",
+		"content": "technologies/gitlab-duo/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/gitlab/horizontal.svg",
+		"content": "technologies/gitlab/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/gitpod/horizontal.svg",
+		"content": "technologies/gitpod/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/graalvm/icon.svg",
+		"content": "technologies/graalvm/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/grafana/stacked.svg",
+		"content": "technologies/grafana/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/grafbase/horizontal.svg",
+		"content": "technologies/grafbase/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/grpc/horizontal.svg",
+		"content": "technologies/grpc/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/grpc/icon.svg",
+		"content": "technologies/grpc/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/grpc/stacked.svg",
+		"content": "technologies/grpc/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/guidepad/horizontal.svg",
+		"content": "technologies/guidepad/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/hami/horizontal.svg",
+		"content": "technologies/hami/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/hami/icon.svg",
+		"content": "technologies/hami/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/hami/stacked.svg",
+		"content": "technologies/hami/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/harbor/horizontal.svg",
+		"content": "technologies/harbor/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/harbor/icon.svg",
+		"content": "technologies/harbor/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/harbor/stacked.svg",
+		"content": "technologies/harbor/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/headlamp/horizontal.svg",
+		"content": "technologies/headlamp/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/headlamp/icon.svg",
+		"content": "technologies/headlamp/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/headlamp/stacked.svg",
+		"content": "technologies/headlamp/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/helm-dashboard/horizontal.svg",
+		"content": "technologies/helm-dashboard/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/helm/horizontal.svg",
+		"content": "technologies/helm/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/helm/icon.svg",
+		"content": "technologies/helm/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/helm/stacked.svg",
+		"content": "technologies/helm/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/holmesgpt/horizontal.svg",
+		"content": "technologies/holmesgpt/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/holmesgpt/icon.svg",
+		"content": "technologies/holmesgpt/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/holmesgpt/stacked.svg",
+		"content": "technologies/holmesgpt/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/home-assistant/horizontal.svg",
+		"content": "technologies/home-assistant/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/hubble/horizontal.svg",
+		"content": "technologies/hubble/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/hubble/icon.svg",
+		"content": "technologies/hubble/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/hubble/stacked.svg",
+		"content": "technologies/hubble/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/hurl/horizontal.svg",
+		"content": "technologies/hurl/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/hwameistor/horizontal.svg",
+		"content": "technologies/hwameistor/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/hwameistor/icon.svg",
+		"content": "technologies/hwameistor/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/hwameistor/stacked.svg",
+		"content": "technologies/hwameistor/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/hyperlight/horizontal.svg",
+		"content": "technologies/hyperlight/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/hyperlight/icon.svg",
+		"content": "technologies/hyperlight/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/hyperlight/stacked.svg",
+		"content": "technologies/hyperlight/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/in-toto/horizontal.svg",
+		"content": "technologies/in-toto/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/in-toto/icon.svg",
+		"content": "technologies/in-toto/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/in-toto/stacked.svg",
+		"content": "technologies/in-toto/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/inclavare/horizontal.svg",
+		"content": "technologies/inclavare/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/inclavare/icon.svg",
+		"content": "technologies/inclavare/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/inclavare/stacked.svg",
+		"content": "technologies/inclavare/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/infisical/horizontal.svg",
+		"content": "technologies/infisical/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/influxdb/icon.svg",
+		"content": "technologies/influxdb/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/inlets/stacked.svg",
+		"content": "technologies/inlets/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/inspektor-gadget/horizontal.svg",
+		"content": "technologies/inspektor-gadget/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/inspektor-gadget/icon.svg",
+		"content": "technologies/inspektor-gadget/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/inspektor-gadget/stacked.svg",
+		"content": "technologies/inspektor-gadget/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/interlink/horizontal.svg",
+		"content": "technologies/interlink/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/interlink/icon.svg",
+		"content": "technologies/interlink/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/interlink/stacked.svg",
+		"content": "technologies/interlink/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/iroh/horizontal.svg",
+		"content": "technologies/iroh/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/iroh/icon.svg",
+		"content": "technologies/iroh/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/istio/horizontal.svg",
+		"content": "technologies/istio/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/istio/icon.svg",
+		"content": "technologies/istio/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/istio/stacked.svg",
+		"content": "technologies/istio/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/jaeger/horizontal.svg",
+		"content": "technologies/jaeger/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/jaeger/icon.svg",
+		"content": "technologies/jaeger/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/jaeger/stacked.svg",
+		"content": "technologies/jaeger/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/java/icon.svg",
+		"content": "technologies/java/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/jspolicy/horizontal.svg",
+		"content": "technologies/jspolicy/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/k0s/horizontal.svg",
+		"content": "technologies/k0s/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/k0s/icon.svg",
+		"content": "technologies/k0s/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/k0s/stacked.svg",
+		"content": "technologies/k0s/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/k3s/horizontal.svg",
+		"content": "technologies/k3s/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/k3s/icon.svg",
+		"content": "technologies/k3s/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/k3s/stacked.svg",
+		"content": "technologies/k3s/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/k8gb/horizontal.svg",
+		"content": "technologies/k8gb/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/k8gb/icon.svg",
+		"content": "technologies/k8gb/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/k8gb/stacked.svg",
+		"content": "technologies/k8gb/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/k8sgpt/horizontal.svg",
+		"content": "technologies/k8sgpt/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/k8sgpt/icon.svg",
+		"content": "technologies/k8sgpt/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/k8sgpt/stacked.svg",
+		"content": "technologies/k8sgpt/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/k8up/horizontal.svg",
+		"content": "technologies/k8up/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kagent/horizontal.svg",
+		"content": "technologies/kagent/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kagent/icon.svg",
+		"content": "technologies/kagent/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kairos/horizontal.svg",
+		"content": "technologies/kairos/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kairos/icon.svg",
+		"content": "technologies/kairos/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kairos/stacked.svg",
+		"content": "technologies/kairos/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kaito/horizontal.svg",
+		"content": "technologies/kaito/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kaito/icon.svg",
+		"content": "technologies/kaito/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kaito/stacked.svg",
+		"content": "technologies/kaito/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kamaji/stacked.svg",
+		"content": "technologies/kamaji/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kaniko/horizontal.svg",
+		"content": "technologies/kaniko/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kanister/stacked.svg",
+		"content": "technologies/kanister/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kapitan/stacked.svg",
+		"content": "technologies/kapitan/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/karmada/horizontal.svg",
+		"content": "technologies/karmada/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/karmada/icon.svg",
+		"content": "technologies/karmada/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/karmada/stacked.svg",
+		"content": "technologies/karmada/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kcl/horizontal.svg",
+		"content": "technologies/kcl/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kcl/icon.svg",
+		"content": "technologies/kcl/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kcl/stacked.svg",
+		"content": "technologies/kcl/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kcp/horizontal.svg",
+		"content": "technologies/kcp/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kcp/icon.svg",
+		"content": "technologies/kcp/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kcp/stacked.svg",
+		"content": "technologies/kcp/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/keda/horizontal.svg",
+		"content": "technologies/keda/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/keda/icon.svg",
+		"content": "technologies/keda/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/keda/stacked.svg",
+		"content": "technologies/keda/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kepler/horizontal.svg",
+		"content": "technologies/kepler/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kepler/icon.svg",
+		"content": "technologies/kepler/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kepler/stacked.svg",
+		"content": "technologies/kepler/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/keptn/horizontal.svg",
+		"content": "technologies/keptn/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/keptn/icon.svg",
+		"content": "technologies/keptn/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/keptn/stacked.svg",
+		"content": "technologies/keptn/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/keycloak/horizontal.svg",
+		"content": "technologies/keycloak/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/keycloak/icon.svg",
+		"content": "technologies/keycloak/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/keycloak/stacked.svg",
+		"content": "technologies/keycloak/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/keylime/horizontal.svg",
+		"content": "technologies/keylime/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/keylime/icon.svg",
+		"content": "technologies/keylime/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/keylime/stacked.svg",
+		"content": "technologies/keylime/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kgateway/horizontal.svg",
+		"content": "technologies/kgateway/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kgateway/icon.svg",
+		"content": "technologies/kgateway/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kitops/horizontal.svg",
+		"content": "technologies/kitops/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kitops/icon.svg",
+		"content": "technologies/kitops/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kitops/stacked.svg",
+		"content": "technologies/kitops/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kluctl/horizontal.svg",
+		"content": "technologies/kluctl/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kmesh/horizontal.svg",
+		"content": "technologies/kmesh/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kmesh/icon.svg",
+		"content": "technologies/kmesh/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kmesh/stacked.svg",
+		"content": "technologies/kmesh/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/knative/horizontal.svg",
+		"content": "technologies/knative/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/knative/icon.svg",
+		"content": "technologies/knative/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/knative/stacked.svg",
+		"content": "technologies/knative/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/ko/icon.svg",
+		"content": "technologies/ko/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/ko/stacked.svg",
+		"content": "technologies/ko/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/komodor/horizontal.svg",
+		"content": "technologies/komodor/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/konveyor/horizontal.svg",
+		"content": "technologies/konveyor/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/konveyor/icon.svg",
+		"content": "technologies/konveyor/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/konveyor/stacked.svg",
+		"content": "technologies/konveyor/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/koordinator/horizontal.svg",
+		"content": "technologies/koordinator/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/koordinator/icon.svg",
+		"content": "technologies/koordinator/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/koordinator/stacked.svg",
+		"content": "technologies/koordinator/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kpt/horizontal.svg",
+		"content": "technologies/kpt/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kpt/icon.svg",
+		"content": "technologies/kpt/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kpt/stacked.svg",
+		"content": "technologies/kpt/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/krkn/horizontal.svg",
+		"content": "technologies/krkn/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/krkn/icon.svg",
+		"content": "technologies/krkn/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/krkn/stacked.svg",
+		"content": "technologies/krkn/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kserve/icon.svg",
+		"content": "technologies/kserve/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kuadrant/horizontal.svg",
+		"content": "technologies/kuadrant/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kuadrant/icon.svg",
+		"content": "technologies/kuadrant/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kuadrant/stacked.svg",
+		"content": "technologies/kuadrant/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kuasar/horizontal.svg",
+		"content": "technologies/kuasar/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kuasar/icon.svg",
+		"content": "technologies/kuasar/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kuasar/stacked.svg",
+		"content": "technologies/kuasar/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kube-burner/horizontal.svg",
+		"content": "technologies/kube-burner/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kube-burner/icon.svg",
+		"content": "technologies/kube-burner/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kube-burner/stacked.svg",
+		"content": "technologies/kube-burner/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kube-ovn/horizontal.svg",
+		"content": "technologies/kube-ovn/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kube-ovn/icon.svg",
+		"content": "technologies/kube-ovn/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kube-ovn/stacked.svg",
+		"content": "technologies/kube-ovn/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kube-vip/icon.svg",
+		"content": "technologies/kube-vip/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubean/horizontal.svg",
+		"content": "technologies/kubean/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubean/icon.svg",
+		"content": "technologies/kubean/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubean/stacked.svg",
+		"content": "technologies/kubean/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubearmor/horizontal.svg",
+		"content": "technologies/kubearmor/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubearmor/icon.svg",
+		"content": "technologies/kubearmor/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubearmor/stacked.svg",
+		"content": "technologies/kubearmor/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubeclipper/stacked.svg",
+		"content": "technologies/kubeclipper/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubeedge/horizontal.svg",
+		"content": "technologies/kubeedge/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubeedge/icon.svg",
+		"content": "technologies/kubeedge/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubeedge/stacked.svg",
+		"content": "technologies/kubeedge/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubefleet/horizontal.svg",
+		"content": "technologies/kubefleet/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubefleet/icon.svg",
+		"content": "technologies/kubefleet/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubefleet/stacked.svg",
+		"content": "technologies/kubefleet/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubeflow/horizontal.svg",
+		"content": "technologies/kubeflow/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubeflow/icon.svg",
+		"content": "technologies/kubeflow/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubeflow/stacked.svg",
+		"content": "technologies/kubeflow/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kuberhealthy/horizontal.svg",
+		"content": "technologies/kuberhealthy/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kuberhealthy/icon.svg",
+		"content": "technologies/kuberhealthy/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubernetes/horizontal.svg",
+		"content": "technologies/kubernetes/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubernetes/icon.svg",
+		"content": "technologies/kubernetes/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubernetes/stacked.svg",
+		"content": "technologies/kubernetes/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubescape/horizontal.svg",
+		"content": "technologies/kubescape/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubescape/icon.svg",
+		"content": "technologies/kubescape/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubescape/stacked.svg",
+		"content": "technologies/kubescape/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubeslice/horizontal.svg",
+		"content": "technologies/kubeslice/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubeslice/icon.svg",
+		"content": "technologies/kubeslice/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubeslice/stacked.svg",
+		"content": "technologies/kubeslice/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubestellar/horizontal.svg",
+		"content": "technologies/kubestellar/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubestellar/icon.svg",
+		"content": "technologies/kubestellar/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubestellar/stacked.svg",
+		"content": "technologies/kubestellar/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubevela/horizontal.svg",
+		"content": "technologies/kubevela/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubevela/icon.svg",
+		"content": "technologies/kubevela/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubevela/stacked.svg",
+		"content": "technologies/kubevela/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubevious/horizontal.svg",
+		"content": "technologies/kubevious/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubevirt/horizontal.svg",
+		"content": "technologies/kubevirt/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubevirt/icon.svg",
+		"content": "technologies/kubevirt/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubevirt/stacked.svg",
+		"content": "technologies/kubevirt/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubewarden/horizontal.svg",
+		"content": "technologies/kubewarden/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubewarden/icon.svg",
+		"content": "technologies/kubewarden/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kubewarden/stacked.svg",
+		"content": "technologies/kubewarden/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kudo/horizontal.svg",
+		"content": "technologies/kudo/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kudo/icon.svg",
+		"content": "technologies/kudo/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kudo/stacked.svg",
+		"content": "technologies/kudo/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kueue/icon.svg",
+		"content": "technologies/kueue/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kuma/horizontal.svg",
+		"content": "technologies/kuma/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kuma/icon.svg",
+		"content": "technologies/kuma/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kuma/stacked.svg",
+		"content": "technologies/kuma/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kured/horizontal.svg",
+		"content": "technologies/kured/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kured/icon.svg",
+		"content": "technologies/kured/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kured/stacked.svg",
+		"content": "technologies/kured/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kusionstack/horizontal.svg",
+		"content": "technologies/kusionstack/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kusionstack/icon.svg",
+		"content": "technologies/kusionstack/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kusionstack/stacked.svg",
+		"content": "technologies/kusionstack/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kwasm/icon.svg",
+		"content": "technologies/kwasm/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kyverno/horizontal.svg",
+		"content": "technologies/kyverno/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kyverno/icon.svg",
+		"content": "technologies/kyverno/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/kyverno/stacked.svg",
+		"content": "technologies/kyverno/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/laravel/horizontal.svg",
+		"content": "technologies/laravel/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/lens/logo.ico",
+		"content": "technologies/lens/logo.ico",
+		"contentType": "image/x-icon"
+	},
+	{
+		"key": "technologies/lima/horizontal.svg",
+		"content": "technologies/lima/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/linkerd/horizontal.svg",
+		"content": "technologies/linkerd/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/linkerd/icon.svg",
+		"content": "technologies/linkerd/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/linkerd/stacked.svg",
+		"content": "technologies/linkerd/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/litestream/horizontal.svg",
+		"content": "technologies/litestream/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/litmus/horizontal.svg",
+		"content": "technologies/litmus/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/litmus/icon.svg",
+		"content": "technologies/litmus/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/litmus/stacked.svg",
+		"content": "technologies/litmus/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/logging-operator/horizontal.svg",
+		"content": "technologies/logging-operator/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/logging-operator/icon.svg",
+		"content": "technologies/logging-operator/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/logging-operator/stacked.svg",
+		"content": "technologies/logging-operator/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/loki/stacked.svg",
+		"content": "technologies/loki/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/longhorn/horizontal.svg",
+		"content": "technologies/longhorn/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/longhorn/icon.svg",
+		"content": "technologies/longhorn/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/longhorn/stacked.svg",
+		"content": "technologies/longhorn/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/loxilb/horizontal.svg",
+		"content": "technologies/loxilb/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/loxilb/icon.svg",
+		"content": "technologies/loxilb/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/loxilb/stacked.svg",
+		"content": "technologies/loxilb/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/lumigo/horizontal.svg",
+		"content": "technologies/lumigo/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/meilisearch/horizontal.svg",
+		"content": "technologies/meilisearch/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/metal3/icon.svg",
+		"content": "technologies/metal3/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/metallb/horizontal.svg",
+		"content": "technologies/metallb/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/metallb/icon.svg",
+		"content": "technologies/metallb/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/metallb/stacked.svg",
+		"content": "technologies/metallb/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/microcks/horizontal.svg",
+		"content": "technologies/microcks/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/microcks/icon.svg",
+		"content": "technologies/microcks/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/microcks/stacked.svg",
+		"content": "technologies/microcks/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/micronaut/horizontal.svg",
+		"content": "technologies/micronaut/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/mirrord/horizontal.svg",
+		"content": "technologies/mirrord/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/modelpack/horizontal.svg",
+		"content": "technologies/modelpack/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/modelpack/icon.svg",
+		"content": "technologies/modelpack/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/modelpack/stacked.svg",
+		"content": "technologies/modelpack/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/n8n/horizontal.svg",
+		"content": "technologies/n8n/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/namespace/horizontal.svg",
+		"content": "technologies/namespace/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/nats/horizontal.svg",
+		"content": "technologies/nats/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/nats/icon.svg",
+		"content": "technologies/nats/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/nats/stacked.svg",
+		"content": "technologies/nats/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/nerdctl/horizontal.svg",
+		"content": "technologies/nerdctl/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/networkservicemesh/horizontal.svg",
+		"content": "technologies/networkservicemesh/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/networkservicemesh/icon.svg",
+		"content": "technologies/networkservicemesh/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/networkservicemesh/stacked.svg",
+		"content": "technologies/networkservicemesh/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/ngrok/horizontal.svg",
+		"content": "technologies/ngrok/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/notary/horizontal.svg",
+		"content": "technologies/notary/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/notary/icon.svg",
+		"content": "technologies/notary/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/notary/stacked.svg",
+		"content": "technologies/notary/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/oauth2-proxy/horizontal.svg",
+		"content": "technologies/oauth2-proxy/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/oauth2-proxy/icon.svg",
+		"content": "technologies/oauth2-proxy/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/oauth2-proxy/stacked.svg",
+		"content": "technologies/oauth2-proxy/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/odin/horizontal.svg",
+		"content": "technologies/odin/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/odin/icon.svg",
+		"content": "technologies/odin/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/okteto/horizontal.svg",
+		"content": "technologies/okteto/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/opa/horizontal.svg",
+		"content": "technologies/opa/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/opa/icon.svg",
+		"content": "technologies/opa/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/opa/stacked.svg",
+		"content": "technologies/opa/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/opcr/horizontal.svg",
+		"content": "technologies/opcr/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/opcr/icon.svg",
+		"content": "technologies/opcr/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/opcr/stacked.svg",
+		"content": "technologies/opcr/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/open-cluster-management/horizontal.svg",
+		"content": "technologies/open-cluster-management/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/open-cluster-management/icon.svg",
+		"content": "technologies/open-cluster-management/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/open-cluster-management/stacked.svg",
+		"content": "technologies/open-cluster-management/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/opencost/horizontal.svg",
+		"content": "technologies/opencost/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/opencost/icon.svg",
+		"content": "technologies/opencost/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/opencost/stacked.svg",
+		"content": "technologies/opencost/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/openebs/horizontal.svg",
+		"content": "technologies/openebs/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/openebs/icon.svg",
+		"content": "technologies/openebs/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/openebs/stacked.svg",
+		"content": "technologies/openebs/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/openfaas/stacked.svg",
+		"content": "technologies/openfaas/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/openfga/icon.svg",
+		"content": "technologies/openfga/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/openfunction/horizontal.svg",
+		"content": "technologies/openfunction/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/openfunction/icon.svg",
+		"content": "technologies/openfunction/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/openfunction/stacked.svg",
+		"content": "technologies/openfunction/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/opengemini/horizontal.svg",
+		"content": "technologies/opengemini/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/opengemini/icon.svg",
+		"content": "technologies/opengemini/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/opengemini/stacked.svg",
+		"content": "technologies/opengemini/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/opengitops/horizontal.svg",
+		"content": "technologies/opengitops/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/opengitops/icon.svg",
+		"content": "technologies/opengitops/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/opengitops/stacked.svg",
+		"content": "technologies/opengitops/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/openkruise/horizontal.svg",
+		"content": "technologies/openkruise/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/openkruise/icon.svg",
+		"content": "technologies/openkruise/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/openkruise/stacked.svg",
+		"content": "technologies/openkruise/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/opentelemetry/horizontal.svg",
+		"content": "technologies/opentelemetry/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/opentelemetry/icon.svg",
+		"content": "technologies/opentelemetry/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/opentelemetry/stacked.svg",
+		"content": "technologies/opentelemetry/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/opentofu/horizontal.svg",
+		"content": "technologies/opentofu/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/opentofu/icon.svg",
+		"content": "technologies/opentofu/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/opentofu/stacked.svg",
+		"content": "technologies/opentofu/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/openyurt/horizontal.svg",
+		"content": "technologies/openyurt/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/openyurt/icon.svg",
+		"content": "technologies/openyurt/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/openyurt/stacked.svg",
+		"content": "technologies/openyurt/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/operatorframework/horizontal.svg",
+		"content": "technologies/operatorframework/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/operatorframework/icon.svg",
+		"content": "technologies/operatorframework/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/operatorframework/stacked.svg",
+		"content": "technologies/operatorframework/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/oras/horizontal.svg",
+		"content": "technologies/oras/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/oscal-compass/horizontal.svg",
+		"content": "technologies/oscal-compass/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/oscal-compass/icon.svg",
+		"content": "technologies/oscal-compass/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/oscal-compass/stacked.svg",
+		"content": "technologies/oscal-compass/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/otterize/horizontal.svg",
+		"content": "technologies/otterize/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/ovn-kubernetes/horizontal.svg",
+		"content": "technologies/ovn-kubernetes/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/ovn-kubernetes/icon.svg",
+		"content": "technologies/ovn-kubernetes/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/ovn-kubernetes/stacked.svg",
+		"content": "technologies/ovn-kubernetes/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/paralus/horizontal.svg",
+		"content": "technologies/paralus/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/paralus/icon.svg",
+		"content": "technologies/paralus/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/paralus/stacked.svg",
+		"content": "technologies/paralus/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/parca/horizontal.svg",
+		"content": "technologies/parca/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/parsec/horizontal.svg",
+		"content": "technologies/parsec/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/parsec/icon.svg",
+		"content": "technologies/parsec/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/parsec/stacked.svg",
+		"content": "technologies/parsec/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/perses/horizontal.svg",
+		"content": "technologies/perses/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/perses/icon.svg",
+		"content": "technologies/perses/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/perses/stacked.svg",
+		"content": "technologies/perses/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/php/icon.svg",
+		"content": "technologies/php/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/pipecd/horizontal.svg",
+		"content": "technologies/pipecd/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/pipecd/icon.svg",
+		"content": "technologies/pipecd/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/pipecd/stacked.svg",
+		"content": "technologies/pipecd/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/pipedream/horizontal.svg",
+		"content": "technologies/pipedream/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/piraeus/horizontal.svg",
+		"content": "technologies/piraeus/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/piraeus/icon.svg",
+		"content": "technologies/piraeus/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/piraeus/stacked.svg",
+		"content": "technologies/piraeus/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/pixie/horizontal.svg",
+		"content": "technologies/pixie/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/pixie/icon.svg",
+		"content": "technologies/pixie/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/pixie/stacked.svg",
+		"content": "technologies/pixie/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/pkgx/logo.ico",
+		"content": "technologies/pkgx/logo.ico",
+		"contentType": "image/x-icon"
+	},
+	{
+		"key": "technologies/podman-desktop/horizontal.svg",
+		"content": "technologies/podman-desktop/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/podman-desktop/icon.svg",
+		"content": "technologies/podman-desktop/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/podman-desktop/stacked.svg",
+		"content": "technologies/podman-desktop/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/podman/horizontal.svg",
+		"content": "technologies/podman/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/podman/icon.svg",
+		"content": "technologies/podman/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/podman/stacked.svg",
+		"content": "technologies/podman/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/portainer/horizontal.svg",
+		"content": "technologies/portainer/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/porter/horizontal.svg",
+		"content": "technologies/porter/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/porter/icon.svg",
+		"content": "technologies/porter/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/porter/stacked.svg",
+		"content": "technologies/porter/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/postgresql/icon.svg",
+		"content": "technologies/postgresql/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/postgresql/logo.ico",
+		"content": "technologies/postgresql/logo.ico",
+		"contentType": "image/x-icon"
+	},
+	{
+		"key": "technologies/postman/icon.svg",
+		"content": "technologies/postman/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/prometheus/horizontal.svg",
+		"content": "technologies/prometheus/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/prometheus/icon.svg",
+		"content": "technologies/prometheus/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/prometheus/stacked.svg",
+		"content": "technologies/prometheus/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/promlens/horizontal.svg",
+		"content": "technologies/promlens/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/promscale/stacked.svg",
+		"content": "technologies/promscale/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/promtail/icon.svg",
+		"content": "technologies/promtail/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/pulumi/stacked.svg",
+		"content": "technologies/pulumi/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/qovery/horizontal.svg",
+		"content": "technologies/qovery/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/quarkus/icon.svg",
+		"content": "technologies/quarkus/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/questdb/horizontal.svg",
+		"content": "technologies/questdb/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/quickwit/horizontal.svg",
+		"content": "technologies/quickwit/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/radius/horizontal.svg",
+		"content": "technologies/radius/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/radius/icon.svg",
+		"content": "technologies/radius/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/radius/stacked.svg",
+		"content": "technologies/radius/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/rancher/stacked.svg",
+		"content": "technologies/rancher/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/ratify/horizontal.svg",
+		"content": "technologies/ratify/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/ratify/icon.svg",
+		"content": "technologies/ratify/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/ratify/stacked.svg",
+		"content": "technologies/ratify/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/restate/horizontal.svg",
+		"content": "technologies/restate/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/robusta/horizontal.svg",
+		"content": "technologies/robusta/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/rook/horizontal.svg",
+		"content": "technologies/rook/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/rook/icon.svg",
+		"content": "technologies/rook/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/rook/stacked.svg",
+		"content": "technologies/rook/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/runme/horizontal.svg",
+		"content": "technologies/runme/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/runme/icon.svg",
+		"content": "technologies/runme/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/runme/stacked.svg",
+		"content": "technologies/runme/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/rust/icon.svg",
+		"content": "technologies/rust/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/salt/horizontal.svg",
+		"content": "technologies/salt/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/salt/icon.svg",
+		"content": "technologies/salt/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/schemahero/horizontal.svg",
+		"content": "technologies/schemahero/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/schemahero/icon.svg",
+		"content": "technologies/schemahero/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/schemahero/stacked.svg",
+		"content": "technologies/schemahero/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/score/horizontal.svg",
+		"content": "technologies/score/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/score/icon.svg",
+		"content": "technologies/score/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/score/stacked.svg",
+		"content": "technologies/score/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/second-state/horizontal.svg",
+		"content": "technologies/second-state/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/sermant/horizontal.svg",
+		"content": "technologies/sermant/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/sermant/icon.svg",
+		"content": "technologies/sermant/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/sermant/stacked.svg",
+		"content": "technologies/sermant/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/serverless-devs/horizontal.svg",
+		"content": "technologies/serverless-devs/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/serverless-devs/icon.svg",
+		"content": "technologies/serverless-devs/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/serverless-devs/stacked.svg",
+		"content": "technologies/serverless-devs/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/serverlessworkflow/horizontal.svg",
+		"content": "technologies/serverlessworkflow/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/serverlessworkflow/icon.svg",
+		"content": "technologies/serverlessworkflow/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/serverlessworkflow/stacked.svg",
+		"content": "technologies/serverlessworkflow/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/shipwright/horizontal.svg",
+		"content": "technologies/shipwright/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/shipwright/icon.svg",
+		"content": "technologies/shipwright/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/shipwright/stacked.svg",
+		"content": "technologies/shipwright/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/sigstore/stacked.svg",
+		"content": "technologies/sigstore/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/skaffold/stacked.svg",
+		"content": "technologies/skaffold/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/slim-toolkit/horizontal.svg",
+		"content": "technologies/slim-toolkit/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/slim-toolkit/icon.svg",
+		"content": "technologies/slim-toolkit/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/slimfaas/horizontal.svg",
+		"content": "technologies/slimfaas/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/slimfaas/icon.svg",
+		"content": "technologies/slimfaas/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/slimfaas/stacked.svg",
+		"content": "technologies/slimfaas/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/snyk/horizontal.svg",
+		"content": "technologies/snyk/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/sops/icon.svg",
+		"content": "technologies/sops/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/spectro-cloud/horizontal.svg",
+		"content": "technologies/spectro-cloud/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/spicedb/horizontal.svg",
+		"content": "technologies/spicedb/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/spicedb/icon.svg",
+		"content": "technologies/spicedb/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/spicedb/stacked.svg",
+		"content": "technologies/spicedb/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/spiderpool/horizontal.svg",
+		"content": "technologies/spiderpool/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/spiderpool/icon.svg",
+		"content": "technologies/spiderpool/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/spiderpool/stacked.svg",
+		"content": "technologies/spiderpool/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/spiffe/horizontal.svg",
+		"content": "technologies/spiffe/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/spiffe/icon.svg",
+		"content": "technologies/spiffe/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/spiffe/stacked.svg",
+		"content": "technologies/spiffe/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/spin/horizontal.svg",
+		"content": "technologies/spin/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/spin/icon.svg",
+		"content": "technologies/spin/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/spin/stacked.svg",
+		"content": "technologies/spin/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/spinkube/horizontal.svg",
+		"content": "technologies/spinkube/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/spinkube/icon.svg",
+		"content": "technologies/spinkube/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/spinkube/stacked.svg",
+		"content": "technologies/spinkube/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/spire/horizontal.svg",
+		"content": "technologies/spire/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/spire/icon.svg",
+		"content": "technologies/spire/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/spire/stacked.svg",
+		"content": "technologies/spire/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/spring/icon.svg",
+		"content": "technologies/spring/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/stacker/icon.svg",
+		"content": "technologies/stacker/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/strimzi/horizontal.svg",
+		"content": "technologies/strimzi/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/strimzi/icon.svg",
+		"content": "technologies/strimzi/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/strimzi/stacked.svg",
+		"content": "technologies/strimzi/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/submariner/horizontal.svg",
+		"content": "technologies/submariner/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/submariner/icon.svg",
+		"content": "technologies/submariner/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/submariner/stacked.svg",
+		"content": "technologies/submariner/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/suborbital/horizontal.svg",
+		"content": "technologies/suborbital/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/swamp/icon.svg",
+		"content": "technologies/swamp/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/system-initiative/icon.svg",
+		"content": "technologies/system-initiative/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/tektoncd/stacked.svg",
+		"content": "technologies/tektoncd/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/telegraf/horizontal.svg",
+		"content": "technologies/telegraf/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/teleport/horizontal.svg",
+		"content": "technologies/teleport/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/teleport/icon.svg",
+		"content": "technologies/teleport/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/telepresence/icon.svg",
+		"content": "technologies/telepresence/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/terraform/horizontal.svg",
+		"content": "technologies/terraform/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/terraform/icon.svg",
+		"content": "technologies/terraform/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/terraform/stacked.svg",
+		"content": "technologies/terraform/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/tetragon/stacked.svg",
+		"content": "technologies/tetragon/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/thanos/horizontal.svg",
+		"content": "technologies/thanos/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/thanos/icon.svg",
+		"content": "technologies/thanos/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/thanos/stacked.svg",
+		"content": "technologies/thanos/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/tikv/horizontal.svg",
+		"content": "technologies/tikv/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/tikv/icon.svg",
+		"content": "technologies/tikv/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/tikv/stacked.svg",
+		"content": "technologies/tikv/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/tilt/horizontal.svg",
+		"content": "technologies/tilt/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/timescale/horizontal.svg",
+		"content": "technologies/timescale/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/timoni/horizontal.svg",
+		"content": "technologies/timoni/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/tokenetes/horizontal.svg",
+		"content": "technologies/tokenetes/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/tokenetes/icon.svg",
+		"content": "technologies/tokenetes/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/tokenetes/stacked.svg",
+		"content": "technologies/tokenetes/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/tremor/horizontal.svg",
+		"content": "technologies/tremor/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/tremor/icon.svg",
+		"content": "technologies/tremor/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/tremor/stacked.svg",
+		"content": "technologies/tremor/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/trickster/icon.svg",
+		"content": "technologies/trickster/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/trickster/stacked.svg",
+		"content": "technologies/trickster/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/trivy/stacked.svg",
+		"content": "technologies/trivy/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/tuf/horizontal.svg",
+		"content": "technologies/tuf/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/tuf/icon.svg",
+		"content": "technologies/tuf/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/tuf/stacked.svg",
+		"content": "technologies/tuf/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/tyk/horizontal.svg",
+		"content": "technologies/tyk/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/universal-blue/horizontal.svg",
+		"content": "technologies/universal-blue/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/urunc/horizontal.svg",
+		"content": "technologies/urunc/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/urunc/icon.svg",
+		"content": "technologies/urunc/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/urunc/stacked.svg",
+		"content": "technologies/urunc/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/vcluster/stacked.svg",
+		"content": "technologies/vcluster/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/velero/horizontal.svg",
+		"content": "technologies/velero/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/vineyard/horizontal.svg",
+		"content": "technologies/vineyard/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/vineyard/icon.svg",
+		"content": "technologies/vineyard/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/vineyard/stacked.svg",
+		"content": "technologies/vineyard/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/virtualkubelet/horizontal.svg",
+		"content": "technologies/virtualkubelet/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/virtualkubelet/icon.svg",
+		"content": "technologies/virtualkubelet/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/virtualkubelet/stacked.svg",
+		"content": "technologies/virtualkubelet/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/vitess/horizontal.svg",
+		"content": "technologies/vitess/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/vitess/icon.svg",
+		"content": "technologies/vitess/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/vitess/stacked.svg",
+		"content": "technologies/vitess/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/volcano/horizontal.svg",
+		"content": "technologies/volcano/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/volcano/icon.svg",
+		"content": "technologies/volcano/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/volcano/stacked.svg",
+		"content": "technologies/volcano/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/wasm-edge-runtime/horizontal.svg",
+		"content": "technologies/wasm-edge-runtime/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/wasm-edge-runtime/icon.svg",
+		"content": "technologies/wasm-edge-runtime/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/wasm-edge-runtime/stacked.svg",
+		"content": "technologies/wasm-edge-runtime/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/wasmcloud/horizontal.svg",
+		"content": "technologies/wasmcloud/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/wasmcloud/icon.svg",
+		"content": "technologies/wasmcloud/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/wasmcloud/stacked.svg",
+		"content": "technologies/wasmcloud/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/waypoint/icon.svg",
+		"content": "technologies/waypoint/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/webassembly/stacked.svg",
+		"content": "technologies/webassembly/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/werf/horizontal.svg",
+		"content": "technologies/werf/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/werf/icon.svg",
+		"content": "technologies/werf/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/werf/stacked.svg",
+		"content": "technologies/werf/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/wundergraph/horizontal.svg",
+		"content": "technologies/wundergraph/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/xdebug/icon.svg",
+		"content": "technologies/xdebug/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/xregistry/horizontal.svg",
+		"content": "technologies/xregistry/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/xregistry/icon.svg",
+		"content": "technologies/xregistry/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/xregistry/stacked.svg",
+		"content": "technologies/xregistry/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/youki/horizontal.svg",
+		"content": "technologies/youki/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/youki/icon.svg",
+		"content": "technologies/youki/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/youki/stacked.svg",
+		"content": "technologies/youki/stacked.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/zitadel/horizontal.svg",
+		"content": "technologies/zitadel/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/zot/horizontal.svg",
+		"content": "technologies/zot/horizontal.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/zot/icon.svg",
+		"content": "technologies/zot/icon.svg",
+		"contentType": "image/svg+xml"
+	},
+	{
+		"key": "technologies/zot/stacked.svg",
+		"content": "technologies/zot/stacked.svg",
+		"contentType": "image/svg+xml"
+	}
+]

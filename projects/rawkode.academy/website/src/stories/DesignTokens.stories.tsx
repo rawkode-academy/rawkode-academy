@@ -1,431 +1,195 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import type { CSSProperties } from "react";
 
 const meta = {
-	title: "Design System/Design Tokens",
+	title: "Design System/Tokens",
+	// Screenshot baselines in visual/__screenshots__ (bun run test:visual).
+	tags: ["visual"],
 	parameters: {
-		layout: "padded",
+		layout: "fullscreen",
+		docs: {
+			description: {
+				component:
+					"The Academy semantic tokens as they resolve in the active colour scheme. Values come from `packages/design-system/panda.config.ts`; switch the theme in the toolbar.",
+			},
+		},
 	},
 } satisfies Meta;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const ColorSwatch = ({
-	color,
-	name,
-	value,
-}: {
-	color: string;
-	name: string;
-	value: string;
-}) => (
-	<div className="flex flex-col items-center">
-		<div
-			className="w-24 h-24 rounded-lg shadow-md border border-surface mb-2"
-			style={{ backgroundColor: color }}
-		/>
-		<p className="text-sm font-medium text-primary-content">{name}</p>
-		<code className="text-xs text-muted">{value}</code>
-	</div>
-);
-
-const TextSample = ({
-	font,
-	name,
-	className,
-}: {
-	font: string;
-	name: string;
-	className: string;
-}) => (
-	<div className="space-y-2">
-		<h3 className="text-lg font-semibold text-primary-content">
-			{name}
-		</h3>
-		<p
-			className={`${className} text-secondary-content`}
-			style={{ fontFamily: font }}
-		>
-			The quick brown fox jumps over the lazy dog
-		</p>
-		<p
-			className={`${className} text-2xl text-primary-content`}
-			style={{ fontFamily: font }}
-		>
-			ABCDEFGHIJKLMNOPQRSTUVWXYZ
-		</p>
-		<p
-			className={`${className} text-2xl text-primary-content`}
-			style={{ fontFamily: font }}
-		>
-			abcdefghijklmnopqrstuvwxyz
-		</p>
-		<p
-			className={`${className} text-xl text-primary-content`}
-			style={{ fontFamily: font }}
-		>
-			0123456789
-		</p>
-		<code className="text-xs text-muted">{font}</code>
-	</div>
-);
-
-export const Colors: Story = {
-	render: () => (
-		<div className="space-y-8">
-			<div>
-				<h2 className="text-2xl font-bold text-primary-content mb-6">
-					Brand Colors
-				</h2>
-				<div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-					<ColorSwatch color="#5f5ed7" name="Primary" value="#5f5ed7" />
-					<ColorSwatch color="#00ceff" name="Secondary" value="#00ceff" />
-					<ColorSwatch color="#04b59c" name="Tertiary" value="#04b59c" />
-					<ColorSwatch color="#85ff95" name="Quaternary" value="#85ff95" />
-				</div>
-			</div>
-
-			<div>
-				<h2 className="text-2xl font-bold text-primary-content mb-6">
-					Editorial Neutrals
-				</h2>
-				<div className="grid grid-cols-2 md:grid-cols-5 gap-6">
-					<ColorSwatch
-						color="var(--editorial-ink)"
-						name="Ink"
-						value="var(--editorial-ink)"
-					/>
-					<ColorSwatch
-						color="var(--editorial-ink-soft)"
-						name="Ink soft"
-						value="var(--editorial-ink-soft)"
-					/>
-					<ColorSwatch
-						color="var(--editorial-ink-mute)"
-						name="Ink mute"
-						value="var(--editorial-ink-mute)"
-					/>
-					<ColorSwatch
-						color="var(--editorial-paper-deep)"
-						name="Paper deep"
-						value="var(--editorial-paper-deep)"
-					/>
-					<ColorSwatch
-						color="var(--editorial-paper)"
-						name="Paper"
-						value="var(--editorial-paper)"
-					/>
-				</div>
-			</div>
-
-			<div>
-				<h2 className="text-2xl font-bold text-primary-content mb-6">
-					Semantic Colors
-				</h2>
-				<div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-					<ColorSwatch color="#10B981" name="Success" value="#10B981" />
-					<ColorSwatch color="#F59E0B" name="Warning" value="#F59E0B" />
-					<ColorSwatch color="#EF4444" name="Error" value="#EF4444" />
-					<ColorSwatch color="#3B82F6" name="Info" value="#3B82F6" />
-				</div>
-			</div>
-		</div>
-	),
+// Specimen layout only. Product styles live in design-system recipes.
+const page: CSSProperties = {
+	display: "grid",
+	gap: "3rem",
+	padding: "3rem var(--spacing-academy-gutter)",
+	background: "var(--colors-academy-canvas)",
+	color: "var(--colors-academy-text)",
+	fontFamily: "var(--fonts-academy-text)",
+};
+const heading: CSSProperties = {
+	margin: "0 0 1rem",
+	fontFamily: "var(--fonts-academy-display)",
+	fontSize: "1.5rem",
+	fontWeight: 700,
+};
+const grid: CSSProperties = {
+	display: "grid",
+	gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))",
+	gap: "1rem",
+};
+const mono: CSSProperties = {
+	fontFamily: "var(--fonts-academy-mono)",
+	fontSize: "0.75rem",
+	color: "var(--colors-academy-text-muted)",
 };
 
-export const Typography: Story = {
-	render: () => (
-		<div className="space-y-8">
-			<div>
-				<h2 className="text-2xl font-bold text-primary-content mb-6">
-					Font Families
-				</h2>
-				<div className="space-y-8">
-					<TextSample
-						font="'Quicksand', sans-serif"
-						name="Display Font (Headings)"
-						className="font-display"
-					/>
-					<TextSample
-						font="'Poppins', sans-serif"
-						name="Body Font (Text)"
-						className="font-body"
-					/>
-					<TextSample
-						font="'Monaspace', monospace"
-						name="Monospace Font (Code)"
-						className="font-mono"
-					/>
-				</div>
-			</div>
+const colourGroups: Array<[string, Array<[string, string]>]> = [
+	[
+		"Canvas and text",
+		[
+			["academy.canvas", "canvas"],
+			["academy.ground", "ground"],
+			["academy.panel", "panel"],
+			["academy.border", "border"],
+			["academy.text", "text"],
+			["academy.textSoft", "text-soft"],
+			["academy.textMuted", "text-muted"],
+		],
+	],
+	[
+		"Accent",
+		[
+			["academy.accent", "accent"],
+			["academy.accentHover", "accent-hover"],
+			["academy.accentForeground", "accent-foreground"],
+		],
+	],
+	[
+		"Ink surfaces",
+		[
+			["academy.ink", "ink"],
+			["academy.inkRaised", "ink-raised"],
+			["academy.inkBorder", "ink-border"],
+			["academy.inkText", "ink-text"],
+			["academy.inkTextMuted", "ink-text-muted"],
+			["academy.inkAccent", "ink-accent"],
+		],
+	],
+	[
+		"Status (a real state, never decoration)",
+		[
+			["academy.statusSpruce", "status-spruce"],
+			["academy.statusAmber", "status-amber"],
+			["academy.statusRust", "status-rust"],
+			["academy.statusSky", "status-sky"],
+			["academy.statusViolet", "status-violet"],
+		],
+	],
+];
 
-			<div>
-				<h2 className="text-2xl font-bold text-primary-content mb-6">
-					Type Scale
-				</h2>
-				<div className="space-y-4">
-					<div>
-						<p className="text-xs text-muted mb-1">
-							text-xs (12px)
-						</p>
-						<p className="text-xs text-primary-content">
-							The quick brown fox jumps over the lazy dog
-						</p>
-					</div>
-					<div>
-						<p className="text-xs text-muted mb-1">
-							text-sm (14px)
-						</p>
-						<p className="text-sm text-primary-content">
-							The quick brown fox jumps over the lazy dog
-						</p>
-					</div>
-					<div>
-						<p className="text-xs text-muted mb-1">
-							text-base (16px)
-						</p>
-						<p className="text-base text-primary-content">
-							The quick brown fox jumps over the lazy dog
-						</p>
-					</div>
-					<div>
-						<p className="text-xs text-muted mb-1">
-							text-lg (18px)
-						</p>
-						<p className="text-lg text-primary-content">
-							The quick brown fox jumps over the lazy dog
-						</p>
-					</div>
-					<div>
-						<p className="text-xs text-muted mb-1">
-							text-xl (20px)
-						</p>
-						<p className="text-xl text-primary-content">
-							The quick brown fox jumps over the lazy dog
-						</p>
-					</div>
-					<div>
-						<p className="text-xs text-muted mb-1">
-							text-2xl (24px)
-						</p>
-						<p className="text-2xl text-primary-content">
-							The quick brown fox jumps over the lazy dog
-						</p>
-					</div>
-					<div>
-						<p className="text-xs text-muted mb-1">
-							text-3xl (30px)
-						</p>
-						<p className="text-3xl text-primary-content">
-							The quick brown fox jumps over the lazy dog
-						</p>
-					</div>
-					<div>
-						<p className="text-xs text-muted mb-1">
-							text-4xl (36px)
-						</p>
-						<p className="text-4xl text-primary-content">
-							The quick brown fox jumps over the lazy dog
-						</p>
-					</div>
-				</div>
-			</div>
-		</div>
-	),
-};
+const typeScale: Array<[string, string, CSSProperties]> = [
+	[
+		"academy-poster",
+		"Learn in public",
+		{
+			fontSize: "var(--font-sizes-academy-poster)",
+			lineHeight: 0.9,
+			letterSpacing: "-0.05em",
+			fontWeight: 800,
+		},
+	],
+	[
+		"academy-masthead",
+		"Videos",
+		{
+			fontSize: "var(--font-sizes-academy-masthead)",
+			lineHeight: 0.95,
+			letterSpacing: "-0.035em",
+			fontWeight: 800,
+		},
+	],
+	[
+		"academy-section",
+		"Latest sessions",
+		{
+			fontSize: "var(--font-sizes-academy-section)",
+			lineHeight: 1.04,
+			letterSpacing: "-0.035em",
+			fontWeight: 700,
+		},
+	],
+	[
+		"academy-title",
+		"Debugging a broken cluster",
+		{
+			fontSize: "var(--font-sizes-academy-title)",
+			lineHeight: 1.15,
+			letterSpacing: "-0.02em",
+			fontWeight: 700,
+		},
+	],
+];
 
-export const Spacing: Story = {
+export const Colour: Story = {
 	render: () => (
-		<div className="space-y-8">
-			<div>
-				<h2 className="text-2xl font-bold text-primary-content mb-6">
-					Spacing Scale
-				</h2>
-				<div className="space-y-4">
-					{[1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32, 40, 48, 56, 64].map(
-						(size) => (
-							<div key={size} className="flex items-center gap-4">
-								<code className="text-xs text-muted w-16">
-									{size}
-								</code>
+		<div style={page}>
+			{colourGroups.map(([title, tokens]) => (
+				<section key={title}>
+					<h2 style={heading}>{title}</h2>
+					<div style={grid}>
+						{tokens.map(([name, cssName]) => (
+							<div key={name} style={{ display: "grid", gap: "0.5rem" }}>
 								<div
-									className="bg-primary h-4"
-									style={{ width: `${size * 0.25}rem` }}
+									style={{
+										height: "4.5rem",
+										borderRadius: "var(--radii-academy-m)",
+										border: "1px solid var(--colors-academy-border)",
+										background: `var(--colors-academy-${cssName})`,
+									}}
 								/>
-								<span className="text-sm text-secondary-content">
-									{size * 0.25}rem / {size * 4}px
-								</span>
+								<code style={mono}>{name}</code>
 							</div>
-						),
-					)}
-				</div>
-			</div>
+						))}
+					</div>
+				</section>
+			))}
 		</div>
 	),
 };
 
-export const Shadows: Story = {
+export const Type: Story = {
 	render: () => (
-		<div className="space-y-8">
-			<div>
-				<h2 className="text-2xl font-bold text-primary-content mb-6">
-					Box Shadows
-				</h2>
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-					<div className="space-y-2">
-						<div className="w-full h-24 bg-[var(--surface-card)] rounded-lg shadow-sm flex items-center justify-center">
-							<span className="text-sm text-secondary-content">
-								shadow-sm
-							</span>
-						</div>
-					</div>
-					<div className="space-y-2">
-						<div className="w-full h-24 bg-[var(--surface-card)] rounded-lg shadow flex items-center justify-center">
-							<span className="text-sm text-secondary-content">
-								shadow
-							</span>
-						</div>
-					</div>
-					<div className="space-y-2">
-						<div className="w-full h-24 bg-[var(--surface-card)] rounded-lg shadow-md flex items-center justify-center">
-							<span className="text-sm text-secondary-content">
-								shadow-md
-							</span>
-						</div>
-					</div>
-					<div className="space-y-2">
-						<div className="w-full h-24 bg-[var(--surface-card)] rounded-lg shadow-lg flex items-center justify-center">
-							<span className="text-sm text-secondary-content">
-								shadow-lg
-							</span>
-						</div>
-					</div>
-					<div className="space-y-2">
-						<div className="w-full h-24 bg-[var(--surface-card)] rounded-lg shadow-xl flex items-center justify-center">
-							<span className="text-sm text-secondary-content">
-								shadow-xl
-							</span>
-						</div>
-					</div>
-					<div className="space-y-2">
-						<div className="w-full h-24 bg-[var(--surface-card)] rounded-lg shadow-2xl flex items-center justify-center">
-							<span className="text-sm text-secondary-content">
-								shadow-2xl
-							</span>
-						</div>
-					</div>
+		<div style={page}>
+			{typeScale.map(([token, sample, style]) => (
+				<div
+					key={token}
+					style={{ display: "grid", gap: "0.5rem", minWidth: 0 }}
+				>
+					<code style={mono}>{token}</code>
+					<p
+						style={{
+							margin: 0,
+							fontFamily: "var(--fonts-academy-display)",
+							overflowWrap: "anywhere",
+							...style,
+						}}
+					>
+						{sample}
+					</p>
 				</div>
-			</div>
-		</div>
-	),
-};
-
-export const BorderRadius: Story = {
-	render: () => (
-		<div className="space-y-8">
-			<div>
-				<h2 className="text-2xl font-bold text-primary-content mb-6">
-					Border Radius
-				</h2>
-				<div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-					<div className="text-center">
-						<div className="w-24 h-24 bg-primary rounded-none mx-auto mb-2" />
-						<code className="text-xs text-muted">
-							rounded-none
-						</code>
-					</div>
-					<div className="text-center">
-						<div className="w-24 h-24 bg-primary rounded-sm mx-auto mb-2" />
-						<code className="text-xs text-muted">
-							rounded-sm
-						</code>
-					</div>
-					<div className="text-center">
-						<div className="w-24 h-24 bg-primary rounded mx-auto mb-2" />
-						<code className="text-xs text-muted">
-							rounded
-						</code>
-					</div>
-					<div className="text-center">
-						<div className="w-24 h-24 bg-primary rounded-md mx-auto mb-2" />
-						<code className="text-xs text-muted">
-							rounded-md
-						</code>
-					</div>
-					<div className="text-center">
-						<div className="w-24 h-24 bg-primary rounded-lg mx-auto mb-2" />
-						<code className="text-xs text-muted">
-							rounded-lg
-						</code>
-					</div>
-					<div className="text-center">
-						<div className="w-24 h-24 bg-primary rounded-xl mx-auto mb-2" />
-						<code className="text-xs text-muted">
-							rounded-xl
-						</code>
-					</div>
-					<div className="text-center">
-						<div className="w-24 h-24 bg-primary rounded-2xl mx-auto mb-2" />
-						<code className="text-xs text-muted">
-							rounded-2xl
-						</code>
-					</div>
-					<div className="text-center">
-						<div className="w-24 h-24 bg-primary rounded-full mx-auto mb-2" />
-						<code className="text-xs text-muted">
-							rounded-full
-						</code>
-					</div>
-				</div>
-			</div>
-		</div>
-	),
-};
-
-export const Surfaces: Story = {
-	render: () => (
-		<div className="space-y-8">
-			<div>
-				<h2 className="text-2xl font-bold text-primary-content mb-6">
-					Editorial Surfaces
-				</h2>
-				<p className="text-sm text-secondary-content mb-6 max-w-2xl">
-					Editorial design uses flat surfaces with 1px hairline borders — no
-					gradients, no backdrop blur, no depth shadows. The four primary
-					surface tokens cover ~95% of cases.
+			))}
+			<div style={{ display: "grid", gap: "0.5rem", maxWidth: "680px" }}>
+				<code style={mono}>academy-text · academy-reading</code>
+				<p style={{ margin: 0, fontSize: "1.125rem", lineHeight: 1.65 }}>
+					Rawkode Academy makes complex cloud-native systems easier to learn
+					without pretending they are simple. Reading copy sets at 680px so a
+					line holds about seventy characters.
 				</p>
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-					{[
-						["Paper", "var(--editorial-paper)", "Default page background"],
-						[
-							"Paper deep",
-							"var(--editorial-paper-deep)",
-							"Secondary surface — card backgrounds, video frames",
-						],
-						[
-							"Surface card muted",
-							"var(--surface-card-muted)",
-							"Hover state, subtle wells",
-						],
-						[
-							"Ink",
-							"var(--editorial-ink)",
-							"Solid ink background (CTAs, panels)",
-						],
-					].map(([name, value, note]) => (
-						<div key={name}>
-							<p className="text-sm font-medium text-primary-content mb-2">
-								{name}
-							</p>
-							<div
-								className="w-full h-24 rounded-sm border border-[var(--editorial-hairline)]"
-								style={{ background: value }}
-							/>
-							<code className="text-xs text-muted block mt-2">{value}</code>
-							<p className="text-xs text-muted mt-1">{note}</p>
-						</div>
-					))}
-				</div>
+				<code style={mono}>
+					academy-mono · 2026-11-09 · 42:18 · Intermediate
+				</code>
 			</div>
 		</div>
 	),

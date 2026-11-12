@@ -8,9 +8,12 @@ export interface BuildHowToJsonLdInput {
 	imageUrl?: string;
 	publishedAt: Date;
 	updatedAt?: Date;
-	/** From Astro's `render(article)` return value. */
+	/** From `renderEntry(article)` (same shape as Astro's `render()`). */
 	headings: ReadonlyArray<MarkdownHeading>;
-	/** Raw markdown source of the article. */
+	/**
+	 * Markdown rendition of the article body: `documentToMarkdown(article.data.body)`.
+	 * (`entry.body` is plain text now, without the `## ` heading markers.)
+	 */
 	body: string;
 	/** Optional ISO 8601 duration for the whole tutorial (e.g. "PT45M"). */
 	totalTime?: string;
@@ -102,8 +105,7 @@ function sliceBodyByH2(body: string): Map<string, string> {
 	const headingRegex = /^##\s+(.+?)\s*$/gm;
 
 	const matches: Array<{ text: string; start: number; end: number }> = [];
-	let m: RegExpExecArray | null;
-	while ((m = headingRegex.exec(body)) !== null) {
+	for (const m of body.matchAll(headingRegex)) {
 		matches.push({ text: m[1] ?? "", start: m.index + m[0].length, end: 0 });
 	}
 	for (let i = 0; i < matches.length; i++) {

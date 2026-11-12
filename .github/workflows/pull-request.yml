@@ -1,0 +1,43 @@
+# The check every pull request must pass before it can merge. It runs without
+# secrets, so it also runs for forks: it evaluates the configuration and
+# checks the committed generated files are in sync, but contacts no provider
+# and reads no state.
+
+name: pull-request
+on:
+  pull_request: {}
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    name: validate
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Install cuenv
+      run: |-
+        cuenv_version="$(sed -n 's/^\t\tversion: "\(.*\)"$/\1/p' env.cue | head -n 1)"
+        curl -fsSL -o "$RUNNER_TEMP/cuenv" "https://github.com/cuenv/cuenv/releases/download/${cuenv_version}/cuenv-linux-x64"
+        chmod +x "$RUNNER_TEMP/cuenv"
+        echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+    # Many generated files (provider types, vendored skills, codegen output)
+    # are ignored, so materialise everything the way the other workflows do,
+    # then fail if anything committed changed.
+    - name: Sync generated files
+      run: cuenv sync -A
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+    - name: Check committed files are in sync
+      run: |-
+        if [ -n "$(git status --porcelain)" ]; then
+          git status --short
+          git diff
+          echo "::error::Generated files are out of sync: run 'cuenv sync -A' and commit the result."
+          exit 1
+        fi

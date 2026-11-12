@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from "vue";
+import { createLiveStatePoller } from "@rawkodeacademy/live-viewer";
 import {
 	emptyStudioLiveState,
 	parseStudioLiveState,
@@ -27,12 +28,24 @@ const liveState = ref<StudioLiveState>(
 		: emptyStudioLiveState(),
 );
 let pollTimer: number | undefined;
+const livePoller = createLiveStatePoller({
+	async load(signal) {
+		const response = await fetch(
+			`/api/studio/live-state?videoSlug=${encodeURIComponent(props.videoSlug)}`,
+			{ cache: "no-store", signal },
+		);
+		if (!response.ok) throw new Error("Live state unavailable.");
+		return parseStudioLiveState(await response.json());
+	},
+	onState(state) { liveState.value = state; },
+	onUnavailable() { liveState.value = emptyStudioLiveState(); },
+});
 
 onMounted(() => {
 	if (props.youtubeId) return;
-	void refreshLiveState();
+	void livePoller.refresh();
 	pollTimer = window.setInterval(() => {
-		void refreshLiveState();
+		void livePoller.refresh();
 	}, 15_000);
 });
 
@@ -40,17 +53,8 @@ onUnmounted(() => {
 	if (pollTimer !== undefined) {
 		window.clearInterval(pollTimer);
 	}
+	livePoller.dispose();
 });
-
-async function refreshLiveState(): Promise<void> {
-	const response = await fetch(
-		`/api/studio/live-state?videoSlug=${encodeURIComponent(props.videoSlug)}`,
-	).catch(() => null);
-	if (!response?.ok) return;
-	liveState.value = parseStudioLiveState(
-		await response.json().catch(() => null),
-	);
-}
 </script>
 
 <template>

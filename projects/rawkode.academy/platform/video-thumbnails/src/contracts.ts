@@ -35,7 +35,7 @@ export interface ThumbnailShow {
 
 export interface ThumbnailSource {
 	commitSha: string;
-	trigger: "github-actions" | "manual" | "test";
+	trigger: "github-actions" | "manual" | "scheduled" | "test";
 	contentPath?: string;
 }
 

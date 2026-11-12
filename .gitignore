@@ -3,6 +3,7 @@
 
 # cuenv local config
 local.cue
+.cuenv/reports/
 
 # Devenv
 .devenv*
@@ -15,6 +16,9 @@ devenv.local.nix
 # NodeJS
 node_modules
 dist
+
+# Astro generated types and content cache
+.astro/
 
 # Rust
 target
@@ -41,11 +45,6 @@ devenv.local.nix
 *.tfstate
 *.tfstate.*
 
-# Generated YouTube descriptions — built on demand from video frontmatter
-# (see content/scripts/build-youtube-description.ts), pasted into YouTube
-# by hand, not source of truth.
-content/scripts/output/youtube-descriptions/
-
 # Local Claude Code agent state
 **/.claude/scheduled_tasks.lock
 
@@ -60,4 +59,20 @@ content/scripts/output/youtube-descriptions/
 # BEGIN cuenv infrastructure
 /cue.mod/gen/registry.terraform.io/cloudflare/cloudflare/
 /cue.mod/gen/registry.terraform.io/dnsimple/dnsimple/
+/cue.mod/gen/registry.terraform.io/infisical/infisical/
+/cue.mod/gen/registry.terraform.io/integrations/github/
 # END cuenv infrastructure
+
+# swamp (kept by hand: cuenv rejects swamp's BEGIN/END markers, see gitignoreManaged in .swamp.yaml)
+
+# Runtime data (not needed in version control)
+.swamp/
+
+# Local extension sources (developer-specific, not shared)
+.swamp-sources.yaml
+
+# Claude Code configuration (managed by swamp)
+.claude/worktrees/
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+.claude/scheduled_tasks.json

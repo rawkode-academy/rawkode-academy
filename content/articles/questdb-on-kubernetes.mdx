@@ -1,6 +1,6 @@
 ---
-title: "QuestDB on Kubernetes"
-description: "I was first introduced to QuestDB by my former colleague, David Simmons, who now runs their Developer..."
+title: QuestDB on Kubernetes
+description: I was first introduced to QuestDB by my former colleague, David Simmons, who now runs their Developer...
 type: tutorial
 publishedAt: 2020-08-24
 authors:
@@ -18,7 +18,7 @@ I opted for Kubernetes, as there was no Helm chart currently available; this wou
 
 If you'd prefer to watch a video than read this blog, fear not! You can watch David and I run through this process in the following video, which also includes configuring Telegraf to write data to QuestDB.
 
-<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/EFpZzgj8EfE" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe>
+<iframe src="https://www.youtube-nocookie.com/embed/EFpZzgj8EfE" width={560} height={315} allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
 
 ## Installing QuestDB on Kubernetes with Helm
 
@@ -235,7 +235,7 @@ service:
 
 You know what's more fun than accessing QuestDB internally within your cluster? Making it public ... ooooooh yeah.
 
-<iframe src="https://giphy.com/embed/aTx5OMKR7FCGQ" width="480" height="270" frameborder="0" allowfullscreen=""></iframe>
+<iframe src="https://giphy.com/embed/aTx5OMKR7FCGQ" width={480} height={270} allowFullScreen />
 
 The Helm chart allows you to leverage Kubernetes Ingress controllers to expose your services to the big bad world. In fact, QuestDB being rather bold ... actually runs their [own public QuestDB](https://questdb.io/blog/2020/07/01/we-put-a-sql-database-on-the-internet) that allows you to query 2.6 billion records ... that's wild. I don't think anyone's broken it ... yet 😂
 

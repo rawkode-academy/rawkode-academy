@@ -1,6 +1,5 @@
 import { access, readdir, readFile } from "node:fs/promises";
-import { join, relative } from "node:path";
-import { resolveContentDir } from "@rawkodeacademy/content/utils";
+import { join, relative, resolve } from "node:path";
 import { createLogger } from "../lib/logger";
 
 const logger = createLogger("webcontainer-demos");
@@ -15,6 +14,8 @@ interface VitePlugin {
 	) => string | null | undefined | Promise<string | null | undefined>;
 }
 
+// Root-relative, as import.meta.glob expects; keys come back in this form.
+const GLOB_BASE = "/src/webcontainer-demos";
 const VIRTUAL_MODULE_ID = "virtual:webcontainer-demos";
 const RESOLVED_VIRTUAL_MODULE_ID = "\0" + VIRTUAL_MODULE_ID;
 
@@ -31,7 +32,9 @@ interface DemoInfo {
 	config: DemoConfig;
 }
 
-// Auto-discover all demos in the courses directory
+// Demo trees live in src/webcontainer-demos/<course>/<demo> (they moved out of
+// content/courses/<course>/examples when course content moved to D1). Course
+// resources reference them by `embedConfig.import.localDir` = "<course>/<demo>".
 async function discoverDemos(coursesDir: string): Promise<DemoInfo[]> {
 	const demos: DemoInfo[] = [];
 
@@ -41,8 +44,7 @@ async function discoverDemos(coursesDir: string): Promise<DemoInfo[]> {
 		for (const course of courses) {
 			if (!course.isDirectory()) continue;
 
-			const coursePath = join(coursesDir, course.name);
-			const examplesPath = join(coursePath, "examples");
+			const examplesPath = join(coursesDir, course.name);
 
 			try {
 				await access(examplesPath);
@@ -77,7 +79,7 @@ async function discoverDemos(coursesDir: string): Promise<DemoInfo[]> {
 					});
 				}
 			} catch {
-				// No examples directory for this course
+				// Unreadable course directory
 			}
 		}
 	} catch (error) {
@@ -94,9 +96,12 @@ export function webcontainerDemosPlugin(): VitePlugin {
 	return {
 		name: "vite-plugin-webcontainer-demos",
 
-		async configResolved(_config) {
+		async configResolved(config) {
 			// Discover all demos at build time
-			coursesDir = await resolveContentDir("courses");
+			coursesDir = resolve(
+				config.root ?? process.cwd(),
+				"src/webcontainer-demos",
+			);
 			demos = await discoverDemos(coursesDir);
 			logger.info(`Discovered ${demos.length} WebContainer demos`);
 		},
@@ -119,7 +124,7 @@ export function webcontainerDemosPlugin(): VitePlugin {
 
 			demos.forEach((demo, index) => {
 				const key = `${demo.courseId}/${demo.demoId}`;
-				const globPattern = `${coursesDir}/${demo.path}/**/*`;
+				const globPattern = `${GLOB_BASE}/${demo.path}/**/*`;
 
 				// Use Vite's updated glob options: `query` + `import`
 				imports.push(
@@ -148,7 +153,7 @@ export function loadDemoFiles(courseId, demoId) {
   }
   
   const processedFiles = {};
-  const basePath = \`${coursesDir}/\${demo.path}/\`;
+  const basePath = \`${GLOB_BASE}/\${demo.path}/\`;
   
   for (const [path, content] of Object.entries(demo.files)) {
     if (path.startsWith(basePath)) {

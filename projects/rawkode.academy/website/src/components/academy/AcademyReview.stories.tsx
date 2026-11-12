@@ -3,6 +3,7 @@ import {
 	academyDocument,
 	academyForms,
 	academyLayout,
+	button,
 } from "@rawkodeacademy/design-system";
 import { useId } from "react";
 import { defineComponent, h } from "vue";
@@ -16,7 +17,9 @@ import EmptyState from "../ui/EmptyState.vue";
 import ErrorState from "../common/ErrorState.vue";
 import SkeletonTranscript from "../common/SkeletonTranscript.vue";
 import ResourceSimulator from "../articles/cgroups/ResourceSimulator";
-import teleportCover from "../../../../../../content/courses/teleport-for-kubernetes.png?url";
+// Production covers come from the content CDN. A story must render with no
+// network, so the fixture uses artwork that ships in public/.
+import teleportCover from "../../../public/games/secret-of-kubernetes-island/scenes/scene-control-plane.webp?url";
 
 const doc = academyDocument();
 const form = academyForms();
@@ -100,7 +103,11 @@ function CourseFixture({ empty = false }: { empty?: boolean }) {
 	);
 }
 
-export const Default: Story = { render: () => <CourseFixture /> };
+// Composed specimens with a screenshot baseline (bun run test:visual).
+export const Default: Story = {
+	tags: ["visual", "visual-mobile"],
+	render: () => <CourseFixture />,
+};
 export const CourseWithoutLessons: Story = {
 	render: () => <CourseFixture empty />,
 	play: async ({ canvasElement }) => {
@@ -128,6 +135,7 @@ export const Loading: Story = {
 	),
 };
 
+// biome-ignore lint/suspicious/noShadowRestrictedNames: Storybook story name
 export const Error: Story = {
 	render: () => (
 		<VueInReact
@@ -289,7 +297,11 @@ function FormRecipeFixture({ state = "default" }: { state?: FormState }) {
 					Optional consent checkbox specimen
 				</label>
 			</div>
-			<button className={form.button} type="button" disabled={disabled}>
+			<button
+				className={button({ fullWidth: true })}
+				type="button"
+				disabled={disabled}
+			>
 				Button specimen · no submission
 			</button>
 		</section>
@@ -316,6 +328,7 @@ export const FormLabels: Story = {
 	},
 };
 export const FormError: Story = {
+	tags: ["visual"],
 	render: () => <FormRecipeFixture state="error" />,
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -404,6 +417,7 @@ const resourceFixtures = [
 ] as const;
 
 export const Resources: Story = {
+	tags: ["visual"],
 	render: () => (
 		<div
 			className={[layout.container, doc.stack].join(" ")}

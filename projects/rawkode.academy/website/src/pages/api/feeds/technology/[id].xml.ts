@@ -1,60 +1,58 @@
-import { getCollection } from "astro:content";
 import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
 import { withRssMimeType } from "../../../../lib/feed-utils";
 import { isNewsPublished } from "@/lib/news-publication";
+import {
+	getCollection,
+	getEntry,
+	sameId,
+	setContentCache,
+} from "@/lib/live-content";
 
 import type { RSSFeedItem } from "@astrojs/rss";
 
-interface Props {
-	technologyName: string;
-	technologyRawId: string;
-	technologyIndexedId: string;
-}
-
-export async function getStaticPaths() {
-	const technologies = await getCollection("technologies");
-	return technologies.map((technology) => {
-		const rawId = technology.id.replace(/\/index$/, "");
-		return {
-			params: { id: rawId },
-			props: {
-				technologyName: technology.data.name,
-				technologyRawId: rawId,
-				technologyIndexedId: technology.id,
-			} satisfies Props,
-		};
-	});
-}
+export const prerender = false;
 
 export async function GET(context: APIContext) {
 	const now = new Date();
-	const { technologyName, technologyRawId, technologyIndexedId } =
-		context.props as Props;
+	const id = context.params.id;
+	const technology = id ? await getEntry("technologies", id) : undefined;
+	if (!technology) {
+		return new Response("Technology feed not found", { status: 404 });
+	}
+	const technologyName = technology.data.name;
 
 	const matches = (
 		technologies: ReadonlyArray<string | { id?: string }> | undefined,
-	): boolean => {
-		if (!Array.isArray(technologies)) return false;
-		for (const value of technologies) {
-			const id = typeof value === "string" ? value : value?.id;
-			if (id === technologyRawId || id === technologyIndexedId) {
-				return true;
-			}
-		}
-		return false;
-	};
+	): boolean =>
+		Array.isArray(technologies) &&
+		technologies.some((value) =>
+			sameId(typeof value === "string" ? value : value?.id, technology.id),
+		);
 
+	// Future-dated articles and news are hidden by the content layer; upcoming
+	// streams are excluded here so the feed only lists published recordings.
 	const [articles, news, videos] = await Promise.all([
-		getCollection("articles"),
-		getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
-		getCollection("videos"),
+		getCollection("articles", ({ data }) => matches(data.technologies)),
+		getCollection(
+			"news",
+			({ data }) =>
+				isNewsPublished(data.publishedAt, now) && matches(data.technologies),
+		),
+		getCollection(
+			"videos",
+			({ data }) => data.publishedAt <= now && matches(data.technologies),
+		),
 	]);
+
+	await setContentCache(context, {
+		entries: [technology, ...articles, ...news, ...videos],
+		collections: ["articles", "news", "videos"],
+	});
 
 	const items: RSSFeedItem[] = [];
 
 	for (const article of articles) {
-		if (!matches(article.data.technologies)) continue;
 		items.push({
 			title: article.data.title,
 			description: article.data.description ?? "",
@@ -65,7 +63,6 @@ export async function GET(context: APIContext) {
 	}
 
 	for (const story of news) {
-		if (!matches(story.data.technologies)) continue;
 		items.push({
 			title: story.data.title,
 			description: story.data.description ?? "",
@@ -76,7 +73,6 @@ export async function GET(context: APIContext) {
 	}
 
 	for (const video of videos) {
-		if (!matches(video.data.technologies as ReadonlyArray<string>)) continue;
 		items.push({
 			title: video.data.title,
 			description: video.data.description ?? "",

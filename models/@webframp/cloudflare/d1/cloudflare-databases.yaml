@@ -1,0 +1,10 @@
+type: '@webframp/cloudflare/d1'
+typeVersion: 2026.11.03.1
+id: 127abfb4-f327-4fb8-a371-36e24b92b3ef
+name: cloudflare-databases
+version: 1
+tags: {}
+globalArguments:
+  accountId: 0aeb879de8e3cdde5fb3d413025222ce
+  apiToken: '${{ vault.get(rawkode-academy, cloudflare/api-tokens/workers) }}'
+methods: {}

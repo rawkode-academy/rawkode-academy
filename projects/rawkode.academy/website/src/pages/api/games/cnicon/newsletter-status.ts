@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
-import { createLearnerId } from "@/actions/newsletter";
+import { createLearnerId } from "@/lib/newsletter-ids";
 
 const AUDIENCE = "cnicon";
 

@@ -1,41 +1,42 @@
-import type { StoryObj } from "@storybook/vue3";
+import type { Meta, StoryObj } from "@storybook/react";
+import { defineComponent, h } from "vue";
+import { VueInReact } from "../vue-wrapper";
 import MLabel from "./MLabel.vue";
 
 const meta = {
-	title: "UI/Editorial/MLabel",
-	component: MLabel,
-	tags: ["autodocs"],
-	argTypes: {
-		tone: {
-			control: "select",
-			options: ["muted", "soft", "ink", "accent", "amber", "rust", "spruce"],
-		},
-	},
-};
+	title: "Components/UI/MLabel",
+} satisfies Meta;
+
 export default meta;
-type Story = StoryObj<typeof MLabel>;
+type Story = StoryObj<typeof meta>;
+
+const tones = [
+	"muted",
+	"soft",
+	"ink",
+	"accent",
+	"amber",
+	"rust",
+	"spruce",
+] as const;
+
+const DefaultSpecimen = defineComponent({
+	setup: () => () => h(MLabel, { tone: "muted" }, () => "Articles"),
+});
+
+const TonesSpecimen = defineComponent({
+	setup: () => () =>
+		h(
+			"div",
+			{ style: "display:flex;flex-direction:column;gap:0.75rem" },
+			tones.map((tone) => h(MLabel, { tone }, () => `Tone ${tone}`)),
+		),
+});
 
 export const Default: Story = {
-	render: (args) => ({
-		components: { MLabel },
-		setup: () => ({ args }),
-		template: `<MLabel v-bind="args">Articles</MLabel>`,
-	}),
-	args: { tone: "muted" },
+	render: () => <VueInReact component={DefaultSpecimen} />,
 };
 
 export const Tones: Story = {
-	render: () => ({
-		components: { MLabel },
-		template: `
-			<div style="display:flex;flex-direction:column;gap:0.75rem">
-				<MLabel tone="muted">§00 · Muted</MLabel>
-				<MLabel tone="soft">§01 · Soft</MLabel>
-				<MLabel tone="ink">§02 · Ink</MLabel>
-				<MLabel tone="accent">§03 · Accent (spruce)</MLabel>
-				<MLabel tone="amber">§04 · Amber</MLabel>
-				<MLabel tone="rust">§05 · Rust</MLabel>
-			</div>
-		`,
-	}),
+	render: () => <VueInReact component={TonesSpecimen} />,
 };

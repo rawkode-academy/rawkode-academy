@@ -9,6 +9,9 @@ name: "rawkode-academy-website"
 runtime: schema.#DevenvRuntime
 hooks: onEnter: devenv: schema.#Devenv
 
+// deploy.main and deploy.preview read BASIN_SQL_TOKEN from Infisical.
+_ciInfisicalOidc: true
+
 let _t = tasks
 // CI tasks resolve their tools through Nix directly, the way the platform
 // services do, instead of relying on the devenv shell being materialised on
@@ -22,6 +25,11 @@ env: {
 	DISABLE_GAME_AUTH: true
 	environment: production: {
 		DISABLE_GAME_AUTH: false
+		// Worker secret for POST /api/cache/invalidate; scripts/wrangler-deploy.ts
+		// uploads it with every deploy and preview.
+		CACHE_INVALIDATION_TOKEN: schema.#OnePasswordRef & {
+			ref: "op://sa.rawkode.academy/website-cache-invalidation/password"
+		}
 	}
 }
 
@@ -59,6 +67,7 @@ tasks: {
 			"astro.config.mts",
 			"package.json",
 			"../../../bun.lock",
+			"../../../packages/live-viewer/**",
 			"scripts/**",
 			"vitest.config.ts",
 			"public/**",
@@ -75,15 +84,16 @@ tasks: {
 		// env.cue is included so build-time env changes (e.g. DISABLE_GAME_AUTH)
 		// mark the build/deploy affected; otherwise CI would skip the redeploy.
 		inputs: [
-			// CI change detection compares repo-relative paths; retain the
-			// definition-relative glob below for local/task input resolution.
-			"content/**",
-			"../../../content/**",
+			// Articles are files compiled into the site; all other content is
+			// served live from the API gateway.
+			"../../../content/articles/**",
 			"astro.config.mts",
 			"env.cue",
 			"../../../packages/design-system/**",
+			"../../../packages/rich-text/**",
 			"package.json",
 			"../../../bun.lock",
+			"../../../packages/live-viewer/**",
 			"scripts/**",
 			"vitest.config.ts",
 			"public/**",
@@ -103,21 +113,34 @@ tasks: {
 			command:  "sh"
 			args: [
 				"-lc",
-				"\(_toolchain) sh -c 'bun run build && bun x wrangler deploy --config ./dist/server/wrangler.json'",
+				"\(_toolchain) sh -c 'bun run build && bun scripts/wrangler-deploy.ts deploy --config ./dist/server/wrangler.json --purge'",
 			]
-			env: PATH: _taskPath
+			labels: ["infisical"]
+			env: {
+				PATH: _taskPath
+				// Written to Infisical by the observability collector's
+				// infrastructure.cue. scripts/wrangler-deploy.ts uploads it.
+				BASIN_SQL_TOKEN: schema.#InfisicalSecret & {
+					projectId:   "6575a392d7a5ef0555ade86b"
+					environment: "production"
+					secretPath:  "/projects/basin"
+					secretName:  "BASIN_SQL_TOKEN"
+					apiUrl:      "https://app.infisical.com"
+				}
+			}
 			// env.cue drives build-time vars (e.g. DISABLE_GAME_AUTH); include it so
 			// an env-only change marks this deploy affected (else CI skips it).
 			inputs: [
-				// CI change detection compares repo-relative paths; retain the
-				// definition-relative glob below for local/task input resolution.
-				"content/**",
-				"../../../content/**",
+				// Articles are files compiled into the site; all other content is
+				// served live from the API gateway.
+				"../../../content/articles/**",
 				"astro.config.mts",
 				"env.cue",
 				"../../../packages/design-system/**",
+				"../../../packages/rich-text/**",
 				"package.json",
 				"../../../bun.lock",
+				"../../../packages/live-viewer/**",
 				"scripts/**",
 				"vitest.config.ts",
 				"public/**",
@@ -128,7 +151,7 @@ tasks: {
 		preview: schema.#Task & {
 			hermetic: false
 			command:  "sh"
-			args: ["-lc", "\(_toolchain) bun x wrangler versions upload"]
+			args: ["-lc", "\(_toolchain) bun scripts/wrangler-deploy.ts versions upload"]
 			env: PATH: _taskPath
 			dependsOn: [_t.build]
 			// A pull-request preview is the pipeline's deliverable, so it must run

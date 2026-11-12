@@ -62,36 +62,34 @@ function fmt(iso?: string | null) {
 
 {
 	scheduled.length === 0 ? (
-		<div class="mx-auto max-w-2xl rounded-sm paper-card p-12 text-center">
-			<p class="text-lg font-medium text-secondary-content">
-				Nothing scheduled yet
-			</p>
-			<p class="mt-2 text-sm text-muted">
+		<div class="schedule-empty">
+			<p class="schedule-empty__title">Nothing scheduled yet</p>
+			<p class="schedule-empty__copy">
 				Match times appear here once brackets are drawn.
 			</p>
 		</div>
 	) : (
-		<div class="flex flex-col gap-5">
+		<div class="schedule">
 			{groups.map((group) => (
 				<section>
-					<h2 class="mb-3 text-xl font-semibold text-primary-content">{group.title}</h2>
-					<ul class="flex flex-col gap-3" role="list">
+					<h2 class="schedule__title">{group.title}</h2>
+					<ul class="schedule__list" role="list">
 						{group.matches.map((m) => {
 							const date = fmt(m.scheduledAt);
 							return (
-								<li class="flex flex-wrap items-center justify-between gap-3 rounded-sm paper-card p-4">
-									<div class="flex items-center gap-3">
-										<span class="font-medium text-primary-content">{m.sideA?.displayName ?? "TBD"}</span>
-										<span class="text-xs text-muted">vs</span>
-										<span class="font-medium text-primary-content">{m.sideB?.displayName ?? "TBD"}</span>
+								<li class="schedule__match">
+									<div class="schedule__sides">
+										<span class="schedule__side">{m.sideA?.displayName ?? "TBD"}</span>
+										<span class="schedule__versus">vs</span>
+										<span class="schedule__side">{m.sideB?.displayName ?? "TBD"}</span>
 									</div>
-									<div class="flex items-center gap-3 text-sm text-muted">
+									<div class="schedule__meta">
 										{date ? <time {...date.attrs}>{date.label}</time> : <span>{m.status === "completed" ? "Time unavailable" : "Time to be announced"}</span>}
-										{m.status === "live" && <span class="font-semibold text-secondary">● LIVE</span>}
+										{m.status === "live" && <span class="schedule__live">● LIVE</span>}
 										{m.status === "completed" && (
-											<span class="text-xs">{m.winner?.displayName ? `${m.winner.displayName} won` : "Completed"}</span>
+											<span class="schedule__status">{m.winner?.displayName ? `${m.winner.displayName} won` : "Completed"}</span>
 										)}
-										{m.status !== "live" && m.status !== "completed" && <span class="text-xs">{m.status}</span>}
+										{m.status !== "live" && m.status !== "completed" && <span class="schedule__status">{m.status}</span>}
 									</div>
 								</li>
 							);
@@ -102,3 +100,102 @@ function fmt(iso?: string | null) {
 		</div>
 	)
 }
+
+<style>
+	.schedule-empty,
+	.schedule__match {
+		background: var(--colors-academy-panel);
+		border: 1px solid var(--colors-academy-border);
+		border-radius: var(--radii-academy-s);
+	}
+
+	.schedule-empty {
+		max-width: 42rem;
+		margin-inline: auto;
+		padding: 3rem;
+		text-align: center;
+	}
+
+	.schedule-empty__title {
+		margin: 0;
+		font-size: 1.125rem;
+		line-height: 1.75rem;
+		font-weight: 500;
+		color: var(--colors-academy-text-soft);
+	}
+
+	.schedule-empty__copy {
+		margin: 0.5rem 0 0;
+		font-size: 0.875rem;
+		line-height: 1.25rem;
+		color: var(--colors-academy-text-muted);
+	}
+
+	.schedule {
+		display: flex;
+		flex-direction: column;
+		gap: 1.25rem;
+	}
+
+	.schedule__title {
+		margin: 0 0 0.75rem;
+		font-size: 1.25rem;
+		line-height: 1.75rem;
+		font-weight: 600;
+		color: var(--colors-academy-text);
+	}
+
+	.schedule__list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.schedule__match {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+		padding: 1rem;
+	}
+
+	.schedule__sides,
+	.schedule__meta {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		min-width: 0;
+	}
+
+	.schedule__side {
+		font-weight: 500;
+		color: var(--colors-academy-text);
+		overflow-wrap: anywhere;
+	}
+
+	.schedule__versus,
+	.schedule__status {
+		font-size: 0.75rem;
+		line-height: 1rem;
+	}
+
+	.schedule__versus,
+	.schedule__meta {
+		color: var(--colors-academy-text-muted);
+	}
+
+	.schedule__meta {
+		flex-wrap: wrap;
+		font-size: 0.875rem;
+		line-height: 1.25rem;
+	}
+
+	.schedule__live {
+		font-weight: 600;
+		color: var(--colors-academy-accent);
+	}
+</style>

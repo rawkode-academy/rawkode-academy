@@ -1,24 +1,25 @@
 <template>
 	<div :class="s.root">
-		<p role="status" aria-live="polite" aria-atomic="true" :class="ready ? s.hidden : s.copy">{{ statusMessage }}</p>
+		<p role="status" aria-live="polite" aria-atomic="true" :class="s.hidden">{{ statusMessage }}</p>
 		<p :id="errorId" role="alert" aria-atomic="true" :class="error ? s.error : s.hidden" :data-error-code="errorCode || undefined">{{ error }}</p>
 		<p v-if="fallback" :class="s.copy">
-			<a :href="fallbackMailto">Email David directly</a> with the details you entered.
+			<a :href="fallbackMailto">Email me directly</a> with the details you entered.
 		</p>
 		<div v-if="submitted" :class="[s.panel, s.status]">
-			<h3 :class="s.heading">Enquiry received</h3>
-			<p :class="s.copy">David reads every enquiry and will reply by email.</p>
+			<h3 ref="successHeading" :class="s.heading" tabindex="-1">Enquiry received</h3>
+			<p :class="s.copy">I read every enquiry and will reply by email.</p>
 		</div>
 		<form
 			v-else
 			method="POST"
 			action="?_action=partnership.applyForm"
+			ref="formElement"
 			:class="s.form"
 			@submit="onSubmit"
 			:aria-busy="loading"
 			:aria-describedby="error ? errorId : undefined"
 		>
-			<fieldset :class="[s.form, 'form-controls']" :disabled="loading" aria-label="Product review enquiry" @input="trackStarted">
+			<fieldset :class="[s.form, 'form-controls']" :disabled="loading" aria-label="Academy enquiry" @input="trackStarted">
 				<div class="form-honeypot" aria-hidden="true">
 					<label :for="honeypotId">Website</label>
 					<input
@@ -55,6 +56,7 @@
 							v-model="email"
 							:class="s.input"
 							type="email"
+							maxlength="254"
 							name="email"
 							autocomplete="email"
 							required
@@ -93,7 +95,7 @@
 						:aria-invalid="fieldErrors.path ? 'true' : undefined"
 						:aria-describedby="fieldErrors.path ? pathErrorId : undefined"
 					>
-						<option v-for="option in applicationPaths" :key="option" :value="option">{{ option }}</option>
+						<option v-for="option in applicationPaths" :key="option" :value="option">{{ applicationPathLabels[option] }}</option>
 					</select>
 					<p v-if="fieldErrors.path" :id="pathErrorId" :class="s.fieldError">{{ fieldErrors.path }}</p>
 				</div>
@@ -114,22 +116,30 @@
 					<p v-if="fieldErrors.message" :id="messageErrorId" :class="s.fieldError">{{ fieldErrors.message }}</p>
 				</div>
 
-				<button type="submit" :class="s.button" :disabled="loading">
+				<button type="submit" :class="button({ fullWidth: true })" :disabled="loading">
 					{{ loading ? "Sending enquiry..." : "Send enquiry" }}
 				</button>
 			</fieldset>
-			<p v-if="!ready" :class="s.copy">You can <a href="mailto:david@rawkode.academy">email David directly</a> instead.</p>
+			<p v-if="!ready" :class="s.copy">You can <a href="mailto:david@rawkode.academy">email me directly</a> instead.</p>
 		</form>
 	</div>
 </template>
 
 <script setup lang="ts">
 import { actions, isInputError } from "astro:actions";
-import { academyForms } from "@rawkodeacademy/design-system";
-import { computed, onBeforeUnmount, onMounted, ref, useId } from "vue";
+import { academyForms, button } from "@rawkodeacademy/design-system";
+import {
+	computed,
+	nextTick,
+	onBeforeUnmount,
+	onMounted,
+	ref,
+	useId,
+} from "vue";
+import { capture } from "@/lib/analytics/track";
 import {
 	type ApplicationPath,
-	applicationPathDeals,
+	applicationPathLabels,
 	applicationPaths,
 	resolveApplicationPath,
 } from "@/lib/partnerships";
@@ -147,7 +157,7 @@ const props = withDefaults(
 		serverFieldErrors?: Record<string, string>;
 	}>(),
 	{
-		initialPath: "Not sure yet",
+		initialPath: "Partnership",
 		submittedValues: () => ({}),
 		serverFieldErrors: () => ({}),
 	},
@@ -168,7 +178,7 @@ const pathErrorId = `${pathId}-error`;
 const messageErrorId = `${messageId}-error`;
 
 const FALLBACK_ERROR =
-	"We could not send your enquiry. Please email david@rawkode.academy directly.";
+	"Your enquiry wasn't sent. Please email me at david@rawkode.academy.";
 
 const isApplicationPath = (value: string): value is ApplicationPath =>
 	(applicationPaths as readonly string[]).includes(value);
@@ -179,7 +189,7 @@ const email = ref(submittedText(props.submittedValues.email));
 const company = ref(submittedText(props.submittedValues.company));
 const submittedPath = props.submittedValues.path ?? "";
 const path = ref<ApplicationPath>(
-	isApplicationPath(submittedPath) ? submittedPath : props.initialPath,
+	resolveApplicationPath(submittedPath) ?? props.initialPath,
 );
 const message = ref(submittedText(props.submittedValues.message));
 const website = ref("");
@@ -195,7 +205,7 @@ const fieldErrors = ref<Record<string, string>>({
 	...props.serverFieldErrors,
 });
 const fallbackMailto = computed(() => {
-	const subject = encodeURIComponent("Product review enquiry");
+	const subject = encodeURIComponent(`Rawkode Academy enquiry: ${applicationPathLabels[path.value]}`);
 	const body = encodeURIComponent(
 		[
 			`Name: ${name.value}`,
@@ -211,9 +221,25 @@ const fallbackMailto = computed(() => {
 const statusMessage = computed(() => {
 	if (!ready.value) return "Loading enquiry form...";
 	if (submitted.value)
-		return "Enquiry received. David reads every enquiry and will reply by email.";
+		return "Enquiry received. I read every enquiry and will reply by email.";
 	return loading.value ? "Sending enquiry..." : "";
 });
+
+const formElement = ref<HTMLFormElement | null>(null);
+const successHeading = ref<HTMLHeadingElement | null>(null);
+
+// The form is replaced on success and the submit button keeps focus on
+// errors, so move focus to where the result is.
+const focusResult = async () => {
+	await nextTick();
+	if (submitted.value) {
+		successHeading.value?.focus();
+		return;
+	}
+	formElement.value
+		?.querySelector<HTMLElement>("[aria-invalid='true']")
+		?.focus();
+};
 
 const onDocumentClick = (event: MouseEvent) => {
 	const target = event.target as HTMLElement | null;
@@ -242,12 +268,17 @@ onBeforeUnmount(() => {
 const capturePartnershipEvent = (
 	event: "enquiry_form_started" | "enquiry_form_submitted",
 ) => {
-	window.posthog?.capture(event, {
+	capture(event, {
 		form: "partnership_enquiry",
 		path: window.location.pathname,
 		route: path.value,
 		...(event === "enquiry_form_submitted"
-			? { offer: applicationPathDeals[path.value].offer }
+			? {
+					offer:
+						path.value === "Not sure yet"
+							? null
+							: applicationPathLabels[path.value],
+				}
 			: {}),
 	});
 };
@@ -325,13 +356,14 @@ async function submit() {
 					? result.data.code
 					: "";
 			error.value =
-				"Something went wrong, so your enquiry wasn't sent. Please email David directly.";
+				"Something went wrong, so your enquiry wasn't sent. Please email me directly.";
 		}
 	} catch {
 		fallback.value = true;
 		error.value = FALLBACK_ERROR;
 	} finally {
 		loading.value = false;
+		void focusResult();
 	}
 }
 </script>

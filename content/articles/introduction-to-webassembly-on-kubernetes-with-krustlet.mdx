@@ -1,6 +1,6 @@
 ---
-title: "Introduction to WebAssembly on Kubernetes with Krustlet"
-description: "Welcome! 👋 This article will aim to introduce you to something wild and wonderful - running WebAssem..."
+title: Introduction to WebAssembly on Kubernetes with Krustlet
+description: Welcome! 👋 This article will aim to introduce you to something wild and wonderful - running WebAssem...
 type: tutorial
 publishedAt: 2020-07-02
 updatedAt: 2020-07-12
@@ -17,11 +17,9 @@ This article will aim to introduce you to something wild and wonderful - running
 
 ## Why?
 
-WebAssembly is bytecode that can be executed in your browser, regardless of operating system or architecture; this has opened up a, potentially,
-whole new era of web programming; one that doesn't need transpiled to JavaScript.
+WebAssembly is bytecode that can be executed in your browser, regardless of operating system or architecture; this has opened up a, potentially, whole new era of web programming; one that doesn't need transpiled to JavaScript.
 
-Thus far, a few languages have trialed and tested support for compiling their code to WASM for usage within the browser. You can learn about some
-of these efforts by checking out these links.
+Thus far, a few languages have trialed and tested support for compiling their code to WASM for usage within the browser. You can learn about some of these efforts by checking out these links.
 
 - [C/C++](http://kripken.github.io/emscripten-site/)
 - [Go](https://github.com/golang/go/wiki/WebAssembly)
@@ -34,9 +32,7 @@ There are more, but I think that's enough to pique your interest.
 
 **ANY** language, in the browser ... that's a pretty interesting idea, right? 😉
 
-One thing we don't often talk about when discussing the browser ... it's pretty darn secure. Running JavaScript in your browser can't
-actually do much damage to your host system. This is because the JavaScript engines, such as v8 or SpiderMonkey, run the JavaScript
-code in a sandbox; much like modern Linux container systems, like containerd.
+One thing we don't often talk about when discussing the browser ... it's pretty darn secure. Running JavaScript in your browser can't actually do much damage to your host system. This is because the JavaScript engines, such as v8 or SpiderMonkey, run the JavaScript code in a sandbox; much like modern Linux container systems, like containerd.
 
 So what if we want to leverage WASM, in our many languages, and benefit from the sandbox out the browser ... but without the browser?
 
@@ -44,42 +40,33 @@ Enter, WASI and `wasmtime`.
 
 ### WebAssembly System Interface (WASI)
 
-[WASI](https://wasi.dev/) provides an interface for running WASM code as a process on your operating system, rather than
-browsers; which allows us to interact with all the things the browser doesn't: files and filesystems, Berkeley sockets, clocks, and random numbers.
+[WASI](https://wasi.dev/) provides an interface for running WASM code as a process on your operating system, rather than browsers; which allows us to interact with all the things the browser doesn't: files and filesystems, Berkeley sockets, clocks, and random numbers.
 
-WASI does this in a fashion that still gives us similiar security boundaries that we get within the browser, but through a capabilities model defined
-by the runtime. WASI is not a runtime, but the interface that runtimes must adhere too. This is handled by a capability-based security model.
+WASI does this in a fashion that still gives us similiar security boundaries that we get within the browser, but through a capabilities model defined by the runtime. WASI is not a runtime, but the interface that runtimes must adhere too. This is handled by a capability-based security model.
 
-How do capabilities work? Lets use an example. Most applications open a file by some reference, which is usually a file path on the filesystem. Any application
-that has that reference (file path) can interact with that file, provided the [Ambient Authority](https://en.wikipedia.org/wiki/Ambient_authority) allows.
+How do capabilities work? Lets use an example. Most applications open a file by some reference, which is usually a file path on the filesystem. Any application that has that reference (file path) can interact with that file, provided the [Ambient Authority](https://en.wikipedia.org/wiki/Ambient_authority) allows.
 
 What does that mean? It means that if user `rawkode` executes a binary, and `rawkode` has permissions to read a file; then that binary can read that file.
 
 That's not ideal.
 
-WASI uses a [Capability model](https://en.wikipedia.org/wiki/Capability-based_security), rather than ambient authority. When you execute a WASI binary, it can ONLY access the files that you have given that binary
-the permission to.
+WASI uses a [Capability model](https://en.wikipedia.org/wiki/Capability-based_security), rather than ambient authority. When you execute a WASI binary, it can ONLY access the files that you have given that binary the permission to.
 
-What does that mean? Think about container images when executed, they can only access the files within the container image, or explictly bind mounted in. WASI is
-the same. WASI binaries can only access files if the binary is given permission to access them, usually by providing a directory root.
+What does that mean? Think about container images when executed, they can only access the files within the container image, or explictly bind mounted in. WASI is the same. WASI binaries can only access files if the binary is given permission to access them, usually by providing a directory root.
 
 ### wasmtime
 
-`wasmtime` is an implemention of WASI. You can think of `wasmtime` much like `node`. In the same way that `node` allowed us to execute JavaScript outside of the browser,
-`wasmtime` does that for WASM.
+`wasmtime` is an implemention of WASI. You can think of `wasmtime` much like `node`. In the same way that `node` allowed us to execute JavaScript outside of the browser, `wasmtime` does that for WASM.
 
 ### Krustlet
 
-[Krustlet](https://github.com/deislabs/krustlet) is a Kubelet implementation for Kubernetes that supports running WASM bytecode, with the `wasmtime` runtime, instead of
-container images with a container runtime.
+[Krustlet](https://github.com/deislabs/krustlet) is a Kubelet implementation for Kubernetes that supports running WASM bytecode, with the `wasmtime` runtime, instead of container images with a container runtime.
 
 ## Getting Started
 
 ### Getting a Kubernetes cluster
 
-For today's tutorial, we're going to use [minikube](https://github.com/kubernetes/minikube). `minikube`
-gives us a full Kubernetes cluster, in a VM, on our local machine. With `minikube` installed, create a
-cluster with the following command.
+For today's tutorial, we're going to use [minikube](https://github.com/kubernetes/minikube). `minikube` gives us a full Kubernetes cluster, in a VM, on our local machine. With `minikube` installed, create a cluster with the following command.
 
 ```console
 minikube start
@@ -87,8 +74,7 @@ minikube start
 
 ### Building Krustlet
 
-As this is rather experimental / early stages, you'll need to compile the Krustlet from source. Depending on your
-machine, this can take anywhere from 3 minutes to 10 minutes; so you make want to go make a coffee or something ⏰
+As this is rather experimental / early stages, you'll need to compile the Krustlet from source. Depending on your machine, this can take anywhere from 3 minutes to 10 minutes; so you make want to go make a coffee or something ⏰
 
 ```console
 # Clone the Krustlet source code to a local directory and enter it
@@ -103,12 +89,9 @@ cargo build
 
 Now that we have the binaries needed to run our Krustlet, we need to perform some initial bootstrapping.
 
-Bootstrapping is important, because Kubernetes restricts access to the control plane. We need to provide enough
-configuration for our Krustlet to register itself with the control plane, so it can become a "Node" within the
-cluster.
+Bootstrapping is important, because Kubernetes restricts access to the control plane. We need to provide enough configuration for our Krustlet to register itself with the control plane, so it can become a "Node" within the cluster.
 
-You can create this bootstrap configuration with the following command. **PLEASE** ensure your `KUBECONFIG` context is pointing to
-your development cluster, and not something in production.
+You can create this bootstrap configuration with the following command. **PLEASE** ensure your `KUBECONFIG` context is pointing to your development cluster, and not something in production.
 
 ```console
 ./docs/howto/assets/bootstrap.sh
@@ -127,8 +110,7 @@ Context "tls-bootstrap-token-user@kubernetes" modified.
 
 What does this all mean? 🤓
 
-First, this bootstrap script creates a secret inside of our cluster; using our default `KUBECONFIG`.
-This will be setup for you when you spin up `minikube`.
+First, this bootstrap script creates a secret inside of our cluster; using our default `KUBECONFIG`. This will be setup for you when you spin up `minikube`.
 
 This secret is very similiar to a Kubelets bootstrap secret. It's all very 😴
 
@@ -141,9 +123,7 @@ usage-bootstrap-authentication: dHJ1ZQ==   # true
 usage-bootstrap-signing: dHJ1ZQ==          # true
 ```
 
-Next, the bootstrap script grabs your existing `KUBECONFIG`, copies it, crates a new user within your cluster,
-modifies the context to use that new user, and stores it at `~/.krustlet/config/bootstrap.conf`. This `bootstrap.conf`
-can now be used to provide authentication for our Krustlet to the control plane.
+Next, the bootstrap script grabs your existing `KUBECONFIG`, copies it, crates a new user within your cluster, modifies the context to use that new user, and stores it at `~/.krustlet/config/bootstrap.conf`. This `bootstrap.conf` can now be used to provide authentication for our Krustlet to the control plane.
 
 #### Running the Krustlet
 
@@ -169,8 +149,7 @@ Congratulations, you've got a Krustlet running on `minikube`
 
 ## Building a WASI Application
 
-Next, we're going to throw together a quick "Hello World" style application. Unfortunately, WASI hasn't defined what networking / Berkeley sockets will
-look like yet within WASI-land; so we can't run a web server or anything more interesting (yet).
+Next, we're going to throw together a quick "Hello World" style application. Unfortunately, WASI hasn't defined what networking / Berkeley sockets will look like yet within WASI-land; so we can't run a web server or anything more interesting (yet).
 
 All in good time though 😁
 
@@ -190,8 +169,7 @@ First, create a Rust project. This command generates a skeleton Rust project.
 cargo new --bin wasi-hello-world
 ```
 
-You'll want to update `main.rs` with the following code. This code prints a message,
-and sleeps for 5 seconds; it then loops this process indefinitely.
+You'll want to update `main.rs` with the following code. This code prints a message, and sleeps for 5 seconds; it then loops this process indefinitely.
 
 ```rust
 // Code from

@@ -1,0 +1,6 @@
+id: d86f6aeb-6078-48b2-9cfe-22769fe3242e
+name: rawkode-academy
+type: '@swamp/1password'
+config:
+  op_vault: sa.rawkode.academy
+createdAt: '2026-11-11T18:43:10.720Z'

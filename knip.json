@@ -15,11 +15,17 @@
       "entry": [
         "astro.config.mts",
         "scripts/*.ts",
-        ".storybook/main.ts"
+        ".storybook/main.ts",
+        "src/live.config.ts",
+        "src/lib/live-content/render/shiki-*.ts"
       ],
       "ignore": [
-        "content/**/examples/**"
-      ]
+        "src/webcontainer-demos/**"
+      ],
+      "playwright": {
+        "config": ["visual/playwright.config.ts"],
+        "entry": ["visual/**/*.visual.ts", "visual/serve.ts"]
+      }
     },
     "projects/rawkode.academy/platform/*": {
       "entry": [
@@ -31,6 +37,9 @@
       "ignore": [
         ".projen/**"
       ]
+    },
+    "projects/rawkode.arcade": {
+      "bun": false
     }
   },
   "astro": true,

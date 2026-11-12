@@ -145,6 +145,7 @@ function createEnv(
 		AI: {
 			run: async () => ({ image: btoa("fake-png") }),
 		} as unknown as Ai,
+		API: {} as Fetcher,
 		BROWSER: browser as unknown as BrowserRun,
 		CONTENT_BUCKET: bucket as unknown as R2Bucket,
 		GENERATE_VIDEO_THUMBNAIL: {} as Workflow<ThumbnailWorkflowParams>,

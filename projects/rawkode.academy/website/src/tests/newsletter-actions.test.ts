@@ -14,6 +14,7 @@ const imports: Record<string, unknown> = {
 		env: { EMAIL_PREFERENCES: { setPreference }, ANALYTICS: {} },
 	},
 	"@/lib/analytics/attribution": { parseCampaignAttribution: () => ({}) },
+	"@/lib/newsletter-ids": await import("@/lib/newsletter-ids"),
 	"@/lib/analytics/growth": {
 		GROWTH_EVENTS: {
 			NEWSLETTER_SUBSCRIBED: "subscribed",

@@ -1,19 +1,18 @@
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
-import {
-	discoverThumbnailJobs,
-	thumbnailUrl,
-	type SkippedContentItem,
-} from "./content";
 import type { ThumbnailWorkflowParams } from "../src/contracts";
+import {
+	DEFAULT_API_URL,
+	discoverThumbnailJobs,
+	type SkippedVideo,
+	thumbnailUrl,
+} from "./videos";
 
 interface ParsedArgs {
+	apiUrl: string;
 	concurrency: number;
 	dryRun: boolean;
 	force: boolean;
-	forceChangedContent: boolean;
+	forceUpdatedSince?: Date;
 	max?: number;
-	repoRoot: string;
 	videoIds: string[];
 }
 
@@ -28,9 +27,6 @@ interface TriggerResult {
 	error?: string;
 }
 
-const serviceDir = dirname(fileURLToPath(import.meta.url));
-const defaultRepoRoot = resolve(serviceDir, "../../../../..");
-
 function usage(code = 1): never {
 	console.log(
 		[
@@ -40,11 +36,12 @@ function usage(code = 1): never {
 			"Options:",
 			"  --dry-run        List jobs without triggering Workflows",
 			"  --force          Trigger jobs even when thumbnail.webp already exists",
-			"  --force-changed-content",
-			"                   Force changed content/videos files even when thumbnail.webp exists",
+			"  --force-updated-since WHEN",
+			"                   Force videos updated at or after WHEN (ISO timestamp,",
+			"                   or a duration such as 6h or 2d) even when thumbnail.webp exists",
 			"  --concurrency N  Number of concurrent HEAD checks (default: 10)",
 			"  --max N          Limit the number of Workflow triggers",
-			"  --repo-root DIR  Override repository root",
+			`  --api-url URL    GraphQL gateway to read videos from (default: ${DEFAULT_API_URL})`,
 			"  --video-id ID    Only consider a specific video id. Repeatable",
 			"  -h, --help       Show this help message",
 			"",
@@ -53,6 +50,7 @@ function usage(code = 1): never {
 			"  bun scripts/trigger_missing.ts --max 5",
 			"  bun scripts/trigger_missing.ts --force --max 1",
 			"  bun scripts/trigger_missing.ts --force --video-id abc123",
+			"  bun scripts/trigger_missing.ts --force-updated-since 24h",
 		].join("\n"),
 	);
 	process.exit(code);
@@ -63,9 +61,9 @@ export function parseArgs(argv: string[]): ParsedArgs {
 	let concurrency = 10;
 	let dryRun = false;
 	let force = false;
-	let forceChangedContent = false;
+	let forceUpdatedSince: Date | undefined;
 	let max: number | undefined;
-	let repoRoot = defaultRepoRoot;
+	let apiUrl = process.env.GRAPHQL_API_URL || DEFAULT_API_URL;
 	const videoIds: string[] = [];
 
 	for (let i = 0; i < args.length; i++) {
@@ -79,8 +77,8 @@ export function parseArgs(argv: string[]): ParsedArgs {
 			force = true;
 			continue;
 		}
-		if (arg === "--force-changed-content") {
-			forceChangedContent = true;
+		if (arg === "--force-updated-since") {
+			forceUpdatedSince = parseSince(args[++i]);
 			continue;
 		}
 		if (arg === "--concurrency") {
@@ -91,13 +89,13 @@ export function parseArgs(argv: string[]): ParsedArgs {
 			max = parsePositiveInt(args[++i], "--max");
 			continue;
 		}
-		if (arg === "--repo-root") {
-			const value = args[++i];
+		if (arg === "--api-url") {
+			const value = args[++i]?.trim();
 			if (!value) {
-				console.error("--repo-root requires a directory");
+				console.error("--api-url requires a URL");
 				usage();
 			}
-			repoRoot = resolve(value);
+			apiUrl = value;
 			continue;
 		}
 		if (arg === "--video-id") {
@@ -114,12 +112,12 @@ export function parseArgs(argv: string[]): ParsedArgs {
 	}
 
 	return {
+		apiUrl,
 		concurrency,
 		dryRun,
 		force,
-		forceChangedContent,
+		forceUpdatedSince,
 		max,
-		repoRoot,
 		videoIds,
 	};
 }
@@ -131,6 +129,29 @@ function parsePositiveInt(value: string | undefined, flag: string): number {
 		usage();
 	}
 	return parsed;
+}
+
+const DURATION_UNITS_MS: Record<string, number> = {
+	m: 60_000,
+	h: 3_600_000,
+	d: 86_400_000,
+};
+
+export function parseSince(value: string | undefined, now = Date.now()): Date {
+	const trimmed = value?.trim() ?? "";
+	const duration = trimmed.match(/^(\d+)([mhd])$/);
+	if (duration) {
+		return new Date(now - Number(duration[1]) * DURATION_UNITS_MS[duration[2]]);
+	}
+
+	const time = Date.parse(trimmed);
+	if (!trimmed || !Number.isFinite(time)) {
+		console.error(
+			"--force-updated-since requires an ISO timestamp or a duration like 6h or 2d",
+		);
+		usage();
+	}
+	return new Date(time);
 }
 
 async function currentCommitSha(): Promise<string> {
@@ -149,51 +170,6 @@ async function currentCommitSha(): Promise<string> {
 	}
 
 	return stdout.trim();
-}
-
-async function changedVideoContentPaths(repoRoot: string): Promise<Set<string>> {
-	const before = process.env.GITHUB_EVENT_BEFORE;
-	const sha = process.env.GITHUB_SHA;
-	const zeroSha = /^0+$/.test(before ?? "");
-	const range = before && sha && !zeroSha ? `${before}..${sha}` : "HEAD^..HEAD";
-	const proc = Bun.spawn(
-		[
-			"git",
-			"-C",
-			repoRoot,
-			"diff",
-			"--name-only",
-			"--diff-filter=ACMRT",
-			range,
-			"--",
-			"content/videos",
-		],
-		{ stdout: "pipe", stderr: "pipe" },
-	);
-	const [stdout, stderr, exitCode] = await Promise.all([
-		new Response(proc.stdout).text(),
-		new Response(proc.stderr).text(),
-		proc.exited,
-	]);
-
-	if (exitCode !== 0) {
-		console.warn(`Unable to resolve changed video content paths: ${stderr.trim()}`);
-		return new Set();
-	}
-
-	return new Set(stdout.split("\n").map((line) => line.trim()).filter(Boolean));
-}
-
-function markChangedContentJobs(
-	jobs: ThumbnailWorkflowParams[],
-	changedPaths: Set<string>,
-): ThumbnailWorkflowParams[] {
-	if (changedPaths.size === 0) return jobs;
-	return jobs.map((job) =>
-		job.source.contentPath && changedPaths.has(job.source.contentPath)
-			? { ...job, force: true }
-			: job,
-	);
 }
 
 async function thumbnailExists(job: ThumbnailWorkflowParams): Promise<boolean> {
@@ -272,40 +248,44 @@ async function triggerWorkflow(
 	return { success: true, workflowId: match?.[1] ?? "unknown" };
 }
 
-function logSkipped(skipped: SkippedContentItem[]): void {
+function logSkipped(skipped: SkippedVideo[]): void {
 	if (skipped.length === 0) return;
-	console.log(`\nSkipped ${skipped.length} content item(s):`);
+	console.log(`\nSkipped ${skipped.length} video(s):`);
 	for (const item of skipped) {
-		console.log(`  - ${item.path}: ${item.reason}`);
+		console.log(`  - ${item.videoId}: ${item.reason}`);
 	}
 }
 
 async function main() {
 	const args = parseArgs(process.argv);
-	const commitSha = process.env.GITHUB_SHA || await currentCommitSha();
+	const commitSha = process.env.GITHUB_SHA || (await currentCommitSha());
 
-	console.log("Discovering video content...");
-	const { jobs: discoveredJobs, skipped } = await discoverThumbnailJobs(args.repoRoot, {
+	console.log(`Discovering videos from ${args.apiUrl}...`);
+	const { jobs, skipped } = await discoverThumbnailJobs({
+		apiUrl: args.apiUrl,
 		commitSha,
 		force: args.force,
+		forceUpdatedSince: args.forceUpdatedSince,
 	});
-	const changedPaths = args.forceChangedContent
-		? await changedVideoContentPaths(args.repoRoot)
-		: new Set<string>();
-	const jobs = markChangedContentJobs(discoveredJobs, changedPaths);
-	const filteredJobs = args.videoIds.length > 0
-		? jobs.filter((job) => args.videoIds.includes(job.videoId))
-		: jobs;
+	const filteredJobs =
+		args.videoIds.length > 0
+			? jobs.filter((job) => args.videoIds.includes(job.videoId))
+			: jobs;
 	console.log(`Discovered ${jobs.length} triggerable video thumbnail job(s)`);
 	if (args.videoIds.length > 0) {
 		console.log(`Filtering to ${filteredJobs.length} requested video id(s)`);
 	}
-	if (changedPaths.size > 0) {
-		console.log(`Forcing ${changedPaths.size} changed video content file(s)`);
+	if (args.forceUpdatedSince) {
+		const forced = filteredJobs.filter((job) => job.force).length;
+		console.log(
+			`Forcing ${forced} video(s) updated since ${args.forceUpdatedSince.toISOString()}`,
+		);
 	}
 	logSkipped(skipped);
 
-	console.log(`\nChecking existing thumbnails (concurrency: ${args.concurrency})...`);
+	console.log(
+		`\nChecking existing thumbnails (concurrency: ${args.concurrency})...`,
+	);
 	const missing = await checkMissingInBatches(
 		filteredJobs,
 		args.concurrency,
@@ -315,7 +295,7 @@ async function main() {
 
 	console.log(`\nThumbnail jobs to trigger: ${selected.length}`);
 	for (const job of selected) {
-		console.log(`  - ${job.videoId} ${job.source.contentPath ?? ""}`.trimEnd());
+		console.log(`  - ${job.videoId}${job.force ? " (forced)" : ""}`);
 	}
 
 	if (selected.length === 0) {

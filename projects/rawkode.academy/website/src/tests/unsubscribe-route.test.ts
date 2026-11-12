@@ -20,7 +20,7 @@ const source = readFileSync(
 	"utf8",
 );
 const newsletterSource = readFileSync(
-	resolve(testsDir, "../actions/newsletter.ts"),
+	resolve(testsDir, "../lib/newsletter-ids.ts"),
 	"utf8",
 );
 const setPreference = vi.fn();
@@ -325,17 +325,27 @@ describe("Unsubscribe route: explicit identity and confirmed POST results", () =
 
 		const { state, status } = await request({
 			signedIn: true,
-			fields: [["scope", "account"], ["audience", "klustered"]],
+			fields: [
+				["scope", "account"],
+				["audience", "klustered"],
+			],
 		});
 		expect(status).toBe(200);
 		expect(state.successMessage).toContain("Klustered updates");
 		expect(setPreference).toHaveBeenCalledTimes(5);
 		expect(setPreference.mock.calls.map((call) => call[1].audience)).toEqual([
-			"klustered-watch", "klustered-solo", "klustered-team", "klustered-compete", "show:klustered",
+			"klustered-watch",
+			"klustered-solo",
+			"klustered-team",
+			"klustered-compete",
+			"show:klustered",
 		]);
 		for (const [identity, payload] of setPreference.mock.calls) {
 			expect(identity).toBe("learner:learner-123");
-			expect(payload).toMatchObject({ channel: "newsletter", status: "unsubscribed" });
+			expect(payload).toMatchObject({
+				channel: "newsletter",
+				status: "unsubscribed",
+			});
 		}
 		expect(deleteCookie).not.toHaveBeenCalled();
 	});
@@ -343,21 +353,38 @@ describe("Unsubscribe route: explicit identity and confirmed POST results", () =
 	it("removes all Klustered email subscriptions without touching an account", async () => {
 		const { state, status } = await request({
 			signedIn: true,
-			fields: [["scope", "email"], ["audience", "klustered"], ["email", " Reader@Example.com "]],
+			fields: [
+				["scope", "email"],
+				["audience", "klustered"],
+				["email", " Reader@Example.com "],
+			],
 		});
 		expect(status).toBe(200);
 		expect(state.successMessage).toContain("Klustered updates");
 		expect(setPreference).toHaveBeenCalledTimes(5);
-		for (const [identity] of setPreference.mock.calls) expect(identity).toBe("email:reader@example.com");
+		for (const [identity] of setPreference.mock.calls)
+			expect(identity).toBe("email:reader@example.com");
 		expect(deleteCookie).toHaveBeenCalledTimes(5);
 	});
 
 	for (const [caseName, audienceFields] of [
 		["invalid", [["audience", "unknown"]]],
-		["duplicate", [["audience", "academy"], ["audience", "klustered"]]],
+		[
+			"duplicate",
+			[
+				["audience", "academy"],
+				["audience", "klustered"],
+			],
+		],
 	] satisfies Array<[string, Array<[string, string]>]>) {
 		it(`rejects ${caseName} audience fields`, async () => {
-			const { status } = await request({ fields: [["scope", "email"], ["email", "reader@example.com"], ...audienceFields] });
+			const { status } = await request({
+				fields: [
+					["scope", "email"],
+					["email", "reader@example.com"],
+					...audienceFields,
+				],
+			});
 			expect(status).toBe(400);
 			expect(setPreference).not.toHaveBeenCalled();
 		});
@@ -368,7 +395,9 @@ describe("Unsubscribe route: explicit identity and confirmed POST results", () =
 		expect(source).toContain('scope === "email" && <label');
 		expect(source).toContain('name="email" value={email}');
 		expect(source).toContain('name="audience"');
-		expect(source).toContain('href={`/unsubscribe?scope=email&audience=${audience}`}');
+		expect(source).toContain(
+			"href={`/unsubscribe?scope=email&audience=${audience}`}",
+		);
 		expect(source).toContain("Unsubscribe my account");
 		expect(source).toContain("{successMessage ?");
 		expect(source).not.toContain('searchParams.get("success")');

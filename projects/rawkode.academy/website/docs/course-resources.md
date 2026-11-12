@@ -4,8 +4,10 @@ This document explains how to add resource attachments to course modules.
 
 ## Adding Resources to a Course Module
 
-In your course module frontmatter (e.g.,
-`content/courses/your-course/01-introduction.mdx`), add a `resources` array:
+Course and module resources are stored in the platform-courses D1 service
+(`projects/rawkode.academy/platform/courses`) and reach the website through the
+API gateway (`resources` on `Course` and `CourseModule`). The shape below is the
+resource object as authored and stored (shown as YAML for readability):
 
 ```yaml
 ---
@@ -87,11 +89,13 @@ resources:
       height: "800px"
       startCommand: "bun run dev"
       import:
-        localDir: "./examples/oauth-pkce-app" # Path relative to the module file
+        localDir: "your-course/oauth-pkce-app" # <course>/<demo> under src/webcontainer-demos
     category: "code"
 ```
 
-Place your app files in `content/courses/your-course/examples/oauth-pkce-app/`.
+Demo trees are code, not content: place the app files in
+`src/webcontainer-demos/<course>/<demo>/` in the website. The stored
+`importLocalDir` must match that `<course>/<demo>` key.
 
 2. **Inline files** (for simple examples):
 
@@ -171,7 +175,7 @@ resources:
       height: "700px"
       startCommand: "npm run dev"
       import:
-        localDir: "./examples/zitadel-demo"
+        localDir: "your-course/zitadel-demo"
     category: "code"
 ---
 ```

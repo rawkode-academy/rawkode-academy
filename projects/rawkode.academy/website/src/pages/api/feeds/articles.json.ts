@@ -1,18 +1,26 @@
-import { getCollection, getEntries } from "astro:content";
 import type { APIRoute } from "astro";
 import { buildJsonFeed, type JsonFeedItem } from "@/lib/json-feed";
+import {
+	type ContentEntry,
+	getCollection,
+	getEntries,
+	setContentCache,
+} from "@/lib/live-content";
 
 const SITE_FALLBACK = "https://rawkode.academy";
 
-export const GET: APIRoute = async ({ site }) => {
+export const GET: APIRoute = async (context) => {
+	const { site } = context;
 	const baseUrl = (site?.toString() ?? SITE_FALLBACK).replace(/\/$/, "");
 	const u = (path: string) => `${baseUrl}${path}`;
 
 	const articles = await getCollection("articles");
 
 	const items: JsonFeedItem[] = [];
+	const authorEntries: ContentEntry<"people">[] = [];
 	for (const article of articles) {
 		const authors = await getEntries(article.data.authors);
+		authorEntries.push(...authors);
 		const url = u(`/read/${article.id}/`);
 		items.push({
 			id: url,
@@ -27,7 +35,6 @@ export const GET: APIRoute = async ({ site }) => {
 				name: author.data.name,
 				url: u(`/people/${author.data.id}`),
 			})),
-			tags: article.data.series?.id ? [article.data.series.id] : [],
 		});
 	}
 
@@ -48,12 +55,16 @@ export const GET: APIRoute = async ({ site }) => {
 		items,
 	});
 
+	await setContentCache(context, {
+		entries: [...articles, ...authorEntries],
+		collections: ["articles"],
+	});
+
 	return new Response(JSON.stringify(feed), {
 		headers: {
 			"Content-Type": "application/feed+json; charset=utf-8",
-			"Cache-Control": "public, max-age=3600",
 		},
 	});
 };
 
-export const prerender = true;
+export const prerender = false;

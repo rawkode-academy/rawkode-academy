@@ -394,7 +394,7 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  background: var(--colors-academy-panel);
  border: 1px solid var(--colors-academy-input-border);
  border-top: 2px solid var(--colors-academy-accent);
- border-radius: var(--radius-3xl);
+ border-radius: var(--radii-academy-l);
  font-size: 0.8rem;
  font-weight: 600;
  letter-spacing: 0.01em;
@@ -402,7 +402,7 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  white-space: nowrap;
  opacity: 0;
  visibility: hidden;
- transition: all var(--duration-base) var(--ease-standard);
+ transition: all var(--durations-base) var(--easings-academy-standard);
  pointer-events: none;
  z-index: 100;
 }
@@ -421,7 +421,7 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  border-top: 8px solid var(--colors-academy-input-border);
  opacity: 0;
  visibility: hidden;
- transition: all var(--duration-base) var(--ease-standard);
+ transition: all var(--durations-base) var(--easings-academy-standard);
  pointer-events: none;
  z-index: 100;
 }
@@ -518,8 +518,8 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  background: var(--colors-academy-text);
  color: var(--colors-academy-canvas);
  border: 1px solid var(--colors-academy-text);
- border-radius: var(--radius-md);
- font-family: var(--fonts-academy-mono), monospace;
+ border-radius: var(--radii-academy-s);
+ font-family: var(--fonts-academy-mono);
  font-size: 0.72rem;
  font-weight: 700;
  letter-spacing: 0.1em;

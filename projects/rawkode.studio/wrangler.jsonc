@@ -1,7 +1,7 @@
 {
 	"$schema": "./node_modules/wrangler/config-schema.json",
 	"name": "rawkode-academy-studio",
-	"main": "@astrojs/cloudflare/entrypoints/server",
+	"main": "./src/worker.ts",
 	"compatibility_date": "2026-06-05",
 	"compatibility_flags": ["nodejs_compat"],
 	"assets": {
@@ -11,6 +11,7 @@
 	},
 	"workers_dev": true,
 	"preview_urls": true,
+	"triggers": { "crons": ["* * * * *"] },
 	"observability": {
 		"traces": {
 			"enabled": true,

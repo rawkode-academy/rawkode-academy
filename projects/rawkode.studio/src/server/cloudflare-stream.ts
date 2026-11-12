@@ -11,7 +11,13 @@ export interface CloudflareStreamLiveInput {
 	enabled?: boolean;
 	meta?: Record<string, unknown>;
 	modified?: string;
-	status?: string;
+	status?: string | {
+		current?: {
+			ingestProtocol?: string;
+			state?: string;
+		} | null;
+		history?: unknown[];
+	} | null;
 	uid: string;
 	webRTC?: {
 		url?: string;
@@ -54,40 +60,77 @@ export async function getCloudflareStreamConfig(
 export function cloudflareStreamLiveInputIsConnected(
 	liveInput: Pick<CloudflareStreamLiveInput, "status">,
 ): boolean {
-	return liveInput.status === "connected" || liveInput.status === "reconnected";
+	const status = liveInput.status;
+	const state = typeof status === "string" ? status : status?.current?.state;
+	return state === "connected" || state === "reconnected";
 }
 
-export async function createCloudflareStreamLiveInput(
-	config: CloudflareStreamConfig,
+export function createCloudflareStreamLiveInputBody(
 	input: {
 		contentVideoSlug: string | null;
 		name: string;
 		sessionId: string;
 		streamEnvironment: StreamEnvironment;
 	},
+): string {
+	return JSON.stringify({
+		enabled: true,
+		meta: {
+			contentVideoSlug: input.contentVideoSlug,
+			name: input.name,
+			studioSessionId: input.sessionId,
+			streamEnvironment: input.streamEnvironment,
+		},
+		recording: {
+			hideLiveViewerCount: false,
+			mode: "off",
+			requireSignedURLs: false,
+			timeoutSeconds: 0,
+		},
+	});
+}
+
+export async function createCloudflareStreamLiveInput(
+	config: CloudflareStreamConfig,
+	input: { body: string; idempotencyKey: string },
 ): Promise<CloudflareStreamLiveInput> {
 	return await cloudflareStreamRequest<CloudflareStreamLiveInput>(
 		config,
 		"/stream/live_inputs",
 		{
 			method: "POST",
-			body: JSON.stringify({
-				enabled: true,
-				meta: {
-					contentVideoSlug: input.contentVideoSlug,
-					name: input.name,
-					studioSessionId: input.sessionId,
-					streamEnvironment: input.streamEnvironment,
-				},
-				recording: {
-					hideLiveViewerCount: false,
-					mode: "off",
-					requireSignedURLs: false,
-					timeoutSeconds: 0,
-				},
-			}),
+			headers: { "Idempotency-Key": input.idempotencyKey },
+			body: input.body,
+			signal: AbortSignal.timeout(10_000),
 		},
 	);
+}
+
+export async function deleteCloudflareStreamLiveInput(
+	config: CloudflareStreamConfig,
+	liveInputId: string,
+	timeoutMs = 10_000,
+): Promise<void> {
+	const response = await fetch(
+		`https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(config.accountId)}/stream/live_inputs/${encodeURIComponent(liveInputId)}`,
+		{
+			method: "DELETE",
+			headers: { Authorization: `Bearer ${config.apiToken}` },
+			signal: AbortSignal.timeout(timeoutMs),
+		},
+	);
+	const body = await response.json().catch(() => null) as unknown;
+	// Cloudflare documents an empty object. A provider probe also returned an
+	// explicit success envelope; accept only that complete, error-free shape.
+	const object = body && typeof body === "object" && !Array.isArray(body) ? body as Record<string, unknown> : null;
+	const emptyObject = object !== null && Object.keys(object).length === 0;
+	const successEnvelope = object !== null && Object.keys(object).length === 4 &&
+		object.success === true && object.result === "" &&
+		Array.isArray(object.errors) && object.errors.length === 0 &&
+		Array.isArray(object.messages) && object.messages.length === 0;
+	if (response.status !== 200 || (!emptyObject && !successEnvelope)) {
+		throw new Error(`Cloudflare Stream input deletion was not confirmed (${response.status}).`);
+	}
 }
 
 export async function getCloudflareStreamLiveInput(

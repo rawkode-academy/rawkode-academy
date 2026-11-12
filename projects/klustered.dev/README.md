@@ -4,12 +4,13 @@ Admin + competitor portal for the Klustered game show. Lives at `https://kluster
 
 ## Stack
 
-- Bun + Astro 6 (matches `projects/rawkode.academy/website`)
+- Bun + Astro 7 (matches `projects/rawkode.academy/website`)
 - UnoCSS (`preset-wind3`)
 - Cloudflare Workers (SSR via `@astrojs/cloudflare`)
 - Reads the `platform-brackets` D1 (owned by `platform/brackets`) via `env.BRACKETS`;
   all writes go through the brackets write-model over the `BRACKETS_WRITE` service binding
 - Auth via id.rawkode.academy (OIDC client `klustered-dev`); sessions in the `SESSION` KV
+- Reads people from the API gateway (`API` service binding, `src/lib/people.ts`)
 
 This portal owns no database of its own. The bracket domain belongs to the
 `platform/brackets` service, and auth is delegated to id.rawkode.academy.
