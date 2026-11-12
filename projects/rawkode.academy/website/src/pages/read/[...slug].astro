@@ -10,7 +10,6 @@ import {
 	getEntry,
 	optionalContent,
 	renderEntry,
-	setContentCache,
 } from "@/lib/live-content";
 import RichText from "@/components/content/RichText.astro";
 
@@ -33,19 +32,25 @@ import EndSlug from "@/components/read/EndSlug.astro";
 
 import { calculateReadingTime } from "@/utils/reading-time";
 import { getTypeBadgeConfig } from "@/utils/article-types";
-import { localTime } from "@/lib/local-time";
+import { localDate } from "@/lib/local-time";
+import { buildTechnologyTags } from "@/lib/technology-tags";
 
-export const prerender = false;
+// Articles are files in content/articles: every page is generated at build
+// time and served as a static asset. A production build only contains
+// published articles (no drafts, nothing dated in the future), so anything
+// else is a 404 until the deploy that publishes it. Authors, related videos
+// and technology links are read from the gateway during the build.
+export const prerender = true;
+
+export async function getStaticPaths() {
+	const articles = await getCollection("articles");
+	return articles.map((entry) => ({ params: { slug: entry.id } }));
+}
 
 const RELATED_ARTICLE_LIMIT = 3;
 
-// Every article id the content layer returns resolves. Drafts are removed by
-// the content layer (store.ts) so they 404; scheduled (future-dated) articles
-// stay hidden until their publication time.
-const article = Astro.params.slug
-	? await getEntry("articles", Astro.params.slug)
-	: undefined;
-if (!article) return new Response(null, { status: 404 });
+const article = await getEntry("articles", Astro.params.slug);
+if (!article) throw new Error(`No article for /read/${Astro.params.slug}`);
 
 const [{ html, headings }, authors, allArticles, allTechnologies] =
 	await Promise.all([
@@ -57,23 +62,13 @@ const [{ html, headings }, authors, allArticles, allTechnologies] =
 		optionalContent(getCollection("technologies"), []),
 	]);
 
-// Same pool and ranking RelatedArticles applies, resolved here so the cache
-// tags cover the related cards (and their authors).
+// Same pool and ranking RelatedArticles applies.
 const relatedArticles = allArticles
 	.filter((candidate) => candidate.id !== article.id)
 	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
 	.slice(0, RELATED_ARTICLE_LIMIT);
 
-await setContentCache(Astro, {
-	entries: [article, ...authors, ...relatedArticles],
-	// Related articles and videos are listed; the body autolinks and the tags
-	// are labelled from technologies.
-	collections: ["articles", "videos", "technologies"],
-});
-
-const computeImageUrl = (
-	entry: ContentEntry<"articles">,
-): URL | undefined =>
+const computeImageUrl = (entry: ContentEntry<"articles">): URL | undefined =>
 	entry.data.cover
 		? new URL(entry.data.cover.image.src, Astro.site ?? Astro.url)
 		: undefined;
@@ -98,40 +93,16 @@ const howToJsonLd = article.data.howto
 
 const readingTime = calculateReadingTime(article.body || "");
 
-// Technology → readable label (technology ids carry no "/index").
-const technologyNameById = new Map<string, string>();
-for (const technology of allTechnologies) {
-	technologyNameById.set(technology.id, technology.data.name);
-}
-
-function formatTechnologyLabel(value: string): string {
-	const fromCollection = technologyNameById.get(value);
-	if (fromCollection) return fromCollection;
-	return value
-		.split(/[-/]/g)
-		.filter(Boolean)
-		.map((segment) =>
-			segment.length <= 3
-				? segment.toUpperCase()
-				: `${segment.charAt(0).toUpperCase()}${segment.slice(1)}`,
-		)
-		.join(" ");
-}
-
-const tags = (article.data.technologies ?? []).map((technologyId) => ({
-	label: formatTechnologyLabel(technologyId),
-	href: `/technology/${technologyId}`,
-}));
+// Technology → readable label; only ids in the collection link to a page.
+const tags = buildTechnologyTags(
+	article.data.technologies ?? [],
+	allTechnologies,
+);
 
 const articleType = article.data.type || "tutorial";
 const badgeConfig = getTypeBadgeConfig(articleType);
 
-const dateOptions: Intl.DateTimeFormatOptions = {
-	month: "short",
-	day: "2-digit",
-	year: "numeric",
-};
-const publishDate = localTime(article.data.publishedAt, dateOptions);
+const publishDate = localDate(article.data.publishedAt);
 
 const sameCalendarDayUtc = (a: Date, b: Date): boolean =>
 	a.getUTCFullYear() === b.getUTCFullYear() &&
@@ -144,7 +115,7 @@ const wasUpdated =
 	!sameCalendarDayUtc(article.data.updatedAt, article.data.publishedAt);
 
 const updateDate = wasUpdated
-	? localTime(article.data.updatedAt as Date, dateOptions)
+	? localDate(article.data.updatedAt as Date)
 	: undefined;
 
 // Breadcrumb trail.
@@ -216,7 +187,7 @@ const subtitle = article.data.openGraph?.subtitle || article.data.subtitle;
 
 		<div class={doc.body}>
 			<div class={doc.main}>
-				<article class={styles.prose}>
+				<article class={[styles.prose, doc.articleProse].join(" ")}>
 					<Updates updates={article.data.updates} />
 					<RichText html={html} />
 				</article>

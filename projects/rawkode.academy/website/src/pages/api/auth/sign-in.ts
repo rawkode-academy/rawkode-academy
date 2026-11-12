@@ -1,9 +1,21 @@
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
+import { isPrefetch } from "@/lib/auth/prefetch";
 import { buildAuthorizationUrl, PKCE_COOKIE_NAME } from "@/lib/auth/server";
 import { captureServerEvent, getDistinctId } from "@/server/analytics";
 
 export const GET: APIRoute = async (context) => {
+	if (isPrefetch(context.request)) {
+		// Never let the browser reuse this empty response for the real click.
+		return new Response(null, {
+			status: 204,
+			headers: {
+				"Cache-Control": "no-store",
+				Vary: "Sec-Purpose, Purpose, Sec-Fetch-Mode",
+			},
+		});
+	}
+
 	let returnTo = context.url.searchParams.get("returnTo") || "/";
 
 	// Fallback to Referer header if returnTo is a server island path
@@ -33,6 +45,7 @@ export const GET: APIRoute = async (context) => {
 			properties: {
 				auth_method: "github",
 				from_page: returnTo,
+				user_agent: context.request.headers.get("user-agent") ?? "",
 			},
 			distinctId: getDistinctId(context),
 		},

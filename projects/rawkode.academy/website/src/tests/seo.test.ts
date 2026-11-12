@@ -4,7 +4,6 @@ import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { VideoData } from "@/lib/live-content";
 import {
-	mapArticle,
 	mapLearningPath,
 	mapNews,
 	mapTechnology,
@@ -160,7 +159,8 @@ function technologyTaxonomyViolations(
 function articleTaxonomySources(rows: GatewayRow[]): TaxonomySource[] {
 	return rows.map((row) => ({
 		source: `articles/${row.id}`,
-		technologies: mapArticle(row).technologies,
+		// Article frontmatter lists plain technology ids.
+		technologies: mapNews(row).technologies,
 	}));
 }
 
@@ -835,9 +835,8 @@ describe("Crawlability and Sitemaps", () => {
 	});
 
 	it("renders robots.txt with private routes blocked and the sitemap index declared", async () => {
-		const { GET, ROBOTS_DISALLOWS, ROBOTS_SITEMAP_PATH } = await import(
-			"../pages/robots.txt.ts"
-		);
+		const { GET, ROBOTS_ALLOWS, ROBOTS_DISALLOWS, ROBOTS_SITEMAP_PATH } =
+			await import("../pages/robots.txt.ts");
 
 		const response = await GET({
 			site: new URL("https://rawkode.academy"),
@@ -855,6 +854,12 @@ describe("Crawlability and Sitemaps", () => {
 		}
 		// Search results carry noindex; blocking the crawl would hide it.
 		expect(body).not.toMatch(/^Disallow: \/search$/m);
+
+		// Feeds sit under /api/; the longer Allow must override Disallow: /api/.
+		expect(ROBOTS_ALLOWS).toContain("/api/feeds/");
+		for (const path of ROBOTS_ALLOWS) {
+			expect(body).toMatch(new RegExp(`^Allow: ${path}$`, "m"));
+		}
 	});
 
 	it("keeps all intended sitemap sections in the index, even if a section is empty", async () => {
@@ -1605,7 +1610,7 @@ describe("Structured Data Validation", () => {
 				price: "0",
 				priceCurrency: "USD",
 				availability: "https://schema.org/InStock",
-				category: "Educational",
+				category: "Free",
 				itemOffered: {
 					"@type": "Course",
 					name: mockCourse.data.title,
@@ -1629,7 +1634,7 @@ describe("Structured Data Validation", () => {
 		expect(courseJsonLd.offers.price).toBe("0");
 		expect(courseJsonLd.offers.priceCurrency).toBe("USD");
 		expect(courseJsonLd.offers.availability).toBe("https://schema.org/InStock");
-		expect(courseJsonLd.offers.category).toBe("Educational");
+		expect(courseJsonLd.offers.category).toBe("Free");
 		expect(courseJsonLd.offers.itemOffered).toBeDefined();
 		expect(courseJsonLd.offers.itemOffered["@type"]).toBe("Course");
 		expect(courseJsonLd.offers.itemOffered.url).toBeDefined();

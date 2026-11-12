@@ -68,10 +68,11 @@ const getSiteUrl = () => {
 export default defineConfig({
 	output: "server",
 	adapter: cloudflare({
-		// Cloudflare's runtime transform endpoint is not available on every
-		// Pages preview. Compile local assets into the deployment so content
-		// cards never render a broken image when the transform is unavailable.
-		imageService: "compile",
+		// Local assets are compiled into the deployment at build time. Remote
+		// content images (covers, logos) are resized and re-encoded on demand
+		// through the IMAGES binding; a "compile"-only runtime would pass the
+		// original multi-megabyte PNGs straight through /_image.
+		imageService: { build: "compile", runtime: "cloudflare-binding" },
 		sessionKVBindingName: "SESSION",
 		// Use an ephemeral inspector in local dev where network-interface discovery is unavailable.
 		inspectorPort: 0,

@@ -12,10 +12,10 @@ const layout = academyLayout({ width: "wide" });
 
 {
 	match && (
-		<div class:list={[layout.notice, "bg-primary"]}>
-			<div class:list={[layout.container, "mx-auto flex max-w-7xl items-center gap-3 content-px py-2 text-sm text-white"]}>
-				<span class="font-semibold uppercase tracking-wide">● Live now</span>
-				<span class="truncate">
+		<div class:list={[layout.notice, "live-banner"]}>
+			<div class:list={[layout.container, "live-banner__inner"]}>
+				<span class="live-banner__label">● Live now</span>
+				<span class="live-banner__match">
 					{match.sideA?.displayName ?? "TBD"} vs{" "}
 					{match.sideB?.displayName ?? "TBD"}
 				</span>
@@ -23,3 +23,30 @@ const layout = academyLayout({ width: "wide" });
 		</div>
 	)
 }
+
+<style>
+	.live-banner {
+		background: var(--colors-academy-accent);
+		color: var(--colors-academy-accent-foreground);
+	}
+
+	.live-banner__inner {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding-block: 0.5rem;
+		font-size: 0.875rem;
+	}
+
+	.live-banner__label {
+		flex-shrink: 0;
+		font-weight: 600;
+	}
+
+	.live-banner__match {
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+</style>

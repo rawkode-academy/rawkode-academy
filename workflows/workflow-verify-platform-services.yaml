@@ -1,0 +1,178 @@
+id: 2517e618-093c-4604-b1eb-495b7c0a2f7a
+name: verify-platform-services
+description: >-
+  Check that every platform service is deployed as it declares: compare the
+  generated Wrangler configurations with the workers, D1 databases and queues
+  in the Cloudflare account, and ask the public gateway whether each subgraph
+  answers. Read-only: it reports and fails, it never creates or changes
+  anything.
+version: 1
+tags: {}
+vaults:
+  - rawkode-academy
+  - default
+jobs:
+  - name: verify
+    description: Read what is declared, list what is live, compare and assert
+    steps:
+      - name: declared
+        description: Read what every service declares from its Wrangler configurations
+        task:
+          type: behavior
+          behavior: platform-services
+          methodName: declared
+      - name: databases
+        description: List the D1 databases in the Cloudflare account
+        task:
+          type: behavior
+          behavior: cloudflare-databases
+          methodName: list_databases
+      - name: queues
+        description: List the queues in the Cloudflare account
+        task:
+          type: behavior
+          behavior: cloudflare-queues
+          methodName: list
+      - name: workers
+        description: List the workers in the Cloudflare account
+        task:
+          type: behavior
+          behavior: cloudflare-workers
+          methodName: list_workers
+      - name: compare
+        description: Record, per service, what matches the account and what does not
+        dependsOn:
+          - step: declared
+            condition:
+              type: succeeded
+          - step: databases
+            condition:
+              type: succeeded
+          - step: queues
+            condition:
+              type: succeeded
+          - step: workers
+            condition:
+              type: succeeded
+        task:
+          type: behavior
+          behavior: platform-services
+          methodName: compare
+          inputs:
+            services: ${{ data.latest("platform-services", "declared").attributes.services }}
+            databases: ${{ data.latest("cloudflare-databases", "main").attributes.items }}
+            queues: ${{ data.latest("cloudflare-queues", "main").attributes.items }}
+            workers: ${{ data.latest("cloudflare-workers", "main").attributes.items }}
+            truncated: >-
+              ${{ data.latest("cloudflare-databases", "main").attributes.truncated
+              || data.latest("cloudflare-queues", "main").attributes.truncated
+              || data.latest("cloudflare-workers", "main").attributes.truncated }}
+      - name: workers-deployed
+        description: Every declared worker is deployed
+        dependsOn:
+          - step: compare
+            condition:
+              type: succeeded
+        task:
+          type: assert
+          expr: >-
+            size(data.latest("platform-services", "verdict").attributes.problems.filter(problem,
+            problem.kind == "worker-missing")) == 0
+          message: >-
+            A declared worker is not deployed. ${{ data.latest("platform-services", "verdict").attributes.summary }}
+          severity: high
+      - name: databases-exist
+        description: Every declared D1 database exists
+        dependsOn:
+          - step: compare
+            condition:
+              type: succeeded
+        task:
+          type: assert
+          expr: >-
+            size(data.latest("platform-services", "verdict").attributes.problems.filter(problem,
+            problem.kind == "database-missing")) == 0
+          message: >-
+            A declared D1 database does not exist. ${{ data.latest("platform-services", "verdict").attributes.summary }}
+          severity: high
+      - name: databases-match
+        description: Every declared D1 database has the declared id and name
+        dependsOn:
+          - step: compare
+            condition:
+              type: succeeded
+        task:
+          type: assert
+          expr: >-
+            size(data.latest("platform-services", "verdict").attributes.problems.filter(problem,
+            problem.kind == "database-identifier-mismatch" || problem.kind == "database-name-mismatch")) == 0
+          message: >-
+            A D1 database differs from its declaration. ${{ data.latest("platform-services", "verdict").attributes.summary }}
+          severity: high
+      - name: queues-exist
+        description: Every declared queue exists
+        dependsOn:
+          - step: compare
+            condition:
+              type: succeeded
+        task:
+          type: assert
+          expr: >-
+            size(data.latest("platform-services", "verdict").attributes.problems.filter(problem,
+            problem.kind == "queue-missing")) == 0
+          message: >-
+            A declared queue does not exist. ${{ data.latest("platform-services", "verdict").attributes.summary }}
+          severity: high
+      - name: service-bindings-resolve
+        description: Every worker bound as a service is deployed
+        dependsOn:
+          - step: compare
+            condition:
+              type: succeeded
+        task:
+          type: assert
+          expr: >-
+            size(data.latest("platform-services", "verdict").attributes.problems.filter(problem,
+            problem.kind == "service-binding-target-missing")) == 0
+          message: >-
+            A service binding points at a worker that is not deployed. ${{ data.latest("platform-services", "verdict").attributes.summary }}
+          severity: high
+      - name: listings-complete
+        description: The account listings were not cut short
+        dependsOn:
+          - step: compare
+            condition:
+              type: succeeded
+        task:
+          type: assert
+          expr: >-
+            data.latest("platform-services", "verdict").attributes.liveListingsTruncated == false
+          message: >-
+            A listing from the Cloudflare account was cut short, so the verdict
+            may report something as missing that exists.
+          severity: medium
+      - name: probe
+        description: Ask the public gateway, without credentials, whether each subgraph answers
+        dependsOn:
+          - step: declared
+            condition:
+              type: succeeded
+        task:
+          type: behavior
+          behavior: platform-services
+          methodName: probe
+          inputs:
+            subgraphs: ${{ data.latest("platform-services", "declared").attributes.gateway.subgraphs }}
+      - name: subgraphs-answer
+        description: The gateway answers and serves every subgraph
+        dependsOn:
+          - step: probe
+            condition:
+              type: succeeded
+        task:
+          type: assert
+          expr: >-
+            data.latest("platform-services", "liveness").attributes.ok == true
+          message: >-
+            The public gateway does not serve every subgraph. ${{ data.latest("platform-services", "liveness").attributes.summary }}
+          severity: high

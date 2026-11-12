@@ -4,7 +4,7 @@ import { createLogger } from "@/lib/logger";
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
 import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 import Page from "@/wrappers/page.astro";
-import { localTime } from "@/lib/local-time";
+import { localDate } from "@/lib/local-time";
 
 const logger = createLogger("adrs");
 const allAdrs = await getCollection("adrs");
@@ -38,7 +38,7 @@ await setContentCache(Astro, {
 });
 
 const formatDate = (date: Date) =>
-	localTime(date, { year: "numeric", month: "long", day: "numeric" });
+	localDate(date);
 
 const getAdrNumber = (id: string): string => {
 	return id.match(/^(\d{4})-/)?.[1] || "0000";

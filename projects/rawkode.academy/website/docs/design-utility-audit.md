@@ -4,6 +4,8 @@ Snapshot: 2026-09-20 UTC, working tree based on `e5280286`. Source inspection on
 
 ## Decision
 
+Alias-layer retirement (2026-11-09): the `global.css` alias layer this audit measured against is retired. The `--editorial-*`, `--brand-*`, `--surface-*`, `--text-*-content`, `--text-muted`, `--radius-*`, `--duration-*` and `--ease-*` custom properties, the named classes that went with them (`paper-card`, `hairline-chip`, `focus-ring`, `text-muted`, `text-primary-content`, `ed-btn*`) and the `[class~="..."]` utility shim are no longer a styling contract. Components read the Panda variables for the `academy.*` tokens (`var(--colors-academy-text)`, `var(--radii-academy-s)`, `var(--durations-base)`) from a recipe slot or a scoped style. Read every mention of those names below as history: a selector reported "missing" from the shim is fixed by moving the component to a recipe or scoped style, never by adding a shim rule. `ui/Grid.vue`, `common/SkeletonCard.vue`, the bracket Seasons page, the technology matrix page and the Kubele board have been moved this way and no longer emit utility classes.
+
 Bounded implementation follow-up (2026-09-20): `RelatedVideos.astro`, `AuthorAvatarGroup.vue`, `TopicHub.astro`, and `Container.vue` now use dedicated Academy recipes instead of the missing selectors identified below. Duration labels are anchored and omit unknown runtimes; avatar overlap is explicit with activity off by default; news rows have semantic rules; Container defines all six width variants. TopicHub also keeps video titles visible and supports Astro technology references. The original inventory/counts below remain a historical snapshot, not a fresh assertion about the current tree. Verification: 20 Vue/recipe tests, six Astro SSR fixture tests, scoped Vue diagnostics and strict recipe type checks passed. No Browser verification or shared CSS regeneration was performed by this owner.
 
 Integration follow-up: regenerate Panda CSS for `academyRelatedContent`, `academyAuthorGroup`, and `academyContainer`. The technology page's separate `hasTopicContent` guard must mirror TopicHub's string-or-`{ id }` normalization so reference-only article matches are not hidden upstream. Container `xl` uses the 1180px Academy shell; `padding="lg"` uses the shared responsive 20–48px gutter. Other widths retain 42/56/72rem, `2xl` is 96rem, and `full` is 100%.
@@ -11,6 +13,17 @@ Integration follow-up: regenerate Panda CSS for `academyRelatedContent`, `academ
 **Do not declare every component correctly styled yet.** The current compatibility layer still misses **41 distinct legacy class tokens selected by current production branches**, across six components, the unsubscribe route, and the bracket plugin page. Three additional tokens exist in reachable component APIs but have no current caller selecting their branches. The missing tokens affect positioning, responsive spacing, state colors, expand/collapse indicators, focus styling, and separators; not just decoration.
 
 There is **no source evidence here of a new missing `hidden` / `fixed` / `inset-0` rule on the migrated dialogs or watch controls**. Those controls predominantly use recipes. Absence of such a finding is not a visual/accessibility sign-off.
+
+## Resolved (2026-11-09)
+
+A fresh token scan of every `.astro`, `.vue`, `.tsx` and `.mdx` file under `src` against the built Panda stylesheet, `src/styles/global.css` and each file's own `<style>` block found no class token without CSS, other than semantic marker classes that carry no styling intent (`toc-nav`, `game-route`, `matrix-route`, `privacy-prose` and similar) and the vidstack `vds-poster` class. Source inspection only; nothing here is a browser sign-off.
+
+- Ranked blockers above: the unsubscribe error uses `academyForms.error` (`academy.statusRust` on `academy.panel`, which has light and dark values); avatar overlap is in `academyAuthorGroup`; the cgroups chevron rotation, controller badges, hover surfaces, milestone focus ring (shared `focusRing` fragment), tabular numerals and the Pod mapper's desktop arrow padding are slots in `academyCgroups`; TopicHub row separators and the learning-path hover are in `academyRelatedContent`.
+- Bracket plugin: `Apply.astro`, `Seasons.astro` and `LiveBanner.astro` no longer carry `uppercase` or any utility token; their labels are sentence case in scoped styles.
+- Skeletons: `Skeleton.vue`, `SkeletonCard.vue`, `SkeletonList.vue` and `SkeletonList.tsx` draw fill and pulse from `academySkeleton`; `animate-pulse`, `bg-[var(--surface-skeleton)]` and `last:border-b-0` are gone.
+- `ui/Grid.vue`, `ui/accordion.vue` and `common/SkipLink.astro` use scoped styles reading `academy.*` variables; the dead column, gap, arbitrary-value and `focus:not-sr-only` tokens are gone.
+- `utils/article-types.ts` keeps only `label` and `icon`; the unused Tailwind palette `bg`/`text` fields are removed.
+- `common/BaseCard.vue` dropped a leftover `group` token that no rule or descendant selector read.
 
 ### Scope and corrected reachability
 
@@ -135,7 +148,7 @@ These remain within the original 143-entry review set but are **not active-route
 | `common/Heading.vue` | `md:text-base`, `md:text-lg`, `md:text-xl`, `md:text-3xl`, `lg:text-5xl` | Only barrel/reusable/story path; no selected production export. |
 | `technology/RelatedTechnologies.astro` | `group-hover:text-secondary-content` | Last profile consumer removed; no current import. |
 | `ui/Card.vue` | `border-[var(--editorial-hairline)]`, `border-[var(--editorial-hairline-strong)]`, `rounded-3xl`, `mt-auto` | Only barrel/reusable/story path; no selected production export. |
-| `ui/Grid.vue` | `grid-cols-4`, `grid-cols-6`, `grid-cols-[repeat(auto-fit,minmax(250px,1fr))]`, `grid-cols-[repeat(auto-fill,minmax(250px,1fr))]`, `md:grid-cols-6`, `lg:grid-cols-1`, `lg:grid-cols-4`, `lg:grid-cols-5`, `lg:grid-cols-6`, `gap-0` | Only barrel/reusable/story path; no selected production export. |
+| `ui/Grid.vue` | None. Columns and gap are custom properties read by a scoped style (resolved 2026-11-09). | Only barrel/reusable/story path; no selected production export. |
 | `ui/Hero.vue` | `md:py-12`, `md:py-16`, `lg:py-20`, `md:py-20`, `lg:py-24`, `py-20`, `md:py-24`, `lg:py-32`, `md:text-lg`, `md:text-xl`, `lg:text-3xl` | Only barrel/reusable/story path; no selected production export. |
 | `ui/Stack.vue` | `gap-0`, `justify-evenly` | Only barrel/reusable/story path; no selected production export. |
 | `ui/accordion.vue` | `hover:bg-[var(--surface-card-muted)]` | Only barrel/reusable/story path; no selected production export. |

@@ -2,7 +2,7 @@
 export const prerender = false;
 
 import { getCollection, setContentCache } from "@/lib/live-content";
-import { academyPage } from "@rawkodeacademy/design-system";
+import { academyPage, button } from "@rawkodeacademy/design-system";
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Page from "@/wrappers/page.astro";
@@ -10,7 +10,9 @@ import VideoItemListJsonLd from "@/components/html/video-itemlist-jsonld.astro";
 import { getPublishedVideos, getUpcomingVideos } from "@/lib/content";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { selectWatchArchive, watchArchiveHref, WATCH_PAGE_SIZE } from "@/lib/watch-archive";
-import { localTime } from "@/lib/local-time";
+import { localDateTime } from "@/lib/local-time";
+import { formatRuntime } from "@/lib/video-runtime";
+import VideoCard from "@/components/video/VideoCard.astro";
 
 const styles = academyPage();
 const [publishedVideos, upcomingVideos, technologies, people, shows] = await Promise.all([
@@ -36,21 +38,14 @@ const compactCopy = (value: string | undefined, maxLength = 220) => {
 	return `${normalized.slice(0, maxLength).trimEnd()}…`;
 };
 
-const formatDuration = (seconds?: number | null) => {
-	if (!seconds || !Number.isFinite(seconds) || seconds <= 0) return undefined;
-	const minutes = Math.floor(seconds / 60);
-	if (minutes < 1) return "<1 min";
-	if (minutes < 60) return `${minutes} min`;
-	const hours = Math.floor(minutes / 60);
-	const remainder = minutes % 60;
-	return remainder > 0 ? `${hours}h ${remainder}m` : `${hours}h`;
-};
-
 const videos = archive.items.map((video) => ({
 	href: `/watch/${video.data.slug}`,
 	title: video.data.title,
 	description: compactCopy(video.data.subtitle || video.data.description),
-	duration: formatDuration(video.data.duration),
+	runtime: formatRuntime(video.data.duration),
+	duration: video.data.duration,
+	publishedAt: video.data.publishedAt,
+	type: video.data.type,
 	mediaSrc: getVideoThumbnailUrl(video.data.id),
 }));
 const jsonLdVideos = archive.items.map(({ data }) => ({
@@ -65,15 +60,8 @@ const upcomingStreams = upcomingVideos.map((video) => ({
 	href: `/watch/${video.data.slug}`,
 	title: video.data.title,
 	description: compactCopy(video.data.subtitle || video.data.description),
-	scheduledAt: localTime(video.data.publishedAt, {
-		weekday: "long",
-		year: "numeric",
-		month: "long",
-		day: "numeric",
-		hour: "numeric",
-		minute: "2-digit",
-		timeZoneName: "short",
-	}),
+	publishedAt: video.data.publishedAt,
+	scheduledAt: localDateTime(video.data.publishedAt),
 	mediaSrc: video.data.youtubeId
 		? `https://i.ytimg.com/vi/${video.data.youtubeId}/hqdefault.jpg`
 		: getVideoThumbnailUrl(video.data.id),
@@ -130,20 +118,29 @@ const pageDescription =
 				<div class={styles.sectionHead}>
 					<h2 id="upcoming-streams-title" class={styles.sectionTitle}>Upcoming live streams</h2>
 				</div>
-				<div class={styles.feedGrid}>
-					{upcomingStreams.map((item) => (
-						<a href={item.href} class={styles.card}>
-							<div class={styles.cardArt}>
-								<img src={item.mediaSrc} alt="" class={styles.cardImage} width="640" height="360" loading="lazy" />
-							</div>
-							<div class={styles.cardBody}>
-								<p class={styles.cardMeta}>Upcoming · <time {...item.scheduledAt.attrs}>{item.scheduledAt.text}</time></p>
-								<h3 class={styles.cardTitle}>{item.title}</h3>
-								<p class={styles.lede}>{item.description}</p>
-							</div>
-						</a>
-					))}
-				</div>
+				{upcomingStreams.length < 3 ? (
+					<div class={styles.streamList}>
+						{upcomingStreams.map((item) => (
+							<a href={item.href} class={styles.streamFeature}>
+								<div class={styles.cardArt}>
+									<img src={item.mediaSrc} alt="" class={styles.cardImage} width="960" height="540" loading="lazy" />
+								</div>
+								<div class={styles.featureCopy}>
+									<p class={styles.streamMeta}><span data-label>Upcoming live stream</span><time {...item.scheduledAt.attrs}>{item.scheduledAt.text}</time></p>
+									<h3 class={styles.streamTitle}>{item.title}</h3>
+									<p class={styles.sectionLede}>{item.description}</p>
+									<span class={styles.textLink}>Get notified <span aria-hidden="true">→</span></span>
+								</div>
+							</a>
+						))}
+					</div>
+				) : (
+					<div class={styles.feedGrid}>
+						{upcomingStreams.map((item) => (
+							<VideoCard href={item.href} title={item.title} thumbnailUrl={item.mediaSrc} publishedAt={item.publishedAt} description={item.description} scheduled />
+						))}
+					</div>
+				)}
 			</section>
 		)}
 		{featured && (
@@ -154,7 +151,7 @@ const pageDescription =
 						<span class={styles.play} data-play aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12-7.5z" /></svg></span>
 					</div>
 					<div class={styles.featureCopy}>
-						<p class={styles.kicker}>Latest session{featured.duration && ` · ${featured.duration}`}</p>
+						<p class={styles.kicker}>Latest session{featured.runtime && ` · ${featured.runtime}`}</p>
 						<h2 class={styles.watchTitle}>{featured.title}</h2>
 						<p class={styles.lede}>{featured.description}</p>
 						<span class={styles.textLink}>Watch the session <span aria-hidden="true">→</span></span>
@@ -169,7 +166,7 @@ const pageDescription =
 			<form action="/watch" method="get" role="search" aria-label="Search the video library" class={styles.searchBar}>
 				<label for="video-search">Find a session</label>
 				<input id="video-search" name="q" value={archive.query} class={styles.input} type="search" placeholder="Search topics, tools, or speakers" autocomplete="off" />
-				<button class={styles.buttonPrimary} type="submit">Search</button>
+				<button class={button({ variant: "outline", size: "lg" })} type="submit">Search</button>
 			</form>
 			<div class={styles.sectionHead}>
 				{archive.total > 0 && <p class={styles.resultCount}>Showing {archive.first}–{archive.last} of {archive.total} {archive.total === 1 ? "video" : "videos"}{archive.query && ` matching “${archive.query}”`}</p>}
@@ -178,14 +175,8 @@ const pageDescription =
 			{archive.total > 0 ? (
 				<>
 					<div class={styles.feedGrid}>
-						{libraryVideos.map(item => (
-							<a href={item.href} class={styles.card}>
-								<div class={styles.cardArt}><img src={item.mediaSrc} alt="" class={styles.cardImage} width="640" height="360" loading="lazy" /></div>
-								<div class={styles.cardBody}>
-									{item.duration && <p class={styles.cardMeta}>{item.duration}</p>}
-									<h3 class={styles.cardTitle}>{item.title}</h3>
-								</div>
-							</a>
+						{libraryVideos.map((item) => (
+							<VideoCard href={item.href} title={item.title} thumbnailUrl={item.mediaSrc} duration={item.duration} publishedAt={item.publishedAt} type={item.type} />
 						))}
 					</div>
 				</>
@@ -195,9 +186,9 @@ const pageDescription =
 			{archive.pageCount > 1 && (
 				<nav class={styles.more} aria-label="Video library pages">
 					<div class={styles.actions}>
-						{archive.page > 1 && <a class={styles.buttonSecondary} href={watchArchiveHref(archive.query, archive.page - 1)} rel="prev">Previous</a>}
+						{archive.page > 1 && <a class={button({ variant: "outline" })} href={watchArchiveHref(archive.query, archive.page - 1)} rel="prev">Previous</a>}
 						<p class={styles.resultCount}>Page {archive.page} of {archive.pageCount}</p>
-						{archive.page < archive.pageCount && <a class={styles.buttonSecondary} href={watchArchiveHref(archive.query, archive.page + 1)} rel="next">Next</a>}
+						{archive.page < archive.pageCount && <a class={button({ variant: "outline" })} href={watchArchiveHref(archive.query, archive.page + 1)} rel="next">Next</a>}
 					</div>
 				</nav>
 			)}

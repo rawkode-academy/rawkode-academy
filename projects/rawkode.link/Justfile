@@ -1,2 +1,0 @@
-deploy:
-	op run -- wrangler deploy

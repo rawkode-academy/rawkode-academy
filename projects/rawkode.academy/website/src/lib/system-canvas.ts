@@ -5,9 +5,12 @@
  * places the work somewhere healthy.
  *
  * It is decoration with a point of view, so it never covers content (every
- * element marked `data-system-avoid` is kept clear), it stops drawing when
- * the hero is off screen or the tab is hidden, and with reduced motion it
- * renders still frames: no packets, no autonomous failures, instant moves.
+ * element marked `data-system-avoid` is kept clear) and it stops drawing when
+ * the hero is off screen or the tab is hidden. It moves for five seconds
+ * after load or the last pointer interaction, with one failure of its own so
+ * the behaviour is seen once, then holds a still frame (WCAG 2.2.2). With
+ * reduced motion it only ever renders still frames: a few packets at rest
+ * on their routes, no autonomous failure, instant moves.
  */
 
 type Point = { x: number; y: number };
@@ -48,15 +51,37 @@ const FAIL_MS = 650;
 const TERMINATE_MS = 320;
 const SCHEDULE_MS = 520;
 const NODE_DOWN_MS = 4200;
+/** How long the system moves after load or the last pointer interaction. */
+const RUN_MS = 5000;
+/** The first and only failure nobody asked for. */
+const FIRST_FAILURE_MS = 1500;
+/** Moving packets hand over to the still frame's packets at the end of a run. */
+const HANDOVER_MS = 400;
+/** A run may overrun to finish a failure that is still playing out. */
+const OVERRUN_MS = NODE_DOWN_MS + 2000;
+const STILL_PACKETS = 3;
+const PACKET_LENGTH = 14;
 const WORKLOADS = ["api", "web", "worker", "cache", "ingest", "auth"];
 
-const pick = <T>(items: readonly T[]): T | undefined =>
-	items[Math.floor(Math.random() * items.length)];
+export interface SystemOptions {
+	/** Lays the system out from a seeded generator, so a render repeats. */
+	seed?: number;
+	/** Holds still frames, as reduced motion does. */
+	still?: boolean;
+}
 
-const hex = () =>
-	Math.floor(Math.random() * 0xffff)
-		.toString(16)
-		.padStart(4, "0");
+/** mulberry32: a small seeded generator, enough for a repeatable layout. */
+const seeded = (seed: number) => {
+	let state = seed >>> 0;
+	return () => {
+		state = (state + 0x6d2b79f5) >>> 0;
+		let t = state;
+		t = Math.imul(t ^ (t >>> 15), t | 1);
+		t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+		return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+	};
+};
+
 const ease = (t: number) => 1 - (1 - Math.min(1, Math.max(0, t))) ** 4;
 
 const routeBetween = (
@@ -92,12 +117,20 @@ const along = (route: Route, distance: number): Point => {
 	);
 };
 
-export function mountSystem(hero: HTMLElement) {
+export function mountSystem(hero: HTMLElement, options: SystemOptions = {}) {
 	const canvas = hero.querySelector<HTMLCanvasElement>("[data-system-canvas]");
 	const context = canvas?.getContext("2d");
 	if (!canvas || !context) return;
 
 	const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+	const still = () => options.still === true || reduced.matches;
+	let random = Math.random;
+	const pick = <T>(items: readonly T[]): T | undefined =>
+		items[Math.floor(random() * items.length)];
+	const hex = () =>
+		Math.floor(random() * 0xffff)
+			.toString(16)
+			.padStart(4, "0");
 	let palette: Palette;
 	let width = 0;
 	let height = 0;
@@ -105,12 +138,16 @@ export function mountSystem(hero: HTMLElement) {
 	let nodes: Node[] = [];
 	let pods: Pod[] = [];
 	let free: Point[] = [];
+	/** The copy's boxes, padded: nothing is placed or routed through them. */
+	let avoid: { left: number; right: number; top: number; bottom: number }[] =
+		[];
 	let hovered: Pod | Node | undefined;
 	let visible = true;
 	let frame = 0;
 	let last = performance.now();
+	const startedAt = performance.now();
 	let lastInteraction = 0;
-	let nextChaos = performance.now() + 6000;
+	let failedOnce = false;
 
 	const readPalette = () => {
 		const style = getComputedStyle(hero);
@@ -141,11 +178,34 @@ export function mountSystem(hero: HTMLElement) {
 				.length;
 		const candidates = nodes
 			.filter((node) => node.ready && node !== preferAwayFrom)
-			.sort((a, b) => load(a) - load(b) || Math.random() - 0.5);
+			.sort((a, b) => load(a) - load(b) || random() - 0.5);
 		return candidates[0];
 	};
 
-	const placeNear = (node: Node): Point | undefined => {
+	// A route is clear when neither leg runs through the copy.
+	const clear = (route: Route) =>
+		[
+			[route[0], route[1]],
+			[route[1], route[2]],
+		].every(([from, to]) =>
+			avoid.every(
+				(rect) =>
+					!from ||
+					!to ||
+					Math.max(from.x, to.x) <= rect.left ||
+					Math.min(from.x, to.x) >= rect.right ||
+					Math.max(from.y, to.y) <= rect.top ||
+					Math.min(from.y, to.y) >= rect.bottom,
+			),
+		);
+	const routeTo = (node: Node, at: Point): Route | undefined => {
+		const first = random() > 0.5;
+		return [first, !first]
+			.map((horizontalFirst) => routeBetween(node, at, horizontalFirst))
+			.find(clear);
+	};
+
+	const placeNear = (node: Node): { at: Point; route: Route } | undefined => {
 		const options = free
 			.filter((point) => !occupied(point))
 			.map((point) => ({
@@ -154,31 +214,34 @@ export function mountSystem(hero: HTMLElement) {
 			}))
 			.filter(({ distance }) => distance > 0)
 			.sort((a, b) => a.distance - b.distance)
+			.flatMap(({ point }) => {
+				const route = routeTo(node, point);
+				return route ? [{ at: point, route }] : [];
+			})
 			.slice(0, 5);
-		return pick(options)?.point;
+		return pick(options);
 	};
 
 	const spawn = (
 		node: Node,
-		at: Point,
+		{ at, route }: { at: Point; route: Route },
 		now: number,
 		phase: PodPhase = "pending",
-	): Pod => {
-		const route = routeBetween(node, at, Math.random() > 0.5);
-		return {
-			...at,
-			name: `${pick(WORKLOADS) ?? "app"}-${hex()}`,
-			node,
-			phase,
-			since: now,
-			route,
-			link: phase === "running" ? 1 : 0,
-			packet: Math.random() * routeLength(route),
-			packetSpeed: 70 + Math.random() * 90,
-		};
-	};
+	): Pod => ({
+		...at,
+		name: `${pick(WORKLOADS) ?? "app"}-${hex()}`,
+		node,
+		phase,
+		since: now,
+		route,
+		link: phase === "running" ? 1 : 0,
+		packet: random() * routeLength(route),
+		packetSpeed: 70 + random() * 90,
+	});
 
 	const layout = () => {
+		// A seeded layout repeats on every pass, a resize included.
+		if (options.seed !== undefined) random = seeded(options.seed);
 		const bounds = hero.getBoundingClientRect();
 		width = bounds.width;
 		height = bounds.height;
@@ -202,55 +265,99 @@ export function mountSystem(hero: HTMLElement) {
 			range.selectNodeContents(element);
 			return [...range.getClientRects()];
 		};
-		const avoid = [...hero.querySelectorAll<HTMLElement>("[data-system-avoid]")]
-			.flatMap(rectsOf)
-			.filter((rect) => rect.width > 0 && rect.height > 0)
-			.map((rect) => ({
-				left: rect.left - bounds.left - cell * 0.35,
-				right: rect.right - bounds.left + cell * 0.35,
-				top: rect.top - bounds.top - cell * 0.35,
-				bottom: rect.bottom - bounds.top + cell * 0.35,
-			}));
-		free = [];
-		for (let y = cell; y < height * 0.8; y += cell) {
-			for (let x = originX; x < width - cell * 0.4; x += cell) {
-				if (x < cell * 0.4) continue;
-				const blocked = avoid.some(
-					(rect) =>
-						x > rect.left && x < rect.right && y > rect.top && y < rect.bottom,
-				);
-				if (!blocked) free.push({ x, y });
+		const pad = cell * 0.35;
+		const boxes = [
+			...hero.querySelectorAll<HTMLElement>("[data-system-avoid]"),
+		].map((element) =>
+			rectsOf(element)
+				.filter((rect) => rect.width > 0 && rect.height > 0)
+				.map((rect) => ({
+					left: rect.left - bounds.left - pad,
+					right: rect.right - bounds.left + pad,
+					top: rect.top - bounds.top - pad,
+					bottom: rect.bottom - bounds.top + pad,
+				})),
+		);
+		avoid = boxes.flat();
+		// The system lives beside the copy: on every intersection to the right
+		// of the statement and the lede, from the first grid row to the last
+		// one with room beneath it. Rows above, between and below the copy
+		// start where its narrowest box ends, so nothing strays into the text
+		// column.
+		const column = Math.min(
+			width,
+			...boxes
+				.filter((rects) => rects.length > 0)
+				.map((rects) => Math.max(...rects.map((rect) => rect.right))),
+		);
+		// Where the copy fills the measure (a phone), the hero keeps room at its
+		// foot, and the one lattice row there is where the system lives: half a
+		// cell clear of the copy and of the edge, open across the hero. The
+		// row is found from the hero's own padding, which no entrance
+		// animation moves.
+		const foot =
+			height - Number.parseFloat(getComputedStyle(hero).paddingBottom);
+		const under = boxes.length > 0 ? foot + cell * 0.5 : height;
+		const points = (open: boolean) => {
+			const found: Point[] = [];
+			for (let y = cell; y < height - cell * 0.5; y += cell) {
+				if (open !== y >= under) continue;
+				if (!open && y > height - cell * 0.75) continue;
+				for (let x = originX; x < width - cell * 0.4; x += cell) {
+					if (x < cell * 0.4 || (!open && boxes.length > 0 && x < column))
+						continue;
+					const blocked = avoid.some(
+						(rect) => x < rect.right && y > rect.top && y < rect.bottom,
+					);
+					if (!blocked) found.push({ x, y });
+				}
 			}
-		}
+			return found;
+		};
+		const row = points(true);
+		free = row.length > 0 ? row : points(false);
 
 		const now = performance.now();
 		nodes = [];
 		pods = [];
-		if (free.length < 6) return;
+		if (free.length < 4) return;
 
-		// Nodes go where the open lattice is densest, at least three cells
-		// apart, so the cluster gathers in the space the layout leaves free.
-		const nodeCount = Math.max(2, Math.min(5, Math.round(free.length / 14)));
+		// The first node goes where the open lattice is densest; each one
+		// after it goes as far from the others as the lattice allows (at least
+		// three cells, or two on a row too short for three), so the cluster spans the space the layout leaves free.
+		const nodeCount = Math.max(2, Math.min(5, Math.round(free.length / 10)));
 		const reach = cell * 2.5;
+		const distance = (a: Point, b: Point) =>
+			Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 		const density = new Map(
 			free.map((point) => [
 				point,
-				free.filter(
-					(other) =>
-						Math.abs(other.x - point.x) + Math.abs(other.y - point.y) <= reach,
-				).length + Math.random(),
+				free.filter((other) => distance(other, point) <= reach).length +
+					random(),
 			]),
 		);
 		const picks: Point[] = [];
-		for (const point of [...free].sort(
-			(a, b) => (density.get(b) ?? 0) - (density.get(a) ?? 0),
-		)) {
-			if (picks.length === nodeCount) break;
-			const clear = picks.every(
-				(pick) =>
-					Math.abs(pick.x - point.x) + Math.abs(pick.y - point.y) >= cell * 3,
-			);
-			if (clear) picks.push(point);
+		while (picks.length < nodeCount) {
+			const next = [3, 2]
+				.map((apart) =>
+					free.filter((point) =>
+						picks.every((pick) => distance(pick, point) >= cell * apart),
+					),
+				)
+				.find((candidates) => candidates.length > 0)
+				?.map((point) => ({
+					point,
+					score:
+						(density.get(point) ?? 0) +
+						(picks.length
+							? (Math.min(...picks.map((pick) => distance(pick, point))) /
+									cell) *
+								3
+							: 0),
+				}))
+				.sort((a, b) => b.score - a.score)[0];
+			if (!next) break;
+			picks.push(next.point);
 		}
 		nodes = picks.map((point, index) => ({
 			...point,
@@ -260,7 +367,7 @@ export function mountSystem(hero: HTMLElement) {
 			downAt: 0,
 		}));
 
-		const podCount = Math.min(30, Math.round(free.length * 0.32));
+		const podCount = Math.min(30, Math.round(free.length * 0.45));
 		for (let index = 0; index < podCount; index++) {
 			const node = nodes[index % nodes.length];
 			const at = node && placeNear(node);
@@ -290,7 +397,7 @@ export function mountSystem(hero: HTMLElement) {
 	};
 
 	const step = (now: number, delta: number) => {
-		const instant = reduced.matches;
+		const instant = still();
 		for (const node of nodes) {
 			if (!node.ready && now - node.downAt > NODE_DOWN_MS) {
 				node.ready = true;
@@ -321,23 +428,39 @@ export function mountSystem(hero: HTMLElement) {
 					(pod.packet + (pod.packetSpeed * delta) / 1000) % (length + 80);
 			}
 		}
-		// With nobody at the controls, the cluster has the occasional bad day.
-		if (!instant && now > nextChaos && now - lastInteraction > 8000) {
-			nextChaos = now + 7000 + Math.random() * 5000;
-			breakSomething(now, 0.25);
+		// One pod fails on its own, once, so the behaviour is seen. The rest
+		// is the reader's doing.
+		if (!instant && !failedOnce && now - startedAt > FIRST_FAILURE_MS) {
+			failedOnce = true;
+			const pod = pick(
+				pods.filter((candidate) => candidate.phase === "running"),
+			);
+			if (pod) breakPod(pod, now);
 		}
 	};
 
-	// Takes down a node (with the given chance, and never the last one
-	// standing) or else a single pod.
-	const breakSomething = (now: number, nodeChance: number) => {
-		const ready = nodes.filter((node) => node.ready);
-		const node =
-			ready.length > 1 && Math.random() < nodeChance ? pick(ready) : undefined;
-		if (node) return breakNode(node, now);
-		const pod = pick(pods.filter((candidate) => candidate.phase === "running"));
-		if (pod) breakPod(pod, now);
+	// A run lasts RUN_MS from load or the last pointer interaction, and
+	// overruns only to finish a failure the reader started.
+	const sinceActivity = (now: number) =>
+		now - Math.max(startedAt, lastInteraction);
+	const unsettled = () =>
+		nodes.some((node) => !node.ready) ||
+		pods.some((pod) => pod.phase !== "running");
+	const running = (now: number) => {
+		const elapsed = sinceActivity(now);
+		return elapsed < RUN_MS || (unsettled() && elapsed < RUN_MS + OVERRUN_MS);
 	};
+	/** 0 while packets travel, 1 once the frame is still. */
+	const stillness = (now: number) =>
+		still()
+			? 1
+			: Math.min(
+					1,
+					Math.max(
+						0,
+						(sinceActivity(now) - (RUN_MS - HANDOVER_MS)) / HANDOVER_MS,
+					),
+				);
 
 	const crisp = (value: number) => Math.round(value) + 0.5;
 
@@ -353,6 +476,20 @@ export function mountSystem(hero: HTMLElement) {
 		context.stroke();
 	};
 
+	const strokePacket = (route: Route, at: number) => {
+		const head = along(route, at);
+		const tail = along(route, Math.max(0, at - PACKET_LENGTH));
+		const [, corner] = route;
+		const cornerAt = toCorner(route);
+		context.beginPath();
+		context.moveTo(tail.x, tail.y);
+		// Follow the corner when the packet is turning it.
+		if (at - PACKET_LENGTH < cornerAt && at > cornerAt)
+			context.lineTo(corner.x, corner.y);
+		context.lineTo(head.x, head.y);
+		context.stroke();
+	};
+
 	const draw = (now: number) => {
 		context.clearRect(0, 0, width, height);
 		context.lineWidth = 1;
@@ -365,37 +502,41 @@ export function mountSystem(hero: HTMLElement) {
 				? 0.7
 				: pod === hovered || pod.node === hovered
 					? 0.6
-					: 0.28;
+					: 0.5;
 			context.setLineDash(failing ? [3, 4] : []);
 			strokeRoute(pod.route, pod.link);
 		}
 		context.setLineDash([]);
 
-		// Packets: a short bright segment travelling the route.
-		if (!reduced.matches) {
-			context.lineWidth = 2;
-			context.lineCap = "round";
-			for (const pod of pods) {
-				if (pod.phase !== "running" || !pod.node.ready) continue;
-				const length = routeLength(pod.route);
-				if (pod.packet > length) continue;
-				const head = along(pod.route, pod.packet);
-				const tail = along(pod.route, Math.max(0, pod.packet - 14));
-				context.strokeStyle = palette.text;
-				context.globalAlpha = 0.75;
-				context.beginPath();
-				context.moveTo(tail.x, tail.y);
-				// Follow the corner when the packet is turning it.
-				const [, corner] = pod.route;
-				const cornerAt = toCorner(pod.route);
-				if (pod.packet - 14 < cornerAt && pod.packet > cornerAt)
-					context.lineTo(corner.x, corner.y);
-				context.lineTo(head.x, head.y);
-				context.stroke();
+		// Packets: a short accent segment on the route. They travel while the
+		// system runs; a still frame holds a few at rest, mid-route.
+		const settled = stillness(now);
+		const healthy = pods.filter(
+			(pod) => pod.phase === "running" && pod.node.ready,
+		);
+		context.lineWidth = 2;
+		context.lineCap = "round";
+		context.strokeStyle = palette.accent;
+		if (settled < 1) {
+			context.globalAlpha = 0.9 * (1 - settled);
+			for (const pod of healthy) {
+				if (pod.packet <= routeLength(pod.route))
+					strokePacket(pod.route, pod.packet);
 			}
-			context.lineCap = "butt";
-			context.lineWidth = 1;
 		}
+		if (settled > 0) {
+			context.globalAlpha = 0.9 * settled;
+			const resting = healthy.filter((pod) => routeLength(pod.route) >= cell);
+			const every = Math.max(1, Math.floor(resting.length / STILL_PACKETS));
+			resting
+				.filter((_, index) => index % every === 0)
+				.slice(0, STILL_PACKETS)
+				.forEach((pod) => {
+					strokePacket(pod.route, routeLength(pod.route) / 2);
+				});
+		}
+		context.lineCap = "butt";
+		context.lineWidth = 1;
 
 		// Pods.
 		for (const pod of pods) {
@@ -409,7 +550,7 @@ export function mountSystem(hero: HTMLElement) {
 				const pulse = Math.max(0, age) / FAIL_MS;
 				context.fillStyle = palette.accent;
 				context.fillRect(pod.x - size / 2, pod.y - size / 2, size, size);
-				if (!reduced.matches && pulse > 0) {
+				if (!still() && pulse > 0) {
 					const ring = size + ease(pulse) * 36;
 					context.globalAlpha = 1 - pulse;
 					context.strokeStyle = palette.accent;
@@ -444,7 +585,7 @@ export function mountSystem(hero: HTMLElement) {
 		for (const node of nodes) {
 			const size = 14;
 			const accent = !node.ready || node === hovered;
-			context.globalAlpha = 1;
+			context.globalAlpha = accent ? 1 : 0.6;
 			context.fillStyle = accent ? palette.accent : palette.text;
 			context.fillRect(node.x - size / 2, node.y - size / 2, size, size);
 			context.globalAlpha = accent ? 0.5 : 0.2;
@@ -490,7 +631,8 @@ export function mountSystem(hero: HTMLElement) {
 		last = now;
 		step(now, delta);
 		draw(now);
-		if (visible && !document.hidden && !reduced.matches)
+		// The last frame of a run is the still frame: stillness() is 1 by then.
+		if (visible && !document.hidden && !still() && running(now))
 			frame = requestAnimationFrame(tick);
 	};
 
@@ -500,9 +642,10 @@ export function mountSystem(hero: HTMLElement) {
 		frame = requestAnimationFrame(tick);
 	};
 
-	// Reduced motion renders on demand only.
+	// Still frames render on demand only; otherwise this draws a frame and
+	// keeps going for as long as the run lasts.
 	const settle = () => {
-		if (reduced.matches) {
+		if (still()) {
 			const now = performance.now();
 			step(now, 0);
 			draw(now);
@@ -536,6 +679,10 @@ export function mountSystem(hero: HTMLElement) {
 
 	hero.addEventListener("pointermove", (event) => {
 		if (event.pointerType === "touch") return;
+		// Any pointer movement in the hero starts a fresh run.
+		const resting = !running(performance.now());
+		lastInteraction = performance.now();
+		if (resting) settle();
 		const next = interactive(event.target) ? undefined : hit(pointer(event));
 		if (next !== hovered) {
 			hovered = next;
@@ -550,15 +697,15 @@ export function mountSystem(hero: HTMLElement) {
 	});
 	hero.addEventListener("click", (event) => {
 		if (interactive(event.target)) return;
-		const target = hit(pointer(event));
-		if (!target) return;
 		const now = performance.now();
 		lastInteraction = now;
+		const target = hit(pointer(event));
+		if (!target) return settle();
 		if ("ready" in target) breakNode(target, now);
 		else breakPod(target, now);
 		settle();
 		// Reduced motion has no animation frames to play out the failure.
-		if (reduced.matches) window.setTimeout(settle, 0);
+		if (still()) window.setTimeout(settle, 0);
 	});
 	new IntersectionObserver(([entry]) => {
 		visible = entry?.isIntersecting ?? true;

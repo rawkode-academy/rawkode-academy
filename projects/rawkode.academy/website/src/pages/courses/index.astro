@@ -8,10 +8,10 @@ import {
 import AcademyCatalogCard from "@/components/academy/AcademyCatalogCard.astro";
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
 import CourseItemListJsonLd from "@/components/html/course-itemlist-jsonld.astro";
-import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
+import { academyCatalog, academyLayout, button } from "@rawkodeacademy/design-system";
 import { getCourseModuleSlug } from "@/utils/course-path";
 import Page from "@/wrappers/page.astro";
-import { type LocalTimeValue, localTime } from "@/lib/local-time";
+import { localDate, type LocalTimeValue } from "@/lib/local-time";
 
 export const prerender = false;
 
@@ -30,9 +30,11 @@ function availabilityLabel(courseId: string) {
 		(module) => module.data.course.id === courseId && !module.data.draft,
 	).length;
 	return count === 0
-		? "Announced · no lessons available yet"
+		? "Announced"
 		: `${count} lesson${count === 1 ? "" : "s"} available`;
 }
+const levelLabel = (difficulty: string) =>
+	difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
 // Covers are remote (content.rawkode.academy); the runtime image service is a
 // passthrough on SSR routes, so use the source URL directly.
 const courseImages = new Map(
@@ -70,11 +72,7 @@ if (featuredCourse) {
 		name: author.data.name,
 		avatarUrl: author.data.avatarUrl,
 	}));
-	featuredPublished = localTime(featuredCourse.data.publishedAt, {
-		month: "short",
-		day: "numeric",
-		year: "numeric",
-	});
+	featuredPublished = localDate(featuredCourse.data.publishedAt);
 }
 
 await setContentCache(Astro, {
@@ -106,8 +104,8 @@ const catalog = academyCatalog();
 						<p class={catalog.featuredKicker}>Featured course · {featuredAvailableModuleCount > 0 ? `${featuredAvailableModuleCount}/${featuredModuleCount} lessons available` : availabilityLabel(featuredCourse.id)}</p>
 						<h2 class={catalog.featuredTitle}>{featuredCourse.data.title}</h2>
 						<p class={catalog.featuredDescription}>{featuredCourse.data.description}</p>
-						<p class={catalog.rowMeta}>{featuredCourse.data.difficulty} · {featuredPublished && <time {...featuredPublished.attrs}>{featuredPublished.text}</time>}{featuredAuthors.length > 0 && ` · ${featuredAuthors.map((author) => author.name).join(", ")}`}</p>
-						<a class={styles.button} href={firstModuleSlug ? `/courses/${featuredCourse.id}/${firstModuleSlug}` : `/courses/${featuredCourse.id}`}>{firstModuleSlug ? "Start the course →" : "View course plan →"}</a>
+						<p class={catalog.rowMeta}>{levelLabel(featuredCourse.data.difficulty)} · {featuredPublished && <time {...featuredPublished.attrs}>{featuredPublished.text}</time>}{featuredAuthors.length > 0 && ` · ${featuredAuthors.map((author) => author.name).join(", ")}`}</p>
+						<a class={button()} href={firstModuleSlug ? `/courses/${featuredCourse.id}/${firstModuleSlug}` : `/courses/${featuredCourse.id}`}>{firstModuleSlug ? "Start the course →" : "View course plan →"}</a>
 					</div>
 					{courseImages.get(featuredCourse.id) && <a class={catalog.featuredMedia} href={`/courses/${featuredCourse.id}`} aria-label={`Explore ${featuredCourse.data.title}`}>
 						<img class={catalog.featuredImage} src={courseImages.get(featuredCourse.id)} alt={featuredCourse.data.cover?.alt ?? ""} width="960" height="540" fetchpriority="high" />
@@ -127,7 +125,7 @@ const catalog = academyCatalog();
 
 				<div class={styles.grid}>
 					{libraryCourses.map((course) => (
-						<AcademyCatalogCard href={`/courses/${course.id}`} title={course.data.title} description={course.data.description} meta={[course.data.difficulty, availabilityLabel(course.id)]} image={courseImages.get(course.id)} imageAlt={course.data.cover?.alt ?? ""} />
+						<AcademyCatalogCard href={`/courses/${course.id}`} title={course.data.title} description={course.data.description} level={course.data.difficulty} meta={[availabilityLabel(course.id)]} image={courseImages.get(course.id)} imageAlt={course.data.cover?.alt ?? ""} />
 					))}
 				</div>
 			</div>

@@ -27,14 +27,20 @@ export const isCalendarDate = (date: Date) =>
 const toDate = (value: Date | string | number) =>
 	value instanceof Date ? value : new Date(value);
 
+// en-GB abbreviates September to four letters where every other month has
+// three. One short form, so a column of dates stays aligned.
+const shortMonths = (text: string) => text.replace(/\bSept\b/g, "Sep");
+
 /** Format in UTC: the server-rendered fallback, identical for every reader. */
 export const formatUtc = (
 	value: Date | string | number,
 	options: Intl.DateTimeFormatOptions,
 	locale = "en-US",
 ) =>
-	new Intl.DateTimeFormat(locale, { ...options, timeZone: "UTC" }).format(
-		toDate(value),
+	shortMonths(
+		new Intl.DateTimeFormat(locale, { ...options, timeZone: "UTC" }).format(
+			toDate(value),
+		),
 	);
 
 /**
@@ -51,10 +57,12 @@ export const formatLocal = (
 	const date = toDate(value);
 	const { timeZone: _ignored, ...rest } = options;
 	const zone = isCalendarDate(date) ? "UTC" : timeZone;
-	return new Intl.DateTimeFormat(locale, {
-		...rest,
-		...(zone ? { timeZone: zone } : {}),
-	}).format(date);
+	return shortMonths(
+		new Intl.DateTimeFormat(locale, {
+			...rest,
+			...(zone ? { timeZone: zone } : {}),
+		}).format(date),
+	);
 };
 
 /**
@@ -81,3 +89,32 @@ export const localTime = (
 };
 
 export type LocalTimeValue = ReturnType<typeof localTime>;
+
+/**
+ * The Academy's one date form: day, short month, year ("17 Jul 2026"). Use
+ * it wherever a publication date is set as metadata; ledger rows split the
+ * same parts into a numeral and a label.
+ */
+export const ACADEMY_DATE_LOCALE = "en-GB";
+export const ACADEMY_DATE = {
+	day: "numeric",
+	month: "short",
+	year: "numeric",
+} as const satisfies Intl.DateTimeFormatOptions;
+
+export const localDate = (value: Date | string | number) =>
+	localTime(value, ACADEMY_DATE, ACADEMY_DATE_LOCALE);
+
+/** A scheduled start: "Wed, 11 Nov 2026, 12:00 GMT" in the reader's zone. */
+export const ACADEMY_DATE_TIME = {
+	weekday: "short",
+	day: "numeric",
+	month: "short",
+	year: "numeric",
+	hour: "numeric",
+	minute: "2-digit",
+	timeZoneName: "short",
+} as const satisfies Intl.DateTimeFormatOptions;
+
+export const localDateTime = (value: Date | string | number) =>
+	localTime(value, ACADEMY_DATE_TIME, ACADEMY_DATE_LOCALE);
