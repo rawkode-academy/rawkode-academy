@@ -49,7 +49,11 @@ type Trajectory = (typeof MATRIX_TRAJECTORY_VALUES)[number];
 
 // CNCF Categories (dynamically discovered from data)
 const pipelineStages = MATRIX_STATUS_VALUES.filter(
-	(s) => s !== "graveyard" && s !== "guilty-pleasure" && s !== "skip",
+	(s) =>
+		s !== "under-review" &&
+		s !== "graveyard" &&
+		s !== "guilty-pleasure" &&
+		s !== "skip",
 );
 
 const categoryDescriptions: Record<string, string> = {
@@ -93,8 +97,12 @@ const trajectoryEmoji: Record<Trajectory, string> = {
 const allTechnologies = await getCollection("technologies");
 // Counts cover every video (scheduled ones included), as the static page did.
 await setContentCache(Astro, { collections: ["technologies", "videos"] });
+// Technologies still under review have no placement to show yet.
 const matrixTechnologies = allTechnologies
-	.filter((tech) => tech.data.matrix?.status)
+	.filter(
+		(tech) =>
+			tech.data.matrix?.status && tech.data.matrix.status !== "under-review",
+	)
 	.map((tech) => ({
 		id: tech.id,
 		name: tech.data.name,
