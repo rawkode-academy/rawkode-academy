@@ -8,12 +8,6 @@ name: "rawkode-academy-content"
 
 env: {
 	SERVICE_NAME: "content"
-
-	environment: production: {
-		CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {
-			ref: "op://sa.rawkode.academy/cloudflare/api-tokens/workers"
-		}
-	}
 }
 
 ci:      _service.ci

@@ -2,7 +2,9 @@ id: cb02e6c2-c244-411c-bb61-3403e6e85c50
 name: update-technologies
 description: >-
   Audit technology profiles in the platform-technologies D1 database against
-  primary sources, then write the confirmed corrections after approval.
+  primary sources and search-result standards, draft the search-result text
+  that falls short, and write the corrections. The plan step lists every
+  change before it is written; nothing waits for approval.
 version: 1
 tags: {}
 vaults:
@@ -29,7 +31,7 @@ inputs:
         {"kubernetes": {"community.blog": "https://kubernetes.io/blog/"}}
 jobs:
   - name: update
-    description: Read, audit, approve, write, invalidate and confirm
+    description: Read, audit, draft, plan, redraft, write, confirm and invalidate
     steps:
       - name: read
         description: Read the requested technology rows from D1
@@ -48,7 +50,7 @@ jobs:
               params:
                 - ${{ inputs.technologies }}
       - name: audit
-        description: Check every field against primary sources and plan the update
+        description: Check every field against primary sources and search-result standards
         dependsOn:
           - step: read
             condition:
@@ -60,29 +62,85 @@ jobs:
           inputs:
             rows: ${{ data.latest("technologies-database", "d1_query_database-current").attributes[0].results }}
             technologies: ${{ inputs.technologies }}
-            accept: ${{ inputs.accept }}
             changes: ${{ inputs.changes }}
-      - name: approve
-        description: Review the plan before anything is written
+      - name: draft
+        description: Draft the search-result title and description of every profile that lacks a good one
         dependsOn:
           - step: audit
             condition:
               type: succeeded
-        guard: ${{ size(data.latest("technology-profiles", "plan").attributes.statements) == 0 }}
+        guard: ${{ size(data.latest("technology-profiles", "seo-requests").attributes.requests) == 0 }}
         task:
-          type: manual_approval
-          prompt: >-
-            Review the planned technology updates before they are written to
-            production D1: swamp data query 'modelName == "technology-profiles"
-            && name == "plan"' --select attributes.summary
-          timeout: 86400
+          type: behavior
+          behavior: seo-writer
+          methodName: cli_generate_many
+          inputs:
+            batch: technology-seo
+            systemPrompt: ${{ data.latest("technology-profiles", "seo-requests").attributes.systemPrompt }}
+            requests: ${{ data.latest("technology-profiles", "seo-requests").attributes.requests }}
+      - name: plan
+        description: Plan the update from the audit, the checked drafts and the inputs
+        dependsOn:
+          - step: draft
+            condition:
+              type: or
+              conditions:
+                - type: succeeded
+                - type: skipped
+        task:
+          type: behavior
+          behavior: technology-profiles
+          methodName: plan
+          inputs:
+            rows: ${{ data.latest("technologies-database", "d1_query_database-current").attributes[0].results }}
+            accept: ${{ inputs.accept }}
+            changes: ${{ inputs.changes }}
+            drafts: ${{ data.findBySpec("seo-writer", "cliResult") }}
+            run: ${{ run.id }}
+      - name: redraft
+        description: Give every draft that failed the checks one more attempt
+        dependsOn:
+          - step: plan
+            condition:
+              type: succeeded
+        guard: ${{ size(data.latest("technology-profiles", "seo-retries").attributes.requests) == 0 }}
+        task:
+          type: behavior
+          behavior: seo-writer
+          methodName: cli_generate_many
+          inputs:
+            batch: technology-seo
+            systemPrompt: ${{ data.latest("technology-profiles", "seo-retries").attributes.systemPrompt }}
+            requests: ${{ data.latest("technology-profiles", "seo-retries").attributes.requests }}
+      - name: replan
+        description: Plan again with the second drafts
+        dependsOn:
+          - step: redraft
+            condition:
+              type: succeeded
+        task:
+          type: behavior
+          behavior: technology-profiles
+          methodName: plan
+          inputs:
+            rows: ${{ data.latest("technologies-database", "d1_query_database-current").attributes[0].results }}
+            accept: ${{ inputs.accept }}
+            changes: ${{ inputs.changes }}
+            drafts: ${{ data.findBySpec("seo-writer", "cliResult") }}
+            run: ${{ run.id }}
       - name: write
         description: Apply the planned updates to D1 in one batch
         dependsOn:
-          - step: approve
+          - step: plan
             condition:
               type: succeeded
-        guard: ${{ size(data.latest("technology-profiles", "plan").attributes.statements) == 0 }}
+          - step: replan
+            condition:
+              type: or
+              conditions:
+                - type: succeeded
+                - type: skipped
+        guard: ${{ size(data.latest("technology-profiles", "plan-" + run.id).attributes.statements) == 0 }}
         task:
           type: behavior
           behavior: technologies-database
@@ -90,14 +148,14 @@ jobs:
           inputs:
             database_id: 4671b796-cdc8-4a4e-aa58-4e10eb24b67d
             body:
-              batch: ${{ data.latest("technology-profiles", "plan").attributes.statements }}
+              batch: ${{ data.latest("technology-profiles", "plan-" + run.id).attributes.statements }}
       - name: reread
         description: Read the rows back from D1
         dependsOn:
           - step: write
             condition:
               type: succeeded
-        guard: ${{ size(data.latest("technology-profiles", "plan").attributes.statements) == 0 }}
+        guard: ${{ size(data.latest("technology-profiles", "plan-" + run.id).attributes.statements) == 0 }}
         task:
           type: behavior
           behavior: technologies-database
@@ -117,23 +175,25 @@ jobs:
           - step: reread
             condition:
               type: succeeded
-        guard: ${{ size(data.latest("technology-profiles", "plan").attributes.statements) == 0 }}
+        guard: ${{ size(data.latest("technology-profiles", "plan-" + run.id).attributes.statements) == 0 }}
         task:
           type: behavior
           behavior: technology-profiles
           methodName: confirm
           inputs:
             rows: ${{ data.latest("technologies-database", "d1_query_database-current").attributes[0].results }}
+            run: ${{ run.id }}
       - name: invalidate
         description: Purge the website cache for the updated technologies
         dependsOn:
           - step: confirm
             condition:
               type: succeeded
-        guard: ${{ size(data.latest("technology-profiles", "plan").attributes.statements) == 0 }}
+        guard: ${{ size(data.latest("technology-profiles", "plan-" + run.id).attributes.statements) == 0 }}
         task:
           type: behavior
           behavior: technology-profiles
           methodName: invalidate
           inputs:
             token: ${{ vault.get(rawkode-academy, website-cache-invalidation) }}
+            run: ${{ run.id }}

@@ -1,0 +1,40 @@
+id: e40fe14d-a737-49ad-bcc7-3abeff1ae8bb
+name: find-missing-technologies
+description: >-
+  List the CNCF landscape projects that have no technology profile in the
+  platform-technologies D1 database. Read-only: nothing is created.
+version: 1
+tags: {}
+inputs:
+  properties:
+    maturity:
+      type: string
+      default: graduated,incubating,sandbox
+      description: Comma-separated CNCF maturity levels to include
+jobs:
+  - name: find
+    description: Read the profiles and compare them with the CNCF landscape
+    steps:
+      - name: read
+        description: Read what identifies every technology profile in D1
+        task:
+          type: behavior
+          behavior: technologies-database
+          methodName: d1_query_database
+          inputs:
+            database_id: 4671b796-cdc8-4a4e-aa58-4e10eb24b67d
+            body:
+              sql: SELECT id, name, aliases, source, website FROM technologies ORDER BY id
+      - name: discover
+        description: List the CNCF projects no profile covers
+        dependsOn:
+          - step: read
+            condition:
+              type: succeeded
+        task:
+          type: behavior
+          behavior: technology-profiles
+          methodName: discover
+          inputs:
+            rows: ${{ data.latest("technologies-database", "d1_query_database-current").attributes[0].results }}
+            maturity: ${{ inputs.maturity }}
