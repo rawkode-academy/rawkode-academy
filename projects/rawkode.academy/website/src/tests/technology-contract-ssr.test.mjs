@@ -108,8 +108,10 @@ const entry = (id, data = {}) => ({
 // Shared page/services are outside this fragment; no network or Browser is used.
 async function renderRelated(items, resolveLogo, profile = technology) {
 	const props = contracts(profile, items, resolveLogo);
-	const start = page.indexOf("\n\t\t{relatedTechnologies.length > 0 && (");
-	const end = page.indexOf("\n\t\t<div class={styles.newsletter}>", start);
+	// Found by what the lines say, whatever their indentation.
+	const start = page.search(/\n[ \t]*\{relatedTechnologies\.length > 0 && \(/);
+	const end = start +
+		page.slice(start).search(/\n[ \t]*<div class=\{styles\.newsletter\}>/);
 	assert(start > 0 && end > start);
 	const markup = page.slice(start, end);
 	const compiled = await transform(

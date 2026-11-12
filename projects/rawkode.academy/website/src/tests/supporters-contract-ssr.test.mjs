@@ -11,8 +11,13 @@ import * as runtime from "astro/runtime/server/index.js";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import { parse } from "node-html-parser";
 
+// Indentation is dropped as the source is read, so a fragment is found by
+// what it says and re-nesting a page does not move it.
 const read = (path) =>
-	readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
+	readFileSync(new URL(`../${path}`, import.meta.url), "utf8").replace(
+		/^[ \t]+/gm,
+		"",
+	);
 const technologyPage = read("pages/technology/[id].astro");
 const wallPage = read("pages/supporters.astro");
 const partnershipsPage = read("pages/organizations/partnerships/index.astro");
@@ -110,8 +115,8 @@ function contentCacheCall(page) {
 
 const badgeMarkup = fragment(
 	technologyPage,
-	"\t\t\t\t{supporter && (",
-	"\t\t\t\t{description && ",
+	"{supporter && (",
+	"{description && ",
 );
 const renderBadge = (supporter) =>
 	render(badgeMarkup, ["supporter", "SUPPORTERS_PATH", "MLabel"], {
@@ -151,11 +156,11 @@ test("technology credit thanks the supporter, links to its website and to the wa
 
 test("technology badge sits directly under the identity block and its supporter is optional content", () => {
 	const identityEnd = technologyPage.indexOf(
-		"<h1 class={styles.title}>{technology.name}</h1>\n\t\t\t\t</div>",
+		"<h1 class={styles.title}>{technology.name}</h1>\n</div>",
 	);
 	assert(identityEnd > 0);
 	assert.equal(
-		technologyPage.indexOf("\t\t\t\t{supporter && (", identityEnd),
+		technologyPage.indexOf("{supporter && (", identityEnd),
 		technologyPage.indexOf(
 			"\n",
 			technologyPage.indexOf("</div>", identityEnd),
@@ -175,8 +180,8 @@ test("technology badge sits directly under the identity block and its supporter 
 
 const wallMarkup = fragment(
 	wallPage,
-	"\t\t\t\t{wall.length > 0 ? (",
-	"\n\t\t\t</div>\n\t\t</section>",
+	"{wall.length > 0 ? (",
+	"\n</div>\n</section>",
 );
 const renderWall = (wall) =>
 	render(
