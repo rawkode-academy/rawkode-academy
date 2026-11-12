@@ -1,6 +1,6 @@
 import { DurableObject } from "cloudflare:workers";
-import { PostHog } from "posthog-node";
 import { CloudEvent } from "cloudevents";
+import { PostHog } from "posthog-node";
 import type { ExceptionData } from "../index";
 
 interface CloudEventData {
@@ -12,7 +12,22 @@ interface CloudEventData {
 	subject?: string;
 	datacontenttype?: string;
 	data?: unknown;
+	/** Extension attributes carry request context, such as country and referrer. */
+	[extension: string]: unknown;
 }
+
+const CORE_ATTRIBUTES = new Set([
+	"specversion",
+	"id",
+	"source",
+	"type",
+	"time",
+	"subject",
+	"datacontenttype",
+	"dataschema",
+	"data",
+	"data_base64",
+]);
 
 interface StoredEvent {
 	event: CloudEventData;
@@ -462,6 +477,10 @@ export class DataBuffer extends DurableObject<Env> {
 
 			if (event.datacontenttype) {
 				properties.cloudevents_datacontenttype = event.datacontenttype;
+			}
+
+			for (const [key, value] of Object.entries(event)) {
+				if (!CORE_ATTRIBUTES.has(key)) properties[key] = value;
 			}
 
 			// Include event data as properties (prefixed to avoid collisions)

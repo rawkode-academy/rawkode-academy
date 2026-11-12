@@ -2,9 +2,9 @@
 import { env } from "cloudflare:workers";
 import { z } from "astro/zod";
 import Page from "@/wrappers/page.astro";
-import { createEmailId, createLearnerId } from "@/actions/newsletter";
+import { createEmailId, createLearnerId } from "@/lib/newsletter-ids";
 import { createLogger } from "@/lib/logger";
-import { academyForms, academyDocument } from "@rawkodeacademy/design-system";
+import { academyDocument, academyForms, button } from "@rawkodeacademy/design-system";
 import "@rawkodeacademy/design-system/styles.css";
 
 export const prerender = false;
@@ -115,7 +115,7 @@ const doc = academyDocument();
 						<span class={form.label}>Subscription email address</span>
 						<input id="unsubscribe-email" type="email" name="email" value={email} autocomplete="email" required class={form.input} aria-describedby={errorMessage ? "unsubscribe-error" : undefined} aria-invalid={emailError ? "true" : undefined} />
 					</label>}
-					<button type="submit" class={form.button}>{scope === "account" ? "Unsubscribe my account" : "Unsubscribe this email address"}</button>
+					<button type="submit" class={button({ fullWidth: true })}>{scope === "account" ? "Unsubscribe my account" : "Unsubscribe this email address"}</button>
 				</form>
 				{scope === "account"
 					? <a class={doc.link} href={`/unsubscribe?scope=email&audience=${audience}`}>Unsubscribe a separate email address</a>

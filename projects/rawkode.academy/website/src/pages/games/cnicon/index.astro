@@ -1,15 +1,22 @@
 ---
 import PageWrapper from "@/wrappers/page.astro";
 import { DISABLE_GAME_AUTH } from "astro:env/server";
-import { getCollection } from "astro:content";
+import { disableContentCache, getCollection } from "@/lib/live-content";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { weekKey, buildWeeklyRounds, type CncfStatus } from "@/lib/games/guess-the-logo";
-import { academyLayout, academyMedia } from "@rawkodeacademy/design-system";
+import {
+	academyLayout,
+	academyMedia,
+	button,
+} from "@rawkodeacademy/design-system";
 import "@rawkodeacademy/design-system/styles.css";
 
 const disableAuth = DISABLE_GAME_AUTH === "true";
 const user = Astro.locals.user;
 const canPlay = Boolean(user) || disableAuth;
+// The response depends on the visitor (sign-in CTA vs. the player's game), and
+// the CDN key ignores cookies, so it must never be stored.
+disableContentCache(Astro);
 const layout = academyLayout({ width: "wide" });
 const media = academyMedia();
 
@@ -48,13 +55,13 @@ if (canPlay) {
 	useImageDirectly={true}
 	image={{ image: new URL("/games/cnicon-og.png", Astro.site) }}
 >
-	<div class:list={[layout.root, media.root, "game-route"]}>
+	<div class:list={[layout.root, media.root]}>
 	{!canPlay ? (
 		<div class:list={[layout.section, "sign-in-cta"]}>
 			<div class="sign-in-card">
 				<h1>CNIcon</h1>
 				<p>Sign in to play this week's CNIcon and compete on the leaderboard.</p>
-				<a href="/api/auth/sign-in?returnTo=/games/cnicon" class="sign-in-btn">
+				<a href="/api/auth/sign-in?returnTo=/games/cnicon" class={button()}>
 					Sign in to play this week's CNIcon
 				</a>
 			</div>
@@ -105,9 +112,9 @@ if (canPlay) {
 		text-align: center;
 		max-width: 480px;
 		padding: 3rem 2rem;
-		border: 1px solid var(--editorial-hairline);
-		border-radius: var(--radius-md);
-		background: var(--surface-card);
+		border: 1px solid var(--colors-academy-border);
+		border-radius: var(--radii-academy-s);
+		background: var(--colors-academy-panel);
 	}
 
 	.sign-in-card h1 {
@@ -115,25 +122,8 @@ if (canPlay) {
 	}
 
 	.sign-in-card p {
-		color: var(--editorial-ink-soft);
+		color: var(--colors-academy-text-soft);
 		margin-bottom: 2rem;
-	}
-
-	.sign-in-btn {
-		display: inline-block;
-		padding: 0.625rem 1.5rem;
-		background: var(--editorial-ink);
-		color: var(--editorial-paper);
-		font-family: var(--font-jetbrains-mono);
-		font-size: 0.875rem;
-		letter-spacing: 0.08em;
-		text-decoration: none;
-		border-radius: var(--radius-sm);
-		transition: opacity var(--duration-fast) var(--ease-standard);
-	}
-
-	.sign-in-btn:hover {
-		opacity: 0.85;
 	}
 
 	.game-wrapper {

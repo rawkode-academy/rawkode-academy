@@ -54,8 +54,11 @@ tasks: {
 		]
 	}
 	deploy: schema.#Task & {
-		command: "bun"
-		args: ["x", "wrangler", "deploy"]
+		// Wrangler needs Node.js 22 or newer and the runner's default is 20, so
+		// take the toolchain from Nix, as the website's deploy does.
+		command: "sh"
+		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun x wrangler deploy"]
+		env: PATH: "/home/runner/.bun/bin:/Users/rawkode/.bun/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
 		dependsOn: [_t.compose]
 
 		// Keep API deploy affected when the source schemas that compose the
@@ -66,10 +69,18 @@ tasks: {
 			"schemas/**",
 			"../platform/*/read-model/schema.gql",
 			"../website/src/subgraph/**",
+			// cuenv ci ignores inputs outside the project directory when it
+			// decides what is affected (cuenv/cuenv#611). Until that is fixed
+			// they are repeated relative to the repository root, the only form
+			// the affected check matches.
+			"projects/rawkode.academy/website/src/subgraph/**",
+			"bun.lock",
 			"src/**",
 			"supergraph.graphql",
 			"wrangler.jsonc",
 			"package.json",
+			// The frozen install decides whether the deploy can run at all.
+			"../../../bun.lock",
 		]
 	}
 }

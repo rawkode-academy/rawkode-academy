@@ -1,4 +1,5 @@
 import { sva } from "../../styled-system/css";
+import { focusRing } from "../styles/focus";
 
 /** Compact supporting resources; modal and WebContainer behavior stays in Vue. */
 export const academyCourseResources = sva({
@@ -63,11 +64,7 @@ export const academyCourseResources = sva({
 			overflowWrap: "anywhere",
 			cursor: "pointer",
 			_hover: { color: "academy.text" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		details: { display: "grid", gap: "1", minWidth: "0" },
 		description: {

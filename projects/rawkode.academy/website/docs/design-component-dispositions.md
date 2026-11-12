@@ -1,5 +1,7 @@
 # Legacy UI component dispositions
 
+> **Historical note:** content now lives in D1 platform services behind the API gateway and the website reads it through `src/lib/live-content` (see `docs/live-content.md`). References below to `content/**` files and `src/content.config.ts` describe the file-based sources at the time of this audit.
+
 Status: **approved exact set removed; verification complete with unrelated guard/test limitations below.**
 
 Snapshot: 2026-09-20, working tree based on `e5280286`. Other agents are editing active UI concurrently. This inventory describes the inspected working tree, not an immutable build artifact.
@@ -16,6 +18,35 @@ inline. The shared `/apple-touch-icon.png` asset is preserved. None has a surviv
 export, story or event caller. Negative test assertions forbidding the legacy
 shell remain intact. Current `AcademyTopbar`, footer, auth/admin sidebar and
 shared tokens are preserved. All four files remain recoverable from Git.
+
+## Removal of the retired visual primitives
+
+The "Kept despite no discovered production path" table below is historical for
+the rows listed here. With the shared `button` recipe and the Academy recipes
+in place, the visual primitives of the retired editorial system were removed:
+they had no production importer, were styled with utility classes or
+`--editorial-*` values that no longer describe the site, and their stories
+documented a system that does not ship.
+
+Removed: `AsideWrapper.tsx`, `common/Button.astro`, `common/Button.vue`,
+`common/FeatureCard.vue`, `common/FeaturedContent.astro`,
+`common/FormattedDate.vue`, `common/GridLayout.vue`, `common/Heading.vue`,
+`common/Section.vue`, `common/SectionHeader.vue`, `common/TerminalWindow.vue`,
+`faq/accordion-wrapper.vue`, `faq/list.vue`, `feature/grid.vue`,
+`feature/list-icons.vue`, `feature/list.vue`, `read/Pullquote.astro`,
+`stats/SimpleStatsWrapper.tsx`, `stats/simple.vue`, `testimonial/slider.astro`,
+`testimonial/slider.vue`, `title/center.astro`, `title/h2-highlight.vue`,
+`ui/Card.vue`, `ui/CollectionMasthead.astro`, `ui/CollectionToolbar.astro`,
+`ui/CommandBar.vue`, `ui/ContentCard.astro`, `ui/DetailFrame.astro`,
+`ui/EditorialButton.vue`, `ui/HairlinePanel.vue`, `ui/Hero.vue`,
+`ui/KickerStrip.vue`, `ui/MastheadBar.vue`, `ui/PageMasthead.astro`,
+`ui/PagerStrip.astro`, `ui/SectionMark.vue`, `ui/SectionRail.vue`,
+`ui/Stack.vue`, `ui/StatRow.vue`, and the stories that only exercised them.
+
+Still kept without a production path, because they carry behaviour rather
+than a retired look: `articles/TableOfContents.astro`, `common/SkipLink.astro`,
+`html/faq-jsonld.astro`, `video/ContinueWatchingRail.astro`, the `Skeleton*`
+family, `common/Badge.vue`, `read/ReadNext.astro` and `vue-wrapper.tsx`.
 
 ## Scope and decision
 
@@ -190,13 +221,13 @@ All 143 components below remain outside the deletion scope. The right column giv
 | `common/ThemeAwareImage.astro` | `content/articles/discover-lazyjournal/index.mdx` |
 | `courses/CourseDetailHero.vue` | `src/pages/courses/[...slug].astro` |
 | `courses/CourseModules.astro` | `src/pages/courses/[...slug].astro` |
-| `courses/CourseSignupForm.astro` | `src/pages/courses/[course]/[...slug].astro` |
-| `courses/CourseSignupFormClient.vue` | `src/pages/courses/[course]/[...slug].astro` |
+| `courses/CourseSignupForm.astro` | `src/pages/courses/[course]/[slug].astro` |
+| `courses/CourseSignupFormClient.vue` | `src/pages/courses/[course]/[slug].astro` |
 | `courses/CourseSignupFormCompact.astro` | `src/pages/courses/[...slug].astro` |
 | `courses/CourseSignupFormCompact.vue` | `src/pages/courses/[...slug].astro` |
-| `courses/EmbeddedAppModal.vue` | `src/pages/courses/[course]/[...slug].astro` |
-| `courses/ResourceList.vue` | `src/pages/courses/[course]/[...slug].astro` |
-| `courses/WebContainerEmbed.vue` | `src/pages/courses/[course]/[...slug].astro` |
+| `courses/EmbeddedAppModal.vue` | `src/pages/courses/[course]/[slug].astro` |
+| `courses/ResourceList.vue` | `src/pages/courses/[course]/[slug].astro` |
+| `courses/WebContainerEmbed.vue` | `src/pages/courses/[course]/[slug].astro` |
 | `explorer/ExplorerHeader.vue` | `src/pages/technology/matrix/advanced.astro` |
 | `explorer/TechnologyExplorer.vue` | `src/pages/technology/matrix/advanced.astro` |
 | `explorer/cards/TechCardPopover.vue` | `src/pages/technology/matrix/advanced.astro` |

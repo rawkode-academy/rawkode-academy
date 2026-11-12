@@ -2,8 +2,8 @@ export interface PersonListEntry {
 	id: string;
 	name: string;
 	avatarUrl?: string | undefined;
-	// Full URLs only - the content-config transform on people resolves
-	// the bare-handle frontmatter fields into URLs already.
+	// Full URLs only - the people live collection resolves the bare
+	// handles from the API into profile URLs already.
 	sameAs?: ReadonlyArray<string | undefined>;
 }
 

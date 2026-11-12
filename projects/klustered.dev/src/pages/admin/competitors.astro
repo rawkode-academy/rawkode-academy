@@ -1,11 +1,11 @@
 ---
 import { env } from "cloudflare:workers";
 import { desc, eq } from "drizzle-orm";
-import { getCollection } from "astro:content";
 import PortalLayout from "@/layouts/PortalLayout.astro";
 import { getBracketsDb, schema } from "@/db/client";
 import { SHOW_ID } from "@/lib/brackets-write";
 import { ADMIN_NAV } from "@/lib/nav";
+import { getPeople } from "@/lib/people";
 
 const db = getBracketsDb(env.BRACKETS);
 const competitors = await db
@@ -33,7 +33,7 @@ const seasons = await db
 	.orderBy(desc(schema.seasons.createdAt))
 	.all();
 
-const people = await getCollection("people");
+const people = await getPeople();
 const peopleSorted = people.sort((a, b) =>
 	a.data.name.localeCompare(b.data.name),
 );

@@ -1,0 +1,1 @@
+ALTER TABLE `people_biographies` ADD `biography_doc` text;

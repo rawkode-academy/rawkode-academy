@@ -1,6 +1,6 @@
 ---
 title: "Dockerfile Tip 1: Define a Base Layer"
-description: "With the advent of the Multi Stage Dockerfile, it's very common for people to ver..."
+description: With the advent of the Multi Stage Dockerfile, it's very common for people to ver...
 type: tutorial
 publishedAt: 2019-05-03
 authors:
@@ -9,8 +9,7 @@ technologies:
   - docker
 ---
 
-With the advent of the Multi Stage Dockerfile, it's very common for people to very specific layers that do a single task; which often utilise the same 
-"primary" base layer.
+With the advent of the Multi Stage Dockerfile, it's very common for people to very specific layers that do a single task; which often utilise the same "primary" base layer.
 
 **Example:**
 
@@ -46,5 +45,4 @@ FROM base AS compile
 
 This reduces duplication and makes maintenance, and pull-requests, easier to review/manage/change.
 
-Until next time
-:metal:
+Until next time :metal:

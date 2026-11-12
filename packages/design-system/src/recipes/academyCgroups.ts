@@ -1,10 +1,6 @@
 import { sva } from "../../styled-system/css";
+import { focusRing } from "../styles/focus";
 
-const focus = {
-	outline: "focus",
-	outlineColor: "academy.accent",
-	outlineOffset: "focus",
-} as const;
 const tone = (
 	color:
 		| "academy.textMuted"
@@ -30,7 +26,6 @@ export const academyCgroups = sva({
 	slots: [
 		"root",
 		"toolbar",
-		"button",
 		"content",
 		"heading",
 		"copy",
@@ -172,29 +167,6 @@ export const academyCgroups = sva({
 			borderBottom: "hairline",
 			borderColor: "academy.border",
 		},
-		button: {
-			display: "inline-flex",
-			alignItems: "center",
-			justifyContent: "center",
-			minHeight: "11",
-			paddingInline: "4",
-			paddingBlock: "2",
-			border: "hairline",
-			borderColor: "academy.inputBorder",
-			borderRadius: "academy-s",
-			backgroundColor: "academy.panel",
-			color: "academy.textSoft",
-			fontSize: "sm",
-			fontWeight: "semibold",
-			cursor: "pointer",
-			_hover: { backgroundColor: "academy.ground", color: "academy.text" },
-			_focusVisible: focus,
-			"&[aria-pressed=true]": {
-				backgroundColor: "academy.accent",
-				borderColor: "academy.accent",
-				color: "academy.accentForeground",
-			},
-		},
 		content: {
 			display: "grid",
 			gap: "5",
@@ -308,7 +280,7 @@ export const academyCgroups = sva({
 			cursor: "pointer",
 			overflowWrap: "anywhere",
 			_hover: { color: "academy.accent", backgroundColor: "academy.ground" },
-			_focusVisible: focus,
+			_focusVisible: focusRing,
 		},
 		chevron: {
 			width: "3",
@@ -374,7 +346,7 @@ export const academyCgroups = sva({
 			overflowX: "auto",
 			minWidth: "0",
 			padding: "4",
-			_focusVisible: focus,
+			_focusVisible: focusRing,
 		},
 		timeline: {
 			display: "flex",
@@ -385,7 +357,7 @@ export const academyCgroups = sva({
 			padding: "1",
 			width: "max-content",
 		},
-		milestoneItem: { width: "64", minWidth: "0" },
+		milestoneItem: { width: "64", minWidth: "0", paddingInlineStart: "0" },
 		milestone: {
 			display: "grid",
 			gap: "2",
@@ -400,7 +372,7 @@ export const academyCgroups = sva({
 			color: "academy.text",
 			cursor: "pointer",
 			_hover: { backgroundColor: "academy.ground" },
-			_focusVisible: focus,
+			_focusVisible: focusRing,
 			"&[aria-expanded=true]": { backgroundColor: "academy.ground" },
 		},
 		year: {
@@ -453,7 +425,7 @@ export const academyCgroups = sva({
 			fontFamily: "academy-mono",
 			fontSize: "sm",
 			lineHeight: "relaxed",
-			_focusVisible: focus,
+			_focusVisible: focusRing,
 		},
 		codeKey: { color: "academy.statusViolet" },
 		codeText: {

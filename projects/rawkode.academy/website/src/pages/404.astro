@@ -1,7 +1,9 @@
 ---
 import Page from "@/wrappers/page.astro";
-import { academySearch } from "@rawkodeacademy/design-system";
-export const prerender = true;
+import { academySearch, button } from "@rawkodeacademy/design-system";
+// Rendered on request: a prerendered 404 is served from assets without
+// running middleware, which would disable the legacy redirects.
+export const prerender = false;
 const s = academySearch();
 ---
 
@@ -15,7 +17,7 @@ const s = academySearch();
 				<label class={s.field} for="not-found-search">Search the Academy
 					<input class={s.input} type="search" name="q" id="not-found-search" placeholder="Kubernetes, eBPF, GitOps…" required />
 				</label>
-				<button class={s.button} type="submit">Search</button>
+				<button class={button({ surface: "ink", size: "lg" })} type="submit">Search</button>
 			</form>
 			<nav aria-label="Page recovery" class={s.filters}>
 				<a class={s.headerLink} href="/">Back to the homepage →</a>

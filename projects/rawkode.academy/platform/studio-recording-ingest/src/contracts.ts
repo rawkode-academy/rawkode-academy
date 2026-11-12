@@ -41,6 +41,17 @@ export interface StudioTranscodeStatusDocument {
 	error?: string;
 }
 
+export interface StudioRecordingVodIdentity {
+	videoId: string;
+	studioSessionId: string;
+	recordingId: string;
+	sourceBucket: string;
+	sourceKey: string;
+	sourceEtag: string;
+	sourceFormat: "mkv" | "mp4" | "webm";
+	outputPrefix: string;
+}
+
 const safePathSegmentPattern = /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/;
 
 export function isObjectCreateAction(action: string): boolean {
@@ -82,6 +93,46 @@ export function createReadyMarkerKey(marker: Pick<
 
 export function createTranscodeStatusKey(outputPrefix: string): string {
 	return `${outputPrefix.endsWith("/") ? outputPrefix : `${outputPrefix}/`}transcode-status.json`;
+}
+
+export function createCanonicalStreamKey(outputPrefix: string): string {
+	return `${outputPrefix.endsWith("/") ? outputPrefix : `${outputPrefix}/`}stream.m3u8`;
+}
+
+export function normalizeEtag(value: string): string {
+	return value.trim().replace(/^"|"$/g, "");
+}
+
+export function createVodIdentity(
+	marker: StudioRecordingReadyMarker,
+): StudioRecordingVodIdentity {
+	return {
+		videoId: marker.videoId,
+		studioSessionId: marker.studioSessionId,
+		recordingId: marker.recordingId,
+		sourceBucket: marker.sourceBucket,
+		sourceKey: marker.sourceKey,
+		sourceEtag: marker.sourceEtag,
+		sourceFormat: marker.sourceFormat,
+		outputPrefix: marker.outputPrefix,
+	};
+}
+
+export function vodIdentityMatchesMarker(
+	identity: StudioRecordingVodIdentity,
+	marker: StudioRecordingReadyMarker,
+): boolean {
+	const expected = createVodIdentity(marker);
+	return (
+		identity.videoId === expected.videoId &&
+		identity.studioSessionId === expected.studioSessionId &&
+		identity.recordingId === expected.recordingId &&
+		identity.sourceBucket === expected.sourceBucket &&
+		identity.sourceKey === expected.sourceKey &&
+		identity.sourceEtag === expected.sourceEtag &&
+		identity.sourceFormat === expected.sourceFormat &&
+		identity.outputPrefix === expected.outputPrefix
+	);
 }
 
 export function createEventId(event: R2EventNotification): string {

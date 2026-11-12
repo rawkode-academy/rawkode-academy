@@ -1,31 +1,39 @@
 ---
-export const prerender = true;
+export const prerender = false;
 
 import TopicHub from "@/components/technology/TopicHub.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
+import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
+import VideoCard from "@/components/video/VideoCard.astro";
+import RichText from "@/components/content/RichText.astro";
 import Page from "@/wrappers/page.astro";
 import TechnologyJsonLd from "@/components/html/technology-jsonld.astro";
 import TechnologyArticleJsonLd from "@/components/html/technology-article-jsonld.astro";
-import type { GetStaticPaths } from "astro";
-import { getCollection, render } from "astro:content";
-import matter from "gray-matter";
-import { readdir, readFile } from "node:fs/promises";
-import { join } from "node:path";
+import MLabel from "@/components/ui/MLabel.vue";
 import {
+	getCollection,
+	getEntry,
+	optionalContent,
+	renderEntry,
+	setContentCache,
 	type TechnologyData,
-	DEFAULT_TECHNOLOGY_STATUS,
-	DEFAULT_TECHNOLOGY_LICENSE,
-} from "@rawkodeacademy/content";
-import { resolveContentDirSync } from "@rawkodeacademy/content/utils";
+} from "@/lib/live-content";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
-import { getVideosForTechnology } from "@/utils/get-videos-for-technology";
+import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
+import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import { localDateTime } from "@/lib/local-time";
 import { isNewsPublished } from "@/lib/news-publication";
-import { academyTechnology } from "@rawkodeacademy/design-system";
+import {
+	academyPage,
+	academyTechnology,
+	button,
+} from "@rawkodeacademy/design-system";
 import "@rawkodeacademy/design-system/styles.css";
-import { localTime } from "@/lib/local-time";
+import { DIMENSIONS } from "@/lib/explorer/dimensions";
+import { SUPPORTERS_PATH, supporterForTechnology } from "@/lib/supporters";
 
-export interface Technology extends Omit<TechnologyData, "logos"> {
+export interface Technology extends Omit<TechnologyData, "logos" | "body"> {
 	id: string;
 	logo?: string | undefined;
 	videos?:
@@ -34,213 +42,88 @@ export interface Technology extends Omit<TechnologyData, "logos"> {
 				title: string;
 				thumbnailUrl: string;
 				slug: string;
+				duration?: number | undefined;
 				publishedAt: Date | string;
+				type?: string | undefined;
 		  }[]
 		| undefined;
 	videoCount?: number;
 	articleCount?: number;
 }
 
-export const getStaticPaths = (async () => {
-	try {
-		const items = await getCollection("technologies");
-		if (items.length > 0) {
-			return Promise.all(
-				items.map(async (e) => {
-					const logo =
-						resolveTechnologyIconUrl(e.id, e.data.logos) ?? undefined;
-					const videos = await getVideosForTechnology(e.id);
-					return {
-						params: { id: e.id },
-						props: {
-							technology: {
-								id: e.id,
-								name: e.data.name,
-								seo: e.data.seo,
-								documentation: e.data.documentation,
-								website: e.data.website,
-								source: e.data.source,
-								aliases: e.data.aliases,
-								terms: e.data.terms,
-								relatedTechnologies: e.data.relatedTechnologies,
-								license: e.data.license,
-								category: e.data.category,
-								subcategory: e.data.subcategory,
-								status: e.data.status,
-								logo,
-								videos,
-								matrix: e.data.matrix,
-								cncf: e.data.cncf,
-								community: e.data.community,
-							} as Technology,
-						},
-					};
-				}),
-			);
-		}
-	} catch (error) {
-		console.warn(
-			"getCollection('technologies') failed; falling back to FS glob:",
-			error,
-		);
-	}
-
-	try {
-		const base = resolveContentDirSync("technologies");
-		async function walk(dir: string, rel = ""): Promise<string[]> {
-			const out: string[] = [];
-			const entries = await readdir(dir, { withFileTypes: true });
-			for (const e of entries) {
-				const p = join(dir, e.name);
-				const r = rel ? join(rel, e.name) : e.name;
-				if (e.isDirectory()) out.push(...(await walk(p, r)));
-				else if (e.isFile() && /\.mdx$/i.test(e.name)) out.push(r);
-			}
-			return out;
-		}
-		const files = await walk(base);
-
-		return await Promise.all(
-			files.map(async (rel) => {
-				const id = rel.replace(/\.mdx$/i, "");
-				try {
-					const raw = await readFile(join(base, rel), "utf8");
-					const fm = matter(raw).data as any;
-					const logo = resolveTechnologyIconUrl(id, fm.logos) ?? undefined;
-					const videos = await getVideosForTechnology(id);
-					return {
-						params: { id },
-						props: {
-							technology: {
-								id,
-								name: fm.name ?? id,
-								seo: fm.seo,
-								documentation: fm.documentation,
-								website: fm.website,
-								source: fm.source,
-								aliases: fm.aliases,
-								terms: fm.terms,
-								relatedTechnologies: fm.relatedTechnologies,
-								license: fm.license,
-								category: fm.category,
-								subcategory: fm.subcategory,
-								status: fm.status,
-								logo,
-								videos,
-								matrix: fm.matrix,
-								cncf: fm.cncf,
-								community: fm.community,
-							} as Technology,
-						},
-					};
-				} catch {
-					const videos = await getVideosForTechnology(id);
-					return {
-						params: { id },
-						props: {
-							technology: {
-								id,
-								name: id,
-								videos,
-								status: DEFAULT_TECHNOLOGY_STATUS,
-								website: "",
-								license: DEFAULT_TECHNOLOGY_LICENSE,
-							} as Technology,
-						},
-					};
-				}
-			}),
-		);
-	} catch (error) {
-		console.error("FS fallback for technologies failed:", error);
-		return [];
-	}
-}) satisfies GetStaticPaths;
-
-let { technology } = Astro.props as { technology?: Technology };
-
 const id = Astro.params.id as string;
-const items = await getCollection("technologies");
-const technologyEntry = items.find((x) => x.id === id);
-let Content: any = null;
-let hasContent = false;
-
-if (technologyEntry) {
-	try {
-		const rendered = await render(technologyEntry);
-		Content = rendered.Content;
-		hasContent = Boolean(
-			technologyEntry.body && technologyEntry.body.trim().length > 0,
-		);
-	} catch (err) {
-		console.warn("Failed to render technology content:", err);
-	}
+// getEntry loads the profile body (the list omits it) and normalises "/index".
+const technologyEntry = id ? await getEntry("technologies", id) : undefined;
+if (!technologyEntry) {
+	return new Response(null, { status: 404 });
 }
 
-if (!technology) {
-	try {
-		const e = technologyEntry;
-		if (e) {
-			const logo = resolveTechnologyIconUrl(e.id, e.data.logos) ?? undefined;
-			const videos = await getVideosForTechnology(e.id);
-			technology = {
-				id: e.id,
-				name: e.data.name,
-				seo: e.data.seo,
-				documentation: e.data.documentation,
-				website: e.data.website,
-				source: e.data.source,
-				aliases: e.data.aliases,
-				terms: e.data.terms,
-				relatedTechnologies: e.data.relatedTechnologies,
-				license: e.data.license,
-				category: e.data.category,
-				subcategory: e.data.subcategory,
-				status: e.data.status,
-				logo,
-				videos,
-				matrix: e.data.matrix,
-				cncf: e.data.cncf,
-				community: e.data.community,
-			};
-		} else {
-			const base = resolveContentDirSync("technologies");
-			const raw = await readFile(join(base, `${id}.mdx`), "utf8");
-			const fm = matter(raw).data as any;
-			const logo = resolveTechnologyIconUrl(id, fm.logos) ?? undefined;
-			const videos = await getVideosForTechnology(id);
-			technology = {
-				id,
-				name: fm.name ?? id,
-				seo: fm.seo,
-				documentation: fm.documentation,
-				website: fm.website,
-				source: fm.source,
-				aliases: fm.aliases,
-				terms: fm.terms,
-				relatedTechnologies: fm.relatedTechnologies,
-				license: fm.license,
-				category: fm.category,
-				subcategory: fm.subcategory,
-				status: fm.status,
-				logo,
-				videos,
-				matrix: fm.matrix,
-				cncf: fm.cncf,
-				community: fm.community,
-			};
-		}
-	} catch (err) {
-		console.error("Failed to load technology at runtime:", err);
-	}
-}
+// The profile is the page; the video rails, related technologies, topic hub
+// and supporter badge are optional and render nothing when the content layer
+// is down.
+const [items, allVideos, supporters] = await Promise.all([
+	optionalContent(getCollection("technologies"), []),
+	optionalContent(getCollection("videos"), []),
+	optionalContent(getCollection("supporters"), []),
+]);
+const supporter = supporterForTechnology(supporters, technologyEntry.id);
 
-if (!technology) {
-	return Astro.redirect("/technology");
-}
+const now = new Date();
+const upcomingSessions = allVideos
+	.filter(
+		({ data }) =>
+			data.type === "live" &&
+			data.publishedAt > now &&
+			normalizeTechnologyReferences(data.technologies).includes(
+				technologyEntry.id,
+			),
+	)
+	.sort((a, b) => a.data.publishedAt.getTime() - b.data.publishedAt.getTime());
+// Published recordings about this technology, most recent first.
+const technologyVideos = allVideos
+	.filter(
+		({ data }) =>
+			data.publishedAt <= now &&
+			normalizeTechnologyReferences(data.technologies).includes(
+				technologyEntry.id,
+			),
+	)
+	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
+
+const hasContent = technologyEntry.body.trim().length > 0;
+const profileHtml = hasContent ? (await renderEntry(technologyEntry)).html : "";
+
+const e = technologyEntry;
+const technology: Technology = {
+	id: e.id,
+	name: e.data.name,
+	seo: e.data.seo,
+	documentation: e.data.documentation,
+	website: e.data.website,
+	source: e.data.source,
+	aliases: e.data.aliases,
+	terms: e.data.terms,
+	relatedTechnologies: e.data.relatedTechnologies,
+	license: e.data.license,
+	category: e.data.category,
+	subcategory: e.data.subcategory,
+	status: e.data.status,
+	logo: resolveTechnologyIconUrl(e.id, e.data.logos) ?? undefined,
+	videos: technologyVideos.map((video) => ({
+		id: video.data.id,
+		title: video.data.title,
+		thumbnailUrl: getVideoThumbnailUrl(video.data.id),
+		slug: video.data.slug,
+		duration: video.data.duration,
+		publishedAt: video.data.publishedAt,
+		type: video.data.type,
+	})),
+	matrix: e.data.matrix,
+	cncf: e.data.cncf,
+	community: e.data.community,
+};
 
 const videoCount = technology.videos?.length ?? 0;
-const featuredVideos = (technology.videos ?? []).slice(0, 4);
 const categoryLabel =
 	technology.subcategory ?? technology.category ?? "Cloud Native";
 
@@ -253,7 +136,7 @@ const allTechItems = items;
 const techById = new Map(allTechItems.map((t) => [t.id, t]));
 
 const explicitMatches = explicitRelated
-	.map((relId) => techById.get(relId) ?? techById.get(`${relId}/index`))
+	.map((relId) => techById.get(relId))
 	.filter((t): t is (typeof allTechItems)[number] => Boolean(t));
 
 let siblingMatches: typeof allTechItems = [];
@@ -278,14 +161,22 @@ const relatedTechnologies = relatedTechSeed
 		status: entry.data.status,
 	}));
 const firstRelatedSubcategory = relatedTechnologies[0]?.subcategory?.trim();
-const sharedRelatedSubcategory = firstRelatedSubcategory &&
-	relatedTechnologies.every((related) => related.subcategory?.trim() === firstRelatedSubcategory)
-		? firstRelatedSubcategory : undefined;
+const sharedRelatedSubcategory =
+	firstRelatedSubcategory &&
+	relatedTechnologies.every(
+		(related) => related.subcategory?.trim() === firstRelatedSubcategory,
+	)
+		? firstRelatedSubcategory
+		: undefined;
 const relatedInitials = (name: string) => {
 	const words = name.trim().split(/[\s-]+/u);
-	return (words.length > 1
-		? words.slice(0, 2).map((word) => Array.from(word)[0]).join("")
-		: Array.from(name).slice(0, 2).join("")
+	return (
+		words.length > 1
+			? words
+					.slice(0, 2)
+					.map((word) => Array.from(word)[0])
+					.join("")
+			: Array.from(name).slice(0, 2).join("")
 	).toUpperCase();
 };
 
@@ -310,9 +201,10 @@ const cncfStatusLabel = (() => {
 const seoDescription = (() => {
 	if (technology.seo?.description) return technology.seo.description;
 	const parts: string[] = [];
+	const article = /^[aeiou]/i.test(categoryLabel) ? "an" : "a";
 	const projectQualifier = cncfStatusLabel
 		? `a ${cncfStatusLabel} ${categoryLabel} project`
-		: `a ${categoryLabel} project`;
+		: `${article} ${categoryLabel} project`;
 	if (videoCount > 0) {
 		parts.push(
 			`${videoCount} video${videoCount === 1 ? "" : "s"} and tutorials covering ${technology.name}, ${projectQualifier}`,
@@ -330,11 +222,9 @@ const seoDescription = (() => {
 // noindex these so Google doesn't classify the site as low-quality.
 const noindex = !hasContent && videoCount === 0;
 const styles = academyTechnology();
+const page = academyPage();
 
-const technologyUrl = new URL(
-	`/technology/${technology.id.replace(/\/index$/, "")}`,
-	Astro.site,
-).href;
+const technologyUrl = new URL(`/technology/${technology.id}`, Astro.site).href;
 const absoluteLogo = technology.logo
 	? technology.logo.startsWith("http")
 		? technology.logo
@@ -367,21 +257,29 @@ const statusLabels: Record<string, string> = {
 	trial: "Explore",
 };
 
-const statusLabel = technology.matrix?.status
-	? statusLabels[technology.matrix.status] ?? technology.matrix.status
+// "under-review" means not rated yet, so there is no rating to show.
+const statusLabel =
+	technology.matrix?.status && technology.matrix.status !== "under-review"
+		? (statusLabels[technology.matrix.status] ?? technology.matrix.status)
+		: undefined;
+// What the placement means, in the matrix's own words.
+const statusNote = statusLabel
+	? DIMENSIONS["matrix.status"].values.find(
+			(value) => value.value === technology.matrix?.status,
+		)?.description
 	: undefined;
 const description = technology.seo?.description?.trim();
-const videoDate = (value: string | Date) =>
-	localTime(value, { day: "numeric", month: "short", year: "numeric" }, "en-GB");
+// Stored values are lowercase identifiers ("stable", "rising"); set them as words.
+const sentenceCase = (value: string) =>
+	value.charAt(0).toUpperCase() + value.slice(1).replace(/[-_]/g, " ");
 const historicalStatuses = new Set(["abandoned", "deprecated", "superseded"]);
-const remainingVideos = (technology.videos ?? []).slice(featuredVideos.length);
 const breadcrumbs = [
 	{ title: "Home", link: "/" },
 	{ title: "Technologies", link: "/technology" },
 	{ title: technology.name, link: technologyUrl },
 ];
 const metadata = [
-	["Status", technology.status],
+	["Status", technology.status && sentenceCase(technology.status)],
 	["Category", technology.category],
 	["Subcategory", technology.subcategory],
 	["License", technology.license],
@@ -399,8 +297,14 @@ for (const [label, url] of projectLinks) {
 	else officialLinks.push([label, url]);
 }
 const communityLabels: Record<string, string> = {
-	twitter: "Twitter / X", youtube: "YouTube", slack: "Slack", discord: "Discord",
-	blog: "Blog", mailingList: "Mailing list", githubDiscussions: "GitHub discussions", chat: "Chat",
+	twitter: "Twitter / X",
+	youtube: "YouTube",
+	slack: "Slack",
+	discord: "Discord",
+	blog: "Blog",
+	mailingList: "Mailing list",
+	githubDiscussions: "GitHub discussions",
+	chat: "Chat",
 };
 const communityLinks = Object.entries(technology.community ?? {})
 	.filter((entry): entry is [string, string] => Boolean(entry[1]))
@@ -416,17 +320,27 @@ const cncfLinks = [
 	["Annual review", technology.cncf?.annualReviewUrl],
 ].filter((entry): entry is [string, string] => Boolean(entry[1]));
 const confidenceLabels: Record<string, string> = {
-	"deep-experience": "Deep experience", "some-experience": "Some experience", gut: "Gut feeling",
+	"deep-experience": "Deep experience",
+	"some-experience": "Some experience",
+	gut: "Gut feeling",
 };
 const matrixMetadata = [
 	["First used", technology.matrix?.firstUsed],
 	["Last used", technology.matrix?.lastUsed],
-	["Confidence", technology.matrix?.confidence && confidenceLabels[technology.matrix.confidence]],
-	["Trajectory", technology.matrix?.trajectory],
+	[
+		"Confidence",
+		technology.matrix?.confidence &&
+			confidenceLabels[technology.matrix.confidence],
+	],
+	[
+		"Trajectory",
+		technology.matrix?.trajectory && sentenceCase(technology.matrix.trajectory),
+	],
 ].filter((entry): entry is [string, string] => Boolean(entry[1]));
 const hasMatrixDetails = Boolean(
-	technology.matrix?.why || technology.matrix?.spicyTake ||
-	technology.matrix?.makesMeFeel,
+	technology.matrix?.why ||
+		technology.matrix?.spicyTake ||
+		technology.matrix?.makesMeFeel,
 );
 
 // Mirror TopicHub's matching rules so its generic empty state cannot contradict
@@ -435,20 +349,66 @@ const normalizedTechnologyId = technology.id.replace(/\/index$/, "");
 const matchesTechnology = (
 	references: ReadonlyArray<string | { id: string }> | undefined,
 ) =>
-	Array.isArray(references) && references.some((reference) => {
+	Array.isArray(references) &&
+	references.some((reference) => {
 		const id = typeof reference === "string" ? reference : reference.id;
 		return id.replace(/\/index$/, "") === normalizedTechnologyId;
 	});
 const [articles, news, learningPaths] = await Promise.all([
-	getCollection("articles"), getCollection("news"), getCollection("learningPaths"),
+	optionalContent(getCollection("articles"), []),
+	optionalContent(getCollection("news"), []),
+	optionalContent(getCollection("learningPaths"), []),
 ]);
-const now = new Date();
 const hasTopicContent =
-	articles.some(({ data }) => data.publishedAt <= now && matchesTechnology(data.technologies)) ||
-	news.some(({ data }) => isNewsPublished(data.publishedAt, now) && matchesTechnology(data.technologies)) ||
-	learningPaths.some(({ data }) => data.publishedAt <= now && matchesTechnology(data.technologies));
-const hasAside = videoCount > 0 || hasMatrixDetails ||
-	Boolean(technology.cncf?.status) || cncfDates.length > 0 || cncfLinks.length > 0 || communityLinks.length > 0;
+	articles.some(
+		({ data }) =>
+			data.publishedAt <= now && matchesTechnology(data.technologies),
+	) ||
+	news.some(
+		({ data }) =>
+			isNewsPublished(data.publishedAt, now) &&
+			matchesTechnology(data.technologies),
+	) ||
+	learningPaths.some(
+		({ data }) =>
+			data.publishedAt <= now && matchesTechnology(data.technologies),
+	);
+const hasAside =
+	hasMatrixDetails ||
+	Boolean(technology.cncf?.status) ||
+	cncfDates.length > 0 ||
+	cncfLinks.length > 0 ||
+	communityLinks.length > 0;
+
+// TopicHub (articles, news, learning paths), the video rails and the related
+// technologies rail all list collections, so their tags and schedules apply.
+// The supporter badge relies on entity tags instead: supporter entries carry
+// "technologies:<id>", so only the supported page is purged when a supporter
+// starts, changes or ends, and a failing supporters load keeps the full TTL.
+const relatedEntryIds = new Set(
+	relatedTechnologies.map((related) => related.id),
+);
+await setContentCache(Astro, {
+	entries: [
+		technologyEntry,
+		supporter,
+		...technologyVideos,
+		...upcomingSessions,
+		...items.filter((t) => relatedEntryIds.has(t.id)),
+		...(hasTopicContent
+			? [
+					...articles.filter(({ data }) =>
+						matchesTechnology(data.technologies),
+					),
+					...news.filter(({ data }) => matchesTechnology(data.technologies)),
+					...learningPaths.filter(({ data }) =>
+						matchesTechnology(data.technologies),
+					),
+				]
+			: []),
+	],
+	collections: ["technologies", "videos", "articles", "news", "learningPaths"],
+});
 ---
 
 <Page
@@ -484,6 +444,7 @@ const hasAside = videoCount > 0 || hasMatrixDetails ||
 			image={absoluteLogo}
 			about={technology.name}
 			keywords={technologyKeywords.join(", ")}
+			dateModified={technologyEntry?.data.recordUpdatedAt}
 		/>
 	)}
 	<BreadcrumbJsonLd slot="extra-head" elements={breadcrumbs} />
@@ -497,89 +458,122 @@ const hasAside = videoCount > 0 || hasMatrixDetails ||
 	</Fragment>
 	<div class={styles.root}>
 		<header class={styles.hero}>
-			<nav aria-label="Breadcrumb">
-				<ol class={styles.breadcrumb}>
-					{breadcrumbs.map((crumb, index) => (
-						<li>
-							{index > 0 && <span aria-hidden="true">/</span>}
-							{index === breadcrumbs.length - 1
-								? <span aria-current="page">{crumb.title}</span>
-								: <a class={styles.link} href={crumb.link}>{crumb.title}</a>}
-						</li>
-					))}
-				</ol>
-			</nav>
-			<div class={styles.identity}>
-				{technology.logo && (
-					<img src={technology.logo} alt="" width="64" height="64" class={styles.logo}
-						onerror="this.hidden=true;" />
-				)}
-				<h1 class={styles.title}>{technology.name}</h1>
-			</div>
-			{description && <p class={styles.description}>{description}</p>}
-			{metadata.length > 0 && (
-				<dl class={styles.metadata}>
-					{metadata.map(([label, value]) => (
-						<div><dt>{label}</dt><dd>{value}</dd></div>
-					))}
-				</dl>
-			)}
-			{statusLabel && !hasMatrixDetails && (
-				<div class={styles.personalRating}>
-					<p class={styles.copy}>Rawkode’s personal rating: <a class={styles.link} href="/technology/matrix">{statusLabel}</a></p>
-					{matrixMetadata.map(([label, value]) => <span class={styles.copy}>{label}: {value}</span>)}
+			<div class={styles.heroBody}>
+				<Breadcrumb parents={breadcrumbs.slice(0, -1)} />
+				<div class={styles.identity}>
+					{technology.logo && (
+						<img src={technology.logo} alt="" width="64" height="64" class={styles.logo}
+							onerror="this.hidden=true;" />
+					)}
+					<h1 class={styles.title}>{technology.name}</h1>
 				</div>
-			)}
-			{officialLinks.length > 0 && (
-				<ul class={styles.actions} aria-label="Project links">
-					{officialLinks.map(([label, url]) => (
-						<li><a href={url} class={styles.link} target="_blank" rel="noopener noreferrer">{label}</a></li>
-					))}
-				</ul>
+				{supporter && (
+					<aside class="technology-supporter" aria-label="Community supporter">
+						<MLabel tone="spruce">Community supporter</MLabel>
+						<p class="technology-supporter__thanks">
+							<a class="technology-supporter__name" href={supporter.data.websiteUrl} target="_blank" rel="sponsored noopener">{supporter.data.name}<span class="sr-only"> (opens in a new tab)</span></a> helps keep Rawkode Academy free to watch. Thank you.
+						</p>
+						<a class="technology-supporter__wall" href={SUPPORTERS_PATH}>All community supporters <span aria-hidden="true">→</span></a>
+					</aside>
+				)}
+				{description && <p class={styles.description}>{description}</p>}
+				{metadata.length > 0 && (
+					<dl class={styles.metadata}>
+						{metadata.map(([label, value]) => (
+							<div><dt>{label}</dt><dd>{value}</dd></div>
+						))}
+					</dl>
+				)}
+				{officialLinks.length > 0 && (
+					<ul class={styles.actions} aria-label="Project links">
+						{officialLinks.map(([label, url]) => (
+							<li><a href={url} class={button({ variant: "outline", size: "sm" })} target="_blank" rel="noopener noreferrer">{label} <span aria-hidden="true">↗</span></a></li>
+						))}
+					</ul>
+				)}
+			</div>
+			{statusLabel && (
+				<a class={styles.rating} href="/technology/matrix">
+					<span class={styles.ratingLabel}>Technology matrix</span>
+					<strong class={styles.ratingStatus}>{statusLabel}</strong>
+					{statusNote && <span class={styles.ratingNote}>{statusNote}</span>}
+					{!hasMatrixDetails && matrixMetadata.length > 0 && (
+						<span class={styles.ratingFacts}>
+							{matrixMetadata.map(([label, value]) => <span>{label}: {value}</span>)}
+						</span>
+					)}
+					<span class={styles.ratingMore}>See the matrix <span aria-hidden="true">→</span></span>
+				</a>
 			)}
 		</header>
 
 		<div class={hasAside ? styles.columns : styles.reading}>
-			{hasContent && Content ? (
-				<article id="complete-guide" class={styles.prose} aria-label={technology.name + " profile"}>
-					<Content />
-				</article>
-			) : (
-				<section class={styles.section} aria-labelledby="overview-heading">
-					<h2 id="overview-heading" class={styles.heading}>Overview</h2>
-					<p class={styles.copy}>A written overview of {technology.name} is not available here.</p>
-					{officialLinks.length > 0 && (
-						<p class={styles.copy}>Explore the project links above for information from its maintainers.</p>
-					)}
-				</section>
-			)}
+			<div class={styles.main}>
+				{hasContent ? (
+					<article id="complete-guide" class={styles.prose} aria-label={technology.name + " profile"}>
+						<RichText html={profileHtml} />
+					</article>
+				) : (
+					<section class={styles.section} aria-labelledby="overview-heading">
+						<h2 id="overview-heading" class={styles.heading}>Overview</h2>
+						<p class={styles.copy}>A written overview of {technology.name} is not available here.</p>
+						{officialLinks.length > 0 && (
+							<p class={styles.copy}>Explore the project links above for information from its maintainers.</p>
+						)}
+					</section>
+				)}
+
+				{upcomingSessions.length > 0 && (
+					<section class={styles.ruledSection} aria-labelledby="upcoming-sessions-heading">
+						<h2 id="upcoming-sessions-heading" class={styles.heading}>Upcoming sessions</h2>
+						{upcomingSessions.length < 3 ? (
+							<div class={page.streamList}>
+								{upcomingSessions.map(({ data: video }) => {
+									const startsAt = localDateTime(video.publishedAt);
+									return (
+										<a href={"/watch/" + video.slug} class={page.streamFeature}>
+											<div class={page.cardArt}>
+												<img src={getVideoThumbnailUrl(video.id)} alt="" class={page.cardImage} width="960" height="540" loading="lazy" />
+											</div>
+											<div class={page.featureCopy}>
+												<p class={page.streamMeta}><span data-label>Upcoming live stream</span><time {...startsAt.attrs}>{startsAt.text}</time></p>
+												<h3 class={page.streamTitle}>{video.title}</h3>
+												<span class={page.textLink}>Get notified <span aria-hidden="true">→</span></span>
+											</div>
+										</a>
+									);
+								})}
+							</div>
+						) : (
+							<div class={page.feedGrid}>
+								{upcomingSessions.map(({ data: video }) => (
+									<VideoCard href={"/watch/" + video.slug} title={video.title} thumbnailUrl={getVideoThumbnailUrl(video.id)} publishedAt={video.publishedAt} scheduled />
+								))}
+							</div>
+						)}
+					</section>
+				)}
+
+				{videoCount > 0 && (
+					<section id="videos" class={styles.ruledSection} aria-labelledby="videos-heading">
+						<div class={styles.sectionHead}>
+							<h2 id="videos-heading" class={styles.heading}>{technology.name} recordings</h2>
+							<p class={styles.copy}>{videoCount} {videoCount === 1 ? "recording" : "recordings"}, newest first</p>
+						</div>
+						<div class={page.feedGrid}>
+							{(technology.videos ?? []).map((video) => (
+								<VideoCard href={"/watch/" + video.slug} title={video.title} thumbnailUrl={video.thumbnailUrl} duration={video.duration} publishedAt={video.publishedAt} type={video.type} />
+							))}
+						</div>
+					</section>
+				)}
+			</div>
 
 			{hasAside && (
-				<aside class={styles.aside} aria-label={technology.name + " videos and resources"}>
-					{featuredVideos.length > 0 && (
-						<section class={styles.section} aria-labelledby="videos-heading">
-							<h2 id="videos-heading" class={styles.heading}>Related recordings</h2>
-							<ul class={styles.list}>
-								{featuredVideos.map((video) => (
-									<li>
-										<a href={"/watch/" + video.slug} class={styles.video}>
-											<img src={video.thumbnailUrl} alt="" loading="lazy" width="480" height="270" />
-											<span>{video.title}</span>
-											<time class={styles.videoDate} {...videoDate(video.publishedAt).attrs}>{videoDate(video.publishedAt).text}</time>
-										</a>
-									</li>
-								))}
-							</ul>
-							{remainingVideos.length > 0 && (
-								<a href="#more-videos" class={styles.link}>More {technology.name} videos ({remainingVideos.length})</a>
-							)}
-						</section>
-					)}
+				<aside class={styles.aside} aria-label={technology.name + " facts and links"}>
 					{technology.matrix && hasMatrixDetails && (
 						<section class={styles.section} aria-labelledby="matrix-heading">
-							<h2 id="matrix-heading" class={styles.heading}>Rawkode’s take</h2>
-							{statusLabel && <p class={styles.copy}>Personal rating: <a class={styles.link} href="/technology/matrix">{statusLabel}</a></p>}
-							{technology.matrix.makesMeFeel && <p class={styles.copy}>Makes me feel: {technology.matrix.makesMeFeel}</p>}
+							<h2 id="matrix-heading" class={styles.heading}>{statusLabel ? `Why ${statusLabel}` : "Notes"}</h2>
 							{technology.matrix.why && <p class={styles.copy}>{technology.matrix.why}</p>}
 							{technology.matrix.spicyTake && <blockquote class={styles.quote}>{technology.matrix.spicyTake}</blockquote>}
 							{matrixMetadata.length > 0 && (
@@ -601,7 +595,7 @@ const hasAside = videoCount > 0 || hasMatrixDetails ||
 							{cncfLinks.length > 0 && (
 								<ul class={styles.list}>
 									{cncfLinks.map(([label, url]) => (
-										<li><a href={url} class={styles.link} target="_blank" rel="noopener noreferrer">{label}</a></li>
+										<li><a href={url} class={styles.listLink} target="_blank" rel="noopener noreferrer">{label} <span aria-hidden="true">↗</span></a></li>
 									))}
 								</ul>
 							)}
@@ -612,7 +606,7 @@ const hasAside = videoCount > 0 || hasMatrixDetails ||
 							<h2 id="community-heading" class={styles.heading}>Community</h2>
 							<ul class={styles.list}>
 								{communityLinks.map(([label, url]) => (
-									<li><a href={url} class={styles.link} target="_blank" rel="noopener noreferrer">{label}</a></li>
+									<li><a href={url} class={styles.listLink} target="_blank" rel="noopener noreferrer">{label} <span aria-hidden="true">↗</span></a></li>
 								))}
 							</ul>
 						</section>
@@ -621,22 +615,6 @@ const hasAside = videoCount > 0 || hasMatrixDetails ||
 			)}
 		</div>
 
-		{remainingVideos.length > 0 && (
-			<section id="more-videos" class={styles.ruledSection} aria-labelledby="more-videos-heading">
-				<h2 id="more-videos-heading" class={styles.heading}>More {technology.name} videos</h2>
-				<ul class={styles.videoGrid}>
-					{remainingVideos.map((video) => (
-						<li>
-							<a href={"/watch/" + video.slug} class={styles.video}>
-								<img src={video.thumbnailUrl} alt="" loading="lazy" width="480" height="270" />
-								<span>{video.title}</span>
-								<time class={styles.videoDate} {...videoDate(video.publishedAt).attrs}>{videoDate(video.publishedAt).text}</time>
-							</a>
-						</li>
-					))}
-				</ul>
-			</section>
-		)}
 		{hasTopicContent && (
 			<section id="more-content" class={styles.ruledSection} aria-label={technology.name + " learning resources"}>
 				<TopicHub technologyId={technology.id} technologyName={technology.name}
@@ -673,5 +651,99 @@ const hasAside = videoCount > 0 || hasMatrixDetails ||
 				<p slot="fallback" class={styles.copy}>Email signup loads here. You can also <a class={styles.link} href="/settings">manage email preferences in account settings</a>.</p>
 			</NewsletterCTA>
 		</div>
+		<p class="technology-vendor">
+			<a href="/organizations/partnerships">Build {technology.name}? I'll show you where engineers get stuck with it →</a>
+			<span aria-hidden="true"> · </span>
+			<a href="/organizations/support-our-work#supporter">Back free content for the community →</a>
+		</p>
 	</div>
 </Page>
+
+<style>
+	.technology-supporter {
+		display: grid;
+		gap: 0.6rem 2rem;
+		padding: 1.1rem 1.25rem;
+		border: 1px solid
+			color-mix(
+				in oklab,
+				var(--colors-academy-status-spruce) 45%,
+				var(--colors-academy-border)
+			);
+		border-radius: var(--radii-academy-s);
+		background: color-mix(
+			in oklab,
+			var(--colors-academy-status-spruce) 7%,
+			transparent
+		);
+	}
+
+	@media (min-width: 48rem) {
+		.technology-supporter {
+			grid-template-columns: minmax(0, 1fr) auto;
+			align-items: end;
+		}
+
+		.technology-supporter > :first-child {
+			grid-column: 1 / -1;
+		}
+	}
+
+	.technology-supporter__thanks {
+		max-width: 46ch;
+		margin: 0;
+		color: var(--colors-academy-text);
+		font-size: 1.25rem;
+		line-height: 1.35;
+	}
+
+	.technology-supporter__name {
+		color: var(--colors-academy-text);
+		font-family: var(--fonts-academy-display);
+		font-weight: 800;
+		overflow-wrap: anywhere;
+		text-decoration: underline;
+		text-decoration-color: var(--colors-academy-status-spruce);
+		text-decoration-thickness: 2px;
+		text-underline-offset: 0.18em;
+	}
+
+	.technology-supporter__name:hover {
+		text-decoration-color: var(--colors-academy-accent);
+	}
+
+	.technology-supporter__wall {
+		color: var(--colors-academy-text-soft);
+		font-size: 0.875rem;
+		text-underline-offset: 0.2em;
+		white-space: nowrap;
+	}
+
+	.technology-supporter__wall:hover {
+		color: var(--colors-academy-text);
+	}
+
+	.technology-supporter__name:focus-visible,
+	.technology-supporter__wall:focus-visible {
+		outline: 2px solid var(--colors-academy-accent);
+		outline-offset: 2px;
+	}
+
+	.technology-vendor {
+		margin: 0;
+		padding-top: 1rem;
+		border-top: 1px solid var(--colors-academy-border);
+		font-size: 0.875rem;
+		line-height: 1.6;
+		color: var(--colors-academy-text-muted);
+	}
+
+	.technology-vendor a {
+		color: var(--colors-academy-text-soft);
+		text-underline-offset: 0.2em;
+	}
+
+	.technology-vendor a:hover {
+		color: var(--colors-academy-text);
+	}
+</style>

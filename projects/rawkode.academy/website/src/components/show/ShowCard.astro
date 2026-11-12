@@ -1,264 +1,52 @@
 ---
 import type { ShowSummary } from "@/types/show";
-import { Image } from "astro:assets";
-import MLabel from "@/components/ui/MLabel.vue";
-import { academyDocument } from "@rawkodeacademy/design-system";
-import { localTime } from "@/lib/local-time";
+import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 
+/**
+ * The one show card: the show's artwork, a mono line with its real episode
+ * count (or its status), the name, its tagline and the latest episode. Used
+ * by Shows and by a person's hosted shows.
+ */
 interface Props {
 	show: ShowSummary;
+	heading?: "h2" | "h3";
 }
 
-const { show } = Astro.props as Props;
+const { show, heading: Heading = "h3" } = Astro.props as Props;
+const styles = academyLayout({ width: "wide" });
+const catalog = academyCatalog();
+
 const isComingSoon = show.status === "coming-soon";
-const isArchived = show.status === "archived";
-const statusLabel = isComingSoon ? "Coming soon" : isArchived ? "Archived" : null;
-const cardCta = isComingSoon
-	? "Get notified →"
-	: isArchived
-		? "View archive →"
-		: "Open show →";
-const doc = academyDocument();
-
-const hostNames = (show.hosts ?? [])
-	.map((host) => [host.forename, host.surname].filter(Boolean).join(" ").trim())
-	.filter(Boolean);
-
-const episodes = (show.episodes ?? []).filter(
-	(ep): ep is NonNullable<typeof ep> => ep !== null && ep.video !== null,
-);
-const visibleEpisodes = isComingSoon ? [] : episodes;
-
-const latestEpisode = visibleEpisodes
-	.filter((ep) => ep.video?.thumbnailUrl && ep.video?.publishedAt)
-	.sort((a, b) => {
-		const aTime = new Date(a.video!.publishedAt!).getTime();
-		const bTime = new Date(b.video!.publishedAt!).getTime();
-		return bTime - aTime;
-	})[0];
-
-const thumbnailUrl = latestEpisode?.video?.thumbnailUrl;
-const latestEpisodeTitle = latestEpisode?.video?.title;
-const latestEpisodePublishedAt = latestEpisode?.video?.publishedAt;
-const latestEpisodeDate = latestEpisodePublishedAt
-	? localTime(latestEpisodePublishedAt, { dateStyle: "medium" })
-	: null;
+const comingSoonCta = "Get notified →";
+const episodes = isComingSoon
+	? []
+	: (show.episodes ?? []).filter(
+			(episode): episode is NonNullable<typeof episode> =>
+				episode !== null && episode.video !== null,
+		);
+const publishedTime = (value: string | null | undefined) =>
+	value ? new Date(value).getTime() : 0;
+const latestEpisode = [...episodes].sort(
+	(a, b) =>
+		publishedTime(b.video?.publishedAt) - publishedTime(a.video?.publishedAt),
+)[0];
+const artwork = show.cover?.image.src ?? latestEpisode?.video?.thumbnailUrl;
+const statusLine = isComingSoon
+	? "Coming soon"
+	: `${show.status === "archived" ? "Archived · " : ""}${episodes.length} published ${episodes.length === 1 ? "episode" : "episodes"}`;
 ---
 
-<a href={`/shows/${show.id}`} class="show-card" data-show-status={show.status}>
-	{(show.cover || thumbnailUrl) && <div class="show-card__frame">
-		{show.cover ? (
-			<Image
-				src={show.cover.image}
-				alt={show.cover.alt}
-				class="show-card__img"
-				loading="lazy"
-			/>
-		) : (
-			<img
-				src={thumbnailUrl}
-				alt={`Latest episode from ${show.name}`}
-				class="show-card__img"
-				width="1280"
-				height="720"
-				loading="lazy"
-				decoding="async"
-			/>
-		)}
-		{statusLabel && (
-			<span class:list={["show-card__status", { "show-card__status--archived": isArchived }]}>
-				{statusLabel}
-			</span>
-		)}
-		{visibleEpisodes.length > 0 && (
-			<span class="show-card__count">
-				{visibleEpisodes.length} {visibleEpisodes.length === 1 ? "episode" : "episodes"}
-			</span>
-		)}
-	</div>}
-
-	<div class="show-card__body">
-		<h3 class:list={[doc.cardTitle, "show-card__title"]}>{show.name}</h3>
-		{!show.cover && !thumbnailUrl && statusLabel && (
-			<span class:list={["show-card__status", { "show-card__status--archived": isArchived }]}>{statusLabel}</span>
-		)}
-		{show.tagline && <p class="show-card__tagline">{show.tagline}</p>}
-		{!show.cover && !thumbnailUrl && visibleEpisodes.length > 0 && <span class="show-card__count">
-			{visibleEpisodes.length} {visibleEpisodes.length === 1 ? "episode" : "episodes"}
-		</span>}
-		{hostNames.length > 0 && <p class="show-card__hosts">
-					<MLabel>Hosted by</MLabel>
-					<span class="show-card__host-list">{hostNames.join(", ")}</span>
-		</p>}
-		{latestEpisodeTitle && (
-			<p class="show-card__latest">
-				<MLabel tone="muted">Latest</MLabel>
-				<span class="show-card__latest-title">{latestEpisodeTitle}</span>
-				{latestEpisodeDate && (
-					<MLabel tone="muted"><time {...latestEpisodeDate.attrs}>{latestEpisodeDate.text}</time></MLabel>
-				)}
-			</p>
-		)}
-		<div class="show-card__cta">
-			<MLabel tone={isComingSoon ? "amber" : "ink"}>{cardCta}</MLabel>
-		</div>
+<a class={styles.card} href={`/shows/${show.id}`} data-show-status={show.status}>
+	{artwork && (
+		<span class={catalog.featuredMedia}>
+			<img class={catalog.featuredImage} src={artwork} alt="" loading="lazy" />
+		</span>
+	)}
+	<div class={styles.cardBody}>
+		<span class={catalog.rowMeta}>{statusLine}</span>
+		<Heading class={styles.cardTitle}>{show.name}</Heading>
+		{show.tagline && <span class={catalog.rowDescription}>{show.tagline}</span>}
+		{latestEpisode?.video?.title && <span class={catalog.rowDescription}>Latest: {latestEpisode.video.title}</span>}
+		{isComingSoon && <span class={catalog.rowMeta}>{comingSoonCta}</span>}
 	</div>
 </a>
-
-<style>
-	.show-card {
-		display: flex;
-		flex-direction: column;
-		min-width: 0;
-		font-family: var(--fonts-academy-text), sans-serif;
-		background: var(--colors-academy-panel);
-		border: 1px solid var(--colors-academy-border);
-		border-radius: var(--radii-academy-m);
-		text-decoration: none;
-		color: var(--colors-academy-text);
-		transition: border-color var(--duration-base) var(--ease-standard);
-	}
-
-	.show-card:hover {
-		border-color: var(--colors-academy-accent);
-	}
-
-	.show-card:focus-visible {
-		outline: 2px solid var(--colors-academy-accent);
-		outline-offset: 3px;
-	}
-
-	.show-card__frame {
-		position: relative;
-		aspect-ratio: 16 / 9;
-		background: var(--colors-academy-ground);
-		overflow: hidden;
-		border-radius: var(--radii-academy-m) var(--radii-academy-m) 0 0;
-		border-bottom: 1px solid var(--colors-academy-border);
-	}
-
-	.show-card__img {
-		display: block;
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-	}
-
-	.show-card__count {
-		align-self: flex-start;
-		font-family: var(--fonts-academy-mono), monospace;
-		font-size: 0.75rem;
-		line-height: 1.5;
-		color: var(--colors-academy-canvas);
-		background: var(--colors-academy-text);
-		padding: 0.2rem 0.5rem;
-		border-radius: var(--radii-academy-s);
-	}
-
-	.show-card__frame .show-card__count {
-		position: absolute;
-		bottom: 0.5rem;
-		right: 0.5rem;
-		max-width: calc(100% - 1rem);
-	}
-
-	.show-card__status {
-		align-self: flex-start;
-		font-family: var(--fonts-academy-mono), monospace;
-		font-size: 0.66rem;
-		font-weight: 600;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
-		color: var(--colors-academy-accent-foreground);
-		background: var(--colors-academy-accent);
-		padding: 0.2rem 0.5rem;
-	}
-
-	.show-card__frame .show-card__status {
-		position: absolute;
-		top: 0.5rem;
-		left: 0.5rem;
-	}
-
-	.show-card__status--archived {
-		color: var(--colors-academy-canvas);
-		background: var(--colors-academy-text-soft);
-	}
-
-	.show-card__body {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-		padding: 1.25rem;
-	}
-
-	.show-card__title {
-		font-size: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
-		line-height: 1.3;
-		overflow-wrap: anywhere;
-	}
-
-	.show-card__tagline {
-		margin: -0.25rem 0 0;
-		font-family: var(--fonts-academy-mono), monospace;
-		font-size: 0.68rem;
-		font-weight: 600;
-		letter-spacing: 0.1em;
-		line-height: 1.35;
-		text-transform: uppercase;
-		color: var(--colors-academy-accent);
-	}
-
-	.show-card[data-show-status="coming-soon"] .show-card__tagline {
-		color: var(--colors-academy-accent);
-	}
-
-	.show-card:hover .show-card__title {
-		color: var(--colors-academy-accent);
-	}
-
-	.show-card__hosts {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-		align-items: baseline;
-		margin: 0;
-	}
-
-	.show-card__host-list {
-		font-size: 0.875rem;
-		line-height: 1.5;
-		overflow-wrap: anywhere;
-		color: var(--colors-academy-text);
-	}
-
-	.show-card__latest {
-		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
-		margin: 0;
-		padding-top: 0.75rem;
-		border-top: 1px solid var(--colors-academy-border);
-	}
-
-	.show-card__latest-title {
-		font-size: 0.875rem;
-		line-height: 1.5;
-		overflow-wrap: anywhere;
-		color: var(--colors-academy-text-soft);
-		display: -webkit-box;
-		-webkit-line-clamp: 2;
-		-webkit-box-orient: vertical;
-		overflow: hidden;
-	}
-
-	.show-card__cta {
-		margin-top: auto;
-		padding-top: 0.5rem;
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.show-card { transition: none; }
-	}
-</style>

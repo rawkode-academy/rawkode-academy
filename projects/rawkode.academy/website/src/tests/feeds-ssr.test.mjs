@@ -1,10 +1,10 @@
 // Run from website: node --experimental-vm-modules --test src/tests/feeds-ssr.test.mjs
-// Render the actual Feeds page with local collections; only shared chrome/styles are stubbed.
+// Render the actual Feeds page with a mocked content layer; only shared chrome/styles are stubbed.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import vm from "node:vm";
-import { transform } from "@astrojs/compiler";
+import { parse as parseAstro, transform } from "@astrojs/compiler";
 import ts from "typescript";
 import * as runtime from "astro/runtime/server/index.js";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
@@ -53,15 +53,21 @@ async function renderFeeds(collection = shows) {
 	const context = vm.createContext({ console });
 	const pageProps = [];
 	const collectionsRead = [];
+	const cacheCalls = [];
 	const mocks = {
 		// CSS is a build artifact, not executable in this semantic SSR harness.
 		"feeds.astro?astro&type=style&index=0&lang.css": {},
 		"astro/runtime/server/index.js": { ...runtime, createMetadata: () => ({}) },
-		"astro:content": {
+		"@/lib/live-content": {
 			getCollection: async (name, filter) => {
 				assert.equal(name, "shows", "Unexpected collection read");
 				collectionsRead.push(name);
 				return collection.filter(filter ?? (() => true));
+			},
+			setContentCache: async (astro, input) => {
+				assert(astro?.request, "setContentCache needs the Astro global");
+				cacheCalls.push(input);
+				return {};
 			},
 		},
 		"@rawkodeacademy/design-system": {
@@ -71,7 +77,7 @@ async function renderFeeds(collection = shows) {
 		"@/wrappers/page.astro": {
 			default: runtime.createComponent((result, props, slots) => {
 				pageProps.push(props);
-				return runtime.render`<main>${runtime.renderSlot(result, slots.default)}</main>`;
+				return runtime.render`<head>${runtime.renderSlot(result, slots["extra-head"])}</head><main>${runtime.renderSlot(result, slots.default)}</main>`;
 			}),
 		},
 		"@/components/ui/EditorialShell.astro": {
@@ -110,6 +116,11 @@ async function renderFeeds(collection = shows) {
 		request: new Request("https://rawkode.academy/feeds"),
 	});
 	assert.deepEqual(collectionsRead, ["shows"]);
+	// The page lists shows, so any show change (or publication) purges it.
+	// The page module runs in its own realm: compare plain data.
+	assert.deepEqual(JSON.parse(JSON.stringify(cacheCalls)), [
+		{ collections: ["shows"] },
+	]);
 	return { html, dom: parse(html), pageProps };
 }
 
@@ -206,6 +217,76 @@ test("Format guidance is a closed native disclosure with all four notes in SSR",
 			"OPML lets you import many feeds into a reader at once.",
 		],
 	);
+});
+
+// Feed readers given the site's homepage or /feeds discover the all-content
+// feeds through these <head> links.
+const allContentAlternates = [
+	{
+		type: "application/rss+xml",
+		title: "Rawkode Academy - All Content (RSS)",
+		href: "/api/feeds/all.xml",
+	},
+	{
+		type: "application/atom+xml",
+		title: "Rawkode Academy - All Content (Atom)",
+		href: "/api/feeds/all.atom",
+	},
+	{
+		type: "application/feed+json",
+		title: "Rawkode Academy - All Content (JSON Feed)",
+		href: "/api/feeds/all.json",
+	},
+];
+
+test("Feeds advertises the all-content feeds for autodiscovery in <head>", async () => {
+	const { dom } = await renderFeeds();
+	const alternates = dom
+		.querySelectorAll('head link[rel="alternate"]')
+		.map((link) => ({
+			type: link.getAttribute("type"),
+			title: link.getAttribute("title"),
+			href: link.getAttribute("href"),
+		}));
+	assert.deepEqual(alternates, allContentAlternates);
+	assert.equal(dom.querySelectorAll('main link[rel="alternate"]').length, 0);
+});
+
+test("Homepage advertises the all-content feeds through its extra-head slot", async () => {
+	// The homepage pulls in the whole landing composition; its <head> links
+	// are static, so read them from the parsed template.
+	const homepage = readFileSync(
+		new URL("../pages/index.astro", import.meta.url),
+		"utf8",
+	);
+	const { ast } = await parseAstro(homepage);
+	const attribute = (node, name) =>
+		node.attributes?.find((candidate) => candidate.name === name)?.value;
+	const alternates = [];
+	const visit = (node, inExtraHead) => {
+		const extraHead = inExtraHead || attribute(node, "slot") === "extra-head";
+		if (
+			extraHead &&
+			node.name === "link" &&
+			attribute(node, "rel") === "alternate"
+		) {
+			alternates.push({
+				type: attribute(node, "type"),
+				title: attribute(node, "title"),
+				href: attribute(node, "href"),
+			});
+		}
+		for (const child of node.children ?? []) visit(child, extraHead);
+	};
+	visit(ast, false);
+	assert.deepEqual(alternates, allContentAlternates);
+	// Section pages advertise their own feeds; the shared head must not add
+	// site-wide ones on top of them.
+	const sharedHead = readFileSync(
+		new URL("../components/html/head.astro", import.meta.url),
+		"utf8",
+	);
+	assert(!sharedHead.includes("/api/feeds/all."));
 });
 
 for (const [state, collection] of [

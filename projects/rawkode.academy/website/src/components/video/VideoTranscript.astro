@@ -7,6 +7,7 @@ import {
 	normalizeTranscriptCues,
 	transcriptSections,
 } from "./transcript-content";
+import { timestampHref } from "@/lib/video-deep-link";
 
 interface Props {
 	cues: readonly InitialTranscriptCue[];
@@ -19,25 +20,26 @@ const styles = academyWatch();
 const searchId = `transcript-search-${crypto.randomUUID()}`;
 ---
 
-<academy-transcript class={styles.comments} data-highlight-class={styles.transcriptHighlight}>
+<academy-transcript class={styles.transcript} data-highlight-class={styles.transcriptHighlight}>
 	{sections.length > 0 ? (
 		<>
 			<div data-transcript-controls hidden>
-				<label for={searchId} class={styles.noticeCopy}>Search transcript</label>
+				<label for={searchId} class={styles.fieldLabel}>Search transcript</label>
 				<div class={styles.search}>
-					<input id={searchId} type="search" placeholder="Search transcript..." class={styles.searchInput} />
+					<input id={searchId} type="search" class={styles.searchInput} />
 					<svg class={styles.searchIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
 					</svg>
 				</div>
 				<p class={styles.searchSummary} role="status" aria-atomic="true" />
 			</div>
+			<div class={styles.transcriptContainer} role="region" aria-label="Transcript text" tabindex="0">
 			<div class={styles.transcriptBody}>
 				{sections.map((section) => (
-					<section data-transcript-section aria-label={section.chapter?.title}>
+					<section data-transcript-section>
 						{section.chapter && (
 							<h3 class={styles.transcriptChapter}>
-								<a href={`?t=${section.chapter.startTime}`} data-chapter-link={section.chapter.startTime} class={styles.transcriptChapterLink}>
+								<a href={timestampHref(section.chapter.startTime)} data-chapter-link={section.chapter.startTime} class={styles.transcriptChapterLink}>
 									<span class={styles.transcriptTimestamp}>{formatTranscriptTimestamp(section.chapter.startTime)}</span>
 									{section.chapter.title}
 								</a>
@@ -45,7 +47,7 @@ const searchId = `transcript-search-${crypto.randomUUID()}`;
 						)}
 						{section.cues.map((cue) => (
 							<p data-transcript-row class={styles.transcriptParagraph}>
-								<a href={`?t=${cue.startSeconds}`} data-chapter-link={cue.startSeconds} aria-label={`Jump to ${formatTranscriptTimestamp(cue.startSeconds)}`} class={styles.transcriptTimestampLink}>
+								<a href={timestampHref(cue.startSeconds)} data-chapter-link={cue.startSeconds} aria-label={`Jump to ${formatTranscriptTimestamp(cue.startSeconds)}`} class={styles.transcriptTimestampLink}>
 									<span class={styles.transcriptTimestamp}>{formatTranscriptTimestamp(cue.startSeconds)}</span>
 								</a>
 								<span data-transcript-text>{cue.text}</span>
@@ -54,8 +56,9 @@ const searchId = `transcript-search-${crypto.randomUUID()}`;
 					</section>
 				))}
 			</div>
+			</div>
 		</>
-	) : <p class={styles.noticeCopy}>No transcript is available for this video.</p>}
+	) : <p class={styles.transcriptNote}>No transcript is available for this video.</p>}
 </academy-transcript>
 
 <script>

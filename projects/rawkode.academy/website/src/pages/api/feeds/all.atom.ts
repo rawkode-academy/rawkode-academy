@@ -1,6 +1,15 @@
-import { getCollection, getEntries } from "astro:content";
 import type { APIContext } from "astro";
-import { renderAndSanitizeArticles } from "../../../lib/feed-utils";
+import {
+	type ContentEntry,
+	getCollection,
+	getEntries,
+	setContentCache,
+} from "@/lib/live-content";
+import {
+	escapeAttribute,
+	renderAndSanitizeArticles,
+} from "../../../lib/feed-utils";
+import { getPublishedVideos } from "@/lib/content";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { isNewsPublished } from "@/lib/news-publication";
 
@@ -22,7 +31,9 @@ export async function GET(context: APIContext) {
 	const now = new Date();
 	const [articles, videos, technologies, news] = await Promise.all([
 		getCollection("articles"),
-		getCollection("videos"),
+		// Published videos only, like the videos feeds: a scheduled stream
+		// must not lead the feed or push its <updated> into the future.
+		getPublishedVideos(),
 		getCollection("technologies"),
 		getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
 	]);
@@ -38,15 +49,17 @@ export async function GET(context: APIContext) {
 	const feedUrl = `${site}/api/feeds/all.atom`;
 
 	// Render all articles in parallel for better performance
-	const renderedContent = await renderAndSanitizeArticles(articles);
+	const renderedContent = await renderAndSanitizeArticles(articles, site);
 
 	const entries: AtomEntry[] = [];
+	const authorEntries: ContentEntry<"people">[] = [];
 
 	// Add articles with rendered content
 	await Promise.all(
 		articles.map(async (article) => {
 			const renderResult = renderedContent.get(article.id);
 			const authors = await getEntries(article.data.authors);
+			authorEntries.push(...authors);
 
 			entries.push({
 				title: article.data.title,
@@ -56,7 +69,7 @@ export async function GET(context: APIContext) {
 				updated: article.data.updatedAt
 					? new Date(article.data.updatedAt).toISOString()
 					: new Date(article.data.publishedAt).toISOString(),
-				categories: article.data.series?.id ? [article.data.series.id] : [],
+				categories: [],
 				author: authors.map((author) => author.data.name).join(", "),
 				type: "article",
 				...(renderResult?.content && { content: renderResult.content }),
@@ -72,8 +85,8 @@ export async function GET(context: APIContext) {
 			url: `${site}/watch/${video.data.slug}/`,
 			published: new Date(video.data.publishedAt).toISOString(),
 			updated: new Date(video.data.publishedAt).toISOString(),
-			categories: (video.data.technologies as string[]).map(
-				(id) => techName.get(id) || id,
+			categories: video.data.technologies.map(
+				(technology) => techName.get(technology.id) || technology.id,
 			),
 			thumbnail: getVideoThumbnailUrl(video.data.id),
 			type: "video",
@@ -88,6 +101,7 @@ export async function GET(context: APIContext) {
 	await Promise.all(
 		news.map(async (story) => {
 			const authors = await getEntries(story.data.authors);
+			authorEntries.push(...authors);
 			entries.push({
 				title: story.data.title,
 				description: story.data.description,
@@ -151,19 +165,26 @@ ${entries
 		<updated>${entry.updated}</updated>
 		<summary><![CDATA[${entry.description}]]></summary>
 		<content type="html"><![CDATA[${content}]]></content>
-		${entry.author ? `<author><name>${entry.author}</name></author>` : ""}
+		${entry.author ? `<author><name>${escapeAttribute(entry.author)}</name></author>` : ""}
 		${entry.categories
-			.map((cat) => `<category term="${cat}" label="${cat}"/>`)
+			.map((cat) => {
+				const name = escapeAttribute(cat);
+				return `<category term="${name}" label="${name}"/>`;
+			})
 			.join("\n\t\t")}
 	</entry>`;
 	})
 	.join("\n")}
 </feed>`;
 
+	await setContentCache(context, {
+		entries: authorEntries,
+		collections: ["articles", "videos", "news", "technologies"],
+	});
+
 	return new Response(atomFeed, {
 		headers: {
 			"Content-Type": "application/atom+xml; charset=utf-8",
-			"Cache-Control": "max-age=3600",
 		},
 	});
 }

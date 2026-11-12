@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { mount, type VueWrapper } from "@vue/test-utils";
-import type { CollectionEntry } from "astro:content";
+import type { ContentEntry } from "@/lib/live-content";
 import AuthorAvatarGroup from "../components/common/AuthorAvatarGroup.vue";
 import Container from "../components/ui/Container.vue";
 import {
@@ -20,10 +20,10 @@ const authors = Array.from({ length: 5 }, (_, i) => ({
 		name: `Author ${i}`,
 		avatarUrl: `https://example.test/author-${i}.jpg`,
 	},
-})) as CollectionEntry<"people">[];
+})) as ContentEntry<"people">[];
 const group = (
 	props: {
-		authors?: CollectionEntry<"people">[];
+		authors?: ContentEntry<"people">[];
 		maxDisplay?: number;
 		showNames?: boolean;
 		showActiveIndicator?: boolean;
@@ -138,17 +138,18 @@ describe("explicit Container width and padding contracts", () => {
 });
 
 describe("related editorial style contracts", () => {
-	it("anchors duration inside the thumbnail without relying on legacy bottom-2", () => {
+	it("anchors the shared runtime badge inside the shared 16:9 frame", () => {
 		expect(academyRelatedContent.raw().media).toMatchObject({
 			position: "relative",
-			aspectRatio: "video",
+			aspectRatio: "academy-video",
 		});
+		// The badge is ink in both colour schemes so it reads over any still.
 		expect(academyRelatedContent.raw().duration).toMatchObject({
 			position: "absolute",
-			bottom: "2",
-			right: "2",
-			color: "academy.text",
-			background: "academy.canvas",
+			insetBlockEnd: "2",
+			insetInlineEnd: "2",
+			color: "academy.inkText",
+			backgroundColor: "academy.ink",
 		});
 	});
 	it("rules adjacent news items with semantic borders and uses Academy fonts", () => {

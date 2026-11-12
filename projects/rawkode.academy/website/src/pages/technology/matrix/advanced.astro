@@ -1,7 +1,7 @@
 ---
-export const prerender = true;
+export const prerender = false;
 
-import { getCollection } from "astro:content";
+import { getCollection, setContentCache } from "@/lib/live-content";
 import Page from "@/wrappers/page.astro";
 import { Container } from "@/components/ui";
 import {
@@ -43,6 +43,8 @@ for (const video of allVideos) {
 
 // Get all technologies
 const allTechnologies = await getCollection("technologies");
+// Counts cover every video (scheduled ones included), as the static page did.
+await setContentCache(Astro, { collections: ["technologies", "videos"] });
 
 // Normalize technologies for the explorer
 const normalizedTechnologies = allTechnologies.map((tech) => {
@@ -73,7 +75,7 @@ const media = academyMedia();
 	title="Advanced Technology Matrix"
 	description="Filter and compare cloud native and platform engineering technologies by adoption stage, category, confidence, and trajectory."
 >
-	<div class:list={[layout.root, media.root, "matrix-route"]}>
+	<div class:list={[layout.root, media.root]}>
 	<section class:list={[layout.hero, media.hero, "explorer-hero"]}>
 		<div class="hero-background">
 			<div class="hero-gradient"></div>
@@ -82,12 +84,12 @@ const media = academyMedia();
 		<Container size="xl" padding="lg">
 			<div class="hero-content">
 				<a href="/technology/matrix" class="back-link">Technology Matrix</a>
-				<div class="hero-badge hairline-chip">
+				<div class="hero-badge">
 					<span class="badge-dot"></span>
 					<span>{totalTechnologies} technologies</span>
 				</div>
 				<h1 class="hero-title">Advanced Technology Matrix</h1>
-				<p class="hero-subtitle text-secondary-content">
+				<p class="hero-subtitle">
 					Filter and compare tools by adoption stage, category, confidence, and trajectory.
 				</p>
 			</div>
@@ -159,8 +161,18 @@ const media = academyMedia();
 	.hero-badge {
 		display: inline-flex;
 		align-items: center;
+		justify-content: center;
 		gap: 0.5rem;
 		margin-bottom: 1rem;
+		padding: 0.25rem 0.6rem;
+		border: 1px solid var(--colors-academy-border);
+		border-radius: var(--radii-academy-pill);
+		background: var(--colors-academy-panel);
+		color: var(--colors-academy-text);
+		font-family: var(--fonts-academy-mono);
+		font-size: 0.6875rem;
+		font-weight: 500;
+		letter-spacing: 0.14em;
 	}
 
 	.badge-dot {
@@ -187,6 +199,7 @@ const media = academyMedia();
 		font-size: clamp(1rem, 1.8vw, 1.28rem);
 		margin: 0;
 		line-height: 1.45;
+		color: var(--colors-academy-text-soft);
 	}
 
 	.explorer-shell {

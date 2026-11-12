@@ -66,17 +66,12 @@ function evaluate(source, filename, resolveImport = require) {
 	);
 	return module.exports;
 }
-const designSystem = evaluate(
-	readFileSync(
-		resolve(
-			website,
-			"../../../packages/design-system/src/recipes/academyForms.ts",
-		),
-		"utf8",
-	),
-	"academyForms.ts",
-	() => css,
-);
+// The real recipes, so the rendered class names are the production ones.
+const recipes = "../../../../../packages/design-system/src/recipes";
+const designSystem = {
+	...(await import(`${recipes}/academyForms.ts`)),
+	...(await import(`${recipes}/button.ts`)),
+};
 let calls = [];
 let respond;
 const action = async (payload) => {
@@ -285,7 +280,13 @@ for (const fixture of fixtures) {
 					form.querySelectorAll("select[name=path] option"),
 					(option) => option.textContent,
 				),
-				["Product review", "90-day partnership", "Annual plan", "Not sure yet"],
+				[
+					"Support Our Work",
+					"Partnership",
+					"Bespoke project",
+					"Community challenge series",
+					"Not sure yet",
+				],
 			);
 		} else {
 			assert.equal(form.getAttribute("aria-busy"), "true");
@@ -412,7 +413,7 @@ for (const fixture of fixtures) {
 					name: "Test Person",
 					email: "person@example.test",
 					company: "Test Company",
-					path: "Not sure yet",
+					path: "Partnership",
 					message: "Our quick start loses Kubernetes users.",
 					website: "",
 				});
@@ -459,8 +460,8 @@ for (const fixture of fixtures) {
 					["enquiry_form_started", "enquiry_form_submitted"],
 				);
 				assert.equal(capturedEvents[1].properties.form, "partnership_enquiry");
-				assert.equal(capturedEvents[1].properties.route, "Not sure yet");
-				assert.equal(capturedEvents[1].properties.offer, "Review");
+				assert.equal(capturedEvents[1].properties.route, "Partnership");
+				assert.equal(capturedEvents[1].properties.offer, "Partnership");
 			} else {
 				assert.equal(host.querySelector("[type=checkbox]").checked, false);
 				assert.equal(host.querySelector("button[type=submit]").disabled, true);
@@ -476,7 +477,7 @@ for (const fixture of fixtures) {
 	});
 }
 
-test("partnership CRM fallback keeps the form and offers a prefilled email", async () => {
+test("partnership email fallback keeps the form and offers a prefilled email", async () => {
 	calls = [];
 	const capturedEvents = [];
 	window.posthog = {
@@ -498,7 +499,7 @@ test("partnership CRM fallback keeps the form and offers a prefilled email", asy
 			.dispatchEvent(new window.Event("focusin", { bubbles: true }));
 		view.host.querySelector("form").requestSubmit();
 		respond({
-			data: { success: false, fallback: "mailto", code: "crm_lookup_failed" },
+			data: { success: false, fallback: "mailto", code: "email_send_failed" },
 		});
 		await flush();
 
@@ -506,9 +507,9 @@ test("partnership CRM fallback keeps the form and offers a prefilled email", asy
 		const alert = view.host.querySelector("[role=alert]");
 		assert.match(
 			alert.textContent,
-			/Something went wrong, so your enquiry wasn't sent\. Please email David directly\./,
+			/Something went wrong, so your enquiry wasn't sent\. Please email me directly\./,
 		);
-		assert.equal(alert.getAttribute("data-error-code"), "crm_lookup_failed");
+		assert.equal(alert.getAttribute("data-error-code"), "email_send_failed");
 		const fallback = view.host.querySelector(
 			'a[href^="mailto:david@rawkode.academy"]',
 		);
@@ -731,7 +732,7 @@ test("partnership enquiry keeps rejected values and describes each field error",
 		name: "  Ada ",
 		email: "not-an-email",
 		company: "Analytical Engine",
-		path: "Annual plan",
+		path: "Ongoing partnership",
 		message: "   ",
 	};
 	const serverFieldErrors = {
@@ -748,7 +749,7 @@ test("partnership enquiry keeps rejected values and describes each field error",
 			form.querySelector("[name=company]").value,
 			"Analytical Engine",
 		);
-		assert.equal(form.querySelector("[name=path]").value, "Annual plan");
+		assert.equal(form.querySelector("[name=path]").value, "Partnership");
 		assert.equal(form.querySelector("[name=message]").value, "   ");
 		assert.equal(
 			form.querySelector("[name=name]").getAttribute("maxlength"),

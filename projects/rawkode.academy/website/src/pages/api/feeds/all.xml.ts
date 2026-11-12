@@ -1,13 +1,23 @@
-import { getCollection, getEntries } from "astro:content";
 import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
 import {
 	renderAndSanitizeArticles,
+	rssCreator,
+	rssNamespaces,
+	rssSelfLink,
+	rssThumbnail,
 	withRssMimeType,
 } from "../../../lib/feed-utils";
+import { getPublishedVideos } from "@/lib/content";
 import { createLogger } from "@/lib/logger";
 import { getVideoThumbnailJpegUrl } from "@/lib/video-thumbnail";
 import { isNewsPublished } from "@/lib/news-publication";
+import {
+	type ContentEntry,
+	getCollection,
+	getEntries,
+	setContentCache,
+} from "@/lib/live-content";
 
 import type { RSSFeedItem } from "@astrojs/rss";
 
@@ -22,17 +32,21 @@ export async function GET(context: APIContext) {
 
 	const [articles, videos, technologies, news] = await Promise.all([
 		getCollection("articles"),
-		getCollection("videos"),
+		// Published videos only, like the videos feeds: a scheduled stream
+		// must not lead the feed with a future date.
+		getPublishedVideos(),
 		getCollection("technologies"),
 		getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
 	]);
+
+	const authorEntries: ContentEntry<"people">[] = [];
 
 	const techName = new Map(
 		technologies.map((t) => [t.id, t.data.name] as const),
 	);
 
 	// Render all articles in parallel for better performance
-	const renderedContent = await renderAndSanitizeArticles(articles);
+	const renderedContent = await renderAndSanitizeArticles(articles, site);
 
 	// Add articles with rendered content
 	const articleItems = (
@@ -50,17 +64,16 @@ export async function GET(context: APIContext) {
 
 				const renderResult = renderedContent.get(article.id);
 				const authors = await getEntries(article.data.authors);
+				authorEntries.push(...authors);
 
 				const item: RSSFeedItem = {
 					title,
 					description,
 					pubDate: new Date(article.data.publishedAt),
 					link: `/read/${article.id}/`,
-					categories: article.data.series?.id ? [article.data.series.id] : [],
+					categories: [],
+					customData: rssCreator(authors.map((author) => author.data.name)),
 				};
-				if (authors.length > 0) {
-					item.author = authors.map((author) => author.data.name).join(", ");
-				}
 				if (renderResult?.content) {
 					item.content = renderResult.content;
 				}
@@ -85,22 +98,10 @@ export async function GET(context: APIContext) {
 			const duration =
 				typeof video.data.duration === "number" ? video.data.duration : null;
 
-			const categories = (video.data.technologies as string[])
-				.map((id) => {
-					// Handle both string IDs and reference objects
-					const techId = typeof id === "string" ? id : (id as any).id || id;
-					const normalizedId = techId.endsWith?.("/index")
-						? techId.slice(0, -6)
-						: techId;
-					return (
-						techName.get(normalizedId + "/index") ||
-						techName.get(normalizedId) ||
-						normalizedId
-					);
-				})
-				.filter(
-					(cat) => cat !== null && cat !== undefined && typeof cat === "string",
-				);
+			// Technology references carry ids without "/index".
+			const categories = video.data.technologies
+				.map((technology) => techName.get(technology.id) || technology.id)
+				.filter((cat) => typeof cat === "string" && cat.length > 0);
 
 			const item: RSSFeedItem = {
 				title,
@@ -110,10 +111,10 @@ export async function GET(context: APIContext) {
 				categories,
 			};
 
+			const itunesImageUrl = getVideoThumbnailJpegUrl(site, video.data.id);
+			item.customData = rssThumbnail(itunesImageUrl);
 			if (duration) {
-				const itunesImageUrl = getVideoThumbnailJpegUrl(site, video.data.id);
-				item.customData = `
-				<enclosure url="${itunesImageUrl}" type="image/jpeg" />
+				item.customData += `
 				<itunes:duration>${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, "0")}</itunes:duration>
 				<itunes:image href="${itunesImageUrl}" />
 			`;
@@ -136,16 +137,15 @@ export async function GET(context: APIContext) {
 					return null;
 				}
 				const authors = await getEntries(story.data.authors);
+				authorEntries.push(...authors);
 				const item: RSSFeedItem = {
 					title,
 					description,
 					pubDate: new Date(story.data.publishedAt),
 					link: `/news/${story.id}/`,
 					categories: [...(story.data.technologies ?? [])],
+					customData: rssCreator(authors.map((author) => author.data.name)),
 				};
-				if (authors.length > 0) {
-					item.author = authors.map((author) => author.data.name).join(", ");
-				}
 				return item;
 			}),
 		)
@@ -161,6 +161,11 @@ export async function GET(context: APIContext) {
 		return bTime - aTime;
 	});
 
+	await setContentCache(context, {
+		entries: authorEntries,
+		collections: ["articles", "videos", "news", "technologies"],
+	});
+
 	return withRssMimeType(
 		await rss({
 			title: "Rawkode Academy - All Content",
@@ -168,10 +173,11 @@ export async function GET(context: APIContext) {
 				"Latest articles, news, and videos from Rawkode Academy covering Cloud Native, DevOps, and Modern Software Development",
 			site: context.site?.toString() || "https://rawkode.academy",
 			items,
-			customData: "<language>en-us</language>",
+			customData: `<language>en-us</language>${rssSelfLink(`${site}/api/feeds/all.xml`)}`,
 			stylesheet: false,
 			xmlns: {
 				itunes: "http://www.itunes.com/dtds/podcast-1.0.dtd",
+				...rssNamespaces,
 			},
 		}),
 	);

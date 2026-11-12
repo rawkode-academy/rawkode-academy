@@ -4,8 +4,10 @@
 	"exclude": [
 		"dist",
 		"node_modules",
+		"storybook-static",
+		"visual/test-results",
 		"**/examples/**",
-		"content/courses/*/examples/**",
+		"src/webcontainer-demos/**",
 		"scripts/publish-subgraph.ts"
 	],
 

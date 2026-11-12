@@ -18,6 +18,13 @@ export const SUBGRAPH_BINDING_MAP: Record<string, keyof Env> = {
 	"people-links": "PEOPLE_LINKS",
 	"people-biographies": "PEOPLE_BIOGRAPHIES",
 	"transcription-terms": "TRANSCRIPTION_TERMS",
+	// Editorial content
+	news: "NEWS",
+	changelog: "CHANGELOG",
+	adrs: "ADRS",
+	testimonials: "TESTIMONIALS",
+	courses: "COURSES",
+	supporters: "SUPPORTERS",
 	// User interaction services (dynamic data)
 	"emoji-reactions": "EMOJI_REACTIONS",
 	"email-preferences": "EMAIL_PREFERENCES",

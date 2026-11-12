@@ -1,10 +1,8 @@
-import { getCollection } from "astro:content";
 import type { APIContext } from "astro";
 import { articleMarkdownUrl } from "@/lib/article-markdown";
 import { getPublishedVideos } from "@/lib/content";
+import { getCollection, setContentCache } from "@/lib/live-content";
 import { SITE_DESCRIPTION } from "@/lib/site";
-
-export const prerender = true;
 
 const DEFAULT_SITE_URL = "https://rawkode.academy";
 const SUMMARY_MAX_LENGTH = 160;
@@ -21,13 +19,14 @@ function summarize(text: string): string {
 	return `${truncated.slice(0, lastSpace > 80 ? lastSpace : SUMMARY_MAX_LENGTH)}…`;
 }
 
-export async function GET({ site }: APIContext) {
+export async function GET(context: APIContext) {
+	const { site } = context;
 	const base = site ?? new URL(DEFAULT_SITE_URL);
 	const absolute = (path: string) => new URL(path, base).href;
 
-	const articles = (
-		await getCollection("articles")
-	).sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+	const articles = (await getCollection("articles")).sort(
+		(a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf(),
+	);
 	const videos = await getPublishedVideos();
 	const courses = await getCollection("courses");
 	const learningPaths = await getCollection("learningPaths");
@@ -77,6 +76,10 @@ export async function GET({ site }: APIContext) {
 		`- [Sitemap index](${absolute("/sitemap-index.xml")})`,
 		"",
 	];
+
+	await setContentCache(context, {
+		collections: ["articles", "courses", "learningPaths", "videos"],
+	});
 
 	return new Response(lines.join("\n"), {
 		headers: {

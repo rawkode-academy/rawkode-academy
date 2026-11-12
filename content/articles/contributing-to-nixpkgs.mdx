@@ -1,6 +1,6 @@
 ---
-title: "Contributing to nixpkgs"
-description: "I've been using NixOS, on and off, for around 2 years now. It's got its challenges, which usually mea..."
+title: Contributing to nixpkgs
+description: I've been using NixOS, on and off, for around 2 years now. It's got its challenges, which usually mea...
 type: tutorial
 publishedAt: 2020-07-15
 authors:
@@ -11,30 +11,23 @@ technologies:
   - nixpkgs
 ---
 
-I've been using [NixOS](https://nixos.org/), on and off, for around 2 years now. It's got its challenges, which
-usually means I switch back to Arch after a few weeks; but not this time ... I'm not switching back.
+I've been using [NixOS](https://nixos.org/), on and off, for around 2 years now. It's got its challenges, which usually means I switch back to Arch after a few weeks; but not this time ... I'm not switching back.
 
-As I stumble my way through the trials and tribulations of Nix, NixOS, and nixpkgs; I'll document
-my path so that others can learn from my misery. Starting right now ...
+As I stumble my way through the trials and tribulations of Nix, NixOS, and nixpkgs; I'll document my path so that others can learn from my misery. Starting right now ...
 
 ## What is Nix / NixOS?
 
 This is from the NixOS website:
 
-> Nix is a powerful package manager for Linux and other Unix systems that makes package management reliable and reproducible. Share
-> your development and build environments across different machines.
+> Nix is a powerful package manager for Linux and other Unix systems that makes package management reliable and reproducible. Share your development and build environments across different machines.
 >
-> NixOS is a Linux distribution with a unique approach to package and configuration management. Built on top of the Nix package
-> manager, it is completely declarative, makes upgrading systems reliable, and has many other advantages.
+> NixOS is a Linux distribution with a unique approach to package and configuration management. Built on top of the Nix package manager, it is completely declarative, makes upgrading systems reliable, and has many other advantages.
 
 ## Contributing a GNOME Extension to nixpkgs
 
-In this article, I am going to walk you through the steps I've taken to contribute a GNOME Extension
-to the nixpkgs repository. The extension is one that I just CAN'T live without, the
-[emoji selector](https://github.com/maoschanz/emoji-selector-for-gnome) 😹🌟🥰
+In this article, I am going to walk you through the steps I've taken to contribute a GNOME Extension to the nixpkgs repository. The extension is one that I just CAN'T live without, the [emoji selector](https://github.com/maoschanz/emoji-selector-for-gnome) 😹🌟🥰
 
-This wasn't my first contribution to [nixpkgs](https://github.com/NixOS/nixpkgs/pulls?q=is%3Apr+author%3Arawkode+is%3Aclosed), I've
-sent 16 pull requests to nixpkgs since August 2018 ... and I still have no idea what I'm doing 😂
+This wasn't my first contribution to [nixpkgs](https://github.com/NixOS/nixpkgs/pulls?q=is%3Apr+author%3Arawkode+is%3Aclosed), I've sent 16 pull requests to nixpkgs since August 2018 ... and I still have no idea what I'm doing 😂
 
 OK. That's a lie, I know enough to be dangerous, but not enough to be smart.
 
@@ -50,8 +43,7 @@ git clone https://github.com/NixOS/nixpkgs
 
 ### Step 2. Find Something Similiar
 
-I'm not a huge fan of reinventing the wheel. I'm certainly not going to type a bunch of Nix code
-that shares about 95% of it's logic with many other packages already contributed to the nixpkgs repository.
+I'm not a huge fan of reinventing the wheel. I'm certainly not going to type a bunch of Nix code that shares about 95% of it's logic with many other packages already contributed to the nixpkgs repository.
 
 Fortunately for us, this repository is segmented really well.
 
@@ -98,20 +90,13 @@ drwxr-xr-x - rawkode 11 Jul 13:34 -- surf-display
 drwxr-xr-x - rawkode 11 Jul 13:34 -- xfce
 ```
 
-Pretty much every desktop environment there is ... and if you're shouting in your head
-"WHAT ABOUT MY SHITTY ESOTERIC TILING WINDOW MANAGER?" ... then I've got you; it's under
-`./applications/window-managers`. I love i3, but it's also quite nice being able to change
-the volume or pair bluetooth headphones without having to put my beer down and grep some shell
-history.
+Pretty much every desktop environment there is ... and if you're shouting in your head "WHAT ABOUT MY SHITTY ESOTERIC TILING WINDOW MANAGER?" ... then I've got you; it's under `./applications/window-managers`. I love i3, but it's also quite nice being able to change the volume or pair bluetooth headphones without having to put my beer down and grep some shell history.
 
-Notice how I delicately said "shell history" and not `zsh`, `bash`, `fish`, or `nu` ... I can't be
-bothered getting into another shell debate; 2020's been shit enough.
+Notice how I delicately said "shell history" and not `zsh`, `bash`, `fish`, or `nu` ... I can't be bothered getting into another shell debate; 2020's been shit enough.
 
 Sorry, I've digressed.
 
-Lets move forward. I've found some similiar packages. I've redacted some of the extensions below
-... mostly at random; but you can see that we're in the `./pkgs/desktops/gnome-3/extensions` directory
-and we have a fair number of example packages to use as a base for our new one.
+Lets move forward. I've found some similiar packages. I've redacted some of the extensions below ... mostly at random; but you can see that we're in the `./pkgs/desktops/gnome-3/extensions` directory and we have a fair number of example packages to use as a base for our new one.
 
 Perfect.
 
@@ -136,9 +121,7 @@ drwxr-xr-x - rawkode 11 Jul 13:34 -- topicons-plus
 
 ### Step 3. Creating Our Package
 
-I need to create a new directory with a `default.nix` and copy over my
-example Nix from the sample extension. I started with `dash-to-panel`,
-as I like that extension. The code for that looks like so:
+I need to create a new directory with a `default.nix` and copy over my example Nix from the sample extension. I started with `dash-to-panel`, as I like that extension. The code for that looks like so:
 
 ```nix
 { stdenv, fetchFromGitHub, glib, gettext }:
@@ -171,9 +154,7 @@ stdenv.mkDerivation rec {
 }
 ```
 
-Unfortunately, there was a problem. This extension uses a `Makefile` to document its
-build steps (which I recommend for ALL repositories), but unfortunately; emoji-selector
-doesn't ship with a `Makefile` 😢
+Unfortunately, there was a problem. This extension uses a `Makefile` to document its build steps (which I recommend for ALL repositories), but unfortunately; emoji-selector doesn't ship with a `Makefile` 😢
 
 So I'm going to copy the "core" sections and make up the rest from another example shortly.
 
@@ -211,12 +192,9 @@ Lets break this down.
 { stdenv, fetchFromGitHub, glib, gettext }:
 ```
 
-This first line of Nix is in almost every Nix file you'll work with. It's the
-imports / dependencies that our Nix script needs from the environment / runtime.
+This first line of Nix is in almost every Nix file you'll work with. It's the imports / dependencies that our Nix script needs from the environment / runtime.
 
-I like to think of it as similiar to JavaScript's destructing syntax; selecting
-only the values we need from the global list. If that's a terrible way to think
-about it, I'm sure someone from HackerNews will be along shortly.
+I like to think of it as similiar to JavaScript's destructing syntax; selecting only the values we need from the global list. If that's a terrible way to think about it, I'm sure someone from HackerNews will be along shortly.
 
 ```nix
 stdenv.mkDerivation rec {
@@ -224,8 +202,7 @@ stdenv.mkDerivation rec {
 }
 ```
 
-Next up, we need to create a derivation. That's fancy functional talk for a set of values
-that allow for some output to be derived.
+Next up, we need to create a derivation. That's fancy functional talk for a set of values that allow for some output to be derived.
 
 The set that we need to build our GNOME Extension contain some obvious facts:
 
@@ -239,8 +216,7 @@ The set that we need to build our GNOME Extension contain some obvious facts:
   version = "19";
 ```
 
-We define the package name and the version. The version is a tag / branch name that you can
-get from the Git repository or the GitHub UI.
+We define the package name and the version. The version is a tag / branch name that you can get from the Git repository or the GitHub UI.
 
 ```nix
   src = fetchFromGitHub {
@@ -251,30 +227,21 @@ get from the Git repository or the GitHub UI.
   };
 ```
 
-`fetchFromGitHub` is a function that grabs some source code from GitHub. The
-owner, repo, and rev are hopefully self-explanitory. However, we also have `sha256`.
+`fetchFromGitHub` is a function that grabs some source code from GitHub. The owner, repo, and rev are hopefully self-explanitory. However, we also have `sha256`.
 
-Nix requires builds to be idempotent. That means it uses the sha to verify that
-the downloaded and extracted code is what we expected. If it's different, it'll let
-us know and we can decide what we want to do.
+Nix requires builds to be idempotent. That means it uses the sha to verify that the downloaded and extracted code is what we expected. If it's different, it'll let us know and we can decide what we want to do.
 
 #### Warning
 
-Word of warning ... if the sha that you use already exists in the Nix store (meaning you copied
-it from another example that you had installed), then Nix bypasses the download step and reuses
-the local files. This means that I ... you, will install some random extension instead of getting
-the actual download you expected.
+Word of warning ... if the sha that you use already exists in the Nix store (meaning you copied it from another example that you had installed), then Nix bypasses the download step and reuses the local files. This means that I ... you, will install some random extension instead of getting the actual download you expected.
 
 #### How Do We Get the Sha?
 
-The simplest way is to use lots of 0's. When you try to build
-this derivation, Nix will complain that your sha256 doesn't match the repositories download. You can
-then copy the sha and update in your derivation.
+The simplest way is to use lots of 0's. When you try to build this derivation, Nix will complain that your sha256 doesn't match the repositories download. You can then copy the sha and update in your derivation.
 
 Another approach is to calculate the actual sha yourself, using `nix-prefetch-url`.
 
-Go to GitHub and grab the URL for the `tar.gz` artefact on the releases page for the revision
-or version that you want to add to the repository. Now you can run:
+Go to GitHub and grab the URL for the `tar.gz` artefact on the releases page for the revision or version that you want to add to the repository. Now you can run:
 
 ```console
 nix-prefetch-url --unpack https://github.com/maoschanz/emoji-selector-for-gnome/archive/19.tar.gz
@@ -287,9 +254,7 @@ path is '/nix/store/694kcbsz38rni0lykffv89ndivgcccks-19.tar.gz'
 
 #### Meta
 
-This is mostly self-explanitory. Just remember to check the license of the package you're adding and
-update `license =`. I use the [source code](https://github.com/NixOS/nixpkgs/blob/master/lib/licenses.nix) to
-check the correct way to reference the licenses.
+This is mostly self-explanitory. Just remember to check the license of the package you're adding and update `license =`. I use the [source code](https://github.com/NixOS/nixpkgs/blob/master/lib/licenses.nix) to check the correct way to reference the licenses.
 
 ```nix
   meta = with stdenv.lib; {
@@ -324,13 +289,11 @@ If you don't know what your dependency you need is called, search on the [Nix Pa
 
 Example, if I need to build some code that needs Rust, Make, and bash - I'd run: `nix-shell -p bash cargo gnumake rustc`
 
-To use our repository as an example, if I ran `nix-shell` with no dependencies and then ran `./install.sh` - then
-our install would have failed with `glib-compile-schemas` command not found; which is provided by `glib`.
+To use our repository as an example, if I ran `nix-shell` with no dependencies and then ran `./install.sh` - then our install would have failed with `glib-compile-schemas` command not found; which is provided by `glib`.
 
 #### Skipped Makefile
 
-So I said that we had a problem, the problem was that our example extension used `make` and our
-current extension doesn't. We know this because our example Nix contained:
+So I said that we had a problem, the problem was that our example extension used `make` and our current extension doesn't. We know this because our example Nix contained:
 
 ```nix
 makeFlags = [ "INSTALLBASE=$(out)/share/gnome-shell/extensions" ];
@@ -340,8 +303,7 @@ and our extension repository doesn't have a `Makefile`, it only has `./install.s
 
 Drats.
 
-Fortunately, I looked at another example (caffeine) and came across the following code.
-It turns out that we can manually configure the build steps ourself. Sweet! 🥞
+Fortunately, I looked at another example (caffeine) and came across the following code. It turns out that we can manually configure the build steps ourself. Sweet! 🥞
 
 ```nix
   uuid = "caffeine@patapon.info";
@@ -363,32 +325,21 @@ It turns out that we can manually configure the build steps ourself. Sweet! 🥞
 
 ##### Customizing the Build
 
-In the code above, we've removed the `makeFlags` configuration that we found in the `dash-to-panel` Nix package,
-because `emoji-selector` doesn't have a `Makefile`. We've instead provided `buildPhase` and `installPhase` configuration. These
-two different "examples" also used slightly different inputs: `buildInputs` and `nativeBuildInputs`
+In the code above, we've removed the `makeFlags` configuration that we found in the `dash-to-panel` Nix package, because `emoji-selector` doesn't have a `Makefile`. We've instead provided `buildPhase` and `installPhase` configuration. These two different "examples" also used slightly different inputs: `buildInputs` and `nativeBuildInputs`
 
 Argh. What?
 
-First, `buildInputs` vs `nativeBuildInputs`. This was tricky to track down, it's not that well documented. However,
-I did [find the following](https://nixos.org/nixpkgs/manual/#ssec-stdenv-dependencies):
+First, `buildInputs` vs `nativeBuildInputs`. This was tricky to track down, it's not that well documented. However, I did [find the following](https://nixos.org/nixpkgs/manual/#ssec-stdenv-dependencies):
 
-> nativeBuildInputs
-> A list of dependencies whose host platform is the new derivation's build platform, and target platform is the new derivation's
-> host platform. This means a -1 host offset and 0 target offset from the new derivation's platforms. These are programs and libraries
-> used at build-time that, if they are a compiler or similar tool, produce code to run at run-time—i.e. tools used to build the new
-> derivation. If the dependency doesn't care about the target platform (i.e. isn't a compiler or similar tool), put it here, rather
-> than in depsBuildBuild or depsBuildTarget. This could be called depsBuildHost but nativeBuildInputs is used for historical continuity.
+> nativeBuildInputs A list of dependencies whose host platform is the new derivation's build platform, and target platform is the new derivation's host platform. This means a -1 host offset and 0 target offset from the new derivation's platforms. These are programs and libraries used at build-time that, if they are a compiler or similar tool, produce code to run at run-time—i.e. tools used to build the new derivation. If the dependency doesn't care about the target platform (i.e. isn't a compiler or similar tool), put it here, rather than in depsBuildBuild or depsBuildTarget. This could be called depsBuildHost but nativeBuildInputs is used for historical continuity.
 
-That's a mouthful. As I understand it, we use `nativeBuildInputs` when we expect the inputs to be build for the platform on our local machine;
-and can use `buildInputs` for when we don't have such a constraint. I definitely need to understand this more and I'll write more on this
-parameter soon; once I've done some more digging 😃
+That's a mouthful. As I understand it, we use `nativeBuildInputs` when we expect the inputs to be build for the platform on our local machine; and can use `buildInputs` for when we don't have such a constraint. I definitely need to understand this more and I'll write more on this parameter soon; once I've done some more digging 😃
 
 Next, those phases!
 
 From the [documentation](https://nixos.org/nixpkgs/manual/#ssec-stdenv-attributes); we can see that there's many phases in a build:
 
-> $prePhases unpackPhase patchPhase $preConfigurePhases configurePhase $preBuildPhases buildPhase checkPhase $preInstallPhases
-> installPhase fixupPhase installCheckPhase $preDistPhases distPhase $postPhases.
+> $prePhases unpackPhase patchPhase $preConfigurePhases configurePhase $preBuildPhases buildPhase checkPhase $preInstallPhases installPhase fixupPhase installCheckPhase $preDistPhases distPhase $postPhases.
 
 Each of these are called in this order, unless specifically overridden by the Nix package by providing `phases = []`.
 
@@ -398,17 +349,15 @@ We need to override the `buildPhase` because [by default](https://nixos.org/nixp
 
 This is also true for `installPhase`, only it tries to run the [install target](https://nixos.org/nixpkgs/manual/#ssec-install-phase).
 
-> The default installPhase creates the directory \$out and calls make install.
+> The default installPhase creates the directory $out and calls make install.
 
 It's a little less magic when you break it down; right? 🧙
 
 ### Testing Our Package
 
-Using the commands inside of `./install.sh`, I was able to piece together the config
-we needed for our extension to be successfully build and installed by `nix`.
+Using the commands inside of `./install.sh`, I was able to piece together the config we needed for our extension to be successfully build and installed by `nix`.
 
-The only "gotcha" here is that Nix provides `$out` variable that provides the directory
-our package should install things into.
+The only "gotcha" here is that Nix provides `$out` variable that provides the directory our package should install things into.
 
 ```nix
 { stdenv, fetchFromGitHub, glib, gettext }:
@@ -455,8 +404,7 @@ So how do we test this to make sure it works?
 
 We can install it 😁
 
-To do that, we need to `cd` into the `nixpkgs` directory; then
-install our package using `nix-env` and the package name we declared above.
+To do that, we need to `cd` into the `nixpkgs` directory; then install our package using `nix-env` and the package name we declared above.
 
 ```console
 cd ~/Code/src/github.com/NixOS/nixpkgs

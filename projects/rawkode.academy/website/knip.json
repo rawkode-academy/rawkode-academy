@@ -1,4 +1,8 @@
 {
 	"$schema": "https://unpkg.com/knip@5/schema.json",
-	"tags": ["-lintignore"]
+	"tags": ["-lintignore"],
+	"playwright": {
+		"config": ["visual/playwright.config.ts"],
+		"entry": ["visual/**/*.visual.ts", "visual/serve.ts"]
+	}
 }

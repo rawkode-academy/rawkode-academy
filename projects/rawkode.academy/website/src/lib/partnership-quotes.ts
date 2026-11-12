@@ -1,6 +1,6 @@
 /**
  * Quotes on the partnerships page are verbatim excerpts of testimonials in
- * `content/testimonials`. `src/tests/partnership-quotes.test.ts` checks
+ * the platform-testimonials service. `src/tests/partnership-quotes.test.ts` checks
  * every excerpt against its testimonial, so an edited testimonial fails CI
  * instead of misquoting anyone on the live page.
  */

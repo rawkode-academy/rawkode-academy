@@ -5,6 +5,7 @@ import federationPlugin from "@pothos/plugin-federation";
 import { asc, eq, isNotNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import type { GraphQLSchema } from "graphql";
+import { DateTimeResolver } from "graphql-scalars";
 import * as s from "../data-model/schema";
 
 type Person = s.Person;
@@ -15,6 +16,9 @@ export interface PeopleReadContext {
 
 export interface PothosTypes {
 	Context: PeopleReadContext;
+	Scalars: {
+		DateTime: { Input: Date; Output: Date };
+	};
 }
 
 // Same rule the website used to match a GitHub username to a person id.
@@ -34,6 +38,8 @@ export const getSchema = (env: { DB: D1Database }): GraphQLSchema => {
 	const builder = new schemaBuilder<PothosTypes>({
 		plugins: [directivesPlugin, federationPlugin],
 	});
+
+	builder.addScalarType("DateTime", DateTimeResolver);
 
 	const byId = (id: string) =>
 		db.select().from(s.peopleTable).where(eq(s.peopleTable.id, id)).get();
@@ -89,6 +95,14 @@ export const getSchema = (env: { DB: D1Database }): GraphQLSchema => {
 			mastodonUrl: t.string({ nullable: true, resolve: (p) => p.mastodon }),
 			websiteUrl: t.string({ nullable: true, resolve: (p) => p.website }),
 			youtubeUrl: t.string({ nullable: true, resolve: (p) => p.youtube }),
+			// When the people row last changed; null for rows never edited since
+			// seeding. Biography and links live in their own services and are not
+			// covered by this timestamp.
+			updatedAt: t.field({
+				type: "DateTime",
+				nullable: true,
+				resolve: (p) => p.updatedAt,
+			}),
 		}),
 	});
 

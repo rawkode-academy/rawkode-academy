@@ -1,7 +1,9 @@
-import { getCollection } from "astro:content";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { getLatestContent } from "@/lib/content";
+import { getLatestContent, LATEST_CONTENT_COLLECTIONS } from "@/lib/content";
+import { getCollection } from "@/lib/live-content";
+
+vi.mock("@/lib/live-content", () => ({ getCollection: vi.fn() }));
 
 const mockedGetCollection = vi.mocked(getCollection);
 
@@ -65,15 +67,13 @@ describe("Academy latest content", () => {
 			const collectionPredicate = predicate as
 				| ((value: ReturnType<typeof entry>) => boolean)
 				| undefined;
-			return (collectionPredicate
-				? values.filter(collectionPredicate)
-				: values) as never;
+			return (
+				collectionPredicate ? values.filter(collectionPredicate) : values
+			) as never;
 		});
 
-		const latest = await getLatestContent(
-			10,
-			new Date("2026-01-06T00:00:00.000Z"),
-		);
+		const now = new Date("2026-01-06T00:00:00.000Z");
+		const latest = await getLatestContent(10, now);
 
 		expect(latest.map((item) => item.kind)).toEqual([
 			"News",
@@ -89,5 +89,61 @@ describe("Academy latest content", () => {
 			"/courses/course-1",
 			"/learning-paths/path-1",
 		]);
+
+		// Every listed collection is read, and the content layer compares
+		// scheduled entries against the same instant as the date filters.
+		const read = mockedGetCollection.mock.calls.map(([name]) => name);
+		expect([...new Set(read)].sort()).toEqual(
+			[...LATEST_CONTENT_COLLECTIONS].sort(),
+		);
+		for (const [name, , options] of mockedGetCollection.mock.calls) {
+			if (name !== "videos") expect(options).toEqual({ now });
+		}
+	});
+
+	it("leaves future-dated entries out of the feed", async () => {
+		const now = new Date("2026-01-06T00:00:00.000Z");
+		const future = new Date("2026-01-07T00:00:00.000Z");
+		const collections: Record<string, ReturnType<typeof entry>[]> = {
+			videos: [
+				entry("upcoming", {
+					id: "upcoming",
+					slug: "upcoming",
+					title: "Upcoming stream",
+					description: "Soon.",
+					publishedAt: future,
+					type: "live",
+				}),
+			],
+			articles: [
+				entry("scheduled", {
+					title: "Scheduled",
+					description: "Later.",
+					publishedAt: future,
+				}),
+			],
+			news: [
+				entry("published", {
+					title: "Published",
+					description: "Now.",
+					publishedAt: now,
+				}),
+			],
+		};
+		mockedGetCollection.mockImplementation(async (name, predicate) => {
+			const values = collections[name] ?? [];
+			const filter = predicate as
+				| ((value: ReturnType<typeof entry>) => boolean)
+				| undefined;
+			return (filter ? values.filter(filter) : values) as never;
+		});
+		vi.useFakeTimers();
+		vi.setSystemTime(now);
+		try {
+			const latest = await getLatestContent(10, now);
+			expect(latest.map((item) => item.href)).toEqual(["/news/published"]);
+		} finally {
+			vi.useRealTimers();
+		}
 	});
 });

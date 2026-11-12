@@ -46,6 +46,14 @@ describe("people read model", () => {
 		});
 	});
 
+	it("serves updatedAt as an ISO DateTime, null until the row changes", async () => {
+		expect((await query(`{ personById(id: "salaboy") { updatedAt } }`)).personById.updatedAt).toBeNull();
+		await db.DB.prepare("UPDATE people SET updated_at = 1792777295000 WHERE id = 'salaboy'").run();
+		// graphql-scalars hands back a Date; the HTTP response carries it as JSON.
+		const { personById } = await query(`{ personById(id: "salaboy") { updatedAt } }`);
+		expect(JSON.parse(JSON.stringify(personById))).toEqual({ updatedAt: "2026-10-23T17:41:35.000Z" });
+	});
+
 	it("matches GitHub usernames by id first, then by handle", async () => {
 		const { personByGithub } = await query(`{ personByGithub(username: "SalaBoy") { id } }`);
 		expect(personByGithub).toEqual({ id: "salaboy" });

@@ -1,19 +1,20 @@
 ---
 title: "Zed: Show & Tell"
-description: "Explore Zed, a fast and modern code editor written in Rust with collaborative features"
+description: Explore Zed, a fast and modern code editor written in Rust with collaborative features
 type: article
-slug: zed-show-and-tell
-openGraph:
-  title: "A New Editor in Town"
-  subtitle: "A modern code editor, written in Rust"
-cover:
-  image: "./images/zed-show-and-tell-cover.png"
-  alt: "zed website"
 publishedAt: 2024-07-05
 authors:
   - icepuma
 technologies:
   - rust
+cover:
+  image: https://content.rawkode.academy/articles/zed-show-and-tell/zed-show-and-tell-cover.png
+  alt: zed website
+  width: 1574
+  height: 769
+openGraph:
+  title: A New Editor in Town
+  subtitle: A modern code editor, written in Rust
 ---
 
 import ZoomableImage from "@/components/image/ZoomableImage.astro";
@@ -36,42 +37,25 @@ I personally used `brew` to install Zed: `brew install zed`
 
 The first thing you see is an empty window. I typically use `⌘ + P` to open the file finder and navigate to my file of choice.
 
-<ZoomableImage
-	image={import("./images/zed-show-and-tell-01.png")}
-	alt="Zed - empty window"
-/>
+<ZoomableImage image="https://content.rawkode.academy/articles/zed-show-and-tell/zed-show-and-tell-01.png" alt="Zed - empty window" width={2672} height={1420} />
 
 Here you see the file finder in action.
 
-<ZoomableImage
-	image={import("./images/zed-show-and-tell-02.png")}
-	alt="Zed - file finder"
-/>
+<ZoomableImage image="https://content.rawkode.academy/articles/zed-show-and-tell/zed-show-and-tell-02.png" alt="Zed - file finder" width={2672} height={1420} />
 
 ## Working with Rust
 
-Zed is "language aware" and detected that I opened a Rust file and applies the correct syntax highlighting. The [Rust extension](https://zed.dev/docs/languages/rust) is shipped with Zed by default.
-The extension uses [rust-analyzer](https://github.com/rust-lang/rust-analyzer) for things like code completion, running tests and [tree-sitter-rust](https://github.com/tree-sitter/tree-sitter-rust) for syntax highlighting.
-It also added indicators for Rust tests, so that I can run them directly from the editor. Let's try it out :)
+Zed is "language aware" and detected that I opened a Rust file and applies the correct syntax highlighting. The [Rust extension](https://zed.dev/docs/languages/rust) is shipped with Zed by default. The extension uses [rust-analyzer](https://github.com/rust-lang/rust-analyzer) for things like code completion, running tests and [tree-sitter-rust](https://github.com/tree-sitter/tree-sitter-rust) for syntax highlighting. It also added indicators for Rust tests, so that I can run them directly from the editor. Let's try it out :)
 
-<ZoomableImage
-	image={import("./images/zed-show-and-tell-03.png")}
-	alt="Zed - rust file"
-/>
+<ZoomableImage image="https://content.rawkode.academy/articles/zed-show-and-tell/zed-show-and-tell-03.png" alt="Zed - rust file" width={2672} height={1420} />
 
 After clicking the "Run" button (the little "play" icon next to the test function), the test output is displayed in the built-in terminal at the bottom of the window.
 
-<ZoomableImage
-	image={import("./images/zed-show-and-tell-04.png")}
-	alt="Zed - rust test"
-/>
+<ZoomableImage image="https://content.rawkode.academy/articles/zed-show-and-tell/zed-show-and-tell-04.png" alt="Zed - rust test" width={2672} height={1420} />
 
 Let's do some refactoring. I open the `editor: rename` option (via Command Palette) by pressing `⌘ + Shift + P`, change the name of the variable and see all changes in some kind of preview window.
 
-<ZoomableImage
-	image={import("./images/zed-show-and-tell-05.png")}
-	alt="Zed - refactoring"
-/>
+<ZoomableImage image="https://content.rawkode.academy/articles/zed-show-and-tell/zed-show-and-tell-05.png" alt="Zed - refactoring" width={2672} height={1420} />
 
 ## Conclusion
 

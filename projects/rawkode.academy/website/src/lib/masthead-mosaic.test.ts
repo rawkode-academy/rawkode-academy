@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { layoutMosaic, type MosaicShape } from "./masthead-mosaic";
+import {
+	layoutMosaic,
+	type MosaicShape,
+	titleClearColumns,
+} from "./masthead-mosaic";
 
 const sources = (count: number) =>
 	Array.from({ length: count }, (_, index) => `/art/${index}.webp`);
@@ -54,4 +58,31 @@ describe("layoutMosaic", () => {
 			expect(tiles.filter((tile) => tile.lit)).toEqual([tiles[0]]);
 		});
 	}
+
+	it("leaves the short collection names' mastheads as they were", () => {
+		for (const [title, figure] of [
+			["Videos", 330],
+			["Articles", 34],
+			["People", 212],
+			["News", 96],
+			["Shows", 10],
+			["Courses", 4],
+			["Series", 12],
+		] as const) {
+			expect(titleClearColumns(title, figure)).toBe(0);
+			expect(layoutMosaic(sources(12), "video", title, 0)).toEqual(
+				layoutMosaic(sources(12), "video", title),
+			);
+		}
+	});
+
+	it("keeps every tile a full cell beyond a long title", () => {
+		const clear = titleClearColumns("Technologies", 187);
+		expect(clear).toBe(4);
+		const tiles = layoutMosaic(sources(40), "logo", "Technologies", clear);
+		expect(tiles.length).toBeGreaterThan(0);
+		for (const tile of tiles) expect(tile.x).toBeGreaterThanOrEqual(clear);
+		expect(tiles.filter((tile) => tile.lit)).toEqual([tiles[0]]);
+		expect(tiles[0]?.src).toBe("/art/0.webp");
+	});
 });

@@ -8,9 +8,11 @@ on:
     - .github/workflows/rawkode-academy-website-pullrequest.yml
     - bun.lock
     - bun.lock/**
-    - content/**
+    - content/articles/**
     - cue.mod/**
     - packages/design-system/**
+    - packages/live-viewer/**
+    - packages/rich-text/**
     - projects/rawkode.academy/games/secrets-of-kubernetes/achievements/**
     - projects/rawkode.academy/games/secrets-of-kubernetes/leaderboard/**
     - projects/rawkode.academy/games/secrets-of-kubernetes/player-learned-phrases/**
@@ -20,29 +22,24 @@ on:
     - projects/rawkode.academy/platform/notifications/**
     - projects/rawkode.academy/website/astro.config.mts
     - projects/rawkode.academy/website/astro.config.mts/**
-    - projects/rawkode.academy/website/astro.review.config.mts
-    - projects/rawkode.academy/website/astro.review.config.mts/**
-    - projects/rawkode.academy/website/content/**
+    - projects/rawkode.academy/website/bun.lock
+    - projects/rawkode.academy/website/bun.lock/**
+    - projects/rawkode.academy/website/content/articles/**
     - projects/rawkode.academy/website/env.cue
     - projects/rawkode.academy/website/env.cue/**
     - projects/rawkode.academy/website/package.json
     - projects/rawkode.academy/website/package.json/**
+    - projects/rawkode.academy/website/packages/design-system/**
+    - projects/rawkode.academy/website/packages/live-viewer/**
+    - projects/rawkode.academy/website/packages/rich-text/**
     - projects/rawkode.academy/website/public/**
-    - projects/rawkode.academy/website/review/**
     - projects/rawkode.academy/website/schema/**
     - projects/rawkode.academy/website/scripts/**
     - projects/rawkode.academy/website/src/**
-    - projects/rawkode.academy/website/src/styles/**
-    - projects/rawkode.academy/website/tsconfig.review.json
-    - projects/rawkode.academy/website/tsconfig.review.json/**
     - projects/rawkode.academy/website/vitest.config.ts
     - projects/rawkode.academy/website/vitest.config.ts/**
-    - projects/rawkode.academy/website/vitest.review.config.ts
-    - projects/rawkode.academy/website/vitest.review.config.ts/**
     - projects/rawkode.academy/website/wrangler.jsonc
     - projects/rawkode.academy/website/wrangler.jsonc/**
-    - projects/rawkode.academy/website/wrangler.review.jsonc
-    - projects/rawkode.academy/website/wrangler.review.jsonc/**
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
@@ -52,13 +49,12 @@ jobs:
       contents: read
       checks: write
       pull-requests: write
-      packages: write
     name: rawkode-academy-website-pullRequest
     runs-on: namespace-profile-linux-x86
     environment: production
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
       with:
         fetch-depth: 2
     - name: Cache /nix on Namespace volume
@@ -91,13 +87,14 @@ jobs:
       run: 'true'
     - name: Setup cuenv (release)
       run: |-
-        arch="$(uname -m)"
-        case "$arch" in
-          x86_64|amd64) cuenv_asset="cuenv-linux-x64" ;;
-          aarch64|arm64) cuenv_asset="cuenv-linux-arm64" ;;
-          *) echo "Unsupported Linux architecture: $arch" >&2; exit 1 ;;
+        platform="$(uname -s)-$(uname -m)"
+        case "$platform" in
+          Linux-x86_64|Linux-amd64) cuenv_asset="cuenv-linux-x64" ;;
+          Linux-aarch64|Linux-arm64) cuenv_asset="cuenv-linux-arm64" ;;
+          Darwin-arm64) cuenv_asset="cuenv-darwin-arm64" ;;
+          *) echo "Unsupported platform: $platform" >&2; exit 1 ;;
         esac
-        cuenv_version="0.60.1"
+        cuenv_version="0.73.1"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi

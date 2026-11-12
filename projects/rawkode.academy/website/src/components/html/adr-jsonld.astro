@@ -1,10 +1,10 @@
 ---
-import type { CollectionEntry } from "astro:content";
+import type { ContentEntry } from "@/lib/live-content";
 import { buildAdrJsonLd } from "@/lib/adr-jsonld";
 
 interface Props {
-	adr: CollectionEntry<"adrs">;
-	authors: ReadonlyArray<CollectionEntry<"people">>;
+	adr: ContentEntry<"adrs">;
+	authors: ReadonlyArray<ContentEntry<"people">>;
 	slot?: string;
 }
 

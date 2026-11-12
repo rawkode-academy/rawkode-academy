@@ -80,6 +80,7 @@ export async function GET({ params, site }: APIContext) {
 	return new Response(lines.join("\n"), {
 		headers: {
 			"Content-Type": "text/markdown; charset=utf-8",
+			Link: `<${canonicalUrl}>; rel="canonical"`,
 			"Cache-Control":
 				"public, max-age=600, s-maxage=7200, stale-while-revalidate=172800",
 			"CDN-Cache-Control": "public, max-age=7200",

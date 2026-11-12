@@ -5,10 +5,17 @@ import federationPlugin from "@pothos/plugin-federation";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import type { GraphQLSchema } from "graphql";
+import { JSONObjectResolver } from "graphql-scalars";
 import * as s from "../data-model/schema";
 
 export interface PothosTypes {
 	Context: Record<string, unknown>;
+	Scalars: {
+		RichTextDocument: {
+			Input: s.RichTextDocument;
+			Output: s.RichTextDocument;
+		};
+	};
 }
 
 const subgraph = {
@@ -21,7 +28,14 @@ export const getSchema = (env: { DB: D1Database }): GraphQLSchema => {
 	const builder = new schemaBuilder<PothosTypes>({
 		plugins: [directivesPlugin, federationPlugin],
 	});
+	// The rich-text document format shared by every content service.
+	builder.addScalarType("RichTextDocument", JSONObjectResolver, {
+		description:
+			'A TipTap/ProseMirror JSON document ({"type":"doc","content":[...]}), see @rawkodeacademy/rich-text.',
+	});
 	const t = s.peopleBiographies;
+	const row = (personId: string) =>
+		db.select().from(t).where(eq(t.personId, personId)).get();
 
 	builder.externalRef("Person", builder.selection<{ id: string }>("id")).implement({
 		externalFields: (f) => ({ id: f.string() }),
@@ -29,9 +43,14 @@ export const getSchema = (env: { DB: D1Database }): GraphQLSchema => {
 			// Markdown. Empty when the person has no biography.
 			biography: f.string({
 				nullable: true,
-				resolve: async (person) =>
-					(await db.select({ biography: t.biography }).from(t).where(eq(t.personId, person.id)).get())
-						?.biography ?? "",
+				deprecationReason: "Markdown; use biographyDoc.",
+				resolve: async (person) => (await row(person.id))?.biography ?? "",
+			}),
+			// Null when the person has no biography or it is not backfilled yet.
+			biographyDoc: f.field({
+				type: "RichTextDocument",
+				nullable: true,
+				resolve: async (person) => (await row(person.id))?.biographyDoc ?? null,
 			}),
 		}),
 	});

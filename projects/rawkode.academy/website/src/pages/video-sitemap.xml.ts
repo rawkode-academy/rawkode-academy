@@ -1,10 +1,15 @@
-import { getCollection } from "astro:content";
 import type { APIRoute } from "astro";
 import { getPublishedVideos } from "@/lib/content";
+import { getCollection, setContentCache } from "@/lib/live-content";
+import { plainTextDescription } from "@/lib/plain-text-description";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
+
+export const prerender = false;
 
 const DEFAULT_SITE_URL = "https://rawkode.academy";
 const MAX_VIDEO_DURATION_SECONDS = 28_800;
+const MAX_VIDEO_DESCRIPTION_LENGTH = 2048;
 
 export function toVideoDurationValue(duration: unknown): string | undefined {
 	if (typeof duration !== "number" || !Number.isFinite(duration)) {
@@ -41,10 +46,15 @@ function escapeXml(value: unknown): string {
 	});
 }
 
-export const GET: APIRoute = async ({ site }) => {
-	const videos = await getPublishedVideos();
-	const technologies = await getCollection("technologies");
-	const siteUrl = site ?? new URL(DEFAULT_SITE_URL);
+export const GET: APIRoute = async (context) => {
+	const [videos, technologies] = await Promise.all([
+		getPublishedVideos(),
+		getCollection("technologies"),
+	]);
+	await setContentCache(context, {
+		collections: ["videos", "technologies"],
+	});
+	const siteUrl = context.site ?? new URL(DEFAULT_SITE_URL);
 	const techName = new Map(
 		technologies.map((t) => [t.id, t.data.name] as const),
 	);
@@ -66,14 +76,16 @@ ${sortedVideos
 		const contentUrl = `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`;
 		const duration = toVideoDurationValue(video.data.duration);
 		const publishedDate = new Date(video.data.publishedAt).toISOString();
+		const recordUpdatedAt = video.data.recordUpdatedAt;
+		const lastModified =
+			recordUpdatedAt && recordUpdatedAt > video.data.publishedAt
+				? recordUpdatedAt.toISOString()
+				: publishedDate;
 
 		// Create tags from technologies
-		const tags = (video.data.technologies || [])
-			.map((id) => {
-				if (typeof id !== "string") return undefined;
-				return techName.get(id) ?? id.replace(/\/index$/, "");
-			})
-			.filter((tag): tag is string => typeof tag === "string" && tag.length > 0)
+		const tags = normalizeTechnologyReferences(video.data.technologies)
+			.map((id) => techName.get(id) ?? id)
+			.filter((tag) => tag.length > 0)
 			.slice(0, 32);
 
 		const tagsXml = tags.length
@@ -86,13 +98,16 @@ ${sortedVideos
 			: "";
 
 		return `  <url>
-    <loc>${videoUrl}</loc>
-    <lastmod>${publishedDate}</lastmod>
+    <loc>${escapeXml(videoUrl)}</loc>
+    <lastmod>${lastModified}</lastmod>
     <video:video>
       <video:thumbnail_loc>${escapeXml(thumbnailUrl)}</video:thumbnail_loc>
       <video:title>${escapeXml(video.data.title)}</video:title>
       <video:description>${escapeXml(
-				video.data.description,
+				plainTextDescription(
+					video.data.description,
+					MAX_VIDEO_DESCRIPTION_LENGTH,
+				),
 			)}</video:description>
       <video:content_loc>${escapeXml(contentUrl)}</video:content_loc>
       ${durationXml}
@@ -111,10 +126,6 @@ ${sortedVideos
 	return new Response(sitemap.trim(), {
 		headers: {
 			"Content-Type": "application/xml; charset=utf-8",
-			"Cache-Control": "public, max-age=3600", // Cache for 1 hour
 		},
 	});
 };
-
-// Prerender at build time
-export const prerender = true;

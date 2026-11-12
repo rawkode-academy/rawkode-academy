@@ -10,7 +10,7 @@ describe("fetchRandomVideos", () => {
 
   it("should fetch random videos from GraphQL API", async () => {
     globalThis.fetch = mock(async (url: string, options?: RequestInit) => {
-      if (url === "https://api.rawkode.academy/graphql") {
+      if (url === "https://api.rawkode.academy/") {
         const requestBody = JSON.parse(options?.body as string);
         if (requestBody.query.includes("getRandomVideos")) {
           return new Response(JSON.stringify({
@@ -18,6 +18,7 @@ describe("fetchRandomVideos", () => {
               getRandomVideos: [
                 {
                   title: "Test Video",
+                  slug: "test-video",
                   description: "This is a test video",
                   duration: 120,
                   publishedAt: "2023-01-01",
@@ -38,6 +39,7 @@ describe("fetchRandomVideos", () => {
     expect(videos).toBeArray();
     expect(videos[0]).toMatchObject({
       title: "Test Video",
+      slug: "test-video",
       description: "This is a test video",
       duration: 120,
       publishedAt: "2023-01-01",

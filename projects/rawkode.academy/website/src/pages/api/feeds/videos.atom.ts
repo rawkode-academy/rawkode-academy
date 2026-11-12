@@ -1,15 +1,26 @@
-import { getCollection } from "astro:content";
-import { getPublishedVideos } from "@/lib/content";
 import type { APIContext } from "astro";
+import { getPublishedVideos } from "@/lib/content";
+import { getCollection, setContentCache } from "@/lib/live-content";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
+import { escapeAttribute } from "../../../lib/feed-utils";
+
+export const prerender = false;
 
 export async function GET(context: APIContext) {
 	// Get published videos only (filters out future-dated for scheduled publishing)
-	const sortedVideos = await getPublishedVideos();
-	const technologies = await getCollection("technologies");
+	const [sortedVideos, technologies] = await Promise.all([
+		getPublishedVideos(),
+		getCollection("technologies"),
+	]);
 	const techName = new Map(
 		technologies.map((t) => [t.id, t.data.name] as const),
 	);
+	// Every video and technology appears in the feed; the next scheduled
+	// video caps the cache lifetime so it shows up on time.
+	await setContentCache(context, {
+		collections: ["videos", "technologies"],
+	});
 
 	const site = context.site?.toString() || "https://rawkode.academy";
 	const feedUrl = `${site}/api/feeds/videos.atom`;
@@ -46,12 +57,12 @@ ${sortedVideos
 						.padStart(2, "0")}</p>`
 				: "";
 
-		const categories = ((video.data.technologies as string[]) || [])
+		const categories = normalizeTechnologyReferences(video.data.technologies)
 			.map((id) => {
-				const name = techName.get(id) || id;
-				return `<category term=\"${name}\" label=\"${name}\"/>`;
+				const name = escapeAttribute(techName.get(id) || id);
+				return `<category term="${name}" label="${name}"/>`;
 			})
-			.join("\\n\\t\\t");
+			.join("\n\t\t");
 
 		const thumbnailUrl = getVideoThumbnailUrl(video.data.id);
 		return `\t<entry>
@@ -76,7 +87,6 @@ ${sortedVideos
 	return new Response(atomFeed, {
 		headers: {
 			"Content-Type": "application/atom+xml; charset=utf-8",
-			"Cache-Control": "max-age=3600",
 		},
 	});
 }

@@ -1,5 +1,5 @@
 ---
-import type { CollectionEntry } from "astro:content";
+import type { ContentEntry } from "@/lib/live-content";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import ShowNav from "@/components/show/ShowNav.astro";
 import type { ShowNavItem } from "@/lib/shows/types";
@@ -7,7 +7,7 @@ import Page from "@/wrappers/page.astro";
 import { showLayoutStyles } from "./showStyles";
 
 interface Props {
-	show: CollectionEntry<"shows">;
+	show: ContentEntry<"shows">;
 	nav: ShowNavItem[];
 	active?: string | null;
 	title: string;

@@ -1,60 +1,51 @@
 ---
-import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
+import { academyDocument, academyLayout, button } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
 const styles = academyLayout({ width: "reading" });
 import {
-	type CollectionEntry,
 	getCollection,
 	getEntries,
-	render,
-} from "astro:content";
-import type { GetStaticPaths, GetStaticPathsResult } from "astro";
+	getEntry,
+	optionalContent,
+	renderEntry,
+	setContentCache,
+} from "@/lib/live-content";
+import RichText from "@/components/content/RichText.astro";
 import Page from "@/wrappers/page.astro";
 import ArticleTOC from "@/components/read/ArticleTOC.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import LearningPathJsonLd from "@/components/html/learning-path-jsonld.astro";
 import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
-import { localTime } from "@/lib/local-time";
+import { localDate } from "@/lib/local-time";
+import { buildTechnologyTags } from "@/lib/technology-tags";
 
-export const prerender = true;
+export const prerender = false;
 
-type Props = {
-	learningPath: CollectionEntry<"learningPaths">;
-};
-
-export const getStaticPaths: GetStaticPaths =
-	async (): Promise<GetStaticPathsResult> => {
-		const learningPaths = await getCollection("learningPaths");
-
-		return learningPaths.map((learningPath) => ({
-			params: {
-				slug: learningPath.id,
-			},
-			props: {
-				learningPath,
-			},
-		}));
-	};
-
-const { learningPath } = Astro.props;
-const { Content, headings } = await render(learningPath);
-const authors = await getEntries(learningPath.data.authors);
-
-const allTechnologies = await getCollection("technologies");
-const technologyNameById = new Map<string, string>();
-for (const technology of allTechnologies) {
-	const rawId = technology.id.replace(/\/index$/, "");
-	technologyNameById.set(rawId, technology.data.name);
+const learningPath = await getEntry("learningPaths", Astro.params.slug);
+if (!learningPath) {
+	return new Response(null, { status: 404 });
 }
-const technologyLabels = (learningPath.data.technologies ?? []).map(
-	(technologyId) => technologyNameById.get(technologyId) ?? technologyId,
+
+const [{ html, headings }, authors, allTechnologies] = await Promise.all([
+	renderEntry(learningPath),
+	getEntries(learningPath.data.authors),
+	// Labels fall back to the technology id when the listing is unavailable.
+	optionalContent(getCollection("technologies"), []),
+]);
+
+await setContentCache(Astro, {
+	entries: [learningPath, ...authors],
+	// Technology labels come from the technologies listing; the body is autolinked.
+	collections: ["technologies"],
+});
+
+// Only ids in the technologies collection link to a technology page.
+const technologyTags = buildTechnologyTags(
+	learningPath.data.technologies ?? [],
+	allTechnologies,
+	(technologyId) => technologyId,
 );
-const technologyTags = (learningPath.data.technologies ?? []).map(
-	(technologyId) => ({
-		id: technologyId,
-		label: technologyNameById.get(technologyId) ?? technologyId,
-	}),
-);
+const technologyLabels = technologyTags.map((technology) => technology.label);
 
 function formatDuration(minutes: number): string {
 	const hours = Math.floor(minutes / 60);
@@ -64,9 +55,10 @@ function formatDuration(minutes: number): string {
 	return `${hours}h ${mins}m`;
 }
 
-const durationLabel = learningPath.data.estimatedDuration > 0
-	? formatDuration(learningPath.data.estimatedDuration)
-	: undefined;
+const durationLabel =
+	learningPath.data.estimatedDuration > 0
+		? formatDuration(learningPath.data.estimatedDuration)
+		: undefined;
 // The content owns the resource sequence; use its rendered slug, not a second index.
 const firstResource = headings.find(
 	(heading) => heading.depth === 3 && /^\d+\.\s/.test(heading.text),
@@ -77,11 +69,7 @@ const difficultyLabel =
 	learningPath.data.difficulty.charAt(0).toUpperCase() +
 	learningPath.data.difficulty.slice(1);
 
-const publishDate = localTime(learningPath.data.publishedAt, {
-	month: "short",
-	day: "numeric",
-	year: "numeric",
-});
+const publishDate = localDate(learningPath.data.publishedAt);
 
 const pageTitle = `${learningPath.data.title} | Learning Path`;
 const pageDescription = learningPath.data.description;
@@ -111,7 +99,7 @@ const pageDescription = learningPath.data.description;
 	<div class={doc.root}>
 		<header class={doc.pathHero}>
 			<div class={doc.body}>
-			<div class={[doc.main, styles.container, styles.heroCopy].join(" ")}>
+			<div class={[doc.pathColumn, styles.heroCopy].join(" ")}>
 				<a class={doc.link} href="/learning-paths">Learning paths</a>
 				<h1 class={doc.title}>{learningPath.data.title}</h1>
 				<div class={styles.meta}>
@@ -128,8 +116,28 @@ const pageDescription = learningPath.data.description;
 						</a>
 					))}
 				</div>
+				{learningPath.id === "build-your-first-kubernetes-developer-platform" && (
+					<aside class={styles.prose} aria-labelledby="waypoint-history">
+						<h2 id="waypoint-history">Waypoint lesson: historical material</h2>
+						<p>
+							This path includes the legacy Waypoint workflow.
+							HashiCorp ended active development in 2023, and the repository
+							was archived in January 2024. The Waypoint server,
+							<code>waypoint.hcl</code>, <code>waypoint up</code>, and pipeline
+							suggestions below are historical examples, not current
+							deployment recommendations. Skip this lesson when choosing
+							tooling for a new platform.
+						</p>
+						<p>
+							Read <a href="https://www.hashicorp.com/en/blog/a-new-vision-for-hcp-waypoint">HashiCorp's product announcement</a>
+							{" "}and the <a href="https://github.com/hashicorp/waypoint">archived repository</a>
+							{" "}for context. <a href="https://developer.hashicorp.com/hcp/docs/waypoint">HCP Waypoint</a>
+							{" "}uses a different architecture and workflow; this video does not teach it.
+						</p>
+					</aside>
+				)}
 				<div class={doc.actions}>
-					<a class={doc.button} href={firstResource ? `#${firstResource.slug}` : "#path-content"}>
+					<a class={button()} href={firstResource ? `#${firstResource.slug}` : "#path-content"}>
 						Start learning
 					</a>
 				</div>
@@ -138,7 +146,7 @@ const pageDescription = learningPath.data.description;
 		</header>
 
 		<div class={doc.body}>
-			<div class={[doc.main, styles.container, doc.stack].join(" ")}>
+			<div class={[doc.pathColumn, doc.stack].join(" ")}>
 				{prerequisites.length > 0 && (
 					<details>
 						<summary class={doc.tocSummary}>Before you start</summary>
@@ -152,7 +160,7 @@ const pageDescription = learningPath.data.description;
 
 				{/* The content supplies the introduction, objectives, and ordered resources once. */}
 				<article id="path-content" class={[styles.prose, doc.pathProse].join(" ")}>
-					<Content />
+					<RichText html={html} />
 				</article>
 
 				{technologyTags.length > 0 && (
@@ -160,7 +168,9 @@ const pageDescription = learningPath.data.description;
 						Technologies: {technologyTags.map((technology, index) => (
 							<Fragment>
 								{index > 0 && ", "}
-								<a class={doc.link} href={`/technology/${technology.id}`} rel="tag">{technology.label}</a>
+								{technology.href
+									? <a class={doc.link} href={technology.href} rel="tag">{technology.label}</a>
+									: technology.label}
 							</Fragment>
 						))}
 					</p>

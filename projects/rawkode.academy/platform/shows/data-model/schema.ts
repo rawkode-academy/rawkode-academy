@@ -11,6 +11,13 @@ export type Podcast = {
 };
 export type SubscribeLink = { platform: string; url: string; icon: string };
 
+// A TipTap/ProseMirror document ({"type":"doc","content":[...]}), as written by
+// @rawkodeacademy/rich-text. The read model passes it through untouched.
+export type RichTextDocument = {
+	type: "doc";
+	content: Record<string, unknown>[];
+};
+
 const json = <T>(name: string) => text(name, { mode: "json" }).$type<T>();
 
 // A recurring show. The id is the public slug (e.g. "klustered"). Hosts,
@@ -19,7 +26,10 @@ const json = <T>(name: string) => text(name, { mode: "json" }).$type<T>();
 export const showsTable = sqliteTable("shows", {
 	id: text("id").notNull().primaryKey(),
 	name: text("name").notNull(),
+	// Markdown, kept until every reader uses descriptionDoc.
 	description: text("description"),
+	// The description as a rich-text document; null until backfilled.
+	descriptionDoc: json<RichTextDocument>("description_doc"),
 	tagline: text("tagline"),
 	status: text("status", { enum: ["coming-soon", "active", "archived"] })
 		.notNull()
@@ -28,6 +38,9 @@ export const showsTable = sqliteTable("shows", {
 	gameFormatUrl: text("game_format_url"),
 	coverUrl: text("cover_url"),
 	coverAlt: text("cover_alt"),
+	// Intrinsic pixel size of the cover, so clients can size remote images.
+	coverWidth: integer("cover_width"),
+	coverHeight: integer("cover_height"),
 	podcast: json<Podcast>("podcast"),
 	subscribeLinks: json<SubscribeLink[]>("subscribe_links"),
 	updatedAt: integer("updated_at", { mode: "timestamp_ms" }),

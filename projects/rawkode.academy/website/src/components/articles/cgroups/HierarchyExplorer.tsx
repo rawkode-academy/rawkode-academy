@@ -1,5 +1,5 @@
 import { useCallback, useId, useMemo, useState } from "react";
-import { academyCgroups } from "@rawkodeacademy/design-system";
+import { academyCgroups, button } from "@rawkodeacademy/design-system";
 
 type Tab = "v1" | "v2";
 interface TreeNode {
@@ -277,7 +277,7 @@ export default function HierarchyExplorer() {
 					<button
 						key={tab}
 						type="button"
-						className={s.button}
+						className={button({ variant: "outline" })}
 						aria-pressed={activeTab === tab}
 						aria-controls={panelId}
 						onClick={() => setActiveTab(tab)}

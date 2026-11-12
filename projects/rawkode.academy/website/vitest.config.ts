@@ -16,7 +16,13 @@ export default defineConfig({
 			},
 			load(id) {
 				if (id === "\0astro:content") {
-					return "export const getCollection = async () => []; export const getEntry = async () => undefined;";
+					return [
+						"export const getCollection = async () => [];",
+						"export const getEntry = async () => undefined;",
+						"export const getLiveCollection = async () => ({ entries: [] });",
+						"export const getLiveEntry = async () => ({ error: Object.assign(new Error('not found'), { name: 'LiveEntryNotFoundError' }) });",
+						"export const defineLiveCollection = (config) => config;",
+					].join("\n");
 				}
 				if (id === "\0astro:middleware") {
 					return "export const defineMiddleware = (handler) => handler;";
@@ -28,6 +34,12 @@ export default defineConfig({
 	resolve: {
 		alias: {
 			"@": fileURLToPath(new URL("./src", import.meta.url)),
+			"astro:env/server": fileURLToPath(
+				new URL("./src/tests/stubs/astro-env-server.ts", import.meta.url),
+			),
+			"cloudflare:workers": fileURLToPath(
+				new URL("./src/tests/stubs/cloudflare-workers.ts", import.meta.url),
+			),
 		},
 	},
 	test: {

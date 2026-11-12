@@ -1,11 +1,17 @@
-import { getCollection, getEntries } from "astro:content";
 import type { APIRoute } from "astro";
+import {
+	type ContentEntry,
+	getCollection,
+	getEntries,
+	setContentCache,
+} from "@/lib/live-content";
 import { buildJsonFeed, type JsonFeedItem } from "@/lib/json-feed";
 import { isNewsPublished } from "@/lib/news-publication";
 
 const SITE_FALLBACK = "https://rawkode.academy";
 
-export const GET: APIRoute = async ({ site }) => {
+export const GET: APIRoute = async (context) => {
+	const { site } = context;
 	const baseUrl = (site?.toString() ?? SITE_FALLBACK).replace(/\/$/, "");
 	const u = (path: string) => `${baseUrl}${path}`;
 
@@ -15,8 +21,10 @@ export const GET: APIRoute = async ({ site }) => {
 	);
 
 	const items: JsonFeedItem[] = [];
+	const authorEntries: ContentEntry<"people">[] = [];
 	for (const story of news) {
 		const authors = await getEntries(story.data.authors);
+		authorEntries.push(...authors);
 		const url = u(`/news/${story.id}/`);
 		items.push({
 			id: url,
@@ -49,12 +57,16 @@ export const GET: APIRoute = async ({ site }) => {
 		items,
 	});
 
+	await setContentCache(context, {
+		entries: [...news, ...authorEntries],
+		collections: ["news"],
+	});
+
 	return new Response(JSON.stringify(feed), {
 		headers: {
 			"Content-Type": "application/feed+json; charset=utf-8",
-			"Cache-Control": "public, max-age=900",
 		},
 	});
 };
 
-export const prerender = true;
+export const prerender = false;

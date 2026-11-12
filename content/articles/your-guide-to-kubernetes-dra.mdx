@@ -1,7 +1,7 @@
 ---
-title: "Your Guide to Kubernetes DRA"
-description: "Dynamic Resource Allocation lets Kubernetes match device claims to GPU properties. Here is what DRA changes for AI training and inference, and where it still falls short."
-slug: your-guide-to-kubernetes-dra
+title: Your Guide to Kubernetes DRA
+description: Dynamic Resource Allocation lets Kubernetes match device claims to GPU properties. Here is what DRA changes for AI training and inference, and where it still falls short.
+type: tutorial
 publishedAt: 2026-09-25
 authors:
   - rawkode
@@ -9,7 +9,7 @@ technologies:
   - kubernetes
 ---
 
-*DRA gives Kubernetes a richer device request than a GPU count. Some of the workload-level scheduling that makes this useful is still opt-in.*
+_DRA gives Kubernetes a richer device request than a GPU count. Some of the workload-level scheduling that makes this useful is still opt-in._
 
 `nvidia.com/gpu: 8` answers one question: how many? It does not, by itself, say which memory profile is acceptable, whether a partitioned device will work, or whether the workers need to fit a particular topology. Teams can encode some of that elsewhere, in node labels, separate resource names or vendor-specific schedulers. Then the hardware request is spread across the platform instead of stated with the workload.
 

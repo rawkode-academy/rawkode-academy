@@ -64,7 +64,6 @@ export async function renderProgramCanvas(
   }
 
   drawActiveStinger(context, options);
-  drawProgramChrome(context, options);
 }
 
 function getMediaVideoElement(layer: StudioLayer, options: ProgramRenderOptions): HTMLVideoElement | undefined {
@@ -925,28 +924,6 @@ function drawVideoLayer(
   context.font = "900 46px Inter, system-ui, sans-serif";
   context.textBaseline = "middle";
   context.fillText(layer.label ?? layer.name, x + 100, y + height - 82);
-
-  context.restore();
-}
-
-function drawProgramChrome(
-  context: CanvasRenderingContext2D,
-  options: ProgramRenderOptions,
-): void {
-  context.save();
-
-  context.fillStyle = options.isRecording ? "#ff6f61" : "#39d5c5";
-  roundedRect(context, 1504, 34, 140, 40, 20);
-  context.fill();
-  context.fillStyle = "#071014";
-  context.font = "800 18px Inter, system-ui, sans-serif";
-  context.textBaseline = "middle";
-  context.fillText(options.isRecording ? "REC" : "PROGRAM", 1534, 54);
-
-  context.strokeStyle = "rgba(255, 255, 255, 0.18)";
-  context.lineWidth = 2;
-  roundedRect(context, 96, 72, options.resolution.width - 192, options.resolution.height - 144, 34);
-  context.stroke();
 
   context.restore();
 }

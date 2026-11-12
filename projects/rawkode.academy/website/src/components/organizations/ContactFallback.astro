@@ -1,6 +1,6 @@
 ---
 import { PARTNERSHIP_EMAIL } from "@/lib/partnerships";
-import { academyMarketing } from "@rawkodeacademy/design-system";
+import { academyMarketing, button } from "@rawkodeacademy/design-system";
 import "@rawkodeacademy/design-system/styles.css";
 
 /**
@@ -30,7 +30,11 @@ const marketing = academyMarketing();
 		<code class="contact-fallback__email">{PARTNERSHIP_EMAIL}</code>
 		<button
 			type="button"
-			class:list={[marketing.copyButton, "contact-fallback__copy"]}
+			class:list={[
+				button({ variant: "outline" }),
+				marketing.copyButton,
+				"contact-fallback__copy",
+			]}
 			data-copy-text={PARTNERSHIP_EMAIL}
 			data-copy-kind="Email address"
 		>
@@ -45,7 +49,11 @@ const marketing = academyMarketing();
 	<pre class="contact-fallback__template">{template}</pre>
 	<button
 		type="button"
-		class:list={[marketing.copyButton, "contact-fallback__copy"]}
+		class:list={[
+				button({ variant: "outline" }),
+				marketing.copyButton,
+				"contact-fallback__copy",
+			]}
 		data-copy-text={template}
 		data-copy-kind="Template"
 	>

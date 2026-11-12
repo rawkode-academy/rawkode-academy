@@ -1,64 +1,81 @@
 ---
-import { getCollection } from "astro:content";
 import { academyPage } from "@rawkodeacademy/design-system";
 import AcademyPage from "@/components/academy/AcademyPage.vue";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Page from "@/wrappers/page.astro";
 import {
-	getLatestContent,
 	getPublishedVideos,
 	getUpcomingVideos,
+	LATEST_CONTENT_COLLECTIONS,
 } from "@/lib/content";
-import { localTime } from "@/lib/local-time";
-import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import {
+	type ContentEntry,
+	getCollection,
+	getEntries,
+	getEntry,
+	optionalContent,
+	setContentCache,
+} from "@/lib/live-content";
+import { isNewsPublished } from "@/lib/news-publication";
+import { supporterLogo } from "@/lib/supporter-logos";
+import { SUPPORTERS_PATH } from "@/lib/supporters";
+import { getTypeBadgeConfig } from "@/utils/article-types";
+import { formatRuntime } from "@/lib/video-runtime";
+import {
+	getVideoThumbnailResizedUrl,
+	getVideoThumbnailUrl,
+} from "@/lib/video-thumbnail";
 
 const styles = academyPage();
 
-// The homepage is format-agnostic. Collection routes such as /watch and
-// /read remain focused, but Latest is one chronological stream of everything
-// the Academy publishes.
+// The homepage is an index of the archive: the four collections with their
+// real sizes, the latest session, what each collection published most
+// recently, the next live stream, and the learning paths.
+// Every ledger column holds the same number of rows.
+const LEDGER_ROWS = 5;
+
 const now = new Date();
 const [
-	latest,
 	publishedVideos,
 	upcomingVideos,
 	learningPaths,
 	courses,
 	articles,
+	news,
+	supporters,
 ] = await Promise.all([
-	getLatestContent(12, now),
 	getPublishedVideos(),
 	getUpcomingVideos(),
 	getCollection("learningPaths", ({ data }) => data.publishedAt <= now),
 	getCollection("courses", ({ data }) => data.publishedAt <= now),
-	getCollection("articles", ({ data }) => data.publishedAt <= now),
+	getCollection("articles", ({ data }) => data.publishedAt <= now, { now }),
+	getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now), {
+		now,
+	}),
+	// The thank-you is optional: the page renders without it when the
+	// supporters service cannot be reached.
+	optionalContent(getCollection("supporters"), []),
 ]);
 
-learningPaths.sort(
-	(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
-);
+const newestFirst = (
+	a: { data: { publishedAt: Date } },
+	b: { data: { publishedAt: Date } },
+) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime();
+learningPaths.sort(newestFirst);
+articles.sort(newestFirst);
+news.sort(newestFirst);
 
 const compactCopy = (value: string | undefined, maxLength = 220) => {
 	const normalized = (value ?? "").replace(/\s+/g, " ").trim();
-	if (!normalized)
-		return "Practical cloud native education from Rawkode Academy.";
+	if (!normalized) return undefined;
 	const firstSentence = normalized.match(/^.*?[.!?](?:\s|$)/)?.[0]?.trim();
 	if (firstSentence && firstSentence.length <= maxLength) return firstSentence;
 	if (normalized.length <= maxLength) return normalized;
 	return `${normalized.slice(0, maxLength).trimEnd()}…`;
 };
 
-const formatDuration = (seconds?: number | null) => {
-	if (!seconds || seconds <= 0) return undefined;
-	const minutes = Math.floor(seconds / 60);
-	if (minutes < 60) return `${minutes} min`;
-	const hours = Math.floor(minutes / 60);
-	const remainder = minutes % 60;
-	return remainder > 0 ? `${hours}h ${remainder}m` : `${hours}h`;
-};
-
 const formatPathDuration = (minutes?: number | null) => {
-	if (!minutes || minutes <= 0) return "Self-paced";
+	if (!minutes || minutes <= 0) return undefined;
 	if (minutes < 60) return `${minutes} min core video`;
 	const hours = Math.floor(minutes / 60);
 	const remainder = minutes % 60;
@@ -67,109 +84,240 @@ const formatPathDuration = (minutes?: number | null) => {
 		: `${hours}h core video`;
 };
 
-const videos = publishedVideos.slice(0, 1).map((video) => {
-	const duration = formatDuration(video.data.duration);
-	return {
-		href: `/watch/${video.data.slug}`,
-		title: video.data.title,
-		description: compactCopy(video.data.subtitle || video.data.description),
-		meta: [
-			video.data.type === "live" ? "Live session" : "Recorded session",
-			...(duration ? [duration] : []),
-		],
-		mediaSrc: getVideoThumbnailUrl(video.data.id),
-	};
-});
+// A path's content owns its sequence: each stop is a numbered third-level
+// heading ("1. Hands-on Introduction to Portainer"), the same headings the
+// path page starts its reader from. Counting them is the path's real length.
+type RichNode = {
+	type?: string;
+	text?: string;
+	attrs?: { level?: number };
+	content?: RichNode[];
+};
+const textOf = (node: RichNode): string =>
+	node.text ?? (node.content ?? []).map(textOf).join("");
+const sessionsIn = (body: unknown) =>
+	((body as RichNode | undefined)?.content ?? []).filter(
+		(node) =>
+			node.type === "heading" &&
+			node.attrs?.level === 3 &&
+			/^\d+\.\s/.test(textOf(node)),
+	).length;
 
-// Scheduled live streams lead the page: they are the only time-sensitive
-// thing on it. Times render in UTC and follow the reader's time zone in the
-// browser.
+// Guests, the latest session's show and article authors are secondary facts:
+// when the content layer cannot resolve one, its line is left out.
+const namesOf = async (people: ContentEntry<"videos">["data"]["guests"]) =>
+	(await optionalContent(getEntries(people), [])).map(
+		(person) => person.data.name,
+	);
+
+// The latest session sits beside the next live stream; the Sessions column
+// continues from the one after it, so the same session is not listed twice.
+const latestVideo = publishedVideos[0];
+const recentVideos = publishedVideos.slice(1, 1 + LEDGER_ROWS);
+const recentArticles = articles.slice(0, LEDGER_ROWS);
+const recentNews = news.slice(0, LEDGER_ROWS);
+
+const [latestGuests, latestShow, sessionGuests, articleAuthors, newsAuthors] =
+	await Promise.all([
+		latestVideo ? namesOf(latestVideo.data.guests) : [],
+		latestVideo?.data.show
+			? optionalContent(getEntry(latestVideo.data.show), undefined)
+			: undefined,
+		Promise.all(recentVideos.map((video) => namesOf(video.data.guests))),
+		Promise.all(recentArticles.map((article) => namesOf(article.data.authors))),
+		Promise.all(recentNews.map((item) => namesOf(item.data.authors))),
+	]);
+const latestShowEpisodes = latestShow
+	? publishedVideos.filter((video) => video.data.show?.id === latestShow.id)
+			.length
+	: 0;
+
+const latestDescription =
+	latestVideo &&
+	compactCopy(latestVideo.data.subtitle || latestVideo.data.description);
+const latestRuntime = latestVideo && formatRuntime(latestVideo.data.duration);
+const featured = latestVideo && {
+	href: `/watch/${latestVideo.data.slug}`,
+	title: latestVideo.data.title,
+	publishedAt: latestVideo.data.publishedAt.toISOString(),
+	...(latestDescription ? { description: latestDescription } : {}),
+	mediaSrc: getVideoThumbnailUrl(latestVideo.data.id),
+	...(latestRuntime ? { runtime: latestRuntime } : {}),
+	guests: latestGuests,
+	...(latestShow
+		? {
+				show: {
+					href: `/shows/${latestShow.id}`,
+					name: latestShow.data.name,
+					episodes: latestShowEpisodes,
+				},
+			}
+		: {}),
+};
+const featuredMedia = featured?.mediaSrc;
+
+// Scheduled live streams. The next one sits beside the latest session; any
+// after it are listed beneath it. Times render in UTC and follow the reader's time zone in
+// the browser.
 const upcoming = upcomingVideos.slice(0, 3).map((video) => {
-	const scheduled = localTime(video.data.publishedAt, {
-		weekday: "short",
-		day: "numeric",
-		month: "short",
-		hour: "numeric",
-		minute: "2-digit",
-		timeZoneName: "short",
-	});
+	const description = compactCopy(
+		video.data.subtitle || video.data.description,
+	);
 	return {
 		href: `/watch/${video.data.slug}`,
 		title: video.data.title,
-		description: compactCopy(video.data.subtitle || video.data.description),
-		meta: ["Upcoming live stream", scheduled.text],
-		publishedAt: scheduled.iso,
-		localTime: scheduled.attrs["data-local-time"],
+		...(description ? { description } : {}),
+		publishedAt: video.data.publishedAt.toISOString(),
 		mediaSrc: video.data.youtubeId
 			? `https://i.ytimg.com/vi/${video.data.youtubeId}/hqdefault.jpg`
 			: getVideoThumbnailUrl(video.data.id),
 	};
 });
 
-const paths = learningPaths.slice(0, 8).map((path) => ({
-	href: `/learning-paths/${path.id}`,
-	title: path.data.title,
-	description: compactCopy(path.data.description),
-	meta: [
-		path.data.difficulty.charAt(0).toUpperCase() +
-			path.data.difficulty.slice(1),
-		formatPathDuration(path.data.estimatedDuration),
-	] as [string, string],
-}));
+const paths = learningPaths.slice(0, 8).map((path) => {
+	const duration = formatPathDuration(path.data.estimatedDuration);
+	const sessions = sessionsIn(path.data.body);
+	return {
+		href: `/learning-paths/${path.id}`,
+		title: path.data.title,
+		description: compactCopy(path.data.description) ?? "",
+		meta: [
+			path.data.difficulty.charAt(0).toUpperCase() +
+				path.data.difficulty.slice(1),
+			...(duration ? [duration] : []),
+		],
+		...(sessions > 0 ? { sessions } : {}),
+	};
+});
 
-const featured = videos[0] ?? {
-	href: "/watch",
-	title: "Cloud native is complex. It does not need to be hard.",
-	description:
-		"Hands-on cloud native lessons and build sessions for engineers, taught by people who run production systems.",
-	meta: ["Rawkode Academy", "Start here"],
-};
-const featuredMedia = "mediaSrc" in featured ? featured.mediaSrc : undefined;
-
-// The archive strip links to each collection by name, with its real count
-// set beside it exactly as the collection's own masthead sets it.
+// The hero index links to each collection by name, with its real count set
+// beside it exactly as the collection's own masthead sets it.
 const plural = (
 	count: number,
 	singular: string,
 	pluralForm = `${singular}s`,
 ) => (count === 1 ? singular : pluralForm);
-const archive = [
+const collections = [
 	{
 		href: "/watch",
-		value: `${publishedVideos.length}`,
+		count: publishedVideos.length,
 		label: plural(publishedVideos.length, "Video"),
+		description:
+			"Hands-on sessions with the people who build the tools, kept whole.",
 	},
 	{
 		href: "/read",
-		value: `${articles.length}`,
+		count: articles.length,
 		label: plural(articles.length, "Article"),
+		description:
+			"Guides you can follow at a terminal, with the reasoning written down.",
 	},
 	{
 		href: "/learning-paths",
-		value: `${learningPaths.length}`,
+		count: learningPaths.length,
 		label: plural(learningPaths.length, "Learning path"),
+		description:
+			"Archive sessions in a deliberate order, each building on the last.",
 	},
 	{
 		href: "/courses",
-		value: `${courses.length}`,
+		count: courses.length,
 		label: plural(courses.length, "Course"),
+		description:
+			"Structured courses, taught a module at a time and open to everyone.",
 	},
-].filter((link) => link.value !== "0");
+].filter((link) => link.count > 0);
+
+// Recently published: one column per collection, newest first. A collection
+// with nothing published has no column (the component collapses the rest).
+const ledger = [
+	{
+		id: "sessions",
+		title: "Sessions",
+		href: "/watch",
+		more: "All sessions",
+		entries: recentVideos.map((video, index) => {
+			const runtime = formatRuntime(video.data.duration);
+			const guests = sessionGuests[index] ?? [];
+			return {
+				href: `/watch/${video.data.slug}`,
+				title: video.data.title,
+				publishedAt: video.data.publishedAt.toISOString(),
+				meta: [
+					...(runtime ? [runtime] : []),
+					...(guests.length ? [`with ${guests.join(", ")}`] : []),
+				],
+				mediaSrc: getVideoThumbnailResizedUrl(video.data.id, 384),
+			};
+		}),
+	},
+	{
+		id: "articles",
+		title: "Articles",
+		href: "/read",
+		more: "All articles",
+		entries: recentArticles.map((article, index) => {
+			const authors = articleAuthors[index] ?? [];
+			return {
+				href: `/read/${article.id}`,
+				title: article.data.title,
+				publishedAt: article.data.publishedAt.toISOString(),
+				meta: [
+					getTypeBadgeConfig(article.data.type).label,
+					...(authors.length ? [authors.join(", ")] : []),
+				],
+				...(article.data.cover?.image.src
+					? { mediaSrc: article.data.cover.image.src }
+					: {}),
+			};
+		}),
+	},
+	{
+		id: "news",
+		title: "News",
+		href: "/news",
+		more: "All news",
+		entries: recentNews.map((item, index) => {
+			const authors = newsAuthors[index] ?? [];
+			return {
+				href: `/news/${item.id}`,
+				title: item.data.title,
+				publishedAt: item.data.publishedAt.toISOString(),
+				meta: authors.length ? [authors.join(", ")] : [],
+			};
+		}),
+	},
+];
 
 const pageTitle = "Cloud Native & Kubernetes Education";
 const pageDescription =
 	"Hands-on cloud native education and partnerships from Rawkode Academy for engineers and teams shipping production systems.";
 
-Astro.response.headers.set(
-	"Cache-Control",
-	"public, max-age=60, s-maxage=300, stale-while-revalidate=3600",
-);
-Astro.response.headers.set("CDN-Cache-Control", "public, max-age=300");
-Astro.response.headers.set("Cache-Tag", "homepage");
+// Every collection the page lists: any change purges it, and the next
+// scheduled item (an upcoming stream going live, a dated article) caps maxAge.
+// Video and article cache hints carry their guests', show's and authors' tags.
+await setContentCache(Astro, {
+	entries: [
+		...publishedVideos.slice(0, 1 + LEDGER_ROWS),
+		...upcomingVideos.slice(0, 3),
+		...learningPaths.slice(0, 8),
+		...recentArticles,
+		...recentNews,
+		...(latestShow ? [latestShow] : []),
+		...supporters,
+	],
+	collections: [...LATEST_CONTENT_COLLECTIONS],
+	tags: ["page:home"],
+});
 Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 ---
 
 <Page title={pageTitle} description={pageDescription}>
+		<Fragment slot="extra-head">
+			<link rel="alternate" type="application/rss+xml" title="Rawkode Academy - All Content (RSS)" href="/api/feeds/all.xml" />
+			<link rel="alternate" type="application/atom+xml" title="Rawkode Academy - All Content (Atom)" href="/api/feeds/all.atom" />
+			<link rel="alternate" type="application/feed+json" title="Rawkode Academy - All Content (JSON Feed)" href="/api/feeds/all.json" />
+		</Fragment>
 		{featuredMedia && (
 			<link
 				slot="extra-head"
@@ -181,13 +329,32 @@ Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 		)}
 		<AcademyPage
 			page="home"
+			collections={collections}
 			featured={featured}
+			ledger={ledger}
 			upcoming={upcoming}
-			latest={latest}
 			learningPaths={paths}
-			archive={archive}
 		/>
-		<div id="join" class={styles.section}>
+		{supporters.length > 0 && (
+			<section class={styles.section} aria-labelledby="home-supporters-title">
+				<div class="home-supporters">
+					<h2 id="home-supporters-title" class="home-supporters__title">Free to watch, thanks to</h2>
+					<ul class="home-supporters__names">
+						{supporters.map((supporter) => ({ data: supporter.data, logo: supporterLogo(supporter) })).map(({ data, logo }) => (
+							<li>
+								<a href={data.websiteUrl} target="_blank" rel="sponsored noopener">
+									{logo && <img src={logo.src} alt={logo.wordmark ? "" : data.name} width="160" height="40" loading="lazy" onerror="this.hidden=true; this.nextElementSibling.hidden=false;" />}
+									<span hidden={Boolean(logo) && !logo?.wordmark}>{data.name}</span>
+									<span class="sr-only"> (opens in a new tab)</span>
+								</a>
+							</li>
+						))}
+					</ul>
+					<a class="home-supporters__all" href={SUPPORTERS_PATH}>Meet the community supporters <span aria-hidden="true">→</span></a>
+				</div>
+			</section>
+		)}
+		<div id="join" class={styles.join}>
 			<NewsletterCTA
 				badge="Rawkode Academy newsletter"
 				headline="Keep learning"
@@ -202,3 +369,98 @@ Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 	const hero = document.querySelector<HTMLElement>("[data-system]");
 	if (hero) mountSystem(hero);
 </script>
+
+<style>
+	.home-supporters {
+		display: grid;
+		gap: 1.25rem 3rem;
+		padding-top: 2rem;
+		border-top: 1px solid var(--colors-academy-border);
+	}
+
+	@media (min-width: 64rem) {
+		.home-supporters {
+			grid-template-columns: 16rem minmax(0, 1fr);
+			align-items: center;
+		}
+
+		.home-supporters__all {
+			grid-column: 2;
+		}
+	}
+
+	.home-supporters__title {
+		margin: 0;
+		color: var(--colors-academy-text-soft);
+		font-family: var(--fonts-academy-mono);
+		font-size: 0.875rem;
+		font-weight: 500;
+		letter-spacing: normal;
+		line-height: 1.4;
+	}
+
+	.home-supporters__names {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 1.5rem 3.5rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.home-supporters__names a {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		color: var(--colors-academy-text);
+		font-family: var(--fonts-academy-display);
+		font-size: clamp(1.75rem, 3vw, 2.25rem);
+		font-weight: 800;
+		letter-spacing: var(--letter-spacings-academy-display);
+		line-height: 1;
+		overflow-wrap: anywhere;
+		text-decoration: none;
+		opacity: 0.82;
+		transition: opacity var(--durations-base) var(--easings-academy-out);
+	}
+
+	.home-supporters__names a:hover {
+		opacity: 1;
+	}
+
+	/* One-ink marks, set in the text colour of either scheme. */
+	.home-supporters__names img {
+		width: auto;
+		height: clamp(2rem, 3.5vw, 2.75rem);
+		object-fit: contain;
+		filter: brightness(0);
+	}
+
+	:global(html.dark) .home-supporters__names img {
+		filter: brightness(0) invert(1);
+	}
+
+	.home-supporters__all {
+		justify-self: start;
+		color: var(--colors-academy-text-soft);
+		font-size: 0.875rem;
+		text-underline-offset: 0.2em;
+	}
+
+	.home-supporters__all:hover {
+		color: var(--colors-academy-text);
+	}
+
+	.home-supporters__names a:focus-visible,
+	.home-supporters__all:focus-visible {
+		outline: 2px solid var(--colors-academy-accent);
+		outline-offset: 2px;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.home-supporters__names a {
+			transition: none;
+		}
+	}
+</style>

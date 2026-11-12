@@ -1,7 +1,7 @@
 {
 	"$schema": "./node_modules/wrangler/config-schema.json",
 	"name": "rawkode-academy-website",
-	"main": "@astrojs/cloudflare/entrypoints/server",
+	"main": "./src/worker.ts",
 	"compatibility_date": "2026-03-12",
 	"compatibility_flags": ["nodejs_compat"],
 	"assets": {
@@ -21,10 +21,20 @@
 			"destinations": ["grafana-logs"]
 		}
 	},
+	"triggers": {
+		"crons": ["0 * * * *"]
+	},
+	"version_metadata": {
+		"binding": "CF_VERSION_METADATA"
+	},
 	"kv_namespaces": [
 		{
 			"binding": "SESSION",
 			"id": "f3a5e01c10b144f5964d060cefa1b70c"
+		},
+		{
+			"binding": "CONTENT_CACHE",
+			"id": "28d816db99f34b06b48db5fec83bc06d"
 		}
 	],
 	"ratelimits": [
@@ -46,12 +56,20 @@
 	"vars": {
 		"CLOUDFLARE_ACCOUNT_ID": "0aeb879de8e3cdde5fb3d413025222ce",
 		"NOTIFICATIONS_VAPID_PUBLIC_KEY": "BDgtSVztEoFZDmO0Iz-MpBNaYv8ukGIQQYS8SwUBt7vMLXQT60-zjsyMTY8opukUBHoptdgm2u-uonWthz6e1SE",
-		"ATTIO_INBOUND_DEAL_STAGE": "In Progress",
-		"ATTIO_INBOUND_DEAL_OFFER_ATTRIBUTE": "offer",
-		"ATTIO_SOURCE_ATTRIBUTE": "source",
-		"ATTIO_SOURCE_VALUE": "Inbound: partnerships page"
+		"BASIN_BUCKET": "rawkode-analytics",
+		"ANALYTICS_ADMIN_EMAILS": "david@rawkode.academy"
 	},
+	"send_email": [
+		{
+			"name": "PARTNERSHIP_EMAIL",
+			"destination_address": "david@rawkode.academy"
+		}
+	],
 	"services": [
+		{
+			"binding": "API",
+			"service": "platform-api-gateway"
+		},
 		{
 			"binding": "EMOJI_REACTIONS",
 			"service": "platform-emoji-reactions-write-model"

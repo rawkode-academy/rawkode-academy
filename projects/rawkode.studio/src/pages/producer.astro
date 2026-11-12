@@ -45,6 +45,9 @@ const sessions = (await listStudioSessions(env)).filter(isStudioSessionActive);
 						<a class="button" href={`/studio/${session.id}/recordings`}>
 							Recordings
 						</a>
+						<a class="button" href={`/studio/${session.id}/outputs`}>
+							Outputs
+						</a>
 					</div>
 				</article>
 			))

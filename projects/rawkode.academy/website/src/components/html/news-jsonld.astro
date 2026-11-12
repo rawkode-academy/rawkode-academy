@@ -1,20 +1,22 @@
 ---
-import type { CollectionEntry } from "astro:content";
 import {
 	encodeImageServicePayload,
 	IMAGE_SERVICE_TEMPLATE_VERSION,
 } from "@/lib/image-service-payload";
+import type { ContentEntry } from "@/lib/live-content";
 import { buildNewsArticleJsonLd } from "@/lib/news-jsonld";
+import { buildPersonJsonLd } from "@/lib/person-jsonld";
 import { calculateReadingTime } from "@/utils/reading-time";
 
 interface Props {
-	article: CollectionEntry<"news">;
-	authors: CollectionEntry<"people">[];
+	article: ContentEntry<"news">;
+	authors: ContentEntry<"people">[];
 	// Allow placement into a named slot in parents (for TS exactOptionalPropertyTypes)
 	slot?: string;
 }
 
 const { article, authors } = Astro.props;
+const siteUrl = (Astro.site ?? Astro.url).origin;
 const reading = calculateReadingTime(article.body || "");
 const wordCount = (article.body || "")
 	.replace(/```[\s\S]*?```/g, "")
@@ -39,13 +41,10 @@ const jsonLd = buildNewsArticleJsonLd({
 		wordCount,
 		readingMinutes: reading.minutes,
 	},
-	authors: authors.map((author) => ({
-		name: author.data.name,
-		url: author.data.github,
-	})),
-	url: Astro.url.href,
+	authors: authors.map((author) => buildPersonJsonLd(author.data, siteUrl)),
+	url: new URL(Astro.url.pathname, Astro.site ?? Astro.url).href,
 	imageUrl,
-	siteUrl: (Astro.site ?? Astro.url).origin,
+	siteUrl,
 });
 ---
 

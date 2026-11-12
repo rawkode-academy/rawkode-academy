@@ -1,15 +1,15 @@
-import { getCollection } from "astro:content";
-import type { APIRoute } from "astro";
 import { DISCORD_INVITE_URL } from "astro:env/server";
+import type { APIRoute } from "astro";
+import { getEntry, setContentCache } from "@/lib/live-content";
 import { createLogger } from "@/lib/logger";
 
 export const prerender = false;
 
 const logger = createLogger("comments");
 
-export const GET: APIRoute = async ({ params }) => {
+export const GET: APIRoute = async (context) => {
 	try {
-		const { videoId } = params;
+		const { videoId } = context.params;
 
 		if (!videoId) {
 			return new Response(JSON.stringify({ error: "Video ID is required" }), {
@@ -18,8 +18,8 @@ export const GET: APIRoute = async ({ params }) => {
 			});
 		}
 
-		const videos = await getCollection("videos");
-		const video = videos.find((v) => v.data.id === videoId);
+		// Video entry ids are the video (asset) ids.
+		const video = await getEntry("videos", videoId);
 
 		if (!video) {
 			return new Response(
@@ -30,6 +30,8 @@ export const GET: APIRoute = async ({ params }) => {
 				},
 			);
 		}
+
+		await setContentCache(context, { entries: [video] });
 
 		return new Response(
 			JSON.stringify({

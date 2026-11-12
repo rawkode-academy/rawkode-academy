@@ -18,6 +18,13 @@ export type RealtimeKit = {
 	roomName?: string;
 };
 
+// A TipTap/ProseMirror document ({"type":"doc","content":[...]}), as written by
+// @rawkodeacademy/rich-text. The read model passes it through untouched.
+export type RichTextDocument = {
+	type: "doc";
+	content: Record<string, unknown>[];
+};
+
 const json = <T>(name: string) => text(name, { mode: "json" }).$type<T>();
 
 // A video. The id is the media asset id used for CDN paths; slug is the public
@@ -30,7 +37,10 @@ export const videosTable = sqliteTable("videos", {
 	subtitle: text("subtitle"),
 	tagline: text("tagline"),
 	slug: text("slug").notNull().unique(),
+	// Markdown, kept until every reader uses descriptionDoc.
 	description: text("description").notNull(),
+	// The description as a rich-text document; null until backfilled.
+	descriptionDoc: json<RichTextDocument>("description_doc"),
 	whatYouWillLearn: json<string[]>("what_you_will_learn"),
 	duration: integer({ mode: "number" }),
 	audioFileSize: integer("audio_file_size", { mode: "number" }),

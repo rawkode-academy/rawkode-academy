@@ -1,17 +1,20 @@
 ---
-import { type CollectionEntry, getCollection } from "astro:content";
 import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 import NewsStoryRow from "@/components/news/NewsStoryRow.astro";
+import type { ContentEntry } from "@/lib/live-content";
 import { selectRelatedNews } from "@/lib/related-news";
 
 interface Props {
-	currentStory: CollectionEntry<"news">;
+	currentStory: ContentEntry<"news">;
+	// The page fetches the candidates and lists "news" in setContentCache, so
+	// this component loads no content of its own.
+	stories: ReadonlyArray<ContentEntry<"news">>;
 	limit?: number;
 }
 
-const { currentStory, limit = 3 } = Astro.props;
+const { currentStory, stories, limit = 3 } = Astro.props;
 const layout = academyLayout({ width: "wide" });
-const related = selectRelatedNews(currentStory.id, currentStory.data.technologies ?? [], await getCollection("news"), limit);
+const related = selectRelatedNews(currentStory.id, currentStory.data.technologies ?? [], stories, limit);
 const catalog = academyCatalog();
 ---
 

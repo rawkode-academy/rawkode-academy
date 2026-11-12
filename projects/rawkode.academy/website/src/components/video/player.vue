@@ -7,6 +7,7 @@ import "vidstack/player/ui";
 import { actions } from "astro:actions";
 import { onMounted, onUnmounted, ref } from "vue";
 import { academyWatch } from "@rawkodeacademy/design-system";
+import { startTimeFromUrl } from "@/lib/video-deep-link";
 
 const props = defineProps<{
 	video: string;
@@ -75,11 +76,11 @@ onMounted(() => {
 	if (!playerEl) return;
 
 	// Handle media events
-	// Support deep-link starting time via ?t=SECONDS, or use saved position
-	const tParam = new URL(window.location.href).searchParams.get("t");
-	const startAt = tParam
-		? Number.parseInt(tParam, 10)
-		: (props.initialPosition ?? 0);
+	// Deep-link start time from #t=SECONDS or ?t=SECONDS, else the saved position
+	const startAt =
+		startTimeFromUrl(new URL(window.location.href)) ??
+		props.initialPosition ??
+		0;
 	if (!Number.isNaN(startAt) && startAt > 0) {
 		const mediaEl = playerEl.querySelector("video");
 		if (mediaEl) {

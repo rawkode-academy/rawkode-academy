@@ -1,29 +1,58 @@
 import type { APIContext } from "astro";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const { collections, getCollection } = vi.hoisted(() => ({
-	collections: {} as Record<string, any[]>,
-	getCollection: vi.fn(),
+const { collections, getCollection, getEntry, setContentCache } = vi.hoisted(
+	() => ({
+		collections: {} as Record<string, any[]>,
+		getCollection: vi.fn(),
+		getEntry: vi.fn(),
+		setContentCache: vi.fn(),
+	}),
+);
+vi.mock("@/lib/live-content", async (importOriginal) => ({
+	...(await importOriginal<typeof import("@/lib/live-content")>()),
+	getCollection,
+	getEntry,
+	setContentCache,
 }));
-vi.mock("astro:content", () => ({ getCollection, render: vi.fn() }));
 import { GET, prerender } from "../pages/api/feeds/people/[id].xml";
 
 const entry = (id: string, data = {}) => ({
 	id,
-	data: { id, name: id, title: id, description: "A & B", slug: id,
-		publishedAt: new Date("2026-01-01"), authors: ["person"], guests: ["person"], ...data },
+	data: {
+		id,
+		name: id,
+		title: id,
+		description: "A & B",
+		slug: id,
+		publishedAt: new Date("2026-01-01"),
+		authors: ["person"],
+		guests: ["person"],
+		...data,
+	},
 });
-const context = (id: string | undefined) => ({
-	params: { id }, props: {}, site: new URL("https://academy.test"),
-}) as unknown as APIContext;
+const context = (id: string | undefined) =>
+	({
+		params: { id },
+		props: {},
+		site: new URL("https://academy.test"),
+	}) as unknown as APIContext;
 
 beforeEach(() => {
 	vi.useFakeTimers();
 	vi.setSystemTime(new Date("2026-09-20T12:00:00Z"));
 	for (const key of Object.keys(collections)) delete collections[key];
 	collections.people = [entry("person", { name: "Person & Friends" })];
+	getCollection.mockReset();
+	getEntry.mockReset();
+	setContentCache.mockReset();
 	getCollection.mockImplementation(async (name, filter) =>
-		(collections[name] ?? []).filter(filter ?? (() => true)));
+		(collections[name] ?? []).filter(filter ?? (() => true)),
+	);
+	getEntry.mockImplementation(async (name, id) =>
+		(collections[name] ?? []).find((item) => item.id === id),
+	);
+	setContentCache.mockResolvedValue({});
 });
 afterEach(() => vi.useRealTimers());
 
@@ -34,16 +63,24 @@ describe("person RSS request-time contracts", () => {
 		const xml = await response.text();
 		expect(prerender).toBe(false);
 		expect(response.status).toBe(200);
-		expect(response.headers.get("Content-Type")).toBe("application/rss+xml; charset=utf-8");
+		expect(response.headers.get("Content-Type")).toBe(
+			"application/rss+xml; charset=utf-8",
+		);
 		expect(xml).toContain("Rawkode Academy - Person &amp; Friends");
 		expect(xml).toContain("https://academy.test/watch/talk/");
 		expect(xml).not.toContain("undefined");
 	});
 
-	it.each(["unknown", undefined])("returns 404 for unknown/missing ID %s", async (id) => {
+	it.each([
+		"unknown",
+		undefined,
+	])("returns 404 for unknown/missing ID %s", async (id) => {
 		const response = await GET(context(id));
 		expect(response.status).toBe(404);
-		expect(getCollection).toHaveBeenCalledTimes(1);
+		expect(getEntry).toHaveBeenCalledTimes(1);
+		expect(getEntry).toHaveBeenCalledWith("people", id);
+		expect(getCollection).not.toHaveBeenCalled();
+		expect(setContentCache).not.toHaveBeenCalled();
 	});
 
 	it("returns a valid named empty feed for a known host-only profile", async () => {
@@ -57,17 +94,52 @@ describe("person RSS request-time contracts", () => {
 
 	it("filters future content while including legacy-flagged articles and excluding unrelated people", async () => {
 		const future = new Date("2026-09-20T12:00:00.001Z");
-		collections.articles = [entry("article"), entry("formerly-hidden", { draft: true }), entry("future-article", { publishedAt: future })];
-		collections.news = [entry("news", { authors: [{ id: "person" }] }), entry("future-news", { publishedAt: future })];
-		collections.videos = [entry("video", { guests: [{ id: "person" }], publishedAt: new Date() }),
+		collections.articles = [
+			entry("article"),
+			entry("formerly-hidden", { draft: true }),
+			entry("future-article", { publishedAt: future }),
+		];
+		collections.news = [
+			entry("news", { authors: [{ id: "person" }] }),
+			entry("future-news", { publishedAt: future }),
+		];
+		collections.videos = [
+			entry("video", { guests: [{ id: "person" }], publishedAt: new Date() }),
 			entry("future-recorded", { publishedAt: future, type: "recorded" }),
 			entry("future-live", { publishedAt: future, type: "live" }),
-			entry("unrelated", { guests: ["someone-else"] })];
+			entry("unrelated", { guests: ["someone-else"] }),
+		];
 		const xml = await (await GET(context("person"))).text();
 		expect(xml.match(/<item>/g)).toHaveLength(4);
-		for (const word of ["future-", "unrelated"]) expect(xml).not.toContain(word);
-		for (const url of ["/read/article/", "/read/formerly-hidden/", "/news/news/", "/watch/video/"]) expect(xml).toContain(url);
-		expect(xml.indexOf("/watch/video/")).toBeLessThan(xml.indexOf("/read/article/"));
+		for (const word of ["future-", "unrelated"])
+			expect(xml).not.toContain(word);
+		for (const url of [
+			"/read/article/",
+			"/read/formerly-hidden/",
+			"/news/news/",
+			"/watch/video/",
+		])
+			expect(xml).toContain(url);
+		expect(xml.indexOf("/watch/video/")).toBeLessThan(
+			xml.indexOf("/read/article/"),
+		);
+	});
+
+	it("caches the feed with the person, every listed item and the listed collections", async () => {
+		collections.articles = [
+			entry("article"),
+			entry("other-article", { authors: ["someone-else"] }),
+		];
+		collections.news = [entry("news")];
+		collections.videos = [entry("video", { guests: [{ id: "person" }] })];
+		await GET(context("person"));
+		expect(setContentCache).toHaveBeenCalledTimes(1);
+		const [target, input] = setContentCache.mock.calls[0]!;
+		expect(target.params.id).toBe("person");
+		expect(input.collections).toEqual(["articles", "news", "videos"]);
+		expect(input.entries.map((item: { id: string }) => item.id).sort()).toEqual(
+			["article", "news", "person", "video"],
+		);
 	});
 
 	it("does not trust an unrelated identity supplied through props", async () => {

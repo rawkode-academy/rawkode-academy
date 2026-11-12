@@ -1,15 +1,18 @@
 ---
-export const prerender = true;
+export const prerender = false;
 
 import PersonItemListJsonLd from "@/components/html/person-itemlist-jsonld.astro";
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
 import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 import Page from "@/wrappers/page.astro";
-import { getCollection } from "astro:content";
-import { getPublishedVideos } from "@/lib/content";
+import { getCollection, setContentCache } from "@/lib/live-content";
 import { getPersonIdentityUrls } from "@/lib/person-identity-links";
 
-const people = await getCollection("people");
+const now = new Date();
+const [people, publishedVideos] = await Promise.all([
+	getCollection("people"),
+	getCollection("videos", ({ data }) => data.publishedAt <= now),
+]);
 const sortedPeople = people.sort((a, b) =>
 	a.data.name.localeCompare(b.data.name),
 );
@@ -22,9 +25,12 @@ const peopleJsonLd = sortedPeople.map((person) => ({
 }));
 // The masthead shows the most recent guests first, in the order they
 // appeared on the Academy, then fills with everyone else who has a portrait.
-const recentGuestIds = (await getPublishedVideos())
-	.slice(0, 40)
-	.flatMap((video) => video.data.guests.map((guest) => guest.id));
+const recentVideos = publishedVideos
+	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
+	.slice(0, 40);
+const recentGuestIds = recentVideos.flatMap((video) =>
+	video.data.guests.map((guest) => guest.id),
+);
 const portraitOf = new Map(
 	sortedPeople
 		.filter((person) => person.data.avatarUrl)
@@ -33,6 +39,12 @@ const portraitOf = new Map(
 const mosaic = [...new Set([...recentGuestIds, ...portraitOf.keys()])]
 	.map((id) => portraitOf.get(id))
 	.filter((src): src is string => Boolean(src));
+// The directory lists every person; the masthead ordering follows the most
+// recently published videos, so a newly published video reorders it.
+await setContentCache(Astro, {
+	entries: [...people, ...recentVideos],
+	collections: ["people", "videos"],
+});
 const styles = academyLayout({ width: "wide" });
 const catalog = academyCatalog({ identityLayout: "portrait" });
 ---

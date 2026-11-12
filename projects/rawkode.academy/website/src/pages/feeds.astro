@@ -1,17 +1,16 @@
 ---
-import { getCollection } from "astro:content";
 import EditorialShell from "@/components/ui/EditorialShell.astro";
 import Page from "@/wrappers/page.astro";
 import { academyDocument } from "@rawkodeacademy/design-system";
+import { getCollection, setContentCache } from "@/lib/live-content";
 
 const doc = academyDocument();
-
-export const prerender = true;
 
 const shows = await getCollection("shows");
 const publishedShows = shows.filter(
 	(show) => show.data.publish && show.data.status !== "coming-soon",
 );
+await setContentCache(Astro, { collections: ["shows"] });
 
 const feedGroups = [
 	{
@@ -61,6 +60,11 @@ const formatNotes = [
 ---
 
 <Page title="Feeds" description="Subscribe to Rawkode Academy via RSS, Atom, JSON Feed, or OPML.">
+	<Fragment slot="extra-head">
+		<link rel="alternate" type="application/rss+xml" title="Rawkode Academy - All Content (RSS)" href="/api/feeds/all.xml" />
+		<link rel="alternate" type="application/atom+xml" title="Rawkode Academy - All Content (Atom)" href="/api/feeds/all.atom" />
+		<link rel="alternate" type="application/feed+json" title="Rawkode Academy - All Content (JSON Feed)" href="/api/feeds/all.json" />
+	</Fragment>
 	<EditorialShell title="Feeds" lede="Follow the Academy in your feed reader. Choose a topic below, or import all feeds at once." compact>
 		<a slot="actions" class={doc.link} href="/feeds.opml" download>Download all feeds (OPML) ↓</a>
 

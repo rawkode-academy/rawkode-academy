@@ -1,7 +1,29 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { resolveLegacyRoute } from "../middleware/legacy-routes";
 
 describe("legacy route resolver", () => {
+	it("routes old supporter enquiries to Support Our Work", () => {
+		for (const route of [
+			"Support the Academy",
+			"Community Support",
+			"Community supporter",
+		]) {
+			const source = new URL(
+				"https://rawkode.academy/organizations/partnerships",
+			);
+			source.searchParams.set("route", route);
+			source.hash = "#enquiry-form";
+			expect(resolveLegacyRoute(source)).toEqual({
+				kind: "redirect",
+				status: 302,
+				location: source
+					.toString()
+					.replace("/partnerships", "/support-our-work"),
+			});
+		}
+	});
 	it("permanently redirects retired public pages to current hubs", () => {
 		expect(
 			resolveLegacyRoute(new URL("https://rawkode.academy/events")),
@@ -25,13 +47,27 @@ describe("legacy route resolver", () => {
 			location: "https://rawkode.academy/technology/equinix-metal",
 		});
 		expect(
+			resolveLegacyRoute(new URL("https://rawkode.academy/series/")),
+		).toEqual({
+			kind: "redirect",
+			status: 301,
+			location: "https://rawkode.academy/read",
+		});
+		expect(
 			resolveLegacyRoute(
 				new URL("https://rawkode.academy/series/talos-on-hetzner"),
 			),
 		).toEqual({
 			kind: "redirect",
 			status: 301,
-			location: "https://rawkode.academy/series",
+			location: "https://rawkode.academy/read",
+		});
+		expect(
+			resolveLegacyRoute(new URL("https://rawkode.academy/organizations")),
+		).toEqual({
+			kind: "redirect",
+			status: 301,
+			location: "https://rawkode.academy/organizations/partnerships",
 		});
 		expect(
 			resolveLegacyRoute(
@@ -121,5 +157,15 @@ describe("legacy route resolver", () => {
 		expect(resolveLegacyRoute(new URL("https://rawkode.academy/shows"))).toBe(
 			undefined,
 		);
+	});
+
+	// The Cloudflare adapter serves a prerendered 404 straight from assets for
+	// unmatched paths, so middleware never runs and none of these redirects fire.
+	it("renders the 404 page on request so unmatched paths reach middleware", () => {
+		const page = readFileSync(
+			join(process.cwd(), "src", "pages", "404.astro"),
+			"utf8",
+		);
+		expect(page).toMatch(/export const prerender = false;/);
 	});
 });

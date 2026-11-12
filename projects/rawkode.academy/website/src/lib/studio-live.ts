@@ -22,6 +22,8 @@ export interface StudioLiveGateInput {
 	publishedAt: Date;
 }
 
+const studioLiveStateTimeoutMs = 2_000;
+
 export function emptyStudioLiveState(): StudioLiveState {
 	return {
 		live: false,
@@ -50,13 +52,32 @@ export async function getStudioLiveState(
 		return emptyStudioLiveState();
 	}
 
-	const request = new Request(studioLiveStateUrl(videoSlug));
-	const response = await env.STUDIO.fetch(request).catch(() => null);
-	if (!response?.ok) {
+	const controller = new AbortController();
+	const deadline = Date.now() + studioLiveStateTimeoutMs;
+	const monotonicDeadline = performance.now() + studioLiveStateTimeoutMs;
+	let timer: ReturnType<typeof setTimeout> | undefined;
+	const timeout = new Promise<StudioLiveState>((resolve) => {
+		timer = setTimeout(() => {
+			controller.abort();
+			resolve(emptyStudioLiveState());
+		}, studioLiveStateTimeoutMs);
+	});
+	try {
+		const request = new Request(studioLiveStateUrl(videoSlug), { signal: controller.signal });
+		const state = await Promise.race([
+			(async () => {
+				const response = await env.STUDIO!.fetch(request);
+				return response.ok ? parseStudioLiveState(await response.json()) : emptyStudioLiveState();
+			})(),
+			timeout,
+		]);
+		if (Date.now() >= deadline || performance.now() >= monotonicDeadline) return emptyStudioLiveState();
+		return state;
+	} catch {
 		return emptyStudioLiveState();
+	} finally {
+		if (timer !== undefined) clearTimeout(timer);
 	}
-
-	return parseStudioLiveState(await response.json().catch(() => null));
 }
 
 export function studioLiveStateUrl(videoSlug: string): string {

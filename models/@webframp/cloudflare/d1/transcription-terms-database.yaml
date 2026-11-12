@@ -1,0 +1,10 @@
+type: '@webframp/cloudflare/d1'
+typeVersion: 2026.11.03.1
+id: f8e43d38-b56c-4c84-b4cb-66abd4ecd985
+name: transcription-terms-database
+version: 1
+tags: {}
+globalArguments:
+  accountId: 0aeb879de8e3cdde5fb3d413025222ce
+  apiToken: ${{ vault.get(rawkode-academy, cloudflare/api-tokens/workers) }}
+methods: {}
