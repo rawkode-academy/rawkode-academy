@@ -3,7 +3,7 @@ name: update-people
 description: >-
   Audit people in the platform-people D1 database, and their extra links in
   platform-people-links, against the sites they point at, then write the
-  confirmed corrections to the people table after approval. Link problems are
+  confirmed corrections to the people table. Link problems are
   reported for review and never written.
 version: 1
 tags: {}
@@ -31,7 +31,7 @@ inputs:
         {"rawkode": {"mastodon": "https://hachyderm.io/@rawkode"}}
 jobs:
   - name: update
-    description: Read, audit, approve, write, confirm and invalidate
+    description: Read, audit, write, confirm and invalidate
     steps:
       - name: read
         description: Read the requested people rows from D1
@@ -83,24 +83,10 @@ jobs:
             people: ${{ inputs.people }}
             accept: ${{ inputs.accept }}
             changes: ${{ inputs.changes }}
-      - name: approve
-        description: Review the plan before anything is written
-        dependsOn:
-          - step: audit
-            condition:
-              type: succeeded
-        guard: ${{ size(data.latest("person-profiles", "plan").attributes.statements) == 0 }}
-        task:
-          type: manual_approval
-          prompt: >-
-            Review the planned people updates before they are written to
-            production D1: swamp data query 'modelName == "person-profiles"
-            && name == "plan"' --select attributes.summary
-          timeout: 86400
       - name: write
         description: Apply the planned updates to the people table in one batch
         dependsOn:
-          - step: approve
+          - step: audit
             condition:
               type: succeeded
         guard: ${{ size(data.latest("person-profiles", "plan").attributes.statements) == 0 }}
