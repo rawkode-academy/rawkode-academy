@@ -4,7 +4,7 @@ import {
 	type LearningPathAuthor,
 } from "@/lib/learning-path-jsonld";
 
-export interface LearningPathListEntry {
+interface LearningPathListEntry {
 	id: string;
 	source: LearningPathSource;
 	authors: ReadonlyArray<LearningPathAuthor>;

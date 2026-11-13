@@ -8,7 +8,7 @@ import { isRealtimeKitScreenSource } from "./programmeMediaGate";
 const RUNTIME_SOURCE_TYPES = new Set<StudioSource["type"]>(["audio", "camera", "screen"]);
 const MANUAL_BOUNDS_SETTING = "studioManualBounds";
 
-export type StudioSourceAuthority = "realtimekit";
+type StudioSourceAuthority = "realtimekit";
 
 export interface StudioSourceReconciliationOptions {
   authoritativeRuntimeSource?: StudioSourceAuthority;

@@ -11,7 +11,7 @@ const MAX_SVG_BYTES = 2 * 1024 * 1024;
 /** Per-isolate memo bound: SVGs can be large, the isolate's memory is not. */
 export const DIAGRAM_MEMO_MAX = 64;
 /** A slow asset host must not hold the page render. */
-export const DIAGRAM_FETCH_TIMEOUT_MS = 5_000;
+const DIAGRAM_FETCH_TIMEOUT_MS = 5_000;
 
 /** Find the end of a `{ ... }` block starting at `open` (index of "{"). */
 function matchingBrace(css: string, open: number): number {

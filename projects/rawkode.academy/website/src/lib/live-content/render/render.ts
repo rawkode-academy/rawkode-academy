@@ -44,7 +44,7 @@ const MEMO_MAX = 128;
 /** How long an isolate reuses a degraded render before retrying. */
 const DEGRADED_MEMO_MS = 60_000;
 
-export type RenderProfile = "prose" | "description";
+type RenderProfile = "prose" | "description";
 
 export interface RenderOptions {
 	/**
@@ -106,8 +106,8 @@ const ASIDE_ICON_PATHS: Record<"tip" | "caution" | "danger" | "info", string> =
 		info: "m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z",
 	};
 
-/** Same markup as src/components/Aside.astro. */
-export function asideHtml(node: AsideNode, children: string): string {
+/** The authored Aside callout. */
+function asideHtml(node: AsideNode, children: string): string {
 	const variant = node.attrs.variant;
 	const tone = variant === "warning" ? "caution" : variant;
 	const styles = academyCallout({ tone });
@@ -144,11 +144,11 @@ function imgTag(
 }
 
 /** ThemeAwareImage / ZoomableImage / plain images. */
-export function imageHtml(node: ImageNode): string {
+function imageHtml(node: ImageNode): string {
 	const { src, alt, title, width, height, darkSrc, zoomable } = node.attrs;
 	const dims = { width, height, title };
 	if (darkSrc) {
-		// Same classes as ThemeAwareImage.astro; RichText ships the CSS, which
+		// The ThemeAwareImage component; RichText ships the CSS, which
 		// follows the site's .dark class rather than the OS preference.
 		return `<div class="theme-aware-image">${imgTag(src, alt ?? "", { ...dims, class: "theme-light-only" })}${imgTag(darkSrc, alt ?? "", { ...dims, class: "theme-dark-only" })}</div>`;
 	}
@@ -166,7 +166,7 @@ export function imageHtml(node: ImageNode): string {
 	return img;
 }
 
-export function videoHtml(node: VideoNode): string {
+function videoHtml(node: VideoNode): string {
 	const thumbnailUrl =
 		node.attrs.thumbnailUrl ?? videoThumbnailUrl(node.attrs.videoId);
 	return islandHtml(
@@ -435,7 +435,7 @@ export async function renderDocument(
 }
 
 /** The document an entry renders as its body. */
-export function entryDocument(
+function entryDocument(
 	entry: ContentEntry<CollectionName>,
 ): DocNode | undefined {
 	const data = entry.data as { body?: DocNode; descriptionDoc?: DocNode };

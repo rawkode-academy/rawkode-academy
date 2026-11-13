@@ -5,7 +5,7 @@ import { captureServerEvent, getDistinctId } from "../server/analytics";
 
 const ReactionSchema = z.object({
 	contentId: z.string(),
-	emoji: z.string().emoji(),
+	emoji: z.emoji(),
 	contentTimestamp: z.number().optional(),
 });
 

@@ -86,7 +86,6 @@ async function renderPartnerships(
 			}),
 		},
 		"@/components/organizations/PartnerLogos.astro": { default: empty },
-		"@/components/organizations/ReviewPreview.astro": { default: empty },
 	};
 	const modules = new Map();
 	async function load(path) {

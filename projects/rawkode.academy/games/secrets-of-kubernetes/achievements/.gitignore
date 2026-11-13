@@ -14,7 +14,6 @@ node_modules/
 
 # BEGIN cuenv codegen
 README.md
-biome.json
 drizzle.config.ts
 http/wrangler.jsonc
 package.json

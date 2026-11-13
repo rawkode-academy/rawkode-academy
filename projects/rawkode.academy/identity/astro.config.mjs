@@ -10,7 +10,9 @@ export default defineConfig({
   adapter: cloudflare(),
   integrations: [react()],
   vite: {
-    plugins: [tailwindcss()],
+    // @tailwindcss/vite is typed against Vite 8, Astro 6 runs Vite 7; the
+    // plugin works with both (same cast as the website's asAstroVitePlugins).
+    plugins: /** @type {any} */ ([tailwindcss()]),
     resolve: {
       // Use react-dom/server.edge instead of react-dom/server.browser for React 19.
       // Without this, MessageChannel from node:worker_threads needs to be polyfilled.

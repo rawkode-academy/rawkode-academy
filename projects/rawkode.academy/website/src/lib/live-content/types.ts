@@ -120,7 +120,7 @@ export interface VideoData {
 	recordUpdatedAt?: Date | undefined;
 }
 
-export type ShowStatus = "coming-soon" | "active" | "archived";
+type ShowStatus = "coming-soon" | "active" | "archived";
 
 export interface ShowData {
 	id: string;

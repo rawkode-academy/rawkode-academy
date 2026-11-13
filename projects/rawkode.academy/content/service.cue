@@ -8,6 +8,9 @@ _service: gen.#PlatformService & {
 	includeReadModel:  false
 	includeWriteModel: false
 	includeHttp:       true
+	additionalDevDependencies: {
+		vitest: "^4.1.8"
+	}
 	bindings: {
 		r2Buckets: [{
 			binding:    "CONTENT_BUCKET"

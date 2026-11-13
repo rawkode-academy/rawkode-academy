@@ -21,7 +21,6 @@ const documentComponents = [
 	"read/ArticleByline.astro",
 	"read/ArticleTOC.astro",
 	"read/EndSlug.astro",
-	"read/ReadNext.astro",
 	"courses/CourseDetailHero.vue",
 	"courses/CourseModules.astro",
 	"articles/Resources.astro",

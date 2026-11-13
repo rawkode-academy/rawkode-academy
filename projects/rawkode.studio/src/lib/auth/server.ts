@@ -1,6 +1,6 @@
 const ID_PROVIDER_URL = "https://id.rawkode.academy";
 
-export const CLIENT_ID = "rawkode-studio";
+const CLIENT_ID = "rawkode-studio";
 export const PKCE_COOKIE_NAME = "studio-pkce-verifier";
 export const SESSION_COOKIE_NAME = "rawkode-studio-session";
 export const SESSION_DURATION_SECONDS = 60 * 60 * 24 * 7;
@@ -86,11 +86,11 @@ async function generateCodeChallenge(verifier: string): Promise<string> {
 	return encodeBase64UrlFromBytes(new Uint8Array(hash));
 }
 
-export function getCallbackUrl(origin: string): string {
+function getCallbackUrl(origin: string): string {
 	return `${origin}/api/auth/callback`;
 }
 
-export function normalizeReturnTo(returnTo: string, origin: string): string {
+function normalizeReturnTo(returnTo: string, origin: string): string {
 	if (!returnTo || returnTo.startsWith("//")) return "/";
 
 	try {

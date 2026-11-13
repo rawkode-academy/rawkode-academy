@@ -44,7 +44,7 @@ if (canPlay) {
 	weekStart = weekKey(now);
 	const rounds = buildWeeklyRounds(logos, now);
 	// Escape `<` so a technology name containing `</script>` can't break out of
-	// the JSON <script> tag below (JSON-in-HTML embedding mitigation).
+	// the JSON script tag below (JSON-in-HTML embedding mitigation).
 	roundsJson = JSON.stringify(rounds).replace(/</g, "\\u003c");
 }
 ---

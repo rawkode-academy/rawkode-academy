@@ -106,7 +106,7 @@ export const signupForCourseUpdates = defineAction({
 				const signedUpCourses =
 					(await ctx.session.get("signedUpCourses")) || {};
 				signedUpCourses[audienceId] = email;
-				await ctx.session.set("signedUpCourses", signedUpCourses);
+				ctx.session.set("signedUpCourses", signedUpCourses);
 			}
 
 			// Analytics: capture course signup (without sending PII)

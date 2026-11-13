@@ -1,11 +1,4 @@
-export interface ApiError {
-	message: string;
-	code?: string;
-	status?: number;
-	details?: unknown;
-}
-
-export class ApiResponseError extends Error {
+class ApiResponseError extends Error {
 	public readonly status: number;
 	public readonly code?: string;
 	public readonly details?: unknown;
@@ -79,31 +72,4 @@ export function getErrorMessage(error: unknown): string {
 	}
 
 	return "An unexpected error occurred";
-}
-
-export function isNetworkError(error: unknown): boolean {
-	if (error instanceof TypeError && error.message.includes("fetch")) {
-		return true;
-	}
-
-	if (
-		error instanceof Error &&
-		(error.message.includes("NetworkError") ||
-			error.message.includes("Failed to fetch") ||
-			error.message.includes("Network request failed"))
-	) {
-		return true;
-	}
-
-	return false;
-}
-
-export function logError(
-	error: unknown,
-	context?: Record<string, unknown>,
-): void {
-	// Use the centralized logger - import dynamically to avoid circular deps
-	import("@/lib/logger").then(({ logger }) => {
-		logger.error("Error occurred", error, context);
-	});
 }

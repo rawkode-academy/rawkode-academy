@@ -3,6 +3,7 @@ import { escapeHtml } from "@rawkodeacademy/rich-text";
 import { z } from "astro/zod";
 import ts from "typescript";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import * as partnerships from "@/lib/partnerships";
 
 const limit = vi.fn();
 const send = vi.fn();
@@ -31,9 +32,6 @@ const loadModule = (
 	);
 	return module.exports;
 };
-const partnerships = loadModule(
-	"src/lib/partnerships.ts",
-) as typeof import("@/lib/partnerships");
 type Action = {
 	accept?: string;
 	input: { parse: (value: unknown) => Record<string, unknown> };

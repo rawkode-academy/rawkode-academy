@@ -1,4 +1,4 @@
-export interface ArticleListEntry {
+interface ArticleListEntry {
 	id: string;
 	data: {
 		title: string;

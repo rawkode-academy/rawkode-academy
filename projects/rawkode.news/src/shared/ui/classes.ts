@@ -1,10 +1,10 @@
 export const interactiveControlClass =
   "outline-none transition-[background-color,color,border-color,box-shadow] duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:ring-2 focus-visible:ring-ring/60";
 
-export const interactiveTextClass =
+const interactiveTextClass =
   "outline-none transition-colors duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:ring-2 focus-visible:ring-ring/60";
 
-export const interactiveTextActionClass =
+const interactiveTextActionClass =
   "outline-none transition-[color,box-shadow] duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:ring-2 focus-visible:ring-ring/60";
 
 export const inputClass =
@@ -52,7 +52,7 @@ export const textActionMutedXsClass =
 export const textActionMutedXsUnderlineClass =
   `inline-flex items-center text-xs font-medium text-muted-foreground underline-offset-4 ${interactiveTextClass} hover:text-foreground hover:underline`;
 
-export const tagChipBaseClass =
+const tagChipBaseClass =
   "inline-flex h-[var(--rkn-control-sm-height)] max-w-full min-w-0 items-center gap-1 border px-[var(--rkn-control-inline-padding)] text-xs font-medium";
 
 export const tagFilterChipClass =

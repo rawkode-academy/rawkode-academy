@@ -146,7 +146,7 @@ export function assertPushSubscriptionInput(
 	requireAuthSecret(value.keys.auth);
 }
 
-export function assertNotificationIntentInput(
+function assertNotificationIntentInput(
 	value: unknown,
 ): asserts value is NotificationIntentInput {
 	if (!isRecord(value)) {

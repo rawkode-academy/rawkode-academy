@@ -1,10 +1,10 @@
-export interface NewsArticleAuthor {
+interface NewsArticleAuthor {
 	name: string;
 	url?: string | undefined;
 	sameAs?: ReadonlyArray<string> | undefined;
 }
 
-export interface NewsArticleSource {
+interface NewsArticleSource {
 	title: string;
 	description: string;
 	publishedAt: Date;

@@ -8,7 +8,7 @@ import { drizzle } from "drizzle-orm/d1";
 import type { GraphQLSchema } from "graphql";
 import * as dataSchema from "../data-model/schema";
 
-export interface PothosTypes {
+interface PothosTypes {
 	DrizzleSchema: typeof dataSchema;
 }
 

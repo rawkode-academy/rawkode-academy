@@ -22,7 +22,7 @@ export interface LeaderboardEntry {
  * platform services, via service bindings) invoke the recordScore RPC method;
  * no public caller writes D1 directly.
  */
-export class LeaderboardWriteModel extends WorkerEntrypoint<Env> {
+export default class LeaderboardWriteModel extends WorkerEntrypoint<Env> {
 	private get db() {
 		return drizzle(this.env.DB);
 	}
@@ -150,5 +150,3 @@ export class LeaderboardWriteModel extends WorkerEntrypoint<Env> {
 		};
 	}
 }
-
-export default LeaderboardWriteModel;

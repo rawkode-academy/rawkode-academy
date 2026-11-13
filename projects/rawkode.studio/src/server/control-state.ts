@@ -426,7 +426,7 @@ function rowToSnapshot(row: StudioControlStateRow): StudioControlStateSnapshot {
 	};
 }
 
-export function normalizeStoredStudioControlState(value: unknown): unknown {
+function normalizeStoredStudioControlState(value: unknown): unknown {
 	if (!isRecord(value)) {
 		return value;
 	}

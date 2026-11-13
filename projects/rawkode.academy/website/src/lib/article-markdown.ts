@@ -4,7 +4,7 @@ const DEFAULT_SITE_URL = "https://rawkode.academy";
 
 type ArticleRef = Pick<ContentEntry<"articles">, "id">;
 
-export function articleCanonicalUrl(
+function articleCanonicalUrl(
 	article: ArticleRef,
 	site: URL | undefined,
 ): string {

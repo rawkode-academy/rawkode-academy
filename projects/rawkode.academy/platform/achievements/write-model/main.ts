@@ -56,7 +56,7 @@ function initStats(): PlayerStats {
 	};
 }
 
-export class AchievementsWriteModel extends WorkerEntrypoint<Env> {
+export default class AchievementsWriteModel extends WorkerEntrypoint<Env> {
 	private get db() {
 		return drizzle(this.env.DB, { schema: dataSchema });
 	}
@@ -223,5 +223,3 @@ export class AchievementsWriteModel extends WorkerEntrypoint<Env> {
 		return stats;
 	}
 }
-
-export default AchievementsWriteModel;

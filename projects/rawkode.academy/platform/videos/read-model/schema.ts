@@ -14,7 +14,7 @@ import * as s from "../data-model/schema";
 
 type Video = s.Video;
 
-export interface PothosTypes {
+interface PothosTypes {
 	Context: Record<string, unknown>;
 	Scalars: {
 		DateTime: { Input: Date; Output: Date };

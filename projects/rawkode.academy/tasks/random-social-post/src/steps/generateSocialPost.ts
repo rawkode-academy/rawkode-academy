@@ -7,11 +7,11 @@ export enum SocialPlatforms {
 	Zulip = "Zulip",
 }
 
-export const GeneratedSocialPost = z.object({
+const GeneratedSocialPost = z.object({
 	post: z.string(),
 });
 
-export const AiResponse = z.object({
+const AiResponse = z.object({
 	response: GeneratedSocialPost,
 });
 

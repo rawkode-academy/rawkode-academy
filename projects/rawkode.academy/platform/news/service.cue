@@ -8,6 +8,7 @@ _service: gen.#PlatformService & {
 	// Rich-text bodies are TipTap documents; the read model uses its types.
 	additionalDependencies: {
 		"@rawkodeacademy/rich-text": "workspace:*"
+		"graphql-scalars":           "^1.24.2"
 	}
 	additionalDevDependencies: {
 		miniflare: "4.20260529.0"

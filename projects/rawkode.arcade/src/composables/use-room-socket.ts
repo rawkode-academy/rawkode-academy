@@ -40,7 +40,7 @@ const initialRoom = (
  * Durable Object adapter. Tickets are supplied as a subprotocol so they never
  * appear in URLs, browser history, referrers, or ordinary request logs.
  */
-export const createWebSocketPort = (): RoomSocketPort => {
+const createWebSocketPort = (): RoomSocketPort => {
 	let socket: WebSocket | undefined;
 	return {
 		connect({ roomId, ticket, socketUrl, onMessage, onConnection }) {
@@ -126,7 +126,7 @@ function publicPrompt(active: Record<string, unknown>) {
 }
 
 /** Validate the reducer's game-specific projection at the browser boundary. */
-export function mapPublicGameBoard(value: unknown): PublicRoomState["gameBoard"] {
+function mapPublicGameBoard(value: unknown): PublicRoomState["gameBoard"] {
 	const board = asRecord(value);
 	if (board.kind === "merge-conflict" && typeof board.total === "number") {
 		const entries = Array.isArray(board.entries)
@@ -224,7 +224,7 @@ export function normalizeRoomSnapshot(
 		};
 	const game = isGameId(state.gameKey) ? state.gameKey : fallback.game;
 	const teams = Object.entries(asRecord(state.teams)).map(
-		([id, value], index) => {
+		([id, value]) => {
 			const team = asRecord(value);
 			return {
 				id,

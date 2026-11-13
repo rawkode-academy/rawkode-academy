@@ -5,6 +5,12 @@ import gen "github.com/rawkode-academy/rawkode-academy/projects/rawkode.academy/
 _service: gen.#PlatformService & {
 	serviceName:       "brackets"
 	includeWriteModel: true
+	additionalDependencies: {
+		"@paralleldrive/cuid2":   "^2.2.2"
+		"@pothos/plugin-drizzle": "^0.8.1"
+		"graphql-scalars":        "^1.24.2"
+		zod:                      "^3.24.3"
+	}
 	bindings: {
 		d1Databases: [{
 			binding:      "DB"

@@ -8,6 +8,12 @@ _service: gen.#PlatformService & {
 	includeReadModel:  false
 	includeWriteModel: false
 	includeHttp:       true
+	additionalDependencies: {
+		cloudevents: "^8.0.2"
+	}
+	additionalDevDependencies: {
+		vitest: "^4.1.8"
+	}
 	bindings: {
 		sendEmail: [{
 			name: "SEND_EMAIL"

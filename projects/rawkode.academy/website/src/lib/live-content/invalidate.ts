@@ -5,7 +5,7 @@ import { bumpGeneration, type GenerationState } from "./kv-cache";
 import { COLLECTIONS } from "./types";
 
 /** Cloudflare purges at most this many tags per call. */
-export const PURGE_BATCH = 30;
+const PURGE_BATCH = 30;
 const MAX_TAGS = 1_000;
 const TAG_PATTERN = /^[^\s,]{1,1024}$/;
 
@@ -78,10 +78,7 @@ export function expandTags(tags: Iterable<string>): string[] {
 	return [...out];
 }
 
-export async function purgeInBatches(
-	purge: PurgeTags,
-	tags: string[],
-): Promise<void> {
+async function purgeInBatches(purge: PurgeTags, tags: string[]): Promise<void> {
 	for (let i = 0; i < tags.length; i += PURGE_BATCH) {
 		await purge(tags.slice(i, i + PURGE_BATCH));
 	}

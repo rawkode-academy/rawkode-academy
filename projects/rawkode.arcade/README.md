@@ -110,7 +110,7 @@ over a ticketed WebSocket, not by polling secret-bearing room storage.
 | Path | Responsibility |
 | --- | --- |
 | `src/protocol/` | Versioned envelopes, commands, events, and runtime validation. |
-| `src/domain/` | Deterministic engine, room state, roles, redaction, clock, and registry. |
+| `src/domain/` | Deterministic engine, room state, roles, redaction, and registry. |
 | `src/games/` | Six game plugins implementing the shared contract. |
 | `src/durable-objects/` | Authoritative room and sharded audience coordination. |
 | `src/server/` | Ticket issuance, result projection, and server-only helpers. |

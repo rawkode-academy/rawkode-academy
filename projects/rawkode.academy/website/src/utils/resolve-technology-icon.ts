@@ -19,10 +19,3 @@ export function resolveTechnologyIconUrl(
 ): string | undefined {
 	return logos?.icon ? logoUrl(entryId, "icon.svg") : undefined;
 }
-
-export function resolveTechnologyHorizontalLogoUrl(
-	entryId: string,
-	logos?: LogosConfig | null,
-): string | undefined {
-	return logos?.horizontal ? logoUrl(entryId, "horizontal.svg") : undefined;
-}

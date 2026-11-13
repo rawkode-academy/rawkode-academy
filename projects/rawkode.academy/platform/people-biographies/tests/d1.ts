@@ -27,8 +27,3 @@ export async function exec(DB: D1Database, sql: string) {
 		.filter(Boolean);
 	for (const statement of statements) await DB.prepare(statement).run();
 }
-
-// Loads tests/fixtures.sql: a small slice of real content, in migration format.
-export async function loadFixtures(DB: D1Database) {
-	await exec(DB, await readFile(join(import.meta.dir, "fixtures.sql"), "utf8"));
-}

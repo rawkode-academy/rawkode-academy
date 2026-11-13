@@ -1,9 +1,9 @@
-export interface AdrAuthor {
+interface AdrAuthor {
 	id: string;
 	name: string;
 }
 
-export interface AdrSource {
+interface AdrSource {
 	id: string;
 	title: string;
 	adoptedAt: Date;

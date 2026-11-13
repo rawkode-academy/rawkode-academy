@@ -13,7 +13,7 @@ type Env = {
 	ANALYTICS: Fetcher;
 };
 
-export type RecordResultParams = {
+type RecordResultParams = {
 	matchId: string;
 	winnerEntryId: string;
 	scoreA?: number | null;
@@ -110,7 +110,7 @@ export class RecordResultWorkflow extends WorkflowEntrypoint<
 
 // Build the next round once the current round is fully completed. If only one
 // winner remains the bracket is marked finished.
-export async function advanceBracket(db: Db, bracketId: string): Promise<void> {
+async function advanceBracket(db: Db, bracketId: string): Promise<void> {
 	const all = await db
 		.select()
 		.from(s.matches)

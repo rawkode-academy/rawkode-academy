@@ -7,6 +7,9 @@ _service: gen.#PlatformService & {
 	servicePrefix:    "games"
 	includeReadModel: false
 	includeHttp:      true
+	additionalDependencies: {
+		"@paralleldrive/cuid2": "^2.2.2"
+	}
 	bindings: {
 		d1Databases: [{
 			binding:      "DB"

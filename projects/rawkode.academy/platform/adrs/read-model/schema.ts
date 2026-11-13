@@ -12,7 +12,7 @@ import { batchLoader, chunk, groupBy } from "./batch";
 
 type Adr = s.Adr;
 
-export interface PothosTypes {
+interface PothosTypes {
 	Context: Record<string, unknown>;
 	Scalars: {
 		DateTime: { Input: Date; Output: Date };

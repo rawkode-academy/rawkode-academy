@@ -1,4 +1,4 @@
-import { css, cva, sva } from "../../styled-system/css";
+import { css, sva } from "../../styled-system/css";
 
 /**
  * The broadcast scale.
@@ -76,12 +76,6 @@ export const castPrompt = css({
 	textWrap: "balance",
 });
 
-export const castHero = css({
-	textStyle: "castHero",
-	color: "ink",
-	lineHeight: "flat",
-});
-
 /** Team standings as read off the stream. Numbers carry the frame. */
 export const castScores = sva({
 	slots: ["root", "row", "name", "score"],
@@ -118,44 +112,4 @@ export const castScores = sva({
 		},
 	},
 	defaultVariants: { position: "default" },
-});
-
-/**
- * Countdown ring. Animates a registered `--arcade-sweep` angle so the sweep
- * runs on the compositor rather than repainting a layout property.
- */
-export const castClock = cva({
-	base: {
-		display: "grid",
-		placeItems: "center",
-		width: "castRing",
-		height: "castRing",
-		borderRadius: "pill",
-		backgroundImage: "castSweep",
-		position: "relative",
-		_before: {
-			content: '""',
-			position: "absolute",
-			inset: "castRingInset",
-			borderRadius: "pill",
-			bg: "ground",
-		},
-	},
-	variants: {
-		running: {
-			true: {
-				animation: "sweep",
-				animationTimingFunction: "linear",
-				animationFillMode: "forwards",
-			},
-		},
-	},
-});
-
-export const castClockValue = css({
-	position: "relative",
-	textStyle: "castTitle",
-	fontFamily: "mono",
-	color: "ink",
-	fontVariantNumeric: "tabular-nums",
 });

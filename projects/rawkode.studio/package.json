@@ -21,7 +21,6 @@
     "@cloudflare/realtimekit": "2.0.0",
     "@cloudflare/realtimekit-ui": "2.0.0",
     "@noble/hashes": "1.8.0",
-    "@remotion/player": "^4.0.473",
     "astro": "^6.4.2",
     "motion": "^12.40.0",
     "notifications": "workspace:*",

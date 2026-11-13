@@ -128,7 +128,8 @@ export async function getRecipeUsage(source, extension = ".ts") {
 				module: statement.moduleSpecifier.text,
 				imported: (specifier.propertyName ?? specifier.name).text,
 				typeOnly: Boolean(
-					statement.importClause.isTypeOnly || specifier.isTypeOnly,
+					statement.importClause.phaseModifier === ts.SyntaxKind.TypeKeyword ||
+						specifier.isTypeOnly,
 				),
 			};
 			bindings.set(checker.getSymbolAtLocation(specifier.name), binding);

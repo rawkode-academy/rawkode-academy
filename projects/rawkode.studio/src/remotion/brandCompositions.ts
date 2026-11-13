@@ -51,7 +51,7 @@ export function drawRemotionCompositionLayer(
 }
 
 function drawIntroComposition(context: CanvasRenderingContext2D, params: CompositionRenderParams): void {
-  const { frame, layer, resolution } = params;
+  const { frame, layer } = params;
   const { x, y, width, height } = layer.bounds;
   const title = layer.settings?.remotion?.title ?? "Rawkode Live";
   const subtitle = layer.settings?.remotion?.subtitle ?? "Browser production console";
@@ -125,7 +125,7 @@ function drawIntroComposition(context: CanvasRenderingContext2D, params: Composi
 }
 
 function drawOutroComposition(context: CanvasRenderingContext2D, params: CompositionRenderParams): void {
-  const { frame, layer, resolution } = params;
+  const { frame, layer } = params;
   const { x, y, width, height } = layer.bounds;
   const title = layer.settings?.remotion?.title ?? "Thanks for watching";
   const subtitle = layer.settings?.remotion?.subtitle ?? "Rawkode Live";

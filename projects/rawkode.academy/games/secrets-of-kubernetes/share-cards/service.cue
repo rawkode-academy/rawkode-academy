@@ -9,6 +9,9 @@ _service: gen.#PlatformService & {
 	includeReadModel:  false
 	includeWriteModel: false
 	includeHttp:       true
+	additionalDependencies: {
+		"@paralleldrive/cuid2": "^2.2.2"
+	}
 	bindings: {
 		r2Buckets: [{
 			binding:    "UGC_BUCKET"

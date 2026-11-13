@@ -7,7 +7,7 @@ import { drizzle } from "drizzle-orm/d1";
 import type { GraphQLSchema } from "graphql";
 import * as s from "../data-model/schema";
 
-export interface PothosTypes {
+interface PothosTypes {
 	Context: Record<string, unknown>;
 }
 

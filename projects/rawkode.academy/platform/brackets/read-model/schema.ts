@@ -9,7 +9,7 @@ import { DateTimeResolver } from "graphql-scalars";
 import type { GraphQLSchema } from "graphql";
 import * as s from "../data-model/schema";
 
-export interface PothosTypes {
+interface PothosTypes {
 	DrizzleSchema: typeof s;
 	Context: BracketsReadContext;
 	Scalars: {
@@ -17,7 +17,7 @@ export interface PothosTypes {
 	};
 }
 
-export interface BracketsReadContext {
+interface BracketsReadContext {
 	userId: string | null;
 }
 

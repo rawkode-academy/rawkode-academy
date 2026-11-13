@@ -251,26 +251,6 @@ export function filterTechnologies(
 }
 
 /**
- * Group technologies by a dimension
- */
-export function groupByDimension(
-	technologies: NormalizedTechnology[],
-	dimension: DimensionKey,
-): Map<string | null, NormalizedTechnology[]> {
-	const groups = new Map<string | null, NormalizedTechnology[]>();
-
-	for (const tech of technologies) {
-		const value = tech.dimensions[dimension];
-		if (!groups.has(value)) {
-			groups.set(value, []);
-		}
-		groups.get(value)!.push(tech);
-	}
-
-	return groups;
-}
-
-/**
  * Create a 2D grid grouping for matrix visualization
  */
 export function createGrid(
@@ -360,11 +340,4 @@ export function serializeForClient(
 	technologies: NormalizedTechnology[],
 ): string {
 	return JSON.stringify(technologies);
-}
-
-/**
- * Parse serialized data on client
- */
-export function parseFromServer(json: string): NormalizedTechnology[] {
-	return JSON.parse(json) as NormalizedTechnology[];
 }

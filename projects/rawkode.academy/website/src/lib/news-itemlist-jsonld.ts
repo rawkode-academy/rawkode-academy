@@ -1,6 +1,6 @@
 import { isNewsPublished } from "./news-publication";
 
-export interface NewsListEntry {
+interface NewsListEntry {
 	id: string;
 	data: {
 		title: string;

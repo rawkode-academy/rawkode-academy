@@ -43,41 +43,6 @@ const supportApplicationBody = [
 	"When you'd like to start:",
 ].join("\n");
 
-/**
- * Capacity. David does every review and partnership himself, so places are
- * capped. The page prints these numbers as written: update `active` and
- * `asOf` by hand whenever a review starts or a partnership ends, and never
- * lower `places` or raise `active` to manufacture urgency.
- */
-export const partnershipCapacity = {
-	/** Partners (including first engagements in progress) David works with at once. */
-	places: 6,
-	/** Places taken today. */
-	active: 0,
-	/** New first engagements David can start in a calendar month. */
-	newStartsPerMonth: 2,
-	asOf: "12 October 2026",
-	/** Week the next engagement can start, e.g. "2 November 2026". Leave null until known. */
-	nextStart: null as string | null,
-} as const;
-
-export const partnershipPlacesOpen = Math.max(
-	0,
-	partnershipCapacity.places - partnershipCapacity.active,
-);
-
-export const partnershipIsFull = partnershipPlacesOpen === 0;
-
-/**
- * Current availability, worded for the page. While no places are taken the
- * page states the limits and the booking order rather than a count.
- */
-export const partnershipAvailability = partnershipIsFull
-	? `All ${partnershipCapacity.places} places are taken as of ${partnershipCapacity.asOf}. Enquire to join the waiting list; places go in the order work is booked.`
-	: partnershipCapacity.active > 0
-		? `${partnershipPlacesOpen} of ${partnershipCapacity.places} places open as of ${partnershipCapacity.asOf}. Places go in the order work is booked.`
-		: `New work starts in the order it's booked, ${partnershipCapacity.newStartsPerMonth} a month. Once ${partnershipCapacity.places} partners are in progress, new work waits for a place.`;
-
 export interface CopyPart {
 	text: string;
 	href?: string;
@@ -149,29 +114,6 @@ export const partnershipDescription =
 
 export const supportOurWorkDescription =
 	"Support Rawkode Academy's free developer education. Help engineers learn through practical tutorials, live streams and shows, with clear recognition for your company.";
-
-export interface PartnershipPerk {
-	title: string;
-	detail: string;
-}
-
-export const partnershipPerks: PartnershipPerk[] = [
-	{
-		title: "Practitioner feedback",
-		detail:
-			"We use our monthly working session to discuss what came up in the work and what your team can do next.",
-	},
-	{
-		title: "Your technology page",
-		detail:
-			"Your Academy technology page carries your partner badge, docs and the examples we create together. We check it at the quarterly review.",
-	},
-	{
-		title: "Newsletter feature",
-		detail:
-			"One technical update per quarter, with the edition, material and submission deadline agreed in the scope.",
-	},
-];
 
 export interface AdoptionStage {
 	id: "awareness" | "adoption" | "support";
@@ -253,9 +195,6 @@ export const supporterIndependenceRules = [
 			"David decides what he publishes and keeps his own conclusions, including limitations. Funding does not buy an endorsement or recommendation.",
 	},
 ] as const;
-
-export const partnershipAdvice =
-	"We choose the work your users need and agree the priorities, outputs and cadence for each quarter.";
 
 export const supportAcademyOffer: PartnershipOffer = {
 	id: "support-our-work",
@@ -369,49 +308,6 @@ export const partnershipAddOns = [
 export const partnershipOwnership =
 	"You own the reports and the read-outs. Example repositories are licensed Apache 2.0, so you can use, change and ship them.";
 
-export const partnershipTerms = [
-	{
-		title: "Scope",
-		detail:
-			"We agree the quarterly work, outputs and dates before you commit. Bespoke projects and community challenges have their own fixed quotes.",
-	},
-	{
-		title: "Renewal",
-		detail:
-			"Nothing renews automatically. Each agreement ends after its agreed term of three, six or twelve months. We agree any continuation in writing.",
-	},
-	{
-		title: "Payment",
-		detail:
-			"Partnerships are $15,000 for three months. Discounted pricing requires a commitment of six months or longer: $24,000 for six months billed $12,000 a quarter, or $40,000 for a 12-month contract billed $10,000 a quarter. Prices are fixed in the statement of work, in USD, with 30-day payment terms, and exclude VAT where it applies.",
-	},
-	{
-		title: "Paperwork",
-		detail:
-			"A one-page statement of work lists the deliverables and dates, contracting entity and liability cap. We can work under your MSA and sign your NDA.",
-	},
-	{
-		title: "Access and data",
-		detail:
-			"I work from a trial or sandbox account and don't need production systems or customer data. Review materials stay private and I delete my copies 90 days after the work ends, or sooner if you ask. Your admins control the shared Slack channel.",
-	},
-	{
-		title: "Ownership",
-		detail: `${partnershipOwnership} We agree recording reuse rights and factual review before publication.`,
-	},
-] as const;
-
-export const productReviewScope =
-	"Within the partnership, we agree the product areas, intended users and workflows to review, from a first working result to production tasks such as backup and restore or upgrades. The plan defines the evidence, fixes and any later retest.";
-
-export const partnershipTiers = [
-	supportAcademyOffer,
-	ongoingPartnershipOffer,
-	bespokeProjectOffer,
-	communityChallengeOffer,
-] as const;
-export const partnershipTierNames = partnershipTiers.map((offer) => offer.name);
-
 export const applicationPaths = [
 	"Support Our Work",
 	"Partnership",
@@ -420,8 +316,6 @@ export const applicationPaths = [
 	"Not sure yet",
 ] as const;
 export type ApplicationPath = (typeof applicationPaths)[number];
-export const productReviewPath = "Partnership" satisfies ApplicationPath;
-export const notSurePath = "Not sure yet" satisfies ApplicationPath;
 
 export const applicationPathLabels: Record<ApplicationPath, string> = {
 	"Support Our Work": supportAcademyOffer.name,
@@ -463,15 +357,12 @@ export const resolveApplicationPath = (
 		: undefined;
 };
 
-export const partnershipFitSubject = "Rawkode Academy partnership";
-export const partnershipFitTemplate = applicationBody;
-export const partnershipFitMailto = buildMailto(
-	partnershipFitSubject,
-	partnershipFitTemplate,
-);
-export const decisionBriefSubject = partnershipFitSubject;
+export const decisionBriefSubject = "Rawkode Academy partnership";
 export const decisionBriefTemplate = applicationBody;
-export const decisionBriefMailto = partnershipFitMailto;
+export const decisionBriefMailto = buildMailto(
+	decisionBriefSubject,
+	decisionBriefTemplate,
+);
 
 const partnershipBriefBody = [
 	"Rawkode Academy Partnership",

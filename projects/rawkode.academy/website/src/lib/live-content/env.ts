@@ -19,7 +19,7 @@ export interface ContentKV {
 	delete?(key: string): Promise<void>;
 }
 
-export interface ContentFetcher {
+interface ContentFetcher {
 	fetch(input: Request | string | URL, init?: RequestInit): Promise<Response>;
 }
 

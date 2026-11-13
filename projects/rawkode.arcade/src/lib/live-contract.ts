@@ -1,7 +1,7 @@
 import type { GameId } from "./game-catalogue";
 
 /** Browser-safe projection; it never contains answer keys or producer notes. */
-export type PublicChoice = { id: string; label: string; votes?: number };
+type PublicChoice = { id: string; label: string; votes?: number };
 export type PublicPrompt = {
 	id: string;
 	label: string;
@@ -15,7 +15,7 @@ export type TeamScore = {
 	score: number;
 	streak?: number;
 };
-export type LeaderboardEntry = {
+type LeaderboardEntry = {
 	rank: number;
 	name: string;
 	score: number;
@@ -40,7 +40,7 @@ export type RoomPhase =
  * deliberately progress/reveal data only: no unrevealed answers, aliases, or
  * producer notes cross this browser boundary.
  */
-export type PublicGameBoard = {
+type PublicGameBoard = {
 	mergeConflict?: {
 		entries: readonly { rank: number; label?: string; revealed: boolean }[];
 		total: number;
@@ -113,7 +113,7 @@ export type CommandEnvelope<T = Record<string, unknown>> = {
 	payload: T;
 	sentAt: string;
 };
-export type SnapshotEnvelope = {
+type SnapshotEnvelope = {
 	v: 1;
 	type: "snapshot";
 	version: number;
@@ -122,7 +122,7 @@ export type SnapshotEnvelope = {
 	state: unknown;
 	serverTime: string;
 };
-export type EventEnvelope = {
+type EventEnvelope = {
 	v: 1;
 	type: "event";
 	version: number;
@@ -130,7 +130,7 @@ export type EventEnvelope = {
 	payload: unknown;
 	commandId?: string;
 };
-export type ErrorEnvelope = {
+type ErrorEnvelope = {
 	v: 1;
 	type: "error";
 	code: string;

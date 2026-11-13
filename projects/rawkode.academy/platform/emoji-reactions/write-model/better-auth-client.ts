@@ -6,7 +6,7 @@
 
 const ID_PROVIDER_URL = "https://id.rawkode.academy";
 
-export interface User {
+interface User {
 	id: string;
 	email: string;
 	emailVerified: boolean;
@@ -16,7 +16,7 @@ export interface User {
 	updatedAt: Date;
 }
 
-export interface Session {
+interface Session {
 	id: string;
 	userId: string;
 	expiresAt: Date;

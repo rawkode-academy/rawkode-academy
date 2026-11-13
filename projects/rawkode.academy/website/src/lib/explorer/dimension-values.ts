@@ -1,13 +1,6 @@
 // Technology Explorer dimensions (ported from the retired @rawkodeacademy/content
 // package, content/src/dimensions.ts).
 
-export const MATRIX_GROUPING_VALUES = [
-	"plumbing",
-	"platform",
-	"observability",
-	"security",
-] as const;
-
 export const MATRIX_STATUS_VALUES = [
 	"under-review",
 	"skip",
@@ -32,23 +25,6 @@ export const MATRIX_TRAJECTORY_VALUES = [
 	"falling",
 ] as const;
 
-export const CNCF_STATUS_VALUES = [
-	"sandbox",
-	"incubating",
-	"graduated",
-	"archived",
-] as const;
-
-export const TECHNOLOGY_STATUS_VALUES = [
-	"alpha",
-	"beta",
-	"stable",
-	"preview",
-	"superseded",
-	"deprecated",
-	"abandoned",
-] as const;
-
 export type DimensionKey =
 	| "matrix.grouping"
 	| "matrix.status"
@@ -59,7 +35,7 @@ export type DimensionKey =
 	| "subcategory"
 	| "status";
 
-export interface DimensionValue {
+interface DimensionValue {
 	value: string;
 	label: string;
 	description?: string;
@@ -379,13 +355,6 @@ export const DIMENSIONS: Record<DimensionKey, DimensionDefinition> = {
 };
 
 /**
- * Get dimension definition by key
- */
-export function getDimension(key: DimensionKey): DimensionDefinition {
-	return DIMENSIONS[key];
-}
-
-/**
  * Get color for a dimension value
  */
 export function getDimensionColor(
@@ -438,24 +407,3 @@ export function getAxisOptions(): Array<{
 		description: dim.description,
 	}));
 }
-
-/**
- * Dimensions that work well as X-axis (ordered/sequential)
- */
-export const ORDERED_DIMENSIONS: DimensionKey[] = [
-	"matrix.status",
-	"matrix.confidence",
-	"matrix.trajectory",
-	"cncf.status",
-	"status",
-];
-
-/**
- * Dimensions that work well as Y-axis (categorical)
- */
-export const CATEGORICAL_DIMENSIONS: DimensionKey[] = [
-	"matrix.grouping",
-	"category",
-	"subcategory",
-	"cncf.status",
-];

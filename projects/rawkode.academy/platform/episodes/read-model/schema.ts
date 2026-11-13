@@ -7,12 +7,12 @@ import { drizzle } from "drizzle-orm/d1";
 import type { GraphQLSchema } from "graphql";
 import * as s from "../data-model/schema";
 
-export interface PothosTypes {
+interface PothosTypes {
 	Context: Record<string, unknown>;
 }
 
 // The public id the website used: "<show>-<video>".
-export const episodeId = (episode: Pick<s.Episode, "showId" | "videoId">) =>
+const episodeId = (episode: Pick<s.Episode, "showId" | "videoId">) =>
 	`${episode.showId}-${episode.videoId}`;
 
 export const getSchema = (env: { DB: D1Database }): GraphQLSchema => {

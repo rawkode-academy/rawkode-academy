@@ -9,14 +9,14 @@ on:
     paths:
     - '*.cue'
     - .github/workflows/rawkode-academy-identity-default.yml
+    - bun.lock
+    - bun.lock/**
     - cue.mod/**
     - projects/*.cue
     - projects/rawkode.academy/*.cue
     - projects/rawkode.academy/identity/*.cue
     - projects/rawkode.academy/identity/astro.config.mjs
     - projects/rawkode.academy/identity/astro.config.mjs/**
-    - projects/rawkode.academy/identity/bun.lock
-    - projects/rawkode.academy/identity/bun.lock/**
     - projects/rawkode.academy/identity/migrations/**
     - projects/rawkode.academy/identity/package.json
     - projects/rawkode.academy/identity/package.json/**

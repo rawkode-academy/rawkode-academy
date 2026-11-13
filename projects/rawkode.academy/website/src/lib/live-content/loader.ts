@@ -27,13 +27,11 @@ export interface ContentEntryFilter extends ContentCollectionFilter {
 	id: string;
 }
 
-export function defaultScheduledMode(
-	collection: CollectionName,
-): ScheduledMode {
+function defaultScheduledMode(collection: CollectionName): ScheduledMode {
 	return collection === "videos" ? "include" : "exclude";
 }
 
-export function isScheduled<C extends CollectionName>(
+function isScheduled<C extends CollectionName>(
 	entry: Pick<ContentEntry<C>, "collection" | "data">,
 	at: number = now(),
 ): boolean {

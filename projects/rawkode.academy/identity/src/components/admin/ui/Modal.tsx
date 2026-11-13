@@ -10,7 +10,7 @@ interface ModalProps {
 	footer?: ReactNode;
 }
 
-export function Modal({ isOpen, onClose, title, children, footer }: ModalProps) {
+function Modal({ isOpen, onClose, title, children, footer }: ModalProps) {
 	useEffect(() => {
 		const handleEscape = (e: KeyboardEvent) => {
 			if (e.key === "Escape") {

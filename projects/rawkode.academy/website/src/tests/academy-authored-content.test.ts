@@ -5,13 +5,11 @@ import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import * as runtime from "astro/runtime/server/index.js";
 import ts from "typescript";
 import { academyRelatedContent } from "@rawkodeacademy/design-system";
-import { academyCallout } from "../../../../../packages/design-system/src/recipes/academyCallout";
 import { ContentError, optionalContent } from "@/lib/live-content/collections";
 
 type Component = Parameters<
 	Awaited<ReturnType<typeof AstroContainer.create>>["renderToString"]
 >[0];
-let aside: Component;
 let related: Component;
 let articles: ReturnType<typeof article>[] = [];
 let collectionReads: string[] = [];
@@ -52,11 +50,6 @@ async function compile(file: string, imports: Record<string, unknown>) {
 }
 
 beforeAll(async () => {
-	aside = await compile("Aside.astro", {
-		"@rawkodeacademy/design-system": {
-			academyCallout,
-		},
-	});
 	related = await compile("articles/RelatedArticles.astro", {
 		"@rawkodeacademy/design-system": { academyRelatedContent },
 		"@/lib/live-content": {
@@ -97,42 +90,7 @@ async function render(
 }
 
 describe("authored callouts", () => {
-	it.each([
-		"info",
-		"tip",
-		"caution",
-		"danger",
-		"warning",
-	] as const)("renders %s with a decorative, sized icon and intact content", async (variant) => {
-		const dom = await render(
-			aside,
-			{ variant },
-			{
-				default:
-					'<p>Read <a href="/read/cgroups">the guide</a>.</p><p>Second paragraph.</p>',
-			},
-		);
-		const styles = academyCallout({
-			tone: variant === "warning" ? "caution" : variant,
-		});
-		expect(dom.querySelector("aside")?.getAttribute("aria-label")).toBe(
-			variant,
-		);
-		expect(dom.querySelector("aside > div")?.className).toBe(styles.header);
-		const icon = dom.querySelector("svg")!;
-		expect(icon.getAttribute("class")).toBe(styles.icon);
-		expect(icon.getAttribute("aria-hidden")).toBe("true");
-		expect(icon.getAttribute("focusable")).toBe("false");
-		expect(
-			icon.querySelector("path")?.getAttribute("d")?.length,
-		).toBeGreaterThan(30);
-		expect(dom.querySelectorAll("p")).toHaveLength(2);
-		expect(dom.querySelector("a")?.getAttribute("href")).toBe("/read/cgroups");
-		expect(dom.querySelector("astro-island, style")).toBeNull();
-	});
-	it("uses theme-aware recipes and scoped prose isolation, without legacy utilities", () => {
-		const source = readFileSync("src/components/Aside.astro", "utf8");
-		expect(source).not.toMatch(/<style|h-4|w-4|editorial-|not-prose/);
+	it("uses theme-aware recipes and scoped prose isolation", () => {
 		const callout = readFileSync(
 			"../../../packages/design-system/src/recipes/academyCallout.ts",
 			"utf8",

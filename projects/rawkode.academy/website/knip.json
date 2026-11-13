@@ -1,6 +1,13 @@
 {
-	"$schema": "https://unpkg.com/knip@5/schema.json",
+	"$schema": "https://unpkg.com/knip@6/schema.json",
 	"tags": ["-lintignore"],
+	"entry": [
+		"scripts/*.ts",
+		"src/live.config.ts",
+		"src/lib/live-content/render/shiki-*.ts",
+		"public/notification-service-worker.js"
+	],
+	"ignore": ["src/webcontainer-demos/**"],
 	"playwright": {
 		"config": ["visual/playwright.config.ts"],
 		"entry": ["visual/**/*.visual.ts", "visual/serve.ts"]

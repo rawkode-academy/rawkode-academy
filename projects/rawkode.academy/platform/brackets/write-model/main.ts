@@ -48,7 +48,7 @@ function slugify(value: string): string {
  * public caller writes D1 directly. Durable multi-step operations (generate,
  * record result) are delegated to Cloudflare Workflows.
  */
-export class BracketsWriteModel extends WorkerEntrypoint<Env> {
+export default class BracketsWriteModel extends WorkerEntrypoint<Env> {
 	private get db(): Db {
 		return drizzle(this.env.DB);
 	}
@@ -1477,5 +1477,3 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 		return { ok: true };
 	}
 }
-
-export default BracketsWriteModel;

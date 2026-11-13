@@ -2,7 +2,7 @@
 // federation gateway at request time.
 import { env } from "cloudflare:workers";
 
-export const DEFAULT_GRAPHQL_ENDPOINT = "https://api.rawkode.academy/";
+const DEFAULT_GRAPHQL_ENDPOINT = "https://api.rawkode.academy/";
 
 /** Upper bound for one gateway request, so a hung gateway fails fast. */
 const GATEWAY_TIMEOUT_MS = 8_000;
@@ -10,7 +10,7 @@ const GATEWAY_TIMEOUT_MS = 8_000;
 /** How long a fetched copy is reused within one isolate. */
 const MEMO_TTL_MS = 5 * 60_000;
 
-export interface PersonData {
+interface PersonData {
 	name: string;
 	/** GitHub handle (not a URL). */
 	github?: string;
@@ -61,7 +61,7 @@ function str(value: string | null | undefined): string | undefined {
 	return typeof value === "string" && value.trim() !== "" ? value : undefined;
 }
 
-export function mapPerson(raw: RawPerson): Person {
+function mapPerson(raw: RawPerson): Person {
 	const data: PersonData = { name: str(raw.name) ?? raw.id };
 	const github = str(raw.githubHandle);
 	const twitter = str(raw.twitterHandle);

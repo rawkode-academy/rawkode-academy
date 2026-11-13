@@ -1,10 +1,12 @@
-// @vitest-environment node
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({ infrastructure: "" }));
-vi.mock("node:fs/promises", () => ({
-	readFile: vi.fn(() => Promise.resolve(mocks.infrastructure)),
-}));
+// The script sits outside the website's Vite root, so vitest reaches its
+// named import through the module's default export: mock both.
+vi.mock("node:fs/promises", () => {
+	const readFile = vi.fn(() => Promise.resolve(mocks.infrastructure));
+	return { default: { readFile }, readFile };
+});
 
 const live = ["events_archive", "short_links"];
 let current: string[];

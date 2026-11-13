@@ -3,7 +3,7 @@ export const THUMBNAIL_HEIGHT = 720;
 export const THUMBNAIL_CONTENT_TYPE = "image/webp";
 export const THUMBNAIL_CACHE_CONTROL = "public, max-age=3600, s-maxage=3600";
 
-export interface ThumbnailVideo {
+interface ThumbnailVideo {
 	id: string;
 	slug: string;
 	title: string;
@@ -12,7 +12,7 @@ export interface ThumbnailVideo {
 	publishedAt?: string;
 }
 
-export interface ThumbnailTechnology {
+interface ThumbnailTechnology {
 	id: string;
 	name: string;
 	iconSvg?: string;
@@ -33,7 +33,7 @@ export interface ThumbnailShow {
 	terms?: string[];
 }
 
-export interface ThumbnailSource {
+interface ThumbnailSource {
 	commitSha: string;
 	trigger: "github-actions" | "manual" | "scheduled" | "test";
 	contentPath?: string;
@@ -64,7 +64,7 @@ export interface GuestLayout {
 
 const VIDEO_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/;
 
-export function assertValidVideoId(id: string): void {
+function assertValidVideoId(id: string): void {
 	if (!VIDEO_ID_PATTERN.test(id)) {
 		throw new Error(`Invalid video id for thumbnail key: ${id}`);
 	}

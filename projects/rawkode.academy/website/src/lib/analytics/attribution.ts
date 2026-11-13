@@ -1,4 +1,4 @@
-export const UTM_KEYS = [
+const UTM_KEYS = [
 	"utm_source",
 	"utm_medium",
 	"utm_campaign",
@@ -6,7 +6,7 @@ export const UTM_KEYS = [
 	"utm_content",
 ] as const;
 
-export type UtmKey = (typeof UTM_KEYS)[number];
+type UtmKey = (typeof UTM_KEYS)[number];
 
 export type CampaignAttribution = Partial<
 	Record<UtmKey, string> & {

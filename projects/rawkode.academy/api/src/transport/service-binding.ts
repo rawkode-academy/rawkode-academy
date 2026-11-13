@@ -5,7 +5,7 @@ import { print } from "graphql";
  * Map subgraph names (as they appear in the supergraph) to service binding keys.
  * The keys must match the binding names in wrangler.jsonc.
  */
-export const SUBGRAPH_BINDING_MAP: Record<string, keyof Env> = {
+const SUBGRAPH_BINDING_MAP: Record<string, keyof Env> = {
 	people: "PEOPLE",
 	technologies: "TECHNOLOGIES",
 	shows: "SHOWS",
@@ -36,7 +36,7 @@ export const SUBGRAPH_BINDING_MAP: Record<string, keyof Env> = {
 	achievements: "ACHIEVEMENTS",
 };
 
-export interface ServiceBindingTransportContext {
+interface ServiceBindingTransportContext {
 	env: Env;
 	user?: {
 		id: string;

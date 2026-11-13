@@ -31,7 +31,7 @@ export function TeamCreate() {
 
 	const organizations = (orgsResult?.data ?? []) as Organization[];
 
-	const handleSubmit = (e: React.FormEvent) => {
+	const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
 		const newErrors: Record<string, string> = {};

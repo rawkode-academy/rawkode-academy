@@ -15,11 +15,11 @@ export default defineConfig({
 		alias: {
 			"cloudflare:workers": path.join(
 				__dirname,
-				"rpc/__mocks__/cloudflare-workers.ts",
+				"http/__mocks__/cloudflare-workers.ts",
 			),
 			"cloudflare:email": path.join(
 				__dirname,
-				"rpc/__mocks__/cloudflare-email.ts",
+				"http/__mocks__/cloudflare-email.ts",
 			),
 		},
 	},

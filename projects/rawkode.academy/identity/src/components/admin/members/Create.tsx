@@ -59,7 +59,7 @@ export function MemberCreate() {
 	const organizations = (orgsResult?.data ?? []) as Organization[];
 	const users = (usersResult?.data ?? []) as User[];
 
-	const handleSubmit = (e: React.FormEvent) => {
+	const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
 		const newErrors: Record<string, string> = {};

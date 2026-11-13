@@ -111,7 +111,7 @@ function parseAttributionCookie(raw?: string): AttributionSnapshot | undefined {
  * server-emitted funnel events without requiring every CTA call site to pass
  * it explicitly.
  */
-export function getAttributionFromCookies(req: Request): {
+function getAttributionFromCookies(req: Request): {
 	first?: AttributionSnapshot;
 	last?: AttributionSnapshot;
 } {

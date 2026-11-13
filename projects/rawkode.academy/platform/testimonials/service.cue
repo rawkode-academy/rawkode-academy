@@ -5,6 +5,9 @@ import gen "github.com/rawkode-academy/rawkode-academy/projects/rawkode.academy/
 // Testimonials: quotes from maintainers, partners and viewers, with an embedded author.
 _service: gen.#PlatformService & {
 	serviceName: "testimonials"
+	additionalDependencies: {
+		"graphql-scalars": "^1.24.2"
+	}
 	additionalDevDependencies: {
 		miniflare: "4.20260529.0"
 	}

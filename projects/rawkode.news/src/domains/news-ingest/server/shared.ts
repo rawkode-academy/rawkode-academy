@@ -44,9 +44,9 @@ const htmlToMarkdown = new NodeHtmlMarkdown({
   ignore: ["script", "style", "noscript"],
 });
 
-export const collapseWhitespace = (value: string) => value.replace(/\s+/gu, " ").trim();
+const collapseWhitespace = (value: string) => value.replace(/\s+/gu, " ").trim();
 
-export const truncateText = (value: string, maxLength: number) => {
+const truncateText = (value: string, maxLength: number) => {
   if (value.length <= maxLength) {
     return value;
   }
@@ -68,10 +68,10 @@ export const decodeHtmlEntities = (value: string) =>
     return NAMED_HTML_ENTITIES.get(normalized) ?? match;
   });
 
-export const stripHtml = (value: string) =>
+const stripHtml = (value: string) =>
   value
-    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/giu, " ")
-    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/giu, " ")
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style\b[^>]*>/giu, " ")
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script\b[^>]*>/giu, " ")
     .replace(/<[^>]+>/gu, " ");
 
 const normalizeMarkdownWhitespace = (value: string) =>
@@ -174,7 +174,7 @@ export const truncateStatusMessage = (value: string | null | undefined) => {
   return truncateText(normalized, NEWS_SOURCE_STATUS_MAX_LENGTH);
 };
 
-export const normalizeBlueskyLocator = (value: string) => {
+const normalizeBlueskyLocator = (value: string) => {
   const trimmed = value.trim();
   if (!trimmed) {
     throw new RequestError("Bluesky account is required", 400);

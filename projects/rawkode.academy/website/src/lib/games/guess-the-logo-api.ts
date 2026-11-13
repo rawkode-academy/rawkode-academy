@@ -133,20 +133,6 @@ export async function getLeaderboard(
 }
 
 /**
- * Unlock achievements by id (idempotent).
- * Returns the ids that were newly unlocked in this call.
- * @deprecated Achievement unlocking is now handled server-side in the score route.
- */
-export async function unlockAchievements(
-	ids: string[],
-): Promise<{ unlocked: string[] }> {
-	return fetchJson("/api/games/cnicon/achievements", {
-		method: "POST",
-		body: JSON.stringify({ achievementIds: ids }),
-	});
-}
-
-/**
  * Get all achievements unlocked by the current user (across all weeks).
  */
 export async function getAchievements(): Promise<

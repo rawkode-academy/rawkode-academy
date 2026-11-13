@@ -39,7 +39,7 @@ import type { CollectionDataMap, CollectionName } from "./types";
 export const MANIFEST_KEY = "content:manifest";
 const MANIFEST_VERSION = 1;
 
-export interface ManifestEntity {
+interface ManifestEntity {
 	/** Hash of the entity's gateway JSON. */
 	h: string;
 	/** Publication time (epoch ms), when the collection schedules entries. */
@@ -186,9 +186,7 @@ export function diffManifests(
  * left out of the result and its entities are carried over from the previous
  * manifest, so the other collections are still checked.
  */
-export const OPTIONAL_SOURCES: ReadonlySet<ListSource> = new Set([
-	"supporters",
-]);
+const OPTIONAL_SOURCES: ReadonlySet<ListSource> = new Set(["supporters"]);
 
 /** Fetch every collection fresh from the gateway (no caches). */
 export async function fetchSources(

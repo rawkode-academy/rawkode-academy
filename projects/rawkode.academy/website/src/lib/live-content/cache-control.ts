@@ -37,12 +37,12 @@ import {
 export const DEFAULT_MAX_AGE = 60 * 60;
 export const DEFAULT_SWR = 24 * 60 * 60;
 /** After an invalidation, how long pages are only cached briefly. */
-export const SETTLING_WINDOW_MS = 2 * 60_000;
+const SETTLING_WINDOW_MS = 2 * 60_000;
 export const SETTLING_MAX_AGE = 60;
 /** Pages rendered from the last-good copy (gateway failing) cache briefly. */
 export const STALE_MAX_AGE = 60;
 /** Cloudflare caps Cache-Tag at 16 KB; leave room for the adapter's tags. */
-export const TAG_BUDGET = 8_000;
+const TAG_BUDGET = 8_000;
 
 interface EntryLike {
 	cacheHint?: CacheHint;

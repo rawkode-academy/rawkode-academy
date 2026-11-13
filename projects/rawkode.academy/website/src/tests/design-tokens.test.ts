@@ -59,7 +59,6 @@ const PROVIDED_CUSTOM_PROPERTIES: Record<string, string> = {
 	"--font-red-hat-mono": "Astro's font integration (astro.config.mts)",
 	"--reference-width": "Ark UI positioner",
 	"--available-height": "Ark UI positioner",
-	"--height": "Ark UI collapsible content",
 };
 
 // The lookbehind drops HTML numeric entities (&#123;) and mid-word hashes.

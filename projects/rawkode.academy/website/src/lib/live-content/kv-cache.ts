@@ -12,7 +12,7 @@
 import type { ContentKV } from "./env";
 
 export const GENERATION_KEY = "content:generation";
-export const PAYLOAD_TTL_SECONDS = 24 * 60 * 60;
+const PAYLOAD_TTL_SECONDS = 24 * 60 * 60;
 const LAST_GOOD_TTL_SECONDS = 7 * 24 * 60 * 60;
 /** How long an isolate trusts its copy of the generation. */
 const GENERATION_MEMO_MS = 10_000;
@@ -150,7 +150,7 @@ export function stableStringify(value: unknown): string {
 	return `{${entries.map(([k, v]) => `${JSON.stringify(k)}:${stableStringify(v)}`).join(",")}}`;
 }
 
-export function payloadKey(
+function payloadKey(
 	generation: number,
 	name: string,
 	variables: Record<string, unknown>,

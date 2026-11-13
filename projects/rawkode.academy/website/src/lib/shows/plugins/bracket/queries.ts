@@ -43,7 +43,7 @@ export interface BracketSeason {
 	brackets: Bracket[];
 }
 
-export interface MyTeam {
+interface MyTeam {
 	id: string;
 	name: string;
 	slug: string;
@@ -51,7 +51,7 @@ export interface MyTeam {
 	memberCount: number;
 }
 
-export interface MyBracketParticipation {
+interface MyBracketParticipation {
 	bracketId: string;
 	bracketSlug: string;
 	bracketName: string;
@@ -177,26 +177,6 @@ export async function loadSchedule(
 		{ showId },
 	);
 	return data.schedule ?? [];
-}
-
-export async function loadOpenBrackets(
-	showId: string,
-	readModel: BracketsReadBinding,
-): Promise<Bracket[]> {
-	const data = await queryBracketsRead<{
-		openBrackets?: Bracket[];
-	}>(
-		readModel,
-		`query ShowOpenBrackets($showId: String!) {
-			openBrackets(showId: $showId) {
-				id slug name kind format status maxEntries teamSize startsAt registrationClosesAt
-				entries { kind id displayName seed }
-				matches { ${MATCH_FIELDS} }
-			}
-		}`,
-		{ showId },
-	);
-	return data.openBrackets ?? [];
 }
 
 export async function loadMyParticipation(

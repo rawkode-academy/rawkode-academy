@@ -13,7 +13,7 @@ import { batchLoader, chunk, groupBy } from "./batch";
 // A story with its people and technology ids, in order.
 type NewsStory = s.NewsStory & { authorIds: string[]; technologyIds: string[] };
 
-export interface PothosTypes {
+interface PothosTypes {
 	Context: Record<string, unknown>;
 	Scalars: {
 		DateTime: { Input: Date; Output: Date };

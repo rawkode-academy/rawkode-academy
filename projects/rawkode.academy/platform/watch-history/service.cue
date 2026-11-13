@@ -6,8 +6,8 @@ _service: gen.#PlatformService & {
 	serviceName:       "watch-history"
 	includeWriteModel: true
 	additionalDependencies: {
-		"better-auth": "^1.4.1"
-		cloudevents:   "^8.0.2"
+		"@pothos/plugin-drizzle": "^0.8.1"
+		cloudevents:              "^8.0.2"
 	}
 	bindings: {
 		d1Databases: [{

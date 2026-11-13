@@ -13,7 +13,6 @@ node_modules/
 
 # BEGIN cuenv codegen
 README.md
-biome.json
 http/wrangler.jsonc
 package.json
 tsconfig.json

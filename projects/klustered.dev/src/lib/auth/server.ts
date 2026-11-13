@@ -8,7 +8,7 @@
  */
 
 const ID_PROVIDER_URL = "https://id.rawkode.academy";
-export const CLIENT_ID = "klustered-dev";
+const CLIENT_ID = "klustered-dev";
 export const PKCE_COOKIE_NAME = "pkce_verifier";
 export const SESSION_COOKIE_NAME = "klustered-session";
 export const SESSION_DURATION_SECONDS = 60 * 60 * 24 * 7;
@@ -55,7 +55,7 @@ async function generateCodeChallenge(verifier: string): Promise<string> {
 	return encodeBase64UrlFromBytes(new Uint8Array(hash));
 }
 
-export function getCallbackUrl(origin: string): string {
+function getCallbackUrl(origin: string): string {
 	return `${origin}/api/auth/callback`;
 }
 
@@ -148,10 +148,6 @@ export function getSignInUrl(returnTo?: string): string {
 	const url = new URL("/api/auth/sign-in", "http://internal");
 	if (returnTo) url.searchParams.set("returnTo", returnTo);
 	return `${url.pathname}${url.search}`;
-}
-
-export function getSignOutUrl(): string {
-	return "/api/auth/sign-out";
 }
 
 // Sessions live in the SESSION KV namespace (same approach as the website), not

@@ -28,9 +28,9 @@ interface __BaseEnv_Env {
 	SKI_LEADERBOARD: Service<typeof import("../games/secrets-of-kubernetes/leaderboard/http/http-service").SkiLeaderboard>;
 	SKI_SHARE_CARDS: Service<typeof import("../games/secrets-of-kubernetes/share-cards/http/http-service").SkiShareCards>;
 	LEADERBOARD_READ: Fetcher /* platform-leaderboard-read-model */;
-	LEADERBOARD_WRITE: Service<typeof import("../platform/leaderboard/write-model/main").LeaderboardWriteModel>;
+	LEADERBOARD_WRITE: Service<typeof import("../platform/leaderboard/write-model/main").default>;
 	ACHIEVEMENTS_READ: Fetcher /* platform-achievements-read-model */;
-	ACHIEVEMENTS_WRITE: Service<typeof import("../platform/achievements/write-model/main").AchievementsWriteModel>;
+	ACHIEVEMENTS_WRITE: Service<typeof import("../platform/achievements/write-model/main").default>;
 }
 declare namespace Cloudflare {
 	interface Env extends __BaseEnv_Env {}

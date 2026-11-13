@@ -4,28 +4,8 @@ import { getCourseModuleSlug } from "@/utils/course-path";
 import { isNewsPublished } from "@/lib/news-publication";
 
 const DEFAULT_SITE_URL = "https://rawkode.academy";
-const MODULE_LOADED_AT = new Date();
-let deployedAt: Date | undefined;
 
-/**
- * The deployed version's upload time (CF_VERSION_METADATA), used as the
- * lastmod of pages without an editorial date. Sitemaps used to be built at
- * deploy time and stamped those with the build time; now they render on
- * request, and the isolate start time would churn lastmod for crawlers.
- */
-export async function getDeployTime(): Promise<Date> {
-	if (deployedAt) return deployedAt;
-	try {
-		const { env } = await import("cloudflare:workers");
-		const timestamp = (env as { CF_VERSION_METADATA?: { timestamp?: string } })
-			.CF_VERSION_METADATA?.timestamp;
-		const parsed = timestamp ? new Date(timestamp) : undefined;
-		if (parsed && !Number.isNaN(parsed.getTime())) deployedAt = parsed;
-	} catch {}
-	return deployedAt ?? MODULE_LOADED_AT;
-}
-
-export type SitemapChangeFreq =
+type SitemapChangeFreq =
 	| "always"
 	| "hourly"
 	| "daily"
@@ -302,7 +282,7 @@ export async function getTechnologySitemapEntries(): Promise<
 	return sortByPath(entries);
 }
 
-export async function getVideoSitemapEntries(): Promise<SitemapUrlEntry[]> {
+async function getVideoSitemapEntries(): Promise<SitemapUrlEntry[]> {
 	const [videos] = await Promise.all([getPublishedVideos()]);
 
 	const entries = videos.map((video) => ({

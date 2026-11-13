@@ -195,7 +195,6 @@ Bracket, and later Quiz/Poll) and each show is just an instance with config.
   (a `(config) => ShowExtension` factory).
 - `registry.ts` — maps `showId -> ShowExtension`; `getShowExtension`,
   `getShowNav`, `hasExtension`.
-- `client.ts` — `queryShowsApi` helper for federated GraphQL reads.
 - Routing: `src/pages/shows/[showId]/[...slug].astro` (pages) and
   `src/pages/api/shows/[showId]/[...slug].ts` (endpoints) dispatch from the
   registry into `ShowLayout` + `ShowNav`. The hub `[showId].astro` renders the
@@ -206,8 +205,7 @@ title); `Component` receives the data as props.
 
 **Writing a plugin:** export a `ShowPlugin<Config>` factory under
 `src/lib/shows/plugins/<name>/` returning `{ showId, pages, endpoints }`. Reads
-go through `queryShowsApi` to the federated API; writes go through a platform
-service's write-model bound on the worker (see Bracket).
+and writes go through a platform service bound on the worker (see Bracket).
 
 **Bracket plugin** (`src/lib/shows/plugins/bracket/`): reads bracket data from
 the federated `Show` entity (served by the `platform/brackets` CQRS service),

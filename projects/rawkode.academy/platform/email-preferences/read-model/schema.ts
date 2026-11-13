@@ -20,7 +20,7 @@ interface Context {
 	};
 }
 
-export interface PothosTypes {
+interface PothosTypes {
 	Context: Context;
 	DrizzleSchema: typeof dataSchema;
 }

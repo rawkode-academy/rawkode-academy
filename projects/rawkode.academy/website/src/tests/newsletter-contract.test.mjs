@@ -31,9 +31,7 @@ const vue = require("vue");
 const { renderToString } = require("vue/server-renderer");
 const { parse, compileScript } = require("vue/compiler-sfc");
 const ts = require("typescript");
-const css = await import(
-	"../../../../../packages/design-system/styled-system/css/index.js"
-);
+const css = await import("@rawkodeacademy/design-system/css");
 // The real recipes, so the rendered class names are the production ones.
 const recipes = "../../../../../packages/design-system/src/recipes";
 const { academyMarketing } = await import(`${recipes}/academyMarketing.ts`);

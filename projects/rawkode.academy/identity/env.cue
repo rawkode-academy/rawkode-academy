@@ -41,7 +41,7 @@ tasks: {
 			args: ["x", "wrangler", "dev"]
 			inputs: [
 				"astro.config.mjs",
-				"bun.lock",
+				schema.#ModuleFiles & {paths: ["bun.lock"]},
 				"package.json",
 				"src/**",
 			]
@@ -64,7 +64,7 @@ tasks: {
 		args: ["run", "build"]
 		inputs: [
 			"astro.config.mjs",
-			"bun.lock",
+			schema.#ModuleFiles & {paths: ["bun.lock"]},
 			"package.json",
 			"src/**",
 		]
@@ -77,7 +77,7 @@ tasks: {
 		dependsOn: [_t.migrations.remote, _t.build]
 		inputs: [
 			"astro.config.mjs",
-			"bun.lock",
+			schema.#ModuleFiles & {paths: ["bun.lock"]},
 			"migrations/**",
 			"package.json",
 			"src/**",

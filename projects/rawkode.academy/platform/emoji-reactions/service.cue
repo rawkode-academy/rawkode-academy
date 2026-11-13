@@ -6,8 +6,12 @@ _service: gen.#PlatformService & {
 	serviceName:       "emoji-reactions"
 	includeWriteModel: true
 	additionalDependencies: {
-		"better-auth": "^1.4.1"
-		cloudevents:   "^8.0.2"
+		"@pothos/plugin-drizzle": "^0.8.1"
+		cloudevents:              "^8.0.2"
+	}
+	additionalDevDependencies: {
+		"@graphql-tools/utils": "^10.8.6"
+		miniflare:              "4.20260529.0"
 	}
 	bindings: {
 		d1Databases: [{

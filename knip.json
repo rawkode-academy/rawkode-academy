@@ -1,5 +1,5 @@
 {
-  "$schema": "https://unpkg.com/knip@latest/schema.json",
+  "$schema": "https://unpkg.com/knip@6/schema.json",
   "workspaces": {
     ".": {
       "entry": [
@@ -8,16 +8,15 @@
         "devenv.yaml",
         "devenv.nix",
         "env.cue",
-        "tsconfig.json"
+        "presentations/cloud-native-2.0/demo/set_url/{webpack.config,src/index}.js"
       ]
     },
     "projects/rawkode.academy/website": {
       "entry": [
-        "astro.config.mts",
         "scripts/*.ts",
-        ".storybook/main.ts",
         "src/live.config.ts",
-        "src/lib/live-content/render/shiki-*.ts"
+        "src/lib/live-content/render/shiki-*.ts",
+        "public/notification-service-worker.js"
       ],
       "ignore": [
         "src/webcontainer-demos/**"
@@ -29,17 +28,38 @@
     },
     "projects/rawkode.academy/platform/*": {
       "entry": [
-        "rpc/main.ts",
-        "rpc/*.ts",
-        "data-model/schema.ts",
-        "read-model/**/*.ts"
-      ],
-      "ignore": [
-        ".projen/**"
+        "{read-model,write-model,http,rpc}/main.ts",
+        "read-model/publish.ts",
+        "drizzle.config.ts",
+        "scripts/*.ts"
       ]
     },
+    "projects/rawkode.academy/games/secrets-of-kubernetes/*": {
+      "entry": ["http/main.ts", "drizzle.config.ts"]
+    },
     "projects/rawkode.arcade": {
-      "bun": false
+      "bun": false,
+      "entry": [
+        "{src,tests}/**/*.test.ts",
+        "scripts/load-rehearsal.ts",
+        "src/testing/worker-entry.ts"
+      ],
+      "playwright": {
+        "config": ["e2e/playwright.config.ts"]
+      },
+      "postcss": true
+    },
+    "projects/klustered.dev": {
+      "ignoreDependencies": ["@unocss/reset"]
+    },
+    "projects/rawkode.academy/content": {
+      "entry": ["http/main.ts"]
+    },
+    "projects/rawkode.academy/identity": {
+      "entry": ["src/lib/auth.config.ts"]
+    },
+    "projects/rawkode.tools/observability-collector": {
+      "entry": ["basin/reconcile.ts"]
     }
   },
   "astro": true,
@@ -47,10 +67,17 @@
   "storybook": true,
   "graphql-codegen": true,
   "typescript": true,
+  "ignoreDependencies": ["wrangler"],
   "ignore": [
-    "**/dist/**",
-    "**/.astro/**",
-    "**/node_modules/**",
-    "**/*.generated.*"
+    ".claude/**",
+    ".github/skills/**",
+    "extensions/**",
+    "packages/rich-text/tests/fixtures/**",
+    "projects/rawkode.academy/platform/youtube-to-structured-json/**",
+    "projects/rawkode.academy/platform/zitadel-zulip-connector/src/zitadel/actions/**",
+    "projects/rawkode.academy/tasks/content-cutover/**",
+    "projects/rawkode.academy/tasks/mp3-extraction-job/**",
+    "projects/rawkode.academy/tasks/transcoding-job/**",
+    "projects/rocko/**"
   ]
 }

@@ -2,7 +2,7 @@ export const MAX_AUDIENCE_BINS_PER_SHARD = 32;
 // The public protocol accepts up to 100 characters. 128 bytes preserves the
 // advertised maximum for ASCII answers while still giving the room row a hard
 // storage ceiling for multibyte input.
-export const MAX_AUDIENCE_CHOICE_BYTES = 128;
+const MAX_AUDIENCE_CHOICE_BYTES = 128;
 export const AUDIENCE_OTHER_BIN = "Other";
 
 const bytes = (value: string): number => new TextEncoder().encode(value).byteLength;

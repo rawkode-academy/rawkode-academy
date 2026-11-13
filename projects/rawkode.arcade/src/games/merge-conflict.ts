@@ -1,9 +1,9 @@
-import { hasTeam, isHost, matchesAnswer, next, score, validation, type GameActor, type GameDefinition, type ValidationResult } from "./common";
+import { hasTeam, isHost, matchesAnswer, next, score, validation, type GameDefinition, type ValidationResult } from "./common";
 
-export interface MergeAnswer { answer: string; aliases?: string[]; points: number }
-export interface MergeRound { prompt: string; answers: MergeAnswer[] }
+interface MergeAnswer { answer: string; aliases?: string[]; points: number }
+interface MergeRound { prompt: string; answers: MergeAnswer[] }
 export interface MergeConflictContent { title: string; rounds: MergeRound[] }
-export interface MergeConflictState {
+interface MergeConflictState {
 	phase: "lobby" | "open" | "complete";
 	roundIndex: number;
 	revealed: string[];
@@ -11,7 +11,7 @@ export interface MergeConflictState {
 	audienceSubmissions: Record<string, string>;
 	lastAnswer?: { teamId: string; answer: string; correct: boolean; points: number };
 }
-export type MergeConflictCommand =
+type MergeConflictCommand =
 	| { type: "start" }
 	| { type: "answer"; answer: string }
 	| { type: "audience-answer"; answer: string }
@@ -27,7 +27,7 @@ const validate = (content: MergeConflictContent): ValidationResult => validation
 			...round.answers.filter((answer) => answer.points < 1 || !answer.answer.trim()).map(() => `round ${index + 1} has an invalid answer`),
 		]),
 	);
-export const mergeConflict = (content: MergeConflictContent): GameDefinition<MergeConflictContent, MergeConflictState, MergeConflictCommand> => ({
+export const createMergeConflict = (content: MergeConflictContent): GameDefinition<MergeConflictContent, MergeConflictState, MergeConflictCommand> => ({
 	id: "merge-conflict", name: "Merge Conflict",
 	createState: () => ({ phase: "lobby", roundIndex: 0, revealed: [], scores: {}, audienceSubmissions: {} }),
 	validateContent: validate,
@@ -36,7 +36,7 @@ export const mergeConflict = (content: MergeConflictContent): GameDefinition<Mer
 		const { audienceSubmissions: _audienceSubmissions, ...publicState } = state;
 		return publicState;
 	},
-	handle: (state, command, actor, now) => {
+	handle: (state, command, actor) => {
 		const round = roundFor(content, state);
 		if (command.type === "start" && isHost(actor) && state.phase === "lobby") return next(state, { phase: "open" });
 		if (command.type === "audience-answer" && actor.role === "audience" && state.phase === "open" && round) {
@@ -58,5 +58,3 @@ export const mergeConflict = (content: MergeConflictContent): GameDefinition<Mer
 		return state;
 	},
 });
-
-export const createMergeConflict = mergeConflict;

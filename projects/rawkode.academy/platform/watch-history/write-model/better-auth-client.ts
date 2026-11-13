@@ -6,7 +6,7 @@
 
 const ID_PROVIDER_URL = "https://id.rawkode.academy";
 
-export interface User {
+interface User {
 	id: string;
 	email: string;
 	emailVerified: boolean;
@@ -16,7 +16,7 @@ export interface User {
 	updatedAt: Date;
 }
 
-export interface Session {
+interface Session {
 	id: string;
 	userId: string;
 	expiresAt: Date;
@@ -33,7 +33,7 @@ export interface SessionResponse {
  * Filter cookies to only include Better Auth session cookies.
  * Better Auth uses cookies prefixed with "better-auth." or "__Secure-better-auth."
  */
-export function getAuthCookies(cookies: string): string {
+function getAuthCookies(cookies: string): string {
 	const allCookies = cookies.split(";").map((c) => c.trim());
 	// Match both "better-auth." and "__Secure-better-auth." prefixes
 	const authCookies = allCookies.filter(

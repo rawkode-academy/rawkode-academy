@@ -14,7 +14,7 @@ export const MAX_OPTIONAL_TAGS = 4;
 
 const tagSlugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
-export const normalizeTagSlug = (value: string) => value.trim().toLowerCase();
+const normalizeTagSlug = (value: string) => value.trim().toLowerCase();
 
 export const deriveTagSlug = (value: string) =>
   normalizeTagSlug(value)

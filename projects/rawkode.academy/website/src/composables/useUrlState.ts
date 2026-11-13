@@ -61,7 +61,7 @@ const REVERSE_DIMENSION_MAP = Object.fromEntries(
 /**
  * Encode state to URL search params
  */
-export function encodeStateToUrl(state: Partial<ExplorerState>): string {
+function encodeStateToUrl(state: Partial<ExplorerState>): string {
 	const params = new URLSearchParams();
 
 	// View mode
@@ -142,7 +142,7 @@ export function encodeStateToUrl(state: Partial<ExplorerState>): string {
 /**
  * Decode URL search params to state
  */
-export function decodeUrlToState(search: string): Partial<ExplorerState> {
+function decodeUrlToState(search: string): Partial<ExplorerState> {
 	const params = new URLSearchParams(search);
 	const state: Partial<ExplorerState> = {};
 
@@ -225,7 +225,7 @@ export function decodeUrlToState(search: string): Partial<ExplorerState> {
 /**
  * Get shareable URL for current state
  */
-export function getShareableUrl(state: ExplorerState): string {
+function getShareableUrl(state: ExplorerState): string {
 	const encoded = encodeStateToUrl(state);
 	const baseUrl =
 		typeof window !== "undefined"

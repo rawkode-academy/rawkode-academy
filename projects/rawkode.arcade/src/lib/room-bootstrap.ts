@@ -13,7 +13,7 @@ export type JoinableTeam = { id: string; name: string };
 export const joinBootstrapKey = "rawkode-arcade-join-bootstrap";
 export const hostBootstrapKey = "rawkode-arcade-host-bootstrap";
 
-export function isBootstrap(value: unknown): value is RoomBootstrap {
+function isBootstrap(value: unknown): value is RoomBootstrap {
 	if (!value || typeof value !== "object") return false;
 	const candidate = value as Partial<RoomBootstrap>;
 	return Boolean(

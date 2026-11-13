@@ -1,4 +1,4 @@
-import { type CollectionName, getCollection } from "@/lib/live-content";
+import { getCollection } from "@/lib/live-content";
 import { isNewsPublished } from "@/lib/news-publication";
 
 /**
@@ -12,15 +12,6 @@ import { isNewsPublished } from "@/lib/news-publication";
  */
 
 /** Collections the index lists; callers pass them to setContentCache(). */
-export const SEARCH_COLLECTIONS = [
-	"videos",
-	"articles",
-	"news",
-	"courses",
-	"learningPaths",
-	"shows",
-	"technologies",
-] as const satisfies readonly CollectionName[];
 
 export const SEARCH_TYPES = [
 	"video",

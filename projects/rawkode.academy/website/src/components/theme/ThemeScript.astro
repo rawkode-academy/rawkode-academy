@@ -69,12 +69,7 @@
 					}),
 				);
 			};
-			if (mq.addEventListener) {
-				mq.addEventListener("change", handle);
-			} else if (mq.addListener) {
-				// Safari < 14 fallback
-				mq.addListener(handle);
-			}
+			mq.addEventListener("change", handle);
 		}
 	})();
 </script>

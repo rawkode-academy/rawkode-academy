@@ -16,8 +16,8 @@ import {
 	requireBracketsReadBinding,
 } from "./queries";
 
-export type BracketPageSlug = "seasons" | "brackets" | "schedule" | "apply";
-export type BracketEndpointSlug = "apply" | "live" | "schedule.ics";
+type BracketPageSlug = "seasons" | "brackets" | "schedule" | "apply";
+type BracketEndpointSlug = "apply" | "live" | "schedule.ics";
 
 export interface BracketPluginConfig {
 	showId: string;

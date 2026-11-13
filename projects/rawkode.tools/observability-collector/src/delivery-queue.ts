@@ -1,13 +1,13 @@
 // Each destination owns its acknowledgement. External I/O never runs in a
 // storage transaction; deleting only the selected keys preserves concurrent adds.
-export const DESTINATIONS = ["basin", "posthog", "grafana"] as const;
+const DESTINATIONS = ["basin", "posthog", "grafana"] as const;
 export type Destination = (typeof DESTINATIONS)[number];
 const BATCH_SIZE = 25;
 const MAX_ATTEMPTS = 12;
 const FLUSH_DELAY_MS = 30_000;
 
 type Entry<T> = { payload: T; attempts: number; acceptedAt: number };
-export type DeliveryStats = {
+type DeliveryStats = {
 	accepted: number;
 	delivered: number;
 	retried: number;
@@ -237,7 +237,7 @@ export class DeliveryQueue<T> {
 
 // Fixed shards avoid turning the collector into one global coordination object.
 // Keep the shard count stable so older queues remain discoverable for replay.
-export const EVENT_BUFFER_NAMES = Array.from(
+const EVENT_BUFFER_NAMES = Array.from(
 	{ length: 16 },
 	(_, index) => `buffer-events-${index}`,
 );

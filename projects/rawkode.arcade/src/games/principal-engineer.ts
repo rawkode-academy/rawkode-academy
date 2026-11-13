@@ -1,8 +1,8 @@
-import { hasTeam, isHost, next, score, validation, type GameActor, type GameDefinition, type ValidationResult } from "./common";
-export interface PrincipalQuestion { prompt: string; choices: string[]; correct: number; prize: number }
+import { hasTeam, isHost, next, score, validation, type GameDefinition, type ValidationResult } from "./common";
+interface PrincipalQuestion { prompt: string; choices: string[]; correct: number; prize: number }
 export interface PrincipalEngineerContent { title: string; questions: PrincipalQuestion[] }
-export interface PrincipalEngineerState { phase: "lobby" | "question" | "complete"; questionIndex: number; scores: Record<string, number>; answeredTeams: string[]; audienceVotes: Record<string, number>; revealed?: boolean; lifelines: Record<string, string[]>; activeLifelines: Record<string, string[]>; /** Private uniformly-random index into this question's incorrect choices. */ fiftyFiftyDraws: number[]; fiftyFiftyIncorrect?: number }
-export type PrincipalEngineerCommand = { type: "start" } | { type: "answer"; choice: number } | { type: "audience-vote"; choice: number } | { type: "use-lifeline"; lifeline: "fifty-fifty" | "ask-audience" } | { type: "reveal" } | { type: "next-question" };
+interface PrincipalEngineerState { phase: "lobby" | "question" | "complete"; questionIndex: number; scores: Record<string, number>; answeredTeams: string[]; audienceVotes: Record<string, number>; revealed?: boolean; lifelines: Record<string, string[]>; activeLifelines: Record<string, string[]>; /** Private uniformly-random index into this question's incorrect choices. */ fiftyFiftyDraws: number[]; fiftyFiftyIncorrect?: number }
+type PrincipalEngineerCommand = { type: "start" } | { type: "answer"; choice: number } | { type: "audience-vote"; choice: number } | { type: "use-lifeline"; lifeline: "fifty-fifty" | "ask-audience" } | { type: "reveal" } | { type: "next-question" };
 const cryptoIndex = (upperBound: number): number => {
 	if (!Number.isInteger(upperBound) || upperBound < 1) return 0;
 	const range = 0x1_0000_0000;
@@ -18,7 +18,7 @@ const lifelineDraws = (content: PrincipalEngineerContent, drawIndex?: (upperBoun
 		const candidate = drawIndex?.(upperBound, questionIndex);
 		return Number.isInteger(candidate) && candidate! >= 0 && candidate! < upperBound ? candidate! : cryptoIndex(upperBound);
 	});
-export const principalEngineer = (content: PrincipalEngineerContent, randomIndex?: (upperBound: number, questionIndex: number) => number): GameDefinition<PrincipalEngineerContent, PrincipalEngineerState, PrincipalEngineerCommand> => ({
+export const createPrincipalEngineer = (content: PrincipalEngineerContent, randomIndex?: (upperBound: number, questionIndex: number) => number): GameDefinition<PrincipalEngineerContent, PrincipalEngineerState, PrincipalEngineerCommand> => ({
 	id: "principal-engineer", name: "Who Wants to Be a Principal Engineer?", createState: () => ({ phase: "lobby", questionIndex: 0, scores: {}, answeredTeams: [], audienceVotes: {}, lifelines: {}, activeLifelines: {}, fiftyFiftyDraws: lifelineDraws(content, randomIndex) }),
 	validateContent: (value): ValidationResult => validation(...(value.questions.length ? [] : ["at least one question is required"]), ...value.questions.flatMap((question, index) => [ ...(question.choices.length === 4 ? [] : [`question ${index + 1} needs four choices`]), ...(question.correct >= 0 && question.correct < question.choices.length ? [] : [`question ${index + 1} has invalid correct index`]), ...(question.prize > 0 ? [] : [`question ${index + 1} needs a prize`]) ])),
 	redact: (state, role) => { if (role === "host") return state; const { audienceVotes: _audienceVotes, fiftyFiftyDraws: _fiftyFiftyDraws, fiftyFiftyIncorrect: _fiftyFiftyIncorrect, ...publicState } = state; return publicState; },
@@ -33,4 +33,3 @@ export const principalEngineer = (content: PrincipalEngineerContent, randomIndex
 		return state;
 	},
 });
-export const createPrincipalEngineer = principalEngineer;

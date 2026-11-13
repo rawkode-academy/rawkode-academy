@@ -12,12 +12,12 @@ export interface Domain {
 	};
 }
 
-export interface Redirect {
+interface Redirect {
 	to: string;
 	linkTracking?: LinkTracking;
 }
 
-export interface LinkTracking {
+interface LinkTracking {
 	source?: string;
 	medium?: string;
 	campaign?: string;

@@ -176,46 +176,6 @@ export function createMockEnv(): Env {
   };
 }
 
-export function createMockContext(env: Env, zulipClient: MockZulipClient) {
-  return {
-    env,
-    get: (key: string) => {
-      if (key === 'zulipClient') return zulipClient;
-      return undefined;
-    },
-    set: () => {},
-    req: {
-      json: async () => ({}),
-    },
-    json: (data: unknown, status?: number) => ({
-      data,
-      status: status || 200,
-    }),
-  } as never;
-}
-
-export const testUserMapping: UserMapping = {
-  zitadelUserId: 'zitadel-123',
-  zulipUserId: 1001,
-  email: 'test@example.com',
-  createdAt: '2024-01-01T00:00:00.000Z',
-  updatedAt: '2024-01-01T00:00:00.000Z',
-};
-
-export const testZulipUser: ZulipUser = {
-  user_id: 1001,
-  email: 'test@example.com',
-  full_name: 'Test User',
-  is_active: true,
-  is_admin: false,
-  is_owner: false,
-  is_guest: false,
-  is_bot: false,
-  avatar_url: 'https://example.com/avatar.png',
-  timezone: 'UTC',
-  date_joined: '2024-01-01T00:00:00.000Z',
-};
-
 export const testZitadelUser: ZitadelUser = {
   userId: 'zitadel-123',
   userName: 'johndoe',

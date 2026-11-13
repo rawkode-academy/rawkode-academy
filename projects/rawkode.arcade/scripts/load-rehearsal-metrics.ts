@@ -10,7 +10,7 @@ interface ProbeRecord extends ProbeTarget {
 	visibilityFinished: boolean;
 }
 
-export interface LatencySummary {
+interface LatencySummary {
 	completed: number;
 	timedOut: number;
 	lost: number;
