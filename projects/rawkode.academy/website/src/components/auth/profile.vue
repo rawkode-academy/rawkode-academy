@@ -4,6 +4,7 @@ import { actions } from "astro:actions";
 import Avatar from "vue-boring-avatars";
 import { academyShell } from "@rawkodeacademy/design-system";
 import type { BetterAuthUser } from "../../lib/auth/better-auth-client";
+import { resetIdentity } from "@/lib/analytics/track";
 import { createLogger } from "@/lib/logger";
 
 const logger = createLogger("auth");
@@ -14,6 +15,7 @@ defineProps<{ user: BetterAuthUser }>();
 const signOut = async () => {
 	try {
 		await actions.auth.signOut();
+		resetIdentity();
 		if ((window as any).posthog?.reset) (window as any).posthog.reset();
 		window.location.href = "/";
 	} catch (error) {

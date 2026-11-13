@@ -3,6 +3,7 @@ import { actions } from "astro:actions";
 import { academyShell } from "@rawkodeacademy/design-system";
 import { NavigationDrawer } from "@rawkodeacademy/design-system/vue";
 import { ref } from "vue";
+import { resetIdentity } from "@/lib/analytics/track";
 import { createLogger } from "@/lib/logger";
 
 interface NavigationItem {
@@ -45,6 +46,7 @@ const loadAccount = async (open: boolean) => {
 const signOut = async () => {
 	try {
 		await actions.auth.signOut();
+		resetIdentity();
 		if ((window as any).posthog?.reset) (window as any).posthog.reset();
 		window.location.href = "/";
 	} catch (error) {

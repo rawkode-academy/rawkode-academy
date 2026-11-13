@@ -4,14 +4,10 @@ import {
 	DELIVERY_BUFFER_NAMES,
 	type Destination,
 } from "./delivery-queue";
+import { browserCloudEvent } from "./web-events";
 import { validateCloudEvent } from "./cloudevents";
 import type { DataBuffer } from "./durable-objects/data-buffer";
-import {
-	prepareCloudEvent,
-	redactUserAgent,
-	type WebContext,
-	type WebEvent,
-} from "./events";
+import { prepareCloudEvent, redactUserAgent, type WebContext } from "./events";
 
 export interface EventsStream {
 	send(records: Record<string, unknown>[]): Promise<void>;
@@ -83,6 +79,21 @@ export class PostHogCollector extends WorkerEntrypoint<Env> {
 				};
 
 				const event = body.event ?? body;
+				// Only the website RPC may emit browser events with trusted identity.
+				if (
+					event &&
+					typeof event === "object" &&
+					"source" in event &&
+					event.source === "rawkode-academy-browser"
+				) {
+					return Response.json(
+						{
+							success: false,
+							error: "Browser events require website ingestion",
+						},
+						{ status: 403 },
+					);
+				}
 				const attributes = body.event ? body.attributes : undefined;
 
 				const result = await this.trackEvent(event, { attributes });
@@ -169,18 +180,26 @@ export class PostHogCollector extends WorkerEntrypoint<Env> {
 		return { success: true };
 	}
 
-	/**
-	 * Browser events from the website's /api/e. They reach Basin once each one
-	 * is defined as a CloudEvent with a typed table; until then posthog-js is
-	 * their only destination and this records nothing. RPC only, never HTTP:
-	 * the collector is public on workers.dev, and `context` (user, geography,
-	 * user agent) must come from the website, not the caller.
-	 */
+	/** Browser batches are RPC-only; each accepted event is durable before return. */
 	async ingestWebEvents(
-		_events: WebEvent[],
-		_context: WebContext,
+		events: unknown[],
+		context: WebContext,
 	): Promise<number> {
-		return 0;
+		if (!Array.isArray(events) || events.length > 50)
+			throw new Error("Invalid browser batch");
+		const normalized = events
+			.map((event) => browserCloudEvent(event, context))
+			.filter((event) => event !== null);
+		const results = await Promise.all(
+			normalized.map((event) => this.trackEvent(event)),
+		);
+		if (results.some((result) => !result.success))
+			throw new Error("Browser event acceptance failed");
+		console.log("analytics.web.accepted", {
+			accepted: normalized.length,
+			dropped: events.length - normalized.length,
+		});
+		return normalized.length;
 	}
 
 	async captureException(

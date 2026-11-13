@@ -21,6 +21,20 @@ removed after replacement coverage and reliable delivery are demonstrated.
 Cutover is gated by evidence, not the merge date. The current count-only
 reconciliation is insufficient to approve retiring PostHog by itself.
 
+### Progress recorded 13 November 2026
+
+- Durable delivery: PR #1600, verified locally with restart/outage tests; production
+  validation and required GitHub review remain outstanding until merged/deployed.
+- Browser ingestion: versioned normalization, trusted context, bounded bodies,
+  durable acknowledgement, retries preserving IDs, first-party identity and logout
+  reset are implemented for review. Query strings and sensitive property fields
+  are stripped; DNT is checked on client and server. Browser delivery on unload
+  remains best effort, and loss before durable acceptance is outside the server
+  delivery guarantee.
+- Next: complete attribution independence, add typed browser/event-family tables,
+  deduplicate archive/typed reporting, and establish production validation evidence.
+- The fourteen-day production validation window has not started.
+
 ## Delivery operations
 
 The collector persists a separate pending entry for Basin, PostHog and configured
@@ -60,8 +74,10 @@ services (CloudEvents) ─ /track ─► observability-collector ─► stream a
   changes, so every other table can be rebuilt from it.
 - `basin/typed.sql` turns events into typed tables, one per event family. Today
   that's `shortLink` (rawkode.link redirects) into `analytics.short_links`.
-- Browser events aren't sent to the stream yet: each one moves over once it is
-  defined as a CloudEvent with a typed table.
+- Browser batches become schema-v1 CloudEvents under source
+  `rawkode-academy-browser` and type `web.<event>`. They reach the archive
+  through the same durable delivery path. Typed browser tables and dashboard
+  panels remain a later migration stage.
 
 ## Constraints that shape this
 
@@ -97,7 +113,7 @@ Cloudflare tokens to Infisical.
 
 After the first apply, set the `pipelines` binding in `../wrangler.jsonc` to the
 stream ID from `bun x wrangler pipelines streams get analytics_events`, and
-merge. Until then the collector skips the stream.
+merge. Until then Basin deliveries remain pending and retry, rather than being acknowledged.
 
 The website's `deploy.main` task reads `BASIN_SQL_TOKEN` from Infisical, so run
 it locally with `INFISICAL_CLIENT_ID` and `INFISICAL_CLIENT_SECRET` set. A
@@ -117,15 +133,15 @@ cuenv task reconcile -e production   # DAYS=14 to widen the window (1–90)
 ```
 
 Counts must agree within 5% (with an absolute slack of two events per day).
-Missing Basin days fail the check. Browser events, OTLP logs and metrics are
-outside this comparison; a clean result does not validate browser migration.
+Missing Basin days fail the check. Browser CloudEvents are included once ingestion is deployed; browser SDK-only
+PostHog events, OTLP logs and metrics are outside this comparison; a clean result does not validate browser migration.
 
 The internal website dashboard queries CloudEvents in `events_archive` for
 server event totals, sign-in events, newsletter submissions and video engagement.
 Matched redirects come from `short_links`. Counts are events, not deduplicated
 people or attributed funnels. Viewer estimates exclude missing and anonymous
 IDs. Browser traffic, referrers, campaigns and CTA impressions/clicks are marked
-unavailable until browser ingestion is migrated. There is no stored bot total:
+unavailable until typed browser reporting is migrated. There is no stored bot total:
 known bots are filtered at ingestion and missing classification is not proof of
 a human visitor.
 

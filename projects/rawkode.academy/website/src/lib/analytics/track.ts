@@ -21,7 +21,6 @@ export interface TrackedEvent {
 	event: string;
 	anonymous_id: string;
 	session_id: string;
-	distinct_id?: string;
 	url: string;
 	referrer?: string;
 	properties?: Record<string, unknown>;
@@ -34,20 +33,31 @@ type PostHogLike = {
 let queue: TrackedEvent[] = [];
 let timer: ReturnType<typeof setTimeout> | undefined;
 let listening = false;
+let identityGeneration = 0;
+let fallbackAnonymousId: string | undefined;
+let fallbackSession: { id: string; seen: number } | undefined;
+const retryTimers = new Set<ReturnType<typeof setTimeout>>();
+const MAX_RETRY_BATCHES = 20;
 
 function readCookie(name: string): string | undefined {
-	const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${name}=([^;]+)`));
-	if (!match?.[1]) return undefined;
+	const prefix = `${name}=`;
+	const cookie = document.cookie
+		.split(";")
+		.map((value) => value.trim())
+		.find((value) => value.startsWith(prefix));
+	const value = cookie?.slice(prefix.length);
+	if (!value) return undefined;
 	try {
-		return decodeURIComponent(match[1]);
+		return decodeURIComponent(value);
 	} catch {
-		return match[1];
+		return value;
 	}
 }
 
 function anonymousId(): string {
 	let id = readCookie(ANON_COOKIE);
-	if (!id) id = crypto.randomUUID();
+	if (!id) id = fallbackAnonymousId ?? crypto.randomUUID();
+	fallbackAnonymousId = id;
 	// Refresh the year-long expiry on every visit.
 	document.cookie = `${ANON_COOKIE}=${encodeURIComponent(id)}; path=/; max-age=31536000; SameSite=Lax; Secure`;
 	return id;
@@ -55,9 +65,9 @@ function anonymousId(): string {
 
 function sessionId(now: number): string {
 	try {
-		const stored = JSON.parse(sessionStorage.getItem(SESSION_KEY) ?? "null") as
-			| { id: string; seen: number }
-			| null;
+		const stored = JSON.parse(
+			sessionStorage.getItem(SESSION_KEY) ?? "null",
+		) as { id: string; seen: number } | null;
 		const id =
 			stored && now - stored.seen < SESSION_IDLE_MS
 				? stored.id
@@ -65,7 +75,12 @@ function sessionId(now: number): string {
 		sessionStorage.setItem(SESSION_KEY, JSON.stringify({ id, seen: now }));
 		return id;
 	} catch {
-		return "no-storage";
+		const id =
+			fallbackSession && now - fallbackSession.seen < SESSION_IDLE_MS
+				? fallbackSession.id
+				: crypto.randomUUID();
+		fallbackSession = { id, seen: now };
+		return id;
 	}
 }
 
@@ -76,7 +91,13 @@ function trackingDisabled(): boolean {
 	);
 }
 
-function send(events: TrackedEvent[], unloading: boolean): void {
+function send(
+	events: TrackedEvent[],
+	unloading: boolean,
+	attempt = 0,
+	generation = identityGeneration,
+): void {
+	if (trackingDisabled() || generation !== identityGeneration) return;
 	const body = JSON.stringify({ events });
 	if (unloading && navigator.sendBeacon) {
 		const sent = navigator.sendBeacon(
@@ -90,10 +111,31 @@ function send(events: TrackedEvent[], unloading: boolean): void {
 		headers: { "Content-Type": "application/json" },
 		body,
 		keepalive: true,
+		signal: AbortSignal.timeout(5_000),
 		credentials: "same-origin",
-	}).catch(() => {
-		// Analytics must never surface an error to the reader.
-	});
+	})
+		.then((response) => {
+			if (response.status === 429 || response.status >= 500) retry();
+		})
+		.catch(retry);
+
+	function retry() {
+		if (
+			generation !== identityGeneration ||
+			attempt >= 3 ||
+			trackingDisabled() ||
+			retryTimers.size >= MAX_RETRY_BATCHES
+		)
+			return;
+		const retryTimer = setTimeout(
+			() => {
+				retryTimers.delete(retryTimer);
+				send(events, false, attempt + 1, generation);
+			},
+			1_000 * 2 ** attempt,
+		);
+		retryTimers.add(retryTimer);
+	}
 }
 
 export function flush(unloading = false): void {
@@ -138,19 +180,20 @@ function listenForUnload(): void {
 	});
 }
 
-export function track(event: string, properties?: Record<string, unknown>): void {
+export function track(
+	event: string,
+	properties?: Record<string, unknown>,
+): void {
 	if (typeof window === "undefined") return;
 	try {
 		if (trackingDisabled()) return;
 		const now = Date.now();
-		const distinctId = readCookie("posthog_distinct_id");
 		queue.push({
 			event_id: crypto.randomUUID(),
 			ts_ms: now,
 			event,
 			anonymous_id: anonymousId(),
 			session_id: sessionId(now),
-			...(distinctId ? { distinct_id: distinctId } : {}),
 			url: location.href,
 			...(document.referrer ? { referrer: document.referrer } : {}),
 			...(properties && Object.keys(properties).length > 0
@@ -177,7 +220,7 @@ export function capture(
 	event: string,
 	properties?: Record<string, unknown>,
 ): void {
-	if (typeof window === "undefined") return;
+	if (typeof window === "undefined" || trackingDisabled()) return;
 	try {
 		(window as Window & { posthog?: PostHogLike }).posthog?.capture?.(
 			event,
@@ -189,9 +232,25 @@ export function capture(
 	track(event, properties);
 }
 
-/** Test hook: drop queued events and timers. */
+/** Start a fresh first-party identity after a successful sign-out. */
+export function resetIdentity(): void {
+	resetForTests();
+	document.cookie = `${ANON_COOKIE}=; path=/; max-age=0; SameSite=Lax; Secure`;
+	try {
+		sessionStorage.removeItem(SESSION_KEY);
+	} catch {
+		/* Storage may be blocked. */
+	}
+}
+
+/** Drop queued events and timers; also used by identity reset. */
 export function resetForTests(): void {
 	queue = [];
+	identityGeneration++;
+	fallbackAnonymousId = undefined;
+	fallbackSession = undefined;
+	for (const retryTimer of retryTimers) clearTimeout(retryTimer);
+	retryTimers.clear();
 	if (timer) clearTimeout(timer);
 	timer = undefined;
 }

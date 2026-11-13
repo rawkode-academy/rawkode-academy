@@ -16,6 +16,8 @@ export interface WebEvent {
 
 /** Request context the website attaches to a batch of web events. */
 export interface WebContext {
+	/** Website origin supplied by the RPC caller, never by the browser event. */
+	url_origin?: string;
 	user_id?: string;
 	user_agent?: string;
 	country?: string;
