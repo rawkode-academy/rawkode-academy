@@ -7,15 +7,18 @@ on:
     branches:
     - main
     paths:
+    - '*.cue'
     - .github/workflows/rawkode-academy-platform-studio-recording-ingest-default.yml
     - bun.lock
     - bun.lock/**
     - cue.mod/**
+    - projects/*.cue
+    - projects/rawkode.academy/*.cue
+    - projects/rawkode.academy/platform/*.cue
+    - projects/rawkode.academy/platform/studio-recording-ingest/*.cue
     - projects/rawkode.academy/platform/studio-recording-ingest/data-model/**
-    - projects/rawkode.academy/platform/studio-recording-ingest/env.cue
     - projects/rawkode.academy/platform/studio-recording-ingest/package.json
     - projects/rawkode.academy/platform/studio-recording-ingest/package.json/**
-    - projects/rawkode.academy/platform/studio-recording-ingest/schema/**
     - projects/rawkode.academy/platform/studio-recording-ingest/scripts/**
     - projects/rawkode.academy/platform/studio-recording-ingest/src/**
     - projects/rawkode.academy/platform/studio-recording-ingest/tests/**
@@ -76,7 +79,7 @@ jobs:
           Darwin-arm64) cuenv_asset="cuenv-darwin-arm64" ;;
           *) echo "Unsupported platform: $platform" >&2; exit 1 ;;
         esac
-        cuenv_version="0.73.1"
+        cuenv_version="0.76.0"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi

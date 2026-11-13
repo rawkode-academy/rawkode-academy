@@ -5,12 +5,15 @@ name: rawkode-academy-platform-notifications-pullRequest
 on:
   pull_request:
     paths:
+    - '*.cue'
     - .github/workflows/rawkode-academy-platform-notifications-pullrequest.yml
     - cue.mod/**
-    - projects/rawkode.academy/platform/notifications/env.cue
+    - projects/*.cue
+    - projects/rawkode.academy/*.cue
+    - projects/rawkode.academy/platform/*.cue
+    - projects/rawkode.academy/platform/notifications/*.cue
     - projects/rawkode.academy/platform/notifications/package.json
     - projects/rawkode.academy/platform/notifications/package.json/**
-    - projects/rawkode.academy/platform/notifications/schema/**
     - projects/rawkode.academy/platform/notifications/src/**
     - projects/rawkode.academy/platform/notifications/tests/**
     - projects/rawkode.academy/platform/notifications/tsconfig.json
@@ -70,7 +73,7 @@ jobs:
           Darwin-arm64) cuenv_asset="cuenv-darwin-arm64" ;;
           *) echo "Unsupported platform: $platform" >&2; exit 1 ;;
         esac
-        cuenv_version="0.73.1"
+        cuenv_version="0.76.0"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi

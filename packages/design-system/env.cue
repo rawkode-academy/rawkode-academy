@@ -39,8 +39,8 @@ tasks: {
 		args: ["run", "check"]
 
 		inputs: [
-			"../../bun.lock",
-			"../../package.json",
+			schema.#ModuleFiles & {paths: ["bun.lock"]},
+			schema.#ModuleFiles & {paths: ["package.json"]},
 			"env.cue",
 			"package.json",
 			"panda.config.ts",

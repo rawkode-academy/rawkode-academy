@@ -5,12 +5,15 @@ name: rawkode-academy-platform-video-thumbnails-pullRequest
 on:
   pull_request:
     paths:
+    - '*.cue'
     - .github/workflows/rawkode-academy-platform-video-thumbnails-pullrequest.yml
     - cue.mod/**
-    - projects/rawkode.academy/platform/video-thumbnails/env.cue
+    - projects/*.cue
+    - projects/rawkode.academy/*.cue
+    - projects/rawkode.academy/platform/*.cue
+    - projects/rawkode.academy/platform/video-thumbnails/*.cue
     - projects/rawkode.academy/platform/video-thumbnails/package.json
     - projects/rawkode.academy/platform/video-thumbnails/package.json/**
-    - projects/rawkode.academy/platform/video-thumbnails/schema/**
     - projects/rawkode.academy/platform/video-thumbnails/scripts/**
     - projects/rawkode.academy/platform/video-thumbnails/src/**
     - projects/rawkode.academy/platform/video-thumbnails/tests/**
@@ -71,7 +74,7 @@ jobs:
           Darwin-arm64) cuenv_asset="cuenv-darwin-arm64" ;;
           *) echo "Unsupported platform: $platform" >&2; exit 1 ;;
         esac
-        cuenv_version="0.73.1"
+        cuenv_version="0.76.0"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi

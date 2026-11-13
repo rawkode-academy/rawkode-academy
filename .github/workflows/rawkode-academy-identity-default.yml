@@ -7,17 +7,19 @@ on:
     branches:
     - main
     paths:
+    - '*.cue'
     - .github/workflows/rawkode-academy-identity-default.yml
     - cue.mod/**
+    - projects/*.cue
+    - projects/rawkode.academy/*.cue
+    - projects/rawkode.academy/identity/*.cue
     - projects/rawkode.academy/identity/astro.config.mjs
     - projects/rawkode.academy/identity/astro.config.mjs/**
     - projects/rawkode.academy/identity/bun.lock
     - projects/rawkode.academy/identity/bun.lock/**
-    - projects/rawkode.academy/identity/env.cue
     - projects/rawkode.academy/identity/migrations/**
     - projects/rawkode.academy/identity/package.json
     - projects/rawkode.academy/identity/package.json/**
-    - projects/rawkode.academy/identity/schema/**
     - projects/rawkode.academy/identity/src/**
     - projects/rawkode.academy/identity/wrangler.jsonc
     - projects/rawkode.academy/identity/wrangler.jsonc/**
@@ -75,7 +77,7 @@ jobs:
           Darwin-arm64) cuenv_asset="cuenv-darwin-arm64" ;;
           *) echo "Unsupported platform: $platform" >&2; exit 1 ;;
         esac
-        cuenv_version="0.73.1"
+        cuenv_version="0.76.0"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi

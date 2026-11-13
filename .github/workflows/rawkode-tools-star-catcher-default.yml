@@ -7,10 +7,13 @@ on:
     branches:
     - main
     paths:
+    - '*.cue'
     - .github/workflows/rawkode-tools-star-catcher-default.yml
     - cue.mod/**
-    - projects/rawkode.tools/star-catcher/env.cue
-    - projects/rawkode.tools/star-catcher/schema/**
+    - projects/*.cue
+    - projects/rawkode.tools/*.cue
+    - projects/rawkode.tools/star-catcher/**
+    - projects/rawkode.tools/star-catcher/*.cue
     - projects/rawkode.tools/star-catcher/wrangler.jsonc
     - projects/rawkode.tools/star-catcher/wrangler.jsonc/**
   workflow_dispatch: {}
@@ -67,7 +70,7 @@ jobs:
           Darwin-arm64) cuenv_asset="cuenv-darwin-arm64" ;;
           *) echo "Unsupported platform: $platform" >&2; exit 1 ;;
         esac
-        cuenv_version="0.73.1"
+        cuenv_version="0.76.0"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi

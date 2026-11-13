@@ -317,7 +317,7 @@ describe("studio recording ingest contracts", () => {
 		expect(envCue).toContain('queues: schema.#TaskGroup');
 		expect(envCue).toContain('notify: schema.#TaskGroup');
 		expect(envCue).toContain('dependsOn: [_t.migrations.remote]');
-		expect(envCue).toContain("../../../../bun.lock");
+		expect(envCue).toContain('schema.#ModuleFiles & {paths: ["bun.lock"]}');
 		expect(defaultWorkflow).not.toContain("environment: production");
 		expect(defaultWorkflow).not.toContain("OP_SERVICE_ACCOUNT_TOKEN");
 		expect(defaultWorkflow).not.toContain("CUENV_ENVIRONMENT");

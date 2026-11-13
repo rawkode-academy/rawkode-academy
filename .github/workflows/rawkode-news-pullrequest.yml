@@ -5,15 +5,16 @@ name: rawkode-news-pullRequest
 on:
   pull_request:
     paths:
+    - '*.cue'
     - .github/workflows/rawkode-news-pullrequest.yml
     - cue.mod/**
+    - projects/*.cue
+    - projects/rawkode.news/*.cue
     - projects/rawkode.news/astro.config.ts
     - projects/rawkode.news/astro.config.ts/**
-    - projects/rawkode.news/env.cue
     - projects/rawkode.news/package.json
     - projects/rawkode.news/package.json/**
     - projects/rawkode.news/public/**
-    - projects/rawkode.news/schema/**
     - projects/rawkode.news/src/**
     - projects/rawkode.news/wrangler.jsonc
     - projects/rawkode.news/wrangler.jsonc/**
@@ -70,7 +71,7 @@ jobs:
           Darwin-arm64) cuenv_asset="cuenv-darwin-arm64" ;;
           *) echo "Unsupported platform: $platform" >&2; exit 1 ;;
         esac
-        cuenv_version="0.73.1"
+        cuenv_version="0.76.0"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi

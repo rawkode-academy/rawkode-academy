@@ -36,7 +36,7 @@ tasks: {
 		command:  "bun"
 		args: ["run", "dev"]
 		inputs: [
-			"../../bun.lock",
+			schema.#ModuleFiles & {paths: ["bun.lock"]},
 			"astro.config.mts",
 			"package.json",
 			"scripts/**",
@@ -51,7 +51,7 @@ tasks: {
 		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run build"]
 		env: PATH: _taskPath
 		inputs: [
-			"../../bun.lock",
+			schema.#ModuleFiles & {paths: ["bun.lock"]},
 			"astro.config.mts",
 			"package.json",
 			"src/**",
@@ -66,7 +66,7 @@ tasks: {
 		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run check"]
 		env: PATH: _taskPath
 		inputs: [
-			"../../bun.lock",
+			schema.#ModuleFiles & {paths: ["bun.lock"]},
 			"astro.config.mts",
 			"package.json",
 			"src/**",
@@ -81,7 +81,7 @@ tasks: {
 		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run test"]
 		env: PATH: _taskPath
 		inputs: [
-			"../../bun.lock",
+			schema.#ModuleFiles & {paths: ["bun.lock"]},
 			"data-model/**",
 			"package.json",
 			"scripts/**",
@@ -113,7 +113,7 @@ tasks: {
 			env: PATH: _taskPath
 			dependsOn: [_t.build]
 			inputs: [
-				"../../bun.lock",
+				schema.#ModuleFiles & {paths: ["bun.lock"]},
 				"astro.config.mts",
 				"data-model/**",
 				"package.json",
@@ -138,7 +138,7 @@ tasks: {
 			env: PATH: _taskPath
 			dependsOn: [_t.build]
 			inputs: [
-				"../../bun.lock",
+				schema.#ModuleFiles & {paths: ["bun.lock"]},
 				"astro.config.mts",
 				"data-model/**",
 				"package.json",

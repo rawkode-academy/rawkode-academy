@@ -7,15 +7,17 @@ on:
     branches:
     - main
     paths:
+    - '*.cue'
     - .github/workflows/klustered-dev-default.yml
     - cue.mod/**
+    - projects/*.cue
+    - projects/klustered.dev/**
+    - projects/klustered.dev/*.cue
     - projects/klustered.dev/astro.config.mjs
     - projects/klustered.dev/astro.config.mjs/**
-    - projects/klustered.dev/env.cue
     - projects/klustered.dev/package.json
     - projects/klustered.dev/package.json/**
     - projects/klustered.dev/public/**
-    - projects/klustered.dev/schema/**
     - projects/klustered.dev/src/**
     - projects/klustered.dev/wrangler.jsonc
     - projects/klustered.dev/wrangler.jsonc/**
@@ -73,7 +75,7 @@ jobs:
           Darwin-arm64) cuenv_asset="cuenv-darwin-arm64" ;;
           *) echo "Unsupported platform: $platform" >&2; exit 1 ;;
         esac
-        cuenv_version="0.73.1"
+        cuenv_version="0.76.0"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi

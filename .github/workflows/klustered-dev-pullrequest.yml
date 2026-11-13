@@ -5,15 +5,16 @@ name: klustered-dev-pullRequest
 on:
   pull_request:
     paths:
+    - '*.cue'
     - .github/workflows/klustered-dev-pullrequest.yml
     - cue.mod/**
+    - projects/*.cue
+    - projects/klustered.dev/*.cue
     - projects/klustered.dev/astro.config.mjs
     - projects/klustered.dev/astro.config.mjs/**
-    - projects/klustered.dev/env.cue
     - projects/klustered.dev/package.json
     - projects/klustered.dev/package.json/**
     - projects/klustered.dev/public/**
-    - projects/klustered.dev/schema/**
     - projects/klustered.dev/src/**
     - projects/klustered.dev/tsconfig.json
     - projects/klustered.dev/tsconfig.json/**
@@ -72,7 +73,7 @@ jobs:
           Darwin-arm64) cuenv_asset="cuenv-darwin-arm64" ;;
           *) echo "Unsupported platform: $platform" >&2; exit 1 ;;
         esac
-        cuenv_version="0.73.1"
+        cuenv_version="0.76.0"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi

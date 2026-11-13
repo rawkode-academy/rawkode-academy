@@ -172,7 +172,7 @@ import (
 		if includeWriteModel {_wranglerWithNode24 + " deploy --config ./write-model/wrangler.jsonc"},
 		if includeHttp {_wranglerWithNode24 + " deploy --config ./http/wrangler.jsonc"},
 	]
-	let _serviceDefinitionInputs = ["env.cue", "service.cue", "../../codegen/platform-service.cue"]
+	let _serviceDefinitionInputs = ["env.cue", "service.cue", schema.#ModuleFiles & {paths: ["projects/rawkode.academy/codegen/platform-service.cue"]}]
 	let _ciDeployInputSets = [
 		_serviceDefinitionInputs,
 		if includeDataModel {["data-model/**"]},
