@@ -40,28 +40,25 @@ services (CloudEvents) ─ /track ─► observability-collector ─► stream a
 ## Provisioning
 
 `../infrastructure.cue` declares the bucket, catalog, API tokens, stream, sinks,
-pipelines and the Infisical secrets. The
-`rawkode-tools-observability-collector-infrastructure` workflow applies it on
-merge to `main`. CI can only log in to Infisical from `main`, so pull requests
-don't plan it. Changing a sink or pipeline replaces it on merge.
+pipelines and the Infisical secrets. Pull requests that change it get a plan as
+a comment, made with read-only credentials; the
+`rawkode-tools-observability-collector-infrastructure-apply` workflow applies it
+on merge to `main`. Changing a sink or pipeline replaces it.
 
-Before the first apply:
+Compaction and snapshot expiry aren't in the Cloudflare provider, so
+`maintenance.sh` sets them through the catalog API. The
+`rawkode-tools-observability-collector-maintenance` workflow runs it on `main`
+whenever the script or the infrastructure changes, which stores a rotated
+catalog token again, and it can be run by hand.
 
-1. Apply `infrastructure/bootstrap` by hand. It creates CI's Infisical identity,
-   its login from `main`, the folders and the state credentials, and writes the
-   all-access Cloudflare token from 1Password to
-   `/infrastructure/CLOUDFLARE_ROOT_TOKEN` in Infisical.
-2. Set the `INFISICAL_MACHINE_IDENTITY_ID` repository secret to the new identity's
-   ID.
+Before the first apply, apply `infrastructure/bootstrap` by hand. It creates
+CI's Infisical identities and their logins, the folders, the state credentials
+and the repository variables that name the identities, and writes the
+Cloudflare tokens to Infisical.
 
-After the first apply:
-
-1. Set the `pipelines` binding in `../wrangler.jsonc` to the stream ID from
-   `bun x wrangler pipelines streams get analytics_events`, and merge. Until
-   then the collector skips the stream.
-2. Run the `rawkode-tools-observability-collector-maintenance` workflow once to
-   enable compaction and snapshot expiry, which the Cloudflare provider can't
-   manage yet.
+After the first apply, set the `pipelines` binding in `../wrangler.jsonc` to the
+stream ID from `bun x wrangler pipelines streams get analytics_events`, and
+merge. Until then the collector skips the stream.
 
 The website's `deploy.main` task reads `BASIN_SQL_TOKEN` from Infisical, so run
 it locally with `INFISICAL_CLIENT_ID` and `INFISICAL_CLIENT_SECRET` set. A

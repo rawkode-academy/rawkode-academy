@@ -16,7 +16,7 @@ This directory contains infrastructure-as-code configurations for DNS, GitHub or
 Manages DNS with cuenv infrastructure (`cuenv infrastructure`, alias `cuenv i`), which drives the Cloudflare Terraform provider directly. Delegations of domains registered with DNSimple are in `bootstrap/`, since DNSimple has no read-only tokens. State lives in the `rawkode-academy-cuenv-infrastructure` Cloudflare D1 database.
 
 **Layout:**
-- `env.cue` - the cuenv project; Infisical-backed credentials chosen by context: read-only for `plan`, read-write for `apply`, `import` and `destroy`
+- `env.cue` - the cuenv project. Its credentials come from the root `env.cue`, which chooses them by context: read-only for `plan`, read-write for `apply`, `import`, `destroy` and `state-remove`
 - `infrastructure.cue` - state, providers, and every zone's resources flattened together
 - `zone/` - package `zone`: `#Zone` (records, settings) and one file per mixin: registrars (`cloudflare_registrar.cue`, `dnsimple_registrar.cue`) and services (`gmail.cue`, `fastmail.cue`, `cloudflare_email_routing.cue`, `no_email.cue`, `transistor.cue`)
 - `domains/` - package `domains`: one file per domain, named after it, composing mixins
@@ -76,7 +76,7 @@ Scripts for Google Cloud Workload Identity configuration.
 
 ## Environment Variables
 
-DNS infrastructure reads these secrets (configured in `dns/env.cue` and `dns/infrastructure.cue`), written to Infisical by `bootstrap/`:
+DNS infrastructure reads these secrets (`CLOUDFLARE_API_TOKEN` chosen in the root `env.cue`, state credentials in `dns/infrastructure.cue`), written to Infisical by `bootstrap/`:
 
 | Secret | Plan (`/infrastructure/github-read-only`) | Apply (`/infrastructure`) |
 |--------|------------------------------------|---------------------------|
