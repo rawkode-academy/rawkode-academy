@@ -208,7 +208,7 @@ describe("POST /api/e", () => {
 		delete testEnv.ANALYTICS;
 	});
 
-	function call(body: unknown, headers: Record<string, string> = {}) {
+	async function call(body: unknown, headers: Record<string, string> = {}) {
 		const url = new URL("https://rawkode.academy/api/e");
 		// happy-dom's Request drops the forbidden `origin` header, so stub it.
 		const all: Record<string, string> = {
