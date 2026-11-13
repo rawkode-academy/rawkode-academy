@@ -1,8 +1,11 @@
-// Dashboard queries over `analytics.events`. Every query is bounded by a time
-// filter: the Iceberg sink can't be partitioned, so the time range is what
-// limits the bytes Basin SQL scans (and bills).
+// The archive stores CloudEvents; typed redirects live in a separate table.
+// Filter the physical event_time column so Basin can prune files.
+export const TABLE = "analytics.events_archive";
+export const LINKS_TABLE = "analytics.short_links";
 
-export const TABLE = "analytics.events";
+// Match the collector's PostHog event naming, including its missing-source fallback.
+export const ARCHIVE_EVENT =
+	"concat(coalesce(nullif(event_source, ''), 'unknown'), '.', event_type)";
 
 export const RANGES = { "7d": 7, "30d": 30, "90d": 90 } as const;
 export type Range = keyof typeof RANGES;
@@ -22,9 +25,7 @@ export function rangeStart(range: Range, now = new Date()): string {
 }
 
 const since = (range: Range) =>
-	`ts >= CAST('${rangeStart(range)}' AS TIMESTAMP)`;
-
-const HUMAN = "is_bot = false";
+	`event_time >= CAST('${rangeStart(range)}' AS TIMESTAMP)`;
 
 export const SIGN_IN_EVENTS = {
 	initiated: "rawkode-academy-website.auth.sign_in_initiated",
@@ -34,9 +35,8 @@ export const SIGN_IN_EVENTS = {
 	failed: "rawkode-academy-website.custom.sign_in_failed",
 } as const;
 
+// Browser CTA impressions and clicks have not migrated to CloudEvents yet.
 export const NEWSLETTER_EVENTS = [
-	"newsletter_cta_impression",
-	"newsletter_cta_clicked",
 	"rawkode-academy-website.newsletter.submission_attempted",
 	"rawkode-academy-website.newsletter.subscribed",
 ] as const;
@@ -45,83 +45,49 @@ const list = (values: readonly string[]) =>
 	values.map((value) => `'${value}'`).join(", ");
 
 export const dashboardQueries = (range: Range) => ({
-	traffic: `
-		SELECT to_char(date_trunc('day', ts), '%Y-%m-%d') AS day,
-			count(*) AS views,
-			approx_distinct(anonymous_id) AS visitors
-		FROM ${TABLE}
-		WHERE ${since(range)} AND event = 'page_view' AND ${HUMAN}
-		GROUP BY 1
-		ORDER BY 1`,
-
-	referrers: `
-		SELECT referrer_host, count(*) AS views
-		FROM ${TABLE}
-		WHERE ${since(range)} AND event = 'page_view' AND ${HUMAN}
-			AND referrer_host IS NOT NULL AND referrer_host <> 'rawkode.academy'
-		GROUP BY 1
-		ORDER BY views DESC
-		LIMIT 15`,
-
-	campaigns: `
-		SELECT utm_source, utm_medium, utm_campaign, count(*) AS views
-		FROM ${TABLE}
-		WHERE ${since(range)} AND event = 'page_view' AND ${HUMAN}
-			AND utm_source IS NOT NULL
-		GROUP BY 1, 2, 3
-		ORDER BY views DESC
-		LIMIT 15`,
-
-	topContent: `
-		SELECT url_path,
-			count(*) AS views,
-			approx_distinct(anonymous_id) AS visitors
-		FROM ${TABLE}
-		WHERE ${since(range)} AND event = 'page_view' AND ${HUMAN}
-		GROUP BY 1
-		ORDER BY views DESC
-		LIMIT 25`,
-
-	video: `
-		SELECT json_get_str(properties_json, 'video_id') AS video_id,
-			sum(CASE WHEN event = 'rawkode-academy-website.video.play' THEN 1 ELSE 0 END) AS plays,
-			sum(CASE WHEN event = 'rawkode-academy-website.video.complete' THEN 1 ELSE 0 END) AS completes,
-			approx_distinct(distinct_id) AS viewers
+	events: `
+		SELECT ${ARCHIVE_EVENT} AS event, count(*) AS events
 		FROM ${TABLE}
 		WHERE ${since(range)}
-			AND event IN ('rawkode-academy-website.video.play', 'rawkode-academy-website.video.complete')
+		GROUP BY 1
+		ORDER BY events DESC
+		LIMIT 100`,
+
+	video: `
+		SELECT nullif(json_get_str(value, 'data', 'video_id'), '') AS video_id,
+			sum(CASE WHEN event_type = 'video.play' THEN 1 ELSE 0 END) AS plays,
+			sum(CASE WHEN event_type = 'video.complete' THEN 1 ELSE 0 END) AS completes,
+			approx_distinct(nullif(nullif(json_get_str(value, 'data', 'distinct_id'), ''), 'anonymous')) AS viewers
+		FROM ${TABLE}
+		WHERE ${since(range)} AND event_source = 'rawkode-academy-website'
+			AND event_type IN ('video.play', 'video.complete')
 		GROUP BY 1
 		ORDER BY plays DESC
 		LIMIT 20`,
 
 	signIn: `
-		SELECT event, is_bot,
-			count(*) AS events,
-			approx_distinct(distinct_id) AS people
+		SELECT ${ARCHIVE_EVENT} AS event, count(*) AS events
 		FROM ${TABLE}
-		WHERE ${since(range)} AND event IN (${list(Object.values(SIGN_IN_EVENTS))})
-		GROUP BY 1, 2`,
+		WHERE ${since(range)} AND ${ARCHIVE_EVENT} IN (${list(Object.values(SIGN_IN_EVENTS))})
+		GROUP BY 1`,
 
 	linkTotals: `
-		SELECT count(*) AS clicks,
-			sum(CASE WHEN is_bot THEN 1 ELSE 0 END) AS bot_clicks
-		FROM ${TABLE}
-		WHERE ${since(range)} AND event = 'rawkode-link.link.redirect'`,
+		SELECT count(*) AS clicks
+		FROM ${LINKS_TABLE}
+		WHERE ${since(range)} AND matched = true`,
 
 	links: `
-		SELECT url_host, url_path,
-			count(*) AS clicks,
-			sum(CASE WHEN is_bot THEN 1 ELSE 0 END) AS bot_clicks
-		FROM ${TABLE}
-		WHERE ${since(range)} AND event = 'rawkode-link.link.redirect'
+		SELECT domain, path, count(*) AS clicks
+		FROM ${LINKS_TABLE}
+		WHERE ${since(range)} AND matched = true
 		GROUP BY 1, 2
 		ORDER BY clicks DESC
 		LIMIT 25`,
 
 	newsletter: `
-		SELECT event, count(*) AS events
+		SELECT ${ARCHIVE_EVENT} AS event, count(*) AS events
 		FROM ${TABLE}
-		WHERE ${since(range)} AND event IN (${list(NEWSLETTER_EVENTS)}) AND ${HUMAN}
+		WHERE ${since(range)} AND ${ARCHIVE_EVENT} IN (${list(NEWSLETTER_EVENTS)})
 		GROUP BY 1`,
 });
 

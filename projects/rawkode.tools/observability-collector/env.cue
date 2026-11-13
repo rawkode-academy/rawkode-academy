@@ -91,13 +91,22 @@ tasks: {
 		inputs: _deployInputs
 	}
 
-	// Secrets for these two tasks are scoped here, not to the environment, so
+	// Secrets for these tasks are scoped here, not to the environment, so
 	// a missing Infisical secret can't break the collector's deploy.
 	maintenance: schema.#Task & {
 		hermetic: false
 		command:  "bash"
 		args: ["basin/maintenance.sh"]
 		inputs: ["basin/maintenance.sh", "infrastructure.cue"]
+		labels: ["infisical"]
+		env: BASIN_CATALOG_TOKEN: _basinSecret & {secretName: "BASIN_CATALOG_TOKEN"}
+	}
+
+	"drop-legacy-table": schema.#Task & {
+		hermetic: false
+		command:  "bun"
+		args: ["basin/drop-legacy-table.ts"]
+		inputs: ["basin/drop-legacy-table.ts", "infrastructure.cue"]
 		labels: ["infisical"]
 		env: BASIN_CATALOG_TOKEN: _basinSecret & {secretName: "BASIN_CATALOG_TOKEN"}
 	}
