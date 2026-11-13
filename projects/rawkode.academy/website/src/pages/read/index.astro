@@ -1,6 +1,7 @@
 ---
 import {
 	type Cover,
+	getAllSeries,
 	getCollection,
 	getEntries,
 	setContentCache,
@@ -24,6 +25,7 @@ export const prerender = false;
 const allArticles = (
 	await getCollection("articles")
 ).sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+const hasSeries = (await getAllSeries()).length > 0;
 
 // ─── Filters (?type=…&topic=…) ─────────────────────────────────
 
@@ -245,7 +247,7 @@ const catalog = academyCatalog();
 	</Fragment>
 
 	<div class={styles.root}>
-		<AcademyCatalogMasthead title="Articles" description="Articles and tutorials for engineers building and running production systems." figure={allArticles.length} figureLabel={allArticles.length === 1 ? "article" : "articles"} mosaic={restWithMeta.map(({ cover }) => cover?.src).filter((src): src is string => Boolean(src))} mosaicShape="video" />
+		<AcademyCatalogMasthead title="Articles" description="Articles and tutorials for engineers building and running production systems." figure={allArticles.length} figureLabel={allArticles.length === 1 ? "article" : "articles"} mosaic={restWithMeta.map(({ cover }) => cover?.src).filter((src): src is string => Boolean(src))} mosaicShape="video">{hasSeries && <a slot="actions" class={button({ variant: "outline", surface: "ink" })} href="/series">Article series <span data-part="arrow" aria-hidden="true">→</span></a>}</AcademyCatalogMasthead>
 
 		{featured && (
 			<section class={styles.section}><div class={styles.container}>

@@ -8,8 +8,17 @@ import {
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { articleId, loadArticleFiles } from "@/lib/articles/loader";
-import { ArticleError, parseArticle } from "@/lib/articles/source";
+import {
+	articleId,
+	loadArticleFiles,
+	loadSeriesFiles,
+} from "@/lib/articles/loader";
+import {
+	ArticleError,
+	checkSeries,
+	parseArticle,
+	parseSeries,
+} from "@/lib/articles/source";
 
 const noAssets = (path: string): never => {
 	throw new Error(`unexpected asset ${path}`);
@@ -125,6 +134,88 @@ describe("article files", () => {
 	});
 });
 
+describe("series", () => {
+	const seriesFile = (frontmatter: string, body = "") => ({
+		id: "understanding-mcp",
+		file: "content/series/understanding-mcp.md",
+		mdx: false,
+		raw: `---\n${frontmatter}\n---\n\n${body}`,
+	});
+	const SERIES =
+		'title: "Understanding MCP"\ndescription: One piece at a time.';
+
+	it("carry an article's series and part", () => {
+		const data = parseArticle(
+			file(`${MINIMAL}\nseries:\n  id: understanding-mcp\n  part: 2`),
+			noAssets,
+		);
+		expect(data.series).toEqual({ id: "understanding-mcp", part: 2 });
+		expect(() =>
+			parseArticle(
+				file(`${MINIMAL}\nseries:\n  id: understanding-mcp\n  part: 0`),
+				noAssets,
+			),
+		).toThrow(/series\.part/);
+	});
+
+	it("map a series file to its title, description, cover and intro", () => {
+		expect(parseSeries(seriesFile(SERIES), noAssets)).toEqual({
+			title: "Understanding MCP",
+			description: "One piece at a time.",
+		});
+		const data = parseSeries(
+			seriesFile(
+				`${SERIES}\ncover:\n  image: ./cover.png\n  alt: A cover`,
+				"Start **here**.\n",
+			),
+			() => ({
+				src: "/_content/series/understanding-mcp/cover.png",
+				width: 8,
+				height: 4,
+			}),
+		);
+		expect(data.cover?.image.src).toBe(
+			"/_content/series/understanding-mcp/cover.png",
+		);
+		expect(JSON.stringify(data.body)).toContain("here");
+		expect(() =>
+			parseSeries(seriesFile(`${SERIES}\npart: 1`), noAssets),
+		).toThrow(
+			/content\/series\/understanding-mcp\.md: invalid frontmatter .*part/,
+		);
+	});
+
+	it("fail when a series is missing or a part number repeats", () => {
+		const part = (file: string, id: string, n: number) => ({
+			file,
+			data: { series: { id, part: n } },
+		});
+		const known = new Set(["understanding-mcp"]);
+		expect(() =>
+			checkSeries(
+				[
+					part("a.mdx", "understanding-mcp", 1),
+					part("b.mdx", "understanding-mcp", 2),
+					{ file: "c.mdx", data: {} },
+				],
+				known,
+			),
+		).not.toThrow();
+		expect(() => checkSeries([part("a.mdx", "talos", 1)], known)).toThrow(
+			/a\.mdx: series "talos" does not exist/,
+		);
+		expect(() =>
+			checkSeries(
+				[
+					part("a.mdx", "understanding-mcp", 1),
+					part("b.mdx", "understanding-mcp", 1),
+				],
+				known,
+			),
+		).toThrow(/b\.mdx: is part 1 of series "understanding-mcp", like a\.mdx/);
+	});
+});
+
 describe("the articles directory", () => {
 	const temporary: string[] = [];
 	const scratch = () => {
@@ -162,6 +253,26 @@ describe("the articles directory", () => {
 		writeFileSync(join(root, "Bad Name.md"), `---\n${MINIMAL}\n---\n\nText\n`);
 		await expect(loadArticleFiles(root, assets)).rejects.toThrow(
 			/not a valid slug/,
+		);
+	});
+
+	it("copies a series cover to /_content/series, and needs no series directory", async () => {
+		const root = join(scratch(), "series");
+		const assets = join(scratch(), "public");
+		expect(await loadSeriesFiles(root, assets)).toEqual([]);
+		mkdirSync(join(root, "understanding-mcp"), { recursive: true });
+		writeFileSync(join(root, "understanding-mcp", "cover.png"), "not a png");
+		writeFileSync(
+			join(root, "understanding-mcp", "index.md"),
+			"---\ntitle: MCP\ndescription: D.\ncover:\n  image: ./cover.png\n  alt: A\n  width: 8\n  height: 4\n---\n",
+		);
+		const [series] = await loadSeriesFiles(root, assets);
+		expect(series?.id).toBe("understanding-mcp");
+		expect(series?.data.cover?.image.src).toBe(
+			"/_content/series/understanding-mcp/cover.png",
+		);
+		expect(existsSync(join(assets, "understanding-mcp", "cover.png"))).toBe(
+			true,
 		);
 	});
 

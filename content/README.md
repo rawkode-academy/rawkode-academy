@@ -57,6 +57,7 @@ Optional:
 | `howto` | `true` adds how-to structured data built from the headings |
 | `draft` | `true` keeps the article off the published site |
 | `categories`, `tags` | Free-form labels |
+| `series` | `id` and `part`: makes the article one part of a [series](#series) |
 
 A misspelt or unknown field fails the build and names the file and the field.
 
@@ -97,6 +98,39 @@ import Diagram from "@/components/articles/Diagram.astro";
 
 Any other import or component fails the build. Look at the existing articles
 for worked examples of each.
+
+## Series
+
+A series is a set of articles read in order. Describe it in
+`content/series/<id>.md`, served at `/series/<id>`:
+
+```md
+---
+title: "Understanding MCP"
+description: A walk through the Model Context Protocol, one piece at a time.
+cover:                     # optional; falls back to the first part's cover
+  image: ./cover.png
+  alt: What the image shows
+---
+
+An optional introduction, shown above the list of parts.
+```
+
+Like an article, a series can be a directory (`content/series/<id>/index.md`)
+with its images beside it. Then mark each article as a part:
+
+```yaml
+series:
+  id: understanding-mcp    # the file name in content/series
+  part: 1                  # sets the order
+```
+
+Each part links to the series and to the previous and next parts. Readers
+see "Part 2 of 3" counted over the published parts, so a draft part leaves no
+gap. A series page appears once its first part is published.
+
+The build fails when an article names a series that has no file, or when two
+articles in a series share a `part`.
 
 ## Preview
 

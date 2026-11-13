@@ -5,6 +5,7 @@ const styles = academyLayout({ width: "reading" });
 import {
 	type ContentEntry,
 	documentToMarkdown,
+	getAllSeries,
 	getCollection,
 	getEntries,
 	getEntry,
@@ -29,6 +30,7 @@ import ArticleHeader from "@/components/read/ArticleHeader.astro";
 import ArticleByline from "@/components/read/ArticleByline.astro";
 import ArticleTOC from "@/components/read/ArticleTOC.astro";
 import EndSlug from "@/components/read/EndSlug.astro";
+import SeriesNav from "@/components/read/SeriesNav.astro";
 
 import { calculateReadingTime } from "@/utils/reading-time";
 import { getTypeBadgeConfig } from "@/utils/article-types";
@@ -61,6 +63,12 @@ const [{ html, headings }, authors, allArticles, allTechnologies] =
 		optionalContent(getCollection("articles"), []),
 		optionalContent(getCollection("technologies"), []),
 	]);
+
+const series = article.data.series
+	? (await getAllSeries()).find(({ id }) => id === article.data.series?.id)
+	: undefined;
+const seriesPart =
+	series && series.parts.findIndex(({ id }) => id === article.id) + 1;
 
 // Same pool and ranking RelatedArticles applies.
 const relatedArticles = allArticles
@@ -183,6 +191,12 @@ const subtitle = article.data.openGraph?.subtitle || article.data.subtitle;
 				readingTime={readingTime.text}
 				tags={tags}
 			/>
+			{series && (
+				<p class={doc.meta}>
+					Part {seriesPart} of {series.parts.length} in
+					<a class={doc.link} href={`/series/${series.id}`}>{series.data.title}</a>
+				</p>
+			)}
 		</ArticleHeader>
 
 		<div class={doc.body}>
@@ -191,6 +205,8 @@ const subtitle = article.data.openGraph?.subtitle || article.data.subtitle;
 					<Updates updates={article.data.updates} />
 					<RichText html={html} />
 				</article>
+
+				{series && <SeriesNav series={series} currentId={article.id} />}
 
 				<EndSlug date={publishDate} />
 

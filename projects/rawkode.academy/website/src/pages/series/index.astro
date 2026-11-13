@@ -1,0 +1,80 @@
+---
+import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
+import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
+import { getAllSeries } from "@/lib/live-content";
+import { localTime } from "@/lib/local-time";
+import Page from "@/wrappers/page.astro";
+
+// Series are files in content/series, fixed for the life of a deployment.
+export const prerender = true;
+
+const latest = (series: Awaited<ReturnType<typeof getAllSeries>>[number]) =>
+	Math.max(...series.parts.map((part) => part.data.publishedAt.getTime()));
+
+const allSeries = (await getAllSeries()).sort((a, b) => latest(b) - latest(a));
+
+// Ledger dates: the day is the numeral, month and year sit beneath it.
+const ledgerDay = (date: Date) => localTime(date, { day: "2-digit" }, "en-GB");
+const ledgerMonth = (date: Date) =>
+	localTime(date, { month: "short", year: "numeric" }, "en-GB");
+
+const rows = allSeries.map((series) => {
+	const updated = new Date(latest(series));
+	const cover = series.data.cover ?? series.parts[0]?.data.cover;
+	return {
+		series,
+		updated,
+		day: ledgerDay(updated),
+		month: ledgerMonth(updated),
+		cover: cover && {
+			src: cover.image.src,
+			width: 640,
+			height:
+				cover.image.width > 0
+					? Math.round((640 * cover.image.height) / cover.image.width)
+					: cover.image.height,
+		},
+	};
+});
+
+const styles = academyLayout({ width: "wide" });
+const catalog = academyCatalog();
+---
+
+<Page
+	title="Article Series"
+	description="Multi-part article series from Rawkode Academy: follow a topic from the first step to the last."
+	pageType="CollectionPage"
+>
+	<div class={styles.root}>
+		<AcademyCatalogMasthead
+			title="Series"
+			description="Multi-part articles that walk through one topic, in order."
+			figure={allSeries.length}
+			figureLabel="series"
+		/>
+
+		<section class={styles.section}><div class={styles.container}>
+			{rows.length === 0 ? (
+				<div class={styles.empty}>No series yet. <a href="/read">Browse all articles →</a></div>
+			) : (
+				<div class={catalog.editorialList}>
+					{rows.map(({ series, updated, day, month, cover }) => (
+						<a class={catalog.editorialRow} href={`/series/${series.id}`} data-media={Boolean(cover)}>
+							<time class={catalog.editorialDate} datetime={updated.toISOString()}>
+								<strong data-datetime={day.iso} data-local-time={day.attrs["data-local-time"]}>{day.text}</strong>
+								<span data-datetime={month.iso} data-local-time={month.attrs["data-local-time"]}>{month.text}</span>
+							</time>
+							{cover && <span class={catalog.editorialMedia}><img class={catalog.editorialImage} src={cover.src} alt="" width={cover.width} height={cover.height} loading="lazy" /></span>}
+							<div class={catalog.editorialBody} data-body>
+								<p class={catalog.editorialKind}><span>Series</span><span>·</span><span>{series.parts.length} {series.parts.length === 1 ? "part" : "parts"}</span></p>
+								<h2 class={catalog.editorialTitle}>{series.data.title}</h2>
+								<p class={catalog.editorialDescription}>{series.data.description}</p>
+							</div>
+						</a>
+					))}
+				</div>
+			)}
+		</div></section>
+	</div>
+</Page>

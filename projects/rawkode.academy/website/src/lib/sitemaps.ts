@@ -1,5 +1,9 @@
 import { getPublishedVideos } from "@/lib/content";
-import { type CollectionName, getCollection } from "@/lib/live-content";
+import {
+	type CollectionName,
+	getAllSeries,
+	getCollection,
+} from "@/lib/live-content";
 import { getCourseModuleSlug } from "@/utils/course-path";
 import { isNewsPublished } from "@/lib/news-publication";
 
@@ -268,14 +272,35 @@ export async function getPagesSitemapEntries(): Promise<SitemapUrlEntry[]> {
 }
 
 export async function getArticleSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const [articles] = await Promise.all([getCollection("articles")]);
+	const [articles, series] = await Promise.all([
+		getCollection("articles"),
+		getAllSeries(),
+	]);
 
-	const entries = articles.map((article) => ({
+	const entries: SitemapUrlEntry[] = articles.map((article) => ({
 		path: `/read/${article.id}`,
 		lastmod: pickLastmod(article.data.updatedAt, article.data.publishedAt),
 		changefreq: "daily" as const,
 		priority: 0.7,
 	}));
+	// Series pages are built from the same files, so they live here too.
+	if (series.length > 0) {
+		entries.push({ path: "/series", changefreq: "weekly", priority: 0.6 });
+	}
+	for (const { id, parts } of series) {
+		entries.push({
+			path: `/series/${id}`,
+			lastmod: new Date(
+				Math.max(
+					...parts.map((part) =>
+						(part.data.updatedAt ?? part.data.publishedAt).getTime(),
+					),
+				),
+			),
+			changefreq: "weekly",
+			priority: 0.6,
+		});
+	}
 
 	return sortByPath(entries);
 }
