@@ -58,26 +58,15 @@ const results = Object.fromEntries(
 ) as Record<DashboardQuery, Panel>;
 
 const num = (value: unknown) => Number(value ?? 0);
-// Basin SQL may return booleans as strings.
-const isTrue = (value: unknown) => value === true || value === "true";
 const fmt = new Intl.NumberFormat("en-GB");
 const pct = (part: number, whole: number) =>
 	whole > 0 ? `${((part / whole) * 100).toFixed(1)}%` : "–";
 
-const traffic = results.traffic.rows;
-const totalViews = traffic.reduce((sum, row) => sum + num(row.views), 0);
-const peakViews = Math.max(1, ...traffic.map((row) => num(row.views)));
-
-const signInCount = (event: string, isBot?: boolean) =>
+const signInCount = (event: string) =>
 	results.signIn.rows
-		.filter(
-			(row) =>
-				row.event === event &&
-				(isBot === undefined || isTrue(row.is_bot) === isBot),
-		)
+		.filter((row) => row.event === event)
 		.reduce((sum, row) => sum + num(row.events), 0);
-const initiatedHuman = signInCount(SIGN_IN_EVENTS.initiated, false);
-const initiatedBot = signInCount(SIGN_IN_EVENTS.initiated, true);
+const initiated = signInCount(SIGN_IN_EVENTS.initiated);
 const completed = signInCount(SIGN_IN_EVENTS.completed);
 const registered = signInCount(SIGN_IN_EVENTS.registered);
 const failed = signInCount(SIGN_IN_EVENTS.failed);
@@ -85,23 +74,19 @@ const failed = signInCount(SIGN_IN_EVENTS.failed);
 const newsletter = new Map(
 	results.newsletter.rows.map((row) => [String(row.event), num(row.events)]),
 );
-const [impressionsEvent, clicksEvent, attemptsEvent, subscribedEvent] =
-	NEWSLETTER_EVENTS;
-const impressions = newsletter.get(impressionsEvent) ?? 0;
-const clicks = newsletter.get(clicksEvent) ?? 0;
+const [attemptsEvent, subscribedEvent] = NEWSLETTER_EVENTS;
 const attempts = newsletter.get(attemptsEvent) ?? 0;
 const subscribed = newsletter.get(subscribedEvent) ?? 0;
 
 // All links, not just the top 25 listed below.
 const linkClicks = num(results.linkTotals.rows[0]?.clicks);
-const linkBots = num(results.linkTotals.rows[0]?.bot_clicks);
 ---
 
 <Page title="Analytics" description="First-party analytics from the Basin lake.">
 	<EditorialShell
 		eyebrow="Internal"
 		title="Analytics"
-		lede={`First-party events from analytics.events, last ${RANGES[range]} days. Bots excluded unless noted. Results cached for 10 minutes.`}
+		lede={`Server events and matched short-link redirects, last ${RANGES[range]} days. Known bots are filtered during ingestion. Results cached for 10 minutes.`}
 	>
 		<nav class="ranges" aria-label="Date range">
 			{
@@ -122,105 +107,51 @@ const linkBots = num(results.linkTotals.rows[0]?.bot_clicks);
 			)
 		}
 
+		<p class="notice">
+			Browser traffic, referrers, campaigns and CTA impressions/clicks are unavailable
+			until browser event ingestion is migrated. The figures below cover server events
+			and short-link redirects only. Bot totals are unavailable because filtered
+			traffic is not stored; events without a user agent are not classified as human.
+		</p>
+
 		<section class="panel">
-			<h2>Traffic</h2>
-			{results.traffic.error && <p class="error">{results.traffic.error}</p>}
-			<p class="stat"><strong>{fmt.format(totalViews)}</strong> page views</p>
-			<svg
-				class="bars"
-				viewBox={`0 0 ${Math.max(traffic.length, 1) * 10} 100`}
-				preserveAspectRatio="none"
-				role="img"
-				aria-label="Daily page views"
-			>
-				{
-					traffic.map((row, i) => {
-						const h = (num(row.views) / peakViews) * 100;
-						return (
-							<rect x={i * 10 + 1} y={100 - h} width="8" height={h}>
-								<title>{`${row.day}: ${fmt.format(num(row.views))} views, ~${fmt.format(num(row.visitors))} visitors`}</title>
-							</rect>
-						);
-					})
-				}
-			</svg>
-			<details class="figures">
-				<summary>Daily figures</summary>
-				<table>
-					<thead><tr><th>Day</th><th>Views</th><th>Visitors</th></tr></thead>
-					<tbody>
-						{traffic.map((row) => (
-							<tr><td>{row.day}</td><td>{fmt.format(num(row.views))}</td><td>~{fmt.format(num(row.visitors))}</td></tr>
-						))}
-					</tbody>
-				</table>
-			</details>
+			<h2>Server events</h2>
+			{results.events.error && <p class="error">{results.events.error}</p>}
+			<table>
+				<thead><tr><th>Event (top 100)</th><th>Events</th></tr></thead>
+				<tbody>
+					{results.events.rows.map((row) => (
+						<tr><td>{row.event}</td><td>{fmt.format(num(row.events))}</td></tr>
+					))}
+				</tbody>
+			</table>
 		</section>
 
 		<div class="grid">
 			<section class="panel">
-				<h2>Top content</h2>
-				{results.topContent.error && <p class="error">{results.topContent.error}</p>}
-				<table>
-					<thead><tr><th>Path</th><th>Views</th><th>Visitors</th></tr></thead>
-					<tbody>
-						{results.topContent.rows.map((row) => (
-							<tr><td>{row.url_path}</td><td>{fmt.format(num(row.views))}</td><td>~{fmt.format(num(row.visitors))}</td></tr>
-						))}
-					</tbody>
-				</table>
-			</section>
-
-			<section class="panel">
-				<h2>Referrers</h2>
-				{results.referrers.error && <p class="error">{results.referrers.error}</p>}
-				<table>
-					<thead><tr><th>Host</th><th>Views</th></tr></thead>
-					<tbody>
-						{results.referrers.rows.map((row) => (
-							<tr><td>{row.referrer_host}</td><td>{fmt.format(num(row.views))}</td></tr>
-						))}
-					</tbody>
-				</table>
-				<h3>Campaigns</h3>
-				<table>
-					<thead><tr><th>Source / medium / campaign</th><th>Views</th></tr></thead>
-					<tbody>
-						{results.campaigns.rows.map((row) => (
-							<tr>
-								<td>{[row.utm_source, row.utm_medium, row.utm_campaign].filter(Boolean).join(" / ")}</td>
-								<td>{fmt.format(num(row.views))}</td>
-							</tr>
-						))}
-					</tbody>
-				</table>
-			</section>
-
-			<section class="panel">
-				<h2>Sign-in funnel</h2>
+				<h2>Sign-in events</h2>
+				<p>Counts are events; percentages compare totals rather than linked user journeys.</p>
 				{results.signIn.error && <p class="error">{results.signIn.error}</p>}
 				<dl class="funnel">
-					<dt>Started (people)</dt><dd>{fmt.format(initiatedHuman)}</dd>
-					<dt>Started (bots, excluded)</dt><dd>{fmt.format(initiatedBot)}</dd>
-					<dt>Completed</dt><dd>{fmt.format(completed)} <span>{pct(completed, initiatedHuman)}</span></dd>
+					<dt>Started (events)</dt><dd>{fmt.format(initiated)}</dd>
+					<dt>Completed</dt><dd>{fmt.format(completed)} <span>{pct(completed, initiated)}</span></dd>
 					<dt>New accounts</dt><dd>{fmt.format(registered)}</dd>
 					<dt>Failed</dt><dd>{fmt.format(failed)}</dd>
 				</dl>
 			</section>
 
 			<section class="panel">
-				<h2>Newsletter CTA</h2>
+				<h2>Newsletter submissions</h2>
 				{results.newsletter.error && <p class="error">{results.newsletter.error}</p>}
 				<dl class="funnel">
-					<dt>Impressions</dt><dd>{fmt.format(impressions)}</dd>
-					<dt>Clicks</dt><dd>{fmt.format(clicks)} <span>{pct(clicks, impressions)}</span></dd>
 					<dt>Submitted</dt><dd>{fmt.format(attempts)}</dd>
-					<dt>Subscribed</dt><dd>{fmt.format(subscribed)} <span>{pct(subscribed, impressions)}</span></dd>
+					<dt>Subscribed</dt><dd>{fmt.format(subscribed)} <span>{pct(subscribed, attempts)}</span></dd>
 				</dl>
 			</section>
 
 			<section class="panel">
 				<h2>Video engagement</h2>
+				<p>Viewer estimates exclude anonymous events. Rates compare event totals, not linked user journeys.</p>
 				{results.video.error && <p class="error">{results.video.error}</p>}
 				<table>
 					<thead><tr><th>Video</th><th>Plays</th><th>Completes</th><th>Viewers</th></tr></thead>
@@ -242,17 +173,15 @@ const linkBots = num(results.linkTotals.rows[0]?.bot_clicks);
 				{results.linkTotals.error && <p class="error">{results.linkTotals.error}</p>}
 				{results.links.error && <p class="error">{results.links.error}</p>}
 				<p class="stat">
-					<strong>{fmt.format(linkClicks - linkBots)}</strong> human clicks,
-					{fmt.format(linkBots)} bot ({pct(linkBots, linkClicks)})
+					<strong>{fmt.format(linkClicks)}</strong> matched redirects
 				</p>
 				<table>
-					<thead><tr><th>Link</th><th>Clicks</th><th>Bots</th></tr></thead>
+					<thead><tr><th>Link</th><th>Redirects</th></tr></thead>
 					<tbody>
 						{results.links.rows.map((row) => (
 							<tr>
-								<td>{row.url_host}/{row.url_path}</td>
+								<td>{row.domain}/{String(row.path ?? "").replace(/^\//, "")}</td>
 								<td>{fmt.format(num(row.clicks))}</td>
-								<td>{fmt.format(num(row.bot_clicks))}</td>
 							</tr>
 						))}
 					</tbody>
@@ -311,31 +240,6 @@ const linkBots = num(results.linkTotals.rows[0]?.bot_clicks);
 		font-size: 2rem;
 		font-weight: 400;
 		color: var(--colors-academy-text);
-	}
-	.bars {
-		width: 100%;
-		height: 8rem;
-		display: block;
-	}
-	.bars rect {
-		fill: var(--colors-academy-text-soft);
-	}
-	.bars rect:hover {
-		fill: var(--colors-academy-text);
-	}
-	.figures {
-		margin-block-start: 0.75rem;
-	}
-	.figures summary {
-		cursor: pointer;
-		font-family: var(--fonts-academy-mono);
-		font-size: 0.6875rem;
-		text-transform: uppercase;
-		letter-spacing: 0.14em;
-		color: var(--colors-academy-text-muted);
-	}
-	.figures table {
-		margin-block-start: 0.5rem;
 	}
 	table {
 		width: 100%;

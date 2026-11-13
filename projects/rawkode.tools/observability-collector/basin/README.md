@@ -67,20 +67,42 @@ deployed Worker without the token shows "not configured" on
 
 ## Dual-run and cutover
 
-`reconcile.ts` still queries the old flat `analytics.events` table, so it needs
-rewriting against the new tables before it can compare anything. After that,
-run it daily while both destinations are live:
+`reconcile.ts` compares daily CloudEvent counts from `analytics.events_archive`
+with PostHog events written by the collector (`$lib = observability-collector`
+and `cloudevents_id` present). It reconstructs PostHog names as
+`<event_source>.<event_type>`, groups by `event_time` in UTC, and skips the
+partial first day using the archive's earliest `__ingest_ts`.
 
 ```sh
-cuenv task reconcile -e production   # DAYS=14 to widen the window
+cuenv task reconcile -e production   # DAYS=14 to widen the window (1–90)
 ```
 
-Server events must agree with PostHog within 5%. Browser events should match
-or exceed PostHog: ad blockers stop posthog-js but not `/api/e`, and page views
-are recorded on load rather than after PostHog's delayed init. The script also
-breaks down `auth.sign_in_initiated` by bot classification and device.
+Counts must agree within 5% (with an absolute slack of two events per day).
+Missing Basin days fail the check. Browser events, OTLP logs and metrics are
+outside this comparison; a clean result does not validate browser migration.
 
-Cut over after two weeks of clean reconciliation: remove the PostHog
+The internal website dashboard queries CloudEvents in `events_archive` for
+server event totals, sign-in events, newsletter submissions and video engagement.
+Matched redirects come from `short_links`. Counts are events, not deduplicated
+people or attributed funnels. Viewer estimates exclude missing and anonymous
+IDs. Browser traffic, referrers, campaigns and CTA impressions/clicks are marked
+unavailable until browser ingestion is migrated. There is no stored bot total:
+known bots are filtered at ingestion and missing classification is not proof of
+a human visitor.
+
+The empty legacy `analytics.events` table is no longer queried. To purge it,
+run the guarded one-time cleanup task with Infisical access:
+
+```sh
+cuenv task drop-legacy-table -e production
+```
+
+The task refuses deletion if a sink names it, the table is nonempty, or the
+namespace contains unexpected tables. It uses the catalog write token without
+printing it, requests purge, then verifies the surviving tables and their
+maintenance settings. Purging is irreversible.
+
+Cut over after browser ingestion is migrated and two weeks of clean reconciliation: remove the PostHog
 component, the `posthog?.capture` call in `capture()`, the PostHog flush in
 `src/durable-objects/data-buffer.ts`, and export PostHog history into
 `analytics.events_legacy`.

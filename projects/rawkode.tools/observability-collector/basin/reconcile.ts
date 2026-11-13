@@ -1,34 +1,21 @@
-// Dual-run reconciliation: daily event counts in PostHog vs analytics.events.
-//
-//   cuenv task reconcile -e production          # last 7 full days
-//   DAYS=14 cuenv task reconcile -e production
-//
-// Each event is compared day by day over every full day since ingestion
-// started. Server-side events (`<source>.<type>`, written by both destinations
-// from the collector) must agree within TOLERANCE. Browser events should read
-// the same or higher in Basin: ad blockers stop posthog-js but not the
-// first-party endpoint, and Basin records page views on load rather than after
-// idle. Exits 1 when any event fails on any day or Basin is missing a day.
+// Compare collector CloudEvents in PostHog and analytics.events_archive.
+// Browser events and OTLP logs/metrics are outside this comparison.
+//   cuenv task reconcile -e production   # DAYS=14 to widen the window
+// Exits 1 for daily drift or a missing Basin day after ingestion began.
 
 import { basinQuery } from "../../../rawkode.academy/website/src/server/basin";
+
+import {
+	ARCHIVE_EVENT,
+	TABLE,
+} from "../../../rawkode.academy/website/src/lib/analytics/queries";
 
 const TOLERANCE = 0.05;
 const DAYS = Number(process.env.DAYS ?? 7);
 
-const POSTHOG_ONLY = new Set([
-	"$autocapture",
-	"$dead_click",
-	"$dead_swipe",
-	"$rageclick",
-	"$web_vitals",
-	"$identify",
-	"$pageview",
-	"$pageleave",
-	"$set",
-]);
-const BASIN_ONLY = new Set(["web_vitals"]);
-const SIGN_IN_INITIATED = "rawkode-academy-website.auth.sign_in_initiated";
-const SIGN_IN_COMPLETED = "rawkode-academy-website.auth.sign_in_completed";
+if (!Number.isInteger(DAYS) || DAYS < 1 || DAYS > 90) {
+	throw new Error("DAYS must be an integer between 1 and 90");
+}
 
 function required(name: string): string {
 	const value = process.env[name];
@@ -86,12 +73,14 @@ const posthogRows = await posthog(`
 	FROM events
 	WHERE timestamp >= toDateTime('${fromIso.slice(0, 19).replace("T", " ")}', 'UTC')
 		AND timestamp < toDateTime('${toIso.slice(0, 19).replace("T", " ")}', 'UTC')
+		AND properties.$lib = 'observability-collector'
+		AND properties.cloudevents_id IS NOT NULL
 	GROUP BY day, event`);
 
 const basinRows = await basin(`
-	SELECT to_char(date_trunc('day', ts), '%Y-%m-%d') AS day, event, count(*) AS c
-	FROM analytics.events
-	WHERE ts >= CAST('${fromIso}' AS TIMESTAMP) AND ts < CAST('${toIso}' AS TIMESTAMP)
+	SELECT to_char(date_trunc('day', event_time), '%Y-%m-%d') AS day, ${ARCHIVE_EVENT} AS event, count(*) AS c
+	FROM ${TABLE}
+	WHERE event_time >= CAST('${fromIso}' AS TIMESTAMP) AND event_time < CAST('${toIso}' AS TIMESTAMP)
 	GROUP BY 1, 2`);
 
 const ph: Counts = new Map();
@@ -103,13 +92,17 @@ for (const row of basinRows) {
 	add(lake, String(row.event), String(row.day), Number(row.c));
 }
 
-// Find when ingestion started from the whole table, not this window: a stream
+// Find when ingestion started from __ingest_ts, not a backdated event time: a stream
 // that stopped and resumed inside the window must fail, not look like a
 // fresh start. The first day is partial unless it began at midnight.
-const [startRow] = await basin("SELECT min(ts) AS first FROM analytics.events");
+const [startRow] = await basin(
+	`SELECT min(__ingest_ts) AS first FROM ${TABLE}`,
+);
 const firstTs = startRow?.first ? new Date(String(startRow.first)) : undefined;
 if (!firstTs || Number.isNaN(firstTs.getTime())) {
-	console.error("analytics.events has no rows: the stream isn't receiving data.");
+	console.error(
+		"analytics.events_archive has no rows: the stream isn't receiving data.",
+	);
 	process.exit(1);
 }
 const firstFullDay = new Date(
@@ -165,33 +158,16 @@ for (const event of [...events].sort()) {
 	const b = total(lake, event);
 	if (p === 0 && b === 0) continue;
 
-	if (POSTHOG_ONLY.has(event) || BASIN_ONLY.has(event)) {
-		lines.push({
-			event,
-			posthog: p,
-			basin: b,
-			status: POSTHOG_ONLY.has(event)
-				? "PostHog only (not migrated)"
-				: "Basin only",
-			failing_days: "",
-		});
-		continue;
-	}
-
-	// Browser events may read higher in Basin; server events must match.
-	const browser = !event.includes(".");
 	const failing = days.filter((day) => {
 		const pd = count(ph, event, day);
 		const bd = count(lake, event, day);
-		return browser ? bd < pd - allowed(pd) : Math.abs(bd - pd) > allowed(pd);
+		return Math.abs(bd - pd) > allowed(pd);
 	});
 
 	let status: string;
 	if (failing.length > 0) {
-		status = browser ? "LOW" : "DRIFT";
+		status = "DRIFT";
 		failed = true;
-	} else if (browser && b > p + allowed(p)) {
-		status = `ok (+${(((b - p) / Math.max(p, 1)) * 100).toFixed(0)}% blockers/early capture)`;
 	} else {
 		status = "ok";
 	}
@@ -216,24 +192,5 @@ console.table(lines);
 if (missingDays.length > 0) {
 	console.log(`Basin has no rows at all on: ${missingDays.join(", ")}`);
 }
-
-// Sign-in: is the PostHog funnel inflated by prefetches or bots?
-const signIn = await basin(`
-	SELECT is_bot, device, count(*) AS c
-	FROM analytics.events
-	WHERE ts >= CAST('${days[0]}T00:00:00Z' AS TIMESTAMP)
-		AND ts < CAST('${toIso}' AS TIMESTAMP)
-		AND event = '${SIGN_IN_INITIATED}'
-	GROUP BY 1, 2
-	ORDER BY c DESC`);
-const humans = signIn
-	.filter((row) => row.is_bot === false || row.is_bot === "false")
-	.reduce((sum, row) => sum + Number(row.c), 0);
-const completed = total(lake, SIGN_IN_COMPLETED);
-console.log("\nSign-in initiated, by bot classification and device:");
-console.table(signIn);
-console.log(
-	`Human sign-in starts: ${humans}, completions: ${completed} (${humans ? ((completed / humans) * 100).toFixed(1) : "–"}%). PostHog starts over the same days: ${total(ph, SIGN_IN_INITIATED)}.`,
-);
 
 process.exit(failed ? 1 : 0);

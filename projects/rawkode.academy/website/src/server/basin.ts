@@ -1,5 +1,5 @@
 // Basin SQL client for the analytics lake (bucket `rawkode-analytics`, table
-// `analytics.events`). Results are cached at the edge: Basin bills per byte
+// `analytics.events_archive` and `analytics.short_links`). Results are cached at the edge: Basin bills per byte
 // scanned, and dashboard numbers don't need to be fresher than a few minutes.
 
 const DEFAULT_TTL_SECONDS = 600;
