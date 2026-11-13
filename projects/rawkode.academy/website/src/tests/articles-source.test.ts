@@ -7,7 +7,8 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { getCollection } from "astro:content";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
 	articleId,
 	loadArticleFiles,
@@ -19,6 +20,7 @@ import {
 	parseArticle,
 	parseSeries,
 } from "@/lib/articles/source";
+import { getAllSeries } from "@/lib/live-content/articles";
 
 const noAssets = (path: string): never => {
 	throw new Error(`unexpected asset ${path}`);
@@ -144,18 +146,51 @@ describe("series", () => {
 	const SERIES =
 		'title: "Understanding MCP"\ndescription: One piece at a time.';
 
-	it("carry an article's series and part", () => {
+	it("carry an article's series", () => {
 		const data = parseArticle(
-			file(`${MINIMAL}\nseries:\n  id: understanding-mcp\n  part: 2`),
+			file(`${MINIMAL}\nseries: understanding-mcp`),
 			noAssets,
 		);
-		expect(data.series).toEqual({ id: "understanding-mcp", part: 2 });
-		expect(() =>
-			parseArticle(
-				file(`${MINIMAL}\nseries:\n  id: understanding-mcp\n  part: 0`),
-				noAssets,
-			),
-		).toThrow(/series\.part/);
+		expect(data.series).toBe("understanding-mcp");
+	});
+
+	it("order published parts by file name and leave out series without one", async () => {
+		const article = (id: string, series?: string) => ({
+			id,
+			data: {
+				title: id,
+				description: id,
+				publishedAt: new Date("2026-01-01"),
+				authors: [],
+				categories: [],
+				tags: [],
+				technologies: [],
+				type: "article",
+				howto: false,
+				draft: false,
+				...(series ? { series } : {}),
+			},
+		});
+		const meta = { title: "T", description: "D" };
+		vi.mocked(getCollection).mockImplementation((async (name: string) =>
+			name === "series"
+				? [
+						{ id: "understanding-mcp", data: meta },
+						{ id: "not-started", data: meta },
+					]
+				: [
+						article("10-servers", "understanding-mcp"),
+						article("2-tools", "understanding-mcp"),
+						article("0-what-is-mcp", "understanding-mcp"),
+						article("how-i-git"),
+					]) as never);
+		const series = await getAllSeries();
+		expect(series.map(({ id }) => id)).toEqual(["understanding-mcp"]);
+		expect(series[0]?.parts.map(({ id }) => id)).toEqual([
+			"0-what-is-mcp",
+			"2-tools",
+			"10-servers",
+		]);
 	});
 
 	it("map a series file to its title, description, cover and intro", () => {
@@ -185,34 +220,20 @@ describe("series", () => {
 		);
 	});
 
-	it("fail when a series is missing or a part number repeats", () => {
-		const part = (file: string, id: string, n: number) => ({
-			file,
-			data: { series: { id, part: n } },
-		});
+	it("fail when an article names a series that has no file", () => {
 		const known = new Set(["understanding-mcp"]);
 		expect(() =>
 			checkSeries(
 				[
-					part("a.mdx", "understanding-mcp", 1),
-					part("b.mdx", "understanding-mcp", 2),
-					{ file: "c.mdx", data: {} },
+					{ file: "a.mdx", data: { series: "understanding-mcp" } },
+					{ file: "b.mdx", data: {} },
 				],
 				known,
 			),
 		).not.toThrow();
-		expect(() => checkSeries([part("a.mdx", "talos", 1)], known)).toThrow(
-			/a\.mdx: series "talos" does not exist/,
-		);
 		expect(() =>
-			checkSeries(
-				[
-					part("a.mdx", "understanding-mcp", 1),
-					part("b.mdx", "understanding-mcp", 1),
-				],
-				known,
-			),
-		).toThrow(/b\.mdx: is part 1 of series "understanding-mcp", like a\.mdx/);
+			checkSeries([{ file: "a.mdx", data: { series: "unknown" } }], known),
+		).toThrow(/a\.mdx: series "unknown" does not exist/);
 	});
 });
 

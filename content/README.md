@@ -57,7 +57,7 @@ Optional:
 | `howto` | `true` adds how-to structured data built from the headings |
 | `draft` | `true` keeps the article off the published site |
 | `categories`, `tags` | Free-form labels |
-| `series` | `id` and `part`: makes the article one part of a [series](#series) |
+| `series` | A series id: makes the article one part of a [series](#series) |
 
 A misspelt or unknown field fails the build and names the file and the field.
 
@@ -120,17 +120,18 @@ Like an article, a series can be a directory (`content/series/<id>/index.md`)
 with its images beside it. Then mark each article as a part:
 
 ```yaml
-series:
-  id: understanding-mcp    # the file name in content/series
-  part: 1                  # sets the order
+series: understanding-mcp  # the file name in content/series
 ```
+
+Parts are read in the order of their file names, with numbers compared as
+numbers: `0-what-is-mcp.mdx`, `1-…`, `2-…`, then `10-…`. The file name is
+also the article's URL (`/read/0-what-is-mcp`).
 
 Each part links to the series and to the previous and next parts. Readers
 see "Part 2 of 3" counted over the published parts, so a draft part leaves no
 gap. A series page appears once its first part is published.
 
-The build fails when an article names a series that has no file, or when two
-articles in a series share a `part`.
+The build fails when an article names a series that has no file.
 
 ## Preview
 
