@@ -5,7 +5,7 @@ export const SEO_TITLE_LIMIT = 60;
  * The episode title without a stored "| <show>" suffix. Titles in the
  * database should not carry their show; this keeps a stray one from doubling.
  */
-export function withoutShowSuffix(title: string, showName: string): string {
+function withoutShowSuffix(title: string, showName: string): string {
 	const separator = title.lastIndexOf("|");
 	if (separator === -1) return title;
 	const suffix = title.slice(separator + 1).trim();

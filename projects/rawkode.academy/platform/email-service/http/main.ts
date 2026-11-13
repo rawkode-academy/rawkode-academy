@@ -1,8 +1,9 @@
-import { Emailservice } from "./http-service.js";
+import { EmailService } from "./http-service.js";
 
 export interface Env {
-	ANALYTICS: Service;
-	EMAIL_PREFERENCES: Service;
+	SEND_EMAIL: SendEmail;
+	EMAIL_PREFERENCES: Fetcher;
+	ANALYTICS: Fetcher;
 }
 
-export default Emailservice;
+export default EmailService;

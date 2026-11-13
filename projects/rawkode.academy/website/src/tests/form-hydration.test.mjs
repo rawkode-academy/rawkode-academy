@@ -46,9 +46,7 @@ const vue = require("vue");
 const { renderToString } = require("vue/server-renderer");
 const { parse, compileScript } = require("vue/compiler-sfc");
 const ts = require("typescript");
-const css = await import(
-	"../../../../../packages/design-system/styled-system/css/index.js"
-);
+const css = await import("@rawkodeacademy/design-system/css");
 
 function evaluate(source, filename, resolveImport = require) {
 	const { outputText } = ts.transpileModule(source, {

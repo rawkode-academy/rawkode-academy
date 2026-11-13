@@ -10,11 +10,11 @@ import * as s from "../data-model/schema";
 
 type Person = s.Person;
 
-export interface PeopleReadContext {
+interface PeopleReadContext {
 	request?: Request;
 }
 
-export interface PothosTypes {
+interface PothosTypes {
 	Context: PeopleReadContext;
 	Scalars: {
 		DateTime: { Input: Date; Output: Date };
@@ -22,7 +22,7 @@ export interface PothosTypes {
 }
 
 // Same rule the website used to match a GitHub username to a person id.
-export function normalizeGithubHandle(handle: string): string {
+function normalizeGithubHandle(handle: string): string {
 	return handle
 		.trim()
 		.toLowerCase()

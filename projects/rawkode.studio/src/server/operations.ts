@@ -193,7 +193,7 @@ export interface StudioRecordingHeartbeatInput {
 	sessionId: string;
 }
 
-export type StudioRecordingHandoff = StudioRecordingReadyMarker & {
+type StudioRecordingHandoff = StudioRecordingReadyMarker & {
 	readyMarkerKey: string;
 	sourceVerified: boolean;
 };

@@ -10,7 +10,7 @@
   ],
   "devDependencies": {
     "@types/node": "^24.10.1",
-    "knip": "^5.71.0",
+    "knip": "6.45.1",
     "typescript": "^5.9.3"
   },
   "scripts": {

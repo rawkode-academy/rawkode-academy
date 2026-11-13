@@ -1,19 +1,6 @@
 // CloudEvents written to the `analytics_events` Basin stream. The stream takes
 // any JSON; the typed tables are defined by the pipeline SQL in basin/.
 
-/** An event captured in the browser and posted to the website's /api/e. */
-export interface WebEvent {
-	event_id: string;
-	ts_ms: number;
-	event: string;
-	anonymous_id?: string;
-	session_id?: string;
-	distinct_id?: string;
-	url?: string;
-	referrer?: string;
-	properties?: Record<string, unknown>;
-}
-
 /** Request context the website attaches to a batch of web events. */
 export interface WebContext {
 	/** Website origin supplied by the RPC caller, never by the browser event. */

@@ -13,7 +13,7 @@ type Env = {
 	ANALYTICS: Fetcher;
 };
 
-export type GenerateBracketParams = {
+type GenerateBracketParams = {
 	bracketId: string;
 	startsAt?: number | null;
 };

@@ -4,7 +4,6 @@
 	"description": "Transcription service for Rawkode Academy",
 	"type": "module",
 	"dependencies": {
-		"@aws-sdk/client-s3": "^3.750.0",
 		"graphql": "^16.8.1",
 		"graphql-request": "^6.1.0"
 	},

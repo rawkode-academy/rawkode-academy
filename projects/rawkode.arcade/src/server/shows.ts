@@ -1,13 +1,13 @@
 import type { Env } from "../env";
 
-export interface StudioShow {
+interface StudioShow {
 	id: string;
 	title: string;
 	show: string;
 	startsAt: string;
 }
 
-export interface LiveStudioShow extends StudioShow {
+interface LiveStudioShow extends StudioShow {
 	startedAt: number | null;
 	playbackUrl: string;
 }

@@ -1,17 +1,14 @@
 import {
   coreTagSlugs,
-  feedTypes,
   tagKinds,
   type CoreTagSlug,
   type FeedType as BaseFeedType,
   type TagKind,
 } from "@/domains/tags/model";
 
-export const feedCategories = feedTypes;
 export const mandatoryTagSlugs = coreTagSlugs;
 
 export type FeedType = BaseFeedType;
-export type FeedCategory = BaseFeedType;
 export type MandatoryTagSlug = CoreTagSlug;
 
 export type ApiTag = {
@@ -54,28 +51,13 @@ export type Paginated<T> = {
 
 export type CommentNode = ApiComment & { replies: CommentNode[] };
 
-export type ApiSession = {
-  user: {
-    id: string;
-    email: string;
-    name: string;
-    image: string | null;
-    identity?: unknown;
-  };
-  permissions?: {
-    isAdmin: boolean;
-    canSubmitRka: boolean;
-    allowedMandatoryTags: MandatoryTagSlug[];
-  };
-};
-
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   Boolean(value && typeof value === "object");
 
 const hasOwn = (value: Record<string, unknown>, key: string) =>
   Object.prototype.hasOwnProperty.call(value, key);
 
-export const isApiTag = (value: unknown): value is ApiTag => {
+const isApiTag = (value: unknown): value is ApiTag => {
   if (!isRecord(value)) return false;
   if (typeof value.id !== "string") return false;
   if (typeof value.slug !== "string") return false;
@@ -89,7 +71,7 @@ export const isApiTag = (value: unknown): value is ApiTag => {
   return true;
 };
 
-export const isApiPost = (value: unknown): value is ApiPost => {
+const isApiPost = (value: unknown): value is ApiPost => {
   if (!isRecord(value)) return false;
   if (typeof value.id !== "string") return false;
   if (typeof value.title !== "string") return false;

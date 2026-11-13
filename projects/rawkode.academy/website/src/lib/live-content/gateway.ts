@@ -17,7 +17,7 @@ export class GatewayError extends Error {
  * page render until the Worker's wall-clock limit: fail fast so the caller
  * serves the last-good copy from KV.
  */
-export const GATEWAY_TIMEOUT_MS = 8_000;
+const GATEWAY_TIMEOUT_MS = 8_000;
 
 interface GraphQLResponse<T> {
 	data?: T | null;

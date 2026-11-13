@@ -1,4 +1,4 @@
-export interface JsonFeedAuthor {
+interface JsonFeedAuthor {
 	name: string;
 	url?: string;
 	avatar?: string;

@@ -6,6 +6,11 @@ _service: gen.#PlatformService & {
 	serviceName:       "leaderboard"
 	servicePrefix:     "platform"
 	includeWriteModel: true
+	additionalDependencies: {
+		"@paralleldrive/cuid2":   "^2.2.2"
+		"@pothos/plugin-drizzle": "^0.8.1"
+		"graphql-scalars":        "^1.24.2"
+	}
 	bindings: {
 		d1Databases: [{
 			binding:      "DB"

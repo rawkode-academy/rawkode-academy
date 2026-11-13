@@ -1,4 +1,4 @@
-export interface PersonListEntry {
+interface PersonListEntry {
 	id: string;
 	name: string;
 	avatarUrl?: string | undefined;

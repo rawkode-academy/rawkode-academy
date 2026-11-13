@@ -75,11 +75,6 @@ import (
 				content: json.Indent(json.Marshal(_tsconfigJson), "", "  ")
 			}
 
-			"biome.json": gen.#JSONFile & {
-				mode:    "managed"
-				content: json.Indent(json.Marshal(_biomeJson), "", "  ")
-			}
-
 			"README.md": gen.#MarkdownFile & {
 				mode:    "managed"
 				content: _readme
@@ -284,38 +279,32 @@ import (
 		type:    "module"
 		dependencies: {
 			if includeDataModel {
-				"@paralleldrive/cuid2":  "^2.2.2"
-				"@sindresorhus/slugify": "^2.2.1"
-				"drizzle-kit":           "^0.30.6"
-				"drizzle-orm":           "^0.38.4"
-				"drizzle-zod":           "^0.6.1"
-				"zod":                   "^3.24.3"
+				"drizzle-orm": "^0.38.4"
 			}
 			if includeReadModel {
 				"@apollo/subgraph":          "^2.10.2"
-				"@graphql-tools/utils":      "^10.8.6"
 				"@pothos/core":              "^4.6.0"
 				"@pothos/plugin-directives": "^4.2.0"
-				"@pothos/plugin-drizzle":    "^0.8.1"
 				"@pothos/plugin-federation": "^4.3.2"
 				"graphql":                   "^16.10.0"
-				"graphql-scalars":           "^1.24.2"
 				"graphql-yoga":              "^5.13.4"
-			}
-			if includeWriteModel {
-				"hono": "^4.8.3"
 			}
 			for k, v in additionalDependencies {
 				"\(k)": v
 			}
 		}
 		devDependencies: {
-			"@biomejs/biome":            "^1.9.4"
-			"@cloudflare/workers-types": "^4.20250426.0"
-			"@types/bun":                "^1.4.4"
-			"@types/node":               "^22.15.2"
-			"vitest":                    "^4.1.8"
-			"wrangler":                  "^4.13.2"
+			if includeDataModel {
+				"drizzle-kit": "^0.30.6"
+			}
+
+			// D1-backed services import the D1Database type from here.
+			if len(bindings.d1Databases) > 0 {
+				"@cloudflare/workers-types": "^4.20250426.0"
+			}
+			"@types/bun":  "^1.4.4"
+			"@types/node": "^22.15.2"
+			"wrangler":    "^4.13.2"
 			for k, v in additionalDevDependencies {
 				"\(k)": v
 			}
@@ -345,30 +334,6 @@ import (
 		}
 		fileNames: []
 		errors: []
-	}
-
-	_biomeJson: {
-		"$schema": "./node_modules/@biomejs/biome/configuration_schema.json"
-		vcs: {
-			enabled:       true
-			clientKind:    "git"
-			useIgnoreFile: true
-		}
-		formatter: {
-			enabled:         true
-			useEditorconfig: true
-			indentStyle:     "tab"
-			indentWidth:     2
-		}
-		linter: {
-			enabled: true
-			rules: recommended: true
-		}
-		javascript: formatter: quoteStyle: "double"
-		assist: {
-			enabled: true
-			actions: source: organizeImports: "on"
-		}
 	}
 
 	// List of enabled components for README
@@ -660,15 +625,13 @@ import (
 			\(_writeEnvInterface)
 		}
 
-		export class \(_pascalName)WriteModel extends WorkerEntrypoint<Env> {
+		export default class \(_pascalName)WriteModel extends WorkerEntrypoint<Env> {
 			async fetch(request: Request): Promise<Response> {
 				return new Response("Not Found", { status: 404 });
 			}
 
 			// Add your workflow handlers here
 		}
-
-		export default \(_pascalName)WriteModel;
 		"""
 }
 

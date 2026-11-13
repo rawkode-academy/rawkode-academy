@@ -12,39 +12,11 @@ const readComponent = (name: string): string =>
 
 describe("Skeleton Components", () => {
 	it("provide accessible loading semantics", () => {
-		const skeleton = readComponent("Skeleton.vue");
-		const skeletonText = readComponent("SkeletonText.vue");
-		const skeletonCard = readComponent("SkeletonCard.vue");
-		const skeletonList = readComponent("SkeletonList.vue");
-
-		for (const source of [skeleton, skeletonText, skeletonCard, skeletonList]) {
+		for (const name of ["SkeletonText.vue", "SkeletonComment.vue"]) {
+			const source = readComponent(name);
 			expect(source).toContain('role="status"');
 			expect(source).toContain("sr-only");
 			expect(source).toContain("ariaLabel");
 		}
-	});
-
-	it("keeps deterministic structure for card and list variants", () => {
-		const skeletonCard = readComponent("SkeletonCard.vue");
-		const skeletonList = readComponent("SkeletonList.vue");
-
-		expect(skeletonCard).toContain(
-			'import SkeletonText from "./SkeletonText.vue";',
-		);
-		expect(skeletonCard).toContain("showDescription");
-		expect(skeletonCard).toContain("showFooter");
-
-		expect(skeletonList).toContain('v-for="index in items"');
-		expect(skeletonList).toContain("getTitleWidth");
-		expect(skeletonList).toContain("getSubtitleWidth");
-	});
-
-	it("draws the React list from the shared skeleton recipe", () => {
-		const skeletonList = readComponent("SkeletonList.tsx");
-
-		expect(skeletonList).toContain('role="status"');
-		expect(skeletonList).toContain("sr-only");
-		expect(skeletonList).toContain("academySkeleton()");
-		expect(skeletonList).not.toMatch(/--surface-|border-surface|animate-pulse/);
 	});
 });

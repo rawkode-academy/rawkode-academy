@@ -13,7 +13,7 @@ import type {
 
 // Ambiguity guards carried over from remark-tech-autolink: short names and
 // ordinary words that happen to be technology names.
-export const DEFAULT_SKIP_NAMES = [
+const DEFAULT_SKIP_NAMES = [
 	"d",
 	"k",
 	"go",

@@ -70,7 +70,7 @@ export const rssThumbnail = (url: string) =>
  * The article link is absolute: feed readers render item content away from
  * the site, where a relative link resolves against the reader's own host.
  */
-export async function renderAndSanitizeArticle(
+async function renderAndSanitizeArticle(
 	article: ContentEntry<"articles">,
 	site: string | URL,
 ): Promise<RenderResult> {

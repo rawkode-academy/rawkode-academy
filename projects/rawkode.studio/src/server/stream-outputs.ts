@@ -7,7 +7,7 @@ import {
 	type StudioSessionRecord,
 } from "./studio";
 
-export const cloudflareWhipLimitations = [
+const cloudflareWhipLimitations = [
 	"Broadcast metrics and player experience metrics are unavailable.",
 	"Recording and live HLS/DASH playback are unavailable.",
 	"Simulcasting or restreaming via RTMP/SRT is unavailable.",
@@ -20,7 +20,7 @@ export interface StreamOutputDestination {
 	url: string;
 }
 
-export interface StreamOutputReadiness {
+interface StreamOutputReadiness {
 	inputMode: "whip" | "rtmps-srt";
 	managedOutputsReady: boolean;
 	maxDestinations: number;
@@ -116,7 +116,7 @@ async function requireConfig(env: StudioEnv): Promise<CloudflareStreamConfig> {
 	return config;
 }
 
-export async function requireStreamOutputSession(
+async function requireStreamOutputSession(
 	env: StudioEnv,
 	user: StudioUser,
 	sessionId: string,

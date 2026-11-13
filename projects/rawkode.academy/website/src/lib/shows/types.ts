@@ -13,7 +13,7 @@ export interface ShowPageContext {
 	locals: App.Locals;
 }
 
-export interface ShowPageMeta {
+interface ShowPageMeta {
 	title: string;
 	description?: string | undefined;
 }

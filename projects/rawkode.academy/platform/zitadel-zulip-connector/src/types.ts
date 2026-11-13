@@ -15,19 +15,7 @@ export const ProvisionUserSchema = z.object({
 	zitadelUserId: z.string(),
 });
 
-export const UpdateUserSchema = z.object({
-	zitadelUserId: z.string(),
-	email: z.string().email(),
-	updates: z.object({
-		firstName: z.string().optional(),
-		lastName: z.string().optional(),
-		email: z.string().email().optional(),
-		isActive: z.boolean().optional(),
-	}),
-});
-
 export type ProvisionUserRequest = z.infer<typeof ProvisionUserSchema>;
-export type UpdateUserRequest = z.infer<typeof UpdateUserSchema>;
 
 export interface UserMapping {
 	zitadelUserId: string;

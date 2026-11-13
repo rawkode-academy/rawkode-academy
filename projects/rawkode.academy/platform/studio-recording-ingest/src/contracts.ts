@@ -103,7 +103,7 @@ export function normalizeEtag(value: string): string {
 	return value.trim().replace(/^"|"$/g, "");
 }
 
-export function createVodIdentity(
+function createVodIdentity(
 	marker: StudioRecordingReadyMarker,
 ): StudioRecordingVodIdentity {
 	return {

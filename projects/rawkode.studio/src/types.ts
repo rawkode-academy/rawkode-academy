@@ -1,7 +1,7 @@
-export type LayerType = "audio" | "background" | "camera" | "html" | "remotion" | "screen" | "video";
+type LayerType = "audio" | "background" | "camera" | "html" | "remotion" | "screen" | "video";
 export type PeopleRole = "guests" | "hosts" | "producer";
-export type SourceType = "audio" | "camera" | "comment" | "graphic" | "html" | "remotion" | "screen" | "video" | "browser";
-export type StudioPhase = "designing" | "previewing" | "live" | "recording";
+type SourceType = "audio" | "camera" | "comment" | "graphic" | "html" | "remotion" | "screen" | "video" | "browser";
+type StudioPhase = "designing" | "previewing" | "live" | "recording";
 export type SceneLayout = "dynamic-grid" | "freeform" | "remotion" | "screenshare" | "solo";
 export type TransitionAxis = "x" | "y";
 export type TransitionDirection = "down" | "left" | "right" | "up";
@@ -115,7 +115,7 @@ export interface CanvasResolution {
   fps: number;
 }
 
-export interface LowerThirdDraft {
+interface LowerThirdDraft {
   speaker: string;
   comment: string;
 }

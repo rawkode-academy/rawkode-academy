@@ -1,6 +1,6 @@
 import type { GatewayPlugin } from "@graphql-hive/gateway-runtime";
 
-export interface User {
+interface User {
 	id: string;
 	email: string;
 	emailVerified: boolean;
@@ -11,7 +11,7 @@ export interface User {
 	updatedAt: Date;
 }
 
-export interface Session {
+interface Session {
 	id: string;
 	userId: string;
 	expiresAt: Date;
@@ -19,12 +19,12 @@ export interface Session {
 	userAgent: string | null;
 }
 
-export interface SessionResponse {
+interface SessionResponse {
 	user: User;
 	session: Session;
 }
 
-export interface AuthContext {
+interface AuthContext {
 	user: User | null;
 	session: Session | null;
 	isAuthenticated: boolean;

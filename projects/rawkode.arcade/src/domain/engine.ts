@@ -1,21 +1,21 @@
 import type { CommandEnvelope, Principal, Role } from "./protocol";
 import { MAX_TEAMS_PER_ROOM } from "./contestant-limits";
 
-export type RoomStatus = "lobby" | "live" | "paused" | "complete";
+type RoomStatus = "lobby" | "live" | "paused" | "complete";
 
-export interface TeamState {
+interface TeamState {
 	id: string;
 	name: string;
 	score: number;
 	memberIds: string[];
 }
 
-export interface BuzzerState {
+interface BuzzerState {
 	principalId: string;
 	at: string;
 }
 
-export type PublicGameBoard =
+type PublicGameBoard =
 	| { kind: "merge-conflict"; entries: Array<{ rank: number; label?: string; revealed: boolean }>; total: number }
 	| { kind: "spinlock"; board: string; letters: string[]; activeValue: number; solved: boolean }
 	| { kind: "principal-engineer"; index: number; total: number }

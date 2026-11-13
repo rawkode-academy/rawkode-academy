@@ -1,4 +1,4 @@
-export const CONTRIBUTOR_LOCAL_ISO_DB = "rawkode-studio-contributor-local-iso-v1";
+const CONTRIBUTOR_LOCAL_ISO_DB = "rawkode-studio-contributor-local-iso-v1";
 const DATABASE_VERSION = 1;
 const RECORDINGS_STORE = "recordings";
 const CHUNKS_STORE = "chunks";
@@ -47,7 +47,7 @@ export function resolveContributorLocalIsoOutcome(
   return trackEnded || writeFailed ? "failed" : "complete";
 }
 
-export function createContributorLocalIsoManifest(
+function createContributorLocalIsoManifest(
   options: StartContributorLocalIsoOptions,
   mimeType: string,
   id = createRecordingId(),

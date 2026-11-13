@@ -1,6 +1,6 @@
 import type { StudioRecordingReadyMarker } from "./contracts.js";
 
-export interface GoogleServiceAccount {
+interface GoogleServiceAccount {
 	client_email: string;
 	private_key: string;
 	token_uri?: string;
@@ -120,7 +120,7 @@ function jobResourceName(config: CloudRunConfig): string {
 	return `projects/${config.projectId}/locations/${config.location}/jobs/${config.jobName}`;
 }
 
-export async function findTranscodingExecution(
+async function findTranscodingExecution(
 	config: CloudRunConfig,
 	marker: StudioRecordingReadyMarker,
 	dispatchToken: string,
@@ -197,7 +197,7 @@ async function importPrivateKey(privateKey: string): Promise<CryptoKey> {
 	);
 }
 
-export async function getGoogleAccessToken(
+async function getGoogleAccessToken(
 	serviceAccount: GoogleServiceAccount,
 ): Promise<string> {
 	const now = Math.floor(Date.now() / 1000);

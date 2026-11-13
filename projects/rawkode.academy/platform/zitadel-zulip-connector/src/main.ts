@@ -1,6 +1,5 @@
 import { Hono } from "hono";
 import { provisionUser } from "./handlers/provision";
-import { updateUser } from "./handlers/update";
 import type { Env } from "./types";
 import { ZitadelClient } from "./zitadel";
 import { ZulipClient } from "./zulip";
@@ -30,6 +29,5 @@ app.use("/api/*", async (c, next) => {
 });
 
 app.post("/api/users/provision", provisionUser);
-app.patch("/api/users/update", updateUser);
 
 export default app;

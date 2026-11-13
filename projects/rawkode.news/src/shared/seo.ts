@@ -2,7 +2,7 @@ const normalizeWhitespace = (value: string) => value.replace(/\s+/g, " ").trim()
 
 const POST_DESCRIPTION_MAX = 180;
 
-export const postUnavailableMeta = {
+const postUnavailableMeta = {
   title: "Post unavailable | Rawkode News",
   description: "This post is not available right now. Browse the latest discussions on Rawkode News.",
   robots: "noindex, nofollow" as const,
@@ -39,7 +39,7 @@ type PostSeoInput = {
   body?: string | null;
 };
 
-export const getPostDescription = (post: PostSeoInput, max = POST_DESCRIPTION_MAX) => {
+const getPostDescription = (post: PostSeoInput, max = POST_DESCRIPTION_MAX) => {
   const source = stripMarkdownToText(post.body ?? "");
   const fallback = `${post.title} — ${post.author}`;
   return truncateDescription(source || fallback, max);

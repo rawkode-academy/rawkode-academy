@@ -7,7 +7,7 @@
  * sessions (locals.user), the Astro session (anonymous course sign-ups), and
  * the newsletter / lead-magnet flags that hide CTAs for anonymous visitors.
  */
-export const PERSONALISING_COOKIES: ReadonlyArray<string | RegExp> = [
+const PERSONALISING_COOKIES: ReadonlyArray<string | RegExp> = [
 	"rawkode-session",
 	/^(__Secure-)?better-auth\./,
 	"astro-session",

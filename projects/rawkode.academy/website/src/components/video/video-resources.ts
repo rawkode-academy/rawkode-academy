@@ -8,7 +8,7 @@ export interface VideoResource {
 	category?: string | undefined;
 }
 
-export const RESOURCE_CATEGORIES = [
+const RESOURCE_CATEGORIES = [
 	"documentation",
 	"code",
 	"slides",
@@ -20,7 +20,7 @@ export const RESOURCE_CATEGORIES = [
  * The destination of a resource, or undefined when it has none worth
  * linking: only http(s) URLs and site-relative paths are links.
  */
-export function resourceHref(resource: VideoResource): string | undefined {
+function resourceHref(resource: VideoResource): string | undefined {
 	for (const candidate of [resource.url, resource.filePath]) {
 		const href = candidate?.trim();
 		if (

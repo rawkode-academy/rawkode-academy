@@ -1,4 +1,4 @@
-export interface ShowListEntry {
+interface ShowListEntry {
 	id: string;
 	name: string;
 	description?: string | undefined;

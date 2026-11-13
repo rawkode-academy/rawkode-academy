@@ -31,8 +31,8 @@ tasks: {
 
 		inputs: [
 			"scripts/collect-schemas.ts",
-			schema.#ModuleFiles & {paths: ["projects/rawkode.academy/platform/*/read-model/schema.gql"]},
-			schema.#ModuleFiles & {paths: ["projects/rawkode.academy/website/src/subgraph/**"]},
+			// publish.ts generates each schema.gql (not committed) from these.
+			schema.#ModuleFiles & {paths: ["projects/rawkode.academy/platform/*/read-model/**", "projects/rawkode.academy/platform/*/data-model/**"]},
 		]
 
 		outputs: [
@@ -67,14 +67,7 @@ tasks: {
 			"scripts/collect-schemas.ts",
 			"scripts/compose.ts",
 			"schemas/**",
-			schema.#ModuleFiles & {paths: ["projects/rawkode.academy/platform/*/read-model/schema.gql"]},
-			schema.#ModuleFiles & {paths: ["projects/rawkode.academy/website/src/subgraph/**"]},
-			// cuenv ci ignores inputs outside the project directory when it
-			// decides what is affected (cuenv/cuenv#611). Until that is fixed
-			// they are repeated relative to the repository root, the only form
-			// the affected check matches.
-			"projects/rawkode.academy/website/src/subgraph/**",
-			"bun.lock",
+			schema.#ModuleFiles & {paths: ["projects/rawkode.academy/platform/*/read-model/**", "projects/rawkode.academy/platform/*/data-model/**"]},
 			"src/**",
 			"supergraph.graphql",
 			"wrangler.jsonc",

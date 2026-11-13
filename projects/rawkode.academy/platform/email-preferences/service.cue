@@ -7,7 +7,9 @@ _service: gen.#PlatformService & {
 	includeWriteModel: false
 	includeHttp:       true
 	additionalDependencies: {
-		cloudevents: "^8.0.2"
+		"@paralleldrive/cuid2":   "^2.2.2"
+		"@pothos/plugin-drizzle": "^0.8.1"
+		cloudevents:              "^8.0.2"
 	}
 	bindings: {
 		d1Databases: [{

@@ -64,7 +64,7 @@ const resource = z.strictObject({
 });
 
 // Unknown keys are errors, so a misspelt field never goes unnoticed.
-export const articleFrontmatter = z.strictObject({
+const articleFrontmatter = z.strictObject({
 	title: z.string().trim().min(1),
 	subtitle: z.string().trim().min(1).optional(),
 	description: z.string().trim().min(1),
@@ -101,7 +101,7 @@ export const articleFrontmatter = z.strictObject({
 	resources: z.array(resource).default([]),
 });
 
-export type ArticleFrontmatter = z.infer<typeof articleFrontmatter>;
+type ArticleFrontmatter = z.infer<typeof articleFrontmatter>;
 
 function compact<T extends object>(value: T): T {
 	for (const key of Object.keys(value) as (keyof T)[]) {
@@ -115,7 +115,7 @@ function imageFormat(src: string): string {
 	return ext === "jpeg" ? "jpg" : ext || "png";
 }
 
-export function splitFrontmatter(article: ArticleFile): {
+function splitFrontmatter(article: ArticleFile): {
 	frontmatter: ArticleFrontmatter;
 	body: string;
 } {

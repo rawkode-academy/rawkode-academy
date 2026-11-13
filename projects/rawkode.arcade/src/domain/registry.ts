@@ -32,7 +32,7 @@ function asItems(value: unknown): unknown[] { return Array.isArray(value) ? valu
 function answerItems(value: unknown, options: unknown): unknown[] { const record = asRecord(value); const optionRecord = asRecord(options); return asItems(record?.answers ?? optionRecord?.answers ?? options ?? value); }
 function text(value: unknown): string { return typeof value === "string" || typeof value === "number" ? String(value) : ""; }
 function title(snapshot: PublishedSnapshot, fallback: string): string { return text(snapshot.manifest.title) || fallback; }
-function mappedContent(key: GameKey, snapshot: PublishedSnapshot, fallback: unknown): unknown {
+function mappedContent(key: GameKey, snapshot: PublishedSnapshot): unknown {
 	const direct = snapshot.manifest.gameContent ?? snapshot.manifest.runtimeContent ?? snapshot.manifest.content;
 	if (direct !== undefined) return structuredClone(direct);
 	const questions = [...snapshot.questions].sort((left, right) => left.ordinal - right.ordinal);
@@ -53,7 +53,7 @@ function bindRuntime(template: Runtime, content: unknown): Runtime {
 	return { ...template, content: immutableContent, reducer: asRuntime(createNullPointer(immutableContent as Parameters<typeof createNullPointer>[0])), prompt: (state) => { const round = (immutableContent as typeof nullPointerSeed).rounds[Number(state.roundIndex)]; return round ? { id: `null-${state.roundIndex}`, prompt: round.prompt, choices: [] } : undefined; } };
 }
 function snapshotFor(state: GameState): PublishedSnapshot | undefined { return (state.private as GameState["private"] & { contentSnapshot?: PublishedSnapshot }).contentSnapshot; }
-function runtimeFor(gameKey: string, state?: GameState): Runtime | undefined { const template = runtimes[gameKey as GameKey]; if (!template) return undefined; const snapshot = state && snapshotFor(state); if (!snapshot) return template; const runtime = bindRuntime(template, mappedContent(template.key, snapshot, template.content)); const validation = runtime.reducer.validateContent(runtime.content); if (!validation.valid) throw new Error("BAD_COMMAND"); return runtime; }
+function runtimeFor(gameKey: string, state?: GameState): Runtime | undefined { const template = runtimes[gameKey as GameKey]; if (!template) return undefined; const snapshot = state && snapshotFor(state); if (!snapshot) return template; const runtime = bindRuntime(template, mappedContent(template.key, snapshot)); const validation = runtime.reducer.validateContent(runtime.content); if (!validation.valid) throw new Error("BAD_COMMAND"); return runtime; }
 /** Resolves an audience response to the pinned Null Pointer answer without exposing the answer set. */
 export function canonicalAudienceChoice(state: GameState, value: string): string | undefined {
 	const runtime = runtimeFor(state.gameKey, state);
@@ -68,7 +68,7 @@ export function canonicalAudienceChoice(state: GameState, value: string): string
 export function validatePublishedContent(gameKey: string, snapshot: PublishedSnapshot): ValidationResult {
 	const template = runtimes[gameKey as GameKey];
 	if (!template) return { valid: false, errors: ["unknown game key"] };
-	const runtime = bindRuntime(template, mappedContent(template.key, snapshot, template.content));
+	const runtime = bindRuntime(template, mappedContent(template.key, snapshot));
 	return runtime.reducer.validateContent(runtime.content);
 }
 function runtimeState(state: GameState, runtime: Runtime): unknown { const persisted = state.private.runtime; return persisted?.gameKey === runtime.key ? immutable(structuredClone(persisted.state)) : immutable(runtime.reducer.createState(runtime.content)); }

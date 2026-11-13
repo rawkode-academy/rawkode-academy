@@ -21,7 +21,7 @@ export interface GameDefinition<Content, State, Command> {
 	validateContent: (content: Content) => ValidationResult;
 }
 
-export const normalizeAnswer = (value: string): string =>
+const normalizeAnswer = (value: string): string =>
 	value
 		.normalize("NFKD")
 		.replace(/[\u0300-\u036f]/g, "")

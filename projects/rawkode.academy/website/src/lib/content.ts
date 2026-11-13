@@ -4,7 +4,7 @@ import { ACADEMY_DATE, ACADEMY_DATE_LOCALE, formatUtc } from "@/lib/local-time";
 import { isNewsPublished } from "@/lib/news-publication";
 import { formatRuntime } from "@/lib/video-runtime";
 
-export type AcademyContentKind =
+type AcademyContentKind =
 	| "Video"
 	| "Article"
 	| "News"

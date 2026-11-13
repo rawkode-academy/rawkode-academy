@@ -1,5 +1,5 @@
-export const ID_PROVIDER_URL = "https://id.rawkode.academy";
-export const CLIENT_ID = "rawkode-news";
+const ID_PROVIDER_URL = "https://id.rawkode.academy";
+const CLIENT_ID = "rawkode-news";
 export const SESSION_COOKIE_NAME = "rawkode-news-session";
 export const SESSION_DURATION_SECONDS = 60 * 60 * 24 * 7; // 7 days
 
@@ -15,7 +15,7 @@ export interface StoredSession {
   expiresAt: number;
 }
 
-export function getCallbackUrl(origin: string): string {
+function getCallbackUrl(origin: string): string {
   return `${origin}/api/auth/callback`;
 }
 

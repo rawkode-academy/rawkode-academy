@@ -100,7 +100,7 @@ function engine(): Promise<ExpressiveCodeEngine> {
 }
 
 /** Build the fence meta Expressive Code parses (title="…" plus the rest). */
-export function codeMeta(title: string | null, meta: string | null): string {
+function codeMeta(title: string | null, meta: string | null): string {
 	const parts: string[] = [];
 	if (title) parts.push(`title=${JSON.stringify(title)}`);
 	if (meta) parts.push(meta);

@@ -146,13 +146,3 @@ export function createLogger(scope: string): Logger {
 		error: createLogFunction("error", scope),
 	};
 }
-
-/**
- * Default logger instance without a scope.
- */
-export const logger: Logger = {
-	debug: createLogFunction("debug", null),
-	info: createLogFunction("info", null),
-	warn: createLogFunction("warn", null),
-	error: createLogFunction("error", null),
-};

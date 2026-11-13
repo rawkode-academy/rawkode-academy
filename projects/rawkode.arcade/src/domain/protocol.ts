@@ -19,7 +19,7 @@ export interface CommandEnvelope<T = unknown> {
 	sentAt: string;
 }
 
-export interface SnapshotMessage {
+interface SnapshotMessage {
 	v: typeof PROTOCOL_VERSION;
 	type: "snapshot";
 	version: number;
@@ -41,7 +41,7 @@ export interface EventMessage {
 	deliverySequence?: number;
 }
 
-export interface ErrorMessage {
+interface ErrorMessage {
 	v: typeof PROTOCOL_VERSION;
 	type: "error";
 	code: "BAD_COMMAND" | "CONFLICT" | "FORBIDDEN" | "DUPLICATE" | "RATE_LIMITED" | "DEADLINE_EXPIRED";
@@ -49,12 +49,4 @@ export interface ErrorMessage {
 	commandId?: string;
 }
 
-export type ClientMessage = CommandEnvelope | { v: typeof PROTOCOL_VERSION; type: "ping" };
 export type ServerMessage = SnapshotMessage | EventMessage | ErrorMessage | { v: typeof PROTOCOL_VERSION; type: "pong" };
-
-export function isCommand(value: unknown): value is CommandEnvelope {
-	if (!value || typeof value !== "object") return false;
-	const candidate = value as Partial<CommandEnvelope>;
-	return candidate.v === PROTOCOL_VERSION && typeof candidate.id === "string" && candidate.id.trim().length > 0 &&
-		typeof candidate.type === "string" && typeof candidate.expectedVersion === "number";
-}

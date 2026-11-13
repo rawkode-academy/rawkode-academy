@@ -11,7 +11,7 @@ type OpenGraphImagePayload = Omit<Partial<ImageServicePayload>, "image"> & {
  * by the dedicated article-jsonld emitters and the inline WebPage block
  * is suppressed.
  */
-export type PageType =
+type PageType =
 	| "WebPage"
 	| "AboutPage"
 	| "CollectionPage"

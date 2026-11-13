@@ -18,7 +18,7 @@ const RESOURCE_EMBED = /* GraphQL */ `
 	}
 `;
 
-export const VIDEO_FIELDS = /* GraphQL */ `
+const VIDEO_FIELDS = /* GraphQL */ `
 	fragment LiveVideo on Video {
 		id
 		slug
@@ -73,7 +73,7 @@ export const VIDEO_FIELDS = /* GraphQL */ `
 	}
 `;
 
-export const SHOW_FIELDS = /* GraphQL */ `
+const SHOW_FIELDS = /* GraphQL */ `
 	fragment LiveShow on Show {
 		id
 		name
@@ -109,7 +109,7 @@ export const SHOW_FIELDS = /* GraphQL */ `
 	}
 `;
 
-export const PERSON_FIELDS = /* GraphQL */ `
+const PERSON_FIELDS = /* GraphQL */ `
 	fragment LivePerson on Person {
 		id
 		name
@@ -137,7 +137,7 @@ export const PERSON_FIELDS = /* GraphQL */ `
 	}
 `;
 
-export const TECHNOLOGY_FIELDS = /* GraphQL */ `
+const TECHNOLOGY_FIELDS = /* GraphQL */ `
 	fragment LiveTechnology on Technology {
 		id
 		name
@@ -210,7 +210,7 @@ export const TECHNOLOGY_FIELDS = /* GraphQL */ `
 	}
 `;
 
-export const NEWS_FIELDS = /* GraphQL */ `
+const NEWS_FIELDS = /* GraphQL */ `
 	fragment LiveNews on NewsStory {
 		id
 		slug
@@ -228,7 +228,7 @@ export const NEWS_FIELDS = /* GraphQL */ `
 	}
 `;
 
-export const CHANGELOG_FIELDS = /* GraphQL */ `
+const CHANGELOG_FIELDS = /* GraphQL */ `
 	fragment LiveChangelog on ChangelogEntry {
 		id
 		title
@@ -244,7 +244,7 @@ export const CHANGELOG_FIELDS = /* GraphQL */ `
 	}
 `;
 
-export const ADR_FIELDS = /* GraphQL */ `
+const ADR_FIELDS = /* GraphQL */ `
 	fragment LiveAdr on Adr {
 		id
 		title
@@ -257,7 +257,7 @@ export const ADR_FIELDS = /* GraphQL */ `
 	}
 `;
 
-export const TESTIMONIAL_FIELDS = /* GraphQL */ `
+const TESTIMONIAL_FIELDS = /* GraphQL */ `
 	fragment LiveTestimonial on Testimonial {
 		id
 		type
@@ -285,7 +285,7 @@ const COURSE_RESOURCE = /* GraphQL */ `
 	}
 `;
 
-export const COURSE_MODULE_FIELDS = /* GraphQL */ `
+const COURSE_MODULE_FIELDS = /* GraphQL */ `
 	fragment LiveCourseModule on CourseModule {
 		id
 		courseId
@@ -320,7 +320,7 @@ export const COURSE_MODULE_FIELDS = /* GraphQL */ `
 	}
 `;
 
-export const COURSE_FIELDS = /* GraphQL */ `
+const COURSE_FIELDS = /* GraphQL */ `
 	fragment LiveCourse on Course {
 		id
 		title
@@ -356,7 +356,7 @@ export const COURSE_FIELDS = /* GraphQL */ `
 	${COURSE_MODULE_FIELDS}
 `;
 
-export const LEARNING_PATH_FIELDS = /* GraphQL */ `
+const LEARNING_PATH_FIELDS = /* GraphQL */ `
 	fragment LiveLearningPath on LearningPath {
 		id
 		title
@@ -376,7 +376,7 @@ export const LEARNING_PATH_FIELDS = /* GraphQL */ `
 	}
 `;
 
-export const SUPPORTER_FIELDS = /* GraphQL */ `
+const SUPPORTER_FIELDS = /* GraphQL */ `
 	fragment LiveSupporter on Supporter {
 		id
 		name

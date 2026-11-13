@@ -2,14 +2,14 @@
 // have no team: a slot is the bracket entry itself, and a slot the form does
 // not send stays as it is.
 
-export const MATCH_STATUSES = [
+const MATCH_STATUSES = [
 	"scheduled",
 	"live",
 	"completed",
 	"cancelled",
 ] as const;
 
-export type MatchStatus = (typeof MATCH_STATUSES)[number];
+type MatchStatus = (typeof MATCH_STATUSES)[number];
 export type BracketKind = "solo" | "team";
 
 export type MatchSides = {
@@ -24,7 +24,7 @@ export type BracketEntryRef = {
 	teamId: string | null;
 };
 
-export type EntryPatch = {
+type EntryPatch = {
 	entryAId?: string | null;
 	entryBId?: string | null;
 };
@@ -43,7 +43,7 @@ export type MatchResultCommand = {
 	notes: string | null;
 };
 
-export type WinnerOption = {
+type WinnerOption = {
 	value: string;
 	label: string;
 	selected: boolean;

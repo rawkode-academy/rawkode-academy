@@ -3,7 +3,7 @@ const databaseVersion = 2;
 const storeName = "recording_chunks";
 const metadataStoreName = "recording_metadata";
 
-export type RecordingBackupIntegrity = "complete" | "gapped" | "unfinalized";
+type RecordingBackupIntegrity = "complete" | "gapped" | "unfinalized";
 
 export interface RecordingBackup {
 	contentType: string;
@@ -222,23 +222,6 @@ export async function finalizeRecordingBackup(
 		expectedChunkCount: Math.max(0, Math.floor(expectedChunkCount)),
 		finalized: !persistedError,
 		id: backup.id,
-	});
-}
-
-export async function readRecordingBackupBlob(
-	backup: RecordingBackup | undefined,
-): Promise<Blob | null> {
-	if (!backup) {
-		return null;
-	}
-	const rows = await readRecordingBackupChunks(backup);
-	if (rows.length === 0) {
-		return null;
-	}
-
-	rows.sort((left, right) => left.chunkIndex - right.chunkIndex);
-	return new Blob(rows.map((row) => row.chunk), {
-		type: backup.contentType,
 	});
 }
 

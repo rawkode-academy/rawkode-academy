@@ -10,7 +10,7 @@ import type { GraphQLSchema } from "graphql";
 import * as s from "../data-model/schema";
 import type { PlayerStats } from "../write-model/main";
 
-export interface PothosTypes {
+interface PothosTypes {
 	DrizzleSchema: typeof s;
 	Scalars: {
 		DateTime: { Input: Date; Output: Date };

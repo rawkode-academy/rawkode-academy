@@ -1,4 +1,4 @@
-import { asc, desc, eq, inArray, sql } from "drizzle-orm";
+import { asc, desc, eq, sql } from "drizzle-orm";
 import { getDb, type DatabaseEnv } from "@/db";
 import { postTags, tags } from "@/db/schema";
 import type { ApiTag } from "@/shared/contracts";
@@ -37,7 +37,7 @@ const normalizeTag = (value: {
   usageCount: Number(value.usageCount || 0),
 });
 
-export const sortTags = (items: ApiTag[]) =>
+const sortTags = (items: ApiTag[]) =>
   [...items].sort((left, right) => {
     if (left.kind !== right.kind) {
       return left.kind === "mandatory" ? -1 : 1;
@@ -73,30 +73,7 @@ export const listTags = async (env: DatabaseEnv, kind?: TagKind) => {
   return sortTags(rows.map(normalizeTag));
 };
 
-export const getTagsBySlugs = async (env: DatabaseEnv, slugs: string[]) => {
-  const normalized = Array.from(
-    new Set(slugs.map((slug) => slug.trim().toLowerCase()).filter(Boolean)),
-  );
-  if (normalized.length === 0) {
-    return [];
-  }
-
-  const db = getDb(env);
-  const rows = await db
-    .select({
-      id: tags.id,
-      slug: tags.slug,
-      name: tags.name,
-      description: tags.description,
-      kind: tags.kind,
-    })
-    .from(tags)
-    .where(inArray(tags.slug, normalized));
-
-  return sortTags(rows.map((row) => ({ ...row })));
-};
-
-export const getTagBySlug = async (env: DatabaseEnv, slug: string) => {
+const getTagBySlug = async (env: DatabaseEnv, slug: string) => {
   const db = getDb(env);
   const normalizedSlug = slug.trim().toLowerCase();
   const [row] = await db

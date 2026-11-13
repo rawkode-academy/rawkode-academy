@@ -1,13 +1,13 @@
 import type { RemoteImage } from "@/lib/live-content/types";
 
-export type ShowStatus = "coming-soon" | "active" | "archived";
+type ShowStatus = "coming-soon" | "active" | "archived";
 
-export interface ShowHost {
+interface ShowHost {
 	forename?: string | null;
 	surname?: string | null;
 }
 
-export interface ShowEpisode {
+interface ShowEpisode {
 	video?: {
 		title?: string | null;
 		thumbnailUrl?: string | null;

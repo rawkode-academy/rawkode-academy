@@ -738,14 +738,3 @@ export const comebacks: Comeback[] = [
 export function getEffectiveComebacks(insultId: string): Comeback[] {
 	return comebacks.filter((c) => c.effectiveness.includes(insultId));
 }
-
-export function getRandomInsult(enemyId: string): Insult {
-	const filtered = insults.filter(
-		(i) => i.enemies.includes(enemyId) || i.layer === "Generic",
-	);
-	const insult = filtered[Math.floor(Math.random() * filtered.length)];
-	if (!insult) {
-		return insults[0] as Insult;
-	}
-	return insult;
-}

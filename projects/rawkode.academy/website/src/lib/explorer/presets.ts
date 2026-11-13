@@ -46,7 +46,7 @@ export const DEFAULT_FILTERS: ExplorerFilters = {
 	search: "",
 };
 
-export const EXPLORER_PRESETS: ExplorerPreset[] = [
+const EXPLORER_PRESETS: ExplorerPreset[] = [
 	// Phase 1 - Grid view presets
 	{
 		id: "pipeline",
@@ -173,13 +173,6 @@ export function getDefaultPreset(): ExplorerPreset {
 }
 
 /**
- * Get presets by view mode
- */
-export function getPresetsByViewMode(viewMode: ViewMode): ExplorerPreset[] {
-	return EXPLORER_PRESETS.filter((p) => p.viewMode === viewMode);
-}
-
-/**
  * Available view modes with metadata
  */
 export const VIEW_MODES: Array<{
@@ -225,12 +218,3 @@ export const VIEW_MODES: Array<{
 		phase: 3,
 	},
 ];
-
-/**
- * Get available view modes for a phase
- */
-export function getViewModesForPhase(
-	phase: 1 | 2 | 3,
-): Array<(typeof VIEW_MODES)[number]> {
-	return VIEW_MODES.filter((v) => v.phase <= phase);
-}

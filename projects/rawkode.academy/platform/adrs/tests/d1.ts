@@ -20,7 +20,7 @@ export async function migratedD1(serviceDir: string, upTo?: string) {
 	return { DB, dispose: () => mf.dispose() };
 }
 
-export async function exec(DB: D1Database, sql: string) {
+async function exec(DB: D1Database, sql: string) {
 	const statements = sql
 		.split("--> statement-breakpoint")
 		.map((statement) => statement.trim())

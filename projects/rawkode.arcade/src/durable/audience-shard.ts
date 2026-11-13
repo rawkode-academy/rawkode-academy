@@ -46,7 +46,7 @@ export class AudienceShard implements DurableObject {
 		if (url.pathname === "/_internal/submit-reaction" && request.method === "POST") {
 			const principal = this.principal(request);
 			if (!principal || principal.role !== "audience") return new Response("Forbidden", { status: 403 });
-			return this.submitReaction(principal, await request.json<{ roomId: string; reaction: string; promptId: string; shardId: string; commandId: string }>());
+			return this.submitReaction(await request.json<{ roomId: string; reaction: string; promptId: string; shardId: string; commandId: string }>());
 		}
 		if (url.pathname !== "/_internal/submit" || request.method !== "POST") return new Response("Not found", { status: 404 });
 		const principal = this.principal(request);
@@ -118,7 +118,7 @@ export class AudienceShard implements DurableObject {
 		try { input = JSON.parse(typeof message === "string" ? message : new TextDecoder().decode(message)); } catch { return socket.send(JSON.stringify({ v: PROTOCOL_VERSION, type: "error", code: "BAD_COMMAND", message: "Invalid JSON" })); }
 		if (input.v !== PROTOCOL_VERSION || !input.id || (input.type !== "audience.vote" && input.type !== "audience.reaction")) return socket.send(JSON.stringify({ v: PROTOCOL_VERSION, type: "error", code: "BAD_COMMAND", message: "Invalid audience command", commandId: input.id }));
 		const result = input.type === "audience.reaction"
-			? await this.submitReaction(attachment.principal, { roomId: attachment.roomId, shardId: attachment.shardId, promptId: input.payload?.promptId ?? "live", reaction: input.payload?.reaction ?? "like", commandId: input.id })
+			? await this.submitReaction({ roomId: attachment.roomId, shardId: attachment.shardId, promptId: input.payload?.promptId ?? "live", reaction: input.payload?.reaction ?? "like", commandId: input.id })
 			: input.payload?.choice ? await this.submit(attachment.principal, { roomId: attachment.roomId, shardId: attachment.shardId, promptId: input.payload.promptId ?? "default", choice: input.payload.choice, commandId: input.id }) : new Response("Invalid vote", { status: 400 });
 		const rawPayload = await result.text();
 		let payload: unknown;
@@ -186,7 +186,7 @@ export class AudienceShard implements DurableObject {
 		return Response.json({ queued: true, shardId: body.shardId }, { status: 202 });
 	}
 
-	private async submitReaction(principal: Principal, body: { roomId: string; reaction: string; promptId: string; shardId: string; commandId: string }): Promise<Response> {
+	private async submitReaction(body: { roomId: string; reaction: string; promptId: string; shardId: string; commandId: string }): Promise<Response> {
 		if (!body.roomId || !body.promptId || !body.reaction || body.reaction.length > 64) return new Response("Invalid reaction", { status: 400 });
 		if (!await roomAcceptsPublicParticipation(this.env, body.roomId)) return Response.json({ error: { code: "SHOW_OFF_AIR" } }, { status: 403 });
 		if (!body.commandId || typeof body.commandId !== "string" || body.commandId.trim().length === 0) return new Response("Command id required", { status: 400 });

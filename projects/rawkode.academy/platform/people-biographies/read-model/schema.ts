@@ -8,7 +8,7 @@ import type { GraphQLSchema } from "graphql";
 import { JSONObjectResolver } from "graphql-scalars";
 import * as s from "../data-model/schema";
 
-export interface PothosTypes {
+interface PothosTypes {
 	Context: Record<string, unknown>;
 	Scalars: {
 		RichTextDocument: {

@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import * as dataSchema from "../data-model/schema.js";
 import type { Env } from "./main.js";
 
-export interface PlayerStats {
+interface PlayerStats {
 	totalWins: number;
 	totalLosses: number;
 	currentStreak: number;
@@ -14,7 +14,7 @@ export interface PlayerStats {
 	fastestBreachSeconds: number | null;
 }
 
-export type PlayerRank =
+type PlayerRank =
 	| "SCRIPT_KIDDIE"
 	| "PENTESTER"
 	| "RED_TEAMER"

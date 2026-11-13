@@ -2,7 +2,7 @@ import type { AstroCookies } from "astro";
 import { SESSION_COOKIE_NAME, type StoredSession } from "@/core/auth";
 import { getPermissions, type Permissions } from "@/core/permissions";
 
-export const getSession = async (env: Pick<Env, "SESSION">, cookies: AstroCookies) => {
+const getSession = async (env: Pick<Env, "SESSION">, cookies: AstroCookies) => {
   const sessionId = cookies.get(SESSION_COOKIE_NAME)?.value;
   if (!sessionId) {
     return null;
@@ -38,6 +38,3 @@ export const getSessionWithPermissions = async (
   const permissions = await getPermissions(env, session.user.id);
   return { session, permissions };
 };
-
-export const buildReturnToPath = (url: URL) =>
-  `${url.pathname}${url.search}${url.hash}`;

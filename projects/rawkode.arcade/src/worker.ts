@@ -93,7 +93,7 @@ function webSocketTicket(request: Request): string | null {
 	return null;
 }
 
-async function api(request: Request, env: Env, ctx: ExecutionContext, path: string): Promise<Response> {
+async function api(request: Request, env: Env, path: string): Promise<Response> {
 	// The isolated test Worker uses direct SELF.fetch calls without browser Origin
 	// headers. Deployed preview and production Workers always enforce this check.
 	if (!mutationOriginAllowed(request, env)) {
@@ -415,7 +415,7 @@ export const arcadeWorker = {
 		const pathname = new URL(request.url).pathname;
 		if (pathname === "/auth/sign-in" && request.method === "GET") return signIn(request);
 		const path = routePath(pathname);
-		if (path) return api(request, env, ctx, path);
+		if (path) return api(request, env, path);
 		if (pathname === "/health") return json({ ok: true, service: "rawkode-arcade" });
 		const { handle } = await import("@astrojs/cloudflare/handler");
 		return handle(request, env, ctx);

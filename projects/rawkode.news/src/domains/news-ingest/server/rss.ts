@@ -385,8 +385,3 @@ export const loadRssFeed = async (
 
   throw parsed.error ?? new RequestError("Could not parse feed", 422);
 };
-
-export const fetchRssNewsItems = async (feedUrl: string) => {
-  const { items } = await loadRssFeed(feedUrl);
-  return items;
-};

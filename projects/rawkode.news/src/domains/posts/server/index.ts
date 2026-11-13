@@ -133,13 +133,6 @@ export const parsePageValue = (value: string | null) => {
   return Math.floor(parsed);
 };
 
-export const parsePageSize = (value: string | null) => {
-  if (!value) return null;
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed) || parsed < 1) return null;
-  return Math.min(50, Math.floor(parsed));
-};
-
 type ListPostsOptions = {
   feed?: FeedType;
   mineAuthor?: string | null;

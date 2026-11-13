@@ -10,7 +10,7 @@ import * as s from "../data-model/schema";
 
 type Technology = s.Technology;
 
-export interface PothosTypes {
+interface PothosTypes {
 	Context: Record<string, unknown>;
 	Scalars: {
 		DateTime: { Input: Date; Output: Date };
@@ -35,9 +35,9 @@ const logoUrl =
 			? `${cdn}/technologies/${technology.id}/${variant}.svg`
 			: null;
 
-export const iconUrl = logoUrl("icon");
-export const horizontalLogoUrl = logoUrl("horizontal");
-export const stackedLogoUrl = logoUrl("stacked");
+const iconUrl = logoUrl("icon");
+const horizontalLogoUrl = logoUrl("horizontal");
+const stackedLogoUrl = logoUrl("stacked");
 
 export const getSchema = (env: { DB: D1Database }): GraphQLSchema => {
 	const db = drizzle(env.DB, { schema: s });

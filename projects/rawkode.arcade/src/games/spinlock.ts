@@ -1,10 +1,10 @@
-import { hasTeam, isHost, matchesAnswer, next, score, validation, type GameActor, type GameDefinition, type ValidationResult } from "./common";
-export interface SpinRound { phrase: string; category: string; aliases?: string[] }
+import { hasTeam, isHost, matchesAnswer, next, score, validation, type GameDefinition, type ValidationResult } from "./common";
+interface SpinRound { phrase: string; category: string; aliases?: string[] }
 export interface SpinlockContent { title: string; wheel: number[]; rounds: SpinRound[] }
-export interface SpinlockState { phase: "lobby" | "open" | "complete"; roundIndex: number; turn: number; wheelIndex: number; activeValue: number; letters: string[]; scores: Record<string, number>; solvedBy?: string; revealed?: boolean; audienceGuesses: Record<string, string> }
-export type SpinlockCommand = { type: "start" } | { type: "spin" } | { type: "guess-letter"; letter: string } | { type: "solve"; answer: string } | { type: "audience-guess"; letter: string } | { type: "reveal" } | { type: "next-round" };
+interface SpinlockState { phase: "lobby" | "open" | "complete"; roundIndex: number; turn: number; wheelIndex: number; activeValue: number; letters: string[]; scores: Record<string, number>; solvedBy?: string; revealed?: boolean; audienceGuesses: Record<string, string> }
+type SpinlockCommand = { type: "start" } | { type: "spin" } | { type: "guess-letter"; letter: string } | { type: "solve"; answer: string } | { type: "audience-guess"; letter: string } | { type: "reveal" } | { type: "next-round" };
 const chars = (phrase: string) => [...new Set(phrase.toUpperCase().match(/[A-Z0-9]/g) ?? [])];
-export const spinlock = (content: SpinlockContent): GameDefinition<SpinlockContent, SpinlockState, SpinlockCommand> => ({
+export const createSpinlock = (content: SpinlockContent): GameDefinition<SpinlockContent, SpinlockState, SpinlockCommand> => ({
 	id: "spinlock", name: "Spinlock", createState: () => ({ phase: "lobby", roundIndex: 0, turn: 0, wheelIndex: 0, activeValue: 0, letters: [], scores: {}, audienceGuesses: {} }),
 	validateContent: (value): ValidationResult => validation(...(value.wheel.length ? [] : ["wheel requires values"]), ...(value.rounds.length ? [] : ["at least one round is required"]), ...value.rounds.filter((round) => !round.phrase.trim() || !round.category.trim()).map(() => "round needs phrase and category")),
 	redact: (state, role) => { if (role === "host") return state; const { audienceGuesses: _audienceGuesses, ...publicState } = state; return publicState; },
@@ -22,4 +22,3 @@ export const spinlock = (content: SpinlockContent): GameDefinition<SpinlockConte
 		return state;
 	},
 });
-export const createSpinlock = spinlock;

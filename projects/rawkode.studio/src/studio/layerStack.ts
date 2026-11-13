@@ -1,6 +1,6 @@
 import type { StudioLayer, StudioScene } from "../types";
 
-export function getLayersById(layers: StudioLayer[]): Map<string, StudioLayer> {
+function getLayersById(layers: StudioLayer[]): Map<string, StudioLayer> {
   return new Map(layers.map((layer) => [layer.id, layer]));
 }
 

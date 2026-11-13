@@ -1,4 +1,4 @@
-export interface VideoListEntry {
+interface VideoListEntry {
 	id: string;
 	slug: string;
 	title: string;

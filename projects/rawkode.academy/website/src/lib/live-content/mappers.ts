@@ -45,7 +45,7 @@ const strings = (value: unknown): string[] =>
 const optionalStrings = (value: unknown): string[] | undefined =>
 	Array.isArray(value) ? strings(value) : undefined;
 
-export function toDate(value: unknown): Date | undefined {
+function toDate(value: unknown): Date | undefined {
 	if (value === null || value === undefined || value === "") return undefined;
 	const date = new Date(value as string | number);
 	return Number.isNaN(date.getTime()) ? undefined : date;
@@ -55,7 +55,7 @@ export function toDate(value: unknown): Date | undefined {
 const requiredDate = (value: unknown): Date =>
 	toDate(value) ?? new Date(Number.NaN);
 
-export function doc(value: unknown): DocNode | undefined {
+function doc(value: unknown): DocNode | undefined {
 	if (
 		value &&
 		typeof value === "object" &&
@@ -69,7 +69,7 @@ export function doc(value: unknown): DocNode | undefined {
 
 // Code is left out (blocks and inline code): reading time and word counts used
 // to strip it from the Markdown body, so including it inflated "N min read".
-export function docText(value: DocNode | undefined): string {
+function docText(value: DocNode | undefined): string {
 	if (!value || isEmptyDoc(value)) return "";
 	return toText(withoutInlineCode(value) as DocNode, { code: false });
 }
@@ -575,7 +575,7 @@ export function mapSupporter(raw: Raw): SupporterData {
 }
 
 /** The document whose text becomes `entry.body`. */
-export function mainDocument<C extends CollectionName>(
+function mainDocument<C extends CollectionName>(
 	collection: C,
 	data: CollectionDataMap[C],
 ): DocNode | undefined {
@@ -647,7 +647,7 @@ export function relatedTags<C extends CollectionName>(
 	return [...new Set(tags)];
 }
 
-export function entryTags<C extends CollectionName>(
+function entryTags<C extends CollectionName>(
 	collection: C,
 	id: string,
 	data: CollectionDataMap[C],
@@ -655,7 +655,7 @@ export function entryTags<C extends CollectionName>(
 	return [collection, `${collection}:${id}`, ...relatedTags(collection, data)];
 }
 
-export function lastModified<C extends CollectionName>(
+function lastModified<C extends CollectionName>(
 	collection: C,
 	data: CollectionDataMap[C],
 	now: number,

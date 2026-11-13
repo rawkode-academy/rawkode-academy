@@ -14,7 +14,7 @@ import {
 import * as s from "../data-model/schema";
 import { batchLoader, chunk, groupBy } from "./batch";
 
-export interface PothosTypes {
+interface PothosTypes {
 	Context: Record<string, unknown>;
 	Scalars: {
 		DateTime: { Input: Date; Output: Date };

@@ -30,10 +30,3 @@ export interface Comeback {
 	effectiveness: string[];
 	layer: InsultLayer;
 }
-
-export interface PlayerProgress {
-	currentLayer: ClusterLayer;
-	defeatedEnemies: string[];
-	unlockedComebacks: string[];
-	health: number;
-}

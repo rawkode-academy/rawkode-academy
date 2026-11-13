@@ -11,7 +11,7 @@ import * as s from "../data-model/schema";
 
 type ChangelogEntry = s.ChangelogEntry;
 
-export interface PothosTypes {
+interface PothosTypes {
 	Context: Record<string, unknown>;
 	Scalars: {
 		DateTime: { Input: Date; Output: Date };

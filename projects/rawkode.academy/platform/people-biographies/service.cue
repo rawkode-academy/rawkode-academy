@@ -5,6 +5,9 @@ import gen "github.com/rawkode-academy/rawkode-academy/projects/rawkode.academy/
 // People biographies: the Markdown biography on a person's profile.
 _service: gen.#PlatformService & {
 	serviceName: "people-biographies"
+	additionalDependencies: {
+		"graphql-scalars": "^1.24.2"
+	}
 	additionalDevDependencies: {
 		miniflare: "4.20260529.0"
 	}

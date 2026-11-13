@@ -3,7 +3,7 @@ import { Menu } from "@ark-ui/vue/menu";
 import { actions } from "astro:actions";
 import Avatar from "vue-boring-avatars";
 import { academyShell } from "@rawkodeacademy/design-system";
-import type { BetterAuthUser } from "../../lib/auth/better-auth-client";
+import type { User as BetterAuthUser } from "../../lib/auth/server";
 import { resetIdentity } from "@/lib/analytics/track";
 import { createLogger } from "@/lib/logger";
 

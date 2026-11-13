@@ -10,7 +10,7 @@ export interface Payload {
 export const TEMPLATE_VERSION = "2026-05-24-4";
 export const CACHE_SECONDS = 60 * 60 * 24 * 3;
 
-export const DEFAULT_PAYLOAD: Payload = {
+const DEFAULT_PAYLOAD: Payload = {
   format: "png",
   title: "Hello, World!",
   subtitle:

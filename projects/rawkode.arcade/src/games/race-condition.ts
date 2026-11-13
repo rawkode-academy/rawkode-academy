@@ -1,9 +1,9 @@
-import { hasTeam, isHost, matchesAnswer, next, score, validation, type GameActor, type GameDefinition, type ValidationResult } from "./common";
-export interface RaceRound { prompt: string; answer: string; aliases?: string[]; teamSteps: number; chaserSteps: number }
+import { hasTeam, isHost, matchesAnswer, next, score, validation, type GameDefinition, type ValidationResult } from "./common";
+interface RaceRound { prompt: string; answer: string; aliases?: string[]; teamSteps: number; chaserSteps: number }
 export interface RaceConditionContent { title: string; finish: number; rounds: RaceRound[] }
-export interface RaceConditionState { phase: "lobby" | "open" | "complete"; roundIndex: number; positions: Record<string, number>; chaserPosition: number; buzzed?: { teamId: string; at: number }; awaitingChaser?: boolean; settled?: boolean; audienceAnswers: Record<string, string>; scores: Record<string, number>; winner?: string }
-export type RaceConditionCommand = { type: "start" } | { type: "buzz" } | { type: "answer"; answer: string } | { type: "chaser-answer"; answer: string } | { type: "audience-answer"; answer: string } | { type: "next-round" };
-export const raceCondition = (content: RaceConditionContent): GameDefinition<RaceConditionContent, RaceConditionState, RaceConditionCommand> => ({
+interface RaceConditionState { phase: "lobby" | "open" | "complete"; roundIndex: number; positions: Record<string, number>; chaserPosition: number; buzzed?: { teamId: string; at: number }; awaitingChaser?: boolean; settled?: boolean; audienceAnswers: Record<string, string>; scores: Record<string, number>; winner?: string }
+type RaceConditionCommand = { type: "start" } | { type: "buzz" } | { type: "answer"; answer: string } | { type: "chaser-answer"; answer: string } | { type: "audience-answer"; answer: string } | { type: "next-round" };
+export const createRaceCondition = (content: RaceConditionContent): GameDefinition<RaceConditionContent, RaceConditionState, RaceConditionCommand> => ({
 	id: "race-condition", name: "Race Condition", createState: () => ({ phase: "lobby", roundIndex: 0, positions: {}, chaserPosition: 0, audienceAnswers: {}, scores: {} }),
 	validateContent: (value): ValidationResult => validation(...(value.finish > 0 ? [] : ["finish must be positive"]), ...(value.rounds.length ? [] : ["at least one round is required"]), ...value.rounds.filter((round) => !round.prompt.trim() || !round.answer.trim() || round.teamSteps < 1 || round.chaserSteps < 1).map(() => "round needs a prompt, answer, and positive steps")),
 	redact: (state, role) => { if (role === "host") return state; const { audienceAnswers: _audienceAnswers, ...publicState } = state; return publicState; },
@@ -21,4 +21,3 @@ export const raceCondition = (content: RaceConditionContent): GameDefinition<Rac
 		return state;
 	},
 });
-export const createRaceCondition = raceCondition;

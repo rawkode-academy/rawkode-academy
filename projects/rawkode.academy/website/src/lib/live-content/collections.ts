@@ -159,14 +159,6 @@ export async function getEntries<C extends CollectionName>(
 	return resolved.filter((entry): entry is ContentEntry<C> => Boolean(entry));
 }
 
-/** Build a reference, e.g. for comparisons: reference("people", "rawkode"). */
-export function reference<C extends CollectionName>(
-	collection: C,
-	id: string,
-): Reference<C> {
-	return { collection, id: normalizeEntryId(collection, id) };
-}
-
 /** Compare a reference (or id string) with an id, ignoring "/index". */
 export function sameId(
 	a: Reference | string | undefined | null,

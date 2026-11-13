@@ -15,11 +15,8 @@ on:
     - projects/*.cue
     - projects/rawkode.academy/*.cue
     - projects/rawkode.academy/api/*.cue
-    - projects/rawkode.academy/api/bun.lock
-    - projects/rawkode.academy/api/bun.lock/**
     - projects/rawkode.academy/api/package.json
     - projects/rawkode.academy/api/package.json/**
-    - projects/rawkode.academy/api/projects/rawkode.academy/website/src/subgraph/**
     - projects/rawkode.academy/api/schemas/**
     - projects/rawkode.academy/api/scripts/collect-schemas.ts
     - projects/rawkode.academy/api/scripts/collect-schemas.ts/**
@@ -31,7 +28,6 @@ on:
     - projects/rawkode.academy/api/wrangler.jsonc
     - projects/rawkode.academy/api/wrangler.jsonc/**
     - projects/rawkode.academy/platform/**
-    - projects/rawkode.academy/website/src/subgraph/**
   workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}

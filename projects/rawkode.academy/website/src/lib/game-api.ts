@@ -4,7 +4,7 @@
  */
 
 // Types matching the game services
-export interface PlayerStats {
+interface PlayerStats {
 	totalWins: number;
 	totalLosses: number;
 	currentStreak: number;
@@ -14,7 +14,7 @@ export interface PlayerStats {
 	fastestBreachSeconds: number | null;
 }
 
-export type PlayerRank =
+type PlayerRank =
 	| "SCRIPT_KIDDIE"
 	| "PENTESTER"
 	| "RED_TEAMER"
@@ -209,11 +209,4 @@ export async function generateShareCard(params: {
 		method: "POST",
 		body: JSON.stringify(params),
 	});
-}
-
-/**
- * Get share card image URL
- */
-export function getShareCardUrl(cardId: string): string {
-	return `/api/games/ski/share-card/${cardId}.svg`;
 }

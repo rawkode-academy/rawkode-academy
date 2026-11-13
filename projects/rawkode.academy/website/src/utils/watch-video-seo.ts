@@ -7,7 +7,7 @@ import {
 	type TranscriptParagraphText,
 } from "@/utils/video-transcript";
 
-export type WatchVideoSeoTextSource = "transcript" | "summary" | "none";
+type WatchVideoSeoTextSource = "transcript" | "summary" | "none";
 
 export interface WatchVideoSeoTextState {
 	textSource: WatchVideoSeoTextSource;

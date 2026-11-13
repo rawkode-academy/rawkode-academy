@@ -30,7 +30,6 @@ write-model/wrangler.jsonc
 
 # BEGIN cuenv codegen
 README.md
-biome.json
 drizzle.config.ts
 package.json
 read-model/main.ts

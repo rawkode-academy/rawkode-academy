@@ -15,7 +15,7 @@ const MAX_BATCH_BYTES = 60 * 1024;
 // The collector keeps at most 8 KB of properties per event anyway.
 const MAX_EVENT_BYTES = 8 * 1024;
 
-export interface TrackedEvent {
+interface TrackedEvent {
 	event_id: string;
 	ts_ms: number;
 	event: string;

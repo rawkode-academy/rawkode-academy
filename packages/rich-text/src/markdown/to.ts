@@ -419,7 +419,7 @@ function label(variant: string): string {
 	return `${variant.charAt(0).toUpperCase()}${variant.slice(1)}:`;
 }
 
-export function codeMeta(
+function codeMeta(
 	title: string | null,
 	meta: string | null,
 ): string | null {

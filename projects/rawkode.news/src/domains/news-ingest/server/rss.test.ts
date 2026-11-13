@@ -4,6 +4,7 @@ import {
   loadRssFeed,
   parseRssFeed,
 } from "@/domains/news-ingest/server/rss";
+import { summarizeText } from "@/domains/news-ingest/server/shared";
 
 describe("parseRssFeed", () => {
   test("parses RSS items and converts HTML descriptions to markdown", () => {
@@ -160,5 +161,15 @@ describe("parseRssFeed", () => {
       normalizedUrl: "https://example.com/posts/detected",
       title: "Detected feed item",
     });
+  });
+});
+
+describe("summarizeText", () => {
+  test("drops script and style blocks whose end tags carry whitespace or attributes", () => {
+    expect(
+      summarizeText(
+        "Before<script>alert(1)</script >middle<style>p{}</style\n>after<SCRIPT>x()</script\t\n bar>end",
+      ),
+    ).toBe("Before middle after end");
   });
 });

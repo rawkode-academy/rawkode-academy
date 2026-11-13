@@ -1,9 +1,9 @@
-export interface PodcastSeriesHost {
+interface PodcastSeriesHost {
 	id: string;
 	name: string;
 }
 
-export interface PodcastSeriesSource {
+interface PodcastSeriesSource {
 	id: string;
 	name: string;
 	description?: string;

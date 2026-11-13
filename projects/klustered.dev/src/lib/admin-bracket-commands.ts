@@ -3,7 +3,6 @@ import type { Database } from "@/db/client";
 import { schema } from "@/db/client";
 
 export type BracketStatus = "draft" | "active" | "finished";
-export type SeasonStatus = "interest" | "active" | "finished";
 export type ApplicationDecision = "approved" | "rejected";
 
 async function getBracket(db: Database, bracketId: string) {
@@ -69,16 +68,6 @@ export async function updateBracketStatus(
 		.update(schema.brackets)
 		.set({ status: input.status })
 		.where(eq(schema.brackets.id, input.id));
-}
-
-export async function updateSeasonStatus(
-	db: Database,
-	input: { id: string; status: SeasonStatus },
-): Promise<void> {
-	await db
-		.update(schema.seasons)
-		.set({ status: input.status })
-		.where(eq(schema.seasons.id, input.id));
 }
 
 export async function createBracketEntry(

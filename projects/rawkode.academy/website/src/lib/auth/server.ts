@@ -6,7 +6,7 @@
  */
 
 const ID_PROVIDER_URL = "https://id.rawkode.academy";
-export const CLIENT_ID = "rawkode-academy-website";
+const CLIENT_ID = "rawkode-academy-website";
 export const PKCE_COOKIE_NAME = "pkce_verifier";
 export const SESSION_COOKIE_NAME = "rawkode-session";
 export const SESSION_DURATION_SECONDS = 60 * 60 * 24 * 7; // 7 days
@@ -54,7 +54,7 @@ async function generateCodeChallenge(verifier: string): Promise<string> {
 	return encodeBase64UrlFromBytes(new Uint8Array(hash));
 }
 
-export function getCallbackUrl(origin: string): string {
+function getCallbackUrl(origin: string): string {
 	return `${origin}/api/auth/callback`;
 }
 
@@ -190,7 +190,7 @@ export interface User {
 	updatedAt: Date;
 }
 
-export interface Session {
+interface Session {
 	id: string;
 	userId: string;
 	expiresAt: Date;
@@ -265,25 +265,6 @@ export async function getSession(
 		console.error("Failed to validate session:", error);
 		return null;
 	}
-}
-
-/**
- * Get the sign-in URL for the identity provider
- */
-export function getSignInUrl(callbackUrl?: string): string {
-	const params = new URLSearchParams();
-	params.set("provider", "github");
-	if (callbackUrl) {
-		params.set("callbackURL", callbackUrl);
-	}
-	return `${ID_PROVIDER_URL}/auth/sign-in/social?${params.toString()}`;
-}
-
-/**
- * Get the sign-out URL for the identity provider
- */
-export function getSignOutUrl(): string {
-	return `${ID_PROVIDER_URL}/auth/sign-out`;
 }
 
 /**

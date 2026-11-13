@@ -5,6 +5,10 @@ import gen "github.com/rawkode-academy/rawkode-academy/projects/rawkode.academy/
 // Videos: the Video entity and its queries. Guests, technologies, chapters, episodes and terms live in join services.
 _service: gen.#PlatformService & {
 	serviceName: "videos"
+	additionalDependencies: {
+		"@paralleldrive/cuid2": "^2.2.2"
+		"graphql-scalars":      "^1.24.2"
+	}
 	additionalDevDependencies: {
 		miniflare: "4.20260529.0"
 	}

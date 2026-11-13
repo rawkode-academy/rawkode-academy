@@ -7,7 +7,7 @@ export type InlineTree =
 	| { kind: "leaf"; node: InlineNode }
 	| { kind: "mark"; mark: Mark; children: InlineTree[] };
 
-export function sameMark(a: Mark, b: Mark): boolean {
+function sameMark(a: Mark, b: Mark): boolean {
 	if (a.type !== b.type) return false;
 	if (a.type === "link" && b.type === "link") {
 		return (
@@ -23,7 +23,7 @@ export function sameMark(a: Mark, b: Mark): boolean {
 
 const rank = (mark: Mark) => MARK_ORDER.indexOf(mark.type);
 
-export function sortMarks(marks: Mark[]): Mark[] {
+function sortMarks(marks: Mark[]): Mark[] {
 	return [...marks].sort((a, b) => rank(a) - rank(b));
 }
 
