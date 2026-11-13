@@ -122,23 +122,43 @@ deployed Worker without the token shows "not configured" on
 
 ## Dual-run and cutover
 
-`reconcile.ts` compares daily CloudEvent counts from `analytics.events_archive`
-with PostHog events written by the collector (`$lib = observability-collector`
-and `cloudevents_id` present). It reconstructs PostHog names as
-`<event_source>.<event_type>`, groups by `event_time` in UTC, and skips the
-partial first day using the archive's earliest `__ingest_ts`.
+`reconcile.ts` compares exact daily `(source, id)` sets in the archive with
+collector CloudEvents in PostHog (`$lib = observability-collector` and
+`cloudevents_id` present). It checks canonical event names and identities reused
+on different days. Extra physical deliveries are reported separately rather
+than inflating event totals. Matching counts with different IDs fail.
 
 ```sh
-cuenv task reconcile -e production   # DAYS=14 to widen the window (1–90)
+cuenv task reconcile -e production
+# Optional controls: DAYS=14 SETTLE_HOURS=6 RECONCILE_REPORT=./delivery-parity.json
 ```
 
-Counts must agree within 5% (with an absolute slack of two events per day).
-Missing Basin days fail the check. Browser CloudEvents are included once ingestion is deployed; browser SDK-only
-PostHog events, OTLP logs and metrics are outside this comparison; a clean result does not validate browser migration.
+Days use UTC and exclude the partial first ingestion day. A six-hour grace
+period defers checking yesterday until 06:00 UTC (`SETTLE_HOURS`, 0–48). Both
+providers are read with ordered 1,000-row keyset pages, with at most 100,000
+identities per day; malformed, repeated, unordered or truncated pages fail rather
+than produce a partial success. Late arrivals still require repeated checks of
+settled days; cross-provider reads are not a shared snapshot.
+
+Exit 0 means ID parity for all examined days; 1 means mismatch or an empty day;
+2 means no full settled day was eligible. Query/authentication failures also
+fail the command. `RECONCILE_REPORT` optionally saves a private JSON receipt
+containing generation time, UTC window, source coverage, duplicate counts and
+daily differences. Receipts deliberately set `cutover_ready: false`: ID parity
+does not prove producer acceptance, payload equality, complete event-family
+coverage, identity stitching, dashboard correctness or operational telemetry.
+Browser CloudEvents are included; browser SDK-only PostHog events and OTLP
+telemetry are outside this comparison.
 
 The internal website dashboard queries CloudEvents in `events_archive` for
 server event totals, sign-in events, newsletter submissions and video engagement.
-Matched redirects come from `short_links`. Counts are events, not deduplicated
+Matched redirects come from `short_links`. Archive aggregations select the
+first ingested copy per `(event_source, event_id)` before counting. The original
+short-links schema lacks source, so its deduplication uses the rawkode-link
+producer's globally generated UUID `event_id`. Missing event identities are
+excluded from business totals and exposed as data-quality failures; repeated
+delivery counts are also visible. A future typed-table revision must retain
+source so this narrower scope can be removed. Counts are events, not deduplicated
 people or attributed funnels. Viewer estimates exclude missing and anonymous
 IDs. Browser traffic, referrers, campaigns and CTA impressions/clicks are marked
 unavailable until typed browser reporting is migrated. There is no stored bot total:
