@@ -7,19 +7,21 @@ on:
     branches:
     - main
     paths:
+    - '*.cue'
     - .github/workflows/rawkode-academy-design-system-default.yml
     - bun.lock
     - bun.lock/**
     - cue.mod/**
     - package.json
     - package.json/**
+    - packages/*.cue
+    - packages/design-system/*.cue
     - packages/design-system/env.cue
     - packages/design-system/env.cue/**
     - packages/design-system/package.json
     - packages/design-system/package.json/**
     - packages/design-system/panda.config.ts
     - packages/design-system/panda.config.ts/**
-    - packages/design-system/schema/**
     - packages/design-system/src/**
     - packages/design-system/tsconfig.json
     - packages/design-system/tsconfig.json/**
@@ -77,7 +79,7 @@ jobs:
           Darwin-arm64) cuenv_asset="cuenv-darwin-arm64" ;;
           *) echo "Unsupported platform: $platform" >&2; exit 1 ;;
         esac
-        cuenv_version="0.73.1"
+        cuenv_version="0.76.0"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi

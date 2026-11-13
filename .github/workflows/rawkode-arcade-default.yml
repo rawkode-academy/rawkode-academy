@@ -7,11 +7,14 @@ on:
     branches:
     - main
     paths:
+    - '*.cue'
     - .github/workflows/rawkode-arcade-default.yml
     - bun.lock
     - bun.lock/**
     - cue.mod/**
     - packages/live-viewer/**
+    - projects/*.cue
+    - projects/rawkode.arcade/*.cue
     - projects/rawkode.arcade/astro.config.mts
     - projects/rawkode.arcade/astro.config.mts/**
     - projects/rawkode.arcade/devenv.nix
@@ -25,7 +28,6 @@ on:
     - projects/rawkode.arcade/panda.config.ts
     - projects/rawkode.arcade/panda.config.ts/**
     - projects/rawkode.arcade/public/**
-    - projects/rawkode.arcade/schema/**
     - projects/rawkode.arcade/scripts/**
     - projects/rawkode.arcade/src/**
     - projects/rawkode.arcade/tests/**
@@ -90,7 +92,7 @@ jobs:
           Darwin-arm64) cuenv_asset="cuenv-darwin-arm64" ;;
           *) echo "Unsupported platform: $platform" >&2; exit 1 ;;
         esac
-        cuenv_version="0.73.1"
+        cuenv_version="0.76.0"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi

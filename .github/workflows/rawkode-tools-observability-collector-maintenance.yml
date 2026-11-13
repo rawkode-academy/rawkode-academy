@@ -7,14 +7,34 @@ on:
     branches:
     - main
     paths:
+    - '*.cue'
     - .github/workflows/rawkode-tools-observability-collector-maintenance.yml
     - cue.mod/**
+    - cue.mod/*.cue
+    - cue.mod/gen/*.cue
+    - cue.mod/gen/registry.terraform.io/*.cue
+    - cue.mod/gen/registry.terraform.io/cloudflare/*.cue
+    - cue.mod/gen/registry.terraform.io/cloudflare/cloudflare/*.cue
+    - cue.mod/gen/registry.terraform.io/cloudflare/cloudflare/resources/*.cue
+    - cue.mod/gen/registry.terraform.io/cloudflare/cloudflare/resources/cloudflare_account_token/*.cue
+    - cue.mod/gen/registry.terraform.io/cloudflare/cloudflare/resources/cloudflare_pipeline/*.cue
+    - cue.mod/gen/registry.terraform.io/cloudflare/cloudflare/resources/cloudflare_pipeline_sink/*.cue
+    - cue.mod/gen/registry.terraform.io/cloudflare/cloudflare/resources/cloudflare_pipeline_stream/*.cue
+    - cue.mod/gen/registry.terraform.io/cloudflare/cloudflare/resources/cloudflare_r2_bucket/*.cue
+    - cue.mod/gen/registry.terraform.io/cloudflare/cloudflare/resources/cloudflare_r2_data_catalog/*.cue
+    - cue.mod/gen/registry.terraform.io/infisical/*.cue
+    - cue.mod/gen/registry.terraform.io/infisical/infisical/*.cue
+    - cue.mod/gen/registry.terraform.io/infisical/infisical/resources/*.cue
+    - cue.mod/gen/registry.terraform.io/infisical/infisical/resources/infisical_secret/*.cue
+    - projects/*.cue
+    - projects/rawkode.tools/*.cue
+    - projects/rawkode.tools/observability-collector/*.cue
+    - projects/rawkode.tools/observability-collector/basin/archive.sql
     - projects/rawkode.tools/observability-collector/basin/maintenance.sh
     - projects/rawkode.tools/observability-collector/basin/maintenance.sh/**
-    - projects/rawkode.tools/observability-collector/env.cue
+    - projects/rawkode.tools/observability-collector/basin/typed.sql
     - projects/rawkode.tools/observability-collector/infrastructure.cue
     - projects/rawkode.tools/observability-collector/infrastructure.cue/**
-    - projects/rawkode.tools/observability-collector/schema/**
   workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
@@ -70,7 +90,7 @@ jobs:
           Darwin-arm64) cuenv_asset="cuenv-darwin-arm64" ;;
           *) echo "Unsupported platform: $platform" >&2; exit 1 ;;
         esac
-        cuenv_version="0.73.1"
+        cuenv_version="0.76.0"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi

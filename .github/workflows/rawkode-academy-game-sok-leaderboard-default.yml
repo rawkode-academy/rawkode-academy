@@ -7,11 +7,16 @@ on:
     branches:
     - main
     paths:
+    - '*.cue'
     - .github/workflows/rawkode-academy-game-sok-leaderboard-default.yml
     - cue.mod/**
+    - projects/*.cue
+    - projects/rawkode.academy/*.cue
+    - projects/rawkode.academy/codegen/*.cue
+    - projects/rawkode.academy/games/*.cue
+    - projects/rawkode.academy/games/secrets-of-kubernetes/*.cue
     - projects/rawkode.academy/games/secrets-of-kubernetes/leaderboard/**
-    - projects/rawkode.academy/games/secrets-of-kubernetes/leaderboard/env.cue
-    - projects/rawkode.academy/games/secrets-of-kubernetes/leaderboard/schema/**
+    - projects/rawkode.academy/games/secrets-of-kubernetes/leaderboard/*.cue
   workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
@@ -66,7 +71,7 @@ jobs:
           Darwin-arm64) cuenv_asset="cuenv-darwin-arm64" ;;
           *) echo "Unsupported platform: $platform" >&2; exit 1 ;;
         esac
-        cuenv_version="0.73.1"
+        cuenv_version="0.76.0"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi

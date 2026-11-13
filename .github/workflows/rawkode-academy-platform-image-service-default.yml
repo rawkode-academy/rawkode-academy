@@ -7,14 +7,17 @@ on:
     branches:
     - main
     paths:
+    - '*.cue'
     - .github/workflows/rawkode-academy-platform-image-service-default.yml
     - cue.mod/**
+    - projects/*.cue
+    - projects/rawkode.academy/*.cue
+    - projects/rawkode.academy/platform/*.cue
+    - projects/rawkode.academy/platform/image-service/*.cue
     - projects/rawkode.academy/platform/image-service/astro.config.ts
     - projects/rawkode.academy/platform/image-service/astro.config.ts/**
-    - projects/rawkode.academy/platform/image-service/env.cue
     - projects/rawkode.academy/platform/image-service/package.json
     - projects/rawkode.academy/platform/image-service/package.json/**
-    - projects/rawkode.academy/platform/image-service/schema/**
     - projects/rawkode.academy/platform/image-service/src/**
     - projects/rawkode.academy/platform/image-service/vitest.config.ts
     - projects/rawkode.academy/platform/image-service/vitest.config.ts/**
@@ -74,7 +77,7 @@ jobs:
           Darwin-arm64) cuenv_asset="cuenv-darwin-arm64" ;;
           *) echo "Unsupported platform: $platform" >&2; exit 1 ;;
         esac
-        cuenv_version="0.73.1"
+        cuenv_version="0.76.0"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi

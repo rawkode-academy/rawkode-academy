@@ -36,7 +36,7 @@ tasks: {
 		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run check"]
 		env: PATH: _taskPath
 		inputs: [
-			"../../../../bun.lock",
+			schema.#ModuleFiles & {paths: ["bun.lock"]},
 			"data-model/**",
 			"package.json",
 			"scripts/**",
@@ -54,7 +54,7 @@ tasks: {
 		env: PATH: _taskPath
 		dependsOn: [_t.check]
 		inputs: [
-			"../../../../bun.lock",
+			schema.#ModuleFiles & {paths: ["bun.lock"]},
 			"data-model/**",
 			"package.json",
 			"scripts/**",
@@ -73,7 +73,7 @@ tasks: {
 			env: PATH: _taskPath
 			dependsOn: [_t.deploy."dry-run"]
 			inputs: [
-				"../../../../bun.lock",
+				schema.#ModuleFiles & {paths: ["bun.lock"]},
 				"data-model/**",
 				"package.json",
 				"wrangler.jsonc",
@@ -90,7 +90,7 @@ tasks: {
 			env: PATH: _taskPath
 			dependsOn: [_t.migrations.remote]
 			inputs: [
-				"../../../../bun.lock",
+				schema.#ModuleFiles & {paths: ["bun.lock"]},
 				"data-model/**",
 				"package.json",
 				"src/**",
@@ -105,7 +105,7 @@ tasks: {
 			env: PATH: _taskPath
 			dependsOn: [_t.test]
 			inputs: [
-				"../../../../bun.lock",
+				schema.#ModuleFiles & {paths: ["bun.lock"]},
 				"data-model/**",
 				"package.json",
 				"src/**",

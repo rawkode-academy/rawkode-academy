@@ -5,18 +5,19 @@ name: rawkode-academy-studio-pullRequest
 on:
   pull_request:
     paths:
+    - '*.cue'
     - .github/workflows/rawkode-academy-studio-pullrequest.yml
     - bun.lock
     - bun.lock/**
     - cue.mod/**
+    - projects/*.cue
     - projects/rawkode.academy/platform/notifications/**
+    - projects/rawkode.studio/*.cue
     - projects/rawkode.studio/astro.config.mts
     - projects/rawkode.studio/astro.config.mts/**
     - projects/rawkode.studio/data-model/**
-    - projects/rawkode.studio/env.cue
     - projects/rawkode.studio/package.json
     - projects/rawkode.studio/package.json/**
-    - projects/rawkode.studio/schema/**
     - projects/rawkode.studio/scripts/**
     - projects/rawkode.studio/src/**
     - projects/rawkode.studio/tsconfig.json
@@ -76,7 +77,7 @@ jobs:
           Darwin-arm64) cuenv_asset="cuenv-darwin-arm64" ;;
           *) echo "Unsupported platform: $platform" >&2; exit 1 ;;
         esac
-        cuenv_version="0.73.1"
+        cuenv_version="0.76.0"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi

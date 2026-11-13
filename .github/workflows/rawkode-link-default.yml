@@ -7,11 +7,12 @@ on:
     branches:
     - main
     paths:
+    - '*.cue'
     - .github/workflows/rawkode-link-default.yml
     - cue.mod/**
+    - projects/*.cue
     - projects/rawkode.link/**
-    - projects/rawkode.link/env.cue
-    - projects/rawkode.link/schema/**
+    - projects/rawkode.link/*.cue
   workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
@@ -66,7 +67,7 @@ jobs:
           Darwin-arm64) cuenv_asset="cuenv-darwin-arm64" ;;
           *) echo "Unsupported platform: $platform" >&2; exit 1 ;;
         esac
-        cuenv_version="0.73.1"
+        cuenv_version="0.76.0"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi
