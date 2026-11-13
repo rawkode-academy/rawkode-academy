@@ -64,7 +64,7 @@ describe("legacy table purge guards", () => {
 	it("purges only the empty legacy table, then verifies survivors", async () => {
 		await run();
 		expect(deletes()).toHaveLength(1);
-		expect(deletes()[0][0]).toMatch(
+		expect(deletes()[0]?.[0]).toMatch(
 			/\/v1\/namespaces\/analytics\/tables\/events\?purgeRequested=true$/,
 		);
 		expect(current).toEqual(live);

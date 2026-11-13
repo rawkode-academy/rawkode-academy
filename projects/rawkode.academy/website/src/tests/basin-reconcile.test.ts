@@ -58,7 +58,7 @@ describe("CloudEvent reconciliation", () => {
 		lake([100, 100]);
 		await expect(run()).rejects.toThrow("exit:0");
 		const request = JSON.parse(
-			vi.mocked(fetch).mock.calls[0][1]?.body as string,
+			vi.mocked(fetch).mock.calls[0]?.[1]?.body as string,
 		);
 		expect(request.query.query).toContain(
 			"properties.$lib = 'observability-collector'",
@@ -66,8 +66,8 @@ describe("CloudEvent reconciliation", () => {
 		expect(request.query.query).toContain(
 			"properties.cloudevents_id IS NOT NULL",
 		);
-		expect(mocks.basin.mock.calls[0][1]).toContain("event_time");
-		expect(mocks.basin.mock.calls[1][1]).toContain("min(__ingest_ts)");
+		expect(mocks.basin.mock.calls[0]?.[1]).toContain("event_time");
+		expect(mocks.basin.mock.calls[1]?.[1]).toContain("min(__ingest_ts)");
 	});
 
 	it("fails daily drift even when window totals match", async () => {
