@@ -91,13 +91,8 @@ export const articleFrontmatter = z.strictObject({
 	categories: z.array(z.string()).default([]),
 	tags: z.array(z.string()).default([]),
 	cover,
-	// content/series/<id>; parts are ordered by `part`.
-	series: z
-		.strictObject({
-			id: z.string().trim().min(1),
-			part: z.number().int().positive(),
-		})
-		.optional(),
+	// content/series/<id>; parts are ordered by file name.
+	series: z.string().trim().min(1).optional(),
 	openGraph: z
 		.strictObject({
 			title: z.string().min(1),
@@ -260,32 +255,17 @@ export function parseSeries(
 	});
 }
 
-/**
- * Every article's series exists, and no two articles in a series share a part
- * number. Runs over all files, drafts included.
- */
+/** Every article's series exists. Runs over all files, drafts included. */
 export function checkSeries(
 	articles: readonly { file: string; data: Pick<ArticleData, "series"> }[],
 	seriesIds: ReadonlySet<string>,
 ): void {
-	const parts = new Map<string, string>();
 	for (const { file, data } of articles) {
-		if (!data.series) continue;
-		const { id, part } = data.series;
-		if (!seriesIds.has(id)) {
+		if (data.series && !seriesIds.has(data.series)) {
 			throw new ArticleError(
 				file,
-				`series "${id}" does not exist (add content/series/${id}.md)`,
+				`series "${data.series}" does not exist (add content/series/${data.series}.md)`,
 			);
 		}
-		const key = `${id}#${part}`;
-		const other = parts.get(key);
-		if (other) {
-			throw new ArticleError(
-				file,
-				`is part ${part} of series "${id}", like ${other}`,
-			);
-		}
-		parts.set(key, file);
 	}
 }

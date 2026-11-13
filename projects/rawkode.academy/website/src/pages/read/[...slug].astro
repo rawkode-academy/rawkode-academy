@@ -65,7 +65,7 @@ const [{ html, headings }, authors, allArticles, allTechnologies] =
 	]);
 
 const series = article.data.series
-	? (await getAllSeries()).find(({ id }) => id === article.data.series?.id)
+	? (await getAllSeries()).find(({ id }) => id === article.data.series)
 	: undefined;
 const seriesPart =
 	series && series.parts.findIndex(({ id }) => id === article.id) + 1;

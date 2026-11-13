@@ -63,9 +63,11 @@ export function loadArticles(): Promise<LoadedArticles> {
 export interface SeriesEntry {
 	id: string;
 	data: SeriesData;
-	/** Published parts, in `part` order. Never empty. */
+	/** Published parts in file-name order (2-… before 10-…). Never empty. */
 	parts: ContentEntry<"articles">[];
 }
+
+const byFileName = new Intl.Collator("en", { numeric: true }).compare;
 
 /**
  * Every series with at least one published part (content/series), joined
@@ -83,10 +85,8 @@ export async function getAllSeries(): Promise<SeriesEntry[]> {
 			id,
 			data,
 			parts: entries
-				.filter((article) => article.data.series?.id === id)
-				.sort(
-					(a, b) => (a.data.series?.part ?? 0) - (b.data.series?.part ?? 0),
-				),
+				.filter((article) => article.data.series === id)
+				.sort((a, b) => byFileName(a.id, b.id)),
 		}))
 		.filter((series) => series.parts.length > 0);
 }
