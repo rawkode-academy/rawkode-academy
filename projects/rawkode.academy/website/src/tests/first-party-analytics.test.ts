@@ -1,6 +1,12 @@
 import { env } from "cloudflare:workers";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { capture, flush, resetForTests, track } from "@/lib/analytics/track";
+import {
+	capture,
+	flush,
+	resetForTests,
+	resetIdentity,
+	track,
+} from "@/lib/analytics/track";
 import { isPrefetch } from "@/lib/auth/prefetch";
 import { POST } from "@/pages/api/e";
 
@@ -18,6 +24,7 @@ describe("track()", () => {
 	beforeEach(() => {
 		vi.useFakeTimers();
 		resetForTests();
+		sessionStorage.clear();
 		fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 204 }));
 		vi.stubGlobal("fetch", fetchMock);
 		Object.defineProperty(navigator, "doNotTrack", {
@@ -53,6 +60,21 @@ describe("track()", () => {
 		});
 	});
 
+	it("reads an existing first-party cookie after other cookies", () => {
+		const cookies = vi
+			.spyOn(document, "cookie", "get")
+			.mockReturnValue("other=value; rk_aid=existing-id");
+		try {
+			track("page_view");
+			flush();
+			expect(sentBatches(fetchMock)[0]?.events[0]?.anonymous_id).toBe(
+				"existing-id",
+			);
+		} finally {
+			cookies.mockRestore();
+		}
+	});
+
 	it("keeps one anonymous id and one session across events", () => {
 		track("a");
 		track("b");
@@ -66,7 +88,8 @@ describe("track()", () => {
 	});
 
 	it("splits batches by size so none exceeds the 64 KiB endpoint limit", () => {
-		for (let i = 0; i < 40; i++) track("$exception", { stack: "x".repeat(3000) });
+		for (let i = 0; i < 40; i++)
+			track("$exception", { stack: "x".repeat(3000) });
 		flush();
 		const bodies = fetchMock.mock.calls.map(
 			([, init]) => (init as RequestInit).body as string,
@@ -84,7 +107,10 @@ describe("track()", () => {
 		track("$exception", { stack: "x".repeat(20_000) });
 		flush();
 		const [batch] = sentBatches(fetchMock);
-		expect(batch?.events.map((e) => e.event)).toEqual(["page_view", "$exception"]);
+		expect(batch?.events.map((e) => e.event)).toEqual([
+			"page_view",
+			"$exception",
+		]);
 		expect(batch?.events[1]?.properties).toEqual({
 			_truncated: true,
 			keys: ["stack"],
@@ -139,6 +165,29 @@ describe("track()", () => {
 		expect(sentBatches(fetchMock)[0]?.events[0]?.event).toBe("cta_clicked");
 	});
 
+	it("retries retryable responses with the original event ID", async () => {
+		fetchMock.mockResolvedValueOnce(new Response(null, { status: 503 }));
+		track("page_view");
+		flush();
+		await vi.advanceTimersByTimeAsync(1000);
+		expect(fetchMock).toHaveBeenCalledTimes(2);
+		const batches = sentBatches(fetchMock);
+		expect(batches[1]?.events).toEqual(batches[0]?.events);
+	});
+
+	it("clears first-party identity and stale retries on sign-out", async () => {
+		fetchMock.mockResolvedValueOnce(new Response(null, { status: 503 }));
+		track("page_view");
+		flush();
+		const old = sentBatches(fetchMock)[0]?.events[0]?.anonymous_id;
+		resetIdentity();
+		await vi.advanceTimersByTimeAsync(5000);
+		expect(fetchMock).toHaveBeenCalledTimes(1);
+		track("page_view");
+		flush();
+		expect(sentBatches(fetchMock)[1]?.events[0]?.anonymous_id).not.toBe(old);
+	});
+
 	it("capture() still reaches Basin when PostHog is blocked", () => {
 		capture("cta_clicked");
 		flush();
@@ -151,7 +200,7 @@ describe("POST /api/e", () => {
 	const testEnv = env as unknown as Record<string, unknown>;
 
 	beforeEach(() => {
-		analytics.ingestWebEvents.mockResolvedValue(1);
+		analytics.ingestWebEvents.mockReset().mockResolvedValue(1);
 		testEnv.ANALYTICS = analytics;
 	});
 
@@ -169,7 +218,16 @@ describe("POST /api/e", () => {
 		};
 		const request = {
 			headers: { get: (name: string) => all[name.toLowerCase()] ?? null },
-			text: async () => (typeof body === "string" ? body : JSON.stringify(body)),
+			body: new ReadableStream({
+				start(controller) {
+					controller.enqueue(
+						new TextEncoder().encode(
+							typeof body === "string" ? body : JSON.stringify(body),
+						),
+					);
+					controller.close();
+				},
+			}),
 		};
 		return POST({
 			request,
@@ -189,8 +247,40 @@ describe("POST /api/e", () => {
 		expect(events).toHaveLength(1);
 		expect(context).toMatchObject({
 			user_id: "user-1",
+			url_origin: "https://rawkode.academy",
 			user_agent: "Mozilla/5.0 Chrome/130.0",
 		});
+	});
+
+	it("returns a retryable failure when durable ingestion fails or is unbound", async () => {
+		analytics.ingestWebEvents.mockRejectedValueOnce(new Error("unavailable"));
+		expect((await call({ events: [{}] })).status).toBe(503);
+		delete testEnv.ANALYTICS;
+		expect((await call({ events: [{}] })).status).toBe(503);
+	});
+
+	it("honours DNT on the server before ingestion", async () => {
+		expect((await call({ events: [{}] }, { dnt: "1" })).status).toBe(204);
+		expect(analytics.ingestWebEvents).not.toHaveBeenCalled();
+	});
+
+	it("waits for durable acceptance before acknowledging", async () => {
+		let accept!: (value: number) => void;
+		analytics.ingestWebEvents.mockImplementationOnce(
+			() =>
+				new Promise((resolve) => {
+					accept = resolve;
+				}),
+		);
+		let acknowledged = false;
+		const response = call({ events: [{}] }).then((value) => {
+			acknowledged = true;
+			return value;
+		});
+		await vi.waitFor(() => expect(accept).toBeTypeOf("function"));
+		expect(acknowledged).toBe(false);
+		accept(1);
+		expect((await response).status).toBe(204);
 	});
 
 	it("rejects other origins", async () => {
@@ -213,13 +303,13 @@ describe("POST /api/e", () => {
 		expect(analytics.ingestWebEvents).not.toHaveBeenCalled();
 	});
 
-	it("caps a batch at 50 events", async () => {
+	it("rejects oversized batches instead of silently dropping events", async () => {
 		const events = Array.from({ length: 80 }, (_, i) => ({
 			event_id: `e${i}`,
 			event: "seek",
 		}));
-		await call({ events });
-		expect(analytics.ingestWebEvents.mock.calls[0]?.[0]).toHaveLength(50);
+		expect((await call({ events })).status).toBe(400);
+		expect(analytics.ingestWebEvents).not.toHaveBeenCalled();
 	});
 });
 

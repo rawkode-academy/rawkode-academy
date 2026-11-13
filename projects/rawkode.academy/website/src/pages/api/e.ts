@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { env, waitUntil } from "cloudflare:workers";
+import { env } from "cloudflare:workers";
 import { createLogger } from "@/lib/logger";
 
 export const prerender = false;
@@ -16,6 +16,7 @@ interface CollectorRpc {
 		events: unknown[],
 		context: {
 			user_id?: string | undefined;
+			url_origin: string;
 			user_agent: string;
 			country?: string | undefined;
 			continent?: string | undefined;
@@ -32,15 +33,39 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
 		return new Response(null, { status: 403 });
 	}
 
+	if (request.headers.get("dnt") === "1")
+		return new Response(null, { status: 204 });
+
 	const length = Number(request.headers.get("content-length") ?? 0);
 	if (length > MAX_BODY_BYTES) {
 		return new Response(null, { status: 413 });
 	}
-	// Content-Length is absent on chunked bodies, so check what was read too.
-	const text = await request.text().catch(() => "");
-	if (new TextEncoder().encode(text).byteLength > MAX_BODY_BYTES) {
-		return new Response(null, { status: 413 });
+	// Bound the stream as well as Content-Length before buffering it.
+	const reader = request.body?.getReader();
+	if (!reader) return new Response(null, { status: 400 });
+	const chunks: Uint8Array[] = [];
+	let bytes = 0;
+	try {
+		while (true) {
+			const chunk = await reader.read();
+			if (chunk.done) break;
+			bytes += chunk.value.byteLength;
+			if (bytes > MAX_BODY_BYTES) {
+				await reader.cancel();
+				return new Response(null, { status: 413 });
+			}
+			chunks.push(chunk.value);
+		}
+	} catch {
+		return new Response(null, { status: 400 });
 	}
+	const buffer = new Uint8Array(bytes);
+	let offset = 0;
+	for (const chunk of chunks) {
+		buffer.set(chunk, offset);
+		offset += chunk.byteLength;
+	}
+	const text = new TextDecoder().decode(buffer);
 
 	const body = (() => {
 		try {
@@ -49,27 +74,31 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
 			return null;
 		}
 	})();
-	if (!body || !Array.isArray(body.events) || body.events.length === 0) {
+	if (
+		!body ||
+		!Array.isArray(body.events) ||
+		body.events.length === 0 ||
+		body.events.length > MAX_EVENTS
+	) {
 		return new Response(null, { status: 400 });
 	}
 
 	const analytics = env.ANALYTICS as unknown as CollectorRpc | undefined;
-	if (!analytics) return new Response(null, { status: 204 });
+	if (!analytics) return new Response(null, { status: 503 });
 
 	const cf = (request as Request & { cf?: IncomingRequestCfProperties }).cf;
 
-	const forward = analytics
-		.ingestWebEvents(body.events.slice(0, MAX_EVENTS), {
+	try {
+		await analytics.ingestWebEvents(body.events, {
 			user_id: locals.user?.id,
+			url_origin: url.origin,
 			user_agent: request.headers.get("user-agent") ?? "",
 			country: cf?.country,
 			continent: cf?.continent,
-		})
-		.catch((error: unknown) => {
-			logger.error("Analytics ingest failed", error);
 		});
-	// The reader's request shouldn't wait on the lake.
-	waitUntil(forward);
-
+	} catch (error) {
+		logger.error("Analytics ingest failed", error);
+		return new Response(null, { status: 503 });
+	}
 	return new Response(null, { status: 204 });
 };

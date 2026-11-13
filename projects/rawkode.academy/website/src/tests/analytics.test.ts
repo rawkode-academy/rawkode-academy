@@ -149,12 +149,12 @@ describe("getAnonDistinctIdFromCookies", () => {
 	const withCookie = (cookie: string) =>
 		({ headers: { get: () => cookie } }) as unknown as Request;
 
-	it("prefers the PostHog id during the dual-run", () => {
+	it("prefers the first-party id used by browser CloudEvents", () => {
 		expect(
 			getAnonDistinctIdFromCookies(
 				withCookie("rk_aid=first-party; posthog_distinct_id=ph-1"),
 			),
-		).toBe("ph-1");
+		).toBe("first-party");
 	});
 
 	it("falls back to the first-party id when PostHog is blocked", () => {

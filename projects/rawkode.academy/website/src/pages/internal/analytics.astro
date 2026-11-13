@@ -86,7 +86,7 @@ const linkClicks = num(results.linkTotals.rows[0]?.clicks);
 	<EditorialShell
 		eyebrow="Internal"
 		title="Analytics"
-		lede={`Server events and matched short-link redirects, last ${RANGES[range]} days. Known bots are filtered during ingestion. Results cached for 10 minutes.`}
+		lede={`Archived product events and matched short-link redirects, last ${RANGES[range]} days. Known bots are filtered during ingestion. Results cached for 10 minutes.`}
 	>
 		<nav class="ranges" aria-label="Date range">
 			{
@@ -109,13 +109,13 @@ const linkClicks = num(results.linkTotals.rows[0]?.clicks);
 
 		<p class="notice">
 			Browser traffic, referrers, campaigns and CTA impressions/clicks are unavailable
-			until browser event ingestion is migrated. The figures below cover server events
-			and short-link redirects only. Bot totals are unavailable because filtered
+			until typed browser reporting is migrated. The event overview includes browser
+			events as ingestion rolls out; the other panels cover server events and short links. Bot totals are unavailable because filtered
 			traffic is not stored; events without a user agent are not classified as human.
 		</p>
 
 		<section class="panel">
-			<h2>Server events</h2>
+			<h2>Archived events</h2>
 			{results.events.error && <p class="error">{results.events.error}</p>}
 			<table>
 				<thead><tr><th>Event (top 100)</th><th>Events</th></tr></thead>
