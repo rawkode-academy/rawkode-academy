@@ -12,6 +12,7 @@ on:
     - bun.lock
     - bun.lock/**
     - content/articles/**
+    - content/series/**
     - cue.mod/**
     - packages/design-system/**
     - packages/live-viewer/**
@@ -31,6 +32,7 @@ on:
     - projects/rawkode.academy/website/bun.lock
     - projects/rawkode.academy/website/bun.lock/**
     - projects/rawkode.academy/website/content/articles/**
+    - projects/rawkode.academy/website/content/series/**
     - projects/rawkode.academy/website/env.cue
     - projects/rawkode.academy/website/env.cue/**
     - projects/rawkode.academy/website/package.json

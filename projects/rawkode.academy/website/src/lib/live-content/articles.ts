@@ -5,7 +5,7 @@
 import { getCollection as getBuiltCollection } from "astro:content";
 import { now } from "./kv-cache";
 import { toEntry } from "./mappers";
-import type { ArticleData, ContentEntry } from "./types";
+import type { ArticleData, ContentEntry, SeriesData } from "./types";
 
 export interface LoadedArticles {
 	entries: ContentEntry<"articles">[];
@@ -58,4 +58,35 @@ export function loadArticles(): Promise<LoadedArticles> {
 		throw error;
 	});
 	return memo;
+}
+
+export interface SeriesEntry {
+	id: string;
+	data: SeriesData;
+	/** Published parts, in `part` order. Never empty. */
+	parts: ContentEntry<"articles">[];
+}
+
+/**
+ * Every series with at least one published part (content/series), joined
+ * with its articles.
+ */
+export async function getAllSeries(): Promise<SeriesEntry[]> {
+	const [built, { entries }] = await Promise.all([
+		getBuiltCollection("series") as unknown as Promise<
+			{ id: string; data: SeriesData }[]
+		>,
+		loadArticles(),
+	]);
+	return built
+		.map(({ id, data }) => ({
+			id,
+			data,
+			parts: entries
+				.filter((article) => article.data.series?.id === id)
+				.sort(
+					(a, b) => (a.data.series?.part ?? 0) - (b.data.series?.part ?? 0),
+				),
+		}))
+		.filter((series) => series.parts.length > 0);
 }

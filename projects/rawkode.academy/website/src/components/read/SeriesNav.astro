@@ -1,0 +1,61 @@
+---
+import { academyDocument } from "@rawkodeacademy/design-system";
+import type { SeriesEntry } from "@/lib/live-content";
+
+interface Props {
+	series: SeriesEntry;
+	currentId: string;
+}
+
+const { series, currentId } = Astro.props as Props;
+const doc = academyDocument();
+
+const index = series.parts.findIndex((part) => part.id === currentId);
+const previous = index > 0 ? series.parts[index - 1] : undefined;
+const next = series.parts[index + 1];
+---
+
+<nav aria-label={`Series: ${series.data.title}`} class={[doc.stack, doc.rule].join(" ")}>
+	<div class={doc.stackSmall}>
+		<p class={doc.kicker}>Part {index + 1} of {series.parts.length}</p>
+		<h2 class={doc.cardTitle}>
+			<a class={doc.link} href={`/series/${series.id}`}>{series.data.title}</a>
+		</h2>
+	</div>
+
+	<ol class={doc.list}>
+		{series.parts.map((part, position) => (
+			<li class={doc.step}>
+				<span class={doc.stepIndex} aria-hidden="true">{position + 1}</span>
+				{part.id === currentId ? (
+					<span class={doc.copy} aria-current="page">{part.data.title}</span>
+				) : (
+					<a class={doc.link} href={`/read/${part.id}`}>{part.data.title}</a>
+				)}
+			</li>
+		))}
+	</ol>
+
+	{(previous || next) && (
+		<div class={doc.gridTwo}>
+			{previous ? (
+				<a href={`/read/${previous.id}`} class={doc.link} rel="prev">
+					<p class={doc.kicker}>Previous</p>
+					<div class={doc.rowBetween}>
+						<p class={doc.copy}>{previous.data.title}</p>
+						<span aria-hidden="true">←</span>
+					</div>
+				</a>
+			) : <span />}
+			{next && (
+				<a href={`/read/${next.id}`} class={doc.link} rel="next">
+					<p class={doc.kicker}>Next</p>
+					<div class={doc.rowBetween}>
+						<p class={doc.copy}>{next.data.title}</p>
+						<span aria-hidden="true">→</span>
+					</div>
+				</a>
+			)}
+		</div>
+	)}
+</nav>

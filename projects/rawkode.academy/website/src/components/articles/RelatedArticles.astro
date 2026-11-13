@@ -25,7 +25,7 @@ const styles = academyRelatedContent();
 const allArticles: ReadonlyArray<ContentEntry<"articles">> =
 	articles ?? (await optionalContent(getCollection("articles"), []));
 
-// Most recent articles, excluding the current one (articles have no series).
+// Most recent articles, excluding the current one.
 const finalRelatedArticles = allArticles
 	.filter((article) => article.id !== currentArticle.id)
 	.sort(
