@@ -255,3 +255,8 @@ export const DELIVERY_BUFFER_NAMES = [
 	"buffer-tail",
 	...EVENT_BUFFER_NAMES,
 ];
+
+/** Unambiguous encoding of the CloudEvent uniqueness pair. */
+export function cloudEventInsertId(source: string, id: string): string {
+	return JSON.stringify([source, id]);
+}

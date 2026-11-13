@@ -6,7 +6,11 @@ import {
 	setSystemTime,
 	test,
 } from "bun:test";
-import { DeliveryQueue, eventBufferName } from "../src/delivery-queue";
+import {
+	DeliveryQueue,
+	eventBufferName,
+	cloudEventInsertId,
+} from "../src/delivery-queue";
 
 class Storage {
 	values = new Map<string, unknown>();
@@ -153,12 +157,10 @@ describe("durable destination delivery", () => {
 	test("legacy buffers migrate once", async () => {
 		await storage.put("events", [{ id: "old" }]);
 		const migrate = () =>
-			storage
-				.queue()
-				.migrate<{ id: string }>("events", (value) => ({
-					payload: value,
-					destinations: ["basin"],
-				}));
+			storage.queue().migrate<{ id: string }>("events", (value) => ({
+				payload: value,
+				destinations: ["basin"],
+			}));
 		await migrate();
 		await migrate();
 		expect(await storage.get("events")).toBeUndefined();
@@ -197,4 +199,13 @@ describe("durable destination delivery", () => {
 			).size,
 		).toBe(16);
 	});
+});
+
+test("PostHog insert IDs preserve source/id boundaries", () => {
+	expect(cloudEventInsertId("a:b", "c")).not.toBe(
+		cloudEventInsertId("a", "b:c"),
+	);
+	expect(cloudEventInsertId("website", "event-1")).toBe(
+		cloudEventInsertId("website", "event-1"),
+	);
 });

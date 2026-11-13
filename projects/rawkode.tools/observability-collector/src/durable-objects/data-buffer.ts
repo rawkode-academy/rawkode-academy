@@ -1,6 +1,10 @@
 import { DurableObject } from "cloudflare:workers";
 import type { EventsStream, ExceptionData } from "../index";
-import { DeliveryQueue, type Destination } from "../delivery-queue";
+import {
+	DeliveryQueue,
+	cloudEventInsertId,
+	type Destination,
+} from "../delivery-queue";
 
 interface CloudEventData {
 	specversion: string;
@@ -424,6 +428,8 @@ export class DataBuffer extends DurableObject<Env> {
 	): Promise<void> {
 		const token = await this.env.POSTHOG_PROJECT_TOKEN.get();
 		const batch: {
+			type: "capture";
+			distinct_id: string;
 			event: string;
 			properties: Record<string, unknown>;
 			timestamp: string;
@@ -435,8 +441,10 @@ export class DataBuffer extends DurableObject<Env> {
 			timestamp: Date;
 		}) => {
 			batch.push({
+				type: "capture",
+				distinct_id: input.distinctId,
 				event: input.event,
-				properties: { ...input.properties, distinct_id: input.distinctId },
+				properties: { ...input.properties, $geoip_disable: true },
 				timestamp: input.timestamp.toISOString(),
 			});
 		};
@@ -471,7 +479,7 @@ export class DataBuffer extends DurableObject<Env> {
 				}
 			}
 
-			properties.$insert_id = `${event.source}:${event.id}`;
+			properties.$insert_id = cloudEventInsertId(event.source, event.id);
 
 			// Determine distinct_id
 			let distinctId = "anonymous";
