@@ -4,6 +4,45 @@ First-party product analytics, replacing PostHog. Events land in Apache
 Iceberg tables in the `analytics` namespace of the R2 bucket `rawkode-analytics`,
 and are queried with Basin SQL (or DuckDB, Spark, anything that reads Iceberg).
 
+## Migration goal and exit criteria
+
+Basin becomes the complete source for Academy product analytics, and PostHog is
+removed after replacement coverage and reliable delivery are demonstrated.
+
+| Stage | Exit criterion |
+| --- | --- |
+| Durable delivery | Accepted events survive restarts and outages; each destination acknowledges independently; failed records are retained and replayable. |
+| Browser and identity | Browser events reach the archive; anonymous/session IDs, sign-in links, logout, attribution and DNT work without PostHog cookies. |
+| Typed tables and reporting | Event-family tables and replayable backfills support the existing traffic, growth, video, authentication and game reporting. |
+| Operational telemetry | Logs, metrics, exceptions and tail events have a verified replacement destination and retention policy. |
+| Production validation | Fourteen consecutive healthy days: accepted-to-archive checks, ID-based reconciliation, deduplication, identity/funnel checks, and outage recovery. |
+| Retirement | Stop PostHog delivery behind a rollback switch, preserve required history, then remove SDKs, secrets, bindings, cookies and obsolete docs. |
+
+Cutover is gated by evidence, not the merge date. The current count-only
+reconciliation is insufficient to approve retiring PostHog by itself.
+
+## Delivery operations
+
+The collector persists a separate pending entry for Basin, PostHog and configured
+Grafana delivery before acknowledging an event. New CloudEvents use 16 fixed
+buffer shards; legacy array buffers are adopted atomically on their next alarm.
+Every destination is acknowledged independently. HTTP failures and timeouts
+retain work, with exponential retry and individual retries after batch failure.
+After 12 failed attempts, records move to retained failed storage; they are never
+silently discarded. This is at-least-once delivery: the archive and typed-table
+queries must deduplicate CloudEvents by `(source, id)` before cutover. PostHog
+receives a stable `$insert_id` derived from these fields.
+
+Structured `analytics.delivery.status`, `.retry` and `.failed` logs provide
+per-destination counters and retry/failed signals. The collector's internal RPC
+`deliveryStatus()` reports each current and legacy buffer. After correcting a
+destination failure, `replayFailed(bufferName, destination)` requeues up to 25
+failed entries with their original payloads. Repeat while the reported failed
+count is nonzero. Neither operation is exposed on the public HTTP router.
+Failed storage has no automatic expiry; monitor its count and provision alerts
+before declaring this stage validated in production.
+
+
 ```
 services (CloudEvents) ─ /track ─► observability-collector ─► stream analytics_events
                                          │                      │

@@ -1,7 +1,10 @@
 import { DurableObject } from "cloudflare:workers";
-import { CloudEvent } from "cloudevents";
-import { PostHog } from "posthog-node";
-import type { ExceptionData } from "../index";
+import type { EventsStream, ExceptionData } from "../index";
+import {
+	DeliveryQueue,
+	cloudEventInsertId,
+	type Destination,
+} from "../delivery-queue";
 
 interface CloudEventData {
 	specversion: string;
@@ -116,6 +119,7 @@ function getWorkerName(source: string | undefined): string {
 }
 
 export interface Env {
+	EVENTS?: EventsStream;
 	POSTHOG_PROJECT_TOKEN: SecretsStoreSecret;
 	POSTHOG_HOST: string;
 	GRAFANA_OTLP_TOKEN?: SecretsStoreSecret;
@@ -123,169 +127,145 @@ export interface Env {
 	GRAFANA_INSTANCE_ID?: string;
 }
 
-const FLUSH_INTERVAL_MS = 30 * 1000; // 30 seconds
-const EVENTS_KEY = "events";
-const METRICS_KEY = "metrics";
-const LOGS_KEY = "logs";
-const EXCEPTIONS_KEY = "exceptions";
-const TAIL_EVENTS_KEY = "tail_events";
+type Delivery =
+	| { kind: "event"; value: StoredEvent }
+	| { kind: "metric"; value: StoredMetric }
+	| { kind: "exception"; value: ExceptionData }
+	| { kind: "log"; value: StoredLog }
+	| { kind: "tail"; value: StoredTailEvent };
 
 export class DataBuffer extends DurableObject<Env> {
+	private queue() {
+		return new DeliveryQueue<Delivery>(this.ctx.storage);
+	}
+
+	private destinations(kind: Delivery["kind"]): Destination[] {
+		return [
+			...(kind === "event" ? ["basin" as const] : []),
+			"posthog",
+			...(this.env.GRAFANA_OTLP_TOKEN && this.env.GRAFANA_OTLP_HOST
+				? ["grafana" as const]
+				: []),
+		];
+	}
+
 	async addEvent(
 		event: Record<string, unknown>,
 		attributes?: string[],
 	): Promise<void> {
-		const events = await this.getEvents();
-		events.push({ event: event as unknown as CloudEventData, attributes });
-		await this.ctx.storage.put(EVENTS_KEY, events);
-		await this.ensureAlarm();
+		await this.queue().enqueue(
+			{
+				kind: "event",
+				value: { event: event as unknown as CloudEventData, attributes },
+			},
+			this.destinations("event"),
+		);
 	}
 
 	async addMetric(metric: Omit<StoredMetric, "timestamp">): Promise<void> {
-		const metrics = await this.getMetrics();
-		metrics.push({ ...metric, timestamp: Date.now() });
-		await this.ctx.storage.put(METRICS_KEY, metrics);
-		await this.ensureAlarm();
+		await this.queue().enqueue(
+			{ kind: "metric", value: { ...metric, timestamp: Date.now() } },
+			this.destinations("metric"),
+		);
 	}
 
 	async addLog(body: ArrayBuffer, contentType: string): Promise<void> {
-		const logs = await this.getLogs();
-		const base64Body = btoa(String.fromCharCode(...new Uint8Array(body)));
-		logs.push({
-			body: base64Body,
-			contentType,
-			timestamp: Date.now(),
-		});
-		await this.ctx.storage.put(LOGS_KEY, logs);
-		await this.ensureAlarm();
+		const bytes = new Uint8Array(body);
+		// Avoid spreading an unbounded request body onto the JavaScript stack.
+		let binary = "";
+		for (let offset = 0; offset < bytes.length; offset += 8192)
+			binary += String.fromCharCode(...bytes.subarray(offset, offset + 8192));
+		await this.queue().enqueue(
+			{
+				kind: "log",
+				value: { body: btoa(binary), contentType, timestamp: Date.now() },
+			},
+			this.destinations("log"),
+		);
 	}
 
 	async addException(exception: ExceptionData): Promise<void> {
-		const exceptions = await this.getExceptions();
-		exceptions.push(exception);
-		await this.ctx.storage.put(EXCEPTIONS_KEY, exceptions);
-		await this.ensureAlarm();
+		await this.queue().enqueue(
+			{ kind: "exception", value: exception },
+			this.destinations("exception"),
+		);
 	}
 
 	async addTailEvent(trace: SerializedTraceItem): Promise<void> {
-		const tailEvents = await this.getTailEvents();
-		tailEvents.push({ trace, timestamp: Date.now() });
-		await this.ctx.storage.put(TAIL_EVENTS_KEY, tailEvents);
-		await this.ensureAlarm();
+		await this.queue().enqueue(
+			{ kind: "tail", value: { trace, timestamp: Date.now() } },
+			this.destinations("tail"),
+		);
 	}
 
-	private async ensureAlarm(): Promise<void> {
-		const alarm = await this.ctx.storage.getAlarm();
-		if (alarm === null) {
-			await this.ctx.storage.setAlarm(Date.now() + FLUSH_INTERVAL_MS);
-		}
+	// RPC only: never expose queue contents, health or replay on public /track.
+	async deliveryStatus() {
+		return this.queue().status();
+	}
+	async replayFailed(destination: Destination) {
+		if (!["basin", "posthog", "grafana"].includes(destination))
+			throw new Error("Invalid destination");
+		await this.queue().replay(destination);
 	}
 
 	async alarm(): Promise<void> {
-		const logs = await this.getLogs();
-		const tailEvents = await this.getTailEvents();
-		const events = await this.getEvents();
-		const metrics = await this.getMetrics();
-		const exceptions = await this.getExceptions();
-
-		// Flush to PostHog
-		if (logs.length > 0) {
-			try {
-				await this.flushLogsToPostHog(logs);
-			} catch (error) {
-				console.error("Failed to flush logs to PostHog:", error);
-			}
-		}
-
-		if (tailEvents.length > 0) {
-			try {
-				await this.flushTailEventsAsOTLP(tailEvents);
-			} catch (error) {
-				console.error("Failed to flush tail events to PostHog:", error);
-			}
-		}
-
-		if (events.length > 0 || metrics.length > 0 || exceptions.length > 0) {
-			try {
-				await this.flushToPostHogSDK(events, metrics, exceptions);
-			} catch (error) {
-				console.error("Failed to flush to PostHog SDK:", error);
-			}
-		}
-
-		// Flush to Grafana (if configured)
-		if (this.env.GRAFANA_OTLP_TOKEN && this.env.GRAFANA_OTLP_HOST) {
-			if (logs.length > 0) {
-				try {
-					await this.flushLogsToGrafana(logs);
-				} catch (error) {
-					console.error("Failed to flush logs to Grafana:", error);
-				}
-			}
-
-			if (tailEvents.length > 0) {
-				try {
-					await this.flushTailEventsToGrafana(tailEvents);
-				} catch (error) {
-					console.error("Failed to flush tail events to Grafana:", error);
-				}
-			}
-
-			if (events.length > 0 || metrics.length > 0 || exceptions.length > 0) {
-				try {
-					await this.flushToGrafanaOTLP(events, metrics, exceptions);
-				} catch (error) {
-					console.error("Failed to flush to Grafana OTLP:", error);
-				}
-			}
-		}
-
-		// Clear storage after flushing to all destinations
-		if (logs.length > 0) await this.ctx.storage.delete(LOGS_KEY);
-		if (tailEvents.length > 0) await this.ctx.storage.delete(TAIL_EVENTS_KEY);
-		if (events.length > 0) await this.ctx.storage.delete(EVENTS_KEY);
-		if (metrics.length > 0) await this.ctx.storage.delete(METRICS_KEY);
-		if (exceptions.length > 0) await this.ctx.storage.delete(EXCEPTIONS_KEY);
-	}
-
-	private async getEvents(): Promise<StoredEvent[]> {
-		const raw = await this.ctx.storage.get<StoredEvent[]>(EVENTS_KEY);
-		if (!raw) return [];
-
-		return raw.filter((stored) => {
-			try {
-				new CloudEvent(
-					stored.event as unknown as Record<string, unknown>,
-					true,
+		const queue = this.queue();
+		await queue.migrate<StoredEvent>("events", (value) => ({
+			payload: { kind: "event", value },
+			destinations: this.destinations("event"),
+		}));
+		await queue.migrate<StoredMetric>("metrics", (value) => ({
+			payload: { kind: "metric", value },
+			destinations: this.destinations("metric"),
+		}));
+		await queue.migrate<ExceptionData>("exceptions", (value) => ({
+			payload: { kind: "exception", value },
+			destinations: this.destinations("exception"),
+		}));
+		await queue.migrate<StoredLog>("logs", (value) => ({
+			payload: { kind: "log", value },
+			destinations: this.destinations("log"),
+		}));
+		await queue.migrate<StoredTailEvent>("tail_events", (value) => ({
+			payload: { kind: "tail", value },
+			destinations: this.destinations("tail"),
+		}));
+		await queue.drain(async (destination, deliveries) => {
+			const events = deliveries.flatMap((item) =>
+				item.kind === "event" ? [item.value] : [],
+			);
+			const metrics = deliveries.flatMap((item) =>
+				item.kind === "metric" ? [item.value] : [],
+			);
+			const exceptions = deliveries.flatMap((item) =>
+				item.kind === "exception" ? [item.value] : [],
+			);
+			const logs = deliveries.flatMap((item) =>
+				item.kind === "log" ? [item.value] : [],
+			);
+			const tails = deliveries.flatMap((item) =>
+				item.kind === "tail" ? [item.value] : [],
+			);
+			if (destination === "basin") {
+				if (!this.env.EVENTS) throw new Error("Basin stream is not bound");
+				await this.env.EVENTS.send(
+					events.map((item) => ({ value: item.event })),
 				);
-				return true;
-			} catch (error) {
-				console.warn("Filtering invalid stored CloudEvent:", error, stored);
-				return false;
+			} else if (destination === "posthog") {
+				if (logs.length) await this.flushLogsToPostHog(logs);
+				if (tails.length) await this.flushTailEventsAsOTLP(tails);
+				if (events.length || metrics.length || exceptions.length)
+					await this.flushEventsToPostHog(events, metrics, exceptions);
+			} else {
+				if (!this.env.GRAFANA_OTLP_TOKEN || !this.env.GRAFANA_OTLP_HOST)
+					throw new Error("Grafana is not configured");
+				if (logs.length) await this.flushLogsToGrafana(logs);
+				if (tails.length) await this.flushTailEventsToGrafana(tails);
+				if (events.length || metrics.length || exceptions.length)
+					await this.flushToGrafanaOTLP(events, metrics, exceptions);
 			}
 		});
-	}
-
-	private async getMetrics(): Promise<StoredMetric[]> {
-		const metrics = await this.ctx.storage.get<StoredMetric[]>(METRICS_KEY);
-		return metrics ?? [];
-	}
-
-	private async getLogs(): Promise<StoredLog[]> {
-		const logs = await this.ctx.storage.get<StoredLog[]>(LOGS_KEY);
-		return logs ?? [];
-	}
-
-	private async getExceptions(): Promise<ExceptionData[]> {
-		const exceptions =
-			await this.ctx.storage.get<ExceptionData[]>(EXCEPTIONS_KEY);
-		return exceptions ?? [];
-	}
-
-	private async getTailEvents(): Promise<StoredTailEvent[]> {
-		const tailEvents =
-			await this.ctx.storage.get<StoredTailEvent[]>(TAIL_EVENTS_KEY);
-		return tailEvents ?? [];
+		console.log("analytics.delivery.status", await queue.status());
 	}
 
 	private async flushTailEventsAsOTLP(
@@ -406,6 +386,7 @@ export class DataBuffer extends DurableObject<Env> {
 
 		const response = await fetch(`${this.env.POSTHOG_HOST}/i/v1/logs`, {
 			method: "POST",
+			signal: AbortSignal.timeout(15_000),
 			headers: {
 				"Content-Type": "application/json",
 				Authorization: `Bearer ${token}`,
@@ -413,13 +394,8 @@ export class DataBuffer extends DurableObject<Env> {
 			body: JSON.stringify(otlpRequest),
 		});
 
-		if (!response.ok) {
-			const text = await response.text();
-			console.error("PostHog OTLP logs request failed:", {
-				status: response.status,
-				body: text,
-			});
-		}
+		if (!response.ok)
+			throw new Error(`Destination rejected delivery (${response.status})`);
 	}
 
 	private async flushLogsToPostHog(logs: StoredLog[]): Promise<void> {
@@ -432,6 +408,7 @@ export class DataBuffer extends DurableObject<Env> {
 
 			const response = await fetch(`${this.env.POSTHOG_HOST}/i/v1/logs`, {
 				method: "POST",
+				signal: AbortSignal.timeout(15_000),
 				headers: {
 					"Content-Type": log.contentType,
 					Authorization: `Bearer ${token}`,
@@ -439,27 +416,38 @@ export class DataBuffer extends DurableObject<Env> {
 				body: body,
 			});
 
-			if (!response.ok) {
-				const text = await response.text();
-				console.error("PostHog logs request failed:", {
-					status: response.status,
-					body: text,
-				});
-			}
+			if (!response.ok)
+				throw new Error(`Destination rejected delivery (${response.status})`);
 		}
 	}
 
-	private async flushToPostHogSDK(
+	private async flushEventsToPostHog(
 		events: StoredEvent[],
 		metrics: StoredMetric[],
 		exceptions: ExceptionData[],
 	): Promise<void> {
 		const token = await this.env.POSTHOG_PROJECT_TOKEN.get();
-		const posthog = new PostHog(token, {
-			host: this.env.POSTHOG_HOST,
-			flushAt: 1,
-			flushInterval: 0,
-		});
+		const batch: {
+			type: "capture";
+			distinct_id: string;
+			event: string;
+			properties: Record<string, unknown>;
+			timestamp: string;
+		}[] = [];
+		const capture = (input: {
+			distinctId: string;
+			event: string;
+			properties: Record<string, unknown>;
+			timestamp: Date;
+		}) => {
+			batch.push({
+				type: "capture",
+				distinct_id: input.distinctId,
+				event: input.event,
+				properties: { ...input.properties, $geoip_disable: true },
+				timestamp: input.timestamp.toISOString(),
+			});
+		};
 
 		// Process CloudEvents
 		for (const stored of events) {
@@ -491,6 +479,8 @@ export class DataBuffer extends DurableObject<Env> {
 				}
 			}
 
+			properties.$insert_id = cloudEventInsertId(event.source, event.id);
+
 			// Determine distinct_id
 			let distinctId = "anonymous";
 			if (event.data && typeof event.data === "object") {
@@ -510,7 +500,7 @@ export class DataBuffer extends DurableObject<Env> {
 			const workerName = getWorkerName(event.source);
 			const eventName = `${workerName}.${event.type}`;
 
-			posthog.capture({
+			capture({
 				distinctId,
 				event: eventName,
 				properties,
@@ -520,7 +510,7 @@ export class DataBuffer extends DurableObject<Env> {
 
 		// Process metrics as events
 		for (const metric of metrics) {
-			posthog.capture({
+			capture({
 				distinctId:
 					metric.attributes.userId || metric.attributes.sessionId || "system",
 				event: "$metric",
@@ -536,7 +526,7 @@ export class DataBuffer extends DurableObject<Env> {
 
 		// Process exceptions
 		for (const exception of exceptions) {
-			posthog.capture({
+			capture({
 				distinctId: exception.distinctId || "anonymous",
 				event: "$exception",
 				properties: {
@@ -550,8 +540,15 @@ export class DataBuffer extends DurableObject<Env> {
 			});
 		}
 
-		// Flush all queued events
-		await posthog.shutdown();
+		// A batch is acknowledged only after the server accepts it.
+		const response = await fetch(`${this.env.POSTHOG_HOST}/batch/`, {
+			method: "POST",
+			signal: AbortSignal.timeout(15_000),
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ api_key: token, batch }),
+		});
+		if (!response.ok)
+			throw new Error(`PostHog batch rejected (${response.status})`);
 	}
 
 	// Grafana OTLP flush methods
@@ -566,6 +563,7 @@ export class DataBuffer extends DurableObject<Env> {
 
 			const response = await fetch(`${this.env.GRAFANA_OTLP_HOST}/v1/logs`, {
 				method: "POST",
+				signal: AbortSignal.timeout(15_000),
 				headers: {
 					"Content-Type": log.contentType,
 					Authorization: `Basic ${authHeader}`,
@@ -573,13 +571,8 @@ export class DataBuffer extends DurableObject<Env> {
 				body: body,
 			});
 
-			if (!response.ok) {
-				const text = await response.text();
-				console.error("Grafana OTLP logs request failed:", {
-					status: response.status,
-					body: text,
-				});
-			}
+			if (!response.ok)
+				throw new Error(`Destination rejected delivery (${response.status})`);
 		}
 	}
 
@@ -700,6 +693,7 @@ export class DataBuffer extends DurableObject<Env> {
 
 		const response = await fetch(`${this.env.GRAFANA_OTLP_HOST}/v1/logs`, {
 			method: "POST",
+			signal: AbortSignal.timeout(15_000),
 			headers: {
 				"Content-Type": "application/json",
 				Authorization: `Basic ${authHeader}`,
@@ -707,13 +701,8 @@ export class DataBuffer extends DurableObject<Env> {
 			body: JSON.stringify(otlpRequest),
 		});
 
-		if (!response.ok) {
-			const text = await response.text();
-			console.error("Grafana OTLP tail events request failed:", {
-				status: response.status,
-				body: text,
-			});
-		}
+		if (!response.ok)
+			throw new Error(`Destination rejected delivery (${response.status})`);
 	}
 
 	private async flushToGrafanaOTLP(
@@ -881,6 +870,7 @@ export class DataBuffer extends DurableObject<Env> {
 
 		const response = await fetch(`${this.env.GRAFANA_OTLP_HOST}/v1/logs`, {
 			method: "POST",
+			signal: AbortSignal.timeout(15_000),
 			headers: {
 				"Content-Type": "application/json",
 				Authorization: `Basic ${authHeader}`,
@@ -888,12 +878,7 @@ export class DataBuffer extends DurableObject<Env> {
 			body: JSON.stringify(otlpRequest),
 		});
 
-		if (!response.ok) {
-			const text = await response.text();
-			console.error("Grafana OTLP events request failed:", {
-				status: response.status,
-				body: text,
-			});
-		}
+		if (!response.ok)
+			throw new Error(`Destination rejected delivery (${response.status})`);
 	}
 }

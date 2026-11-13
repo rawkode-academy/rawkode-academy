@@ -10,6 +10,10 @@
 		"GRAFANA_OTLP_HOST": "https://otlp-gateway-prod-gb-south-1.grafana.net/otlp",
 		"GRAFANA_INSTANCE_ID": "1457812"
 	},
+	"observability": {
+		"enabled": true,
+		"traces": { "enabled": true }
+	},
 	"placement": {
 		"mode": "smart"
 	},

@@ -1,4 +1,9 @@
 import { WorkerEntrypoint } from "cloudflare:workers";
+import {
+	eventBufferName,
+	DELIVERY_BUFFER_NAMES,
+	type Destination,
+} from "./delivery-queue";
 import { validateCloudEvent } from "./cloudevents";
 import type { DataBuffer } from "./durable-objects/data-buffer";
 import {
@@ -119,13 +124,36 @@ export class PostHogCollector extends WorkerEntrypoint<Env> {
 		// Bot traffic is accepted and dropped, so senders don't retry it.
 		if (!prepared) return { success: true };
 		const json = redactUserAgent(prepared);
+		if (!json.time) json.time = new Date().toISOString();
 
-		const id = this.env.DATA_BUFFER.idFromName("buffer-events");
+		const id = this.env.DATA_BUFFER.idFromName(
+			eventBufferName(String(json.source), String(json.id)),
+		);
 		const buffer = this.env.DATA_BUFFER.get(id);
 		await buffer.addEvent(json, options?.attributes);
-		this.stream(json);
 
 		return { success: true };
+	}
+
+	/** Internal RPC health/replay; intentionally absent from the public fetch router. */
+	async deliveryStatus() {
+		return Promise.all(
+			DELIVERY_BUFFER_NAMES.map(async (name) => {
+				const buffer = this.env.DATA_BUFFER.get(
+					this.env.DATA_BUFFER.idFromName(name),
+				);
+				return { name, destinations: await buffer.deliveryStatus() };
+			}),
+		);
+	}
+
+	async replayFailed(bufferName: string, destination: Destination) {
+		if (!DELIVERY_BUFFER_NAMES.includes(bufferName))
+			throw new Error("Invalid buffer");
+		const buffer = this.env.DATA_BUFFER.get(
+			this.env.DATA_BUFFER.idFromName(bufferName),
+		);
+		await buffer.replayFailed(destination);
 	}
 
 	async trackMetric(
@@ -153,24 +181,6 @@ export class PostHogCollector extends WorkerEntrypoint<Env> {
 		_context: WebContext,
 	): Promise<number> {
 		return 0;
-	}
-
-	/** Fire-and-forget: the stream must never fail a PostHog/Grafana write. */
-	private stream(event: Record<string, unknown>): void {
-		this.ctx.waitUntil(this.send(event));
-	}
-
-	private async send(event: Record<string, unknown>): Promise<void> {
-		if (!this.env.EVENTS) return;
-		try {
-			// The stream's only column is `value`, holding the whole CloudEvent.
-			await this.env.EVENTS.send([{ value: event }]);
-		} catch (error) {
-			console.error("Basin stream send failed", {
-				error: error instanceof Error ? error.message : String(error),
-				id: event.id,
-			});
-		}
 	}
 
 	async captureException(
@@ -214,9 +224,9 @@ export default class extends PostHogCollector {
 
 			// Serialize TraceItem to a plain object for Durable Object storage
 			const serializedTrace = {
-				scriptName: trace.scriptName,
+				scriptName: trace.scriptName ?? undefined,
 				outcome: trace.outcome,
-				eventTimestamp: trace.eventTimestamp,
+				eventTimestamp: trace.eventTimestamp ?? undefined,
 				logs: trace.logs.map((log) => ({
 					level: log.level,
 					message: log.message,
