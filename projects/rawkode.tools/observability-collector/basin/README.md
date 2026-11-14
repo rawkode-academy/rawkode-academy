@@ -191,7 +191,9 @@ and 1Password service account for the PostHog query key. No secret value is
 copied into this runner, repository, report or workflow input. Existing GitHub
 production-environment protections remain in place. The query wrapper only runs
 for scheduled/manual events on this repository's `main`; feature/PR execution
-fails before provider queries. Do not dispatch the workflow against a feature
+fails before provider queries. The task explicitly forwards the five required
+GitHub context variables through cuenv because CI task execution clears inherited
+environment variables. Do not dispatch the workflow against a feature
 branch to bypass pending review.
 
 Each run invokes the exact-ID reconciliation for only the latest eligible full

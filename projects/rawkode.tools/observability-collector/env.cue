@@ -141,6 +141,12 @@ tasks: {
 		inputs: ["basin/**"]
 		labels: ["infisical"]
 		env: {
+			// CI task execution clears inherited env; explicitly forward audit context.
+			GITHUB_REPOSITORY: schema.#EnvPassthrough
+			GITHUB_REF: schema.#EnvPassthrough
+			GITHUB_EVENT_NAME: schema.#EnvPassthrough
+			GITHUB_SHA: schema.#EnvPassthrough
+			GITHUB_RUN_ID: schema.#EnvPassthrough
 			BASIN_SQL_TOKEN: _basinSecret & {secretName: "BASIN_SQL_TOKEN"}
 			POSTHOG_PROJECT_ID: "12084"
 			POSTHOG_PERSONAL_API_KEY: schema.#OnePasswordRef & {
