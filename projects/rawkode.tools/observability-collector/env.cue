@@ -55,6 +55,13 @@ ci: pipelines: {
 		tasks: [_t.deploy]
 	}
 
+	// Existing, user-authorized guarded purge; no push or scheduled trigger.
+	"legacy-cleanup": {
+		environment: "production"
+		when: manual: true
+		tasks: [_t["drop-legacy-table"]]
+	}
+
 	// Compaction and snapshot expiry aren't in the Cloudflare provider yet,
 	// so infrastructure.cue can't enable them. Runs on main when the script or
 	// the infrastructure (and so the catalog token) changes.
@@ -108,7 +115,14 @@ tasks: {
 		args: ["basin/drop-legacy-table.ts"]
 		inputs: ["basin/drop-legacy-table.ts", "infrastructure.cue"]
 		labels: ["infisical"]
-		env: BASIN_CATALOG_TOKEN: _basinSecret & {secretName: "BASIN_CATALOG_TOKEN"}
+		env: {
+			BASIN_CATALOG_TOKEN: _basinSecret & {secretName: "BASIN_CATALOG_TOKEN"}
+			// CI execution clears inherited task env; forward only guard context.
+			GITHUB_ACTIONS: schema.#EnvPassthrough
+			GITHUB_REPOSITORY: schema.#EnvPassthrough
+			GITHUB_REF: schema.#EnvPassthrough
+			GITHUB_EVENT_NAME: schema.#EnvPassthrough
+		}
 	}
 
 	reconcile: schema.#Task & {

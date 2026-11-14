@@ -164,6 +164,45 @@ backfills, producer acceptance, login linkage and operational telemetry coverage
 remain work. Do not retire PostHog before fourteen consecutive healthy production
 days covering those requirements and outage/replay validation.
 
+### Guarded legacy cleanup in CI — 14 November 2026
+
+The already-authorized empty `analytics.events` purge now has a **manual-only**
+production workflow, `rawkode-tools-observability-collector-legacy-cleanup`.
+It invokes the existing `drop-legacy-table` task with its existing Infisical
+catalog-write credential. There is no push or scheduled deletion trigger. The
+task itself rejects GitHub runs unless the repository matches, the ref is
+`refs/heads/main`, and the event is `workflow_dispatch`. Explicit task-environment
+passthrough preserves those checks when cuenv clears inherited task variables.
+Local authorized operators can still run the existing guarded task.
+
+After this PR merges and infrastructure apply/table creation is stable, dispatch
+that workflow on `main`. Do not run it on a feature branch to bypass review. The
+task freshly lists the namespace, checks sink declarations, proves no current
+snapshot/history or zero current records, requests purge, then verifies every
+survivor and its compaction/snapshot-expiry settings. The versioned browser table
+is only allowed when its sink is explicitly declared. Unknown tables, nonempty
+metadata, sink references, disabled maintenance and inexact snapshot IDs stop
+before deletion. Decimal snapshot IDs are reported losslessly; unsafe numeric
+IDs require review instead of guessing their value.
+
+Each catalog request has a 30-second deadline. Transport and malformed-response
+errors omit raw response/error content and credentials. If a request fails after
+the purge starts, deletion may already have completed: inspect the recorded
+pre-drop snapshot/record count and re-list the catalog before reporting or
+retrying. The task is idempotent when the legacy table is already absent, and it
+still verifies survivor maintenance in that case. Never claim the table remains
+present merely because a post-drop verification failed.
+
+No production cleanup was dispatched in this implementation run. The legacy
+table remains pending review and execution on merged main; no deletion result is
+claimed. Current main remains `922fda0198911725f60f8c1f4b66219b5d76d791`, and migration
+PRs #1602–#1605 still require review. Validation: 60 focused website tests,
+including manual-main CI acceptance, automatic/feature CI rejection, response
+redaction, nonempty-table refusal, maintenance and exact-snapshot guards; strict
+browser-tool TypeScript and browser SQL/CLI fixture checks pass. The 28 collector tests also pass. Local `cuenv sync -A` was attempted but CUE
+registry access is forbidden; generated workflow equality must pass in CI.
+PostHog and the fourteen-day cutover gate are unchanged.
+
 ## Provisioning
 
 `../infrastructure.cue` declares the bucket, catalog, API tokens, stream, sinks,
