@@ -148,8 +148,14 @@ backfill or legacy purge is claimed. The guarded purge now permits only the
 explicitly declared browser table as an optional additional survivor, verifies
 its maintenance when present and still refuses all unexpected/undeclared tables.
 
-Before merging, inspect the infrastructure plan: only the browser sink and
-pipeline may be added; reject replacement/deletion of any existing lake resource.
+Live catalog verification on 14 November 2026 confirmed `events_archive` and
+`short_links` still have compaction enabled (128 MB target) and snapshot expiry
+enabled (7 days, keep 10). The namespace still contains the empty-table cleanup
+target `events`; no purge was attempted. The initial CI plan for `9d4b1ed`
+showed exactly two browser resources to create and eleven unchanged, with no
+replacements/deletions (run `43537387432`). CI also reported four generated
+workflow path additions for `browser.sql`; those exact changes are committed.
+Refresh the plan/checks against the current final commit before merging.
 After merge, verify infrastructure apply, the new table/schema, catalog and
 per-table compaction/snapshot expiry, sink error metrics and production SQL
 compatibility. Archive history before the new pipeline is not automatically
