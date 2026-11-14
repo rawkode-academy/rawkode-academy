@@ -1,3 +1,4 @@
+import { tailInvocationRecord } from "../tail-invocation";
 import { tailRequestOrigin } from "../tail-privacy";
 import { acknowledgeOTLP } from "../otlp-response";
 import {
@@ -329,6 +330,8 @@ export class DataBuffer extends DurableObject<Env> {
 			for (const stored of events) {
 				const trace = stored.trace;
 				const requestOrigin = tailRequestOrigin(trace.request?.url);
+				if (trace.logs.length === 0 && trace.exceptions.length === 0)
+					logRecords.push(tailInvocationRecord(trace, stored.timestamp));
 
 				// Convert each console log to an OTLP LogRecord
 				for (const log of trace.logs) {
@@ -640,6 +643,8 @@ export class DataBuffer extends DurableObject<Env> {
 			for (const stored of events) {
 				const trace = stored.trace;
 				const requestOrigin = tailRequestOrigin(trace.request?.url);
+				if (trace.logs.length === 0 && trace.exceptions.length === 0)
+					logRecords.push(tailInvocationRecord(trace, stored.timestamp));
 
 				for (const log of trace.logs) {
 					const severity = LOG_LEVEL_TO_SEVERITY[log.level] ?? {

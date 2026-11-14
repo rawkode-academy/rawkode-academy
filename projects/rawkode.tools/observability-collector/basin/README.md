@@ -127,6 +127,16 @@ exception message content; that remains a separate privacy verification requirem
 Runtime validation checks new durable records and both destinations after legacy
 migration, with stable explicit replay.
 
+Quiet Worker invocations (no console logs or exceptions) now export a minimal
+`worker.invocation` log to both destinations instead of acknowledging an empty
+request. It records only worker name, outcome and the original event timestamp,
+or persisted acceptance time when absent; it adds no request details. Timestamp
+conversion uses exact integer nanoseconds and rejects invalid/out-of-range values.
+The informational severity does not classify every non-OK outcome as an error.
+Runtime validation covers independent acknowledgement, partial rejection retention
+and explicit replay with stable timestamps. This adds a record per quiet invocation;
+verify actual volume and retention after deployment before claiming full coverage.
+
 Monitor `deliveryStatus()` for the `grafana-metrics` entry in `buffer-metrics`.
 After diagnosing a retained native failure, the existing internal RPC
 `replayFailed("buffer-metrics", "grafana-metrics")` can explicitly requeue it.
@@ -135,7 +145,7 @@ already acknowledged PostHog or legacy Grafana-log copies. Missing Grafana
 configuration is not evidence of replacement coverage, and zero pending records
 alone is not a healthy-ingestion receipt.
 
-Validation: 42 collector tests and strict collector/exporter/test
+Validation: 45 collector tests and strict collector/exporter/test
 TypeScript checks. A real workerd test with mocked endpoints verifies native
 gauge payloads, label privacy, partial rejection retention, no automatic retry,
 independent acknowledgements and stable explicit replay without repeating other
