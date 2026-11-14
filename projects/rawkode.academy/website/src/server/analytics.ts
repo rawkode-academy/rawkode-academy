@@ -1,7 +1,8 @@
 import { CloudEvent } from "cloudevents";
-import { createLogger } from "@/lib/logger";
-
-const logger = createLogger("analytics");
+import {
+	deliverAnalyticsEvent,
+	type AnalyticsDelivery,
+} from "./analytics-delivery";
 
 export type CaptureOptions = {
 	event: string;
@@ -200,8 +201,8 @@ function createCloudEvent(
  */
 export async function captureServerEvent(
 	opts: CaptureOptions,
-	analytics?: Fetcher,
-): Promise<void> {
+	analytics?: Pick<Fetcher, "fetch">,
+): Promise<AnalyticsDelivery> {
 	const { event, properties = {}, distinctId } = opts;
 
 	// Map event names to CloudEvent types (domain events only, prefix added by observability-collector)
@@ -318,35 +319,12 @@ export async function captureServerEvent(
 		"last_touch_initial_referrer",
 	];
 
-	if (analytics) {
-		// Use service binding via fetch to POST /track endpoint
-		try {
-			await analytics.fetch("https://analytics.internal/track", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					event: cloudEvent,
-					attributes: attributesToPromote,
-				}),
-			});
-		} catch (err) {
-			logger.error("Analytics service binding call failed", err);
-		}
-	} else {
-		// Fallback: log warning (service binding should always be available in production)
-		logger.warn("Analytics service binding not available; event not tracked", {
-			event,
-		});
-	}
+	return deliverAnalyticsEvent(analytics, cloudEvent, attributesToPromote);
 }
 
 type IdentifyOptions = {
 	distinctId: string;
 	anonId?: string | undefined;
-	set?: Record<string, unknown> | undefined;
-	setOnce?: Record<string, unknown> | undefined;
 };
 
 /**
@@ -355,9 +333,9 @@ type IdentifyOptions = {
  */
 export async function identifyServerUser(
 	opts: IdentifyOptions,
-	analytics?: Fetcher,
-): Promise<void> {
-	const { distinctId, anonId, set, setOnce } = opts;
+	analytics?: Pick<Fetcher, "fetch">,
+): Promise<AnalyticsDelivery> {
+	const { distinctId, anonId } = opts;
 
 	const cloudEvent = createCloudEvent(
 		"user.identified",
@@ -365,25 +343,11 @@ export async function identifyServerUser(
 		{
 			distinct_id: distinctId,
 			anon_id: anonId,
-			set_properties: set,
-			set_once_properties: setOnce,
 		},
 	);
 
-	if (analytics) {
-		try {
-			await analytics.fetch("https://analytics.internal/track", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					event: cloudEvent,
-					attributes: ["distinct_id", "anon_id"],
-				}),
-			});
-		} catch (err) {
-			logger.error("Analytics identify call failed", err);
-		}
-	}
+	return deliverAnalyticsEvent(analytics, cloudEvent, [
+		"distinct_id",
+		"anon_id",
+	]);
 }
