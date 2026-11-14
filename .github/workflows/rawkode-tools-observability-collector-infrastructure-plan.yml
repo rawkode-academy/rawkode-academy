@@ -32,6 +32,7 @@ on:
     - projects/rawkode.tools/observability-collector/**
     - projects/rawkode.tools/observability-collector/*.cue
     - projects/rawkode.tools/observability-collector/basin/archive.sql
+    - projects/rawkode.tools/observability-collector/basin/browser.sql
     - projects/rawkode.tools/observability-collector/basin/typed.sql
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}

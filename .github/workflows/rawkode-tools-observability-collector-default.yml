@@ -31,6 +31,7 @@ on:
     - projects/rawkode.tools/observability-collector/*.cue
     - projects/rawkode.tools/observability-collector/basin/**
     - projects/rawkode.tools/observability-collector/basin/archive.sql
+    - projects/rawkode.tools/observability-collector/basin/browser.sql
     - projects/rawkode.tools/observability-collector/basin/typed.sql
     - projects/rawkode.tools/observability-collector/env.cue
     - projects/rawkode.tools/observability-collector/env.cue/**
