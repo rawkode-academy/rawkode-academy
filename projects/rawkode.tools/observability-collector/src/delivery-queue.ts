@@ -1,7 +1,30 @@
 // Each destination owns its acknowledgement. External I/O never runs in a
 // storage transaction; deleting only the selected keys preserves concurrent adds.
-export const DESTINATIONS = ["basin", "posthog", "grafana"] as const;
+export const DESTINATIONS = [
+	"basin",
+	"posthog",
+	"grafana",
+	"grafana-metrics",
+] as const;
 export type Destination = (typeof DESTINATIONS)[number];
+// Only explicit protocol failures stop automatic retries; payloads remain retained.
+export class PermanentDeliveryError extends Error {
+	constructor(
+		readonly reason:
+			| "invalid_payload"
+			| "invalid_response"
+			| "partial_success"
+			| "rejected",
+		readonly status?: number,
+	) {
+		super("Delivery requires operator review");
+	}
+}
+export class RetryableDeliveryError extends Error {
+	constructor(readonly retryAfterMs?: number) {
+		super("Destination temporarily unavailable");
+	}
+}
 const BATCH_SIZE = 25;
 const MAX_ATTEMPTS = 12;
 const FLUSH_DELAY_MS = 30_000;
@@ -101,7 +124,9 @@ export class DeliveryQueue<T> {
 			// Split retries so one malformed payload cannot quarantine an entire batch.
 			if (entries.some(([, entry]) => entry.attempts > 0))
 				entries = entries.slice(0, 1);
-			let delivered = false;
+			let delivered = false,
+				permanent = false,
+				retryAfterMs = 0;
 			try {
 				let timeout: ReturnType<typeof setTimeout> | undefined;
 				try {
@@ -121,12 +146,26 @@ export class DeliveryQueue<T> {
 					if (timeout !== undefined) clearTimeout(timeout);
 				}
 				delivered = true;
-			} catch {
-				// Log counts only: payloads and destination responses can contain secrets.
-				console.error("analytics.delivery.retry", {
-					destination,
-					records: entries.length,
-				});
+			} catch (error) {
+				permanent = error instanceof PermanentDeliveryError;
+				if (
+					error instanceof RetryableDeliveryError &&
+					error.retryAfterMs !== undefined
+				)
+					retryAfterMs = error.retryAfterMs;
+				// Log only protocol enums/counts, never response bodies or payloads.
+				console.error(
+					permanent
+						? "analytics.delivery.rejected"
+						: "analytics.delivery.retry",
+					{
+						destination,
+						records: entries.length,
+						...(error instanceof PermanentDeliveryError
+							? { reason: error.reason, status: error.status }
+							: {}),
+					},
+				);
 			}
 			await this.storage.transaction(async (txn) => {
 				const stats =
@@ -140,7 +179,7 @@ export class DeliveryQueue<T> {
 						continue;
 					}
 					const attempts = entry.attempts + 1;
-					if (attempts >= MAX_ATTEMPTS) {
+					if (permanent || attempts >= MAX_ATTEMPTS) {
 						await txn.put(key.replace("/pending/", "/failed/"), {
 							...entry,
 							attempts,
@@ -153,7 +192,10 @@ export class DeliveryQueue<T> {
 							attempts,
 						});
 					} else {
-						const delay = Math.min(3_600_000, 30_000 * 2 ** (attempts - 1));
+						const delay = Math.max(
+							retryAfterMs,
+							Math.min(3_600_000, 30_000 * 2 ** (attempts - 1)),
+						);
 						await txn.put(pendingKey(destination, Date.now() + delay), {
 							...entry,
 							attempts,

@@ -1,3 +1,8 @@
+import {
+	exportMetrics,
+	validateMetric,
+	type MetricObservation,
+} from "../native-metrics";
 import { DurableObject } from "cloudflare:workers";
 import type { EventsStream, ExceptionData } from "../index";
 import {
@@ -37,12 +42,7 @@ interface StoredEvent {
 	attributes?: string[];
 }
 
-interface StoredMetric {
-	name: string;
-	value: number;
-	attributes: Record<string, string>;
-	timestamp: number;
-}
+type StoredMetric = MetricObservation;
 
 interface StoredLog {
 	body: string; // base64 encoded
@@ -144,7 +144,10 @@ export class DataBuffer extends DurableObject<Env> {
 			...(kind === "event" ? ["basin" as const] : []),
 			"posthog",
 			...(this.env.GRAFANA_OTLP_TOKEN && this.env.GRAFANA_OTLP_HOST
-				? ["grafana" as const]
+				? [
+						"grafana" as const,
+						...(kind === "metric" ? ["grafana-metrics" as const] : []),
+					]
 				: []),
 		];
 	}
@@ -163,6 +166,7 @@ export class DataBuffer extends DurableObject<Env> {
 	}
 
 	async addMetric(metric: Omit<StoredMetric, "timestamp">): Promise<void> {
+		validateMetric(metric);
 		await this.queue().enqueue(
 			{ kind: "metric", value: { ...metric, timestamp: Date.now() } },
 			this.destinations("metric"),
@@ -203,7 +207,9 @@ export class DataBuffer extends DurableObject<Env> {
 		return this.queue().status();
 	}
 	async replayFailed(destination: Destination) {
-		if (!["basin", "posthog", "grafana"].includes(destination))
+		if (
+			!["basin", "posthog", "grafana", "grafana-metrics"].includes(destination)
+		)
 			throw new Error("Invalid destination");
 		await this.queue().replay(destination);
 	}
@@ -256,6 +262,23 @@ export class DataBuffer extends DurableObject<Env> {
 				if (tails.length) await this.flushTailEventsAsOTLP(tails);
 				if (events.length || metrics.length || exceptions.length)
 					await this.flushEventsToPostHog(events, metrics, exceptions);
+			} else if (destination === "grafana-metrics") {
+				if (
+					!this.env.GRAFANA_OTLP_TOKEN ||
+					!this.env.GRAFANA_OTLP_HOST ||
+					!this.env.GRAFANA_INSTANCE_ID
+				)
+					throw new Error("Grafana metrics is not configured");
+				if (metrics.length !== deliveries.length)
+					throw new Error("Unexpected native metric payload");
+				await exportMetrics(
+					{
+						host: this.env.GRAFANA_OTLP_HOST,
+						instanceId: this.env.GRAFANA_INSTANCE_ID,
+						token: await this.env.GRAFANA_OTLP_TOKEN.get(),
+					},
+					metrics,
+				);
 			} else {
 				if (!this.env.GRAFANA_OTLP_TOKEN || !this.env.GRAFANA_OTLP_HOST)
 					throw new Error("Grafana is not configured");
