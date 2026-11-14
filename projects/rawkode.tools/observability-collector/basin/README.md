@@ -79,6 +79,95 @@ services (CloudEvents) ─ /track ─► observability-collector ─► stream a
   through the same durable delivery path. Typed browser tables and dashboard
   panels remain a later migration stage.
 
+## Native metric export — 14 November 2026
+
+The collector previously forwarded `trackMetric` observations to Grafana only
+as log records. This stage adds native OTLP gauge samples at the existing
+Grafana gateway's `/v1/metrics` endpoint. The current caller is the star-catcher's
+`github.stars` observation with its repository dimension. Values remain gauges:
+no counter monotonicity, delta aggregation, histogram buckets or units are
+invented for an API that only supplies a value. Existing PostHog metric events
+and Grafana metric logs are preserved.
+
+New metric records receive a separate durable `grafana-metrics` destination when
+Grafana is configured. It has its own acknowledgement, retry/failure counters
+and internal replay path, so failure of native writes never replays acknowledged
+PostHog or Grafana-log deliveries. Previously queued metric records retain their
+existing destination set; legacy array migration adds the native destination.
+No stream, table, binding, secret or infrastructure resource changes.
+
+The native exporter preserves observation timestamps as exact nanosecond strings,
+checks finite values/supported names and bounded string attributes before new
+metric acceptance, and rejects invalid stored timestamps. Native labels only
+include a bounded GitHub repository slug; user IDs, email, URL and arbitrary
+attributes are excluded from time-series labels. Existing legacy log payloads
+are unchanged. New native payloads are not printed to operational logs.
+
+[OTLP/HTTP response rules](https://opentelemetry.io/docs/specs/otlp/#otlphttp-response)
+require treating partial success and permanent errors differently from transient
+failures. A complete JSON or protobuf success acknowledges delivery. The shared validator
+also covers Grafana raw logs, Worker tails, exceptions and CloudEvent log exports,
+including protobuf requests. Response bodies are bounded to 8 KiB; malformed or
+contradictory receipts fail closed. PostHog log receipt handling is unchanged. HTTP 429, 502,
+503 and 504 retry with the existing bounded exponential policy, respecting valid
+Retry-After delays up to one day. Transport failures also retry. Permanent HTTP
+errors, invalid success receipts and partial rejection move affected destination batches to
+retained failed storage immediately, with no automatic retry. Logs expose only
+protocol reason/status and counts, never provider response bodies or credentials.
+The partial batch is retained for operator triage; it may contain accepted as
+well as rejected points, so do not blindly replay it. Zero-rejection warnings
+can acknowledge delivery without logging their free-text message.
+
+Worker-tail request URLs now retain only an HTTP(S) origin. Credentials, paths,
+queries and fragments are removed before new durable storage and again in both
+Grafana and PostHog exporters, covering previously queued and legacy-array tails.
+Invalid, non-HTTP and oversized URLs are omitted. This deliberately removes route
+and personal-path detail from telemetry. It does not sanitize arbitrary log or
+exception message content; that remains a separate privacy verification requirement.
+Runtime validation checks new durable records and both destinations after legacy
+migration, with stable explicit replay.
+
+Quiet Worker invocations (no console logs or exceptions) now export a minimal
+`worker.invocation` log to both destinations instead of acknowledging an empty
+request. It records only worker name, outcome and the original event timestamp,
+or persisted acceptance time when absent; it adds no request details. Timestamp
+conversion uses exact integer nanoseconds and rejects invalid/out-of-range values.
+The informational severity does not classify every non-OK outcome as an error.
+Runtime validation covers independent acknowledgement, partial rejection retention
+and explicit replay with stable timestamps. This adds a record per quiet invocation;
+verify actual volume and retention after deployment before claiming full coverage.
+
+Monitor `deliveryStatus()` for the `grafana-metrics` entry in `buffer-metrics`.
+After diagnosing a retained native failure, the existing internal RPC
+`replayFailed("buffer-metrics", "grafana-metrics")` can explicitly requeue it.
+Replay preserves timestamps, values and dimensions. It does not resend the
+already acknowledged PostHog or legacy Grafana-log copies. Missing Grafana
+configuration is not evidence of replacement coverage, and zero pending records
+alone is not a healthy-ingestion receipt.
+
+Validation: 45 collector tests and strict collector/exporter/test
+TypeScript checks. A real workerd test with mocked endpoints verifies native
+gauge payloads, label privacy, partial rejection retention, no automatic retry,
+independent acknowledgements and stable explicit replay without repeating other
+destinations. A second real workerd test exercises partial rejection and stable
+manual replay for raw protobuf logs, JSON Worker tails, exceptions and CloudEvents,
+without resending acknowledged PostHog copies. Retained batches can contain accepted
+and not-yet-sent records; inspect them before replay. Unit tests cover protobuf
+wire bounds, int64 overflow, duplicate/contradictory fields, timestamp precision, finite values,
+permanent/transient/partial responses, bounded malformed receipts and backoff.
+Required `cuenv sync -A` was attempted; local CUE registry access remains blocked.
+
+Current main advanced to unrelated dependency update #1606; migration PRs
+#1602–#1605 are still review-blocked. This code is not deployed and no live
+Grafana acceptance, query visibility or retention is claimed. After merge, verify
+the exact collector deployment, actual star observations at the native endpoint,
+existing token permission for metric writes, queue counters, time-series labels
+and read/query/retention evidence through an approved Grafana connection. Logs,
+exceptions and Worker tails still use their existing log paths and require
+production/privacy/retention verification. No telemetry family is declared fully
+replaced by this code-only stage. PostHog stays enabled and the fourteen-day
+all-family production window has not started.
+
 ## Constraints that shape this
 
 - The stream's only column is `value` (JSON), so it never needs replacing and

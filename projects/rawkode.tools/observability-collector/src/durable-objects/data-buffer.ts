@@ -1,3 +1,11 @@
+import { tailInvocationRecord } from "../tail-invocation";
+import { tailRequestOrigin } from "../tail-privacy";
+import { acknowledgeOTLP } from "../otlp-response";
+import {
+	exportMetrics,
+	validateMetric,
+	type MetricObservation,
+} from "../native-metrics";
 import { DurableObject } from "cloudflare:workers";
 import type { EventsStream, ExceptionData } from "../index";
 import {
@@ -37,12 +45,7 @@ interface StoredEvent {
 	attributes?: string[];
 }
 
-interface StoredMetric {
-	name: string;
-	value: number;
-	attributes: Record<string, string>;
-	timestamp: number;
-}
+type StoredMetric = MetricObservation;
 
 interface StoredLog {
 	body: string; // base64 encoded
@@ -144,7 +147,10 @@ export class DataBuffer extends DurableObject<Env> {
 			...(kind === "event" ? ["basin" as const] : []),
 			"posthog",
 			...(this.env.GRAFANA_OTLP_TOKEN && this.env.GRAFANA_OTLP_HOST
-				? ["grafana" as const]
+				? [
+						"grafana" as const,
+						...(kind === "metric" ? ["grafana-metrics" as const] : []),
+					]
 				: []),
 		];
 	}
@@ -163,6 +169,7 @@ export class DataBuffer extends DurableObject<Env> {
 	}
 
 	async addMetric(metric: Omit<StoredMetric, "timestamp">): Promise<void> {
+		validateMetric(metric);
 		await this.queue().enqueue(
 			{ kind: "metric", value: { ...metric, timestamp: Date.now() } },
 			this.destinations("metric"),
@@ -193,7 +200,18 @@ export class DataBuffer extends DurableObject<Env> {
 
 	async addTailEvent(trace: SerializedTraceItem): Promise<void> {
 		await this.queue().enqueue(
-			{ kind: "tail", value: { trace, timestamp: Date.now() } },
+			{
+				kind: "tail",
+				value: {
+					trace: {
+						...trace,
+						request: trace.request
+							? { ...trace.request, url: tailRequestOrigin(trace.request.url) }
+							: undefined,
+					},
+					timestamp: Date.now(),
+				},
+			},
 			this.destinations("tail"),
 		);
 	}
@@ -203,7 +221,9 @@ export class DataBuffer extends DurableObject<Env> {
 		return this.queue().status();
 	}
 	async replayFailed(destination: Destination) {
-		if (!["basin", "posthog", "grafana"].includes(destination))
+		if (
+			!["basin", "posthog", "grafana", "grafana-metrics"].includes(destination)
+		)
 			throw new Error("Invalid destination");
 		await this.queue().replay(destination);
 	}
@@ -256,6 +276,23 @@ export class DataBuffer extends DurableObject<Env> {
 				if (tails.length) await this.flushTailEventsAsOTLP(tails);
 				if (events.length || metrics.length || exceptions.length)
 					await this.flushEventsToPostHog(events, metrics, exceptions);
+			} else if (destination === "grafana-metrics") {
+				if (
+					!this.env.GRAFANA_OTLP_TOKEN ||
+					!this.env.GRAFANA_OTLP_HOST ||
+					!this.env.GRAFANA_INSTANCE_ID
+				)
+					throw new Error("Grafana metrics is not configured");
+				if (metrics.length !== deliveries.length)
+					throw new Error("Unexpected native metric payload");
+				await exportMetrics(
+					{
+						host: this.env.GRAFANA_OTLP_HOST,
+						instanceId: this.env.GRAFANA_INSTANCE_ID,
+						token: await this.env.GRAFANA_OTLP_TOKEN.get(),
+					},
+					metrics,
+				);
 			} else {
 				if (!this.env.GRAFANA_OTLP_TOKEN || !this.env.GRAFANA_OTLP_HOST)
 					throw new Error("Grafana is not configured");
@@ -292,6 +329,9 @@ export class DataBuffer extends DurableObject<Env> {
 
 			for (const stored of events) {
 				const trace = stored.trace;
+				const requestOrigin = tailRequestOrigin(trace.request?.url);
+				if (trace.logs.length === 0 && trace.exceptions.length === 0)
+					logRecords.push(tailInvocationRecord(trace, stored.timestamp));
 
 				// Convert each console log to an OTLP LogRecord
 				for (const log of trace.logs) {
@@ -314,11 +354,11 @@ export class DataBuffer extends DurableObject<Env> {
 						attributes: [
 							{ key: "worker.name", value: { stringValue: workerName } },
 							{ key: "worker.outcome", value: { stringValue: trace.outcome } },
-							...(trace.request?.url
+							...(requestOrigin
 								? [
 										{
 											key: "http.url",
-											value: { stringValue: trace.request.url },
+											value: { stringValue: requestOrigin },
 										},
 									]
 								: []),
@@ -564,6 +604,7 @@ export class DataBuffer extends DurableObject<Env> {
 			const response = await fetch(`${this.env.GRAFANA_OTLP_HOST}/v1/logs`, {
 				method: "POST",
 				signal: AbortSignal.timeout(15_000),
+				redirect: "manual",
 				headers: {
 					"Content-Type": log.contentType,
 					Authorization: `Basic ${authHeader}`,
@@ -571,8 +612,7 @@ export class DataBuffer extends DurableObject<Env> {
 				body: body,
 			});
 
-			if (!response.ok)
-				throw new Error(`Destination rejected delivery (${response.status})`);
+			await acknowledgeOTLP(response, "logs", log.contentType);
 		}
 	}
 
@@ -602,6 +642,9 @@ export class DataBuffer extends DurableObject<Env> {
 
 			for (const stored of events) {
 				const trace = stored.trace;
+				const requestOrigin = tailRequestOrigin(trace.request?.url);
+				if (trace.logs.length === 0 && trace.exceptions.length === 0)
+					logRecords.push(tailInvocationRecord(trace, stored.timestamp));
 
 				for (const log of trace.logs) {
 					const severity = LOG_LEVEL_TO_SEVERITY[log.level] ?? {
@@ -622,11 +665,11 @@ export class DataBuffer extends DurableObject<Env> {
 						attributes: [
 							{ key: "worker.name", value: { stringValue: workerName } },
 							{ key: "worker.outcome", value: { stringValue: trace.outcome } },
-							...(trace.request?.url
+							...(requestOrigin
 								? [
 										{
 											key: "http.url",
-											value: { stringValue: trace.request.url },
+											value: { stringValue: requestOrigin },
 										},
 									]
 								: []),
@@ -694,6 +737,7 @@ export class DataBuffer extends DurableObject<Env> {
 		const response = await fetch(`${this.env.GRAFANA_OTLP_HOST}/v1/logs`, {
 			method: "POST",
 			signal: AbortSignal.timeout(15_000),
+			redirect: "manual",
 			headers: {
 				"Content-Type": "application/json",
 				Authorization: `Basic ${authHeader}`,
@@ -701,8 +745,7 @@ export class DataBuffer extends DurableObject<Env> {
 			body: JSON.stringify(otlpRequest),
 		});
 
-		if (!response.ok)
-			throw new Error(`Destination rejected delivery (${response.status})`);
+		await acknowledgeOTLP(response, "logs", "application/json");
 	}
 
 	private async flushToGrafanaOTLP(
@@ -871,6 +914,7 @@ export class DataBuffer extends DurableObject<Env> {
 		const response = await fetch(`${this.env.GRAFANA_OTLP_HOST}/v1/logs`, {
 			method: "POST",
 			signal: AbortSignal.timeout(15_000),
+			redirect: "manual",
 			headers: {
 				"Content-Type": "application/json",
 				Authorization: `Basic ${authHeader}`,
@@ -878,7 +922,6 @@ export class DataBuffer extends DurableObject<Env> {
 			body: JSON.stringify(otlpRequest),
 		});
 
-		if (!response.ok)
-			throw new Error(`Destination rejected delivery (${response.status})`);
+		await acknowledgeOTLP(response, "logs", "application/json");
 	}
 }
