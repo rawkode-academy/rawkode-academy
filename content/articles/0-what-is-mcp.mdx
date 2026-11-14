@@ -1,0 +1,326 @@
+---
+title: "The Model Has Never Heard of MCP"
+subtitle: I follow one question from your prompt to an MCP server and back and show every payload on the way. Based on spec version 2026-07-28.
+description: "What the Model Context Protocol is, explained by following one question through the host, the model API and an MCP server. Based on spec version 2026-07-28."
+type: guide
+publishedAt: 2026-11-13
+draft: true
+authors:
+  - icepuma
+series: understanding-mcp
+resources:
+  - title: What is the Model Context Protocol (MCP)?
+    type: url
+    url: https://modelcontextprotocol.io/docs/2026-07-28/getting-started/intro
+    description: The official introduction.
+    category: documentation
+  - title: Architecture overview
+    type: url
+    url: https://modelcontextprotocol.io/docs/2026-07-28/learn/architecture
+    description: Participants, layers and primitives, with a message-by-message example.
+    category: documentation
+  - title: MCP Specification 2026-07-28
+    type: url
+    url: https://modelcontextprotocol.io/specification/2026-07-28
+    description: The specification this series follows.
+    category: documentation
+---
+
+import Aside from "@/components/Aside.astro";
+
+You paste a few lines of config into your coding agent, and after that it can search your issues. It just works, which is awesome, and it's also why most people never look at what happens in between.
+
+One thing up front, the model has never heard of MCP. It never talks to a server, the application around it does all of that.
+
+Pretty much every introduction explains MCP with a USB-C port. I'd rather take a single question and follow it all the way through, one payload after the other. Two different APIs are involved, and only one of them is MCP.
+
+<Aside variant="info">
+Everything here follows spec version **2026-07-28**. MCP versions are dates, and this one changed quite a lot compared to the 2025 versions. There's a short section about that near the end.
+</Aside>
+
+## The setup
+
+MCP calls the AI application you use the **host**, your coding agent for example. Claude Code is a host, and so is Visual Studio Code. The host owns the conversation, and it's the only one that talks to the model.
+
+A **server** is a program that provides data and actions. You tell the host about servers in a config file. The format belongs to the host and isn't part of MCP, this one is a `.mcp.json` for Claude Code:
+
+```json title=".mcp.json"
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "."]
+    },
+    "issues": {
+      "type": "http",
+      "url": "https://mcp.example.com/mcp"
+    }
+  }
+}
+```
+
+The first entry has a command, so the host starts that program on your machine. People call that a local server. The second entry has a URL, so that server runs somewhere else, and that's a remote server. For the protocol both are just servers.
+
+The question I'll follow is "Which bugs are still open?", and it ends up at the issues server.
+
+## Hop 1: the host asks the server what it has
+
+Before you type anything, the host has already sent a `tools/list` request to the issues server. This came back:
+
+```json title="tools/list response"
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "result": {
+    "resultType": "complete",
+    "tools": [
+      {
+        "name": "issues_search",
+        "description": "Search issues, for example is:open label:bug.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": { "type": "string" }
+          },
+          "required": ["query"]
+        }
+      }
+    ],
+    "ttlMs": 300000,
+    "cacheScope": "public"
+  }
+}
+```
+
+All MCP messages are [JSON-RPC 2.0](https://www.jsonrpc.org/specification), which is a pretty small format. A request has a `method`, some `params` and an `id`, and the response carries the same `id`.
+
+A **tool** is a function the server offers. The definition isn't much, a name, a description in plain text and a JSON Schema for the arguments. The two fields at the end are about caching the list.
+
+## Hop 2: the host asks the model
+
+Now you type the question, and the host sends it to the API of whoever runs the model. Here is that request, trimmed down, in the shape of the Anthropic Messages API. Other providers use different field names, but the steps are the same.
+
+```json title="Request to the model API"
+{
+  "model": "claude-sonnet-5-5",
+  "max_tokens": 1024,
+  "tools": [
+    {
+      "name": "issues_search",
+      "description": "Search issues, for example is:open label:bug.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string" }
+        },
+        "required": ["query"]
+      }
+    }
+  ],
+  "messages": [
+    { "role": "user", "content": "Which bugs are still open?" }
+  ]
+}
+```
+
+There is no MCP in this request. The `tools` entry is the definition from hop 1, copied over, and `inputSchema` is now called `input_schema`. Real hosts often rename the tool as well, for example by putting the server name in front, so two servers can both have a `search` tool. This is ordinary function calling, the same thing a host does with a function it ships itself.
+
+Apart from such a prefix, the model can't tell where a tool came from. The description is just text in its context, like your question, and that's how the model knows what to put into `query`.
+
+That text comes from the server, and the host normally doesn't put it in front of you unless you go looking. A server you add gets a say in what the model does that way, even before one of its tools is called.
+
+## Hop 3: the model asks for a tool
+
+The model doesn't answer your question yet, it comes back with a tool call:
+
+```json title="Response from the model API (trimmed)"
+{
+  "role": "assistant",
+  "stop_reason": "tool_use",
+  "content": [
+    {
+      "type": "tool_use",
+      "id": "toolu_01A9",
+      "name": "issues_search",
+      "input": { "query": "is:open label:bug" }
+    }
+  ]
+}
+```
+
+The model can't run anything, it can only say which tool it wants and with which arguments. The `id` belongs to the model API and has nothing to do with the JSON-RPC one.
+
+## Hop 4: the host calls the server
+
+Okay, now MCP comes back in. The host hands the call to the **client** for the issues server. A client is a component inside the host that holds the connection to exactly one server, so the config above gives you two clients. Depending on the host, you get asked for approval first.
+
+The client sends this:
+
+```json title="tools/call request"
+{
+  "jsonrpc": "2.0",
+  "id": 7,
+  "method": "tools/call",
+  "params": {
+    "name": "issues_search",
+    "arguments": {
+      "query": "is:open label:bug"
+    },
+    "_meta": {
+      "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+      "io.modelcontextprotocol/clientInfo": {
+        "name": "my-editor",
+        "version": "1.4.0"
+      },
+      "io.modelcontextprotocol/clientCapabilities": {
+        "elicitation": {}
+      }
+    }
+  }
+}
+```
+
+`name` and `arguments` are what the model asked for. The `_meta` block looks like a lot for one call, and yes, it's sent with every request. It says which protocol version the client speaks, which optional features it supports and usually who the client is. Those are called capabilities, and `elicitation` is one of them, I'll get to that further down. You don't write this block by hand of course, that's what the SDKs are for.
+
+The server runs the search and answers:
+
+```json title="tools/call response"
+{
+  "jsonrpc": "2.0",
+  "id": 7,
+  "result": {
+    "resultType": "complete",
+    "content": [
+      {
+        "type": "text",
+        "text": "#212 Login fails with SSO, #215 Crash on empty config"
+      }
+    ]
+  }
+}
+```
+
+Because every request carries its own `_meta`, the server doesn't have to remember anything about the client between two requests. That is why the spec calls MCP a stateless protocol. For a remote server this is quite nice, because any instance behind a load balancer can answer any request.
+
+The server only got a tool name, a query and some information about the client, your question isn't in there.
+
+## Hop 5: the result goes back to the model
+
+The host sends a second request to the model API. It has everything from the first one, plus the tool call and its result:
+
+```json title="Second request to the model API (messages only)"
+[
+  { "role": "user", "content": "Which bugs are still open?" },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool_use",
+        "id": "toolu_01A9",
+        "name": "issues_search",
+        "input": { "query": "is:open label:bug" }
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": [
+      {
+        "type": "tool_result",
+        "tool_use_id": "toolu_01A9",
+        "content": "#212 Login fails with SSO, #215 Crash on empty config"
+      }
+    ]
+  }
+]
+```
+
+For the model the result is more text to read. Now it can write what you see in the end, two open bugs, #212 and #215.
+
+Tool results are where I'd be a bit careful. Other people write issues, and if one of them contains instructions, the model reads those like everything else in its context. Invariant Labs [showed in May 2025](https://invariantlabs.ai/blog/mcp-github-vulnerability) how a malicious issue in a public repository made an agent leak data from a private one. That went through the official GitHub server, and the server had no bug.
+
+## Who did what
+
+```text
+You <--> Host <--- model API ---> Model
+          |
+          +-- Client 1 <--- stdio ---> filesystem server (local)
+          |
+          +-- Client 2 <--- HTTP ----> issues server (remote)
+```
+
+MCP was only hops 1 and 4. The other three happened between the host and the model, and that's function calling, the way the model asks for a tool. MCP covers the rest, how the host finds out which tools exist and how the call gets to the program that runs it. Some model providers can also connect to a remote MCP server for you. Then their API does hops 1 and 4, and the model still only sees tool definitions.
+
+Before MCP every host did that second part in its own way, so a service had to be integrated once per host. Now you wrap it once, as an MCP server, and every host that speaks MCP can use it. What a host does with a server is still up to the host, so one calls a tool right away and another asks you first.
+
+Host and client get mixed up a lot, and I get that. When people say "MCP client" they often mean the whole application, but in the spec the client is only the connection piece inside the host.
+
+## What else a server offers
+
+The question above only needed a tool. The spec calls the things a server can offer **primitives**, and there are two more.
+
+| Primitive | What it is | Who decides to use it | Methods |
+|---|---|---|---|
+| **Tools** | Functions that do something, like searching issues or sending a message | The model | `tools/list`, `tools/call` |
+| **Resources** | Data to read, like a file or a database schema | The host | `resources/list`, `resources/read` |
+| **Prompts** | Prepared templates for a task, often shown as slash commands | You | `prompts/list`, `prompts/get` |
+
+The third column is from the [server concepts](https://modelcontextprotocol.io/docs/2026-07-28/learn/server-concepts) page. A tool can change things and the model decides on its own when to call it, so this is where a host asks you for approval. Reading a resource doesn't change anything, and the host decides which ones end up in front of the model, for example because you picked a file. A prompt does nothing until you pick it yourself.
+
+Each one has a `list` method, so a host finds out at runtime what a server offers. If it wants to know up front what a server supports at all, it sends `server/discover`. Every server has to answer that, and nobody has to ask.
+
+## Who sees what
+
+| Who | What it sees |
+|---|---|
+| You | What the host shows you. Tool descriptions usually aren't part of that. |
+| Host | Everything: the conversation, every tool definition, every call and every result. |
+| Model provider | What the host sends: the conversation, all tool definitions and all tool results. |
+| Server | The requests sent to it: a tool name, the arguments the model wrote and the `_meta` block. A remote server also gets your credentials for it. |
+
+A server doesn't see the conversation, the model or the other servers. That's also why there is one client per server, the spec wants each connection isolated and the host in control of what crosses over.
+
+The last row has a catch though. The filesystem server from the config is a program the host started on your machine. It normally runs with your privileges and can read whatever you can read, so I'd look at the command in a config before pasting it. A remote server can't do that, but everything in the arguments leaves your machine.
+
+<Aside variant="tip">
+Start with read-only servers. The [Kubernetes server](https://github.com/containers/kubernetes-mcp-server) has a `read_only` option and the [Grafana one](https://github.com/grafana/mcp-grafana) has `--disable-write`. The Kubernetes one calls its switch a best-effort guardrail, the real limit is the RBAC of the account you give it.
+</Aside>
+
+## What it costs
+
+The model API doesn't remember anything between two requests either, so by default the host sends the `tools` array again every time, with every tool of every server in it. Tool definitions are tokens, which means every server you add costs context, even if the model never calls it.
+
+Anthropic [wrote in November 2025](https://www.anthropic.com/engineering/advanced-tool-use) that five servers with 58 tools came to about 55,000 tokens before the conversation had even started. That's a bit much.
+
+Hosts have started to work around it. Claude Code by default [loads only the tool names](https://code.claude.com/docs/en/mcp) and each server's instructions at the start, and searches for a full definition when it needs one.
+
+## When a server needs you
+
+A client can offer something to the server as well. In this version that's one thing, **elicitation**. The word sounds more complicated than it is, a server can ask you for a missing detail or a confirmation. The server answers the `tools/call` with "input required" and says what it needs, the host asks you, and then the client sends the same request again with your input in it.
+
+## The two transports
+
+The transport is how the messages get from one side to the other. The spec defines two standard ones, and the messages are the same in both.
+
+**stdio** is for local servers. The host starts the server as a child process and they talk over standard input and standard output.
+
+**Streamable HTTP** is for remote servers. The client sends each message as an HTTP POST. A remote server needs to know who is asking, so this is where authorization comes in, and the docs recommend OAuth for that.
+
+## If you read older posts
+
+Most of what you find about MCP still describes the 2025 versions, so here is what changed:
+
+- There used to be a handshake. The client sent `initialize` first and both sides agreed on a version and on capabilities. That's gone, and the `_meta` block replaced it. The [proposal that removed it](https://modelcontextprotocol.io/seps/2575-stateless-mcp) says why: the server had to remember the handshake to understand later requests, so a remote server couldn't sit behind a plain load balancer. A client only falls back to the handshake when it talks to a server that still speaks an older version.
+- Sessions with an `Mcp-Session-Id` header are gone too. According to [the proposal for that](https://modelcontextprotocol.io/seps/2567-sessionless-mcp), clients never agreed on what a session is, and some opened a new one for every tool call. If a server needs state across calls now, a tool returns an ID and a later call takes it as an argument.
+- A server can't send requests to the client on its own anymore. It asks inside its response and the client retries, like elicitation does above.
+- **Sampling**, where a server asks the host's model for a completion, is deprecated. A new server should call a model API itself.
+- **Roots**, where the host tells a server which directories to work in, are deprecated as well, a new server should get its paths through tool arguments, resource URIs or its configuration.
+- The same goes for logging through the protocol. A stdio server writes to stderr, and a remote one can use OpenTelemetry.
+
+The [proposal for the three deprecations](https://modelcontextprotocol.io/seps/2577-deprecate-roots-sampling-and-logging) gives the reasons, few clients ever implemented roots or sampling, logging duplicates what stderr and OpenTelemetry already do, and each of the three has an alternative outside the protocol. They still work, but I wouldn't start anything new with them.
+
+## What's next
+
+I left out change notifications, where a server tells the client that its list of tools is different now, and extensions like Tasks for long-running requests. Both come later in the series.
+
+Okay, that was a lot of JSON for one article. The next part is about tools and is more hands-on, I'll start a real server, send it the messages from this article by hand and look at what comes back.
