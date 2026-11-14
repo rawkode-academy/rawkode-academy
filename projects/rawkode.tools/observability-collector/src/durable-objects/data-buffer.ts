@@ -1,3 +1,4 @@
+import { acknowledgeOTLP } from "../otlp-response";
 import {
 	exportMetrics,
 	validateMetric,
@@ -587,6 +588,7 @@ export class DataBuffer extends DurableObject<Env> {
 			const response = await fetch(`${this.env.GRAFANA_OTLP_HOST}/v1/logs`, {
 				method: "POST",
 				signal: AbortSignal.timeout(15_000),
+				redirect: "manual",
 				headers: {
 					"Content-Type": log.contentType,
 					Authorization: `Basic ${authHeader}`,
@@ -594,8 +596,7 @@ export class DataBuffer extends DurableObject<Env> {
 				body: body,
 			});
 
-			if (!response.ok)
-				throw new Error(`Destination rejected delivery (${response.status})`);
+			await acknowledgeOTLP(response, "logs", log.contentType);
 		}
 	}
 
@@ -717,6 +718,7 @@ export class DataBuffer extends DurableObject<Env> {
 		const response = await fetch(`${this.env.GRAFANA_OTLP_HOST}/v1/logs`, {
 			method: "POST",
 			signal: AbortSignal.timeout(15_000),
+			redirect: "manual",
 			headers: {
 				"Content-Type": "application/json",
 				Authorization: `Basic ${authHeader}`,
@@ -724,8 +726,7 @@ export class DataBuffer extends DurableObject<Env> {
 			body: JSON.stringify(otlpRequest),
 		});
 
-		if (!response.ok)
-			throw new Error(`Destination rejected delivery (${response.status})`);
+		await acknowledgeOTLP(response, "logs", "application/json");
 	}
 
 	private async flushToGrafanaOTLP(
@@ -894,6 +895,7 @@ export class DataBuffer extends DurableObject<Env> {
 		const response = await fetch(`${this.env.GRAFANA_OTLP_HOST}/v1/logs`, {
 			method: "POST",
 			signal: AbortSignal.timeout(15_000),
+			redirect: "manual",
 			headers: {
 				"Content-Type": "application/json",
 				Authorization: `Basic ${authHeader}`,
@@ -901,7 +903,6 @@ export class DataBuffer extends DurableObject<Env> {
 			body: JSON.stringify(otlpRequest),
 		});
 
-		if (!response.ok)
-			throw new Error(`Destination rejected delivery (${response.status})`);
+		await acknowledgeOTLP(response, "logs", "application/json");
 	}
 }

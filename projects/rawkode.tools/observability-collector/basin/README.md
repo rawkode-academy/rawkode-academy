@@ -105,10 +105,13 @@ are unchanged. New native payloads are not printed to operational logs.
 
 [OTLP/HTTP response rules](https://opentelemetry.io/docs/specs/otlp/#otlphttp-response)
 require treating partial success and permanent errors differently from transient
-failures. A complete JSON success acknowledges native delivery. HTTP 429, 502,
+failures. A complete JSON or protobuf success acknowledges delivery. The shared validator
+also covers Grafana raw logs, Worker tails, exceptions and CloudEvent log exports,
+including protobuf requests. Response bodies are bounded to 8 KiB; malformed or
+contradictory receipts fail closed. PostHog log receipt handling is unchanged. HTTP 429, 502,
 503 and 504 retry with the existing bounded exponential policy, respecting valid
 Retry-After delays up to one day. Transport failures also retry. Permanent HTTP
-errors, invalid success receipts and partial rejection move native records to
+errors, invalid success receipts and partial rejection move affected destination batches to
 retained failed storage immediately, with no automatic retry. Logs expose only
 protocol reason/status and counts, never provider response bodies or credentials.
 The partial batch is retained for operator triage; it may contain accepted as
@@ -123,11 +126,15 @@ already acknowledged PostHog or legacy Grafana-log copies. Missing Grafana
 configuration is not evidence of replacement coverage, and zero pending records
 alone is not a healthy-ingestion receipt.
 
-Validation: 32 collector tests and strict collector/native-exporter/test
+Validation: 39 collector tests and strict collector/exporter/test
 TypeScript checks. A real workerd test with mocked endpoints verifies native
 gauge payloads, label privacy, partial rejection retention, no automatic retry,
 independent acknowledgements and stable explicit replay without repeating other
-destinations. Unit tests cover timestamp precision/overflow, finite values,
+destinations. A second real workerd test exercises partial rejection and stable
+manual replay for raw protobuf logs, JSON Worker tails, exceptions and CloudEvents,
+without resending acknowledged PostHog copies. Retained batches can contain accepted
+and not-yet-sent records; inspect them before replay. Unit tests cover protobuf
+wire bounds, int64 overflow, duplicate/contradictory fields, timestamp precision, finite values,
 permanent/transient/partial responses, bounded malformed receipts and backoff.
 Required `cuenv sync -A` was attempted; local CUE registry access remains blocked.
 

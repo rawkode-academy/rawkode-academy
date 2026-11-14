@@ -1,7 +1,5 @@
-import {
-	PermanentDeliveryError,
-	RetryableDeliveryError,
-} from "./delivery-queue";
+import { PermanentDeliveryError } from "./delivery-queue";
+import { acknowledgeOTLP } from "./otlp-response";
 
 export interface MetricObservation {
 	name: string;
@@ -83,41 +81,6 @@ export function metricsRequest(metrics: MetricObservation[]) {
 		],
 	};
 }
-function retryAfter(value: string | null): number | undefined {
-	if (!value) return;
-	const delay = /^\d+$/.test(value)
-		? Number(value) * 1000
-		: Date.parse(value) - Date.now();
-	return Number.isFinite(delay) && delay >= 0 && delay <= 86_400_000
-		? delay
-		: undefined;
-}
-async function responsePayload(response: Response): Promise<unknown> {
-	if (!response.body) throw new PermanentDeliveryError("invalid_response");
-	const reader = response.body.getReader();
-	let bytes = 0,
-		text = "";
-	const decoder = new TextDecoder();
-	try {
-		while (true) {
-			const next = await reader.read();
-			if (next.done) break;
-			bytes += next.value.byteLength;
-			if (bytes > 8192) {
-				await reader.cancel();
-				throw new PermanentDeliveryError("invalid_response");
-			}
-			text += decoder.decode(next.value, { stream: true });
-		}
-		try {
-			return JSON.parse(text + decoder.decode());
-		} catch {
-			throw new PermanentDeliveryError("invalid_response");
-		}
-	} finally {
-		reader.releaseLock();
-	}
-}
 export async function exportMetrics(
 	config: { host: string; instanceId: string; token: string },
 	metrics: MetricObservation[],
@@ -134,54 +97,5 @@ export async function exportMetrics(
 		},
 		body,
 	});
-	if (response.status !== 200) {
-		await response.body?.cancel();
-		if ([429, 502, 503, 504].includes(response.status))
-			throw new RetryableDeliveryError(
-				retryAfter(response.headers.get("retry-after")),
-			);
-		throw new PermanentDeliveryError("rejected", response.status);
-	}
-	const payload = await responsePayload(response);
-	if (!payload || typeof payload !== "object" || Array.isArray(payload))
-		throw new PermanentDeliveryError("invalid_response");
-	const responseBody = payload as {
-		partialSuccess?: unknown;
-		partial_success?: unknown;
-	};
-	if (
-		responseBody.partialSuccess !== undefined &&
-		responseBody.partial_success !== undefined
-	)
-		throw new PermanentDeliveryError("invalid_response");
-	const partial =
-		responseBody.partialSuccess !== undefined
-			? responseBody.partialSuccess
-			: responseBody.partial_success;
-	if (partial === undefined) return;
-	if (!partial || typeof partial !== "object" || Array.isArray(partial))
-		throw new PermanentDeliveryError("invalid_response");
-	const partialBody = partial as {
-		rejectedDataPoints?: unknown;
-		rejected_data_points?: unknown;
-	};
-	if (
-		partialBody.rejectedDataPoints !== undefined &&
-		partialBody.rejected_data_points !== undefined
-	)
-		throw new PermanentDeliveryError("invalid_response");
-	const rejected =
-		partialBody.rejectedDataPoints ?? partialBody.rejected_data_points ?? 0;
-	if (
-		!(
-			typeof rejected === "number" &&
-			Number.isSafeInteger(rejected) &&
-			rejected >= 0
-		) &&
-		!(typeof rejected === "string" && /^\d+$/.test(rejected))
-	)
-		throw new PermanentDeliveryError("invalid_response");
-	// OTLP forbids automatic retry after partial success. Retain for operator triage.
-	if (BigInt(rejected) > 0n)
-		throw new PermanentDeliveryError("partial_success");
+	await acknowledgeOTLP(response, "metrics");
 }
