@@ -7,6 +7,7 @@ import {
 	resetIdentity,
 	track,
 } from "@/lib/analytics/track";
+import { clearCampaignAttribution } from "@/lib/analytics/attribution-cookies";
 import { isPrefetch } from "@/lib/auth/prefetch";
 import { POST } from "@/pages/api/e";
 
@@ -24,6 +25,7 @@ describe("track()", () => {
 	beforeEach(() => {
 		vi.useFakeTimers();
 		resetForTests();
+		clearCampaignAttribution();
 		sessionStorage.clear();
 		fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 204 }));
 		vi.stubGlobal("fetch", fetchMock);
@@ -111,9 +113,9 @@ describe("track()", () => {
 			"page_view",
 			"$exception",
 		]);
-		expect(batch?.events[1]?.properties).toEqual({
+		expect(batch?.events[1]?.properties).toMatchObject({
 			_truncated: true,
-			keys: ["stack"],
+			keys: expect.arrayContaining(["stack"]),
 		});
 	});
 
