@@ -124,6 +124,15 @@ tasks: {
 		}
 	}
 
+	"browser-report": schema.#Task & {
+		hermetic: false
+		command:  "bun"
+		args: ["basin/browser-report.ts"]
+		inputs: ["basin/browser*.ts", "basin/browser.sql"]
+		labels: ["infisical"]
+		env: BASIN_SQL_TOKEN: _basinSecret & {secretName: "BASIN_SQL_TOKEN"}
+	}
+
 	typegen: schema.#Task & {
 		hermetic: false
 		command:  "bun"

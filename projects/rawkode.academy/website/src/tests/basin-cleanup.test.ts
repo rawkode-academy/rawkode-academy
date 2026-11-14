@@ -30,7 +30,7 @@ describe("legacy table purge guards", () => {
 			"fetch",
 			vi.fn(async (url: string, init: RequestInit) => {
 				if (init.method === "DELETE") {
-					current = [...live];
+					current = current.filter((name) => name !== "events");
 					return new Response(null, { status: 204 });
 				}
 				if (url.endsWith("maintenance-configs"))
@@ -81,6 +81,25 @@ describe("legacy table purge guards", () => {
 		);
 	});
 
+	it("preserves a declared browser table and verifies its maintenance", async () => {
+		current.push("browser_events_v1");
+		mocks.infrastructure += '\nconfig: table_name: "browser_events_v1"';
+		await run();
+		expect(current).toEqual([...live, "browser_events_v1"]);
+		expect(deletes()).toHaveLength(1);
+		expect(
+			vi
+				.mocked(fetch)
+				.mock.calls.filter(([url]) =>
+					String(url).endsWith("browser_events_v1/maintenance-configs"),
+				),
+		).toHaveLength(2);
+	});
+	it("refuses a browser table without its declared sink", async () => {
+		current.push("browser_events_v1");
+		await expect(run()).rejects.toThrow("Unexpected tables");
+		expect(deletes()).toHaveLength(0);
+	});
 	it("refuses a table containing records", async () => {
 		metadata = {
 			"current-snapshot-id": 1,

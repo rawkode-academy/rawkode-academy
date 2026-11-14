@@ -5,6 +5,8 @@ const ACCOUNT = "0aeb879de8e3cdde5fb3d413025222ce";
 const BUCKET = "rawkode-analytics";
 const LEGACY = "events";
 const LIVE = ["events_archive", "short_links"];
+// The additive browser table may not exist until its first flush.
+const OPTIONAL = ["browser_events_v1"];
 const token = process.env.BASIN_CATALOG_TOKEN;
 if (!token) throw new Error("BASIN_CATALOG_TOKEN is not set");
 if (process.env.CLOUDFLARE_ACCOUNT_ID !== ACCOUNT) {
@@ -23,9 +25,19 @@ const declarations = [
 		.matchAll(/\btable_name\s*:\s*([^\n}]+)/g),
 ];
 if (
-	declarations.length !== LIVE.length ||
+	declarations.length < LIVE.length ||
+	declarations.length > LIVE.length + OPTIONAL.length ||
+	new Set(declarations.map(([, value]) => value.trim())).size !==
+		declarations.length ||
+	LIVE.some(
+		(name) =>
+			!declarations.some(([, value]) => value.trim() === JSON.stringify(name)),
+	) ||
 	declarations.some(
-		([, value]) => !LIVE.some((name) => value.trim() === JSON.stringify(name)),
+		([, value]) =>
+			![...LIVE, ...OPTIONAL].some(
+				(name) => value.trim() === JSON.stringify(name),
+			),
 	)
 ) {
 	throw new Error(
@@ -85,8 +97,8 @@ function same(actual: string[], expected: string[]) {
 		throw new Error(`Unexpected tables: ${actual.join(", ")}`);
 	}
 }
-async function verifyMaintenance() {
-	for (const name of LIVE) {
+async function verifyMaintenance(live: string[]) {
+	for (const name of live) {
 		const body = await request<Maintenance>(
 			`${management}/${name}/maintenance-configs`,
 		);
@@ -102,13 +114,21 @@ async function verifyMaintenance() {
 }
 
 const before = await names();
+const survivors = before.filter((name) => name !== LEGACY);
+const optional = OPTIONAL.filter(
+	(name) =>
+		survivors.includes(name) &&
+		declarations.some(([, value]) => value.trim() === JSON.stringify(name)),
+);
+// Still refuse unknown/undeclared tables and require both original live tables.
+same(survivors, [...LIVE, ...optional]);
 if (!before.includes(LEGACY)) {
-	same(before, LIVE);
-	await verifyMaintenance();
+	same(before, survivors);
+	await verifyMaintenance(survivors);
 	console.log("analytics.events is already absent; nothing dropped");
 } else {
-	same(before, [...LIVE, LEGACY]);
-	await verifyMaintenance();
+	same(before, [...survivors, LEGACY]);
+	await verifyMaintenance(survivors);
 	const loaded = await request<Loaded>(`${tables}/${LEGACY}`);
 	const metadata = loaded.metadata;
 	const snapshotId = metadata["current-snapshot-id"];
@@ -130,7 +150,7 @@ if (!before.includes(LEGACY)) {
 		`analytics.events before drop: snapshot=${noSnapshot ? "none" : snapshotId}, records=0`,
 	);
 	await request(`${tables}/${LEGACY}?purgeRequested=true`, "DELETE");
-	same(await names(), LIVE);
-	await verifyMaintenance();
+	same(await names(), survivors);
+	await verifyMaintenance(survivors);
 	console.log("Dropped analytics.events with purge");
 }

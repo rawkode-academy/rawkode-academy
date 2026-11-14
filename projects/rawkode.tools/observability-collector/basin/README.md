@@ -92,6 +92,72 @@ services (CloudEvents) ─ /track ─► observability-collector ─► stream a
 - The Iceberg sink has no partitioning option. Queries must filter on
   `event_time`; compaction and snapshot expiry keep file counts down.
 
+### Browser table stage — 14 November 2026
+
+PRs #1600 and #1601 are merged and their collector/website deployment workflows
+succeeded. PRs #1602 (deduplication/exact-ID comparison) and #1603 (first-party
+attribution) have green checks with protected auto-merge enabled, but required
+review still blocks them. The fourteen-day all-family production window has not
+started; deployment success alone is not healthy-delivery evidence.
+
+`browser.sql` adds a separate `analytics_browser_v1` pipeline and
+`analytics_browser_events_v1` sink for `analytics.browser_events_v1`. Existing
+archive/short-link SQL, sinks, stream identity and bindings are preserved. Only
+source `rawkode-academy-browser`, `web.*` events and numeric schema version 1 in
+both envelope and data are routed. The table projects source/ID, event time,
+anonymous/session/authenticated identity, page/referrer dimensions, geography,
+device/browser and current/first/last campaign fields. Optional strings are empty
+when absent. It stores normalized fields rather than raw URLs or headers.
+First/last attribution is sparse until #1603 is deployed; absent values are not
+proof of direct traffic. Schema changes require a new versioned sink/table.
+
+The read-only `browser-report` task compares every projected field and source/ID
+against the same projection of the archive using bidirectional set differences.
+It rejects missing/substituted identities, changed attribution, conflicting
+same-ID projections, invalid anonymous/session identities and empty evidence.
+Identical repeated deliveries are allowed. Both the full window and each UTC
+day must pass, so busy days cannot hide missing days or cross-day ID conflicts.
+Only after parity passes does it produce deduplicated traffic, page/referrer and
+first/last campaign reports. Anonymous visitor estimates, sessions and distinct
+authenticated users are separate measurements, not a linked-person funnel.
+
+After confirming the new table's first flush and maintenance settings, choose
+full UTC days after deployment (or a separately verified backfill), ending at
+least six hours ago. Use 1–31 days per report:
+
+```sh
+BROWSER_START=YYYY-MM-DD BROWSER_END=YYYY-MM-DD BROWSER_REPORT=/private/browser-report.json \
+  cuenv task browser-report -e production
+```
+
+`BROWSER_END` is exclusive. Exit 0 means projection parity only; exit 1 means
+failed/empty evidence and exit 2 means a query, access or output error. Invalid
+configuration also exits nonzero. Output files use mode 0600, refuse overwrite
+and contain event dimensions; store them privately. No replay, backfill or
+PostHog cutover occurs. Reports always record `cutover_ready: false`. The website
+dashboard remains unchanged until live typed reporting is verified.
+
+Offline validation: 28 collector tests, 56 focused website tests, strict
+collector/browser-tool TypeScript and all four SQL queries executed in DuckDB
+with JSON/timestamp compatibility adapters. Fixtures cover routing, sparse
+fields, duplicates, attribution corruption with equal IDs/counts, conflicting
+IDs, invalid sessions and missing typed rows. This is not live Basin execution.
+`cuenv sync -A` was attempted; the runner's CUE registry fetch is forbidden.
+Basin SQL/Infisical credentials remain unavailable, so no live parity result,
+backfill or legacy purge is claimed. The guarded purge now permits only the
+explicitly declared browser table as an optional additional survivor, verifies
+its maintenance when present and still refuses all unexpected/undeclared tables.
+
+Before merging, inspect the infrastructure plan: only the browser sink and
+pipeline may be added; reject replacement/deletion of any existing lake resource.
+After merge, verify infrastructure apply, the new table/schema, catalog and
+per-table compaction/snapshot expiry, sink error metrics and production SQL
+compatibility. Archive history before the new pipeline is not automatically
+backfilled. Typed server/video/game families, dashboard wiring, replayable
+backfills, producer acceptance, login linkage and operational telemetry coverage
+remain work. Do not retire PostHog before fourteen consecutive healthy production
+days covering those requirements and outage/replay validation.
+
 ## Provisioning
 
 `../infrastructure.cue` declares the bucket, catalog, API tokens, stream, sinks,

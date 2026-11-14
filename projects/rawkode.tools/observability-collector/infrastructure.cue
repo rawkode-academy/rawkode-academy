@@ -60,6 +60,7 @@ _permissionGroups: {
 
 _archiveSql: string @embed(file=basin/archive.sql, type=text)
 _typedSql:   string @embed(file=basin/typed.sql, type=text)
+_browserSql: string @embed(file=basin/browser.sql, type=text)
 
 // Every sink writes Parquet into the analytics namespace of the catalog.
 _icebergSink: {
@@ -220,6 +221,23 @@ infrastructure: {
 				account_id: _account
 				name:       "analytics_typed"
 				sql:        _typedSql
+			}
+		}
+
+		// Additive: preserve both live pipelines, their sinks and stream identity.
+		browser_sink_v1: pipeline_sink.#Resource & {
+			configuration: _icebergSink & {
+				name: "analytics_browser_events_v1"
+				config: table_name: "browser_events_v1"
+			}
+		}
+
+		browser_pipeline_v1: pipeline.#Resource & {
+			dependsOn: ["stream", "browser_sink_v1"]
+			configuration: {
+				account_id: _account
+				name:       "analytics_browser_v1"
+				sql:        _browserSql
 			}
 		}
 
