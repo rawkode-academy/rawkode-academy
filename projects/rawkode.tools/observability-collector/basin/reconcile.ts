@@ -1,44 +1,34 @@
-// Compare collector CloudEvents in PostHog and analytics.events_archive.
-// Browser events and OTLP logs/metrics are outside this comparison.
-//   cuenv task reconcile -e production   # DAYS=14 to widen the window
-// Exits 1 for daily drift or a missing Basin day after ingestion began.
-
+// Exact CloudEvent identity parity over settled full UTC days. Browser SDK-only
+// PostHog events and OTLP telemetry are outside this comparison.
+import { writeFile } from "node:fs/promises";
 import { basinQuery } from "../../../rawkode.academy/website/src/server/basin";
-
 import {
 	ARCHIVE_EVENT,
 	TABLE,
 } from "../../../rawkode.academy/website/src/lib/analytics/queries";
+import {
+	afterCursor,
+	compareIdentities,
+	crossDayIdentities,
+	identity,
+	PAGE_SIZE,
+	readIdentities,
+} from "./event-parity";
 
-const TOLERANCE = 0.05;
 const DAYS = Number(process.env.DAYS ?? 7);
-
-if (!Number.isInteger(DAYS) || DAYS < 1 || DAYS > 90) {
+if (!Number.isInteger(DAYS) || DAYS < 1 || DAYS > 90)
 	throw new Error("DAYS must be an integer between 1 and 90");
-}
-
-function required(name: string): string {
+function required(name: string) {
 	const value = process.env[name];
 	if (!value) throw new Error(`${name} is not set`);
 	return value;
 }
-
-const now = new Date();
-const to = new Date(
-	Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
-);
-const from = new Date(to);
-from.setUTCDate(from.getUTCDate() - DAYS);
-const fromIso = from.toISOString();
-const toIso = to.toISOString();
-
-type Counts = Map<string, Map<string, number>>; // event -> day -> count
-
-function add(counts: Counts, event: string, day: string, count: number) {
-	const days = counts.get(event) ?? new Map<string, number>();
-	days.set(day, (days.get(day) ?? 0) + count);
-	counts.set(event, days);
-}
+const config = {
+	accountId: required("CLOUDFLARE_ACCOUNT_ID"),
+	bucket: process.env.BASIN_BUCKET ?? "rawkode-analytics",
+	token: required("BASIN_SQL_TOKEN"),
+};
+const basin = (query: string) => basinQuery(config, query);
 
 async function posthog(query: string): Promise<unknown[][]> {
 	const host = process.env.POSTHOG_APP_HOST ?? "https://eu.posthog.com";
@@ -46,6 +36,7 @@ async function posthog(query: string): Promise<unknown[][]> {
 		`${host}/api/projects/${required("POSTHOG_PROJECT_ID")}/query/`,
 		{
 			method: "POST",
+			signal: AbortSignal.timeout(60_000),
 			headers: {
 				Authorization: `Bearer ${required("POSTHOG_PERSONAL_API_KEY")}`,
 				"Content-Type": "application/json",
@@ -53,144 +44,132 @@ async function posthog(query: string): Promise<unknown[][]> {
 			body: JSON.stringify({ query: { kind: "HogQLQuery", query } }),
 		},
 	);
-	if (!response.ok) {
-		throw new Error(`PostHog ${response.status}: ${await response.text()}`);
-	}
-	return ((await response.json()) as { results: unknown[][] }).results;
+	if (!response.ok)
+		throw new Error(`PostHog request failed (${response.status})`);
+	const payload = (await response.json()) as {
+		results?: unknown;
+		hasMore?: boolean;
+		has_more?: boolean;
+	};
+	if (
+		!Array.isArray(payload.results) ||
+		payload.results.some((row) => !Array.isArray(row))
+	)
+		throw new Error("Unexpected PostHog query result");
+	if (
+		(payload.hasMore || payload.has_more) &&
+		payload.results.length < PAGE_SIZE
+	)
+		throw new Error("PostHog truncated an identity page");
+	return payload.results as unknown[][];
 }
 
-// Same client the dashboard uses. Bun has no `caches`, so nothing is cached.
-const basinConfig = {
-	accountId: required("CLOUDFLARE_ACCOUNT_ID"),
-	bucket: process.env.BASIN_BUCKET ?? "rawkode-analytics",
-	token: required("BASIN_SQL_TOKEN"),
-};
-const basin = (query: string) => basinQuery(basinConfig, query);
-
-// The PostHog project's timezone is Europe/London; days are compared in UTC.
-const posthogRows = await posthog(`
-	SELECT toString(toDate(toTimeZone(timestamp, 'UTC'))) AS day, event, count() AS c
-	FROM events
-	WHERE timestamp >= toDateTime('${fromIso.slice(0, 19).replace("T", " ")}', 'UTC')
-		AND timestamp < toDateTime('${toIso.slice(0, 19).replace("T", " ")}', 'UTC')
-		AND properties.$lib = 'observability-collector'
-		AND properties.cloudevents_id IS NOT NULL
-	GROUP BY day, event`);
-
-const basinRows = await basin(`
-	SELECT to_char(date_trunc('day', event_time), '%Y-%m-%d') AS day, ${ARCHIVE_EVENT} AS event, count(*) AS c
-	FROM ${TABLE}
-	WHERE event_time >= CAST('${fromIso}' AS TIMESTAMP) AND event_time < CAST('${toIso}' AS TIMESTAMP)
-	GROUP BY 1, 2`);
-
-const ph: Counts = new Map();
-const lake: Counts = new Map();
-for (const [day, event, c] of posthogRows) {
-	add(ph, String(event), String(day), Number(c));
-}
-for (const row of basinRows) {
-	add(lake, String(row.event), String(row.day), Number(row.c));
-}
-
-// Find when ingestion started from __ingest_ts, not a backdated event time: a stream
-// that stopped and resumed inside the window must fail, not look like a
-// fresh start. The first day is partial unless it began at midnight.
-const [startRow] = await basin(
-	`SELECT min(__ingest_ts) AS first FROM ${TABLE}`,
-);
-const firstTs = startRow?.first ? new Date(String(startRow.first)) : undefined;
-if (!firstTs || Number.isNaN(firstTs.getTime())) {
-	console.error(
-		"analytics.events_archive has no rows: the stream isn't receiving data.",
-	);
-	process.exit(1);
-}
-const firstFullDay = new Date(
+const SETTLE_HOURS = Number(process.env.SETTLE_HOURS ?? 6);
+if (!Number.isInteger(SETTLE_HOURS) || SETTLE_HOURS < 0 || SETTLE_HOURS > 48)
+	throw new Error("SETTLE_HOURS must be an integer between 0 and 48");
+const now = new Date();
+const settled = new Date(now.getTime() - SETTLE_HOURS * 3_600_000);
+const to = new Date(
 	Date.UTC(
-		firstTs.getUTCFullYear(),
-		firstTs.getUTCMonth(),
-		firstTs.getUTCDate(),
+		settled.getUTCFullYear(),
+		settled.getUTCMonth(),
+		settled.getUTCDate(),
 	),
 );
-if (firstFullDay.getTime() < firstTs.getTime()) {
-	firstFullDay.setUTCDate(firstFullDay.getUTCDate() + 1);
-}
-
-const days: string[] = [];
-for (
-	const d = new Date(Math.max(from.getTime(), firstFullDay.getTime()));
-	d < to;
-	d.setUTCDate(d.getUTCDate() + 1)
-) {
-	days.push(d.toISOString().slice(0, 10));
-}
-if (days.length === 0) {
-	console.log(
-		`Ingestion started ${firstTs.toISOString()}; no full day to compare yet.`,
+const from = new Date(to);
+from.setUTCDate(from.getUTCDate() - DAYS);
+const [start] = await basin(`SELECT min(__ingest_ts) AS first FROM ${TABLE}`);
+const first = start?.first ? new Date(String(start.first)) : undefined;
+if (!first || Number.isNaN(first.getTime()))
+	throw new Error(
+		"Archive has no valid ingestion start; cannot certify delivery",
 	);
-	process.exit(0);
+const firstFullDay = new Date(
+	Date.UTC(first.getUTCFullYear(), first.getUTCMonth(), first.getUTCDate()),
+);
+if (firstFullDay < first)
+	firstFullDay.setUTCDate(firstFullDay.getUTCDate() + 1);
+const results: Array<
+	{ day: string; crossDayIdentities: number } & ReturnType<
+		typeof compareIdentities
+	>
+> = [];
+
+const seen = new Map<string, string>();
+for (
+	const day = new Date(Math.max(from.getTime(), firstFullDay.getTime()));
+	day < to;
+	day.setUTCDate(day.getUTCDate() + 1)
+) {
+	const until = new Date(day);
+	until.setUTCDate(until.getUTCDate() + 1);
+	const beginIso = day.toISOString(),
+		endIso = until.toISOString();
+	const ph = await readIdentities(async (cursor) =>
+		(
+			await posthog(`
+		SELECT properties.cloudevents_source AS source, properties.cloudevents_id AS event_id,
+			min(event) AS event_name, count() AS copies, count(DISTINCT event) AS versions
+		FROM events
+		WHERE timestamp >= toDateTime('${beginIso.slice(0, 19).replace("T", " ")}', 'UTC')
+			AND timestamp < toDateTime('${endIso.slice(0, 19).replace("T", " ")}', 'UTC')
+			AND properties.$lib = 'observability-collector' AND properties.cloudevents_id IS NOT NULL
+			${afterCursor(cursor, "posthog")}
+		GROUP BY source, event_id ORDER BY source, event_id LIMIT ${PAGE_SIZE}
+	`)
+		).map((row) => identity(row[0], row[1], row[2], row[3], row[4])),
+	);
+	const lake = await readIdentities(async (cursor) =>
+		(
+			await basin(`
+		SELECT event_source AS source, event_id, min(${ARCHIVE_EVENT}) AS event,
+			count(*) AS copies, count(DISTINCT ${ARCHIVE_EVENT}) AS versions
+		FROM ${TABLE}
+		WHERE event_time >= CAST('${beginIso}' AS TIMESTAMP) AND event_time < CAST('${endIso}' AS TIMESTAMP)
+			${afterCursor(cursor, "basin")}
+		GROUP BY event_source, event_id ORDER BY event_source, event_id LIMIT ${PAGE_SIZE}
+	`)
+		).map((row) =>
+			identity(row.source, row.event_id, row.event, row.copies, row.versions),
+		),
+	);
+	const parity = compareIdentities(ph, lake);
+	const crossDay = crossDayIdentities(
+		[...ph, ...lake],
+		beginIso.slice(0, 10),
+		seen,
+	);
+	results.push({
+		day: beginIso.slice(0, 10),
+		...parity,
+		crossDayIdentities: crossDay,
+		passed: parity.passed && crossDay === 0,
+	});
 }
 
-const count = (counts: Counts, event: string, day: string) =>
-	counts.get(event)?.get(day) ?? 0;
-const total = (counts: Counts, event: string) =>
-	days.reduce((sum, day) => sum + count(counts, event, day), 0);
-
-// Each event is checked day by day: window totals can hide a day that ran
-// double and another that ran half. The absolute slack stops a single event
-// landing either side of midnight failing a low-volume event.
-const SLACK = 2;
-const allowed = (p: number) => Math.max(p * TOLERANCE, SLACK);
-
-type Line = {
-	event: string;
-	posthog: number;
-	basin: number;
-	status: string;
-	failing_days: string;
+const passed = results.length > 0 && results.every((row) => row.passed);
+const report = {
+	schema_version: 1,
+	scope: "collector-cloud-event-id-parity",
+	generated_at: now.toISOString(),
+	window: {
+		from: from.toISOString(),
+		to: to.toISOString(),
+		ingestion_started: first.toISOString(),
+		settle_hours: SETTLE_HOURS,
+	},
+	status: results.length ? (passed ? "passed" : "failed") : "insufficient_data",
+	cutover_ready: false,
+	// ID parity does not prove producer acceptance, payload equality, source/family
+	// completeness, identity stitching, dashboard correctness or telemetry coverage.
+	days: results,
 };
-const lines: Line[] = [];
-let failed = false;
-
-const events = new Set([...ph.keys(), ...lake.keys()]);
-for (const event of [...events].sort()) {
-	const p = total(ph, event);
-	const b = total(lake, event);
-	if (p === 0 && b === 0) continue;
-
-	const failing = days.filter((day) => {
-		const pd = count(ph, event, day);
-		const bd = count(lake, event, day);
-		return Math.abs(bd - pd) > allowed(pd);
-	});
-
-	let status: string;
-	if (failing.length > 0) {
-		status = "DRIFT";
-		failed = true;
-	} else {
-		status = "ok";
-	}
-	lines.push({
-		event,
-		posthog: p,
-		basin: b,
-		status,
-		failing_days: failing.join(", "),
-	});
-}
-
-const missingDays = days.filter(
-	(day) => ![...lake.values()].some((counts) => (counts.get(day) ?? 0) > 0),
-);
-if (missingDays.length > 0) failed = true;
-
-console.log(
-	`Reconciling ${days[0]} to ${days.at(-1)} (${days.length} full days, ingestion started ${firstTs.toISOString()})\n`,
-);
-console.table(lines);
-if (missingDays.length > 0) {
-	console.log(`Basin has no rows at all on: ${missingDays.join(", ")}`);
-}
-
-process.exit(failed ? 1 : 0);
+if (process.env.RECONCILE_REPORT)
+	await writeFile(
+		process.env.RECONCILE_REPORT,
+		`${JSON.stringify(report, null, 2)}\n`,
+		{ mode: 0o600 },
+	);
+console.table(results.map(({ sources, ...summary }) => summary));
+console.log(JSON.stringify(report));
+process.exit(passed ? 0 : results.length ? 1 : 2);
