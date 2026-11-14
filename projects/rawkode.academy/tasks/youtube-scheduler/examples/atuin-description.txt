@@ -1,0 +1,15 @@
+Pick up a Claude Code session in Codex on another machine. Find the command that fixed last month's outage. Give your agent access to an investigation you already did.
+
+Atuin creator Ellie Huxtable joins David Flanagan to explore how Atuin is bringing shell history and coding-agent sessions together. We'll get hands-on with Threads, released in October: searching past sessions, resuming work across machines, and switching between agent tools without manually rebuilding the context.
+
+We'll also look at how Atuin's MCP server makes previous sessions available to your agents, and what stays on your machine versus what gets synced. Session capture is opt-in, and synced Threads use end-to-end encryption.
+
+Along the way, we'll explore the shell-history features that started it all, the recent sync performance improvements, and where the open-source Atuin AI server fits for people who want to run their own terminal assistant.
+
+Bring a terminal and your questions.
+
+Atuin: https://atuin.sh
+Documentation: https://docs.atuin.sh
+More cloud native learning: https://rawkode.academy
+
+#RawkodeLive #Atuin #Linux
