@@ -182,6 +182,52 @@ component, the `posthog?.capture` call in `capture()`, the PostHog flush in
 `src/durable-objects/data-buffer.ts`, and export PostHog history into
 `analytics.events_legacy`.
 
+## Scheduled ID-parity evidence — 14 November 2026
+
+The reconciliation PR now includes a daily read-only evidence pipeline at 06:30
+UTC and a manual workflow, `rawkode-tools-observability-collector-evidence`.
+It reuses the existing production CI Infisical identity for `BASIN_SQL_TOKEN`
+and 1Password service account for the PostHog query key. No secret value is
+copied into this runner, repository, report or workflow input. Existing GitHub
+production-environment protections remain in place. The query wrapper only runs
+for scheduled/manual events on this repository's `main`; feature/PR execution
+fails before provider queries. Do not dispatch the workflow against a feature
+branch to bypass pending review.
+
+Each run invokes the exact-ID reconciliation for only the latest eligible full
+UTC day with six hours of settlement. The child process is limited to two
+minutes, and its raw stdout/stderr is discarded. Its receipt is written inside
+a mode-0700 temporary directory, read with a 1 MiB bound, checked for freshness,
+scope, window alignment, safe counters, source totals, pass/exit consistency and
+`cutover_ready: false`, then deleted. CI logs contain only allowlisted aggregate
+counters, source count (not source strings or event IDs), commit SHA and workflow
+link. There is no public raw-data artifact or cutover action. A missing, stale,
+malformed, contradictory or empty receipt never becomes a successful result.
+Errors report only the internal stage: context, credentials, provider queries or
+receipt validation; provider response/error text is never forwarded.
+
+After this PR merges, dispatch the existing workflow on `main` and inspect its
+run result. A failure in credential setup identifies the CI identity/provider
+configuration to fix; a query-stage failure needs provider access/query review.
+Do not paste credential values into chat. The current runner still lacks Basin
+SQL/Infisical credentials, and no live provider result is claimed before this
+workflow has run after merge. On this run #1602–#1605 remain review-blocked; their
+existing CI was green. Main remains `922fda0198911725f60f8c1f4b66219b5d76d791`.
+
+Offline validation: 41 collector tests, including real subprocess boundaries
+that deliberately emit fake secrets on both child streams and confirm they never
+reach parent logs, plus failed/malformed/missing receipts, private-file cleanup,
+feature-branch rejection and aggregate-only serialization. Strict collector and
+new evidence-tool/test TypeScript checks pass. Local `cuenv sync -A` was attempted
+but the CUE registry returns Forbidden; generated-file validation remains required
+in CI. No new lake resources, secrets, permissions or PostHog cutover are created.
+
+A green evidence job means **collector source/ID/type parity for that day only**.
+It does not prove producer acceptance, payload equality, all required event-family
+coverage, identity linkage, reporting, Grafana/operational telemetry or outage
+recovery. It must not start or satisfy the fourteen-day all-family cutover window
+by itself. The fourteen-day production window has not started; PostHog stays on.
+
 ## Cost
 
 Ingress is free; at current volume (~150K events/month) everything sits inside

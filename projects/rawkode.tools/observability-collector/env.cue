@@ -55,6 +55,16 @@ ci: pipelines: {
 		tasks: [_t.deploy]
 	}
 
+	// Read-only, bounded daily ID parity; never a complete cutover decision.
+	evidence: {
+		environment: "production"
+		when: {
+			manual: true
+			scheduled: "30 6 * * *"
+		}
+		tasks: [_t.evidence]
+	}
+
 	// Compaction and snapshot expiry aren't in the Cloudflare provider yet,
 	// so infrastructure.cue can't enable them. Runs on main when the script or
 	// the infrastructure (and so the catalog token) changes.
@@ -115,6 +125,21 @@ tasks: {
 		hermetic: false
 		command:  "bun"
 		args: ["basin/reconcile.ts"]
+		env: {
+			BASIN_SQL_TOKEN: _basinSecret & {secretName: "BASIN_SQL_TOKEN"}
+			POSTHOG_PROJECT_ID: "12084"
+			POSTHOG_PERSONAL_API_KEY: schema.#OnePasswordRef & {
+				ref: "op://sa.rawkode.academy/posthog/personal-api-key"
+			}
+		}
+	}
+
+	evidence: schema.#Task & {
+		hermetic: false
+		command: "bun"
+		args: ["basin/ci-evidence.ts"]
+		inputs: ["basin/**"]
+		labels: ["infisical"]
 		env: {
 			BASIN_SQL_TOKEN: _basinSecret & {secretName: "BASIN_SQL_TOKEN"}
 			POSTHOG_PROJECT_ID: "12084"
