@@ -118,6 +118,15 @@ The partial batch is retained for operator triage; it may contain accepted as
 well as rejected points, so do not blindly replay it. Zero-rejection warnings
 can acknowledge delivery without logging their free-text message.
 
+Worker-tail request URLs now retain only an HTTP(S) origin. Credentials, paths,
+queries and fragments are removed before new durable storage and again in both
+Grafana and PostHog exporters, covering previously queued and legacy-array tails.
+Invalid, non-HTTP and oversized URLs are omitted. This deliberately removes route
+and personal-path detail from telemetry. It does not sanitize arbitrary log or
+exception message content; that remains a separate privacy verification requirement.
+Runtime validation checks new durable records and both destinations after legacy
+migration, with stable explicit replay.
+
 Monitor `deliveryStatus()` for the `grafana-metrics` entry in `buffer-metrics`.
 After diagnosing a retained native failure, the existing internal RPC
 `replayFailed("buffer-metrics", "grafana-metrics")` can explicitly requeue it.
@@ -126,7 +135,7 @@ already acknowledged PostHog or legacy Grafana-log copies. Missing Grafana
 configuration is not evidence of replacement coverage, and zero pending records
 alone is not a healthy-ingestion receipt.
 
-Validation: 39 collector tests and strict collector/exporter/test
+Validation: 42 collector tests and strict collector/exporter/test
 TypeScript checks. A real workerd test with mocked endpoints verifies native
 gauge payloads, label privacy, partial rejection retention, no automatic retry,
 independent acknowledgements and stable explicit replay without repeating other

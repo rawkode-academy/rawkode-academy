@@ -1,3 +1,4 @@
+import { tailRequestOrigin } from "../tail-privacy";
 import { acknowledgeOTLP } from "../otlp-response";
 import {
 	exportMetrics,
@@ -198,7 +199,18 @@ export class DataBuffer extends DurableObject<Env> {
 
 	async addTailEvent(trace: SerializedTraceItem): Promise<void> {
 		await this.queue().enqueue(
-			{ kind: "tail", value: { trace, timestamp: Date.now() } },
+			{
+				kind: "tail",
+				value: {
+					trace: {
+						...trace,
+						request: trace.request
+							? { ...trace.request, url: tailRequestOrigin(trace.request.url) }
+							: undefined,
+					},
+					timestamp: Date.now(),
+				},
+			},
 			this.destinations("tail"),
 		);
 	}
@@ -316,6 +328,7 @@ export class DataBuffer extends DurableObject<Env> {
 
 			for (const stored of events) {
 				const trace = stored.trace;
+				const requestOrigin = tailRequestOrigin(trace.request?.url);
 
 				// Convert each console log to an OTLP LogRecord
 				for (const log of trace.logs) {
@@ -338,11 +351,11 @@ export class DataBuffer extends DurableObject<Env> {
 						attributes: [
 							{ key: "worker.name", value: { stringValue: workerName } },
 							{ key: "worker.outcome", value: { stringValue: trace.outcome } },
-							...(trace.request?.url
+							...(requestOrigin
 								? [
 										{
 											key: "http.url",
-											value: { stringValue: trace.request.url },
+											value: { stringValue: requestOrigin },
 										},
 									]
 								: []),
@@ -626,6 +639,7 @@ export class DataBuffer extends DurableObject<Env> {
 
 			for (const stored of events) {
 				const trace = stored.trace;
+				const requestOrigin = tailRequestOrigin(trace.request?.url);
 
 				for (const log of trace.logs) {
 					const severity = LOG_LEVEL_TO_SEVERITY[log.level] ?? {
@@ -646,11 +660,11 @@ export class DataBuffer extends DurableObject<Env> {
 						attributes: [
 							{ key: "worker.name", value: { stringValue: workerName } },
 							{ key: "worker.outcome", value: { stringValue: trace.outcome } },
-							...(trace.request?.url
+							...(requestOrigin
 								? [
 										{
 											key: "http.url",
-											value: { stringValue: trace.request.url },
+											value: { stringValue: requestOrigin },
 										},
 									]
 								: []),
