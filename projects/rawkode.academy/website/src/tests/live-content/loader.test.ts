@@ -1,7 +1,16 @@
-import { existsSync, readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { buildASTSchema, parse, validate } from "graphql";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+	afterEach,
+	beforeAll,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+} from "vitest";
 import { setContentEnv } from "@/lib/live-content/env";
 import {
 	bumpGeneration,
@@ -241,10 +250,16 @@ describe("live loaders", () => {
 	});
 });
 
-// Generated (gitignored): bun run scripts/collect-schemas.ts && bun run scripts/compose.ts in ../api.
-const supergraph = resolve(process.cwd(), "../api/supergraph.graphql");
+const api = resolve(process.cwd(), "../api");
+const supergraph = resolve(api, "supergraph.graphql");
 
-describe.skipIf(!existsSync(supergraph))("GraphQL documents", () => {
+describe("GraphQL documents", () => {
+	// The supergraph is generated (gitignored): compose it from the current
+	// subgraph schemas so the check never runs against a stale or missing one.
+	beforeAll(() => {
+		execFileSync("bun", ["run", "build"], { cwd: api, stdio: "pipe" });
+	}, 120_000);
+
 	it("validate against the composed supergraph", () => {
 		const schema = buildASTSchema(parse(readFileSync(supergraph, "utf8")), {
 			assumeValidSDL: true,

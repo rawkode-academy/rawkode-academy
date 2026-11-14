@@ -9,7 +9,7 @@ import {
 } from "@rawkodeacademy/rich-text/markdown";
 import { z } from "astro/zod";
 import { load as parseYaml } from "js-yaml";
-import type { ArticleData, Resource } from "../live-content/types";
+import type { ArticleData, Resource, SeriesData } from "../live-content/types";
 
 export interface ArticleFile {
 	/** The public slug (/read/<id>). */
@@ -63,6 +63,17 @@ const resource = z.strictObject({
 		.default("other"),
 });
 
+const cover = z
+	.strictObject({
+		// A path relative to the file, or an absolute URL (which needs width
+		// and height).
+		image: z.string().min(1),
+		alt: z.string(),
+		width: z.number().int().positive().optional(),
+		height: z.number().int().positive().optional(),
+	})
+	.optional();
+
 // Unknown keys are errors, so a misspelt field never goes unnoticed.
 export const articleFrontmatter = z.strictObject({
 	title: z.string().trim().min(1),
@@ -79,16 +90,9 @@ export const articleFrontmatter = z.strictObject({
 	technologies: z.array(z.string().trim().min(1)).default([]),
 	categories: z.array(z.string()).default([]),
 	tags: z.array(z.string()).default([]),
-	cover: z
-		.strictObject({
-			// A path relative to the article file, or an absolute URL (which
-			// needs width and height).
-			image: z.string().min(1),
-			alt: z.string(),
-			width: z.number().int().positive().optional(),
-			height: z.number().int().positive().optional(),
-		})
-		.optional(),
+	cover,
+	// content/series/<id>; parts are ordered by file name.
+	series: z.string().trim().min(1).optional(),
 	openGraph: z
 		.strictObject({
 			title: z.string().min(1),
@@ -101,7 +105,14 @@ export const articleFrontmatter = z.strictObject({
 	resources: z.array(resource).default([]),
 });
 
-export type ArticleFrontmatter = z.infer<typeof articleFrontmatter>;
+type ArticleFrontmatter = z.infer<typeof articleFrontmatter>;
+
+// content/series/<id>.md: the body is the intro on /series/<id>.
+const seriesFrontmatter = z.strictObject({
+	title: z.string().trim().min(1),
+	description: z.string().trim().min(1),
+	cover,
+});
 
 function compact<T extends object>(value: T): T {
 	for (const key of Object.keys(value) as (keyof T)[]) {
@@ -115,8 +126,11 @@ function imageFormat(src: string): string {
 	return ext === "jpeg" ? "jpg" : ext || "png";
 }
 
-export function splitFrontmatter(article: ArticleFile): {
-	frontmatter: ArticleFrontmatter;
+function splitFrontmatter<T>(
+	article: ArticleFile,
+	schema: z.ZodType<T>,
+): {
+	frontmatter: T;
 	body: string;
 } {
 	const match = article.raw.match(FRONTMATTER);
@@ -135,7 +149,7 @@ export function splitFrontmatter(article: ArticleFile): {
 			`invalid frontmatter YAML: ${(error as Error).message}`,
 		);
 	}
-	const parsed = articleFrontmatter.safeParse(data);
+	const parsed = schema.safeParse(data);
 	if (!parsed.success) {
 		const issues = parsed.error.issues
 			.map(
@@ -181,7 +195,7 @@ export function parseArticle(
 	article: ArticleFile,
 	resolveAsset: ArticleAssetResolver,
 ): ArticleData {
-	const { frontmatter, body } = splitFrontmatter(article);
+	const { frontmatter, body } = splitFrontmatter(article, articleFrontmatter);
 	const doc: DocNode = fromMarkdown(body, {
 		mdx: article.mdx,
 		file: article.file,
@@ -206,6 +220,7 @@ export function parseArticle(
 		howto: frontmatter.howto,
 		draft: frontmatter.draft,
 		technologies: frontmatter.technologies,
+		series: frontmatter.series,
 		openGraph: frontmatter.openGraph
 			? compact({ ...frontmatter.openGraph })
 			: undefined,
@@ -218,4 +233,39 @@ export function parseArticle(
 				: undefined,
 		body: doc,
 	});
+}
+
+/** Parse and validate one series file (content/series/<id>.md). */
+export function parseSeries(
+	series: ArticleFile,
+	resolveAsset: ArticleAssetResolver,
+): SeriesData {
+	const { frontmatter, body } = splitFrontmatter(series, seriesFrontmatter);
+	return compact<SeriesData>({
+		title: frontmatter.title,
+		description: frontmatter.description,
+		cover: coverFrom(series, frontmatter.cover, resolveAsset),
+		body: body.trim()
+			? fromMarkdown(body, {
+					mdx: series.mdx,
+					file: series.file,
+					assetResolver: (path) => resolveAsset(path),
+				})
+			: undefined,
+	});
+}
+
+/** Every article's series exists. Runs over all files, drafts included. */
+export function checkSeries(
+	articles: readonly { file: string; data: Pick<ArticleData, "series"> }[],
+	seriesIds: ReadonlySet<string>,
+): void {
+	for (const { file, data } of articles) {
+		if (data.series && !seriesIds.has(data.series)) {
+			throw new ArticleError(
+				file,
+				`series "${data.series}" does not exist (add content/series/${data.series}.md)`,
+			);
+		}
+	}
 }

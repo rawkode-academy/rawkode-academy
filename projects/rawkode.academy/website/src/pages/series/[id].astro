@@ -1,0 +1,73 @@
+---
+import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
+import ArticleCard from "@/components/articles/ArticleCard.astro";
+import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
+import RichText from "@/components/content/RichText.astro";
+import ArticleHeader from "@/components/read/ArticleHeader.astro";
+import { getAllSeries } from "@/lib/live-content";
+import Page from "@/wrappers/page.astro";
+
+// Series are files in content/series; a page exists once a part is published.
+export const prerender = true;
+
+export async function getStaticPaths() {
+	return (await getAllSeries()).map((series) => ({
+		params: { id: series.id },
+		props: { series },
+	}));
+}
+
+const { series } = Astro.props;
+const doc = academyDocument();
+const styles = academyLayout({ width: "reading" });
+
+const cover = series.data.cover ?? series.parts[0]?.data.cover;
+const imageUrl = cover
+	? new URL(cover.image.src, Astro.site ?? Astro.url)
+	: undefined;
+---
+
+<Page
+	title={series.data.title}
+	description={series.data.description}
+	image={imageUrl ? { image: imageUrl, text: series.data.title, format: "png" as const } : undefined}
+	useImageDirectly={true}
+	pageType="CollectionPage"
+>
+	<BreadcrumbJsonLd
+		slot="extra-head"
+		elements={[
+			{ title: "Home", link: "/" },
+			{ title: "Series", link: "/series" },
+			{ title: series.data.title, link: `/series/${series.id}` },
+		]}
+	/>
+	<div class={doc.root}>
+		<ArticleHeader
+			breadcrumbs={[
+				{ label: "Read", href: "/read" },
+				{ label: "Series", href: "/series" },
+			]}
+			kicker={`Article series · ${series.parts.length} ${series.parts.length === 1 ? "part" : "parts"}`}
+			title={series.data.title}
+			dek={series.data.description}
+		/>
+
+		{series.data.body && (
+			<section class={[doc.section, doc.container].join(" ")}>
+				<article class={styles.prose}>
+					<RichText doc={series.data.body} />
+				</article>
+			</section>
+		)}
+
+		<section class={[doc.section, doc.container, doc.stack].join(" ")}>
+			<h2 class={doc.sectionTitle}>Parts</h2>
+			<div class={doc.grid}>
+				{series.parts.map((article) => (
+					<ArticleCard article={article} headingLevel={3} />
+				))}
+			</div>
+		</section>
+	</div>
+</Page>
