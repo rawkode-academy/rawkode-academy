@@ -168,3 +168,40 @@ Ingress is free; at current volume (~150K events/month) everything sits inside
 the Workers Paid allowances. Pipelines bills $0.04/GB transformed and $0.06/GB
 written to Iceberg beyond 50 GB/month each; Basin SQL bills $2.50/TB scanned
 beyond 10 GB/month; storage is $0.015/GB-month.
+
+## Migration evidence — 14 November 2026
+
+Delivery PR #1600 merged as `8c1457c50e1daac8c08d82d54dfe42f2a50f4a1d`;
+browser ingestion PR #1601 merged as `922fda0198911725f60f8c1f4b66219b5d76d791`.
+Collector deployment runs `43527362020` and `43528237422`, website deployment
+`43528237312`, and infrastructure apply `43528237169` succeeded. These are
+release evidence, not evidence of healthy production delivery.
+
+PR #1602 adds deduplicated reporting and exact CloudEvent source/ID comparison.
+Its head `7fa6b15f7c1293620b5556c426dfc389be3167a3` has green checks and
+GitHub auto-merge enabled; required review still blocks merging. The count-based
+reconciliation and cutover guidance above are superseded by that work and the
+gate below. No live SQL parity run has been claimed.
+
+The next bounded change moves first/last campaign cookies to the first-party
+tracker, attaches normalized attribution to browser events, removes the custom
+PostHog identity bridge and authentication-session cookie fallback, and sanitizes
+server attribution reads. Existing first-touch timestamps and expiry are kept;
+new campaigns replace last-touch UTM fields atomically, direct returns preserve
+last touch, and logout clears attribution. DNT prevents attribution reads/writes.
+PostHog remains a dual-run destination and consumes normalized attribution.
+Focused validation: 63 website tests, strict tracker TypeScript, both Astro
+components, inline PostHog JavaScript compilation, and real Chromium checks for
+attribution without PostHog, campaign replacement, direct returns, logout, stable
+retry IDs and DNT. Repository environment synchronization was attempted but its
+CUE dependency registry fetch failed; CI must pass before merging.
+
+**Cutover gate:** do not remove PostHog until fourteen consecutive healthy
+production days are evidenced for all required event families, identity/login
+linkage, attribution, reporting, source/ID deduplication and destination delivery,
+including outage/replay and acceptance/archive/typed-table reconciliation.
+Count agreement alone does not pass. This window has not started. Typed browser
+reporting, operational telemetry coverage and live reconciliation remain work.
+Basin SQL/catalog write credentials are not available in this runner; legacy
+`analytics.events` purge remains pending the guarded task. Preserve
+`events_archive`, `short_links`, their maintenance settings and stream identity.
