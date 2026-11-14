@@ -24,6 +24,12 @@ export interface Env {
 export interface TrackEventResult {
 	success: boolean;
 	error?: string;
+	receipt?: {
+		version: 1;
+		event_source: string;
+		event_id: string;
+		disposition: "persisted" | "filtered";
+	};
 }
 
 export interface TrackEventOptions {
@@ -72,12 +78,17 @@ export class PostHogCollector extends WorkerEntrypoint<Env> {
 
 		// CloudEvent tracking endpoint (compatible with analytics worker)
 		if (url.pathname === "/track" && request.method === "POST") {
+			let body: { event?: unknown; attributes?: string[] };
 			try {
-				const body = (await request.json()) as {
-					event?: unknown;
-					attributes?: string[];
-				};
-
+				body = await request.json();
+				if (!body || typeof body !== "object") throw new Error("Invalid body");
+			} catch {
+				return Response.json(
+					{ success: false, error: "Invalid JSON event" },
+					{ status: 400 },
+				);
+			}
+			try {
 				const event = body.event ?? body;
 				// Only the website RPC may emit browser events with trusted identity.
 				if (
@@ -101,13 +112,11 @@ export class PostHogCollector extends WorkerEntrypoint<Env> {
 				return Response.json(result, {
 					status: result.success ? 200 : 400,
 				});
-			} catch (error) {
-				const errorMessage =
-					error instanceof Error ? error.message : "Unknown error";
-				console.error("Track endpoint error", { error: errorMessage });
+			} catch {
+				console.error("analytics.acceptance.failed", { retryable: true });
 				return Response.json(
-					{ success: false, error: errorMessage },
-					{ status: 400 },
+					{ success: false, error: "Durable acceptance unavailable" },
+					{ status: 503 },
 				);
 			}
 		}
@@ -122,18 +131,24 @@ export class PostHogCollector extends WorkerEntrypoint<Env> {
 		const validation = validateCloudEvent(event);
 
 		if (!validation.valid) {
-			console.error("CloudEvent validation failed", {
-				error: validation.error,
-				event,
-			});
+			console.error("CloudEvent validation failed");
 			return { success: false, error: validation.error };
 		}
 
 		const prepared = prepareCloudEvent(
 			validation.event.toJSON() as Record<string, unknown>,
 		);
-		// Bot traffic is accepted and dropped, so senders don't retry it.
-		if (!prepared) return { success: true };
+		const receipt = {
+			version: 1 as const,
+			event_source: validation.event.source,
+			event_id: validation.event.id,
+		};
+		// Filtered traffic is explicitly distinguished from persisted acceptance.
+		if (!prepared)
+			return {
+				success: true,
+				receipt: { ...receipt, disposition: "filtered" },
+			};
 		const json = redactUserAgent(prepared);
 		if (!json.time) json.time = new Date().toISOString();
 
@@ -143,7 +158,7 @@ export class PostHogCollector extends WorkerEntrypoint<Env> {
 		const buffer = this.env.DATA_BUFFER.get(id);
 		await buffer.addEvent(json, options?.attributes);
 
-		return { success: true };
+		return { success: true, receipt: { ...receipt, disposition: "persisted" } };
 	}
 
 	/** Internal RPC health/replay; intentionally absent from the public fetch router. */

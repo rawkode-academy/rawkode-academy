@@ -17,7 +17,6 @@ import {
 	identifyServerUser,
 } from "@/server/analytics";
 
-
 export const GET: APIRoute = async (context) => {
 	const code = context.url.searchParams.get("code");
 	const state = context.url.searchParams.get("state");
@@ -142,17 +141,16 @@ export const GET: APIRoute = async (context) => {
 	});
 
 	// Stitch the pre-auth anonymous session to the now-authenticated user
-	// so downstream PostHog queries see one identity across the funnel.
-	const anonId = getAnonDistinctIdFromCookies(context.request);
+	// so first-party analytics can link the pre-auth funnel using opaque IDs.
+	const anonId =
+		context.request.headers.get("dnt") === "1"
+			? undefined
+			: getAnonDistinctIdFromCookies(context.request);
 	if (anonId && anonId !== userInfo.sub) {
 		await identifyServerUser(
 			{
 				distinctId: userInfo.sub,
 				anonId,
-				set: {
-					email: userInfo.email,
-					name: userInfo.name,
-				},
 			},
 			analytics,
 		);

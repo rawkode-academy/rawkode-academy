@@ -57,6 +57,57 @@ Failed storage has no automatic expiry; monitor its count and provision alerts
 before declaring this stage validated in production.
 
 
+### Producer acknowledgement — 14 November 2026
+
+PRs #1600 and #1601 remain merged/deployed; #1602, #1603 and #1604 have green
+checks and protected auto-merge enabled, but GitHub still requires review. This
+bounded follow-up fixes a separate acceptance gap: website domain/identity
+producers previously ignored non-OK HTTP responses, and storage failures were
+reported as non-retryable 400 responses.
+
+`/track` now returns a version-1 receipt with CloudEvent source/ID and disposition
+only after the durable buffer accepts the event. Bot filtering returns a separate
+`filtered` disposition. Invalid requests remain 400, forged browser sources
+remain 403, and acceptance/storage failures return sanitized 503 responses.
+Validation/storage logs omit raw event payloads and exception bodies.
+
+Website producers serialize once and retry transient/network/ambiguous failures
+at most three times with the original source, ID and timestamp. Each attempt,
+including receipt-body reading, is limited to 600 ms within a 2-second total
+budget per producer call. Receipt bodies are bounded to 8 KiB. Permanent errors
+and redirects are not retried or followed. A matching receipt is required to
+report `accepted`; an old success-only response remains `unconfirmed`. Collector
+and website deploy independently: verify the collector protocol first, and
+expect bounded unconfirmed outcomes/duplicate IDs during deployment skew. Always
+deduplicate by `(source, id)` as implemented in #1602.
+
+Both `captureServerEvent` and `identifyServerUser` return an explicit delivery
+outcome. Their existing callers continue the business action on telemetry
+failure; failures are observable through `analytics.producer.failed`, while
+`analytics.producer.acknowledged` includes only event source/ID, disposition and
+attempt count. Logs omit event/profile contents and response/error bodies. Login
+linkage carries only opaque user/anonymous IDs, omits email/name profile copies,
+and skips anonymous linkage when the request sends DNT. First-party cookie
+ownership and broader cookie/DNT independence remain covered by #1603.
+
+Validation: 29 collector tests, 62 focused website tests, strict collector and
+website producer/source/test TypeScript checks. A real workerd test over HTTP
+service bindings injected a Durable Object rejection, verified retry with the
+same ID and a matching persistence receipt, and found exactly one pending event
+per destination. Unit tests cover acknowledgement ordering, invalid/forged
+requests, filtering, retries, receipt identity mismatch, hung bindings/streams,
+oversized receipts, missing bindings, permanent errors and safe logs. Required
+`cuenv sync -A` was attempted; local CUE registry access remains forbidden.
+
+This is **not a producer outbox**: a process/request can still end before durable
+acceptance or after bounded retry exhaustion. Logs are not a durable acceptance
+ledger and their production sampling/retention/completeness is unverified. No
+live Basin SQL, producer-to-archive proof, linked-person report, outage/replay
+production result or fourteen-day healthy window is claimed. PostHog stays on;
+all-family typed reporting, durable producer failure recovery, production
+identity evidence and operational telemetry replacement remain outstanding.
+
+
 ```
 services (CloudEvents) ─ /track ─► observability-collector ─► stream analytics_events
                                          │                      │
