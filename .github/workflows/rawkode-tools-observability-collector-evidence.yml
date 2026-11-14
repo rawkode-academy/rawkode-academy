@@ -3,9 +3,9 @@
 
 name: rawkode-tools-observability-collector-evidence
 on:
-  schedule:
-  - cron: '30 6 * * *'
   workflow_dispatch: {}
+  schedule:
+  - cron: 30 6 * * *
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
