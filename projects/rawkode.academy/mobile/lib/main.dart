@@ -60,7 +60,10 @@ class _AcademyHomeState extends State<AcademyHome> {
   }
 
   Future<void> _signOut() async {
-    try { await account.signOut(); } catch (_) { error = 'Could not remove saved credentials. Please try again.'; }
+    try {
+      final revoked = await account.signOut();
+      error = revoked ? null : 'Signed out on this device, but the server could not revoke the session.';
+    } catch (_) { error = 'Could not remove saved credentials. Please try again.'; }
     if (mounted) setState(() {});
   }
 

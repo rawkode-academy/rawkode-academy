@@ -150,8 +150,8 @@ class AcademyAccount extends ChangeNotifier {
     return jsonDecode(response.body);
   }
 
-  Future<void> signOut() async {
-    if (_signingOut) return;
+  Future<bool> signOut() async {
+    if (_signingOut) return false;
     _signingOut = true;
     _generation++;
     try {
@@ -159,11 +159,13 @@ class AcademyAccount extends ChangeNotifier {
     } catch (_) {
       // Continue clearing local credentials if refresh failed.
     }
+    var revoked = true;
     if (_token != null) {
       try {
-        await _client.delete(Uri.https('id.rawkode.academy', '/api/mobile/session'), headers: _headers).timeout(const Duration(seconds: 10));
+        final response = await _client.delete(Uri.https('id.rawkode.academy', '/api/mobile/session'), headers: _headers).timeout(const Duration(seconds: 10));
+        revoked = response.statusCode >= 200 && response.statusCode < 300;
       } catch (_) {
-        // Remove local credentials even if revocation cannot be reached.
+        revoked = false;
       }
     }
     _token = null;
@@ -180,5 +182,6 @@ class AcademyAccount extends ChangeNotifier {
       notifyListeners();
     }
     if (deletionError != null) throw StateError('Could not remove saved credentials. Please try signing out again.');
+    return revoked;
   }
 }

@@ -111,4 +111,16 @@ void main() {
     expect(account.credentialCleanupRequired, isFalse);
     expect(storage.data['token_pair'], isNull);
   });
+  test('failed remote revocation still removes local credentials', () async {
+    final storage = MemoryStorage();
+    final client = MockClient((request) async {
+      if (request.method == 'DELETE') return http.Response('{}', 503);
+      return http.Response(jsonEncode({'user': {'id': 'u', 'name': 'Player'}}), 200);
+    });
+    final account = AcademyAccount(client: client, auth: FakeAuth(() async => rotated()), storage: storage);
+    await account.restore();
+    expect(await account.signOut(), isFalse);
+    expect(storage.data['token_pair'], isNull);
+    expect(account.user, isNull);
+  });
 }
