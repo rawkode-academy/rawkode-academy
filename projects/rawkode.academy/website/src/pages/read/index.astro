@@ -25,7 +25,13 @@ export const prerender = false;
 const allArticles = (
 	await getCollection("articles")
 ).sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
-const hasSeries = (await getAllSeries()).length > 0;
+// "Part 2 of Understanding MCP", by article id.
+const seriesLabel = new Map(
+	(await getAllSeries()).flatMap(({ data, parts }) =>
+		parts.map(({ id }, index) => [id, `Part ${index + 1} of ${data.title}`] as const),
+	),
+);
+const hasSeries = seriesLabel.size > 0;
 
 // ─── Filters (?type=…&topic=…) ─────────────────────────────────
 
@@ -256,7 +262,7 @@ const catalog = academyCatalog();
 						<p class={catalog.featuredKicker}>{getTypeBadgeConfig(featured.data.type || "tutorial").label}</p>
 						<h2 class={catalog.featuredTitle}>{featured.data.title}</h2>
 						<p class={catalog.featuredDescription}>{compactCopy(featured.data.openGraph?.subtitle || featured.data.description, 180)}</p>
-						<p class={catalog.rowMeta}>{featuredAuthors.map((author) => author.data.name).join(", ")} · <time {...featuredDate(featured.data.publishedAt).attrs}>{featuredDate(featured.data.publishedAt).text}</time> · {calculateReadingTime(featured.body || "").text}</p>
+						<p class={catalog.rowMeta}>{featuredAuthors.map((author) => author.data.name).join(", ")} · <time {...featuredDate(featured.data.publishedAt).attrs}>{featuredDate(featured.data.publishedAt).text}</time> · {calculateReadingTime(featured.body || "").text}{seriesLabel.has(featured.id) && ` · ${seriesLabel.get(featured.id)}`}</p>
 						<a class={button()} href={`/read/${featured.id}`}>Read the article <span data-part="arrow" aria-hidden="true">→</span></a>
 					</div>
 					{featuredImage && <a class={catalog.featuredMedia} href={`/read/${featured.id}`} aria-label={`Read ${featured.data.title}`}>
@@ -288,7 +294,7 @@ const catalog = academyCatalog();
 					<time class={catalog.editorialDate} datetime={article.data.publishedAt.toISOString()}><strong data-datetime={ledgerDay(article.data.publishedAt).iso} data-local-time={ledgerDay(article.data.publishedAt).attrs["data-local-time"]}>{ledgerDay(article.data.publishedAt).text}</strong><span data-datetime={ledgerMonth(article.data.publishedAt).iso} data-local-time={ledgerMonth(article.data.publishedAt).attrs["data-local-time"]}>{ledgerMonth(article.data.publishedAt).text}</span></time>
 					{cover && <span class={catalog.editorialMedia}><img class={catalog.editorialImage} src={cover.src} alt="" width={cover.attributes.width} height={cover.attributes.height} loading="lazy" /></span>}
 					<div class={catalog.editorialBody} data-body>
-						<p class={catalog.editorialKind}><span>{getTypeBadgeConfig(article.data.type || "tutorial").label}</span><span>·</span><span>{author ?? "Rawkode Academy"}</span><span>·</span><span>{readingTime}</span></p>
+						<p class={catalog.editorialKind}><span>{getTypeBadgeConfig(article.data.type || "tutorial").label}</span><span>·</span><span>{author ?? "Rawkode Academy"}</span><span>·</span><span>{readingTime}</span>{seriesLabel.has(article.id) && <><span>·</span><span>{seriesLabel.get(article.id)}</span></>}</p>
 						<h3 class={catalog.editorialTitle}>{article.data.title}</h3>
 						<p class={catalog.editorialDescription}>{compactCopy(article.data.openGraph?.subtitle || article.data.subtitle || article.data.description, 160)}</p>
 					</div>
