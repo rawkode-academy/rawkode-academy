@@ -1,10 +1,15 @@
 ---
-import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
-import ArticleCard from "@/components/articles/ArticleCard.astro";
+import {
+	academyCatalog,
+	academyDocument,
+	academyLayout,
+} from "@rawkodeacademy/design-system";
 import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
 import RichText from "@/components/content/RichText.astro";
 import ArticleHeader from "@/components/read/ArticleHeader.astro";
 import { getAllSeries } from "@/lib/live-content";
+import { localDate } from "@/lib/local-time";
+import { calculateReadingTime } from "@/utils/reading-time";
 import Page from "@/wrappers/page.astro";
 
 // Series are files in content/series; a page exists once a part is published.
@@ -20,6 +25,16 @@ export async function getStaticPaths() {
 const { series } = Astro.props;
 const doc = academyDocument();
 const styles = academyLayout({ width: "reading" });
+const catalog = academyCatalog();
+
+const parts = series.parts.map((article, index) => ({
+	article,
+	number: String(index + 1).padStart(2, "0"),
+	date: localDate(article.data.publishedAt),
+	readingTime: calculateReadingTime(article.body || ""),
+}));
+const totalMinutes = parts.reduce((sum, part) => sum + part.readingTime.minutes, 0);
+const partCount = `${parts.length} ${parts.length === 1 ? "part" : "parts"}`;
 
 const cover = series.data.cover ?? series.parts[0]?.data.cover;
 const imageUrl = cover
@@ -48,7 +63,7 @@ const imageUrl = cover
 				{ label: "Read", href: "/read" },
 				{ label: "Series", href: "/series" },
 			]}
-			kicker={`Article series · ${series.parts.length} ${series.parts.length === 1 ? "part" : "parts"}`}
+			kicker={`Article series · ${partCount} · ${totalMinutes} min read`}
 			title={series.data.title}
 			dek={series.data.description}
 		/>
@@ -63,9 +78,20 @@ const imageUrl = cover
 
 		<section class={[doc.section, doc.container, doc.stack].join(" ")}>
 			<h2 class={doc.sectionTitle}>Parts</h2>
-			<div class={doc.grid}>
-				{series.parts.map((article) => (
-					<ArticleCard article={article} headingLevel={3} />
+			<div class={catalog.rows}>
+				{parts.map(({ article, number, date, readingTime }) => (
+					<a href={`/read/${article.id}`} class={catalog.row}>
+						<span class={catalog.rowIndex}>{number}</span>
+						<div class={catalog.rowMain}>
+							<h3 class={catalog.rowTitle}>{article.data.title}</h3>
+							<span class={catalog.rowDescription}>{article.data.subtitle || article.data.description}</span>
+							<span class={catalog.rowMeta}>
+								<time {...date.attrs}>{date.text}</time>
+								<span>·</span>
+								<span>{readingTime.text}</span>
+							</span>
+						</div>
+					</a>
 				))}
 			</div>
 		</section>
