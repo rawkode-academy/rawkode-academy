@@ -12,6 +12,12 @@ activities = root.findall("./application/activity")
 main = next((activity for activity in activities if activity.get(f"{namespace}name", "").endswith(".MainActivity")), None)
 if main is None or main.get(f"{namespace}taskAffinity") != root.get("package"):
     raise SystemExit("MainActivity must share the application task with AppAuth")
+manager = next((activity for activity in activities if activity.get(f"{namespace}name") == "net.openid.appauth.AuthorizationManagementActivity"), None)
+app = root.find("application")
+default_affinity = app.get(f"{namespace}taskAffinity", root.get("package")) if app is not None else None
+if (manager is None or manager.get(f"{namespace}exported") != "false" or
+    manager.get(f"{namespace}taskAffinity", default_affinity) != main.get(f"{namespace}taskAffinity")):
+    raise SystemExit("AppAuth management activity must be private and share the app task")
 receiver = next((activity for activity in activities if activity.get(f"{namespace}name") == "net.openid.appauth.RedirectUriReceiverActivity"), None)
 if receiver is None or receiver.get(f"{namespace}exported") != "true":
     raise SystemExit("AppAuth redirect receiver is missing or not exported")
