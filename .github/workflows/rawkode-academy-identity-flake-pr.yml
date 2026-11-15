@@ -23,8 +23,7 @@ jobs:
         working-directory: projects/rawkode.academy/identity
         run: nix flake check --no-build
       - name: Install workspace dependencies in the flake shell
-        working-directory: projects/rawkode.academy/identity
-        run: nix develop --command bun install --frozen-lockfile
+        run: /tmp/cuenv exec -- bun install --frozen-lockfile
       - name: Build with cuenv's Nix runtime
         run: /tmp/cuenv task --path projects/rawkode.academy/identity build
       - name: Show sync lock changes

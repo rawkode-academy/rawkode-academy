@@ -10,6 +10,9 @@ export default defineConfig({
   adapter: cloudflare(),
   integrations: [react()],
   vite: {
+    // Bun may bind Tailwind's Vite peer to Vite 8 while Astro uses Vite 7.
+    // Tailwind supports both; the production-parity build verifies the plugin at runtime.
+    // @ts-ignore Vite plugin types differ across major versions.
     plugins: [tailwindcss()],
     resolve: {
       // Use react-dom/server.edge instead of react-dom/server.browser for React 19.
