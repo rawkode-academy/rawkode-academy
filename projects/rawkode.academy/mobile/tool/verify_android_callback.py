@@ -9,6 +9,9 @@ if len(manifests) != 1:
 
 root = ElementTree.parse(manifests[0]).getroot()
 activities = root.findall("./application/activity")
+main = next((activity for activity in activities if activity.get(f"{namespace}name", "").endswith(".MainActivity")), None)
+if main is None or main.get(f"{namespace}taskAffinity") != root.get("package"):
+    raise SystemExit("MainActivity must share the application task with AppAuth")
 receiver = next((activity for activity in activities if activity.get(f"{namespace}name") == "net.openid.appauth.RedirectUriReceiverActivity"), None)
 if receiver is None or receiver.get(f"{namespace}exported") != "true":
     raise SystemExit("AppAuth redirect receiver is missing or not exported")

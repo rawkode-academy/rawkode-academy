@@ -25,10 +25,16 @@ path.write_text(text.replace(before, after, 1).replace(old_min, new_min, 1))
 
 manifest = root / 'src/main/AndroidManifest.xml'
 xml = manifest.read_text()
+# AppAuth's management activity must share the app's task. Flutter's empty
+# task affinity causes the browser to close immediately as a cancelled flow.
+empty_affinity = 'android:taskAffinity=""'
+if xml.count(empty_affinity) != 1:
+    raise SystemExit('Unexpected Android activity task affinity')
+xml = xml.replace(empty_affinity, 'android:taskAffinity="${applicationId}"', 1)
 permission = '<uses-permission android:name="android.permission.INTERNET"/>'
 if permission not in xml:
     marker = '    <application'
     if marker not in xml:
         raise SystemExit('Unexpected Android manifest')
     xml = xml.replace(marker, f'    {permission}\n{marker}', 1)
-    manifest.write_text(xml)
+manifest.write_text(xml)
