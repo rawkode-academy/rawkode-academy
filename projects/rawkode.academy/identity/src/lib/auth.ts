@@ -202,6 +202,16 @@ export const createAuth = async (env: AuthEnv) => {
 				},
 				trustedClients: [
 					{
+						clientId: "rawkode-academy-mobile",
+						name: "Rawkode Academy Mobile",
+						type: "public",
+						clientSecret: "pkce-public-client-placeholder",
+						redirectUrls: ["academy.rawkode.app:/oauth2redirect"],
+						disabled: false,
+						skipConsent: true,
+						metadata: null,
+					},
+					{
 						clientId: "rawkode-academy-website",
 						name: "Rawkode Academy",
 						type: "public",

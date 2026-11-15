@@ -62,6 +62,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		fastWeek,
 		correctLogoNames,
 		poolSize,
+		week,
 	} = body as {
 		score: unknown;
 		correct: unknown;
@@ -70,6 +71,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		fastWeek: unknown;
 		correctLogoNames: unknown;
 		poolSize: unknown;
+		week?: unknown;
 	};
 
 	// Validate score
@@ -174,6 +176,12 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
 	const now = new Date();
 	const currentWeekKey = weekKey(now);
+	if (week !== undefined && week !== currentWeekKey) {
+		return new Response(JSON.stringify({ error: "Challenge week has expired" }), {
+			status: 409,
+			headers: { "Content-Type": "application/json", "Cache-Control": "private, no-store" },
+		});
+	}
 	const currentWeekIndex = weekIndex(now);
 	const scoreType = "weekly-" + currentWeekKey;
 

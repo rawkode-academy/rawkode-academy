@@ -7,6 +7,7 @@ import {
 	buildDailyRounds,
 	buildRounds,
 	buildWeeklyRounds,
+	buildPracticeRounds,
 	computeScore,
 	createRng,
 	pickDistractors,
@@ -409,5 +410,20 @@ describe("computeScore", () => {
 		const answers: (string | null)[] = rounds.map(() => null);
 		const timeLeftMs = rounds.map(() => 0);
 		expect(computeScore(rounds, answers, timeLeftMs)).toBe(0);
+	});
+});
+
+
+describe("practice rounds", () => {
+	it("excludes this week's answers from practice options", () => {
+		const date = new Date("2026-11-15T12:00:00Z");
+		const weekly = new Set(buildWeeklyRounds(POOL_20, date).map((round) => round.answer));
+		const practice = buildPracticeRounds(POOL_20, date, createRng(123));
+		expect(practice.poolSize).toBe(15);
+		expect(practice.rounds).toHaveLength(5);
+		for (const round of practice.rounds) {
+			expect(round.options).toContain(round.answer);
+			expect(round.options.every((option) => !weekly.has(option))).toBe(true);
+		}
 	});
 });

@@ -1,0 +1,64 @@
+name: rawkode-academy-mobile
+on:
+  pull_request:
+    paths:
+      - 'projects/rawkode.academy/mobile/**'
+      - 'projects/rawkode.academy/identity/**'
+      - 'projects/rawkode.academy/website/src/middleware/auth.ts'
+      - 'projects/rawkode.academy/website/src/pages/api/games/**'
+      - 'projects/rawkode.academy/website/src/pages/api/mobile/**'
+      - '.github/workflows/rawkode-academy-mobile.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'projects/rawkode.academy/mobile/**'
+      - 'projects/rawkode.academy/identity/**'
+      - 'projects/rawkode.academy/website/src/middleware/auth.ts'
+      - 'projects/rawkode.academy/website/src/pages/api/games/**'
+      - 'projects/rawkode.academy/website/src/pages/api/mobile/**'
+      - '.github/workflows/rawkode-academy-mobile.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/determinate-nix-action@v3
+      - name: Set up cuenv and sync
+        run: |
+          curl -fsSL -o /tmp/cuenv https://github.com/cuenv/cuenv/releases/download/0.76.0/cuenv-linux-x64
+          chmod +x /tmp/cuenv
+          /tmp/cuenv sync -A
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.4'
+          channel: stable
+          cache: true
+      - name: Generate Android platform files
+        working-directory: projects/rawkode.academy/mobile
+        run: |
+          flutter create --platforms=android --org academy.rawkode .
+          rm -f test/widget_test.dart
+          python3 tool/configure_android.py
+      - name: Resolve dependencies
+        working-directory: projects/rawkode.academy/mobile
+        run: flutter pub get
+      - name: Analyze and test
+        working-directory: projects/rawkode.academy/mobile
+        run: |
+          flutter analyze
+          flutter test
+      - name: Build test APK
+        working-directory: projects/rawkode.academy/mobile
+        run: flutter build apk --debug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rawkode-academy-debug-apk
+          path: projects/rawkode.academy/mobile/build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error

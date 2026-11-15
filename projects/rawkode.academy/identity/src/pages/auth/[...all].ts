@@ -7,6 +7,17 @@ const handler: APIRoute = async (context) => {
 	const url = new URL(context.request.url);
 	const pathname = url.pathname;
 
+	// Native clients must bind every authorization code to an S256 verifier.
+	if (pathname === "/auth/oauth2/authorize" && context.request.method !== "GET") {
+		return new Response("Method not allowed", { status: 405, headers: { "Allow": "GET", "Cache-Control": "no-store" } });
+	}
+	if (context.request.method === "GET" && pathname === "/auth/oauth2/authorize" && url.searchParams.get("client_id") === "rawkode-academy-mobile") {
+		const challenge = url.searchParams.get("code_challenge") ?? "";
+		if (url.searchParams.get("response_type") !== "code" || url.searchParams.get("code_challenge_method") !== "S256" || !/^[A-Za-z0-9_-]{43}$/.test(challenge)) {
+			return new Response("S256 PKCE is required", { status: 400, headers: { "Cache-Control": "no-store" } });
+		}
+	}
+
 	const usernameClientIds = ["rawkode-academy-website", "klustered-dev"];
 	const readUsername = async (userId: string) =>
 		env.DB.prepare("SELECT username FROM user WHERE id = ?")
