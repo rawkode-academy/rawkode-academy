@@ -4,11 +4,29 @@ import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
+abstract class CredentialStorage {
+  Future<String?> read({required String key});
+  Future<void> write({required String key, required String? value});
+  Future<void> delete({required String key});
+}
+
+class SecureCredentialStorage implements CredentialStorage {
+  const SecureCredentialStorage();
+  static const _storage = FlutterSecureStorage();
+  @override
+  Future<String?> read({required String key}) => _storage.read(key: key);
+  @override
+  Future<void> write({required String key, required String? value}) => _storage.write(key: key, value: value);
+  @override
+  Future<void> delete({required String key}) => _storage.delete(key: key);
+}
+
 class AcademyAccount extends ChangeNotifier {
-  AcademyAccount({http.Client? client}) : _client = client ?? http.Client();
+  AcademyAccount({http.Client? client, FlutterAppAuth? auth, CredentialStorage? storage})
+      : _client = client ?? http.Client(), _auth = auth ?? const FlutterAppAuth(), _storage = storage ?? const SecureCredentialStorage();
   final http.Client _client;
-  final _auth = const FlutterAppAuth();
-  final _storage = const FlutterSecureStorage();
+  final FlutterAppAuth _auth;
+  final CredentialStorage _storage;
   String? _token;
   String? _refreshToken;
   Future<bool>? _refreshing;
@@ -26,8 +44,15 @@ class AcademyAccount extends ChangeNotifier {
   );
 
   Future<bool> restore() async {
-    _token = await _storage.read(key: 'access_token');
-    _refreshToken = await _storage.read(key: 'refresh_token');
+    final stored = await _storage.read(key: 'token_pair');
+    if (stored != null) {
+      final pair = jsonDecode(stored) as Map<String, dynamic>;
+      _token = pair['access'] as String?;
+      _refreshToken = pair['refresh'] as String?;
+    } else {
+      _token = await _storage.read(key: 'access_token');
+      _refreshToken = await _storage.read(key: 'refresh_token');
+    }
     if (_token == null) return false;
     return _loadUser();
   }
@@ -48,12 +73,10 @@ class AcademyAccount extends ChangeNotifier {
   }
 
   Future<void> _saveTokens() async {
-    await _storage.write(key: 'access_token', value: _token);
-    if (_refreshToken == null) {
-      await _storage.delete(key: 'refresh_token');
-    } else {
-      await _storage.write(key: 'refresh_token', value: _refreshToken);
-    }
+    await _storage.write(key: 'token_pair', value: jsonEncode({'access': _token, 'refresh': _refreshToken}));
+    // Remove keys from earlier preview builds after the pair is safely stored.
+    await _storage.delete(key: 'access_token');
+    await _storage.delete(key: 'refresh_token');
   }
 
   Future<bool> _refresh() async {
@@ -147,7 +170,8 @@ class AcademyAccount extends ChangeNotifier {
     user = null;
     Object? deletionError;
     try {
-      try { await _storage.delete(key: 'access_token'); } catch (error) { deletionError = error; }
+      try { await _storage.delete(key: 'token_pair'); } catch (error) { deletionError = error; }
+      try { await _storage.delete(key: 'access_token'); } catch (error) { deletionError ??= error; }
       try { await _storage.delete(key: 'refresh_token'); } catch (error) { deletionError ??= error; }
     } finally {
       credentialCleanupRequired = deletionError != null;
