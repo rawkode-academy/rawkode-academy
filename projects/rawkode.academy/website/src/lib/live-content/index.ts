@@ -7,7 +7,13 @@ export {
 	disableContentCache,
 	setContentCache,
 } from "./cache-control";
-export { getAllSeries, type SeriesEntry } from "./articles";
+export {
+	getAllSeries,
+	getSeriesLabels,
+	partNumber,
+	plannedParts,
+	type SeriesEntry,
+} from "./articles";
 export {
 	ContentError,
 	type ContentQueryOptions,

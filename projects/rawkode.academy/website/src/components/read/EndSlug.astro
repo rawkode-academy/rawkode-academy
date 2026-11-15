@@ -13,5 +13,4 @@ const { date } = Astro.props as Props;
 
 <div class={doc.end}>
 	<MLabel>Published {typeof date === "string" ? date : <time {...date.attrs}>{date.text}</time>}</MLabel>
-	<slot />
 </div>

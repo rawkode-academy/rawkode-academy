@@ -111,6 +111,8 @@ description: A walk through the Model Context Protocol, one piece at a time.
 cover:                     # optional; falls back to the first part's cover
   image: ./cover.png
   alt: What the image shows
+planned:                   # optional; titles of parts not written yet
+  - Tools
 ---
 
 An optional introduction, shown above the list of parts.
@@ -127,9 +129,13 @@ Parts are read in the order of their file names, with numbers compared as
 numbers: `0-what-is-mcp.mdx`, `1-…`, `2-…`, then `10-…`. The file name is
 also the article's URL (`/read/0-what-is-mcp`).
 
-Each part links to the series and to the previous and next parts. Readers
-see "Part 2 of 3" counted over the published parts, so a draft part leaves no
-gap. A series page appears once its first part is published.
+A part's number is the number its file name starts with, so `0-what-is-mcp`
+is Part 0. Without one, parts count from 1 in file-name order.
+
+Each part opens with the list of parts and ends with a link to the next one.
+`planned` titles are listed after the published parts, without a link, and
+mark the series as ongoing: remove a title when its part is published. A
+series page appears once its first part is published.
 
 The build fails when an article names a series that has no file.
 

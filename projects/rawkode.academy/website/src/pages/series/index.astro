@@ -67,7 +67,7 @@ const catalog = academyCatalog();
 							</time>
 							{cover && <span class={catalog.editorialMedia}><img class={catalog.editorialImage} src={cover.src} alt="" width={cover.width} height={cover.height} loading="lazy" /></span>}
 							<div class={catalog.editorialBody} data-body>
-								<p class={catalog.editorialKind}><span>Series</span><span>·</span><span>{series.parts.length} {series.parts.length === 1 ? "part" : "parts"}</span></p>
+								<p class={catalog.editorialKind}><span>Series</span><span>·</span><span>{series.parts.length} {series.parts.length === 1 ? "part" : "parts"}</span>{series.data.planned && <><span>·</span><span>Ongoing</span></>}</p>
 								<h2 class={catalog.editorialTitle}>{series.data.title}</h2>
 								<p class={catalog.editorialDescription}>{series.data.description}</p>
 							</div>

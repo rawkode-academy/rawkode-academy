@@ -112,6 +112,8 @@ const seriesFrontmatter = z.strictObject({
 	title: z.string().trim().min(1),
 	description: z.string().trim().min(1),
 	cover,
+	// Titles of parts that are not written yet, in order.
+	planned: z.array(z.string().trim().min(1)).default([]),
 });
 
 function compact<T extends object>(value: T): T {
@@ -245,6 +247,7 @@ export function parseSeries(
 		title: frontmatter.title,
 		description: frontmatter.description,
 		cover: coverFrom(series, frontmatter.cover, resolveAsset),
+		planned: frontmatter.planned.length > 0 ? frontmatter.planned : undefined,
 		body: body.trim()
 			? fromMarkdown(body, {
 					mdx: series.mdx,

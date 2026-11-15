@@ -1,0 +1,101 @@
+---
+import { academyDocument } from "@rawkodeacademy/design-system";
+import {
+	partNumber,
+	plannedParts,
+	type SeriesEntry,
+} from "@/lib/live-content";
+
+interface Props {
+	series: SeriesEntry;
+	currentId: string;
+	/** start: the list of parts above the article. end: what to read next. */
+	at: "start" | "end";
+}
+
+const { series, currentId, at } = Astro.props as Props;
+const doc = academyDocument();
+
+const planned = plannedParts(series);
+const next = series.parts[
+	series.parts.findIndex((part) => part.id === currentId) + 1
+];
+const upcoming = planned[0];
+
+// A long series folds away so the article still starts on the first screen.
+const long = series.parts.length + planned.length > 6;
+const Box = long ? "details" : "div";
+const Head = long ? "summary" : "p";
+---
+
+{at === "start" && (
+	<nav aria-label={`Series: ${series.data.title}`} class={doc.notice}>
+		<Box>
+			<Head class={doc.kicker}>
+				{series.data.title} · Part {partNumber(series, currentId)}{planned.length > 0 && " · Ongoing"}
+			</Head>
+			<ol class:list={[doc.list, "series-nav__parts"]}>
+				{series.parts.map((part) => (
+					<li class="series-nav__part">
+						<span class={doc.meta} aria-hidden="true">{partNumber(series, part.id)}</span>
+						{part.id === currentId ? (
+							<span aria-current="page">{part.data.title}</span>
+						) : (
+							<a class={doc.link} href={`/read/${part.id}`}>{part.data.title}</a>
+						)}
+						{part.id === currentId && <span class={doc.meta}>You are here</span>}
+					</li>
+				))}
+				{planned.map((part) => (
+					<li class="series-nav__part series-nav__part--planned">
+						<span class={doc.meta} aria-hidden="true">{part.number}</span>
+						<span>{part.title}</span>
+						<span class={doc.meta}>Planned</span>
+					</li>
+				))}
+			</ol>
+			<a class={doc.link} href={`/series/${series.id}`}>About this series →</a>
+		</Box>
+	</nav>
+)}
+
+{at === "end" && next && (
+	<a class:list={[doc.notice, "series-nav__next"]} href={`/read/${next.id}`} rel="next">
+		<p class={doc.kicker}>Next · Part {partNumber(series, next.id)}</p>
+		<p class={doc.cardTitle}>{next.data.title} <span aria-hidden="true">→</span></p>
+		<p class={doc.copy}>{next.data.description}</p>
+	</a>
+)}
+
+{at === "end" && !next && upcoming && (
+	<aside class:list={[doc.notice, "series-nav__next"]}>
+		<p class={doc.kicker}>Next · Part {upcoming.number} · Not published yet</p>
+		<p class={doc.cardTitle}>{upcoming.title}</p>
+		<p class={doc.copy}>
+			It will appear on the <a class={doc.link} href={`/series/${series.id}`}>series page</a>
+			and in the <a class={doc.link} href="/api/feeds/articles.atom">feed</a>.
+		</p>
+	</aside>
+)}
+
+<style>
+	.series-nav__parts { margin-block: 0.75rem; }
+
+	.series-nav__part {
+		display: grid;
+		grid-template-columns: 1.5rem minmax(0, 1fr) auto;
+		gap: 0.75rem;
+		align-items: baseline;
+		padding-block: 0.375rem;
+	}
+
+	.series-nav__part--planned { color: var(--colors-academy-text-muted); }
+
+	.series-nav__next {
+		display: block;
+		margin-top: 2rem;
+		text-decoration: none;
+	}
+
+	.series-nav__next p { margin: 0 0 0.375rem; }
+</style>

@@ -3,11 +3,12 @@ import {
 	academyCatalog,
 	academyDocument,
 	academyLayout,
+	button,
 } from "@rawkodeacademy/design-system";
 import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
 import RichText from "@/components/content/RichText.astro";
 import ArticleHeader from "@/components/read/ArticleHeader.astro";
-import { getAllSeries } from "@/lib/live-content";
+import { getAllSeries, partNumber, plannedParts } from "@/lib/live-content";
 import { localDate } from "@/lib/local-time";
 import { calculateReadingTime } from "@/utils/reading-time";
 import Page from "@/wrappers/page.astro";
@@ -27,9 +28,12 @@ const doc = academyDocument();
 const styles = academyLayout({ width: "reading" });
 const catalog = academyCatalog();
 
-const parts = series.parts.map((article, index) => ({
+const pad = (number: number) => String(number).padStart(2, "0");
+const planned = plannedParts(series);
+const first = series.parts[0];
+const parts = series.parts.map((article) => ({
 	article,
-	number: String(index + 1).padStart(2, "0"),
+	number: pad(partNumber(series, article.id)),
 	date: localDate(article.data.publishedAt),
 	readingTime: calculateReadingTime(article.body || ""),
 }));
@@ -63,10 +67,18 @@ const imageUrl = cover
 				{ label: "Read", href: "/read" },
 				{ label: "Series", href: "/series" },
 			]}
-			kicker={`Article series · ${partCount} · ${totalMinutes} min read`}
+			kicker={`Article series · ${partCount} · ${totalMinutes} min read${planned.length > 0 ? " · Ongoing" : ""}`}
 			title={series.data.title}
 			dek={series.data.description}
-		/>
+		>
+			{first && (
+				<div class={doc.actions}>
+					<a class={button()} href={`/read/${first.id}`}>
+						Start with part {partNumber(series, first.id)} <span data-part="arrow" aria-hidden="true">→</span>
+					</a>
+				</div>
+			)}
+		</ArticleHeader>
 
 		{series.data.body && (
 			<section class={[doc.section, doc.container].join(" ")}>
@@ -92,6 +104,15 @@ const imageUrl = cover
 							</span>
 						</div>
 					</a>
+				))}
+				{planned.map((part) => (
+					<div class={catalog.row}>
+						<span class={catalog.rowIndex}>{pad(part.number)}</span>
+						<div class={catalog.rowMain}>
+							<h3 class={catalog.rowTitle}>{part.title}</h3>
+							<span class={catalog.rowMeta}>Planned</span>
+						</div>
+					</div>
 				))}
 			</div>
 		</section>
