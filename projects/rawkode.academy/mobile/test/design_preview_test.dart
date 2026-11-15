@@ -57,6 +57,8 @@ void main() {
         'video': const VideoDetail(item: {'title': 'Cloud native live', 'description': 'Join the Academy for a hands-on session.'}, upcoming: true),
         'kubele': const KubeleScreen(answer: 'Helm'),
         'kubele-long': const KubeleScreen(answer: 'Inspektor Gadget'),
+        'kubele-played': const KubeleScreen(answer: 'Helm'),
+        'kubele-played-long': const KubeleScreen(answer: 'Inspektor Gadget'),
         'cnicon': CniconScreen(account: account),
         'cnicon-play': CniconScreen(account: account, loadLogo: (_) async => '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><path d="M50 5L95 80H5Z" fill="#0077ff"/></svg>'),
         'cnicon-reveal': CniconScreen(account: account, loadLogo: (_) async => '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><path d="M50 5L95 80H5Z" fill="#0077ff"/></svg>'),
@@ -76,6 +78,14 @@ void main() {
             await tester.tap(find.text('Project 0'));
             await tester.pump(); await tester.pump(const Duration(milliseconds: 400));
           }
+        }
+        if (entry.key.startsWith('kubele-played')) {
+          final vertical = find.descendant(of: find.byType(ListView), matching: find.byType(Scrollable)).first;
+          await tester.scrollUntilVisible(find.byType(TextField), 150, scrollable: vertical);
+          await tester.enterText(find.byType(TextField), entry.key.endsWith('long') ? 'AAAAAAAAAAAAAA' : 'HELP');
+          await tester.scrollUntilVisible(find.text('Submit guess'), 100, scrollable: vertical);
+          await tester.tap(find.text('Submit guess')); await tester.pump();
+          await tester.drag(find.byType(ListView), const Offset(0, 700)); await tester.pump();
         }
         expect(tester.takeException(), isNull, reason: '${entry.key} ${brightness.name}');
         final boundary = key.currentContext!.findRenderObject()! as RenderRepaintBoundary;

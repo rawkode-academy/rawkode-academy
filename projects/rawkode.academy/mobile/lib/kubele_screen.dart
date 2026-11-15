@@ -196,10 +196,10 @@ class _Tile extends StatelessWidget {
         width: 40,
         height: 44,
         decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2)),
-        child: Stack(alignment: Alignment.center, children: [
+        child: SizedBox.expand(child: Stack(alignment: Alignment.center, children: [
           Text(letter, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontFamily: 'Red Hat Mono')),
           Positioned(right: 2, bottom: 0, child: ExcludeSemantics(child: Text(switch (mark) { Mark.correct => '✓', Mark.present => '~', Mark.absent => '×' }, style: const TextStyle(color: Colors.white, fontSize: 9)))),
-        ]),
+        ])),
       ),
     );
   }
