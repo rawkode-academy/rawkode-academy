@@ -12,6 +12,8 @@ class AcademyAccount extends ChangeNotifier {
   String? _token;
   String? _refreshToken;
   Future<bool>? _refreshing;
+  bool _signingOut = false;
+  int _generation = 0;
   Map<String, dynamic>? user;
   static const _origin = 'https://rawkode.academy';
   static const _redirect = 'academy.rawkode.app:/oauth2redirect';
@@ -30,9 +32,12 @@ class AcademyAccount extends ChangeNotifier {
   }
 
   Future<bool> signIn() async {
+    if (_signingOut) throw StateError('Sign out is in progress');
+    final generation = _generation;
     final result = await _auth.authorizeAndExchangeCode(
       AuthorizationTokenRequest(_clientId, _redirect, serviceConfiguration: _config, scopes: _scopes),
     );
+    if (_signingOut || generation != _generation) return false;
     if (result.accessToken == null || result.accessToken!.isEmpty) return false;
     _token = result.accessToken;
     _refreshToken = result.refreshToken;
@@ -51,6 +56,7 @@ class AcademyAccount extends ChangeNotifier {
   }
 
   Future<bool> _refresh() async {
+    if (_signingOut) return false;
     if (_refreshing != null) return _refreshing!;
     final pending = _performRefresh();
     _refreshing = pending;
@@ -68,24 +74,30 @@ class AcademyAccount extends ChangeNotifier {
       await _saveTokens();
       return true;
     } catch (_) {
-      return false;
+      throw StateError('Could not refresh your session. Please retry.');
     }
   }
 
   Future<http.Response> _send(Future<http.Response> Function() request) async {
+    if (_signingOut) throw StateError('Sign out is in progress');
+    final generation = _generation;
     final usedToken = _token;
     var response = await request().timeout(const Duration(seconds: 15));
+    if (_signingOut || generation != _generation) throw StateError('Session changed');
     if (response.statusCode == 401) {
       if ((_token != usedToken && _token != null) || await _refresh()) {
         response = await request().timeout(const Duration(seconds: 15));
       }
+      if (_signingOut || generation != _generation) throw StateError('Session changed');
       if (response.statusCode == 401) await signOut();
     }
     return response;
   }
 
   Future<bool> _loadUser() async {
+    final generation = _generation;
     final response = await _send(() => _client.get(Uri.https('id.rawkode.academy', '/api/mobile/session'), headers: _headers));
+    if (_signingOut || generation != _generation) return false;
     if (response.statusCode == 401) return false;
     if (response.statusCode != 200) throw StateError('Account service is unavailable');
     user = (jsonDecode(response.body) as Map<String, dynamic>)['user'] as Map<String, dynamic>;
@@ -111,7 +123,14 @@ class AcademyAccount extends ChangeNotifier {
   }
 
   Future<void> signOut() async {
-    if (_refreshing != null) await _refreshing;
+    if (_signingOut) return;
+    _signingOut = true;
+    _generation++;
+    try {
+      if (_refreshing != null) await _refreshing;
+    } catch (_) {
+      // Continue clearing local credentials if refresh failed.
+    }
     if (_token != null) {
       try {
         await _client.delete(Uri.https('id.rawkode.academy', '/api/mobile/session'), headers: _headers).timeout(const Duration(seconds: 10));
@@ -124,6 +143,7 @@ class AcademyAccount extends ChangeNotifier {
     user = null;
     await _storage.delete(key: 'access_token');
     await _storage.delete(key: 'refresh_token');
+    _signingOut = false;
     notifyListeners();
   }
 }
