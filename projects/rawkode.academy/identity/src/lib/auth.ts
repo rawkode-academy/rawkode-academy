@@ -425,4 +425,3 @@ export const createAuth = async (env: AuthEnv) => {
 };
 
 export type Auth = Awaited<ReturnType<typeof createAuth>>;
-

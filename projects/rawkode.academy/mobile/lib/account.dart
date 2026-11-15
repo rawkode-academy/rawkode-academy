@@ -10,10 +10,13 @@ class AcademyAccount extends ChangeNotifier {
   final _auth = const FlutterAppAuth();
   final _storage = const FlutterSecureStorage();
   String? _token;
+  String? _refreshToken;
+  Future<bool>? _refreshing;
   Map<String, dynamic>? user;
   static const _origin = 'https://rawkode.academy';
   static const _redirect = 'academy.rawkode.app:/oauth2redirect';
   static const _clientId = 'rawkode-academy-mobile';
+  static const _scopes = ['openid', 'profile', 'email', 'offline_access'];
   static final _config = AuthorizationServiceConfiguration(
     authorizationEndpoint: 'https://id.rawkode.academy/auth/oauth2/authorize',
     tokenEndpoint: 'https://id.rawkode.academy/auth/oauth2/token',
@@ -21,32 +24,69 @@ class AcademyAccount extends ChangeNotifier {
 
   Future<bool> restore() async {
     _token = await _storage.read(key: 'access_token');
+    _refreshToken = await _storage.read(key: 'refresh_token');
     if (_token == null) return false;
     return _loadUser();
   }
 
   Future<bool> signIn() async {
     final result = await _auth.authorizeAndExchangeCode(
-      AuthorizationTokenRequest(_clientId, _redirect,
-        serviceConfiguration: _config, scopes: ['openid', 'profile', 'email']),
+      AuthorizationTokenRequest(_clientId, _redirect, serviceConfiguration: _config, scopes: _scopes),
     );
-    final token = result.accessToken;
-    if (token == null || token.isEmpty) return false;
-    _token = token;
-    if (!await _loadUser()) {
-      _token = null;
-      return false;
-    }
-    await _storage.write(key: 'access_token', value: token);
+    if (result.accessToken == null || result.accessToken!.isEmpty) return false;
+    _token = result.accessToken;
+    _refreshToken = result.refreshToken;
+    if (!await _loadUser()) return false;
+    await _saveTokens();
     return true;
   }
 
-  Future<bool> _loadUser() async {
-    final response = await _client.get(Uri.https('id.rawkode.academy', '/api/mobile/session'), headers: _headers).timeout(const Duration(seconds: 15));
-    if (response.statusCode == 401) {
-      await signOut();
+  Future<void> _saveTokens() async {
+    await _storage.write(key: 'access_token', value: _token);
+    if (_refreshToken == null) {
+      await _storage.delete(key: 'refresh_token');
+    } else {
+      await _storage.write(key: 'refresh_token', value: _refreshToken);
+    }
+  }
+
+  Future<bool> _refresh() async {
+    if (_refreshing != null) return _refreshing!;
+    final pending = _performRefresh();
+    _refreshing = pending;
+    try { return await pending; } finally { _refreshing = null; }
+  }
+
+  Future<bool> _performRefresh() async {
+    if (_refreshToken == null) return false;
+    try {
+      final result = await _auth.token(TokenRequest(_clientId, _redirect,
+        refreshToken: _refreshToken, serviceConfiguration: _config, scopes: _scopes)).timeout(const Duration(seconds: 20));
+      if (result.accessToken == null || result.accessToken!.isEmpty) return false;
+      _token = result.accessToken;
+      _refreshToken = result.refreshToken ?? _refreshToken;
+      await _saveTokens();
+      return true;
+    } catch (_) {
       return false;
     }
+  }
+
+  Future<http.Response> _send(Future<http.Response> Function() request) async {
+    final usedToken = _token;
+    var response = await request().timeout(const Duration(seconds: 15));
+    if (response.statusCode == 401) {
+      if ((_token != usedToken && _token != null) || await _refresh()) {
+        response = await request().timeout(const Duration(seconds: 15));
+      }
+      if (response.statusCode == 401) await signOut();
+    }
+    return response;
+  }
+
+  Future<bool> _loadUser() async {
+    final response = await _send(() => _client.get(Uri.https('id.rawkode.academy', '/api/mobile/session'), headers: _headers));
+    if (response.statusCode == 401) return false;
     if (response.statusCode != 200) throw StateError('Account service is unavailable');
     user = (jsonDecode(response.body) as Map<String, dynamic>)['user'] as Map<String, dynamic>;
     return true;
@@ -55,14 +95,12 @@ class AcademyAccount extends ChangeNotifier {
   Map<String, String> get _headers => {'Authorization': 'Bearer $_token', 'Accept': 'application/json'};
 
   Future<dynamic> get(String path) async {
-    final response = await _client.get(Uri.parse('$_origin$path'), headers: _headers).timeout(const Duration(seconds: 15));
-    if (response.statusCode == 401) await signOut();
+    final response = await _send(() => _client.get(Uri.parse('$_origin$path'), headers: _headers));
     return _decode(response);
   }
 
   Future<dynamic> post(String path, Map<String, dynamic> body) async {
-    final response = await _client.post(Uri.parse('$_origin$path'), headers: {..._headers, 'Content-Type': 'application/json'}, body: jsonEncode(body)).timeout(const Duration(seconds: 15));
-    if (response.statusCode == 401) await signOut();
+    final response = await _send(() => _client.post(Uri.parse('$_origin$path'), headers: {..._headers, 'Content-Type': 'application/json'}, body: jsonEncode(body)));
     return _decode(response);
   }
 
@@ -73,16 +111,19 @@ class AcademyAccount extends ChangeNotifier {
   }
 
   Future<void> signOut() async {
+    if (_refreshing != null) await _refreshing;
     if (_token != null) {
       try {
         await _client.delete(Uri.https('id.rawkode.academy', '/api/mobile/session'), headers: _headers).timeout(const Duration(seconds: 10));
       } catch (_) {
-        // Local credentials must still be removed when offline.
+        // Remove local credentials even if revocation cannot be reached.
       }
     }
     _token = null;
+    _refreshToken = null;
     user = null;
     await _storage.delete(key: 'access_token');
+    await _storage.delete(key: 'refresh_token');
     notifyListeners();
   }
 }
