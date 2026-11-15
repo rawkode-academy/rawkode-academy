@@ -1,5 +1,5 @@
 ---
-import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
+import { academyDocument, academyLayout, button } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
 const styles = academyLayout({ width: "reading" });
 import {
@@ -30,7 +30,6 @@ import ArticleHeader from "@/components/read/ArticleHeader.astro";
 import ArticleByline from "@/components/read/ArticleByline.astro";
 import ArticleTOC from "@/components/read/ArticleTOC.astro";
 import EndSlug from "@/components/read/EndSlug.astro";
-import SeriesNav from "@/components/read/SeriesNav.astro";
 
 import { calculateReadingTime } from "@/utils/reading-time";
 import { getTypeBadgeConfig } from "@/utils/article-types";
@@ -69,6 +68,7 @@ const series = article.data.series
 	: undefined;
 const seriesPart =
 	series && series.parts.findIndex(({ id }) => id === article.id) + 1;
+const nextPart = series && seriesPart ? series.parts[seriesPart] : undefined;
 
 // Same pool and ranking RelatedArticles applies.
 const relatedArticles = allArticles
@@ -181,6 +181,8 @@ const subtitle = article.data.openGraph?.subtitle || article.data.subtitle;
 		<ArticleHeader
 			breadcrumbs={breadcrumbs}
 			kicker={badgeConfig.label}
+			eyebrow={series ? `${series.data.title} · Part ${seriesPart} of ${series.parts.length}` : undefined}
+			eyebrowHref={series ? `/series/${series.id}` : undefined}
 			title={article.data.title}
 			dek={subtitle}
 		>
@@ -191,12 +193,6 @@ const subtitle = article.data.openGraph?.subtitle || article.data.subtitle;
 				readingTime={readingTime.text}
 				tags={tags}
 			/>
-			{series && (
-				<p class={doc.meta}>
-					Part {seriesPart} of {series.parts.length} in
-					<a class={doc.link} href={`/series/${series.id}`}>{series.data.title}</a>
-				</p>
-			)}
 		</ArticleHeader>
 
 		<div class={doc.body}>
@@ -206,14 +202,19 @@ const subtitle = article.data.openGraph?.subtitle || article.data.subtitle;
 					<RichText html={html} />
 				</article>
 
-				{series && <SeriesNav series={series} currentId={article.id} />}
-
-				<EndSlug date={publishDate} />
+				{/* Short labels: a button never wraps, and the titles are in the rail. */}
+				<EndSlug date={publishDate}>
+					{nextPart ? (
+						<a class={button()} href={`/read/${nextPart.id}`} rel="next" aria-label={`Next: Part ${(seriesPart ?? 0) + 1}, ${nextPart.data.title}`}>Next: Part {(seriesPart ?? 0) + 1} <span data-part="arrow" aria-hidden="true">→</span></a>
+					) : series && (
+						<a class={button({ variant: "outline" })} href={`/series/${series.id}`} aria-label={`All parts of ${series.data.title}`}>All parts <span data-part="arrow" aria-hidden="true">→</span></a>
+					)}
+				</EndSlug>
 
 				<Resources resources={article.data.resources} />
 			</div>
 
-			<ArticleTOC headings={headings} />
+			<ArticleTOC headings={headings} series={series} currentId={article.id} />
 		</div>
 
 		<div class={doc.section}>

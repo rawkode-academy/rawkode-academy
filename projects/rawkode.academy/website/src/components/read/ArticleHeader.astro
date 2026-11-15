@@ -17,6 +17,8 @@ interface Props {
 	title: string;
 	dek?: string | undefined;
 	eyebrow?: string | undefined;
+	/** Makes the eyebrow a link, e.g. to the article's series. */
+	eyebrowHref?: string | undefined;
 }
 
 const {
@@ -26,6 +28,7 @@ const {
 	title,
 	dek,
 	eyebrow,
+	eyebrowHref,
 } = Astro.props as Props;
 
 // Parent links only: the title below is the current page.
@@ -39,9 +42,11 @@ const eyebrowText =
 <header class={doc.hero}>
 	<div class={[doc.container, doc.stack].join(" ")}>
 		<Breadcrumb parents={parents} />
-		{eyebrowText && <MLabel tone="accent">
-			{eyebrowText}
-		</MLabel>}
+		{eyebrowText && (eyebrowHref ? (
+			<a class={doc.link} href={eyebrowHref}><MLabel tone="accent">{eyebrowText}</MLabel></a>
+		) : (
+			<MLabel tone="accent">{eyebrowText}</MLabel>
+		))}
 
 		<h1 class={doc.title} set:html={title}></h1>
 
