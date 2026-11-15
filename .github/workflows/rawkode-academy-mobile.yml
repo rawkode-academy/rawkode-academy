@@ -54,6 +54,13 @@ jobs:
         run: |
           flutter analyze
           flutter test
+      - name: Upload design previews
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: academy-design-previews
+          path: projects/rawkode.academy/mobile/build/design-previews/*.png
+          if-no-files-found: warn
       - name: Build test APK
         working-directory: projects/rawkode.academy/mobile
         run: flutter build apk --debug

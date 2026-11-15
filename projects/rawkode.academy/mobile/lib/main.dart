@@ -5,6 +5,7 @@ import 'kubele_screen.dart';
 import 'cnicon_screen.dart';
 import 'catalog_screen.dart';
 import 'profile_screen.dart';
+import 'academy_design.dart';
 
 void main() => runApp(const AcademyApp());
 
@@ -13,20 +14,22 @@ class AcademyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MaterialApp(
         title: 'Rawkode Academy',
-        theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
-        darkTheme: ThemeData(colorSchemeSeed: const Color(0xffbca8ff), brightness: Brightness.dark, useMaterial3: true),
+        theme: AcademyDesign.theme(Brightness.light),
+        darkTheme: AcademyDesign.theme(Brightness.dark),
+        debugShowCheckedModeBanner: false,
         home: const AcademyHome(),
       );
 }
 
 class AcademyHome extends StatefulWidget {
-  const AcademyHome({super.key});
+  const AcademyHome({super.key, this.account});
+  final AcademyAccount? account;
   @override
   State<AcademyHome> createState() => _AcademyHomeState();
 }
 
 class _AcademyHomeState extends State<AcademyHome> {
-  final account = AcademyAccount();
+  late final account = widget.account ?? AcademyAccount();
   bool loading = true;
   String? error;
 
@@ -76,7 +79,7 @@ class _AcademyHomeState extends State<AcademyHome> {
         if (user != null) TextButton(onPressed: _signOut, child: const Text('Sign out')),
       ]),
       body: Center(child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 720), child: ListView(padding: const EdgeInsets.all(24), children: [
-        Text('Learn. Play. Build.', style: Theme.of(context).textTheme.headlineLarge),
+        const AcademyHeading(label: 'Rawkode Academy', title: 'Learn. Play. Build.', description: 'Practical cloud native learning. A new challenge every day.'),
         const SizedBox(height: 16),
         if (loading) const LinearProgressIndicator()
         else if (user == null) ...[
@@ -87,12 +90,12 @@ class _AcademyHomeState extends State<AcademyHome> {
         if (error != null) Padding(padding: const EdgeInsets.only(top: 12), child: Text(error!, style: TextStyle(color: Theme.of(context).colorScheme.error))),
         if (account.credentialCleanupRequired) TextButton(onPressed: _signOut, child: const Text('Retry removing credentials')),
         const SizedBox(height: 24),
-        Text('Play', style: Theme.of(context).textTheme.headlineSmall),
+        const AcademyHeading(label: 'Challenge yourself', title: 'Play'),
         Card(child: ListTile(leading: const Icon(Icons.grid_on), title: const Text('Kubele'), subtitle: const Text('Daily cloud native word game'), enabled: user != null && !loading, onTap: user == null ? null : () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => KubeleScreen(answer: dailyAnswer(DateTime.now()), account: account))))),
         Card(child: ListTile(leading: const Icon(Icons.extension_outlined), title: const Text('CNIcon'), subtitle: const Text('Weekly cloud native logo game'), enabled: user != null && !loading, onTap: user == null ? null : () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => CniconScreen(account: account))))),
         if (user != null) Card(child: ListTile(leading: const Icon(Icons.person_outline), title: const Text('Your profile'), subtitle: const Text('Player statistics'), onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => ProfileScreen(account: account))))),
         const SizedBox(height: 24),
-        Text('Explore', style: Theme.of(context).textTheme.headlineSmall),
+        const AcademyHeading(label: 'Keep learning', title: 'Explore'),
         Card(child: ListTile(leading: const Icon(Icons.school_outlined), title: const Text('Learn'), subtitle: const Text('Courses and lessons'), onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const CatalogScreen(videos: false))))),
         Card(child: ListTile(leading: const Icon(Icons.play_circle_outline), title: const Text('Watch & live'), subtitle: const Text('Sessions and upcoming streams'), onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const CatalogScreen(videos: true))))),
       ]))),

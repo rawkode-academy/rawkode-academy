@@ -47,7 +47,7 @@ void main() {
     expect(find.textContaining('Round 1 of 5'), findsOneWidget);
     expect(find.text('Could not load the logo. Check your connection and try again.'), findsNothing);
     expect(tester.widget<CniconLogo>(find.byType(CniconLogo)).revealed, isFalse);
-    await tester.ensureVisible(find.text('Logo 0'));
+    await tester.scrollUntilVisible(find.text('Logo 0'), 150);
     await tester.tap(find.text('Logo 0'));
     await tester.pump();
     expect(tester.widget<CniconLogo>(find.byType(CniconLogo)).revealed, isTrue);

@@ -24,3 +24,13 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  fonts:
+    - family: Red Hat Text
+      fonts:
+        - asset: assets/fonts/RedHatText.ttf
+    - family: Red Hat Display
+      fonts:
+        - asset: assets/fonts/RedHatDisplay.ttf
+    - family: Red Hat Mono
+      fonts:
+        - asset: assets/fonts/RedHatMono.ttf

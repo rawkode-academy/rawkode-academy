@@ -1,3 +1,4 @@
+import 'academy_design.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,6 +17,7 @@ class KubeleScreen extends StatefulWidget {
 
 class _KubeleScreenState extends State<KubeleScreen> {
   final controller = TextEditingController();
+  final boardController = ScrollController();
   late KubeleSession session;
   String? error;
   bool loading = false;
@@ -77,6 +79,7 @@ class _KubeleScreenState extends State<KubeleScreen> {
   @override
   void dispose() {
     controller.dispose();
+    boardController.dispose();
     super.dispose();
   }
 
@@ -111,18 +114,27 @@ class _KubeleScreenState extends State<KubeleScreen> {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 600),
             child: ListView(padding: const EdgeInsets.all(24), children: [
-              Text('Daily cloud native word game', style: Theme.of(context).textTheme.headlineSmall),
+              const AcademyHeading(label: 'Daily challenge', title: 'Kubele', description: 'Six guesses. One cloud native term.'),
               const SizedBox(height: 8),
               Text('Guess the ${normalize(widget.answer).length}-letter term in six attempts.'),
               const SizedBox(height: 20),
-              for (final guess in guesses)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Wrap(spacing: 4, runSpacing: 4, children: [
-                    for (var i = 0; i < guess.length; i++)
-                      _Tile(letter: guess[i], mark: markGuess(guess, widget.answer)[i]),
+              Scrollbar(controller: boardController, thumbVisibility: true, child: SingleChildScrollView(
+                controller: boardController, scrollDirection: Axis.horizontal,
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              for (var row = 0; row < 6; row++)
+                Padding(padding: const EdgeInsets.only(bottom: 6), child: Semantics(label: 'Guess ${row + 1}',
+                  child: Row(children: [
+                    for (var i = 0; i < normalize(widget.answer).length; i++)
+                      Padding(padding: const EdgeInsets.only(right: 4), child: row < guesses.length
+                        ? _Tile(letter: guesses[row][i], mark: markGuess(guesses[row], widget.answer)[i])
+                        : Container(width: 40, height: 44, decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surface,
+                            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant)),
+                            child: Semantics(label: 'Empty'))),
                   ]),
-                ),
+                )),
+                ]),
+              )),
               const SizedBox(height: 16),
               if (loading || saving) const LinearProgressIndicator(),
               if (error != null && (finished || unavailable)) Text(error!),
@@ -183,8 +195,11 @@ class _Tile extends StatelessWidget {
         alignment: Alignment.center,
         width: 40,
         height: 44,
-        decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(4)),
-        child: Text(letter, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2)),
+        child: SizedBox.expand(child: Stack(alignment: Alignment.center, children: [
+          Text(letter, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontFamily: 'Red Hat Mono')),
+          Positioned(right: 2, bottom: 0, child: ExcludeSemantics(child: Text(switch (mark) { Mark.correct => '✓', Mark.present => '~', Mark.absent => '×' }, style: const TextStyle(color: Colors.white, fontSize: 9)))),
+        ])),
       ),
     );
   }
