@@ -57,6 +57,9 @@ jobs:
       - name: Build test APK
         working-directory: projects/rawkode.academy/mobile
         run: flutter build apk --debug
+      - name: Verify OAuth callback registration
+        working-directory: projects/rawkode.academy/mobile
+        run: python3 tool/verify_android_callback.py
       - uses: actions/upload-artifact@v4
         with:
           name: rawkode-academy-debug-apk

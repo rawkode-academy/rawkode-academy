@@ -4,6 +4,39 @@ import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
+/// Show a safe diagnostic code without exposing URLs, tokens, or server text.
+String signInErrorMessage(Object error) {
+  if (error is FlutterAppAuthUserCancelledException) {
+    return 'Sign-in was cancelled.';
+  }
+  if (error is FlutterAppAuthPlatformException) {
+    final details = error.platformErrorDetails;
+    const oauthErrors = {
+      'invalid_request', 'invalid_client', 'invalid_grant', 'unauthorized_client',
+      'unsupported_grant_type', 'invalid_scope', 'access_denied', 'server_error',
+      'temporarily_unavailable',
+    };
+    final numeric = RegExp(r'^\d{1,6}$');
+    final codes = [
+      if (details.type != null && numeric.hasMatch(details.type!)) details.type!,
+      if (details.code != null && numeric.hasMatch(details.code!)) details.code!,
+      if (oauthErrors.contains(details.error)) details.error!,
+    ].join('/');
+    return codes.isEmpty
+        ? 'Sign-in failed in the browser or account service. Please try again.'
+        : 'Sign-in failed (authentication error $codes). Please try again.';
+  }
+  if (error is AccountLookupException) {
+    return 'Sign-in succeeded, but your account could not be loaded (HTTP ${error.statusCode}).';
+  }
+  return 'Could not sign in. Please check your connection and try again.';
+}
+
+class AccountLookupException implements Exception {
+  const AccountLookupException(this.statusCode);
+  final int statusCode;
+}
+
 abstract class CredentialStorage {
   Future<String?> read({required String key});
   Future<void> write({required String key, required String? value});
@@ -125,9 +158,9 @@ class AcademyAccount extends ChangeNotifier {
   Future<bool> _loadUser() async {
     final generation = _generation;
     final response = await _send(() => _client.get(Uri.https('id.rawkode.academy', '/api/mobile/session'), headers: _headers));
+    if (response.statusCode == 401) throw const AccountLookupException(401);
     if (_signingOut || generation != _generation) return false;
-    if (response.statusCode == 401) return false;
-    if (response.statusCode != 200) throw StateError('Account service is unavailable');
+    if (response.statusCode != 200) throw AccountLookupException(response.statusCode);
     user = (jsonDecode(response.body) as Map<String, dynamic>)['user'] as Map<String, dynamic>;
     return true;
   }

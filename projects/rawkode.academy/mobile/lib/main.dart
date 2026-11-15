@@ -55,8 +55,8 @@ class _AcademyHomeState extends State<AcademyHome> {
     setState(() { loading = true; error = null; });
     try {
       if (!await account.signIn()) error = 'Sign-in did not complete.';
-    } catch (_) {
-      error = 'Could not sign in. Please try again.';
+    } catch (exception) {
+      error = signInErrorMessage(exception);
     }
     if (mounted) setState(() => loading = false);
   }
