@@ -82,10 +82,10 @@ void main() {
         if (entry.key.startsWith('kubele-played')) {
           final vertical = find.descendant(of: find.byType(ListView), matching: find.byType(Scrollable)).first;
           await tester.scrollUntilVisible(find.byType(TextField), 150, scrollable: vertical);
-          await tester.enterText(find.byType(TextField), entry.key.endsWith('long') ? 'AAAAAAAAAAAAAA' : 'HELP');
+          await tester.enterText(find.byType(TextField), entry.key.endsWith('long') ? 'AAAAAAAAAAAAAAA' : 'HELP');
           await tester.scrollUntilVisible(find.text('Submit guess'), 100, scrollable: vertical);
           await tester.tap(find.text('Submit guess')); await tester.pump();
-          await tester.drag(find.byType(ListView), const Offset(0, 700)); await tester.pump();
+          await tester.drag(find.byType(ListView), const Offset(0, 700)); await tester.pump(const Duration(milliseconds: 350));
         }
         expect(tester.takeException(), isNull, reason: '${entry.key} ${brightness.name}');
         final boundary = key.currentContext!.findRenderObject()! as RenderRepaintBoundary;
