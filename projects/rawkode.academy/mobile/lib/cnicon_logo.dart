@@ -46,9 +46,9 @@ class _CniconLogoState extends State<CniconLogo> with SingleTickerProviderStateM
       child: AspectRatio(aspectRatio: 1, child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: theme.colorScheme.primary.withValues(alpha: .05),
+          color: theme.colorScheme.tertiary.withValues(alpha: .05),
           border: Border.all(color: theme.colorScheme.outlineVariant),
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(4),
         ),
         child: Stack(fit: StackFit.expand, children: [
           AnimatedOpacity(

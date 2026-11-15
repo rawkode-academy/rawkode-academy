@@ -1,3 +1,4 @@
+import 'academy_design.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -207,6 +208,7 @@ class _CniconScreenState extends State<CniconScreen> {
     return Scaffold(appBar: AppBar(title: const Text('CNIcon')), body: Center(child: ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 600),
       child: ListView(padding: const EdgeInsets.all(24), children: [
+        const AcademyHeading(label: 'Weekly challenge', title: 'CNIcon', description: 'Know the tools. Recognise the marks.'),
         if (loading) const Center(child: CircularProgressIndicator())
         else if (submitted) ...[
           Text('Your weekly result', style: Theme.of(context).textTheme.headlineSmall),

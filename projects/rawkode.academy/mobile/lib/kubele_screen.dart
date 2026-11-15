@@ -1,3 +1,4 @@
+import 'academy_design.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -111,7 +112,7 @@ class _KubeleScreenState extends State<KubeleScreen> {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 600),
             child: ListView(padding: const EdgeInsets.all(24), children: [
-              Text('Daily cloud native word game', style: Theme.of(context).textTheme.headlineSmall),
+              const AcademyHeading(label: 'Daily challenge', title: 'Kubele', description: 'Six guesses. One cloud native term.'),
               const SizedBox(height: 8),
               Text('Guess the ${normalize(widget.answer).length}-letter term in six attempts.'),
               const SizedBox(height: 20),
