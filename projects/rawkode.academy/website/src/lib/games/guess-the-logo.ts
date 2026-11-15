@@ -243,3 +243,10 @@ export function scoreGame(answers: (string | null)[], rounds: Round[]): number {
 	}
 	return score;
 }
+
+/** Practice excludes the current weekly answers, including from distractors. */
+export function buildPracticeRounds(pool: Logo[], date: Date, rng: () => number) {
+	const weeklyAnswers = new Set(buildWeeklyRounds(pool, date).map((round) => round.answer));
+	const practicePool = pool.filter((logo) => !weeklyAnswers.has(logo.name));
+	return { poolSize: practicePool.length, rounds: buildRounds(practicePool, ROUND_COUNT, OPTION_COUNT, rng) };
+}

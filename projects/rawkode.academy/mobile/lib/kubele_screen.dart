@@ -6,9 +6,10 @@ import 'kubele.dart';
 
 /// Presented after the caller has authenticated the player.
 class KubeleScreen extends StatefulWidget {
-  const KubeleScreen({super.key, required this.answer, this.account});
+  const KubeleScreen({super.key, required this.answer, this.account, this.practice = false});
   final String answer;
   final AcademyAccount? account;
+  final bool practice;
 
   @override
   State<KubeleScreen> createState() => _KubeleScreenState();
@@ -33,7 +34,7 @@ class _KubeleScreenState extends State<KubeleScreen> {
     super.initState();
     session = KubeleSession(answer: widget.answer);
     day = DateTime.now().toUtc().toIso8601String().substring(0, 10);
-    if (widget.account != null) {
+    if (widget.account != null && !widget.practice) {
       loading = true;
       _restore();
     }
@@ -84,7 +85,7 @@ class _KubeleScreenState extends State<KubeleScreen> {
     final guess = normalize(controller.text);
     setState(() {
       if (finished || loading || saving || unavailable) return;
-      if (DateTime.now().toUtc().toIso8601String().substring(0, 10) != day) {
+      if (!widget.practice && DateTime.now().toUtc().toIso8601String().substring(0, 10) != day) {
         error = 'A new puzzle is available. Reopen Kubele to play it.';
         return;
       }
@@ -96,7 +97,7 @@ class _KubeleScreenState extends State<KubeleScreen> {
         session.submit(guess);
         controller.clear();
         error = null;
-        if (widget.account != null) {
+        if (widget.account != null && !widget.practice) {
           saving = true;
           _persist();
         }
@@ -111,7 +112,7 @@ class _KubeleScreenState extends State<KubeleScreen> {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 600),
             child: ListView(padding: const EdgeInsets.all(24), children: [
-              Text('Daily cloud native word game', style: Theme.of(context).textTheme.headlineSmall),
+              Text(widget.practice ? 'Practice cloud native words' : 'Daily cloud native word game', style: Theme.of(context).textTheme.headlineSmall),
               const SizedBox(height: 8),
               Text('Guess the ${normalize(widget.answer).length}-letter term in six attempts.'),
               const SizedBox(height: 20),
@@ -139,7 +140,7 @@ class _KubeleScreenState extends State<KubeleScreen> {
                 FilledButton(onPressed: loading || saving || unavailable ? null : submit, child: const Text('Submit guess')),
               ] else
                 Text(won ? 'You got it in ${guesses.length} ${guesses.length == 1 ? 'guess' : 'guesses'}!' : 'Today’s answer: ${widget.answer}', style: Theme.of(context).textTheme.titleLarge),
-              if (finished) TextButton.icon(
+              if (finished && !widget.practice) TextButton.icon(
                 icon: const Icon(Icons.copy),
                 label: const Text('Copy spoiler-free result'),
                 onPressed: () async {

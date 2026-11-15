@@ -1,10 +1,10 @@
 import type { APIRoute } from "astro";
 import { getCollection } from "@/lib/live-content";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
-import { weekKey, buildWeeklyRounds, type CncfStatus } from "@/lib/games/guess-the-logo";
+import { weekKey, buildWeeklyRounds, buildPracticeRounds, createRng, type CncfStatus } from "@/lib/games/guess-the-logo";
 
 /** Canonical weekly rounds, shared with authenticated game clients. */
-export const GET: APIRoute = async ({ locals }) => {
+export const GET: APIRoute = async ({ locals, url }) => {
   const headers = { "Content-Type": "application/json", "Cache-Control": "private, no-store" };
   if (!locals.user) {
     return new Response(JSON.stringify({ error: "Authentication required" }), { status: 401, headers });
@@ -21,6 +21,10 @@ export const GET: APIRoute = async ({ locals }) => {
       };
     }).filter((logo): logo is NonNullable<typeof logo> => logo !== null);
     const now = new Date();
+    if (url.searchParams.get("mode") === "practice") {
+      const seed = crypto.getRandomValues(new Uint32Array(1))[0]!;
+      return new Response(JSON.stringify({ week: weekKey(now), ...buildPracticeRounds(logos, now, createRng(seed)) }), { headers });
+    }
     return new Response(JSON.stringify({ week: weekKey(now), poolSize: logos.length, rounds: buildWeeklyRounds(logos, now) }), { headers });
   } catch {
     return new Response(JSON.stringify({ error: "Rounds unavailable" }), { status: 503, headers });
