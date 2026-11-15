@@ -158,8 +158,8 @@ class AcademyAccount extends ChangeNotifier {
   Future<bool> _loadUser() async {
     final generation = _generation;
     final response = await _send(() => _client.get(Uri.https('id.rawkode.academy', '/api/mobile/session'), headers: _headers));
+    if (response.statusCode == 401) throw const AccountLookupException(401);
     if (_signingOut || generation != _generation) return false;
-    if (response.statusCode == 401) return false;
     if (response.statusCode != 200) throw AccountLookupException(response.statusCode);
     user = (jsonDecode(response.body) as Map<String, dynamic>)['user'] as Map<String, dynamic>;
     return true;
