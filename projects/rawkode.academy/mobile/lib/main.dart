@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'account.dart';
 import 'kubele.dart';
@@ -90,12 +89,7 @@ class _AcademyHomeState extends State<AcademyHome> {
         const SizedBox(height: 24),
         Text('Play', style: Theme.of(context).textTheme.headlineSmall),
         Card(child: ListTile(leading: const Icon(Icons.grid_on), title: const Text('Kubele'), subtitle: const Text('Daily cloud native word game'), enabled: user != null && !loading, onTap: user == null ? null : () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => KubeleScreen(answer: dailyAnswer(DateTime.now()), account: account))))),
-        if (user != null) TextButton.icon(onPressed: () {
-          final pool = answers.where((answer) => answer != dailyAnswer(DateTime.now())).toList();
-          Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => KubeleScreen(answer: pool[Random.secure().nextInt(pool.length)], account: account, practice: true)));
-        }, icon: const Icon(Icons.refresh), label: const Text('Practice Kubele')),
         Card(child: ListTile(leading: const Icon(Icons.extension_outlined), title: const Text('CNIcon'), subtitle: const Text('Weekly cloud native logo game'), enabled: user != null && !loading, onTap: user == null ? null : () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => CniconScreen(account: account))))),
-        if (user != null) TextButton.icon(onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => CniconScreen(account: account, practice: true))), icon: const Icon(Icons.refresh), label: const Text('Practice CNIcon')),
         if (user != null) Card(child: ListTile(leading: const Icon(Icons.person_outline), title: const Text('Your profile'), subtitle: const Text('Player statistics'), onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => ProfileScreen(account: account))))),
         const SizedBox(height: 24),
         Text('Explore', style: Theme.of(context).textTheme.headlineSmall),
