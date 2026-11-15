@@ -45,6 +45,19 @@ http.Client clientFor(List<String> revoked, {List<String>? gameTokens}) => MockC
 });
 
 void main() {
+  test('sign-in diagnostics exclude arbitrary server text', () {
+    final error = FlutterAppAuthPlatformException(
+      code: 'token_failed',
+      platformErrorDetails: FlutterAppAuthPlatformErrorDetails(
+        type: '2', code: '2001', error: 'invalid_grant',
+        errorDescription: 'sensitive server response',
+      ),
+    );
+    expect(signInErrorMessage(error), contains('2/2001/invalid_grant'));
+    expect(signInErrorMessage(error), isNot(contains('sensitive')));
+    expect(signInErrorMessage(const AccountLookupException(503)), contains('HTTP 503'));
+  });
+
   test('concurrent expired requests share one rotating refresh', () async {
     final pending = Completer<TokenResponse>();
     final auth = FakeAuth(() => pending.future);
