@@ -1,5 +1,11 @@
 version = 5
 
+[runtimes."projects/rawkode.academy/identity"]
+type = "nix"
+flake = "."
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/identity/./flake.lock"
+
 [vcs.cuenv-skills]
 url = "https://github.com/cuenv/cuenv.git"
 reference = "main"
