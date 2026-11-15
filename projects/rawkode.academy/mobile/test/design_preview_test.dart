@@ -26,6 +26,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     SharedPreferences.setMockInitialValues({});
     FlutterSecureStorage.setMockInitialValues({});
+    await (FontLoader('MaterialIcons')..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
     for (final family in ['Text', 'Display', 'Mono']) {
       await (FontLoader('Red Hat $family')..addFont(rootBundle.load('assets/fonts/RedHat$family.ttf'))).load();
     }
@@ -43,22 +44,38 @@ void main() {
           final week = DateTime.utc(now.year, now.month, now.day).subtract(Duration(days: now.weekday - 1)).toIso8601String().substring(0, 10);
           return http.Response(jsonEncode({'week': week, 'poolSize': 5, 'rounds': List.generate(5, (i) => {'logo': {'name': 'Project $i', 'iconUrl': 'https://example.com/logo.svg', 'cncfStatus': null}, 'answer': 'Project $i', 'options': ['Project $i', 'Another project']})}), 200);
         }
-        if (request.url.path.contains('achievements')) return http.Response('[]', 200);
+        if (request.url.path.contains('cnicon-achievements')) return http.Response('[{"id":"first","icon":"★","name":"First steps","description":"Complete your first weekly challenge."}]', 200);
+        if (request.url.path.contains('achievements')) return http.Response('[{"achievementId":"first"}]', 200);
         return http.Response('{"stats":{"played":12,"wins":10,"streak":3},"weeksPlayed":4,"lifetimeCorrect":18,"currentStreak":2}', 200);
       }))..user = {'id': 'preview', 'name': 'Academy player', 'username': 'cloudnative'};
       final screens = <String, Widget>{
         'home': const AcademyHome(),
+        'home-player': AcademyHome(account: account),
         'watch': CatalogScreen(videos: true, service: catalog()),
         'learn': CatalogScreen(videos: false, service: catalog()),
         'course': CourseDetail(item: course), 'lesson': LessonDetail(item: lesson),
         'video': const VideoDetail(item: {'title': 'Cloud native live', 'description': 'Join the Academy for a hands-on session.'}, upcoming: true),
         'kubele': const KubeleScreen(answer: 'Helm'),
-        'cnicon': CniconScreen(account: account), 'profile': ProfileScreen(account: account),
+        'cnicon': CniconScreen(account: account),
+        'cnicon-play': CniconScreen(account: account, loadLogo: (_) async => '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><path d="M50 5L95 80H5Z" fill="#0077ff"/></svg>'),
+        'cnicon-reveal': CniconScreen(account: account, loadLogo: (_) async => '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><path d="M50 5L95 80H5Z" fill="#0077ff"/></svg>'),
+        'profile': ProfileScreen(account: account),
       };
       for (final entry in screens.entries) {
+        SharedPreferences.setMockInitialValues({});
         final key = GlobalKey();
         await tester.pumpWidget(MaterialApp(theme: AcademyDesign.theme(brightness), home: RepaintBoundary(key: key, child: entry.value)));
         await tester.pump(); await tester.pump(const Duration(milliseconds: 100)); await tester.pump();
+        if (entry.key.startsWith('cnicon-')) {
+          await tester.scrollUntilVisible(find.text('Start weekly challenge'), 150);
+          await tester.tap(find.text('Start weekly challenge'));
+          await tester.pump(); await tester.pump();
+          if (entry.key == 'cnicon-reveal') {
+            await tester.scrollUntilVisible(find.text('Project 0'), 150);
+            await tester.tap(find.text('Project 0'));
+            await tester.pump(); await tester.pump(const Duration(milliseconds: 400));
+          }
+        }
         expect(tester.takeException(), isNull, reason: '${entry.key} ${brightness.name}');
         final boundary = key.currentContext!.findRenderObject()! as RenderRepaintBoundary;
         await tester.runAsync(() async {
@@ -69,6 +86,7 @@ void main() {
           image.dispose();
         });
         await tester.pumpWidget(const SizedBox());
+        await tester.pump(const Duration(seconds: 1));
       }
     }
   });

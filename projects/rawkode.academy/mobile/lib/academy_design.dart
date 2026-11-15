@@ -78,3 +78,13 @@ class AcademyStat extends StatelessWidget {
       const SizedBox(height: 8), Text(label.toUpperCase(), style: Theme.of(context).textTheme.labelSmall)],
   )));
 }
+
+class AcademyBody extends StatelessWidget {
+  const AcademyBody({super.key, required this.children});
+  final List<Widget> children;
+  @override
+  Widget build(BuildContext context) => Center(child: ConstrainedBox(
+    constraints: const BoxConstraints(maxWidth: 800),
+    child: ListView(padding: const EdgeInsets.all(24), children: children),
+  ));
+}

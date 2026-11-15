@@ -116,14 +116,18 @@ class _KubeleScreenState extends State<KubeleScreen> {
               const SizedBox(height: 8),
               Text('Guess the ${normalize(widget.answer).length}-letter term in six attempts.'),
               const SizedBox(height: 20),
-              for (final guess in guesses)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Wrap(spacing: 4, runSpacing: 4, children: [
-                    for (var i = 0; i < guess.length; i++)
-                      _Tile(letter: guess[i], mark: markGuess(guess, widget.answer)[i]),
-                  ]),
-                ),
+              for (var row = 0; row < 6; row++)
+                Padding(padding: const EdgeInsets.only(bottom: 6), child: Semantics(label: 'Guess ${row + 1}',
+                  child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Row(children: [
+                    for (var i = 0; i < normalize(widget.answer).length; i++)
+                      Padding(padding: const EdgeInsets.only(right: 4), child: row < guesses.length
+                        ? _Tile(letter: guesses[row][i], mark: markGuess(guesses[row], widget.answer)[i])
+                        : Container(width: 40, height: 44, decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surface,
+                            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant)),
+                            child: Semantics(label: 'Empty'))),
+                  ])),
+                )),
               const SizedBox(height: 16),
               if (loading || saving) const LinearProgressIndicator(),
               if (error != null && (finished || unavailable)) Text(error!),
@@ -184,8 +188,8 @@ class _Tile extends StatelessWidget {
         alignment: Alignment.center,
         width: 40,
         height: 44,
-        decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(4)),
-        child: Text(letter, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2)),
+        child: Text(letter, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontFamily: 'Red Hat Mono')),
       ),
     );
   }

@@ -22,13 +22,14 @@ class AcademyApp extends StatelessWidget {
 }
 
 class AcademyHome extends StatefulWidget {
-  const AcademyHome({super.key});
+  const AcademyHome({super.key, this.account});
+  final AcademyAccount? account;
   @override
   State<AcademyHome> createState() => _AcademyHomeState();
 }
 
 class _AcademyHomeState extends State<AcademyHome> {
-  final account = AcademyAccount();
+  late final account = widget.account ?? AcademyAccount();
   bool loading = true;
   String? error;
 

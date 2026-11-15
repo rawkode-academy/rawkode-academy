@@ -124,7 +124,7 @@ class CourseDetail extends StatelessWidget {
   const CourseDetail({super.key, required this.item});
   final Map<String, dynamic> item;
   @override
-  Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: Text(item['title'] as String)), body: ListView(padding: const EdgeInsets.all(24), children: [
+  Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: Text(item['title'] as String)), body: AcademyBody(children: [
     AcademyHeading(label: 'Course', title: item['title'] as String, description: item['description'] as String?),
     const SizedBox(height: 16),
     Text('Lessons', style: Theme.of(context).textTheme.titleLarge),
@@ -154,7 +154,7 @@ class LessonDetail extends StatelessWidget {
   Widget build(BuildContext context) {
     final videoId = item['videoId'] as String?;
     final text = _plainText(item['body']);
-    return Scaffold(appBar: AppBar(title: Text(item['title'] as String)), body: ListView(padding: const EdgeInsets.all(24), children: [
+    return Scaffold(appBar: AppBar(title: Text(item['title'] as String)), body: AcademyBody(children: [
       AcademyHeading(label: 'Lesson', title: item['title'] as String, description: item['description'] as String?),
       if (videoId != null) FilledButton.icon(icon: const Icon(Icons.play_arrow), label: const Text('Watch lesson'), onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => VideoDetail(item: {'id': videoId, 'title': item['title'], 'description': item['description']}, upcoming: false)))),
       if (text.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 20), child: SelectableText(text)),
@@ -187,7 +187,7 @@ class _VideoDetailState extends State<VideoDetail> {
   @override
   void dispose() { controller?.removeListener(_playerChanged); controller?.dispose(); super.dispose(); }
   @override
-  Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: Text(widget.item['title'] as String)), body: ListView(padding: const EdgeInsets.all(24), children: [
+  Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: Text(widget.item['title'] as String)), body: AcademyBody(children: [
     AcademyHeading(label: widget.upcoming ? 'Upcoming session' : 'Watch', title: widget.item['title'] as String),
     if (DateTime.tryParse(widget.item['publishedAt'] as String? ?? '') != null) Padding(padding: const EdgeInsets.only(bottom: 20), child: Text('${MaterialLocalizations.of(context).formatFullDate(DateTime.parse(widget.item['publishedAt'] as String).toLocal())} · ${TimeOfDay.fromDateTime(DateTime.parse(widget.item['publishedAt'] as String).toLocal()).format(context)}')),
     if (widget.upcoming) Card(child: Padding(padding: const EdgeInsets.all(24), child: Column(children: [const Icon(Icons.schedule, size: 32), const SizedBox(height: 12), const Text('This session has not started yet.')])) )

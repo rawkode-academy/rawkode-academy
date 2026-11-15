@@ -22,7 +22,8 @@ void main() {
       child: CatalogScreen(videos: true, service: service))));
     await tester.pump(); await tester.pump();
     expect(tester.takeException(), isNull);
-    await tester.scrollUntilVisible(find.text('No results found.'), 150);
+    await tester.scrollUntilVisible(find.text('No results found.'), 150,
+      scrollable: find.descendant(of: find.byType(CustomScrollView), matching: find.byType(Scrollable)).first);
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox());
   });
