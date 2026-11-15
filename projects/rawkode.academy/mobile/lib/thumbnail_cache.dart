@@ -14,21 +14,26 @@ class ThumbnailFileService extends FileService {
     final request = http.Request('GET', uri);
     if (headers != null) request.headers.addAll(headers);
     final response = await _client.send(request).timeout(const Duration(seconds: 20));
-    if (response.statusCode != 206) return HttpGetResponse(response);
+    if (response.statusCode != 200 && response.statusCode != 206) return HttpGetResponse(response);
 
-    final range = RegExp(r'^bytes 0-(\d+)/(\d+)$').firstMatch(response.headers['content-range'] ?? '');
+    final range = response.statusCode == 206
+        ? RegExp(r'^bytes 0-(\d+)/(\d+)$').firstMatch(response.headers['content-range'] ?? '')
+        : null;
     final end = range == null ? null : int.tryParse(range.group(1)!);
     final total = range == null ? null : int.tryParse(range.group(2)!);
     const maxImageBytes = 5 * 1024 * 1024;
-    if (end == null || total == null || end + 1 != total || total > maxImageBytes) {
+    final invalidRange = response.statusCode == 206 &&
+        (end == null || total == null || end + 1 != total || total > maxImageBytes);
+    if (invalidRange || (response.contentLength != null && response.contentLength! > maxImageBytes)) {
+      await response.stream.listen((_) {}).cancel();
       throw const FormatException('Incomplete thumbnail');
     }
     final bytes = BytesBuilder(copy: false);
     await for (final chunk in response.stream.timeout(const Duration(seconds: 20))) {
       bytes.add(chunk);
-      if (bytes.length > maxImageBytes || bytes.length > total) throw const FormatException('Invalid thumbnail size');
+      if (bytes.length > maxImageBytes || (total != null && bytes.length > total)) throw const FormatException('Invalid thumbnail size');
     }
-    if (bytes.length != total) throw const FormatException('Incomplete thumbnail');
+    if (total != null && bytes.length != total) throw const FormatException('Incomplete thumbnail');
     final complete = bytes.takeBytes();
     return HttpGetResponse(http.StreamedResponse(Stream.value(complete), 200,
       contentLength: complete.length, headers: response.headers, request: request));

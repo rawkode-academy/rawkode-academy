@@ -6,6 +6,14 @@ import 'package:http/testing.dart';
 import 'package:rawkode_academy_mobile/thumbnail_cache.dart';
 
 void main() {
+  test('keeps ordinary image responses cacheable', () async {
+    final service = ThumbnailFileService(client: MockClient((_) async => http.Response('image', 200,
+      headers: {'content-type': 'image/webp'})));
+    final result = await service.get('https://example.com/image.webp');
+    expect(result.statusCode, 200);
+    expect(await result.content.expand((chunk) => chunk).toList(), utf8.encode('image'));
+  });
+
   test('makes a complete 206 image cacheable', () async {
     final bytes = utf8.encode('complete');
     final service = ThumbnailFileService(client: MockClient((_) async => http.Response.bytes(bytes, 206,

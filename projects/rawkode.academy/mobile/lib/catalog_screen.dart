@@ -5,14 +5,15 @@ import 'catalog_service.dart';
 import 'thumbnail_cache.dart';
 
 class CatalogScreen extends StatefulWidget {
-  const CatalogScreen({super.key, required this.videos});
+  const CatalogScreen({super.key, required this.videos, this.service});
   final bool videos;
+  final CatalogService? service;
   @override
   State<CatalogScreen> createState() => _CatalogScreenState();
 }
 
 class _CatalogScreenState extends State<CatalogScreen> {
-  final catalog = CatalogService();
+  late final catalog = widget.service ?? CatalogService();
   List<dynamic> items = [];
   bool loading = true;
   String? error;
