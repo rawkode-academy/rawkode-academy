@@ -4,10 +4,15 @@ import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { weekKey, buildWeeklyRounds, type CncfStatus } from "@/lib/games/guess-the-logo";
 
 /** Canonical weekly rounds, shared with authenticated game clients. */
-export const GET: APIRoute = async ({ locals }) => {
+export const GET: APIRoute = async ({ locals, url }) => {
   const headers = { "Content-Type": "application/json", "Cache-Control": "private, no-store" };
   if (!locals.user) {
     return new Response(JSON.stringify({ error: "Authentication required" }), { status: 401, headers });
+  }
+  // Older preview APKs requested practice rounds. Never return the weekly
+  // answers in response to that obsolete request.
+  if (url.searchParams.get("mode") === "practice") {
+    return new Response(JSON.stringify({ error: "Practice is no longer available" }), { status: 410, headers });
   }
   try {
     const entries = await getCollection("technologies");

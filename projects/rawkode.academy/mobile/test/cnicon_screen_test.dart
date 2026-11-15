@@ -44,7 +44,7 @@ void main() {
     await tester.pump();
     await tester.pump();
     expect(find.textContaining('Round 1 of 5'), findsOneWidget);
-    expect(find.text('Could not load the logo or save your game. Try again.'), findsNothing);
+    expect(find.text('Could not load the logo. Check your connection and try again.'), findsNothing);
     await tester.pumpWidget(const SizedBox());
   });
 }
