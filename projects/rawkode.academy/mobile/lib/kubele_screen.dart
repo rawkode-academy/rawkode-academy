@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'account.dart';
 import 'kubele.dart';
@@ -135,6 +136,18 @@ class _KubeleScreenState extends State<KubeleScreen> {
                 FilledButton(onPressed: loading || saving || unavailable ? null : submit, child: const Text('Submit guess')),
               ] else
                 Text(won ? 'You got it in ${guesses.length} ${guesses.length == 1 ? 'guess' : 'guesses'}!' : 'Today’s answer: ${widget.answer}', style: Theme.of(context).textTheme.titleLarge),
+              if (finished) TextButton.icon(
+                icon: const Icon(Icons.copy),
+                label: const Text('Copy spoiler-free result'),
+                onPressed: () async {
+                  try {
+                    await Clipboard.setData(ClipboardData(text: shareResult(DateTime.parse('${day}T00:00:00Z'), guesses, widget.answer)));
+                    if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Result copied.')));
+                  } catch (_) {
+                    if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not copy the result.')));
+                  }
+                },
+              ),
               const SizedBox(height: 20),
               const Text('Green: correct place · Amber: in the answer · Grey: absent'),
             ]),

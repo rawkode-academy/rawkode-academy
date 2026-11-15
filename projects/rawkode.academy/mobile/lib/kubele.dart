@@ -73,3 +73,13 @@ class KubeleSession {
     _guesses.add(guess);
   }
 }
+
+/// A spoiler-free share card in the same format as the Academy website.
+String shareResult(DateTime date, List<String> guesses, String answer) {
+  final day = date.toUtc().toIso8601String().substring(0, 10);
+  final won = guesses.contains(normalize(answer));
+  final score = won ? '${guesses.length}' : 'X';
+  const icons = {Mark.correct: '🟩', Mark.present: '🟨', Mark.absent: '⬛'};
+  final rows = guesses.map((guess) => markGuess(guess, answer).map((mark) => icons[mark]!).join()).join('\n');
+  return 'Kubele $day $score/6\n$rows\nhttps://rawkode.academy/games/kubele';
+}

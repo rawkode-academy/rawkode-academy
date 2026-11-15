@@ -22,4 +22,10 @@ void main() {
     expect(session.won, isTrue);
     expect(() => session.submit('held'), throwsStateError);
   });
+  test('share text contains marks without the answer', () {
+    final result = shareResult(DateTime.utc(2026, 10, 13), ['HELM'], 'Helm');
+    expect(result, contains('Kubele 2026-10-13 1/6'));
+    expect(result, contains('🟩🟩🟩🟩'));
+    expect(result, isNot(contains('HELM')));
+  });
 }

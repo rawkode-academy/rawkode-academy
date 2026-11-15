@@ -75,8 +75,7 @@ class AcademyAccount extends ChangeNotifier {
       await _saveTokens();
       return true;
     } on FlutterAppAuthPlatformException catch (error) {
-      final details = error.details;
-      if (details is FlutterAppAuthPlatformErrorDetails && details.error == 'invalid_grant') return false;
+      if (error.platformErrorDetails.error == FlutterAppAuthOAuthError.invalidGrant) return false;
       throw StateError('Could not refresh your session. Please retry.');
     } catch (_) {
       throw StateError('Could not refresh your session. Please retry.');
