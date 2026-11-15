@@ -301,6 +301,8 @@ export interface SeriesData {
 	title: string;
 	description: string;
 	cover?: Cover | undefined;
+	/** Titles of parts that are not written yet; a series with any is ongoing. */
+	planned?: string[] | undefined;
 	/** The intro shown on /series/<id>. */
 	body?: DocNode | undefined;
 }

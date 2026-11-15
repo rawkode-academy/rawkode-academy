@@ -90,3 +90,37 @@ export async function getAllSeries(): Promise<SeriesEntry[]> {
 		}))
 		.filter((series) => series.parts.length > 0);
 }
+
+/** The number in a part's file name (0-what-is-mcp is 0), else its position from 1. */
+export function partNumber(series: SeriesEntry, id: string): number {
+	const match = /^(\d+)-/.exec(id.split("/").pop() ?? "");
+	return match
+		? Number(match[1])
+		: series.parts.findIndex((part) => part.id === id) + 1;
+}
+
+/** Planned parts, numbered on from the last published one. */
+export function plannedParts(
+	series: SeriesEntry,
+): { number: number; title: string }[] {
+	const last = series.parts.at(-1);
+	const from = last ? partNumber(series, last.id) + 1 : 1;
+	return (series.data.planned ?? []).map((title, index) => ({
+		number: from + index,
+		title,
+	}));
+}
+
+/** "Understanding MCP · Part 0" by article id, for cards and lists. */
+export async function getSeriesLabels(): Promise<Map<string, string>> {
+	const labels = new Map<string, string>();
+	for (const series of await getAllSeries()) {
+		for (const part of series.parts) {
+			labels.set(
+				part.id,
+				`${series.data.title} · Part ${partNumber(series, part.id)}`,
+			);
+		}
+	}
+	return labels;
+}

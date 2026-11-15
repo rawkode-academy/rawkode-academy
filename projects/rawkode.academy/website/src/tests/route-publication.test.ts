@@ -267,6 +267,7 @@ async function loadArticlePage(): Promise<Component> {
 		"@/components/articles/Updates.astro": { default: empty },
 		"@/components/articles/RelatedVideos.astro": { default: empty },
 		"@/components/newsletter/NewsletterCTA.astro": { default: empty },
+		"@/components/read/SeriesNav.astro": { default: empty },
 		"@/components/read/ArticleHeader.astro": {
 			default: stub(
 				(result, _props, slots) =>

@@ -1,7 +1,7 @@
 ---
 import {
 	type Cover,
-	getAllSeries,
+	getSeriesLabels,
 	getCollection,
 	getEntries,
 	setContentCache,
@@ -25,12 +25,7 @@ export const prerender = false;
 const allArticles = (
 	await getCollection("articles")
 ).sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
-// "Part 2 of Understanding MCP", by article id.
-const seriesLabel = new Map(
-	(await getAllSeries()).flatMap(({ data, parts }) =>
-		parts.map(({ id }, index) => [id, `Part ${index + 1} of ${data.title}`] as const),
-	),
-);
+const seriesLabel = await getSeriesLabels();
 const hasSeries = seriesLabel.size > 0;
 
 // ─── Filters (?type=…&topic=…) ─────────────────────────────────

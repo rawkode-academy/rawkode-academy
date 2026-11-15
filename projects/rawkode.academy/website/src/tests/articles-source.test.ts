@@ -20,7 +20,12 @@ import {
 	parseArticle,
 	parseSeries,
 } from "@/lib/articles/source";
-import { getAllSeries } from "@/lib/live-content/articles";
+import {
+	getAllSeries,
+	getSeriesLabels,
+	partNumber,
+	plannedParts,
+} from "@/lib/live-content/articles";
 
 const noAssets = (path: string): never => {
 	throw new Error(`unexpected asset ${path}`);
@@ -171,7 +176,7 @@ describe("series", () => {
 				...(series ? { series } : {}),
 			},
 		});
-		const meta = { title: "T", description: "D" };
+		const meta = { title: "T", description: "D", planned: ["Tasks"] };
 		vi.mocked(getCollection).mockImplementation((async (name: string) =>
 			name === "series"
 				? [
@@ -191,6 +196,15 @@ describe("series", () => {
 			"2-tools",
 			"10-servers",
 		]);
+		// Numbers come from the file names; planned parts carry on from the last.
+		const [mcp] = series;
+		if (!mcp) throw new Error("no series");
+		expect(mcp.parts.map(({ id }) => partNumber(mcp, id))).toEqual([0, 2, 10]);
+		expect(
+			partNumber({ ...mcp, parts: [{ id: "intro" }] as never }, "intro"),
+		).toBe(1);
+		expect(plannedParts(mcp)).toEqual([{ number: 11, title: "Tasks" }]);
+		expect((await getSeriesLabels()).get("2-tools")).toBe("T · Part 2");
 	});
 
 	it("map a series file to its title, description, cover and intro", () => {
@@ -213,6 +227,10 @@ describe("series", () => {
 			"/_content/series/understanding-mcp/cover.png",
 		);
 		expect(JSON.stringify(data.body)).toContain("here");
+		expect(
+			parseSeries(seriesFile(`${SERIES}\nplanned:\n  - Tools`), noAssets)
+				.planned,
+		).toEqual(["Tools"]);
 		expect(() =>
 			parseSeries(seriesFile(`${SERIES}\npart: 1`), noAssets),
 		).toThrow(

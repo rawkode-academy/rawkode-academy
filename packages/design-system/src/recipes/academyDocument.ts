@@ -587,8 +587,7 @@ export const academyDocument = sva({
 			_hover: {
 				color: "academy.accent",
 			},
-			// location: the section in view; page: this article in its series.
-			'&[aria-current="location"], &[aria-current="page"]': {
+			'&[aria-current="location"]': {
 				color: "academy.accent",
 				fontWeight: "semibold",
 			},
