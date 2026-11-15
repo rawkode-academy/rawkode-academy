@@ -1,7 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:video_player/video_player.dart';
+import 'catalog_service.dart';
 
 class CatalogScreen extends StatefulWidget {
   const CatalogScreen({super.key, required this.videos});
@@ -11,6 +10,7 @@ class CatalogScreen extends StatefulWidget {
 }
 
 class _CatalogScreenState extends State<CatalogScreen> {
+  final catalog = CatalogService();
   List<dynamic> items = [];
   bool loading = true;
   String? error;
@@ -20,10 +20,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
   void initState() { super.initState(); _load(); }
   Future<void> _load() async {
     try {
-      final response = await http.get(Uri.https('rawkode.academy', '/api/mobile/catalog')).timeout(const Duration(seconds: 15));
-      if (response.statusCode != 200) throw StateError('Catalog unavailable');
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
-      items = data[widget.videos ? 'videos' : 'courses'] as List;
+      items = await catalog.load(videos: widget.videos);
       if (widget.videos) {
         items.sort((a, b) => (b['publishedAt'] as String).compareTo(a['publishedAt'] as String));
       }
@@ -32,13 +29,16 @@ class _CatalogScreenState extends State<CatalogScreen> {
   }
 
   @override
+  void dispose() { catalog.close(); super.dispose(); }
+
+  @override
   Widget build(BuildContext context) {
     final visible = items.where((item) => (item['title'] as String).toLowerCase().contains(search.toLowerCase())).toList();
     return Scaffold(appBar: AppBar(title: Text(widget.videos ? 'Watch & live' : 'Learn')),
       body: Center(child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 800), child: Column(children: [
         Padding(padding: const EdgeInsets.all(16), child: TextField(decoration: const InputDecoration(labelText: 'Search', prefixIcon: Icon(Icons.search), border: OutlineInputBorder()), onChanged: (value) => setState(() => search = value))),
         if (loading) const LinearProgressIndicator()
-        else if (error != null) Padding(padding: const EdgeInsets.all(16), child: Text(error!))
+        else if (error != null) Padding(padding: const EdgeInsets.all(16), child: Column(children: [Text(error!), TextButton(onPressed: () { setState(() { loading = true; error = null; }); _load(); }, child: const Text('Retry'))]))
         else if (visible.isEmpty) const Padding(padding: EdgeInsets.all(16), child: Text('No results found.'))
         else Expanded(child: ListView.builder(itemCount: visible.length, itemBuilder: (context, index) {
           final item = visible[index] as Map<String, dynamic>;
