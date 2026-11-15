@@ -21,6 +21,7 @@ class _KubeleScreenState extends State<KubeleScreen> {
   bool loading = false;
   bool saving = false;
   bool unavailable = false;
+  Map<String, dynamic>? stats;
   late final String day;
   String get storageKey => 'kubele:${widget.account!.user!['id']}:$day';
   List<String> get guesses => session.guesses;
@@ -43,6 +44,7 @@ class _KubeleScreenState extends State<KubeleScreen> {
       final prefs = await SharedPreferences.getInstance();
       final local = prefs.getStringList(storageKey) ?? <String>[];
       final result = await widget.account!.get('/api/games/kubele/stats') as Map<String, dynamic>;
+      stats = result['stats'] as Map<String, dynamic>?;
       final server = result['today'];
       session = KubeleSession(answer: widget.answer, guesses: server == null ? local : (server as List).cast<String>());
       if (session.finished && server == null) await _saveResult();
@@ -55,6 +57,7 @@ class _KubeleScreenState extends State<KubeleScreen> {
 
   Future<void> _saveResult() async {
     final result = await widget.account!.post('/api/games/kubele/stats', {'date': day, 'guesses': guesses}) as Map<String, dynamic>;
+    stats = result['stats'] as Map<String, dynamic>?;
     final saved = result['today'];
     if (saved is List) session = KubeleSession(answer: widget.answer, guesses: saved.cast<String>());
   }
@@ -150,6 +153,7 @@ class _KubeleScreenState extends State<KubeleScreen> {
               ),
               const SizedBox(height: 20),
               const Text('Green: correct place · Amber: in the answer · Grey: absent'),
+              if (stats != null) Padding(padding: const EdgeInsets.only(top: 20), child: Text("${stats!['played']} played · ${stats!['wins']} wins · ${stats!['streak']} day streak")),
             ]),
           ),
         ),

@@ -32,6 +32,8 @@ class _CniconScreenState extends State<CniconScreen> {
   String? error;
   int? rank;
   int? recordedScore;
+  List<dynamic>? leaderboard;
+  bool leaderboardUnavailable = false;
 
   @override
   void initState() { super.initState(); _load(); }
@@ -45,6 +47,7 @@ class _CniconScreenState extends State<CniconScreen> {
         submitted = true;
         rank = status['rank'] as int?;
         recordedScore = status['score'] as int?;
+        await _loadLeaderboard();
       } else {
         final data = await widget.account.get('/api/games/cnicon/rounds') as Map<String, dynamic>;
         rounds = (data['rounds'] as List).map((e) => CniconRound.fromJson(e as Map<String, dynamic>)).toList();
@@ -72,6 +75,16 @@ class _CniconScreenState extends State<CniconScreen> {
       }
     } catch (_) { deadline = null; unavailable = true; error = 'Could not load CNIcon. Please reopen it to retry.'; }
     if (mounted) setState(() => loading = false);
+  }
+
+  Future<void> _loadLeaderboard() async {
+    try {
+      leaderboard = await widget.account.get('/api/games/cnicon/leaderboard') as List<dynamic>;
+      leaderboardUnavailable = false;
+    } catch (_) {
+      leaderboardUnavailable = true;
+    }
+    if (mounted) setState(() {});
   }
 
   String _weekKey() {
@@ -158,6 +171,7 @@ class _CniconScreenState extends State<CniconScreen> {
       recordedScore = result['score'] as int?;
       rank = result['rank'] as int?;
       submitted = true;
+      await _loadLeaderboard();
     } catch (_) { error = 'Your result could not be saved. Retry while this screen is open.'; }
     if (mounted) setState(() => busy = false);
   }
@@ -171,6 +185,15 @@ class _CniconScreenState extends State<CniconScreen> {
         else if (submitted) ...[
           Text('Your weekly result', style: Theme.of(context).textTheme.headlineSmall),
           Text('Score: ${recordedScore ?? '—'} · Rank: ${rank ?? '—'}'),
+          const SizedBox(height: 20),
+          Text('This week’s leaderboard', style: Theme.of(context).textTheme.titleLarge),
+          if (leaderboardUnavailable) TextButton(onPressed: _loadLeaderboard, child: const Text('Retry leaderboard')),
+          if (leaderboard != null && leaderboard!.isEmpty) const Text('No scores yet.'),
+          if (leaderboard != null) for (final row in leaderboard!) ListTile(
+            leading: Text('${row['rank']}'),
+            title: Text(row['personName'] as String? ?? 'Player'),
+            trailing: Text('${row['score']}'),
+          ),
         ] else if (unavailable || (error != null && rounds.isEmpty)) Text(error ?? 'CNIcon is unavailable.')
         else if (rounds.isNotEmpty && answers.length == rounds.length) ...[
           Text(error ?? 'Saving your result…'),

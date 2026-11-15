@@ -4,6 +4,7 @@ import 'kubele.dart';
 import 'kubele_screen.dart';
 import 'cnicon_screen.dart';
 import 'catalog_screen.dart';
+import 'profile_screen.dart';
 
 void main() => runApp(const AcademyApp());
 
@@ -89,6 +90,7 @@ class _AcademyHomeState extends State<AcademyHome> {
         Text('Play', style: Theme.of(context).textTheme.headlineSmall),
         Card(child: ListTile(leading: const Icon(Icons.grid_on), title: const Text('Kubele'), subtitle: const Text('Daily cloud native word game'), enabled: user != null && !loading, onTap: user == null ? null : () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => KubeleScreen(answer: dailyAnswer(DateTime.now()), account: account))))),
         Card(child: ListTile(leading: const Icon(Icons.extension_outlined), title: const Text('CNIcon'), subtitle: const Text('Weekly cloud native logo game'), enabled: user != null && !loading, onTap: user == null ? null : () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => CniconScreen(account: account))))),
+        if (user != null) Card(child: ListTile(leading: const Icon(Icons.person_outline), title: const Text('Your profile'), subtitle: const Text('Player statistics'), onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => ProfileScreen(account: account))))),
         const SizedBox(height: 24),
         Text('Explore', style: Theme.of(context).textTheme.headlineSmall),
         Card(child: ListTile(leading: const Icon(Icons.school_outlined), title: const Text('Learn'), subtitle: const Text('Courses and lessons'), onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const CatalogScreen(videos: false))))),
