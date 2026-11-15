@@ -3,6 +3,7 @@ package cuenv
 import (
 	"github.com/cuenv/cuenv/schema"
 	c "github.com/cuenv/cuenv/contrib/contributors"
+	xNix "github.com/cuenv/cuenv/contrib/nix"
 )
 
 let _removeDeterminateReceipt = """
@@ -73,9 +74,14 @@ config: ci: cuenv: {
 	}
 }
 
-runtime: schema.#DevenvRuntime
+runtime: *schema.#DevenvRuntime | schema.#NixRuntime
 
-hooks: onEnter: devenv: schema.#Devenv
+let _shellHooks = {
+	devenv: {devenv: schema.#Devenv}
+	nix: {nix: xNix.#NixFlake}
+}
+
+hooks: onEnter: _shellHooks[runtime.type]
 
 // A project may set _ciRequireReport to its repository-relative path. `cuenv
 // ci` skips a project whose env.cue fails to evaluate and still exits 0, so the
@@ -225,3 +231,4 @@ if _ownCloudflareToken == _|_ {
 		apply: CLOUDFLARE_API_TOKEN: _readWrite & {secretName: "CLOUDFLARE_ROOT_TOKEN"}
 	}
 }
+

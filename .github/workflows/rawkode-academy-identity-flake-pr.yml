@@ -1,0 +1,32 @@
+name: rawkode-academy-identity-flake
+on:
+  pull_request:
+    paths:
+      - 'projects/rawkode.academy/identity/**'
+      - '.github/workflows/rawkode-academy-identity-flake-pr.yml'
+      - 'bun.lock'
+      - 'cuenv.lock'
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/determinate-nix-action@v3
+      - name: Install cuenv and sync
+        run: |
+          curl -fsSL -o /tmp/cuenv https://github.com/cuenv/cuenv/releases/download/0.76.0/cuenv-linux-x64
+          chmod +x /tmp/cuenv
+          /tmp/cuenv sync -A
+      - name: Validate the identity flake
+        working-directory: projects/rawkode.academy/identity
+        run: nix flake check --no-build
+      - name: Install workspace dependencies in the flake shell
+        working-directory: projects/rawkode.academy/identity
+        run: nix develop --command bun install --frozen-lockfile
+      - name: Build with cuenv's Nix runtime
+        run: /tmp/cuenv task --path projects/rawkode.academy/identity build
+      - name: Show sync lock changes
+        if: always()
+        run: git diff -- cuenv.lock
