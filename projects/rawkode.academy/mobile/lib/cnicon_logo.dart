@@ -66,7 +66,7 @@ class _CniconLogoState extends State<CniconLogo> with SingleTickerProviderStateM
               );
             }, child: ColorFiltered(colorFilter: tint, child: SvgPicture.string(widget.svg, fit: BoxFit.contain))),
           ),
-          AnimatedOpacity(opacity: widget.revealed ? 1 : 0, duration: const Duration(milliseconds: 350),
+          AnimatedOpacity(key: const ValueKey('cnicon-colour-logo'), opacity: widget.revealed ? 1 : 0, duration: const Duration(milliseconds: 350),
             child: SvgPicture.string(widget.svg, fit: BoxFit.contain)),
         ]),
       )),

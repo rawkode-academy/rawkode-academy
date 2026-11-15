@@ -224,7 +224,7 @@ class _CniconScreenState extends State<CniconScreen> {
         else if (revealingIndex != null && logoSvg != null) ...[
           Text('Round ${revealingIndex! + 1} of ${rounds.length}'),
           const SizedBox(height: 24),
-          CniconLogo(svg: logoSvg!, revealed: true),
+          CniconLogo(key: ValueKey('cnicon-logo-$revealingIndex'), svg: logoSvg!, revealed: true),
           const SizedBox(height: 24),
           Text(answers[revealingIndex!] == null
               ? 'Time’s up! The answer was ${rounds[revealingIndex!].answer}.'
@@ -241,7 +241,7 @@ class _CniconScreenState extends State<CniconScreen> {
         ] else if (rounds.isNotEmpty && logoSvg != null) ...[
           Text('Round ${answers.length + 1} of ${rounds.length} · $remaining seconds'),
           const SizedBox(height: 24),
-          CniconLogo(svg: logoSvg!, revealed: false),
+          CniconLogo(key: ValueKey('cnicon-logo-${answers.length}'), svg: logoSvg!, revealed: false),
           const SizedBox(height: 24),
           for (final option in rounds[answers.length].options)
             Padding(padding: const EdgeInsets.only(bottom: 8), child: OutlinedButton(onPressed: busy ? null : () => _answer(option), child: Text(option))),

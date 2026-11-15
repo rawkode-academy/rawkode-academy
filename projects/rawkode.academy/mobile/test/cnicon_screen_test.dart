@@ -56,6 +56,10 @@ void main() {
     await tester.pump();
     expect(find.textContaining('Round 2 of 5'), findsOneWidget);
     expect(tester.widget<CniconLogo>(find.byType(CniconLogo)).revealed, isFalse);
+    final fullColourFade = tester.widget<FadeTransition>(find.descendant(
+      of: find.byKey(const ValueKey('cnicon-colour-logo')),
+      matching: find.byType(FadeTransition)).first);
+    expect(fullColourFade.opacity.value, 0);
     await tester.pumpWidget(const SizedBox());
   });
 }
