@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'account.dart';
 import 'cnicon.dart';
+import 'cnicon_logo.dart';
 
 /// Accept a whole SVG even if the CDN serves it as a complete byte range.
 bool isCompleteLogoResponse(http.Response response) {
@@ -37,6 +37,7 @@ class _CniconScreenState extends State<CniconScreen> {
   int poolSize = 0;
   String? week;
   String? logoSvg;
+  int? revealingIndex;
   String get storageKey => 'cnicon:${widget.account.user!['id']}:$week';
   bool loading = true;
   bool busy = false;
@@ -156,15 +157,18 @@ class _CniconScreenState extends State<CniconScreen> {
     final ms = deadline!.difference(DateTime.now().toUtc()).inMilliseconds.clamp(0, 15000);
     timer?.cancel();
     deadline = null;
-    setState(() { busy = true; answers.add(answer); times.add(ms); });
+    setState(() { busy = true; revealingIndex = answers.length; answers.add(answer); times.add(ms); });
     try { await _save(); } catch (_) {
       unavailable = true;
+      revealingIndex = null;
       error = 'Could not save your game. Reopen CNIcon to retry.';
       if (mounted) setState(() => busy = false);
       return;
     }
     if (!mounted) return;
-    setState(() => busy = false);
+    await Future<void>.delayed(const Duration(milliseconds: 900));
+    if (!mounted) return;
+    setState(() { busy = false; revealingIndex = null; });
     if (answers.length == rounds.length) { await _submit(); } else { await _start(); }
   }
 
@@ -217,7 +221,17 @@ class _CniconScreenState extends State<CniconScreen> {
             trailing: Text('${row['score']}'),
           ),
         ] else if (unavailable || (error != null && rounds.isEmpty)) Text(error ?? 'CNIcon is unavailable.')
-        else if (rounds.isNotEmpty && answers.length == rounds.length) ...[
+        else if (revealingIndex != null && logoSvg != null) ...[
+          Text('Round ${revealingIndex! + 1} of ${rounds.length}'),
+          const SizedBox(height: 24),
+          CniconLogo(svg: logoSvg!, revealed: true),
+          const SizedBox(height: 24),
+          Text(answers[revealingIndex!] == null
+              ? 'Time’s up! The answer was ${rounds[revealingIndex!].answer}.'
+              : answers[revealingIndex!] == rounds[revealingIndex!].answer
+                  ? 'Correct!'
+                  : 'Incorrect. The answer was ${rounds[revealingIndex!].answer}.'),
+        ] else if (rounds.isNotEmpty && answers.length == rounds.length) ...[
           Text(error ?? 'Saving your result…'),
           if (!busy) FilledButton(onPressed: _submit, child: const Text('Retry saving')),
         ] else if (rounds.isNotEmpty && deadline == null) ...[
@@ -227,7 +241,7 @@ class _CniconScreenState extends State<CniconScreen> {
         ] else if (rounds.isNotEmpty && logoSvg != null) ...[
           Text('Round ${answers.length + 1} of ${rounds.length} · $remaining seconds'),
           const SizedBox(height: 24),
-          SizedBox(height: 180, child: SvgPicture.string(logoSvg!)),
+          CniconLogo(svg: logoSvg!, revealed: false),
           const SizedBox(height: 24),
           for (final option in rounds[answers.length].options)
             Padding(padding: const EdgeInsets.only(bottom: 8), child: OutlinedButton(onPressed: busy ? null : () => _answer(option), child: Text(option))),
