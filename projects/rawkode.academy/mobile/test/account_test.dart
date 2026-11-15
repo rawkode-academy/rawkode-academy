@@ -16,6 +16,15 @@ class MemoryStorage implements CredentialStorage {
   Future<void> delete({required String key}) async { data.remove(key); }
 }
 
+class FailingStorage extends MemoryStorage {
+  bool fail = true;
+  @override
+  Future<void> delete({required String key}) async {
+    if (fail && key == 'token_pair') throw StateError('Storage unavailable');
+    await super.delete(key: key);
+  }
+}
+
 class FakeAuth extends FlutterAppAuth {
   FakeAuth(this.refresh);
   final Future<TokenResponse> Function() refresh;
@@ -89,5 +98,17 @@ void main() {
     expect(gameTokens, ['Bearer old']);
     expect(storage.data['token_pair'], isNull);
     expect(account.user, isNull);
+  });
+  test('credential deletion failure can be retried', () async {
+    final storage = FailingStorage();
+    final account = AcademyAccount(client: clientFor([]), auth: FakeAuth(() async => rotated()), storage: storage);
+    await account.restore();
+    await expectLater(account.signOut(), throwsStateError);
+    expect(account.credentialCleanupRequired, isTrue);
+    expect(account.user, isNull);
+    storage.fail = false;
+    await account.signOut();
+    expect(account.credentialCleanupRequired, isFalse);
+    expect(storage.data['token_pair'], isNull);
   });
 }

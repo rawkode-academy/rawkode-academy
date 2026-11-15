@@ -23,5 +23,6 @@ for name in ('DebugProfile.entitlements', 'Release.entitlements'):
     with path.open('rb') as source:
         entitlements = plistlib.load(source)
     entitlements['com.apple.security.network.client'] = True
+    entitlements.setdefault('keychain-access-groups', [])
     with path.open('wb') as target:
         plistlib.dump(entitlements, target, sort_keys=False)
