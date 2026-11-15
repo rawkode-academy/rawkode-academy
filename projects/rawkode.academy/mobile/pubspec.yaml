@@ -1,0 +1,24 @@
+name: rawkode_academy_mobile
+description: Rawkode Academy for mobile and desktop.
+publish_to: none
+version: 0.1.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_appauth: ^8.0.3
+  flutter_secure_storage: ^9.2.4
+  http: ^1.2.2
+  shared_preferences: ^2.3.4
+  flutter_svg: ^2.0.17
+  video_player: ^2.9.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
