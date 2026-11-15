@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Reads published Academy content from the existing public GraphQL gateway.
 class CatalogService {
@@ -13,8 +14,21 @@ class CatalogService {
     }
   }''';
   static const _videosQuery = '''query MobileVideos {
-    getAllVideos { id slug title description publishedAt type youtubeId }
+    getAllVideos { id slug title description publishedAt type youtubeId thumbnailUrl }
   }''';
+
+  String _cacheKey(bool videos) => videos ? 'catalog_videos_v1' : 'catalog_courses_v1';
+
+  /// Read the last successful public catalog, including when it is stale.
+  Future<List<dynamic>?> loadCached({required bool videos, DateTime? now}) async {
+    try {
+      final cached = (await SharedPreferences.getInstance()).getString(_cacheKey(videos));
+      if (cached == null) return null;
+      return _decode(cached, videos: videos, now: now);
+    } catch (_) {
+      return null;
+    }
+  }
 
   Future<List<dynamic>> load({required bool videos, DateTime? now}) async {
     final response = await _client.post(Uri.https('api.rawkode.academy', '/'),
@@ -22,7 +36,17 @@ class CatalogService {
       body: jsonEncode({'query': videos ? _videosQuery : _coursesQuery}),
     ).timeout(const Duration(seconds: 20));
     if (response.statusCode != 200) throw StateError('Catalog unavailable');
-    final result = jsonDecode(response.body) as Map<String, dynamic>;
+    final items = _decode(response.body, videos: videos, now: now);
+    try {
+      await (await SharedPreferences.getInstance()).setString(_cacheKey(videos), response.body);
+    } catch (_) {
+      // A storage failure must not hide a successfully fetched catalog.
+    }
+    return items;
+  }
+
+  List<dynamic> _decode(String body, {required bool videos, DateTime? now}) {
+    final result = jsonDecode(body) as Map<String, dynamic>;
     if (result['errors'] != null || result['data'] is! Map) throw StateError('Catalog unavailable');
     final data = result['data'] as Map<String, dynamic>;
     final source = data[videos ? 'getAllVideos' : 'allCourses'];

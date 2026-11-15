@@ -2,9 +2,12 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:rawkode_academy_mobile/catalog_service.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  setUp(() => SharedPreferences.setMockInitialValues({}));
   final now = DateTime.utc(2026, 11, 15);
   test('loads courses from GraphQL and hides draft and future lessons', () async {
     final requests = <String>[];
@@ -40,5 +43,28 @@ void main() {
       'data': {'allCourses': []}, 'errors': [{'message': 'Unavailable'}]
     }), 200)));
     await expectLater(service.load(videos: false, now: now), throwsStateError);
+  });
+  test('persists a successful catalog and keeps it when refresh fails', () async {
+    var offline = false;
+    final service = CatalogService(client: MockClient((request) async {
+      if (offline) return http.Response('offline', 503);
+      expect(request.body, contains('thumbnailUrl'));
+      return http.Response(jsonEncode({'data': {'getAllVideos': [
+        {'id': 'video', 'title': 'Video', 'publishedAt': '2026-01-01T00:00:00Z',
+          'type': 'recorded', 'thumbnailUrl': 'https://example.com/video.webp'},
+      ]}}), 200);
+    }));
+    await service.load(videos: true, now: now);
+    offline = true;
+    await expectLater(service.load(videos: true, now: now), throwsStateError);
+    final cached = await service.loadCached(videos: true, now: now);
+    expect(cached?.single['thumbnailUrl'], 'https://example.com/video.webp');
+    expect(await service.loadCached(videos: false, now: now), isNull);
+  });
+
+  test('ignores an invalid cached catalog', () async {
+    SharedPreferences.setMockInitialValues({'catalog_videos_v1': '{broken'});
+    final service = CatalogService(client: MockClient((_) async => http.Response('', 500)));
+    expect(await service.loadCached(videos: true, now: now), isNull);
   });
 }

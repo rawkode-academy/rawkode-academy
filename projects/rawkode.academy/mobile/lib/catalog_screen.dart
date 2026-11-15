@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:video_player/video_player.dart';
 import 'catalog_service.dart';
+import 'thumbnail_cache.dart';
 
 class CatalogScreen extends StatefulWidget {
   const CatalogScreen({super.key, required this.videos});
@@ -14,18 +16,39 @@ class _CatalogScreenState extends State<CatalogScreen> {
   List<dynamic> items = [];
   bool loading = true;
   String? error;
+  bool showingCached = false;
+  bool refreshing = false;
   String search = '';
 
   @override
   void initState() { super.initState(); _load(); }
   Future<void> _load() async {
+    if (refreshing) return;
+    refreshing = true;
+    var hasCached = false;
     try {
-      items = await catalog.load(videos: widget.videos);
-      if (widget.videos) {
-        items.sort((a, b) => (b['publishedAt'] as String).compareTo(a['publishedAt'] as String));
+      final cached = await catalog.loadCached(videos: widget.videos);
+      if (!mounted) return;
+      if (cached != null) {
+        hasCached = true;
+        setState(() { items = _sorted(cached); loading = false; error = null; showingCached = false; });
       }
-    } catch (_) { error = 'Could not load the catalog. Please try again.'; }
-    if (mounted) setState(() => loading = false);
+      final fresh = await catalog.load(videos: widget.videos);
+      if (mounted) setState(() { items = _sorted(fresh); loading = false; error = null; showingCached = false; });
+    } catch (_) {
+      if (mounted) setState(() {
+        loading = false;
+        if (hasCached || items.isNotEmpty) { showingCached = true; } else { error = 'Could not load the catalog. Please try again.'; }
+      });
+    } finally {
+      refreshing = false;
+    }
+  }
+
+  List<dynamic> _sorted(List<dynamic> data) {
+    final copy = List<dynamic>.of(data);
+    if (widget.videos) copy.sort((a, b) => (b['publishedAt'] as String).compareTo(a['publishedAt'] as String));
+    return copy;
   }
 
   @override
@@ -37,6 +60,10 @@ class _CatalogScreenState extends State<CatalogScreen> {
     return Scaffold(appBar: AppBar(title: Text(widget.videos ? 'Watch & live' : 'Learn')),
       body: Center(child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 800), child: Column(children: [
         Padding(padding: const EdgeInsets.all(16), child: TextField(decoration: const InputDecoration(labelText: 'Search', prefixIcon: Icon(Icons.search), border: OutlineInputBorder()), onChanged: (value) => setState(() => search = value))),
+        if (showingCached) Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Row(children: [
+          const Expanded(child: Text('Showing saved catalog. Could not refresh.')),
+          TextButton(onPressed: _load, child: const Text('Retry')),
+        ])),
         if (loading) const LinearProgressIndicator()
         else if (error != null) Padding(padding: const EdgeInsets.all(16), child: Column(children: [Text(error!), TextButton(onPressed: () { setState(() { loading = true; error = null; }); _load(); }, child: const Text('Retry'))]))
         else if (visible.isEmpty) const Padding(padding: EdgeInsets.all(16), child: Text('No results found.'))
@@ -45,6 +72,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
           final date = widget.videos ? DateTime.tryParse(item['publishedAt'] as String? ?? '')?.toLocal() : null;
           final upcoming = date != null && date.isAfter(DateTime.now());
           return Card(child: ListTile(
+            leading: widget.videos ? _VideoThumbnail(item: item) : null,
             title: Text(item['title'] as String),
             subtitle: Text(widget.videos && date != null ? '${upcoming ? 'Upcoming · ' : ''}${MaterialLocalizations.of(context).formatFullDate(date)} ${TimeOfDay.fromDateTime(date).format(context)}' : (item['description'] as String? ?? ''), maxLines: 2, overflow: TextOverflow.ellipsis),
             trailing: const Icon(Icons.chevron_right),
@@ -52,6 +80,28 @@ class _CatalogScreenState extends State<CatalogScreen> {
           ));
         })),
       ]))));
+  }
+}
+
+class _VideoThumbnail extends StatelessWidget {
+  const _VideoThumbnail({required this.item});
+  final Map<String, dynamic> item;
+
+  @override
+  Widget build(BuildContext context) {
+    final supplied = Uri.tryParse(item['thumbnailUrl'] as String? ?? '');
+    final id = item['id'] as String?;
+    final uri = supplied != null && supplied.scheme == 'https' && supplied.host.isNotEmpty
+        ? supplied
+        : id == null || id.isEmpty ? null : Uri.https('content.rawkode.academy', '/videos/${Uri.encodeComponent(id)}/thumbnail.webp');
+    Widget placeholder() => ColoredBox(color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      child: const Center(child: Icon(Icons.play_circle_outline)));
+    return SizedBox(width: 108, height: 61, child: ClipRRect(borderRadius: BorderRadius.circular(6),
+      child: uri == null ? placeholder() : CachedNetworkImage(
+        imageUrl: uri.toString(), cacheManager: watchThumbnailCache, fit: BoxFit.cover,
+        placeholder: (_, __) => placeholder(), errorWidget: (_, __, ___) => placeholder(),
+      ),
+    ));
   }
 }
 
