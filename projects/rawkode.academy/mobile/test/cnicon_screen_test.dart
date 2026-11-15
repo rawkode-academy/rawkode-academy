@@ -6,6 +6,7 @@ import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:rawkode_academy_mobile/account.dart';
 import 'package:rawkode_academy_mobile/cnicon_screen.dart';
+import 'package:rawkode_academy_mobile/cnicon_logo.dart';
 
 void main() {
   test('accepts only a complete successful logo response', () {
@@ -45,6 +46,20 @@ void main() {
     await tester.pump();
     expect(find.textContaining('Round 1 of 5'), findsOneWidget);
     expect(find.text('Could not load the logo. Check your connection and try again.'), findsNothing);
+    expect(tester.widget<CniconLogo>(find.byType(CniconLogo)).revealed, isFalse);
+    await tester.ensureVisible(find.text('Logo 0'));
+    await tester.tap(find.text('Logo 0'));
+    await tester.pump();
+    expect(tester.widget<CniconLogo>(find.byType(CniconLogo)).revealed, isTrue);
+    expect(find.text('Correct!'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 900));
+    await tester.pump();
+    expect(find.textContaining('Round 2 of 5'), findsOneWidget);
+    expect(tester.widget<CniconLogo>(find.byType(CniconLogo)).revealed, isFalse);
+    final fullColourFade = tester.widget<FadeTransition>(find.descendant(
+      of: find.byKey(const ValueKey('cnicon-colour-logo')),
+      matching: find.byType(FadeTransition)).first);
+    expect(fullColourFade.opacity.value, 0);
     await tester.pumpWidget(const SizedBox());
   });
 }
