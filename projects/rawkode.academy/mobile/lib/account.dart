@@ -113,6 +113,7 @@ class AcademyAccount extends ChangeNotifier {
     if (_signingOut || generation != _generation) throw StateError('Session changed');
     if (response.statusCode == 401) {
       if ((_token != usedToken && _token != null) || await _refresh()) {
+        if (_signingOut || generation != _generation) throw StateError('Session changed');
         response = await request().timeout(const Duration(seconds: 15));
       }
       if (_signingOut || generation != _generation) throw StateError('Session changed');

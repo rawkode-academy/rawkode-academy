@@ -26,10 +26,11 @@ class FakeAuth extends FlutterAppAuth {
 
 TokenResponse rotated() => TokenResponse('new', 'refresh-new', null, null, 'Bearer', null, null);
 
-http.Client clientFor(List<String> revoked) => MockClient((request) async {
+http.Client clientFor(List<String> revoked, {List<String>? gameTokens}) => MockClient((request) async {
   final token = request.headers['authorization'];
   if (request.method == 'DELETE') { revoked.add(token ?? ''); return http.Response('{}', 200); }
   if (request.url.host == 'id.rawkode.academy') return http.Response(jsonEncode({'user': {'id': 'u', 'name': 'Player'}}), 200);
+  gameTokens?.add(token ?? '');
   if (token == 'Bearer old') return http.Response('{}', 401);
   return http.Response('{"ok":true}', 200);
 });
@@ -73,8 +74,9 @@ void main() {
   test('sign out during refresh revokes the rotated token', () async {
     final pending = Completer<TokenResponse>();
     final revoked = <String>[];
+    final gameTokens = <String>[];
     final storage = MemoryStorage();
-    final account = AcademyAccount(client: clientFor(revoked), auth: FakeAuth(() => pending.future), storage: storage);
+    final account = AcademyAccount(client: clientFor(revoked, gameTokens: gameTokens), auth: FakeAuth(() => pending.future), storage: storage);
     await account.restore();
     final request = account.get('/a');
     final requestResult = expectLater(request, throwsStateError);
@@ -84,6 +86,7 @@ void main() {
     await logout;
     await requestResult;
     expect(revoked, contains('Bearer new'));
+    expect(gameTokens, ['Bearer old']);
     expect(storage.data['token_pair'], isNull);
     expect(account.user, isNull);
   });
