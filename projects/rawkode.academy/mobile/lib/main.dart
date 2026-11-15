@@ -60,7 +60,7 @@ class _AcademyHomeState extends State<AcademyHome> {
   }
 
   Future<void> _signOut() async {
-    await account.signOut();
+    try { await account.signOut(); } catch (_) { error = 'Could not remove saved credentials. Please try again.'; }
     if (mounted) setState(() {});
   }
 
@@ -81,6 +81,7 @@ class _AcademyHomeState extends State<AcademyHome> {
           FilledButton(onPressed: _signIn, child: const Text('Sign in')),
         ] else Text('Welcome, ${user['name']}'),
         if (error != null) Padding(padding: const EdgeInsets.only(top: 12), child: Text(error!, style: TextStyle(color: Theme.of(context).colorScheme.error))),
+        if (account.credentialCleanupRequired) TextButton(onPressed: _signOut, child: const Text('Retry removing credentials')),
         const SizedBox(height: 24),
         Text('Play', style: Theme.of(context).textTheme.headlineSmall),
         Card(child: ListTile(leading: const Icon(Icons.grid_on), title: const Text('Kubele'), subtitle: const Text('Daily cloud native word game'), enabled: user != null && !loading, onTap: user == null ? null : () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => KubeleScreen(answer: dailyAnswer(DateTime.now()), account: account))))),

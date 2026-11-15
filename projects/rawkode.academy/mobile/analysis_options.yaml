@@ -1,0 +1,3 @@
+# Keep analysis independent of generated Flutter template lint packages.
+analyzer:
+  errors: {}

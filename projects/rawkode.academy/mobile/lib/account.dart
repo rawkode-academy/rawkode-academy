@@ -14,6 +14,7 @@ class AcademyAccount extends ChangeNotifier {
   Future<bool>? _refreshing;
   bool _signingOut = false;
   int _generation = 0;
+  bool credentialCleanupRequired = false;
   Map<String, dynamic>? user;
   static const _origin = 'https://rawkode.academy';
   static const _redirect = 'academy.rawkode.app:/oauth2redirect';
@@ -73,6 +74,10 @@ class AcademyAccount extends ChangeNotifier {
       _refreshToken = result.refreshToken ?? _refreshToken;
       await _saveTokens();
       return true;
+    } on FlutterAppAuthPlatformException catch (error) {
+      final details = error.details;
+      if (details is FlutterAppAuthPlatformErrorDetails && details.error == 'invalid_grant') return false;
+      throw StateError('Could not refresh your session. Please retry.');
     } catch (_) {
       throw StateError('Could not refresh your session. Please retry.');
     }
@@ -141,9 +146,15 @@ class AcademyAccount extends ChangeNotifier {
     _token = null;
     _refreshToken = null;
     user = null;
-    await _storage.delete(key: 'access_token');
-    await _storage.delete(key: 'refresh_token');
-    _signingOut = false;
-    notifyListeners();
+    Object? deletionError;
+    try {
+      try { await _storage.delete(key: 'access_token'); } catch (error) { deletionError = error; }
+      try { await _storage.delete(key: 'refresh_token'); } catch (error) { deletionError ??= error; }
+    } finally {
+      credentialCleanupRequired = deletionError != null;
+      _signingOut = false;
+      notifyListeners();
+    }
+    if (deletionError != null) throw StateError('Could not remove saved credentials. Please try signing out again.');
   }
 }
