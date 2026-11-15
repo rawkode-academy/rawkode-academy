@@ -60,7 +60,8 @@ class _CatalogScreenState extends State<CatalogScreen> {
   Widget build(BuildContext context) {
     final visible = items.where((item) => (item['title'] as String).toLowerCase().contains(search.toLowerCase())).toList();
     return Scaffold(appBar: AppBar(title: Text(widget.videos ? 'Watch & live' : 'Learn')),
-      body: Center(child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 800), child: Column(children: [
+      body: Center(child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 800), child: CustomScrollView(slivers: [
+        SliverToBoxAdapter(child: Column(children: [
         Padding(padding: const EdgeInsets.fromLTRB(24, 20, 24, 0), child: AcademyHeading(label: widget.videos ? 'Watch & live' : 'Learn', title: widget.videos ? 'Ideas into practice.' : 'Build your knowledge.')),
         Padding(padding: const EdgeInsets.all(16), child: TextField(decoration: const InputDecoration(labelText: 'Search', prefixIcon: Icon(Icons.search), border: OutlineInputBorder()), onChanged: (value) => setState(() => search = value))),
         if (showingCached) Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Row(children: [
@@ -70,7 +71,8 @@ class _CatalogScreenState extends State<CatalogScreen> {
         if (loading) const LinearProgressIndicator()
         else if (error != null) Padding(padding: const EdgeInsets.all(16), child: Column(children: [Text(error!), TextButton(onPressed: () { setState(() { loading = true; error = null; }); _load(); }, child: const Text('Retry'))]))
         else if (visible.isEmpty) const Padding(padding: EdgeInsets.all(16), child: Text('No results found.'))
-        else Expanded(child: ListView.builder(itemCount: visible.length, itemBuilder: (context, index) {
+        ])),
+        if (!loading && error == null && visible.isNotEmpty) SliverList(delegate: SliverChildBuilderDelegate((context, index) {
           final item = visible[index] as Map<String, dynamic>;
           final date = widget.videos ? DateTime.tryParse(item['publishedAt'] as String? ?? '')?.toLocal() : null;
           final upcoming = date != null && date.isAfter(DateTime.now());
@@ -81,7 +83,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
               Padding(padding: const EdgeInsets.all(20), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(upcoming ? 'UPCOMING SESSION' : 'WATCH ON DEMAND', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.primary)),
                 const SizedBox(height: 10), Text(item['title'] as String, style: Theme.of(context).textTheme.titleLarge),
-                if (date != null) ...[const SizedBox(height: 10), Text(MaterialLocalizations.of(context).formatFullDate(date), style: Theme.of(context).textTheme.bodySmall)],
+                if (date != null) ...[const SizedBox(height: 10), Text('${MaterialLocalizations.of(context).formatFullDate(date)} · ${TimeOfDay.fromDateTime(date).format(context)}', style: Theme.of(context).textTheme.bodySmall)],
                 const SizedBox(height: 16), Row(children: [Text(upcoming ? 'Session details' : 'Watch session', style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w700)), const SizedBox(width: 8), const Icon(Icons.arrow_forward, size: 18)]),
               ])),
             ])));
@@ -91,7 +93,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
             subtitle: Text(item['description'] as String? ?? '', maxLines: 3, overflow: TextOverflow.ellipsis),
             trailing: const Icon(Icons.arrow_forward), onTap: open,
           ));
-        })),
+        }, childCount: visible.length)),
       ]))));
   }
 }
@@ -187,6 +189,7 @@ class _VideoDetailState extends State<VideoDetail> {
   @override
   Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: Text(widget.item['title'] as String)), body: ListView(padding: const EdgeInsets.all(24), children: [
     AcademyHeading(label: widget.upcoming ? 'Upcoming session' : 'Watch', title: widget.item['title'] as String),
+    if (DateTime.tryParse(widget.item['publishedAt'] as String? ?? '') != null) Padding(padding: const EdgeInsets.only(bottom: 20), child: Text('${MaterialLocalizations.of(context).formatFullDate(DateTime.parse(widget.item['publishedAt'] as String).toLocal())} · ${TimeOfDay.fromDateTime(DateTime.parse(widget.item['publishedAt'] as String).toLocal()).format(context)}')),
     if (widget.upcoming) Card(child: Padding(padding: const EdgeInsets.all(24), child: Column(children: [const Icon(Icons.schedule, size: 32), const SizedBox(height: 12), const Text('This session has not started yet.')])) )
     else if (error != null) Text(error!)
     else if (controller?.value.isInitialized != true) const Center(child: CircularProgressIndicator())
