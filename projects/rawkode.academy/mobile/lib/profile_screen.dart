@@ -11,6 +11,8 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   Map<String, dynamic>? kubele;
   Map<String, dynamic>? cnicon;
+  List<dynamic> achievements = [];
+  Set<String> unlocked = {};
   bool loading = true;
   bool failed = false;
   @override
@@ -22,9 +24,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final data = await Future.wait([
         widget.account.get('/api/games/kubele/stats'),
         widget.account.get('/api/games/cnicon/stats'),
+        widget.account.get('/api/games/cnicon/achievements'),
+        widget.account.get('/api/mobile/cnicon-achievements'),
       ]);
       kubele = (data[0] as Map<String, dynamic>)['stats'] as Map<String, dynamic>?;
       cnicon = data[1] as Map<String, dynamic>?;
+      unlocked = (data[2] as List).map((entry) => entry['achievementId'] as String).toSet();
+      achievements = data[3] as List;
     } catch (_) { failed = true; }
     if (mounted) setState(() => loading = false);
   }
@@ -44,6 +50,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SizedBox(height: 20),
         Text('CNIcon', style: Theme.of(context).textTheme.titleLarge),
         Text('${cnicon?['weeksPlayed'] ?? 0} weeks played · ${cnicon?['lifetimeCorrect'] ?? 0} correct · ${cnicon?['currentStreak'] ?? 0} week streak'),
+        const SizedBox(height: 20),
+        Text('CNIcon achievements', style: Theme.of(context).textTheme.titleLarge),
+        for (final badge in achievements) ListTile(
+          leading: Text(unlocked.contains(badge['id']) ? '${badge['icon']}' : '🔒'),
+          title: Text(badge['name'] as String),
+          subtitle: Text(badge['description'] as String),
+        ),
       ],
     ]),
   )));

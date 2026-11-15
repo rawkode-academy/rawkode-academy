@@ -7,6 +7,7 @@ import {
 	type User,
 } from "@/lib/auth/server";
 import { createLogger } from "@/lib/logger";
+import { isMobileGamePath, isMobileGameMethodAllowed } from "@/lib/auth/mobile";
 
 const logger = createLogger("auth");
 
@@ -26,7 +27,10 @@ export const authMiddleware = defineMiddleware(async (context, next) => {
 		// Mobile access tokens are accepted only on game API routes. Do not fall
 		// back to browser cookies when a caller supplies an invalid bearer token.
 		const authorization = context.request.headers.get("authorization");
-		if (authorization && /^\/api\/games\/(?:kubele|cnicon)\/(?:stats|rounds|score|status|leaderboard|achievements)$/.test(context.url.pathname)) {
+		if (authorization && isMobileGamePath(context.url.pathname)) {
+			if (!isMobileGameMethodAllowed(context.url.pathname, context.request.method)) {
+				return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405, headers: { "Content-Type": "application/json", "Cache-Control": "private, no-store" } });
+			}
 			try {
 				const response = await env.IDENTITY.fetch("https://id.rawkode.academy/api/mobile/session", {
 					headers: { Authorization: authorization },
