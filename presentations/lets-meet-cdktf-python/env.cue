@@ -6,6 +6,9 @@ schema.#Project
 
 name: "presentation-lets-meet-cdktf-python"
 
+// Uses its own Cloudflare token, not the ones the root env.cue chooses.
+_ownCloudflareToken: true
+
 env: {
 	ABC: "123"
 

@@ -24,9 +24,11 @@ it("shows compact empty comments without a Discord discussion link", async () =>
 	wrappers.push(wrapper);
 	expect(wrapper.get("h2").text()).toBe("Comments");
 	await flushPromises();
-	expect(wrapper.get("h2").text()).toBe("Comments (0)");
+	// No count for an empty discussion, and no invitation the page cannot
+	// honour: there is no comment form here.
+	expect(wrapper.get("h2").text()).toBe("Comments");
 	expect(wrapper.findAll("p").map((p) => p.text())).toEqual([
-		"No comments yet. Be the first to start the discussion.",
+		"No comments yet.",
 	]);
 	expect(wrapper.findAll("a")).toHaveLength(0);
 	expect(fetch).toHaveBeenCalledExactlyOnceWith("/api/comments/fixture");

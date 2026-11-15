@@ -2,8 +2,13 @@ import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
 import {
 	renderAndSanitizeArticles,
+	rssCreator,
+	rssNamespaces,
+	rssSelfLink,
+	rssThumbnail,
 	withRssMimeType,
 } from "../../../lib/feed-utils";
+import { getPublishedVideos } from "@/lib/content";
 import { createLogger } from "@/lib/logger";
 import { getVideoThumbnailJpegUrl } from "@/lib/video-thumbnail";
 import { isNewsPublished } from "@/lib/news-publication";
@@ -27,8 +32,9 @@ export async function GET(context: APIContext) {
 
 	const [articles, videos, technologies, news] = await Promise.all([
 		getCollection("articles"),
-		// Videos include upcoming streams (they have pages), as before.
-		getCollection("videos"),
+		// Published videos only, like the videos feeds: a scheduled stream
+		// must not lead the feed with a future date.
+		getPublishedVideos(),
 		getCollection("technologies"),
 		getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
 	]);
@@ -40,7 +46,7 @@ export async function GET(context: APIContext) {
 	);
 
 	// Render all articles in parallel for better performance
-	const renderedContent = await renderAndSanitizeArticles(articles);
+	const renderedContent = await renderAndSanitizeArticles(articles, site);
 
 	// Add articles with rendered content
 	const articleItems = (
@@ -66,10 +72,8 @@ export async function GET(context: APIContext) {
 					pubDate: new Date(article.data.publishedAt),
 					link: `/read/${article.id}/`,
 					categories: [],
+					customData: rssCreator(authors.map((author) => author.data.name)),
 				};
-				if (authors.length > 0) {
-					item.author = authors.map((author) => author.data.name).join(", ");
-				}
 				if (renderResult?.content) {
 					item.content = renderResult.content;
 				}
@@ -107,10 +111,10 @@ export async function GET(context: APIContext) {
 				categories,
 			};
 
+			const itunesImageUrl = getVideoThumbnailJpegUrl(site, video.data.id);
+			item.customData = rssThumbnail(itunesImageUrl);
 			if (duration) {
-				const itunesImageUrl = getVideoThumbnailJpegUrl(site, video.data.id);
-				item.customData = `
-				<enclosure url="${itunesImageUrl}" type="image/jpeg" />
+				item.customData += `
 				<itunes:duration>${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, "0")}</itunes:duration>
 				<itunes:image href="${itunesImageUrl}" />
 			`;
@@ -140,10 +144,8 @@ export async function GET(context: APIContext) {
 					pubDate: new Date(story.data.publishedAt),
 					link: `/news/${story.id}/`,
 					categories: [...(story.data.technologies ?? [])],
+					customData: rssCreator(authors.map((author) => author.data.name)),
 				};
-				if (authors.length > 0) {
-					item.author = authors.map((author) => author.data.name).join(", ");
-				}
 				return item;
 			}),
 		)
@@ -171,10 +173,11 @@ export async function GET(context: APIContext) {
 				"Latest articles, news, and videos from Rawkode Academy covering Cloud Native, DevOps, and Modern Software Development",
 			site: context.site?.toString() || "https://rawkode.academy",
 			items,
-			customData: "<language>en-us</language>",
+			customData: `<language>en-us</language>${rssSelfLink(`${site}/api/feeds/all.xml`)}`,
 			stylesheet: false,
 			xmlns: {
 				itunes: "http://www.itunes.com/dtds/podcast-1.0.dtd",
+				...rssNamespaces,
 			},
 		}),
 	);

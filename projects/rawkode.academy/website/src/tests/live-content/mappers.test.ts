@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
-	mapArticle,
 	mapChangelog,
 	mapCourse,
 	mapCourseModule,
+	mapNews,
 	mapPerson,
 	mapShow,
 	mapTechnology,
@@ -126,32 +126,6 @@ describe("gateway → entry data", () => {
 		expect(data.surname).toBeUndefined();
 	});
 
-	it("uses revisedAt as the article's updatedAt and plain technology ids", () => {
-		const data = mapArticle({
-			id: "a",
-			title: "A",
-			publishedAt: "2026-01-01",
-			revisedAt: "2026-02-01",
-			updatedAt: "2026-10-01T10:00:00Z",
-			technologies: [{ id: "kubernetes" }],
-			authors: [],
-			type: null,
-			draft: null,
-			cover: { url: "https://c/a.jpeg", alt: "x", width: null, height: null },
-		});
-		expect(data.updatedAt).toEqual(new Date("2026-02-01"));
-		expect(data.recordUpdatedAt).toEqual(new Date("2026-10-01T10:00:00Z"));
-		expect(data.technologies).toEqual(["kubernetes"]);
-		expect(data.authors).toEqual([{ collection: "people", id: "rawkode" }]);
-		expect(data.type).toBe("tutorial");
-		expect(data.draft).toBe(false);
-		expect(data.cover?.image).toMatchObject({
-			width: 1280,
-			height: 720,
-			format: "jpg",
-		});
-	});
-
 	it("keeps the changelog description as text plus its document", () => {
 		const data = mapChangelog({
 			id: "c",
@@ -240,7 +214,7 @@ describe("gateway → entry data", () => {
 
 describe("entries", () => {
 	it("carry body text and cache hints with collection, entity and related tags", () => {
-		const data = mapArticle({
+		const data = mapNews({
 			id: "a",
 			title: "A",
 			publishedAt: "2026-01-01",
@@ -249,12 +223,12 @@ describe("entries", () => {
 			technologies: [{ id: "bun" }],
 			updatedAt: "2026-05-01",
 		});
-		const entry = toEntry("articles", "a", data, NOW);
+		const entry = toEntry("news", "a", data, NOW);
 		expect(entry.body).toBe("Body text here");
-		expect(entry.collection).toBe("articles");
+		expect(entry.collection).toBe("news");
 		expect(entry.cacheHint?.tags).toEqual([
-			"articles",
-			"articles:a",
+			"news",
+			"news:a",
 			"people:icepuma",
 			"technologies:bun",
 		]);
@@ -262,7 +236,7 @@ describe("entries", () => {
 	});
 
 	it("leave code out of body text, as reading time did for Markdown", () => {
-		const data = mapArticle({
+		const data = mapNews({
 			id: "a",
 			title: "A",
 			publishedAt: "2026-01-01",
@@ -289,6 +263,6 @@ describe("entries", () => {
 				],
 			},
 		});
-		expect(toEntry("articles", "a", data, NOW).body).toBe("Run  now");
+		expect(toEntry("news", "a", data, NOW).body).toBe("Run  now");
 	});
 });

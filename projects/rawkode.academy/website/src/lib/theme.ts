@@ -1,10 +1,12 @@
 /**
  * Theme utilities.
  *
- * The site has a single brand theme - the editorial palette (defined in
- * `:root` and `html.dark` in `src/styles/global.css`). The only
- * user-controlled knob is the colour-scheme preference: light, dark, or
- * system.
+ * The site has a single brand theme: the Academy palette, defined as
+ * `academy.*` semantic tokens in the design-system package
+ * (`packages/design-system/panda.config.ts`) and emitted as
+ * `--colors-academy-*` custom properties that switch on `html.dark`. The
+ * only user-controlled knob is the colour-scheme preference: light, dark,
+ * or system.
  *
  * Concepts:
  *   - `ColorScheme`             - the *applied* mode on the page (light | dark).
@@ -16,11 +18,10 @@
 const PREF_STORAGE_KEY = "rawkode-color-scheme";
 
 /**
- * Light-mode brand palette as sRGB hex approximations of the editorial
- * oklch tokens in `global.css`:
- *   primary   = spruce     - oklch(0.50 0.09 165)
- *   secondary = amber-text - oklch(0.52 0.13 65)
- *   accent    = rust       - oklch(0.52 0.13 40)
+ * Legacy editorial palette (spruce, amber, rust) as fixed sRGB hex values.
+ * These predate the Academy tokens and do not follow the colour scheme;
+ * styles must read `var(--colors-academy-*)` instead. Kept only for
+ * `getThemeColors()`, whose values `src/tests/theme.test.ts` pins.
  */
 const BRAND_COLORS = {
 	primary: "#237356",
@@ -69,7 +70,8 @@ export function getColorSchemePreference(): ColorSchemePreference {
 	} catch {
 		// Use the in-document preference if browser storage is unavailable.
 	}
-	const applied = document.documentElement.getAttribute?.("data-color-preference") ?? null;
+	const applied =
+		document.documentElement.getAttribute?.("data-color-preference") ?? null;
 	return isValidPreference(applied) ? applied : DEFAULT_PREFERENCE;
 }
 
@@ -93,8 +95,8 @@ function applyColorScheme(scheme: ColorScheme): void {
 	if (themeColor) {
 		themeColor.content =
 			scheme === "dark"
-				? (themeColor.dataset.darkColor ?? "#1b1b23")
-				: (themeColor.dataset.lightColor ?? "#f8f5ef");
+				? (themeColor.dataset.darkColor ?? "#0a1220")
+				: (themeColor.dataset.lightColor ?? "#f4f7fb");
 	}
 }
 
@@ -168,7 +170,7 @@ export function initTheme(): void {
 	mq.addEventListener("change", systemMediaListener);
 }
 
-/** Read the brand palette as hex strings. */
+/** Read the legacy editorial palette as hex strings. */
 export function getThemeColors(): {
 	primary: string;
 	secondary: string;

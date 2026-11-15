@@ -1,4 +1,5 @@
 import { sva } from "../../styled-system/css";
+import { focusRing } from "../styles/focus";
 
 /** Shared document sections used by marketing, utility, and legal pages. */
 export const academyEditorial = sva({
@@ -78,45 +79,11 @@ export const academyEditorial = sva({
 				letterSpacing: "wide",
 			},
 			"& .editorial-kicker": { color: "academy.accent", margin: "0" },
-			"& .editorial-actions, & .editorial-button-row, & .editorial-pill-row": {
+			"& .editorial-actions": {
 				display: "flex",
 				flexWrap: "wrap",
 				gap: "3",
 				alignItems: "center",
-			},
-			"& .editorial-button": {
-				display: "inline-flex",
-				alignItems: "center",
-				justifyContent: "center",
-				minHeight: "11",
-				paddingInline: "5",
-				paddingBlock: "3",
-				border: "academy-button",
-				borderRadius: "academy-s",
-				background: "academy.accent",
-				color: "academy.accentForeground",
-				fontWeight: "bold",
-				textDecoration: "none",
-				_focusVisible: {
-					outline: "focus",
-					outlineColor: "academy.accent",
-					outlineOffset: "focus",
-				},
-			},
-			"& .editorial-button--secondary": {
-				borderColor: "academy.border",
-				background: "transparent",
-				color: "academy.text",
-			},
-			"& .editorial-pill": {
-				display: "inline-flex",
-				paddingInline: "3",
-				paddingBlock: "1",
-				border: "hairline",
-				borderColor: "academy.border",
-				borderRadius: "academy-pill",
-				color: "academy.textSoft",
-				fontSize: "xs",
 			},
 			"& .editorial-list": {
 				display: "grid",
@@ -170,11 +137,7 @@ export const academyEditorial = sva({
 				cursor: "pointer",
 				color: "academy.text",
 				fontWeight: "bold",
-				_focusVisible: {
-					outline: "focus",
-					outlineColor: "academy.accent",
-					outlineOffset: "focus",
-				},
+				_focusVisible: focusRing,
 			},
 			"& .editorial-faq p": {
 				margin: "0",

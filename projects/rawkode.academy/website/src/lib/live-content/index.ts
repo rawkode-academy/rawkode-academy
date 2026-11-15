@@ -8,6 +8,13 @@ export {
 	setContentCache,
 } from "./cache-control";
 export {
+	getAllSeries,
+	getSeriesLabels,
+	partNumber,
+	plannedParts,
+	type SeriesEntry,
+} from "./articles";
+export {
 	ContentError,
 	type ContentQueryOptions,
 	getCollection,

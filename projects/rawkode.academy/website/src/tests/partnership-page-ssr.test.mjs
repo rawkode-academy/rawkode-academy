@@ -50,6 +50,8 @@ async function renderPartnerships(
 					...options,
 				),
 		},
+		// Stand-in for the design-system button recipe.
+		"@rawkodeacademy/design-system": { button: () => "button" },
 		"astro:actions": {
 			actions: { partnership: { applyForm: {} } },
 			isInputError: () => false,

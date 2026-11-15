@@ -4,7 +4,6 @@
 import { type DocNode, isEmptyDoc, toText } from "@rawkodeacademy/rich-text";
 import type {
 	AdrData,
-	ArticleData,
 	ChangelogData,
 	CollectionDataMap,
 	CollectionName,
@@ -417,49 +416,6 @@ export function mapTechnology(raw: Raw): TechnologyData {
 		icon: logos?.icon ? str(raw.icon) : undefined,
 		horizontalLogo: logos?.horizontal ? str(raw.horizontalLogo) : undefined,
 		stackedLogo: logos?.stacked ? str(raw.stackedLogo) : undefined,
-		body: doc(raw.body),
-		recordUpdatedAt: toDate(raw.updatedAt),
-	});
-}
-
-const ARTICLE_TYPES = new Set(["tutorial", "article", "guide", "news"]);
-
-export function mapArticle(raw: Raw): ArticleData {
-	const updates = Array.isArray(raw.updates)
-		? raw.updates
-				.filter((u: Raw) => u && toDate(u.date))
-				.map((u: Raw) => ({
-					date: toDate(u.date) as Date,
-					description: str(u.description) ?? "",
-				}))
-		: undefined;
-	// revisedAt already falls back to the latest update; repeat it so a
-	// missing resolver value keeps the old transform's behaviour.
-	const latestUpdate = updates?.reduce<Date | undefined>(
-		(acc, u) => (!acc || u.date > acc ? u.date : acc),
-		undefined,
-	);
-	const og = raw.openGraph as Raw | null | undefined;
-	return compact<ArticleData>({
-		title: str(raw.title) ?? "",
-		publishedAt: requiredDate(raw.publishedAt),
-		updatedAt: toDate(raw.revisedAt) ?? latestUpdate,
-		subtitle: str(raw.subtitle),
-		description: str(raw.description) ?? "",
-		authors: authors(raw.authors),
-		categories: strings(raw.categories),
-		tags: strings(raw.tags),
-		cover: coverFrom(raw.cover),
-		type: ARTICLE_TYPES.has(raw.type) ? raw.type : "tutorial",
-		howto: bool(raw.howto, false),
-		draft: bool(raw.draft, false),
-		technologies: refs("technologies", raw.technologies).map((r) => r.id),
-		openGraph:
-			og && str(og.title)
-				? compact({ title: og.title as string, subtitle: str(og.subtitle) })
-				: undefined,
-		updates: updates && updates.length > 0 ? updates : undefined,
-		resources: resources(raw.resources),
 		body: doc(raw.body),
 		recordUpdatedAt: toDate(raw.updatedAt),
 	});

@@ -1,18 +1,32 @@
 ---
-import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
+import {
+	academyCatalog,
+	academyLayout,
+	academyPage,
+} from "@rawkodeacademy/design-system";
 
 interface Props {
 	href: string;
 	title: string;
 	description?: string | undefined;
 	meta?: string[] | undefined;
+	/**
+	 * A difficulty ("beginner", "intermediate", "advanced"), set as the
+	 * three-bar meter and capitalised label that learning paths use.
+	 */
+	level?: string | undefined;
 	image?: string | undefined;
 	imageAlt?: string | undefined;
 }
 
-const { href, title, description, meta = [], image, imageAlt = "" } = Astro.props as Props;
+const { href, title, description, meta = [], level, image, imageAlt = "" } = Astro.props as Props;
 const layout = academyLayout({ width: "wide" });
 const catalog = academyCatalog();
+const page = academyPage();
+const levels = ["beginner", "intermediate", "advanced"];
+const levelRank = level ? levels.indexOf(level.toLowerCase()) + 1 : 0;
+const levelLabel = level ? level.charAt(0).toUpperCase() + level.slice(1) : undefined;
+const metaLine = [levelLabel, ...meta].filter(Boolean).join(" · ");
 ---
 
 <a class={layout.card} href={href}>
@@ -22,7 +36,16 @@ const catalog = academyCatalog();
 		</span>
 	)}
 	<div class={layout.cardBody}>
-		{meta.length > 0 && <span class={catalog.rowMeta}>{meta.join(" · ")}</span>}
+		{metaLine && (
+			<span class={catalog.rowMeta}>
+				{levelRank > 0 && (
+					<span class={page.pathLevel} aria-hidden="true">
+						{[1, 2, 3].map((bar) => <i class={page.pathLevelBar} data-on={String(bar <= levelRank)} />)}
+					</span>
+				)}
+				<span>{metaLine}</span>
+			</span>
+		)}
 		<h3 class={layout.cardTitle}>{title}</h3>
 		{description && <span class={catalog.rowDescription}>{description}</span>}
 	</div>

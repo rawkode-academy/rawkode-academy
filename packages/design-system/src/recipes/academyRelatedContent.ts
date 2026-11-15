@@ -1,4 +1,7 @@
 import { sva } from "../../styled-system/css";
+import { focusRing } from "../styles/focus";
+import { coverImage, runtimeBadge, videoFrame } from "../styles/media";
+import { cardTitle } from "../styles/type";
 
 /** Linked editorial content: readable titles, genuine imagery, and ruled news. */
 export const academyRelatedContent = sva({
@@ -77,11 +80,7 @@ export const academyRelatedContent = sva({
 			borderBottom: "hairline",
 			borderColor: "academy.border",
 			_hover: { color: "academy.accent" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		path: {
 			display: "grid",
@@ -94,42 +93,11 @@ export const academyRelatedContent = sva({
 			background: "academy.panel",
 			_hover: { background: "academy.ground", borderColor: "academy.accent" },
 		},
-		media: {
-			position: "relative",
-			aspectRatio: "video",
-			overflow: "hidden",
-			background: "academy.ground",
-		},
-		image: {
-			display: "block",
-			width: "full",
-			height: "full",
-			objectFit: "cover",
-		},
-		duration: {
-			position: "absolute",
-			bottom: "2",
-			right: "2",
-			paddingInline: "2",
-			paddingBlock: "1",
-			borderRadius: "academy-s",
-			background: "academy.canvas",
-			color: "academy.text",
-			fontFamily: "academy-mono",
-			fontSize: "xs",
-			fontVariantNumeric: "tabular-nums",
-			lineHeight: "normal",
-		},
+		media: videoFrame,
+		image: coverImage,
+		duration: runtimeBadge,
 		body: { paddingBlock: "4" },
-		title: {
-			margin: "0",
-			fontFamily: "academy-display",
-			fontWeight: "bold",
-			fontSize: "lg",
-			lineHeight: "snug",
-			overflowWrap: "anywhere",
-			color: "inherit",
-		},
+		title: { ...cardTitle, overflowWrap: "anywhere", color: "inherit" },
 		copy: {
 			margin: "0",
 			maxWidth: "academy-copy",
@@ -166,11 +134,7 @@ export const academyRelatedContent = sva({
 				textDecoration: "underline",
 				textUnderlineOffset: "3px",
 			},
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		empty: {
 			paddingBlock: "8",

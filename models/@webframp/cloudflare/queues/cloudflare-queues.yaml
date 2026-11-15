@@ -1,0 +1,10 @@
+type: '@webframp/cloudflare/queues'
+typeVersion: 2026.11.03.1
+id: 11ba1f63-645b-4969-ba35-bf794e96e9ab
+name: cloudflare-queues
+version: 1
+tags: {}
+globalArguments:
+  accountId: 0aeb879de8e3cdde5fb3d413025222ce
+  apiToken: '${{ vault.get(rawkode-academy, cloudflare/api-tokens/workers) }}'
+methods: {}

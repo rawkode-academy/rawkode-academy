@@ -31,8 +31,8 @@ tasks: {
 
 		inputs: [
 			"scripts/collect-schemas.ts",
-			"../platform/*/read-model/schema.gql",
-			"../website/src/subgraph/**",
+			schema.#ModuleFiles & {paths: ["projects/rawkode.academy/platform/*/read-model/schema.gql"]},
+			schema.#ModuleFiles & {paths: ["projects/rawkode.academy/website/src/subgraph/**"]},
 		]
 
 		outputs: [
@@ -67,12 +67,20 @@ tasks: {
 			"scripts/collect-schemas.ts",
 			"scripts/compose.ts",
 			"schemas/**",
-			"../platform/*/read-model/schema.gql",
-			"../website/src/subgraph/**",
+			schema.#ModuleFiles & {paths: ["projects/rawkode.academy/platform/*/read-model/schema.gql"]},
+			schema.#ModuleFiles & {paths: ["projects/rawkode.academy/website/src/subgraph/**"]},
+			// cuenv ci ignores inputs outside the project directory when it
+			// decides what is affected (cuenv/cuenv#611). Until that is fixed
+			// they are repeated relative to the repository root, the only form
+			// the affected check matches.
+			"projects/rawkode.academy/website/src/subgraph/**",
+			"bun.lock",
 			"src/**",
 			"supergraph.graphql",
 			"wrangler.jsonc",
 			"package.json",
+			// The frozen install decides whether the deploy can run at all.
+			schema.#ModuleFiles & {paths: ["bun.lock"]},
 		]
 	}
 }

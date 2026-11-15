@@ -354,12 +354,12 @@ test("related videos retain ranking, destinations, genuine thumbnails, limit, an
 			"https://images.example.test/newer.jpg",
 		],
 	);
-	assert.equal(dom.querySelector("h2").text.trim(), "Related Videos");
+	assert.equal(dom.querySelector("h2").text.trim(), "Related videos");
 	assert.equal(
 		dom.querySelectorAll(".related-media .related-duration").length,
 		2,
 	);
-	assert.equal(dom.querySelector(".related-duration").text.trim(), "1:05");
+	assert.equal(dom.querySelector(".related-duration").text.trim(), "1 min");
 });
 
 test("unknown runtimes render no invented values; scheduled livestreams retain Upcoming", async () => {

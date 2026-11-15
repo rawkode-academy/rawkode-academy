@@ -12,38 +12,33 @@ let _queueNames = "rawkode-academy-notifications"
 
 env: {
 	SERVICE_NAME: "notifications"
-
-	environment: production: {
-		CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {
-			ref: "op://sa.rawkode.academy/cloudflare/api-tokens/workers"
-		}
-	}
 }
 
 ci: pipelines: {
 	default: {
 		environment: "production"
 		when: {
-			branch:        ["main"]
+			branch: ["main"]
 			defaultBranch: true
 			manual:        true
 		}
 		tasks: [_t.check, _t.test, _t.migrate, _t.deploy.main]
 	}
 
+	// Pull requests run without credentials: no previews or dry runs until a
+	// trusted publisher deploys them.
 	pullRequest: {
-		environment: "production"
 		when: {
 			pullRequest: true
 		}
-		tasks: [_t.check, _t.test, _t.deploy."dry-run"]
+		tasks: [_t.check, _t.test]
 	}
 }
 
 tasks: {
 	check: schema.#Task & {
 		hermetic: false
-		command: "sh"
+		command:  "sh"
 		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run check"]
 		env: PATH: _taskPath
 		inputs: [
@@ -57,7 +52,7 @@ tasks: {
 
 	test: schema.#Task & {
 		hermetic: false
-		command: "sh"
+		command:  "sh"
 		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run test"]
 		env: PATH: _taskPath
 		inputs: [
@@ -70,7 +65,7 @@ tasks: {
 
 	migrate: schema.#Task & {
 		hermetic: false
-		command: "sh"
+		command:  "sh"
 		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run migrate"]
 		env: PATH: _taskPath
 		inputs: [
@@ -84,7 +79,7 @@ tasks: {
 		type: "group"
 		ensure: schema.#Task & {
 			hermetic: false
-			command: "sh"
+			command:  "sh"
 			args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run queues:ensure"]
 			env: {
 				PATH:                   _taskPath
@@ -102,7 +97,7 @@ tasks: {
 		type: "group"
 		main: schema.#Task & {
 			hermetic: false
-			command: "sh"
+			command:  "sh"
 			args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run deploy"]
 			env: PATH: _taskPath
 			dependsOn: [_t.queues.ensure]
@@ -118,7 +113,7 @@ tasks: {
 
 		"dry-run": schema.#Task & {
 			hermetic: false
-			command: "sh"
+			command:  "sh"
 			args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run deploy:dry-run"]
 			env: PATH: _taskPath
 			inputs: [

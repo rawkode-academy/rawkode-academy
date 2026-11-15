@@ -22,8 +22,9 @@ ci: pipelines: {
 		tasks: [_t.check]
 	}
 
+	// Pull requests run outside the production environment, so they get no
+	// credentials.
 	pullRequest: {
-		environment: "production"
 		when: {
 			pullRequest: true
 		}
@@ -38,8 +39,8 @@ tasks: {
 		args: ["run", "check"]
 
 		inputs: [
-			"../../bun.lock",
-			"../../package.json",
+			schema.#ModuleFiles & {paths: ["bun.lock"]},
+			schema.#ModuleFiles & {paths: ["package.json"]},
 			"env.cue",
 			"package.json",
 			"panda.config.ts",

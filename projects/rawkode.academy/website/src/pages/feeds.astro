@@ -60,6 +60,11 @@ const formatNotes = [
 ---
 
 <Page title="Feeds" description="Subscribe to Rawkode Academy via RSS, Atom, JSON Feed, or OPML.">
+	<Fragment slot="extra-head">
+		<link rel="alternate" type="application/rss+xml" title="Rawkode Academy - All Content (RSS)" href="/api/feeds/all.xml" />
+		<link rel="alternate" type="application/atom+xml" title="Rawkode Academy - All Content (Atom)" href="/api/feeds/all.atom" />
+		<link rel="alternate" type="application/feed+json" title="Rawkode Academy - All Content (JSON Feed)" href="/api/feeds/all.json" />
+	</Fragment>
 	<EditorialShell title="Feeds" lede="Follow the Academy in your feed reader. Choose a topic below, or import all feeds at once." compact>
 		<a slot="actions" class={doc.link} href="/feeds.opml" download>Download all feeds (OPML) ↓</a>
 

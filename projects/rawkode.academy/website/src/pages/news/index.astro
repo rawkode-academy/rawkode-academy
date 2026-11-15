@@ -7,7 +7,7 @@ import NewsSubscribeCard from "@/components/news/NewsSubscribeCard.astro";
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
 import NewsStoryRow from "@/components/news/NewsStoryRow.astro";
 import { getTechnologyLogos, logosFor } from "@/lib/technology-logos";
-import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
+import { academyCatalog, academyLayout, button } from "@rawkodeacademy/design-system";
 import { localTime } from "@/lib/local-time";
 
 export const prerender = false;
@@ -59,7 +59,7 @@ const catalog = academyCatalog();
 					<p class={catalog.leadKicker}>Latest story</p>
 					<h2 class={catalog.leadTitle}>{leadStory.data.title}</h2>
 					<p class={catalog.leadDescription}>{leadStory.data.description}</p>
-					<a class={styles.button} href={`/news/${leadStory.id}`}>Read the story →</a>
+					<a class={button()} href={`/news/${leadStory.id}`}>Read the story <span data-part="arrow" aria-hidden="true">→</span></a>
 				</div>
 			</article>
 		</section>}

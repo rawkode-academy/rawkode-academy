@@ -1,3 +1,5 @@
+import { academySkeleton } from "@rawkodeacademy/design-system";
+
 export interface SkeletonListProps {
 	items?: number;
 	showIcon?: boolean;
@@ -22,46 +24,46 @@ export function SkeletonList({
 		return widths[index % widths.length] || "70%";
 	};
 
+	const skeleton = academySkeleton();
+
+	// Layout only; the surfaces and pulse come from academySkeleton.
 	return (
 		<div className={className} role="status" aria-label="Loading list...">
 			<span className="sr-only">Loading list...</span>
 			{Array.from({ length: items }).map((_, index) => (
 				<div
 					key={index}
-					className="flex items-center gap-3 p-3 border-b border-surface last:border-b-0"
+					className={skeleton.row}
+					style={{
+						alignItems: "center",
+						padding: "0.75rem",
+						...(index === items - 1 ? { borderBottom: 0 } : {}),
+					}}
 				>
 					{showIcon && (
 						<div
-							className={`animate-pulse bg-[var(--surface-skeleton)] shrink-0 ${
-								iconRounded ? "rounded-full" : "rounded"
-							}`}
-							style={{
-								width: iconSize,
-								height: iconSize,
-							}}
+							className={iconRounded ? skeleton.avatar : skeleton.line}
+							style={{ flexShrink: 0, width: iconSize, height: iconSize }}
 						/>
 					)}
 
-					<div className="flex-1">
+					<div
+						className={skeleton.content}
+						style={{ display: "grid", gap: "0.25rem" }}
+					>
 						<div
-							className="animate-pulse bg-[var(--surface-skeleton)] rounded h-4 mb-1"
+							className={skeleton.lineMedium}
 							style={{ width: getTitleWidth(index) }}
 						/>
 						{showSubtitle && (
-							<div
-								className="animate-pulse bg-[var(--surface-skeleton)] rounded h-3"
-								style={{ width: "50%" }}
-							/>
+							<div className={skeleton.lineSmall} style={{ width: "50%" }} />
 						)}
 					</div>
 
 					{showAction && (
 						<div
-							className="animate-pulse bg-[var(--surface-skeleton)] rounded shrink-0"
-							style={{
-								width: "1.5rem",
-								height: "1.5rem",
-							}}
+							className={skeleton.line}
+							style={{ flexShrink: 0, width: "1.5rem", height: "1.5rem" }}
 						/>
 					)}
 				</div>

@@ -63,7 +63,7 @@
 			<div v-else-if="onRetry" :class="doc.actions">
 				<button
 					@click="onRetry"
-					:class="doc.button"
+					:class="button()"
 				>
 					{{ retryText }}
 				</button>
@@ -73,7 +73,7 @@
 </template>
 
 <script setup lang="ts">
-import { academyDocument } from "@rawkodeacademy/design-system";
+import { academyDocument, button } from "@rawkodeacademy/design-system";
 
 interface Props {
 	variant?: "error" | "warning";

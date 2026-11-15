@@ -1,5 +1,5 @@
-// Runs a wrangler upload with the Worker's secrets, which cuenv resolves from
-// 1Password into the environment, so every deploy and preview carries them.
+// Runs a wrangler upload with the Worker's secrets, which cuenv resolves into
+// the environment, so every deploy and preview carries them.
 // With --purge, it then purges every content cache: pages cached by the
 // previous version were rendered with its code.
 //
@@ -21,7 +21,12 @@ const wranglerArgs = args.filter((arg) => arg !== "--purge");
 
 const token = process.env.CACHE_INVALIDATION_TOKEN;
 if (!token) throw new Error("CACHE_INVALIDATION_TOKEN is not set");
-const secrets = { CACHE_INVALIDATION_TOKEN: token };
+const secrets: Record<string, string> = { CACHE_INVALIDATION_TOKEN: token };
+// Only deploy.main sets the Basin read token: the internal analytics dashboard
+// reports "not configured" without it.
+if (process.env.BASIN_SQL_TOKEN) {
+	secrets.BASIN_SQL_TOKEN = process.env.BASIN_SQL_TOKEN;
+}
 
 const dir = mkdtempSync(join(tmpdir(), "wrangler-secrets-"));
 const file = join(dir, "secrets.json");

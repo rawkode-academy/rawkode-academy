@@ -226,7 +226,7 @@ async function finishGame(finalAnswers: (string | null)[], finalTimes: number[])
 		</div>
 
 		<!-- Intro -->
-		<div v-else-if="state === 'intro'" class="gtl-intro gtl-center">
+		<div v-else-if="state === 'intro'" class="gtl-center">
 			<p class="gtl-intro-eyebrow">Weekly challenge</p>
 			<h1 class="gtl-intro-title">CNIcon</h1>
 			<p class="gtl-intro-week">{{ weekLabel }}</p>

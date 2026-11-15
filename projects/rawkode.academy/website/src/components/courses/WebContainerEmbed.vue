@@ -22,7 +22,7 @@
  <button
  @click="restart"
  :disabled="status !== 'ready' && status !== 'error'"
- :class="s.button"
+ :class="button({ variant: 'quiet' })"
  title="Restart"
  aria-label="Restart container"
  type="button"
@@ -114,7 +114,7 @@
  <span :class="s.status">Terminal</span>
  <button
  @click="clearTerminal"
- :class="s.button"
+ :class="button({ variant: 'quiet' })"
  >
  Clear
  </button>
@@ -135,7 +135,7 @@
 </template>
 
 <script setup lang="ts">
-import { academyCourse } from "@rawkodeacademy/design-system";
+import { academyCourse, button } from "@rawkodeacademy/design-system";
 const s = academyCourse();
 import { ref, shallowRef, computed, onMounted, onUnmounted, watch, nextTick } from "vue";
 import { WebContainer } from "@webcontainer/api";

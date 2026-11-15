@@ -1,4 +1,4 @@
-interface PersonIdentityFields {
+export interface PersonIdentityFields {
 	github?: string | undefined;
 	twitter?: string | undefined;
 	bluesky?: string | undefined;

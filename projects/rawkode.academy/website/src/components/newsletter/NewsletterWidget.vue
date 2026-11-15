@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick } from "vue";
 import { actions } from "astro:actions";
-import { academyMarketing } from "@rawkodeacademy/design-system";
+import { academyMarketing, button } from "@rawkodeacademy/design-system";
 import {
 	getSessionCampaignAttribution,
 	serializeCampaignAttribution,
@@ -264,7 +264,7 @@ const trackSignInClick = () => {
 							@click="subscribeAsLearner"
 							:disabled="!isHydrated || isLoading"
 							:aria-busy="isLoading"
-							:class="marketing.newsletterButton"
+							:class="button({ variant: 'outline', fullWidth: true })"
 						>
 							<svg v-if="isLoading" :class="marketing.newsletterSpinner" fill="none" viewBox="0 0 24 24">
 								<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
@@ -287,7 +287,7 @@ const trackSignInClick = () => {
 							:disabled="!isHydrated"
 							:aria-expanded="isExpanded"
 							:aria-controls="formId"
-							:class="marketing.newsletterButton"
+							:class="button({ variant: 'outline', fullWidth: true })"
 						>
 							<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 								<path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 00-2-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />

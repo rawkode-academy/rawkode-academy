@@ -87,6 +87,7 @@ async function renderArchive(search = "", data = collections) {
 				new Proxy({}, { get: (_, slot) => `archive-${String(slot)}` }),
 			academyLayout: () =>
 				new Proxy({}, { get: (_, slot) => `layout-${String(slot)}` }),
+			button: ({ variant = "solid" } = {}) => `button-${variant}`,
 		},
 		"@/lib/video-thumbnail": {
 			getVideoThumbnailUrl: (id) => `https://images.example.test/${id}.webp`,
@@ -141,6 +142,7 @@ async function renderArchive(search = "", data = collections) {
 	}
 	for (const name of [
 		"local-time",
+		"video-runtime",
 		"masthead-mosaic",
 		"news-publication",
 		"watch-archive",
@@ -157,6 +159,14 @@ async function renderArchive(search = "", data = collections) {
 		await compile(
 			"AcademyCatalogMasthead.astro",
 			readSource("components/academy/AcademyCatalogMasthead.astro"),
+			true,
+		),
+	);
+	modules.set(
+		"@/components/video/VideoCard.astro",
+		await compile(
+			"VideoCard.astro",
+			readSource("components/video/VideoCard.astro"),
 			true,
 		),
 	);
@@ -211,10 +221,13 @@ test("Watch is a static server-rendered archive with labeled GET search, existin
 		"329 videos in the library",
 	);
 	assert(!dom.text.includes("per page"));
-	assert.deepEqual(
-		dom.querySelectorAll(".archive-cardMeta").map((meta) => meta.text),
-		Array(23).fill("1h 1m"),
-	);
+	// One meta line per card: the runtime, then the date in the Academy form.
+	const metaLines = dom
+		.querySelectorAll(".archive-cardMeta")
+		.map((meta) => meta.text.replace(/\s+/g, " ").trim());
+	assert.equal(metaLines.length, 23);
+	for (const line of metaLines)
+		assert.match(line, /^1h 1m · \d{1,2} [A-Z][a-z]{2} 20\d\d$/);
 	assert.equal(
 		dom.querySelector('form[role="search"]').getAttribute("method"),
 		"get",

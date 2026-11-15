@@ -23,9 +23,6 @@ env: {
 			ref: "op://Employee/w3etxulw37bsqb2rsna5px7y4u/rawkode-academy-content/secret-access-key"
 		}
 		// Needs D1 edit on platform-videos (same token the platform services deploy with).
-		CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {
-			ref: "op://sa.rawkode.academy/cloudflare/api-tokens/workers"
-		}
 		// The website's CACHE_INVALIDATION_TOKEN secret (POST /api/cache/invalidate).
 		// Optional: without it the importer warns and skips invalidation.
 		CACHE_INVALIDATION_TOKEN: schema.#OnePasswordRef & {

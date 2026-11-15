@@ -16,13 +16,13 @@ import {
 import RichText from "@/components/content/RichText.astro";
 import VideoFeed from "@/components/video/video-feed.astro";
 import ShowCard from "@/components/show/ShowCard.astro";
-import PersonJsonLd from "@/components/html/person-jsonld.astro";
 import type { ShowSummary } from "@/types/show";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { getPersonIdentityUrls } from "@/lib/person-identity-links";
+import { buildPersonJsonLd } from "@/lib/person-jsonld";
 import { isNewsPublished } from "@/lib/news-publication";
-import { localTime } from "@/lib/local-time";
+import { localDate } from "@/lib/local-time";
 
 const person = await getEntry("people", Astro.params.id);
 if (!person) return new Response(null, { status: 404 });
@@ -57,8 +57,7 @@ const authoredArticles = articles
 	)
 	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
 
-const formatPublishDate = (date: Date) =>
-	localTime(date, { month: "short", day: "numeric", year: "numeric" });
+const formatPublishDate = (date: Date) => localDate(date);
 
 // Prepare Show Summaries
 const showHosts = await Promise.all(
@@ -181,7 +180,9 @@ const pageDescription = (() => {
 	if (parts.length === 0) {
 		return `${person.data.name} on Rawkode Academy: interviews, live coding, and conversations with leaders in Cloud Native and open source.`;
 	}
-	return `${person.data.name}: ${parts.join(", ")}. Watch interviews, live coding, and technical discussions on Rawkode Academy.`;
+	const summary = `${person.data.name}: ${parts.join(", ")}.`;
+	const withCallToAction = `${summary} Watch interviews, live coding, and technical discussions.`;
+	return withCallToAction.length <= 160 ? withCallToAction : summary;
 })();
 
 const profileUrl = new URL(`/people/${person.data.id}`, Astro.site).href;
@@ -227,7 +228,10 @@ const authoredSocialLinks = [
 ].filter((link) => typeof link === "object");
 
 // Exact equality only: authored fragments can identify different destinations.
-const linksByUrl = new Map<string, { name: string; url: string; icon: string; filled?: boolean }>();
+const linksByUrl = new Map<
+	string,
+	{ name: string; url: string; icon: string; filled?: boolean }
+>();
 for (const link of authoredSocialLinks) {
 	const existing = linksByUrl.get(link.url);
 	if (existing) existing.name += ` / ${link.name}`;
@@ -239,6 +243,13 @@ const socialLinks = [...linksByUrl.values()];
 // Website/YouTube links remain visible without claiming they identify a Person.
 const relMeUrls = getPersonIdentityUrls(person.data);
 const identityUrls = new Set(relMeUrls);
+
+// Google's ProfilePage markup expects the person as the page's mainEntity.
+const profileEntity = {
+	...buildPersonJsonLd(person.data, profileUrl),
+	description: pageDescription,
+	...(person.data.avatarUrl ? { image: person.data.avatarUrl } : {}),
+};
 
 await setContentCache(Astro, {
 	entries: [
@@ -268,17 +279,10 @@ await setContentCache(Astro, {
  description={pageDescription}
  noindex={noindex}
  pageType="ProfilePage"
+ mainEntity={profileEntity}
  useImageDirectly={Boolean(person.data.avatarUrl)}
  image={person.data.avatarUrl ? { image: new URL(person.data.avatarUrl) } : undefined}
 >
- <PersonJsonLd
- slot="extra-head"
- name={person.data.name}
- url={profileUrl}
- description={pageDescription}
- image={person.data.avatarUrl}
- sameAs={relMeUrls}
- />
  <Fragment slot="extra-head">
  {relMeUrls.map((url) => (
  <link rel="me" href={url} />

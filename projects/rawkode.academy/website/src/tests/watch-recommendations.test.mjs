@@ -66,7 +66,7 @@ const show = { id: "show", data: { name: "Fixture show" } };
 async function select(videos, showEntry = show, video = current) {
 	const lookups = [];
 	const selected = await vm.runInNewContext(
-		`(async () => { ${transpile(selection)}; return { showEntry, showRelatedAll, showRelatedVideos, technologyRecommendation, techEntries }; })()`,
+		`(async () => { ${transpile(selection)}; return { showEntry, showRelatedAll, showRelatedVideos, showEpisodeTotal, technologyRecommendation, techEntries }; })()`,
 		{
 			videos,
 			video,
@@ -94,12 +94,11 @@ async function select(videos, showEntry = show, video = current) {
 
 async function renderRecommendations(props) {
 	const calls = [];
-	const markup = source.slice(
-		source.indexOf("{showEntry && showRelatedVideos.length > 0 ?"),
-		source.indexOf("<NewsletterCTA />"),
-	);
+	// The recommendation is the only thing inside the "more to watch" aside.
+	const start = source.indexOf("{showEntry && showRelatedVideos.length > 0 ?");
+	const markup = source.slice(start, source.indexOf("</div>", start));
 	assert(markup.includes("TechnologyVideoSection"));
-	const input = `---\nimport ShowVideoSection from "show";\nimport TechnologyVideoSection from "technology";\nconst { showEntry, showRelatedAll, showRelatedVideos, technologyRecommendation } = Astro.props;\n---\n${markup}`;
+	const input = `---\nimport ShowVideoSection from "show";\nimport TechnologyVideoSection from "technology";\nconst { showEntry, showRelatedAll, showRelatedVideos, showEpisodeTotal, technologyRecommendation } = Astro.props;\n---\n${markup}`;
 	const compiled = await transform(input, {
 		filename: "recommendations.astro",
 	});
@@ -178,7 +177,20 @@ test("one show section wins, capped at six newest, without reading technology re
 	assert.equal(dom.querySelectorAll("section").length, 1);
 	assert.equal(dom.querySelectorAll("a").length, 6);
 	assert.equal(calls[0].kind, "show");
-	assert.equal(calls[0].props.totalVideos, 9);
+	// The label counts what the show page lists: every published episode,
+	// the one being watched included.
+	assert.equal(selected.showEpisodeTotal, 10);
+	assert.equal(calls[0].props.totalVideos, 10);
+	// A scheduled stream is not an episode yet, so it is not counted.
+	const upcoming = makeVideo("current", {
+		publishedAt: new Date("2999-01-01"),
+		technologies: [],
+	});
+	assert.equal(
+		(await select([upcoming, ...alternatives], show, upcoming))
+			.showEpisodeTotal,
+		9,
+	);
 });
 
 test("fallback chooses only the first declared technology with published alternatives", async () => {
@@ -196,7 +208,8 @@ test("fallback chooses only the first declared technology with published alterna
 	]);
 	assert.equal(selected.showRelatedVideos.length, 0);
 	assert.equal(selected.technologyRecommendation.technology.id, "second");
-	assert.equal(selected.technologyRecommendation.totalVideos, 8);
+	// Eight alternatives plus the published video being watched.
+	assert.equal(selected.technologyRecommendation.totalVideos, 9);
 	assert.equal(selected.technologyRecommendation.videos.length, 6);
 	assert.equal(selected.technologyRecommendation.videos[0].slug, "second-7");
 	const { dom, calls } = await renderRecommendations(selected);
@@ -212,7 +225,7 @@ test("current and future videos cannot become recommendations or inflate totals"
 	const eligible = makeVideo("published", { show: undefined });
 	const selected = await select([current, ...future, eligible]);
 	assert.equal(selected.showRelatedAll.length, 0);
-	assert.equal(selected.technologyRecommendation.totalVideos, 1);
+	assert.equal(selected.technologyRecommendation.totalVideos, 2);
 	assert.equal(selected.technologyRecommendation.videos[0].slug, "published");
 	const none = await select([current, ...future]);
 	assert.equal(none.technologyRecommendation, null);
@@ -272,7 +285,9 @@ test("breadcrumb status exists only for actual live/upcoming states; page remain
 			source,
 		),
 	);
-	assert(!source.includes('video.data.type === "live") {\n\tdisableContentCache'));
+	assert(
+		!source.includes('video.data.type === "live") {\n\tdisableContentCache'),
+	);
 	assert(!source.includes("astro:content"));
 	assert(source.includes('from "@/lib/live-content"'));
 	// The only hand-written header is the browser no-store on live sessions
@@ -295,5 +310,134 @@ test("breadcrumb status exists only for actual live/upcoming states; page remain
 		(await transform(source, { filename: "watch/[...slug].astro" }))
 			.diagnostics,
 		[],
+	);
+});
+
+test("workbench notes: reactions close the notes beside comments, with a sized fallback", () => {
+	const template = source.slice(0, source.lastIndexOf("<script>"));
+	const about = template.slice(
+		template.indexOf('aria-labelledby="watch-detail-about-heading"'),
+		template.indexOf("video.data.whatYouWillLearn.length > 0"),
+	);
+	assert(!about.includes("VideoReactions"));
+	const transcript = template.indexOf("<VideoTranscript");
+	const discussion = template.indexOf("<div class={watch.discussion}>");
+	const reactions = template.indexOf("<VideoReactions server:defer");
+	const comments = template.indexOf("<VideoContentTabs");
+	assert(transcript > 0);
+	assert(transcript < discussion && discussion < reactions);
+	assert(reactions < comments);
+	assert.equal(template.match(/<VideoReactions\b/g).length, 1);
+	// The deferred island's placeholder holds the row's height.
+	assert.match(
+		template,
+		/<VideoReactions server:defer videoId=\{video\.data\.slug\}>\s*<div slot="fallback" class=\{watch\.reactions\} aria-hidden="true" \/>\s*<\/VideoReactions>/,
+	);
+});
+
+test("copy link announces its result and jumps only scroll to a player that is out of view", () => {
+	const template = source.slice(0, source.lastIndexOf("<script>"));
+	const script = source.slice(source.lastIndexOf("<script>"));
+	// An empty live region right after the button on the server.
+	assert.match(
+		template,
+		/data-copy-link-label>Copy link<\/span>\s*<\/button>\s*<span class="sr-only" role="status" data-copy-link-status><\/span>/,
+	);
+	assert.match(
+		script,
+		/copyStatus\.textContent = result;[\s\S]*copyStatus\.textContent = "";/,
+	);
+	const seek = script.slice(
+		script.indexOf("function seekTo"),
+		script.indexOf("for (const link of"),
+	);
+	// Visible (pinned pane or docked strip): seek in place, no scroll.
+	assert.match(
+		seek,
+		/if \(r\.bottom > 0 && r\.top < window\.innerHeight\) return true;[\s\S]*scrollIntoView/,
+	);
+	assert.match(
+		seek,
+		/behavior: matchMedia\("\(prefers-reduced-motion: reduce\)"\)\.matches\s*\? "auto"\s*: "smooth"/,
+	);
+	assert(!seek.includes('block: "center"'));
+	// The chapter being played is marked for assistive technology too.
+	assert.match(
+		template,
+		/<ol class=\{watch\.chapterList\} data-watch-chapters>/,
+	);
+	assert.match(script, /setAttribute\("aria-current", "true"\)/);
+	assert.match(script, /removeAttribute\("aria-current"\)/);
+});
+
+test("the pinned pane has a measured fallback and the scheduled start uses the Academy date form", () => {
+	const template = source.slice(0, source.lastIndexOf("<script>"));
+	const script = source.slice(source.lastIndexOf("<script>"));
+	// The route runs the shipped fitter against the bench it renders.
+	assert.match(
+		script,
+		/import \{ fitWatchPane \} from "@\/lib\/watch-pane-fit";/,
+	);
+	assert.match(script, /if \(bench\) fitWatchPane\(bench\);/);
+	assert.match(template, /class=\{watch\.bench\}\s+data-watch-bench/);
+	const fitter = readFileSync(
+		new URL("../lib/watch-pane-fit.ts", import.meta.url),
+		"utf8",
+	);
+	assert(fitter.includes('bench.dataset.paneFlow = "all"'));
+	assert(fitter.includes('bench.dataset.paneFlow = "more"'));
+	// It never observes the block whose size its own attribute changes.
+	assert.equal(fitter.match(/\.observe\(/g).length, 1);
+	assert(fitter.includes("observer?.observe(hero)"));
+	const recipe = readFileSync(
+		new URL(
+			"../../../../../packages/design-system/src/recipes/academyWatch.ts",
+			import.meta.url,
+		),
+		"utf8",
+	);
+	// Every pin rule yields to the attribute; the player's budget does not.
+	const pinned = recipe.match(/"&\[data-pin\][^"]*"/g);
+	assert.equal(pinned.length, 11);
+	for (const selector of pinned) {
+		if (selector === '"&[data-pin]"') continue;
+		assert(
+			selector.startsWith('"&[data-pin]:not([data-pane-flow]) > [data-watch-'),
+			selector,
+		);
+	}
+	assert.equal(pinned.filter((s) => s === '"&[data-pin]"').length, 4);
+	// A richer tier starts where the full-width player still fits, so the
+	// player never narrows as the viewport gets taller: each tier's start is
+	// its `--watch-rest` plus the 619px player's height, on a 0.25rem step.
+	const tiers = [
+		...recipe.matchAll(
+			/\(min-height: ([\d.]+)rem\)[^{]*\{\s*(?:\/\/[^\n]*\n\s*)*"&\[data-pin\]": \{ "--watch-rest": "([\d.]+)rem" \}/g,
+		),
+	].map(([, from, rest]) => [Number(from), Number(rest)]);
+	assert.deepEqual(tiers, [
+		[46, 30.5],
+		[54, 31.5],
+		[59.5, 37.5],
+		[63.75, 41.75],
+	]);
+	for (const [from, rest] of tiers.slice(1)) {
+		const fits = Math.ceil((rest + (619 * 9) / 16 / 16) * 4) / 4;
+		assert(from >= fits, `${from}rem starts before ${fits}rem`);
+	}
+	// The pinned block keeps its end border: the seam is one unbroken rule.
+	assert(!recipe.includes('borderInlineEndColor: "transparent"'));
+	assert.match(
+		recipe,
+		/"&\[data-pane-flow=all\] \[data-watch-pane-sticky\]": \{\s*position: "static",\s*overflow: "visible",\s*\}/,
+	);
+	// The notice: one date form, following the reader's zone.
+	assert(
+		source.includes("const scheduled = localDateTime(video.data.publishedAt);"),
+	);
+	assert(!/\blocalTime\(/.test(source));
+	assert.match(
+		template,
+		/Join us on <time \{\.\.\.scheduled\.attrs\}>\{scheduled\.text\}<\/time>\./,
 	);
 });

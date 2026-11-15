@@ -3,9 +3,10 @@ import { ref, computed, onMounted } from "vue";
 import { actions } from "astro:actions";
 import { Accordion } from "@ark-ui/vue/accordion";
 import {
-	academyReference,
-	academyLayout,
 	academyAccount,
+	academyLayout,
+	academyReference,
+	button,
 } from "@rawkodeacademy/design-system";
 const s = academyReference();
 const layout = academyLayout();
@@ -242,18 +243,18 @@ const subscribeAsLearner = async () => {
 				<div v-if="showSuccessState" :class="account.stack" role="status">
 					<h3 :class="s.subheading">You're on the list!</h3>
 					<p :class="s.text">Your cheat sheet is ready.</p>
-					<a href="/resources/kubernetes/1.35-cheatsheet" :class="layout.button" @click="trackViewAssetClick">View Cheat Sheet</a>
+					<a href="/resources/kubernetes/1.35-cheatsheet" :class="button()" @click="trackViewAssetClick">View Cheat Sheet</a>
 				</div>
 				<div v-else :class="account.stack">
 					<h3 :class="s.subheading">Get the free cheat sheet</h3>
 					<p :class="s.text">Subscribe to Kubernetes release updates to get the cheat sheet.</p>
 					<p v-if="error" :class="account.error" role="alert">{{ error }}</p>
-					<button v-if="isSignedIn" type="button" :class="layout.button" :disabled="isLoading" @click="subscribeAsLearner">
+					<button v-if="isSignedIn" type="button" :class="button()" :disabled="isLoading" @click="subscribeAsLearner">
 						{{ isLoading ? 'Subscribing…' : error ? 'Try again' : 'Get the Free Cheat Sheet' }}
 					</button>
 					<template v-else>
 						<p :class="s.text">Sign in with GitHub to get instant access.</p>
-						<a :href="signInUrl" :class="layout.button" @click="trackSignInClick">Sign in with GitHub</a>
+						<a :href="signInUrl" :class="button()" @click="trackSignInClick">Sign in with GitHub</a>
 					</template>
 					<p :class="s.muted">No spam. Unsubscribe anytime.</p>
 				</div>

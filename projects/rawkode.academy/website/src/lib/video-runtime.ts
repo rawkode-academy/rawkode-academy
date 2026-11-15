@@ -17,28 +17,27 @@ export function isUpcomingLiveVideo(
 	return Number.isFinite(publishedAt.getTime()) && publishedAt > now;
 }
 
-export function formatVideoRuntime(seconds?: number | null): string {
-	if (typeof seconds !== "number" || seconds <= 0 || Number.isNaN(seconds)) {
-		return "--:--";
-	}
-	const hours = Math.floor(seconds / 3600);
-	const minutes = Math.floor((seconds % 3600) / 60);
-	const remainingSeconds = Math.floor(seconds % 60);
-
-	if (hours > 0) {
-		return `${hours}:${minutes.toString().padStart(2, "0")}:${remainingSeconds
-			.toString()
-			.padStart(2, "0")}`;
-	}
-
-	return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+/**
+ * The Academy's one runtime form: "42 min", "1h 2m", "2h". Undefined when
+ * the duration is unknown, so a meta line can leave it out.
+ */
+export function formatRuntime(seconds?: number | null): string | undefined {
+	if (typeof seconds !== "number" || !Number.isFinite(seconds) || seconds <= 0)
+		return undefined;
+	const minutes = Math.floor(seconds / 60);
+	if (minutes < 1) return "<1 min";
+	if (minutes < 60) return `${minutes} min`;
+	const hours = Math.floor(minutes / 60);
+	const remainder = minutes % 60;
+	return remainder > 0 ? `${hours}h ${remainder}m` : `${hours}h`;
 }
 
-export function formatVideoRuntimeLabel(
+/** The runtime for a card's meta line: "Upcoming" for a scheduled stream. */
+export function formatRuntimeLabel(
 	video: VideoRuntimeInput,
 	now = new Date(),
-): string {
+): string | undefined {
 	return isUpcomingLiveVideo(video, now)
 		? "Upcoming"
-		: formatVideoRuntime(video.duration);
+		: formatRuntime(video.duration);
 }

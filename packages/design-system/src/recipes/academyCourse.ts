@@ -1,4 +1,8 @@
 import { sva } from "../../styled-system/css";
+import { focusRing, focusRingInset } from "../styles/focus";
+import { coverImage, videoFrame } from "../styles/media";
+import { panelSurface } from "../styles/surface";
+import { headingLg, kicker } from "../styles/type";
 
 export const academyCourse = sva({
 	slots: [
@@ -35,7 +39,6 @@ export const academyCourse = sva({
 		"terminalOutput",
 		"terminalLine",
 		"link",
-		"button",
 		"embed",
 		"fill",
 		"detailHero",
@@ -44,13 +47,13 @@ export const academyCourse = sva({
 		"heroCopy",
 		"heroTitle",
 		"heroDescription",
+		"heroCoverFrame",
 		"heroCover",
 		"kicker",
 		"metadata",
 		"byline",
 		"author",
 		"avatar",
-		"curriculumAction",
 		"detailBody",
 		"detailGrid",
 		"detailStack",
@@ -130,24 +133,22 @@ export const academyCourse = sva({
 			lineHeight: "body",
 			textWrap: "pretty",
 		},
-		heroCover: {
-			display: "block",
+		// A fixed 16:9 box on the ground colour. A cover that is late or
+		// fails leaves a quiet frame, never a line of alt text.
+		heroCoverFrame: {
+			...videoFrame,
 			width: "full",
-			maxWidth: "full",
-			height: "auto",
-			aspectRatio: "academy-video",
-			objectFit: "contain",
 			borderRadius: "academy-m",
-			background: "academy.ground",
 		},
-		kicker: {
-			margin: "0",
-			color: "academy.accent",
-			fontFamily: "academy-mono",
-			fontSize: "xs",
-			fontWeight: "semibold",
-			letterSpacing: "wide",
+		heroCover: {
+			...coverImage,
+			objectFit: "contain",
+			// The alt text stays for assistive technology but is not drawn
+			// in the frame when the image is missing.
+			color: "transparent",
+			fontSize: "[0]",
 		},
+		kicker: kicker,
 		metadata: {
 			display: "flex",
 			flexWrap: "wrap",
@@ -176,11 +177,7 @@ export const academyCourse = sva({
 			color: "academy.text",
 			textDecoration: "none",
 			_hover: { textDecoration: "underline" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		avatar: {
 			width: "7",
@@ -189,28 +186,6 @@ export const academyCourse = sva({
 			borderRadius: "full",
 			objectFit: "cover",
 			background: "academy.panel",
-		},
-		curriculumAction: {
-			display: "inline-flex",
-			alignItems: "center",
-			justifyContent: "center",
-			minHeight: "11",
-			paddingInline: "4",
-			paddingBlock: "2",
-			marginBlockStart: "1",
-			border: "academy-button",
-			borderRadius: "academy-s",
-			background: "academy.accent",
-			color: "academy.accentForeground",
-			fontSize: "sm",
-			fontWeight: "bold",
-			textDecoration: "none",
-			_hover: { opacity: "0.9" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
 		},
 		detailBody: {
 			display: "grid",
@@ -233,14 +208,7 @@ export const academyCourse = sva({
 			_lg: { gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1fr)" },
 		},
 		detailStack: { display: "grid", gap: "6", minWidth: "0" },
-		sectionHeading: {
-			margin: "0",
-			color: "academy.text",
-			fontFamily: "academy-display",
-			fontSize: "2xl",
-			fontWeight: "bold",
-			lineHeight: "tight",
-		},
+		sectionHeading: { ...headingLg, color: "academy.text" },
 		objectiveList: {
 			display: "grid",
 			gap: "2",
@@ -259,14 +227,11 @@ export const academyCourse = sva({
 			minWidth: "0",
 		},
 		signup: {
+			...panelSurface,
 			display: "grid",
 			gap: "4",
 			minWidth: "0",
 			padding: "5",
-			border: "hairline",
-			borderColor: "academy.border",
-			borderRadius: "academy-m",
-			background: "academy.panel",
 		},
 		curriculum: {
 			display: "grid",
@@ -306,11 +271,7 @@ export const academyCourse = sva({
 		},
 		lessonLink: {
 			_hover: { background: "academy.ground" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus-inset",
-			},
+			_focusVisible: focusRingInset,
 		},
 		lessonIndex: {
 			paddingBlockStart: "0.5",
@@ -396,11 +357,7 @@ export const academyCourse = sva({
 			textDecoration: "none",
 			cursor: "pointer",
 			_hover: { background: "academy.ground" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		icon: { width: "5", height: "5", flexShrink: "0" },
 		iconBadge: {
@@ -511,11 +468,7 @@ export const academyCourse = sva({
 			border: "hairline",
 			borderColor: "academy.inputBorder",
 			borderRadius: "academy-s",
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		editorFrame: { flex: "1", position: "relative", minHeight: "64" },
 		editor: {
@@ -529,11 +482,7 @@ export const academyCourse = sva({
 			fontFamily: "academy-mono",
 			fontSize: "sm",
 			resize: "none",
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus-inset",
-			},
+			_focusVisible: focusRingInset,
 		},
 		preview: {
 			position: "absolute",
@@ -577,27 +526,7 @@ export const academyCourse = sva({
 			fontSize: "sm",
 			textDecoration: "underline",
 			overflowWrap: "anywhere",
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
-		},
-		button: {
-			minHeight: "11",
-			minWidth: "11",
-			paddingInline: "3",
-			color: "academy.textSoft",
-			fontSize: "sm",
-			borderRadius: "academy-s",
-			cursor: "pointer",
-			_hover: { background: "academy.ground", color: "academy.text" },
-			_disabled: { opacity: "0.5", cursor: "not-allowed" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		embed: {
 			position: "relative",

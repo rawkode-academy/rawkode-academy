@@ -210,55 +210,6 @@ export const TECHNOLOGY_FIELDS = /* GraphQL */ `
 	}
 `;
 
-export const ARTICLE_FIELDS = /* GraphQL */ `
-	fragment LiveArticle on Article {
-		id
-		slug
-		title
-		subtitle
-		description
-		body
-		type
-		howto
-		draft
-		categories
-		tags
-		cover {
-			url
-			alt
-			width
-			height
-		}
-		openGraph {
-			title
-			subtitle
-		}
-		updates {
-			date
-			description
-		}
-		resources {
-			id
-			title
-			description
-			type
-			url
-			filePath
-			${RESOURCE_EMBED}
-			category
-		}
-		publishedAt
-		revisedAt
-		updatedAt
-		authors {
-			id
-		}
-		technologies {
-			id
-		}
-	}
-`;
-
 export const NEWS_FIELDS = /* GraphQL */ `
 	fragment LiveNews on NewsStory {
 		id
@@ -458,11 +409,6 @@ export const LIST_QUERIES = {
 		operationName: "LiveTechnologies",
 		query: `query LiveTechnologies { allTechnologies { ...LiveTechnology } }\n${TECHNOLOGY_FIELDS}`,
 		root: "allTechnologies",
-	},
-	articles: {
-		operationName: "LiveArticles",
-		query: `query LiveArticles { allArticles { ...LiveArticle } }\n${ARTICLE_FIELDS}`,
-		root: "allArticles",
 	},
 	news: {
 		operationName: "LiveNews",

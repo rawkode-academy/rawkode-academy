@@ -4,34 +4,37 @@
 		<div
 			v-for="index in items"
 			:key="index"
-			class="flex items-center gap-3 border-b border-surface p-3 last:border-b-0"
+			:class="[skeleton.row, 'skeleton-list__row']"
 		>
 			<div
 				v-if="showIcon"
-				class="shrink-0 animate-pulse bg-[var(--surface-skeleton)]"
-				:class="[iconRounded ? 'rounded-full' : 'rounded']"
+				:class="iconRounded ? skeleton.avatar : skeleton.line"
+				class="skeleton-list__fixed"
 				:style="{ width: iconSize, height: iconSize }"
 			/>
-			<div class="flex-1">
+			<div :class="[skeleton.content, 'skeleton-list__copy']">
 				<div
-					class="mb-1 h-4 animate-pulse rounded bg-[var(--surface-skeleton)]"
+					:class="skeleton.lineMedium"
 					:style="{ width: getTitleWidth(index) }"
 				/>
 				<div
 					v-if="showSubtitle"
-					class="h-3 animate-pulse rounded bg-[var(--surface-skeleton)]"
+					:class="skeleton.lineSmall"
 					:style="{ width: getSubtitleWidth(index) }"
 				/>
 			</div>
 			<div
 				v-if="showAction"
-				class="h-6 w-6 shrink-0 animate-pulse rounded bg-[var(--surface-skeleton)]"
+				:class="skeleton.line"
+				class="skeleton-list__fixed skeleton-list__action"
 			/>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
+import { academySkeleton } from "@rawkodeacademy/design-system";
+
 interface Props {
 	items?: number;
 	showIcon?: boolean;
@@ -53,6 +56,7 @@ withDefaults(defineProps<Props>(), {
 	className: "",
 	ariaLabel: "Loading list...",
 });
+const skeleton = academySkeleton();
 
 const getTitleWidth = (index: number): string => {
 	const widths = ["70%", "85%", "60%", "75%", "65%"];
@@ -64,3 +68,29 @@ const getSubtitleWidth = (index: number): string => {
 	return widths[(index - 1) % widths.length] || "50%";
 };
 </script>
+
+<style scoped>
+/* Layout only; the surfaces and pulse come from academySkeleton. */
+.skeleton-list__row {
+	align-items: center;
+	padding: 0.75rem;
+}
+
+.skeleton-list__row:last-child {
+	border-bottom: 0;
+}
+
+.skeleton-list__fixed {
+	flex-shrink: 0;
+}
+
+.skeleton-list__copy {
+	display: grid;
+	gap: 0.25rem;
+}
+
+.skeleton-list__action {
+	width: 1.5rem;
+	height: 1.5rem;
+}
+</style>

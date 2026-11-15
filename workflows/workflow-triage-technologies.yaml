@@ -1,0 +1,34 @@
+id: dcd2273a-2cc8-480e-a100-884c11f2065b
+name: triage-technologies
+description: >-
+  List the technology profiles whose matrix placement is still under review,
+  for the monthly triage. Read-only: place one with update-technologies and
+  --input 'changes={"<id>": {"matrix.status": "<status>"}}'.
+version: 1
+tags: {}
+jobs:
+  - name: triage
+    description: Read the profiles and list the ones awaiting a matrix placement
+    steps:
+      - name: read
+        description: Read what identifies and places every technology profile in D1
+        task:
+          type: behavior
+          behavior: technologies-database
+          methodName: d1_query_database
+          inputs:
+            database_id: 4671b796-cdc8-4a4e-aa58-4e10eb24b67d
+            body:
+              sql: SELECT id, name, category, website, cncf, matrix FROM technologies ORDER BY id
+      - name: list
+        description: List the profiles under review
+        dependsOn:
+          - step: read
+            condition:
+              type: succeeded
+        task:
+          type: behavior
+          behavior: technology-profiles
+          methodName: triage
+          inputs:
+            rows: ${{ data.latest("technologies-database", "d1_query_database-current").attributes[0].results }}

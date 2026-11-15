@@ -300,7 +300,7 @@ describe("setContentCache against live collections", () => {
 	});
 
 	function env(rows: unknown[] | (() => never)) {
-		const spec = LIST_QUERIES.articles;
+		const spec = LIST_QUERIES.news;
 		return {
 			CONTENT_CACHE: memoryKv(),
 			API: {
@@ -326,14 +326,14 @@ describe("setContentCache against live collections", () => {
 			]),
 		);
 		const first = target();
-		await setContentCache(first.t, { collections: ["articles"] });
+		await setContentCache(first.t, { collections: ["news"] });
 		expect(first.set.mock.calls[0]![0]).toMatchObject({ maxAge: 60, swr: 0 });
 
 		// Two minutes later the mapped collection is still memoised; "soon" has
 		// passed, so the page must still expire when "later" goes live.
 		clock = NOW + 120_000;
 		const second = target();
-		await setContentCache(second.t, { collections: ["articles"] });
+		await setContentCache(second.t, { collections: ["news"] });
 		expect(second.set.mock.calls[0]![0]).toMatchObject({
 			maxAge: 1_680,
 			swr: 0,
@@ -342,7 +342,7 @@ describe("setContentCache against live collections", () => {
 
 	it("caches only briefly when the gateway failed and the last-good copy was served", async () => {
 		const kv = memoryKv();
-		const spec = LIST_QUERIES.articles;
+		const spec = LIST_QUERIES.news;
 		let fail = false;
 		setContentEnv({
 			CONTENT_CACHE: kv,
@@ -356,7 +356,7 @@ describe("setContentCache against live collections", () => {
 			},
 		});
 		const ok = target();
-		await setContentCache(ok.t, { collections: ["articles"] });
+		await setContentCache(ok.t, { collections: ["news"] });
 		expect(ok.set.mock.calls[0]![0].maxAge).toBe(DEFAULT_MAX_AGE);
 
 		// New generation, gateway down: the page renders from the last-good copy.
@@ -372,9 +372,9 @@ describe("setContentCache against live collections", () => {
 		await setContentCache(degraded.t, {
 			entries: [
 				{
-					collection: "articles",
+					collection: "news",
 					data: { publishedAt: new Date(NOW - 1000) },
-					cacheHint: { tags: ["articles", "articles:a"] },
+					cacheHint: { tags: ["news", "news:a"] },
 				},
 			],
 		});
@@ -497,23 +497,24 @@ describe("guardSharedCache", () => {
 		expect(res.headers.get("Cloudflare-CDN-Cache-Control")).toBe("no-store");
 	});
 
-	it.each([
-		404, 500, 502, 503,
-	])("never lets the CDN store a %i error response", (status) => {
-		const res = guardSharedCache(
-			fakeRequest("https://rawkode.academy/read/missing"),
-			fakeResponse(
-				{
-					"Cloudflare-CDN-Cache-Control":
-						"public, max-age=3600, stale-while-revalidate=86400",
-					"Cache-Tag": "articles,articles:missing",
-				},
-				status,
-			),
-		);
-		expect(res.headers.get("Cloudflare-CDN-Cache-Control")).toBe("no-store");
-		expect(res.headers.has("Cache-Tag")).toBe(false);
-	});
+	it.each([404, 500, 502, 503])(
+		"never lets the CDN store a %i error response",
+		(status) => {
+			const res = guardSharedCache(
+				fakeRequest("https://rawkode.academy/read/missing"),
+				fakeResponse(
+					{
+						"Cloudflare-CDN-Cache-Control":
+							"public, max-age=3600, stale-while-revalidate=86400",
+						"Cache-Tag": "articles,articles:missing",
+					},
+					status,
+				),
+			);
+			expect(res.headers.get("Cloudflare-CDN-Cache-Control")).toBe("no-store");
+			expect(res.headers.has("Cache-Tag")).toBe(false);
+		},
+	);
 
 	it("keeps redirects cacheable", () => {
 		const res = guardSharedCache(

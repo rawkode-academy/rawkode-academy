@@ -1,4 +1,10 @@
 import { sva } from "../../styled-system/css";
+import { inputField } from "../styles/field";
+import { inkStage } from "../styles/ink";
+import { coverImage } from "../styles/media";
+import { proseLists } from "../styles/prose";
+import { linkedPanel, panelSurface, pill } from "../styles/surface";
+import { headingLg, headingMd, ledeText, mastheadTitle } from "../styles/type";
 
 /** Content primitives. The document wrapper owns header/main/footer landmarks. */
 export const academyLayout = sva({
@@ -39,8 +45,6 @@ export const academyLayout = sva({
 		"split",
 		"toolbar",
 		"input",
-		"button",
-		"buttonSecondary",
 		"tag",
 		"empty",
 		"notice",
@@ -83,35 +87,15 @@ export const academyLayout = sva({
 		// the work instead of decorating an empty panel. Reading pages keep the
 		// canvas hero above.
 		masthead: {
-			position: "relative",
-			overflow: "hidden",
+			...inkStage,
 			paddingBlockStart: "academy-hero-tight",
 			paddingBlockEnd: "10",
 			paddingInline: "academy-gutter",
-			backgroundColor: "academy.ink",
-			color: "academy.inkText",
-			borderBottom: "hairline",
-			borderColor: "academy.inkBorder",
 			_lg: {
 				minHeight: "academy-masthead",
 				paddingBlockStart: "academy-masthead-top",
 				paddingBlockEnd: "12",
 			},
-			"--academy-grid-line":
-				"color-mix(in srgb, var(--colors-academy-ink-border) 70%, transparent)",
-			_before: {
-				content: '""',
-				position: "absolute",
-				inset: "0",
-				pointerEvents: "none",
-				backgroundImage:
-					"[linear-gradient(var(--academy-grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--academy-grid-line) 1px, transparent 1px)]",
-				backgroundSize: "[4rem 4rem]",
-				backgroundPosition: "[center top]",
-				maskImage:
-					"[radial-gradient(120% 100% at 50% 0%, black 20%, transparent 100%)]",
-			},
-			"& > *": { position: "relative" },
 		},
 		mastheadInner: {
 			display: "grid",
@@ -134,15 +118,7 @@ export const academyLayout = sva({
 			fontSize: "sm",
 		},
 		mastheadTitle: {
-			margin: "0",
-			color: "academy.inkText",
-			fontFamily: "academy-display",
-			fontSize: "academy-masthead",
-			fontWeight: "extrabold",
-			lineHeight: "academy-poster",
-			letterSpacing: "academy-poster",
-			textWrap: "balance",
-			overflowWrap: "anywhere",
+			...mastheadTitle,
 			animation: "academy-rise",
 			_motionReduce: { animation: "none" },
 		},
@@ -176,12 +152,8 @@ export const academyLayout = sva({
 		},
 		mastheadSummary: { srOnly: true },
 		mastheadDescription: {
-			margin: "0",
-			maxWidth: "academy-lede",
+			...ledeText,
 			color: "academy.inkTextSoft",
-			fontSize: "academy-lede",
-			lineHeight: "academy-reading",
-			textWrap: "pretty",
 			animation: "academy-rise",
 			animationDelay: "stagger-2",
 			_motionReduce: { animation: "none" },
@@ -229,10 +201,7 @@ export const academyLayout = sva({
 			},
 		},
 		mastheadImage: {
-			display: "block",
-			width: "full",
-			height: "full",
-			objectFit: "cover",
+			...coverImage,
 			// Everything but the lead tile is printed in the ink itself, a
 			// navy duotone, so the wall reads as one surface and the lead as
 			// the thing on air.
@@ -305,38 +274,18 @@ export const academyLayout = sva({
 			gap: "4",
 			marginBottom: "6",
 		},
-		sectionTitle: {
-			margin: "0",
-			fontFamily: "academy-display",
-			fontSize: "2xl",
-			fontWeight: "bold",
-			lineHeight: "tight",
-		},
+		sectionTitle: headingLg,
 		grid: {
 			display: "grid",
 			gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 18rem), 1fr))",
 			gap: "6",
 		},
 		card: {
+			...linkedPanel,
 			display: "flex",
 			flexDirection: "column",
 			minWidth: "0",
 			overflow: "hidden",
-			border: "hairline",
-			borderColor: "academy.border",
-			borderRadius: "academy-m",
-			backgroundColor: "academy.panel",
-			color: "academy.text",
-			textDecoration: "none",
-			transitionProperty: "colors",
-			transitionDuration: "fast",
-			_hover: { borderColor: "academy.accent" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
-			_motionReduce: { transitionDuration: "none" },
 		},
 		cardMedia: {
 			width: "full",
@@ -350,13 +299,7 @@ export const academyLayout = sva({
 			flexDirection: "column",
 			gap: "3",
 		},
-		cardTitle: {
-			margin: "0",
-			fontFamily: "academy-display",
-			fontSize: "xl",
-			fontWeight: "bold",
-			lineHeight: "tight",
-		},
+		cardTitle: headingMd,
 		meta: {
 			display: "flex",
 			flexWrap: "wrap",
@@ -384,20 +327,7 @@ export const academyLayout = sva({
 				textDecoration: "underline",
 				textUnderlineOffset: "0.2em",
 			},
-			"& ul, & ol": {
-				display: "grid",
-				gap: "3",
-				margin: "0",
-				paddingInlineStart: "6",
-			},
-			"& ul": { listStyle: "disc" },
-			"& ol": { listStyle: "decimal" },
-			"& li": { paddingInlineStart: "1" },
-			"& li::marker": {
-				color: "academy.accent",
-				fontFamily: "academy-mono",
-				fontWeight: "bold",
-			},
+			...proseLists,
 			"& img": { maxWidth: "full", height: "auto" },
 			"& pre": {
 				maxWidth: "full",
@@ -406,15 +336,38 @@ export const academyLayout = sva({
 				borderRadius: "academy-m",
 				backgroundColor: "academy.ground",
 			},
+			// Rich text emits a bare table with no wrapper, so the table is its
+			// own scroll container: a wide one scrolls inside the column rather
+			// than breaking identifiers mid-word.
+			"& table": {
+				display: "block",
+				width: "max-content",
+				maxWidth: "full",
+				overflowX: "auto",
+				borderCollapse: "collapse",
+				fontSize: "sm",
+				lineHeight: "normal",
+				overflowWrap: "normal",
+			},
+			"& th, & td": {
+				padding: "3",
+				textAlign: "start",
+				verticalAlign: "top",
+				borderBottom: "hairline",
+				borderBottomColor: "academy.border",
+			},
+			"& th": {
+				color: "academy.text",
+				fontWeight: "semibold",
+				backgroundColor: "academy.ground",
+			},
+			"& td code": { whiteSpace: "nowrap" },
 		},
 		sidebar: {
+			...panelSurface,
 			minWidth: "0",
 			alignSelf: "start",
 			padding: "6",
-			border: "hairline",
-			borderColor: "academy.border",
-			borderRadius: "academy-m",
-			backgroundColor: "academy.panel",
 		},
 		split: {
 			display: "grid",
@@ -454,79 +407,14 @@ export const academyLayout = sva({
 			},
 		},
 		input: {
-			width: "full",
-			minWidth: "0",
+			...inputField,
 			minHeight: "12",
 			paddingInline: "4",
 			paddingBlock: "2",
-			border: "hairline",
-			borderColor: "academy.inputBorder",
-			borderRadius: "academy-s",
-			backgroundColor: "academy.input",
-			color: "academy.text",
 			font: "inherit",
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
-		},
-		button: {
-			display: "inline-flex",
-			alignItems: "center",
-			justifyContent: "center",
-			gap: "2",
-			minHeight: "11",
-			paddingInline: "5",
-			paddingBlock: "3",
-			backgroundColor: "academy.accent",
-			color: "academy.accentForeground",
-			border: "academy-button",
-			borderRadius: "academy-s",
-			fontSize: "sm",
-			fontWeight: "bold",
-			textDecoration: "none",
-			cursor: "pointer",
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.text",
-				outlineOffset: "focus",
-			},
-			_disabled: { opacity: "0.5", cursor: "not-allowed" },
-		},
-		buttonSecondary: {
-			display: "inline-flex",
-			alignItems: "center",
-			justifyContent: "center",
-			gap: "2",
-			minHeight: "11",
-			paddingInline: "5",
-			paddingBlock: "3",
-			backgroundColor: "transparent",
-			color: "academy.text",
-			border: "hairline",
-			borderColor: "academy.border",
-			borderRadius: "academy-s",
-			fontSize: "sm",
-			fontWeight: "semibold",
-			textDecoration: "none",
-			cursor: "pointer",
-			_hover: { backgroundColor: "academy.panel" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
 		},
 		tag: {
-			display: "inline-flex",
-			alignItems: "center",
-			paddingInline: "3",
-			paddingBlock: "1",
-			border: "hairline",
-			borderColor: "academy.border",
-			borderRadius: "academy-pill",
-			fontSize: "xs",
+			...pill,
 			color: "academy.textSoft",
 			backgroundColor: "academy.panel",
 			textDecoration: "none",

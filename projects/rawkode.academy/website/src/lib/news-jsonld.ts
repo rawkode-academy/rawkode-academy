@@ -1,6 +1,7 @@
 export interface NewsArticleAuthor {
 	name: string;
 	url?: string | undefined;
+	sameAs?: ReadonlyArray<string> | undefined;
 }
 
 export interface NewsArticleSource {
@@ -71,6 +72,7 @@ export function buildNewsArticleJsonLd(
 			"@type": "Person",
 			name: author.name,
 			...(author.url ? { url: author.url } : {}),
+			...(author.sameAs?.length ? { sameAs: author.sameAs } : {}),
 		})),
 		publisher: {
 			"@type": "Organization",

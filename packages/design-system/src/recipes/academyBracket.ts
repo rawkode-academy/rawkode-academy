@@ -1,4 +1,5 @@
 import { sva } from "../../styled-system/css";
+import { focusRing } from "../styles/focus";
 
 export const academyBracket = sva({
 	slots: [
@@ -65,11 +66,7 @@ export const academyBracket = sva({
 			padding: "1",
 			paddingBottom: "4",
 			overscrollBehaviorX: "contain",
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 		round: { width: "64", minWidth: "64", flexShrink: "0" },
 		roundTitle: {

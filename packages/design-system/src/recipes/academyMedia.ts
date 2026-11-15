@@ -1,4 +1,5 @@
 import { sva } from "../../styled-system/css";
+import { panelSurface } from "../styles/surface";
 
 /**
  * Presentation primitives for media-heavy Academy surfaces.
@@ -30,13 +31,7 @@ export const academyMedia = sva({
 			borderBottom: "hairline",
 			borderColor: "academy.border",
 		},
-		frame: {
-			backgroundColor: "academy.panel",
-			border: "hairline",
-			borderColor: "academy.border",
-			borderRadius: "academy-m",
-			overflow: "hidden",
-		},
+		frame: { ...panelSurface, overflow: "hidden" },
 		canvas: {
 			backgroundColor: "academyBase.ground",
 			color: "academyBase.text",
@@ -60,12 +55,7 @@ export const academyMedia = sva({
 		body: {
 			paddingBlock: "academy-section",
 		},
-		aside: {
-			backgroundColor: "academy.panel",
-			border: "hairline",
-			borderColor: "academy.border",
-			borderRadius: "academy-m",
-		},
+		aside: panelSurface,
 		notice: {
 			border: "hairline",
 			borderColor: "academy.border",

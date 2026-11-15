@@ -116,7 +116,7 @@
 					<p v-if="fieldErrors.message" :id="messageErrorId" :class="s.fieldError">{{ fieldErrors.message }}</p>
 				</div>
 
-				<button type="submit" :class="s.button" :disabled="loading">
+				<button type="submit" :class="button({ fullWidth: true })" :disabled="loading">
 					{{ loading ? "Sending enquiry..." : "Send enquiry" }}
 				</button>
 			</fieldset>
@@ -127,7 +127,7 @@
 
 <script setup lang="ts">
 import { actions, isInputError } from "astro:actions";
-import { academyForms } from "@rawkodeacademy/design-system";
+import { academyForms, button } from "@rawkodeacademy/design-system";
 import {
 	computed,
 	nextTick,
@@ -136,6 +136,7 @@ import {
 	ref,
 	useId,
 } from "vue";
+import { capture } from "@/lib/analytics/track";
 import {
 	type ApplicationPath,
 	applicationPathLabels,
@@ -267,7 +268,7 @@ onBeforeUnmount(() => {
 const capturePartnershipEvent = (
 	event: "enquiry_form_started" | "enquiry_form_submitted",
 ) => {
-	window.posthog?.capture(event, {
+	capture(event, {
 		form: "partnership_enquiry",
 		path: window.location.pathname,
 		route: path.value,

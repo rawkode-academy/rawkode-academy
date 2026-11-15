@@ -1,0 +1,28 @@
+# Approves Dependabot's pull requests and turns on auto-merge, so they merge
+# once the required checks pass. Major version updates are left for a person.
+
+name: dependabot-auto-merge
+on:
+  pull_request: {}
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  auto-merge:
+    name: auto-merge
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+    - name: Read update metadata
+      id: metadata
+      uses: dependabot/fetch-metadata@v3
+      with:
+        github-token: ${{ github.token }}
+    - name: Approve and enable auto-merge
+      if: steps.metadata.outputs.update-type != 'version-update:semver-major'
+      run: |-
+        gh pr review --approve "$PULL_REQUEST_URL"
+        gh pr merge --auto --squash "$PULL_REQUEST_URL"
+      env:
+        PULL_REQUEST_URL: ${{ github.event.pull_request.html_url }}
+        GH_TOKEN: ${{ github.token }}

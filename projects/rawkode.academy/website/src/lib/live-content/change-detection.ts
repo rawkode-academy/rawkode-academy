@@ -15,7 +15,6 @@ import { bumpGeneration, hashString, now, stableStringify } from "./kv-cache";
 import {
 	courseModuleId,
 	mapAdr,
-	mapArticle,
 	mapChangelog,
 	mapCourse,
 	mapCourseModule,
@@ -104,7 +103,6 @@ export function buildManifest(
 	for (const r of rows("people")) put("people", r.id, r, mapPerson(r));
 	for (const r of rows("technologies"))
 		put("technologies", r.id, r, mapTechnology(r));
-	for (const r of rows("articles")) put("articles", r.id, r, mapArticle(r));
 	for (const r of rows("news")) put("news", r.id, r, mapNews(r));
 	for (const r of rows("changelog")) put("changelog", r.id, r, mapChangelog(r));
 	for (const r of rows("adrs")) put("adrs", r.id, r, mapAdr(r));

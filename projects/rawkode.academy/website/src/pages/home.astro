@@ -1,5 +1,5 @@
 ---
-import { academyAccount } from "@rawkodeacademy/design-system";
+import { academyAccount, button } from "@rawkodeacademy/design-system";
 const account = academyAccount();
 import { disableContentCache, getCollection } from "@/lib/live-content";
 import VideoFeed from "@/components/video/video-feed.astro";
@@ -135,7 +135,7 @@ const layout = academyLayout({ width: "wide" });
 				</p>
 				<a
 					href="/watch"
-					class={layout.button}
+					class={button()}
 				>
 					Browse Videos
 					<svg class={account.smallIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">

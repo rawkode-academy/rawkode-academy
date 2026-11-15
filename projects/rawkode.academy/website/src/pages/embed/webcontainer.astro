@@ -51,13 +51,14 @@ export const prerender = false;
  align-items: center;
  justify-content: center;
  height: 100vh;
- color: #ef4444;
+ /* media.canvas is navy in both schemes, so the text must not flip. */
+ color: var(--colors-academy-base-text);
  font-size: 1.25rem;
  text-align: center;
  padding: 2rem;
  }
  .error a {
- color: #60a5fa;
+ color: var(--colors-academy-ink-accent);
  text-decoration: underline;
  }
  </style>

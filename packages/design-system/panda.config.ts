@@ -8,6 +8,19 @@ export default defineConfig({
 	strictTokens: true,
 	include: ["./src/**/*.{ts,vue}"],
 	outdir: "./styled-system",
+	// The watch page's player is a sticky 3.5rem strip on narrow screens
+	// (`academyWatch.deck`, same conditions): a row scrolled to by focus or a
+	// fragment stops below it. A recipe slot cannot style its ancestor.
+	globalCss: {
+		"html:has([data-watch-root])": {
+			"@media screen and (max-width: 1023.98px) and (prefers-reduced-motion: no-preference)":
+				{
+					"@supports (animation-timeline: view())": {
+						scrollPaddingBlockStart: "16",
+					},
+				},
+		},
+	},
 	conditions: {
 		extend: {
 			sm: "@media (min-width: 640px)",
@@ -19,16 +32,6 @@ export default defineConfig({
 		extend: {
 			tokens: {
 				colors: {
-					editorial: {
-						paper: { value: "oklch(0.97 0.008 85)" },
-						"paper-deep": { value: "oklch(0.93 0.012 85)" },
-						ink: { value: "oklch(0.18 0.02 60)" },
-						"ink-soft": { value: "oklch(0.36 0.015 60)" },
-						"ink-mute": { value: "oklch(0.58 0.012 60)" },
-						hairline: { value: "oklch(0.18 0.02 60 / 0.12)" },
-						spruce: { value: "oklch(0.52 0.09 165)" },
-						overlay: { value: "oklch(0 0 0 / 0.55)" },
-					},
 					academyBase: {
 						ground: { value: "#0a1220" },
 						"ground-raised": { value: "#0d1728" },
@@ -39,6 +42,7 @@ export default defineConfig({
 						"text-soft": { value: "#bfcbdd" },
 						"text-muted": { value: "#8fa0b8" },
 						accent: { value: "#ff7ab6" },
+						"accent-hover": { value: "#ff9cc8" },
 						"accent-foreground": { value: "#2a0616" },
 						input: { value: "#0a1220" },
 						"input-border": { value: "#64768f" },
@@ -157,6 +161,7 @@ export default defineConfig({
 					"stagger-2": { value: "140ms" },
 					"stagger-3": { value: "220ms" },
 					"stagger-4": { value: "320ms" },
+					"stagger-5": { value: "420ms" },
 				},
 				easings: {
 					"academy-out": { value: "cubic-bezier(0.22, 1, 0.36, 1)" },
@@ -174,6 +179,11 @@ export default defineConfig({
 					"academy-rise": {
 						value: "academy-rise 720ms cubic-bezier(0.22, 1, 0.36, 1) both",
 					},
+					// Transform only, for content that must never be hidden: the
+					// homepage's first-screen stills settle in under the statement.
+					"academy-settle": {
+						value: "academy-settle 720ms cubic-bezier(0.22, 1, 0.36, 1) both",
+					},
 					"academy-fade": {
 						value: "academy-fade 900ms cubic-bezier(0.22, 1, 0.36, 1) both",
 					},
@@ -183,7 +193,7 @@ export default defineConfig({
 					// Scroll-driven: paired with animation-timeline: view() so rows
 					// rise as they enter the viewport. Browsers without scroll
 					// timelines never apply it (see the @supports guards).
-					"academy-reveal": { value: "academy-reveal linear both" },
+					"academy-reveal": { value: "academy-reveal linear forwards" },
 					// A tile being placed into a grid cell: it opens from its
 					// centre, the way the scheduler fills a node.
 					"academy-schedule": {
@@ -213,6 +223,10 @@ export default defineConfig({
 					from: { opacity: "0", transform: "translateY(0.75rem)" },
 					to: { opacity: "1", transform: "translateY(0)" },
 				},
+				"academy-settle": {
+					from: { transform: "translateY(1rem)" },
+					to: { transform: "translateY(0)" },
+				},
 				"academy-fade": {
 					from: { opacity: "0" },
 					to: { opacity: "1" },
@@ -232,6 +246,22 @@ export default defineConfig({
 				"academy-progress": {
 					from: { transform: "scaleX(0)" },
 					to: { transform: "scaleX(1)" },
+				},
+				// The watch page's narrow player, scroll-driven along the
+				// `--watch-deck` view timeline (see `academyWatch`).
+				"academy-watch-shrink": {
+					from: { height: "var(--watch-full)" },
+					to: { height: "var(--watch-strip)" },
+				},
+				"academy-watch-dock": {
+					to: { marginInlineStart: "0" },
+				},
+				"academy-watch-chrome-out": {
+					to: { opacity: "0", visibility: "hidden" },
+				},
+				"academy-watch-strip-in": {
+					from: { opacity: "0", visibility: "hidden" },
+					to: { opacity: "1", visibility: "visible" },
 				},
 			},
 			semanticTokens: {
@@ -291,6 +321,15 @@ export default defineConfig({
 								_dark: "{colors.academyBase.accent}",
 							},
 						},
+						// The accent under the pointer: one step further from the
+						// surface it sits on (deeper on the light canvas, brighter
+						// on navy), so a filled control answers without fading.
+						accentHover: {
+							value: {
+								base: "#a3124b",
+								_dark: "{colors.academyBase.accent-hover}",
+							},
+						},
 						accentForeground: {
 							value: {
 								base: "#ffffff",
@@ -333,6 +372,14 @@ export default defineConfig({
 							value: {
 								base: "#c3d0e2",
 								_dark: "{colors.academyBase.segment-off}",
+							},
+						},
+						// The backdrop behind a dialog or drawer. It is the same in
+						// both schemes: a scrim mixed from a themed colour stops
+						// dimming once the page beneath it is already that colour.
+						scrim: {
+							value: {
+								base: "oklch(0 0 0 / 0.55)",
 							},
 						},
 						// Ink surfaces: the navy that carries the homepage hero and
@@ -380,66 +427,16 @@ export default defineConfig({
 								_dark: "{colors.academyBase.accent}",
 							},
 						},
+						inkAccentHover: {
+							value: {
+								base: "{colors.academyBase.accent-hover}",
+								_dark: "{colors.academyBase.accent-hover}",
+							},
+						},
 						inkAccentForeground: {
 							value: {
 								base: "{colors.academyBase.accent-foreground}",
 								_dark: "{colors.academyBase.accent-foreground}",
-							},
-						},
-					},
-					surface: {
-						canvas: {
-							value: {
-								base: "{colors.editorial.paper}",
-								_dark: "oklch(0.14 0.01 280)",
-							},
-						},
-						panel: {
-							value: {
-								base: "{colors.editorial.paper-deep}",
-								_dark: "oklch(0.26 0.014 280)",
-							},
-						},
-					},
-					content: {
-						primary: {
-							value: {
-								base: "{colors.editorial.ink}",
-								_dark: "oklch(0.93 0.008 85)",
-							},
-						},
-						muted: {
-							value: {
-								base: "{colors.editorial.ink-soft}",
-								_dark: "oklch(0.72 0.012 280)",
-							},
-						},
-					},
-					border: {
-						default: {
-							value: {
-								base: "{colors.editorial.hairline}",
-								_dark: "oklch(1 0 0 / 0.16)",
-							},
-						},
-					},
-					action: {
-						primary: {
-							value: {
-								base: "{colors.editorial.ink}",
-								_dark: "{colors.editorial.paper}",
-							},
-						},
-						interactive: {
-							value: {
-								base: "{colors.editorial.spruce}",
-								_dark: "oklch(0.72 0.16 165)",
-							},
-						},
-						primaryForeground: {
-							value: {
-								base: "{colors.editorial.paper}",
-								_dark: "{colors.editorial.ink}",
 							},
 						},
 					},

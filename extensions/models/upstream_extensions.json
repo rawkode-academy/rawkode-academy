@@ -1,0 +1,81 @@
+{
+  "@webframp/cloudflare/d1": {
+    "version": "2026.11.03.1",
+    "pulledAt": "2026-11-11T18:32:41.200Z",
+    "files": [
+      ".swamp/pulled-extensions/@webframp/cloudflare/d1/dependency-audit.json",
+      ".swamp/pulled-extensions/@webframp/cloudflare/d1/files/LICENSE.md",
+      ".swamp/pulled-extensions/@webframp/cloudflare/d1/files/README.md",
+      ".swamp/pulled-extensions/@webframp/cloudflare/d1/manifest.yaml",
+      ".swamp/pulled-extensions/@webframp/cloudflare/d1/models/cloudflare/_lib/api.ts",
+      ".swamp/pulled-extensions/@webframp/cloudflare/d1/models/cloudflare/d1.ts"
+    ],
+    "checksum": "547814f7804276dd91cbf930d66fd838761fbe04505a07807269d60994fc95d5",
+    "filesChecksum": "38c7331a4d5033f592566b5c9959b666323693a94001957041d0d38d0743e5d8",
+    "serverUrl": "https://swamp-club.com",
+    "publishedChannel": "stable"
+  },
+  "@swamp/1password": {
+    "version": "2026.10.23.1",
+    "pulledAt": "2026-11-11T18:33:26.488Z",
+    "files": [
+      ".swamp/pulled-extensions/@swamp/1password/dependency-audit.json",
+      ".swamp/pulled-extensions/@swamp/1password/files/LICENSE.txt",
+      ".swamp/pulled-extensions/@swamp/1password/files/README.md",
+      ".swamp/pulled-extensions/@swamp/1password/manifest.yaml",
+      ".swamp/pulled-extensions/@swamp/1password/vaults/_lib/tracing.ts",
+      ".swamp/pulled-extensions/@swamp/1password/vaults/onepassword.ts"
+    ],
+    "checksum": "0a70c6f5adb962c9012595147c4338ca8f70fe75e0a8cb1c44afdeea9cfcf840",
+    "filesChecksum": "2e41064d566d4b767442b04494201f245923b198f7cde2efc447ca50eebccef5",
+    "serverUrl": "https://swamp-club.com",
+    "publishedChannel": "stable"
+  },
+  "@keeb/anthropic": {
+    "version": "2026.10.15.1",
+    "pulledAt": "2026-11-11T22:54:06.774Z",
+    "files": [
+      ".claude/skills/anthropic",
+      ".swamp/pulled-extensions/@keeb/anthropic/files/LICENSE.txt",
+      ".swamp/pulled-extensions/@keeb/anthropic/files/README.md",
+      ".swamp/pulled-extensions/@keeb/anthropic/manifest.yaml",
+      ".swamp/pulled-extensions/@keeb/anthropic/models/claude.ts"
+    ],
+    "checksum": "3a63d126362f5ce13f2b49532ccc0e23c33169b22a6a1fe513c89c45dcf64a6b",
+    "filesChecksum": "f8a5cdcbc12997bb95db7d053be19003967be17e4a5d30e4cd2f00f7eab9e2a5",
+    "serverUrl": "https://swamp-club.com",
+    "publishedChannel": "stable"
+  },
+  "@webframp/cloudflare/queues": {
+    "version": "2026.11.03.1",
+    "pulledAt": "2026-11-11T18:59:05.402Z",
+    "files": [
+      ".swamp/pulled-extensions/@webframp/cloudflare/queues/dependency-audit.json",
+      ".swamp/pulled-extensions/@webframp/cloudflare/queues/files/LICENSE.md",
+      ".swamp/pulled-extensions/@webframp/cloudflare/queues/files/README.md",
+      ".swamp/pulled-extensions/@webframp/cloudflare/queues/manifest.yaml",
+      ".swamp/pulled-extensions/@webframp/cloudflare/queues/models/cloudflare/_lib/api.ts",
+      ".swamp/pulled-extensions/@webframp/cloudflare/queues/models/cloudflare/queues.ts"
+    ],
+    "checksum": "48cd7d1efe0ba29e30fbe4df51c9da32eeea309b32fd7e904e65390e1a80050f",
+    "filesChecksum": "8889eb0ef65f878ec330ecdf0e693edcc30d29ee25af0470db2ff6ee66172742",
+    "serverUrl": "https://swamp-club.com",
+    "publishedChannel": "stable"
+  },
+  "@webframp/cloudflare/workers-scripts": {
+    "version": "2026.11.03.1",
+    "pulledAt": "2026-11-11T18:59:10.668Z",
+    "files": [
+      ".swamp/pulled-extensions/@webframp/cloudflare/workers-scripts/dependency-audit.json",
+      ".swamp/pulled-extensions/@webframp/cloudflare/workers-scripts/files/LICENSE.md",
+      ".swamp/pulled-extensions/@webframp/cloudflare/workers-scripts/files/README.md",
+      ".swamp/pulled-extensions/@webframp/cloudflare/workers-scripts/manifest.yaml",
+      ".swamp/pulled-extensions/@webframp/cloudflare/workers-scripts/models/cloudflare/_lib/api.ts",
+      ".swamp/pulled-extensions/@webframp/cloudflare/workers-scripts/models/cloudflare/workers_scripts.ts"
+    ],
+    "checksum": "e8724edf82b7e90e83978e6819776e85383ccf8733d3b56d6fbd1b42f7d748a4",
+    "filesChecksum": "3d45e617548bf94e2dc97c8927a27752d0615b4e333611cc8d6a1f9dcfdc5827",
+    "serverUrl": "https://swamp-club.com",
+    "publishedChannel": "stable"
+  }
+}

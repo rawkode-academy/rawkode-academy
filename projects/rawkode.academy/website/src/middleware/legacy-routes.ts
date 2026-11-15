@@ -21,9 +21,6 @@ const PERMANENT_REDIRECTS = new Map<string, string>([
 	["/organizations", "/organizations/partnerships"],
 	["/organizations/consulting", "/organizations/partnerships"],
 	["/organizations/training", "/organizations/partnerships"],
-	// Article series were retired; the Talos on Hetzner series never shipped.
-	["/series", "/read"],
-	["/series/talos-on-hetzner", "/read"],
 ]);
 
 export function resolveLegacyRoute(url: URL): LegacyRouteResult | undefined {

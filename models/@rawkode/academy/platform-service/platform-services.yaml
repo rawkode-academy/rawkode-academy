@@ -1,0 +1,8 @@
+type: '@rawkode/academy/platform-service'
+typeVersion: 2026.11.11.1
+id: 0078e0c5-60b6-4901-bb10-3dca7a9d39e0
+name: platform-services
+version: 1
+tags: {}
+globalArguments: {}
+methods: {}

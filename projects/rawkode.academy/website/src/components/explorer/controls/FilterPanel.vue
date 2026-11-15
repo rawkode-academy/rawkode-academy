@@ -43,18 +43,13 @@
 
 <script setup lang="ts">
 import { computed, watch } from "vue";
+import { capture } from "@/lib/analytics/track";
 import type { DimensionKey } from "@/lib/explorer/dimensions";
 import type { ExplorerFilters } from "@/lib/explorer/presets";
 import MultiSelectFilter from "./MultiSelectFilter.vue";
 
 // Track analytics events client-side
-const trackEvent = (event: string, properties?: Record<string, unknown>) => {
-	try {
-		(window as any).posthog?.capture(event, properties);
-	} catch {
-		// Ignore tracking errors
-	}
-};
+const trackEvent = capture;
 
 interface Props {
 	filters: ExplorerFilters;
@@ -141,7 +136,7 @@ const handleSearchInput = (event: Event) => {
  border: none;
  font-size: 0.7rem;
  font-weight: 600;
- color: rgb(239, 68, 68);
+ color: var(--colors-academy-status-rust);
  cursor: pointer;
  transition: opacity 0.15s ease;
 }

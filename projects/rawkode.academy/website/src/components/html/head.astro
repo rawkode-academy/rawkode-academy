@@ -2,6 +2,7 @@
 import { Font } from "astro:assets";
 import { SITE_DESCRIPTION } from "@/lib/site";
 import type { OpenGraphProps } from "@/types/opengraph";
+import Analytics from "../analytics/index.astro";
 import PostHog from "../posthog/index.astro";
 import Grafana from "../grafana/index.astro";
 import Opengraph from "./opengraph.astro";
@@ -124,6 +125,7 @@ const normalizedTitle =
 
 	<!-- PostHog analytics (loaded lazily, respects DNT) -->
 	<PostHog userId={userId} />
+	<Analytics />
 
 	<!-- Grafana Faro observability (loaded lazily, skips localhost) -->
 	<Grafana />

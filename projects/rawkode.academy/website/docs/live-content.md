@@ -1,9 +1,38 @@
 # Live content and caching
 
-All content (videos, shows, people, technologies, articles, news, changelog,
-ADRs, testimonials, courses, course modules, learning paths, community
-supporters) lives in D1 platform services behind the GraphQL gateway. The website has no build-time
-content: every content page renders on demand and is cached at the edge.
+Content (videos, shows, people, technologies, news, changelog, ADRs,
+testimonials, courses, course modules, learning paths, community supporters)
+lives in D1 platform services behind the GraphQL gateway. Those pages render
+on demand and are cached at the edge. Articles are the exception; see below.
+
+## Articles (build-time)
+
+Articles are Markdown/MDX files in the repository's `content/articles`
+(authoring guide: `content/README.md`).
+
+- `src/content.config.ts` defines a build-time `articles` collection. Its
+  loader (`src/lib/articles/loader.ts`) validates each file's frontmatter,
+  converts the body to a rich-text document with
+  `@rawkodeacademy/rich-text/markdown` (the same document the live
+  collections carry) and copies images referenced by a relative path to
+  `public/_content/articles` (generated, ignored by git).
+- `getCollection("articles")` / `getEntry("articles", id)` from
+  `@/lib/live-content` read that collection (`src/lib/live-content/articles.ts`)
+  and return the same entry shape as a live collection, so listings, feeds,
+  sitemaps, search and technology pages are unchanged.
+- `/read/<slug>` is prerendered (`getStaticPaths`). Authors, related videos
+  and technology links are read from the gateway during the build, so the
+  build needs network access to it, and those parts of an article page are
+  as fresh as the last deploy.
+- A production build leaves out `draft: true` articles and articles dated in
+  the future; `astro dev` shows them. There is no scheduled publication: a
+  future-dated article appears with the first deploy after its date.
+- Pages that list articles next to live content (`/read`, feeds, the
+  homepage) still render on demand and keep the `articles` cache tags. The
+  deploy purges the cache, which is the only time articles change.
+- `setContentCache` ignores `articles` when it looks for stale collections
+  and the next scheduled entry, and the hourly change detection does not
+  cover them.
 
 ## Request path
 

@@ -1,6 +1,8 @@
 import { type CollectionName, getCollection } from "@/lib/live-content";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import { ACADEMY_DATE, ACADEMY_DATE_LOCALE, formatUtc } from "@/lib/local-time";
 import { isNewsPublished } from "@/lib/news-publication";
+import { formatRuntime } from "@/lib/video-runtime";
 
 export type AcademyContentKind =
 	| "Video"
@@ -33,21 +35,7 @@ const compactCopy = (value: string | undefined, maxLength = 180) => {
 };
 
 const formatDate = (value: Date) =>
-	value.toLocaleDateString("en-US", {
-		year: "numeric",
-		month: "short",
-		day: "numeric",
-		timeZone: "UTC",
-	});
-
-const formatDuration = (seconds?: number) => {
-	if (!seconds || !Number.isFinite(seconds) || seconds <= 0) return undefined;
-	const minutes = Math.floor(seconds / 60);
-	if (minutes < 60) return `${minutes} min`;
-	const hours = Math.floor(minutes / 60);
-	const remainder = minutes % 60;
-	return remainder > 0 ? `${hours}h ${remainder}m` : `${hours}h`;
-};
+	formatUtc(value, ACADEMY_DATE, ACADEMY_DATE_LOCALE);
 
 /**
  * Get published videos (excludes future-dated content for scheduled publishing).
@@ -113,7 +101,7 @@ export async function getLatestContent(
 
 	const items: AcademyContentItem[] = [
 		...videos.map((video) => {
-			const duration = formatDuration(video.data.duration);
+			const duration = formatRuntime(video.data.duration);
 			return {
 				kind: "Video" as const,
 				href: `/watch/${video.data.slug}`,

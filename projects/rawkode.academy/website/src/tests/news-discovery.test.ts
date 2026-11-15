@@ -210,14 +210,14 @@ describe("News discovery publication contracts", () => {
 		expect(await feedNewsPaths(handler)).toEqual([]);
 	});
 
-	// The technology feed lists published recordings only (upcoming streams
-	// are filtered by the route); the site-wide feeds keep announcing them.
+	// Feeds list published videos only: a scheduled stream has a page, but
+	// must not lead a feed with a future date.
 	it.each([
-		["All RSS", allRss, true],
-		["All Atom", allAtom, true],
-		["All JSON", allJson, true],
-		["Technology RSS", technologyRss, false],
-	] as const)("%s includes articles regardless of the legacy flag and preserves News publication rules", async (_name, handler, listsUpcomingVideos) => {
+		["All RSS", allRss],
+		["All Atom", allAtom],
+		["All JSON", allJson],
+		["Technology RSS", technologyRss],
+	] as const)("%s includes articles regardless of the legacy flag and preserves News publication rules", async (_name, handler) => {
 		collections.articles = [
 			entry("future-article", future.data.publishedAt),
 			entry("draft-article", now, { draft: true }),
@@ -225,8 +225,7 @@ describe("News discovery publication contracts", () => {
 		collections.videos = [entry("future-video", future.data.publishedAt)];
 		const text = await (await handler(context())).text();
 		expect(text).toContain("/read/future-article/");
-		if (listsUpcomingVideos) expect(text).toContain("/watch/future-video/");
-		else expect(text).not.toContain("/watch/future-video/");
+		expect(text).not.toContain("/watch/future-video/");
 		expect(text).toContain("/read/draft-article/");
 		expect(text).not.toContain("/news/future/");
 	});

@@ -1,0 +1,146 @@
+id: 6b54ed72-a03c-40d6-b5dc-31dbcdaa0644
+name: update-people
+description: >-
+  Audit people in the platform-people D1 database, and their extra links in
+  platform-people-links, against the sites they point at, then write the
+  confirmed corrections to the people table. Link problems are
+  reported for review and never written.
+version: 1
+tags: {}
+vaults:
+  - rawkode-academy
+  - default
+inputs:
+  properties:
+    people:
+      type: string
+      default: ""
+      description: Comma-separated person ids to audit; empty audits everyone
+    accept:
+      type: string
+      default: ""
+      description: >-
+        Comma-separated findings whose observed value should be written, as
+        `field` or `id:field` (for example `rawkode:website,youtube`)
+    changes:
+      type: object
+      default: {}
+      description: >-
+        Values to write regardless of the findings: person id, then column,
+        then value (null clears), for example
+        {"rawkode": {"mastodon": "https://hachyderm.io/@rawkode"}}
+jobs:
+  - name: update
+    description: Read, audit, write, confirm and invalidate
+    steps:
+      - name: read
+        description: Read the requested people rows from D1
+        task:
+          type: behavior
+          behavior: people-database
+          methodName: d1_query_database
+          inputs:
+            database_id: d2cd6600-ca32-47d8-bc7d-147c6c7bb794
+            body:
+              sql: >-
+                SELECT *, (SELECT json_group_array(id) FROM people) AS known_ids
+                FROM people
+                WHERE ?1 = '' OR instr(',' || replace(?1, ' ', '') || ',', ',' || id || ',') > 0
+                ORDER BY id
+              params:
+                - ${{ inputs.people }}
+      - name: read-links
+        description: Read the extra links of the requested people from D1
+        task:
+          type: behavior
+          behavior: people-links-database
+          methodName: d1_query_database
+          inputs:
+            database_id: a9fd441c-34f3-4f1d-a4c0-875d2716e694
+            body:
+              sql: >-
+                SELECT person_id, url, name, position FROM people_links
+                WHERE ?1 = '' OR instr(',' || replace(?1, ' ', '') || ',', ',' || person_id || ',') > 0
+                ORDER BY person_id, position
+              params:
+                - ${{ inputs.people }}
+      - name: audit
+        description: Check every field and link against its site and plan the update
+        dependsOn:
+          - step: read
+            condition:
+              type: succeeded
+          - step: read-links
+            condition:
+              type: succeeded
+        task:
+          type: behavior
+          behavior: person-profiles
+          methodName: audit
+          inputs:
+            rows: ${{ data.latest("people-database", "d1_query_database-current").attributes[0].results }}
+            links: ${{ data.latest("people-links-database", "d1_query_database-current").attributes[0].results }}
+            people: ${{ inputs.people }}
+            accept: ${{ inputs.accept }}
+            changes: ${{ inputs.changes }}
+      - name: write
+        description: Apply the planned updates to the people table in one batch
+        dependsOn:
+          - step: audit
+            condition:
+              type: succeeded
+        guard: ${{ size(data.latest("person-profiles", "plan").attributes.statements) == 0 }}
+        task:
+          type: behavior
+          behavior: people-database
+          methodName: d1_query_database
+          inputs:
+            database_id: d2cd6600-ca32-47d8-bc7d-147c6c7bb794
+            body:
+              batch: ${{ data.latest("person-profiles", "plan").attributes.statements }}
+      - name: reread
+        description: Read the rows back from D1
+        dependsOn:
+          - step: write
+            condition:
+              type: succeeded
+        guard: ${{ size(data.latest("person-profiles", "plan").attributes.statements) == 0 }}
+        task:
+          type: behavior
+          behavior: people-database
+          methodName: d1_query_database
+          inputs:
+            database_id: d2cd6600-ca32-47d8-bc7d-147c6c7bb794
+            body:
+              sql: >-
+                SELECT * FROM people
+                WHERE ?1 = '' OR instr(',' || replace(?1, ' ', '') || ',', ',' || id || ',') > 0
+                ORDER BY id
+              params:
+                - ${{ inputs.people }}
+      - name: confirm
+        description: Fail unless every planned value is now stored
+        dependsOn:
+          - step: reread
+            condition:
+              type: succeeded
+        guard: ${{ size(data.latest("person-profiles", "plan").attributes.statements) == 0 }}
+        task:
+          type: behavior
+          behavior: person-profiles
+          methodName: confirm
+          inputs:
+            rows: ${{ data.latest("people-database", "d1_query_database-current").attributes[0].results }}
+      - name: invalidate
+        description: Purge the website cache for the updated people
+        dependsOn:
+          - step: confirm
+            condition:
+              type: succeeded
+        guard: ${{ size(data.latest("person-profiles", "plan").attributes.statements) == 0 }}
+        task:
+          type: behavior
+          behavior: person-profiles
+          methodName: invalidate
+          inputs:
+            token: ${{ vault.get(rawkode-academy, website-cache-invalidation) }}

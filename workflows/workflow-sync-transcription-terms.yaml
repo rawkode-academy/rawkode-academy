@@ -1,0 +1,130 @@
+id: 3688096e-9c59-4723-85e3-1a50da0868c4
+name: sync-transcription-terms
+description: >-
+  Add the transcription terms that technologies and people are missing to the
+  platform-transcription-terms D1 database. Additive only:
+  orphaned terms are reported, never removed.
+version: 1
+tags: {}
+vaults:
+  - rawkode-academy
+  - default
+inputs:
+  properties:
+    kinds:
+      type: string
+      default: ""
+      description: >-
+        Comma-separated kinds to synchronise (technology, person); empty
+        covers both
+    identifiers:
+      type: string
+      default: ""
+      description: >-
+        Comma-separated technology or person ids to synchronise; empty covers
+        every row of the kinds
+jobs:
+  - name: synchronise
+    description: Read, plan, write and confirm
+    steps:
+      - name: read-technologies
+        description: Read the name and aliases of every technology from D1
+        task:
+          type: behavior
+          behavior: technologies-database
+          methodName: d1_query_database
+          inputs:
+            database_id: 4671b796-cdc8-4a4e-aa58-4e10eb24b67d
+            body:
+              sql: SELECT id, name, aliases FROM technologies ORDER BY id
+      - name: read-people
+        description: Read the names of every person from D1
+        task:
+          type: behavior
+          behavior: people-database
+          methodName: d1_query_database
+          inputs:
+            database_id: d2cd6600-ca32-47d8-bc7d-147c6c7bb794
+            body:
+              sql: SELECT id, name, forename, surname FROM people ORDER BY id
+      - name: read-terms
+        description: Read the stored technology and person terms from D1
+        task:
+          type: behavior
+          behavior: transcription-terms-database
+          methodName: d1_query_database
+          inputs:
+            database_id: 0466023a-da45-4b6e-8aed-d638c790be62
+            body:
+              sql: >-
+                SELECT kind, foreignId, term FROM transcription_terms
+                WHERE kind IN ('technology', 'person')
+                ORDER BY kind, foreignId, rowid
+      - name: plan
+        description: Work out the missing terms and report the orphaned ones
+        dependsOn:
+          - step: read-technologies
+            condition:
+              type: succeeded
+          - step: read-people
+            condition:
+              type: succeeded
+          - step: read-terms
+            condition:
+              type: succeeded
+        task:
+          type: behavior
+          behavior: transcription-terms
+          methodName: plan
+          inputs:
+            technologies: ${{ data.latest("technologies-database", "d1_query_database-current").attributes[0].results }}
+            people: ${{ data.latest("people-database", "d1_query_database-current").attributes[0].results }}
+            terms: ${{ data.latest("transcription-terms-database", "d1_query_database-current").attributes[0].results }}
+            kinds: ${{ inputs.kinds }}
+            identifiers: ${{ inputs.identifiers }}
+      - name: write
+        description: Insert the missing terms into D1 in one batch
+        dependsOn:
+          - step: plan
+            condition:
+              type: succeeded
+        guard: ${{ size(data.latest("transcription-terms", "plan").attributes.statements) == 0 }}
+        task:
+          type: behavior
+          behavior: transcription-terms-database
+          methodName: d1_query_database
+          inputs:
+            database_id: 0466023a-da45-4b6e-8aed-d638c790be62
+            body:
+              batch: ${{ data.latest("transcription-terms", "plan").attributes.statements }}
+      - name: reread
+        description: Read the terms back from D1
+        dependsOn:
+          - step: write
+            condition:
+              type: succeeded
+        guard: ${{ size(data.latest("transcription-terms", "plan").attributes.statements) == 0 }}
+        task:
+          type: behavior
+          behavior: transcription-terms-database
+          methodName: d1_query_database
+          inputs:
+            database_id: 0466023a-da45-4b6e-8aed-d638c790be62
+            body:
+              sql: >-
+                SELECT kind, foreignId, term FROM transcription_terms
+                WHERE kind IN ('technology', 'person')
+                ORDER BY kind, foreignId, rowid
+      - name: confirm
+        description: Fail unless every planned term is now stored
+        dependsOn:
+          - step: reread
+            condition:
+              type: succeeded
+        guard: ${{ size(data.latest("transcription-terms", "plan").attributes.statements) == 0 }}
+        task:
+          type: behavior
+          behavior: transcription-terms
+          methodName: confirm
+          inputs:
+            terms: ${{ data.latest("transcription-terms-database", "d1_query_database-current").attributes[0].results }}

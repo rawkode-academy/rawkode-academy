@@ -3,7 +3,7 @@ import { env } from "cloudflare:workers";
 import Page from "@/wrappers/page.astro";
 import K8sCheatsheetCTA from "@/components/lead-magnet/K8sCheatsheetCTA.vue";
 import { createLearnerId } from "@/lib/newsletter-ids";
-import { academyLayout, academyReference } from "@rawkodeacademy/design-system";
+import { academyLayout, academyReference, button } from "@rawkodeacademy/design-system";
 import "@rawkodeacademy/design-system/styles.css";
 
 export const prerender = false;
@@ -331,13 +331,13 @@ const layout = academyLayout({ width: "reading" });
 						<div class={reference.actions}>
 							<a
 								href="/"
-								class={layout.button}
+								class={button()}
 							>
 								Back to Academy
 							</a>
 							<a
 								href="/watch"
-								class={layout.buttonSecondary}
+								class={button({ variant: "outline" })}
 							>
 								Watch Kubernetes Videos
 							</a>

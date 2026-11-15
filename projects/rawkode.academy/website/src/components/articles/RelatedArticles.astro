@@ -25,7 +25,7 @@ const styles = academyRelatedContent();
 const allArticles: ReadonlyArray<ContentEntry<"articles">> =
 	articles ?? (await optionalContent(getCollection("articles"), []));
 
-// Most recent articles, excluding the current one (articles have no series).
+// Most recent articles, excluding the current one.
 const finalRelatedArticles = allArticles
 	.filter((article) => article.id !== currentArticle.id)
 	.sort(
@@ -39,7 +39,7 @@ const finalRelatedArticles = allArticles
 {finalRelatedArticles.length > 0 && (
 	<section class:list={[styles.section, styles.related]}>
 		<h2 class={styles.heading}>
-			Related Articles
+			Related articles
 		</h2>
 		<div class={styles.grid}>
 			{finalRelatedArticles.map((article) => (

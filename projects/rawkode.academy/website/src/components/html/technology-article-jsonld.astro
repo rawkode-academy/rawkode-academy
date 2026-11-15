@@ -14,6 +14,7 @@ interface Props {
 	siteUrl?: string | undefined;
 	about?: string | undefined;
 	keywords?: string | undefined;
+	dateModified?: Date | undefined;
 }
 
 const {
@@ -23,6 +24,7 @@ const {
 	image,
 	about,
 	keywords,
+	dateModified,
 	siteName = "Rawkode Academy",
 	siteUrl = "https://rawkode.academy",
 } = Astro.props;
@@ -40,6 +42,7 @@ const jsonLd = {
 	...(image && { image }),
 	...(about && { about }),
 	...(keywords && { keywords }),
+	...(dateModified && { dateModified: dateModified.toISOString() }),
 	author: {
 		"@type": "Organization",
 		name: siteName,

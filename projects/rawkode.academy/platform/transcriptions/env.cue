@@ -13,12 +13,6 @@ tasks: [string]: hermetic: false
 
 env: {
 	SERVICE_NAME: "transcriptions"
-
-	environment: production: {
-		CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {
-			ref: "op://sa.rawkode.academy/cloudflare/api-tokens/workers"
-		}
-	}
 }
 
 ci: pipelines: {
@@ -39,11 +33,11 @@ tasks: {
 		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun x wrangler deploy --config ./wrangler.jsonc"]
 	}
 	"check-missing": schema.#Task & {
-		command:  "bun"
+		command: "bun"
 		args: ["scripts/schedule_missing.ts"]
 	}
 	"schedule-missing": schema.#Task & {
-		command:  "bun"
+		command: "bun"
 		args: ["scripts/schedule_missing.ts", "--execute"]
 	}
 }

@@ -1,6 +1,10 @@
 ---
 import { academyLayout } from "@rawkodeacademy/design-system";
-import { layoutMosaic, type MosaicShape } from "@/lib/masthead-mosaic";
+import {
+	layoutMosaic,
+	type MosaicShape,
+	titleClearColumns,
+} from "@/lib/masthead-mosaic";
 
 interface Props {
 	kicker?: string;
@@ -29,7 +33,14 @@ const {
 	mosaicShape = "video",
 } = Astro.props as Props;
 const styles = academyLayout({ width });
-const tiles = layoutMosaic(mosaic, mosaicShape, title);
+// A long title (Technologies) reaches into the mosaic's first columns; keep
+// them clear so tiles never sit under it.
+const tiles = layoutMosaic(
+	mosaic,
+	mosaicShape,
+	title,
+	titleClearColumns(title, figure),
+);
 const hasActions = Astro.slots.has("actions");
 ---
 

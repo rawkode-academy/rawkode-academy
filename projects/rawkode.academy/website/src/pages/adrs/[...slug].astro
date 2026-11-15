@@ -15,7 +15,7 @@ import { createLogger } from "@/lib/logger";
 import ArticleHeader from "@/components/read/ArticleHeader.astro";
 import ArticleByline from "@/components/read/ArticleByline.astro";
 import Page from "@/wrappers/page.astro";
-import { localTime } from "@/lib/local-time";
+import { localDate } from "@/lib/local-time";
 
 const logger = createLogger("adrs");
 
@@ -40,7 +40,7 @@ await setContentCache(Astro, {
 });
 
 const formatDate = (date: Date) =>
-	localTime(date, { year: "numeric", month: "long", day: "numeric" });
+	localDate(date);
 
 const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
 const adoptedLabel = adr.data.adoptedAt

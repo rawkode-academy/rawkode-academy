@@ -18,25 +18,28 @@
 							{{ author.name }}
 						</a>
 					</div>
-					<a href="#course-content" :class="s.curriculumAction">View curriculum</a>
+					<a href="#course-content" :class="button()">View curriculum</a>
 				</div>
-				<img
-					v-if="cover"
-					:src="cover.src"
-					:alt="cover.alt"
-					:width="cover.width"
-					:height="cover.height"
-					:class="s.heroCover"
-					fetchpriority="high"
-					decoding="async"
-				/>
+				<div v-if="cover" :class="s.heroCoverFrame">
+					<img
+						:src="cover.src"
+						:alt="cover.alt"
+						:width="cover.width"
+						:height="cover.height"
+						:class="s.heroCover"
+						crossorigin="anonymous"
+						loading="eager"
+						fetchpriority="high"
+						decoding="async"
+					/>
+				</div>
 			</div>
 		</div>
 	</section>
 </template>
 
 <script setup lang="ts">
-import { academyCourse } from "@rawkodeacademy/design-system";
+import { academyCourse, button } from "@rawkodeacademy/design-system";
 
 const s = academyCourse();
 

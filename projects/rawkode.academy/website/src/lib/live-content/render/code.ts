@@ -63,19 +63,20 @@ async function createEngine(): Promise<ExpressiveCodeEngine> {
 		// Code blocks are "screen within the page" surfaces: like the
 		// --terminal-* tokens they stay dark in both colour schemes.
 		styleOverrides: {
-			borderRadius: "var(--radius-sm)",
+			borderRadius: "var(--radii-sm)",
 			borderColor: "var(--terminal-border)",
 			borderWidth: "1px",
 			codeBackground: "var(--terminal-bg)",
-			codeFontFamily:
-				"var(--font-red-hat-mono), ui-monospace, SFMono-Regular, Menlo, monospace",
+			codeFontFamily: "var(--fonts-academy-mono)",
 			codeFontSize: "13px",
 			codeLineHeight: "1.7",
 			frames: {
 				editorActiveTabBackground: "transparent",
 				editorActiveTabBorderColor: "transparent",
 				editorActiveTabIndicatorBottomColor: "transparent",
-				editorActiveTabIndicatorTopColor: "var(--editorial-spruce)",
+				// The active tab sits on the always-dark terminal surface, so it
+				// takes the ink accent in both colour schemes.
+				editorActiveTabIndicatorTopColor: "var(--colors-academy-ink-accent)",
 				editorBackground: "var(--terminal-bg)",
 				editorTabBarBackground: "var(--terminal-surface)",
 				editorTabBarBorderBottomColor: "var(--terminal-border)",

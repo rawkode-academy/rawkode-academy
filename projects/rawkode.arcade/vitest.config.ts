@@ -1,6 +1,11 @@
+import { fileURLToPath } from "node:url";
 import { defineWorkersConfig, readD1Migrations } from "@cloudflare/vitest-pool-workers/config";
 
-const migrations = await readD1Migrations("./migrations");
+// Resolved from this file, not the working directory: knip loads this
+// configuration from the repository root.
+const migrations = await readD1Migrations(
+	fileURLToPath(new URL("./migrations", import.meta.url)),
+);
 
 export default defineWorkersConfig({
 	test: {

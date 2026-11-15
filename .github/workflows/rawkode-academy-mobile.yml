@@ -6,6 +6,7 @@ on:
       - 'projects/rawkode.academy/identity/**'
       - 'projects/rawkode.academy/website/src/middleware/auth.ts'
       - 'projects/rawkode.academy/website/src/pages/api/games/**'
+      - 'projects/rawkode.academy/website/src/pages/api/mobile/**'
       - '.github/workflows/rawkode-academy-mobile.yml'
   push:
     branches: [main]
@@ -14,6 +15,7 @@ on:
       - 'projects/rawkode.academy/identity/**'
       - 'projects/rawkode.academy/website/src/middleware/auth.ts'
       - 'projects/rawkode.academy/website/src/pages/api/games/**'
+      - 'projects/rawkode.academy/website/src/pages/api/mobile/**'
       - '.github/workflows/rawkode-academy-mobile.yml'
   workflow_dispatch:
 permissions:

@@ -19,7 +19,8 @@ import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Page from "@/wrappers/page.astro";
 import { calculateReadingTime } from "@/utils/reading-time";
 import { isNewsPublished } from "@/lib/news-publication";
-import { localTime } from "@/lib/local-time";
+import { localDate } from "@/lib/local-time";
+import { buildTechnologyTags } from "@/lib/technology-tags";
 
 export const prerender = false;
 
@@ -59,36 +60,13 @@ await setContentCache(Astro, {
 	...(degraded ? { maxAge: 60, swr: 0 } : {}),
 });
 
-const technologyNameById = new Map<string, string>();
-for (const technology of allTechnologies) {
-	technologyNameById.set(technology.id, technology.data.name);
-}
+// Only ids in the technologies collection link to a technology page.
+const tags = buildTechnologyTags(
+	article.data.technologies ?? [],
+	allTechnologies,
+);
 
-function formatTechnologyLabel(value: string): string {
-	const fromCollection = technologyNameById.get(value);
-	if (fromCollection) return fromCollection;
-	return value
-		.split(/[-/]/g)
-		.filter(Boolean)
-		.map((segment) =>
-			segment.length <= 3
-				? segment.toUpperCase()
-				: `${segment.charAt(0).toUpperCase()}${segment.slice(1)}`,
-		)
-		.join(" ");
-}
-
-const tags = (article.data.technologies ?? []).map((technologyId) => ({
-	id: technologyId,
-	label: formatTechnologyLabel(technologyId),
-	href: `/technology/${technologyId}`,
-}));
-
-const publishDate = localTime(article.data.publishedAt, {
-	month: "short",
-	day: "numeric",
-	year: "numeric",
-});
+const publishDate = localDate(article.data.publishedAt);
 
 const readingTime = calculateReadingTime(article.body || "");
 
@@ -145,7 +123,7 @@ const breadcrumbItems = [{ label: "News", href: "/news" }];
 				authors={authors}
 				date={publishDate}
 				readingTime={readingTime.text}
-				tags={tags.map((t) => ({ label: t.label, href: t.href }))}
+				tags={tags}
 			/>
 		</ArticleHeader>
 

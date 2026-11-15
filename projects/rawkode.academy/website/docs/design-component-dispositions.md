@@ -19,6 +19,35 @@ export, story or event caller. Negative test assertions forbidding the legacy
 shell remain intact. Current `AcademyTopbar`, footer, auth/admin sidebar and
 shared tokens are preserved. All four files remain recoverable from Git.
 
+## Removal of the retired visual primitives
+
+The "Kept despite no discovered production path" table below is historical for
+the rows listed here. With the shared `button` recipe and the Academy recipes
+in place, the visual primitives of the retired editorial system were removed:
+they had no production importer, were styled with utility classes or
+`--editorial-*` values that no longer describe the site, and their stories
+documented a system that does not ship.
+
+Removed: `AsideWrapper.tsx`, `common/Button.astro`, `common/Button.vue`,
+`common/FeatureCard.vue`, `common/FeaturedContent.astro`,
+`common/FormattedDate.vue`, `common/GridLayout.vue`, `common/Heading.vue`,
+`common/Section.vue`, `common/SectionHeader.vue`, `common/TerminalWindow.vue`,
+`faq/accordion-wrapper.vue`, `faq/list.vue`, `feature/grid.vue`,
+`feature/list-icons.vue`, `feature/list.vue`, `read/Pullquote.astro`,
+`stats/SimpleStatsWrapper.tsx`, `stats/simple.vue`, `testimonial/slider.astro`,
+`testimonial/slider.vue`, `title/center.astro`, `title/h2-highlight.vue`,
+`ui/Card.vue`, `ui/CollectionMasthead.astro`, `ui/CollectionToolbar.astro`,
+`ui/CommandBar.vue`, `ui/ContentCard.astro`, `ui/DetailFrame.astro`,
+`ui/EditorialButton.vue`, `ui/HairlinePanel.vue`, `ui/Hero.vue`,
+`ui/KickerStrip.vue`, `ui/MastheadBar.vue`, `ui/PageMasthead.astro`,
+`ui/PagerStrip.astro`, `ui/SectionMark.vue`, `ui/SectionRail.vue`,
+`ui/Stack.vue`, `ui/StatRow.vue`, and the stories that only exercised them.
+
+Still kept without a production path, because they carry behaviour rather
+than a retired look: `articles/TableOfContents.astro`, `common/SkipLink.astro`,
+`html/faq-jsonld.astro`, `video/ContinueWatchingRail.astro`, the `Skeleton*`
+family, `common/Badge.vue`, `read/ReadNext.astro` and `vue-wrapper.tsx`.
+
 ## Scope and decision
 
 Removed **31 obsolete route-specific UI components and one orphan story (32 files)** after main approved the exact set and the concurrent-reference recheck passed. The original inventory retained 143 components with a discovered route/content path and 40 components without one. Main continues to change consumers; those original witnesses are historical inventory evidence, not a claim that every retained component still has the same callers. A missing production path is a screening signal, not a deletion criterion.

@@ -8,7 +8,6 @@ import { type CachedValue, cachedQuery, now } from "./kv-cache";
 import {
 	courseModuleId,
 	mapAdr,
-	mapArticle,
 	mapChangelog,
 	mapCourse,
 	mapCourseModule,
@@ -32,18 +31,18 @@ import type {
 	CollectionDataMap,
 	CollectionName,
 	ContentEntry,
+	LiveCollectionName,
 	VideoData,
 } from "./types";
 
 // biome-ignore lint/suspicious/noExplicitAny: raw gateway JSON
 type Raw = Record<string, any>;
 
-const SOURCE: Record<CollectionName, ListSource> = {
+const SOURCE: Record<LiveCollectionName, ListSource> = {
 	videos: "videos",
 	shows: "shows",
 	people: "people",
 	technologies: "technologies",
-	articles: "articles",
 	news: "news",
 	changelog: "changelog",
 	adrs: "adrs",
@@ -102,7 +101,7 @@ async function fetchSource(source: ListSource): Promise<CachedValue<Raw[]>> {
 	);
 }
 
-function mapRows<C extends CollectionName>(
+function mapRows<C extends LiveCollectionName>(
 	collection: C,
 	rows: Raw[],
 	t: number,
@@ -130,13 +129,6 @@ function mapRows<C extends CollectionName>(
 			return valid.map((r) =>
 				entry("technologies", r.id, mapTechnology(r)),
 			) as ContentEntry<C>[];
-		case "articles":
-			// Drafts never reach the public site: no page (404), listing, feed,
-			// search result or sitemap entry. Every article route and list reads
-			// through here, so this is the only gate.
-			return valid
-				.map((r) => entry("articles", r.id, mapArticle(r)))
-				.filter((e) => !e.data.draft) as ContentEntry<C>[];
 		case "news":
 			return valid.map((r) =>
 				entry("news", r.id, mapNews(r)),
@@ -210,7 +202,7 @@ const mapped = new WeakMap<
 	Map<CollectionName, LoadedCollection<CollectionName>>
 >();
 
-export async function loadCollection<C extends CollectionName>(
+export async function loadCollection<C extends LiveCollectionName>(
 	collection: C,
 ): Promise<LoadedCollection<C>> {
 	const cached = await fetchSource(SOURCE[collection]);

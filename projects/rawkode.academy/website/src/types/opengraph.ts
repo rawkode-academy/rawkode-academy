@@ -26,11 +26,18 @@ export interface OpenGraphProps {
 	useImageDirectly?: boolean | undefined;
 	image?: OpenGraphImagePayload | undefined;
 	isArticle?: boolean | undefined;
+	/** Overrides the Open Graph type for non-article pages, e.g. `video.other`. */
+	ogType?: string | undefined;
 	publishedAt?: Date | undefined;
 	updatedAt?: Date | undefined;
 	authors?: ContentEntry<"people">[] | undefined;
 	noindex?: boolean | undefined;
 	pageType?: PageType | undefined;
+	/**
+	 * The entity the page is about, emitted as `mainEntity` on the inline
+	 * WebPage-family JSON-LD. ProfilePage needs the Person here.
+	 */
+	mainEntity?: Record<string, unknown> | undefined;
 	/**
 	 * Optional pre-built schema.org JSON-LD blob to emit in <head> in
 	 * addition to the inline WebPage / Article JSON-LD. Use for entity

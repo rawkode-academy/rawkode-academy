@@ -1,13 +1,25 @@
 import { WorkerEntrypoint } from "cloudflare:workers";
+import {
+	eventBufferName,
+	DELIVERY_BUFFER_NAMES,
+	type Destination,
+} from "./delivery-queue";
+import { browserCloudEvent } from "./web-events";
 import { validateCloudEvent } from "./cloudevents";
 import type { DataBuffer } from "./durable-objects/data-buffer";
+import { prepareCloudEvent, redactUserAgent, type WebContext } from "./events";
+
+export interface EventsStream {
+	send(records: Record<string, unknown>[]): Promise<void>;
+}
 
 export interface Env {
 	DATA_BUFFER: DurableObjectNamespace<DataBuffer>;
 	POSTHOG_PROJECT_TOKEN: SecretsStoreSecret;
 	POSTHOG_HOST: string;
+	/** Basin stream `analytics_events`; absent until the wrangler.jsonc binding is set. */
+	EVENTS?: EventsStream;
 }
-
 
 export interface TrackEventResult {
 	success: boolean;
@@ -67,6 +79,21 @@ export class PostHogCollector extends WorkerEntrypoint<Env> {
 				};
 
 				const event = body.event ?? body;
+				// Only the website RPC may emit browser events with trusted identity.
+				if (
+					event &&
+					typeof event === "object" &&
+					"source" in event &&
+					event.source === "rawkode-academy-browser"
+				) {
+					return Response.json(
+						{
+							success: false,
+							error: "Browser events require website ingestion",
+						},
+						{ status: 403 },
+					);
+				}
 				const attributes = body.event ? body.attributes : undefined;
 
 				const result = await this.trackEvent(event, { attributes });
@@ -102,12 +129,42 @@ export class PostHogCollector extends WorkerEntrypoint<Env> {
 			return { success: false, error: validation.error };
 		}
 
-		const id = this.env.DATA_BUFFER.idFromName("buffer-events");
-		const buffer = this.env.DATA_BUFFER.get(id);
+		const prepared = prepareCloudEvent(
+			validation.event.toJSON() as Record<string, unknown>,
+		);
+		// Bot traffic is accepted and dropped, so senders don't retry it.
+		if (!prepared) return { success: true };
+		const json = redactUserAgent(prepared);
+		if (!json.time) json.time = new Date().toISOString();
 
-		await buffer.addEvent(validation.event.toJSON(), options?.attributes);
+		const id = this.env.DATA_BUFFER.idFromName(
+			eventBufferName(String(json.source), String(json.id)),
+		);
+		const buffer = this.env.DATA_BUFFER.get(id);
+		await buffer.addEvent(json, options?.attributes);
 
 		return { success: true };
+	}
+
+	/** Internal RPC health/replay; intentionally absent from the public fetch router. */
+	async deliveryStatus() {
+		return Promise.all(
+			DELIVERY_BUFFER_NAMES.map(async (name) => {
+				const buffer = this.env.DATA_BUFFER.get(
+					this.env.DATA_BUFFER.idFromName(name),
+				);
+				return { name, destinations: await buffer.deliveryStatus() };
+			}),
+		);
+	}
+
+	async replayFailed(bufferName: string, destination: Destination) {
+		if (!DELIVERY_BUFFER_NAMES.includes(bufferName))
+			throw new Error("Invalid buffer");
+		const buffer = this.env.DATA_BUFFER.get(
+			this.env.DATA_BUFFER.idFromName(bufferName),
+		);
+		await buffer.replayFailed(destination);
 	}
 
 	async trackMetric(
@@ -121,6 +178,28 @@ export class PostHogCollector extends WorkerEntrypoint<Env> {
 		await buffer.addMetric({ name, value, attributes });
 
 		return { success: true };
+	}
+
+	/** Browser batches are RPC-only; each accepted event is durable before return. */
+	async ingestWebEvents(
+		events: unknown[],
+		context: WebContext,
+	): Promise<number> {
+		if (!Array.isArray(events) || events.length > 50)
+			throw new Error("Invalid browser batch");
+		const normalized = events
+			.map((event) => browserCloudEvent(event, context))
+			.filter((event) => event !== null);
+		const results = await Promise.all(
+			normalized.map((event) => this.trackEvent(event)),
+		);
+		if (results.some((result) => !result.success))
+			throw new Error("Browser event acceptance failed");
+		console.log("analytics.web.accepted", {
+			accepted: normalized.length,
+			dropped: events.length - normalized.length,
+		});
+		return normalized.length;
 	}
 
 	async captureException(
@@ -146,8 +225,8 @@ export class PostHogCollector extends WorkerEntrypoint<Env> {
 	}
 }
 
-export { DataBuffer } from "./durable-objects/data-buffer";
 export type { CloudEvent } from "./cloudevents";
+export { DataBuffer } from "./durable-objects/data-buffer";
 
 export default class extends PostHogCollector {
 	async tail(events: TraceItem[]): Promise<void> {
@@ -157,14 +236,16 @@ export default class extends PostHogCollector {
 		for (const trace of events) {
 			// Extract request info from fetch events
 			const eventInfo = trace.event as
-				| { request?: { url?: string; method?: string; cf?: { colo?: string } } }
+				| {
+						request?: { url?: string; method?: string; cf?: { colo?: string } };
+				  }
 				| undefined;
 
 			// Serialize TraceItem to a plain object for Durable Object storage
 			const serializedTrace = {
-				scriptName: trace.scriptName,
+				scriptName: trace.scriptName ?? undefined,
 				outcome: trace.outcome,
-				eventTimestamp: trace.eventTimestamp,
+				eventTimestamp: trace.eventTimestamp ?? undefined,
 				logs: trace.logs.map((log) => ({
 					level: log.level,
 					message: log.message,

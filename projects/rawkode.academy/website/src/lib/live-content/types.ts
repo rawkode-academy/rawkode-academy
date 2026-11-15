@@ -23,6 +23,18 @@ export const COLLECTIONS = [
 
 export type CollectionName = (typeof COLLECTIONS)[number];
 
+/**
+ * Articles are files in the repository (content/articles), compiled into the
+ * deployment; every other collection is loaded live from the gateway.
+ */
+export type LiveCollectionName = Exclude<CollectionName, "articles">;
+
+export function isLiveCollection(
+	collection: CollectionName,
+): collection is LiveCollectionName {
+	return collection !== "articles";
+}
+
 export interface Reference<C extends CollectionName = CollectionName> {
 	collection: C;
 	id: string;
@@ -275,11 +287,24 @@ export interface ArticleData {
 	draft: boolean;
 	/** Plain technology ids (not references), as before. */
 	technologies: string[];
+	/** content/series/<id>; parts are ordered by file name. */
+	series?: string | undefined;
 	openGraph?: { title: string; subtitle?: string | undefined } | undefined;
 	updates?: { date: Date; description: string }[] | undefined;
 	resources?: Resource[] | undefined;
 	body?: DocNode | undefined;
 	recordUpdatedAt?: Date | undefined;
+}
+
+/** A content/series/<id>.md file. Build-time only, like articles. */
+export interface SeriesData {
+	title: string;
+	description: string;
+	cover?: Cover | undefined;
+	/** Titles of parts that are not written yet; a series with any is ongoing. */
+	planned?: string[] | undefined;
+	/** The intro shown on /series/<id>. */
+	body?: DocNode | undefined;
 }
 
 export interface NewsData {

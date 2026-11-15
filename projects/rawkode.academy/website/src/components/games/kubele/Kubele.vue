@@ -114,28 +114,28 @@ onUnmounted(() => { clearInterval(timer); window.removeEventListener("focus", ch
 <style scoped>
 .kubele { max-width: 42rem; margin: 0 auto; padding: 2rem 0; display: grid; gap: 1.25rem; }
 header { display: grid; gap: .6rem; line-height: 1.6; }
-h1 { font-family: var(--font-red-hat-display); font-size: clamp(3rem, 10vw, 5rem); font-weight: 800; line-height: 1; }
-.eyebrow, .help { font-size: .8rem; color: var(--editorial-ink-soft); }
+h1 { font-family: var(--fonts-academy-display); font-size: clamp(3rem, 10vw, 5rem); font-weight: 800; line-height: 1; }
+.eyebrow, .help { font-size: .8rem; color: var(--colors-academy-text-soft); }
 .puzzle-meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem; font-size: .85rem; }
-details { border-block: 1px solid var(--editorial-hairline); padding: .8rem 0; }
+details { border-block: 1px solid var(--colors-academy-border); padding: .8rem 0; }
 summary { cursor: pointer; min-height: 2.75rem; display: flex; align-items: center; }
 details p { margin-top: .5rem; line-height: 1.6; }
 .board { display: grid; gap: .3rem; }
 .row { display: grid; gap: .25rem; }
-.tile { position: relative; display: grid; place-items: center; aspect-ratio: 1; max-height: 3.8rem; border: 1px solid var(--editorial-hairline); background: var(--surface-card); font-family: var(--font-red-hat-mono); font-weight: 700; font-size: clamp(.75rem, 3vw, 1.5rem); }
+.tile { position: relative; display: grid; place-items: center; aspect-ratio: 1; max-height: 3.8rem; border: 1px solid var(--colors-academy-border); background: var(--colors-academy-panel); font-family: var(--fonts-academy-mono); font-weight: 700; font-size: clamp(.75rem, 3vw, 1.5rem); }
 .tile small { position: absolute; bottom: 0; right: .15rem; font-size: .65rem; }
-.correct { background: #166534 !important; color: #fff !important; border-color: #166534; }
-.present { background: #854d0e !important; color: #fff !important; border-color: #854d0e; }
-.absent { background: #475569 !important; color: #fff !important; border-color: #475569; }
+.correct { background: var(--colors-academy-status-spruce) !important; color: var(--colors-academy-canvas) !important; border-color: var(--colors-academy-status-spruce); }
+.present { background: var(--colors-academy-status-amber) !important; color: var(--colors-academy-canvas) !important; border-color: var(--colors-academy-status-amber); }
+.absent { background: var(--colors-academy-text-muted) !important; color: var(--colors-academy-canvas) !important; border-color: var(--colors-academy-text-muted); }
 .message { min-height: 1.5rem; line-height: 1.5; }
 form, .result { display: grid; gap: .75rem; }
 .entry { display: flex; gap: .5rem; }
-input, textarea { min-width: 0; width: 100%; padding: .75rem; border: 1px solid var(--editorial-hairline); border-radius: var(--radius-sm); background: var(--surface-card); color: inherit; }
-input { text-transform: uppercase; font-family: var(--font-red-hat-mono); }
-button { padding: .6rem .85rem; border: 1px solid var(--editorial-hairline); border-radius: var(--radius-sm); color: inherit; background: var(--surface-card); }
+input, textarea { min-width: 0; width: 100%; padding: .75rem; border: 1px solid var(--colors-academy-border); border-radius: var(--radii-sm); background: var(--colors-academy-panel); color: inherit; }
+input { text-transform: uppercase; font-family: var(--fonts-academy-mono); }
+button { padding: .6rem .85rem; border: 1px solid var(--colors-academy-border); border-radius: var(--radii-sm); color: inherit; background: var(--colors-academy-panel); }
 button:hover { outline: 1px solid currentColor; }
-.result { border: 1px solid var(--editorial-hairline); padding: 1.25rem; background: var(--surface-card); line-height: 1.6; }
-a { color: var(--editorial-spruce); text-underline-offset: .2em; }
-footer { border-top: 1px solid var(--editorial-hairline); padding-top: 1rem; font-size: .85rem; }
-summary:focus-visible { outline: 2px solid var(--editorial-spruce); outline-offset: 2px; }
+.result { border: 1px solid var(--colors-academy-border); padding: 1.25rem; background: var(--colors-academy-panel); line-height: 1.6; }
+a { color: var(--colors-academy-accent); text-underline-offset: .2em; }
+footer { border-top: 1px solid var(--colors-academy-border); padding-top: 1rem; font-size: .85rem; }
+summary:focus-visible { outline: 2px solid var(--colors-academy-accent); outline-offset: 2px; }
 </style>

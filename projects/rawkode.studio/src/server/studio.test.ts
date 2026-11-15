@@ -1771,8 +1771,12 @@ describe("Studio operations", () => {
 		expect(packageJson.dependencies).toMatchObject({
 			notifications: "workspace:*",
 		});
-		expect(envCue).toContain("CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef");
-		expect(envCue).toContain("op://sa.rawkode.academy/cloudflare/api-tokens/workers");
+		// The root env.cue gives production tasks the Workers token.
+		const rootEnvCue = readFileSync(new URL("../../../../env.cue", import.meta.url), "utf8");
+		expect(envCue).not.toContain("CLOUDFLARE_API_TOKEN");
+		expect(rootEnvCue).toMatch(
+			/workload: environment: production: CLOUDFLARE_API_TOKEN: schema\.#OnePasswordRef & \{\s*ref: "op:\/\/sa\.rawkode\.academy\/cloudflare\/api-tokens\/workers"/,
+		);
 		const defaultTasks = envCue.match(/default:\s*\{[\s\S]*?tasks:\s*\[([^\]]*)\]/)?.[1];
 		expect(defaultTasks).toBe('_t.check, _t.test, _t.deploy."dry-run"');
 		expect(defaultTasks).not.toContain("_t.migrations.remote");

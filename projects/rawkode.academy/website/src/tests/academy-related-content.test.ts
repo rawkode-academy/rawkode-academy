@@ -138,17 +138,18 @@ describe("explicit Container width and padding contracts", () => {
 });
 
 describe("related editorial style contracts", () => {
-	it("anchors duration inside the thumbnail without relying on legacy bottom-2", () => {
+	it("anchors the shared runtime badge inside the shared 16:9 frame", () => {
 		expect(academyRelatedContent.raw().media).toMatchObject({
 			position: "relative",
-			aspectRatio: "video",
+			aspectRatio: "academy-video",
 		});
+		// The badge is ink in both colour schemes so it reads over any still.
 		expect(academyRelatedContent.raw().duration).toMatchObject({
 			position: "absolute",
-			bottom: "2",
-			right: "2",
-			color: "academy.text",
-			background: "academy.canvas",
+			insetBlockEnd: "2",
+			insetInlineEnd: "2",
+			color: "academy.inkText",
+			backgroundColor: "academy.ink",
 		});
 	});
 	it("rules adjacent news items with semantic borders and uses Academy fonts", () => {

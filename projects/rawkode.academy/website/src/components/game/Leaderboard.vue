@@ -72,8 +72,8 @@
 				<p class="your-rank-label">YOUR RANK</p>
 				<div class="your-rank-entry">
 					<span class="rank">{{ playerRank.rank }}</span>
-					<span class="player">{{ playerRank.personName || 'You' }}</span>
-					<span class="score">{{ formatScore(playerRank.score) }}</span>
+					<span>{{ playerRank.personName || 'You' }}</span>
+					<span>{{ formatScore(playerRank.score) }}</span>
 				</div>
 			</div>
 

@@ -71,7 +71,7 @@ export function buildLearningPathJsonLd(
 			"@type": "Offer",
 			price: "0",
 			priceCurrency: "USD",
-			category: "Educational",
+			category: "Free",
 			availability: "https://schema.org/InStock",
 		},
 		hasCourseInstance: [

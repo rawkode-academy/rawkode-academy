@@ -11,7 +11,12 @@
 // important ones: errors throw a ContentError, scheduled (future-dated)
 // entries are hidden unless { scheduled: "include" } (videos include them by
 // default), and entries carry `cacheHint` for setContentCache().
+//
+// Articles are the exception: they come from the files in content/articles,
+// compiled into the deployment (./articles.ts), so they never fail to load
+// and a build only contains the ones already published.
 import { getLiveCollection, getLiveEntry } from "astro:content";
+import { loadArticles } from "./articles";
 import {
 	type ContentCollectionFilter,
 	normalizeEntryId,
@@ -70,6 +75,13 @@ export async function getCollection<C extends CollectionName>(
 	filter?: (entry: ContentEntry<C>) => unknown,
 	options?: ContentQueryOptions,
 ): Promise<ContentEntry<C>[]> {
+	if (collection === "articles") {
+		// A fresh array: callers sort and splice it, the entries are shared.
+		const articles = [
+			...(await loadArticles()).entries,
+		] as unknown as ContentEntry<C>[];
+		return filter ? articles.filter((entry) => filter(entry)) : articles;
+	}
 	const result = await getLiveCollection(collection, toFilter(options));
 	if (result.error) {
 		throw new ContentError(
@@ -112,6 +124,11 @@ export async function getEntry<C extends CollectionName>(
 		return undefined;
 	}
 	if (!id) return undefined;
+	if (collection === "articles") {
+		return (await loadArticles()).byId.get(
+			normalizeEntryId(collection, id),
+		) as unknown as ContentEntry<C> | undefined;
+	}
 	const result = await getLiveEntry(collection, {
 		id: normalizeEntryId(collection, id),
 		...toFilter(options),

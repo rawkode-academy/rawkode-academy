@@ -67,7 +67,7 @@ JSON text.
 | `learning_resources` | JSON `{ "official"?: [], "community"?: [], "tutorials"?: [] }` |
 | `logos` | JSON `{ "icon"?: true, "horizontal"?: true, "stacked"?: true }`: set a flag only once that file is in R2 |
 | `cncf`, `community`, `seo` | JSON objects (keys in `data-model/schema.ts`) |
-| `matrix` | JSON; required `status` (`skip`, `watch`, `explore`, `learn`, `adopt`, `advocate`, `graveyard`, `guilty-pleasure`), optional `grouping` (`plumbing`/`platform`/`observability`/`security`), `confidence` (`gut`/`some-experience`/`deep-experience`), `trajectory` (`rising`/`stable`/`falling`) |
+| `matrix` | JSON; required `status` (`under-review` — the default for a technology that has not been triaged, never shown as a rating — or `skip`, `watch`, `explore`, `learn`, `adopt`, `advocate`, `graveyard`, `guilty-pleasure`), optional `grouping` (`plumbing`/`platform`/`observability`/`security`), `confidence` (`gut`/`some-experience`/`deep-experience`), `trajectory` (`rising`/`stable`/`falling`) |
 | `updated_at` | milliseconds: `CAST(strftime('%s','now') AS INTEGER) * 1000` |
 
 Add optional fields only when verified and useful. Do not add obsolete fields

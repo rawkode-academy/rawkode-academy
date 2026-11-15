@@ -110,8 +110,8 @@ function contentCacheCall(page) {
 
 const badgeMarkup = fragment(
 	technologyPage,
-	"\t\t\t{supporter && (",
-	"\t\t\t{description && ",
+	"\t\t\t\t{supporter && (",
+	"\t\t\t\t{description && ",
 );
 const renderBadge = (supporter) =>
 	render(badgeMarkup, ["supporter", "SUPPORTERS_PATH", "MLabel"], {
@@ -119,21 +119,26 @@ const renderBadge = (supporter) =>
 		SUPPORTERS_PATH: "/supporters",
 	});
 
-test("technology badge links to the supporters wall only when the technology has a supporter", async () => {
+test("technology credit thanks the supporter, links to its website and to the wall", async () => {
 	const supported = await renderBadge({
 		id: "acme",
 		data: { name: "Acme <Cloud>", websiteUrl: "https://acme.example/" },
 	});
-	const link = supported.querySelector("a");
-	assert.equal(link.getAttribute("href"), "/supporters");
 	assert.equal(supported.querySelector(".m-label").text, "Community supporter");
 	assert.equal(
 		supported.querySelector(".m-label").getAttribute("data-tone"),
 		"spruce",
 	);
+	const website = supported.querySelector(".technology-supporter__name");
+	assert.equal(website.getAttribute("href"), "https://acme.example/");
+	assert.equal(website.getAttribute("target"), "_blank");
+	assert.match(website.getAttribute("rel"), /\bnoopener\b/);
+	assert.equal(website.firstChild.text, "Acme <Cloud>");
+	assert.equal(website.querySelector(".sr-only").text, " (opens in a new tab)");
+	assert.match(supported.text, /Thank you\./);
 	assert.equal(
-		supported.querySelector(".technology-supporter__name").text,
-		"Acme <Cloud>",
+		supported.querySelector(".technology-supporter__wall").getAttribute("href"),
+		"/supporters",
 	);
 	assert.doesNotMatch(supported.text, /sponsor|advert|\bad\b/i);
 
@@ -146,11 +151,11 @@ test("technology badge links to the supporters wall only when the technology has
 
 test("technology badge sits directly under the identity block and its supporter is optional content", () => {
 	const identityEnd = technologyPage.indexOf(
-		"<h1 class={styles.title}>{technology.name}</h1>\n\t\t\t</div>",
+		"<h1 class={styles.title}>{technology.name}</h1>\n\t\t\t\t</div>",
 	);
 	assert(identityEnd > 0);
 	assert.equal(
-		technologyPage.indexOf("\t\t\t{supporter && (", identityEnd),
+		technologyPage.indexOf("\t\t\t\t{supporter && (", identityEnd),
 		technologyPage.indexOf(
 			"\n",
 			technologyPage.indexOf("</div>", identityEnd),
@@ -176,8 +181,13 @@ const wallMarkup = fragment(
 const renderWall = (wall) =>
 	render(
 		wallMarkup,
-		["wall", "BECOME_A_SUPPORTER_PATH", "MLabel", "EmptyState"],
-		{ wall, BECOME_A_SUPPORTER_PATH: "/organizations/support-our-work#supporter" },
+		["wall", "BECOME_A_SUPPORTER_PATH", "MLabel", "EmptyState", "button"],
+		{
+			wall,
+			BECOME_A_SUPPORTER_PATH: "/organizations/support-our-work#supporter",
+			// Stand-in for the design-system button recipe.
+			button: () => "button",
+		},
 	);
 
 test("wall shows each supporter's logo or name, its website and the technologies it supports", async () => {
@@ -188,8 +198,14 @@ test("wall shows each supporter's logo or name, its website and the technologies
 			websiteUrl: "https://acme.example/",
 			logoUrl: "https://cdn.example/acme.svg",
 			technologies: [
-				{ id: "kubernetes", name: "Kubernetes" },
-				{ id: "docker", name: "Docker" },
+				{
+					id: "kubernetes",
+					label: "Kubernetes",
+					href: "/technology/kubernetes",
+				},
+				{ id: "docker", label: "Docker", href: "/technology/docker" },
+				// No technology page: listed, but not linked.
+				{ id: "nix", label: "nix" },
 			],
 		},
 		{
@@ -222,6 +238,12 @@ test("wall shows each supporter's logo or name, its website and the technologies
 			["/technology/kubernetes", "Kubernetes"],
 			["/technology/docker", "Docker"],
 		],
+	);
+	assert.deepEqual(
+		acme
+			.querySelectorAll(".supporter-wall__technologies li")
+			.map((item) => item.text.trim()),
+		["Kubernetes", "Docker", "nix"],
 	);
 
 	assert.equal(zeta.querySelector("img"), null);
@@ -262,8 +284,8 @@ test("wall is cached under the supporters tag", () => {
 		wallPage,
 		/optionalContent\(getCollection\("supporters"\)/,
 	);
-	// Held until the gateway serves Query.supporters (see the service README).
-	assert.doesNotMatch(sitemaps, /path: "\/supporters"/);
+	// Listed now that the gateway serves Query.supporters.
+	assert.match(sitemaps, /path: "\/supporters"/);
 });
 
 test("support page does not link to the wall until the service is live", () => {

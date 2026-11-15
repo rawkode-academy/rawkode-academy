@@ -3,6 +3,8 @@
  * Integrates with PostHog for production error tracking.
  */
 
+import { capture } from "@/lib/analytics/track";
+
 type LogLevel = "debug" | "info" | "warn" | "error";
 
 interface LogContext {
@@ -57,12 +59,9 @@ function logToPostHog(
 ): void {
 	if (typeof window === "undefined") return;
 
-	const posthog = (window as { posthog?: { capture: Function } }).posthog;
-	if (!posthog) return;
-
 	if (level === "error" && error) {
 		const errorObj = error instanceof Error ? error : new Error(String(error));
-		posthog.capture("$exception", {
+		capture("$exception", {
 			$exception_message: errorObj.message,
 			$exception_stack_trace_raw: errorObj.stack,
 			$exception_type: errorObj.name,

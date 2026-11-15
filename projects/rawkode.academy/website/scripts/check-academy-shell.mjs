@@ -235,8 +235,11 @@ const watchVisibleSources = [
 	"src/components/common/SkeletonText.vue",
 	"src/components/common/SkeletonTranscript.vue",
 ];
+// The retired global.css alias layer: custom properties and named classes
+// that used to stand in for academy.* tokens. Scoped styles read the
+// Panda-generated variables (--colors-academy-*, --radii-*, --durations-*).
 const legacyWatchAliases =
-	/--(?:editorial|surface|brand)-|\b(?:paper-card|paper-panel|section-shell|text-(?:primary-content|secondary-content|muted)|border-surface|focus-ring|bleed-x-mobile)\b/;
+	/--(?:editorial|surface|brand|terminal|utility)-|--text-(?:primary-content|secondary-content|muted)\b|--font-(?:instrument-serif|inter-tight|jetbrains-mono)\b|--(?:radius|duration|ease|shadow|space|layout|type)-|\b(?:paper-card|paper-panel|hairline-chip|section-shell|soft-panel|ed-btn|ed-aside|text-(?:primary-content|secondary-content|muted)|border-surface|focus-ring|bleed-x-mobile|content-px|transition-smooth)\b/;
 const directBrandRgb = /rgb\(var\(--brand-/;
 const directPaletteUtility =
 	/\b(?:bg|text|border|ring|outline|fill|stroke)-(?:primary|secondary|accent|white|black|neutral|red|yellow|orange|amber|green|emerald|blue|indigo|violet|purple|pink|rose)-[\w/[\].-]+/;

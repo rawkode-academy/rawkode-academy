@@ -1,4 +1,5 @@
 ---
+import { button } from "@rawkodeacademy/design-system";
 import ContactFallback from "@/components/organizations/ContactFallback.astro";
 import EditorialShell from "@/components/ui/EditorialShell.astro";
 import {
@@ -16,10 +17,10 @@ export const prerender = true;
 	<EditorialShell compact eyebrow="Work with Rawkode Academy" title="Tell David what you're exploring."
 		lede="Ask about a Partnership or supporting free developer education. David reads every enquiry and replies by email.">
 		<div class="editorial-actions" slot="actions">
-			<a class="editorial-button" href="/organizations/partnerships#apply">Partnership enquiry</a>
-			<a class="editorial-button editorial-button--secondary" href="/organizations/support-our-work#apply">Support Our Work enquiry</a>
-			<a class="editorial-button editorial-button--secondary" href={decisionBriefMailto}>Partnership by email</a>
-			<a class="editorial-button editorial-button--secondary" href={supportAcademyOffer.mailto}>Support Our Work by email</a>
+			<a class={button()} href="/organizations/partnerships#apply">Partnership enquiry</a>
+			<a class={button({ variant: "outline" })} href="/organizations/support-our-work#apply">Support Our Work enquiry</a>
+			<a class={button({ variant: "outline" })} href={decisionBriefMailto}>Partnership by email</a>
+			<a class={button({ variant: "outline" })} href={supportAcademyOffer.mailto}>Support Our Work by email</a>
 		</div>
 
 		<section class="editorial-section" aria-labelledby="application-context">

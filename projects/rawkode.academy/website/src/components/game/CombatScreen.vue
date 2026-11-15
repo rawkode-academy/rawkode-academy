@@ -4,7 +4,7 @@
 			<div class="player-status">
 				<span class="status-label">{{ playerName }}</span>
 				<div class="health-bar">
-					<span v-for="n in 3" :key="n" class="heart" :class="{ empty: n > playerHealth }">
+					<span v-for="n in 3" :key="n">
 						{{ n <= playerHealth ? "❤️" : "🖤" }}
 					</span>
 				</div>
@@ -15,7 +15,7 @@
 			<div class="enemy-status">
 				<span class="status-label">{{ enemy.name }}</span>
 				<div class="health-bar">
-					<span v-for="n in 3" :key="n" class="heart" :class="{ empty: n > enemyHealth }">
+					<span v-for="n in 3" :key="n">
 						{{ n <= enemyHealth ? "❤️" : "🖤" }}
 					</span>
 				</div>

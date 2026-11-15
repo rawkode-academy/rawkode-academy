@@ -1,5 +1,5 @@
 <template>
-	<a :href="href" :class="['group base-card', { 'base-card--text': !showCover }, className]">
+	<a :href="href" :class="['base-card', { 'base-card--text': !showCover }, className]">
 		<article class="base-card__article">
 			<div v-if="showCover && $slots.cover" class="base-card__cover">
 				<slot name="cover" />
@@ -50,8 +50,8 @@ const className = props.class;
 	flex-direction: column;
 	height: 100%;
 	padding-top: 1rem;
-	border-top: 1px solid var(--editorial-hairline);
-	transition: border-color var(--duration-base) var(--ease-standard);
+	border-top: 1px solid var(--colors-academy-border);
+	transition: border-color var(--durations-base) var(--easings-academy-standard);
 	position: relative;
 }
 
@@ -62,9 +62,9 @@ const className = props.class;
 	left: 0;
 	right: 0;
 	height: 2px;
-	background: var(--editorial-ink);
+	background: var(--colors-academy-text);
 	opacity: 0;
-	transition: opacity var(--duration-base) var(--ease-standard);
+	transition: opacity var(--durations-base) var(--easings-academy-standard);
 	pointer-events: none;
 }
 
@@ -73,8 +73,8 @@ const className = props.class;
 .base-card__cover {
 	position: relative;
 	overflow: hidden;
-	background: var(--editorial-paper-deep);
-	border: 1px solid var(--editorial-hairline);
+	background: var(--colors-academy-ground);
+	border: 1px solid var(--colors-academy-border);
 	aspect-ratio: 16 / 10;
 }
 
@@ -105,7 +105,7 @@ const className = props.class;
 .base-card__footer {
 	margin-top: auto;
 	padding-top: 1rem;
-	border-top: 1px solid var(--editorial-hairline);
+	border-top: 1px solid var(--colors-academy-border);
 }
 
 .base-card--text,

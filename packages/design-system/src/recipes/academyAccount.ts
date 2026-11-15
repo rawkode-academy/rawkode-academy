@@ -1,7 +1,8 @@
 import { sva } from "../../styled-system/css";
+import { focusRing } from "../styles/focus";
 
 export const academyAccount = sva({
-	slots: ["stack", "list", "panel", "header", "body", "row", "preference", "copy", "title", "label", "description", "heading", "avatar", "identity", "success", "error", "icon", "smallIcon", "emptyIcon", "actions", "divider", "empty", "link", "danger", "button", "spinner", "switchRoot", "switchControl", "switchThumb", "hidden"],
+	slots: ["stack", "list", "panel", "header", "body", "row", "preference", "copy", "title", "label", "description", "heading", "avatar", "identity", "success", "error", "icon", "smallIcon", "emptyIcon", "actions", "divider", "empty", "link", "danger", "spinner", "switchRoot", "switchControl", "switchThumb", "hidden"],
 	base: {
 		stack: { display: "flex", flexDirection: "column", gap: "8", minWidth: "0" },
 		list: { display: "flex", flexDirection: "column", gap: "3" },
@@ -25,9 +26,8 @@ export const academyAccount = sva({
 		actions: { display: "flex", alignItems: "center", flexWrap: "wrap", gap: "3" },
 		divider: { paddingTop: "6", borderTop: "hairline", borderColor: "academy.border" },
 		empty: { textAlign: "center", paddingBlock: "4", color: "academy.textMuted", fontSize: "sm" },
-		link: { display: "inline-block", marginTop: "1", color: "academy.accent", fontSize: "sm", textDecoration: "underline", _focusVisible: { outline: "focus", outlineColor: "academy.accent", outlineOffset: "focus" } },
-		danger: { minHeight: "11", paddingInline: "3", color: "academy.statusRust", fontSize: "sm", cursor: "pointer", _disabled: { opacity: "0.5", cursor: "wait" }, _focusVisible: { outline: "focus", outlineColor: "academy.accent", outlineOffset: "focus" } },
-		button: { display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "2", minHeight: "11", paddingInline: "4", paddingBlock: "2", borderRadius: "academy-s", background: "academy.accent", color: "academy.accentForeground", fontSize: "sm", fontWeight: "semibold", cursor: "pointer", _disabled: { opacity: "0.5", cursor: "wait" }, _focusVisible: { outline: "focus", outlineColor: "academy.accent", outlineOffset: "focus" } },
+		link: { display: "inline-block", marginTop: "1", color: "academy.accent", fontSize: "sm", textDecoration: "underline", _focusVisible: focusRing },
+		danger: { minHeight: "11", paddingInline: "3", color: "academy.statusRust", fontSize: "sm", cursor: "pointer", _disabled: { opacity: "0.5", cursor: "wait" }, _focusVisible: focusRing },
 		spinner: { width: "4", height: "4", animation: "academy-spinner", _motionReduce: { animation: "none" } },
 		switchRoot: { flexShrink: "0", display: "inline-flex", alignItems: "center", minHeight: "11", _focusWithin: { outline: "focus", outlineColor: "academy.accent", outlineOffset: "focus", borderRadius: "academy-s" } },
 		switchControl: { display: "inline-flex", alignItems: "center", padding: "1", width: "12", height: "7", borderRadius: "full", background: "academy.inputBorder", cursor: "pointer", _checked: { background: "academy.accent" }, _disabled: { opacity: "0.5", cursor: "wait" } },

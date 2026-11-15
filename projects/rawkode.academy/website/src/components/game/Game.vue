@@ -95,6 +95,7 @@
 import { academyGame } from "@rawkodeacademy/design-system";
 const gameTheme = academyGame();
 import { ref, onMounted } from "vue";
+import { capture } from "@/lib/analytics/track";
 import type { EnemyData, Insult, Comeback } from "@/game/data/types";
 import {
 	insults as allInsults,
@@ -119,13 +120,7 @@ import {
 } from "@/lib/game-api";
 
 // Track analytics events client-side
-const trackEvent = (event: string, properties?: Record<string, unknown>) => {
-	try {
-		(window as any).posthog?.capture(event, properties);
-	} catch {
-		// Ignore tracking errors
-	}
-};
+const trackEvent = capture;
 
 type GameState =
 	| "menu"

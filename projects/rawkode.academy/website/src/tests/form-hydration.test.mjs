@@ -66,17 +66,12 @@ function evaluate(source, filename, resolveImport = require) {
 	);
 	return module.exports;
 }
-const designSystem = evaluate(
-	readFileSync(
-		resolve(
-			website,
-			"../../../packages/design-system/src/recipes/academyForms.ts",
-		),
-		"utf8",
-	),
-	"academyForms.ts",
-	() => css,
-);
+// The real recipes, so the rendered class names are the production ones.
+const recipes = "../../../../../packages/design-system/src/recipes";
+const designSystem = {
+	...(await import(`${recipes}/academyForms.ts`)),
+	...(await import(`${recipes}/button.ts`)),
+};
 let calls = [];
 let respond;
 const action = async (payload) => {

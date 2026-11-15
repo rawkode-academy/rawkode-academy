@@ -13,7 +13,7 @@
  />
 
  <!-- Main content area -->
- <div class="explorer-main" :class="{ 'controls-collapsed': !showControls }">
+ <div class="explorer-main">
  <!-- Closed desktop controls must leave both the layout and tab order. -->
  <aside
  v-if="!isMobile"
@@ -718,7 +718,7 @@ onBeforeUnmount(() => {
  width: 2.5rem;
  height: 0.25rem;
  border-radius: 9999px;
- background: var(--surface-border-strong, var(--colors-academy-border));
+ background: var(--colors-academy-input-border);
  }
 }
 </style>

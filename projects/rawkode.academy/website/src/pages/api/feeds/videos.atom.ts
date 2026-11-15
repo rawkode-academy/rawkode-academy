@@ -3,15 +3,9 @@ import { getPublishedVideos } from "@/lib/content";
 import { getCollection, setContentCache } from "@/lib/live-content";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
+import { escapeAttribute } from "../../../lib/feed-utils";
 
 export const prerender = false;
-
-const escapeAttribute = (value: string) =>
-	value
-		.replace(/&/g, "&amp;")
-		.replace(/</g, "&lt;")
-		.replace(/>/g, "&gt;")
-		.replace(/"/g, "&quot;");
 
 export async function GET(context: APIContext) {
 	// Get published videos only (filters out future-dated for scheduled publishing)

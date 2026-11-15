@@ -1,0 +1,156 @@
+# Content
+
+Articles on [rawkode.academy/read](https://rawkode.academy/read) are the
+Markdown files in `content/articles`. To publish or fix one, open a pull
+request. Everything else on the site (videos, shows, people, technologies,
+courses, news) lives in the platform's databases, not here.
+
+## Add an article
+
+Create `content/articles/<slug>.mdx`. The file name is the URL:
+`content/articles/how-i-git.mdx` is served at `/read/how-i-git`. Use lowercase
+letters, digits and hyphens.
+
+If the article has images of its own, give it a directory instead and put
+them beside it:
+
+```
+content/articles/my-article/index.mdx
+content/articles/my-article/cover.png
+content/articles/my-article/terminal.png
+```
+
+`.md` files work too. Use `.mdx` when you need one of the components below.
+
+## Frontmatter
+
+```yaml
+---
+title: "Seccomp for Kubernetes workloads"
+description: One or two sentences, used for search results and link previews.
+type: guide                # tutorial (default), article, guide or news
+publishedAt: 2026-10-01
+authors:
+  - rawkode                # ids from rawkode.academy/people/<id>
+technologies:
+  - kubernetes             # ids from rawkode.academy/technology/<id>
+cover:
+  image: ./cover.png       # beside the article, or an absolute URL
+  alt: What the image shows
+---
+```
+
+Required: `title`, `description`, `publishedAt`, `authors`.
+
+Optional:
+
+| Field | Purpose |
+|---|---|
+| `subtitle` | A line under the title |
+| `type` | `tutorial`, `article`, `guide` or `news` |
+| `technologies` | Technology ids; they tag the article and list it on those pages |
+| `cover` | `image` and `alt`. A remote `image` URL also needs `width` and `height` |
+| `openGraph` | `title` and `subtitle` for link previews, when they should differ |
+| `updatedAt` | The date of a substantial revision |
+| `updates` | A change log shown above the article: `date` and `description` |
+| `resources` | Links listed after the article: `title`, `type: url`, `url`, `description`, `category` |
+| `howto` | `true` adds how-to structured data built from the headings |
+| `draft` | `true` keeps the article off the published site |
+| `categories`, `tags` | Free-form labels |
+| `series` | A series id: makes the article one part of a [series](#series) |
+
+A misspelt or unknown field fails the build and names the file and the field.
+
+## Writing
+
+The body is Markdown (GitHub flavoured: tables, task lists, fenced code). Code
+fences take a language and an optional title:
+
+````md
+```yaml title="deployment.yaml"
+spec:
+  replicas: 3
+```
+````
+
+Technology names are linked to their pages for you, and external links open
+in a new tab.
+
+Images use normal Markdown, with a path relative to the article:
+
+```md
+![The terminal after the rollout](./terminal.png)
+```
+
+`.mdx` files can import these components:
+
+```mdx
+import Aside from "@/components/Aside.astro";
+import ZoomableImage from "@/components/image/ZoomableImage.astro";
+import ThemeAwareImage from "@/components/common/ThemeAwareImage.astro";
+import VideoPlayer from "@/components/video/player.vue";
+import Diagram from "@/components/articles/Diagram.astro";
+
+<Aside variant="tip">
+  Keep `RuntimeDefault` until your tests cover more than startup.
+</Aside>
+```
+
+Any other import or component fails the build. Look at the existing articles
+for worked examples of each.
+
+## Series
+
+A series is a set of articles read in order. Describe it in
+`content/series/<id>.md`, served at `/series/<id>`:
+
+```md
+---
+title: "Understanding MCP"
+description: A walk through the Model Context Protocol, one piece at a time.
+cover:                     # optional; falls back to the first part's cover
+  image: ./cover.png
+  alt: What the image shows
+planned:                   # optional; titles of parts not written yet
+  - Tools
+---
+
+An optional introduction, shown above the list of parts.
+```
+
+Like an article, a series can be a directory (`content/series/<id>/index.md`)
+with its images beside it. Then mark each article as a part:
+
+```yaml
+series: understanding-mcp  # the file name in content/series
+```
+
+Parts are read in the order of their file names, with numbers compared as
+numbers: `0-what-is-mcp.mdx`, `1-…`, `2-…`, then `10-…`. The file name is
+also the article's URL (`/read/0-what-is-mcp`).
+
+A part's number is the number its file name starts with, so `0-what-is-mcp`
+is Part 0. Without one, parts count from 1 in file-name order.
+
+Each part opens with the list of parts and ends with a link to the next one.
+`planned` titles are listed after the published parts, without a link, and
+mark the series as ongoing: remove a title when its part is published. A
+series page appears once its first part is published.
+
+The build fails when an article names a series that has no file.
+
+## Preview
+
+```bash
+cd projects/rawkode.academy/website
+cuenv task dev
+```
+
+The development server shows drafts and future-dated articles and reloads when
+a file changes. A pull request also gets a preview deployment.
+
+## Publishing
+
+Merging to `main` deploys the site with the article. A `draft: true` article,
+or one whose `publishedAt` is still in the future, is left out of the
+deployment: it appears with the first deploy after that date.

@@ -30,7 +30,7 @@ export default {
 	): Promise<Response> {
 		const requestUrl = new URL(request.url);
 
-		const hostname = requestUrl.host;
+		const hostname = requestUrl.hostname;
 		const path = requestUrl.pathname.substring(1);
 
 		if (path === "healthcheck") {
@@ -39,54 +39,82 @@ export default {
 			});
 		}
 
-		ctx.waitUntil(logAnalytics(env, request, hostname, path));
+		const domain = own(redirects.domains, hostname);
+		const link = domain && own(domain.redirects, path);
+		const destination =
+			link?.to ?? domain?.defaultRedirect ?? redirects.defaultRedirect;
 
-		if (!(hostname in redirects["domains"])) {
-			return Response.redirect(redirects.defaultRedirect);
+		if (!isBot(request)) {
+			ctx.waitUntil(
+				trackShortLink(env, request, {
+					domain: hostname,
+					path,
+					matched: link !== undefined,
+					destination,
+				}),
+			);
 		}
 
-		const domain = redirects["domains"][hostname];
-
-		if (path in domain["redirects"]) {
-			return Response.redirect(domain["redirects"][path].to);
-		}
-
-		return Response.redirect(domain.defaultRedirect);
+		return Response.redirect(destination);
 	},
 };
 
-const logAnalytics = async (
+// Paths come from the request, so a path like "constructor" must not match
+// anything inherited from Object.prototype.
+const own = <T>(record: Record<string, T>, key: string): T | undefined =>
+	Object.prototype.hasOwnProperty.call(record, key) ? record[key] : undefined;
+
+/**
+ * Cloudflare's verdict, present only on zones with Bot Management. A score of
+ * 0 means it wasn't computed. Without a verdict, the collector drops bots by
+ * user agent.
+ */
+const isBot = (request: Request): boolean => {
+	const bot = (
+		request.cf as
+			| { botManagement?: { score: number; verifiedBot: boolean } }
+			| undefined
+	)?.botManagement;
+	return (
+		bot !== undefined && (bot.verifiedBot || (bot.score > 0 && bot.score < 30))
+	);
+};
+
+const trackShortLink = async (
 	env: Env,
 	request: Request,
-	hostname: string,
-	path: string,
+	data: {
+		domain: string;
+		path: string;
+		matched: boolean;
+		destination: string;
+	},
 ) => {
-	const event = {
+	// Request context travels as CloudEvents extension attributes. The
+	// collector turns `useragent` into device and browser, drops bots, and
+	// never stores the raw string.
+	const event: Record<string, unknown> = {
 		specversion: "1.0",
-		type: "link.redirect",
+		type: "shortLink",
 		source: "rawkode-link",
 		id: crypto.randomUUID(),
 		time: new Date().toISOString(),
-		data: {
-			domain: hostname,
-			path,
-			referrer: request.headers.get("Referer") || "",
-			country: (request.cf?.country as string) || "",
-			continent: (request.cf?.continent as string) || "",
-		},
+		useragent: request.headers.get("User-Agent") ?? "",
+		data,
 	};
+	const referrer = request.headers.get("Referer");
+	if (referrer) event.referrer = referrer;
+	if (request.cf?.country) event.country = request.cf.country as string;
+	if (request.cf?.continent) event.continent = request.cf.continent as string;
 
-	const payload = {
-		event,
-		attributes: ["path", "country", "continent"],
-	};
-
-	console.log("Sending analytics event", { payload });
+	// Log the id, not the payload: it carries the raw user agent, and these
+	// logs are exported to Grafana.
+	console.log("Sending analytics event", { id: event.id });
 
 	const response = await env.ANALYTICS.fetch("https://analytics/track", {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify(payload),
+		body: JSON.stringify({ event }),
 	});
 
 	if (!response.ok) {
@@ -94,7 +122,7 @@ const logAnalytics = async (
 		console.error("Analytics tracking failed", {
 			status: response.status,
 			body,
-			event,
+			id: event.id,
 		});
 	}
 };

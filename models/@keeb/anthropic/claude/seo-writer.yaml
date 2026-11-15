@@ -1,0 +1,10 @@
+type: '@keeb/anthropic/claude'
+typeVersion: 2026.10.15.1
+id: dbbd8e1e-87e5-4669-941e-d9fe84552fd3
+name: seo-writer
+version: 1
+tags: {}
+globalArguments:
+  model: claude-sonnet-5-5
+  maxTokens: 512
+methods: {}

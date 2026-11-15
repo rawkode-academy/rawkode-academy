@@ -1,4 +1,7 @@
 import { sva } from "../../styled-system/css";
+import { focusRing } from "../styles/focus";
+import { inputField } from "../styles/field";
+import { panelSurface, pill } from "../styles/surface";
 
 /**
  * Presentational additions for the Academy's informational and commercial
@@ -35,7 +38,6 @@ export const academyMarketing = sva({
 		"newsletterWidget",
 		"newsletterSuccess",
 		"newsletterError",
-		"newsletterButton",
 		"newsletterSpinner",
 		"newsletterForm",
 		"newsletterInputRow",
@@ -49,14 +51,7 @@ export const academyMarketing = sva({
 	],
 	base: {
 		actions: { display: "flex", flexWrap: "wrap", gap: "3", marginTop: "6" },
-		card: {
-			minWidth: "0",
-			padding: "6",
-			border: "hairline",
-			borderColor: "academy.border",
-			borderRadius: "academy-m",
-			backgroundColor: "academy.panel",
-		},
+		card: { ...panelSurface, minWidth: "0", padding: "6" },
 		cardBody: { color: "academy.textSoft", lineHeight: "relaxed" },
 		eyebrow: {
 			margin: "0",
@@ -79,17 +74,7 @@ export const academyMarketing = sva({
 			fontSize: "xs",
 			letterSpacing: "wide",
 		},
-		pill: {
-			display: "inline-flex",
-			alignItems: "center",
-			paddingInline: "3",
-			paddingBlock: "1",
-			border: "hairline",
-			borderColor: "academy.border",
-			borderRadius: "academy-pill",
-			color: "academy.textSoft",
-			fontSize: "xs",
-		},
+		pill: { ...pill, color: "academy.textSoft" },
 		statGrid: {
 			display: "grid",
 			gridTemplateColumns: "repeat(auto-fit, minmax(10rem, 1fr))",
@@ -120,10 +105,7 @@ export const academyMarketing = sva({
 			gap: "3",
 			"& details": {
 				padding: "5",
-				border: "hairline",
-				borderColor: "academy.border",
-				borderRadius: "academy-m",
-				backgroundColor: "academy.panel",
+				...panelSurface,
 			},
 			"& summary": {
 				cursor: "pointer",
@@ -168,10 +150,7 @@ export const academyMarketing = sva({
 			gap: "4",
 			width: "full",
 			padding: "6",
-			border: "hairline",
-			borderColor: "academy.border",
-			borderRadius: "academy-m",
-			backgroundColor: "academy.panel",
+			...panelSurface,
 		},
 		contactRow: {
 			display: "flex",
@@ -179,29 +158,11 @@ export const academyMarketing = sva({
 			alignItems: "center",
 			gap: "3",
 		},
-		copyButton: {
-			display: "inline-flex",
-			minWidth: "32",
-			alignItems: "center",
-			justifySelf: "start",
-			minHeight: "11",
-			paddingInline: "3",
-			border: "hairline",
-			borderColor: "academy.border",
-			borderRadius: "academy-s",
-			backgroundColor: "transparent",
-			color: "academy.text",
-			fontSize: "sm",
-			fontWeight: "semibold",
-			cursor: "pointer",
-			_hover: { backgroundColor: "academy.ground" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
-		},
-		newsletter: { width: "full" },
+		// Layout only: the control itself is `button({ variant: "outline" })`.
+		copyButton: { minWidth: "32", justifySelf: "start" },
+		// The card answers to the width it is given, not the window: its two
+		// columns need a wide viewport and a container with room for both.
+		newsletter: { width: "full", containerType: "inline-size" },
 		newsletterSection: {
 			overflow: "hidden",
 			border: "hairline",
@@ -235,7 +196,10 @@ export const academyMarketing = sva({
 			color: "academy.textSoft",
 			lineHeight: "relaxed",
 		},
-		newsletterWidget: { width: "full", _lg: { justifySelf: "end" } },
+		newsletterWidget: {
+			width: "full",
+			_lg: { "@container (min-width: 40rem)": { justifySelf: "end" } },
+		},
 		newsletterSuccess: {
 			margin: "0",
 			display: "flex",
@@ -252,11 +216,7 @@ export const academyMarketing = sva({
 			color: "academy.accent",
 			fontSize: "sm",
 			fontWeight: "semibold",
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 			"& svg": { width: "5", height: "5", flexShrink: "0" },
 		},
 		newsletterError: {
@@ -279,32 +239,6 @@ export const academyMarketing = sva({
 				color: "academy.accent",
 			},
 		},
-		newsletterButton: {
-			display: "inline-flex",
-			alignItems: "center",
-			justifyContent: "center",
-			gap: "2",
-			width: "full",
-			minHeight: "11",
-			paddingInline: "4",
-			paddingBlock: "3",
-			border: "academy-button",
-			borderRadius: "academy-s",
-			backgroundColor: "academy.accent",
-			color: "academy.accentForeground",
-			fontFamily: "academy-text",
-			fontSize: "sm",
-			fontWeight: "semibold",
-			cursor: "pointer",
-			_hover: { opacity: "0.9" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
-			_disabled: { cursor: "wait", opacity: "0.7" },
-			"& svg": { width: "4", height: "4", flexShrink: "0" },
-		},
 		newsletterSpinner: {
 			width: "4",
 			height: "4",
@@ -320,23 +254,12 @@ export const academyMarketing = sva({
 			color: "academy.text",
 		},
 		newsletterField: {
-			width: "full",
+			...inputField,
 			minHeight: "14",
 			paddingInlineStart: "3",
 			paddingInlineEnd: "14",
-			border: "hairline",
-			borderColor: "academy.inputBorder",
-			borderRadius: "academy-s",
-			backgroundColor: "academy.input",
-			color: "academy.text",
 			fontFamily: "academy-text",
 			fontSize: "sm",
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
-			_disabled: { opacity: "0.6" },
 		},
 		newsletterSubmit: {
 			position: "absolute",
@@ -352,11 +275,7 @@ export const academyMarketing = sva({
 			backgroundColor: "academy.accent",
 			color: "academy.accentForeground",
 			cursor: "pointer",
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 			_disabled: { cursor: "not-allowed", opacity: "0.5" },
 			"& svg": { width: "4", height: "4" },
 		},
@@ -388,11 +307,7 @@ export const academyMarketing = sva({
 			fontWeight: "semibold",
 			textDecoration: "none",
 			_hover: { borderColor: "academy.accent", color: "academy.accent" },
-			_focusVisible: {
-				outline: "focus",
-				outlineColor: "academy.accent",
-				outlineOffset: "focus",
-			},
+			_focusVisible: focusRing,
 		},
 	},
 	variants: {
@@ -407,7 +322,12 @@ export const academyMarketing = sva({
 				},
 				newsletterGrid: {
 					gap: "5",
-					_lg: { gridTemplateColumns: "minmax(0, 1fr) 18rem", gap: "8" },
+					_lg: {
+						"@container (min-width: 40rem)": {
+							gridTemplateColumns: "minmax(0, 1fr) 18rem",
+							gap: "8",
+						},
+					},
 				},
 				newsletterCopy: { gap: "2" },
 				newsletterTitle: { fontSize: "xl", _lg: { fontSize: "2xl" } },
@@ -424,7 +344,12 @@ export const academyMarketing = sva({
 				},
 				newsletterGrid: {
 					gap: "6",
-					_lg: { gridTemplateColumns: "minmax(0, 1fr) 20rem", gap: "10" },
+					_lg: {
+						"@container (min-width: 40rem)": {
+							gridTemplateColumns: "minmax(0, 1fr) 20rem",
+							gap: "10",
+						},
+					},
 				},
 				newsletterCopy: { gap: "3" },
 				newsletterTitle: { fontSize: "2xl", _lg: { fontSize: "3xl" } },

@@ -4,7 +4,12 @@ import { getPublishedVideos } from "@/lib/content";
 import { getCollection, setContentCache } from "@/lib/live-content";
 import { getVideoThumbnailJpegUrl } from "@/lib/video-thumbnail";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
-import { withRssMimeType } from "../../../lib/feed-utils";
+import {
+	rssNamespaces,
+	rssSelfLink,
+	rssThumbnail,
+	withRssMimeType,
+} from "../../../lib/feed-utils";
 
 export const prerender = false;
 
@@ -54,7 +59,7 @@ export async function GET(context: APIContext) {
 					pubDate: new Date(video.data.publishedAt),
 					link: `/watch/${video.data.slug}/`,
 					customData: `
-						<enclosure url="${itunesImageUrl}" type="image/jpeg" />
+						${rssThumbnail(itunesImageUrl)}
 						${durationTag}
 						<itunes:image href="${itunesImageUrl}" />
 					`,
@@ -63,10 +68,12 @@ export async function GET(context: APIContext) {
 					).map((id) => techName.get(id) || id),
 				};
 			}),
-			customData: "<language>en-us</language>",
+			customData: `<language>en-us</language>${rssSelfLink(`${site}/api/feeds/videos.xml`)}`,
 			stylesheet: false,
 			xmlns: {
 				itunes: "http://www.itunes.com/dtds/podcast-1.0.dtd",
+				atom: rssNamespaces.atom,
+				media: rssNamespaces.media,
 			},
 		}),
 	);

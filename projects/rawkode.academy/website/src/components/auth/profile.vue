@@ -4,6 +4,7 @@ import { actions } from "astro:actions";
 import Avatar from "vue-boring-avatars";
 import { academyShell } from "@rawkodeacademy/design-system";
 import type { BetterAuthUser } from "../../lib/auth/better-auth-client";
+import { resetIdentity } from "@/lib/analytics/track";
 import { createLogger } from "@/lib/logger";
 
 const logger = createLogger("auth");
@@ -14,6 +15,7 @@ defineProps<{ user: BetterAuthUser }>();
 const signOut = async () => {
 	try {
 		await actions.auth.signOut();
+		resetIdentity();
 		if ((window as any).posthog?.reset) (window as any).posthog.reset();
 		window.location.href = "/";
 	} catch (error) {
@@ -24,7 +26,7 @@ const signOut = async () => {
 
 <template>
 	<Menu.Root>
-		<Menu.Trigger id="userProfileButton" :class="shell.profileTrigger">
+		<Menu.Trigger :class="shell.profileTrigger">
 			<span class="sr-only">Open user menu</span>
 			<img v-if="user.image" :class="shell.profileAvatar" :src="user.image" :alt="`Profile picture for ${user.name || 'user'}`" loading="lazy" />
 			<Avatar v-else :class="shell.profileAvatar" :name="user.name || ''" variant="pixel" />
@@ -32,7 +34,7 @@ const signOut = async () => {
 
 		<Teleport to="body">
 			<Menu.Positioner :class="shell.profilePositioner">
-				<Menu.Content id="userProfileMenu" :class="shell.profileMenu">
+				<Menu.Content :class="shell.profileMenu">
 					<div :class="shell.profileIdentity">
 						<span :class="shell.profileName">{{ user.name }}</span>
 						<span :class="shell.profileEmail">{{ user.email }}</span>

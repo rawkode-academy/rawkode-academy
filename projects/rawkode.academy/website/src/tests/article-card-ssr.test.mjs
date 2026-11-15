@@ -61,6 +61,7 @@ const card = evaluate(compiled.code, {
 	// Live-content boundary: references resolve to people fixtures, and a
 	// failing lookup throws a ContentError that optionalContent absorbs.
 	"@/lib/live-content": {
+		getSeriesLabels: async () => new Map(),
 		getEntries: async (refs) => {
 			if (refs === "unavailable") throw new ContentError("gateway down");
 			return refs.map((ref) => people[ref.id]).filter(Boolean);
@@ -77,7 +78,7 @@ const card = evaluate(compiled.code, {
 	"astro:assets": {
 		Image: runtime.createComponent(
 			(_, props) =>
-				runtime.render`<img src="${props.src}" alt="${props.alt}" width="${props.width}" height="${props.height}" loading="${props.loading}">`,
+				runtime.render`<img src="${props.src}" alt="${props.alt}" width="${props.width}" height="${props.height}" data-widths="${props.widths?.join(",")}" loading="${props.loading}">`,
 		),
 	},
 	"../common/BaseCard.vue": baseCard,
@@ -146,8 +147,9 @@ test("authored remote cover and its alternative remain, with default level-two t
 	);
 	const image = dom.querySelector(".base-card__cover img");
 	assert.equal(image.getAttribute("src"), src);
-	assert.equal(image.getAttribute("width"), "1600");
-	assert.equal(image.getAttribute("height"), "900");
+	assert.equal(image.getAttribute("width"), "640");
+	assert.equal(image.getAttribute("height"), "360");
+	assert.equal(image.getAttribute("data-widths"), "640,1280");
 	assert.equal(image.getAttribute("alt"), "Container architecture");
 	assert.equal(image.getAttribute("loading"), "lazy");
 	assert.ok(dom.querySelector("h2"));

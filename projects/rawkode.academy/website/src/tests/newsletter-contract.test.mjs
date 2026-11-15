@@ -34,33 +34,10 @@ const ts = require("typescript");
 const css = await import(
 	"../../../../../packages/design-system/styled-system/css/index.js"
 );
-const recipeSource = readFileSync(
-	new URL(
-		"../../../../../packages/design-system/src/recipes/academyMarketing.ts",
-		import.meta.url,
-	),
-	"utf8",
-);
-const recipeModule = { exports: {} };
-new Function(
-	"require",
-	"module",
-	"exports",
-	ts.transpileModule(recipeSource, {
-		compilerOptions: {
-			module: ts.ModuleKind.CommonJS,
-			target: ts.ScriptTarget.ES2022,
-		},
-	}).outputText,
-)(
-	(id) => {
-		assert.equal(id, "../../styled-system/css");
-		return css;
-	},
-	recipeModule,
-	recipeModule.exports,
-);
-const { academyMarketing } = recipeModule.exports;
+// The real recipes, so the rendered class names are the production ones.
+const recipes = "../../../../../packages/design-system/src/recipes";
+const { academyMarketing } = await import(`${recipes}/academyMarketing.ts`);
+const { button } = await import(`${recipes}/button.ts`);
 const source = readFileSync(
 	new URL("../components/newsletter/NewsletterWidget.vue", import.meta.url),
 	"utf8",
@@ -79,7 +56,7 @@ const mocks = {
 	"astro:actions": {
 		actions: { newsletter: { subscribe: action, subscribeWithEmail: action } },
 	},
-	"@rawkodeacademy/design-system": { academyMarketing },
+	"@rawkodeacademy/design-system": { academyMarketing, button },
 	"@/lib/analytics/attribution": {
 		getSessionCampaignAttribution: () => undefined,
 		serializeCampaignAttribution: () => undefined,

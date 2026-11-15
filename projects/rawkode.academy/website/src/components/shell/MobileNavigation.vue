@@ -3,6 +3,7 @@ import { actions } from "astro:actions";
 import { academyShell } from "@rawkodeacademy/design-system";
 import { NavigationDrawer } from "@rawkodeacademy/design-system/vue";
 import { ref } from "vue";
+import { resetIdentity } from "@/lib/analytics/track";
 import { createLogger } from "@/lib/logger";
 
 interface NavigationItem {
@@ -45,6 +46,7 @@ const loadAccount = async (open: boolean) => {
 const signOut = async () => {
 	try {
 		await actions.auth.signOut();
+		resetIdentity();
 		if ((window as any).posthog?.reset) (window as any).posthog.reset();
 		window.location.href = "/";
 	} catch (error) {
@@ -57,7 +59,7 @@ const signOut = async () => {
 	<NavigationDrawer :primary="primary" :groups="groups" :current-path="currentPath" @open-change="loadAccount">
 		<template #account>
 			<div v-if="account.state !== 'unknown'" :class="styles.menuAccount">
-				<a v-if="account.state === 'signed-out'" href="/api/auth/sign-in" :class="styles.menuSignIn">Sign in</a>
+				<a v-if="account.state === 'signed-out'" href="/api/auth/sign-in" data-astro-prefetch="false" :class="styles.menuSignIn">Sign in</a>
 				<div v-else :class="styles.menuIdentity">
 					<span :class="styles.menuIdentityText">
 						<span :class="styles.menuIdentityName">{{ account.name }}</span>

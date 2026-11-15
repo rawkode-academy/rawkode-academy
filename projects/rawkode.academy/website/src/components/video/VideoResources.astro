@@ -1,0 +1,42 @@
+---
+import { academyWatch } from "@rawkodeacademy/design-system";
+import { type VideoResource, validVideoResources } from "./video-resources";
+
+/**
+ * A session's resources as a ruled list, rendered on the server. The name
+ * takes the full measure; the resource's own category sits beneath it.
+ * "other" says nothing, so those rows carry no kind.
+ */
+interface Props {
+	resources: readonly VideoResource[];
+}
+
+const resources = validVideoResources(Astro.props.resources);
+const watch = academyWatch();
+---
+
+{resources.length > 0 && (
+	<section class={watch.section} aria-labelledby="watch-detail-resources-heading">
+		<h2 id="watch-detail-resources-heading" class={watch.sectionTitle}>Resources</h2>
+		<ul class={watch.linkList}>
+			{resources.map((resource) => (
+				<li>
+					<a
+						class={watch.linkRow}
+						href={resource.href}
+						target={resource.type === "url" ? "_blank" : undefined}
+						rel={resource.type === "url" ? "noopener noreferrer" : undefined}
+					>
+						<span class={watch.linkBody}>
+							<span class={watch.linkName} data-name>{resource.title}</span>
+							{resource.description && <span class={watch.linkNote}>{resource.description}</span>}
+							{resource.category !== "other" && <span class={watch.linkKind}>{resource.category}</span>}
+						</span>
+						{resource.type === "url" && <span class={watch.linkArrow} data-arrow aria-hidden="true">↗</span>}
+					{resource.type === "url" && <span class="sr-only"> (opens in a new tab)</span>}
+					</a>
+				</li>
+			))}
+		</ul>
+	</section>
+)}

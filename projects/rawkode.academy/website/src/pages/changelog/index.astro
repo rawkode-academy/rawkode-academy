@@ -7,10 +7,14 @@ import {
 } from "@/lib/live-content";
 import EditorialShell from "@/components/ui/EditorialShell.astro";
 import Page from "@/wrappers/page.astro";
-import { academyDocument } from "@rawkodeacademy/design-system";
-import { localTime } from "@/lib/local-time";
+import {
+	academyDocument,
+	academyMarketing,
+} from "@rawkodeacademy/design-system";
+import { localDate } from "@/lib/local-time";
 
 const doc = academyDocument();
+const marketing = academyMarketing();
 
 const changelogEntries = await getCollection("changelog");
 
@@ -81,9 +85,9 @@ await setContentCache(Astro, {
 					processedChangelog.map((entry) => (
 						<article class="changelog-entry">
 							<div class="changelog-entry__meta">
-								<span class="editorial-pill">{entry.type}</span>
-								<time {...localTime(entry.date, { year: "numeric", month: "long", day: "numeric" }).attrs}>
-									{localTime(entry.date, { year: "numeric", month: "long", day: "numeric" }).text}
+								<span class={marketing.pill}>{entry.type}</span>
+								<time {...localDate(entry.date).attrs}>
+									{localDate(entry.date).text}
 								</time>
 								<span>by {entry.author.name}</span>
 							</div>

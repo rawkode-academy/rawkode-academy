@@ -6,6 +6,9 @@ updates:
       - "/"
     schedule:
       interval: "weekly"
+    # Ignore releases younger than three days. Security updates are exempt.
+    cooldown:
+      default-days: 3
     open-pull-requests-limit: 5
     commit-message:
       prefix: "chore(deps)"
@@ -28,6 +31,9 @@ updates:
       - "/presentations/lets-meet-cdktf-python"
     schedule:
       interval: "weekly"
+    # Ignore releases younger than three days. Security updates are exempt.
+    cooldown:
+      default-days: 3
     open-pull-requests-limit: 5
     groups:
       dependencies:
@@ -45,6 +51,9 @@ updates:
     directory: "/projects/rawkode.cloud"
     schedule:
       interval: "weekly"
+    # Ignore releases younger than three days. Security updates are exempt.
+    cooldown:
+      default-days: 3
     open-pull-requests-limit: 5
     groups:
       dependencies:
@@ -62,6 +71,9 @@ updates:
     directory: "/projects/rawkode.academy/tasks/video-importer"
     schedule:
       interval: "weekly"
+    # Ignore releases younger than three days. Security updates are exempt.
+    cooldown:
+      default-days: 3
     open-pull-requests-limit: 5
     groups:
       dependencies:
@@ -79,6 +91,9 @@ updates:
     directory: "/projects/rocko/software-developer"
     schedule:
       interval: "weekly"
+    # Ignore releases younger than three days. Security updates are exempt.
+    cooldown:
+      default-days: 3
     open-pull-requests-limit: 5
     groups:
       dependencies:
@@ -96,6 +111,9 @@ updates:
     directory: "/presentations/cloud-native-2.0/demo"
     schedule:
       interval: "weekly"
+    # Ignore releases younger than three days. Security updates are exempt.
+    cooldown:
+      default-days: 3
     open-pull-requests-limit: 5
     groups:
       dependencies:
@@ -113,6 +131,9 @@ updates:
     directory: "/projects/rawkode.academy/platform/search"
     schedule:
       interval: "weekly"
+    # Ignore releases younger than three days. Security updates are exempt.
+    cooldown:
+      default-days: 3
     open-pull-requests-limit: 5
     groups:
       dependencies:

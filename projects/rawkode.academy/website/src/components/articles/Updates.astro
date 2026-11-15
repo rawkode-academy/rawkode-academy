@@ -1,6 +1,6 @@
 ---
 import { academyDocument } from "@rawkodeacademy/design-system";
-import { localTime } from "@/lib/local-time";
+import { localDate } from "@/lib/local-time";
 const doc = academyDocument();
 interface Update {
 	date: Date;
@@ -14,7 +14,7 @@ interface Props {
 const { updates } = Astro.props;
 
 const formatDate = (date: Date) =>
-	localTime(date, { year: "numeric", month: "long", day: "numeric" });
+	localDate(date);
 ---
 
 {

@@ -4,7 +4,7 @@ const doc = academyDocument();
 import type { ContentEntry } from "@/lib/live-content";
 import MLabel from "@/components/ui/MLabel.vue";
 import { getTypeBadgeConfig } from "@/utils/article-types";
-import { localTime } from "@/lib/local-time";
+import { localDate } from "@/lib/local-time";
 
 interface Props {
 	articles: ContentEntry<"articles">[];
@@ -18,11 +18,7 @@ const items = articles.slice(0, 3).map((a) => ({
 	href: `/read/${a.id}`,
 	kicker: getTypeBadgeConfig(a.data.type || "tutorial").label,
 	title: a.data.title,
-	date: localTime(a.data.publishedAt, {
-		month: "short",
-		day: "2-digit",
-		year: "numeric",
-	}),
+	date: localDate(a.data.publishedAt),
 	readingTime: a.body
 		? `${Math.max(1, Math.round(a.body.split(/\s+/).length / 220))} min`
 		: undefined,

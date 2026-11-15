@@ -123,6 +123,7 @@ class _CniconScreenState extends State<CniconScreen> {
     deadline = null;
     setState(() { busy = true; answers.add(answer); times.add(ms); });
     try { await _save(); } catch (_) {
+      unavailable = true;
       error = 'Could not save your game. Reopen CNIcon to retry.';
       if (mounted) setState(() => busy = false);
       return;

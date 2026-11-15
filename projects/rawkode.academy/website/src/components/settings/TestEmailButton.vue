@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { academyAccount } from "@rawkodeacademy/design-system";
+import { academyAccount, button } from "@rawkodeacademy/design-system";
 const account = academyAccount();
 
 import { ref } from "vue";
@@ -44,7 +44,7 @@ const sendTestEmail = async () => {
 				type="button"
 				:disabled="isSending"
 				@click="sendTestEmail"
-				:class="account.button"
+				:class="button()"
 			>
 				<svg
 					v-if="isSending"
@@ -53,8 +53,8 @@ const sendTestEmail = async () => {
 					viewBox="0 0 24 24"
 					stroke="currentColor"
 				>
-					<circle class="opacity-25" cx="12" cy="12" r="10" stroke-width="4"></circle>
-					<path class="opacity-75" d="M4 12a8 8 0 018-8" stroke-linecap="round" stroke-width="4"></path>
+					<circle opacity="0.25" cx="12" cy="12" r="10" stroke-width="4"></circle>
+					<path opacity="0.75" d="M4 12a8 8 0 018-8" stroke-linecap="round" stroke-width="4"></path>
 				</svg>
 				<span>{{ isSending ? "Sending..." : "Send Test Email" }}</span>
 			</button>

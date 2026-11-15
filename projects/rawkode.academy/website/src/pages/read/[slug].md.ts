@@ -16,6 +16,7 @@ export async function GET(context: APIContext) {
 	return new Response(await articleToMarkdown(article, authors, context.site), {
 		headers: {
 			"Content-Type": "text/markdown; charset=utf-8",
+			Link: `<${new URL(`/read/${article.id}`, context.site ?? "https://rawkode.academy").href}>; rel="canonical"`,
 		},
 	});
 }

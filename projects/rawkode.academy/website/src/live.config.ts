@@ -1,5 +1,6 @@
-// Every content collection is live: fetched at request time from the API
-// gateway (src/lib/live-content), cached in KV and at the CDN. Pages use the
+// Every content collection except articles is live: fetched at request time
+// from the API gateway (src/lib/live-content), cached in KV and at the CDN.
+// Articles are files, built by src/content.config.ts. Pages use the
 // wrappers in "@/lib/live-content" rather than astro:content directly; see
 // the migration guide for the call patterns.
 import { defineLiveCollection } from "astro:content";
@@ -11,7 +12,6 @@ const people = defineLiveCollection({ loader: contentLoader("people") });
 const technologies = defineLiveCollection({
 	loader: contentLoader("technologies"),
 });
-const articles = defineLiveCollection({ loader: contentLoader("articles") });
 const news = defineLiveCollection({ loader: contentLoader("news") });
 const changelog = defineLiveCollection({ loader: contentLoader("changelog") });
 const adrs = defineLiveCollection({ loader: contentLoader("adrs") });
@@ -35,7 +35,6 @@ export const collections = {
 	shows,
 	people,
 	technologies,
-	articles,
 	news,
 	changelog,
 	adrs,

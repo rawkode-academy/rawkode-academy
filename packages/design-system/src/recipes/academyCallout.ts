@@ -1,4 +1,5 @@
 import { sva } from "../../styled-system/css";
+import { focusRing } from "../styles/focus";
 
 /** Authored callouts share Academy surfaces and theme-aware status colors. */
 export const academyCallout = sva({
@@ -47,11 +48,7 @@ export const academyCallout = sva({
 				textDecoration: "underline",
 				textUnderlineOffset: "{spacing.0.5}",
 				_hover: { color: "academy.text" },
-				_focusVisible: {
-					outline: "focus",
-					outlineColor: "academy.accent",
-					outlineOffset: "focus",
-				},
+				_focusVisible: focusRing,
 			},
 		},
 	},
