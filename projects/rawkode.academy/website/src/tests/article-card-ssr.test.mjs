@@ -61,6 +61,7 @@ const card = evaluate(compiled.code, {
 	// Live-content boundary: references resolve to people fixtures, and a
 	// failing lookup throws a ContentError that optionalContent absorbs.
 	"@/lib/live-content": {
+		getSeriesLabels: async () => new Map(),
 		getEntries: async (refs) => {
 			if (refs === "unavailable") throw new ContentError("gateway down");
 			return refs.map((ref) => people[ref.id]).filter(Boolean);
