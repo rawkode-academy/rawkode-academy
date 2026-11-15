@@ -1,13 +1,16 @@
 package cuenv
 
-import "github.com/cuenv/cuenv/schema"
+import (
+	"github.com/cuenv/cuenv/schema"
+	xNix "github.com/cuenv/cuenv/contrib/nix"
+)
 
 schema.#Project
 
 name: "rawkode-academy-identity"
 
-runtime: schema.#DevenvRuntime
-hooks: onEnter: devenv: schema.#Devenv
+runtime: schema.#NixRuntime
+hooks: onEnter: nix: xNix.#NixFlake
 
 let _t = tasks
 
@@ -28,7 +31,7 @@ tasks: {
 		type: "group"
 		generate: schema.#Task & {
 			hermetic: false
-			command:  "bun"
+			command:  "identity-bun"
 			args: ["x", "@better-auth/cli", "generate", "--config", "./src/lib/auth.config.ts", "--output", "./src/db/schema.ts", "-y"]
 		}
 	}
@@ -37,10 +40,12 @@ tasks: {
 		type: "group"
 		dev: schema.#Task & {
 			hermetic: false
-			command:  "bun"
+			command:  "identity-bun"
 			args: ["x", "wrangler", "dev"]
 			inputs: [
 				"astro.config.mjs",
+				"flake.nix",
+				"flake.lock",
 				"bun.lock",
 				"package.json",
 				"src/**",
@@ -52,18 +57,20 @@ tasks: {
 		type: "group"
 		remote: schema.#Task & {
 			hermetic: false
-			command:  "bun"
+			command:  "identity-bun"
 			args: ["x", "wrangler", "d1", "migrations", "apply", "identity", "--remote"]
-			inputs: ["migrations/**", "wrangler.jsonc", "package.json"]
+			inputs: ["migrations/**", "wrangler.jsonc", "package.json", "flake.nix", "flake.lock"]
 		}
 	}
 
 	build: schema.#Task & {
 		hermetic: false
-		command:  "bun"
+		command:  "identity-bun"
 		args: ["run", "build"]
 		inputs: [
 			"astro.config.mjs",
+			"flake.nix",
+			"flake.lock",
 			"bun.lock",
 			"package.json",
 			"src/**",
@@ -72,11 +79,13 @@ tasks: {
 
 	deploy: schema.#Task & {
 		hermetic: false
-		command:  "bun"
+		command:  "identity-bun"
 		args: ["x", "wrangler", "deploy"]
 		dependsOn: [_t.migrations.remote, _t.build]
 		inputs: [
 			"astro.config.mjs",
+			"flake.nix",
+			"flake.lock",
 			"bun.lock",
 			"migrations/**",
 			"package.json",
