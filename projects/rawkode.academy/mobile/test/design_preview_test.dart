@@ -56,6 +56,7 @@ void main() {
         'course': CourseDetail(item: course), 'lesson': LessonDetail(item: lesson),
         'video': const VideoDetail(item: {'title': 'Cloud native live', 'description': 'Join the Academy for a hands-on session.'}, upcoming: true),
         'kubele': const KubeleScreen(answer: 'Helm'),
+        'kubele-long': const KubeleScreen(answer: 'Inspektor Gadget'),
         'cnicon': CniconScreen(account: account),
         'cnicon-play': CniconScreen(account: account, loadLogo: (_) async => '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><path d="M50 5L95 80H5Z" fill="#0077ff"/></svg>'),
         'cnicon-reveal': CniconScreen(account: account, loadLogo: (_) async => '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><path d="M50 5L95 80H5Z" fill="#0077ff"/></svg>'),

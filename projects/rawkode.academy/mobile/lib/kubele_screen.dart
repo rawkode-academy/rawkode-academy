@@ -17,6 +17,7 @@ class KubeleScreen extends StatefulWidget {
 
 class _KubeleScreenState extends State<KubeleScreen> {
   final controller = TextEditingController();
+  final boardController = ScrollController();
   late KubeleSession session;
   String? error;
   bool loading = false;
@@ -78,6 +79,7 @@ class _KubeleScreenState extends State<KubeleScreen> {
   @override
   void dispose() {
     controller.dispose();
+    boardController.dispose();
     super.dispose();
   }
 
@@ -116,9 +118,12 @@ class _KubeleScreenState extends State<KubeleScreen> {
               const SizedBox(height: 8),
               Text('Guess the ${normalize(widget.answer).length}-letter term in six attempts.'),
               const SizedBox(height: 20),
+              Scrollbar(controller: boardController, thumbVisibility: true, child: SingleChildScrollView(
+                controller: boardController, scrollDirection: Axis.horizontal,
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               for (var row = 0; row < 6; row++)
                 Padding(padding: const EdgeInsets.only(bottom: 6), child: Semantics(label: 'Guess ${row + 1}',
-                  child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Row(children: [
+                  child: Row(children: [
                     for (var i = 0; i < normalize(widget.answer).length; i++)
                       Padding(padding: const EdgeInsets.only(right: 4), child: row < guesses.length
                         ? _Tile(letter: guesses[row][i], mark: markGuess(guesses[row], widget.answer)[i])
@@ -126,8 +131,10 @@ class _KubeleScreenState extends State<KubeleScreen> {
                             color: Theme.of(context).colorScheme.surface,
                             border: Border.all(color: Theme.of(context).colorScheme.outlineVariant)),
                             child: Semantics(label: 'Empty'))),
-                  ])),
+                  ]),
                 )),
+                ]),
+              )),
               const SizedBox(height: 16),
               if (loading || saving) const LinearProgressIndicator(),
               if (error != null && (finished || unavailable)) Text(error!),
@@ -189,7 +196,10 @@ class _Tile extends StatelessWidget {
         width: 40,
         height: 44,
         decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2)),
-        child: Text(letter, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontFamily: 'Red Hat Mono')),
+        child: Stack(alignment: Alignment.center, children: [
+          Text(letter, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontFamily: 'Red Hat Mono')),
+          Positioned(right: 2, bottom: 0, child: ExcludeSemantics(child: Text(switch (mark) { Mark.correct => '✓', Mark.present => '~', Mark.absent => '×' }, style: const TextStyle(color: Colors.white, fontSize: 9)))),
+        ]),
       ),
     );
   }
