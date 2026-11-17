@@ -17,3 +17,4 @@ cuenv -e production exec -- bun x wrangler d1 execute platform-videos --remote \
 | Patch | Database | Source |
 | --- | --- | --- |
 | `0002-swamp-club-video-description.sql` | `platform-videos` | live description rewritten on 2026-10-23 |
+| `0003-learning-path-copy.sql` | `platform-courses` | GitOps Landscape and Klustered triage descriptions and introductions |

@@ -188,7 +188,7 @@ export const adoptionStages: AdoptionStage[] = [
 		stage: "Awareness",
 		tagline: "Get engineers interested",
 		summary:
-			"Show engineers what your product can do through real problems and honest technical work.",
+			"Show what your product can do in a live demo, then give engineers an example they can run.",
 		activities: [
 			"Practical builds and live sessions",
 			"Walkthroughs, runnable examples and reusable clips",
@@ -289,7 +289,7 @@ export const ongoingPartnershipOffer: PartnershipOffer = {
 	cadence:
 		"Three months at $15,000. Discounted pricing starts at six months: $24,000 for six months, billed $12,000 a quarter, or $40,000 for a 12-month contract, billed $10,000 a quarter.",
 	summary:
-		"Work with me across Awareness, Adoption, and Support. Each quarter has a focused plan built around what your users and your team need.",
+		"Work with me across Awareness, Adoption, and Support.",
 	included: [
 		"An agreed delivery plan with named outputs, dates and review rounds",
 		"Monthly 60-minute working sessions with written recaps",
