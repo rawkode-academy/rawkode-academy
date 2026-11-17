@@ -94,15 +94,11 @@ tasks: {
 			// Articles and series are files compiled into the site; all other
 			// content is served live from the API gateway.
 			schema.#ModuleFiles & {paths: ["content/articles/**"]},
-			"content/articles/**",
 			schema.#ModuleFiles & {paths: ["content/series/**"]},
-			"content/series/**",
 			"astro.config.mts",
 			"env.cue",
 			schema.#ModuleFiles & {paths: ["packages/design-system/**"]},
-			"packages/design-system/**",
 			schema.#ModuleFiles & {paths: ["packages/rich-text/**"]},
-			"packages/rich-text/**",
 			"package.json",
 			schema.#ModuleFiles & {paths: ["bun.lock"]},
 			"bun.lock",
@@ -148,15 +144,11 @@ tasks: {
 				// Articles and series are files compiled into the site; all other
 				// content is served live from the API gateway.
 				schema.#ModuleFiles & {paths: ["content/articles/**"]},
-				"content/articles/**",
 				schema.#ModuleFiles & {paths: ["content/series/**"]},
-				"content/series/**",
 				"astro.config.mts",
 				"env.cue",
 				schema.#ModuleFiles & {paths: ["packages/design-system/**"]},
-				"packages/design-system/**",
 				schema.#ModuleFiles & {paths: ["packages/rich-text/**"]},
-				"packages/rich-text/**",
 				"package.json",
 				schema.#ModuleFiles & {paths: ["bun.lock"]},
 				"bun.lock",
