@@ -105,7 +105,7 @@ The answer comes back as one line too. Indented it looks like this:
 
 The server speaks 2026-07-28 and has tools and resources. It doesn't offer prompts. `listChanged` means it can notify clients that subscribe when one of those lists changes. `ttlMs: 0` makes the answer stale right away, and `cacheScope: "private"` tells clients to keep separate caches for different credentials. The server gives its name and version in `_meta`, as the spec recommends for each result.
 
-A client doesn't have to call discovery, but every server has to answer it. On stdio the spec recommends starting there when a client supports both the old and new protocols. This server uses the first request to pick which one to speak. When my first line was a `tools/list` without `_meta`, the server took me for a 2025 client. It stayed with the old format even when I sent `_meta` on later lines. That's how this server treats old clients on stdio. The spec itself wants every request with `_meta` handled on its own.
+A client doesn't have to call discovery, but every server that speaks 2026-07-28 has to answer it. A server that only knows the 2025 versions doesn't have this request and expects `initialize`. On stdio the spec recommends starting there when a client supports both the old and new protocols. This server uses the first request to pick which one to speak. When my first line was a `tools/list` without `_meta`, the server took me for a 2025 client. It stayed with the old format even when I sent `_meta` on later lines. That's how this server treats old clients on stdio. The spec itself wants every request with `_meta` handled on its own.
 
 ## What a tool looks like
 
