@@ -1,0 +1,459 @@
+---
+title: "A Tool Call Is One Line of JSON"
+subtitle: I start a real MCP server in a terminal, type the requests myself and read what comes back. Based on spec version 2026-07-28.
+description: "MCP tools hands-on: I start the filesystem server by hand, send it tools/list and tools/call as JSON and go through the replies, the two kinds of errors and the annotations. Based on spec version 2026-07-28."
+type: guide
+publishedAt: 2026-11-16
+authors:
+  - icepuma
+series: understanding-mcp
+resources:
+  - title: Tools
+    type: url
+    url: https://modelcontextprotocol.io/specification/2026-07-28/server/tools
+    description: The specification page for tools, with every field and both kinds of errors.
+    category: documentation
+  - title: stdio transport
+    type: url
+    url: https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/stdio
+    description: One JSON message per line over standard input and output.
+    category: documentation
+  - title: Streamable HTTP transport
+    type: url
+    url: https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/streamable-http
+    description: The request headers and the two response formats.
+    category: documentation
+  - title: Filesystem MCP Server
+    type: url
+    url: https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem
+    description: The server used in this article, with its tools and options.
+    category: code
+  - title: MCP Inspector
+    type: url
+    url: https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector
+    description: Sends the same requests from a web UI, a CLI or a terminal UI.
+    category: documentation
+---
+
+import Aside from "@/components/Aside.astro";
+
+In the first part I followed one question from your prompt to an MCP server and back, and every payload on the way was printed for you. At the end I promised to send those messages myself. So this time there's no host and no model, only a server in a terminal and me typing JSON.
+
+I also wrote that you don't write the `_meta` block by hand. Well, today I do.
+
+<Aside variant="info">
+I use MCP **2026-07-28**, `@modelcontextprotocol/server-filesystem` 2.3.0 and `@modelcontextprotocol/server-everything` 2.3.0. Both packages need Node.js 24 or later. I format the replies so you can read them. Each request is ready to paste.
+</Aside>
+
+## A server without a host
+
+The filesystem server was the first entry in the config last time. A host would start it for me. Now I do that myself, in a new folder with one file in it:
+
+```bash
+demo_dir=$(mktemp -d "${TMPDIR:-/tmp}/mcp-demo.XXXXXX") &&
+  cd -P "$demo_dir" &&
+  printf 'replicas: 3\nimage: ghcr.io/example/api:1.4.0\n' > deployment.yaml &&
+  npx -y @modelcontextprotocol/server-filesystem@2.3.0 .
+```
+
+```text
+Secure MCP Filesystem Server running on stdio
+Effective allowed directories (from the command line):
+  /tmp/mcp-demo.A1B2C3
+```
+
+Your directory name will differ. After that nothing happens. There's no prompt. The server just waits.
+
+This is already the whole **stdio** transport. The server reads messages from standard input and writes its answers to standard output, and every message is one line of JSON. The three lines above went to standard error, which is where a stdio server is allowed to log.
+
+A message can't contain a literal line break, so I put the JSON from the first part on one line before I paste it. Paste each request into the terminal where the server is waiting, then press Enter. The `.` at the end of the command makes the current directory the only allowed directory in this run. I'll come back to that.
+
+## Who are you
+
+The first line I paste is a `server/discover` request:
+
+```json
+{"jsonrpc":"2.0","id":1,"method":"server/discover","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"by-hand","version":"0.1.0"},"io.modelcontextprotocol/clientCapabilities":{}}}}
+```
+
+Most of that line is the `_meta` block. Every request in this version needs `io.modelcontextprotocol/protocolVersion` and `io.modelcontextprotocol/clientCapabilities`. The spec also recommends `io.modelcontextprotocol/clientInfo`, so I give myself a name. [MCP metadata rules](https://modelcontextprotocol.io/specification/2026-07-28/basic/index#meta)
+
+The answer comes back as one line too. Indented it looks like this:
+
+```json title="server/discover response"
+{
+  "result": {
+    "supportedVersions": ["2026-07-28"],
+    "capabilities": {
+      "tools": { "listChanged": true },
+      "resources": { "listChanged": true }
+    },
+    "resultType": "complete",
+    "ttlMs": 0,
+    "cacheScope": "private",
+    "_meta": {
+      "io.modelcontextprotocol/serverInfo": {
+        "name": "secure-filesystem-server",
+        "version": "2.3.0"
+      }
+    }
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+```
+
+The server speaks 2026-07-28 and has tools and resources. It doesn't offer prompts. `listChanged` means it can tell a client when one of those lists changes. The server gives its name and version in `_meta`, as the spec recommends for each result.
+
+Discovery is optional in 2026-07-28. The spec recommends starting there when a client supports both the old and new protocols. This stdio server uses the first request to pick which one to speak. When my first line was a `tools/list` without `_meta`, the server took me for a 2025 client. It stayed with the old format even when I sent `_meta` on later lines.
+
+## What a tool looks like
+
+Next I ask the server what tools it has.
+
+```json
+{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"by-hand","version":"0.1.0"},"io.modelcontextprotocol/clientCapabilities":{}}}}
+```
+
+The answer is a single line of 19,571 characters with 16 tools in it. I look for `read_text_file`. Its description says to use it to examine one file, and its `inputSchema` says it needs a string named `path`. That's enough to read my file.
+
+<details>
+<summary>Full tool definition for read_text_file</summary>
+
+```json title="One tool from the tools/list response"
+{
+  "name": "read_text_file",
+  "title": "Read Text File",
+  "description": "Read the complete contents of a file from the file system as text. Handles various text encodings and provides detailed error messages if the file cannot be read. Use this tool when you need to examine the contents of a single file. Use the 'head' parameter to read only the first N lines of a file, or the 'tail' parameter to read only the last N lines of a file. Operates on the file as text regardless of extension. Only works within allowed directories.",
+  "inputSchema": {
+    "type": "object",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "properties": {
+      "path": {
+        "type": "string",
+        "description": "The file to read as text. Absolute, or relative to an allowed directory; it must resolve inside the allowed directories."
+      },
+      "tail": {
+        "description": "If provided, returns only the last N lines of the file",
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 9007199254740991
+      },
+      "head": {
+        "description": "If provided, returns only the first N lines of the file",
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 9007199254740991
+      }
+    },
+    "required": ["path"]
+  },
+  "annotations": {
+    "readOnlyHint": true,
+    "idempotentHint": true,
+    "destructiveHint": false,
+    "openWorldHint": false
+  },
+  "outputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "content": { "type": "string" }
+    },
+    "required": ["content"],
+    "additionalProperties": false
+  }
+}
+```
+
+</details>
+
+## Calling one
+
+Now the request a host sends after the model asked for a tool. I play the model as well and pick the arguments:
+
+```json
+{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"read_text_file","arguments":{"path":"deployment.yaml"},"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"by-hand","version":"0.1.0"},"io.modelcontextprotocol/clientCapabilities":{}}}}
+```
+
+```json title="tools/call response"
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "replicas: 3\nimage: ghcr.io/example/api:1.4.0\n"
+      }
+    ],
+    "structuredContent": {
+      "content": "replicas: 3\nimage: ghcr.io/example/api:1.4.0\n"
+    },
+    "resultType": "complete",
+    "_meta": {
+      "io.modelcontextprotocol/serverInfo": {
+        "name": "secure-filesystem-server",
+        "version": "2.3.0"
+      }
+    }
+  },
+  "jsonrpc": "2.0",
+  "id": 4
+}
+```
+
+I gave it a relative path and the server resolved it against its allowed directory, like the schema said it would. The IDs jump because I sent more requests than I show here.
+
+The file is in there twice. `content` is a list of blocks that a host can pass to the model. A block can contain text, an image, audio, a link to a resource or an embedded resource.
+
+This server puts the raw YAML in the text block. It also puts the YAML in a JSON object with one string field named `content`, as its `outputSchema` describes. Code can read that field directly. For clients that don't support `structuredContent`, the spec recommends that servers also put the serialized JSON in a text block. [MCP structured content](https://modelcontextprotocol.io/specification/2026-07-28/server/tools#structured-content)
+
+`resultType` says the call is finished. The other value in the core protocol is `input_required`, which is how the elicitation from the first part starts.
+
+The rest of the tool list is worth a second look. `name` is what I put in `tools/call`. It only needs to be unique on this server, so a host can add a server prefix when it sends tool names to a model. A host can show the `title` to people and pass the `description` and the argument schema to the model. The description of `list_directory` even points the model to two other tools. The first tool, `read_file`, uses its title and description to say it's deprecated. I'll get to the `annotations` after I try a write.
+
+The list also has `ttlMs: 0` and `cacheScope: "private"`. The first makes it stale right away. The second tells clients to keep separate caches for different credentials. Close to half of the line is text from tool and argument descriptions. That text takes up context when a host sends it to the model. Some hosts load full descriptions only when they need them, as we saw in the first part.
+
+## Two kinds of errors
+
+The issues server from the first part doesn't exist here. I call its tool anyway:
+
+```json
+{"jsonrpc":"2.0","id":9,"method":"tools/call","params":{"name":"issues_search","arguments":{"query":"is:open label:bug"},"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"by-hand","version":"0.1.0"},"io.modelcontextprotocol/clientCapabilities":{}}}}
+```
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 9,
+  "error": {
+    "code": -32602,
+    "message": "Tool issues_search not found"
+  }
+}
+```
+
+That's a **protocol error**. JSON-RPC puts the error in `error`, and `-32602` means invalid parameters.
+
+Now a tool that exists, with a path it isn't allowed to read:
+
+```json
+{"jsonrpc":"2.0","id":10,"method":"tools/call","params":{"name":"read_text_file","arguments":{"path":"/etc/hosts"},"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"by-hand","version":"0.1.0"},"io.modelcontextprotocol/clientCapabilities":{}}}}
+```
+
+```json title="tools/call response (without _meta)"
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Access denied - path outside allowed directories: /etc/hosts not in /tmp/mcp-demo.A1B2C3"
+      }
+    ],
+    "isError": true,
+    "resultType": "complete"
+  },
+  "jsonrpc": "2.0",
+  "id": 10
+}
+```
+
+This one is a **tool execution error**. The server understood the request and ran the tool, so the reply has a `result` marked with `isError: true`. The last path in the error will be your demo directory.
+
+The host should pass a tool execution error to the model so it can read the text and try something else. A protocol error can mean that the request itself has the wrong shape. For example, `tools/call` requires a tool name in `params.name`.
+
+I can also give a tool an input that fails its schema. This request has the right shape for `tools/call`, but the tool expects a string for `path`.
+
+```json
+{"jsonrpc":"2.0","id":11,"method":"tools/call","params":{"name":"read_text_file","arguments":{"path":123},"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"by-hand","version":"0.1.0"},"io.modelcontextprotocol/clientCapabilities":{}}}}
+```
+
+I get `isError: true` again, with this text.
+
+```text
+Input validation error: Invalid arguments for tool read_text_file: path: Invalid input: expected string, received number
+```
+
+That makes sense to me. The model wrote the arguments, so the model should hear what was wrong with them.
+
+Two more mistakes are mine and not the model's. The first is a request without the `_meta` block:
+
+```json
+{"jsonrpc":"2.0","id":16,"method":"tools/list","params":{}}
+```
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 16,
+  "error": {
+    "code": -32602,
+    "message": "Request is missing the required _meta envelope for protocol revision 2026-07-28 (io.modelcontextprotocol/protocolVersion, io.modelcontextprotocol/clientCapabilities)"
+  }
+}
+```
+
+The second is a line that isn't complete JSON. I lose a bracket while pasting and press Enter. This server prints nothing. It just keeps waiting for the next line.
+
+## Nobody asked me
+
+So far I only read. This call writes:
+
+```json
+{"jsonrpc":"2.0","id":14,"method":"tools/call","params":{"name":"write_file","arguments":{"path":"notes.txt","content":"written over stdin\n"},"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"by-hand","version":"0.1.0"},"io.modelcontextprotocol/clientCapabilities":{}}}}
+```
+
+The text in the result is `Successfully wrote to notes.txt`. I press Ctrl-D on a blank line to close standard input and get my shell prompt back. The file is there.
+
+```bash
+cat notes.txt
+```
+
+```text
+written over stdin
+```
+
+The server didn't ask if I'm sure. It sees the same request whether a host asked me first or I typed it in my terminal. A server can ask for confirmation through elicitation if the client supports it. This tool just writes the file.
+
+The approval prompt you know from your coding agent belongs to the host. The spec recommends that the application give a person a way to deny tool calls.
+
+The server does enforce the directory limit. It refused `/etc/hosts` because that file is outside the demo directory. It makes that check whoever is calling.
+
+## Hints and limits
+
+The server does say something about its tools, in the annotations. These are the ones of `write_file`:
+
+```json
+{
+  "readOnlyHint": false,
+  "idempotentHint": true,
+  "destructiveHint": true,
+  "openWorldHint": false
+}
+```
+
+| Hint | When it's true | Default |
+|---|---|---|
+| `readOnlyHint` | The tool doesn't change anything | `false` |
+| `destructiveHint` | It may overwrite or delete data | `true` |
+| `idempotentHint` | Calling it again with the same arguments changes nothing more | `false` |
+| `openWorldHint` | It may interact with an open set of external systems, like a web search tool does | `true` |
+
+The defaults assume the tool could make destructive changes or interact with external systems. The destructive and idempotent hints apply to tools that can make changes.
+
+A host can use them, for example to ask before `write_file` and not before `read_text_file`. But every one of these names ends in "Hint", and they are what a server says about itself. The spec tells clients not to base decisions on annotations from a server they don't trust.
+
+A limit looks different. From the same demo directory, I start the server again with one more option.
+
+```bash
+npx -y @modelcontextprotocol/server-filesystem@2.3.0 --read-only .
+```
+
+I paste the discovery request again, then paste the same `tools/list` line. It now returns 10 tools instead of 16. They all have `readOnlyHint: true`, and the reply is about 12,400 characters.
+
+I try `write_file` again.
+
+```json
+{"jsonrpc":"2.0","id":24,"method":"tools/call","params":{"name":"write_file","arguments":{"path":"notes.txt","content":"written over stdin\n"},"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"by-hand","version":"0.1.0"},"io.modelcontextprotocol/clientCapabilities":{}}}}
+```
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 24,
+  "error": {
+    "code": -32602,
+    "message": "Tool write_file not found"
+  }
+}
+```
+
+I sent `write_file` anyway. In read-only mode the server disables the tool, so I get the same answer as for the tool that never existed. That's the kind of switch I meant when I wrote to start with read-only servers. I press Ctrl-D again before moving on.
+
+## The same over HTTP
+
+A server can get the same requests as HTTP POSTs. The filesystem server uses stdio, so here I use the everything server. It's a test server from the same repository with a bit of every MCP feature in it. I start it in one terminal and leave it running.
+
+```bash
+npx -y @modelcontextprotocol/server-everything@2.3.0 streamableHttp
+```
+
+```text
+Starting Streamable HTTP server...
+MCP Streamable HTTP Server listening on 127.0.0.1:3001
+```
+
+In a second terminal I call its `echo` tool with curl.
+
+```bash
+curl -sS -i http://127.0.0.1:3001/mcp \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -H 'MCP-Protocol-Version: 2026-07-28' \
+  -H 'Mcp-Method: tools/call' \
+  -H 'Mcp-Name: echo' \
+  -d '{"jsonrpc":"2.0","id":31,"method":"tools/call","params":{"name":"echo","arguments":{"message":"hello"},"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"by-hand","version":"0.1.0"},"io.modelcontextprotocol/clientCapabilities":{}}}}'
+```
+
+```text title="Response (headers and _meta trimmed)"
+HTTP/1.1 200 OK
+content-type: application/json
+
+{"result":{"content":[{"type":"text","text":"Echo: hello"}],"resultType":"complete"},"jsonrpc":"2.0","id":31}
+```
+
+The body is the kind of line I pasted into the terminal before. Three headers copy values from that line. `MCP-Protocol-Version` carries the version from `_meta`, `Mcp-Method` carries the method, and `Mcp-Name` carries the tool name. A load balancer or a gateway can use those headers to route or limit requests without parsing JSON.
+
+A copy can be wrong, so the server compares. I run the curl command again with just the `Mcp-Name` header changed to `get-sum`. The body still says `echo`. I get `400 Bad Request` and this error.
+
+```json title="Error (trimmed)"
+{
+  "jsonrpc": "2.0",
+  "error": {
+    "code": -32020,
+    "message": "Bad Request: the request headers and body disagree: the body carries params.name=\"echo\" but the Mcp-Name header names \"get-sum\""
+  },
+  "id": 31
+}
+```
+
+Otherwise a proxy in front could decide on the header while the server runs what's in the body.
+
+I run it one more time with `issues_search` in both the header and the body's tool name. I get the same `-32602` error as on stdio, with a `200 OK` in front of it. I have to read the body to see what happened.
+
+The `Accept` header names two formats because the server picks one per request. The echo reply was a single JSON object. The everything server also has a tool that takes a while, `trigger-long-running-operation`. I give it two seconds and two steps, and ask for progress with a `progressToken` in `_meta`. I add `-N` so curl prints the events as they arrive.
+
+```bash
+curl -sS -i -N http://127.0.0.1:3001/mcp \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -H 'MCP-Protocol-Version: 2026-07-28' \
+  -H 'Mcp-Method: tools/call' \
+  -H 'Mcp-Name: trigger-long-running-operation' \
+  -d '{"jsonrpc":"2.0","id":40,"method":"tools/call","params":{"name":"trigger-long-running-operation","arguments":{"duration":2,"steps":2},"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"by-hand","version":"0.1.0"},"io.modelcontextprotocol/clientCapabilities":{},"progressToken":"p1"}}}'
+```
+
+```text title="Response (headers and _meta trimmed)"
+HTTP/1.1 200 OK
+content-type: text/event-stream
+
+event: message
+data: {"jsonrpc":"2.0","method":"notifications/progress","params":{"progress":1,"total":2,"progressToken":"p1"}}
+
+event: message
+data: {"jsonrpc":"2.0","method":"notifications/progress","params":{"progress":2,"total":2,"progressToken":"p1"}}
+
+event: message
+data: {"result":{"content":[{"type":"text","text":"Long running operation completed. Duration: 2 seconds, Steps: 2."}],"resultType":"complete"},"jsonrpc":"2.0","id":40}
+```
+
+That's the "streamable" in Streamable HTTP. Two notifications come first. They have no `id` because nobody answers them. Then I get the result, and the stream ends.
+
+This demo server listens on the loopback address and accepts these calls without credentials. The spec recommends authentication for HTTP servers. How a protected server checks a token is a topic for a later part. I stop the server with Ctrl-C in its terminal.
+
+## What's next
+
+I left out a few things about tools. Long lists can come in pages. Servers can notify clients when the list changes. HTTP can also carry selected tool arguments in headers.
+
+You don't have to type all of this either. The [MCP Inspector](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector) sends the same requests from a web UI, a command line or a terminal UI. I'd still do it by hand once. After that a tool call isn't magic anymore.
+
+I can read the same `deployment.yaml` with `resources/read` if I give it a `file://` URI for the file in my demo directory. Next time I'll try that and see what the host can do with the result.

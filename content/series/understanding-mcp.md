@@ -2,7 +2,7 @@
 title: "Understanding MCP"
 description: A walk through the Model Context Protocol, one piece at a time.
 planned:
-  - Tools
+  - Resources
 ---
 
 The [Model Context Protocol](https://modelcontextprotocol.io) (MCP) is how AI applications such as Claude Code,
