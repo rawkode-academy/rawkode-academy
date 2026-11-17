@@ -144,7 +144,7 @@ test("partnership SSR leads with one partnership and keeps scoped work discovera
 		await renderPartnerships();
 	assert.equal(
 		dom.querySelector("h1").text,
-		"Build the developer journey your product needs.",
+		"Help engineers get your product running in production.",
 	);
 	assert.equal(pageProps[0].title, "Partnerships for developer tools");
 	assert.match(pageProps[0].description, /Awareness, Adoption, and Support/);

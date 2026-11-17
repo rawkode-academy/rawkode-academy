@@ -263,7 +263,7 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 		);
 		const dom = parse(html);
 		expect(dom.querySelectorAll("h1")).toHaveLength(1);
-		expect(dom.querySelector("h1")?.text).toBe("Understand the system.");
+		expect(dom.querySelector("h1")?.text).toBe("Kubernetes tutorials, live demos, and a game show");
 		expect(html).toContain("Recently published");
 		expect(html).toContain('href="/learning-paths/path-4"');
 		expect(html).not.toContain("email.rawkode.academy/subscribe");
@@ -296,7 +296,7 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 				?.text.replace(/\s+/g, " ")
 				.trim(),
 		).toBe(
-			"Understand the system.Cloud native, taught by the engineers doing the work, with every decision on screen.",
+			"Kubernetes tutorials, live demos, and a game showWatch maintainers demo their tools on Rawkode Live, or see how fast engineers can fix a broken Kubernetes cluster on Klustered.",
 		);
 		const links = nav?.querySelectorAll("a") ?? [];
 		expect(links.map((link) => link.getAttribute("href"))).toEqual([
@@ -592,7 +592,7 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 		expect(
 			dom.querySelectorAll("h1, h2").map((heading) => heading.text),
 		).toEqual([
-			"Understand the system.",
+			"Kubernetes tutorials, live demos, and a game show",
 			"Next stream",
 			"Real session",
 			"The archive",

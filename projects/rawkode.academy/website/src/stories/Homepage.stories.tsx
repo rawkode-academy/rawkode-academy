@@ -29,7 +29,7 @@ const collections = [
 		label: "Videos",
 		count: 330,
 		description:
-			"Hands-on sessions with the people who build the tools, kept whole.",
+			"Full recordings of live demos and tutorials.",
 	},
 	{
 		href: "/read",

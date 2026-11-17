@@ -128,8 +128,8 @@ const laterStarts = laterStreams.map((stream) => ({ ...stream, start: localDateT
 			<section :class="styles.hero" aria-labelledby="home-title" data-system>
 				<canvas :class="styles.system" data-system-canvas aria-hidden="true" />
 				<div :class="styles.container">
-					<h1 id="home-title" :class="styles.title"><span :class="styles.titleLine" data-system-avoid="text">Understand</span> <span :class="styles.titleLine" data-system-avoid="text">the system<span :class="styles.titleAccent">.</span></span></h1>
-					<p :class="styles.heroLede" data-system-avoid="text">Cloud native, taught by the engineers doing the work, with every decision on screen.</p>
+					<h1 id="home-title" :class="styles.title"><span :class="styles.titleLine" data-system-avoid="text">Kubernetes tutorials,</span> <span :class="styles.titleLine" data-system-avoid="text">live demos, and a game show</span></h1>
+					<p :class="styles.heroLede" data-system-avoid="text">Watch maintainers demo their tools on Rawkode Live, or see how fast engineers can fix a broken Kubernetes cluster on Klustered.</p>
 				</div>
 			</section>
 			<section v-if="nextStream && nextStart" :class="styles.sectionLead" aria-label="Next live stream and latest session">
@@ -239,7 +239,6 @@ const laterStarts = laterStreams.map((stream) => ({ ...stream, start: localDateT
 				<div :class="styles.paths">
 					<div :class="styles.pathsIntro">
 						<h2 id="paths-title" :class="styles.sectionTitle">Learning paths</h2>
-						<p>Ordered routes through the archive, for when you want a sequence and a place to start.</p>
 						<a href="/learning-paths" :class="styles.textLink">All learning paths <span aria-hidden="true">→</span></a>
 					</div>
 					<div>

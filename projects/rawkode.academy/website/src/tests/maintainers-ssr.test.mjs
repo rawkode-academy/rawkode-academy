@@ -149,7 +149,7 @@ test("shared shell preserves heading hierarchy and both supporting lists", async
 	assert.deepEqual(
 		dom.querySelectorAll("h2").map((h) => h.text),
 		[
-			"From idea to live demo.",
+			"How to get on Rawkode Live",
 			"Is your project a fit?",
 			"What would you like to show?",
 		],
