@@ -129,7 +129,7 @@ const laterStarts = laterStreams.map((stream) => ({ ...stream, start: localDateT
 				<canvas :class="styles.system" data-system-canvas aria-hidden="true" />
 				<div :class="styles.container">
 					<h1 id="home-title" :class="styles.title"><span :class="styles.titleLine" data-system-avoid="text">Kubernetes tutorials,</span> <span :class="styles.titleLine" data-system-avoid="text">live demos, and a game show</span></h1>
-					<p :class="styles.heroLede" data-system-avoid="text">Watch maintainers demo their tools on Rawkode Live, or see how fast engineers can fix a broken Kubernetes cluster on Klustered.</p>
+					<p :class="styles.heroLede" data-system-avoid="text">Watch maintainers demo their tools and talk through cloud native releases on Rawkode Live.</p>
 				</div>
 			</section>
 			<section v-if="nextStream && nextStart" :class="styles.sectionLead" aria-label="Next live stream and latest session">

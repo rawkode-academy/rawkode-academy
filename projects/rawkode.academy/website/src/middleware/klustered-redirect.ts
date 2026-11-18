@@ -1,21 +1,12 @@
 import type { MiddlewareHandler } from "astro";
 
-// klustered.live was a standalone site; its public experience now lives at
-// rawkode.academy/shows/klustered. When the website worker serves a request on
-// a klustered.live host, 301 it to the canonical path.
+// klustered.live was a standalone site; its public page now lives at
+// rawkode.academy/shows/klustered, a holding notice. When the website worker
+// serves a request on a klustered.live host, 301 every path to that page.
 
 const KLUSTERED_HOSTS = new Set(["klustered.live", "www.klustered.live"]);
 const CANONICAL_ORIGIN = "https://rawkode.academy";
 const SHOW_BASE = "/shows/klustered";
-
-function mapPath(pathname: string): string {
-	if (pathname === "/schedule.ics") return "/api/shows/klustered/schedule.ics";
-	if (/^\/(seasons|brackets|schedule|apply)\/?$/.test(pathname)) {
-		return `${SHOW_BASE}/${pathname.replace(/^\/|\/$/g, "")}`;
-	}
-	// Everything else (home, about, rules, sponsors, episodes/*) lands on the hub.
-	return SHOW_BASE;
-}
 
 export const klusteredRedirectMiddleware: MiddlewareHandler = async (
 	context,
@@ -25,7 +16,7 @@ export const klusteredRedirectMiddleware: MiddlewareHandler = async (
 		return next();
 	}
 
-	const target = `${CANONICAL_ORIGIN}${mapPath(context.url.pathname)}${context.url.search}`;
+	const target = `${CANONICAL_ORIGIN}${SHOW_BASE}`;
 	return new Response(null, {
 		status: 301,
 		headers: { Location: target, "Cache-Control": "public, max-age=3600" },
