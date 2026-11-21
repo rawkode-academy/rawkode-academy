@@ -10,30 +10,30 @@ resolution-markers = [
 
 [[package]]
 name = "boto3"
-version = "1.44.0"
+version = "1.44.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "botocore" },
     { name = "jmespath" },
     { name = "s3transfer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e7/b4/da0e5fd912f51d04e9f019fea50cbb859a4ba07947c6e28262ff59c98360/boto3-1.44.0.tar.gz", hash = "sha256:5d311d2988ae560f83e5fb8a284cb57b48e2c8d444ecb78a6d6752ae1740e04a", size = 112741, upload-time = "2026-11-10T20:22:34.536Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/aa/b8/149e2c2a599a6a3d3818bb7d9c30996be703d6bfc71b2bbe11b7c1a86ecc/boto3-1.44.5.tar.gz", hash = "sha256:667b344e25d2bcbb7c42fcf6b92a07bb1d73ee9d6d12c3a7873ec4c490b6fb64", size = 112787, upload-time = "2026-11-17T20:24:23.125Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e2/53/9c2ca547dc9fa1e9e2a0fec0096b9e25277f6864faba580ace75e0db5585/boto3-1.44.0-py3-none-any.whl", hash = "sha256:ae3009db1294fd4ca2e30d9592ead8ab56f0e270bcad0b95e555f03f7875716d", size = 140153, upload-time = "2026-11-10T20:22:31.736Z" },
+    { url = "https://files.pythonhosted.org/packages/47/b1/89e65362f9409fa3233fa227d1798e3e39012f7461a75b8ca9472c3d3b0b/boto3-1.44.5-py3-none-any.whl", hash = "sha256:70c3e0409794b29ec1900bcaff0695b73234a2d32ffaed35045b94caa26212a5", size = 140158, upload-time = "2026-11-17T20:24:21.741Z" },
 ]
 
 [[package]]
 name = "botocore"
-version = "1.44.3"
+version = "1.44.9"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jmespath" },
     { name = "python-dateutil" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/03/e8/130935f123174b900f55fef077c33af43825e5b68fe963bcc1fc3e4634eb/botocore-1.44.3.tar.gz", hash = "sha256:44d86fff55ce2d014bd72183ebc164b21b36598253b8234d4f59e8600e09b8b3", size = 16668982, upload-time = "2026-11-13T20:16:47.549Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/04/10/cf5cb95dee4b956eb785e5225aa47054872bbcf263241e926fa796c388ce/botocore-1.44.9.tar.gz", hash = "sha256:1f783e0b31f0053f41f4239b7a7e2e73957f25cdc6b2f45d113f1b575a4db10b", size = 17206061, upload-time = "2026-11-21T01:33:31.469Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/20/65/e39cc0e0d16cf9efe0afab0edef48b89491b548e2c7d7ddc23bbb2c6422c/botocore-1.44.3-py3-none-any.whl", hash = "sha256:793eac2a7ca167e9376b136cf000e1675e9ffe8d7ec609160cc1ee00b93ace28", size = 16368633, upload-time = "2026-11-13T20:16:43.695Z" },
+    { url = "https://files.pythonhosted.org/packages/20/ad/f8143d7a78503c3b67d135589cd1da82d3867ed1f37149e64d6f9bef6cfb/botocore-1.44.9-py3-none-any.whl", hash = "sha256:6966752d38514a8e457ea062ea171b2b320c55bad23c8ae4f74f88296e00890d", size = 16905925, upload-time = "2026-11-21T01:33:28.733Z" },
 ]
 
 [[package]]
@@ -356,7 +356,7 @@ wheels = [
 
 [[package]]
 name = "google-cloud-run"
-version = "0.16.2"
+version = "0.16.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "google-api-core", extra = ["grpc"] },
@@ -366,9 +366,9 @@ dependencies = [
     { name = "proto-plus" },
     { name = "protobuf" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/cb/95/303555b84bc111068c1ea9bd5a792c049b09f641ecf89b8e87d6dc048f10/google_cloud_run-0.16.2.tar.gz", hash = "sha256:480ecde89b18dc99aac4584048f6477e856002af4d7a8e7a6eb894801d01190b", size = 496276, upload-time = "2026-10-01T18:17:57.468Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/9f/bb/f974a6d853b8e22a1621fad636c0e309470f4fa6c9990cde18950b0b2dad/google_cloud_run-0.16.3.tar.gz", hash = "sha256:3a87db9012059639b0c3d8f3f05d4a692c1f7b417c667ccca7b80cda47caa622", size = 553537, upload-time = "2026-11-12T14:23:22.273Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f2/65/61f0a0d8f61519606082f129f53769a84b8abf5298c413a0eeffd4671fc1/google_cloud_run-0.16.2-py3-none-any.whl", hash = "sha256:cf21a6ee67fb237f694b444862fb0a717f0e0dfeabfdb64b927c7d1303f18957", size = 448656, upload-time = "2026-10-01T18:12:04.178Z" },
+    { url = "https://files.pythonhosted.org/packages/52/51/1a2f411f0fdf106d8ccb6a9e0c83aee3171dce0c1af99c73d7ab92f6debf/google_cloud_run-0.16.3-py3-none-any.whl", hash = "sha256:e1d659cd1a58fbcfa6c0d2b7dfa2e316805657303ca219660112734127d30659", size = 500352, upload-time = "2026-11-12T14:22:35.335Z" },
 ]
 
 [[package]]
