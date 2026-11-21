@@ -4,8 +4,10 @@
 
 <script>
 	import { onCLS, onFCP, onINP, onLCP, onTTFB, type Metric } from "web-vitals";
+	import { persistCampaignAttribution } from "@/lib/analytics/attribution-cookies";
 	import { track } from "@/lib/analytics/track";
 
+	persistCampaignAttribution();
 	track("page_view", { title: document.title });
 
 	const report = (metric: Metric) =>
