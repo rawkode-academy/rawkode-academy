@@ -1,0 +1,20 @@
+---
+// Klustered's public page is a holding notice. A static route outranks the
+// dynamic show page, so no episode list, newsletter prompt or bracket
+// navigation renders here. Bracket data and the klustered.dev portal are
+// untouched.
+import { academyDocument } from "@rawkodeacademy/design-system";
+import Page from "@/wrappers/page.astro";
+
+const doc = academyDocument();
+const announcement = "Klustered news will be released soon.";
+---
+
+<Page title="Klustered" description={announcement}>
+	<section class={doc.hero}>
+		<div class={[doc.container, doc.stack].join(" ")}>
+			<h1 class={doc.title}>Klustered</h1>
+			<p class={doc.lede}>{announcement}</p>
+		</div>
+	</section>
+</Page>
