@@ -8,6 +8,8 @@ import {
 } from "bun:test";
 import {
 	DeliveryQueue,
+	PermanentDeliveryError,
+	RetryableDeliveryError,
 	eventBufferName,
 	cloudEventInsertId,
 } from "../src/delivery-queue";
@@ -187,6 +189,48 @@ describe("durable destination delivery", () => {
 		expect(status.grafana.delivered).toBe(1);
 		expect(status.posthog.pending).toBe(1);
 	});
+	test("native metric permanent failures remain retained without replaying acknowledged destinations", async () => {
+		await storage
+			.queue()
+			.enqueue({ id: "metric" }, ["posthog", "grafana", "grafana-metrics"]);
+		const sent: string[] = [];
+		await storage.queue().drain(async (destination) => {
+			sent.push(destination);
+			if (destination === "grafana-metrics")
+				throw new PermanentDeliveryError("partial_success");
+		});
+		const status = await storage.queue().status();
+		expect(status.posthog.delivered).toBe(1);
+		expect(status.grafana.delivered).toBe(1);
+		expect(status["grafana-metrics"].failed).toBe(1);
+		expect(status["grafana-metrics"].retried).toBe(0);
+		await storage.queue().drain(async (destination) => {
+			sent.push(destination);
+		});
+		expect(sent).toEqual(["posthog", "grafana", "grafana-metrics"]);
+	});
+
+	test("native receiver backoff delays only its own retries", async () => {
+		await storage
+			.queue()
+			.enqueue({ id: "metric" }, ["posthog", "grafana", "grafana-metrics"]);
+		await storage.queue().drain(async (destination) => {
+			if (destination === "grafana-metrics")
+				throw new RetryableDeliveryError(120_000);
+		});
+		setSystemTime(now + 30_000);
+		const sent: string[] = [];
+		await storage.queue().drain(async (destination) => {
+			sent.push(destination);
+		});
+		expect(sent).toEqual([]);
+		setSystemTime(now + 120_000);
+		await storage.queue().drain(async (destination) => {
+			sent.push(destination);
+		});
+		expect(sent).toEqual(["grafana-metrics"]);
+	});
+
 	test("source and id select the same bounded shard", () => {
 		expect(eventBufferName("website", "id")).toBe(
 			eventBufferName("website", "id"),
