@@ -62,6 +62,10 @@ const fmt = new Intl.NumberFormat("en-GB");
 const pct = (part: number, whole: number) =>
 	whole > 0 ? `${((part / whole) * 100).toFixed(1)}%` : "–";
 
+const invalidRecords = num(results.archiveQuality.rows[0]?.invalid_records) + num(results.linkQuality.rows[0]?.invalid_records);
+const repeatedArchiveRecords = num(results.archiveQuality.rows[0]?.repeated_records);
+const repeatedLinkRecords = num(results.linkQuality.rows[0]?.repeated_records);
+
 const signInCount = (event: string) =>
 	results.signIn.rows
 		.filter((row) => row.event === event)
@@ -113,6 +117,14 @@ const linkClicks = num(results.linkTotals.rows[0]?.clicks);
 			events as ingestion rolls out; the other panels cover server events and short links. Bot totals are unavailable because filtered
 			traffic is not stored; events without a user agent are not classified as human.
 		</p>
+
+		<p class="notice">
+			Totals count each event once. Excluded repeated deliveries:
+			{results.archiveQuality.error ? "unavailable" : fmt.format(repeatedArchiveRecords)} in the archive and {results.linkQuality.error ? "unavailable" : fmt.format(repeatedLinkRecords)} in short links.
+		</p>
+		{invalidRecords > 0 && <p class="error">{fmt.format(invalidRecords)} records have missing event identities and are excluded from totals. Investigate ingestion before using these figures.</p>}
+		{results.archiveQuality.error && <p class="error">Archive quality check failed: {results.archiveQuality.error}</p>}
+		{results.linkQuality.error && <p class="error">Short-link quality check failed: {results.linkQuality.error}</p>}
 
 		<section class="panel">
 			<h2>Archived events</h2>
