@@ -1,5 +1,10 @@
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
+import {
+	automatedRequestReason,
+	clientAsn,
+	isProductionUrl,
+} from "@/lib/analytics/automation";
 import { createLogger } from "@/lib/logger";
 
 export const prerender = false;
@@ -20,6 +25,7 @@ interface CollectorRpc {
 			user_agent: string;
 			country?: string | undefined;
 			continent?: string | undefined;
+			asn?: number | undefined;
 		},
 	): Promise<number>;
 }
@@ -35,6 +41,15 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
 
 	if (request.headers.get("dnt") === "1")
 		return new Response(null, { status: 204 });
+
+	// Previews, other ports and automated clients get the same empty success,
+	// so nothing retries and nothing reaches the collector.
+	if (!isProductionUrl(url)) return new Response(null, { status: 204 });
+	const automated = automatedRequestReason(request);
+	if (automated) {
+		logger.info("Analytics dropped automated client", { reason: automated });
+		return new Response(null, { status: 204 });
+	}
 
 	const length = Number(request.headers.get("content-length") ?? 0);
 	if (length > MAX_BODY_BYTES) {
@@ -95,6 +110,7 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
 			user_agent: request.headers.get("user-agent") ?? "",
 			country: cf?.country,
 			continent: cf?.continent,
+			asn: clientAsn(request),
 		});
 	} catch (error) {
 		logger.error("Analytics ingest failed", error);

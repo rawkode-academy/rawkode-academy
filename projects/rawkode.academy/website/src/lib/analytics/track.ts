@@ -86,6 +86,8 @@ function sessionId(now: number): string {
 
 function trackingDisabled(): boolean {
 	return (
+		// Set by Puppeteer, Playwright and Selenium unless a crawler hides it.
+		navigator.webdriver === true ||
 		navigator.doNotTrack === "1" ||
 		(window as Window & { doNotTrack?: string }).doNotTrack === "1"
 	);

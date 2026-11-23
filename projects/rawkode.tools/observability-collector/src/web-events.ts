@@ -1,4 +1,4 @@
-import { classifyUserAgent, type WebContext } from "./events";
+import { classifyUserAgent, isHostingAsn, type WebContext } from "./events";
 
 const ID = /^[a-zA-Z0-9._:-]{1,128}$/;
 const NAME = /^\$?[a-z][a-z0-9_.:-]{0,127}$/;
@@ -107,8 +107,10 @@ export function browserCloudEvent(
 		return null;
 	const location = url(event.url);
 	if (!location || location.origin !== context.url_origin) return null;
-	const classification = classifyUserAgent(context.user_agent);
-	if (classification.is_bot) return null;
+	const classification = classifyUserAgent(context.user_agent, {
+		browser: true,
+	});
+	if (classification.is_bot || isHostingAsn(context.asn)) return null;
 	const referrer = url(event.referrer);
 	const attribution = Object.fromEntries(
 		[

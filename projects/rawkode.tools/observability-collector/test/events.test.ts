@@ -52,6 +52,37 @@ describe("classifyUserAgent", () => {
 		expect(classifyUserAgent("").is_bot).toBe(true);
 	});
 
+	test("named crawlers that spoof Chrome are bots", () => {
+		for (const ua of [
+			`${CHROME_MAC} (compatible; meta-webindexer/1.1 (+https://developers.facebook.com/docs/sharing/webmasters/crawler))`,
+			"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/146.0.7680.165 Safari/537.36",
+			"Lightpanda/1.0",
+			"nginx-ssl early hints",
+		])
+			expect(classifyUserAgent(ua).is_bot, ua).toBe(true);
+	});
+
+	test("browser requests must come from a browser", () => {
+		expect(classifyUserAgent("Overcast/3.0").is_bot).toBe(false);
+		expect(classifyUserAgent("Overcast/3.0", { browser: true }).is_bot).toBe(
+			true,
+		);
+		expect(
+			classifyUserAgent("Mozilla/5.0 (X11; Linux x86_64)", { browser: true })
+				.is_bot,
+		).toBe(true);
+	});
+
+	test("in-app browsers on phones are people", () => {
+		const linkedin =
+			"Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 [LinkedInApp]/9.30";
+		expect(classifyUserAgent(linkedin, { browser: true })).toEqual({
+			device: "mobile",
+			browser: "other",
+			is_bot: false,
+		});
+	});
+
 	test("an unknown agent is not a bot", () => {
 		expect(classifyUserAgent(undefined)).toEqual({
 			device: null,
@@ -80,6 +111,13 @@ describe("prepareCloudEvent", () => {
 	test("leaves events without a user agent untouched", () => {
 		const { useragent: _, ...event } = shortLink;
 		expect(prepareCloudEvent(event)).toBe(event);
+	});
+
+	test("drops hosting networks and never stores the ASN", () => {
+		expect(prepareCloudEvent({ ...shortLink, asn: 132203 })).toBeNull();
+		const prepared = prepareCloudEvent({ ...shortLink, asn: 2856 });
+		expect(prepared).not.toBeNull();
+		expect(prepared).not.toHaveProperty("asn");
 	});
 
 	test("carries every field the typed pipeline reads", () => {
@@ -117,5 +155,20 @@ describe("redactUserAgent", () => {
 	test("leaves events without a user agent untouched", () => {
 		const event = { id: "1", data: { path: "/x" } };
 		expect(redactUserAgent(event)).toBe(event);
+	});
+
+	test("marks hosting networks and spoofed browsers as bots", () => {
+		expect(
+			redactUserAgent({ data: { user_agent: CHROME_MAC, asn: 31898 } }).data,
+		).toEqual({ device: "desktop", browser: "chrome", is_bot: true });
+		expect(
+			redactUserAgent(
+				{ data: { user_agent: "nginx-ssl early hints" } },
+				{ browser: true },
+			).data,
+		).toMatchObject({ is_bot: true });
+		expect(
+			redactUserAgent({ data: { user_agent: "AppleCoreMedia/1.0" } }).data,
+		).toMatchObject({ is_bot: false });
 	});
 });

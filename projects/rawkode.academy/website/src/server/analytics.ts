@@ -1,4 +1,6 @@
 import { CloudEvent } from "cloudevents";
+import { env } from "cloudflare:workers";
+import { isProductionUrl } from "@/lib/analytics/automation";
 import { createLogger } from "@/lib/logger";
 
 const logger = createLogger("analytics");
@@ -173,6 +175,17 @@ export function getAttributionFromSource(
 		...(sourceContext ? { source_context: sourceContext } : {}),
 		...(pagePath ? { page_path: pagePath } : {}),
 	};
+}
+
+/**
+ * The collector binding for a request, or undefined when the request didn't
+ * reach production. Previews share the production Worker's bindings, so their
+ * test traffic would otherwise land in production analytics.
+ */
+export function analyticsFor(ctx: { request?: Request }): Fetcher | undefined {
+	if (ctx.request && !isProductionUrl(new URL(ctx.request.url)))
+		return undefined;
+	return env.ANALYTICS as Fetcher | undefined;
 }
 
 /**

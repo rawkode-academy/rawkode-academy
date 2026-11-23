@@ -5,7 +5,11 @@ import {
 	signOut as serverSignOut,
 	SESSION_COOKIE_NAME,
 } from "@/lib/auth/server";
-import { captureServerEvent, getDistinctId } from "@/server/analytics";
+import {
+	analyticsFor,
+	captureServerEvent,
+	getDistinctId,
+} from "@/server/analytics";
 
 export const auth = {
 	signOut: defineAction({
@@ -37,7 +41,7 @@ export const auth = {
 				domain: ".rawkode.academy",
 			});
 
-			const analytics = env.ANALYTICS as Fetcher | undefined;
+			const analytics = analyticsFor(context);
 			await captureServerEvent(
 				{
 					event: "sign_out_completed",

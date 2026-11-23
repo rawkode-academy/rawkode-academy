@@ -44,7 +44,9 @@ export default {
 		const destination =
 			link?.to ?? domain?.defaultRedirect ?? redirects.defaultRedirect;
 
-		if (!isBot(request)) {
+		// Unmatched paths are scanners probing for wp-includes/ and .env (46 of
+		// 31,989 hits matched a link, Nov 2026). They still redirect, uncounted.
+		if (link !== undefined && !isBot(request)) {
 			ctx.waitUntil(
 				trackShortLink(env, request, {
 					domain: hostname,
@@ -91,8 +93,8 @@ const trackShortLink = async (
 	},
 ) => {
 	// Request context travels as CloudEvents extension attributes. The
-	// collector turns `useragent` into device and browser, drops bots, and
-	// never stores the raw string.
+	// collector turns `useragent` into device and browser, drops bots and
+	// hosting networks, and never stores the raw string.
 	const event: Record<string, unknown> = {
 		specversion: "1.0",
 		type: "shortLink",
@@ -106,6 +108,8 @@ const trackShortLink = async (
 	if (referrer) event.referrer = referrer;
 	if (request.cf?.country) event.country = request.cf.country as string;
 	if (request.cf?.continent) event.continent = request.cf.continent as string;
+	// The collector drops hosting networks and never stores the ASN.
+	if (typeof request.cf?.asn === "number") event.asn = request.cf.asn;
 
 	// Log the id, not the payload: it carries the raw user agent, and these
 	// logs are exported to Grafana.

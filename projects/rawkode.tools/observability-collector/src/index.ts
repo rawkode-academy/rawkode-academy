@@ -134,7 +134,13 @@ export class PostHogCollector extends WorkerEntrypoint<Env> {
 		);
 		// Bot traffic is accepted and dropped, so senders don't retry it.
 		if (!prepared) return { success: true };
-		const json = redactUserAgent(prepared);
+		// The website's server events come from browser requests; other senders
+		// (podcast downloads) also see app user agents.
+		const json = redactUserAgent(prepared, {
+			browser: prepared.source === "rawkode-academy-website",
+		});
+		if ((json.data as { is_bot?: unknown } | undefined)?.is_bot === true)
+			return { success: true };
 		if (!json.time) json.time = new Date().toISOString();
 
 		const id = this.env.DATA_BUFFER.idFromName(

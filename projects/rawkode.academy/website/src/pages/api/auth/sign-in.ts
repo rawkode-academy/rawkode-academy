@@ -1,8 +1,12 @@
 import type { APIRoute } from "astro";
-import { env } from "cloudflare:workers";
+import { automatedRequestReason, clientAsn } from "@/lib/analytics/automation";
 import { isPrefetch } from "@/lib/auth/prefetch";
 import { buildAuthorizationUrl, PKCE_COOKIE_NAME } from "@/lib/auth/server";
-import { captureServerEvent, getDistinctId } from "@/server/analytics";
+import {
+	analyticsFor,
+	captureServerEvent,
+	getDistinctId,
+} from "@/server/analytics";
 
 export const GET: APIRoute = async (context) => {
 	if (isPrefetch(context.request)) {
@@ -37,20 +41,24 @@ export const GET: APIRoute = async (context) => {
 
 	const origin = context.url.origin;
 
-	const analytics = env.ANALYTICS as Fetcher | undefined;
-
-	await captureServerEvent(
-		{
-			event: "sign_in_initiated",
-			properties: {
-				auth_method: "github",
-				from_page: returnTo,
-				user_agent: context.request.headers.get("user-agent") ?? "",
+	// Crawlers follow the sign-in link (robots.txt disallows /api/), and most
+	// starts are theirs. The collector also drops bot agents and hosting
+	// networks, using the ASN sent here.
+	if (!automatedRequestReason(context.request)) {
+		await captureServerEvent(
+			{
+				event: "sign_in_initiated",
+				properties: {
+					auth_method: "github",
+					from_page: returnTo,
+					user_agent: context.request.headers.get("user-agent") ?? "",
+					asn: clientAsn(context.request),
+				},
+				distinctId: getDistinctId(context),
 			},
-			distinctId: getDistinctId(context),
-		},
-		analytics,
-	);
+			analyticsFor(context),
+		);
+	}
 
 	const { url, codeVerifier } = await buildAuthorizationUrl(origin, returnTo);
 

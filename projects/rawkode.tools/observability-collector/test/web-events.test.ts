@@ -104,6 +104,14 @@ describe("browser CloudEvent v1", () => {
 			),
 		).toBeNull();
 	});
+
+	test("drops crawlers on hosting networks that spoof a browser", () => {
+		expect(
+			browserCloudEvent(event, { ...context, asn: 132203 }, now),
+		).toBeNull();
+		const normalized = browserCloudEvent(event, { ...context, asn: 2856 }, now);
+		expect(JSON.stringify(normalized)).not.toContain("2856");
+	});
 	test("keeps event ID and time stable across retries", () => {
 		expect(browserCloudEvent(event, context, now)).toEqual(
 			browserCloudEvent(event, context, now + 60_000),

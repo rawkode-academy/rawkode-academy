@@ -1,7 +1,11 @@
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro/zod";
 import { env } from "cloudflare:workers";
-import { captureServerEvent, getDistinctId } from "../server/analytics";
+import {
+	analyticsFor,
+	captureServerEvent,
+	getDistinctId,
+} from "../server/analytics";
 
 const WatchPositionSchema = z.object({
 	videoId: z.string(),
@@ -54,7 +58,7 @@ export const updateWatchPosition = defineAction({
 			const result = (await response.json()) as Record<string, unknown>;
 
 			// Track the event for analytics
-			const analytics = env.ANALYTICS;
+			const analytics = analyticsFor(ctx);
 			const distinctId = getDistinctId(ctx);
 			await captureServerEvent(
 				{

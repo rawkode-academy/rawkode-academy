@@ -275,10 +275,17 @@ const { userId } = Astro.props;
 		window.setTimeout(start, 4000);
 	};
 
+	// Previews (workers.dev) and local builds share this project key, and
+	// automated browsers announce themselves with navigator.webdriver.
+	const shouldCapture =
+		location.hostname === "rawkode.academy" && navigator.webdriver !== true;
+
 	// Initialize PostHog lazily after page load.
-	if (document.readyState === "complete") {
-		schedulePostHogEnable();
-	} else {
-		window.addEventListener("load", schedulePostHogEnable, { once: true });
+	if (shouldCapture) {
+		if (document.readyState === "complete") {
+			schedulePostHogEnable();
+		} else {
+			window.addEventListener("load", schedulePostHogEnable, { once: true });
+		}
 	}
 </script>

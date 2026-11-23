@@ -10,6 +10,7 @@ import {
 	type StoredSession,
 } from "@/lib/auth/server";
 import {
+	analyticsFor,
 	captureServerEvent,
 	getAnonDistinctIdFromCookies,
 	getDistinctId,
@@ -24,7 +25,7 @@ export const GET: APIRoute = async (context) => {
 	const error = context.url.searchParams.get("error");
 	const codeVerifier = context.cookies.get(PKCE_COOKIE_NAME)?.value;
 
-	const analytics = env.ANALYTICS as Fetcher | undefined;
+	const analytics = analyticsFor(context);
 
 	if (error) {
 		console.error("[callback] OAuth error from provider:", error);
