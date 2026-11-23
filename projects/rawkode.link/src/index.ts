@@ -46,7 +46,10 @@ export default {
 
 		// Unmatched paths are scanners probing for wp-includes/ and .env (46 of
 		// 31,989 hits matched a link, Nov 2026). They still redirect, uncounted.
-		if (link !== undefined && !isBot(request)) {
+		// A domain's root is a real entry point and is still recorded.
+		const recorded =
+			link !== undefined || (domain !== undefined && path === "");
+		if (recorded && !isBot(request)) {
 			ctx.waitUntil(
 				trackShortLink(env, request, {
 					domain: hostname,
