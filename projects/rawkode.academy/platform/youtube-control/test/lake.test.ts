@@ -4,7 +4,7 @@ import { backfillWindows, normalizeReport } from "../src/analytics.ts";
 import { reportEvents, sendToLake } from "../src/lake.ts";
 
 const channelId = "UCrber_mFvp_FEF7D9u8PDEA";
-const report = normalizeReport({ report: "daily_traffic", startDate: "2026-10-01", endDate: "2026-10-02", limit: 50, refresh: true }, {
+const report = normalizeReport({ report: "daily_traffic", startDate: "2026-10-01", endDate: "2026-10-02", limit: 50 }, {
   columnHeaders: [
     { name: "day", columnType: "DIMENSION", dataType: "STRING" },
     { name: "insightTrafficSourceType", columnType: "DIMENSION", dataType: "STRING" },

@@ -7,7 +7,6 @@ export const analyticsSchema = z.object({
   endDate: daySchema,
   videoId: videoId.optional(),
   limit: z.number().int().min(1).max(200).default(50),
-  refresh: z.boolean().default(false),
 }).strict().superRefine((q, ctx) => {
   const days = (Date.parse(q.endDate) - Date.parse(q.startDate)) / 86400000 + 1;
   if (days < 1 || days > 92) ctx.addIssue({ code: "custom", message: "Use an inclusive window of 1–92 days" });
@@ -60,24 +59,18 @@ export function normalizeReport(q: AnalyticsQuery, raw: GoogleReport, channelId:
 }
 export type AnalyticsReport = ReturnType<typeof normalizeReport>;
 
-export async function fetchReportSnapshot(api: AnalyticsAPI, q: AnalyticsQuery, channelId: string) {
+export async function fetchReport(api: AnalyticsAPI, q: AnalyticsQuery, channelId: string) {
   const params = reportParameters(q);
   let combined: GoogleReport | undefined;
-  const rawPages: GoogleReport[] = [];
   // Top-video reports are explicitly ranked and limited, never a channel total.
   for (let page = 0; page < 20; page++) {
     const raw = await api.analytics<GoogleReport>({ ...params, startIndex: page * params.maxResults + 1 });
     normalizeReport(q, raw, channelId); // Validate every page before combining.
-    rawPages.push(raw);
     if (!combined) combined = { columnHeaders: raw.columnHeaders, rows: [] };
     combined.rows!.push(...(raw.rows ?? []));
-    if (q.report === "top_videos" || (raw.rows?.length ?? 0) < params.maxResults) return { report: normalizeReport(q, combined, channelId), rawPages };
+    if (q.report === "top_videos" || (raw.rows?.length ?? 0) < params.maxResults) return normalizeReport(q, combined, channelId);
   }
   throw new Error("Report pagination exceeded its bound");
-}
-
-export async function fetchReport(api: AnalyticsAPI, q: AnalyticsQuery, channelId: string) {
-  return (await fetchReportSnapshot(api, q, channelId)).report;
 }
 
 export function recentWindow(now = new Date()) {
