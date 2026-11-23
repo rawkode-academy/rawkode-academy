@@ -1,5 +1,4 @@
 ---
-import Zoom from "react-medium-image-zoom";
 // One island from a rendered document. Client directives must be written
 // statically, hence the explicit branches per component and directive.
 import CgroupTimeline from "@/components/articles/cgroups/CgroupTimeline";
@@ -8,7 +7,6 @@ import HierarchyExplorer from "@/components/articles/cgroups/HierarchyExplorer";
 import PodCgroupMapper from "@/components/articles/cgroups/PodCgroupMapper";
 import ResourceSimulator from "@/components/articles/cgroups/ResourceSimulator";
 import VideoPlayer from "@/components/video/player.vue";
-import "react-medium-image-zoom/dist/styles.css";
 import type { IslandName } from "@/lib/live-content/render/islands";
 
 interface Props {
@@ -37,17 +35,26 @@ const isInteractive = component in interactive;
 	</VideoPlayer>
 )}
 {component === "ZoomableImage" && (
-	<Zoom client:only="react">
-		<img
-			src={str(props.src)}
-			alt={str(props.alt)}
-			width={typeof props.width === "number" ? props.width : undefined}
-			height={typeof props.height === "number" ? props.height : undefined}
-			loading="lazy"
-			decoding="async"
-		/>
-		<Fragment slot="fallback" set:html={fallback} />
-	</Zoom>
+	<span class="rt-zoom" data-rt-zoom>
+		<button
+			type="button"
+			class="rt-zoom-trigger"
+			aria-label={`Zoom image: ${str(props.alt) || "diagram"}`}
+		>
+			<img
+				src={str(props.src)}
+				alt={str(props.alt)}
+				width={typeof props.width === "number" ? props.width : undefined}
+				height={typeof props.height === "number" ? props.height : undefined}
+				loading="lazy"
+				decoding="async"
+			/>
+		</button>
+		<dialog class="rt-zoom-dialog" aria-label={str(props.alt) || "Zoomed image"}>
+			<button type="button" class="rt-zoom-close" aria-label="Close zoomed image">×</button>
+			<img src={str(props.src)} alt={str(props.alt)} loading="lazy" decoding="async" />
+		</dialog>
+	</span>
 )}
 {component === "CgroupTimeline" && when === "visible" && <CgroupTimeline client:visible {...props} />}
 {component === "CgroupTimeline" && when === "load" && <CgroupTimeline client:load {...props} />}
@@ -67,3 +74,82 @@ const isInteractive = component in interactive;
 {component !== "VideoPlayer" && component !== "ZoomableImage" && !isInteractive && (
 	<Fragment set:html={fallback} />
 )}
+
+<script>
+	for (const root of document.querySelectorAll<HTMLElement>("[data-rt-zoom]")) {
+		if (root.dataset.bound === "true") continue;
+		root.dataset.bound = "true";
+		const trigger = root.querySelector<HTMLButtonElement>(".rt-zoom-trigger");
+		const dialog = root.querySelector<HTMLDialogElement>(".rt-zoom-dialog");
+		const close = root.querySelector<HTMLButtonElement>(".rt-zoom-close");
+		trigger?.addEventListener("click", () => dialog?.showModal());
+		close?.addEventListener("click", () => dialog?.close());
+		dialog?.addEventListener("click", (event) => {
+			if (event.target === dialog) {
+				dialog.close();
+			}
+		});
+	}
+</script>
+
+<style>
+	.rt-zoom {
+		display: inline-block;
+		max-width: 100%;
+	}
+
+	.rt-zoom-trigger {
+		display: block;
+		max-width: 100%;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		cursor: zoom-in;
+	}
+
+	.rt-zoom-trigger img {
+		display: block;
+		max-width: 100%;
+		height: auto;
+	}
+
+	.rt-zoom-dialog {
+		margin: auto;
+		padding: 1rem;
+		border: 1px solid var(--colors-academy-border);
+		border-radius: var(--radii-academy-s);
+		background: var(--colors-academy-panel);
+		max-width: min(92vw, 1200px);
+		max-height: 92vh;
+	}
+
+	.rt-zoom-dialog::backdrop {
+		background: var(--colors-academy-scrim);
+	}
+
+	.rt-zoom-dialog img {
+		display: block;
+		max-width: 100%;
+		max-height: calc(92vh - 4rem);
+		width: auto;
+		height: auto;
+		margin: 0 auto;
+	}
+
+	.rt-zoom-close {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		margin-left: auto;
+		margin-bottom: 0.5rem;
+		width: 2.25rem;
+		height: 2.25rem;
+		border: 1px solid var(--colors-academy-border);
+		border-radius: var(--radii-academy-pill);
+		background: var(--colors-academy-panel);
+		color: var(--colors-academy-text);
+		cursor: pointer;
+		font-size: 1.25rem;
+		line-height: 1;
+	}
+</style>

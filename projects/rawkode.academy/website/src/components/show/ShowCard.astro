@@ -39,7 +39,7 @@ const statusLine = isComingSoon
 <a class={styles.card} href={`/shows/${show.id}`} data-show-status={show.status}>
 	{artwork && (
 		<span class={catalog.featuredMedia}>
-			<img class={catalog.featuredImage} src={artwork} alt="" loading="lazy" />
+			<img class={catalog.featuredImage} src={artwork} alt="" width="640" height="360" loading="lazy" decoding="async" />
 		</span>
 	)}
 	<div class={styles.cardBody}>

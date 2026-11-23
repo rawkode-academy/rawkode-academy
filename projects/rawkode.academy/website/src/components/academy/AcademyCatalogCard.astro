@@ -32,7 +32,7 @@ const metaLine = [levelLabel, ...meta].filter(Boolean).join(" · ");
 <a class={layout.card} href={href}>
 	{image && (
 		<span class={catalog.featuredMedia}>
-			<img class={catalog.featuredImage} src={image} alt={imageAlt} loading="lazy" />
+			<img class={catalog.featuredImage} src={image} alt={imageAlt} width="640" height="360" loading="lazy" decoding="async" />
 		</span>
 	)}
 	<div class={layout.cardBody}>

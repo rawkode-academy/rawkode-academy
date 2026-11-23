@@ -2,6 +2,7 @@
 import type { ContentEntry } from "@/lib/live-content";
 import { academyWatch } from "@rawkodeacademy/design-system";
 import { formatRuntimeLabel } from "@/lib/video-runtime";
+import { resizeRemoteImageUrl } from "@/lib/video-thumbnail";
 
 interface Props {
 	show: ContentEntry<"shows">;
@@ -39,7 +40,7 @@ const UP_NEXT_LIMIT = 3;
 				<li>
 					<a href={`/watch/${video.slug}`} class={watch.upNextLink} data-up-next-link>
 						<span class={watch.upNextStill} data-still>
-							<img src={video.thumbnailUrl} alt="" class={watch.upNextImage} width="320" height="180" loading="lazy" decoding="async" />
+							<img src={resizeRemoteImageUrl(video.thumbnailUrl, 320)} alt="" class={watch.upNextImage} width="320" height="180" loading="lazy" decoding="async" />
 						</span>
 						<span class={watch.upNextBody}>
 							{formatRuntimeLabel(video) && <span class={watch.upNextMeta}>{formatRuntimeLabel(video)}</span>}

@@ -1,7 +1,7 @@
 ---
 import { getCollection, optionalContent } from "@/lib/live-content";
 import MLabel from "@/components/ui/MLabel.vue";
-import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import { getVideoThumbnailResizedUrl } from "@/lib/video-thumbnail";
 
 /**
  * Personalised "Continue watching" rail.
@@ -85,7 +85,7 @@ if (user) {
 				return {
 					slug: video.data.slug,
 					title: video.data.title,
-					thumbnailUrl: getVideoThumbnailUrl(video.data.id),
+					thumbnailUrl: getVideoThumbnailResizedUrl(video.data.id, 640),
 					progressPercent,
 					remainingLabel: `${remainingMinutes} min left`,
 				};

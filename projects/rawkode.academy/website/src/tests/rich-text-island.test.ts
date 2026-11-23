@@ -36,8 +36,6 @@ beforeAll(async () => {
 			...runtime,
 			createMetadata: () => ({ resolvePath: (p: string) => p }),
 		},
-		"react-medium-image-zoom": { default: stub() },
-		"react-medium-image-zoom/dist/styles.css": {},
 		"@/components/video/player.vue": { default: stub() },
 		"@/components/articles/cgroups/CgroupTimeline": { default: stub() },
 		"@/components/articles/cgroups/CgroupTreeDiagram": { default: stub() },
@@ -48,6 +46,7 @@ beforeAll(async () => {
 	};
 	const exports: Record<string, Component> = {};
 	new Function("require", "exports", code)((id: string) => {
+		if (id.includes("?astro&type=")) return {};
 		if (!(id in dependencies)) throw new Error(`Unexpected import: ${id}`);
 		return dependencies[id];
 	}, exports);
@@ -85,7 +84,7 @@ describe("RichTextIsland client:only fallbacks", () => {
 		expect(html).toContain('src="https://example.com/t.jpg"');
 	});
 
-	it("server-renders the zoomable image with its alt text", async () => {
+	it("server-renders the zoomable image in a native dialog without framework hydration", async () => {
 		const html = visible(
 			await container.renderToString(island, {
 				props: {
@@ -96,7 +95,9 @@ describe("RichTextIsland client:only fallbacks", () => {
 				},
 			}),
 		);
-		expect(html).toContain("<astro-island");
+		expect(html).not.toContain("<astro-island");
+		expect(html).toContain("<dialog");
 		expect(html).toContain('alt="Cluster diagram"');
+		expect(html).toContain('src="/diagram.png"');
 	});
 });
