@@ -238,6 +238,7 @@ function pageHasTopicContent(collections, technologyId = "kubernetes/index") {
 		articles: [],
 		news: [],
 		learningPaths: [],
+		courses: [],
 		...collections,
 	});
 }
@@ -270,7 +271,7 @@ test("technology page guard admits object-reference-only articles and agrees wit
 });
 
 test("technology page ignores legacy article draft flags and retains news/path matches", () => {
-	for (const collection of ["articles", "news", "learningPaths"]) {
+	for (const collection of ["articles", "news", "learningPaths", "courses"]) {
 		for (const reference of ["kubernetes", { id: "kubernetes/index" }]) {
 			assert.equal(
 				pageHasTopicContent({
@@ -308,7 +309,7 @@ test("technology page ignores legacy article draft flags and retains news/path m
 });
 
 test("technology guard and TopicHub both exclude future articles, news and learning paths", async () => {
-	for (const collection of ["articles", "news", "learningPaths"]) {
+	for (const collection of ["articles", "news", "learningPaths", "courses"]) {
 		const collections = {
 			[collection]: [entry("future", { publishedAt: new Date("2999-01-01") })],
 		};
@@ -504,9 +505,23 @@ test("TopicHub display flags suppress sections; absent path duration does not in
 			showArticles: false,
 			showNews: false,
 			showLearningPaths: false,
+			showCourses: false,
 			showVideos: false,
 		},
 		collections,
 	);
 	assert.equal(hidden.dom.querySelectorAll("section").length, 0);
+
+	const { html: coursesHtml, dom: coursesDom } = await render(
+		"technology/TopicHub.astro",
+		topic,
+		{
+			articles: [],
+			news: [],
+			learningPaths: [],
+			courses: [entry("course")],
+		},
+	);
+	assert(coursesHtml.includes("Kubernetes courses"));
+	assert(coursesDom.querySelector('a[href^="/courses/"]'));
 });

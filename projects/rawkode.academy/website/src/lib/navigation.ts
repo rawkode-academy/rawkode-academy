@@ -1,17 +1,30 @@
+export interface NavigationItem {
+	label: string;
+	href: string;
+	rel?: string;
+}
+
+export interface NavigationGroup {
+	label: string;
+	items: NavigationItem[];
+}
+
 /** One route inventory for the production header, drawer, and footer. */
-export const primaryNavigation = [
+export const primaryNavigation: NavigationItem[] = [
 	{ label: "Watch", href: "/watch" },
 	{ label: "Read", href: "/read" },
 	{ label: "Learn", href: "/learning-paths" },
 	{ label: "Matrix", href: "/technology/matrix" },
 ];
 
-export const navigationGroups = [
+export const navigationGroups: NavigationGroup[] = [
 	{ label: "Learn", items: [
 		{ label: "Videos", href: "/watch" },
 		{ label: "Articles", href: "/read" },
+		{ label: "Series", href: "/series" },
 		{ label: "Courses", href: "/courses" },
 		{ label: "Learning paths", href: "/learning-paths" },
+		{ label: "Kubernetes 1.35 Cheat Sheet", href: "/resources/kubernetes/1.35-cheatsheet" },
 	] },
 	{ label: "Explore", items: [
 		{ label: "Search", href: "/search" },
@@ -22,14 +35,17 @@ export const navigationGroups = [
 	] },
 	{ label: "Community", items: [
 		{ label: "People", href: "/people" },
+		{ label: "Supporters", href: "/supporters" },
 		{ label: "Share your project", href: "/maintainers/share-your-project" },
 		{ label: "CNIcon", href: "/games/cnicon" },
 		{ label: "Kubele", href: "/games/kubele" },
+		{ label: "Secret of Kubernetes Island", href: "/games/secret-of-kubernetes-island" },
 		{ label: "Join the Academy", href: "/#join" },
 	] },
 	{ label: "For teams", items: [
 		{ label: "Partnerships", href: "/organizations/partnerships" },
 		{ label: "Support Our Work", href: "/organizations/support-our-work" },
+		{ label: "Let's chat", href: "/organizations/lets-chat" },
 		{ label: "Branding", href: "/organizations/branding" },
 	] },
 	{ label: "Academy", items: [
@@ -38,7 +54,7 @@ export const navigationGroups = [
 		{ label: "ADRs", href: "/adrs" },
 		{ label: "Feeds", href: "/feeds" },
 		{ label: "Privacy", href: "/privacy" },
-		{ label: "Your account", href: "/settings" },
+		{ label: "Your account", href: "/settings", rel: "nofollow" },
 	] },
 ];
 

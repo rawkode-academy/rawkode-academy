@@ -25,9 +25,10 @@ if (!course) {
 	return new Response(null, { status: 404 });
 }
 
-const [{ html }, authors, allCourseModules] = await Promise.all([
+const [{ html }, authors, technologies, allCourseModules] = await Promise.all([
 	renderEntry(course),
 	getEntries(course.data.authors),
+	getEntries(course.data.technologies ?? []),
 	// Get all modules for this course
 	getCollection(
 		"courseModules",
@@ -36,7 +37,7 @@ const [{ html }, authors, allCourseModules] = await Promise.all([
 ]);
 
 await setContentCache(Astro, {
-	entries: [course, ...authors, ...allCourseModules],
+	entries: [course, ...authors, ...technologies, ...allCourseModules],
 	// The curriculum lists this course's modules; the body is autolinked.
 	collections: ["courseModules", "technologies"],
 });
@@ -113,15 +114,13 @@ function getResourceHref(resource: Resource) {
 	updatedAt={course.data.updatedAt}
 	authors={authors}
 >
-	{imageUrl && (
-		<CourseJsonLd
-			slot="extra-head"
-			course={course}
-			imageUrl={imageUrl}
-			modules={allCourseModules}
-			authors={authors}
-		/>
-	)}
+	<CourseJsonLd
+		slot="extra-head"
+		course={course}
+		imageUrl={imageUrl}
+		modules={allCourseModules}
+		authors={authors}
+	/>
 	<BreadcrumbJsonLd
 		slot="extra-head"
 		elements={[
@@ -139,6 +138,11 @@ function getResourceHref(resource: Resource) {
 		totalDuration={totalDuration === undefined ? undefined : formatDuration(totalDuration)}
 		difficulty={course.data.difficulty.charAt(0).toUpperCase() + course.data.difficulty.slice(1)}
 		authors={formattedAuthors}
+		breadcrumbs={[
+			{ title: "Home", link: "/" },
+			{ title: "Courses", link: "/courses" },
+		]}
+		technologies={technologies.map((tech) => ({ id: tech.id, name: tech.data.name }))}
 		cover={cover}
 	/>
 

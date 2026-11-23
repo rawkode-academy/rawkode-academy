@@ -16,7 +16,7 @@ const styles = academyShell();
 			{navigationGroups.map((group) => (
 				<div class={styles.footerGroup}>
 					<h2 class={styles.footerTitle}>{group.label}</h2>
-					{group.items.map((item) => <a class={styles.footerLink} href={item.href}>{item.label}</a>)}
+					{group.items.map((item) => <a class={styles.footerLink} href={item.href} rel={item.rel}>{item.label}</a>)}
 				</div>
 			))}
 		</nav>

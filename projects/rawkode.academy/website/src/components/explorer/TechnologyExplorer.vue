@@ -26,7 +26,7 @@
  <div class="controls-content">
  <!-- Axis selectors -->
  <div class="control-section">
- <h3 class="control-label">Axes</h3>
+ <h2 class="control-label">Axes</h2>
  <AxisSelector
  :id="`${controlsId}-x`"
  label="X-Axis (Columns)"
@@ -142,28 +142,28 @@
  <!-- Scatter View (Phase 2) -->
  <div v-else-if="viewMode === 'scatter'" class="coming-soon">
  <div class="coming-soon-icon">⊚</div>
- <h3>Scatter View</h3>
+ <h2>Scatter View</h2>
  <p>Coming in Phase 2</p>
  </div>
 
  <!-- Timeline View (Phase 2) -->
  <div v-else-if="viewMode === 'timeline'" class="coming-soon">
  <div class="coming-soon-icon">━</div>
- <h3>Timeline View</h3>
+ <h2>Timeline View</h2>
  <p>Coming in Phase 2</p>
  </div>
 
  <!-- Treemap View (Phase 3) -->
  <div v-else-if="viewMode === 'treemap'" class="coming-soon">
  <div class="coming-soon-icon">▤</div>
- <h3>Treemap View</h3>
+ <h2>Treemap View</h2>
  <p>Coming in Phase 3</p>
  </div>
 
  <!-- Sankey View (Phase 3) -->
  <div v-else-if="viewMode === 'sankey'" class="coming-soon">
  <div class="coming-soon-icon">⥤</div>
- <h3>Sankey Flow View</h3>
+ <h2>Sankey Flow View</h2>
  <p>Coming in Phase 3</p>
  </div>
  </div>
@@ -502,7 +502,7 @@ onBeforeUnmount(() => {
  opacity: 0.3;
 }
 
-.coming-soon h3 {
+.coming-soon h2 {
  font-size: 1.5rem;
  font-weight: 700;
  margin: 0 0 0.5rem;

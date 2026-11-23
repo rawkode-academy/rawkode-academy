@@ -1,10 +1,12 @@
 ---
+import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import PageWrapper from "@/wrappers/page.astro";
 import { DISABLE_GAME_AUTH } from "astro:env/server";
 import { disableContentCache, getCollection } from "@/lib/live-content";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { weekKey, buildWeeklyRounds, type CncfStatus } from "@/lib/games/guess-the-logo";
 import {
+	academyDocument,
 	academyLayout,
 	academyMedia,
 	button,
@@ -17,6 +19,7 @@ const canPlay = Boolean(user) || disableAuth;
 // The response depends on the visitor (sign-in CTA vs. the player's game), and
 // the CDN key ignores cookies, so it must never be stored.
 disableContentCache(Astro);
+const doc = academyDocument();
 const layout = academyLayout({ width: "wide" });
 const media = academyMedia();
 
@@ -56,10 +59,29 @@ if (canPlay) {
 	image={{ image: new URL("/games/cnicon-og.png", Astro.site) }}
 >
 	<div class:list={[layout.root, media.root]}>
+		<header class:list={[layout.section, doc.container, doc.stack]}>
+			<Breadcrumb
+				elements={[
+					{ title: "Home", link: "/" },
+					{ title: "CNIcon", link: "/games/cnicon" },
+				]}
+			/>
+			<h1 class={doc.title}>CNIcon</h1>
+			<p class={doc.lede}>
+				Guess the cloud native technology logo in this weekly puzzle featuring CNCF ecosystem projects.
+			</p>
+			<ul class={doc.tagList} aria-label="Related cloud native topics">
+				<li><a href="/technology/kubernetes" class={doc.tag}>Kubernetes</a></li>
+				<li><a href="/technology" class={doc.tag}>Technologies</a></li>
+				<li><a href="/technology/matrix" class={doc.tag}>Technology Matrix</a></li>
+				<li><a href="/games/kubele" class={doc.tag}>Kubele</a></li>
+				<li><a href="/games/secret-of-kubernetes-island" class={doc.tag}>Secret of Kubernetes Island</a></li>
+			</ul>
+		</header>
 	{!canPlay ? (
 		<div class:list={[layout.section, "sign-in-cta"]}>
 			<div class="sign-in-card">
-				<h1>CNIcon</h1>
+				<h2>Sign in to play</h2>
 				<p>Sign in to play this week's CNIcon and compete on the leaderboard.</p>
 				<a href="/api/auth/sign-in?returnTo=/games/cnicon" class={button()}>
 					Sign in to play this week's CNIcon
@@ -117,7 +139,7 @@ if (canPlay) {
 		background: var(--colors-academy-panel);
 	}
 
-	.sign-in-card h1 {
+	.sign-in-card h2 {
 		margin-bottom: 1rem;
 	}
 

@@ -1,5 +1,6 @@
 ---
 import { env } from "cloudflare:workers";
+import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import Page from "@/wrappers/page.astro";
 import K8sCheatsheetCTA from "@/components/lead-magnet/K8sCheatsheetCTA.vue";
 import { createLearnerId } from "@/lib/newsletter-ids";
@@ -41,8 +42,8 @@ if (user) {
 	}
 }
 
-// User has access if they've subscribed (via preferences, cookie, or query param)
-const hasAccess =
+// Track subscription state for the inline release-updates CTA without hiding the guide.
+const hasSubscribed =
 	hasNewsletterSubscription ||
 	hasCheatsheetCookie ||
 	Astro.url.searchParams.has("subscribed");
@@ -56,10 +57,15 @@ const layout = academyLayout({ width: "reading" });
 
 <Page title={pageTitle} description={pageDescription}>
 	<div class={layout.root}>
-	{hasAccess ? (
 		<section class={layout.section}>
 			<div class={layout.container}>
-				<!-- Success Header -->
+				<Breadcrumb
+					elements={[
+						{ title: "Home", link: "/" },
+						{ title: "Kubernetes", link: "/technology/kubernetes" },
+						{ title: pageTitle, link: "/resources/kubernetes/1.35-cheatsheet" },
+					]}
+				/>
 				<div class:list={[layout.hero, reference.center]}>
 					<div class={reference.iconBadge}>
 						<svg class={reference.icon} fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -67,10 +73,10 @@ const layout = academyLayout({ width: "reading" });
 						</svg>
 					</div>
 					<h1 class={layout.title}>
-						Your Kubernetes 1.35 Cheat Sheet
+						Kubernetes 1.35 Cheat Sheet
 					</h1>
 					<p class={layout.description}>
-						Thank you for joining the Rawkode Academy community. Here's everything you need to know about Kubernetes 1.35.
+						Everything you need to know about Kubernetes 1.35 — breaking changes, new GA features, AI/ML scheduler primitives, and a migration checklist.
 					</p>
 				</div>
 
@@ -319,6 +325,16 @@ const layout = academyLayout({ width: "reading" });
 					</div>
 				</div>
 
+				<div class={reference.context}>
+					<K8sCheatsheetCTA
+						client:visible
+						isSignedIn={!!user}
+						isSubscribed={hasSubscribed}
+						signInUrl={signInUrl}
+						pagePath={pagePath}
+					/>
+				</div>
+
 				<!-- CTA -->
 				<div class={reference.center}>
 					<div class={reference.panel}>
@@ -336,6 +352,12 @@ const layout = academyLayout({ width: "reading" });
 								Back to Academy
 							</a>
 							<a
+								href="/technology/kubernetes"
+								class={button({ variant: "outline" })}
+							>
+								Explore Kubernetes hub
+							</a>
+							<a
 								href="/watch"
 								class={button({ variant: "outline" })}
 							>
@@ -346,62 +368,5 @@ const layout = academyLayout({ width: "reading" });
 				</div>
 			</div>
 		</section>
-	) : (
-		<section class={layout.section}>
-			<div class:list={[layout.container, reference.center]}>
-				<h1 class={layout.title}>
-					Be Ready for <span class={reference.accent}>Kubernetes 1.35</span>
-				</h1>
-				<p class={layout.description}>
-					The biggest Kubernetes release of 2025 is coming. Don't get caught off guard by breaking changes.
-				</p>
-			</div>
-
-			<div class={layout.container}>
-				<K8sCheatsheetCTA
-					client:visible
-					isSignedIn={!!user}
-					isSubscribed={false}
-					signInUrl={signInUrl}
-					pagePath={pagePath}
-				/>
-			</div>
-
-			<!-- Additional context -->
-			<div class:list={[layout.container, reference.context]}>
-				<div class:list={[layout.card, reference.panel]}>
-					<h2 class={reference.subheading}>
-						Why You Need This Cheat Sheet
-					</h2>
-					<div class={reference.grid}>
-						<div>
-							<h3 class={reference.label}>Breaking Changes</h3>
-							<p class={reference.text}>
-								cgroup v1 is disabled by default - kubelet will crash on older nodes. containerd 1.x support ends. Know what to fix before you upgrade.
-							</p>
-						</div>
-						<div>
-							<h3 class={reference.label}>New GA Features</h3>
-							<p class={reference.text}>
-								In-place pod scaling is finally stable. Resize CPU and memory without restarts. Structured authentication enables hot-swap OIDC.
-							</p>
-						</div>
-						<div>
-							<h3 class={reference.label}>AI/ML Scheduling</h3>
-							<p class={reference.text}>
-								Native gang scheduling for distributed training. DRA binding conditions for GPU initialization. Built for expensive hardware.
-							</p>
-						</div>
-						<div>
-							<h3 class={reference.label}>Migration Checklist</h3>
-							<p class={reference.text}>
-								Step-by-step checklist to prepare your clusters. kubectl commands to verify compatibility. Feature gate reference table.
-							</p>
-						</div>
-					</div>
-				</div>
-			</div>
-		</section>
-	)}
 	</div>
 </Page>

@@ -18,8 +18,10 @@ export interface Props {
 	showVideos?: boolean;
 	showNews?: boolean;
 	showLearningPaths?: boolean;
+	showCourses?: boolean;
 	newsLimit?: number;
 	learningPathLimit?: number;
+	courseLimit?: number;
 }
 
 const {
@@ -30,8 +32,10 @@ const {
 	showVideos = true,
 	showNews = true,
 	showLearningPaths = true,
+	showCourses = true,
 	newsLimit = 6,
 	learningPathLimit = 6,
+	courseLimit = 6,
 } = Astro.props;
 const s = academyRelatedContent();
 
@@ -80,11 +84,21 @@ const learningPaths = showLearningPaths
 			.slice(0, learningPathLimit)
 	: [];
 
+const courses = showCourses
+	? (await optionalContent(getCollection("courses"), []))
+			.filter((course) => course.data.publishedAt <= now && matchesTechnology(course.data.technologies))
+			.sort(
+				(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
+			)
+			.slice(0, courseLimit)
+	: [];
+
 const hasArticles = showArticles && articles.length > 0;
 const hasVideos = showVideos && videos.length > 0;
 const hasNews = showNews && allNews.length > 0;
 const hasLearningPaths = showLearningPaths && learningPaths.length > 0;
-const isEmpty = !hasArticles && !hasVideos && !hasNews && !hasLearningPaths;
+const hasCourses = showCourses && courses.length > 0;
+const isEmpty = !hasArticles && !hasVideos && !hasNews && !hasLearningPaths && !hasCourses;
 
 const newsDate = (date: Date) =>
 	localDate(date);
@@ -119,6 +133,23 @@ function formatLearningPathDuration(minutes: number): string {
 						</div>
 						<h3 class={s.title}>{path.data.title}</h3>
 						<p class={s.copy}>{path.data.description}</p>
+					</a>
+				))}
+			</div>
+		</section>
+	)}
+
+	{hasCourses && (
+		<section class={s.section}>
+			<h2 class={s.heading}>{technologyName} courses</h2>
+			<div class={s.pathGrid}>
+				{courses.map((course) => (
+					<a href={`/courses/${course.id}`} class:list={[s.card, s.path]}>
+						<div class={s.metadata}>
+							<span>{difficultyLabel[course.data.difficulty] ?? course.data.difficulty}</span>
+						</div>
+						<h3 class={s.title}>{course.data.title}</h3>
+						<p class={s.copy}>{course.data.description}</p>
 					</a>
 				))}
 			</div>
@@ -159,7 +190,7 @@ function formatLearningPathDuration(minutes: number): string {
 				{videos.map((video) => (
 					<a href={`/watch/${video.slug}`} class={s.card}>
 						<div class={s.media}>
-							<img src={video.thumbnailUrl} alt={video.title} class={s.image}
+							<img src={video.thumbnailUrl} alt="" class={s.image}
 								width="1280" height="720" loading="lazy" decoding="async" />
 						</div>
 						<div class={s.body}><h3 class={s.title}>{video.title}</h3></div>
