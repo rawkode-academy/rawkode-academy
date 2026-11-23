@@ -119,7 +119,7 @@ export const academyLayout = sva({
 		},
 		mastheadTitle: {
 			...mastheadTitle,
-			animation: "academy-rise",
+			animation: "academy-settle",
 			_motionReduce: { animation: "none" },
 		},
 		// The heading sits inline in the title row so the count can follow
@@ -154,8 +154,7 @@ export const academyLayout = sva({
 		mastheadDescription: {
 			...ledeText,
 			color: "academy.inkTextSoft",
-			animation: "academy-rise",
-			animationDelay: "stagger-2",
+			animation: "academy-settle",
 			_motionReduce: { animation: "none" },
 		},
 		// The mosaic sits on the same 4rem lattice as the grid behind it. Its
