@@ -29,7 +29,7 @@ describe("analytics dashboard queries", () => {
 	it("bounds every query by time, since the table can't be partitioned", () => {
 		for (const [name, sql] of Object.entries(dashboardQueries("7d"))) {
 			expect(sql, name).toContain(
-				`FROM ${name === "links" || name === "linkTotals" ? LINKS_TABLE : TABLE}`,
+				`FROM ${name === "links" || name === "linkTotals" || name === "linkQuality" ? LINKS_TABLE : TABLE}`,
 			);
 			expect(sql, name).toMatch(/event_time >= CAST\('[^']+' AS TIMESTAMP\)/);
 		}
@@ -53,6 +53,18 @@ describe("analytics dashboard queries", () => {
 		expect(queries.video).toContain("'anonymous'");
 		expect(queries.newsletter).toContain("newsletter.submission_attempted");
 		expect(queries.newsletter).not.toContain("newsletter_cta_impression");
+	});
+
+	it("deduplicates before every business aggregation and exposes rejected records", () => {
+		const queries = dashboardQueries("7d");
+		for (const name of ["events", "video", "signIn", "newsletter"] as const) {
+			expect(queries[name]).toContain("PARTITION BY event_source, event_id");
+			expect(queries[name]).toContain("WHERE delivery_rank = 1");
+		}
+		for (const name of ["links", "linkTotals"] as const)
+			expect(queries[name]).toContain("PARTITION BY event_id");
+		expect(queries.archiveQuality).toContain("AS invalid_records");
+		expect(queries.archiveQuality).toContain("AS repeated_records");
 	});
 
 	it("stays under Basin SQL's 10,000-row cap", () => {
