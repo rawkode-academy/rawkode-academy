@@ -177,6 +177,8 @@ function harness({
 			(await Promise.all(refs.map((r) => getEntry(r, options)))).filter(
 				Boolean,
 			),
+		getAllSeries: async () => [],
+		renderEntry: async () => ({ html: "", headings: [] }),
 		sameId: (a, b) => idOf(a) !== undefined && idOf(a) === idOf(b),
 		setContentCache: async (astro, input = {}) => {
 			cacheCalls.push(input);
@@ -210,7 +212,14 @@ function harness({
 		},
 		"astro:assets": { Image: empty },
 		"@/lib/logger": { createLogger: () => ({ error() {} }) },
+		"@/lib/video-thumbnail": {
+			getVideoThumbnailUrl: (id) =>
+				`https://content.rawkode.academy/videos/${id}/thumbnail.webp`,
+			getVideoThumbnailResizedUrl: (id, width) =>
+				`https://content.rawkode.academy/videos/${id}/thumbnail.webp?w=${width}`,
+		},
 		"@/components/breadcrumb/Breadcrumb.astro": { default: empty },
+		"@/components/content/RichText.astro": { default: empty },
 		"@/components/show/SubscribeLinks.astro": { default: empty },
 		"@/components/newsletter/NewsletterCTA.astro": { default: empty },
 		"@/components/html/video-metadata.astro": { default: empty },
@@ -858,5 +867,6 @@ test("coming-soon archive cards retain branding and omit episode claims", async 
 	const metadata = JSON.parse(
 		dom.querySelector('script[type="application/ld+json"]').text,
 	);
-	assert.equal(metadata.itemListElement[0].item.numberOfEpisodes, undefined);
+	assert.equal(metadata.numberOfItems, 0);
+	assert.deepEqual(metadata.itemListElement, []);
 });

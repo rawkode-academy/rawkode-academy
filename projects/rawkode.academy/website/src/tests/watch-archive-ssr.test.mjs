@@ -91,6 +91,8 @@ async function renderArchive(search = "", data = collections) {
 		},
 		"@/lib/video-thumbnail": {
 			getVideoThumbnailUrl: (id) => `https://images.example.test/${id}.webp`,
+			getVideoThumbnailResizedUrl: (id, width) =>
+				`https://images.example.test/${id}-${width}.webp`,
 		},
 		"@/components/newsletter/NewsletterCTA.astro": {
 			default: newsletterCta,
@@ -184,9 +186,8 @@ async function renderArchive(search = "", data = collections) {
 		request: new Request(`https://rawkode.academy/watch${search}`),
 	});
 	const dom = parse(html);
-	const jsonLd = JSON.parse(
-		dom.querySelector('script[type="application/ld+json"]').textContent,
-	);
+	const jsonLdEl = dom.querySelector('script[type="application/ld+json"]');
+	const jsonLd = jsonLdEl ? JSON.parse(jsonLdEl.textContent) : null;
 	return { html, dom, jsonLd, pageProps, cacheCalls };
 }
 
@@ -264,19 +265,35 @@ test("Watch is a static server-rendered archive with labeled GET search, existin
 	assert(!html.includes('href="/watch/future"'));
 });
 
-test("only the unfiltered first page is indexable; later pages and searches are noindex,follow", async () => {
-	for (const [search, expected] of [
-		["", false],
-		["?page=1", false],
-		["?page=-2", false],
-		["?page=2", true],
-		["?page=999", true],
-		["?q=ebpf", true],
-		["?q=ebpf&page=2", true],
+test("unfiltered archive pages 1..N are indexable with self-canonicals; searches and out-of-range pages are noindex,follow", async () => {
+	for (const [search, expectedNoindex, expectedCanonical] of [
+		["", false, "https://rawkode.academy/watch"],
+		["?page=1", false, "https://rawkode.academy/watch"],
+		["?page=-2", true, "https://rawkode.academy/watch"],
+		["?page=2", false, "https://rawkode.academy/watch?page=2"],
+		["?page=999", true, "https://rawkode.academy/watch"],
+		["?q=ebpf", true, "https://rawkode.academy/watch"],
+		["?q=ebpf&page=2", true, "https://rawkode.academy/watch"],
 	]) {
 		const { pageProps } = await renderArchive(search);
-		assert.equal(Boolean(pageProps[0].noindex), expected, search || "/watch");
+		assert.equal(
+			Boolean(pageProps[0].noindex),
+			expectedNoindex,
+			search || "/watch",
+		);
+		assert.equal(pageProps[0].pageType, "CollectionPage");
+		assert.equal(String(pageProps[0].canonicalUrl), expectedCanonical);
 	}
+	const page2 = await renderArchive("?page=2");
+	assert.equal(page2.pageProps[0].title, "Watch Cloud Native Sessions — Page 2");
+	assert.equal(
+		page2.dom.querySelector('link[rel="prev"]')?.getAttribute("href"),
+		"https://rawkode.academy/watch",
+	);
+	assert.equal(
+		page2.dom.querySelector('link[rel="next"]')?.getAttribute("href"),
+		"https://rawkode.academy/watch?page=3",
+	);
 });
 
 test("unfiltered archive features the latest once and keeps every published URL in page order", async () => {
@@ -287,10 +304,14 @@ test("unfiltered archive features the latest once and keeps every published URL 
 			.querySelectorAll(".archive-watchFeature, .archive-feedGrid > a")
 			.map((link) => link.getAttribute("href"));
 		assert.equal(links.length, page === 14 ? 17 : 24);
-		assert.deepEqual(
-			jsonLd.itemListElement.map((item) => new URL(item.url).pathname),
-			links,
-		);
+		if (page === 1) {
+			assert.deepEqual(
+				jsonLd.itemListElement.map((item) => new URL(item.url).pathname),
+				links,
+			);
+		} else {
+			assert.equal(jsonLd, null);
+		}
 		seen.push(...links);
 	}
 	assert.deepEqual(
@@ -313,12 +334,7 @@ test("all published fixture URLs remain reachable once across ordinary 24-result
 			dom.querySelectorAll('[aria-label="Featured session"]').length,
 			0,
 		);
-		assert.equal(jsonLd.numberOfItems, links.length);
-		assert.deepEqual(
-			jsonLd.itemListElement.map((item) => new URL(item.url).pathname),
-			links,
-		);
-		assert.equal(new URL(jsonLd.url).searchParams.get("q"), "SeSsIoN");
+		assert.equal(jsonLd, null);
 		for (const link of dom.querySelectorAll(
 			'nav[aria-label="Video library pages"] a',
 		)) {
@@ -373,7 +389,7 @@ test("server search reaches full description, subtitle, technology name, guest a
 			query,
 		);
 		assert.match(dom.text, /Showing 1–1 of 1 video/);
-		assert.equal(jsonLd.numberOfItems, 1);
+		assert.equal(jsonLd, null);
 	}
 });
 
@@ -410,7 +426,7 @@ test("page bounds, clear search, escaped no-results copy, and empty archive are 
 		emptySearch.dom.querySelector('a[href="/watch"]').text,
 		"Clear search",
 	);
-	assert.equal(emptySearch.jsonLd.numberOfItems, 0);
+	assert.equal(emptySearch.jsonLd, null);
 	const empty = await renderArchive("", { ...collections, videos: [upcoming] });
 	assert.match(empty.dom.text, /No published videos are available yet/);
 	assert.equal(empty.dom.querySelectorAll(".archive-watchFeature").length, 0);

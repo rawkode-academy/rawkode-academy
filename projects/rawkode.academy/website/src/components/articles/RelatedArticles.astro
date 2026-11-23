@@ -4,6 +4,7 @@ import {
 	getCollection,
 	optionalContent,
 } from "@/lib/live-content";
+import { selectRelatedArticles } from "@/lib/related-articles";
 import ArticleCard from "./ArticleCard.astro";
 import { academyRelatedContent } from "@rawkodeacademy/design-system";
 
@@ -25,15 +26,12 @@ const styles = academyRelatedContent();
 const allArticles: ReadonlyArray<ContentEntry<"articles">> =
 	articles ?? (await optionalContent(getCollection("articles"), []));
 
-// Most recent articles, excluding the current one.
-const finalRelatedArticles = allArticles
-	.filter((article) => article.id !== currentArticle.id)
-	.sort(
-		(a, b) =>
-			new Date(b.data.publishedAt).getTime() -
-			new Date(a.data.publishedAt).getTime(),
-	)
-	.slice(0, Math.max(0, limit));
+// Topically ranked related articles (series -> shared technologies -> type -> recency).
+const finalRelatedArticles = selectRelatedArticles(
+	currentArticle,
+	allArticles,
+	limit,
+);
 ---
 
 {finalRelatedArticles.length > 0 && (

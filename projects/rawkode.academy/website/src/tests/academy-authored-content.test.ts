@@ -7,6 +7,7 @@ import ts from "typescript";
 import { academyRelatedContent } from "@rawkodeacademy/design-system";
 import { academyCallout } from "../../../../../packages/design-system/src/recipes/academyCallout";
 import { ContentError, optionalContent } from "@/lib/live-content/collections";
+import * as relatedArticles from "@/lib/related-articles";
 
 type Component = Parameters<
 	Awaited<ReturnType<typeof AstroContainer.create>>["renderToString"]
@@ -59,6 +60,7 @@ beforeAll(async () => {
 	});
 	related = await compile("articles/RelatedArticles.astro", {
 		"@rawkodeacademy/design-system": { academyRelatedContent },
+		"@/lib/related-articles": relatedArticles,
 		"@/lib/live-content": {
 			optionalContent,
 			getCollection: async (

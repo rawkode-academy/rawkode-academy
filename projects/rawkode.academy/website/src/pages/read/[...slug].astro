@@ -4,7 +4,6 @@ const doc = academyDocument();
 const styles = academyLayout({ width: "reading" });
 import {
 	type ContentEntry,
-	documentToMarkdown,
 	getAllSeries,
 	partNumber,
 	getCollection,
@@ -19,7 +18,6 @@ import Page from "@/wrappers/page.astro";
 
 import ArticleJsonLd from "@/components/html/article-jsonld.astro";
 import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
-import { buildHowToJsonLd } from "@/lib/howto-jsonld";
 
 import RelatedArticles from "@/components/articles/RelatedArticles.astro";
 import Resources from "@/components/articles/Resources.astro";
@@ -69,34 +67,12 @@ const series = article.data.series
 	? (await getAllSeries()).find(({ id }) => id === article.data.series)
 	: undefined;
 
-// Same pool and ranking RelatedArticles applies.
-const relatedArticles = allArticles
-	.filter((candidate) => candidate.id !== article.id)
-	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
-	.slice(0, RELATED_ARTICLE_LIMIT);
-
 const computeImageUrl = (entry: ContentEntry<"articles">): URL | undefined =>
 	entry.data.cover
 		? new URL(entry.data.cover.image.src, Astro.site ?? Astro.url)
 		: undefined;
 
 const imageUrl = computeImageUrl(article);
-
-const howToJsonLd = article.data.howto
-	? buildHowToJsonLd({
-			siteUrl: (Astro.site ?? Astro.url).origin,
-			articleUrl: new URL(`/read/${article.id}`, Astro.site ?? Astro.url).href,
-			name: article.data.title,
-			description: article.data.description,
-			...(imageUrl ? { imageUrl: imageUrl.href } : {}),
-			publishedAt: new Date(article.data.publishedAt),
-			...(article.data.updatedAt
-				? { updatedAt: new Date(article.data.updatedAt) }
-				: {}),
-			headings,
-			body: await documentToMarkdown(article.data.body),
-		})
-	: undefined;
 
 const readingTime = calculateReadingTime(article.body || "");
 
@@ -135,13 +111,17 @@ const subtitle = article.data.openGraph?.subtitle || article.data.subtitle;
 ---
 
 <Page
-	title={`${article.data.openGraph?.title || article.data.title}`}
+	title={article.data.title}
+	ogTitle={article.data.openGraph?.title}
 	subtitle={subtitle}
 	description={article.data.description}
-	image={imageUrl ? {
+	image={imageUrl && article.data.cover ? {
 		image: imageUrl,
 		text: article.data.title,
-		format: "png" as const
+		format: article.data.cover.image.format as "png" | "svg" | "jpg" | "jpeg" | "webp",
+		width: article.data.cover.image.width,
+		height: article.data.cover.image.height,
+		alt: article.data.cover.alt || article.data.title,
 	} : undefined}
 	useImageDirectly={true}
 	isArticle={true}
@@ -150,7 +130,6 @@ const subtitle = article.data.openGraph?.subtitle || article.data.subtitle;
 	authors={authors}
 	articleSection={badgeConfig.label}
 	articleTags={tags.map((tag) => tag.label)}
-	{...(howToJsonLd ? { jsonLd: howToJsonLd } : {})}
 >
 	{/*
 		A single slotted element with a conditional spread — a ternary holding
@@ -216,7 +195,7 @@ const subtitle = article.data.openGraph?.subtitle || article.data.subtitle;
 		<div class={doc.section}>
 			<RelatedArticles
 				currentArticle={article}
-				articles={relatedArticles}
+				articles={allArticles}
 				limit={RELATED_ARTICLE_LIMIT}
 			/>
 			<RelatedVideos currentArticle={article} limit={3} />

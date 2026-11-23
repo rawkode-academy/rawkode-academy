@@ -15,7 +15,7 @@ import Page from "@/wrappers/page.astro";
 import ArticleTOC from "@/components/read/ArticleTOC.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import LearningPathJsonLd from "@/components/html/learning-path-jsonld.astro";
-import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
+import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import { localDate } from "@/lib/local-time";
 import { buildTechnologyTags } from "@/lib/technology-tags";
 
@@ -71,7 +71,7 @@ const difficultyLabel =
 
 const publishDate = localDate(learningPath.data.publishedAt);
 
-const pageTitle = `${learningPath.data.title} | Learning Path`;
+const pageTitle = `${learningPath.data.title} — Learning Path`;
 const pageDescription = learningPath.data.description;
 ---
 
@@ -79,6 +79,7 @@ const pageDescription = learningPath.data.description;
 	title={pageTitle}
 	description={pageDescription}
 	publishedAt={learningPath.data.publishedAt}
+	{...(learningPath.data.recordUpdatedAt ? { updatedAt: learningPath.data.recordUpdatedAt } : {})}
 	authors={authors}
 >
 	<LearningPathJsonLd
@@ -87,20 +88,18 @@ const pageDescription = learningPath.data.description;
 		authors={authors}
 		technologyLabels={technologyLabels}
 	/>
-	<BreadcrumbJsonLd
-		slot="extra-head"
-		elements={[
-			{ title: "Home", link: "/" },
-			{ title: "Learning Paths", link: "/learning-paths" },
-			{ title: learningPath.data.title, link: `/learning-paths/${learningPath.id}` },
-		]}
-	/>
 
 	<div class={doc.root}>
 		<header class={doc.pathHero}>
 			<div class={doc.body}>
 			<div class={[doc.pathColumn, styles.heroCopy].join(" ")}>
-				<a class={doc.link} href="/learning-paths">Learning paths</a>
+				<Breadcrumb
+					elements={[
+						{ title: "Home", link: "/" },
+						{ title: "Learning Paths", link: "/learning-paths" },
+						{ title: learningPath.data.title, link: `/learning-paths/${learningPath.id}` },
+					]}
+				/>
 				<h1 class={doc.title}>{learningPath.data.title}</h1>
 				<div class={styles.meta}>
 					<span>{difficultyLabel}</span>

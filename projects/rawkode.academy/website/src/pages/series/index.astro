@@ -9,7 +9,9 @@ import Page from "@/wrappers/page.astro";
 export const prerender = true;
 
 const latest = (series: Awaited<ReturnType<typeof getAllSeries>>[number]) =>
-	Math.max(...series.parts.map((part) => part.data.publishedAt.getTime()));
+	series.parts.length > 0
+		? Math.max(...series.parts.map((part) => part.data.publishedAt.getTime()))
+		: 0;
 
 const allSeries = (await getAllSeries()).sort((a, b) => latest(b) - latest(a));
 

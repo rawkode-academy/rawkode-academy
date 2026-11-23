@@ -70,7 +70,10 @@ const publishDate = localDate(article.data.publishedAt);
 
 const readingTime = calculateReadingTime(article.body || "");
 
-const breadcrumbItems = [{ label: "News", href: "/news" }];
+const breadcrumbItems = [
+	{ label: "Home", href: "/" },
+	{ label: "News", href: "/news" },
+];
 ---
 
 <Page
@@ -78,6 +81,7 @@ const breadcrumbItems = [{ label: "News", href: "/news" }];
 	description={article.data.description}
 	isArticle={true}
 	publishedAt={article.data.publishedAt}
+	{...(article.data.recordUpdatedAt ? { updatedAt: article.data.recordUpdatedAt } : {})}
 	authors={authors}
 	articleSection="News"
 	articleTags={tags.map((tag) => tag.label)}

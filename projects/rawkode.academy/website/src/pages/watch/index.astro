@@ -8,7 +8,7 @@ import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Page from "@/wrappers/page.astro";
 import VideoItemListJsonLd from "@/components/html/video-itemlist-jsonld.astro";
 import { getPublishedVideos, getUpcomingVideos } from "@/lib/content";
-import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import { getVideoThumbnailResizedUrl } from "@/lib/video-thumbnail";
 import { selectWatchArchive, watchArchiveHref, WATCH_PAGE_SIZE } from "@/lib/watch-archive";
 import { localDateTime } from "@/lib/local-time";
 import { formatRuntime } from "@/lib/video-runtime";
@@ -46,7 +46,7 @@ const videos = archive.items.map((video) => ({
 	duration: video.data.duration,
 	publishedAt: video.data.publishedAt,
 	type: video.data.type,
-	mediaSrc: getVideoThumbnailUrl(video.data.id),
+	mediaSrc: getVideoThumbnailResizedUrl(video.data.id, 640),
 }));
 const jsonLdVideos = archive.items.map(({ data }) => ({
 	id: data.id,
@@ -64,15 +64,24 @@ const upcomingStreams = upcomingVideos.map((video) => ({
 	scheduledAt: localDateTime(video.data.publishedAt),
 	mediaSrc: video.data.youtubeId
 		? `https://i.ytimg.com/vi/${video.data.youtubeId}/hqdefault.jpg`
-		: getVideoThumbnailUrl(video.data.id),
+		: getVideoThumbnailResizedUrl(video.data.id, 640),
 }));
 const showUpcomingStreams = !archive.query && archive.page === 1 && upcomingStreams.length > 0;
-const featured = archive.showFeatured ? videos[0] : undefined;
+const featured =
+	archive.showFeatured && videos[0] && archive.items[0]
+		? {
+				...videos[0],
+				mediaSrc: getVideoThumbnailResizedUrl(archive.items[0].data.id, 1280),
+			}
+		: undefined;
 // The latest session gets its own feature below, so the masthead schedules
 // the sessions that came before it.
-const mosaic = publishedVideos.slice(1, 10).map((video) => getVideoThumbnailUrl(video.data.id));
+const mosaic = publishedVideos
+	.slice(1, 10)
+	.map((video) => getVideoThumbnailResizedUrl(video.data.id, 384));
 const libraryVideos = featured ? videos.slice(1) : videos;
-const listUrl = new URL(watchArchiveHref(archive.query, archive.page), Astro.site ?? Astro.url).href;
+const siteBase = Astro.site ?? Astro.url;
+const listUrl = new URL(watchArchiveHref(archive.query, archive.page), siteBase).href;
 
 // The archive lists videos (published and upcoming streams) and searches
 // technology, people and show names. Listing "videos" caps the cache
@@ -83,26 +92,62 @@ await setContentCache(Astro, {
 });
 Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 
-// Only the unfiltered first page is a search landing page. Later pages and
-// search results stay crawlable (follow) but out of the index, matching /read.
-const noindex = archive.query.length > 0 || archive.page > 1;
+// Unfiltered paginated archive pages (?page=2..N) remain indexable with
+// self-referencing canonicals; search queries and out-of-range pages are noindex.
+const rawPageParam = Astro.url.searchParams.get("page");
+const hasExplicitPage = rawPageParam !== null;
+const parsedPage =
+	hasExplicitPage && /^\d+$/.test(rawPageParam)
+		? Number.parseInt(rawPageParam, 10)
+		: 1;
+const isOutOfRangePage =
+	hasExplicitPage &&
+	(!/^\d+$/.test(rawPageParam) ||
+		parsedPage < 1 ||
+		parsedPage > archive.pageCount);
+const isFiltered = archive.query.length > 0;
+const noindex = isFiltered || isOutOfRangePage;
 
-const pageTitle = "Watch Cloud Native Sessions";
+const canonicalPath = noindex ? "/watch" : watchArchiveHref("", archive.page);
+const canonicalUrl = new URL(canonicalPath, siteBase);
+const prevHref =
+	!noindex && archive.page > 1
+		? new URL(watchArchiveHref("", archive.page - 1), siteBase).href
+		: undefined;
+const nextHref =
+	!noindex && archive.page < archive.pageCount
+		? new URL(watchArchiveHref("", archive.page + 1), siteBase).href
+		: undefined;
+
+const pageTitle =
+	!noindex && archive.page > 1
+		? `Watch Cloud Native Sessions — Page ${archive.page}`
+		: "Watch Cloud Native Sessions";
 const pageDescription =
 	"Recorded sessions and live builds from the Rawkode Academy cloud native archive.";
 ---
 
-<Page title={pageTitle} description={pageDescription} noindex={noindex}>
+<Page
+	title={pageTitle}
+	description={pageDescription}
+	canonicalUrl={canonicalUrl}
+	pageType="CollectionPage"
+	noindex={noindex}
+>
 	<Fragment slot="extra-head">
+		{prevHref && <link rel="prev" href={prevHref} />}
+		{nextHref && <link rel="next" href={nextHref} />}
 		<link rel="alternate" type="application/rss+xml" title="Rawkode Academy - Videos (RSS)" href="/api/feeds/videos.xml" />
 		<link rel="alternate" type="application/atom+xml" title="Rawkode Academy - Videos (Atom)" href="/api/feeds/videos.atom" />
 		<link rel="alternate" type="application/feed+json" title="Rawkode Academy - Videos (JSON Feed)" href="/api/feeds/videos.json" />
-		<VideoItemListJsonLd
-			videos={jsonLdVideos}
-			listUrl={listUrl}
-			listName="Rawkode Academy Videos"
-			limit={WATCH_PAGE_SIZE}
-		/>
+		{!noindex && archive.page === 1 && (
+			<VideoItemListJsonLd
+				videos={jsonLdVideos}
+				listUrl={listUrl}
+				listName="Rawkode Academy Videos"
+				limit={WATCH_PAGE_SIZE}
+			/>
+		)}
 	</Fragment>
 	<div class={styles.root}>
 		<AcademyCatalogMasthead

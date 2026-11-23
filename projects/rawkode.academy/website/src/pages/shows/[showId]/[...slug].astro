@@ -44,9 +44,13 @@ try {
 	Astro.response.status = 503;
 }
 
-const meta = (!loadError && page.meta?.(data)) || {
-	title: `${show.data.name} — ${page.label}`,
+const rawMeta = (!loadError && page.meta?.(data)) || {
+	title: page.label,
+	description: `${page.label} for ${show.data.name} is temporarily unavailable.`,
 };
+const pageTitle = rawMeta.title.includes(show.data.name)
+	? rawMeta.title
+	: `${rawMeta.title} — ${show.data.name}`;
 
 // Plugin pages that declare `cache` are public reads (the same for every
 // visitor) whose data lives outside the content layer, so the plugin's
@@ -76,8 +80,8 @@ const layout = academyLayout();
 	show={show}
 	nav={nav}
 	active={page.slug}
-	title={meta.title}
-	description={meta.description}
+	title={pageTitle}
+	description={rawMeta.description}
 >
 	{loadError ? (
 		<p class={layout.notice} role="status">

@@ -7,22 +7,68 @@ import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 import Page from "@/wrappers/page.astro";
 import { getCollection, setContentCache } from "@/lib/live-content";
 import { getPersonIdentityUrls } from "@/lib/person-identity-links";
+import { isNewsPublished } from "@/lib/news-publication";
+import { personHasIndexableContent } from "@/lib/sitemaps";
 
 const now = new Date();
-const [people, publishedVideos] = await Promise.all([
-	getCollection("people"),
-	getCollection("videos", ({ data }) => data.publishedAt <= now),
-]);
+const [people, publishedVideos, shows, news, articles, courses, learningPaths] =
+	await Promise.all([
+		getCollection("people"),
+		getCollection("videos", ({ data }) => data.publishedAt <= now),
+		getCollection("shows", ({ data }) => data.publish),
+		getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
+		getCollection("articles", ({ data }) => data.publishedAt <= now),
+		getCollection("courses", ({ data }) => data.publishedAt <= now),
+		getCollection("learningPaths", ({ data }) => data.publishedAt <= now),
+	]);
 const sortedPeople = people.sort((a, b) =>
 	a.data.name.localeCompare(b.data.name),
 );
 
-const peopleJsonLd = sortedPeople.map((person) => ({
-	id: person.data.id,
-	name: person.data.name,
-	avatarUrl: person.data.avatarUrl,
-	sameAs: getPersonIdentityUrls(person.data),
-}));
+const normalizePersonRef = (ref: string | { id: string }) =>
+	(typeof ref === "string" ? ref : ref.id).replace(/\/index$/, "");
+const countByPerson = (refsList: ReadonlyArray<ReadonlyArray<string | { id: string }>>) => {
+	const counts = new Map<string, number>();
+	for (const refs of refsList) {
+		const seen = new Set<string>();
+		for (const ref of refs) {
+			const id = normalizePersonRef(ref);
+			if (!id || seen.has(id)) continue;
+			seen.add(id);
+			counts.set(id, (counts.get(id) ?? 0) + 1);
+		}
+	}
+	return counts;
+};
+
+const videoCounts = countByPerson(publishedVideos.map((v) => v.data.guests));
+const showCounts = countByPerson(shows.map((s) => s.data.hosts));
+const newsCounts = countByPerson(news.map((n) => n.data.authors));
+const articleCounts = countByPerson(articles.map((a) => a.data.authors));
+const courseCounts = countByPerson(courses.map((c) => c.data.authors));
+const learningPathCounts = countByPerson(
+	learningPaths.map((lp) => lp.data.authors),
+);
+
+const peopleJsonLd = sortedPeople
+	.filter((person) => {
+		const personId = normalizePersonRef(person.data.id);
+		return personHasIndexableContent({
+			hasBiography: Boolean(person.body && person.body.trim().length > 0),
+			videoCount: videoCounts.get(personId) ?? 0,
+			showCount: showCounts.get(personId) ?? 0,
+			newsCount: newsCounts.get(personId) ?? 0,
+			articleCount: articleCounts.get(personId) ?? 0,
+			courseCount: courseCounts.get(personId) ?? 0,
+			learningPathCount: learningPathCounts.get(personId) ?? 0,
+		});
+	})
+	.map((person) => ({
+		id: person.data.id,
+		name: person.data.name,
+		avatarUrl: person.data.avatarUrl,
+		sameAs: getPersonIdentityUrls(person.data),
+	}));
 // The masthead shows the most recent guests first, in the order they
 // appeared on the Academy, then fills with everyone else who has a portrait.
 const recentVideos = publishedVideos
@@ -40,10 +86,18 @@ const mosaic = [...new Set([...recentGuestIds, ...portraitOf.keys()])]
 	.map((id) => portraitOf.get(id))
 	.filter((src): src is string => Boolean(src));
 // The directory lists every person; the masthead ordering follows the most
-// recently published videos, so a newly published video reorders it.
+// recently published videos, and indexable JSON-LD tracks published work.
 await setContentCache(Astro, {
 	entries: [...people, ...recentVideos],
-	collections: ["people", "videos"],
+	collections: [
+		"people",
+		"videos",
+		"shows",
+		"news",
+		"articles",
+		"courses",
+		"learningPaths",
+	],
 });
 const styles = academyLayout({ width: "wide" });
 const catalog = academyCatalog({ identityLayout: "portrait" });

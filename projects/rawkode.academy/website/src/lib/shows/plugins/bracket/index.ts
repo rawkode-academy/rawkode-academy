@@ -47,7 +47,11 @@ export const bracketPlugin: ShowPlugin<BracketPluginConfig> = (
 				showId: ctx.showId,
 				seasons: await loadSeasons(showId, requireBracketsReadBinding(ctx.env)),
 			}),
-			meta: () => ({ title: "Seasons" }),
+			meta: () => ({
+				title: "Seasons",
+				description:
+					"Browse tournament seasons, brackets, and competition history.",
+			}),
 			Component: Seasons,
 		},
 		brackets: {
@@ -60,7 +64,11 @@ export const bracketPlugin: ShowPlugin<BracketPluginConfig> = (
 					requireBracketsReadBinding(ctx.env),
 				),
 			}),
-			meta: () => ({ title: "Brackets" }),
+			meta: () => ({
+				title: "Brackets",
+				description:
+					"Follow live tournament brackets, match pairings, and round-by-round results.",
+			}),
 			Component: Brackets,
 		},
 		schedule: {
@@ -73,7 +81,11 @@ export const bracketPlugin: ShowPlugin<BracketPluginConfig> = (
 					requireBracketsReadBinding(ctx.env),
 				),
 			}),
-			meta: () => ({ title: "Schedule" }),
+			meta: () => ({
+				title: "Schedule",
+				description:
+					"View upcoming live matches, UTC broadcast times, and completed match results.",
+			}),
 			Component: Schedule,
 		},
 		apply: {
@@ -90,7 +102,11 @@ export const bracketPlugin: ShowPlugin<BracketPluginConfig> = (
 					}),
 				};
 			},
-			meta: () => ({ title: "Apply to compete" }),
+			meta: () => ({
+				title: "Apply to compete",
+				description:
+					"Register as a competitor or team to take part in upcoming tournament brackets.",
+			}),
 			Component: Apply,
 		},
 	};

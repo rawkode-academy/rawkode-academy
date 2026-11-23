@@ -14,27 +14,32 @@ import {
 	setContentCache,
 } from "@/lib/live-content";
 import RichText from "@/components/content/RichText.astro";
+import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import VideoFeed from "@/components/video/video-feed.astro";
 import ShowCard from "@/components/show/ShowCard.astro";
 import type { ShowSummary } from "@/types/show";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
-import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import { getVideoThumbnailResizedUrl } from "@/lib/video-thumbnail";
 import { getPersonIdentityUrls } from "@/lib/person-identity-links";
 import { buildPersonJsonLd } from "@/lib/person-jsonld";
 import { isNewsPublished } from "@/lib/news-publication";
+import { personHasIndexableContent } from "@/lib/sitemaps";
 import { localDate } from "@/lib/local-time";
 
 const person = await getEntry("people", Astro.params.id);
 if (!person) return new Response(null, { status: 404 });
 
 const now = new Date();
-const [videos, shows, technologies, news, articles] = await Promise.all([
-	getCollection("videos", ({ data }) => data.publishedAt <= now),
-	getCollection("shows", ({ data }) => data.publish),
-	getCollection("technologies"),
-	getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
-	getCollection("articles", ({ data }) => data.publishedAt <= now),
-]);
+const [videos, shows, technologies, news, articles, courses, learningPaths] =
+	await Promise.all([
+		getCollection("videos", ({ data }) => data.publishedAt <= now),
+		getCollection("shows", ({ data }) => data.publish),
+		getCollection("technologies"),
+		getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now)),
+		getCollection("articles", ({ data }) => data.publishedAt <= now),
+		getCollection("courses", ({ data }) => data.publishedAt <= now),
+		getCollection("learningPaths", ({ data }) => data.publishedAt <= now),
+	]);
 const technologyById = new Map(technologies.map((t) => [t.id, t] as const));
 
 const hostedShows = shows.filter((show) =>
@@ -54,6 +59,18 @@ const authoredNews = news
 const authoredArticles = articles
 	.filter((article) =>
 		article.data.authors.some((author) => sameId(author, person.data.id)),
+	)
+	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
+
+const authoredCourses = courses
+	.filter((course) =>
+		course.data.authors.some((author) => sameId(author, person.data.id)),
+	)
+	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
+
+const authoredLearningPaths = learningPaths
+	.filter((lp) =>
+		lp.data.authors.some((author) => sameId(author, person.data.id)),
 	)
 	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
 
@@ -81,7 +98,7 @@ const showSummaries: ShowSummary[] = hostedShows.map((show, index) => {
 		episodes: showVideos.map((v) => ({
 			video: {
 				title: v.data.title,
-				thumbnailUrl: getVideoThumbnailUrl(v.data.id),
+				thumbnailUrl: getVideoThumbnailResizedUrl(v.data.id, 640),
 				publishedAt: v.data.publishedAt.toISOString(),
 			},
 		})),
@@ -93,7 +110,7 @@ const guestVideoFeed = guestVideos
 	.map((video) => ({
 		id: video.data.id,
 		title: video.data.title,
-		thumbnailUrl: getVideoThumbnailUrl(video.data.id),
+		thumbnailUrl: getVideoThumbnailResizedUrl(video.data.id, 640),
 		streamUrl: `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`,
 		duration: typeof video.data.duration === "number" ? video.data.duration : 0,
 		slug: video.data.slug,
@@ -131,20 +148,30 @@ const topTechNames = topTechIds.map(
 	(id) => technologyById.get(id)?.data.name ?? id,
 );
 
+const topTechLinks = topTechIds
+	.map((id) => technologyById.get(id))
+	.filter((tech): tech is NonNullable<typeof tech> => Boolean(tech))
+	.map((tech) => ({ id: tech.id, name: tech.data.name }));
+
 const showNames = hostedShows.map((s) => s.data.name);
 
 const newsCount = authoredNews.length;
 const articleCount = authoredArticles.length;
+const courseCount = authoredCourses.length;
+const learningPathCount = authoredLearningPaths.length;
 
 // Thin profiles (no shows hosted, no guest appearances, no authored content,
 // no biography) get noindex'd so Google doesn't classify them as low-quality
 // and drag down site quality.
-const noindex =
-	videoCount === 0 &&
-	showCount === 0 &&
-	newsCount === 0 &&
-	articleCount === 0 &&
-	!hasBiography;
+const noindex = !personHasIndexableContent({
+	hasBiography,
+	videoCount,
+	showCount,
+	newsCount,
+	articleCount,
+	courseCount,
+	learningPathCount,
+});
 
 const pageTitle = (() => {
 	if (showCount > 0) {
@@ -259,6 +286,8 @@ await setContentCache(Astro, {
 		...guestVideos,
 		...authoredArticles,
 		...authoredNews,
+		...authoredCourses,
+		...authoredLearningPaths,
 		...topTechIds.map((id) => technologyById.get(id)),
 	],
 	// Each listing on the profile is a filtered collection: a newly published
@@ -269,6 +298,8 @@ await setContentCache(Astro, {
 		"shows",
 		"articles",
 		"news",
+		"courses",
+		"learningPaths",
 		...(hasBiography ? (["technologies"] as const) : []),
 	],
 });
@@ -280,7 +311,7 @@ await setContentCache(Astro, {
  noindex={noindex}
  pageType="ProfilePage"
  mainEntity={profileEntity}
- useImageDirectly={Boolean(person.data.avatarUrl)}
+ useImageDirectly={false}
  image={person.data.avatarUrl ? { image: new URL(person.data.avatarUrl) } : undefined}
 >
  <Fragment slot="extra-head">
@@ -308,12 +339,20 @@ await setContentCache(Astro, {
 				<span class={doc.portraitInitials} hidden={Boolean(person.data.avatarUrl)}>{person.data.name.split(/\s+/).map((part: string) => part[0]).slice(0, 2).join("")}</span>
 			</div>
 			<div class={doc.stack}>
-				<a href="/people" class={doc.link}>← People</a>
+				<Breadcrumb
+					elements={[
+						{ title: "Home", link: "/" },
+						{ title: "People", link: "/people" },
+						{ title: person.data.name, link: `/people/${person.data.id}` },
+					]}
+				/>
 				<h1 class={doc.title}>{person.data.name}</h1>
-				{(showCount > 0 || videoCount > 0 || articleCount + newsCount > 0) && <p class={doc.meta}>{
+				{(showCount > 0 || videoCount > 0 || articleCount + newsCount + courseCount + learningPathCount > 0) && <p class={doc.meta}>{
 					[
 						showCount > 0 ? `Host of ${showCount} ${showCount === 1 ? "show" : "shows"}` : undefined,
 						videoCount > 0 ? `${videoCount} guest ${videoCount === 1 ? "appearance" : "appearances"}` : undefined,
+						courseCount > 0 ? `${courseCount} ${courseCount === 1 ? "course" : "courses"}` : undefined,
+						learningPathCount > 0 ? `${learningPathCount} ${learningPathCount === 1 ? "learning path" : "learning paths"}` : undefined,
 						articleCount + newsCount > 0 ? `${articleCount + newsCount} published stories` : undefined,
 					].filter(Boolean).join(" · ")
 				}</p>}
@@ -323,6 +362,13 @@ await setContentCache(Astro, {
 						{link.name}
 					</a>)}
 				</nav>}
+				{topTechLinks.length > 0 && (
+					<div class={doc.tagList}>
+						{topTechLinks.map((tech) => (
+							<a href={`/technology/${tech.id}`} class={doc.tag}>#{tech.name}</a>
+						))}
+					</div>
+				)}
 			</div>
 		</header>
 
@@ -340,6 +386,8 @@ await setContentCache(Astro, {
 		</section>}
 
 		{[
+			{ id: "courses", heading: "Courses", entries: authoredCourses, prefix: "/courses" },
+			{ id: "learning-paths", heading: "Learning paths", entries: authoredLearningPaths, prefix: "/learning-paths" },
 			{ id: "articles", heading: "Articles", entries: authoredArticles, prefix: "/read" },
 			{ id: "news", heading: "News", entries: authoredNews, prefix: "/news" },
 		].map(({id, heading, entries, prefix}) => entries.length > 0 && <section class={doc.stack} aria-labelledby={id}>

@@ -92,6 +92,7 @@ async function render(
 		"@rawkodeacademy/design-system": {
 			academyDocument: styles,
 			academyLayout: styles,
+			academyNavigation: styles,
 			academyWatch: styles,
 			academyCatalog: styles,
 			academyPage: styles,
@@ -118,6 +119,7 @@ async function render(
 				cacheCalls.push(input);
 				return {};
 			},
+			getAllSeries: async () => [],
 			sameId,
 		},
 		"@/components/content/RichText.astro": {
@@ -140,6 +142,12 @@ async function render(
 		},
 		"@/components/video/VideoProgressBar.vue": { default: empty },
 		"@/components/academy/AcademyCatalogMasthead.astro": { default: empty },
+		"@/lib/video-thumbnail": {
+			getVideoThumbnailUrl: (id) =>
+				`https://content.rawkode.academy/videos/${id}/thumbnail.webp`,
+			getVideoThumbnailResizedUrl: (id, width) =>
+				`https://content.rawkode.academy/videos/${id}/thumbnail.webp?w=${width}`,
+		},
 	};
 	async function load(path) {
 		const source = read(path);
@@ -166,7 +174,7 @@ async function render(
 			// A sibling module of the component under test (pure helpers).
 			if (!exports && specifier.startsWith("./"))
 				return load(
-					`${path.slice(0, path.lastIndexOf("/") + 1)}${specifier.slice(2)}.ts`,
+					`${path.slice(0, path.lastIndexOf("/") + 1)}${specifier.slice(2)}${specifier.endsWith(".astro") ? "" : ".ts"}`,
 				);
 			assert(exports, `Unexpected import ${specifier}`);
 			return new vm.SyntheticModule(
@@ -215,7 +223,7 @@ test("profile SSR exposes YouTube and merges exact URLs with labels, including i
 			youtube: "https://youtube.test/channel",
 		}),
 	);
-	const links = dom.querySelectorAll("nav a");
+	const links = dom.querySelectorAll('nav[aria-label$="\'s links"] a');
 	assert.deepEqual(
 		links.map((a) => [a.getAttribute("href"), a.text.trim()]),
 		[
@@ -245,11 +253,15 @@ test("distinct authored URL fragments remain separate controls", async () => {
 		}),
 	);
 	assert.deepEqual(
-		dom.querySelectorAll("nav a").map((a) => a.getAttribute("href")),
+		dom
+			.querySelectorAll('nav[aria-label$="\'s links"] a')
+			.map((a) => a.getAttribute("href")),
 		["https://example.test/#profile", "https://example.test/#work"],
 	);
 	assert.deepEqual(
-		dom.querySelectorAll("nav a").map((a) => a.getAttribute("rel")),
+		dom
+			.querySelectorAll('nav[aria-label$="\'s links"] a')
+			.map((a) => a.getAttribute("rel")),
 		["me noopener noreferrer", "noopener noreferrer"],
 	);
 });
@@ -261,10 +273,13 @@ test("generic organization/content links stay visible without person identity cl
 			youtube: "https://youtube.com/@RawkodeAcademy",
 		}),
 	);
-	assert.equal(dom.querySelectorAll("nav a").length, 2);
+	assert.equal(
+		dom.querySelectorAll('nav[aria-label$="\'s links"] a').length,
+		2,
+	);
 	assert(
 		dom
-			.querySelectorAll("nav a")
+			.querySelectorAll('nav[aria-label$="\'s links"] a')
 			.every((a) => a.getAttribute("rel") === "noopener noreferrer"),
 	);
 	assert.equal(dom.querySelectorAll('link[rel="me"]').length, 0);
@@ -272,12 +287,15 @@ test("generic organization/content links stay visible without person identity cl
 });
 
 test("directory and detail share conservative identity metadata without losing native profile links", async () => {
-	const entry = person({
-		github: "https://github.com/person",
-		mastodon: "https://social.test/@person",
-		website: "https://company.test/",
-		youtube: "https://youtube.test/company",
-	});
+	const entry = {
+		...person({
+			github: "https://github.com/person",
+			mastodon: "https://social.test/@person",
+			website: "https://company.test/",
+			youtube: "https://youtube.test/company",
+		}),
+		body: "Cloud native engineer.",
+	};
 	const { dom } = await render("pages/people/index.astro", {
 		collections: { people: [entry] },
 	});
@@ -362,7 +380,10 @@ test("future-only profile stays honestly empty, noindex, with no empty section h
 	});
 	assert.equal(pageProps[0].noindex, true);
 	assert.match(dom.text, /No published contributions yet/);
-	assert.equal(dom.querySelectorAll("h2, nav").length, 0);
+	assert.equal(
+		dom.querySelectorAll('h2, nav:not([aria-label="Breadcrumb"])').length,
+		0,
+	);
 	assert.equal(
 		dom.querySelectorAll('link[type="application/rss+xml"]').length,
 		1,
@@ -442,6 +463,8 @@ test("profile caches with every rendered entry and caps on the collections it li
 		"shows",
 		"articles",
 		"news",
+		"courses",
+		"learningPaths",
 	]);
 	assert.deepEqual(
 		[...new Set(cacheCalls[0].entries.filter(Boolean).map((e) => e.id))].sort(),
@@ -488,7 +511,15 @@ test("directory caches every person plus the recent videos behind the masthead",
 		},
 	});
 	assert.equal(cacheCalls.length, 1);
-	assert.deepEqual(Array.from(cacheCalls[0].collections), ["people", "videos"]);
+	assert.deepEqual(Array.from(cacheCalls[0].collections), [
+		"people",
+		"videos",
+		"shows",
+		"news",
+		"articles",
+		"courses",
+		"learningPaths",
+	]);
 	assert.deepEqual(Array.from(cacheCalls[0].entries.map((e) => e.id)), [
 		"person",
 		"published",

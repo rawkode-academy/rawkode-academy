@@ -63,16 +63,26 @@ const catalog = academyCatalog();
 					const adrNumber = getAdrNumber(adr.id);
 
 					return (
-						<a href={`/adrs/${adr.id}`} class={catalog.row}>
+						<article class={catalog.row}>
 							<span class={catalog.rowIndex}>ADR-{adrNumber}</span>
 							<div class={catalog.rowMain}>
-								<h2 class={catalog.rowTitle}>{adr.data.title}</h2>
+								<h2 class={catalog.rowTitle}><a href={`/adrs/${adr.id}`}>{adr.data.title}</a></h2>
 								<span class={catalog.rowMeta}>
 									<time {...formatDate(adr.data.adoptedAt).attrs}>{formatDate(adr.data.adoptedAt).text}</time>
-									{authors.length > 0 && <span>By {authors.map((author) => author.data.name).join(", ")}</span>}
+									{authors.length > 0 && (
+										<span>
+											By{" "}
+											{authors.map((author, index) => (
+												<>
+													{index > 0 && ", "}
+													<a href={`/people/${author.data.id}`}>{author.data.name}</a>
+												</>
+											))}
+										</span>
+									)}
 								</span>
 							</div>
-						</a>
+						</article>
 					);
 				})}
 			</div>

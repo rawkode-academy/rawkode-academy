@@ -89,6 +89,8 @@ async function render(file, props, collections = {}) {
 		},
 		"@/lib/video-thumbnail": {
 			getVideoThumbnailUrl: (id) => `https://images.example.test/${id}.jpg`,
+			getVideoThumbnailResizedUrl: (id, width) =>
+				`https://images.example.test/${id}-${width}.jpg`,
 		},
 		"@/components/articles/ArticleCard.astro": {
 			default: runtime.createComponent((_, props) =>
@@ -350,9 +352,13 @@ test("related videos retain ranking, destinations, genuine thumbnails, limit, an
 	assert.deepEqual(
 		dom.querySelectorAll("img").map((img) => img.getAttribute("src")),
 		[
-			"https://images.example.test/best-match.jpg",
-			"https://images.example.test/newer.jpg",
+			"https://images.example.test/best-match-640.jpg",
+			"https://images.example.test/newer-640.jpg",
 		],
+	);
+	assert.deepEqual(
+		dom.querySelectorAll("img").map((img) => img.getAttribute("alt")),
+		["", ""],
 	);
 	assert.equal(dom.querySelector("h2").text.trim(), "Related videos");
 	assert.equal(

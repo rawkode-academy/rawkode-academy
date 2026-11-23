@@ -179,7 +179,7 @@ describe("renderDocument hooks", () => {
 		expect(isExternalHref("mailto:x@y")).toBe(false);
 	});
 
-	it("keeps descriptions marked-style: no typography, autolinks or new tabs", async () => {
+	it("keeps descriptions marked-style (no typography or new tabs) while autolinking technologies", async () => {
 		const { html } = await render(
 			doc(p(text('"Kubernetes" -- '), text("x", [link("https://e.com")]))),
 			{
@@ -187,6 +187,17 @@ describe("renderDocument hooks", () => {
 			},
 		);
 		expect(html).toBe(
+			'<p>&quot;<a href="/technology/kubernetes">Kubernetes</a>&quot; -- <a href="https://e.com">x</a></p>',
+		);
+
+		const { html: noAutolink } = await render(
+			doc(p(text('"Kubernetes" -- '), text("x", [link("https://e.com")]))),
+			{
+				profile: "description",
+				autolink: false,
+			},
+		);
+		expect(noAutolink).toBe(
 			'<p>&quot;Kubernetes&quot; -- <a href="https://e.com">x</a></p>',
 		);
 	});
@@ -412,7 +423,7 @@ describe("renderDocument caching", () => {
 			highlight: false,
 		});
 		expect(first.html).toBe("<p>Hello</p>");
-		const key = [...kv.store.keys()].find((k) => k.startsWith("render:v2:"));
+		const key = [...kv.store.keys()].find((k) => k.startsWith("render:v3:"));
 		expect(key).toBeDefined();
 		resetRenderCacheForTests();
 		kv.store.set(
@@ -434,17 +445,43 @@ describe("renderDocument caching", () => {
 		).toBe("<p>Other</p>");
 	});
 
-	it("does not autolink technology profiles, as remark-tech-autolink skipped them", async () => {
+	it("autolinks other technologies on technology profiles while skipping self-links", async () => {
 		const body = doc(p(text("Kubernetes and Docker")));
 		const entry = (collection: "technologies" | "articles") =>
 			({ id: "kubernetes", collection, data: { body } }) as never;
 		const opts = { kv: memoryKv(), technologies, highlight: false };
-		expect((await renderEntry(entry("technologies"), opts)).html).toBe(
-			"<p>Kubernetes and Docker</p>",
-		);
+		const techHtml = (await renderEntry(entry("technologies"), opts)).html;
+		expect(techHtml).toContain('<a href="/technology/docker">Docker</a>');
+		expect(techHtml).not.toContain("/technology/kubernetes");
+		expect(
+			(
+				await renderEntry(entry("technologies"), {
+					...opts,
+					autolink: false,
+				})
+			).html,
+		).toBe("<p>Kubernetes and Docker</p>");
 		expect((await renderEntry(entry("articles"), opts)).html).toContain(
 			'"/technology/docker"',
 		);
+	});
+
+	it("autolinks technologies in video and show descriptionDoc renders", async () => {
+		const descriptionDoc = doc(
+			p(text('"Kubernetes" -- '), text("docs", [link("https://e.com")])),
+		);
+		const opts = { kv: memoryKv(), technologies, highlight: false };
+		for (const collection of ["videos", "shows"] as const) {
+			const entry = {
+				id: "sample",
+				collection,
+				data: { descriptionDoc },
+			} as never;
+			const { html } = await renderEntry(entry, opts);
+			expect(html).toBe(
+				'<p>&quot;<a href="/technology/kubernetes">Kubernetes</a>&quot; -- <a href="https://e.com">docs</a></p>',
+			);
+		}
 	});
 
 	it("returns empty output for empty documents", async () => {

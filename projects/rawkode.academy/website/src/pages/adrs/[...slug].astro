@@ -11,6 +11,7 @@ import {
 } from "@/lib/live-content";
 import RichText from "@/components/content/RichText.astro";
 import AdrJsonLd from "@/components/html/adr-jsonld.astro";
+import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
 import { createLogger } from "@/lib/logger";
 import ArticleHeader from "@/components/read/ArticleHeader.astro";
 import ArticleByline from "@/components/read/ArticleByline.astro";
@@ -52,10 +53,27 @@ const validAuthors = authors.filter((author) => author && author.data);
 <Page
 	title={`ADR-${adrNumber}: ${adr.data.title}`}
 	description={`Architecture Decision Record: ${adr.data.title}`}
+	isArticle={true}
+	publishedAt={adr.data.adoptedAt}
+	{...(adr.data.recordUpdatedAt ? { updatedAt: adr.data.recordUpdatedAt } : {})}
+	authors={validAuthors}
+	articleSection="Architecture Decision Records"
 >
-	<AdrJsonLd slot="extra-head" adr={adr} authors={authors} />
+	<Fragment slot="extra-head">
+		<AdrJsonLd adr={adr} authors={authors} />
+		<BreadcrumbJsonLd
+			elements={[
+				{ title: "Home", link: "/" },
+				{ title: "Architecture Decision Records", link: "/adrs" },
+				{ title: `ADR-${adrNumber}: ${adr.data.title}`, link: `/adrs/${adr.id}` },
+			]}
+		/>
+	</Fragment>
 	<ArticleHeader
-		breadcrumbs={[{ label: "Architecture decisions", href: "/adrs" }]}
+		breadcrumbs={[
+			{ label: "Home", href: "/" },
+			{ label: "Architecture decisions", href: "/adrs" },
+		]}
 		kicker={`ADR-${adrNumber}`}
 		title={adr.data.title}
 	>
