@@ -11,5 +11,5 @@
     "skipLibCheck": true,
     "types": ["node"]
   },
-  "include": ["src/**/*.ts", "test/**/*.ts", "worker-configuration.d.ts", "secrets.d.ts"]
+  "include": ["src/**/*.ts", "test/**/*.ts", "scripts/*.mjs", "worker-configuration.d.ts", "secrets.d.ts"]
 }

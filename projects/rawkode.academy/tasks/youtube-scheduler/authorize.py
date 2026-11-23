@@ -2,11 +2,7 @@
 # requires-python = ">=3.11"
 # dependencies = ["google-auth-oauthlib>=1.2.2,<2"]
 # ///
-"""Run on the desktop where the Google consent browser opens, once per channel.
-
-Grants read-only YouTube and YouTube Analytics access and saves the offline
-credential for the Worker's YOUTUBE_CREDENTIALS_JSON secret.
-"""
+"""Run on the desktop where the Google consent browser is opened, once per channel."""
 import argparse
 import json
 import os
@@ -15,6 +11,8 @@ from pathlib import Path
 from google_auth_oauthlib.flow import InstalledAppFlow
 
 SCOPES = [
+    "openid",
+    "https://www.googleapis.com/auth/youtube.force-ssl",
     "https://www.googleapis.com/auth/youtube.readonly",
     "https://www.googleapis.com/auth/yt-analytics.readonly",
 ]
@@ -40,19 +38,24 @@ def main():
     if not credentials.refresh_token:
         raise SystemExit("Google did not issue a refresh token; no credentials were saved.")
     if not set(SCOPES).issubset(set(credentials.granted_scopes or credentials.scopes or [])):
-        raise SystemExit("YouTube and YouTube Analytics read access are both required; no credentials were saved.")
+        raise SystemExit("Publishing and analytics both require consent; no credentials were saved.")
     response = flow.authorized_session().get("https://www.googleapis.com/youtube/v3/channels", params={"part": "id", "mine": "true"}, timeout=30)
     channel_response = response.json() if response.status_code == 200 else {}
     channels = channel_response.get("items", [])
     if len(channels) != 1 or channels[0].get("id") != args.channel or channel_response.get("nextPageToken"):
         raise SystemExit("Authorize exactly the requested Google/Brand channel; no credentials were saved.")
-    value = {"client_id": credentials.client_id, "client_secret": credentials.client_secret, "refresh_token": credentials.refresh_token, "channel_id": args.channel, "scopes": credentials.granted_scopes or credentials.scopes}
+    identity = flow.authorized_session().get("https://openidconnect.googleapis.com/v1/userinfo", timeout=30)
+    if identity.status_code != 200 or not identity.json().get("sub"):
+        raise SystemExit("Google did not confirm the owner's subject ID; no credentials were saved.")
+    subject = identity.json()["sub"]
+    value = {"client_id": credentials.client_id, "client_secret": credentials.client_secret, "refresh_token": credentials.refresh_token, "channel_id": args.channel, "google_subject": subject, "scopes": credentials.granted_scopes or credentials.scopes}
     output.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
     fd = os.open(output, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
     with os.fdopen(fd, "w") as file:
         json.dump(value, file)
         file.write("\n")
     print(f"Authorized channel {args.channel}. Credentials saved to {output}.")
+    print(f"MCP owner Google subject: {subject}")
 
 
 if __name__ == "__main__":

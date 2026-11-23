@@ -6,8 +6,8 @@ schema.#Project
 
 name: "rawkode-academy-platform-youtube-control"
 
-// No automatic deploy pipeline yet: deploy with `npm run deploy` after the
-// Worker secrets in README.md are set.
+// This isolated PoC has no automatic deploy pipeline. Provisioned IDs and
+// owner credentials are configured through scripts/setup.mjs and Worker secrets.
 tasks: [string]: hermetic: false
 
 tasks: {
@@ -19,12 +19,12 @@ tasks: {
 	check: schema.#Task & {
 		command: "npm"
 		args: ["run", "check", "--workspaces=false"]
-		inputs: ["src/**", "test/**", "package.json", "package-lock.json", "tsconfig.json", "secrets.d.ts", "wrangler.jsonc"]
+		inputs: ["src/**", "test/**", "scripts/**", "package.json", "package-lock.json", "tsconfig.json", "secrets.d.ts", "wrangler.jsonc"]
 	}
 	test: schema.#Task & {
 		command: "npm"
 		args: ["test", "--workspaces=false"]
-		inputs: ["src/**", "test/**", "package.json", "package-lock.json", "wrangler.jsonc"]
+		inputs: ["src/**", "test/**", "scripts/**", "infra/**", "package.json", "package-lock.json", "wrangler.jsonc"]
 	}
 	build: schema.#Task & {
 		command: "npm"

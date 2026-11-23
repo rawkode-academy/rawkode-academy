@@ -1,15 +1,16 @@
-# Standalone checks. No deployment credentials, production environment or live API calls.
-name: YouTube analytics
+# Standalone PoC checks. No deployment credentials, production environment or live API calls.
+name: YouTube control PoC
 on:
   pull_request:
     paths:
       - .github/workflows/youtube-control-poc.yml
       - projects/rawkode.academy/platform/youtube-control/**
+      - projects/rawkode.academy/tasks/youtube-scheduler/**
   workflow_dispatch:
 permissions:
   contents: read
 concurrency:
-  group: youtube-analytics-${{ github.head_ref || github.ref }}
+  group: youtube-control-poc-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 jobs:
   test:
@@ -40,4 +41,9 @@ jobs:
       - run: npm ci --workspaces=false --no-audit --no-fund
       - run: npm run check --workspaces=false
       - run: npm test --workspaces=false
-      - run: python3 -m py_compile scripts/authorize.py
+      - name: Verify cost model arithmetic
+        run: python3 -m unittest discover -s test -p '*_test.py'
+      - name: Check existing scheduling CLI
+        run: |
+          node --test ../../tasks/youtube-scheduler/youtube.test.mjs
+          python3 -m py_compile ../../tasks/youtube-scheduler/authorize.py
