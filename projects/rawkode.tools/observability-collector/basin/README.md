@@ -161,14 +161,14 @@ after this change is deployed (so nothing new is written to `short_links`):
 
 ```sh
 cuenv task relabel-history -e production            # dry run: counts per reason
-cuenv task relabel-history -e production -- --apply # rewrite in place
+RELABEL_ARGS=--apply cuenv task relabel-history -e production # rewrite in place
 ```
 
 It rewrites only rows ingested before it starts, adds `bot`, `botreason` and
 `botbackfill` to archive events, and adds `bot`, `bot_reason` and `asn`
 columns to `short_links`. Rows already labelled are kept, so it is safe to
 re-run. Each table's previous snapshot ID is printed; within the 7-day
-snapshot expiry, `-- --rollback <table> <snapshot-id>` restores it (and drops
+snapshot expiry, `RELABEL_ARGS="--rollback <table> <snapshot-id>"` restores it (and drops
 anything appended since). The query-time rules stay, so the dashboard is
 correct before and after the rewrite.
 

@@ -212,4 +212,5 @@ def main(argv: list[str]) -> None:
 
 
 if __name__ == "__main__":
-	main(sys.argv[1:])
+	# RELABEL_ARGS lets a task runner that doesn't forward arguments pass them.
+	main(sys.argv[1:] or os.environ.get("RELABEL_ARGS", "").split())
