@@ -1,27 +1,32 @@
 import type { MiddlewareHandler } from "astro";
 
+const ALLOW_INDEX_PREFIXES = ["/api/feeds/"];
 const NOINDEX_PREFIXES = ["/api/", "/_server-islands/", "/internal/"];
 const NOINDEX_EXACT_PATHS = new Set(["/graphql", "/settings"]);
 
-// Production hostnames Google should index. Anything else (workers.dev
-// preview URLs, design.rawkode.academy, branch deploys) gets a noindex
-// header so they don't compete with the canonical domain in search.
-const INDEXABLE_HOSTNAMES = new Set(["rawkode.academy", "www.rawkode.academy"]);
+// Canonical production hostname plus loopback addresses used by local dev and
+// E2E preview servers. Everything else (www.rawkode.academy, *.workers.dev,
+// *.pages.dev, design.rawkode.academy, branch deploys) is non-production.
+const INDEXABLE_HOSTNAMES = new Set([
+	"",
+	"rawkode.academy",
+	"localhost",
+	"127.0.0.1",
+	"[::1]",
+	"::1",
+]);
 
-export const robotsMiddleware: MiddlewareHandler = async (context, next) => {
-	const response = await next();
-	const pathname = context.url.pathname;
-	const hostname = context.url.hostname;
+export function isNonProductionHost(hostname: string): boolean {
+	const normalized = hostname.trim().toLowerCase().replace(/\.$/, "");
+	return !INDEXABLE_HOSTNAMES.has(normalized);
+}
 
-	const isNonProductionHost =
-		hostname !== "" && !INDEXABLE_HOSTNAMES.has(hostname);
+export function applyRobotsNoindexHeader(response: Response): Response {
+	if (response.status === 101) {
+		return response;
+	}
 
-	const shouldNoindex =
-		isNonProductionHost ||
-		NOINDEX_PREFIXES.some((prefix) => pathname.startsWith(prefix)) ||
-		NOINDEX_EXACT_PATHS.has(pathname);
-
-	if (!shouldNoindex || response.headers.has("X-Robots-Tag")) {
+	if (response.headers.get("X-Robots-Tag") === "noindex, nofollow") {
 		return response;
 	}
 
@@ -29,7 +34,7 @@ export const robotsMiddleware: MiddlewareHandler = async (context, next) => {
 		response.headers.set("X-Robots-Tag", "noindex, nofollow");
 		return response;
 	} catch {
-		// Prerendered and static responses arrive with immutable headers.
+		// Prerendered static assets and cached responses arrive with immutable headers.
 		const headers = new Headers(response.headers);
 		headers.set("X-Robots-Tag", "noindex, nofollow");
 		return new Response(response.body, {
@@ -38,4 +43,36 @@ export const robotsMiddleware: MiddlewareHandler = async (context, next) => {
 			headers,
 		});
 	}
+}
+
+export const robotsMiddleware: MiddlewareHandler = async (context, next) => {
+	const response = await next();
+	const pathname = context.url.pathname;
+	const hostname = context.url.hostname;
+
+	if (isNonProductionHost(hostname)) {
+		return applyRobotsNoindexHeader(response);
+	}
+
+	const collapsedPathname = pathname.replace(/^\/+/, "/");
+	const normalizedPathname =
+		collapsedPathname.length > 1
+			? collapsedPathname.replace(/\/+$/, "") || "/"
+			: collapsedPathname;
+
+	const isAllowedFeedPath = ALLOW_INDEX_PREFIXES.some((prefix) =>
+		collapsedPathname.startsWith(prefix),
+	);
+	const isBlockedPath =
+		(!isAllowedFeedPath &&
+			NOINDEX_PREFIXES.some((prefix) =>
+				collapsedPathname.startsWith(prefix),
+			)) ||
+		NOINDEX_EXACT_PATHS.has(normalizedPathname);
+
+	if (!isBlockedPath || response.headers.has("X-Robots-Tag")) {
+		return response;
+	}
+
+	return applyRobotsNoindexHeader(response);
 };

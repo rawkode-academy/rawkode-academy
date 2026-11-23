@@ -1,8 +1,20 @@
 import type { ContentEntry } from "@/lib/live-content";
 import type { ImageServicePayload } from "./image-service";
 
-type OpenGraphImagePayload = Omit<Partial<ImageServicePayload>, "image"> & {
+export type OpenGraphImageFormat = "png" | "svg" | "jpg" | "jpeg" | "webp";
+
+export type TwitterCardType = "summary_large_image" | "summary";
+
+export type OpenGraphImagePayload = Omit<
+	Partial<ImageServicePayload>,
+	"image" | "format"
+> & {
 	image?: string | URL | undefined;
+	format?: OpenGraphImageFormat | undefined;
+	width?: number | undefined;
+	height?: number | undefined;
+	mimeType?: string | undefined;
+	alt?: string | undefined;
 };
 
 /**
@@ -21,13 +33,17 @@ export type PageType =
 
 export interface OpenGraphProps {
 	title: string;
+	ogTitle?: string | undefined;
 	subtitle?: string | undefined;
 	description?: string | undefined;
+	canonicalUrl?: URL | string | undefined;
 	useImageDirectly?: boolean | undefined;
 	image?: OpenGraphImagePayload | undefined;
 	isArticle?: boolean | undefined;
 	/** Overrides the Open Graph type for non-article pages, e.g. `video.other`. */
 	ogType?: string | undefined;
+	twitterCard?: TwitterCardType | undefined;
+	twitterCreator?: string | undefined;
 	publishedAt?: Date | undefined;
 	updatedAt?: Date | undefined;
 	authors?: ContentEntry<"people">[] | undefined;

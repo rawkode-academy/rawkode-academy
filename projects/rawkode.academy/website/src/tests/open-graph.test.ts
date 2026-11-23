@@ -57,6 +57,7 @@ describe("resolveOpenGraphImage", () => {
 		expect(image).toEqual({
 			url: "https://rawkode.academy/images/video.jpg",
 			alt: "Hands-on Introduction to sympozium",
+			type: "image/jpeg",
 		});
 	});
 

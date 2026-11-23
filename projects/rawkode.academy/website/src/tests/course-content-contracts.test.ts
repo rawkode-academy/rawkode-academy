@@ -230,7 +230,7 @@ describe("truthful course structured data", () => {
 	});
 	it("does not advertise an announced course as in stock or zero minutes", async () => {
 		const data = await jsonLd([moduleEntry("draft", 1, true, 30)]);
-		expect(data.teaches).toEqual([]);
+		expect(data).not.toHaveProperty("teaches");
 		expect(data).not.toHaveProperty("hasCourseInstance");
 		expect(data).not.toHaveProperty("timeRequired");
 		expect(data.offers).not.toHaveProperty("availability");

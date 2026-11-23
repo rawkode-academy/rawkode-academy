@@ -1,5 +1,11 @@
 ---
 import { Font } from "astro:assets";
+import {
+	clampDescription,
+	formatPageTitle,
+	resolveCanonicalUrl,
+	serializeJsonLd,
+} from "@/lib/open-graph";
 import { SITE_DESCRIPTION } from "@/lib/site";
 import type { OpenGraphProps } from "@/types/opengraph";
 import Analytics from "../analytics/index.astro";
@@ -15,22 +21,15 @@ interface Props extends OpenGraphProps {
 }
 
 const { userId } = Astro.props;
-const BRAND_NAME = "Rawkode Academy";
-const TITLE_SUFFIX = ` | ${BRAND_NAME}`;
-// Google truncates SERP titles around 60 characters. Skip the brand
-// suffix when appending it would push the title past that threshold -
-// `og:site_name` (emitted by opengraph.astro) and the domain itself
-// carry the brand for the cases where the suffix is dropped.
-const TITLE_MAX_LENGTH = 60;
-const baseTitle = (Astro.props.title ?? BRAND_NAME).trim();
-const baseTitleContainsBrand = baseTitle
-	.toLowerCase()
-	.includes(BRAND_NAME.toLowerCase());
-const normalizedTitle =
-	baseTitleContainsBrand ||
-	baseTitle.length + TITLE_SUFFIX.length > TITLE_MAX_LENGTH
-		? baseTitle
-		: `${baseTitle}${TITLE_SUFFIX}`;
+const normalizedTitle = formatPageTitle(Astro.props.title);
+const metaDescription = clampDescription(
+	Astro.props.description?.trim() ? Astro.props.description : SITE_DESCRIPTION,
+);
+const canonicalURL = resolveCanonicalUrl(
+	Astro.props.canonicalUrl,
+	Astro.url.pathname,
+	Astro.site,
+);
 ---
 
 <style is:global>
@@ -64,13 +63,14 @@ const normalizedTitle =
 		the matching SVG via the `media` attribute; PNG fallbacks remain for
 		legacy and pinned-tab contexts (still on the prior brand pending regen).
 	*/}
+	<link rel="icon" href="/favicon.ico" sizes="48x48" />
 	<link rel="icon" type="image/svg+xml" href="/icon-dark.svg" media="(prefers-color-scheme: light)" />
 	<link rel="icon" type="image/svg+xml" href="/icon-light.svg" media="(prefers-color-scheme: dark)" />
 	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
 	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
 	<link rel="manifest" href="/site.webmanifest" />
-	<link rel="mask-icon" href="/icon-dark.svg" color="#23282d" />
+	<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#0a1220" />
 	<meta name="msapplication-TileColor" content="#f4f7fb" />
 	{/* ThemeScript keeps browser chrome aligned with the applied preference,
 	    including when it overrides the operating-system scheme. */}
@@ -82,7 +82,7 @@ const normalizedTitle =
 	/>
 	<meta
 		name="description"
-		content={Astro.props.description || SITE_DESCRIPTION}
+		content={metaDescription}
 	/>
 
 	<title>{normalizedTitle}</title>
@@ -92,18 +92,22 @@ const normalizedTitle =
 	)}
 
 	<!-- Canonical URL -->
-	<link rel="canonical" href={new URL(Astro.url.pathname, Astro.site).href} />
+	<link rel="canonical" href={canonicalURL.href} />
 
-	<Opengraph {...Astro.props} />
-	{Astro.props.jsonLd && (
+	<Opengraph {...Astro.props} canonicalUrl={canonicalURL} />
+	{!Astro.props.noindex && Astro.props.jsonLd && (
 		<script
 			is:inline
 			type="application/ld+json"
-			set:html={JSON.stringify(Astro.props.jsonLd)}
+			set:html={serializeJsonLd(Astro.props.jsonLd)}
 		/>
 	)}
-	<SearchActionJsonLd />
-	<OrganizationJsonLd />
+	{!Astro.props.noindex && (
+		<>
+			<SearchActionJsonLd />
+			<OrganizationJsonLd />
+		</>
+	)}
 
 	<!-- Resource hints for performance -->
 	<link rel="preconnect" href="https://content.rawkode.academy" />

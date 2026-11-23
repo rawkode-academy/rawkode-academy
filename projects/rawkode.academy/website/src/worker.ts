@@ -7,11 +7,43 @@ import { runChangeDetection } from "./lib/live-content/change-detection";
 import type { ContentEnv } from "./lib/live-content/env";
 import { workersCachePurge } from "./lib/live-content/invalidate";
 import { guardSharedCache } from "./lib/live-content/personalisation";
+import {
+	applyRobotsNoindexHeader,
+	isNonProductionHost,
+} from "./middleware/robots";
+
+const LEGACY_REDIRECT_HOSTS = new Set(["klustered.live", "www.klustered.live"]);
 
 export default {
 	async fetch(request, env, ctx) {
-		const response = await handle(request, env, ctx);
-		return guardSharedCache(request, response);
+		const url = new URL(request.url);
+		const hostname = url.hostname.trim().toLowerCase().replace(/\.$/, "");
+
+		if (hostname === "www.rawkode.academy") {
+			return new Response(null, {
+				status: 301,
+				headers: {
+					Location: `https://rawkode.academy${url.pathname}${url.search}`,
+					"Cache-Control": "public, max-age=3600",
+				},
+			});
+		}
+
+		const rawResponse = await handle(request, env, ctx);
+		const response = guardSharedCache(request, rawResponse);
+
+		if (
+			isNonProductionHost(hostname) &&
+			!(
+				LEGACY_REDIRECT_HOSTS.has(hostname) &&
+				response.status >= 300 &&
+				response.status < 400
+			)
+		) {
+			return applyRobotsNoindexHeader(response);
+		}
+
+		return response;
 	},
 	async scheduled(controller, env, ctx) {
 		const contentEnv = env as unknown as ContentEnv;

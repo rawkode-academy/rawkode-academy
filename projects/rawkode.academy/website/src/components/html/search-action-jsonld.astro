@@ -9,8 +9,13 @@ const siteOrigin = (
 const searchActionJsonLd = {
 	"@context": "https://schema.org",
 	"@type": "WebSite",
+	"@id": "https://rawkode.academy/#website",
 	url: `${siteOrigin}/`,
 	name: "Rawkode Academy",
+	inLanguage: "en",
+	publisher: {
+		"@id": "https://rawkode.academy/#organization",
+	},
 	potentialAction: {
 		"@type": "SearchAction",
 		target: {
@@ -24,6 +29,9 @@ const searchActionJsonLd = {
 
 <script
 	type="application/ld+json"
-	set:html={JSON.stringify(searchActionJsonLd)}
+	set:html={JSON.stringify(searchActionJsonLd)
+		.replace(/</g, "\\u003c")
+		.replace(/\u2028/g, "\\u2028")
+		.replace(/\u2029/g, "\\u2029")}
 	is:inline
 ></script>

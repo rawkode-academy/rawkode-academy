@@ -4,23 +4,30 @@ import { buildPersonJsonLd } from "@/lib/person-jsonld";
 
 interface Props {
 	course: ContentEntry<"courses">;
-	modules: ContentEntry<"courseModules">[];
-	authors: ContentEntry<"people">[];
-	imageUrl?: URL;
+	modules?: ContentEntry<"courseModules">[] | undefined;
+	authors?: ContentEntry<"people">[] | undefined;
+	imageUrl?: URL | string | undefined;
+	module?: ContentEntry<"courseModules"> | undefined;
+	isModule?: boolean | undefined;
+	slot?: string | undefined;
 }
 
-const { course, modules, authors, imageUrl } = Astro.props;
+const {
+	course,
+	modules = [],
+	authors = [],
+	imageUrl,
+	module,
+	isModule = false,
+} = Astro.props;
 
-const publishedModules = modules.filter((module) => !module.data.draft);
+const publishedModules = modules.filter((item) => !item.data.draft);
 const hasDuration = (minutes: number | undefined): minutes is number =>
 	typeof minutes === "number" && Number.isFinite(minutes) && minutes > 0;
 const totalDurationMinutes =
 	publishedModules.length > 0 &&
-	publishedModules.every((module) => hasDuration(module.data.duration))
-		? publishedModules.reduce(
-				(total, module) => total + module.data.duration!,
-				0,
-			)
+	publishedModules.every((item) => hasDuration(item.data.duration))
+		? publishedModules.reduce((total, item) => total + item.data.duration!, 0)
 		: undefined;
 
 // Map difficulty to skill level
@@ -38,69 +45,160 @@ const getSkillLevel = (difficulty: string) => {
 };
 
 // Create hasCourseInstance for each module
-const courseInstances = publishedModules.map((module) => ({
+const courseInstances = publishedModules.map((item) => ({
 	"@type": "CourseInstance",
-	name: module.data.title,
-	description: module.data.description,
+	name: item.data.title,
+	description: item.data.description,
 	courseMode: "online",
-	...(hasDuration(module.data.duration)
-		? { courseWorkload: `PT${module.data.duration}M` }
+	...(hasDuration(item.data.duration)
+		? { courseWorkload: `PT${item.data.duration}M` }
 		: {}),
 }));
 
-const courseUrl = new URL(`/courses/${course.id}`, Astro.site).href;
+const siteBase =
+	Astro.site ?? Astro.url ?? new URL("https://rawkode.academy");
+const courseUrl = new URL(`/courses/${course.id}`, siteBase).href;
+const defaultImage = "https://rawkode.academy/android-chrome-512x512.png";
 
-// Create structured data for the course
-const courseJsonLd = {
-	"@context": "https://schema.org",
-	"@type": "Course",
-	name: course.data.title,
-	description: course.data.description,
-	url: courseUrl,
-	provider: {
-		"@type": "Organization",
-		name: "Rawkode Academy",
-		sameAs: "https://rawkode.academy",
-		logo: {
-			"@type": "ImageObject",
-			url: "https://rawkode.academy/android-chrome-512x512.png",
-		},
-	},
-	...(courseInstances.length ? { hasCourseInstance: courseInstances } : {}),
-	...(totalDurationMinutes === undefined
-		? {}
-		: { timeRequired: `PT${totalDurationMinutes}M` }),
-	inLanguage: "en-US",
-	availableLanguage: ["en-US"],
-	datePublished: course.data.publishedAt.toISOString(),
-	dateModified:
-		course.data.updatedAt?.toISOString() ||
-		course.data.publishedAt.toISOString(),
-	image:
-		imageUrl?.toString() ||
-		"https://rawkode.academy/android-chrome-512x512.png",
-	creator: authors.map((author) =>
-		buildPersonJsonLd(author.data, "https://rawkode.academy"),
-	),
-	teaches: publishedModules.map((module) => module.data.title),
-	educationalLevel: getSkillLevel(course.data.difficulty),
-	learningResourceType: "Online Course",
-	interactivityType: "active",
-	isAccessibleForFree: true,
-	offers: {
-		"@type": "Offer",
-		price: "0",
-		priceCurrency: "USD",
-		...(publishedModules.length
-			? { availability: "https://schema.org/InStock" }
-			: {}),
-		category: "Free",
+const rawImageCandidate =
+	(typeof imageUrl === "string" && imageUrl.trim().length > 0
+		? imageUrl.trim()
+		: imageUrl instanceof URL
+			? imageUrl.href
+			: undefined) ??
+	(isModule ? module?.data.cover?.image.src : undefined) ??
+	course.data.cover?.image.src;
+
+const resolvedImage = rawImageCandidate
+	? new URL(rawImageCandidate, siteBase).href
+	: defaultImage;
+
+const provider = {
+	"@type": "Organization",
+	"@id": "https://rawkode.academy/#organization",
+	name: "Rawkode Academy",
+	sameAs: "https://rawkode.academy",
+	logo: {
+		"@type": "ImageObject",
+		url: defaultImage,
 	},
 };
+
+const creators = authors.map((author) =>
+	buildPersonJsonLd(author.data, "https://rawkode.academy"),
+);
+
+const normalizedLearningPath = Array.isArray(course.data.learningPath)
+	? course.data.learningPath
+			.filter((item): item is string => typeof item === "string")
+			.map((item) => item.trim())
+			.filter((item) => item.length > 0)
+	: [];
+const normalizedModuleTitles = publishedModules
+	.map((item) =>
+		typeof item.data.title === "string" ? item.data.title.trim() : "",
+	)
+	.filter((item) => item.length > 0);
+const teachesValues =
+	normalizedLearningPath.length > 0
+		? normalizedLearningPath
+		: normalizedModuleTitles;
+
+const moduleSlug =
+	module?.data.slug ||
+	(module && module.id.startsWith(`${course.id}/`)
+		? module.id.slice(course.id.length + 1)
+		: module?.id);
+const moduleUrl = moduleSlug
+	? new URL(`/courses/${course.id}/${moduleSlug}`, siteBase).href
+	: courseUrl;
+
+// Create structured data for the course or course module
+const courseJsonLd =
+	isModule && module
+		? {
+				"@context": "https://schema.org",
+				"@type": "LearningResource",
+				"@id": `${moduleUrl}#learningresource`,
+				name: module.data.title,
+				description: module.data.description,
+				url: moduleUrl,
+				inLanguage: "en",
+				learningResourceType: module.data.video
+					? "Video Lesson"
+					: "Course Lesson",
+				educationalLevel: getSkillLevel(
+					module.data.difficulty ?? course.data.difficulty,
+				),
+				isAccessibleForFree: true,
+				datePublished: module.data.publishedAt.toISOString(),
+				dateModified:
+					module.data.updatedAt?.toISOString() ||
+					module.data.publishedAt.toISOString(),
+				image: resolvedImage,
+				...(hasDuration(module.data.duration)
+					? { timeRequired: `PT${module.data.duration}M` }
+					: {}),
+				...(typeof module.data.order === "number"
+					? { position: module.data.order }
+					: {}),
+				provider,
+				...(creators.length > 0 ? { creator: creators } : {}),
+				isPartOf: {
+					"@type": "Course",
+					"@id": `${courseUrl}#course`,
+					name: course.data.title,
+					description: course.data.description,
+					url: courseUrl,
+					provider: {
+						"@id": "https://rawkode.academy/#organization",
+					},
+				},
+			}
+		: {
+				"@context": "https://schema.org",
+				"@type": "Course",
+				"@id": `${courseUrl}#course`,
+				name: course.data.title,
+				description: course.data.description,
+				url: courseUrl,
+				provider,
+				...(courseInstances.length
+					? { hasCourseInstance: courseInstances }
+					: {}),
+				...(totalDurationMinutes === undefined
+					? {}
+					: { timeRequired: `PT${totalDurationMinutes}M` }),
+				inLanguage: "en",
+				availableLanguage: ["en"],
+				datePublished: course.data.publishedAt.toISOString(),
+				dateModified:
+					course.data.updatedAt?.toISOString() ||
+					course.data.publishedAt.toISOString(),
+				image: resolvedImage,
+				creator: creators,
+				...(teachesValues.length > 0 ? { teaches: teachesValues } : {}),
+				educationalLevel: getSkillLevel(course.data.difficulty),
+				learningResourceType: "Online Course",
+				interactivityType: "active",
+				isAccessibleForFree: true,
+				offers: {
+					"@type": "Offer",
+					price: "0",
+					priceCurrency: "USD",
+					...(publishedModules.length
+						? { availability: "https://schema.org/InStock" }
+						: {}),
+					category: "Free",
+				},
+			};
 ---
 
 <script
 	type="application/ld+json"
-	set:html={JSON.stringify(courseJsonLd)}
+	set:html={JSON.stringify(courseJsonLd)
+		.replace(/</g, "\\u003c")
+		.replace(/\u2028/g, "\\u2028")
+		.replace(/\u2029/g, "\\u2029")}
 	is:inline
 ></script>

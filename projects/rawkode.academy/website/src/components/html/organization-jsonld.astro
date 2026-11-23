@@ -13,10 +13,15 @@ interface Props {
 
 const { showInAllPages = false } = Astro.props;
 
-// Only show on homepage or if explicitly requested
-const shouldShow = Astro.url.pathname === "/" || showInAllPages;
-
-if (!shouldShow) return;
+// Show on homepage, about page, or if explicitly requested
+const normalizedPathname =
+	Astro.url.pathname.length > 1
+		? Astro.url.pathname.replace(/\/+$/, "")
+		: Astro.url.pathname;
+const shouldShow =
+	normalizedPathname === "/" ||
+	normalizedPathname === "/about" ||
+	showInAllPages;
 
 // Offers come from the same copy module as the partnerships page, so prices
 // in search results cannot drift from what the page says.
@@ -36,25 +41,31 @@ const partnerOffer = (offer: PartnershipOffer, anchor: string, baseUrl = PARTNER
 	},
 });
 
-const organizationSchema = {
-	"@context": "https://schema.org",
-	"@type": "Organization",
+const organizationSchema = shouldShow
+	? {
+			"@context": "https://schema.org",
+	"@type": ["EducationalOrganization", "Organization"],
 	"@id": "https://rawkode.academy/#organization",
 	name: "Rawkode Academy",
 	url: "https://rawkode.academy",
 	logo: {
 		"@type": "ImageObject",
+		"@id": "https://rawkode.academy/#logo",
 		url: "https://rawkode.academy/android-chrome-512x512.png",
+		contentUrl: "https://rawkode.academy/android-chrome-512x512.png",
 		width: 512,
 		height: 512,
+		caption: "Rawkode Academy",
 	},
+	image: "https://rawkode.academy/android-chrome-512x512.png",
 	description:
-		"Rawkode Academy provides cloud-native education and partnerships for companies building technical products for practitioners.",
+		"Rawkode Academy provides hands-on cloud-native education, tutorials, courses, live shows, and technical partnerships for practitioners.",
 	sameAs: [
 		"https://github.com/rawkode-academy",
 		"https://www.youtube.com/@RawkodeAcademy",
-		"https://x.com/RawkodeAcademy",
+		"https://bsky.app/profile/rawkode.academy",
 		"https://www.linkedin.com/company/rawkode-academy",
+		"https://x.com/RawkodeAcademy",
 	],
 	contactPoint: {
 		"@type": "ContactPoint",
@@ -65,8 +76,12 @@ const organizationSchema = {
 	founder: {
 		"@type": "Person",
 		name: "David Flanagan",
-		url: "https://github.com/rawkode",
-		sameAs: ["https://x.com/rawkode", "https://www.linkedin.com/in/rawkode"],
+		url: "https://rawkode.academy/people/rawkode",
+		sameAs: [
+			"https://github.com/rawkode",
+			"https://x.com/rawkode",
+			"https://www.linkedin.com/in/rawkode",
+		],
 	},
 	foundingDate: "2021",
 	areaServed: {
@@ -120,12 +135,18 @@ const organizationSchema = {
 				description: "Self-paced online courses for cloud native technologies",
 			},
 		},
-	],
-};
+		],
+	}
+	: undefined;
 ---
 
-<script
-	type="application/ld+json"
-	set:html={JSON.stringify(organizationSchema)}
-	is:inline
-></script>
+{organizationSchema && (
+	<script
+		type="application/ld+json"
+		set:html={JSON.stringify(organizationSchema)
+			.replace(/</g, "\\u003c")
+			.replace(/\u2028/g, "\\u2028")
+			.replace(/\u2029/g, "\\u2029")}
+		is:inline
+	></script>
+)}
