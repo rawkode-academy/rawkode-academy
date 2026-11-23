@@ -54,7 +54,7 @@ const hasActions = Astro.slots.has("actions");
 					data-lit={tile.lit ? "" : undefined}
 					style={`--x:${tile.x};--y:${tile.y};--w:${tile.w};--h:${tile.h};--i:${tile.order}`}
 				>
-					<img class={styles.mastheadImage} src={tile.src} alt="" loading="lazy" decoding="async" fetchpriority="low" />
+					<img class={styles.mastheadImage} src={tile.src} alt="" width={tile.w * 64} height={tile.h * 64} loading="lazy" decoding="async" fetchpriority="low" />
 				</span>
 			))}
 		</div>

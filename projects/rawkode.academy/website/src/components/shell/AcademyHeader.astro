@@ -27,13 +27,13 @@ const styles = academyShell();
 				<span class={styles.searchLabel} aria-hidden="true">Search</span>
 				<kbd class={styles.searchKey} aria-hidden="true">⌘K</kbd>
 			</a>
-			<ThemeToggle client:load variant="icon" size="md" />
+			<ThemeToggle client:idle variant="icon" size="md" />
 			<div class={styles.account}>
 				<UserHeader server:defer>
 					<a href="/settings" rel="nofollow" slot="fallback" class={styles.link}>Account</a>
 				</UserHeader>
 			</div>
-			<MobileNavigation client:load primary={primaryNavigation} groups={navigationGroups} currentPath={Astro.url.pathname} />
+			<MobileNavigation client:media="(max-width: 1023px)" primary={primaryNavigation} groups={navigationGroups} currentPath={Astro.url.pathname} />
 		</div>
 	</div>
 </header>
