@@ -156,6 +156,22 @@ the signals they kept (host, the old user-agent verdict, device and browser);
 hosting networks, client hints and webdriver weren't stored, so older events
 from those bots still count as people.
 
+To write those labels into the stored rows, run the one-time relabel task
+after this change is deployed (so nothing new is written to `short_links`):
+
+```sh
+cuenv task relabel-history -e production            # dry run: counts per reason
+cuenv task relabel-history -e production -- --apply # rewrite in place
+```
+
+It rewrites only rows ingested before it starts, adds `bot`, `botreason` and
+`botbackfill` to archive events, and adds `bot`, `bot_reason` and `asn`
+columns to `short_links`. Rows already labelled are kept, so it is safe to
+re-run. Each table's previous snapshot ID is printed; within the 7-day
+snapshot expiry, `-- --rollback <table> <snapshot-id>` restores it (and drops
+anything appended since). The query-time rules stay, so the dashboard is
+correct before and after the rewrite.
+
 The empty legacy `analytics.events` table is no longer queried. To purge it,
 run the guarded one-time cleanup task with Infisical access:
 
