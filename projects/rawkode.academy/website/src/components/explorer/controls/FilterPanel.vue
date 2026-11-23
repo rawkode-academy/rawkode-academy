@@ -1,7 +1,7 @@
 <template>
  <div class="filter-panel">
  <div class="filter-header">
- <h3 class="filter-title">Filters</h3>
+ <h2 class="filter-title">Filters</h2>
  <button
  v-if="hasActiveFilters"
  type="button"

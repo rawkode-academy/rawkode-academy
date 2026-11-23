@@ -11,6 +11,7 @@ import CourseItemListJsonLd from "@/components/html/course-itemlist-jsonld.astro
 import { academyCatalog, academyLayout, button } from "@rawkodeacademy/design-system";
 import { getCourseModuleSlug } from "@/utils/course-path";
 import Page from "@/wrappers/page.astro";
+import { resizeRemoteImageUrl } from "@/lib/video-thumbnail";
 import { localDate, type LocalTimeValue } from "@/lib/local-time";
 
 export const prerender = false;
@@ -95,20 +96,22 @@ const catalog = academyCatalog();
 		listName="Cloud Native Courses"
 	/>
 	<div class={styles.root}>
-		<AcademyCatalogMasthead title="Courses" description="Structured courses and labs, taken lesson by lesson." figure={allCourses.length} figureLabel={allCourses.length === 1 ? "course" : "courses"} mosaic={allCourses.map((course) => courseImages.get(course.id)).filter((src): src is string => Boolean(src))} mosaicShape="video" />
+		<AcademyCatalogMasthead title="Courses" description="Structured courses and labs, taken lesson by lesson." figure={allCourses.length} figureLabel={allCourses.length === 1 ? "course" : "courses"} mosaic={allCourses.map((course) => courseImages.get(course.id)).filter((src): src is string => Boolean(src)).map((src) => resizeRemoteImageUrl(src, 384))} mosaicShape="video" />
 		<section class={styles.section}>
 			<div class={styles.container}>
 			{featuredCourse ? (
 				<article class={catalog.featured}>
 					<div class={catalog.featuredBody}>
 						<p class={catalog.featuredKicker}>Featured course · {featuredAvailableModuleCount > 0 ? `${featuredAvailableModuleCount}/${featuredModuleCount} lessons available` : availabilityLabel(featuredCourse.id)}</p>
-						<h2 class={catalog.featuredTitle}>{featuredCourse.data.title}</h2>
+						<h2 class={catalog.featuredTitle}>
+							<a href={`/courses/${featuredCourse.id}`}>{featuredCourse.data.title}</a>
+						</h2>
 						<p class={catalog.featuredDescription}>{featuredCourse.data.description}</p>
 						<p class={catalog.rowMeta}>{levelLabel(featuredCourse.data.difficulty)} · {featuredPublished && <time {...featuredPublished.attrs}>{featuredPublished.text}</time>}{featuredAuthors.length > 0 && ` · ${featuredAuthors.map((author) => author.name).join(", ")}`}</p>
 						<a class={button()} href={firstModuleSlug ? `/courses/${featuredCourse.id}/${firstModuleSlug}` : `/courses/${featuredCourse.id}`}>{firstModuleSlug ? "Start the course →" : "View course plan →"}</a>
 					</div>
 					{courseImages.get(featuredCourse.id) && <a class={catalog.featuredMedia} href={`/courses/${featuredCourse.id}`} aria-label={`Explore ${featuredCourse.data.title}`}>
-						<img class={catalog.featuredImage} src={courseImages.get(featuredCourse.id)} alt={featuredCourse.data.cover?.alt ?? ""} width="960" height="540" fetchpriority="high" />
+						<img class={catalog.featuredImage} src={resizeRemoteImageUrl(courseImages.get(featuredCourse.id)!, 960)} alt={featuredCourse.data.cover?.alt ?? ""} width="960" height="540" fetchpriority="high" />
 					</a>}
 				</article>
 			) : (
@@ -124,9 +127,12 @@ const catalog = academyCatalog();
 			</header>
 
 				<div class={styles.grid}>
-					{libraryCourses.map((course) => (
-						<AcademyCatalogCard href={`/courses/${course.id}`} title={course.data.title} description={course.data.description} level={course.data.difficulty} meta={[availabilityLabel(course.id)]} image={courseImages.get(course.id)} imageAlt={course.data.cover?.alt ?? ""} />
-					))}
+					{libraryCourses.map((course) => {
+						const coverSrc = courseImages.get(course.id);
+						return (
+							<AcademyCatalogCard href={`/courses/${course.id}`} title={course.data.title} description={course.data.description} level={course.data.difficulty} meta={[availabilityLabel(course.id)]} image={coverSrc ? resizeRemoteImageUrl(coverSrc, 640) : undefined} imageAlt={course.data.cover?.alt ?? ""} />
+						);
+					})}
 				</div>
 			</div>
 		</section>}

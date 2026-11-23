@@ -21,9 +21,10 @@ import {
 } from "@/lib/live-content";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
-import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import { getVideoThumbnailResizedUrl } from "@/lib/video-thumbnail";
 import { localDateTime } from "@/lib/local-time";
 import { isNewsPublished } from "@/lib/news-publication";
+import { isTechnologyIndexable } from "@/lib/sitemaps";
 import {
 	academyPage,
 	academyTechnology,
@@ -112,7 +113,7 @@ const technology: Technology = {
 	videos: technologyVideos.map((video) => ({
 		id: video.data.id,
 		title: video.data.title,
-		thumbnailUrl: getVideoThumbnailUrl(video.data.id),
+		thumbnailUrl: getVideoThumbnailResizedUrl(video.data.id, 640),
 		slug: video.data.slug,
 		duration: video.data.duration,
 		publishedAt: video.data.publishedAt,
@@ -218,9 +219,6 @@ const seoDescription = (() => {
 	return parts.join(". ");
 })();
 
-// Page is "thin" if it has no MDX body content AND no associated videos.
-// noindex these so Google doesn't classify the site as low-quality.
-const noindex = !hasContent && videoCount === 0;
 const styles = academyTechnology();
 const page = academyPage();
 
@@ -354,10 +352,11 @@ const matchesTechnology = (
 		const id = typeof reference === "string" ? reference : reference.id;
 		return id.replace(/\/index$/, "") === normalizedTechnologyId;
 	});
-const [articles, news, learningPaths] = await Promise.all([
+const [articles, news, learningPaths, courses] = await Promise.all([
 	optionalContent(getCollection("articles"), []),
 	optionalContent(getCollection("news"), []),
 	optionalContent(getCollection("learningPaths"), []),
+	optionalContent(getCollection("courses"), []),
 ]);
 const hasTopicContent =
 	articles.some(
@@ -372,7 +371,16 @@ const hasTopicContent =
 	learningPaths.some(
 		({ data }) =>
 			data.publishedAt <= now && matchesTechnology(data.technologies),
+	) ||
+	courses.some(
+		({ data }) =>
+			data.publishedAt <= now && matchesTechnology(data.technologies),
 	);
+const noindex = !isTechnologyIndexable({
+	hasBodyContent: hasContent,
+	videoCount,
+	hasTopicContent,
+});
 const hasAside =
 	hasMatrixDetails ||
 	Boolean(technology.cncf?.status) ||
@@ -380,7 +388,7 @@ const hasAside =
 	cncfLinks.length > 0 ||
 	communityLinks.length > 0;
 
-// TopicHub (articles, news, learning paths), the video rails and the related
+// TopicHub (articles, news, learning paths, courses), the video rails and the related
 // technologies rail all list collections, so their tags and schedules apply.
 // The supporter badge relies on entity tags instead: supporter entries carry
 // "technologies:<id>", so only the supported page is purged when a supporter
@@ -404,10 +412,20 @@ await setContentCache(Astro, {
 					...learningPaths.filter(({ data }) =>
 						matchesTechnology(data.technologies),
 					),
+					...courses.filter(({ data }) =>
+						matchesTechnology(data.technologies),
+					),
 				]
 			: []),
 	],
-	collections: ["technologies", "videos", "articles", "news", "learningPaths"],
+	collections: [
+		"technologies",
+		"videos",
+		"articles",
+		"news",
+		"learningPaths",
+		"courses",
+	],
 });
 ---
 
@@ -415,7 +433,7 @@ await setContentCache(Astro, {
 	title={seoTitle}
 	description={seoDescription}
 	noindex={noindex}
-	useImageDirectly={Boolean(absoluteLogo)}
+	useImageDirectly={false}
 	image={absoluteLogo ? { image: new URL(absoluteLogo) } : undefined}
 >
 	<TechnologyJsonLd
@@ -533,7 +551,7 @@ await setContentCache(Astro, {
 									return (
 										<a href={"/watch/" + video.slug} class={page.streamFeature}>
 											<div class={page.cardArt}>
-												<img src={getVideoThumbnailUrl(video.id)} alt="" class={page.cardImage} width="960" height="540" loading="lazy" />
+												<img src={getVideoThumbnailResizedUrl(video.id, 960)} alt="" class={page.cardImage} width="960" height="540" loading="lazy" />
 											</div>
 											<div class={page.featureCopy}>
 												<p class={page.streamMeta}><span data-label>Upcoming live stream</span><time {...startsAt.attrs}>{startsAt.text}</time></p>
@@ -547,7 +565,7 @@ await setContentCache(Astro, {
 						) : (
 							<div class={page.feedGrid}>
 								{upcomingSessions.map(({ data: video }) => (
-									<VideoCard href={"/watch/" + video.slug} title={video.title} thumbnailUrl={getVideoThumbnailUrl(video.id)} publishedAt={video.publishedAt} scheduled />
+									<VideoCard href={"/watch/" + video.slug} title={video.title} thumbnailUrl={getVideoThumbnailResizedUrl(video.id, 640)} publishedAt={video.publishedAt} scheduled />
 								))}
 							</div>
 						)}

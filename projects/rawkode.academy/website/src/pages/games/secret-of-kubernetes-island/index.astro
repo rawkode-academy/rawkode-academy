@@ -1,10 +1,12 @@
 ---
+import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import PageWrapper from "@/wrappers/page.astro";
 import { DISABLE_GAME_AUTH } from "astro:env/server";
-import { academyLayout, academyMedia } from "@rawkodeacademy/design-system";
+import { academyDocument, academyLayout, academyMedia } from "@rawkodeacademy/design-system";
 import "@rawkodeacademy/design-system/styles.css";
 
 const disableAuth = DISABLE_GAME_AUTH === "true";
+const doc = academyDocument();
 const layout = academyLayout({ width: "wide" });
 const media = academyMedia();
 ---
@@ -14,6 +16,28 @@ const media = academyMedia();
 	description="A verbal combat game where you breach Kubernetes clusters one insult at a time"
 >
 	<div class:list={[layout.root, media.root]}>
+		<header class:list={[layout.section, doc.container, doc.stack]}>
+			<Breadcrumb
+				elements={[
+					{ title: "Home", link: "/" },
+					{
+						title: "Secret of Kubernetes Island",
+						link: "/games/secret-of-kubernetes-island",
+					},
+				]}
+			/>
+			<h1 class={doc.title}>Secret of Kubernetes Island</h1>
+			<p class={doc.lede}>
+				A verbal combat game where you breach Kubernetes clusters one insult at a time.
+			</p>
+			<ul class={doc.tagList} aria-label="Related cloud native topics">
+				<li><a href="/technology/kubernetes" class={doc.tag}>Kubernetes</a></li>
+				<li><a href="/technology" class={doc.tag}>Technologies</a></li>
+				<li><a href="/technology/matrix" class={doc.tag}>Technology Matrix</a></li>
+				<li><a href="/games/kubele" class={doc.tag}>Kubele</a></li>
+				<li><a href="/games/cnicon" class={doc.tag}>CNIcon</a></li>
+			</ul>
+		</header>
 	<div class:list={[layout.section, media.frame, media.canvas, "game-wrapper"]}>
 		<div id="game-root" data-disable-auth={disableAuth ? "true" : "false"}></div>
 	</div>
