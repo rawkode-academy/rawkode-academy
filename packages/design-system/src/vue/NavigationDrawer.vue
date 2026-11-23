@@ -6,6 +6,7 @@ import { academyShell } from "../recipes/academyShell";
 interface NavigationItem {
 	label: string;
 	href: string;
+	rel?: string;
 }
 
 interface NavigationGroup {
@@ -73,7 +74,7 @@ onUnmounted(() => desktop?.removeEventListener("change", closeOnDesktop));
 						<nav aria-label="Mobile navigation">
 							<ul v-if="props.primary.length" :class="styles.menuPrimary">
 								<li v-for="item in props.primary" :key="item.href">
-									<a :href="item.href" :class="styles.menuPrimaryLink" :aria-current="isCurrent(item.href) ? 'page' : undefined" @click="open = false">
+									<a :href="item.href" :rel="item.rel" :class="styles.menuPrimaryLink" :aria-current="isCurrent(item.href) ? 'page' : undefined" @click="open = false">
 										{{ item.label }}
 										<span :class="styles.menuArrow" aria-hidden="true">→</span>
 									</a>
@@ -84,7 +85,7 @@ onUnmounted(() => desktop?.removeEventListener("change", closeOnDesktop));
 									<h2 :id="`${props.id}-group-${index}`" :class="styles.menuHeading">{{ group.label }}</h2>
 									<ul :class="styles.menuGroup">
 										<li v-for="item in group.items" :key="item.href">
-											<a :href="item.href" :class="styles.menuLink" :aria-current="isCurrent(item.href) ? 'page' : undefined" @click="open = false">{{ item.label }}</a>
+											<a :href="item.href" :rel="item.rel" :class="styles.menuLink" :aria-current="isCurrent(item.href) ? 'page' : undefined" @click="open = false">{{ item.label }}</a>
 										</li>
 									</ul>
 								</section>
