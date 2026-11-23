@@ -1,4 +1,8 @@
 import { CloudEvent } from "cloudevents";
+import {
+	parseCampaignAttribution,
+	type CampaignAttribution,
+} from "@/lib/analytics/attribution";
 import { createLogger } from "@/lib/logger";
 
 const logger = createLogger("analytics");
@@ -17,40 +21,26 @@ export type AnalyticsAttribution = {
 	page_path?: string;
 };
 
-/**
- * Attempt to extract an anonymous distinct id from cookies.
- * Prefers the first-party `rk_aid` cookie, matching browser CloudEvents.
- * The PostHog cookie and generic session cookie are transitional fallbacks
- * for requests from browsers that have not created a first-party identity yet.
- */
+function cookieValue(header: string, name: string): string | undefined {
+	const prefix = `${name}=`;
+	return header
+		.split(";")
+		.map((part) => part.trim())
+		.find((part) => part.startsWith(prefix))
+		?.slice(prefix.length);
+}
+
+/** Only first-party anonymous IDs belong in analytics; never use an auth cookie. */
 export function getAnonDistinctIdFromCookies(req: Request): string | undefined {
-	const cookieHeader = req.headers.get("cookie");
-	if (!cookieHeader) return undefined;
-
-	const aidMatch = cookieHeader.match(/(?:^|;\s*)rk_aid=([^;]+)/);
-	if (aidMatch?.[1]) {
-		try {
-			return decodeURIComponent(aidMatch[1]);
-		} catch {
-			return aidMatch[1];
-		}
+	if (req.headers.get("dnt") === "1") return;
+	const raw = cookieValue(req.headers.get("cookie") ?? "", "rk_aid");
+	if (!raw) return;
+	try {
+		const value = decodeURIComponent(raw);
+		return /^[a-zA-Z0-9._:-]{1,128}$/.test(value) ? value : undefined;
+	} catch {
+		return;
 	}
-
-	const phMatch = cookieHeader.match(/(?:^|;\s*)posthog_distinct_id=([^;]+)/);
-	if (phMatch?.[1]) {
-		try {
-			return decodeURIComponent(phMatch[1]);
-		} catch {
-			return phMatch[1];
-		}
-	}
-
-	const sessionMatch = cookieHeader.match(/(?:^|;\s*)session_id=([^;]+)/);
-	if (sessionMatch?.[1]) {
-		return sessionMatch[1];
-	}
-
-	return undefined;
 }
 
 /**
@@ -68,46 +58,20 @@ export function getDistinctId(ctx: {
 	);
 }
 
-type AttributionSnapshot = {
-	utm_source?: string;
-	utm_medium?: string;
-	utm_campaign?: string;
-	utm_term?: string;
-	utm_content?: string;
-	landing_page?: string;
-	initial_referrer?: string;
-};
-
+type AttributionSnapshot = CampaignAttribution;
 function parseAttributionCookie(raw?: string): AttributionSnapshot | undefined {
-	if (!raw) return undefined;
+	if (!raw) return;
 	try {
-		const decoded = decodeURIComponent(raw);
-		const parsed = JSON.parse(decoded);
-		if (!parsed || typeof parsed !== "object") return undefined;
-		const out: AttributionSnapshot = {};
-		for (const key of [
-			"utm_source",
-			"utm_medium",
-			"utm_campaign",
-			"utm_term",
-			"utm_content",
-			"landing_page",
-			"initial_referrer",
-		] as const) {
-			const value = (parsed as Record<string, unknown>)[key];
-			if (typeof value === "string" && value) {
-				out[key] = value;
-			}
-		}
-		return Object.keys(out).length > 0 ? out : undefined;
+		const snapshot = parseCampaignAttribution(decodeURIComponent(raw));
+		return Object.keys(snapshot).length ? snapshot : undefined;
 	} catch {
-		return undefined;
+		return;
 	}
 }
 
 /**
  * Read the `rk_first_touch` and `rk_last_touch` cookies written by the
- * client-side PostHog component. Use these to attach campaign attribution to
+ * first-party analytics component. Use these to attach campaign attribution to
  * server-emitted funnel events without requiring every CTA call site to pass
  * it explicitly.
  */
@@ -115,14 +79,15 @@ export function getAttributionFromCookies(req: Request): {
 	first?: AttributionSnapshot;
 	last?: AttributionSnapshot;
 } {
+	if (req.headers.get("dnt") === "1") return {};
 	const cookieHeader = req.headers.get("cookie");
 	if (!cookieHeader) return {};
-
-	const firstMatch = cookieHeader.match(/(?:^|;\s*)rk_first_touch=([^;]+)/);
-	const lastMatch = cookieHeader.match(/(?:^|;\s*)rk_last_touch=([^;]+)/);
-
-	const first = parseAttributionCookie(firstMatch?.[1]);
-	const last = parseAttributionCookie(lastMatch?.[1]);
+	const first = parseAttributionCookie(
+		cookieValue(cookieHeader, "rk_first_touch"),
+	);
+	const last = parseAttributionCookie(
+		cookieValue(cookieHeader, "rk_last_touch"),
+	);
 
 	return {
 		...(first ? { first } : {}),
@@ -133,7 +98,7 @@ export function getAttributionFromCookies(req: Request): {
 /**
  * Build the canonical event-attribution properties for funnel events.
  * Flattens the two attribution snapshots into `first_touch_*` / `last_touch_*`
- * keys so PostHog can group on them without parsing nested objects.
+ * keys so analytics can group on them without parsing nested objects.
  */
 export function getEventAttribution(req?: Request): Record<string, string> {
 	if (!req) return {};

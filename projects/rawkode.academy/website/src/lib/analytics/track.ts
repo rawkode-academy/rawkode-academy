@@ -3,6 +3,11 @@
 //
 // During the PostHog dual-run, call `capture()` so each event reaches both.
 
+import {
+	campaignAttributionProperties,
+	clearCampaignAttribution,
+} from "./attribution-cookies";
+
 const ENDPOINT = "/api/e";
 const ANON_COOKIE = "rk_aid";
 const SESSION_KEY = "rk_sid";
@@ -196,9 +201,7 @@ export function track(
 			session_id: sessionId(now),
 			url: location.href,
 			...(document.referrer ? { referrer: document.referrer } : {}),
-			...(properties && Object.keys(properties).length > 0
-				? { properties }
-				: {}),
+			properties: { ...campaignAttributionProperties(), ...properties },
 		});
 		listenForUnload();
 		// web-vitals reports final CLS/INP after the page is hidden, when a
@@ -235,6 +238,7 @@ export function capture(
 /** Start a fresh first-party identity after a successful sign-out. */
 export function resetIdentity(): void {
 	resetForTests();
+	clearCampaignAttribution();
 	document.cookie = `${ANON_COOKIE}=; path=/; max-age=0; SameSite=Lax; Secure`;
 	try {
 		sessionStorage.removeItem(SESSION_KEY);
