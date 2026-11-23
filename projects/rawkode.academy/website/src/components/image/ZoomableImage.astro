@@ -1,17 +1,118 @@
 ---
 import { Image } from "astro:assets";
 import type { ImageMetadata } from "astro";
-import Zoom from "react-medium-image-zoom";
-import "react-medium-image-zoom/dist/styles.css";
 
 interface Props {
-	image: ImageMetadata;
+	image: ImageMetadata | string;
 	alt: string;
+	width?: number;
+	height?: number;
 }
 
-const { image, alt } = Astro.props;
+const { image, alt, width, height } = Astro.props;
+const src = typeof image === "string" ? image : image.src;
 ---
 
-<Zoom client:only="react">
-	<Image src={image} alt={alt} />
-</Zoom>
+<span class="zoomable-image" data-zoomable-image>
+	<button
+		type="button"
+		class="zoomable-image-trigger"
+		aria-label={`Zoom image: ${alt || "diagram"}`}
+	>
+		{typeof image === "string" ? (
+			<img
+				src={image}
+				alt={alt}
+				width={width}
+				height={height}
+				loading="lazy"
+				decoding="async"
+			/>
+		) : (
+			<Image src={image} alt={alt} />
+		)}
+	</button>
+	<dialog class="zoomable-image-dialog" aria-label={alt || "Zoomed image"}>
+		<button type="button" class="zoomable-image-close" aria-label="Close zoomed image">×</button>
+		<img src={src} alt={alt} loading="lazy" decoding="async" />
+	</dialog>
+</span>
+
+<script>
+	for (const root of document.querySelectorAll<HTMLElement>("[data-zoomable-image]")) {
+		if (root.dataset.bound === "true") continue;
+		root.dataset.bound = "true";
+		const trigger = root.querySelector<HTMLButtonElement>(".zoomable-image-trigger");
+		const dialog = root.querySelector<HTMLDialogElement>(".zoomable-image-dialog");
+		const close = root.querySelector<HTMLButtonElement>(".zoomable-image-close");
+		trigger?.addEventListener("click", () => dialog?.showModal());
+		close?.addEventListener("click", () => dialog?.close());
+		dialog?.addEventListener("click", (event) => {
+			if (event.target === dialog) {
+				dialog.close();
+			}
+		});
+	}
+</script>
+
+<style>
+	.zoomable-image {
+		display: inline-block;
+		max-width: 100%;
+	}
+
+	.zoomable-image-trigger {
+		display: block;
+		max-width: 100%;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		cursor: zoom-in;
+	}
+
+	.zoomable-image-trigger img {
+		display: block;
+		max-width: 100%;
+		height: auto;
+	}
+
+	.zoomable-image-dialog {
+		margin: auto;
+		padding: 1rem;
+		border: 1px solid var(--colors-academy-border);
+		border-radius: var(--radii-academy-s);
+		background: var(--colors-academy-panel);
+		max-width: min(92vw, 1200px);
+		max-height: 92vh;
+	}
+
+	.zoomable-image-dialog::backdrop {
+		background: var(--colors-academy-scrim);
+	}
+
+	.zoomable-image-dialog img {
+		display: block;
+		max-width: 100%;
+		max-height: calc(92vh - 4rem);
+		width: auto;
+		height: auto;
+		margin: 0 auto;
+	}
+
+	.zoomable-image-close {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		margin-left: auto;
+		margin-bottom: 0.5rem;
+		width: 2.25rem;
+		height: 2.25rem;
+		border: 1px solid var(--colors-academy-border);
+		border-radius: var(--radii-academy-pill);
+		background: var(--colors-academy-panel);
+		color: var(--colors-academy-text);
+		cursor: pointer;
+		font-size: 1.25rem;
+		line-height: 1;
+	}
+</style>
