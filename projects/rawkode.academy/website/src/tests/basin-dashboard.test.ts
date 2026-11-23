@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
 	dashboardQueries,
+	HUMAN,
+	LINK_HUMAN,
 	parseRange,
 	rangeStart,
 	TABLE,
@@ -33,6 +35,13 @@ describe("analytics dashboard queries", () => {
 			);
 			expect(sql, name).toMatch(/event_time >= CAST\('[^']+' AS TIMESTAMP\)/);
 		}
+	});
+
+	it("leaves labelled bot traffic out of every query", () => {
+		for (const [name, sql] of Object.entries(dashboardQueries("7d")))
+			expect(sql, name).toContain(
+				name === "links" || name === "linkTotals" ? LINK_HUMAN : HUMAN,
+			);
 	});
 
 	it("reads redirect fields from the typed sink and excludes unmatched paths", () => {

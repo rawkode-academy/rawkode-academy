@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import typedSql from "../basin/typed.sql" with { type: "text" };
 import {
+	annotateServerEvent,
 	classifyUserAgent,
 	prepareCloudEvent,
-	redactUserAgent,
 } from "../src/events";
 
 const CHROME_MAC =
@@ -98,26 +98,49 @@ describe("prepareCloudEvent", () => {
 		expect(prepared).not.toHaveProperty("useragent");
 		expect(prepared?.device).toBe("desktop");
 		expect(prepared?.browser).toBe("chrome");
+		expect(prepared?.bot).toBe(false);
+		expect(prepared).not.toHaveProperty("botreason");
 		expect(JSON.stringify(prepared)).not.toContain("Macintosh");
 	});
 
-	test("drops bot traffic", () => {
+	test("labels bot traffic instead of dropping it", () => {
 		expect(
 			prepareCloudEvent({ ...shortLink, useragent: "curl/8.4.0" }),
-		).toBeNull();
-		expect(prepareCloudEvent({ ...shortLink, useragent: "" })).toBeNull();
+		).toMatchObject({ bot: true, botreason: "ua-pattern", device: "bot" });
+		expect(prepareCloudEvent({ ...shortLink, useragent: "" })).toMatchObject({
+			bot: true,
+			botreason: "ua-pattern",
+		});
+		expect(
+			prepareCloudEvent({ ...shortLink, useragent: "Overcast/3.0" }),
+		).toMatchObject({ bot: true, botreason: "non-browser-ua" });
 	});
 
-	test("leaves events without a user agent untouched", () => {
+	test("leaves events without request context untouched", () => {
 		const { useragent: _, ...event } = shortLink;
 		expect(prepareCloudEvent(event)).toBe(event);
 	});
 
-	test("drops hosting networks and never stores the ASN", () => {
-		expect(prepareCloudEvent({ ...shortLink, asn: 132203 })).toBeNull();
-		const prepared = prepareCloudEvent({ ...shortLink, asn: 2856 });
-		expect(prepared).not.toBeNull();
-		expect(prepared).not.toHaveProperty("asn");
+	test("keeps the ASN and labels hosting networks", () => {
+		expect(prepareCloudEvent({ ...shortLink, asn: 132203 })).toMatchObject({
+			asn: 132203,
+			bot: true,
+			botreason: "hosting-asn",
+		});
+		expect(prepareCloudEvent({ ...shortLink, asn: 2856 })).toMatchObject({
+			asn: 2856,
+			bot: false,
+		});
+	});
+
+	test("a sender's reason wins over its own signals", () => {
+		expect(
+			prepareCloudEvent({
+				...shortLink,
+				asn: 132203,
+				botreason: "unmatched-path",
+			}),
+		).toMatchObject({ bot: true, botreason: "unmatched-path" });
 	});
 
 	test("carries every field the typed pipeline reads", () => {
@@ -136,13 +159,13 @@ describe("prepareCloudEvent", () => {
 	});
 });
 
-describe("redactUserAgent", () => {
+describe("annotateServerEvent", () => {
 	test("replaces the raw user agent with its classification", () => {
 		const event = {
 			id: "1",
 			data: { path: "/x", user_agent: IPHONE_SAFARI },
 		};
-		const redacted = redactUserAgent(event);
+		const redacted = annotateServerEvent(event);
 		expect(redacted.data).toEqual({
 			path: "/x",
 			device: "mobile",
@@ -154,21 +177,37 @@ describe("redactUserAgent", () => {
 
 	test("leaves events without a user agent untouched", () => {
 		const event = { id: "1", data: { path: "/x" } };
-		expect(redactUserAgent(event)).toBe(event);
+		expect(annotateServerEvent(event)).toBe(event);
 	});
 
-	test("marks hosting networks and spoofed browsers as bots", () => {
+	test("labels hosting networks and spoofed browsers as bots", () => {
 		expect(
-			redactUserAgent({ data: { user_agent: CHROME_MAC, asn: 31898 } }).data,
-		).toEqual({ device: "desktop", browser: "chrome", is_bot: true });
+			annotateServerEvent({ data: { user_agent: CHROME_MAC, asn: 31898 } }),
+		).toEqual({
+			asn: 31898,
+			bot: true,
+			botreason: "hosting-asn",
+			device: "desktop",
+			browser: "chrome",
+			data: { device: "desktop", browser: "chrome", is_bot: true },
+		});
 		expect(
-			redactUserAgent(
+			annotateServerEvent(
 				{ data: { user_agent: "nginx-ssl early hints" } },
 				{ browser: true },
-			).data,
-		).toMatchObject({ is_bot: true });
+			),
+		).toMatchObject({ bot: true, botreason: "ua-pattern" });
 		expect(
-			redactUserAgent({ data: { user_agent: "AppleCoreMedia/1.0" } }).data,
-		).toMatchObject({ is_bot: false });
+			annotateServerEvent({
+				data: { user_agent: CHROME_MAC, bot_reason: "spoofed-chrome" },
+			}),
+		).toMatchObject({
+			bot: true,
+			botreason: "spoofed-chrome",
+			data: { is_bot: true },
+		});
+		expect(
+			annotateServerEvent({ data: { user_agent: "AppleCoreMedia/1.0" } }),
+		).toMatchObject({ bot: false, data: { is_bot: false } });
 	});
 });

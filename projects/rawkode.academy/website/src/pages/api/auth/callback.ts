@@ -18,7 +18,6 @@ import {
 	identifyServerUser,
 } from "@/server/analytics";
 
-
 export const GET: APIRoute = async (context) => {
 	const code = context.url.searchParams.get("code");
 	const state = context.url.searchParams.get("state");

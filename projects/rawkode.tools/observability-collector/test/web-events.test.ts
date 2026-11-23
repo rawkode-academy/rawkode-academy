@@ -83,7 +83,7 @@ describe("browser CloudEvent v1", () => {
 		});
 		expect(JSON.stringify(normalized)).not.toContain("secret");
 	});
-	test("drops bots, cross-origin pages, malformed IDs and unbounded payloads", () => {
+	test("drops cross-origin pages, malformed IDs and unbounded payloads", () => {
 		for (const input of [
 			null,
 			[],
@@ -96,22 +96,43 @@ describe("browser CloudEvent v1", () => {
 			{ ...event, properties: { text: "x".repeat(9000) } },
 		])
 			expect(browserCloudEvent(input, context, now)).toBeNull();
+	});
+
+	test("labels crawlers instead of dropping them", () => {
 		expect(
 			browserCloudEvent(
 				event,
 				{ ...context, user_agent: "Googlebot/2.1" },
 				now,
 			),
-		).toBeNull();
+		).toMatchObject({ bot: true, botreason: "ua-pattern", device: "bot" });
+		expect(browserCloudEvent(event, context, now)).toMatchObject({
+			bot: false,
+			device: "desktop",
+			browser: "chrome",
+		});
 	});
 
-	test("drops crawlers on hosting networks that spoof a browser", () => {
+	test("labels hosting networks and the website's own verdicts", () => {
 		expect(
 			browserCloudEvent(event, { ...context, asn: 132203 }, now),
-		).toBeNull();
-		const normalized = browserCloudEvent(event, { ...context, asn: 2856 }, now);
-		expect(JSON.stringify(normalized)).not.toContain("2856");
+		).toMatchObject({ asn: 132203, bot: true, botreason: "hosting-asn" });
+		expect(
+			browserCloudEvent(
+				event,
+				{ ...context, asn: 2856, bot_reason: "non-production" },
+				now,
+			),
+		).toMatchObject({ asn: 2856, bot: true, botreason: "non-production" });
+		expect(
+			browserCloudEvent(
+				{ ...event, properties: { webdriver: true } },
+				context,
+				now,
+			),
+		).toMatchObject({ bot: true, botreason: "webdriver" });
 	});
+
 	test("keeps event ID and time stable across retries", () => {
 		expect(browserCloudEvent(event, context, now)).toEqual(
 			browserCloudEvent(event, context, now + 60_000),

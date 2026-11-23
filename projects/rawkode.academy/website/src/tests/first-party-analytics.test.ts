@@ -31,7 +31,7 @@ describe("track()", () => {
 			value: null,
 			configurable: true,
 		});
-		// happy-dom reports itself as automated.
+		// happy-dom reports itself as automated, which flags every event.
 		Object.defineProperty(navigator, "webdriver", {
 			value: false,
 			configurable: true,
@@ -39,14 +39,16 @@ describe("track()", () => {
 		document.cookie = "rk_aid=; max-age=0; path=/";
 	});
 
-	it("sends nothing from an automated browser", () => {
+	it("flags events from an automated browser", () => {
 		Object.defineProperty(navigator, "webdriver", {
 			value: true,
 			configurable: true,
 		});
 		track("page_view");
 		flush();
-		expect(fetchMock).not.toHaveBeenCalled();
+		expect(sentBatches(fetchMock)[0]?.events[0]?.properties).toEqual({
+			webdriver: true,
+		});
 	});
 
 	afterEach(() => {
@@ -283,32 +285,35 @@ describe("POST /api/e", () => {
 		expect(context).toMatchObject({ asn: 132203 });
 	});
 
-	it("drops previews and other ports without ingesting", async () => {
-		for (const href of [
-			"https://website.rawkode.workers.dev/api/e",
-			"https://abc123-website.rawkode.workers.dev/api/e",
-			"https://rawkode.academy:8443/api/e",
-			"http://localhost:4321/api/e",
-		])
-			expect((await call({ events: [{}] }, {}, { href })).status).toBe(204);
-		expect(analytics.ingestWebEvents).not.toHaveBeenCalled();
-	});
-
-	it("drops automated browsers without ingesting", async () => {
-		const spoofed = { "sec-ch-ua": null };
-		const headless = { "sec-ch-ua": '"HeadlessChrome";v="146"' };
-		for (const headers of [spoofed, headless])
-			expect((await call({ events: [{}] }, headers)).status).toBe(204);
-		expect(
-			(
-				await call(
-					{ events: [{}] },
-					{},
-					{ cf: { botManagement: { verifiedBot: true, score: 1 } } },
-				)
-			).status,
-		).toBe(204);
-		expect(analytics.ingestWebEvents).not.toHaveBeenCalled();
+	it("labels previews, other ports and automated browsers", async () => {
+		const cases: Array<
+			[string, Parameters<typeof call>[1], Parameters<typeof call>[2]]
+		> = [
+			[
+				"non-production",
+				{},
+				{ href: "https://website.rawkode.workers.dev/api/e" },
+			],
+			["non-production", {}, { href: "https://rawkode.academy:8443/api/e" }],
+			["non-production", {}, { href: "http://localhost:4321/api/e" }],
+			["spoofed-chrome", { "sec-ch-ua": null }, {}],
+			["headless", { "sec-ch-ua": '"HeadlessChrome";v="146"' }, {}],
+			[
+				"cf-verified-bot",
+				{},
+				{ cf: { botManagement: { verifiedBot: true, score: 1 } } },
+			],
+		];
+		for (const [reason, headers, options] of cases) {
+			analytics.ingestWebEvents.mockClear();
+			const href = options?.href ?? "https://rawkode.academy/api/e";
+			const origin = new URL(href).origin;
+			expect(
+				(await call({ events: [{}] }, { origin, ...headers }, options)).status,
+			).toBe(204);
+			const [, context] = analytics.ingestWebEvents.mock.calls[0] ?? [];
+			expect(context, reason).toMatchObject({ bot_reason: reason });
+		}
 	});
 
 	it("keeps browsers that don't send client hints", async () => {
@@ -318,7 +323,8 @@ describe("POST /api/e", () => {
 			"Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/158.0.8127.35 Mobile/15E148 Safari/604.1",
 		])
 			await call({ events: [{}] }, { "user-agent": ua, "sec-ch-ua": null });
-		expect(analytics.ingestWebEvents).toHaveBeenCalledTimes(3);
+		for (const [, context] of analytics.ingestWebEvents.mock.calls)
+			expect(context.bot_reason).toBeUndefined();
 	});
 
 	it("returns a retryable failure when durable ingestion fails or is unbound", async () => {

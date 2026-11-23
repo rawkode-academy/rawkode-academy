@@ -24,6 +24,15 @@ export function rangeStart(range: Range, now = new Date()): string {
 	return start.toISOString();
 }
 
+// The collector labels automated traffic `bot` and gives the rule that matched
+// in `botreason`, which is present only on bots. Older events and events with
+// no request context have neither and count as people.
+export const HUMAN = "json_get_str(value, 'botreason') IS NULL";
+
+// The short_links table has no bot columns yet; its `device` is "bot" for
+// crawler user agents, but hosting-network bots still count there.
+export const LINK_HUMAN = "coalesce(device, '') <> 'bot'";
+
 const since = (range: Range) =>
 	`event_time >= CAST('${rangeStart(range)}' AS TIMESTAMP)`;
 
@@ -48,7 +57,7 @@ export const dashboardQueries = (range: Range) => ({
 	events: `
 		SELECT ${ARCHIVE_EVENT} AS event, count(*) AS events
 		FROM ${TABLE}
-		WHERE ${since(range)}
+		WHERE ${since(range)} AND ${HUMAN}
 		GROUP BY 1
 		ORDER BY events DESC
 		LIMIT 100`,
@@ -59,7 +68,7 @@ export const dashboardQueries = (range: Range) => ({
 			sum(CASE WHEN event_type = 'video.complete' THEN 1 ELSE 0 END) AS completes,
 			approx_distinct(nullif(nullif(json_get_str(value, 'data', 'distinct_id'), ''), 'anonymous')) AS viewers
 		FROM ${TABLE}
-		WHERE ${since(range)} AND event_source = 'rawkode-academy-website'
+		WHERE ${since(range)} AND ${HUMAN} AND event_source = 'rawkode-academy-website'
 			AND event_type IN ('video.play', 'video.complete')
 		GROUP BY 1
 		ORDER BY plays DESC
@@ -68,18 +77,18 @@ export const dashboardQueries = (range: Range) => ({
 	signIn: `
 		SELECT ${ARCHIVE_EVENT} AS event, count(*) AS events
 		FROM ${TABLE}
-		WHERE ${since(range)} AND ${ARCHIVE_EVENT} IN (${list(Object.values(SIGN_IN_EVENTS))})
+		WHERE ${since(range)} AND ${HUMAN} AND ${ARCHIVE_EVENT} IN (${list(Object.values(SIGN_IN_EVENTS))})
 		GROUP BY 1`,
 
 	linkTotals: `
 		SELECT count(*) AS clicks
 		FROM ${LINKS_TABLE}
-		WHERE ${since(range)} AND matched = true`,
+		WHERE ${since(range)} AND ${LINK_HUMAN} AND matched = true`,
 
 	links: `
 		SELECT domain, path, count(*) AS clicks
 		FROM ${LINKS_TABLE}
-		WHERE ${since(range)} AND matched = true
+		WHERE ${since(range)} AND ${LINK_HUMAN} AND matched = true
 		GROUP BY 1, 2
 		ORDER BY clicks DESC
 		LIMIT 25`,
@@ -87,7 +96,7 @@ export const dashboardQueries = (range: Range) => ({
 	newsletter: `
 		SELECT ${ARCHIVE_EVENT} AS event, count(*) AS events
 		FROM ${TABLE}
-		WHERE ${since(range)} AND ${ARCHIVE_EVENT} IN (${list(NEWSLETTER_EVENTS)})
+		WHERE ${since(range)} AND ${HUMAN} AND ${ARCHIVE_EVENT} IN (${list(NEWSLETTER_EVENTS)})
 		GROUP BY 1`,
 });
 

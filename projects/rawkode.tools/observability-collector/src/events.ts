@@ -22,8 +22,10 @@ export interface WebContext {
 	user_agent?: string;
 	country?: string;
 	continent?: string;
-	/** Cloudflare `cf.asn` of the client; used only to drop automated traffic, never stored. */
+	/** Cloudflare `cf.asn` of the client. */
 	asn?: number;
+	/** The website's verdict from request headers and host, if any. */
+	bot_reason?: string;
 }
 
 const BOT_PATTERN =
@@ -34,7 +36,7 @@ const BOT_PATTERN =
  * desktop Chrome and run JavaScript, so the user agent alone lets them through
  * (Cloudflare analytics, Nov 2026: Tencent and Alibaba in Singapore, Oracle,
  * Pfcloud and Meta account for most sign-in starts and page views that pass the
- * user-agent check). Consumer VPN exits on these networks are dropped too.
+ * user-agent check). Consumer VPN exits on these networks are labelled too.
  */
 const HOSTING_ASNS = new Set([
 	16509, // Amazon AWS
@@ -66,26 +68,27 @@ export function isHostingAsn(asn: unknown): boolean {
 }
 
 /**
- * With `browser`, the agent must belong to a web browser: requests from apps
- * (podcast players send their own agents) are only checked against known bots.
+ * Why traffic was classified as automated. Bot traffic is stored and
+ * labelled, never dropped: queries filter on the `bot` extension attribute.
+ * Senders add their own reasons (`non-production`, `spoofed-chrome`,
+ * `headless`, `cf-verified-bot`, `cf-bot-score`, `unmatched-path`).
  */
-export function classifyUserAgent(
-	ua: string | undefined,
-	{ browser: browserOnly = false }: { browser?: boolean } = {},
-): {
-	device: string | null;
-	browser: string | null;
-	is_bot: boolean;
-} {
-	if (ua === undefined) return { device: null, browser: null, is_bot: false };
+export type BotReason =
+	| "ua-pattern"
+	| "non-browser-ua"
+	| "desktop-no-browser"
+	| "hosting-asn"
+	| (string & {});
+
+function userAgentVerdict(
+	ua: string,
+	browserOnly: boolean,
+): { device: string | null; browser: string | null; reason: BotReason | null } {
+	if (ua.trim() === "" || BOT_PATTERN.test(ua))
+		return { device: "bot", browser: null, reason: "ua-pattern" };
 	// Every web browser's user agent starts with Mozilla/5.0.
-	if (
-		ua.trim() === "" ||
-		BOT_PATTERN.test(ua) ||
-		(browserOnly && !/^Mozilla\/5\.0 /.test(ua))
-	) {
-		return { device: "bot", browser: null, is_bot: true };
-	}
+	if (browserOnly && !/^Mozilla\/5\.0 /.test(ua))
+		return { device: "bot", browser: null, reason: "non-browser-ua" };
 	const device = /iPad|Tablet/i.test(ua)
 		? "tablet"
 		: /Mobi|Android|iPhone/i.test(ua)
@@ -105,44 +108,97 @@ export function classifyUserAgent(
 	// In-app browsers on phones (LinkedIn, Facebook) omit every browser token;
 	// on the desktop a missing token means an automated client.
 	if (browserOnly && browser === "other" && device === "desktop")
-		return { device: "bot", browser: null, is_bot: true };
-	return { device, browser, is_bot: false };
+		return { device: "bot", browser: null, reason: "desktop-no-browser" };
+	return { device, browser, reason: null };
+}
+
+/**
+ * With `browser`, the agent must belong to a web browser: requests from apps
+ * (podcast players send their own agents) are only checked against known bots.
+ */
+export function classifyUserAgent(
+	ua: string | undefined,
+	{ browser: browserOnly = false }: { browser?: boolean } = {},
+): {
+	device: string | null;
+	browser: string | null;
+	is_bot: boolean;
+} {
+	if (ua === undefined) return { device: null, browser: null, is_bot: false };
+	const { device, browser, reason } = userAgentVerdict(ua, browserOnly);
+	return { device, browser, is_bot: reason !== null };
+}
+
+export interface BotSignals {
+	/** Raw user agent; reduced to device and browser, never stored. */
+	userAgent?: string | undefined;
+	/** Cloudflare `cf.asn`, stored as the `asn` extension attribute. */
+	asn?: unknown;
+	/** A reason the sender already established, which takes precedence. */
+	reason?: unknown;
+	/** Apply the browser-only user-agent rules. */
+	browser?: boolean;
+}
+
+/**
+ * The `device`, `browser`, `bot`, `botreason` and `asn` extension attributes
+ * for a set of signals. `botreason` is present only when `bot` is true.
+ */
+export function botAttributes(signals: BotSignals): Record<string, unknown> {
+	const attributes: Record<string, unknown> = {};
+	let reason: BotReason | null =
+		typeof signals.reason === "string" && signals.reason !== ""
+			? signals.reason.slice(0, 64)
+			: null;
+	if (signals.userAgent !== undefined) {
+		const verdict = userAgentVerdict(
+			signals.userAgent,
+			signals.browser ?? false,
+		);
+		if (verdict.device) attributes.device = verdict.device;
+		if (verdict.browser) attributes.browser = verdict.browser;
+		reason ??= verdict.reason;
+	}
+	if (typeof signals.asn === "number" && Number.isInteger(signals.asn)) {
+		attributes.asn = signals.asn;
+		if (isHostingAsn(signals.asn)) reason ??= "hosting-asn";
+	}
+	attributes.bot = reason !== null;
+	if (reason !== null) attributes.botreason = reason;
+	return attributes;
 }
 
 /**
  * Request context travels as CloudEvents extension attributes. The
  * `useragent` extension (sent by browser-facing redirects) is reduced to
- * `device` and `browser`, and the `asn` extension is removed, so neither is
- * stored. Bot traffic isn't recorded: an event from a bot, or from a hosting
- * network, comes back as null.
+ * `device` and `browser`, so the raw string is never stored; `asn` and a
+ * sender's `botreason` feed the bot label.
  */
 export function prepareCloudEvent(
 	event: Record<string, unknown>,
-): Record<string, unknown> | null {
-	if ("asn" in event) {
-		const { asn, ...rest } = event;
-		if (isHostingAsn(asn)) return null;
-		event = rest;
-	}
-	if (!("useragent" in event)) return event;
-	const { useragent, ...rest } = event;
-	const { device, browser, is_bot } = classifyUserAgent(
-		String(useragent ?? ""),
-		{ browser: true },
-	);
-	if (is_bot) return null;
-	if (device) rest.device = device;
-	if (browser) rest.browser = browser;
-	return rest;
+): Record<string, unknown> {
+	if (!("useragent" in event || "asn" in event || "botreason" in event))
+		return event;
+	const { useragent, asn, botreason, bot: _, ...rest } = event;
+	return {
+		...rest,
+		...botAttributes({
+			userAgent: "useragent" in event ? String(useragent ?? "") : undefined,
+			asn,
+			reason: botreason,
+			browser: true,
+		}),
+	};
 }
 
 /**
  * Senders that predate the `useragent` extension put the user agent in
- * `data.user_agent` (and the client network in `data.asn`). PostHog, Grafana
- * and the stream receive its classification, never the raw string or the ASN.
- * Callers drop the event when `data.is_bot` comes back true.
+ * `data.user_agent`, the client network in `data.asn` and their own verdict
+ * in `data.bot_reason`. These become the bot extension attributes; `data`
+ * keeps the classification (`device`, `browser`, `is_bot`), never the raw
+ * string.
  */
-export function redactUserAgent<T extends { data?: unknown }>(
+export function annotateServerEvent<T extends { data?: unknown }>(
 	event: T,
 	options: { browser?: boolean } = {},
 ): T {
@@ -150,18 +206,27 @@ export function redactUserAgent<T extends { data?: unknown }>(
 	if (
 		!data ||
 		typeof data !== "object" ||
-		!("user_agent" in data || "asn" in data)
+		!("user_agent" in data || "asn" in data || "bot_reason" in data)
 	) {
 		return event;
 	}
-	const { user_agent, asn, ...rest } = data as Record<string, unknown>;
+	const { user_agent, asn, bot_reason, ...rest } = data as Record<
+		string,
+		unknown
+	>;
+	const attributes = botAttributes({
+		userAgent: "user_agent" in data ? String(user_agent ?? "") : undefined,
+		asn,
+		reason: bot_reason,
+		browser: options.browser,
+	});
 	const classification =
 		"user_agent" in data
 			? classifyUserAgent(String(user_agent ?? ""), options)
-			: undefined;
-	const is_bot = (classification?.is_bot ?? false) || isHostingAsn(asn);
+			: {};
 	return {
 		...event,
-		data: { ...rest, ...classification, is_bot },
+		...attributes,
+		data: { ...rest, ...classification, is_bot: attributes.bot },
 	};
 }

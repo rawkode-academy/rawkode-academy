@@ -1,11 +1,12 @@
-// Request-level checks that keep crawlers, previews and scanners out of
-// analytics. The collector also drops bots by user agent and hosting network;
-// these checks need the request headers, which only the website sees.
+// Request-level checks that label crawlers, previews and scanners in
+// analytics. Nothing is dropped: the collector stores every event with `bot`
+// and `botreason`, adding its own user-agent and hosting-network rules. These
+// checks need the request headers and host, which only the website sees.
 
 /** The only origin whose traffic is analytics. Previews run on workers.dev. */
 export const PRODUCTION_HOST = "rawkode.academy";
 
-/** Previews, local development and other ports (scanners use :8443) aren't counted. */
+/** Previews, local development and other ports (scanners use :8443) are labelled `non-production`. */
 export function isProductionUrl(url: URL): boolean {
 	return (
 		url.hostname === PRODUCTION_HOST &&
@@ -43,11 +44,11 @@ const CHROMIUM_WITHOUT_HINTS = /SamsungBrowser|; wv\)/;
  * Chromium brand, and a Chrome user agent without Chrome's client hints, which
  * means the user agent is spoofed.
  */
-export function automatedRequestReason(request: Request): string | null {
+function automatedRequestReason(request: Request): string | null {
 	const bot = cfProperties(request)?.botManagement;
-	if (bot?.verifiedBot) return "verified-bot";
+	if (bot?.verifiedBot) return "cf-verified-bot";
 	if (bot?.score !== undefined && bot.score > 0 && bot.score < 30)
-		return "bot-score";
+		return "cf-bot-score";
 
 	const hints = request.headers.get("sec-ch-ua");
 	if (hints && /headless/i.test(hints)) return "headless";
@@ -63,4 +64,10 @@ export function automatedRequestReason(request: Request): string | null {
 		return "spoofed-chrome";
 
 	return null;
+}
+
+/** The website's bot verdict for a request, or undefined for a person. */
+export function botReason(request: Request): string | undefined {
+	if (!isProductionUrl(new URL(request.url))) return "non-production";
+	return automatedRequestReason(request) ?? undefined;
 }

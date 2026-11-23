@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { automatedRequestReason, clientAsn } from "@/lib/analytics/automation";
+import { botReason, clientAsn } from "@/lib/analytics/automation";
 import { isPrefetch } from "@/lib/auth/prefetch";
 import { buildAuthorizationUrl, PKCE_COOKIE_NAME } from "@/lib/auth/server";
 import {
@@ -42,23 +42,22 @@ export const GET: APIRoute = async (context) => {
 	const origin = context.url.origin;
 
 	// Crawlers follow the sign-in link (robots.txt disallows /api/), and most
-	// starts are theirs. The collector also drops bot agents and hosting
-	// networks, using the ASN sent here.
-	if (!automatedRequestReason(context.request)) {
-		await captureServerEvent(
-			{
-				event: "sign_in_initiated",
-				properties: {
-					auth_method: "github",
-					from_page: returnTo,
-					user_agent: context.request.headers.get("user-agent") ?? "",
-					asn: clientAsn(context.request),
-				},
-				distinctId: getDistinctId(context),
+	// starts are theirs. Every start is recorded; the collector labels bots
+	// from this verdict, the user agent and the ASN.
+	await captureServerEvent(
+		{
+			event: "sign_in_initiated",
+			properties: {
+				auth_method: "github",
+				from_page: returnTo,
+				user_agent: context.request.headers.get("user-agent") ?? "",
+				asn: clientAsn(context.request),
+				bot_reason: botReason(context.request),
 			},
-			analyticsFor(context),
-		);
-	}
+			distinctId: getDistinctId(context),
+		},
+		analyticsFor(context),
+	);
 
 	const { url, codeVerifier } = await buildAuthorizationUrl(origin, returnTo);
 

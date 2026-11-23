@@ -44,21 +44,21 @@ export default {
 		const destination =
 			link?.to ?? domain?.defaultRedirect ?? redirects.defaultRedirect;
 
-		// Unmatched paths are scanners probing for wp-includes/ and .env (46 of
-		// 31,989 hits matched a link, Nov 2026). They still redirect, uncounted.
-		// A domain's root is a real entry point and is still recorded.
-		const recorded =
-			link !== undefined || (domain !== undefined && path === "");
-		if (recorded && !isBot(request)) {
-			ctx.waitUntil(
-				trackShortLink(env, request, {
-					domain: hostname,
-					path,
-					matched: link !== undefined,
-					destination,
-				}),
-			);
-		}
+		// Every hit is recorded; bots are labelled, not dropped. Unmatched paths
+		// are scanners probing for wp-includes/ and .env (46 of 31,989 hits
+		// matched a link, Nov 2026), so they are labelled too. A domain's root is
+		// a real entry point.
+		const matched = link !== undefined;
+		const entryPoint = matched || (domain !== undefined && path === "");
+		ctx.waitUntil(
+			trackShortLink(
+				env,
+				request,
+				{ domain: hostname, path, matched, destination },
+				cloudflareVerdict(request) ??
+					(entryPoint ? undefined : "unmatched-path"),
+			),
+		);
 
 		return Response.redirect(destination);
 	},
@@ -71,18 +71,18 @@ const own = <T>(record: Record<string, T>, key: string): T | undefined =>
 
 /**
  * Cloudflare's verdict, present only on zones with Bot Management. A score of
- * 0 means it wasn't computed. Without a verdict, the collector drops bots by
- * user agent.
+ * 0 means it wasn't computed. The collector adds its own user-agent and
+ * hosting-network rules.
  */
-const isBot = (request: Request): boolean => {
+const cloudflareVerdict = (request: Request): string | undefined => {
 	const bot = (
 		request.cf as
 			| { botManagement?: { score: number; verifiedBot: boolean } }
 			| undefined
 	)?.botManagement;
-	return (
-		bot !== undefined && (bot.verifiedBot || (bot.score > 0 && bot.score < 30))
-	);
+	if (bot?.verifiedBot) return "cf-verified-bot";
+	if (bot && bot.score > 0 && bot.score < 30) return "cf-bot-score";
+	return undefined;
 };
 
 const trackShortLink = async (
@@ -94,10 +94,12 @@ const trackShortLink = async (
 		matched: boolean;
 		destination: string;
 	},
+	botReason: string | undefined,
 ) => {
 	// Request context travels as CloudEvents extension attributes. The
-	// collector turns `useragent` into device and browser, drops bots and
-	// hosting networks, and never stores the raw string.
+	// collector turns `useragent` into device and browser, labels bots and
+	// hosting networks with `bot` and `botreason`, and never stores the raw
+	// string.
 	const event: Record<string, unknown> = {
 		specversion: "1.0",
 		type: "shortLink",
@@ -111,8 +113,8 @@ const trackShortLink = async (
 	if (referrer) event.referrer = referrer;
 	if (request.cf?.country) event.country = request.cf.country as string;
 	if (request.cf?.continent) event.continent = request.cf.continent as string;
-	// The collector drops hosting networks and never stores the ASN.
 	if (typeof request.cf?.asn === "number") event.asn = request.cf.asn;
+	if (botReason) event.botreason = botReason;
 
 	// Log the id, not the payload: it carries the raw user agent, and these
 	// logs are exported to Grafana.

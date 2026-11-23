@@ -7,7 +7,11 @@ import {
 import { browserCloudEvent } from "./web-events";
 import { validateCloudEvent } from "./cloudevents";
 import type { DataBuffer } from "./durable-objects/data-buffer";
-import { prepareCloudEvent, redactUserAgent, type WebContext } from "./events";
+import {
+	annotateServerEvent,
+	prepareCloudEvent,
+	type WebContext,
+} from "./events";
 
 export interface EventsStream {
 	send(records: Record<string, unknown>[]): Promise<void>;
@@ -132,15 +136,11 @@ export class PostHogCollector extends WorkerEntrypoint<Env> {
 		const prepared = prepareCloudEvent(
 			validation.event.toJSON() as Record<string, unknown>,
 		);
-		// Bot traffic is accepted and dropped, so senders don't retry it.
-		if (!prepared) return { success: true };
 		// The website's server events come from browser requests; other senders
 		// (podcast downloads) also see app user agents.
-		const json = redactUserAgent(prepared, {
+		const json = annotateServerEvent(prepared, {
 			browser: prepared.source === "rawkode-academy-website",
 		});
-		if ((json.data as { is_bot?: unknown } | undefined)?.is_bot === true)
-			return { success: true };
 		if (!json.time) json.time = new Date().toISOString();
 
 		const id = this.env.DATA_BUFFER.idFromName(
