@@ -1147,7 +1147,7 @@ describe("Crawlability and Sitemaps", () => {
 					expectedRobots: "index,follow",
 				}),
 				expect.objectContaining({
-					path: "/read?q=kubernetes",
+					path: "/read?topic=kubernetes",
 					expectedCanonicalPath: "/read",
 					expectedRobots: "noindex,follow",
 				}),

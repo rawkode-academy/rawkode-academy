@@ -127,10 +127,10 @@ export function findSitemapOrphans(
 	return Array.from(orphans).sort();
 }
 
-async function fetchHtml(url: string) {
+async function fetchHtml(url: string): Promise<{ html: string; finalUrl: string }> {
 	const res = await fetch(url, { headers: { Accept: "text/html" } });
 	if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-	return await res.text();
+	return { html: await res.text(), finalUrl: res.url || url };
 }
 
 function extractLinks(html: string, baseUrl: string) {
@@ -167,8 +167,9 @@ export async function run() {
 		seen.add(url);
 		depthMap.set(url, depth);
 		try {
-			const html = await fetchHtml(url);
-			const links = extractLinks(html, url);
+			const { html, finalUrl } = await fetchHtml(url);
+			if (!isInternal(baseHost, finalUrl)) continue;
+			const links = extractLinks(html, finalUrl);
 			for (const l of links) {
 				if (!isInternal(baseHost, l)) continue;
 				const n = normalizeUrl(l);

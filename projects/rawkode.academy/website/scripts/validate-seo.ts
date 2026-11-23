@@ -1,9 +1,25 @@
 #!/usr/bin/env bun
-// Validates SEO-relevant fields of the content served by the API gateway
-// (content lives in D1 platform services, not in files). Point it at another
-// gateway with GRAPHQL_ENDPOINT, e.g. a local composed gateway.
+// Validates SEO-relevant fields of local Markdown/MDX articles and the courses
+// and videos served by the API gateway. Point it at another gateway with
+// GRAPHQL_ENDPOINT, e.g. a local composed gateway.
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { join, relative, resolve, sep } from "node:path";
+import { fileURLToPath } from "node:url";
+import { load as parseYaml } from "js-yaml";
+
 const GRAPHQL_ENDPOINT =
 	process.env.GRAPHQL_ENDPOINT ?? "https://api.rawkode.academy/";
+const ARTICLE_FILE = /\.mdx?$/;
+const FRONTMATTER = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/;
+
+function defaultArticlesDir(): string {
+	if (import.meta.url.startsWith("file:")) {
+		return fileURLToPath(
+			new URL("../../../../content/articles", import.meta.url),
+		);
+	}
+	return resolve(process.cwd(), "../../../content/articles");
+}
 
 // biome-ignore lint/suspicious/noExplicitAny: untyped gateway JSON
 type Data = Record<string, any>;
@@ -191,28 +207,53 @@ export function validateVideo(data: Data, now: Date = new Date()): string[] {
 	return errors;
 }
 
+function walkArticleFiles(dir: string): string[] {
+	if (!existsSync(dir)) return [];
+	const files: string[] = [];
+	for (const entry of readdirSync(dir, { withFileTypes: true })) {
+		const path = join(dir, entry.name);
+		if (entry.isDirectory()) files.push(...walkArticleFiles(path));
+		else if (ARTICLE_FILE.test(entry.name)) files.push(path);
+	}
+	return files.sort();
+}
+
+export function loadLocalArticles(root: string = defaultArticlesDir()): Data[] {
+	const articles: Data[] = [];
+	for (const path of walkArticleFiles(root)) {
+		const id = relative(root, path)
+			.split(sep)
+			.join("/")
+			.replace(ARTICLE_FILE, "")
+			.replace(/\/index$/, "");
+		const raw = readFileSync(path, "utf8");
+		const match = raw.match(FRONTMATTER);
+		const parsed = match?.[1] ? (parseYaml(match[1]) as Data | null) : null;
+		if (!parsed || typeof parsed !== "object" || parsed.draft === true) {
+			continue;
+		}
+		articles.push({ id, ...parsed });
+	}
+	return articles;
+}
+
 export async function main() {
 	console.log(
-		`🔍 Validating SEO requirements against ${GRAPHQL_ENDPOINT}...\n`,
+		`🔍 Validating SEO requirements against local articles and ${GRAPHQL_ENDPOINT}...\n`,
 	);
 
 	const validationErrors: ValidationError[] = [];
-	const [{ allArticles }, { allCourses }, { getAllVideos }] = await Promise.all(
-		[
-			query<{ allArticles: Data[] }>(
-				"SeoArticles",
-				"query SeoArticles { allArticles { id title description openGraph { title subtitle } publishedAt authors { id } cover { alt } } }",
-			),
-			query<{ allCourses: Data[] }>(
-				"SeoCourses",
-				"query SeoCourses { allCourses { id title description publishedAt difficulty modules { id title description publishedAt difficulty } } }",
-			),
-			query<{ getAllVideos: Data[] }>(
-				"SeoVideos",
-				"query SeoVideos { getAllVideos { id slug title description publishedAt duration type } }",
-			),
-		],
-	);
+	const allArticles = loadLocalArticles();
+	const [{ allCourses }, { getAllVideos }] = await Promise.all([
+		query<{ allCourses: Data[] }>(
+			"SeoCourses",
+			"query SeoCourses { allCourses { id title description publishedAt difficulty modules { id title description publishedAt difficulty } } }",
+		),
+		query<{ getAllVideos: Data[] }>(
+			"SeoVideos",
+			"query SeoVideos { getAllVideos { id slug title description publishedAt duration type } }",
+		),
+	]);
 
 	const check = (file: string, errors: string[]) => {
 		if (errors.length > 0) validationErrors.push({ file, errors });

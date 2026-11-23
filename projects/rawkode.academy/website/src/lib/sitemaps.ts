@@ -5,6 +5,7 @@ import {
 	getCollection,
 } from "@/lib/live-content";
 import { isNewsPublished } from "@/lib/news-publication";
+import { getShowSubpages } from "@/lib/shows/subpages";
 import { getCourseModuleSlug } from "@/utils/course-path";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
 
@@ -120,10 +121,6 @@ export function personHasIndexableContent({
 		learningPathCount > 0
 	);
 }
-
-const SHOW_SUBPAGES: Readonly<Record<string, readonly string[]>> = {
-	klustered: ["seasons", "brackets", "schedule", "apply"],
-};
 
 function collectRefId(ref: unknown): string | undefined {
 	if (typeof ref === "string") return ref;
@@ -654,7 +651,7 @@ export async function getShowSitemapEntries(): Promise<SitemapUrlEntry[]> {
 			priority: 0.6,
 		});
 
-		const subpages = SHOW_SUBPAGES[show.data.id] ?? [];
+		const subpages = getShowSubpages(show.data.id);
 		for (const subpage of subpages) {
 			entries.push({
 				path: `/shows/${show.data.id}/${subpage}`,
