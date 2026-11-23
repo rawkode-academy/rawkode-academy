@@ -8,6 +8,8 @@ import {
 } from "@/lib/live-content";
 import { SITE_DESCRIPTION } from "@/lib/site";
 
+const DEFAULT_SITE_URL = "https://rawkode.academy";
+
 export async function GET(context: APIContext) {
 	const { site } = context;
 	const articles = (await getCollection("articles")).sort(
@@ -37,9 +39,16 @@ export async function GET(context: APIContext) {
 		collections: ["articles"],
 	});
 
+	const canonicalUrl = new URL("/read", site ?? DEFAULT_SITE_URL).href.replace(
+		/\/+$/,
+		"",
+	);
+
 	return new Response(body, {
 		headers: {
 			"Content-Type": "text/plain; charset=utf-8",
+			"X-Robots-Tag": "noindex",
+			Link: `<${canonicalUrl}>; rel="canonical"`,
 		},
 	});
 }

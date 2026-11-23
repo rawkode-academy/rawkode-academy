@@ -5,6 +5,8 @@ import { getCollection, setContentCache } from "@/lib/live-content";
 import { getVideoThumbnailJpegUrl } from "@/lib/video-thumbnail";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
 import {
+	escapeAttribute,
+	normalizeSiteUrl,
 	rssNamespaces,
 	rssSelfLink,
 	rssThumbnail,
@@ -28,10 +30,7 @@ export async function GET(context: APIContext) {
 		collections: ["videos", "technologies"],
 	});
 
-	const site = (context.site?.toString() || "https://rawkode.academy").replace(
-		/\/$/,
-		"",
-	);
+	const site = normalizeSiteUrl(context.site);
 
 	return withRssMimeType(
 		await rss({
@@ -39,6 +38,7 @@ export async function GET(context: APIContext) {
 			description:
 				"Latest videos from Rawkode Academy covering Cloud Native, DevOps, and Modern Software Development",
 			site,
+			trailingSlash: false,
 			items: sortedVideos.map((video) => {
 				const duration =
 					typeof video.data.duration === "number" &&
@@ -57,11 +57,11 @@ export async function GET(context: APIContext) {
 					title: video.data.title,
 					description: video.data.description,
 					pubDate: new Date(video.data.publishedAt),
-					link: `/watch/${video.data.slug}/`,
+					link: `/watch/${video.data.slug}`,
 					customData: `
 						${rssThumbnail(itunesImageUrl)}
 						${durationTag}
-						<itunes:image href="${itunesImageUrl}" />
+						<itunes:image href="${escapeAttribute(itunesImageUrl)}" />
 					`,
 					categories: normalizeTechnologyReferences(
 						video.data.technologies,

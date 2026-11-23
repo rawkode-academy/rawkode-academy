@@ -3,7 +3,14 @@ import { getPublishedVideos } from "@/lib/content";
 import { getCollection, setContentCache } from "@/lib/live-content";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
-import { escapeAttribute } from "../../../lib/feed-utils";
+import {
+	DEFAULT_FEED_AUTHOR,
+	escapeAttribute,
+	escapeCdata,
+	escapeXml,
+	getImageMimeType,
+	normalizeSiteUrl,
+} from "../../../lib/feed-utils";
 
 export const prerender = false;
 
@@ -22,7 +29,7 @@ export async function GET(context: APIContext) {
 		collections: ["videos", "technologies"],
 	});
 
-	const site = context.site?.toString() || "https://rawkode.academy";
+	const site = normalizeSiteUrl(context.site);
 	const feedUrl = `${site}/api/feeds/videos.atom`;
 
 	// Get the most recent update time
@@ -35,14 +42,15 @@ export async function GET(context: APIContext) {
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>Rawkode Academy - Videos</title>
   <subtitle>Latest videos from Rawkode Academy covering Cloud Native, DevOps, and Modern Software Development</subtitle>
-  <link href="${feedUrl}" rel="self" type="application/atom+xml"/>
-  <link href="${site}" rel="alternate" type="text/html"/>
-  <id>${site}/</id>
+  <link href="${escapeAttribute(feedUrl)}" rel="self" type="application/atom+xml"/>
+  <link href="${escapeAttribute(site)}" rel="alternate" type="text/html"/>
+  <id>${escapeXml(`${site}/`)}</id>
   <updated>${lastUpdated}</updated>
+  <author><name>${escapeXml(DEFAULT_FEED_AUTHOR)}</name></author>
   <generator>Astro</generator>
 ${sortedVideos
 	.map((video) => {
-		const videoUrl = `${site}/watch/${video.data.slug}/`;
+		const videoUrl = `${site}/watch/${video.data.slug}`;
 		const published = new Date(video.data.publishedAt).toISOString();
 		const duration =
 			typeof video.data.duration === "number" &&
@@ -65,18 +73,19 @@ ${sortedVideos
 			.join("\n\t\t");
 
 		const thumbnailUrl = getVideoThumbnailUrl(video.data.id);
+		const contentHtml = `<img src="${escapeAttribute(thumbnailUrl)}" alt="${escapeAttribute(video.data.title)}" />
+\t\t\t<p>${escapeXml(video.data.description)}</p>
+\t\t\t${durationContent}`;
 		return `\t<entry>
-\t\t<title><![CDATA[${video.data.title}]]></title>
-\t\t<link href="${videoUrl}" rel="alternate" type="text/html"/>
-\t\t<link href="${thumbnailUrl}" rel="enclosure" type="image/webp"/>
-\t\t<id>${videoUrl}</id>
+\t\t<title><![CDATA[${escapeCdata(video.data.title)}]]></title>
+\t\t<link href="${escapeAttribute(videoUrl)}" rel="alternate" type="text/html"/>
+\t\t<link href="${escapeAttribute(thumbnailUrl)}" rel="enclosure" type="${escapeAttribute(getImageMimeType(thumbnailUrl))}"/>
+\t\t<id>${escapeXml(videoUrl)}</id>
 \t\t<published>${published}</published>
 \t\t<updated>${published}</updated>
-\t\t<summary><![CDATA[${video.data.description}]]></summary>
+\t\t<summary><![CDATA[${escapeCdata(video.data.description)}]]></summary>
 \t\t<content type="html"><![CDATA[
-\t\t\t<img src="${thumbnailUrl}" alt="${video.data.title}" />
-\t\t\t<p>${video.data.description}</p>
-\t\t\t${durationContent}
+\t\t\t${escapeCdata(contentHtml)}
 \t\t]]></content>
 \t\t${categories}
 \t</entry>`;

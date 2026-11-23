@@ -852,8 +852,12 @@ describe("Crawlability and Sitemaps", () => {
 		for (const path of ROBOTS_DISALLOWS) {
 			expect(body).toContain(`Disallow: ${path}`);
 		}
-		// Search results carry noindex; blocking the crawl would hide it.
+		expect(ROBOTS_DISALLOWS).toContain("/settings");
+		expect(ROBOTS_DISALLOWS).not.toContain("/settings/");
+		// Search, confirm-subscription, and unsubscribe carry noindex; blocking crawl hides it.
 		expect(body).not.toMatch(/^Disallow: \/search$/m);
+		expect(body).not.toMatch(/^Disallow: \/confirm-subscription$/m);
+		expect(body).not.toMatch(/^Disallow: \/unsubscribe$/m);
 
 		// Feeds sit under /api/; the longer Allow must override Disallow: /api/.
 		expect(ROBOTS_ALLOWS).toContain("/api/feeds/");
@@ -1088,7 +1092,10 @@ describe("Crawlability and Sitemaps", () => {
 			getCollection: mockGetCollection,
 			setContentCache: mockSetContentCache,
 		}));
+		const actualContent =
+			await vi.importActual<typeof import("../lib/content")>("../lib/content");
 		vi.doMock("@/lib/content", () => ({
+			...actualContent,
 			getPublishedVideos: mockGetPublishedVideos,
 		}));
 
@@ -1110,7 +1117,7 @@ describe("Crawlability and Sitemaps", () => {
 		expect(xml).not.toContain("<video:duration>28801</video:duration>");
 	});
 
-	it("defines supplemental canonical checks for paginated watch pages", async () => {
+	it("defines supplemental canonical checks for paginated watch and read pages", async () => {
 		const {
 			REQUIRED_SITEMAP_PATHS,
 			SUPPLEMENTAL_URL_CHECKS,
@@ -1126,7 +1133,22 @@ describe("Crawlability and Sitemaps", () => {
 				}),
 				expect.objectContaining({
 					path: "/watch?page=2",
+					expectedCanonicalPath: "/watch?page=2",
+					expectedRobots: "index,follow",
+				}),
+				expect.objectContaining({
+					path: "/watch?q=kubernetes",
 					expectedCanonicalPath: "/watch",
+					expectedRobots: "noindex,follow",
+				}),
+				expect.objectContaining({
+					path: "/read?page=2",
+					expectedCanonicalPath: "/read?page=2",
+					expectedRobots: "index,follow",
+				}),
+				expect.objectContaining({
+					path: "/read?q=kubernetes",
+					expectedCanonicalPath: "/read",
 					expectedRobots: "noindex,follow",
 				}),
 			]),
@@ -1136,6 +1158,11 @@ describe("Crawlability and Sitemaps", () => {
 			expect.arrayContaining([
 				expect.objectContaining({
 					url: "https://rawkode.academy/watch?page=2",
+					expectedCanonical: "https://rawkode.academy/watch?page=2",
+					expectedRobots: "index,follow",
+				}),
+				expect.objectContaining({
+					url: "https://rawkode.academy/watch?q=kubernetes",
 					expectedCanonical: "https://rawkode.academy/watch",
 					expectedRobots: "noindex,follow",
 				}),

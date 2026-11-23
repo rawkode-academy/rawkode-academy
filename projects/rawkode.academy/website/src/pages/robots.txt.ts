@@ -4,14 +4,13 @@ const DEFAULT_SITE_URL = "https://rawkode.academy";
 
 export const ROBOTS_SITEMAP_PATH = "/sitemap-index.xml";
 
-// /search is deliberately not listed: the page sends noindex, and Google
-// only sees a noindex on URLs it is allowed to crawl.
+// /search, /confirm-subscription, and /unsubscribe are deliberately not listed:
+// those pages send noindex, and crawlers only see a noindex on URLs they are
+// allowed to crawl.
 export const ROBOTS_DISALLOWS = [
 	"/admin/",
 	"/private/",
-	"/settings/",
-	"/confirm-subscription",
-	"/unsubscribe",
+	"/settings",
 	"/_server-islands/",
 	"/api/",
 	"/internal/",

@@ -184,14 +184,14 @@ describe("News discovery publication contracts", () => {
 			);
 			expect(feed.id).toBe(name === "news" ? `${base}/news` : `${base}/`);
 			expect(feed.entries?.map((item) => item.id)).toEqual([
-				`${base}/news/boundary/`,
-				`${base}/news/past/`,
+				`${base}/news/boundary`,
+				`${base}/news/past`,
 			]);
 			expect(
 				feed.entries?.map(
 					(item) => item.links?.find((link) => link.rel === "alternate")?.href,
 				),
-			).toEqual([`${base}/news/boundary/`, `${base}/news/past/`]);
+			).toEqual([`${base}/news/boundary`, `${base}/news/past`]);
 		}
 	});
 	it.each(
@@ -224,10 +224,10 @@ describe("News discovery publication contracts", () => {
 		];
 		collections.videos = [entry("future-video", future.data.publishedAt)];
 		const text = await (await handler(context())).text();
-		expect(text).toContain("/read/future-article/");
-		expect(text).not.toContain("/watch/future-video/");
-		expect(text).toContain("/read/draft-article/");
-		expect(text).not.toContain("/news/future/");
+		expect(text).toContain("/read/future-article");
+		expect(text).not.toContain("/watch/future-video");
+		expect(text).toContain("/read/draft-article");
+		expect(text).not.toContain("/news/future");
 	});
 
 	it("search indexes eligible News and articles regardless of the legacy draft flag", async () => {

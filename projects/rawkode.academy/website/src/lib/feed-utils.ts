@@ -26,15 +26,64 @@ export function withRssMimeType(res: Response): Response {
 	});
 }
 
-/**
- * Escape a value for use inside a double-quoted XML attribute.
- */
-export const escapeAttribute = (value: string) =>
-	value
+export const SITE_FALLBACK = "https://rawkode.academy";
+export const DEFAULT_FEED_AUTHOR = "Rawkode Academy";
+
+/** Normalize a site URL (string or URL) with no trailing slash(es). */
+export function normalizeSiteUrl(
+	site?: string | URL,
+	fallback = SITE_FALLBACK,
+): string {
+	return (site?.toString() || fallback).replace(/\/+$/, "");
+}
+
+/** Escape text or attribute values for XML / HTML contexts. */
+export function escapeXml(value: string): string {
+	return value
 		.replace(/&/g, "&amp;")
 		.replace(/</g, "&lt;")
 		.replace(/>/g, "&gt;")
-		.replace(/"/g, "&quot;");
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&apos;");
+}
+
+/**
+ * Escape a value for use inside a double-quoted XML attribute.
+ */
+export const escapeAttribute = (value: string) => escapeXml(value);
+
+/** Safely escape `]]>` inside XML CDATA sections. */
+export function escapeCdata(value: string): string {
+	return value.replaceAll("]]>", "]]]]><![CDATA[>");
+}
+
+/** Infer MIME type from an image URL's pathname extension (default image/jpeg). */
+export function getImageMimeType(url: string): string {
+	let pathname = url;
+	try {
+		pathname = new URL(url, SITE_FALLBACK).pathname;
+	} catch {
+		pathname = url.split(/[?#]/, 1)[0] ?? url;
+	}
+	const dotIndex = pathname.lastIndexOf(".");
+	const ext = dotIndex >= 0 ? pathname.slice(dotIndex).toLowerCase() : "";
+	switch (ext) {
+		case ".webp":
+			return "image/webp";
+		case ".png":
+			return "image/png";
+		case ".gif":
+			return "image/gif";
+		case ".avif":
+			return "image/avif";
+		case ".svg":
+			return "image/svg+xml";
+		case ".jpg":
+		case ".jpeg":
+		default:
+			return "image/jpeg";
+	}
+}
 
 /**
  * XML namespaces the RSS 2.0 feeds use for elements RSS itself lacks:
@@ -55,7 +104,7 @@ export const rssSelfLink = (feedUrl: string) =>
 /** An item's `<dc:creator>`, or nothing when the item has no authors. */
 export const rssCreator = (names: string[]) =>
 	names.length > 0
-		? `<dc:creator>${escapeAttribute(names.join(", "))}</dc:creator>`
+		? `<dc:creator>${escapeXml(names.join(", "))}</dc:creator>`
 		: "";
 
 /** A video item's thumbnail image as `<media:thumbnail>`. */
@@ -74,7 +123,8 @@ export async function renderAndSanitizeArticle(
 	article: ContentEntry<"articles">,
 	site: string | URL,
 ): Promise<RenderResult> {
-	const articleUrl = new URL(`/read/${article.id}/`, site).href;
+	const articleUrl = new URL(`/read/${article.id}`, normalizeSiteUrl(site))
+		.href;
 	try {
 		let htmlContent = article.data.description;
 		htmlContent += `<hr/><p><em>Note: Full article content with interactive elements is available on our website.</em></p>`;
@@ -106,7 +156,7 @@ export async function renderAndSanitizeArticle(
 	} catch (error) {
 		console.error(`Failed to render content for article ${article.id}:`, error);
 		return {
-			content: `<div>${article.data.description}</div><p><a href="${articleUrl}">Read the full article on our website</a></p>`,
+			content: `<div>${escapeXml(article.data.description)}</div><p><a href="${escapeAttribute(articleUrl)}">Read the full article on our website</a></p>`,
 		};
 	}
 }

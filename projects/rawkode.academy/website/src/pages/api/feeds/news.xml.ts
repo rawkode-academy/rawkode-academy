@@ -1,6 +1,7 @@
 import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
 import {
+	normalizeSiteUrl,
 	rssCreator,
 	rssNamespaces,
 	rssSelfLink,
@@ -16,10 +17,7 @@ import { isNewsPublished } from "@/lib/news-publication";
 
 export async function GET(context: APIContext) {
 	const now = new Date();
-	const site = (context.site?.toString() || "https://rawkode.academy").replace(
-		/\/$/,
-		"",
-	);
+	const site = normalizeSiteUrl(context.site);
 	const news = await getCollection("news", ({ data }) =>
 		isNewsPublished(data.publishedAt, now),
 	);
@@ -39,7 +37,7 @@ export async function GET(context: APIContext) {
 				title: story.data.title,
 				description: story.data.description,
 				pubDate: new Date(story.data.publishedAt),
-				link: `/news/${story.id}/`,
+				link: `/news/${story.id}`,
 				customData: rssCreator(authors.map((author) => author.data.name)),
 				categories: [...(story.data.technologies ?? [])],
 			};
@@ -56,7 +54,8 @@ export async function GET(context: APIContext) {
 			title: "Rawkode Academy - News",
 			description:
 				"Cloud native, Kubernetes, and AI infrastructure news for engineers.",
-			site: context.site?.toString() || "https://rawkode.academy",
+			site,
+			trailingSlash: false,
 			items,
 			customData: `<language>en-us</language>${rssSelfLink(`${site}/api/feeds/news.xml`)}`,
 			stylesheet: false,

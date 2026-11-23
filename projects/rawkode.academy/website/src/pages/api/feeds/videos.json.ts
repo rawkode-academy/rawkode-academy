@@ -5,15 +5,12 @@ import { getCollection, setContentCache } from "@/lib/live-content";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
 
-const SITE_FALLBACK = "https://rawkode.academy";
+import { normalizeSiteUrl } from "../../../lib/feed-utils";
 
 export const prerender = false;
 
 export const GET: APIRoute = async (context) => {
-	const baseUrl = (context.site?.toString() ?? SITE_FALLBACK).replace(
-		/\/$/,
-		"",
-	);
+	const baseUrl = normalizeSiteUrl(context.site);
 	const u = (path: string) => `${baseUrl}${path}`;
 
 	// Published videos only, like the RSS and Atom feeds: scheduled videos
@@ -32,7 +29,7 @@ export const GET: APIRoute = async (context) => {
 
 	const items: JsonFeedItem[] = videos
 		.map((video) => {
-			const url = u(`/watch/${video.data.slug}/`);
+			const url = u(`/watch/${video.data.slug}`);
 			const tagNames = normalizeTechnologyReferences(
 				video.data.technologies,
 			).map((id) => techName.get(id) ?? id);

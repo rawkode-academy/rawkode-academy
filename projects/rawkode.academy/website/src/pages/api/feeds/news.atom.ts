@@ -7,24 +7,13 @@ import {
 } from "@/lib/live-content";
 import { isNewsPublished } from "@/lib/news-publication";
 
-function escapeXml(value: string): string {
-	return value.replace(/[<>&'"]/g, (char) => {
-		switch (char) {
-			case "<":
-				return "&lt;";
-			case ">":
-				return "&gt;";
-			case "&":
-				return "&amp;";
-			case "'":
-				return "&apos;";
-			case '"':
-				return "&quot;";
-			default:
-				return char;
-		}
-	});
-}
+import {
+	DEFAULT_FEED_AUTHOR,
+	escapeAttribute,
+	escapeCdata,
+	escapeXml,
+	normalizeSiteUrl,
+} from "../../../lib/feed-utils";
 
 export async function GET(context: APIContext) {
 	const now = new Date();
@@ -38,10 +27,7 @@ export async function GET(context: APIContext) {
 			new Date(a.data.publishedAt).getTime(),
 	);
 
-	const site = (context.site?.toString() || "https://rawkode.academy").replace(
-		/\/$/,
-		"",
-	);
+	const site = normalizeSiteUrl(context.site);
 	const feedUrl = `${site}/api/feeds/news.atom`;
 
 	const lastUpdated =
@@ -52,7 +38,7 @@ export async function GET(context: APIContext) {
 	const authorEntries: ContentEntry<"people">[] = [];
 	const entries = await Promise.all(
 		sortedNews.map(async (story) => {
-			const storyUrl = `${site}/news/${story.id}/`;
+			const storyUrl = `${site}/news/${story.id}`;
 			const published = new Date(story.data.publishedAt).toISOString();
 			const authors = await getEntries(story.data.authors);
 			authorEntries.push(...authors);
@@ -65,17 +51,20 @@ export async function GET(context: APIContext) {
 				.join("\n\t\t");
 
 			const categoryTags = (story.data.technologies ?? [])
-				.map((technology) => `<category term="${escapeXml(technology)}"/>`)
+				.map(
+					(technology) =>
+						`<category term="${escapeAttribute(technology)}"/>`,
+				)
 				.join("\n\t\t");
 
 			return `	<entry>
-		<title><![CDATA[${story.data.title}]]></title>
-		<link href="${storyUrl}" rel="alternate" type="text/html"/>
-		<id>${storyUrl}</id>
+		<title><![CDATA[${escapeCdata(story.data.title)}]]></title>
+		<link href="${escapeAttribute(storyUrl)}" rel="alternate" type="text/html"/>
+		<id>${escapeXml(storyUrl)}</id>
 		<published>${published}</published>
 		<updated>${published}</updated>
-		<summary><![CDATA[${story.data.description}]]></summary>
-		<content type="html"><![CDATA[${story.data.description}]]></content>
+		<summary><![CDATA[${escapeCdata(story.data.description)}]]></summary>
+		<content type="html"><![CDATA[${escapeCdata(escapeXml(story.data.description))}]]></content>
 		${authorTags}
 		${categoryTags}
 	</entry>`;
@@ -86,10 +75,11 @@ export async function GET(context: APIContext) {
 <feed xmlns="http://www.w3.org/2005/Atom">
 	<title>Rawkode Academy - News</title>
 	<subtitle>Cloud native, Kubernetes, and AI infrastructure news for engineers.</subtitle>
-	<link href="${feedUrl}" rel="self" type="application/atom+xml"/>
-	<link href="${site}/news" rel="alternate" type="text/html"/>
-	<id>${site}/news</id>
+	<link href="${escapeAttribute(feedUrl)}" rel="self" type="application/atom+xml"/>
+	<link href="${escapeAttribute(`${site}/news`)}" rel="alternate" type="text/html"/>
+	<id>${escapeXml(`${site}/news`)}</id>
 	<updated>${lastUpdated}</updated>
+	<author><name>${escapeXml(DEFAULT_FEED_AUTHOR)}</name></author>
 	<generator>Astro</generator>
 ${entries.join("\n")}
 </feed>`;

@@ -43,13 +43,35 @@ const shows = [
 		},
 	},
 ];
+const defaultVideos = [
+	{
+		id: "ep-1",
+		data: {
+			id: "ep-1",
+			slug: "ep-1",
+			show: { id: "first-show" },
+			publishedAt: new Date("2025-01-01T00:00:00Z"),
+			duration: 1200,
+		},
+	},
+	{
+		id: "ep-2",
+		data: {
+			id: "ep-2",
+			slug: "ep-2",
+			show: { id: "second-show" },
+			publishedAt: new Date("2025-02-01T00:00:00Z"),
+			duration: 900,
+		},
+	},
+];
 const formatGroups = ["all", "articles", "news", "videos"];
 const formats = ["xml", "atom", "json"];
 const expectedFormatUrls = formatGroups.flatMap((group) =>
 	formats.map((format) => `/api/feeds/${group}.${format}`),
 );
 
-async function renderFeeds(collection = shows) {
+async function renderFeeds(collection = shows, videos = defaultVideos) {
 	const context = vm.createContext({ console });
 	const pageProps = [];
 	const collectionsRead = [];
@@ -58,11 +80,23 @@ async function renderFeeds(collection = shows) {
 		// CSS is a build artifact, not executable in this semantic SSR harness.
 		"feeds.astro?astro&type=style&index=0&lang.css": {},
 		"astro/runtime/server/index.js": { ...runtime, createMetadata: () => ({}) },
+		"@/lib/content": {
+			getPublishedVideos: async () => videos,
+			hasTranscodedVodAssets: (video, now = new Date()) =>
+				new Date(video.data.publishedAt).getTime() <= now.getTime() &&
+				typeof video.data.duration === "number" &&
+				Number.isFinite(video.data.duration) &&
+				video.data.duration > 0,
+		},
 		"@/lib/live-content": {
 			getCollection: async (name, filter) => {
 				assert.equal(name, "shows", "Unexpected collection read");
 				collectionsRead.push(name);
 				return collection.filter(filter ?? (() => true));
+			},
+			sameId: (ref, id) => {
+				if (!ref || !id) return false;
+				return (typeof ref === "string" ? ref : ref.id) === id;
 			},
 			setContentCache: async (astro, input) => {
 				assert(astro?.request, "setContentCache needs the Astro global");
@@ -119,7 +153,7 @@ async function renderFeeds(collection = shows) {
 	// The page lists shows, so any show change (or publication) purges it.
 	// The page module runs in its own realm: compare plain data.
 	assert.deepEqual(JSON.parse(JSON.stringify(cacheCalls)), [
-		{ collections: ["shows"] },
+		{ collections: ["shows", "videos"] },
 	]);
 	return { html, dom: parse(html), pageProps };
 }
@@ -289,12 +323,13 @@ test("Homepage advertises the all-content feeds through its extra-head slot", as
 	assert(!sharedHead.includes("/api/feeds/all."));
 });
 
-for (const [state, collection] of [
-	["empty collection", []],
-	["only unpublished shows", [shows[1]]],
+for (const [state, collection, videos] of [
+	["empty collection", [], defaultVideos],
+	["only unpublished shows", [shows[1]], defaultVideos],
+	["shows with 0 transcoded episodes", shows, []],
 ]) {
 	test(`Feeds renders an honest empty podcast state for ${state}`, async () => {
-		const { dom } = await renderFeeds(collection);
+		const { dom } = await renderFeeds(collection, videos);
 		const podcasts = dom.querySelector('section[aria-labelledby="show-feeds"]');
 		assert.match(podcasts.text, /No podcast feeds are published yet\./);
 		assert.equal(podcasts.querySelectorAll("article, a").length, 0);

@@ -6,7 +6,12 @@ import {
 	setContentCache,
 } from "@/lib/live-content";
 import {
+	DEFAULT_FEED_AUTHOR,
 	escapeAttribute,
+	escapeCdata,
+	escapeXml,
+	getImageMimeType,
+	normalizeSiteUrl,
 	renderAndSanitizeArticles,
 } from "../../../lib/feed-utils";
 import { getPublishedVideos } from "@/lib/content";
@@ -42,10 +47,7 @@ export async function GET(context: APIContext) {
 		technologies.map((t) => [t.id, t.data.name] as const),
 	);
 
-	const site = (context.site?.toString() || "https://rawkode.academy").replace(
-		/\/$/,
-		"",
-	);
+	const site = normalizeSiteUrl(context.site);
 	const feedUrl = `${site}/api/feeds/all.atom`;
 
 	// Render all articles in parallel for better performance
@@ -64,7 +66,7 @@ export async function GET(context: APIContext) {
 			entries.push({
 				title: article.data.title,
 				description: article.data.description,
-				url: `${site}/read/${article.id}/`,
+				url: `${site}/read/${article.id}`,
 				published: new Date(article.data.publishedAt).toISOString(),
 				updated: article.data.updatedAt
 					? new Date(article.data.updatedAt).toISOString()
@@ -82,7 +84,7 @@ export async function GET(context: APIContext) {
 		const entry: AtomEntry = {
 			title: video.data.title,
 			description: video.data.description,
-			url: `${site}/watch/${video.data.slug}/`,
+			url: `${site}/watch/${video.data.slug}`,
 			published: new Date(video.data.publishedAt).toISOString(),
 			updated: new Date(video.data.publishedAt).toISOString(),
 			categories: video.data.technologies.map(
@@ -105,7 +107,7 @@ export async function GET(context: APIContext) {
 			entries.push({
 				title: story.data.title,
 				description: story.data.description,
-				url: `${site}/news/${story.id}/`,
+				url: `${site}/news/${story.id}`,
 				published: new Date(story.data.publishedAt).toISOString(),
 				updated: new Date(story.data.publishedAt).toISOString(),
 				categories: [...(story.data.technologies ?? [])],
@@ -130,10 +132,11 @@ export async function GET(context: APIContext) {
 <feed xmlns="http://www.w3.org/2005/Atom">
 	<title>Rawkode Academy - All Content</title>
 	<subtitle>Latest articles, news, and videos from Rawkode Academy covering Cloud Native, DevOps, and Modern Software Development</subtitle>
-	<link href="${feedUrl}" rel="self" type="application/atom+xml"/>
-	<link href="${site}" rel="alternate" type="text/html"/>
-	<id>${site}/</id>
+	<link href="${escapeAttribute(feedUrl)}" rel="self" type="application/atom+xml"/>
+	<link href="${escapeAttribute(site)}" rel="alternate" type="text/html"/>
+	<id>${escapeXml(`${site}/`)}</id>
 	<updated>${lastUpdated}</updated>
+	<author><name>${escapeXml(DEFAULT_FEED_AUTHOR)}</name></author>
 	<generator>Astro</generator>
 ${entries
 	.map((entry) => {
@@ -141,7 +144,7 @@ ${entries
 			entry.type === "article" && entry.content
 				? entry.content
 				: entry.type === "video" && entry.thumbnail
-					? `<img src="${entry.thumbnail}" alt="${entry.title}" /><p>${entry.description}</p>${
+					? `<img src="${escapeAttribute(entry.thumbnail)}" alt="${escapeAttribute(entry.title)}" /><p>${escapeXml(entry.description)}</p>${
 							entry.duration
 								? `<p>Duration: ${Math.floor(entry.duration / 60)}:${(
 										entry.duration % 60
@@ -150,22 +153,22 @@ ${entries
 										.padStart(2, "0")}</p>`
 								: ""
 						}`
-					: entry.description;
+					: escapeXml(entry.description);
 
 		return `	<entry>
-		<title><![CDATA[${entry.title}]]></title>
-		<link href="${entry.url}" rel="alternate" type="text/html"/>
+		<title><![CDATA[${escapeCdata(entry.title)}]]></title>
+		<link href="${escapeAttribute(entry.url)}" rel="alternate" type="text/html"/>
 		${
 			entry.thumbnail
-				? `<link href="${entry.thumbnail}" rel="enclosure" type="image/jpeg"/>`
+				? `<link href="${escapeAttribute(entry.thumbnail)}" rel="enclosure" type="${escapeAttribute(getImageMimeType(entry.thumbnail))}"/>`
 				: ""
 		}
-		<id>${entry.url}</id>
+		<id>${escapeXml(entry.url)}</id>
 		<published>${entry.published}</published>
 		<updated>${entry.updated}</updated>
-		<summary><![CDATA[${entry.description}]]></summary>
-		<content type="html"><![CDATA[${content}]]></content>
-		${entry.author ? `<author><name>${escapeAttribute(entry.author)}</name></author>` : ""}
+		<summary><![CDATA[${escapeCdata(entry.description)}]]></summary>
+		<content type="html"><![CDATA[${escapeCdata(content)}]]></content>
+		${entry.author ? `<author><name>${escapeXml(entry.author)}</name></author>` : ""}
 		${entry.categories
 			.map((cat) => {
 				const name = escapeAttribute(cat);

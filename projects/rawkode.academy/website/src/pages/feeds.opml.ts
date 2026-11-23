@@ -1,9 +1,9 @@
 import type { APIRoute } from "astro";
-import { getCollection, setContentCache } from "@/lib/live-content";
-import { buildOpmlDocument, type OpmlFeed, type OpmlOutline } from "@/lib/opml";
+import { hasTranscodedVodAssets } from "@/lib/content";
+import { normalizeSiteUrl } from "@/lib/feed-utils";
+import { getCollection, sameId, setContentCache } from "@/lib/live-content";
 import { isNewsPublished } from "@/lib/news-publication";
-
-const SITE_FALLBACK = "https://rawkode.academy";
+import { buildOpmlDocument, type OpmlFeed, type OpmlOutline } from "@/lib/opml";
 
 const matchRef = (
 	ref: { collection?: string; id?: string } | string | undefined,
@@ -51,10 +51,19 @@ const personHasContribution = (
 	);
 };
 
+const itemReferencesTechnology = (
+	technologies: ReadonlyArray<string | { id?: string }> | undefined,
+	technologyId: string,
+): boolean =>
+	Array.isArray(technologies) &&
+	technologies.some((value) =>
+		sameId(typeof value === "string" ? value : value?.id, technologyId),
+	);
+
 export const GET: APIRoute = async (context) => {
 	const { site } = context;
 	const now = new Date();
-	const baseUrl = (site?.toString() ?? SITE_FALLBACK).replace(/\/$/, "");
+	const baseUrl = normalizeSiteUrl(site);
 	const u = (path: string) => `${baseUrl}${path}`;
 
 	const [articles, news, videos, technologies, people, shows] =
@@ -63,12 +72,18 @@ export const GET: APIRoute = async (context) => {
 			getCollection("news", ({ data }) =>
 				isNewsPublished(data.publishedAt, now),
 			),
-			// Videos include upcoming streams (they have pages), as before.
 			getCollection("videos"),
 			getCollection("technologies"),
 			getCollection("people"),
 			getCollection("shows"),
 		]);
+
+	const publishedVideos = videos.filter(
+		(video) => new Date(video.data.publishedAt).getTime() <= now.getTime(),
+	);
+	const transcodedVideos = publishedVideos.filter((video) =>
+		hasTranscodedVodAssets(video, now),
+	);
 
 	const topLevelFeeds: OpmlFeed[] = [
 		{
@@ -94,7 +109,19 @@ export const GET: APIRoute = async (context) => {
 		},
 	];
 
-	const technologyOutlines: OpmlFeed[] = [...technologies]
+	const technologyOutlines: OpmlFeed[] = technologies
+		.filter(
+			(technology) =>
+				articles.some((article) =>
+					itemReferencesTechnology(article.data.technologies, technology.id),
+				) ||
+				news.some((story) =>
+					itemReferencesTechnology(story.data.technologies, technology.id),
+				) ||
+				publishedVideos.some((video) =>
+					itemReferencesTechnology(video.data.technologies, technology.id),
+				),
+		)
 		.map((technology) => ({
 			rawId: technology.id,
 			name: technology.data.name,
@@ -112,7 +139,7 @@ export const GET: APIRoute = async (context) => {
 				person.data.id,
 				articles as never,
 				news as never,
-				videos as never,
+				publishedVideos as never,
 			),
 		)
 		.map((person) => ({ id: person.data.id, name: person.data.name }))
@@ -124,7 +151,10 @@ export const GET: APIRoute = async (context) => {
 		}));
 
 	const publishedShows = shows.filter(
-		(show) => show.data.publish && show.data.status !== "coming-soon",
+		(show) =>
+			show.data.publish &&
+			show.data.status !== "coming-soon" &&
+			transcodedVideos.some((video) => sameId(video.data.show, show.data.id)),
 	);
 	const showOutlines: OpmlFeed[] = publishedShows
 		.map((show) => ({ id: show.data.id, name: show.data.name }))

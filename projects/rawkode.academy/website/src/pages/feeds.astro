@@ -2,15 +2,26 @@
 import EditorialShell from "@/components/ui/EditorialShell.astro";
 import Page from "@/wrappers/page.astro";
 import { academyDocument } from "@rawkodeacademy/design-system";
-import { getCollection, setContentCache } from "@/lib/live-content";
+import { getPublishedVideos, hasTranscodedVodAssets } from "@/lib/content";
+import { getCollection, sameId, setContentCache } from "@/lib/live-content";
 
 const doc = academyDocument();
+const now = new Date();
 
-const shows = await getCollection("shows");
-const publishedShows = shows.filter(
-	(show) => show.data.publish && show.data.status !== "coming-soon",
+const [shows, publishedVideos] = await Promise.all([
+	getCollection("shows"),
+	getPublishedVideos(),
+]);
+const transcodedVideos = publishedVideos.filter((video) =>
+	hasTranscodedVodAssets(video, now),
 );
-await setContentCache(Astro, { collections: ["shows"] });
+const publishedShows = shows.filter(
+	(show) =>
+		show.data.publish &&
+		show.data.status !== "coming-soon" &&
+		transcodedVideos.some((video) => sameId(video.data.show, show.data.id)),
+);
+await setContentCache(Astro, { collections: ["shows", "videos"] });
 
 const feedGroups = [
 	{

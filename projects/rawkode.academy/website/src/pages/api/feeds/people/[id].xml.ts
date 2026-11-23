@@ -1,6 +1,11 @@
 import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
-import { withRssMimeType } from "../../../../lib/feed-utils";
+import {
+	normalizeSiteUrl,
+	rssNamespaces,
+	rssSelfLink,
+	withRssMimeType,
+} from "../../../../lib/feed-utils";
 import {
 	type AnyEntry,
 	getCollection,
@@ -40,7 +45,7 @@ export async function GET(context: APIContext) {
 			title: article.data.title,
 			description: article.data.description ?? "",
 			pubDate: new Date(article.data.publishedAt),
-			link: `/read/${article.id}/`,
+			link: `/read/${article.id}`,
 			categories: ["Article"],
 		});
 	}
@@ -54,7 +59,7 @@ export async function GET(context: APIContext) {
 			title: story.data.title,
 			description: story.data.description ?? "",
 			pubDate: new Date(story.data.publishedAt),
-			link: `/news/${story.id}/`,
+			link: `/news/${story.id}`,
 			categories: ["News"],
 		});
 	}
@@ -68,7 +73,7 @@ export async function GET(context: APIContext) {
 			title: video.data.title,
 			description: video.data.description ?? "",
 			pubDate: new Date(video.data.publishedAt),
-			link: `/watch/${video.data.slug}/`,
+			link: `/watch/${video.data.slug}`,
 			categories: ["Video"],
 		});
 	}
@@ -86,14 +91,20 @@ export async function GET(context: APIContext) {
 		collections: ["articles", "news", "videos"],
 	});
 
+	const site = normalizeSiteUrl(context.site);
+
 	return withRssMimeType(
 		await rss({
 			title: `Rawkode Academy - ${personName}`,
 			description: `Articles, news, and video appearances by ${personName} on Rawkode Academy.`,
-			site: context.site?.toString() || "https://rawkode.academy",
+			site,
+			trailingSlash: false,
 			items,
-			customData: "<language>en-us</language>",
+			customData: `<language>en-us</language>${rssSelfLink(`${site}/api/feeds/people/${personId}.xml`)}`,
 			stylesheet: false,
+			xmlns: {
+				atom: rssNamespaces.atom,
+			},
 		}),
 	);
 }

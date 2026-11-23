@@ -195,7 +195,7 @@ describe("Article feed content links", () => {
 		const text = await read(handler);
 		expect(text).not.toMatch(/href=(?:"|&quot;)\//);
 		expect(text).toMatch(
-			/href=(?:"|&quot;)https:\/\/rawkode\.academy\/read\/seccomp-kubernetes\/(?:"|&quot;)/,
+			/href=(?:"|&quot;)https:\/\/rawkode\.academy\/read\/seccomp-kubernetes(?:"|&quot;)/,
 		);
 	});
 });
@@ -223,8 +223,8 @@ describe("All-content feeds and scheduled videos", () => {
 		["all.json", allJson],
 	] as const)("%s omits a video scheduled for the future", async (_name, handler) => {
 		const text = await read(handler);
-		expect(text).toContain("/watch/hands-on-swamp/");
-		expect(text).not.toContain("/watch/atuin/");
+		expect(text).toContain("/watch/hands-on-swamp");
+		expect(text).not.toContain("/watch/atuin");
 	});
 
 	it("all.atom does not take its <updated> from a scheduled video", async () => {
@@ -236,6 +236,6 @@ describe("All-content feeds and scheduled videos", () => {
 	it("a scheduled video appears once its publication time has passed", async () => {
 		vi.setSystemTime(scheduled);
 		for (const handler of [allRss, allAtom, allJson])
-			expect(await read(handler)).toContain("/watch/atuin/");
+			expect(await read(handler)).toContain("/watch/atuin");
 	});
 });

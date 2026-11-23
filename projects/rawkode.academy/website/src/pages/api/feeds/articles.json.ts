@@ -7,11 +7,11 @@ import {
 	setContentCache,
 } from "@/lib/live-content";
 
-const SITE_FALLBACK = "https://rawkode.academy";
+import { normalizeSiteUrl } from "../../../lib/feed-utils";
 
 export const GET: APIRoute = async (context) => {
 	const { site } = context;
-	const baseUrl = (site?.toString() ?? SITE_FALLBACK).replace(/\/$/, "");
+	const baseUrl = normalizeSiteUrl(site);
 	const u = (path: string) => `${baseUrl}${path}`;
 
 	const articles = await getCollection("articles");
@@ -21,7 +21,7 @@ export const GET: APIRoute = async (context) => {
 	for (const article of articles) {
 		const authors = await getEntries(article.data.authors);
 		authorEntries.push(...authors);
-		const url = u(`/read/${article.id}/`);
+		const url = u(`/read/${article.id}`);
 		items.push({
 			id: url,
 			url,
