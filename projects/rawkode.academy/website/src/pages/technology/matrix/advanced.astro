@@ -1,7 +1,11 @@
 ---
 export const prerender = false;
 
-import { getCollection, setContentCache } from "@/lib/live-content";
+import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
+import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
+import { getCollection, optionalContent, setContentCache } from "@/lib/live-content";
+import { serializeJsonLd } from "@/lib/open-graph";
+import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
 import Page from "@/wrappers/page.astro";
 import { Container } from "@/components/ui";
 import {
@@ -43,8 +47,21 @@ for (const video of allVideos) {
 
 // Get all technologies
 const allTechnologies = await getCollection("technologies");
+const articleCutoff = new Date();
+const publishedArticles = await optionalContent(
+	getCollection("articles", ({ data }) => data.publishedAt <= articleCutoff),
+	[],
+);
+const articleCountsByTech = new Map<string, number>();
+for (const article of publishedArticles) {
+	for (const techId of new Set(
+		normalizeTechnologyReferences(article.data.technologies),
+	)) {
+		articleCountsByTech.set(techId, (articleCountsByTech.get(techId) || 0) + 1);
+	}
+}
 // Counts cover every video (scheduled ones included), as the static page did.
-await setContentCache(Astro, { collections: ["technologies", "videos"] });
+await setContentCache(Astro, { collections: ["technologies", "videos", "articles"] });
 
 // Normalize technologies for the explorer
 const normalizedTechnologies = allTechnologies.map((tech) => {
@@ -57,7 +74,7 @@ const normalizedTechnologies = allTechnologies.map((tech) => {
 	return normalizeTechnology(
 		rawTech,
 		videoCountsByTech.get(tech.id) || 0,
-		0, // articleCount - TODO: wire up when available
+		articleCountsByTech.get(tech.id.replace(/\/index$/, "")) || 0,
 		iconUrl,
 	);
 });
@@ -74,7 +91,39 @@ const media = academyMedia();
 <Page
 	title="Advanced Technology Matrix"
 	description="Filter and compare cloud native and platform engineering technologies by adoption stage, category, confidence, and trajectory."
+	pageType="CollectionPage"
 >
+	<BreadcrumbJsonLd
+		slot="extra-head"
+		elements={[
+			{ title: "Home", link: "/" },
+			{ title: "Technologies", link: "/technology" },
+			{ title: "Technology Matrix", link: "/technology/matrix" },
+			{
+				title: "Advanced Technology Matrix",
+				link: "/technology/matrix/advanced",
+			},
+		]}
+	/>
+	<script
+		is:inline
+		slot="extra-head"
+		type="application/ld+json"
+		set:html={serializeJsonLd({
+			"@context": "https://schema.org",
+			"@type": "ItemList",
+			name: "Rawkode Academy Advanced Technology Matrix",
+			description:
+				"Filter and compare cloud native and platform engineering technologies by adoption stage, category, confidence, and trajectory.",
+			numberOfItems: normalizedTechnologies.length,
+			itemListElement: normalizedTechnologies.map((tech, index) => ({
+				"@type": "ListItem",
+				position: index + 1,
+				name: tech.name,
+				url: `https://rawkode.academy/technology/${tech.id}`,
+			})),
+		})}
+	></script>
 	<div class:list={[layout.root, media.root]}>
 	<section class:list={[layout.hero, media.hero, "explorer-hero"]}>
 		<div class="hero-background">
@@ -83,6 +132,13 @@ const media = academyMedia();
 		</div>
 		<Container size="xl" padding="lg">
 			<div class="hero-content">
+				<Breadcrumb
+					parents={[
+						{ title: "Home", link: "/" },
+						{ title: "Technologies", link: "/technology" },
+						{ title: "Technology Matrix", link: "/technology/matrix" },
+					]}
+				/>
 				<a href="/technology/matrix" class="back-link">Technology Matrix</a>
 				<div class="hero-badge">
 					<span class="badge-dot"></span>
@@ -99,7 +155,7 @@ const media = academyMedia();
 	<Container size="xl" padding="lg">
 		<div class:list={[layout.container, media.body, "explorer-shell"]}>
 			<TechnologyExplorer
-				client:load
+				client:idle
 				technologies={JSON.parse(technologiesJson)}
 			/>
 		</div>

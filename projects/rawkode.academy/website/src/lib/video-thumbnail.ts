@@ -18,6 +18,24 @@ export function getVideoThumbnailResizedUrl(
 	return `/cdn-cgi/image/${params}/${source}`;
 }
 
+export function resizeRemoteImageUrl(src: string, width: number): string;
+export function resizeRemoteImageUrl(
+	src: string | undefined,
+	width: number,
+): string | undefined;
+export function resizeRemoteImageUrl(
+	src: string | undefined,
+	width: number,
+): string | undefined {
+	if (!src || import.meta.env.DEV) {
+		return src;
+	}
+	if (src.includes("/cdn-cgi/image/") || !/^https?:\/\//i.test(src)) {
+		return src;
+	}
+	return `/cdn-cgi/image/width=${width},quality=82,format=auto/${src}`;
+}
+
 export function getVideoThumbnailJpegUrl(
 	site: string | URL,
 	videoId: string,

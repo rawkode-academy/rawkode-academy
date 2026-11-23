@@ -5,12 +5,15 @@ const styles = academyLayout({ width: "reading" });
 import {
 	type ContentEntry,
 	getCollection,
+	getEntries,
 	getEntry,
 	renderEntry,
 	setContentCache,
 } from "@/lib/live-content";
 import RichText from "@/components/content/RichText.astro";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
+import CourseJsonLd from "@/components/html/course-jsonld.astro";
+import VideoMetadata from "@/components/html/video-metadata.astro";
 import CourseSignupForm from "@/components/courses/CourseSignupForm.astro";
 import ResourceList from "@/components/courses/ResourceList.vue";
 import VideoPlayer from "@/components/video/player.vue";
@@ -55,16 +58,25 @@ if (module.data.draft) {
 const composite = `${module.data.title} - ${course.data.title}`;
 const pageTitle = composite.length <= 58 ? composite : module.data.title;
 
-const [{ html }, allCourseModules] = await Promise.all([
-	renderEntry(module),
-	getCollection(
-		"courseModules",
-		({ data }) => data.course.id === course.id && !data.draft,
-	).then((modules) => modules.sort((a, b) => a.data.order - b.data.order)),
-]);
+const [{ html }, authors, courseTechnologies, allCourseModules] =
+	await Promise.all([
+		renderEntry(module),
+		getEntries(module.data.authors ?? course.data.authors ?? []),
+		getEntries(course.data.technologies ?? []),
+		getCollection(
+			"courseModules",
+			({ data }) => data.course.id === course.id && !data.draft,
+		).then((modules) => modules.sort((a, b) => a.data.order - b.data.order)),
+	]);
 
 await setContentCache(Astro, {
-	entries: [module, course, ...allCourseModules],
+	entries: [
+		module,
+		course,
+		...authors,
+		...courseTechnologies,
+		...allCourseModules,
+	],
 	// The lesson navigation lists this course's modules; the body is autolinked.
 	collections: ["courseModules", "technologies"],
 });
@@ -92,6 +104,38 @@ const dedupedResources = Array.from(
 
 // Covers are remote images; the runtime image service is a passthrough.
 const imageUrl = module.data.cover?.image.src ?? null;
+const siteBase = Astro.site || "https://rawkode.academy";
+const courseImageUrl = course.data.cover?.image
+	? new URL(course.data.cover.image.src, siteBase)
+	: undefined;
+const lessonImageUrl = imageUrl
+	? imageUrl.startsWith("http")
+		? new URL(imageUrl)
+		: new URL(imageUrl, siteBase)
+	: courseImageUrl;
+const videoThumbnailUrl = module.data.video
+	? module.data.video.thumbnailUrl ||
+		module.data.video.poster ||
+		`https://content.rawkode.academy/videos/${module.data.video.id}/thumbnail.jpg`
+	: undefined;
+const videoStreamUrl = module.data.video
+	? `https://content.rawkode.academy/videos/${module.data.video.id}/stream.m3u8`
+	: undefined;
+const videoDurationSeconds =
+	module.data.duration && module.data.duration > 0
+		? module.data.duration * 60
+		: undefined;
+const publishedDate =
+	"publishedAt" in module.data && module.data.publishedAt instanceof Date
+		? module.data.publishedAt
+		: course.data.publishedAt;
+const creatorRefs =
+	authors.length > 0
+		? authors.map((author) => ({
+				name: author.data.name,
+				url: `https://rawkode.academy/people/${author.data.id}`,
+			}))
+		: undefined;
 const moduleSlug = getCourseModuleSlug(course.id, module.id);
 
 const breadcrumbElements = [
@@ -144,6 +188,31 @@ function formatDuration(minutes?: number) {
 			}
 		: undefined}
 >
+	<CourseJsonLd
+		slot="extra-head"
+		course={course}
+		module={module}
+		isModule={true}
+		imageUrl={lessonImageUrl}
+		authors={authors}
+	/>
+	{module.data.video && videoThumbnailUrl && (
+		<VideoMetadata
+			slot="extra-head"
+			title={module.data.title}
+			description={module.data.description}
+			thumbnailUrl={videoThumbnailUrl}
+			publishedAt={publishedDate.toISOString()}
+			duration={videoDurationSeconds}
+			streamUrl={videoStreamUrl}
+			keywords={courseTechnologies.map((tech) => tech.data.name)}
+			creators={creatorRefs}
+			partOfSeries={{
+				name: course.data.title,
+				url: `https://rawkode.academy/courses/${course.id}`,
+			}}
+		/>
+	)}
 	<section class={doc.section}>
 		<div class={[doc.container, doc.stack].join(" ")}>
 			<Breadcrumb elements={breadcrumbElements} />
@@ -174,6 +243,37 @@ function formatDuration(minutes?: number) {
 							<p class={doc.lede}>
 								{module.data.description}
 							</p>
+							{authors.length > 0 && (
+								<div class={doc.byline}>
+									{authors.map((author) => (
+										<a href={`/people/${author.data.id}`} class={doc.author}>
+											{author.data.avatarUrl && (
+												<img
+													src={author.data.avatarUrl}
+													alt=""
+													width="44"
+													height="44"
+													class={doc.avatar}
+													loading="lazy"
+													decoding="async"
+												/>
+											)}
+											<span>{author.data.name}</span>
+										</a>
+									))}
+								</div>
+							)}
+							{courseTechnologies.length > 0 && (
+								<ul class={doc.tagList} aria-label="Technologies">
+									{courseTechnologies.map((tech) => (
+										<li>
+											<a href={`/technology/${tech.id}`} class={doc.tag}>
+												{tech.data.name}
+											</a>
+										</li>
+									))}
+								</ul>
+							)}
 						</div>
 					</div>
 
@@ -189,8 +289,26 @@ function formatDuration(minutes?: number) {
 								thumbnailUrl={module.data.video.thumbnailUrl || module.data.video.poster || ""}
 								client:only="vue"
 								isAuthenticated={false}
-							/>
+							>
+								<img
+									slot="fallback"
+									src={videoThumbnailUrl}
+									alt={module.data.title}
+									width="1280"
+									height="720"
+									fetchpriority="high"
+									decoding="async"
+								/>
+							</VideoPlayer>
 						</div>
+						<noscript>
+							<p class={doc.copy}>
+								The embedded player needs JavaScript.
+								{videoStreamUrl && (
+									<>{" "}<a class={doc.link} href={videoStreamUrl}>Open the lesson video stream (HLS)</a></>
+								)}
+							</p>
+						</noscript>
 					</section>
 				)}
 
@@ -202,9 +320,29 @@ function formatDuration(minutes?: number) {
 
 				{dedupedResources.length > 0 && (
 					<aside class={doc.moduleRail}>
-						<ResourceList resources={dedupedResources} courseId={course.id} client:load />
+						<ResourceList resources={dedupedResources} courseId={course.id} client:idle />
 					</aside>
 				)}
+
+				<details class:list={[doc.moduleMain, doc.panel]}>
+					<summary class={doc.tocSummary}>
+						Course curriculum ({allCourseModules.length}{" "}
+						{allCourseModules.length === 1 ? "lesson" : "lessons"})
+					</summary>
+					<ol class={doc.list}>
+						{allCourseModules.map((entry, index) => (
+							<li>
+								<a
+									href={moduleHref(entry)}
+									class={doc.tocLink}
+									aria-current={entry.id === module.id ? "page" : undefined}
+								>
+									{String(index + 1).padStart(2, "0")}. {entry.data.title}
+								</a>
+							</li>
+						))}
+					</ol>
+				</details>
 
 				{(previousModule || nextModule) && (
 					<nav aria-label="Course lessons" class={[doc.moduleMain, doc.rule].join(" ")}>

@@ -49,20 +49,24 @@
  :href="`/technology/${tech.id}`"
  class="tech-icon"
  :data-name="tech.name"
+ :aria-label="tech.name"
  :class="{ 'is-hovered': hoveredTechId === tech.id }"
  @mouseenter="$emit('hover', tech.id)"
  @mouseleave="$emit('hover', null)"
- @click.prevent="$emit('select', tech.id)"
+ @click="onTechClick($event, tech.id)"
  >
  <img
  v-if="tech.icon"
  :src="tech.icon"
  alt=""
  class="icon-img"
+ width="22"
+ height="22"
  loading="lazy"
  />
  <span v-else class="icon-initial" aria-hidden="true">{{ tech.name[0] }}</span>
  <span class="tech-name">{{ tech.name }}</span>
+ <span v-if="tech.cardData.why" class="sr-only"> — {{ tech.cardData.why }}</span>
  <span
  v-if="tech.dimensions['matrix.trajectory']"
  class="icon-trajectory"
@@ -79,7 +83,7 @@
 
  <!-- Empty state -->
  <div v-if="technologies.length === 0" class="empty-state">
- <h3>No technologies match</h3>
+ <h2>No technologies match</h2>
  <p>Loosen a filter, clear the search, or switch an axis to a broader dimension.</p>
  <button
  v-if="explorer"
@@ -115,10 +119,24 @@ interface Props {
 
 const props = defineProps<Props>();
 
-defineEmits<{
+const emit = defineEmits<{
 	hover: [id: string | null];
 	select: [id: string | null];
 }>();
+
+function onTechClick(event: MouseEvent, id: string) {
+	if (
+		event.metaKey ||
+		event.ctrlKey ||
+		event.shiftKey ||
+		event.altKey ||
+		event.button !== 0
+	) {
+		return;
+	}
+	event.preventDefault();
+	emit("select", id);
+}
 
 // Explorer state (provided by TechnologyExplorer) — used by the empty state
 // to offer a one-click way out of an over-filtered view.
@@ -532,7 +550,19 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  border-color: var(--colors-academy-status-spruce);
 }
 
-.empty-state h3 {
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+.empty-state h2 {
  font-size: 1.25rem;
  font-weight: 700;
  color: var(--colors-academy-text);

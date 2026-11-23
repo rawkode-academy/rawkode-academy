@@ -6,14 +6,11 @@ import { ref } from "vue";
 import { resetIdentity } from "@/lib/analytics/track";
 import { createLogger } from "@/lib/logger";
 
-interface NavigationItem {
-	label: string;
-	href: string;
-}
+import type { NavigationGroup, NavigationItem } from "@/lib/navigation";
 
 defineProps<{
 	primary: NavigationItem[];
-	groups: Array<{ label: string; items: NavigationItem[] }>;
+	groups: NavigationGroup[];
 	currentPath: string;
 }>();
 

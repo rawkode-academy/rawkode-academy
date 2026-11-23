@@ -1,11 +1,32 @@
 ---
+import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import PageWrapper from "@/wrappers/page.astro";
 import Kubele from "@/components/games/kubele/Kubele.vue";
-import { academyLayout } from "@rawkodeacademy/design-system";
+import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
+const doc = academyDocument();
 const layout = academyLayout({ width: "wide" });
 ---
 <PageWrapper title="Kubele — a daily cloud native word game" description="Six guesses. One cloud native project or term. Play Kubele, featuring CNCF projects, including Sandbox projects.">
 	<section class:list={[layout.root, layout.section]}>
+		<div class:list={[doc.container, doc.stack]}>
+			<Breadcrumb
+				elements={[
+					{ title: "Home", link: "/" },
+					{ title: "Kubele", link: "/games/kubele" },
+				]}
+			/>
+			<h1 class={doc.title}>Kubele</h1>
+			<p class={doc.lede}>
+				Six guesses. One cloud native project or term. Play Kubele, featuring CNCF projects including Sandbox projects.
+			</p>
+			<ul class={doc.tagList} aria-label="Related cloud native topics">
+				<li><a href="/technology/kubernetes" class={doc.tag}>Kubernetes</a></li>
+				<li><a href="/technology" class={doc.tag}>Technologies</a></li>
+				<li><a href="/technology/matrix" class={doc.tag}>Technology Matrix</a></li>
+				<li><a href="/games/cnicon" class={doc.tag}>CNIcon</a></li>
+				<li><a href="/games/secret-of-kubernetes-island" class={doc.tag}>Secret of Kubernetes Island</a></li>
+			</ul>
+		</div>
 		<Kubele registered={Boolean(Astro.locals.user)} client:only="vue"><p slot="fallback">Loading Kubele…</p></Kubele>
 		<noscript>Enable JavaScript to play Kubele.</noscript>
 	</section>

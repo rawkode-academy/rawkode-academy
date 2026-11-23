@@ -18,7 +18,7 @@ const styles = academyShell();
 		<AcademyBrand />
 		<nav class={styles.links} aria-label="Primary navigation">
 			{primaryNavigation.map((item) => (
-				<a href={item.href} class={styles.link} aria-current={isCurrentRoute(Astro.url.pathname, item.href) ? "page" : undefined}>{item.label}</a>
+				<a href={item.href} rel={item.rel} class={styles.link} aria-current={isCurrentRoute(Astro.url.pathname, item.href) ? "page" : undefined}>{item.label}</a>
 			))}
 		</nav>
 		<div class={styles.actions}>
@@ -30,7 +30,7 @@ const styles = academyShell();
 			<ThemeToggle client:load variant="icon" size="md" />
 			<div class={styles.account}>
 				<UserHeader server:defer>
-					<a href="/settings" slot="fallback" class={styles.link}>Account</a>
+					<a href="/settings" rel="nofollow" slot="fallback" class={styles.link}>Account</a>
 				</UserHeader>
 			</div>
 			<MobileNavigation client:load primary={primaryNavigation} groups={navigationGroups} currentPath={Astro.url.pathname} />
