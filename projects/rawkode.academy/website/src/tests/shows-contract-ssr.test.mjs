@@ -108,6 +108,7 @@ function harness({
 	collections = { shows: [show()], videos: [] },
 	participation = [],
 	writeError = false,
+	openBrackets = false,
 } = {}) {
 	const reads = [],
 		writes = [],
@@ -255,6 +256,8 @@ function harness({
 					},
 					{ context },
 				);
+			if (openBrackets && specifier === "@/shows/klustered")
+				return load("tests/fixtures/open-klustered-extension.ts");
 			assert(
 				specifier.startsWith("@/") || specifier.startsWith("."),
 				`Unexpected import: ${specifier}`,
@@ -500,7 +503,7 @@ test("future-only detail has an honest empty state/archive link; hidden detail r
 
 test("forged success GET cannot claim saved/entered or call registration", async () => {
 	for (const locals of [{}, { user: { id: "user" } }]) {
-		const h = harness();
+		const h = harness({ openBrackets: true });
 		const result = await h.render(
 			extras,
 			{},
@@ -524,7 +527,10 @@ test("forged success GET cannot claim saved/entered or call registration", async
 test("only service-confirmed participation shows Entered; native form/auth paths are preserved", async () => {
 	for (const signedIn of [false, true]) {
 		for (const applied of [false, true]) {
-			const h = harness({ participation: [card({ applied })] });
+			const h = harness({
+				openBrackets: true,
+				participation: [card({ applied })],
+			});
 			const { dom } = await h.render(
 				extras,
 				{},
@@ -572,7 +578,7 @@ test("mocked application handler preserves validation/auth and redirects only af
 	const user = {
 		user: { id: "user", name: "Fixture User", username: "fixture-user" },
 	};
-	const h = harness();
+	const h = harness({ openBrackets: true });
 	const { ALL } = await h.module(api);
 	assert.equal((await ALL(h.routeContext())).status, 405);
 	const anonymous = await ALL(h.routeContext("POST", { bracketId: "b" }));
@@ -602,7 +608,7 @@ test("mocked application handler preserves validation/auth and redirects only af
 			username: "fixture-user",
 		},
 	]);
-	const rejected = harness({ writeError: true });
+	const rejected = harness({ openBrackets: true, writeError: true });
 	const result = await (await rejected.module(api)).ALL(
 		rejected.routeContext("POST", { bracketId: "b" }, user),
 	);
@@ -612,7 +618,7 @@ test("mocked application handler preserves validation/auth and redirects only af
 
 test("hidden/missing shows reject every extension before read/write dispatch", async () => {
 	for (const shows of [[show("klustered", false)], []]) {
-		const h = harness({ collections: { shows } });
+		const h = harness({ openBrackets: true, collections: { shows } });
 		for (const slug of ["seasons", "brackets", "schedule", "apply"]) {
 			assert.equal(
 				(await h.render(extras, {}, { params: { showId: "klustered", slug } }))
@@ -641,17 +647,46 @@ test("hidden/missing shows reject every extension before read/write dispatch", a
 	}
 });
 
-test("Klustered exposes only the apply page and endpoint until the relaunch is ready", async () => {
+test("Klustered exposes no public pages or endpoints while it is a holding page", async () => {
 	const h = harness();
 	const { klusteredExtension } = await h.module("shows/klustered/index.ts");
-	assert.equal(
-		klusteredExtension.pages.map((page) => page.slug).join(","),
-		"apply",
-	);
-	assert.equal(
-		klusteredExtension.endpoints?.map((endpoint) => endpoint.slug).join(","),
-		"apply",
-	);
+	assert.deepEqual(plain(klusteredExtension.pages), []);
+	assert.deepEqual(plain(klusteredExtension.endpoints ?? []), []);
+
+	for (const slug of ["seasons", "brackets", "schedule", "apply"]) {
+		assert.equal(
+			(await h.render(extras, {}, { params: { showId: "klustered", slug } }))
+				.status,
+			404,
+		);
+	}
+	const { ALL } = await h.module(api);
+	for (const slug of ["apply", "live", "schedule.ics"]) {
+		assert.equal((await ALL(h.routeContext("GET", {}, {}, slug))).status, 404);
+	}
+	assert.equal(h.reads.length, 0);
+	assert.equal(h.writes.length, 0);
+});
+
+test("the Klustered holding page shows only the announcement, with no links, forms or sign-up prompts", async () => {
+	for (const locals of [{}, { user: { id: "user" } }]) {
+		const h = harness();
+		const { dom, status } = await h.render(
+			"pages/shows/klustered/index.astro",
+			{},
+			{ url: "https://academy.test/shows/klustered", locals },
+		);
+		assert.equal(status, 200);
+		assert.deepEqual(
+			dom.querySelectorAll("h1,h2,h3").map((n) => [n.tagName, n.text]),
+			[["H1", "Klustered"]],
+		);
+		assert.match(dom.text, /Klustered news will be released soon\./);
+		assert.equal(dom.querySelectorAll("a,form,button,input").length, 0);
+		assert.doesNotMatch(dom.text, /apply|bracket|ladder|sign in|subscribe/i);
+		assert.equal(h.reads.length, 0);
+		assert.equal(h.writes.length, 0);
+	}
 });
 
 test("only active, unexpired brackets link to applications, without service calls", async () => {

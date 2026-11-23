@@ -296,7 +296,7 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 				?.text.replace(/\s+/g, " ")
 				.trim(),
 		).toBe(
-			"Kubernetes tutorials, live demos, and a game showWatch maintainers demo their tools on Rawkode Live, or see how fast engineers can fix a broken Kubernetes cluster on Klustered.",
+			"Kubernetes tutorials, live demos, and a game showWatch maintainers demo their tools and talk through cloud native releases on Rawkode Live.",
 		);
 		const links = nav?.querySelectorAll("a") ?? [];
 		expect(links.map((link) => link.getAttribute("href"))).toEqual([

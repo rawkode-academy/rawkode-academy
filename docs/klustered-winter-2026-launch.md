@@ -2,11 +2,13 @@
 
 Status checked 24 October 2026. Pre-season format approved 24 October 2026.
 
+> **Public page on hold.** `https://rawkode.academy/shows/klustered` shows only "Klustered news will be released soon." The public pages and endpoints listed below are switched off in `projects/rawkode.academy/website/src/shows/klustered/index.ts`, and every `klustered.live` path redirects to the holding page. The dates below are internal planning notes and are not announced. Bracket data and the klustered.dev portal are unchanged. Re-enable public pages by listing slugs in `enabledPages` and `enabledEndpoints`.
+
 ## What exists
 
 - The Summer-to-Winter transfer ran on 25 September 2026. It created the Winter Solo and Team brackets, moved the Summer applications and competitor profiles, activated Winter, and deleted Summer. Do not run it again. Winter already has brackets, so the action refuses.
-- The public application route is `https://rawkode.academy/shows/klustered/apply`. It needs an active, eligible bracket to show an application option.
-- Until the Winter relaunch is ready, the public site exposes only the Apply page. Seasons, bracket listings, schedules, the live endpoint, and the calendar feed are hidden for Klustered.
+- The public application route `https://rawkode.academy/shows/klustered/apply` needs an active, eligible bracket to show an application option. It is switched off while the holding page is live.
+- While the holding page is live, the public site exposes no Klustered Apply page, seasons, bracket listings, schedules, live endpoint or calendar feed.
 - The public schedule currently has no Winter matches. Do not generate fixtures until applications have been reviewed and entries are ready.
 
 ## Confirmed schedule
@@ -43,7 +45,7 @@ New brackets default to 17:30 UTC. The Summer-to-Winter date field defaults to *
 2. Done (25 Sep 2026): Summer-to-Winter transfer. Do not run it again.
 3. Correct the existing brackets' start times before generating round one. Solo is 2027-01-06 at 17:30 UTC, with applications closing 2026-12-13.
 4. Schedule the five pre-season matches listed above, at 17:30 UTC. No episodes on 23 or 30 December.
-5. Verify `/shows/klustered/apply` while signed out, then verify sign-in and self-application.
+5. When public applications reopen, enable the `apply` page and endpoint, then verify `/shows/klustered/apply` while signed out, then verify sign-in and self-application.
 6. Review applications, confirm 8 Solo entries, then generate Solo round one and publish match dates.
 7. On 31 January 2027, start the Team bracket on 24 February only if 4 teams of 3 or more are ready.
 
