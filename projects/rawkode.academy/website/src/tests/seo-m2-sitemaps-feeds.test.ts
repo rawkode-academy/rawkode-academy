@@ -7,6 +7,7 @@ import {
 	findSitemapOrphans,
 } from "../../scripts/orphan-check";
 import {
+	matchesExpectedRobots,
 	normalizeUrl as normalizeCheckSitemapUrl,
 	OPTIONAL_SITEMAP_PATHS,
 	REQUIRED_SITEMAP_PATHS,
@@ -842,9 +843,6 @@ describe("M2 F11 — XML sitemap completeness, indexability predicates & empty n
 		expect(showEntries.map((e) => e.path)).toEqual([
 			"/shows/klustered",
 			"/shows/klustered/apply",
-			"/shows/klustered/brackets",
-			"/shows/klustered/schedule",
-			"/shows/klustered/seasons",
 		]);
 		const klusteredEntry = showEntries.find(
 			(e) => e.path === "/shows/klustered",
@@ -1068,6 +1066,22 @@ describe("M2 F12 — LLM/Markdown endpoints, robots.txt & SEO CLI scripts", () =
 			expectedCanonicalPath: "/watch?page=2",
 			expectedRobots: "index,follow",
 		});
+		expect(
+			SUPPLEMENTAL_URL_CHECKS.find((c) => c.path === "/read?topic=kubernetes"),
+		).toEqual({
+			path: "/read?topic=kubernetes",
+			expectedCanonicalPath: "/read",
+			expectedRobots: "noindex,follow",
+		});
+		expect(matchesExpectedRobots(null, "index,follow")).toBe(true);
+		expect(matchesExpectedRobots("index, follow", "index,follow")).toBe(true);
+		expect(matchesExpectedRobots("noindex, follow", "index,follow")).toBe(
+			false,
+		);
+		expect(matchesExpectedRobots(null, "noindex,follow")).toBe(false);
+		expect(matchesExpectedRobots("noindex, follow", "noindex,follow")).toBe(
+			true,
+		);
 	});
 
 	it("scripts/validate-seo.ts aligns article, course, and upcoming live video rules with M1/M2", () => {

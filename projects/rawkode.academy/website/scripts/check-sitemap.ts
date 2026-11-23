@@ -90,7 +90,7 @@ export const SUPPLEMENTAL_URL_CHECKS: readonly SupplementalUrlCheck[] = [
 		expectedRobots: "index,follow",
 	},
 	{
-		path: "/read?q=kubernetes",
+		path: "/read?topic=kubernetes",
 		expectedCanonicalPath: "/read",
 		expectedRobots: "noindex,follow",
 	},
@@ -175,6 +175,19 @@ export function normalizeUrl(url: string): string {
 
 function normalizeRobots(robots: string | null): string | null {
 	return robots?.replace(/\s+/g, "").toLowerCase() ?? null;
+}
+
+export function matchesExpectedRobots(
+	actual: string | null,
+	expected: string,
+): boolean {
+	const normalizedActual = normalizeRobots(actual);
+	const normalizedExpected = normalizeRobots(expected);
+	// Omitting <meta name="robots"> is semantically equivalent to index,follow.
+	if (normalizedExpected === "index,follow" && normalizedActual === null) {
+		return true;
+	}
+	return normalizedActual === normalizedExpected;
 }
 
 export function buildSupplementalUrlChecks(base: string): UrlExpectation[] {
@@ -268,8 +281,7 @@ async function checkUrl(
 		}
 
 		if (expectation?.expectedRobots) {
-			robotsOk =
-				normalizeRobots(robots) === normalizeRobots(expectation.expectedRobots);
+			robotsOk = matchesExpectedRobots(robots, expectation.expectedRobots);
 		}
 	}
 
