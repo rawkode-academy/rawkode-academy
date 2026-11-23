@@ -18,6 +18,19 @@ flowchart TD
 
 Each warehouse row contains one complete report snapshot. Replaying an event keeps its content-derived ID; reads choose the newest whole snapshot for the exact query. Duplicate delivery and later YouTube corrections cannot inflate totals or mix partial snapshots. Raw API pages remain available for validation and replay.
 
+### Academy analytics lake
+
+Every report the Worker fetches is also sent, one CloudEvent per row, to `rawkode-tools-observability-collector` through the `ANALYTICS` service binding. The collector persists and delivers them to `analytics.events_archive` in the `rawkode-analytics` bucket, the same Basin lake as website and short-link analytics. Events use source `rawkode-academy-youtube` and type `youtube.<report>` (`youtube.daily`, `youtube.daily_traffic`, `youtube.top_videos`, …). This path does not depend on K2 or the PoC warehouse, and a collector failure never fails the request; the response's `lake` field reports how many rows were accepted.
+
+The daily cron collects the last 28 days, including `daily_traffic` (views per day per traffic source). YouTube revises recent days, so readers keep the latest `fetchedAt` per day; see [infra/lake-queries.sql](infra/lake-queries.sql). Load history once after deploying, repeating with the returned `next` until it is `null`:
+
+```sh
+curl -X POST "$ORIGIN/v1/analytics/backfill" -H "authorization: Bearer $WRITE_API_TOKEN" \
+  -H 'content-type: application/json' -d '{"since":"2019-01-01"}'
+```
+
+Each call collects up to eight 92-day windows of `daily` and `daily_traffic`.
+
 See [COSTS.md](COSTS.md) for current prices, workload assumptions, and a reproducible best/worst-case calculator.
 
 ## Verify locally
@@ -162,6 +175,7 @@ REST endpoints use the independent `READ_API_TOKEN` / `WRITE_API_TOKEN` bearer c
 | `POST /v1/analytics/query` | Read | Query a stored report; `refresh:true` fetches Google and queues a new snapshot. |
 | `POST /v1/analytics/sync` | Write | Refresh recent channel daily/summary/top/traffic reports. |
 | `POST /v1/analytics/drain` | Write | Flush the outbox, consume K2 and hand reports to Pipelines. |
+| `POST /v1/analytics/backfill` | Write | Collect `daily` and `daily_traffic` history from `{ "since": "YYYY-MM-DD" }`, eight 92-day windows per call. |
 | `POST /v1/analytics/replay` | Write | Requeue `{ "snapshotId": "..." }` from its verified R2 archive. |
 | `POST /v1/sessions/plan` | Read | Preview changes for a stable Academy `sessionId`. |
 | `POST /v1/sessions/apply` | Write | Apply `{ "planId": "..." }`. |

@@ -11,7 +11,7 @@ const json = (body: unknown, status = 200) => Response.json(body, { status });
 test("API writes are not retried and upstream secret-bearing bodies do not escape", async () => {
   let writes = 0;
   const api = new GoogleClient(credentials, channelId, (async (input: RequestInfo | URL) => {
-    if (String(input).includes("oauth2.googleapis.com")) return json({ access_token: "access" });
+    if (new URL(String(input)).hostname === "oauth2.googleapis.com") return json({ access_token: "access" });
     writes++;
     return json({ message: "refresh=DO_NOT_PRINT client_secret=DO_NOT_PRINT" }, 503);
   }) as typeof fetch);
@@ -34,7 +34,7 @@ test("only bounded, well-formed Google rejection envelopes are definitive", asyn
     { status: 403, body: JSON.stringify({ ...envelope(403), padding: "x".repeat(65536) }), definitive: false },
   ];
   for (const item of cases) {
-    const api = new GoogleClient(credentials, channelId, (async (input: RequestInfo | URL) => String(input).includes("oauth2.googleapis.com") ? json({ access_token: "access" }) : new Response(item.body, { status: item.status, headers: { "content-type": "application/json" } })) as typeof fetch);
+    const api = new GoogleClient(credentials, channelId, (async (input: RequestInfo | URL) => new URL(String(input)).hostname === "oauth2.googleapis.com" ? json({ access_token: "access" }) : new Response(item.body, { status: item.status, headers: { "content-type": "application/json" } })) as typeof fetch);
     await assert.rejects(api.request("POST", "liveBroadcasts", {}, {}), error => {
       assert.ok(error instanceof ServiceError);
       assert.equal(error.upstreamStatus, item.status);
@@ -51,7 +51,7 @@ test("only bounded, well-formed Google rejection envelopes are definitive", asyn
 test("conditional update preserves Google ETag and surfaces conflicts as stale plans", async () => {
   let actualHeader: string | null = null;
   const api = new GoogleClient(credentials, channelId, (async (input: RequestInfo | URL, init?: RequestInit) => {
-    if (String(input).includes("oauth2.googleapis.com")) return json({ access_token: "access" });
+    if (new URL(String(input)).hostname === "oauth2.googleapis.com") return json({ access_token: "access" });
     actualHeader = new Headers(init?.headers).get("if-match");
     return json({}, 412);
   }) as typeof fetch);
@@ -62,7 +62,7 @@ test("conditional update preserves Google ETag and surfaces conflicts as stale p
 test("analytics always uses the configured channel, regardless of query input", async () => {
   let actualIds: string | null = null;
   const api = new GoogleClient(credentials, channelId, (async (input: RequestInfo | URL) => {
-    if (String(input).includes("oauth2.googleapis.com")) return json({ access_token: "access" });
+    if (new URL(String(input)).hostname === "oauth2.googleapis.com") return json({ access_token: "access" });
     actualIds = new URL(String(input)).searchParams.get("ids");
     return json({});
   }) as typeof fetch);
@@ -82,13 +82,13 @@ test("an ambiguous owned-channel list cannot authorize creation on a possibly di
     { items: [{ id: channelId }, { id: `UC${"b".repeat(22)}` }] },
     { items: [{ id: channelId }], nextPageToken: "more-channels" },
   ]) {
-    const api = new GoogleClient(credentials, channelId, (async (input: RequestInfo | URL) => String(input).includes("oauth2.googleapis.com") ? json({ access_token: "access" }) : json(response)) as typeof fetch);
+    const api = new GoogleClient(credentials, channelId, (async (input: RequestInfo | URL) => new URL(String(input)).hostname === "oauth2.googleapis.com" ? json({ access_token: "access" }) : json(response)) as typeof fetch);
     await assert.rejects(api.checkChannel(), fails("wrong_channel"));
   }
 });
 
 test("a grant identifying only the configured YouTube channel is accepted", async () => {
-  const api = new GoogleClient(credentials, channelId, (async (input: RequestInfo | URL) => String(input).includes("oauth2.googleapis.com") ? json({ access_token: "access" }) : json({ items: [{ id: channelId }] })) as typeof fetch);
+  const api = new GoogleClient(credentials, channelId, (async (input: RequestInfo | URL) => new URL(String(input)).hostname === "oauth2.googleapis.com" ? json({ access_token: "access" }) : json({ items: [{ id: channelId }] })) as typeof fetch);
   await api.checkChannel();
 });
 
@@ -118,7 +118,7 @@ test("OAuth and API redirects are handled manually and cannot forward credential
 test("broadcast discovery paginates and never combines mutually exclusive filters", async () => {
   const urls: URL[] = [];
   const api = new GoogleClient(credentials, channelId, (async (input: RequestInfo | URL) => {
-    if (String(input).includes("oauth2.googleapis.com")) return json({ access_token: "access" });
+    if (new URL(String(input)).hostname === "oauth2.googleapis.com") return json({ access_token: "access" });
     const url = new URL(String(input)); urls.push(url);
     return json(url.searchParams.has("pageToken") ? { items: [] } : { items: [], nextPageToken: "second" });
   }) as typeof fetch);
@@ -132,7 +132,7 @@ test("broadcast discovery paginates and never combines mutually exclusive filter
 test("incomplete discovery fails closed after its bounded page budget", async () => {
   let pages = 0;
   const api = new GoogleClient(credentials, channelId, (async (input: RequestInfo | URL) => {
-    if (String(input).includes("oauth2.googleapis.com")) return json({ access_token: "access" });
+    if (new URL(String(input)).hostname === "oauth2.googleapis.com") return json({ access_token: "access" });
     pages++;
     return json({ items: [], nextPageToken: `page-${pages}` });
   }) as typeof fetch);
@@ -143,7 +143,7 @@ test("incomplete discovery fails closed after its bounded page budget", async ()
 test("stream checks request no ingestion address or stream key fields", async () => {
   let fields: string | null = null;
   const api = new GoogleClient(credentials, channelId, (async (input: RequestInfo | URL) => {
-    if (String(input).includes("oauth2.googleapis.com")) return json({ access_token: "access" });
+    if (new URL(String(input)).hostname === "oauth2.googleapis.com") return json({ access_token: "access" });
     fields = new URL(String(input)).searchParams.get("fields");
     return json({ items: [{ id: "encoder", snippet: { channelId }, status: { streamStatus: "inactive" } }] });
   }) as typeof fetch);

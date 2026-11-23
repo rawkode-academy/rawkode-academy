@@ -50,8 +50,8 @@ test("OAuth protects ChatGPT MCP with owner login, PKCE, consent and resource sc
     for (const redirect_uri of ["https://chatgpt.example/callback", "https://attacker.example/callback"]) {
       const response = await mf.dispatchFetch(`${oauthOrigin}/oauth/authorize?${new URLSearchParams({ response_type: "code", client_id, redirect_uri, scope: "youtube:read" })}`, { redirect: "manual" });
       assert.ok(response.status === 400 || response.status === 302);
-      assert.ok(!(response.headers.get("location") ?? "").startsWith("https://accounts.google.com"));
-      assert.ok(!(response.headers.get("location") ?? "").startsWith("https://attacker.example"));
+      assert.notEqual(URL.parse(response.headers.get("location") ?? "")?.hostname, "accounts.google.com");
+      assert.notEqual(URL.parse(response.headers.get("location") ?? "")?.hostname, "attacker.example");
     }
   });
 

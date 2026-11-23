@@ -1,12 +1,13 @@
 import { DurableObject } from "cloudflare:workers";
 import { z } from "zod";
-import { analyticsSchema, fetchReportSnapshot, recentWindow } from "./analytics.ts";
-import { ensure, errorBody, readLimited, sessionSchema, sha256Schema, videoId, type Plan, type SessionState } from "./domain.ts";
+import { analyticsSchema, backfillWindows, fetchReportSnapshot, recentWindow } from "./analytics.ts";
+import { daySchema, ensure, errorBody, readLimited, sessionSchema, sha256Schema, videoId, type Plan, type SessionState } from "./domain.ts";
 import { GoogleClient } from "./google.ts";
 import { Publisher, type PublishingStore } from "./publishing.ts";
+import { sendToLake, type AnalyticsCollector } from "./lake.ts";
 import { Warehouse, type SnapshotPointer } from "./warehouse.ts";
 
-export type Operation = "plan" | "apply" | "broadcast" | "analytics" | "status" | "sync" | "drain" | "replay";
+export type Operation = "plan" | "apply" | "broadcast" | "analytics" | "status" | "sync" | "drain" | "replay" | "backfill";
 export type Outcome = { ok: true; value: unknown } | { ok: false; error: ReturnType<typeof errorBody> };
 export class YouTubeChannel extends DurableObject<CloudflareEnv> implements PublishingStore {
   private publishingBusy = false;
@@ -68,13 +69,16 @@ export class YouTubeChannel extends DurableObject<CloudflareEnv> implements Publ
     // A successful Analytics call validates both channel access and analytics
     // scope. Warehouse reads require this to have succeeded within 30 days.
     this.ctx.storage.sql.exec("INSERT INTO metadata(id,value) VALUES('analytics_authorization',?) ON CONFLICT(id) DO UPDATE SET value=excluded.value", JSON.stringify({ verifiedAt: new Date().toISOString() }));
+    // Rows go to the Academy analytics lake as CloudEvents. The collector
+    // persists them before acknowledging; a failure here never blocks the K2 path.
+    const lake = await sendToLake(this.env.ANALYTICS as unknown as AnalyticsCollector | undefined, report);
     const pointer = await warehouse.archiveReport(query, report, rawPages);
     // Persist the outbox before acknowledging collection. A K2 outage cannot
     // discard a report already archived in R2. Analytics data is kept out of SQL.
     this.enqueue(pointer);
     await this.flushEvents(warehouse);
     const queued = this.ctx.storage.sql.exec("SELECT id FROM analytics_outbox WHERE id = ?", pointer.snapshotId).toArray().length > 0;
-    return { ...report, servedFrom: "youtube", storage: { snapshotId: pointer.snapshotId, stage: queued ? "queued_for_k2" : "accepted_by_k2", warehouseVisible: false } };
+    return { ...report, servedFrom: "youtube", storage: { snapshotId: pointer.snapshotId, stage: queued ? "queued_for_k2" : "accepted_by_k2", warehouseVisible: false }, lake };
   }
   private enqueue(pointer: SnapshotPointer) {
     this.ctx.storage.sql.exec("INSERT INTO analytics_outbox(id,created_at,pointer) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET attempts=0,last_error=NULL", pointer.snapshotId, new Date().toISOString(), JSON.stringify(pointer));
@@ -126,7 +130,7 @@ export class YouTubeChannel extends DurableObject<CloudflareEnv> implements Publ
       await api.checkChannel();
       const window = recentWindow();
       const outcomes: { report: string; dataThrough?: string | null; error?: string }[] = [];
-      for (const report of ["daily", "summary", "top_videos", "traffic"] as const) {
+      for (const report of ["daily", "summary", "top_videos", "traffic", "daily_traffic"] as const) {
         try { const result = await this.analytics({ report, ...window, refresh: true }, api); outcomes.push({ report, dataThrough: result.dataThrough }); }
         catch (error) { outcomes.push({ report, error: errorBody(error).error }); }
       }
@@ -142,16 +146,36 @@ export class YouTubeChannel extends DurableObject<CloudflareEnv> implements Publ
       throw error;
     } finally { this.syncBusy = false; }
   }
+  // History for the analytics lake. Each call collects at most eight 92-day
+  // windows and returns the next start date; repeat until `next` is null.
+  private async backfill(input: unknown, api: GoogleClient) {
+    const { since } = z.object({ since: daySchema }).strict().parse(input);
+    ensure(!this.syncBusy, "sync_busy", "An analytics refresh is already running", 409);
+    this.syncBusy = true;
+    try {
+      await api.checkChannel();
+      const { windows, next } = backfillWindows(since, recentWindow().endDate, 8);
+      const outcomes: { report: string; startDate: string; endDate: string; rows?: number; lake?: unknown; error?: string }[] = [];
+      for (const window of windows) for (const report of ["daily", "daily_traffic"] as const) {
+        try {
+          const result = await this.analytics({ report, ...window, refresh: true }, api) as { rows: unknown[]; lake: unknown };
+          outcomes.push({ report, ...window, rows: result.rows.length, lake: result.lake });
+        } catch (error) { outcomes.push({ report, ...window, error: errorBody(error).error }); }
+      }
+      return { since, next, success: outcomes.every(o => !o.error), outcomes };
+    } finally { this.syncBusy = false; }
+  }
   async invoke(operation: Operation, input: unknown): Promise<Outcome> {
     try {
       if (operation === "status") {
         const sync = this.ctx.storage.sql.exec<{ value: string }>("SELECT value FROM metadata WHERE id='sync'").toArray()[0];
         const drain = this.ctx.storage.sql.exec<{ value: string }>("SELECT value FROM metadata WHERE id='drain'").toArray()[0];
-        return { ok: true, value: { channelId: this.env.YOUTUBE_CHANNEL_ID, authorizationConfigured: Boolean(this.env.YOUTUBE_CREDENTIALS_JSON), lastSync: sync ? JSON.parse(sync.value) : null, lastDrain: drain ? JSON.parse(drain.value) : null, outbox: this.outboxStatus(), capabilities: ["publish_upcoming_broadcast", "update_upcoming_broadcast", "thumbnail", "bind_encoder", "analytics", "k2_replay", "basin_queries"] } };
+        return { ok: true, value: { channelId: this.env.YOUTUBE_CHANNEL_ID, authorizationConfigured: Boolean(this.env.YOUTUBE_CREDENTIALS_JSON), lastSync: sync ? JSON.parse(sync.value) : null, lastDrain: drain ? JSON.parse(drain.value) : null, outbox: this.outboxStatus(), capabilities: ["publish_upcoming_broadcast", "update_upcoming_broadcast", "thumbnail", "bind_encoder", "analytics", "k2_replay", "basin_queries", "analytics_lake", "backfill"] } };
       }
       const api = this.api();
       let value: unknown;
       if (operation === "sync") value = await this.sync(api);
+      else if (operation === "backfill") value = await this.backfill(input, api);
       else if (operation === "drain") value = await this.drain();
       else if (operation === "replay") {
         const { snapshotId } = z.object({ snapshotId: sha256Schema }).strict().parse(input);

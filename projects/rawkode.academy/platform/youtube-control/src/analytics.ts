@@ -2,7 +2,7 @@ import { z } from "zod";
 import { daySchema, ensure, validDay, videoId } from "./domain.ts";
 
 export const analyticsSchema = z.object({
-  report: z.enum(["summary", "daily", "top_videos", "traffic", "retention", "concurrent_viewers"]),
+  report: z.enum(["summary", "daily", "top_videos", "traffic", "retention", "concurrent_viewers", "daily_traffic"]),
   startDate: daySchema,
   endDate: daySchema,
   videoId: videoId.optional(),
@@ -25,6 +25,7 @@ const reports = {
   daily: { dimensions: "day", metrics: activity, sort: "day" },
   top_videos: { dimensions: "video", metrics: activity, sort: "-views" },
   traffic: { dimensions: "insightTrafficSourceType", metrics: "views,estimatedMinutesWatched", sort: "-views" },
+  daily_traffic: { dimensions: "day,insightTrafficSourceType", metrics: "views,estimatedMinutesWatched", sort: "day" },
   retention: { dimensions: "elapsedVideoTimeRatio", metrics: "audienceWatchRatio,relativeRetentionPerformance", sort: "elapsedVideoTimeRatio" },
   concurrent_viewers: { dimensions: "livestreamPosition", metrics: "averageConcurrentViewers,peakConcurrentViewers", sort: "livestreamPosition" },
 } as const;
@@ -51,7 +52,7 @@ export function normalizeReport(q: AnalyticsQuery, raw: GoogleReport, channelId:
     source: "youtube_analytics_api", channelId, report: q.report, videoId: q.videoId ?? null,
     requestedRange: { startDate: q.startDate, endDate: q.endDate, timeZone: "America/Los_Angeles" },
     fetchedAt, dataThrough: days.at(-1) ?? null, absentDays,
-    coverage: q.report === "daily" ? "Only returned dates are populated. Absent dates are unknown, not zero." : "Google does not expose the effective end date for this aggregate report; dataThrough is unknown.",
+    coverage: q.report === "daily" || q.report === "daily_traffic" ? "Only returned dates are populated. Absent dates are unknown, not zero." : "Google does not expose the effective end date for this aggregate report; dataThrough is unknown.",
     limitedToTop: q.report === "top_videos" ? q.limit : null,
     columnHeaders: raw.columnHeaders, rows,
     units: { views: "count", engagedViews: "count", estimatedMinutesWatched: "minutes", averageViewDuration: "seconds", averageViewPercentage: "percent", audienceWatchRatio: "ratio, may exceed 1", relativeRetentionPerformance: "0–1 relative score", elapsedVideoTimeRatio: "0–1 video position", livestreamPosition: "minutes", averageConcurrentViewers: "viewers", peakConcurrentViewers: "viewers" },
@@ -83,4 +84,17 @@ export function recentWindow(now = new Date()) {
   const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles", year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
   const end = Date.parse(today) - 86400000;
   return { startDate: new Date(end - 27 * 86400000).toISOString().slice(0, 10), endDate: new Date(end).toISOString().slice(0, 10) };
+}
+
+// Consecutive inclusive windows of at most 92 days from `since` to `until`.
+export function backfillWindows(since: string, until: string, max: number) {
+  const windows: { startDate: string; endDate: string }[] = [];
+  let start = Date.parse(since);
+  const end = Date.parse(until);
+  while (start <= end && windows.length < max) {
+    const stop = Math.min(start + 91 * 86400000, end);
+    windows.push({ startDate: new Date(start).toISOString().slice(0, 10), endDate: new Date(stop).toISOString().slice(0, 10) });
+    start = stop + 86400000;
+  }
+  return { windows, next: start <= end ? new Date(start).toISOString().slice(0, 10) : null };
 }

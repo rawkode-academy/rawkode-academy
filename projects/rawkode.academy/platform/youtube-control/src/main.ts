@@ -37,6 +37,7 @@ export default {
         "/v1/analytics/sync": { operation: "sync", write: true },
         "/v1/analytics/drain": { operation: "drain", write: true },
         "/v1/analytics/replay": { operation: "replay", write: true },
+        "/v1/analytics/backfill": { operation: "backfill", write: true },
       };
       const route = routes[url.pathname];
       if (route && request.method === "POST") {

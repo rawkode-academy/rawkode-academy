@@ -33,6 +33,7 @@ class Upstreams {
   k2Records: Json[] = [];
   leased: Json[] = [];
   pipelineRecords: Json[] = [];
+  lakeEvents: Json[] = [];
   lastUpdate: Json | null = null;
   unexpected: string[] = [];
 
@@ -46,6 +47,10 @@ class Upstreams {
     if (url.hostname === "mock.internal" && url.pathname === "/k2-produce") {
       if (this.failNextProduce) { this.failNextProduce = false; return json({ success: false, error: { code: 10211, retryable: true } }); }
       this.k2Records.push(...await request.json() as Json[]);
+      return json({ success: true });
+    }
+    if (url.hostname === "mock.internal" && url.pathname === "/collector-track") {
+      this.lakeEvents.push(await request.json() as Json);
       return json({ success: true });
     }
     if (url.hostname === "mock.internal" && url.pathname === "/pipeline-send") {
@@ -172,7 +177,7 @@ async function fixture(upstreams: Upstreams, overrides: Record<string, string> =
       },
       durableObjects: { CHANNELS: { className: "YouTubeChannel", useSQLite: true } },
       r2Buckets: ["ASSETS", "ANALYTICS_RAW"], kvNamespaces: ["OAUTH_KV"],
-      serviceBindings: { ANALYTICS_EVENTS: { name: "mock-producers", entrypoint: "K2Producer" }, ANALYTICS_PIPELINE: { name: "mock-producers", entrypoint: "PipelineProducer" } },
+      serviceBindings: { ANALYTICS_EVENTS: { name: "mock-producers", entrypoint: "K2Producer" }, ANALYTICS_PIPELINE: { name: "mock-producers", entrypoint: "PipelineProducer" }, ANALYTICS: { name: "mock-producers", entrypoint: "Collector" } },
       outboundService: (request: Request) => upstreams.fetch(request),
     }, {
       name: "mock-producers", modules: true,
@@ -254,6 +259,12 @@ test("Worker runtime acceptance: publishing and stored analytics work together",
     assert.equal(collected.body.rows[0].views, 123);
     assert.equal(collected.body.servedFrom, "youtube");
     assert.equal(collected.body.storage.stage, "queued_for_k2", "K2 rejection must retain the report in the outbox");
+    assert.deepEqual(collected.body.lake, { configured: true, sent: 1, failed: 0 }, "A K2 outage must not block the analytics lake");
+    const lakeEvent = upstreams.lakeEvents.at(-1)!;
+    assert.equal(lakeEvent.source, "rawkode-academy-youtube");
+    assert.equal(lakeEvent.type, "youtube.daily");
+    assert.equal(lakeEvent.data.day, "2026-10-01");
+    assert.equal(lakeEvent.data.views, 123);
     assert.equal(collected.body.storage.warehouseVisible, false);
     assert.equal(collected.body.dataThrough, "2026-10-01");
     assert.deepEqual(collected.body.absentDays, ["2026-10-02", "2026-10-03"]);
@@ -320,7 +331,7 @@ test("Worker runtime acceptance: publishing and stored analytics work together",
     const metadata = await mf.dispatchFetch(metadataURL);
     assert.equal(metadata.status, 200);
     const protectedResource = await metadata.json() as Json;
-    assert.ok(protectedResource.authorization_servers?.includes(origin));
+    assert.ok(protectedResource.authorization_servers?.some((server: string) => server === origin));
   });
   await t.test("ChatGPT-style OAuth MCP clients can query analytics and explicitly publish a reviewed plan", async () => {
     const reader = await authorizedMcp(mf, googleLogin);

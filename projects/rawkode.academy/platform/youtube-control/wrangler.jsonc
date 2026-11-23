@@ -34,6 +34,9 @@
   "kv_namespaces": [{ "binding": "OAUTH_KV", "id": "00000000000000000000000000000000" }],
   "k2": [{ "binding": "ANALYTICS_EVENTS", "stream": "00000000000000000000000000000000" }],
   "pipelines": [{ "binding": "ANALYTICS_PIPELINE", "stream": "00000000000000000000000000000000" }],
+  // Academy analytics lake: report rows become CloudEvents in
+  // analytics.events_archive (R2 bucket rawkode-analytics).
+  "services": [{ "binding": "ANALYTICS", "service": "rawkode-tools-observability-collector" }],
   "triggers": { "crons": ["*/5 * * * *", "17 8 * * *"] },
   "limits": { "cpu_ms": 30000 }
 }

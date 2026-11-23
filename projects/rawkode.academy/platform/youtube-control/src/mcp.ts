@@ -26,7 +26,7 @@ export function createServer(invoke: (operation: Operation, input: unknown) => P
     annotations: { readOnlyHint: true, openWorldHint: true },
   }, input => run("broadcast", input));
   server.registerTool("get_analytics", {
-    description: "Retrieve owned YouTube channel/video analytics: summary, daily, top_videos, traffic, retention or concurrent_viewers. Dates use America/Los_Angeles, 1–92 days inclusive. Retention/concurrent reports require videoId. Returns the latest stored Basin snapshot with its age, or fetches YouTube when absent. Set refresh=true to fetch and archive a fresh report. Missing rows are unknown, never zeros. Top-video rows are not channel totals.",
+    description: "Retrieve owned YouTube channel/video analytics: summary, daily, top_videos, traffic, daily_traffic (views per day per traffic source), retention or concurrent_viewers. Dates use America/Los_Angeles, 1–92 days inclusive. Retention/concurrent reports require videoId. Returns the latest stored Basin snapshot with its age, or fetches YouTube when absent. Set refresh=true to fetch and archive a fresh report. Missing rows are unknown, never zeros. Top-video rows are not channel totals.",
     inputSchema: analyticsSchema,
     annotations: { readOnlyHint: true, openWorldHint: true },
   }, input => run("analytics", input));

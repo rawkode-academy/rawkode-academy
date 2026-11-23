@@ -20,4 +20,11 @@ export class PipelineProducer extends WorkerEntrypoint {
   }
 }
 
+export class Collector extends WorkerEntrypoint {
+  async trackEvent(event) {
+    const response = await fetch("https://mock.internal/collector-track", { method: "POST", body: JSON.stringify(event) });
+    return response.json();
+  }
+}
+
 export default { fetch() { return new Response("Not found", { status: 404 }); } };
