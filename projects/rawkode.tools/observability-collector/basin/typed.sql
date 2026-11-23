@@ -1,4 +1,4 @@
-INSERT INTO short_links
+INSERT INTO short_link_redirects
 SELECT
 	json_get_str(value, 'id') AS event_id,
 	to_timestamp_millis(json_get_str(value, 'time')) AS event_time,
@@ -10,6 +10,9 @@ SELECT
 	json_get_str(value, 'country') AS country,
 	json_get_str(value, 'continent') AS continent,
 	json_get_str(value, 'device') AS device,
-	json_get_str(value, 'browser') AS browser
+	json_get_str(value, 'browser') AS browser,
+	json_get_bool(value, 'bot') AS bot,
+	json_get_str(value, 'botreason') AS bot_reason,
+	json_get_int(value, 'asn') AS asn
 FROM analytics_events
 WHERE json_get_str(value, 'type') = 'shortLink'

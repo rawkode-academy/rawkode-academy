@@ -37,6 +37,16 @@ describe("analytics dashboard queries", () => {
 		}
 	});
 
+	it("reads redirects from the legacy and labelled tables", () => {
+		for (const sql of [
+			dashboardQueries("7d").links,
+			dashboardQueries("7d").linkTotals,
+		]) {
+			expect(sql).toContain("FROM analytics.short_links");
+			expect(sql).toContain("FROM analytics.short_link_redirects");
+		}
+	});
+
 	it("leaves labelled bot traffic out of every query", () => {
 		for (const [name, sql] of Object.entries(dashboardQueries("7d")))
 			expect(sql, name).toContain(

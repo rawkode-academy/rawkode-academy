@@ -196,10 +196,21 @@ infrastructure: {
 			}
 		}
 
+		// Rows before 23 November 2026. No pipeline writes to it any more; the
+		// sink stays so the table and its history are left untouched.
 		short_links_sink: pipeline_sink.#Resource & {
 			configuration: _icebergSink & {
 				name: "short_links"
 				config: table_name: "short_links"
+			}
+		}
+
+		// short_links plus the bot labels. A sink can't change its table's
+		// columns, so the labelled table has a new name.
+		short_link_redirects_sink: pipeline_sink.#Resource & {
+			configuration: _icebergSink & {
+				name: "short_link_redirects"
+				config: table_name: "short_link_redirects"
 			}
 		}
 
@@ -215,7 +226,7 @@ infrastructure: {
 		}
 
 		typed_pipeline: pipeline.#Resource & {
-			dependsOn: ["stream", "short_links_sink"]
+			dependsOn: ["stream", "short_link_redirects_sink"]
 			configuration: {
 				account_id: _account
 				name:       "analytics_typed"

@@ -1,7 +1,17 @@
 // The archive stores CloudEvents; typed redirects live in a separate table.
 // Filter the physical event_time column so Basin can prune files.
 export const TABLE = "analytics.events_archive";
-export const LINKS_TABLE = "analytics.short_links";
+// Redirects before 23 November 2026 are in short_links; later ones, with bot
+// labels, in short_link_redirects. A sink can't change its table's columns.
+export const LEGACY_LINKS_TABLE = "analytics.short_links";
+export const LABELLED_LINKS_TABLE = "analytics.short_link_redirects";
+export const LINKS_TABLE = `(
+		SELECT event_time, domain, path, matched, device, browser, CAST(NULL AS VARCHAR) AS bot_reason
+		FROM ${LEGACY_LINKS_TABLE}
+		UNION ALL
+		SELECT event_time, domain, path, matched, device, browser, bot_reason
+		FROM ${LABELLED_LINKS_TABLE}
+	) AS links`;
 
 // Match the collector's PostHog event naming, including its missing-source fallback.
 export const ARCHIVE_EVENT =
@@ -24,14 +34,37 @@ export function rangeStart(range: Range, now = new Date()): string {
 	return start.toISOString();
 }
 
-// The collector labels automated traffic `bot` and gives the rule that matched
-// in `botreason`, which is present only on bots. Older events and events with
-// no request context have neither and count as people.
-export const HUMAN = "json_get_str(value, 'botreason') IS NULL";
+// The collector labels automated traffic `bot` and names the rule that
+// matched in `botreason`. Events stored before labelling get the rules whose
+// signals they kept (json_get_str returns '' for a missing key):
+// - non-production: browser events from any host but rawkode.academy
+// - ua-pattern: the old collector's user-agent verdict on server events
+// - desktop-no-browser: a desktop agent with no browser token
+// Hosting networks, client hints and webdriver weren't stored, so older
+// events from those bots still count as people.
+const DEVICE =
+	"coalesce(nullif(json_get_str(value, 'device'), ''), json_get_str(value, 'data', 'device'))";
+const BROWSER =
+	"coalesce(nullif(json_get_str(value, 'browser'), ''), json_get_str(value, 'data', 'browser'))";
+export const BOT_REASON = `coalesce(
+		nullif(json_get_str(value, 'botreason'), ''),
+		CASE
+			WHEN event_source = 'rawkode-academy-browser'
+				AND json_get_str(value, 'data', 'url_host') <> 'rawkode.academy' THEN 'non-production'
+			WHEN json_get_bool(value, 'data', 'is_bot') THEN 'ua-pattern'
+			WHEN ${DEVICE} = 'desktop' AND ${BROWSER} = 'other' THEN 'desktop-no-browser'
+		END)`;
+export const HUMAN = `${BOT_REASON} IS NULL`;
 
-// The short_links table has no bot columns yet; its `device` is "bot" for
-// crawler user agents, but hosting-network bots still count there.
-export const LINK_HUMAN = "coalesce(device, '') <> 'bot'";
+// The same rules for redirects, plus probes of paths that aren't short links.
+export const LINK_BOT_REASON = `coalesce(
+		nullif(bot_reason, ''),
+		CASE
+			WHEN device = 'bot' THEN 'ua-pattern'
+			WHEN device = 'desktop' AND browser = 'other' THEN 'desktop-no-browser'
+			WHEN NOT matched AND path <> '' THEN 'unmatched-path'
+		END)`;
+export const LINK_HUMAN = `${LINK_BOT_REASON} IS NULL`;
 
 const since = (range: Range) =>
 	`event_time >= CAST('${rangeStart(range)}' AS TIMESTAMP)`;

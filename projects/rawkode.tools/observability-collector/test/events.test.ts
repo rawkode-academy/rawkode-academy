@@ -144,7 +144,8 @@ describe("prepareCloudEvent", () => {
 	});
 
 	test("carries every field the typed pipeline reads", () => {
-		const prepared = prepareCloudEvent(shortLink) as Record<string, unknown>;
+		// A labelled bot carries every optional field: botreason and asn.
+		const prepared = prepareCloudEvent({ ...shortLink, asn: 132203 });
 		const paths = [...typedSql.matchAll(/json_get_\w+\(value, ([^)]+)\)/g)].map(
 			(match) => match[1].split(",").map((key) => key.trim().slice(1, -1)),
 		);
