@@ -38,6 +38,11 @@ for (const name of [
 				: value,
 	});
 }
+// happy-dom reports itself as automated, and track() sends nothing then.
+Object.defineProperty(window.navigator, "webdriver", {
+	configurable: true,
+	value: false,
+});
 const unexpectedFetch = () => {
 	throw new Error("Real network requests are forbidden");
 };
