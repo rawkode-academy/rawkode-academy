@@ -4,7 +4,7 @@ import {
 	getCollection,
 	optionalContent,
 } from "@/lib/live-content";
-import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import { getVideoThumbnailResizedUrl } from "@/lib/video-thumbnail";
 import { formatRuntimeLabel, isUpcomingLiveVideo } from "@/lib/video-runtime";
 import { academyRelatedContent } from "@rawkodeacademy/design-system";
 
@@ -41,6 +41,7 @@ const articleTechnologyIds = Array.isArray(currentArticle.data.technologies)
 const articleTechnologySet = new Set(articleTechnologyIds);
 
 let relatedVideos: {
+	id: string;
 	slug: string;
 	title: string;
 	duration: number | undefined;
@@ -87,12 +88,13 @@ if (articleTechnologySet.size > 0) {
 		})
 		.slice(0, limit)
 		.map((item) => ({
+			id: item.video.data.id,
 			slug: item.video.data.slug,
 			title: item.video.data.title,
 			duration: item.video.data.duration,
 			publishedAt: item.video.data.publishedAt,
 			type: item.video.data.type,
-			thumbnailUrl: getVideoThumbnailUrl(item.video.data.id),
+			thumbnailUrl: getVideoThumbnailResizedUrl(item.video.data.id, 640),
 		}));
 }
 ---
@@ -111,10 +113,12 @@ if (articleTechnologySet.size > 0) {
 					<div class={s.media}>
 						<img
 							src={video.thumbnailUrl}
-							alt={video.title}
+							srcset={`${getVideoThumbnailResizedUrl(video.id, 360)} 360w, ${getVideoThumbnailResizedUrl(video.id, 640)} 640w`}
+							sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw"
+							alt=""
 							class={s.image}
-							width="1280"
-							height="720"
+							width="640"
+							height="360"
 							loading="lazy"
 							decoding="async"
 						/>

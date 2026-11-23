@@ -5,7 +5,14 @@ import {
 	getEntries,
 	setContentCache,
 } from "@/lib/live-content";
-import { renderAndSanitizeArticles } from "../../../lib/feed-utils";
+import {
+	DEFAULT_FEED_AUTHOR,
+	escapeAttribute,
+	escapeCdata,
+	escapeXml,
+	normalizeSiteUrl,
+	renderAndSanitizeArticles,
+} from "../../../lib/feed-utils";
 
 export const prerender = false;
 
@@ -19,7 +26,7 @@ export async function GET(context: APIContext) {
 			new Date(a.data.publishedAt).getTime(),
 	);
 
-	const site = context.site?.toString() || "https://rawkode.academy";
+	const site = normalizeSiteUrl(context.site);
 	const feedUrl = `${site}/api/feeds/articles.atom`;
 
 	// Get the most recent update time
@@ -40,14 +47,15 @@ export async function GET(context: APIContext) {
 	// Process each article to include full content
 	const entries = await Promise.all(
 		sortedArticles.map(async (article) => {
-			const articleUrl = `${site}/read/${article.id}/`;
+			const articleUrl = `${site}/read/${article.id}`;
 			const published = new Date(article.data.publishedAt).toISOString();
 			const updated = article.data.updatedAt
 				? new Date(article.data.updatedAt).toISOString()
 				: published;
 
 			const renderResult = renderedContent.get(article.id);
-			const contentHtml = renderResult?.content || article.data.description;
+			const contentHtml =
+				renderResult?.content || escapeXml(article.data.description);
 
 			// Resolve author references (articles have no series any more,
 			// so no <category> is emitted).
@@ -55,17 +63,19 @@ export async function GET(context: APIContext) {
 			authorsByArticle.set(article.id, authors);
 
 			return `	<entry>
-		<title><![CDATA[${article.data.title}]]></title>
-		<link href="${articleUrl}" rel="alternate" type="text/html"/>
-		<id>${articleUrl}</id>
+		<title><![CDATA[${escapeCdata(article.data.title)}]]></title>
+		<link href="${escapeAttribute(articleUrl)}" rel="alternate" type="text/html"/>
+		<id>${escapeXml(articleUrl)}</id>
 		<published>${published}</published>
 		<updated>${updated}</updated>
-		<summary><![CDATA[${article.data.description}]]></summary>
-		<content type="html"><![CDATA[${contentHtml}]]></content>
+		<summary><![CDATA[${escapeCdata(article.data.description)}]]></summary>
+		<content type="html"><![CDATA[${escapeCdata(contentHtml)}]]></content>
 		${authors
-			.map((author) => `<author><name>${author.data.name}</name></author>`)
+			.map(
+				(author) =>
+					`<author><name>${escapeXml(author.data.name)}</name></author>`,
+			)
 			.join("\n\t\t")}
-		
 	</entry>`;
 		}),
 	);
@@ -74,10 +84,11 @@ export async function GET(context: APIContext) {
 <feed xmlns="http://www.w3.org/2005/Atom">
 	<title>Rawkode Academy - Articles</title>
 	<subtitle>Latest articles and tutorials from Rawkode Academy covering Cloud Native, DevOps, and Modern Software Development</subtitle>
-	<link href="${feedUrl}" rel="self" type="application/atom+xml"/>
-	<link href="${site}" rel="alternate" type="text/html"/>
-	<id>${site}/</id>
+	<link href="${escapeAttribute(feedUrl)}" rel="self" type="application/atom+xml"/>
+	<link href="${escapeAttribute(site)}" rel="alternate" type="text/html"/>
+	<id>${escapeXml(`${site}/`)}</id>
 	<updated>${lastUpdated}</updated>
+	<author><name>${escapeXml(DEFAULT_FEED_AUTHOR)}</name></author>
 	<generator>Astro</generator>
 ${entries.join("\n")}
 </feed>`;

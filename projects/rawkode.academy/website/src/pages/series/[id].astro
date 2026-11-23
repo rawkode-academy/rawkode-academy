@@ -49,7 +49,14 @@ const imageUrl = cover
 <Page
 	title={series.data.title}
 	description={series.data.description}
-	image={imageUrl ? { image: imageUrl, text: series.data.title, format: "png" as const } : undefined}
+	image={imageUrl && cover ? {
+		image: imageUrl,
+		text: series.data.title,
+		format: cover.image.format as "png" | "svg" | "jpg" | "jpeg" | "webp",
+		width: cover.image.width,
+		height: cover.image.height,
+		alt: cover.alt || series.data.title,
+	} : undefined}
 	useImageDirectly={true}
 	pageType="CollectionPage"
 >
@@ -57,6 +64,7 @@ const imageUrl = cover
 		slot="extra-head"
 		elements={[
 			{ title: "Home", link: "/" },
+			{ title: "Read", link: "/read" },
 			{ title: "Series", link: "/series" },
 			{ title: series.data.title, link: `/series/${series.id}` },
 		]}
@@ -64,6 +72,7 @@ const imageUrl = cover
 	<div class={doc.root}>
 		<ArticleHeader
 			breadcrumbs={[
+				{ label: "Home", href: "/" },
 				{ label: "Read", href: "/read" },
 				{ label: "Series", href: "/series" },
 			]}

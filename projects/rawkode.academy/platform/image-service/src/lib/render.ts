@@ -134,15 +134,18 @@ export const renderOpenGraphHtml = (payload: Payload): string => {
       .media {
         align-self: stretch;
         min-height: 0;
-        padding: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
         background: var(--paper-deep);
         border: 1px solid var(--hairline-strong);
       }
       .image {
+        display: block;
         width: 100%;
         height: 100%;
-        object-fit: cover;
-        border: 1px solid var(--hairline);
+        object-fit: contain;
       }
       footer {
         display: grid;

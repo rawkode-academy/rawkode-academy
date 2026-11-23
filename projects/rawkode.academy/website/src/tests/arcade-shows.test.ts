@@ -136,20 +136,19 @@ describe("Arcade show publishing", () => {
 		expect(feed).toContain('show.data.status === "coming-soon"');
 	});
 
-	it("includes every coming-soon show in the public show sitemap", async () => {
+	it("excludes coming-soon 0-episode shows from the public show sitemap", async () => {
 		const entries = (Object.keys(arcadeShows) as ArcadeShowId[]).map((id) => ({
 			id,
 			collection: "shows",
 			data: mapShow(gatewayRow(id)),
 			body: "",
 		}));
-		// The sitemap reads shows through the live collection loader.
-		vi.mocked(getLiveCollection).mockResolvedValue({ entries } as never);
+		// The sitemap reads shows and videos through the live collection loader.
+		vi.mocked(getLiveCollection).mockImplementation(async (name) => {
+			if (name === "shows") return { entries } as never;
+			return { entries: [] } as never;
+		});
 		const sitemap = await getShowSitemapEntries();
-		expect(sitemap.map((entry) => entry.path)).toEqual(
-			Object.keys(arcadeShows)
-				.sort()
-				.map((id) => `/shows/${id}`),
-		);
+		expect(sitemap.map((entry) => entry.path)).toEqual([]);
 	});
 });

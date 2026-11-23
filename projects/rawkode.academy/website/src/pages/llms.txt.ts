@@ -7,9 +7,9 @@ import { SITE_DESCRIPTION } from "@/lib/site";
 const DEFAULT_SITE_URL = "https://rawkode.academy";
 const SUMMARY_MAX_LENGTH = 160;
 
-function summarize(text: string): string {
-	const normalized = text
-		.replace(/\\n/g, " ")
+export function summarize(text: string): string {
+	const normalized = (text ?? "")
+		.replace(/\\r\\n|\\n|\r?\n/g, " ")
 		.replace(/[*_`#]+/g, "")
 		.replace(/\s+/g, " ")
 		.trim();

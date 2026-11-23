@@ -1,6 +1,8 @@
 import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
 import {
+	escapeAttribute,
+	normalizeSiteUrl,
 	renderAndSanitizeArticles,
 	rssCreator,
 	rssNamespaces,
@@ -25,10 +27,7 @@ const logger = createLogger("feeds");
 
 export async function GET(context: APIContext) {
 	const now = new Date();
-	const site = (context.site?.toString() || "https://rawkode.academy").replace(
-		/\/$/,
-		"",
-	);
+	const site = normalizeSiteUrl(context.site);
 
 	const [articles, videos, technologies, news] = await Promise.all([
 		getCollection("articles"),
@@ -70,7 +69,7 @@ export async function GET(context: APIContext) {
 					title,
 					description,
 					pubDate: new Date(article.data.publishedAt),
-					link: `/read/${article.id}/`,
+					link: `/read/${article.id}`,
 					categories: [],
 					customData: rssCreator(authors.map((author) => author.data.name)),
 				};
@@ -107,7 +106,7 @@ export async function GET(context: APIContext) {
 				title,
 				description,
 				pubDate: new Date(video.data.publishedAt),
-				link: `/watch/${video.data.slug}/`,
+				link: `/watch/${video.data.slug}`,
 				categories,
 			};
 
@@ -116,7 +115,7 @@ export async function GET(context: APIContext) {
 			if (duration) {
 				item.customData += `
 				<itunes:duration>${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, "0")}</itunes:duration>
-				<itunes:image href="${itunesImageUrl}" />
+				<itunes:image href="${escapeAttribute(itunesImageUrl)}" />
 			`;
 			}
 
@@ -142,7 +141,7 @@ export async function GET(context: APIContext) {
 					title,
 					description,
 					pubDate: new Date(story.data.publishedAt),
-					link: `/news/${story.id}/`,
+					link: `/news/${story.id}`,
 					categories: [...(story.data.technologies ?? [])],
 					customData: rssCreator(authors.map((author) => author.data.name)),
 				};
@@ -171,7 +170,8 @@ export async function GET(context: APIContext) {
 			title: "Rawkode Academy - All Content",
 			description:
 				"Latest articles, news, and videos from Rawkode Academy covering Cloud Native, DevOps, and Modern Software Development",
-			site: context.site?.toString() || "https://rawkode.academy",
+			site,
+			trailingSlash: false,
 			items,
 			customData: `<language>en-us</language>${rssSelfLink(`${site}/api/feeds/all.xml`)}`,
 			stylesheet: false,

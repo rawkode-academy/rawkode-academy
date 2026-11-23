@@ -143,6 +143,19 @@ const gridArticles = visibleArticles.filter(
 	(article) => !featuredCandidate || article.id !== featuredCandidate.id,
 );
 const totalPages = Math.max(1, Math.ceil(gridArticles.length / articlesPerPage));
+const rawPageParam = Astro.url.searchParams.get("page");
+const parsedPageParam =
+	rawPageParam !== null && /^\d+$/.test(rawPageParam)
+		? Number.parseInt(rawPageParam, 10)
+		: 1;
+const isOutOfRangePage =
+	rawPageParam !== null &&
+	(!/^\d+$/.test(rawPageParam) ||
+		parsedPageParam < 1 ||
+		parsedPageParam > totalPages);
+const hasFilterParams = Boolean(requestedType || requestedTopic);
+const shouldNoindex = isFiltered || hasFilterParams || isOutOfRangePage;
+
 // Clamp out-of-range requests so ?page=999 renders the last real page
 // instead of an empty grid with prev/next links into a phantom crawl space.
 const page = Math.min(requestedPage, totalPages);
@@ -223,23 +236,37 @@ const activeFilterSummary = [
 	.join(" · ");
 
 // SERP title leads with what people search for.
-const pageTitle = "Cloud Native & Kubernetes Articles";
+const basePageTitle = "Cloud Native & Kubernetes Articles";
+const pageTitle =
+	!shouldNoindex && page > 1
+		? `${basePageTitle} — Page ${page}`
+		: basePageTitle;
 const pageDescription =
 	"Articles and tutorials on cloud native engineering — Kubernetes, eBPF, containers, supply chain — from Rawkode Academy.";
+const siteBase = Astro.site ?? Astro.url;
+const canonicalUrl =
+	!shouldNoindex && page > 1
+		? new URL(`/read?page=${page}`, siteBase)
+		: new URL("/read", siteBase);
 const styles = academyLayout({ width: "wide" });
 const catalog = academyCatalog();
 ---
 
-<Page title={pageTitle} description={pageDescription} pageType="CollectionPage">
+<Page
+	title={pageTitle}
+	description={pageDescription}
+	pageType="CollectionPage"
+	noindex={shouldNoindex}
+	canonicalUrl={canonicalUrl}
+>
 	<Fragment slot="extra-head">
-		{(isFiltered || page > 1) && <meta name="robots" content="noindex,follow" />}
-		{page > 1 && <link rel="prev" href={readPathFor(page - 1)} />}
-		{hasNextPage && <link rel="next" href={readPathFor(page + 1)} />}
-		{!isFiltered && page === 1 && (
+		{!shouldNoindex && page > 1 && <link rel="prev" href={new URL(readPathFor(page - 1), siteBase).href} />}
+		{!shouldNoindex && hasNextPage && <link rel="next" href={new URL(readPathFor(page + 1), siteBase).href} />}
+		{!shouldNoindex && page === 1 && (
 			<ArticleItemListJsonLd
 				articles={allArticles}
-				listUrl={new URL("/read", Astro.site ?? Astro.url).href}
-				listName={pageTitle}
+				listUrl={new URL("/read", siteBase).href}
+				listName={basePageTitle}
 			/>
 		)}
 		<link rel="alternate" type="application/rss+xml" title="Rawkode Academy - Articles (RSS)" href="/api/feeds/articles.xml" />
@@ -255,9 +282,23 @@ const catalog = academyCatalog();
 				<article class={catalog.featured}>
 					<div class={catalog.featuredBody}>
 						<p class={catalog.featuredKicker}>{getTypeBadgeConfig(featured.data.type || "tutorial").label}</p>
-						<h2 class={catalog.featuredTitle}>{featured.data.title}</h2>
+						<h2 class={catalog.featuredTitle}>
+							<a href={`/read/${featured.id}`}>{featured.data.title}</a>
+						</h2>
 						<p class={catalog.featuredDescription}>{compactCopy(featured.data.openGraph?.subtitle || featured.data.description, 180)}</p>
-						<p class={catalog.rowMeta}>{featuredAuthors.map((author) => author.data.name).join(", ")} · <time {...featuredDate(featured.data.publishedAt).attrs}>{featuredDate(featured.data.publishedAt).text}</time> · {calculateReadingTime(featured.body || "").text}{seriesLabel.has(featured.id) && ` · ${seriesLabel.get(featured.id)}`}</p>
+						<p class={catalog.rowMeta}>
+							{featuredAuthors.map((author, index) => (
+								<>
+									{index > 0 && ", "}
+									<a href={`/people/${author.id}`}>{author.data.name}</a>
+								</>
+							))}
+							{" · "}
+							<time {...featuredDate(featured.data.publishedAt).attrs}>{featuredDate(featured.data.publishedAt).text}</time>
+							{" · "}
+							{calculateReadingTime(featured.body || "").text}
+							{seriesLabel.has(featured.id) && ` · ${seriesLabel.get(featured.id)}`}
+						</p>
 						<a class={button()} href={`/read/${featured.id}`}>Read the article <span data-part="arrow" aria-hidden="true">→</span></a>
 					</div>
 					{featuredImage && <a class={catalog.featuredMedia} href={`/read/${featured.id}`} aria-label={`Read ${featured.data.title}`}>
@@ -268,6 +309,13 @@ const catalog = academyCatalog();
 		)}
 
 		<section class={styles.section}><div class={styles.container}>
+			<h2 class={styles.sectionTitle}>
+				{isFiltered
+					? "Filtered articles"
+					: page > 1
+						? `All articles — Page ${page}`
+						: "All articles"}
+			</h2>
 			<form action="/read" method="get" class={catalog.filterForm} aria-label="Filter articles">
 				<label class={catalog.filterField}>Format
 					<select class={styles.input} name="type">

@@ -38,7 +38,7 @@ import { loadDiagramSvg } from "./diagram";
 import { islandHtml } from "./islands";
 import { smartypants } from "./typography";
 
-const RENDER_VERSION = "v2";
+const RENDER_VERSION = "v3";
 const RENDER_TTL_SECONDS = 30 * 24 * 60 * 60;
 const MEMO_MAX = 128;
 /** How long an isolate reuses a degraded render before retrying. */
@@ -50,10 +50,10 @@ export interface RenderOptions {
 	/**
 	 * "prose" (default): Markdown bodies, as Astro rendered content files.
 	 * "description": video and show descriptions, as `marked` rendered them
-	 * (no typography, autolinks or new-tab links).
+	 * (no typography or new-tab links; technology autolinking enabled by default).
 	 */
 	profile?: RenderProfile | undefined;
-	/** Link technology names (prose only, default true). */
+	/** Link technology names (default true). */
 	autolink?: boolean | undefined;
 	/** Technology ids never to autolink, e.g. the profile being rendered. */
 	skipTechnologyIds?: string[] | undefined;
@@ -335,7 +335,7 @@ export async function renderDocumentUncached(
 	if (isEmptyDoc(doc)) return EMPTY;
 	const prose = (options.profile ?? "prose") === "prose";
 	let prepared = doc;
-	if (prose && options.autolink !== false && lookup) {
+	if (options.autolink !== false && lookup) {
 		prepared = autolinkTechnologies(prepared, lookup, {
 			skipIds: options.skipTechnologyIds,
 		});
@@ -378,9 +378,8 @@ export async function renderDocument(
 		? { CONTENT_CACHE: options.kv }
 		: await getContentEnv();
 	const kv = options.kv ?? env.CONTENT_CACHE;
-	const prose = (options.profile ?? "prose") === "prose";
 	const lookup =
-		prose && options.autolink !== false
+		options.autolink !== false
 			? (options.technologies ??
 				(await technologyLookup().catch(() => undefined)))
 			: undefined;
@@ -447,7 +446,8 @@ export function entryDocument(
 
 /**
  * Render an entry's main document: bodies, biographies, technology profiles
- * (without self-links) and video/show descriptions (marked-style).
+ * (autolinking other technologies without self-links) and video/show
+ * descriptions (marked-style typography/links with technology autolinks).
  */
 export async function renderEntry(
 	entry: ContentEntry<CollectionName> | undefined | null,
@@ -467,11 +467,6 @@ export async function renderEntry(
 	return renderDocument(doc, {
 		...options,
 		profile,
-		// remark-tech-autolink skipped technology profile files entirely, so
-		// profiles get no autolinks unless asked.
-		...(entry.collection === "technologies" && options.autolink === undefined
-			? { autolink: false }
-			: {}),
 		...(skip ? { skipTechnologyIds: skip } : {}),
 	});
 }

@@ -10,12 +10,12 @@ import { buildJsonFeed, type JsonFeedItem } from "@/lib/json-feed";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { isNewsPublished } from "@/lib/news-publication";
 
-const SITE_FALLBACK = "https://rawkode.academy";
+import { normalizeSiteUrl } from "../../../lib/feed-utils";
 
 export const GET: APIRoute = async (context) => {
 	const { site } = context;
 	const now = new Date();
-	const baseUrl = (site?.toString() ?? SITE_FALLBACK).replace(/\/$/, "");
+	const baseUrl = normalizeSiteUrl(site);
 	const u = (path: string) => `${baseUrl}${path}`;
 
 	const [articles, videos, news, technologies] = await Promise.all([
@@ -37,7 +37,7 @@ export const GET: APIRoute = async (context) => {
 	for (const article of articles) {
 		const authors = await getEntries(article.data.authors);
 		authorEntries.push(...authors);
-		const url = u(`/read/${article.id}/`);
+		const url = u(`/read/${article.id}`);
 		items.push({
 			id: url,
 			url,
@@ -58,7 +58,7 @@ export const GET: APIRoute = async (context) => {
 	for (const story of news) {
 		const authors = await getEntries(story.data.authors);
 		authorEntries.push(...authors);
-		const url = u(`/news/${story.id}/`);
+		const url = u(`/news/${story.id}`);
 		items.push({
 			id: url,
 			url,
@@ -74,7 +74,7 @@ export const GET: APIRoute = async (context) => {
 	}
 
 	for (const video of videos) {
-		const url = u(`/watch/${video.data.slug}/`);
+		const url = u(`/watch/${video.data.slug}`);
 		// Technology references carry ids without "/index".
 		const tagNames = video.data.technologies
 			.map((technology) => techName.get(technology.id) ?? technology.id)

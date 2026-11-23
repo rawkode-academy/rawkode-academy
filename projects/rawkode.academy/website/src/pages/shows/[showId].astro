@@ -6,12 +6,14 @@ export const prerender = false;
 import {
 	getEntries,
 	getEntry,
+	renderEntry,
 	sameId,
 	setContentCache,
 } from "@/lib/live-content";
 import { getPublishedVideos } from "@/lib/content";
+import { isShowIndexable } from "@/lib/sitemaps";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
-import VideoMetadata from "@/components/html/video-metadata.astro";
+import RichText from "@/components/content/RichText.astro";
 import PodcastSeriesJsonLd from "@/components/html/podcast-series-jsonld.astro";
 import VideoCard from "@/components/video/VideoCard.astro";
 import VideoFeed from "@/components/video/video-feed.astro";
@@ -20,7 +22,7 @@ import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Page from "@/wrappers/page.astro";
 import { Image } from "astro:assets";
 import { createLogger } from "@/lib/logger";
-import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import { getVideoThumbnailResizedUrl } from "@/lib/video-thumbnail";
 import ShowNav from "@/components/show/ShowNav.astro";
 import { getShowNav, hasExtension } from "@/lib/shows/registry";
 
@@ -58,7 +60,7 @@ const feedVideos = videosForShow
 	.map((video) => ({
 		id: video.data.id,
 		title: video.data.title,
-		thumbnailUrl: getVideoThumbnailUrl(video.data.id),
+		thumbnailUrl: getVideoThumbnailResizedUrl(video.data.id, 640),
 		streamUrl: `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`,
 		duration: typeof video.data.duration === "number" ? video.data.duration : 0,
 		slug: video.data.slug,
@@ -73,12 +75,16 @@ const feedVideos = videosForShow
 			new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
 	);
 const hasEpisodeFeed = !isComingSoon && feedVideos.length > 0;
+const isIndexable = isShowIndexable(showEntry, feedVideos.length);
+const descriptionHtml = showEntry.data.descriptionDoc
+	? (await renderEntry(showEntry)).html
+	: "";
 
 // The episode list comes from the videos collection: listing it caps maxAge
 // at the next scheduled video so new episodes appear on time.
 await setContentCache(Astro, {
 	entries: [showEntry, ...hostEntries],
-	collections: ["videos"],
+	collections: descriptionHtml ? ["videos", "technologies"] : ["videos"],
 });
 
 // Only https links leave the site from the game-format button.
@@ -125,7 +131,12 @@ if (hasEpisodeFeed && showEntry.data.podcast?.artworkUrl) {
 }
 ---
 
-<Page title={pageTitle} description={showDescription}>
+<Page
+	title={pageTitle}
+	description={showDescription}
+	noindex={!isIndexable}
+	pageType="CollectionPage"
+>
  {hasEpisodeFeed && (
 	<link
 		slot="extra-head"
@@ -142,14 +153,6 @@ if (hasEpisodeFeed && showEntry.data.podcast?.artworkUrl) {
 		hosts={hostEntries}
 		episodeCount={feedVideos.length}
 		{...(podcastImageUrl ? { imageUrl: podcastImageUrl } : {})}
-	/>
- )}
- {hasEpisodeFeed && (
-	<VideoMetadata
-		slot="extra-head"
-		title={pageTitle}
-		description={showDescription}
-		isVideoList={true}
 	/>
  )}
 
@@ -182,9 +185,15 @@ if (hasEpisodeFeed && showEntry.data.podcast?.artworkUrl) {
  </div>
  )}
 
+ {descriptionHtml ? (
+ <div class={doc.lede}>
+ <RichText html={descriptionHtml} />
+ </div>
+ ) : (
  <p class={doc.lede}>
  {showDescription}
  </p>
+ )}
 
  {gameFormatUrl && (
  <div class={doc.actions}>
@@ -224,6 +233,8 @@ if (hasEpisodeFeed && showEntry.data.podcast?.artworkUrl) {
  height={cover.image.height}
  alt={cover.alt}
  class={doc.image}
+ loading="eager"
+ fetchpriority="high"
  />
  </div>
  </div>

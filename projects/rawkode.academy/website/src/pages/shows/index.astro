@@ -13,8 +13,9 @@ import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.
 import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 import Page from "@/wrappers/page.astro";
 import type { ShowSummary } from "@/types/show";
-import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import { getVideoThumbnailResizedUrl } from "@/lib/video-thumbnail";
 import { getPublishedVideos } from "@/lib/content";
+import { isShowIndexable } from "@/lib/sitemaps";
 
 // Build shows from the live content collections. `publish: false` shows are
 // drafts - they don't belong in the public directory.
@@ -53,7 +54,7 @@ const showsToRender: ShowSummary[] = await (async () => {
 			.map((v) => ({
 				video: {
 					title: v.data.title,
-					thumbnailUrl: getVideoThumbnailUrl(v.data.id),
+					thumbnailUrl: getVideoThumbnailResizedUrl(v.data.id, 640),
 					publishedAt:
 						v.data.publishedAt instanceof Date
 							? v.data.publishedAt.toISOString()
@@ -95,16 +96,19 @@ const listedTitle = listed.every((show) => show.status === "coming-soon")
 	? "Announced"
 	: "More shows";
 
-const showsJsonLd = showEntries.map((s) => {
-	const episodeCount = videos.filter(
+const showsJsonLd = showEntries.flatMap((s) => {
+	const count = videos.filter(
 		(v) => s.data.status !== "coming-soon" && sameId(v.data.show, s.data.id),
 	).length;
-	return {
-		id: s.data.id,
-		name: s.data.name,
-		...(s.data.description ? { description: s.data.description } : {}),
-		...(episodeCount > 0 ? { episodeCount } : {}),
-	};
+	if (!isShowIndexable(s, count)) return [];
+	return [
+		{
+			id: s.data.id,
+			name: s.data.name,
+			...(s.data.description ? { description: s.data.description } : {}),
+			...(count > 0 ? { episodeCount: count } : {}),
+		},
+	];
 });
 const styles = academyLayout({ width: "wide" });
 const catalog = academyCatalog();

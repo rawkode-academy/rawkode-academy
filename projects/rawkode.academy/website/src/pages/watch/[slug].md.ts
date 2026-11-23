@@ -1,5 +1,6 @@
 import type { APIContext } from "astro";
 import { getPublishedVideos } from "@/lib/content";
+import { setContentCache } from "@/lib/live-content";
 import { buildWatchVideoSeoText } from "@/utils/watch-video-seo";
 
 export const prerender = false;
@@ -15,7 +16,8 @@ function formatTimestamp(seconds: number): string {
 		: `${m}:${String(s).padStart(2, "0")}`;
 }
 
-export async function GET({ params, site }: APIContext) {
+export async function GET(context: APIContext) {
+	const { params, site } = context;
 	const videos = await getPublishedVideos();
 	const video = videos.find((v) => v.data.slug === params.slug);
 
@@ -24,7 +26,7 @@ export async function GET({ params, site }: APIContext) {
 	}
 
 	const canonicalUrl = new URL(
-		`/watch/${video.data.slug}`,
+		`/watch/${video.data.slug.replace(/^\/+|\/+$/g, "")}`,
 		site ?? DEFAULT_SITE_URL,
 	).href;
 	const captionUrl = `https://content.rawkode.academy/videos/${video.data.id}/captions/en.vtt`;
@@ -77,14 +79,16 @@ export async function GET({ params, site }: APIContext) {
 
 	lines.push("");
 
+	await setContentCache(context, {
+		entries: [video],
+		collections: ["videos"],
+		tags: [`video-${video.data.slug}`, "video-markdown"],
+	});
+
 	return new Response(lines.join("\n"), {
 		headers: {
 			"Content-Type": "text/markdown; charset=utf-8",
 			Link: `<${canonicalUrl}>; rel="canonical"`,
-			"Cache-Control":
-				"public, max-age=600, s-maxage=7200, stale-while-revalidate=172800",
-			"CDN-Cache-Control": "public, max-age=7200",
-			"Cache-Tag": `video-${video.data.slug}, video-markdown`,
 		},
 	});
 }

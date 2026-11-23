@@ -7,6 +7,7 @@ import {
 	setContentCache,
 } from "@/lib/live-content";
 import {
+	normalizeSiteUrl,
 	renderAndSanitizeArticles,
 	rssCreator,
 	rssNamespaces,
@@ -17,10 +18,7 @@ import {
 export const prerender = false;
 
 export async function GET(context: APIContext) {
-	const site = (context.site?.toString() || "https://rawkode.academy").replace(
-		/\/$/,
-		"",
-	);
+	const site = normalizeSiteUrl(context.site);
 	const articles = await getCollection("articles");
 
 	// Sort by publishedAt desc
@@ -46,7 +44,7 @@ export async function GET(context: APIContext) {
 				title: article.data.title,
 				description: article.data.description,
 				pubDate: new Date(article.data.publishedAt),
-				link: `/read/${article.id}/`,
+				link: `/read/${article.id}`,
 				customData: rssCreator(authors.map((author) => author.data.name)),
 				// Categories carried the series id; articles have no series any more.
 				categories: [],
@@ -65,7 +63,8 @@ export async function GET(context: APIContext) {
 			title: "Rawkode Academy - Articles",
 			description:
 				"Latest articles and tutorials from Rawkode Academy covering Cloud Native, DevOps, and Modern Software Development",
-			site: context.site?.toString() || "https://rawkode.academy",
+			site,
+			trailingSlash: false,
 			items,
 			customData: `<language>en-us</language>${rssSelfLink(`${site}/api/feeds/articles.xml`)}`,
 			stylesheet: false,

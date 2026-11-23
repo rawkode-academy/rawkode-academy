@@ -3,8 +3,11 @@ import {
 	type ContentEntry,
 	getCollection,
 	getEntry,
+	renderDocument,
+	renderEntry,
 	setContentCache,
 } from "@/lib/live-content";
+import RichText from "@/components/content/RichText.astro";
 import EditorialShell from "@/components/ui/EditorialShell.astro";
 import Page from "@/wrappers/page.astro";
 import {
@@ -43,13 +46,23 @@ const processedChangelog = await Promise.all(
 	sortedChangelog.map(async (entry) => {
 		const authorEntry = await getEntry(entry.data.author);
 		if (authorEntry) authorEntries.push(authorEntry);
+		const descriptionDoc =
+			"descriptionDoc" in entry.data
+				? (entry.data as { descriptionDoc?: Parameters<typeof renderDocument>[0] })
+						.descriptionDoc
+				: undefined;
+		const renderedHtml =
+			(await renderEntry(entry)).html ||
+			(descriptionDoc ? (await renderDocument(descriptionDoc)).html : "");
 
 		return {
 			...entry.data,
 			id: entry.id,
 			title: cleanTitle(entry.data.title),
 			summary: cleanSummary(entry.data.description),
+			html: renderedHtml,
 			author: {
+				id: authorEntry?.data.id,
 				name: authorEntry?.data.name || "Unknown",
 			},
 		};
@@ -58,13 +71,14 @@ const processedChangelog = await Promise.all(
 
 await setContentCache(Astro, {
 	entries: [...sortedChangelog, ...authorEntries],
-	collections: ["changelog"],
+	collections: ["changelog", "technologies"],
 });
 ---
 
 <Page
 	title="Changelog"
 	description="Rawkode Academy product updates, fixes, and content changes."
+	pageType="CollectionPage"
 >
 	<EditorialShell
 		title="Changelog"
@@ -89,10 +103,23 @@ await setContentCache(Astro, {
 								<time {...localDate(entry.date).attrs}>
 									{localDate(entry.date).text}
 								</time>
-								<span>by {entry.author.name}</span>
+								<span>
+									by{" "}
+									{entry.author.id ? (
+										<a class={doc.link} href={`/people/${entry.author.id}`}>{entry.author.name}</a>
+									) : (
+										entry.author.name
+									)}
+								</span>
 							</div>
 							<h2>{entry.title}</h2>
-							{entry.summary && <p class="changelog-entry__summary">{entry.summary}</p>}
+							{entry.html ? (
+								<div class="changelog-entry__summary">
+									<RichText html={entry.html} />
+								</div>
+							) : (
+								entry.summary && <p class="changelog-entry__summary">{entry.summary}</p>
+							)}
 							{entry.pullRequest && (
 								<a
 									class="changelog-entry__link"

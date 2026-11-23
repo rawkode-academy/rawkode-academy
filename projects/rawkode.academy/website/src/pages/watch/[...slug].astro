@@ -30,7 +30,8 @@ import Page from "@/wrappers/page.astro";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
 import { buildWatchVideoSeoText } from "@/utils/watch-video-seo";
-import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import { getVideoThumbnailResizedUrl, getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import { hasTranscodedVodAssets } from "@/lib/content";
 import { buildVideoClips, type VideoClip } from "@/lib/video-clips";
 import { formatRuntimeLabel } from "@/lib/video-runtime";
 import {
@@ -118,7 +119,7 @@ const relatedCandidates = videos
 const toRelatedVideo = (candidate: (typeof videos)[number]) => ({
 	id: candidate.data.id,
 	title: candidate.data.title,
-	thumbnailUrl: getVideoThumbnailUrl(candidate.data.id),
+	thumbnailUrl: getVideoThumbnailResizedUrl(candidate.data.id, 320),
 	slug: candidate.data.slug,
 	duration: typeof candidate.data.duration === "number" ? candidate.data.duration : undefined,
 	publishedAt: candidate.data.publishedAt,
@@ -183,13 +184,83 @@ const hostEntries = showEntry
 	: [];
 const guestEntries = await optionalContent(getEntries(video.data.guests), []);
 
-const thumbnailUrl = video.data.youtubeId
-	? `https://i.ytimg.com/vi/${video.data.youtubeId}/hqdefault.jpg`
-	: getVideoThumbnailUrl(video.data.id);
-const streamUrl = `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`;
-const captionUrl = `https://content.rawkode.academy/videos/${video.data.id}/captions/en.vtt`;
 const isLive = video.data.type === "live";
 const isUpcomingLive = isLive && video.data.publishedAt > now;
+const hasVodAssets = hasTranscodedVodAssets(video, now);
+const r2ThumbnailUrl = getVideoThumbnailUrl(video.data.id);
+const thumbnailUrl =
+	isUpcomingLive && video.data.youtubeId
+		? `https://i.ytimg.com/vi/${video.data.youtubeId}/hqdefault.jpg`
+		: r2ThumbnailUrl;
+const isR2Thumbnail = thumbnailUrl === r2ThumbnailUrl;
+const rawStreamUrl = `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`;
+const rawCaptionUrl = `https://content.rawkode.academy/videos/${video.data.id}/captions/en.vtt`;
+const streamUrl = hasVodAssets ? rawStreamUrl : undefined;
+const embedUrl =
+	!hasVodAssets && video.data.youtubeId
+		? `https://www.youtube.com/embed/${video.data.youtubeId}`
+		: undefined;
+
+const [allArticles, allCourses, allLearningPaths] = await Promise.all([
+	optionalContent(getCollection("articles"), []),
+	optionalContent(getCollection("courses"), []),
+	optionalContent(getCollection("learningPaths"), []),
+]);
+const videoTechSet = new Set(normalizedTechIds);
+type RelatedReadingItem = {
+	kind: "Article" | "Course" | "Learning path";
+	href: string;
+	title: string;
+	description: string;
+	overlap: number;
+	publishedTime: number;
+};
+const scoreTechOverlap = (refs: readonly unknown[] | undefined) =>
+	normalizeTechnologyReferences(refs).filter((id) => videoTechSet.has(id)).length;
+const relatedReading: RelatedReadingItem[] =
+	videoTechSet.size === 0
+		? []
+		: [
+				...allArticles
+					.filter((entry) => !entry.data.draft && entry.data.publishedAt <= now)
+					.map((entry) => ({
+						kind: "Article" as const,
+						href: `/read/${entry.id}`,
+						title: entry.data.title,
+						description: entry.data.description,
+						overlap: scoreTechOverlap(entry.data.technologies),
+						publishedTime: entry.data.publishedAt.getTime(),
+					})),
+				...allCourses
+					.filter((entry) => entry.data.publishedAt <= now)
+					.map((entry) => ({
+						kind: "Course" as const,
+						href: `/courses/${entry.id}`,
+						title: entry.data.title,
+						description: entry.data.description,
+						overlap: scoreTechOverlap(entry.data.technologies),
+						publishedTime: entry.data.publishedAt.getTime(),
+					})),
+				...allLearningPaths
+					.filter((entry) => entry.data.publishedAt <= now)
+					.map((entry) => ({
+						kind: "Learning path" as const,
+						href: `/learning-paths/${entry.id}`,
+						title: entry.data.title,
+						description: entry.data.description,
+						overlap: scoreTechOverlap(entry.data.technologies),
+						publishedTime: entry.data.publishedAt.getTime(),
+					})),
+			]
+				.filter((item) => item.overlap > 0)
+				.sort(
+					(a, b) =>
+						b.overlap - a.overlap ||
+						b.publishedTime - a.publishedTime ||
+						a.href.localeCompare(b.href),
+				)
+				.slice(0, 6);
+
 const studioLiveState = isLive
 	? await getStudioLiveState(env as StudioBindingEnv, video.data.slug)
 	: {
@@ -219,7 +290,7 @@ if (shouldMountLiveGate) {
 	// renders (watch position) are skipped by setContentCache.
 	await setContentCache(Astro, {
 		entries: [video, showEntry, ...techEntries, ...hostEntries, ...guestEntries],
-		collections: ["videos"],
+		collections: ["videos", "articles", "courses", "learningPaths"],
 	});
 }
 
@@ -260,10 +331,12 @@ const partOfSeriesRef = showEntry
 		}
 	: undefined;
 const watchVideoSeoText = await buildWatchVideoSeoText({
-	captionUrl,
+	captionUrl: rawCaptionUrl,
 	description: processedDescription,
 	chapters: chapterSource,
 });
+const captionUrl =
+	watchVideoSeoText.textSource === "transcript" ? rawCaptionUrl : undefined;
 const transcriptCues = watchVideoSeoText.transcriptParagraphs ?? [];
 
 const user = Astro.locals.user;
@@ -344,7 +417,13 @@ const watchStatusLabel = isLiveNow
 	noindex={metaDescription.length < 30}
 	ogType="video.other"
 	useImageDirectly={true}
-	image={{ image: new URL(thumbnailUrl) }}
+	image={{
+		image: new URL(thumbnailUrl),
+		...(isR2Thumbnail
+			? { width: 1280, height: 720, mimeType: "image/webp" }
+			: {}),
+		alt: video.data.title,
+	}}
 >
 	<VideoMetadata
 		slot="extra-head"
@@ -354,10 +433,11 @@ const watchStatusLabel = isLiveNow
 		publishedAt={publishedIso}
 		duration={durationSec ?? undefined}
 		streamUrl={streamUrl}
+		embedUrl={embedUrl}
 		captionUrl={captionUrl}
 		transcript={watchVideoSeoText.transcriptExcerpt}
 		keywords={techEntries.map((tech) => tech.data.name)}
-		isLiveBroadcast={video.data.type === "live"}
+		isLiveBroadcast={isLive}
 		category={video.data.category}
 		clips={clips}
 		creators={creatorRefs}
@@ -396,7 +476,7 @@ const watchStatusLabel = isLiveNow
 										class={watch.poster}
 										data-watch-player-poster
 										src={thumbnailUrl}
-										alt=""
+										alt={video.data.title}
 										width="1280"
 										height="720"
 										fetchpriority="high"
@@ -426,10 +506,12 @@ const watchStatusLabel = isLiveNow
 									<noscript>
 										<div class={watch.noscript}>
 											<p>The embedded player needs JavaScript.</p>
-											<p class={watch.noscriptLinks}>
-												<a href={streamUrl}>Open the video stream (HLS)</a>
-												<a href={captionUrl}>Download captions (VTT)</a>
-											</p>
+											{(streamUrl || captionUrl) && (
+												<p class={watch.noscriptLinks}>
+													{streamUrl && <a href={streamUrl}>Open the video stream (HLS)</a>}
+													{captionUrl && <a href={captionUrl}>Download captions (VTT)</a>}
+												</p>
+											)}
 										</div>
 									</noscript>
 								</div>
@@ -596,6 +678,28 @@ const watchStatusLabel = isLiveNow
 								cues={transcriptCues}
 								chapters={chapterSource}
 							/>
+						</section>
+					)}
+
+					{relatedReading.length > 0 && (
+						<section class={watch.section} aria-labelledby="watch-detail-related-reading-heading">
+							<h2 id="watch-detail-related-reading-heading" class={watch.sectionTitle}>
+								Related guides &amp; courses
+							</h2>
+							<ul class={watch.linkList}>
+								{relatedReading.map((item) => (
+									<li>
+										<a class={watch.linkRow} href={item.href}>
+											<span class={watch.linkBody}>
+												<span class={watch.linkName} data-name>{item.title}</span>
+												{item.description && <span class={watch.linkNote}>{item.description}</span>}
+												<span class={watch.linkKind}>{item.kind}</span>
+											</span>
+											<span class={watch.linkArrow} data-arrow aria-hidden="true">→</span>
+										</a>
+									</li>
+								))}
+							</ul>
 						</section>
 					)}
 

@@ -8,11 +8,11 @@ import {
 import { buildJsonFeed, type JsonFeedItem } from "@/lib/json-feed";
 import { isNewsPublished } from "@/lib/news-publication";
 
-const SITE_FALLBACK = "https://rawkode.academy";
+import { normalizeSiteUrl } from "../../../lib/feed-utils";
 
 export const GET: APIRoute = async (context) => {
 	const { site } = context;
-	const baseUrl = (site?.toString() ?? SITE_FALLBACK).replace(/\/$/, "");
+	const baseUrl = normalizeSiteUrl(site);
 	const u = (path: string) => `${baseUrl}${path}`;
 
 	const now = new Date();
@@ -25,7 +25,7 @@ export const GET: APIRoute = async (context) => {
 	for (const story of news) {
 		const authors = await getEntries(story.data.authors);
 		authorEntries.push(...authors);
-		const url = u(`/news/${story.id}/`);
+		const url = u(`/news/${story.id}`);
 		items.push({
 			id: url,
 			url,

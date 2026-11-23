@@ -96,11 +96,10 @@ vi.mock("@/lib/live-content", () => liveContent);
 vi.mock("@/lib/content", () => ({ getPublishedVideos: vi.fn() }));
 
 import { getArticleSitemapEntries } from "../lib/sitemaps";
-import { GET as markdownRoute } from "../pages/read/[slug].md";
+import { GET as markdownRoute } from "../pages/read/[...slug].md";
 import { GET as atomFeed } from "../pages/api/feeds/articles.atom";
 import { GET as jsonFeed } from "../pages/api/feeds/articles.json";
 import { GET as rssFeed } from "../pages/api/feeds/articles.xml";
-import * as howto from "../lib/howto-jsonld";
 import * as localTime from "../lib/local-time";
 import * as readingTime from "../utils/reading-time";
 import * as articleTypes from "../utils/article-types";
@@ -256,7 +255,6 @@ async function loadArticlePage(): Promise<Component> {
 		},
 		"@/components/html/article-jsonld.astro": { default: articleJsonLd },
 		"@/components/breadcrumb/BreadcrumbJsonLd.astro": { default: empty },
-		"@/lib/howto-jsonld": howto,
 		"@/components/articles/RelatedArticles.astro": {
 			default: stub((_result, props: Record<string, unknown>) => {
 				relatedProps.push(props);
@@ -343,7 +341,11 @@ describe("Published route and sitemap contracts", () => {
 		collections([olderPublished, published, defaultPublished, scheduled]);
 		await renderArticle("older-published");
 		expect(state.cacheCalls).toHaveLength(0);
-		expect(relatedProps[0]?.articles).toEqual([published, defaultPublished]);
+		expect(relatedProps[0]?.articles).toEqual([
+			olderPublished,
+			published,
+			defaultPublished,
+		]);
 		expect(relatedProps[0]?.limit).toBe(3);
 	});
 
@@ -381,12 +383,18 @@ describe("Published route and sitemap contracts", () => {
 		const { status, html } = await renderArticle("covered");
 		expect(status).toBe(200);
 		const props = pageProps[0]!;
-		expect(props.title).toBe("OG title");
+		expect(props.title).toBe("Title covered");
+		expect(props.ogTitle).toBe("OG title");
 		expect(props.subtitle).toBe("OG subtitle");
 		expect(props.description).toBe("Description covered");
 		expect(props.isArticle).toBe(true);
 		expect(props.updatedAt).toEqual(updatedAt);
 		expect(props.articleTags).toEqual(["Kubernetes", "Open Telemetry"]);
+		expect(props.image).toMatchObject({
+			width: 1280,
+			height: 720,
+			alt: "Cover",
+		});
 		expect(String((props.image as { image: URL }).image)).toBe(
 			"https://content.rawkode.academy/articles/covered/cover.png",
 		);
@@ -439,39 +447,10 @@ describe("Published route and sitemap contracts", () => {
 		]);
 	});
 
-	it("read/[...slug].astro builds HowTo JSON-LD from the Markdown rendition of the document", async () => {
-		state.markdown = [
-			"Intro.",
-			"",
-			"## Step one",
-			"",
-			"Install the **tool** with [the docs](https://example.com).",
-			"",
-			"## Step two",
-			"",
-			"Run `tool init` in your project.",
-		].join("\n");
+	it("read/[...slug].astro does not emit deprecated HowTo JSON-LD even when howto is true", async () => {
 		collections([article("guide", { howto: true })]);
 		await renderArticle("guide");
-		const jsonLd = pageProps[0]!.jsonLd as Record<string, unknown>;
-		expect(jsonLd).toMatchObject({
-			"@type": "HowTo",
-			name: "Title guide",
-			step: [
-				{
-					position: 1,
-					name: "Step one",
-					text: "Install the tool with the docs.",
-					url: "https://rawkode.academy/read/guide#step-one",
-				},
-				{
-					position: 2,
-					name: "Step two",
-					text: "Run tool init in your project.",
-					url: "https://rawkode.academy/read/guide#step-two",
-				},
-			],
-		});
+		expect(pageProps[0]!.jsonLd).toBeUndefined();
 	});
 
 	it("read/[slug].md.ts serves every article id the content layer returns", async () => {
@@ -531,7 +510,7 @@ describe("Published route and sitemap contracts", () => {
 		expect(
 			[
 				...rss.matchAll(
-					/<link>https:\/\/rawkode\.academy\/+read\/([^/<]+)\/<\/link>/g,
+					/<link>https:\/\/rawkode\.academy\/read\/([^/<]+)<\/link>/g,
 				),
 			].map((m) => m[1]),
 		).toEqual(expectedOrder);
@@ -545,7 +524,7 @@ describe("Published route and sitemap contracts", () => {
 		expect(
 			[
 				...atom.matchAll(
-					/<id>https:\/\/rawkode\.academy\/+read\/([^/<]+)\/<\/id>/g,
+					/<id>https:\/\/rawkode\.academy\/read\/([^/<]+)<\/id>/g,
 				),
 			].map((m) => m[1]),
 		).toEqual(expectedOrder);
@@ -556,7 +535,7 @@ describe("Published route and sitemap contracts", () => {
 			items: Array<Record<string, unknown>>;
 		};
 		expect(json.items.map((item) => item.id)).toEqual(
-			expectedOrder.map((id) => `https://rawkode.academy/read/${id}/`),
+			expectedOrder.map((id) => `https://rawkode.academy/read/${id}`),
 		);
 		// Tags carried the series id; articles have no series any more.
 		for (const item of json.items) expect(item).not.toHaveProperty("tags");

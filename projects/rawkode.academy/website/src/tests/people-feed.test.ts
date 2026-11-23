@@ -67,7 +67,7 @@ describe("person RSS request-time contracts", () => {
 			"application/rss+xml; charset=utf-8",
 		);
 		expect(xml).toContain("Rawkode Academy - Person &amp; Friends");
-		expect(xml).toContain("https://academy.test/watch/talk/");
+		expect(xml).toContain("<link>https://academy.test/watch/talk</link>");
 		expect(xml).not.toContain("undefined");
 	});
 
@@ -114,14 +114,14 @@ describe("person RSS request-time contracts", () => {
 		for (const word of ["future-", "unrelated"])
 			expect(xml).not.toContain(word);
 		for (const url of [
-			"/read/article/",
-			"/read/formerly-hidden/",
-			"/news/news/",
-			"/watch/video/",
+			"/read/article<",
+			"/read/formerly-hidden<",
+			"/news/news<",
+			"/watch/video<",
 		])
 			expect(xml).toContain(url);
-		expect(xml.indexOf("/watch/video/")).toBeLessThan(
-			xml.indexOf("/read/article/"),
+		expect(xml.indexOf("/watch/video<")).toBeLessThan(
+			xml.indexOf("/read/article<"),
 		);
 	});
 

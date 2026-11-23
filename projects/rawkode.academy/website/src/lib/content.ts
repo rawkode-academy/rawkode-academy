@@ -65,6 +65,39 @@ export async function getUpcomingVideos() {
 	);
 }
 
+/**
+ * Returns true when a video is published (publishedAt <= now) and has a
+ * finite positive duration indicating transcoded VOD assets are available.
+ */
+export function hasTranscodedVodAssets(
+	video: {
+		data: {
+			duration?: number | null | undefined;
+			publishedAt: Date | string;
+			type?: string | undefined;
+		};
+	},
+	now: Date = new Date(),
+): boolean {
+	const publishedTime =
+		video.data.publishedAt instanceof Date
+			? video.data.publishedAt.getTime()
+			: new Date(video.data.publishedAt).getTime();
+	const nowTime = now.getTime();
+	if (Number.isNaN(publishedTime) || Number.isNaN(nowTime)) {
+		return false;
+	}
+	if (publishedTime > nowTime) {
+		return false;
+	}
+	const duration = video.data.duration;
+	return (
+		typeof duration === "number" &&
+		Number.isFinite(duration) &&
+		duration > 0
+	);
+}
+
 /** Collections getLatestContent() lists; pass them to setContentCache(). */
 export const LATEST_CONTENT_COLLECTIONS = [
 	"videos",

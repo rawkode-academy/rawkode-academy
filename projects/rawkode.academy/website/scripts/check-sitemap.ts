@@ -49,9 +49,10 @@ export const REQUIRED_SITEMAP_PATHS = [
 	"/sitemaps/people.xml",
 	"/sitemaps/shows.xml",
 	"/sitemaps/news.xml",
-	"/news-sitemap.xml",
 	"/sitemaps/adrs.xml",
 ] as const;
+
+export const OPTIONAL_SITEMAP_PATHS = ["/news-sitemap.xml"] as const;
 
 export const DISALLOWED_SITEMAP_PATH_PREFIXES = [
 	"/admin",
@@ -71,7 +72,26 @@ export const SUPPLEMENTAL_URL_CHECKS: readonly SupplementalUrlCheck[] = [
 	},
 	{
 		path: "/watch?page=2",
+		expectedCanonicalPath: "/watch?page=2",
+		expectedRobots: "index,follow",
+	},
+	{
+		path: "/watch?q=kubernetes",
 		expectedCanonicalPath: "/watch",
+		expectedRobots: "noindex,follow",
+	},
+	{
+		path: "/read",
+		expectedCanonicalPath: "/read",
+	},
+	{
+		path: "/read?page=2",
+		expectedCanonicalPath: "/read?page=2",
+		expectedRobots: "index,follow",
+	},
+	{
+		path: "/read?q=kubernetes",
+		expectedCanonicalPath: "/read",
 		expectedRobots: "noindex,follow",
 	},
 ] as const;
@@ -144,13 +164,13 @@ function extractTagAttribute(
 	return null;
 }
 
-function normalizeUrl(url: string): string {
+export function normalizeUrl(url: string): string {
 	const parsed = new URL(url);
 	let pathname = parsed.pathname;
 	if (pathname.length > 1 && pathname.endsWith("/")) {
 		pathname = pathname.slice(0, -1);
 	}
-	return `${parsed.protocol}//${parsed.host}${pathname}`;
+	return `${parsed.protocol}//${parsed.host}${pathname}${parsed.search}`;
 }
 
 function normalizeRobots(robots: string | null): string | null {

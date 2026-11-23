@@ -15,21 +15,24 @@ interface SeriesRef {
 interface Props {
 	title: string;
 	description: string;
-	thumbnailUrl?: string;
-	publishedAt?: string;
-	duration?: number | undefined;
-	streamUrl?: string;
-	embedUrl?: string; // Only when a true embeddable player URL (e.g., YouTube/Vimeo)
+	thumbnailUrl?: string | undefined;
+	publishedAt?: string | undefined;
+	duration?: number | null | undefined;
+	streamUrl?: string | undefined;
+	embedUrl?: string | undefined; // Only when a true embeddable player URL (e.g., YouTube/Vimeo)
 	captionUrl?: string | undefined;
 	transcript?: string | undefined;
-	keywords?: string[];
-	isLiveBroadcast?: boolean;
+	keywords?: string[] | undefined;
+	isLiveBroadcast?: boolean | undefined;
 	category?: string | undefined;
-	isVideoList?: boolean;
-	clips?: Array<{ name: string; startOffset: number; endOffset?: number }>;
+	isVideoList?: boolean | undefined;
+	clips?:
+		| Array<{ name: string; startOffset: number; endOffset?: number }>
+		| undefined;
 	creators?: PersonRef[] | undefined;
 	guests?: PersonRef[] | undefined;
 	partOfSeries?: SeriesRef | undefined;
+	slot?: string | undefined;
 }
 
 const {
@@ -64,7 +67,36 @@ const resolvedCreators: PersonRef[] =
 			];
 
 const plainDescription = plainTextDescription(description, 500);
-const pageUrl = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
+const pageUrl = new URL(
+	Astro.url.pathname,
+	Astro.site ?? Astro.url ?? "https://rawkode.academy",
+).href;
+
+const normalizedStreamUrl =
+	typeof streamUrl === "string" && streamUrl.trim().length > 0
+		? streamUrl.trim()
+		: undefined;
+const normalizedCaptionUrl =
+	typeof captionUrl === "string" && captionUrl.trim().length > 0
+		? captionUrl.trim()
+		: undefined;
+const normalizedEmbedUrl =
+	typeof embedUrl === "string" && embedUrl.trim().length > 0
+		? embedUrl.trim()
+		: undefined;
+const wholeDurationSeconds =
+	typeof duration === "number" && Number.isFinite(duration)
+		? Math.floor(duration)
+		: 0;
+const hasPositiveDuration = wholeDurationSeconds >= 1;
+const publishedTimestamp =
+	typeof publishedAt === "string" && publishedAt.trim().length > 0
+		? new Date(publishedAt).getTime()
+		: Number.NaN;
+const hasValidPublishedAt = Number.isFinite(publishedTimestamp);
+const isUpcomingBroadcast = Boolean(
+	isLiveBroadcast && hasValidPublishedAt && publishedTimestamp > Date.now(),
+);
 
 // Format duration from seconds to ISO 8601
 function formatDuration(seconds: number): string {
@@ -86,31 +118,34 @@ function formatDuration(seconds: number): string {
 }
 
 const formattedDuration =
-	typeof duration === "number" && Number.isFinite(duration) && duration > 0
-		? formatDuration(duration)
+	hasPositiveDuration && !isUpcomingBroadcast
+		? formatDuration(wholeDurationSeconds)
 		: undefined;
 
 // Generate structured data
 // Compute a safe embedUrl: only use if explicitly provided or clearly an embed player URL
 const computedEmbedUrl = (() => {
-	if (embedUrl) return embedUrl;
-	if (!streamUrl) return undefined;
-	const s = String(streamUrl).toLowerCase();
+	if (normalizedEmbedUrl) return normalizedEmbedUrl;
+	if (!normalizedStreamUrl) return undefined;
+	const s = normalizedStreamUrl.toLowerCase();
 	if (
 		s.includes("youtube.com/embed/") ||
 		s.includes("youtu.be/") ||
 		s.includes("player.vimeo.com/")
 	) {
-		return streamUrl;
+		return normalizedStreamUrl;
 	}
 	return undefined; // Avoid using HLS/MP4 as embedUrl
 })();
 
 const broadcastEvent =
-	isLiveBroadcast && publishedAt
+	isLiveBroadcast && publishedAt && hasValidPublishedAt
 		? buildBroadcastEventJsonLd({
 				startDate: publishedAt,
-				durationSeconds: duration,
+				durationSeconds:
+					!isUpcomingBroadcast && hasPositiveDuration
+						? wholeDurationSeconds
+						: undefined,
 			})
 		: undefined;
 
@@ -120,23 +155,19 @@ const normalizedKeywords = keywords
 	.filter((keyword) => keyword.length > 0);
 
 const structuredData = isVideoList
-	? {
-			"@context": "https://schema.org",
-			"@type": "ItemList",
-			name: title,
-			description: plainDescription,
-			url: pageUrl,
-		}
+	? undefined
 	: {
 			"@context": "https://schema.org",
 			"@type": "VideoObject",
 			name: title,
 			description: plainDescription,
-			thumbnailUrl: thumbnailUrl ? [thumbnailUrl] : undefined,
-			uploadDate: publishedAt,
+			...(thumbnailUrl ? { thumbnailUrl: [thumbnailUrl] } : {}),
+			...(hasValidPublishedAt && publishedAt
+				? { uploadDate: publishedAt }
+				: {}),
 			...(formattedDuration ? { duration: formattedDuration } : {}),
 			...(broadcastEvent ? { publication: broadcastEvent } : {}),
-			contentUrl: streamUrl,
+			...(normalizedStreamUrl ? { contentUrl: normalizedStreamUrl } : {}),
 			...(computedEmbedUrl ? { embedUrl: computedEmbedUrl } : {}),
 			url: pageUrl,
 			mainEntityOfPage: pageUrl,
@@ -148,7 +179,9 @@ const structuredData = isVideoList
 			// Additional required/recommended properties for Google Video Search
 			publisher: {
 				"@type": "Organization",
+				"@id": "https://rawkode.academy/#organization",
 				name: "Rawkode Academy",
+				url: "https://rawkode.academy",
 				logo: {
 					"@type": "ImageObject",
 					url: "https://rawkode.academy/android-chrome-512x512.png",
@@ -198,37 +231,62 @@ const structuredData = isVideoList
 			isAccessibleForFree: true,
 			requiresSubscription: false,
 			isFamilyFriendly: true,
-			inLanguage: "en-US",
-			genre: category,
-			keywords:
-				normalizedKeywords.length > 0
-					? normalizedKeywords.join(", ")
-					: undefined,
-			caption: captionUrl
+			inLanguage: "en",
+			...(category ? { genre: category } : {}),
+			...(normalizedKeywords.length > 0
+				? { keywords: normalizedKeywords.join(", ") }
+				: {}),
+			...(normalizedCaptionUrl
 				? {
-						"@type": "MediaObject",
-						contentUrl: captionUrl,
-						encodingFormat: "text/vtt",
-						inLanguage: "en-US",
-						name: `${title} captions`,
+						caption: {
+							"@type": "MediaObject",
+							contentUrl: normalizedCaptionUrl,
+							encodingFormat: "text/vtt",
+							inLanguage: "en",
+							name: `${title} captions`,
+						},
 					}
-				: undefined,
-			transcript: transcript,
+				: {}),
+			...(transcript ? { transcript } : {}),
 		};
 ---
 
-<!-- Preload video thumbnail to improve LCP on detail pages -->
-{!isVideoList && thumbnailUrl && (
- <link rel="preload" as="image" href={thumbnailUrl} fetchpriority="high" />
+{!isVideoList && (
+	<>
+		<!-- Preload video thumbnail to improve LCP on detail pages -->
+		{thumbnailUrl && (
+			<link rel="preload" as="image" href={thumbnailUrl} fetchpriority="high" />
+		)}
+
+		<!-- Video-specific meta tags (og:type and the Twitter card come from opengraph.astro) -->
+		{normalizedStreamUrl && <meta property="og:video" content={normalizedStreamUrl} />}
+		{normalizedStreamUrl && <meta property="og:video:url" content={normalizedStreamUrl} />}
+		{normalizedStreamUrl && normalizedStreamUrl.startsWith("https://") && (
+			<meta property="og:video:secure_url" content={normalizedStreamUrl} />
+		)}
+		{normalizedStreamUrl && /\.m3u8(?:$|[?#])/i.test(normalizedStreamUrl) && (
+			<meta property="og:video:type" content="application/x-mpegURL" />
+		)}
+		{normalizedStreamUrl && hasPositiveDuration && !isUpcomingBroadcast && (
+			<meta
+				property="og:video:duration"
+				content={String(wholeDurationSeconds)}
+			/>
+		)}
+		{normalizedStreamUrl && hasValidPublishedAt && publishedAt && (
+			<meta property="og:video:release_date" content={publishedAt} />
+		)}
+
+		<!-- Structured Data -->
+		{structuredData && (
+			<script
+				is:inline
+				type="application/ld+json"
+				set:html={JSON.stringify(structuredData)
+					.replace(/</g, "\\u003c")
+					.replace(/\u2028/g, "\\u2028")
+					.replace(/\u2029/g, "\\u2029")}
+			/>
+		)}
+	</>
 )}
-
-<!-- Video-specific meta tags (og:type and the Twitter card come from opengraph.astro) -->
-{!isVideoList && streamUrl && <meta property="og:video" content={streamUrl} />}
-{!isVideoList && streamUrl && <meta property="og:video:url" content={streamUrl} />}
-{!isVideoList && streamUrl && streamUrl.endsWith(".m3u8") && <meta property="og:video:type" content="application/x-mpegURL" />}
-{!isVideoList && thumbnailUrl && <meta property="og:video:thumbnail" content={thumbnailUrl} />}
-{!isVideoList && duration && <meta property="og:video:duration" content={String(Math.floor(duration))} />}
-{!isVideoList && publishedAt && <meta property="og:video:release_date" content={publishedAt} />}
-
-<!-- Structured Data -->
-<script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />

@@ -4,7 +4,7 @@ const account = academyAccount();
 import { disableContentCache, getCollection } from "@/lib/live-content";
 import VideoFeed from "@/components/video/video-feed.astro";
 import Page from "@/wrappers/page.astro";
-import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import { getVideoThumbnailResizedUrl } from "@/lib/video-thumbnail";
 import { academyLayout } from "@rawkodeacademy/design-system";
 import "@rawkodeacademy/design-system/styles.css";
 
@@ -75,7 +75,7 @@ const continueWatchingVideos = continueWatchingData
 			id: video.data.id,
 			title: video.data.title,
 			slug: video.data.slug,
-			thumbnailUrl: getVideoThumbnailUrl(video.data.id),
+			thumbnailUrl: getVideoThumbnailResizedUrl(video.data.id, 640),
 			streamUrl: `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`,
 			duration:
 				typeof video.data.duration === "number" ? video.data.duration : 0,
@@ -99,7 +99,7 @@ const watchPositionsMap = continueWatchingData.reduce(
 const layout = academyLayout({ width: "wide" });
 ---
 
-<Page title="Home - Rawkode Academy" description="Your personalized dashboard" noindex>
+<Page title="Home" description="Your personalized dashboard" noindex>
 	<div class={layout.root}>
 		<section class={layout.hero}>
 			<div class={layout.container}>

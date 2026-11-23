@@ -1,7 +1,7 @@
 import type { APIContext } from "astro";
 import { generateRssFeed } from "feedsmith";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
-import { getPublishedVideos } from "@/lib/content";
+import { getPublishedVideos, hasTranscodedVodAssets } from "@/lib/content";
 import {
 	type ContentEntry,
 	getEntries,
@@ -25,8 +25,9 @@ function getSquaredArtworkUrl(site: string, originalUrl: string): string {
 
 export async function GET(context: APIContext) {
 	const { showId } = context.params;
+	const now = new Date();
 	const site = (context.site?.toString() || "https://rawkode.academy").replace(
-		/\/$/,
+		/\/+$/,
 		"",
 	);
 
@@ -38,12 +39,20 @@ export async function GET(context: APIContext) {
 
 	const videos = await getPublishedVideos();
 	const showVideos = videos
-		.filter((video) => sameId(video.data.show, show.data.id))
+		.filter(
+			(video) =>
+				sameId(video.data.show, show.data.id) &&
+				hasTranscodedVodAssets(video, now),
+		)
 		.sort(
 			(a, b) =>
 				new Date(b.data.publishedAt).getTime() -
 				new Date(a.data.publishedAt).getTime(),
 		);
+
+	if (showVideos.length === 0) {
+		return new Response("Show feed not found", { status: 404 });
+	}
 
 	const hostEntries = await getEntries(show.data.hosts);
 
@@ -77,7 +86,7 @@ export async function GET(context: APIContext) {
 			const episodeNumber = showVideos.length - index;
 			const audioUrl = `https://content.rawkode.academy/videos/${video.data.id}/original.mp3`;
 			const originalThumbnailUrl = getVideoThumbnailUrl(video.data.id);
-			const episodeUrl = `${site}/watch/${video.data.slug}/`;
+			const episodeUrl = `${site}/watch/${video.data.slug}`;
 			const audioFileSize = video.data.audioFileSize || 0;
 			const chaptersUrl = `${site}/api/feeds/shows/${showId}/${video.data.slug}/chapters.json`;
 
@@ -97,7 +106,7 @@ export async function GET(context: APIContext) {
 				href:
 					guest.data.website ||
 					guest.data.twitter ||
-					`https://rawkode.academy/people/${guest.data.id}`,
+					`${site}/people/${guest.data.id}`,
 			}));
 
 			const hostPersons = hostEntries.map((host) => ({
@@ -107,7 +116,7 @@ export async function GET(context: APIContext) {
 				href:
 					host.data.website ||
 					host.data.twitter ||
-					`https://rawkode.academy/people/${host.data.id}`,
+					`${site}/people/${host.data.id}`,
 			}));
 
 			const hasChapters = video.data.chapters && video.data.chapters.length > 0;

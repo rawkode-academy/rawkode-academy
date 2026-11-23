@@ -75,6 +75,8 @@ async function select(videos, showEntry = show, video = current) {
 			normalizeTechnologyReferences:
 				normalizer.namespace.normalizeTechnologyReferences,
 			getVideoThumbnailUrl: (id) => `https://example.test/${id}.webp`,
+			getVideoThumbnailResizedUrl: (id, width) =>
+				`https://example.test/${id}-${width}.webp`,
 			// One technologies listing (ids carry no "/index"); "missing" has
 			// no profile.
 			getCollection: async (collection) => {
@@ -302,7 +304,7 @@ test("breadcrumb status exists only for actual live/upcoming states; page remain
 		),
 	);
 	assert(
-		/setContentCache\(Astro, \{\s*entries: \[video, showEntry, \.\.\.techEntries, \.\.\.hostEntries, \.\.\.guestEntries\],\s*collections: \["videos"\],/.test(
+		/setContentCache\(Astro, \{\s*entries: \[video, showEntry, \.\.\.techEntries, \.\.\.hostEntries, \.\.\.guestEntries\],\s*collections: \["videos", "articles", "courses", "learningPaths"\],/.test(
 			source,
 		),
 	);

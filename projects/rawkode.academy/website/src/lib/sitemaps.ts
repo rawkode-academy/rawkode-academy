@@ -1,11 +1,12 @@
-import { getPublishedVideos } from "@/lib/content";
+import { getPublishedVideos, hasTranscodedVodAssets } from "@/lib/content";
 import {
 	type CollectionName,
 	getAllSeries,
 	getCollection,
 } from "@/lib/live-content";
-import { getCourseModuleSlug } from "@/utils/course-path";
 import { isNewsPublished } from "@/lib/news-publication";
+import { getCourseModuleSlug } from "@/utils/course-path";
+import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
 
 const DEFAULT_SITE_URL = "https://rawkode.academy";
 const MODULE_LOADED_AT = new Date();
@@ -61,6 +62,75 @@ export interface SitemapDefinition {
 	getEntries: () => Promise<SitemapUrlEntry[]>;
 	/** Collections the sitemap lists; pass them to setContentCache(). */
 	collections: readonly CollectionName[];
+	/** When true, omit this sitemap from sitemap-index.xml if it has 0 entries. */
+	omitWhenEmpty?: boolean;
+}
+
+export interface TechnologyIndexabilityInput {
+	hasBodyContent: boolean;
+	videoCount: number;
+	hasTopicContent: boolean;
+}
+
+export function isTechnologyIndexable({
+	hasBodyContent,
+	videoCount,
+	hasTopicContent,
+}: TechnologyIndexabilityInput): boolean {
+	return Boolean(hasBodyContent) || videoCount > 0 || Boolean(hasTopicContent);
+}
+
+export function isShowIndexable(
+	show: { data: { publish?: boolean; status?: string } },
+	episodeCount: number,
+): boolean {
+	return (
+		Boolean(show.data.publish) &&
+		show.data.status !== "coming-soon" &&
+		episodeCount > 0
+	);
+}
+
+export interface PersonIndexabilityInput {
+	hasBiography: boolean;
+	videoCount?: number;
+	showCount?: number;
+	newsCount?: number;
+	articleCount?: number;
+	courseCount?: number;
+	learningPathCount?: number;
+}
+
+export function personHasIndexableContent({
+	hasBiography,
+	videoCount = 0,
+	showCount = 0,
+	newsCount = 0,
+	articleCount = 0,
+	courseCount = 0,
+	learningPathCount = 0,
+}: PersonIndexabilityInput): boolean {
+	return (
+		Boolean(hasBiography) ||
+		videoCount > 0 ||
+		showCount > 0 ||
+		newsCount > 0 ||
+		articleCount > 0 ||
+		courseCount > 0 ||
+		learningPathCount > 0
+	);
+}
+
+const SHOW_SUBPAGES: Readonly<Record<string, readonly string[]>> = {
+	klustered: ["seasons", "brackets", "schedule", "apply"],
+};
+
+function collectRefId(ref: unknown): string | undefined {
+	if (typeof ref === "string") return ref;
+	if (ref && typeof ref === "object" && "id" in ref) {
+		return (ref as { id: string }).id;
+	}
+	return undefined;
 }
 
 type StaticPageDefinition = {
@@ -288,15 +358,16 @@ export async function getArticleSitemapEntries(): Promise<SitemapUrlEntry[]> {
 		entries.push({ path: "/series", changefreq: "weekly", priority: 0.6 });
 	}
 	for (const { id, parts } of series) {
+		const latestTimestamp = parts.reduce<number | undefined>((latest, part) => {
+			const date = pickLastmod(part.data.updatedAt, part.data.publishedAt);
+			if (!date) return latest;
+			const ts = date.getTime();
+			return latest === undefined || ts > latest ? ts : latest;
+		}, undefined);
 		entries.push({
 			path: `/series/${id}`,
-			lastmod: new Date(
-				Math.max(
-					...parts.map((part) =>
-						(part.data.updatedAt ?? part.data.publishedAt).getTime(),
-					),
-				),
-			),
+			lastmod:
+				latestTimestamp !== undefined ? new Date(latestTimestamp) : undefined,
 			changefreq: "weekly",
 			priority: 0.6,
 		});
@@ -305,37 +376,106 @@ export async function getArticleSitemapEntries(): Promise<SitemapUrlEntry[]> {
 	return sortByPath(entries);
 }
 
-export async function getTechnologySitemapEntries(): Promise<
-	SitemapUrlEntry[]
-> {
-	const [technologies] = await Promise.all([getCollection("technologies")]);
+export async function getTechnologySitemapEntries(
+	now: Date = new Date(),
+): Promise<SitemapUrlEntry[]> {
+	const [technologies, videos, articles, news, learningPaths, courses] =
+		await Promise.all([
+			getCollection("technologies"),
+			getPublishedVideos(),
+			getCollection(
+				"articles",
+				({ data }) => {
+					const publishedAt = toValidDate(data.publishedAt);
+					return publishedAt !== undefined && publishedAt <= now;
+				},
+				{ now },
+			),
+			getCollection(
+				"news",
+				({ data }) => isNewsPublished(data.publishedAt, now),
+				{ now },
+			),
+			getCollection(
+				"learningPaths",
+				({ data }) => {
+					const publishedAt = toValidDate(data.publishedAt);
+					return publishedAt !== undefined && publishedAt <= now;
+				},
+				{ now },
+			),
+			getCollection(
+				"courses",
+				({ data }) => {
+					const publishedAt = toValidDate(data.publishedAt);
+					return publishedAt !== undefined && publishedAt <= now;
+				},
+				{ now },
+			),
+		]);
 
-	// Every technology page has a written profile (the technologies service
-	// stores a body for each one; the list query omits bodies to stay small),
-	// so none is a thin page. This used to check the MDX body and fall back
-	// to "has at least one published video".
-	const entries = technologies.map((technology) => ({
-		path: `/technology/${technology.id}`,
-		lastmod: pickLastmod(
-			technology.data.recordUpdatedAt,
-			(technology.data as unknown as Record<string, unknown>).publishedAt,
-		),
-		changefreq: "weekly" as const,
-		priority: 0.5,
-	}));
+	const videoCounts = new Map<string, number>();
+	for (const video of videos) {
+		for (const techId of normalizeTechnologyReferences(
+			video.data.technologies,
+		)) {
+			videoCounts.set(techId, (videoCounts.get(techId) ?? 0) + 1);
+		}
+	}
+
+	const topicTechIds = new Set<string>();
+	for (const item of [...articles, ...news, ...learningPaths, ...courses]) {
+		const refs = (item.data as { technologies?: unknown }).technologies;
+		for (const techId of normalizeTechnologyReferences(
+			refs as Parameters<typeof normalizeTechnologyReferences>[0],
+		)) {
+			topicTechIds.add(techId);
+		}
+	}
+
+	const entries = technologies
+		.filter((technology) => {
+			const normalizedId = technology.id.replace(/\/index$/, "");
+			return isTechnologyIndexable({
+				hasBodyContent: Boolean(
+					technology.body && technology.body.trim().length > 0,
+				),
+				videoCount: videoCounts.get(normalizedId) ?? 0,
+				hasTopicContent: topicTechIds.has(normalizedId),
+			});
+		})
+		.map((technology) => ({
+			path: `/technology/${technology.id}`,
+			lastmod: pickLastmod(
+				technology.data.recordUpdatedAt,
+				(technology.data as unknown as Record<string, unknown>).publishedAt,
+			),
+			changefreq: "weekly" as const,
+			priority: 0.5,
+		}));
 
 	return sortByPath(entries);
 }
 
-export async function getVideoSitemapEntries(): Promise<SitemapUrlEntry[]> {
+export async function getVideoSitemapEntries(
+	now: Date = new Date(),
+): Promise<SitemapUrlEntry[]> {
 	const [videos] = await Promise.all([getPublishedVideos()]);
 
-	const entries = videos.map((video) => ({
-		path: `/watch/${video.data.slug}`,
-		lastmod: pickLastmod(video.data.recordUpdatedAt, video.data.publishedAt),
-		changefreq: "daily" as const,
-		priority: 0.7,
-	}));
+	const entries = videos
+		.filter((video) => {
+			if (hasTranscodedVodAssets(video, now)) return true;
+			return (
+				typeof video.data.youtubeId === "string" &&
+				video.data.youtubeId.trim().length > 0
+			);
+		})
+		.map((video) => ({
+			path: `/watch/${video.data.slug}`,
+			lastmod: pickLastmod(video.data.recordUpdatedAt, video.data.publishedAt),
+			changefreq: "daily" as const,
+			priority: 0.7,
+		}));
 
 	return sortByPath(entries);
 }
@@ -405,20 +545,17 @@ export async function getPeopleSitemapEntries(): Promise<SitemapUrlEntry[]> {
 	// profile is indexable with a biography, a guest appearance, a hosted
 	// published show, or authored news or articles. Thin profiles stay out
 	// of the sitemap, and every indexable one is listed.
-	const peopleWithAppearances = new Set<string>();
-	const collectRefId = (ref: unknown): string | undefined => {
-		if (typeof ref === "string") return ref;
-		if (ref && typeof ref === "object" && "id" in ref) {
-			return (ref as { id: string }).id;
-		}
-		return undefined;
-	};
+	const videoCounts = new Map<string, number>();
+	const showCounts = new Map<string, number>();
+	const newsCounts = new Map<string, number>();
+	const articleCounts = new Map<string, number>();
+
 	for (const v of allVideos) {
 		const guests = (v.data as { guests?: unknown[] }).guests;
 		if (Array.isArray(guests)) {
 			for (const g of guests) {
 				const id = collectRefId(g);
-				if (id) peopleWithAppearances.add(id);
+				if (id) videoCounts.set(id, (videoCounts.get(id) ?? 0) + 1);
 			}
 		}
 	}
@@ -427,22 +564,33 @@ export async function getPeopleSitemapEntries(): Promise<SitemapUrlEntry[]> {
 		if (Array.isArray(hosts)) {
 			for (const h of hosts) {
 				const id = collectRefId(h);
-				if (id) peopleWithAppearances.add(id);
+				if (id) showCounts.set(id, (showCounts.get(id) ?? 0) + 1);
 			}
 		}
 	}
-	for (const item of [...allNews, ...allArticles]) {
+	for (const item of allNews) {
 		for (const author of item.data.authors ?? []) {
 			const id = collectRefId(author);
-			if (id) peopleWithAppearances.add(id);
+			if (id) newsCounts.set(id, (newsCounts.get(id) ?? 0) + 1);
+		}
+	}
+	for (const item of allArticles) {
+		for (const author of item.data.authors ?? []) {
+			const id = collectRefId(author);
+			if (id) articleCounts.set(id, (articleCounts.get(id) ?? 0) + 1);
 		}
 	}
 
 	const entries = people
-		.filter((person) => {
-			const hasBody = Boolean(person.body && person.body.trim().length > 0);
-			return hasBody || peopleWithAppearances.has(person.data.id);
-		})
+		.filter((person) =>
+			personHasIndexableContent({
+				hasBiography: Boolean(person.body && person.body.trim().length > 0),
+				videoCount: videoCounts.get(person.data.id) ?? 0,
+				showCount: showCounts.get(person.data.id) ?? 0,
+				newsCount: newsCounts.get(person.data.id) ?? 0,
+				articleCount: articleCounts.get(person.data.id) ?? 0,
+			}),
+		)
 		.map((person) => ({
 			path: `/people/${person.data.id}`,
 			lastmod: pickLastmod(
@@ -457,19 +605,65 @@ export async function getPeopleSitemapEntries(): Promise<SitemapUrlEntry[]> {
 }
 
 export async function getShowSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const [shows] = await Promise.all([
+	const [shows, videos] = await Promise.all([
 		getCollection("shows", ({ data }) => data.publish),
+		getPublishedVideos(),
 	]);
 
-	const entries = shows.map((show) => ({
-		path: `/shows/${show.data.id}`,
-		lastmod: pickLastmod(
+	const episodeCounts = new Map<string, number>();
+	const latestEpisodeLastmod = new Map<string, Date>();
+
+	for (const video of videos) {
+		const showId = collectRefId(video.data.show);
+		if (!showId) continue;
+		episodeCounts.set(showId, (episodeCounts.get(showId) ?? 0) + 1);
+		const episodeDate = pickLastmod(
+			video.data.recordUpdatedAt,
+			video.data.publishedAt,
+		);
+		if (episodeDate) {
+			const existing = latestEpisodeLastmod.get(showId);
+			if (!existing || episodeDate.getTime() > existing.getTime()) {
+				latestEpisodeLastmod.set(showId, episodeDate);
+			}
+		}
+	}
+
+	const entries: SitemapUrlEntry[] = [];
+	for (const show of shows) {
+		const episodeCount = episodeCounts.get(show.data.id) ?? 0;
+		if (!isShowIndexable(show, episodeCount)) {
+			continue;
+		}
+		const showLastmod = pickLastmod(
 			show.data.recordUpdatedAt,
 			(show.data as unknown as Record<string, unknown>).publishedAt,
-		),
-		changefreq: "weekly" as const,
-		priority: 0.6,
-	}));
+		);
+		const epLastmod = latestEpisodeLastmod.get(show.data.id);
+		const lastmod =
+			showLastmod && epLastmod
+				? showLastmod.getTime() >= epLastmod.getTime()
+					? showLastmod
+					: epLastmod
+				: (epLastmod ?? showLastmod);
+
+		entries.push({
+			path: `/shows/${show.data.id}`,
+			lastmod,
+			changefreq: "weekly" as const,
+			priority: 0.6,
+		});
+
+		const subpages = SHOW_SUBPAGES[show.data.id] ?? [];
+		for (const subpage of subpages) {
+			entries.push({
+				path: `/shows/${show.data.id}/${subpage}`,
+				lastmod,
+				changefreq: "weekly" as const,
+				priority: 0.5,
+			});
+		}
+	}
 
 	return sortByPath(entries);
 }
@@ -552,7 +746,14 @@ export const sitemapDefinitions: readonly SitemapDefinition[] = [
 	{
 		path: "/sitemaps/technologies.xml",
 		getEntries: getTechnologySitemapEntries,
-		collections: ["technologies"],
+		collections: [
+			"technologies",
+			"videos",
+			"articles",
+			"news",
+			"learningPaths",
+			"courses",
+		],
 	},
 	{
 		path: "/video-sitemap.xml",
@@ -577,7 +778,7 @@ export const sitemapDefinitions: readonly SitemapDefinition[] = [
 	{
 		path: "/sitemaps/shows.xml",
 		getEntries: getShowSitemapEntries,
-		collections: ["shows"],
+		collections: ["shows", "videos"],
 	},
 	{
 		path: "/sitemaps/news.xml",
@@ -588,6 +789,7 @@ export const sitemapDefinitions: readonly SitemapDefinition[] = [
 		path: "/news-sitemap.xml",
 		getEntries: getFreshNewsSitemapEntries,
 		collections: ["news"],
+		omitWhenEmpty: true,
 	},
 	{
 		path: "/sitemaps/adrs.xml",
@@ -597,22 +799,29 @@ export const sitemapDefinitions: readonly SitemapDefinition[] = [
 ] as const;
 
 export async function buildSitemapIndexEntries(
-	definitions: ReadonlyArray<Pick<SitemapDefinition, "path" | "getEntries">>,
+	definitions: ReadonlyArray<
+		Pick<SitemapDefinition, "path" | "getEntries" | "omitWhenEmpty">
+	>,
 ): Promise<SitemapIndexEntry[]> {
-	const sitemapEntries = await Promise.all(
-		definitions.map(async (definition) => {
-			const entries = await definition.getEntries();
-			const lastmod = getLatestLastmod(entries);
-			return lastmod
-				? {
-						path: definition.path,
-						lastmod,
-					}
-				: {
-						path: definition.path,
-					};
-		}),
-	);
+	const sitemapEntries = (
+		await Promise.all(
+			definitions.map(async (definition) => {
+				const entries = await definition.getEntries();
+				if (definition.omitWhenEmpty && entries.length === 0) {
+					return null;
+				}
+				const lastmod = getLatestLastmod(entries);
+				return lastmod
+					? {
+							path: definition.path,
+							lastmod,
+						}
+					: {
+							path: definition.path,
+						};
+			}),
+		)
+	).filter((entry): entry is SitemapIndexEntry => entry !== null);
 
 	return sitemapEntries.sort((a, b) => a.path.localeCompare(b.path));
 }
