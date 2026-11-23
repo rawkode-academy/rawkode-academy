@@ -51,10 +51,6 @@
 		{
 			"pattern": "rawkode.academy",
 			"custom_domain": true
-		},
-		{
-			"pattern": "www.rawkode.academy/*",
-			"zone_name": "rawkode.academy"
 		}
 	],
 	"vars": {

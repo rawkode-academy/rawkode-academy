@@ -393,7 +393,8 @@ describe("M1 Suite 2 — F02 & F03: Edge www 301, Preview noindex, Feed Unblocki
 		expect(response.headers.get("Location")).toBe(
 			"https://rawkode.academy/watch/klustered-1?page=2&t=45",
 		);
-		expect(response.headers.get("Cache-Control")).toBe("public, max-age=3600");
+		expect(response.headers.get("Cache-Control")).toBe("no-store");
+		expect(response.headers.get("Vary")).toBe("Host");
 		expect(response.headers.get("X-Robots-Tag")).toBeNull();
 	});
 
