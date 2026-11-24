@@ -44,6 +44,14 @@ export const getSchema = (env: { DB: D1Database }): GraphQLSchema => {
 		}),
 	});
 
+	const VideoChannelMapping = builder.objectRef<{ videoId: string; externalId: string }>("VideoChannelMapping");
+	VideoChannelMapping.implement({
+		fields: (f) => ({
+			videoId: f.exposeString("videoId", { nullable: false }),
+			externalId: f.exposeString("externalId", { nullable: false }),
+		}),
+	});
+
 	const VideoRef = builder.externalRef("Video", builder.selection<{ id: string }>("id"));
 
 	VideoRef.implement({
@@ -65,6 +73,20 @@ export const getSchema = (env: { DB: D1Database }): GraphQLSchema => {
 
 	builder.queryType({
 		fields: (f) => ({
+			// Every mapping on one platform, including videos that are not Video
+			// entities (course module videos). For collectors that need all ids.
+			videoChannels: f.field({
+				type: [VideoChannelMapping],
+				nullable: false,
+				args: { platform: f.arg({ type: Platform, required: true }) },
+				resolve: (_root, args) =>
+					db
+						.select({ videoId: t.videoId, externalId: t.externalId })
+						.from(t)
+						.where(eq(t.platform, args.platform))
+						.orderBy(asc(t.videoId))
+						.all(),
+			}),
 			// Reverse lookup: which Academy video is this external id?
 			videoByChannel: f.field({
 				type: VideoRef,

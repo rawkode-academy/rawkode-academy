@@ -37,7 +37,7 @@ async function checkChannel(env: CloudflareEnv, step: WorkflowStep) {
 }
 // The Academy's YouTube videos are one step, so replays reuse the same video batches.
 async function listVideos(env: CloudflareEnv, step: WorkflowStep): Promise<Video[]> {
-  return unwrap(await step.do("list channel videos", retries, () => guarded(() => fetchVideos(env.ACADEMY_API))));
+  return unwrap(await step.do("list channel videos", retries, () => guarded(() => fetchVideos(env))));
 }
 async function runJobs(env: CloudflareEnv, step: WorkflowStep, jobs: Job[]) {
   const results = [];
