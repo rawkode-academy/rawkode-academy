@@ -234,7 +234,73 @@ maintenance settings. Purging is irreversible.
 Cut over after browser ingestion is migrated and two weeks of clean reconciliation: remove the PostHog
 component, the `posthog?.capture` call in `capture()`, the PostHog flush in
 `src/durable-objects/data-buffer.ts`, and export PostHog history into
-`analytics.events_legacy`.
+`analytics.events_legacy` (below).
+
+### PostHog history: `analytics.events_legacy`
+
+`import-posthog.py` copies PostHog project 12084 from 1 December 2023 into
+`analytics.events_legacy`, with the archive's columns (`event_id`,
+`event_source`, `event_type`, `event_time`, `value`). `value` is a CloudEvent
+whose `data.posthog` keeps the PostHog UUID, event name, distinct ID, person
+ID and the cleaned properties.
+
+- `posthog-mapping.json` maps all ~120 PostHog names, across the bare,
+  `rawkode.academy.*`, `com.rawkode.academy.*`, `/<service>.*` and
+  `<source>.<type>` schemes, to today's source and type. A name it doesn't
+  list stops the import.
+- Each family is imported up to its cutoff, the first instant Basin has it:
+  server events 7 November 2026, browser `capture()`/`track()` events
+  13 November 2026. Events PostHog's SDK collects on its own (`$pageleave`,
+  `$exception`, `$dead_click`, `$rageclick`, `$dead_swipe`) are imported up
+  to 24 November 2026 16:14 UTC, when PR #1646's website deploy finished.
+  IDs already in `events_archive` are skipped too.
+- Dropped, counted per rule: `$autocapture`; every `link.redirect` spelling
+  (~1.4M scanner hits; PostHog never recorded whether a path matched a short
+  link, so none can be kept); operational and PostHog-internal events;
+  test events; browser events from localhost, `*.workers.dev`, `*.pages.dev`
+  and `*.deno.dev`; and browser events from 10 July to 4 August 2025 by
+  PostHog people first seen in that window (the ad-network spike).
+- Kept events are labelled with the collector's bot rules
+  (`src/bot-rules.json`, shared with `src/events.ts`) from the stored user
+  agent and host, plus `botbackfill: "posthog-import"`.
+- Properties are cleaned like browser events: no emails, credentials, raw
+  user agents, IPs, person-profile updates or city-level location, and URLs
+  keep only origin and path.
+- Keyed on the event ID, so re-runs only add what's missing. After writing,
+  the table is re-read and every month and event must match the run's
+  expected count within 0.5%.
+
+Run the dry run, read the report in the job summary, then apply:
+
+```sh
+# GitHub Actions, on main: rawkode-tools-observability-collector-posthog-import
+#                          rawkode-tools-observability-collector-posthog-import-apply
+cuenv task import-posthog -e production         # locally, dry run
+cuenv task import-posthog-apply -e production   # locally, writes
+```
+
+Charting December 2023 to today in one query (Basin SQL):
+
+```sql
+SELECT date_trunc('month', event_time) AS month, event_source, event_type, count(*) AS events
+FROM (
+	SELECT event_time, event_source, event_type, value FROM analytics.events_legacy
+	UNION ALL
+	SELECT event_time, event_source, event_type, value FROM analytics.events_archive
+) AS events
+WHERE event_time >= CAST('2023-12-01T00:00:00Z' AS TIMESTAMP)
+	AND coalesce(json_get_bool(value, 'bot'), false) = false
+	AND (
+		(event_source = 'rawkode-academy-browser' AND event_type = 'web.page_view')
+		OR (event_source = 'rawkode-academy-website' AND event_type = 'video.play')
+		OR (event_source = 'rawkode-academy-identity' AND event_type = 'auth.user_registered')
+		OR (event_source = 'platform-email-preferences-rpc' AND event_type = 'email.subscribed')
+	)
+GROUP BY 1, 2, 3
+ORDER BY 1
+```
+
+Run status: not yet applied.
 
 ## Cost
 

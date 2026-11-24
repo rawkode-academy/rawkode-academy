@@ -1,3 +1,5 @@
+import botRules from "./bot-rules.json";
+
 // CloudEvents written to the `analytics_events` Basin stream. The stream takes
 // any JSON; the typed tables are defined by the pipeline SQL in basin/.
 
@@ -28,8 +30,8 @@ export interface WebContext {
 	bot_reason?: string;
 }
 
-const BOT_PATTERN =
-	/bot|crawl|spider|slurp|facebookexternalhit|externalagent|webindexer|embedly|preview|monitor|uptime|pingdom|lighthouse|headless|lightpanda|phantomjs|selenium|puppeteer|playwright|early hints|curl\/|wget\/|python-|httpx|go-http-client|axios|node-fetch|undici|bun\/|java\/|okhttp|libwww|scrapy/i;
+// Shared with basin/import-posthog.py, so history is labelled by the same rules.
+const BOT_PATTERN = new RegExp(botRules.userAgentPattern, "i");
 
 /**
  * Networks that host servers, not people. Crawlers on these networks spoof
@@ -38,30 +40,7 @@ const BOT_PATTERN =
  * Pfcloud and Meta account for most sign-in starts and page views that pass the
  * user-agent check). Consumer VPN exits on these networks are labelled too.
  */
-const HOSTING_ASNS = new Set([
-	16509, // Amazon AWS
-	14618, // Amazon AWS
-	396982, // Google Cloud
-	8075, // Microsoft Azure
-	31898, // Oracle Cloud
-	32934, // Meta (crawlers; people reach Meta apps from their own ISP)
-	132203, // Tencent Cloud
-	45090, // Tencent Cloud
-	45102, // Alibaba Cloud
-	37963, // Alibaba Cloud
-	24940, // Hetzner
-	16276, // OVH
-	14061, // DigitalOcean
-	63949, // Akamai Linode
-	20473, // Vultr
-	51396, // Pfcloud
-	212238, // Datacamp (CDN77)
-	30058, // FDCservers
-	18779, // EGIHosting
-	47007, // Colocation America
-	62874, // Web2Objects
-	46635, // AviationAI
-]);
+const HOSTING_ASNS = new Set(botRules.hostingAsns.map(({ asn }) => asn));
 
 export function isHostingAsn(asn: unknown): boolean {
 	return typeof asn === "number" && HOSTING_ASNS.has(asn);

@@ -1,0 +1,94 @@
+{
+	"$comment": "Bot labelling rules shared by src/events.ts (the collector) and basin/import-posthog.py (history import). Change them here only.",
+	"userAgentPattern": "bot|crawl|spider|slurp|facebookexternalhit|externalagent|webindexer|embedly|preview|monitor|uptime|pingdom|lighthouse|headless|lightpanda|phantomjs|selenium|puppeteer|playwright|early hints|curl\\/|wget\\/|python-|httpx|go-http-client|axios|node-fetch|undici|bun\\/|java\\/|okhttp|libwww|scrapy",
+	"hostingAsns": [
+		{
+			"asn": 16509,
+			"name": "Amazon AWS"
+		},
+		{
+			"asn": 14618,
+			"name": "Amazon AWS"
+		},
+		{
+			"asn": 396982,
+			"name": "Google Cloud"
+		},
+		{
+			"asn": 8075,
+			"name": "Microsoft Azure"
+		},
+		{
+			"asn": 31898,
+			"name": "Oracle Cloud"
+		},
+		{
+			"asn": 32934,
+			"name": "Meta (crawlers; people reach Meta apps from their own ISP)"
+		},
+		{
+			"asn": 132203,
+			"name": "Tencent Cloud"
+		},
+		{
+			"asn": 45090,
+			"name": "Tencent Cloud"
+		},
+		{
+			"asn": 45102,
+			"name": "Alibaba Cloud"
+		},
+		{
+			"asn": 37963,
+			"name": "Alibaba Cloud"
+		},
+		{
+			"asn": 24940,
+			"name": "Hetzner"
+		},
+		{
+			"asn": 16276,
+			"name": "OVH"
+		},
+		{
+			"asn": 14061,
+			"name": "DigitalOcean"
+		},
+		{
+			"asn": 63949,
+			"name": "Akamai Linode"
+		},
+		{
+			"asn": 20473,
+			"name": "Vultr"
+		},
+		{
+			"asn": 51396,
+			"name": "Pfcloud"
+		},
+		{
+			"asn": 212238,
+			"name": "Datacamp (CDN77)"
+		},
+		{
+			"asn": 30058,
+			"name": "FDCservers"
+		},
+		{
+			"asn": 18779,
+			"name": "EGIHosting"
+		},
+		{
+			"asn": 47007,
+			"name": "Colocation America"
+		},
+		{
+			"asn": 62874,
+			"name": "Web2Objects"
+		},
+		{
+			"asn": 46635,
+			"name": "AviationAI"
+		}
+	]
+}

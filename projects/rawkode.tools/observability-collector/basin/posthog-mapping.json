@@ -1,0 +1,618 @@
+{
+	"$comment": "PostHog event name -> CloudEvents source and type in analytics.events_legacy (issue #1634). basin/import-posthog.py fails on any name not listed here. A family's cutoff is the first instant Basin has that family; the import takes only events before it. A null cutoff skips the family until it is set.",
+	"families": {
+		"server": {
+			"cutoff": "2026-11-07T00:00:00Z",
+			"comment": "Server CloudEvents reach events_archive from 7 Nov 2026."
+		},
+		"browser": {
+			"cutoff": "2026-11-13T00:00:00Z",
+			"comment": "capture()/track() browser events reach events_archive from 13 Nov 2026."
+		},
+		"sdk": {
+			"cutoff": "2026-11-24T16:14:00Z",
+			"comment": "Collected only by the PostHog SDK until PR #1646 was deployed (website deploy finished 2026-11-24T16:13:26Z)."
+		}
+	},
+	"events": {
+		"$autocapture": {
+			"exclude": "raw-autocapture"
+		},
+		"$dead_click": {
+			"source": "rawkode-academy-browser",
+			"type": "web.dead_click",
+			"family": "sdk"
+		},
+		"$dead_swipe": {
+			"source": "rawkode-academy-browser",
+			"type": "web.dead_swipe",
+			"family": "sdk"
+		},
+		"$exception": {
+			"source": "rawkode-academy-browser",
+			"type": "web.exception",
+			"family": "sdk"
+		},
+		"$identify": {
+			"exclude": "posthog-internal"
+		},
+		"$metric": {
+			"exclude": "operational-telemetry"
+		},
+		"$opt_in": {
+			"exclude": "posthog-internal"
+		},
+		"$pageleave": {
+			"source": "rawkode-academy-browser",
+			"type": "web.page_leave",
+			"family": "sdk"
+		},
+		"$pageview": {
+			"source": "rawkode-academy-browser",
+			"type": "web.page_view",
+			"family": "browser"
+		},
+		"$rageclick": {
+			"source": "rawkode-academy-browser",
+			"type": "web.rage_click",
+			"family": "sdk"
+		},
+		"$snapshot": {
+			"exclude": "posthog-internal"
+		},
+		"$web_vitals": {
+			"source": "rawkode-academy-browser",
+			"type": "web.web_vitals",
+			"family": "browser"
+		},
+		"$worker_invocation": {
+			"exclude": "operational-telemetry"
+		},
+		"$worker_log": {
+			"exclude": "operational-telemetry"
+		},
+		"/email-preferences.email.subscribed": {
+			"source": "platform-email-preferences-rpc",
+			"type": "email.subscribed",
+			"family": "server"
+		},
+		"/email-preferences.email.unsubscribed": {
+			"source": "platform-email-preferences-rpc",
+			"type": "email.unsubscribed",
+			"family": "server"
+		},
+		"accordion_toggled": {
+			"source": "rawkode-academy-browser",
+			"type": "web.accordion_toggled",
+			"family": "browser"
+		},
+		"appearance_switched": {
+			"source": "rawkode-academy-browser",
+			"type": "web.appearance_switched",
+			"family": "browser"
+		},
+		"auth.sign_in_completed": {
+			"source": "rawkode-academy-identity",
+			"type": "auth.sign_in_completed",
+			"family": "server"
+		},
+		"auth.sign_in_initiated": {
+			"source": "rawkode-academy-website",
+			"type": "auth.sign_in_initiated",
+			"family": "server"
+		},
+		"auth.sign_out_completed": {
+			"source": "rawkode-academy-website",
+			"type": "auth.sign_out_completed",
+			"family": "server"
+		},
+		"auth_sign_in": {
+			"source": "rawkode-academy-website",
+			"type": "auth.sign_in_completed",
+			"family": "server"
+		},
+		"auth_sign_in_start": {
+			"source": "rawkode-academy-browser",
+			"type": "web.auth_sign_in_start",
+			"family": "browser"
+		},
+		"color_scheme_switched": {
+			"source": "rawkode-academy-browser",
+			"type": "web.color_scheme_switched",
+			"family": "browser"
+		},
+		"com.rawkode.academy.auth.sign_in_initiated": {
+			"source": "rawkode-academy-website",
+			"type": "auth.sign_in_initiated",
+			"family": "server"
+		},
+		"com.rawkode.academy.email.subscribed": {
+			"source": "platform-email-preferences-rpc",
+			"type": "email.subscribed",
+			"family": "server"
+		},
+		"com.rawkode.academy.email.unsubscribed": {
+			"source": "platform-email-preferences-rpc",
+			"type": "email.unsubscribed",
+			"family": "server"
+		},
+		"com.rawkode.academy.search.performed": {
+			"source": "rawkode-academy-website",
+			"type": "search.performed",
+			"family": "server"
+		},
+		"com.rawkode.academy.video.complete": {
+			"source": "rawkode-academy-website",
+			"type": "video.complete",
+			"family": "server"
+		},
+		"com.rawkode.academy.video.pause": {
+			"source": "rawkode-academy-website",
+			"type": "video.pause",
+			"family": "server"
+		},
+		"com.rawkode.academy.video.play": {
+			"source": "rawkode-academy-website",
+			"type": "video.play",
+			"family": "server"
+		},
+		"com.rawkode.academy.video.seek": {
+			"source": "rawkode-academy-website",
+			"type": "video.seek",
+			"family": "server"
+		},
+		"command_palette_navigation": {
+			"source": "rawkode-academy-browser",
+			"type": "web.command_palette_navigation",
+			"family": "browser"
+		},
+		"command_palette_opened": {
+			"source": "rawkode-academy-browser",
+			"type": "web.command_palette_opened",
+			"family": "browser"
+		},
+		"course_signup": {
+			"source": "rawkode-academy-website",
+			"type": "course.signup",
+			"family": "server"
+		},
+		"cta_clicked": {
+			"source": "rawkode-academy-browser",
+			"type": "web.cta_clicked",
+			"family": "browser"
+		},
+		"discord_link_clicked": {
+			"source": "rawkode-academy-browser",
+			"type": "web.discord_link_clicked",
+			"family": "browser"
+		},
+		"email.subscribed": {
+			"source": "platform-email-preferences-rpc",
+			"type": "email.subscribed",
+			"family": "server"
+		},
+		"email.unsubscribed": {
+			"source": "platform-email-preferences-rpc",
+			"type": "email.unsubscribed",
+			"family": "server"
+		},
+		"enquiry_form_started": {
+			"source": "rawkode-academy-browser",
+			"type": "web.enquiry_form_started",
+			"family": "browser"
+		},
+		"enquiry_form_submitted": {
+			"source": "rawkode-academy-browser",
+			"type": "web.enquiry_form_submitted",
+			"family": "browser"
+		},
+		"filter_applied": {
+			"source": "rawkode-academy-browser",
+			"type": "web.filter_applied",
+			"family": "browser"
+		},
+		"filter_cleared": {
+			"source": "rawkode-academy-browser",
+			"type": "web.filter_cleared",
+			"family": "browser"
+		},
+		"https://cloudnativecompass.fm.link.redirect": {
+			"exclude": "redirect-noise"
+		},
+		"https://klustered.live.link.redirect": {
+			"exclude": "redirect-noise"
+		},
+		"https://rawkode.link.link.redirect": {
+			"exclude": "redirect-noise"
+		},
+		"js_hunter_probe": {
+			"exclude": "test-event"
+		},
+		"lead_magnet_viewed": {
+			"source": "rawkode-academy-browser",
+			"type": "web.lead_magnet_viewed",
+			"family": "browser"
+		},
+		"link.redirect": {
+			"exclude": "redirect-noise"
+		},
+		"newsletter_cta_clicked": {
+			"source": "rawkode-academy-browser",
+			"type": "web.newsletter_cta_clicked",
+			"family": "browser"
+		},
+		"newsletter_cta_impression": {
+			"source": "rawkode-academy-browser",
+			"type": "web.newsletter_cta_impression",
+			"family": "browser"
+		},
+		"newsletter_submission_attempted": {
+			"source": "rawkode-academy-browser",
+			"type": "web.newsletter_submission_attempted",
+			"family": "browser"
+		},
+		"page_exit": {
+			"source": "rawkode-academy-browser",
+			"type": "web.page_leave",
+			"family": "sdk"
+		},
+		"page_view": {
+			"source": "rawkode-academy-browser",
+			"type": "web.page_view",
+			"family": "browser"
+		},
+		"platform-email-preferences-rpc.email.subscribed": {
+			"source": "platform-email-preferences-rpc",
+			"type": "email.subscribed",
+			"family": "server"
+		},
+		"platform-email-preferences-rpc.email.unsubscribed": {
+			"source": "platform-email-preferences-rpc",
+			"type": "email.unsubscribed",
+			"family": "server"
+		},
+		"platform-emoji-reactions-write-model.reaction.added": {
+			"source": "platform-emoji-reactions-write-model",
+			"type": "reaction.added",
+			"family": "server"
+		},
+		"platform-watch-history-write-model.watch_position.updated": {
+			"source": "platform-watch-history-write-model",
+			"type": "watch_position.updated",
+			"family": "server"
+		},
+		"podcast_subscribe_clicked": {
+			"source": "rawkode-academy-browser",
+			"type": "web.podcast_subscribe_clicked",
+			"family": "browser"
+		},
+		"rawkode-academy-browser.web.color_scheme_switched": {
+			"source": "rawkode-academy-browser",
+			"type": "web.color_scheme_switched",
+			"family": "browser"
+		},
+		"rawkode-academy-browser.web.command_palette_opened": {
+			"source": "rawkode-academy-browser",
+			"type": "web.command_palette_opened",
+			"family": "browser"
+		},
+		"rawkode-academy-browser.web.cta_clicked": {
+			"source": "rawkode-academy-browser",
+			"type": "web.cta_clicked",
+			"family": "browser"
+		},
+		"rawkode-academy-browser.web.filter_applied": {
+			"source": "rawkode-academy-browser",
+			"type": "web.filter_applied",
+			"family": "browser"
+		},
+		"rawkode-academy-browser.web.newsletter_cta_impression": {
+			"source": "rawkode-academy-browser",
+			"type": "web.newsletter_cta_impression",
+			"family": "browser"
+		},
+		"rawkode-academy-browser.web.page_view": {
+			"source": "rawkode-academy-browser",
+			"type": "web.page_view",
+			"family": "browser"
+		},
+		"rawkode-academy-browser.web.web_vitals": {
+			"source": "rawkode-academy-browser",
+			"type": "web.web_vitals",
+			"family": "browser"
+		},
+		"rawkode-academy-identity.auth.sign_in_completed": {
+			"source": "rawkode-academy-identity",
+			"type": "auth.sign_in_completed",
+			"family": "server"
+		},
+		"rawkode-academy-identity.auth.user_registered": {
+			"source": "rawkode-academy-identity",
+			"type": "auth.user_registered",
+			"family": "server"
+		},
+		"rawkode-academy-website.article.completed": {
+			"source": "rawkode-academy-website",
+			"type": "article.completed",
+			"family": "browser"
+		},
+		"rawkode-academy-website.article.progressed": {
+			"source": "rawkode-academy-website",
+			"type": "article.progressed",
+			"family": "browser"
+		},
+		"rawkode-academy-website.article.related_content_clicked": {
+			"source": "rawkode-academy-website",
+			"type": "article.related_content_clicked",
+			"family": "browser"
+		},
+		"rawkode-academy-website.article.viewed": {
+			"source": "rawkode-academy-website",
+			"type": "article.viewed",
+			"family": "browser"
+		},
+		"rawkode-academy-website.auth.sign_in_completed": {
+			"source": "rawkode-academy-website",
+			"type": "auth.sign_in_completed",
+			"family": "server"
+		},
+		"rawkode-academy-website.auth.sign_in_initiated": {
+			"source": "rawkode-academy-website",
+			"type": "auth.sign_in_initiated",
+			"family": "server"
+		},
+		"rawkode-academy-website.auth.sign_out_completed": {
+			"source": "rawkode-academy-website",
+			"type": "auth.sign_out_completed",
+			"family": "server"
+		},
+		"rawkode-academy-website.course.signup": {
+			"source": "rawkode-academy-website",
+			"type": "course.signup",
+			"family": "server"
+		},
+		"rawkode-academy-website.custom.sign_in_completed": {
+			"source": "rawkode-academy-website",
+			"type": "custom.sign_in_completed",
+			"family": "server"
+		},
+		"rawkode-academy-website.custom.sign_in_failed": {
+			"source": "rawkode-academy-website",
+			"type": "custom.sign_in_failed",
+			"family": "server"
+		},
+		"rawkode-academy-website.custom.watch_position_update": {
+			"source": "rawkode-academy-website",
+			"type": "custom.watch_position_update",
+			"family": "server"
+		},
+		"rawkode-academy-website.growth.activated_user": {
+			"source": "rawkode-academy-website",
+			"type": "growth.activated_user",
+			"family": "server"
+		},
+		"rawkode-academy-website.newsletter.subscribed": {
+			"source": "rawkode-academy-website",
+			"type": "newsletter.subscribed",
+			"family": "server"
+		},
+		"rawkode-academy-website.reaction.added": {
+			"source": "rawkode-academy-website",
+			"type": "reaction.added",
+			"family": "server"
+		},
+		"rawkode-academy-website.search.performed": {
+			"source": "rawkode-academy-website",
+			"type": "search.performed",
+			"family": "server"
+		},
+		"rawkode-academy-website.user.identified": {
+			"source": "rawkode-academy-website",
+			"type": "user.identified",
+			"family": "server"
+		},
+		"rawkode-academy-website.video.complete": {
+			"source": "rawkode-academy-website",
+			"type": "video.complete",
+			"family": "server"
+		},
+		"rawkode-academy-website.video.pause": {
+			"source": "rawkode-academy-website",
+			"type": "video.pause",
+			"family": "server"
+		},
+		"rawkode-academy-website.video.play": {
+			"source": "rawkode-academy-website",
+			"type": "video.play",
+			"family": "server"
+		},
+		"rawkode-academy-website.video.seek": {
+			"source": "rawkode-academy-website",
+			"type": "video.seek",
+			"family": "server"
+		},
+		"rawkode-academy-youtube.youtube.daily": {
+			"source": "rawkode-academy-youtube",
+			"type": "youtube.daily",
+			"family": "server"
+		},
+		"rawkode-academy-youtube.youtube.daily_traffic": {
+			"source": "rawkode-academy-youtube",
+			"type": "youtube.daily_traffic",
+			"family": "server"
+		},
+		"rawkode-academy-youtube.youtube.summary": {
+			"source": "rawkode-academy-youtube",
+			"type": "youtube.summary",
+			"family": "server"
+		},
+		"rawkode-academy-youtube.youtube.top_videos": {
+			"source": "rawkode-academy-youtube",
+			"type": "youtube.top_videos",
+			"family": "server"
+		},
+		"rawkode-academy-youtube.youtube.traffic": {
+			"source": "rawkode-academy-youtube",
+			"type": "youtube.traffic",
+			"family": "server"
+		},
+		"rawkode-link.link.redirect": {
+			"exclude": "redirect-noise"
+		},
+		"rawkode-link.shortLink": {
+			"source": "rawkode-link",
+			"type": "shortLink",
+			"family": "server"
+		},
+		"rawkode.academy.auth.sign_in_completed": {
+			"source": "rawkode-academy-identity",
+			"type": "auth.sign_in_completed",
+			"family": "server"
+		},
+		"rawkode.academy.auth.sign_in_initiated": {
+			"source": "rawkode-academy-website",
+			"type": "auth.sign_in_initiated",
+			"family": "server"
+		},
+		"rawkode.academy.auth.user_registered": {
+			"source": "rawkode-academy-identity",
+			"type": "auth.user_registered",
+			"family": "server"
+		},
+		"rawkode.academy.email.subscribed": {
+			"source": "platform-email-preferences-rpc",
+			"type": "email.subscribed",
+			"family": "server"
+		},
+		"rawkode.academy.email.unsubscribed": {
+			"source": "platform-email-preferences-rpc",
+			"type": "email.unsubscribed",
+			"family": "server"
+		},
+		"rawkode.academy.link.redirect": {
+			"exclude": "redirect-noise"
+		},
+		"rawkode.academy.search.performed": {
+			"source": "rawkode-academy-website",
+			"type": "search.performed",
+			"family": "server"
+		},
+		"rawkode.academy.video.complete": {
+			"source": "rawkode-academy-website",
+			"type": "video.complete",
+			"family": "server"
+		},
+		"rawkode.academy.video.pause": {
+			"source": "rawkode-academy-website",
+			"type": "video.pause",
+			"family": "server"
+		},
+		"rawkode.academy.video.play": {
+			"source": "rawkode-academy-website",
+			"type": "video.play",
+			"family": "server"
+		},
+		"rawkode.academy.video.seek": {
+			"source": "rawkode-academy-website",
+			"type": "video.seek",
+			"family": "server"
+		},
+		"reaction_add": {
+			"source": "rawkode-academy-website",
+			"type": "reaction.added",
+			"family": "server"
+		},
+		"real_user_test": {
+			"exclude": "test-event"
+		},
+		"search.performed": {
+			"source": "rawkode-academy-website",
+			"type": "search.performed",
+			"family": "server"
+		},
+		"seo.kpi.severe_drop": {
+			"exclude": "test-event"
+		},
+		"sidebar_mode_switched": {
+			"source": "rawkode-academy-browser",
+			"type": "web.sidebar_mode_switched",
+			"family": "browser"
+		},
+		"theme_switched": {
+			"source": "rawkode-academy-browser",
+			"type": "web.theme_switched",
+			"family": "browser"
+		},
+		"video.complete": {
+			"source": "rawkode-academy-website",
+			"type": "video.complete",
+			"family": "server"
+		},
+		"video.pause": {
+			"source": "rawkode-academy-website",
+			"type": "video.pause",
+			"family": "server"
+		},
+		"video.play": {
+			"source": "rawkode-academy-website",
+			"type": "video.play",
+			"family": "server"
+		},
+		"video.seek": {
+			"source": "rawkode-academy-website",
+			"type": "video.seek",
+			"family": "server"
+		},
+		"video_complete": {
+			"source": "rawkode-academy-website",
+			"type": "video.complete",
+			"family": "server"
+		},
+		"video_pause": {
+			"source": "rawkode-academy-website",
+			"type": "video.pause",
+			"family": "server"
+		},
+		"video_play": {
+			"source": "rawkode-academy-website",
+			"type": "video.play",
+			"family": "server"
+		},
+		"video_seek": {
+			"source": "rawkode-academy-website",
+			"type": "video.seek",
+			"family": "server"
+		},
+		"video_tab_viewed": {
+			"source": "rawkode-academy-browser",
+			"type": "web.video_tab_viewed",
+			"family": "browser"
+		}
+	},
+	"bySource": {
+		"reaction.added": {
+			"/website": {
+				"source": "rawkode-academy-website",
+				"type": "reaction.added",
+				"family": "server"
+			},
+			"/emoji-reactions": {
+				"source": "platform-emoji-reactions-write-model",
+				"type": "reaction.added",
+				"family": "server"
+			}
+		},
+		"rawkode.academy.reaction.added": {
+			"/website": {
+				"source": "rawkode-academy-website",
+				"type": "reaction.added",
+				"family": "server"
+			},
+			"/emoji-reactions": {
+				"source": "platform-emoji-reactions-write-model",
+				"type": "reaction.added",
+				"family": "server"
+			}
+		}
+	}
+}
