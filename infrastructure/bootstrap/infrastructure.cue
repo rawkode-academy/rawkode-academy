@@ -2,6 +2,7 @@ package cuenv
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/cuenv/cuenv/schema"
 	"registry.terraform.io/cloudflare/cloudflare:cloudflare_provider"
@@ -78,23 +79,30 @@ _github: {
 // Cloudflare API token permission groups, looked up by name so no ID is
 // hardcoded. The lookup takes a URL-encoded name and fails the plan if
 // nothing matches.
-_permissionGroupId: {
-	key: string
-	out: schema.#Select & {
-		from: infrastructure.data[key].outputs.result
-		path: [0, "id"]
-		type: "string"
-	}
-}
+_permissionNames: [
+	"Workers R2 Storage Bucket Item Write",
+	"Workers R2 Storage Bucket Item Read",
+	"Zone Read",
+	"Zone Settings Read",
+	"DNS Read",
+	"SSL and Certificates Read",
+	"Bot Management Read",
+	"Workers R2 Storage Read",
+	"Workers R2 Data Catalog Read",
+	"Pipelines Read",
+	"Account API Tokens Read",
+	"Mass URL Redirects Read",
+	"Dynamic URL Redirects Read",
+]
 
-_permissionGroup: {
-	name: string
-	ds: permission_groups.#DataSource & {
-		configuration: {
-			account_id: _account
-			"name":     name
+// Permission group IDs by name, read from Cloudflare.
+_permissions: {
+	for n in _permissionNames {
+		(n): schema.#Select & {
+			from: infrastructure.data[n].outputs.result
+			path: [0, "id"]
+			type: "string"
 		}
-		outputs: result: type: "list"
 	}
 }
 
@@ -128,20 +136,17 @@ infrastructure: {
 		}
 	}
 
+	// The name filter takes the URL-encoded permission group name.
 	data: {
-		storageItemWrite: (_permissionGroup & {name: "Workers%20R2%20Storage%20Bucket%20Item%20Write"}).ds
-		storageItemRead: (_permissionGroup & {name: "Workers%20R2%20Storage%20Bucket%20Item%20Read"}).ds
-		zoneRead: (_permissionGroup & {name: "Zone%20Read"}).ds
-		zoneSettingsRead: (_permissionGroup & {name: "Zone%20Settings%20Read"}).ds
-		dnsRead: (_permissionGroup & {name: "DNS%20Read"}).ds
-		sslRead: (_permissionGroup & {name: "SSL%20and%20Certificates%20Read"}).ds
-		botRead: (_permissionGroup & {name: "Bot%20Management%20Read"}).ds
-		storageRead: (_permissionGroup & {name: "Workers%20R2%20Storage%20Read"}).ds
-		catalogRead: (_permissionGroup & {name: "Workers%20R2%20Data%20Catalog%20Read"}).ds
-		pipelinesRead: (_permissionGroup & {name: "Pipelines%20Read"}).ds
-		accountTokenRead: (_permissionGroup & {name: "Account%20API%20Tokens%20Read"}).ds
-		massRedirectRead: (_permissionGroup & {name: "Mass%20URL%20Redirects%20Read"}).ds
-		dynamicRedirectRead: (_permissionGroup & {name: "Dynamic%20URL%20Redirects%20Read"}).ds
+		for n in _permissionNames {
+			(n): permission_groups.#DataSource & {
+				configuration: {
+					account_id: _account
+					name:       strings.Replace(n, " ", "%20", -1)
+				}
+				outputs: result: type: "list"
+			}
+		}
 	}
 
 	resources: {
@@ -503,8 +508,8 @@ infrastructure: {
 					effect: "allow"
 					resources: json.Marshal({"com.cloudflare.edge.r2.bucket.\(_account)_default_\(_stateBucket)": "*"})
 					permission_groups: [
-						{id: (_permissionGroupId & {key: "storageItemWrite"}).out},
-						{id: (_permissionGroupId & {key: "storageItemRead"}).out},
+						{id: _permissions["Workers R2 Storage Bucket Item Write"]},
+						{id: _permissions["Workers R2 Storage Bucket Item Read"]},
 					]
 				}]
 			}
@@ -543,17 +548,17 @@ infrastructure: {
 					effect: "allow"
 					resources: json.Marshal({"com.cloudflare.api.account.\(_account)": "*"})
 					permission_groups: [
-						{id: (_permissionGroupId & {key: "zoneRead"}).out},
-						{id: (_permissionGroupId & {key: "zoneSettingsRead"}).out},
-						{id: (_permissionGroupId & {key: "dnsRead"}).out},
-						{id: (_permissionGroupId & {key: "sslRead"}).out},
-						{id: (_permissionGroupId & {key: "botRead"}).out},
-						{id: (_permissionGroupId & {key: "storageRead"}).out},
-						{id: (_permissionGroupId & {key: "catalogRead"}).out},
-						{id: (_permissionGroupId & {key: "pipelinesRead"}).out},
-						{id: (_permissionGroupId & {key: "accountTokenRead"}).out},
-						{id: (_permissionGroupId & {key: "massRedirectRead"}).out},
-						{id: (_permissionGroupId & {key: "dynamicRedirectRead"}).out},
+						{id: _permissions["Zone Read"]},
+						{id: _permissions["Zone Settings Read"]},
+						{id: _permissions["DNS Read"]},
+						{id: _permissions["SSL and Certificates Read"]},
+						{id: _permissions["Bot Management Read"]},
+						{id: _permissions["Workers R2 Storage Read"]},
+						{id: _permissions["Workers R2 Data Catalog Read"]},
+						{id: _permissions["Pipelines Read"]},
+						{id: _permissions["Account API Tokens Read"]},
+						{id: _permissions["Mass URL Redirects Read"]},
+						{id: _permissions["Dynamic URL Redirects Read"]},
 					]
 				}]
 			}
@@ -578,7 +583,7 @@ infrastructure: {
 				policies: [{
 					effect: "allow"
 					resources: json.Marshal({"com.cloudflare.edge.r2.bucket.\(_account)_default_\(_stateBucket)": "*"})
-					permission_groups: [{id: (_permissionGroupId & {key: "storageItemRead"}).out}]
+					permission_groups: [{id: _permissions["Workers R2 Storage Bucket Item Read"]}]
 				}]
 			}
 		}

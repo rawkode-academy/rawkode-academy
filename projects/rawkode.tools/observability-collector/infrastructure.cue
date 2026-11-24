@@ -4,6 +4,7 @@ package cuenv
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/cuenv/cuenv/schema"
 	"registry.terraform.io/cloudflare/cloudflare:cloudflare_provider"
@@ -52,23 +53,22 @@ _accountResources: json.Marshal({
 // Cloudflare API token permission groups, from the Basin Catalog and Basin SQL
 // docs, looked up by name so no ID is hardcoded. The lookup takes a
 // URL-encoded name and fails the plan if nothing matches.
-_permissionGroupId: {
-	key: string
-	out: schema.#Select & {
-		from: infrastructure.data[key].outputs.result
-		path: [0, "id"]
-		type: "string"
-	}
-}
+_permissionNames: [
+	"Workers R2 Data Catalog Write",
+	"Workers R2 Data Catalog Read",
+	"Workers R2 Storage Bucket Item Write",
+	"Workers R2 Storage Bucket Item Read",
+	"Workers R2 SQL Read",
+]
 
-_permissionGroup: {
-	name: string
-	ds: permission_groups.#DataSource & {
-		configuration: {
-			account_id: _account
-			"name":     name
+// Permission group IDs by name, read from Cloudflare.
+_permissions: {
+	for n in _permissionNames {
+		(n): schema.#Select & {
+			from: infrastructure.data[n].outputs.result
+			path: [0, "id"]
+			type: "string"
 		}
-		outputs: result: type: "list"
 	}
 }
 
@@ -131,12 +131,17 @@ infrastructure: {
 		apply: environment: "infrastructure"
 	}
 
+	// The name filter takes the URL-encoded permission group name.
 	data: {
-		catalogWrite:     (_permissionGroup & {name: "Workers%20R2%20Data%20Catalog%20Write"}).ds
-		catalogRead:      (_permissionGroup & {name: "Workers%20R2%20Data%20Catalog%20Read"}).ds
-		storageItemWrite: (_permissionGroup & {name: "Workers%20R2%20Storage%20Bucket%20Item%20Write"}).ds
-		storageItemRead:  (_permissionGroup & {name: "Workers%20R2%20Storage%20Bucket%20Item%20Read"}).ds
-		sqlRead:          (_permissionGroup & {name: "Workers%20R2%20SQL%20Read"}).ds
+		for n in _permissionNames {
+			(n): permission_groups.#DataSource & {
+				configuration: {
+					account_id: _account
+					name:       strings.Replace(n, " ", "%20", -1)
+				}
+				outputs: result: type: "list"
+			}
+		}
 	}
 
 	resources: {
@@ -164,8 +169,8 @@ infrastructure: {
 					effect:    "allow"
 					resources: _accountResources
 					permission_groups: [
-						{id: (_permissionGroupId & {key: "catalogWrite"}).out},
-						{id: (_permissionGroupId & {key: "storageItemWrite"}).out},
+						{id: _permissions["Workers R2 Data Catalog Write"]},
+						{id: _permissions["Workers R2 Storage Bucket Item Write"]},
 					]
 				}]
 			}
@@ -180,9 +185,9 @@ infrastructure: {
 					effect:    "allow"
 					resources: _bucketResources
 					permission_groups: [
-						{id: (_permissionGroupId & {key: "sqlRead"}).out},
-						{id: (_permissionGroupId & {key: "catalogRead"}).out},
-						{id: (_permissionGroupId & {key: "storageItemRead"}).out},
+						{id: _permissions["Workers R2 SQL Read"]},
+						{id: _permissions["Workers R2 Data Catalog Read"]},
+						{id: _permissions["Workers R2 Storage Bucket Item Read"]},
 					]
 				}]
 			}
