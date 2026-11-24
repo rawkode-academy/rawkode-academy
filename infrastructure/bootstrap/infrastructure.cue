@@ -78,6 +78,15 @@ _github: {
 // Cloudflare API token permission groups, looked up by name so no ID is
 // hardcoded. The lookup takes a URL-encoded name and fails the plan if
 // nothing matches.
+_permissionGroupId: {
+	key: string
+	out: schema.#Select & {
+		from: infrastructure.data[key].outputs.result
+		path: [0, "id"]
+		type: "string"
+	}
+}
+
 _permissionGroup: {
 	name: string
 	ds: permission_groups.#DataSource & {
@@ -85,7 +94,7 @@ _permissionGroup: {
 			account_id: _account
 			"name":     name
 		}
-		outputs: result: [_]
+		outputs: result: type: "list"
 	}
 }
 
@@ -494,8 +503,8 @@ infrastructure: {
 					effect: "allow"
 					resources: json.Marshal({"com.cloudflare.edge.r2.bucket.\(_account)_default_\(_stateBucket)": "*"})
 					permission_groups: [
-						{id: infrastructure.data.storageItemWrite.outputs.result[0].id},
-						{id: infrastructure.data.storageItemRead.outputs.result[0].id},
+						{id: (_permissionGroupId & {key: "storageItemWrite"}).out},
+						{id: (_permissionGroupId & {key: "storageItemRead"}).out},
 					]
 				}]
 			}
@@ -534,17 +543,17 @@ infrastructure: {
 					effect: "allow"
 					resources: json.Marshal({"com.cloudflare.api.account.\(_account)": "*"})
 					permission_groups: [
-						{id: infrastructure.data.zoneRead.outputs.result[0].id},
-						{id: infrastructure.data.zoneSettingsRead.outputs.result[0].id},
-						{id: infrastructure.data.dnsRead.outputs.result[0].id},
-						{id: infrastructure.data.sslRead.outputs.result[0].id},
-						{id: infrastructure.data.botRead.outputs.result[0].id},
-						{id: infrastructure.data.storageRead.outputs.result[0].id},
-						{id: infrastructure.data.catalogRead.outputs.result[0].id},
-						{id: infrastructure.data.pipelinesRead.outputs.result[0].id},
-						{id: infrastructure.data.accountTokenRead.outputs.result[0].id},
-						{id: infrastructure.data.massRedirectRead.outputs.result[0].id},
-						{id: infrastructure.data.dynamicRedirectRead.outputs.result[0].id},
+						{id: (_permissionGroupId & {key: "zoneRead"}).out},
+						{id: (_permissionGroupId & {key: "zoneSettingsRead"}).out},
+						{id: (_permissionGroupId & {key: "dnsRead"}).out},
+						{id: (_permissionGroupId & {key: "sslRead"}).out},
+						{id: (_permissionGroupId & {key: "botRead"}).out},
+						{id: (_permissionGroupId & {key: "storageRead"}).out},
+						{id: (_permissionGroupId & {key: "catalogRead"}).out},
+						{id: (_permissionGroupId & {key: "pipelinesRead"}).out},
+						{id: (_permissionGroupId & {key: "accountTokenRead"}).out},
+						{id: (_permissionGroupId & {key: "massRedirectRead"}).out},
+						{id: (_permissionGroupId & {key: "dynamicRedirectRead"}).out},
 					]
 				}]
 			}
@@ -569,7 +578,7 @@ infrastructure: {
 				policies: [{
 					effect: "allow"
 					resources: json.Marshal({"com.cloudflare.edge.r2.bucket.\(_account)_default_\(_stateBucket)": "*"})
-					permission_groups: [{id: infrastructure.data.storageItemRead.outputs.result[0].id}]
+					permission_groups: [{id: (_permissionGroupId & {key: "storageItemRead"}).out}]
 				}]
 			}
 		}

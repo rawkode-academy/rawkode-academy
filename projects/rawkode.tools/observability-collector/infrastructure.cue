@@ -5,6 +5,7 @@ package cuenv
 import (
 	"encoding/json"
 
+	"github.com/cuenv/cuenv/schema"
 	"registry.terraform.io/cloudflare/cloudflare:cloudflare_provider"
 	"registry.terraform.io/infisical/infisical:infisical_provider"
 	r2_bucket "registry.terraform.io/cloudflare/cloudflare/resources/cloudflare_r2_bucket"
@@ -51,6 +52,15 @@ _accountResources: json.Marshal({
 // Cloudflare API token permission groups, from the Basin Catalog and Basin SQL
 // docs, looked up by name so no ID is hardcoded. The lookup takes a
 // URL-encoded name and fails the plan if nothing matches.
+_permissionGroupId: {
+	key: string
+	out: schema.#Select & {
+		from: infrastructure.data[key].outputs.result
+		path: [0, "id"]
+		type: "string"
+	}
+}
+
 _permissionGroup: {
 	name: string
 	ds: permission_groups.#DataSource & {
@@ -58,7 +68,7 @@ _permissionGroup: {
 			account_id: _account
 			"name":     name
 		}
-		outputs: result: [_]
+		outputs: result: type: "list"
 	}
 }
 
@@ -154,8 +164,8 @@ infrastructure: {
 					effect:    "allow"
 					resources: _accountResources
 					permission_groups: [
-						{id: infrastructure.data.catalogWrite.outputs.result[0].id},
-						{id: infrastructure.data.storageItemWrite.outputs.result[0].id},
+						{id: (_permissionGroupId & {key: "catalogWrite"}).out},
+						{id: (_permissionGroupId & {key: "storageItemWrite"}).out},
 					]
 				}]
 			}
@@ -170,9 +180,9 @@ infrastructure: {
 					effect:    "allow"
 					resources: _bucketResources
 					permission_groups: [
-						{id: infrastructure.data.sqlRead.outputs.result[0].id},
-						{id: infrastructure.data.catalogRead.outputs.result[0].id},
-						{id: infrastructure.data.storageItemRead.outputs.result[0].id},
+						{id: (_permissionGroupId & {key: "sqlRead"}).out},
+						{id: (_permissionGroupId & {key: "catalogRead"}).out},
+						{id: (_permissionGroupId & {key: "storageItemRead"}).out},
 					]
 				}]
 			}
