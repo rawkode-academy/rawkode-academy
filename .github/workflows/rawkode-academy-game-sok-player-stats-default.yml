@@ -13,10 +13,19 @@ on:
     - projects/*.cue
     - projects/rawkode.academy/*.cue
     - projects/rawkode.academy/codegen/*.cue
+    - projects/rawkode.academy/codegen/platform-service.cue
+    - projects/rawkode.academy/codegen/platform-service.cue/**
     - projects/rawkode.academy/games/*.cue
     - projects/rawkode.academy/games/secrets-of-kubernetes/*.cue
-    - projects/rawkode.academy/games/secrets-of-kubernetes/player-stats/**
     - projects/rawkode.academy/games/secrets-of-kubernetes/player-stats/*.cue
+    - projects/rawkode.academy/games/secrets-of-kubernetes/player-stats/data-model/**
+    - projects/rawkode.academy/games/secrets-of-kubernetes/player-stats/env.cue
+    - projects/rawkode.academy/games/secrets-of-kubernetes/player-stats/env.cue/**
+    - projects/rawkode.academy/games/secrets-of-kubernetes/player-stats/http/**
+    - projects/rawkode.academy/games/secrets-of-kubernetes/player-stats/package.json
+    - projects/rawkode.academy/games/secrets-of-kubernetes/player-stats/package.json/**
+    - projects/rawkode.academy/games/secrets-of-kubernetes/player-stats/service.cue
+    - projects/rawkode.academy/games/secrets-of-kubernetes/player-stats/service.cue/**
   workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}

@@ -13,9 +13,18 @@ on:
     - projects/*.cue
     - projects/rawkode.academy/*.cue
     - projects/rawkode.academy/codegen/*.cue
+    - projects/rawkode.academy/codegen/platform-service.cue
+    - projects/rawkode.academy/codegen/platform-service.cue/**
     - projects/rawkode.academy/platform/*.cue
-    - projects/rawkode.academy/platform/episodes/**
     - projects/rawkode.academy/platform/episodes/*.cue
+    - projects/rawkode.academy/platform/episodes/data-model/**
+    - projects/rawkode.academy/platform/episodes/env.cue
+    - projects/rawkode.academy/platform/episodes/env.cue/**
+    - projects/rawkode.academy/platform/episodes/package.json
+    - projects/rawkode.academy/platform/episodes/package.json/**
+    - projects/rawkode.academy/platform/episodes/read-model/**
+    - projects/rawkode.academy/platform/episodes/service.cue
+    - projects/rawkode.academy/platform/episodes/service.cue/**
   workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}

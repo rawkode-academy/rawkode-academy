@@ -13,9 +13,18 @@ on:
     - projects/*.cue
     - projects/rawkode.academy/*.cue
     - projects/rawkode.academy/codegen/*.cue
+    - projects/rawkode.academy/codegen/platform-service.cue
+    - projects/rawkode.academy/codegen/platform-service.cue/**
     - projects/rawkode.academy/platform/*.cue
-    - projects/rawkode.academy/platform/video-technologies/**
     - projects/rawkode.academy/platform/video-technologies/*.cue
+    - projects/rawkode.academy/platform/video-technologies/data-model/**
+    - projects/rawkode.academy/platform/video-technologies/env.cue
+    - projects/rawkode.academy/platform/video-technologies/env.cue/**
+    - projects/rawkode.academy/platform/video-technologies/package.json
+    - projects/rawkode.academy/platform/video-technologies/package.json/**
+    - projects/rawkode.academy/platform/video-technologies/read-model/**
+    - projects/rawkode.academy/platform/video-technologies/service.cue
+    - projects/rawkode.academy/platform/video-technologies/service.cue/**
   workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}

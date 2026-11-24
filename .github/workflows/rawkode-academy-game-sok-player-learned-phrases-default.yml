@@ -13,10 +13,19 @@ on:
     - projects/*.cue
     - projects/rawkode.academy/*.cue
     - projects/rawkode.academy/codegen/*.cue
+    - projects/rawkode.academy/codegen/platform-service.cue
+    - projects/rawkode.academy/codegen/platform-service.cue/**
     - projects/rawkode.academy/games/*.cue
     - projects/rawkode.academy/games/secrets-of-kubernetes/*.cue
-    - projects/rawkode.academy/games/secrets-of-kubernetes/player-learned-phrases/**
     - projects/rawkode.academy/games/secrets-of-kubernetes/player-learned-phrases/*.cue
+    - projects/rawkode.academy/games/secrets-of-kubernetes/player-learned-phrases/data-model/**
+    - projects/rawkode.academy/games/secrets-of-kubernetes/player-learned-phrases/env.cue
+    - projects/rawkode.academy/games/secrets-of-kubernetes/player-learned-phrases/env.cue/**
+    - projects/rawkode.academy/games/secrets-of-kubernetes/player-learned-phrases/http/**
+    - projects/rawkode.academy/games/secrets-of-kubernetes/player-learned-phrases/package.json
+    - projects/rawkode.academy/games/secrets-of-kubernetes/player-learned-phrases/package.json/**
+    - projects/rawkode.academy/games/secrets-of-kubernetes/player-learned-phrases/service.cue
+    - projects/rawkode.academy/games/secrets-of-kubernetes/player-learned-phrases/service.cue/**
   workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
