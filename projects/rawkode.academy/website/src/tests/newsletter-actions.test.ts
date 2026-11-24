@@ -23,6 +23,7 @@ const imports: Record<string, unknown> = {
 		},
 	},
 	"@/server/analytics": {
+		analyticsFor: () => ({}),
 		captureServerEvent,
 		getAttributionFromSource: () => ({ source_surface: "lead-magnet" }),
 		getDistinctId: () => "fixture",

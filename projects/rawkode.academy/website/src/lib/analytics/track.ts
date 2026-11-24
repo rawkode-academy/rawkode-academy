@@ -188,6 +188,10 @@ export function track(
 	try {
 		if (trackingDisabled()) return;
 		const now = Date.now();
+		// Set by Puppeteer, Playwright and Selenium unless a crawler hides it.
+		// The collector labels these events `bot` with reason `webdriver`.
+		if (navigator.webdriver === true)
+			properties = { ...properties, webdriver: true };
 		queue.push({
 			event_id: crypto.randomUUID(),
 			ts_ms: now,

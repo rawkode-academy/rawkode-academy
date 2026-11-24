@@ -1,7 +1,11 @@
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro/zod";
 import { env } from "cloudflare:workers";
-import { captureServerEvent, getDistinctId } from "../server/analytics";
+import {
+	analyticsFor,
+	captureServerEvent,
+	getDistinctId,
+} from "../server/analytics";
 
 const ReactionSchema = z.object({
 	contentId: z.string(),
@@ -61,7 +65,7 @@ export const addReaction = defineAction({
 			const result = (await response.json()) as Record<string, unknown>;
 
 			// Track the reaction event
-			const analytics = env.ANALYTICS;
+			const analytics = analyticsFor(ctx);
 			const distinctId = getDistinctId(ctx);
 			await captureServerEvent(
 				{
@@ -93,7 +97,7 @@ export const addReaction = defineAction({
 export const removeReaction = defineAction({
 	input: ReactionSchema,
 	handler: async ({ contentId, emoji }, ctx) => {
-		const analytics = env.ANALYTICS;
+		const analytics = analyticsFor(ctx);
 
 		// Track the reaction removal event
 		const distinctId = getDistinctId(ctx);

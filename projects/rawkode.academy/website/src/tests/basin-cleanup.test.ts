@@ -6,7 +6,7 @@ vi.mock("node:fs/promises", () => ({
 	readFile: vi.fn(() => Promise.resolve(mocks.infrastructure)),
 }));
 
-const live = ["events_archive", "short_links"];
+const live = ["events_archive", "short_links", "short_link_redirects"];
 let current: string[];
 let metadata: Record<string, unknown>;
 let maintenanceEnabled: boolean;
@@ -23,7 +23,7 @@ describe("legacy table purge guards", () => {
 		vi.spyOn(console, "log").mockImplementation(() => {});
 		current = ["events", ...live];
 		mocks.infrastructure =
-			'config: table_name: "events_archive"\nconfig: table_name: "short_links"';
+			'config: table_name: "events_archive"\nconfig: table_name: "short_links"\nconfig: table_name: "short_link_redirects"';
 		metadata = {};
 		maintenanceEnabled = true;
 		vi.stubGlobal(
@@ -75,7 +75,7 @@ describe("legacy table purge guards", () => {
 				.mock.calls.filter(([url]) =>
 					String(url).endsWith("maintenance-configs"),
 				),
-		).toHaveLength(4);
+		).toHaveLength(live.length * 2);
 		expect(JSON.stringify(vi.mocked(console.log).mock.calls)).not.toContain(
 			"test-token",
 		);

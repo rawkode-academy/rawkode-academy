@@ -229,6 +229,19 @@ const { userId } = Astro.props;
 
 			registerAttributionSuperProperties();
 
+			// Label, don't drop: previews and local builds share this project
+			// key, and automated browsers announce themselves with
+			// navigator.webdriver. Insights filter on bot = false.
+			const botReason =
+				location.hostname !== "rawkode.academy"
+					? "non-production"
+					: navigator.webdriver === true
+						? "webdriver"
+						: undefined;
+			window.posthog.register(
+				botReason ? { bot: true, botreason: botReason } : { bot: false },
+			);
+
 			if (userId) {
 				window.posthog.identify(userId);
 			}

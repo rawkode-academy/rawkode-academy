@@ -2,11 +2,11 @@ import process from "node:process";
 import { ActionError, defineAction } from "astro:actions";
 import { getSecret } from "astro:env/server";
 import { z } from "astro/zod";
-import { env } from "cloudflare:workers";
 import { Resend } from "resend";
 import { parseCampaignAttribution } from "@/lib/analytics/attribution";
 import { GROWTH_EVENTS } from "@/lib/analytics/growth";
 import {
+	analyticsFor,
 	captureServerEvent,
 	getAttributionFromSource,
 	getDistinctId,
@@ -83,7 +83,8 @@ export const signupForCourseUpdates = defineAction({
 			});
 		}
 
-		let sponsorStatus: "not_requested" | "subscribed" | "unconfirmed" = "not_requested";
+		let sponsorStatus: "not_requested" | "subscribed" | "unconfirmed" =
+			"not_requested";
 		try {
 			const resend = new Resend(resendApiKey);
 
@@ -111,7 +112,7 @@ export const signupForCourseUpdates = defineAction({
 
 			// Analytics: capture course signup (without sending PII)
 			const distinctId = getDistinctId(ctx);
-			const analytics = env.ANALYTICS as Fetcher | undefined;
+			const analytics = analyticsFor(ctx);
 			const attribution = getAttributionFromSource(source);
 			const campaign = parseCampaignAttribution(campaignAttribution);
 			const cookieAttribution = getEventAttribution(ctx.request);
@@ -162,11 +163,12 @@ export const signupForCourseUpdates = defineAction({
 		return {
 			success: true,
 			sponsorStatus,
-			message: sponsorStatus === "unconfirmed"
-				? "Course updates are saved. Sponsor signup could not be confirmed. You can choose to retry below."
-				: sponsorStatus === "subscribed"
-					? "Course updates and sponsor signup are confirmed."
-					: "Course updates are saved. We'll notify you when new course content is available.",
+			message:
+				sponsorStatus === "unconfirmed"
+					? "Course updates are saved. Sponsor signup could not be confirmed. You can choose to retry below."
+					: sponsorStatus === "subscribed"
+						? "Course updates and sponsor signup are confirmed."
+						: "Course updates are saved. We'll notify you when new course content is available.",
 		};
 	},
 });

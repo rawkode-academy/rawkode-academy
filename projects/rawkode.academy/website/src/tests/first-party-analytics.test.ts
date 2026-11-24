@@ -31,7 +31,24 @@ describe("track()", () => {
 			value: null,
 			configurable: true,
 		});
+		// happy-dom reports itself as automated, which flags every event.
+		Object.defineProperty(navigator, "webdriver", {
+			value: false,
+			configurable: true,
+		});
 		document.cookie = "rk_aid=; max-age=0; path=/";
+	});
+
+	it("flags events from an automated browser", () => {
+		Object.defineProperty(navigator, "webdriver", {
+			value: true,
+			configurable: true,
+		});
+		track("page_view");
+		flush();
+		expect(sentBatches(fetchMock)[0]?.events[0]?.properties).toEqual({
+			webdriver: true,
+		});
 	});
 
 	afterEach(() => {
@@ -208,15 +225,25 @@ describe("POST /api/e", () => {
 		delete testEnv.ANALYTICS;
 	});
 
-	async function call(body: unknown, headers: Record<string, string> = {}) {
-		const url = new URL("https://rawkode.academy/api/e");
+	async function call(
+		body: unknown,
+		headers: Record<string, string | null> = {},
+		{
+			href = "https://rawkode.academy/api/e",
+			cf,
+		}: { href?: string; cf?: Record<string, unknown> } = {},
+	) {
+		const url = new URL(href);
 		// happy-dom's Request drops the forbidden `origin` header, so stub it.
-		const all: Record<string, string> = {
+		const all: Record<string, string | null> = {
 			"content-type": "application/json",
 			"user-agent": "Mozilla/5.0 Chrome/130.0",
+			"sec-ch-ua": '"Chromium";v="130", "Google Chrome";v="130"',
 			...headers,
 		};
 		const request = {
+			cf,
+			url: href,
 			headers: { get: (name: string) => all[name.toLowerCase()] ?? null },
 			body: new ReadableStream({
 				start(controller) {
@@ -250,6 +277,54 @@ describe("POST /api/e", () => {
 			url_origin: "https://rawkode.academy",
 			user_agent: "Mozilla/5.0 Chrome/130.0",
 		});
+	});
+
+	it("passes the client network to the collector", async () => {
+		await call({ events: [{}] }, {}, { cf: { asn: 132203 } });
+		const [, context] = analytics.ingestWebEvents.mock.calls[0] ?? [];
+		expect(context).toMatchObject({ asn: 132203 });
+	});
+
+	it("labels previews, other ports and automated browsers", async () => {
+		const cases: Array<
+			[string, Parameters<typeof call>[1], Parameters<typeof call>[2]]
+		> = [
+			[
+				"non-production",
+				{},
+				{ href: "https://website.rawkode.workers.dev/api/e" },
+			],
+			["non-production", {}, { href: "https://rawkode.academy:8443/api/e" }],
+			["non-production", {}, { href: "http://localhost:4321/api/e" }],
+			["spoofed-chrome", { "sec-ch-ua": null }, {}],
+			["headless", { "sec-ch-ua": '"HeadlessChrome";v="146"' }, {}],
+			[
+				"cf-verified-bot",
+				{},
+				{ cf: { botManagement: { verifiedBot: true, score: 1 } } },
+			],
+		];
+		for (const [reason, headers, options] of cases) {
+			analytics.ingestWebEvents.mockClear();
+			const href = options?.href ?? "https://rawkode.academy/api/e";
+			const origin = new URL(href).origin;
+			expect(
+				(await call({ events: [{}] }, { origin, ...headers }, options)).status,
+			).toBe(204);
+			const [, context] = analytics.ingestWebEvents.mock.calls[0] ?? [];
+			expect(context, reason).toMatchObject({ bot_reason: reason });
+		}
+	});
+
+	it("keeps browsers that don't send client hints", async () => {
+		for (const ua of [
+			"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15",
+			"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0",
+			"Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/158.0.8127.35 Mobile/15E148 Safari/604.1",
+		])
+			await call({ events: [{}] }, { "user-agent": ua, "sec-ch-ua": null });
+		for (const [, context] of analytics.ingestWebEvents.mock.calls)
+			expect(context.bot_reason).toBeUndefined();
 	});
 
 	it("returns a retryable failure when durable ingestion fails or is unbound", async () => {

@@ -106,7 +106,7 @@ onUnmounted(() => { clearInterval(timer); window.removeEventListener("focus", ch
 			<p class="help">Next puzzle at midnight UTC. Come back tomorrow.</p>
 		</section>
 		<section v-if="stats" class="result" aria-label="Your account statistics"><h2>Your Kubele stats</h2><p>{{ stats.played }} played · {{ stats.wins }} wins · {{ stats.played ? Math.round(stats.wins / stats.played * 100) : 0 }}% win rate · {{ stats.streak }} day streak</p><ol aria-label="Winning guess distribution"><li v-for="(count, index) in stats.distribution" :key="index">{{ index + 1 }} guesses: {{ count }}</li></ol></section>
-  <p v-if="!registered"><a href="/api/auth/sign-in?returnTo=/games/kubele">Sign in to save your stats across devices.</a></p>
+  <p v-if="!registered"><a href="/api/auth/sign-in?returnTo=/games/kubele" rel="nofollow">Sign in to save your stats across devices.</a></p>
   <footer><a href="/games/cnicon">Prefer pictures? Play CNIcon ↗</a></footer>
 	</div>
 </template>

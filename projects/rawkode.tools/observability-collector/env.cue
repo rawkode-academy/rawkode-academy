@@ -111,6 +111,15 @@ tasks: {
 		env: BASIN_CATALOG_TOKEN: _basinSecret & {secretName: "BASIN_CATALOG_TOKEN"}
 	}
 
+	"relabel-history": schema.#Task & {
+		hermetic: false
+		command:  "uv"
+		args: ["run", "basin/relabel-history.py"]
+		inputs: ["basin/relabel-history.py"]
+		labels: ["infisical"]
+		env: BASIN_CATALOG_TOKEN: _basinSecret & {secretName: "BASIN_CATALOG_TOKEN"}
+	}
+
 	reconcile: schema.#Task & {
 		hermetic: false
 		command:  "bun"

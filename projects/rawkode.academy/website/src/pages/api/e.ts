@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
+import { botReason, clientAsn } from "@/lib/analytics/automation";
 import { createLogger } from "@/lib/logger";
 
 export const prerender = false;
@@ -20,6 +21,8 @@ interface CollectorRpc {
 			user_agent: string;
 			country?: string | undefined;
 			continent?: string | undefined;
+			asn?: number | undefined;
+			bot_reason?: string | undefined;
 		},
 	): Promise<number>;
 }
@@ -95,6 +98,9 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
 			user_agent: request.headers.get("user-agent") ?? "",
 			country: cf?.country,
 			continent: cf?.continent,
+			asn: clientAsn(request),
+			// Previews, other ports and automated clients are stored, labelled.
+			bot_reason: botReason(request),
 		});
 	} catch (error) {
 		logger.error("Analytics ingest failed", error);
