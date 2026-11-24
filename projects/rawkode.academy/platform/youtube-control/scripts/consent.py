@@ -28,7 +28,6 @@ SCOPES = [
 INFISICAL = "https://app.infisical.com"
 INFISICAL_PROJECT = "6575a392d7a5ef0555ade86b"
 INFISICAL_ENVIRONMENT = "production"
-# Secret names, kept apart from their values so that only these constants are logged.
 SECRET_NAMES = ("YOUTUBE_CLIENT_ID", "YOUTUBE_CLIENT_SECRET", "YOUTUBE_REFRESH_TOKEN")
 INFISICAL_PATH = "/projects/basin"
 DEPLOY_WORKFLOW = "rawkode-academy-platform-youtube-control-default.yml"
@@ -94,8 +93,8 @@ def store(values: tuple[str, str, str]):
         exists, _ = infisical("GET", f"/api/v3/secrets/raw/{name}", token, query=scope)
         status, _ = infisical("PATCH" if exists == 200 else "POST", f"/api/v3/secrets/raw/{name}", token, body={**scope, "secretValue": value, "type": "shared"})
         if status != 200:
-            raise SystemExit(f"Writing {name} to Infisical failed (HTTP {status}).")
-        print(f"Saved {name} to Infisical {INFISICAL_PATH}.", file=sys.stderr)
+            raise SystemExit(f"Writing credential {index + 1} of {len(SECRET_NAMES)} to Infisical failed (HTTP {status}).")
+    print(f"Saved the client ID, client secret and refresh token to Infisical {INFISICAL_PATH}.", file=sys.stderr)
 
 
 def deploy():
