@@ -3,11 +3,14 @@
 """One-time, explicitly requested rewrite: remove personal data from archived events.
 
 Until PR #1646, every sign-in sent `rawkode-academy-website` / `user.identified`
-with the user's email and name in `data.set_properties`, and the archive
-stored them. This rewrites `analytics.events_archive` in place:
+with the user's email and name in `data.set_properties`, and until the identity
+fix every registration sent `rawkode-academy-identity` /
+`auth.user_registered` with them in `data.$set`. The archive stored both. This
+rewrites `analytics.events_archive` in place:
 
-- drops `email` and `name` from `data.set_properties` and
-  `data.set_once_properties` (and the objects themselves once empty)
+- drops `email` and `name` from `data.set_properties`,
+  `data.set_once_properties`, `data.$set` and `data.$set_once` (and the
+  objects themselves once empty)
 - replaces any other string value that contains an email address with
   "[redacted]", wherever it is in the event
 
@@ -38,7 +41,7 @@ ACCOUNT = "0aeb879de8e3cdde5fb3d413025222ce"
 BUCKET = "rawkode-analytics"
 NAMESPACE = "analytics"
 TABLE = "events_archive"
-PROFILE_KEYS = ("set_properties", "set_once_properties")
+PROFILE_KEYS = ("set_properties", "set_once_properties", "$set", "$set_once")
 PERSONAL_KEYS = ("email", "name")
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}")
 REDACTED = "[redacted]"
