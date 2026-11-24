@@ -51,13 +51,7 @@ export const ACCESS_APPLICATIONS: AccessApplication[] = [
 				key: "operator",
 				label: "Operator",
 				description:
-					"May connect MCP clients and use every Rawkode Tools module, such as analytics.",
-			},
-			{
-				key: "guest",
-				label: "Guest",
-				description:
-					"May connect MCP clients and see only the YouTube numbers of episodes they guest on, or of every episode of a show they host. Needs a GitHub-linked account.",
+					"May connect MCP clients and use every Rawkode Tools module, such as analytics. Guests and show hosts need no role: they see their own episodes automatically.",
 			},
 		],
 	},
@@ -66,7 +60,6 @@ export const ACCESS_APPLICATIONS: AccessApplication[] = [
 export const ROLE_KEYS = Object.freeze({
 	studioOperator: "studio_operator",
 	toolsOperator: "operator",
-	toolsGuest: "guest",
 } as const);
 
 export function findAccessApplication(

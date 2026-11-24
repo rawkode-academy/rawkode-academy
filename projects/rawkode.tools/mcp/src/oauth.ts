@@ -28,7 +28,7 @@ export function renderConsent(details: ConsentDescription, handle: string, scope
   ${details.redirectIsLoopback ? "<p><strong>This returns access to an app on your computer.</strong> Continue only if you started this connection.</p>" : ""}
   <form method="post" action="/oauth/authorize"><input type="hidden" name="handle" value="${escape(handle)}">
   <p>This connection can:</p><ul>${abilities}</ul>
-  <p><small>The connection can refresh its access for up to 30 days. Continuing signs you in with your Rawkode Academy account, which needs the Rawkode Tools operator role, or the guest role, which shows only the YouTube numbers of episodes you appear in. No credentials are shared with this client.</small></p>
+  <p><small>The connection can refresh its access for up to 30 days. Continuing signs you in with your Rawkode Academy account, which needs the Rawkode Tools operator role. Without it, you can still sign in if you are a guest or host in the Rawkode Academy episode list, and then see only the YouTube numbers of your own episodes. No credentials are shared with this client.</small></p>
   <button name="decision" value="approve">Continue with Rawkode Academy</button><button name="decision" value="deny">Cancel</button></form></html>`;
 }
 // formTargets: origins the consent form's POST may redirect to. Browsers apply form-action to redirects.
