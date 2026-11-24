@@ -1,4 +1,4 @@
-import { ensure, readLimited } from "./errors.ts";
+import { ensure, readLimited, ServiceError } from "./errors.ts";
 
 // Sign-in goes to Rawkode Academy's identity service (id.rawkode.academy),
 // where this Worker is the public PKCE client `rawkode-tools-mcp`. Access
@@ -45,7 +45,11 @@ async function operator(tokens: Tokens, previousRefreshToken?: string): Promise<
   catch { info = {}; }
   const roles = Array.isArray(info[ROLES_CLAIM]) ? info[ROLES_CLAIM] as unknown[] : [];
   ensure(typeof info.sub === "string" && info.sub, "identity_sign_in_failed", "Rawkode Academy didn't identify the user", 502);
-  ensure(info[CLIENT_CLAIM] === IDENTITY_CLIENT_ID && roles.includes(OPERATOR_ROLE), "forbidden", "This Rawkode Academy account isn't a Rawkode Tools operator", 403);
+  if (info[CLIENT_CLAIM] !== IDENTITY_CLIENT_ID || !roles.includes(OPERATOR_ROLE)) {
+    // Opaque ids and role names only, so a refusal can be traced without exposing PII.
+    const seen = roles.filter((role): role is string => typeof role === "string").join(", ") || "none";
+    throw new ServiceError("forbidden", `This Rawkode Academy account isn't a Rawkode Tools operator. Identity user: ${info.sub}. Client claim: ${typeof info[CLIENT_CLAIM] === "string" ? info[CLIENT_CLAIM] : "missing"}. Roles: ${seen}.`, 403);
+  }
   return { userId: info.sub, upstreamRefreshToken: tokens.refresh_token ?? previousRefreshToken };
 }
 
