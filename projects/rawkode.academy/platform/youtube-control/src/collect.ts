@@ -26,7 +26,8 @@ export const VIDEO_BACKFILL_REPORTS = ["video_daily"] as const;
 // another one when needed).
 export const FIRST_BACKFILL_ID = "backfill-initial";
 // Per-video history, started once the same way.
-export const VIDEO_BACKFILL_ID = "backfill-videos";
+// -2: the first instance (backfill-videos) errored on an HTTP 500 from YouTube; this one splits a per-video query that gets a 5xx.
+export const VIDEO_BACKFILL_ID = "backfill-videos-2";
 export const syncInstanceId = (date: Date) => `sync-${date.toISOString().slice(0, 10)}`;
 
 export function syncJobs(now = new Date()): Job[] {
@@ -77,7 +78,7 @@ const summaryOf = ({ videoIds, ...job }: Job) => ({ ...job, ...(videoIds ? { vid
 
 // Fetches one report and sends every row to the lake. Throws if any row was
 // not accepted, so the caller retries the whole job; row IDs make retries safe.
-export async function collect(api: AnalyticsAPI, channelId: string, lake: AnalyticsCollector, job: Job) {
+async function collectOnce(api: AnalyticsAPI, channelId: string, lake: AnalyticsCollector, job: Job) {
   let report;
   try { report = await fetchReport(api, analyticsSchema.parse(job), channelId); }
   catch (error) {
@@ -89,4 +90,26 @@ export async function collect(api: AnalyticsAPI, channelId: string, lake: Analyt
   const delivered = await sendToLake(lake, report);
   if (delivered.failed > 0) throw new ServiceError("lake_rejected", `The analytics collector rejected ${delivered.failed} of ${report.rows.length} ${job.report} rows (${delivered.error})`, 502);
   return { ...summaryOf(job), rows: report.rows.length, sent: delivered.sent };
+}
+
+type Collected = Awaited<ReturnType<typeof collectOnce>> & { skippedVideos?: string[] };
+const serverError = (error: unknown) => error instanceof ServiceError && error.code === "google_api_error" && (error.upstreamStatus ?? 0) >= 500;
+
+// A per-video query that YouTube answers with HTTP 5xx is split in half and
+// each half retried, down to one video. That separates a query that is too
+// heavy (many videos over a long window) from one bad video: a single video
+// that still fails is skipped and named in the result, so one video can't stop
+// the history load. Any other error still fails the step and is retried.
+export async function collect(api: AnalyticsAPI, channelId: string, lake: AnalyticsCollector, job: Job): Promise<Collected> {
+  try { return await collectOnce(api, channelId, lake, job); }
+  catch (error) {
+    const ids = job.videoIds;
+    if (!ids || !serverError(error)) throw error;
+    if (ids.length === 1) return { ...summaryOf(job), rows: 0, sent: 0, skippedVideos: [ids[0]!] };
+    const middle = Math.ceil(ids.length / 2);
+    const first = await collect(api, channelId, lake, { ...job, videoIds: ids.slice(0, middle) });
+    const second = await collect(api, channelId, lake, { ...job, videoIds: ids.slice(middle) });
+    const skippedVideos = [...(first.skippedVideos ?? []), ...(second.skippedVideos ?? [])];
+    return { ...summaryOf(job), rows: first.rows + second.rows, sent: first.sent + second.sent, ...(skippedVideos.length ? { skippedVideos: skippedVideos.slice(0, 50) } : {}) };
+  }
 }

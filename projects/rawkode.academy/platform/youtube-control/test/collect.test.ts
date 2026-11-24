@@ -68,3 +68,29 @@ test("per-video rows must be for requested videos, and a rejected traffic query 
   assert.ok("skipped" in skipped);
   await assert.rejects(collect(refusing, channelId, { async trackEvent() { return { success: true }; } }, job));
 });
+
+test("a per-video query that YouTube answers with HTTP 5xx is split until it succeeds, and one bad video is skipped", async () => {
+  const ids = Array.from({ length: 8 }, (_, i) => `video${i}000000`.slice(0, 11));
+  const bad = ids[5]!;
+  const queries: string[][] = [];
+  const flaky: AnalyticsAPI = {
+    async analytics<T>(query: Record<string, string | number | undefined>) {
+      const asked = String(query.filters).replace("video==", "").split(",");
+      queries.push(asked);
+      if (asked.length > 4 || asked.includes(bad)) throw new ServiceError("google_api_error", "reports failed (HTTP 500)", 502, 500);
+      const metrics = String(query.metrics).split(",");
+      const headers = [{ name: "day", columnType: "DIMENSION", dataType: "STRING" }, { name: "video", columnType: "DIMENSION", dataType: "STRING" }, ...metrics.map(name => ({ name, columnType: "METRIC", dataType: "INTEGER" }))];
+      return { columnHeaders: headers, rows: asked.map(video => [String(query.startDate), video, ...metrics.map(() => 1)]) } as T;
+    },
+  };
+  const sent: any[] = [];
+  const job = { report: "video_daily", startDate: "2026-10-01", endDate: "2026-10-30", videoIds: ids };
+  const result = await collect(flaky, channelId, { async trackEvent(e) { sent.push(e); return { success: true }; } }, job);
+  assert.equal(result.rows, 7, "every video except the bad one");
+  assert.equal(sent.length, 7);
+  assert.deepEqual((result as any).skippedVideos, [bad]);
+  assert.ok(queries.some(q => q.length === 1 && q[0] === bad), "the bad video was isolated");
+  // Other failures are not split: they fail the step so it is retried.
+  const denied: AnalyticsAPI = { async analytics() { throw new ServiceError("google_api_error", "reports failed (HTTP 403)", 502, 403); } };
+  await assert.rejects(collect(denied, channelId, { async trackEvent() { return { success: true }; } }, job), (error: unknown) => error instanceof ServiceError && error.upstreamStatus === 403);
+});

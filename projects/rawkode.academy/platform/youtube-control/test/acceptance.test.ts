@@ -80,7 +80,7 @@ test("Worker runtime: the cron starts the sync and the one-time backfill, and ro
   const worker = await mf.getWorker("youtube-analytics");
   await worker.scheduled({ cron: "17 8 * * *", scheduledTime: new Date() });
   const status = await settle(mf, s => s.sync?.status === "complete" && s.backfill?.status === "complete" && s.videoBackfill?.status === "complete");
-  assert.equal(status.videoBackfill.id, "backfill-videos");
+  assert.equal(status.videoBackfill.id, "backfill-videos-2");
   assert.match(status.sync.id, /^sync-\d{4}-\d{2}-\d{2}$/);
   assert.equal(status.backfill.id, "backfill-initial");
 
