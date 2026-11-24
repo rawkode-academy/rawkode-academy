@@ -1,7 +1,10 @@
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro/zod";
-import { env } from "cloudflare:workers";
-import { captureServerEvent, getDistinctId } from "../server/analytics";
+import {
+	analyticsFor,
+	captureServerEvent,
+	getDistinctId,
+} from "../server/analytics";
 
 const ShareEventSchema = z.object({
 	action: z.enum(["share"]),
@@ -15,7 +18,7 @@ export const trackShareEvent = defineAction({
 	input: ShareEventSchema,
 	handler: async (event, ctx) => {
 		try {
-			const analytics = env.ANALYTICS;
+			const analytics = analyticsFor(ctx);
 
 			const distinctId = getDistinctId(ctx);
 

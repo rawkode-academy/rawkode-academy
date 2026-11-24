@@ -1,4 +1,4 @@
-import { classifyUserAgent, type WebContext } from "./events";
+import { botAttributes, type WebContext } from "./events";
 
 const ID = /^[a-zA-Z0-9._:-]{1,128}$/;
 const NAME = /^\$?[a-z][a-z0-9_.:-]{0,127}$/;
@@ -6,6 +6,10 @@ const SENSITIVE =
 	/password|passwd|token|secret|authorization|cookie|email|user.?agent/i;
 const EMAIL = /[^\s@]+@[^\s@]+\.[^\s@]+/;
 const encoder = new TextEncoder();
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === "object" && value !== null && !Array.isArray(value);
+}
 
 function identifier(value: unknown): string | undefined {
 	return typeof value === "string" && ID.test(value) ? value : undefined;
@@ -107,8 +111,18 @@ export function browserCloudEvent(
 		return null;
 	const location = url(event.url);
 	if (!location || location.origin !== context.url_origin) return null;
-	const classification = classifyUserAgent(context.user_agent);
-	if (classification.is_bot) return null;
+	// Bots are labelled, not dropped: queries exclude `bot = true`.
+	const bot = botAttributes({
+		userAgent: context.user_agent,
+		asn: context.asn,
+		// The browser reports navigator.webdriver; the website's verdict wins.
+		reason:
+			context.bot_reason ??
+			(isRecord(event.properties) && event.properties.webdriver === true
+				? "webdriver"
+				: undefined),
+		browser: true,
+	});
 	const referrer = url(event.referrer);
 	const attribution = Object.fromEntries(
 		[
@@ -134,8 +148,7 @@ export function browserCloudEvent(
 		schemaversion: 1,
 		...(context.country ? { country: context.country } : {}),
 		...(context.continent ? { continent: context.continent } : {}),
-		...(classification.device ? { device: classification.device } : {}),
-		...(classification.browser ? { browser: classification.browser } : {}),
+		...bot,
 		...(referrer ? { referrer: referrer.origin } : {}),
 		data: {
 			schema_version: 1,

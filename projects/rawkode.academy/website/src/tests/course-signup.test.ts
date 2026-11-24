@@ -47,6 +47,7 @@ const imports: Record<string, unknown> = {
 		GROWTH_EVENTS: { COURSE_SIGNUP: "signup", ACTIVATED_USER: "activated" },
 	},
 	"../server/analytics": {
+		analyticsFor: () => ({}),
 		captureServerEvent,
 		getAttributionFromSource: () => ({}),
 		getDistinctId: () => "fixture",

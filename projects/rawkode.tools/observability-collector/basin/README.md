@@ -66,14 +66,23 @@ services (CloudEvents) ─ /track ─► observability-collector ─► stream a
 
 - Every event is a CloudEvent. The collector sends it to the stream whole, as
   `{ value: event }`, and to PostHog under `<source>.<type>`.
-- Request context (`referrer`, `country`, `continent`) travels as CloudEvents
-  extension attributes. A `useragent` extension is reduced to `device` and
-  `browser`, and events from bots are dropped before PostHog or the stream see
-  them.
+- Request context (`referrer`, `country`, `continent`, `asn`) travels as
+  CloudEvents extension attributes. A `useragent` extension is reduced to
+  `device` and `browser`; the raw string is never stored.
+- Bot traffic is stored and labelled, never dropped. Every event with request
+  context carries `bot` (true/false) and, for bots, `botreason`: the rule that
+  matched (`hosting-asn`, `ua-pattern`, `non-browser-ua`, `desktop-no-browser`
+  from the collector; `non-production`, `spoofed-chrome`, `headless`,
+  `webdriver`, `cf-verified-bot`, `cf-bot-score` from the website;
+  `unmatched-path` from rawkode.link). Queries exclude bots; see
+  `HUMAN` and `LINK_HUMAN` in the website's `src/lib/analytics/queries.ts`.
 - `analytics.events_archive` keeps every event as sent. Its pipeline never
   changes, so every other table can be rebuilt from it.
 - `basin/typed.sql` turns events into typed tables, one per event family. Today
-  that's `shortLink` (rawkode.link redirects) into `analytics.short_links`.
+  that's `shortLink` (rawkode.link redirects) into
+  `analytics.short_link_redirects`, which has `bot`, `bot_reason` and `asn`
+  columns. Redirects before 23 November 2026 stay in `analytics.short_links`,
+  which no pipeline writes to any more.
 - Browser batches become schema-v1 CloudEvents under source
   `rawkode-academy-browser` and type `web.<event>`. They reach the archive
   through the same durable delivery path. Typed browser tables and dashboard
@@ -138,12 +147,33 @@ PostHog events, OTLP logs and metrics are outside this comparison; a clean resul
 
 The internal website dashboard queries CloudEvents in `events_archive` for
 server event totals, sign-in events, newsletter submissions and video engagement.
-Matched redirects come from `short_links`. Counts are events, not deduplicated
+Matched redirects come from `short_links` and `short_link_redirects`. Counts are events, not deduplicated
 people or attributed funnels. Viewer estimates exclude missing and anonymous
 IDs. Browser traffic, referrers, campaigns and CTA impressions/clicks are marked
-unavailable until typed browser reporting is migrated. There is no stored bot total:
-known bots are filtered at ingestion and missing classification is not proof of
-a human visitor.
+unavailable until typed browser reporting is migrated. Every query
+excludes bots. Events stored before labelling are labelled at query time from
+the signals they kept (host, the old user-agent verdict, device and browser);
+hosting networks, client hints and webdriver weren't stored, so older events
+from those bots still count as people.
+
+To write those labels into the stored rows, run the one-time relabel task
+after this change is deployed (so nothing new is written to `short_links`):
+
+```sh
+cuenv task relabel-history -e production            # dry run: counts per reason
+RELABEL_ARGS=--apply cuenv task relabel-history -e production # rewrite in place
+```
+
+It rewrites only rows ingested before it starts, adds `bot`, `botreason` and
+`botbackfill` to archive events, and adds `bot`, `bot_reason` and `asn`
+columns to `short_links`. Rows already labelled are kept, so it is safe to
+re-run. Each table's previous snapshot ID is printed; within the 7-day
+snapshot expiry, `RELABEL_ARGS="--rollback <table> <snapshot-id>"` restores it (and drops
+anything appended since). The query-time rules stay, so the dashboard is
+correct before and after the rewrite.
+
+The task needs only Nix: it runs the script with Python, PyIceberg and PyArrow
+from nixpkgs (`nix shell`), so it works the same on NixOS, macOS and CI.
 
 The empty legacy `analytics.events` table is no longer queried. To purge it,
 run the guarded one-time cleanup task with Infisical access:

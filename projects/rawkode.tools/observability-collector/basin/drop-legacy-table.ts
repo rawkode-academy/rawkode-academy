@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 const ACCOUNT = "0aeb879de8e3cdde5fb3d413025222ce";
 const BUCKET = "rawkode-analytics";
 const LEGACY = "events";
-const LIVE = ["events_archive", "short_links"];
+const LIVE = ["events_archive", "short_links", "short_link_redirects"];
 const token = process.env.BASIN_CATALOG_TOKEN;
 if (!token) throw new Error("BASIN_CATALOG_TOKEN is not set");
 if (process.env.CLOUDFLARE_ACCOUNT_ID !== ACCOUNT) {

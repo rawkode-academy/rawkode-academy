@@ -4,4 +4,4 @@ package domains
 
 import "github.com/rawkode-academy/rawkode-academy/infrastructure/dns/zone"
 
-zones: [Name=string]: zone.#Zone & {name: Name}
+zones: [string]~(Name,_): zone.#Zone & {name: Name}

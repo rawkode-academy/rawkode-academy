@@ -15,23 +15,18 @@ on:
     - projects/*.cue
     - projects/rawkode.academy/*.cue
     - projects/rawkode.academy/api/*.cue
-    - projects/rawkode.academy/api/bun.lock
-    - projects/rawkode.academy/api/bun.lock/**
+    - projects/rawkode.academy/api/env.cue
+    - projects/rawkode.academy/api/env.cue/**
     - projects/rawkode.academy/api/package.json
     - projects/rawkode.academy/api/package.json/**
-    - projects/rawkode.academy/api/projects/rawkode.academy/website/src/subgraph/**
-    - projects/rawkode.academy/api/schemas/**
     - projects/rawkode.academy/api/scripts/collect-schemas.ts
     - projects/rawkode.academy/api/scripts/collect-schemas.ts/**
     - projects/rawkode.academy/api/scripts/compose.ts
     - projects/rawkode.academy/api/scripts/compose.ts/**
     - projects/rawkode.academy/api/src/**
-    - projects/rawkode.academy/api/supergraph.graphql
-    - projects/rawkode.academy/api/supergraph.graphql/**
     - projects/rawkode.academy/api/wrangler.jsonc
     - projects/rawkode.academy/api/wrangler.jsonc/**
     - projects/rawkode.academy/platform/**
-    - projects/rawkode.academy/website/src/subgraph/**
   workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
@@ -86,7 +81,7 @@ jobs:
           Darwin-arm64) cuenv_asset="cuenv-darwin-arm64" ;;
           *) echo "Unsupported platform: $platform" >&2; exit 1 ;;
         esac
-        cuenv_version="0.76.0"
+        cuenv_version="0.78.0"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi
