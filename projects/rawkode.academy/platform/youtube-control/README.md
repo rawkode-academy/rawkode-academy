@@ -38,7 +38,7 @@ When the alert says the grant was revoked, repeat step 2.
 | `GET /health` | Process health only. |
 | `GET /status` | Today's (or yesterday's) sync instance and the initial backfill: `status` and `error` only. |
 
-To run a sync by hand: `npx wrangler workflows trigger youtube-analytics-sync`.
+To run today's sync (and the initial backfill, if it hasn't started) now and see what reached the lake, run the `rawkode-academy-platform-youtube-control-verify` workflow from Actions.
 
 ## Verify locally
 

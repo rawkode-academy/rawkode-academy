@@ -54,6 +54,14 @@ ci: pipelines: default: {
 	tasks: [_t.deploy]
 }
 
+// Run by hand from Actions: starts today's sync and the initial backfill now
+// (with the cron's instance IDs) and prints what reached the lake.
+ci: pipelines: verify: {
+	environment: "production"
+	when: manual: true
+	tasks: [_t.verify]
+}
+
 tasks: [string]: hermetic: false
 
 tasks: {
@@ -95,6 +103,14 @@ tasks: {
 			GOOGLE_OAUTH_CLIENT_ID: schema.#OnePasswordRef & {ref: "op://Employee/565nub77bcoxqd5a77kbdets3q/youtube-control/client-id"}
 			GOOGLE_OAUTH_CLIENT_SECRET: schema.#OnePasswordRef & {ref: "op://Employee/565nub77bcoxqd5a77kbdets3q/youtube-control/client-secret"}
 		}
+	}
+
+	verify: schema.#Task & {
+		command: "bash"
+		args: ["-c", _npm + "bash scripts/verify.sh"]
+		inputs: list.Concat([_sources, ["scripts/verify.sh"]])
+		labels: ["infisical"]
+		env: BASIN_SQL_TOKEN: _youtubeSecret & {secretName: "BASIN_SQL_TOKEN"}
 	}
 
 	// Starts another history load; see scripts/backfill.sh.

@@ -27,6 +27,8 @@
               (python3.withPackages (p: [ p.google-auth-oauthlib ]))
               nodejs_24
               gh
+              curl
+              jq
             ];
           };
         });
