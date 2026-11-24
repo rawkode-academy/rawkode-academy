@@ -106,9 +106,15 @@ export async function beginOwnerLogin(mf: Miniflare) {
     method: "POST", redirect: "manual", headers: { "content-type": "application/x-www-form-urlencoded", cookie: jar.value(), origin: oauthOrigin },
     body: new URLSearchParams({ handle, decision: "approve" }).toString(),
   });
-  assert.equal(approved.status, 302, await approved.clone().text());
+  // A page that navigates on its own, not a redirect: form-action would stop a redirect chain that ends at GitHub.
+  assert.equal(approved.status, 200, await approved.clone().text());
+  assert.equal(approved.headers.get("location"), null);
+  assert.match(approved.headers.get("content-security-policy") ?? "", /form-action 'self';/);
   jar.add(approved);
-  const signInURL = new URL(approved.headers.get("location")!);
+  const approvedHtml = await approved.text();
+  const target = approvedHtml.match(/http-equiv="refresh" content="0;url=([^"]+)"/)?.[1];
+  assert.ok(target, approvedHtml);
+  const signInURL = new URL(target.replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code))));
   assert.equal(signInURL.origin + signInURL.pathname, `${identity}/auth/oauth2/authorize`);
   assert.equal(signInURL.searchParams.get("client_id"), "rawkode-tools-mcp");
   assert.equal(signInURL.searchParams.get("redirect_uri"), `${oauthOrigin}/oauth/callback`);
