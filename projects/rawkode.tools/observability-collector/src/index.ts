@@ -152,6 +152,26 @@ export class PostHogCollector extends WorkerEntrypoint<Env> {
 		return { success: true };
 	}
 
+	/**
+	 * Server batches (RPC-only): up to 100 CloudEvents per call, each validated
+	 * and made durable independently, so a sender spends one subrequest per
+	 * batch instead of one per event. Results are in event order.
+	 */
+	async trackEvents(events: unknown[]): Promise<TrackEventResult[]> {
+		if (!Array.isArray(events) || events.length > 100)
+			throw new Error("Invalid event batch");
+		return Promise.all(
+			events.map((event) =>
+				this.trackEvent(event).catch(
+					(error): TrackEventResult => ({
+						success: false,
+						error: error instanceof Error ? error.message : "rejected",
+					}),
+				),
+			),
+		);
+	}
+
 	/** Internal RPC health/replay; intentionally absent from the public fetch router. */
 	async deliveryStatus() {
 		return Promise.all(

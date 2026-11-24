@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { backfillWindows, normalizeReport } from "../src/analytics.ts";
-import { reportEvents, sendToLake } from "../src/lake.ts";
+import { reportEvents, sendEvents, sendToLake } from "../src/lake.ts";
 
 const channelId = "UCrber_mFvp_FEF7D9u8PDEA";
 const report = normalizeReport({ report: "daily_traffic", startDate: "2026-10-01", endDate: "2026-10-02", limit: 50 }, {
@@ -32,6 +32,16 @@ test("lake delivery reports partial failure without throwing", async () => {
   const result = await sendToLake({ async trackEvent() { calls++; if (calls === 2) throw new Error("down"); return calls === 3 ? { success: false, error: "invalid" } : { success: true }; } }, report);
   assert.deepEqual(result, { configured: true, sent: 1, failed: 2, error: "invalid" });
   assert.deepEqual(await sendToLake(undefined, report), { configured: false, sent: 0, failed: 0 });
+});
+
+test("a batching collector gets 50 events per call and partial failures are counted", async () => {
+  const sizes: number[] = [];
+  const collector = { async trackEvent() { return { success: true }; }, async trackEvents(batch: unknown[]) { sizes.push(batch.length); return batch.map((_, i) => (sizes.length === 2 && i === 0 ? { success: false, error: "invalid" } : { success: true })); } };
+  const result = await sendEvents(collector, Array.from({ length: 120 }, (_, i) => ({ i })), 1);
+  assert.deepEqual(sizes, [50, 50, 20]);
+  assert.deepEqual(result, { configured: true, sent: 119, failed: 1, error: "invalid" });
+  const short = await sendEvents({ async trackEvent() { return { success: true }; }, async trackEvents() { return [{ success: true }]; } }, [1, 2, 3]);
+  assert.deepEqual(short, { configured: true, sent: 1, failed: 2, error: "incomplete_batch" });
 });
 
 test("backfill windows cover the range in 92-day steps and resume", () => {
