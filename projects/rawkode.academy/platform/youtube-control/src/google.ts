@@ -8,9 +8,6 @@ const analyticsAPI = "https://youtubeanalytics.googleapis.com/v2/";
 // YouTube Analytics API (reports), using a stored offline refresh token.
 export type GoogleCredentials = { clientId?: string; clientSecret?: string; refreshToken?: string };
 
-export type Video = { videoId: string; title: string; publishedAt: string | null };
-type PlaylistPage = { items?: { snippet?: { title?: string; publishedAt?: string }; contentDetails?: { videoId?: string; videoPublishedAt?: string } }[]; nextPageToken?: string };
-
 export const CONSENT_TASK = "cuenv task consent (in projects/rawkode.academy/platform/youtube-control)";
 
 export class GoogleClient {
@@ -53,27 +50,6 @@ export class GoogleClient {
     return this.decode<T>(response, `GET ${resource}`);
   }
   analytics<T>(query: Query) { return this.get<T>(analyticsAPI, "reports", { ...query, ids: `channel==${this.channelId}` }); }
-  // Every upload on the channel, newest first, from its uploads playlist (one
-  // Data API unit per 50 videos). Titles are what the channel shows today.
-  async videos(): Promise<Video[]> {
-    const channel = await this.get<{ items?: { id: string; contentDetails?: { relatedPlaylists?: { uploads?: string } } }[] }>(dataAPI, "channels", { part: "contentDetails", id: this.channelId });
-    const uploads = channel.items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
-    ensure(typeof uploads === "string" && /^[A-Za-z0-9_-]{10,64}$/.test(uploads), "invalid_google_response", "The channel has no uploads playlist", 502);
-    const videos = new Map<string, Video>();
-    let pageToken: string | undefined;
-    for (let page = 0; page < 400; page++) {
-      const result = await this.get<PlaylistPage>(dataAPI, "playlistItems", { part: "snippet,contentDetails", playlistId: uploads, maxResults: 50, pageToken });
-      for (const item of result.items ?? []) {
-        const videoId = item.contentDetails?.videoId;
-        if (typeof videoId !== "string" || !/^[A-Za-z0-9_-]{11}$/.test(videoId)) continue;
-        const publishedAt = item.contentDetails?.videoPublishedAt ?? item.snippet?.publishedAt;
-        videos.set(videoId, { videoId, title: String(item.snippet?.title ?? "").slice(0, 300), publishedAt: typeof publishedAt === "string" && Number.isFinite(Date.parse(publishedAt)) ? publishedAt : null });
-      }
-      pageToken = result.nextPageToken;
-      if (!pageToken) return [...videos.values()];
-    }
-    throw new ServiceError("invalid_google_response", "The uploads playlist exceeded its page bound", 502);
-  }
   async checkChannel() {
     const result = await this.get<{ items?: { id: string }[]; nextPageToken?: string }>(dataAPI, "channels", { part: "id", mine: true, maxResults: 50 });
     // The grant must identify exactly the configured YouTube/Brand channel.

@@ -18,13 +18,7 @@ class Upstreams {
     if (url.hostname === "mock.internal" && url.pathname === "/collector-track") { this.lakeEvents.push(await request.json() as Json); return json({ success: true }); }
     if (url.hostname === "oauth2.googleapis.com") return this.revoked ? json({ error: "invalid_grant" }, 400) : json({ access_token: "access" });
     if (url.hostname === "www.googleapis.com" && url.pathname === "/youtube/v3/channels") {
-      if (url.searchParams.get("part") === "contentDetails") return json({ items: [{ id: channelId, contentDetails: { relatedPlaylists: { uploads: "UUrber_mFvp_FEF7D9u8PDEA" } } }] });
       return json({ items: [{ id: channelId }] });
-    }
-    if (url.hostname === "www.googleapis.com" && url.pathname === "/youtube/v3/playlistItems") {
-      assert.equal(url.searchParams.get("playlistId"), "UUrber_mFvp_FEF7D9u8PDEA");
-      if (!url.searchParams.get("pageToken")) return json({ items: [{ snippet: { title: "First" }, contentDetails: { videoId: "abcdefghijk", videoPublishedAt: "2020-01-01T00:00:00Z" } }], nextPageToken: "p2" });
-      return json({ items: [{ snippet: { title: "Second" }, contentDetails: { videoId: "bcdefghijkl", videoPublishedAt: new Date().toISOString() } }] });
     }
     if (url.hostname === "youtubeanalytics.googleapis.com" && url.pathname === "/v2/reports") {
       assert.equal(url.searchParams.get("ids"), `channel==${channelId}`);
@@ -45,12 +39,18 @@ async function fixture(upstreams: Upstreams) {
       scriptPath: fileURLToPath(new URL("../dist/main.js", import.meta.url)),
       compatibilityDate: "2026-10-31", compatibilityFlags: ["nodejs_compat"],
       bindings: { YOUTUBE_CHANNEL_ID: channelId, YOUTUBE_HISTORY_SINCE: new Date(Date.now() - 70 * 86400000).toISOString().slice(0, 10), YOUTUBE_CLIENT_ID: "c", YOUTUBE_CLIENT_SECRET: "s", YOUTUBE_REFRESH_TOKEN: "r" },
-      serviceBindings: { ANALYTICS: { name: "collector", entrypoint: "Collector" } },
+      serviceBindings: { ANALYTICS: { name: "collector", entrypoint: "Collector" }, ACADEMY_API: "gateway" },
       workflows: {
         SYNC: { name: "youtube-analytics-sync", className: "SyncWorkflow" },
         BACKFILL: { name: "youtube-analytics-backfill", className: "BackfillWorkflow" },
       },
       outboundService: (request: Request) => upstreams.fetch(request),
+    }, {
+      name: "gateway", modules: true, compatibilityDate: "2026-10-31",
+      script: `export default { async fetch(request) { const body = await request.json(); if (!body.query.includes("getAllVideos")) return Response.json({ errors: [{ message: "unexpected" }] }); return Response.json({ data: { getAllVideos: [
+        { id: "v1", title: "First", channels: [{ platform: "X", externalId: "123" }, { platform: "YOUTUBE", externalId: "abcdefghijk" }] },
+        { id: "v2", title: "Second", channels: [{ platform: "YOUTUBE", externalId: "bcdefghijkl" }] },
+        { id: "v3", title: "No YouTube", channels: [] }] } }); } };`,
     }, {
       name: "collector", modules: true, compatibilityDate: "2026-10-31",
       script: await readFile(new URL("fixtures/collector.mjs", import.meta.url), "utf8"),
@@ -80,7 +80,7 @@ test("Worker runtime: the cron starts the sync and the one-time backfill, and ro
   const worker = await mf.getWorker("youtube-analytics");
   await worker.scheduled({ cron: "17 8 * * *", scheduledTime: new Date() });
   const status = await settle(mf, s => s.sync?.status === "complete" && s.backfill?.status === "complete" && s.videoBackfill?.status === "complete");
-  assert.equal(status.videoBackfill.id, "backfill-videos-2");
+  assert.equal(status.videoBackfill.id, "backfill-videos-3");
   assert.match(status.sync.id, /^sync-\d{4}-\d{2}-\d{2}$/);
   assert.equal(status.backfill.id, "backfill-initial");
 
@@ -89,8 +89,8 @@ test("Worker runtime: the cron starts the sync and the one-time backfill, and ro
   const catalogue = upstreams.lakeEvents.filter(e => e.type === "youtube.video");
   assert.deepEqual(catalogue.map(e => [e.data.video, e.data.title]).sort(), [["abcdefghijk", "First"], ["bcdefghijkl", "Second"]]);
   const videoDays = upstreams.lakeEvents.filter(e => e.type === "youtube.video_daily");
-  assert.ok(videoDays.every(e => e.data.video === "abcdefghijk" && e.data.views === 123 && typeof e.data.day === "string"));
-  // History only asks for videos published by each window's end.
+  assert.ok(videoDays.length > 0 && videoDays.every(e => e.data.views === 123 && typeof e.data.day === "string"));
+  // The video list is the Academy's YouTube IDs, so every one is asked for from the start of history.
   assert.ok(videoDays.some(e => e.data.startDate === new Date(Date.now() - 70 * 86400000).toISOString().slice(0, 10)), "Per-video history starts at YOUTUBE_HISTORY_SINCE");
   const daily = upstreams.lakeEvents.find(e => e.type === "youtube.daily")!;
   assert.equal(daily.source, "rawkode-academy-youtube");
