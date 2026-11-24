@@ -62,6 +62,13 @@ ci: pipelines: verify: {
 	tasks: [_t.verify]
 }
 
+// Run by hand from Actions: read-only look at how `likes` is stored in the lake.
+ci: pipelines: inspect: {
+	environment: "production"
+	when: manual: true
+	tasks: [_t.inspect]
+}
+
 tasks: [string]: hermetic: false
 
 tasks: {
@@ -109,6 +116,14 @@ tasks: {
 		command: "bash"
 		args: ["-c", _npm + "bash scripts/verify.sh"]
 		inputs: list.Concat([_sources, ["scripts/verify.sh"]])
+		labels: ["infisical"]
+		env: BASIN_SQL_TOKEN: _youtubeSecret & {secretName: "BASIN_SQL_TOKEN"}
+	}
+
+	inspect: schema.#Task & {
+		command: "bash"
+		args: ["scripts/inspect-likes.sh"]
+		inputs: ["scripts/inspect-likes.sh"]
 		labels: ["infisical"]
 		env: BASIN_SQL_TOKEN: _youtubeSecret & {secretName: "BASIN_SQL_TOKEN"}
 	}
