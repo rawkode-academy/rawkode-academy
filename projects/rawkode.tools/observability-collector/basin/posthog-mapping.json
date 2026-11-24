@@ -10,8 +10,8 @@
 			"comment": "capture()/track() browser events reach events_archive from 13 Nov 2026."
 		},
 		"sdk": {
-			"cutoff": null,
-			"comment": "Collected only by the PostHog SDK until PR #1646 is deployed; set to its deploy time."
+			"cutoff": "2026-11-24T16:14:00Z",
+			"comment": "Collected only by the PostHog SDK until PR #1646 was deployed (website deploy finished 2026-11-24T16:13:26Z)."
 		}
 	},
 	"events": {

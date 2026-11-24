@@ -251,9 +251,9 @@ ID and the cleaned properties.
 - Each family is imported up to its cutoff, the first instant Basin has it:
   server events 7 November 2026, browser `capture()`/`track()` events
   13 November 2026. Events PostHog's SDK collects on its own (`$pageleave`,
-  `$exception`, `$dead_click`, `$rageclick`, `$dead_swipe`) have no cutoff
-  until PR #1646 is deployed: set `families.sdk.cutoff` to its deploy time and
-  run the import again. IDs already in `events_archive` are skipped too.
+  `$exception`, `$dead_click`, `$rageclick`, `$dead_swipe`) are imported up
+  to 24 November 2026 16:14 UTC, when PR #1646's website deploy finished.
+  IDs already in `events_archive` are skipped too.
 - Dropped, counted per rule: `$autocapture`; every `link.redirect` spelling
   (~1.4M scanner hits; PostHog never recorded whether a path matched a short
   link, so none can be kept); operational and PostHog-internal events;
