@@ -19,6 +19,7 @@ import ResourceList from "@/components/courses/ResourceList.vue";
 import VideoPlayer from "@/components/video/player.vue";
 import Page from "@/wrappers/page.astro";
 import { getCourseModuleSlug } from "@/utils/course-path";
+import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 
 export const prerender = false;
 
@@ -114,9 +115,7 @@ const lessonImageUrl = imageUrl
 		: new URL(imageUrl, siteBase)
 	: courseImageUrl;
 const videoThumbnailUrl = module.data.video
-	? module.data.video.thumbnailUrl ||
-		module.data.video.poster ||
-		`https://content.rawkode.academy/videos/${module.data.video.id}/thumbnail.jpg`
+	? getVideoThumbnailUrl(module.data.video.id)
 	: undefined;
 const videoStreamUrl = module.data.video
 	? `https://content.rawkode.academy/videos/${module.data.video.id}/stream.m3u8`
@@ -286,7 +285,7 @@ function formatDuration(minutes?: number) {
 						<div class={doc.media}>
 							<VideoPlayer
 								video={module.data.video.id}
-								thumbnailUrl={module.data.video.thumbnailUrl || module.data.video.poster || ""}
+								thumbnailUrl={videoThumbnailUrl}
 								client:only="vue"
 								isAuthenticated={false}
 							>

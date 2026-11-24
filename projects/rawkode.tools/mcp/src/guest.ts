@@ -8,7 +8,7 @@ import { ensure, readLimited, ServiceError } from "./errors.ts";
 // A video that can't be tied to one YouTube video with certainty is left out.
 export const ACADEMY_API = "https://api.rawkode.academy/";
 
-const QUERY = `query GuestScope { getAllVideos { id title slug publishedAt youtubeId guests { id githubHandle } episode { show { id hosts { id githubHandle } } } } }`;
+const QUERY = `query GuestScope { getAllVideos(includeCourseVideos: true) { id title slug publishedAt youtubeId guests { id githubHandle } episode { show { id hosts { id githubHandle } } } } }`;
 
 const person = z.object({ id: z.string(), githubHandle: z.string().nullable().optional() });
 const response = z.object({

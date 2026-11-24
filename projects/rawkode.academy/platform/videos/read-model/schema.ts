@@ -46,6 +46,8 @@ export const getSchema = (
 
 	const v = s.videosTable;
 	const published = () => lte(v.publishedAt, now());
+	// Course lesson videos stay out of the catalogue unless asked for.
+	const listed = () => eq(v.courseOnly, false);
 	const byId = (id: string) => db.select().from(v).where(eq(v.id, id)).get();
 
 	const VideoTypeEnum = builder.enumType("VideoType", {
@@ -198,13 +200,20 @@ export const getSchema = (
 				nullable: true,
 				args: { slug: t.arg.string({ required: true }) },
 				resolve: (_root, args) =>
-					db.select().from(v).where(eq(v.slug, args.slug)).get(),
+					db.select().from(v).where(and(eq(v.slug, args.slug), listed())).get(),
 			}),
-			// Every video, upcoming streams included.
+			// Every catalogue video, upcoming streams included. Course lesson
+			// videos are left out unless includeCourseVideos is true.
 			getAllVideos: t.field({
 				type: [VideoRef],
-				resolve: () =>
-					db.select().from(v).orderBy(desc(v.publishedAt), asc(v.id)).all(),
+				args: { includeCourseVideos: t.arg.boolean({ defaultValue: false }) },
+				resolve: (_root, args) =>
+					db
+						.select()
+						.from(v)
+						.where(args.includeCourseVideos ? undefined : listed())
+						.orderBy(desc(v.publishedAt), asc(v.id))
+						.all(),
 			}),
 			// Every video's id and updatedAt, upcoming streams included, for change
 			// detection. updatedAt is null for rows not touched since the import.
@@ -214,6 +223,7 @@ export const getSchema = (
 					db
 						.select({ id: v.id, updatedAt: v.updatedAt })
 						.from(v)
+						.where(listed())
 						.orderBy(asc(v.id))
 						.all(),
 			}),
@@ -227,7 +237,7 @@ export const getSchema = (
 					db
 						.select()
 						.from(v)
-						.where(published())
+						.where(and(published(), listed()))
 						.orderBy(desc(v.publishedAt))
 						.limit(args.limit ?? 15)
 						.offset(args.offset ?? 0)
@@ -243,7 +253,7 @@ export const getSchema = (
 					db
 						.select()
 						.from(v)
-						.where(and(eq(v.type, "live"), gt(v.publishedAt, now())))
+						.where(and(listed(), eq(v.type, "live"), gt(v.publishedAt, now())))
 						.orderBy(asc(v.publishedAt))
 						.limit(args.limit ?? 15)
 						.offset(args.offset ?? 0)
@@ -256,7 +266,7 @@ export const getSchema = (
 					db
 						.select()
 						.from(v)
-						.where(published())
+						.where(and(published(), listed()))
 						.orderBy(sql`random()`)
 						.limit(args.limit ?? 5)
 						.all(),
@@ -277,7 +287,7 @@ export const getSchema = (
 						.select()
 						.from(v)
 						.where(
-							and(published(), or(match(v.title), match(v.description), match(v.subtitle))),
+							and(published(), listed(), or(match(v.title), match(v.description), match(v.subtitle))),
 						)
 						.orderBy(desc(v.publishedAt))
 						.limit(args.limit ?? 15)
