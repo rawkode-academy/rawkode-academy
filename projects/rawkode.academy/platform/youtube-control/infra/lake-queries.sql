@@ -39,6 +39,8 @@ FROM (
 ORDER BY day, views DESC;
 
 -- Views and watch time per video per day, with each video's current title.
+-- likes and comments are net and can be negative; json_get_int returns NULL for
+-- a negative number, so they are read as text and cast.
 -- youtube.video is the channel's video catalogue (one row per video per sync).
 WITH titles AS (
 	SELECT video, title, published_at FROM (
@@ -59,8 +61,8 @@ days AS (
 			json_get_int(value, 'data', 'views') AS views,
 			json_get_int(value, 'data', 'estimatedMinutesWatched') AS minutes_watched,
 			json_get_int(value, 'data', 'averageViewDuration') AS average_view_duration_seconds,
-			json_get_int(value, 'data', 'likes') AS likes,
-			json_get_int(value, 'data', 'comments') AS comments,
+			CAST(json_as_text(value, 'data', 'likes') AS BIGINT) AS likes,
+			CAST(json_as_text(value, 'data', 'comments') AS BIGINT) AS comments,
 			json_get_int(value, 'data', 'subscribersGained') AS subscribers_gained,
 			ROW_NUMBER() OVER (
 				PARTITION BY json_get_str(value, 'data', 'video'), json_get_str(value, 'data', 'day')
