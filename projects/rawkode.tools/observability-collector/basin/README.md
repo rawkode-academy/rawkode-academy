@@ -210,6 +210,10 @@ SCRUB_ARGS=--apply cuenv task scrub-pii -e production    # rewrite in place
 SCRUB_ARGS="--rollback <snapshot-id>" cuenv task scrub-pii -e production
 ```
 
+From CI (main): the manual workflows
+`rawkode-tools-observability-collector-scrub-pii` (dry run) and
+`rawkode-tools-observability-collector-scrub-pii-apply`.
+
 It rewrites only rows ingested before it starts and keeps `distinct_id` and
 `anon_id`, so identity links survive. Re-runs change nothing. The previous
 snapshot, printed on apply, still holds the data until snapshot expiry

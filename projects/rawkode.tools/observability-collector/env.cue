@@ -66,6 +66,19 @@ ci: pipelines: {
 	// Compaction and snapshot expiry aren't in the Cloudflare provider yet,
 	// so infrastructure.cue can't enable them. Runs on main when the script or
 	// the infrastructure (and so the catalog token) changes.
+	// One-off personal-data scrub of events_archive. Manual only: the dry
+	// run prints counts; the apply pipeline writes.
+	"scrub-pii": {
+		environment: "production"
+		when: manual: true
+		tasks: [_t."scrub-pii"]
+	}
+	"scrub-pii-apply": {
+		environment: "production"
+		when: manual: true
+		tasks: [_t."scrub-pii-apply"]
+	}
+
 	maintenance: {
 		environment: "production"
 		when: {
@@ -132,6 +145,15 @@ tasks: {
 		hermetic: false
 		command:  "python"
 		args: ["-I", "basin/scrub-pii.py"]
+		inputs: ["basin/scrub-pii.py", "flake.nix", "flake.lock"]
+		labels: ["infisical"]
+		env: BASIN_CATALOG_TOKEN: _basinSecret & {secretName: "BASIN_CATALOG_TOKEN"}
+	}
+
+	"scrub-pii-apply": schema.#Task & {
+		hermetic: false
+		command:  "python"
+		args: ["-I", "basin/scrub-pii.py", "--apply"]
 		inputs: ["basin/scrub-pii.py", "flake.nix", "flake.lock"]
 		labels: ["infisical"]
 		env: BASIN_CATALOG_TOKEN: _basinSecret & {secretName: "BASIN_CATALOG_TOKEN"}
