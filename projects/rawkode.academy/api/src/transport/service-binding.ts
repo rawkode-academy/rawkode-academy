@@ -11,6 +11,7 @@ export const SUBGRAPH_BINDING_MAP: Record<string, keyof Env> = {
 	shows: "SHOWS",
 	videos: "VIDEOS",
 	"video-guests": "VIDEO_GUESTS",
+	"video-channels": "VIDEO_CHANNELS",
 	"video-technologies": "VIDEO_TECHNOLOGIES",
 	"show-hosts": "SHOW_HOSTS",
 	episodes: "EPISODES",

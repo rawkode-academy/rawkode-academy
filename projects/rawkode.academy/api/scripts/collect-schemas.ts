@@ -15,6 +15,7 @@ const PLATFORM_SERVICES = [
 	"videos",
 	// Content relationships
 	"video-guests",
+	"video-channels",
 	"video-technologies",
 	"show-hosts",
 	"episodes",

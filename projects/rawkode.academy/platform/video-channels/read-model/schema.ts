@@ -39,8 +39,8 @@ export const getSchema = (env: { DB: D1Database }): GraphQLSchema => {
 	}>("VideoChannel");
 	VideoChannel.implement({
 		fields: (f) => ({
-			platform: f.field({ type: Platform, resolve: (c) => c.platform }),
-			externalId: f.exposeString("externalId"),
+			platform: f.field({ type: Platform, nullable: false, resolve: (c) => c.platform }),
+			externalId: f.exposeString("externalId", { nullable: false }),
 		}),
 	});
 
@@ -51,6 +51,7 @@ export const getSchema = (env: { DB: D1Database }): GraphQLSchema => {
 		fields: (f) => ({
 			channels: f.field({
 				type: [VideoChannel],
+				nullable: false,
 				resolve: (video) =>
 					db
 						.select({ platform: t.platform, externalId: t.externalId })

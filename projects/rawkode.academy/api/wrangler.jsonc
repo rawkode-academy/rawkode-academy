@@ -39,6 +39,7 @@
 		{ "binding": "SHOWS", "service": "platform-shows-read-model" },
 		{ "binding": "VIDEOS", "service": "platform-videos-read-model" },
 		{ "binding": "VIDEO_GUESTS", "service": "platform-video-guests-read-model" },
+		{ "binding": "VIDEO_CHANNELS", "service": "platform-video-channels-read-model" },
 		{ "binding": "VIDEO_TECHNOLOGIES", "service": "platform-video-technologies-read-model" },
 		{ "binding": "SHOW_HOSTS", "service": "platform-show-hosts-read-model" },
 		{ "binding": "EPISODES", "service": "platform-episodes-read-model" },

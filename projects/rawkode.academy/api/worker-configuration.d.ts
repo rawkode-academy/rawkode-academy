@@ -7,6 +7,7 @@ interface __BaseEnv_Env {
 	SHOWS: Fetcher /* platform-shows-read-model */;
 	VIDEOS: Fetcher /* platform-videos-read-model */;
 	VIDEO_GUESTS: Fetcher /* platform-video-guests-read-model */;
+	VIDEO_CHANNELS: Fetcher /* platform-video-channels-read-model */;
 	VIDEO_TECHNOLOGIES: Fetcher /* platform-video-technologies-read-model */;
 	SHOW_HOSTS: Fetcher /* platform-show-hosts-read-model */;
 	EPISODES: Fetcher /* platform-episodes-read-model */;
