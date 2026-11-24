@@ -1,14 +1,14 @@
 """One-time consent for the Academy channel's YouTube Analytics access.
 
 Run with `cuenv task consent`, which supplies Python and google-auth-oauthlib
-from nixpkgs and the Infisical machine identity from 1Password. It opens Google
+from nixpkgs, and the Google OAuth client and Infisical machine identity from
+1Password. It opens Google
 consent in the browser, checks the grant is for exactly the Academy channel,
 writes the OAuth client and refresh token to Infisical (/projects/basin), and
 starts the deploy workflow that uploads them to the Worker. Nothing is written
 to disk. Run it again whenever the alert says the grant was revoked.
 """
 import contextlib
-import glob
 import json
 import os
 import subprocess
@@ -16,7 +16,6 @@ import sys
 import urllib.error
 import urllib.parse
 import urllib.request
-from pathlib import Path
 
 from google_auth_oauthlib.flow import InstalledAppFlow
 
@@ -33,23 +32,21 @@ INFISICAL_PATH = "/projects/basin"
 DEPLOY_WORKFLOW = "rawkode-academy-platform-youtube-control-default.yml"
 
 
-def client_file() -> Path:
-    found = glob.glob(os.path.expanduser("~/Downloads/client_secret_*.apps.googleusercontent.com.json"))
-    default = found[0] if len(found) == 1 else ""
-    answer = input(f"Google Desktop OAuth client JSON [{default or 'path'}]: ").strip()
-    path = Path(answer or default).expanduser()
-    if not path.is_file():
-        raise SystemExit(f"No such file: {path}")
-    return path
+def client_config() -> dict:
+    client_id = os.environ.get("GOOGLE_OAUTH_CLIENT_ID", "").strip()
+    client_secret = os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET", "").strip()
+    if not client_id or not client_secret:
+        raise SystemExit("The Google OAuth client ID and secret weren't supplied; run this with `cuenv task consent`.")
+    return {"installed": {
+        "client_id": client_id,
+        "client_secret": client_secret,
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "redirect_uris": ["http://localhost"],
+    }}
 
 
 def consent(config: dict):
-    installed = config.get("installed")
-    if not installed:
-        raise SystemExit("Use a Desktop app OAuth client from Google Cloud.")
-    # Restrict endpoints even if the supplied config is edited or untrusted.
-    installed["auth_uri"] = "https://accounts.google.com/o/oauth2/auth"
-    installed["token_uri"] = "https://oauth2.googleapis.com/token"
     flow = InstalledAppFlow.from_client_config(config, SCOPES, autogenerate_code_verifier=True)
     print("Opening Google consent: choose the Rawkode Academy channel.", file=sys.stderr)
     with contextlib.redirect_stdout(sys.stderr):
@@ -106,13 +103,8 @@ def deploy():
 
 
 def main():
-    path = client_file()
-    config = json.loads(path.read_text())
-    credentials = consent(config)
+    credentials = consent(client_config())
     store((credentials.client_id, credentials.client_secret, credentials.refresh_token))
-    if input(f"Delete {path}? Infisical now holds its client ID and secret. [y/N] ").strip().lower() == "y":
-        path.unlink()
-        print(f"Deleted {path}.", file=sys.stderr)
     deploy()
 
 

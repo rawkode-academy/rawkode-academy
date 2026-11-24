@@ -86,7 +86,7 @@ tasks: {
 	}
 
 	// Run by hand, once, and again whenever the sync alert says the grant was
-	// revoked: Google consent in the browser, credential to Infisical, then the
+	// revoked: Google consent in the browser with the OAuth client from 1Password, credential to Infisical, then the
 	// deploy workflow. Logs in to Infisical as the bootstrap machine identity.
 	consent: schema.#Task & {
 		command: "nix"
@@ -95,6 +95,8 @@ tasks: {
 		env: {
 			INFISICAL_UNIVERSAL_AUTH_CLIENT_ID: schema.#OnePasswordRef & {ref: "op://Employee/Infisical/machine-identity/client-id"}
 			INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET: schema.#OnePasswordRef & {ref: "op://Employee/Infisical/machine-identity/client-secret"}
+			GOOGLE_OAUTH_CLIENT_ID: schema.#OnePasswordRef & {ref: "op://Employee/565nub77bcoxqd5a77kbdets3q/youtube-control/client-id"}
+			GOOGLE_OAUTH_CLIENT_SECRET: schema.#OnePasswordRef & {ref: "op://Employee/565nub77bcoxqd5a77kbdets3q/youtube-control/client-secret"}
 		}
 	}
 

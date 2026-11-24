@@ -25,8 +25,8 @@ Dates are YouTube's `America/Los_Angeles` reporting days. YouTube revises recent
 
 ## Going live
 
-1. In Google Cloud, create a project with **YouTube Data API v3** and **YouTube Analytics API** enabled, an OAuth consent screen that is **Internal** (Workspace) or **published to Production** (in Testing, refresh tokens die after seven days), and a **Desktop app** OAuth client. Download its JSON.
-2. `cuenv task consent` in this directory. It asks for the client JSON (default: the one `~/Downloads/client_secret_*.json`), opens Google consent (pick the Rawkode Academy channel), checks the grant is for exactly that channel, writes the three secrets to Infisical as the bootstrap machine identity (from 1Password), offers to delete the JSON, and starts the deploy workflow if it's on `main`.
+1. In Google Cloud, create a project with **YouTube Data API v3** and **YouTube Analytics API** enabled, an OAuth consent screen that is **Internal** (Workspace) or **published to Production** (in Testing, refresh tokens die after seven days), and a **Desktop app** OAuth client. Store its client ID and secret in 1Password at `op://Employee/565nub77bcoxqd5a77kbdets3q/youtube-control/client-id` and `.../client-secret`.
+2. `cuenv task consent` in this directory. It reads the OAuth client from 1Password, opens Google consent (pick the Rawkode Academy channel), checks the grant is for exactly that channel, writes the client ID, client secret and refresh token to Infisical as the bootstrap machine identity (also from 1Password), and starts the deploy workflow if it's on `main`.
 3. Merge. CI deploys; the next 08:17 UTC cron runs the first sync and starts the backfill.
 
 When the alert says the grant was revoked, repeat step 2.
