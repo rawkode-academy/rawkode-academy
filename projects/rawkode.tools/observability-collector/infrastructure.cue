@@ -52,19 +52,19 @@ _accountResources: json.Marshal({
 // Cloudflare API token permission groups, from the Basin Catalog and Basin SQL
 // docs, looked up by name so no ID is hardcoded. A lookup that matches
 // nothing fails the plan.
-_permissionNames: [
-	"Workers R2 Data Catalog Write",
-	"Workers R2 Data Catalog Read",
-	"Workers R2 Storage Bucket Item Write",
-	"Workers R2 Storage Bucket Item Read",
-	"Workers R2 SQL Read",
-]
+_permissionNames: {
+	workersR2DataCatalogWrite: "Workers R2 Data Catalog Write"
+	workersR2DataCatalogRead: "Workers R2 Data Catalog Read"
+	workersR2StorageBucketItemWrite: "Workers R2 Storage Bucket Item Write"
+	workersR2StorageBucketItemRead: "Workers R2 Storage Bucket Item Read"
+	workersR2SQLRead: "Workers R2 SQL Read"
+}
 
 // Permission group IDs by name, read from Cloudflare.
 _permissions: {
-	for n in _permissionNames {
-		(n): schema.#Select & {
-			from: infrastructure.data[n].outputs.result
+	for k, _ in _permissionNames {
+		(k): schema.#Select & {
+			from: infrastructure.data[k].outputs.result
 			path: [0, "id"]
 			type: "string"
 		}
@@ -131,8 +131,8 @@ infrastructure: {
 	}
 
 	data: {
-		for n in _permissionNames {
-			(n): permission_groups.#DataSource & {
+		for k, n in _permissionNames {
+			(k): permission_groups.#DataSource & {
 				configuration: {
 					account_id: _account
 					name:       n
@@ -167,8 +167,8 @@ infrastructure: {
 					effect:    "allow"
 					resources: _accountResources
 					permission_groups: [
-						{id: _permissions["Workers R2 Data Catalog Write"]},
-						{id: _permissions["Workers R2 Storage Bucket Item Write"]},
+						{id: _permissions.workersR2DataCatalogWrite},
+						{id: _permissions.workersR2StorageBucketItemWrite},
 					]
 				}]
 			}
@@ -183,9 +183,9 @@ infrastructure: {
 					effect:    "allow"
 					resources: _bucketResources
 					permission_groups: [
-						{id: _permissions["Workers R2 SQL Read"]},
-						{id: _permissions["Workers R2 Data Catalog Read"]},
-						{id: _permissions["Workers R2 Storage Bucket Item Read"]},
+						{id: _permissions.workersR2SQLRead},
+						{id: _permissions.workersR2DataCatalogRead},
+						{id: _permissions.workersR2StorageBucketItemRead},
 					]
 				}]
 			}
