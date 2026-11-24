@@ -50,7 +50,7 @@ windows_arm64 = "sha256:7df6fe6573379c2faf2e801fdbca58ac909266dbee604feaa993439b
 
 [infrastructure_providers."registry.terraform.io/dnsimple/dnsimple"]
 version = "2.2.1"
-schema_digest = "sha256:593a1d3acea9ad1619ce5e28db67f0e75007a8106bf426ac0add995055eab689"
+schema_digest = "sha256:d4d711394e2c83aa554577f44f6d8ed9bb676a883d6ff0aded5f76cef7ac8384"
 
 [infrastructure_providers."registry.terraform.io/dnsimple/dnsimple".platforms]
 darwin_amd64 = "sha256:24839076472007bafb89023879a433d887a1909ce925c61c46ae37987170866d"
