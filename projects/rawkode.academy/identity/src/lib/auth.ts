@@ -180,7 +180,14 @@ export const createAuth = async (env: AuthEnv) => {
 						(client.clientId === "rawkode-academy-website" && !storedUsername)
 					) {
 						username = await refreshGitHubUsername(user.id);
-					} else if (client.clientId === "rawkode-academy-website") {
+					} else if (
+						client.clientId === "rawkode-academy-website" ||
+						// Rawkode Tools scopes guests by this verified GitHub login, so
+						// refresh it on every sign-in and token refresh. If GitHub can't
+						// be reached the last verified one stands; with none, the MCP
+						// refuses the guest.
+						client.clientId === "rawkode-tools-mcp"
+					) {
 						try {
 							username = await refreshGitHubUsername(user.id);
 						} catch (error) {

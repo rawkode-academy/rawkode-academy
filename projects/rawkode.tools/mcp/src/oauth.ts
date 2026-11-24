@@ -4,7 +4,7 @@ import {
 } from "@cloudflare/workers-oauth-provider";
 import { createMcpHandler } from "agents/mcp/server";
 import { ensure, errorBody, readLimited, ServiceError, validateOrigin } from "./errors.ts";
-import { authorizeUrl, IDENTITY_ORIGIN, recheckOperator, signInOperator, type Operator } from "./identity.ts";
+import { authorizeUrl, IDENTITY_ORIGIN, recheckCaller, roleOf, signInCaller, type Caller, type CallerRole } from "./identity.ts";
 import { createServer, grantedScopes, MODULE_SCOPES, modulesFor } from "./tools/index.ts";
 
 const SCOPES = [...MODULE_SCOPES, "offline_access"];
@@ -28,7 +28,7 @@ export function renderConsent(details: ConsentDescription, handle: string, scope
   ${details.redirectIsLoopback ? "<p><strong>This returns access to an app on your computer.</strong> Continue only if you started this connection.</p>" : ""}
   <form method="post" action="/oauth/authorize"><input type="hidden" name="handle" value="${escape(handle)}">
   <p>This connection can:</p><ul>${abilities}</ul>
-  <p><small>The connection can refresh its access for up to 30 days. Continuing signs you in with your Rawkode Academy account, which needs the Rawkode Tools operator role. No credentials are shared with this client.</small></p>
+  <p><small>The connection can refresh its access for up to 30 days. Continuing signs you in with your Rawkode Academy account, which needs the Rawkode Tools operator role, or the guest role, which shows only the YouTube numbers of episodes you appear in. No credentials are shared with this client.</small></p>
   <button name="decision" value="approve">Continue with Rawkode Academy</button><button name="decision" value="deny">Cancel</button></form></html>`;
 }
 // formTargets: origins the consent form's POST may redirect to. Browsers apply form-action to redirects.
@@ -48,8 +48,8 @@ export async function s256(value: string) {
   return Buffer.from(bytes).toString("base64url");
 }
 // The consent page shows the same modules this grants.
-function grantScope(requested: string[]) {
-  return [...grantedScopes(requested), ...(requested.includes("offline_access") ? ["offline_access"] : [])];
+function grantScope(requested: string[], role: CallerRole) {
+  return [...grantedScopes(requested, role), ...(requested.includes("offline_access") ? ["offline_access"] : [])];
 }
 async function signIn(request: Request, env: OAuthEnv) {
   const oauth = env.OAUTH_PROVIDER;
@@ -91,14 +91,14 @@ async function callback(request: Request, env: OAuthEnv) {
   }
   const code = parameters.get("code");
   ensure(code && code.length <= 4096, "invalid_callback", "Missing authorization code");
-  let signedIn: Operator;
+  let signedIn: Caller;
   try {
-    signedIn = await signInOperator(code, data.verifier, `${publicOrigin(env)}/oauth/callback`);
+    signedIn = await signInCaller(code, data.verifier, `${publicOrigin(env)}/oauth/callback`);
   } catch (error) {
     const body = errorBody(error);
     return new Response(body.status === 403 ? escape(body.message) : "Rawkode Academy sign-in failed. Start a new connection.", { status: body.status === 403 ? 403 : 502, headers: pageHeaders(headers) });
   }
-  const { redirectTo } = await oauth.completeAuthorization({ request: original, userId: signedIn.userId, scope: grantScope(original.scope), metadata: { label: "Rawkode Tools" }, props: signedIn satisfies Operator });
+  const { redirectTo } = await oauth.completeAuthorization({ request: original, userId: signedIn.userId, scope: grantScope(original.scope, roleOf(signedIn)), metadata: { label: "Rawkode Tools" }, props: signedIn satisfies Caller });
   headers.set("location", redirectTo);
   return new Response(null, { status: 302, headers });
 }
@@ -116,17 +116,18 @@ export async function oauthFetch(request: Request, env: CloudflareEnv, ctx: Exec
     onError: ({ code, status, headers }) => Response.json({ error: code, error_description: "Authorization failed; reconnect or check the requested permissions" }, { status, headers: { ...headers, "cache-control": "no-store" } }),
     tokenExchangeCallback: async ({ grantType, props }) => {
       if (grantType !== "refresh_token") return;
-      try { return { newProps: await recheckOperator(props as Operator) }; }
+      try { return { newProps: await recheckCaller(props as Caller) }; }
       catch { throw new OAuthError("invalid_grant", { description: "Rawkode Tools access changed; reconnect" }); }
     },
     apiHandler: {
       async fetch(req, currentEnv, executionContext) {
-        const authContext = executionContext as OAuthResourceContext<Operator>;
+        const authContext = executionContext as OAuthResourceContext<Caller>;
+        const caller = authContext.props;
         ensure(new URL(req.url).pathname === "/mcp", "not_found", "Unknown MCP endpoint", 404);
         validateOrigin(req);
-        if (modulesFor(authContext.auth.scope).length === 0) return insufficientScope(authContext.auth, MODULE_SCOPES);
+        if (modulesFor(authContext.auth.scope, roleOf(caller)).length === 0) return insufficientScope(authContext.auth, MODULE_SCOPES);
         const safeRequest = req.body ? new Request(req, { body: await readLimited(req.body, 65536) }) : req;
-        return createMcpHandler(() => createServer(currentEnv, authContext.auth.scope), { corsOptions: false, allowedHostnames: [new URL(origin).hostname], allowedOriginHostnames: [new URL(origin).hostname] })(safeRequest, currentEnv, executionContext);
+        return createMcpHandler(() => createServer(currentEnv, authContext.auth.scope, caller), { corsOptions: false, allowedHostnames: [new URL(origin).hostname], allowedOriginHostnames: [new URL(origin).hostname] })(safeRequest, currentEnv, executionContext);
       },
     },
     defaultHandler: {

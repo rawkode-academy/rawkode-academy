@@ -14,7 +14,7 @@ export const publicOriginProxy = `export default { fetch(request, env) {
   return env.APP.fetch(new Request(request, { headers }));
 } };`;
 type FetchRequest = { url: string; method: string; headers: { get(name: string): string | null }; text(): Promise<string> };
-export type UserOptions = { sub?: string; roles?: string[]; clientId?: string; refresh?: boolean };
+export type UserOptions = { sub?: string; roles?: string[]; clientId?: string; refresh?: boolean; username?: string };
 type Session = { challenge: string; user: UserOptions };
 
 // Stands in for id.rawkode.academy's OIDC provider: authorization codes bound
@@ -46,7 +46,7 @@ export class IdentityMock {
       if (!user) return MockResponse.json({ error: "invalid_token" }, { status: 401 });
       const roles = user.roles ?? ["operator"];
       const clientId = user.clientId ?? "rawkode-tools-mcp";
-      return MockResponse.json({ sub: user.sub ?? operatorId, email: "operator@example.test", ...(roles.length ? { roles, "https://rawkode.academy/roles": roles, "https://rawkode.academy/client_id": clientId } : {}) });
+      return MockResponse.json({ sub: user.sub ?? operatorId, email: "operator@example.test", ...(user.username ? { username: user.username, preferred_username: user.username } : {}), ...(roles.length ? { roles, "https://rawkode.academy/roles": roles, "https://rawkode.academy/client_id": clientId } : {}) });
     }
     if (url.href !== `${identity}/auth/oauth2/token`) return null;
     const parameters = new URLSearchParams(await request.text());
@@ -129,9 +129,9 @@ export async function exchangeCode(mf: Miniflare, pending: OAuthPending, code: s
     body: new URLSearchParams({ grant_type: "authorization_code", client_id: pending.clientId, code, code_verifier: verifier, redirect_uri: "https://chatgpt.example/callback", resource: `${oauthOrigin}/mcp` }).toString(),
   });
 }
-export async function authorizedMcp(mf: Miniflare, identity: IdentityMock) {
+export async function authorizedMcp(mf: Miniflare, identity: IdentityMock, user: UserOptions = {}) {
   const pending = await beginOwnerLogin(mf);
-  const { response } = await completeOwnerLogin(mf, identity, pending);
+  const { response } = await completeOwnerLogin(mf, identity, pending, user);
   assert.equal(response.status, 302, await response.clone().text());
   const redirect = new URL(response.headers.get("location")!);
   assert.equal(redirect.searchParams.get("state"), "downstream-client-state");

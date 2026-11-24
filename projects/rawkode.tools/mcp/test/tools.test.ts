@@ -3,11 +3,19 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { grantedScopes, MODULE_SCOPES, modulesFor } from "../src/tools/index.ts";
 
-test("consent grants the requested module scopes, or every read-only module when none is named", () => {
-  assert.deepEqual(MODULE_SCOPES, ["analytics:read"]);
+test("consent grants the requested module scopes of the caller's role, or every read-only module of that role when none is named", () => {
+  assert.deepEqual(MODULE_SCOPES, ["analytics:read", "guest:read"]);
   assert.deepEqual(grantedScopes(["analytics:read", "offline_access"]), ["analytics:read"]);
   assert.deepEqual(grantedScopes([]), ["analytics:read"]);
   assert.deepEqual(grantedScopes(["offline_access"]), ["analytics:read"]);
+  assert.deepEqual(grantedScopes(["analytics:read", "guest:read"], "operator"), ["analytics:read"]);
+});
+
+test("a guest is never granted the analytics module, whatever it asks for", () => {
+  assert.deepEqual(grantedScopes(["analytics:read", "offline_access"], "guest"), ["guest:read"]);
+  assert.deepEqual(grantedScopes([], "guest"), ["guest:read"]);
+  assert.deepEqual(modulesFor(["analytics:read", "guest:read"], "guest").map(module => module.scope), ["guest:read"]);
+  assert.deepEqual(modulesFor(["analytics:read", "guest:read"], "operator").map(module => module.scope), ["analytics:read"]);
 });
 
 test("a grant unlocks only its modules", () => {

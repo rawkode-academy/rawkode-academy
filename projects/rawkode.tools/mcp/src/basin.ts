@@ -34,7 +34,8 @@ export function readOnlyStatement(sql: string) {
   return statement;
 }
 
-export async function basinQuery(config: BasinConfig, sql: string) {
+// maxRows caps what is returned; callers that need a whole catalogue raise it.
+export async function basinQuery(config: BasinConfig, sql: string, maxRows = MAX_ROWS) {
   const fetcher = config.fetcher ?? ((...args: Parameters<typeof fetch>) => fetch(...args));
   const response = await fetcher(`https://api.sql.cloudflarestorage.com/api/v1/accounts/${config.accountId}/basin-sql/query/${config.bucket}`, {
     method: "POST", redirect: "manual", signal: AbortSignal.timeout(60000),
@@ -50,5 +51,5 @@ export async function basinQuery(config: BasinConfig, sql: string) {
     throw new ServiceError("basin_query_failed", errors ? errors.slice(0, 2000) : `Basin SQL failed (HTTP ${response.status})`, response.status === 400 ? 400 : 502, response.status);
   }
   const rows = parseRows(payload);
-  return { rows: rows.slice(0, MAX_ROWS), rowCount: rows.length, truncated: rows.length > MAX_ROWS };
+  return { rows: rows.slice(0, maxRows), rowCount: rows.length, truncated: rows.length > maxRows };
 }
