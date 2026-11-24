@@ -114,7 +114,7 @@ tasks: {
 	"relabel-history": schema.#Task & {
 		hermetic: false
 		command:  "uv"
-		args: ["run", "basin/relabel-history.py"]
+		args: ["run", "--no-build", "basin/relabel-history.py"]
 		inputs: ["basin/relabel-history.py"]
 		labels: ["infisical"]
 		env: BASIN_CATALOG_TOKEN: _basinSecret & {secretName: "BASIN_CATALOG_TOKEN"}

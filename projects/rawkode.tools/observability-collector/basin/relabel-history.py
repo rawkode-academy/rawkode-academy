@@ -1,6 +1,6 @@
 # /// script
-# requires-python = ">=3.11"
-# dependencies = ["pyiceberg[pyarrow]==0.9.1"]
+# requires-python = ">=3.11,<3.15"
+# dependencies = ["pyiceberg[pyarrow]==0.12.0", "pyarrow==26.0.1"]
 # ///
 """One-time, explicitly requested rewrite: label rows stored before bot labelling.
 
