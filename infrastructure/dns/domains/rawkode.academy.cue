@@ -2,7 +2,7 @@ package domains
 
 import "github.com/rawkode-academy/rawkode-academy/infrastructure/dns/zone"
 
-zones: "rawkode.academy": zone.#CloudflareRegistrar & zone.#Gmail & {
+zones: "rawkode.academy": zone.#CloudflareRegistrar & zone.#Gmail & zone.#WwwToApexRedirect & {
 	id: "789be9a4588576db675cc2053ea3a89d"
 	settings: {
 		ssl:     "strict"
