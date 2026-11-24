@@ -199,6 +199,22 @@ The task needs only Nix: the project's `flake.nix` provides Python with
 PyIceberg, pyiceberg-core and PyArrow, so it works the same on NixOS, macOS
 and CI.
 
+Sign-ins before PR #1646 wrote the user's email and name into
+`user.identified` events (`data.set_properties`). After #1646 is deployed,
+remove them, and any other email address in stored events, with the one-time
+scrub task:
+
+```sh
+cuenv task scrub-pii -e production                       # dry run: counts per field
+SCRUB_ARGS=--apply cuenv task scrub-pii -e production    # rewrite in place
+SCRUB_ARGS="--rollback <snapshot-id>" cuenv task scrub-pii -e production
+```
+
+It rewrites only rows ingested before it starts and keeps `distinct_id` and
+`anon_id`, so identity links survive. Re-runs change nothing. The previous
+snapshot, printed on apply, still holds the data until snapshot expiry
+(7 days); rolling back restores it.
+
 The empty legacy `analytics.events` table is no longer queried. To purge it,
 run the guarded one-time cleanup task with Infisical access:
 

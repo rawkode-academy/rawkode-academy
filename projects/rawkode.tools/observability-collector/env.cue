@@ -128,6 +128,15 @@ tasks: {
 		env: BASIN_CATALOG_TOKEN: _basinSecret & {secretName: "BASIN_CATALOG_TOKEN"}
 	}
 
+	"scrub-pii": schema.#Task & {
+		hermetic: false
+		command:  "python"
+		args: ["-I", "basin/scrub-pii.py"]
+		inputs: ["basin/scrub-pii.py", "flake.nix", "flake.lock"]
+		labels: ["infisical"]
+		env: BASIN_CATALOG_TOKEN: _basinSecret & {secretName: "BASIN_CATALOG_TOKEN"}
+	}
+
 	reconcile: schema.#Task & {
 		hermetic: false
 		command:  "bun"
