@@ -1,7 +1,5 @@
-# /// script
-# requires-python = ">=3.11,<3.15"
-# dependencies = ["pyiceberg[pyarrow]==0.12.0", "pyarrow==26.0.1"]
-# ///
+# Run through `cuenv task relabel-history`, which provides Python, PyIceberg
+# and PyArrow from nixpkgs.
 """One-time, explicitly requested rewrite: label rows stored before bot labelling.
 
 The collector labels every new event with `bot` and `botreason`. This rewrites
