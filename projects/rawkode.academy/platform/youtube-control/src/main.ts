@@ -1,4 +1,4 @@
-import { FIRST_BACKFILL_ID, syncInstanceId } from "./collect.ts";
+import { FIRST_BACKFILL_ID, syncInstanceId, VIDEO_BACKFILL_ID } from "./collect.ts";
 export { BackfillWorkflow, SyncWorkflow } from "./workflows.ts";
 
 const json = (body: unknown, status = 200) => Response.json(body, { status, headers: { "cache-control": "no-store", "x-content-type-options": "nosniff" } });
@@ -26,7 +26,7 @@ export default {
     if (url.pathname === "/status") {
       const now = Date.now();
       const sync = await instanceStatus(env.SYNC, syncInstanceId(new Date(now))) ?? await instanceStatus(env.SYNC, syncInstanceId(new Date(now - 86400000)));
-      return json({ sync, backfill: await instanceStatus(env.BACKFILL, FIRST_BACKFILL_ID) });
+      return json({ sync, backfill: await instanceStatus(env.BACKFILL, FIRST_BACKFILL_ID), videoBackfill: await instanceStatus(env.BACKFILL, VIDEO_BACKFILL_ID) });
     }
     return json({ error: "not_found" }, 404);
   },
@@ -34,6 +34,7 @@ export default {
     ctx.waitUntil((async () => {
       await startOnce(env.SYNC, syncInstanceId(new Date(controller.scheduledTime)), {});
       await startOnce(env.BACKFILL, FIRST_BACKFILL_ID, { since: env.YOUTUBE_HISTORY_SINCE });
+      await startOnce(env.BACKFILL, VIDEO_BACKFILL_ID, { since: env.YOUTUBE_HISTORY_SINCE, scope: "videos" });
     })());
   },
 } satisfies ExportedHandler<CloudflareEnv>;

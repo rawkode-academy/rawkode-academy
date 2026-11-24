@@ -1,7 +1,7 @@
 import { WorkflowEntrypoint, type WorkflowEvent, type WorkflowStep } from "cloudflare:workers";
-import { backfillJobs, collect, syncJobs, type Job } from "./collect.ts";
+import { backfillJobs, collect, collectVideos, jobName, syncJobs, videoBackfillJobs, videoSyncJobs, type Job } from "./collect.ts";
 import { daySchema, ServiceError } from "./domain.ts";
-import { GoogleClient } from "./google.ts";
+import { GoogleClient, type Video } from "./google.ts";
 import type { AnalyticsCollector } from "./lake.ts";
 
 const retries = { retries: { limit: 4, delay: "2 minutes", backoff: "exponential" }, timeout: "10 minutes" } as const;
@@ -29,27 +29,50 @@ function unwrap<T>(result: T | Stopped): T {
   return result as T;
 }
 
-async function run(env: CloudflareEnv, step: WorkflowStep, jobs: Job[]) {
+const lake = (env: CloudflareEnv) => env.ANALYTICS as unknown as AnalyticsCollector;
+
+async function checkChannel(env: CloudflareEnv, step: WorkflowStep) {
   unwrap(await step.do("check channel authorization", retries, () => guarded(async () => { await client(env).checkChannel(); return { checked: true }; })));
+}
+// The uploads list is one step, so replays reuse the same video batches.
+async function listVideos(env: CloudflareEnv, step: WorkflowStep): Promise<Video[]> {
+  return unwrap(await step.do("list channel videos", retries, () => guarded(() => client(env).videos())));
+}
+async function runJobs(env: CloudflareEnv, step: WorkflowStep, jobs: Job[]) {
   const results = [];
   for (const job of jobs) {
-    results.push(unwrap(await step.do(`${job.report} ${job.startDate}..${job.endDate}`, retries, () => guarded(() => collect(client(env), env.YOUTUBE_CHANNEL_ID, env.ANALYTICS as unknown as AnalyticsCollector, job)))));
+    results.push(unwrap(await step.do(jobName(job), retries, () => guarded(() => collect(client(env), env.YOUTUBE_CHANNEL_ID, lake(env), job)))));
   }
-  return { jobs: results.length, rows: results.reduce((sum, r) => sum + r.rows, 0) };
+  return results;
 }
+const summary = (results: { rows: number }[]) => ({ jobs: results.length, rows: results.reduce((sum, r) => sum + r.rows, 0) });
 
-// The daily collection: the last 28 days of every daily report.
+// The daily collection: the last 28 days of every channel report, the video
+// catalogue, and the last 28 days of every video.
 export class SyncWorkflow extends WorkflowEntrypoint<CloudflareEnv, { now?: string }> {
   async run(event: WorkflowEvent<{ now?: string }>, step: WorkflowStep) {
-    return run(this.env, step, syncJobs(new Date(event.payload?.now ?? event.timestamp)));
+    const now = new Date(event.payload?.now ?? event.timestamp);
+    await checkChannel(this.env, step);
+    const channel = await runJobs(this.env, step, syncJobs(now));
+    const videos = await listVideos(this.env, step);
+    const catalogue = unwrap(await step.do("video catalogue", retries, () => guarded(() => collectVideos(videos, this.env.YOUTUBE_CHANNEL_ID, lake(this.env)))));
+    const perVideo = await runJobs(this.env, step, videoSyncJobs(videos, now));
+    return { ...summary([...channel, catalogue, ...perVideo]), videos: videos.length };
   }
 }
 
-// History from `since` in 30-day windows. Re-running is safe: readers keep the
+// History from `since` in 30-day windows: channel reports, or with
+// `scope: "videos"` every video's days. Re-running is safe: readers keep the
 // latest observation per day.
-export class BackfillWorkflow extends WorkflowEntrypoint<CloudflareEnv, { since?: string }> {
-  async run(event: WorkflowEvent<{ since?: string }>, step: WorkflowStep) {
+export class BackfillWorkflow extends WorkflowEntrypoint<CloudflareEnv, { since?: string; scope?: "channel" | "videos" }> {
+  async run(event: WorkflowEvent<{ since?: string; scope?: "channel" | "videos" }>, step: WorkflowStep) {
     const since = daySchema.parse(event.payload?.since ?? this.env.YOUTUBE_HISTORY_SINCE);
-    return run(this.env, step, backfillJobs(since, new Date(event.timestamp)));
+    const now = new Date(event.timestamp);
+    await checkChannel(this.env, step);
+    if (event.payload?.scope === "videos") {
+      const videos = await listVideos(this.env, step);
+      return { ...summary(await runJobs(this.env, step, videoBackfillJobs(videos, since, now))), videos: videos.length };
+    }
+    return summary(await runJobs(this.env, step, backfillJobs(since, now)));
   }
 }
