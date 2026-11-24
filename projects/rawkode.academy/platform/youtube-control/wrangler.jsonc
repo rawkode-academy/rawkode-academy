@@ -5,15 +5,26 @@
   "compatibility_date": "2026-10-31",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
+  // OAuth callbacks carry one-use codes in the query string: redact query
+  // strings and skip automatic invocation records.
   "observability": {
+    "redact_query_string": true,
     "traces": { "enabled": true, "destinations": ["grafana-traces"] },
-    "logs": { "enabled": true, "destinations": ["grafana-logs"] }
+    "logs": { "enabled": true, "invocation_logs": false, "destinations": ["grafana-logs"] }
   },
   "vars": {
     "YOUTUBE_CHANNEL_ID": "UCrber_mFvp_FEF7D9u8PDEA",
     // Where the initial backfill starts; earlier days just return no rows.
-    "YOUTUBE_HISTORY_SINCE": "2015-01-01"
+    "YOUTUBE_HISTORY_SINCE": "2015-01-01",
+    // The MCP server's public origin: OAuth issuer and Google callback base.
+    "PUBLIC_ORIGIN": "https://rawkode-academy-youtube-analytics.rawkodeacademy.workers.dev",
+    // The analytics lake the MCP tools read with BASIN_SQL_TOKEN.
+    "BASIN_ACCOUNT_ID": "0aeb879de8e3cdde5fb3d413025222ce",
+    "BASIN_BUCKET": "rawkode-analytics"
   },
+  // MCP OAuth grants and tokens. No ID: Wrangler creates the namespace on the
+  // first deploy and reuses it afterwards.
+  "kv_namespaces": [{ "binding": "OAUTH_KV" }],
   // Report rows become CloudEvents in analytics.events_archive
   // (R2 bucket rawkode-analytics) through the observability collector.
   "services": [{ "binding": "ANALYTICS", "service": "rawkode-tools-observability-collector" }],

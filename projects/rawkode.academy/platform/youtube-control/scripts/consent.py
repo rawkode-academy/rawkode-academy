@@ -7,10 +7,16 @@ consent in the browser, checks the grant is for exactly the Academy channel,
 writes the OAuth client and refresh token to Infisical (/projects/basin), and
 starts the deploy workflow that uploads them to the Worker. Nothing is written
 to disk. Run it again whenever the alert says the grant was revoked.
+
+`cuenv task mcp-owner` runs it with `mcp-owner`: Google sign-in (openid only)
+to learn the owner's Google account ID, then the MCP's Web OAuth client (from
+1Password) and that ID are written to Infisical for the analytics MCP sign-in.
 """
+import base64
 import contextlib
 import json
 import os
+import re
 import subprocess
 import sys
 import urllib.error
@@ -28,6 +34,7 @@ INFISICAL = "https://app.infisical.com"
 INFISICAL_PROJECT = "6575a392d7a5ef0555ade86b"
 INFISICAL_ENVIRONMENT = "production"
 SECRET_NAMES = ("YOUTUBE_CLIENT_ID", "YOUTUBE_CLIENT_SECRET", "YOUTUBE_REFRESH_TOKEN")
+MCP_SECRET_NAMES = ("MCP_GOOGLE_CLIENT_ID", "MCP_GOOGLE_CLIENT_SECRET", "MCP_OWNER_GOOGLE_SUB")
 INFISICAL_PATH = "/projects/basin"
 DEPLOY_WORKFLOW = "rawkode-academy-platform-youtube-control-default.yml"
 
@@ -76,7 +83,30 @@ def infisical(method: str, path: str, token: str | None = None, body: dict | Non
         return error.code, {}
 
 
-def store(values: tuple[str, str, str]):
+def owner_sub(config: dict) -> str:
+    flow = InstalledAppFlow.from_client_config(config, ["openid"], autogenerate_code_verifier=True)
+    print("Opening Google sign-in: choose the Google account that will connect the analytics MCP.", file=sys.stderr)
+    with contextlib.redirect_stdout(sys.stderr):
+        credentials = flow.run_local_server(host="127.0.0.1", port=0, open_browser=True, timeout_seconds=300, prompt="select_account")
+    # The ID token came straight from Google's token endpoint over TLS, so its
+    # claims can be read without re-verifying the signature here.
+    payload = credentials.id_token.split(".")[1] if credentials.id_token else ""
+    claims = json.loads(base64.urlsafe_b64decode(payload + "=" * (-len(payload) % 4)) or b"{}") if payload else {}
+    sub = str(claims.get("sub", ""))
+    if not re.fullmatch(r"[A-Za-z0-9_-]{1,255}", sub):
+        raise SystemExit("Google didn't return an account ID; nothing was saved.")
+    return sub
+
+
+def mcp_client() -> tuple[str, str]:
+    client_id = os.environ.get("MCP_GOOGLE_CLIENT_ID", "").strip()
+    client_secret = os.environ.get("MCP_GOOGLE_CLIENT_SECRET", "").strip()
+    if not client_id or not client_secret:
+        raise SystemExit("The MCP's Google Web OAuth client wasn't supplied; run this with `cuenv task mcp-owner`.")
+    return client_id, client_secret
+
+
+def store(values: tuple[str, ...], names: tuple[str, ...] = SECRET_NAMES):
     status, login = infisical("POST", "/api/v1/auth/universal-auth/login", body={
         "clientId": os.environ["INFISICAL_UNIVERSAL_AUTH_CLIENT_ID"],
         "clientSecret": os.environ["INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET"],
@@ -85,13 +115,13 @@ def store(values: tuple[str, str, str]):
         raise SystemExit(f"Infisical login failed (HTTP {status}); nothing was saved.")
     token = login["accessToken"]
     scope = {"workspaceId": INFISICAL_PROJECT, "environment": INFISICAL_ENVIRONMENT, "secretPath": INFISICAL_PATH}
-    for index, name in enumerate(SECRET_NAMES):
+    for index, name in enumerate(names):
         value = values[index]
         exists, _ = infisical("GET", f"/api/v3/secrets/raw/{name}", token, query=scope)
         status, _ = infisical("PATCH" if exists == 200 else "POST", f"/api/v3/secrets/raw/{name}", token, body={**scope, "secretValue": value, "type": "shared"})
         if status != 200:
-            raise SystemExit(f"Writing credential {index + 1} of {len(SECRET_NAMES)} to Infisical failed (HTTP {status}).")
-    print(f"Saved the client ID, client secret and refresh token to Infisical {INFISICAL_PATH}.", file=sys.stderr)
+            raise SystemExit(f"Writing credential {index + 1} of {len(names)} to Infisical failed (HTTP {status}).")
+    print(f"Saved {len(names)} values to Infisical {INFISICAL_PATH}.", file=sys.stderr)
 
 
 def deploy():
@@ -103,6 +133,11 @@ def deploy():
 
 
 def main():
+    if sys.argv[1:] == ["mcp-owner"]:
+        client = mcp_client()
+        store((*client, owner_sub(client_config())), MCP_SECRET_NAMES)
+        deploy()
+        return
     credentials = consent(client_config())
     store((credentials.client_id, credentials.client_secret, credentials.refresh_token))
     deploy()

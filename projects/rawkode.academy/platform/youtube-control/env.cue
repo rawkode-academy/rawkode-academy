@@ -77,7 +77,8 @@ tasks: {
 	}
 
 	// CI on main: tests, then deploys the Worker with its secrets from
-	// Infisical. Fails if `cuenv task consent` hasn't stored them yet.
+	// Infisical. Fails until `cuenv task consent` and `cuenv task mcp-owner`
+	// have stored them.
 	deploy: schema.#Task & {
 		command: "sh"
 		args: ["-c", _npm + "npm test --workspaces=false && npx --no-install wrangler deploy --secrets-file secrets.env"]
@@ -87,6 +88,10 @@ tasks: {
 			YOUTUBE_CLIENT_ID: _youtubeSecret & {secretName: "YOUTUBE_CLIENT_ID"}
 			YOUTUBE_CLIENT_SECRET: _youtubeSecret & {secretName: "YOUTUBE_CLIENT_SECRET"}
 			YOUTUBE_REFRESH_TOKEN: _youtubeSecret & {secretName: "YOUTUBE_REFRESH_TOKEN"}
+			BASIN_SQL_TOKEN: _youtubeSecret & {secretName: "BASIN_SQL_TOKEN"}
+			MCP_GOOGLE_CLIENT_ID: _youtubeSecret & {secretName: "MCP_GOOGLE_CLIENT_ID"}
+			MCP_GOOGLE_CLIENT_SECRET: _youtubeSecret & {secretName: "MCP_GOOGLE_CLIENT_SECRET"}
+			MCP_OWNER_GOOGLE_SUB: _youtubeSecret & {secretName: "MCP_OWNER_GOOGLE_SUB"}
 		}
 	}
 
@@ -102,6 +107,23 @@ tasks: {
 			INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET: schema.#OnePasswordRef & {ref: "op://Employee/Infisical/machine-identity/client-secret"}
 			GOOGLE_OAUTH_CLIENT_ID: schema.#OnePasswordRef & {ref: "op://Employee/565nub77bcoxqd5a77kbdets3q/youtube-control/client-id"}
 			GOOGLE_OAUTH_CLIENT_SECRET: schema.#OnePasswordRef & {ref: "op://Employee/565nub77bcoxqd5a77kbdets3q/youtube-control/client-secret"}
+		}
+	}
+
+	// Run by hand, once: signs in with Google (openid only) to learn the owner's
+	// account ID, then writes it and the MCP's Web OAuth client (1Password) to
+	// Infisical, and starts the deploy workflow.
+	"mcp-owner": schema.#Task & {
+		command: "python"
+		args: ["-I", "scripts/consent.py", "mcp-owner"]
+		inputs: ["scripts/consent.py"]
+		env: {
+			INFISICAL_UNIVERSAL_AUTH_CLIENT_ID: schema.#OnePasswordRef & {ref: "op://Employee/Infisical/machine-identity/client-id"}
+			INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET: schema.#OnePasswordRef & {ref: "op://Employee/Infisical/machine-identity/client-secret"}
+			GOOGLE_OAUTH_CLIENT_ID: schema.#OnePasswordRef & {ref: "op://Employee/565nub77bcoxqd5a77kbdets3q/youtube-control/client-id"}
+			GOOGLE_OAUTH_CLIENT_SECRET: schema.#OnePasswordRef & {ref: "op://Employee/565nub77bcoxqd5a77kbdets3q/youtube-control/client-secret"}
+			MCP_GOOGLE_CLIENT_ID: schema.#OnePasswordRef & {ref: "op://Employee/565nub77bcoxqd5a77kbdets3q/youtube-control/mcp-client-id"}
+			MCP_GOOGLE_CLIENT_SECRET: schema.#OnePasswordRef & {ref: "op://Employee/565nub77bcoxqd5a77kbdets3q/youtube-control/mcp-client-secret"}
 		}
 	}
 
