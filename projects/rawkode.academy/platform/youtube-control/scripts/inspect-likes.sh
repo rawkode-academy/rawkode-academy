@@ -1,17 +1,23 @@
 #!/usr/bin/env bash
-# Read-only: shows how `likes` is stored for the youtube.daily days that the
-# MCP's youtube_daily returned with likes = null.
-set -euo pipefail
+# Read-only: tries ways of reading a negative `likes` (YouTube reports net
+# likes, so a day with more removed than added is negative) from
+# analytics.events_archive. json_get_int returns NULL for a negative integer.
+set -uo pipefail
 query() {
 	echo "== $1"
-	curl -fsS "https://api.sql.cloudflarestorage.com/api/v1/accounts/$CLOUDFLARE_ACCOUNT_ID/basin-sql/query/rawkode-analytics" \
+	curl -sS "https://api.sql.cloudflarestorage.com/api/v1/accounts/$CLOUDFLARE_ACCOUNT_ID/basin-sql/query/rawkode-analytics" \
 		-H "Authorization: Bearer $BASIN_SQL_TOKEN" -H "Content-Type: application/json" \
-		--data "$(jq -n --arg query "$2" '{query: $query}')" | jq -c '.result.rows // .rows // .'
+		--data "$(jq -n --arg query "$2" '{query: $query}')" | jq -c '.result.rows // .errors // .'
 }
-days="'2026-10-26','2026-10-27','2026-10-28','2026-11-03','2026-11-06','2026-11-07','2026-11-19','2026-11-20'"
-query "stored rows for the affected days (latest fetches)" \
-	"SELECT json_get_str(value, 'data', 'day') AS day, json_get_str(value, 'data', 'fetchedAt') AS fetched, json_get_int(value, 'data', 'likes') AS likes_int, json_get_str(value, 'data', 'likes') AS likes_str, json_get_int(value, 'data', 'views') AS views FROM analytics.events_archive WHERE event_source = 'rawkode-academy-youtube' AND event_type = 'youtube.daily' AND json_get_str(value, 'data', 'day') IN ($days) ORDER BY day, fetched DESC LIMIT 60"
-query "raw value for one affected day" \
-	"SELECT value FROM analytics.events_archive WHERE event_source = 'rawkode-academy-youtube' AND event_type = 'youtube.daily' AND json_get_str(value, 'data', 'day') = '2026-11-03' LIMIT 2"
-query "rows with null likes (int) in the last 60 days, by fetch" \
-	"SELECT json_get_str(value, 'data', 'fetchedAt') AS fetched, COUNT(*) AS rows, SUM(CASE WHEN json_get_int(value, 'data', 'likes') IS NULL THEN 1 ELSE 0 END) AS null_likes FROM analytics.events_archive WHERE event_source = 'rawkode-academy-youtube' AND event_type = 'youtube.daily' AND json_get_str(value, 'data', 'day') >= '2026-09-25' GROUP BY 1 ORDER BY 1 DESC LIMIT 20"
+base="FROM analytics.events_archive WHERE event_source = 'rawkode-academy-youtube' AND event_type = 'youtube.daily' AND json_get_str(value, 'data', 'day') IN ('2026-11-03','2026-11-20') AND json_get_str(value, 'data', 'fetchedAt') = '2026-11-24T16:19:59.024Z'"
+for expr in \
+	"json_get_int(value, 'data', 'likes')" \
+	"json_get_float(value, 'data', 'likes')" \
+	"json_as_text(value, 'data', 'likes')" \
+	"CAST(json_as_text(value, 'data', 'likes') AS BIGINT)" \
+	"CAST(json_get(value, 'data', 'likes') AS VARCHAR)" \
+	"CAST(json_get_float(value, 'data', 'likes') AS BIGINT)" \
+	"json_get_int(value, 'data', 'comments')" \
+	"json_get_int(value, 'data', 'subscribersLost')"; do
+	query "$expr" "SELECT json_get_str(value, 'data', 'day') AS day, $expr AS v $base ORDER BY day"
+done
