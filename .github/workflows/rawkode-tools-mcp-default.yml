@@ -11,8 +11,7 @@ on:
     - .github/workflows/rawkode-tools-mcp-default.yml
     - cue.mod/**
     - projects/*.cue
-    - projects/rawkode.academy/*.cue
-    - projects/rawkode.academy/platform/*.cue
+    - projects/rawkode.tools/*.cue
     - projects/rawkode.tools/mcp/*.cue
     - projects/rawkode.tools/mcp/env.cue
     - projects/rawkode.tools/mcp/env.cue/**
