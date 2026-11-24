@@ -3,7 +3,7 @@ import { generateKeyPair, exportJWK, SignJWT } from "jose";
 import { Response as MockResponse, type Miniflare } from "miniflare";
 import { createHash, randomBytes } from "node:crypto";
 
-export const oauthOrigin = "https://youtube-analytics.example.test";
+export const oauthOrigin = "https://mcp.example.test";
 export const oauthOwner = "owner-sub";
 export const oauthClient = "test-mcp-client";
 // Miniflare's HTTP bridge rewrites Host to 127.0.0.1 even when dispatchFetch's

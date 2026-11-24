@@ -11,8 +11,8 @@ test("OAuth protects the analytics MCP with owner login, PKCE, consent and resou
   const google = await GoogleLoginMock.create();
   const unexpected: string[] = [];
   const queries: string[] = [];
-  const mf = new Miniflare(convertV4MiniflareOptions({ workers: [{ name: "edge-proxy", modules: true, script: publicOriginProxy, serviceBindings: { APP: "youtube-oauth-test" }, compatibilityDate: "2026-10-31" }, {
-    name: "youtube-oauth-test", modules: true, scriptPath: fileURLToPath(new NodeURL("../dist/main.js", import.meta.url)),
+  const mf = new Miniflare(convertV4MiniflareOptions({ workers: [{ name: "edge-proxy", modules: true, script: publicOriginProxy, serviceBindings: { APP: "mcp-test" }, compatibilityDate: "2026-10-31" }, {
+    name: "mcp-test", modules: true, scriptPath: fileURLToPath(new NodeURL("../dist/main.js", import.meta.url)),
     compatibilityDate: "2026-10-31", compatibilityFlags: ["nodejs_compat"],
     kvNamespaces: ["OAUTH_KV"],
     bindings: { PUBLIC_ORIGIN: oauthOrigin, MCP_OWNER_GOOGLE_SUB: oauthOwner, MCP_GOOGLE_CLIENT_ID: oauthClient, MCP_GOOGLE_CLIENT_SECRET: "test-mcp-secret", BASIN_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce", BASIN_BUCKET: "rawkode-analytics", BASIN_SQL_TOKEN: "test-basin-token" },
@@ -66,7 +66,7 @@ test("OAuth protects the analytics MCP with owner login, PKCE, consent and resou
     assert.equal(initialized.status, 200);
     const handshake = await readMcp(initialized);
     assert.equal(handshake.result.protocolVersion, "2025-11-25");
-    assert.equal(handshake.result.serverInfo.name, "rawkode-academy-analytics");
+    assert.equal(handshake.result.serverInfo.name, "rawkode-tools");
     const list = await readMcp(await mcpRequest(mf, auth.access_token, "tools/list"));
     assert.deepEqual(list.result.tools.map((tool: Json) => tool.name).sort(), ["describe_analytics", "query_analytics", "youtube_daily", "youtube_traffic"]);
     for (const tool of list.result.tools) assert.equal(tool.annotations.readOnlyHint, true, tool.name);

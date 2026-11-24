@@ -17,10 +17,6 @@ export const videoId = z.string().regex(/^[A-Za-z0-9_-]{11}$/);
 export function validDay(value: string) {
   return /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(Date.parse(value)) && new Date(value).toISOString().slice(0, 10) === value;
 }
-export function validateOrigin(request: Request) {
-  const origin = request.headers.get("origin");
-  ensure(!origin || origin === new URL(request.url).origin, "invalid_origin", "Cross-origin browser requests are not supported", 403);
-}
 export const daySchema = z.string().refine(validDay, "Expected a real YYYY-MM-DD date");
 
 export async function hash(value: string | Uint8Array) {

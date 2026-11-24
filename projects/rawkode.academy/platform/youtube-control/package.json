@@ -11,10 +11,6 @@
     "deploy": "wrangler deploy"
   },
   "dependencies": {
-    "@cloudflare/workers-oauth-provider": "1.2.4",
-    "@modelcontextprotocol/server": "2.4.0",
-    "agents": "0.32.0",
-    "jose": "6.2.14",
     "zod": "4.3.6"
   },
   "overrides": {

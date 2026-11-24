@@ -1,7 +1,8 @@
-import { McpServer } from "@modelcontextprotocol/server";
+import type { McpServer } from "@modelcontextprotocol/server";
 import { z } from "zod";
-import { basinQuery, readOnlyStatement, type BasinConfig } from "./basin.ts";
-import { daySchema, errorBody } from "./domain.ts";
+import { basinConfig, basinQuery, readOnlyStatement } from "../basin.ts";
+import { daySchema } from "../errors.ts";
+import { read, reply, type ToolModule } from "./module.ts";
 
 // Read-only analytics from the Academy analytics lake (Basin). Nothing here
 // calls YouTube: the daily sync already lands YouTube Analytics in the lake.
@@ -62,32 +63,33 @@ FROM (
 ORDER BY day, views DESC`;
 }
 
-export function createServer(basin: BasinConfig) {
-  const server = new McpServer({ name: "rawkode-academy-analytics", version: "0.1.0" });
-  const reply = async (work: () => Promise<unknown>) => {
-    try { return { content: [{ type: "text" as const, text: JSON.stringify(await work()) }], isError: false }; }
-    catch (error) { return { content: [{ type: "text" as const, text: JSON.stringify(errorBody(error)) }], isError: true }; }
-  };
-  const read = { readOnlyHint: true, destructiveHint: false, openWorldHint: false } as const;
-  server.registerTool("describe_analytics", {
-    description: "Describe the Rawkode Academy analytics lake: tables, columns, event sources, how YouTube rows are shaped and how to exclude bots. Read this before writing SQL.",
-    inputSchema: z.object({}).strict(),
-    annotations: read,
-  }, async () => ({ content: [{ type: "text" as const, text: LAKE_GUIDE }], isError: false }));
-  server.registerTool("query_analytics", {
-    description: "Run one read-only SQL query (SELECT or WITH) against the analytics lake with Basin SQL. Returns at most 500 rows; aggregate rather than listing raw events. Basin bills per byte scanned, so filter on event_source, event_type and event_time.",
-    inputSchema: z.object({ sql: z.string().min(1).max(20000) }).strict(),
-    annotations: read,
-  }, ({ sql }) => reply(() => basinQuery(basin, readOnlyStatement(sql))));
-  server.registerTool("youtube_daily", {
-    description: "Rawkode Academy YouTube channel totals per day (views, engaged views, watch minutes, average view duration, likes, comments, shares, subscribers gained and lost) for an inclusive date range (at most 500 days per call), from the analytics lake. Days are America/Los_Angeles and lag about three days.",
-    inputSchema: range,
-    annotations: read,
-  }, ({ startDate, endDate }) => reply(() => basinQuery(basin, youtubeDailySql(startDate, endDate))));
-  server.registerTool("youtube_traffic", {
-    description: "Rawkode Academy YouTube views and watch minutes per day per traffic source (search, suggested, external, …) for an inclusive date range (at most 500 days per call; at most 500 rows), from the analytics lake.",
-    inputSchema: range,
-    annotations: read,
-  }, ({ startDate, endDate }) => reply(() => basinQuery(basin, youtubeTrafficSql(startDate, endDate))));
-  return server;
-}
+// Reads the analytics lake with the read-only Basin SQL token. No binding:
+// Basin SQL is a public API.
+export const analytics: ToolModule = {
+  scope: "analytics:read",
+  readOnly: true,
+  description: "read Rawkode Academy's analytics lake (website, short-link and YouTube analytics)",
+  register(server: McpServer, env: CloudflareEnv) {
+    const basin = basinConfig(env);
+    server.registerTool("describe_analytics", {
+      description: "Describe the Rawkode Academy analytics lake: tables, columns, event sources, how YouTube rows are shaped and how to exclude bots. Read this before writing SQL.",
+      inputSchema: z.object({}).strict(),
+      annotations: read,
+    }, async () => ({ content: [{ type: "text" as const, text: LAKE_GUIDE }], isError: false }));
+    server.registerTool("query_analytics", {
+      description: "Run one read-only SQL query (SELECT or WITH) against the analytics lake with Basin SQL. Returns at most 500 rows; aggregate rather than listing raw events. Basin bills per byte scanned, so filter on event_source, event_type and event_time.",
+      inputSchema: z.object({ sql: z.string().min(1).max(20000) }).strict(),
+      annotations: read,
+    }, ({ sql }) => reply(() => basinQuery(basin, readOnlyStatement(sql))));
+    server.registerTool("youtube_daily", {
+      description: "Rawkode Academy YouTube channel totals per day (views, engaged views, watch minutes, average view duration, likes, comments, shares, subscribers gained and lost) for an inclusive date range (at most 500 days per call), from the analytics lake. Days are America/Los_Angeles and lag about three days.",
+      inputSchema: range,
+      annotations: read,
+    }, ({ startDate, endDate }) => reply(() => basinQuery(basin, youtubeDailySql(startDate, endDate))));
+    server.registerTool("youtube_traffic", {
+      description: "Rawkode Academy YouTube views and watch minutes per day per traffic source (search, suggested, external, …) for an inclusive date range (at most 500 days per call; at most 500 rows), from the analytics lake.",
+      inputSchema: range,
+      annotations: read,
+    }, ({ startDate, endDate }) => reply(() => basinQuery(basin, youtubeTrafficSql(startDate, endDate))));
+  },
+};

@@ -7,7 +7,8 @@
     "projects/**",
     "!projects/**/generators/**",
     "!projects/**/webcontainer-demos/**",
-    "!projects/rawkode.academy/platform/youtube-control"
+    "!projects/rawkode.academy/platform/youtube-control",
+    "!projects/rawkode.tools/mcp"
   ],
   "devDependencies": {
     "@types/node": "^24.10.1",

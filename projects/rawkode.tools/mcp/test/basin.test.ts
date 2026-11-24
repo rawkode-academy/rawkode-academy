@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { basinQuery, MAX_ROWS, parseRows, readOnlyStatement } from "../src/basin.ts";
-import { youtubeDailySql, youtubeTrafficSql } from "../src/mcp.ts";
+import { youtubeDailySql, youtubeTrafficSql } from "../src/tools/analytics.ts";
 
 test("readOnlyStatement accepts one SELECT or WITH statement only", () => {
   assert.equal(readOnlyStatement("  select 1;  "), "select 1");

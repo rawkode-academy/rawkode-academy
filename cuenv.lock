@@ -12,6 +12,12 @@ flake = "."
 digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
 lockfile = "projects/rawkode.academy/platform/youtube-control/./flake.lock"
 
+[runtimes."projects/rawkode.tools/mcp"]
+type = "nix"
+flake = "."
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.tools/mcp/./flake.lock"
+
 [runtimes."projects/rawkode.tools/observability-collector"]
 type = "nix"
 flake = "."

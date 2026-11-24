@@ -1,4 +1,4 @@
-import { ensure, readLimited, ServiceError } from "./domain.ts";
+import { ensure, readLimited, ServiceError } from "./errors.ts";
 
 // Read-only Basin SQL over the Academy analytics lake (bucket
 // rawkode-analytics). BASIN_SQL_TOKEN is the lake's read-only SQL token.
