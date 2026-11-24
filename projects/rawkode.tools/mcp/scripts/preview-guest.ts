@@ -10,6 +10,9 @@ const basin = basinConfig({ BASIN_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce"
 const [videos, lake] = await Promise.all([fetchAcademyVideos(), fetchLakeCatalogue(basin)]);
 const ids = youtubeIds(videos, lake);
 console.log(`Academy videos: ${videos.length}. YouTube catalogue: ${lake.length}. Academy videos tied to one YouTube video: ${ids.size}.`);
+const withGuests = videos.filter(v => v.guests.length > 0);
+const guestIds = new Set(withGuests.flatMap(v => v.guests.map(g => g.id)));
+console.log(`Guests: ${videos.length} videos, ${withGuests.length} with at least one guest, ${guestIds.size} distinct guests. Of the videos with guests, ${withGuests.filter(v => ids.has(v.id)).length} tie to YouTube.`);
 const episodes = visibleEpisodes(videos, username).map(episode => ({ ...episode, youtube: ids.get(episode.id) ?? null }));
 console.log(`\n${username} would see ${episodes.length} episodes (${episodes.filter(e => e.youtube).length} with YouTube numbers):`);
 const totals = new Map<string, { days: number; views: number }>();
