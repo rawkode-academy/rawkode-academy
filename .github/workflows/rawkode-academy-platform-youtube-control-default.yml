@@ -16,6 +16,10 @@ on:
     - projects/rawkode.academy/platform/youtube-control/*.cue
     - projects/rawkode.academy/platform/youtube-control/env.cue
     - projects/rawkode.academy/platform/youtube-control/env.cue/**
+    - projects/rawkode.academy/platform/youtube-control/flake.lock
+    - projects/rawkode.academy/platform/youtube-control/flake.lock/**
+    - projects/rawkode.academy/platform/youtube-control/flake.nix
+    - projects/rawkode.academy/platform/youtube-control/flake.nix/**
     - projects/rawkode.academy/platform/youtube-control/package-lock.json
     - projects/rawkode.academy/platform/youtube-control/package-lock.json/**
     - projects/rawkode.academy/platform/youtube-control/package.json

@@ -20,11 +20,6 @@ jobs:
         working-directory: projects/rawkode.academy/platform/youtube-control
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          cache: npm
-          cache-dependency-path: projects/rawkode.academy/platform/youtube-control/package-lock.json
       - name: Install repository Nix runtime
         uses: DeterminateSystems/determinate-nix-action@v3
         with:
@@ -38,7 +33,10 @@ jobs:
           /tmp/cuenv sync -A
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: npm ci --workspaces=false --no-audit --no-fund
-      - run: npm run check --workspaces=false
-      - run: npm test --workspaces=false
-      - run: python3 -m py_compile scripts/consent.py && bash -n scripts/backfill.sh
+      - name: Validate the flake
+        run: nix flake check --no-build
+      # Both run inside the flake's dev shell through cuenv's Nix runtime.
+      - run: /tmp/cuenv task check
+      - run: /tmp/cuenv task test
+      - name: Consent script compiles with the flake's Python and google-auth-oauthlib
+        run: /tmp/cuenv exec -- python -I -c "import google_auth_oauthlib, py_compile; py_compile.compile('scripts/consent.py', doraise=True)" && bash -n scripts/backfill.sh

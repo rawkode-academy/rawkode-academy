@@ -4,11 +4,18 @@ import (
 	"list"
 
 	"github.com/cuenv/cuenv/schema"
+	xNix "github.com/cuenv/cuenv/contrib/nix"
 )
 
 schema.#Project
 
 name: "rawkode-academy-platform-youtube-control"
+
+// Tasks run in this directory's flake.nix dev shell (Node, Python with
+// google-auth-oauthlib, gh), pinned by flake.lock, so nothing depends on
+// system or uv-downloaded toolchains (which don't run on NixOS).
+runtime: schema.#NixRuntime
+hooks: onEnter: nix: xNix.#NixFlake
 
 let _t = tasks
 
@@ -34,18 +41,8 @@ env: {
 	}
 }
 
-// Every task runs in a Nix shell with Python (and google-auth-oauthlib),
-// Node 24, curl, jq and gh from nixpkgs, so nothing depends on system or
-// uv-downloaded toolchains (which don't run on NixOS).
-let _nixShell = [
-	"shell",
-	"--impure",
-	"--expr",
-	"with (builtins.getFlake \"nixpkgs\").legacyPackages.${builtins.currentSystem}; buildEnv { name = \"youtube-analytics-tools\"; paths = [ (python3.withPackages (p: [ p.google-auth-oauthlib ])) nodejs_24 curl jq gh ]; }",
-	"-c",
-]
 let _npm = "npm ci --workspaces=false --no-audit --no-fund >/dev/null && "
-let _sources = ["src/**", "package.json", "package-lock.json", "wrangler.jsonc", "secrets.env"]
+let _sources = ["src/**", "package.json", "package-lock.json", "wrangler.jsonc", "secrets.env", "flake.nix", "flake.lock"]
 
 ci: pipelines: default: {
 	environment: "production"
@@ -61,21 +58,21 @@ tasks: [string]: hermetic: false
 
 tasks: {
 	check: schema.#Task & {
-		command: "nix"
-		args: list.Concat([_nixShell, ["sh", "-c", _npm + "npm run check --workspaces=false"]])
+		command: "sh"
+		args: ["-c", _npm + "npm run check --workspaces=false"]
 		inputs: list.Concat([_sources, ["test/**", "tsconfig.json", "secrets.d.ts"]])
 	}
 	test: schema.#Task & {
-		command: "nix"
-		args: list.Concat([_nixShell, ["sh", "-c", _npm + "npm test --workspaces=false"]])
+		command: "sh"
+		args: ["-c", _npm + "npm test --workspaces=false"]
 		inputs: list.Concat([_sources, ["test/**"]])
 	}
 
 	// CI on main: tests, then deploys the Worker with its secrets from
 	// Infisical. Fails if `cuenv task consent` hasn't stored them yet.
 	deploy: schema.#Task & {
-		command: "nix"
-		args: list.Concat([_nixShell, ["sh", "-c", _npm + "npm test --workspaces=false && npx --no-install wrangler deploy --secrets-file secrets.env"]])
+		command: "sh"
+		args: ["-c", _npm + "npm test --workspaces=false && npx --no-install wrangler deploy --secrets-file secrets.env"]
 		inputs: list.Concat([_sources, ["env.cue", "test/**"]])
 		labels: ["infisical"]
 		env: {
@@ -89,8 +86,8 @@ tasks: {
 	// revoked: Google consent in the browser with the OAuth client from 1Password, credential to Infisical, then the
 	// deploy workflow. Logs in to Infisical as the bootstrap machine identity.
 	consent: schema.#Task & {
-		command: "nix"
-		args: list.Concat([_nixShell, ["python", "-I", "scripts/consent.py"]])
+		command: "python"
+		args: ["-I", "scripts/consent.py"]
 		inputs: ["scripts/consent.py"]
 		env: {
 			INFISICAL_UNIVERSAL_AUTH_CLIENT_ID: schema.#OnePasswordRef & {ref: "op://Employee/Infisical/machine-identity/client-id"}
@@ -102,8 +99,8 @@ tasks: {
 
 	// Starts another history load; see scripts/backfill.sh.
 	backfill: schema.#Task & {
-		command: "nix"
-		args: list.Concat([_nixShell, ["sh", "-c", _npm + "bash scripts/backfill.sh"]])
+		command: "sh"
+		args: ["-c", _npm + "bash scripts/backfill.sh"]
 		inputs: list.Concat([_sources, ["scripts/backfill.sh"]])
 	}
 }
