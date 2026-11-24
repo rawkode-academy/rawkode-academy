@@ -4,16 +4,24 @@ import (
 	"list"
 
 	"github.com/cuenv/cuenv/schema"
+	xNix "github.com/cuenv/cuenv/contrib/nix"
 )
 
 schema.#Project
 
 name: "rawkode-tools-observability-collector"
 
+// Tools (Bun, Node, curl, and Python with PyIceberg for basin/) come from
+// flake.nix, locally and in CI.
+runtime: schema.#NixRuntime
+hooks: onEnter: nix: xNix.#NixFlake
+
 let _t = tasks
 
 let _deployInputs = [
 	"env.cue",
+	"flake.lock",
+	"flake.nix",
 	"package.json",
 	"src/**",
 	"wrangler.jsonc",
@@ -113,21 +121,9 @@ tasks: {
 
 	"relabel-history": schema.#Task & {
 		hermetic: false
-		// Python, PyIceberg, pyiceberg-core (partitioned writes need it) and
-		// PyArrow come from nixpkgs' binary cache, so nothing is downloaded or
-		// compiled outside Nix (uv's Pythons don't run on NixOS).
-		command: "nix"
-		args: [
-			"shell",
-			"--impure",
-			"--expr",
-			"with (builtins.getFlake \"nixpkgs\").legacyPackages.${builtins.currentSystem}; python3.withPackages (p: [ p.pyiceberg p.pyiceberg-core p.pyarrow ])",
-			"-c",
-			"python",
-			"-I",
-			"basin/relabel-history.py",
-		]
-		inputs: ["basin/relabel-history.py"]
+		command:  "python"
+		args: ["-I", "basin/relabel-history.py"]
+		inputs: ["basin/relabel-history.py", "flake.nix", "flake.lock"]
 		labels: ["infisical"]
 		env: BASIN_CATALOG_TOKEN: _basinSecret & {secretName: "BASIN_CATALOG_TOKEN"}
 	}

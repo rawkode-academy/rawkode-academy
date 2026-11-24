@@ -172,8 +172,9 @@ snapshot expiry, `RELABEL_ARGS="--rollback <table> <snapshot-id>"` restores it (
 anything appended since). The query-time rules stay, so the dashboard is
 correct before and after the rewrite.
 
-The task needs only Nix: it runs the script with Python, PyIceberg and PyArrow
-from nixpkgs (`nix shell`), so it works the same on NixOS, macOS and CI.
+The task needs only Nix: the project's `flake.nix` provides Python with
+PyIceberg, pyiceberg-core and PyArrow, so it works the same on NixOS, macOS
+and CI.
 
 The empty legacy `analytics.events` table is no longer queried. To purge it,
 run the guarded one-time cleanup task with Infisical access:

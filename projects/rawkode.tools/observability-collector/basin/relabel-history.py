@@ -1,5 +1,5 @@
-# Run through `cuenv task relabel-history`, which provides Python, PyIceberg
-# and PyArrow from nixpkgs.
+# Run through `cuenv task relabel-history`; flake.nix provides Python,
+# PyIceberg, pyiceberg-core and PyArrow.
 """One-time, explicitly requested rewrite: label rows stored before bot labelling.
 
 The collector labels every new event with `bot` and `botreason`. This rewrites

@@ -34,6 +34,10 @@ on:
     - projects/rawkode.tools/observability-collector/basin/typed.sql
     - projects/rawkode.tools/observability-collector/env.cue
     - projects/rawkode.tools/observability-collector/env.cue/**
+    - projects/rawkode.tools/observability-collector/flake.lock
+    - projects/rawkode.tools/observability-collector/flake.lock/**
+    - projects/rawkode.tools/observability-collector/flake.nix
+    - projects/rawkode.tools/observability-collector/flake.nix/**
     - projects/rawkode.tools/observability-collector/package.json
     - projects/rawkode.tools/observability-collector/package.json/**
     - projects/rawkode.tools/observability-collector/src/**
