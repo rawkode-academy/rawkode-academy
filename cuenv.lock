@@ -88,7 +88,7 @@ windows_arm64 = "sha256:dd1d07f4224b24c7ccdc400aac2ccbf104cd740054e679d4a1900db5
 
 [infrastructure_providers."registry.terraform.io/integrations/github"]
 version = "6.13.0"
-schema_digest = "sha256:4e40d3ed070c1dddc5781bf07977c919e9112655c4b4f0a1fb8345a992aedd4e"
+schema_digest = "sha256:344e64f0324c9cb24c36600b32e56c32cf9b0f589cae62118005a6b730e43990"
 
 [infrastructure_providers."registry.terraform.io/integrations/github".platforms]
 darwin_amd64 = "sha256:2a6a11c21eae408055f45b9533c07afd2e845f6d496fd1b645aec2e873012103"
