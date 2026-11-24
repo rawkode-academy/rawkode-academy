@@ -15,6 +15,8 @@ on:
     - cue.mod/gen/registry.terraform.io/*.cue
     - cue.mod/gen/registry.terraform.io/cloudflare/*.cue
     - cue.mod/gen/registry.terraform.io/cloudflare/cloudflare/*.cue
+    - cue.mod/gen/registry.terraform.io/cloudflare/cloudflare/data/*.cue
+    - cue.mod/gen/registry.terraform.io/cloudflare/cloudflare/data/cloudflare_account_api_token_permission_groups_list/*.cue
     - cue.mod/gen/registry.terraform.io/cloudflare/cloudflare/resources/*.cue
     - cue.mod/gen/registry.terraform.io/cloudflare/cloudflare/resources/cloudflare_account_token/*.cue
     - cue.mod/gen/registry.terraform.io/cloudflare/cloudflare/resources/cloudflare_pipeline/*.cue
