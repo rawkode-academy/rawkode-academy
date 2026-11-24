@@ -81,7 +81,7 @@ jobs:
           Darwin-arm64) cuenv_asset="cuenv-darwin-arm64" ;;
           *) echo "Unsupported platform: $platform" >&2; exit 1 ;;
         esac
-        cuenv_version="0.76.0"
+        cuenv_version="0.78.0"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi
@@ -168,7 +168,7 @@ jobs:
         INFISICAL_TOKEN: ${{ secrets.INFISICAL_TOKEN }}
     - name: Keep the plan for the comment
       if: '!cancelled() && steps.plan.outcome != ''skipped'''
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: cuenv-infrastructure-plan
         path: ${{ runner.temp }}/cuenv-infrastructure-plan.txt
@@ -184,13 +184,13 @@ jobs:
     if: '!cancelled() && !contains(needs.*.result, ''skipped'')'
     steps:
     - name: Fetch the plan
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: cuenv-infrastructure-plan
         path: ${{ runner.temp }}
       continue-on-error: true
     - name: Comment infrastructure plan
-      uses: actions/github-script@v7
+      uses: actions/github-script@v9
       with:
         script: |-
           const fs = require('fs');
