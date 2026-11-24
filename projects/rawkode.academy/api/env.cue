@@ -33,8 +33,6 @@ tasks: {
 			"scripts/collect-schemas.ts",
 			schema.#ModuleFiles & {paths: ["projects/rawkode.academy/platform/*/read-model/**"]},
 			schema.#ModuleFiles & {paths: ["projects/rawkode.academy/platform/*/data-model/schema.ts"]},
-			// Gitignored files are skipped by globs above, so name the generated schema explicitly.
-			schema.#ModuleFiles & {paths: ["projects/rawkode.academy/platform/*/read-model/schema.gql"]},
 		]
 
 		outputs: [
@@ -69,8 +67,6 @@ tasks: {
 			"scripts/compose.ts",
 			schema.#ModuleFiles & {paths: ["projects/rawkode.academy/platform/*/read-model/**"]},
 			schema.#ModuleFiles & {paths: ["projects/rawkode.academy/platform/*/data-model/schema.ts"]},
-			// Gitignored files are skipped by globs above, so name the generated schema explicitly.
-			schema.#ModuleFiles & {paths: ["projects/rawkode.academy/platform/*/read-model/schema.gql"]},
 			"env.cue",
 			"src/**",
 			"wrangler.jsonc",
