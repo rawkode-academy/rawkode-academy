@@ -79,13 +79,13 @@ export function recentWindow(now = new Date()) {
   return { startDate: new Date(end - 27 * 86400000).toISOString().slice(0, 10), endDate: new Date(end).toISOString().slice(0, 10) };
 }
 
-// Consecutive inclusive windows of at most 92 days from `since` to `until`.
-export function backfillWindows(since: string, until: string, max: number) {
+// Consecutive inclusive windows of at most `days` days from `since` to `until`.
+export function backfillWindows(since: string, until: string, max: number, days = 92) {
   const windows: { startDate: string; endDate: string }[] = [];
   let start = Date.parse(since);
   const end = Date.parse(until);
   while (start <= end && windows.length < max) {
-    const stop = Math.min(start + 91 * 86400000, end);
+    const stop = Math.min(start + (days - 1) * 86400000, end);
     windows.push({ startDate: new Date(start).toISOString().slice(0, 10), endDate: new Date(stop).toISOString().slice(0, 10) });
     start = stop + 86400000;
   }

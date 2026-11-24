@@ -15,66 +15,42 @@ Rows go, one CloudEvent each, to `rawkode-tools-observability-collector` through
 
 Dates are YouTube's `America/Los_Angeles` reporting days. A cron at 08:17 UTC collects the last 28 days of `daily`, `daily_traffic`, `top_videos`, `traffic` and `summary`. YouTube revises recent days, so the same day is sent again on later runs: readers keep the latest `fetchedAt` per day (and per traffic source). [infra/lake-queries.sql](infra/lake-queries.sql) has the queries for views and watch time per day and views per traffic source per day. Re-sending also repairs any day a failed run missed.
 
-## Deploy
+## Go live
 
-1. In a Google Cloud project, enable **YouTube Data API v3** and **YouTube Analytics API**. Publish the OAuth consent screen (in **Testing**, refresh tokens expire after seven days), and create a **Desktop app** OAuth client.
-2. As the channel owner, on a machine with a browser:
+1. In Google Cloud, create a project with **YouTube Data API v3** and **YouTube Analytics API** enabled, an OAuth consent screen **published to Production** (in Testing, refresh tokens die after seven days), and a **Desktop app** OAuth client. Download the client JSON.
+2. From this directory: `cuenv task connect`.
 
-   ```sh
-   uv run scripts/authorize.py \
-     --client-secrets /private/google-desktop-client.json \
-     --channel UCrber_mFvp_FEF7D9u8PDEA \
-     --output /private/youtube.credentials.json
-   ```
+`connect` runs [scripts/connect.sh](scripts/connect.sh) in a Nix shell (Python with google-auth-oauthlib, Node 24, curl and jq from nixpkgs). It asks for the client JSON (default: the single `~/Downloads/client_secret_*.json`), signs Wrangler in as you if needed, deploys the Worker, opens Google consent, and stores two Worker secrets:
 
-   It requests read-only YouTube and YouTube Analytics access, checks that the grant is for exactly that channel, and saves the credential with mode `0600`.
-3. Deploy and set the secrets:
+| Secret | Value |
+| --- | --- |
+| `YOUTUBE_CREDENTIALS_JSON` | The offline credential from [scripts/authorize.py](scripts/authorize.py): read-only YouTube and YouTube Analytics scopes, checked to be exactly this channel. It goes straight from the script to `wrangler secret put` and is never written to disk. |
+| `API_TOKEN` | A random token generated for the run. |
 
-   ```sh
-   npm ci --workspaces=false
-   npm run deploy
-   npx wrangler secret put YOUTUBE_CREDENTIALS_JSON < /private/youtube.credentials.json
-   openssl rand -hex 32 | npx wrangler secret put API_TOKEN
-   ```
-
-   `API_TOKEN` protects the endpoints below. Keep a copy in your secret manager.
-4. Load history once, repeating until `next` is `null`:
-
-   ```sh
-   since=2019-01-01
-   while [ "$since" != "null" ]; do
-     since=$(curl -fsS -X POST "$ORIGIN/v1/analytics/backfill" -H "authorization: Bearer $API_TOKEN" \
-       -H 'content-type: application/json' -d "{\"since\":\"$since\"}" | jq -r .next)
-   done
-   ```
-
-   Each call collects one 92-day window of `daily` and `daily_traffic`, which keeps it inside Workers' subrequest limit (one collector call per row).
+It then runs a sync (the last 28 days) and loads history from `YOUTUBE_ANALYTICS_SINCE` (default 2015-01-01), one 30-day window per request. Rerun it to reauthorize or rotate the token; set `YOUTUBE_ANALYTICS_SINCE` to resume an interrupted backfill. After that the cron keeps the lake current. Deploy code changes with `cuenv task deploy`.
 
 ## Endpoints
 
-All but `/health` need `authorization: Bearer $API_TOKEN` and a JSON body.
+All but `/health` need `authorization: Bearer $API_TOKEN` and a JSON body. `connect` doesn't keep the token; rerun it for a new one when you need to call these yourself.
 
 | Endpoint | Purpose |
 | --- | --- |
 | `GET /health` | Process health only. |
 | `POST /v1/analytics/collect` | Fetch one report, e.g. `{ "report": "daily", "startDate": "2026-10-01", "endDate": "2026-10-31" }` (1–92 days; `videoId` for `retention`/`concurrent_viewers`), send its rows, and return it with `lake: { sent, failed }`. |
 | `POST /v1/analytics/sync` | Run the daily collection now. |
-| `POST /v1/analytics/backfill` | `{ "since": "YYYY-MM-DD" }`: one window of history; returns `next`. |
+| `POST /v1/analytics/backfill` | `{ "since": "YYYY-MM-DD" }`: one 30-day window of history; returns `next`. |
 
 `sync` and `backfill` return 502 when any report or row failed; the body lists each report's outcome.
 
 ## Verify locally
 
-Requires Node 24 and npm; this service is excluded from the root Bun workspaces and has its own lockfile.
-
 ```sh
-npm ci --workspaces=false
-npm run check --workspaces=false
-npm test --workspaces=false
+cuenv task check
+cuenv task test
 ```
 
-`npm test` builds the Worker and runs unit tests plus a Miniflare test with Google and the collector mocked.
+`test` builds the Worker and runs unit tests plus a Miniflare test with Google and the collector mocked. The service is excluded from the root Bun workspaces and has its own npm lockfile.
 
 ## Revoking access
 
-Revoke the app's access in the Google account, then delete or replace the `YOUTUBE_CREDENTIALS_JSON` secret.
+Revoke the app's access in the Google account, then rerun `cuenv task connect` or delete the `YOUTUBE_CREDENTIALS_JSON` secret with `wrangler secret delete`.

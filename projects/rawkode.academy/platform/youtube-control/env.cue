@@ -1,34 +1,51 @@
 package cuenv
 
-import "github.com/cuenv/cuenv/schema"
+import (
+	"list"
+
+	"github.com/cuenv/cuenv/schema"
+)
 
 schema.#Project
 
 name: "rawkode-academy-platform-youtube-control"
 
-// No automatic deploy pipeline yet: deploy with `npm run deploy` after the
-// Worker secrets in README.md are set.
+// Every task runs in a Nix shell with Python (and google-auth-oauthlib),
+// Node 24, curl and jq from nixpkgs, so nothing depends on system or
+// uv-downloaded toolchains (which don't run on NixOS).
+let _nixShell = [
+	"shell",
+	"--impure",
+	"--expr",
+	"with (builtins.getFlake \"nixpkgs\").legacyPackages.${builtins.currentSystem}; buildEnv { name = \"youtube-analytics-tools\"; paths = [ (python3.withPackages (p: [ p.google-auth-oauthlib ])) nodejs_24 curl jq ]; }",
+	"-c",
+]
+let _npm = "npm ci --workspaces=false --no-audit --no-fund >/dev/null && "
+let _sources = ["src/**", "package.json", "package-lock.json", "wrangler.jsonc"]
+
 tasks: [string]: hermetic: false
 
 tasks: {
-	install: schema.#Task & {
-		command: "npm"
-		args: ["ci", "--workspaces=false", "--no-audit", "--no-fund"]
-		inputs: ["package.json", "package-lock.json"]
-	}
 	check: schema.#Task & {
-		command: "npm"
-		args: ["run", "check", "--workspaces=false"]
-		inputs: ["src/**", "test/**", "package.json", "package-lock.json", "tsconfig.json", "secrets.d.ts", "wrangler.jsonc"]
+		command: "nix"
+		args: list.Concat([_nixShell, ["sh", "-c", _npm + "npm run check --workspaces=false"]])
+		inputs: list.Concat([_sources, ["test/**", "tsconfig.json", "secrets.d.ts"]])
 	}
 	test: schema.#Task & {
-		command: "npm"
-		args: ["test", "--workspaces=false"]
-		inputs: ["src/**", "test/**", "package.json", "package-lock.json", "wrangler.jsonc"]
+		command: "nix"
+		args: list.Concat([_nixShell, ["sh", "-c", _npm + "npm test --workspaces=false"]])
+		inputs: list.Concat([_sources, ["test/**"]])
 	}
-	build: schema.#Task & {
-		command: "npm"
-		args: ["run", "build", "--workspaces=false"]
-		inputs: ["src/**", "package.json", "package-lock.json", "wrangler.jsonc"]
+	deploy: schema.#Task & {
+		command: "nix"
+		args: list.Concat([_nixShell, ["sh", "-c", _npm + "npx --no-install wrangler deploy"]])
+		inputs: _sources
+	}
+	// Deploys the Worker, authorizes the channel in the browser, stores the
+	// Worker secrets and loads history. See README.md.
+	connect: schema.#Task & {
+		command: "nix"
+		args: list.Concat([_nixShell, ["bash", "scripts/connect.sh"]])
+		inputs: list.Concat([_sources, ["scripts/**"]])
 	}
 }

@@ -48,14 +48,14 @@ test("a failed report or lake rejection marks the run unsuccessful without stopp
   assert.equal((await new Collector(new FakeYouTube(), channelId, rejecting).sync()).success, false);
 });
 
-test("backfill collects one 92-day window of per-day reports and returns the next start", async () => {
+test("backfill collects one 30-day window of per-day reports and returns the next start", async () => {
   const youtube = new FakeYouTube();
   const sink = lake();
   const collector = new Collector(youtube, channelId, sink);
   const first = await collector.backfill({ since: "2026-01-01" }, new Date("2026-11-23T12:00:00Z"));
   assert.equal(first.success, true);
-  assert.deepEqual(first.outcomes.map(o => [o.report, o.startDate, o.endDate]), [["daily", "2026-01-01", "2026-04-02"], ["daily_traffic", "2026-01-01", "2026-04-02"]]);
-  assert.equal(first.next, "2026-04-03");
+  assert.deepEqual(first.outcomes.map(o => [o.report, o.startDate, o.endDate]), [["daily", "2026-01-01", "2026-01-30"], ["daily_traffic", "2026-01-01", "2026-01-30"]]);
+  assert.equal(first.next, "2026-01-31");
   const last = await collector.backfill({ since: "2026-11-01" }, new Date("2026-11-23T12:00:00Z"));
   assert.equal(last.next, null);
   await assert.rejects(collector.backfill({ since: "not-a-day" }));

@@ -31,8 +31,8 @@ jobs:
       - name: Synchronize repository environment
         working-directory: .
         run: |
-          curl -fsSL https://github.com/cuenv/cuenv/releases/download/0.76.0/cuenv-linux-x64 -o /tmp/cuenv
-          echo 'ba8f18e7dcd39102b6a0a64814079ca2ceb3388748caf65f7a91ce4d3877b005  /tmp/cuenv' | sha256sum --check --status
+          curl -fsSL https://github.com/cuenv/cuenv/releases/download/0.78.0/cuenv-linux-x64 -o /tmp/cuenv
+          echo '4f582623e67a12fab3814e2ec72d053e5fc17ee105a1071d016a9fdf9bfe31b3  /tmp/cuenv' | sha256sum --check --status
           chmod +x /tmp/cuenv
           /tmp/cuenv sync -A
         env:
@@ -40,4 +40,4 @@ jobs:
       - run: npm ci --workspaces=false --no-audit --no-fund
       - run: npm run check --workspaces=false
       - run: npm test --workspaces=false
-      - run: python3 -m py_compile scripts/authorize.py
+      - run: python3 -m py_compile scripts/authorize.py && bash -n scripts/connect.sh

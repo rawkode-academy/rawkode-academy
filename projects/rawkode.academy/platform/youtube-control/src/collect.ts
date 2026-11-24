@@ -38,11 +38,12 @@ export class Collector {
     return this.run(DAILY_REPORTS, [recentWindow(now)]);
   }
 
-  // One 92-day window per call keeps each request well inside Workers'
-  // subrequest limit (one collector call per row). Repeat with `next`.
+  // One 30-day window per call: about 30 daily rows plus ~15 traffic sources
+  // a day, so each request stays well inside Workers' subrequest limit (one
+  // collector call per row). Repeat with `next`.
   async backfill(input: unknown, now = new Date()) {
     const { since } = z.object({ since: daySchema }).strict().parse(input);
-    const { windows, next } = backfillWindows(since, recentWindow(now).endDate, 1);
+    const { windows, next } = backfillWindows(since, recentWindow(now).endDate, 1, 30);
     return { ...(await this.run(BACKFILL_REPORTS, windows)), since, next };
   }
 }

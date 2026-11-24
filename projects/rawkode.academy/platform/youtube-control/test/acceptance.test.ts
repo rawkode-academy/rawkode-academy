@@ -71,5 +71,5 @@ test("Worker runtime: reports reach the analytics collector as CloudEvents", { t
 
   const backfill = await post("/v1/analytics/backfill", { since: "2026-01-01" });
   assert.equal(backfill.status, 200, JSON.stringify(backfill.body));
-  assert.equal(backfill.body.next, "2026-04-03");
+  assert.equal(backfill.body.next, "2026-01-31");
 });
