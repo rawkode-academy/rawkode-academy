@@ -2,7 +2,6 @@ package cuenv
 
 import (
 	"encoding/json"
-	"strings"
 
 	"github.com/cuenv/cuenv/schema"
 	"registry.terraform.io/cloudflare/cloudflare:cloudflare_provider"
@@ -77,8 +76,7 @@ _github: {
 }
 
 // Cloudflare API token permission groups, looked up by name so no ID is
-// hardcoded. The lookup takes a URL-encoded name and fails the plan if
-// nothing matches.
+// hardcoded. A lookup that matches nothing fails the plan.
 _permissionNames: [
 	"Workers R2 Storage Bucket Item Write",
 	"Workers R2 Storage Bucket Item Read",
@@ -136,13 +134,12 @@ infrastructure: {
 		}
 	}
 
-	// The name filter takes the URL-encoded permission group name.
 	data: {
 		for n in _permissionNames {
 			(n): permission_groups.#DataSource & {
 				configuration: {
 					account_id: _account
-					name:       strings.Replace(n, " ", "%20", -1)
+					name:       n
 				}
 				outputs: result: type: "list"
 			}
