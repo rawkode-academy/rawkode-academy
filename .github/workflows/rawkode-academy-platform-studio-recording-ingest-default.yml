@@ -68,8 +68,6 @@ jobs:
             rm -f /nix/receipt.json
           fi
         fi
-    - name: cuenv:contributor:bun.workspace.setup
-      run: 'true'
     - name: Setup cuenv (release)
       run: |-
         platform="$(uname -s)-$(uname -m)"
@@ -93,6 +91,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Install Bun dependencies
       run: cuenv exec -- bun install --frozen-lockfile
+    - name: cuenv:contributor:bun.workspace.setup
+      run: 'true'
     - name: 'Run pipeline: default'
       run: cuenv ci --pipeline default --path projects/rawkode.academy/platform/studio-recording-ingest
       env:
