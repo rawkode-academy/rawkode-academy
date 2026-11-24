@@ -73,6 +73,7 @@ export async function fetchReport(api: AnalyticsAPI, q: AnalyticsQuery, channelI
   throw new Error("Report pagination exceeded its bound");
 }
 
+// The last 28 complete reporting days (YouTube's America/Los_Angeles days).
 export function recentWindow(now = new Date()) {
   const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles", year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
   const end = Date.parse(today) - 86400000;

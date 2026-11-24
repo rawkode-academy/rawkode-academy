@@ -6,23 +6,31 @@ const analyticsAPI = "https://youtubeanalytics.googleapis.com/v2/";
 
 // Read-only access to one channel: YouTube Data API (channel check) and
 // YouTube Analytics API (reports), using a stored offline refresh token.
+export type GoogleCredentials = { clientId?: string; clientSecret?: string; refreshToken?: string };
+
+export const CONSENT_TASK = "cuenv task consent (in projects/rawkode.academy/platform/youtube-control)";
+
 export class GoogleClient {
   private token?: string;
-  constructor(private credentialsJSON: string, public channelId: string, private fetcher: typeof fetch = (...args) => fetch(...args)) {}
+  constructor(private credentials: GoogleCredentials, public channelId: string, private fetcher: typeof fetch = (...args) => fetch(...args)) {}
 
   private async authorize() {
     if (this.token) return;
-    let credentials;
-    try { credentials = JSON.parse(this.credentialsJSON); } catch { throw new ServiceError("not_configured", "YouTube authorization is not configured", 503); }
-    ensure([credentials?.client_id, credentials?.client_secret, credentials?.refresh_token].every(value => typeof value === "string" && value.length > 0), "not_configured", "YouTube authorization is incomplete", 503);
-    ensure(!credentials.channel_id || credentials.channel_id === this.channelId, "wrong_channel", "Stored Google credentials belong to a different channel", 403);
+    const { clientId, clientSecret, refreshToken } = this.credentials;
+    ensure([clientId, clientSecret, refreshToken].every(value => typeof value === "string" && value.length > 0), "reauthorization_required", `YouTube authorization is missing. Run ${CONSENT_TASK}.`, 503);
     const response = await this.fetcher("https://oauth2.googleapis.com/token", {
       method: "POST", signal: AbortSignal.timeout(20000), redirect: "manual",
       headers: { "content-type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ grant_type: "refresh_token", client_id: credentials.client_id, client_secret: credentials.client_secret, refresh_token: credentials.refresh_token }),
+      body: new URLSearchParams({ grant_type: "refresh_token", client_id: clientId!, client_secret: clientSecret!, refresh_token: refreshToken! }),
     });
+    if (response.status === 400 || response.status === 401) {
+      // Google's OAuth error codes are fixed identifiers, never secrets.
+      let code = "unknown";
+      try { const body = JSON.parse(new TextDecoder().decode(await readLimited(response.body, 4096))); if (typeof body?.error === "string" && /^[a-z_]{1,64}$/.test(body.error)) code = body.error; } catch { /* keep "unknown" */ }
+      throw new ServiceError("reauthorization_required", `Google rejected the stored YouTube authorization (${code}). Run ${CONSENT_TASK}.`, 401, response.status);
+    }
     const value = await this.decode<{ access_token?: string }>(response, "oauth_refresh", 65536);
-    ensure(typeof value.access_token === "string" && value.access_token.length > 0, "oauth_refresh", "Google authorization returned no access token; reauthorize the channel", 502);
+    ensure(typeof value.access_token === "string" && value.access_token.length > 0, "oauth_refresh", "Google authorization returned no access token", 502);
     this.token = value.access_token;
   }
   private async decode<T>(response: Response, operation: string, max = 4 * 1024 * 1024): Promise<T> {

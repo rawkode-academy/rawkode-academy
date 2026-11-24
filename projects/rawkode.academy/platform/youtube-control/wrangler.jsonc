@@ -10,11 +10,18 @@
     "logs": { "enabled": true, "destinations": ["grafana-logs"] }
   },
   "vars": {
-    "YOUTUBE_CHANNEL_ID": "UCrber_mFvp_FEF7D9u8PDEA"
+    "YOUTUBE_CHANNEL_ID": "UCrber_mFvp_FEF7D9u8PDEA",
+    // Where the initial backfill starts; earlier days just return no rows.
+    "YOUTUBE_HISTORY_SINCE": "2015-01-01"
   },
   // Report rows become CloudEvents in analytics.events_archive
   // (R2 bucket rawkode-analytics) through the observability collector.
   "services": [{ "binding": "ANALYTICS", "service": "rawkode-tools-observability-collector" }],
-  // Daily: the last 28 days of reports, after YouTube's overnight processing.
+  "workflows": [
+    { "name": "youtube-analytics-sync", "binding": "SYNC", "class_name": "SyncWorkflow" },
+    { "name": "youtube-analytics-backfill", "binding": "BACKFILL", "class_name": "BackfillWorkflow" }
+  ],
+  // Daily, after YouTube's overnight processing: start that day's sync (and,
+  // once, the initial backfill).
   "triggers": { "crons": ["17 8 * * *"] }
 }

@@ -1,62 +1,40 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { Collector, DAILY_REPORTS, type ChannelAPI } from "../src/collect.ts";
+import { backfillJobs, collect, DAILY_REPORTS, syncJobs } from "../src/collect.ts";
+import type { AnalyticsAPI } from "../src/analytics.ts";
+import { ServiceError } from "../src/domain.ts";
 
 const channelId = "UCrber_mFvp_FEF7D9u8PDEA";
-const metric = (name: string) => ({ name, columnType: "METRIC", dataType: "INTEGER" });
-const dimension = (name: string) => ({ name, columnType: "DIMENSION", dataType: "STRING" });
-const activity = "views,engagedViews,estimatedMinutesWatched,averageViewDuration,averageViewPercentage,likes,comments,shares,subscribersGained,subscribersLost".split(",");
-
-class FakeYouTube implements ChannelAPI {
-  queries: Record<string, string | number | undefined>[] = [];
-  failReport?: string;
-  async checkChannel() {}
+const youtube: AnalyticsAPI = {
   async analytics<T>(query: Record<string, string | number | undefined>) {
-    this.queries.push(query);
     const dims = String(query.dimensions ?? "").split(",").filter(Boolean);
     const metrics = String(query.metrics).split(",");
-    if (this.failReport && query.dimensions === this.failReport) throw new Error("boom");
     const row = [...dims.map(d => d === "day" ? String(query.startDate) : d === "video" ? "abcdefghijk" : "YT_SEARCH"), ...metrics.map(() => 1)];
-    return { columnHeaders: [...dims.map(dimension), ...metrics.map(metric)], rows: [row] } as T;
-  }
-}
-const lake = () => {
-  const events: any[] = [];
-  return { events, async trackEvent(event: unknown) { events.push(event); return { success: true }; } };
+    return { columnHeaders: [...dims.map(name => ({ name, columnType: "DIMENSION", dataType: "STRING" })), ...metrics.map(name => ({ name, columnType: "METRIC", dataType: "INTEGER" }))], rows: [row] } as T;
+  },
 };
 
-test("sync collects every daily report for the last 28 days and sends each row", async () => {
-  const youtube = new FakeYouTube();
-  const sink = lake();
-  const result = await new Collector(youtube, channelId, sink).sync(new Date("2026-11-23T12:00:00Z"));
-  assert.equal(result.success, true);
-  assert.deepEqual(result.outcomes.map(o => o.report), [...DAILY_REPORTS]);
-  assert.ok(result.outcomes.every(o => o.startDate === "2026-10-26" && o.endDate === "2026-11-22"));
-  assert.deepEqual([...new Set(sink.events.map(e => e.type))], DAILY_REPORTS.map(r => `youtube.${r}`));
-  assert.equal(sink.events.find(e => e.type === "youtube.daily").data.views, 1);
+test("the daily sync covers every daily report for the last 28 reporting days", () => {
+  const jobs = syncJobs(new Date("2026-11-23T12:00:00Z"));
+  assert.deepEqual(jobs.map(j => j.report), [...DAILY_REPORTS]);
+  assert.ok(jobs.every(j => j.startDate === "2026-10-26" && j.endDate === "2026-11-22"));
 });
 
-test("a failed report or lake rejection marks the run unsuccessful without stopping it", async () => {
-  const youtube = new FakeYouTube();
-  youtube.failReport = "insightTrafficSourceType";
-  const sink = lake();
-  const result = await new Collector(youtube, channelId, sink).sync(new Date("2026-11-23T12:00:00Z"));
-  assert.equal(result.success, false);
-  assert.equal(result.outcomes.find(o => o.report === "traffic")?.error, "internal_error");
-  assert.equal(result.outcomes.filter(o => !o.error).length, DAILY_REPORTS.length - 1);
-  const rejecting = { async trackEvent() { return { success: false, error: "invalid" }; } };
-  assert.equal((await new Collector(new FakeYouTube(), channelId, rejecting).sync()).success, false);
+test("backfill covers history in 30-day windows of per-day reports up to yesterday", () => {
+  const jobs = backfillJobs("2026-09-01", new Date("2026-11-23T12:00:00Z"));
+  assert.deepEqual(jobs.map(j => `${j.report} ${j.startDate} ${j.endDate}`), [
+    "daily 2026-09-01 2026-09-30", "daily_traffic 2026-09-01 2026-09-30",
+    "daily 2026-10-01 2026-10-30", "daily_traffic 2026-10-01 2026-10-30",
+    "daily 2026-10-31 2026-11-22", "daily_traffic 2026-10-31 2026-11-22",
+  ]);
+  assert.equal(backfillJobs("2015-01-01", new Date("2026-11-23T12:00:00Z")).length % 2, 0);
 });
 
-test("backfill collects one 30-day window of per-day reports and returns the next start", async () => {
-  const youtube = new FakeYouTube();
-  const sink = lake();
-  const collector = new Collector(youtube, channelId, sink);
-  const first = await collector.backfill({ since: "2026-01-01" }, new Date("2026-11-23T12:00:00Z"));
-  assert.equal(first.success, true);
-  assert.deepEqual(first.outcomes.map(o => [o.report, o.startDate, o.endDate]), [["daily", "2026-01-01", "2026-01-30"], ["daily_traffic", "2026-01-01", "2026-01-30"]]);
-  assert.equal(first.next, "2026-01-31");
-  const last = await collector.backfill({ since: "2026-11-01" }, new Date("2026-11-23T12:00:00Z"));
-  assert.equal(last.next, null);
-  await assert.rejects(collector.backfill({ since: "not-a-day" }));
+test("a job sends every row and fails if the lake rejects any", async () => {
+  const events: any[] = [];
+  const job = { report: "daily_traffic", startDate: "2026-10-01", endDate: "2026-10-01" };
+  const result = await collect(youtube, channelId, { async trackEvent(e) { events.push(e); return { success: true }; } }, job);
+  assert.deepEqual(result, { ...job, rows: 1, sent: 1 });
+  assert.equal(events[0].type, "youtube.daily_traffic");
+  await assert.rejects(collect(youtube, channelId, { async trackEvent() { return { success: false, error: "invalid" }; } }, job), (error: unknown) => error instanceof ServiceError && error.code === "lake_rejected");
 });

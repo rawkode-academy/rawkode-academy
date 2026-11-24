@@ -1,5 +1,6 @@
-// Secret bindings are provisioned with `wrangler secret put`, never as vars.
+// Secret bindings, uploaded from Infisical by the deploy task (see secrets.env).
 interface CloudflareEnv {
-  YOUTUBE_CREDENTIALS_JSON: string;
-  API_TOKEN: string;
+  YOUTUBE_CLIENT_ID: string;
+  YOUTUBE_CLIENT_SECRET: string;
+  YOUTUBE_REFRESH_TOKEN: string;
 }

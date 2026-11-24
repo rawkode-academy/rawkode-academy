@@ -4,7 +4,7 @@ import { errorBody, ServiceError } from "../src/domain.ts";
 import { GoogleClient } from "../src/google.ts";
 
 const channelId = `UC${"a".repeat(22)}`;
-const credentials = JSON.stringify({ client_id: "client", client_secret: "secret", refresh_token: "refresh", channel_id: channelId });
+const credentials = { clientId: "client", clientSecret: "secret", refreshToken: "refresh" };
 const json = (body: unknown, status = 200) => Response.json(body, { status });
 const isTokenEndpoint = (input: RequestInfo | URL) => new URL(String(input)).hostname === "oauth2.googleapis.com";
 
@@ -34,13 +34,25 @@ test("upstream error bodies never escape", async () => {
   });
 });
 
-test("missing, incomplete or foreign credentials are refused before calling Google", async () => {
+test("missing credentials are refused before calling Google", async () => {
   let calls = 0;
   const fetcher = (async () => { calls++; return json({}); }) as typeof fetch;
-  for (const [value, code] of [["", "not_configured"], [JSON.stringify({ client_id: "c" }), "not_configured"], [JSON.stringify({ client_id: "c", client_secret: "s", refresh_token: "r", channel_id: "UCother" }), "wrong_channel"]]) {
-    await assert.rejects(new GoogleClient(value, channelId, fetcher).analytics({}), (error: unknown) => error instanceof ServiceError && error.code === code);
+  for (const value of [{}, { clientId: "c" }, { clientId: "c", clientSecret: "s", refreshToken: "" }]) {
+    await assert.rejects(new GoogleClient(value, channelId, fetcher).analytics({}), (error: unknown) => error instanceof ServiceError && error.code === "reauthorization_required");
   }
   assert.equal(calls, 0);
+});
+
+test("a revoked grant says to re-run consent, naming only Google's error code", async () => {
+  const api = new GoogleClient(credentials, channelId, (async () => json({ error: "invalid_grant", error_description: "Token has been expired or revoked. refresh=DO_NOT_PRINT" }, 400)) as typeof fetch);
+  await assert.rejects(api.analytics({}), (error: unknown) => {
+    assert.ok(error instanceof ServiceError);
+    assert.equal(error.code, "reauthorization_required");
+    assert.match(error.message, /invalid_grant/);
+    assert.match(error.message, /cuenv task consent/);
+    assert.doesNotMatch(error.message, /DO_NOT_PRINT/);
+    return true;
+  });
 });
 
 test("the grant must identify exactly the configured channel", async () => {

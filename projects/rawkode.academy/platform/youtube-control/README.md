@@ -13,34 +13,32 @@ Rows go, one CloudEvent each, to `rawkode-tools-observability-collector` through
 | `summary` | none | as `daily` |
 | `retention`, `concurrent_viewers` | per video, on request only | |
 
-Dates are YouTube's `America/Los_Angeles` reporting days. A cron at 08:17 UTC collects the last 28 days of `daily`, `daily_traffic`, `top_videos`, `traffic` and `summary`. YouTube revises recent days, so the same day is sent again on later runs: readers keep the latest `fetchedAt` per day (and per traffic source). [infra/lake-queries.sql](infra/lake-queries.sql) has the queries for views and watch time per day and views per traffic source per day. Re-sending also repairs any day a failed run missed.
+Dates are YouTube's `America/Los_Angeles` reporting days. YouTube revises recent days, so the same day is sent again on later runs: readers keep the latest `fetchedAt` per day (and per traffic source). [infra/lake-queries.sql](infra/lake-queries.sql) has the queries for views and watch time per day and views per traffic source per day.
 
-## Go live
+## How it runs
 
-1. In Google Cloud, create a project with **YouTube Data API v3** and **YouTube Analytics API** enabled, an OAuth consent screen **published to Production** (in Testing, refresh tokens die after seven days), and a **Desktop app** OAuth client. Download the client JSON.
-2. From this directory: `cuenv task connect`.
+- **Daily sync.** A cron at 08:17 UTC starts the `youtube-analytics-sync` Workflow (instance `sync-<UTC date>`), which collects the last 28 days of `daily`, `daily_traffic`, `top_videos`, `traffic` and `summary`, one retried step per report. Re-sending recent days also repairs a day a failed run missed.
+- **History.** The first cron after deploy also starts `youtube-analytics-backfill` once (instance `backfill-initial`), from `YOUTUBE_HISTORY_SINCE` (2015-01-01) in 30-day steps of `daily` and `daily_traffic`. `cuenv task backfill -e production` starts another; it is safe to repeat.
+- **Credentials.** `YOUTUBE_CLIENT_ID`, `YOUTUBE_CLIENT_SECRET` and `YOUTUBE_REFRESH_TOKEN` live in Infisical at `/projects/basin` (production). `cuenv task consent` writes them; nothing else does. The YouTube Analytics API doesn't accept service accounts, so a channel owner's refresh token is unavoidable.
+- **Deploy.** CI on `main` (`rawkode-academy-platform-youtube-control-default`) runs the tests and `wrangler deploy --secrets-file secrets.env`, with the three secrets read from Infisical as the `github-actions` identity and the Workers token from the root `env.cue`. Nothing is deployed from a laptop.
+- **Alerts.** `.github/workflows/youtube-analytics-monitor.yml` reads `GET /status` at 10:47 UTC. If today's sync didn't complete (or the initial backfill failed), it opens an issue titled "YouTube analytics sync is failing", or comments on the open one, and closes it once a sync completes. A revoked or expired grant (`invalid_grant`) stops the sync without retries and the issue says to run `cuenv task consent`.
 
-`connect` runs [scripts/connect.sh](scripts/connect.sh) in a Nix shell (Python with google-auth-oauthlib, Node 24, curl and jq from nixpkgs). It asks for the client JSON (default: the single `~/Downloads/client_secret_*.json`), signs Wrangler in as you if needed, deploys the Worker, opens Google consent, and stores two Worker secrets:
+## Going live
 
-| Secret | Value |
-| --- | --- |
-| `YOUTUBE_CREDENTIALS_JSON` | The offline credential from [scripts/authorize.py](scripts/authorize.py): read-only YouTube and YouTube Analytics scopes, checked to be exactly this channel. It goes straight from the script to `wrangler secret put` and is never written to disk. |
-| `API_TOKEN` | A random token generated for the run. |
+1. In Google Cloud, create a project with **YouTube Data API v3** and **YouTube Analytics API** enabled, an OAuth consent screen that is **Internal** (Workspace) or **published to Production** (in Testing, refresh tokens die after seven days), and a **Desktop app** OAuth client. Download its JSON.
+2. `cuenv task consent` in this directory. It asks for the client JSON (default: the one `~/Downloads/client_secret_*.json`), opens Google consent (pick the Rawkode Academy channel), checks the grant is for exactly that channel, writes the three secrets to Infisical as the bootstrap machine identity (from 1Password), offers to delete the JSON, and starts the deploy workflow if it's on `main`.
+3. Merge. CI deploys; the next 08:17 UTC cron runs the first sync and starts the backfill.
 
-It then runs a sync (the last 28 days) and loads history from `YOUTUBE_ANALYTICS_SINCE` (default 2015-01-01), one 30-day window per request. Rerun it to reauthorize or rotate the token; set `YOUTUBE_ANALYTICS_SINCE` to resume an interrupted backfill. After that the cron keeps the lake current. Deploy code changes with `cuenv task deploy`.
+When the alert says the grant was revoked, repeat step 2.
 
 ## Endpoints
-
-All but `/health` need `authorization: Bearer $API_TOKEN` and a JSON body. `connect` doesn't keep the token; rerun it for a new one when you need to call these yourself.
 
 | Endpoint | Purpose |
 | --- | --- |
 | `GET /health` | Process health only. |
-| `POST /v1/analytics/collect` | Fetch one report, e.g. `{ "report": "daily", "startDate": "2026-10-01", "endDate": "2026-10-31" }` (1–92 days; `videoId` for `retention`/`concurrent_viewers`), send its rows, and return it with `lake: { sent, failed }`. |
-| `POST /v1/analytics/sync` | Run the daily collection now. |
-| `POST /v1/analytics/backfill` | `{ "since": "YYYY-MM-DD" }`: one 30-day window of history; returns `next`. |
+| `GET /status` | Today's (or yesterday's) sync instance and the initial backfill: `status` and `error` only. |
 
-`sync` and `backfill` return 502 when any report or row failed; the body lists each report's outcome.
+To run a sync by hand: `npx wrangler workflows trigger youtube-analytics-sync`.
 
 ## Verify locally
 
@@ -49,8 +47,8 @@ cuenv task check
 cuenv task test
 ```
 
-`test` builds the Worker and runs unit tests plus a Miniflare test with Google and the collector mocked. The service is excluded from the root Bun workspaces and has its own npm lockfile.
+`test` builds the Worker and runs unit tests plus Miniflare tests of both Workflows with Google and the collector mocked, including a revoked grant. The service is excluded from the root Bun workspaces and has its own npm lockfile.
 
 ## Revoking access
 
-Revoke the app's access in the Google account, then rerun `cuenv task connect` or delete the `YOUTUBE_CREDENTIALS_JSON` secret with `wrangler secret delete`.
+Revoke the app in the Google account's security settings and delete the three secrets from Infisical; the next sync fails and the alert opens.
