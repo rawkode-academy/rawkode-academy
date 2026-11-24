@@ -9,7 +9,7 @@ import { read, reply, type ToolModule } from "./module.ts";
 export const LAKE_GUIDE = `Rawkode Academy analytics lake (Cloudflare Basin, Iceberg, queried with Basin SQL / DataFusion).
 
 Tables:
-- analytics.events_archive: every CloudEvent as sent. Columns: event_id, event_source, event_type, event_time (timestamp), value (the whole CloudEvent as JSON text). Read fields with json_get_str / json_get_int / json_get_float / json_get_bool(value, 'data', '<field>'). Top-level attributes such as referrer, country, device, bot and botreason are json_get_str(value, '<attribute>').
+- analytics.events_archive: every CloudEvent as sent. Columns: event_id, event_source, event_type, event_time (timestamp), value (the whole CloudEvent as JSON text). Read fields with json_get_str / json_get_int / json_get_float / json_get_bool(value, 'data', '<field>'). json_get_int and json_get_float return NULL for a negative number; read a field that can be negative (YouTube's likes, comments and shares are net) with CAST(json_as_text(value, 'data', '<field>') AS BIGINT). Top-level attributes such as referrer, country, device, bot and botreason are json_get_str(value, '<attribute>').
 - analytics.short_link_redirects: typed short-link redirects (event_id, event_time, domain, path, matched, destination, referrer, country, continent, device, browser, bot, bot_reason).
 
 Event sources in events_archive include rawkode-academy-website and rawkode-academy-browser (website and browser events), short-link redirects, and rawkode-academy-youtube (YouTube Analytics).
@@ -31,9 +31,9 @@ FROM (
 		json_get_int(value, 'data', 'engagedViews') AS engaged_views,
 		json_get_int(value, 'data', 'estimatedMinutesWatched') AS minutes_watched,
 		json_get_int(value, 'data', 'averageViewDuration') AS average_view_duration_seconds,
-		json_get_int(value, 'data', 'likes') AS likes,
-		json_get_int(value, 'data', 'comments') AS comments,
-		json_get_int(value, 'data', 'shares') AS shares,
+		CAST(json_as_text(value, 'data', 'likes') AS BIGINT) AS likes,
+		CAST(json_as_text(value, 'data', 'comments') AS BIGINT) AS comments,
+		CAST(json_as_text(value, 'data', 'shares') AS BIGINT) AS shares,
 		json_get_int(value, 'data', 'subscribersGained') AS subscribers_gained,
 		json_get_int(value, 'data', 'subscribersLost') AS subscribers_lost,
 		ROW_NUMBER() OVER (PARTITION BY json_get_str(value, 'data', 'day') ORDER BY json_get_str(value, 'data', 'fetchedAt') DESC) AS rn
