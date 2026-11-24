@@ -383,10 +383,6 @@ export const createAuth = async (env: AuthEnv) => {
 								event: "auth.user_registered",
 								distinctId: user.id,
 								properties: {
-									$set: {
-										email: user.email,
-										name: user.name,
-									},
 									$set_once: {
 										registered_at: new Date().toISOString(),
 									},
