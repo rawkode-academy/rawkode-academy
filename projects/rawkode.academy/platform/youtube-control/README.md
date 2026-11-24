@@ -33,7 +33,7 @@ When the alert says the grant was revoked, repeat step 2.
 
 ## Analytics MCP
 
-`/mcp` is a remote MCP server (Streamable HTTP) for reading the Academy analytics lake from Claude, ChatGPT or any MCP client. It never calls YouTube: the daily sync already lands YouTube Analytics in the lake. Its tools run Basin SQL with the lake's read-only `BASIN_SQL_TOKEN`:
+`https://mcp.rawkode.academy/mcp` is a remote MCP server (Streamable HTTP) for reading the Academy analytics lake from Claude, ChatGPT or any MCP client. It never calls YouTube: the daily sync already lands YouTube Analytics in the lake. Its tools run Basin SQL with the lake's read-only `BASIN_SQL_TOKEN`:
 
 | Tool | What it does |
 | --- | --- |
@@ -46,9 +46,9 @@ Clients connect with OAuth 2.1 (dynamic client registration, PKCE S256, scope `a
 
 Setting it up:
 
-1. In the same Google Cloud project, create a **Web application** OAuth client with the redirect URI `https://rawkode-academy-youtube-analytics.rawkodeacademy.workers.dev/oauth/callback`. Store its client ID and secret in 1Password at `op://Employee/565nub77bcoxqd5a77kbdets3q/youtube-control/mcp-client-id` and `.../mcp-client-secret`.
+1. In the same Google Cloud project, create a **Web application** OAuth client with the redirect URI `https://mcp.rawkode.academy/oauth/callback`. Store its client ID and secret in 1Password at `op://Employee/565nub77bcoxqd5a77kbdets3q/youtube-control/mcp-client-id` and `.../mcp-client-secret`.
 2. `cuenv task mcp-owner` in this directory. It signs in with Google through the Desktop client (pick the account you'll approve connections with), and writes that account's ID and the Web client to Infisical `/projects/basin` as `MCP_OWNER_GOOGLE_SUB`, `MCP_GOOGLE_CLIENT_ID` and `MCP_GOOGLE_CLIENT_SECRET`. The deploy fails until these exist.
-3. Add `https://rawkode-academy-youtube-analytics.rawkodeacademy.workers.dev/mcp` as a custom connector in Claude or ChatGPT, and sign in when asked.
+3. Add `https://mcp.rawkode.academy/mcp` as a custom connector in Claude or ChatGPT, and sign in when asked.
 
 ## Endpoints
 
@@ -56,7 +56,7 @@ Setting it up:
 | --- | --- |
 | `GET /health` | Process health only. |
 | `GET /status` | Today's (or yesterday's) sync instance and the initial backfill: `status` and `error` only. |
-| `/mcp`, `/oauth/*`, `/.well-known/*` | The analytics MCP and its OAuth endpoints (above). |
+| `/mcp`, `/oauth/*`, `/.well-known/*` | The analytics MCP and its OAuth endpoints (above), on `mcp.rawkode.academy` only. |
 
 To run today's sync (and the initial backfill, if it hasn't started) now and see what reached the lake, run the `rawkode-academy-platform-youtube-control-verify` workflow from Actions.
 
