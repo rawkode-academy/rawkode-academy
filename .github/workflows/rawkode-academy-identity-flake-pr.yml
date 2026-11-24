@@ -16,7 +16,7 @@ jobs:
       - uses: DeterminateSystems/determinate-nix-action@v3
       - name: Install cuenv and sync
         run: |
-          curl -fsSL -o /tmp/cuenv https://github.com/cuenv/cuenv/releases/download/0.78.0/cuenv-linux-x64
+          curl -fsSL -o /tmp/cuenv https://github.com/cuenv/cuenv/releases/download/0.80.0/cuenv-linux-x64
           chmod +x /tmp/cuenv
           /tmp/cuenv sync -A
       - name: Validate the identity flake

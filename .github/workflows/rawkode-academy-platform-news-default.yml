@@ -14,9 +14,18 @@ on:
     - projects/*.cue
     - projects/rawkode.academy/*.cue
     - projects/rawkode.academy/codegen/*.cue
+    - projects/rawkode.academy/codegen/platform-service.cue
+    - projects/rawkode.academy/codegen/platform-service.cue/**
     - projects/rawkode.academy/platform/*.cue
-    - projects/rawkode.academy/platform/news/**
     - projects/rawkode.academy/platform/news/*.cue
+    - projects/rawkode.academy/platform/news/data-model/**
+    - projects/rawkode.academy/platform/news/env.cue
+    - projects/rawkode.academy/platform/news/env.cue/**
+    - projects/rawkode.academy/platform/news/package.json
+    - projects/rawkode.academy/platform/news/package.json/**
+    - projects/rawkode.academy/platform/news/read-model/**
+    - projects/rawkode.academy/platform/news/service.cue
+    - projects/rawkode.academy/platform/news/service.cue/**
   workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
@@ -60,8 +69,6 @@ jobs:
             rm -f /nix/receipt.json
           fi
         fi
-    - name: cuenv:contributor:bun.workspace.setup
-      run: 'true'
     - name: Setup cuenv (release)
       run: |-
         platform="$(uname -s)-$(uname -m)"
@@ -71,7 +78,7 @@ jobs:
           Darwin-arm64) cuenv_asset="cuenv-darwin-arm64" ;;
           *) echo "Unsupported platform: $platform" >&2; exit 1 ;;
         esac
-        cuenv_version="0.78.0"
+        cuenv_version="0.80.0"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi
@@ -85,6 +92,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Install Bun dependencies
       run: cuenv exec -- bun install --frozen-lockfile
+    - name: cuenv:contributor:bun.workspace.setup
+      run: 'true'
     - name: Setup 1Password
       run: cuenv secrets setup onepassword
       env:

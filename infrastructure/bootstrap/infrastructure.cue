@@ -1,8 +1,6 @@
 package cuenv
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 
 	"github.com/cuenv/cuenv/schema"
@@ -507,7 +505,7 @@ infrastructure: {
 				env_slug:     _infisical.environment
 				folder_path:  infrastructure.resources.infrastructure_folder.outputs.path
 				name:         "CUENV_STATE_SECRET_ACCESS_KEY"
-				value:        hex.Encode(sha256.Sum256(infrastructure.resources.state_token.outputs.value))
+				value:        schema.#Sha256 & {of: infrastructure.resources.state_token.outputs.value}
 			}
 		}
 
@@ -578,7 +576,7 @@ infrastructure: {
 				env_slug:     _infisical.environment
 				folder_path:  infrastructure.resources.read_only_folder.outputs.path
 				name:         "CUENV_STATE_SECRET_ACCESS_KEY"
-				value:        hex.Encode(sha256.Sum256(infrastructure.resources.state_read_only_token.outputs.value))
+				value:        schema.#Sha256 & {of: infrastructure.resources.state_read_only_token.outputs.value}
 			}
 		}
 	}
