@@ -4,7 +4,7 @@ import {
 } from "@cloudflare/workers-oauth-provider";
 import { createMcpHandler } from "agents/mcp/server";
 import { ensure, errorBody, readLimited, ServiceError, validateOrigin } from "./errors.ts";
-import { authorizeUrl, IDENTITY_ORIGIN, recheckCaller, roleOf, signInCaller, type Caller, type CallerRole } from "./identity.ts";
+import { authorizeUrl, recheckCaller, roleOf, signInCaller, type Caller, type CallerRole } from "./identity.ts";
 import { createServer, grantedScopes, MODULE_SCOPES, modulesFor } from "./tools/index.ts";
 
 const SCOPES = [...MODULE_SCOPES, "offline_access"];
@@ -31,7 +31,7 @@ export function renderConsent(details: ConsentDescription, handle: string, scope
   <p><small>The connection can refresh its access for up to 30 days. Continuing signs you in with your Rawkode Academy account, which needs the Rawkode Tools operator role. Without it, you can still sign in if you are a guest or host in the Rawkode Academy episode list, and then see only the YouTube numbers of your own episodes. No credentials are shared with this client.</small></p>
   <button name="decision" value="approve">Continue with Rawkode Academy</button><button name="decision" value="deny">Cancel</button></form></html>`;
 }
-// formTargets: origins the consent form's POST may redirect to. Browsers apply form-action to redirects.
+// formTargets: origins the consent form's POST may redirect to (the client, on deny). Browsers apply form-action to redirects.
 function pageHeaders(headers: Headers, formTargets: readonly string[] = []) {
   headers.set("content-type", "text/html; charset=utf-8");
   headers.set("cache-control", "no-store");
@@ -59,7 +59,7 @@ async function signIn(request: Request, env: OAuthEnv) {
     ensure(original.scope.every(s => SCOPES.includes(s)), "invalid_scope", "Unsupported OAuth scope");
     const details = await oauth.describeConsent(original);
     const consent = await oauth.beginConsent(original);
-    const formTargets = [IDENTITY_ORIGIN, new URL(original.redirectUri).origin];
+    const formTargets = [new URL(original.redirectUri).origin];
     return new Response(renderConsent(details, consent.handle, grantedScopes(original.scope)), { headers: pageHeaders(consent.headers, formTargets) });
   }
   ensure(request.method === "POST", "method_not_allowed", "Use GET or POST", 405);
@@ -75,9 +75,14 @@ async function signIn(request: Request, env: OAuthEnv) {
   const approved = await oauth.approveConsent(request, handle);
   const verifier = Buffer.from(crypto.getRandomValues(new Uint8Array(32))).toString("base64url");
   const transaction = await oauth.beginUpstream(approved.request, { data: { verifier } satisfies LoginState, headers: approved.headers });
-  transaction.headers.set("location", authorizeUrl(`${publicOrigin(env)}/oauth/callback`, transaction.state, await s256(verifier)));
-  transaction.headers.set("referrer-policy", "no-referrer");
-  return new Response(null, { status: 302, headers: transaction.headers });
+  const target = authorizeUrl(`${publicOrigin(env)}/oauth/callback`, transaction.state, await s256(verifier));
+  // Not a 302: identity may send a user without a session on to GitHub, and browsers apply the form's
+  // form-action to every redirect after a form POST, which would stop that last hop. A page that
+  // navigates on its own is a fresh navigation that form-action doesn't govern.
+  const headers = pageHeaders(transaction.headers);
+  headers.set("referrer-policy", "no-referrer");
+  const url = escape(target);
+  return new Response(`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="refresh" content="0;url=${url}"><title>Continue to Rawkode Academy</title><p><a href="${url}">Continue to Rawkode Academy</a></p></html>`, { status: 200, headers });
 }
 async function callback(request: Request, env: OAuthEnv) {
   ensure(request.method === "GET", "method_not_allowed", "Use GET", 405);
