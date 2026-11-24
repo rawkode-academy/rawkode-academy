@@ -301,6 +301,18 @@ export const createAuth = async (env: AuthEnv) => {
 						metadata: null,
 					},
 					{
+						clientId: "rawkode-tools-mcp",
+						name: "Rawkode Tools MCP",
+						type: "public",
+						// Workaround for https://github.com/better-auth/better-auth/issues/6651
+						// Better Auth incorrectly requires a secret for ID token signing even for public clients
+						clientSecret: "pkce-public-client-placeholder",
+						redirectUrls: ["https://mcp.rawkode.tools/oauth/callback"],
+						disabled: false,
+						skipConsent: true,
+						metadata: null,
+					},
+					{
 						clientId: "comtrya",
 						name: "Comtrya",
 						type: "public",

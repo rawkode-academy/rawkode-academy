@@ -1,0 +1,26 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "rawkode-tools-mcp",
+  "main": "src/main.ts",
+  "compatibility_date": "2026-10-31",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "routes": [{ "pattern": "mcp.rawkode.tools", "custom_domain": true }],
+  // OAuth callbacks carry one-use codes in the query string: redact query
+  // strings and skip automatic invocation records.
+  "observability": {
+    "redact_query_string": true,
+    "traces": { "enabled": true, "destinations": ["grafana-traces"] },
+    "logs": { "enabled": true, "invocation_logs": false, "destinations": ["grafana-logs"] }
+  },
+  "vars": {
+    // OAuth issuer and Google callback base.
+    "PUBLIC_ORIGIN": "https://mcp.rawkode.tools",
+    // The analytics lake the analytics tools read with BASIN_SQL_TOKEN.
+    "BASIN_ACCOUNT_ID": "0aeb879de8e3cdde5fb3d413025222ce",
+    "BASIN_BUCKET": "rawkode-analytics"
+  },
+  // OAuth grants and tokens. No ID: Wrangler creates the namespace on the
+  // first deploy and reuses it afterwards.
+  "kv_namespaces": [{ "binding": "OAUTH_KV" }]
+}

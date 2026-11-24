@@ -42,10 +42,24 @@ export const ACCESS_APPLICATIONS: AccessApplication[] = [
 			},
 		],
 	},
+	{
+		clientId: "rawkode-tools-mcp",
+		name: "Rawkode Tools MCP",
+		description: "mcp.rawkode.tools, the MCP server for Claude, ChatGPT and other MCP clients",
+		roles: [
+			{
+				key: "operator",
+				label: "Operator",
+				description:
+					"May connect MCP clients and use every Rawkode Tools module, such as analytics.",
+			},
+		],
+	},
 ];
 
 export const ROLE_KEYS = Object.freeze({
 	studioOperator: "studio_operator",
+	toolsOperator: "operator",
 } as const);
 
 export function findAccessApplication(
