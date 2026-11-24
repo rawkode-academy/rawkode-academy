@@ -1,20 +1,20 @@
 import { ensure, readLimited, ServiceError } from "./errors.ts";
+import { appearsInAcademy } from "./guest.ts";
 
 // Sign-in goes to Rawkode Academy's identity service (id.rawkode.academy),
 // where this Worker is the public PKCE client `rawkode-tools-mcp`. Access
-// needs one of the client's roles, assigned in the identity admin: `operator`
-// (every module) or `guest` (only the guest module, scoped to the episodes the
-// person appears in, so it also needs their verified GitHub username).
+// needs the client's `operator` role (every module), assigned in the identity
+// admin, or no role at all: anyone whose verified GitHub username is a guest or
+// show host in the Academy's data may use the guest module for their episodes.
 export const IDENTITY_ORIGIN = "https://id.rawkode.academy";
 export const IDENTITY_CLIENT_ID = "rawkode-tools-mcp";
 export const OPERATOR_ROLE = "operator";
-export const GUEST_ROLE = "guest";
 const ROLES_CLAIM = "https://rawkode.academy/roles";
 const CLIENT_CLAIM = "https://rawkode.academy/client_id";
 
 type Tokens = { access_token: string; refresh_token?: string };
 export type CallerRole = "operator" | "guest";
-// role is absent on grants made before guests existed: those are operators.
+// "guest" is anyone scoped to their own episodes: a guest or a show host. role is absent on grants made before it existed: those are operators.
 export type Caller = { userId: string; role?: CallerRole; username?: string; upstreamRefreshToken?: string };
 export const roleOf = (caller: Pick<Caller, "role">): CallerRole => caller.role ?? "operator";
 
@@ -38,8 +38,9 @@ async function token(parameters: Record<string, string>): Promise<Tokens> {
   return tokens as Tokens;
 }
 
-// Reads the user and their roles for this client over TLS from the identity
-// service itself, so no token signature needs checking here.
+// Reads the user, their roles for this client and their verified GitHub
+// username over TLS from the identity service itself, so no token signature
+// needs checking here.
 async function caller(tokens: Tokens, previousRefreshToken?: string): Promise<Caller> {
   const response = await fetch(`${IDENTITY_ORIGIN}/auth/oauth2/userinfo`, {
     redirect: "manual", signal: AbortSignal.timeout(20000),
@@ -51,26 +52,29 @@ async function caller(tokens: Tokens, previousRefreshToken?: string): Promise<Ca
   catch { info = {}; }
   const roles = Array.isArray(info[ROLES_CLAIM]) ? info[ROLES_CLAIM] as unknown[] : [];
   ensure(typeof info.sub === "string" && info.sub, "identity_sign_in_failed", "Rawkode Academy didn't identify the user", 502);
-  const isOperator = roles.includes(OPERATOR_ROLE);
-  if (info[CLIENT_CLAIM] !== IDENTITY_CLIENT_ID || (!isOperator && !roles.includes(GUEST_ROLE))) {
-    // Opaque ids and role names only, so a refusal can be traced without exposing PII.
-    const seen = roles.filter((role): role is string => typeof role === "string").join(", ") || "none";
-    // Claim names and the raw roles value say whether identity sent no roles or another shape.
-    const rawRoles = JSON.stringify(info[ROLES_CLAIM] ?? null).slice(0, 200);
-    throw new ServiceError("forbidden", `This Rawkode Academy account isn't a Rawkode Tools operator or guest. Identity user: ${info.sub}. Client claim: ${typeof info[CLIENT_CLAIM] === "string" ? info[CLIENT_CLAIM] : "missing"}. Roles: ${seen}. Roles claim as received: ${rawRoles}. Claims received: ${Object.keys(info).sort().join(", ")}.`, 403);
-  }
   const upstreamRefreshToken = tokens.refresh_token ?? previousRefreshToken;
-  if (isOperator) return { userId: info.sub, role: "operator", upstreamRefreshToken };
-  // Guests are scoped by GitHub username, which identity verifies with GitHub.
+  if (info[CLIENT_CLAIM] === IDENTITY_CLIENT_ID && roles.includes(OPERATOR_ROLE)) return { userId: info.sub, role: "operator", upstreamRefreshToken };
+  // Anyone else is a possible guest, scoped by GitHub username, which identity
+  // verifies with GitHub. Whether they appear in the Academy's data is checked
+  // by the caller of this function.
   const username = info.preferred_username;
-  if (typeof username !== "string" || !/^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$/.test(username) || username.length > 39) {
-    throw new ServiceError("forbidden", `This guest account has no verified GitHub username, so its episodes can't be worked out. Identity user: ${info.sub}.`, 403);
+  if (typeof username === "string" && username.length <= 39 && /^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$/.test(username)) return { userId: info.sub, role: "guest", username, upstreamRefreshToken };
+  // Opaque ids and role names only, so a refusal can be traced without exposing PII.
+  const seen = roles.filter((role): role is string => typeof role === "string").join(", ") || "none";
+  throw new ServiceError("forbidden", `This Rawkode Academy account isn't a Rawkode Tools operator, and has no verified GitHub username to find its episodes with. Identity user: ${info.sub}. Client claim: ${typeof info[CLIENT_CLAIM] === "string" ? info[CLIENT_CLAIM] : "missing"}. Roles: ${seen}.`, 403);
+}
+
+// A non-operator is let in only while they appear in the Academy's data as a
+// guest or show host. Identity's `username` is the verified GitHub login.
+async function admitted(who: Caller) {
+  if (roleOf(who) === "guest" && !await appearsInAcademy(who.username ?? "")) {
+    throw new ServiceError("forbidden", `GitHub user ${who.username} isn't a Rawkode Tools operator, and no Rawkode Academy episode lists them as a guest or host. Identity user: ${who.userId}.`, 403);
   }
-  return { userId: info.sub, role: "guest", username, upstreamRefreshToken };
+  return who;
 }
 
 export async function signInCaller(code: string, verifier: string, redirectUri: string) {
-  return caller(await token({ grant_type: "authorization_code", code, code_verifier: verifier, redirect_uri: redirectUri }));
+  return admitted(await caller(await token({ grant_type: "authorization_code", code, code_verifier: verifier, redirect_uri: redirectUri })));
 }
 
 // Run on every MCP token refresh: the role is checked again, so removing it
@@ -79,7 +83,7 @@ export async function signInCaller(code: string, verifier: string, redirectUri: 
 // grant's scope was fixed by the role it was made with.
 export async function recheckCaller(props: Caller) {
   ensure(props.upstreamRefreshToken, "forbidden", "Reconnect to Rawkode Tools", 403);
-  const next = await caller(await token({ grant_type: "refresh_token", refresh_token: props.upstreamRefreshToken }), props.upstreamRefreshToken);
+  const next = await admitted(await caller(await token({ grant_type: "refresh_token", refresh_token: props.upstreamRefreshToken }), props.upstreamRefreshToken));
   ensure(roleOf(next) === roleOf(props), "forbidden", "Your Rawkode Tools role changed; reconnect", 403);
   return next;
 }

@@ -137,19 +137,30 @@ ORDER BY day, video`;
 
 export type Episodes = { episodes: (EpisodeAccess & { youtubeVideoId: string | null })[]; unmatched: number };
 
+// The Academy and lake lists are cached for five minutes per isolate.
 const TTL = 5 * 60 * 1000;
-let cache: { at: number; videos: AcademyVideo[]; lake: LakeVideo[] } | undefined;
+type Cached<T> = { at: number; value: T };
+let academyCache: Cached<AcademyVideo[]> | undefined;
+let lakeCache: Cached<LakeVideo[]> | undefined;
+async function cached<T>(slot: Cached<T> | undefined, now: number, load: () => Promise<T>): Promise<Cached<T>> {
+  return slot && now - slot.at <= TTL ? slot : { at: now, value: await load() };
+}
+const academyVideos = async (now: number) => (academyCache = await cached(academyCache, now, () => fetchAcademyVideos())).value;
+const lakeVideos = async (basin: BasinConfig, now: number) => (lakeCache = await cached(lakeCache, now, () => fetchLakeCatalogue(basin))).value;
+
+// Whether anyone may sign in as this GitHub username without the operator
+// role: they must be a guest of a video, or a host of a show, in the Academy's
+// data. Nothing is assigned by hand.
+export async function appearsInAcademy(username: string, now = Date.now()) {
+  return visibleEpisodes(await academyVideos(now), username).length > 0;
+}
 
 // What this person may see, with each episode's YouTube video ID (null when it
-// can't be tied to exactly one). Academy and lake lists are cached for five
-// minutes per isolate.
+// can't be tied to exactly one).
 export async function episodesFor(username: string, basin: BasinConfig, now = Date.now()): Promise<Episodes> {
-  if (!cache || now - cache.at > TTL) {
-    const [videos, lake] = await Promise.all([fetchAcademyVideos(), fetchLakeCatalogue(basin)]);
-    cache = { at: now, videos, lake };
-  }
-  const ids = youtubeIds(cache.videos, cache.lake);
-  const episodes = visibleEpisodes(cache.videos, username).map(episode => ({ ...episode, youtubeVideoId: ids.get(episode.id) ?? null }));
+  const [videos, lake] = await Promise.all([academyVideos(now), lakeVideos(basin, now)]);
+  const ids = youtubeIds(videos, lake);
+  const episodes = visibleEpisodes(videos, username).map(episode => ({ ...episode, youtubeVideoId: ids.get(episode.id) ?? null }));
   return { episodes, unmatched: episodes.filter(episode => !episode.youtubeVideoId).length };
 }
-export const resetGuestCache = () => { cache = undefined; };
+export const resetGuestCache = () => { academyCache = undefined; lakeCache = undefined; };

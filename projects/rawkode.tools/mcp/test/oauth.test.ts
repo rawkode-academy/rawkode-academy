@@ -117,7 +117,7 @@ test("OAuth protects the analytics MCP with owner login, PKCE, consent and resou
   });
 
   await t.test("a guest gets only the guest tools, scoped to their own episodes, and no SQL", async () => {
-    const auth = await authorizedMcp(mf, identity, { sub: "guest-user", roles: ["guest"], username: "icepuma" });
+    const auth = await authorizedMcp(mf, identity, { sub: "guest-user", roles: [], username: "icepuma" });
     assert.deepEqual(auth.scope.split(" ").sort(), ["guest:read", "offline_access"], "asking for analytics:read grants the guest module instead");
     const list = await readMcp(await mcpRequest(mf, auth.access_token, "tools/list"));
     assert.deepEqual(list.result.tools.map((tool: Json) => tool.name).sort(), ["my_episode_daily", "my_episodes"]);
@@ -156,13 +156,27 @@ test("OAuth protects the analytics MCP with owner login, PKCE, consent and resou
     assert.ok(!((await refresh.json() as Json).scope as string).includes("analytics:read"));
   });
 
-  await t.test("a guest without a verified GitHub username is refused, and a role change needs a new connection", async () => {
+  await t.test("without the operator role, only someone in the Academy's guest and host data gets in", async () => {
     const pending = await beginOwnerLogin(mf);
-    const { response } = await completeOwnerLogin(mf, identity, pending, { roles: ["guest"] });
-    assert.equal(response.status, 403, await response.clone().text());
-    assert.match(await response.text(), /no verified GitHub username/);
+    const noName = await completeOwnerLogin(mf, identity, pending, { roles: [] });
+    assert.equal(noName.response.status, 403, await noName.response.clone().text());
+    assert.match(await noName.response.text(), /no verified GitHub username/);
 
-    const auth = await authorizedMcp(mf, identity, { roles: ["guest"], username: "icepuma" });
+    for (const username of ["nobody", "someone-else-entirely"]) {
+      const stranger = await completeOwnerLogin(mf, identity, await beginOwnerLogin(mf), { roles: [], username });
+      assert.equal(stranger.response.status, 403, await stranger.response.clone().text());
+      assert.match(await stranger.response.text(), /no Rawkode Academy episode lists them as a guest or host/);
+      assert.equal(stranger.response.headers.get("location"), null);
+    }
+    // A guest of one video, matched by person id or by GitHub handle in any case.
+    for (const username of ["someone", "Rawkode"]) {
+      const auth = await authorizedMcp(mf, identity, { roles: [], username });
+      assert.deepEqual(auth.scope.split(" ").sort(), ["guest:read", "offline_access"]);
+    }
+  });
+
+  await t.test("a guest is re-checked on refresh, and a role change needs a new connection", async () => {
+    const auth = await authorizedMcp(mf, identity, { roles: [], username: "icepuma" });
     identity.update({ roles: ["operator"] });
     const refresh = await mf.dispatchFetch(`${oauthOrigin}/oauth/token`, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ grant_type: "refresh_token", client_id: auth.clientId, refresh_token: auth.refresh_token, resource: `${oauthOrigin}/mcp` }).toString() });
     assert.equal(refresh.status, 400);
