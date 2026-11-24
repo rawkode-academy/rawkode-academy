@@ -4,7 +4,7 @@ import {
 } from "@cloudflare/workers-oauth-provider";
 import { createMcpHandler } from "agents/mcp/server";
 import { ensure, errorBody, readLimited, ServiceError, validateOrigin } from "./errors.ts";
-import { authorizeUrl, recheckOperator, signInOperator, type Operator } from "./identity.ts";
+import { authorizeUrl, IDENTITY_ORIGIN, recheckOperator, signInOperator, type Operator } from "./identity.ts";
 import { createServer, grantedScopes, MODULE_SCOPES, modulesFor } from "./tools/index.ts";
 
 const SCOPES = [...MODULE_SCOPES, "offline_access"];
@@ -31,12 +31,15 @@ export function renderConsent(details: ConsentDescription, handle: string, scope
   <p><small>The connection can refresh its access for up to 30 days. Continuing signs you in with your Rawkode Academy account, which needs the Rawkode Tools operator role. No credentials are shared with this client.</small></p>
   <button name="decision" value="approve">Continue with Rawkode Academy</button><button name="decision" value="deny">Cancel</button></form></html>`;
 }
-function pageHeaders(headers: Headers) {
+// formTargets: origins the consent form's POST may redirect to. Browsers apply form-action to redirects.
+function pageHeaders(headers: Headers, formTargets: readonly string[] = []) {
   headers.set("content-type", "text/html; charset=utf-8");
   headers.set("cache-control", "no-store");
-  headers.set("referrer-policy", "no-referrer");
+  // Not no-referrer: under it, browsers send `Origin: null` on the form POST, which validateOrigin rejects.
+  // same-origin still sends nothing to other sites.
+  headers.set("referrer-policy", "same-origin");
   headers.set("x-content-type-options", "nosniff");
-  headers.set("content-security-policy", "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'");
+  headers.set("content-security-policy", `default-src 'none'; style-src 'unsafe-inline'; form-action ${["'self'", ...formTargets].join(" ")}; base-uri 'none'; frame-ancestors 'none'`);
   headers.set("x-frame-options", "DENY");
   return headers;
 }
@@ -56,7 +59,8 @@ async function signIn(request: Request, env: OAuthEnv) {
     ensure(original.scope.every(s => SCOPES.includes(s)), "invalid_scope", "Unsupported OAuth scope");
     const details = await oauth.describeConsent(original);
     const consent = await oauth.beginConsent(original);
-    return new Response(renderConsent(details, consent.handle, grantedScopes(original.scope)), { headers: pageHeaders(consent.headers) });
+    const formTargets = [IDENTITY_ORIGIN, new URL(original.redirectUri).origin];
+    return new Response(renderConsent(details, consent.handle, grantedScopes(original.scope)), { headers: pageHeaders(consent.headers, formTargets) });
   }
   ensure(request.method === "POST", "method_not_allowed", "Use GET or POST", 405);
   validateOrigin(request);
