@@ -1,0 +1,56 @@
+# Alerts when YouTube analytics stops reaching the analytics lake: opens a
+# GitHub issue (or comments on the open one) when the day's sync or the initial
+# backfill failed, and closes it once a sync completes. Hand-written because
+# cuenv pipelines have no schedule trigger. Reads only the Worker's public
+# /status endpoint: workflow states and error messages, no data or secrets.
+name: youtube-analytics-monitor
+on:
+  schedule:
+    # Two and a half hours after the 08:17 UTC sync starts.
+    - cron: "47 10 * * *"
+  workflow_dispatch: {}
+permissions:
+  contents: read
+  issues: write
+concurrency:
+  group: youtube-analytics-monitor
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the latest sync and the initial backfill
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          STATUS_URL: https://rawkode-academy-youtube-analytics.rawkodeacademy.workers.dev/status
+        run: |
+          set -uo pipefail
+          title="YouTube analytics sync is failing"
+          consent="Run \`cuenv task consent\` in \`projects/rawkode.academy/platform/youtube-control\`: it renews the Google grant in Infisical and redeploys."
+          problem=""
+          if ! status=$(curl -fsS --max-time 30 "$STATUS_URL"); then
+            problem="The Worker's status endpoint didn't answer ($STATUS_URL). Check the latest run of the rawkode-academy-platform-youtube-control-default workflow."
+          else
+            sync=$(jq -r '.sync.status // "missing"' <<<"$status")
+            sync_error=$(jq -r '.sync.error // ""' <<<"$status")
+            backfill=$(jq -r '.backfill.status // "missing"' <<<"$status")
+            backfill_error=$(jq -r '.backfill.error // ""' <<<"$status")
+            if [ "$sync" != "complete" ]; then
+              problem="Today's sync is \`$sync\`${sync_error:+: $sync_error}"
+            elif [ "$backfill" = "errored" ] || [ "$backfill" = "terminated" ]; then
+              problem="The initial backfill is \`$backfill\`${backfill_error:+: $backfill_error}. Restart it with \`cuenv task backfill -e production\`."
+            fi
+            if grep -q "reauthorization_required" <<<"$sync_error$backfill_error"; then
+              problem="$problem"$'\n\n'"**Google no longer accepts the stored authorization.** $consent"
+            fi
+          fi
+          existing=$(gh issue list --state open --search "in:title \"$title\"" --json number,title --jq ".[] | select(.title == \"$title\") | .number" | head -n 1)
+          if [ -z "$problem" ]; then
+            echo "Sync complete."
+            if [ -n "$existing" ]; then gh issue close "$existing" --comment "Today's sync completed."; fi
+            exit 0
+          fi
+          body="$problem"$'\n\n'"Status: $STATUS_URL"$'\n'"Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          if [ -n "$existing" ]; then gh issue comment "$existing" --body "$body"; else gh issue create --title "$title" --body "$body"; fi
+          echo "::error::$problem"
+          exit 1
