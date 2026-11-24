@@ -31,10 +31,14 @@ export async function getUserAccessClaims(
 		return {};
 	}
 
+	// Each claim needs its own array. Better Auth serialises the userinfo
+	// response with a cycle-safe encoder that replaces a repeated reference to
+	// the same object with the string "[Circular ref-1]", so sharing one array
+	// turned `groups` and the namespaced roles claim into strings.
 	return {
 		roles,
-		groups: roles,
-		[ROLE_NAMESPACE]: roles,
+		groups: [...roles],
+		[ROLE_NAMESPACE]: [...roles],
 		[CLIENT_NAMESPACE]: clientId,
 	};
 }
