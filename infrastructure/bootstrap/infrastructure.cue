@@ -85,6 +85,7 @@ _permissionGroups: {
 	dnsRead:          "82e64a83756745bbbb1c9c2701bf816b" // DNS Read
 	sslRead:          "7b7216b327b04b8fbc8f524e1f9b7531" // SSL and Certificates Read
 	botRead:          "07bea2220b2343fa9fae15656c0d8e88" // Bot Management Read
+	redirectRead:     "d8e12db741544d1586ec1d6f5d3c7786" // Dynamic URL Redirects Read
 	storageRead:      "b4992e1108244f5d8bfbd5744320c2e1" // Workers R2 Storage Read
 	catalogRead:      "45db74139a62490b9b60eb7c4f34994b" // Workers R2 Data Catalog Read
 	pipelinesRead:    "14b9cf2f410f4c0c9a16bb10a81c0e0b" // Pipelines Read
@@ -525,6 +526,7 @@ infrastructure: {
 						{id: _permissionGroups.dnsRead},
 						{id: _permissionGroups.sslRead},
 						{id: _permissionGroups.botRead},
+						{id: _permissionGroups.redirectRead},
 						{id: _permissionGroups.storageRead},
 						{id: _permissionGroups.catalogRead},
 						{id: _permissionGroups.pipelinesRead},
