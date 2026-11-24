@@ -1,16 +1,24 @@
 import { z } from "zod";
 import { daySchema, ensure, validDay, videoId } from "./domain.ts";
 
+// Video IDs per per-video query. The video filter takes a list; with `video`
+// also a dimension, each row is one video's day.
+export const VIDEO_BATCH = 200;
+
 export const analyticsSchema = z.object({
-  report: z.enum(["summary", "daily", "top_videos", "traffic", "retention", "concurrent_viewers", "daily_traffic"]),
+  report: z.enum(["summary", "daily", "top_videos", "traffic", "retention", "concurrent_viewers", "daily_traffic", "video_daily", "video_traffic"]),
   startDate: daySchema,
   endDate: daySchema,
   videoId: videoId.optional(),
+  // Per-video reports: one query covers up to 200 videos, with `video` as a dimension.
+  videoIds: z.array(videoId).min(1).max(VIDEO_BATCH).optional(),
   limit: z.number().int().min(1).max(200).default(50),
 }).strict().superRefine((q, ctx) => {
   const days = (Date.parse(q.endDate) - Date.parse(q.startDate)) / 86400000 + 1;
   if (days < 1 || days > 92) ctx.addIssue({ code: "custom", message: "Use an inclusive window of 1–92 days" });
   if (["retention", "concurrent_viewers"].includes(q.report) && !q.videoId) ctx.addIssue({ code: "custom", path: ["videoId"], message: "This report requires one videoId" });
+  if (q.report.startsWith("video_") !== Boolean(q.videoIds)) ctx.addIssue({ code: "custom", path: ["videoIds"], message: "videoIds is required for, and only for, per-video reports" });
+  if (q.report.startsWith("video_") && q.videoId) ctx.addIssue({ code: "custom", path: ["videoId"], message: "Per-video reports take videoIds" });
   if (q.report === "top_videos" && q.videoId) ctx.addIssue({ code: "custom", path: ["videoId"], message: "Top videos is a channel report; use daily or summary for one video" });
 });
 export type AnalyticsQuery = z.infer<typeof analyticsSchema>;
@@ -19,18 +27,22 @@ export interface AnalyticsAPI {
   analytics<T>(query: Record<string, string | number | undefined>): Promise<T>;
 }
 const activity = "views,engagedViews,estimatedMinutesWatched,averageViewDuration,averageViewPercentage,likes,comments,shares,subscribersGained,subscribersLost";
+// engagedViews isn't documented for per-video breakdowns, so it's left out.
+const videoActivity = "views,estimatedMinutesWatched,averageViewDuration,averageViewPercentage,likes,comments,shares,subscribersGained,subscribersLost";
 const reports = {
   summary: { dimensions: undefined, metrics: activity, sort: undefined },
   daily: { dimensions: "day", metrics: activity, sort: "day" },
   top_videos: { dimensions: "video", metrics: activity, sort: "-views" },
   traffic: { dimensions: "insightTrafficSourceType", metrics: "views,estimatedMinutesWatched", sort: "-views" },
   daily_traffic: { dimensions: "day,insightTrafficSourceType", metrics: "views,estimatedMinutesWatched", sort: "day" },
+  video_daily: { dimensions: "day,video", metrics: videoActivity, sort: "day" },
+  video_traffic: { dimensions: "insightTrafficSourceType,video", metrics: "views,estimatedMinutesWatched", sort: undefined },
   retention: { dimensions: "elapsedVideoTimeRatio", metrics: "audienceWatchRatio,relativeRetentionPerformance", sort: "elapsedVideoTimeRatio" },
   concurrent_viewers: { dimensions: "livestreamPosition", metrics: "averageConcurrentViewers,peakConcurrentViewers", sort: "livestreamPosition" },
 } as const;
 
 export function reportParameters(q: AnalyticsQuery) {
-  return { ...reports[q.report], startDate: q.startDate, endDate: q.endDate, filters: q.videoId ? `video==${q.videoId}` : undefined, maxResults: q.report === "top_videos" ? q.limit : 200 };
+  return { ...reports[q.report], startDate: q.startDate, endDate: q.endDate, filters: q.videoIds ? `video==${q.videoIds.join(",")}` : q.videoId ? `video==${q.videoId}` : undefined, maxResults: q.report === "top_videos" ? q.limit : 200 };
 }
 export function normalizeReport(q: AnalyticsQuery, raw: GoogleReport, channelId: string, fetchedAt = new Date().toISOString()) {
   const expected = [...(reports[q.report].dimensions?.split(",") ?? []), ...reports[q.report].metrics.split(",")];
@@ -39,6 +51,10 @@ export function normalizeReport(q: AnalyticsQuery, raw: GoogleReport, channelId:
     ensure(Array.isArray(row) && row.length === expected.length && row.every(v => typeof v === "string" || (typeof v === "number" && Number.isFinite(v))), "invalid_report", "Google returned an invalid report row", 502);
     return Object.fromEntries(expected.map((name, i) => [name, row[i]]));
   });
+  if (q.videoIds) {
+    const requested = new Set(q.videoIds);
+    ensure(rows.every(r => typeof r.video === "string" && requested.has(r.video)), "invalid_report", "Google returned a video that wasn't requested", 502);
+  }
   const days = rows.map(r => r.day).filter((v): v is string => typeof v === "string").sort();
   ensure(days.every(d => validDay(d) && d >= q.startDate && d <= q.endDate), "invalid_report", "Google returned dates outside the requested range", 502);
   const returnedDays = new Set(days);
@@ -51,7 +67,7 @@ export function normalizeReport(q: AnalyticsQuery, raw: GoogleReport, channelId:
     source: "youtube_analytics_api", channelId, report: q.report, videoId: q.videoId ?? null,
     requestedRange: { startDate: q.startDate, endDate: q.endDate, timeZone: "America/Los_Angeles" },
     fetchedAt, dataThrough: days.at(-1) ?? null, absentDays,
-    coverage: q.report === "daily" || q.report === "daily_traffic" ? "Only returned dates are populated. Absent dates are unknown, not zero." : "Google does not expose the effective end date for this aggregate report; dataThrough is unknown.",
+    coverage: q.report === "daily" || q.report === "daily_traffic" || q.report === "video_daily" ? "Only returned dates are populated. Absent dates are unknown, not zero." : "Google does not expose the effective end date for this aggregate report; dataThrough is unknown.",
     limitedToTop: q.report === "top_videos" ? q.limit : null,
     columnHeaders: raw.columnHeaders, rows,
     units: { views: "count", engagedViews: "count", estimatedMinutesWatched: "minutes", averageViewDuration: "seconds", averageViewPercentage: "percent", audienceWatchRatio: "ratio, may exceed 1", relativeRetentionPerformance: "0–1 relative score", elapsedVideoTimeRatio: "0–1 video position", livestreamPosition: "minutes", averageConcurrentViewers: "viewers", peakConcurrentViewers: "viewers" },
@@ -63,7 +79,8 @@ export async function fetchReport(api: AnalyticsAPI, q: AnalyticsQuery, channelI
   const params = reportParameters(q);
   let combined: GoogleReport | undefined;
   // Top-video reports are explicitly ranked and limited, never a channel total.
-  for (let page = 0; page < 20; page++) {
+  // 100 pages of 200 rows covers a 30-day window of 200 videos with room to spare.
+  for (let page = 0; page < 100; page++) {
     const raw = await api.analytics<GoogleReport>({ ...params, startIndex: page * params.maxResults + 1 });
     normalizeReport(q, raw, channelId); // Validate every page before combining.
     if (!combined) combined = { columnHeaders: raw.columnHeaders, rows: [] };

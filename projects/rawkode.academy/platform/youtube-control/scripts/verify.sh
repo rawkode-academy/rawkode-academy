@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Runs today's sync now instead of waiting for the 08:17 UTC cron, starts the
-# initial backfill if it hasn't started, waits for the sync to finish and
-# prints what reached the lake. Both starts use the IDs the cron uses
-# (sync-<UTC date>, backfill-initial), so the cron won't run them again.
+# channel and per-video backfills if they haven't started, waits for the sync
+# to finish and prints what reached the lake. The starts use the IDs the cron
+# uses (sync-<UTC date>, backfill-initial, backfill-videos), so the cron won't
+# run them again. Run it again later to see the backfills' progress.
 # Run from CI as the manual `verify` pipeline.
 set -euo pipefail
 
@@ -15,6 +16,9 @@ if [ "$(status | jq -r '.sync.id // empty')" != "sync-$today" ]; then
 fi
 if [ -z "$(status | jq -r '.backfill.id // empty')" ]; then
 	npx --no-install wrangler workflows trigger youtube-analytics-backfill '{"since":"2015-01-01"}' --id backfill-initial
+fi
+if [ -z "$(status | jq -r '.videoBackfill.id // empty')" ]; then
+	npx --no-install wrangler workflows trigger youtube-analytics-backfill '{"since":"2015-01-01","scope":"videos"}' --id backfill-videos
 fi
 
 for _ in $(seq 1 90); do
@@ -30,6 +34,6 @@ query() {
 		--data "$(jq -n --arg query "$1" '{query: $query}')" | jq -c '.result.rows // .rows // .'
 }
 echo "Rows in analytics.events_archive by report:"
-query "SELECT event_type, COUNT(*) AS rows, MIN(json_get_str(value, 'data', 'day')) AS first_day, MAX(json_get_str(value, 'data', 'day')) AS last_day FROM analytics.events_archive WHERE event_source = 'rawkode-academy-youtube' GROUP BY event_type ORDER BY event_type"
+query "SELECT event_type, COUNT(*) AS rows, COUNT(DISTINCT json_get_str(value, 'data', 'video')) AS videos, MIN(json_get_str(value, 'data', 'day')) AS first_day, MAX(json_get_str(value, 'data', 'day')) AS last_day FROM analytics.events_archive WHERE event_source = 'rawkode-academy-youtube' GROUP BY event_type ORDER BY event_type"
 
 [ "$sync" = complete ]
