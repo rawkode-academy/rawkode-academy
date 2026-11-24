@@ -33,7 +33,10 @@ function pagePath(location: URL): string {
 	);
 }
 
-function clean(value: unknown, depth = 0): unknown {
+// Exception stacks keep more than the default string length.
+const LONG_STRINGS: Record<string, number> = { stack: 4096 };
+
+function clean(value: unknown, depth = 0, limit = 512): unknown {
 	if (depth > 3) return undefined;
 	if (typeof value === "boolean" || value === null) return value;
 	if (typeof value === "number")
@@ -50,7 +53,7 @@ function clean(value: unknown, depth = 0): unknown {
 					: "[redacted]";
 			})
 			.replace(/Bearer\s+[^\s]+/gi, "Bearer [redacted]")
-			.slice(0, 512);
+			.slice(0, limit);
 	}
 	if (Array.isArray(value))
 		return value.slice(0, 20).map((item) => clean(item, depth + 1) ?? null);
@@ -70,7 +73,7 @@ function clean(value: unknown, depth = 0): unknown {
 						return typeof entry === "string"
 							? [[`${key}_length`, entry.length]]
 							: [];
-					const cleaned = clean(entry, depth + 1);
+					const cleaned = clean(entry, depth + 1, LONG_STRINGS[key] ?? 512);
 					return cleaned === undefined ? [] : [[key.slice(0, 128), cleaned]];
 				}),
 		);

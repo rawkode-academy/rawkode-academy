@@ -1,10 +1,10 @@
-import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
+import type { APIRoute } from "astro";
 import {
-	parseState,
 	exchangeCodeForTokens,
 	getUserInfo,
 	PKCE_COOKIE_NAME,
+	parseState,
 	SESSION_COOKIE_NAME,
 	SESSION_DURATION_SECONDS,
 	type StoredSession,
@@ -141,18 +141,15 @@ export const GET: APIRoute = async (context) => {
 		maxAge: SESSION_DURATION_SECONDS,
 	});
 
-	// Stitch the pre-auth anonymous session to the now-authenticated user
-	// so downstream PostHog queries see one identity across the funnel.
+	// Link the pre-sign-in first-party ID (rk_aid) to the user, so every
+	// anonymous ID belonging to a user can be found in the archive. Names and
+	// emails stay in the identity service: analytics events never carry them.
 	const anonId = getAnonDistinctIdFromCookies(context.request);
 	if (anonId && anonId !== userInfo.sub) {
 		await identifyServerUser(
 			{
 				distinctId: userInfo.sub,
 				anonId,
-				set: {
-					email: userInfo.email,
-					name: userInfo.name,
-				},
 			},
 			analytics,
 		);

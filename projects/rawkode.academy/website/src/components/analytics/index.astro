@@ -1,10 +1,18 @@
 ---
-// First-party page views and Core Web Vitals, sent to Basin via /api/e.
+// First-party page views, Core Web Vitals, clicks, page leave and uncaught
+// exceptions, sent to Basin via /api/e.
 ---
 
 <script>
 	import { onCLS, onFCP, onINP, onLCP, onTTFB, type Metric } from "web-vitals";
+	import {
+		installClickTracking,
+		installExceptionTracking,
+		installPageLeaveTracking,
+	} from "@/lib/analytics/interactions";
 	import { track } from "@/lib/analytics/track";
+
+	installExceptionTracking();
 
 	track("page_view", { title: document.title });
 
@@ -21,4 +29,7 @@
 	onINP(report);
 	onLCP(report);
 	onTTFB(report);
+
+	installClickTracking();
+	installPageLeaveTracking();
 </script>

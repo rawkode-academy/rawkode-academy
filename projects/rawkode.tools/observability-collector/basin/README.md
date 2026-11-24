@@ -85,8 +85,31 @@ services (CloudEvents) ─ /track ─► observability-collector ─► stream a
   which no pipeline writes to any more.
 - Browser batches become schema-v1 CloudEvents under source
   `rawkode-academy-browser` and type `web.<event>`. They reach the archive
-  through the same durable delivery path. Typed browser tables and dashboard
-  panels remain a later migration stage.
+  through the same durable delivery path. `typed.sql` also writes the browser
+  families PostHog's SDK used to collect on its own into typed tables:
+  `web_page_views`, `web_clicks` (`web.click`, `web.dead_click`,
+  `web.rage_click` in `kind`), `web_page_leaves` (`time_on_page_ms`,
+  `max_scroll_pct`), `web_exceptions` (stack up to 4 KB) and `web_vitals`
+  (`metric`, `metric_value`). Delivery is at-least-once: deduplicate on
+  `event_id`. Typed tables start empty on the day their pipeline is created;
+  the archive holds everything since 13 November 2026.
+- Identity: browser events carry `data.anonymous_id` (the `rk_aid` cookie) and,
+  when signed in, `data.user_id`. Sign-in also sends
+  `rawkode-academy-website` / `user.identified` with `data.distinct_id` (the
+  user) and `data.anon_id`. Every anonymous ID of one user:
+
+  ```sql
+  SELECT DISTINCT json_get_str(value, 'data', 'anon_id') AS anonymous_id
+  FROM analytics.events_archive
+  WHERE event_type = 'user.identified'
+    AND json_get_str(value, 'data', 'distinct_id') = '<user id>'
+    AND event_time >= CAST('2026-11-07T00:00:00Z' AS TIMESTAMP)
+  ```
+
+  Browser events signed in with that user add the rest
+  (`data.user_id = '<user id>'`, select `data.anonymous_id`). Before
+  24 November 2026 `user.identified` also carried the user's email and name in
+  `data.set_properties`; it no longer does.
 
 ## Constraints that shape this
 

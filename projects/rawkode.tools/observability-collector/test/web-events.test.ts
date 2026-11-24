@@ -139,3 +139,22 @@ describe("browser CloudEvent v1", () => {
 		);
 	});
 });
+
+describe("browser exception stacks", () => {
+	test("keep up to 4 KB of stack and 512 characters elsewhere", () => {
+		const long = "x".repeat(5000);
+		const normalized = browserCloudEvent(
+			{
+				...event,
+				event: "exception",
+				properties: { message: long.slice(0, 1000), stack: long.slice(0, 4500) },
+			},
+			context,
+			now,
+		);
+		const properties = (normalized?.data as { properties: Record<string, string> })
+			.properties;
+		expect(properties.stack).toHaveLength(4096);
+		expect(properties.message).toHaveLength(512);
+	});
+});
