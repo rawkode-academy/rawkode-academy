@@ -78,17 +78,19 @@ _github: {
 
 // Cloudflare API token permission groups.
 _permissionGroups: {
-	storageItemWrite: "2efd5506f9c8494dacb1fa10a3e7d5b6" // Workers R2 Storage Bucket Item Write
-	storageItemRead:  "6a018a9f2fc74eb6b293b0c548f38b39" // Workers R2 Storage Bucket Item Read
-	zoneRead:         "c8fed203ed3043cba015a93ad1616f1f" // Zone Read
-	zoneSettingsRead: "517b21aee92c4d89936c976ba6e4be55" // Zone Settings Read
-	dnsRead:          "82e64a83756745bbbb1c9c2701bf816b" // DNS Read
-	sslRead:          "7b7216b327b04b8fbc8f524e1f9b7531" // SSL and Certificates Read
-	botRead:          "07bea2220b2343fa9fae15656c0d8e88" // Bot Management Read
-	storageRead:      "b4992e1108244f5d8bfbd5744320c2e1" // Workers R2 Storage Read
-	catalogRead:      "45db74139a62490b9b60eb7c4f34994b" // Workers R2 Data Catalog Read
-	pipelinesRead:    "14b9cf2f410f4c0c9a16bb10a81c0e0b" // Pipelines Read
-	accountTokenRead: "eb56a6953c034b9d97dd838155666f06" // Account API Tokens Read
+	storageItemWrite:    "2efd5506f9c8494dacb1fa10a3e7d5b6" // Workers R2 Storage Bucket Item Write
+	storageItemRead:     "6a018a9f2fc74eb6b293b0c548f38b39" // Workers R2 Storage Bucket Item Read
+	zoneRead:            "c8fed203ed3043cba015a93ad1616f1f" // Zone Read
+	zoneSettingsRead:    "517b21aee92c4d89936c976ba6e4be55" // Zone Settings Read
+	dnsRead:             "82e64a83756745bbbb1c9c2701bf816b" // DNS Read
+	sslRead:             "7b7216b327b04b8fbc8f524e1f9b7531" // SSL and Certificates Read
+	botRead:             "07bea2220b2343fa9fae15656c0d8e88" // Bot Management Read
+	storageRead:         "b4992e1108244f5d8bfbd5744320c2e1" // Workers R2 Storage Read
+	catalogRead:         "45db74139a62490b9b60eb7c4f34994b" // Workers R2 Data Catalog Read
+	pipelinesRead:       "14b9cf2f410f4c0c9a16bb10a81c0e0b" // Pipelines Read
+	accountTokenRead:    "eb56a6953c034b9d97dd838155666f06" // Account API Tokens Read
+	massRedirectRead:    "429a068902904c5a9ed9fc267c67da9a" // Mass URL Redirects Read
+	dynamicRedirectRead: "d8e12db741544d1586ec1d6f5d3c7786" // Dynamic URL Redirects Read
 }
 
 _stateBucket: "cuenv-state"
@@ -510,7 +512,7 @@ infrastructure: {
 		}
 
 		// What plans read Cloudflare with: every zone's records and settings,
-		// and the collector's analytics lake. R2 read is account-wide, so a
+		// the zones' redirect rulesets, and the collector's analytics lake. R2 read is account-wide, so a
 		// plan can read every bucket's objects, the analytics events included.
 		read_only_token: account_token.#Resource & {
 			configuration: {
@@ -529,6 +531,8 @@ infrastructure: {
 						{id: _permissionGroups.catalogRead},
 						{id: _permissionGroups.pipelinesRead},
 						{id: _permissionGroups.accountTokenRead},
+						{id: _permissionGroups.massRedirectRead},
+						{id: _permissionGroups.dynamicRedirectRead},
 					]
 				}]
 			}
