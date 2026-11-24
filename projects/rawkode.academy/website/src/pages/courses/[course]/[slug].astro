@@ -200,7 +200,7 @@ function formatDuration(minutes?: number) {
 			slot="extra-head"
 			title={module.data.title}
 			description={module.data.description}
-			thumbnailUrl={videoThumbnailUrl}
+			thumbnailUrl={getVideoThumbnailUrl(module.data.video.id)}
 			publishedAt={publishedDate.toISOString()}
 			duration={videoDurationSeconds}
 			streamUrl={videoStreamUrl}
@@ -285,7 +285,7 @@ function formatDuration(minutes?: number) {
 						<div class={doc.media}>
 							<VideoPlayer
 								video={module.data.video.id}
-								thumbnailUrl={videoThumbnailUrl}
+								thumbnailUrl={getVideoThumbnailUrl(module.data.video.id)}
 								client:only="vue"
 								isAuthenticated={false}
 							>
