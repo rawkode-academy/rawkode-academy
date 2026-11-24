@@ -24,6 +24,10 @@ describe("access applications", () => {
 		).toBeDefined();
 	});
 
+	test("Rawkode Tools MCP exposes the guest role", () => {
+		expect(findAccessRole("rawkode-tools-mcp", ROLE_KEYS.toolsGuest)).toBeDefined();
+	});
+
 	test("client_approver is not an identity role", () => {
 		expect(
 			findAccessRole("rawkode-studio", "client_approver"),

@@ -5,6 +5,17 @@ import { convertV4MiniflareOptions, Miniflare, Request as MockRequest, Response 
 import { authorizedMcp, beginOwnerLogin, completeOwnerLogin, exchangeCode, IdentityMock, mcpRequest, oauthOrigin, publicOriginProxy, readMcp, registerOAuthClient } from "./oauth-fixture.ts";
 
 type Json = Record<string, any>;
+const academyAPI = "https://api.rawkode.academy/";
+const person = (id: string, githubHandle: string | null = id) => ({ id, githubHandle });
+// Who guested on what: icepuma guests on "intar" (matched to YouTube by title)
+// and hosts "icepuma-show"; "other" is somebody else's episode.
+const academyVideos = [
+  { id: "intar", title: "Intar Office Hours", slug: "intar", publishedAt: "2026-06-01T00:00:00.000Z", youtubeId: null, guests: [person("icepuma")], episode: { show: { id: "office-hours", hosts: [person("rawkode")] } } },
+  { id: "other", title: "Someone Else", slug: "other", publishedAt: "2026-05-01T00:00:00.000Z", youtubeId: "BBBBBBBBBBB", guests: [person("someone")], episode: { show: { id: "office-hours", hosts: [person("rawkode")] } } },
+  { id: "ip-1", title: "Ice Show One", slug: "ip-1", publishedAt: "2026-04-01T00:00:00.000Z", youtubeId: "AAAAAAAAAAA", guests: [], episode: { show: { id: "icepuma-show", hosts: [person("icepuma")] } } },
+  { id: "ip-2", title: "Ice Show Two", slug: "ip-2", publishedAt: "2026-04-08T00:00:00.000Z", youtubeId: null, guests: [], episode: { show: { id: "icepuma-show", hosts: [person("icepuma")] } } },
+];
+const lakeCatalogue = [{ video: "INTARvideo1", title: "Intar Office Hours!" }, { video: "BBBBBBBBBBB", title: "Someone Else" }, { video: "AAAAAAAAAAA", title: "Ice Show One" }];
 const basinURL = "https://api.sql.cloudflarestorage.com/api/v1/accounts/0aeb879de8e3cdde5fb3d413025222ce/basin-sql/query/rawkode-analytics";
 
 test("OAuth protects the analytics MCP with owner login, PKCE, consent and resource scopes", async t => {
@@ -19,10 +30,13 @@ test("OAuth protects the analytics MCP with owner login, PKCE, consent and resou
     outboundService: async (request: MockRequest) => {
       const response = await identity.handle(request.clone());
       if (response) return response;
+      if (request.url === academyAPI) return MockResponse.json({ data: { getAllVideos: academyVideos } });
       if (request.url === basinURL) {
         assert.equal(request.headers.get("authorization"), "Bearer test-basin-token");
         const { query } = await request.json() as { query: string };
         queries.push(query);
+        if (query.includes("event_type = 'youtube.video'")) return MockResponse.json({ success: true, result: { rows: lakeCatalogue } });
+        if (query.includes("youtube.video_daily")) return MockResponse.json({ success: true, result: { rows: [{ video: "AAAAAAAAAAA", day: "2026-11-20", views: 7 }] } });
         if (query.includes("no_such_column")) return MockResponse.json({ success: false, errors: [{ message: "Schema error: No field named no_such_column" }] }, { status: 400 });
         return MockResponse.json({ success: true, result: { schema: [{ name: "day" }, { name: "views" }], rows: [["2026-11-20", 123], ["2026-11-21", 456]] } });
       }
@@ -100,6 +114,59 @@ test("OAuth protects the analytics MCP with owner login, PKCE, consent and resou
 
     const replay = await exchangeCode(mf, auth.pending, auth.code);
     assert.equal(replay.status, 400);
+  });
+
+  await t.test("a guest gets only the guest tools, scoped to their own episodes, and no SQL", async () => {
+    const auth = await authorizedMcp(mf, identity, { sub: "guest-user", roles: ["guest"], username: "icepuma" });
+    assert.deepEqual(auth.scope.split(" ").sort(), ["guest:read", "offline_access"], "asking for analytics:read grants the guest module instead");
+    const list = await readMcp(await mcpRequest(mf, auth.access_token, "tools/list"));
+    assert.deepEqual(list.result.tools.map((tool: Json) => tool.name).sort(), ["my_episode_daily", "my_episodes"]);
+    for (const tool of list.result.tools) assert.equal(tool.annotations.readOnlyHint, true, tool.name);
+
+    for (const name of ["query_analytics", "youtube_daily", "describe_analytics"]) {
+      const refused = await readMcp(await mcpRequest(mf, auth.access_token, "tools/call", { name, arguments: { sql: "SELECT 1", startDate: "2026-11-20", endDate: "2026-11-21" } }));
+      assert.ok(refused.error || refused.result?.isError, `${name} is not available to a guest`);
+    }
+
+    const episodes = await readMcp(await mcpRequest(mf, auth.access_token, "tools/call", { name: "my_episodes", arguments: {} }));
+    assert.equal(episodes.result.isError, false, JSON.stringify(episodes));
+    const mine = JSON.parse(episodes.result.content[0].text);
+    assert.deepEqual(mine.episodes.map((e: Json) => [e.slug, e.role, e.youtubeVideoId]), [["intar", "guest", "INTARvideo1"], ["ip-2", "host", null], ["ip-1", "host", "AAAAAAAAAAA"]]);
+    assert.equal(mine.withoutYouTubeNumbers, 1);
+    assert.ok(!JSON.stringify(mine).includes("someone") && !JSON.stringify(mine).includes("rawkode"), "other people and episodes are not exposed");
+
+    const daily = await readMcp(await mcpRequest(mf, auth.access_token, "tools/call", { name: "my_episode_daily", arguments: { startDate: "2026-11-01", endDate: "2026-11-30" } }));
+    assert.equal(daily.result.isError, false, JSON.stringify(daily));
+    assert.deepEqual(JSON.parse(daily.result.content[0].text).rows, [{ title: "Ice Show One", video: "AAAAAAAAAAA", day: "2026-11-20", views: 7 }]);
+    const sql = queries.at(-1)!;
+    assert.match(sql, /IN \('INTARvideo1', 'AAAAAAAAAAA'\)/);
+    assert.ok(!sql.includes("BBBBBBBBBBB"), "another guest's video is never queried");
+
+    const own = await readMcp(await mcpRequest(mf, auth.access_token, "tools/call", { name: "my_episode_daily", arguments: { startDate: "2026-11-01", endDate: "2026-11-30", videoId: "AAAAAAAAAAA" } }));
+    assert.equal(own.result.isError, false);
+    assert.match(queries.at(-1)!, /IN \('AAAAAAAAAAA'\)/);
+    const before = queries.length;
+    const foreign = await readMcp(await mcpRequest(mf, auth.access_token, "tools/call", { name: "my_episode_daily", arguments: { startDate: "2026-11-01", endDate: "2026-11-30", videoId: "BBBBBBBBBBB" } }));
+    assert.equal(foreign.result.isError, true);
+    assert.equal(JSON.parse(foreign.result.content[0].text).error, "forbidden");
+    assert.equal(queries.length, before, "a video that isn't theirs never reaches Basin");
+
+    const refresh = await mf.dispatchFetch(`${oauthOrigin}/oauth/token`, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ grant_type: "refresh_token", client_id: auth.clientId, refresh_token: auth.refresh_token, resource: `${oauthOrigin}/mcp` }).toString() });
+    assert.equal(refresh.status, 200, await refresh.clone().text());
+    assert.ok(!((await refresh.json() as Json).scope as string).includes("analytics:read"));
+  });
+
+  await t.test("a guest without a verified GitHub username is refused, and a role change needs a new connection", async () => {
+    const pending = await beginOwnerLogin(mf);
+    const { response } = await completeOwnerLogin(mf, identity, pending, { roles: ["guest"] });
+    assert.equal(response.status, 403, await response.clone().text());
+    assert.match(await response.text(), /no verified GitHub username/);
+
+    const auth = await authorizedMcp(mf, identity, { roles: ["guest"], username: "icepuma" });
+    identity.update({ roles: ["operator"] });
+    const refresh = await mf.dispatchFetch(`${oauthOrigin}/oauth/token`, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ grant_type: "refresh_token", client_id: auth.clientId, refresh_token: auth.refresh_token, resource: `${oauthOrigin}/mcp` }).toString() });
+    assert.equal(refresh.status, 400);
+    assert.equal(((await refresh.json()) as Json).error, "invalid_grant");
   });
 
   await t.test("untrusted client metadata is escaped and unknown scopes cannot begin sign-in", async () => {

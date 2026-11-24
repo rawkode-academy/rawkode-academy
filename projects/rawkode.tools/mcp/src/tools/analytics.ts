@@ -67,6 +67,7 @@ ORDER BY day, views DESC`;
 // Basin SQL is a public API.
 export const analytics: ToolModule = {
   scope: "analytics:read",
+  audience: "operator",
   readOnly: true,
   description: "read Rawkode Academy's analytics lake (website, short-link and YouTube analytics)",
   register(server: McpServer, env: CloudflareEnv) {

@@ -54,6 +54,14 @@ ci: pipelines: default: {
 	tasks: [_t.deploy]
 }
 
+// Run by hand from Actions: prints what a guest's GitHub username would see
+// (their episodes and which have YouTube numbers), read-only.
+ci: pipelines: preview: {
+	environment: "production"
+	when: manual: true
+	tasks: [_t.preview]
+}
+
 tasks: [string]: hermetic: false
 
 tasks: {
@@ -74,6 +82,14 @@ tasks: {
 		command: "sh"
 		args: ["-c", _npm + "npm test --workspaces=false && npx --no-install wrangler deploy --secrets-file secrets.env"]
 		inputs: list.Concat([_sources, ["env.cue", "test/**"]])
+		labels: ["infisical"]
+		env: BASIN_SQL_TOKEN: _secret & {secretName: "BASIN_SQL_TOKEN"}
+	}
+
+	preview: schema.#Task & {
+		command: "sh"
+		args: ["-c", _npm + "node --experimental-transform-types scripts/preview-guest.ts icepuma"]
+		inputs: list.Concat([_sources, ["scripts/preview-guest.ts"]])
 		labels: ["infisical"]
 		env: BASIN_SQL_TOKEN: _secret & {secretName: "BASIN_SQL_TOKEN"}
 	}
