@@ -31,8 +31,8 @@ tasks: {
 
 		inputs: [
 			"scripts/collect-schemas.ts",
-			schema.#ModuleFiles & {paths: ["projects/rawkode.academy/platform/*/read-model/schema.gql"]},
-			schema.#ModuleFiles & {paths: ["projects/rawkode.academy/website/src/subgraph/**"]},
+			schema.#ModuleFiles & {paths: ["projects/rawkode.academy/platform/*/read-model/**"]},
+			schema.#ModuleFiles & {paths: ["projects/rawkode.academy/platform/*/data-model/schema.ts"]},
 		]
 
 		outputs: [
@@ -46,7 +46,6 @@ tasks: {
 
 		inputs: [
 			"scripts/compose.ts",
-			"schemas/**",
 		]
 
 		outputs: [
@@ -62,21 +61,14 @@ tasks: {
 		dependsOn: [_t.compose]
 
 		// Keep API deploy affected when the source schemas that compose the
-		// bundled supergraph change. The generated supergraph is not committed.
+		// bundled supergraph change. Generated outputs flow through dependsOn.
 		inputs: [
 			"scripts/collect-schemas.ts",
 			"scripts/compose.ts",
-			"schemas/**",
-			schema.#ModuleFiles & {paths: ["projects/rawkode.academy/platform/*/read-model/schema.gql"]},
-			schema.#ModuleFiles & {paths: ["projects/rawkode.academy/website/src/subgraph/**"]},
-			// cuenv ci ignores inputs outside the project directory when it
-			// decides what is affected (cuenv/cuenv#611). Until that is fixed
-			// they are repeated relative to the repository root, the only form
-			// the affected check matches.
-			"projects/rawkode.academy/website/src/subgraph/**",
-			"bun.lock",
+			schema.#ModuleFiles & {paths: ["projects/rawkode.academy/platform/*/read-model/**"]},
+			schema.#ModuleFiles & {paths: ["projects/rawkode.academy/platform/*/data-model/schema.ts"]},
+			"env.cue",
 			"src/**",
-			"supergraph.graphql",
 			"wrangler.jsonc",
 			"package.json",
 			// The frozen install decides whether the deploy can run at all.
