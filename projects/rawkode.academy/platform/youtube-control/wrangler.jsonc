@@ -17,7 +17,7 @@
     // Where the initial backfill starts; earlier days just return no rows.
     "YOUTUBE_HISTORY_SINCE": "2015-01-01",
     // The MCP server's public origin: OAuth issuer and Google callback base.
-    "PUBLIC_ORIGIN": "https://mcp.rawkode.academy",
+    "PUBLIC_ORIGIN": "https://mcp.rawkode.tools",
     // The analytics lake the MCP tools read with BASIN_SQL_TOKEN.
     "BASIN_ACCOUNT_ID": "0aeb879de8e3cdde5fb3d413025222ce",
     "BASIN_BUCKET": "rawkode-analytics"
@@ -26,7 +26,7 @@
   // first deploy and reuses it afterwards.
   // The MCP's public hostname. workers.dev stays on for /status and /health;
   // MCP and OAuth requests there are refused (wrong origin).
-  "routes": [{ "pattern": "mcp.rawkode.academy", "custom_domain": true }],
+  "routes": [{ "pattern": "mcp.rawkode.tools", "custom_domain": true }],
   "kv_namespaces": [{ "binding": "OAUTH_KV" }],
   // Report rows become CloudEvents in analytics.events_archive
   // (R2 bucket rawkode-analytics) through the observability collector.
