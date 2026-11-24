@@ -39,4 +39,4 @@ jobs:
       - run: /tmp/cuenv task check
       - run: /tmp/cuenv task test
       - name: Consent script compiles with the flake's Python and google-auth-oauthlib
-        run: /tmp/cuenv exec -- python -I -c "import google_auth_oauthlib, py_compile; py_compile.compile('scripts/consent.py', doraise=True)" && bash -n scripts/backfill.sh
+        run: /tmp/cuenv exec -- python -I -c "import google_auth_oauthlib, py_compile; py_compile.compile('scripts/consent.py', doraise=True)" && bash -n scripts/backfill.sh && bash -n scripts/verify.sh
