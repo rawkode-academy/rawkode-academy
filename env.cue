@@ -58,7 +58,7 @@ let _NamespaceNix = schema.#Contributor & {
 	]
 }
 
-schema.#Base
+schema.#Base...
 
 // A project may set _cuenvBinary to pin a different cuenv release for its own
 // generated workflows; every other project keeps the repository-wide pin.
@@ -67,7 +67,7 @@ _cuenvBinary?: string
 config: ci: cuenv: {
 	source: "release"
 	if _cuenvBinary == _|_ {
-		version: "0.76.0"
+		version: "0.78.0"
 	}
 	if _cuenvBinary != _|_ {
 		version: _cuenvBinary

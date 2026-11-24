@@ -24,7 +24,8 @@ export default {
 				status: 301,
 				headers: {
 					Location: `https://rawkode.academy${url.pathname}${url.search}`,
-					"Cache-Control": "public, max-age=3600",
+					"Cache-Control": "no-store",
+					Vary: "Host",
 				},
 			});
 		}

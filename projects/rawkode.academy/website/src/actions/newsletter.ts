@@ -5,6 +5,7 @@ import { parseCampaignAttribution } from "@/lib/analytics/attribution";
 import { GROWTH_EVENTS } from "@/lib/analytics/growth";
 import { createEmailId, createLearnerId } from "@/lib/newsletter-ids";
 import {
+	analyticsFor,
 	captureServerEvent,
 	getAttributionFromSource,
 	getDistinctId,
@@ -15,10 +16,6 @@ const NEWSLETTER_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year in seconds
 
 function getNewsletterCookieName(audience: string): string {
 	return `newsletter:${audience}:updates`;
-}
-
-function getAnalyticsBinding(): Fetcher | undefined {
-	return env.ANALYTICS;
 }
 
 type NewsletterAnalyticsContext = {
@@ -74,7 +71,7 @@ async function captureActivatedUserFromNewsletter({
 				...getEventAttribution(context.request),
 			},
 		},
-		getAnalyticsBinding(),
+		analyticsFor(context),
 	);
 }
 
@@ -109,7 +106,7 @@ async function captureNewsletterAnalytics({
 				...getEventAttribution(context.request),
 			},
 		},
-		getAnalyticsBinding(),
+		analyticsFor(context),
 	);
 }
 

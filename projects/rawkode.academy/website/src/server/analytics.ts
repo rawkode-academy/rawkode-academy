@@ -1,4 +1,6 @@
 import { CloudEvent } from "cloudevents";
+import { env } from "cloudflare:workers";
+import { isProductionUrl } from "@/lib/analytics/automation";
 import { createLogger } from "@/lib/logger";
 
 const logger = createLogger("analytics");
@@ -173,6 +175,27 @@ export function getAttributionFromSource(
 		...(sourceContext ? { source_context: sourceContext } : {}),
 		...(pagePath ? { page_path: pagePath } : {}),
 	};
+}
+
+/**
+ * The collector binding for a request. Previews share the production Worker's
+ * bindings, so their events are labelled `non-production` (the collector turns
+ * `data.bot_reason` into `bot` and `botreason`) and stay out of default queries.
+ */
+export function analyticsFor(ctx: { request?: Request }): Fetcher | undefined {
+	const analytics = env.ANALYTICS as Fetcher | undefined;
+	if (!analytics || !ctx.request || isProductionUrl(new URL(ctx.request.url)))
+		return analytics;
+	return {
+		fetch: async (input: RequestInfo | URL, init?: RequestInit) => {
+			if (typeof init?.body !== "string") return analytics.fetch(input, init);
+			const body = JSON.parse(init.body) as {
+				event?: { data?: Record<string, unknown> };
+			};
+			if (body.event?.data) body.event.data.bot_reason ??= "non-production";
+			return analytics.fetch(input, { ...init, body: JSON.stringify(body) });
+		},
+	} as Fetcher;
 }
 
 /**

@@ -1,7 +1,10 @@
 ---
-import { env } from "cloudflare:workers";
 import Page from "@/wrappers/page.astro";
-import { captureServerEvent, getDistinctId } from "@/server/analytics";
+import {
+	analyticsFor,
+	captureServerEvent,
+	getDistinctId,
+} from "@/server/analytics";
 import { shouldCaptureSearchAnalytics } from "@/lib/search-analytics";
 import {
 	getSearchIndex,
@@ -29,7 +32,7 @@ const ranked = activeType
 	: allRanked;
 
 if (shouldCaptureSearchAnalytics(searchQuery)) {
-	const analytics = env.ANALYTICS as Fetcher | undefined;
+	const analytics = analyticsFor(Astro);
 	await captureServerEvent(
 		{
 			event: "search_performed",
@@ -48,8 +51,14 @@ if (shouldCaptureSearchAnalytics(searchQuery)) {
 // ordered by their best-ranked result, items stay ranked within each group.
 const GROUP_LIMIT = activeType ? 24 : 12;
 const pageCount = Math.max(1, Math.ceil(ranked.length / GROUP_LIMIT));
-const requestedPage = Number.parseInt(Astro.url.searchParams.get("page") ?? "1", 10);
-const page = activeType && Number.isFinite(requestedPage) ? Math.min(pageCount, Math.max(1, requestedPage)) : 1;
+const requestedPage = Number.parseInt(
+	Astro.url.searchParams.get("page") ?? "1",
+	10,
+);
+const page =
+	activeType && Number.isFinite(requestedPage)
+		? Math.min(pageCount, Math.max(1, requestedPage))
+		: 1;
 const offset = (page - 1) * GROUP_LIMIT;
 
 const groups: { type: SearchType; results: SearchResult[]; total: number }[] =
@@ -97,8 +106,7 @@ const typeFilters = [
 	),
 ];
 
-const resultDate = (iso: string) =>
-	localDate(iso);
+const resultDate = (iso: string) => localDate(iso);
 
 const truncate = (text: string, maxLength: number): string => {
 	const normalized = text.replace(/\s+/g, " ").trim();
