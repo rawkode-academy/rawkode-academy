@@ -28,6 +28,8 @@ SCOPES = [
 INFISICAL = "https://app.infisical.com"
 INFISICAL_PROJECT = "6575a392d7a5ef0555ade86b"
 INFISICAL_ENVIRONMENT = "production"
+# Secret names, kept apart from their values so that only these constants are logged.
+SECRET_NAMES = ("YOUTUBE_CLIENT_ID", "YOUTUBE_CLIENT_SECRET", "YOUTUBE_REFRESH_TOKEN")
 INFISICAL_PATH = "/projects/basin"
 DEPLOY_WORKFLOW = "rawkode-academy-platform-youtube-control-default.yml"
 
@@ -78,7 +80,7 @@ def infisical(method: str, path: str, token: str | None = None, body: dict | Non
         return error.code, {}
 
 
-def store(secrets: dict[str, str]):
+def store(values: tuple[str, str, str]):
     status, login = infisical("POST", "/api/v1/auth/universal-auth/login", body={
         "clientId": os.environ["INFISICAL_UNIVERSAL_AUTH_CLIENT_ID"],
         "clientSecret": os.environ["INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET"],
@@ -87,7 +89,8 @@ def store(secrets: dict[str, str]):
         raise SystemExit(f"Infisical login failed (HTTP {status}); nothing was saved.")
     token = login["accessToken"]
     scope = {"workspaceId": INFISICAL_PROJECT, "environment": INFISICAL_ENVIRONMENT, "secretPath": INFISICAL_PATH}
-    for name, value in secrets.items():
+    for index, name in enumerate(SECRET_NAMES):
+        value = values[index]
         exists, _ = infisical("GET", f"/api/v3/secrets/raw/{name}", token, query=scope)
         status, _ = infisical("PATCH" if exists == 200 else "POST", f"/api/v3/secrets/raw/{name}", token, body={**scope, "secretValue": value, "type": "shared"})
         if status != 200:
@@ -107,11 +110,7 @@ def main():
     path = client_file()
     config = json.loads(path.read_text())
     credentials = consent(config)
-    store({
-        "YOUTUBE_CLIENT_ID": credentials.client_id,
-        "YOUTUBE_CLIENT_SECRET": credentials.client_secret,
-        "YOUTUBE_REFRESH_TOKEN": credentials.refresh_token,
-    })
+    store((credentials.client_id, credentials.client_secret, credentials.refresh_token))
     if input(f"Delete {path}? Infisical now holds its client ID and secret. [y/N] ").strip().lower() == "y":
         path.unlink()
         print(f"Deleted {path}.", file=sys.stderr)
