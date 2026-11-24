@@ -15,12 +15,12 @@ const EXCEPTIONS_PER_PAGE = 5;
 const EXCEPTIONS_PER_SESSION = 20;
 const EXCEPTION_COUNT_KEY = "rk_exc";
 
-export interface ClickDetails {
+export type ClickDetails = {
 	tag: string;
 	data_attr?: string;
 	href?: string;
 	text?: string;
-}
+};
 
 /** The element a click is about: the nearest interactive ancestor, if any. */
 function interactiveTarget(target: EventTarget | null): Element | undefined {

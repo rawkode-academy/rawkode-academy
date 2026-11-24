@@ -105,7 +105,7 @@ describe("click tracking", () => {
 		document.body.innerHTML = `<button>Open</button>`;
 		const button = document.querySelector("button") as Element;
 		button.addEventListener("click", () => {
-			document.body.append(document.createElement("dialog"));
+			document.body.appendChild(document.createElement("dialog"));
 		});
 		click(button);
 		await vi.advanceTimersByTimeAsync(1_000);
