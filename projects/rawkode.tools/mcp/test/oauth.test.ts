@@ -158,6 +158,9 @@ test("OAuth protects the analytics MCP with owner login, PKCE, consent and resou
       const pending = await beginOwnerLogin(mf);
       const { response } = await completeOwnerLogin(mf, identity, pending, user);
       assert.equal(response.status, 403, await response.clone().text());
+      const page = await response.text();
+      assert.match(page, /Identity user: [^ .]+\. Client claim: [^ ]+\. Roles: [^.]+\./);
+      assert.ok(!page.includes("@"), "the denial page shows no email");
       assert.equal(response.headers.get("location"), null);
     }
   });

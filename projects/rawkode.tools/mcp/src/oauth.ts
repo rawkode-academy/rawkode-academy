@@ -96,7 +96,7 @@ async function callback(request: Request, env: OAuthEnv) {
     signedIn = await signInOperator(code, data.verifier, `${publicOrigin(env)}/oauth/callback`);
   } catch (error) {
     const body = errorBody(error);
-    return new Response(body.status === 403 ? "This Rawkode Academy account isn't a Rawkode Tools operator." : "Rawkode Academy sign-in failed. Start a new connection.", { status: body.status === 403 ? 403 : 502, headers: pageHeaders(headers) });
+    return new Response(body.status === 403 ? escape(body.message) : "Rawkode Academy sign-in failed. Start a new connection.", { status: body.status === 403 ? 403 : 502, headers: pageHeaders(headers) });
   }
   const { redirectTo } = await oauth.completeAuthorization({ request: original, userId: signedIn.userId, scope: grantScope(original.scope), metadata: { label: "Rawkode Tools" }, props: signedIn satisfies Operator });
   headers.set("location", redirectTo);

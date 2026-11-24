@@ -24,6 +24,13 @@ ci: pipelines: {
 		}
 		tasks: [_t.deploy]
 	}
+	// Run by hand from Actions: read-only report of how the Rawkode Tools
+	// operator role resolves in production (no emails or names).
+	diagnose: {
+		environment: "production"
+		when: manual: true
+		tasks: [_t.diagnose]
+	}
 }
 
 tasks: {
@@ -61,6 +68,13 @@ tasks: {
 			args: ["x", "wrangler", "d1", "migrations", "apply", "identity", "--remote"]
 			inputs: ["migrations/**", "wrangler.jsonc", "package.json", "flake.nix", "flake.lock"]
 		}
+	}
+
+	diagnose: schema.#Task & {
+		hermetic: false
+		command:  "bash"
+		args: ["scripts/diagnose-operator.sh"]
+		inputs: ["scripts/diagnose-operator.sh", "wrangler.jsonc", "package.json", "flake.nix", "flake.lock"]
 	}
 
 	build: schema.#Task & {
