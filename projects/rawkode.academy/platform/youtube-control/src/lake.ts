@@ -1,5 +1,5 @@
 import type { AnalyticsReport } from "./analytics.ts";
-import type { Video } from "./google.ts";
+import type { Video } from "./academy.ts";
 import { hash } from "./domain.ts";
 
 // The Academy analytics lake: the observability collector accepts CloudEvents

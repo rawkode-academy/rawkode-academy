@@ -1,9 +1,9 @@
 import { analyticsSchema, backfillWindows, fetchReport, recentWindow, VIDEO_BATCH, type AnalyticsAPI } from "./analytics.ts";
 import { ServiceError } from "./domain.ts";
-import type { Video } from "./google.ts";
+import type { Video } from "./academy.ts";
 import { sendEvents, sendToLake, videoEvents, type AnalyticsCollector } from "./lake.ts";
 
-export interface ChannelAPI extends AnalyticsAPI { checkChannel(): Promise<void>; videos(): Promise<Video[]> }
+export interface ChannelAPI extends AnalyticsAPI { checkChannel(): Promise<void> }
 export type Job = { report: string; startDate: string; endDate: string; videoIds?: string[] };
 
 // Reports collected every day for the last 28 days. YouTube revises recent
@@ -27,7 +27,8 @@ export const VIDEO_BACKFILL_REPORTS = ["video_daily"] as const;
 export const FIRST_BACKFILL_ID = "backfill-initial";
 // Per-video history, started once the same way.
 // -2: the first instance (backfill-videos) errored on an HTTP 500 from YouTube; this one splits a per-video query that gets a 5xx.
-export const VIDEO_BACKFILL_ID = "backfill-videos-2";
+// -3: the video list now comes from the Academy's video-channels IDs instead of the uploads playlist, so videos the playlist never listed (some old live streams) get their history.
+export const VIDEO_BACKFILL_ID = "backfill-videos-3";
 export const syncInstanceId = (date: Date) => `sync-${date.toISOString().slice(0, 10)}`;
 
 export function syncJobs(now = new Date()): Job[] {
