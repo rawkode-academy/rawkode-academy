@@ -27,7 +27,7 @@ jobs:
         working-directory: .
         run: |
           curl -fsSL https://github.com/cuenv/cuenv/releases/download/0.80.0/cuenv-linux-x64 -o /tmp/cuenv
-          echo '4f582623e67a12fab3814e2ec72d053e5fc17ee105a1071d016a9fdf9bfe31b3  /tmp/cuenv' | sha256sum --check --status
+          echo '0171fff68ef7762fad474732640a23dc3ea16de353008c90db17d88c6bc8c7b6  /tmp/cuenv' | sha256sum --check --status
           chmod +x /tmp/cuenv
           /tmp/cuenv sync -A
         env:
