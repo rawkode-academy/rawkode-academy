@@ -2,16 +2,13 @@ import {
   AuthorizationError, OAuthError, OAuthProvider, authorizationErrorRedirect, insufficientScope,
   type ConsentDescription, type OAuthHelpers, type OAuthResourceContext,
 } from "@cloudflare/workers-oauth-provider";
-import { createRemoteJWKSet, jwtVerify } from "jose";
 import { createMcpHandler } from "agents/mcp/server";
 import { ensure, errorBody, readLimited, ServiceError, validateOrigin } from "./errors.ts";
+import { authorizeUrl, recheckOperator, signInOperator, type Operator } from "./identity.ts";
 import { createServer, grantedScopes, MODULE_SCOPES, modulesFor } from "./tools/index.ts";
 
 const SCOPES = [...MODULE_SCOPES, "offline_access"];
-// Only public signing keys are cached. No login state or credentials live here.
-const googleKeys = createRemoteJWKSet(new URL("https://www.googleapis.com/oauth2/v3/certs"), { timeoutDuration: 10000 });
-type OwnerProps = { ownerSub: string };
-type LoginState = { verifier: string; nonce: string };
+type LoginState = { verifier: string };
 type OAuthEnv = CloudflareEnv & { OAUTH_PROVIDER: OAuthHelpers };
 
 export function publicOrigin(env: Pick<CloudflareEnv, "PUBLIC_ORIGIN">) {
@@ -19,9 +16,6 @@ export function publicOrigin(env: Pick<CloudflareEnv, "PUBLIC_ORIGIN">) {
   try { url = new URL(env.PUBLIC_ORIGIN); } catch { throw new ServiceError("not_configured", "MCP public origin is not configured", 503); }
   ensure(url.protocol === "https:" && url.origin === env.PUBLIC_ORIGIN, "not_configured", "PUBLIC_ORIGIN must be a canonical HTTPS origin without a trailing slash", 503);
   return url.origin;
-}
-function requireLoginConfig(env: CloudflareEnv) {
-  ensure(/^[A-Za-z0-9_-]{1,255}$/.test(env.MCP_OWNER_GOOGLE_SUB ?? "") && env.MCP_GOOGLE_CLIENT_ID && env.MCP_GOOGLE_CLIENT_SECRET, "not_configured", "MCP owner sign-in is not configured", 503);
 }
 const escape = (value: string) => value.replace(/[&<>"']/g, char => `&#${char.charCodeAt(0)};`);
 export function renderConsent(details: ConsentDescription, handle: string, scopes: readonly string[]) {
@@ -34,8 +28,8 @@ export function renderConsent(details: ConsentDescription, handle: string, scope
   ${details.redirectIsLoopback ? "<p><strong>This returns access to an app on your computer.</strong> Continue only if you started this connection.</p>" : ""}
   <form method="post" action="/oauth/authorize"><input type="hidden" name="handle" value="${escape(handle)}">
   <p>This connection can:</p><ul>${abilities}</ul>
-  <p><small>The connection can refresh its access for up to 30 days. Signing in below only verifies the configured owner. No Google or Cloudflare credentials are shared with this client.</small></p>
-  <button name="decision" value="approve">Continue with Google</button><button name="decision" value="deny">Cancel</button></form></html>`;
+  <p><small>The connection can refresh its access for up to 30 days. Continuing signs you in with your Rawkode Academy account, which needs the Rawkode Tools operator role. No credentials are shared with this client.</small></p>
+  <button name="decision" value="approve">Continue with Rawkode Academy</button><button name="decision" value="deny">Cancel</button></form></html>`;
 }
 function pageHeaders(headers: Headers) {
   headers.set("content-type", "text/html; charset=utf-8");
@@ -55,7 +49,6 @@ function grantScope(requested: string[]) {
   return [...grantedScopes(requested), ...(requested.includes("offline_access") ? ["offline_access"] : [])];
 }
 async function signIn(request: Request, env: OAuthEnv) {
-  requireLoginConfig(env);
   const oauth = env.OAUTH_PROVIDER;
   if (request.method === "GET") {
     const original = await oauth.parseAuthRequest(request);
@@ -77,16 +70,12 @@ async function signIn(request: Request, env: OAuthEnv) {
   }
   const approved = await oauth.approveConsent(request, handle);
   const verifier = Buffer.from(crypto.getRandomValues(new Uint8Array(32))).toString("base64url");
-  const nonce = crypto.randomUUID();
-  const transaction = await oauth.beginUpstream(approved.request, { data: { verifier, nonce }, headers: approved.headers });
-  const location = new URL("https://accounts.google.com/o/oauth2/v2/auth");
-  location.search = new URLSearchParams({ client_id: env.MCP_GOOGLE_CLIENT_ID, redirect_uri: `${publicOrigin(env)}/oauth/callback`, response_type: "code", scope: "openid", state: transaction.state, nonce, code_challenge: await s256(verifier), code_challenge_method: "S256", prompt: "select_account" }).toString();
-  transaction.headers.set("location", location.toString());
+  const transaction = await oauth.beginUpstream(approved.request, { data: { verifier } satisfies LoginState, headers: approved.headers });
+  transaction.headers.set("location", authorizeUrl(`${publicOrigin(env)}/oauth/callback`, transaction.state, await s256(verifier)));
   transaction.headers.set("referrer-policy", "no-referrer");
   return new Response(null, { status: 302, headers: transaction.headers });
 }
 async function callback(request: Request, env: OAuthEnv) {
-  requireLoginConfig(env);
   ensure(request.method === "GET", "method_not_allowed", "Use GET", 405);
   const oauth = env.OAUTH_PROVIDER;
   const { request: original, data, headers } = await oauth.finishUpstream<LoginState>(request);
@@ -97,27 +86,15 @@ async function callback(request: Request, env: OAuthEnv) {
     return new Response(null, { status: 302, headers });
   }
   const code = parameters.get("code");
-  ensure(code && code.length <= 4096, "invalid_callback", "Missing Google authorization code");
-  const response = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST", redirect: "manual", signal: AbortSignal.timeout(20000),
-    headers: { "content-type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({ grant_type: "authorization_code", code, client_id: env.MCP_GOOGLE_CLIENT_ID, client_secret: env.MCP_GOOGLE_CLIENT_SECRET, redirect_uri: `${publicOrigin(env)}/oauth/callback`, code_verifier: data.verifier }),
-  });
-  ensure(response.ok, "google_login_failed", "Google sign-in could not be completed; start again", 502);
-  let tokens: { id_token?: string };
-  try { tokens = JSON.parse(new TextDecoder().decode(await readLimited(response.body, 65536))); }
-  catch { throw new Error("Invalid Google token response"); }
-  ensure(tokens.id_token, "google_login_failed", "Google did not return an identity token", 502);
-  let sub: string | undefined;
+  ensure(code && code.length <= 4096, "invalid_callback", "Missing authorization code");
+  let signedIn: Operator;
   try {
-    const { payload } = await jwtVerify(tokens.id_token, googleKeys, { issuer: ["https://accounts.google.com", "accounts.google.com"], audience: env.MCP_GOOGLE_CLIENT_ID, algorithms: ["RS256"], requiredClaims: ["sub", "exp", "iat", "nonce"], maxTokenAge: "10m", clockTolerance: 5 });
-    ensure(payload.nonce === data.nonce && (!payload.azp || payload.azp === env.MCP_GOOGLE_CLIENT_ID) && (!Array.isArray(payload.aud) || payload.aud.length <= 1 || payload.azp === env.MCP_GOOGLE_CLIENT_ID), "google_login_failed", "Google identity verification failed", 403);
-    sub = payload.sub;
-  } catch {
-    return new Response("Google identity verification failed. Start a new connection.", { status: 403, headers: pageHeaders(headers) });
+    signedIn = await signInOperator(code, data.verifier, `${publicOrigin(env)}/oauth/callback`);
+  } catch (error) {
+    const body = errorBody(error);
+    return new Response(body.status === 403 ? "This Rawkode Academy account isn't a Rawkode Tools operator." : "Rawkode Academy sign-in failed. Start a new connection.", { status: body.status === 403 ? 403 : 502, headers: pageHeaders(headers) });
   }
-  if (sub !== env.MCP_OWNER_GOOGLE_SUB) return new Response("This Google account is not the configured Rawkode Tools owner.", { status: 403, headers: pageHeaders(headers) });
-  const { redirectTo } = await oauth.completeAuthorization({ request: original, userId: sub, scope: grantScope(original.scope), metadata: { label: "Rawkode Tools" }, props: { ownerSub: sub } satisfies OwnerProps });
+  const { redirectTo } = await oauth.completeAuthorization({ request: original, userId: signedIn.userId, scope: grantScope(original.scope), metadata: { label: "Rawkode Tools" }, props: signedIn satisfies Operator });
   headers.set("location", redirectTo);
   return new Response(null, { status: 302, headers });
 }
@@ -133,15 +110,16 @@ export async function oauthFetch(request: Request, env: CloudflareEnv, ctx: Exec
     accessTokenTTL: 3600, refreshTokenTTL: 30 * 86400, clientRegistrationTTL: 30 * 86400,
     clientIdMetadataDocumentEnabled: false,
     onError: ({ code, status, headers }) => Response.json({ error: code, error_description: "Authorization failed; reconnect or check the requested permissions" }, { status, headers: { ...headers, "cache-control": "no-store" } }),
-    tokenExchangeCallback: ({ props, env: currentEnv }) => {
-      if (props?.ownerSub !== currentEnv.MCP_OWNER_GOOGLE_SUB) throw new OAuthError("invalid_grant", { description: "Owner access changed; reconnect" });
+    tokenExchangeCallback: async ({ grantType, props }) => {
+      if (grantType !== "refresh_token") return;
+      try { return { newProps: await recheckOperator(props as Operator) }; }
+      catch { throw new OAuthError("invalid_grant", { description: "Rawkode Tools access changed; reconnect" }); }
     },
     apiHandler: {
       async fetch(req, currentEnv, executionContext) {
-        const authContext = executionContext as OAuthResourceContext<OwnerProps>;
+        const authContext = executionContext as OAuthResourceContext<Operator>;
         ensure(new URL(req.url).pathname === "/mcp", "not_found", "Unknown MCP endpoint", 404);
         validateOrigin(req);
-        ensure(authContext.props.ownerSub === currentEnv.MCP_OWNER_GOOGLE_SUB, "forbidden", "Owner access changed; reconnect", 403);
         if (modulesFor(authContext.auth.scope).length === 0) return insufficientScope(authContext.auth, MODULE_SCOPES);
         const safeRequest = req.body ? new Request(req, { body: await readLimited(req.body, 65536) }) : req;
         return createMcpHandler(() => createServer(currentEnv, authContext.auth.scope), { corsOptions: false, allowedHostnames: [new URL(origin).hostname], allowedOriginHostnames: [new URL(origin).hostname] })(safeRequest, currentEnv, executionContext);

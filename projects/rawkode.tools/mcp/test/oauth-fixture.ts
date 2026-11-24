@@ -1,11 +1,10 @@
 import assert from "node:assert/strict";
-import { generateKeyPair, exportJWK, SignJWT } from "jose";
 import { Response as MockResponse, type Miniflare } from "miniflare";
 import { createHash, randomBytes } from "node:crypto";
 
 export const oauthOrigin = "https://mcp.example.test";
-export const oauthOwner = "owner-sub";
-export const oauthClient = "test-mcp-client";
+export const operatorId = "operator-user";
+const identity = "https://id.rawkode.academy";
 // Miniflare's HTTP bridge rewrites Host to 127.0.0.1 even when dispatchFetch's
 // public URL differs. Model the public edge before entering the real Worker;
 // production host/origin validation remains enabled and unchanged.
@@ -14,41 +13,59 @@ export const publicOriginProxy = `export default { fetch(request, env) {
   headers.set("host", new URL(request.url).host);
   return env.APP.fetch(new Request(request, { headers }));
 } };`;
-type FetchRequest = { url: string; method: string; text(): Promise<string> };
-type IdentityOptions = { sub?: string; nonce?: string; audience?: string; issuer?: string };
-export class GoogleLoginMock {
-  private codes = new Map<string, { nonce: string; identity: IdentityOptions }>();
-  private constructor(private privateKey: CryptoKey, private jwk: Record<string, unknown>) {}
-  static async create() {
-    const pair = await generateKeyPair("RS256");
-    const jwk = { ...await exportJWK(pair.publicKey), kid: crypto.randomUUID(), alg: "RS256", use: "sig" };
-    return new GoogleLoginMock(pair.privateKey, jwk);
-  }
-  issueCode(nonce: string, identity: IdentityOptions = {}) {
+type FetchRequest = { url: string; method: string; headers: { get(name: string): string | null }; text(): Promise<string> };
+export type UserOptions = { sub?: string; roles?: string[]; clientId?: string; refresh?: boolean };
+type Session = { challenge: string; user: UserOptions };
+
+// Stands in for id.rawkode.academy's OIDC provider: authorization codes bound
+// to a PKCE challenge, refresh tokens, and userinfo with per-client roles.
+export class IdentityMock {
+  private codes = new Map<string, Session>();
+  private access = new Map<string, UserOptions>();
+  private refresh = new Map<string, UserOptions>();
+  issueCode(challenge: string, user: UserOptions = {}) {
     const code = randomBytes(24).toString("base64url");
-    this.codes.set(code, { nonce, identity });
+    this.codes.set(code, { challenge, user });
     return code;
+  }
+  // Changes what userinfo reports for every token already issued.
+  update(user: UserOptions) {
+    for (const map of [this.access, this.refresh]) for (const value of map.values()) Object.assign(value, user);
+  }
+  private tokens(user: UserOptions) {
+    const access_token = randomBytes(24).toString("base64url");
+    this.access.set(access_token, user);
+    const refresh_token = user.refresh === false ? undefined : randomBytes(24).toString("base64url");
+    if (refresh_token) this.refresh.set(refresh_token, user);
+    return MockResponse.json({ access_token, refresh_token, token_type: "Bearer", expires_in: 3600 });
   }
   async handle(request: FetchRequest) {
     const url = new URL(request.url);
-    if (url.href === "https://www.googleapis.com/oauth2/v3/certs") return MockResponse.json({ keys: [this.jwk] });
-    if (url.href !== "https://oauth2.googleapis.com/token") return null;
+    if (url.href === `${identity}/auth/oauth2/userinfo`) {
+      const user = this.access.get((request.headers.get("authorization") ?? "").replace(/^Bearer /, ""));
+      if (!user) return MockResponse.json({ error: "invalid_token" }, { status: 401 });
+      const roles = user.roles ?? ["operator"];
+      const clientId = user.clientId ?? "rawkode-tools-mcp";
+      return MockResponse.json({ sub: user.sub ?? operatorId, email: "operator@example.test", ...(roles.length ? { roles, "https://rawkode.academy/roles": roles, "https://rawkode.academy/client_id": clientId } : {}) });
+    }
+    if (url.href !== `${identity}/auth/oauth2/token`) return null;
     const parameters = new URLSearchParams(await request.text());
-    if (parameters.get("grant_type") !== "authorization_code") return null;
-    assert.equal(parameters.get("client_id"), oauthClient);
-    assert.equal(parameters.get("client_secret"), "test-mcp-secret");
+    assert.equal(parameters.get("client_id"), "rawkode-tools-mcp");
+    assert.equal(parameters.get("client_secret"), null);
+    if (parameters.get("grant_type") === "refresh_token") {
+      const user = this.refresh.get(parameters.get("refresh_token") ?? "");
+      if (!user) return MockResponse.json({ error: "invalid_grant" }, { status: 400 });
+      this.refresh.delete(parameters.get("refresh_token")!);
+      return this.tokens(user);
+    }
+    assert.equal(parameters.get("grant_type"), "authorization_code");
     assert.equal(parameters.get("redirect_uri"), `${oauthOrigin}/oauth/callback`);
-    assert.match(parameters.get("code_verifier") ?? "", /^[A-Za-z0-9_-]{43}$/);
     const code = parameters.get("code") ?? "";
-    const value = this.codes.get(code);
+    const session = this.codes.get(code);
     this.codes.delete(code);
-    if (!value) return MockResponse.json({ error: "invalid_grant" }, { status: 400 });
-    const { identity } = value;
-    const token = await new SignJWT({ nonce: identity.nonce ?? value.nonce })
-      .setProtectedHeader({ alg: "RS256", kid: this.jwk.kid as string })
-      .setSubject(identity.sub ?? oauthOwner).setIssuer(identity.issuer ?? "https://accounts.google.com")
-      .setAudience(identity.audience ?? oauthClient).setIssuedAt().setExpirationTime("5m").sign(this.privateKey);
-    return MockResponse.json({ id_token: token, access_token: "test-upstream-access-token", token_type: "Bearer", expires_in: 300 });
+    const verifier = parameters.get("code_verifier") ?? "";
+    if (!session || createHash("sha256").update(verifier).digest("base64url") !== session.challenge) return MockResponse.json({ error: "invalid_grant" }, { status: 400 });
+    return this.tokens({ ...session.user });
   }
 }
 
@@ -91,15 +108,16 @@ export async function beginOwnerLogin(mf: Miniflare) {
   });
   assert.equal(approved.status, 302, await approved.clone().text());
   jar.add(approved);
-  const googleURL = new URL(approved.headers.get("location")!);
-  assert.equal(googleURL.origin, "https://accounts.google.com");
-  assert.equal(googleURL.searchParams.get("code_challenge_method"), "S256");
-  assert.equal(googleURL.searchParams.get("scope"), "openid");
-  return { clientId: client.client_id, verifier, jar, nonce: googleURL.searchParams.get("nonce")!, state: googleURL.searchParams.get("state")! };
+  const signInURL = new URL(approved.headers.get("location")!);
+  assert.equal(signInURL.origin + signInURL.pathname, `${identity}/auth/oauth2/authorize`);
+  assert.equal(signInURL.searchParams.get("client_id"), "rawkode-tools-mcp");
+  assert.equal(signInURL.searchParams.get("redirect_uri"), `${oauthOrigin}/oauth/callback`);
+  assert.equal(signInURL.searchParams.get("code_challenge_method"), "S256");
+  return { clientId: client.client_id, verifier, jar, challenge: signInURL.searchParams.get("code_challenge")!, state: signInURL.searchParams.get("state")! };
 }
 export type OAuthPending = Awaited<ReturnType<typeof beginOwnerLogin>>;
-export async function completeOwnerLogin(mf: Miniflare, google: GoogleLoginMock, pending: OAuthPending, identity: IdentityOptions = {}) {
-  const code = google.issueCode(pending.nonce, identity);
+export async function completeOwnerLogin(mf: Miniflare, identity: IdentityMock, pending: OAuthPending, user: UserOptions = {}) {
+  const code = identity.issueCode(pending.challenge, user);
   const callbackURL = `${oauthOrigin}/oauth/callback?${new URLSearchParams({ state: pending.state, code })}`;
   const response = await mf.dispatchFetch(callbackURL, { redirect: "manual", headers: { cookie: pending.jar.value() } });
   pending.jar.add(response);
@@ -111,9 +129,9 @@ export async function exchangeCode(mf: Miniflare, pending: OAuthPending, code: s
     body: new URLSearchParams({ grant_type: "authorization_code", client_id: pending.clientId, code, code_verifier: verifier, redirect_uri: "https://chatgpt.example/callback", resource: `${oauthOrigin}/mcp` }).toString(),
   });
 }
-export async function authorizedMcp(mf: Miniflare, google: GoogleLoginMock) {
+export async function authorizedMcp(mf: Miniflare, identity: IdentityMock) {
   const pending = await beginOwnerLogin(mf);
-  const { response } = await completeOwnerLogin(mf, google, pending);
+  const { response } = await completeOwnerLogin(mf, identity, pending);
   assert.equal(response.status, 302, await response.clone().text());
   const redirect = new URL(response.headers.get("location")!);
   assert.equal(redirect.searchParams.get("state"), "downstream-client-state");

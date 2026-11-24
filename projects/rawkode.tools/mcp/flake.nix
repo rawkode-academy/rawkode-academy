@@ -20,15 +20,10 @@
         in
         {
           # cuenv's Nix runtime enters this shell for every task: Node for
-          # the Worker and its tests, Python with google-auth-oauthlib for
-          # `cuenv task owner`, and gh to start the deploy afterwards.
+          # the Worker and its tests.
           default = pkgs.mkShell {
             packages = with pkgs; [
-              (python3.withPackages (p: [ p.google-auth-oauthlib ]))
               nodejs_24
-              gh
-              curl
-              jq
             ];
           };
         });

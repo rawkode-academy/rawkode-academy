@@ -37,5 +37,3 @@ jobs:
       # Both run inside the flake's dev shell through cuenv's Nix runtime.
       - run: /tmp/cuenv task check
       - run: /tmp/cuenv task test
-      - name: Owner script compiles with the flake's Python and google-auth-oauthlib
-        run: /tmp/cuenv exec -- python -I -c "import google_auth_oauthlib, py_compile; py_compile.compile('scripts/owner.py', doraise=True)"

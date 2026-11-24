@@ -2,22 +2,22 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { URL as NodeURL, fileURLToPath } from "node:url";
 import { convertV4MiniflareOptions, Miniflare, Request as MockRequest, Response as MockResponse } from "miniflare";
-import { authorizedMcp, beginOwnerLogin, completeOwnerLogin, exchangeCode, GoogleLoginMock, mcpRequest, oauthClient, oauthOrigin, oauthOwner, publicOriginProxy, readMcp, registerOAuthClient } from "./oauth-fixture.ts";
+import { authorizedMcp, beginOwnerLogin, completeOwnerLogin, exchangeCode, IdentityMock, mcpRequest, oauthOrigin, publicOriginProxy, readMcp, registerOAuthClient } from "./oauth-fixture.ts";
 
 type Json = Record<string, any>;
 const basinURL = "https://api.sql.cloudflarestorage.com/api/v1/accounts/0aeb879de8e3cdde5fb3d413025222ce/basin-sql/query/rawkode-analytics";
 
 test("OAuth protects the analytics MCP with owner login, PKCE, consent and resource scopes", async t => {
-  const google = await GoogleLoginMock.create();
+  const identity = new IdentityMock();
   const unexpected: string[] = [];
   const queries: string[] = [];
   const mf = new Miniflare(convertV4MiniflareOptions({ workers: [{ name: "edge-proxy", modules: true, script: publicOriginProxy, serviceBindings: { APP: "mcp-test" }, compatibilityDate: "2026-10-31" }, {
     name: "mcp-test", modules: true, scriptPath: fileURLToPath(new NodeURL("../dist/main.js", import.meta.url)),
     compatibilityDate: "2026-10-31", compatibilityFlags: ["nodejs_compat"],
     kvNamespaces: ["OAUTH_KV"],
-    bindings: { PUBLIC_ORIGIN: oauthOrigin, MCP_OWNER_GOOGLE_SUB: oauthOwner, MCP_GOOGLE_CLIENT_ID: oauthClient, MCP_GOOGLE_CLIENT_SECRET: "test-mcp-secret", BASIN_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce", BASIN_BUCKET: "rawkode-analytics", BASIN_SQL_TOKEN: "test-basin-token" },
+    bindings: { PUBLIC_ORIGIN: oauthOrigin, BASIN_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce", BASIN_BUCKET: "rawkode-analytics", BASIN_SQL_TOKEN: "test-basin-token" },
     outboundService: async (request: MockRequest) => {
-      const response = await google.handle(request.clone());
+      const response = await identity.handle(request.clone());
       if (response) return response;
       if (request.url === basinURL) {
         assert.equal(request.headers.get("authorization"), "Bearer test-basin-token");
@@ -53,13 +53,13 @@ test("OAuth protects the analytics MCP with owner login, PKCE, consent and resou
     for (const redirect_uri of ["https://chatgpt.example/callback", "https://attacker.example/callback"]) {
       const response = await mf.dispatchFetch(`${oauthOrigin}/oauth/authorize?${new URLSearchParams({ response_type: "code", client_id, redirect_uri, scope: "analytics:read" })}`, { redirect: "manual" });
       assert.ok(response.status === 400 || response.status === 302);
-      assert.notEqual(URL.parse(response.headers.get("location") ?? "")?.hostname, "accounts.google.com");
+      assert.notEqual(URL.parse(response.headers.get("location") ?? "")?.hostname, "id.rawkode.academy");
       assert.notEqual(URL.parse(response.headers.get("location") ?? "")?.hostname, "attacker.example");
     }
   });
 
   await t.test("owner consent exposes only the read-only analytics tools, backed by Basin SQL", async () => {
-    const auth = await authorizedMcp(mf, google);
+    const auth = await authorizedMcp(mf, identity);
     assert.ok(auth.refresh_token);
     assert.deepEqual(auth.scope.split(" ").sort(), ["analytics:read", "offline_access"]);
     const initialized = await mcpRequest(mf, auth.access_token, "initialize", { protocolVersion: "2025-11-25", capabilities: {}, clientInfo: { name: "MCP integration test", version: "1.0.0" } });
@@ -113,11 +113,11 @@ test("OAuth protects the analytics MCP with owner login, PKCE, consent and resou
     parameters.set("scope", "analytics:read youtube:publish");
     const widened = await mf.dispatchFetch(`${oauthOrigin}/oauth/authorize?${parameters}`, { redirect: "manual" });
     assert.notEqual(widened.status, 200);
-    assert.notEqual(URL.parse(widened.headers.get("location") ?? "")?.hostname, "accounts.google.com");
+    assert.notEqual(URL.parse(widened.headers.get("location") ?? "")?.hostname, "id.rawkode.academy");
   });
 
   await t.test("refresh keeps the scope and revocation ends MCP access", async () => {
-    const auth = await authorizedMcp(mf, google);
+    const auth = await authorizedMcp(mf, identity);
     const refresh = await mf.dispatchFetch(`${oauthOrigin}/oauth/token`, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ grant_type: "refresh_token", client_id: auth.clientId, refresh_token: auth.refresh_token, resource: `${oauthOrigin}/mcp` }).toString() });
     assert.equal(refresh.status, 200, await refresh.clone().text());
     const refreshed = await refresh.json() as Json;
@@ -128,18 +128,31 @@ test("OAuth protects the analytics MCP with owner login, PKCE, consent and resou
     assert.equal((await mcpRequest(mf, refreshed.access_token, "tools/list")).status, 401);
   });
 
+  await t.test("refresh re-checks the operator role with the identity service", async () => {
+    const refresh = (clientId: string, refresh_token: string) => mf.dispatchFetch(`${oauthOrigin}/oauth/token`, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ grant_type: "refresh_token", client_id: clientId, refresh_token, resource: `${oauthOrigin}/mcp` }).toString() });
+    const auth = await authorizedMcp(mf, identity);
+    const first = await refresh(auth.clientId, auth.refresh_token);
+    assert.equal(first.status, 200, await first.clone().text());
+    const rotated = await first.json() as Json;
+    identity.update({ roles: [] });
+    const removed = await refresh(auth.clientId, rotated.refresh_token);
+    assert.equal(removed.status, 400);
+    assert.equal((await removed.json() as Json).error, "invalid_grant");
+    identity.update({ roles: ["operator"] });
+  });
+
   await t.test("browser-bound upstream state rejects a callback without its cookie", async () => {
     const pending = await beginOwnerLogin(mf);
-    const code = google.issueCode(pending.nonce);
+    const code = identity.issueCode(pending.challenge);
     const callback = await mf.dispatchFetch(`${oauthOrigin}/oauth/callback?${new URLSearchParams({ state: pending.state, code })}`, { redirect: "manual" });
     assert.equal(callback.status, 400);
     assert.equal(callback.headers.get("location"), null);
   });
 
-  await t.test("wrong owner, audience and nonce cannot issue downstream authorization", async () => {
-    for (const identity of [{ sub: "another-owner" }, { audience: "another-client" }, { nonce: "incorrect-nonce" }, { issuer: "https://attacker.example" }]) {
+  await t.test("accounts without the operator role for this client cannot issue downstream authorization", async () => {
+    for (const user of [{ roles: [] }, { roles: ["admin"] }, { clientId: "rawkode-studio" }]) {
       const pending = await beginOwnerLogin(mf);
-      const { response } = await completeOwnerLogin(mf, google, pending, identity);
+      const { response } = await completeOwnerLogin(mf, identity, pending, user);
       assert.equal(response.status, 403, await response.clone().text());
       assert.equal(response.headers.get("location"), null);
     }
@@ -147,7 +160,7 @@ test("OAuth protects the analytics MCP with owner login, PKCE, consent and resou
 
   await t.test("a wrong downstream PKCE verifier cannot exchange an authorization code", async () => {
     const pending = await beginOwnerLogin(mf);
-    const { response } = await completeOwnerLogin(mf, google, pending);
+    const { response } = await completeOwnerLogin(mf, identity, pending);
     assert.equal(response.status, 302, await response.clone().text());
     const code = new URL(response.headers.get("location")!).searchParams.get("code")!;
     const token = await exchangeCode(mf, pending, code, "x".repeat(43));
