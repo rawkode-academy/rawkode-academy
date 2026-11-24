@@ -166,7 +166,7 @@ describe("courses read model", () => {
 		const { byFile, byFrontmatter } = await query(`{
 			byFile: courseModule(courseId: "complete-guide-zitadel", slug: "01-introduction") {
 				id courseId slug frontmatterSlug title section order draft publishedAt
-				cover { url } video { id thumbnailUrl } authors { id } course { id }
+				cover { url } video { id } authors { id } course { id }
 				resources { type category embedConfig { container src height width importLocalDir startCommand files } } }
 			byFrontmatter: courseModule(courseId: "complete-guide-zitadel", slug: "introduction") { id } }`);
 		expect(byFrontmatter).toBeNull();
@@ -178,11 +178,8 @@ describe("courses read model", () => {
 			order: 1,
 			draft: false,
 			publishedAt: "2025-07-02T00:00:00.000Z",
-			video: {
-				id: "hgg3yhgkk4jn9l7ryjw9ebs8",
-				thumbnailUrl:
-					"https://content.rawkode.academy/videos/hgg3yhgkk4jn9l7ryjw9ebs8/thumbnail.jpg",
-			},
+			// A Video entity reference; the videos subgraph resolves the rest.
+			video: { id: "hgg3yhgkk4jn9l7ryjw9ebs8" },
 			authors: [{ id: "rawkode" }],
 			course: { id: "complete-guide-zitadel" },
 			cover: null,
@@ -304,6 +301,7 @@ describe("courses read model", () => {
 			"Query",
 			"Person",
 			"Technology",
+			"Video",
 		];
 		expect(sdl).toContain("scalar RichTextDocument");
 		expect(
