@@ -113,8 +113,20 @@ tasks: {
 
 	"relabel-history": schema.#Task & {
 		hermetic: false
-		command:  "uv"
-		args: ["run", "basin/relabel-history.py"]
+		// Python, PyIceberg, pyiceberg-core (partitioned writes need it) and
+		// PyArrow come from nixpkgs' binary cache, so nothing is downloaded or
+		// compiled outside Nix (uv's Pythons don't run on NixOS).
+		command: "nix"
+		args: [
+			"shell",
+			"--impure",
+			"--expr",
+			"with (builtins.getFlake \"nixpkgs\").legacyPackages.${builtins.currentSystem}; python3.withPackages (p: [ p.pyiceberg p.pyiceberg-core p.pyarrow ])",
+			"-c",
+			"python",
+			"-I",
+			"basin/relabel-history.py",
+		]
 		inputs: ["basin/relabel-history.py"]
 		labels: ["infisical"]
 		env: BASIN_CATALOG_TOKEN: _basinSecret & {secretName: "BASIN_CATALOG_TOKEN"}
