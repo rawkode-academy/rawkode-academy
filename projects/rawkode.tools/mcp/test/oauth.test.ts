@@ -110,6 +110,10 @@ test("OAuth protects the analytics MCP with owner login, PKCE, consent and resou
     const html = await consent.text();
     assert.ok(!html.includes("<script>"));
     assert.ok(html.includes("&#60;script&#62;"));
+    // Under no-referrer browsers POST the form with `Origin: null`, which the origin check rejects.
+    assert.equal(consent.headers.get("referrer-policy"), "same-origin");
+    // form-action also governs the POST's redirects: to identity on approve, to the client on deny.
+    assert.match(consent.headers.get("content-security-policy") ?? "", /form-action 'self' https:\/\/id\.rawkode\.academy https:\/\/chatgpt\.example;/);
     parameters.set("scope", "analytics:read youtube:publish");
     const widened = await mf.dispatchFetch(`${oauthOrigin}/oauth/authorize?${parameters}`, { redirect: "manual" });
     assert.notEqual(widened.status, 200);
