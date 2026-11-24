@@ -48,7 +48,9 @@ async function operator(tokens: Tokens, previousRefreshToken?: string): Promise<
   if (info[CLIENT_CLAIM] !== IDENTITY_CLIENT_ID || !roles.includes(OPERATOR_ROLE)) {
     // Opaque ids and role names only, so a refusal can be traced without exposing PII.
     const seen = roles.filter((role): role is string => typeof role === "string").join(", ") || "none";
-    throw new ServiceError("forbidden", `This Rawkode Academy account isn't a Rawkode Tools operator. Identity user: ${info.sub}. Client claim: ${typeof info[CLIENT_CLAIM] === "string" ? info[CLIENT_CLAIM] : "missing"}. Roles: ${seen}.`, 403);
+    // Claim names and the raw roles value say whether identity sent no roles or another shape.
+    const rawRoles = JSON.stringify(info[ROLES_CLAIM] ?? null).slice(0, 200);
+    throw new ServiceError("forbidden", `This Rawkode Academy account isn't a Rawkode Tools operator. Identity user: ${info.sub}. Client claim: ${typeof info[CLIENT_CLAIM] === "string" ? info[CLIENT_CLAIM] : "missing"}. Roles: ${seen}. Roles claim as received: ${rawRoles}. Claims received: ${Object.keys(info).sort().join(", ")}.`, 403);
   }
   return { userId: info.sub, upstreamRefreshToken: tokens.refresh_token ?? previousRefreshToken };
 }
