@@ -4,6 +4,7 @@ import EditorialShell from "@/components/ui/EditorialShell.astro";
 import {
 	type DashboardQuery,
 	dashboardQueries,
+	FUNNEL_EVENTS,
 	NEWSLETTER_EVENTS,
 	parseRange,
 	RANGES,
@@ -80,6 +81,30 @@ const subscribed = newsletter.get(subscribedEvent) ?? 0;
 
 // All links, not just the top 25 listed below.
 const linkClicks = num(results.linkTotals.rows[0]?.clicks);
+
+const traffic = results.traffic.rows[0] ?? {};
+const funnel = new Map(
+	results.funnel.rows.map((row) => [String(row.step), row]),
+);
+const funnelStep = (step: string) => ({
+	events: num(funnel.get(step)?.events),
+	visitors: num(funnel.get(step)?.visitors),
+});
+const partnershipViews = funnelStep("web.partnerships_view");
+const enquiryStarted = funnelStep(FUNNEL_EVENTS.enquiryStarted);
+const enquirySubmitted = funnelStep(FUNNEL_EVENTS.enquirySubmitted);
+const ctaClicked = funnelStep(FUNNEL_EVENTS.ctaClicked);
+const newsletterCtaClicked = funnelStep(FUNNEL_EVENTS.newsletterCtaClicked);
+const leadMagnetViewed = funnelStep(FUNNEL_EVENTS.leadMagnetViewed);
+
+const clickKinds = (kind: string) =>
+	results.clicks.rows
+		.filter((row) => row.kind === kind)
+		.reduce((sum, row) => sum + num(row.clicks), 0);
+const vitalUnit = (metric: unknown) => (metric === "CLS" ? "" : " ms");
+const vitalValue = (metric: unknown, value: unknown) =>
+	metric === "CLS" ? num(value).toFixed(3) : fmt.format(Math.round(num(value)));
+const pageLeave = results.pageLeave.rows[0] ?? {};
 ---
 
 <Page title="Analytics" description="First-party analytics from the Basin lake." noindex>
@@ -108,11 +133,127 @@ const linkClicks = num(results.linkTotals.rows[0]?.clicks);
 		}
 
 		<p class="notice">
-			Browser traffic, referrers, campaigns and CTA impressions/clicks are unavailable
-			until typed browser reporting is migrated. The event overview includes browser
-			events as ingestion rolls out; the other panels cover server events and short links. Bot totals are unavailable because filtered
-			traffic is not stored; events without a user agent are not classified as human.
+			Browser panels count events captured by the site itself since 13 November 2026.
+			Web vitals and page leave read typed tables that start on the day their pipeline
+			was created. Earlier history is in PostHog until it is imported into
+			<code>analytics.events_legacy</code>. Labelled bots are excluded everywhere.
 		</p>
+
+		<div class="grid">
+			<section class="panel">
+				<h2>Traffic</h2>
+				{results.traffic.error && <p class="error">{results.traffic.error}</p>}
+				<dl class="funnel">
+					<dt>Page views</dt><dd>{fmt.format(num(traffic.views))}</dd>
+					<dt>Visitors (approx.)</dt><dd>~{fmt.format(num(traffic.visitors))}</dd>
+					<dt>Sessions (approx.)</dt><dd>~{fmt.format(num(traffic.sessions))}</dd>
+				</dl>
+				<h3>Top pages</h3>
+				{results.pages.error && <p class="error">{results.pages.error}</p>}
+				<table>
+					<thead><tr><th>Path</th><th>Views</th></tr></thead>
+					<tbody>
+						{results.pages.rows.map((row) => (
+							<tr><td>{row.path}</td><td>{fmt.format(num(row.views))}</td></tr>
+						))}
+					</tbody>
+				</table>
+			</section>
+
+			<section class="panel">
+				<h2>Referrers and campaigns</h2>
+				{results.referrers.error && <p class="error">{results.referrers.error}</p>}
+				<table>
+					<thead><tr><th>Referrer</th><th>utm_source</th><th>Views</th></tr></thead>
+					<tbody>
+						{results.referrers.rows.map((row) => (
+							<tr>
+								<td>{row.referrer}</td>
+								<td>{row.utm_source ?? "–"}</td>
+								<td>{fmt.format(num(row.views))}</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</section>
+
+			<section class="panel">
+				<h2>Partnerships funnel</h2>
+				<p>Visitors are approximate distinct anonymous IDs at each step.</p>
+				{results.funnel.error && <p class="error">{results.funnel.error}</p>}
+				<dl class="funnel">
+					<dt>Viewed partnerships</dt><dd>~{fmt.format(partnershipViews.visitors)}</dd>
+					<dt>Clicked a CTA</dt><dd>~{fmt.format(ctaClicked.visitors)}</dd>
+					<dt>Started enquiry</dt><dd>~{fmt.format(enquiryStarted.visitors)} <span>{pct(enquiryStarted.visitors, partnershipViews.visitors)}</span></dd>
+					<dt>Submitted enquiry</dt><dd>~{fmt.format(enquirySubmitted.visitors)} <span>{pct(enquirySubmitted.visitors, enquiryStarted.visitors)}</span></dd>
+					<dt>Newsletter CTA clicks</dt><dd>{fmt.format(newsletterCtaClicked.events)}</dd>
+					<dt>Lead magnet views</dt><dd>{fmt.format(leadMagnetViewed.events)}</dd>
+				</dl>
+			</section>
+
+			<section class="panel">
+				<h2>Clicks</h2>
+				{results.clicks.error && <p class="error">{results.clicks.error}</p>}
+				<dl class="funnel">
+					<dt>Clicks</dt><dd>{fmt.format(clickKinds("web.click"))}</dd>
+					<dt>Dead clicks</dt><dd>{fmt.format(clickKinds("web.dead_click"))}</dd>
+					<dt>Rage clicks</dt><dd>{fmt.format(clickKinds("web.rage_click"))}</dd>
+				</dl>
+				<table>
+					<thead><tr><th>Element</th><th>Kind</th><th>Clicks</th></tr></thead>
+					<tbody>
+						{results.clicks.rows.map((row) => (
+							<tr>
+								<td>{row.element ?? "unknown"}</td>
+								<td>{String(row.kind).replace(/^web\./, "")}</td>
+								<td>{fmt.format(num(row.clicks))}</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</section>
+
+			<section class="panel">
+				<h2>Web vitals (p75)</h2>
+				{results.vitals.error && <p class="error">{results.vitals.error}</p>}
+				<table>
+					<thead><tr><th>Metric</th><th>p75</th><th>Samples</th></tr></thead>
+					<tbody>
+						{results.vitals.rows.map((row) => (
+							<tr>
+								<td>{row.metric}</td>
+								<td>{vitalValue(row.metric, row.p75)}{vitalUnit(row.metric)}</td>
+								<td>{fmt.format(num(row.samples))}</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+				<h3>Page leave</h3>
+				{results.pageLeave.error && <p class="error">{results.pageLeave.error}</p>}
+				<dl class="funnel">
+					<dt>Median time on page</dt><dd>{fmt.format(Math.round(num(pageLeave.median_time_ms) / 1000))} s</dd>
+					<dt>Median scroll depth</dt><dd>{fmt.format(num(pageLeave.median_scroll_pct))}%</dd>
+					<dt>Page leaves</dt><dd>{fmt.format(num(pageLeave.leaves))}</dd>
+				</dl>
+			</section>
+
+			<section class="panel">
+				<h2>Exceptions</h2>
+				{results.exceptions.error && <p class="error">{results.exceptions.error}</p>}
+				<table>
+					<thead><tr><th>Error</th><th>Events</th><th>Sessions</th></tr></thead>
+					<tbody>
+						{results.exceptions.rows.map((row) => (
+							<tr>
+								<td>{row.type}: {row.message}</td>
+								<td>{fmt.format(num(row.events))}</td>
+								<td>{fmt.format(num(row.sessions))}</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</section>
+		</div>
 
 		<section class="panel">
 			<h2>Archived events</h2>

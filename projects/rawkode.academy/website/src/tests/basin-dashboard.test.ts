@@ -3,11 +3,28 @@ import {
 	dashboardQueries,
 	HUMAN,
 	LINK_HUMAN,
+	LINKS_TABLE,
 	parseRange,
 	rangeStart,
 	TABLE,
-	LINKS_TABLE,
+	TYPED_HUMAN,
+	WEB_PAGE_LEAVES_TABLE,
+	WEB_VITALS_TABLE,
 } from "@/lib/analytics/queries";
+
+const SOURCES: Record<string, string> = {
+	links: LINKS_TABLE,
+	linkTotals: LINKS_TABLE,
+	vitals: WEB_VITALS_TABLE,
+	pageLeave: WEB_PAGE_LEAVES_TABLE,
+};
+const FILTERS: Record<string, string> = {
+	links: LINK_HUMAN,
+	linkTotals: LINK_HUMAN,
+	vitals: TYPED_HUMAN,
+	pageLeave: TYPED_HUMAN,
+};
+
 import { BasinQueryError, basinQuery, parseRows } from "@/server/basin";
 
 describe("analytics dashboard queries", () => {
@@ -30,9 +47,7 @@ describe("analytics dashboard queries", () => {
 
 	it("bounds every query by time, since the table can't be partitioned", () => {
 		for (const [name, sql] of Object.entries(dashboardQueries("7d"))) {
-			expect(sql, name).toContain(
-				`FROM ${name === "links" || name === "linkTotals" ? LINKS_TABLE : TABLE}`,
-			);
+			expect(sql, name).toContain(`FROM ${SOURCES[name] ?? TABLE}`);
 			expect(sql, name).toMatch(/event_time >= CAST\('[^']+' AS TIMESTAMP\)/);
 		}
 	});
@@ -49,9 +64,7 @@ describe("analytics dashboard queries", () => {
 
 	it("leaves labelled bot traffic out of every query", () => {
 		for (const [name, sql] of Object.entries(dashboardQueries("7d")))
-			expect(sql, name).toContain(
-				name === "links" || name === "linkTotals" ? LINK_HUMAN : HUMAN,
-			);
+			expect(sql, name).toContain(FILTERS[name] ?? HUMAN);
 	});
 
 	it("reads redirect fields from the typed sink and excludes unmatched paths", () => {
@@ -63,15 +76,38 @@ describe("analytics dashboard queries", () => {
 		}
 	});
 
-	it("uses CloudEvent names and data, without claiming missing browser metrics", () => {
+	it("uses CloudEvent names and data", () => {
 		const queries = dashboardQueries("7d");
-		expect(Object.keys(queries)).not.toContain("traffic");
 		expect(queries.signIn).toContain("event_source");
 		expect(queries.signIn).toContain("event_type");
 		expect(queries.video).toContain("json_get_str(value, 'data', 'video_id')");
 		expect(queries.video).toContain("'anonymous'");
 		expect(queries.newsletter).toContain("newsletter.submission_attempted");
 		expect(queries.newsletter).not.toContain("newsletter_cta_impression");
+	});
+
+	it("reads browser reporting from rawkode-academy-browser events", () => {
+		const queries = dashboardQueries("7d");
+		for (const name of [
+			"traffic",
+			"pages",
+			"referrers",
+			"funnel",
+			"clicks",
+			"exceptions",
+		] as const) {
+			expect(queries[name], name).toContain(
+				"event_source = 'rawkode-academy-browser'",
+			);
+			// At-least-once delivery: count distinct event IDs.
+			expect(queries[name], name).toContain("approx_distinct(event_id)");
+		}
+		expect(queries.funnel).toContain("/organizations/partnerships");
+		expect(queries.funnel).toContain("web.enquiry_form_submitted");
+		expect(queries.clicks).toContain("web.rage_click");
+		expect(queries.vitals).toContain(
+			"approx_percentile_cont(metric_value, 0.75)",
+		);
 	});
 
 	it("stays under Basin SQL's 10,000-row cap", () => {

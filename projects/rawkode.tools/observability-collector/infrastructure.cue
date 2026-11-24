@@ -214,6 +214,39 @@ infrastructure: {
 			}
 		}
 
+		// Typed browser events (rawkode-academy-browser), one table per event
+		// family. Rows are at-least-once: deduplicate on event_id.
+		web_page_views_sink: pipeline_sink.#Resource & {
+			configuration: _icebergSink & {
+				name: "web_page_views"
+				config: table_name: "web_page_views"
+			}
+		}
+		web_clicks_sink: pipeline_sink.#Resource & {
+			configuration: _icebergSink & {
+				name: "web_clicks"
+				config: table_name: "web_clicks"
+			}
+		}
+		web_page_leaves_sink: pipeline_sink.#Resource & {
+			configuration: _icebergSink & {
+				name: "web_page_leaves"
+				config: table_name: "web_page_leaves"
+			}
+		}
+		web_exceptions_sink: pipeline_sink.#Resource & {
+			configuration: _icebergSink & {
+				name: "web_exceptions"
+				config: table_name: "web_exceptions"
+			}
+		}
+		web_vitals_sink: pipeline_sink.#Resource & {
+			configuration: _icebergSink & {
+				name: "web_vitals"
+				config: table_name: "web_vitals"
+			}
+		}
+
 		// Each pipeline's SQL names the stream and its sinks, so it has to wait
 		// for them.
 		archive_pipeline: pipeline.#Resource & {
@@ -226,7 +259,15 @@ infrastructure: {
 		}
 
 		typed_pipeline: pipeline.#Resource & {
-			dependsOn: ["stream", "short_link_redirects_sink"]
+			dependsOn: [
+				"stream",
+				"short_link_redirects_sink",
+				"web_page_views_sink",
+				"web_clicks_sink",
+				"web_page_leaves_sink",
+				"web_exceptions_sink",
+				"web_vitals_sink",
+			]
 			configuration: {
 				account_id: _account
 				name:       "analytics_typed"

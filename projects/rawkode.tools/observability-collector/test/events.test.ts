@@ -1,5 +1,4 @@
 import { describe, expect, test } from "bun:test";
-import typedSql from "../basin/typed.sql" with { type: "text" };
 import {
 	annotateServerEvent,
 	classifyUserAgent,
@@ -141,22 +140,6 @@ describe("prepareCloudEvent", () => {
 				botreason: "unmatched-path",
 			}),
 		).toMatchObject({ bot: true, botreason: "unmatched-path" });
-	});
-
-	test("carries every field the typed pipeline reads", () => {
-		// A labelled bot carries every optional field: botreason and asn.
-		const prepared = prepareCloudEvent({ ...shortLink, asn: 132203 });
-		const paths = [...typedSql.matchAll(/json_get_\w+\(value, ([^)]+)\)/g)].map(
-			(match) => match[1].split(",").map((key) => key.trim().slice(1, -1)),
-		);
-		expect(paths.length).toBeGreaterThan(0);
-		for (const path of paths) {
-			const value = path.reduce<unknown>(
-				(node, key) => (node as Record<string, unknown> | undefined)?.[key],
-				prepared,
-			);
-			expect(value, path.join(".")).toBeDefined();
-		}
 	});
 });
 

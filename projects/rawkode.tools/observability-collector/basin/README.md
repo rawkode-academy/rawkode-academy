@@ -85,8 +85,31 @@ services (CloudEvents) ─ /track ─► observability-collector ─► stream a
   which no pipeline writes to any more.
 - Browser batches become schema-v1 CloudEvents under source
   `rawkode-academy-browser` and type `web.<event>`. They reach the archive
-  through the same durable delivery path. Typed browser tables and dashboard
-  panels remain a later migration stage.
+  through the same durable delivery path. `typed.sql` also writes the browser
+  families PostHog's SDK used to collect on its own into typed tables:
+  `web_page_views`, `web_clicks` (`web.click`, `web.dead_click`,
+  `web.rage_click` in `kind`), `web_page_leaves` (`time_on_page_ms`,
+  `max_scroll_pct`), `web_exceptions` (stack up to 4 KB) and `web_vitals`
+  (`metric`, `metric_value`). Delivery is at-least-once: deduplicate on
+  `event_id`. Typed tables start empty on the day their pipeline is created;
+  the archive holds everything since 13 November 2026.
+- Identity: browser events carry `data.anonymous_id` (the `rk_aid` cookie) and,
+  when signed in, `data.user_id`. Sign-in also sends
+  `rawkode-academy-website` / `user.identified` with `data.distinct_id` (the
+  user) and `data.anon_id`. Every anonymous ID of one user:
+
+  ```sql
+  SELECT DISTINCT json_get_str(value, 'data', 'anon_id') AS anonymous_id
+  FROM analytics.events_archive
+  WHERE event_type = 'user.identified'
+    AND json_get_str(value, 'data', 'distinct_id') = '<user id>'
+    AND event_time >= CAST('2026-11-07T00:00:00Z' AS TIMESTAMP)
+  ```
+
+  Browser events signed in with that user add the rest
+  (`data.user_id = '<user id>'`, select `data.anonymous_id`). Before
+  24 November 2026 `user.identified` also carried the user's email and name in
+  `data.set_properties`; it no longer does.
 
 ## Constraints that shape this
 
@@ -175,6 +198,26 @@ correct before and after the rewrite.
 The task needs only Nix: the project's `flake.nix` provides Python with
 PyIceberg, pyiceberg-core and PyArrow, so it works the same on NixOS, macOS
 and CI.
+
+Sign-ins before PR #1646 wrote the user's email and name into
+`user.identified` events (`data.set_properties`). After #1646 is deployed,
+remove them, and any other email address in stored events, with the one-time
+scrub task:
+
+```sh
+cuenv task scrub-pii -e production                       # dry run: counts per field
+SCRUB_ARGS=--apply cuenv task scrub-pii -e production    # rewrite in place
+SCRUB_ARGS="--rollback <snapshot-id>" cuenv task scrub-pii -e production
+```
+
+From CI (main): the manual workflows
+`rawkode-tools-observability-collector-scrub-pii` (dry run) and
+`rawkode-tools-observability-collector-scrub-pii-apply`.
+
+It rewrites only rows ingested before it starts and keeps `distinct_id` and
+`anon_id`, so identity links survive. Re-runs change nothing. The previous
+snapshot, printed on apply, still holds the data until snapshot expiry
+(7 days); rolling back restores it.
 
 The empty legacy `analytics.events` table is no longer queried. To purge it,
 run the guarded one-time cleanup task with Infisical access:
