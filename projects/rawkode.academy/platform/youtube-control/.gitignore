@@ -4,4 +4,8 @@ dist/
 .dev.vars*
 *.credentials.json
 worker-configuration.d.ts
+wrangler.deploy.jsonc
+.poc-resources.json
+*.secrets.json
+smoke-session.json
 __pycache__/
