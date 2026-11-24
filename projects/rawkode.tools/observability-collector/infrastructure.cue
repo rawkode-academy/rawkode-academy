@@ -14,6 +14,7 @@ import (
 	pipeline_sink "registry.terraform.io/cloudflare/cloudflare/resources/cloudflare_pipeline_sink"
 	pipeline "registry.terraform.io/cloudflare/cloudflare/resources/cloudflare_pipeline"
 	infisical_secret "registry.terraform.io/infisical/infisical/resources/infisical_secret"
+	permission_groups "registry.terraform.io/cloudflare/cloudflare/data/cloudflare_account_api_token_permission_groups_list"
 )
 
 // The analytics lake: an R2 bucket with Basin Catalog, the stream the
@@ -48,14 +49,17 @@ _accountResources: json.Marshal({
 })
 
 // Cloudflare API token permission groups, from the Basin Catalog and Basin SQL
-// docs. The permission-group data sources return a list, which cuenv can't
-// reference yet.
-_permissionGroups: {
-	catalogWrite:     "d229766a2f7f4d299f20eaa8c9b1fde9" // Workers R2 Data Catalog Write
-	catalogRead:      "45db74139a62490b9b60eb7c4f34994b" // Workers R2 Data Catalog Read
-	storageItemWrite: "2efd5506f9c8494dacb1fa10a3e7d5b6" // Workers R2 Storage Bucket Item Write
-	storageItemRead:  "6a018a9f2fc74eb6b293b0c548f38b39" // Workers R2 Storage Bucket Item Read
-	sqlRead:          "f45430d92e2b4a6cb9f94f2594c141b8" // Workers R2 SQL Read
+// docs, looked up by name so no ID is hardcoded. The lookup takes a
+// URL-encoded name and fails the plan if nothing matches.
+_permissionGroup: {
+	name: string
+	ds: permission_groups.#DataSource & {
+		configuration: {
+			account_id: _account
+			"name":     name
+		}
+		outputs: result: [_]
+	}
 }
 
 _archiveSql: string @embed(file=basin/archive.sql, type=text)
@@ -117,6 +121,14 @@ infrastructure: {
 		apply: environment: "infrastructure"
 	}
 
+	data: {
+		catalogWrite:     (_permissionGroup & {name: "Workers%20R2%20Data%20Catalog%20Write"}).ds
+		catalogRead:      (_permissionGroup & {name: "Workers%20R2%20Data%20Catalog%20Read"}).ds
+		storageItemWrite: (_permissionGroup & {name: "Workers%20R2%20Storage%20Bucket%20Item%20Write"}).ds
+		storageItemRead:  (_permissionGroup & {name: "Workers%20R2%20Storage%20Bucket%20Item%20Read"}).ds
+		sqlRead:          (_permissionGroup & {name: "Workers%20R2%20SQL%20Read"}).ds
+	}
+
 	resources: {
 		bucket: r2_bucket.#Resource & {
 			configuration: {
@@ -142,8 +154,8 @@ infrastructure: {
 					effect:    "allow"
 					resources: _accountResources
 					permission_groups: [
-						{id: _permissionGroups.catalogWrite},
-						{id: _permissionGroups.storageItemWrite},
+						{id: infrastructure.data.catalogWrite.outputs.result[0].id},
+						{id: infrastructure.data.storageItemWrite.outputs.result[0].id},
 					]
 				}]
 			}
@@ -158,9 +170,9 @@ infrastructure: {
 					effect:    "allow"
 					resources: _bucketResources
 					permission_groups: [
-						{id: _permissionGroups.sqlRead},
-						{id: _permissionGroups.catalogRead},
-						{id: _permissionGroups.storageItemRead},
+						{id: infrastructure.data.sqlRead.outputs.result[0].id},
+						{id: infrastructure.data.catalogRead.outputs.result[0].id},
+						{id: infrastructure.data.storageItemRead.outputs.result[0].id},
 					]
 				}]
 			}
