@@ -40,7 +40,7 @@ export async function fetchVideos(env: { VIDEO_CHANNELS: Gateway; ACADEMY_API: G
   // module video) is still collected; its title is blank.
   const titles = new Map<string, string>();
   try {
-    const all = await graphql<{ getAllVideos?: { id?: string; title?: string }[] }>(env.ACADEMY_API, "https://api.rawkode.academy/", "{ getAllVideos { id title } }");
+    const all = await graphql<{ getAllVideos?: { id?: string; title?: string }[] }>(env.ACADEMY_API, "https://api.rawkode.academy/", "{ getAllVideos(includeCourseVideos: true) { id title } }");
     for (const video of all.getAllVideos ?? []) if (typeof video.id === "string") titles.set(video.id, String(video.title ?? ""));
   } catch (error) {
     console.error(JSON.stringify({ operation: "academy_titles", error: error instanceof ServiceError ? error.code : "unknown" }));

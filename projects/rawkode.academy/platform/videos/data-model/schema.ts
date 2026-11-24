@@ -53,6 +53,9 @@ export const videosTable = sqliteTable("videos", {
 	realtimeKit: json<RealtimeKit>("realtime_kit"),
 	resources: json<Resource[]>("resources"),
 	updatedAt: integer("updated_at", { mode: "timestamp_ms" }),
+	// A course lesson's video. It plays on its lesson page and is not listed
+	// in the catalogue (no /watch page, feed, RSS or sitemap entry).
+	courseOnly: integer("course_only", { mode: "boolean" }).notNull().default(false),
 });
 
 export type Video = typeof videosTable.$inferSelect;
