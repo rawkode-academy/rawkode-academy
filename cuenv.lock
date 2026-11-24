@@ -69,7 +69,7 @@ windows_arm64 = "sha256:a6c15afefe1814502ff055ef5e7eb754b96a37e91472be97f5b7036d
 
 [infrastructure_providers."registry.terraform.io/infisical/infisical"]
 version = "0.20.10"
-schema_digest = "sha256:8235062a6a6d5f1e59bbae550fb50ed217a2b812ed24f560fb530c1aa5c18d34"
+schema_digest = "sha256:d8bc104514ee8124a63fd342586c037819550843a187dac811bfe2f744c51af2"
 
 [infrastructure_providers."registry.terraform.io/infisical/infisical".platforms]
 darwin_amd64 = "sha256:3b8a2e7ad90ab00e2fd44a9cd9d1cc575f0333f23bc96167d01e2884e7ecff97"
