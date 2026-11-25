@@ -17,8 +17,9 @@ let _removeDeterminateReceipt = """
 	"""
 
 // Cache the Nix store on the Namespace runner's persistent volume and install
-// Determinate Nix on top. Replaces the stock `c.#Nix` contributor so the
-// cache, receipt cleanup, and install steps stay in a single ordered group.
+// Determinate Nix on top, then put the repository's pinned Bun on PATH.
+// Replaces the stock `c.#Nix` contributor so the cache, receipt cleanup,
+// install and Bun steps stay in a single ordered group.
 let _NamespaceNix = schema.#Contributor & {
 	id: "namespaceNix"
 	tasks: [
@@ -54,6 +55,18 @@ let _NamespaceNix = schema.#Contributor & {
 			priority: 3
 			dependsOn: ["namespaceNix.install"]
 			script: _removeDeterminateReceipt
+		},
+		{
+			// `cuenv exec` at the repository root has no runtime, so the
+			// workspace install and any task that calls bun directly get
+			// the Bun that flakes/bun pins.
+			id:       "namespaceNix.bun"
+			label:    "Add Bun from flakes/bun to PATH"
+			priority: 4
+			dependsOn: ["namespaceNix.cleanupReceipt"]
+			script: """
+				nix develop "path:$GITHUB_WORKSPACE/flakes/bun" --command bash -c 'dirname "$(command -v bun)"' >> "$GITHUB_PATH"
+				"""
 		},
 	]
 }

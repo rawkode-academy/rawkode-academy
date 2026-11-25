@@ -26,7 +26,7 @@ jobs:
       - name: Synchronize repository environment
         working-directory: .
         run: |
-          curl -fsSL https://github.com/cuenv/cuenv/releases/download/0.81.1/cuenv-linux-x64 -o /tmp/cuenv
+          curl -fsSL https://github.com/cuenv/cuenv/releases/download/0.81.2/cuenv-linux-x64 -o /tmp/cuenv
           echo 'f9474ef178a0db827ce5f4f02aac532eb88fb2e21bbb088b2959eb8dd193b3cc  /tmp/cuenv' | sha256sum --check --status
           chmod +x /tmp/cuenv
           /tmp/cuenv sync -A
