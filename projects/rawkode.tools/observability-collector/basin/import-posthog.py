@@ -437,8 +437,8 @@ def fetch(posthog: PostHog, start: datetime, end: datetime, names: list[str]):
 	after: tuple[str, str] | None = None
 	while True:
 		page = (
-			f" AND (timestamp > parseDateTime64BestEffort('{after[0]}', 6, 'UTC')"
-			f" OR (timestamp = parseDateTime64BestEffort('{after[0]}', 6, 'UTC') AND uuid > toUUID('{after[1]}')))"
+			f" AND (timestamp > {sql_time(parse_time(after[0]))}"
+			f" OR (timestamp = {sql_time(parse_time(after[0]))} AND uuid > toUUID('{after[1]}')))"
 			if after
 			else ""
 		)
