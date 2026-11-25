@@ -17,6 +17,12 @@ const data = {
 		{ id: "v2", title: "Other", slug: "other", youtubeId: null, guests: [], episode: null },
 		{ title: "no id", guests: [] },
 	],
+	allCourses: [
+		{
+			authors: [{ id: "teacher", githubHandle: "teacher" }],
+			modules: [{ video: { id: "v2" } }, { video: null }],
+		},
+	],
 };
 
 describe("guest analytics", () => {
@@ -32,6 +38,11 @@ describe("guest analytics", () => {
 		expect(visibleEpisodes(videos, "icepuma").map((episode) => episode.role)).toEqual(["guest"]);
 		expect(visibleEpisodes(videos, "rawkode").map((episode) => episode.id)).toEqual(["v1"]);
 		expect(visibleEpisodes(videos, "nobody")).toEqual([]);
+	});
+
+	it("shows a course author the course's lesson videos", () => {
+		const videos = parseAcademyVideos(data) ?? [];
+		expect(visibleEpisodes(videos, "teacher").map((episode) => episode.id)).toEqual(["v2"]);
 	});
 
 	it("sums deduplicated daily rows over 90 days and lifetime", () => {

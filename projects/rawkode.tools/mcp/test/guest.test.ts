@@ -69,12 +69,13 @@ test("the Academy video list is read from GraphQL and an unusable answer is refu
   let sent: { url: string; body: string } | undefined;
   const good = (async (url: string, init: RequestInit) => {
     sent = { url, body: init.body as string };
-    return Response.json({ data: { getAllVideos: [{ id: "v", title: "T", slug: "t", publishedAt: "2026-01-02T03:04:05.000Z", youtubeId: null, guests: [{ id: "icepuma", githubHandle: "icepuma" }], episode: { show: { id: "oh", hosts: [{ id: "rawkode", githubHandle: null }] } } }, { id: "w", title: "W", slug: "w", publishedAt: null, youtubeId: null, guests: [], episode: null }] } });
+    return Response.json({ data: { getAllVideos: [{ id: "v", title: "T", slug: "t", publishedAt: "2026-01-02T03:04:05.000Z", youtubeId: null, guests: [{ id: "icepuma", githubHandle: "icepuma" }], episode: { show: { id: "oh", hosts: [{ id: "rawkode", githubHandle: null }] } } }, { id: "w", title: "W", slug: "w", publishedAt: null, youtubeId: null, guests: [], episode: null }], allCourses: [{ authors: [{ id: "teacher", githubHandle: null }], modules: [{ video: { id: "w" } }, { video: null }] }] } });
   }) as unknown as typeof fetch;
   const videos = await fetchAcademyVideos(good);
   assert.equal(sent!.url, "https://api.rawkode.academy/");
   assert.match(JSON.parse(sent!.body).query, /getAllVideos/);
-  assert.deepEqual(videos.map(v => [v.id, v.show, v.guests.length, v.hosts.length, v.publishedAt]), [["v", "oh", 1, 1, "2026-01-02T03:04:05.000Z"], ["w", null, 0, 0, null]]);
+  assert.deepEqual(videos.map(v => [v.id, v.show, v.guests.length, v.hosts.length, v.publishedAt]), [["v", "oh", 1, 1, "2026-01-02T03:04:05.000Z"], ["w", null, 0, 1, null]]);
+  assert.deepEqual(videos[1].hosts, [{ id: "teacher", githubHandle: null }]);
   for (const bad of [Response.json({ errors: [{ message: "x" }] }), Response.json({ data: { getAllVideos: [{ id: 1 }] } }), new Response("oops", { status: 502 })]) {
     await assert.rejects(fetchAcademyVideos((async () => bad) as unknown as typeof fetch), { code: "academy_api_unavailable" });
   }

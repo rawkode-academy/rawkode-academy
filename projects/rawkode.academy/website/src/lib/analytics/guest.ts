@@ -10,6 +10,7 @@ import {
 	type LakeVideo,
 	videoIdPattern,
 	visibleEpisodes,
+	withCourseAuthors,
 	youtubeIds,
 } from "../../../../../../packages/guest-scope/index";
 import { basinQuery, type BasinConfig } from "@/server/basin";
@@ -47,7 +48,18 @@ const people = (value: unknown) =>
 export function parseAcademyVideos(data: unknown): AcademyVideo[] | undefined {
 	const videos = (data as { getAllVideos?: unknown } | null)?.getAllVideos;
 	if (!Array.isArray(videos)) return undefined;
-	return videos.flatMap((video: Record<string, unknown>) => {
+	const courses = (data as { allCourses?: unknown }).allCourses;
+	if (!Array.isArray(courses)) return undefined;
+	const scope = courses.map((course: Record<string, unknown>) => ({
+		authors: people(course?.authors),
+		videoIds: (Array.isArray(course?.modules) ? course.modules : []).flatMap(
+			(module: { video?: { id?: unknown } | null }) => {
+				const id = text(module?.video?.id);
+				return id ? [id] : [];
+			},
+		),
+	}));
+	const parsed = videos.flatMap((video: Record<string, unknown>) => {
 		const id = text(video?.id);
 		const title = text(video?.title);
 		if (!id || title === null) return [];
@@ -70,6 +82,7 @@ export function parseAcademyVideos(data: unknown): AcademyVideo[] | undefined {
 			},
 		];
 	});
+	return withCourseAuthors(parsed, scope);
 }
 
 /** The whole-lake totals SQL for these videos, 90 days and lifetime. */

@@ -30,7 +30,7 @@ test("OAuth protects the analytics MCP with owner login, PKCE, consent and resou
     outboundService: async (request: MockRequest) => {
       const response = await identity.handle(request.clone());
       if (response) return response;
-      if (request.url === academyAPI) return MockResponse.json({ data: { getAllVideos: academyVideos } });
+      if (request.url === academyAPI) return MockResponse.json({ data: { getAllVideos: academyVideos, allCourses: [] } });
       if (request.url === basinURL) {
         assert.equal(request.headers.get("authorization"), "Bearer test-basin-token");
         const { query } = await request.json() as { query: string };
