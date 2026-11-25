@@ -10,16 +10,15 @@ on:
     - '*.cue'
     - .github/workflows/rawkode-tools-mcp-default.yml
     - cue.mod/**
-    - flake.lock
-    - flake.lock/**
-    - flake.nix
-    - flake.nix/**
-    - nix/**
     - projects/*.cue
     - projects/rawkode.tools/*.cue
     - projects/rawkode.tools/mcp/*.cue
     - projects/rawkode.tools/mcp/env.cue
     - projects/rawkode.tools/mcp/env.cue/**
+    - projects/rawkode.tools/mcp/flake.lock
+    - projects/rawkode.tools/mcp/flake.lock/**
+    - projects/rawkode.tools/mcp/flake.nix
+    - projects/rawkode.tools/mcp/flake.nix/**
     - projects/rawkode.tools/mcp/package-lock.json
     - projects/rawkode.tools/mcp/package-lock.json/**
     - projects/rawkode.tools/mcp/package.json

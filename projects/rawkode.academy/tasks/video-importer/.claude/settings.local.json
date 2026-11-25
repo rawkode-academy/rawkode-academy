@@ -1,6 +1,7 @@
 {
   "permissions": {
     "allow": [
+      "Bash(devenv:*)",
       "Bash(direnv allow:*)",
       "Bash(ls:*)",
       "Bash(find:*)",

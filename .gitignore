@@ -5,6 +5,10 @@
 local.cue
 .cuenv/reports/
 
+# Devenv
+.devenv*
+devenv.local.nix
+
 # direnv
 .direnv
 .envrc
@@ -22,6 +26,10 @@ target
 # moon
 .moon/cache
 .moon/docker
+
+# Devenv
+.devenv*
+devenv.local.nix
 
 # direnv
 .direnv

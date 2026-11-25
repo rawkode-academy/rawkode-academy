@@ -5,7 +5,6 @@ import "github.com/cuenv/cuenv/schema"
 schema.#Project
 
 name: "rawkode-academy-api"
-_flakeRoot: "../../.."
 
 let _t = tasks
 

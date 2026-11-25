@@ -5,7 +5,6 @@ import "github.com/cuenv/cuenv/schema"
 schema.#Project
 
 name: "cloudnativecompass-fm"
-_flakeRoot: "../.."
 
 let _t = tasks
 

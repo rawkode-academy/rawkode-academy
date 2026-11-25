@@ -5,8 +5,9 @@ import "github.com/cuenv/cuenv/schema"
 schema.#Project
 
 name: "rawkode-academy-design-system"
-_flakeRoot: "../.."
 
+runtime: schema.#DevenvRuntime
+hooks: onEnter: devenv: schema.#Devenv
 
 let _t = tasks
 
