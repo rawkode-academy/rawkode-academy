@@ -4,7 +4,7 @@ Run with `cuenv task consent`, which supplies Python and google-auth-oauthlib
 from nixpkgs, and the Google OAuth client and Infisical machine identity from
 1Password. It opens Google
 consent in the browser, checks the grant is for exactly the Academy channel,
-writes the OAuth client and refresh token to Infisical (/projects/basin), and
+writes the OAuth client and refresh token to Infisical (/projects/rawkode-academy/platform/youtube-control), and
 starts the deploy workflow that uploads them to the Worker. Nothing is written
 to disk. Run it again whenever the alert says the grant was revoked.
 """
@@ -28,7 +28,7 @@ INFISICAL = "https://app.infisical.com"
 INFISICAL_PROJECT = "6575a392d7a5ef0555ade86b"
 INFISICAL_ENVIRONMENT = "production"
 SECRET_NAMES = ("YOUTUBE_CLIENT_ID", "YOUTUBE_CLIENT_SECRET", "YOUTUBE_REFRESH_TOKEN")
-INFISICAL_PATH = "/projects/basin"
+INFISICAL_PATH = "/projects/rawkode-academy/platform/youtube-control"
 DEPLOY_WORKFLOW = "rawkode-academy-platform-youtube-control-default.yml"
 
 
