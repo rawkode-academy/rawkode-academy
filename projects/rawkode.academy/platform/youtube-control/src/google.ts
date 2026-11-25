@@ -55,4 +55,16 @@ export class GoogleClient {
     // The grant must identify exactly the configured YouTube/Brand channel.
     ensure(result.items?.length === 1 && result.items[0].id === this.channelId && !result.nextPageToken, "wrong_channel", "Authorize the configured YouTube/Brand channel directly; Google must identify exactly that channel", 403);
   }
+  // Channel-wide totals. YouTube rounds subscriberCount to three significant figures.
+  async channelStatistics(): Promise<{ subscriberCount: number | null; viewCount: number; videoCount: number }> {
+    const result = await this.get<{ items?: { id: string; statistics?: { subscriberCount?: string; hiddenSubscriberCount?: boolean; viewCount?: string; videoCount?: string } }[] }>(dataAPI, "channels", { part: "statistics", id: this.channelId });
+    const item = result.items?.[0];
+    ensure(result.items?.length === 1 && item?.id === this.channelId && item.statistics, "invalid_google_response", "channels returned no statistics for the configured channel", 502);
+    const stats = item!.statistics!;
+    const count = (value: string | undefined) => { const n = Number(value); return Number.isSafeInteger(n) && n >= 0 ? n : null; };
+    const views = count(stats.viewCount);
+    const videos = count(stats.videoCount);
+    ensure(views !== null && videos !== null, "invalid_google_response", "channels returned malformed statistics", 502);
+    return { subscriberCount: stats.hiddenSubscriberCount ? null : count(stats.subscriberCount), viewCount: views!, videoCount: videos! };
+  }
 }
