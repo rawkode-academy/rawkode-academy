@@ -6,8 +6,7 @@ schema.#Project
 
 name: "rawkode-academy-website"
 
-runtime: schema.#DevenvRuntime
-hooks: onEnter: devenv: schema.#Devenv
+runtime: schema.#NixRuntime
 
 // deploy.main and deploy.preview read BASIN_SQL_TOKEN from Infisical.
 _ciInfisicalOidc: true
