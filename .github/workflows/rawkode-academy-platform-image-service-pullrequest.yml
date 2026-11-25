@@ -27,8 +27,8 @@ concurrency:
 jobs:
   rawkode-academy-platform-image-service-pullRequest:
     permissions:
-      contents: read
       checks: write
+      contents: read
       pull-requests: write
     name: rawkode-academy-platform-image-service-pullRequest
     runs-on: namespace-profile-linux-x86

@@ -43,8 +43,8 @@ concurrency:
 jobs:
   rawkode-arcade-pullRequest:
     permissions:
-      contents: read
       checks: write
+      contents: read
       pull-requests: write
     name: rawkode-arcade-pullRequest
     runs-on: namespace-profile-linux-x86

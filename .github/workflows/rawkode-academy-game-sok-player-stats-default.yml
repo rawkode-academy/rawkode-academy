@@ -33,8 +33,8 @@ concurrency:
 jobs:
   rawkode-academy-game-sok-player-stats-default:
     permissions:
-      contents: read
       checks: write
+      contents: read
     name: rawkode-academy-game-sok-player-stats-default
     runs-on: namespace-profile-linux-x86
     environment: production

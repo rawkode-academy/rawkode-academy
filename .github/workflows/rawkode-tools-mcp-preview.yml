@@ -10,8 +10,8 @@ concurrency:
 jobs:
   rawkode-tools-mcp-preview:
     permissions:
-      contents: read
       checks: write
+      contents: read
       id-token: write
     name: rawkode-tools-mcp-preview
     runs-on: namespace-profile-linux-x86

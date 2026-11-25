@@ -10,8 +10,8 @@ concurrency:
 jobs:
   rawkode-academy-identity-diagnose:
     permissions:
-      contents: read
       checks: write
+      contents: read
     name: rawkode-academy-identity-diagnose
     runs-on: namespace-profile-linux-x86
     environment: production

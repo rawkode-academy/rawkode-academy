@@ -53,8 +53,8 @@ concurrency:
 jobs:
   rawkode-tools-observability-collector-default:
     permissions:
-      contents: read
       checks: write
+      contents: read
       id-token: write
     name: rawkode-tools-observability-collector-default
     runs-on: namespace-profile-linux-x86

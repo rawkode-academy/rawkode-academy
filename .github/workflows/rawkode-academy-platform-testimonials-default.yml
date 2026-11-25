@@ -32,8 +32,8 @@ concurrency:
 jobs:
   rawkode-academy-platform-testimonials-default:
     permissions:
-      contents: read
       checks: write
+      contents: read
     name: rawkode-academy-platform-testimonials-default
     runs-on: namespace-profile-linux-x86
     environment: production

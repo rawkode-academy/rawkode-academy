@@ -34,8 +34,8 @@ concurrency:
 jobs:
   rawkode-academy-identity-default:
     permissions:
-      contents: read
       checks: write
+      contents: read
     name: rawkode-academy-identity-default
     runs-on: namespace-profile-linux-x86
     environment: production

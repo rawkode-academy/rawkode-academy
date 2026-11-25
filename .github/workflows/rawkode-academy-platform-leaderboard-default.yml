@@ -33,8 +33,8 @@ concurrency:
 jobs:
   rawkode-academy-platform-leaderboard-default:
     permissions:
-      contents: read
       checks: write
+      contents: read
     name: rawkode-academy-platform-leaderboard-default
     runs-on: namespace-profile-linux-x86
     environment: production

@@ -36,8 +36,8 @@ concurrency:
 jobs:
   infrastructure-dns-infrastructure-apply:
     permissions:
-      contents: read
       checks: write
+      contents: read
       id-token: write
     name: infrastructure-dns-infrastructure-apply
     runs-on: namespace-profile-linux-x86

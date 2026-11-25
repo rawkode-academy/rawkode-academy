@@ -10,8 +10,8 @@ concurrency:
 jobs:
   rawkode-academy-platform-youtube-control-verify:
     permissions:
-      contents: read
       checks: write
+      contents: read
       id-token: write
     name: rawkode-academy-platform-youtube-control-verify
     runs-on: namespace-profile-linux-x86

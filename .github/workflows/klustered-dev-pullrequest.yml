@@ -26,8 +26,8 @@ concurrency:
 jobs:
   klustered-dev-pullRequest:
     permissions:
-      contents: read
       checks: write
+      contents: read
       pull-requests: write
     name: klustered-dev-pullRequest
     runs-on: namespace-profile-linux-x86

@@ -10,8 +10,8 @@ concurrency:
 jobs:
   rawkode-tools-observability-collector-scrub-pii-apply:
     permissions:
-      contents: read
       checks: write
+      contents: read
       id-token: write
     name: rawkode-tools-observability-collector-scrub-pii-apply
     runs-on: namespace-profile-linux-x86

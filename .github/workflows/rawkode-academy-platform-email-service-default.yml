@@ -31,8 +31,8 @@ concurrency:
 jobs:
   rawkode-academy-platform-email-service-default:
     permissions:
-      contents: read
       checks: write
+      contents: read
     name: rawkode-academy-platform-email-service-default
     runs-on: namespace-profile-linux-x86
     environment: production

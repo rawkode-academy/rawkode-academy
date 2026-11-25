@@ -22,8 +22,8 @@ concurrency:
 jobs:
   rawkode-academy-platform-transcriptions-default:
     permissions:
-      contents: read
       checks: write
+      contents: read
     name: rawkode-academy-platform-transcriptions-default
     runs-on: namespace-profile-linux-x86
     environment: production

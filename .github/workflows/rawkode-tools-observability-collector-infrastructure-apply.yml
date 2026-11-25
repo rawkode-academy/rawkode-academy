@@ -44,8 +44,8 @@ concurrency:
 jobs:
   rawkode-tools-observability-collector-infrastructure-apply:
     permissions:
-      contents: read
       checks: write
+      contents: read
       id-token: write
     name: rawkode-tools-observability-collector-infrastructure-apply
     runs-on: namespace-profile-linux-x86

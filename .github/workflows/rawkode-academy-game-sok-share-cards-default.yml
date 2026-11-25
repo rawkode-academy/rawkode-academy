@@ -32,8 +32,8 @@ concurrency:
 jobs:
   rawkode-academy-game-sok-share-cards-default:
     permissions:
-      contents: read
       checks: write
+      contents: read
     name: rawkode-academy-game-sok-share-cards-default
     runs-on: namespace-profile-linux-x86
     environment: production

@@ -27,8 +27,8 @@ concurrency:
 jobs:
   rawkode-academy-platform-video-thumbnails-pullRequest:
     permissions:
-      contents: read
       checks: write
+      contents: read
       pull-requests: write
     name: rawkode-academy-platform-video-thumbnails-pullRequest
     runs-on: namespace-profile-linux-x86

@@ -24,8 +24,8 @@ concurrency:
 jobs:
   rawkode-news-pullRequest:
     permissions:
-      contents: read
       checks: write
+      contents: read
       pull-requests: write
     name: rawkode-news-pullRequest
     runs-on: namespace-profile-linux-x86
