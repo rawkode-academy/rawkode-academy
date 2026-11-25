@@ -26,7 +26,7 @@ let _infrastructure = [{allowInfrastructure: ["plan", "apply", "import", "destro
 // Where the deploy's secrets live. The github-actions identity (deploys on
 // main) can read this folder; the collector's infrastructure writes
 // BASIN_SQL_TOKEN here.
-_secret: _infisicalSecret & {secretPath: "/projects/basin"}
+_secret: _infisicalSecret & {secretPath: "/projects/rawkode-tools/mcp"}
 
 env: {
 	// cuenv withholds Infisical credentials from providers unless the project

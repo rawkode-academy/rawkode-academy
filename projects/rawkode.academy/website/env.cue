@@ -124,7 +124,7 @@ tasks: {
 				BASIN_SQL_TOKEN: schema.#InfisicalSecret & {
 					projectId:   "6575a392d7a5ef0555ade86b"
 					environment: "production"
-					secretPath:  "/projects/basin"
+					secretPath:  "/projects/rawkode-academy/website"
 					secretName:  "BASIN_SQL_TOKEN"
 					apiUrl:      "https://app.infisical.com"
 				}

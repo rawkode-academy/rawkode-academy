@@ -38,7 +38,7 @@ Every MCP token refresh refreshes the identity session and checks the role again
 
 ## Deploy
 
-CI on `main` (`rawkode-tools-mcp-default`) runs the tests and `wrangler deploy --secrets-file secrets.env`, reading `BASIN_SQL_TOKEN` from Infisical `/projects/basin` as the `github-actions` identity. The custom domain needs the Workers deploy token to cover the `rawkode.tools` zone.
+CI on `main` (`rawkode-tools-mcp-default`) runs the tests and `wrangler deploy --secrets-file secrets.env`, reading `BASIN_SQL_TOKEN` from Infisical `/projects/rawkode-tools/mcp` as the `github-actions` identity. The custom domain needs the Workers deploy token to cover the `rawkode.tools` zone.
 
 Connect with `https://mcp.rawkode.tools/mcp` as a custom connector in Claude or ChatGPT.
 

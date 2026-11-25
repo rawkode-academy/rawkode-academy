@@ -35,6 +35,10 @@ import (
 // Read the plan before merging.
 
 _account: env.CLOUDFLARE_ACCOUNT_ID
+
+// The pre-move secret folder. Removed, with the resources that use it, once
+// every consumer has been verified on its own folder.
+_legacyBasinPath: "/projects/basin"
 _bucket:  "rawkode-analytics"
 
 // Bucket-scoped resource key for account token policies.
@@ -304,7 +308,7 @@ infrastructure: {
 			configuration: {
 				workspace_id: _infisicalSecret.projectId
 				env_slug:     _infisicalSecret.environment
-				folder_path:  _basinSecret.secretPath
+				folder_path:  _legacyBasinPath
 				name:         "BASIN_CATALOG_TOKEN"
 				value:        infrastructure.resources.catalog_token.outputs.value
 			}
@@ -314,7 +318,7 @@ infrastructure: {
 			configuration: {
 				workspace_id: _infisicalSecret.projectId
 				env_slug:     _infisicalSecret.environment
-				folder_path:  _basinSecret.secretPath
+				folder_path:  _legacyBasinPath
 				name:         "BASIN_SQL_TOKEN"
 				value:        infrastructure.resources.sql_read_token.outputs.value
 			}
@@ -323,7 +327,7 @@ infrastructure: {
 		// Secret paths mirror the repository layout (dots in directory names
 		// become dashes). Each project that reads a Basin token gets its own
 		// copy, so no project reads another's folder. The /projects/basin
-		// resources above go once every consumer has moved.
+		// resources above (_legacyBasinPath) go once the move is verified.
 		collector_catalog_token_secret: infisical_secret.#Resource & {
 			configuration: {
 				workspace_id: _infisicalSecret.projectId
@@ -338,6 +342,7 @@ infrastructure: {
 			"collector": "/projects/rawkode-tools/observability-collector"
 			"mcp":       "/projects/rawkode-tools/mcp"
 			"website":   "/projects/rawkode-academy/website"
+			"youtube":   "/projects/rawkode-academy/platform/youtube-control"
 		} {
 			"\(project)_sql_read_token_secret": infisical_secret.#Resource & {
 				configuration: {
