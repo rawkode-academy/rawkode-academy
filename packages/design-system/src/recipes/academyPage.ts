@@ -174,8 +174,7 @@ export const academyPage = sva({
 			// From lg the statement's cap height sits on the first grid line: one
 			// cell, less the gap between the line box and the capitals.
 			_lg: {
-				paddingBlockStart:
-					"[calc(4rem - var(--font-sizes-academy-poster) * 0.106)]",
+				paddingBlockStart: "[calc(4rem - clamp(3.5rem, 6.5vw, 6.5rem) * 0.106)]",
 				paddingBlockEnd: "8",
 			},
 			// Not inkStage: the living-system canvas is absolutely positioned.
@@ -218,6 +217,11 @@ export const academyPage = sva({
 			fontSize: {
 				base: "[clamp(2.75rem, 16vw, 3.5rem)]",
 				sm: "academy-poster",
+				// The shared poster size grows to 10rem and fills a laptop's
+				// first viewport with the headline alone; from lg it stays at
+				// two lines so the latest session shows beneath it. The hero's
+				// lg padding uses the same size.
+				lg: "[clamp(3.5rem, 6.5vw, 6.5rem)]",
 			},
 		},
 		titleLine: {
