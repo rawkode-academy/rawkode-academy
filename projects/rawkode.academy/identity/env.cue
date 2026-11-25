@@ -9,6 +9,7 @@ schema.#Project
 
 name: "rawkode-academy-identity"
 
+_shell: "nix"
 runtime: schema.#NixRuntime
 hooks: onEnter: nix: xNix.#NixFlake
 

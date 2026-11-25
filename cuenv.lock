@@ -1,10 +1,22 @@
 version = 5
 
+[runtimes."packages/design-system"]
+type = "nix"
+flake = "path:../../flakes/bun"
+digest = "sha256:8261b4019a6793d123f65adb01279b20db640ab75a0294be28e9bfd8f15290ee"
+lockfile = "packages/design-system/../../flakes/bun/flake.lock"
+
 [runtimes."projects/rawkode.academy/identity"]
 type = "nix"
 flake = "."
 digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
 lockfile = "projects/rawkode.academy/identity/./flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/video-thumbnails"]
+type = "nix"
+flake = "path:../../../../flakes/bun"
+digest = "sha256:8261b4019a6793d123f65adb01279b20db640ab75a0294be28e9bfd8f15290ee"
+lockfile = "projects/rawkode.academy/platform/video-thumbnails/../../../../flakes/bun/flake.lock"
 
 [runtimes."projects/rawkode.academy/platform/youtube-control"]
 type = "nix"
@@ -17,6 +29,12 @@ type = "nix"
 flake = "."
 digest = "sha256:888cf35008fc8b9b6c27c83e33e38780b6108fc821c5ca16877b524818c3a80b"
 lockfile = "projects/rawkode.academy/website/./flake.lock"
+
+[runtimes."projects/rawkode.studio"]
+type = "nix"
+flake = "path:../../flakes/bun"
+digest = "sha256:8261b4019a6793d123f65adb01279b20db640ab75a0294be28e9bfd8f15290ee"
+lockfile = "projects/rawkode.studio/../../flakes/bun/flake.lock"
 
 [runtimes."projects/rawkode.tools/mcp"]
 type = "nix"

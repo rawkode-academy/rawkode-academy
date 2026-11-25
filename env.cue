@@ -74,14 +74,23 @@ config: ci: cuenv: {
 	}
 }
 
-runtime: *schema.#DevenvRuntime | schema.#NixRuntime
+_shell: *"bun" | "nix"
 
 let _shellHooks = {
-	devenv: {devenv: schema.#Devenv}
+	bun: {nix: schema.#ExecHook & {
+		order:     10
+		propagate: false
+		command:   "bash"
+		args: ["-ec", """
+			root="$(git rev-parse --show-toplevel)"
+			exec nix print-dev-env "path:$root/flakes/bun"
+			"""]
+		source: true
+	}}
 	nix: {nix: xNix.#NixFlake}
 }
 
-hooks: onEnter: _shellHooks[runtime.type]
+hooks: onEnter: _shellHooks[_shell]
 
 // A project may set _ciRequireReport to its repository-relative path. `cuenv
 // ci` skips a project whose env.cue fails to evaluate and still exits 0, so the

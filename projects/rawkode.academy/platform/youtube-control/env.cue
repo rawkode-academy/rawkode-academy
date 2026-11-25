@@ -14,6 +14,7 @@ name: "rawkode-academy-platform-youtube-control"
 // Tasks run in this directory's flake.nix dev shell (Node, Python with
 // google-auth-oauthlib, gh), pinned by flake.lock, so nothing depends on
 // system or uv-downloaded toolchains (which don't run on NixOS).
+_shell: "nix"
 runtime: schema.#NixRuntime
 hooks: onEnter: nix: xNix.#NixFlake
 

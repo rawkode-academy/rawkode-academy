@@ -6,6 +6,7 @@ schema.#Project
 
 name: "rawkode-academy-website"
 
+_shell: "nix"
 runtime: schema.#NixRuntime
 
 // deploy.main and deploy.preview read BASIN_SQL_TOKEN from Infisical.
@@ -13,7 +14,7 @@ _ciInfisicalOidc: true
 
 let _t = tasks
 // CI tasks resolve their tools through Nix directly, the way the platform
-// services do, instead of relying on the devenv shell being materialised on
+// services do, instead of relying on the Nix dev shell being materialised on
 // the runner. The explicit PATH exposes the runner's Nix profile and Bun.
 let _taskPath = "/home/runner/.bun/bin:/Users/rawkode/.bun/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
 let _toolchain = "nix shell nixpkgs#bun nixpkgs#nodejs_24 nixpkgs#d2 -c"

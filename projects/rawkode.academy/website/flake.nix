@@ -1,45 +1,67 @@
 {
   description = "Rawkode Academy website development environment";
 
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+  # The toolchains are the repository's shared flakes. They follow this flake's
+  # nixpkgs, so flake.lock here pins every tool in the shell.
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    bun = {
+      url = "path:../../../flakes/bun";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    node = {
+      url = "path:../../../flakes/node";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    workerd = {
+      url = "path:../../../flakes/workerd";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+  };
 
-  outputs = { nixpkgs, ... }:
+  outputs =
+    {
+      nixpkgs,
+      bun,
+      node,
+      workerd,
+      ...
+    }:
     let
-      systems = [
+      forAllSystems = nixpkgs.lib.genAttrs [
         "x86_64-linux"
         "aarch64-linux"
-        "x86_64-darwin"
         "aarch64-darwin"
       ];
-      forAllSystems = nixpkgs.lib.genAttrs systems;
     in
     {
-      devShells = forAllSystems (system:
+      devShells = forAllSystems (
+        system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
         in
         {
           default = pkgs.mkShell {
-            packages = with pkgs; [
-              biome
-              bun
-              d2
-              nixfmt-rfc-style
-              nodejs_24
+            inputsFrom = [
+              bun.devShells.${system}.default
+              node.devShells.${system}.default
+              workerd.devShells.${system}.default
             ];
 
+            packages = with pkgs; [
+              biome
+              d2
+              nixfmt
+            ];
+
+            # prepare-workerd runs again here because the workerd shell's own
+            # hook runs before the install that fetches the binary.
             shellHook = ''
               bun install
-            '' + pkgs.lib.optionalString pkgs.stdenv.isLinux ''
-              export LD_LIBRARY_PATH=${pkgs.libgccjit}/lib:$LD_LIBRARY_PATH
-
-              # workerd ships an ELF interpreter path that is absent on NixOS.
-              __patchTarget="./node_modules/@cloudflare/workerd-linux-64/bin/workerd"
-              if [ -f "$__patchTarget" ]; then
-                ${pkgs.patchelf}/bin/patchelf --set-interpreter ${pkgs.glibc}/lib/ld-linux-x86-64.so.2 "$__patchTarget"
-              fi
+              prepare-workerd
             '';
           };
-        });
+        }
+      );
     };
 }

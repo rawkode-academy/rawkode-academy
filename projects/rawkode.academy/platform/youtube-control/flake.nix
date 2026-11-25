@@ -1,20 +1,28 @@
 {
   description = "Rawkode Academy YouTube analytics tools";
 
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+  # The toolchains are the repository's shared flakes. They follow this flake's
+  # nixpkgs, so flake.lock here pins every tool in the shell.
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    node = {
+      url = "path:../../../../flakes/node";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+  };
 
-  outputs = { nixpkgs, ... }:
+  outputs =
+    { nixpkgs, node, ... }:
     let
-      systems = [
+      forAllSystems = nixpkgs.lib.genAttrs [
         "x86_64-linux"
         "aarch64-linux"
-        "x86_64-darwin"
         "aarch64-darwin"
       ];
-      forAllSystems = nixpkgs.lib.genAttrs systems;
     in
     {
-      devShells = forAllSystems (system:
+      devShells = forAllSystems (
+        system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
         in
@@ -23,14 +31,18 @@
           # the Worker and its tests, Python with google-auth-oauthlib for
           # `cuenv task consent`, and gh to start the deploy afterwards.
           default = pkgs.mkShell {
+            inputsFrom = [
+              node.devShells.${system}.default
+            ];
+
             packages = with pkgs; [
               (python3.withPackages (p: [ p.google-auth-oauthlib ]))
-              nodejs_24
               gh
               curl
               jq
             ];
           };
-        });
+        }
+      );
     };
 }

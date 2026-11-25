@@ -5,11 +5,8 @@ import "github.com/cuenv/cuenv/schema"
 schema.#Project
 
 name: "rawkode-academy-platform-video-thumbnails"
-runtime: schema.#DevenvRuntime & {
-	path: "../../../.."
-}
-hooks: onEnter: devenv: schema.#Devenv & {
-	dir: "../../../.."
+runtime: schema.#NixRuntime & {
+	flake: "path:../../../../flakes/bun"
 }
 
 let _t = tasks

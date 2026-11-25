@@ -6,12 +6,12 @@ schema.#Project
 
 name: "klustered-dev"
 
-runtime: schema.#DevenvRuntime
-hooks: onEnter: devenv: schema.#Devenv
+_shell: "nix"
+runtime: schema.#NixRuntime
 
 let _t = tasks
 // CI tasks resolve their tools through Nix directly, the way the platform
-// services do, instead of relying on the devenv shell being materialised on
+// services do, instead of relying on the Nix dev shell being materialised on
 // the runner. The explicit PATH exposes the runner's Nix profile and Bun.
 let _taskPath = "/home/runner/.bun/bin:/Users/rawkode/.bun/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
 let _toolchain = "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c"

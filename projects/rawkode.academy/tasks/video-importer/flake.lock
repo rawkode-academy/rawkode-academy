@@ -1,22 +1,5 @@
 {
   "nodes": {
-    "devenv": {
-      "locked": {
-        "dir": "src/modules",
-        "lastModified": 1794307783,
-        "narHash": "sha256-ks05AJY27rCF6KzuXIlmky0eZzNGgbSTfHKTr4j2rdg=",
-        "owner": "cachix",
-        "repo": "devenv",
-        "rev": "4a1138b49c3b0503c214e4b6e59102dbdd3282ca",
-        "type": "github"
-      },
-      "original": {
-        "dir": "src/modules",
-        "owner": "cachix",
-        "repo": "devenv",
-        "type": "github"
-      }
-    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1794042290,
@@ -33,10 +16,26 @@
         "type": "github"
       }
     },
+    "python": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "path": "../../../../flakes/python",
+        "type": "path"
+      },
+      "original": {
+        "path": "../../../../flakes/python",
+        "type": "path"
+      },
+      "parent": []
+    },
     "root": {
       "inputs": {
-        "devenv": "devenv",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "python": "python"
       }
     }
   },

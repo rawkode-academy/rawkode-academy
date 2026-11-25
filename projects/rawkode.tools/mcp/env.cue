@@ -13,6 +13,7 @@ name: "rawkode-tools-mcp"
 
 // Tasks run in this directory's flake.nix dev shell (Node), pinned by
 // flake.lock.
+_shell: "nix"
 runtime: schema.#NixRuntime
 hooks: onEnter: nix: xNix.#NixFlake
 

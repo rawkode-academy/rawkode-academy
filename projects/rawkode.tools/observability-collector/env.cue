@@ -13,6 +13,7 @@ name: "rawkode-tools-observability-collector"
 
 // Tools (Bun, Node, curl, and Python with PyIceberg for basin/) come from
 // flake.nix, locally and in CI.
+_shell: "nix"
 runtime: schema.#NixRuntime
 hooks: onEnter: nix: xNix.#NixFlake
 

@@ -6,8 +6,9 @@ schema.#Project
 
 name: "rawkode-academy-design-system"
 
-runtime: schema.#DevenvRuntime
-hooks: onEnter: devenv: schema.#Devenv
+runtime: schema.#NixRuntime & {
+	flake: "path:../../flakes/bun"
+}
 
 let _t = tasks
 
