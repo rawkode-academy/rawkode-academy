@@ -80,7 +80,12 @@ export const GET: APIRoute = async (context): Promise<Response> => {
 		// Video entry ids are the video (asset) ids.
 		const localVideo = await getEntry("videos", videoId);
 		if (!localVideo) {
-			return new Response("Video not found", { status: 404 });
+			// Course lesson videos are hidden from the video collection, so they
+			// have no entry. The player loads this track for every video and
+			// drops the poster when it errors; answer with an empty track.
+			return new Response("WEBVTT\n\n", {
+				headers: { "Content-Type": "text/vtt" },
+			});
 		}
 
 		const title = localVideo.data.title ?? videoId;
