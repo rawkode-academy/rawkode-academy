@@ -163,7 +163,12 @@ export const getSchema = (
 				nullable: true,
 				resolve: (r) => r.category,
 			}),
-			youtubeId: t.string({ nullable: true, resolve: (r) => r.youtubeId }),
+			// Also served by video-channels, which replaces this once deployed.
+			youtubeId: t.string({
+				nullable: true,
+				shareable: true,
+				resolve: (r) => r.youtubeId,
+			}),
 			realtimeKit: t.field({
 				type: VideoRealtimeKitRef,
 				nullable: true,
@@ -299,6 +304,6 @@ export const getSchema = (
 
 	return builder.toSubGraphSchema({
 		linkUrl: "https://specs.apollo.dev/federation/v2.6",
-		federationDirectives: ["@key"],
+		federationDirectives: ["@key", "@shareable"],
 	});
 };
