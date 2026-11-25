@@ -242,9 +242,31 @@ def write_video(client, row):
     changes = (result[0].get("meta") or {}).get("changes", 0) if result else 0
     if changes:
         logger.info(f"Created video {row['id']} in platform-videos")
+    elif row.get("duration"):
+        # A live stream's row is created when it is scheduled, before its
+        # length is known; the recording supplies it.
+        client.query(
+            "UPDATE `videos` SET `duration` = ?, `updated_at` = ? "
+            "WHERE `id` = ? AND `duration` IS NULL",
+            [row["duration"], row["updated_at"], row["id"]],
+        )
+        logger.info(f"Video {row['id']} already exists in platform-videos; filled in a missing duration")
     else:
         logger.warning(f"Video {row['id']} already exists in platform-videos; left unchanged")
     return bool(changes)
+
+
+def find_video_by_youtube_id(client, youtube_id):
+    """
+    The id of the platform-videos row that already carries this YouTube ID,
+    such as a live stream scheduled before it aired, or None.
+    """
+    result = client.query(
+        "SELECT `id` FROM `videos` WHERE `youtube_id` = ? ORDER BY `publishedAt` LIMIT 1",
+        [youtube_id],
+    )
+    rows = result[0].get("results", []) if result else []
+    return rows[0]["id"] if rows else None
 
 
 def invalidate_cache(tags, token=None, url=None, attempts=3, timeout=120):
