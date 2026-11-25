@@ -52,6 +52,19 @@ _infisical: {
 	environment: "production"
 }
 
+// Secret paths mirror the repository layout, with dots in directory names
+// written as dashes (Infisical folder names allow no dots).
+// BASIN_SQL_TOKEN is written to each project that reads it, by the
+// collector's infrastructure.cue.
+_projectSecretPaths: {
+	collector: "/projects/rawkode-tools/observability-collector"
+	mcp:       "/projects/rawkode-tools/mcp"
+	website:   "/projects/rawkode-academy/website"
+	youtube:   "/projects/rawkode-academy/platform/youtube-control"
+}
+// What the collector's infrastructure writes.
+_basinWritePaths: [_projectSecretPaths.collector, _projectSecretPaths.mcp, _projectSecretPaths.website]
+
 _github: {
 	issuer:     "https://token.actions.githubusercontent.com"
 	owner:      "rawkode-academy"
@@ -177,6 +190,15 @@ infrastructure: {
 							secretPath: "$eq":  "/projects/basin"
 						})
 					},
+					// Each project's deploy reads its own folder.
+					for _name, path in _projectSecretPaths {
+						subject: "secrets"
+						action: ["describeSecret", "readValue"]
+						conditions: json.Marshal({
+							environment: "$eq": _infisical.environment
+							secretPath: "$eq":  path
+						})
+					},
 				]
 			}
 		}
@@ -234,6 +256,14 @@ infrastructure: {
 						conditions: json.Marshal({
 							environment: "$eq": _infisical.environment
 							secretPath: "$eq":  "/projects/basin"
+						})
+					},
+					for path in _basinWritePaths {
+						subject: "secrets"
+						action: ["describeSecret", "readValue", "create", "edit", "delete"]
+						conditions: json.Marshal({
+							environment: "$eq": _infisical.environment
+							secretPath: "$eq":  path
 						})
 					},
 				]
@@ -296,6 +326,14 @@ infrastructure: {
 						conditions: json.Marshal({
 							environment: "$eq": _infisical.environment
 							secretPath: "$eq":  "/projects/basin"
+						})
+					},
+					for path in _basinWritePaths {
+						subject: "secrets"
+						action: ["describeSecret", "readValue"]
+						conditions: json.Marshal({
+							environment: "$eq": _infisical.environment
+							secretPath: "$eq":  path
 						})
 					},
 				]
@@ -472,7 +510,66 @@ infrastructure: {
 			}
 		}
 
-		// /projects already exists: rawkode.cloud keeps its secrets under it.
+		// The folders below mirror the repository. /projects already exists:
+		// rawkode.cloud keeps its secrets under it.
+		projects_rawkode_academy_folder: infisical_secret_folder.#Resource & {
+			configuration: {
+				project_id:       _infisical.projectId
+				environment_slug: _infisical.environment
+				folder_path:      "/projects"
+				name:             "rawkode-academy"
+			}
+		}
+		projects_rawkode_academy_platform_folder: infisical_secret_folder.#Resource & {
+			configuration: {
+				project_id:       _infisical.projectId
+				environment_slug: _infisical.environment
+				folder_path:      infrastructure.resources.projects_rawkode_academy_folder.outputs.path
+				name:             "platform"
+			}
+		}
+		youtube_control_folder: infisical_secret_folder.#Resource & {
+			configuration: {
+				project_id:       _infisical.projectId
+				environment_slug: _infisical.environment
+				folder_path:      infrastructure.resources.projects_rawkode_academy_platform_folder.outputs.path
+				name:             "youtube-control"
+			}
+		}
+		website_folder: infisical_secret_folder.#Resource & {
+			configuration: {
+				project_id:       _infisical.projectId
+				environment_slug: _infisical.environment
+				folder_path:      infrastructure.resources.projects_rawkode_academy_folder.outputs.path
+				name:             "website"
+			}
+		}
+		projects_rawkode_tools_folder: infisical_secret_folder.#Resource & {
+			configuration: {
+				project_id:       _infisical.projectId
+				environment_slug: _infisical.environment
+				folder_path:      "/projects"
+				name:             "rawkode-tools"
+			}
+		}
+		mcp_folder: infisical_secret_folder.#Resource & {
+			configuration: {
+				project_id:       _infisical.projectId
+				environment_slug: _infisical.environment
+				folder_path:      infrastructure.resources.projects_rawkode_tools_folder.outputs.path
+				name:             "mcp"
+			}
+		}
+		observability_collector_folder: infisical_secret_folder.#Resource & {
+			configuration: {
+				project_id:       _infisical.projectId
+				environment_slug: _infisical.environment
+				folder_path:      infrastructure.resources.projects_rawkode_tools_folder.outputs.path
+				name:             "observability-collector"
+			}
+		}
+
+		// Legacy, removed once every consumer has moved to the folders above.
 		basin_folder: infisical_secret_folder.#Resource & {
 			configuration: {
 				project_id:       _infisical.projectId

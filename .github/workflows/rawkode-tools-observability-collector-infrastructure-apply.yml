@@ -44,8 +44,8 @@ concurrency:
 jobs:
   rawkode-tools-observability-collector-infrastructure-apply:
     permissions:
-      contents: read
       checks: write
+      contents: read
       id-token: write
     name: rawkode-tools-observability-collector-infrastructure-apply
     runs-on: namespace-profile-linux-x86
@@ -91,7 +91,7 @@ jobs:
           Darwin-arm64) cuenv_asset="cuenv-darwin-arm64" ;;
           *) echo "Unsupported platform: $platform" >&2; exit 1 ;;
         esac
-        cuenv_version="0.80.0"
+        cuenv_version="0.81.1"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi

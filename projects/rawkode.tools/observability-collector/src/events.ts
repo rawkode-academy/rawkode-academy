@@ -30,7 +30,7 @@ export interface WebContext {
 	bot_reason?: string;
 }
 
-// Shared with basin/import-posthog.py, so history is labelled by the same rules.
+// Shared with src/bot-rules.json.
 const BOT_PATTERN = new RegExp(botRules.userAgentPattern, "i");
 
 /**

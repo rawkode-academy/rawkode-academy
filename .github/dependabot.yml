@@ -127,22 +127,3 @@ updates:
         patterns:
           - "*"
 
-  - package-ecosystem: "cargo"
-    directory: "/projects/rawkode.academy/platform/search"
-    schedule:
-      interval: "weekly"
-    # Ignore releases younger than three days. Security updates are exempt.
-    cooldown:
-      default-days: 3
-    open-pull-requests-limit: 5
-    groups:
-      dependencies:
-        patterns:
-          - "*"
-        update-types:
-          - "minor"
-          - "patch"
-      security:
-        applies-to: "security-updates"
-        patterns:
-          - "*"

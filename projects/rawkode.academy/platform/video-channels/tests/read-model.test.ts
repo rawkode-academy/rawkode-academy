@@ -36,6 +36,18 @@ describe("video-channels read model", () => {
 		});
 	});
 
+	it("resolves a video's YouTube id from its youtube channel", async () => {
+		const youtubeId = async (id: string) =>
+			(
+				await query(
+					"query ($r: [_Any!]!) { _entities(representations: $r) { ... on Video { youtubeId } } }",
+					{ r: [{ __typename: "Video", id }] },
+				)
+			)._entities[0];
+		expect(await youtubeId("v1")).toEqual({ youtubeId: "dQw4w9WgXcQ" });
+		expect(await youtubeId("nope")).toEqual({ youtubeId: null });
+	});
+
 	it("returns an empty list for unmapped videos", async () => {
 		expect(await channels("nope")).toEqual({ channels: [] });
 	});

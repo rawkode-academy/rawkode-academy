@@ -165,6 +165,9 @@ export const academyPage = sva({
 		// viewport of a laptop.
 		hero: {
 			...inkSurface,
+			// The statement's size, shared with the cap-height offset below. Two
+			// lines on a laptop, so the lede and the pair below stay in view.
+			"--academy-hero-title": "clamp(2rem, 8.4vw, 4.5rem)",
 			paddingBlockStart: "10",
 			// On phones the foot holds one lattice row for the living system:
 			// half a cell clear of the lede, one cell of lattice, and room for a
@@ -175,7 +178,7 @@ export const academyPage = sva({
 			// cell, less the gap between the line box and the capitals.
 			_lg: {
 				paddingBlockStart:
-					"[calc(4rem - var(--font-sizes-academy-poster) * 0.106)]",
+					"[calc(4rem - var(--academy-hero-title) * 0.106)]",
 				paddingBlockEnd: "8",
 			},
 			// Not inkStage: the living-system canvas is absolutely positioned.
@@ -214,11 +217,7 @@ export const academyPage = sva({
 		title: {
 			...posterTitle,
 			color: "academy.inkText",
-			// Below 350px the poster clamp's floor would break "Understand".
-			fontSize: {
-				base: "[clamp(2.75rem, 16vw, 3.5rem)]",
-				sm: "academy-poster",
-			},
+			fontSize: "[var(--academy-hero-title)]",
 		},
 		titleLine: {
 			display: "block",
@@ -230,12 +229,12 @@ export const academyPage = sva({
 		lede: { ...ledeText, color: "academy.textSoft" },
 		heroLede: {
 			...ledeText,
-			maxWidth: "[30ch]",
+			maxWidth: "[48ch]",
 			marginTop: "6",
 			color: "academy.inkTextSoft",
 			lineHeight: "[1.4]",
 			animation: "academy-settle",
-			_lg: { marginTop: "10" },
+			_lg: { marginTop: "8" },
 			_motionReduce: { animation: "none" },
 		},
 		// The field index: its own ink band under the next and latest pair.

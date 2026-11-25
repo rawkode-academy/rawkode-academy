@@ -179,115 +179,33 @@ the signals they kept (host, the old user-agent verdict, device and browser);
 hosting networks, client hints and webdriver weren't stored, so older events
 from those bots still count as people.
 
-To write those labels into the stored rows, run the one-time relabel task
-after this change is deployed (so nothing new is written to `short_links`):
-
-```sh
-cuenv task relabel-history -e production            # dry run: counts per reason
-RELABEL_ARGS=--apply cuenv task relabel-history -e production # rewrite in place
-```
-
-It rewrites only rows ingested before it starts, adds `bot`, `botreason` and
-`botbackfill` to archive events, and adds `bot`, `bot_reason` and `asn`
-columns to `short_links`. Rows already labelled are kept, so it is safe to
-re-run. Each table's previous snapshot ID is printed; within the 7-day
-snapshot expiry, `RELABEL_ARGS="--rollback <table> <snapshot-id>"` restores it (and drops
-anything appended since). The query-time rules stay, so the dashboard is
-correct before and after the rewrite.
-
-The task needs only Nix: the project's `flake.nix` provides Python with
-PyIceberg, pyiceberg-core and PyArrow, so it works the same on NixOS, macOS
-and CI.
-
-Sign-ins before PR #1646 wrote the user's email and name into
-`user.identified` events (`data.set_properties`). After #1646 is deployed,
-remove them, and any other email address in stored events, with the one-time
-scrub task:
-
-```sh
-cuenv task scrub-pii -e production                       # dry run: counts per field
-SCRUB_ARGS=--apply cuenv task scrub-pii -e production    # rewrite in place
-SCRUB_ARGS="--rollback <snapshot-id>" cuenv task scrub-pii -e production
-```
-
-From CI (main): the manual workflows
-`rawkode-tools-observability-collector-scrub-pii` (dry run) and
-`rawkode-tools-observability-collector-scrub-pii-apply`.
-
-It rewrites only rows ingested before it starts and keeps `distinct_id` and
-`anon_id`, so identity links survive. Re-runs change nothing. The previous
-snapshot, printed on apply, still holds the data until snapshot expiry
-(7 days); rolling back restores it.
-
-The empty legacy `analytics.events` table is no longer queried. To purge it,
-run the guarded one-time cleanup task with Infisical access:
-
-```sh
-cuenv task drop-legacy-table -e production
-```
-
-The task refuses deletion if a sink names it, the table is nonempty, or the
-namespace contains unexpected tables. It uses the catalog write token without
-printing it, requests purge, then verifies the surviving tables and their
-maintenance settings. Purging is irreversible.
-
 Cut over after browser ingestion is migrated and two weeks of clean reconciliation: remove the PostHog
-component, the `posthog?.capture` call in `capture()`, the PostHog flush in
-`src/durable-objects/data-buffer.ts`, and export PostHog history into
-`analytics.events_legacy` (below).
+component, the `posthog?.capture` call in `capture()` and the PostHog flush in
+`src/durable-objects/data-buffer.ts`. PostHog history is already in
+`events_archive` (below).
 
-### PostHog history: `analytics.events_legacy`
+### PostHog history in `events_archive`
 
-`import-posthog.py` copies PostHog project 12084 from 1 December 2023 into
-`analytics.events_legacy`, with the archive's columns (`event_id`,
-`event_source`, `event_type`, `event_time`, `value`). `value` is a CloudEvent
-whose `data.posthog` keeps the PostHog UUID, event name, distinct ID, person
-ID and the cleaned properties.
+PostHog project 12084 was imported once, on 25 November 2026, into
+`analytics.events_archive`: 124,800 events from 1 December 2023 up to each
+family's cutoff (server events 7 November 2026, browser `capture()`/`track()`
+events 13 November 2026, SDK-only events like `$pageleave` 24 November 2026
+16:14 UTC). Names were mapped from the bare, `rawkode.academy.*`,
+`com.rawkode.academy.*`, `/<service>.*` and `<source>.<type>` schemes to
+today's source and type. Imported rows carry `botbackfill: "posthog-import"`
+and `data.posthog` (PostHog UUID, event name, distinct ID, person ID, cleaned
+properties). Their `__ingest_ts` is the import time.
 
-- `posthog-mapping.json` maps all ~120 PostHog names, across the bare,
-  `rawkode.academy.*`, `com.rawkode.academy.*`, `/<service>.*` and
-  `<source>.<type>` schemes, to today's source and type. A name it doesn't
-  list stops the import.
-- Each family is imported up to its cutoff, the first instant Basin has it:
-  server events 7 November 2026, browser `capture()`/`track()` events
-  13 November 2026. Events PostHog's SDK collects on its own (`$pageleave`,
-  `$exception`, `$dead_click`, `$rageclick`, `$dead_swipe`) are imported up
-  to 24 November 2026 16:14 UTC, when PR #1646's website deploy finished.
-  IDs already in `events_archive` are skipped too.
-- Dropped, counted per rule: `$autocapture`; every `link.redirect` spelling
-  (~1.4M scanner hits; PostHog never recorded whether a path matched a short
-  link, so none can be kept); operational and PostHog-internal events;
-  test events; browser events from localhost, `*.workers.dev`, `*.pages.dev`
-  and `*.deno.dev`; and browser events from 10 July to 4 August 2025 by
-  PostHog people first seen in that window (the ad-network spike).
-- Kept events are labelled with the collector's bot rules
-  (`src/bot-rules.json`, shared with `src/events.ts`) from the stored user
-  agent and host, plus `botbackfill: "posthog-import"`.
-- Properties are cleaned like browser events: no emails, credentials, raw
-  user agents, IPs, person-profile updates or city-level location, and URLs
-  keep only origin and path.
-- Keyed on the event ID, so re-runs only add what's missing. After writing,
-  the table is re-read and every month and event must match the run's
-  expected count within 0.5%.
-
-Run the dry run, read the report in the job summary, then apply:
-
-```sh
-# GitHub Actions, on main: rawkode-tools-observability-collector-posthog-import
-#                          rawkode-tools-observability-collector-posthog-import-apply
-cuenv task import-posthog -e production         # locally, dry run
-cuenv task import-posthog-apply -e production   # locally, writes
-```
+Not imported: `$autocapture`; every `link.redirect` spelling (~1.4M scanner
+hits); operational and PostHog-internal events; test events; localhost and
+preview hosts; and the July 2025 ad-network spike. The importer is not kept
+in the repository.
 
 Charting December 2023 to today in one query (Basin SQL):
 
 ```sql
 SELECT date_trunc('month', event_time) AS month, event_source, event_type, count(*) AS events
-FROM (
-	SELECT event_time, event_source, event_type, value FROM analytics.events_legacy
-	UNION ALL
-	SELECT event_time, event_source, event_type, value FROM analytics.events_archive
-) AS events
+FROM analytics.events_archive
 WHERE event_time >= CAST('2023-12-01T00:00:00Z' AS TIMESTAMP)
 	AND coalesce(json_get_bool(value, 'bot'), false) = false
 	AND (
@@ -299,8 +217,6 @@ WHERE event_time >= CAST('2023-12-01T00:00:00Z' AS TIMESTAMP)
 GROUP BY 1, 2, 3
 ORDER BY 1
 ```
-
-Run status: not yet applied.
 
 ## Cost
 

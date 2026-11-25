@@ -1,0 +1,365 @@
+---
+import { env } from "cloudflare:workers";
+import EditorialShell from "@/components/ui/EditorialShell.astro";
+import {
+	PERIODS,
+	type ReachQuery,
+	reachQueries,
+	reachWindow,
+} from "@/lib/analytics/reach";
+import { guestTotals, type GuestTotals } from "@/lib/analytics/guest";
+import type { ContentEnv } from "@/lib/live-content/env";
+import { basinQuery, type Row } from "@/server/basin";
+import Page from "@/wrappers/page.astro";
+
+export const prerender = false;
+
+// Signed-in members only. Headline totals, aggregate only, bots excluded.
+const user = Astro.locals.user;
+if (!user && !import.meta.env.DEV) {
+	return Astro.redirect(
+		`/api/auth/sign-in?returnTo=${encodeURIComponent("/analytics")}`,
+	);
+}
+Astro.response.headers.set("Cache-Control", "private, no-store");
+
+const vars = env as unknown as {
+	BASIN_BUCKET?: string;
+	BASIN_SQL_TOKEN?: string;
+	CLOUDFLARE_ACCOUNT_ID?: string;
+};
+const config = {
+	accountId: vars.CLOUDFLARE_ACCOUNT_ID ?? "",
+	bucket: vars.BASIN_BUCKET ?? "rawkode-analytics",
+	token: vars.BASIN_SQL_TOKEN ?? "",
+};
+const configured = Boolean(config.accountId && config.token);
+
+const queries = reachQueries(reachWindow());
+const results = Object.fromEntries(
+	await Promise.all(
+		(Object.keys(queries) as ReachQuery[]).map(async (name) => {
+			if (!configured) return [name, { rows: [] as Row[], failed: true }];
+			try {
+				// Reach numbers move slowly; cache for 30 minutes at the edge.
+				const rows = await basinQuery(config, queries[name], {
+					ttlSeconds: 1800,
+				});
+				return [name, { rows, failed: false }];
+			} catch {
+				return [name, { rows: [] as Row[], failed: true }];
+			}
+		}),
+	),
+) as Record<ReachQuery, { rows: Row[]; failed: boolean }>;
+
+const num = (value: unknown) => Number(value ?? 0);
+const fmt = new Intl.NumberFormat("en-GB");
+
+const web = results.web.rows[0];
+const youtube = results.youtube.rows[0];
+const periodValue = (
+	failed: boolean,
+	row: Row | undefined,
+	metric: string,
+	key: string,
+) => (failed || !row ? undefined : num(row[`${metric}_${key}`]));
+const periods = PERIODS.map((period) => {
+	const visits = periodValue(results.web.failed, web, "visits", period.key);
+	const webViews = periodValue(results.web.failed, web, "views", period.key);
+	const youtubeViews = periodValue(results.youtube.failed, youtube, "views", period.key);
+	return {
+		label: period.label,
+		visits,
+		views:
+			webViews === undefined || youtubeViews === undefined
+				? undefined
+				: webViews + youtubeViews,
+	};
+});
+
+// Subs: total people reachable, counted once. YouTube subscribers, plus site
+// accounts, plus mailing-list members who have no account. Each source is read
+// separately so a missing one is named rather than silently left out.
+async function accountCount(): Promise<number | undefined> {
+	try {
+		const accounts = await env.IDENTITY_STATS.countAccounts();
+		return Number.isSafeInteger(accounts) ? accounts : undefined;
+	} catch {
+		return undefined;
+	}
+}
+async function mailingOnlyCount(): Promise<number | undefined> {
+	try {
+		const counts = await env.EMAIL_PREFERENCES.countSubscribers();
+		return Number.isSafeInteger(counts.emailOnly) ? counts.emailOnly : undefined;
+	} catch {
+		return undefined;
+	}
+}
+const [accounts, mailingOnly] = await Promise.all([accountCount(), mailingOnlyCount()]);
+const youtubeSubs =
+	results.subscribers.failed || results.subscribers.rows.length === 0
+		? undefined
+		: num(results.subscribers.rows[0]?.subscribers);
+const subSources = [
+	{ name: "YouTube subscribers", value: youtubeSubs },
+	{ name: "site accounts", value: accounts },
+	{ name: "mailing list", value: mailingOnly },
+];
+const missing = subSources.filter((source) => source.value === undefined);
+// Subs is the sum of whatever can be read; a missing source is named in a
+// small note rather than hiding the total.
+const available = subSources.filter(
+	(source): source is { name: string; value: number } => source.value !== undefined,
+);
+const subs =
+	available.length === 0
+		? undefined
+		: available.reduce((total, source) => total + source.value, 0);
+
+const TOP_VIDEOS = 10;
+
+// A signed-in guest or show host also sees their own episodes' totals: who
+// counts as one is decided by packages/guest-scope, shared with the MCP.
+let guest: GuestTotals | undefined;
+if (user?.username && configured) {
+	try {
+		guest = await guestTotals(env as unknown as ContentEnv, config, user.username);
+	} catch (error) {
+		console.warn("[analytics] guest totals unavailable", error);
+	}
+}
+
+const show = (value: number | undefined) =>
+	value === undefined ? "Unavailable" : fmt.format(value);
+const hours = (minutes: number) => fmt.format(Math.round(minutes / 60));
+// Per-video watch time is small, so keep a decimal below 10 hours.
+const videoHours = (minutes: number) =>
+	minutes < 600 ? (minutes / 60).toFixed(1) : hours(minutes);
+const cards = [
+	{
+		label: "Visits",
+		values: periods.map((period) => ({ label: period.label, text: show(period.visits) })),
+	},
+	{
+		label: "Views",
+		values: periods.map((period) => ({ label: period.label, text: show(period.views) })),
+	},
+];
+---
+
+<Page title="Reach" description="Rawkode Academy audience." noindex>
+	<EditorialShell
+		eyebrow="Members"
+		title="Reach"
+		lede="Rawkode Academy audience"
+	>
+		<section class="editorial-section">
+			<div class="editorial-grid editorial-grid--3">
+				{cards.map((card) => (
+					<div class="editorial-card">
+						<h2 class="card-label">{card.label}</h2>
+						<dl class="pair">
+							{card.values.map((value) => (
+								<div>
+									<dd class="num">{value.text}</dd>
+									<dt class="period">{value.label}</dt>
+								</div>
+							))}
+						</dl>
+					</div>
+				))}
+				<div class="editorial-card">
+					<h2 class="card-label">Subs</h2>
+					<p class="num">{show(subs)}</p>
+					{subs !== undefined && missing.length > 0 && (
+						<p class="note">Not including {missing.map((source) => source.name).join(", ")}.</p>
+					)}
+					{subs === undefined && <p class="note">No source could be read.</p>}
+				</div>
+			</div>
+		</section>
+
+		{guest && (
+			<section class="editorial-section">
+				<h2 class="section-title">Your episodes</h2>
+				<div class="editorial-grid editorial-grid--2">
+					<div class="editorial-card">
+						<h3 class="card-label">Views</h3>
+						<dl class="pair">
+							<div><dd class="num">{fmt.format(guest.views.d90)}</dd><dt class="period">90 days</dt></div>
+							<div><dd class="num">{fmt.format(guest.views.lifetime)}</dd><dt class="period">Lifetime</dt></div>
+						</dl>
+					</div>
+					<div class="editorial-card">
+						<h3 class="card-label">Watch time</h3>
+						<dl class="pair">
+							<div><dd class="num">{hours(guest.minutes.d90)}<span class="unit"> h</span></dd><dt class="period">90 days</dt></div>
+							<div><dd class="num">{hours(guest.minutes.lifetime)}<span class="unit"> h</span></dd><dt class="period">Lifetime</dt></div>
+						</dl>
+					</div>
+				</div>
+				{guest.videos.length > 0 && (
+					<div class="videos">
+						<h3 class="card-label">By video</h3>
+						<ol class="video-list">
+							{guest.videos.slice(0, TOP_VIDEOS).map((video) => (
+								<li class="video">
+		<a class="video-title" href={`/watch/${video.slug}`}>{video.title}</a>
+		<dl class="video-stats">
+			<div><dt>Views, 90 days</dt><dd>{fmt.format(video.views.d90)}</dd></div>
+			<div><dt>Views, lifetime</dt><dd>{fmt.format(video.views.lifetime)}</dd></div>
+			<div><dt>Hours, 90 days</dt><dd>{videoHours(video.minutes.d90)}</dd></div>
+			<div><dt>Hours, lifetime</dt><dd>{videoHours(video.minutes.lifetime)}</dd></div>
+		</dl>
+	</li>
+							))}
+						</ol>
+						{guest.videos.length > TOP_VIDEOS && (
+							<details class="more">
+								<summary>Show all {fmt.format(guest.videos.length)} videos</summary>
+								<ol class="video-list" start={TOP_VIDEOS + 1}>
+									{guest.videos.slice(TOP_VIDEOS).map((video) => (
+										<li class="video">
+		<a class="video-title" href={`/watch/${video.slug}`}>{video.title}</a>
+		<dl class="video-stats">
+			<div><dt>Views, 90 days</dt><dd>{fmt.format(video.views.d90)}</dd></div>
+			<div><dt>Views, lifetime</dt><dd>{fmt.format(video.views.lifetime)}</dd></div>
+			<div><dt>Hours, 90 days</dt><dd>{videoHours(video.minutes.d90)}</dd></div>
+			<div><dt>Hours, lifetime</dt><dd>{videoHours(video.minutes.lifetime)}</dd></div>
+		</dl>
+	</li>
+									))}
+								</ol>
+							</details>
+						)}
+					</div>
+				)}
+				{guest.withoutNumbers > 0 && (
+					<p class="note">
+						{fmt.format(guest.withoutNumbers)} of {fmt.format(guest.episodes)} episodes aren't matched to a YouTube video yet.
+					</p>
+				)}
+			</section>
+		)}
+	</EditorialShell>
+</Page>
+
+<style>
+	.editorial-card {
+		container-type: inline-size;
+	}
+	.card-label,
+	.section-title {
+		margin: 0 0 1rem;
+		font-family: var(--fonts-academy-text);
+		font-size: 1rem;
+		font-weight: 500;
+		color: var(--colors-academy-text-soft);
+	}
+	.section-title {
+		font-family: var(--fonts-academy-display);
+		font-size: 1.5rem;
+		color: var(--colors-academy-text);
+		margin-bottom: 1.5rem;
+	}
+	.pair {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 1rem;
+		margin: 0;
+	}
+	.pair dd {
+		margin: 0;
+	}
+	.num {
+		margin: 0;
+		font-family: var(--fonts-academy-display);
+		/* Sized to the card, so a seven-digit total fits two to a row. */
+		font-size: clamp(1.25rem, 7.5cqi, 2.25rem);
+		font-weight: 700;
+		line-height: 1.1;
+		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
+		color: var(--colors-academy-text);
+	}
+	.unit {
+		font-size: 0.5em;
+		font-weight: 500;
+		color: var(--colors-academy-text-soft);
+	}
+	.period {
+		margin-top: 0.25rem;
+		font-size: 0.875rem;
+		color: var(--colors-academy-text-muted);
+	}
+	.note {
+		margin: 0.75rem 0 0;
+		font-size: 0.8125rem;
+		color: var(--colors-academy-text-muted);
+	}
+	.editorial-grid + .note {
+		margin-top: 1rem;
+	}
+	.videos {
+		margin-top: 2rem;
+	}
+	.video-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		border-top: 1px solid var(--colors-academy-border);
+	}
+	.video {
+		padding: 0.875rem 0;
+		border-bottom: 1px solid var(--colors-academy-border);
+	}
+	.video-title {
+		display: block;
+		font-family: var(--fonts-academy-text);
+		font-weight: 500;
+		color: var(--colors-academy-text);
+		text-decoration: none;
+		overflow-wrap: anywhere;
+	}
+	.video-title:hover {
+		text-decoration: underline;
+	}
+	.video-title:focus-visible,
+	.more summary:focus-visible {
+		outline: 2px solid var(--colors-academy-accent);
+		outline-offset: 2px;
+	}
+	.video-stats {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.5rem 1rem;
+		margin: 0.5rem 0 0;
+	}
+	.video-stats div {
+		display: flex;
+		flex-direction: column-reverse;
+	}
+	.video-stats dt {
+		font-family: var(--fonts-academy-text);
+		font-size: 0.8125rem;
+		color: var(--colors-academy-text-soft);
+	}
+	.video-stats dd {
+		margin: 0;
+		font-family: var(--fonts-academy-mono);
+		font-variant-numeric: tabular-nums;
+	}
+	.more summary {
+		cursor: pointer;
+		padding: 0.875rem 0;
+		font-family: var(--fonts-academy-text);
+		color: var(--colors-academy-accent);
+	}
+	@media (min-width: 40rem) {
+		.video-stats {
+			grid-template-columns: repeat(4, minmax(0, 1fr));
+		}
+	}
+</style>

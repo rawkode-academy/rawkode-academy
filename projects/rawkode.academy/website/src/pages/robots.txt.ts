@@ -11,6 +11,7 @@ export const ROBOTS_DISALLOWS = [
 	"/admin/",
 	"/private/",
 	"/settings",
+	"/analytics",
 	"/_server-islands/",
 	"/api/",
 	"/internal/",

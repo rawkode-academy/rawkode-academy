@@ -183,6 +183,17 @@ const RESOURCE_CATEGORIES = new Set([
 	"other",
 ]);
 
+function collaborators(value: unknown): { id: string; name: string }[] {
+	if (!Array.isArray(value)) return [];
+	return value
+		.filter((c): c is Raw => Boolean(c) && typeof c === "object")
+		.flatMap((c) => {
+			const id = str(c.id);
+			const name = str(c.name);
+			return id && name ? [{ id, name }] : [];
+		});
+}
+
 function resources(value: unknown): Resource[] | undefined {
 	if (!Array.isArray(value)) return undefined;
 	return value
@@ -265,6 +276,7 @@ export function mapVideo(raw: Raw): VideoData {
 					)
 			: [],
 		guests: refs("people", raw.guests),
+		collaborators: collaborators(raw.collaborators),
 		resources: resources(raw.resources),
 		streamUrl: str(raw.streamUrl),
 		thumbnailUrl: str(raw.thumbnailUrl),

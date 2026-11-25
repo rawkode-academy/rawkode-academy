@@ -35,8 +35,8 @@ concurrency:
 jobs:
   rawkode-academy-platform-notifications-default:
     permissions:
-      contents: read
       checks: write
+      contents: read
     name: rawkode-academy-platform-notifications-default
     runs-on: namespace-profile-linux-x86
     environment: production
@@ -80,7 +80,7 @@ jobs:
           Darwin-arm64) cuenv_asset="cuenv-darwin-arm64" ;;
           *) echo "Unsupported platform: $platform" >&2; exit 1 ;;
         esac
-        cuenv_version="0.80.0"
+        cuenv_version="0.81.1"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi

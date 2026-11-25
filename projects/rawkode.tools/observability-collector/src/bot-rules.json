@@ -1,5 +1,5 @@
 {
-	"$comment": "Bot labelling rules shared by src/events.ts (the collector) and basin/import-posthog.py (history import). Change them here only.",
+	"$comment": "Bot labelling rules shared by src/events.ts (the collector). Change them here only.",
 	"userAgentPattern": "bot|crawl|spider|slurp|facebookexternalhit|externalagent|webindexer|embedly|preview|monitor|uptime|pingdom|lighthouse|headless|lightpanda|phantomjs|selenium|puppeteer|playwright|early hints|curl\\/|wget\\/|python-|httpx|go-http-client|axios|node-fetch|undici|bun\\/|java\\/|okhttp|libwww|scrapy",
 	"hostingAsns": [
 		{

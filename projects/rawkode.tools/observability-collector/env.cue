@@ -52,15 +52,6 @@ env: {
 	}
 }
 
-_posthogImportEnv: {
-	BASIN_CATALOG_TOKEN: _basinSecret & {secretName: "BASIN_CATALOG_TOKEN"}
-	POSTHOG_PROJECT_ID:  "12084"
-	POSTHOG_HOST:        "https://eu.posthog.com"
-	POSTHOG_PERSONAL_API_KEY: schema.#OnePasswordRef & {
-		ref: "op://sa.rawkode.academy/posthog/personal-api-key"
-	}
-}
-
 ci: pipelines: {
 	default: {
 		environment: "production"
@@ -70,32 +61,6 @@ ci: pipelines: {
 			manual:        true
 		}
 		tasks: [_t.deploy]
-	}
-
-	// One-off personal-data scrub of events_archive. Manual only: the dry
-	// run prints counts; the apply pipeline writes.
-	"scrub-pii": {
-		environment: "production"
-		when: manual: true
-		tasks: [_t."scrub-pii"]
-	}
-	"scrub-pii-apply": {
-		environment: "production"
-		when: manual: true
-		tasks: [_t."scrub-pii-apply"]
-	}
-
-	// One-off PostHog history import (#1634). Manual only: the dry run
-	// prints the per-month report; the apply pipeline writes.
-	"posthog-import": {
-		environment: "production"
-		when: manual: true
-		tasks: [_t."import-posthog"]
-	}
-	"posthog-import-apply": {
-		environment: "production"
-		when: manual: true
-		tasks: [_t."import-posthog-apply"]
 	}
 
 	// Compaction and snapshot expiry aren't in the Cloudflare provider yet,
@@ -143,64 +108,6 @@ tasks: {
 		inputs: ["basin/maintenance.sh", "infrastructure.cue"]
 		labels: ["infisical"]
 		env: BASIN_CATALOG_TOKEN: _basinSecret & {secretName: "BASIN_CATALOG_TOKEN"}
-	}
-
-	"drop-legacy-table": schema.#Task & {
-		hermetic: false
-		command:  "bun"
-		args: ["basin/drop-legacy-table.ts"]
-		inputs: ["basin/drop-legacy-table.ts", "infrastructure.cue"]
-		labels: ["infisical"]
-		env: BASIN_CATALOG_TOKEN: _basinSecret & {secretName: "BASIN_CATALOG_TOKEN"}
-	}
-
-	"relabel-history": schema.#Task & {
-		hermetic: false
-		command:  "python"
-		args: ["-I", "basin/relabel-history.py"]
-		inputs: ["basin/relabel-history.py", "flake.nix", "flake.lock"]
-		labels: ["infisical"]
-		env: BASIN_CATALOG_TOKEN: _basinSecret & {secretName: "BASIN_CATALOG_TOKEN"}
-	}
-
-	"scrub-pii": schema.#Task & {
-		hermetic: false
-		command:  "python"
-		args: ["-I", "basin/scrub-pii.py"]
-		inputs: ["basin/scrub-pii.py", "flake.nix", "flake.lock"]
-		labels: ["infisical"]
-		env: BASIN_CATALOG_TOKEN: _basinSecret & {secretName: "BASIN_CATALOG_TOKEN"}
-	}
-
-	"scrub-pii-apply": schema.#Task & {
-		hermetic: false
-		command:  "python"
-		args: ["-I", "basin/scrub-pii.py", "--apply"]
-		inputs: ["basin/scrub-pii.py", "flake.nix", "flake.lock"]
-		labels: ["infisical"]
-		env: BASIN_CATALOG_TOKEN: _basinSecret & {secretName: "BASIN_CATALOG_TOKEN"}
-	}
-
-	// basin/import-posthog.py: PostHog history into analytics.events_legacy.
-	// Dry run by default; the -apply task writes. Run from the
-	// posthog-import* pipelines on main, or locally with Infisical and
-	// 1Password access.
-	"import-posthog": schema.#Task & {
-		hermetic: false
-		command:  "python"
-		args: ["-I", "basin/import-posthog.py"]
-		inputs: ["basin/import-posthog.py", "basin/posthog-mapping.json", "src/bot-rules.json", "flake.nix", "flake.lock"]
-		labels: ["infisical"]
-		env: _posthogImportEnv
-	}
-
-	"import-posthog-apply": schema.#Task & {
-		hermetic: false
-		command:  "python"
-		args: ["-I", "basin/import-posthog.py", "--apply"]
-		inputs: ["basin/import-posthog.py", "basin/posthog-mapping.json", "src/bot-rules.json", "flake.nix", "flake.lock"]
-		labels: ["infisical"]
-		env: _posthogImportEnv
 	}
 
 	reconcile: schema.#Task & {
