@@ -263,7 +263,18 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 		);
 		const dom = parse(html);
 		expect(dom.querySelectorAll("h1")).toHaveLength(1);
-		expect(dom.querySelector("h1")?.text).toBe("Kubernetes tutorials, live demos, and a game show");
+		expect(dom.querySelector("h1")?.text).toBe(
+			"Kubernetes may be complex, but it doesn't need to be hard.",
+		);
+		// The subject types itself; the label keeps the statement whole for
+		// assistive technology, and the first topic is the one in the HTML.
+		const typed = dom.querySelector("[data-typewriter]");
+		expect(dom.querySelector("h1")?.getAttribute("aria-label")).toBe(
+			"Kubernetes may be complex, but it doesn't need to be hard.",
+		);
+		expect(typed?.text).toBe("Kubernetes");
+		expect(JSON.parse(typed?.getAttribute("data-topics") ?? "[]")[0]).toBe("Kubernetes");
+		expect(typed?.getAttribute("data-widest")).toBe("Platform engineering");
 		expect(html).toContain("Recently published");
 		expect(html).toContain('href="/learning-paths/path-4"');
 		expect(html).not.toContain("email.rawkode.academy/subscribe");
@@ -296,7 +307,7 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 				?.text.replace(/\s+/g, " ")
 				.trim(),
 		).toBe(
-			"Kubernetes tutorials, live demos, and a game showWatch maintainers demo their tools on Rawkode Live, or see how fast engineers can fix a broken Kubernetes cluster on Klustered.",
+			"Kubernetes may be complex, but it doesn't need to be hard.Watch maintainers demo their tools on Rawkode Live, or see how fast engineers can fix a broken Kubernetes cluster on Klustered.",
 		);
 		const links = nav?.querySelectorAll("a") ?? [];
 		expect(links.map((link) => link.getAttribute("href"))).toEqual([
@@ -592,7 +603,7 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 		expect(
 			dom.querySelectorAll("h1, h2").map((heading) => heading.text),
 		).toEqual([
-			"Kubernetes tutorials, live demos, and a game show",
+			"Kubernetes may be complex, but it doesn't need to be hard.",
 			"Next stream",
 			"Real session",
 			"The archive",

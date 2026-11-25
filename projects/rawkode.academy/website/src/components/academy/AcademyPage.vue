@@ -73,6 +73,13 @@ interface LearnProps {
 const props = withDefaults(defineProps<HomeProps | LearnProps>(), { page: "home" });
 const styles = academyPage();
 
+// The statement's subject types itself through what the Academy covers; the
+// first is what is in the HTML, so it is the one a crawler and a reader
+// without script get. The line is as wide as the longest.
+const topics = ["Kubernetes", "Platform engineering", "GitOps", "Observability", "WebAssembly", "Nix", "MCP"];
+const statementRest = "may be complex, but it doesn't need to be hard.";
+const widestTopic = topics.reduce((widest, topic) => (topic.length > widest.length ? topic : widest));
+
 // Difficulty reads as a three-bar meter beside its label, so the level is
 // never carried by colour alone.
 const levelOf = (label: string) => {
@@ -128,7 +135,7 @@ const laterStarts = laterStreams.map((stream) => ({ ...stream, start: localDateT
 			<section :class="styles.hero" aria-labelledby="home-title" data-system>
 				<canvas :class="styles.system" data-system-canvas aria-hidden="true" />
 				<div :class="styles.container">
-					<h1 id="home-title" :class="styles.title"><span :class="styles.titleLine" data-system-avoid="text">Kubernetes tutorials,</span> <span :class="styles.titleLine" data-system-avoid="text">live demos, and a game show</span></h1>
+					<h1 id="home-title" :class="styles.title" :aria-label="`${topics[0]} ${statementRest}`"><span :class="styles.titleLine" data-system-avoid><span :class="styles.titleTyped" data-typewriter :data-topics="JSON.stringify(topics)" :data-widest="widestTopic">{{ topics[0] }}</span></span> <span :class="styles.titlePhrase" data-system-avoid="text"><span :class="styles.titleSoft">may be complex,</span> but it</span> <span :class="styles.titlePhrase" data-system-avoid="text">doesn't need to be <span :class="styles.titleMark">hard</span>.</span></h1>
 					<p :class="styles.heroLede" data-system-avoid="text">Watch maintainers demo their tools on Rawkode Live, or see how fast engineers can fix a broken Kubernetes cluster on Klustered.</p>
 				</div>
 			</section>
