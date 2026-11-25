@@ -12,17 +12,13 @@ describe("reach window", () => {
 describe("reach queries", () => {
 	const queries = reachQueries(reachWindow(new Date("2026-11-25T15:00:00Z")));
 
-	it("exclude bots from every web query", () => {
-		for (const name of ["totals", "daily", "referrers", "countries"] as const) {
-			expect(queries[name], name).toContain("bot_reason IS NULL");
-		}
+	it("exclude bots from the web query", () => {
+		expect(queries.totals).toContain("bot_reason IS NULL");
 	});
 
 	it("never call json_get_* on browser events, whose imported rows exceed Basin's 2,000-byte limit", () => {
-		for (const name of ["totals", "daily", "referrers", "countries"] as const) {
-			expect(queries[name], name).not.toContain("json_get");
-			expect(queries[name], name).toContain("substr(value, 1, 1500)");
-		}
+		expect(queries.totals).not.toContain("json_get");
+		expect(queries.totals).toContain("substr(value, 1, 1500)");
 	});
 
 	it("bound every query by time and read no per-video or per-person fields", () => {

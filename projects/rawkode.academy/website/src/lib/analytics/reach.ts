@@ -55,8 +55,6 @@ const flag = (key: string) => `regexp_like(${HEAD}, '"${key}":true')`;
 const PAGE_VIEWS = (w: ReachWindow) => `(
 	SELECT event_id, event_time,
 		${field("anonymous_id")} AS visitor,
-		${field("referrer_host")} AS referrer,
-		${field("country")} AS country,
 		coalesce(
 			${field("botreason")},
 			CASE
@@ -79,41 +77,15 @@ const HUMAN_VIEWS = (w: ReachWindow) => `FROM ${PAGE_VIEWS(w)} WHERE bot_reason 
 
 export const reachQueries = (w: ReachWindow) => ({
 	totals: `
-		SELECT approx_distinct(event_id) AS views, approx_distinct(visitor) AS visitors,
-			approx_distinct(country) AS countries
+		SELECT approx_distinct(event_id) AS views, approx_distinct(visitor) AS visitors
 		${HUMAN_VIEWS(w)}`,
 
-	daily: `
-		SELECT date_trunc('day', event_time) AS day,
-			approx_distinct(event_id) AS views, approx_distinct(visitor) AS visitors
-		${HUMAN_VIEWS(w)}
-		GROUP BY 1
-		ORDER BY 1`,
-
-	referrers: `
-		SELECT coalesce(referrer, 'direct') AS referrer, approx_distinct(event_id) AS views
-		${HUMAN_VIEWS(w)}
-		GROUP BY 1
-		ORDER BY views DESC
-		LIMIT 8`,
-
-	countries: `
-		SELECT country, approx_distinct(event_id) AS views
-		${HUMAN_VIEWS(w)} AND country IS NOT NULL
-		GROUP BY 1
-		ORDER BY views DESC
-		LIMIT 8`,
-
 	youtube: `
-		SELECT day, views, engaged_views, minutes_watched, subscribers_gained, subscribers_lost
+		SELECT day, views
 		FROM (
 			SELECT
 				json_get_str(value, 'data', 'day') AS day,
 				json_get_int(value, 'data', 'views') AS views,
-				json_get_int(value, 'data', 'engagedViews') AS engaged_views,
-				json_get_int(value, 'data', 'estimatedMinutesWatched') AS minutes_watched,
-				json_get_int(value, 'data', 'subscribersGained') AS subscribers_gained,
-				json_get_int(value, 'data', 'subscribersLost') AS subscribers_lost,
 				ROW_NUMBER() OVER (PARTITION BY json_get_str(value, 'data', 'day') ORDER BY json_get_str(value, 'data', 'fetchedAt') DESC) AS rn
 			FROM ${TABLE}
 			WHERE event_source = 'rawkode-academy-youtube' AND event_type = 'youtube.daily'
