@@ -5,7 +5,10 @@ import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import * as runtime from "astro/runtime/server/index.js";
 import ts from "typescript";
 import { webcontainerDemosPlugin } from "../utils/vite-plugin-webcontainer-demos";
-import { getCourseModuleSlug } from "../utils/course-path";
+import {
+	getCourseModuleSlug,
+	getUnnumberedLessonSlug,
+} from "../utils/course-path";
 import { localDate } from "../lib/local-time";
 import { setContentEnv } from "../lib/live-content/env";
 import { resetContentCacheForTests } from "../lib/live-content/kv-cache";
@@ -398,6 +401,7 @@ describe("server-rendered course routes", () => {
 					cacheCalls.push(args);
 				},
 				getCourseModuleSlug,
+				getUnnumberedLessonSlug,
 				academyDocument: styleProxy,
 				academyLayout: styleProxy,
 				academyCourse: styleProxy,
@@ -416,6 +420,25 @@ describe("server-rendered course routes", () => {
 		expect(result).toBeInstanceOf(Response);
 		expect(result.status).toBe(404);
 		expect(cacheCalls).toEqual([]);
+	});
+	it("redirects an old numbered lesson URL to the lesson's current slug", async () => {
+		const { deps, cacheCalls } = dependencies({
+			course: "course",
+			slug: "03-three",
+		});
+		const result = await frontmatter(lessonPage, deps, "undefined");
+		expect(result.status).toBe(301);
+		expect(result.headers.get("Location")).toBe("/courses/course/three");
+		expect(cacheCalls).toEqual([]);
+	});
+	it.each([
+		["a draft", "02-draft"],
+		["a missing lesson", "04-missing"],
+		["another course's lesson", "01-elsewhere"],
+	])("does not redirect a numbered URL for %s", async (_, slug) => {
+		const { deps } = dependencies({ course: "course", slug });
+		const result = await frontmatter(lessonPage, deps, "undefined");
+		expect(result.status).toBe(404);
 	});
 	it("navigates between published lessons and tags the page with what it shows", async () => {
 		const { deps, cacheCalls } = dependencies({
@@ -593,7 +616,7 @@ describe("authored course contracts", () => {
 		const source = read("src/pages/courses/[course]/[slug].astro");
 		expect(source).toContain("video={module.data.video.id}");
 		expect(source).toContain(
-			'thumbnailUrl={module.data.video.thumbnailUrl || module.data.video.poster || ""}',
+			"thumbnailUrl={getVideoThumbnailUrl(module.data.video.id)}",
 		);
 	});
 	// The authored-prose contracts that used to read content/courses/**/*.mdx

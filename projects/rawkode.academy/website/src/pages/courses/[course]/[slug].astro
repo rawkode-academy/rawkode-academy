@@ -18,7 +18,10 @@ import CourseSignupForm from "@/components/courses/CourseSignupForm.astro";
 import ResourceList from "@/components/courses/ResourceList.vue";
 import VideoPlayer from "@/components/video/player.vue";
 import Page from "@/wrappers/page.astro";
-import { getCourseModuleSlug } from "@/utils/course-path";
+import {
+	getCourseModuleSlug,
+	getUnnumberedLessonSlug,
+} from "@/utils/course-path";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 
 export const prerender = false;
@@ -35,6 +38,21 @@ const [course, module] = await Promise.all([
 	getEntry("courses", courseId),
 	getEntry("courseModules", `${courseId}/${lessonSlug}`),
 ]);
+
+// An old numbered URL ("01-introduction") moves to the lesson's current slug.
+const unnumberedSlug = getUnnumberedLessonSlug(lessonSlug);
+if (course && !module && unnumberedSlug) {
+	const lesson = await getEntry(
+		"courseModules",
+		`${courseId}/${unnumberedSlug}`,
+	);
+	if (lesson && !lesson.data.draft && lesson.data.course.id === course.id) {
+		return new Response(null, {
+			status: 301,
+			headers: { Location: `/courses/${courseId}/${unnumberedSlug}` },
+		});
+	}
+}
 
 if (!course || !module || module.data.course.id !== course.id) {
 	return new Response(null, { status: 404 });
