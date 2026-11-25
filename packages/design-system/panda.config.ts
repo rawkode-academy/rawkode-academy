@@ -176,6 +176,8 @@ export default defineConfig({
 						value: "academy-live-pulse 1.8s ease-in-out infinite",
 					},
 					"academy-spinner": { value: "academy-spinner 1s linear infinite" },
+					// The headline's typing caret: on, then off, with no fade.
+					"academy-caret": { value: "academy-caret 1.06s steps(1, end) infinite" },
 					"academy-rise": {
 						value: "academy-rise 720ms cubic-bezier(0.22, 1, 0.36, 1) both",
 					},
@@ -218,6 +220,10 @@ export default defineConfig({
 				},
 				"academy-spinner": {
 					to: { transform: "rotate(360deg)" },
+				},
+				"academy-caret": {
+					"0%, 100%": { opacity: "1" },
+					"50%": { opacity: "0" },
 				},
 				"academy-rise": {
 					from: { opacity: "0", transform: "translateY(0.75rem)" },

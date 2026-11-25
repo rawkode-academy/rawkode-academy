@@ -38,6 +38,8 @@ export const academyPage = sva({
 		"title",
 		"titleLine",
 		"titleAccent",
+		"titleTyped",
+		"titleRest",
 		"lede",
 		"heroLede",
 		"indexBand",
@@ -167,7 +169,7 @@ export const academyPage = sva({
 			...inkSurface,
 			// The statement's size, shared with the cap-height offset below. Two
 			// lines on a laptop, so the lede and the pair below stay in view.
-			"--academy-hero-title": "clamp(2rem, 8.4vw, 4.5rem)",
+			"--academy-hero-title": "clamp(1.75rem, 8.4vw, 4.5rem)",
 			paddingBlockStart: "10",
 			// On phones the foot holds one lattice row for the living system:
 			// half a cell clear of the lede, one cell of lattice, and room for a
@@ -226,6 +228,41 @@ export const academyPage = sva({
 			_motionReduce: { animation: "none" },
 		},
 		titleAccent: { color: "academy.inkAccent" },
+		// The topic that types itself. Its width is the longest topic's, so the
+		// line, and the living system beside it, never move as the text does.
+		// The caret is added by the script: without it the first topic is
+		// simply the statement.
+		titleTyped: {
+			color: "academy.inkAccent",
+			"&::after": {
+				content: "[attr(data-widest)]",
+				display: "block",
+				height: "0",
+				overflow: "hidden",
+				visibility: "hidden",
+			},
+			"& [data-caret]": {
+				display: "inline-block",
+				width: "[0.06em]",
+				height: "[0.82em]",
+				marginInlineStart: "[0.08em]",
+				verticalAlign: "[-0.04em]",
+				backgroundColor: "academy.inkAccent",
+				animation: "academy-caret",
+				_motionReduce: { animation: "none" },
+			},
+		},
+		// What follows the topic, set quieter than the topic so the line reads
+		// as one sentence with a changing subject.
+		titleRest: {
+			fontSize: "[max(1.125rem, 0.46em)]",
+			fontWeight: "semibold",
+			letterSpacing: "[-0.02em]",
+			lineHeight: "[1.25]",
+			marginTop: "[0.4em]",
+			color: "academy.inkTextSoft",
+			textWrap: "balance",
+		},
 		lede: { ...ledeText, color: "academy.textSoft" },
 		heroLede: {
 			...ledeText,
