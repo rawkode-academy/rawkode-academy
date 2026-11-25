@@ -17,7 +17,7 @@
       devShells = forAllSystems (system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
-          # basin/relabel-history.py. Partitioned writes need pyiceberg-core.
+          # Local one-off table rewrites (PyIceberg). Partitioned writes need pyiceberg-core.
           python = pkgs.python3.withPackages (p: [
             p.pyarrow
             p.pyiceberg
