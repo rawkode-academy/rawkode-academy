@@ -51,7 +51,7 @@ export function mountTypewriter(target: HTMLElement) {
 			}
 			await sleep(GAP_MS);
 			index = (index + 1) % topics.length;
-			const next: string = topics[index];
+			const next = topics[index] ?? "";
 			for (let at = 1; at <= next.length; at++) {
 				label.textContent = next.slice(0, at);
 				await sleep(TYPE_MS);
