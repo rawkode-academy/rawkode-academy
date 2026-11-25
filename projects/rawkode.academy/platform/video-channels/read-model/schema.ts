@@ -60,12 +60,14 @@ export const getSchema = (env: { DB: D1Database }): GraphQLSchema => {
 			// The video's YouTube id.
 			youtubeId: f.string({
 				nullable: true,
-				resolve: (video) =>
-					db
+				resolve: async (video) => {
+					const row = await db
 						.select({ externalId: t.externalId })
 						.from(t)
 						.where(and(eq(t.videoId, video.id), eq(t.platform, "youtube")))
-						.get()?.externalId ?? null,
+						.get();
+					return row?.externalId ?? null;
+				},
 			}),
 			channels: f.field({
 				type: [VideoChannel],
