@@ -4,18 +4,18 @@ import (
 	"list"
 
 	"github.com/cuenv/cuenv/schema"
-	xNix "github.com/cuenv/cuenv/contrib/nix"
 )
 
 schema.#Project
 
 name: "rawkode-academy-platform-youtube-control"
+_flakeRoot: "../../../.."
 
-// Tasks run in this directory's flake.nix dev shell (Node, Python with
-// google-auth-oauthlib, gh), pinned by flake.lock, so nothing depends on
-// system or uv-downloaded toolchains (which don't run on NixOS).
-runtime: schema.#NixRuntime
-hooks: onEnter: nix: xNix.#NixFlake
+// Tasks run in the `youtube-control` dev shell from the root flake.nix (Node,
+// Python with google-auth-oauthlib, gh), pinned by the root flake.lock, so
+// nothing depends on system or uv-downloaded toolchains (which don't run on
+// NixOS).
+_nixShell: "youtube-control"
 
 let _t = tasks
 
@@ -42,7 +42,7 @@ env: {
 }
 
 let _npm = "npm ci --workspaces=false --no-audit --no-fund >/dev/null && "
-let _sources = ["src/**", "package.json", "package-lock.json", "wrangler.jsonc", "secrets.env", "flake.nix", "flake.lock"]
+let _sources = ["src/**", "package.json", "package-lock.json", "wrangler.jsonc", "secrets.env", schema.#ModuleFiles & {paths: ["flake.nix", "flake.lock", "nix/**"]}]
 
 ci: pipelines: default: {
 	environment: "production"

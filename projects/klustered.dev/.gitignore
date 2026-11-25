@@ -9,10 +9,6 @@ node_modules/
 .wrangler/
 .dev.vars
 
-# devenv
-.devenv*
-devenv.local.nix
-
 # Local env
 .env
 .env.local

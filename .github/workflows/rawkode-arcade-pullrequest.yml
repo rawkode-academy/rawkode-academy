@@ -15,8 +15,6 @@ on:
     - projects/rawkode.arcade/*.cue
     - projects/rawkode.arcade/astro.config.mts
     - projects/rawkode.arcade/astro.config.mts/**
-    - projects/rawkode.arcade/devenv.nix
-    - projects/rawkode.arcade/devenv.nix/**
     - projects/rawkode.arcade/e2e/**
     - projects/rawkode.arcade/env.cue
     - projects/rawkode.arcade/env.cue/**

@@ -3,6 +3,9 @@ on:
   pull_request:
     paths:
       - 'projects/rawkode.academy/identity/**'
+      - 'flake.nix'
+      - 'flake.lock'
+      - 'nix/**'
       - '.github/workflows/rawkode-academy-identity-flake-pr.yml'
       - 'bun.lock'
       - 'cuenv.lock'
@@ -19,8 +22,7 @@ jobs:
           curl -fsSL -o /tmp/cuenv https://github.com/cuenv/cuenv/releases/download/0.81.1/cuenv-linux-x64
           chmod +x /tmp/cuenv
           /tmp/cuenv sync -A
-      - name: Validate the identity flake
-        working-directory: projects/rawkode.academy/identity
+      - name: Validate the root flake
         run: nix flake check --no-build
       - name: Install workspace dependencies in the flake shell
         run: /tmp/cuenv exec -- bun install --frozen-lockfile

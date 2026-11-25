@@ -80,6 +80,8 @@ cuenv task build     # Run build task
 
 If no `env.cue` exists, use `bun run <script>` directly.
 
+**Dev shells are layered Nix flakes.** One root `flake.nix` (+ `flake.lock`) provides the shells; `nix/base.nix` is the base every project inherits (`default`: Bun, Node, nixd, nixfmt, workerd patch). A directory that needs more ships a `devshell.nix` (`{ pkgs, base }: pkgs.mkShell { inputsFrom = [ base ]; packages = [...]; }`), registers it in `flake.nix`'s `shells`, and sets `_nixShell: "<name>"` in its `env.cue`. Every project's `env.cue` also sets `_flakeRoot` (relative path to the repo root) so cuenv finds the lock. After changing `flake.lock`, run `cuenv sync -A` and commit `cuenv.lock`. There is no devenv.
+
 **After adding or changing a cuenv-managed service** (any directory with an `env.cue`/`service.cue`), run `cuenv sync -A` at the repo root to materialize generated files (`wrangler.jsonc`, `package.json`, `http/main.ts`, `drizzle.config.ts`) so the Bun workspace and typechecks resolve.
 
 ## Common Commands

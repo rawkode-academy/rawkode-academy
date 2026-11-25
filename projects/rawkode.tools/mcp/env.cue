@@ -4,17 +4,15 @@ import (
 	"list"
 
 	"github.com/cuenv/cuenv/schema"
-	xNix "github.com/cuenv/cuenv/contrib/nix"
 )
 
 schema.#Project
 
 name: "rawkode-tools-mcp"
+_flakeRoot: "../../.."
 
-// Tasks run in this directory's flake.nix dev shell (Node), pinned by
-// flake.lock.
-runtime: schema.#NixRuntime
-hooks: onEnter: nix: xNix.#NixFlake
+// Tasks run in the base dev shell from the root flake.nix (Node, Bun), pinned
+// by the root flake.lock.
 
 let _t = tasks
 
@@ -42,7 +40,7 @@ env: {
 }
 
 let _npm = "npm ci --workspaces=false --no-audit --no-fund >/dev/null && "
-let _sources = ["src/**", "package.json", "package-lock.json", "wrangler.jsonc", "secrets.env", "flake.nix", "flake.lock"]
+let _sources = ["src/**", "package.json", "package-lock.json", "wrangler.jsonc", "secrets.env", schema.#ModuleFiles & {paths: ["flake.nix", "flake.lock", "nix/**"]}]
 
 ci: pipelines: default: {
 	environment: "production"

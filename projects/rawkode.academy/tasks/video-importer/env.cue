@@ -5,6 +5,9 @@ import "github.com/cuenv/cuenv/schema"
 schema.#Project
 
 name: "rawkode-academy-task-video-importer"
+_flakeRoot: "../../../.."
+
+_nixShell: "video-importer"
 
 env: {
 	VIDEOS_ENDPOINT:    "https://0aeb879de8e3cdde5fb3d413025222ce.eu.r2.cloudflarestorage.com"

@@ -2,15 +2,15 @@ package cuenv
 
 import (
 	"github.com/cuenv/cuenv/schema"
-	xNix "github.com/cuenv/cuenv/contrib/nix"
 )
 
 schema.#Project
 
 name: "rawkode-academy-identity"
+_flakeRoot: "../../.."
 
-runtime: schema.#NixRuntime
-hooks: onEnter: nix: xNix.#NixFlake
+// Tasks run in the `identity` dev shell from the root flake.nix.
+_nixShell: "identity"
 
 let _t = tasks
 
@@ -51,8 +51,7 @@ tasks: {
 			args: ["x", "wrangler", "dev"]
 			inputs: [
 				"astro.config.mjs",
-				"flake.nix",
-				"flake.lock",
+				schema.#ModuleFiles & {paths: ["flake.nix", "flake.lock", "nix/**"]},
 				"bun.lock",
 				"package.json",
 				"src/**",
@@ -66,7 +65,7 @@ tasks: {
 			hermetic: false
 			command:  "identity-bun"
 			args: ["x", "wrangler", "d1", "migrations", "apply", "identity", "--remote"]
-			inputs: ["migrations/**", "wrangler.jsonc", "package.json", "flake.nix", "flake.lock"]
+			inputs: ["migrations/**", "wrangler.jsonc", "package.json", schema.#ModuleFiles & {paths: ["flake.nix", "flake.lock", "nix/**"]}]
 		}
 	}
 
@@ -74,7 +73,7 @@ tasks: {
 		hermetic: false
 		command:  "bash"
 		args: ["scripts/diagnose-operator.sh"]
-		inputs: ["scripts/diagnose-operator.sh", "wrangler.jsonc", "package.json", "flake.nix", "flake.lock"]
+		inputs: ["scripts/diagnose-operator.sh", "wrangler.jsonc", "package.json", schema.#ModuleFiles & {paths: ["flake.nix", "flake.lock", "nix/**"]}]
 	}
 
 	build: schema.#Task & {
@@ -83,8 +82,7 @@ tasks: {
 		args: ["run", "build"]
 		inputs: [
 			"astro.config.mjs",
-			"flake.nix",
-			"flake.lock",
+			schema.#ModuleFiles & {paths: ["flake.nix", "flake.lock", "nix/**"]},
 			"bun.lock",
 			"package.json",
 			"src/**",
@@ -98,8 +96,7 @@ tasks: {
 		dependsOn: [_t.migrations.remote, _t.build]
 		inputs: [
 			"astro.config.mjs",
-			"flake.nix",
-			"flake.lock",
+			schema.#ModuleFiles & {paths: ["flake.nix", "flake.lock", "nix/**"]},
 			"bun.lock",
 			"migrations/**",
 			"package.json",

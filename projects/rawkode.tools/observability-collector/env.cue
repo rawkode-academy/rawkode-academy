@@ -4,24 +4,22 @@ import (
 	"list"
 
 	"github.com/cuenv/cuenv/schema"
-	xNix "github.com/cuenv/cuenv/contrib/nix"
 )
 
 schema.#Project
 
 name: "rawkode-tools-observability-collector"
+_flakeRoot: "../../.."
 
-// Tools (Bun, Node, curl, and Python with PyIceberg for basin/) come from
-// flake.nix, locally and in CI.
-runtime: schema.#NixRuntime
-hooks: onEnter: nix: xNix.#NixFlake
+// Tools (Bun, Node, curl, and Python with PyIceberg for basin/) come from the
+// `observability-collector` dev shell in the root flake.nix, locally and in CI.
+_nixShell: "observability-collector"
 
 let _t = tasks
 
 let _deployInputs = [
 	"env.cue",
-	"flake.lock",
-	"flake.nix",
+	schema.#ModuleFiles & {paths: ["flake.nix", "flake.lock", "nix/**"]},
 	"package.json",
 	"src/**",
 	"wrangler.jsonc",

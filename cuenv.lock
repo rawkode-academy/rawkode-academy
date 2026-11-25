@@ -1,28 +1,424 @@
 version = 5
 
+[runtimes."infrastructure/bootstrap"]
+type = "nix"
+flake = "../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "infrastructure/bootstrap/../../flake.lock"
+
+[runtimes."infrastructure/dns"]
+type = "nix"
+flake = "../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "infrastructure/dns/../../flake.lock"
+
+[runtimes."packages/design-system"]
+type = "nix"
+flake = "../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "packages/design-system/../../flake.lock"
+
+[runtimes."presentations/lets-meet-cdktf-python"]
+type = "nix"
+flake = "../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "presentations/lets-meet-cdktf-python/../../flake.lock"
+
+[runtimes."projects/cloudnativecompass.fm"]
+type = "nix"
+flake = "../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/cloudnativecompass.fm/../../flake.lock"
+
+[runtimes."projects/klustered.dev"]
+type = "nix"
+flake = "../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/klustered.dev/../../flake.lock"
+
+[runtimes."projects/rawkode.academy/api"]
+type = "nix"
+flake = "../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/api/../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/content"]
+type = "nix"
+flake = "../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/content/../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/games/secrets-of-kubernetes/achievements"]
+type = "nix"
+flake = "../../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/games/secrets-of-kubernetes/achievements/../../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/games/secrets-of-kubernetes/leaderboard"]
+type = "nix"
+flake = "../../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/games/secrets-of-kubernetes/leaderboard/../../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/games/secrets-of-kubernetes/player-learned-phrases"]
+type = "nix"
+flake = "../../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/games/secrets-of-kubernetes/player-learned-phrases/../../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/games/secrets-of-kubernetes/player-stats"]
+type = "nix"
+flake = "../../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/games/secrets-of-kubernetes/player-stats/../../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/games/secrets-of-kubernetes/share-cards"]
+type = "nix"
+flake = "../../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/games/secrets-of-kubernetes/share-cards/../../../../../flake.lock"
+
 [runtimes."projects/rawkode.academy/identity"]
 type = "nix"
-flake = "."
+flake = "../../.."
+output = "identity"
 digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
-lockfile = "projects/rawkode.academy/identity/./flake.lock"
+lockfile = "projects/rawkode.academy/identity/../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/achievements"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/achievements/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/adrs"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/adrs/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/brackets"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/brackets/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/changelog"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/changelog/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/chapters"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/chapters/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/courses"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/courses/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/email-preferences"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/email-preferences/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/email-service"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/email-service/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/emoji-reactions"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/emoji-reactions/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/episodes"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/episodes/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/image-service"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/image-service/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/leaderboard"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/leaderboard/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/news"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/news/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/notifications"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/notifications/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/people"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/people/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/people-biographies"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/people-biographies/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/people-links"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/people-links/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/show-hosts"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/show-hosts/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/shows"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/shows/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/studio-recording-ingest"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/studio-recording-ingest/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/supporters"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/supporters/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/technologies"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/technologies/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/testimonials"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/testimonials/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/transcription-terms"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/transcription-terms/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/transcriptions"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/transcriptions/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/video-channels"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/video-channels/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/video-collaborations"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/video-collaborations/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/video-guests"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/video-guests/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/video-technologies"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/video-technologies/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/video-thumbnails"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/video-thumbnails/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/videos"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/videos/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/watch-history"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/watch-history/../../../../flake.lock"
 
 [runtimes."projects/rawkode.academy/platform/youtube-control"]
 type = "nix"
-flake = "."
+flake = "../../../.."
+output = "youtube-control"
 digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
-lockfile = "projects/rawkode.academy/platform/youtube-control/./flake.lock"
+lockfile = "projects/rawkode.academy/platform/youtube-control/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/platform/zitadel-zulip-connector"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/platform/zitadel-zulip-connector/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/tasks/random-social-post"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/tasks/random-social-post/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/tasks/remove-content-prefix"]
+type = "nix"
+flake = "../../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/tasks/remove-content-prefix/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/tasks/video-importer"]
+type = "nix"
+flake = "../../../.."
+output = "video-importer"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/tasks/video-importer/../../../../flake.lock"
+
+[runtimes."projects/rawkode.academy/website"]
+type = "nix"
+flake = "../../.."
+output = "website"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.academy/website/../../../flake.lock"
+
+[runtimes."projects/rawkode.arcade"]
+type = "nix"
+flake = "../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.arcade/../../flake.lock"
+
+[runtimes."projects/rawkode.cloud"]
+type = "nix"
+flake = "../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.cloud/../../flake.lock"
+
+[runtimes."projects/rawkode.link"]
+type = "nix"
+flake = "../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.link/../../flake.lock"
+
+[runtimes."projects/rawkode.news"]
+type = "nix"
+flake = "../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.news/../../flake.lock"
+
+[runtimes."projects/rawkode.studio"]
+type = "nix"
+flake = "../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.studio/../../flake.lock"
 
 [runtimes."projects/rawkode.tools/mcp"]
 type = "nix"
-flake = "."
+flake = "../../.."
+output = "default"
 digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
-lockfile = "projects/rawkode.tools/mcp/./flake.lock"
+lockfile = "projects/rawkode.tools/mcp/../../../flake.lock"
 
 [runtimes."projects/rawkode.tools/observability-collector"]
 type = "nix"
-flake = "."
-digest = "sha256:42ce3afcf3774deb29fdf77002bcb4d0e43ded8a1626404dd30e77ce81c0aab6"
-lockfile = "projects/rawkode.tools/observability-collector/./flake.lock"
+flake = "../../.."
+output = "observability-collector"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.tools/observability-collector/../../../flake.lock"
+
+[runtimes."projects/rawkode.tools/star-catcher"]
+type = "nix"
+flake = "../../.."
+output = "default"
+digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
+lockfile = "projects/rawkode.tools/star-catcher/../../../flake.lock"
 
 [vcs.cuenv-skills]
 url = "https://github.com/cuenv/cuenv.git"
