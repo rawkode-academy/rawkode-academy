@@ -138,16 +138,15 @@ export async function guestTotals(
 	basin: BasinConfig,
 	username: string,
 ): Promise<GuestTotals | undefined> {
-	const videos = await cachedJson("videos", async () => {
+	const videosPending = cachedJson("videos", async () => {
 		const data = await queryGateway<unknown>(env, GUEST_SCOPE_QUERY);
 		const parsed = parseAcademyVideos(data);
 		if (!parsed) throw new Error("Academy video list unusable");
 		return parsed;
 	});
-	const mine = visibleEpisodes(videos, username);
-	if (mine.length === 0) return undefined;
-
-	const lake = await cachedJson<LakeVideo[]>("lake", async () =>
+	// Start the catalogue query alongside the gateway query; it is cached for
+	// everyone, so a non-guest pays nothing extra on a warm cache.
+	const lakePending = cachedJson<LakeVideo[]>("lake", async () =>
 		(await basinQuery(basin, lakeCatalogueSql, { ttlSeconds: CACHE_SECONDS }))
 			.flatMap((row) =>
 				typeof row.video === "string" && typeof row.title === "string"
@@ -155,6 +154,9 @@ export async function guestTotals(
 					: [],
 			),
 	);
+	const [videos, lake] = await Promise.all([videosPending, lakePending]);
+	const mine = visibleEpisodes(videos, username);
+	if (mine.length === 0) return undefined;
 	const ids = youtubeIds(videos, lake);
 	const tracked = [
 		...new Set(
