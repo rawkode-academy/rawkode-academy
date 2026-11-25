@@ -495,18 +495,19 @@ def ids(table, where=None) -> set[str]:
 
 def to_arrow(events: list[dict], table):
 	"""Rows in the table's own columns: the five the pipeline writes, plus
-	__ingest_ts (the event's time) so relabel and scrub filters cover them."""
+	__ingest_ts (now, the real ingestion time)."""
 	import pyarrow as pa
 
 	events = sorted(events, key=lambda event: event["time"])
 	times = [parse_time(e["time"]).replace(tzinfo=None) for e in events]
+	ingested = datetime.now(timezone.utc).replace(tzinfo=None)
 	values = {
 		"event_id": [e["id"] for e in events],
 		"event_type": [e["type"] for e in events],
 		"event_source": [e["source"] for e in events],
 		"event_time": times,
 		"value": [json.dumps(e, separators=(",", ":"), ensure_ascii=False) for e in events],
-		"__ingest_ts": times,
+		"__ingest_ts": [ingested] * len(events),
 	}
 	target = table.schema().as_arrow()
 	unknown = [field.name for field in target if field.name not in values]

@@ -81,6 +81,7 @@ const basinRows = await basin(`
 	SELECT to_char(date_trunc('day', event_time), '%Y-%m-%d') AS day, ${ARCHIVE_EVENT} AS event, count(*) AS c
 	FROM ${TABLE}
 	WHERE event_time >= CAST('${fromIso}' AS TIMESTAMP) AND event_time < CAST('${toIso}' AS TIMESTAMP)
+		AND COALESCE(json_get_str(value, 'botbackfill'), '') <> 'posthog-import'
 	GROUP BY 1, 2`);
 
 const ph: Counts = new Map();
