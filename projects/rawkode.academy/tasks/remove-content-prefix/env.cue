@@ -5,7 +5,6 @@ import "github.com/cuenv/cuenv/schema"
 schema.#Project
 
 name: "rawkode-academy-task-remove-content-prefix"
-_flakeRoot: "../../../.."
 
 env: {
 	R2_BUCKET_NAME: "rawkode-academy-content"

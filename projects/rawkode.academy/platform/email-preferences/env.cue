@@ -5,7 +5,6 @@ import "github.com/cuenv/cuenv/schema"
 schema.#Project
 
 name: "rawkode-academy-platform-email-preferences"
-_flakeRoot: "../../../.."
 
 env: {
 	SERVICE_NAME: "email-preferences"

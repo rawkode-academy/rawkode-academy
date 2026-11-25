@@ -9,6 +9,9 @@ dist
 # Direnv
 .direnv
 
+# Devenv
+.devenv*
+
 # GraphQL Generated Client
 ./src/gql
 

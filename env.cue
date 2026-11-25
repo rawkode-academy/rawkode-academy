@@ -3,6 +3,7 @@ package cuenv
 import (
 	"github.com/cuenv/cuenv/schema"
 	c "github.com/cuenv/cuenv/contrib/contributors"
+	xNix "github.com/cuenv/cuenv/contrib/nix"
 )
 
 let _removeDeterminateReceipt = """
@@ -73,19 +74,14 @@ config: ci: cuenv: {
 	}
 }
 
-// Every project runs in a Nix dev shell from the root flake.nix, activated by
-// cuenv's Nix runtime. A project without its own shell gets `default`, the base
-// shell. A project that needs more ships a devshell.nix (layered on the base
-// with inputsFrom), registers it in the root flake.nix, and names it here:
-// `_nixShell: "website"`.
-_nixShell: *"default" | string
+runtime: *schema.#DevenvRuntime | schema.#NixRuntime
 
-// Relative path from the project directory to the repository root (where
-// flake.nix and flake.lock live). cuenv reads the lock from there, so each
-// project sets it: `_flakeRoot: "../.."`.
-_flakeRoot: *"." | string
+let _shellHooks = {
+	devenv: {devenv: schema.#Devenv}
+	nix: {nix: xNix.#NixFlake}
+}
 
-runtime: schema.#NixRuntime & {flake: _flakeRoot, output: _nixShell}
+hooks: onEnter: _shellHooks[runtime.type]
 
 // A project may set _ciRequireReport to its repository-relative path. `cuenv
 // ci` skips a project whose env.cue fails to evaluate and still exits 0, so the
