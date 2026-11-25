@@ -110,7 +110,7 @@ const show = (value: number | undefined, prefix = "") =>
 	<EditorialShell
 		eyebrow="Members"
 		title="Reach"
-		lede={`Rawkode Academy over the last ${REACH_DAYS} days, across the website and YouTube.`}
+		lede={`Last ${REACH_DAYS} days`}
 	>
 		<dl class="stats">
 			<div><dt>Visits</dt><dd>{show(visits, "~")}</dd></div>
@@ -121,17 +121,6 @@ const show = (value: number | undefined, prefix = "") =>
 				{missing.length > 0 && <p class="missing">Unavailable: {missing.map((source) => source.name).join(", ")}.</p>}
 			</div>
 		</dl>
-
-		<section class="method">
-			<h2>How these are counted</h2>
-			<p>
-				Visits are approximate distinct anonymous browsers on rawkode.academy, so one
-				person on two devices counts twice. Views are website page views plus YouTube
-				views. Subs are YouTube subscribers (rounded by YouTube), site accounts and mailing-list members
-				without an account, so nobody is counted twice. Automated traffic is removed from the
-				website figures. YouTube runs a few days behind. Nothing here identifies a person or a video.
-			</p>
-		</section>
 	</EditorialShell>
 </Page>
 
@@ -159,15 +148,5 @@ const show = (value: number | undefined, prefix = "") =>
 		margin: 0.25rem 0 0;
 		font-size: 0.8125rem;
 		color: var(--colors-academy-text-muted);
-	}
-	.method {
-		border-top: 1px solid var(--colors-academy-border);
-		padding-block: 1rem 2rem;
-		color: var(--colors-academy-text-soft);
-		max-width: 44rem;
-	}
-	.method h2 {
-		font-size: 1.125rem;
-		margin-block-end: 0.25rem;
 	}
 </style>
