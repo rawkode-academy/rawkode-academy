@@ -319,5 +319,35 @@ infrastructure: {
 				value:        infrastructure.resources.sql_read_token.outputs.value
 			}
 		}
+
+		// Secret paths mirror the repository layout (dots in directory names
+		// become dashes). Each project that reads a Basin token gets its own
+		// copy, so no project reads another's folder. The /projects/basin
+		// resources above go once every consumer has moved.
+		collector_catalog_token_secret: infisical_secret.#Resource & {
+			configuration: {
+				workspace_id: _infisicalSecret.projectId
+				env_slug:     _infisicalSecret.environment
+				folder_path:  "/projects/rawkode-tools/observability-collector"
+				name:         "BASIN_CATALOG_TOKEN"
+				value:        infrastructure.resources.catalog_token.outputs.value
+			}
+		}
+
+		for project, path in {
+			"collector": "/projects/rawkode-tools/observability-collector"
+			"mcp":       "/projects/rawkode-tools/mcp"
+			"website":   "/projects/rawkode-academy/website"
+		} {
+			"\(project)_sql_read_token_secret": infisical_secret.#Resource & {
+				configuration: {
+					workspace_id: _infisicalSecret.projectId
+					env_slug:     _infisicalSecret.environment
+					folder_path:  path
+					name:         "BASIN_SQL_TOKEN"
+					value:        infrastructure.resources.sql_read_token.outputs.value
+				}
+			}
+		}
 	}
 }
