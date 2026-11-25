@@ -6,9 +6,6 @@ schema.#Project
 
 name: "rawkode-academy-website"
 
-_shell: "nix"
-runtime: schema.#NixRuntime
-
 // deploy.main and deploy.preview read BASIN_SQL_TOKEN from Infisical.
 _ciInfisicalOidc: true
 

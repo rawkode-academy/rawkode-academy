@@ -64,8 +64,6 @@ jobs:
             rm -f /nix/receipt.json
           fi
         fi
-    - name: Add Bun from flakes/bun to PATH
-      run: nix develop "path:$GITHUB_WORKSPACE/flakes/bun" --command bash -c 'dirname "$(command -v bun)"' >> "$GITHUB_PATH"
     - name: Setup cuenv (release)
       run: |-
         platform="$(uname -s)-$(uname -m)"
@@ -75,7 +73,7 @@ jobs:
           Darwin-arm64) cuenv_asset="cuenv-darwin-arm64" ;;
           *) echo "Unsupported platform: $platform" >&2; exit 1 ;;
         esac
-        cuenv_version="0.81.2"
+        cuenv_version="0.81.3"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi

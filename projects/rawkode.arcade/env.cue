@@ -6,9 +6,6 @@ schema.#Project
 
 name: "rawkode-arcade"
 
-_shell: "nix"
-runtime: schema.#NixRuntime
-
 let _t = tasks
 
 ci: pipelines: {

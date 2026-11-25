@@ -6,10 +6,6 @@ schema.#Project
 
 name: "rawkode-academy-design-system"
 
-runtime: schema.#NixRuntime & {
-	flake: "path:../../flakes/bun"
-}
-
 let _t = tasks
 
 ci: pipelines: {

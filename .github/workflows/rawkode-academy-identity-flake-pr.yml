@@ -16,17 +16,13 @@ jobs:
       - uses: DeterminateSystems/determinate-nix-action@v3
       - name: Install cuenv and sync
         run: |
-          curl -fsSL -o /tmp/cuenv https://github.com/cuenv/cuenv/releases/download/0.81.2/cuenv-linux-x64
+          curl -fsSL -o /tmp/cuenv https://github.com/cuenv/cuenv/releases/download/0.81.3/cuenv-linux-x64
           chmod +x /tmp/cuenv
           /tmp/cuenv sync -A
       - name: Validate the identity flake
         working-directory: projects/rawkode.academy/identity
         run: nix flake check --no-build
-      # Run from the identity project so cuenv enters its flake shell. The
-      # repository root has no runtime, and Bun installs the whole workspace
-      # from any member.
-      - name: Install workspace dependencies in the flake shell
-        working-directory: projects/rawkode.academy/identity
+      - name: Install workspace dependencies in the root flake shell
         run: /tmp/cuenv exec -- bun install --frozen-lockfile
       - name: Build with cuenv's Nix runtime
         run: /tmp/cuenv task --path projects/rawkode.academy/identity build

@@ -6,9 +6,6 @@ schema.#Project
 
 name: "klustered-dev"
 
-_shell: "nix"
-runtime: schema.#NixRuntime
-
 let _t = tasks
 // CI tasks resolve their tools through Nix directly, the way the platform
 // services do, instead of relying on the Nix dev shell being materialised on

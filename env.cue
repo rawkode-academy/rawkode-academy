@@ -17,9 +17,8 @@ let _removeDeterminateReceipt = """
 	"""
 
 // Cache the Nix store on the Namespace runner's persistent volume and install
-// Determinate Nix on top, then put the repository's pinned Bun on PATH.
-// Replaces the stock `c.#Nix` contributor so the cache, receipt cleanup,
-// install and Bun steps stay in a single ordered group.
+// Determinate Nix on top. Replaces the stock `c.#Nix` contributor so the cache,
+// receipt cleanup and install steps stay in a single ordered group.
 let _NamespaceNix = schema.#Contributor & {
 	id: "namespaceNix"
 	tasks: [
@@ -56,18 +55,6 @@ let _NamespaceNix = schema.#Contributor & {
 			dependsOn: ["namespaceNix.install"]
 			script: _removeDeterminateReceipt
 		},
-		{
-			// `cuenv exec` at the repository root has no runtime, so the
-			// workspace install and any task that calls bun directly get
-			// the Bun that flakes/bun pins.
-			id:       "namespaceNix.bun"
-			label:    "Add Bun from flakes/bun to PATH"
-			priority: 4
-			dependsOn: ["namespaceNix.cleanupReceipt"]
-			script: """
-				nix develop "path:$GITHUB_WORKSPACE/flakes/bun" --command bash -c 'dirname "$(command -v bun)"' >> "$GITHUB_PATH"
-				"""
-		},
 	]
 }
 
@@ -80,30 +67,17 @@ _cuenvBinary?: string
 config: ci: cuenv: {
 	source: "release"
 	if _cuenvBinary == _|_ {
-		version: "0.81.2"
+		version: "0.81.3"
 	}
 	if _cuenvBinary != _|_ {
 		version: _cuenvBinary
 	}
 }
 
-_shell: *"bun" | "nix"
-
-let _shellHooks = {
-	bun: {nix: schema.#ExecHook & {
-		order:     10
-		propagate: false
-		command:   "bash"
-		args: ["-ec", """
-			root="$(git rev-parse --show-toplevel)"
-			exec nix print-dev-env "path:$root/flakes/bun"
-			"""]
-		source: true
-	}}
-	nix: {nix: xNix.#NixFlake}
-}
-
-hooks: onEnter: _shellHooks[_shell]
+// Every project runs in a Nix dev shell. A project with its own flake.nix uses
+// it; every other project, and the repository root, resolves to the root flake.
+runtime: schema.#NixRuntime
+hooks: onEnter: nix: xNix.#NixFlake
 
 // A project may set _ciRequireReport to its repository-relative path. `cuenv
 // ci` skips a project whose env.cue fails to evaluate and still exits 0, so the
