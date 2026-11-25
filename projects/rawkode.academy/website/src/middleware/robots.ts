@@ -2,7 +2,7 @@ import type { MiddlewareHandler } from "astro";
 
 const ALLOW_INDEX_PREFIXES = ["/api/feeds/"];
 const NOINDEX_PREFIXES = ["/api/", "/_server-islands/", "/internal/"];
-const NOINDEX_EXACT_PATHS = new Set(["/graphql", "/settings"]);
+const NOINDEX_EXACT_PATHS = new Set(["/graphql", "/settings", "/analytics"]);
 
 // Canonical production hostname plus loopback addresses used by local dev and
 // E2E preview servers. Everything else (www.rawkode.academy, *.workers.dev,
