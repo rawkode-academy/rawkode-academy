@@ -39,7 +39,9 @@ export const academyPage = sva({
 		"titleLine",
 		"titleAccent",
 		"titleTyped",
-		"titleRest",
+		"titlePhrase",
+		"titleSoft",
+		"titleMark",
 		"lede",
 		"heroLede",
 		"indexBand",
@@ -230,8 +232,8 @@ export const academyPage = sva({
 		titleAccent: { color: "academy.inkAccent" },
 		// The topic that types itself. Its width is the longest topic's, so the
 		// line, and the living system beside it, never move as the text does.
-		// The caret is added by the script: without it the first topic is
-		// simply the statement.
+		// The script adds the label and the caret: without it the first topic
+		// is simply the statement.
 		titleTyped: {
 			color: "academy.inkAccent",
 			"&::after": {
@@ -241,27 +243,62 @@ export const academyPage = sva({
 				overflow: "hidden",
 				visibility: "hidden",
 			},
+			// A topic is replaced the way an editor replaces a word: it is
+			// selected, in the accent that selection carries everywhere else,
+			// and the next one is typed over it.
+			"& [data-label]": {
+				marginInline: "[-0.05em]",
+				paddingInline: "[0.05em]",
+				borderRadius: "academy-s",
+				backgroundImage:
+					"[linear-gradient(var(--colors-academy-ink-accent), var(--colors-academy-ink-accent))]",
+				backgroundRepeat: "no-repeat",
+				backgroundPosition: "[left 60%]",
+				backgroundSize: "[0% 82%]",
+				transitionProperty: "[background-size, color]",
+				transitionDuration: "base",
+				transitionTimingFunction: "academy-out",
+			},
+			"& [data-label][data-selected]": {
+				backgroundSize: "[100% 82%]",
+				color: "academy.inkAccentForeground",
+			},
 			"& [data-caret]": {
 				display: "inline-block",
-				width: "[0.06em]",
-				height: "[0.82em]",
-				marginInlineStart: "[0.08em]",
-				verticalAlign: "[-0.04em]",
+				width: "[0.08em]",
+				height: "[0.84em]",
+				marginInlineStart: "[0.1em]",
+				verticalAlign: "[-0.06em]",
 				backgroundColor: "academy.inkAccent",
 				animation: "academy-caret",
 				_motionReduce: { animation: "none" },
 			},
 		},
-		// What follows the topic, set quieter than the topic so the line reads
-		// as one sentence with a changing subject.
-		titleRest: {
-			fontSize: "[max(1.125rem, 0.46em)]",
-			fontWeight: "semibold",
-			letterSpacing: "[-0.02em]",
-			lineHeight: "[1.25]",
-			marginTop: "[0.4em]",
-			color: "academy.inkTextSoft",
-			textWrap: "balance",
+		// The rest of the statement, at the statement's own scale: one phrase
+		// to a line from sm, running on as a sentence on phones.
+		titlePhrase: {
+			display: "inline",
+			_sm: { display: "block", width: "fit-content" },
+		},
+		// The concession is set back so the promise after it lands.
+		titleSoft: { color: "academy.inkTextMuted" },
+		// The word the statement turns on: a rule in the accent draws in under
+		// it once, after the statement has settled.
+		titleMark: {
+			position: "relative",
+			whiteSpace: "nowrap",
+			"&::after": {
+				content: '""',
+				position: "absolute",
+				insetInline: "0",
+				bottom: "[-0.04em]",
+				height: "[0.07em]",
+				backgroundColor: "academy.inkAccent",
+				transformOrigin: "left",
+				animation:
+					"[academy-progress 640ms cubic-bezier(0.22, 1, 0.36, 1) 520ms both]",
+				_motionReduce: { animation: "none" },
+			},
 		},
 		lede: { ...ledeText, color: "academy.textSoft" },
 		heroLede: {

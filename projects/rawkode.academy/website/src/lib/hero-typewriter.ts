@@ -3,12 +3,14 @@
  *
  * The first topic is already in the HTML, so the statement reads in full
  * without script and under reduced motion; this only types the others in
- * after it. It idles while the tab is hidden or the hero is off screen.
+ * after it, each one selected and typed over like a word in an editor. It
+ * idles while the tab is hidden or the hero is off screen.
  */
 const TYPE_MS = 55;
-const DELETE_MS = 28;
 const HOLD_MS = 2400;
-const GAP_MS = 320;
+/** The selection sweeps across the topic, then holds for a beat. */
+const SELECT_MS = 520;
+const GAP_MS = 180;
 
 export function mountTypewriter(target: HTMLElement) {
 	const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -22,6 +24,7 @@ export function mountTypewriter(target: HTMLElement) {
 		return;
 
 	const label = document.createElement("span");
+	label.dataset.label = "";
 	const caret = document.createElement("span");
 	caret.dataset.caret = "";
 	caret.setAttribute("aria-hidden", "true");
@@ -45,10 +48,11 @@ export function mountTypewriter(target: HTMLElement) {
 		while (true) {
 			await sleep(HOLD_MS);
 			await attended();
-			for (let at = label.textContent.length; at > 0; at--) {
-				label.textContent = label.textContent.slice(0, at - 1);
-				await sleep(DELETE_MS);
-			}
+			// Replace it as an editor would: select the word, then type over it.
+			label.dataset.selected = "";
+			await sleep(SELECT_MS);
+			label.textContent = "";
+			delete label.dataset.selected;
 			await sleep(GAP_MS);
 			index = (index + 1) % topics.length;
 			const next = topics[index] ?? "";
@@ -68,6 +72,7 @@ export function mountTypewriter(target: HTMLElement) {
 		if (!reduced.matches) return;
 		window.clearTimeout(timer);
 		label.textContent = String(topics[0]);
+		delete label.dataset.selected;
 		caret.remove();
 	});
 
