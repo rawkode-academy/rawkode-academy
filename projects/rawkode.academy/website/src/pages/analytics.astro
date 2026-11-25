@@ -206,6 +206,9 @@ const cards = [
 </Page>
 
 <style>
+	.editorial-card {
+		container-type: inline-size;
+	}
 	.card-label,
 	.section-title {
 		margin: 0 0 1rem;
@@ -232,11 +235,12 @@ const cards = [
 	.num {
 		margin: 0;
 		font-family: var(--fonts-academy-display);
-		font-size: clamp(1.5rem, 6.5vw, 2.25rem);
+		/* Sized to the card, so a seven-digit total fits two to a row. */
+		font-size: clamp(1.25rem, 7.5cqi, 2.25rem);
 		font-weight: 700;
 		line-height: 1.1;
 		font-variant-numeric: tabular-nums;
-		overflow-wrap: anywhere;
+		white-space: nowrap;
 		color: var(--colors-academy-text);
 	}
 	.unit {
