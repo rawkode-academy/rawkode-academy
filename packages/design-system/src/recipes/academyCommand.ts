@@ -9,7 +9,7 @@ export const academyCommand = sva({
 		header: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: "3", padding: "4", borderBottom: "hairline", borderColor: "academy.border" },
 		title: { fontFamily: "academy-display", fontWeight: "bold", fontSize: "lg" },
 		input: { width: "full", minHeight: "12", padding: "4", background: "academy.input", color: "academy.text", borderBottom: "hairline", borderColor: "academy.inputBorder", fontSize: "md", _placeholder: { color: "academy.textMuted" }, _focusVisible: focusRingInset },
-		list: { overflowY: "auto", maxHeight: "academy-command-list", padding: "2", overscrollBehavior: "contain" },
+		list: { overflowY: "auto", maxHeight: "academy-command-list", padding: "2", overscrollBehavior: "contain", pointerEvents: "auto !important" },
 		group: { padding: "3", fontFamily: "academy-mono", fontSize: "xs", color: "academy.textMuted", letterSpacing: "wide" },
 		item: { display: "flex", flexDirection: "column", gap: "1", padding: "3", borderRadius: "academy-s", color: "academy.text", cursor: "pointer", _hover: { background: "academy.ground" }, _highlighted: { background: "academy.ground", outline: "focus", outlineColor: "academy.accent", outlineOffset: "focus-inset" } },
 		label: { fontWeight: "semibold", fontSize: "sm", overflowWrap: "anywhere" },
