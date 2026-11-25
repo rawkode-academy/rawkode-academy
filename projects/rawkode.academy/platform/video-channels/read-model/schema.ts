@@ -13,7 +13,7 @@ export interface PothosTypes {
 
 const subgraph = {
 	linkUrl: "https://specs.apollo.dev/federation/v2.6",
-	federationDirectives: ["@extends", "@external", "@key", "@shareable"],
+	federationDirectives: ["@extends", "@external", "@key"],
 };
 
 const PLATFORM_ENUM = {
@@ -57,10 +57,9 @@ export const getSchema = (env: { DB: D1Database }): GraphQLSchema => {
 	VideoRef.implement({
 		externalFields: (f) => ({ id: f.string() }),
 		fields: (f) => ({
-			// The video's YouTube id. Replaces videos.youtubeId.
+			// The video's YouTube id.
 			youtubeId: f.string({
 				nullable: true,
-				shareable: true,
 				resolve: (video) =>
 					db
 						.select({ externalId: t.externalId })

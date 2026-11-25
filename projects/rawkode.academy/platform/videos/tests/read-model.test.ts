@@ -114,7 +114,7 @@ describe("videos read model", () => {
 
 	it("returns everything the website needs in one getAllVideos query", async () => {
 		const { getAllVideos } = await query(`{ getAllVideos { id slug title subtitle tagline description whatYouWillLearn
-			publishedAt updatedAt duration audioFileSize type category youtubeId streamUrl thumbnailUrl
+			publishedAt updatedAt duration audioFileSize type category streamUrl thumbnailUrl
 			realtimeKit { streamId meetingId livestreamName roomName }
 			resources { id title description type url filePath embedConfig category } } }`);
 		expect(getAllVideos).toHaveLength(11);
