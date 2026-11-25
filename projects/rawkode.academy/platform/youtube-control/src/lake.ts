@@ -58,6 +58,21 @@ export async function videoEvents(videos: Video[], channelId: string, fetchedAt 
   })));
 }
 
+// Channel totals (subscribers, lifetime views, video count) at fetch time:
+// one `youtube.channel_stats` event per sync. Unlike the daily reports these
+// are point-in-time totals; readers keep the latest `fetchedAt`.
+export async function channelStatsEvent(channelId: string, stats: { subscriberCount: number | null; viewCount: number; videoCount: number }, fetchedAt = new Date().toISOString()) {
+  return {
+    specversion: "1.0",
+    id: await hash(JSON.stringify([channelId, "channel_stats", fetchedAt])),
+    source: LAKE_SOURCE,
+    type: "youtube.channel_stats",
+    time: fetchedAt,
+    datacontenttype: "application/json",
+    data: { channelId, report: "channel_stats", fetchedAt, ...stats },
+  };
+}
+
 // Delivers events and counts what the collector accepted. A collector that
 // takes batches gets 50 events per RPC: one subrequest per batch instead of
 // one per event, which kept exhausting the Worker's subrequest limit across a

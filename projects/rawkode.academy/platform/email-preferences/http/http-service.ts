@@ -183,6 +183,24 @@ export class EmailPreferences extends WorkerEntrypoint<Env> {
 		}));
 	}
 
+	/**
+	 * Distinct people on a mailing list (newsletter or marketing), as counts only.
+	 * `accountKeyed` are signed-in accounts (also counted by identity);
+	 * `emailOnly` signed up with just an email address.
+	 */
+	async countSubscribers(): Promise<{ emailOnly: number; accountKeyed: number }> {
+		const row = await this.env.DB.prepare(
+			`SELECT
+				coalesce(sum(CASE WHEN user_id LIKE 'email:%' THEN 1 ELSE 0 END), 0) AS emailOnly,
+				coalesce(sum(CASE WHEN user_id LIKE 'learner:%' THEN 1 ELSE 0 END), 0) AS accountKeyed
+			FROM (SELECT DISTINCT user_id FROM email_preferences WHERE channel IN ('newsletter', 'marketing'))`,
+		).first<{ emailOnly: number; accountKeyed: number }>();
+		return {
+			emailOnly: Number(row?.emailOnly ?? 0),
+			accountKeyed: Number(row?.accountKeyed ?? 0),
+		};
+	}
+
 	private validatePayload(
 		payload: PreferencePayload,
 	):

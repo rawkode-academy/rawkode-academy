@@ -18,6 +18,7 @@ class Upstreams {
     if (url.hostname === "mock.internal" && url.pathname === "/collector-track") { this.lakeEvents.push(await request.json() as Json); return json({ success: true }); }
     if (url.hostname === "oauth2.googleapis.com") return this.revoked ? json({ error: "invalid_grant" }, 400) : json({ access_token: "access" });
     if (url.hostname === "www.googleapis.com" && url.pathname === "/youtube/v3/channels") {
+      if (url.searchParams.get("part") === "statistics") return json({ items: [{ id: channelId, statistics: { subscriberCount: "12300", viewCount: "4567890", videoCount: "344" } }] });
       return json({ items: [{ id: channelId }] });
     }
     if (url.hostname === "youtubeanalytics.googleapis.com" && url.pathname === "/v2/reports") {
@@ -85,7 +86,8 @@ test("Worker runtime: the cron starts the sync and the one-time backfill, and ro
   assert.equal(status.backfill.id, "backfill-initial");
 
   const types = new Set(upstreams.lakeEvents.map(e => e.type));
-  for (const type of ["youtube.daily", "youtube.daily_traffic", "youtube.top_videos", "youtube.traffic", "youtube.summary", "youtube.video", "youtube.video_daily", "youtube.video_traffic"]) assert.ok(types.has(type), type);
+  for (const type of ["youtube.daily", "youtube.daily_traffic", "youtube.top_videos", "youtube.traffic", "youtube.summary", "youtube.channel_stats", "youtube.video", "youtube.video_daily", "youtube.video_traffic"]) assert.ok(types.has(type), type);
+  assert.equal(upstreams.lakeEvents.find(e => e.type === "youtube.channel_stats")!.data.subscriberCount, 12300);
   const catalogue = upstreams.lakeEvents.filter(e => e.type === "youtube.video");
   assert.deepEqual(catalogue.map(e => [e.data.video, e.data.title]).sort(), [["abcdefghijk", "First"], ["bcdefghijkl", ""]]);
   const videoDays = upstreams.lakeEvents.filter(e => e.type === "youtube.video_daily");
