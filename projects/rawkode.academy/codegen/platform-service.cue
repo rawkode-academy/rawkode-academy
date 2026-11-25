@@ -232,6 +232,7 @@ import (
 	tasks: {
 		// Runs the service's bun:test suite; services without a tests/ directory pass.
 		ciTest: schema.#Task & {
+			description: "service-tests"
 			hermetic: false
 			dir: from: "caller"
 			command: "sh"
