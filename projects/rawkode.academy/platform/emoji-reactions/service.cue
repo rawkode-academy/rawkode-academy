@@ -5,7 +5,7 @@ import gen "github.com/rawkode-academy/rawkode-academy/projects/rawkode.academy/
 _service: gen.#PlatformService & {
 	serviceName:       "emoji-reactions"
 	includeWriteModel: true
-	// Its tests target vitest-pool-workers and fail under bun test; see #1715.
+	// Its tests target vitest-pool-workers and fail under bun test; see #1716.
 	ciTests: false
 	additionalDependencies: {
 		"better-auth": "^1.4.1"
