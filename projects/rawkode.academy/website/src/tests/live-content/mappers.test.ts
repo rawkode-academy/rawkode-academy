@@ -32,6 +32,7 @@ describe("gateway → entry data", () => {
 			whatYouWillLearn: null,
 			technologies: [{ id: "kubernetes/index" }, { id: "docker" }],
 			guests: [{ id: "rawkode" }],
+			collaborators: [{ id: "datum", name: "Datum" }, { id: "", name: "No id" }],
 			episode: { code: "42", show: { id: "rawkode-live" } },
 			chapters: [
 				{ startTime: 60, title: "Two" },
@@ -54,6 +55,7 @@ describe("gateway → entry data", () => {
 		expect(data.show).toEqual({ collection: "shows", id: "rawkode-live" });
 		expect(data.episodeCode).toBe("42");
 		expect(data.guests).toEqual([{ collection: "people", id: "rawkode" }]);
+		expect(data.collaborators).toEqual([{ id: "datum", name: "Datum" }]);
 		expect(data.chapters.map((c) => c.title)).toEqual(["One", "Two"]);
 		expect(data.resources).toEqual([
 			{ title: "Repo", type: "url", url: "https://x", category: "other" },
