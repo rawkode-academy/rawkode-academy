@@ -4,49 +4,67 @@ version = 5
 type = "nix"
 flake = "path:../../flakes/bun"
 digest = "sha256:8261b4019a6793d123f65adb01279b20db640ab75a0294be28e9bfd8f15290ee"
-lockfile = "packages/design-system/../../flakes/bun/flake.lock"
+lockfile = "flakes/bun/flake.lock"
+
+[runtimes."projects/klustered.dev"]
+type = "nix"
+flake = "."
+digest = "sha256:e32b1898c2d8c4b08f73046e06ae222692d4cadd7888db513195080e85d1a156"
+lockfile = "projects/klustered.dev/flake.lock"
 
 [runtimes."projects/rawkode.academy/identity"]
 type = "nix"
 flake = "."
-digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
-lockfile = "projects/rawkode.academy/identity/./flake.lock"
+digest = "sha256:bd8e7829a8d4f5ab1b574d29df96f7cbeab18a3cd3fa56175836177626a5a40b"
+lockfile = "projects/rawkode.academy/identity/flake.lock"
 
 [runtimes."projects/rawkode.academy/platform/video-thumbnails"]
 type = "nix"
 flake = "path:../../../../flakes/bun"
 digest = "sha256:8261b4019a6793d123f65adb01279b20db640ab75a0294be28e9bfd8f15290ee"
-lockfile = "projects/rawkode.academy/platform/video-thumbnails/../../../../flakes/bun/flake.lock"
+lockfile = "flakes/bun/flake.lock"
 
 [runtimes."projects/rawkode.academy/platform/youtube-control"]
 type = "nix"
 flake = "."
-digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
-lockfile = "projects/rawkode.academy/platform/youtube-control/./flake.lock"
+digest = "sha256:82756de00dc5a94a422a1d44694e90880edcffc6b2ecb8f33a39944211f30531"
+lockfile = "projects/rawkode.academy/platform/youtube-control/flake.lock"
 
 [runtimes."projects/rawkode.academy/website"]
 type = "nix"
 flake = "."
-digest = "sha256:888cf35008fc8b9b6c27c83e33e38780b6108fc821c5ca16877b524818c3a80b"
-lockfile = "projects/rawkode.academy/website/./flake.lock"
+digest = "sha256:330da8dfa70502e67f112d33694f8e432f261db3566d97f0be41d6513edf584a"
+lockfile = "projects/rawkode.academy/website/flake.lock"
+
+[runtimes."projects/rawkode.arcade"]
+type = "nix"
+flake = "."
+digest = "sha256:e48f86efe01662bfaa1c6df577b5f4f6f6f905991a88eb443645dc047c587996"
+lockfile = "projects/rawkode.arcade/flake.lock"
+
+[runtimes."projects/rawkode.news"]
+type = "nix"
+flake = "."
+digest = "sha256:e32b1898c2d8c4b08f73046e06ae222692d4cadd7888db513195080e85d1a156"
+lockfile = "projects/rawkode.news/flake.lock"
 
 [runtimes."projects/rawkode.studio"]
 type = "nix"
 flake = "path:../../flakes/bun"
 digest = "sha256:8261b4019a6793d123f65adb01279b20db640ab75a0294be28e9bfd8f15290ee"
-lockfile = "projects/rawkode.studio/../../flakes/bun/flake.lock"
+lockfile = "flakes/bun/flake.lock"
 
 [runtimes."projects/rawkode.tools/mcp"]
 type = "nix"
 flake = "."
-digest = "sha256:da4a4421ff4b0495949f74cec60fe8954e381c06608b055411c4bec676b1f44e"
-lockfile = "projects/rawkode.tools/mcp/./flake.lock"
+digest = "sha256:1f5a5f8766e2cca499979f9dd975a153bdee25900122b89dd8d6ffe5310e2260"
+lockfile = "projects/rawkode.tools/mcp/flake.lock"
 
 [runtimes."projects/rawkode.tools/observability-collector"]
 type = "nix"
 flake = "."
-digest = "sha256:42ce3afcf3774deb29fdf77002bcb4d0e43ded8a1626404dd30e77ce81c0aab6"
-lockfile = "projects/rawkode.tools/observability-collector/./flake.lock"
+digest = "sha256:259f9cbc0ebd49e419f790dd0e482bd89aa0c7bce6af67943cbf930951c24d18"
+lockfile = "projects/rawkode.tools/observability-collector/flake.lock"
 
 [vcs.cuenv-skills]
 url = "https://github.com/cuenv/cuenv.git"
