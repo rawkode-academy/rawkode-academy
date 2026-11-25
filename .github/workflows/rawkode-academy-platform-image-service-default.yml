@@ -30,8 +30,8 @@ concurrency:
 jobs:
   rawkode-academy-platform-image-service-default:
     permissions:
-      contents: read
       checks: write
+      contents: read
     name: rawkode-academy-platform-image-service-default
     runs-on: namespace-profile-linux-x86
     environment: production
@@ -66,8 +66,6 @@ jobs:
             rm -f /nix/receipt.json
           fi
         fi
-    - name: cuenv:contributor:bun.workspace.setup
-      run: 'true'
     - name: Setup cuenv (release)
       run: |-
         platform="$(uname -s)-$(uname -m)"
@@ -77,7 +75,7 @@ jobs:
           Darwin-arm64) cuenv_asset="cuenv-darwin-arm64" ;;
           *) echo "Unsupported platform: $platform" >&2; exit 1 ;;
         esac
-        cuenv_version="0.78.0"
+        cuenv_version="0.81.1"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi
@@ -91,6 +89,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Install Bun dependencies
       run: cuenv exec -- bun install --frozen-lockfile
+    - name: cuenv:contributor:bun.workspace.setup
+      run: 'true'
     - name: Setup 1Password
       run: cuenv secrets setup onepassword
       env:

@@ -104,6 +104,12 @@ export const getSchema = (env: { DB: D1Database }): GraphQLSchema => {
 		builder.selection<{ id: string }>("id"),
 	);
 	TechnologyRef.implement({ externalFields: (f) => ({ id: f.id() }) });
+	// A lesson's video is a Video owned by the videos subgraph.
+	const VideoRef = builder.externalRef(
+		"Video",
+		builder.selection<{ id: string }>("id"),
+	);
+	VideoRef.implement({ externalFields: (f) => ({ id: f.string() }) });
 
 	// Nested types are prefixed with Courses so they cannot clash with other
 	// subgraphs in the supergraph.
@@ -211,20 +217,6 @@ export const getSchema = (env: { DB: D1Database }): GraphQLSchema => {
 		}),
 	});
 
-	const ModuleVideoRef = builder.objectRef<s.ModuleVideo>("CoursesModuleVideo");
-	builder.objectType(ModuleVideoRef, {
-		fields: (t) => ({
-			id: t.exposeString("id"),
-			thumbnailUrl: t.string({
-				nullable: true,
-				resolve: (v) => v.thumbnailUrl,
-			}),
-			youtube: t.string({ nullable: true, resolve: (v) => v.youtube }),
-			rawkode: t.string({ nullable: true, resolve: (v) => v.rawkode }),
-			poster: t.string({ nullable: true, resolve: (v) => v.poster }),
-		}),
-	});
-
 	const CourseRef = builder.objectRef<s.Course>("Course");
 	const CourseModuleRef = builder.objectRef<s.CourseModule>("CourseModule");
 	const LearningPathRef = builder.objectRef<s.LearningPath>("LearningPath");
@@ -293,9 +285,9 @@ export const getSchema = (env: { DB: D1Database }): GraphQLSchema => {
 			section: t.string({ nullable: true, resolve: (r) => r.section }),
 			order: t.int({ resolve: (r) => r.sortOrder }),
 			video: t.field({
-				type: ModuleVideoRef,
+				type: VideoRef,
 				nullable: true,
-				resolve: (r) => r.video,
+				resolve: (r) => (r.videoId ? { id: r.videoId } : null),
 			}),
 			// Minutes.
 			duration: t.int({ nullable: true, resolve: (r) => r.duration }),

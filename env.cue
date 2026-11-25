@@ -67,7 +67,7 @@ _cuenvBinary?: string
 config: ci: cuenv: {
 	source: "release"
 	if _cuenvBinary == _|_ {
-		version: "0.78.0"
+		version: "0.81.1"
 	}
 	if _cuenvBinary != _|_ {
 		version: _cuenvBinary

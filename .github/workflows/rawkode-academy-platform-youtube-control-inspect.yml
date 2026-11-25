@@ -10,8 +10,8 @@ concurrency:
 jobs:
   rawkode-academy-platform-youtube-control-inspect:
     permissions:
-      contents: read
       checks: write
+      contents: read
       id-token: write
     name: rawkode-academy-platform-youtube-control-inspect
     runs-on: namespace-profile-linux-x86
@@ -47,8 +47,6 @@ jobs:
             rm -f /nix/receipt.json
           fi
         fi
-    - name: cuenv:contributor:bun.workspace.setup
-      run: 'true'
     - name: Setup cuenv (release)
       run: |-
         platform="$(uname -s)-$(uname -m)"
@@ -58,7 +56,7 @@ jobs:
           Darwin-arm64) cuenv_asset="cuenv-darwin-arm64" ;;
           *) echo "Unsupported platform: $platform" >&2; exit 1 ;;
         esac
-        cuenv_version="0.78.0"
+        cuenv_version="0.81.1"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi
@@ -113,6 +111,8 @@ jobs:
         INFISICAL_MACHINE_IDENTITY_ID: ${{ endsWith(github.workflow, '-infrastructure-apply') && vars.INFISICAL_READ_WRITE_IDENTITY_ID || endsWith(github.workflow, '-infrastructure-plan') && vars.INFISICAL_READ_ONLY_IDENTITY_ID || vars.INFISICAL_MACHINE_IDENTITY_ID }}
     - name: Install Bun dependencies
       run: cuenv exec -- bun install --frozen-lockfile
+    - name: cuenv:contributor:bun.workspace.setup
+      run: 'true'
     - name: Setup 1Password
       run: cuenv secrets setup onepassword
       env:

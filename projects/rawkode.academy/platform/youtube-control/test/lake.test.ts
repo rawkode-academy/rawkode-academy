@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { backfillWindows, normalizeReport } from "../src/analytics.ts";
-import { reportEvents, sendToLake } from "../src/lake.ts";
+import { channelStatsEvent, reportEvents, sendEvents, sendToLake } from "../src/lake.ts";
 
 const channelId = "UCrber_mFvp_FEF7D9u8PDEA";
 const report = normalizeReport({ report: "daily_traffic", startDate: "2026-10-01", endDate: "2026-10-02", limit: 50 }, {
@@ -34,6 +34,16 @@ test("lake delivery reports partial failure without throwing", async () => {
   assert.deepEqual(await sendToLake(undefined, report), { configured: false, sent: 0, failed: 0 });
 });
 
+test("a batching collector gets 50 events per call and partial failures are counted", async () => {
+  const sizes: number[] = [];
+  const collector = { async trackEvent() { return { success: true }; }, async trackEvents(batch: unknown[]) { sizes.push(batch.length); return batch.map((_, i) => (sizes.length === 2 && i === 0 ? { success: false, error: "invalid" } : { success: true })); } };
+  const result = await sendEvents(collector, Array.from({ length: 120 }, (_, i) => ({ i })), 1);
+  assert.deepEqual(sizes, [50, 50, 20]);
+  assert.deepEqual(result, { configured: true, sent: 119, failed: 1, error: "invalid" });
+  const short = await sendEvents({ async trackEvent() { return { success: true }; }, async trackEvents() { return [{ success: true }]; } }, [1, 2, 3]);
+  assert.deepEqual(short, { configured: true, sent: 1, failed: 2, error: "incomplete_batch" });
+});
+
 test("backfill windows cover the range in 92-day steps and resume", () => {
   const first = backfillWindows("2026-01-01", "2026-10-31", 2);
   assert.deepEqual(first.windows, [{ startDate: "2026-01-01", endDate: "2026-04-02" }, { startDate: "2026-04-03", endDate: "2026-07-03" }]);
@@ -41,4 +51,14 @@ test("backfill windows cover the range in 92-day steps and resume", () => {
   const rest = backfillWindows(first.next!, "2026-10-31", 8);
   assert.deepEqual(rest.windows, [{ startDate: "2026-07-04", endDate: "2026-10-03" }, { startDate: "2026-10-04", endDate: "2026-10-31" }]);
   assert.equal(rest.next, null);
+});
+
+test("channel totals are one point-in-time event with a stable ID", async () => {
+  const stats = { subscriberCount: 12300, viewCount: 4567890, videoCount: 344 };
+  const event = await channelStatsEvent(channelId, stats, "2026-11-25T08:17:00.000Z");
+  assert.equal(event.type, "youtube.channel_stats");
+  assert.equal(event.source, "rawkode-academy-youtube");
+  assert.deepEqual(event.data, { channelId, report: "channel_stats", fetchedAt: "2026-11-25T08:17:00.000Z", ...stats });
+  assert.equal((await channelStatsEvent(channelId, stats, "2026-11-25T08:17:00.000Z")).id, event.id);
+  assert.notEqual((await channelStatsEvent(channelId, stats, "2026-11-26T08:17:00.000Z")).id, event.id);
 });

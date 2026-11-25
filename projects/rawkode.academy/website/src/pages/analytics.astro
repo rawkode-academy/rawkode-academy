@@ -1,0 +1,196 @@
+---
+import { env } from "cloudflare:workers";
+import EditorialShell from "@/components/ui/EditorialShell.astro";
+import {
+	PERIODS,
+	type ReachQuery,
+	reachQueries,
+	reachWindow,
+} from "@/lib/analytics/reach";
+import { basinQuery, type Row } from "@/server/basin";
+import Page from "@/wrappers/page.astro";
+
+export const prerender = false;
+
+// Signed-in members only. Headline totals, aggregate only, bots excluded.
+const user = Astro.locals.user;
+if (!user && !import.meta.env.DEV) {
+	return Astro.redirect(
+		`/api/auth/sign-in?returnTo=${encodeURIComponent("/analytics")}`,
+	);
+}
+Astro.response.headers.set("Cache-Control", "private, no-store");
+
+const vars = env as unknown as {
+	BASIN_BUCKET?: string;
+	BASIN_SQL_TOKEN?: string;
+	CLOUDFLARE_ACCOUNT_ID?: string;
+};
+const config = {
+	accountId: vars.CLOUDFLARE_ACCOUNT_ID ?? "",
+	bucket: vars.BASIN_BUCKET ?? "rawkode-analytics",
+	token: vars.BASIN_SQL_TOKEN ?? "",
+};
+const configured = Boolean(config.accountId && config.token);
+
+const queries = reachQueries(reachWindow());
+const results = Object.fromEntries(
+	await Promise.all(
+		(Object.keys(queries) as ReachQuery[]).map(async (name) => {
+			if (!configured) return [name, { rows: [] as Row[], failed: true }];
+			try {
+				// Reach numbers move slowly; cache for 30 minutes at the edge.
+				const rows = await basinQuery(config, queries[name], {
+					ttlSeconds: 1800,
+				});
+				return [name, { rows, failed: false }];
+			} catch {
+				return [name, { rows: [] as Row[], failed: true }];
+			}
+		}),
+	),
+) as Record<ReachQuery, { rows: Row[]; failed: boolean }>;
+
+const num = (value: unknown) => Number(value ?? 0);
+const fmt = new Intl.NumberFormat("en-GB");
+
+const web = results.web.rows[0];
+const youtube = results.youtube.rows[0];
+const periodValue = (
+	failed: boolean,
+	row: Row | undefined,
+	metric: string,
+	key: string,
+) => (failed || !row ? undefined : num(row[`${metric}_${key}`]));
+const periods = PERIODS.map((period) => {
+	const visits = periodValue(results.web.failed, web, "visits", period.key);
+	const webViews = periodValue(results.web.failed, web, "views", period.key);
+	const youtubeViews = periodValue(results.youtube.failed, youtube, "views", period.key);
+	return {
+		label: period.label,
+		visits,
+		views:
+			webViews === undefined || youtubeViews === undefined
+				? undefined
+				: webViews + youtubeViews,
+	};
+});
+
+// Subs: total people reachable, counted once. YouTube subscribers, plus site
+// accounts, plus mailing-list members who have no account. Each source is read
+// separately so a missing one is named rather than silently left out.
+async function accountCount(): Promise<number | undefined> {
+	try {
+		const accounts = await env.IDENTITY_STATS.countAccounts();
+		return Number.isSafeInteger(accounts) ? accounts : undefined;
+	} catch {
+		return undefined;
+	}
+}
+async function mailingOnlyCount(): Promise<number | undefined> {
+	try {
+		const counts = await env.EMAIL_PREFERENCES.countSubscribers();
+		return Number.isSafeInteger(counts.emailOnly) ? counts.emailOnly : undefined;
+	} catch {
+		return undefined;
+	}
+}
+const [accounts, mailingOnly] = await Promise.all([accountCount(), mailingOnlyCount()]);
+const youtubeSubs =
+	results.subscribers.failed || results.subscribers.rows.length === 0
+		? undefined
+		: num(results.subscribers.rows[0]?.subscribers);
+const subSources = [
+	{ name: "YouTube subscribers", value: youtubeSubs },
+	{ name: "site accounts", value: accounts },
+	{ name: "mailing list", value: mailingOnly },
+];
+const missing = subSources.filter((source) => source.value === undefined);
+const subs =
+	missing.length === 0
+		? subSources.reduce((total, source) => total + (source.value ?? 0), 0)
+		: undefined;
+
+const show = (value: number | undefined, prefix = "") =>
+	value === undefined ? "Unavailable" : `${prefix}${fmt.format(value)}`;
+---
+
+<Page title="Reach" description="Rawkode Academy audience." noindex>
+	<EditorialShell
+		eyebrow="Members"
+		title="Reach"
+		lede="Rawkode Academy audience"
+	>
+		<table class="periods">
+			<thead>
+				<tr><th scope="col"><span class="sr-only">Metric</span></th>{periods.map((period) => <th scope="col">{period.label}</th>)}</tr>
+			</thead>
+			<tbody>
+				<tr><th scope="row">Visits</th>{periods.map((period) => <td>{show(period.visits, "~")}</td>)}</tr>
+				<tr><th scope="row">Views</th>{periods.map((period) => <td>{show(period.views)}</td>)}</tr>
+			</tbody>
+		</table>
+
+		<dl class="stats">
+			<div>
+				<dt>Subs</dt>
+				<dd>{show(subs)}</dd>
+				{missing.length > 0 && <p class="missing">Unavailable: {missing.map((source) => source.name).join(", ")}.</p>}
+			</div>
+		</dl>
+	</EditorialShell>
+</Page>
+
+<style>
+	.periods {
+		width: 100%;
+		border-collapse: collapse;
+		border-top: 2px solid var(--colors-academy-text);
+		font-variant-numeric: tabular-nums;
+	}
+	.periods th,
+	.periods td {
+		padding: 1rem 0;
+		border-bottom: 1px solid var(--colors-academy-border);
+		text-align: right;
+	}
+	.periods thead th {
+		font-weight: 500;
+		font-size: 1rem;
+		color: var(--colors-academy-text-soft);
+	}
+	.periods tbody th {
+		text-align: left;
+		font-weight: 400;
+		font-size: 1rem;
+		color: var(--colors-academy-text-soft);
+	}
+	.periods td {
+		font-family: var(--fonts-academy-display);
+		font-size: clamp(1.5rem, 5vw, 2.5rem);
+		color: var(--colors-academy-text);
+	}
+	.stats {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+		gap: 2rem;
+		margin: 0 0 2.5rem;
+		padding-block: 1.5rem;
+	}
+	.stats dt {
+		color: var(--colors-academy-text-soft);
+		font-size: 1rem;
+	}
+	.stats dd {
+		margin: 0;
+		font-family: var(--fonts-academy-display);
+		font-size: clamp(2.25rem, 8vw, 3.75rem);
+		font-variant-numeric: tabular-nums;
+		color: var(--colors-academy-text);
+	}
+	.missing {
+		margin: 0.25rem 0 0;
+		font-size: 0.8125rem;
+		color: var(--colors-academy-text-muted);
+	}
+</style>

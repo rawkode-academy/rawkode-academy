@@ -46,8 +46,8 @@ concurrency:
 jobs:
   rawkode-arcade-default:
     permissions:
-      contents: read
       checks: write
+      contents: read
     name: rawkode-arcade-default
     runs-on: namespace-profile-linux-x86
     steps:
@@ -81,8 +81,6 @@ jobs:
             rm -f /nix/receipt.json
           fi
         fi
-    - name: cuenv:contributor:bun.workspace.setup
-      run: 'true'
     - name: Setup cuenv (release)
       run: |-
         platform="$(uname -s)-$(uname -m)"
@@ -92,7 +90,7 @@ jobs:
           Darwin-arm64) cuenv_asset="cuenv-darwin-arm64" ;;
           *) echo "Unsupported platform: $platform" >&2; exit 1 ;;
         esac
-        cuenv_version="0.78.0"
+        cuenv_version="0.81.1"
         if [ -z "$cuenv_version" ]; then
           cuenv_version="latest"
         fi
@@ -106,6 +104,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Install Bun dependencies
       run: cuenv exec -- bun install --frozen-lockfile
+    - name: cuenv:contributor:bun.workspace.setup
+      run: 'true'
     - name: 'Run pipeline: default'
       run: cuenv ci --pipeline default --path projects/rawkode.arcade
       env:

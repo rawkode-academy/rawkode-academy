@@ -16,7 +16,13 @@
   },
   // Report rows become CloudEvents in analytics.events_archive
   // (R2 bucket rawkode-analytics) through the observability collector.
-  "services": [{ "binding": "ANALYTICS", "service": "rawkode-tools-observability-collector" }],
+  // VIDEO_CHANNELS: the YouTube IDs the Academy maps to its videos. ACADEMY_API:
+  // the GraphQL gateway, for video titles.
+  "services": [
+    { "binding": "ANALYTICS", "service": "rawkode-tools-observability-collector" },
+    { "binding": "VIDEO_CHANNELS", "service": "platform-video-channels-read-model" },
+    { "binding": "ACADEMY_API", "service": "platform-api-gateway" }
+  ],
   "workflows": [
     { "name": "youtube-analytics-sync", "binding": "SYNC", "class_name": "SyncWorkflow" },
     { "name": "youtube-analytics-backfill", "binding": "BACKFILL", "class_name": "BackfillWorkflow" }

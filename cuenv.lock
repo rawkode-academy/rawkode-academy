@@ -36,7 +36,7 @@ subtree = "93741fc7e8359b5f341c5e2a620a5e58af007857"
 
 [infrastructure_providers."registry.terraform.io/cloudflare/cloudflare"]
 version = "5.28.1"
-schema_digest = "sha256:128a8189f6a781073cbe582a6c8af706e8671b528486abfa7e088ac26d17f9bf"
+schema_digest = "sha256:88697e5940532eec372176b15f00c1e510e68c377c543df7a24bcaaed0b2e0c0"
 
 [infrastructure_providers."registry.terraform.io/cloudflare/cloudflare".platforms]
 darwin_amd64 = "sha256:bef2ffbdb68569549fe432b550592e07456759a7288f84f7c37c9d933a493f54"
@@ -50,7 +50,7 @@ windows_arm64 = "sha256:7df6fe6573379c2faf2e801fdbca58ac909266dbee604feaa993439b
 
 [infrastructure_providers."registry.terraform.io/dnsimple/dnsimple"]
 version = "2.2.1"
-schema_digest = "sha256:593a1d3acea9ad1619ce5e28db67f0e75007a8106bf426ac0add995055eab689"
+schema_digest = "sha256:d4d711394e2c83aa554577f44f6d8ed9bb676a883d6ff0aded5f76cef7ac8384"
 
 [infrastructure_providers."registry.terraform.io/dnsimple/dnsimple".platforms]
 darwin_amd64 = "sha256:24839076472007bafb89023879a433d887a1909ce925c61c46ae37987170866d"
@@ -69,7 +69,7 @@ windows_arm64 = "sha256:a6c15afefe1814502ff055ef5e7eb754b96a37e91472be97f5b7036d
 
 [infrastructure_providers."registry.terraform.io/infisical/infisical"]
 version = "0.20.10"
-schema_digest = "sha256:8235062a6a6d5f1e59bbae550fb50ed217a2b812ed24f560fb530c1aa5c18d34"
+schema_digest = "sha256:d8bc104514ee8124a63fd342586c037819550843a187dac811bfe2f744c51af2"
 
 [infrastructure_providers."registry.terraform.io/infisical/infisical".platforms]
 darwin_amd64 = "sha256:3b8a2e7ad90ab00e2fd44a9cd9d1cc575f0333f23bc96167d01e2884e7ecff97"
@@ -88,7 +88,7 @@ windows_arm64 = "sha256:dd1d07f4224b24c7ccdc400aac2ccbf104cd740054e679d4a1900db5
 
 [infrastructure_providers."registry.terraform.io/integrations/github"]
 version = "6.13.0"
-schema_digest = "sha256:4e40d3ed070c1dddc5781bf07977c919e9112655c4b4f0a1fb8345a992aedd4e"
+schema_digest = "sha256:344e64f0324c9cb24c36600b32e56c32cf9b0f589cae62118005a6b730e43990"
 
 [infrastructure_providers."registry.terraform.io/integrations/github".platforms]
 darwin_amd64 = "sha256:2a6a11c21eae408055f45b9533c07afd2e845f6d496fd1b645aec2e873012103"

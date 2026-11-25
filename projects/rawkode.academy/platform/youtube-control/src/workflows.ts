@@ -1,7 +1,8 @@
 import { WorkflowEntrypoint, type WorkflowEvent, type WorkflowStep } from "cloudflare:workers";
-import { backfillJobs, collect, collectVideos, jobName, syncJobs, videoBackfillJobs, videoSyncJobs, type Job } from "./collect.ts";
+import { backfillJobs, collect, collectChannelStats, collectVideos, jobName, syncJobs, videoBackfillJobs, videoSyncJobs, type Job } from "./collect.ts";
 import { daySchema, ServiceError } from "./domain.ts";
-import { GoogleClient, type Video } from "./google.ts";
+import { fetchVideos, type Video } from "./academy.ts";
+import { GoogleClient } from "./google.ts";
 import type { AnalyticsCollector } from "./lake.ts";
 
 const retries = { retries: { limit: 4, delay: "2 minutes", backoff: "exponential" }, timeout: "10 minutes" } as const;
@@ -34,9 +35,9 @@ const lake = (env: CloudflareEnv) => env.ANALYTICS as unknown as AnalyticsCollec
 async function checkChannel(env: CloudflareEnv, step: WorkflowStep) {
   unwrap(await step.do("check channel authorization", retries, () => guarded(async () => { await client(env).checkChannel(); return { checked: true }; })));
 }
-// The uploads list is one step, so replays reuse the same video batches.
+// The Academy's YouTube videos are one step, so replays reuse the same video batches.
 async function listVideos(env: CloudflareEnv, step: WorkflowStep): Promise<Video[]> {
-  return unwrap(await step.do("list channel videos", retries, () => guarded(() => client(env).videos())));
+  return unwrap(await step.do("list channel videos", retries, () => guarded(() => fetchVideos(env))));
 }
 async function runJobs(env: CloudflareEnv, step: WorkflowStep, jobs: Job[]) {
   const results = [];
@@ -47,17 +48,18 @@ async function runJobs(env: CloudflareEnv, step: WorkflowStep, jobs: Job[]) {
 }
 const summary = (results: { rows: number }[]) => ({ jobs: results.length, rows: results.reduce((sum, r) => sum + r.rows, 0) });
 
-// The daily collection: the last 28 days of every channel report, the video
-// catalogue, and the last 28 days of every video.
+// The daily collection: the last 28 days of every channel report, the catalogue
+// of Academy videos with a YouTube ID, and the last 28 days of each of them.
 export class SyncWorkflow extends WorkflowEntrypoint<CloudflareEnv, { now?: string }> {
   async run(event: WorkflowEvent<{ now?: string }>, step: WorkflowStep) {
     const now = new Date(event.payload?.now ?? event.timestamp);
     await checkChannel(this.env, step);
     const channel = await runJobs(this.env, step, syncJobs(now));
+    const stats = unwrap(await step.do("channel statistics", retries, () => guarded(() => collectChannelStats(client(this.env), this.env.YOUTUBE_CHANNEL_ID, lake(this.env)))));
     const videos = await listVideos(this.env, step);
     const catalogue = unwrap(await step.do("video catalogue", retries, () => guarded(() => collectVideos(videos, this.env.YOUTUBE_CHANNEL_ID, lake(this.env)))));
     const perVideo = await runJobs(this.env, step, videoSyncJobs(videos, now));
-    return { ...summary([...channel, catalogue, ...perVideo]), videos: videos.length };
+    return { ...summary([...channel, stats, catalogue, ...perVideo]), videos: videos.length };
   }
 }
 

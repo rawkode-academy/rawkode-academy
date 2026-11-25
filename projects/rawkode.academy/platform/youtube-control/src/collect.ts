@@ -1,9 +1,10 @@
 import { analyticsSchema, backfillWindows, fetchReport, recentWindow, VIDEO_BATCH, type AnalyticsAPI } from "./analytics.ts";
 import { ServiceError } from "./domain.ts";
-import type { Video } from "./google.ts";
-import { sendEvents, sendToLake, videoEvents, type AnalyticsCollector } from "./lake.ts";
+import type { Video } from "./academy.ts";
+import { channelStatsEvent, sendEvents, sendToLake, videoEvents, type AnalyticsCollector } from "./lake.ts";
 
-export interface ChannelAPI extends AnalyticsAPI { checkChannel(): Promise<void>; videos(): Promise<Video[]> }
+export interface ChannelAPI extends AnalyticsAPI { checkChannel(): Promise<void> }
+export interface ChannelStatsAPI { channelStatistics(): Promise<{ subscriberCount: number | null; viewCount: number; videoCount: number }> }
 export type Job = { report: string; startDate: string; endDate: string; videoIds?: string[] };
 
 // Reports collected every day for the last 28 days. YouTube revises recent
@@ -27,7 +28,8 @@ export const VIDEO_BACKFILL_REPORTS = ["video_daily"] as const;
 export const FIRST_BACKFILL_ID = "backfill-initial";
 // Per-video history, started once the same way.
 // -2: the first instance (backfill-videos) errored on an HTTP 500 from YouTube; this one splits a per-video query that gets a 5xx.
-export const VIDEO_BACKFILL_ID = "backfill-videos-2";
+// -3: the video list now comes from the Academy's video-channels IDs instead of the uploads playlist, so videos the playlist never listed (some old live streams) get their history.
+export const VIDEO_BACKFILL_ID = "backfill-videos-3";
 export const syncInstanceId = (date: Date) => `sync-${date.toISOString().slice(0, 10)}`;
 
 export function syncJobs(now = new Date()): Job[] {
@@ -71,6 +73,12 @@ export async function collectVideos(videos: Video[], channelId: string, lake: An
   const delivered = await sendEvents(lake, await videoEvents(videos, channelId));
   if (delivered.failed > 0) throw new ServiceError("lake_rejected", `The analytics collector rejected ${delivered.failed} of ${videos.length} video rows (${delivered.error})`, 502);
   return { report: "video", rows: videos.length, sent: delivered.sent };
+}
+
+export async function collectChannelStats(api: ChannelStatsAPI, channelId: string, lake: AnalyticsCollector) {
+  const delivered = await sendEvents(lake, [await channelStatsEvent(channelId, await api.channelStatistics())]);
+  if (delivered.failed > 0) throw new ServiceError("lake_rejected", `The analytics collector rejected the channel statistics (${delivered.error})`, 502);
+  return { report: "channel_stats", rows: 1, sent: delivered.sent };
 }
 
 // Step results are persisted: report a batch's size, not its IDs.

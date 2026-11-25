@@ -22,6 +22,22 @@ beforeAll(async () => {
 afterAll(() => db.dispose());
 
 describe("videos read model", () => {
+	it("keeps course lesson videos out of the catalogue unless asked", async () => {
+		const [{ id, slug }] = (await query("{ getAllVideos { id slug } }")).getAllVideos;
+		await exec(db.DB, `UPDATE videos SET course_only = 1 WHERE id = '${id}'`);
+		try {
+			const listed = await query("{ getAllVideos { id } getVideoVersions { id } }");
+			expect(listed.getAllVideos).toHaveLength(10);
+			expect(listed.getVideoVersions).toHaveLength(10);
+			const all = await query("{ getAllVideos(includeCourseVideos: true) { id } }");
+			expect(all.getAllVideos).toHaveLength(11);
+			expect((await query(`{ videoBySlug(slug: "${slug}") { id } }`)).videoBySlug).toBeNull();
+			expect((await query(`{ videoByID(id: "${id}") { id } }`)).videoByID.id).toBe(id);
+		} finally {
+			await exec(db.DB, `UPDATE videos SET course_only = 0 WHERE id = '${id}'`);
+		}
+	});
+
 	it("imports every video, upcoming streams included", async () => {
 		const { getAllVideos } = await query("{ getAllVideos { id } }");
 		expect(getAllVideos).toHaveLength(11);

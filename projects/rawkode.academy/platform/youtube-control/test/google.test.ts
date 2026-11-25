@@ -62,3 +62,11 @@ test("the grant must identify exactly the configured channel", async () => {
   await assert.rejects(channels([{ id: channelId }, { id: "UCother" }]).checkChannel());
   await assert.rejects(channels([{ id: channelId }], "more").checkChannel());
 });
+
+test("channel statistics are read for the configured channel and hidden subscriber counts become null", async () => {
+  const stats = (item: unknown) => new GoogleClient(credentials, channelId, (async (input: RequestInfo | URL) => isTokenEndpoint(input) ? json({ access_token: "access" }) : json({ items: [item] })) as typeof fetch);
+  assert.deepEqual(await stats({ id: channelId, statistics: { subscriberCount: "12300", viewCount: "4567890", videoCount: "344" } }).channelStatistics(), { subscriberCount: 12300, viewCount: 4567890, videoCount: 344 });
+  assert.equal((await stats({ id: channelId, statistics: { hiddenSubscriberCount: true, viewCount: "1", videoCount: "1" } }).channelStatistics()).subscriberCount, null);
+  await assert.rejects(stats({ id: "UCother", statistics: { subscriberCount: "1", viewCount: "1", videoCount: "1" } }).channelStatistics());
+  await assert.rejects(stats({ id: channelId, statistics: { viewCount: "nope", videoCount: "1" } }).channelStatistics());
+});

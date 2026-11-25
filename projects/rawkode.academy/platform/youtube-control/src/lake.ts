@@ -1,5 +1,5 @@
 import type { AnalyticsReport } from "./analytics.ts";
-import type { Video } from "./google.ts";
+import type { Video } from "./academy.ts";
 import { hash } from "./domain.ts";
 
 // The Academy analytics lake: the observability collector accepts CloudEvents
@@ -7,6 +7,7 @@ import { hash } from "./domain.ts";
 // (`analytics.events_archive` in the `rawkode-analytics` bucket).
 export interface AnalyticsCollector {
   trackEvent(event: unknown): Promise<{ success: boolean; error?: string }>;
+  trackEvents?(events: unknown[]): Promise<{ success: boolean; error?: string }[]>;
 }
 
 export const LAKE_SOURCE = "rawkode-academy-youtube";
@@ -57,27 +58,58 @@ export async function videoEvents(videos: Video[], channelId: string, fetchedAt 
   })));
 }
 
-// Sends events with bounded concurrency; counts what the collector accepted.
-export async function sendEvents(collector: AnalyticsCollector | undefined, events: unknown[], concurrency = 16) {
+// Channel totals (subscribers, lifetime views, video count) at fetch time:
+// one `youtube.channel_stats` event per sync. Unlike the daily reports these
+// are point-in-time totals; readers keep the latest `fetchedAt`.
+export async function channelStatsEvent(channelId: string, stats: { subscriberCount: number | null; viewCount: number; videoCount: number }, fetchedAt = new Date().toISOString()) {
+  return {
+    specversion: "1.0",
+    id: await hash(JSON.stringify([channelId, "channel_stats", fetchedAt])),
+    source: LAKE_SOURCE,
+    type: "youtube.channel_stats",
+    time: fetchedAt,
+    datacontenttype: "application/json",
+    data: { channelId, report: "channel_stats", fetchedAt, ...stats },
+  };
+}
+
+// Delivers events and counts what the collector accepted. A collector that
+// takes batches gets 50 events per RPC: one subrequest per batch instead of
+// one per event, which kept exhausting the Worker's subrequest limit across a
+// long backfill and left most of each step's rows rejected.
+export const LAKE_BATCH = 50;
+const failure = (error: unknown) => (error instanceof Error ? `${error.name}: ${error.message}`.slice(0, 160) : "collector_unavailable");
+
+export async function sendEvents(collector: AnalyticsCollector | undefined, events: unknown[], concurrency = 4) {
   if (!collector) return { configured: false, sent: 0, failed: 0 };
   let sent = 0;
   let failed = 0;
   let lastError: string | undefined;
+  const count = (results: { success: boolean; error?: string }[], expected: number) => {
+    for (const result of results) {
+      if (result.success) sent++;
+      else { failed++; lastError = result.error ?? "rejected"; }
+    }
+    // A short answer means the collector dropped events it never reported on.
+    if (results.length < expected) { failed += expected - results.length; lastError = "incomplete_batch"; }
+  };
+  const batched = typeof collector.trackEvents === "function";
+  const groups: unknown[][] = [];
+  const size = batched ? LAKE_BATCH : 1;
+  for (let i = 0; i < events.length; i += size) groups.push(events.slice(i, i + size));
   let next = 0;
   const worker = async () => {
-    while (next < events.length) {
-      const event = events[next++];
+    while (next < groups.length) {
+      const group = groups[next++]!;
       try {
-        const result = await collector.trackEvent(event);
-        if (result.success) sent++;
-        else { failed++; lastError = result.error ?? "rejected"; }
+        count(batched ? await collector.trackEvents!(group) : [await collector.trackEvent(group[0])], group.length);
       } catch (error) {
-        failed++;
-        lastError = error instanceof Error ? error.name : "collector_unavailable";
+        failed += group.length;
+        lastError = failure(error);
       }
     }
   };
-  await Promise.all(Array.from({ length: Math.min(concurrency, events.length) }, worker));
+  await Promise.all(Array.from({ length: Math.min(concurrency, groups.length) }, worker));
   return { configured: true, sent, failed, ...(lastError ? { error: lastError } : {}) };
 }
 

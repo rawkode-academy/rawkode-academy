@@ -37,8 +37,8 @@ export type SignupConfig = {
 	sponsorAudienceId?: string;
 	allowSponsorContact: boolean;
 };
-// Lesson videos are course-only assets on content.rawkode.academy/videos/<id>/,
-// not rows in the videos service, so they are stored inline.
+// Deprecated: the inline lesson video. Lesson videos are rows in the videos
+// service, referenced by video_id; this column is only kept until it is dropped.
 export type ModuleVideo = {
 	id: string;
 	thumbnailUrl?: string;
@@ -97,6 +97,9 @@ export const courseModulesTable = sqliteTable(
 		coverHeight: integer("cover_height"),
 		section: text("section"),
 		sortOrder: integer("sort_order").notNull(),
+		// The lesson's video: an id in the videos service.
+		videoId: text("video_id"),
+		// Deprecated, replaced by videoId. Not read.
 		video: json<ModuleVideo>("video"),
 		duration: integer("duration"),
 		difficulty: difficulty("difficulty"),

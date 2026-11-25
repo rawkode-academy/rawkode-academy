@@ -2,7 +2,7 @@
 # Runs today's sync now instead of waiting for the 08:17 UTC cron, starts the
 # channel and per-video backfills if they haven't started, waits for the sync
 # to finish and prints what reached the lake. The starts use the IDs the cron
-# uses (sync-<UTC date>, backfill-initial, backfill-videos-2), so the cron won't
+# uses (sync-<UTC date>, backfill-initial, backfill-videos-3), so the cron won't
 # run them again. If the lake has no video catalogue yet it also runs one extra
 # sync (sync-<date>-catalogue). Run it again later to see the backfills' progress.
 # Run from CI as the manual `verify` pipeline.
@@ -30,7 +30,7 @@ if [ -z "$(status | jq -r '.backfill.id // empty')" ]; then
 	npx --no-install wrangler workflows trigger youtube-analytics-backfill '{"since":"2015-01-01"}' --id backfill-initial
 fi
 if [ -z "$(status | jq -r '.videoBackfill.id // empty')" ]; then
-	npx --no-install wrangler workflows trigger youtube-analytics-backfill '{"since":"2015-01-01","scope":"videos"}' --id backfill-videos-2
+	npx --no-install wrangler workflows trigger youtube-analytics-backfill '{"since":"2015-01-01","scope":"videos"}' --id backfill-videos-3
 fi
 
 for _ in $(seq 1 90); do

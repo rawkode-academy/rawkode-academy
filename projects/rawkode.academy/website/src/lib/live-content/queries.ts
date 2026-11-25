@@ -303,9 +303,6 @@ export const COURSE_MODULE_FIELDS = /* GraphQL */ `
 		video {
 			id
 			thumbnailUrl
-			youtube
-			rawkode
-			poster
 		}
 		duration
 		difficulty
