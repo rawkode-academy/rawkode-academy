@@ -1,5 +1,5 @@
 import { WorkflowEntrypoint, type WorkflowEvent, type WorkflowStep } from "cloudflare:workers";
-import { backfillJobs, collect, collectVideos, jobName, syncJobs, videoBackfillJobs, videoSyncJobs, type Job } from "./collect.ts";
+import { backfillJobs, collect, collectChannelStats, collectVideos, jobName, syncJobs, videoBackfillJobs, videoSyncJobs, type Job } from "./collect.ts";
 import { daySchema, ServiceError } from "./domain.ts";
 import { fetchVideos, type Video } from "./academy.ts";
 import { GoogleClient } from "./google.ts";
@@ -55,10 +55,11 @@ export class SyncWorkflow extends WorkflowEntrypoint<CloudflareEnv, { now?: stri
     const now = new Date(event.payload?.now ?? event.timestamp);
     await checkChannel(this.env, step);
     const channel = await runJobs(this.env, step, syncJobs(now));
+    const stats = unwrap(await step.do("channel statistics", retries, () => guarded(() => collectChannelStats(client(this.env), this.env.YOUTUBE_CHANNEL_ID, lake(this.env)))));
     const videos = await listVideos(this.env, step);
     const catalogue = unwrap(await step.do("video catalogue", retries, () => guarded(() => collectVideos(videos, this.env.YOUTUBE_CHANNEL_ID, lake(this.env)))));
     const perVideo = await runJobs(this.env, step, videoSyncJobs(videos, now));
-    return { ...summary([...channel, catalogue, ...perVideo]), videos: videos.length };
+    return { ...summary([...channel, stats, catalogue, ...perVideo]), videos: videos.length };
   }
 }
 

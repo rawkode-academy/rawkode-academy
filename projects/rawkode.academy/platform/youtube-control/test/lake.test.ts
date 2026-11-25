@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { backfillWindows, normalizeReport } from "../src/analytics.ts";
-import { reportEvents, sendEvents, sendToLake } from "../src/lake.ts";
+import { channelStatsEvent, reportEvents, sendEvents, sendToLake } from "../src/lake.ts";
 
 const channelId = "UCrber_mFvp_FEF7D9u8PDEA";
 const report = normalizeReport({ report: "daily_traffic", startDate: "2026-10-01", endDate: "2026-10-02", limit: 50 }, {
@@ -51,4 +51,14 @@ test("backfill windows cover the range in 92-day steps and resume", () => {
   const rest = backfillWindows(first.next!, "2026-10-31", 8);
   assert.deepEqual(rest.windows, [{ startDate: "2026-07-04", endDate: "2026-10-03" }, { startDate: "2026-10-04", endDate: "2026-10-31" }]);
   assert.equal(rest.next, null);
+});
+
+test("channel totals are one point-in-time event with a stable ID", async () => {
+  const stats = { subscriberCount: 12300, viewCount: 4567890, videoCount: 344 };
+  const event = await channelStatsEvent(channelId, stats, "2026-11-25T08:17:00.000Z");
+  assert.equal(event.type, "youtube.channel_stats");
+  assert.equal(event.source, "rawkode-academy-youtube");
+  assert.deepEqual(event.data, { channelId, report: "channel_stats", fetchedAt: "2026-11-25T08:17:00.000Z", ...stats });
+  assert.equal((await channelStatsEvent(channelId, stats, "2026-11-25T08:17:00.000Z")).id, event.id);
+  assert.notEqual((await channelStatsEvent(channelId, stats, "2026-11-26T08:17:00.000Z")).id, event.id);
 });
