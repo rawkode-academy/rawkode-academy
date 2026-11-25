@@ -32,8 +32,8 @@ import (
 // - github-read-only, the identity infrastructure plans on pull requests log
 //   in as, in the `infrastructure-plan` GitHub environment. It reads
 //   /infrastructure/github-read-only: a Cloudflare token and a state key
-//   that can only read. It also reads /projects/basin, which the
-//   collector's plan refreshes.
+//   that can only read. It also reads the project folders the collector's
+//   infrastructure writes BASIN_SQL_TOKEN into, which its plan refreshes.
 // - github-actions, the identity deploys on main log in as, in the
 //   `production` GitHub environment. It reads project secrets only.
 //
@@ -182,15 +182,6 @@ infrastructure: {
 				name:       "CI"
 				slug:       "ci"
 				permissions_v2: [
-					// The Basin tokens the collector's maintenance task reads.
-					{
-						subject: "secrets"
-						action: ["describeSecret", "readValue"]
-						conditions: json.Marshal({
-							environment: "$eq": _infisical.environment
-							secretPath: "$eq":  "/projects/basin"
-						})
-					},
 					// Each project's deploy reads its own folder.
 					for _name, path in _projectSecretPaths {
 						subject: "secrets"
@@ -250,15 +241,6 @@ infrastructure: {
 							secretPath: "$eq":  "/infrastructure"
 						})
 					},
-					// The Basin tokens the collector's infrastructure.cue writes.
-					{
-						subject: "secrets"
-						action: ["describeSecret", "readValue", "create", "edit", "delete"]
-						conditions: json.Marshal({
-							environment: "$eq": _infisical.environment
-							secretPath: "$eq":  "/projects/basin"
-						})
-					},
 					for path in _basinWritePaths {
 						subject: "secrets"
 						action: ["describeSecret", "readValue", "create", "edit", "delete"]
@@ -316,17 +298,6 @@ infrastructure: {
 						conditions: json.Marshal({
 							environment: "$eq": _infisical.environment
 							secretPath: "$eq":  "/infrastructure/github-read-only"
-						})
-					},
-					// The collector's plan refreshes the Basin tokens it writes
-					// here. Its state already holds them, so this exposes
-					// nothing a plan can't read.
-					{
-						subject: "secrets"
-						action: ["describeSecret", "readValue"]
-						conditions: json.Marshal({
-							environment: "$eq": _infisical.environment
-							secretPath: "$eq":  "/projects/basin"
 						})
 					},
 					for path in _basinWritePaths {
@@ -567,16 +538,6 @@ infrastructure: {
 				environment_slug: _infisical.environment
 				folder_path:      infrastructure.resources.projects_rawkode_tools_folder.outputs.path
 				name:             "observability-collector"
-			}
-		}
-
-		// Legacy, removed once every consumer has moved to the folders above.
-		basin_folder: infisical_secret_folder.#Resource & {
-			configuration: {
-				project_id:       _infisical.projectId
-				environment_slug: _infisical.environment
-				folder_path:      "/projects"
-				name:             "basin"
 			}
 		}
 
