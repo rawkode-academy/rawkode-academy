@@ -15,7 +15,7 @@ lockfile = "projects/klustered.dev/flake.lock"
 [runtimes."projects/rawkode.academy/identity"]
 type = "nix"
 flake = "."
-digest = "sha256:bd8e7829a8d4f5ab1b574d29df96f7cbeab18a3cd3fa56175836177626a5a40b"
+digest = "sha256:330da8dfa70502e67f112d33694f8e432f261db3566d97f0be41d6513edf584a"
 lockfile = "projects/rawkode.academy/identity/flake.lock"
 
 [runtimes."projects/rawkode.academy/platform/video-thumbnails"]
