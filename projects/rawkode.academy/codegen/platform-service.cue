@@ -196,6 +196,13 @@ import (
 				_t.ciDeploy,
 			]
 		}
+
+		// Pull requests run the service's tests without credentials. cuenv only
+		// runs the task for services whose files the pull request touched.
+		pullRequest: {
+			when: pullRequest: true
+			tasks: [_t.test]
+		}
 	}
 
 	// A service owns migrations when it has a data-model, a "DB" D1 binding, and
@@ -223,6 +230,15 @@ import (
 	// tasks are never "affected" and CI skips them. data-model/** is shared by
 	// the read and write workers (and gates migrations).
 	tasks: {
+		// Runs the service's bun:test suite; services without a tests/ directory pass.
+		test: schema.#Task & {
+			hermetic: false
+			dir: from: "caller"
+			command: "sh"
+			args: ["-lc", "[ -d tests ] || exit 0\nnix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun test"]
+			inputs: list.Concat([_ciDeployInputSets, [["tests/**"]]])
+		}
+
 		ciDeploy: schema.#Task & {
 			hermetic: false
 			dir: from: "caller"
