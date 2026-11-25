@@ -364,10 +364,13 @@ Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 </Page>
 
 <script>
+	import { mountTypewriter } from "@/lib/hero-typewriter";
 	import { mountSystem } from "@/lib/system-canvas";
 
 	const hero = document.querySelector<HTMLElement>("[data-system]");
 	if (hero) mountSystem(hero);
+	const typed = document.querySelector<HTMLElement>("[data-typewriter]");
+	if (typed) mountTypewriter(typed);
 </script>
 
 <style>

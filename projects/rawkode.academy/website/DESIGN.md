@@ -57,8 +57,13 @@ controls, and duplicate recommendations.
     duotone so the wall reads as one surface. Tiles never enter the title's
     cells and fade in from the left so the title always reads.
 - Type runs to poster scale where the title is the composition. The homepage
-  statement uses `academy-poster` (up to 10rem, 0.9 leading, -0.05em
-  tracking); collection mastheads use `academy-masthead`; section titles use
+  statement is three short lines at its own size (up to 4.5rem, 0.9 leading,
+  -0.05em tracking): the subject in the accent, the concession set back, the
+  promise in full ink text with a rule under the word it turns on. The
+  subject types itself through what the Academy covers, each topic selected
+  and typed over like a word in an editor (`src/lib/hero-typewriter.ts`);
+  the first is in the HTML and is all that shows without script or with
+  reduced motion. Other poster titles use `academy-poster`; collection mastheads use `academy-masthead`; section titles use
   `academy-section`. A masthead title takes its own full-width row so a long
   name wraps at word boundaries; the description and the collection's real
   count share the row beneath it.
