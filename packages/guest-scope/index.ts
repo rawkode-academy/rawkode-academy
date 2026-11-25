@@ -8,12 +8,13 @@
 // which video; the analytics lake's `youtube.video` catalogue says which
 // YouTube video that is. A video that can't be tied to one YouTube video with
 // certainty is left out.
-export const GUEST_SCOPE_QUERY = `query GuestScope { getAllVideos(includeCourseVideos: true) { id title slug publishedAt youtubeId guests { id githubHandle } episode { show { id hosts { id githubHandle } } } } }`;
+export const GUEST_SCOPE_QUERY = `query GuestScope { getAllVideos(includeCourseVideos: true) { id title slug publishedAt youtubeId guests { id githubHandle } episode { show { id hosts { id githubHandle } } } } allCourses { authors { id githubHandle } modules { video { id } } } }`;
 
 export type Role = "guest" | "host";
 export type Person = { id: string; githubHandle: string | null };
 export type AcademyVideo = { id: string; title: string; slug: string; publishedAt: string | null; youtubeId: string | null; show: string | null; guests: Person[]; hosts: Person[] };
 export type EpisodeAccess = Omit<AcademyVideo, "guests" | "hosts"> & { role: Role };
+export type CourseScope = { authors: Person[]; videoIds: string[] };
 export type LakeVideo = { video: string; title: string };
 
 // The rule the Academy used to match a GitHub username to a person id.
@@ -22,6 +23,16 @@ export function normalizeHandle(handle: string) {
 }
 const isPerson = (candidate: Person, handle: string) =>
   handle !== "" && (candidate.id === handle || normalizeHandle(candidate.githubHandle ?? "") === handle);
+
+// A course's authors present its lesson videos, so they count as hosts of them.
+export function withCourseAuthors(videos: readonly AcademyVideo[], courses: readonly CourseScope[]): AcademyVideo[] {
+  const authors = new Map<string, Person[]>();
+  for (const course of courses) for (const id of course.videoIds) authors.set(id, [...(authors.get(id) ?? []), ...course.authors]);
+  return videos.map(video => {
+    const extra = authors.get(video.id);
+    return extra ? { ...video, hosts: [...video.hosts, ...extra.filter(p => !video.hosts.some(h => h.id === p.id))] } : video;
+  });
+}
 
 // Guests of a video see it; hosts of a show see every episode of it.
 export function visibleEpisodes(videos: readonly AcademyVideo[], username: string): EpisodeAccess[] {

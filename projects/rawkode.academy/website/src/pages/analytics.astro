@@ -118,6 +118,8 @@ const subs =
 		? undefined
 		: available.reduce((total, source) => total + source.value, 0);
 
+const TOP_VIDEOS = 10;
+
 // A signed-in guest or show host also sees their own episodes' totals: who
 // counts as one is decided by packages/guest-scope, shared with the MCP.
 let guest: GuestTotals | undefined;
@@ -132,6 +134,9 @@ if (user?.username && configured) {
 const show = (value: number | undefined) =>
 	value === undefined ? "Unavailable" : fmt.format(value);
 const hours = (minutes: number) => fmt.format(Math.round(minutes / 60));
+// Per-video watch time is small, so keep a decimal below 10 hours.
+const videoHours = (minutes: number) =>
+	minutes < 600 ? (minutes / 60).toFixed(1) : hours(minutes);
 const cards = [
 	{
 		label: "Visits",
@@ -195,6 +200,42 @@ const cards = [
 						</dl>
 					</div>
 				</div>
+				{guest.videos.length > 0 && (
+					<div class="videos">
+						<h3 class="card-label">By video</h3>
+						<ol class="video-list">
+							{guest.videos.slice(0, TOP_VIDEOS).map((video) => (
+								<li class="video">
+		<a class="video-title" href={`/watch/${video.slug}`}>{video.title}</a>
+		<dl class="video-stats">
+			<div><dt>Views, 90 days</dt><dd>{fmt.format(video.views.d90)}</dd></div>
+			<div><dt>Views, lifetime</dt><dd>{fmt.format(video.views.lifetime)}</dd></div>
+			<div><dt>Hours, 90 days</dt><dd>{videoHours(video.minutes.d90)}</dd></div>
+			<div><dt>Hours, lifetime</dt><dd>{videoHours(video.minutes.lifetime)}</dd></div>
+		</dl>
+	</li>
+							))}
+						</ol>
+						{guest.videos.length > TOP_VIDEOS && (
+							<details class="more">
+								<summary>Show all {fmt.format(guest.videos.length)} videos</summary>
+								<ol class="video-list" start={TOP_VIDEOS + 1}>
+									{guest.videos.slice(TOP_VIDEOS).map((video) => (
+										<li class="video">
+		<a class="video-title" href={`/watch/${video.slug}`}>{video.title}</a>
+		<dl class="video-stats">
+			<div><dt>Views, 90 days</dt><dd>{fmt.format(video.views.d90)}</dd></div>
+			<div><dt>Views, lifetime</dt><dd>{fmt.format(video.views.lifetime)}</dd></div>
+			<div><dt>Hours, 90 days</dt><dd>{videoHours(video.minutes.d90)}</dd></div>
+			<div><dt>Hours, lifetime</dt><dd>{videoHours(video.minutes.lifetime)}</dd></div>
+		</dl>
+	</li>
+									))}
+								</ol>
+							</details>
+						)}
+					</div>
+				)}
 				{guest.withoutNumbers > 0 && (
 					<p class="note">
 						{fmt.format(guest.withoutNumbers)} of {fmt.format(guest.episodes)} episodes aren't matched to a YouTube video yet.
@@ -260,5 +301,65 @@ const cards = [
 	}
 	.editorial-grid + .note {
 		margin-top: 1rem;
+	}
+	.videos {
+		margin-top: 2rem;
+	}
+	.video-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		border-top: 1px solid var(--colors-academy-border);
+	}
+	.video {
+		padding: 0.875rem 0;
+		border-bottom: 1px solid var(--colors-academy-border);
+	}
+	.video-title {
+		display: block;
+		font-family: var(--fonts-academy-text);
+		font-weight: 500;
+		color: var(--colors-academy-text);
+		text-decoration: none;
+		overflow-wrap: anywhere;
+	}
+	.video-title:hover {
+		text-decoration: underline;
+	}
+	.video-title:focus-visible,
+	.more summary:focus-visible {
+		outline: 2px solid var(--colors-academy-accent);
+		outline-offset: 2px;
+	}
+	.video-stats {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.5rem 1rem;
+		margin: 0.5rem 0 0;
+	}
+	.video-stats div {
+		display: flex;
+		flex-direction: column-reverse;
+	}
+	.video-stats dt {
+		font-family: var(--fonts-academy-text);
+		font-size: 0.8125rem;
+		color: var(--colors-academy-text-soft);
+	}
+	.video-stats dd {
+		margin: 0;
+		font-family: var(--fonts-academy-mono);
+		font-variant-numeric: tabular-nums;
+	}
+	.more summary {
+		cursor: pointer;
+		padding: 0.875rem 0;
+		font-family: var(--fonts-academy-text);
+		color: var(--colors-academy-accent);
+	}
+	@media (min-width: 40rem) {
+		.video-stats {
+			grid-template-columns: repeat(4, minmax(0, 1fr));
+		}
 	}
 </style>
