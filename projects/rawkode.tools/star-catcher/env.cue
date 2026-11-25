@@ -5,6 +5,7 @@ import "github.com/cuenv/cuenv/schema"
 schema.#Project
 
 name: "rawkode-tools-star-catcher"
+_flakeRoot: "../../.."
 
 let _t = tasks
 

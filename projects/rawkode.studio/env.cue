@@ -5,9 +5,8 @@ import "github.com/cuenv/cuenv/schema"
 schema.#Project
 
 name: "rawkode-academy-studio"
+_flakeRoot: "../.."
 
-runtime: schema.#DevenvRuntime
-hooks: onEnter: devenv: schema.#Devenv
 
 let _t = tasks
 let _taskPath = "/home/runner/.bun/bin:/Users/rawkode/.bun/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"

@@ -10,16 +10,17 @@ on:
     - '*.cue'
     - .github/workflows/rawkode-academy-platform-youtube-control-default.yml
     - cue.mod/**
+    - flake.lock
+    - flake.lock/**
+    - flake.nix
+    - flake.nix/**
+    - nix/**
     - projects/*.cue
     - projects/rawkode.academy/*.cue
     - projects/rawkode.academy/platform/*.cue
     - projects/rawkode.academy/platform/youtube-control/*.cue
     - projects/rawkode.academy/platform/youtube-control/env.cue
     - projects/rawkode.academy/platform/youtube-control/env.cue/**
-    - projects/rawkode.academy/platform/youtube-control/flake.lock
-    - projects/rawkode.academy/platform/youtube-control/flake.lock/**
-    - projects/rawkode.academy/platform/youtube-control/flake.nix
-    - projects/rawkode.academy/platform/youtube-control/flake.nix/**
     - projects/rawkode.academy/platform/youtube-control/package-lock.json
     - projects/rawkode.academy/platform/youtube-control/package-lock.json/**
     - projects/rawkode.academy/platform/youtube-control/package.json

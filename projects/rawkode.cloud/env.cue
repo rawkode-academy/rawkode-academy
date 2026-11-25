@@ -4,6 +4,7 @@ import "github.com/cuenv/cuenv/schema"
 
 schema.#Project & {
 	name: "rawkode-cloud"
+	_flakeRoot: "../.."
 
 	env: {
 		environment: production: {

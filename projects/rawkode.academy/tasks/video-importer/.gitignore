@@ -16,10 +16,6 @@ venv/
 *.tmp
 *.log
 
-# Devenv
-.devenv*
-devenv.local.nix
-
 # direnv
 .direnv
 

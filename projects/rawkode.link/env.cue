@@ -5,9 +5,11 @@ import "github.com/cuenv/cuenv/schema"
 schema.#Project
 
 name: "rawkode-link"
+_flakeRoot: "../.."
 
-// No devenv: with it, every CI deploy since July failed to spawn bun. The
-// collector deploys with CI's own bun, so this does the same.
+// Deploys with the base dev shell's Bun, like every project without its own
+// shell. (The old devenv runtime made every CI deploy since July fail to spawn
+// bun; that runtime is gone.)
 
 let _t = tasks
 

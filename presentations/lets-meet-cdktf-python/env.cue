@@ -5,6 +5,7 @@ import "github.com/cuenv/cuenv/schema"
 schema.#Project
 
 name: "presentation-lets-meet-cdktf-python"
+_flakeRoot: "../.."
 
 // Uses its own Cloudflare token, not the ones the root env.cue chooses.
 _ownCloudflareToken: true

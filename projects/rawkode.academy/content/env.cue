@@ -5,6 +5,7 @@ import "github.com/cuenv/cuenv/schema"
 schema.#Project
 
 name: "rawkode-academy-content"
+_flakeRoot: "../../.."
 
 env: {
 	SERVICE_NAME: "content"

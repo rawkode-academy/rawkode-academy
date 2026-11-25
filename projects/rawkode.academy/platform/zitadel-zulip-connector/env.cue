@@ -5,6 +5,7 @@ import "github.com/cuenv/cuenv/schema"
 schema.#Project
 
 name: "rawkode-academy-platform-zitadel-zulip-connector"
+_flakeRoot: "../../../.."
 
 let _t = tasks
 
