@@ -35,23 +35,43 @@ const config = {
 };
 const configured = Boolean(config.accountId && config.token);
 
+// A signed-in guest or show host also sees their own episodes' totals: who
+// counts as one is decided by packages/guest-scope, shared with the MCP.
+// Started first so it runs alongside every other query rather than after them.
+const guestPending: Promise<GuestTotals | undefined> =
+	user?.username && configured
+		? guestTotals(env as unknown as ContentEnv, config, user.username).catch(
+				(error) => {
+					console.warn("[analytics] guest totals unavailable", error);
+					return undefined;
+				},
+			)
+		: Promise.resolve(undefined);
+
 const queries = reachQueries(reachWindow());
-const results = Object.fromEntries(
-	await Promise.all(
-		(Object.keys(queries) as ReachQuery[]).map(async (name) => {
-			if (!configured) return [name, { rows: [] as Row[], failed: true }];
-			try {
-				// Reach numbers move slowly; cache for 30 minutes at the edge.
-				const rows = await basinQuery(config, queries[name], {
-					ttlSeconds: 1800,
-				});
-				return [name, { rows, failed: false }];
-			} catch {
-				return [name, { rows: [] as Row[], failed: true }];
-			}
-		}),
-	),
-) as Record<ReachQuery, { rows: Row[]; failed: boolean }>;
+const reachPending = Promise.all(
+	(Object.keys(queries) as ReachQuery[]).map(async (name) => {
+		if (!configured) return [name, { rows: [] as Row[], failed: true }] as const;
+		try {
+			// Reach numbers move slowly; cache for 30 minutes at the edge.
+			const rows = await basinQuery(config, queries[name], {
+				ttlSeconds: 1800,
+			});
+			return [name, { rows, failed: false }] as const;
+		} catch {
+			return [name, { rows: [] as Row[], failed: true }] as const;
+		}
+	}),
+);
+const [reachEntries, [accounts, mailingOnly], guest] = await Promise.all([
+	reachPending,
+	Promise.all([accountCount(), mailingOnlyCount()]),
+	guestPending,
+]);
+const results = Object.fromEntries(reachEntries) as Record<
+	ReachQuery,
+	{ rows: Row[]; failed: boolean }
+>;
 
 const num = (value: unknown) => Number(value ?? 0);
 const fmt = new Intl.NumberFormat("en-GB");
@@ -97,7 +117,6 @@ async function mailingOnlyCount(): Promise<number | undefined> {
 		return undefined;
 	}
 }
-const [accounts, mailingOnly] = await Promise.all([accountCount(), mailingOnlyCount()]);
 const youtubeSubs =
 	results.subscribers.failed || results.subscribers.rows.length === 0
 		? undefined
@@ -119,17 +138,6 @@ const subs =
 		: available.reduce((total, source) => total + source.value, 0);
 
 const TOP_VIDEOS = 10;
-
-// A signed-in guest or show host also sees their own episodes' totals: who
-// counts as one is decided by packages/guest-scope, shared with the MCP.
-let guest: GuestTotals | undefined;
-if (user?.username && configured) {
-	try {
-		guest = await guestTotals(env as unknown as ContentEnv, config, user.username);
-	} catch (error) {
-		console.warn("[analytics] guest totals unavailable", error);
-	}
-}
 
 const show = (value: number | undefined) =>
 	value === undefined ? "Unavailable" : fmt.format(value);
