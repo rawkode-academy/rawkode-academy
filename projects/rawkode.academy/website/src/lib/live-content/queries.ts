@@ -61,6 +61,10 @@ export const VIDEO_FIELDS = /* GraphQL */ `
 		guests {
 			id
 		}
+		collaborators {
+			id
+			name
+		}
 		technologies {
 			id
 		}
