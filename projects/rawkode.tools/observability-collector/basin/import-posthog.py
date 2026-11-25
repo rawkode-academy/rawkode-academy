@@ -1,6 +1,6 @@
 # Run through `cuenv task import-posthog`; flake.nix provides Python, PyIceberg,
 # pyiceberg-core and PyArrow.
-"""Import PostHog history into analytics.events_legacy (issue #1634).
+"""Import PostHog history into analytics.events_archive (issue #1634).
 
 Basin has no events before November 2026. This copies PostHog project 12084
 from 1 December 2023 up to the day Basin took over each event family, as
@@ -13,7 +13,7 @@ CloudEvents shaped like the rows in analytics.events_archive:
   doesn't list stops the import before anything is fetched.
 - IDs: an event the collector sent keeps its CloudEvent ID (cloudevents_id);
   every other event uses its PostHog UUID. The import is keyed on that ID:
-  rows already in events_legacy are skipped, so re-runs add nothing twice.
+  rows already in events_archive are skipped, so re-runs add nothing twice.
 - Overlap: only events before their family's cutoff are taken, and events
   whose ID is already in events_archive are skipped.
 - Junk: excluded names, development and preview hosts, and the July 2025
@@ -52,8 +52,7 @@ from urllib.parse import urlsplit
 ACCOUNT = "0aeb879de8e3cdde5fb3d413025222ce"
 BUCKET = "rawkode-analytics"
 NAMESPACE = "analytics"
-TABLE = "events_legacy"
-ARCHIVE = "events_archive"
+TABLE = "events_archive"
 PRODUCTION_HOST = "rawkode.academy"
 START = datetime(2023, 12, 1, tzinfo=timezone.utc)
 PAGE_SIZE = 5_000
@@ -489,41 +488,35 @@ def catalog():
 	)
 
 
-def schema():
-	from pyiceberg.schema import Schema
-	from pyiceberg.types import NestedField, StringType, TimestampType
-
-	return Schema(
-		NestedField(1, "event_id", StringType(), required=False),
-		NestedField(2, "event_type", StringType(), required=False),
-		NestedField(3, "event_source", StringType(), required=False),
-		NestedField(4, "event_time", TimestampType(), required=False),
-		NestedField(5, "value", StringType(), required=False),
-	)
-
-
 def ids(table, where=None) -> set[str]:
 	scan = table.scan(selected_fields=("event_id",), **({"row_filter": where} if where else {}))
 	return {value for value in scan.to_arrow().column("event_id").to_pylist() if value}
 
 
-def to_arrow(events: list[dict]):
+def to_arrow(events: list[dict], table):
+	"""Rows in the table's own columns: the five the pipeline writes, plus
+	__ingest_ts (the event's time) so relabel and scrub filters cover them."""
 	import pyarrow as pa
 
 	events = sorted(events, key=lambda event: event["time"])
-	return pa.table(
-		{
-			"event_id": pa.array([e["id"] for e in events], pa.string()),
-			"event_type": pa.array([e["type"] for e in events], pa.string()),
-			"event_source": pa.array([e["source"] for e in events], pa.string()),
-			"event_time": pa.array(
-				[parse_time(e["time"]).replace(tzinfo=None) for e in events], pa.timestamp("us")
-			),
-			"value": pa.array(
-				[json.dumps(e, separators=(",", ":"), ensure_ascii=False) for e in events], pa.string()
-			),
-		}
-	)
+	times = [parse_time(e["time"]).replace(tzinfo=None) for e in events]
+	values = {
+		"event_id": [e["id"] for e in events],
+		"event_type": [e["type"] for e in events],
+		"event_source": [e["source"] for e in events],
+		"event_time": times,
+		"value": [json.dumps(e, separators=(",", ":"), ensure_ascii=False) for e in events],
+		"__ingest_ts": times,
+	}
+	target = table.schema().as_arrow()
+	unknown = [field.name for field in target if field.name not in values]
+	if unknown and any(not field.nullable for field in target if field.name in unknown):
+		sys.exit(f"{TABLE} has required columns the importer does not fill: {unknown}")
+	arrays = [
+		pa.array(values[field.name], field.type) if field.name in values else pa.nulls(len(events), field.type)
+		for field in target
+	]
+	return pa.table(arrays, schema=target)
 
 
 def stored_counts(table, end: datetime) -> Counter:
@@ -562,15 +555,13 @@ def main(argv: list[str]) -> None:
 		sys.exit("Unmapped PostHog events (add them to basin/posthog-mapping.json):\n  " + "\n  ".join(unmapped))
 
 	lake = catalog()
-	archived = ids(lake.load_table((NAMESPACE, ARCHIVE)))
-	table = None
-	imported: set[str] = set()
-	before: Counter[tuple[str, str]] = Counter()
-	if lake.table_exists((NAMESPACE, TABLE)):
-		table = lake.load_table((NAMESPACE, TABLE))
-		imported = ids(table)
-		before = stored_counts(table, end)
-	print(f"events_archive IDs: {len(archived)}; already in {TABLE}: {len(imported)}")
+	table = lake.load_table((NAMESPACE, TABLE))
+	archived = imported = ids(table)
+	before = stored_counts(table, end)
+	snapshot = table.current_snapshot()
+	print(f"{TABLE} IDs: {len(archived)}")
+	if apply:
+		print(f"Rollback snapshot (current before this run): {snapshot.snapshot_id if snapshot else 'none'}", flush=True)
 	returning = returning_people(posthog)
 	print(f"People seen before the July 2025 spike: {len(returning)}")
 
@@ -617,10 +608,7 @@ def main(argv: list[str]) -> None:
 			sys.exit(f"{month}: fetched counts differ from PostHog's counts: {short}")
 		print(f"{month}: {sum(month_counts.values())} in PostHog, {len(events)} to import", flush=True)
 		if apply and events:
-			if table is None:
-				table = lake.create_table((NAMESPACE, TABLE), schema=schema())
-				print(f"Created {NAMESPACE}.{TABLE}")
-			table.append(to_arrow(list(events.values())))
+			table.append(to_arrow(list(events.values()), table))
 			imported.update(events)
 
 	print(f"PostHog queries: {posthog.queries}")
