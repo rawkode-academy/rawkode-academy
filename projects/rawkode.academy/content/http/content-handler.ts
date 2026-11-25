@@ -15,6 +15,9 @@ const corsHeaders = {
 	"Access-Control-Allow-Headers": "Content-Type, Range",
 	"Access-Control-Expose-Headers":
 		"Content-Length, Content-Range, Accept-Ranges",
+	// Course and embed pages set COEP require-corp (WebContainer needs it),
+	// which blocks cross-origin <img> and <video> loads without this header.
+	"Cross-Origin-Resource-Policy": "cross-origin",
 	// Stored R2 objects (captions, HLS manifests, thumbnails) are assets,
 	// not pages. Tell Google not to index them - otherwise they pile up
 	// under "Crawled - currently not indexed" in Search Console.
@@ -108,7 +111,8 @@ export async function handleContentRequest(
 	headers.set("etag", object.httpEtag);
 	headers.set("accept-ranges", "bytes");
 
-	if (object.range) {
+	// R2 reports a range on every get, so only answer 206 when one was asked for.
+	if (range !== null && object.range) {
 		const { offset, length } = object.range as {
 			offset: number;
 			length: number;
