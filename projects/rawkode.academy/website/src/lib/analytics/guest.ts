@@ -6,19 +6,14 @@ import {
 	type AcademyVideo,
 	dailySql,
 	GUEST_SCOPE_QUERY,
-	lakeCatalogueSql,
-	type LakeVideo,
-	videoIdPattern,
 	visibleEpisodes,
 	withCourseAuthors,
 	youtubeIds,
 } from "../../../../../../packages/guest-scope/index";
-import { basinQuery, type BasinConfig } from "@/server/basin";
+import type { Snapshot } from "@/lib/analytics/snapshot";
 import type { ContentEnv } from "@/lib/live-content/env";
 import { queryGateway } from "@/lib/live-content/gateway";
 import { reachWindow, YOUTUBE_HISTORY_FROM } from "@/lib/analytics/reach";
-
-const CACHE_SECONDS = 300;
 
 export type GuestVideo = {
 	title: string;
@@ -109,63 +104,23 @@ FROM (${dailySql(videoIds, YOUTUBE_HISTORY_FROM, window.youtubeEnd)})
 GROUP BY video`;
 }
 
-async function cachedJson<T>(
-	key: string,
-	load: () => Promise<T>,
-): Promise<T> {
-	const cache =
-		typeof caches === "undefined"
-			? undefined
-			: (caches as unknown as { default: Cache }).default;
-	const request = new Request(`https://guest-scope.cache.internal/${key}`);
-	const hit = await cache?.match(request);
-	if (hit) return (await hit.json()) as T;
-	const value = await load();
-	await cache?.put(
-		request,
-		Response.json(value, {
-			headers: { "Cache-Control": `max-age=${CACHE_SECONDS}` },
-		}),
-	);
-	return value;
-}
-
-const num = (value: unknown) => Number(value ?? 0);
-
-/** undefined when there is nothing to show (not a guest or host). Throws if a source can't be read. */
+/**
+ * undefined when there is nothing to show (not a guest or host). Per-video
+ * numbers come from the daily snapshot; only the Academy video list (and so
+ * who counts as a guest or host) is read live. Throws if that list can't be read.
+ */
 export async function guestTotals(
 	env: ContentEnv,
-	basin: BasinConfig,
+	snapshot: Snapshot,
 	username: string,
 ): Promise<GuestTotals | undefined> {
-	const videosPending = cachedJson("videos", async () => {
-		const data = await queryGateway<unknown>(env, GUEST_SCOPE_QUERY);
-		const parsed = parseAcademyVideos(data);
-		if (!parsed) throw new Error("Academy video list unusable");
-		return parsed;
-	});
-	// Start the catalogue query alongside the gateway query; it is cached for
-	// everyone, so a non-guest pays nothing extra on a warm cache.
-	const lakePending = cachedJson<LakeVideo[]>("lake", async () =>
-		(await basinQuery(basin, lakeCatalogueSql, { ttlSeconds: CACHE_SECONDS }))
-			.flatMap((row) =>
-				typeof row.video === "string" && typeof row.title === "string"
-					? [{ video: row.video, title: row.title }]
-					: [],
-			),
-	);
-	const [videos, lake] = await Promise.all([videosPending, lakePending]);
+	const data = await queryGateway<unknown>(env, GUEST_SCOPE_QUERY);
+	const videos = parseAcademyVideos(data);
+	if (!videos) throw new Error("Academy video list unusable");
 	const mine = visibleEpisodes(videos, username);
 	if (mine.length === 0) return undefined;
-	const ids = youtubeIds(videos, lake);
-	const tracked = [
-		...new Set(
-			mine.flatMap((episode) => {
-				const id = ids.get(episode.id);
-				return id && videoIdPattern.test(id) ? [id] : [];
-			}),
-		),
-	];
+
+	const ids = youtubeIds(videos, snapshot.lake);
 	const totals: GuestTotals = {
 		episodes: mine.length,
 		withoutNumbers: mine.filter((episode) => !ids.has(episode.id)).length,
@@ -173,23 +128,18 @@ export async function guestTotals(
 		minutes: { d90: 0, lifetime: 0 },
 		videos: [],
 	};
-	if (tracked.length === 0) return totals;
-	const rows = await basinQuery(basin, guestVideosSql(tracked, reachWindow()), {
-		ttlSeconds: 1800,
-	});
-	const byYoutube = new Map(rows.map((row) => [String(row.video), row]));
 	const seen = new Set<string>();
 	for (const episode of mine) {
 		const youtube = ids.get(episode.id);
-		const row = youtube ? byYoutube.get(youtube) : undefined;
+		const stats = youtube ? snapshot.videos[youtube] : undefined;
 		// Two Academy videos never share a YouTube video, but count it once if they do.
-		if (!youtube || !row || seen.has(youtube)) continue;
+		if (!youtube || !stats || seen.has(youtube)) continue;
 		seen.add(youtube);
 		const video: GuestVideo = {
 			title: episode.title,
 			slug: episode.slug,
-			views: { d90: num(row.views_d90), lifetime: num(row.views_lifetime) },
-			minutes: { d90: num(row.minutes_d90), lifetime: num(row.minutes_lifetime) },
+			views: stats.views,
+			minutes: stats.minutes,
 		};
 		totals.videos.push(video);
 		totals.views.d90 += video.views.d90;

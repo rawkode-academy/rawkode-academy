@@ -4,12 +4,11 @@ import EditorialShell from "@/components/ui/EditorialShell.astro";
 import {
 	PERIODS,
 	type ReachQuery,
-	reachQueries,
-	reachWindow,
 } from "@/lib/analytics/reach";
-import { guestTotals, type GuestTotals } from "@/lib/analytics/guest";
+import { guestTotals } from "@/lib/analytics/guest";
+import { loadSnapshot, type Snapshot } from "@/lib/analytics/snapshot";
 import type { ContentEnv } from "@/lib/live-content/env";
-import { basinQuery, type Row } from "@/server/basin";
+import type { Row } from "@/server/basin";
 import Page from "@/wrappers/page.astro";
 
 export const prerender = false;
@@ -35,43 +34,38 @@ const config = {
 };
 const configured = Boolean(config.accountId && config.token);
 
-// A signed-in guest or show host also sees their own episodes' totals: who
-// counts as one is decided by packages/guest-scope, shared with the MCP.
-// Started first so it runs alongside every other query rather than after them.
-const guestPending: Promise<GuestTotals | undefined> =
-	user?.username && configured
-		? guestTotals(env as unknown as ContentEnv, config, user.username).catch(
+// The reach and per-video numbers come from a snapshot refreshed once a day
+// (KV, see src/lib/analytics/snapshot.ts); a signed-in guest or show host's
+// episodes are matched against it live, so only the Academy video list and the
+// two counts below are read per view. Who counts as a guest or host is decided
+// by packages/guest-scope, shared with the MCP.
+const kv = (env as unknown as ContentEnv).CONTENT_CACHE;
+let snapshot: Snapshot | undefined;
+if (configured) {
+	try {
+		snapshot = await loadSnapshot(config, kv);
+	} catch (error) {
+		console.warn("[analytics] snapshot unavailable", error);
+	}
+}
+
+const [[accounts, mailingOnly], guest] = await Promise.all([
+	Promise.all([accountCount(), mailingOnlyCount()]),
+	user?.username && snapshot
+		? guestTotals(env as unknown as ContentEnv, snapshot, user.username).catch(
 				(error) => {
 					console.warn("[analytics] guest totals unavailable", error);
 					return undefined;
 				},
 			)
-		: Promise.resolve(undefined);
-
-const queries = reachQueries(reachWindow());
-const reachPending = Promise.all(
-	(Object.keys(queries) as ReachQuery[]).map(async (name) => {
-		if (!configured) return [name, { rows: [] as Row[], failed: true }] as const;
-		try {
-			// Reach numbers move slowly; cache for 30 minutes at the edge.
-			const rows = await basinQuery(config, queries[name], {
-				ttlSeconds: 1800,
-			});
-			return [name, { rows, failed: false }] as const;
-		} catch {
-			return [name, { rows: [] as Row[], failed: true }] as const;
-		}
-	}),
-);
-const [reachEntries, [accounts, mailingOnly], guest] = await Promise.all([
-	reachPending,
-	Promise.all([accountCount(), mailingOnlyCount()]),
-	guestPending,
+		: Promise.resolve(undefined),
 ]);
-const results = Object.fromEntries(reachEntries) as Record<
-	ReachQuery,
-	{ rows: Row[]; failed: boolean }
->;
+const results = Object.fromEntries(
+	(["web", "subscribers", "youtube"] as ReachQuery[]).map((name) => [
+		name,
+		{ rows: snapshot?.reach[name] ?? ([] as Row[]), failed: !snapshot },
+	]),
+) as Record<ReachQuery, { rows: Row[]; failed: boolean }>;
 
 const num = (value: unknown) => Number(value ?? 0);
 const fmt = new Intl.NumberFormat("en-GB");
