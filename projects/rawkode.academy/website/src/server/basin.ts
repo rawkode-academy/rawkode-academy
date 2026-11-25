@@ -2,6 +2,8 @@
 // `analytics.events_archive` and `analytics.short_links`). Results are cached at the edge: Basin bills per byte
 // scanned, and dashboard numbers don't need to be fresher than a few minutes.
 
+import type { ContentKV } from "@/lib/live-content/env";
+
 const DEFAULT_TTL_SECONDS = 600;
 const CACHE_ORIGIN = "https://basin-sql.cache.internal";
 
@@ -73,10 +75,56 @@ function errorMessage(payload: unknown, status: number): string {
 	);
 }
 
+export interface BasinQueryOptions {
+	ttlSeconds?: number;
+	/**
+	 * Keep the result in KV for the rest of the UTC day. The first read after
+	 * midnight (or the daily warm-up) runs the query; every other read is a KV
+	 * get. If a refresh fails, the previous day's result is served instead.
+	 */
+	daily?: DailyStore | undefined;
+	/** With `daily`: skip the stored result and replace it (the warm-up). */
+	refresh?: boolean;
+}
+
+export type DailyStore = ContentKV;
+
+const DAILY_RETENTION_SECONDS = 2 * 86_400;
+
 export async function basinQuery(
 	config: BasinConfig,
 	sql: string,
-	{ ttlSeconds = DEFAULT_TTL_SECONDS }: { ttlSeconds?: number } = {},
+	{ ttlSeconds = DEFAULT_TTL_SECONDS, daily, refresh = false }: BasinQueryOptions = {},
+): Promise<Row[]> {
+	if (!daily) return runBasinQuery(config, sql, ttlSeconds);
+	const request = await cacheKey(sql);
+	const hash = new URL(request.url).pathname.slice(1);
+	const today = new Date().toISOString().slice(0, 10);
+	const todayKey = `basin-daily:${today}:${hash}`;
+	const latestKey = `basin-daily:latest:${hash}`;
+	if (!refresh) {
+		const hit = await daily.get<Row[]>(todayKey, { type: "json" }).catch(() => null);
+		if (hit) return hit;
+	}
+	try {
+		const rows = await runBasinQuery(config, sql, ttlSeconds);
+		const body = JSON.stringify(rows);
+		await Promise.all([
+			daily.put(todayKey, body, { expirationTtl: DAILY_RETENTION_SECONDS }),
+			daily.put(latestKey, body, { expirationTtl: DAILY_RETENTION_SECONDS * 7 }),
+		]).catch(() => undefined);
+		return rows;
+	} catch (error) {
+		const previous = await daily.get<Row[]>(latestKey, { type: "json" }).catch(() => null);
+		if (previous) return previous;
+		throw error;
+	}
+}
+
+async function runBasinQuery(
+	config: BasinConfig,
+	sql: string,
+	ttlSeconds: number,
 ): Promise<Row[]> {
 	// Workers' `caches.default`; the DOM CacheStorage type doesn't declare it.
 	const cache =

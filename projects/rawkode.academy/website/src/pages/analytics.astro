@@ -41,9 +41,11 @@ const results = Object.fromEntries(
 		(Object.keys(queries) as ReachQuery[]).map(async (name) => {
 			if (!configured) return [name, { rows: [] as Row[], failed: true }];
 			try {
-				// Reach numbers move slowly; cache for 30 minutes at the edge.
+				// Reach numbers move slowly: one query a day, kept in KV and
+				// warmed by the midnight UTC cron (src/lib/analytics/warm.ts).
 				const rows = await basinQuery(config, queries[name], {
 					ttlSeconds: 1800,
+					daily: (env as unknown as ContentEnv).CONTENT_CACHE,
 				});
 				return [name, { rows, failed: false }];
 			} catch {

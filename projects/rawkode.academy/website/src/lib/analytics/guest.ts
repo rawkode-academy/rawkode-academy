@@ -148,7 +148,10 @@ export async function guestTotals(
 	if (mine.length === 0) return undefined;
 
 	const lake = await cachedJson<LakeVideo[]>("lake", async () =>
-		(await basinQuery(basin, lakeCatalogueSql, { ttlSeconds: CACHE_SECONDS }))
+		(await basinQuery(basin, lakeCatalogueSql, {
+			ttlSeconds: CACHE_SECONDS,
+			daily: env.CONTENT_CACHE,
+		}))
 			.flatMap((row) =>
 				typeof row.video === "string" && typeof row.title === "string"
 					? [{ video: row.video, title: row.title }]
@@ -174,6 +177,7 @@ export async function guestTotals(
 	if (tracked.length === 0) return totals;
 	const rows = await basinQuery(basin, guestVideosSql(tracked, reachWindow()), {
 		ttlSeconds: 1800,
+		daily: env.CONTENT_CACHE,
 	});
 	const byYoutube = new Map(rows.map((row) => [String(row.video), row]));
 	const seen = new Set<string>();

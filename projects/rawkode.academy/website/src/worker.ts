@@ -1,8 +1,9 @@
 // Worker entrypoint (wrangler.jsonc "main"): Astro's request handler plus the
-// hourly content change detection on the cron trigger "0 * * * *".
+// hourly content change detection (and the daily analytics refresh) on the cron trigger "0 * * * *".
 
 import { cache } from "cloudflare:workers";
 import { handle } from "@astrojs/cloudflare/handler";
+import { isWarmTime, warmAnalytics } from "./lib/analytics/warm";
 import { runChangeDetection } from "./lib/live-content/change-detection";
 import type { ContentEnv } from "./lib/live-content/env";
 import { workersCachePurge } from "./lib/live-content/invalidate";
@@ -53,6 +54,9 @@ export default {
 				"[content] change detection skipped: CONTENT_CACHE is not bound",
 			);
 			return;
+		}
+		if (isWarmTime(controller.scheduledTime)) {
+			ctx.waitUntil(warmAnalytics(env as unknown as Parameters<typeof warmAnalytics>[0]));
 		}
 		ctx.waitUntil(
 			runChangeDetection({
