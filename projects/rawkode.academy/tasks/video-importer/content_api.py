@@ -294,6 +294,8 @@ def invalidate_cache(tags, token=None, url=None, attempts=3, timeout=120):
         request = urllib.request.Request(url, data=body, method="POST", headers={
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json",
+            # Cloudflare refuses urllib's default User-Agent (error 1010).
+            "User-Agent": "rawkode-academy-video-importer",
         })
         try:
             # The endpoint purges twice ~50s apart before answering.
