@@ -91,6 +91,11 @@
 			"service": "rawkode-academy-identity"
 		},
 		{
+			"binding": "IDENTITY_STATS",
+			"service": "rawkode-academy-identity",
+			"entrypoint": "AccountStats"
+		},
+		{
 			"binding": "EMAIL_PREFERENCES",
 			"service": "platform-email-preferences-rpc",
 			"entrypoint": "EmailPreferences"

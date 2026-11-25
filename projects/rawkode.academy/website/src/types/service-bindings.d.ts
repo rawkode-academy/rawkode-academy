@@ -18,6 +18,7 @@ export interface TypedEnv {
 	EMOJI_REACTIONS: Fetcher;
 	WATCH_HISTORY: Fetcher;
 	IDENTITY: Fetcher;
+	IDENTITY_STATS: Fetcher & { countAccounts(): Promise<number> };
 	ANALYTICS: Fetcher;
 	STUDIO: Fetcher;
 	ASSETS: Fetcher;

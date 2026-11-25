@@ -18,6 +18,7 @@ interface __BaseEnv_Env {
 	BRACKETS_READ: Fetcher /* platform-brackets-read-model */;
 	BRACKETS_WRITE: Fetcher /* platform-brackets-write-model */;
 	IDENTITY: Fetcher /* rawkode-academy-identity */;
+	IDENTITY_STATS: Fetcher /* rawkode-academy-identity#AccountStats */ & { countAccounts(): Promise<number> };
 	EMAIL_PREFERENCES: Service<typeof import("../platform/email-preferences/http/http-service").EmailPreferences>;
 	ANALYTICS: Fetcher /* rawkode-tools-observability-collector */;
 	NOTIFICATIONS: Service<typeof import("../platform/notifications/src/main").Notifications>;
