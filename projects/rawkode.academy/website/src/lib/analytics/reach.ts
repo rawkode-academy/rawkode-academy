@@ -80,6 +80,15 @@ export const reachQueries = (w: ReachWindow) => ({
 		SELECT approx_distinct(event_id) AS views, approx_distinct(visitor) AS visitors
 		${HUMAN_VIEWS(w)}`,
 
+	// Latest channel total from the daily sync (`youtube.channel_stats`).
+	subscribers: `
+		SELECT json_get_int(value, 'data', 'subscriberCount') AS subscribers
+		FROM ${TABLE}
+		WHERE event_source = 'rawkode-academy-youtube' AND event_type = 'youtube.channel_stats'
+			AND event_time >= CAST('${w.start}T00:00:00Z' AS TIMESTAMP)
+		ORDER BY json_get_str(value, 'data', 'fetchedAt') DESC
+		LIMIT 1`,
+
 	youtube: `
 		SELECT day, views
 		FROM (

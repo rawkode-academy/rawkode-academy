@@ -32,4 +32,10 @@ describe("reach queries", () => {
 		expect(queries.youtube).toContain("ROW_NUMBER()");
 		expect(queries.youtube).toContain("'youtube.daily'");
 	});
+
+	it("reads the latest YouTube channel total", () => {
+		expect(queries.subscribers).toContain("'youtube.channel_stats'");
+		expect(queries.subscribers).toContain("ORDER BY json_get_str(value, 'data', 'fetchedAt') DESC");
+		expect(queries.subscribers).toContain("LIMIT 1");
+	});
 });

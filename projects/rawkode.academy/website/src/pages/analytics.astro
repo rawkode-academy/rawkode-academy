@@ -60,6 +60,43 @@ const youtubeViews = results.youtube.rows
 	.slice(-REACH_DAYS)
 	.reduce((total, row) => total + num(row.views), 0);
 
+// Subs: total people reachable, counted once. YouTube subscribers, plus site
+// accounts, plus mailing-list members who have no account. Each source is read
+// separately so a missing one is named rather than silently left out.
+async function accountCount(): Promise<number | undefined> {
+	try {
+		const response = await env.IDENTITY.fetch("https://id.rawkode.academy/api/stats");
+		if (!response.ok) return undefined;
+		const body = (await response.json()) as { accounts?: unknown };
+		return Number.isSafeInteger(body.accounts) ? (body.accounts as number) : undefined;
+	} catch {
+		return undefined;
+	}
+}
+async function mailingOnlyCount(): Promise<number | undefined> {
+	try {
+		const counts = await env.EMAIL_PREFERENCES.countSubscribers();
+		return Number.isSafeInteger(counts.emailOnly) ? counts.emailOnly : undefined;
+	} catch {
+		return undefined;
+	}
+}
+const [accounts, mailingOnly] = await Promise.all([accountCount(), mailingOnlyCount()]);
+const youtubeSubs =
+	results.subscribers.failed || results.subscribers.rows.length === 0
+		? undefined
+		: num(results.subscribers.rows[0]?.subscribers);
+const subSources = [
+	{ name: "YouTube subscribers", value: youtubeSubs },
+	{ name: "site accounts", value: accounts },
+	{ name: "mailing list", value: mailingOnly },
+];
+const missing = subSources.filter((source) => source.value === undefined);
+const subs =
+	missing.length === 0
+		? subSources.reduce((total, source) => total + (source.value ?? 0), 0)
+		: undefined;
+
 const visits = results.totals.failed ? undefined : num(web?.visitors);
 const views =
 	results.totals.failed || results.youtube.failed
@@ -78,7 +115,11 @@ const show = (value: number | undefined, prefix = "") =>
 		<dl class="stats">
 			<div><dt>Visits</dt><dd>{show(visits, "~")}</dd></div>
 			<div><dt>Views</dt><dd>{show(views)}</dd></div>
-			<div><dt>Subs</dt><dd>Not yet available</dd></div>
+			<div>
+				<dt>Subs</dt>
+				<dd>{show(subs)}</dd>
+				{missing.length > 0 && <p class="missing">Unavailable: {missing.map((source) => source.name).join(", ")}.</p>}
+			</div>
 		</dl>
 
 		<section class="method">
@@ -86,8 +127,9 @@ const show = (value: number | undefined, prefix = "") =>
 			<p>
 				Visits are approximate distinct anonymous browsers on rawkode.academy, so one
 				person on two devices counts twice. Views are website page views plus YouTube
-				views. Automated traffic is removed from the website figures. YouTube runs a few
-				days behind. Nothing here identifies a person or a video.
+				views. Subs are YouTube subscribers (rounded by YouTube), site accounts and mailing-list members
+				without an account, so nobody is counted twice. Automated traffic is removed from the
+				website figures. YouTube runs a few days behind. Nothing here identifies a person or a video.
 			</p>
 		</section>
 	</EditorialShell>
@@ -112,6 +154,11 @@ const show = (value: number | undefined, prefix = "") =>
 		font-size: clamp(2.25rem, 8vw, 3.75rem);
 		font-variant-numeric: tabular-nums;
 		color: var(--colors-academy-text);
+	}
+	.missing {
+		margin: 0.25rem 0 0;
+		font-size: 0.8125rem;
+		color: var(--colors-academy-text-muted);
 	}
 	.method {
 		border-top: 1px solid var(--colors-academy-border);
