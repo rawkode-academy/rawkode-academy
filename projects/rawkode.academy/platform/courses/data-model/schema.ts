@@ -37,15 +37,6 @@ export type SignupConfig = {
 	sponsorAudienceId?: string;
 	allowSponsorContact: boolean;
 };
-// Deprecated: the inline lesson video. Lesson videos are rows in the videos
-// service, referenced by video_id; this column is only kept until it is dropped.
-export type ModuleVideo = {
-	id: string;
-	thumbnailUrl?: string;
-	youtube?: string;
-	rawkode?: string;
-	poster?: string;
-};
 
 const json = <T>(name: string) => text(name, { mode: "json" }).$type<T>();
 // Rich text: a TipTap document (JSON text, see packages/rich-text).
@@ -99,8 +90,6 @@ export const courseModulesTable = sqliteTable(
 		sortOrder: integer("sort_order").notNull(),
 		// The lesson's video: an id in the videos service.
 		videoId: text("video_id"),
-		// Deprecated, replaced by videoId. Not read.
-		video: json<ModuleVideo>("video"),
 		duration: integer("duration"),
 		difficulty: difficulty("difficulty"),
 		publishedAt: integer("published_at", { mode: "timestamp" }).notNull(),
