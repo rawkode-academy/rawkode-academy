@@ -179,45 +179,6 @@ the signals they kept (host, the old user-agent verdict, device and browser);
 hosting networks, client hints and webdriver weren't stored, so older events
 from those bots still count as people.
 
-To write those labels into the stored rows, run the one-time relabel task
-after this change is deployed (so nothing new is written to `short_links`):
-
-```sh
-cuenv task relabel-history -e production            # dry run: counts per reason
-RELABEL_ARGS=--apply cuenv task relabel-history -e production # rewrite in place
-```
-
-It rewrites only rows ingested before it starts, adds `bot`, `botreason` and
-`botbackfill` to archive events, and adds `bot`, `bot_reason` and `asn`
-columns to `short_links`. Rows already labelled are kept, so it is safe to
-re-run. Each table's previous snapshot ID is printed; within the 7-day
-snapshot expiry, `RELABEL_ARGS="--rollback <table> <snapshot-id>"` restores it (and drops
-anything appended since). The query-time rules stay, so the dashboard is
-correct before and after the rewrite.
-
-The task needs only Nix: the project's `flake.nix` provides Python with
-PyIceberg, pyiceberg-core and PyArrow, so it works the same on NixOS, macOS
-and CI.
-
-Sign-ins before PR #1646 wrote the user's email and name into
-`user.identified` events (`data.set_properties`). After #1646 is deployed,
-remove them, and any other email address in stored events, with the one-time
-scrub task:
-
-```sh
-cuenv task scrub-pii -e production                       # dry run: counts per field
-SCRUB_ARGS=--apply cuenv task scrub-pii -e production    # rewrite in place
-SCRUB_ARGS="--rollback <snapshot-id>" cuenv task scrub-pii -e production
-```
-
-From CI (main): the manual workflows
-`rawkode-tools-observability-collector-scrub-pii` (dry run) and
-`rawkode-tools-observability-collector-scrub-pii-apply`.
-
-It rewrites only rows ingested before it starts and keeps `distinct_id` and
-`anon_id`, so identity links survive. Re-runs change nothing. The previous
-snapshot, printed on apply, still holds the data until snapshot expiry
-(7 days); rolling back restores it.
 Cut over after browser ingestion is migrated and two weeks of clean reconciliation: remove the PostHog
 component, the `posthog?.capture` call in `capture()` and the PostHog flush in
 `src/durable-objects/data-buffer.ts`. PostHog history is already in
