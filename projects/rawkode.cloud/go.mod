@@ -4,11 +4,11 @@ go 1.27.0
 
 require (
 	github.com/cilium/cilium v1.21.0-pre.4
-	github.com/fluxcd/flux2/v2 v2.10.0
-	github.com/fluxcd/kustomize-controller/api v1.10.1
-	github.com/fluxcd/source-controller/api v1.10.1
+	github.com/fluxcd/flux2/v2 v2.10.1
+	github.com/fluxcd/kustomize-controller/api v1.10.2
+	github.com/fluxcd/source-controller/api v1.10.2
 	github.com/infisical/go-sdk v0.9.1
-	github.com/scaleway/scaleway-sdk-go v1.39.0
+	github.com/scaleway/scaleway-sdk-go v1.40.0
 	github.com/siderolabs/talos/pkg/machinery v1.14.6
 	github.com/spf13/cobra v1.10.2
 	golang.org/x/crypto v0.59.0
@@ -228,7 +228,7 @@ require (
 	go.uber.org/zap v1.28.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
-	go.yaml.in/yaml/v4 v4.0.0-rc.6 // indirect
+	go.yaml.in/yaml/v4 v4.0.0 // indirect
 	go4.org/netipx v0.0.0-20260823151212-3075585bcbeb // indirect
 	golang.org/x/exp v0.0.0-20261014143641-f0251eb4aa3e // indirect
 	golang.org/x/net v0.62.0 // indirect
@@ -245,7 +245,6 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20261026165753-2ffab32bce7e // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
 	k8s.io/apiextensions-apiserver v0.37.2 // indirect
 	k8s.io/apiserver v0.37.2 // indirect
 	k8s.io/cli-runtime v0.37.2 // indirect
