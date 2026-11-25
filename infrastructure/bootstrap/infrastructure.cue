@@ -62,8 +62,9 @@ _projectSecretPaths: {
 	website:   "/projects/rawkode-academy/website"
 	youtube:   "/projects/rawkode-academy/platform/youtube-control"
 }
-// What the collector's infrastructure writes.
-_basinWritePaths: [_projectSecretPaths.collector, _projectSecretPaths.mcp, _projectSecretPaths.website]
+// Every folder the collector's infrastructure writes BASIN_SQL_TOKEN into
+// (youtube-control's verify tasks query Basin too).
+_basinWritePaths: [_projectSecretPaths.collector, _projectSecretPaths.mcp, _projectSecretPaths.website, _projectSecretPaths.youtube]
 
 _github: {
 	issuer:     "https://token.actions.githubusercontent.com"
