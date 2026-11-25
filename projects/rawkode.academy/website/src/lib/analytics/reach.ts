@@ -1,5 +1,5 @@
 // Aggregate reach numbers for /analytics: human web traffic and YouTube
-// channel totals for the last 30 days, 90 days and lifetime. Nothing here is
+// channel totals for the last 90 days and lifetime. Nothing here is
 // per video or per person.
 //
 // Fields are read with regular expressions over the first 1,500 bytes of the
@@ -12,7 +12,6 @@ import { TABLE } from "@/lib/analytics/queries";
 // YouTube days are America/Los_Angeles and lag about three days.
 export const YOUTUBE_LAG_DAYS = 3;
 export const PERIODS = [
-	{ key: "d30", label: "30 days", days: 30 },
 	{ key: "d90", label: "90 days", days: 90 },
 	{ key: "lifetime", label: "Lifetime", days: undefined },
 ] as const;
@@ -28,11 +27,9 @@ export interface ReachWindow {
 	/** Today (UTC): web days end before it, so only complete days count. */
 	today: string;
 	/** Web window starts, inclusive (YYYY-MM-DD). */
-	d30: string;
 	d90: string;
-	/** Last YouTube day with data; its windows end here and cover 30 and 90 days. */
+	/** Last YouTube day with data; its 90-day window ends here. */
 	youtubeEnd: string;
-	youtubeD30: string;
 	youtubeD90: string;
 }
 
@@ -47,10 +44,8 @@ export function reachWindow(now = new Date()): ReachWindow {
 	const day = (offset: number) => isoDay(new Date(today + offset * DAY_MS));
 	return {
 		today: day(0),
-		d30: day(-30),
 		d90: day(-90),
 		youtubeEnd: day(-YOUTUBE_LAG_DAYS),
-		youtubeD30: day(-YOUTUBE_LAG_DAYS - 29),
 		youtubeD90: day(-YOUTUBE_LAG_DAYS - 89),
 	};
 }
@@ -94,8 +89,6 @@ export const reachQueries = (w: ReachWindow) => ({
 	// Human views and approximate distinct visitors per period.
 	web: `
 		SELECT
-			approx_distinct(CASE WHEN ${since(w.d30)} THEN event_id END) AS views_d30,
-			approx_distinct(CASE WHEN ${since(w.d30)} THEN visitor END) AS visits_d30,
 			approx_distinct(CASE WHEN ${since(w.d90)} THEN event_id END) AS views_d90,
 			approx_distinct(CASE WHEN ${since(w.d90)} THEN visitor END) AS visits_d90,
 			approx_distinct(event_id) AS views_lifetime,
@@ -114,7 +107,6 @@ export const reachQueries = (w: ReachWindow) => ({
 	// YouTube views per period, keeping the latest observation of each day.
 	youtube: `
 		SELECT
-			sum(CASE WHEN day >= '${w.youtubeD30}' THEN views ELSE 0 END) AS views_d30,
 			sum(CASE WHEN day >= '${w.youtubeD90}' THEN views ELSE 0 END) AS views_d90,
 			sum(views) AS views_lifetime
 		FROM (

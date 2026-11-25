@@ -81,10 +81,8 @@ const periods = PERIODS.map((period) => {
 // separately so a missing one is named rather than silently left out.
 async function accountCount(): Promise<number | undefined> {
 	try {
-		const response = await env.IDENTITY.fetch("https://id.rawkode.academy/api/stats");
-		if (!response.ok) return undefined;
-		const body = (await response.json()) as { accounts?: unknown };
-		return Number.isSafeInteger(body.accounts) ? (body.accounts as number) : undefined;
+		const accounts = await env.IDENTITY_STATS.countAccounts();
+		return Number.isSafeInteger(accounts) ? accounts : undefined;
 	} catch {
 		return undefined;
 	}
