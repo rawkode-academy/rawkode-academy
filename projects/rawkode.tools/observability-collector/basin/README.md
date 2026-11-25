@@ -218,19 +218,6 @@ It rewrites only rows ingested before it starts and keeps `distinct_id` and
 `anon_id`, so identity links survive. Re-runs change nothing. The previous
 snapshot, printed on apply, still holds the data until snapshot expiry
 (7 days); rolling back restores it.
-
-The empty legacy `analytics.events` table is no longer queried. To purge it,
-run the guarded one-time cleanup task with Infisical access:
-
-```sh
-cuenv task drop-legacy-table -e production
-```
-
-The task refuses deletion if a sink names it, the table is nonempty, or the
-namespace contains unexpected tables. It uses the catalog write token without
-printing it, requests purge, then verifies the surviving tables and their
-maintenance settings. Purging is irreversible.
-
 Cut over after browser ingestion is migrated and two weeks of clean reconciliation: remove the PostHog
 component, the `posthog?.capture` call in `capture()` and the PostHog flush in
 `src/durable-objects/data-buffer.ts`. PostHog history is already in

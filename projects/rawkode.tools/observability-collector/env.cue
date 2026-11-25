@@ -123,15 +123,6 @@ tasks: {
 		env: BASIN_CATALOG_TOKEN: _basinSecret & {secretName: "BASIN_CATALOG_TOKEN"}
 	}
 
-	"drop-legacy-table": schema.#Task & {
-		hermetic: false
-		command:  "bun"
-		args: ["basin/drop-legacy-table.ts"]
-		inputs: ["basin/drop-legacy-table.ts", "infrastructure.cue"]
-		labels: ["infisical"]
-		env: BASIN_CATALOG_TOKEN: _basinSecret & {secretName: "BASIN_CATALOG_TOKEN"}
-	}
-
 	"relabel-history": schema.#Task & {
 		hermetic: false
 		command:  "python"
