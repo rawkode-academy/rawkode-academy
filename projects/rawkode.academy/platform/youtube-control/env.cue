@@ -26,7 +26,7 @@ let _infrastructure = [{allowInfrastructure: ["plan", "apply", "import", "destro
 
 // Where `cuenv task consent` writes the Google OAuth client and refresh token.
 // The github-actions identity (deploys on main) can already read this folder.
-_youtubeSecret: _infisicalSecret & {secretPath: "/projects/basin"}
+_youtubeSecret: _infisicalSecret & {secretPath: "/projects/rawkode-academy/platform/youtube-control"}
 
 env: {
 	// cuenv withholds Infisical credentials from providers unless the project

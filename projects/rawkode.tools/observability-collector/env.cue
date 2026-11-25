@@ -33,7 +33,7 @@ _ciInfisicalInfrastructure: true
 let _infrastructure = [{allowInfrastructure: ["plan", "apply", "import", "destroy"]}]
 
 // Where infrastructure.cue writes the Basin tokens.
-_basinSecret: _infisicalSecret & {secretPath: "/projects/basin"}
+_basinSecret: _infisicalSecret & {secretPath: "/projects/rawkode-tools/observability-collector"}
 
 env: {
 	SERVICE_NAME:          "observability-collector"
