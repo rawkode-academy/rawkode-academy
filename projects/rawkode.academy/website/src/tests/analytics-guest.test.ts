@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseAcademyVideos, guestTotalsSql } from "@/lib/analytics/guest";
+import { parseAcademyVideos, guestVideosSql } from "@/lib/analytics/guest";
 import { reachWindow } from "@/lib/analytics/reach";
 import { visibleEpisodes } from "../../../../../packages/guest-scope/index";
 
@@ -46,7 +46,8 @@ describe("guest analytics", () => {
 	});
 
 	it("sums deduplicated daily rows over 90 days and lifetime", () => {
-		const sql = guestTotalsSql(["AAAAAAAAAAA"], reachWindow(new Date("2026-11-25T15:00:00Z")));
+		const sql = guestVideosSql(["AAAAAAAAAAA"], reachWindow(new Date("2026-11-25T15:00:00Z")));
+		expect(sql).toContain("GROUP BY video");
 		expect(sql).toContain("ROW_NUMBER()");
 		expect(sql).toContain("WHERE rn = 1");
 		expect(sql).toContain("IN ('AAAAAAAAAAA')");
