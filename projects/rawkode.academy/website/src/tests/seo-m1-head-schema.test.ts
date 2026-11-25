@@ -478,6 +478,7 @@ describe("M1 Suite 2 — F02 & F03: Edge www 301, Preview noindex, Feed Unblocki
 			"https://rawkode.academy/internal/analytics",
 			"https://rawkode.academy/graphql",
 			"https://rawkode.academy/settings",
+			"https://rawkode.academy/analytics",
 			"https://preview.workers.dev/api/feeds/all.xml",
 			"https://www.rawkode.academy/api/feeds/all.xml",
 		]) {
