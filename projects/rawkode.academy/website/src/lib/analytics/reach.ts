@@ -1,5 +1,6 @@
 // Aggregate reach numbers for /analytics: human web traffic and YouTube
-// channel totals over the last 30 days. Nothing here is per video or per person.
+// channel totals for the last 30 days, 90 days and lifetime. Nothing here is
+// per video or per person.
 //
 // Fields are read with regular expressions over the first 1,500 bytes of the
 // CloudEvent, not json_get_*: Basin's JSON functions reject values over 2,000
@@ -8,20 +9,31 @@
 // range fails.
 import { TABLE } from "@/lib/analytics/queries";
 
-export const REACH_DAYS = 30;
 // YouTube days are America/Los_Angeles and lag about three days.
 export const YOUTUBE_LAG_DAYS = 3;
+export const PERIODS = [
+	{ key: "d30", label: "30 days", days: 30 },
+	{ key: "d90", label: "90 days", days: 90 },
+	{ key: "lifetime", label: "Lifetime", days: undefined },
+] as const;
+export type PeriodKey = (typeof PERIODS)[number]["key"];
+
+// The lake holds browser page views from July 2024; bound the scan there.
+const WEB_HISTORY_FROM = "2024-01-01";
+const YOUTUBE_HISTORY_FROM = "2018-01-01";
 
 const DAY_MS = 86_400_000;
 
 export interface ReachWindow {
-	/** First UTC day of the web window, inclusive (YYYY-MM-DD). */
-	start: string;
-	/** Day after the last web day, exclusive: today, so only complete days count. */
-	end: string;
-	/** Inclusive lower bound for YouTube days; the page keeps the latest 30 rows. */
-	youtubeFrom: string;
-	youtubeTo: string;
+	/** Today (UTC): web days end before it, so only complete days count. */
+	today: string;
+	/** Web window starts, inclusive (YYYY-MM-DD). */
+	d30: string;
+	d90: string;
+	/** Last YouTube day with data; its windows end here and cover 30 and 90 days. */
+	youtubeEnd: string;
+	youtubeD30: string;
+	youtubeD90: string;
 }
 
 const isoDay = (date: Date) => date.toISOString().slice(0, 10);
@@ -32,13 +44,14 @@ export function reachWindow(now = new Date()): ReachWindow {
 		now.getUTCMonth(),
 		now.getUTCDate(),
 	);
+	const day = (offset: number) => isoDay(new Date(today + offset * DAY_MS));
 	return {
-		start: isoDay(new Date(today - REACH_DAYS * DAY_MS)),
-		end: isoDay(new Date(today)),
-		youtubeFrom: isoDay(
-			new Date(today - (REACH_DAYS + YOUTUBE_LAG_DAYS + 2) * DAY_MS),
-		),
-		youtubeTo: isoDay(new Date(today)),
+		today: day(0),
+		d30: day(-30),
+		d90: day(-90),
+		youtubeEnd: day(-YOUTUBE_LAG_DAYS),
+		youtubeD30: day(-YOUTUBE_LAG_DAYS - 29),
+		youtubeD90: day(-YOUTUBE_LAG_DAYS - 89),
 	};
 }
 
@@ -68,20 +81,42 @@ const PAGE_VIEWS = (w: ReachWindow) => `(
 			END
 		) AS bot_reason
 	FROM ${TABLE}
-	WHERE event_time >= CAST('${w.start}T00:00:00Z' AS TIMESTAMP)
-		AND event_time < CAST('${w.end}T00:00:00Z' AS TIMESTAMP)
+	WHERE event_time >= CAST('${WEB_HISTORY_FROM}T00:00:00Z' AS TIMESTAMP)
+		AND event_time < CAST('${w.today}T00:00:00Z' AS TIMESTAMP)
 		AND event_source = 'rawkode-academy-browser' AND event_type = 'web.page_view'
 ) AS pv`;
 
 const HUMAN_VIEWS = (w: ReachWindow) => `FROM ${PAGE_VIEWS(w)} WHERE bot_reason IS NULL`;
 
+const since = (day: string) => `event_time >= CAST('${day}T00:00:00Z' AS TIMESTAMP)`;
+
 export const reachQueries = (w: ReachWindow) => ({
-	totals: `
-		SELECT approx_distinct(event_id) AS views, approx_distinct(visitor) AS visitors
+	// Human views and approximate distinct visitors per period.
+	web: `
+		SELECT
+			approx_distinct(CASE WHEN ${since(w.d30)} THEN event_id END) AS views_d30,
+			approx_distinct(CASE WHEN ${since(w.d30)} THEN visitor END) AS visits_d30,
+			approx_distinct(CASE WHEN ${since(w.d90)} THEN event_id END) AS views_d90,
+			approx_distinct(CASE WHEN ${since(w.d90)} THEN visitor END) AS visits_d90,
+			approx_distinct(event_id) AS views_lifetime,
+			approx_distinct(visitor) AS visits_lifetime
 		${HUMAN_VIEWS(w)}`,
 
+	// Latest channel total from the daily sync (`youtube.channel_stats`).
+	subscribers: `
+		SELECT json_get_int(value, 'data', 'subscriberCount') AS subscribers
+		FROM ${TABLE}
+		WHERE event_source = 'rawkode-academy-youtube' AND event_type = 'youtube.channel_stats'
+			AND event_time >= CAST('${w.d90}T00:00:00Z' AS TIMESTAMP)
+		ORDER BY json_get_str(value, 'data', 'fetchedAt') DESC
+		LIMIT 1`,
+
+	// YouTube views per period, keeping the latest observation of each day.
 	youtube: `
-		SELECT day, views
+		SELECT
+			sum(CASE WHEN day >= '${w.youtubeD30}' THEN views ELSE 0 END) AS views_d30,
+			sum(CASE WHEN day >= '${w.youtubeD90}' THEN views ELSE 0 END) AS views_d90,
+			sum(views) AS views_lifetime
 		FROM (
 			SELECT
 				json_get_str(value, 'data', 'day') AS day,
@@ -89,10 +124,9 @@ export const reachQueries = (w: ReachWindow) => ({
 				ROW_NUMBER() OVER (PARTITION BY json_get_str(value, 'data', 'day') ORDER BY json_get_str(value, 'data', 'fetchedAt') DESC) AS rn
 			FROM ${TABLE}
 			WHERE event_source = 'rawkode-academy-youtube' AND event_type = 'youtube.daily'
-				AND event_time >= CAST('${w.youtubeFrom}T00:00:00Z' AS TIMESTAMP)
-				AND json_get_str(value, 'data', 'day') BETWEEN '${w.youtubeFrom}' AND '${w.youtubeTo}'
-		) WHERE rn = 1
-		ORDER BY day`,
+				AND event_time >= CAST('${YOUTUBE_HISTORY_FROM}T00:00:00Z' AS TIMESTAMP)
+				AND json_get_str(value, 'data', 'day') BETWEEN '${YOUTUBE_HISTORY_FROM}' AND '${w.youtubeEnd}'
+		) WHERE rn = 1`,
 });
 
 export type ReachQuery = keyof ReturnType<typeof reachQueries>;
