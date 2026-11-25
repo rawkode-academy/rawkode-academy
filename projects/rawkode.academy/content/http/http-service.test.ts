@@ -114,6 +114,11 @@ describe("content request handler cache behavior", () => {
 		});
 		await Promise.all(waitUntil);
 
+		expect(first.status).toBe(200);
+		expect(first.headers.get("content-range")).toBeNull();
+		expect(first.headers.get("cross-origin-resource-policy")).toBe(
+			"cross-origin",
+		);
 		expect(first.headers.get("cache-control")).toBe(
 			"public, max-age=3600, s-maxage=3600",
 		);
@@ -324,8 +329,9 @@ class FakeR2Object {
 		private readonly value: string,
 		range?: R2Range,
 	) {
-		this.range = range;
 		this.size = value.length;
+		// Real R2 reports a range on every get, even without a Range request.
+		this.range = range ?? { offset: 0, length: value.length };
 	}
 
 	get body(): ReadableStream {
