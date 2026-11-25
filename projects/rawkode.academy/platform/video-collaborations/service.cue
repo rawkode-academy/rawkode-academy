@@ -12,8 +12,7 @@ _service: gen.#PlatformService & {
 		d1Databases: [{
 			binding:      "DB"
 			databaseName: "platform-video-collaborations"
-			// TODO: replace with the id of the created D1 database before merging.
-			databaseId: "00000000-0000-0000-0000-000000000000"
+			databaseId:   "4f2f882e-1a7f-4873-b5d6-9fc85f9efd4d"
 		}]
 	}
 }
