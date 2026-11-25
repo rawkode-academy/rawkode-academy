@@ -81,8 +81,10 @@ config: ci: cuenv: {
 _nixShell: *"default" | string
 
 // Relative path from the project directory to the repository root (where
-// flake.nix and flake.lock live). cuenv reads the lock from there, so each
-// project sets it: `_flakeRoot: "../.."`.
+// flake.nix and flake.lock live). cuenv reads the lock from there and accepts
+// only a local path (no `git+file:`, which also needs an absolute path), so a
+// project sets it: `_flakeRoot: "../.."`. Directories whose projects all share one
+// depth (platform/, tasks/, games/secrets-of-kubernetes/) set it once in their own env.cue.
 _flakeRoot: *"." | string
 
 runtime: schema.#NixRuntime & {flake: _flakeRoot, output: _nixShell}

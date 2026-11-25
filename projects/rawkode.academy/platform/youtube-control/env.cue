@@ -9,7 +9,6 @@ import (
 schema.#Project
 
 name: "rawkode-academy-platform-youtube-control"
-_flakeRoot: "../../../.."
 
 // Tasks run in the `youtube-control` dev shell from the root flake.nix (Node,
 // Python with google-auth-oauthlib, gh), pinned by the root flake.lock, so
