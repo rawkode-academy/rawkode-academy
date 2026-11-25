@@ -19,7 +19,7 @@ export type PeriodKey = (typeof PERIODS)[number]["key"];
 
 // The lake holds browser page views from July 2024; bound the scan there.
 const WEB_HISTORY_FROM = "2024-01-01";
-const YOUTUBE_HISTORY_FROM = "2018-01-01";
+export const YOUTUBE_HISTORY_FROM = "2018-01-01";
 
 const DAY_MS = 86_400_000;
 

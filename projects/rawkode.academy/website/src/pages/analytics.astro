@@ -7,6 +7,8 @@ import {
 	reachQueries,
 	reachWindow,
 } from "@/lib/analytics/reach";
+import { guestTotals, type GuestTotals } from "@/lib/analytics/guest";
+import type { ContentEnv } from "@/lib/live-content/env";
 import { basinQuery, type Row } from "@/server/basin";
 import Page from "@/wrappers/page.astro";
 
@@ -106,13 +108,40 @@ const subSources = [
 	{ name: "mailing list", value: mailingOnly },
 ];
 const missing = subSources.filter((source) => source.value === undefined);
+// Subs is the sum of whatever can be read; a missing source is named in a
+// small note rather than hiding the total.
+const available = subSources.filter(
+	(source): source is { name: string; value: number } => source.value !== undefined,
+);
 const subs =
-	missing.length === 0
-		? subSources.reduce((total, source) => total + (source.value ?? 0), 0)
-		: undefined;
+	available.length === 0
+		? undefined
+		: available.reduce((total, source) => total + source.value, 0);
 
-const show = (value: number | undefined, prefix = "") =>
-	value === undefined ? "Unavailable" : `${prefix}${fmt.format(value)}`;
+// A signed-in guest or show host also sees their own episodes' totals: who
+// counts as one is decided by packages/guest-scope, shared with the MCP.
+let guest: GuestTotals | undefined;
+if (user?.username && configured) {
+	try {
+		guest = await guestTotals(env as unknown as ContentEnv, config, user.username);
+	} catch (error) {
+		console.warn("[analytics] guest totals unavailable", error);
+	}
+}
+
+const show = (value: number | undefined) =>
+	value === undefined ? "Unavailable" : fmt.format(value);
+const hours = (minutes: number) => fmt.format(Math.round(minutes / 60));
+const cards = [
+	{
+		label: "Visits",
+		values: periods.map((period) => ({ label: period.label, text: show(period.visits) })),
+	},
+	{
+		label: "Views",
+		values: periods.map((period) => ({ label: period.label, text: show(period.views) })),
+	},
+];
 ---
 
 <Page title="Reach" description="Rawkode Academy audience." noindex>
@@ -121,76 +150,111 @@ const show = (value: number | undefined, prefix = "") =>
 		title="Reach"
 		lede="Rawkode Academy audience"
 	>
-		<table class="periods">
-			<thead>
-				<tr><th scope="col"><span class="sr-only">Metric</span></th>{periods.map((period) => <th scope="col">{period.label}</th>)}</tr>
-			</thead>
-			<tbody>
-				<tr><th scope="row">Visits</th>{periods.map((period) => <td>{show(period.visits, "~")}</td>)}</tr>
-				<tr><th scope="row">Views</th>{periods.map((period) => <td>{show(period.views)}</td>)}</tr>
-			</tbody>
-		</table>
-
-		<dl class="stats">
-			<div>
-				<dt>Subs</dt>
-				<dd>{show(subs)}</dd>
-				{missing.length > 0 && <p class="missing">Unavailable: {missing.map((source) => source.name).join(", ")}.</p>}
+		<section class="editorial-section">
+			<div class="editorial-grid editorial-grid--3">
+				{cards.map((card) => (
+					<div class="editorial-card">
+						<h2 class="card-label">{card.label}</h2>
+						<dl class="pair">
+							{card.values.map((value) => (
+								<div>
+									<dd class="num">{value.text}</dd>
+									<dt class="period">{value.label}</dt>
+								</div>
+							))}
+						</dl>
+					</div>
+				))}
+				<div class="editorial-card">
+					<h2 class="card-label">Subs</h2>
+					<p class="num">{show(subs)}</p>
+					{subs !== undefined && missing.length > 0 && (
+						<p class="note">Not including {missing.map((source) => source.name).join(", ")}.</p>
+					)}
+					{subs === undefined && <p class="note">No source could be read.</p>}
+				</div>
 			</div>
-		</dl>
+		</section>
+
+		{guest && (
+			<section class="editorial-section">
+				<h2 class="section-title">Your episodes</h2>
+				<div class="editorial-grid editorial-grid--2">
+					<div class="editorial-card">
+						<h3 class="card-label">Views</h3>
+						<dl class="pair">
+							<div><dd class="num">{fmt.format(guest.views.d90)}</dd><dt class="period">90 days</dt></div>
+							<div><dd class="num">{fmt.format(guest.views.lifetime)}</dd><dt class="period">Lifetime</dt></div>
+						</dl>
+					</div>
+					<div class="editorial-card">
+						<h3 class="card-label">Watch time</h3>
+						<dl class="pair">
+							<div><dd class="num">{hours(guest.minutes.d90)}<span class="unit"> h</span></dd><dt class="period">90 days</dt></div>
+							<div><dd class="num">{hours(guest.minutes.lifetime)}<span class="unit"> h</span></dd><dt class="period">Lifetime</dt></div>
+						</dl>
+					</div>
+				</div>
+				{guest.withoutNumbers > 0 && (
+					<p class="note">
+						{fmt.format(guest.withoutNumbers)} of {fmt.format(guest.episodes)} episodes aren't matched to a YouTube video yet.
+					</p>
+				)}
+			</section>
+		)}
 	</EditorialShell>
 </Page>
 
 <style>
-	.periods {
-		width: 100%;
-		border-collapse: collapse;
-		border-top: 2px solid var(--colors-academy-text);
-		font-variant-numeric: tabular-nums;
-	}
-	.periods th,
-	.periods td {
-		padding: 1rem 0;
-		border-bottom: 1px solid var(--colors-academy-border);
-		text-align: right;
-	}
-	.periods thead th {
+	.card-label,
+	.section-title {
+		margin: 0 0 1rem;
+		font-family: var(--fonts-academy-text);
+		font-size: 1rem;
 		font-weight: 500;
-		font-size: 1rem;
 		color: var(--colors-academy-text-soft);
 	}
-	.periods tbody th {
-		text-align: left;
-		font-weight: 400;
-		font-size: 1rem;
-		color: var(--colors-academy-text-soft);
-	}
-	.periods td {
+	.section-title {
 		font-family: var(--fonts-academy-display);
-		font-size: clamp(1.5rem, 5vw, 2.5rem);
+		font-size: 1.5rem;
 		color: var(--colors-academy-text);
+		margin-bottom: 1.5rem;
 	}
-	.stats {
+	.pair {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
-		gap: 2rem;
-		margin: 0 0 2.5rem;
-		padding-block: 1.5rem;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 1rem;
+		margin: 0;
 	}
-	.stats dt {
-		color: var(--colors-academy-text-soft);
-		font-size: 1rem;
+	.pair dd {
+		margin: 0;
 	}
-	.stats dd {
+	.num {
 		margin: 0;
 		font-family: var(--fonts-academy-display);
-		font-size: clamp(2.25rem, 8vw, 3.75rem);
+		font-size: clamp(1.5rem, 6.5vw, 2.25rem);
+		font-weight: 700;
+		line-height: 1.1;
 		font-variant-numeric: tabular-nums;
+		overflow-wrap: anywhere;
 		color: var(--colors-academy-text);
 	}
-	.missing {
-		margin: 0.25rem 0 0;
+	.unit {
+		font-size: 0.5em;
+		font-weight: 500;
+		color: var(--colors-academy-text-soft);
+	}
+	.period {
+		margin-top: 0.25rem;
+		font-size: 0.875rem;
+		color: var(--colors-academy-text-muted);
+	}
+	.note {
+		margin: 0.75rem 0 0;
 		font-size: 0.8125rem;
 		color: var(--colors-academy-text-muted);
+	}
+	.editorial-grid + .note {
+		margin-top: 1rem;
 	}
 </style>
