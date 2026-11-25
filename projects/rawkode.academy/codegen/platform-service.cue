@@ -201,7 +201,7 @@ import (
 		// runs the task for services whose files the pull request touched.
 		pullRequest: {
 			when: pullRequest: true
-			tasks: [_t.test]
+			tasks: [_t.ciTest]
 		}
 	}
 
@@ -231,7 +231,7 @@ import (
 	// the read and write workers (and gates migrations).
 	tasks: {
 		// Runs the service's bun:test suite; services without a tests/ directory pass.
-		test: schema.#Task & {
+		ciTest: schema.#Task & {
 			hermetic: false
 			dir: from: "caller"
 			command: "sh"
