@@ -236,7 +236,7 @@ import (
 			dir: from: "caller"
 			command: "sh"
 			args: ["-lc", "[ -d tests ] || exit 0\nnix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun test"]
-			inputs: list.Concat([_ciDeployInputSets, [["tests/**"]]])
+			inputs: list.Concat([list.Concat(_ciDeployInputSets), ["tests/**"]])
 		}
 
 		ciDeploy: schema.#Task & {
