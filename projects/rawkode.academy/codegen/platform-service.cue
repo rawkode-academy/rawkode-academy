@@ -21,6 +21,8 @@ import (
 	includeReadModel:  bool | *true
 	includeWriteModel: bool | *false
 	includeHttp:       bool | *false
+	// Set false for a service whose tests don't pass under bun test yet.
+	ciTests: bool | *true
 
 	// Cloudflare bindings
 	bindings: #CloudflareBindings
@@ -199,9 +201,11 @@ import (
 
 		// Pull requests run the service's tests without credentials. cuenv only
 		// runs the task for services whose files the pull request touched.
-		pullRequest: {
-			when: pullRequest: true
-			tasks: [_t.ciTest]
+		if ciTests {
+			pullRequest: {
+				when: pullRequest: true
+				tasks: [_t.ciTest]
+			}
 		}
 	}
 
