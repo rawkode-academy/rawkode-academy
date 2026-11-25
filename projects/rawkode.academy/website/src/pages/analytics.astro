@@ -102,10 +102,12 @@ const ytDaily = results.youtube.rows
 	.slice(-REACH_DAYS);
 const sum = (key: "views" | "engaged" | "minutes" | "gained" | "lost") =>
 	ytDaily.reduce((total, row) => total + row[key], 0);
+const ytFirst = ytDaily.at(0);
+const ytLast = ytDaily.at(-1);
+const webFirst = webDaily.at(0);
+const webLast = webDaily.at(-1);
 const ytRange =
-	ytDaily.length > 0
-		? `${dayLabel(ytDaily[0].day)} – ${dayLabel(ytDaily[ytDaily.length - 1].day)}`
-		: "";
+	ytFirst && ytLast ? `${dayLabel(ytFirst.day)} – ${dayLabel(ytLast.day)}` : "";
 const watchHours = Math.round(sum("minutes") / 60);
 
 // Weekly bars would hide the shape; draw one bar per day.
@@ -152,12 +154,12 @@ const unavailable = Object.values(results).some((result) => result.failed);
 				<div><dt>Countries</dt><dd>{fmt.format(num(web.countries))}</dd></div>
 			</dl>
 			{
-				webDaily.length > 0 && (
+				webFirst && webLast && (
 					<figure>
-						<svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={`Daily visitors, ${webDaily[0].day} to ${webDaily[webDaily.length - 1].day}, peak ${Math.max(...webDaily.map((row) => row.visitors))}`}>
+						<svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={`Daily visitors, ${webFirst.day} to ${webLast.day}, peak ${Math.max(...webDaily.map((row) => row.visitors))}`}>
 							{webBars.map((bar, i) => (
 								<rect x={bar.x} y={100 - bar.height} width={bar.width} height={bar.height}>
-									<title>{dayLabel(webDaily[i].day)}: {fmt.format(webDaily[i].visitors)} visitors</title>
+									<title>{dayLabel(webDaily[i]?.day ?? "")}: {fmt.format(webDaily[i]?.visitors ?? 0)} visitors</title>
 								</rect>
 							))}
 						</svg>
@@ -201,12 +203,12 @@ const unavailable = Object.values(results).some((result) => result.failed);
 				<div><dt>Net new subscribers</dt><dd>{sum("gained") - sum("lost") >= 0 ? "+" : "−"}{fmt.format(Math.abs(sum("gained") - sum("lost")))}</dd></div>
 			</dl>
 			{
-				ytDaily.length > 0 && (
+				ytFirst && ytLast && (
 					<figure>
-						<svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={`Daily YouTube views, ${ytDaily[0].day} to ${ytDaily[ytDaily.length - 1].day}, peak ${compact.format(Math.max(...ytDaily.map((row) => row.views)))}`}>
+						<svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={`Daily YouTube views, ${ytFirst.day} to ${ytLast.day}, peak ${compact.format(Math.max(...ytDaily.map((row) => row.views)))}`}>
 							{ytBars.map((bar, i) => (
 								<rect x={bar.x} y={100 - bar.height} width={bar.width} height={bar.height}>
-									<title>{dayLabel(ytDaily[i].day)}: {fmt.format(ytDaily[i].views)} views</title>
+									<title>{dayLabel(ytDaily[i]?.day ?? "")}: {fmt.format(ytDaily[i]?.views ?? 0)} views</title>
 								</rect>
 							))}
 						</svg>
