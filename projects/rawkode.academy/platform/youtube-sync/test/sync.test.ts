@@ -3,7 +3,7 @@ import { readdir, readFile } from "node:fs/promises";
 import { URL } from "node:url";
 import test, { after, before } from "node:test";
 import { convertV4MiniflareOptions, Miniflare } from "miniflare";
-import { createPlan, applyPlan, DAILY_BUDGET, rollback, type Deps } from "../src/sync.ts";
+import { createPlan, applyPlan, autoApplyLimit, DAILY_BUDGET, rollback, scheduledCandidates, type Deps } from "../src/sync.ts";
 import { composeDescription, composeTitle, type AcademyVideo, type Snippet } from "../src/render.ts";
 import { Store } from "../src/store.ts";
 import { ServiceError } from "../src/domain.ts";
@@ -78,6 +78,16 @@ test("limit and the video filter make the canary", async () => {
   assert.deepEqual(f.writes.map(w => w.id), [yt(3)]);
   assert.equal((await applyPlan(f.deps, plan.id, { limit: 2 })).applied, 2);
   assert.equal(f.writes.length, 3);
+});
+
+test("the daily cron queues at most AUTO_APPLY_LIMIT changes, and nothing when it is 0 or unset", async () => {
+  const f = await fixture(); seed(f, 5);
+  const { plan } = await createPlan(f.deps, catalogue(5));
+  assert.equal((await scheduledCandidates(f.deps.store, plan.id, "3")).length, 3);
+  assert.equal((await scheduledCandidates(f.deps.store, plan.id, "400")).length, 5);
+  for (const off of ["0", "", "abc", "-4", "1.5", undefined]) assert.equal((await scheduledCandidates(f.deps.store, plan.id, off)).length, 0);
+  assert.equal(autoApplyLimit("9999"), 400);
+  assert.equal(f.writes.length, 0);
 });
 
 test("a video edited in Studio after the plan is refused as stale, and nothing is written for it", async () => {
