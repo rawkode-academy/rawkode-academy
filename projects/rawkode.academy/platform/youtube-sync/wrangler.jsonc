@@ -11,10 +11,11 @@
   },
   "vars": {
     "YOUTUBE_CHANNEL_ID": "UCrber_mFvp_FEF7D9u8PDEA",
-    // Which YouTube fields the site manages: "description" (the footer only),
-    // "title", or "title,description". Thumbnails are not managed yet.
-    "MANAGED_FIELDS": "description"
+    // The site owns these YouTube fields: any of "title", "description", "thumbnail".
+    "MANAGED_FIELDS": "title,description,thumbnail"
   },
+  // Converts the site's WebP thumbnails to JPEG for YouTube.
+  "images": { "binding": "IMAGES" },
   "d1_databases": [
     { "binding": "DB", "database_name": "platform-youtube-sync", "database_id": "dc6b56d6-d32d-4a22-90f7-6dffdd6edf93", "migrations_dir": "migrations" }
   ],

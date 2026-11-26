@@ -24,12 +24,15 @@ export async function fetchCatalogue(env: { VIDEO_CHANNELS: Gateway; ACADEMY_API
   const byAcademyId = new Map<string, string>();
   for (const row of mappings.videoChannels ?? []) if (typeof row.videoId === "string" && typeof row.externalId === "string" && /^[A-Za-z0-9_-]{11}$/.test(row.externalId)) byAcademyId.set(row.videoId, row.externalId);
   ensure(byAcademyId.size > 0, "invalid_academy_response", "video-channels returned no YouTube IDs", 502);
-  const all = await graphql<{ getAllVideos?: { id?: string; title?: string; slug?: string; collaborators?: { name?: string }[] }[] }>(env.ACADEMY_API, "https://api.rawkode.academy/", "{ getAllVideos { id title slug collaborators { name } } }");
+  const all = await graphql<{ getAllVideos?: { id?: string; title?: string; slug?: string; description?: string; thumbnailUrl?: string; chapters?: { startTime?: number; title?: string }[]; collaborators?: { name?: string }[] }[] }>(env.ACADEMY_API, "https://api.rawkode.academy/", "{ getAllVideos { id title slug description thumbnailUrl chapters { startTime title } collaborators { name } } }");
   ensure(all.getAllVideos?.length, "invalid_academy_response", "The Academy API returned no videos", 502);
   const listed = new Map<string, AcademyVideo>();
   for (const video of all.getAllVideos ?? []) {
     if (typeof video.id !== "string" || typeof video.title !== "string" || typeof video.slug !== "string") continue;
-    listed.set(video.id, { id: video.id, title: video.title, slug: video.slug, collaborators: (video.collaborators ?? []).map(c => String(c.name ?? "")).filter(Boolean) });
+    listed.set(video.id, { id: video.id, title: video.title, slug: video.slug, collaborators: (video.collaborators ?? []).map(c => String(c.name ?? "")).filter(Boolean),
+      description: typeof video.description === "string" ? video.description : "",
+      chapters: (video.chapters ?? []).flatMap(c => typeof c.startTime === "number" && typeof c.title === "string" ? [{ startTime: c.startTime, title: c.title }] : []),
+      thumbnailUrl: typeof video.thumbnailUrl === "string" ? video.thumbnailUrl : "" });
   }
   return new Map([...byAcademyId].map(([academyId, youtubeId]) => [youtubeId, listed.get(academyId)]));
 }

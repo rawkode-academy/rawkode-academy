@@ -1,28 +1,33 @@
 import { hash } from "./domain.ts";
 
-// Bump when the footer's wording or links change: a new version re-plans every video.
-export const TEMPLATE_VERSION = 1;
-// Everything from this line to the end of the description belongs to the site.
-// Anything above it is written in Studio and is never touched.
+// Bump when the template's wording or layout changes: a new version re-plans every video.
+export const TEMPLATE_VERSION = 2;
+// The footer starts at this line. The site owns the whole description, so the
+// marker only identifies the footer in a description we generated.
 export const MARKER = "──── Rawkode Academy ────";
 export const MAX_TITLE = 100;
 export const MAX_DESCRIPTION_BYTES = 5000;
 
-export type Field = "title" | "description";
-export const ALL_FIELDS: Field[] = ["title", "description"];
+export type TextField = "title" | "description";
+export type Field = TextField | "thumbnail";
+export const TEXT_FIELDS: TextField[] = ["title", "description"];
+export const ALL_FIELDS: Field[] = ["title", "description", "thumbnail"];
 
 // The writable part of a video's snippet. videos.update replaces the whole
 // snippet, so a managed update always starts from the live one.
 export type Snippet = { title: string; description: string; categoryId: string; tags?: string[]; defaultLanguage?: string };
-export type Managed = Partial<Record<Field, string>>;
-export type AcademyVideo = { id: string; title: string; slug: string; collaborators: string[] };
+export type Managed = Partial<Record<TextField, string>>;
+export type Chapter = { startTime: number; title: string };
+// description is the Markdown the website renders for the video.
+export type AcademyVideo = { id: string; title: string; slug: string; collaborators: string[]; description: string; chapters: Chapter[]; thumbnailUrl: string };
 
 export function parseFields(value: string | undefined): Field[] {
-  const wanted = (value ?? "description").split(",").map(item => item.trim()).filter(Boolean);
+  const wanted = (value ?? ALL_FIELDS.join(",")).split(",").map(item => item.trim()).filter(Boolean);
   const unknown = wanted.filter(item => !(ALL_FIELDS as string[]).includes(item));
   if (unknown.length || !wanted.length) throw new Error(`MANAGED_FIELDS must list ${ALL_FIELDS.join(", ")}; got "${value}"`);
   return wanted as Field[];
 }
+export const textFields = (fields: readonly Field[]): TextField[] => TEXT_FIELDS.filter(field => fields.includes(field));
 
 // Keep only the writable snippet fields from a videos.list item.
 export function writableSnippet(raw: Partial<Snippet> | undefined): Snippet {
@@ -32,17 +37,48 @@ export function writableSnippet(raw: Partial<Snippet> | undefined): Snippet {
   return snippet;
 }
 
-// The description written in Studio, without the site's footer.
-export function descriptionBody(description: string): string {
-  const lines = description.replace(/\r\n/g, "\n").split("\n");
-  const marker = lines.findIndex(line => line.trim() === MARKER);
-  return (marker === -1 ? lines : lines.slice(0, marker)).join("\n").replace(/\s+$/, "");
+const encoder = new TextEncoder();
+const byteLength = (value: string) => encoder.encode(value).length;
+const stripAngles = (value: string) => value.replace(/[<>]/g, "");
+
+// The site's Markdown description as plain text for YouTube, which shows no markup.
+export function markdownToText(markdown: string): string {
+  return markdown
+    .replace(/\\n/g, "\n").replace(/\r\n/g, "\n")
+    .replace(/^```.*$/gm, "")
+    .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/\[([^\]]+)\]\(([^)\s]+)[^)]*\)/g, (_, text: string, url: string) => (text.trim() === url ? url : `${text} (${url})`))
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/(\*\*|__)(.+?)\1/g, "$2")
+    .replace(/`([^`\n]+)`/g, "$1")
+    .replace(/<[^>\n]*>/g, "")
+    .replace(/[<>]/g, "")
+    .replace(/[ \t]+$/gm, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }
 
-export function renderFooter(video: Pick<AcademyVideo, "slug" | "collaborators">): string {
+const clock = (seconds: number) => {
+  const h = Math.floor(seconds / 3600), m = Math.floor((seconds % 3600) / 60), s = Math.floor(seconds % 60);
+  return h ? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}` : `${m}:${String(s).padStart(2, "0")}`;
+};
+
+// YouTube only makes chapters of a list that starts at 0:00, has at least three
+// entries and keeps each at least ten seconds long. A list that starts later gets
+// an "Intro" at 0:00; a list that still isn't valid is omitted.
+export function renderChapters(chapters: readonly Chapter[]): string {
+  const sorted = [...chapters].filter(c => c.title.trim()).sort((a, b) => a.startTime - b.startTime);
+  if (sorted.length && sorted[0].startTime >= 10) sorted.unshift({ startTime: 0, title: "Intro" });
+  const valid = sorted.length >= 3 && sorted[0].startTime === 0 && sorted.every((c, i) => i === 0 || c.startTime - sorted[i - 1].startTime >= 10);
+  return valid ? ["Chapters", ...sorted.map(c => `${clock(c.startTime)} ${stripAngles(c.title.trim())}`)].join("\n") : "";
+}
+
+export const watchUrl = (video: Pick<AcademyVideo, "slug">) => `https://rawkode.academy/watch/${video.slug}?utm_source=youtube&utm_medium=description`;
+export const renderHeader = (video: Pick<AcademyVideo, "slug">) => `Watch with chapters, code and resources: ${watchUrl(video)}`;
+
+export function renderFooter(video: Pick<AcademyVideo, "collaborators">): string {
   const lines = [
     MARKER,
-    `Watch with chapters, code and resources: https://rawkode.academy/watch/${video.slug}?utm_source=youtube&utm_medium=description`,
     "Newsletter: https://rawkode.academy/#join",
     "Support the Academy: https://rawkode.academy/organizations/support-our-work?utm_source=youtube&utm_medium=description",
   ];
@@ -50,38 +86,64 @@ export function renderFooter(video: Pick<AcademyVideo, "slug" | "collaborators">
   return lines.join("\n");
 }
 
-export function composeDescription(live: string, video: AcademyVideo): string {
-  const body = descriptionBody(live);
-  return (body ? `${body}\n\n` : "") + renderFooter(video);
+// Cuts at a paragraph, else a sentence, else a word: never mid-word.
+export function trimToBytes(text: string, max: number): string {
+  if (byteLength(text) <= max) return text;
+  const room = max - byteLength("…");
+  if (room <= 0) return "";
+  let cut = new TextDecoder().decode(encoder.encode(text).slice(0, room)).replace(/\uFFFD+$/, "");
+  const atBoundary = text.slice(cut.length, cut.length + 1);
+  if (!/\s/.test(atBoundary)) {
+    const paragraph = cut.lastIndexOf("\n\n");
+    const sentence = Math.max(cut.lastIndexOf(". "), cut.lastIndexOf(".\n"), cut.lastIndexOf("! "), cut.lastIndexOf("? "));
+    const word = cut.search(/\s\S*$/);
+    const point = paragraph > cut.length * 0.4 ? paragraph : sentence > cut.length * 0.6 ? sentence + 1 : word;
+    if (point > 0) cut = cut.slice(0, point);
+  }
+  return `${cut.replace(/\s+$/, "")}…`;
 }
 
-// The managed values the site wants, for the managed fields only.
-export function desiredManaged(live: Snippet, video: AcademyVideo, fields: readonly Field[]): Managed {
+// The whole YouTube description: header, the site's description, chapters, footer.
+export function composeDescription(video: AcademyVideo): string {
+  const header = renderHeader(video);
+  const footer = renderFooter(video);
+  const body = markdownToText(video.description);
+  let chapters = renderChapters(video.chapters);
+  const fixed = (part: string) => [header, part, footer].filter(Boolean);
+  const room = (part: string) => MAX_DESCRIPTION_BYTES - byteLength(fixed(part).join("\n\n")) - 4;
+  if (room(chapters) < 200) chapters = "";
+  const trimmed = trimToBytes(body, Math.max(0, room(chapters)));
+  return [header, trimmed, chapters, footer].filter(Boolean).join("\n\n");
+}
+
+// A title over YouTube's limit is cut at a word, never mid-word.
+export function composeTitle(video: Pick<AcademyVideo, "title">): string {
+  const title = stripAngles(video.title).replace(/\s+/g, " ").trim();
+  if ([...title].length <= MAX_TITLE) return title;
+  const cut = [...title].slice(0, MAX_TITLE - 1).join("");
+  const word = cut.search(/\s\S*$/);
+  return `${(word > 0 ? cut.slice(0, word) : cut).replace(/[\s,;:–-]+$/, "")}…`;
+}
+
+// The managed values the site wants, for the managed text fields only.
+export function desiredManaged(video: AcademyVideo, fields: readonly Field[]): Managed {
   const managed: Managed = {};
-  if (fields.includes("title")) managed.title = video.title;
-  if (fields.includes("description")) managed.description = composeDescription(live.description, video);
+  if (fields.includes("title")) managed.title = composeTitle(video);
+  if (fields.includes("description")) managed.description = composeDescription(video);
   return managed;
 }
 
 export function validateManaged(managed: Managed): string[] {
   const errors: string[] = [];
-  if (managed.title !== undefined) {
-    if (!managed.title.trim()) errors.push("title is empty");
-    if ([...managed.title].length > MAX_TITLE) errors.push(`title is over ${MAX_TITLE} characters`);
-    if (/[<>]/.test(managed.title)) errors.push("title contains < or >");
-  }
-  if (managed.description !== undefined) {
-    if (new TextEncoder().encode(managed.description).length > MAX_DESCRIPTION_BYTES) errors.push(`description is over ${MAX_DESCRIPTION_BYTES} bytes`);
-    if (/[<>]/.test(managed.description)) errors.push("description contains < or >");
-  }
+  if (managed.title !== undefined && !managed.title.trim()) errors.push("title is empty");
+  if (managed.description !== undefined && byteLength(managed.description) > MAX_DESCRIPTION_BYTES) errors.push(`description is over ${MAX_DESCRIPTION_BYTES} bytes`);
   return errors;
 }
 
-export function pickManaged(snippet: Snippet, fields: readonly Field[]): Managed {
+export function pickManaged(snippet: Snippet, fields: readonly TextField[]): Managed {
   return Object.fromEntries(fields.map(field => [field, snippet[field]])) as Managed;
 }
 
-// Live snippet with the managed values swapped in: what videos.update sends.
 export function withManaged(live: Snippet, managed: Managed): Snippet {
   return { ...live, ...managed };
 }
@@ -90,7 +152,7 @@ export function managedHash(managed: Managed): Promise<string> {
   return hash(JSON.stringify(Object.entries(managed).sort(([a], [b]) => a.localeCompare(b))));
 }
 
-export type FieldHashes = Record<Field, string>;
+export type FieldHashes = Record<TextField, string>;
 // Hash of every managed-capable field, so a later change to MANAGED_FIELDS
 // compares against a baseline that already covers the new field.
 export async function fieldHashes(snippet: Snippet): Promise<FieldHashes> {

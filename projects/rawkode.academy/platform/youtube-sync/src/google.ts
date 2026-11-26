@@ -76,4 +76,9 @@ export class GoogleClient {
     ensure(snippet.title && snippet.categoryId, "invalid_input", "A snippet update needs the live title and categoryId; refusing to send a partial snippet");
     await this.send("PUT", dataAPI, "videos", { part: "snippet" }, JSON.stringify({ id, snippet }), { "content-type": "application/json" });
   }
+  // Uploads a JPEG or PNG (up to 2 MB) as the video's custom thumbnail (50 quota units).
+  async setThumbnail(id: string, image: Uint8Array): Promise<void> {
+    ensure(image.byteLength > 0 && image.byteLength <= 2 * 1024 * 1024, "invalid_input", "A thumbnail must be 1 byte to 2 MB");
+    await this.send("POST", "https://www.googleapis.com/upload/youtube/v3/", "thumbnails/set", { videoId: id, uploadType: "media" }, image, { "content-type": "image/jpeg" });
+  }
 }

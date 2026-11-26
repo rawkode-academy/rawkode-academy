@@ -15,11 +15,18 @@ case "${1:-}" in
     echo "$result" | jq .
     id=$(jq -r .id <<<"$result")
     request "$base/plans/$id/report" | tee -a "$summary"
+    # The full, untruncated change for one video (the first named in apply.json,
+    # else the first in the plan), so it can be reviewed before an apply.
+    slug=$(jq -r '.videos[0] // empty' apply.json)
+    slug=${slug:-$(request "$base/plans/$id/report" | sed -n 's/^### \([^ ]*\) (https.*/\1/p' | head -1)}
+    if [ -n "$slug" ]; then
+      { echo; echo "## Full change for $slug"; request "$base/plans/$id/videos/$slug" | jq -r '"Status: \(.status)\(if .reason then " (" + .reason + ")" else "" end)\n", (.changes[] | "### \(.field) before\n\n```\n\(.before)\n```\n\n### \(.field) after\n\n```\n\(.after)\n```\n"), (if .thumbnail then "### thumbnail\n\nsource: \(.thumbnail.url)\nchanged: \(.thumbnail.changed)" else empty end)'; } | tee -a "$summary"
+    fi
     ;;
   apply)
     # apply.json is the approval: its commit says which plan size and videos
     # are allowed to be written. See README.
-    body=$(jq -c '{planId, limit, videos, overrides, dryRun} | with_entries(select(.value != null))' apply.json)
+    body=$(jq -c '{planId, limit, videos, dryRun} | with_entries(select(.value != null))' apply.json)
     echo "Applying: $body"
     result=$(request -X POST "$base/apply" -d "$body")
     echo "$result" | jq . | tee -a "$summary"

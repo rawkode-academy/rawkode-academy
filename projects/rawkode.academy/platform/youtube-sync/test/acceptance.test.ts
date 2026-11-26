@@ -39,7 +39,7 @@ before(async () => {
       name: "youtube-sync", modules: true,
       scriptPath: fileURLToPath(new URL("../dist/main.js", import.meta.url)),
       compatibilityDate: "2026-10-31", compatibilityFlags: ["nodejs_compat"],
-      bindings: { YOUTUBE_CHANNEL_ID: channelId, MANAGED_FIELDS: "description", YOUTUBE_SYNC_CLIENT_ID: "c", YOUTUBE_SYNC_CLIENT_SECRET: "s", YOUTUBE_SYNC_REFRESH_TOKEN: "r", SYNC_ADMIN_TOKEN: token },
+      bindings: { YOUTUBE_CHANNEL_ID: channelId, MANAGED_FIELDS: "title,description", YOUTUBE_SYNC_CLIENT_ID: "c", YOUTUBE_SYNC_CLIENT_SECRET: "s", YOUTUBE_SYNC_REFRESH_TOKEN: "r", SYNC_ADMIN_TOKEN: token },
       d1Databases: { DB: "db" },
       serviceBindings: { ANALYTICS: { name: "collector", entrypoint: "Collector" }, ACADEMY_API: "gateway", VIDEO_CHANNELS: "gateway" },
       outboundService: (request: Request) => upstream.fetch(request),
@@ -47,7 +47,7 @@ before(async () => {
       name: "gateway", modules: true, compatibilityDate: "2026-10-31",
       script: `export default { async fetch(request) { const body = await request.json();
         if (body.query.includes("videoChannels")) return Response.json({ data: { videoChannels: [${ids.map((id, i) => `{ videoId: "v${i}", externalId: "${id}" }`).join(",")}, { videoId: "course", externalId: "ddddddddddd" }] } });
-        if (body.query.includes("getAllVideos")) return Response.json({ data: { getAllVideos: [${ids.map((_, i) => `{ id: "v${i}", title: "Video ${i}", slug: "video-${i}", collaborators: ${i === 0 ? '[{ name: "Teleport" }]' : "[]"} }`).join(",")}] } });
+        if (body.query.includes("getAllVideos")) return Response.json({ data: { getAllVideos: [${ids.map((_, i) => `{ id: "v${i}", title: "Video ${i}", slug: "video-${i}", description: "Site description ${i}.", thumbnailUrl: "https://cdn.test/v${i}/thumbnail.webp", chapters: [], collaborators: ${i === 0 ? '[{ name: "Teleport" }]' : "[]"} }`).join(",")}] } });
         return Response.json({ errors: [{ message: "unexpected" }] }); } };`,
     }, {
       name: "collector", modules: true, compatibilityDate: "2026-10-31",
@@ -57,7 +57,9 @@ before(async () => {
   }));
   await mf.ready;
   const db = await mf.getD1Database("DB");
-  const sql = (await readFile(new URL("../migrations/0001_init.sql", import.meta.url), "utf8")).replace(/--.*$/gm, "");
+  const { readdir } = await import("node:fs/promises");
+  const files = (await readdir(new URL("../migrations/", import.meta.url))).filter(name => name.endsWith(".sql")).sort();
+  const sql = (await Promise.all(files.map(name => readFile(new URL(`../migrations/${name}`, import.meta.url), "utf8")))).join("\n").replace(/--.*$/gm, "");
   for (const statement of sql.split(";").map(s => s.trim()).filter(Boolean)) await db.prepare(statement.replace(/\s+/g, " ")).run();
 });
 after(async () => { await mf.dispose(); });
@@ -95,9 +97,9 @@ test("plan, report, canary apply, then the rest, then rollback", async () => {
   assert.equal(upstream.updates[0].id, ids[1]);
   assert.deepEqual(upstream.updates[0].snippet.tags, ["k8s"]);
   assert.equal(upstream.updates[0].snippet.categoryId, "28");
-  assert.match(upstream.updates[0].snippet.description, /^Studio 1\n\n──── Rawkode Academy ────\nWatch with chapters/);
+  assert.match(upstream.updates[0].snippet.description, /^Watch with chapters, code and resources: https:\/\/rawkode\.academy\/watch\/video-1[^\n]*\n\nSite description 1\.\n\n──── Rawkode Academy ────\nNewsletter/);
   assert.equal(upstream.lake.at(-1)?.type, "youtube.sync.write");
-  assert.equal(JSON.stringify(upstream.lake).includes("Studio 1"), false, "lake events carry no descriptions");
+  assert.equal(JSON.stringify(upstream.lake).includes("Site description 1"), false, "lake events carry no descriptions");
 
   const rest = await (await call("/apply", { method: "POST", body: { limit: 10 } })).json() as Json;
   assert.equal(rest.applied, 2);

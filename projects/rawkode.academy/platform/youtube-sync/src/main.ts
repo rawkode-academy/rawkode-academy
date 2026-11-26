@@ -1,11 +1,11 @@
 import { z } from "zod";
 import { fetchCatalogue } from "./academy.ts";
-import { errorBody, ServiceError } from "./domain.ts";
+import { ensure, errorBody, hash, readLimited, ServiceError } from "./domain.ts";
 import { GoogleClient } from "./google.ts";
 import { renderReport } from "./plan.ts";
 import { parseFields } from "./render.ts";
 import { pacificDay, Store } from "./store.ts";
-import { applyPlan, createPlan, DAILY_BUDGET, type Deps, rollback } from "./sync.ts";
+import { applyPlan, createPlan, DAILY_BUDGET, type Deps, rollback, type Thumbnails } from "./sync.ts";
 
 const json = (body: unknown, status = 200) => Response.json(body, { status, headers: { "cache-control": "no-store", "x-content-type-options": "nosniff" } });
 const markdown = (body: string) => new Response(body, { headers: { "content-type": "text/markdown; charset=utf-8", "cache-control": "no-store", "x-content-type-options": "nosniff" } });
@@ -19,19 +19,45 @@ async function authorized(request: Request, env: CloudflareEnv) {
 }
 
 const google = (env: CloudflareEnv) => new GoogleClient({ clientId: env.YOUTUBE_SYNC_CLIENT_ID, clientSecret: env.YOUTUBE_SYNC_CLIENT_SECRET, refreshToken: env.YOUTUBE_SYNC_REFRESH_TOKEN }, env.YOUTUBE_CHANNEL_ID);
+const MAX_JPEG = 2 * 1024 * 1024;
+// The site serves WebP; YouTube takes JPEG or PNG up to 2 MB, 16:9, 1280x720 ideal.
+const thumbnails = (env: CloudflareEnv, api: GoogleClient): Thumbnails => ({
+  // The CDN sends no ETag or Last-Modified, so the tag is the hash of the image itself.
+  async tag(url) {
+    const response = await fetch(url, { redirect: "manual", signal: AbortSignal.timeout(15000) });
+    if (!response.ok) { await response.body?.cancel(); return null; }
+    return hash(await readLimited(response.body, 10 * 1024 * 1024));
+  },
+  async prepare(url) {
+    const response = await fetch(url, { redirect: "manual", signal: AbortSignal.timeout(20000) });
+    ensure(response.ok, "thumbnail_source", `Thumbnail source returned HTTP ${response.status}`, 502);
+    const source = await readLimited(response.body, 10 * 1024 * 1024);
+    for (const quality of [90, 80, 65]) {
+      const output = await env.IMAGES.input(new Blob([source]).stream()).transform({ width: 1280, height: 720, fit: "cover" }).output({ format: "image/jpeg", quality });
+      const bytes = new Uint8Array(await output.response().arrayBuffer());
+      if (bytes.byteLength <= MAX_JPEG) return bytes;
+    }
+    throw new ServiceError("thumbnail_too_large", "Thumbnail is over 2 MB even at low quality", 422);
+  },
+  async current(youtubeId) {
+    const response = await fetch(`https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg`, { redirect: "manual", signal: AbortSignal.timeout(10000) });
+    if (!response.ok) { await response.body?.cancel(); return null; }
+    return readLimited(response.body, 5 * 1024 * 1024);
+  },
+  set: (youtubeId, jpeg) => api.setThumbnail(youtubeId, jpeg),
+});
 const deps = (env: CloudflareEnv, api: GoogleClient): Deps => ({
-  api, store: new Store(env.DB), fields: parseFields(env.MANAGED_FIELDS), now: () => new Date(),
+  api, thumbnails: thumbnails(env, api), store: new Store(env.DB), fields: parseFields(env.MANAGED_FIELDS), now: () => new Date(),
   emit: async event => { const result = await (env.ANALYTICS as unknown as { trackEvent(event: unknown): Promise<{ success: boolean }> }).trackEvent(event); if (!result.success) throw new Error("lake delivery failed"); },
 });
 
 const applyBody = z.object({
   planId: z.string().min(1).default("latest"),
-  limit: z.number().int().min(1).max(170),
+  limit: z.number().int().min(1).max(400),
   videos: z.array(z.string().min(1)).max(500).optional(),
-  overrides: z.array(z.string().min(1)).max(500).optional(),
   dryRun: z.boolean().optional(),
 }).strict();
-const rollbackBody = z.object({ planId: z.string().min(1).optional(), youtubeId: z.string().min(1).optional(), limit: z.number().int().min(1).max(170) }).strict().refine(v => v.planId || v.youtubeId, "Give planId or youtubeId");
+const rollbackBody = z.object({ planId: z.string().min(1).optional(), youtubeId: z.string().min(1).optional(), limit: z.number().int().min(1).max(400) }).strict().refine(v => v.planId || v.youtubeId, "Give planId or youtubeId");
 
 async function resolvePlanId(store: Store, id: string) {
   const resolved = id === "latest" ? await store.latestPlanId() : id;
@@ -58,6 +84,15 @@ export default {
         const stored = await store.plan(await resolvePlanId(store, report[1]));
         if (!stored) throw new ServiceError("plan_not_found", "No such plan", 404);
         return markdown(renderReport(stored.plan, stored.items));
+      }
+      // One video's full diff, untruncated, for review before any apply.
+      const preview = url.pathname.match(/^\/plans\/([^/]+)\/videos\/([^/]+)$/);
+      if (request.method === "GET" && preview) {
+        const store = new Store(env.DB);
+        const stored = await store.plan(await resolvePlanId(store, preview[1]));
+        const item = stored?.items.find(i => i.slug === preview[2] || i.youtubeId === preview[2]);
+        if (!item) throw new ServiceError("video_not_found", "No such video in that plan", 404);
+        return json({ youtubeId: item.youtubeId, slug: item.slug, status: item.status, reason: item.reason, changes: item.diff, thumbnail: item.thumbnail });
       }
       if (request.method === "POST" && url.pathname === "/plan") {
         // Reads YouTube, writes only the plan to D1.
