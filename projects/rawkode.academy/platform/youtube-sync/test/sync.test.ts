@@ -63,8 +63,9 @@ test("apply writes the site's title and description over the live snippet and ke
   assert.equal(result.applied, 2);
   const written = f.writes.find(w => w.id === yt(0))!.snippet;
   assert.equal(written.description, composeDescription(video(0)));
+  assert.equal(composeTitle(video(0)), "Video 0");
   assert.doesNotMatch(written.description, /Studio text/);
-  assert.deepEqual({ title: written.title, categoryId: written.categoryId, tags: written.tags, defaultLanguage: written.defaultLanguage }, { title: composeTitle(video(0)), categoryId: "28", tags: ["k8s", "t0"], defaultLanguage: "en" });
+  assert.deepEqual({ title: written.title, categoryId: written.categoryId, tags: written.tags, defaultLanguage: written.defaultLanguage }, { title: "Old title", categoryId: "28", tags: ["k8s", "t0"], defaultLanguage: "en" });
   assert.equal(f.events.length, 2);
   // Applied videos are now in sync, and the next plan sees nothing to do.
   assert.deepEqual((await createPlan(f.deps, catalogue(2))).plan.summary, { NOOP: 2 });

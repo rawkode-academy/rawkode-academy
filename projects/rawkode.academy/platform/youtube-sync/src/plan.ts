@@ -1,4 +1,4 @@
-import { type AcademyVideo, desiredManaged, type Field, type FieldHashes, fieldHashes, type Managed, managedHash, pickManaged, type Snippet, textFields, validateManaged } from "./render.ts";
+import { type AcademyVideo, desiredManaged, type Field, type FieldHashes, fieldHashes, hasTitleContext, type Managed, managedHash, pickManaged, type Snippet, textFields, validateManaged } from "./render.ts";
 
 // The site owns the video, so a difference is always a CHANGE; there is no drift.
 export type Status = "NOOP" | "CHANGE" | "SKIP" | "ERROR";
@@ -38,8 +38,10 @@ export async function classify(input: ClassifyInput): Promise<PlanItem & { adopt
   const textual = textFields(input.fields);
   const live = pickManaged(input.live, textual);
   const desired = desiredManaged(input.academy, input.fields);
-  const base = { youtubeId: input.youtubeId, academyId: input.academy.id, slug: input.academy.slug };
   const errors = validateManaged(desired);
+  // No show or course on the site: the YouTube title is left exactly as it is.
+  if (desired.title !== undefined && !hasTitleContext(input.academy)) desired.title = live.title;
+  const base = { youtubeId: input.youtubeId, academyId: input.academy.id, slug: input.academy.slug };
   const liveHash = await managedHash(live);
   const liveFields = await fieldHashes(input.live);
   const thumbnail: ThumbnailPlan | null = input.fields.includes("thumbnail") && input.thumbnailTag && input.academy.thumbnailUrl ? { url: input.academy.thumbnailUrl, tag: input.thumbnailTag, changed: input.thumbnailTag !== input.pushedThumbnailTag } : null;

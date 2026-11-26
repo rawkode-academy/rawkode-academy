@@ -22,6 +22,13 @@
       "when": 1795617910000,
       "tag": "0002_collaborations_from_credits",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1795617920000,
+      "tag": "0003_portainer_collaboration",
+      "breakpoints": true
     }
   ]
 }

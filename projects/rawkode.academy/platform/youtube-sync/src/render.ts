@@ -177,6 +177,11 @@ function cutAtWord(text: string, max: number): string {
   return `${(word > 0 ? cut.slice(0, word) : cut).replace(/[\s,;:–-]+$/, "")}…`;
 }
 
+// A show or course name is the only thing the YouTube title is ever changed for.
+export function hasTitleContext(video: { show?: Show | null; course?: string | null }): boolean {
+  return Boolean(stripAngles(video.show?.name ?? video.course ?? "").replace(/\s+/g, " ").trim());
+}
+
 export function composeTitle(video: Pick<AcademyVideo, "title"> & { show?: Show | null; course?: string | null }): string {
   const title = stripAngles(video.title).replace(/\s+/g, " ").trim();
   const context = stripAngles(video.show?.name ?? video.course ?? "").replace(/\s+/g, " ").trim();

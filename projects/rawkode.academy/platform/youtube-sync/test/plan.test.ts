@@ -18,9 +18,17 @@ test("first sight adopts the live values as the baseline and plans every change"
   const item = await classify(input);
   assert.equal(item.status, "CHANGE");
   assert.deepEqual(item.adopt, await fieldHashes(live));
-  assert.deepEqual(item.diff.map(d => d.field), ["title", "description"]);
-  assert.equal(item.desired?.title, "Cilium in depth");
+  assert.deepEqual(item.diff.map(d => d.field), ["description"]);
+  assert.equal(item.desired?.title, "Old title");
   assert.deepEqual(item.thumbnail, { url: academy.thumbnailUrl, tag: "etag-2", changed: true });
+});
+
+test("the title is only written when the site has a show or course to suffix it with", async () => {
+  const noContext = await classify(input);
+  assert.equal(noContext.desired?.title, live.title);
+  const show = await classify({ ...input, academy: { ...academy, show: { id: "s1", name: "Klustered" } } });
+  assert.equal(show.desired?.title, "Cilium in depth | Klustered");
+  assert.ok(show.diff.some(d => d.field === "title"));
 });
 
 test("text and thumbnail already in sync is a no-op", async () => {
