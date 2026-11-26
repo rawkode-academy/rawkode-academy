@@ -5,6 +5,7 @@
 import {
 	type AcademyVideo,
 	dailySql,
+	castFromCredits,
 	GUEST_SCOPE_QUERY,
 	visibleEpisodes,
 	withCourseAuthors,
@@ -81,8 +82,16 @@ export function parseAcademyVideos(data: unknown): AcademyVideo[] | undefined {
 						? new Date(published).toISOString()
 						: null,
 				show: text(show?.id),
-				guests: people(video.guests),
-				hosts: people(show?.hosts),
+				...castFromCredits(
+					(Array.isArray(video.castingCredits) ? video.castingCredits : []).flatMap(
+						(credit: { role?: unknown; person?: unknown }) => {
+							const [person] = people([credit?.person]);
+							const role = text(credit?.role);
+							return person && role ? [{ role, person }] : [];
+						},
+					),
+					{ guests: people(video.guests), hosts: people(show?.hosts) },
+				),
 			},
 		];
 	});

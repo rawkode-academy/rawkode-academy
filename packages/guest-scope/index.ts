@@ -8,12 +8,13 @@
 // which video; the analytics lake's `youtube.video` catalogue says which
 // YouTube video that is. A video that can't be tied to one YouTube video with
 // certainty is left out.
-export const GUEST_SCOPE_QUERY = `query GuestScope { getAllVideos(includeCourseVideos: true) { id title slug publishedAt youtubeId guests { id githubHandle } episode { show { id hosts { id githubHandle } } } } allCourses { authors { id githubHandle } modules { video { id } } } }`;
+export const GUEST_SCOPE_QUERY = `query GuestScope { getAllVideos(includeCourseVideos: true) { id title slug publishedAt youtubeId guests { id githubHandle } castingCredits { role person { id githubHandle } } episode { show { id hosts { id githubHandle } } } } allCourses { authors { id githubHandle } modules { video { id } } } }`;
 
 export type Role = "guest" | "host";
 export type Person = { id: string; githubHandle: string | null };
 export type AcademyVideo = { id: string; title: string; slug: string; publishedAt: string | null; youtubeId: string | null; show: string | null; guests: Person[]; hosts: Person[] };
 export type EpisodeAccess = Omit<AcademyVideo, "guests" | "hosts"> & { role: Role };
+export type Credit = { role: string; person: Person };
 export type CourseScope = { authors: Person[]; videoIds: string[] };
 export type LakeVideo = { video: string; title: string };
 
@@ -23,6 +24,15 @@ export function normalizeHandle(handle: string) {
 }
 const isPerson = (candidate: Person, handle: string) =>
   handle !== "" && (candidate.id === handle || normalizeHandle(candidate.githubHandle ?? "") === handle);
+
+// A video's casting credits are the source of truth for who was on it: guests
+// are its GUEST credits, hosts everyone else credited (host, co-host, author).
+// A video with no credits yet falls back to its guests and its show's hosts.
+export function castFromCredits(credits: readonly Credit[], legacy: { guests: Person[]; hosts: Person[] }) {
+  if (credits.length === 0) return legacy;
+  const people = (roles: readonly string[]) => credits.filter(credit => roles.includes(credit.role)).map(credit => credit.person);
+  return { guests: people(["GUEST"]), hosts: people(["HOST", "CO_HOST", "AUTHOR"]) };
+}
 
 // A course's authors present its lesson videos, so they count as hosts of them.
 export function withCourseAuthors(videos: readonly AcademyVideo[], courses: readonly CourseScope[]): AcademyVideo[] {
@@ -34,7 +44,7 @@ export function withCourseAuthors(videos: readonly AcademyVideo[], courses: read
   });
 }
 
-// Guests of a video see it; hosts of a show see every episode of it.
+// Guests of a video see it; so do the hosts credited on it.
 export function visibleEpisodes(videos: readonly AcademyVideo[], username: string): EpisodeAccess[] {
   const handle = normalizeHandle(username);
   const found: EpisodeAccess[] = [];

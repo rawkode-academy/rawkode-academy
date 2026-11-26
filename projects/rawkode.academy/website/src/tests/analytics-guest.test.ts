@@ -40,6 +40,30 @@ describe("guest analytics", () => {
 		expect(visibleEpisodes(videos, "nobody")).toEqual([]);
 	});
 
+	it("uses a video's casting credits over the show's hosts", () => {
+		const credited = {
+			getAllVideos: [
+				{
+					id: "v3",
+					title: "Credited",
+					slug: "credited",
+					youtubeId: null,
+					guests: [],
+					castingCredits: [
+						{ role: "HOST", person: { id: "rawkode", githubHandle: "rawkode" } },
+						{ role: "GUEST", person: { id: "icepuma", githubHandle: "icepuma" } },
+					],
+					episode: { show: { id: "show", hosts: [{ id: "rawkode" }, { id: "cohost" }] } },
+				},
+			],
+			allCourses: [],
+		};
+		const videos = parseAcademyVideos(credited) ?? [];
+		expect(visibleEpisodes(videos, "icepuma").map((episode) => episode.role)).toEqual(["guest"]);
+		expect(visibleEpisodes(videos, "rawkode").map((episode) => episode.role)).toEqual(["host"]);
+		expect(visibleEpisodes(videos, "cohost")).toEqual([]);
+	});
+
 	it("shows a course author the course's lesson videos", () => {
 		const videos = parseAcademyVideos(data) ?? [];
 		expect(visibleEpisodes(videos, "teacher").map((episode) => episode.id)).toEqual(["v2"]);

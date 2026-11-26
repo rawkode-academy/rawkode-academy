@@ -27,6 +27,14 @@ test("guests see their videos, hosts see every episode of their show, everyone e
   assert.ok(!("guests" in visibleEpisodes(videos, "icepuma")[0]), "other people aren't exposed");
 });
 
+test("casting credits decide who was on a video; videos without credits keep the show's hosts", async () => {
+  const credited = { id: "c", title: "C", slug: "c", publishedAt: null, youtubeId: null, guests: [{ id: "legacy-guest" }], castingCredits: [{ role: "HOST", person: { id: "rawkode" } }, { role: "GUEST", person: { id: "icepuma" } }], episode: { show: { id: "cnc", hosts: [{ id: "rawkode" }, { id: "nimbinatus" }] } } };
+  const legacy = { id: "l", title: "L", slug: "l", publishedAt: null, youtubeId: null, guests: [], episode: { show: { id: "cnc", hosts: [{ id: "rawkode" }, { id: "nimbinatus" }] } } };
+  const videos = await fetchAcademyVideos((async () => Response.json({ data: { getAllVideos: [credited, legacy], allCourses: [] } })) as unknown as typeof fetch);
+  assert.deepEqual(videos.map(v => [v.id, v.guests.map(p => p.id), v.hosts.map(p => p.id)]), [["c", ["icepuma"], ["rawkode"]], ["l", [], ["rawkode", "nimbinatus"]]]);
+  assert.deepEqual(visibleEpisodes(videos, "nimbinatus").map(e => e.id), ["l"], "a co-host who was not credited on an episode does not see it");
+});
+
 test("YouTube IDs come from the stored ID, else from a title that is unique on both sides", () => {
   assert.equal(normalizeTitle("  Café: Intar — Office Hours! "), "cafe intar office hours");
   const videos = [
