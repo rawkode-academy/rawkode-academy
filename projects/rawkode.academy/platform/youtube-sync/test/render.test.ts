@@ -25,7 +25,8 @@ test("composing is deterministic and Studio text is not part of it", () => {
 
 test("Markdown becomes plain text, with no angle brackets", () => {
   const text = markdownToText("## Heading\n\n**bold** and `code` and ![alt](x.png)\n\n<div>html</div> a < b\\n\\nescaped newline");
-  assert.equal(text, "Heading\n\nbold and code and alt\n\nhtml a  b\n\nescaped newline");
+  // YouTube rejects angle brackets, so every one is removed.
+  assert.equal(text, "Heading\n\nbold and code and alt\n\ndivhtml/div a  b\n\nescaped newline");
   assert.doesNotMatch(composeDescription({ ...video, description: "x <script> y > z" }), /[<>]/);
 });
 

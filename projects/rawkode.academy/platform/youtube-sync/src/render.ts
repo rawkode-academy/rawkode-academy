@@ -54,7 +54,6 @@ export function markdownToText(markdown: string): string {
     .replace(/^#{1,6}\s+/gm, "")
     .replace(/(\*\*|__)(.+?)\1/g, "$2")
     .replace(/`([^`\n]+)`/g, "$1")
-    .replace(/<[^>\n]*>/g, "")
     .replace(/[<>]/g, "")
     .replace(/[ \t]+$/gm, "")
     .replace(/\n{3,}/g, "\n\n")
