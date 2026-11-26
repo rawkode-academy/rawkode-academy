@@ -29,6 +29,13 @@
       "when": 1792870195290,
       "tag": "0003_course_only",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1792956595290,
+      "tag": "0004_drop_youtube_id",
+      "breakpoints": true
     }
   ]
 }
