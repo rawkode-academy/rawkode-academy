@@ -2,5 +2,5 @@
   "planId": "latest",
   "limit": 1,
   "videos": ["22-borko-vs-bojan"],
-  "dryRun": false
+  "dryRun": true
 }
