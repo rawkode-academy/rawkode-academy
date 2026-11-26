@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { composeDescription, composeTitle, MARKER, markdownToText, parseFields, renderChapters, renderFooter, trimToBytes, validateManaged, writableSnippet, type AcademyVideo } from "../src/render.ts";
+import { composeDescription, composeTitle, https, MARKER, markdownToText, parseFields, renderChapters, renderFooter, renderMetadata, trimToBytes, validateManaged, writableSnippet, type AcademyVideo } from "../src/render.ts";
 
-const video: AcademyVideo = { id: "v1", title: "Cilium in depth", slug: "cilium-in-depth", collaborators: [], description: "First paragraph.\n\nSecond paragraph with [a link](https://example.com).", chapters: [], thumbnailUrl: "https://cdn.test/v1/thumbnail.webp" };
+const video: AcademyVideo = { id: "v1", title: "Cilium in depth", slug: "cilium-in-depth", collaborators: [], description: "First paragraph.\n\nSecond paragraph with [a link](https://example.com).", chapters: [], thumbnailUrl: "https://cdn.test/v1/thumbnail.webp", show: null, guests: [], technologies: [] };
 const bytes = (value: string) => new TextEncoder().encode(value).length;
 
 test("the description is the header, the site's description, then the footer", () => {
@@ -82,4 +82,43 @@ test("MANAGED_FIELDS defaults to everything and rejects unknown fields", () => {
 test("only writable snippet fields are kept", () => {
   const snippet = writableSnippet({ title: "t", description: "d", categoryId: "28", tags: ["a"], defaultLanguage: "en", publishedAt: "x", thumbnails: {} } as never);
   assert.deepEqual(snippet, { title: "t", description: "d", categoryId: "28", tags: ["a"], defaultLanguage: "en" });
+});
+
+const rich: AcademyVideo = {
+  ...video, show: { id: "rawkode-live", name: "Rawkode Live" },
+  guests: [{ id: "ellie", name: "Ellie Huxtable", x: "https://x.com/ellie_huxtable", bluesky: "https://bsky.app/profile/ellie.wtf", linkedin: "https://www.linkedin.com/in/elliehuxtable" }, { id: "nobody", name: "No Socials" }],
+  technologies: [{ id: "atuin", name: "Atuin", website: "https://atuin.sh", x: "https://twitter.com/atuinsh" }],
+};
+
+test("the show, guests and technologies carry full https links, with only the handles that exist", () => {
+  assert.equal(renderMetadata(rich), [
+    "Show: Rawkode Live\nhttps://rawkode.academy/shows/rawkode-live",
+    "Guests\nEllie Huxtable: https://rawkode.academy/people/ellie\nX: https://x.com/ellie_huxtable\nBluesky: https://bsky.app/profile/ellie.wtf\nLinkedIn: https://www.linkedin.com/in/elliehuxtable\nNo Socials: https://rawkode.academy/people/nobody",
+    "Technologies\nAtuin: https://rawkode.academy/technology/atuin\nWebsite: https://atuin.sh\nX: https://twitter.com/atuinsh",
+  ].join("\n\n"));
+  assert.equal(renderMetadata(video), "");
+});
+
+test("links are upgraded to https, handles expanded, junk dropped", () => {
+  assert.equal(https("http://atuin.sh"), "https://atuin.sh");
+  assert.equal(https("@atuinsh", "https://x.com/"), "https://x.com/atuinsh");
+  assert.equal(https("not a url"), undefined);
+  assert.equal(https(null), undefined);
+  assert.doesNotMatch(composeDescription(rich), /http:\/\//);
+});
+
+test("the metadata sits after the chapters and before the footer, and the body is trimmed before it", () => {
+  const long = Array.from({ length: 150 }, () => "Kubernetes controllers reconcile desired state with observed state. ").join("");
+  const description = composeDescription({ ...rich, description: long, chapters: [{ startTime: 0, title: "Intro" }, { startTime: 30, title: "Two" }, { startTime: 90, title: "Three" }] });
+  assert.ok(bytes(description) <= 5000);
+  const order = ["Watch with chapters", "…", "Chapters\n", "Show: Rawkode Live", "Guests\n", "Technologies\n", MARKER].map(part => description.indexOf(part));
+  assert.deepEqual([...order].sort((a, b) => a - b), order);
+  assert.ok(description.includes("https://www.linkedin.com/in/elliehuxtable"));
+});
+
+test("an enormous guest list is capped and the description still fits", () => {
+  const many = Array.from({ length: 40 }, (_, i) => ({ id: `g${i}`, name: `Guest ${i}`, x: `https://x.com/g${i}`.padEnd(400, "x") }));
+  const description = composeDescription({ ...rich, guests: many, technologies: many.map(g => ({ id: g.id, name: g.name, website: g.x })) });
+  assert.ok(bytes(description) <= 5000);
+  assert.ok(description.includes(MARKER));
 });

@@ -3,7 +3,7 @@ import test from "node:test";
 import { classify, renderReport } from "../src/plan.ts";
 import { composeDescription, fieldHashes, type AcademyVideo, type Field, type Snippet } from "../src/render.ts";
 
-const academy: AcademyVideo = { id: "v1", title: "Cilium in depth", slug: "cilium-in-depth", collaborators: [], description: "About Cilium.", chapters: [], thumbnailUrl: "https://cdn.test/v1/thumbnail.webp" };
+const academy: AcademyVideo = { id: "v1", title: "Cilium in depth", slug: "cilium-in-depth", collaborators: [], description: "About Cilium.", chapters: [], thumbnailUrl: "https://cdn.test/v1/thumbnail.webp", show: null, guests: [], technologies: [] };
 const live: Snippet = { title: "Old title", description: "Studio text", categoryId: "28" };
 const fields: Field[] = ["title", "description", "thumbnail"];
 const input = { youtubeId: "abcdefghijk", academy, live, base: undefined, fields, thumbnailTag: "etag-2", pushedThumbnailTag: undefined };

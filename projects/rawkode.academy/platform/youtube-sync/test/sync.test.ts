@@ -40,7 +40,7 @@ async function fixture(fields: Deps["fields"] = ["title", "description"]) {
   };
   return { deps, live, writes, events, thumbs, fail: (error?: Error) => { failWith = error; } };
 }
-const video = (n: number): AcademyVideo => ({ id: `v${n}`, title: `Video ${n}`, slug: `video-${n}`, collaborators: [], description: `Site text ${n}.`, chapters: [], thumbnailUrl: `https://cdn.test/v${n}/thumbnail.webp` });
+const video = (n: number): AcademyVideo => ({ id: `v${n}`, title: `Video ${n}`, slug: `video-${n}`, collaborators: [], description: `Site text ${n}.`, chapters: [], thumbnailUrl: `https://cdn.test/v${n}/thumbnail.webp`, show: null, guests: [], technologies: [] });
 const yt = (n: number) => `${String(n).padStart(11, "a")}`;
 const catalogue = (count: number, extra: [string, AcademyVideo | undefined][] = []) => new Map<string, AcademyVideo | undefined>([...Array.from({ length: count }, (_, i) => [yt(i), video(i)] as [string, AcademyVideo]), ...extra]);
 const seed = (f: Awaited<ReturnType<typeof fixture>>, count: number) => { for (let i = 0; i < count; i++) f.live.set(yt(i), { title: `Video ${i}`, description: `Studio text ${i}`, categoryId: "28", tags: ["k8s", `t${i}`], defaultLanguage: "en" }); };

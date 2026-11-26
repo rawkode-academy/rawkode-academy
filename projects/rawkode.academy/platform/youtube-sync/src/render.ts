@@ -19,7 +19,10 @@ export type Snippet = { title: string; description: string; categoryId: string; 
 export type Managed = Partial<Record<TextField, string>>;
 export type Chapter = { startTime: number; title: string };
 // description is the Markdown the website renders for the video.
-export type AcademyVideo = { id: string; title: string; slug: string; collaborators: string[]; description: string; chapters: Chapter[]; thumbnailUrl: string };
+export type Show = { id: string; name: string };
+export type Person = { id: string; name: string; x?: string; bluesky?: string; linkedin?: string };
+export type Technology = { id: string; name: string; website?: string; x?: string; youtube?: string };
+export type AcademyVideo = { id: string; title: string; slug: string; collaborators: string[]; description: string; chapters: Chapter[]; thumbnailUrl: string; show: Show | null; guests: Person[]; technologies: Technology[] };
 
 export function parseFields(value: string | undefined): Field[] {
   const wanted = (value ?? ALL_FIELDS.join(",")).split(",").map(item => item.trim()).filter(Boolean);
@@ -73,6 +76,29 @@ export function renderChapters(chapters: readonly Chapter[]): string {
   return valid ? ["Chapters", ...sorted.map(c => `${clock(c.startTime)} ${stripAngles(c.title.trim())}`)].join("\n") : "";
 }
 
+const SITE = "https://rawkode.academy";
+// Every link is https. An http link is upgraded, a bare handle is expanded, anything else is dropped.
+export function https(value: string | null | undefined, handleBase?: string): string | undefined {
+  const text = value?.trim();
+  if (!text) return undefined;
+  if (/^https:\/\//i.test(text)) return text;
+  if (/^http:\/\//i.test(text)) return `https://${text.slice(7)}`;
+  if (handleBase && /^@?[A-Za-z0-9_.-]+$/.test(text)) return `${handleBase}${text.replace(/^@/, "")}`;
+  return undefined;
+}
+const MAX_GUESTS = 6;
+const MAX_TECHNOLOGIES = 8;
+const labelled = (pairs: [string, string | undefined][]) => pairs.flatMap(([label, url]) => (url ? [`${label}: ${url}`] : []));
+
+// The site's show, guests and technologies, with full https links.
+export function renderMetadata(video: Pick<AcademyVideo, "show" | "guests" | "technologies">): string {
+  const sections: string[] = [];
+  if (video.show) sections.push(`Show: ${stripAngles(video.show.name)}\n${SITE}/shows/${video.show.id}`);
+  if (video.guests.length) sections.push(["Guests", ...video.guests.slice(0, MAX_GUESTS).flatMap(guest => [`${stripAngles(guest.name)}: ${SITE}/people/${guest.id}`, ...labelled([["X", guest.x], ["Bluesky", guest.bluesky], ["LinkedIn", guest.linkedin]])])].join("\n"));
+  if (video.technologies.length) sections.push(["Technologies", ...video.technologies.slice(0, MAX_TECHNOLOGIES).flatMap(tech => [`${stripAngles(tech.name)}: ${SITE}/technology/${tech.id}`, ...labelled([["Website", tech.website], ["X", tech.x], ["YouTube", tech.youtube]])])].join("\n"));
+  return sections.join("\n\n");
+}
+
 export const watchUrl = (video: Pick<AcademyVideo, "slug">) => `https://rawkode.academy/watch/${video.slug}?utm_source=youtube&utm_medium=description`;
 export const renderHeader = (video: Pick<AcademyVideo, "slug">) => `Watch with chapters, code and resources: ${watchUrl(video)}`;
 
@@ -103,17 +129,20 @@ export function trimToBytes(text: string, max: number): string {
   return `${cut.replace(/\s+$/, "")}…`;
 }
 
-// The whole YouTube description: header, the site's description, chapters, footer.
+// The whole YouTube description: header, the site's description, chapters, the
+// show, guests and technologies, then the footer. The body is trimmed first, then
+// the chapters are dropped, and only then the metadata is shortened.
 export function composeDescription(video: AcademyVideo): string {
   const header = renderHeader(video);
   const footer = renderFooter(video);
   const body = markdownToText(video.description);
   let chapters = renderChapters(video.chapters);
-  const fixed = (part: string) => [header, part, footer].filter(Boolean);
-  const room = (part: string) => MAX_DESCRIPTION_BYTES - byteLength(fixed(part).join("\n\n")) - 4;
-  if (room(chapters) < 200) chapters = "";
-  const trimmed = trimToBytes(body, Math.max(0, room(chapters)));
-  return [header, trimmed, chapters, footer].filter(Boolean).join("\n\n");
+  let metadata = renderMetadata(video);
+  const room = () => MAX_DESCRIPTION_BYTES - byteLength([header, chapters, metadata, footer].filter(Boolean).join("\n\n")) - 6;
+  if (room() < 300) chapters = "";
+  if (room() < 0) metadata = trimToBytes(metadata, Math.max(0, byteLength(metadata) + room() - 1)).replace(/\n[^\n]*…$/, "");
+  const trimmed = trimToBytes(body, Math.max(0, room()));
+  return [header, trimmed, chapters, metadata, footer].filter(Boolean).join("\n\n");
 }
 
 // A title over YouTube's limit is cut at a word, never mid-word.

@@ -47,7 +47,7 @@ before(async () => {
       name: "gateway", modules: true, compatibilityDate: "2026-10-31",
       script: `export default { async fetch(request) { const body = await request.json();
         if (body.query.includes("videoChannels")) return Response.json({ data: { videoChannels: [${ids.map((id, i) => `{ videoId: "v${i}", externalId: "${id}" }`).join(",")}, { videoId: "course", externalId: "ddddddddddd" }] } });
-        if (body.query.includes("getAllVideos")) return Response.json({ data: { getAllVideos: [${ids.map((_, i) => `{ id: "v${i}", title: "Video ${i}", slug: "video-${i}", description: "Site description ${i}.", thumbnailUrl: "https://cdn.test/v${i}/thumbnail.webp", chapters: [], collaborators: ${i === 0 ? '[{ name: "Teleport" }]' : "[]"} }`).join(",")}] } });
+        if (body.query.includes("getAllVideos")) return Response.json({ data: { getAllVideos: [${ids.map((_, i) => `{ id: "v${i}", title: "Video ${i}", slug: "video-${i}", description: "Site description ${i}.", thumbnailUrl: "https://cdn.test/v${i}/thumbnail.webp", chapters: [], episode: { show: { id: "rawkode-live", name: "Rawkode Live" } }, guests: [{ id: "ellie", name: "Ellie Huxtable", twitterUrl: "https://x.com/ellie_huxtable", blueskyUrl: null, linkedinUrl: null }], technologies: [{ id: "atuin", name: "Atuin", website: "https://atuin.sh", community: { twitter: "https://twitter.com/atuinsh", youtube: null } }], collaborators: ${i === 0 ? '[{ name: "Teleport" }]' : "[]"} }`).join(",")}] } });
         return Response.json({ errors: [{ message: "unexpected" }] }); } };`,
     }, {
       name: "collector", modules: true, compatibilityDate: "2026-10-31",
@@ -86,7 +86,10 @@ test("plan, report, canary apply, then the rest, then rollback", async () => {
   assert.equal(upstream.updates.length, 0, "a plan writes nothing to YouTube");
   const report = await (await call(planned.report)).text();
   assert.match(report, /## CHANGE \(3\)/);
-  assert.match(report, /Made in collaboration with Teleport/);
+  // The report clips long text; one video's full change is its own endpoint.
+  const full = await (await call(`/plans/${planned.id}/videos/video-0`)).json() as Json;
+  assert.match(full.changes.find((c: Json) => c.field === "description").after, /Made in collaboration with Teleport\.$/);
+  assert.equal((await call(`/plans/${planned.id}/videos/nope`)).status, 404);
 
   const bad = await call("/apply", { method: "POST", body: { limit: 0 } });
   assert.equal(bad.status, 400);
@@ -97,7 +100,7 @@ test("plan, report, canary apply, then the rest, then rollback", async () => {
   assert.equal(upstream.updates[0].id, ids[1]);
   assert.deepEqual(upstream.updates[0].snippet.tags, ["k8s"]);
   assert.equal(upstream.updates[0].snippet.categoryId, "28");
-  assert.match(upstream.updates[0].snippet.description, /^Watch with chapters, code and resources: https:\/\/rawkode\.academy\/watch\/video-1[^\n]*\n\nSite description 1\.\n\n──── Rawkode Academy ────\nNewsletter/);
+  assert.match(upstream.updates[0].snippet.description, /^Watch with chapters, code and resources: https:\/\/rawkode\.academy\/watch\/video-1[^\n]*\n\nSite description 1\.\n\nShow: Rawkode Live\nhttps:\/\/rawkode\.academy\/shows\/rawkode-live\n\nGuests\nEllie Huxtable: https:\/\/rawkode\.academy\/people\/ellie\nX: https:\/\/x\.com\/ellie_huxtable\n\nTechnologies\nAtuin: https:\/\/rawkode\.academy\/technology\/atuin\nWebsite: https:\/\/atuin\.sh\nX: https:\/\/twitter\.com\/atuinsh\n\n──── Rawkode Academy ────\nNewsletter/);
   assert.equal(upstream.lake.at(-1)?.type, "youtube.sync.write");
   assert.equal(JSON.stringify(upstream.lake).includes("Site description 1"), false, "lake events carry no descriptions");
 

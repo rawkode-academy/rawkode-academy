@@ -1,5 +1,5 @@
 import { ensure, readLimited, ServiceError } from "./domain.ts";
-import type { AcademyVideo } from "./render.ts";
+import { type AcademyVideo, https } from "./render.ts";
 
 type Gateway = { fetch: typeof fetch };
 
@@ -24,7 +24,7 @@ export async function fetchCatalogue(env: { VIDEO_CHANNELS: Gateway; ACADEMY_API
   const byAcademyId = new Map<string, string>();
   for (const row of mappings.videoChannels ?? []) if (typeof row.videoId === "string" && typeof row.externalId === "string" && /^[A-Za-z0-9_-]{11}$/.test(row.externalId)) byAcademyId.set(row.videoId, row.externalId);
   ensure(byAcademyId.size > 0, "invalid_academy_response", "video-channels returned no YouTube IDs", 502);
-  const all = await graphql<{ getAllVideos?: { id?: string; title?: string; slug?: string; description?: string; thumbnailUrl?: string; chapters?: { startTime?: number; title?: string }[]; collaborators?: { name?: string }[] }[] }>(env.ACADEMY_API, "https://api.rawkode.academy/", "{ getAllVideos { id title slug description thumbnailUrl chapters { startTime title } collaborators { name } } }");
+  const all = await graphql<{ getAllVideos?: { id?: string; title?: string; slug?: string; description?: string; thumbnailUrl?: string; chapters?: { startTime?: number; title?: string }[]; collaborators?: { name?: string }[]; episode?: { show?: { id?: string; name?: string } | null } | null; guests?: { id?: string; name?: string; twitterUrl?: string | null; blueskyUrl?: string | null; linkedinUrl?: string | null }[]; technologies?: { id?: string; name?: string; website?: string | null; community?: { twitter?: string | null; youtube?: string | null } | null }[] }[] }>(env.ACADEMY_API, "https://api.rawkode.academy/", "{ getAllVideos { id title slug description thumbnailUrl chapters { startTime title } collaborators { name } episode { show { id name } } guests { id name twitterUrl blueskyUrl linkedinUrl } technologies { id name website community { twitter youtube } } } }");
   ensure(all.getAllVideos?.length, "invalid_academy_response", "The Academy API returned no videos", 502);
   const listed = new Map<string, AcademyVideo>();
   for (const video of all.getAllVideos ?? []) {
@@ -32,7 +32,10 @@ export async function fetchCatalogue(env: { VIDEO_CHANNELS: Gateway; ACADEMY_API
     listed.set(video.id, { id: video.id, title: video.title, slug: video.slug, collaborators: (video.collaborators ?? []).map(c => String(c.name ?? "")).filter(Boolean),
       description: typeof video.description === "string" ? video.description : "",
       chapters: (video.chapters ?? []).flatMap(c => typeof c.startTime === "number" && typeof c.title === "string" ? [{ startTime: c.startTime, title: c.title }] : []),
-      thumbnailUrl: typeof video.thumbnailUrl === "string" ? video.thumbnailUrl : "" });
+      thumbnailUrl: typeof video.thumbnailUrl === "string" ? video.thumbnailUrl : "",
+      show: video.episode?.show?.id && video.episode.show.name ? { id: video.episode.show.id, name: video.episode.show.name } : null,
+      guests: (video.guests ?? []).flatMap(g => g.id && g.name ? [{ id: g.id, name: g.name, x: https(g.twitterUrl, "https://x.com/"), bluesky: https(g.blueskyUrl, "https://bsky.app/profile/"), linkedin: https(g.linkedinUrl, "https://www.linkedin.com/in/") }] : []),
+      technologies: (video.technologies ?? []).flatMap(t => t.id && t.name ? [{ id: t.id, name: t.name, website: https(t.website), x: https(t.community?.twitter, "https://x.com/"), youtube: https(t.community?.youtube, "https://youtube.com/@") }] : []) });
   }
   return new Map([...byAcademyId].map(([academyId, youtubeId]) => [youtubeId, listed.get(academyId)]));
 }
