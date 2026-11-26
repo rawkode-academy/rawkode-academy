@@ -5,7 +5,8 @@ import { GoogleClient } from "./google.ts";
 import { renderReport } from "./plan.ts";
 import { parseFields } from "./render.ts";
 import { pacificDay, Store } from "./store.ts";
-import { applyPlan, createPlan, DAILY_BUDGET, type Deps, rollback, type Thumbnails } from "./sync.ts";
+import { consume, consumeDead, DEAD_LETTER_QUEUE, type SyncMessage } from "./queue.ts";
+import { applyPlan, createPlan, DAILY_BUDGET, type Deps, rollback, selectCandidates, type Thumbnails } from "./sync.ts";
 
 const json = (body: unknown, status = 200) => Response.json(body, { status, headers: { "cache-control": "no-store", "x-content-type-options": "nosniff" } });
 const markdown = (body: string) => new Response(body, { headers: { "content-type": "text/markdown; charset=utf-8", "cache-control": "no-store", "x-content-type-options": "nosniff" } });
@@ -75,7 +76,7 @@ export default {
         const store = new Store(env.DB);
         const id = await store.latestPlanId();
         const latest = id ? (await store.plan(id))?.plan : null;
-        return json({ latestPlan: latest ? { id: latest.id, createdAt: latest.createdAt, summary: latest.summary } : null, lastWrite: await store.lastLog(), quotaUsedToday: await store.quotaUsed(pacificDay(new Date())), budget: DAILY_BUDGET, managedFields: env.MANAGED_FIELDS });
+        return json({ latestPlan: latest ? { id: latest.id, createdAt: latest.createdAt, summary: latest.summary } : null, lastWrite: await store.lastLog(), quotaUsedToday: await store.quotaUsed(pacificDay(new Date())), budget: DAILY_BUDGET, deadLetters: await store.deadCount(), managedFields: env.MANAGED_FIELDS });
       }
       if (!(await authorized(request, env))) return json({ error: "unauthorized" }, 401);
       const report = url.pathname.match(/^\/plans\/([^/]+)\/report$/);
@@ -107,7 +108,13 @@ export default {
         const d = deps(env, api);
         if (url.pathname === "/apply") {
           const input = applyBody.parse(body);
-          return json(await applyPlan(d, await resolvePlanId(d.store, input.planId), input));
+          const planId = await resolvePlanId(d.store, input.planId);
+          if (input.dryRun) return json(await applyPlan(d, planId, input));
+          // apply.json decides how many videos are queued; the queue writes them one at
+          // a time, backs off on errors and waits out the quota reset by itself.
+          const { candidates } = await selectCandidates(d.store, planId, input);
+          for (let i = 0; i < candidates.length; i += 100) await env.SYNC_QUEUE.sendBatch(candidates.slice(i, i + 100).map(item => ({ body: { planId, youtubeId: item.youtubeId } satisfies SyncMessage })));
+          return json({ planId, enqueued: candidates.length, videos: candidates.map(item => item.slug ?? item.youtubeId), note: "Queued. The consumer writes them one at a time within the daily quota budget; see /status for deadLetters." });
         }
         const input = rollbackBody.parse(body);
         return json(await rollback(d, { planId: input.planId, youtubeId: input.youtubeId }, input.limit));
@@ -118,6 +125,12 @@ export default {
       if (body.error === "internal_error") console.error(JSON.stringify({ operation: "request", path: url.pathname, error: error instanceof Error ? error.name : "unknown" }));
       return json(body, body.status);
     }
+  },
+  async queue(batch, env) {
+    const d = deps(env, google(env));
+    const messages = batch.messages.map(m => ({ body: m.body, attempts: m.attempts, ack: () => m.ack(), retry: (options?: { delaySeconds?: number }) => m.retry(options) }));
+    if (batch.queue === DEAD_LETTER_QUEUE) return consumeDead(messages, d);
+    await consume(messages, d, async (body, delaySeconds) => { await env.SYNC_QUEUE.send(body, { delaySeconds }); });
   },
   async scheduled(_controller, env, ctx) {
     ctx.waitUntil((async () => {

@@ -84,11 +84,11 @@ tasks: {
 		inputs: list.Concat([_sources, ["test/**", "migrations/**"]])
 	}
 
-	// CI on main: tests, applies D1 migrations, then deploys the Worker with its
+	// CI on main: tests, applies D1 migrations, creates the queues if missing, then deploys the Worker with its
 	// secrets from Infisical. Fails if `cuenv task consent` hasn't stored them yet.
 	deploy: schema.#Task & {
 		command: "sh"
-		args: ["-c", _npm + "npm test --workspaces=false && npx --no-install wrangler d1 migrations apply DB --remote && npx --no-install wrangler deploy --secrets-file secrets.env"]
+		args: ["-c", _npm + "npm test --workspaces=false && npx --no-install wrangler d1 migrations apply DB --remote && for q in platform-youtube-sync platform-youtube-sync-dlq; do npx --no-install wrangler queues info $q >/dev/null 2>&1 || npx --no-install wrangler queues create $q; done && npx --no-install wrangler deploy --secrets-file secrets.env"]
 		inputs: list.Concat([_sources, ["env.cue", "test/**", "migrations/**"]])
 		labels: ["infisical"]
 		env: {

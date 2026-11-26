@@ -56,3 +56,10 @@ test("missing credentials point at the consent task", async () => {
   const api = new GoogleClient({}, channelId, (async () => json({})) as typeof fetch);
   await assert.rejects(api.listSnippets(["abcdefghijk"]), error => { assert.match(errorBody(error).message, /cuenv task consent/); return true; });
 });
+
+test("a 403 whose reason is quotaExceeded is told apart from a permission 403", async () => {
+  const failing = (reason: string) => new GoogleClient(credentials, channelId, (async (input: RequestInfo | URL) => isToken(input) ? json({ access_token: "a" }) : json({ error: { errors: [{ reason, message: "secret detail" }] } }, 403)) as typeof fetch);
+  for (const [reason, code] of [["quotaExceeded", "quota_exceeded"], ["dailyLimitExceeded", "quota_exceeded"], ["forbidden", "google_api_error"]] as const) {
+    await assert.rejects(failing(reason).listSnippets(["aaaaaaaaaaa"]), (error: unknown) => (error as { code?: string }).code === code && !String((error as Error).message).includes("secret detail"), reason);
+  }
+});

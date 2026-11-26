@@ -6,6 +6,11 @@ export class ServiceError extends Error {
 export function ensure(value: unknown, code: string, message: string, status = 400): asserts value {
   if (!value) throw new ServiceError(code, message, status);
 }
+// YouTube signals an exhausted quota as a 403 whose first error reason is one of these.
+export const isQuota = (error: unknown) => error instanceof ServiceError && error.code === "quota_exceeded";
+// Worth another attempt: a network failure, a timeout, a rate limit or a 5xx. Anything else
+// (a rejected image, a permission error, bad input) fails the same way every time.
+export const isTransient = (error: unknown) => !(error instanceof ServiceError) || error.code === "thumbnail_source" || (error.upstreamStatus !== undefined && (error.upstreamStatus >= 500 || error.upstreamStatus === 408 || error.upstreamStatus === 429));
 export function errorBody(error: unknown) {
   if (error instanceof z.ZodError) return { error: "invalid_input", message: "Invalid request", issues: error.issues.map(i => ({ path: i.path, message: i.message })), status: 400 };
   if (error instanceof ServiceError) return { error: error.code, message: error.message, status: error.status, ...(error.upstreamStatus === undefined ? {} : { upstreamStatus: error.upstreamStatus }) };

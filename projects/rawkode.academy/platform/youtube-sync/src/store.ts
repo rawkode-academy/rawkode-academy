@@ -56,10 +56,11 @@ export class Store {
   async latestPlanId(): Promise<string | null> {
     return (await this.db.prepare("SELECT id FROM youtube_sync_plans ORDER BY created_at DESC LIMIT 1").first<{ id: string }>())?.id ?? null;
   }
-  async plan(id: string): Promise<{ plan: PlanRecord; items: StoredItem[] } | null> {
+  // `only` limits the items to one video (by YouTube ID or slug), for the queue consumer.
+  async plan(id: string, only?: string): Promise<{ plan: PlanRecord; items: StoredItem[] } | null> {
     const row = await this.db.prepare("SELECT * FROM youtube_sync_plans WHERE id = ?1").bind(id).first<Record<string, unknown>>();
     if (!row) return null;
-    const { results } = await this.db.prepare("SELECT * FROM youtube_sync_plan_items WHERE plan_id = ?1 ORDER BY slug, youtube_id").bind(id).all<Record<string, unknown>>();
+    const { results } = await this.db.prepare("SELECT * FROM youtube_sync_plan_items WHERE plan_id = ?1 AND (?2 IS NULL OR youtube_id = ?2 OR slug = ?2) ORDER BY slug, youtube_id").bind(id, only ?? null).all<Record<string, unknown>>();
     return {
       plan: { id: String(row.id), createdAt: String(row.created_at), templateVersion: Number(row.template_version), fields: JSON.parse(String(row.fields)), summary: JSON.parse(String(row.summary)) },
       items: results.map(item => ({ youtubeId: String(item.youtube_id), academyId: (item.academy_id as string | null) ?? null, slug: (item.slug as string | null) ?? null, status: item.status as Status, reason: (item.reason as string | null) ?? null, liveHash: (item.live_hash as string | null) ?? null, desired: parse<Managed>(item.desired), diff: parse<FieldDiff[]>(item.diff) ?? [], thumbnail: typeof item.thumb_tag === "string" ? ({ url: String(item.thumb_url), tag: item.thumb_tag, changed: item.thumb_changed === 1 } satisfies ThumbnailPlan) : null })),
@@ -71,6 +72,20 @@ export class Store {
   }
   async spend(day: string, units: number) {
     await this.db.prepare("INSERT INTO youtube_sync_quota (day, units) VALUES (?1, ?2) ON CONFLICT(day) DO UPDATE SET units = units + ?2").bind(day, units).run();
+  }
+
+  // The day's quota is gone (YouTube said so): mark it spent so nothing else tries until the reset.
+  async exhaust(day: string, units: number) {
+    await this.db.prepare("INSERT INTO youtube_sync_quota (day, units) VALUES (?1, ?2) ON CONFLICT(day) DO UPDATE SET units = MAX(units, ?2)").bind(day, units).run();
+  }
+
+  // Videos the queue gave up on (retries used up, or a failure retrying can't fix).
+  async recordDead(row: { planId: string | null; youtubeId: string | null; at: string; reason: string }) {
+    await this.db.prepare("INSERT INTO youtube_sync_dead (plan_id, youtube_id, at, reason) VALUES (?1, ?2, ?3, ?4)").bind(row.planId, row.youtubeId, row.at, row.reason).run();
+  }
+  // Videos still waiting on a person: given up on, and not written successfully since.
+  async deadCount(): Promise<number> {
+    return (await this.db.prepare("SELECT COUNT(DISTINCT COALESCE(d.youtube_id, d.id)) AS n FROM youtube_sync_dead d WHERE NOT EXISTS (SELECT 1 FROM youtube_sync_log l WHERE l.youtube_id = d.youtube_id AND l.result = 'ok' AND l.at > d.at)").first<{ n: number }>())?.n ?? 0;
   }
 
   async log(row: Omit<LogRow, "id">) {

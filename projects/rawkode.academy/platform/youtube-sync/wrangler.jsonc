@@ -26,6 +26,17 @@
     { "binding": "VIDEO_CHANNELS", "service": "platform-video-channels-read-model" },
     { "binding": "ACADEMY_API", "service": "platform-api-gateway" }
   ],
+  // Writes run through a queue, one message per video. Failed messages retry
+  // with backoff, then go to the dead-letter queue, which the Worker records
+  // and the daily monitor alerts on. One at a time keeps the quota count exact.
+  // The deploy creates both queues (see env.cue).
+  "queues": {
+    "producers": [{ "binding": "SYNC_QUEUE", "queue": "platform-youtube-sync" }],
+    "consumers": [
+      { "queue": "platform-youtube-sync", "max_batch_size": 1, "max_batch_timeout": 1, "max_concurrency": 1, "max_retries": 6, "dead_letter_queue": "platform-youtube-sync-dlq" },
+      { "queue": "platform-youtube-sync-dlq", "max_batch_size": 10, "max_batch_timeout": 5 }
+    ]
+  },
   // Daily read-only plan. Nothing is written to YouTube without an apply.
   "triggers": { "crons": ["47 9 * * *"] }
 }

@@ -1,4 +1,4 @@
-import { hash, ServiceError } from "./domain.ts";
+import { hash, isQuota, isTransient, ServiceError } from "./domain.ts";
 import { classify, type PlanItem, type Status } from "./plan.ts";
 import { type AcademyVideo, type Field, type FieldHashes, fieldHashes, type Managed, managedHash, pickManaged, type Snippet, TEMPLATE_VERSION, type TextField, textFields, TEXT_FIELDS, withManaged } from "./render.ts";
 import { pacificDay, type Store, type StoredItem } from "./store.ts";
@@ -8,6 +8,8 @@ import { pacificDay, type Store, type StoredItem } from "./store.ts";
 export const DAILY_BUDGET = 9000;
 export const UPDATE_COST = 50;
 export const LIST_COST = 1;
+// What a quota 403 marks the day as spent: more than the budget, so nothing else is tried until the reset.
+const QUOTA_EXHAUSTED = 10000;
 
 export type Api = { listSnippets(ids: string[]): Promise<Map<string, Snippet>>; updateSnippet(id: string, snippet: Snippet): Promise<void> };
 // Thumbnails: the site serves WebP, YouTube takes JPEG or PNG up to 2 MB.
@@ -62,7 +64,8 @@ export async function createPlan(deps: Deps, catalogue: Map<string, AcademyVideo
 }
 
 export type ApplyOptions = { limit: number; videos?: string[]; dryRun?: boolean };
-export type Outcome = { youtubeId: string; slug: string | null; result: "applied" | "stale" | "missing" | "error" | "quota"; detail?: string };
+export type Outcome = { youtubeId: string; slug: string | null; result: "applied" | "stale" | "missing" | "error" | "quota"; detail?: string; retryable?: boolean };
+type Written = { result: "applied" | "error" | "quota"; retryable?: boolean };
 const THUMBNAIL_COST = 50;
 
 async function emit(deps: Deps, planId: string, youtubeId: string, kind: string, result: string, fields: string[]) {
@@ -75,7 +78,7 @@ async function emit(deps: Deps, planId: string, youtubeId: string, kind: string,
 
 // Writes one video's managed fields over its live snippet. Reserves the quota
 // before calling, logs the full before and after for rollback.
-async function write(deps: Deps, planId: string, youtubeId: string, kind: "apply" | "rollback", live: Snippet, managed: Managed): Promise<Outcome["result"] | "error"> {
+async function write(deps: Deps, planId: string, youtubeId: string, kind: "apply" | "rollback", live: Snippet, managed: Managed): Promise<Written> {
   const day = pacificDay(deps.now());
   await deps.store.spend(day, UPDATE_COST);
   const after = withManaged(live, managed);
@@ -83,20 +86,21 @@ async function write(deps: Deps, planId: string, youtubeId: string, kind: "apply
   try {
     await deps.api.updateSnippet(youtubeId, after);
   } catch (error) {
-    const quota = error instanceof ServiceError && error.upstreamStatus === 403;
+    const quota = isQuota(error);
+    if (quota) await deps.store.exhaust(day, QUOTA_EXHAUSTED);
     await deps.store.log({ planId, youtubeId, at: deps.now().toISOString(), kind, result: quota ? "quota" : "error", detail: error instanceof ServiceError ? error.code : "unknown", before: live, after: null });
     await emit(deps, planId, youtubeId, kind, quota ? "quota" : "error", fields);
-    return quota ? "quota" : "error";
+    return { result: quota ? "quota" : "error", retryable: !quota && isTransient(error) };
   }
   await deps.store.log({ planId, youtubeId, at: deps.now().toISOString(), kind, result: "ok", detail: null, before: live, after });
   await deps.store.setBaselines([{ youtubeId, academyId: null, hashes: await fieldHashes(after) }], deps.now().toISOString());
   await emit(deps, planId, youtubeId, kind, "ok", fields);
-  return "applied";
+  return { result: "applied" };
 }
 
 // Converts first (no quota spent if that fails), keeps the image YouTube shows
 // now so rollback can restore it, then uploads. No before-image, no write.
-async function pushThumbnail(deps: Deps, planId: string, youtubeId: string, thumbnail: { url: string; tag: string }): Promise<"applied" | "error" | "quota"> {
+async function pushThumbnail(deps: Deps, planId: string, youtubeId: string, thumbnail: { url: string; tag: string }): Promise<Written> {
   const day = pacificDay(deps.now());
   try {
     const jpeg = await deps.thumbnails!.prepare(thumbnail.url);
@@ -105,23 +109,31 @@ async function pushThumbnail(deps: Deps, planId: string, youtubeId: string, thum
     await deps.store.spend(day, THUMBNAIL_COST);
     await deps.thumbnails!.set(youtubeId, jpeg);
   } catch (error) {
-    const quota = error instanceof ServiceError && error.upstreamStatus === 403;
+    const quota = isQuota(error);
+    if (quota) await deps.store.exhaust(day, QUOTA_EXHAUSTED);
     await deps.store.log({ planId, youtubeId, at: deps.now().toISOString(), kind: "apply-thumbnail", result: quota ? "quota" : "error", detail: error instanceof ServiceError ? error.code : "unknown", before: null, after: null });
-    return quota ? "quota" : "error";
+    return { result: quota ? "quota" : "error", retryable: !quota && isTransient(error) };
   }
   await deps.store.setThumbTag(youtubeId, thumbnail.tag, deps.now().toISOString());
   await deps.store.log({ planId, youtubeId, at: deps.now().toISOString(), kind: "apply-thumbnail", result: "ok", detail: thumbnail.tag, before: null, after: null });
   await emit(deps, planId, youtubeId, "thumbnail", "ok", ["thumbnail"]);
-  return "applied";
+  return { result: "applied" };
 }
 
-export async function applyPlan(deps: Deps, planId: string, options: ApplyOptions) {
-  const stored = await deps.store.plan(planId);
+// The plan's CHANGE items that an apply may write, as apply.json allows.
+export async function selectCandidates(store: Store, planId: string, options: Pick<ApplyOptions, "limit" | "videos">, only?: string) {
+  const stored = await store.plan(planId, only);
   if (!stored) throw new ServiceError("plan_not_found", "No such plan", 404);
-  const planFields = textFields(stored.plan.fields as Field[]);
   const wanted = options.videos?.length ? new Set(options.videos) : undefined;
   const matches = (item: StoredItem, set: Set<string>) => set.has(item.youtubeId) || (item.slug !== null && set.has(item.slug));
-  const candidates = stored.items.filter(item => item.status === "CHANGE" && item.desired && item.liveHash && (!wanted || matches(item, wanted))).slice(0, options.limit);
+  return { stored, candidates: stored.items.filter(item => item.status === "CHANGE" && item.desired && item.liveHash && (!wanted || matches(item, wanted))).slice(0, options.limit) };
+}
+
+// Writes the selected videos now, in this call. The queue consumer uses it for
+// one video at a time (`only`); a bulk apply goes through the queue instead.
+export async function applyPlan(deps: Deps, planId: string, options: ApplyOptions, only?: string) {
+  const { stored, candidates } = await selectCandidates(deps.store, planId, options, only);
+  const planFields = textFields(stored.plan.fields as Field[]);
   const day = pacificDay(deps.now());
   const startUnits = await deps.store.quotaUsed(day);
   const outcomes: Outcome[] = [];
@@ -133,7 +145,8 @@ export async function applyPlan(deps: Deps, planId: string, options: ApplyOption
     await deps.store.spend(day, LIST_COST);
     for (const item of group) {
       const needText = item.diff.length > 0;
-      const needThumbnail = Boolean(item.thumbnail?.changed && deps.thumbnails);
+      // A redelivered message must not push the same image again (that would also overwrite the saved before-image).
+      const needThumbnail = Boolean(item.thumbnail?.changed && deps.thumbnails && (await deps.store.thumbTag(item.youtubeId)) !== item.thumbnail.tag);
       const cost = (needText ? UPDATE_COST : 0) + (needThumbnail ? THUMBNAIL_COST : 0);
       if ((await deps.store.quotaUsed(day)) + cost > DAILY_BUDGET) { stopped = "daily quota budget reached"; break; }
       const snippet = live.get(item.youtubeId);
@@ -149,14 +162,17 @@ export async function applyPlan(deps: Deps, planId: string, options: ApplyOption
       let detail: string | undefined;
       if (needThumbnail) {
         const thumbnail = await pushThumbnail(deps, planId, item.youtubeId, item.thumbnail!);
-        if (thumbnail !== "applied") { outcomes.push({ youtubeId: item.youtubeId, slug: item.slug, result: thumbnail === "quota" ? "quota" : "error", detail: "thumbnail not written" }); if (thumbnail === "quota") { stopped = "YouTube refused the write (quota or permission)"; break; } continue; }
+        if (thumbnail.result !== "applied") { outcomes.push({ youtubeId: item.youtubeId, slug: item.slug, result: thumbnail.result, detail: "thumbnail not written", retryable: thumbnail.retryable }); if (thumbnail.result === "quota") { stopped = "YouTube refused the write (quota exhausted)"; break; } continue; }
       }
+      let retryable: boolean | undefined;
       if (needText) {
-        result = await write(deps, planId, item.youtubeId, "apply", snippet, item.desired!);
+        const written = await write(deps, planId, item.youtubeId, "apply", snippet, item.desired!);
+        result = written.result;
+        retryable = written.retryable;
         if (result !== "applied") detail = needThumbnail ? "thumbnail written, text not" : undefined;
       }
-      outcomes.push({ youtubeId: item.youtubeId, slug: item.slug, result, ...(detail ? { detail } : {}) });
-      if (result === "quota") { stopped = "YouTube refused the write (quota or permission)"; break; }
+      outcomes.push({ youtubeId: item.youtubeId, slug: item.slug, result, ...(detail ? { detail } : {}), ...(retryable === undefined ? {} : { retryable }) });
+      if (result === "quota") { stopped = "YouTube refused the write (quota exhausted)"; break; }
     }
     if (stopped) break;
   }
@@ -183,9 +199,9 @@ export async function rollback(deps: Deps, filter: { planId?: string; youtubeId?
       if (!snippet) { outcomes.push({ youtubeId: row.youtubeId, slug: null, result: "missing" }); continue; }
       const changed = (TEXT_FIELDS as TextField[]).filter(field => row.before![field] !== row.after![field]);
       if ((await managedHash(pickManaged(snippet, changed))) !== (await managedHash(pickManaged(row.after!, changed)))) { outcomes.push({ youtubeId: row.youtubeId, slug: null, result: "stale", detail: "edited since the sync wrote it; not rolled back" }); continue; }
-      const result = await write(deps, row.planId, row.youtubeId, "rollback", snippet, pickManaged(row.before!, changed));
+      const { result } = await write(deps, row.planId, row.youtubeId, "rollback", snippet, pickManaged(row.before!, changed));
       outcomes.push({ youtubeId: row.youtubeId, slug: null, result });
-      if (result === "quota") { stopped = "YouTube refused the write (quota or permission)"; break; }
+      if (result === "quota") { stopped = "YouTube refused the write (quota exhausted)"; break; }
     }
     if (stopped) break;
   }
