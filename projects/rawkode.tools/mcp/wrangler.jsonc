@@ -22,5 +22,7 @@
   },
   // OAuth grants and tokens. No ID: Wrangler creates the namespace on the
   // first deploy and reuses it afterwards.
+  // The Workflow that changes a video and everything attached to it (video tools).
+  "services": [{ "binding": "VIDEO_UPDATES", "service": "platform-video-updates", "entrypoint": "VideoUpdates" }],
   "kv_namespaces": [{ "binding": "OAUTH_KV" }]
 }

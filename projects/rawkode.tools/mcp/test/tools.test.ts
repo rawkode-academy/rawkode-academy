@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { grantedScopes, MODULE_SCOPES, modulesFor } from "../src/tools/index.ts";
 
 test("consent grants the requested module scopes of the caller's role, or every read-only module of that role when none is named", () => {
-  assert.deepEqual(MODULE_SCOPES, ["analytics:read", "guest:read"]);
+  assert.deepEqual(MODULE_SCOPES, ["analytics:read", "guest:read", "video:write"]);
   assert.deepEqual(grantedScopes(["analytics:read", "offline_access"]), ["analytics:read"]);
   assert.deepEqual(grantedScopes([]), ["analytics:read"]);
   assert.deepEqual(grantedScopes(["offline_access"]), ["analytics:read"]);
@@ -29,4 +29,23 @@ test("youtube_daily reads likes, comments and shares as text, because json_get_i
     assert.ok(sql.includes(`CAST(json_as_text(value, 'data', '${field}') AS BIGINT) AS ${field}`), field);
     assert.ok(!sql.includes(`json_get_int(value, 'data', '${field}')`), field);
   }
+});
+
+test("the video module is for operators, asked for by name, and calls the video-updates Worker as the signed-in operator", async () => {
+  const { video } = await import("../src/tools/video.ts");
+  assert.equal(video.audience, "operator");
+  assert.equal(video.readOnly, false);
+  assert.deepEqual(grantedScopes([]), ["analytics:read"], "asking for nothing never grants a module that changes data");
+  assert.deepEqual(grantedScopes(["video:write"]), ["video:write"]);
+  assert.deepEqual(modulesFor(["video:write"], "guest"), [], "a guest never reaches it");
+  const calls: unknown[][] = [];
+  const handlers = new Map<string, (input: any) => Promise<any>>();
+  const rpc = { preview: async (r: unknown) => ({ sections: ["video"], errors: [], r }), update: async (...a: unknown[]) => { calls.push(a); return { updateId: "u1", sections: ["video"], duplicate: false }; }, status: async () => null };
+  video.register({ registerTool: (name: string, _config: unknown, handler: (input: any) => Promise<any>) => { handlers.set(name, handler); } } as any, { VIDEO_UPDATES: rpc } as any, { userId: "u-1", username: "rawkode", role: "operator" });
+  assert.deepEqual([...handlers.keys()].sort(), ["preview_video_update", "update_video", "video_update_status"]);
+  const updated = await handlers.get("update_video")!({ videoId: "v1", video: { title: "New" } });
+  assert.equal(JSON.parse(updated.content[0].text).updateId, "u1");
+  assert.deepEqual(calls[0], [{ videoId: "v1", video: { title: "New" } }, { userId: "u-1", username: "rawkode" }]);
+  const missing = await handlers.get("video_update_status")!({ updateId: "nope" });
+  assert.equal(JSON.parse(missing.content[0].text).error, "not_found");
 });
