@@ -502,6 +502,7 @@
         "@cloudflare/workers-types": "^4.20250426.0",
         "@types/bun": "^1.4.4",
         "@types/node": "^22.15.2",
+        "miniflare": "^4.20260529.0",
         "vitest": "^4.1.8",
         "wrangler": "^4.13.2",
       },
