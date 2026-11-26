@@ -2,6 +2,8 @@ import { defineAction } from "astro:actions";
 import { env } from "cloudflare:workers";
 import { escapeHtml } from "@rawkodeacademy/rich-text";
 import { z } from "astro/zod";
+import { GROWTH_EVENTS } from "@/lib/analytics/growth";
+import { analyticsFor, captureServerEvent, getDistinctId } from "@/server/analytics";
 import {
 	applicationPathLabels,
 	applicationPaths,
@@ -112,6 +114,20 @@ const sendEnquiry = async (
 		});
 	} catch {
 		return enquiryFallback("email_send_failed");
+	}
+
+	// Only the chosen route is recorded: no name, email, company or message.
+	try {
+		await captureServerEvent(
+			{
+				event: GROWTH_EVENTS.PARTNERSHIP_ENQUIRY_SUBMITTED,
+				distinctId: getDistinctId({ locals: {}, request: context.request }),
+				properties: { route: input.path },
+			},
+			analyticsFor(context),
+		);
+	} catch {
+		// Tracking must never fail an enquiry that was already sent.
 	}
 
 	return { success: true, accepted: true } as const;

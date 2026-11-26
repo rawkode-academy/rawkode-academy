@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const limit = vi.fn();
 const send = vi.fn();
+const captureServerEvent = vi.fn();
 const workerEnv = {
 	PARTNERSHIP_FORM_RATE_LIMITER: { limit },
 	PARTNERSHIP_EMAIL: { send } as { send: typeof send } | undefined,
@@ -48,6 +49,16 @@ const { partnership } = loadModule("src/actions/partnership.ts", {
 	"astro/zod": { z },
 	"cloudflare:workers": { env: workerEnv },
 	"@/lib/partnerships": partnerships,
+	"@/lib/analytics/growth": {
+		GROWTH_EVENTS: {
+			PARTNERSHIP_ENQUIRY_SUBMITTED: "partnership_enquiry_submitted",
+		},
+	},
+	"@/server/analytics": {
+		analyticsFor: () => undefined,
+		captureServerEvent,
+		getDistinctId: () => "test-distinct-id",
+	},
 }) as { partnership: { apply: Action; applyForm: Action } };
 const { apply, applyForm } = partnership;
 // Exercise Astro's own FormData coercion as well as the shared schema.
@@ -77,6 +88,7 @@ beforeEach(() => {
 	workerEnv.PARTNERSHIP_EMAIL = { send };
 	limit.mockReset().mockResolvedValue({ success: true });
 	send.mockReset().mockResolvedValue({ messageId: "test-message" });
+	captureServerEvent.mockReset().mockResolvedValue(undefined);
 	vi.stubGlobal("fetch", vi.fn());
 	vi.spyOn(console, "error").mockImplementation(() => {});
 });
@@ -113,6 +125,17 @@ describe("partnership email action", () => {
 			expect(message.html).toContain(value);
 		}
 		expect(fetch).not.toHaveBeenCalled();
+	});
+
+	it("records the enquiry route without personal details", async () => {
+		await submit();
+		expect(captureServerEvent).toHaveBeenCalledOnce();
+		const [event] = captureServerEvent.mock.calls[0]!;
+		expect(event).toEqual({
+			event: "partnership_enquiry_submitted",
+			distinctId: "test-distinct-id",
+			properties: { route: input.path },
+		});
 	});
 
 	it("uses the same validation and delivery for native form posts", async () => {

@@ -255,6 +255,8 @@ export async function captureServerEvent(
 		newsletter_unsubscribed: "newsletter.unsubscribed",
 		newsletter_preference_updated: "newsletter.preference_updated",
 		newsletter_unsubscribe_all: "newsletter.unsubscribe_all",
+		supporter_cta_clicked: "supporter.cta_clicked",
+		partnership_enquiry_submitted: "partnership.enquiry_submitted",
 		// Auth events
 		sign_in_initiated: "auth.sign_in_initiated",
 		sign_in_completed: "auth.sign_in_completed",
