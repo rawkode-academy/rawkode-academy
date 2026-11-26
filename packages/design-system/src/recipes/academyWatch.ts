@@ -660,7 +660,7 @@ export const academyWatch = sva({
 			rowGap: "1",
 			"& > span:first-child": { whiteSpace: "nowrap" },
 			// The meta line's dot is a flex item here, so the column gap follows it.
-			"&::before": { marginInlineEnd: "[2px]!" },
+			"&::before": { marginInlineEnd: "0.5!" },
 			// Below `lg` the credit takes its own row, where the dot would lead it.
 			"@media (max-width: 1023.98px)": {
 				flexBasis: "full",
