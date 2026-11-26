@@ -118,7 +118,7 @@ export function renderHashtags(video: Pick<AcademyVideo, "show" | "technologies"
 }
 
 export const watchUrl = (video: Pick<AcademyVideo, "slug">) => `https://rawkode.academy/watch/${video.slug}?utm_source=youtube&utm_medium=description`;
-export const renderHeader = (video: Pick<AcademyVideo, "slug">) => `Watch with chapters, code and resources: ${watchUrl(video)}`;
+export const renderHeader = (video: Pick<AcademyVideo, "slug">) => `Get this video's free resources at ${watchUrl(video)}`;
 
 export function renderFooter(video: Pick<AcademyVideo, "collaborators"> & Partial<Pick<AcademyVideo, "show" | "technologies">>): string {
   const lines = [
@@ -161,7 +161,7 @@ export function composeDescription(video: AcademyVideo): string {
   if (room() < 300) chapters = "";
   if (room() < 0) metadata = trimToBytes(metadata, Math.max(0, byteLength(metadata) + room() - 1)).replace(/\n[^\n]*…$/, "");
   const trimmed = trimToBytes(body, Math.max(0, room()));
-  return [header, trimmed, chapters, metadata, footer].filter(Boolean).join("\n\n");
+  return [trimmed, header, chapters, metadata, footer].filter(Boolean).join("\n\n");
 }
 
 // YouTube has no shows or courses, so the title carries its context as a
