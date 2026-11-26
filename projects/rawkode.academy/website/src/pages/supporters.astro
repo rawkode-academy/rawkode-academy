@@ -1,4 +1,5 @@
 ---
+import { partnerLink } from "@/utils/partner-link";
 export const prerender = false;
 
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
@@ -32,7 +33,7 @@ const wall = supporters
 	.map(({ supporter: { id, data }, logo }) => ({
 		id,
 		name: data.name,
-		websiteUrl: data.websiteUrl,
+		websiteUrl: partnerLink(data.websiteUrl, { medium: "supporter", campaign: "supporters" }),
 		host: supporterHost(data.websiteUrl),
 		logoUrl: logo?.src,
 		// An icon-only mark keeps the name beside it.

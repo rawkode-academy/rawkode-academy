@@ -243,7 +243,7 @@ function formatDuration(minutes?: number) {
 							<p class={doc.lede}>
 								{module.data.description}
 							</p>
-							<Collaboration collaborators={module.data.video?.collaborators ?? []} surface="canvas" />
+							<Collaboration collaborators={module.data.video?.collaborators ?? []} surface="canvas" campaign={course.id} content={lessonSlug} />
 							{authors.length > 0 && (
 								<div class={doc.byline}>
 									{authors.map((author) => (
