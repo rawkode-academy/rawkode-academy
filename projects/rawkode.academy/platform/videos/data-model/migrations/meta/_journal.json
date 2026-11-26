@@ -36,6 +36,13 @@
       "when": 1792956595290,
       "tag": "0004_drop_youtube_id",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1793043000000,
+      "tag": "0005_klustered_titles",
+      "breakpoints": true
     }
   ]
 }

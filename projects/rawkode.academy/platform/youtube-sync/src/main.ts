@@ -6,7 +6,7 @@ import { renderReport } from "./plan.ts";
 import { parseFields } from "./render.ts";
 import { pacificDay, Store } from "./store.ts";
 import { consume, consumeDead, DEAD_LETTER_QUEUE, type SyncMessage } from "./queue.ts";
-import { applyPlan, createPlan, DAILY_BUDGET, type Deps, rollback, selectCandidates, type Thumbnails } from "./sync.ts";
+import { applyPlan, createPlan, DAILY_BUDGET, type Deps, rollback, scheduledCandidates, selectCandidates, type Thumbnails } from "./sync.ts";
 
 const json = (body: unknown, status = 200) => Response.json(body, { status, headers: { "cache-control": "no-store", "x-content-type-options": "nosniff" } });
 const markdown = (body: string) => new Response(body, { headers: { "content-type": "text/markdown; charset=utf-8", "cache-control": "no-store", "x-content-type-options": "nosniff" } });
@@ -134,7 +134,14 @@ export default {
   },
   async scheduled(_controller, env, ctx) {
     ctx.waitUntil((async () => {
-      try { await createPlan(deps(env, google(env)), await fetchCatalogue(env)); }
+      try {
+        const d = deps(env, google(env));
+        const { plan } = await createPlan(d, await fetchCatalogue(env));
+        // The standing approval: queue up to AUTO_APPLY_LIMIT changes from this fresh plan.
+        const candidates = await scheduledCandidates(d.store, plan.id, env.AUTO_APPLY_LIMIT);
+        for (let i = 0; i < candidates.length; i += 100) await env.SYNC_QUEUE.sendBatch(candidates.slice(i, i + 100).map(item => ({ body: { planId: plan.id, youtubeId: item.youtubeId } satisfies SyncMessage })));
+        if (candidates.length) console.log(JSON.stringify({ operation: "scheduled_apply", planId: plan.id, enqueued: candidates.length }));
+      }
       catch (error) { console.error(JSON.stringify({ operation: "scheduled_plan", error: error instanceof ServiceError ? error.code : "unknown" })); }
     })());
   },

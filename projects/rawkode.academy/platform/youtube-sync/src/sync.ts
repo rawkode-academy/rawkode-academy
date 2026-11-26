@@ -129,6 +129,19 @@ export async function selectCandidates(store: Store, planId: string, options: Pi
   return { stored, candidates: stored.items.filter(item => item.status === "CHANGE" && item.desired && item.liveHash && (!wanted || matches(item, wanted))).slice(0, options.limit) };
 }
 
+// The daily schedule's standing approval (AUTO_APPLY_LIMIT in wrangler.jsonc): up to `limit`
+// CHANGE items from the plan the cron has just made. A limit of 0 turns it off. Keep it near
+// a day's quota (about 80 full videos) so no backlog builds: whatever isn't written today
+// is still a CHANGE in tomorrow's plan.
+export function autoApplyLimit(value: string | undefined) {
+  const limit = Number(value ?? 0);
+  return Number.isInteger(limit) && limit > 0 ? Math.min(limit, 400) : 0;
+}
+export async function scheduledCandidates(store: Store, planId: string, value: string | undefined) {
+  const limit = autoApplyLimit(value);
+  return limit ? (await selectCandidates(store, planId, { limit })).candidates : [];
+}
+
 // Writes the selected videos now, in this call. The queue consumer uses it for
 // one video at a time (`only`); a bulk apply goes through the queue instead.
 export async function applyPlan(deps: Deps, planId: string, options: ApplyOptions, only?: string) {

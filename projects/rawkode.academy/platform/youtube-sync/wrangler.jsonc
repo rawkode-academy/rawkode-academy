@@ -12,7 +12,10 @@
   "vars": {
     "YOUTUBE_CHANNEL_ID": "UCrber_mFvp_FEF7D9u8PDEA",
     // The site owns these YouTube fields: any of "title", "description", "thumbnail".
-    "MANAGED_FIELDS": "title,description,thumbnail"
+    "MANAGED_FIELDS": "title,description,thumbnail",
+    // The standing approval for the daily cron: after each plan, queue up to this many
+    // changes for writing (0 = plan only). About a day's quota; the commit is the record.
+    "AUTO_APPLY_LIMIT": "80"
   },
   // Converts the site's WebP thumbnails to JPEG for YouTube.
   "images": { "binding": "IMAGES" },
@@ -37,6 +40,7 @@
       { "queue": "platform-youtube-sync-dlq", "max_batch_size": 10, "max_batch_timeout": 5 }
     ]
   },
-  // Daily read-only plan. Nothing is written to YouTube without an apply.
+  // Daily: plan, then queue up to AUTO_APPLY_LIMIT of its changes. apply.json still
+  // approves a bigger or targeted run by hand.
   "triggers": { "crons": ["47 9 * * *"] }
 }

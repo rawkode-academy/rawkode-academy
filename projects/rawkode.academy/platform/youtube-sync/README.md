@@ -21,14 +21,16 @@ The site owns the video. Studio text never wins: whatever the site generates is 
 
 Every change goes through a plan you can read first.
 
-1. **Plan** (`POST /plan`, daily at 09:47 UTC, or run the `rawkode-academy-platform-youtube-sync-plan` workflow). Reads the live snippets (1 quota unit per 50 videos), compares them to what the site wants, and stores a plan in D1 with a diff per video. The report is in the workflow's job summary and at `GET /plans/<id>/report`. Nothing is written to YouTube. Each video is one of:
+1. **Plan** (`POST /plan`, daily at 09:47 UTC, or run the `rawkode-academy-platform-youtube-sync-plan` workflow). The daily run also queues up to `AUTO_APPLY_LIMIT` (80, in `wrangler.jsonc`) of the plan's changes for writing, which is about a day's quota, so a site change reaches YouTube within a day or two with no one running anything. `0` makes the cron plan-only. Reads the live snippets (1 quota unit per 50 videos), compares them to what the site wants, and stores a plan in D1 with a diff per video. The report is in the workflow's job summary and at `GET /plans/<id>/report`. Nothing is written to YouTube. Each video is one of:
    - `CHANGE`: the live title, description or thumbnail differs from what the site wants. If someone edited it in Studio since the last sync, the reason says it will be overwritten.
    - `NOOP`, `SKIP` (not listed, course-only, unmapped, private or deleted), `ERROR` (cannot be sent as is).
    The job summary also shows the full, untruncated change for the first video named in `apply.json` (else the first in the plan), and `GET /plans/<id>/videos/<slug>` returns any video's.
 2. **Apply** (the `rawkode-academy-platform-youtube-sync-apply` workflow). Queues `CHANGE` items from the latest plan, as `apply.json` allows. Before each write it re-reads the live fields and refuses the video if they changed since the plan (`stale`), so the diff you reviewed is the diff that is written.
 3. **Rollback** (`POST /rollback`). Puts back the logged before values for a plan or one video, unless the field was edited after the sync wrote it.
 
-### `apply.json` is the approval
+### The daily schedule, and `apply.json`
+
+The daily cron's standing approval is `AUTO_APPLY_LIMIT`; changing it is a commit like any other. `apply.json` is the manual approval for a bigger or targeted run:
 
 ```json
 { "planId": "latest", "limit": 1, "videos": [], "dryRun": true }
