@@ -56,7 +56,7 @@ describe("video-collaborations read model", () => {
 		const { collaborator } = await query(`{ collaborator(id: "datum") { videos { id } } }`);
 		expect(collaborator.videos).toHaveLength(4);
 		const { collaborators } = await query(`{ collaborators { id videos { id } } }`);
-		expect(collaborators.map((c: any) => [c.id, c.videos.length])).toEqual([["datum", 4], ["teleport", 17]]);
+		expect(collaborators.map((c: any) => [c.id, c.videos.length])).toEqual([["datum", 4], ["fermyon", 1], ["heroku", 2], ["komodor", 1], ["spectro-cloud", 3], ["teleport", 38], ["wundergraph", 1]]);
 	});
 
 	it("resolves a collaborator reference and returns null for an unknown id", async () => {
