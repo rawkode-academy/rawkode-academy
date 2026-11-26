@@ -183,14 +183,16 @@ const RESOURCE_CATEGORIES = new Set([
 	"other",
 ]);
 
-function collaborators(value: unknown): { id: string; name: string }[] {
+function collaborators(value: unknown): { id: string; name: string; websiteUrl?: string }[] {
 	if (!Array.isArray(value)) return [];
 	return value
 		.filter((c): c is Raw => Boolean(c) && typeof c === "object")
 		.flatMap((c) => {
 			const id = str(c.id);
 			const name = str(c.name);
-			return id && name ? [{ id, name }] : [];
+			const websiteUrl = str(c.websiteUrl);
+			if (!id || !name) return [];
+			return websiteUrl && /^https?:\/\//.test(websiteUrl) ? [{ id, name, websiteUrl }] : [{ id, name }];
 		});
 }
 

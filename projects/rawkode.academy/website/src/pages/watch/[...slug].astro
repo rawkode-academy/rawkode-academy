@@ -186,7 +186,6 @@ const hostEntries = showEntry
 const guestEntries = await optionalContent(getEntries(video.data.guests), []);
 
 const collaborators = video.data.collaborators ?? [];
-const collaboratorNames = collaborators.map((c) => c.name).join(", ");
 
 const isLive = video.data.type === "live";
 const isUpcomingLive = isLive && video.data.publishedAt > now;
@@ -565,8 +564,16 @@ const watchStatusLabel = isLiveNow
 									</MLabel>
 								</span>
 								{collaborators.length > 0 && (
-									<span class={watch.metaKind} title={`In collaboration with ${collaboratorNames}`}>
-										<MLabel tone="muted">Collaborator<span class="sr-only">: {collaboratorNames}</span></MLabel>
+									<span class={watch.metaKind} data-collaboration>
+										<MLabel tone="muted">
+											Made in collaboration with{" "}
+											{collaborators.map((c, i) => (
+												<>
+													{i > 0 && (i === collaborators.length - 1 ? " and " : ", ")}
+													{c.websiteUrl ? <a href={c.websiteUrl} rel="noopener sponsored" target="_blank">{c.name}</a> : c.name}
+												</>
+											))}
+										</MLabel>
 									</span>
 								)}
 							</p>
