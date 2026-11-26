@@ -1,7 +1,7 @@
 import { sva } from "../../styled-system/css";
 import { focusRing, focusRingInk, focusRingInset } from "../styles/focus";
 import { inputField } from "../styles/field";
-import { coverImage, coverImageZoom, videoFrame } from "../styles/media";
+import { coverImage, coverImageZoom, videoFrame, partnerMark } from "../styles/media";
 import { panelSurface } from "../styles/surface";
 import { systemGridBottom } from "../styles/systemGrid";
 import { ledeText, monoMeta } from "../styles/type";
@@ -73,8 +73,6 @@ export const academyWatch = sva({
 		"meta",
 		"metaKind",
 		"collab",
-		"collabPill",
-		"collabPanel",
 		"collabLogo",
 		"upcoming",
 		"noticeTitle",
@@ -651,73 +649,47 @@ export const academyWatch = sva({
 				lineHeight: "inherit",
 			},
 		},
-		// "Collaboration" pill: one chip on the meta line that never changes size. On hover,
-		// focus or press, "In collaboration with <logo>" opens in a panel under it, so
-		// opening it cannot reflow the meta line or move the chip out from under the pointer.
+		// The collaboration credit: the last item of the meta line, "In collaboration with"
+		// and each partner's mark. It is always visible, so there is nothing to open. The
+		// words stay together and the credit wraps to its own row as one unit on a phone.
 		collab: {
+			display: "inline-flex",
+			flexWrap: "wrap",
+			alignItems: "center",
+			columnGap: "2.5",
+			rowGap: "1",
+			"& > span:first-child": { whiteSpace: "nowrap" },
+			// The meta line's dot is a flex item here, so the column gap follows it.
+			"&::before": { marginInlineEnd: "0.5!" },
+			// Below `lg` the credit takes its own row, where the dot would lead it.
+			"@media (max-width: 1023.98px)": {
+				flexBasis: "full",
+				"&::before": { content: "none!" },
+			},
+			// Several partners rarely fit beside the date, so they take the row at every width.
+			"&[data-own-row]": { flexBasis: "full", "&::before": { content: "none!" } },
+		},
+		// A partner's logo is printed in the ink text colour (`partnerMark`) and takes the
+		// accent with the link, like a technology chip.
+		collabLogo: {
 			position: "relative",
 			display: "inline-flex",
 			alignItems: "center",
-			maxWidth: "full",
-			border: "hairline",
-			borderColor: "academy.inkBorder",
-			borderRadius: "academy-pill",
+			gap: "1.5",
+			minHeight: "[18px]",
+			borderRadius: "academy-s",
 			color: "academy.inkText",
+			fontFamily: "academy-text",
 			fontSize: "sm",
-			transitionProperty: "[border-color]",
-			transitionDuration: "fast",
-			// The meta line puts a dot before each item; inside a bordered pill it would sit within the border.
-			"&::before": { content: "none!" },
-			'&[data-open="true"]': { borderColor: "academy.inkAccent", "& [data-collab-panel]": { display: "flex" } },
-			"& [data-collab-panel]": { display: "none" },
-		},
-		collabPill: {
-			display: "inline-flex",
-			alignItems: "center",
-			minHeight: { base: "11", lg: "9" },
-			paddingInline: "3",
-			margin: "0",
-			border: "none",
-			borderRadius: "academy-pill",
-			background: "transparent",
-			color: "inherit",
-			font: "inherit",
-			cursor: "pointer",
-			_focusVisible: focusRingInk,
-		},
-		collabPanel: {
-			position: "absolute",
-			insetInlineStart: "[-1px]",
-			top: "[calc(100% + 6px)]",
-			zIndex: "[30]",
-			alignItems: "center",
-			flexWrap: "wrap",
-			gap: "2",
-			width: "max-content",
-			maxWidth: "[min(32rem, calc(100vw - 2.5rem))]",
-			paddingBlock: "2",
-			paddingInline: "3",
-			border: "hairline",
-			borderColor: "academy.inkAccent",
-			borderRadius: "academy-pill",
-			backgroundColor: "academy.inkRaised",
-			color: "academy.inkTextSoft",
-			// Bridges the gap to the chip so moving the pointer down to the panel doesn't close it.
-			"&::before": { content: '""', position: "absolute", insetInline: "0", top: "[-8px]", height: "[8px]" },
-		},
-		collabLogo: {
-			display: "inline-flex",
-			alignItems: "center",
-			justifyContent: "center",
-			minHeight: "7",
-			paddingInline: "2",
-			borderRadius: "academy-pill",
-			backgroundColor: "academyBase.text",
+			fontWeight: "semibold",
+			lineHeight: "none",
 			textDecoration: "none",
-			color: "academyBase.ground",
-			fontSize: "sm",
+			...watchFeedback,
 			_focusVisible: focusRingInk,
-			"& img": { display: "block", height: "4", width: "auto", maxWidth: "28" },
+			"&:is(a):hover": { color: "academy.inkAccent" },
+			// The mark is drawn at the meta line's scale; the press target is 44px tall.
+			"&:is(a)::after": { content: '""', position: "absolute", insetBlock: "[-13px]", insetInline: "[-6px]" },
+			"& [data-part=mark]": partnerMark,
 		},
 		upcoming: {
 			display: "flex",

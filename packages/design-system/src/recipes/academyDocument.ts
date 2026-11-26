@@ -1,8 +1,8 @@
 import { sva } from "../../styled-system/css";
 import { focusRing } from "../styles/focus";
-import { coverImage, videoFrame } from "../styles/media";
+import { coverImage, partnerMark, videoFrame } from "../styles/media";
 import { linkedPanel, panelSurface, pill } from "../styles/surface";
-import { headingLg, headingMd, kicker } from "../styles/type";
+import { headingLg, headingMd, kicker, monoMeta } from "../styles/type";
 
 /** Shared Academy reading, course, show and contributor compositions.
  * Static document structure stays server rendered; interactive islands own behavior.
@@ -38,6 +38,8 @@ export const academyDocument = sva({
 		"copy",
 		"meta",
 		"kicker",
+		"credit",
+		"creditLogo",
 		"link",
 		"tag",
 		"tagList",
@@ -507,6 +509,38 @@ export const academyDocument = sva({
 		spacer: {
 			flex: "1",
 			minWidth: "0",
+		},
+		// "In collaboration with <logo>" under a lesson's lede: one mono line, each
+		// partner's mark in the text colour and linked to the company.
+		credit: {
+			...monoMeta,
+			display: "flex",
+			flexWrap: "wrap",
+			alignItems: "center",
+			columnGap: "2.5",
+			rowGap: "1",
+		},
+		creditLogo: {
+			position: "relative",
+			display: "inline-flex",
+			alignItems: "center",
+			gap: "1.5",
+			minHeight: "[18px]",
+			borderRadius: "academy-s",
+			color: "academy.text",
+			fontFamily: "academy-text",
+			fontSize: "sm",
+			fontWeight: "semibold",
+			lineHeight: "none",
+			textDecoration: "none",
+			transitionProperty: "[color]",
+			transitionDuration: "fast",
+			transitionTimingFunction: "academy-out",
+			_motionReduce: { transitionDuration: "none" },
+			_focusVisible: focusRing,
+			"&:is(a):hover": { color: "academy.accent" },
+			"&:is(a)::after": { content: '""', position: "absolute", insetBlock: "[-13px]", insetInline: "[-6px]" },
+			"& [data-part=mark]": partnerMark,
 		},
 		dot: {
 			width: "1.5",

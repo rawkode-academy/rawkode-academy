@@ -26,7 +26,7 @@ import StreamNotifyButton from "@/components/video/StreamNotifyButton.vue";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import SupporterCTA from "@/components/organizations/SupporterCTA.astro";
 import MLabel from "@/components/ui/MLabel.vue";
-import CollaborationPill from "@/components/watch/CollaborationPill.astro";
+import Collaboration from "@/components/watch/Collaboration.astro";
 import LiveDot from "@/components/ui/LiveDot.vue";
 import Page from "@/wrappers/page.astro";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
@@ -564,7 +564,7 @@ const watchStatusLabel = isLiveNow
 										{isLiveNow ? "Live · " : ""}{categoryLabel}
 									</MLabel>
 								</span>
-								<CollaborationPill collaborators={collaborators} />
+								<Collaboration collaborators={collaborators} />
 							</p>
 
 							<div class={watch.tools}>

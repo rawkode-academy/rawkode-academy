@@ -548,6 +548,7 @@ export function mapCourseModule(raw: Raw, courseId?: string): CourseModuleData {
 						youtube: str(video.youtube),
 						rawkode: str(video.rawkode),
 						poster: str(video.poster),
+						collaborators: collaborators(video.collaborators),
 					})
 				: undefined,
 		duration: num(raw.duration),

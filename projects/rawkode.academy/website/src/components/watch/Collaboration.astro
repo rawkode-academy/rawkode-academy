@@ -1,0 +1,67 @@
+---
+/**
+ * The collaboration credit: "In collaboration with <logo>", always visible, each
+ * logo linking to the company. On `ink` it is the last item of the watch meta
+ * line; on `canvas` it is a line of its own under a lesson's lede. Marks come
+ * from the partner-wall files and are printed in the text colour by the
+ * recipe; a company without one shows its name.
+ */
+import { academyDocument, academyWatch } from "@rawkodeacademy/design-system";
+import datum from "@/components/partner/logos/datum.svg?url";
+import fermyon from "@/components/partner/logos/fermyon.svg?url";
+import heroku from "@/components/partner/logos/heroku.svg?url";
+import komodor from "@/components/partner/logos/komodor.png?url";
+import portainer from "@/components/partner/logos/portainer.svg?url";
+import spectroCloud from "@/components/partner/logos/spectrocloud.svg?url";
+import teleport from "@/components/partner/logos/teleport.svg?url";
+import wundergraph from "@/components/partner/logos/wundergraph.svg?url";
+
+interface Props {
+	collaborators: { id: string; name: string; websiteUrl?: string | undefined; logoUrl?: string | undefined }[];
+	surface?: "ink" | "canvas";
+}
+
+// `height` is the optical size in px: a stacked lockup needs more than a one-line
+// wordmark to read at the same weight. A bare symbol is set with the company's name.
+const LOGOS: Record<string, { src: string; height?: number; symbol?: boolean }> = {
+	datum: { src: datum, height: 14 },
+	fermyon: { src: fermyon, height: 11 },
+	heroku: { src: heroku, height: 22 },
+	komodor: { src: komodor, height: 14 },
+	portainer: { src: portainer, height: 11 },
+	"spectro-cloud": { src: spectroCloud, height: 22 },
+	teleport: { src: teleport },
+	wundergraph: { src: wundergraph, height: 18, symbol: true },
+};
+
+const { collaborators, surface = "ink" } = Astro.props;
+const watch = academyWatch();
+const doc = academyDocument();
+const root = surface === "ink" ? watch.collab : doc.credit;
+const logoClass = surface === "ink" ? watch.collabLogo : doc.creditLogo;
+const Root = surface === "ink" ? "span" : "p";
+const items = collaborators.map((c) => ({ ...c, logo: c.logoUrl ? { src: c.logoUrl } : LOGOS[c.id] }));
+const markStyle = (logo: { src: string; height?: number }) =>
+	`--partner-mark:url("${logo.src.replaceAll('"', "%22")}")${logo.height ? `;--partner-mark-h:${logo.height}px` : ""}`;
+---
+
+{items.length > 0 && (
+	<Root class={root} data-own-row={items.length > 1 ? "" : undefined}>
+		<span>In collaboration with</span>
+		{items.map((c) => {
+			const content = c.logo ? (
+				<Fragment>
+					<span data-part="mark" style={markStyle(c.logo)}>
+						<img src={c.logo.src} alt={c.name} decoding="async" />
+					</span>
+					{c.logo.symbol && <span aria-hidden="true">{c.name}</span>}
+				</Fragment>
+			) : c.name;
+			return c.websiteUrl ? (
+				<a class={logoClass} href={c.websiteUrl} target="_blank" rel="noopener sponsored">{content}</a>
+			) : (
+				<span class={logoClass}>{content}</span>
+			);
+		})}
+	</Root>
+)}
