@@ -1,9 +1,10 @@
 ---
 /**
- * "Collaboration" pill for the watch meta line. Collapsed it is one chip; on
- * hover, keyboard focus or press (touch) it expands in place to
+ * "Collaboration" chip for the watch meta line. It never changes size; on hover,
+ * keyboard focus or press (touch) a panel opens under it with
  * "In collaboration with <logo>", each logo linking to the company.
- * Marks come from the partner-wall files; a company without one shows its name.
+ * Marks come from the partner-wall files and are printed in one colour by the
+ * recipe; a company without one shows its name.
  */
 import { academyWatch } from "@rawkodeacademy/design-system";
 import datum from "@/components/partner/logos/datum.svg?url";
@@ -18,33 +19,45 @@ interface Props {
 	collaborators: { id: string; name: string; websiteUrl?: string | undefined; logoUrl?: string | undefined }[];
 }
 
-const LOGOS: Record<string, string> = {
-	datum,
-	fermyon,
-	heroku,
-	komodor,
-	"spectro-cloud": spectroCloud,
-	teleport,
-	wundergraph,
+// `height` is the optical size in px: a stacked lockup needs more than a one-line
+// wordmark to read at the same weight. A bare symbol is set with the company's name.
+const LOGOS: Record<string, { src: string; height?: number; symbol?: boolean }> = {
+	datum: { src: datum, height: 16 },
+	fermyon: { src: fermyon, height: 14 },
+	heroku: { src: heroku, height: 24 },
+	komodor: { src: komodor, height: 16 },
+	"spectro-cloud": { src: spectroCloud, height: 24 },
+	teleport: { src: teleport },
+	wundergraph: { src: wundergraph, height: 20, symbol: true },
 };
 
 const { collaborators } = Astro.props;
 const watch = academyWatch();
-const items = collaborators.map((c) => ({ ...c, logo: c.logoUrl ?? LOGOS[c.id] }));
+const items = collaborators.map((c) => ({ ...c, logo: c.logoUrl ? { src: c.logoUrl } : LOGOS[c.id] }));
 const names = items.map((c) => c.name).join(", ");
+const panelId = `collab-${items.map((c) => c.id).join("-")}`;
 ---
 
 {items.length > 0 && (
 	<span class={watch.collab} data-collab data-open="false">
-		<button type="button" class={watch.collabPill} aria-expanded="false" aria-label={`Collaboration: in collaboration with ${names}`} data-collab-toggle>
+		<button type="button" class={watch.collabPill} aria-expanded="false" aria-controls={panelId} aria-label={`Collaboration: in collaboration with ${names}`} data-collab-toggle>
 			Collaboration
+			<svg viewBox="0 0 8 8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 2.75 4 5.5l3-2.75" /></svg>
 		</button>
-		<span class={watch.collabPanel} data-collab-panel>
+		<span class={watch.collabPanel} id={panelId} data-collab-panel>
 			<span aria-hidden="true">In collaboration with</span>
 			{items.map((c) => {
-				const content = c.logo ? <img src={c.logo} alt={c.name} loading="lazy" decoding="async" /> : c.name;
+				const content = c.logo ? (
+					<Fragment>
+						<img src={c.logo.src} alt={c.name} style={c.logo.height ? `--collab-logo-h:${c.logo.height}px` : undefined} loading="lazy" decoding="async" />
+						{c.logo.symbol && <span aria-hidden="true">{c.name}</span>}
+					</Fragment>
+				) : c.name;
 				return c.websiteUrl ? (
-					<a class={watch.collabLogo} href={c.websiteUrl} target="_blank" rel="noopener sponsored">{content}</a>
+					<a class={watch.collabLogo} href={c.websiteUrl} target="_blank" rel="noopener sponsored">
+						{content}
+						<span data-part="arrow" aria-hidden="true">↗</span>
+					</a>
 				) : (
 					<span class={watch.collabLogo}>{content}</span>
 				);
@@ -66,6 +79,17 @@ const names = items.map((c) => c.name).join(", ");
 			const open = hovered || focused || pinned;
 			pill.dataset.open = String(open);
 			pill.querySelector("[data-collab-toggle]")?.setAttribute("aria-expanded", String(open));
+			if (open) place();
+		};
+		// The panel hangs from the chip's left edge; where that would run it past the
+		// viewport (the chip has wrapped far right on a phone) it is pulled back in.
+		const place = () => {
+			const panel = pill.querySelector<HTMLElement>("[data-collab-panel]");
+			if (!panel) return;
+			const gutter = 20;
+			const left = pill.getBoundingClientRect().left;
+			const overflow = left + panel.offsetWidth - (document.documentElement.clientWidth - gutter);
+			panel.style.setProperty("--collab-shift", `${-Math.max(0, Math.min(overflow, left - gutter))}px`);
 		};
 		pill.querySelector("[data-collab-toggle]")?.addEventListener("click", () => {
 			pinned = !pinned;
