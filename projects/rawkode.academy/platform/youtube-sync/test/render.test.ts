@@ -109,6 +109,14 @@ test("the show, guests and technologies are one compact line each, with https li
   assert.equal(renderMetadata(video), "");
 });
 
+test("credited hosts get their own line above the guests; videos without credits list none", () => {
+  const hosts = [{ id: "rawkode", name: "David Flanagan", x: "https://x.com/rawkode" }, { id: "nimbinatus", name: "Laura Santamaria" }];
+  const text = renderMetadata({ ...rich, hosts });
+  assert.ok(text.includes("🎙 *Hosts*\nDavid Flanagan · https://rawkode.academy/people/rawkode · https://x.com/rawkode\nLaura Santamaria · https://rawkode.academy/people/nimbinatus"));
+  assert.ok(text.indexOf("🎙 *Hosts*") < text.indexOf("👥 *Guests*"));
+  assert.ok(!renderMetadata(rich).includes("Hosts"));
+});
+
 test("up to three hashtags: the show, then the technologies", () => {
   assert.equal(renderHashtags(rich), "#RawkodeLive #Atuin");
   assert.equal(renderHashtags({ show: null, technologies: ["A b", "C", "D", "E"].map((name, i) => ({ id: `t${i}`, name })) }), "#Ab #C #D");
