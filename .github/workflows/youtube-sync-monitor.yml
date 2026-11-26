@@ -1,0 +1,54 @@
+# Daily: reads the sync Worker's public /status (counts and times only, no
+# secrets) and opens a GitHub issue when the day's plan didn't run or the
+# plan found Studio edits (drift) or errors. Closes it once the plan is clean.
+# Hand-written because cuenv pipelines have no schedule trigger.
+name: youtube-sync-monitor
+on:
+  schedule:
+    # Shortly after the 09:47 UTC daily plan.
+    - cron: "17 10 * * *"
+  workflow_dispatch: {}
+permissions:
+  contents: read
+  issues: write
+concurrency:
+  group: youtube-sync-monitor
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the latest plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          STATUS_URL: https://rawkode-academy-youtube-sync.rawkodeacademy.workers.dev/status
+        run: |
+          set -uo pipefail
+          title="YouTube sync needs attention"
+          problem=""
+          if ! status=$(curl -fsS --max-time 30 "$STATUS_URL"); then
+            problem="The Worker's status endpoint didn't answer ($STATUS_URL). Check the latest run of the rawkode-academy-platform-youtube-sync-default workflow."
+          else
+            created=$(jq -r '.latestPlan.createdAt // ""' <<<"$status")
+            if [ -z "$created" ]; then
+              problem="No plan has run yet."
+            elif [ "$(date -u -d "$created" +%s)" -lt "$(date -u -d '30 hours ago' +%s)" ]; then
+              problem="The latest plan ran at $created, over 30 hours ago. The daily plan is failing; look at the Worker's logs in Grafana. If it says \`reauthorization_required\`, run \`cuenv task consent\` in \`projects/rawkode.academy/platform/youtube-sync\`."
+            else
+              drift=$(jq -r '.latestPlan.summary.DRIFT // 0' <<<"$status")
+              errors=$(jq -r '.latestPlan.summary.ERROR // 0' <<<"$status")
+              if [ "$drift" != "0" ] || [ "$errors" != "0" ]; then
+                problem="The latest plan has $drift video(s) edited in Studio since the last sync (DRIFT) and $errors error(s). Run the \`rawkode-academy-platform-youtube-sync-plan\` workflow for the report."
+              fi
+            fi
+          fi
+          existing=$(gh issue list --state open --search "in:title \"$title\"" --json number,title --jq ".[] | select(.title == \"$title\") | .number" | head -n 1)
+          if [ -z "$problem" ]; then
+            echo "Plan is current and clean."
+            if [ -n "$existing" ]; then gh issue close "$existing" --comment "The latest plan is current with no drift or errors."; fi
+            exit 0
+          fi
+          body="$problem"$'\n\n'"Status: $STATUS_URL"$'\n'"Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          if [ -n "$existing" ]; then gh issue comment "$existing" --body "$body"; else gh issue create --title "$title" --body "$body"; fi
+          echo "::error::$problem"
+          exit 1

@@ -57,10 +57,12 @@ _infisical: {
 // BASIN_SQL_TOKEN is written to each project that reads it, by the
 // collector's infrastructure.cue.
 _projectSecretPaths: {
-	collector: "/projects/rawkode-tools/observability-collector"
-	mcp:       "/projects/rawkode-tools/mcp"
-	website:   "/projects/rawkode-academy/website"
-	youtube:   "/projects/rawkode-academy/platform/youtube-control"
+	collector:   "/projects/rawkode-tools/observability-collector"
+	mcp:         "/projects/rawkode-tools/mcp"
+	website:     "/projects/rawkode-academy/website"
+	youtube:     "/projects/rawkode-academy/platform/youtube-control"
+	// Write credential for the YouTube metadata sync; separate from youtube-control's read-only one.
+	youtubeSync: "/projects/rawkode-academy/platform/youtube-sync"
 }
 // Every folder the collector's infrastructure writes BASIN_SQL_TOKEN into
 // (youtube-control's verify tasks query Basin too).
@@ -506,6 +508,14 @@ infrastructure: {
 				environment_slug: _infisical.environment
 				folder_path:      infrastructure.resources.projects_rawkode_academy_platform_folder.outputs.path
 				name:             "youtube-control"
+			}
+		}
+		youtube_sync_folder: infisical_secret_folder.#Resource & {
+			configuration: {
+				project_id:       _infisical.projectId
+				environment_slug: _infisical.environment
+				folder_path:      infrastructure.resources.projects_rawkode_academy_platform_folder.outputs.path
+				name:             "youtube-sync"
 			}
 		}
 		website_folder: infisical_secret_folder.#Resource & {
