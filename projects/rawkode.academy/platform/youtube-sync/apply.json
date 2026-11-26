@@ -1,6 +1,17 @@
 {
   "planId": "latest",
-  "limit": 2,
-  "videos": ["22-borko-vs-bojan", "automating-deployments-to-the-edge"],
+  "limit": 10,
+  "videos": [
+    "klustered-11",
+    "klustered-community-vs-rawkode",
+    "introduction-to-containerd",
+    "improve-your-supply-chain-security-pipeline-with-scribe-security",
+    "cloud-containers-and-kubernetes",
+    "podmansh-and-infisical",
+    "workshop-database-access-postgres-with-teleport",
+    "part-3-tutorial-2-getting-started-with-influxdb",
+    "advanced-kubernetes-scheduling",
+    "build-a-production-ready-kubernetes-cluster-with-spectro-cloud-palette-no-code-tutorial"
+  ],
   "dryRun": false
 }
