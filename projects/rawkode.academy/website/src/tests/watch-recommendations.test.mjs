@@ -304,7 +304,7 @@ test("breadcrumb status exists only for actual live/upcoming states; page remain
 		),
 	);
 	assert(
-		/setContentCache\(Astro, \{\s*entries: \[video, showEntry, \.\.\.techEntries, \.\.\.hostEntries, \.\.\.guestEntries\],\s*collections: \["videos", "articles", "courses", "learningPaths"\],/.test(
+		/setContentCache\(Astro, \{\s*entries: \[video, showEntry, \.\.\.techEntries, \.\.\.hostEntries, \.\.\.coHostEntries, \.\.\.guestEntries\],\s*collections: \["videos", "articles", "courses", "learningPaths"\],/.test(
 			source,
 		),
 	);
