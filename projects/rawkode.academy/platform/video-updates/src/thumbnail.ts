@@ -36,6 +36,20 @@ export async function facts(env: Env, r: UpdateRequest): Promise<Facts> {
 	return { title: r.video?.title ?? "", tagline: r.video?.tagline, show, technologies: await names(env.TECHNOLOGIES, "technologies", r.technologies ?? []), people: await names(env.PEOPLE, "people", (r.credits ?? []).map((c) => c.personId)), brief: r.thumbnailBrief };
 }
 
+// The facts of a video already on the site, for making its thumbnail again (the request names only what changes).
+export async function storedFacts(env: Env, videoId: string, brief?: string): Promise<Facts> {
+	const names = async (db: D1Database, table: string, ids: string[]) => {
+		if (!ids.length) return [];
+		const { results } = await db.prepare(`SELECT name FROM ${table} WHERE id IN (${ids.map(() => "?").join(",")})`).bind(...ids).all<{ name: string }>();
+		return results.map((x) => x.name);
+	};
+	const video = await env.VIDEOS.prepare("SELECT title, tagline FROM videos WHERE id = ?").bind(videoId).first<{ title: string; tagline: string | null }>();
+	const episode = await env.EPISODES.prepare(`SELECT "showId" AS s FROM episodes WHERE "videoId" = ?`).bind(videoId).first<{ s: string }>();
+	const technologies = (await env.VIDEO_TECHNOLOGIES.prepare("SELECT technology_id AS t FROM video_technologies WHERE video_id = ? ORDER BY position").bind(videoId).all<{ t: string }>()).results.map((x) => x.t);
+	const credits = (await env.CASTING_CREDITS.prepare("SELECT person_id AS p FROM casting_credits WHERE subject_type = 'video' AND subject_id = ? ORDER BY position").bind(videoId).all<{ p: string }>()).results.map((x) => x.p);
+	return { title: video?.title ?? "", tagline: video?.tagline, show: episode ? (await names(env.SHOWS, "shows", [episode.s]))[0] : undefined, technologies: await names(env.TECHNOLOGIES, "technologies", technologies), people: await names(env.PEOPLE, "people", credits), brief };
+}
+
 // The model answers with a base64 image, either as { image } or in OpenAI's { data: [{ b64_json }] }.
 export function imageOf(response: unknown): Uint8Array {
 	const r = response as { image?: string; data?: { b64_json?: string }[]; result?: { image?: string } } | null;
