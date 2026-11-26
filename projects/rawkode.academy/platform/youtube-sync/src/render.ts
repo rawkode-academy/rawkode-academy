@@ -91,6 +91,9 @@ const MAX_HASHTAGS = 3;
 
 // "https://youtube.com/@handle" becomes "@handle", which YouTube links and shows as a channel card.
 const youtubeHandle = (url: string | undefined) => url?.match(/^https:\/\/(?:www\.)?youtube\.com\/(@[A-Za-z0-9_.-]+)\/?$/i)?.[1];
+// YouTube renders *text* as bold in descriptions. It fails (and shows the
+// asterisks) when a marker touches punctuation, so a name containing any is left plain.
+const bold = (name: string) => { const text = stripAngles(name); return /^[\p{L}\p{N}][\p{L}\p{N} ]*[\p{L}\p{N}]$|^[\p{L}\p{N}]$/u.test(text) ? `*${text}*` : text; };
 const line = (parts: (string | undefined)[]) => parts.filter(Boolean).join(" · ");
 
 // The site's show, guests and technologies: one compact line each, with https
@@ -98,9 +101,9 @@ const line = (parts: (string | undefined)[]) => parts.filter(Boolean).join(" · 
 // website and X, stay on the site pages.
 export function renderMetadata(video: Pick<AcademyVideo, "show" | "guests" | "technologies">): string {
   const sections: string[] = [];
-  if (video.show) sections.push(`🎬 ${stripAngles(video.show.name)} · ${SITE}/shows/${video.show.id}`);
-  if (video.guests.length) sections.push(["👥 Guests", ...video.guests.slice(0, MAX_GUESTS).map(guest => line([stripAngles(guest.name), `${SITE}/people/${guest.id}`, guest.x ?? guest.bluesky ?? guest.linkedin]))].join("\n"));
-  if (video.technologies.length) sections.push(["🧩 Technologies", ...video.technologies.slice(0, MAX_TECHNOLOGIES).map(tech => line([stripAngles(tech.name), `${SITE}/technology/${tech.id}`, youtubeHandle(tech.youtube)]))].join("\n"));
+  if (video.show) sections.push(`🎬 ${bold(video.show.name)} · ${SITE}/shows/${video.show.id}`);
+  if (video.guests.length) sections.push(["👥 *Guests*", ...video.guests.slice(0, MAX_GUESTS).map(guest => line([stripAngles(guest.name), `${SITE}/people/${guest.id}`, guest.x ?? guest.bluesky ?? guest.linkedin]))].join("\n"));
+  if (video.technologies.length) sections.push(["🧩 *Technologies*", ...video.technologies.slice(0, MAX_TECHNOLOGIES).map(tech => line([stripAngles(tech.name), `${SITE}/technology/${tech.id}`, youtubeHandle(tech.youtube)]))].join("\n"));
   return sections.join("\n\n");
 }
 

@@ -110,7 +110,7 @@ test("plan, report, canary apply, then the rest, then rollback", async () => {
   assert.equal(upstream.updates[0].id, ids[1]);
   assert.deepEqual(upstream.updates[0].snippet.tags, ["k8s"]);
   assert.equal(upstream.updates[0].snippet.categoryId, "28");
-  assert.match(upstream.updates[0].snippet.description, /^Watch with chapters, code and resources: https:\/\/rawkode\.academy\/watch\/video-1[^\n]*\n\nSite description 1\.\n\n🎬 Rawkode Live · https:\/\/rawkode\.academy\/shows\/rawkode-live\n\n👥 Guests\nEllie Huxtable · https:\/\/rawkode\.academy\/people\/ellie · https:\/\/x\.com\/ellie_huxtable\n\n🧩 Technologies\nAtuin · https:\/\/rawkode\.academy\/technology\/atuin\n\n──── Rawkode Academy ────\nNewsletter/);
+  assert.match(upstream.updates[0].snippet.description, /^Watch with chapters, code and resources: https:\/\/rawkode\.academy\/watch\/video-1[^\n]*\n\nSite description 1\.\n\n🎬 \*Rawkode Live\* · https:\/\/rawkode\.academy\/shows\/rawkode-live\n\n👥 \*Guests\*\nEllie Huxtable · https:\/\/rawkode\.academy\/people\/ellie · https:\/\/x\.com\/ellie_huxtable\n\n🧩 \*Technologies\*\nAtuin · https:\/\/rawkode\.academy\/technology\/atuin\n\n──── Rawkode Academy ────\nNewsletter/);
   assert.equal(upstream.lake.at(-1)?.type, "youtube.sync.write");
   assert.equal(JSON.stringify(upstream.lake).includes("Site description 1"), false, "lake events carry no descriptions");
 

@@ -101,9 +101,9 @@ const rich: AcademyVideo = {
 
 test("the show, guests and technologies are one compact line each, with https links", () => {
   assert.equal(renderMetadata({ ...rich, technologies: [{ ...rich.technologies[0], youtube: "https://youtube.com/@atuinsh" }] }), [
-    "🎬 Rawkode Live · https://rawkode.academy/shows/rawkode-live",
-    "👥 Guests\nEllie Huxtable · https://rawkode.academy/people/ellie · https://x.com/ellie_huxtable\nNo Socials · https://rawkode.academy/people/nobody",
-    "🧩 Technologies\nAtuin · https://rawkode.academy/technology/atuin · @atuinsh",
+    "🎬 *Rawkode Live* · https://rawkode.academy/shows/rawkode-live",
+    "👥 *Guests*\nEllie Huxtable · https://rawkode.academy/people/ellie · https://x.com/ellie_huxtable\nNo Socials · https://rawkode.academy/people/nobody",
+    "🧩 *Technologies*\nAtuin · https://rawkode.academy/technology/atuin · @atuinsh",
   ].join("\n\n"));
   assert.equal(renderMetadata(rich).split("\n").pop(), "Atuin · https://rawkode.academy/technology/atuin");
   assert.equal(renderMetadata(video), "");
@@ -127,7 +127,7 @@ test("the metadata sits after the chapters and before the footer, and the body i
   const long = Array.from({ length: 150 }, () => "Kubernetes controllers reconcile desired state with observed state. ").join("");
   const description = composeDescription({ ...rich, description: long, chapters: [{ startTime: 0, title: "Intro" }, { startTime: 30, title: "Two" }, { startTime: 90, title: "Three" }] });
   assert.ok(bytes(description) <= 5000);
-  const order = ["Watch with chapters", "…", "Chapters\n", "🎬 Rawkode Live", "👥 Guests\n", "🧩 Technologies\n", MARKER].map(part => description.indexOf(part));
+  const order = ["Watch with chapters", "…", "Chapters\n", "🎬 *Rawkode Live*", "👥 *Guests*\n", "🧩 *Technologies*\n", MARKER].map(part => description.indexOf(part));
   assert.deepEqual([...order].sort((a, b) => a - b), order);
   assert.match(description, /\n#RawkodeLive #Atuin$/);
 });
