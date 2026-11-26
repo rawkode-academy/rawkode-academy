@@ -31,5 +31,9 @@
 	"services": [{ "binding": "ANALYTICS", "service": "rawkode-tools-observability-collector" }],
 	// The YouTube sync consumes this. The deploy creates both queues if missing.
 	"queues": { "producers": [{ "binding": "VIDEO_UPDATED", "queue": "platform-video-updated" }] },
+	// New live streams: thumbnails from GPT Image (AI Gateway "default"), converted by Images, stored where the site reads them.
+	"ai": { "binding": "AI" },
+	"images": { "binding": "IMAGES" },
+	"r2_buckets": [{ "binding": "CONTENT_BUCKET", "bucket_name": "rawkode-academy-content" }],
 	"workflows": [{ "name": "update-video", "binding": "UPDATE_VIDEO", "class_name": "UpdateVideoWorkflow" }]
 }

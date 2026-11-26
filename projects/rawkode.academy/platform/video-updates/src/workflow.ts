@@ -4,6 +4,7 @@ import type { Env, VideoUpdatedEvent } from "./env.ts";
 import type { Actor, UpdateRequest } from "./request.ts";
 import { activeSteps, dbOf, restoreStatements, run, snapshot } from "./sections.ts";
 import { Store } from "./store.ts";
+import { facts, generateThumbnail } from "./thumbnail.ts";
 import { validate } from "./validate.ts";
 
 export type Params = { updateId: string; actor: Actor; request: UpdateRequest };
@@ -66,7 +67,15 @@ export class UpdateVideoWorkflow extends WorkflowEntrypoint<Env, Params> {
 		await step.do("mark succeeded", () => store.setStatus(updateId, "succeeded"));
 
 		// Committed from here on: nothing below undoes the update. The daily YouTube diff is the safety net for a lost event.
-		const message: VideoUpdatedEvent = { type: "video.updated", version: 1, videoId: request.videoId, updateId, at: new Date(now).toISOString(), sections: steps.map((s) => s.key) };
+		// A new live stream gets its thumbnail before the event, so the broadcast is created with it. A failure
+		// doesn't undo the video: the broadcast is made without one and the next sync uploads it once it exists.
+		if (request.create && request.broadcast) {
+			try {
+				const made = await step.do("generate thumbnail", { retries: { limit: 2, delay: "20 seconds", backoff: "exponential" }, timeout: "5 minutes" }, async () => generateThumbnail(this.env, request.videoId, await facts(this.env, request)));
+				log({ updateId, videoId: request.videoId, thumbnail: made.key, bytes: made.bytes });
+			} catch (error) { log({ updateId, level: "alert", thumbnailNotGenerated: error instanceof Error ? error.message : "unknown" }); }
+		}
+		const message: VideoUpdatedEvent = { type: request.create && request.broadcast ? "video.scheduled" : "video.updated", ...(request.broadcast ? { privacy: request.broadcast.privacy } : {}), version: 1, videoId: request.videoId, updateId, at: new Date(now).toISOString(), sections: steps.map((s) => s.key) };
 		try {
 			await step.do("publish event", retry, async () => { await this.env.VIDEO_UPDATED.send(message); await store.flag(updateId, "event_published"); });
 		} catch (error) { log({ updateId, level: "alert", eventNotPublished: error instanceof Error ? error.message : "unknown" }); }

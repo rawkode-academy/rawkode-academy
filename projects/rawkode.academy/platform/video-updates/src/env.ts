@@ -17,6 +17,10 @@ export interface Env {
 	VIDEO_CHANNELS: D1Database;
 	// Published once an update is committed; the YouTube sync consumes it.
 	VIDEO_UPDATED: Queue<VideoUpdatedEvent>;
+	// Thumbnails for new live streams: GPT Image through Workers AI, converted with Images, stored in the content bucket.
+	AI: Ai;
+	IMAGES: ImagesBinding;
+	CONTENT_BUCKET: R2Bucket;
 	UPDATE_VIDEO: Workflow;
 	ANALYTICS: Service;
 	// Bearer token of the website's cache invalidation endpoint.
@@ -26,8 +30,10 @@ export interface Env {
 
 // The contract with the YouTube sync (and any later consumer).
 export type VideoUpdatedEvent = {
-	type: "video.updated";
+	// "video.scheduled": a new live stream whose YouTube broadcast should be created.
+	type: "video.updated" | "video.scheduled";
 	version: 1;
+	privacy?: "public" | "unlisted" | "private";
 	videoId: string;
 	updateId: string;
 	at: string;

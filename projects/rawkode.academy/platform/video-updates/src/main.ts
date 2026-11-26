@@ -6,6 +6,12 @@ import { validate } from "./validate.ts";
 
 export { UpdateVideoWorkflow } from "./workflow.ts";
 
+// 24 lowercase letters and digits, like the ids the videos table makes. Derived from the requestId when given.
+async function newVideoId(requestId?: string) {
+	const bytes = requestId ? new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`video:${requestId}`))) : crypto.getRandomValues(new Uint8Array(24));
+	return Array.from(bytes.slice(0, 24), (b) => "abcdefghijklmnopqrstuvwxyz0123456789"[b % 36]).join("");
+}
+
 // The write surface is this entrypoint, reached by service binding only: the
 // caller (the Rawkode Tools MCP) has already authenticated the operator with
 // Rawkode Academy identity and passes who they are for the audit trail.
@@ -18,7 +24,19 @@ export class VideoUpdates extends WorkerEntrypoint<Env> {
 
 	// Queues the update; the workflow does the work. Same requestId, same update.
 	async update(input: unknown, actor: Actor) {
-		const request = updateRequest.parse(input);
+		return this.start(updateRequest.parse(input), actor);
+	}
+
+	// Creates a video, and for a live stream its YouTube broadcast and a generated thumbnail.
+	// The id comes from the requestId when there is one, so a retry finds the same video.
+	async schedule(input: unknown, actor: Actor) {
+		const given = input as { requestId?: string };
+		const videoId = await newVideoId(given?.requestId);
+		const request = updateRequest.parse({ ...(input as object), videoId, create: true });
+		return this.start(request, actor);
+	}
+
+	private async start(request: ReturnType<typeof updateRequest.parse>, actor: Actor) {
 		const sections = touched(request);
 		if (!sections.length) throw new Error("Nothing to update: give at least one section");
 		const store = new Store(this.env.DB);
@@ -33,7 +51,7 @@ export class VideoUpdates extends WorkerEntrypoint<Env> {
 			try { await this.env.UPDATE_VIDEO.create({ id: updateId, params: { updateId, actor, request } }); }
 			catch (error) { await store.drop(updateId); throw error; }
 		}
-		return { updateId, sections, duplicate: !fresh };
+		return { updateId, videoId: request.videoId, sections, duplicate: !fresh };
 	}
 
 	async status(updateId: string) {

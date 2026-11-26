@@ -81,6 +81,7 @@ export const STEPS: Step[] = [
 			if (v.courseOnly !== undefined) set.course_only = v.courseOnly ? 1 : 0;
 			if (v.resources !== undefined) set.resources = v.resources === null ? null : JSON.stringify(v.resources);
 			set.updated_at = now;
+			if (r.create) return [bind(env.VIDEOS, `INSERT OR REPLACE INTO videos (id, ${Object.keys(set).map((c) => `"${c}"`).join(", ")}) VALUES (?, ${ids(Object.keys(set).length)})`, r.videoId, ...Object.values(set))];
 			return [bind(env.VIDEOS, `UPDATE videos SET ${Object.keys(set).map((c) => `"${c}" = ?`).join(", ")} WHERE id = ?`, ...Object.values(set), r.videoId)];
 		},
 	},

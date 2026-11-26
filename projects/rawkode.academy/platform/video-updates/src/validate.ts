@@ -15,7 +15,17 @@ const missing = (label: string, wanted: string[], have: Set<string>) => [...new 
 export async function validate(env: Env, r: UpdateRequest): Promise<string[]> {
 	const errors: string[] = [];
 	const video = await env.VIDEOS.prepare("SELECT id FROM videos WHERE id = ?").bind(r.videoId).first();
-	if (!video) return [`video "${r.videoId}" does not exist`];
+	if (r.create) {
+		if (video) return [`video "${r.videoId}" already exists`];
+		for (const field of ["title", "slug", "description", "publishedAt"] as const) if (!r.video?.[field]) errors.push(`a new video needs ${field}`);
+		if (r.broadcast) {
+			if (r.video?.type !== "live") errors.push("a broadcast is for a live stream: set type to \"live\"");
+			if (r.video?.publishedAt && Date.parse(r.video.publishedAt) < Date.now() + 10 * 60 * 1000) errors.push("a broadcast must start at least 10 minutes from now");
+		}
+	} else {
+		if (!video) return [`video "${r.videoId}" does not exist`];
+		if (r.broadcast || r.thumbnailBrief) errors.push("a broadcast and a generated thumbnail are only for a new video");
+	}
 
 	if (r.video?.slug) {
 		const clash = await env.VIDEOS.prepare("SELECT id FROM videos WHERE slug = ? AND id <> ?").bind(r.video.slug, r.videoId).first<{ id: string }>();

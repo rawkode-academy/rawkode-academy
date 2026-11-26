@@ -62,6 +62,12 @@ export const updateRequest = z.object({
 	courseModule: id.or(z.string().regex(/^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/)).nullable().optional(),
 	collaborations: z.array(z.object({ collaboratorId: id, startsAt: z.string().datetime().nullable().optional(), endsAt: z.string().datetime().nullable().optional(), ctaLink: https.nullable().optional() }).strict()).max(20).optional(),
 	channels: z.array(z.object({ platform: z.enum(["youtube", "x", "linkedin"]), externalId: z.string().min(1).max(100) }).strict()).max(5).optional(),
+	// Set by `schedule`: the video is new, so its row is inserted instead of updated.
+	create: z.literal(true).optional(),
+	// A new live stream also gets a YouTube broadcast, made by the YouTube sync once this commits.
+	broadcast: z.object({ privacy: z.enum(["public", "unlisted", "private"]).default("public") }).strict().optional(),
+	// What the generated thumbnail should show, in words (the title, show and technologies are always given to the model).
+	thumbnailBrief: z.string().min(1).max(500).optional(),
 }).strict();
 
 export type UpdateRequest = z.infer<typeof updateRequest>;
