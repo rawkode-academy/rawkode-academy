@@ -40,13 +40,15 @@ const eyebrowText =
 ---
 
 <header class={doc.hero}>
-	<div class={[doc.container, doc.stack].join(" ")}>
-		<Breadcrumb parents={parents} />
-		{eyebrowText && (eyebrowHref ? (
-			<a class={doc.link} href={eyebrowHref}><MLabel tone="accent">{eyebrowText}</MLabel></a>
-		) : (
-			<MLabel tone="accent">{eyebrowText}</MLabel>
-		))}
+	<div class={[doc.container, doc.heroStack].join(" ")}>
+		<div class={doc.heroKicker}>
+			<Breadcrumb parents={parents} />
+			{eyebrowText && (eyebrowHref ? (
+				<a class={doc.link} href={eyebrowHref}><MLabel tone="accent">{eyebrowText}</MLabel></a>
+			) : (
+				<MLabel tone="accent">{eyebrowText}</MLabel>
+			))}
+		</div>
 
 		<h1 class={doc.title} set:html={title}></h1>
 
