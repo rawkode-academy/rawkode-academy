@@ -15,7 +15,13 @@ case "${1:-}" in
     echo "$result" | jq .
     id=$(jq -r .id <<<"$result")
     report=$(request "$base/plans/$id/report")
-    echo "$report" | tee -a "$summary"
+    # The full report goes to the job summary. The log gets the title changes and the start
+    # of the report: a long stream into the runner's log closes the pipe (exit 141).
+    printf '%s\n' "$report" >>"$summary"
+    echo "## Title changes (slug: before -> after)"
+    awk '/^### /{slug=$2} /^\*\*title\*\* before:/{m="b";next} m=="b"&&/^after:/{m="a";next} m&&/^\*\*/{m=""} m&&/^    ./{sub(/^    /,""); if(m=="b")b=$0; else {print slug": "b"  ->  "$0; m=""}}' <<<"$report"
+    echo "## Start of the report (the rest is in the job summary)"
+    printf '%s\n' "${report:0:20000}"
     # The full, untruncated change for one video (the first named in apply.json,
     # else the first in the plan), so it can be reviewed before an apply.
     slug=$(jq -r '.videos[0] // empty' apply.json)
