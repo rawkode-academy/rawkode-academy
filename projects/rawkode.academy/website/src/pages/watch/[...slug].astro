@@ -630,6 +630,7 @@ const watchStatusLabel = isLiveNow
 
 			<div class={watch.notes}>
 				<div class={watch.notesInner}>
+					<SupporterCTA surface="video" />
 					<section class={watch.section} aria-labelledby="watch-detail-about-heading">
 						<h2 id="watch-detail-about-heading" class="sr-only">About this video</h2>
 						{heroDescription && (
@@ -747,7 +748,6 @@ const watchStatusLabel = isLiveNow
 
 		<div class={watch.outro}>
 			<NewsletterCTA />
-			<SupporterCTA surface="video" />
 		</div>
 	</div>
 </Page>

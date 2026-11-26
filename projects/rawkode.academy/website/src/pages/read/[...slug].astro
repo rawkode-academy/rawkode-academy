@@ -176,6 +176,7 @@ const subtitle = article.data.openGraph?.subtitle || article.data.subtitle;
 
 		<div class={doc.body}>
 			<div class={doc.main}>
+				<SupporterCTA surface="article" />
 				{series && <SeriesNav series={series} currentId={article.id} at="start" />}
 
 				<article class={[styles.prose, doc.articleProse].join(" ")}>
@@ -201,7 +202,6 @@ const subtitle = article.data.openGraph?.subtitle || article.data.subtitle;
 			/>
 			<RelatedVideos currentArticle={article} limit={3} />
 			<NewsletterCTA />
-			<SupporterCTA surface="article" />
 		</div>
 	</div>
 </Page>
