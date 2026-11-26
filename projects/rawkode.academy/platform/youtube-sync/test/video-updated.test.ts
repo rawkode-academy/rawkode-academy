@@ -3,11 +3,12 @@ import { readdir, readFile } from "node:fs/promises";
 import { URL } from "node:url";
 import test, { after, before } from "node:test";
 import { convertV4MiniflareOptions, Miniflare } from "miniflare";
-import { createPlan, type Deps } from "../src/sync.ts";
+import { BULK_BUDGET, createPlan, DAILY_BUDGET, type Deps } from "../src/sync.ts";
+import { pacificDay } from "../src/store.ts";
 import { Store } from "../src/store.ts";
 import { ServiceError } from "../src/domain.ts";
 import type { AcademyVideo, Snippet } from "../src/render.ts";
-import type { QueueMessage, SyncMessage } from "../src/queue.ts";
+import { process, type QueueMessage, type SyncMessage } from "../src/queue.ts";
 import { consumeVideoUpdated, consumeVideoUpdatedDead } from "../src/video-updated.ts";
 
 let mf: Miniflare;
@@ -28,17 +29,45 @@ const video: AcademyVideo = { id: "v1", title: "New title", slug: "new-title", c
 const message = (body: unknown) => { const result = { acked: false, retried: false } as { acked: boolean; retried: boolean }; const m: QueueMessage = { body, attempts: 1, ack() { result.acked = true; }, retry() { result.retried = true; } }; return { m, result }; };
 const event = { type: "video.updated", version: 1, videoId: "v1", updateId: "u1", at: "2026-11-26T20:00:00Z", sections: ["video"] };
 
-test("an update event plans just that video and queues the write", async () => {
+test("an update event plans just that video and writes it straight away", async () => {
   const f = await fixture();
+  const written: string[] = [];
+  f.deps.api.updateSnippet = async id => { written.push(id); };
   const sent: SyncMessage[] = [];
   const { m, result } = message(event);
   await consumeVideoUpdated([m], f.deps, async () => ({ youtubeId: "aaaaaaaaaaa", video }), async body => { sent.push(body); });
   assert.equal(result.acked, true);
+  assert.deepEqual(written, ["aaaaaaaaaaa"]);
+  assert.equal(sent.length, 0);
+});
+
+test("an update still has quota when a backlog has used the bulk budget", async () => {
+  const f = await fixture();
+  const day = pacificDay(f.deps.now());
+  await f.deps.store.spend(day, BULK_BUDGET);
+  const written: string[] = [];
+  f.deps.api.updateSnippet = async id => { written.push(id); };
+  const { m, result } = message(event);
+  await consumeVideoUpdated([m], f.deps, async () => ({ youtubeId: "aaaaaaaaaaa", video }), async () => {});
+  assert.equal(result.acked, true);
+  assert.deepEqual(written, ["aaaaaaaaaaa"]);
+  // The same video as bulk work is held back by the reserve.
+  const plan = await createPlan({ ...f.deps, now: () => new Date("2026-11-26T20:30:00Z") }, new Map([["aaaaaaaaaaa", video]]), "full");
+  const bulk = await process(f.deps, { planId: plan.plan.id, youtubeId: "aaaaaaaaaaa" });
+  assert.equal(bulk.action, "defer");
+});
+
+test("with the whole day's budget gone the write is re-sent with priority after the reset", async () => {
+  const f = await fixture();
+  await f.deps.store.spend(pacificDay(f.deps.now()), DAILY_BUDGET);
+  const sent: { body: SyncMessage; delay: number }[] = [];
+  const { m, result } = message(event);
+  await consumeVideoUpdated([m], f.deps, async () => ({ youtubeId: "aaaaaaaaaaa", video }), async (body, delay) => { sent.push({ body, delay }); });
+  assert.equal(result.acked, true);
   assert.equal(sent.length, 1);
-  assert.equal(sent[0].youtubeId, "aaaaaaaaaaa");
-  const plan = await f.deps.store.plan(sent[0].planId);
-  assert.equal(plan?.items.length, 1);
-  assert.equal(plan?.items[0].status, "CHANGE");
+  assert.equal(sent[0].body.priority, true);
+  assert.equal(sent[0].body.deferrals, 1);
+  assert.ok(sent[0].delay > 0);
 });
 
 test("a one-video plan never becomes the latest plan", async () => {

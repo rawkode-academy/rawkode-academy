@@ -1,14 +1,16 @@
 import { z } from "zod";
 import { fetchVideo } from "./academy.ts";
 import { isTransient, ServiceError } from "./domain.ts";
-import { backoffSeconds, type QueueMessage, type SyncMessage } from "./queue.ts";
+import { backoffSeconds, handle, type QueueMessage, type Send } from "./queue.ts";
 import type { AcademyVideo } from "./render.ts";
 import { createPlan, type Deps } from "./sync.ts";
 
 // The video-updates Worker publishes one of these once an update of a video
 // (and its credits, technologies, chapters ...) is committed. The sync turns it
-// into a one-video plan and queues the write on the normal write queue, so the
-// quota budget, backoff, dead letters and the monitor all apply as usual.
+// into a one-video plan and writes it straight away, ahead of any backlog on the
+// write queue, from the slice of the daily quota kept for updates. Quota gone,
+// retries, dead letters and the monitor work as for any other write: the write
+// is re-sent on the write queue (still with priority) after the reset.
 export const VIDEO_UPDATED_QUEUE = "platform-video-updated";
 export const VIDEO_UPDATED_DLQ = "platform-video-updated-dlq";
 
@@ -18,7 +20,7 @@ export type VideoUpdated = z.infer<typeof videoUpdated>;
 export type Resolver = (videoId: string) => Promise<{ youtubeId: string; video: AcademyVideo | undefined } | null>;
 const log = (event: Record<string, unknown>) => console.error(JSON.stringify({ operation: "video_updated", ...event }));
 
-export async function consumeVideoUpdated(messages: QueueMessage[], deps: Deps, resolve: Resolver, enqueue: (body: SyncMessage) => Promise<void>) {
+export async function consumeVideoUpdated(messages: QueueMessage[], deps: Deps, resolve: Resolver, send: Send) {
   for (const message of messages) {
     const parsed = videoUpdated.safeParse(message.body);
     if (!parsed.success) { await deps.store.recordDead({ planId: null, youtubeId: null, at: deps.now().toISOString(), reason: "malformed video.updated message" }); message.ack(); continue; }
@@ -30,8 +32,8 @@ export async function consumeVideoUpdated(messages: QueueMessage[], deps: Deps, 
       const { plan, items } = await createPlan(deps, new Map([[found.youtubeId, found.video]]), "video");
       const item = items.find(i => i.youtubeId === found.youtubeId);
       log({ videoId, updateId, youtubeId: found.youtubeId, planId: plan.id, status: item?.status });
-      if (item?.status === "CHANGE") await enqueue({ planId: plan.id, youtubeId: found.youtubeId });
-      message.ack();
+      if (item?.status === "CHANGE") await handle(message, { planId: plan.id, youtubeId: found.youtubeId, priority: true }, deps, send);
+      else message.ack();
     } catch (error) {
       // A rejected request retrying can't fix is recorded for a person; anything else backs off and retries (then the dead-letter queue).
       if (error instanceof ServiceError && !isTransient(error) && error.code !== "reauthorization_required" && error.code !== "academy_api_error" && error.code !== "invalid_academy_response") {

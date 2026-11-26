@@ -45,7 +45,7 @@ The commit is the record of who allowed what.
 
 ## Pushing when the site changes
 
-The `video-updates` Worker publishes `video.updated` to the queue `platform-video-updated` once it has committed a change to a video. This Worker re-reads that one video, plans it (scope `video`, so it never becomes the "latest" plan) and, if the title, description or thumbnail differ, puts it on the write queue below. The daily plan stays as the safety net. Set `PUSH_ON_UPDATE` to anything but `true` to ignore these events; failures land in `platform-video-updated-dlq` and `deadLetters` like any other.
+The `video-updates` Worker publishes `video.updated` to the queue `platform-video-updated` once it has committed a change to a video. This Worker re-reads that one video, plans it (scope `video`, so it never becomes the "latest" plan) and, if the title, description or thumbnail differ, writes it straight away, ahead of anything waiting on the write queue below. The last 1,000 units of the daily budget (`UPDATE_RESERVE`) are kept for these writes: bulk writes stop at 8,000, update events may use up to 9,000. If YouTube's quota is gone the write is re-sent on the write queue (with priority) after the reset. The daily plan stays as the safety net. Set `PUSH_ON_UPDATE` to anything but `true` to ignore these events; failures land in `platform-video-updated-dlq` and `deadLetters` like any other.
 
 ## Quota and the queue
 

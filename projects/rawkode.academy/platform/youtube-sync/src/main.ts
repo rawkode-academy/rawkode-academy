@@ -135,7 +135,7 @@ export default {
     if (batch.queue === VIDEO_UPDATED_QUEUE) {
       // PUSH_ON_UPDATE turns the push off (the daily plan still catches every change).
       if (env.PUSH_ON_UPDATE !== "true") { for (const message of batch.messages) message.ack(); return; }
-      return consumeVideoUpdated(messages, d, resolveVideo(env), async body => { await env.SYNC_QUEUE.send(body); });
+      return consumeVideoUpdated(messages, d, resolveVideo(env), async (body, delaySeconds) => { await env.SYNC_QUEUE.send(body, { delaySeconds }); });
     }
     await consume(messages, d, async (body, delaySeconds) => { await env.SYNC_QUEUE.send(body, { delaySeconds }); });
   },
