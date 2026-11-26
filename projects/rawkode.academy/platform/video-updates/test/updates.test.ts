@@ -3,6 +3,7 @@ import type { Env } from "../src/env.ts";
 import { updateRequest, type UpdateRequest } from "../src/request.ts";
 import { activeSteps } from "../src/sections.ts";
 import { Store } from "../src/store.ts";
+import { imageOf, prompt } from "../src/thumbnail.ts";
 import { validate } from "../src/validate.ts";
 import { seed, testEnv } from "./env.ts";
 
@@ -122,5 +123,66 @@ describe("workflow", () => {
 		const stats = await new Store(env.DB).stats();
 		expect(stats.failedLast24h).toBeGreaterThanOrEqual(1);
 		expect(stats.rollbackFailed).toBe(0);
+	});
+});
+
+
+describe("scheduling a live stream", () => {
+	const start = new Date(Date.now() + 3 * 24 * 3600 * 1000).toISOString();
+	const live = (id: string, over: Record<string, unknown> = {}) => updateRequest.parse({
+		videoId: id, create: true, broadcast: { privacy: "unlisted" }, thumbnailBrief: "a queue of glowing jobs",
+		video: { title: "Hands-on with Kueue", slug: `kueue-${id}`, description: "Job queueing for Kubernetes.", publishedAt: start, type: "live" },
+		credits: [{ personId: "rawkode", role: "host" }], technologies: ["kubernetes"], show: { showId: "rawkode-live", code: `S9${id}` }, ...over,
+	});
+
+	it("validates what a new stream needs", async () => {
+		expect(await validate(env, live("ok1"))).toEqual([]);
+		expect((await validate(env, live("v1"))).join("|")).toContain("already exists");
+		expect((await validate(env, updateRequest.parse({ videoId: "n1", create: true, video: { title: "t" } }))).join("|")).toContain("needs slug");
+		expect((await validate(env, live("n2", { video: { title: "t", slug: "t", description: "d", publishedAt: start, type: "recorded" } }))).join("|")).toContain('type to "live"');
+		expect((await validate(env, live("n3", { video: { title: "t", slug: "t3", description: "d", publishedAt: new Date(Date.now() + 60_000).toISOString(), type: "live" } }))).join("|")).toContain("10 minutes");
+		expect((await validate(env, updateRequest.parse({ videoId: "v1", broadcast: { privacy: "public" } }))).join("|")).toContain("only for a new video");
+	});
+
+	it("creates the video, makes the thumbnail with GPT Image, stores it and asks for the broadcast", async () => {
+		const r = live("newlive1");
+		await begin("u-live", r);
+		await run("u-live", r);
+		expect((await rows(env.VIDEOS, "SELECT title, type FROM videos WHERE id='newlive1'"))[0]).toEqual({ title: "Hands-on with Kueue", type: "live" });
+		expect(await rows(env.EPISODES, `SELECT code FROM episodes WHERE "videoId"='newlive1'`)).toEqual([{ code: "S9newlive1" }]);
+		expect(t.generated.at(-1)?.model).toBe("openai/gpt-image-2.6-sunburst");
+		expect(String(t.generated.at(-1)?.input.prompt)).toContain("Hands-on with Kueue");
+		expect(String(t.generated.at(-1)?.input.prompt)).toContain("a queue of glowing jobs");
+		expect(t.stored.has("videos/newlive1/thumbnail.webp")).toBe(true);
+		expect(t.sent.at(-1)).toMatchObject({ type: "video.scheduled", videoId: "newlive1", privacy: "unlisted" });
+	});
+
+	it("still schedules the broadcast when the image model fails", async () => {
+		const r = live("newlive2");
+		const ai = env.AI.run;
+		(env.AI as any).run = async () => { throw new Error("no credits"); };
+		await begin("u-nothumb", r);
+		await run("u-nothumb", r);
+		(env.AI as any).run = ai;
+		expect(t.stored.has("videos/newlive2/thumbnail.webp")).toBe(false);
+		expect(t.sent.at(-1)).toMatchObject({ type: "video.scheduled", videoId: "newlive2" });
+		expect((await new Store(env.DB).get("u-nothumb"))?.status).toBe("succeeded");
+	});
+
+	it("takes the new video out again when a later section fails", async () => {
+		const r = live("newlive3");
+		failing.add("write technologies");
+		await begin("u-livefail", r);
+		await expect(run("u-livefail", r)).rejects.toThrow("rolled back");
+		failing.clear();
+		expect(await rows(env.VIDEOS, "SELECT id FROM videos WHERE id='newlive3'")).toEqual([]);
+		expect(await rows(env.CASTING_CREDITS, "SELECT * FROM casting_credits WHERE subject_id='newlive3'")).toEqual([]);
+	});
+
+	it("reads the model's answer in either shape and builds a prompt from the facts", () => {
+		expect(new TextDecoder().decode(imageOf({ image: btoa("x") }))).toBe("x");
+		expect(new TextDecoder().decode(imageOf({ data: [{ b64_json: btoa("y") }] }))).toBe("y");
+		expect(() => imageOf({})).toThrow("no image");
+		expect(prompt({ title: "T", technologies: ["Kueue"], people: [], show: "Rawkode Live" })).toContain('"T"');
 	});
 });

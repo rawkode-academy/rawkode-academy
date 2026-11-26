@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { fetchVideo } from "./academy.ts";
 import { isTransient, ServiceError } from "./domain.ts";
-import { backoffSeconds, handle, type QueueMessage, type Send } from "./queue.ts";
+import { type BroadcastPorts, type Privacy, scheduleBroadcast } from "./broadcast.ts";
+import { backoffSeconds, handle, MAX_DELAY_SECONDS, type QueueMessage, secondsUntilReset, type Send } from "./queue.ts";
 import type { AcademyVideo } from "./render.ts";
 import { createPlan, type Deps } from "./sync.ts";
 
@@ -14,17 +15,30 @@ import { createPlan, type Deps } from "./sync.ts";
 export const VIDEO_UPDATED_QUEUE = "platform-video-updated";
 export const VIDEO_UPDATED_DLQ = "platform-video-updated-dlq";
 
-export const videoUpdated = z.object({ type: z.literal("video.updated"), version: z.literal(1), videoId: z.string().min(1), updateId: z.string().min(1), at: z.string(), sections: z.array(z.string()).optional() });
+export const videoUpdated = z.object({ type: z.enum(["video.updated", "video.scheduled"]), version: z.literal(1), privacy: z.enum(["public", "unlisted", "private"]).optional(), videoId: z.string().min(1), updateId: z.string().min(1), at: z.string(), sections: z.array(z.string()).optional() });
 export type VideoUpdated = z.infer<typeof videoUpdated>;
 
 export type Resolver = (videoId: string) => Promise<{ youtubeId: string; video: AcademyVideo | undefined } | null>;
 const log = (event: Record<string, unknown>) => console.error(JSON.stringify({ operation: "video_updated", ...event }));
 
-export async function consumeVideoUpdated(messages: QueueMessage[], deps: Deps, resolve: Resolver, send: Send) {
+export async function consumeVideoUpdated(messages: QueueMessage[], deps: Deps, resolve: Resolver, send: Send, broadcast?: BroadcastPorts) {
   for (const message of messages) {
     const parsed = videoUpdated.safeParse(message.body);
     if (!parsed.success) { await deps.store.recordDead({ planId: null, youtubeId: null, at: deps.now().toISOString(), reason: "malformed video.updated message" }); message.ack(); continue; }
     const { videoId, updateId } = parsed.data;
+    if (parsed.data.type === "video.scheduled") {
+      try {
+        if (!broadcast) { log({ videoId, updateId, skipped: "broadcasts are not configured" }); message.ack(); continue; }
+        log({ videoId, updateId, result: await scheduleBroadcast(deps, broadcast, { videoId, privacy: (parsed.data.privacy ?? "public") as Privacy }) });
+        message.ack();
+      } catch (error) {
+        // A spent quota waits for the reset (the broadcast is made then); anything else backs off and retries, then the dead-letter queue.
+        const quota = error instanceof ServiceError && error.code === "quota_exceeded";
+        log({ videoId, updateId, error: error instanceof ServiceError ? error.code : "unknown", attempts: message.attempts });
+        message.retry({ delaySeconds: quota ? Math.min(secondsUntilReset(deps.now()), MAX_DELAY_SECONDS) : backoffSeconds(message.attempts) });
+      }
+      continue;
+    }
     try {
       const found = await resolve(videoId);
       // Not on YouTube, or not listed on the site: nothing to push.

@@ -8,6 +8,7 @@ export interface VideoUpdatesRpc {
   preview(request: unknown): Promise<{ sections: string[]; errors: string[] }>;
   update(request: unknown, actor: { userId: string; username?: string }): Promise<{ updateId: string; sections: string[]; duplicate: boolean }>;
   status(updateId: string): Promise<unknown>;
+  schedule(request: unknown, actor: { userId: string; username?: string }): Promise<{ updateId: string; videoId: string; sections: string[]; duplicate: boolean }>;
 }
 
 const id = z.string().min(1).max(200);
@@ -35,6 +36,11 @@ export const updateInput = z.object({
   channels: z.array(z.object({ platform: z.enum(["youtube", "x", "linkedin"]), externalId: z.string() })).optional().describe("Where the video lives on other platforms."),
 }).strict();
 
+export const scheduleInput = updateInput.omit({ videoId: true }).extend({
+  privacy: z.enum(["public", "unlisted", "private"]).default("public").describe("Who can see the YouTube broadcast. Use private for a test."),
+  thumbnailBrief: z.string().max(500).optional().describe("What the generated thumbnail should show, in words. The title, show and technologies are always given to the image model."),
+}).strict();
+
 // Changes an Academy video and everything attached to it, through the
 // video-updates Workflow. Operators only, and only when asked for by name.
 export const video: ToolModule = {
@@ -54,6 +60,11 @@ export const video: ToolModule = {
       inputSchema: updateInput,
       annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false },
     }, input => reply(() => rpc().update(input, { userId: caller.userId, username: caller.username })));
+    server.registerTool("schedule_live_stream", {
+      description: "Schedule a new live stream in one operation: create the video (title, slug, description, publishedAt as the start time, type live) with its show, people, credits and technologies, generate its thumbnail with GPT Image, and create the YouTube broadcast (auto-start on, ultra low latency, bound to the channel's stream key) with the same title, description and thumbnail. The start must be at least 10 minutes away. Use preview_video_update-style validation first by giving the same fields to this tool; it rejects without writing anything if a reference is missing. Returns the new videoId and an updateId; poll video_update_status.",
+      inputSchema: scheduleInput,
+      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+    }, ({ privacy, ...rest }) => reply(() => rpc().schedule({ ...rest, broadcast: { privacy } }, { userId: caller.userId, username: caller.username })));
     server.registerTool("video_update_status", {
       description: "The state of a video update: queued, running, succeeded, rejected (nothing written), rolled_back, or rollback_failed (needs a person), and whether the YouTube event and the website cache invalidation went through.",
       inputSchema: z.object({ updateId: id }).strict(),

@@ -10,7 +10,7 @@ Tools come in modules (`src/tools/`), one OAuth scope each. A client gets a modu
 | --- | --- | --- | --- |
 | Analytics | `analytics:read` | `describe_analytics`, `query_analytics` (one `SELECT`/`WITH`, at most 500 rows), `youtube_daily`, `youtube_traffic` | Basin SQL over the analytics lake, with the read-only `BASIN_SQL_TOKEN` |
 | Guest | `guest:read` | `my_episodes`, `my_episode_daily` | The Academy GraphQL API (`api.rawkode.academy`) for who is on what, and Basin SQL for the numbers. No SQL tool |
-| Video | `video:write` | `preview_video_update`, `update_video`, `video_update_status` | The `platform-video-updates` Workflow over a service binding: changes a video and its links, people, credits, technologies, chapters, show, lesson and collaborations, then the YouTube sync pushes it. Operators only, and only when a client asks for the scope by name |
+| Video | `video:write` | `preview_video_update`, `update_video`, `schedule_live_stream`, `video_update_status` | The `platform-video-updates` Workflow over a service binding: changes a video, or schedules a new live stream (creates it, generates its thumbnail with GPT Image and creates the YouTube broadcast); and its links, people, credits, technologies, chapters, show, lesson and collaborations, then the YouTube sync pushes it. Operators only, and only when a client asks for the scope by name |
 
 The analytics tools never call YouTube: `youtube-control`'s daily sync already lands YouTube Analytics in the lake. A module that needs another Worker (such as publishing through `youtube-control`) takes a service binding to that Worker's RPC entrypoint; analytics needs none.
 

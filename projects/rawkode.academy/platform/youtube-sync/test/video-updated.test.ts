@@ -19,7 +19,7 @@ async function fixture() {
   const db = await mf.getD1Database("DB");
   const files = (await readdir(new URL("../migrations/", import.meta.url))).filter(name => name.endsWith(".sql")).sort();
   const sql = (await Promise.all(files.map(name => readFile(new URL(`../migrations/${name}`, import.meta.url), "utf8")))).join("\n").replace(/--.*$/gm, "");
-  for (const table of ["youtube_sync_dead", "youtube_sync_thumbnails", "youtube_sync_log", "youtube_sync_plan_items", "youtube_sync_plans", "youtube_sync_state", "youtube_sync_quota"]) await db.prepare(`DROP TABLE IF EXISTS ${table}`).run();
+  for (const table of ["youtube_sync_broadcasts", "youtube_sync_dead", "youtube_sync_thumbnails", "youtube_sync_log", "youtube_sync_plan_items", "youtube_sync_plans", "youtube_sync_state", "youtube_sync_quota"]) await db.prepare(`DROP TABLE IF EXISTS ${table}`).run();
   for (const statement of sql.split(";").map(s => s.trim()).filter(Boolean)) await db.prepare(statement.replace(/\s+/g, " ")).run();
   const live = new Map<string, Snippet>([["aaaaaaaaaaa", { title: "Old", description: "Old text", categoryId: "28", tags: [], defaultLanguage: "en" }]]);
   const deps: Deps = { store: new Store(db), fields: ["title", "description"], now: () => new Date("2026-11-26T20:00:00Z"), api: { async listSnippets(ids) { return new Map(ids.flatMap(id => live.has(id) ? [[id, structuredClone(live.get(id)!)] as const] : [])); }, async updateSnippet() {} } };
@@ -98,4 +98,70 @@ test("a transient failure retries; a malformed message and the dead-letter queue
   const c = message(event);
   await consumeVideoUpdatedDead([c.m], f.deps);
   assert.equal(await f.deps.store.deadCount(), 2);
+});
+
+// ---- scheduled live streams ----
+import { BROADCAST_UNITS, scheduleBroadcast, type BroadcastPorts } from "../src/broadcast.ts";
+
+const scheduled = { type: "video.scheduled", version: 1, videoId: "v1", updateId: "u9", at: "2026-11-26T20:00:00Z", privacy: "unlisted" };
+function ports(over: Partial<BroadcastPorts> = {}) {
+  const calls = { inserted: [] as unknown[], bound: [] as string[], linked: [] as string[] };
+  const value: BroadcastPorts = {
+    api: { async insertBroadcast(input) { calls.inserted.push(input); return "bbbbbbbbbbb"; }, async findStream() { return "stream1"; }, async bindBroadcast(_id, stream) { calls.bound.push(stream); } },
+    fetchScheduled: async () => ({ video: { ...video, thumbnailUrl: "https://cdn.test/t.webp" }, startsAt: "2026-12-15T17:00:00.000Z" }),
+    link: async (_video, broadcast) => { calls.linked.push(broadcast); },
+    ...over,
+  };
+  return { value, calls };
+}
+const withThumbs = (f: Awaited<ReturnType<typeof fixture>>) => { const set: string[] = []; f.deps.thumbnails = { tag: async () => "tag1", prepare: async () => new Uint8Array([1]), current: async () => null, set: async id => { set.push(id); } }; return set; };
+
+test("a scheduled stream gets a broadcast with auto-start and ultra low latency settings, bound, thumbnailed and linked", async () => {
+  const f = await fixture();
+  const set = withThumbs(f);
+  const p = ports();
+  const { m, result } = message(scheduled);
+  await consumeVideoUpdated([m], f.deps, async () => null, async () => {}, p.value);
+  assert.equal(result.acked, true);
+  assert.equal((p.calls.inserted[0] as { privacy: string }).privacy, "unlisted");
+  assert.equal((p.calls.inserted[0] as { scheduledStartTime: string }).scheduledStartTime, "2026-12-15T17:00:00.000Z");
+  assert.deepEqual(p.calls.bound, ["stream1"]);
+  assert.deepEqual(p.calls.linked, ["bbbbbbbbbbb"]);
+  assert.deepEqual(set, ["bbbbbbbbbbb"]);
+  assert.equal(await f.deps.store.quotaUsed(pacificDay(f.deps.now())), 50 + 1 + 50 + 50);
+});
+
+test("a retry after a failure resumes and never makes a second broadcast", async () => {
+  const f = await fixture();
+  const p = ports({ link: async () => { throw new Error("video-updates down"); } });
+  const first = message(scheduled);
+  await consumeVideoUpdated([first.m], f.deps, async () => null, async () => {}, p.value);
+  assert.equal(first.result.retried, true);
+  const linked: string[] = [];
+  const again = ports({ link: async (_v, b) => { linked.push(b); } });
+  const second = message(scheduled);
+  await consumeVideoUpdated([second.m], f.deps, async () => null, async () => {}, again.value);
+  assert.equal(second.result.acked, true);
+  assert.equal(p.calls.inserted.length, 1);
+  assert.equal(again.calls.inserted.length, 0);
+  assert.deepEqual(linked, ["bbbbbbbbbbb"]);
+});
+
+test("without room in today's quota the broadcast waits for the reset", async () => {
+  const f = await fixture();
+  await f.deps.store.spend(pacificDay(f.deps.now()), DAILY_BUDGET - BROADCAST_UNITS + 1);
+  const p = ports();
+  const { m, result } = message(scheduled);
+  await consumeVideoUpdated([m], f.deps, async () => null, async () => {}, p.value);
+  assert.equal(result.retried, true);
+  assert.equal(p.calls.inserted.length, 0);
+});
+
+test("a video the site doesn't list is skipped, and no broadcast is made without ports", async () => {
+  const f = await fixture();
+  const p = ports({ fetchScheduled: async () => null });
+  assert.equal(await scheduleBroadcast(f.deps, p.value, { videoId: "v1", privacy: "public" }), "skipped");
+  const { m, result } = message(scheduled);
+  await consumeVideoUpdated([m], f.deps, async () => null, async () => {});
+  assert.equal(result.acked, true);
 });

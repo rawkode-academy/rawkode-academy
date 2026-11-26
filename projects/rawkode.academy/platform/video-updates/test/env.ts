@@ -20,10 +20,16 @@ export async function testEnv() {
 	const sent: unknown[] = [];
 	const calls: { url: string; init: RequestInit }[] = [];
 	env.VIDEO_UPDATED = { send: async (m: unknown) => { sent.push(m); } };
+	// GPT Image, Images and the content bucket, faked: the call and the stored bytes are kept for the tests.
+	const generated: { model: string; input: Record<string, unknown>; options: unknown }[] = [];
+	const stored = new Map<string, { bytes: Uint8Array; options: unknown }>();
+	env.AI = { run: async (model: string, input: Record<string, unknown>, options: unknown) => { generated.push({ model, input, options }); return { image: btoa("fake-png") }; } };
+	env.IMAGES = { input: () => ({ transform: () => ({ output: async () => ({ response: () => new Response("fake-webp") }) }) }) };
+	env.CONTENT_BUCKET = { put: async (key: string, value: Uint8Array, options: unknown) => { stored.set(key, { bytes: value, options }); } };
 	env.ANALYTICS = { trackEvent: async () => ({ success: true }) };
 	env.CACHE_INVALIDATION_TOKEN = "token";
 	env.SITE_ORIGIN = "https://site.test";
-	return { env: env as unknown as Env, sent, calls, dispose: () => mf.dispose() };
+	return { env: env as unknown as Env, sent, calls, generated, stored, dispose: () => mf.dispose() };
 }
 
 export async function seed(env: Env) {
