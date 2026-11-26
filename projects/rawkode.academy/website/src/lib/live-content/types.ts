@@ -113,6 +113,8 @@ export interface VideoData {
 	episodeCode?: string | undefined;
 	chapters: { startTime: number; title: string }[];
 	guests: Reference<"people">[];
+	/** Who was on this video, per casting credits. Empty when none are recorded; callers then fall back to the show's hosts and `guests`. */
+	credits?: { role: "host" | "co_host" | "guest" | "author"; person: Reference<"people"> }[] | undefined;
 	/** Companies this video is made with; empty for most videos. */
 	collaborators?: { id: string; name: string; websiteUrl?: string | undefined }[] | undefined;
 	resources?: Resource[] | undefined;

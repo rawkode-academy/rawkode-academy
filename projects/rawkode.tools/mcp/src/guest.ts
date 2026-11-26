@@ -2,7 +2,7 @@ import { z } from "zod";
 import { basinQuery, type BasinConfig, type Row } from "./basin.ts";
 import { ensure, readLimited, ServiceError } from "./errors.ts";
 import {
-  dailySql, GUEST_SCOPE_QUERY, withCourseAuthors, lakeCatalogueSql, normalizeHandle, normalizeTitle, videoIdPattern, visibleEpisodes, youtubeIds,
+  castFromCredits, dailySql, GUEST_SCOPE_QUERY, withCourseAuthors, lakeCatalogueSql, normalizeHandle, normalizeTitle, videoIdPattern, visibleEpisodes, youtubeIds,
   type AcademyVideo, type EpisodeAccess, type LakeVideo, type Role,
 } from "../../../../packages/guest-scope/index.ts";
 
@@ -24,6 +24,7 @@ const response = z.object({
       id: z.string(), title: z.string(), slug: z.string(), publishedAt: z.union([z.string(), z.number()]).nullable().optional(),
       youtubeId: z.string().nullable().optional(),
       guests: z.array(person),
+      castingCredits: z.array(z.object({ role: z.string(), person })).optional(),
       episode: z.object({ show: z.object({ id: z.string(), hosts: z.array(person) }) }).nullable().optional(),
     })),
     allCourses: z.array(z.object({ authors: z.array(person), modules: z.array(z.object({ video: z.object({ id: z.string() }).nullable().optional() })) })),
@@ -44,8 +45,10 @@ export async function fetchAcademyVideos(fetcher: typeof fetch = (...args) => fe
     id: video.id, title: video.title, slug: video.slug, youtubeId: video.youtubeId ?? null,
     publishedAt: video.publishedAt == null ? null : new Date(video.publishedAt).toISOString(),
     show: video.episode?.show.id ?? null,
-    guests: video.guests.map(p => ({ id: p.id, githubHandle: p.githubHandle ?? null })),
-    hosts: (video.episode?.show.hosts ?? []).map(p => ({ id: p.id, githubHandle: p.githubHandle ?? null })),
+    ...castFromCredits((video.castingCredits ?? []).map(c => ({ role: c.role, person: { id: c.person.id, githubHandle: c.person.githubHandle ?? null } })), {
+      guests: video.guests.map(p => ({ id: p.id, githubHandle: p.githubHandle ?? null })),
+      hosts: (video.episode?.show.hosts ?? []).map(p => ({ id: p.id, githubHandle: p.githubHandle ?? null })),
+    }),
   }));
   return withCourseAuthors(videos, parsed.data.data.allCourses.map(course => ({
     authors: course.authors.map(p => ({ id: p.id, githubHandle: p.githubHandle ?? null })),

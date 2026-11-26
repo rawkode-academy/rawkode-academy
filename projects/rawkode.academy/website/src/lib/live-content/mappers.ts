@@ -278,12 +278,28 @@ export function mapVideo(raw: Raw): VideoData {
 					)
 			: [],
 		guests: refs("people", raw.guests),
+		credits: credits(raw.castingCredits),
 		collaborators: collaborators(raw.collaborators),
 		resources: resources(raw.resources),
 		streamUrl: str(raw.streamUrl),
 		thumbnailUrl: str(raw.thumbnailUrl),
 		recordUpdatedAt: toDate(raw.updatedAt),
 	});
+}
+
+const CREDIT_ROLES = new Set(["host", "co_host", "guest", "author"]);
+
+function credits(value: unknown): NonNullable<VideoData["credits"]> {
+	if (!Array.isArray(value)) return [];
+	const out: NonNullable<VideoData["credits"]> = [];
+	for (const item of value as Raw[]) {
+		const role = typeof item?.role === "string" ? item.role.toLowerCase() : "";
+		const person = ref("people", item?.person);
+		if (CREDIT_ROLES.has(role) && person) {
+			out.push({ role: role as NonNullable<VideoData["credits"]>[number]["role"], person });
+		}
+	}
+	return out;
 }
 
 const SHOW_ICONS = new Set([
@@ -636,6 +652,7 @@ export function relatedTags<C extends CollectionName>(
 	if (collection === "videos") {
 		const v = data as VideoData;
 		v.guests.forEach(add);
+		v.credits?.forEach((credit) => add(credit.person));
 		v.technologies.forEach(add);
 		add(v.show);
 	} else if (collection === "shows") {
