@@ -1,0 +1,25 @@
+---
+import { button } from "@rawkodeacademy/design-system";
+import { supportAcademyOffer } from "@/lib/partnerships";
+
+interface Props {
+	surface: "video" | "article";
+}
+
+const { surface } = Astro.props;
+---
+
+<aside class="supporter-cta" aria-labelledby={`supporter-cta-${surface}`} data-supporter-cta={surface}>
+	<div class="supporter-cta__copy">
+		<h2 id={`supporter-cta-${surface}`}>Does your team use this?</h2>
+		<p>Rawkode Academy keeps this {surface === "video" ? "video" : "article"} free for everyone. Companies back the work from {supportAcademyOffer.priceShort}, with a badge on their technology page and a spot on the supporters wall.</p>
+	</div>
+	<a class={button({ variant: "outline" })} href="/organizations/support-our-work" data-supporter-cta-link={surface}>Support our work</a>
+</aside>
+
+<style>
+	.supporter-cta { display: grid; gap: 1.25rem; align-items: center; padding: clamp(1.25rem, 3vw, 2rem); border: 1px solid var(--colors-academy-border); border-radius: var(--radii-academy-l); background: var(--colors-academy-panel); }
+	.supporter-cta h2 { margin: 0 0 0.5rem; font-family: var(--fonts-academy-display), system-ui, sans-serif; font-size: clamp(1.15rem, 2vw, 1.4rem); }
+	.supporter-cta p { margin: 0; line-height: 1.7; max-width: 44rem; }
+	@media (min-width: 48rem) { .supporter-cta { grid-template-columns: minmax(0, 1fr) auto; gap: 2rem; } }
+</style>
