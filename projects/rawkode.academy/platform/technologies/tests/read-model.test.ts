@@ -94,7 +94,7 @@ describe("technologies read model", () => {
 	it("serves the cncf, community, matrix and seo profile", async () => {
 		const { technologyById } = await query(`{ technologyById(id: "kubernetes") {
 			cncf { status accepted incubating graduated archived devStatsUrl personas tags integrations releaseRate }
-			community { twitter youtube slack discord chat blog mailingList githubDiscussions }
+			community { twitter bluesky mastodon youtube slack discord chat blog mailingList githubDiscussions }
 			matrix { status grouping confidence trajectory firstUsed lastUsed makesMeFeel why spicyTake }
 			seo { title description } } }`);
 		expect(technologyById.cncf).toEqual({
@@ -111,6 +111,8 @@ describe("technologies read model", () => {
 		});
 		expect(technologyById.community).toEqual({
 			twitter: "https://twitter.com/kubernetesio",
+			bluesky: null,
+			mastodon: null,
 			youtube: "https://www.youtube.com/channel/UCZ2bu0qutTOM0tHYa_jkIwg",
 			slack: "http://slack.k8s.io/",
 			discord: null,

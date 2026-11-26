@@ -23,6 +23,8 @@ export type Cncf = {
 };
 export type Community = {
 	twitter?: string;
+	bluesky?: string;
+	mastodon?: string;
 	youtube?: string;
 	slack?: string;
 	discord?: string;
