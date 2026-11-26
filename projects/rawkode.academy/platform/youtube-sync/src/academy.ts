@@ -70,3 +70,12 @@ export async function fetchVideo(env: { VIDEO_CHANNELS: Gateway; ACADEMY_API: Ga
   for (const course of courses.allCourses ?? []) for (const lesson of course.modules ?? []) if (course.title && lesson.video?.id && !courseByVideo.has(lesson.video.id)) courseByVideo.set(lesson.video.id, course.title);
   return { youtubeId, video: one.videoByID ? toAcademyVideo(one.videoByID, courseByVideo) : undefined };
 }
+
+// A video that has no YouTube mapping yet: the site's copy and when it goes live. Null when the site doesn't list it.
+export async function fetchScheduled(env: { ACADEMY_API: Gateway }, videoId: string): Promise<{ video: AcademyVideo; startsAt: string } | null> {
+  const one = await graphql<{ videoByID?: (ListedVideo & { publishedAt?: string }) | null }>(env.ACADEMY_API, "https://api.rawkode.academy/", `query ($id: String!) { videoByID(id: $id) { ${VIDEO_FIELDS} publishedAt } }`, { id: videoId });
+  const listed = one.videoByID;
+  const video = listed ? toAcademyVideo(listed, new Map()) : undefined;
+  const startsAt = listed?.publishedAt ? new Date(listed.publishedAt).toISOString() : undefined;
+  return video && startsAt ? { video, startsAt } : null;
+}

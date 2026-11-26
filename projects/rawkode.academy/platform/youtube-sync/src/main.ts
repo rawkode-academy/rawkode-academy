@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { fetchCatalogue } from "./academy.ts";
+import { fetchCatalogue, fetchScheduled } from "./academy.ts";
 import { ensure, errorBody, hash, readLimited, ServiceError } from "./domain.ts";
 import { GoogleClient } from "./google.ts";
 import { renderReport } from "./plan.ts";
@@ -128,14 +128,19 @@ export default {
     }
   },
   async queue(batch, env) {
-    const d = deps(env, google(env));
+    const api = google(env);
+    const d = deps(env, api);
     const messages = batch.messages.map(m => ({ body: m.body, attempts: m.attempts, ack: () => m.ack(), retry: (options?: { delaySeconds?: number }) => m.retry(options) }));
     if (batch.queue === DEAD_LETTER_QUEUE) return consumeDead(messages, d);
     if (batch.queue === VIDEO_UPDATED_DLQ) return consumeVideoUpdatedDead(messages, d);
     if (batch.queue === VIDEO_UPDATED_QUEUE) {
       // PUSH_ON_UPDATE turns the push off (the daily plan still catches every change).
       if (env.PUSH_ON_UPDATE !== "true") { for (const message of batch.messages) message.ack(); return; }
-      return consumeVideoUpdated(messages, d, resolveVideo(env), async (body, delaySeconds) => { await env.SYNC_QUEUE.send(body, { delaySeconds }); });
+      return consumeVideoUpdated(messages, d, resolveVideo(env), async (body, delaySeconds) => { await env.SYNC_QUEUE.send(body, { delaySeconds }); }, {
+        api, fetchScheduled: videoId => fetchScheduled(env, videoId), streamId: env.YOUTUBE_STREAM_ID || undefined,
+        // The new broadcast's YouTube id becomes the video's channel mapping, so every later edit syncs as usual.
+        link: async (videoId, broadcastId) => { await (env.VIDEO_UPDATES as unknown as { update(input: unknown, actor: { userId: string; username?: string }): Promise<unknown> }).update({ videoId, channels: [{ platform: "youtube", externalId: broadcastId }], requestId: `link-${broadcastId}` }, { userId: "youtube-sync", username: "youtube-sync" }); },
+      });
     }
     await consume(messages, d, async (body, delaySeconds) => { await env.SYNC_QUEUE.send(body, { delaySeconds }); });
   },

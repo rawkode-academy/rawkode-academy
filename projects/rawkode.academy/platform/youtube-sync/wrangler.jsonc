@@ -17,7 +17,9 @@
     // changes for writing (0 = plan only). About a day's quota; the commit is the record.
     "AUTO_APPLY_LIMIT": "80",
     // Push a video as soon as the video-updates Worker commits a change to it (queue platform-video-updated).
-    "PUSH_ON_UPDATE": "true"
+    "PUSH_ON_UPDATE": "true",
+    // The reusable stream (stream key) new broadcasts are bound to; empty means the first reusable stream on the channel.
+    "YOUTUBE_STREAM_ID": ""
   },
   // Converts the site's WebP thumbnails to JPEG for YouTube.
   "images": { "binding": "IMAGES" },
@@ -29,7 +31,9 @@
   "services": [
     { "binding": "ANALYTICS", "service": "rawkode-tools-observability-collector" },
     { "binding": "VIDEO_CHANNELS", "service": "platform-video-channels-read-model" },
-    { "binding": "ACADEMY_API", "service": "platform-api-gateway" }
+    { "binding": "ACADEMY_API", "service": "platform-api-gateway" },
+    // Creates videos and writes the YouTube id of a new broadcast back (RPC).
+    { "binding": "VIDEO_UPDATES", "service": "platform-video-updates", "entrypoint": "VideoUpdates" }
   ],
   // Writes run through a queue, one message per video. Failed messages retry
   // with backoff, then go to the dead-letter queue, which the Worker records

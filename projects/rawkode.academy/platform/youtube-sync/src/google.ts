@@ -86,4 +86,23 @@ export class GoogleClient {
     ensure(image.byteLength > 0 && image.byteLength <= 2 * 1024 * 1024, "invalid_input", "A thumbnail must be 1 byte to 2 MB");
     await this.send("POST", "https://www.googleapis.com/upload/youtube/v3/", "thumbnails/set", { videoId: id, uploadType: "media" }, image, { "content-type": "image/jpeg" });
   }
+
+  // Schedules a live broadcast (50 quota units). Auto-start and auto-stop are on and latency is ultra low.
+  async insertBroadcast(input: { title: string; description: string; scheduledStartTime: string; privacy: "public" | "unlisted" | "private" }): Promise<string> {
+    ensure(input.title && input.scheduledStartTime, "invalid_input", "A broadcast needs a title and a start time");
+    const body = { snippet: { title: input.title, description: input.description, scheduledStartTime: input.scheduledStartTime }, status: { privacyStatus: input.privacy, selfDeclaredMadeForKids: false }, contentDetails: { enableAutoStart: true, enableAutoStop: true, latencyPreference: "ultraLow", monitorStream: { enableMonitorStream: false } } };
+    const result = await this.send<{ id?: string }>("POST", dataAPI, "liveBroadcasts", { part: "snippet,status,contentDetails" }, JSON.stringify(body), { "content-type": "application/json" });
+    ensure(typeof result.id === "string" && /^[A-Za-z0-9_-]{11}$/.test(result.id), "invalid_google_response", "liveBroadcasts.insert returned no broadcast id", 502);
+    return result.id;
+  }
+  // The reusable stream (stream key) the broadcast goes out on: the configured one, else the first reusable stream (1 quota unit).
+  async findStream(preferred?: string): Promise<string | null> {
+    const result = await this.get<{ items?: { id?: string; cdn?: { resolution?: string }; contentDetails?: { isReusable?: boolean } }[] }>(dataAPI, "liveStreams", { part: "id,contentDetails,cdn", mine: true, maxResults: 50 });
+    const streams = (result.items ?? []).filter(item => typeof item.id === "string");
+    return (preferred ? streams.find(item => item.id === preferred) : undefined)?.id ?? streams.find(item => item.contentDetails?.isReusable)?.id ?? null;
+  }
+  // Binds a broadcast to a stream (50 quota units).
+  async bindBroadcast(broadcastId: string, streamId: string): Promise<void> {
+    await this.send("POST", dataAPI, "liveBroadcasts/bind", { id: broadcastId, part: "id", streamId }, "", {});
+  }
 }

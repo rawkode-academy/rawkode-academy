@@ -67,6 +67,17 @@ export class Store {
     };
   }
 
+  async broadcast(videoId: string): Promise<{ broadcastId: string; linked: boolean; bound: boolean } | null> {
+    const row = await this.db.prepare("SELECT broadcast_id, linked_at, bound_at FROM youtube_sync_broadcasts WHERE video_id = ?1").bind(videoId).first<{ broadcast_id: string; linked_at: string | null; bound_at: string | null }>();
+    return row ? { broadcastId: row.broadcast_id, linked: row.linked_at !== null, bound: row.bound_at !== null } : null;
+  }
+  async saveBroadcast(videoId: string, broadcastId: string, at: string) {
+    await this.db.prepare("INSERT INTO youtube_sync_broadcasts (video_id, broadcast_id, created_at) VALUES (?1, ?2, ?3)").bind(videoId, broadcastId, at).run();
+  }
+  async markBroadcast(videoId: string, column: "linked_at" | "bound_at", at: string) {
+    await this.db.prepare(`UPDATE youtube_sync_broadcasts SET ${column} = ?2 WHERE video_id = ?1`).bind(videoId, at).run();
+  }
+
   async quotaUsed(day: string): Promise<number> {
     return (await this.db.prepare("SELECT units FROM youtube_sync_quota WHERE day = ?1").bind(day).first<{ units: number }>())?.units ?? 0;
   }

@@ -40,12 +40,15 @@ test("the video module is for operators, asked for by name, and calls the video-
   assert.deepEqual(modulesFor(["video:write"], "guest"), [], "a guest never reaches it");
   const calls: unknown[][] = [];
   const handlers = new Map<string, (input: any) => Promise<any>>();
-  const rpc = { preview: async (r: unknown) => ({ sections: ["video"], errors: [], r }), update: async (...a: unknown[]) => { calls.push(a); return { updateId: "u1", sections: ["video"], duplicate: false }; }, status: async () => null };
+  const rpc = { preview: async (r: unknown) => ({ sections: ["video"], errors: [], r }), update: async (...a: unknown[]) => { calls.push(a); return { updateId: "u1", sections: ["video"], duplicate: false }; }, status: async () => null, schedule: async (...a: unknown[]) => { calls.push(a); return { updateId: "u2", videoId: "newvid", sections: ["video"], duplicate: false }; } };
   video.register({ registerTool: (name: string, _config: unknown, handler: (input: any) => Promise<any>) => { handlers.set(name, handler); } } as any, { VIDEO_UPDATES: rpc } as any, { userId: "u-1", username: "rawkode", role: "operator" });
-  assert.deepEqual([...handlers.keys()].sort(), ["preview_video_update", "update_video", "video_update_status"]);
+  assert.deepEqual([...handlers.keys()].sort(), ["preview_video_update", "schedule_live_stream", "update_video", "video_update_status"]);
   const updated = await handlers.get("update_video")!({ videoId: "v1", video: { title: "New" } });
   assert.equal(JSON.parse(updated.content[0].text).updateId, "u1");
   assert.deepEqual(calls[0], [{ videoId: "v1", video: { title: "New" } }, { userId: "u-1", username: "rawkode" }]);
+  const scheduled = await handlers.get("schedule_live_stream")!({ privacy: "unlisted", video: { title: "Live" } });
+  assert.equal(JSON.parse(scheduled.content[0].text).videoId, "newvid");
+  assert.deepEqual(calls[1], [{ video: { title: "Live" }, broadcast: { privacy: "unlisted" } }, { userId: "u-1", username: "rawkode" }]);
   const missing = await handlers.get("video_update_status")!({ updateId: "nope" });
   assert.equal(JSON.parse(missing.content[0].text).error, "not_found");
 });
