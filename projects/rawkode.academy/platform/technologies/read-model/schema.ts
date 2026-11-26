@@ -111,6 +111,8 @@ export const getSchema = (env: { DB: D1Database }): GraphQLSchema => {
 		.implement({
 			fields: (t) => ({
 				twitter: t.string({ nullable: true, resolve: (c) => c.twitter }),
+				bluesky: t.string({ nullable: true, resolve: (c) => c.bluesky }),
+				mastodon: t.string({ nullable: true, resolve: (c) => c.mastodon }),
 				youtube: t.string({ nullable: true, resolve: (c) => c.youtube }),
 				slack: t.string({ nullable: true, resolve: (c) => c.slack }),
 				discord: t.string({ nullable: true, resolve: (c) => c.discord }),
