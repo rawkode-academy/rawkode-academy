@@ -3,8 +3,9 @@ import { roleOf, type Caller, type CallerRole } from "../identity.ts";
 import { analytics } from "./analytics.ts";
 import { guest } from "./guest.ts";
 import type { ToolModule } from "./module.ts";
+import { video } from "./video.ts";
 
-export const MODULES: readonly ToolModule[] = [analytics, guest];
+export const MODULES: readonly ToolModule[] = [analytics, guest, video];
 export const MODULE_SCOPES = MODULES.map(module => module.scope);
 
 // The modules a grant's scopes unlock for a role. A scope never reaches a
