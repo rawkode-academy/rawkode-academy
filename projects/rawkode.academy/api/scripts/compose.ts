@@ -21,6 +21,7 @@ const SUBGRAPHS = [
 	// Content relationships
 	"video-guests",
 	"video-channels",
+	"casting-credits",
 	"video-collaborations",
 	"video-technologies",
 	"show-hosts",
