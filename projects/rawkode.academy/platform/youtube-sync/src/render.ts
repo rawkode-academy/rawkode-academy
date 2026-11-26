@@ -21,7 +21,7 @@ export type Chapter = { startTime: number; title: string };
 // description is the Markdown the website renders for the video.
 export type Show = { id: string; name: string };
 export type Person = { id: string; name: string; x?: string; bluesky?: string; linkedin?: string };
-export type Technology = { id: string; name: string; website?: string; x?: string; youtube?: string };
+export type Technology = { id: string; name: string; website?: string; x?: string; bluesky?: string; mastodon?: string; youtube?: string };
 export type AcademyVideo = { id: string; title: string; slug: string; collaborators: string[]; description: string; chapters: Chapter[]; thumbnailUrl: string; show: Show | null; guests: Person[]; technologies: Technology[] };
 
 export function parseFields(value: string | undefined): Field[] {
@@ -94,7 +94,7 @@ export function renderMetadata(video: Pick<AcademyVideo, "show" | "guests" | "te
   const sections: string[] = [];
   if (video.show) sections.push(`Show: ${stripAngles(video.show.name)}\n${SITE}/shows/${video.show.id}`);
   if (video.guests.length) sections.push(["Guests", ...video.guests.slice(0, MAX_GUESTS).flatMap(guest => [`${stripAngles(guest.name)}: ${SITE}/people/${guest.id}`, ...labelled([["X", guest.x], ["Bluesky", guest.bluesky], ["LinkedIn", guest.linkedin]])])].join("\n"));
-  if (video.technologies.length) sections.push(["Technologies", ...video.technologies.slice(0, MAX_TECHNOLOGIES).flatMap(tech => [`${stripAngles(tech.name)}: ${SITE}/technology/${tech.id}`, ...labelled([["Website", tech.website], ["X", tech.x], ["YouTube", tech.youtube]])])].join("\n"));
+  if (video.technologies.length) sections.push(["Technologies", ...video.technologies.slice(0, MAX_TECHNOLOGIES).flatMap(tech => [`${stripAngles(tech.name)}: ${SITE}/technology/${tech.id}`, ...labelled([["Website", tech.website], ["X", tech.x], ["Bluesky", tech.bluesky], ["Mastodon", tech.mastodon], ["YouTube", tech.youtube]])])].join("\n"));
   return sections.join("\n\n");
 }
 
