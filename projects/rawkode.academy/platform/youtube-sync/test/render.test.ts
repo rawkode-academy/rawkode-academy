@@ -114,7 +114,7 @@ test("the metadata sits after the chapters and before the footer, and the body i
   assert.ok(bytes(description) <= 5000);
   const order = ["Watch with chapters", "…", "Chapters\n", "Show: Rawkode Live", "Guests\n", "Technologies\n", MARKER].map(part => description.indexOf(part));
   assert.deepEqual([...order].sort((a, b) => a - b), order);
-  assert.ok(description.includes("https://www.linkedin.com/in/elliehuxtable"));
+  assert.match(description, /\nLinkedIn: https:\/\/www\.linkedin\.com\/in\/elliehuxtable\n/);
 });
 
 test("an enormous guest list is capped and the description still fits", () => {
