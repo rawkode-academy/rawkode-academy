@@ -922,7 +922,7 @@ export const academyWatch = sva({
 			// The about block has no visible heading and spans both tracks.
 			"@media (min-width: 768px) and (max-width: 1023.98px)": {
 				maxWidth: "[50rem]",
-				"& > section:first-child": {
+				"& > section:first-of-type": {
 					display: "flex",
 					"& > *": { maxWidth: "[32rem]" },
 				},
@@ -933,7 +933,7 @@ export const academyWatch = sva({
 				maxWidth: "[384px]",
 				// With no lede the description opens the notes: its first line
 				// is trimmed like the lede's (child 1 is the sr-only heading).
-				"& > section:first-child > [data-academy-prose]:nth-child(2) > :first-child":
+				"& > section:first-of-type > [data-academy-prose]:nth-child(2) > :first-child":
 					{ marginBlockStart: "[-0.4em]" },
 			},
 		},
