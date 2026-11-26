@@ -6,43 +6,44 @@ The site is the source of truth and the direction is one way: Academy to YouTube
 
 ## What it manages
 
-| Field | Managed | How |
-| --- | --- | --- |
-| Description | yes, **footer only** | Everything from the line `──── Rawkode Academy ────` to the end is the site's: the watch link (with `utm_source=youtube`), newsletter, supporter link and, for a collaboration, a disclosure line. Text above the marker is written in Studio and never touched. |
-| Title | built, **off** | Turn it on with `MANAGED_FIELDS` in `wrangler.jsonc` (`"title,description"`). Titles over 100 characters or containing `<` or `>` fail that video; they are never truncated. |
-| Thumbnails | not yet | `thumbnails.set` takes JPEG or PNG up to 2 MB, and ours are WebP in R2, so this needs an image-conversion step. It is a follow-up. |
-| Tags, category, language, privacy, schedule | never | `videos.update` replaces the whole snippet, so every write starts from the live snippet and sends it back with only the managed fields changed. |
+The site owns the video. Studio text never wins: whatever the site generates is written, and the previous values are kept so a write can be rolled back.
 
-Course-only videos are excluded (the Academy API's default `getAllVideos` leaves them out, so they plan as `SKIP`), as are videos with no YouTube mapping.
+| Field | How |
+| --- | --- |
+| Title | The site's title. Over 100 characters it is cut at a word with an ellipsis; `<` and `>` are removed. |
+| Description | Generated: a header (the watch link), the site's description as plain text, the chapters, then a footer (newsletter, supporter link and, for a collaboration, a disclosure line). The body is cut at a paragraph, a sentence or a word, never mid-word, so the whole stays under YouTube's 5,000 bytes. Chapters are listed only in the shape YouTube accepts (starting at 0:00, at least three, ten seconds apart); a list that starts later gets an "Intro" at 0:00. |
+| Thumbnail | The site's WebP, converted to a 1280x720 JPEG with the Images binding (under 2 MB) and set with `thumbnails.set`. The source image's hash says when it changed, so a thumbnail is pushed once and again only when the site's image changes. The image YouTube showed before is stored in D1 for rollback. |
+| Tags, category, language, privacy, schedule | never touched: `videos.update` replaces the whole snippet, so every write starts from the live snippet and sends it back with only the title and description changed. |
+
+`MANAGED_FIELDS` in `wrangler.jsonc` (`title,description,thumbnail`) turns each on or off. Course-only videos are excluded (they plan as `SKIP`), as are videos with no YouTube mapping.
 
 ## Plan, apply, rollback
 
 Every change goes through a plan you can read first.
 
 1. **Plan** (`POST /plan`, daily at 09:47 UTC, or run the `rawkode-academy-platform-youtube-sync-plan` workflow). Reads the live snippets (1 quota unit per 50 videos), compares them to what the site wants, and stores a plan in D1 with a diff per video. The report is in the workflow's job summary and at `GET /plans/<id>/report`. Nothing is written to YouTube. Each video is one of:
-   - `CHANGE`: the live fields are what the sync last wrote (or first saw), and the site wants something else.
-   - `DRIFT`: someone edited the fields in Studio since. Reported and **not overwritten** unless named in `overrides`.
+   - `CHANGE`: the live title, description or thumbnail differs from what the site wants. If someone edited it in Studio since the last sync, the reason says it will be overwritten.
    - `NOOP`, `SKIP` (not listed, course-only, unmapped, private or deleted), `ERROR` (cannot be sent as is).
-   The first plan adopts the live values as the baseline: nothing is treated as drift on day one.
+   The job summary also shows the full, untruncated change for the first video named in `apply.json` (else the first in the plan), and `GET /plans/<id>/videos/<slug>` returns any video's.
 2. **Apply** (the `rawkode-academy-platform-youtube-sync-apply` workflow). Applies `CHANGE` items from the latest plan, as `apply.json` allows. Before each write it re-reads the live fields and refuses the video if they changed since the plan (`stale`), so the diff you reviewed is the diff that is written.
 3. **Rollback** (`POST /rollback`). Puts back the logged before values for a plan or one video, unless the field was edited after the sync wrote it.
 
 ### `apply.json` is the approval
 
 ```json
-{ "planId": "latest", "limit": 1, "videos": [], "overrides": [], "dryRun": true }
+{ "planId": "latest", "limit": 1, "videos": [], "dryRun": true }
 ```
 
 It ships as a dry run of one video. To roll out, change it in a commit and run the apply workflow:
 
 1. `dryRun: false`, `limit: 1`, `videos: ["<slug>"]`: the canary. Look at the video in Studio.
-2. `limit: 10`, then `limit: 170` once a day until the plan has no `CHANGE` left.
+2. `limit: 10`, then a large `limit` once a day until the plan has no `CHANGE` left. The daily quota budget stops each run by itself.
 
-The commit is the record of who allowed what. `overrides` takes slugs or YouTube IDs of `DRIFT` videos you want overwritten.
+The commit is the record of who allowed what.
 
 ## Quota
 
-YouTube gives 10,000 units a day, resetting at midnight Pacific. A `videos.update` costs 50 and a `videos.list` 1. The Worker counts units per Pacific day in D1 and stops at 9,000, leaving 1,000 for the analytics sync. So a day writes at most about 170 videos: the first push of ~330 videos takes 2 days for descriptions and titles. Thumbnails will add another 50 per video.
+YouTube gives 10,000 units a day, resetting at midnight Pacific. A `videos.update` costs 50 and a `videos.list` 1. The Worker counts units per Pacific day in D1 and stops at 9,000, leaving 1,000 for the analytics sync. A video's title and description are one update (50) and its thumbnail another (50), so a day writes about 90 full videos and the first push of ~330 takes four days. Run the apply workflow once a day; each run stops at the budget and the next picks up the rest.
 
 ## Audit
 
@@ -69,7 +70,7 @@ When the monitor issue or a log says `reauthorization_required`, repeat step 2.
 | `GET /status` | none | Latest plan's counts and time, last write result, quota used today. No titles or descriptions. |
 | `POST /plan` | bearer | Read-only plan. |
 | `GET /plans/<id\|latest>/report` | bearer | Markdown diff report. |
-| `POST /apply` | bearer | `{ planId, limit, videos?, overrides?, dryRun? }`. |
+| `POST /apply` | bearer | `{ planId, limit, videos?, dryRun? }`. |
 | `POST /rollback` | bearer | `{ planId \| youtubeId, limit }`. |
 
 `.github/workflows/youtube-sync-monitor.yml` reads `/status` daily and opens an issue if the plan stopped running, or found drift or errors.
