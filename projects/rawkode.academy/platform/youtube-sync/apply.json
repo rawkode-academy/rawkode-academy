@@ -1,6 +1,6 @@
 {
   "planId": "latest",
-  "limit": 1,
-  "videos": ["automating-deployments-to-the-edge"],
-  "dryRun": true
+  "limit": 2,
+  "videos": ["22-borko-vs-bojan", "automating-deployments-to-the-edge"],
+  "dryRun": false
 }
