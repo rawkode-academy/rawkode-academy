@@ -26,13 +26,14 @@ jobs:
           set -uo pipefail
           title="YouTube sync needs attention"
           problem=""
-          if ! status=$(curl -fsS --max-time 30 "$STATUS_URL"); then
-            problem="The Worker's status endpoint didn't answer ($STATUS_URL). Check the latest run of the rawkode-academy-platform-youtube-sync-default workflow."
+          # Stay quiet until the first plan has run: before the one-off setup
+          # (bootstrap apply, consent) the Worker isn't deployed or has no plan.
+          if ! status=$(curl -fsS --max-time 30 "$STATUS_URL") || [ -z "$(jq -r '.latestPlan.createdAt // ""' <<<"$status")" ]; then
+            echo "::notice::The sync Worker isn't live or hasn't planned yet; not alerting."
+            exit 0
           else
             created=$(jq -r '.latestPlan.createdAt // ""' <<<"$status")
-            if [ -z "$created" ]; then
-              problem="No plan has run yet."
-            elif [ "$(date -u -d "$created" +%s)" -lt "$(date -u -d '30 hours ago' +%s)" ]; then
+            if [ "$(date -u -d "$created" +%s)" -lt "$(date -u -d '30 hours ago' +%s)" ]; then
               problem="The latest plan ran at $created, over 30 hours ago. The daily plan is failing; look at the Worker's logs in Grafana. If it says \`reauthorization_required\`, run \`cuenv task consent\` in \`projects/rawkode.academy/platform/youtube-sync\`."
             else
               drift=$(jq -r '.latestPlan.summary.DRIFT // 0' <<<"$status")
