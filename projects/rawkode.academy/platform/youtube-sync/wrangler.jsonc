@@ -1,0 +1,30 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "rawkode-academy-youtube-sync",
+  "main": "src/main.ts",
+  "compatibility_date": "2026-10-31",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "observability": {
+    "traces": { "enabled": true, "destinations": ["grafana-traces"] },
+    "logs": { "enabled": true, "destinations": ["grafana-logs"] }
+  },
+  "vars": {
+    "YOUTUBE_CHANNEL_ID": "UCrber_mFvp_FEF7D9u8PDEA",
+    // Which YouTube fields the site manages: "description" (the footer only),
+    // "title", or "title,description". Thumbnails are not managed yet.
+    "MANAGED_FIELDS": "description"
+  },
+  "d1_databases": [
+    { "binding": "DB", "database_name": "platform-youtube-sync", "database_id": "dc6b56d6-d32d-4a22-90f7-6dffdd6edf93", "migrations_dir": "migrations" }
+  ],
+  // ANALYTICS: write audit events to the Basin lake. VIDEO_CHANNELS: the YouTube
+  // IDs the Academy maps to its videos. ACADEMY_API: the GraphQL gateway.
+  "services": [
+    { "binding": "ANALYTICS", "service": "rawkode-tools-observability-collector" },
+    { "binding": "VIDEO_CHANNELS", "service": "platform-video-channels-read-model" },
+    { "binding": "ACADEMY_API", "service": "platform-api-gateway" }
+  ],
+  // Daily read-only plan. Nothing is written to YouTube without an apply.
+  "triggers": { "crons": ["47 9 * * *"] }
+}
