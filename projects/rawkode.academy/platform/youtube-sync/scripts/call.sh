@@ -14,11 +14,12 @@ case "${1:-}" in
     result=$(request -X POST "$base/plan")
     echo "$result" | jq .
     id=$(jq -r .id <<<"$result")
-    request "$base/plans/$id/report" | tee -a "$summary"
+    report=$(request "$base/plans/$id/report")
+    echo "$report" | tee -a "$summary"
     # The full, untruncated change for one video (the first named in apply.json,
     # else the first in the plan), so it can be reviewed before an apply.
     slug=$(jq -r '.videos[0] // empty' apply.json)
-    slug=${slug:-$(request "$base/plans/$id/report" | sed -n 's/^### \([^ ]*\) (https.*/\1/p' | head -1)}
+    slug=${slug:-$(sed -n 's/^### \([^ ]*\) (https.*/\1/p' <<<"$report" | sed -n 1p)}
     if [ -n "$slug" ]; then
       { echo; echo "## Full change for $slug"; request "$base/plans/$id/videos/$slug" | jq -r '"Status: \(.status)\(if .reason then " (" + .reason + ")" else "" end)\n", (.changes[] | "### \(.field) before\n\n```\n\(.before)\n```\n\n### \(.field) after\n\n```\n\(.after)\n```\n"), (if .thumbnail then "### thumbnail\n\nsource: \(.thumbnail.url)\nchanged: \(.thumbnail.changed)" else empty end)'; } | tee -a "$summary"
     fi
