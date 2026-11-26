@@ -282,6 +282,12 @@ flake = "."
 digest = "sha256:82756de00dc5a94a422a1d44694e90880edcffc6b2ecb8f33a39944211f30531"
 lockfile = "projects/rawkode.academy/platform/youtube-control/flake.lock"
 
+[runtimes."projects/rawkode.academy/platform/youtube-sync"]
+type = "nix"
+flake = "."
+digest = "sha256:82756de00dc5a94a422a1d44694e90880edcffc6b2ecb8f33a39944211f30531"
+lockfile = "projects/rawkode.academy/platform/youtube-sync/flake.lock"
+
 [runtimes."projects/rawkode.academy/platform/zitadel-zulip-connector"]
 type = "nix"
 flake = "."

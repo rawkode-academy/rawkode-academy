@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { URL } from "node:url";
 import test, { after, before } from "node:test";
 import { convertV4MiniflareOptions, Miniflare } from "miniflare";
 import { createPlan, applyPlan, DAILY_BUDGET, rollback, type Deps } from "../src/sync.ts";
@@ -94,7 +95,7 @@ test("dry run reports what would be written and writes nothing", async () => {
   const f = await fixture(); seed(f, 3);
   const { plan } = await createPlan(f.deps, catalogue(3));
   const result = await applyPlan(f.deps, plan.id, { limit: 2, dryRun: true });
-  assert.equal("wouldApply" in result && result.wouldApply.length, 2);
+  assert.equal("wouldApply" in result ? result.wouldApply?.length : undefined, 2);
   assert.equal(f.writes.length, 0);
 });
 
