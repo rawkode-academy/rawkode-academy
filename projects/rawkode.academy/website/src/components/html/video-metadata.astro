@@ -16,6 +16,8 @@ interface Props {
 	title: string;
 	description: string;
 	thumbnailUrl?: string | undefined;
+	/** Sized variant of the thumbnail to preload; defaults to thumbnailUrl. */
+	preloadUrl?: string | undefined;
 	publishedAt?: string | undefined;
 	duration?: number | null | undefined;
 	streamUrl?: string | undefined;
@@ -39,6 +41,7 @@ const {
 	title,
 	description,
 	thumbnailUrl,
+	preloadUrl,
 	publishedAt,
 	duration,
 	streamUrl,
@@ -254,8 +257,8 @@ const structuredData = isVideoList
 {!isVideoList && (
 	<>
 		<!-- Preload video thumbnail to improve LCP on detail pages -->
-		{thumbnailUrl && (
-			<link rel="preload" as="image" href={thumbnailUrl} fetchpriority="high" />
+		{(preloadUrl ?? thumbnailUrl) && (
+			<link rel="preload" as="image" href={preloadUrl ?? thumbnailUrl} fetchpriority="high" />
 		)}
 
 		<!-- Video-specific meta tags (og:type and the Twitter card come from opengraph.astro) -->

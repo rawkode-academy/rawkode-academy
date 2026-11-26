@@ -197,6 +197,11 @@ const thumbnailUrl =
 		? `https://i.ytimg.com/vi/${video.data.youtubeId}/hqdefault.jpg`
 		: r2ThumbnailUrl;
 const isR2Thumbnail = thumbnailUrl === r2ThumbnailUrl;
+// The poster is the LCP element: show a resized, modern-format copy (960px
+// covers a phone at 2x) while metadata keeps the full-size original.
+const posterUrl = isR2Thumbnail
+	? getVideoThumbnailResizedUrl(video.data.id, 960)
+	: thumbnailUrl;
 const rawStreamUrl = `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`;
 const rawCaptionUrl = `https://content.rawkode.academy/videos/${video.data.id}/captions/en.vtt`;
 const streamUrl = hasVodAssets ? rawStreamUrl : undefined;
@@ -434,6 +439,7 @@ const watchStatusLabel = isLiveNow
 		title={video.data.title}
 		description={video.data.description}
 		thumbnailUrl={thumbnailUrl}
+		preloadUrl={posterUrl}
 		publishedAt={publishedIso}
 		duration={durationSec ?? undefined}
 		streamUrl={streamUrl}
@@ -479,7 +485,7 @@ const watchStatusLabel = isLiveNow
 									<img
 										class={watch.poster}
 										data-watch-player-poster
-										src={thumbnailUrl}
+										src={posterUrl}
 										alt={video.data.title}
 										width="1280"
 										height="720"
@@ -491,7 +497,7 @@ const watchStatusLabel = isLiveNow
 											client:only="vue"
 											videoSlug={video.data.slug}
 											initialState={studioLiveState}
-											thumbnailUrl={thumbnailUrl}
+											thumbnailUrl={posterUrl}
 											title={video.data.title}
 											fallbackVideoId={shouldRenderVodFallback ? video.data.id : undefined}
 											fallbackInitialPosition={initialPosition}
@@ -502,7 +508,7 @@ const watchStatusLabel = isLiveNow
 										<VideoPlayer
 											client:only="vue"
 											video={video.data.id}
-											thumbnailUrl={thumbnailUrl}
+											thumbnailUrl={posterUrl}
 											initialPosition={initialPosition}
 											isAuthenticated={isAuthenticated}
 										/>
