@@ -1,0 +1,56 @@
+# Hourly: reads the video-updates Worker's public /status (counts and times only,
+# no secrets) and opens a GitHub issue when an update failed and was rolled back,
+# a rollback itself failed, an update is stuck, or a committed update's event never
+# reached the queue. Closes it once the counts are clean.
+# Hand-written because cuenv pipelines have no schedule trigger.
+name: video-updates-monitor
+on:
+  schedule:
+    - cron: "23 * * * *"
+  workflow_dispatch: {}
+permissions:
+  contents: read
+  issues: write
+concurrency:
+  group: video-updates-monitor
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the update counts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          STATUS_URL: https://platform-video-updates.rawkodeacademy.workers.dev/status
+        run: |
+          set -uo pipefail
+          title="Video updates need attention"
+          problem=""
+          # Stay quiet until the Worker is deployed and has answered once.
+          if ! status=$(curl -fsS --max-time 30 "$STATUS_URL") || ! jq -e '.rollbackFailed != null' <<<"$status" >/dev/null; then
+            echo "::notice::The video-updates Worker isn't live; not alerting."
+            exit 0
+          fi
+          rollbackFailed=$(jq -r '.rollbackFailed' <<<"$status")
+          stuck=$(jq -r '.stuck' <<<"$status")
+          failed=$(jq -r '.failedLast24h' <<<"$status")
+          unpublished=$(jq -r '.unpublishedEvents' <<<"$status")
+          if [ "$rollbackFailed" != "0" ]; then
+            problem="$rollbackFailed video update(s) failed and could not be rolled back: the databases may disagree for those videos. Find them in the Worker's logs in Grafana (\`\"operation\":\"video-update\"\`, \`rollbackFailed\`); each stored the rows from before the update."
+          elif [ "$stuck" != "0" ]; then
+            problem="$stuck video update(s) have been queued or running for over 30 minutes. Look at the \`update-video\` Workflow instances in the Cloudflare dashboard."
+          elif [ "$unpublished" != "0" ]; then
+            problem="$unpublished committed video update(s) never published their event, so YouTube has not been pushed. The daily sync still catches the change."
+          elif [ "$failed" != "0" ]; then
+            problem="$failed video update(s) failed in the last 24 hours and were rolled back cleanly. Look at the Worker's logs in Grafana for \`\"operation\":\"video-update\"\`."
+          fi
+          existing=$(gh issue list --state open --search "in:title \"$title\"" --json number,title --jq ".[] | select(.title == \"$title\") | .number" | head -n 1)
+          if [ -z "$problem" ]; then
+            echo "Video updates are clean."
+            if [ -n "$existing" ]; then gh issue close "$existing" --comment "No failed, stuck or unpublished video updates."; fi
+            exit 0
+          fi
+          body="$problem"$'\n\n'"Status: $STATUS_URL"$'\n'"Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          if [ -n "$existing" ]; then gh issue comment "$existing" --body "$body"; else gh issue create --title "$title" --body "$body"; fi
+          echo "::error::$problem"
+          exit 1

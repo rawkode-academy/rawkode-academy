@@ -29,7 +29,7 @@ const compact = (date: Date) => date.toISOString().replace(/[-:]/g, "").slice(0,
 
 // Read-only against YouTube: reads live snippets, writes only the plan (and
 // first-sight baselines) to D1.
-export async function createPlan(deps: Deps, catalogue: Map<string, AcademyVideo | undefined>) {
+export async function createPlan(deps: Deps, catalogue: Map<string, AcademyVideo | undefined>, scope: "full" | "video" = "full") {
   const now = deps.now();
   const ids = [...catalogue.keys()];
   const live = new Map<string, Snippet>();
@@ -57,7 +57,7 @@ export async function createPlan(deps: Deps, catalogue: Map<string, AcademyVideo
   const summary: Record<string, number> = {};
   for (const item of items) summary[item.status] = (summary[item.status] ?? 0) + 1;
   const plan = { id: `plan-${compact(now)}-${(await hash(String(now.getTime()) + ids.join()))
-    .slice(0, 6)}`, createdAt: now.toISOString(), templateVersion: TEMPLATE_VERSION, fields: deps.fields, summary };
+    .slice(0, 6)}`, createdAt: now.toISOString(), templateVersion: TEMPLATE_VERSION, fields: deps.fields, summary, scope };
   await deps.store.savePlan(plan, items);
   await deps.store.setBaselines(adopt, now.toISOString());
   return { plan, items };

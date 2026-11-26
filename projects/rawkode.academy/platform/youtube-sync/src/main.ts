@@ -6,6 +6,7 @@ import { renderReport } from "./plan.ts";
 import { parseFields } from "./render.ts";
 import { pacificDay, Store } from "./store.ts";
 import { consume, consumeDead, DEAD_LETTER_QUEUE, type SyncMessage } from "./queue.ts";
+import { consumeVideoUpdated, consumeVideoUpdatedDead, resolveVideo, VIDEO_UPDATED_DLQ, VIDEO_UPDATED_QUEUE } from "./video-updated.ts";
 import { applyPlan, createPlan, DAILY_BUDGET, type Deps, rollback, scheduledCandidates, selectCandidates, type Thumbnails } from "./sync.ts";
 
 const json = (body: unknown, status = 200) => Response.json(body, { status, headers: { "cache-control": "no-store", "x-content-type-options": "nosniff" } });
@@ -130,6 +131,12 @@ export default {
     const d = deps(env, google(env));
     const messages = batch.messages.map(m => ({ body: m.body, attempts: m.attempts, ack: () => m.ack(), retry: (options?: { delaySeconds?: number }) => m.retry(options) }));
     if (batch.queue === DEAD_LETTER_QUEUE) return consumeDead(messages, d);
+    if (batch.queue === VIDEO_UPDATED_DLQ) return consumeVideoUpdatedDead(messages, d);
+    if (batch.queue === VIDEO_UPDATED_QUEUE) {
+      // PUSH_ON_UPDATE turns the push off (the daily plan still catches every change).
+      if (env.PUSH_ON_UPDATE !== "true") { for (const message of batch.messages) message.ack(); return; }
+      return consumeVideoUpdated(messages, d, resolveVideo(env), async body => { await env.SYNC_QUEUE.send(body); });
+    }
     await consume(messages, d, async (body, delaySeconds) => { await env.SYNC_QUEUE.send(body, { delaySeconds }); });
   },
   async scheduled(_controller, env, ctx) {
