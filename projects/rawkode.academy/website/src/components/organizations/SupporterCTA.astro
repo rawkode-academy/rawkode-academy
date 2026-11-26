@@ -4,22 +4,29 @@ import { supportAcademyOffer } from "@/lib/partnerships";
 
 interface Props {
 	surface: "video" | "article";
+	/** pane: ink surface under the video title. rail: light panel in the description column. end: full-width block after the page. */
+	placement?: "pane" | "rail" | "end";
 }
 
-const { surface } = Astro.props;
+const { surface, placement = "end" } = Astro.props;
+const onInk = placement === "pane";
 ---
 
-<aside class="supporter-cta" aria-labelledby={`supporter-cta-${surface}`} data-supporter-cta={surface}>
+<aside class={`supporter-cta supporter-cta--${placement}`} aria-labelledby={`supporter-cta-${surface}-${placement}`} data-supporter-cta={surface} data-placement={placement}>
 	<div class="supporter-cta__copy">
-		<h2 id={`supporter-cta-${surface}`}>Does your team use this?</h2>
-		<p>Rawkode Academy keeps this {surface === "video" ? "video" : "article"} free for everyone. Companies back the work from {supportAcademyOffer.priceShort}, with a badge on their technology page and a spot on the supporters wall.</p>
+		<h2 id={`supporter-cta-${surface}-${placement}`}>Free for everyone. Funded by companies.</h2>
+		<p>Teams that rely on this work back it from {supportAcademyOffer.priceShort}, with a supporter badge on their technology page.</p>
 	</div>
-	<a class={button({ variant: "outline" })} href="/organizations/support-our-work" data-supporter-cta-link={surface}>Support our work</a>
+	<a class={button(onInk ? { surface: "ink" } : {})} href="/organizations/support-our-work" data-supporter-cta-link={surface}>Become a supporter</a>
 </aside>
 
 <style>
-	.supporter-cta { display: grid; gap: 1.25rem; align-items: center; padding: clamp(1.25rem, 3vw, 2rem); border: 1px solid var(--colors-academy-border); border-radius: var(--radii-academy-l); background: var(--colors-academy-panel); }
-	.supporter-cta h2 { margin: 0 0 0.5rem; font-family: var(--fonts-academy-display), system-ui, sans-serif; font-size: clamp(1.15rem, 2vw, 1.4rem); }
-	.supporter-cta p { margin: 0; line-height: 1.7; max-width: 44rem; }
-	@media (min-width: 48rem) { .supporter-cta { grid-template-columns: minmax(0, 1fr) auto; gap: 2rem; } }
+	.supporter-cta { display: grid; gap: 1rem; align-items: center; padding: clamp(1.25rem, 3vw, 2rem); border: 1px solid var(--colors-academy-border); border-radius: var(--radii-academy-l); background: var(--colors-academy-panel); }
+	.supporter-cta h2 { margin: 0 0 0.4rem; font-family: var(--fonts-academy-display), system-ui, sans-serif; font-size: clamp(1.1rem, 2vw, 1.35rem); line-height: 1.25; }
+	.supporter-cta p { margin: 0; line-height: 1.6; max-width: 44rem; }
+	.supporter-cta a { justify-self: start; }
+	.supporter-cta--pane { margin-block: 1.5rem; padding: 1.25rem; border-color: var(--colors-academy-ink-border); background: transparent; color: var(--colors-academy-ink-text); }
+	.supporter-cta--pane p { color: var(--colors-academy-ink-text-soft); }
+	.supporter-cta--rail { margin-block: 2rem; padding: 1.25rem; border-color: var(--colors-academy-accent); }
+	@media (min-width: 48rem) { .supporter-cta--end { grid-template-columns: minmax(0, 1fr) auto; gap: 2rem; } }
 </style>
