@@ -10,6 +10,7 @@ import { transform } from "@astrojs/compiler";
 import * as runtime from "astro/runtime/server/index.js";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import { parse } from "node-html-parser";
+import { partnerLink } from "../utils/partner-link.ts";
 
 const read = (path) =>
 	readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
@@ -114,8 +115,12 @@ const badgeMarkup = fragment(
 	"\t\t\t\t{description && ",
 );
 const renderBadge = (supporter) =>
-	render(badgeMarkup, ["supporter", "SUPPORTERS_PATH", "MLabel"], {
+	render(badgeMarkup, ["supporter", "supporterWebsiteUrl", "SUPPORTERS_PATH", "MLabel"], {
 		supporter,
+		// As the page's frontmatter derives it.
+		supporterWebsiteUrl:
+			supporter &&
+			partnerLink(supporter.data.websiteUrl, { medium: "supporter", campaign: "technology", content: "kubernetes" }),
 		SUPPORTERS_PATH: "/supporters",
 	});
 
@@ -130,7 +135,10 @@ test("technology credit thanks the supporter, links to its website and to the wa
 		"spruce",
 	);
 	const website = supported.querySelector(".technology-supporter__name");
-	assert.equal(website.getAttribute("href"), "https://acme.example/");
+	assert.equal(
+		website.getAttribute("href"),
+		"https://acme.example/?utm_source=rawkode.academy&utm_medium=supporter&utm_campaign=technology&utm_content=kubernetes",
+	);
 	assert.equal(website.getAttribute("target"), "_blank");
 	assert.match(website.getAttribute("rel"), /\bnoopener\b/);
 	assert.equal(website.firstChild.text, "Acme <Cloud>");

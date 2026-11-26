@@ -1,4 +1,5 @@
 ---
+import { partnerLink } from "@/utils/partner-link";
 export const prerender = false;
 
 import TopicHub from "@/components/technology/TopicHub.astro";
@@ -68,6 +69,9 @@ const [items, allVideos, supporters] = await Promise.all([
 	optionalContent(getCollection("supporters"), []),
 ]);
 const supporter = supporterForTechnology(supporters, technologyEntry.id);
+const supporterWebsiteUrl =
+	supporter &&
+	partnerLink(supporter.data.websiteUrl, { medium: "supporter", campaign: "technology", content: technologyEntry.id });
 
 const now = new Date();
 const upcomingSessions = allVideos
@@ -489,7 +493,7 @@ await setContentCache(Astro, {
 					<aside class="technology-supporter" aria-label="Community supporter">
 						<MLabel tone="spruce">Community supporter</MLabel>
 						<p class="technology-supporter__thanks">
-							<a class="technology-supporter__name" href={supporter.data.websiteUrl} target="_blank" rel="sponsored noopener">{supporter.data.name}<span class="sr-only"> (opens in a new tab)</span></a> helps keep Rawkode Academy free to watch. Thank you.
+							<a class="technology-supporter__name" href={supporterWebsiteUrl} target="_blank" rel="sponsored noopener">{supporter.data.name}<span class="sr-only"> (opens in a new tab)</span></a> helps keep Rawkode Academy free to watch. Thank you.
 						</p>
 						<a class="technology-supporter__wall" href={SUPPORTERS_PATH}>All community supporters <span aria-hidden="true">→</span></a>
 					</aside>

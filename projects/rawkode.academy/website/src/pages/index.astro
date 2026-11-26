@@ -1,4 +1,5 @@
 ---
+import { partnerLink } from "@/utils/partner-link";
 import { academyPage } from "@rawkodeacademy/design-system";
 import AcademyPage from "@/components/academy/AcademyPage.vue";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
@@ -353,7 +354,7 @@ Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 					<ul class="home-supporters__names">
 						{supporters.map((supporter) => ({ data: supporter.data, logo: supporterLogo(supporter) })).map(({ data, logo }) => (
 							<li>
-								<a href={data.websiteUrl} target="_blank" rel="sponsored noopener">
+								<a href={partnerLink(data.websiteUrl, { medium: "supporter", campaign: "home" })} target="_blank" rel="sponsored noopener">
 									{logo && <img src={logo.src} alt={logo.wordmark ? "" : data.name} width="160" height="40" loading="lazy" onerror="this.hidden=true; this.nextElementSibling.hidden=false;" />}
 									<span hidden={Boolean(logo) && !logo?.wordmark}>{data.name}</span>
 									<span class="sr-only"> (opens in a new tab)</span>

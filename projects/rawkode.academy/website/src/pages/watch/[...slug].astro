@@ -564,7 +564,7 @@ const watchStatusLabel = isLiveNow
 										{isLiveNow ? "Live · " : ""}{categoryLabel}
 									</MLabel>
 								</span>
-								<Collaboration collaborators={collaborators} />
+								<Collaboration collaborators={collaborators} campaign={video.data.slug} />
 							</p>
 
 							<div class={watch.tools}>
