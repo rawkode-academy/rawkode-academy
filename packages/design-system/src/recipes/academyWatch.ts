@@ -656,7 +656,8 @@ export const academyWatch = sva({
 		collab: {
 			display: "inline-flex",
 			alignItems: "center",
-			gap: "2",
+			columnGap: "2",
+			rowGap: "1",
 			flexWrap: "wrap",
 			maxWidth: "full",
 			border: "hairline",
@@ -668,8 +669,6 @@ export const academyWatch = sva({
 			transitionDuration: "fast",
 			// The meta line puts a dot before each item; inside a bordered pill it would sit within the border.
 			"&::before": { content: "none!" },
-			_hover: { borderColor: "academy.inkAccent", "& [data-collab-panel]": { display: "inline-flex" } },
-			_focusWithin: { borderColor: "academy.inkAccent", "& [data-collab-panel]": { display: "inline-flex" } },
 			'&[data-open="true"]': { borderColor: "academy.inkAccent", "& [data-collab-panel]": { display: "inline-flex" } },
 			"& [data-collab-panel]": { display: "none" },
 		},

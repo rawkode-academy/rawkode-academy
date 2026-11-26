@@ -59,10 +59,23 @@ const names = items.map((c) => c.name).join(", ");
 		pill.dataset.open = String(open);
 		pill.querySelector("[data-collab-toggle]")?.setAttribute("aria-expanded", String(open));
 	};
+	const canHover = window.matchMedia("(hover: hover)").matches;
 	for (const pill of pills) {
 		pill.querySelector("[data-collab-toggle]")?.addEventListener("click", () => set(pill, pill.dataset.open !== "true"));
 		pill.addEventListener("keydown", (event) => {
 			if ((event as KeyboardEvent).key === "Escape") set(pill, false);
+		});
+		if (canHover) {
+			pill.addEventListener("pointerenter", () => set(pill, true));
+			pill.addEventListener("pointerleave", () => {
+				if (!pill.contains(document.activeElement)) set(pill, false);
+			});
+		}
+		pill.addEventListener("focusin", (event) => {
+			if ((event.target as HTMLElement).matches(":focus-visible")) set(pill, true);
+		});
+		pill.addEventListener("focusout", (event) => {
+			if (!pill.contains((event as FocusEvent).relatedTarget as Node | null)) set(pill, false);
 		});
 	}
 	document.addEventListener("click", (event) => {
