@@ -67,6 +67,14 @@ test("a title over the limit is cut at a word with an ellipsis", () => {
   assert.equal(composeTitle({ title: "a <b> c" }), "a b c");
 });
 
+test("a title carries its show or course as a suffix, kept whole", () => {
+  assert.equal(composeTitle({ title: "22. Borko Vs. Bojan", show: { id: "klustered", name: "Klustered" } }), "22. Borko Vs. Bojan | Klustered");
+  assert.equal(composeTitle({ title: "Intro", course: "Teleport for Kubernetes" }), "Intro | Teleport for Kubernetes");
+  assert.equal(composeTitle({ title: "Already | Klustered", show: { id: "k", name: "Klustered" } }), "Already | Klustered");
+  const long = composeTitle({ title: `${"word ".repeat(30)}end`, show: { id: "k", name: "Klustered" } });
+  assert.ok([...long].length <= 100 && long.endsWith("… | Klustered"));
+});
+
 test("validation fails an empty title or an over-long description", () => {
   assert.deepEqual(validateManaged({ title: "ok", description: "ok" }), []);
   assert.match(validateManaged({ title: "  " })[0], /empty/);

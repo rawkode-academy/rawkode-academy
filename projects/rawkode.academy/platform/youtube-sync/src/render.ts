@@ -22,7 +22,7 @@ export type Chapter = { startTime: number; title: string };
 export type Show = { id: string; name: string };
 export type Person = { id: string; name: string; x?: string; bluesky?: string; linkedin?: string };
 export type Technology = { id: string; name: string; website?: string; x?: string; bluesky?: string; mastodon?: string; youtube?: string };
-export type AcademyVideo = { id: string; title: string; slug: string; collaborators: string[]; description: string; chapters: Chapter[]; thumbnailUrl: string; show: Show | null; guests: Person[]; technologies: Technology[] };
+export type AcademyVideo = { id: string; title: string; slug: string; collaborators: string[]; description: string; chapters: Chapter[]; thumbnailUrl: string; show: Show | null; course?: string | null; guests: Person[]; technologies: Technology[] };
 
 export function parseFields(value: string | undefined): Field[] {
   const wanted = (value ?? ALL_FIELDS.join(",")).split(",").map(item => item.trim()).filter(Boolean);
@@ -144,13 +144,26 @@ export function composeDescription(video: AcademyVideo): string {
   return [header, trimmed, chapters, metadata, footer].filter(Boolean).join("\n\n");
 }
 
-// A title over YouTube's limit is cut at a word, never mid-word.
-export function composeTitle(video: Pick<AcademyVideo, "title">): string {
-  const title = stripAngles(video.title).replace(/\s+/g, " ").trim();
-  if ([...title].length <= MAX_TITLE) return title;
-  const cut = [...title].slice(0, MAX_TITLE - 1).join("");
+// YouTube has no shows or courses, so the title carries its context as a
+// suffix: " | Show" for an episode, " | Course" for a course video. The suffix
+// is kept whole; the site title is cut at a word to make room, within YouTube's
+// 100 characters.
+const MAX_SUFFIX = 40;
+
+function cutAtWord(text: string, max: number): string {
+  if ([...text].length <= max) return text;
+  const cut = [...text].slice(0, max - 1).join("");
   const word = cut.search(/\s\S*$/);
   return `${(word > 0 ? cut.slice(0, word) : cut).replace(/[\s,;:–-]+$/, "")}…`;
+}
+
+export function composeTitle(video: Pick<AcademyVideo, "title"> & { show?: Show | null; course?: string | null }): string {
+  const title = stripAngles(video.title).replace(/\s+/g, " ").trim();
+  const context = stripAngles(video.show?.name ?? video.course ?? "").replace(/\s+/g, " ").trim();
+  if (!context) return cutAtWord(title, MAX_TITLE);
+  const suffix = ` | ${cutAtWord(context, MAX_SUFFIX)}`;
+  if (title.toLowerCase().endsWith(suffix.toLowerCase())) return cutAtWord(title, MAX_TITLE);
+  return `${cutAtWord(title, MAX_TITLE - [...suffix].length)}${suffix}`;
 }
 
 // The managed values the site wants, for the managed text fields only.

@@ -49,6 +49,7 @@ before(async () => {
       name: "gateway", modules: true, compatibilityDate: "2026-10-31",
       script: `export default { async fetch(request) { const body = await request.json();
         if (body.query.includes("videoChannels")) return Response.json({ data: { videoChannels: [${ids.map((id, i) => `{ videoId: "v${i}", externalId: "${id}" }`).join(",")}, { videoId: "course", externalId: "ddddddddddd" }] } });
+        if (body.query.includes("allCourses")) return Response.json({ data: { allCourses: [{ title: "A Course", modules: [{ video: { id: "v1" } }] }] } });
         if (body.query.includes("getAllVideos")) return Response.json({ data: { getAllVideos: [${ids.map((_, i) => `{ id: "v${i}", title: "Video ${i}", slug: "video-${i}", description: "Site description ${i}.", thumbnailUrl: "https://cdn.test/v${i}/thumbnail.webp", chapters: [], episode: { show: { id: "rawkode-live", name: "Rawkode Live" } }, guests: [{ id: "ellie", name: "Ellie Huxtable", twitterUrl: "https://x.com/ellie_huxtable", blueskyUrl: null, linkedinUrl: null }], technologies: [{ id: "atuin", name: "Atuin", website: "https://atuin.sh", community: { twitter: "https://twitter.com/atuinsh", bluesky: "https://bsky.app/profile/atuin.sh", mastodon: "https://hachyderm.io/@atuin", youtube: null } }], collaborators: ${i === 0 ? '[{ name: "Teleport" }]' : "[]"} }`).join(",")}] } });
         return Response.json({ errors: [{ message: "unexpected" }] }); } };`,
     }, {
