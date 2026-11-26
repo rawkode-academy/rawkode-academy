@@ -22,6 +22,7 @@ import json
 import time
 from content_api import (
     D1Client,
+    find_video_by_youtube_id,
     insert_video_sql,
     invalidate_cache,
     video_row,
@@ -685,9 +686,15 @@ class YouTubeToR2:
             logger.info(f"Completed steps: {', '.join(resume_info['completed_steps'])}")
             logger.info(f"Remaining steps: {', '.join(resume_info['remaining_steps'])}")
         else:
-            # Generate new CUID for this video
-            video_cuid = str(cuid_generator.generate())
-            logger.info(f"Generated CUID: {video_cuid}")
+            # A live stream already has a row from when it was scheduled; the
+            # recording belongs to that row, not a new one.
+            existing = find_video_by_youtube_id(d1_client, youtube_id) if d1_client else None
+            if existing:
+                video_cuid = existing
+                logger.info(f"Using existing platform-videos row {video_cuid} for {youtube_id}")
+            else:
+                video_cuid = str(cuid_generator.generate())
+                logger.info(f"Generated CUID: {video_cuid}")
             state.set_cuid(video_cuid)
 
         with tempfile.TemporaryDirectory() as temp_dir:

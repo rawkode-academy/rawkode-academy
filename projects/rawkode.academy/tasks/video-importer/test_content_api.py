@@ -12,6 +12,7 @@ from unittest import mock
 import content_api
 from content_api import (
     D1Client,
+    find_video_by_youtube_id,
     insert_video_sql,
     insert_video_statement,
     invalidate_cache,
@@ -144,7 +145,7 @@ class D1ClientTest(unittest.TestCase):
 
     def test_existing_row(self):
         client = D1Client("acct", "tok", "db")
-        row = video_row("abc", "T", "D", 1, 10, now=0)
+        row = video_row("abc", "T", "D", None, 10, now=0)
         with mock.patch("content_api._urlopen", return_value=respond(
             {"success": True, "result": [{"results": [], "meta": {"changes": 0}}]},
         )):
@@ -164,6 +165,33 @@ class D1ClientTest(unittest.TestCase):
         with mock.patch("content_api._urlopen", return_value=respond({"success": False, "errors": ["x"]})):
             with self.assertRaises(content_api.D1Error):
                 client.query("SELECT 1")
+
+
+class ScheduledRowTest(unittest.TestCase):
+    def test_find_video_by_youtube_id(self):
+        client = D1Client("acct", "tok", "db")
+        with mock.patch("content_api._urlopen", return_value=respond(
+            {"success": True, "result": [{"results": [{"id": "scheduled"}], "meta": {}}]},
+        )) as urlopen:
+            self.assertEqual(find_video_by_youtube_id(client, "yt"), "scheduled")
+        body = json.loads(urlopen.call_args[0][0].data)
+        self.assertEqual(body["params"], ["yt"])
+        with mock.patch("content_api._urlopen", return_value=respond(
+            {"success": True, "result": [{"results": [], "meta": {}}]},
+        )):
+            self.assertIsNone(find_video_by_youtube_id(client, "yt"))
+
+    def test_write_video_fills_missing_duration(self):
+        client = D1Client("acct", "tok", "db")
+        row = video_row("scheduled", "T", "D", 3327, 10, now=0)
+        with mock.patch("content_api._urlopen", side_effect=[
+            respond({"success": True, "result": [{"results": [], "meta": {"changes": 0}}]}),
+            respond({"success": True, "result": [{"results": [], "meta": {"changes": 1}}]}),
+        ]) as urlopen:
+            self.assertFalse(write_video(client, row))
+        update = json.loads(urlopen.call_args_list[1][0][0].data)
+        self.assertIn("`duration` IS NULL", update["sql"])
+        self.assertEqual(update["params"], [3327, 0, "scheduled"])
 
 
 class InvalidateCacheTest(unittest.TestCase):
