@@ -100,6 +100,7 @@ Write SQL files outside the repo, double single quotes inside string literals, s
 | Video metadata | `platform-videos` (`videos`) | `videos`: `slug` (drop show suffixes like `-rawkode-live` unless nearby videos keep them), `subtitle`, `tagline`, `type` (`live`/`recorded`), `category` (`editorial`/`tutorial`/`review`/`interview`/`announcement`), `what_you_will_learn` (JSON string array), `resources` (JSON array of `{title, description?, type: url\|file\|embed, url?, category: slides\|code\|documentation\|demos\|other}`), `description` + `description_doc` |
 | Show episode | `platform-episodes` (`episodes`) | `episodes`: `videoId`, `showId` (e.g. `rawkode-live`, `cloud-native-compass`), `code` (unique per show; the episode code or the video slug) |
 | Guests | `platform-video-guests` (`video-guests`) | `video_guests`: `video_id`, `guest_id` (person id), `position` (credit order from 0) |
+| Casting credits | `platform-casting-credits` (`casting-credits`) | `casting_credits`: `subject_type` (`video`), `subject_id` (the video id), `person_id`, `role` (`host`/`co_host`/`guest`/`author`), `position` (order within the role, from 0). Credit every video explicitly: its host(s) (a show's hosts are a starting point, but only credit those who were on this episode) and each guest |
 | Technologies | `platform-video-technologies` (`video-technologies`) | `video_technologies`: `video_id`, `technology_id` (no `/index`), `position` |
 | Chapters | `platform-chapters` (`chapters`) | `chapters`: `video_id`, `seconds`, `title` |
 | Transcription terms | `platform-transcription-terms` (`transcription-terms`) | `transcription_terms`: `kind` (`video`, `episode`, `person`, `technology`, `show`), `foreignId` (the entity id; for an episode `<showId>-<videoId>`), `term` |
@@ -115,6 +116,8 @@ UPDATE videos SET slug = '<slug>', type = 'live', category = 'tutorial', updated
 INSERT INTO episodes (videoId, showId, code) VALUES ('<cuid>', 'rawkode-live', '<slug>');
 -- platform-video-guests
 INSERT INTO video_guests (video_id, guest_id, position) VALUES ('<cuid>', '<person-id>', 0);
+-- platform-casting-credits
+INSERT INTO casting_credits (subject_type, subject_id, person_id, role, position) VALUES ('video', '<cuid>', 'rawkode', 'host', 0), ('video', '<cuid>', '<person-id>', 'guest', 0);
 -- platform-video-technologies
 INSERT INTO video_technologies (video_id, technology_id, position) VALUES ('<cuid>', 'kubernetes', 0), ('<cuid>', 'helm', 1);
 ```
@@ -241,6 +244,6 @@ curl -fsS https://api.rawkode.academy/ -H 'content-type: application/json' \
 curl -fsS -o /dev/null -w '%{http_code}\n' https://rawkode.academy/watch/<slug>
 ```
 
-Every referenced guest and technology must resolve (no nulls in `guests`/`technologies`).
+Every referenced guest and technology must resolve (no nulls in `guests`/`technologies`). Check `castingCredits { role person { id } }` returns the host and every guest; MCP access and the YouTube description read it.
 
 Always report blocked or in-flight work plainly: uploaded, transcode running, transcription waiting, captions missing, etc.
