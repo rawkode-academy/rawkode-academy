@@ -669,6 +669,8 @@ export const academyWatch = sva({
 			_hover: { borderColor: "academy.inkAccent" },
 			_focusWithin: { borderColor: "academy.inkAccent" },
 			'&[data-open="true"]': { borderColor: "academy.inkAccent" },
+			// The meta line puts a dot before each item; inside a bordered pill it would sit within the border.
+			"&::before": { content: "none!" },
 			"& [data-collab-panel]": { display: "none" },
 			"&:hover [data-collab-panel], &:focus-within [data-collab-panel], &[data-open='true'] [data-collab-panel]": {
 				display: "inline-flex",
