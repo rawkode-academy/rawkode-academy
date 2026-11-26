@@ -3,7 +3,7 @@ import { readdir, readFile } from "node:fs/promises";
 import { URL } from "node:url";
 import test, { after, before } from "node:test";
 import { convertV4MiniflareOptions, Miniflare } from "miniflare";
-import { createPlan, applyPlan, autoApplyLimit, DAILY_BUDGET, rollback, scheduledCandidates, type Deps } from "../src/sync.ts";
+import { createPlan, applyPlan, autoApplyLimit, BULK_BUDGET, rollback, scheduledCandidates, type Deps } from "../src/sync.ts";
 import { composeDescription, composeTitle, type AcademyVideo, type Snippet } from "../src/render.ts";
 import { Store } from "../src/store.ts";
 import { ServiceError } from "../src/domain.ts";
@@ -125,11 +125,11 @@ test("the daily budget stops writes before YouTube's limit", async () => {
   const f = await fixture(); seed(f, 4);
   const { plan } = await createPlan(f.deps, catalogue(4));
   // Today's units already near the budget: room for exactly one more update.
-  await f.deps.store.spend("2026-11-26", DAILY_BUDGET - 1 - 1 - 50);
+  await f.deps.store.spend("2026-11-26", BULK_BUDGET - 1 - 1 - 50);
   const result = await applyPlan(f.deps, plan.id, { limit: 10 });
   assert.equal(result.applied, 1);
   assert.match(String(result.stopped), /budget/);
-  assert.ok((result.unitsUsedToday ?? 0) <= DAILY_BUDGET);
+  assert.ok((result.unitsUsedToday ?? 0) <= BULK_BUDGET);
 });
 
 test("a failed write is logged, counted and does not stop the other videos", async () => {

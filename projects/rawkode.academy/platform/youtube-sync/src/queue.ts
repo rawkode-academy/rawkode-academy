@@ -15,7 +15,7 @@ export const MAX_DELAY_SECONDS = 43200;
 // A message that has waited out this many resets without being written is stuck on something else.
 export const MAX_DEFERRALS = 8;
 
-export const syncMessage = z.object({ planId: z.string().min(1), youtubeId: z.string().min(1), deferrals: z.number().int().min(0).optional() });
+export const syncMessage = z.object({ planId: z.string().min(1), youtubeId: z.string().min(1), deferrals: z.number().int().min(0).optional(), priority: z.boolean().optional() });
 export type SyncMessage = z.infer<typeof syncMessage>;
 
 // 30s, 1m, 2m, 4m ... capped at 15m.
@@ -37,7 +37,7 @@ type Verdict = { action: "ack"; detail: string } | { action: "defer" } | { actio
 
 // What to do with one video's message. Throws only for errors worth retrying.
 export async function process(deps: Deps, body: SyncMessage): Promise<Verdict> {
-  const result = await applyPlan(deps, body.planId, { limit: 1, videos: [body.youtubeId] }, body.youtubeId);
+  const result = await applyPlan(deps, body.planId, { limit: 1, videos: [body.youtubeId], priority: body.priority }, body.youtubeId);
   const outcome = result.outcomes[0];
   if (!outcome) return result.stopped ? { action: "defer" } : { action: "ack", detail: "nothing to write: not a change in that plan" };
   switch (outcome.result) {
@@ -50,27 +50,34 @@ export async function process(deps: Deps, body: SyncMessage): Promise<Verdict> {
 export type QueueMessage = { body: unknown; attempts: number; ack(): void; retry(options?: { delaySeconds?: number }): void };
 const log = (event: Record<string, unknown>) => console.error(JSON.stringify({ operation: "queue", ...event }));
 
-export async function consume(messages: QueueMessage[], deps: Deps, send: (body: SyncMessage, delaySeconds: number) => Promise<void>) {
+export type Send = (body: SyncMessage, delaySeconds: number) => Promise<void>;
+
+// Writes one video now and says what became of the message (ack, retry, deferred to after the quota reset, or buried).
+// Used by the write queue, and directly by the update-event consumer so an update doesn't wait behind a backlog.
+export async function handle(message: QueueMessage, body: SyncMessage, deps: Deps, send: Send) {
+  try {
+    const verdict = await process(deps, body);
+    if (verdict.action === "defer") {
+      const deferrals = (body.deferrals ?? 0) + 1;
+      if (deferrals > MAX_DEFERRALS) { await bury(deps, body, `still refused after ${MAX_DEFERRALS} quota resets`); message.ack(); return; }
+      await send({ ...body, deferrals }, Math.min(secondsUntilReset(deps.now()), MAX_DELAY_SECONDS));
+      message.ack();
+    } else if (verdict.action === "dead") { await bury(deps, body, verdict.reason); message.ack(); }
+    else if (verdict.action === "retry") { log({ youtubeId: body.youtubeId, retry: verdict.detail, attempts: message.attempts }); message.retry({ delaySeconds: backoffSeconds(message.attempts) }); }
+    else message.ack();
+  } catch (error) {
+    // Not worth retrying: record it for a person rather than burn the attempts.
+    if (error instanceof ServiceError && !isTransient(error) && error.code !== "reauthorization_required") { await bury(deps, body, error.code); message.ack(); return; }
+    log({ youtubeId: body.youtubeId, error: error instanceof ServiceError ? error.code : "unknown", attempts: message.attempts });
+    message.retry({ delaySeconds: backoffSeconds(message.attempts) });
+  }
+}
+
+export async function consume(messages: QueueMessage[], deps: Deps, send: Send) {
   for (const message of messages) {
     const parsed = syncMessage.safeParse(message.body);
     if (!parsed.success) { await deps.store.recordDead({ planId: null, youtubeId: null, at: deps.now().toISOString(), reason: "malformed message" }); message.ack(); continue; }
-    const body = parsed.data;
-    try {
-      const verdict = await process(deps, body);
-      if (verdict.action === "defer") {
-        const deferrals = (body.deferrals ?? 0) + 1;
-        if (deferrals > MAX_DEFERRALS) { await bury(deps, body, `still refused after ${MAX_DEFERRALS} quota resets`); message.ack(); continue; }
-        await send({ ...body, deferrals }, Math.min(secondsUntilReset(deps.now()), MAX_DELAY_SECONDS));
-        message.ack();
-      } else if (verdict.action === "dead") { await bury(deps, body, verdict.reason); message.ack(); }
-      else if (verdict.action === "retry") { log({ youtubeId: body.youtubeId, retry: verdict.detail, attempts: message.attempts }); message.retry({ delaySeconds: backoffSeconds(message.attempts) }); }
-      else message.ack();
-    } catch (error) {
-      // Not worth retrying: record it for a person rather than burn the attempts.
-      if (error instanceof ServiceError && !isTransient(error) && error.code !== "reauthorization_required") { await bury(deps, body, error.code); message.ack(); continue; }
-      log({ youtubeId: body.youtubeId, error: error instanceof ServiceError ? error.code : "unknown", attempts: message.attempts });
-      message.retry({ delaySeconds: backoffSeconds(message.attempts) });
-    }
+    await handle(message, parsed.data, deps, send);
   }
 }
 

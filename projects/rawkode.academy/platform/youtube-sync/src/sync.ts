@@ -6,6 +6,11 @@ import { pacificDay, type Store, type StoredItem } from "./store.ts";
 // YouTube's default quota is 10,000 units a day. Keep 1,000 for the analytics
 // sync's own calls and for retries.
 export const DAILY_BUDGET = 9000;
+// The last slice of the budget is kept for update events (a person changed one
+// video and is waiting for it): bulk writes stop short of it, so a backlog
+// from the daily plan can never use up the day before an update arrives.
+export const UPDATE_RESERVE = 1000;
+export const BULK_BUDGET = DAILY_BUDGET - UPDATE_RESERVE;
 export const UPDATE_COST = 50;
 export const LIST_COST = 1;
 // What a quota 403 marks the day as spent: more than the budget, so nothing else is tried until the reset.
@@ -63,7 +68,7 @@ export async function createPlan(deps: Deps, catalogue: Map<string, AcademyVideo
   return { plan, items };
 }
 
-export type ApplyOptions = { limit: number; videos?: string[]; dryRun?: boolean };
+export type ApplyOptions = { limit: number; videos?: string[]; dryRun?: boolean; priority?: boolean };
 export type Outcome = { youtubeId: string; slug: string | null; result: "applied" | "stale" | "missing" | "error" | "quota"; detail?: string; retryable?: boolean };
 type Written = { result: "applied" | "error" | "quota"; retryable?: boolean };
 const THUMBNAIL_COST = 50;
@@ -149,11 +154,12 @@ export async function applyPlan(deps: Deps, planId: string, options: ApplyOption
   const planFields = textFields(stored.plan.fields as Field[]);
   const day = pacificDay(deps.now());
   const startUnits = await deps.store.quotaUsed(day);
+  const ceiling = options.priority ? DAILY_BUDGET : BULK_BUDGET;
   const outcomes: Outcome[] = [];
   if (options.dryRun) return { planId, dryRun: true, wouldApply: candidates.map(item => item.slug ?? item.youtubeId), unitsUsedToday: startUnits, budget: DAILY_BUDGET, outcomes };
   let stopped: string | null = null;
   for (const group of chunk(candidates, 50)) {
-    if ((await deps.store.quotaUsed(day)) + LIST_COST + UPDATE_COST > DAILY_BUDGET) { stopped = "daily quota budget reached"; break; }
+    if ((await deps.store.quotaUsed(day)) + LIST_COST + UPDATE_COST > ceiling) { stopped = "daily quota budget reached"; break; }
     const live = await deps.api.listSnippets(group.map(item => item.youtubeId));
     await deps.store.spend(day, LIST_COST);
     for (const item of group) {
@@ -161,7 +167,7 @@ export async function applyPlan(deps: Deps, planId: string, options: ApplyOption
       // A redelivered message must not push the same image again (that would also overwrite the saved before-image).
       const needThumbnail = Boolean(item.thumbnail?.changed && deps.thumbnails && (await deps.store.thumbTag(item.youtubeId)) !== item.thumbnail.tag);
       const cost = (needText ? UPDATE_COST : 0) + (needThumbnail ? THUMBNAIL_COST : 0);
-      if ((await deps.store.quotaUsed(day)) + cost > DAILY_BUDGET) { stopped = "daily quota budget reached"; break; }
+      if ((await deps.store.quotaUsed(day)) + cost > ceiling) { stopped = "daily quota budget reached"; break; }
       const snippet = live.get(item.youtubeId);
       if (!snippet) { outcomes.push({ youtubeId: item.youtubeId, slug: item.slug, result: "missing" }); continue; }
       // The diff that was reviewed is the diff that is written: refuse if the
@@ -203,11 +209,11 @@ export async function rollback(deps: Deps, filter: { planId?: string; youtubeId?
   const outcomes: Outcome[] = [];
   let stopped: string | null = null;
   for (const group of chunk(rows, 50)) {
-    if ((await deps.store.quotaUsed(day)) + LIST_COST + UPDATE_COST > DAILY_BUDGET) { stopped = "daily quota budget reached"; break; }
+    if ((await deps.store.quotaUsed(day)) + LIST_COST + UPDATE_COST > BULK_BUDGET) { stopped = "daily quota budget reached"; break; }
     const live = await deps.api.listSnippets(group.map(row => row.youtubeId));
     await deps.store.spend(day, LIST_COST);
     for (const row of group) {
-      if ((await deps.store.quotaUsed(day)) + UPDATE_COST > DAILY_BUDGET) { stopped = "daily quota budget reached"; break; }
+      if ((await deps.store.quotaUsed(day)) + UPDATE_COST > BULK_BUDGET) { stopped = "daily quota budget reached"; break; }
       const snippet = live.get(row.youtubeId);
       if (!snippet) { outcomes.push({ youtubeId: row.youtubeId, slug: null, result: "missing" }); continue; }
       const changed = (TEXT_FIELDS as TextField[]).filter(field => row.before![field] !== row.after![field]);
@@ -221,7 +227,7 @@ export async function rollback(deps: Deps, filter: { planId?: string; youtubeId?
   // Thumbnails go back to the image YouTube showed before the push.
   if (!stopped && deps.thumbnails) {
     for (const row of (await deps.store.thumbnailBefores(filter)).slice(0, limit)) {
-      if ((await deps.store.quotaUsed(day)) + THUMBNAIL_COST > DAILY_BUDGET) { stopped = "daily quota budget reached"; break; }
+      if ((await deps.store.quotaUsed(day)) + THUMBNAIL_COST > BULK_BUDGET) { stopped = "daily quota budget reached"; break; }
       try {
         await deps.store.spend(day, THUMBNAIL_COST);
         await deps.thumbnails.set(row.youtubeId, row.image);
