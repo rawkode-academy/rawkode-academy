@@ -1,7 +1,7 @@
 import { sva } from "../../styled-system/css";
 import { focusRing, focusRingInk, focusRingInset } from "../styles/focus";
 import { inputField } from "../styles/field";
-import { coverImage, coverImageZoom, videoFrame } from "../styles/media";
+import { coverImage, coverImageZoom, videoFrame, partnerMark } from "../styles/media";
 import { panelSurface } from "../styles/surface";
 import { systemGridBottom } from "../styles/systemGrid";
 import { ledeText, monoMeta } from "../styles/type";
@@ -669,8 +669,8 @@ export const academyWatch = sva({
 			// Several partners rarely fit beside the date, so they take the row at every width.
 			"&[data-own-row]": { flexBasis: "full", "&::before": { content: "none!" } },
 		},
-		// A partner's logo is printed in the ink text colour, so every mark reads as one set
-		// on the ink pane in both schemes whatever colours it was drawn in.
+		// A partner's logo is printed in the ink text colour (`partnerMark`) and takes the
+		// accent with the link, like a technology chip.
 		collabLogo: {
 			position: "relative",
 			display: "inline-flex",
@@ -689,19 +689,7 @@ export const academyWatch = sva({
 			"&:is(a):hover": { color: "academy.inkAccent" },
 			// The mark is drawn at the meta line's scale; the press target is 44px tall.
 			"&:is(a)::after": { content: '""', position: "absolute", insetBlock: "[-13px]", insetInline: "[-6px]" },
-			"& img": {
-				display: "block",
-				height: "[var(--collab-logo-h, 16px)]",
-				width: "auto",
-				maxWidth: "32",
-				filter: "[brightness(0) invert(1)]",
-				opacity: "0.82",
-				transitionProperty: "[opacity]",
-				transitionDuration: "fast",
-				transitionTimingFunction: "academy-out",
-				_motionReduce: { transitionDuration: "none" },
-			},
-			"&:is(a):hover img": { opacity: "1" },
+			"& [data-part=mark]": partnerMark,
 		},
 		upcoming: {
 			display: "flex",

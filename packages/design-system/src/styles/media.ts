@@ -59,3 +59,28 @@ export const runtimeBadge = {
 	lineHeight: "body",
 	fontVariantNumeric: "tabular-nums",
 } as const satisfies SystemStyleObject;
+
+/**
+ * A partner's logo printed in the current text colour, so marks drawn in
+ * different palettes read as one set on any surface and in both schemes.
+ * The element carries the file as `--partner-mark` and is sized by the
+ * transparent `<img>` inside it, which also holds the alt text:
+ *
+ *   <span data-part="mark" style="--partner-mark:url(...)"><img alt="Datum" /></span>
+ */
+export const partnerMark = {
+	display: "inline-block",
+	flexShrink: "0",
+	backgroundColor: "currentColor",
+	maskImage: "[var(--partner-mark)]",
+	maskRepeat: "no-repeat",
+	maskPosition: "center",
+	maskSize: "contain",
+	"& img": {
+		display: "block",
+		height: "[var(--partner-mark-h, 16px)]",
+		width: "auto",
+		maxWidth: "32",
+		opacity: "0",
+	},
+} as const satisfies SystemStyleObject;

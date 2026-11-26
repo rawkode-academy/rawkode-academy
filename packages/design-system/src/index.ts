@@ -17,6 +17,7 @@ export {
 	coverImageZoom,
 	runtimeBadge,
 	videoFrame,
+	partnerMark,
 } from "./styles/media";
 export { scrollReveal } from "./styles/motion";
 export { textLink } from "./styles/link";

@@ -393,6 +393,8 @@ export interface CourseModuleData {
 				youtube?: string | undefined;
 				rawkode?: string | undefined;
 				poster?: string | undefined;
+				/** Companies the lesson's video is made with; empty for most. */
+				collaborators?: { id: string; name: string; websiteUrl?: string | undefined }[] | undefined;
 		  }
 		| undefined;
 	duration?: number | undefined;

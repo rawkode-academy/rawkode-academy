@@ -194,6 +194,21 @@ describe("gateway → entry data", () => {
 		expect(module.slug).toBe("intro");
 	});
 
+	it("carries a lesson video's collaborators", () => {
+		const module = mapCourseModule(
+			{
+				id: "c/intro",
+				slug: "intro",
+				title: "Intro",
+				order: 1,
+				publishedAt: "2026-01-01",
+				video: { id: "v", collaborators: [{ id: "datum", name: "Datum", websiteUrl: "https://www.datum.net" }] },
+			},
+			"c",
+		);
+		expect(module.video?.collaborators).toEqual([{ id: "datum", name: "Datum", websiteUrl: "https://www.datum.net" }]);
+	});
+
 	it("only exposes logo URLs whose flags are set", () => {
 		const data = mapTechnology({
 			id: "k",
