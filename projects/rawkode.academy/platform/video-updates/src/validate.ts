@@ -24,7 +24,7 @@ export async function validate(env: Env, r: UpdateRequest): Promise<string[]> {
 		}
 	} else {
 		if (!video) return [`video "${r.videoId}" does not exist`];
-		if (r.broadcast || r.thumbnailBrief) errors.push("a broadcast and a generated thumbnail are only for a new video");
+		if (r.broadcast) errors.push("a broadcast is only for a new video");
 	}
 
 	if (r.video?.slug) {

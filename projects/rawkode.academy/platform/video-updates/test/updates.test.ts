@@ -169,6 +169,22 @@ describe("scheduling a live stream", () => {
 		expect((await new Store(env.DB).get("u-nothumb"))?.status).toBe("succeeded");
 	});
 
+	it("makes the thumbnail of a video already on the site again, from its stored title, show, technologies and credits", async () => {
+		const created = live("newlive4");
+		await begin("u-live4", created);
+		await run("u-live4", created);
+		t.stored.delete("videos/newlive4/thumbnail.webp");
+		const again = updateRequest.parse({ videoId: "newlive4", thumbnailBrief: "a vault of snapshots" });
+		expect(await validate(env, again)).toEqual([]);
+		await begin("u-thumb-again", again);
+		await run("u-thumb-again", again);
+		const input = String(t.generated.at(-1)?.input.prompt);
+		expect(input).toContain("Hands-on with Kueue");
+		expect(input).toContain("a vault of snapshots");
+		expect(t.stored.has("videos/newlive4/thumbnail.webp")).toBe(true);
+		expect(t.sent.at(-1)).toMatchObject({ type: "video.updated", videoId: "newlive4" });
+	});
+
 	it("takes the new video out again when a later section fails", async () => {
 		const r = live("newlive3");
 		failing.add("write technologies");
