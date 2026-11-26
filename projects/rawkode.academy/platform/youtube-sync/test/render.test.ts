@@ -5,10 +5,10 @@ import { composeDescription, composeTitle, https, MARKER, markdownToText, parseF
 const video: AcademyVideo = { id: "v1", title: "Cilium in depth", slug: "cilium-in-depth", collaborators: [], description: "First paragraph.\n\nSecond paragraph with [a link](https://example.com).", chapters: [], thumbnailUrl: "https://cdn.test/v1/thumbnail.webp", show: null, guests: [], technologies: [] };
 const bytes = (value: string) => new TextEncoder().encode(value).length;
 
-test("the description is the header, the site's description, then the footer", () => {
+test("the description is the site's description, the resources link, then the footer", () => {
   const lines = composeDescription(video).split("\n");
-  assert.match(lines[0], /^Watch with chapters, code and resources: https:\/\/rawkode\.academy\/watch\/cilium-in-depth\?utm_source=youtube/);
-  assert.equal(lines[2], "First paragraph.");
+  assert.equal(lines[0], "First paragraph.");
+  assert.match(lines.find(line => line.startsWith("Get this video's free resources at")) ?? "", /^Get this video's free resources at https:\/\/rawkode\.academy\/watch\/cilium-in-depth\?utm_source=youtube/);
   assert.ok(composeDescription(video).includes("Second paragraph with a link (https://example.com)."));
   const footer = composeDescription(video).split(`${MARKER}\n`)[1];
   assert.match(footer, /^Newsletter: https:\/\/rawkode\.academy\/#join\nSupport the Academy: https:\/\/rawkode\.academy\/organizations\/support-our-work/);
@@ -45,7 +45,7 @@ test("a long description is cut cleanly, never mid-word, and always fits", () =>
   const long = Array.from({ length: 120 }, () => sentence).join("") + "ending";
   const description = composeDescription({ ...video, description: long, chapters: [{ startTime: 0, title: "Intro" }, { startTime: 30, title: "Two" }, { startTime: 90, title: "Three" }] });
   assert.ok(bytes(description) <= 5000, `${bytes(description)} bytes`);
-  const body = description.split("\n\n")[1];
+  const body = description.split("\n\n")[0];
   assert.ok(body.endsWith("…"));
   assert.match(body.slice(0, -1), /\.$/, "cut at a sentence");
   assert.ok(description.includes("Chapters\n0:00 Intro") && description.includes(MARKER));
@@ -127,7 +127,7 @@ test("the metadata sits after the chapters and before the footer, and the body i
   const long = Array.from({ length: 150 }, () => "Kubernetes controllers reconcile desired state with observed state. ").join("");
   const description = composeDescription({ ...rich, description: long, chapters: [{ startTime: 0, title: "Intro" }, { startTime: 30, title: "Two" }, { startTime: 90, title: "Three" }] });
   assert.ok(bytes(description) <= 5000);
-  const order = ["Watch with chapters", "…", "Chapters\n", "🎬 *Rawkode Live*", "👥 *Guests*\n", "🧩 *Technologies*\n", MARKER].map(part => description.indexOf(part));
+  const order = ["…", "Get this video's free resources at", "Chapters\n", "🎬 *Rawkode Live*", "👥 *Guests*\n", "🧩 *Technologies*\n", MARKER].map(part => description.indexOf(part));
   assert.deepEqual([...order].sort((a, b) => a - b), order);
   assert.match(description, /\n#RawkodeLive #Atuin$/);
 });
