@@ -15,6 +15,8 @@ export const GROWTH_EVENTS = {
 	NEWSLETTER_UNSUBSCRIBED: "newsletter_unsubscribed",
 	NEWSLETTER_PREFERENCE_UPDATED: "newsletter_preference_updated",
 	NEWSLETTER_UNSUBSCRIBE_ALL: "newsletter_unsubscribe_all",
+	SUPPORTER_CTA_CLICKED: "supporter_cta_clicked",
+	PARTNERSHIP_ENQUIRY_SUBMITTED: "partnership_enquiry_submitted",
 } as const;
 
 export type GrowthEvent = (typeof GROWTH_EVENTS)[keyof typeof GROWTH_EVENTS];

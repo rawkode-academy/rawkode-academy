@@ -15,6 +15,18 @@ const { surface } = Astro.props;
 	<a class={button()} href="/organizations/support-our-work" data-supporter-cta-link={surface}>Become a supporter</a>
 </aside>
 
+<script>
+	import { captureGrowthClientEvent, GROWTH_EVENTS } from "@/lib/analytics/growth";
+
+	for (const link of document.querySelectorAll<HTMLAnchorElement>("[data-supporter-cta-link]")) {
+		link.addEventListener("click", () => {
+			captureGrowthClientEvent(GROWTH_EVENTS.SUPPORTER_CTA_CLICKED, {
+				surface: link.dataset.supporterCtaLink,
+			});
+		});
+	}
+</script>
+
 <style>
 	.supporter-cta { display: grid; justify-items: start; gap: 0.75rem; margin-block: 0 2rem; padding: 1.25rem; border: 1px solid var(--colors-academy-accent); border-radius: var(--radii-academy-l); background: var(--colors-academy-panel); }
 	.supporter-cta h2 { margin: 0; font-family: var(--fonts-academy-display), system-ui, sans-serif; font-size: clamp(1.1rem, 2vw, 1.35rem); line-height: 1.25; }
