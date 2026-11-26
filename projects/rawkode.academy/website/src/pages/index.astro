@@ -23,7 +23,7 @@ import { getTypeBadgeConfig } from "@/utils/article-types";
 import { formatRuntime } from "@/lib/video-runtime";
 import {
 	getVideoThumbnailResizedUrl,
-	getVideoThumbnailUrl,
+	resizeRemoteImageUrl,
 } from "@/lib/video-thumbnail";
 
 const styles = academyPage();
@@ -33,6 +33,12 @@ const styles = academyPage();
 // recently, the next live stream, and the learning paths.
 // Every ledger column holds the same number of rows.
 const LEDGER_ROWS = 5;
+
+// The hero still is the LCP element: serve a resized, modern-format image
+// (about 780px covers a 390px phone at 2x) instead of the multi-hundred-KB
+// original. Ledger stills render small, so they match the video thumbnails.
+const FEATURED_WIDTH = 960;
+const LEDGER_THUMB_WIDTH = 384;
 
 const now = new Date();
 const [
@@ -141,7 +147,7 @@ const featured = latestVideo && {
 	title: latestVideo.data.title,
 	publishedAt: latestVideo.data.publishedAt.toISOString(),
 	...(latestDescription ? { description: latestDescription } : {}),
-	mediaSrc: getVideoThumbnailUrl(latestVideo.data.id),
+	mediaSrc: getVideoThumbnailResizedUrl(latestVideo.data.id, FEATURED_WIDTH),
 	...(latestRuntime ? { runtime: latestRuntime } : {}),
 	guests: latestGuests,
 	...(latestShow
@@ -170,7 +176,7 @@ const upcoming = upcomingVideos.slice(0, 3).map((video) => {
 		publishedAt: video.data.publishedAt.toISOString(),
 		mediaSrc: video.data.youtubeId
 			? `https://i.ytimg.com/vi/${video.data.youtubeId}/hqdefault.jpg`
-			: getVideoThumbnailUrl(video.data.id),
+			: getVideoThumbnailResizedUrl(video.data.id, FEATURED_WIDTH),
 	};
 });
 
@@ -267,7 +273,12 @@ const ledger = [
 					...(authors.length ? [authors.join(", ")] : []),
 				],
 				...(article.data.cover?.image.src
-					? { mediaSrc: article.data.cover.image.src }
+					? {
+							mediaSrc: resizeRemoteImageUrl(
+								article.data.cover.image.src,
+								LEDGER_THUMB_WIDTH,
+							),
+						}
 					: {}),
 			};
 		}),
