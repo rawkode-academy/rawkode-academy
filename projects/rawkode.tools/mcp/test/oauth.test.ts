@@ -10,10 +10,10 @@ const person = (id: string, githubHandle: string | null = id) => ({ id, githubHa
 // Who guested on what: icepuma guests on "intar" (matched to YouTube by title)
 // and hosts "icepuma-show"; "other" is somebody else's episode.
 const academyVideos = [
-  { id: "intar", title: "Intar Office Hours", slug: "intar", publishedAt: "2026-06-01T00:00:00.000Z", youtubeId: null, guests: [person("icepuma")], episode: { show: { id: "office-hours", hosts: [person("rawkode")] } } },
-  { id: "other", title: "Someone Else", slug: "other", publishedAt: "2026-05-01T00:00:00.000Z", youtubeId: "BBBBBBBBBBB", guests: [person("someone")], episode: { show: { id: "office-hours", hosts: [person("rawkode")] } } },
-  { id: "ip-1", title: "Ice Show One", slug: "ip-1", publishedAt: "2026-04-01T00:00:00.000Z", youtubeId: "AAAAAAAAAAA", guests: [], episode: { show: { id: "icepuma-show", hosts: [person("icepuma")] } } },
-  { id: "ip-2", title: "Ice Show Two", slug: "ip-2", publishedAt: "2026-04-08T00:00:00.000Z", youtubeId: null, guests: [], episode: { show: { id: "icepuma-show", hosts: [person("icepuma")] } } },
+  { id: "intar", title: "Intar Office Hours", slug: "intar", publishedAt: "2026-06-01T00:00:00.000Z", youtubeId: null, castingCredits: [{ role: "GUEST", person: person("icepuma") }, { role: "HOST", person: person("rawkode") }], episode: { show: { id: "office-hours" } } },
+  { id: "other", title: "Someone Else", slug: "other", publishedAt: "2026-05-01T00:00:00.000Z", youtubeId: "BBBBBBBBBBB", castingCredits: [{ role: "GUEST", person: person("someone") }, { role: "HOST", person: person("rawkode") }], episode: { show: { id: "office-hours" } } },
+  { id: "ip-1", title: "Ice Show One", slug: "ip-1", publishedAt: "2026-04-01T00:00:00.000Z", youtubeId: "AAAAAAAAAAA", castingCredits: [{ role: "HOST", person: person("icepuma") }], episode: { show: { id: "icepuma-show" } } },
+  { id: "ip-2", title: "Ice Show Two", slug: "ip-2", publishedAt: "2026-04-08T00:00:00.000Z", youtubeId: null, castingCredits: [{ role: "HOST", person: person("icepuma") }], episode: { show: { id: "icepuma-show" } } },
 ];
 const lakeCatalogue = [{ video: "INTARvideo1", title: "Intar Office Hours!" }, { video: "BBBBBBBBBBB", title: "Someone Else" }, { video: "AAAAAAAAAAA", title: "Ice Show One" }];
 const basinURL = "https://api.sql.cloudflarestorage.com/api/v1/accounts/0aeb879de8e3cdde5fb3d413025222ce/basin-sql/query/rawkode-analytics";

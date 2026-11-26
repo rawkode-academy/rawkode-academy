@@ -72,7 +72,7 @@ describe("analytics snapshot", () => {
 								title: "Guest episode",
 								slug: "guest-episode",
 								youtubeId: "AAAAAAAAAAA",
-								guests: [{ id: "icepuma", githubHandle: "icepuma" }],
+								castingCredits: [{ role: "GUEST", person: { id: "icepuma", githubHandle: "icepuma" } }],
 								episode: null,
 							},
 						],

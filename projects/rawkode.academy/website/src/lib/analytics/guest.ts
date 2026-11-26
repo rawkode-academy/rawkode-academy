@@ -90,7 +90,6 @@ export function parseAcademyVideos(data: unknown): AcademyVideo[] | undefined {
 							return person && role ? [{ role, person }] : [];
 						},
 					),
-					{ guests: people(video.guests), hosts: people(show?.hosts) },
 				),
 			},
 		];

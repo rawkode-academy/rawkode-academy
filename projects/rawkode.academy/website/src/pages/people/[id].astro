@@ -47,9 +47,7 @@ const hostedShows = shows.filter((show) =>
 );
 
 const guestVideos = videos.filter((video) =>
-	(video.data.credits?.length
-		? video.data.credits.some((c) => c.role === "guest" && sameId(c.person, person.data.id))
-		: video.data.guests.some((g) => sameId(g, person.data.id))),
+	video.data.guests.some((g) => sameId(g, person.data.id)),
 );
 
 const authoredNews = news

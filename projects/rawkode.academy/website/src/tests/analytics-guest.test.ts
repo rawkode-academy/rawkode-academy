@@ -11,8 +11,11 @@ const data = {
 			slug: "guest-episode",
 			publishedAt: "2026-01-02T00:00:00.000Z",
 			youtubeId: "AAAAAAAAAAA",
-			guests: [{ id: "icepuma", githubHandle: "icepuma" }],
-			episode: { show: { id: "show", hosts: [{ id: "rawkode", githubHandle: "rawkode" }] } },
+			castingCredits: [
+				{ role: "GUEST", person: { id: "icepuma", githubHandle: "icepuma" } },
+				{ role: "HOST", person: { id: "rawkode", githubHandle: "rawkode" } },
+			],
+			episode: { show: { id: "show" } },
 		},
 		{ id: "v2", title: "Other", slug: "other", youtubeId: null, guests: [], episode: null },
 		{ title: "no id", guests: [] },
@@ -33,34 +36,22 @@ describe("guest analytics", () => {
 		expect(parseAcademyVideos(null)).toBeUndefined();
 	});
 
-	it("shows a guest their episode and a host every episode of the show", () => {
+	it("shows a guest their episode and a host the episodes they are credited on", () => {
 		const videos = parseAcademyVideos(data) ?? [];
 		expect(visibleEpisodes(videos, "icepuma").map((episode) => episode.role)).toEqual(["guest"]);
 		expect(visibleEpisodes(videos, "rawkode").map((episode) => episode.id)).toEqual(["v1"]);
 		expect(visibleEpisodes(videos, "nobody")).toEqual([]);
 	});
 
-	it("uses a video's casting credits over the show's hosts", () => {
-		const credited = {
+	it("a co-host not credited on a video does not see it, and a video with no credits is seen by nobody", () => {
+		const videos = parseAcademyVideos({
 			getAllVideos: [
-				{
-					id: "v3",
-					title: "Credited",
-					slug: "credited",
-					youtubeId: null,
-					guests: [],
-					castingCredits: [
-						{ role: "HOST", person: { id: "rawkode", githubHandle: "rawkode" } },
-						{ role: "GUEST", person: { id: "icepuma", githubHandle: "icepuma" } },
-					],
-					episode: { show: { id: "show", hosts: [{ id: "rawkode" }, { id: "cohost" }] } },
-				},
+				{ id: "v3", title: "Credited", slug: "credited", youtubeId: null, castingCredits: [{ role: "HOST", person: { id: "rawkode", githubHandle: "rawkode" } }], episode: { show: { id: "show" } } },
+				{ id: "v4", title: "Uncredited", slug: "uncredited", youtubeId: null, episode: { show: { id: "show" } } },
 			],
 			allCourses: [],
-		};
-		const videos = parseAcademyVideos(credited) ?? [];
-		expect(visibleEpisodes(videos, "icepuma").map((episode) => episode.role)).toEqual(["guest"]);
-		expect(visibleEpisodes(videos, "rawkode").map((episode) => episode.role)).toEqual(["host"]);
+		}) ?? [];
+		expect(visibleEpisodes(videos, "rawkode").map((episode) => episode.id)).toEqual(["v3"]);
 		expect(visibleEpisodes(videos, "cohost")).toEqual([]);
 	});
 
