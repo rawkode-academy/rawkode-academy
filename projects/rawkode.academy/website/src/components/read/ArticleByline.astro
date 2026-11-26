@@ -19,6 +19,9 @@ interface Props {
 	tags?: Tag[];
 }
 
+const initials = (name: string) => name.trim().split(/\s+/u).slice(0, 2)
+	.map((part) => Array.from(part)[0] ?? "").join("").toLocaleUpperCase();
+
 const {
 	authors,
 	date,
@@ -31,7 +34,17 @@ const {
 <div class={doc.byline}>
 	{authors.map((author) => (
 		<a class={doc.author} href={`/people/${author.data.id}`}>
-			{author.data.avatarUrl && <img class={doc.avatar} src={author.data.avatarUrl} alt="" width="40" height="40" loading="lazy" />}
+			{author.data.avatarUrl && <img
+				class={doc.avatar}
+				src={author.data.avatarUrl}
+				alt=""
+				width="40"
+				height="40"
+				loading="lazy"
+				decoding="async"
+				onerror="this.hidden=true; this.nextElementSibling.hidden=false;"
+			/>}
+			<span class:list={[doc.avatarInitials]} hidden={Boolean(author.data.avatarUrl)} aria-hidden="true">{initials(author.data.name)}</span>
 			<span class={doc.authorMeta}>{author.data.name}</span>
 		</a>
 	))}
