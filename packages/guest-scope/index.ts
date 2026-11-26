@@ -8,7 +8,7 @@
 // which video; the analytics lake's `youtube.video` catalogue says which
 // YouTube video that is. A video that can't be tied to one YouTube video with
 // certainty is left out.
-export const GUEST_SCOPE_QUERY = `query GuestScope { getAllVideos(includeCourseVideos: true) { id title slug publishedAt youtubeId guests { id githubHandle } castingCredits { role person { id githubHandle } } episode { show { id hosts { id githubHandle } } } } allCourses { authors { id githubHandle } modules { video { id } } } }`;
+export const GUEST_SCOPE_QUERY = `query GuestScope { getAllVideos(includeCourseVideos: true) { id title slug publishedAt youtubeId castingCredits { role person { id githubHandle } } episode { show { id } } } allCourses { authors { id githubHandle } modules { video { id } } } }`;
 
 export type Role = "guest" | "host";
 export type Person = { id: string; githubHandle: string | null };
@@ -27,9 +27,8 @@ const isPerson = (candidate: Person, handle: string) =>
 
 // A video's casting credits are the source of truth for who was on it: guests
 // are its GUEST credits, hosts everyone else credited (host, co-host, author).
-// A video with no credits yet falls back to its guests and its show's hosts.
-export function castFromCredits(credits: readonly Credit[], legacy: { guests: Person[]; hosts: Person[] }) {
-  if (credits.length === 0) return legacy;
+// A video with no credits has no guests or hosts, so nobody sees it.
+export function castFromCredits(credits: readonly Credit[]) {
   const people = (roles: readonly string[]) => credits.filter(credit => roles.includes(credit.role)).map(credit => credit.person);
   return { guests: people(["GUEST"]), hosts: people(["HOST", "CO_HOST", "AUTHOR"]) };
 }
