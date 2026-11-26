@@ -88,14 +88,14 @@ test("only writable snippet fields are kept", () => {
 const rich: AcademyVideo = {
   ...video, show: { id: "rawkode-live", name: "Rawkode Live" },
   guests: [{ id: "ellie", name: "Ellie Huxtable", x: "https://x.com/ellie_huxtable", bluesky: "https://bsky.app/profile/ellie.wtf", linkedin: "https://www.linkedin.com/in/elliehuxtable" }, { id: "nobody", name: "No Socials" }],
-  technologies: [{ id: "atuin", name: "Atuin", website: "https://atuin.sh", x: "https://twitter.com/atuinsh" }],
+  technologies: [{ id: "atuin", name: "Atuin", website: "https://atuin.sh", x: "https://twitter.com/atuinsh", bluesky: "https://bsky.app/profile/atuin.sh", mastodon: "https://hachyderm.io/@atuin" }],
 };
 
 test("the show, guests and technologies carry full https links, with only the handles that exist", () => {
   assert.equal(renderMetadata(rich), [
     "Show: Rawkode Live\nhttps://rawkode.academy/shows/rawkode-live",
     "Guests\nEllie Huxtable: https://rawkode.academy/people/ellie\nX: https://x.com/ellie_huxtable\nBluesky: https://bsky.app/profile/ellie.wtf\nLinkedIn: https://www.linkedin.com/in/elliehuxtable\nNo Socials: https://rawkode.academy/people/nobody",
-    "Technologies\nAtuin: https://rawkode.academy/technology/atuin\nWebsite: https://atuin.sh\nX: https://twitter.com/atuinsh",
+    "Technologies\nAtuin: https://rawkode.academy/technology/atuin\nWebsite: https://atuin.sh\nX: https://twitter.com/atuinsh\nBluesky: https://bsky.app/profile/atuin.sh\nMastodon: https://hachyderm.io/@atuin",
   ].join("\n\n"));
   assert.equal(renderMetadata(video), "");
 });
