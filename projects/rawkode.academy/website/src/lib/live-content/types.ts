@@ -114,7 +114,7 @@ export interface VideoData {
 	chapters: { startTime: number; title: string }[];
 	guests: Reference<"people">[];
 	/** Companies this video is made with; empty for most videos. */
-	collaborators?: { id: string; name: string }[] | undefined;
+	collaborators?: { id: string; name: string; websiteUrl?: string | undefined }[] | undefined;
 	resources?: Resource[] | undefined;
 	streamUrl?: string | undefined;
 	thumbnailUrl?: string | undefined;

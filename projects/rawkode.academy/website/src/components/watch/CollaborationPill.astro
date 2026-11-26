@@ -1,0 +1,84 @@
+---
+/**
+ * "Collaboration" pill for the watch meta line. Collapsed it is one chip; on
+ * hover, keyboard focus or press (touch) it expands in place to
+ * "In collaboration with <logo>", each logo linking to the company.
+ * Marks come from the partner-wall files; a company without one shows its name.
+ */
+import { academyWatch } from "@rawkodeacademy/design-system";
+import datum from "@/components/partner/logos/datum.svg?url";
+import fermyon from "@/components/partner/logos/fermyon.svg?url";
+import heroku from "@/components/partner/logos/heroku.svg?url";
+import komodor from "@/components/partner/logos/komodor.png?url";
+import spectroCloud from "@/components/partner/logos/spectrocloud.svg?url";
+import teleport from "@/components/partner/logos/teleport.svg?url";
+import wundergraph from "@/components/partner/logos/wundergraph.svg?url";
+
+interface Props {
+	collaborators: { id: string; name: string; websiteUrl?: string | undefined; logoUrl?: string | undefined }[];
+}
+
+const LOGOS: Record<string, string> = {
+	datum,
+	fermyon,
+	heroku,
+	komodor,
+	"spectro-cloud": spectroCloud,
+	teleport,
+	wundergraph,
+};
+
+const { collaborators } = Astro.props;
+const watch = academyWatch();
+const items = collaborators.map((c) => ({ ...c, logo: c.logoUrl ?? LOGOS[c.id] }));
+const names = items.map((c) => c.name).join(", ");
+---
+
+{items.length > 0 && (
+	<span class={watch.collab} data-collab data-open="false">
+		<button type="button" class={watch.collabPill} aria-expanded="false" aria-label={`Collaboration: in collaboration with ${names}`} data-collab-toggle>
+			Collaboration
+		</button>
+		<span class={watch.collabPanel} data-collab-panel>
+			<span aria-hidden="true">In collaboration with</span>
+			{items.map((c) => {
+				const content = c.logo ? <img src={c.logo} alt={c.name} loading="lazy" decoding="async" /> : c.name;
+				return c.websiteUrl ? (
+					<a class={watch.collabLogo} href={c.websiteUrl} target="_blank" rel="noopener sponsored">{content}</a>
+				) : (
+					<span class={watch.collabLogo}>{content}</span>
+				);
+			})}
+		</span>
+	</span>
+)}
+
+<script>
+	const pills = document.querySelectorAll<HTMLElement>("[data-collab]");
+	const set = (pill: HTMLElement, open: boolean) => {
+		pill.dataset.open = String(open);
+		pill.querySelector("[data-collab-toggle]")?.setAttribute("aria-expanded", String(open));
+	};
+	const canHover = window.matchMedia("(hover: hover)").matches;
+	for (const pill of pills) {
+		pill.querySelector("[data-collab-toggle]")?.addEventListener("click", () => set(pill, pill.dataset.open !== "true"));
+		pill.addEventListener("keydown", (event) => {
+			if ((event as KeyboardEvent).key === "Escape") set(pill, false);
+		});
+		if (canHover) {
+			pill.addEventListener("pointerenter", () => set(pill, true));
+			pill.addEventListener("pointerleave", () => {
+				if (!pill.contains(document.activeElement)) set(pill, false);
+			});
+		}
+		pill.addEventListener("focusin", (event) => {
+			if ((event.target as HTMLElement).matches(":focus-visible")) set(pill, true);
+		});
+		pill.addEventListener("focusout", (event) => {
+			if (!pill.contains((event as FocusEvent).relatedTarget as Node | null)) set(pill, false);
+		});
+	}
+	document.addEventListener("click", (event) => {
+		for (const pill of pills) if (!pill.contains(event.target as Node)) set(pill, false);
+	});
+</script>

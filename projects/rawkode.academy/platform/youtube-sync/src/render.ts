@@ -22,7 +22,7 @@ export type Chapter = { startTime: number; title: string };
 export type Show = { id: string; name: string };
 export type Person = { id: string; name: string; x?: string; bluesky?: string; linkedin?: string };
 export type Technology = { id: string; name: string; website?: string; x?: string; bluesky?: string; mastodon?: string; youtube?: string };
-export type AcademyVideo = { id: string; title: string; slug: string; collaborators: string[]; description: string; chapters: Chapter[]; thumbnailUrl: string; show: Show | null; guests: Person[]; technologies: Technology[] };
+export type AcademyVideo = { id: string; title: string; slug: string; collaborators: string[]; description: string; chapters: Chapter[]; thumbnailUrl: string; show: Show | null; course?: string | null; guests: Person[]; technologies: Technology[] };
 
 export function parseFields(value: string | undefined): Field[] {
   const wanted = (value ?? ALL_FIELDS.join(",")).split(",").map(item => item.trim()).filter(Boolean);
@@ -87,28 +87,48 @@ export function https(value: string | null | undefined, handleBase?: string): st
 }
 const MAX_GUESTS = 6;
 const MAX_TECHNOLOGIES = 8;
-const labelled = (pairs: [string, string | undefined][]) => pairs.flatMap(([label, url]) => (url ? [`${label}: ${url}`] : []));
+const MAX_HASHTAGS = 3;
 
-// The site's show, guests and technologies, with full https links.
+// "https://youtube.com/@handle" becomes "@handle", which YouTube links and shows as a channel card.
+const youtubeHandle = (url: string | undefined) => url?.match(/^https:\/\/(?:www\.)?youtube\.com\/(@[A-Za-z0-9_.-]+)\/?$/i)?.[1];
+// YouTube renders *text* as bold in descriptions. It fails (and shows the
+// asterisks) when a marker touches punctuation, so a name containing any is left plain.
+const bold = (name: string) => { const text = stripAngles(name); return /^[\p{L}\p{N}][\p{L}\p{N} ]*[\p{L}\p{N}]$|^[\p{L}\p{N}]$/u.test(text) ? `*${text}*` : text; };
+const line = (parts: (string | undefined)[]) => parts.filter(Boolean).join(" · ");
+
+// The site's show, guests and technologies: one compact line each, with https
+// links so YouTube links them. Socials beyond one per guest, and a technology's
+// website and X, stay on the site pages.
 export function renderMetadata(video: Pick<AcademyVideo, "show" | "guests" | "technologies">): string {
   const sections: string[] = [];
-  if (video.show) sections.push(`Show: ${stripAngles(video.show.name)}\n${SITE}/shows/${video.show.id}`);
-  if (video.guests.length) sections.push(["Guests", ...video.guests.slice(0, MAX_GUESTS).flatMap(guest => [`${stripAngles(guest.name)}: ${SITE}/people/${guest.id}`, ...labelled([["X", guest.x], ["Bluesky", guest.bluesky], ["LinkedIn", guest.linkedin]])])].join("\n"));
-  if (video.technologies.length) sections.push(["Technologies", ...video.technologies.slice(0, MAX_TECHNOLOGIES).flatMap(tech => [`${stripAngles(tech.name)}: ${SITE}/technology/${tech.id}`, ...labelled([["Website", tech.website], ["X", tech.x], ["Bluesky", tech.bluesky], ["Mastodon", tech.mastodon], ["YouTube", tech.youtube]])])].join("\n"));
+  if (video.show) sections.push(`🎬 ${bold(video.show.name)} · ${SITE}/shows/${video.show.id}`);
+  if (video.guests.length) sections.push(["👥 *Guests*", ...video.guests.slice(0, MAX_GUESTS).map(guest => line([stripAngles(guest.name), `${SITE}/people/${guest.id}`, guest.x ?? guest.bluesky ?? guest.linkedin]))].join("\n"));
+  if (video.technologies.length) sections.push(["🧩 *Technologies*", ...video.technologies.slice(0, MAX_TECHNOLOGIES).map(tech => line([stripAngles(tech.name), `${SITE}/technology/${tech.id}`, youtubeHandle(tech.youtube)]))].join("\n"));
   return sections.join("\n\n");
+}
+
+// Up to three hashtags for discovery (YouTube shows the first three above the title): the show, then the technologies.
+export function renderHashtags(video: Pick<AcademyVideo, "show" | "technologies">): string {
+  const tags: string[] = [];
+  for (const name of [video.show?.name, ...video.technologies.map(t => t.name)]) {
+    const tag = (name ?? "").replace(/[^\p{L}\p{N}]/gu, "");
+    if (tag && !tags.some(t => t.toLowerCase() === tag.toLowerCase())) tags.push(tag);
+  }
+  return tags.slice(0, MAX_HASHTAGS).map(t => `#${t}`).join(" ");
 }
 
 export const watchUrl = (video: Pick<AcademyVideo, "slug">) => `https://rawkode.academy/watch/${video.slug}?utm_source=youtube&utm_medium=description`;
 export const renderHeader = (video: Pick<AcademyVideo, "slug">) => `Watch with chapters, code and resources: ${watchUrl(video)}`;
 
-export function renderFooter(video: Pick<AcademyVideo, "collaborators">): string {
+export function renderFooter(video: Pick<AcademyVideo, "collaborators"> & Partial<Pick<AcademyVideo, "show" | "technologies">>): string {
   const lines = [
     MARKER,
     "Newsletter: https://rawkode.academy/#join",
     "Support the Academy: https://rawkode.academy/organizations/support-our-work?utm_source=youtube&utm_medium=description",
   ];
   if (video.collaborators.length) lines.push(`Made in collaboration with ${video.collaborators.join(" and ")}.`);
-  return lines.join("\n");
+  const hashtags = renderHashtags({ show: video.show ?? null, technologies: video.technologies ?? [] });
+  return hashtags ? `${lines.join("\n")}\n\n${hashtags}` : lines.join("\n");
 }
 
 // Cuts at a paragraph, else a sentence, else a word: never mid-word.
@@ -144,13 +164,26 @@ export function composeDescription(video: AcademyVideo): string {
   return [header, trimmed, chapters, metadata, footer].filter(Boolean).join("\n\n");
 }
 
-// A title over YouTube's limit is cut at a word, never mid-word.
-export function composeTitle(video: Pick<AcademyVideo, "title">): string {
-  const title = stripAngles(video.title).replace(/\s+/g, " ").trim();
-  if ([...title].length <= MAX_TITLE) return title;
-  const cut = [...title].slice(0, MAX_TITLE - 1).join("");
+// YouTube has no shows or courses, so the title carries its context as a
+// suffix: " | Show" for an episode, " | Course" for a course video. The suffix
+// is kept whole; the site title is cut at a word to make room, within YouTube's
+// 100 characters.
+const MAX_SUFFIX = 40;
+
+function cutAtWord(text: string, max: number): string {
+  if ([...text].length <= max) return text;
+  const cut = [...text].slice(0, max - 1).join("");
   const word = cut.search(/\s\S*$/);
   return `${(word > 0 ? cut.slice(0, word) : cut).replace(/[\s,;:–-]+$/, "")}…`;
+}
+
+export function composeTitle(video: Pick<AcademyVideo, "title"> & { show?: Show | null; course?: string | null }): string {
+  const title = stripAngles(video.title).replace(/\s+/g, " ").trim();
+  const context = stripAngles(video.show?.name ?? video.course ?? "").replace(/\s+/g, " ").trim();
+  if (!context) return cutAtWord(title, MAX_TITLE);
+  const suffix = ` | ${cutAtWord(context, MAX_SUFFIX)}`;
+  if (title.toLowerCase().endsWith(suffix.toLowerCase())) return cutAtWord(title, MAX_TITLE);
+  return `${cutAtWord(title, MAX_TITLE - [...suffix].length)}${suffix}`;
 }
 
 // The managed values the site wants, for the managed text fields only.

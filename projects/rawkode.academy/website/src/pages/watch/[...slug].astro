@@ -26,6 +26,7 @@ import StreamNotifyButton from "@/components/video/StreamNotifyButton.vue";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import SupporterCTA from "@/components/organizations/SupporterCTA.astro";
 import MLabel from "@/components/ui/MLabel.vue";
+import CollaborationPill from "@/components/watch/CollaborationPill.astro";
 import LiveDot from "@/components/ui/LiveDot.vue";
 import Page from "@/wrappers/page.astro";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
@@ -186,7 +187,6 @@ const hostEntries = showEntry
 const guestEntries = await optionalContent(getEntries(video.data.guests), []);
 
 const collaborators = video.data.collaborators ?? [];
-const collaboratorNames = collaborators.map((c) => c.name).join(", ");
 
 const isLive = video.data.type === "live";
 const isUpcomingLive = isLive && video.data.publishedAt > now;
@@ -564,11 +564,7 @@ const watchStatusLabel = isLiveNow
 										{isLiveNow ? "Live · " : ""}{categoryLabel}
 									</MLabel>
 								</span>
-								{collaborators.length > 0 && (
-									<span class={watch.metaKind} title={`In collaboration with ${collaboratorNames}`}>
-										<MLabel tone="muted">Collaborator<span class="sr-only">: {collaboratorNames}</span></MLabel>
-									</span>
-								)}
+								<CollaborationPill collaborators={collaborators} />
 							</p>
 
 							<div class={watch.tools}>

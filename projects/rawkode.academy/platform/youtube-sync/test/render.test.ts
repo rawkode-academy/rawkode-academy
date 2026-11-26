@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { composeDescription, composeTitle, https, MARKER, markdownToText, parseFields, renderChapters, renderFooter, renderMetadata, trimToBytes, validateManaged, writableSnippet, type AcademyVideo } from "../src/render.ts";
+import { composeDescription, composeTitle, https, MARKER, markdownToText, parseFields, renderChapters, renderFooter, renderHashtags, renderMetadata, trimToBytes, validateManaged, writableSnippet, type AcademyVideo } from "../src/render.ts";
 
 const video: AcademyVideo = { id: "v1", title: "Cilium in depth", slug: "cilium-in-depth", collaborators: [], description: "First paragraph.\n\nSecond paragraph with [a link](https://example.com).", chapters: [], thumbnailUrl: "https://cdn.test/v1/thumbnail.webp", show: null, guests: [], technologies: [] };
 const bytes = (value: string) => new TextEncoder().encode(value).length;
@@ -67,6 +67,14 @@ test("a title over the limit is cut at a word with an ellipsis", () => {
   assert.equal(composeTitle({ title: "a <b> c" }), "a b c");
 });
 
+test("a title carries its show or course as a suffix, kept whole", () => {
+  assert.equal(composeTitle({ title: "22. Borko Vs. Bojan", show: { id: "klustered", name: "Klustered" } }), "22. Borko Vs. Bojan | Klustered");
+  assert.equal(composeTitle({ title: "Intro", course: "Teleport for Kubernetes" }), "Intro | Teleport for Kubernetes");
+  assert.equal(composeTitle({ title: "Already | Klustered", show: { id: "k", name: "Klustered" } }), "Already | Klustered");
+  const long = composeTitle({ title: `${"word ".repeat(30)}end`, show: { id: "k", name: "Klustered" } });
+  assert.ok([...long].length <= 100 && long.endsWith("… | Klustered"));
+});
+
 test("validation fails an empty title or an over-long description", () => {
   assert.deepEqual(validateManaged({ title: "ok", description: "ok" }), []);
   assert.match(validateManaged({ title: "  " })[0], /empty/);
@@ -91,13 +99,20 @@ const rich: AcademyVideo = {
   technologies: [{ id: "atuin", name: "Atuin", website: "https://atuin.sh", x: "https://twitter.com/atuinsh", bluesky: "https://bsky.app/profile/atuin.sh", mastodon: "https://hachyderm.io/@atuin" }],
 };
 
-test("the show, guests and technologies carry full https links, with only the handles that exist", () => {
-  assert.equal(renderMetadata(rich), [
-    "Show: Rawkode Live\nhttps://rawkode.academy/shows/rawkode-live",
-    "Guests\nEllie Huxtable: https://rawkode.academy/people/ellie\nX: https://x.com/ellie_huxtable\nBluesky: https://bsky.app/profile/ellie.wtf\nLinkedIn: https://www.linkedin.com/in/elliehuxtable\nNo Socials: https://rawkode.academy/people/nobody",
-    "Technologies\nAtuin: https://rawkode.academy/technology/atuin\nWebsite: https://atuin.sh\nX: https://twitter.com/atuinsh\nBluesky: https://bsky.app/profile/atuin.sh\nMastodon: https://hachyderm.io/@atuin",
+test("the show, guests and technologies are one compact line each, with https links", () => {
+  assert.equal(renderMetadata({ ...rich, technologies: [{ ...rich.technologies[0], youtube: "https://youtube.com/@atuinsh" }] }), [
+    "🎬 *Rawkode Live* · https://rawkode.academy/shows/rawkode-live",
+    "👥 *Guests*\nEllie Huxtable · https://rawkode.academy/people/ellie · https://x.com/ellie_huxtable\nNo Socials · https://rawkode.academy/people/nobody",
+    "🧩 *Technologies*\nAtuin · https://rawkode.academy/technology/atuin · @atuinsh",
   ].join("\n\n"));
+  assert.equal(renderMetadata(rich).split("\n").pop(), "Atuin · https://rawkode.academy/technology/atuin");
   assert.equal(renderMetadata(video), "");
+});
+
+test("up to three hashtags: the show, then the technologies", () => {
+  assert.equal(renderHashtags(rich), "#RawkodeLive #Atuin");
+  assert.equal(renderHashtags({ show: null, technologies: ["A b", "C", "D", "E"].map((name, i) => ({ id: `t${i}`, name })) }), "#Ab #C #D");
+  assert.equal(renderHashtags(video), "");
 });
 
 test("links are upgraded to https, handles expanded, junk dropped", () => {
@@ -112,9 +127,9 @@ test("the metadata sits after the chapters and before the footer, and the body i
   const long = Array.from({ length: 150 }, () => "Kubernetes controllers reconcile desired state with observed state. ").join("");
   const description = composeDescription({ ...rich, description: long, chapters: [{ startTime: 0, title: "Intro" }, { startTime: 30, title: "Two" }, { startTime: 90, title: "Three" }] });
   assert.ok(bytes(description) <= 5000);
-  const order = ["Watch with chapters", "…", "Chapters\n", "Show: Rawkode Live", "Guests\n", "Technologies\n", MARKER].map(part => description.indexOf(part));
+  const order = ["Watch with chapters", "…", "Chapters\n", "🎬 *Rawkode Live*", "👥 *Guests*\n", "🧩 *Technologies*\n", MARKER].map(part => description.indexOf(part));
   assert.deepEqual([...order].sort((a, b) => a - b), order);
-  assert.match(description, /\nLinkedIn: https:\/\/www\.linkedin\.com\/in\/elliehuxtable\n/);
+  assert.match(description, /\n#RawkodeLive #Atuin$/);
 });
 
 test("an enormous guest list is capped and the description still fits", () => {
