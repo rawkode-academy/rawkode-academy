@@ -2,5 +2,5 @@
   "planId": "latest",
   "limit": 1,
   "videos": ["automating-deployments-to-the-edge"],
-  "dryRun": false
+  "dryRun": true
 }
