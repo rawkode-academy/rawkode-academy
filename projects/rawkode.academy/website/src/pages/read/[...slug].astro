@@ -24,6 +24,7 @@ import Resources from "@/components/articles/Resources.astro";
 import Updates from "@/components/articles/Updates.astro";
 import RelatedVideos from "@/components/articles/RelatedVideos.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
+import SupporterCTA from "@/components/organizations/SupporterCTA.astro";
 
 import ArticleHeader from "@/components/read/ArticleHeader.astro";
 import ArticleByline from "@/components/read/ArticleByline.astro";
@@ -200,6 +201,7 @@ const subtitle = article.data.openGraph?.subtitle || article.data.subtitle;
 			/>
 			<RelatedVideos currentArticle={article} limit={3} />
 			<NewsletterCTA />
+			<SupporterCTA surface="article" />
 		</div>
 	</div>
 </Page>
