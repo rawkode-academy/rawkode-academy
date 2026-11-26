@@ -15,7 +15,9 @@
     "MANAGED_FIELDS": "title,description,thumbnail",
     // The standing approval for the daily cron: after each plan, queue up to this many
     // changes for writing (0 = plan only). About a day's quota; the commit is the record.
-    "AUTO_APPLY_LIMIT": "80"
+    "AUTO_APPLY_LIMIT": "80",
+    // Push a video as soon as the video-updates Worker commits a change to it (queue platform-video-updated).
+    "PUSH_ON_UPDATE": "true"
   },
   // Converts the site's WebP thumbnails to JPEG for YouTube.
   "images": { "binding": "IMAGES" },
@@ -37,7 +39,10 @@
     "producers": [{ "binding": "SYNC_QUEUE", "queue": "platform-youtube-sync" }],
     "consumers": [
       { "queue": "platform-youtube-sync", "max_batch_size": 1, "max_batch_timeout": 1, "max_concurrency": 1, "max_retries": 6, "dead_letter_queue": "platform-youtube-sync-dlq" },
-      { "queue": "platform-youtube-sync-dlq", "max_batch_size": 10, "max_batch_timeout": 5 }
+      { "queue": "platform-youtube-sync-dlq", "max_batch_size": 10, "max_batch_timeout": 5 },
+      // Update events from the video-updates Worker: each becomes a one-video plan and a message on the write queue above.
+      { "queue": "platform-video-updated", "max_batch_size": 1, "max_batch_timeout": 1, "max_retries": 5, "dead_letter_queue": "platform-video-updated-dlq" },
+      { "queue": "platform-video-updated-dlq", "max_batch_size": 10, "max_batch_timeout": 5 }
     ]
   },
   // Daily: plan, then queue up to AUTO_APPLY_LIMIT of its changes. apply.json still

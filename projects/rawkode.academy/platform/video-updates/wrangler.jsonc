@@ -1,0 +1,35 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "platform-video-updates",
+	"main": "src/main.ts",
+	"compatibility_date": "2026-10-31",
+	"compatibility_flags": ["nodejs_compat"],
+	// Public surface: /health and /status (counts and times only). Writes are RPC over service bindings.
+	"workers_dev": true,
+	"observability": {
+		"traces": { "enabled": true, "destinations": ["grafana-traces"] },
+		"logs": { "enabled": true, "destinations": ["grafana-logs"] }
+	},
+	"vars": { "SITE_ORIGIN": "https://rawkode.academy" },
+	"d1_databases": [
+		// This service's own audit trail. Wrangler provisions it on the first deploy; the table is created on first use.
+		{ "binding": "DB", "database_name": "platform-video-updates" },
+		{ "binding": "VIDEOS", "database_name": "platform-videos", "database_id": "0e96020b-eb03-456c-a593-fa73f2e845d4" },
+		{ "binding": "PEOPLE", "database_name": "platform-people", "database_id": "d2cd6600-ca32-47d8-bc7d-147c6c7bb794" },
+		{ "binding": "PEOPLE_LINKS", "database_name": "platform-people-links", "database_id": "a9fd441c-34f3-4f1d-a4c0-875d2716e694" },
+		{ "binding": "TECHNOLOGIES", "database_name": "platform-technologies", "database_id": "4671b796-cdc8-4a4e-aa58-4e10eb24b67d" },
+		{ "binding": "SHOWS", "database_name": "platform-shows", "database_id": "533025e2-2267-41e8-bf38-ad171a0d9de4" },
+		{ "binding": "EPISODES", "database_name": "platform-episodes", "database_id": "e1e6c651-f251-486f-94ce-72899f0c4dbf" },
+		{ "binding": "COURSES", "database_name": "platform-courses", "database_id": "9e0bbf1f-9d58-4c68-81bc-7ba67973a5e9" },
+		{ "binding": "CASTING_CREDITS", "database_name": "platform-casting-credits", "database_id": "52ed26af-1541-4a07-8c71-7b8ec252b9d4" },
+		{ "binding": "VIDEO_GUESTS", "database_name": "platform-video-guests", "database_id": "97e8a081-fec7-42fe-bf2f-9d7527654bff" },
+		{ "binding": "VIDEO_TECHNOLOGIES", "database_name": "platform-video-technologies", "database_id": "fcbbfbca-d078-49a5-b9cb-edf6b17592a0" },
+		{ "binding": "CHAPTERS", "database_name": "platform-chapters", "database_id": "c388193d-ef24-4016-827b-ab57a887ee4e" },
+		{ "binding": "VIDEO_COLLABORATIONS", "database_name": "platform-video-collaborations", "database_id": "4f2f882e-1a7f-4873-b5d6-9fc85f9efd4d" },
+		{ "binding": "VIDEO_CHANNELS", "database_name": "platform-video-channels", "database_id": "00e10bc1-5c76-45ac-9b4d-a2f14dcbfd15" }
+	],
+	"services": [{ "binding": "ANALYTICS", "service": "rawkode-tools-observability-collector" }],
+	// The YouTube sync consumes this. The deploy creates both queues if missing.
+	"queues": { "producers": [{ "binding": "VIDEO_UPDATED", "queue": "platform-video-updated" }] },
+	"workflows": [{ "name": "update-video", "binding": "UPDATE_VIDEO", "class_name": "UpdateVideoWorkflow" }]
+}

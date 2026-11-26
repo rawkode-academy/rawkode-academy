@@ -1,7 +1,7 @@
 import type { FieldDiff, PlanItem, Status, ThumbnailPlan } from "./plan.ts";
 import type { FieldHashes, Managed, Snippet } from "./render.ts";
 
-export type PlanRecord = { id: string; createdAt: string; templateVersion: number; fields: string[]; summary: Record<string, number> };
+export type PlanRecord = { id: string; createdAt: string; templateVersion: number; fields: string[]; summary: Record<string, number>; scope?: "full" | "video" };
 export type StoredItem = PlanItem;
 export type LogRow = { id: number; planId: string; youtubeId: string; at: string; kind: string; result: string; detail: string | null; before: Snippet | null; after: Snippet | null };
 
@@ -49,12 +49,12 @@ export class Store {
   }
 
   async savePlan(plan: PlanRecord, items: PlanItem[]) {
-    await this.db.prepare("INSERT INTO youtube_sync_plans (id, created_at, template_version, fields, summary) VALUES (?1, ?2, ?3, ?4, ?5)").bind(plan.id, plan.createdAt, plan.templateVersion, JSON.stringify(plan.fields), JSON.stringify(plan.summary)).run();
+    await this.db.prepare("INSERT INTO youtube_sync_plans (id, created_at, template_version, fields, summary, scope) VALUES (?1, ?2, ?3, ?4, ?5, ?6)").bind(plan.id, plan.createdAt, plan.templateVersion, JSON.stringify(plan.fields), JSON.stringify(plan.summary), plan.scope ?? "full").run();
     const insert = this.db.prepare("INSERT INTO youtube_sync_plan_items (plan_id, youtube_id, academy_id, slug, status, reason, live_hash, desired, diff, thumb_url, thumb_tag, thumb_changed) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)");
     await this.batch(items.map(item => insert.bind(plan.id, item.youtubeId, item.academyId, item.slug, item.status, item.reason, item.liveHash, item.desired ? JSON.stringify(item.desired) : null, JSON.stringify(item.diff), item.thumbnail?.url ?? null, item.thumbnail?.tag ?? null, item.thumbnail?.changed ? 1 : 0)));
   }
   async latestPlanId(): Promise<string | null> {
-    return (await this.db.prepare("SELECT id FROM youtube_sync_plans ORDER BY created_at DESC LIMIT 1").first<{ id: string }>())?.id ?? null;
+    return (await this.db.prepare("SELECT id FROM youtube_sync_plans WHERE scope = 'full' ORDER BY created_at DESC LIMIT 1").first<{ id: string }>())?.id ?? null;
   }
   // `only` limits the items to one video (by YouTube ID or slug), for the queue consumer.
   async plan(id: string, only?: string): Promise<{ plan: PlanRecord; items: StoredItem[] } | null> {

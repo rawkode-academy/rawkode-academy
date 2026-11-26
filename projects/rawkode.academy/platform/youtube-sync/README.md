@@ -43,6 +43,10 @@ It ships as a dry run of one video. To roll out, change it in a commit and run t
 
 The commit is the record of who allowed what.
 
+## Pushing when the site changes
+
+The `video-updates` Worker publishes `video.updated` to the queue `platform-video-updated` once it has committed a change to a video. This Worker re-reads that one video, plans it (scope `video`, so it never becomes the "latest" plan) and, if the title, description or thumbnail differ, puts it on the write queue below. The daily plan stays as the safety net. Set `PUSH_ON_UPDATE` to anything but `true` to ignore these events; failures land in `platform-video-updated-dlq` and `deadLetters` like any other.
+
 ## Quota and the queue
 
 YouTube gives 10,000 units a day, resetting at midnight Pacific. A `videos.update` costs 50, a `thumbnails.set` 50 and a `videos.list` 1. The Worker counts units per Pacific day in D1 and stops at 9,000, leaving 1,000 for the analytics sync. A full video is about 101 units, so a day writes about 89 videos and the first push of ~330 takes four days.

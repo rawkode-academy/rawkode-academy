@@ -270,6 +270,12 @@ flake = "."
 digest = "sha256:e0edb09211430341ac6af83b7e923a3df8ff3aeeb1a7cab50578d062d8c10d66"
 lockfile = "flake.lock"
 
+[runtimes."projects/rawkode.academy/platform/video-updates"]
+type = "nix"
+flake = "."
+digest = "sha256:5ab94ab74d3b616e10cd20efccf6066458f124598a6cd75868b3b16641029e1f"
+lockfile = "projects/rawkode.academy/platform/video-updates/flake.lock"
+
 [runtimes."projects/rawkode.academy/platform/videos"]
 type = "nix"
 flake = "."

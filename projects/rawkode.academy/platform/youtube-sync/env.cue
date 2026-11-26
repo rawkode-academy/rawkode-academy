@@ -88,7 +88,7 @@ tasks: {
 	// secrets from Infisical. Fails if `cuenv task consent` hasn't stored them yet.
 	deploy: schema.#Task & {
 		command: "sh"
-		args: ["-c", _npm + "npm test --workspaces=false && npx --no-install wrangler d1 migrations apply DB --remote && for q in platform-youtube-sync platform-youtube-sync-dlq; do npx --no-install wrangler queues info $q >/dev/null 2>&1 || npx --no-install wrangler queues create $q; done && npx --no-install wrangler deploy --secrets-file secrets.env"]
+		args: ["-c", _npm + "npm test --workspaces=false && npx --no-install wrangler d1 migrations apply DB --remote && for q in platform-youtube-sync platform-youtube-sync-dlq platform-video-updated platform-video-updated-dlq; do npx --no-install wrangler queues info $q >/dev/null 2>&1 || npx --no-install wrangler queues create $q; done && npx --no-install wrangler deploy --secrets-file secrets.env"]
 		inputs: list.Concat([_sources, ["env.cue", "test/**", "migrations/**"]])
 		labels: ["infisical"]
 		env: {
