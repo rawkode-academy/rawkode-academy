@@ -87,28 +87,45 @@ export function https(value: string | null | undefined, handleBase?: string): st
 }
 const MAX_GUESTS = 6;
 const MAX_TECHNOLOGIES = 8;
-const labelled = (pairs: [string, string | undefined][]) => pairs.flatMap(([label, url]) => (url ? [`${label}: ${url}`] : []));
+const MAX_HASHTAGS = 3;
 
-// The site's show, guests and technologies, with full https links.
+// "https://youtube.com/@handle" becomes "@handle", which YouTube links and shows as a channel card.
+const youtubeHandle = (url: string | undefined) => url?.match(/^https:\/\/(?:www\.)?youtube\.com\/(@[A-Za-z0-9_.-]+)\/?$/i)?.[1];
+const line = (parts: (string | undefined)[]) => parts.filter(Boolean).join(" · ");
+
+// The site's show, guests and technologies: one compact line each, with https
+// links so YouTube links them. Socials beyond one per guest, and a technology's
+// website and X, stay on the site pages.
 export function renderMetadata(video: Pick<AcademyVideo, "show" | "guests" | "technologies">): string {
   const sections: string[] = [];
-  if (video.show) sections.push(`Show: ${stripAngles(video.show.name)}\n${SITE}/shows/${video.show.id}`);
-  if (video.guests.length) sections.push(["Guests", ...video.guests.slice(0, MAX_GUESTS).flatMap(guest => [`${stripAngles(guest.name)}: ${SITE}/people/${guest.id}`, ...labelled([["X", guest.x], ["Bluesky", guest.bluesky], ["LinkedIn", guest.linkedin]])])].join("\n"));
-  if (video.technologies.length) sections.push(["Technologies", ...video.technologies.slice(0, MAX_TECHNOLOGIES).flatMap(tech => [`${stripAngles(tech.name)}: ${SITE}/technology/${tech.id}`, ...labelled([["Website", tech.website], ["X", tech.x], ["Bluesky", tech.bluesky], ["Mastodon", tech.mastodon], ["YouTube", tech.youtube]])])].join("\n"));
+  if (video.show) sections.push(`🎬 ${stripAngles(video.show.name)} · ${SITE}/shows/${video.show.id}`);
+  if (video.guests.length) sections.push(["👥 Guests", ...video.guests.slice(0, MAX_GUESTS).map(guest => line([stripAngles(guest.name), `${SITE}/people/${guest.id}`, guest.x ?? guest.bluesky ?? guest.linkedin]))].join("\n"));
+  if (video.technologies.length) sections.push(["🧩 Technologies", ...video.technologies.slice(0, MAX_TECHNOLOGIES).map(tech => line([stripAngles(tech.name), `${SITE}/technology/${tech.id}`, youtubeHandle(tech.youtube)]))].join("\n"));
   return sections.join("\n\n");
+}
+
+// Up to three hashtags for discovery (YouTube shows the first three above the title): the show, then the technologies.
+export function renderHashtags(video: Pick<AcademyVideo, "show" | "technologies">): string {
+  const tags: string[] = [];
+  for (const name of [video.show?.name, ...video.technologies.map(t => t.name)]) {
+    const tag = (name ?? "").replace(/[^\p{L}\p{N}]/gu, "");
+    if (tag && !tags.some(t => t.toLowerCase() === tag.toLowerCase())) tags.push(tag);
+  }
+  return tags.slice(0, MAX_HASHTAGS).map(t => `#${t}`).join(" ");
 }
 
 export const watchUrl = (video: Pick<AcademyVideo, "slug">) => `https://rawkode.academy/watch/${video.slug}?utm_source=youtube&utm_medium=description`;
 export const renderHeader = (video: Pick<AcademyVideo, "slug">) => `Watch with chapters, code and resources: ${watchUrl(video)}`;
 
-export function renderFooter(video: Pick<AcademyVideo, "collaborators">): string {
+export function renderFooter(video: Pick<AcademyVideo, "collaborators"> & Partial<Pick<AcademyVideo, "show" | "technologies">>): string {
   const lines = [
     MARKER,
     "Newsletter: https://rawkode.academy/#join",
     "Support the Academy: https://rawkode.academy/organizations/support-our-work?utm_source=youtube&utm_medium=description",
   ];
   if (video.collaborators.length) lines.push(`Made in collaboration with ${video.collaborators.join(" and ")}.`);
-  return lines.join("\n");
+  const hashtags = renderHashtags({ show: video.show ?? null, technologies: video.technologies ?? [] });
+  return hashtags ? `${lines.join("\n")}\n\n${hashtags}` : lines.join("\n");
 }
 
 // Cuts at a paragraph, else a sentence, else a word: never mid-word.
