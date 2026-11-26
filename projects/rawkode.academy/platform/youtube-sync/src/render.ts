@@ -22,7 +22,7 @@ export type Chapter = { startTime: number; title: string };
 export type Show = { id: string; name: string };
 export type Person = { id: string; name: string; x?: string; bluesky?: string; linkedin?: string };
 export type Technology = { id: string; name: string; website?: string; x?: string; bluesky?: string; mastodon?: string; youtube?: string };
-export type AcademyVideo = { id: string; title: string; slug: string; collaborators: string[]; description: string; chapters: Chapter[]; thumbnailUrl: string; show: Show | null; course?: string | null; guests: Person[]; technologies: Technology[] };
+export type AcademyVideo = { id: string; title: string; slug: string; collaborators: string[]; description: string; chapters: Chapter[]; thumbnailUrl: string; show: Show | null; course?: string | null; guests: Person[]; hosts?: Person[]; technologies: Technology[] };
 
 export function parseFields(value: string | undefined): Field[] {
   const wanted = (value ?? ALL_FIELDS.join(",")).split(",").map(item => item.trim()).filter(Boolean);
@@ -99,9 +99,10 @@ const line = (parts: (string | undefined)[]) => parts.filter(Boolean).join(" · 
 // The site's show, guests and technologies: one compact line each, with https
 // links so YouTube links them. Socials beyond one per guest, and a technology's
 // website and X, stay on the site pages.
-export function renderMetadata(video: Pick<AcademyVideo, "show" | "guests" | "technologies">): string {
+export function renderMetadata(video: Pick<AcademyVideo, "show" | "guests" | "technologies"> & { hosts?: Person[] }): string {
   const sections: string[] = [];
   if (video.show) sections.push(`🎬 ${bold(video.show.name)} · ${SITE}/shows/${video.show.id}`);
+  if (video.hosts?.length) sections.push(["🎙 *Hosts*", ...video.hosts.slice(0, MAX_GUESTS).map(host => line([stripAngles(host.name), `${SITE}/people/${host.id}`, host.x ?? host.bluesky ?? host.linkedin]))].join("\n"));
   if (video.guests.length) sections.push(["👥 *Guests*", ...video.guests.slice(0, MAX_GUESTS).map(guest => line([stripAngles(guest.name), `${SITE}/people/${guest.id}`, guest.x ?? guest.bluesky ?? guest.linkedin]))].join("\n"));
   if (video.technologies.length) sections.push(["🧩 *Technologies*", ...video.technologies.slice(0, MAX_TECHNOLOGIES).map(tech => line([stripAngles(tech.name), `${SITE}/technology/${tech.id}`, youtubeHandle(tech.youtube)]))].join("\n"));
   return sections.join("\n\n");
