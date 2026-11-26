@@ -1,21 +1,36 @@
 {
   "nodes": {
-    "devenv": {
+    "bun": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
       "locked": {
-        "dir": "src/modules",
-        "lastModified": 1794419745,
-        "narHash": "sha256-mGdiUY24F3Owpfn5wa3VkXomrQCNnI9kDy7rXJiFgm8=",
-        "owner": "cachix",
-        "repo": "devenv",
-        "rev": "215e857bd3403963855a4ff718822be0949a41e6",
-        "type": "github"
+        "path": "./flakes/bun",
+        "type": "path"
       },
       "original": {
-        "dir": "src/modules",
-        "owner": "cachix",
-        "repo": "devenv",
-        "type": "github"
-      }
+        "path": "./flakes/bun",
+        "type": "path"
+      },
+      "parent": []
+    },
+    "nix": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "path": "./flakes/nix",
+        "type": "path"
+      },
+      "original": {
+        "path": "./flakes/nix",
+        "type": "path"
+      },
+      "parent": []
     },
     "nixpkgs": {
       "locked": {
@@ -35,7 +50,8 @@
     },
     "root": {
       "inputs": {
-        "devenv": "devenv",
+        "bun": "bun",
+        "nix": "nix",
         "nixpkgs": "nixpkgs"
       }
     }

@@ -5,8 +5,8 @@
       "entry": [
         "package.json",
         "knip.json",
-        "devenv.yaml",
-        "devenv.nix",
+        "flake.nix",
+        "flakes/*/flake.nix",
         "env.cue",
         "tsconfig.json"
       ]

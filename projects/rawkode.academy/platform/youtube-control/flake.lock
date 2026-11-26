@@ -16,9 +16,26 @@
         "type": "github"
       }
     },
+    "node": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "path": "../../../../flakes/node",
+        "type": "path"
+      },
+      "original": {
+        "path": "../../../../flakes/node",
+        "type": "path"
+      },
+      "parent": []
+    },
     "root": {
       "inputs": {
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "node": "node"
       }
     }
   },

@@ -4,7 +4,6 @@ import (
 	"list"
 
 	"github.com/cuenv/cuenv/schema"
-	xNix "github.com/cuenv/cuenv/contrib/nix"
 )
 
 schema.#Project
@@ -13,8 +12,6 @@ name: "rawkode-tools-observability-collector"
 
 // Tools (Bun, Node, curl, and Python with PyIceberg for basin/) come from
 // flake.nix, locally and in CI.
-runtime: schema.#NixRuntime
-hooks: onEnter: nix: xNix.#NixFlake
 
 let _t = tasks
 

@@ -1,16 +1,10 @@
 package cuenv
 
-import (
-	"github.com/cuenv/cuenv/schema"
-	xNix "github.com/cuenv/cuenv/contrib/nix"
-)
+import "github.com/cuenv/cuenv/schema"
 
 schema.#Project
 
 name: "rawkode-academy-identity"
-
-runtime: schema.#NixRuntime
-hooks: onEnter: nix: xNix.#NixFlake
 
 let _t = tasks
 

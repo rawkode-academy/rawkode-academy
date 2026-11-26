@@ -4,7 +4,6 @@ import (
 	"list"
 
 	"github.com/cuenv/cuenv/schema"
-	xNix "github.com/cuenv/cuenv/contrib/nix"
 )
 
 schema.#Project
@@ -13,8 +12,6 @@ name: "rawkode-tools-mcp"
 
 // Tasks run in this directory's flake.nix dev shell (Node), pinned by
 // flake.lock.
-runtime: schema.#NixRuntime
-hooks: onEnter: nix: xNix.#NixFlake
 
 let _t = tasks
 

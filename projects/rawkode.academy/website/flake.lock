@@ -1,0 +1,78 @@
+{
+  "nodes": {
+    "bun": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "path": "../../../flakes/bun",
+        "type": "path"
+      },
+      "original": {
+        "path": "../../../flakes/bun",
+        "type": "path"
+      },
+      "parent": []
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1794042290,
+        "narHash": "sha256-ziZn2PvCJE5JEEpqTdxXwJpPB+L3YqoCpTAMCzyaP3U=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "f4a03c008967841f2a0b3cb7c436fc6fc31671f6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "node": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "path": "../../../flakes/node",
+        "type": "path"
+      },
+      "original": {
+        "path": "../../../flakes/node",
+        "type": "path"
+      },
+      "parent": []
+    },
+    "root": {
+      "inputs": {
+        "bun": "bun",
+        "nixpkgs": "nixpkgs",
+        "node": "node",
+        "workerd": "workerd"
+      }
+    },
+    "workerd": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "path": "../../../flakes/workerd",
+        "type": "path"
+      },
+      "original": {
+        "path": "../../../flakes/workerd",
+        "type": "path"
+      },
+      "parent": []
+    }
+  },
+  "root": "root",
+  "version": 7
+}

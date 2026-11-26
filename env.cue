@@ -17,8 +17,8 @@ let _removeDeterminateReceipt = """
 	"""
 
 // Cache the Nix store on the Namespace runner's persistent volume and install
-// Determinate Nix on top. Replaces the stock `c.#Nix` contributor so the
-// cache, receipt cleanup, and install steps stay in a single ordered group.
+// Determinate Nix on top. Replaces the stock `c.#Nix` contributor so the cache,
+// receipt cleanup and install steps stay in a single ordered group.
 let _NamespaceNix = schema.#Contributor & {
 	id: "namespaceNix"
 	tasks: [
@@ -67,21 +67,17 @@ _cuenvBinary?: string
 config: ci: cuenv: {
 	source: "release"
 	if _cuenvBinary == _|_ {
-		version: "0.81.1"
+		version: "0.81.3"
 	}
 	if _cuenvBinary != _|_ {
 		version: _cuenvBinary
 	}
 }
 
-runtime: *schema.#DevenvRuntime | schema.#NixRuntime
-
-let _shellHooks = {
-	devenv: {devenv: schema.#Devenv}
-	nix: {nix: xNix.#NixFlake}
-}
-
-hooks: onEnter: _shellHooks[runtime.type]
+// Every project runs in a Nix dev shell. A project with its own flake.nix uses
+// it; every other project, and the repository root, resolves to the root flake.
+runtime: schema.#NixRuntime
+hooks: onEnter: nix: xNix.#NixFlake
 
 // A project may set _ciRequireReport to its repository-relative path. `cuenv
 // ci` skips a project whose env.cue fails to evaluate and still exits 0, so the

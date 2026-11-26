@@ -6,8 +6,6 @@ schema.#Project
 
 name: "rawkode-arcade"
 
-runtime: schema.#DevenvRuntime
-
 let _t = tasks
 
 ci: pipelines: {
@@ -42,7 +40,7 @@ tasks: {
 		// panda.config.ts and astro.config.mts are load-bearing for `check`:
 		// it runs panda codegen and the design-token guard, which reads the
 		// token values straight out of the config.
-		inputs: ["src/**", "scripts/**", "tsconfig.json", "panda.config.ts", "astro.config.mts", "wrangler.jsonc", "env.cue", "package.json", "devenv.nix", schema.#ModuleFiles & {paths: ["bun.lock"]}, schema.#ModuleFiles & {paths: ["packages/live-viewer/**"]}]
+		inputs: ["src/**", "scripts/**", "tsconfig.json", "panda.config.ts", "astro.config.mts", "wrangler.jsonc", "env.cue", "package.json", "flake.nix", "flake.lock", schema.#ModuleFiles & {paths: ["bun.lock"]}, schema.#ModuleFiles & {paths: ["packages/live-viewer/**"]}]
 		outputs: ["styled-system/**", ".astro/**"]
 	}
 	test: schema.#Task & {
@@ -70,7 +68,7 @@ tasks: {
 		hermetic: false
 		command:  "bun"
 		args: ["run", "build"]
-		inputs: ["src/**", "scripts/**", "public/**", "astro.config.mts", "panda.config.ts", "tsconfig.json", "wrangler.jsonc", "env.cue", "package.json", "devenv.nix", schema.#ModuleFiles & {paths: ["bun.lock"]}, schema.#ModuleFiles & {paths: ["packages/live-viewer/**"]}]
+		inputs: ["src/**", "scripts/**", "public/**", "astro.config.mts", "panda.config.ts", "tsconfig.json", "wrangler.jsonc", "env.cue", "package.json", "flake.nix", "flake.lock", schema.#ModuleFiles & {paths: ["bun.lock"]}, schema.#ModuleFiles & {paths: ["packages/live-viewer/**"]}]
 		outputs: ["dist/**", ".wrangler/deploy/config.json"]
 	}
 	validate: schema.#Task & {
@@ -80,7 +78,7 @@ tasks: {
 		env: CI: "true"
 		// Keep workerd users sequential and build exactly once. A single task
 		// also avoids deeply expanded CUE task references during evaluation.
-		inputs: ["src/**", "tests/**", "e2e/**", "scripts/**", "public/**", "migrations/**", "astro.config.mts", "panda.config.ts", "tsconfig.json", "vitest.config.ts", "wrangler.jsonc", "wrangler.test.jsonc", "env.cue", "package.json", "devenv.nix", schema.#ModuleFiles & {paths: ["bun.lock"]}, schema.#ModuleFiles & {paths: ["packages/live-viewer/**"]}]
+		inputs: ["src/**", "tests/**", "e2e/**", "scripts/**", "public/**", "migrations/**", "astro.config.mts", "panda.config.ts", "tsconfig.json", "vitest.config.ts", "wrangler.jsonc", "wrangler.test.jsonc", "env.cue", "package.json", "flake.nix", "flake.lock", schema.#ModuleFiles & {paths: ["bun.lock"]}, schema.#ModuleFiles & {paths: ["packages/live-viewer/**"]}]
 		outputs: ["dist/**", "styled-system/**", ".astro/**", ".wrangler/deploy/config.json"]
 	}
 	migrate: schema.#TaskGroup & {
