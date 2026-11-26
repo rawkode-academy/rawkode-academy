@@ -10,6 +10,7 @@ on:
     - '*.cue'
     - .github/workflows/rawkode-academy-platform-video-updates-default.yml
     - cue.mod/**
+    - packages/rich-text/**
     - projects/*.cue
     - projects/rawkode.academy/*.cue
     - projects/rawkode.academy/platform/*.cue
