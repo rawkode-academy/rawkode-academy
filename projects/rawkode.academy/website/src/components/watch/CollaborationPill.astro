@@ -55,30 +55,56 @@ const names = items.map((c) => c.name).join(", ");
 
 <script>
 	const pills = document.querySelectorAll<HTMLElement>("[data-collab]");
-	const set = (pill: HTMLElement, open: boolean) => {
-		pill.dataset.open = String(open);
-		pill.querySelector("[data-collab-toggle]")?.setAttribute("aria-expanded", String(open));
-	};
 	const canHover = window.matchMedia("(hover: hover)").matches;
+	// Open while hovered, focused by keyboard or pinned by a press. A press pins it open
+	// (so a click after hovering doesn't close it); a second press or Escape unpins it.
 	for (const pill of pills) {
-		pill.querySelector("[data-collab-toggle]")?.addEventListener("click", () => set(pill, pill.dataset.open !== "true"));
+		let hovered = false;
+		let focused = false;
+		let pinned = false;
+		const render = () => {
+			const open = hovered || focused || pinned;
+			pill.dataset.open = String(open);
+			pill.querySelector("[data-collab-toggle]")?.setAttribute("aria-expanded", String(open));
+		};
+		pill.querySelector("[data-collab-toggle]")?.addEventListener("click", () => {
+			pinned = !pinned;
+			if (!pinned) {
+				hovered = false;
+				focused = false;
+			}
+			render();
+		});
 		pill.addEventListener("keydown", (event) => {
-			if ((event as KeyboardEvent).key === "Escape") set(pill, false);
+			if ((event as KeyboardEvent).key === "Escape") {
+				hovered = focused = pinned = false;
+				render();
+			}
 		});
 		if (canHover) {
-			pill.addEventListener("pointerenter", () => set(pill, true));
+			pill.addEventListener("pointerenter", () => {
+				hovered = true;
+				render();
+			});
 			pill.addEventListener("pointerleave", () => {
-				if (!pill.contains(document.activeElement)) set(pill, false);
+				hovered = false;
+				render();
 			});
 		}
 		pill.addEventListener("focusin", (event) => {
-			if ((event.target as HTMLElement).matches(":focus-visible")) set(pill, true);
+			focused = (event.target as HTMLElement).matches(":focus-visible");
+			render();
 		});
 		pill.addEventListener("focusout", (event) => {
-			if (!pill.contains((event as FocusEvent).relatedTarget as Node | null)) set(pill, false);
+			if (!pill.contains((event as FocusEvent).relatedTarget as Node | null)) {
+				focused = false;
+				render();
+			}
+		});
+		document.addEventListener("click", (event) => {
+			if (pill.contains(event.target as Node)) return;
+			hovered = focused = pinned = false;
+			render();
 		});
 	}
-	document.addEventListener("click", (event) => {
-		for (const pill of pills) if (!pill.contains(event.target as Node)) set(pill, false);
-	});
 </script>

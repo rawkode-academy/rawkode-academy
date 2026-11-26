@@ -651,14 +651,13 @@ export const academyWatch = sva({
 				lineHeight: "inherit",
 			},
 		},
-		// "Collaboration" pill: collapsed it is one chip on the meta line; on hover,
-		// focus or press it expands in place to "In collaboration with <logo>".
+		// "Collaboration" pill: one chip on the meta line that never changes size. On hover,
+		// focus or press, "In collaboration with <logo>" opens in a panel under it, so
+		// opening it cannot reflow the meta line or move the chip out from under the pointer.
 		collab: {
+			position: "relative",
 			display: "inline-flex",
 			alignItems: "center",
-			columnGap: "2",
-			rowGap: "1",
-			flexWrap: "wrap",
 			maxWidth: "full",
 			border: "hairline",
 			borderColor: "academy.inkBorder",
@@ -669,7 +668,7 @@ export const academyWatch = sva({
 			transitionDuration: "fast",
 			// The meta line puts a dot before each item; inside a bordered pill it would sit within the border.
 			"&::before": { content: "none!" },
-			'&[data-open="true"]': { borderColor: "academy.inkAccent", "& [data-collab-panel]": { display: "inline-flex" } },
+			'&[data-open="true"]': { borderColor: "academy.inkAccent", "& [data-collab-panel]": { display: "flex" } },
 			"& [data-collab-panel]": { display: "none" },
 		},
 		collabPill: {
@@ -687,11 +686,24 @@ export const academyWatch = sva({
 			_focusVisible: focusRingInk,
 		},
 		collabPanel: {
+			position: "absolute",
+			insetInlineStart: "[-1px]",
+			top: "[calc(100% + 6px)]",
+			zIndex: "[30]",
 			alignItems: "center",
 			flexWrap: "wrap",
 			gap: "2",
-			paddingInlineEnd: "2",
+			width: "max-content",
+			maxWidth: "[min(32rem, calc(100vw - 2.5rem))]",
+			paddingBlock: "2",
+			paddingInline: "3",
+			border: "hairline",
+			borderColor: "academy.inkAccent",
+			borderRadius: "academy-pill",
+			backgroundColor: "academy.inkRaised",
 			color: "academy.inkTextSoft",
+			// Bridges the gap to the chip so moving the pointer down to the panel doesn't close it.
+			"&::before": { content: '""', position: "absolute", insetInline: "0", top: "[-8px]", height: "[8px]" },
 		},
 		collabLogo: {
 			display: "inline-flex",
