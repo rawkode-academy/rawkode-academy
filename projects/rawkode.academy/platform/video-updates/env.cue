@@ -53,10 +53,11 @@ tasks: {
 
 	// CI on main: tests, creates the queues if missing (the YouTube sync consumes
 	// them, so its deploy creates them too), then deploys the Worker with the
-	// website's cache invalidation token.
+	// website's cache invalidation token. The secret goes in a JSON file, as the
+	// website's deploy does: a .env file would cut a token at a "#" or expand a "$".
 	deploy: schema.#Task & {
 		command: "sh"
-		args: ["-c", "bun run check && bun run test && for q in platform-video-updated platform-video-updated-dlq; do bun x wrangler queues info $q >/dev/null 2>&1 || bun x wrangler queues create $q; done && bun x wrangler deploy --secrets-file secrets.env"]
+		args: ["-c", "bun run check && bun run test && for q in platform-video-updated platform-video-updated-dlq; do bun x wrangler queues info $q >/dev/null 2>&1 || bun x wrangler queues create $q; done && d=$(mktemp -d) && trap 'rm -rf \"$d\"' EXIT && bun -e 'const t = process.env.CACHE_INVALIDATION_TOKEN; if (!t) throw new Error(\"CACHE_INVALIDATION_TOKEN is not set\"); await Bun.write(process.argv[1], JSON.stringify({ CACHE_INVALIDATION_TOKEN: t }))' \"$d/secrets.json\" && bun x wrangler deploy --secrets-file \"$d/secrets.json\""]
 		inputs: list.Concat([_sources, ["env.cue", "test/**"]])
 		env: CACHE_INVALIDATION_TOKEN: schema.#OnePasswordRef & {
 			ref: "op://sa.rawkode.academy/website-cache-invalidation/password"
