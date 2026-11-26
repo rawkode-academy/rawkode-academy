@@ -4,12 +4,14 @@ import { academyWatch } from "@rawkodeacademy/design-system";
 
 interface Props {
 	hosts: ContentEntry<"people">[];
+	coHosts?: ContentEntry<"people">[];
 	guests: ContentEntry<"people">[];
 }
 
-const { hosts, guests } = Astro.props;
+const { hosts, coHosts = [], guests } = Astro.props;
 const speakers = [
 	...hosts.map((person) => ({ person, role: "Host" })),
+	...coHosts.map((person) => ({ person, role: "Co-host" })),
 	...guests.map((person) => ({ person, role: "Guest" })),
 ];
 const initials = (name: string) => name.trim().split(/\s+/u).slice(0, 2)

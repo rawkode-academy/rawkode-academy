@@ -181,10 +181,24 @@ if (showRelatedVideos.length === 0) {
 }
 
 // The cast is optional: a people lookup failure renders no cast.
-const hostEntries = showEntry
-	? await optionalContent(getEntries(showEntry.data.hosts), [])
-	: [];
-const guestEntries = await optionalContent(getEntries(video.data.guests), []);
+// Casting credits decide who was on this video; videos without any keep the
+// show's hosts and the legacy guest list.
+const credits = video.data.credits ?? [];
+const creditedEntries = (roles: string[]) =>
+	optionalContent(
+		getEntries(credits.filter((c) => roles.includes(c.role)).map((c) => c.person)),
+		[],
+	);
+const hasCredits = credits.length > 0;
+const hostEntries = hasCredits
+	? await creditedEntries(["host", "author"])
+	: showEntry
+		? await optionalContent(getEntries(showEntry.data.hosts), [])
+		: [];
+const coHostEntries = hasCredits ? await creditedEntries(["co_host"]) : [];
+const guestEntries = hasCredits
+	? await creditedEntries(["guest"])
+	: await optionalContent(getEntries(video.data.guests), []);
 
 const collaborators = video.data.collaborators ?? [];
 
@@ -298,7 +312,7 @@ if (shouldMountLiveGate) {
 	// recommendations (a scheduled video caps the cache lifetime). Signed-in
 	// renders (watch position) are skipped by setContentCache.
 	await setContentCache(Astro, {
-		entries: [video, showEntry, ...techEntries, ...hostEntries, ...guestEntries],
+		entries: [video, showEntry, ...techEntries, ...hostEntries, ...coHostEntries, ...guestEntries],
 		collections: ["videos", "articles", "courses", "learningPaths"],
 	});
 }
@@ -321,8 +335,8 @@ const metaDescription = (() => {
 })();
 
 const creatorRefs =
-	hostEntries.length > 0
-		? hostEntries.map((host) => ({
+	hostEntries.length + coHostEntries.length > 0
+		? [...hostEntries, ...coHostEntries].map((host) => ({
 				name: host.data.name,
 				url: `https://rawkode.academy/people/${host.id}`,
 			}))
@@ -656,7 +670,7 @@ const watchStatusLabel = isLiveNow
 
 					<VideoResources resources={video.data.resources ?? []} />
 
-					<VideoCast hosts={hostEntries} guests={guestEntries} />
+					<VideoCast hosts={hostEntries} coHosts={coHostEntries} guests={guestEntries} />
 
 					{chapterSource.length > 0 && (
 						<section class={watch.section} aria-labelledby="watch-detail-chapters-heading">
