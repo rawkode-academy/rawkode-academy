@@ -25,7 +25,7 @@ Every change goes through a plan you can read first.
    - `CHANGE`: the live title, description or thumbnail differs from what the site wants. If someone edited it in Studio since the last sync, the reason says it will be overwritten.
    - `NOOP`, `SKIP` (not listed, course-only, unmapped, private or deleted), `ERROR` (cannot be sent as is).
    The job summary also shows the full, untruncated change for the first video named in `apply.json` (else the first in the plan), and `GET /plans/<id>/videos/<slug>` returns any video's.
-2. **Apply** (the `rawkode-academy-platform-youtube-sync-apply` workflow). Applies `CHANGE` items from the latest plan, as `apply.json` allows. Before each write it re-reads the live fields and refuses the video if they changed since the plan (`stale`), so the diff you reviewed is the diff that is written.
+2. **Apply** (the `rawkode-academy-platform-youtube-sync-apply` workflow). Queues `CHANGE` items from the latest plan, as `apply.json` allows. Before each write it re-reads the live fields and refuses the video if they changed since the plan (`stale`), so the diff you reviewed is the diff that is written.
 3. **Rollback** (`POST /rollback`). Puts back the logged before values for a plan or one video, unless the field was edited after the sync wrote it.
 
 ### `apply.json` is the approval
@@ -37,13 +37,24 @@ Every change goes through a plan you can read first.
 It ships as a dry run of one video. To roll out, change it in a commit and run the apply workflow:
 
 1. `dryRun: false`, `limit: 1`, `videos: ["<slug>"]`: the canary. Look at the video in Studio.
-2. `limit: 10`, then a large `limit` once a day until the plan has no `CHANGE` left. The daily quota budget stops each run by itself.
+2. `limit: 10`, then a large `limit` (up to 400): the queue works through them within each day's quota and carries on the next day by itself, so one apply is enough.
 
 The commit is the record of who allowed what.
 
-## Quota
+## Quota and the queue
 
-YouTube gives 10,000 units a day, resetting at midnight Pacific. A `videos.update` costs 50 and a `videos.list` 1. The Worker counts units per Pacific day in D1 and stops at 9,000, leaving 1,000 for the analytics sync. A video's title and description are one update (50) and its thumbnail another (50), so a day writes about 90 full videos and the first push of ~330 takes four days. Run the apply workflow once a day; each run stops at the budget and the next picks up the rest.
+YouTube gives 10,000 units a day, resetting at midnight Pacific. A `videos.update` costs 50, a `thumbnails.set` 50 and a `videos.list` 1. The Worker counts units per Pacific day in D1 and stops at 9,000, leaving 1,000 for the analytics sync. A full video is about 101 units, so a day writes about 89 videos and the first push of ~330 takes four days.
+
+Apply doesn't write inline. It puts one message per video on the Cloudflare Queue `platform-youtube-sync` (as many as `apply.json` allows), and the Worker's consumer writes them one at a time (`max_concurrency: 1`, so the quota count is exact):
+
+- **Success, stale (edited since the plan) or missing:** acknowledged.
+- **Quota exhausted** (a 403 whose reason is `quotaExceeded`, or the 9,000 budget): not a failure. The day is marked spent and the message is re-sent with a delay that runs past the Pacific reset (at most 12 hours per hop, as Queues allow), so the batch resumes by itself the next day with no one re-running anything. A message still refused after 8 resets is recorded as stuck.
+- **Transient error** (network, timeout, 408, 429, 5xx): retried with exponential backoff, 30 s, 1 m, 2 m ... capped at 15 m, up to `max_retries: 6`, then it goes to the dead-letter queue `platform-youtube-sync-dlq`.
+- **An error retrying can't fix** (a rejected image, a permission 403, bad input): recorded straight away.
+
+Anything the queue gives up on is recorded in D1 (`youtube_sync_dead`), logged with `"operation":"queue"` to Grafana, and counted in `GET /status` as `deadLetters`. The daily `youtube-sync-monitor` workflow opens a GitHub issue while `deadLetters` is above zero; it clears itself once that video is written successfully. A redelivered message is safe: a video already written is skipped, and a thumbnail already pushed is not pushed again (which would also overwrite its saved before-image).
+
+Both queues are created by the CI deploy if missing, and the bindings and consumers are in `wrangler.jsonc`. Rollback stays synchronous (it is one deliberate batch).
 
 ## Audit
 
@@ -67,10 +78,10 @@ When the monitor issue or a log says `reauthorization_required`, repeat step 2.
 | Endpoint | Auth | Purpose |
 | --- | --- | --- |
 | `GET /health` | none | Process health. |
-| `GET /status` | none | Latest plan's counts and time, last write result, quota used today. No titles or descriptions. |
+| `GET /status` | none | Latest plan's counts and time, last write result, quota used today, `deadLetters`. No titles or descriptions. |
 | `POST /plan` | bearer | Read-only plan. |
 | `GET /plans/<id\|latest>/report` | bearer | Markdown diff report. |
-| `POST /apply` | bearer | `{ planId, limit, videos?, dryRun? }`. |
+| `POST /apply` | bearer | `{ planId, limit, videos?, dryRun? }`. Enqueues the selected videos (a dry run only lists them). |
 | `POST /rollback` | bearer | `{ planId \| youtubeId, limit }`. |
 
 `.github/workflows/youtube-sync-monitor.yml` reads `/status` daily and opens an issue if the plan stopped running, or found drift or errors.

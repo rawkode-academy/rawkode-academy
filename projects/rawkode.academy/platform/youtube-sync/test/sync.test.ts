@@ -6,6 +6,8 @@ import { convertV4MiniflareOptions, Miniflare } from "miniflare";
 import { createPlan, applyPlan, DAILY_BUDGET, rollback, type Deps } from "../src/sync.ts";
 import { composeDescription, composeTitle, type AcademyVideo, type Snippet } from "../src/render.ts";
 import { Store } from "../src/store.ts";
+import { ServiceError } from "../src/domain.ts";
+import { backoffSeconds, consume, consumeDead, MAX_DEFERRALS, secondsUntilReset, type QueueMessage, type SyncMessage } from "../src/queue.ts";
 
 let mf: Miniflare;
 before(async () => { mf = new Miniflare(convertV4MiniflareOptions({ workers: [{ name: "db", modules: true, script: "export default { fetch() { return new Response('ok'); } }", compatibilityDate: "2026-10-31", d1Databases: { DB: "db" } }] })); await mf.ready; });
@@ -16,7 +18,7 @@ async function fixture(fields: Deps["fields"] = ["title", "description"]) {
   const db = await mf.getD1Database("DB");
   const files = (await readdir(new URL("../migrations/", import.meta.url))).filter(name => name.endsWith(".sql")).sort();
   const sql = (await Promise.all(files.map(name => readFile(new URL(`../migrations/${name}`, import.meta.url), "utf8")))).join("\n").replace(/--.*$/gm, "");
-  for (const table of ["youtube_sync_thumbnails", "youtube_sync_log", "youtube_sync_plan_items", "youtube_sync_plans", "youtube_sync_state", "youtube_sync_quota"]) await db.prepare(`DROP TABLE IF EXISTS ${table}`).run();
+  for (const table of ["youtube_sync_dead", "youtube_sync_thumbnails", "youtube_sync_log", "youtube_sync_plan_items", "youtube_sync_plans", "youtube_sync_state", "youtube_sync_quota"]) await db.prepare(`DROP TABLE IF EXISTS ${table}`).run();
   for (const statement of sql.split(";").map(s => s.trim()).filter(Boolean)) await db.prepare(statement.replace(/\s+/g, " ")).run();
   const live = new Map<string, Snippet>();
   const writes: { id: string; snippet: Snippet }[] = [];
@@ -184,4 +186,119 @@ test("rollback restores the logged before values, but not over a later Studio ed
   assert.equal(f.live.get(yt(0))!.description, "Studio text 0");
   assert.equal(result.outcomes.find(o => o.youtubeId === yt(1))?.result, "stale");
   assert.deepEqual(f.live.get(yt(0))!.tags, ["k8s", "t0"]);
+});
+
+// ── the queue ──
+function message(body: unknown, attempts = 1) {
+  const seen = { acked: false, retried: undefined as number | undefined | "no-delay" };
+  const m: QueueMessage = { body, attempts, ack() { seen.acked = true; }, retry(options) { seen.retried = options?.delaySeconds ?? "no-delay"; } };
+  return { m, seen };
+}
+const sends: { body: SyncMessage; delay: number }[] = [];
+const send = async (body: SyncMessage, delay: number) => { sends.push({ body, delay }); };
+const body = (planId: string, n: number): SyncMessage => ({ planId, youtubeId: yt(n) });
+const upstream = (status: number, reason?: string) => new ServiceError(reason === "quotaExceeded" ? "quota_exceeded" : "google_api_error", "failed", 502, status);
+
+test("backoff doubles from 30 seconds and stops at 15 minutes", () => {
+  assert.deepEqual([1, 2, 3, 4, 5, 6, 7].map(backoffSeconds), [30, 60, 120, 240, 480, 900, 900]);
+});
+
+test("the reset is the next Pacific midnight, with a minute of margin", () => {
+  // 20:00 UTC in November is noon Pacific, so 12 hours to go.
+  const near = (actual: number, expected: number) => assert.ok(actual >= expected && actual <= expected + 1, `${actual} vs ${expected}`);
+  near(secondsUntilReset(new Date("2026-11-26T20:00:00Z")), 12 * 3600 + 60);
+  // Summer time: 20:00 UTC is 1 pm Pacific, 11 hours to go.
+  near(secondsUntilReset(new Date("2026-07-01T20:00:00Z")), 11 * 3600 + 60);
+});
+
+test("queue: a message writes its one video and is acknowledged", async () => {
+  const f = await fixture(); seed(f, 3);
+  const { plan } = await createPlan(f.deps, catalogue(3));
+  const { m, seen } = message(body(plan.id, 1));
+  await consume([m], f.deps, send);
+  assert.deepEqual(f.writes.map(w => w.id), [yt(1)]);
+  assert.equal(seen.acked, true);
+});
+
+test("queue: a redelivered message does not write or push the thumbnail twice", async () => {
+  const f = await fixture(["title", "description", "thumbnail"]); seed(f, 1);
+  const { plan } = await createPlan(f.deps, catalogue(1));
+  await consume([message(body(plan.id, 0)).m], f.deps, send);
+  const again = message(body(plan.id, 0));
+  await consume([again.m], f.deps, send);
+  assert.equal(f.writes.length, 1);
+  assert.equal(f.thumbs.pushed.length, 1);
+  assert.equal(again.seen.acked, true);
+});
+
+test("queue: a quota 403 is not a failure; the message is re-sent past the reset and the day is marked spent", async () => {
+  sends.length = 0;
+  const f = await fixture(); seed(f, 3);
+  const { plan } = await createPlan(f.deps, catalogue(3));
+  f.fail(upstream(403, "quotaExceeded"));
+  const first = message(body(plan.id, 0));
+  await consume([first.m], f.deps, send);
+  assert.equal(first.seen.acked, true);
+  assert.equal(first.seen.retried, undefined);
+  assert.equal(sends.length, 1);
+  assert.equal(sends[0].body.deferrals, 1);
+  assert.ok(sends[0].delay > 0 && sends[0].delay <= 43200, `delay ${sends[0].delay}`);
+  assert.ok(await f.deps.store.quotaUsed("2026-11-26") >= 9000, "the day is spent");
+  // Other videos now wait for the reset without calling YouTube at all.
+  f.fail(undefined);
+  const second = message(body(plan.id, 1));
+  await consume([second.m], f.deps, send);
+  assert.equal(f.writes.length, 0);
+  assert.equal(sends.length, 2);
+  assert.equal(second.seen.acked, true);
+  assert.equal(await f.deps.store.deadCount(), 0);
+});
+
+test("queue: a message that keeps hitting the quota is given up on after the deferral limit", async () => {
+  sends.length = 0;
+  const f = await fixture(); seed(f, 1);
+  const { plan } = await createPlan(f.deps, catalogue(1));
+  await f.deps.store.exhaust("2026-11-26", 10000);
+  const stuck = message({ ...body(plan.id, 0), deferrals: MAX_DEFERRALS });
+  await consume([stuck.m], f.deps, send);
+  assert.equal(sends.length, 0);
+  assert.equal(stuck.seen.acked, true);
+  assert.equal(await f.deps.store.deadCount(), 1);
+});
+
+test("queue: a 5xx is retried with exponential backoff", async () => {
+  const f = await fixture(); seed(f, 1);
+  const { plan } = await createPlan(f.deps, catalogue(1));
+  f.fail(upstream(503));
+  for (const [attempts, delay] of [[1, 30], [2, 60], [4, 240]] as const) {
+    const { m, seen } = message(body(plan.id, 0), attempts);
+    await consume([m], f.deps, send);
+    assert.equal(seen.retried, delay, `attempt ${attempts}`);
+    assert.equal(seen.acked, false);
+  }
+  assert.equal(await f.deps.store.deadCount(), 0);
+});
+
+test("queue: a failure retrying cannot fix is recorded for a person at once, and clears when a later write succeeds", async () => {
+  const f = await fixture(); seed(f, 1);
+  const { plan } = await createPlan(f.deps, catalogue(1));
+  f.fail(upstream(400));
+  const { m, seen } = message(body(plan.id, 0));
+  await consume([m], f.deps, send);
+  assert.equal(seen.acked, true);
+  assert.equal(seen.retried, undefined);
+  assert.equal(await f.deps.store.deadCount(), 1);
+  f.fail(undefined);
+  await consume([message(body(plan.id, 0)).m], f.deps, send);
+  assert.equal(f.writes.length, 1);
+  assert.equal(await f.deps.store.deadCount(), 0, "written since, so nothing waits on a person");
+});
+
+test("queue: the dead-letter queue records every message it receives", async () => {
+  const f = await fixture(); seed(f, 2);
+  const { plan } = await createPlan(f.deps, catalogue(2));
+  const a = message(body(plan.id, 0)), b = message("not a message");
+  await consumeDead([a.m, b.m], f.deps);
+  assert.equal(a.seen.acked && b.seen.acked, true);
+  assert.equal(await f.deps.store.deadCount(), 2);
 });

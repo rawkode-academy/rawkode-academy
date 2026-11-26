@@ -41,6 +41,8 @@ before(async () => {
       compatibilityDate: "2026-10-31", compatibilityFlags: ["nodejs_compat"],
       bindings: { YOUTUBE_CHANNEL_ID: channelId, MANAGED_FIELDS: "title,description", YOUTUBE_SYNC_CLIENT_ID: "c", YOUTUBE_SYNC_CLIENT_SECRET: "s", YOUTUBE_SYNC_REFRESH_TOKEN: "r", SYNC_ADMIN_TOKEN: token },
       d1Databases: { DB: "db" },
+      queueProducers: { SYNC_QUEUE: "platform-youtube-sync" },
+      queueConsumers: { "platform-youtube-sync": { maxBatchSize: 1, maxBatchTimeout: 0, maxRetries: 1 } },
       serviceBindings: { ANALYTICS: { name: "collector", entrypoint: "Collector" }, ACADEMY_API: "gateway", VIDEO_CHANNELS: "gateway" },
       outboundService: (request: Request) => upstream.fetch(request),
     }, {
@@ -63,6 +65,12 @@ before(async () => {
   for (const statement of sql.split(";").map(s => s.trim()).filter(Boolean)) await db.prepare(statement.replace(/\s+/g, " ")).run();
 });
 after(async () => { await mf.dispose(); });
+
+// The queue consumer runs on its own, so wait for what it should have done.
+async function until(done: () => boolean, ms = 15000) {
+  const end = Date.now() + ms;
+  while (!done()) { if (Date.now() > end) assert.fail("timed out waiting for the queue"); await new Promise(resolve => setTimeout(resolve, 100)); }
+}
 
 const call = (path: string, init: { method?: string; auth?: string | null; body?: unknown } = {}) => mf.dispatchFetch(`${origin}${path}`, {
   method: init.method ?? "GET",
@@ -95,8 +103,9 @@ test("plan, report, canary apply, then the rest, then rollback", async () => {
   assert.equal(bad.status, 400);
 
   const canary = await (await call("/apply", { method: "POST", body: { planId: planned.id, limit: 1, videos: ["video-1"] } })).json() as Json;
-  assert.equal(canary.applied, 1);
-  assert.equal(upstream.updates.length, 1);
+  assert.deepEqual(canary.videos, ["video-1"]);
+  assert.equal(canary.enqueued, 1);
+  await until(() => upstream.updates.length === 1);
   assert.equal(upstream.updates[0].id, ids[1]);
   assert.deepEqual(upstream.updates[0].snippet.tags, ["k8s"]);
   assert.equal(upstream.updates[0].snippet.categoryId, "28");
@@ -105,7 +114,8 @@ test("plan, report, canary apply, then the rest, then rollback", async () => {
   assert.equal(JSON.stringify(upstream.lake).includes("Site description 1"), false, "lake events carry no descriptions");
 
   const rest = await (await call("/apply", { method: "POST", body: { limit: 10 } })).json() as Json;
-  assert.equal(rest.applied, 2);
+  assert.equal(rest.enqueued, 3, "the canary is enqueued again too; it is already written, so it is skipped as stale");
+  await until(() => upstream.updates.length === 3);
   const status = await (await call("/status", { auth: null })).json() as Json;
   assert.equal(status.lastWrite.result, "ok");
   assert.ok(status.quotaUsedToday >= 150);

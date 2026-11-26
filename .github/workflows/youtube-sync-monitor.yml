@@ -1,6 +1,6 @@
 # Daily: reads the sync Worker's public /status (counts and times only, no
-# secrets) and opens a GitHub issue when the day's plan didn't run or the
-# plan found Studio edits (drift) or errors. Closes it once the plan is clean.
+# secrets) and opens a GitHub issue when the day's plan didn't run, the plan
+# found Studio edits (drift) or errors, or the write queue gave up on a video. Closes it once the plan is clean.
 # Hand-written because cuenv pipelines have no schedule trigger.
 name: youtube-sync-monitor
 on:
@@ -42,6 +42,12 @@ jobs:
                 problem="The latest plan has $drift video(s) edited in Studio since the last sync (DRIFT) and $errors error(s). Run the \`rawkode-academy-platform-youtube-sync-plan\` workflow for the report."
               fi
             fi
+          fi
+          # Writes run through a queue; a video it gave up on needs a person. This
+          # clears itself once that video is written successfully.
+          dead=$(jq -r '.deadLetters // 0' <<<"$status")
+          if [ "$dead" != "0" ] && [ -z "$problem" ]; then
+            problem="$dead video(s) failed to sync and the queue gave up on them (retries used up, or an error retrying can't fix). Look at the Worker's logs in Grafana for \`\"operation\":\"queue\"\` and \`dead\`, fix the cause, then plan and apply again."
           fi
           existing=$(gh issue list --state open --search "in:title \"$title\"" --json number,title --jq ".[] | select(.title == \"$title\") | .number" | head -n 1)
           if [ -z "$problem" ]; then

@@ -2,6 +2,8 @@ import { ensure, readLimited, ServiceError } from "./domain.ts";
 import { type Snippet, writableSnippet } from "./render.ts";
 
 type Query = Record<string, string | number | boolean | undefined>;
+// Reasons YouTube gives for a 403 that means "wait for the quota to reset".
+const QUOTA_REASONS = new Set(["quotaExceeded", "dailyLimitExceeded", "rateLimitExceeded", "userRateLimitExceeded"]);
 const dataAPI = "https://www.googleapis.com/youtube/v3/";
 
 // Write access to one channel's video metadata (youtube.force-ssl) using a
@@ -36,8 +38,11 @@ export class GoogleClient {
   private async decode<T>(response: Response, operation: string, max = 4 * 1024 * 1024): Promise<T> {
     // No response bodies or OAuth values in errors or logs.
     if (!response.ok) {
-      await response.body?.cancel();
-      throw new ServiceError("google_api_error", `${operation} failed (HTTP ${response.status}); check access, quota and API configuration`, 502, response.status);
+      // Only the fixed reason identifier is read, never the message.
+      let reason = "";
+      try { const body = JSON.parse(new TextDecoder().decode(await readLimited(response.body, 8192))); const first = body?.error?.errors?.[0]?.reason; if (typeof first === "string" && /^[A-Za-z]{1,64}$/.test(first)) reason = first; } catch { /* keep "" */ }
+      const quota = response.status === 403 && QUOTA_REASONS.has(reason);
+      throw new ServiceError(quota ? "quota_exceeded" : "google_api_error", `${operation} failed (HTTP ${response.status}${quota ? ", quota exhausted" : ""}); check access, quota and API configuration`, 502, response.status);
     }
     try { return JSON.parse(new TextDecoder().decode(await readLimited(response.body, max))) as T; }
     catch (error) { if (error instanceof ServiceError) throw error; throw new ServiceError("invalid_google_response", `${operation} returned invalid JSON`, 502); }
