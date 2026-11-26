@@ -26,6 +26,7 @@ import StreamNotifyButton from "@/components/video/StreamNotifyButton.vue";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import SupporterCTA from "@/components/organizations/SupporterCTA.astro";
 import MLabel from "@/components/ui/MLabel.vue";
+import CollaborationPill from "@/components/watch/CollaborationPill.astro";
 import LiveDot from "@/components/ui/LiveDot.vue";
 import Page from "@/wrappers/page.astro";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
@@ -563,19 +564,7 @@ const watchStatusLabel = isLiveNow
 										{isLiveNow ? "Live · " : ""}{categoryLabel}
 									</MLabel>
 								</span>
-								{collaborators.length > 0 && (
-									<span class={watch.metaKind} data-collaboration>
-										<MLabel tone="muted">
-											Made in collaboration with{" "}
-											{collaborators.map((c, i) => (
-												<>
-													{i > 0 && (i === collaborators.length - 1 ? " and " : ", ")}
-													{c.websiteUrl ? <a href={c.websiteUrl} rel="noopener sponsored" target="_blank">{c.name}</a> : c.name}
-												</>
-											))}
-										</MLabel>
-									</span>
-								)}
+								<CollaborationPill collaborators={collaborators} />
 							</p>
 
 							<div class={watch.tools}>
