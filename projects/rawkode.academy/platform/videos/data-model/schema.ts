@@ -49,7 +49,6 @@ export const videosTable = sqliteTable("videos", {
 	category: text("category", {
 		enum: ["editorial", "tutorial", "review", "interview", "announcement"],
 	}),
-	youtubeId: text("youtube_id"),
 	realtimeKit: json<RealtimeKit>("realtime_kit"),
 	resources: json<Resource[]>("resources"),
 	updatedAt: integer("updated_at", { mode: "timestamp_ms" }),
