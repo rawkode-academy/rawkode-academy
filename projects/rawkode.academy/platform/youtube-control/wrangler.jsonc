@@ -12,7 +12,10 @@
   "vars": {
     "YOUTUBE_CHANNEL_ID": "UCrber_mFvp_FEF7D9u8PDEA",
     // Where the initial backfill starts; earlier days just return no rows.
-    "YOUTUBE_HISTORY_SINCE": "2015-01-01"
+    "YOUTUBE_HISTORY_SINCE": "2015-01-01",
+    // The analytics lake, read by the daily reconciliation.
+    "CLOUDFLARE_ACCOUNT_ID": "0aeb879de8e3cdde5fb3d413025222ce",
+    "BASIN_BUCKET": "rawkode-analytics"
   },
   // Report rows become CloudEvents in analytics.events_archive
   // (R2 bucket rawkode-analytics) through the observability collector.

@@ -91,6 +91,7 @@ tasks: {
 			YOUTUBE_CLIENT_ID: _youtubeSecret & {secretName: "YOUTUBE_CLIENT_ID"}
 			YOUTUBE_CLIENT_SECRET: _youtubeSecret & {secretName: "YOUTUBE_CLIENT_SECRET"}
 			YOUTUBE_REFRESH_TOKEN: _youtubeSecret & {secretName: "YOUTUBE_REFRESH_TOKEN"}
+			BASIN_SQL_TOKEN: _youtubeSecret & {secretName: "BASIN_SQL_TOKEN"}
 		}
 	}
 

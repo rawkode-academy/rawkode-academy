@@ -55,6 +55,18 @@ export class GoogleClient {
     // The grant must identify exactly the configured YouTube/Brand channel.
     ensure(result.items?.length === 1 && result.items[0].id === this.channelId && !result.nextPageToken, "wrong_channel", "Authorize the configured YouTube/Brand channel directly; Google must identify exactly that channel", 403);
   }
+  // Public lifetime view counts, 50 videos a call. A video YouTube doesn't return (deleted, private) is absent.
+  async videoViewCounts(videoIds: string[]): Promise<Map<string, number>> {
+    const counts = new Map<string, number>();
+    for (let i = 0; i < videoIds.length; i += 50) {
+      const result = await this.get<{ items?: { id: string; statistics?: { viewCount?: string } }[] }>(dataAPI, "videos", { part: "statistics", id: videoIds.slice(i, i + 50).join(","), maxResults: 50 });
+      for (const item of result.items ?? []) {
+        const views = Number(item.statistics?.viewCount);
+        if (Number.isSafeInteger(views) && views >= 0) counts.set(item.id, views);
+      }
+    }
+    return counts;
+  }
   // Channel-wide totals. YouTube rounds subscriberCount to three significant figures.
   async channelStatistics(): Promise<{ subscriberCount: number | null; viewCount: number; videoCount: number }> {
     const result = await this.get<{ items?: { id: string; statistics?: { subscriberCount?: string; hiddenSubscriberCount?: boolean; viewCount?: string; videoCount?: string } }[] }>(dataAPI, "channels", { part: "statistics", id: this.channelId });

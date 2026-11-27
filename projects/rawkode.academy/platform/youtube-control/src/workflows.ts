@@ -2,6 +2,8 @@ import { WorkflowEntrypoint, type WorkflowEvent, type WorkflowStep } from "cloud
 import { backfillJobs, collect, collectChannelStats, collectVideos, jobName, syncJobs, videoBackfillJobs, videoSyncJobs, type Job } from "./collect.ts";
 import { daySchema, ServiceError } from "./domain.ts";
 import { fetchVideos, type Video } from "./academy.ts";
+import { findDrift, lakeTotals, type Drift } from "./reconcile.ts";
+import { syncInstanceId } from "./collect.ts";
 import { GoogleClient } from "./google.ts";
 import type { AnalyticsCollector } from "./lake.ts";
 
@@ -59,20 +61,65 @@ export class SyncWorkflow extends WorkflowEntrypoint<CloudflareEnv, { now?: stri
     const videos = await listVideos(this.env, step);
     const catalogue = unwrap(await step.do("video catalogue", retries, () => guarded(() => collectVideos(videos, this.env.YOUTUBE_CHANNEL_ID, lake(this.env)))));
     const perVideo = await runJobs(this.env, step, videoSyncJobs(videos, now));
-    return { ...summary([...channel, stats, catalogue, ...perVideo]), videos: videos.length };
+    const reconcile = await reconcileLake(this.env, step, videos, now);
+    return { ...summary([...channel, stats, catalogue, ...perVideo]), videos: videos.length, reconcile };
+  }
+}
+
+const day = (date: Date) => date.toISOString().slice(0, 10);
+const shown = (drift: Drift[]) => drift.slice(0, 20);
+
+// Compares the lake's lifetime views per video with YouTube's public counts.
+// Undercounted videos (a new video, a newly mapped one, a hole in the history)
+// are backfilled in a heal instance of the backfill workflow. Videos that were
+// already undercounted yesterday, after yesterday's heal, are `persistent`:
+// the monitor alerts on them. The check never fails the sync; a problem is
+// reported as `error` so the sync's own result stays about the sync.
+async function reconcileLake(env: CloudflareEnv, step: WorkflowStep, videos: Video[], now: Date) {
+  if (!env.BASIN_SQL_TOKEN) return { error: "BASIN_SQL_TOKEN is not configured, so the lake can't be reconciled with YouTube" };
+  try {
+    const ids = videos.map(video => video.videoId);
+    const drifting = unwrap(await step.do("reconcile with YouTube", retries, () => guarded(async () => {
+      const basin = { accountId: env.CLOUDFLARE_ACCOUNT_ID, bucket: env.BASIN_BUCKET, token: env.BASIN_SQL_TOKEN };
+      const [lake, youtube] = await Promise.all([lakeTotals(basin), client(env).videoViewCounts(ids)]);
+      return { checked: youtube.size, drifting: findDrift(ids, lake, youtube) };
+    })));
+    const yesterday = await env.SYNC.get(syncInstanceId(new Date(now.getTime() - 86400000))).then(instance => instance.status()).catch(() => undefined);
+    const earlier = new Set<string>((yesterday?.output as { reconcile?: { driftingIds?: string[] } } | undefined)?.reconcile?.driftingIds ?? []);
+    const persistent = drifting.drifting.filter(drift => earlier.has(drift.videoId));
+    let healing: string | undefined;
+    if (drifting.drifting.length > 0) {
+      healing = `heal-${day(now)}`;
+      const videoIds = drifting.drifting.map(drift => drift.videoId);
+      await step.do("start heal backfill", retries, async () => {
+        try { await env.BACKFILL.create({ id: healing!, params: { since: env.YOUTUBE_HISTORY_SINCE, scope: "videos", videoIds } }); } catch (error) {
+          // The same day's instance already exists after a replay.
+          if (!/already|exist/i.test(String(error))) throw error;
+        }
+        return { healing: healing!, videos: videoIds.length };
+      });
+    }
+    return {
+      checked: drifting.checked, drifting: drifting.drifting.length, driftingIds: drifting.drifting.map(drift => drift.videoId),
+      worst: shown(drifting.drifting), persistent: shown(persistent), persistentCount: persistent.length, ...(healing ? { healing } : {}),
+    };
+  } catch (error) {
+    return { error: (error instanceof Error ? error.message : String(error)).slice(0, 300) };
   }
 }
 
 // History from `since` in 30-day windows: channel reports, or with
 // `scope: "videos"` every video's days. Re-running is safe: readers keep the
 // latest observation per day.
-export class BackfillWorkflow extends WorkflowEntrypoint<CloudflareEnv, { since?: string; scope?: "channel" | "videos" }> {
-  async run(event: WorkflowEvent<{ since?: string; scope?: "channel" | "videos" }>, step: WorkflowStep) {
+// `videoIds` limits a videos backfill to those videos (the daily heal).
+export class BackfillWorkflow extends WorkflowEntrypoint<CloudflareEnv, { since?: string; scope?: "channel" | "videos"; videoIds?: string[] }> {
+  async run(event: WorkflowEvent<{ since?: string; scope?: "channel" | "videos"; videoIds?: string[] }>, step: WorkflowStep) {
     const since = daySchema.parse(event.payload?.since ?? this.env.YOUTUBE_HISTORY_SINCE);
     const now = new Date(event.timestamp);
     await checkChannel(this.env, step);
     if (event.payload?.scope === "videos") {
-      const videos = await listVideos(this.env, step);
+      const only = event.payload?.videoIds ? new Set(event.payload.videoIds) : undefined;
+      const videos = (await listVideos(this.env, step)).filter(video => !only || only.has(video.videoId));
       return { ...summary(await runJobs(this.env, step, videoBackfillJobs(videos, since, now))), videos: videos.length };
     }
     return summary(await runJobs(this.env, step, backfillJobs(since, now)));
