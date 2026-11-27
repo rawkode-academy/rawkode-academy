@@ -95,7 +95,7 @@ export default {
 			const kv = contentEnv.CONTENT_CACHE;
 			ctx.waitUntil(
 				kv
-					.get(SNAPSHOT_KEY)
+					.get(SNAPSHOT_KEY, { type: "json" })
 					.then((stored) =>
 						stored ? undefined : refreshAnalytics(env as unknown as AnalyticsEnv),
 					)
