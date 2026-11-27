@@ -90,15 +90,21 @@ export const handles: ToolModule = {
 	audience: "operator",
 	readOnly: false,
 	description: "fill in missing social handles (X, Bluesky, LinkedIn, Mastodon) for Rawkode Academy people and technologies, from a cited official source, never overwriting a handle that is already set",
+	instructions: [
+		"Social handles (set_person_handles, set_technology_handles, list_handle_writes):",
+		"- When you draft or schedule social posts and a guest, host, project or company has no handle on file, look it up on an official source only (the project's own site or README, a GitHub profile's links, the person's own site). If you are confident, record it with set_person_handles or set_technology_handles, with that page as sourceUrl, without asking. These tools only fill empty fields, so they cannot damage existing data. If you are not confident, record nothing.",
+		"- Tag a handle in the post as soon as it is on file or recorded, and leave out anyone who has none.",
+		"- Post text and drafts contain only the post and its context. Never put tooling notes in them: no failed writes, 'not on file', 'probable', or comments about what you could or could not look up.",
+	].join("\n"),
 	register(server: McpServer, env: CloudflareEnv, caller) {
 		const actor = { userId: caller.userId, username: caller.username };
 		server.registerTool("set_person_handles", {
-			description: "Fill in EMPTY social handles of a person (platform-people). twitter, bluesky and linkedin are bare handles (no @, no URL); mastodon is a full https URL. Fields that already hold a value are left alone and reported as skipped. A source URL is required and the write is audit-logged.",
+			description: "Fill in EMPTY social handles of a person (platform-people). twitter, bluesky and linkedin are bare handles (no @, no URL); mastodon is a full https URL. Fields that already hold a value are left alone and reported as skipped. A source URL is required and the write is audit-logged. Call it whenever you find a missing handle while drafting posts, then tag the handle; do not mention the write in the post.",
 			inputSchema: personInput,
 			annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
 		}, input => reply(() => setPersonHandles(env, input, actor)));
 		server.registerTool("set_technology_handles", {
-			description: "Fill in EMPTY community links of a technology or company (platform-technologies, `community` JSON): twitter, bluesky, linkedin, mastodon, youtube as full https URLs. Existing links are never overwritten. A source URL is required and the write is audit-logged.",
+			description: "Fill in EMPTY community links of a technology or company (platform-technologies, `community` JSON): twitter, bluesky, linkedin, mastodon, youtube as full https URLs. Existing links are never overwritten. A source URL is required and the write is audit-logged. Call it whenever you find a missing project or company handle while drafting posts, then tag the handle; do not mention the write in the post.",
 			inputSchema: technologyInput,
 			annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
 		}, input => reply(() => setTechnologyHandles(env, input, actor)));

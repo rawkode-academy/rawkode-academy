@@ -64,3 +64,9 @@ test("input is validated: a source is required, handles are the right shape, not
   assert.throws(() => personInput.parse({ personId: "ellie", name: "Renamed", handles: { twitter: "ok" }, sourceUrl: "https://x.com" }));
   assert.throws(() => technologyInput.parse({ technologyId: "plakar", handles: { website: "https://x.com" }, sourceUrl: "https://x.com" }));
 });
+
+test("the handles module tells the model to record and tag handles and to keep tooling notes out of posts", async () => {
+  const { handles } = await import("../src/tools/handles.ts");
+  assert.match(handles.instructions!, /set_person_handles/);
+  assert.match(handles.instructions!, /Never put tooling notes/);
+});
