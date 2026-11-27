@@ -58,6 +58,23 @@ export async function videoEvents(videos: Video[], channelId: string, fetchedAt 
   })));
 }
 
+// Each video's public lifetime view count (the number YouTube shows on the
+// watch page), one `youtube.video_stats` event per video per daily
+// reconciliation. The Analytics API's per-day views can sum to less than this
+// for older videos, so partner analytics never shows a lifetime below it.
+// Readers keep the latest `fetchedAt` per video.
+export async function videoStatsEvents(counts: Map<string, number>, channelId: string, fetchedAt = new Date().toISOString()) {
+  return Promise.all([...counts].map(async ([videoId, viewCount]) => ({
+    specversion: "1.0",
+    id: await hash(JSON.stringify([channelId, "video_stats", videoId, fetchedAt])),
+    source: LAKE_SOURCE,
+    type: "youtube.video_stats",
+    time: fetchedAt,
+    datacontenttype: "application/json",
+    data: { channelId, report: "video_stats", fetchedAt, video: videoId, viewCount },
+  })));
+}
+
 // Channel totals (subscribers, lifetime views, video count) at fetch time:
 // one `youtube.channel_stats` event per sync. Unlike the daily reports these
 // are point-in-time totals; readers keep the latest `fetchedAt`.
