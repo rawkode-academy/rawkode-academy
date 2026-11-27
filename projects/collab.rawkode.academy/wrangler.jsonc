@@ -1,0 +1,22 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "rawkode-academy-collab",
+  "main": "src/main.ts",
+  "compatibility_date": "2026-10-31",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "routes": [{ "pattern": "collab.rawkode.academy", "custom_domain": true }],
+  "observability": {
+    "redact_query_string": true,
+    "traces": { "enabled": true, "destinations": ["grafana-traces"] },
+    "logs": { "enabled": true, "invocation_logs": false, "destinations": ["grafana-logs"] }
+  },
+  "vars": {
+    "PUBLIC_ORIGIN": "https://collab.rawkode.academy",
+    "OIDC_ISSUER": "https://id.rawkode.academy",
+    "OIDC_CLIENT_ID": "rawkode-collab"
+  },
+  // Sessions, sign-in state and review data. No ID: Wrangler creates the
+  // namespace on the first deploy and reuses it afterwards.
+  "kv_namespaces": [{ "binding": "STORE" }]
+}

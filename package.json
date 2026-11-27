@@ -9,7 +9,8 @@
     "!projects/**/webcontainer-demos/**",
     "!projects/rawkode.academy/platform/youtube-control",
     "!projects/rawkode.academy/platform/youtube-sync",
-    "!projects/rawkode.tools/mcp"
+    "!projects/rawkode.tools/mcp",
+    "!projects/collab.rawkode.academy"
   ],
   "devDependencies": {
     "@types/node": "^24.10.1",

@@ -30,6 +30,12 @@ flake = "."
 digest = "sha256:e0edb09211430341ac6af83b7e923a3df8ff3aeeb1a7cab50578d062d8c10d66"
 lockfile = "flake.lock"
 
+[runtimes."projects/collab.rawkode.academy"]
+type = "nix"
+flake = "."
+digest = "sha256:465ab0a8e06f1fab84ab9fdd1494211ae21b6888dd6c01dfb24d861926fb76d7"
+lockfile = "projects/collab.rawkode.academy/flake.lock"
+
 [runtimes."projects/klustered.dev"]
 type = "nix"
 flake = "."

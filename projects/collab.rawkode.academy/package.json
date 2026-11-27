@@ -1,0 +1,22 @@
+{
+  "name": "@rawkode-academy/collab",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "check": "tsc --noEmit",
+    "test": "node --experimental-transform-types --test test/*.test.ts",
+    "build": "wrangler deploy --dry-run --outdir dist",
+    "deploy": "wrangler deploy",
+    "deploy:preview": "wrangler deploy --config wrangler.preview.jsonc"
+  },
+  "overrides": {
+    "workerd": "1.20261031.1"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20261031.1",
+    "@types/node": "24.10.1",
+    "typescript": "5.9.3",
+    "wrangler": "4.156.0"
+  }
+}

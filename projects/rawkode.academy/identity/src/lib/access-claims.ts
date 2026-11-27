@@ -42,3 +42,25 @@ export async function getUserAccessClaims(
 		[CLIENT_NAMESPACE]: clientId,
 	};
 }
+
+const ORGS_NAMESPACE = "https://rawkode.academy/orgs";
+
+/**
+ * The organisations a user belongs to and their role in each, for clients that
+ * scope by organisation (the partner portal). Ids and roles only: no names or
+ * emails leave identity.
+ */
+export async function getUserOrganisationClaims(
+	db: DrizzleD1Database<typeof schema>,
+	userId: string,
+): Promise<Record<string, unknown>> {
+	const rows = await db
+		.select({
+			id: schema.member.organizationId,
+			role: schema.member.role,
+		})
+		.from(schema.member)
+		.where(eq(schema.member.userId, userId))
+		.orderBy(asc(schema.member.organizationId));
+	return { [ORGS_NAMESPACE]: rows.map((row) => ({ id: row.id, role: row.role })) };
+}

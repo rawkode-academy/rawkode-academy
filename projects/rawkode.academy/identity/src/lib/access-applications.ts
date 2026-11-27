@@ -55,11 +55,25 @@ export const ACCESS_APPLICATIONS: AccessApplication[] = [
 			},
 		],
 	},
+	{
+		clientId: "rawkode-collab",
+		name: "Rawkode Partner Portal",
+		description: "collab.rawkode.academy, where partners and supporters review drafts",
+		roles: [
+			{
+				key: "collab_admin",
+				label: "Portal admin",
+				description:
+					"May see every organisation in the portal, view it as a partner or supporter, and triage comments. Partner and supporter staff need no role: they get access through their organisation.",
+			},
+		],
+	},
 ];
 
 export const ROLE_KEYS = Object.freeze({
 	studioOperator: "studio_operator",
 	toolsOperator: "operator",
+	collabAdmin: "collab_admin",
 } as const);
 
 export function findAccessApplication(

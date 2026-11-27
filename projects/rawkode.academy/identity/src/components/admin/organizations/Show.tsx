@@ -2,6 +2,7 @@ import { useOne, useList, useDelete, useNavigation } from "@refinedev/core";
 import { useState } from "react";
 import { useParams } from "react-router";
 import { Button, Table, RoleBadge, ConfirmModal } from "../ui";
+import { AddByGithub } from "./AddByGithub";
 
 interface Organization {
 	id: string;
@@ -212,6 +213,12 @@ export function OrganizationShow() {
 					>
 						Add Member
 					</Button>
+				</div>
+				<div className="mb-4">
+					<AddByGithub
+						organizationId={id!}
+						onAdded={() => void membersQuery.refetch()}
+					/>
 				</div>
 				<Table
 					columns={memberColumns}

@@ -12,8 +12,9 @@ import {
 	contributor,
 	member,
 } from "./access-control";
-import { getUserAccessClaims } from "./access-claims";
+import { getUserAccessClaims, getUserOrganisationClaims } from "./access-claims";
 import { captureAuthEvent } from "./analytics";
+import { claimPendingMemberships } from "./org-github-members";
 
 export interface AuthEnv {
 	DB: D1Database;
@@ -162,6 +163,7 @@ export const createAuth = async (env: AuthEnv) => {
 						"preferred_username",
 						"https://rawkode.academy/roles",
 						"https://rawkode.academy/client_id",
+						"https://rawkode.academy/orgs",
 					],
 				},
 				getAdditionalUserInfoClaim: async (user, _scopes, client) => {
@@ -186,7 +188,9 @@ export const createAuth = async (env: AuthEnv) => {
 						// refresh it on every sign-in and token refresh. If GitHub can't
 						// be reached the last verified one stands; with none, the MCP
 						// refuses the guest.
-						client.clientId === "rawkode-tools-mcp"
+						client.clientId === "rawkode-tools-mcp" ||
+						// The portal shows and attributes comments by GitHub login.
+						client.clientId === "rawkode-collab"
 					) {
 						try {
 							username = await refreshGitHubUsername(user.id);
@@ -197,8 +201,13 @@ export const createAuth = async (env: AuthEnv) => {
 							);
 						}
 					}
+					const organisationClaims =
+						client.clientId === "rawkode-collab"
+							? await getUserOrganisationClaims(db, user.id)
+							: {};
 					return {
 						...accessClaims,
+						...organisationClaims,
 						...(username
 							? {
 									username,
@@ -320,6 +329,20 @@ export const createAuth = async (env: AuthEnv) => {
 						metadata: null,
 					},
 					{
+						clientId: "rawkode-collab",
+						name: "Rawkode Partner Portal",
+						type: "public",
+						// Workaround for https://github.com/better-auth/better-auth/issues/6651
+						clientSecret: "pkce-public-client-placeholder",
+						redirectUrls: [
+							"https://collab.rawkode.academy/api/auth/callback",
+							"http://localhost:4323/api/auth/callback",
+						],
+						disabled: false,
+						skipConsent: true,
+						metadata: null,
+					},
+					{
 						clientId: "comtrya",
 						name: "Comtrya",
 						type: "public",
@@ -378,6 +401,8 @@ export const createAuth = async (env: AuthEnv) => {
 			"https://klustered.dev",
 			"http://localhost:4322",
 			"https://rawkode.chat",
+			"https://collab.rawkode.academy",
+			"http://localhost:4323",
 			"http://localhost:3000",
 		],
 
@@ -403,6 +428,13 @@ export const createAuth = async (env: AuthEnv) => {
 			session: {
 				create: {
 					after: async (session) => {
+						// Memberships an admin granted by GitHub handle before this
+						// person had ever signed in. Never blocks sign-in.
+						try {
+							await claimPendingMemberships(db, session.userId);
+						} catch (error) {
+							console.error("[auth] claiming pending memberships failed:", error);
+						}
 						await captureAuthEvent(
 							{
 								event: "auth.sign_in_completed",
