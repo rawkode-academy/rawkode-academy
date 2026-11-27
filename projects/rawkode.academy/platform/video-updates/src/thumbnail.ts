@@ -111,17 +111,27 @@ type Layer = { png: Uint8Array; aspect: number; height: number; side: "left" | "
 
 // Draws the real logos over the generated art: the Academy's top left, each technology's along the bottom right.
 export async function composite(env: Env, art: Uint8Array, layers: Layer[]): Promise<Uint8Array> {
+	// Each stage names itself in the error: the binding's own messages don't say which input it refused.
+	const stage = async <T>(name: string, run: () => Promise<T> | T): Promise<T> => {
+		try { return await run(); } catch (e) { throw new Error(`${name}: ${e instanceof Error ? e.message : String(e)}`); }
+	};
+	const head = (b: Uint8Array) => `${b.byteLength} bytes starting ${Array.from(b.slice(0, 8), (x) => x.toString(16).padStart(2, "0")).join(" ")}`;
+	// The binding works lazily and fails only at output, so look at every input first: info() throws for one it can't read.
+	await stage(`art (${head(art)})`, () => env.IMAGES.info(new Blob([art]).stream()));
 	let image = env.IMAGES.input(new Blob([art]).stream()).transform({ width: WIDTH, height: HEIGHT, fit: "cover" });
 	let right = WIDTH - LOGO_PADDING;
+	let n = 0;
 	for (const layer of layers) {
 		const width = Math.round(layer.height * layer.aspect);
 		const left = layer.side === "left" ? LOGO_PADDING : right - width;
 		if (layer.side === "right") right = left - LOGO_PADDING;
 		const top = layer.edge === "top" ? LOGO_PADDING : HEIGHT - LOGO_PADDING - layer.height;
-		image = image.draw(env.IMAGES.input(new Blob([layer.png], { type: "image/png" }).stream()).transform({ height: layer.height }), { top, left });
+		const overlay = layer.png;
+		await stage(`logo ${n++} (${head(overlay)})`, () => env.IMAGES.info(new Blob([overlay]).stream()));
+		image = image.draw(env.IMAGES.input(new Blob([overlay]).stream()).transform({ height: layer.height }), { top, left });
 	}
-	const out = await image.output({ format: "image/webp", quality: 88 });
-	return new Uint8Array(await out.response().arrayBuffer());
+	const out = await stage("output", () => image.output({ format: "image/webp", quality: 88 }));
+	return stage("read", async () => new Uint8Array(await out.response().arrayBuffer()));
 }
 
 // Generates the thumbnail, saves it as the video's WebP (what the site shows, and what the YouTube sync converts and uploads).
