@@ -1,0 +1,98 @@
+---
+import { env } from "cloudflare:workers";
+import { academyLayout } from "@rawkodeacademy/design-system";
+import Base from "../layouts/Base.astro";
+import { GatewayError, gql } from "../lib/gateway.ts";
+import { ANALYTICS, DASHBOARD, type AnalyticsData, type DashboardData } from "../lib/queries.ts";
+import { scopeFor, sees } from "../lib/scope.ts";
+import { count, hours, localDate } from "../lib/format.ts";
+
+const session = Astro.locals.session!;
+const scope = scopeFor(session);
+const layout = academyLayout({ width: "wide" });
+
+let data: AnalyticsData | undefined;
+let orgs: { id: string; name: string }[] = [];
+let failure: string | undefined;
+try {
+	[data, orgs] = await Promise.all([
+		gql<AnalyticsData>(env, session.accessToken, ANALYTICS),
+		gql<DashboardData>(env, session.accessToken, DASHBOARD).then((d) =>
+			d.collaborators.filter((c) => c.organizationId).map((c) => ({ id: c.organizationId!, name: c.name })),
+		),
+	]);
+} catch (error) {
+	failure = error instanceof GatewayError ? error.message : "The API is not answering.";
+}
+const mine = (data?.collaborators ?? []).filter((c) => sees(scope, c.organizationId) && c.analytics);
+---
+
+<Base title="Analytics" session={session} orgs={orgs}>
+	<div class={layout.root}>
+		<header class={layout.masthead}>
+			<div class={layout.container}>
+				<div class={layout.mastheadInner}>
+					<div class={layout.mastheadCopy}>
+						<p class={layout.mastheadKicker}>Partner portal</p>
+						<div class={layout.mastheadTitle}><h1 class={layout.mastheadHeading}>Analytics</h1></div>
+					</div>
+					<p class={layout.mastheadDescription}>How the videos we made together are doing on the Academy and on YouTube.</p>
+				</div>
+			</div>
+		</header>
+		<div class:list={[layout.container, "gutter"]}>
+			{failure && <div class={layout.notice} role="alert">{failure}</div>}
+			{!failure && mine.length === 0 && (
+				<div class={layout.empty}><p>No numbers yet. They appear once a collaboration video has been live for a day.</p></div>
+			)}
+			{mine.map((c) => {
+				const a = c.analytics!;
+				return (
+					<section class="org" aria-labelledby={`a-${c.id}`}>
+						<h2 id={`a-${c.id}`} class="org-title">{c.name}</h2>
+						<dl class="tiles">
+							<div class="tile"><dt>Academy views</dt><dd>{count(a.siteViews.d90)}</dd><p>last 90 days · {count(a.siteViews.lifetime)} lifetime</p></div>
+							<div class="tile"><dt>YouTube views</dt><dd>{count(a.youtubeViews.d90)}</dd><p>last 90 days · {count(a.youtubeViews.lifetime)} lifetime</p></div>
+							<div class="tile"><dt>Watch time</dt><dd>{hours(a.minutesWatched.d90)}</dd><p>last 90 days · {hours(a.minutesWatched.lifetime)} lifetime</p></div>
+						</dl>
+						<ul class="videos">
+							{a.videos.map((v) => (
+								<li class="video">
+									<a class="title" href={`https://rawkode.academy/watch/${v.slug}`}>{v.title}</a>
+									<dl class="figures">
+										<div><dt>Academy</dt><dd>{count(v.siteViews.lifetime)}</dd></div>
+										<div><dt>YouTube</dt><dd>{v.youtubeViews ? count(v.youtubeViews.lifetime) : "n/a"}</dd></div>
+										<div><dt>Watch time</dt><dd>{v.minutesWatched ? hours(v.minutesWatched.lifetime) : "n/a"}</dd></div>
+									</dl>
+								</li>
+							))}
+						</ul>
+						<p class="note">Lifetime figures per video. Updated daily ({localDate(a.generatedAt)}). Academy views exclude bots; YouTube figures lag about three days.</p>
+					</section>
+				);
+			})}
+		</div>
+	</div>
+</Base>
+
+<style>
+	.org { padding-block: 2rem 1rem; font-family: var(--fonts-academy-text); }
+	.org-title { margin: 0 0 1rem; }
+	.tiles { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.75rem; margin: 0 0 1.5rem; }
+	.tile { background: var(--colors-academy-panel); border: 1px solid var(--colors-academy-border); border-radius: var(--radii-academy-m); padding: 1rem 1.25rem; }
+	.tile dt { font-family: var(--fonts-academy-mono); font-size: 0.8125rem; color: var(--colors-academy-text-muted); }
+	.tile dd { margin: 0.125rem 0; font-family: var(--fonts-academy-display); font-size: 2.25rem; line-height: 1.1; color: var(--colors-academy-text); }
+	.tile p { margin: 0; font-size: 0.875rem; color: var(--colors-academy-text-soft); }
+	.videos { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--colors-academy-border); }
+	.video { padding: 0.875rem 0; border-bottom: 1px solid var(--colors-academy-border); display: grid; gap: 0.5rem; }
+	.title { font-weight: 700; color: var(--colors-academy-text); text-decoration: none; overflow-wrap: anywhere; }
+	.title:hover { color: var(--colors-academy-accent); }
+	.figures { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; margin: 0; }
+	.figures dt { font-family: var(--fonts-academy-mono); font-size: 0.75rem; color: var(--colors-academy-text-muted); }
+	.figures dd { margin: 0; font-weight: 600; }
+	.note { margin: 1rem 0 2rem; font-size: 0.8125rem; color: var(--colors-academy-text-muted); }
+	@media (min-width: 48rem) {
+		.tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+		.video { grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem); align-items: center; }
+	}
+</style>

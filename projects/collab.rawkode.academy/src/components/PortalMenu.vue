@@ -10,7 +10,7 @@ defineProps<{
 }>();
 
 const styles = academyShell();
-const primary = [{ label: "Collaborations", href: "/" }];
+const primary = [{ label: "Collaborations", href: "/" }, { label: "Analytics", href: "/analytics" }];
 </script>
 
 <template>

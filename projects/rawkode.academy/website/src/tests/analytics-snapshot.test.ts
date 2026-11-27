@@ -61,6 +61,8 @@ describe("analytics snapshot", () => {
 			videos: {
 				AAAAAAAAAAA: { views: { d90: 5, lifetime: 50 }, minutes: { d90: 10, lifetime: 100 } },
 			},
+			academy: [],
+			watch: {},
 		};
 		const gateway = {
 			fetch: async () =>

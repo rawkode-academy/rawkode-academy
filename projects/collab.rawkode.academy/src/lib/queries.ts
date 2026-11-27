@@ -10,6 +10,24 @@ export const DASHBOARD = /* GraphQL */ `
 	}
 `;
 
+const PERIOD = "{ d90 lifetime }";
+export const ANALYTICS = /* GraphQL */ `
+	query Analytics {
+		collaborators {
+			id
+			name
+			organizationId
+			analytics {
+				generatedAt
+				siteViews ${PERIOD}
+				youtubeViews ${PERIOD}
+				minutesWatched ${PERIOD}
+				videos { id title slug siteViews ${PERIOD} youtubeViews ${PERIOD} minutesWatched ${PERIOD} }
+			}
+		}
+	}
+`;
+
 export const REVIEW = /* GraphQL */ `
 	query Review($id: ID!) {
 		review(id: $id) {
@@ -90,4 +108,20 @@ export interface ReviewData {
 		collaborator: { id: string; name: string; organizationId: string | null };
 		comments: Comment[];
 	} | null;
+}
+
+export interface Period { d90: number; lifetime: number }
+export interface AnalyticsData {
+	collaborators: {
+		id: string;
+		name: string;
+		organizationId: string | null;
+		analytics: {
+			generatedAt: string;
+			siteViews: Period;
+			youtubeViews: Period;
+			minutesWatched: Period;
+			videos: { id: string; title: string; slug: string; siteViews: Period; youtubeViews: Period | null; minutesWatched: Period | null }[];
+		} | null;
+	}[];
 }

@@ -63,6 +63,7 @@ const flag = (key: string) => `regexp_like(${HEAD}, '"${key}":true')`;
 const PAGE_VIEWS = (w: ReachWindow) => `(
 	SELECT event_id, event_time,
 		${field("anonymous_id")} AS visitor,
+		${field("url_path")} AS path,
 		coalesce(
 			${field("botreason")},
 			CASE
@@ -120,5 +121,13 @@ export const reachQueries = (w: ReachWindow) => ({
 				AND json_get_str(value, 'data', 'day') BETWEEN '${YOUTUBE_HISTORY_FROM}' AND '${w.youtubeEnd}'
 		) WHERE rn = 1`,
 });
+
+/** Human views per Academy video page, for partner analytics. Aggregates only. */
+export const watchViewsSql = (w: ReachWindow) => `
+	SELECT path,
+		approx_distinct(CASE WHEN ${since(w.d90)} THEN event_id END) AS views_d90,
+		approx_distinct(event_id) AS views_lifetime
+	${HUMAN_VIEWS(w)} AND path LIKE '/watch/%'
+	GROUP BY path`;
 
 export type ReachQuery = keyof ReturnType<typeof reachQueries>;

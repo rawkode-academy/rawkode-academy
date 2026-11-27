@@ -6,6 +6,7 @@ import {
 	type ReachQuery,
 } from "@/lib/analytics/reach";
 import { guestTotals } from "@/lib/analytics/guest";
+import { partnerAnalytics } from "@/lib/analytics/partner";
 import { loadSnapshot, type Snapshot } from "@/lib/analytics/snapshot";
 import type { ContentEnv } from "@/lib/live-content/env";
 import type { Row } from "@/server/basin";
@@ -43,11 +44,21 @@ const kv = (env as unknown as ContentEnv).CONTENT_CACHE;
 let snapshot: Snapshot | undefined;
 if (configured) {
 	try {
-		snapshot = await loadSnapshot(config, kv);
+		snapshot = await loadSnapshot(config, kv, env as unknown as ContentEnv);
 	} catch (error) {
 		console.warn("[analytics] snapshot unavailable", error);
 	}
 }
+
+const partners =
+	user?.id && snapshot
+		? await partnerAnalytics(env as unknown as ContentEnv, snapshot, user.id).catch(
+				(error) => {
+					console.warn("[analytics] partner analytics unavailable", error);
+					return [];
+				},
+			)
+		: [];
 
 const [[accounts, mailingOnly], guest] = await Promise.all([
 	Promise.all([accountCount(), mailingOnlyCount()]),
@@ -245,6 +256,53 @@ const cards = [
 				)}
 			</section>
 		)}
+
+		{partners.map((partner) => (
+			<section class="editorial-section">
+				<h2 class="section-title">{partner.name}</h2>
+				<div class="editorial-grid editorial-grid--3">
+					<div class="editorial-card">
+						<h3 class="card-label">Academy views</h3>
+						<dl class="pair">
+							<div><dd class="num">{fmt.format(partner.analytics.siteViews.d90)}</dd><dt class="period">90 days</dt></div>
+							<div><dd class="num">{fmt.format(partner.analytics.siteViews.lifetime)}</dd><dt class="period">Lifetime</dt></div>
+						</dl>
+					</div>
+					<div class="editorial-card">
+						<h3 class="card-label">YouTube views</h3>
+						<dl class="pair">
+							<div><dd class="num">{fmt.format(partner.analytics.youtubeViews.d90)}</dd><dt class="period">90 days</dt></div>
+							<div><dd class="num">{fmt.format(partner.analytics.youtubeViews.lifetime)}</dd><dt class="period">Lifetime</dt></div>
+						</dl>
+					</div>
+					<div class="editorial-card">
+						<h3 class="card-label">Watch time</h3>
+						<dl class="pair">
+							<div><dd class="num">{hours(partner.analytics.minutesWatched.d90)}<span class="unit"> h</span></dd><dt class="period">90 days</dt></div>
+							<div><dd class="num">{hours(partner.analytics.minutesWatched.lifetime)}<span class="unit"> h</span></dd><dt class="period">Lifetime</dt></div>
+						</dl>
+					</div>
+				</div>
+				{partner.analytics.videos.length > 0 && (
+					<div class="videos">
+						<h3 class="card-label">By video</h3>
+						<ol class="video-list">
+							{partner.analytics.videos.map((video) => (
+								<li class="video">
+									<a class="video-title" href={`/watch/${video.slug}`}>{video.title}</a>
+									<dl class="video-stats">
+										<div><dt>Academy views</dt><dd>{fmt.format(video.siteViews.lifetime)}</dd></div>
+										<div><dt>YouTube views</dt><dd>{video.youtubeViews ? fmt.format(video.youtubeViews.lifetime) : "n/a"}</dd></div>
+										<div><dt>Hours watched</dt><dd>{video.minutesWatched ? videoHours(video.minutesWatched.lifetime) : "n/a"}</dd></div>
+									</dl>
+								</li>
+							))}
+						</ol>
+					</div>
+				)}
+				<p class="note">Lifetime figures per video, updated daily. Academy views exclude bots; YouTube figures lag about three days.</p>
+			</section>
+		))}
 	</EditorialShell>
 </Page>
 
