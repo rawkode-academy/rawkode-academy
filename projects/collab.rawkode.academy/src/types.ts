@@ -12,6 +12,8 @@ export interface Env {
 	PUBLIC_ORIGIN: string;
 	OIDC_ISSUER: string;
 	OIDC_CLIENT_ID: string;
+	/** Bearer secret the encode workflow presents to open or refresh a review. Unset disables ingest. */
+	INGEST_TOKEN?: string;
 }
 
 /** What an organisation bought. Partners get draft review; supporters do not. */
