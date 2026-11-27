@@ -172,6 +172,24 @@ test("a broadcast that could not be bound or thumbnailed is retried until both a
   assert.deepEqual(set, ["bbbbbbbbbbb"]); // and not again once it is recorded
 });
 
+test("a resumed broadcast is made public when the latest request says so, and not touched again once it is", async () => {
+  const f = await fixture();
+  f.deps.thumbnails = { tag: async () => "tag1", prepare: async () => new Uint8Array([1]), current: async () => null, set: async () => {} };
+  let privacy = "private";
+  const asked: string[] = [];
+  const p = ports({ api: { async insertBroadcast(input) { p.calls.inserted.push(input); return "bbbbbbbbbbb"; }, async findStream() { return "stream1"; }, async bindBroadcast() {}, async ensurePrivacy(_id, want) { asked.push(want); if (privacy === want) return false; privacy = want; return true; } } });
+  await consumeVideoUpdated([message(scheduled).m], f.deps, async () => null, async () => {}, p.value);
+  assert.deepEqual(asked, [], "a new broadcast is made with its privacy already");
+  const publish = message({ ...scheduled, updateId: "u10", privacy: "public" });
+  await consumeVideoUpdated([publish.m], f.deps, async () => null, async () => {}, p.value);
+  assert.equal(publish.result.acked, true);
+  assert.equal(privacy, "public");
+  const again = message({ ...scheduled, updateId: "u11", privacy: "public" });
+  await consumeVideoUpdated([again.m], f.deps, async () => null, async () => {}, p.value);
+  assert.equal(again.result.acked, true);
+  assert.equal(p.calls.inserted.length, 1);
+});
+
 test("without room in today's quota the broadcast waits for the reset", async () => {
   const f = await fixture();
   await f.deps.store.spend(pacificDay(f.deps.now()), DAILY_BUDGET - BROADCAST_UNITS + 1);
