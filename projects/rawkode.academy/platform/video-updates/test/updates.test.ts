@@ -3,7 +3,7 @@ import type { Env } from "../src/env.ts";
 import { updateRequest, type UpdateRequest } from "../src/request.ts";
 import { activeSteps } from "../src/sections.ts";
 import { Store } from "../src/store.ts";
-import { imageOf, prompt, sized } from "../src/thumbnail.ts";
+import { imageOf, prompt } from "../src/thumbnail.ts";
 import { validate } from "../src/validate.ts";
 import { seed, testEnv } from "./env.ts";
 
@@ -188,7 +188,10 @@ describe("scheduling a live stream", () => {
 	});
 
 	it("writes a short hook and composites the real logos instead of letting the model draw them", async () => {
-		t.logos.set("technologies/kubernetes/horizontal.svg", '<svg viewBox="0 0 400 100"></svg>');
+		const png = new Uint8Array(24); // a PNG header is enough: 400 x 100
+		new DataView(png.buffer).setUint32(16, 400);
+		new DataView(png.buffer).setUint32(20, 100);
+		t.logos.set("technologies/kubernetes/horizontal.png", png);
 		t.drawn.length = 0;
 		const r = live("newlive5", { thumbnailHook: "Back up everything", thumbnailLogos: ["kubernetes", "helm"] });
 		await begin("u-live5", r);
@@ -209,10 +212,6 @@ describe("scheduling a live stream", () => {
 		failing.clear();
 		expect(await rows(env.VIDEOS, "SELECT id FROM videos WHERE id='newlive3'")).toEqual([]);
 		expect(await rows(env.CASTING_CREDITS, "SELECT * FROM casting_credits WHERE subject_id='newlive3'")).toEqual([]);
-	});
-
-	it("sizes an SVG in its own markup, since the image binding cannot resize a vector", () => {
-		expect(sized('<svg width="1269" height="317" viewBox="0 0 1269 317" fill="none" xmlns="x"><path d="M0 0"/></svg>', 192, 48)).toBe('<svg viewBox="0 0 1269 317" fill="none" xmlns="x" width="192" height="48"><path d="M0 0"/></svg>');
 	});
 
 	it("reads the model's answer in any shape and builds a prompt from the facts", async () => {
