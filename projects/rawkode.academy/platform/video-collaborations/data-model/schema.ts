@@ -8,6 +8,10 @@ export const collaboratorsTable = sqliteTable("collaborators", {
 	websiteUrl: text("website_url").notNull(),
 	logoUrl: text("logo_url"),
 	organizationId: text("organization_id"),
+	// A short note the partner writes themselves, shown beside their videos on the
+	// watch and lesson pages and in the YouTube description. Null until they set one.
+	announcement: text("announcement"),
+	announcementUrl: text("announcement_url"),
 });
 
 export type Collaborator = typeof collaboratorsTable.$inferSelect;

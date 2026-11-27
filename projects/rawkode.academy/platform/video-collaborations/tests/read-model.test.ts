@@ -88,4 +88,52 @@ describe("video-collaborations read model", () => {
 		const result = await graphql({ schema: getSchema({ DB: db.DB }), source: `{ collaborators { ctaLink } }`, contextValue: {} });
 		expect(result.errors?.[0]?.message).toContain("ctaLink");
 	});
+
+	describe("announcement", () => {
+		const run = async (source: string, contextValue: Record<string, unknown>, variableValues?: Record<string, unknown>) =>
+			graphql({ schema: getSchema({ DB: db.DB }), source, contextValue, variableValues });
+		const set = (text: string, url: string | null, ctx: Record<string, unknown>) =>
+			run(
+				`mutation ($t: String!, $u: String) { setAnnouncement(collaboratorId: "datum", text: $t, url: $u) { announcement announcementUrl } }`,
+				ctx,
+				{ t: text, u: url },
+			);
+		const member = { userId: "u1", roles: [], orgs: [{ id: "collab-datum", role: "member" }] };
+
+		it("is empty until a partner sets one", async () => {
+			expect((await entities("Collaborator", ["datum"], "announcement announcementUrl"))[0]).toEqual({
+				announcement: null,
+				announcementUrl: null,
+			});
+		});
+
+		it("lets a member of the organisation set and clear it", async () => {
+			await exec(db.DB, "UPDATE collaborators SET organization_id = 'collab-datum' WHERE id = 'datum'");
+			const result = await graphql({
+				schema: getSchema({ DB: db.DB }),
+				source: `mutation { setAnnouncement(collaboratorId: "datum", text: "  Join our launch  ", url: "https://datum.net/launch") { announcement announcementUrl } }`,
+				contextValue: member,
+			});
+			expect(result.errors).toBeUndefined();
+			expect(result.data).toEqual({ setAnnouncement: { announcement: "Join our launch", announcementUrl: "https://datum.net/launch" } });
+			expect((await entities("Collaborator", ["datum"], "announcement announcementUrl"))[0].announcement).toBe("Join our launch");
+			const cleared = await set("", "https://datum.net/launch", member);
+			expect(cleared.data).toEqual({ setAnnouncement: { announcement: null, announcementUrl: null } });
+		});
+
+		it("refuses outsiders, anonymous callers, long text and non-https links", async () => {
+			const outsider = { userId: "u2", roles: [], orgs: [{ id: "other", role: "member" }] };
+			expect((await set("hi", null, outsider)).errors?.[0]?.message).toContain("can't change");
+			expect((await set("hi", null, {})).errors?.[0]?.message).toContain("Sign in");
+			expect((await set("x".repeat(281), null, member)).errors?.[0]?.message).toContain("280");
+			expect((await set("hi", "http://datum.net", member)).errors?.[0]?.message).toContain("https");
+			expect((await set("hi", "javascript:alert(1)", member)).errors?.[0]?.message).toContain("https");
+		});
+
+		it("lets staff set it", async () => {
+			const staff = { userId: "s", roles: ["collab_admin"], orgs: [] };
+			expect((await set("From staff", null, staff)).errors).toBeUndefined();
+			await set("", null, staff);
+		});
+	});
 });

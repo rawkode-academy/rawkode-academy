@@ -63,6 +63,15 @@ const siteVideo = (slug: string) => `https://rawkode.academy/watch/${slug}`;
 						</ul>
 					)}
 					{c.reviews.length === 0 && <p class="meta">No draft is waiting for review.</p>}
+					<h3 class="sub">Announcement</h3>
+					<p class="meta hint">Optional. Shown beside our videos on the watch page, on course lessons and in the YouTube description. Leave it empty to show nothing.</p>
+					<form method="post" action="/api/announcement" class="form">
+						<input type="hidden" name="collaboratorId" value={c.id} />
+						<label>Message<textarea name="text" maxlength="280" rows="3" disabled={scope.readOnly} placeholder="Join our launch webinar on 10 December">{c.announcement ?? ""}</textarea></label>
+						<label>Link (https, optional)<input name="url" type="url" disabled={scope.readOnly} value={c.announcementUrl ?? ""} placeholder="https://" /></label>
+						{!scope.readOnly && <button class={button({ variant: "solid", size: "sm" })}>Save announcement</button>}
+						{scope.readOnly && <p class="meta">Read-only while viewing as a partner.</p>}
+					</form>
 					{c.videos.length > 0 && (
 						<>
 							<h3 class="sub">Published together</h3>
@@ -98,7 +107,7 @@ const siteVideo = (slug: string) => `https://rawkode.academy/watch/${slug}`;
 	.rows { list-style: none; margin: 0 0 1.5rem; padding: 0; border-top: 1px solid var(--colors-academy-border); }
 	.row { display: flex; gap: 1rem; align-items: center; justify-content: space-between; padding: 0.875rem 0; border-bottom: 1px solid var(--colors-academy-border); font-family: var(--fonts-academy-text); }
 	.row > div { flex: 1; min-width: 0; }
-	@media (max-width: 40rem) { .row { flex-wrap: wrap; gap: 0.5rem 0.75rem; } .row > div { flex-basis: 100%; } .form input { width: 100%; } }
+	@media (max-width: 40rem) { .row { flex-wrap: wrap; gap: 0.5rem 0.75rem; } .row > div { flex-basis: 100%; } .form input, .form textarea { width: 100%; } }
 	.title { font-weight: 700; color: var(--colors-academy-text); text-decoration: none; }
 	.title:hover { color: var(--colors-academy-accent); }
 	.meta { margin: 0.125rem 0 0; font-family: var(--fonts-academy-mono); font-size: 0.8125rem; color: var(--colors-academy-text-muted); }
@@ -107,5 +116,7 @@ const siteVideo = (slug: string) => `https://rawkode.academy/watch/${slug}`;
 	.open summary { display: inline-flex; cursor: pointer; }
 	.form { display: grid; gap: 0.75rem; max-width: 36rem; margin-top: 1rem; font-family: var(--fonts-academy-text); }
 	.form label { display: grid; gap: 0.25rem; font-size: 0.875rem; font-weight: 600; }
+	.hint { margin-bottom: 0.5rem; }
+	.form textarea { font: inherit; padding: 0.5rem 0.625rem; background: var(--colors-academy-input); color: var(--colors-academy-text); border: 1px solid var(--colors-academy-input-border); border-radius: var(--radii-academy-s); }
 	.form input { font: inherit; padding: 0.5rem 0.625rem; background: var(--colors-academy-input); color: var(--colors-academy-text); border: 1px solid var(--colors-academy-input-border); border-radius: var(--radii-academy-s); }
 </style>

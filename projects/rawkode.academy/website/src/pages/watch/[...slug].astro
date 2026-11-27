@@ -27,6 +27,7 @@ import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import SupporterCTA from "@/components/organizations/SupporterCTA.astro";
 import MLabel from "@/components/ui/MLabel.vue";
 import Collaboration from "@/components/watch/Collaboration.astro";
+import CollaborationAnnouncement from "@/components/watch/CollaborationAnnouncement.astro";
 import LiveDot from "@/components/ui/LiveDot.vue";
 import Page from "@/wrappers/page.astro";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
@@ -572,6 +573,7 @@ const watchStatusLabel = isLiveNow
 								</span>
 								<Collaboration collaborators={collaborators} campaign={video.data.slug} />
 							</p>
+							<CollaborationAnnouncement collaborators={collaborators} campaign={video.data.slug} />
 
 							<div class={watch.tools}>
 								{techEntries.length > 0 && (

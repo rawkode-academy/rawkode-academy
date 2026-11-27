@@ -183,7 +183,7 @@ const RESOURCE_CATEGORIES = new Set([
 	"other",
 ]);
 
-function collaborators(value: unknown): { id: string; name: string; websiteUrl?: string }[] {
+function collaborators(value: unknown): { id: string; name: string; websiteUrl?: string; announcement?: string; announcementUrl?: string }[] {
 	if (!Array.isArray(value)) return [];
 	return value
 		.filter((c): c is Raw => Boolean(c) && typeof c === "object")
@@ -192,7 +192,18 @@ function collaborators(value: unknown): { id: string; name: string; websiteUrl?:
 			const name = str(c.name);
 			const websiteUrl = str(c.websiteUrl);
 			if (!id || !name) return [];
-			return websiteUrl && /^https?:\/\//.test(websiteUrl) ? [{ id, name, websiteUrl }] : [{ id, name }];
+			const announcement = str(c.announcement)?.trim();
+			const announcementUrl = str(c.announcementUrl);
+			return [
+				{
+					id,
+					name,
+					...(websiteUrl && /^https?:\/\//.test(websiteUrl) ? { websiteUrl } : {}),
+					// Nothing is shown without text; a link needs https.
+					...(announcement ? { announcement } : {}),
+					...(announcement && announcementUrl && /^https:\/\//.test(announcementUrl) ? { announcementUrl } : {}),
+				},
+			];
 		});
 }
 

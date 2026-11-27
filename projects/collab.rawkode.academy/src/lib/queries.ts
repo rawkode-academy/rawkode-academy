@@ -4,6 +4,8 @@ export const DASHBOARD = /* GraphQL */ `
 			id
 			name
 			organizationId
+			announcement
+			announcementUrl
 			videos { id title slug }
 			reviews { id title videoId state draftVersion dueAt canSignOff }
 		}
@@ -71,11 +73,19 @@ export const OPEN_REVIEW = /* GraphQL */ `
 	}
 `;
 
+export const SET_ANNOUNCEMENT = /* GraphQL */ `
+	mutation SetAnnouncement($collaboratorId: ID!, $text: String!, $url: String) {
+		setAnnouncement(collaboratorId: $collaboratorId, text: $text, url: $url) { id announcement announcementUrl }
+	}
+`;
+
 export interface DashboardData {
 	collaborators: {
 		id: string;
 		name: string;
 		organizationId: string | null;
+		announcement: string | null;
+		announcementUrl: string | null;
 		videos: { id: string; title: string; slug: string }[];
 		reviews: { id: string; title: string; videoId: string; state: string; draftVersion: number; dueAt: string; canSignOff: boolean }[];
 	}[];

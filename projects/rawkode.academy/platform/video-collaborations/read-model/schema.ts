@@ -3,6 +3,7 @@ import schemaBuilder from "@pothos/core";
 import directivesPlugin from "@pothos/plugin-directives";
 import federationPlugin from "@pothos/plugin-federation";
 import { and, asc, eq, gt, isNull, lte, or } from "drizzle-orm";
+import { GraphQLError } from "graphql";
 import { drizzle } from "drizzle-orm/d1";
 import type { GraphQLSchema } from "graphql";
 import {
@@ -36,6 +37,7 @@ const isActive = (now: Date) =>
 	);
 
 const ADMIN_ROLE = "collab_admin";
+export const ANNOUNCEMENT_MAX = 280;
 const SNAPSHOT_KEY = "analytics:snapshot:v2";
 
 type SnapshotVideos = AnalyticsSnapshot;
@@ -115,6 +117,9 @@ export const getSchema = (env: { DB: D1Database; ANALYTICS_SNAPSHOT?: KVNamespac
 			logoUrl: t.string({ nullable: true, resolve: (r) => r.logoUrl }),
 			// The identity organisation this company's staff belong to.
 			organizationId: t.string({ nullable: true, resolve: (r) => r.organizationId }),
+			// What the partner wants viewers to know; null when they have not set one.
+			announcement: t.string({ nullable: true, resolve: (r) => r.announcement }),
+			announcementUrl: t.string({ nullable: true, resolve: (r) => r.announcementUrl }),
 			videos: t.field({
 				type: [VideoRef],
 				resolve: async (collaborator, _args, context) =>
@@ -177,6 +182,47 @@ export const getSchema = (env: { DB: D1Database; ANALYTICS_SNAPSHOT?: KVNamespac
 			collaborators: t.field({
 				type: [CollaboratorRef],
 				resolve: () => db.select().from(collaborators).orderBy(asc(collaborators.id)).all(),
+			}),
+		}),
+	});
+
+	builder.mutationType({
+		fields: (t) => ({
+			// Partners (and staff) set the note shown with their videos. An empty
+			// text clears it; the link is optional and must be https.
+			setAnnouncement: t.field({
+				type: CollaboratorRef,
+				args: {
+					collaboratorId: t.arg.id({ required: true }),
+					text: t.arg.string({ required: true }),
+					url: t.arg.string({ required: false }),
+				},
+				resolve: async (_root, args, context) => {
+					const caller = context as { userId?: string | null; roles?: string[]; orgs?: { id: string; role: string }[] };
+					if (!caller.userId) throw new GraphQLError("Sign in to continue");
+					const id = String(args.collaboratorId);
+					const collaborator = await db.select().from(collaborators).where(eq(collaborators.id, id)).get();
+					if (!collaborator || !mayViewAnalytics(caller, collaborator.organizationId)) {
+						throw new GraphQLError("You can't change this company's announcement");
+					}
+					const text = args.text.trim();
+					if (text.length > ANNOUNCEMENT_MAX) {
+						throw new GraphQLError(`Keep the announcement under ${ANNOUNCEMENT_MAX} characters`);
+					}
+					const url = text ? (args.url ?? "").trim() || null : null;
+					if (url) {
+						try {
+							if (new URL(url).protocol !== "https:") throw new Error();
+						} catch {
+							throw new GraphQLError("The link must be an https URL");
+						}
+					}
+					await db
+						.update(collaborators)
+						.set({ announcement: text || null, announcementUrl: url })
+						.where(eq(collaborators.id, id));
+					return { ...collaborator, announcement: text || null, announcementUrl: url };
+				},
 			}),
 		}),
 	});
