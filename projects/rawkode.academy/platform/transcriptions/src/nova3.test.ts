@@ -68,4 +68,18 @@ describe("Datum Cloud corrections", () => {
 			),
 		).toBe("run datumctl get, then datumctl diff and datumctl diff");
 	});
+	test("keeps the Datum control plane and joins split subcommands", () => {
+		expect(
+			correctTranscriptText(
+				"the Datum control plane, the data control plan and Datum control plane",
+			),
+		).toBe(
+			"the Datum control plane, the Datum control plane and Datum control plane",
+		);
+		expect(
+			correctTranscriptText(
+				"do the data control\n\n00:05:12.150 --> 00:05:18.390\napply all",
+			),
+		).toBe("do the datumctl\n\n00:05:12.150 --> 00:05:18.390\napply all");
+	});
 });

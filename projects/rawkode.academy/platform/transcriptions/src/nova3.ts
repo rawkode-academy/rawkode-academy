@@ -35,9 +35,14 @@ const TRANSCRIPT_CORRECTIONS: Array<[RegExp, string]> = [
 	[/\byokeflight\b/gi, "Yoke flight"],
 	[/\byokeflights\b/gi, "Yoke flights"],
 	[/\byoke\b/gi, "Yoke"],
+	[/\b(?:datum|data) control plan[es]?\b/gi, "Datum control plane"],
 	[/\bdatum ?control ?def\b/gi, "datumctl diff"],
-	[/\bdata control (?=(?:get|diff|apply|explain|action|plugin)\b)/gi, "datumctl "],
-	[/\bdatum ?control\b/gi, "datumctl"],
+	// A cue boundary can fall between "data control" and its subcommand.
+	[
+		/\bdata control(?=\s+(?:\d{2}:\d{2}:\d{2}\.\d{3}\s*-->\s*\d{2}:\d{2}:\d{2}\.\d{3}\s+)?(?:get|diff|apply|explain|action|plugin)\b)/gi,
+		"datumctl",
+	],
+	[/\bdatum ?control\b(?! plane)/gi, "datumctl"],
 	[/\bdatumctl\b/gi, "datumctl"],
 	[/\bdatum cloud\b/gi, "Datum Cloud"],
 	[/\bkubectl control\b/gi, "kubectl"],
