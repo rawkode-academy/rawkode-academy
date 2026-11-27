@@ -21,6 +21,11 @@ class Upstreams {
       if (url.searchParams.get("part") === "statistics") return json({ items: [{ id: channelId, statistics: { subscriberCount: "12300", viewCount: "4567890", videoCount: "344" } }] });
       return json({ items: [{ id: channelId }] });
     }
+    if (url.hostname === "api.sql.cloudflarestorage.com") {
+      assert.equal(request.headers.get("authorization"), "Bearer basin");
+      return json({ success: true, result: { schema: [{ name: "video" }, { name: "views" }], rows: [["abcdefghijk", 10], ["bcdefghijkl", 1000]] } });
+    }
+    if (url.hostname === "www.googleapis.com" && url.pathname === "/youtube/v3/videos") return json({ items: url.searchParams.get("id")!.split(",").map(id => ({ id, statistics: { viewCount: "1000" } })) });
     if (url.hostname === "youtubeanalytics.googleapis.com" && url.pathname === "/v2/reports") {
       assert.equal(url.searchParams.get("ids"), `channel==${channelId}`);
       const dims = (url.searchParams.get("dimensions") ?? "").split(",").filter(Boolean);
@@ -39,7 +44,7 @@ async function fixture(upstreams: Upstreams) {
       name: "youtube-analytics", modules: true,
       scriptPath: fileURLToPath(new URL("../dist/main.js", import.meta.url)),
       compatibilityDate: "2026-10-31", compatibilityFlags: ["nodejs_compat"],
-      bindings: { YOUTUBE_CHANNEL_ID: channelId, YOUTUBE_HISTORY_SINCE: new Date(Date.now() - 70 * 86400000).toISOString().slice(0, 10), YOUTUBE_CLIENT_ID: "c", YOUTUBE_CLIENT_SECRET: "s", YOUTUBE_REFRESH_TOKEN: "r" },
+      bindings: { YOUTUBE_CHANNEL_ID: channelId, YOUTUBE_HISTORY_SINCE: new Date(Date.now() - 70 * 86400000).toISOString().slice(0, 10), YOUTUBE_CLIENT_ID: "c", YOUTUBE_CLIENT_SECRET: "s", YOUTUBE_REFRESH_TOKEN: "r", BASIN_SQL_TOKEN: "basin", CLOUDFLARE_ACCOUNT_ID: "acct", BASIN_BUCKET: "bucket" },
       serviceBindings: { ANALYTICS: { name: "collector", entrypoint: "Collector" }, ACADEMY_API: "gateway", VIDEO_CHANNELS: "gateway" },
       workflows: {
         SYNC: { name: "youtube-analytics-sync", className: "SyncWorkflow" },
@@ -84,6 +89,12 @@ test("Worker runtime: the cron starts the sync and the one-time backfill, and ro
   assert.equal(status.videoBackfill.id, "backfill-videos-3");
   assert.match(status.sync.id, /^sync-\d{4}-\d{2}-\d{2}$/);
   assert.equal(status.backfill.id, "backfill-initial");
+  // The reconciliation found the video the lake barely has and started a heal backfill for it alone.
+  const { reconcile } = status.sync;
+  assert.equal(reconcile.checked, 2);
+  assert.deepEqual(reconcile.driftingIds, ["abcdefghijk"]);
+  assert.match(reconcile.healing, /^heal-\d{4}-\d{2}-\d{2}$/);
+  assert.equal(reconcile.persistentCount, 0);
 
   const types = new Set(upstreams.lakeEvents.map(e => e.type));
   for (const type of ["youtube.daily", "youtube.daily_traffic", "youtube.top_videos", "youtube.traffic", "youtube.summary", "youtube.channel_stats", "youtube.video", "youtube.video_daily", "youtube.video_traffic"]) assert.ok(types.has(type), type);
@@ -99,6 +110,10 @@ test("Worker runtime: the cron starts the sync and the one-time backfill, and ro
   assert.equal(daily.data.views, 123);
   const backfillStarts = upstreams.lakeEvents.filter(e => e.type === "youtube.daily").map(e => e.data.startDate);
   assert.ok(backfillStarts.includes(new Date(Date.now() - 70 * 86400000).toISOString().slice(0, 10)), "History starts at YOUTUBE_HISTORY_SINCE");
+
+  // The heal backfill the sync started runs on its own; wait until it stops writing.
+  for (let last = -1; last !== upstreams.lakeEvents.length;) { last = upstreams.lakeEvents.length; await sleep(1500); }
+  assert.ok(upstreams.lakeEvents.some(e => e.type === "youtube.video_daily" && e.data.video === "abcdefghijk"), "the heal loaded the drifting video's history");
 
   // A second cron the same day starts nothing new.
   const before = upstreams.lakeEvents.length;

@@ -5,8 +5,8 @@ const json = (body: unknown, status = 200) => Response.json(body, { status, head
 
 async function instanceStatus(binding: Workflow, id: string) {
   try {
-    const { status, error } = await (await binding.get(id)).status();
-    return { id, status, ...(error ? { error: error.message } : {}) };
+    const { status, error, output } = await (await binding.get(id)).status();
+    return { id, status, ...(error ? { error: error.message } : {}), ...(output ? { output } : {}) };
   } catch { return null; }
 }
 
@@ -26,7 +26,8 @@ export default {
     if (url.pathname === "/status") {
       const now = Date.now();
       const sync = await instanceStatus(env.SYNC, syncInstanceId(new Date(now))) ?? await instanceStatus(env.SYNC, syncInstanceId(new Date(now - 86400000)));
-      return json({ sync, backfill: await instanceStatus(env.BACKFILL, FIRST_BACKFILL_ID), videoBackfill: await instanceStatus(env.BACKFILL, VIDEO_BACKFILL_ID) });
+      // A sync's output is its summary and the lake-vs-YouTube reconciliation (counts and video IDs).
+      return json({ sync: sync && { id: sync.id, status: sync.status, ...("error" in sync ? { error: sync.error } : {}), reconcile: (sync.output as { reconcile?: unknown } | undefined)?.reconcile }, backfill: await instanceStatus(env.BACKFILL, FIRST_BACKFILL_ID), videoBackfill: await instanceStatus(env.BACKFILL, VIDEO_BACKFILL_ID) });
     }
     return json({ error: "not_found" }, 404);
   },

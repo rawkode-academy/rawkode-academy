@@ -55,3 +55,24 @@ cuenv task test
 ## Revoking access
 
 Revoke the app in the Google account's security settings and delete the three secrets from Infisical; the next sync fails and the alert opens.
+
+## Reconciliation and self-healing
+
+The daily sync ends with a reconciliation (`src/reconcile.ts`). It sums the
+lake's `youtube.video_daily` views per video (latest observation per day) and
+compares them with the public view count from the Data API (`videos.list`, 50
+IDs a call). A video the lake undercounts by more than 5% plus 25 views is
+"drifting". That covers a new video, a newly mapped one (never seen by the
+lake, so zero) and a hole in its history.
+
+- Drifting videos are backfilled the same day: the sync starts a
+  `youtube-analytics-backfill` instance `heal-<date>` with `scope: "videos"`
+  and `videoIds`, which loads their full history from `YOUTUBE_HISTORY_SINCE`.
+- A video that was already drifting in yesterday's sync, after yesterday's heal,
+  is `persistent`. `/status` reports `sync.reconcile` (`checked`, `drifting`,
+  `worst`, `persistent`, `healing`, or `error`), and the monitor workflow opens
+  the issue "YouTube analytics drifts from YouTube's own counts" for
+  persistent drift or a reconciliation that can't run, and closes it when they
+  agree.
+- The reconciliation needs `BASIN_SQL_TOKEN` (Infisical, same folder as the
+  Google credential, uploaded with the deploy). It never fails the sync.

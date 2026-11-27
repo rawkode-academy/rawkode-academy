@@ -1,6 +1,8 @@
 # Alerts when YouTube analytics stops reaching the analytics lake: opens a
 # GitHub issue (or comments on the open one) when the day's sync or the initial
-# backfill failed, and closes it once a sync completes. Hand-written because
+# backfill failed, and closes it once a sync completes. A second issue opens
+# when the lake's per-video views stay below YouTube's public counts after the
+# daily heal backfill (the sync's reconciliation), and closes when they agree. Hand-written because
 # cuenv pipelines have no schedule trigger. Reads only the Worker's public
 # /status endpoint: workflow states and error messages, no data or secrets.
 name: youtube-analytics-monitor
@@ -44,13 +46,34 @@ jobs:
               problem="$problem"$'\n\n'"**Google no longer accepts the stored authorization.** $consent"
             fi
           fi
-          existing=$(gh issue list --state open --search "in:title \"$title\"" --json number,title --jq ".[] | select(.title == \"$title\") | .number" | head -n 1)
-          if [ -z "$problem" ]; then
-            echo "Sync complete."
-            if [ -n "$existing" ]; then gh issue close "$existing" --comment "Today's sync completed."; fi
-            exit 0
+          report() {
+            # $1 title, $2 problem ("" when healthy), $3 closing comment
+            local existing
+            existing=$(gh issue list --state open --search "in:title \"$1\"" --json number,title --jq ".[] | select(.title == \"$1\") | .number" | head -n 1)
+            if [ -z "$2" ]; then
+              if [ -n "$existing" ]; then gh issue close "$existing" --comment "$3"; fi
+              return 0
+            fi
+            local body="$2"$'\n\n'"Status: $STATUS_URL"$'\n'"Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            if [ -n "$existing" ]; then gh issue comment "$existing" --body "$body"; else gh issue create --title "$1" --body "$body"; fi
+            echo "::error::$2"
+          }
+          report "$title" "$problem" "Today's sync completed."
+          failed=0
+          [ -n "$problem" ] && failed=1
+
+          # The sync's reconciliation: only when the sync itself completed.
+          drift=""
+          if [ -n "${status:-}" ] && [ "${sync:-}" = "complete" ]; then
+            rec_error=$(jq -r '.sync.reconcile.error // ""' <<<"$status")
+            persistent=$(jq -r '.sync.reconcile.persistentCount // 0' <<<"$status")
+            if [ -n "$rec_error" ]; then
+              drift="The daily reconciliation against YouTube could not run: $rec_error"
+            elif [ "$persistent" -gt 0 ]; then
+              list=$(jq -r '.sync.reconcile.persistent[] | "- https://www.youtube.com/watch?v=\(.videoId): lake \(.lake), YouTube \(.youtube)"' <<<"$status")
+              drift="$persistent video(s) were already below YouTube's public view count yesterday, and a heal backfill ran since. The lake still undercounts them (worst first, at most 20 listed):"$'\n\n'"$list"$'\n\n'"Check the heal run: \`youtube-analytics-backfill\` instances \`heal-<date>\`."
+            fi
+            report "YouTube analytics drifts from YouTube's own counts" "$drift" "The lake agrees with YouTube's public view counts again."
+            [ -n "$drift" ] && failed=1
           fi
-          body="$problem"$'\n\n'"Status: $STATUS_URL"$'\n'"Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          if [ -n "$existing" ]; then gh issue comment "$existing" --body "$body"; else gh issue create --title "$title" --body "$body"; fi
-          echo "::error::$problem"
-          exit 1
+          exit $failed
