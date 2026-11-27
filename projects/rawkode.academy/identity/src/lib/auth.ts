@@ -12,7 +12,7 @@ import {
 	contributor,
 	member,
 } from "./access-control";
-import { getUserAccessClaims } from "./access-claims";
+import { getUserAccessClaims, getUserOrganisationClaims } from "./access-claims";
 import { captureAuthEvent } from "./analytics";
 import { claimPendingMemberships } from "./org-github-members";
 
@@ -163,6 +163,7 @@ export const createAuth = async (env: AuthEnv) => {
 						"preferred_username",
 						"https://rawkode.academy/roles",
 						"https://rawkode.academy/client_id",
+						"https://rawkode.academy/orgs",
 					],
 				},
 				getAdditionalUserInfoClaim: async (user, _scopes, client) => {
@@ -187,7 +188,9 @@ export const createAuth = async (env: AuthEnv) => {
 						// refresh it on every sign-in and token refresh. If GitHub can't
 						// be reached the last verified one stands; with none, the MCP
 						// refuses the guest.
-						client.clientId === "rawkode-tools-mcp"
+						client.clientId === "rawkode-tools-mcp" ||
+						// The portal shows and attributes comments by GitHub login.
+						client.clientId === "rawkode-collab"
 					) {
 						try {
 							username = await refreshGitHubUsername(user.id);
@@ -198,8 +201,13 @@ export const createAuth = async (env: AuthEnv) => {
 							);
 						}
 					}
+					const organisationClaims =
+						client.clientId === "rawkode-collab"
+							? await getUserOrganisationClaims(db, user.id)
+							: {};
 					return {
 						...accessClaims,
+						...organisationClaims,
 						...(username
 							? {
 									username,
