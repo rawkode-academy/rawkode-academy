@@ -95,6 +95,7 @@ export const handles: ToolModule = {
 		"- When you draft or schedule social posts and a guest, host, project or company has no handle on file, look it up on an official source only (the project's own site or README, a GitHub profile's links, the person's own site). If you are confident, record it with set_person_handles or set_technology_handles, with that page as sourceUrl, without asking. These tools only fill empty fields, so they cannot damage existing data. If you are not confident, record nothing.",
 		"- Tag a handle in the post as soon as it is on file or recorded, and leave out anyone who has none.",
 		"- Post text and drafts contain only the post and its context. Never put tooling notes in them: no failed writes, 'not on file', 'probable', or comments about what you could or could not look up.",
+		"- Sarcastic Kubernetes jokes for @rawkode: aim for relatable ops irony, where what we actually do drifts from the slogan. Example that landed: 'Cattle, not pets, they said. Now every cattle has a name, a persistent volume, a liveness probe and its own Slack channel.' Trivia, etymology and generic complaints about complexity did not land.",
 	].join("\n"),
 	register(server: McpServer, env: CloudflareEnv, caller) {
 		const actor = { userId: caller.userId, username: caller.username };
