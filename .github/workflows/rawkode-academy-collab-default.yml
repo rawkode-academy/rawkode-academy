@@ -10,8 +10,11 @@ on:
     - '*.cue'
     - .github/workflows/rawkode-academy-collab-default.yml
     - cue.mod/**
+    - packages/design-system/**
     - projects/*.cue
     - projects/collab.rawkode.academy/*.cue
+    - projects/collab.rawkode.academy/astro.config.mjs
+    - projects/collab.rawkode.academy/astro.config.mjs/**
     - projects/collab.rawkode.academy/env.cue
     - projects/collab.rawkode.academy/env.cue/**
     - projects/collab.rawkode.academy/flake.lock
