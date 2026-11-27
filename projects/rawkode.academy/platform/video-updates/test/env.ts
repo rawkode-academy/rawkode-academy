@@ -27,7 +27,7 @@ export async function testEnv() {
 	env.AI = { run: async (model: string, input: Record<string, unknown>, options: unknown) => { generated.push({ model, input, options }); return { image: btoa("fake-png") }; } };
 	const drawn: { top: number; left: number }[] = [];
 	const layer = (): any => ({ transform: () => layer(), draw: (_overlay: unknown, at: { top: number; left: number }) => { drawn.push(at); return layer(); }, output: async () => ({ response: () => new Response("fake-webp") }) });
-	env.IMAGES = { input: () => layer() };
+	env.IMAGES = { input: () => layer(), info: async () => ({ format: "image/png", width: 1, height: 1 }) };
 	env.CONTENT_BUCKET = { get: async (key: string) => logos.has(key) ? { arrayBuffer: async () => logos.get(key)!.buffer } : null, put: async (key: string, value: Uint8Array, options: unknown) => { stored.set(key, { bytes: value, options }); } };
 	env.ANALYTICS = { trackEvent: async () => ({ success: true }) };
 	env.CACHE_INVALIDATION_TOKEN = "token";
