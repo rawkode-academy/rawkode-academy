@@ -42,6 +42,7 @@
 		{ "binding": "VIDEO_CHANNELS", "service": "platform-video-channels-read-model" },
 		{ "binding": "CASTING_CREDITS", "service": "platform-casting-credits-read-model" },
 		{ "binding": "VIDEO_COLLABORATIONS", "service": "platform-video-collaborations-read-model" },
+		{ "binding": "COLLABORATION_REVIEWS", "service": "platform-collaboration-reviews-read-model" },
 		{ "binding": "VIDEO_TECHNOLOGIES", "service": "platform-video-technologies-read-model" },
 		{ "binding": "SHOW_HOSTS", "service": "platform-show-hosts-read-model" },
 		{ "binding": "EPISODES", "service": "platform-episodes-read-model" },

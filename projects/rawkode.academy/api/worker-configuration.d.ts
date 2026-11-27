@@ -10,6 +10,7 @@ interface __BaseEnv_Env {
 	VIDEO_CHANNELS: Fetcher /* platform-video-channels-read-model */;
 	CASTING_CREDITS: Fetcher /* platform-casting-credits-read-model */;
 	VIDEO_COLLABORATIONS: Fetcher /* platform-video-collaborations-read-model */;
+	COLLABORATION_REVIEWS: Fetcher /* platform-collaboration-reviews-read-model */;
 	VIDEO_TECHNOLOGIES: Fetcher /* platform-video-technologies-read-model */;
 	SHOW_HOSTS: Fetcher /* platform-show-hosts-read-model */;
 	EPISODES: Fetcher /* platform-episodes-read-model */;

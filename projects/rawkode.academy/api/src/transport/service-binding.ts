@@ -14,6 +14,7 @@ export const SUBGRAPH_BINDING_MAP: Record<string, keyof Env> = {
 	"video-channels": "VIDEO_CHANNELS",
 	"casting-credits": "CASTING_CREDITS",
 	"video-collaborations": "VIDEO_COLLABORATIONS",
+	"collaboration-reviews": "COLLABORATION_REVIEWS",
 	"video-technologies": "VIDEO_TECHNOLOGIES",
 	"show-hosts": "SHOW_HOSTS",
 	episodes: "EPISODES",
@@ -46,6 +47,9 @@ export interface ServiceBindingTransportContext {
 		email: string;
 		name?: string;
 		username?: string | null;
+		/** Roles and organisations, set only for OIDC bearer callers. */
+		roles?: string[];
+		orgs?: { id: string; role: string }[];
 	};
 }
 
@@ -102,6 +106,12 @@ export function createServiceBindingTransport(env: Env): Transport {
 					}
 					if (ctx.user.name) {
 						headers["X-Gateway-User-Name"] = ctx.user.name;
+					}
+					if (ctx.user.roles?.length) {
+						headers["X-Gateway-Roles"] = ctx.user.roles.join(",");
+					}
+					if (ctx.user.orgs?.length) {
+						headers["X-Gateway-Orgs"] = JSON.stringify(ctx.user.orgs);
 					}
 				}
 

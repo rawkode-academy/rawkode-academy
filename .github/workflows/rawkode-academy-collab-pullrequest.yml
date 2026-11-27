@@ -8,8 +8,11 @@ on:
     - '*.cue'
     - .github/workflows/rawkode-academy-collab-pullrequest.yml
     - cue.mod/**
+    - packages/design-system/**
     - projects/*.cue
     - projects/collab.rawkode.academy/*.cue
+    - projects/collab.rawkode.academy/astro.config.mjs
+    - projects/collab.rawkode.academy/astro.config.mjs/**
     - projects/collab.rawkode.academy/flake.lock
     - projects/collab.rawkode.academy/flake.lock/**
     - projects/collab.rawkode.academy/flake.nix

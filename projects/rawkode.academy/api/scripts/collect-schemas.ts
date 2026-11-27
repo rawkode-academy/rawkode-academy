@@ -18,6 +18,7 @@ const PLATFORM_SERVICES = [
 	"video-channels",
 	"casting-credits",
 	"video-collaborations",
+	"collaboration-reviews",
 	"video-technologies",
 	"show-hosts",
 	"episodes",

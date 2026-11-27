@@ -63,6 +63,8 @@ export const getSchema = (env: { DB: D1Database }): GraphQLSchema => {
 			name: t.exposeString("name"),
 			websiteUrl: t.exposeString("websiteUrl"),
 			logoUrl: t.string({ nullable: true, resolve: (r) => r.logoUrl }),
+			// The identity organisation this company's staff belong to.
+			organizationId: t.string({ nullable: true, resolve: (r) => r.organizationId }),
 			videos: t.field({
 				type: [VideoRef],
 				resolve: async (collaborator, _args, context) =>

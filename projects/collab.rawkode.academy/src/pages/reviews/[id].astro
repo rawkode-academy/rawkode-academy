@@ -1,0 +1,46 @@
+---
+import { env } from "cloudflare:workers";
+import { academyLayout } from "@rawkodeacademy/design-system";
+import Base from "../../layouts/Base.astro";
+import ReviewPlayer from "../../components/ReviewPlayer.vue";
+import { gql } from "../../lib/gateway.ts";
+import { REVIEW, type ReviewData } from "../../lib/queries.ts";
+import { scopeFor, sees } from "../../lib/scope.ts";
+import { STATE_LABEL, localDate } from "../../lib/format.ts";
+
+const session = Astro.locals.session!;
+const scope = scopeFor(session);
+const layout = academyLayout({ width: "wide" });
+
+const { review } = await gql<ReviewData>(env, session.accessToken, REVIEW, { id: Astro.params.id }).catch(() => ({ review: null }));
+if (!review || !sees(scope, review.collaborator.organizationId)) return new Response(null, { status: 404 });
+const frozen = scope.readOnly;
+---
+
+<Base title={review.title} session={session}>
+	<div class={layout.root}>
+		<div class={layout.container}>
+			<p class:list={[layout.breadcrumbs, "crumbs"]}><a href="/">Collaborations</a> / {review.collaborator.name}</p>
+			<h1 class={layout.title}>{review.title}</h1>
+			<p class="meta"><span class={layout.tag}>{STATE_LABEL[review.state] ?? review.state}</span> Cut {review.draftVersion} · due {localDate(review.dueAt)}</p>
+			<ReviewPlayer
+				client:load
+				reviewId={review.id}
+				videoUrl={review.videoUrl}
+				comments={review.comments}
+				canComment={review.canComment && !frozen}
+				canSignOff={review.canSignOff && !frozen}
+				canTriage={scope.canTriage}
+				signedOffBy={review.partnerApprovedBy}
+				readOnly={frozen}
+			/>
+		</div>
+	</div>
+</Base>
+
+<style>
+	.crumbs { padding-top: 1.5rem; }
+	.crumbs a { color: var(--colors-academy-accent, #c2185b); text-decoration: none; }
+	.crumbs a:hover { text-decoration: underline; }
+	.meta { display: flex; gap: 0.75rem; align-items: center; margin: 0.5rem 0 1.5rem; font-family: var(--fonts-academy-mono); font-size: 0.8125rem; color: var(--colors-academy-text-muted); }
+</style>

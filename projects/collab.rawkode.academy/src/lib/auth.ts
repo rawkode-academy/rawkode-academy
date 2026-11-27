@@ -1,9 +1,15 @@
-import type { Env, OrgRole, Principal } from "./types.ts";
+import type { OrgRole, Principal } from "./types.ts";
 
 const ROLE_CLAIM = "https://rawkode.academy/roles";
 const ORGS_CLAIM = "https://rawkode.academy/orgs";
 export const ADMIN_ROLE = "collab_admin";
 const ORG_ROLES: readonly string[] = ["owner", "admin", "moderator", "contributor", "member"];
+
+export interface AuthEnv {
+	PUBLIC_ORIGIN: string;
+	OIDC_ISSUER: string;
+	OIDC_CLIENT_ID: string;
+}
 
 const base64Url = (bytes: Uint8Array): string =>
 	btoa(String.fromCharCode(...bytes)).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
@@ -14,15 +20,10 @@ export const randomToken = (bytes = 32): string =>
 export const challengeFor = async (verifier: string): Promise<string> =>
 	base64Url(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier))));
 
-export const originOf = (env: Env, request: Request): string =>
+export const originOf = (env: AuthEnv, request: Request): string =>
 	env.PUBLIC_ORIGIN || new URL(request.url).origin;
 
-export const authorizationUrl = (
-	env: Env,
-	origin: string,
-	state: string,
-	challenge: string,
-): string => {
+export const authorizationUrl = (env: AuthEnv, origin: string, state: string, challenge: string): string => {
 	const url = new URL("/auth/oauth2/authorize", env.OIDC_ISSUER);
 	url.searchParams.set("client_id", env.OIDC_CLIENT_ID);
 	url.searchParams.set("redirect_uri", `${origin}/api/auth/callback`);
@@ -61,12 +62,18 @@ export const principalFromClaims = (claims: Record<string, unknown>): Principal 
 	};
 };
 
+export interface SignIn {
+	principal: Principal;
+	accessToken: string;
+	expiresInSeconds: number;
+}
+
 export const exchangeCode = async (
-	env: Env,
+	env: AuthEnv,
 	origin: string,
 	code: string,
 	verifier: string,
-): Promise<Record<string, unknown> | null> => {
+): Promise<SignIn | null> => {
 	const token = await fetch(new URL("/auth/oauth2/token", env.OIDC_ISSUER), {
 		method: "POST",
 		headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -79,10 +86,12 @@ export const exchangeCode = async (
 		}),
 	});
 	if (!token.ok) return null;
-	const { access_token } = (await token.json()) as { access_token?: string };
+	const { access_token, expires_in } = (await token.json()) as { access_token?: string; expires_in?: number };
 	if (!access_token) return null;
 	const info = await fetch(new URL("/auth/oauth2/userinfo", env.OIDC_ISSUER), {
 		headers: { Authorization: `Bearer ${access_token}` },
 	});
-	return info.ok ? ((await info.json()) as Record<string, unknown>) : null;
+	if (!info.ok) return null;
+	const principal = principalFromClaims((await info.json()) as Record<string, unknown>);
+	return principal ? { principal, accessToken: access_token, expiresInSeconds: expires_in ?? 3600 } : null;
 };

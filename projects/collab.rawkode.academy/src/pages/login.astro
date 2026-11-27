@@ -1,0 +1,20 @@
+---
+import { academyLayout, academyMarketing, button } from "@rawkodeacademy/design-system";
+import Base from "../layouts/Base.astro";
+
+const layout = academyLayout({ width: "reading" });
+const marketing = academyMarketing();
+const failed = Astro.url.searchParams.get("error") === "1";
+---
+
+<Base title="Sign in">
+	<div class:list={[layout.root]}>
+		<div class:list={[layout.container, marketing.utility]}>
+			<p class={marketing.eyebrow}>Partner portal</p>
+			<h1 class={layout.title}>Review your draft before it goes live</h1>
+			<p class={layout.description}>Watch the cut, pin a comment to the exact second, and sign off when you are happy. Sign in with the GitHub account Rawkode Academy added to your organisation.</p>
+			{failed && <div class={layout.notice} role="alert">We couldn't sign you in. Ask Rawkode Academy to check your GitHub account is on your organisation.</div>}
+			<div class={marketing.utilityActions}><a class={button({ variant: "solid", size: "lg" })} href="/login/start">Sign in with GitHub</a></div>
+		</div>
+	</div>
+</Base>

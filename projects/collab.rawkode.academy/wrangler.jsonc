@@ -1,13 +1,14 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "rawkode-academy-collab",
-  "main": "src/main.ts",
+  "main": "@astrojs/cloudflare/entrypoints/server",
   "compatibility_date": "2026-10-31",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": false,
+  "assets": { "binding": "ASSETS", "directory": "./dist" },
   "routes": [
     { "pattern": "collaborate.rawkode.academy", "custom_domain": true },
-    // The previous host. The Worker redirects it to collaborate.
+    // The previous host. The middleware redirects it to collaborate.
     { "pattern": "collab.rawkode.academy", "custom_domain": true }
   ],
   "observability": {
@@ -20,13 +21,9 @@
     "OIDC_ISSUER": "https://id.rawkode.academy",
     "OIDC_CLIENT_ID": "rawkode-collab"
   },
-  // Sessions, sign-in state and review data. No ID: Wrangler creates the
-  // namespace on the first deploy and reuses it afterwards.
-  "kv_namespaces": [{ "binding": "STORE" }],
-  // The company records the portal reads. Read-only: nothing here writes them.
-  "d1_databases": [
-    { "binding": "COLLABORATIONS_DB", "database_name": "platform-video-collaborations", "database_id": "4f2f882e-1a7f-4873-b5d6-9fc85f9efd4d" },
-    { "binding": "VIDEOS_DB", "database_name": "platform-videos", "database_id": "0e96020b-eb03-456c-a593-fa73f2e845d4" },
-    { "binding": "SUPPORTERS_DB", "database_name": "platform-supporters", "database_id": "e1527293-b2d5-4c7f-8d23-5e8bac24f206" }
-  ]
+  // Sign-in state and sessions. No ID: Wrangler creates the namespace on the
+  // first deploy and reuses it afterwards.
+  "kv_namespaces": [{ "binding": "SESSION" }],
+  // Every portal read and write goes through the federated API.
+  "services": [{ "binding": "GATEWAY", "service": "platform-api-gateway" }]
 }

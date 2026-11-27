@@ -12,13 +12,16 @@ name: "rawkode-academy-collab"
 
 // Tasks run in this directory's flake.nix dev shell (Node), pinned by
 // flake.lock. The Worker holds no secrets: sign-in is a public PKCE client of
-// id.rawkode.academy and sessions are opaque ids in KV. Cloudflare access
+// id.rawkode.academy and sessions are opaque ids in KV. Data comes from the
+// federated API through the gateway service binding. Cloudflare access
 // comes from the repository-wide token.
 
 let _t = tasks
 
-let _npm = "npm ci --workspaces=false --no-audit --no-fund >/dev/null && "
-let _sources = ["src/**", "package.json", "package-lock.json", "wrangler.jsonc", "tsconfig.json", "flake.nix", "flake.lock"]
+let _npm = "npm ci --workspaces=false --no-audit --no-fund >/dev/null && npm run design-system --workspaces=false >/dev/null && "
+let _sources = ["src/**", "package.json", "package-lock.json", "astro.config.mjs", "wrangler.jsonc", "tsconfig.json", "flake.nix", "flake.lock"]
+
+let _ds = [schema.#ModuleFiles & {paths: ["packages/design-system/**"]}]
 
 ci: pipelines: {
 	default: {
@@ -45,18 +48,18 @@ tasks: {
 	check: schema.#Task & {
 		command: "sh"
 		args: ["-c", _npm + "npm run check --workspaces=false"]
-		inputs: list.Concat([_sources, ["test/**"]])
+		inputs: list.Concat([_sources, ["test/**"], _ds])
 	}
 	test: schema.#Task & {
 		command: "sh"
 		args: ["-c", _npm + "npm test --workspaces=false"]
-		inputs: list.Concat([_sources, ["test/**"]])
+		inputs: list.Concat([_sources, ["test/**"], _ds])
 	}
 
 	deploy: schema.#Task & {
 		command: "sh"
-		args: ["-c", _npm + "npx --no-install tsc --noEmit && npm test --workspaces=false && npx --no-install wrangler deploy"]
-		inputs: list.Concat([_sources, ["env.cue", "test/**"]])
+		args: ["-c", _npm + "npm run check --workspaces=false && npm test --workspaces=false && npm run build --workspaces=false && npx --no-install wrangler deploy"]
+		inputs: list.Concat([_sources, ["env.cue", "test/**"], _ds])
 	}
 
 }
