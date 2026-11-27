@@ -1,18 +1,30 @@
 {
   "name": "@rawkode-academy/collab",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "scripts": {
-    "check": "tsc --noEmit",
+    "dev": "astro dev --host 127.0.0.1 --port 4323",
+    "design-system": "npm --prefix ../../packages/design-system install --no-audit --no-fund --no-package-lock && npm --prefix ../../packages/design-system run build",
+    "types": "wrangler types",
+    "check": "wrangler types && astro check",
     "test": "node --experimental-transform-types --test test/*.test.ts",
-    "build": "wrangler deploy --dry-run --outdir dist",
+    "build": "astro build",
     "deploy": "wrangler deploy"
   },
   "overrides": {
     "workerd": "1.20261031.1"
   },
+  "dependencies": {
+    "@astrojs/cloudflare": "14.4.2",
+    "@astrojs/vue": "7.1.2",
+    "@rawkodeacademy/design-system": "file:../../packages/design-system",
+    "astro": "7.4.2",
+    "hls.js": "1.5.17",
+    "vue": "3.5.31"
+  },
   "devDependencies": {
+    "@astrojs/check": "0.9.12",
     "@cloudflare/workers-types": "5.20261031.1",
     "@types/node": "24.10.1",
     "typescript": "5.9.3",

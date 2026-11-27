@@ -1,0 +1,109 @@
+---
+import { env } from "cloudflare:workers";
+import { academyLayout, button } from "@rawkodeacademy/design-system";
+import Base from "../layouts/Base.astro";
+import { GatewayError, gql } from "../lib/gateway.ts";
+import { DASHBOARD, type DashboardData } from "../lib/queries.ts";
+import { scopeFor, sees } from "../lib/scope.ts";
+import { STATE_LABEL, localDate } from "../lib/format.ts";
+
+const session = Astro.locals.session!;
+const scope = scopeFor(session);
+const layout = academyLayout({ width: "wide" });
+
+let data: DashboardData | undefined;
+let failure: string | undefined;
+try {
+	data = await gql<DashboardData>(env, session.accessToken, DASHBOARD);
+} catch (error) {
+	failure = error instanceof GatewayError ? error.message : "The API is not answering.";
+}
+const everyone = (data?.collaborators ?? []).filter((c) => c.organizationId);
+const collaborators = everyone.filter((c) => sees(scope, c.organizationId));
+const orgs = everyone.map((c) => ({ id: c.organizationId!, name: c.name }));
+const mine = scope.all ? "Every collaboration" : "Your collaborations";
+const siteVideo = (slug: string) => `https://rawkode.academy/watch/${slug}`;
+---
+
+<Base title="Collaborations" session={session} orgs={orgs}>
+	<div class={layout.root}>
+		<header class={layout.masthead}>
+			<div class={layout.container}>
+				<div class={layout.mastheadInner}>
+					<div class={layout.mastheadCopy}>
+						<p class={layout.mastheadKicker}>Partner portal</p>
+						<div class={layout.mastheadTitle}><h1 class={layout.mastheadHeading}>{mine}</h1></div>
+					</div>
+					<p class={layout.mastheadDescription}>Draft cuts waiting for your eyes, and the finished videos we've made together.</p>
+				</div>
+			</div>
+		</header>
+		<div class={layout.container}>
+			{failure && <div class={layout.notice} role="alert">{failure}</div>}
+			{!failure && collaborators.length === 0 && (
+				<div class={layout.empty}>
+					<p>Your GitHub account isn't linked to a collaborating organisation yet. Ask Rawkode Academy to add you.</p>
+				</div>
+			)}
+			{collaborators.map((c) => (
+				<section class={layout.section} aria-labelledby={`c-${c.id}`}>
+					<div class={layout.sectionHeader}><h2 id={`c-${c.id}`} class={layout.sectionTitle}>{c.name}</h2></div>
+					{c.reviews.length > 0 && (
+						<ul class="rows">
+							{c.reviews.map((r) => (
+								<li class="row">
+									<div>
+										<a class="title" href={`/reviews/${r.id}`}>{r.title}</a>
+										<p class="meta">Cut {r.draftVersion} · due {localDate(r.dueAt)}</p>
+									</div>
+									<span class={layout.tag}>{STATE_LABEL[r.state] ?? r.state}</span>
+									<a class={button({ variant: r.state === "in_review" ? "solid" : "outline", size: "sm" })} href={`/reviews/${r.id}`}>{r.state === "in_review" ? "Review draft" : "Open"}</a>
+								</li>
+							))}
+						</ul>
+					)}
+					{c.reviews.length === 0 && <p class="meta">No draft is waiting for review.</p>}
+					{c.videos.length > 0 && (
+						<>
+							<h3 class="sub">Published together</h3>
+							<ul class="rows">
+								{c.videos.map((v) => (
+									<li class="row"><a class="title" href={siteVideo(v.slug)}>{v.title}</a></li>
+								))}
+							</ul>
+						</>
+					)}
+					{scope.canTriage && (
+						<details class="open">
+							<summary class={button({ variant: "outline", size: "sm" })}>Open a draft review</summary>
+							<form method="post" action="/api/open-review" class="form">
+								<input type="hidden" name="collaboratorId" value={c.id} />
+								<input type="hidden" name="organizationId" value={c.organizationId} />
+								<label>Video id<input name="videoId" required maxlength="64" list={`v-${c.id}`} /></label>
+								<datalist id={`v-${c.id}`}>{c.videos.map((v) => <option value={v.id}>{v.title}</option>)}</datalist>
+								<label>Title<input name="title" required maxlength="200" /></label>
+								<label>Video URL<input name="videoUrl" type="url" placeholder="https://content.rawkode.academy/videos/…/stream.m3u8" /></label>
+								<button class={button({ variant: "solid", size: "sm" })}>Open review</button>
+							</form>
+						</details>
+					)}
+				</section>
+			))}
+		</div>
+	</div>
+</Base>
+
+<style>
+	.rows { list-style: none; margin: 0 0 1.5rem; padding: 0; border-top: 1px solid var(--colors-academy-border); }
+	.row { display: flex; gap: 1rem; align-items: center; justify-content: space-between; padding: 0.875rem 0; border-bottom: 1px solid var(--colors-academy-border); font-family: var(--fonts-academy-text); }
+	.row > div { flex: 1; min-width: 0; }
+	.title { font-weight: 700; color: var(--colors-academy-text); text-decoration: none; }
+	.title:hover { color: var(--colors-academy-accent); }
+	.meta { margin: 0.125rem 0 0; font-family: var(--fonts-academy-mono); font-size: 0.8125rem; color: var(--colors-academy-text-muted); }
+	.sub { font-family: var(--fonts-academy-display); font-size: 1rem; margin: 1.5rem 0 0.5rem; color: var(--colors-academy-text-soft); }
+	.open { margin: 1rem 0 2rem; }
+	.open summary { display: inline-flex; cursor: pointer; }
+	.form { display: grid; gap: 0.75rem; max-width: 36rem; margin-top: 1rem; font-family: var(--fonts-academy-text); }
+	.form label { display: grid; gap: 0.25rem; font-size: 0.875rem; font-weight: 600; }
+	.form input { font: inherit; padding: 0.5rem 0.625rem; background: var(--colors-academy-input); color: var(--colors-academy-text); border: 1px solid var(--colors-academy-input-border); border-radius: var(--radii-academy-s); }
+</style>
