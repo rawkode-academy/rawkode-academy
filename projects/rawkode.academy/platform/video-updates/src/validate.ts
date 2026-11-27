@@ -27,6 +27,7 @@ export async function validate(env: Env, r: UpdateRequest): Promise<string[]> {
 		if (r.broadcast) errors.push("a broadcast is only for a new video");
 	}
 
+	if (r.thumbnailLogos) errors.push(...missing("technology", r.thumbnailLogos, await existing(env.TECHNOLOGIES, "technologies", "id", r.thumbnailLogos)));
 	if (r.video?.slug) {
 		const clash = await env.VIDEOS.prepare("SELECT id FROM videos WHERE slug = ? AND id <> ?").bind(r.video.slug, r.videoId).first<{ id: string }>();
 		if (clash) errors.push(`slug "${r.video.slug}" is already used by video ${clash.id}`);

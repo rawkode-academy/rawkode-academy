@@ -68,6 +68,10 @@ export const updateRequest = z.object({
 	broadcast: z.object({ privacy: z.enum(["public", "unlisted", "private"]).default("public") }).strict().optional(),
 	// What the generated thumbnail should show, in words (the title, show and technologies are always given to the model).
 	thumbnailBrief: z.string().min(1).max(500).optional(),
+	// The few words written large on the thumbnail (read at phone size, so keep it short). Defaults to the first technology's name.
+	thumbnailHook: z.string().min(1).max(30).optional(),
+	// Technologies whose official logo (technologies/<id>/horizontal.svg) is composited onto the thumbnail. The Academy's wordmark is always added.
+	thumbnailLogos: z.array(id).max(3).optional(),
 }).strict();
 
 export type UpdateRequest = z.infer<typeof updateRequest>;

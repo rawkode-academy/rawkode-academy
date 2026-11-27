@@ -69,9 +69,9 @@ export class UpdateVideoWorkflow extends WorkflowEntrypoint<Env, Params> {
 		// Committed from here on: nothing below undoes the update. The daily YouTube diff is the safety net for a lost event.
 		// A new live stream gets its thumbnail before the event, so the broadcast is created with it. A failure
 		// doesn't undo the video: the broadcast is made without one and the next sync uploads it once it exists.
-		if ((request.create && request.broadcast) || request.thumbnailBrief) {
+		if ((request.create && request.broadcast) || request.thumbnailBrief || request.thumbnailHook || request.thumbnailLogos) {
 			try {
-				const made = await step.do("generate thumbnail", { retries: { limit: 2, delay: "20 seconds", backoff: "exponential" }, timeout: "5 minutes" }, async () => generateThumbnail(this.env, request.videoId, request.create ? await facts(this.env, request) : await storedFacts(this.env, request.videoId, request.thumbnailBrief)));
+				const made = await step.do("generate thumbnail", { retries: { limit: 2, delay: "20 seconds", backoff: "exponential" }, timeout: "5 minutes" }, async () => generateThumbnail(this.env, request.videoId, request.create ? await facts(this.env, request) : await storedFacts(this.env, request.videoId, request.thumbnailBrief, request.thumbnailHook), request.thumbnailLogos));
 				log({ updateId, videoId: request.videoId, thumbnail: made.key, bytes: made.bytes });
 			} catch (error) { log({ updateId, level: "alert", thumbnailNotGenerated: error instanceof Error ? error.message : "unknown" }); }
 		}

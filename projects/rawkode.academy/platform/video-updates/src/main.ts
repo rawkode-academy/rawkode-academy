@@ -38,7 +38,7 @@ export class VideoUpdates extends WorkerEntrypoint<Env> {
 
 	private async start(request: ReturnType<typeof updateRequest.parse>, actor: Actor) {
 		const sections = touched(request);
-		if (!sections.length && !request.thumbnailBrief) throw new Error("Nothing to update: give at least one section");
+		if (!sections.length && !(request.thumbnailBrief || request.thumbnailHook || request.thumbnailLogos)) throw new Error("Nothing to update: give at least one section");
 		const store = new Store(this.env.DB);
 		const updateId = request.requestId ?? crypto.randomUUID();
 		let fresh: boolean;
