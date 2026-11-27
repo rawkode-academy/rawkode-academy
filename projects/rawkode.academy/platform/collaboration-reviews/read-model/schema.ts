@@ -126,7 +126,7 @@ export const getSchema = (env: { DB: D1Database }): GraphQLSchema => {
 	});
 
 	CollaboratorRef.implement({
-		externalFields: (f) => ({ id: f.string() }),
+		externalFields: (f) => ({ id: f.id() }),
 		fields: (f) => ({
 			// The reviews the caller may see for this company.
 			reviews: f.field({
