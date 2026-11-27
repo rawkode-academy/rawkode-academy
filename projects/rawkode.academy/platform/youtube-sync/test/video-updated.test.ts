@@ -227,6 +227,19 @@ test("the stream of a finished broadcast is deleted once, and one still to be st
   assert.deepEqual((await f.deps.store.liveStreams()).map(r => r.streamId), ["s2"]);
 });
 
+test("a dead video event stops waiting on a person once a later event for that video goes through", async () => {
+  const f = await fixture();
+  await consumeVideoUpdatedDead([message({ type: "video.updated", version: 1, videoId: "v1", updateId: "u1", at: "2026-11-26T20:00:00Z" }).m], f.deps);
+  assert.equal(await f.deps.store.deadCount(), 1);
+  const other = message({ type: "video.updated", version: 1, videoId: "v2", updateId: "u2", at: "2026-11-26T20:00:00Z" });
+  await consumeVideoUpdated([other.m], f.deps, async () => null, async () => {});
+  assert.equal(await f.deps.store.deadCount(), 1, "another video's event does not clear it");
+  const again = message({ type: "video.updated", version: 1, videoId: "v1", updateId: "u3", at: "2026-11-26T20:05:00Z" });
+  await consumeVideoUpdated([again.m], f.deps, async () => null, async () => {});
+  assert.equal(again.result.acked, true);
+  assert.equal(await f.deps.store.deadCount(), 0);
+});
+
 test("without room in today's quota the broadcast waits for the reset", async () => {
   const f = await fixture();
   await f.deps.store.spend(pacificDay(f.deps.now()), DAILY_BUDGET - BROADCAST_UNITS + 1);

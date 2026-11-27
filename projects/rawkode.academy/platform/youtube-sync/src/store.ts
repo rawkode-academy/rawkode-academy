@@ -102,12 +102,16 @@ export class Store {
   }
 
   // Videos the queue gave up on (retries used up, or a failure retrying can't fix).
-  async recordDead(row: { planId: string | null; youtubeId: string | null; at: string; reason: string }) {
-    await this.db.prepare("INSERT INTO youtube_sync_dead (plan_id, youtube_id, at, reason) VALUES (?1, ?2, ?3, ?4)").bind(row.planId, row.youtubeId, row.at, row.reason).run();
+  async recordDead(row: { planId: string | null; youtubeId: string | null; at: string; reason: string; videoId?: string }) {
+    await this.db.prepare("INSERT INTO youtube_sync_dead (plan_id, youtube_id, at, reason, video_id) VALUES (?1, ?2, ?3, ?4, ?5)").bind(row.planId, row.youtubeId, row.at, row.reason, row.videoId ?? null).run();
+  }
+  // A video event for this Academy video has gone through, so earlier dead letters for it no longer wait on a person.
+  async resolveDead(videoId: string, at: string) {
+    await this.db.prepare("UPDATE youtube_sync_dead SET resolved_at = ?2 WHERE video_id = ?1 AND resolved_at IS NULL").bind(videoId, at).run();
   }
   // Videos still waiting on a person: given up on, and not written successfully since.
   async deadCount(): Promise<number> {
-    return (await this.db.prepare("SELECT COUNT(DISTINCT COALESCE(d.youtube_id, d.id)) AS n FROM youtube_sync_dead d WHERE NOT EXISTS (SELECT 1 FROM youtube_sync_log l WHERE l.youtube_id = d.youtube_id AND l.result = 'ok' AND l.at > d.at)").first<{ n: number }>())?.n ?? 0;
+    return (await this.db.prepare("SELECT COUNT(DISTINCT COALESCE(d.youtube_id, d.id)) AS n FROM youtube_sync_dead d WHERE d.resolved_at IS NULL AND NOT EXISTS (SELECT 1 FROM youtube_sync_log l WHERE l.youtube_id = d.youtube_id AND l.result = 'ok' AND l.at > d.at)").first<{ n: number }>())?.n ?? 0;
   }
 
   async log(row: Omit<LogRow, "id">) {
