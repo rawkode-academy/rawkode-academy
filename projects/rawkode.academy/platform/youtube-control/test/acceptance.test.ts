@@ -111,6 +111,10 @@ test("Worker runtime: the cron starts the sync and the one-time backfill, and ro
   const backfillStarts = upstreams.lakeEvents.filter(e => e.type === "youtube.daily").map(e => e.data.startDate);
   assert.ok(backfillStarts.includes(new Date(Date.now() - 70 * 86400000).toISOString().slice(0, 10)), "History starts at YOUTUBE_HISTORY_SINCE");
 
+  // The heal backfill the sync started runs on its own; wait until it stops writing.
+  for (let last = -1; last !== upstreams.lakeEvents.length;) { last = upstreams.lakeEvents.length; await sleep(1500); }
+  assert.ok(upstreams.lakeEvents.some(e => e.type === "youtube.video_daily" && e.data.video === "abcdefghijk"), "the heal loaded the drifting video's history");
+
   // A second cron the same day starts nothing new.
   const before = upstreams.lakeEvents.length;
   await worker.scheduled({ cron: "17 8 * * *", scheduledTime: new Date() });
