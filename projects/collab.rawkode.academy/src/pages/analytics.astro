@@ -5,11 +5,13 @@ import Base from "../layouts/Base.astro";
 import { GatewayError, gql } from "../lib/gateway.ts";
 import { ANALYTICS, DASHBOARD, type AnalyticsData, type DashboardData } from "../lib/queries.ts";
 import { scopeFor, sees } from "../lib/scope.ts";
+import { videoLinks } from "../lib/lessons.ts";
 import { count, hours, localDate } from "../lib/format.ts";
 
 const session = Astro.locals.session!;
 const scope = scopeFor(session);
 const layout = academyLayout({ width: "wide" });
+let videoLink = videoLinks(undefined);
 
 let data: AnalyticsData | undefined;
 let orgs: { id: string; name: string }[] = [];
@@ -21,6 +23,7 @@ try {
 			d.collaborators.filter((c) => c.organizationId).map((c) => ({ id: c.organizationId!, name: c.name })),
 		),
 	]);
+	videoLink = videoLinks(data?.allCourses);
 } catch (error) {
 	failure = error instanceof GatewayError ? error.message : "The API is not answering.";
 }
@@ -58,7 +61,7 @@ const mine = (data?.collaborators ?? []).filter((c) => sees(scope, c.organizatio
 						<ul class="videos">
 							{a.videos.map((v) => (
 								<li class="video">
-									<a class="title" href={`https://rawkode.academy/watch/${v.slug}`}>{v.title}</a>
+									<a class="title" href={videoLink(v)}>{v.title}</a>
 									<dl class="figures">
 										<div><dt>Academy</dt><dd>{count(v.siteViews.lifetime)}</dd></div>
 										<div><dt>YouTube</dt><dd>{v.youtubeViews ? count(v.youtubeViews.lifetime) : "n/a"}</dd></div>

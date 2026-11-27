@@ -5,6 +5,7 @@ import Base from "../layouts/Base.astro";
 import { GatewayError, gql } from "../lib/gateway.ts";
 import { DASHBOARD, type DashboardData } from "../lib/queries.ts";
 import { scopeFor, sees } from "../lib/scope.ts";
+import { videoLinks } from "../lib/lessons.ts";
 import { STATE_LABEL, localDate } from "../lib/format.ts";
 
 const session = Astro.locals.session!;
@@ -22,7 +23,7 @@ const everyone = (data?.collaborators ?? []).filter((c) => c.organizationId);
 const collaborators = everyone.filter((c) => sees(scope, c.organizationId));
 const orgs = everyone.map((c) => ({ id: c.organizationId!, name: c.name }));
 const mine = scope.all ? "Every collaboration" : "Your collaborations";
-const siteVideo = (slug: string) => `https://rawkode.academy/watch/${slug}`;
+const siteVideo = videoLinks(data?.allCourses);
 ---
 
 <Base title="Collaborations" session={session} orgs={orgs}>
@@ -77,7 +78,7 @@ const siteVideo = (slug: string) => `https://rawkode.academy/watch/${slug}`;
 							<h3 class="sub">Published together</h3>
 							<ul class="rows">
 								{c.videos.map((v) => (
-									<li class="row"><a class="title" href={siteVideo(v.slug)}>{v.title}</a></li>
+									<li class="row"><a class="title" href={siteVideo(v)}>{v.title}</a></li>
 								))}
 							</ul>
 						</>
