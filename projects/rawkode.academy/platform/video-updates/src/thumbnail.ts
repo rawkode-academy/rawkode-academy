@@ -105,6 +105,10 @@ async function technologyLogo(env: Env, id: string): Promise<{ svg: string; aspe
 	return { svg, aspect: aspectOf(svg) };
 }
 
+// Sets the root element's width and height (the viewBox keeps the drawing in proportion).
+export const sized = (svg: string, width: number, height: number) =>
+	svg.replace(/<svg\b[^>]*>/, (tag) => `<svg${tag.slice(4).replace(/\s(width|height)="[^"]*"/g, "")}`.replace(/>$/, ` width="${width}" height="${height}">`));
+
 type Layer = { svg: string; aspect: number; height: number; side: "left" | "right"; edge: "top" | "bottom" };
 
 // Draws the real logos over the generated art: the Academy's top left, each technology's along the bottom right.
@@ -116,7 +120,8 @@ export async function composite(env: Env, art: Uint8Array, layers: Layer[]): Pro
 		const left = layer.side === "left" ? LOGO_PADDING : right - width;
 		if (layer.side === "right") right = left - LOGO_PADDING;
 		const top = layer.edge === "top" ? LOGO_PADDING : HEIGHT - LOGO_PADDING - layer.height;
-		image = image.draw(env.IMAGES.input(new Blob([layer.svg], { type: "image/svg+xml" }).stream()).transform({ height: layer.height }), { top, left });
+		// The SVG is sized in the markup itself: the binding cannot resize a vector input ("not an image").
+		image = image.draw(env.IMAGES.input(new Blob([sized(layer.svg, width, layer.height)], { type: "image/svg+xml" }).stream()), { top, left });
 	}
 	const out = await image.output({ format: "image/webp", quality: 88 });
 	return new Uint8Array(await out.response().arrayBuffer());
