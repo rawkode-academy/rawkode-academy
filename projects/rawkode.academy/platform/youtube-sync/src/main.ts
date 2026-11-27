@@ -1,10 +1,12 @@
 import { z } from "zod";
+export { StreamKeys } from "./stream-keys.ts";
 import { fetchCatalogue, fetchScheduled } from "./academy.ts";
 import { ensure, errorBody, hash, readLimited, ServiceError } from "./domain.ts";
 import { GoogleClient } from "./google.ts";
 import { renderReport } from "./plan.ts";
 import { parseFields } from "./render.ts";
 import { pacificDay, Store } from "./store.ts";
+import { cleanupStreams } from "./streams.ts";
 import { consume, consumeDead, DEAD_LETTER_QUEUE, type SyncMessage } from "./queue.ts";
 import { consumeVideoUpdated, consumeVideoUpdatedDead, resolveVideo, VIDEO_UPDATED_DLQ, VIDEO_UPDATED_QUEUE } from "./video-updated.ts";
 import { applyPlan, createPlan, DAILY_BUDGET, type Deps, rollback, scheduledCandidates, selectCandidates, type Thumbnails } from "./sync.ts";
@@ -155,6 +157,9 @@ export default {
         if (candidates.length) console.log(JSON.stringify({ operation: "scheduled_apply", planId: plan.id, enqueued: candidates.length }));
       }
       catch (error) { console.error(JSON.stringify({ operation: "scheduled_plan", error: error instanceof ServiceError ? error.code : "unknown" })); }
+      // Streams made for finished broadcasts are deleted, so the channel does not collect them.
+      try { const api = google(env); console.log(JSON.stringify({ operation: "stream_cleanup", ...(await cleanupStreams(deps(env, api), api)) })); }
+      catch (error) { console.error(JSON.stringify({ operation: "stream_cleanup", error: error instanceof ServiceError ? error.code : "unknown" })); }
     })());
   },
 } satisfies ExportedHandler<CloudflareEnv>;

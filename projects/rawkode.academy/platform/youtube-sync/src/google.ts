@@ -110,6 +110,39 @@ export class GoogleClient {
     await this.send("PUT", dataAPI, "liveBroadcasts", { part: "id,status" }, JSON.stringify({ id: broadcastId, status: { privacyStatus: privacy, selfDeclaredMadeForKids: false } }), { "content-type": "application/json" });
     return true;
   }
+  // A new single-use RTMP stream, so the broadcast has a stream key of its own (50 quota units). The key is not read here.
+  async createStream(title: string): Promise<string> {
+    ensure(title, "invalid_input", "A stream needs a title");
+    const body = { snippet: { title }, cdn: { ingestionType: "rtmp", resolution: "variable", frameRate: "variable" }, contentDetails: { isReusable: false } };
+    const result = await this.send<{ id?: string }>("POST", dataAPI, "liveStreams", { part: "snippet,cdn,contentDetails" }, JSON.stringify(body), { "content-type": "application/json" });
+    ensure(typeof result.id === "string" && result.id.length > 0 && result.id.length <= 100, "invalid_google_response", "liveStreams.insert returned no stream id", 502);
+    return result.id;
+  }
+  // The ingestion address and stream key of a stream (1 quota unit). The key is a secret: callers return it to an operator and never log it.
+  async streamKey(streamId: string): Promise<{ ingestionAddress: string; streamName: string }> {
+    const result = await this.get<{ items?: { id?: string; cdn?: { ingestionInfo?: { ingestionAddress?: string; streamName?: string } } }[] }>(dataAPI, "liveStreams", { part: "id,cdn", id: streamId });
+    const info = result.items?.find(item => item.id === streamId)?.cdn?.ingestionInfo;
+    ensure(info?.ingestionAddress && info.streamName, "stream_not_found", `Stream ${streamId} has no ingestion info on the channel`, 404);
+    return { ingestionAddress: info.ingestionAddress, streamName: info.streamName };
+  }
+  // The lifecycle status of up to 50 broadcasts (1 quota unit); a broadcast YouTube no longer has is absent from the map.
+  async broadcastStatuses(ids: string[]): Promise<Map<string, string>> {
+    ensure(ids.length > 0 && ids.length <= 50, "invalid_input", "liveBroadcasts.list takes 1 to 50 IDs");
+    const result = await this.get<{ items?: { id?: string; status?: { lifeCycleStatus?: string } }[] }>(dataAPI, "liveBroadcasts", { part: "id,status", id: ids.join(","), maxResults: 50 });
+    const map = new Map<string, string>();
+    for (const item of result.items ?? []) if (typeof item.id === "string" && typeof item.status?.lifeCycleStatus === "string") map.set(item.id, item.status.lifeCycleStatus);
+    return map;
+  }
+  // Deletes a stream (50 quota units). A stream that is already gone counts as deleted.
+  async deleteStream(streamId: string): Promise<void> {
+    const url = new URL("liveStreams", dataAPI);
+    await this.authorize();
+    url.searchParams.set("id", streamId);
+    const response = await this.fetcher(url, { method: "DELETE", signal: AbortSignal.timeout(20000), redirect: "manual", headers: { authorization: `Bearer ${this.token}` } });
+    if (response.status === 404) { await response.body?.cancel(); return; }
+    if (response.status === 204) return;
+    await this.decode<unknown>(response, "DELETE liveStreams");
+  }
   // Binds a broadcast to a stream (50 quota units).
   async bindBroadcast(broadcastId: string, streamId: string): Promise<void> {
     await this.send("POST", dataAPI, "liveBroadcasts/bind", { id: broadcastId, part: "id", streamId }, "", {});
