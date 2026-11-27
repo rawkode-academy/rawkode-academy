@@ -49,7 +49,7 @@ The `video-updates` Worker publishes `video.updated` to the queue `platform-vide
 
 ### Scheduled live streams
 
-A new live stream is created with the `video-updates` Worker's `schedule` call, which also generates its thumbnail (GPT Image) and then publishes `video.scheduled` on the same queue. This Worker then makes the YouTube broadcast: `liveBroadcasts.insert` (the site's title and description, start time from `publishedAt`, privacy from the request, auto-start and auto-stop on, ultra low latency), binds it to the channel's reusable stream (`YOUTUBE_STREAM_ID`, or the first reusable stream), uploads the thumbnail, and writes the broadcast's YouTube id back as the video's YouTube channel mapping through the `VIDEO_UPDATES` binding. After that it syncs like any other video. About 150 quota units per stream. Each step is recorded in `youtube_sync_broadcasts`, so a retry resumes where it stopped and never creates a second broadcast; a spent quota waits for the reset.
+A new live stream is created with the `video-updates` Worker's `schedule` call, which also generates its thumbnail (GPT Image) and then publishes `video.scheduled` on the same queue. This Worker then makes the YouTube broadcast: `liveBroadcasts.insert` (the site's title and description, start time from `publishedAt`, privacy from the request, auto-start and auto-stop on, ultra low latency), binds it to a stream of its own (`liveStreams.insert`, so every broadcast has its own stream key; set `YOUTUBE_STREAM_ID` to bind them all to one reusable stream instead), uploads the thumbnail, and writes the broadcast's YouTube id back as the video's YouTube channel mapping through the `VIDEO_UPDATES` binding. After that it syncs like any other video. About 200 quota units per stream. The stream key is read on demand (1 unit) through the `StreamKeys` entrypoint, which only the operator MCP tool `get_stream_key` is bound to: it is never stored, logged or in a public field. The daily cron deletes the stream of every broadcast that has finished (`complete` or `revoked`, or gone from YouTube), 51 units, so the channel does not collect one unused stream per show. Each step is recorded in `youtube_sync_broadcasts`, so a retry resumes where it stopped and never creates a second broadcast; a spent quota waits for the reset.
 
 ## Quota and the queue
 
@@ -62,7 +62,7 @@ Apply doesn't write inline. It puts one message per video on the Cloudflare Queu
 - **Transient error** (network, timeout, 408, 429, 5xx): retried with exponential backoff, 30 s, 1 m, 2 m ... capped at 15 m, up to `max_retries: 6`, then it goes to the dead-letter queue `platform-youtube-sync-dlq`.
 - **An error retrying can't fix** (a rejected image, a permission 403, bad input): recorded straight away.
 
-Anything the queue gives up on is recorded in D1 (`youtube_sync_dead`), logged with `"operation":"queue"` to Grafana, and counted in `GET /status` as `deadLetters`. The daily `youtube-sync-monitor` workflow opens a GitHub issue while `deadLetters` is above zero; it clears itself once that video is written successfully. A redelivered message is safe: a video already written is skipped, and a thumbnail already pushed is not pushed again (which would also overwrite its saved before-image).
+Anything the queue gives up on is recorded in D1 (`youtube_sync_dead`), logged with `"operation":"queue"` to Grafana, and counted in `GET /status` as `deadLetters`. The hourly `youtube-sync-monitor` workflow opens a GitHub issue while `deadLetters` is above zero (dead letters of the update-event queues `platform-video-updated-dlq` and `platform-youtube-sync-dlq` are recorded too); it clears itself once that video is written successfully. A redelivered message is safe: a video already written is skipped, and a thumbnail already pushed is not pushed again (which would also overwrite its saved before-image).
 
 Both queues are created by the CI deploy if missing, and the bindings and consumers are in `wrangler.jsonc`. Rollback stays synchronous (it is one deliberate batch).
 
@@ -94,7 +94,7 @@ When the monitor issue or a log says `reauthorization_required`, repeat step 2.
 | `POST /apply` | bearer | `{ planId, limit, videos?, dryRun? }`. Enqueues the selected videos (a dry run only lists them). |
 | `POST /rollback` | bearer | `{ planId \| youtubeId, limit }`. |
 
-`.github/workflows/youtube-sync-monitor.yml` reads `/status` daily and opens an issue if the plan stopped running, or found drift or errors.
+`.github/workflows/youtube-sync-monitor.yml` reads `/status` hourly and opens an issue if the plan stopped running, or found drift or errors.
 
 ## Verify locally
 

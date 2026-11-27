@@ -102,6 +102,7 @@ test("a transient failure retries; a malformed message and the dead-letter queue
 
 // ---- scheduled live streams ----
 import { BROADCAST_UNITS, scheduleBroadcast, type BroadcastPorts } from "../src/broadcast.ts";
+import { cleanupStreams } from "../src/streams.ts";
 
 const scheduled = { type: "video.scheduled", version: 1, videoId: "v1", updateId: "u9", at: "2026-11-26T20:00:00Z", privacy: "unlisted" };
 function ports(over: Partial<BroadcastPorts> = {}) {
@@ -145,6 +146,85 @@ test("a retry after a failure resumes and never makes a second broadcast", async
   assert.equal(p.calls.inserted.length, 1);
   assert.equal(again.calls.inserted.length, 0);
   assert.deepEqual(linked, ["bbbbbbbbbbb"]);
+});
+
+test("a broadcast that could not be bound or thumbnailed is retried until both are done, without a second broadcast", async () => {
+  const f = await fixture();
+  const set: string[] = [];
+  let thumbnailWorks = false;
+  f.deps.thumbnails = { tag: async () => "tag1", prepare: async () => new Uint8Array([1]), current: async () => null, set: async id => { if (!thumbnailWorks) throw new ServiceError("thumbnail_upload", "refused", 502); set.push(id); } };
+  let stream: string | null = null;
+  const p = ports({ api: { async insertBroadcast(input) { p.calls.inserted.push(input); return "bbbbbbbbbbb"; }, async findStream() { return stream; }, async bindBroadcast(_id, s) { p.calls.bound.push(s); } } });
+  const first = message(scheduled);
+  await consumeVideoUpdated([first.m], f.deps, async () => null, async () => {}, p.value);
+  assert.equal(first.result.retried, true);
+  assert.equal(first.result.acked, false);
+  assert.deepEqual(p.calls.linked, ["bbbbbbbbbbb"]); // the link is kept
+  stream = "stream1"; thumbnailWorks = true;
+  const second = message(scheduled);
+  await consumeVideoUpdated([second.m], f.deps, async () => null, async () => {}, p.value);
+  assert.equal(second.result.acked, true);
+  assert.equal(p.calls.inserted.length, 1);
+  assert.deepEqual(p.calls.bound, ["stream1"]);
+  assert.deepEqual(set, ["bbbbbbbbbbb"]); // uploaded on the retry, not only on the first attempt
+  const third = message(scheduled);
+  await consumeVideoUpdated([third.m], f.deps, async () => null, async () => {}, p.value);
+  assert.equal(third.result.acked, true);
+  assert.deepEqual(set, ["bbbbbbbbbbb"]); // and not again once it is recorded
+});
+
+test("a resumed broadcast is made public when the latest request says so, and not touched again once it is", async () => {
+  const f = await fixture();
+  f.deps.thumbnails = { tag: async () => "tag1", prepare: async () => new Uint8Array([1]), current: async () => null, set: async () => {} };
+  let privacy = "private";
+  const asked: string[] = [];
+  const p = ports({ api: { async insertBroadcast(input) { p.calls.inserted.push(input); return "bbbbbbbbbbb"; }, async findStream() { return "stream1"; }, async bindBroadcast() {}, async ensurePrivacy(_id, want) { asked.push(want); if (privacy === want) return false; privacy = want; return true; } } });
+  await consumeVideoUpdated([message(scheduled).m], f.deps, async () => null, async () => {}, p.value);
+  assert.deepEqual(asked, [], "a new broadcast is made with its privacy already");
+  const publish = message({ ...scheduled, updateId: "u10", privacy: "public" });
+  await consumeVideoUpdated([publish.m], f.deps, async () => null, async () => {}, p.value);
+  assert.equal(publish.result.acked, true);
+  assert.equal(privacy, "public");
+  const again = message({ ...scheduled, updateId: "u11", privacy: "public" });
+  await consumeVideoUpdated([again.m], f.deps, async () => null, async () => {}, p.value);
+  assert.equal(again.result.acked, true);
+  assert.equal(p.calls.inserted.length, 1);
+});
+
+test("each broadcast gets a stream of its own, made once and reused by a retried bind", async () => {
+  const f = await fixture();
+  f.deps.thumbnails = { tag: async () => "tag1", prepare: async () => new Uint8Array([1]), current: async () => null, set: async () => {} };
+  const made: string[] = [];
+  const bound: string[] = [];
+  let bindWorks = false;
+  const p = ports({ api: { async insertBroadcast() { return "bbbbbbbbbbb"; }, async findStream() { throw new Error("must not look for a shared stream"); }, async createStream(title) { made.push(title); return "stream-own"; }, async bindBroadcast(_id, s) { if (!bindWorks) throw new ServiceError("google_api_error", "boom", 502); bound.push(s); } } });
+  const first = message(scheduled);
+  await consumeVideoUpdated([first.m], f.deps, async () => null, async () => {}, p.value);
+  assert.equal(first.result.retried, true);
+  assert.equal((await f.deps.store.broadcast("v1"))?.streamId, "stream-own");
+  bindWorks = true;
+  const second = message(scheduled);
+  await consumeVideoUpdated([second.m], f.deps, async () => null, async () => {}, p.value);
+  assert.equal(second.result.acked, true);
+  assert.equal(made.length, 1, "the retry binds the stream it already made");
+  assert.deepEqual(bound, ["stream-own"]);
+});
+
+test("the stream of a finished broadcast is deleted once, and one still to be streamed is kept", async () => {
+  const f = await fixture();
+  const db = (f.deps.store as unknown as { db: D1Database }).db;
+  for (const [video, broadcast, stream] of [["v1", "bbbbbbbbbb1", "s1"], ["v2", "bbbbbbbbbb2", "s2"], ["v3", "bbbbbbbbbb3", "s3"]]) {
+    await db.prepare("INSERT INTO youtube_sync_broadcasts (video_id, broadcast_id, created_at, stream_id) VALUES (?1, ?2, '2026-11-26T00:00:00Z', ?3)").bind(video, broadcast, stream).run();
+  }
+  const deleted: string[] = [];
+  const api = { async broadcastStatuses() { return new Map([["bbbbbbbbbb1", "complete"], ["bbbbbbbbbb2", "ready"]]); }, async deleteStream(id: string) { deleted.push(id); } };
+  const first = await cleanupStreams(f.deps, api);
+  assert.deepEqual(deleted, ["s1", "s3"], "complete, and one YouTube no longer has");
+  assert.equal(first.deleted, 2);
+  const second = await cleanupStreams(f.deps, api);
+  assert.equal(second.deleted, 0);
+  assert.deepEqual(deleted, ["s1", "s3"], "never deleted twice");
+  assert.deepEqual((await f.deps.store.liveStreams()).map(r => r.streamId), ["s2"]);
 });
 
 test("without room in today's quota the broadcast waits for the reset", async () => {

@@ -23,7 +23,11 @@
   // OAuth grants and tokens. No ID: Wrangler creates the namespace on the
   // first deploy and reuses it afterwards.
   // The Workflow that changes a video and everything attached to it (video tools).
-  "services": [{ "binding": "VIDEO_UPDATES", "service": "platform-video-updates", "entrypoint": "VideoUpdates" }],
+  // YOUTUBE_STREAMS: the stream key of a scheduled live stream (get_stream_key), read from YouTube on demand.
+  "services": [
+    { "binding": "VIDEO_UPDATES", "service": "platform-video-updates", "entrypoint": "VideoUpdates" },
+    { "binding": "YOUTUBE_STREAMS", "service": "rawkode-academy-youtube-sync", "entrypoint": "StreamKeys" }
+  ],
   // Social handles only: people and technologies (handles tools).
   "d1_databases": [
     { "binding": "PEOPLE", "database_name": "platform-people", "database_id": "d2cd6600-ca32-47d8-bc7d-147c6c7bb794" },

@@ -34,7 +34,7 @@ export async function consumeVideoUpdated(messages: QueueMessage[], deps: Deps, 
       } catch (error) {
         // A spent quota waits for the reset (the broadcast is made then); anything else backs off and retries, then the dead-letter queue.
         const quota = error instanceof ServiceError && error.code === "quota_exceeded";
-        log({ videoId, updateId, error: error instanceof ServiceError ? error.code : "unknown", attempts: message.attempts });
+        log({ videoId, updateId, error: error instanceof ServiceError ? error.code : "unknown", detail: error instanceof Error ? error.message : undefined, attempts: message.attempts });
         message.retry({ delaySeconds: quota ? Math.min(secondsUntilReset(deps.now()), MAX_DELAY_SECONDS) : backoffSeconds(message.attempts) });
       }
       continue;
