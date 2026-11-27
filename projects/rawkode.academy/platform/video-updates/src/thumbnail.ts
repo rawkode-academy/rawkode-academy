@@ -1,5 +1,5 @@
 import type { Env } from "./env.ts";
-import { BRAND_ACCENT, BRAND_GROUND, WORDMARK_ASPECT, WORDMARK_SVG } from "./brand.ts";
+import { BRAND_ACCENT, BRAND_GROUND, WORDMARK_ASPECT, WORDMARK_PNG } from "./brand.ts";
 import type { UpdateRequest } from "./request.ts";
 
 // The newest GPT Image model in the Workers AI catalogue (through AI Gateway,
@@ -92,24 +92,22 @@ const LOGO_PADDING = 40;
 const OWN_LOGO_HEIGHT = 64;
 const OTHER_LOGO_HEIGHT = 48;
 
-const aspectOf = (svg: string) => {
-	const box = /viewBox="[-\d.]+[ ,]+[-\d.]+[ ,]+([\d.]+)[ ,]+([\d.]+)"/.exec(svg);
-	return box ? Number(box[1]) / Number(box[2]) : 4;
+// The width over the height of a PNG, from its header.
+const aspectOf = (png: Uint8Array) => {
+	const view = new DataView(png.buffer, png.byteOffset, png.byteLength);
+	return view.getUint32(16) / view.getUint32(20);
 };
 
-// The official logo of a technology, as the site keeps it (white on the dark ground), or null when there isn't one.
-async function technologyLogo(env: Env, id: string): Promise<{ svg: string; aspect: number } | null> {
-	const object = await env.CONTENT_BUCKET.get(`technologies/${id}/horizontal.svg`);
+// The official logo of a technology as a PNG (white on transparent, rendered from its horizontal.svg, which the image
+// binding cannot draw), or null when there isn't one.
+async function technologyLogo(env: Env, id: string): Promise<{ png: Uint8Array; aspect: number } | null> {
+	const object = await env.CONTENT_BUCKET.get(`technologies/${id}/horizontal.png`);
 	if (!object) return null;
-	const svg = await object.text();
-	return { svg, aspect: aspectOf(svg) };
+	const png = new Uint8Array(await object.arrayBuffer());
+	return { png, aspect: aspectOf(png) };
 }
 
-// Sets the root element's width and height (the viewBox keeps the drawing in proportion).
-export const sized = (svg: string, width: number, height: number) =>
-	svg.replace(/<svg\b[^>]*>/, (tag) => `<svg${tag.slice(4).replace(/\s(width|height)="[^"]*"/g, "")}`.replace(/>$/, ` width="${width}" height="${height}">`));
-
-type Layer = { svg: string; aspect: number; height: number; side: "left" | "right"; edge: "top" | "bottom" };
+type Layer = { png: Uint8Array; aspect: number; height: number; side: "left" | "right"; edge: "top" | "bottom" };
 
 // Draws the real logos over the generated art: the Academy's top left, each technology's along the bottom right.
 export async function composite(env: Env, art: Uint8Array, layers: Layer[]): Promise<Uint8Array> {
@@ -120,8 +118,7 @@ export async function composite(env: Env, art: Uint8Array, layers: Layer[]): Pro
 		const left = layer.side === "left" ? LOGO_PADDING : right - width;
 		if (layer.side === "right") right = left - LOGO_PADDING;
 		const top = layer.edge === "top" ? LOGO_PADDING : HEIGHT - LOGO_PADDING - layer.height;
-		// The SVG is sized in the markup itself: the binding cannot resize a vector input ("not an image").
-		image = image.draw(env.IMAGES.input(new Blob([sized(layer.svg, width, layer.height)], { type: "image/svg+xml" }).stream()), { top, left });
+		image = image.draw(env.IMAGES.input(new Blob([layer.png], { type: "image/png" }).stream()).transform({ height: layer.height }), { top, left });
 	}
 	const out = await image.output({ format: "image/webp", quality: 88 });
 	return new Uint8Array(await out.response().arrayBuffer());
@@ -135,7 +132,7 @@ export async function generateThumbnail(env: Env, videoId: string, f: Facts, log
 	// Not every size is accepted; a 3:2 canvas is cropped to 16:9 below.
 	catch { response = await env.AI.run(IMAGE_MODEL as never, { ...input, size: "1536x1024" } as never, { gateway: { id: GATEWAY_ID } } as never); }
 	const art = await imageOf(response);
-	const layers: Layer[] = [{ svg: WORDMARK_SVG, aspect: WORDMARK_ASPECT, height: OWN_LOGO_HEIGHT, side: "left", edge: "top" }];
+	const layers: Layer[] = [{ png: WORDMARK_PNG, aspect: WORDMARK_ASPECT, height: OWN_LOGO_HEIGHT, side: "left", edge: "top" }];
 	const used: string[] = [];
 	for (const id of logos) {
 		const logo = await technologyLogo(env, id);

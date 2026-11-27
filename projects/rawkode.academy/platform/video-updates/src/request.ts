@@ -70,7 +70,7 @@ export const updateRequest = z.object({
 	thumbnailBrief: z.string().min(1).max(500).optional(),
 	// The few words written large on the thumbnail (read at phone size, so keep it short). Defaults to the first technology's name.
 	thumbnailHook: z.string().min(1).max(30).optional(),
-	// Technologies whose official logo (technologies/<id>/horizontal.svg) is composited onto the thumbnail. The Academy's wordmark is always added.
+	// Technologies whose official logo (technologies/<id>/horizontal.png) is composited onto the thumbnail. The Academy's wordmark is always added.
 	thumbnailLogos: z.array(id).max(3).optional(),
 }).strict();
 
