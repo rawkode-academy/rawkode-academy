@@ -67,9 +67,12 @@ export class Store {
     };
   }
 
-  async broadcast(videoId: string): Promise<{ broadcastId: string; linked: boolean; bound: boolean } | null> {
-    const row = await this.db.prepare("SELECT broadcast_id, linked_at, bound_at FROM youtube_sync_broadcasts WHERE video_id = ?1").bind(videoId).first<{ broadcast_id: string; linked_at: string | null; bound_at: string | null }>();
-    return row ? { broadcastId: row.broadcast_id, linked: row.linked_at !== null, bound: row.bound_at !== null } : null;
+  async broadcast(videoId: string): Promise<{ broadcastId: string; streamId: string | null; linked: boolean; bound: boolean } | null> {
+    const row = await this.db.prepare("SELECT broadcast_id, stream_id, linked_at, bound_at FROM youtube_sync_broadcasts WHERE video_id = ?1").bind(videoId).first<{ broadcast_id: string; stream_id: string | null; linked_at: string | null; bound_at: string | null }>();
+    return row ? { broadcastId: row.broadcast_id, streamId: row.stream_id, linked: row.linked_at !== null, bound: row.bound_at !== null } : null;
+  }
+  async saveStream(videoId: string, streamId: string) {
+    await this.db.prepare("UPDATE youtube_sync_broadcasts SET stream_id = ?2 WHERE video_id = ?1").bind(videoId, streamId).run();
   }
   async saveBroadcast(videoId: string, broadcastId: string, at: string) {
     await this.db.prepare("INSERT INTO youtube_sync_broadcasts (video_id, broadcast_id, created_at) VALUES (?1, ?2, ?3)").bind(videoId, broadcastId, at).run();

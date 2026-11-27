@@ -1,4 +1,5 @@
 import { z } from "zod";
+export { StreamKeys } from "./stream-keys.ts";
 import { fetchCatalogue, fetchScheduled } from "./academy.ts";
 import { ensure, errorBody, hash, readLimited, ServiceError } from "./domain.ts";
 import { GoogleClient } from "./google.ts";

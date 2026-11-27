@@ -3,14 +3,16 @@ import { composeDescription, composeTitle, type AcademyVideo } from "./render.ts
 import { pacificDay } from "./store.ts";
 import { DAILY_BUDGET, type Deps } from "./sync.ts";
 
-// liveBroadcasts.insert, liveBroadcasts.bind and thumbnails.set cost 50 units each.
-export const BROADCAST_UNITS = 150;
+// liveBroadcasts.insert, liveStreams.insert, liveBroadcasts.bind and thumbnails.set cost 50 units each.
+export const BROADCAST_UNITS = 200;
 const STEP = 50;
 
 export type Privacy = "public" | "unlisted" | "private";
 export type BroadcastApi = {
   insertBroadcast(input: { title: string; description: string; scheduledStartTime: string; privacy: Privacy }): Promise<string>;
   findStream(preferred?: string): Promise<string | null>;
+  // A stream of its own (with its own stream key) for one broadcast; used when no stream is configured.
+  createStream?(title: string): Promise<string>;
   bindBroadcast(broadcastId: string, streamId: string): Promise<void>;
   // Makes the broadcast's privacy what was asked for; true when it had to change it (1 quota unit to look, 50 to change).
   ensurePrivacy?(broadcastId: string, privacy: Privacy): Promise<boolean>;
@@ -56,8 +58,17 @@ export async function scheduleBroadcast(deps: Deps, ports: BroadcastPorts, event
 
   if (!saved!.bound) {
     try {
-      const streamId = await ports.api.findStream(ports.streamId);
-      await store.spend(day, 1);
+      let streamId = saved!.streamId;
+      if (!streamId && !ports.streamId && ports.api.createStream) {
+        // Its own stream, saved before the bind so a retry binds the same one.
+        const found = await ports.fetchScheduled(event.videoId);
+        streamId = await ports.api.createStream(found ? composeTitle(found.video) : `Stream ${broadcastId}`);
+        await store.spend(day, STEP);
+        await store.saveStream(event.videoId, streamId);
+      } else if (!streamId) {
+        streamId = await ports.api.findStream(ports.streamId);
+        await store.spend(day, 1);
+      }
       if (streamId) { await ports.api.bindBroadcast(broadcastId, streamId); await store.spend(day, STEP); await store.markBroadcast(event.videoId, "bound_at", deps.now().toISOString()); }
       else { log({ videoId: event.videoId, broadcastId, warning: "no reusable stream to bind; bind one in YouTube Studio" }); missing.push("no reusable stream to bind"); }
     } catch (error) {

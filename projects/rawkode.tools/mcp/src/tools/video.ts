@@ -11,6 +11,11 @@ export interface VideoUpdatesRpc {
   schedule(request: unknown, actor: { userId: string; username?: string }): Promise<{ updateId: string; videoId: string; sections: string[]; duplicate: boolean }>;
 }
 
+// What the youtube-sync Worker's `StreamKeys` entrypoint offers: the ingestion address and stream key of a broadcast's own stream.
+export interface StreamKeysRpc {
+  get(videoId: string): Promise<{ videoId: string; broadcastId: string; ingestionAddress: string; streamKey: string }>;
+}
+
 const id = z.string().min(1).max(200);
 const resource = z.object({ title: z.string(), description: z.string().optional(), type: z.enum(["url", "file", "embed"]), url: z.string().optional(), category: z.enum(["slides", "code", "documentation", "demos", "other"]) });
 export const updateInput = z.object({
@@ -67,6 +72,11 @@ export const video: ToolModule = {
       inputSchema: scheduleInput,
       annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: true },
     }, ({ privacy, ...rest }) => reply(() => rpc().schedule({ ...rest, broadcast: { privacy } }, { userId: caller.userId, username: caller.username })));
+    server.registerTool("get_stream_key", {
+      description: "The encoder settings (RTMP ingestion address and stream key) of a scheduled live stream. Every scheduled stream has its own key. The key is a secret: paste it into the encoder and do not share or store it.",
+      inputSchema: z.object({ videoId: id.describe("The Academy video id (a cuid) the stream was scheduled for.") }).strict(),
+      annotations: read,
+    }, ({ videoId }) => reply(() => (env as unknown as { YOUTUBE_STREAMS: StreamKeysRpc }).YOUTUBE_STREAMS.get(videoId)));
     server.registerTool("video_update_status", {
       description: "The state of a video update: queued, running, succeeded, rejected (nothing written), rolled_back, or rollback_failed (needs a person), and whether the YouTube event and the website cache invalidation went through.",
       inputSchema: z.object({ updateId: id }).strict(),

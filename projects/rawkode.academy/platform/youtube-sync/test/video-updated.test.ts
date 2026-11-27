@@ -190,6 +190,25 @@ test("a resumed broadcast is made public when the latest request says so, and no
   assert.equal(p.calls.inserted.length, 1);
 });
 
+test("each broadcast gets a stream of its own, made once and reused by a retried bind", async () => {
+  const f = await fixture();
+  f.deps.thumbnails = { tag: async () => "tag1", prepare: async () => new Uint8Array([1]), current: async () => null, set: async () => {} };
+  const made: string[] = [];
+  const bound: string[] = [];
+  let bindWorks = false;
+  const p = ports({ api: { async insertBroadcast() { return "bbbbbbbbbbb"; }, async findStream() { throw new Error("must not look for a shared stream"); }, async createStream(title) { made.push(title); return "stream-own"; }, async bindBroadcast(_id, s) { if (!bindWorks) throw new ServiceError("google_api_error", "boom", 502); bound.push(s); } } });
+  const first = message(scheduled);
+  await consumeVideoUpdated([first.m], f.deps, async () => null, async () => {}, p.value);
+  assert.equal(first.result.retried, true);
+  assert.equal((await f.deps.store.broadcast("v1"))?.streamId, "stream-own");
+  bindWorks = true;
+  const second = message(scheduled);
+  await consumeVideoUpdated([second.m], f.deps, async () => null, async () => {}, p.value);
+  assert.equal(second.result.acked, true);
+  assert.equal(made.length, 1, "the retry binds the stream it already made");
+  assert.deepEqual(bound, ["stream-own"]);
+});
+
 test("without room in today's quota the broadcast waits for the reset", async () => {
   const f = await fixture();
   await f.deps.store.spend(pacificDay(f.deps.now()), DAILY_BUDGET - BROADCAST_UNITS + 1);
