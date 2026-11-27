@@ -101,6 +101,29 @@ test("a video edited in Studio after the plan is refused as stale, and nothing i
   assert.equal(f.live.get(yt(0))!.description, "Edited in Studio after the plan");
 });
 
+test("a later plan queued behind an earlier plan's write still applies, because the live text is our own earlier write", async () => {
+  const f = await fixture(); seed(f, 1);
+  const first = await createPlan(f.deps, catalogue(1));
+  const reverted = { ...video(0), description: "Site text reverted." };
+  const second = await createPlan(f.deps, new Map([[yt(0), reverted]]));
+  assert.equal((await applyPlan(f.deps, first.plan.id, { limit: 1 })).applied, 1);
+  const result = await applyPlan(f.deps, second.plan.id, { limit: 1 });
+  assert.equal(result.stale, 0);
+  assert.equal(result.applied, 1);
+  assert.match(f.live.get(yt(0))!.description, /Site text reverted\./);
+});
+
+test("an older plan never overwrites a newer plan's write, and a Studio edit after our write still goes stale", async () => {
+  const f = await fixture(); seed(f, 1);
+  const first = await createPlan(f.deps, catalogue(1));
+  const second = await createPlan(f.deps, new Map([[yt(0), { ...video(0), description: "Newer site text." }]]));
+  assert.equal((await applyPlan(f.deps, second.plan.id, { limit: 1 })).applied, 1);
+  assert.equal((await applyPlan(f.deps, first.plan.id, { limit: 1 })).stale, 1);
+  const third = await createPlan(f.deps, new Map([[yt(0), { ...video(0), description: "Third." }]]));
+  f.live.get(yt(0))!.description = "Edited in Studio";
+  assert.equal((await applyPlan(f.deps, third.plan.id, { limit: 1 })).stale, 1);
+});
+
 test("a Studio edit since the last sync is overwritten by the next one, with the before kept", async () => {
   const f = await fixture(); seed(f, 1);
   await applyPlan(f.deps, (await createPlan(f.deps, catalogue(1))).plan.id, { limit: 10 });
