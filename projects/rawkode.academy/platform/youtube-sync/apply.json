@@ -1,6 +1,11 @@
 {
   "planId": "latest",
-  "limit": 1,
-  "videos": ["22-borko-vs-bojan"],
-  "dryRun": true
+  "limit": 4,
+  "videos": [
+    "add-cloud-commands-with-plugins-datumctl",
+    "make-safe-changes-to-datum-datumctl",
+    "know-kubectl-meet-datumctl",
+    "explore-datum-without-memorising-resource-names-datumctl-console"
+  ],
+  "dryRun": false
 }
