@@ -14,6 +14,7 @@ import {
 } from "./access-control";
 import { getUserAccessClaims } from "./access-claims";
 import { captureAuthEvent } from "./analytics";
+import { claimPendingMemberships } from "./org-github-members";
 
 export interface AuthEnv {
 	DB: D1Database;
@@ -320,6 +321,20 @@ export const createAuth = async (env: AuthEnv) => {
 						metadata: null,
 					},
 					{
+						clientId: "rawkode-collab",
+						name: "Rawkode Partner Portal",
+						type: "public",
+						// Workaround for https://github.com/better-auth/better-auth/issues/6651
+						clientSecret: "pkce-public-client-placeholder",
+						redirectUrls: [
+							"https://collab.rawkode.academy/api/auth/callback",
+							"http://localhost:4323/api/auth/callback",
+						],
+						disabled: false,
+						skipConsent: true,
+						metadata: null,
+					},
+					{
 						clientId: "comtrya",
 						name: "Comtrya",
 						type: "public",
@@ -378,6 +393,8 @@ export const createAuth = async (env: AuthEnv) => {
 			"https://klustered.dev",
 			"http://localhost:4322",
 			"https://rawkode.chat",
+			"https://collab.rawkode.academy",
+			"http://localhost:4323",
 			"http://localhost:3000",
 		],
 
@@ -403,6 +420,13 @@ export const createAuth = async (env: AuthEnv) => {
 			session: {
 				create: {
 					after: async (session) => {
+						// Memberships an admin granted by GitHub handle before this
+						// person had ever signed in. Never blocks sign-in.
+						try {
+							await claimPendingMemberships(db, session.userId);
+						} catch (error) {
+							console.error("[auth] claiming pending memberships failed:", error);
+						}
 						await captureAuthEvent(
 							{
 								event: "auth.sign_in_completed",

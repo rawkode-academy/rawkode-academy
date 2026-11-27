@@ -424,3 +424,31 @@ export const accessAssignmentRelations = relations(
     }),
   }),
 );
+
+// An organisation membership granted by GitHub handle to someone who has not
+// signed in yet. Claimed (and deleted) on their next sign-in.
+export const pendingMember = sqliteTable(
+  "pending_member",
+  {
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
+    githubId: text("github_id").notNull(),
+    githubLogin: text("github_login").notNull(),
+    role: text("role").default("member").notNull(),
+    invitedByUserId: text("invited_by_user_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("pendingMember_org_github_unique").on(
+      table.organizationId,
+      table.githubId,
+    ),
+    index("pendingMember_githubId_idx").on(table.githubId),
+  ],
+);
