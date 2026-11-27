@@ -30,6 +30,7 @@ export async function consumeVideoUpdated(messages: QueueMessage[], deps: Deps, 
       try {
         if (!broadcast) { log({ videoId, updateId, skipped: "broadcasts are not configured" }); message.ack(); continue; }
         log({ videoId, updateId, result: await scheduleBroadcast(deps, broadcast, { videoId, privacy: (parsed.data.privacy ?? "public") as Privacy }) });
+        await deps.store.resolveDead(videoId, deps.now().toISOString());
         message.ack();
       } catch (error) {
         // A spent quota waits for the reset (the broadcast is made then); anything else backs off and retries, then the dead-letter queue.
@@ -42,16 +43,16 @@ export async function consumeVideoUpdated(messages: QueueMessage[], deps: Deps, 
     try {
       const found = await resolve(videoId);
       // Not on YouTube, or not listed on the site: nothing to push.
-      if (!found || !found.video) { log({ videoId, updateId, skipped: found ? "not listed on the site" : "no YouTube mapping" }); message.ack(); continue; }
+      if (!found || !found.video) { log({ videoId, updateId, skipped: found ? "not listed on the site" : "no YouTube mapping" }); await deps.store.resolveDead(videoId, deps.now().toISOString()); message.ack(); continue; }
       const { plan, items } = await createPlan(deps, new Map([[found.youtubeId, found.video]]), "video");
       const item = items.find(i => i.youtubeId === found.youtubeId);
       log({ videoId, updateId, youtubeId: found.youtubeId, planId: plan.id, status: item?.status });
       if (item?.status === "CHANGE") await handle(message, { planId: plan.id, youtubeId: found.youtubeId, priority: true }, deps, send);
-      else message.ack();
+      else { await deps.store.resolveDead(videoId, deps.now().toISOString()); message.ack(); }
     } catch (error) {
       // A rejected request retrying can't fix is recorded for a person; anything else backs off and retries (then the dead-letter queue).
       if (error instanceof ServiceError && !isTransient(error) && error.code !== "reauthorization_required" && error.code !== "academy_api_error" && error.code !== "invalid_academy_response") {
-        await deps.store.recordDead({ planId: null, youtubeId: null, at: deps.now().toISOString(), reason: `video ${videoId}: ${error.code}` });
+        await deps.store.recordDead({ planId: null, youtubeId: null, at: deps.now().toISOString(), reason: `video ${videoId}: ${error.code}`, videoId });
         message.ack();
         continue;
       }
@@ -64,7 +65,7 @@ export async function consumeVideoUpdated(messages: QueueMessage[], deps: Deps, 
 export async function consumeVideoUpdatedDead(messages: QueueMessage[], deps: Deps) {
   for (const message of messages) {
     const parsed = videoUpdated.safeParse(message.body);
-    await deps.store.recordDead({ planId: null, youtubeId: null, at: deps.now().toISOString(), reason: `video ${parsed.success ? parsed.data.videoId : "?"}: video.updated retries used up (the daily plan will still catch it)` });
+    await deps.store.recordDead({ planId: null, youtubeId: null, at: deps.now().toISOString(), reason: `video ${parsed.success ? parsed.data.videoId : "?"}: video.updated retries used up (the daily plan will still catch it)`, ...(parsed.success ? { videoId: parsed.data.videoId } : {}) });
     message.ack();
   }
 }
