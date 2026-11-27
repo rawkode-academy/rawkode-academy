@@ -101,6 +101,15 @@ export class GoogleClient {
     const streams = (result.items ?? []).filter(item => typeof item.id === "string");
     return (preferred ? streams.find(item => item.id === preferred) : undefined)?.id ?? streams.find(item => item.contentDetails?.isReusable)?.id ?? null;
   }
+  // Sets the broadcast's privacy if it differs (1 quota unit to read, 50 to write). Returns whether it changed it.
+  async ensurePrivacy(broadcastId: string, privacy: "public" | "unlisted" | "private"): Promise<boolean> {
+    const result = await this.get<{ items?: { id?: string; status?: { privacyStatus?: string } }[] }>(dataAPI, "liveBroadcasts", { part: "id,status", id: broadcastId });
+    const current = result.items?.find(item => item.id === broadcastId);
+    ensure(current, "broadcast_not_found", `Broadcast ${broadcastId} is not on the channel`, 404);
+    if (current.status?.privacyStatus === privacy) return false;
+    await this.send("PUT", dataAPI, "liveBroadcasts", { part: "id,status" }, JSON.stringify({ id: broadcastId, status: { privacyStatus: privacy, selfDeclaredMadeForKids: false } }), { "content-type": "application/json" });
+    return true;
+  }
   // Binds a broadcast to a stream (50 quota units).
   async bindBroadcast(broadcastId: string, streamId: string): Promise<void> {
     await this.send("POST", dataAPI, "liveBroadcasts/bind", { id: broadcastId, part: "id", streamId }, "", {});

@@ -12,6 +12,8 @@ export type BroadcastApi = {
   insertBroadcast(input: { title: string; description: string; scheduledStartTime: string; privacy: Privacy }): Promise<string>;
   findStream(preferred?: string): Promise<string | null>;
   bindBroadcast(broadcastId: string, streamId: string): Promise<void>;
+  // Makes the broadcast's privacy what was asked for; true when it had to change it (1 quota unit to look, 50 to change).
+  ensurePrivacy?(broadcastId: string, privacy: Privacy): Promise<boolean>;
 };
 export type BroadcastPorts = {
   api: BroadcastApi;
@@ -62,6 +64,19 @@ export async function scheduleBroadcast(deps: Deps, ports: BroadcastPorts, event
       if (isQuota(error)) { await store.exhaust(day, 10000); quotaSpent = true; }
       log({ videoId: event.videoId, broadcastId, bindFailed: why(error) });
       missing.push(`bind (${why(error)})`);
+    }
+  }
+
+  // An existing broadcast follows the privacy of the latest request: that is how an approved stream goes public.
+  if (!fresh && ports.api.ensurePrivacy) {
+    try {
+      const changed = await ports.api.ensurePrivacy(broadcastId, event.privacy);
+      await store.spend(day, changed ? STEP + 1 : 1);
+      if (changed) log({ videoId: event.videoId, broadcastId, privacy: event.privacy });
+    } catch (error) {
+      if (isQuota(error)) { await store.exhaust(day, 10000); quotaSpent = true; }
+      log({ videoId: event.videoId, broadcastId, privacyFailed: why(error) });
+      missing.push(`privacy (${why(error)})`);
     }
   }
 
