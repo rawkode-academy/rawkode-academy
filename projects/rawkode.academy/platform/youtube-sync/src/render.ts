@@ -24,7 +24,7 @@ export type Person = { id: string; name: string; x?: string; bluesky?: string; l
 export type Technology = { id: string; name: string; website?: string; x?: string; bluesky?: string; mastodon?: string; youtube?: string };
 /** What a collaborating company asks viewers to know, written by them in the partner portal. */
 export type Announcement = { name: string; text: string; url?: string };
-export type AcademyVideo = { id: string; title: string; slug: string; collaborators: string[]; announcements?: Announcement[]; description: string; chapters: Chapter[]; thumbnailUrl: string; show: Show | null; course?: string | null; guests: Person[]; hosts?: Person[]; technologies: Technology[] };
+export type AcademyVideo = { id: string; title: string; slug: string; collaborators: string[]; announcements?: Announcement[]; description: string; chapters: Chapter[]; thumbnailUrl: string; show: Show | null; course?: string | null; lessonUrl?: string; guests: Person[]; hosts?: Person[]; technologies: Technology[] };
 
 export function parseFields(value: string | undefined): Field[] {
   const wanted = (value ?? ALL_FIELDS.join(",")).split(",").map(item => item.trim()).filter(Boolean);
@@ -120,8 +120,9 @@ export function renderHashtags(video: Pick<AcademyVideo, "show" | "technologies"
   return tags.slice(0, MAX_HASHTAGS).map(t => `#${t}`).join(" ");
 }
 
-export const watchUrl = (video: Pick<AcademyVideo, "slug">) => `https://rawkode.academy/watch/${video.slug}?utm_source=youtube&utm_medium=description`;
-export const renderHeader = (video: Pick<AcademyVideo, "slug">) => `Get this video's free resources at ${watchUrl(video)}`;
+// A course-only video has no watch page; its lesson is where the resources are.
+export const watchUrl = (video: Pick<AcademyVideo, "slug"> & Partial<Pick<AcademyVideo, "lessonUrl" | "show">>) => `${video.lessonUrl && !video.show ? video.lessonUrl : `https://rawkode.academy/watch/${video.slug}`}?utm_source=youtube&utm_medium=description`;
+export const renderHeader = (video: Pick<AcademyVideo, "slug"> & Partial<Pick<AcademyVideo, "lessonUrl" | "show">>) => `Get this video's free resources at ${watchUrl(video)}`;
 
 export function renderFooter(video: Pick<AcademyVideo, "collaborators" | "announcements"> & Partial<Pick<AcademyVideo, "show" | "technologies">>): string {
   const lines = [

@@ -22,14 +22,29 @@ async function graphql<T>(service: Gateway, url: string, query: string, variable
 const VIDEO_FIELDS = "id title slug description thumbnailUrl chapters { startTime title } collaborators { name announcement announcementUrl } episode { show { id name } } castingCredits { role person { id name twitterUrl blueskyUrl linkedinUrl } } technologies { id name website community { twitter bluesky mastodon youtube } }";
 type ListedVideo = { id?: string; title?: string; slug?: string; description?: string; thumbnailUrl?: string; chapters?: { startTime?: number; title?: string }[]; collaborators?: { name?: string; announcement?: string | null; announcementUrl?: string | null }[]; episode?: { show?: { id?: string; name?: string } | null } | null; castingCredits?: { role?: string; person?: Credited }[]; technologies?: { id?: string; name?: string; website?: string | null; community?: { twitter?: string | null; bluesky?: string | null; mastodon?: string | null; youtube?: string | null } | null }[] };
 
-function toAcademyVideo(video: ListedVideo, courseByVideo: Map<string, string>): AcademyVideo | undefined {
+const COURSES_QUERY = "{ allCourses { id title modules { slug video { id } } } }";
+type CourseRows = { id?: string; title?: string; modules?: { slug?: string; video?: { id?: string } | null }[] }[];
+type CourseLesson = { title: string; url: string };
+
+// Where each course video lives: its course's title and its lesson page. A
+// course-only video has no /watch page, so the lesson is its only home.
+function courseIndex(courses: CourseRows | undefined): Map<string, CourseLesson> {
+  const index = new Map<string, CourseLesson>();
+  for (const course of courses ?? []) for (const lesson of course.modules ?? []) {
+    if (course.title && course.id && lesson.slug && lesson.video?.id && !index.has(lesson.video.id)) index.set(lesson.video.id, { title: course.title, url: `https://rawkode.academy/courses/${course.id}/${lesson.slug}` });
+  }
+  return index;
+}
+
+function toAcademyVideo(video: ListedVideo, courseByVideo: Map<string, CourseLesson>): AcademyVideo | undefined {
   if (typeof video.id !== "string" || typeof video.title !== "string" || typeof video.slug !== "string") return undefined;
   return { id: video.id, title: video.title, slug: video.slug, collaborators: (video.collaborators ?? []).map(c => String(c.name ?? "")).filter(Boolean),
       announcements: (video.collaborators ?? []).flatMap(c => c.name && c.announcement?.trim() ? [{ name: c.name, text: c.announcement.trim(), ...(c.announcementUrl && /^https:\/\//.test(c.announcementUrl) ? { url: c.announcementUrl } : {}) }] : []),
       description: typeof video.description === "string" ? video.description : "",
       chapters: (video.chapters ?? []).flatMap(c => typeof c.startTime === "number" && typeof c.title === "string" ? [{ startTime: c.startTime, title: c.title }] : []),
       thumbnailUrl: typeof video.thumbnailUrl === "string" ? video.thumbnailUrl : "",
-      course: courseByVideo.get(video.id) ?? null,
+      course: courseByVideo.get(video.id)?.title ?? null,
+      lessonUrl: courseByVideo.get(video.id)?.url,
       show: video.episode?.show?.id && video.episode.show.name ? { id: video.episode.show.id, name: video.episode.show.name } : null,
       // Casting credits decide who is listed.
       hosts: (video.castingCredits ?? []).filter(c => c.role === "HOST" || c.role === "CO_HOST").flatMap(c => person(c.person)),
@@ -39,20 +54,28 @@ function toAcademyVideo(video: ListedVideo, courseByVideo: Map<string, string>):
 
 // Every YouTube ID the Academy maps to a video, and the listed Academy video
 // behind it. Course-only videos are not in getAllVideos' default result, so
-// they are mapped but have no Academy video here, and the plan skips them.
+// they are fetched by ID below; a mapped video the site doesn't list at all is
+// undefined and the plan skips it.
 export async function fetchCatalogue(env: { VIDEO_CHANNELS: Gateway; ACADEMY_API: Gateway }): Promise<Map<string, AcademyVideo | undefined>> {
   const mappings = await graphql<{ videoChannels?: { videoId?: string; externalId?: string }[] }>(env.VIDEO_CHANNELS, "https://video-channels/", "{ videoChannels(platform: YOUTUBE) { videoId externalId } }");
   const byAcademyId = new Map<string, string>();
   for (const row of mappings.videoChannels ?? []) if (typeof row.videoId === "string" && typeof row.externalId === "string" && /^[A-Za-z0-9_-]{11}$/.test(row.externalId)) byAcademyId.set(row.videoId, row.externalId);
   ensure(byAcademyId.size > 0, "invalid_academy_response", "video-channels returned no YouTube IDs", 502);
   const all = await graphql<{ getAllVideos?: ListedVideo[] }>(env.ACADEMY_API, "https://api.rawkode.academy/", `{ getAllVideos { ${VIDEO_FIELDS} } }`);
-  const courses = await graphql<{ allCourses?: { title?: string; modules?: { video?: { id?: string } | null }[] }[] }>(env.ACADEMY_API, "https://api.rawkode.academy/", "{ allCourses { title modules { video { id } } } }");
-  const courseByVideo = new Map<string, string>();
-  for (const course of courses.allCourses ?? []) for (const lesson of course.modules ?? []) if (course.title && lesson.video?.id && !courseByVideo.has(lesson.video.id)) courseByVideo.set(lesson.video.id, course.title);
+  const courses = await graphql<{ allCourses?: CourseRows }>(env.ACADEMY_API, "https://api.rawkode.academy/", COURSES_QUERY);
+  const courseByVideo = courseIndex(courses.allCourses);
   ensure(all.getAllVideos?.length, "invalid_academy_response", "The Academy API returned no videos", 502);
   const listed = new Map<string, AcademyVideo>();
   for (const video of all.getAllVideos ?? []) {
     const mapped = toAcademyVideo(video, courseByVideo);
+    if (mapped) listed.set(mapped.id, mapped);
+  }
+  // Mapped videos the site doesn't list on /watch: the ones in a course are
+  // still the Academy's, so they are fetched one by one and kept.
+  const unlisted = [...byAcademyId.keys()].filter(id => !listed.has(id) && courseByVideo.has(id));
+  const extra = await Promise.all(unlisted.map(async id => (await graphql<{ videoByID?: ListedVideo | null }>(env.ACADEMY_API, "https://api.rawkode.academy/", `query ($id: String!) { videoByID(id: $id) { ${VIDEO_FIELDS} } }`, { id })).videoByID));
+  for (const video of extra) {
+    const mapped = video ? toAcademyVideo(video, courseByVideo) : undefined;
     if (mapped) listed.set(mapped.id, mapped);
   }
   return new Map([...byAcademyId].map(([academyId, youtubeId]) => [youtubeId, listed.get(academyId)]));
@@ -66,9 +89,8 @@ export async function fetchVideo(env: { VIDEO_CHANNELS: Gateway; ACADEMY_API: Ga
   const youtubeId = (mappings.videoChannels ?? []).find(row => row.videoId === videoId)?.externalId;
   if (typeof youtubeId !== "string" || !/^[A-Za-z0-9_-]{11}$/.test(youtubeId)) return null;
   const one = await graphql<{ videoByID?: ListedVideo | null }>(env.ACADEMY_API, "https://api.rawkode.academy/", `query ($id: String!) { videoByID(id: $id) { ${VIDEO_FIELDS} } }`, { id: videoId });
-  const courses = await graphql<{ allCourses?: { title?: string; modules?: { video?: { id?: string } | null }[] }[] }>(env.ACADEMY_API, "https://api.rawkode.academy/", "{ allCourses { title modules { video { id } } } }");
-  const courseByVideo = new Map<string, string>();
-  for (const course of courses.allCourses ?? []) for (const lesson of course.modules ?? []) if (course.title && lesson.video?.id && !courseByVideo.has(lesson.video.id)) courseByVideo.set(lesson.video.id, course.title);
+  const courses = await graphql<{ allCourses?: CourseRows }>(env.ACADEMY_API, "https://api.rawkode.academy/", COURSES_QUERY);
+  const courseByVideo = courseIndex(courses.allCourses);
   return { youtubeId, video: one.videoByID ? toAcademyVideo(one.videoByID, courseByVideo) : undefined };
 }
 

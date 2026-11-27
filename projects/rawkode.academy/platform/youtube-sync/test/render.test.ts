@@ -5,6 +5,13 @@ import { composeDescription, composeTitle, https, MARKER, markdownToText, parseF
 const video: AcademyVideo = { id: "v1", title: "Cilium in depth", slug: "cilium-in-depth", collaborators: [], description: "First paragraph.\n\nSecond paragraph with [a link](https://example.com).", chapters: [], thumbnailUrl: "https://cdn.test/v1/thumbnail.webp", show: null, guests: [], technologies: [] };
 const bytes = (value: string) => new TextEncoder().encode(value).length;
 
+test("a course-only video links its lesson instead of a watch page", () => {
+  const lesson = { ...video, course: "Edge Computing", lessonUrl: "https://rawkode.academy/courses/edge/meet-datumctl" };
+  const header = composeDescription(lesson).split("\n").find(line => line.startsWith("Get this video's free resources at"));
+  assert.equal(header, "Get this video's free resources at https://rawkode.academy/courses/edge/meet-datumctl?utm_source=youtube&utm_medium=description");
+  assert.ok(!composeDescription(lesson).includes("/watch/"));
+});
+
 test("the description is the site's description, the resources link, then the footer", () => {
   const lines = composeDescription(video).split("\n");
   assert.equal(lines[0], "First paragraph.");
