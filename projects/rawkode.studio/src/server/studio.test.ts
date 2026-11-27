@@ -1778,10 +1778,14 @@ describe("Studio operations", () => {
 			/workload: environment: production: CLOUDFLARE_API_TOKEN: schema\.#OnePasswordRef & \{\s*ref: "op:\/\/sa\.rawkode\.academy\/cloudflare\/api-tokens\/workers"/,
 		);
 		const defaultTasks = envCue.match(/default:\s*\{[\s\S]*?tasks:\s*\[([^\]]*)\]/)?.[1];
-		expect(defaultTasks).toBe('_t.check, _t.test, _t.deploy."dry-run"');
-		expect(defaultTasks).not.toContain("_t.migrations.remote");
-		expect(defaultTasks).not.toContain("_t.deploy.main");
-		expect(envCue).toContain('tasks: [_t.check, _t.test, _t.deploy."dry-run"]');
+		// Main runs check, test, dry run, the remote migrations, then the deploy:
+		// deploy.main depends on migrations.remote, which depends on the dry run.
+		expect(defaultTasks).toBe("_t.check, _t.test, _t.deploy.main");
+		expect(envCue).toMatch(/default:\s*\{\s*\/\/[^\n]*\n\s*\/\/[^\n]*\n\s*environment: "production"/);
+		expect(envCue).toContain("dependsOn: [_t.build, _t.migrations.remote]");
+		expect(envCue).toContain('dependsOn: [_t.deploy."dry-run"]');
+		// Pull requests only validate: a preview cannot sign in through identity.
+		expect(envCue).toMatch(/pullRequest:\s*\{[\s\S]*?tasks:\s*\[_t\.check, _t\.test, _t\.deploy\."dry-run"\]/);
 		expect(envCue).toContain('args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run migrate"]');
 		expect(envCue).toContain('args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run deploy:dry-run"]');
 		expect(envCue).toContain("env: PATH: _taskPath");
