@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { principalFromClaims } from "../src/lib/auth.ts";
 import { formatTimestamp } from "../src/lib/format.ts";
+import { videoLinks } from "../src/lib/lessons.ts";
 import { scopeFor, sees } from "../src/lib/scope.ts";
 import type { Session } from "../src/lib/types.ts";
 
@@ -58,4 +59,11 @@ test("formatTimestamp", () => {
 	assert.equal(formatTimestamp(0), "0:00");
 	assert.equal(formatTimestamp(91500), "1:31");
 	assert.equal(formatTimestamp(3_725_000), "1:02:05");
+});
+
+test("a course-only video links to its lesson and any other video to its watch page", () => {
+	const link = videoLinks([{ id: "edge", modules: [{ slug: "meet", video: { id: "v1" } }, { slug: "none", video: null }] }]);
+	assert.equal(link({ id: "v1", slug: "know-kubectl" }), "https://rawkode.academy/courses/edge/meet");
+	assert.equal(link({ id: "v2", slug: "relaunching" }), "https://rawkode.academy/watch/relaunching");
+	assert.equal(videoLinks(undefined)({ id: "v1", slug: "s" }), "https://rawkode.academy/watch/s");
 });

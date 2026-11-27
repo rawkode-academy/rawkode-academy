@@ -1,3 +1,5 @@
+import type { CourseLessons } from "./lessons.ts";
+
 export const DASHBOARD = /* GraphQL */ `
 	query Dashboard {
 		collaborators {
@@ -9,6 +11,7 @@ export const DASHBOARD = /* GraphQL */ `
 			videos { id title slug }
 			reviews { id title videoId state draftVersion dueAt canSignOff }
 		}
+		allCourses { id modules { slug video { id } } }
 	}
 `;
 
@@ -27,6 +30,7 @@ export const ANALYTICS = /* GraphQL */ `
 				videos { id title slug siteViews ${PERIOD} youtubeViews ${PERIOD} minutesWatched ${PERIOD} }
 			}
 		}
+		allCourses { id modules { slug video { id } } }
 	}
 `;
 
@@ -80,6 +84,7 @@ export const SET_ANNOUNCEMENT = /* GraphQL */ `
 `;
 
 export interface DashboardData {
+	allCourses?: CourseLessons;
 	collaborators: {
 		id: string;
 		name: string;
@@ -122,6 +127,7 @@ export interface ReviewData {
 
 export interface Period { d90: number; lifetime: number }
 export interface AnalyticsData {
+	allCourses?: CourseLessons;
 	collaborators: {
 		id: string;
 		name: string;
