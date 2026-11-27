@@ -42,7 +42,7 @@ export class GoogleClient {
       let reason = "";
       try { const body = JSON.parse(new TextDecoder().decode(await readLimited(response.body, 8192))); const first = body?.error?.errors?.[0]?.reason; if (typeof first === "string" && /^[A-Za-z]{1,64}$/.test(first)) reason = first; } catch { /* keep "" */ }
       const quota = response.status === 403 && QUOTA_REASONS.has(reason);
-      throw new ServiceError(quota ? "quota_exceeded" : "google_api_error", `${operation} failed (HTTP ${response.status}${quota ? ", quota exhausted" : ""}); check access, quota and API configuration`, 502, response.status);
+      throw new ServiceError(quota ? "quota_exceeded" : "google_api_error", `${operation} failed (HTTP ${response.status}${reason ? `, ${reason}` : ""}${quota ? ", quota exhausted" : ""}); check access, quota and API configuration`, 502, response.status);
     }
     try { return JSON.parse(new TextDecoder().decode(await readLimited(response.body, max))) as T; }
     catch (error) { if (error instanceof ServiceError) throw error; throw new ServiceError("invalid_google_response", `${operation} returned invalid JSON`, 502); }

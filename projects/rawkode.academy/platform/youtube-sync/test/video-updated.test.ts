@@ -147,6 +147,31 @@ test("a retry after a failure resumes and never makes a second broadcast", async
   assert.deepEqual(linked, ["bbbbbbbbbbb"]);
 });
 
+test("a broadcast that could not be bound or thumbnailed is retried until both are done, without a second broadcast", async () => {
+  const f = await fixture();
+  const set: string[] = [];
+  let thumbnailWorks = false;
+  f.deps.thumbnails = { tag: async () => "tag1", prepare: async () => new Uint8Array([1]), current: async () => null, set: async id => { if (!thumbnailWorks) throw new ServiceError("thumbnail_upload", "refused", 502); set.push(id); } };
+  let stream: string | null = null;
+  const p = ports({ api: { async insertBroadcast(input) { p.calls.inserted.push(input); return "bbbbbbbbbbb"; }, async findStream() { return stream; }, async bindBroadcast(_id, s) { p.calls.bound.push(s); } } });
+  const first = message(scheduled);
+  await consumeVideoUpdated([first.m], f.deps, async () => null, async () => {}, p.value);
+  assert.equal(first.result.retried, true);
+  assert.equal(first.result.acked, false);
+  assert.deepEqual(p.calls.linked, ["bbbbbbbbbbb"]); // the link is kept
+  stream = "stream1"; thumbnailWorks = true;
+  const second = message(scheduled);
+  await consumeVideoUpdated([second.m], f.deps, async () => null, async () => {}, p.value);
+  assert.equal(second.result.acked, true);
+  assert.equal(p.calls.inserted.length, 1);
+  assert.deepEqual(p.calls.bound, ["stream1"]);
+  assert.deepEqual(set, ["bbbbbbbbbbb"]); // uploaded on the retry, not only on the first attempt
+  const third = message(scheduled);
+  await consumeVideoUpdated([third.m], f.deps, async () => null, async () => {}, p.value);
+  assert.equal(third.result.acked, true);
+  assert.deepEqual(set, ["bbbbbbbbbbb"]); // and not again once it is recorded
+});
+
 test("without room in today's quota the broadcast waits for the reset", async () => {
   const f = await fixture();
   await f.deps.store.spend(pacificDay(f.deps.now()), DAILY_BUDGET - BROADCAST_UNITS + 1);
