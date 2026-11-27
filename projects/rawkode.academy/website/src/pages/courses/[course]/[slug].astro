@@ -1,6 +1,7 @@
 ---
-import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
+import { academyDocument, academyLayout, academyWatch } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
+const watch = academyWatch();
 const styles = academyLayout({ width: "reading" });
 import {
 	type ContentEntry,
@@ -18,9 +19,11 @@ import Collaboration from "@/components/watch/Collaboration.astro";
 import CourseSignupForm from "@/components/courses/CourseSignupForm.astro";
 import ResourceList from "@/components/courses/ResourceList.vue";
 import VideoPlayer from "@/components/video/player.vue";
+import VideoTranscript from "@/components/video/VideoTranscript.astro";
 import Page from "@/wrappers/page.astro";
 import { getCourseModuleSlug } from "@/utils/course-path";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import { buildWatchVideoSeoText } from "@/utils/watch-video-seo";
 
 export const prerender = false;
 
@@ -121,6 +124,15 @@ const videoThumbnailUrl = module.data.video
 const videoStreamUrl = module.data.video
 	? `https://content.rawkode.academy/videos/${module.data.video.id}/stream.m3u8`
 	: undefined;
+// Lesson videos are ordinary videos, so their captions live beside the stream
+// and render exactly as on /watch. A video without captions shows nothing.
+const lessonTranscript = module.data.video
+	? await buildWatchVideoSeoText({
+			captionUrl: `https://content.rawkode.academy/videos/${module.data.video.id}/captions/en.vtt`,
+			description: "",
+		})
+	: undefined;
+const transcriptCues = lessonTranscript?.transcriptParagraphs ?? [];
 const videoDurationSeconds =
 	module.data.duration && module.data.duration > 0
 		? module.data.duration * 60
@@ -284,7 +296,7 @@ function formatDuration(minutes?: number) {
 			<div class:list={[doc.moduleFlow, dedupedResources.length > 0 && doc.moduleFlowRail]}>
 				{module.data.video && (
 					<section class={doc.moduleMain}>
-						<div class={doc.media}>
+						<div class={doc.media} data-lesson-player>
 							<VideoPlayer
 								video={module.data.video.id}
 								thumbnailUrl={getVideoThumbnailUrl(module.data.video.id)}
@@ -318,6 +330,14 @@ function formatDuration(minutes?: number) {
 						<RichText html={html} />
 					</div>
 				</article>
+
+				{transcriptCues.length > 0 && (
+					<section class={doc.moduleMain} aria-labelledby="lesson-transcript-heading">
+						<h2 id="lesson-transcript-heading" class={watch.sectionTitle}>Transcript</h2>
+						<p class={watch.transcriptNote}>Generated from English captions. Select a timestamp to jump to that moment.</p>
+						<VideoTranscript cues={transcriptCues} />
+					</section>
+				)}
 
 				{dedupedResources.length > 0 && (
 					<aside class={doc.moduleRail}>
@@ -401,3 +421,26 @@ function formatDuration(minutes?: number) {
 		</div>
 	</section>
 </Page>
+
+<script>
+	// Transcript timestamps are #t=SECONDS links. Seek the lesson player in
+	// place once it has hydrated; otherwise the link's own fragment applies.
+	for (const link of document.querySelectorAll<HTMLAnchorElement>("[data-chapter-link]")) {
+		link.addEventListener("click", (event) => {
+			const seconds = Number.parseInt(link.dataset.chapterLink ?? "", 10);
+			const media = document.querySelector<HTMLVideoElement>("[data-lesson-player] video");
+			if (Number.isNaN(seconds) || !media) return;
+			event.preventDefault();
+			media.currentTime = seconds;
+			void media.play()?.catch(() => {});
+			const r = media.getBoundingClientRect();
+			if (r.bottom <= 0 || r.top >= window.innerHeight) {
+				media.scrollIntoView({
+					block: "center",
+					behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+				});
+			}
+			history.replaceState(null, "", `#t=${seconds}`);
+		});
+	}
+</script>
