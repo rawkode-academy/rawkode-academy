@@ -18,6 +18,8 @@ on:
     - projects/rawkode.studio/astro.config.mts
     - projects/rawkode.studio/astro.config.mts/**
     - projects/rawkode.studio/data-model/**
+    - projects/rawkode.studio/env.cue
+    - projects/rawkode.studio/env.cue/**
     - projects/rawkode.studio/package.json
     - projects/rawkode.studio/package.json/**
     - projects/rawkode.studio/scripts/**
@@ -37,6 +39,7 @@ jobs:
       contents: read
     name: rawkode-academy-studio-default
     runs-on: namespace-profile-linux-x86
+    environment: production
     steps:
     - name: Checkout
       uses: actions/checkout@v7
@@ -93,6 +96,10 @@ jobs:
       run: cuenv exec -- bun install --frozen-lockfile
     - name: cuenv:contributor:bun.workspace.setup
       run: 'true'
+    - name: Setup 1Password
+      run: cuenv secrets setup onepassword
+      env:
+        OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
     - name: 'Run pipeline: default'
       run: cuenv ci --pipeline default --path projects/rawkode.studio
       env:
@@ -100,3 +107,5 @@ jobs:
         GITHUB_ACTOR: ${{ github.actor }}
         GITHUB_REF_TYPE: ${{ github.ref_type }}
         GITHUB_REF_NAME: ${{ github.ref_name }}
+        CUENV_ENVIRONMENT: production
+        OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}

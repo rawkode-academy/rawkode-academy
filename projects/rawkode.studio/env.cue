@@ -11,12 +11,17 @@ let _taskPath = "/home/runner/.bun/bin:/Users/rawkode/.bun/bin:/run/current-syst
 
 ci: pipelines: {
 	default: {
+		// production selects the Cloudflare Workers token that wrangler needs to
+		// apply the D1 migrations and deploy.
+		environment: "production"
 		when: {
 			branch: ["main"]
 			defaultBranch: true
 			manual:        true
 		}
-		tasks: [_t.check, _t.test, _t.deploy."dry-run"]
+		// check and test gate the dry run, which gates the migrations, which gate
+		// the deploy.
+		tasks: [_t.check, _t.test, _t.deploy.main]
 	}
 
 	pullRequest: {
@@ -94,6 +99,7 @@ tasks: {
 			command:  "sh"
 			args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run migrate"]
 			env: PATH: _taskPath
+			dependsOn: [_t.deploy."dry-run"]
 			inputs: [
 				"data-model/**",
 				"wrangler.jsonc",
@@ -108,10 +114,11 @@ tasks: {
 			command:  "sh"
 			args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run deploy"]
 			env: PATH: _taskPath
-			dependsOn: [_t.build]
+			dependsOn: [_t.build, _t.migrations.remote]
 			inputs: [
 				schema.#ModuleFiles & {paths: ["bun.lock"]},
 				"astro.config.mts",
+				"env.cue",
 				"data-model/**",
 				"package.json",
 				"src/**",
@@ -133,7 +140,7 @@ tasks: {
 			command:  "sh"
 			args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run deploy:dry-run"]
 			env: PATH: _taskPath
-			dependsOn: [_t.build]
+			dependsOn: [_t.build, _t.test]
 			inputs: [
 				schema.#ModuleFiles & {paths: ["bun.lock"]},
 				"astro.config.mts",
