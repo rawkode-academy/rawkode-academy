@@ -1,6 +1,7 @@
 import { formatTimestamp, type Scope } from "./access.ts";
+import type { Collaboration, Named } from "./directory.ts";
 import { esc, page } from "./html.ts";
-import type { Comment, Org, Principal, Review, Session, Triage } from "./types.ts";
+import type { Comment, Org, OrgLink, Principal, Review, Session, Triage } from "./types.ts";
 
 const STATE_LABEL: Record<Review["state"], string> = {
 	in_review: "In review",
@@ -58,9 +59,30 @@ export const dashboardPage = (
 	orgs: readonly Org[],
 	preview: boolean,
 	reviews: readonly Review[],
+	collaborations: readonly (Collaboration & { orgId: string })[] = [],
+	unlinked = false,
 ): string => {
 	const orgName = (id: string) => orgs.find((org) => org.id === id)?.name ?? id;
 	const mine = orgs.filter((org) => scope.orgIds.has(org.id));
+	const reviewFor = (item: Collaboration & { orgId: string }) =>
+		reviews.find((review) => review.videoId === item.videoId && review.orgId === item.orgId);
+	const collaborationList =
+		collaborations.length === 0
+			? ""
+			: `<h2>Videos made with ${scope.persona === "staff" ? "partners" : "you"}</h2>${collaborations
+					.map((item) => {
+						const review = reviewFor(item);
+						return `<div class="card"><strong>${esc(item.title)}</strong> <span class="muted">${esc(orgName(item.orgId))}</span><div class="row">${
+							review
+								? `<a href="/reviews/${esc(review.id)}">Open draft review</a>`
+								: `<span class="muted">No draft to review right now.</span>`
+						}<a href="https://rawkode.academy/watch/${esc(item.slug)}">Public page</a></div></div>`;
+					})
+					.join("")}`;
+	const unlinkedNote = unlinked
+		? `<div class="card"><p>Your GitHub account is on an organisation that Rawkode Academy hasn't set up in the portal yet. We'll sort it shortly.</p></div>`
+		: "";
+	const adminLink = session.principal.admin && !scope.banner ? `<p><a href="/admin/orgs">Manage organisations</a></p>` : "";
 	const body =
 		scope.persona === "supporter"
 			? `<h1>Supporter</h1>${mine
@@ -76,7 +98,7 @@ export const dashboardPage = (
 								)
 								.join("")
 				}`;
-	return page("Home", `${header(session, scope, orgs, preview)}<main>${body}</main>`);
+	return page("Home", `${header(session, scope, orgs, preview)}<main>${unlinkedNote}${adminLink}${body}${collaborationList}</main>`);
 };
 
 const jsonForScript = (value: unknown): string => JSON.stringify(value).replaceAll("<", "\\u003c");
@@ -134,5 +156,36 @@ const so=document.getElementById('signoff');if(so)so.addEventListener('click',as
 		review.title,
 		`${header(input.session, scope, input.orgs, input.preview)}<main><p><a href="/">Back</a></p><h1>${esc(review.title)}</h1><div class="row" style="margin-bottom:1rem"><span class="pill">${STATE_LABEL[review.state]}</span><span class="muted">Draft cut ${review.draftVersion}</span><span class="muted">Due ${esc(review.dueAt.slice(0, 10))}</span></div><div class="layout"><div><video controls preload="metadata" src="${esc(review.videoUrl)}"></video>${signoff}</div><div class="card"><h2>Comments (${comments.length})</h2>${commentHtml || `<p class="muted">No comments yet.</p>`}${form}</div></div></main>`,
 		{ script, nonce: input.nonce },
+	);
+};
+
+export const adminOrgsPage = (input: {
+	session: Session;
+	scope: Scope;
+	orgs: readonly Org[];
+	preview: boolean;
+	links: readonly OrgLink[];
+	collaborators: readonly Named[];
+	supporters: readonly Named[];
+	error: string | null;
+}): string => {
+	const name = (list: readonly Named[], id?: string) => (id ? (list.find((item) => item.id === id)?.name ?? id) : "");
+	const options = (list: readonly Named[]) =>
+		`<option value="">None</option>${list.map((item) => `<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("")}`;
+	const rows = input.links
+		.map(
+			(link) =>
+				`<tr><td><code>${esc(link.orgId)}</code></td><td>${esc(name(input.collaborators, link.collaboratorId))}</td><td>${esc(name(input.supporters, link.supporterId))}</td><td><form method="post" action="/admin/orgs/delete"><input type="hidden" name="orgId" value="${esc(link.orgId)}"><button class="ghost" style="background:transparent">Unlink</button></form></td></tr>`,
+		)
+		.join("");
+	const error =
+		input.error === "org"
+			? `<p role="alert">That isn't a valid organisation id.</p>`
+			: input.error === "link"
+				? `<p role="alert">Pick a collaborator, a supporter, or both.</p>`
+				: "";
+	return page(
+		"Organisations",
+		`${header(input.session, input.scope, input.orgs, input.preview)}<main><p><a href="/">Back</a></p><h1>Organisations</h1><p class="muted">Link an identity organisation to the company it represents. A collaborator makes it a partner with draft review; a supporter makes it a supporter. Find the organisation id in the identity admin.</p>${error}<div class="card"><form method="post" action="/admin/orgs" class="row"><label>Organisation id<input name="orgId" required maxlength="64"></label><label>Collaborator<select name="collaboratorId">${options(input.collaborators)}</select></label><label>Supporter<select name="supporterId">${options(input.supporters)}</select></label><button>Link</button></form></div><table style="width:100%;border-collapse:collapse"><thead><tr><th align="left">Organisation</th><th align="left">Collaborator</th><th align="left">Supporter</th><th></th></tr></thead><tbody>${rows || `<tr><td colspan="4" class="muted">Nothing linked yet.</td></tr>`}</tbody></table></main>`,
 	);
 };

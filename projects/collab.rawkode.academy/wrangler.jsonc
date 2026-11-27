@@ -18,5 +18,11 @@
   },
   // Sessions, sign-in state and review data. No ID: Wrangler creates the
   // namespace on the first deploy and reuses it afterwards.
-  "kv_namespaces": [{ "binding": "STORE" }]
+  "kv_namespaces": [{ "binding": "STORE" }],
+  // The company records the portal reads. Read-only: nothing here writes them.
+  "d1_databases": [
+    { "binding": "COLLABORATIONS_DB", "database_name": "platform-video-collaborations", "database_id": "4f2f882e-1a7f-4873-b5d6-9fc85f9efd4d" },
+    { "binding": "VIDEOS_DB", "database_name": "platform-videos", "database_id": "0e96020b-eb03-456c-a593-fa73f2e845d4" },
+    { "binding": "SUPPORTERS_DB", "database_name": "platform-supporters", "database_id": "e1527293-b2d5-4c7f-8d23-5e8bac24f206" }
+  ]
 }

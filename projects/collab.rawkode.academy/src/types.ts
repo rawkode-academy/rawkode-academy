@@ -1,5 +1,11 @@
 export interface Env {
 	STORE: KVNamespace;
+	/** platform-video-collaborations, read-only here. Absent in the preview. */
+	COLLABORATIONS_DB?: D1Database;
+	/** platform-videos, read-only here. Absent in the preview. */
+	VIDEOS_DB?: D1Database;
+	/** platform-supporters, read-only here. Absent in the preview. */
+	SUPPORTERS_DB?: D1Database;
 	/** "true" only in the pull-request preview Worker. */
 	PREVIEW?: string;
 	/** Public origin registered with the OIDC client. Empty in the preview. */
@@ -17,6 +23,18 @@ export interface Org {
 	id: string;
 	name: string;
 	kind: OrgKind;
+}
+
+/**
+ * Ties an identity organisation to the company records it represents. An
+ * organisation with a collaborator is a partner; one with a supporter is a
+ * supporter; with both, it is both.
+ */
+export interface OrgLink {
+	/** The identity organisation id. */
+	orgId: string;
+	collaboratorId?: string;
+	supporterId?: string;
 }
 
 /** Who is signed in, as identity says. Never an email address. */
@@ -39,6 +57,8 @@ export type ReviewState =
 export interface Review {
 	id: string;
 	orgId: string;
+	/** The Academy video this review is for, when it has one. */
+	videoId?: string;
 	title: string;
 	/** A playable source for the draft. Signed, short-lived CDN URLs come later. */
 	videoUrl: string;

@@ -1,11 +1,13 @@
-import type { Comment, Org, Review, Session } from "./types.ts";
+import type { Comment, OrgLink, Review, Session } from "./types.ts";
 
 /**
  * Everything the portal persists. KV today (one JSON document per key);
  * moves to D1 once the review volume warrants it.
  */
 export interface Store {
-	listOrgs(): Promise<Org[]>;
+	listOrgLinks(): Promise<OrgLink[]>;
+	putOrgLink(link: OrgLink): Promise<void>;
+	deleteOrgLink(orgId: string): Promise<void>;
 	listReviews(): Promise<Review[]>;
 	getReview(id: string): Promise<Review | null>;
 	putReview(review: Review): Promise<void>;
@@ -26,7 +28,7 @@ const LOGIN_TTL_SECONDS = 600;
 export class KvStore implements Store {
 	constructor(
 		private readonly kv: KVNamespace,
-		private readonly seed: { orgs: Org[]; reviews: Review[]; comments: Comment[] } | null,
+		private readonly seed: { links: OrgLink[]; reviews: Review[]; comments: Comment[] } | null,
 	) {}
 
 	/** Writes the seed once, only when the preview namespace is empty. */
@@ -34,7 +36,7 @@ export class KvStore implements Store {
 		if (!this.seed) return;
 		if (await this.kv.get("seeded")) return;
 		await Promise.all([
-			this.kv.put("orgs", JSON.stringify(this.seed.orgs)),
+			...this.seed.links.map((l) => this.kv.put(`orglink:${l.orgId}`, JSON.stringify(l))),
 			...this.seed.reviews.map((r) => this.kv.put(`review:${r.id}`, JSON.stringify(r))),
 			...this.seed.comments.map((c) => this.kv.put(`comment:${c.id}`, JSON.stringify(c))),
 		]);
@@ -48,9 +50,14 @@ export class KvStore implements Store {
 		return values.filter((value): value is T => value !== null);
 	}
 
-	async listOrgs() {
-		await this.ensureSeeded();
-		return ((await this.kv.get("orgs", "json")) as Org[] | null) ?? [];
+	listOrgLinks() {
+		return this.list<OrgLink>("orglink:");
+	}
+	async putOrgLink(link: OrgLink) {
+		await this.kv.put(`orglink:${link.orgId}`, JSON.stringify(link));
+	}
+	async deleteOrgLink(orgId: string) {
+		await this.kv.delete(`orglink:${orgId}`);
 	}
 	listReviews() {
 		return this.list<Review>("review:");
