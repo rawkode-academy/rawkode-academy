@@ -1,0 +1,45 @@
+---
+/**
+ * What a collaborating company wants viewers to know, written by the company
+ * in the partner portal. Optional: with no text for any company, nothing is
+ * rendered, not even a placeholder.
+ */
+import { partnerLink } from "@/utils/partner-link";
+
+interface Props {
+	collaborators: { id: string; name: string; announcement?: string | undefined; announcementUrl?: string | undefined }[];
+	campaign: string;
+	content?: string | undefined;
+}
+
+const { collaborators, campaign, content } = Astro.props;
+const items = collaborators.filter((c) => c.announcement);
+---
+
+{items.map((c) => (
+	<aside class="announcement" aria-label={`Announcement from ${c.name}`}>
+		<strong>{c.name}</strong>
+		<span>{c.announcement}</span>
+		{c.announcementUrl && (
+			<a href={partnerLink(c.announcementUrl, { medium: "collaboration-announcement", campaign, content })} target="_blank" rel="noopener sponsored">Learn more</a>
+		)}
+	</aside>
+))}
+
+<style>
+	.announcement {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem 0.5rem;
+		align-items: baseline;
+		margin-block: 1rem;
+		padding: 0.75rem 1rem;
+		border-inline-start: 3px solid currentColor;
+		background: color-mix(in srgb, currentColor 7%, transparent);
+		border-radius: 0 0.375rem 0.375rem 0;
+		font-size: 0.9375rem;
+		line-height: 1.5;
+		max-width: 46rem;
+	}
+	.announcement a { color: inherit; font-weight: 600; text-underline-offset: 0.2em; }
+</style>

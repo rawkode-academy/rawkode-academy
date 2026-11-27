@@ -16,6 +16,7 @@ import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import CourseJsonLd from "@/components/html/course-jsonld.astro";
 import VideoMetadata from "@/components/html/video-metadata.astro";
 import Collaboration from "@/components/watch/Collaboration.astro";
+import CollaborationAnnouncement from "@/components/watch/CollaborationAnnouncement.astro";
 import CourseSignupForm from "@/components/courses/CourseSignupForm.astro";
 import ResourceList from "@/components/courses/ResourceList.vue";
 import VideoPlayer from "@/components/video/player.vue";
@@ -256,6 +257,7 @@ function formatDuration(minutes?: number) {
 								{module.data.description}
 							</p>
 							<Collaboration collaborators={module.data.video?.collaborators ?? []} surface="canvas" campaign={course.id} content={lessonSlug} />
+							<CollaborationAnnouncement collaborators={module.data.video?.collaborators ?? []} campaign={course.id} content={lessonSlug} />
 							{authors.length > 0 && (
 								<div class={doc.byline}>
 									{authors.map((author) => (

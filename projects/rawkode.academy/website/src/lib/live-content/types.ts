@@ -116,7 +116,7 @@ export interface VideoData {
 	/** Who was on this video, per casting credits. Empty when none are recorded; callers then fall back to the show's hosts and `guests`. */
 	credits?: { role: "host" | "co_host" | "guest" | "author"; person: Reference<"people"> }[] | undefined;
 	/** Companies this video is made with; empty for most videos. */
-	collaborators?: { id: string; name: string; websiteUrl?: string | undefined }[] | undefined;
+	collaborators?: { id: string; name: string; websiteUrl?: string | undefined; announcement?: string | undefined; announcementUrl?: string | undefined }[] | undefined;
 	resources?: Resource[] | undefined;
 	streamUrl?: string | undefined;
 	thumbnailUrl?: string | undefined;
@@ -396,7 +396,7 @@ export interface CourseModuleData {
 				rawkode?: string | undefined;
 				poster?: string | undefined;
 				/** Companies the lesson's video is made with; empty for most. */
-				collaborators?: { id: string; name: string; websiteUrl?: string | undefined }[] | undefined;
+				collaborators?: { id: string; name: string; websiteUrl?: string | undefined; announcement?: string | undefined; announcementUrl?: string | undefined }[] | undefined;
 		  }
 		| undefined;
 	duration?: number | undefined;

@@ -19,6 +19,12 @@ test("a collaboration adds a disclosure line and other videos do not", () => {
   assert.match(renderFooter({ ...video, collaborators: ["Teleport"] }), /\nMade in collaboration with Teleport\.$/);
 });
 
+test("a partner's announcement is added after the disclosure, and absent when empty", () => {
+  const footer = renderFooter({ ...video, collaborators: ["Datum"], announcements: [{ name: "Datum", text: "Join our\nlaunch", url: "https://datum.net/launch" }] });
+  assert.match(footer, /\nMade in collaboration with Datum\.\nDatum: Join our launch https:\/\/datum\.net\/launch$/);
+  assert.equal(renderFooter({ ...video, announcements: [] }), renderFooter(video));
+});
+
 test("composing is deterministic and Studio text is not part of it", () => {
   assert.equal(composeDescription(video), composeDescription({ ...video }));
 });

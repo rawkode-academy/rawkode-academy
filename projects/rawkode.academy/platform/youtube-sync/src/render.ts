@@ -22,7 +22,9 @@ export type Chapter = { startTime: number; title: string };
 export type Show = { id: string; name: string };
 export type Person = { id: string; name: string; x?: string; bluesky?: string; linkedin?: string };
 export type Technology = { id: string; name: string; website?: string; x?: string; bluesky?: string; mastodon?: string; youtube?: string };
-export type AcademyVideo = { id: string; title: string; slug: string; collaborators: string[]; description: string; chapters: Chapter[]; thumbnailUrl: string; show: Show | null; course?: string | null; guests: Person[]; hosts?: Person[]; technologies: Technology[] };
+/** What a collaborating company asks viewers to know, written by them in the partner portal. */
+export type Announcement = { name: string; text: string; url?: string };
+export type AcademyVideo = { id: string; title: string; slug: string; collaborators: string[]; announcements?: Announcement[]; description: string; chapters: Chapter[]; thumbnailUrl: string; show: Show | null; course?: string | null; guests: Person[]; hosts?: Person[]; technologies: Technology[] };
 
 export function parseFields(value: string | undefined): Field[] {
   const wanted = (value ?? ALL_FIELDS.join(",")).split(",").map(item => item.trim()).filter(Boolean);
@@ -121,13 +123,14 @@ export function renderHashtags(video: Pick<AcademyVideo, "show" | "technologies"
 export const watchUrl = (video: Pick<AcademyVideo, "slug">) => `https://rawkode.academy/watch/${video.slug}?utm_source=youtube&utm_medium=description`;
 export const renderHeader = (video: Pick<AcademyVideo, "slug">) => `Get this video's free resources at ${watchUrl(video)}`;
 
-export function renderFooter(video: Pick<AcademyVideo, "collaborators"> & Partial<Pick<AcademyVideo, "show" | "technologies">>): string {
+export function renderFooter(video: Pick<AcademyVideo, "collaborators" | "announcements"> & Partial<Pick<AcademyVideo, "show" | "technologies">>): string {
   const lines = [
     MARKER,
     "Newsletter: https://rawkode.academy/#join",
     "Support the Academy: https://rawkode.academy/organizations/support-our-work?utm_source=youtube&utm_medium=description",
   ];
   if (video.collaborators.length) lines.push(`Made in collaboration with ${video.collaborators.join(" and ")}.`);
+  for (const a of video.announcements ?? []) lines.push(`${a.name}: ${a.text.replace(/\s+/g, " ")}${a.url ? ` ${a.url}` : ""}`);
   const hashtags = renderHashtags({ show: video.show ?? null, technologies: video.technologies ?? [] });
   return hashtags ? `${lines.join("\n")}\n\n${hashtags}` : lines.join("\n");
 }

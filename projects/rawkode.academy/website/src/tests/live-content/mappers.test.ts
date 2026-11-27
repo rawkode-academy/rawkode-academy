@@ -209,6 +209,34 @@ describe("gateway → entry data", () => {
 		expect(module.video?.collaborators).toEqual([{ id: "datum", name: "Datum", websiteUrl: "https://www.datum.net" }]);
 	});
 
+	it("keeps a partner's announcement only when it has text, and its link only when https", () => {
+		const module = mapCourseModule(
+			{
+				id: "c/intro",
+				slug: "intro",
+				title: "Intro",
+				order: 1,
+				publishedAt: "2026-01-01",
+				video: {
+					id: "v",
+					collaborators: [
+						{ id: "a", name: "A", announcement: " Join us ", announcementUrl: "https://a.test/x" },
+						{ id: "b", name: "B", announcement: "Hi", announcementUrl: "http://b.test" },
+						{ id: "c", name: "C", announcement: "  ", announcementUrl: "https://c.test" },
+						{ id: "d", name: "D", announcement: null, announcementUrl: null },
+					],
+				},
+			},
+			"c",
+		);
+		expect(module.video?.collaborators).toEqual([
+			{ id: "a", name: "A", announcement: "Join us", announcementUrl: "https://a.test/x" },
+			{ id: "b", name: "B", announcement: "Hi" },
+			{ id: "c", name: "C" },
+			{ id: "d", name: "D" },
+		]);
+	});
+
 	it("only exposes logo URLs whose flags are set", () => {
 		const data = mapTechnology({
 			id: "k",

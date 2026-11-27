@@ -71,6 +71,8 @@ export const VIDEO_FIELDS = /* GraphQL */ `
 			id
 			name
 			websiteUrl
+			announcement
+			announcementUrl
 		}
 		technologies {
 			id
@@ -318,6 +320,8 @@ export const COURSE_MODULE_FIELDS = /* GraphQL */ `
 				id
 				name
 				websiteUrl
+				announcement
+				announcementUrl
 			}
 		}
 		duration

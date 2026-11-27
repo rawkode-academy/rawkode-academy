@@ -29,6 +29,13 @@
       "when": 1795617920000,
       "tag": "0003_portainer_collaboration",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1795617930000,
+      "tag": "0004_collaborator_announcement",
+      "breakpoints": true
     }
   ]
 }

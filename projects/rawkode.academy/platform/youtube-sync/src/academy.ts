@@ -19,12 +19,13 @@ async function graphql<T>(service: Gateway, url: string, query: string, variable
   return page.data;
 }
 
-const VIDEO_FIELDS = "id title slug description thumbnailUrl chapters { startTime title } collaborators { name } episode { show { id name } } castingCredits { role person { id name twitterUrl blueskyUrl linkedinUrl } } technologies { id name website community { twitter bluesky mastodon youtube } }";
-type ListedVideo = { id?: string; title?: string; slug?: string; description?: string; thumbnailUrl?: string; chapters?: { startTime?: number; title?: string }[]; collaborators?: { name?: string }[]; episode?: { show?: { id?: string; name?: string } | null } | null; castingCredits?: { role?: string; person?: Credited }[]; technologies?: { id?: string; name?: string; website?: string | null; community?: { twitter?: string | null; bluesky?: string | null; mastodon?: string | null; youtube?: string | null } | null }[] };
+const VIDEO_FIELDS = "id title slug description thumbnailUrl chapters { startTime title } collaborators { name announcement announcementUrl } episode { show { id name } } castingCredits { role person { id name twitterUrl blueskyUrl linkedinUrl } } technologies { id name website community { twitter bluesky mastodon youtube } }";
+type ListedVideo = { id?: string; title?: string; slug?: string; description?: string; thumbnailUrl?: string; chapters?: { startTime?: number; title?: string }[]; collaborators?: { name?: string; announcement?: string | null; announcementUrl?: string | null }[]; episode?: { show?: { id?: string; name?: string } | null } | null; castingCredits?: { role?: string; person?: Credited }[]; technologies?: { id?: string; name?: string; website?: string | null; community?: { twitter?: string | null; bluesky?: string | null; mastodon?: string | null; youtube?: string | null } | null }[] };
 
 function toAcademyVideo(video: ListedVideo, courseByVideo: Map<string, string>): AcademyVideo | undefined {
   if (typeof video.id !== "string" || typeof video.title !== "string" || typeof video.slug !== "string") return undefined;
   return { id: video.id, title: video.title, slug: video.slug, collaborators: (video.collaborators ?? []).map(c => String(c.name ?? "")).filter(Boolean),
+      announcements: (video.collaborators ?? []).flatMap(c => c.name && c.announcement?.trim() ? [{ name: c.name, text: c.announcement.trim(), ...(c.announcementUrl && /^https:\/\//.test(c.announcementUrl) ? { url: c.announcementUrl } : {}) }] : []),
       description: typeof video.description === "string" ? video.description : "",
       chapters: (video.chapters ?? []).flatMap(c => typeof c.startTime === "number" && typeof c.title === "string" ? [{ startTime: c.startTime, title: c.title }] : []),
       thumbnailUrl: typeof video.thumbnailUrl === "string" ? video.thumbnailUrl : "",
