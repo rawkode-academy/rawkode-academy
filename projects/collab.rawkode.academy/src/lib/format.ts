@@ -17,3 +17,11 @@ export const STATE_LABEL: Record<string, string> = {
 
 export const localDate = (iso: string): string =>
 	new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+
+const numbers = new Intl.NumberFormat("en-GB");
+export const count = (value: number): string => numbers.format(value);
+/** Minutes watched as hours, one decimal under 100 hours. */
+export const hours = (minutes: number): string => {
+	const h = minutes / 60;
+	return `${h < 100 ? (Math.round(h * 10) / 10).toString() : numbers.format(Math.round(h))} h`;
+};

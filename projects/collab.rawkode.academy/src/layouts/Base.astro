@@ -49,6 +49,7 @@ const viewingOrg = viewAs ? orgs.find((org) => org.id === viewAs.orgId) : undefi
 					<a href="/" class={styles.brand} aria-label="Partner portal home"><span class={styles.brandArt} aria-hidden="true" set:html={artwork} /></a>
 					<nav class={styles.links} aria-label="Primary navigation">
 						<a href="/" class={styles.link} aria-current={Astro.url.pathname === "/" ? "page" : undefined}>Collaborations</a>
+						<a href="/analytics" class={styles.link} aria-current={Astro.url.pathname === "/analytics" ? "page" : undefined}>Analytics</a>
 					</nav>
 					<div class={styles.actions}>
 						{session && (

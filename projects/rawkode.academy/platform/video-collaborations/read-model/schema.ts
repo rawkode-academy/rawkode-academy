@@ -5,6 +5,13 @@ import federationPlugin from "@pothos/plugin-federation";
 import { and, asc, eq, gt, isNull, lte, or } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import type { GraphQLSchema } from "graphql";
+import {
+	type AnalyticsSnapshot,
+	type CollaboratorAnalytics,
+	type Period,
+	type VideoAnalytics,
+	analyticsFor,
+} from "../../../../../packages/guest-scope/partner";
 import * as s from "../data-model/schema";
 
 export interface PothosTypes {
@@ -28,7 +35,20 @@ const isActive = (now: Date) =>
 		or(isNull(links.endsAt), gt(links.endsAt, now)),
 	);
 
-export const getSchema = (env: { DB: D1Database }): GraphQLSchema => {
+const ADMIN_ROLE = "collab_admin";
+const SNAPSHOT_KEY = "analytics:snapshot:v2";
+
+type SnapshotVideos = AnalyticsSnapshot;
+
+/** Staff, or anyone who belongs to the collaborator's organisation. */
+export const mayViewAnalytics = (
+	caller: { roles?: string[]; orgs?: { id: string; role: string }[] },
+	organizationId: string | null,
+) =>
+	(caller.roles ?? []).includes(ADMIN_ROLE) ||
+	(organizationId !== null && (caller.orgs ?? []).some((org) => org.id === organizationId));
+
+export const getSchema = (env: { DB: D1Database; ANALYTICS_SNAPSHOT?: KVNamespace }): GraphQLSchema => {
 	const db = drizzle(env.DB, { schema: s });
 	const builder = new schemaBuilder<PothosTypes>({
 		plugins: [directivesPlugin, federationPlugin],
@@ -56,6 +76,36 @@ export const getSchema = (env: { DB: D1Database }): GraphQLSchema => {
 		return rows;
 	};
 
+	const PeriodRef = builder.objectRef<Period>("AnalyticsPeriod");
+	builder.objectType(PeriodRef, {
+		fields: (t) => ({
+			d90: t.exposeInt("d90"),
+			lifetime: t.exposeInt("lifetime"),
+		}),
+	});
+	const VideoAnalyticsRef = builder.objectRef<VideoAnalytics>("VideoAnalytics");
+	builder.objectType(VideoAnalyticsRef, {
+		fields: (t) => ({
+			id: t.exposeID("id"),
+			title: t.exposeString("title"),
+			slug: t.exposeString("slug"),
+			siteViews: t.field({ type: PeriodRef, resolve: (r) => r.siteViews }),
+			// Null when the video can't be tied to one YouTube video with certainty.
+			youtubeViews: t.field({ type: PeriodRef, nullable: true, resolve: (r) => r.youtubeViews }),
+			minutesWatched: t.field({ type: PeriodRef, nullable: true, resolve: (r) => r.minutesWatched }),
+		}),
+	});
+	const CollaboratorAnalyticsRef = builder.objectRef<CollaboratorAnalytics>("CollaboratorAnalytics");
+	builder.objectType(CollaboratorAnalyticsRef, {
+		fields: (t) => ({
+			generatedAt: t.exposeString("generatedAt"),
+			siteViews: t.field({ type: PeriodRef, resolve: (r) => r.siteViews }),
+			youtubeViews: t.field({ type: PeriodRef, resolve: (r) => r.youtubeViews }),
+			minutesWatched: t.field({ type: PeriodRef, resolve: (r) => r.minutesWatched }),
+			videos: t.field({ type: [VideoAnalyticsRef], resolve: (r) => r.videos }),
+		}),
+	});
+
 	const CollaboratorRef = builder.objectRef<s.Collaborator>("Collaborator");
 	builder.objectType(CollaboratorRef, {
 		fields: (t) => ({
@@ -71,6 +121,22 @@ export const getSchema = (env: { DB: D1Database }): GraphQLSchema => {
 					(await activeLinks(context))
 						.filter((link) => link.collaborator.id === collaborator.id)
 						.map((link) => ({ id: link.videoId })),
+			}),
+			// Views and watch time of this company's videos, refreshed daily. Only
+			// staff and members of the company's organisation can read it.
+			analytics: t.field({
+				type: CollaboratorAnalyticsRef,
+				nullable: true,
+				resolve: async (collaborator, _args, context) => {
+					const caller = context as { roles?: string[]; orgs?: { id: string; role: string }[] };
+					if (!mayViewAnalytics(caller, collaborator.organizationId)) return null;
+					const snapshot = await env.ANALYTICS_SNAPSHOT?.get<SnapshotVideos>(SNAPSHOT_KEY, { type: "json" });
+					if (!snapshot) return null;
+					const ids = (await activeLinks(context))
+						.filter((link) => link.collaborator.id === collaborator.id)
+						.map((link) => link.videoId);
+					return analyticsFor(snapshot, ids);
+				},
 			}),
 		}),
 	});

@@ -70,6 +70,8 @@ export default {
 						token: vars.BASIN_SQL_TOKEN,
 					},
 					contentEnv.CONTENT_CACHE,
+					new Date(),
+					contentEnv,
 				).catch((error) => {
 					console.error(
 						JSON.stringify({

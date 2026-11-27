@@ -156,6 +156,32 @@ export async function validateBearer(
 }
 
 /**
+ * The organisations a cookie-session user belongs to. A failure leaves the
+ * caller without any, so organisation-scoped data stays hidden.
+ */
+async function membershipsOf(
+	userId: string,
+	identityService: Fetcher,
+): Promise<{ id: string; role: string }[]> {
+	try {
+		const response = await identityService.fetch(
+			`https://internal/api/internal/memberships?user=${encodeURIComponent(userId)}`,
+		);
+		if (!response.ok) return [];
+		const body = (await response.json()) as { orgs?: unknown };
+		return Array.isArray(body.orgs)
+			? body.orgs.flatMap((item) => {
+					const { id, role } = (item ?? {}) as { id?: unknown; role?: unknown };
+					return typeof id === "string" && typeof role === "string" ? [{ id, role }] : [];
+				})
+			: [];
+	} catch (error) {
+		console.error("Membership lookup failed:", error);
+		return [];
+	}
+}
+
+/**
  * Authentication plugin for Hive Gateway.
  * Validates Better Auth sessions and populates GraphQL context.
  */
@@ -183,8 +209,9 @@ export function createAuthPlugin(env: Env): GatewayPlugin {
 					const sessionData = await validateSession(cookies, env.IDENTITY);
 
 					if (sessionData) {
+						const orgs = await membershipsOf(sessionData.user.id, env.IDENTITY);
 						authContext = {
-							user: sessionData.user,
+							user: { ...sessionData.user, orgs },
 							session: sessionData.session,
 							isAuthenticated: true,
 						};
