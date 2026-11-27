@@ -50,7 +50,7 @@ const num = (value: unknown) => Number(value ?? 0);
 export function viewKey(path: string): string | null {
 	const clean = path.replace(/[?#].*$/, "").replace(/\/+$/, "");
 	const watch = /^\/watch\/([^/]+)$/.exec(clean);
-	if (watch) return watch[1];
+	if (watch) return watch[1] ?? null;
 	const lesson = /^\/courses\/([^/]+)\/([^/]+)$/.exec(clean);
 	return lesson ? `courses/${lesson[1]}/${lesson[2]}` : null;
 }
@@ -106,11 +106,25 @@ export async function buildSnapshot(
 		const videos = parseAcademyVideos(await queryGateway<unknown>(env, GUEST_SCOPE_QUERY));
 		if (!videos) throw new Error("Academy video list unusable");
 		const mapped = youtubeIds(videos, lake);
+		const courses = await queryGateway<{
+			allCourses: {
+				modules: { courseId: string; slug: string; video: { id: string } | null }[];
+			}[];
+		}>(env, LESSONS_QUERY);
+		const lessons = new Map<string, string>();
+		for (const course of courses.allCourses ?? []) {
+			for (const lesson of course.modules ?? []) {
+				if (lesson.video) {
+					lessons.set(lesson.video.id, `courses/${lesson.courseId}/${lesson.slug}`);
+				}
+			}
+		}
 		academy = videos.map((video) => ({
 			id: video.id,
 			title: video.title,
 			slug: video.slug,
 			youtube: mapped.get(video.id) ?? null,
+			lesson: lessons.get(video.id) ?? null,
 		}));
 	}
 	return {
