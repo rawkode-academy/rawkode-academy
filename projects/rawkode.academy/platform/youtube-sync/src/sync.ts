@@ -69,6 +69,9 @@ export async function createPlan(deps: Deps, catalogue: Map<string, AcademyVideo
 }
 
 export type ApplyOptions = { limit: number; videos?: string[]; dryRun?: boolean; priority?: boolean };
+// What the log keeps of a failure: its code and its fixed message (operation, HTTP status, Google's reason id), never a response body.
+const describe = (error: unknown) => error instanceof ServiceError ? `${error.code}: ${error.message}` : "unknown";
+
 export type Outcome = { youtubeId: string; slug: string | null; result: "applied" | "stale" | "missing" | "error" | "quota"; detail?: string; retryable?: boolean };
 type Written = { result: "applied" | "error" | "quota"; retryable?: boolean };
 const THUMBNAIL_COST = 50;
@@ -93,7 +96,7 @@ async function write(deps: Deps, planId: string, youtubeId: string, kind: "apply
   } catch (error) {
     const quota = isQuota(error);
     if (quota) await deps.store.exhaust(day, QUOTA_EXHAUSTED);
-    await deps.store.log({ planId, youtubeId, at: deps.now().toISOString(), kind, result: quota ? "quota" : "error", detail: error instanceof ServiceError ? error.code : "unknown", before: live, after: null });
+    await deps.store.log({ planId, youtubeId, at: deps.now().toISOString(), kind, result: quota ? "quota" : "error", detail: describe(error), before: live, after: null });
     await emit(deps, planId, youtubeId, kind, quota ? "quota" : "error", fields);
     return { result: quota ? "quota" : "error", retryable: !quota && isTransient(error) };
   }
@@ -116,7 +119,7 @@ async function pushThumbnail(deps: Deps, planId: string, youtubeId: string, thum
   } catch (error) {
     const quota = isQuota(error);
     if (quota) await deps.store.exhaust(day, QUOTA_EXHAUSTED);
-    await deps.store.log({ planId, youtubeId, at: deps.now().toISOString(), kind: "apply-thumbnail", result: quota ? "quota" : "error", detail: error instanceof ServiceError ? error.code : "unknown", before: null, after: null });
+    await deps.store.log({ planId, youtubeId, at: deps.now().toISOString(), kind: "apply-thumbnail", result: quota ? "quota" : "error", detail: describe(error), before: null, after: null });
     return { result: quota ? "quota" : "error", retryable: !quota && isTransient(error) };
   }
   await deps.store.setThumbTag(youtubeId, thumbnail.tag, deps.now().toISOString());

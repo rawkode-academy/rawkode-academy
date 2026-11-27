@@ -1,12 +1,14 @@
-# Daily: reads the sync Worker's public /status (counts and times only, no
+# Hourly: reads the sync Worker's public /status (counts and times only, no
 # secrets) and opens a GitHub issue when the day's plan didn't run, the plan
-# found Studio edits (drift) or errors, or the write queue gave up on a video. Closes it once the plan is clean.
+# found Studio edits (drift) or errors, or a queue gave up on a video (the write queue or the
+# update-event queues, whose dead letters are recorded too). Closes it once the plan is clean. An open issue is
+# commented on once a day, not every hour.
 # Hand-written because cuenv pipelines have no schedule trigger.
 name: youtube-sync-monitor
 on:
   schedule:
-    # Shortly after the 09:47 UTC daily plan.
-    - cron: "17 10 * * *"
+    # Hourly, so a dead letter is seen within the hour; the first run after the 09:47 UTC daily plan is at 10:17.
+    - cron: "17 * * * *"
   workflow_dispatch: {}
 permissions:
   contents: read
@@ -56,6 +58,7 @@ jobs:
             exit 0
           fi
           body="$problem"$'\n\n'"Status: $STATUS_URL"$'\n'"Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          if [ -n "$existing" ]; then gh issue comment "$existing" --body "$body"; else gh issue create --title "$title" --body "$body"; fi
+          if [ -z "$existing" ]; then gh issue create --title "$title" --body "$body"
+          elif [ "$(date -u +%H)" = "10" ]; then gh issue comment "$existing" --body "$body"; fi
           echo "::error::$problem"
           exit 1

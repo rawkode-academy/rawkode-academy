@@ -62,7 +62,7 @@ Apply doesn't write inline. It puts one message per video on the Cloudflare Queu
 - **Transient error** (network, timeout, 408, 429, 5xx): retried with exponential backoff, 30 s, 1 m, 2 m ... capped at 15 m, up to `max_retries: 6`, then it goes to the dead-letter queue `platform-youtube-sync-dlq`.
 - **An error retrying can't fix** (a rejected image, a permission 403, bad input): recorded straight away.
 
-Anything the queue gives up on is recorded in D1 (`youtube_sync_dead`), logged with `"operation":"queue"` to Grafana, and counted in `GET /status` as `deadLetters`. The daily `youtube-sync-monitor` workflow opens a GitHub issue while `deadLetters` is above zero; it clears itself once that video is written successfully. A redelivered message is safe: a video already written is skipped, and a thumbnail already pushed is not pushed again (which would also overwrite its saved before-image).
+Anything the queue gives up on is recorded in D1 (`youtube_sync_dead`), logged with `"operation":"queue"` to Grafana, and counted in `GET /status` as `deadLetters`. The hourly `youtube-sync-monitor` workflow opens a GitHub issue while `deadLetters` is above zero (dead letters of the update-event queues `platform-video-updated-dlq` and `platform-youtube-sync-dlq` are recorded too); it clears itself once that video is written successfully. A redelivered message is safe: a video already written is skipped, and a thumbnail already pushed is not pushed again (which would also overwrite its saved before-image).
 
 Both queues are created by the CI deploy if missing, and the bindings and consumers are in `wrangler.jsonc`. Rollback stays synchronous (it is one deliberate batch).
 
@@ -94,7 +94,7 @@ When the monitor issue or a log says `reauthorization_required`, repeat step 2.
 | `POST /apply` | bearer | `{ planId, limit, videos?, dryRun? }`. Enqueues the selected videos (a dry run only lists them). |
 | `POST /rollback` | bearer | `{ planId \| youtubeId, limit }`. |
 
-`.github/workflows/youtube-sync-monitor.yml` reads `/status` daily and opens an issue if the plan stopped running, or found drift or errors.
+`.github/workflows/youtube-sync-monitor.yml` reads `/status` hourly and opens an issue if the plan stopped running, or found drift or errors.
 
 ## Verify locally
 

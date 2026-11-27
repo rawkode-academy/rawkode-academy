@@ -46,21 +46,33 @@ export async function scheduleBroadcast(deps: Deps, ports: BroadcastPorts, event
   }
   const { broadcastId } = saved!;
 
+  // What is still missing after this attempt. A step that fails is logged with its reason and retried by the queue
+  // (the work is recorded, so a retry only repeats what is missing); it is never silently dropped.
+  const missing: string[] = [];
+  let quotaSpent = false;
+  const why = (error: unknown) => error instanceof ServiceError ? `${error.code}: ${error.message}` : error instanceof Error ? error.message : "unknown";
+
   if (!saved!.bound) {
     try {
       const streamId = await ports.api.findStream(ports.streamId);
       await store.spend(day, 1);
       if (streamId) { await ports.api.bindBroadcast(broadcastId, streamId); await store.spend(day, STEP); await store.markBroadcast(event.videoId, "bound_at", deps.now().toISOString()); }
-      else log({ videoId: event.videoId, broadcastId, warning: "no reusable stream to bind; bind one in YouTube Studio" });
-    } catch (error) { if (isQuota(error)) { await store.exhaust(day, 10000); throw error; } log({ videoId: event.videoId, broadcastId, bindFailed: error instanceof ServiceError ? error.code : "unknown" }); }
+      else { log({ videoId: event.videoId, broadcastId, warning: "no reusable stream to bind; bind one in YouTube Studio" }); missing.push("no reusable stream to bind"); }
+    } catch (error) {
+      if (isQuota(error)) { await store.exhaust(day, 10000); quotaSpent = true; }
+      log({ videoId: event.videoId, broadcastId, bindFailed: why(error) });
+      missing.push(`bind (${why(error)})`);
+    }
   }
 
   if (!saved!.linked) { await ports.link(event.videoId, broadcastId); await store.markBroadcast(event.videoId, "linked_at", deps.now().toISOString()); }
 
-  // The thumbnail is the site's generated one. If it isn't there yet or the upload fails, the mapping exists now, so the next sync uploads it.
-  if (fresh && deps.thumbnails) {
+  // The thumbnail is the site's generated one. Its upload is recorded by the tag of the image pushed, so it is tried
+  // again on every attempt until one is recorded. (The daily plan would also upload it, once the mapping exists.)
+  if (deps.thumbnails && !(await store.thumbTag(broadcastId))) {
     const found = await ports.fetchScheduled(event.videoId).catch(() => null);
-    if (found?.video.thumbnailUrl) {
+    if (!found?.video.thumbnailUrl) { log({ videoId: event.videoId, broadcastId, thumbnailFailed: "the site lists no thumbnail yet" }); missing.push("thumbnail (the site lists none yet)"); }
+    else {
       try {
         const tag = await deps.thumbnails.tag(found.video.thumbnailUrl);
         const jpeg = await deps.thumbnails.prepare(found.video.thumbnailUrl);
@@ -68,9 +80,17 @@ export async function scheduleBroadcast(deps: Deps, ports: BroadcastPorts, event
         await store.spend(day, STEP);
         // So the next plan doesn't upload the same image again.
         if (tag) await store.setThumbTag(broadcastId, tag, deps.now().toISOString());
+        else missing.push("thumbnail tag");
       }
-      catch (error) { if (isQuota(error)) await store.exhaust(day, 10000); log({ videoId: event.videoId, broadcastId, thumbnailFailed: error instanceof ServiceError ? error.code : "unknown" }); }
+      catch (error) {
+        if (isQuota(error)) { await store.exhaust(day, 10000); quotaSpent = true; }
+        log({ videoId: event.videoId, broadcastId, thumbnailFailed: why(error) });
+        missing.push(`thumbnail (${why(error)})`);
+      }
     }
   }
+
+  // Nothing is dropped quietly: the queue retries (after the reset when the quota ran out), then the dead-letter queue records it.
+  if (missing.length) throw new ServiceError(quotaSpent ? "quota_exceeded" : "broadcast_incomplete", `Broadcast ${broadcastId} still needs: ${missing.join("; ")}`, 502);
   return fresh ? "created" : "resumed";
 }
