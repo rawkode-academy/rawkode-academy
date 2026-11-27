@@ -3,7 +3,7 @@
 
 import { cache } from "cloudflare:workers";
 import { handle } from "@astrojs/cloudflare/handler";
-import { refreshSnapshot } from "./lib/analytics/snapshot";
+import { refreshSnapshot, SNAPSHOT_KEY } from "./lib/analytics/snapshot";
 import { runChangeDetection } from "./lib/live-content/change-detection";
 import type { ContentEnv } from "./lib/live-content/env";
 import { workersCachePurge } from "./lib/live-content/invalidate";
@@ -15,6 +15,39 @@ import {
 
 // Daily, after the YouTube sync (08:17 UTC) has landed.
 const ANALYTICS_CRON = "30 9 * * *";
+
+type AnalyticsEnv = ContentEnv & {
+	BASIN_BUCKET?: string;
+	BASIN_SQL_TOKEN?: string;
+	CLOUDFLARE_ACCOUNT_ID?: string;
+};
+
+async function refreshAnalytics(env: AnalyticsEnv): Promise<void> {
+	if (!env.CONTENT_CACHE || !env.BASIN_SQL_TOKEN) {
+		console.error("[analytics] snapshot skipped: KV or Basin token missing");
+		return;
+	}
+	try {
+		await refreshSnapshot(
+			{
+				accountId: env.CLOUDFLARE_ACCOUNT_ID ?? "",
+				bucket: env.BASIN_BUCKET ?? "rawkode-analytics",
+				token: env.BASIN_SQL_TOKEN,
+			},
+			env.CONTENT_CACHE,
+			new Date(),
+			env,
+		);
+	} catch (error) {
+		console.error(
+			JSON.stringify({
+				event: "analytics.snapshot.failed",
+				error: error instanceof Error ? error.message : String(error),
+			}),
+		);
+		throw error;
+	}
+}
 
 const LEGACY_REDIRECT_HOSTS = new Set(["klustered.live", "www.klustered.live"]);
 
@@ -53,36 +86,21 @@ export default {
 	async scheduled(controller, env, ctx) {
 		const contentEnv = env as unknown as ContentEnv;
 		if (controller.cron === ANALYTICS_CRON) {
-			const vars = env as unknown as {
-				BASIN_BUCKET?: string;
-				BASIN_SQL_TOKEN?: string;
-				CLOUDFLARE_ACCOUNT_ID?: string;
-			};
-			if (!contentEnv.CONTENT_CACHE || !vars.BASIN_SQL_TOKEN) {
-				console.error("[analytics] snapshot skipped: KV or Basin token missing");
-				return;
-			}
-			ctx.waitUntil(
-				refreshSnapshot(
-					{
-						accountId: vars.CLOUDFLARE_ACCOUNT_ID ?? "",
-						bucket: vars.BASIN_BUCKET ?? "rawkode-analytics",
-						token: vars.BASIN_SQL_TOKEN,
-					},
-					contentEnv.CONTENT_CACHE,
-					new Date(),
-					contentEnv,
-				).catch((error) => {
-					console.error(
-						JSON.stringify({
-							event: "analytics.snapshot.failed",
-							error: error instanceof Error ? error.message : String(error),
-						}),
-					);
-					throw error;
-				}),
-			);
+			ctx.waitUntil(refreshAnalytics(env as unknown as AnalyticsEnv));
 			return;
+		}
+		// A missing snapshot (first deploy, a new key version, an expired key) is
+		// filled by the next hourly run, so no page view has to build it.
+		if (contentEnv.CONTENT_CACHE) {
+			const kv = contentEnv.CONTENT_CACHE;
+			ctx.waitUntil(
+				kv
+					.get(SNAPSHOT_KEY)
+					.then((stored) =>
+						stored ? undefined : refreshAnalytics(env as unknown as AnalyticsEnv),
+					)
+					.catch(() => undefined),
+			);
 		}
 		if (!contentEnv.CONTENT_CACHE) {
 			console.error(
