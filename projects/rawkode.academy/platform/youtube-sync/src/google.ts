@@ -125,6 +125,24 @@ export class GoogleClient {
     ensure(info?.ingestionAddress && info.streamName, "stream_not_found", `Stream ${streamId} has no ingestion info on the channel`, 404);
     return { ingestionAddress: info.ingestionAddress, streamName: info.streamName };
   }
+  // The lifecycle status of up to 50 broadcasts (1 quota unit); a broadcast YouTube no longer has is absent from the map.
+  async broadcastStatuses(ids: string[]): Promise<Map<string, string>> {
+    ensure(ids.length > 0 && ids.length <= 50, "invalid_input", "liveBroadcasts.list takes 1 to 50 IDs");
+    const result = await this.get<{ items?: { id?: string; status?: { lifeCycleStatus?: string } }[] }>(dataAPI, "liveBroadcasts", { part: "id,status", id: ids.join(","), maxResults: 50 });
+    const map = new Map<string, string>();
+    for (const item of result.items ?? []) if (typeof item.id === "string" && typeof item.status?.lifeCycleStatus === "string") map.set(item.id, item.status.lifeCycleStatus);
+    return map;
+  }
+  // Deletes a stream (50 quota units). A stream that is already gone counts as deleted.
+  async deleteStream(streamId: string): Promise<void> {
+    const url = new URL("liveStreams", dataAPI);
+    await this.authorize();
+    url.searchParams.set("id", streamId);
+    const response = await this.fetcher(url, { method: "DELETE", signal: AbortSignal.timeout(20000), redirect: "manual", headers: { authorization: `Bearer ${this.token}` } });
+    if (response.status === 404) { await response.body?.cancel(); return; }
+    if (response.status === 204) return;
+    await this.decode<unknown>(response, "DELETE liveStreams");
+  }
   // Binds a broadcast to a stream (50 quota units).
   async bindBroadcast(broadcastId: string, streamId: string): Promise<void> {
     await this.send("POST", dataAPI, "liveBroadcasts/bind", { id: broadcastId, part: "id", streamId }, "", {});

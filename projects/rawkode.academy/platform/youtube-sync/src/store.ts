@@ -71,6 +71,14 @@ export class Store {
     const row = await this.db.prepare("SELECT broadcast_id, stream_id, linked_at, bound_at FROM youtube_sync_broadcasts WHERE video_id = ?1").bind(videoId).first<{ broadcast_id: string; stream_id: string | null; linked_at: string | null; bound_at: string | null }>();
     return row ? { broadcastId: row.broadcast_id, streamId: row.stream_id, linked: row.linked_at !== null, bound: row.bound_at !== null } : null;
   }
+  // Broadcasts with a stream of their own that has not been deleted yet.
+  async liveStreams(): Promise<{ videoId: string; broadcastId: string; streamId: string }[]> {
+    const { results } = await this.db.prepare("SELECT video_id, broadcast_id, stream_id FROM youtube_sync_broadcasts WHERE stream_id IS NOT NULL AND stream_deleted_at IS NULL ORDER BY created_at").all<{ video_id: string; broadcast_id: string; stream_id: string }>();
+    return results.map(row => ({ videoId: row.video_id, broadcastId: row.broadcast_id, streamId: row.stream_id }));
+  }
+  async markStreamDeleted(videoId: string, at: string) {
+    await this.db.prepare("UPDATE youtube_sync_broadcasts SET stream_deleted_at = ?2 WHERE video_id = ?1").bind(videoId, at).run();
+  }
   async saveStream(videoId: string, streamId: string) {
     await this.db.prepare("UPDATE youtube_sync_broadcasts SET stream_id = ?2 WHERE video_id = ?1").bind(videoId, streamId).run();
   }

@@ -102,6 +102,7 @@ test("a transient failure retries; a malformed message and the dead-letter queue
 
 // ---- scheduled live streams ----
 import { BROADCAST_UNITS, scheduleBroadcast, type BroadcastPorts } from "../src/broadcast.ts";
+import { cleanupStreams } from "../src/streams.ts";
 
 const scheduled = { type: "video.scheduled", version: 1, videoId: "v1", updateId: "u9", at: "2026-11-26T20:00:00Z", privacy: "unlisted" };
 function ports(over: Partial<BroadcastPorts> = {}) {
@@ -207,6 +208,23 @@ test("each broadcast gets a stream of its own, made once and reused by a retried
   assert.equal(second.result.acked, true);
   assert.equal(made.length, 1, "the retry binds the stream it already made");
   assert.deepEqual(bound, ["stream-own"]);
+});
+
+test("the stream of a finished broadcast is deleted once, and one still to be streamed is kept", async () => {
+  const f = await fixture();
+  const db = (f.deps.store as unknown as { db: D1Database }).db;
+  for (const [video, broadcast, stream] of [["v1", "bbbbbbbbbb1", "s1"], ["v2", "bbbbbbbbbb2", "s2"], ["v3", "bbbbbbbbbb3", "s3"]]) {
+    await db.prepare("INSERT INTO youtube_sync_broadcasts (video_id, broadcast_id, created_at, stream_id) VALUES (?1, ?2, '2026-11-26T00:00:00Z', ?3)").bind(video, broadcast, stream).run();
+  }
+  const deleted: string[] = [];
+  const api = { async broadcastStatuses() { return new Map([["bbbbbbbbbb1", "complete"], ["bbbbbbbbbb2", "ready"]]); }, async deleteStream(id: string) { deleted.push(id); } };
+  const first = await cleanupStreams(f.deps, api);
+  assert.deepEqual(deleted, ["s1", "s3"], "complete, and one YouTube no longer has");
+  assert.equal(first.deleted, 2);
+  const second = await cleanupStreams(f.deps, api);
+  assert.equal(second.deleted, 0);
+  assert.deepEqual(deleted, ["s1", "s3"], "never deleted twice");
+  assert.deepEqual((await f.deps.store.liveStreams()).map(r => r.streamId), ["s2"]);
 });
 
 test("without room in today's quota the broadcast waits for the reset", async () => {
