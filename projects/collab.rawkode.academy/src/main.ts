@@ -27,6 +27,7 @@ import {
 	seedReviews,
 	seedSupporters,
 } from "./seed.ts";
+import { applyIngest, parseIngest, tokenMatches } from "./ingest.ts";
 import { KvStore, type Store } from "./store.ts";
 import type { Env, Persona, Session } from "./types.ts";
 import { adminOrgsPage, dashboardPage, loginPage, reviewPage } from "./views.ts";
@@ -94,6 +95,21 @@ export default {
 		const preview = isPreview(env);
 
 		if (url.pathname === "/healthz") return json({ ok: true });
+
+		// Machine endpoint: the encode workflow opens or refreshes a review when a draft is ready.
+		if (url.pathname === "/api/ingest/review") {
+			if (request.method !== "POST") return json({ error: "Method not allowed" }, 405);
+			if (!tokenMatches(request.headers.get("authorization"), env.INGEST_TOKEN)) return json({ error: "Unauthorized" }, 401);
+			const input = parseIngest(await request.json().catch(() => null));
+			if (!input) return json({ error: "Invalid payload" }, 400);
+			const ingestStore = storeFor(env);
+			const orgLinks = await ingestStore.listOrgLinks();
+			if (!orgLinks.some((link) => link.orgId === input.orgId)) return json({ error: "Unknown organisation" }, 422);
+			const review = applyIngest(await ingestStore.getReview(`${input.orgId}-${input.videoId}`), input, new Date());
+			await ingestStore.putReview(review);
+			console.log(JSON.stringify({ event: "review_ingested", reviewId: review.id, draftVersion: review.draftVersion }));
+			return json({ id: review.id, draftVersion: review.draftVersion, url: `/reviews/${review.id}` }, 200);
+		}
 
 		// Sign-in.
 		if (url.pathname === "/login") {
