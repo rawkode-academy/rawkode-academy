@@ -5,7 +5,7 @@ import { fetchVideos, type Video } from "./academy.ts";
 import { findDrift, lakeTotals, type Drift } from "./reconcile.ts";
 import { syncInstanceId } from "./collect.ts";
 import { GoogleClient } from "./google.ts";
-import type { AnalyticsCollector } from "./lake.ts";
+import { sendEvents, videoStatsEvents, type AnalyticsCollector } from "./lake.ts";
 
 const retries = { retries: { limit: 4, delay: "2 minutes", backoff: "exponential" }, timeout: "10 minutes" } as const;
 
@@ -81,8 +81,11 @@ async function reconcileLake(env: CloudflareEnv, step: WorkflowStep, videos: Vid
     const ids = videos.map(video => video.videoId);
     const drifting = unwrap(await step.do("reconcile with YouTube", retries, () => guarded(async () => {
       const basin = { accountId: env.CLOUDFLARE_ACCOUNT_ID, bucket: env.BASIN_BUCKET, token: env.BASIN_SQL_TOKEN };
-      const [lake, youtube] = await Promise.all([lakeTotals(basin), client(env).videoViewCounts(ids)]);
-      return { checked: youtube.size, drifting: findDrift(ids, lake, youtube) };
+      const [stored, youtube] = await Promise.all([lakeTotals(basin), client(env).videoViewCounts(ids)]);
+      // The public counts go to the lake too: partner analytics shows no lifetime below them.
+      const delivered = await sendEvents(lake(env), await videoStatsEvents(youtube, env.YOUTUBE_CHANNEL_ID));
+      if (delivered.failed > 0) throw new ServiceError("lake_rejected", `The analytics collector rejected ${delivered.failed} video statistics rows (${delivered.error})`, 502);
+      return { checked: youtube.size, drifting: findDrift(ids, stored, youtube) };
     })));
     const yesterday = await env.SYNC.get(syncInstanceId(new Date(now.getTime() - 86400000))).then(instance => instance.status()).catch(() => undefined);
     const earlier = new Set<string>((yesterday?.output as { reconcile?: { driftingIds?: string[] } } | undefined)?.reconcile?.driftingIds ?? []);

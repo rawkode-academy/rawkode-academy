@@ -95,6 +95,9 @@ test("Worker runtime: the cron starts the sync and the one-time backfill, and ro
   assert.deepEqual(reconcile.driftingIds, ["abcdefghijk"]);
   assert.match(reconcile.healing, /^heal-\d{4}-\d{2}-\d{2}$/);
   assert.equal(reconcile.persistentCount, 0);
+  // The public counts were recorded for the website to read.
+  const stats = upstreams.lakeEvents.filter(e => e.type === "youtube.video_stats");
+  assert.deepEqual(stats.map(e => [e.data.video, e.data.viewCount]).sort(), [["abcdefghijk", 1000], ["bcdefghijkl", 1000]]);
 
   const types = new Set(upstreams.lakeEvents.map(e => e.type));
   for (const type of ["youtube.daily", "youtube.daily_traffic", "youtube.top_videos", "youtube.traffic", "youtube.summary", "youtube.channel_stats", "youtube.video", "youtube.video_daily", "youtube.video_traffic"]) assert.ok(types.has(type), type);

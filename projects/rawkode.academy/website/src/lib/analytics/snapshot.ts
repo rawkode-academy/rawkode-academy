@@ -13,6 +13,7 @@ import type { ContentEnv } from "@/lib/live-content/env";
 import { queryGateway } from "@/lib/live-content/gateway";
 import { type ReachQuery, reachQueries, reachWindow, watchViewsSql } from "@/lib/analytics/reach";
 import type { ContentKV } from "@/lib/live-content/env";
+import { TABLE } from "@/lib/analytics/queries";
 import { type BasinConfig, basinQuery, type Row } from "@/server/basin";
 
 export const SNAPSHOT_KEY = "analytics:snapshot:v2";
@@ -45,6 +46,28 @@ export type Snapshot = {
 };
 
 const num = (value: unknown) => Number(value ?? 0);
+
+// YouTube's public lifetime view count per video, recorded daily by the
+// youtube-control reconciliation (latest observation per video).
+export const publicViewsSql = (videoIds: readonly string[]) => `
+SELECT video, views FROM (
+	SELECT json_get_str(value, 'data', 'video') AS video,
+		json_get_int(value, 'data', 'viewCount') AS views,
+		ROW_NUMBER() OVER (PARTITION BY json_get_str(value, 'data', 'video') ORDER BY json_get_str(value, 'data', 'fetchedAt') DESC) AS rn
+	FROM ${TABLE}
+	WHERE event_source = 'rawkode-academy-youtube' AND event_type = 'youtube.video_stats'
+		AND json_get_str(value, 'data', 'video') IN (${videoIds.map((id) => `'${id}'`).join(", ")})
+) WHERE rn = 1`;
+
+/**
+ * The Analytics API's per-day views can sum to less than the count YouTube
+ * shows on the watch page, so a video's lifetime never goes below the public
+ * count, and its 90 days never above its lifetime.
+ */
+export function withPublicViews(stats: VideoStats, publicViews: number | undefined): VideoStats {
+	if (publicViews === undefined || publicViews <= stats.views.lifetime) return stats;
+	return { ...stats, views: { d90: Math.min(stats.views.d90, publicViews), lifetime: publicViews } };
+}
 
 /** The snapshot key for a page path: "<slug>" for /watch/<slug>, "courses/<course>/<lesson>" for a lesson. */
 export function viewKey(path: string): string | null {
@@ -99,6 +122,14 @@ export async function buildSnapshot(
 				views: { d90: num(row.views_d90), lifetime: num(row.views_lifetime) },
 				minutes: { d90: num(row.minutes_d90), lifetime: num(row.minutes_lifetime) },
 			};
+		}
+	}
+	if (ids.length > 0) {
+		// Best effort: before the first reconciliation there are no public counts.
+		const publicRows = await basinQuery(config, publicViewsSql(ids), { ttlSeconds: 60 }).catch(() => []);
+		for (const row of publicRows) {
+			const stats = videos[String(row.video)];
+			if (stats) videos[String(row.video)] = withPublicViews(stats, num(row.views));
 		}
 	}
 	let academy: Snapshot["academy"] = [];

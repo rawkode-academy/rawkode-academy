@@ -3,6 +3,7 @@ import { guestTotals } from "@/lib/analytics/guest";
 import {
 	loadSnapshot,
 	viewKey,
+	withPublicViews,
 	refreshSnapshot,
 	SNAPSHOT_KEY,
 	type Snapshot,
@@ -101,5 +102,20 @@ describe("viewKey", () => {
 		expect(viewKey("/courses/edge")).toBeNull();
 		expect(viewKey("/read/post")).toBeNull();
 		expect(viewKey("")).toBeNull();
+	});
+});
+
+describe("withPublicViews", () => {
+	const stats = {
+		views: { d90: 40, lifetime: 100 },
+		minutes: { d90: 10, lifetime: 30 },
+	};
+	it("raises a lifetime the Analytics API undercounts to YouTube's public count", () => {
+		expect(withPublicViews(stats, 961).views).toEqual({ d90: 40, lifetime: 961 });
+		expect(withPublicViews(stats, 961).minutes).toEqual(stats.minutes);
+	});
+	it("never lowers a lifetime and ignores a missing count", () => {
+		expect(withPublicViews(stats, 90)).toBe(stats);
+		expect(withPublicViews(stats, undefined)).toBe(stats);
 	});
 });
