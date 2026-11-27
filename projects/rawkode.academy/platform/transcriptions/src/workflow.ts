@@ -9,6 +9,7 @@ import {
 	buildNova3Input,
 	correctTranscriptText,
 } from "./nova3";
+import { acceptReviewedChunk } from "./vtt-chunk";
 
 type Env = {
 	AI: Ai;
@@ -512,9 +513,8 @@ ${chunk}`;
 								max_tokens: 120000,
 							});
 
-							return typeof response.response === "string"
-								? response.response
-								: chunk; // Fallback to original if AI fails
+							// Falls back to the original chunk if the model's output is unusable
+							return acceptReviewedChunk(chunk, response.response);
 						} catch (error) {
 							console.error(`Error processing chunk ${index}:`, error);
 							return chunk; // Return original chunk if processing fails

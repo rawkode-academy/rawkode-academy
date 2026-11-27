@@ -51,3 +51,14 @@ describe("buildNova3Input", () => {
 		);
 	});
 });
+
+describe("Datum Cloud corrections", () => {
+	test("normalises the datumctl CLI and product names", () => {
+		expect(correctTranscriptText("Datum Control and Datumctl on datum cloud")).toBe(
+			"datumctl and datumctl on Datum Cloud",
+		);
+		expect(correctTranscriptText("like kubectl control does")).toBe(
+			"like kubectl does",
+		);
+	});
+});
