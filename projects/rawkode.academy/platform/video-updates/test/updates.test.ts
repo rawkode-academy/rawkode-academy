@@ -195,10 +195,13 @@ describe("scheduling a live stream", () => {
 		expect(await rows(env.CASTING_CREDITS, "SELECT * FROM casting_credits WHERE subject_id='newlive3'")).toEqual([]);
 	});
 
-	it("reads the model's answer in either shape and builds a prompt from the facts", () => {
-		expect(new TextDecoder().decode(imageOf({ image: btoa("x") }))).toBe("x");
-		expect(new TextDecoder().decode(imageOf({ data: [{ b64_json: btoa("y") }] }))).toBe("y");
-		expect(() => imageOf({})).toThrow("no image");
+	it("reads the model's answer in any shape and builds a prompt from the facts", async () => {
+		expect(new TextDecoder().decode(await imageOf({ image: btoa("x") }))).toBe("x");
+		expect(new TextDecoder().decode(await imageOf({ data: [{ b64_json: btoa("y") }] }))).toBe("y");
+		expect(new TextDecoder().decode(await imageOf({ image: `data:image/png;base64,${btoa("z")}` }))).toBe("z");
+		expect(new TextDecoder().decode(await imageOf({ image: btoa("??>>").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "") }))).toBe("??>>");
+		expect(new TextDecoder().decode(await imageOf(new TextEncoder().encode("raw")))).toBe("raw");
+		await expect(imageOf({ weird: 1 })).rejects.toThrow("no image: {weird: 1}");
 		expect(prompt({ title: "T", technologies: ["Kueue"], people: [], show: "Rawkode Live" })).toContain('"T"');
 	});
 });
