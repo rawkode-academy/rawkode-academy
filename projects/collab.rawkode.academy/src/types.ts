@@ -1,14 +1,12 @@
 export interface Env {
 	STORE: KVNamespace;
-	/** platform-video-collaborations, read-only here. Absent in the preview. */
+	/** platform-video-collaborations, read-only here. */
 	COLLABORATIONS_DB?: D1Database;
-	/** platform-videos, read-only here. Absent in the preview. */
+	/** platform-videos, read-only here. */
 	VIDEOS_DB?: D1Database;
-	/** platform-supporters, read-only here. Absent in the preview. */
+	/** platform-supporters, read-only here. */
 	SUPPORTERS_DB?: D1Database;
-	/** "true" only in the pull-request preview Worker. */
-	PREVIEW?: string;
-	/** Public origin registered with the OIDC client. Empty in the preview. */
+	/** Public origin registered with the OIDC client. */
 	PUBLIC_ORIGIN: string;
 	OIDC_ISSUER: string;
 	OIDC_CLIENT_ID: string;

@@ -21,7 +21,15 @@ export interface Directory {
 	collaborators(): Promise<Named[]>;
 	supporters(): Promise<Named[]>;
 	collaborationsFor(collaboratorId: string): Promise<Collaboration[]>;
+	/** Collaborators whose record already names an identity organisation. */
+	collaboratorOrgLinks(): Promise<OrgLink[]>;
 }
+
+/** Links set in the portal win over the ones the company records carry. */
+export const mergeLinks = (manual: readonly OrgLink[], derived: readonly OrgLink[]): OrgLink[] => {
+	const manualIds = new Set(manual.map((link) => link.orgId));
+	return [...manual, ...derived.filter((link) => !manualIds.has(link.orgId))];
+};
 
 const iso = (seconds: number | null): string | null =>
 	seconds === null || seconds === undefined ? null : new Date(seconds * 1000).toISOString();
@@ -58,6 +66,14 @@ export class D1Directory implements Directory {
 			"SELECT id, name FROM collaborators ORDER BY name",
 		).all<Named>();
 		return results;
+	}
+
+	async collaboratorOrgLinks() {
+		if (!this.env.COLLABORATIONS_DB) return [];
+		const { results } = await this.env.COLLABORATIONS_DB.prepare(
+			"SELECT id, organization_id FROM collaborators WHERE organization_id IS NOT NULL",
+		).all<{ id: string; organization_id: string }>();
+		return results.map((row) => ({ orgId: row.organization_id, collaboratorId: row.id }));
 	}
 
 	async supporters() {
@@ -99,25 +115,5 @@ export class D1Directory implements Directory {
 					]
 				: [];
 		});
-	}
-}
-
-/** Fictional records for the preview. */
-export class StaticDirectory implements Directory {
-	constructor(
-		private readonly data: {
-			collaborators: Named[];
-			supporters: Named[];
-			collaborations: Collaboration[];
-		},
-	) {}
-	async collaborators() {
-		return this.data.collaborators;
-	}
-	async supporters() {
-		return this.data.supporters;
-	}
-	async collaborationsFor(collaboratorId: string) {
-		return this.data.collaborations.filter((item) => item.collaboratorId === collaboratorId);
 	}
 }

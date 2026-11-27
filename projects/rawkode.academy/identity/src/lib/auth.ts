@@ -335,6 +335,7 @@ export const createAuth = async (env: AuthEnv) => {
 						// Workaround for https://github.com/better-auth/better-auth/issues/6651
 						clientSecret: "pkce-public-client-placeholder",
 						redirectUrls: [
+							"https://collaborate.rawkode.academy/api/auth/callback",
 							"https://collab.rawkode.academy/api/auth/callback",
 							"http://localhost:4323/api/auth/callback",
 						],
@@ -401,6 +402,7 @@ export const createAuth = async (env: AuthEnv) => {
 			"https://klustered.dev",
 			"http://localhost:4322",
 			"https://rawkode.chat",
+			"https://collaborate.rawkode.academy",
 			"https://collab.rawkode.academy",
 			"http://localhost:4323",
 			"http://localhost:3000",

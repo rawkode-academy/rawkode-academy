@@ -26,25 +26,9 @@ const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
 const LOGIN_TTL_SECONDS = 600;
 
 export class KvStore implements Store {
-	constructor(
-		private readonly kv: KVNamespace,
-		private readonly seed: { links: OrgLink[]; reviews: Review[]; comments: Comment[] } | null,
-	) {}
-
-	/** Writes the seed once, only when the preview namespace is empty. */
-	private async ensureSeeded(): Promise<void> {
-		if (!this.seed) return;
-		if (await this.kv.get("seeded")) return;
-		await Promise.all([
-			...this.seed.links.map((l) => this.kv.put(`orglink:${l.orgId}`, JSON.stringify(l))),
-			...this.seed.reviews.map((r) => this.kv.put(`review:${r.id}`, JSON.stringify(r))),
-			...this.seed.comments.map((c) => this.kv.put(`comment:${c.id}`, JSON.stringify(c))),
-		]);
-		await this.kv.put("seeded", "1");
-	}
+	constructor(private readonly kv: KVNamespace) {}
 
 	private async list<T>(prefix: string): Promise<T[]> {
-		await this.ensureSeeded();
 		const keys = await this.kv.list({ prefix });
 		const values = await Promise.all(keys.keys.map((key) => this.kv.get(key.name, "json")));
 		return values.filter((value): value is T => value !== null);
@@ -63,7 +47,6 @@ export class KvStore implements Store {
 		return this.list<Review>("review:");
 	}
 	async getReview(id: string) {
-		await this.ensureSeeded();
 		return (await this.kv.get(`review:${id}`, "json")) as Review | null;
 	}
 	async putReview(review: Review) {
@@ -80,7 +63,6 @@ export class KvStore implements Store {
 			);
 	}
 	async getComment(id: string) {
-		await this.ensureSeeded();
 		return (await this.kv.get(`comment:${id}`, "json")) as Comment | null;
 	}
 	async putComment(comment: Comment) {

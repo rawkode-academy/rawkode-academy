@@ -28,8 +28,6 @@ on:
     - projects/collab.rawkode.academy/tsconfig.json/**
     - projects/collab.rawkode.academy/wrangler.jsonc
     - projects/collab.rawkode.academy/wrangler.jsonc/**
-    - projects/collab.rawkode.academy/wrangler.preview.jsonc
-    - projects/collab.rawkode.academy/wrangler.preview.jsonc/**
   workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}

@@ -11,7 +11,7 @@ import {
 	scopeFor,
 } from "../src/access.ts";
 import { principalFromClaims } from "../src/auth.ts";
-import { previewPersonas, seedComments, seedOrgs, seedReviews } from "../src/seed.ts";
+import { previewPersonas, seedComments, seedOrgs, seedReviews } from "./fixtures.ts";
 import type { Principal, Session } from "../src/types.ts";
 
 const persona = (key: string): Principal => previewPersonas.find((p) => p.key === key)!.principal;

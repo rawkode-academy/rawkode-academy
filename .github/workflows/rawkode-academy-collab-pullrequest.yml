@@ -10,8 +10,6 @@ on:
     - cue.mod/**
     - projects/*.cue
     - projects/collab.rawkode.academy/*.cue
-    - projects/collab.rawkode.academy/env.cue
-    - projects/collab.rawkode.academy/env.cue/**
     - projects/collab.rawkode.academy/flake.lock
     - projects/collab.rawkode.academy/flake.lock/**
     - projects/collab.rawkode.academy/flake.nix
@@ -26,8 +24,6 @@ on:
     - projects/collab.rawkode.academy/tsconfig.json/**
     - projects/collab.rawkode.academy/wrangler.jsonc
     - projects/collab.rawkode.academy/wrangler.jsonc/**
-    - projects/collab.rawkode.academy/wrangler.preview.jsonc
-    - projects/collab.rawkode.academy/wrangler.preview.jsonc/**
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true

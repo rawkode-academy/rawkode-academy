@@ -1,5 +1,5 @@
-import { deriveOrgs, type Collaboration, type Named } from "./directory.ts";
-import type { Comment, OrgLink, Principal, Review } from "./types.ts";
+import { deriveOrgs, type Collaboration, type Named } from "../src/directory.ts";
+import type { Comment, OrgLink, Principal, Review } from "../src/types.ts";
 
 /**
  * Fictional data for the pull-request preview only. The organisations, people
