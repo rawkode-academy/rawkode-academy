@@ -35,6 +35,10 @@ const TRANSCRIPT_CORRECTIONS: Array<[RegExp, string]> = [
 	[/\byokeflight\b/gi, "Yoke flight"],
 	[/\byokeflights\b/gi, "Yoke flights"],
 	[/\byoke\b/gi, "Yoke"],
+	[/\bdatum ?control\b/gi, "datumctl"],
+	[/\bdatumctl\b/gi, "datumctl"],
+	[/\bdatum cloud\b/gi, "Datum Cloud"],
+	[/\bkubectl control\b/gi, "kubectl"],
 ];
 
 export function buildNova3Input({
