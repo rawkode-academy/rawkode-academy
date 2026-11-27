@@ -523,7 +523,12 @@ ${chunk}`;
 				);
 
 				// Stitch chunks back together
-				const correctedVtt = stitchWebVTTChunks(correctedChunks);
+				// The review model can undo the deterministic corrections (it turns
+				// "datumctl get" back into "data control get"), so apply them again
+				// to the final text.
+				const correctedVtt = correctTranscriptText(
+					stitchWebVTTChunks(correctedChunks),
+				);
 
 				// Store the corrected WebVTT
 				const correctedVttKey = `videos/${videoId}/captions/en.vtt`;
