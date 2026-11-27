@@ -19,7 +19,7 @@ const frozen = scope.readOnly;
 
 <Base title={review.title} session={session}>
 	<div class={layout.root}>
-		<div class={layout.container}>
+		<div class:list={[layout.container, "gutter"]}>
 			<p class:list={[layout.breadcrumbs, "crumbs"]}><a href="/">Collaborations</a> / {review.collaborator.name}</p>
 			<h1 class={layout.title}>{review.title}</h1>
 			<p class="meta"><span class={layout.tag}>{STATE_LABEL[review.state] ?? review.state}</span> Cut {review.draftVersion} · due {localDate(review.dueAt)}</p>

@@ -132,7 +132,8 @@ const submit = () =>
 @media (min-width: 64rem) { .review { grid-template-columns: minmax(0, 1.6fr) minmax(20rem, 1fr); align-items: start; } }
 video { width: 100%; aspect-ratio: 16 / 9; background: var(--colors-academy-ink); border-radius: var(--radii-academy-m); display: block; }
 .signoff { margin-top: 1rem; padding: 1rem; border: 1px solid var(--colors-academy-border); border-radius: var(--radii-academy-m); background: var(--colors-academy-panel); display: grid; gap: 0.75rem; justify-items: start; }
-.comments { border: 1px solid var(--colors-academy-border); border-radius: var(--radii-academy-m); background: var(--colors-academy-panel); padding: 1.25rem; }
+.comments { border: 1px solid var(--colors-academy-border); border-radius: var(--radii-academy-m); background: var(--colors-academy-panel); padding: 1.25rem; min-width: 0; }
+@media (max-width: 40rem) { .comments { padding: 1rem; } .new button, .signoff button { width: 100%; min-height: 3rem; } textarea { width: 100%; } .head .cut { margin-left: 0; } }
 h2 { font-family: var(--fonts-academy-display); font-size: 1.125rem; margin: 0 0 1rem; }
 .muted { color: var(--colors-academy-text-muted); font-size: 0.9375rem; }
 .list { list-style: none; margin: 0 0 1.25rem; padding: 0; display: grid; gap: 1rem; }
