@@ -150,6 +150,15 @@ export async function scheduledCandidates(store: Store, planId: string, value: s
   return limit ? (await selectCandidates(store, planId, { limit })).candidates : [];
 }
 
+// Plans made while another plan's write was still waiting in the queue (quota spent) see the video as it was
+// before that write. When the live text is exactly what our own write from an older plan left, nobody else
+// edited it, so the newer plan (a revert, say) may go ahead and overwrite it instead of going stale.
+async function ownEarlierWrite(deps: Deps, planId: string, youtubeId: string, live: Snippet, fields: TextField[]) {
+  const last = (await deps.store.writes({ youtubeId })).find(row => row.kind === "apply" && row.after);
+  if (!last || last.planId >= planId) return false;
+  return (await managedHash(pickManaged(live, fields))) === (await managedHash(pickManaged(last.after!, fields)));
+}
+
 // Writes the selected videos now, in this call. The queue consumer uses it for
 // one video at a time (`only`); a bulk apply goes through the queue instead.
 export async function applyPlan(deps: Deps, planId: string, options: ApplyOptions, only?: string) {
@@ -175,7 +184,7 @@ export async function applyPlan(deps: Deps, planId: string, options: ApplyOption
       if (!snippet) { outcomes.push({ youtubeId: item.youtubeId, slug: item.slug, result: "missing" }); continue; }
       // The diff that was reviewed is the diff that is written: refuse if the
       // live fields changed since the plan read them.
-      if (needText && (await managedHash(pickManaged(snippet, planFields))) !== item.liveHash) {
+      if (needText && (await managedHash(pickManaged(snippet, planFields))) !== item.liveHash && !(await ownEarlierWrite(deps, planId, item.youtubeId, snippet, planFields))) {
         await deps.store.log({ planId, youtubeId: item.youtubeId, at: deps.now().toISOString(), kind: "apply", result: "stale", detail: "live fields changed since the plan", before: snippet, after: null });
         outcomes.push({ youtubeId: item.youtubeId, slug: item.slug, result: "stale", detail: "live fields changed since the plan; run a new plan" });
         continue;
