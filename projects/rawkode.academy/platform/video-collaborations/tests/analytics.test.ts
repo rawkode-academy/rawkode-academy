@@ -11,14 +11,14 @@ const DATUM_VIDEO = "dywvwcapxttxtrzzifmfs328";
 const snapshot = {
 	generatedAt: "2026-11-27T04:00:00.000Z",
 	academy: [
-		{ id: DATUM_VIDEO, title: "Make Safe Changes to Datum", slug: "make-safe-changes", youtube: "AAAAAAAAAAA" },
+		{ id: DATUM_VIDEO, title: "Make Safe Changes to Datum", slug: "make-safe-changes", youtube: "AAAAAAAAAAA", lesson: "courses/datum/safe" },
 		{ id: "other", title: "Someone else's video", slug: "other", youtube: "BBBBBBBBBBB" },
 	],
 	videos: {
 		AAAAAAAAAAA: { views: { d90: 40, lifetime: 400 }, minutes: { d90: 80, lifetime: 800 } },
 		BBBBBBBBBBB: { views: { d90: 9, lifetime: 9 }, minutes: { d90: 9, lifetime: 9 } },
 	},
-	watch: { "make-safe-changes": { d90: 7, lifetime: 70 }, other: { d90: 1, lifetime: 1 } },
+	watch: { "make-safe-changes": { d90: 7, lifetime: 70 }, "courses/datum/safe": { d90: 3, lifetime: 30 }, other: { d90: 1, lifetime: 1 } },
 };
 const kv = { get: async () => snapshot } as unknown as KVNamespace;
 
@@ -39,14 +39,14 @@ beforeAll(async () => {
 afterAll(() => db.dispose());
 
 describe("collaborator analytics", () => {
-	it("sums only the collaborator's own videos for a member of its organisation", async () => {
+	it("sums watch-page and lesson-page views of only the collaborator's own videos for a member of its organisation", async () => {
 		const analytics = await ask({ orgs: [{ id: "datum", role: "member" }] });
 		expect(analytics).toEqual({
 			generatedAt: snapshot.generatedAt,
-			siteViews: { d90: 7, lifetime: 70 },
+			siteViews: { d90: 10, lifetime: 100 },
 			youtubeViews: { lifetime: 400 },
 			minutesWatched: { lifetime: 800 },
-			videos: [{ slug: "make-safe-changes", siteViews: { lifetime: 70 }, youtubeViews: { d90: 40 } }],
+			videos: [{ slug: "make-safe-changes", siteViews: { lifetime: 100 }, youtubeViews: { d90: 40 } }],
 		});
 	});
 

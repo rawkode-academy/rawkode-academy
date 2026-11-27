@@ -32,12 +32,30 @@ export type Snapshot = {
 	/** Per YouTube video ID. */
 	videos: Record<string, VideoStats>;
 	/** Every Academy video, with its YouTube video where one is certain. Partner analytics joins on it. */
-	academy: { id: string; title: string; slug: string; youtube: string | null }[];
-	/** Human page views per Academy video slug (/watch/<slug>). */
+	academy: {
+		id: string;
+		title: string;
+		slug: string;
+		youtube: string | null;
+		/** Lesson page key ("courses/<course>/<lesson>") when the video is a course lesson. */
+		lesson: string | null;
+	}[];
+	/** Human page views per key: a video slug (/watch/<slug>) or a lesson page ("courses/<course>/<lesson>"). */
 	watch: Record<string, { d90: number; lifetime: number }>;
 };
 
 const num = (value: unknown) => Number(value ?? 0);
+
+/** The snapshot key for a page path: "<slug>" for /watch/<slug>, "courses/<course>/<lesson>" for a lesson. */
+export function viewKey(path: string): string | null {
+	const clean = path.replace(/[?#].*$/, "").replace(/\/+$/, "");
+	const watch = /^\/watch\/([^/]+)$/.exec(clean);
+	if (watch) return watch[1];
+	const lesson = /^\/courses\/([^/]+)\/([^/]+)$/.exec(clean);
+	return lesson ? `courses/${lesson[1]}/${lesson[2]}` : null;
+}
+
+const LESSONS_QUERY = `query AnalyticsLessons { allCourses { modules { courseId slug video { id } } } }`;
 
 // Basin queries run uncached here (ttl 0 is not an option on the client), so a
 // refresh always reads the lake; the page never does.
@@ -57,9 +75,9 @@ export async function buildSnapshot(
 	]);
 	const watch: Snapshot["watch"] = {};
 	for (const row of await basinQuery(config, watchViewsSql(window), { ttlSeconds: 60 })) {
-		const slug = String(row.path ?? "").replace(/^\/watch\//, "").replace(/[/?#].*$/, "");
-		if (!slug) continue;
-		const entry = (watch[slug] ??= { d90: 0, lifetime: 0 });
+		const key = viewKey(String(row.path ?? ""));
+		if (!key) continue;
+		const entry = (watch[key] ??= { d90: 0, lifetime: 0 });
 		entry.d90 += num(row.views_d90);
 		entry.lifetime += num(row.views_lifetime);
 	}

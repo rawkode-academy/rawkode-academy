@@ -122,12 +122,15 @@ export const reachQueries = (w: ReachWindow) => ({
 		) WHERE rn = 1`,
 });
 
-/** Human views per Academy video page, for partner analytics. Aggregates only. */
+/**
+ * Human views per Academy video page, for partner analytics. Aggregates only.
+ * A video is watched at /watch/<slug>, or as a lesson at /courses/<course>/<lesson>.
+ */
 export const watchViewsSql = (w: ReachWindow) => `
 	SELECT path,
 		approx_distinct(CASE WHEN ${since(w.d90)} THEN event_id END) AS views_d90,
 		approx_distinct(event_id) AS views_lifetime
-	${HUMAN_VIEWS(w)} AND path LIKE '/watch/%'
+	${HUMAN_VIEWS(w)} AND (path LIKE '/watch/%' OR path LIKE '/courses/%/%')
 	GROUP BY path`;
 
 export type ReachQuery = keyof ReturnType<typeof reachQueries>;
