@@ -17,16 +17,7 @@ import {
 	principalFromClaims,
 	randomToken,
 } from "./auth.ts";
-import { D1Directory, StaticDirectory, deriveOrgs, type Directory } from "./directory.ts";
-import {
-	previewPersonas,
-	seedCollaborations,
-	seedCollaborators,
-	seedComments,
-	seedLinks,
-	seedReviews,
-	seedSupporters,
-} from "./seed.ts";
+import { D1Directory, deriveOrgs, mergeLinks, type Directory } from "./directory.ts";
 import { applyIngest, parseIngest, tokenMatches } from "./ingest.ts";
 import { KvStore, type Store } from "./store.ts";
 import type { Env, Persona, Session } from "./types.ts";
@@ -35,15 +26,9 @@ import { adminOrgsPage, dashboardPage, loginPage, reviewPage } from "./views.ts"
 const COOKIE = "portal_session";
 const SESSION_MS = 1000 * 60 * 60 * 24 * 7;
 
-const isPreview = (env: Env) => env.PREVIEW === "true";
+const storeFor = (env: Env): Store => new KvStore(env.STORE);
 
-const storeFor = (env: Env): Store =>
-	new KvStore(env.STORE, isPreview(env) ? { links: seedLinks, reviews: seedReviews, comments: seedComments } : null);
-
-const directoryFor = (env: Env): Directory =>
-	isPreview(env)
-		? new StaticDirectory({ collaborators: seedCollaborators, supporters: seedSupporters, collaborations: seedCollaborations })
-		: new D1Directory(env);
+const directoryFor = (env: Env): Directory => new D1Directory(env);
 
 const headers = (extra: Record<string, string> = {}, nonce = ""): Headers => {
 	const h = new Headers({
@@ -51,7 +36,7 @@ const headers = (extra: Record<string, string> = {}, nonce = ""): Headers => {
 		"Cache-Control": "no-store",
 		"X-Content-Type-Options": "nosniff",
 		"Referrer-Policy": "same-origin",
-		"Content-Security-Policy": `default-src 'self'; media-src 'self' https://interactive-examples.mdn.mozilla.net; script-src 'nonce-${nonce}'; style-src 'unsafe-inline'; frame-ancestors 'none'; form-action 'self'`,
+		"Content-Security-Policy": `default-src 'self'; media-src 'self' blob: https://content.rawkode.academy; connect-src 'self' https://content.rawkode.academy; script-src 'nonce-${nonce}' https://cdnjs.cloudflare.com; style-src 'unsafe-inline'; frame-ancestors 'none'; form-action 'self'`,
 		...extra,
 	});
 	return h;
@@ -66,10 +51,10 @@ const json = (body: unknown, status = 200) =>
 		headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
 	});
 
-const redirect = (to: string, cookie?: string) => {
+const redirect = (to: string, cookie?: string, status = 303) => {
 	const h = new Headers({ Location: to, "Cache-Control": "no-store" });
 	if (cookie) h.append("Set-Cookie", cookie);
-	return new Response(null, { status: 303, headers: h });
+	return new Response(null, { status, headers: h });
 };
 
 const cookieValue = (request: Request, name: string): string | null => {
@@ -92,7 +77,10 @@ export default {
 		const url = new URL(request.url);
 		const store = storeFor(env);
 		const nonce = randomToken(16);
-		const preview = isPreview(env);
+
+		if (url.hostname === "collab.rawkode.academy") {
+			return redirect(`https://collaborate.rawkode.academy${url.pathname}${url.search}`, undefined, 301);
+		}
 
 		if (url.pathname === "/healthz") return json({ ok: true });
 
@@ -103,7 +91,7 @@ export default {
 			const input = parseIngest(await request.json().catch(() => null));
 			if (!input) return json({ error: "Invalid payload" }, 400);
 			const ingestStore = storeFor(env);
-			const orgLinks = await ingestStore.listOrgLinks();
+			const orgLinks = mergeLinks(await ingestStore.listOrgLinks(), await directoryFor(env).collaboratorOrgLinks());
 			if (!orgLinks.some((link) => link.orgId === input.orgId)) return json({ error: "Unknown organisation" }, 422);
 			const review = applyIngest(await ingestStore.getReview(`${input.orgId}-${input.videoId}`), input, new Date());
 			await ingestStore.putReview(review);
@@ -113,36 +101,26 @@ export default {
 
 		// Sign-in.
 		if (url.pathname === "/login") {
-			return html(loginPage(preview, previewPersonas), nonce);
+			return html(loginPage(), nonce);
 		}
-		if (url.pathname === "/login/start" && request.method === "GET" && !preview) {
+		if (url.pathname === "/login/start" && request.method === "GET") {
 			const state = randomToken();
 			const verifier = randomToken(48);
 			await store.putLogin(state, verifier);
 			return redirect(authorizationUrl(env, originOf(env, request), state, await challengeFor(verifier)));
 		}
-		if (url.pathname === "/api/auth/callback" && !preview) {
+		if (url.pathname === "/api/auth/callback") {
 			const state = url.searchParams.get("state");
 			const code = url.searchParams.get("code");
 			const verifier = state ? await store.takeLogin(state) : null;
 			if (!code || !verifier) return redirect("/login");
 			const claims = await exchangeCode(env, originOf(env, request), code, verifier);
 			const principal = claims ? principalFromClaims(claims) : null;
-			if (!principal) return html(loginPage(false, []).replace("</main>", `<p>We couldn't sign you in. Ask Rawkode Academy to check your GitHub account is on your organisation.</p></main>`), nonce, 401);
+			if (!principal) return html(loginPage().replace("</main>", `<p>We couldn't sign you in. Ask Rawkode Academy to check your GitHub account is on your organisation.</p></main>`), nonce, 401);
 			const id = randomToken();
 			await store.putSession(id, { principal, expiresAt: Date.now() + SESSION_MS });
 			return redirect("/", sessionCookie(request, id, SESSION_MS / 1000));
 		}
-		if (url.pathname === "/login/preview" && request.method === "POST" && preview) {
-			if (!sameOrigin(request, env)) return json({ error: "Bad origin" }, 403);
-			const key = String((await request.formData()).get("persona") ?? "");
-			const persona = previewPersonas.find((item) => item.key === key);
-			if (!persona) return redirect("/login");
-			const id = randomToken();
-			await store.putSession(id, { principal: persona.principal, expiresAt: Date.now() + SESSION_MS });
-			return redirect("/", sessionCookie(request, id, SESSION_MS / 1000));
-		}
-
 		// Everything below needs a session.
 		const sessionId = cookieValue(request, COOKIE);
 		const session = sessionId ? await store.getSession(sessionId) : null;
@@ -151,7 +129,7 @@ export default {
 		}
 		const principal = session.principal;
 		const directory = directoryFor(env);
-		const links = await store.listOrgLinks();
+		const links = mergeLinks(await store.listOrgLinks(), await directory.collaboratorOrgLinks());
 		const [collaborators, supporters] = await Promise.all([directory.collaborators(), directory.supporters()]);
 		const orgs = deriveOrgs(links, collaborators, supporters);
 		const scope = scopeFor(session, orgs);
@@ -192,6 +170,23 @@ export default {
 				console.log(JSON.stringify({ event: "org_link", admin: principal.login, orgId, collaboratorId, supporterId }));
 				return redirect("/admin/orgs");
 			}
+			if (url.pathname === "/admin/reviews") {
+				if (!principal.admin || session.viewAs) return json({ error: "Forbidden" }, 403);
+				const form = await request.formData();
+				const videoId = String(form.get("videoId") ?? "").trim();
+				const input = parseIngest({
+					orgId: String(form.get("orgId") ?? ""),
+					videoId,
+					title: String(form.get("title") ?? ""),
+					videoUrl: String(form.get("videoUrl") ?? "").trim() || `https://content.rawkode.academy/videos/${videoId}/stream.m3u8`,
+					dueAt: String(form.get("dueAt") ?? "") || undefined,
+				});
+				if (!input || !links.some((link) => link.orgId === input.orgId)) return redirect("/admin/orgs?error=review");
+				const review = applyIngest(await store.getReview(`${input.orgId}-${input.videoId}`), input, new Date());
+				await store.putReview(review);
+				console.log(JSON.stringify({ event: "review_opened", admin: principal.login, reviewId: review.id, draftVersion: review.draftVersion }));
+				return redirect(`/reviews/${review.id}`);
+			}
 			if (url.pathname === "/view-as/exit") {
 				const { viewAs: _gone, ...rest } = session;
 				await store.putSession(sessionId, rest);
@@ -202,7 +197,7 @@ export default {
 		if (url.pathname === "/admin/orgs" && request.method === "GET") {
 			if (!principal.admin || session.viewAs) return html(page404(), nonce, 404);
 			return html(
-				adminOrgsPage({ session, scope, orgs, preview, links, collaborators, supporters, error: url.searchParams.get("error") }),
+				adminOrgsPage({ session, scope, orgs, links, collaborators, supporters, error: url.searchParams.get("error") }),
 				nonce,
 			);
 		}
@@ -218,7 +213,7 @@ export default {
 				)
 			).flat();
 			const unlinked = !principal.admin && principal.orgs.length > 0 && scope.orgIds.size === 0;
-			return html(dashboardPage(session, scope, orgs, preview, reviews, collaborations, unlinked), nonce, 200);
+			return html(dashboardPage(session, scope, orgs, reviews, collaborations, unlinked), nonce, 200);
 		}
 
 		const reviewMatch = url.pathname.match(/^\/reviews\/([\w-]+)$/);
@@ -228,7 +223,7 @@ export default {
 			const comments = await store.listComments(review.id);
 			return html(
 				reviewPage({
-					session, scope, orgs, preview, review, comments, nonce, principal,
+					session, scope, orgs, review, comments, nonce, principal,
 					canComment: canComment(scope, review),
 					canSignOff: canSignOff(scope, principal, review),
 				}),

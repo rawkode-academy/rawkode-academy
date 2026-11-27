@@ -7,8 +7,7 @@
     "check": "tsc --noEmit",
     "test": "node --experimental-transform-types --test test/*.test.ts",
     "build": "wrangler deploy --dry-run --outdir dist",
-    "deploy": "wrangler deploy",
-    "deploy:preview": "wrangler deploy --config wrangler.preview.jsonc"
+    "deploy": "wrangler deploy"
   },
   "overrides": {
     "workerd": "1.20261031.1"

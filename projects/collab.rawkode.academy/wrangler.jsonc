@@ -5,14 +5,18 @@
   "compatibility_date": "2026-10-31",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": false,
-  "routes": [{ "pattern": "collab.rawkode.academy", "custom_domain": true }],
+  "routes": [
+    { "pattern": "collaborate.rawkode.academy", "custom_domain": true },
+    // The previous host. The Worker redirects it to collaborate.
+    { "pattern": "collab.rawkode.academy", "custom_domain": true }
+  ],
   "observability": {
     "redact_query_string": true,
     "traces": { "enabled": true, "destinations": ["grafana-traces"] },
     "logs": { "enabled": true, "invocation_logs": false, "destinations": ["grafana-logs"] }
   },
   "vars": {
-    "PUBLIC_ORIGIN": "https://collab.rawkode.academy",
+    "PUBLIC_ORIGIN": "https://collaborate.rawkode.academy",
     "OIDC_ISSUER": "https://id.rawkode.academy",
     "OIDC_CLIENT_ID": "rawkode-collab"
   },

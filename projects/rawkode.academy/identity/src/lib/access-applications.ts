@@ -58,7 +58,7 @@ export const ACCESS_APPLICATIONS: AccessApplication[] = [
 	{
 		clientId: "rawkode-collab",
 		name: "Rawkode Partner Portal",
-		description: "collab.rawkode.academy, where partners and supporters review drafts",
+		description: "collaborate.rawkode.academy, where partners and supporters review drafts",
 		roles: [
 			{
 				key: "collab_admin",

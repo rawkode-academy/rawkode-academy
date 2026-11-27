@@ -21,3 +21,13 @@ test("deriveOrgs labels partner, supporter and both; drops dangling links", () =
 		[["a", "partner"], ["b", "supporter"], ["c", "both"]],
 	);
 });
+
+import { mergeLinks } from "../src/directory.ts";
+
+test("mergeLinks lets portal links override collaborator records", () => {
+	const merged = mergeLinks(
+		[{ orgId: "a", supporterId: "s1" }],
+		[{ orgId: "a", collaboratorId: "c1" }, { orgId: "b", collaboratorId: "c2" }],
+	);
+	assert.deepEqual(merged, [{ orgId: "a", supporterId: "s1" }, { orgId: "b", collaboratorId: "c2" }]);
+});

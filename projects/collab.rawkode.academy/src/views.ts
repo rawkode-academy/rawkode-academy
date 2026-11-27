@@ -19,13 +19,10 @@ const TRIAGE_LABEL: Record<Triage, string> = {
 	withdrawn: "Withdrawn",
 };
 
-export const header = (session: Session, scope: Scope, orgs: readonly Org[], preview: boolean): string => {
+export const header = (session: Session, scope: Scope, orgs: readonly Org[]): string => {
 	const { principal } = session;
 	const banner = scope.banner
 		? `<div class="banner"><span>Viewing as <strong>${esc(scope.banner.orgName)}</strong> (${scope.banner.persona}). Read-only.</span><form method="post" action="/view-as/exit"><button class="ghost" style="background:transparent">Exit</button></form></div>`
-		: "";
-	const previewNote = preview
-		? `<div class="banner"><span>Preview with fictional data. Nothing here is real and sign-in is a persona picker.</span></div>`
 		: "";
 	const viewAs = principal.admin && !scope.banner
 		? `<form method="post" action="/view-as" class="row"><select name="target" aria-label="View as">${orgs
@@ -35,29 +32,19 @@ export const header = (session: Session, scope: Scope, orgs: readonly Org[], pre
 				])
 				.join("")}</select><button class="ghost" style="background:transparent">View as</button></form>`
 		: "";
-	return `${previewNote}${banner}<header><a href="/"><strong>Rawkode Academy partner portal</strong></a><div class="row">${viewAs}<span class="muted">${esc(principal.name)}</span><form method="post" action="/logout"><button class="ghost" style="background:transparent">Sign out</button></form></div></header>`;
+	return `${banner}<header><a href="/"><strong>Rawkode Academy partner portal</strong></a><div class="row">${viewAs}<span class="muted">${esc(principal.name)}</span><form method="post" action="/logout"><button class="ghost" style="background:transparent">Sign out</button></form></div></header>`;
 };
 
-export const loginPage = (preview: boolean, personas: readonly { key: string; label: string }[]): string =>
+export const loginPage = (): string =>
 	page(
 		"Sign in",
-		`<main><h1>Partner portal</h1><p>Where partners review draft videos before they go live.</p>${
-			preview
-				? `<div class="card"><p><strong>Preview.</strong> Pick a fictional person to click through as.</p>${personas
-						.map(
-							(persona) =>
-								`<form method="post" action="/login/preview" style="margin:.4rem 0"><input type="hidden" name="persona" value="${esc(persona.key)}"><button>${esc(persona.label)}</button></form>`,
-						)
-						.join("")}</div>`
-				: `<p><a class="btn" href="/login/start">Sign in with GitHub</a></p><p class="muted">You need a GitHub account that Rawkode Academy has added to your organisation.</p>`
-		}</main>`,
+		`<main><h1>Partner portal</h1><p>Where partners review draft videos before they go live.</p><p><a class="btn" href="/login/start">Sign in with GitHub</a></p><p class="muted">You need a GitHub account that Rawkode Academy has added to your organisation.</p></main>`,
 	);
 
 export const dashboardPage = (
 	session: Session,
 	scope: Scope,
 	orgs: readonly Org[],
-	preview: boolean,
 	reviews: readonly Review[],
 	collaborations: readonly (Collaboration & { orgId: string })[] = [],
 	unlinked = false,
@@ -98,7 +85,7 @@ export const dashboardPage = (
 								)
 								.join("")
 				}`;
-	return page("Home", `${header(session, scope, orgs, preview)}<main>${unlinkedNote}${adminLink}${body}${collaborationList}</main>`);
+	return page("Home", `${header(session, scope, orgs)}<main>${unlinkedNote}${adminLink}${body}${collaborationList}</main>`);
 };
 
 const jsonForScript = (value: unknown): string => JSON.stringify(value).replaceAll("<", "\\u003c");
@@ -107,7 +94,6 @@ export const reviewPage = (input: {
 	session: Session;
 	scope: Scope;
 	orgs: readonly Org[];
-	preview: boolean;
 	review: Review;
 	comments: readonly Comment[];
 	canComment: boolean;
@@ -144,6 +130,7 @@ export const reviewPage = (input: {
 			: "";
 	const script = `
 const R=${jsonForScript(review.id)};const v=document.querySelector('video');
+const src=v.getAttribute('src')||'';if(src.endsWith('.m3u8')&&window.Hls&&Hls.isSupported()&&!v.canPlayType('application/vnd.apple.mpegurl')){const h=new Hls();h.loadSource(src);h.attachMedia(v)}
 const fmt=ms=>{const t=Math.floor(ms/1000);return Math.floor(t/60)+':'+String(t%60).padStart(2,'0')};
 const post=async(u,b)=>{const r=await fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});if(!r.ok){throw new Error((await r.json().catch(()=>({}))).error||'Something went wrong')}return r.json()};
 document.querySelectorAll('[data-seek]').forEach(b=>b.addEventListener('click',()=>{v.currentTime=Number(b.dataset.seek)/1000;v.play()}));
@@ -154,7 +141,7 @@ document.querySelectorAll('[data-withdraw]').forEach(b=>b.addEventListener('clic
 const so=document.getElementById('signoff');if(so)so.addEventListener('click',async()=>{try{await post('/api/reviews/'+R+'/signoff',{});location.reload()}catch(x){alert(x.message)}});`;
 	return page(
 		review.title,
-		`${header(input.session, scope, input.orgs, input.preview)}<main><p><a href="/">Back</a></p><h1>${esc(review.title)}</h1><div class="row" style="margin-bottom:1rem"><span class="pill">${STATE_LABEL[review.state]}</span><span class="muted">Draft cut ${review.draftVersion}</span><span class="muted">Due ${esc(review.dueAt.slice(0, 10))}</span></div><div class="layout"><div><video controls preload="metadata" src="${esc(review.videoUrl)}"></video>${signoff}</div><div class="card"><h2>Comments (${comments.length})</h2>${commentHtml || `<p class="muted">No comments yet.</p>`}${form}</div></div></main>`,
+		`${header(input.session, scope, input.orgs)}<main><p><a href="/">Back</a></p><h1>${esc(review.title)}</h1><div class="row" style="margin-bottom:1rem"><span class="pill">${STATE_LABEL[review.state]}</span><span class="muted">Draft cut ${review.draftVersion}</span><span class="muted">Due ${esc(review.dueAt.slice(0, 10))}</span></div><div class="layout"><div><video controls preload="metadata" src="${esc(review.videoUrl)}"></video>${signoff}</div><div class="card"><h2>Comments (${comments.length})</h2>${commentHtml || `<p class="muted">No comments yet.</p>`}${form}</div></div></main>${review.videoUrl.endsWith(".m3u8") ? `<script nonce="${input.nonce}" src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.17/hls.min.js"></script>` : ""}`,
 		{ script, nonce: input.nonce },
 	);
 };
@@ -163,7 +150,6 @@ export const adminOrgsPage = (input: {
 	session: Session;
 	scope: Scope;
 	orgs: readonly Org[];
-	preview: boolean;
 	links: readonly OrgLink[];
 	collaborators: readonly Named[];
 	supporters: readonly Named[];
@@ -183,9 +169,11 @@ export const adminOrgsPage = (input: {
 			? `<p role="alert">That isn't a valid organisation id.</p>`
 			: input.error === "link"
 				? `<p role="alert">Pick a collaborator, a supporter, or both.</p>`
+				: input.error === "review"
+					? `<p role="alert">That review needs a linked organisation, a video id and a title.</p>`
 				: "";
 	return page(
 		"Organisations",
-		`${header(input.session, input.scope, input.orgs, input.preview)}<main><p><a href="/">Back</a></p><h1>Organisations</h1><p class="muted">Link an identity organisation to the company it represents. A collaborator makes it a partner with draft review; a supporter makes it a supporter. Find the organisation id in the identity admin.</p>${error}<div class="card"><form method="post" action="/admin/orgs" class="row"><label>Organisation id<input name="orgId" required maxlength="64"></label><label>Collaborator<select name="collaboratorId">${options(input.collaborators)}</select></label><label>Supporter<select name="supporterId">${options(input.supporters)}</select></label><button>Link</button></form></div><table style="width:100%;border-collapse:collapse"><thead><tr><th align="left">Organisation</th><th align="left">Collaborator</th><th align="left">Supporter</th><th></th></tr></thead><tbody>${rows || `<tr><td colspan="4" class="muted">Nothing linked yet.</td></tr>`}</tbody></table></main>`,
+		`${header(input.session, input.scope, input.orgs)}<main><p><a href="/">Back</a></p><h1>Organisations</h1><p class="muted">Link an identity organisation to the company it represents. A collaborator makes it a partner with draft review; a supporter makes it a supporter. Find the organisation id in the identity admin.</p>${error}<div class="card"><form method="post" action="/admin/orgs" class="row"><label>Organisation id<input name="orgId" required maxlength="64"></label><label>Collaborator<select name="collaboratorId">${options(input.collaborators)}</select></label><label>Supporter<select name="supporterId">${options(input.supporters)}</select></label><button>Link</button></form></div><h2>Open a draft review</h2><p class="muted">Creates the review for a linked organisation, or bumps the cut if it exists. Leave the video URL empty to use the Academy CDN stream for the video id.</p><div class="card"><form method="post" action="/admin/reviews" class="row"><label>Organisation<select name="orgId" required>${input.links.map((link) => `<option value="${esc(link.orgId)}">${esc(link.orgId)}</option>`).join("")}</select></label><label>Video id<input name="videoId" required maxlength="64"></label><label>Title<input name="title" required maxlength="200"></label><label>Video URL<input name="videoUrl" type="url" placeholder="https://content.rawkode.academy/videos/…"></label><button>Open review</button></form></div><h2>Links</h2><table style="width:100%;border-collapse:collapse"><thead><tr><th align="left">Organisation</th><th align="left">Collaborator</th><th align="left">Supporter</th><th></th></tr></thead><tbody>${rows || `<tr><td colspan="4" class="muted">Nothing linked yet.</td></tr>`}</tbody></table></main>`,
 	);
 };

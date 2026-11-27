@@ -18,7 +18,7 @@ name: "rawkode-academy-collab"
 let _t = tasks
 
 let _npm = "npm ci --workspaces=false --no-audit --no-fund >/dev/null && "
-let _sources = ["src/**", "package.json", "package-lock.json", "wrangler.jsonc", "wrangler.preview.jsonc", "tsconfig.json", "flake.nix", "flake.lock"]
+let _sources = ["src/**", "package.json", "package-lock.json", "wrangler.jsonc", "tsconfig.json", "flake.nix", "flake.lock"]
 
 ci: pipelines: {
 	default: {
@@ -31,15 +31,11 @@ ci: pipelines: {
 		tasks: [_t.deploy]
 	}
 
-	// Every pull request gets a click-through preview with fictional data.
+	// Pull requests run the checks and tests; there is no fictional preview.
 	pullRequest: {
 		environment: "production"
 		when: pullRequest: true
-		tasks: [_t.preview]
-		annotations: "Preview URL": schema.#TaskCaptureRef & {
-			cuenvTask:    "preview"
-			cuenvCapture: "previewUrl"
-		}
+		tasks: [_t.check, _t.test]
 	}
 }
 
@@ -63,12 +59,4 @@ tasks: {
 		inputs: list.Concat([_sources, ["env.cue", "test/**"]])
 	}
 
-	preview: schema.#Task & {
-		command: "sh"
-		args: ["-c", _npm + "npx --no-install tsc --noEmit && npm test --workspaces=false && npx --no-install wrangler deploy --config wrangler.preview.jsonc"]
-		inputs: list.Concat([_sources, ["env.cue", "test/**"]])
-		captures: previewUrl: {
-			pattern: "(https://[a-z0-9.-]+\\.workers\\.dev)"
-		}
-	}
 }
