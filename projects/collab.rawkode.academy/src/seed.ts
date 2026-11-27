@@ -1,4 +1,5 @@
-import type { Comment, Org, Principal, Review } from "./types.ts";
+import { deriveOrgs, type Collaboration, type Named } from "./directory.ts";
+import type { Comment, OrgLink, Principal, Review } from "./types.ts";
 
 /**
  * Fictional data for the pull-request preview only. The organisations, people
@@ -7,9 +8,22 @@ import type { Comment, Org, Principal, Review } from "./types.ts";
 export const SAMPLE_VIDEO =
 	"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4";
 
-export const seedOrgs: Org[] = [
-	{ id: "acme-cloud", name: "Acme Cloud (sample partner)", kind: "partner" },
-	{ id: "globex-db", name: "Globex DB (sample supporter)", kind: "supporter" },
+export const seedCollaborators: Named[] = [{ id: "acme-cloud", name: "Acme Cloud (sample partner)" }];
+export const seedSupporters: Named[] = [{ id: "globex-db", name: "Globex DB (sample supporter)" }];
+export const seedLinks: OrgLink[] = [
+	{ orgId: "acme-cloud", collaboratorId: "acme-cloud" },
+	{ orgId: "globex-db", supporterId: "globex-db" },
+];
+export const seedOrgs = deriveOrgs(seedLinks, seedCollaborators, seedSupporters);
+export const seedCollaborations: Collaboration[] = [
+	{
+		videoId: "hands-on-acme-cloud",
+		title: "Hands-on introduction to Acme Cloud",
+		slug: "hands-on-introduction-to-acme-cloud",
+		collaboratorId: "acme-cloud",
+		startsAt: null,
+		endsAt: null,
+	},
 ];
 
 const inDays = (days: number) => new Date(Date.UTC(2026, 10, 27 + days)).toISOString();
@@ -18,6 +32,7 @@ export const seedReviews: Review[] = [
 	{
 		id: "hands-on-acme-cloud",
 		orgId: "acme-cloud",
+		videoId: "hands-on-acme-cloud",
 		title: "Hands-on introduction to Acme Cloud (draft cut 1)",
 		videoUrl: SAMPLE_VIDEO,
 		state: "in_review",

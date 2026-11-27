@@ -17,10 +17,19 @@ import {
 	principalFromClaims,
 	randomToken,
 } from "./auth.ts";
-import { seedComments, seedOrgs, seedReviews, previewPersonas } from "./seed.ts";
+import { D1Directory, StaticDirectory, deriveOrgs, type Directory } from "./directory.ts";
+import {
+	previewPersonas,
+	seedCollaborations,
+	seedCollaborators,
+	seedComments,
+	seedLinks,
+	seedReviews,
+	seedSupporters,
+} from "./seed.ts";
 import { KvStore, type Store } from "./store.ts";
 import type { Env, Persona, Session } from "./types.ts";
-import { dashboardPage, loginPage, reviewPage } from "./views.ts";
+import { adminOrgsPage, dashboardPage, loginPage, reviewPage } from "./views.ts";
 
 const COOKIE = "portal_session";
 const SESSION_MS = 1000 * 60 * 60 * 24 * 7;
@@ -28,7 +37,12 @@ const SESSION_MS = 1000 * 60 * 60 * 24 * 7;
 const isPreview = (env: Env) => env.PREVIEW === "true";
 
 const storeFor = (env: Env): Store =>
-	new KvStore(env.STORE, isPreview(env) ? { orgs: seedOrgs, reviews: seedReviews, comments: seedComments } : null);
+	new KvStore(env.STORE, isPreview(env) ? { links: seedLinks, reviews: seedReviews, comments: seedComments } : null);
+
+const directoryFor = (env: Env): Directory =>
+	isPreview(env)
+		? new StaticDirectory({ collaborators: seedCollaborators, supporters: seedSupporters, collaborations: seedCollaborations })
+		: new D1Directory(env);
 
 const headers = (extra: Record<string, string> = {}, nonce = ""): Headers => {
 	const h = new Headers({
@@ -120,11 +134,10 @@ export default {
 			return url.pathname.startsWith("/api/") ? json({ error: "Sign in first" }, 401) : redirect("/login");
 		}
 		const principal = session.principal;
-		// In production the organisation list comes from identity memberships until
-		// it is linked to the collaborations data.
-		const orgs = preview
-			? await store.listOrgs()
-			: principal.orgs.map((m) => ({ id: m.orgId, name: m.orgId, kind: "partner" as const }));
+		const directory = directoryFor(env);
+		const links = await store.listOrgLinks();
+		const [collaborators, supporters] = await Promise.all([directory.collaborators(), directory.supporters()]);
+		const orgs = deriveOrgs(links, collaborators, supporters);
 		const scope = scopeFor(session, orgs);
 
 		if (request.method === "POST") {
@@ -143,6 +156,26 @@ export default {
 				console.log(JSON.stringify({ event: "view_as_start", admin: principal.login, orgId, persona }));
 				return redirect("/");
 			}
+			if (url.pathname === "/admin/orgs" || url.pathname === "/admin/orgs/delete") {
+				if (!principal.admin || session.viewAs) return json({ error: "Forbidden" }, 403);
+				const form = await request.formData();
+				const orgId = String(form.get("orgId") ?? "").trim();
+				if (!/^[\w-]{1,64}$/.test(orgId)) return redirect("/admin/orgs?error=org");
+				if (url.pathname === "/admin/orgs/delete") {
+					await store.deleteOrgLink(orgId);
+					return redirect("/admin/orgs");
+				}
+				const collaboratorId = String(form.get("collaboratorId") ?? "") || undefined;
+				const supporterId = String(form.get("supporterId") ?? "") || undefined;
+				const knownCollaborator = !collaboratorId || collaborators.some((item) => item.id === collaboratorId);
+				const knownSupporter = !supporterId || supporters.some((item) => item.id === supporterId);
+				if ((!collaboratorId && !supporterId) || !knownCollaborator || !knownSupporter) {
+					return redirect("/admin/orgs?error=link");
+				}
+				await store.putOrgLink({ orgId, collaboratorId, supporterId });
+				console.log(JSON.stringify({ event: "org_link", admin: principal.login, orgId, collaboratorId, supporterId }));
+				return redirect("/admin/orgs");
+			}
 			if (url.pathname === "/view-as/exit") {
 				const { viewAs: _gone, ...rest } = session;
 				await store.putSession(sessionId, rest);
@@ -150,9 +183,26 @@ export default {
 			}
 		}
 
+		if (url.pathname === "/admin/orgs" && request.method === "GET") {
+			if (!principal.admin || session.viewAs) return html(page404(), nonce, 404);
+			return html(
+				adminOrgsPage({ session, scope, orgs, preview, links, collaborators, supporters, error: url.searchParams.get("error") }),
+				nonce,
+			);
+		}
+
 		if (url.pathname === "/" && request.method === "GET") {
 			const reviews = reviewsVisible(scope, orgs, await store.listReviews());
-			return html(dashboardPage(session, scope, orgs, preview, reviews), nonce, 200);
+			const partnerLinks = links.filter(
+				(link) => link.collaboratorId && scope.orgIds.has(link.orgId) && orgs.find((org) => org.id === link.orgId)?.kind !== "supporter",
+			);
+			const collaborations = (
+				await Promise.all(
+					partnerLinks.map(async (link) => (await directory.collaborationsFor(link.collaboratorId!)).map((item) => ({ ...item, orgId: link.orgId }))),
+				)
+			).flat();
+			const unlinked = !principal.admin && principal.orgs.length > 0 && scope.orgIds.size === 0;
+			return html(dashboardPage(session, scope, orgs, preview, reviews, collaborations, unlinked), nonce, 200);
 		}
 
 		const reviewMatch = url.pathname.match(/^\/reviews\/([\w-]+)$/);
