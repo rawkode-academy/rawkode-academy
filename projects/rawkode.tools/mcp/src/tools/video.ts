@@ -38,7 +38,9 @@ export const updateInput = z.object({
 
 export const scheduleInput = updateInput.omit({ videoId: true }).extend({
   privacy: z.enum(["public", "unlisted", "private"]).default("public").describe("Who can see the YouTube broadcast. Use private for a test."),
-  thumbnailBrief: z.string().max(500).optional().describe("What the generated thumbnail should show, in words. The title, show and technologies are always given to the image model."),
+  thumbnailBrief: z.string().max(500).optional().describe("What the picture on the generated thumbnail should show, in words. It is abstract art: the model is told to draw no logos."),
+  thumbnailHook: z.string().max(30).optional().describe("The few words written large on the thumbnail, readable at phone size (for example BACK UP EVERYTHING). Defaults to the first technology's name."),
+  thumbnailLogos: z.array(z.string()).max(3).optional().describe("Technology ids whose official logo is added to the thumbnail (technologies/<id>/horizontal.svg). The Academy's wordmark is always added. Logos are composited from the real files, never drawn by the model."),
 }).strict();
 
 // Changes an Academy video and everything attached to it, through the

@@ -23,13 +23,16 @@ export async function testEnv() {
 	// GPT Image, Images and the content bucket, faked: the call and the stored bytes are kept for the tests.
 	const generated: { model: string; input: Record<string, unknown>; options: unknown }[] = [];
 	const stored = new Map<string, { bytes: Uint8Array; options: unknown }>();
+	const logos = new Map<string, string>();
 	env.AI = { run: async (model: string, input: Record<string, unknown>, options: unknown) => { generated.push({ model, input, options }); return { image: btoa("fake-png") }; } };
-	env.IMAGES = { input: () => ({ transform: () => ({ output: async () => ({ response: () => new Response("fake-webp") }) }) }) };
-	env.CONTENT_BUCKET = { put: async (key: string, value: Uint8Array, options: unknown) => { stored.set(key, { bytes: value, options }); } };
+	const drawn: { top: number; left: number }[] = [];
+	const layer = (): any => ({ transform: () => layer(), draw: (_overlay: unknown, at: { top: number; left: number }) => { drawn.push(at); return layer(); }, output: async () => ({ response: () => new Response("fake-webp") }) });
+	env.IMAGES = { input: () => layer() };
+	env.CONTENT_BUCKET = { get: async (key: string) => logos.has(key) ? { text: async () => logos.get(key)! } : null, put: async (key: string, value: Uint8Array, options: unknown) => { stored.set(key, { bytes: value, options }); } };
 	env.ANALYTICS = { trackEvent: async () => ({ success: true }) };
 	env.CACHE_INVALIDATION_TOKEN = "token";
 	env.SITE_ORIGIN = "https://site.test";
-	return { env: env as unknown as Env, sent, calls, generated, stored, dispose: () => mf.dispose() };
+	return { env: env as unknown as Env, sent, calls, generated, stored, drawn, logos, dispose: () => mf.dispose() };
 }
 
 export async function seed(env: Env) {

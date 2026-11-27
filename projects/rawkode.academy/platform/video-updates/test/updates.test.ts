@@ -151,8 +151,10 @@ describe("scheduling a live stream", () => {
 		expect((await rows(env.VIDEOS, "SELECT title, type FROM videos WHERE id='newlive1'"))[0]).toEqual({ title: "Hands-on with Kueue", type: "live" });
 		expect(await rows(env.EPISODES, `SELECT code FROM episodes WHERE "videoId"='newlive1'`)).toEqual([{ code: "S9newlive1" }]);
 		expect(t.generated.at(-1)?.model).toBe("openai/gpt-image-2.6-sunburst");
-		expect(String(t.generated.at(-1)?.input.prompt)).toContain("Hands-on with Kueue");
+		expect(String(t.generated.at(-1)?.input.prompt)).toContain('"KUBERNETES"');
 		expect(String(t.generated.at(-1)?.input.prompt)).toContain("a queue of glowing jobs");
+		expect(String(t.generated.at(-1)?.input.prompt)).toContain("No logos, no brand marks");
+		expect(t.drawn).toHaveLength(1); // the Academy's wordmark, top left
 		expect(t.stored.has("videos/newlive1/thumbnail.webp")).toBe(true);
 		expect(t.sent.at(-1)).toMatchObject({ type: "video.scheduled", videoId: "newlive1", privacy: "unlisted" });
 	});
@@ -179,10 +181,24 @@ describe("scheduling a live stream", () => {
 		await begin("u-thumb-again", again);
 		await run("u-thumb-again", again);
 		const input = String(t.generated.at(-1)?.input.prompt);
-		expect(input).toContain("Hands-on with Kueue");
+		expect(input).toContain('"KUBERNETES"');
 		expect(input).toContain("a vault of snapshots");
 		expect(t.stored.has("videos/newlive4/thumbnail.webp")).toBe(true);
 		expect(t.sent.at(-1)).toMatchObject({ type: "video.updated", videoId: "newlive4" });
+	});
+
+	it("writes a short hook and composites the real logos instead of letting the model draw them", async () => {
+		t.logos.set("technologies/kubernetes/horizontal.svg", '<svg viewBox="0 0 400 100"></svg>');
+		t.drawn.length = 0;
+		const r = live("newlive5", { thumbnailHook: "Back up everything", thumbnailLogos: ["kubernetes", "helm"] });
+		await begin("u-live5", r);
+		await run("u-live5", r);
+		const asked = String(t.generated.at(-1)?.input.prompt);
+		expect(asked).toContain('"BACK UP EVERYTHING"');
+		expect(asked).not.toContain("Hands-on with Kueue");
+		// The wordmark top left, then the one logo that exists bottom right; a technology without a logo file is skipped.
+		expect(t.drawn).toEqual([{ top: 40, left: 40 }, { top: 720 - 40 - 48, left: 1280 - 40 - 192 }]);
+		expect(t.stored.get("videos/newlive5/thumbnail.webp")?.options).toMatchObject({ customMetadata: { logos: "kubernetes" } });
 	});
 
 	it("takes the new video out again when a later section fails", async () => {
@@ -202,6 +218,6 @@ describe("scheduling a live stream", () => {
 		expect(new TextDecoder().decode(await imageOf({ image: btoa("??>>").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "") }))).toBe("??>>");
 		expect(new TextDecoder().decode(await imageOf(new TextEncoder().encode("raw")))).toBe("raw");
 		await expect(imageOf({ weird: 1 })).rejects.toThrow("no image: {weird: 1}");
-		expect(prompt({ title: "T", technologies: ["Kueue"], people: [], show: "Rawkode Live" })).toContain('"T"');
+		expect(prompt({ title: "T", technologies: ["Kueue"], people: [], show: "Rawkode Live" })).toContain('"KUEUE"');
 	});
 });

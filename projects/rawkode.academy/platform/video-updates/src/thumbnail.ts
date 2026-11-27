@@ -1,4 +1,5 @@
 import type { Env } from "./env.ts";
+import { BRAND_ACCENT, BRAND_GROUND, WORDMARK_ASPECT, WORDMARK_SVG } from "./brand.ts";
 import type { UpdateRequest } from "./request.ts";
 
 // The newest GPT Image model in the Workers AI catalogue (through AI Gateway,
@@ -11,18 +12,22 @@ const HEIGHT = 720;
 // The key the site and the YouTube sync already read a video's thumbnail from.
 export const thumbnailKey = (videoId: string) => `videos/${videoId}/thumbnail.webp`;
 
-export type Facts = { title: string; tagline?: string | null; show?: string; technologies: string[]; people: string[]; brief?: string };
+export type Facts = { title: string; tagline?: string | null; show?: string; technologies: string[]; people: string[]; brief?: string; hook?: string };
+
+// A thumbnail is read at the size of a phone's video list: a few words and one clear picture. The model draws the
+// art and that short hook only. Every logo is composited afterwards from real files (see composite), because a
+// model invents brand marks.
+export const hookOf = (f: Facts) => (f.hook ?? f.technologies[0] ?? f.title).trim().toUpperCase();
 
 export function prompt(f: Facts): string {
 	return [
-		"A YouTube thumbnail for a live technical stream from Rawkode Academy, a cloud native and Kubernetes education channel.",
-		"16:9 landscape, bold and legible at small sizes, dark navy background with a vivid accent colour, clean modern flat design with depth.",
-		`Show the title text exactly as written, spelled correctly, in large heavy sans-serif letters: "${f.title}".`,
-		f.show ? `Small label in a corner: "${f.show}".` : "",
-		f.tagline ? `Theme: ${f.tagline}.` : "",
-		f.technologies.length ? `Subject: ${f.technologies.join(", ")} (use abstract symbols for the technologies, no logos you are unsure of).` : "",
+		"A YouTube thumbnail background for a live technical stream from Rawkode Academy, a cloud native education channel.",
+		`16:9 landscape. Dark navy ground (${BRAND_GROUND}) with one hot pink accent (${BRAND_ACCENT}) and soft light-blue highlights. Clean modern flat design with depth and glow, one strong focal object on the right half.`,
+		`The only text in the image is this hook, exactly as written, spelled correctly, huge heavy white sans-serif capitals on the left, at most two lines: "${hookOf(f)}".`,
+		"Keep the top-left corner, the bottom-left corner and the bottom-right corner plain dark ground: logos are added there later.",
+		f.technologies.length ? `The picture is an abstract metaphor for: ${f.technologies.join(", ")}. Use simple geometric shapes only.` : `The picture is an abstract metaphor for: ${f.title}.`,
 		f.brief ? `Art direction: ${f.brief}` : "",
-		"No other text. No photographs of people or faces. No watermarks.",
+		"No logos, no brand marks, no emblems, no recognisable trademarked symbols or mascots, no small print, no other text, no people or faces, no watermarks.",
 	].filter(Boolean).join(" ");
 }
 
@@ -33,11 +38,11 @@ export async function facts(env: Env, r: UpdateRequest): Promise<Facts> {
 		return results.map((x) => x.name);
 	};
 	const show = r.show ? (await env.SHOWS.prepare("SELECT name FROM shows WHERE id = ?").bind(r.show.showId).first<{ name: string }>())?.name : undefined;
-	return { title: r.video?.title ?? "", tagline: r.video?.tagline, show, technologies: await names(env.TECHNOLOGIES, "technologies", r.technologies ?? []), people: await names(env.PEOPLE, "people", (r.credits ?? []).map((c) => c.personId)), brief: r.thumbnailBrief };
+	return { title: r.video?.title ?? "", tagline: r.video?.tagline, show, technologies: await names(env.TECHNOLOGIES, "technologies", r.technologies ?? []), people: await names(env.PEOPLE, "people", (r.credits ?? []).map((c) => c.personId)), brief: r.thumbnailBrief, hook: r.thumbnailHook };
 }
 
 // The facts of a video already on the site, for making its thumbnail again (the request names only what changes).
-export async function storedFacts(env: Env, videoId: string, brief?: string): Promise<Facts> {
+export async function storedFacts(env: Env, videoId: string, brief?: string, hook?: string): Promise<Facts> {
 	const names = async (db: D1Database, table: string, ids: string[]) => {
 		if (!ids.length) return [];
 		const { results } = await db.prepare(`SELECT name FROM ${table} WHERE id IN (${ids.map(() => "?").join(",")})`).bind(...ids).all<{ name: string }>();
@@ -47,7 +52,7 @@ export async function storedFacts(env: Env, videoId: string, brief?: string): Pr
 	const episode = await env.EPISODES.prepare(`SELECT "showId" AS s FROM episodes WHERE "videoId" = ?`).bind(videoId).first<{ s: string }>();
 	const technologies = (await env.VIDEO_TECHNOLOGIES.prepare("SELECT technology_id AS t FROM video_technologies WHERE video_id = ? ORDER BY position").bind(videoId).all<{ t: string }>()).results.map((x) => x.t);
 	const credits = (await env.CASTING_CREDITS.prepare("SELECT person_id AS p FROM casting_credits WHERE subject_type = 'video' AND subject_id = ? ORDER BY position").bind(videoId).all<{ p: string }>()).results.map((x) => x.p);
-	return { title: video?.title ?? "", tagline: video?.tagline, show: episode ? (await names(env.SHOWS, "shows", [episode.s]))[0] : undefined, technologies: await names(env.TECHNOLOGIES, "technologies", technologies), people: await names(env.PEOPLE, "people", credits), brief };
+	return { title: video?.title ?? "", tagline: video?.tagline, show: episode ? (await names(env.SHOWS, "shows", [episode.s]))[0] : undefined, technologies: await names(env.TECHNOLOGIES, "technologies", technologies), people: await names(env.PEOPLE, "people", credits), brief, hook };
 }
 
 // What the response looks like, for an error message: its keys and the start of each string, never the whole image.
@@ -82,16 +87,58 @@ export async function imageOf(response: unknown): Promise<Uint8Array> {
 	try { return fromBase64(value); } catch { throw new Error(`the image is not base64: ${shape(response)}`); }
 }
 
+const LOGO_PADDING = 40;
+// Our wordmark is always larger than a guest's or a technology's logo, which their brand rules ask for.
+const OWN_LOGO_HEIGHT = 64;
+const OTHER_LOGO_HEIGHT = 48;
+
+const aspectOf = (svg: string) => {
+	const box = /viewBox="[-\d.]+[ ,]+[-\d.]+[ ,]+([\d.]+)[ ,]+([\d.]+)"/.exec(svg);
+	return box ? Number(box[1]) / Number(box[2]) : 4;
+};
+
+// The official logo of a technology, as the site keeps it (white on the dark ground), or null when there isn't one.
+async function technologyLogo(env: Env, id: string): Promise<{ svg: string; aspect: number } | null> {
+	const object = await env.CONTENT_BUCKET.get(`technologies/${id}/horizontal.svg`);
+	if (!object) return null;
+	const svg = await object.text();
+	return { svg, aspect: aspectOf(svg) };
+}
+
+type Layer = { svg: string; aspect: number; height: number; side: "left" | "right"; edge: "top" | "bottom" };
+
+// Draws the real logos over the generated art: the Academy's top left, each technology's along the bottom right.
+export async function composite(env: Env, art: Uint8Array, layers: Layer[]): Promise<Uint8Array> {
+	let image = env.IMAGES.input(new Blob([art]).stream()).transform({ width: WIDTH, height: HEIGHT, fit: "cover" });
+	let right = WIDTH - LOGO_PADDING;
+	for (const layer of layers) {
+		const width = Math.round(layer.height * layer.aspect);
+		const left = layer.side === "left" ? LOGO_PADDING : right - width;
+		if (layer.side === "right") right = left - LOGO_PADDING;
+		const top = layer.edge === "top" ? LOGO_PADDING : HEIGHT - LOGO_PADDING - layer.height;
+		image = image.draw(env.IMAGES.input(new Blob([layer.svg], { type: "image/svg+xml" }).stream()).transform({ height: layer.height }), { top, left });
+	}
+	const out = await image.output({ format: "image/webp", quality: 88 });
+	return new Uint8Array(await out.response().arrayBuffer());
+}
+
 // Generates the thumbnail, saves it as the video's WebP (what the site shows, and what the YouTube sync converts and uploads).
-export async function generateThumbnail(env: Env, videoId: string, f: Facts): Promise<{ key: string; bytes: number }> {
+export async function generateThumbnail(env: Env, videoId: string, f: Facts, logos: string[] = []): Promise<{ key: string; bytes: number; logos: string[] }> {
 	const input = { prompt: prompt(f), size: "1536x864", quality: "high", output_format: "png", n: 1 };
 	let response: unknown;
 	try { response = await env.AI.run(IMAGE_MODEL as never, input as never, { gateway: { id: GATEWAY_ID } } as never); }
 	// Not every size is accepted; a 3:2 canvas is cropped to 16:9 below.
 	catch { response = await env.AI.run(IMAGE_MODEL as never, { ...input, size: "1536x1024" } as never, { gateway: { id: GATEWAY_ID } } as never); }
-	const png = await imageOf(response);
-	const out = await env.IMAGES.input(new Blob([png]).stream()).transform({ width: WIDTH, height: HEIGHT, fit: "cover" }).output({ format: "image/webp", quality: 88 });
-	const webp = new Uint8Array(await out.response().arrayBuffer());
-	await env.CONTENT_BUCKET.put(thumbnailKey(videoId), webp, { httpMetadata: { contentType: "image/webp", cacheControl: "public, max-age=3600, s-maxage=3600" }, customMetadata: { source: "video-updates", model: IMAGE_MODEL } });
-	return { key: thumbnailKey(videoId), bytes: webp.byteLength };
+	const art = await imageOf(response);
+	const layers: Layer[] = [{ svg: WORDMARK_SVG, aspect: WORDMARK_ASPECT, height: OWN_LOGO_HEIGHT, side: "left", edge: "top" }];
+	const used: string[] = [];
+	for (const id of logos) {
+		const logo = await technologyLogo(env, id);
+		if (!logo) { console.error(JSON.stringify({ operation: "video-update", level: "warn", thumbnailLogoMissing: id })); continue; }
+		layers.push({ ...logo, height: OTHER_LOGO_HEIGHT, side: "right", edge: "bottom" });
+		used.push(id);
+	}
+	const webp = await composite(env, art, layers);
+	await env.CONTENT_BUCKET.put(thumbnailKey(videoId), webp, { httpMetadata: { contentType: "image/webp", cacheControl: "public, max-age=3600, s-maxage=3600" }, customMetadata: { source: "video-updates", model: IMAGE_MODEL, logos: used.join(",") } });
+	return { key: thumbnailKey(videoId), bytes: webp.byteLength, logos: used };
 }
