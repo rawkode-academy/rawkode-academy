@@ -61,4 +61,11 @@ describe("Datum Cloud corrections", () => {
 			"like kubectl does",
 		);
 	});
+	test("recovers datumctl subcommands heard as data control", () => {
+		expect(
+			correctTranscriptText(
+				"run data control get, then DatumControlDef and data control diff",
+			),
+		).toBe("run datumctl get, then datumctl diff and datumctl diff");
+	});
 });
