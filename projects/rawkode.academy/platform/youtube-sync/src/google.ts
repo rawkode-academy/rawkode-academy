@@ -97,7 +97,7 @@ export class GoogleClient {
   }
   // The reusable stream (stream key) the broadcast goes out on: the configured one, else the first reusable stream (1 quota unit).
   async findStream(preferred?: string): Promise<string | null> {
-    const result = await this.get<{ items?: { id?: string; cdn?: { resolution?: string }; contentDetails?: { isReusable?: boolean } }[] }>(dataAPI, "liveStreams", { part: "id,contentDetails,cdn", mine: true, maxResults: 50 });
+    const result = await this.get<{ items?: { id?: string; contentDetails?: { isReusable?: boolean } }[] }>(dataAPI, "liveStreams", { part: "id,contentDetails", mine: true, maxResults: 50 });
     const streams = (result.items ?? []).filter(item => typeof item.id === "string");
     return (preferred ? streams.find(item => item.id === preferred) : undefined)?.id ?? streams.find(item => item.contentDetails?.isReusable)?.id ?? null;
   }
