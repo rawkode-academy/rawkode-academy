@@ -31,6 +31,14 @@ beforeAll(async () => {
 afterAll(() => db.dispose());
 
 describe("video-collaborations read model", () => {
+	it("exposes the identity organisation a collaborator belongs to", async () => {
+		const [collaborator] = await entities("Collaborator", ["datum"], "organizationId");
+		expect(collaborator).toEqual({ organizationId: null });
+		await exec(db.DB, "UPDATE collaborators SET organization_id = 'collab-datum' WHERE id = 'datum'");
+		expect((await entities("Collaborator", ["datum"], "organizationId"))[0]).toEqual({ organizationId: "collab-datum" });
+		await exec(db.DB, "UPDATE collaborators SET organization_id = NULL WHERE id = 'datum'");
+	});
+
 	it("names the collaborator of a collaboration video", async () => {
 		const [video] = await entities("Video", [DATUM_VIDEO], "isCollaboration collaborators { id name websiteUrl logoUrl }");
 		expect(video).toEqual({

@@ -23,6 +23,9 @@ import (
 	includeHttp:       bool | *false
 	// Set false for a service whose tests don't pass under bun test yet.
 	ciTests: bool | *true
+	// Also hand the read model the gateway's verified roles and organisations
+	// (context.roles, context.orgs). Only for services that authorise by role.
+	forwardGatewayAuth: bool | *false
 
 	// Cloudflare bindings
 	bindings: #CloudflareBindings
@@ -613,6 +616,15 @@ import (
 		for wf in _bindings.workflows {"export { \(wf.className) } from \"./\(wf.binding)\";"},
 	], "\n")
 
+	_gatewayAuthContext: string | *""
+	if forwardGatewayAuth {
+		_gatewayAuthContext: "\n" + """
+			\t\t\t\t\tusername: request.headers.get("X-Gateway-User-Username"),
+			\t\t\t\t\troles: (request.headers.get("X-Gateway-Roles") ?? "").split(",").filter(Boolean),
+			\t\t\t\t\torgs: JSON.parse(request.headers.get("X-Gateway-Orgs") ?? "[]") as { id: string; role: string }[],
+			"""
+	}
+
 	_readModelMainTs: """
 		import { createYoga } from "graphql-yoga";
 		import { getSchema } from "./schema";
@@ -636,7 +648,7 @@ import (
 						context: ({ request }) => ({
 							// The gateway forwards the authenticated member id for
 							// per-user participation queries.
-							userId: request.headers.get("X-Gateway-User-Id"),
+							userId: request.headers.get("X-Gateway-User-Id"),\(_gatewayAuthContext)
 						}),
 					});
 				}
