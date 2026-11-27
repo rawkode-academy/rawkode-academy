@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { guestTotals } from "@/lib/analytics/guest";
 import {
 	loadSnapshot,
+	viewKey,
 	refreshSnapshot,
 	SNAPSHOT_KEY,
 	type Snapshot,
@@ -86,5 +87,19 @@ describe("analytics snapshot", () => {
 		expect(totals?.views).toEqual({ d90: 5, lifetime: 50 });
 		expect(totals?.videos.map((video) => video.slug)).toEqual(["guest-episode"]);
 		expect(await guestTotals({ API: gateway }, snapshot, "nobody")).toBeUndefined();
+	});
+});
+
+describe("viewKey", () => {
+	it("keys a watch page by its slug and a lesson page by course and lesson", () => {
+		expect(viewKey("/watch/some-video")).toBe("some-video");
+		expect(viewKey("/watch/some-video/")).toBe("some-video");
+		expect(viewKey("/courses/edge/meet-datumctl?x=1")).toBe("courses/edge/meet-datumctl");
+	});
+
+	it("ignores other pages, including a course landing page", () => {
+		expect(viewKey("/courses/edge")).toBeNull();
+		expect(viewKey("/read/post")).toBeNull();
+		expect(viewKey("")).toBeNull();
 	});
 });

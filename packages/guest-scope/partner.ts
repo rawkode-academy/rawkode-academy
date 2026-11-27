@@ -9,7 +9,7 @@ export type Period = { d90: number; lifetime: number };
 export type AnalyticsSnapshot = {
   generatedAt: string;
   videos?: Record<string, { views: Period; minutes: Period }>;
-  academy?: { id: string; title: string; slug: string; youtube: string | null }[];
+  academy?: { id: string; title: string; slug: string; youtube: string | null; lesson?: string | null }[];
   watch?: Record<string, Period>;
 };
 export type VideoAnalytics = {
@@ -45,7 +45,8 @@ export function analyticsFor(snapshot: AnalyticsSnapshot, videoIds: readonly str
   for (const id of videoIds) {
     const video = academy.get(id);
     if (!video) continue;
-    const site = snapshot.watch?.[video.slug] ?? none();
+    // A video is watched at /watch/<slug>, or as a course lesson page.
+    const site = add(snapshot.watch?.[video.slug] ?? none(), (video.lesson && snapshot.watch?.[video.lesson]) || none());
     const youtube = video.youtube ? snapshot.videos?.[video.youtube] : undefined;
     result.videos.push({ id, title: video.title, slug: video.slug, siteViews: site, youtubeViews: youtube?.views ?? null, minutesWatched: youtube?.minutes ?? null });
     result.siteViews = add(result.siteViews, site);
