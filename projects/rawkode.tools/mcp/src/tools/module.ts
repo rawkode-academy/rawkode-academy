@@ -15,6 +15,8 @@ export type ToolModule = {
   readOnly: boolean;
   // Shown on the consent page: "This connection can …".
   description: string;
+  // Guidance for the model, added to the server instructions when the grant includes this module.
+  instructions?: string;
   register(server: McpServer, env: CloudflareEnv, caller: Caller): void;
 };
 

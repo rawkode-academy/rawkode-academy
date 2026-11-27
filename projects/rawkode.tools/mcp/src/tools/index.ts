@@ -24,7 +24,9 @@ export function grantedScopes(requested: readonly string[], role: CallerRole = "
 }
 
 export function createServer(env: CloudflareEnv, scopes: readonly string[], caller: Caller) {
-  const server = new McpServer({ name: "rawkode-tools", version: "0.1.0" });
-  for (const module of modulesFor(scopes, roleOf(caller))) module.register(server, env, caller);
+  const granted = modulesFor(scopes, roleOf(caller));
+  const instructions = granted.flatMap(module => module.instructions ?? []).join("\n\n") || undefined;
+  const server = new McpServer({ name: "rawkode-tools", version: "0.1.0" }, { instructions });
+  for (const module of granted) module.register(server, env, caller);
   return server;
 }
