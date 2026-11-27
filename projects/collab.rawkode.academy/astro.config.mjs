@@ -9,6 +9,10 @@ export default defineConfig({
 	adapter: cloudflare({ inspectorPort: 0, imageService: "passthrough" }),
 	integrations: [vue()],
 	security: { checkOrigin: true },
+	// The design system is linked from outside this project: make sure its Vue
+	// components share this project's single copy of Vue and Ark UI, otherwise
+	// lifecycle hooks never run and islands stay in their server markup.
+	vite: { resolve: { dedupe: ["vue", "@ark-ui/vue"] } },
 	fonts: [
 		{ provider: fontProviders.google(), name: "Red Hat Display", cssVariable: "--font-red-hat-display", weights: ["500", "600", "700", "800", "900"], styles: ["normal"], display: "swap" },
 		{ provider: fontProviders.google(), name: "Red Hat Text", cssVariable: "--font-red-hat-text", weights: ["400", "500", "600", "700"], styles: ["normal"], display: "swap" },

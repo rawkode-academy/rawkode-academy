@@ -4,6 +4,7 @@ import "@rawkodeacademy/design-system/styles.css";
 import "../styles/global.css";
 import { Font } from "astro:assets";
 import wordmark from "../assets/wordmark.svg?raw";
+import PortalMenu from "../components/PortalMenu.vue";
 import type { Session } from "../lib/types.ts";
 
 interface Props {
@@ -50,20 +51,23 @@ const viewingOrg = viewAs ? orgs.find((org) => org.id === viewAs.orgId) : undefi
 						<a href="/" class={styles.link} aria-current={Astro.url.pathname === "/" ? "page" : undefined}>Collaborations</a>
 					</nav>
 					<div class={styles.actions}>
-						{session?.principal.admin && !viewAs && orgs.length > 0 && (
-							<form method="post" action="/view-as" class="view-as">
-								<label class="visually-hidden" for="view-as">View as</label>
-								<select id="view-as" name="target" onchange="this.form.requestSubmit()">
-									<option value="">View as…</option>
-									{orgs.map((org) => <option value={org.id}>View as Partner: {org.name}</option>)}
-								</select>
-							</form>
-						)}
 						{session && (
-							<>
-								<span class="who">{session.principal.name}</span>
-								<form method="post" action="/logout"><button class="quiet">Sign out</button></form>
-							</>
+							<div class={styles.account}>
+								<div class="account-controls">
+									{session.principal.admin && !viewAs && orgs.length > 0 && (
+										<form method="post" action="/view-as" class="view-as">
+											<label class="visually-hidden" for="view-as">View as</label>
+											<select id="view-as" name="target" onchange="this.form.requestSubmit()">
+												<option value="">View as…</option>
+												{orgs.map((org) => <option value={org.id}>{org.name}</option>)}
+											</select>
+										</form>
+									)}
+									<span class="who">{session.principal.name}</span>
+									<form method="post" action="/logout"><button class="quiet">Sign out</button></form>
+								</div>
+							</div>
+							<PortalMenu client:media="(max-width: 1023px)" name={session.principal.name} orgs={orgs} canViewAs={Boolean(session.principal.admin && !viewAs)} currentPath={Astro.url.pathname} />
 						)}
 					</div>
 				</div>
@@ -80,5 +84,6 @@ const viewingOrg = viewAs ? orgs.find((org) => org.id === viewAs.orgId) : undefi
 	.quiet:hover { border-color: var(--colors-academy-accent); }
 	.who { font-family: var(--fonts-academy-text); font-size: 0.875rem; color: var(--colors-academy-text-soft); }
 	.view-as select { font: inherit; font-family: var(--fonts-academy-text); font-size: 0.875rem; background: var(--colors-academy-panel); color: var(--colors-academy-text); border: 1px solid var(--colors-academy-border); border-radius: var(--radii-academy-s); padding: 0.375rem 0.5rem; }
+	.account-controls { display: flex; gap: 0.75rem; align-items: center; }
 	.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 </style>
