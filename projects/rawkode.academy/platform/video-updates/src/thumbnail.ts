@@ -50,12 +50,36 @@ export async function storedFacts(env: Env, videoId: string, brief?: string): Pr
 	return { title: video?.title ?? "", tagline: video?.tagline, show: episode ? (await names(env.SHOWS, "shows", [episode.s]))[0] : undefined, technologies: await names(env.TECHNOLOGIES, "technologies", technologies), people: await names(env.PEOPLE, "people", credits), brief };
 }
 
-// The model answers with a base64 image, either as { image } or in OpenAI's { data: [{ b64_json }] }.
-export function imageOf(response: unknown): Uint8Array {
-	const r = response as { image?: string; data?: { b64_json?: string }[]; result?: { image?: string } } | null;
-	const b64 = r?.image ?? r?.result?.image ?? r?.data?.[0]?.b64_json;
-	if (typeof b64 !== "string" || !b64) throw new Error("the image model returned no image");
-	return Uint8Array.from(atob(b64.replace(/^data:[^,]*,/, "")), (c) => c.charCodeAt(0));
+// What the response looks like, for an error message: its keys and the start of each string, never the whole image.
+const shape = (v: unknown): string => {
+	if (v instanceof ReadableStream) return "ReadableStream";
+	if (v instanceof ArrayBuffer || ArrayBuffer.isView(v)) return `binary ${(v as ArrayBuffer).byteLength} bytes`;
+	if (typeof v === "string") return `string(${v.length}) "${v.slice(0, 60)}"`;
+	if (Array.isArray(v)) return `[${v.slice(0, 2).map(shape).join(", ")}]`;
+	if (v && typeof v === "object") return `{${Object.entries(v).slice(0, 8).map(([k, x]) => `${k}: ${shape(x)}`).join(", ")}}`;
+	return String(v);
+};
+
+function fromBase64(text: string): Uint8Array {
+	const clean = text.replace(/^data:[^,]*,/, "").replace(/\s+/g, "").replace(/-/g, "+").replace(/_/g, "/");
+	return Uint8Array.from(atob(clean + "=".repeat((4 - (clean.length % 4)) % 4)), (c) => c.charCodeAt(0));
+}
+
+// The model answers with an image as base64 ({ image }, { result: { image } } or OpenAI's { data: [{ b64_json }] }), as a
+// data URL, as a link to fetch ({ image } or { data: [{ url }] }), or as the raw bytes.
+export async function imageOf(response: unknown): Promise<Uint8Array> {
+	if (response instanceof ReadableStream) return new Uint8Array(await new Response(response).arrayBuffer());
+	if (response instanceof ArrayBuffer) return new Uint8Array(response);
+	if (ArrayBuffer.isView(response)) return new Uint8Array(response.buffer, response.byteOffset, response.byteLength);
+	const r = response as { image?: string; url?: string; data?: { b64_json?: string; url?: string }[]; result?: { image?: string } } | string | null;
+	const value = typeof r === "string" ? r : r?.image ?? r?.result?.image ?? r?.data?.[0]?.b64_json ?? r?.data?.[0]?.url ?? r?.url;
+	if (typeof value !== "string" || !value) throw new Error(`the image model returned no image: ${shape(response)}`);
+	if (/^https:\/\//.test(value)) {
+		const fetched = await fetch(value);
+		if (!fetched.ok) throw new Error(`the image link answered HTTP ${fetched.status}`);
+		return new Uint8Array(await fetched.arrayBuffer());
+	}
+	try { return fromBase64(value); } catch { throw new Error(`the image is not base64: ${shape(response)}`); }
 }
 
 // Generates the thumbnail, saves it as the video's WebP (what the site shows, and what the YouTube sync converts and uploads).
@@ -65,7 +89,7 @@ export async function generateThumbnail(env: Env, videoId: string, f: Facts): Pr
 	try { response = await env.AI.run(IMAGE_MODEL as never, input as never, { gateway: { id: GATEWAY_ID } } as never); }
 	// Not every size is accepted; a 3:2 canvas is cropped to 16:9 below.
 	catch { response = await env.AI.run(IMAGE_MODEL as never, { ...input, size: "1536x1024" } as never, { gateway: { id: GATEWAY_ID } } as never); }
-	const png = imageOf(response);
+	const png = await imageOf(response);
 	const out = await env.IMAGES.input(new Blob([png]).stream()).transform({ width: WIDTH, height: HEIGHT, fit: "cover" }).output({ format: "image/webp", quality: 88 });
 	const webp = new Uint8Array(await out.response().arrayBuffer());
 	await env.CONTENT_BUCKET.put(thumbnailKey(videoId), webp, { httpMetadata: { contentType: "image/webp", cacheControl: "public, max-age=3600, s-maxage=3600" }, customMetadata: { source: "video-updates", model: IMAGE_MODEL } });
