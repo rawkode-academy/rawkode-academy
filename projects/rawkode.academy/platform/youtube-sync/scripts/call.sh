@@ -33,7 +33,7 @@ case "${1:-}" in
   apply)
     # apply.json is the approval: its commit says which plan size and videos
     # are allowed to be written. See README.
-    body=$(jq -c '{planId, limit, videos, dryRun} | with_entries(select(.value != null))' apply.json)
+    body=$(jq -c '{planId, limit, videos, dryRun, priority} | with_entries(select(.value != null))' apply.json)
     echo "Applying: $body"
     result=$(request -X POST "$base/apply" -d "$body")
     echo "$result" | jq . | tee -a "$summary"
