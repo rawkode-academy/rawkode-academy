@@ -1,6 +1,5 @@
 import cloudNativeCompass from "./cloudnativecompass.fm";
 import klusteredLive from "./klustered.live";
-import rawkodeChat from "./rawkode.chat";
 import rawkodeCommunity from "./rawkode.community";
 import rawkodeLink from "./rawkode.link";
 import rawkodeLive from "./rawkode.live";
@@ -11,7 +10,6 @@ const redirects: Redirects = {
 	domains: {
 		"cloudnativecompass.fm": cloudNativeCompass,
 		"klustered.live": klusteredLive,
-		"rawkode.chat": rawkodeChat,
 		"rawkode.community": rawkodeCommunity,
 		"rawkode.link": rawkodeLink,
 		"rawkode.live": rawkodeLive,
