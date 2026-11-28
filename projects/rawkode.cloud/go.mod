@@ -8,8 +8,8 @@ require (
 	github.com/fluxcd/kustomize-controller/api v1.10.2
 	github.com/fluxcd/source-controller/api v1.10.2
 	github.com/infisical/go-sdk v0.9.1
-	github.com/scaleway/scaleway-sdk-go v1.40.0
-	github.com/siderolabs/talos/pkg/machinery v1.14.6
+	github.com/scaleway/scaleway-sdk-go v1.40.1
+	github.com/siderolabs/talos/pkg/machinery v1.14.7
 	github.com/spf13/cobra v1.10.2
 	golang.org/x/crypto v0.59.0
 	google.golang.org/grpc v1.85.0
