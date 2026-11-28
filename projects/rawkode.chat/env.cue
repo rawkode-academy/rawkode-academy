@@ -4,17 +4,12 @@ import "github.com/cuenv/cuenv/schema"
 
 schema.#Project
 
-// rawkode.chat: the Waddle web client, built from upstream waddle-social/waddle
-// and pointed at the hosted Waddle tenant at waddle.rawkode.chat.
+// rawkode.chat: the Waddle web client, deployed from the build Waddle's CI
+// publishes (ghcr.io/waddle-social/waddle/chat-dist:main) and pointed at the
+// hosted Waddle tenant at waddle.rawkode.chat.
 name: "rawkode-chat"
 
 let _t = tasks
-
-env: {
-	// Track upstream main: the hosted server runs waddle:main, so the client
-	// follows it. The daily run below picks up client changes made upstream.
-	WADDLE_REF: "main"
-}
 
 ci: pipelines: {
 	default: {
@@ -23,34 +18,21 @@ ci: pipelines: {
 			branch: ["main"]
 			defaultBranch: true
 			manual:        true
-			scheduled:     "17 5 * * *"
+			// The hosted server runs waddle:main, so the client follows
+			// chat-dist:main; the daily run picks up new upstream builds.
+			scheduled: "17 5 * * *"
 		}
 		tasks: [_t.deploy]
 	}
 }
 
 tasks: {
-	// Clones Waddle and prints only the checkout path, which build and deploy
-	// receive as WADDLE_CHECKOUT (each task gets its own TMPDIR).
-	checkout: schema.#Task & {
-		hermetic: false
-		command:  "bash"
-		args: ["waddle.sh", "checkout"]
-	}
-
-	build: schema.#Task & {
-		hermetic: false
-		command:  "bash"
-		args: ["waddle.sh", "build"]
-		env: WADDLE_CHECKOUT: _t.checkout.stdout
-		dependsOn: [_t.checkout]
-	}
-
+	// Pulls the published client, rewrites its wrangler config with the
+	// rawkode.chat identity and deploys it, all in one task: cuenv gives each
+	// task its own TMPDIR, so nothing is handed between tasks.
 	deploy: schema.#Task & {
 		hermetic: false
-		command:  "bash"
-		args: ["waddle.sh", "deploy"]
-		env: WADDLE_CHECKOUT: _t.checkout.stdout
-		dependsOn: [_t.build]
+		command:  "bun"
+		args: ["deploy.ts"]
 	}
 }
