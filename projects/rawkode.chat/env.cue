@@ -30,16 +30,27 @@ ci: pipelines: {
 }
 
 tasks: {
+	// Clones Waddle and prints only the checkout path, which build and deploy
+	// receive as WADDLE_CHECKOUT (each task gets its own TMPDIR).
+	checkout: schema.#Task & {
+		hermetic: false
+		command:  "bash"
+		args: ["waddle.sh", "checkout"]
+	}
+
 	build: schema.#Task & {
 		hermetic: false
 		command:  "bash"
 		args: ["waddle.sh", "build"]
+		env: WADDLE_CHECKOUT: _t.checkout.stdout
+		dependsOn: [_t.checkout]
 	}
 
 	deploy: schema.#Task & {
 		hermetic: false
 		command:  "bash"
 		args: ["waddle.sh", "deploy"]
+		env: WADDLE_CHECKOUT: _t.checkout.stdout
 		dependsOn: [_t.build]
 	}
 }
