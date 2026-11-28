@@ -4,7 +4,7 @@
 
 Rawkode Academy is currently run by [@rawkode](https://github.com/rawkode) with the help of people within the community.
 
-Decisions, such as the below, are often discussed openly within [Discord](https://rawkode.chat).
+Decisions, such as the below, are often discussed openly within [Discord](https://rawkode.link/discord).
 
 - Communication channels - Should we use Discord? Should we use Matrix? Use GitHub Discussion?
 - Events - Another Hackathon?

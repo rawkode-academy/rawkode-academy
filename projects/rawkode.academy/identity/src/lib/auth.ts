@@ -289,14 +289,16 @@ export const createAuth = async (env: AuthEnv) => {
 						metadata: null,
 					},
 					{
-						clientId: "rawkode-chat",
+						// Waddle tenant rawkode.chat: the hosted Waddle server at
+						// waddle.rawkode.chat owns sign-in; the web client is rawkode.chat.
+						clientId: "waddle-rawkode-chat",
 						name: "Rawkode Chat",
 						type: "public",
 						// Workaround for https://github.com/better-auth/better-auth/issues/6651
 						// Better Auth incorrectly requires a secret for ID token signing even for public clients
 						clientSecret: "pkce-public-client-placeholder",
 						redirectUrls: [
-							"https://rawkode.chat/api/auth/callback",
+							"https://waddle.rawkode.chat/api/auth/callback",
 						],
 						disabled: false,
 						skipConsent: true,

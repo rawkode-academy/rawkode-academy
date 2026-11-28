@@ -8,7 +8,7 @@ Welcome! We love that you'd like to contribute to the Rawkode Academy.
 
 ## Chat with Us
 
-You can either open a [discussion](https://github.com/RawkodeAcademy/RawkodeAcademy/discussions), [issue](https://github.com/RawkodeAcademy/RawkodeAcademy/issues), or [join the Discord](https://rawkode.chat); we'd be happy to help you find something to build that contributes to making the Rawkode Academy the best palce to learn and practice Cloud Native development.
+You can either open a [discussion](https://github.com/RawkodeAcademy/RawkodeAcademy/discussions), [issue](https://github.com/RawkodeAcademy/RawkodeAcademy/issues), or [join the Discord](https://rawkode.link/discord); we'd be happy to help you find something to build that contributes to making the Rawkode Academy the best palce to learn and practice Cloud Native development.
 
 ## Write an Article
 

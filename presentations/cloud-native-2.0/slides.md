@@ -31,7 +31,7 @@ transition: slide-left
 - <carbon-logo-twitter /> rawkode
 - <carbon-logo-github /> rawkode
 - <carbon-logo-youtube /> @RawkodeAcademy
-- <carbon-logo-discord /> https://rawkode.chat
+- <carbon-logo-discord /> https://rawkode.link/discord
 
 ---
 layout: section

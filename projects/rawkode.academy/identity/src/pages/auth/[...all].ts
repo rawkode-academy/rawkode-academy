@@ -18,7 +18,8 @@ const handler: APIRoute = async (context) => {
 		}
 	}
 
-	const usernameClientIds = ["rawkode-academy-website", "klustered-dev"];
+	// Clients that use the username as an account name (Waddle: the XMPP localpart).
+	const usernameClientIds = ["rawkode-academy-website", "klustered-dev", "waddle-rawkode-chat"];
 	const readUsername = async (userId: string) =>
 		env.DB.prepare("SELECT username FROM user WHERE id = ?")
 			.bind(userId)
