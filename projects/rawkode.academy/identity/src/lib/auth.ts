@@ -294,6 +294,20 @@ export const createAuth = async (env: AuthEnv) => {
 						metadata: null,
 					},
 					{
+						clientId: "waddle-rawkode-chat",
+						name: "Waddle (waddle.rawkode.chat)",
+						type: "public",
+						// Workaround for https://github.com/better-auth/better-auth/issues/6651
+						// Better Auth incorrectly requires a secret for ID token signing even for public clients
+						clientSecret: "pkce-public-client-placeholder",
+						redirectUrls: [
+							"https://waddle.rawkode.chat/api/auth/callback",
+						],
+						disabled: false,
+						skipConsent: true,
+						metadata: null,
+					},
+					{
 						clientId: "rawkode-cloud",
 						name: "Rawkode Cloud",
 						type: "public",
