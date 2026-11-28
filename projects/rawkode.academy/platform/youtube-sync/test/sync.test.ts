@@ -277,8 +277,7 @@ test("queue: a quota 403 is not a failure; the message is re-sent past the reset
   assert.equal(sends.length, 1);
   assert.equal(sends[0].body.deferrals, 1);
   assert.ok(sends[0].delay > 0 && sends[0].delay <= 43200, `delay ${sends[0].delay}`);
-  const deferred = (await f.deps.store.db.prepare("SELECT kind, result FROM youtube_sync_log WHERE kind = 'defer'").all<{ kind: string; result: string }>()).results;
-  assert.equal(deferred.length, 1, "the deferral leaves a log row");
+  assert.equal((await f.deps.store.lastLog())?.kind, "defer", "the deferral leaves a log row");
   assert.ok(await f.deps.store.quotaUsed("2026-11-26") >= 9000, "the day is spent");
   // Other videos now wait for the reset without calling YouTube at all.
   f.fail(undefined);
