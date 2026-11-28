@@ -44,8 +44,14 @@ try {
 	config.workers_dev = false;
 	config.preview_urls = false;
 	config.routes = [{ pattern: "rawkode.chat", custom_domain: true }];
+	// Waddle's Faro collector is waddle.chat's own runtime config (FARO_*
+	// vars), never part of the published build; drop any that ever arrive so
+	// rawkode.chat ships with telemetry off.
+	const inherited = Object.entries((config.vars as Record<string, string> | undefined) ?? {}).filter(
+		([name]) => !name.startsWith("FARO_"),
+	);
 	config.vars = {
-		...(config.vars as Record<string, string> | undefined),
+		...Object.fromEntries(inherited),
 		// Hosted Waddle server for the rawkode.chat tenant (JIDs user@rawkode.chat).
 		SERVER_BASE_URL: "https://waddle.rawkode.chat",
 	};
