@@ -7,5 +7,6 @@
     "know-kubectl-meet-datumctl",
     "explore-datum-without-memorising-resource-names-datumctl-console"
   ],
-  "dryRun": false
+  "dryRun": false,
+  "priority": true
 }

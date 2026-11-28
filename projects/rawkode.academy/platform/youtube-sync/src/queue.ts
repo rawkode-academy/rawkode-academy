@@ -60,7 +60,10 @@ export async function handle(message: QueueMessage, body: SyncMessage, deps: Dep
     if (verdict.action === "defer") {
       const deferrals = (body.deferrals ?? 0) + 1;
       if (deferrals > MAX_DEFERRALS) { await bury(deps, body, `still refused after ${MAX_DEFERRALS} quota resets`); message.ack(); return; }
-      await send({ ...body, deferrals }, Math.min(secondsUntilReset(deps.now()), MAX_DELAY_SECONDS));
+      const delay = Math.min(secondsUntilReset(deps.now()), MAX_DELAY_SECONDS);
+      // A deferred message is otherwise invisible: Queues don't count delayed messages in the backlog.
+      await deps.store.log({ planId: body.planId, youtubeId: body.youtubeId, at: deps.now().toISOString(), kind: "defer", result: "deferred", detail: `quota; retry in ${delay}s (deferral ${deferrals})`, before: null, after: null });
+      await send({ ...body, deferrals }, delay);
       message.ack();
     } else if (verdict.action === "dead") { await bury(deps, body, verdict.reason); message.ack(); }
     else if (verdict.action === "retry") { log({ youtubeId: body.youtubeId, retry: verdict.detail, attempts: message.attempts }); message.retry({ delaySeconds: backoffSeconds(message.attempts) }); }

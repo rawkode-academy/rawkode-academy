@@ -60,6 +60,8 @@ const applyBody = z.object({
   limit: z.number().int().min(1).max(400),
   videos: z.array(z.string().min(1)).max(500).optional(),
   dryRun: z.boolean().optional(),
+  // Queued writes may use the update reserve too, so they go first after a quota reset.
+  priority: z.boolean().optional(),
 }).strict();
 const rollbackBody = z.object({ planId: z.string().min(1).optional(), youtubeId: z.string().min(1).optional(), limit: z.number().int().min(1).max(400) }).strict().refine(v => v.planId || v.youtubeId, "Give planId or youtubeId");
 
@@ -116,7 +118,7 @@ export default {
           // apply.json decides how many videos are queued; the queue writes them one at
           // a time, backs off on errors and waits out the quota reset by itself.
           const { candidates } = await selectCandidates(d.store, planId, input);
-          for (let i = 0; i < candidates.length; i += 100) await env.SYNC_QUEUE.sendBatch(candidates.slice(i, i + 100).map(item => ({ body: { planId, youtubeId: item.youtubeId } satisfies SyncMessage })));
+          for (let i = 0; i < candidates.length; i += 100) await env.SYNC_QUEUE.sendBatch(candidates.slice(i, i + 100).map(item => ({ body: { planId, youtubeId: item.youtubeId, ...(input.priority ? { priority: true } : {}) } satisfies SyncMessage })));
           return json({ planId, enqueued: candidates.length, videos: candidates.map(item => item.slug ?? item.youtubeId), note: "Queued. The consumer writes them one at a time within the daily quota budget; see /status for deadLetters." });
         }
         const input = rollbackBody.parse(body);
